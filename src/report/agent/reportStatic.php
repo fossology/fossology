@@ -194,12 +194,12 @@ class ReportStatic
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $leftColStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Other license (s)"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $firstRowStyle1, "pStyle");    
+    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $infoTextStyle, "pStyle");    
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Do Not Use license (s)"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $firstRowStyle1, "pStyle");    
+    $table->addCell($cellThirdLen,$cellColSpan2)->addText(htmlspecialchars(" YYYY"), $infoTextStyle, "pStyle");    
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
