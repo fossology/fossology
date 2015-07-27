@@ -100,7 +100,7 @@ if [ $BUILDTIME ]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
-         echo "DB: Installing build essiential....."
+         echo "DB: Installing build essential....."
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
