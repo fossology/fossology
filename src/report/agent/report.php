@@ -757,8 +757,8 @@ class ReportAgent extends Agent
     $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
 
     /* Display NON Functional Licenses license files */
-    $heading = "NON Functional Licenses";
-    $sR->getNonFunctionalLicenses($section);
+    $heading = "Non Functional Licenses";
+    $sR->getNonFunctionalLicenses($section, $heading);
 
 
     /* Display irrelavant license files */

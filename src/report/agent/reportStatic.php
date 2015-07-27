@@ -164,7 +164,7 @@ class ReportStatic
     $thColor = array("bgColor" => "E0E0E0");  
     $infoTextStyle = array("size" => 10, "color" => "000000");
     $leftColStyle = array("size" => 11, "color" => "000000","bold" => true);
-    $firstRowStyle1 = array("size" => 11, "bold" => true);
+    $firstRowStyle1 = array("size" => 10, "bold" => true);
     $rightColStyleBlue = array("size" => 11, "color" => "0000A0","italic" => true);
     $rightColStyleBlack = array("size" => 11, "color" => "000000");
     $rightColStyleBlackWithItalic = array("size" => 11, "color" => "000000","italic" => true);
@@ -713,9 +713,12 @@ class ReportStatic
     $section->addTextBreak();
   }
 
-  function getNonFunctionalLicenses(Section $section)
+  /**
+   * @param Section $section 
+   * @param $heading 
+   */ 
+  function getNonFunctionalLicenses(Section $section, $heading)
   {
-    $heading = "NON Functional Licenses";
     $section->addTitle(htmlspecialchars($heading), 2);
     $section->addTextBreak();
   }
