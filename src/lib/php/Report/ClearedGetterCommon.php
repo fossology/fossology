@@ -118,7 +118,6 @@ abstract class ClearedGetterCommon
   {
     $statements = array();
     $findings = array();
-    $findingsCheck = 0;
     foreach($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
       $comments = convertToUTF8($statement['comments'], false);
@@ -173,10 +172,9 @@ abstract class ClearedGetterCommon
             "files" => array($fileName),
             "comments" => convertToUTF8($comments, false)
           );
-        $findingsCheck = 1;
       }
     }
-    if(!empty($findingsCheck))
+    if(!empty($findings))
       $statements = array_merge($findings, $statements);
 
     arsort($statements);
