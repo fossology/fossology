@@ -43,10 +43,10 @@ function createDirlistTable() {
     "bRetrieve": true,
     "bPaginate": true,
     "bFilter": true,
-    "bAutoWidth": false,
+    "bAutoWidth": true,
     "iDisplayLength":50,
     "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
-      "sSearch":'_INPUT_<button onclick="clearSearchFiles();" >Clear<\/button>',
+      "sSearch":'_INPUT_<button onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
       "sLengthMenu":'Display <select><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
        #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} <b>{{ 'flat'|trans }}</b>{#
        #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})' 
@@ -58,5 +58,8 @@ function createDirlistTable() {
 
 $(document).ready(function () {
   createDirlistTable();
+  $(document).tooltip();
+  $("#lichistogram_length select").css('text-align','right');
+  $("#dirlist_length select").css('text-align','right');  
 });
 
