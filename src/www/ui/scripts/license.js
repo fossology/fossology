@@ -25,43 +25,6 @@ function addArsGo(formid, selectid)
   return;
 }
 
-function jQuerySelectorEscape(expression) {
-  return expression.replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, '\\$&');
-}
-/* Add javascript for color highlighting
- This is the response script needed by ActiveHTTPscript
- responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
-var Lastutpks = '';   /* save last list of uploadtree_pk's */
-var LastLic = '';   /* save last License (short) name */
-
-function FileColor_Reply()
-{
-  if ((FileColor.readyState == 4) && (FileColor.status == 200))
-  {
-    /* remove previous highlighting */
-    var numpks = Lastutpks.length;
-    if (numpks > 0)
-      $('#' + jQuerySelectorEscape(LastLic)).removeClass('highlight');
-    while (numpks)
-    {
-      $('#' + jQuerySelectorEscape(Lastutpks[--numpks])).removeClass('highlight');
-    }
-    utpklist = FileColor.responseText.split(',');
-    LastLic = utpklist.shift();
-    numpks = utpklist.length;
-    Lastutpks = utpklist;
-    /* apply new highlighting */
-    elt = $('#' + jQuerySelectorEscape(LastLic));
-    if (elt != null)
-      elt.addClass('highlight');
-    while (numpks)
-    {
-      $('#' + jQuerySelectorEscape(utpklist[--numpks])).addClass('highlight');
-    }
-  }
-  return;
-}
-
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {
   "num-html-pre": function (a) {
     var x = String(a).replace(/<[\s\S]*?>/g, "");
