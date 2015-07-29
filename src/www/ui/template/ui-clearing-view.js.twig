@@ -43,7 +43,7 @@ selectedLicensesTableConfig = {
 editableConfiguration = {
   "sUpdateURL": "?mod=conclude-license&do=updateClearings",
   "fnOnEditing": function(input) {return input[0].value;},
-  "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').css('border-color','red');} } ,
+  "fnOnEdited": function (status){ if(status==="success") { $('#decTypeSet').addClass('decTypeWip');} } ,
   "fnOnDeleted": function(result) { createTable().fnDraw(false);},
   "sSuccessResponse": "success",
   "aoColumns": [null, null,
