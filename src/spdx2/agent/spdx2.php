@@ -203,7 +203,7 @@ class SpdxTwoAgent extends Agent
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='skipcontent'); //, $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
     foreach ($allEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = $finding['content'];
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content']);
     }
   }       
 

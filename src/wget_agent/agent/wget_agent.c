@@ -301,7 +301,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   sprintf(TempFileDirectory, "%s.dir", TempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 #if 1
-  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off -k";
+  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
   /* wget < 1.10 does not support "--no-check-certificate" */
   char WgetArgs[]="--progress=dot -rc -np -e robots=off";
@@ -373,7 +373,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf; 
-     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P 
+     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -P 
      '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */

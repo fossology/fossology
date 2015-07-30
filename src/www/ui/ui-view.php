@@ -25,11 +25,6 @@ use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\TextRenderer;
 use Monolog\Logger;
 
-define("VIEW_BLOCK_HEX", 8192);
-define("VIEW_BLOCK_TEXT", 10 * VIEW_BLOCK_HEX);
-define("MAXHIGHLIGHTCOLOR", 8);
-define("TITLE_ui_view", _("View File"));
-
 class ui_view extends FO_Plugin
 {
   const NAME = "view";
@@ -41,17 +36,28 @@ class ui_view extends FO_Plugin
   private $highlightProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var int */
+  protected $blockSizeHex = 8192;
+  /** @var int */
+  protected $blockSizeText = 81920;
+  
 
   function __construct()
   {
     $this->Name = self::NAME;
-    $this->Title = TITLE_ui_view;
-    $this->Version = "1.0";
+    $this->Title = _("View File");
     $this->Dependency = array("browse");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
 
     parent::__construct();
+
+    if (array_key_exists('BlockSizeHex', $GLOBALS['SysConf']['SYSCONFIG'])) {
+      $this->blockSizeHex = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeHex']);
+    }
+    if (array_key_exists('BlockSizeText', $GLOBALS['SysConf']['SYSCONFIG'])) {
+      $this->blockSizeText = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeText']);
+    }
 
     global $container;
     $this->logger = $container->get("logger");
@@ -287,7 +293,6 @@ class ui_view extends FO_Plugin
     {
       return "s";
     }
-    global $Plugins;
 
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload,Auth::getGroupId()))
@@ -320,59 +325,18 @@ class ui_view extends FO_Plugin
     if (empty($inputFile))
     {
       $inputFile = @fopen(RepPathItem($Item), "rb");
-      if ($inputFile) $openedFin = true;
+      if ($inputFile) {
+        $openedFin = true;
+      }
       if (empty($inputFile))
       {
-        /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
-        /** BEGIN **/
-        /* If this is a POST, then process the request. */
-        $uploadunpack = GetParm('uploadunpack', PARM_INTEGER);
-        $uploadpk = $Upload;
-        $flag = 0;
-
-        $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        $state = $P->CheckStatus($uploadpk, "reunpack", "ununpack");
-        //print "<p>$state</p>";
-        if ($state == 0 || $state == 2)
-        {
-          if (!empty($uploadunpack))
-          {
-            $rc = $P->AgentAdd($uploadpk);
-            if (empty($rc))
-            {
-              /* Need to refresh the screen */
-              $text = _("Unpack added to job queue");
-              $this->vars['message'] = $text;
-              $flag = 1;
-              $text = _("Reunpack job is running: you can see it in");
-              $text1 = _("jobqueue");
-              print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-            } else
-            {
-              $text = _("Unpack of Upload failed");
-              $this->vars['message'] = "$text: $rc";
-            }
-          }
-        }
-        else
-        {
-          $flag = 1;
-          $text = _("Reunpack job is running: you can see it in");
-          $text1 = _("jobqueue");
-          $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-        }
-        $text = _("File contents are not available in the repository.");
-        $output .=  "$text\n";
-        $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        $output .=  $P->ShowReunpackView($Item, $flag);
-        return $output;
+        return $this->outputWhenFileNotInRepo($Upload, $Item);
       }
-      /** END **/
     }
     rewind($inputFile);
     $Uri = preg_replace('/&page=[0-9]*/', '', Traceback());
 
-    $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
+    $blockSize = $Format == 'hex' ? $this->blockSizeHex : $this->blockSizeText;
     
     if(!isset($Page) && !empty($licenseId))
     {
@@ -418,10 +382,10 @@ class ui_view extends FO_Plugin
 
     if ($Format == 'hex')
     {
-       $output .= $this->getHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
+       $output .= $this->getHex($inputFile, $PageSize, $this->blockSizeHex, $splitPositions);
     } else
     {
-      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
+      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, $this->blockSizeText, $splitPositions, $insertBacklink);
     }
     
     if (!empty($PageMenu) and !$getPageMenuInline)
@@ -433,12 +397,56 @@ class ui_view extends FO_Plugin
     {
       fclose($inputFile);
     }
-    if($getPageMenuInline)
-      return array($PageMenu, $output);
-    else
-      return $output;
+    
+    return $getPageMenuInline ? array($PageMenu, $output) : $output;
   }
 
+  
+  /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
+  protected function outputWhenFileNotInRepo($uploadpk, $item)
+  {
+    global $Plugins;
+    $reunpackPlugin = & $Plugins[plugin_find_id("ui_reunpack")];
+    $state = $reunpackPlugin->CheckStatus($uploadpk, "reunpack", "ununpack");
+
+    /* If this is a POST, then process the request. */
+    $uploadunpack = GetParm('uploadunpack', PARM_INTEGER);
+    $flag = 0;
+    $output = '';
+
+    if ($state != 0 && $state != 2)
+    {
+      $flag = 1;
+      $text = _("Reunpack job is running: you can see it in");
+      $text1 = _("jobqueue");
+      $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+    }
+    elseif (!empty($uploadunpack))
+    {
+      $rc = $reunpackPlugin->AgentAdd($uploadpk);
+      if (empty($rc))
+      {
+        /* Need to refresh the screen */
+        $this->vars['message'] =  _("Unpack added to job queue");
+        $flag = 1;
+        $text = _("Reunpack job is running: you can see it in");
+        $text1 = _("jobqueue");
+        $output .= "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+      }
+      else
+      {
+        $text = _("Unpack of Upload failed");
+        $this->vars['message'] = "$text: $rc";
+      }
+    }
+
+    $text = _("File contents are not available in the repository.");
+    $output .=  "$text\n";
+    $output .=  $reunpackPlugin->ShowReunpackView($item, $flag);
+    return $output;
+  }
+  
+  
   public function Output()
   {
     return $this->ShowView(NULL, "browse");
@@ -501,12 +509,12 @@ class ui_view extends FO_Plugin
     {
       case 'hex':
         $pageNumberHex = $pageNumber;
-        $pageNumberText = intval($pageNumber * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
+        $pageNumberText = intval($pageNumber * $this->blockSizeHex / $this->blockSizeText);
         break;
       case 'text':
       case 'flow':
         $pageNumberText = $pageNumber;
-        $pageNumberHex = intval($pageNumber * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
+        $pageNumberHex = intval($pageNumber * $this->blockSizeText / $this->blockSizeHex);
         break;
     }
 

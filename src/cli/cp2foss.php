@@ -199,7 +199,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
       print "Folder not found: Creating $folderHead\n";
     }
     if (!$Test) {
-      $P->Create($Parent, $folderHead, "");
+      $P->create($Parent, $folderHead, "");
       pg_free_result($result);
       $result = pg_query($PG_CONN, $SQL);
       DBCheckResult($result, $SQL, __FILE__, __LINE__);

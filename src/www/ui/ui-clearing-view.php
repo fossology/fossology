@@ -340,7 +340,6 @@ class ClearingView extends FO_Plugin
     $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
     $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
     
-    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
     return $this->render("ui-clearing-view.html.twig");
   }
 

@@ -32,7 +32,7 @@
       <input type="checkbox" name="globalDecision"/> {{ 'Apply decision to all future occurrences of this file'|trans }}<img src="images/info_16.png" title="{{ 'Based on a hash computation of the file contents, Fossology will determine a future occurrence of the same file. Then, if  the same file is part of a subsequent upload, this clearing decision will apply there as well.  Consider that this decision will impact also upload of other users. It should be checked with much care'|trans }}" alt="" class="info-bullet"/>
     </fieldset>
     <br/>
-    <fieldset style="display: inline; {% if tmpClearingType %}border-color: red; border-width: 5px;{% endif %}" id="decTypeSet">
+    <fieldset style="display: inline;" {% if tmpClearingType %}class="decTypeWip"{% endif %} id="decTypeSet">
       <legend>
         {{ 'Clearing decision type'| trans }}
       </legend>

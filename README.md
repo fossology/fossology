@@ -1,38 +1,29 @@
 # FOSSology
 
-Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
-
 [![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.png)](https://travis-ci.org/fossology/fossology/)
 
 ## About
-FOSSology is a framework for software analysis, both source and binary.
-It uses a repository for unpacking and storing the uploads, "agents" 
-to analyze the uploaded files, and a Postgres database to store and display
-the results. Also included is a license agent for scanning source code for
-potential license references. In addition to this document there is much more
-information available on the website
+FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright
+and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance
+workflow.  In one click you can generate an SPDX file, or a ReadMe with all the copyrights notices from your software.
+FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will 
+get rescanned.  This is a big time saver for large projects.
 
- http://fossology.org/
+FOSSology does not give legal advice.
+http://fossology.org/
 
 ## Installation
 FOSSology is available for  multiple versions of Linux.  There are 
-installation packages available from the fossology.org site.  See 
+installation packages for Debian, RHEL/CentOS, Ubuntu, and Fedora, and a source tarball available from the fossology.org site.  See 
 
   http://fossology.org/releases
   
-Both RPM and Debian based systems are available.
-
-You can also build and install FOSSology manually from the source tar archive:
- 
-  http://www.fossology.org/releases/
-
-Please see the file INSTALL within the FOSSology source distribution for 
-instructions.
-
+For installation instructions see http://www.fossology.org/projects/fossology/wiki/Sysadmin_Documentation
 
 ## Documentation
-Documentation on using FOSSology is available on the website at
+We are currently migrating our documentation to github.  At this stage you can find general documentation at:
 http://www.fossology.org/projects/fossology/wiki/User_Documentation
+and developer docs here on [github](https://github.com/fossology/fossology/wiki)
 
 ## Support
 Mailing lists, FAQs, Release Notes, and other useful info is available
@@ -40,10 +31,14 @@ by clicking the documentation tab on the project website. We encourage
 all users to join the mailing list and participate in discussions.
 There is also a #fossology IRC channel on the freenode IRC network if
 you'd like to talk to other FOSSology users and developers.
+See [Contact Us](http://www.fossology.org/projects/fossology/wiki/Contact_Us)
 
-## Hacking
-We welcome contributions and encourage people to hack on FOSSology.
-Please see the file HACKING within the FOSSology source distribution
-and the Developer Resources section on the website to get started.
-http://www.fossology.org/projects/fossology/wiki/Developer_Documentation
+## License
+FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-public-license-v2)
 
+## Screenshots
+![Concluding a license](/examples/Concludeb.jpg)
+
+![Browsing](/examples/Browseb.jpg)
+
+![LicenseBrowser](/examples/LicenseBrowserb.jpg)

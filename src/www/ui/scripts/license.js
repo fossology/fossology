@@ -25,43 +25,6 @@ function addArsGo(formid, selectid)
   return;
 }
 
-function jQuerySelectorEscape(expression) {
-  return expression.replace(/[!"#$%&'()*+,.\/:;<=>?@\[\\\]^`{|}~]/g, '\\$&');
-}
-/* Add javascript for color highlighting
- This is the response script needed by ActiveHTTPscript
- responseText is license name',' followed by a comma seperated list of uploadtree_pk's */
-var Lastutpks = '';   /* save last list of uploadtree_pk's */
-var LastLic = '';   /* save last License (short) name */
-
-function FileColor_Reply()
-{
-  if ((FileColor.readyState == 4) && (FileColor.status == 200))
-  {
-    /* remove previous highlighting */
-    var numpks = Lastutpks.length;
-    if (numpks > 0)
-      $('#' + jQuerySelectorEscape(LastLic)).removeClass('highlight');
-    while (numpks)
-    {
-      $('#' + jQuerySelectorEscape(Lastutpks[--numpks])).removeClass('highlight');
-    }
-    utpklist = FileColor.responseText.split(',');
-    LastLic = utpklist.shift();
-    numpks = utpklist.length;
-    Lastutpks = utpklist;
-    /* apply new highlighting */
-    elt = $('#' + jQuerySelectorEscape(LastLic));
-    if (elt != null)
-      elt.addClass('highlight');
-    while (numpks)
-    {
-      $('#' + jQuerySelectorEscape(utpklist[--numpks])).addClass('highlight');
-    }
-  }
-  return;
-}
-
 jQuery.extend(jQuery.fn.dataTableExt.oSort, {
   "num-html-pre": function (a) {
     var x = String(a).replace(/<[\s\S]*?>/g, "");
@@ -79,17 +42,39 @@ $(document).ready(function () {
   if (typeof createLicHistTable === 'function') {
     createLicHistTable();
   }
+
+  searchField = $('#dirlist_filter input');
+  var dirListFilter = getCookie('dirListFilter');
+  filterLicense(dirListFilter);
+  searchField.keyup(function () {
+    setCookie('dirListFilter', $(this).val());
+  });
+  
+  var scanFilter = getCookie('scanFilter');
+  if(scanFilter==="")
+    scanFilter = 0;
+  $('#scanFilter option[value='+scanFilter+']').parent().val(scanFilter);
+  $('#scanFilter').change(function (){ filterScan($(this).val(),'scan'); });
+
+  var conFilter = getCookie('conFilter');
+  if(conFilter==="")
+    conFilter = 0;
+  $('#conFilter option[value='+conFilter+']').parent().val(conFilter);
+  $('#conFilter').change(function (){ filterScan($(this).val(),'con'); });
+  
+  var openFilter = getCookie('openFilter');
+  if(openFilter==='true' || openFilter==='checked')
+    $('#openCBoxFilter').prop('checked',openFilter);
+  $('#openCBoxFilter').click(function (){
+    setCookie('openFilter', $(this).prop('checked'));
+    otable.fnFilter('');
+  });
+
   if (typeof createDirlistTable === 'function') {
     createDirlistTable();
   }
   $("form[data-autosubmit] select").change(function () {
     $(this).closest('form').submit();
-  });
-
-  var dirListFilter = getCookie('dirListFilter');
-  filterLicense(dirListFilter);
-  $('#dirlist_filter input').keyup(function () {
-    setCookie('dirListFilter', $(this).val(), 1);
   });
 });
 
@@ -161,57 +146,22 @@ function dressContents(data, type, full) {
   return data;
 }
 
-$(document).ready(function () {
-  var isOpen = $('#dirlist_filter input').val().match(new RegExp('open:[^\\s]*','g'));
-  if(isOpen)
-  {
-    $('#filterCBoxOpen').prop('checked', true);
-  }
-  var theScan = $('#dirlist_filter input').val().match(new RegExp('scan:[^\\s]*','g'));
-  if(theScan)
-  {
-    $('#scanFilter').val(theScan[0].substring(5));
-  }
-  var theCon = $('#dirlist_filter input').val().match(new RegExp('con:[^\\s]*','g'));
-  if(theCon)
-  {
-    $('#conFilter').val(theScan[0].substring(4));
-  }
-  
-  $('#filterCBoxOpen').change(function(){
-    var searchField = $('#dirlist_filter input');
-    var searchString = searchField.val();
-    if($(this).is(':checked')){
-      searchString += ' open:1';
-    }
-    else{
-      searchString = searchString.replace(/open:[^\s]*/g,''); 
-    }
-    searchField.val(searchString);
-    searchField.trigger('keyup');
-  });
-  $('#scanFilter').change(function(){ filterScan($(this).val(),'scan'); });
-  $('#conFilter').change(function(){ filterScan($(this).val(),'con'); });
-});
-
 function filterScan(id,keyword) {
-  var searchField = $('#dirlist_filter input');
-  var searchString = searchField.val().replace(new RegExp(keyword+':[^\\s]*','g'),'');
-  if(id>0) {
-    searchString = searchString+' '+keyword+':'+id;
-    if(keyword==='scan'){
-      $('#scanFilter').val(id);
-    }
-    else if(keyword==='con')
-      $('#conFilter').val(id);
+  if(keyword==='scan'){
+    $('#scanFilter').val(id);
+    setCookie('scanFilter', id);
   }
-  searchField.val(searchString.trim());
-  searchField.trigger('keyup');
+  else if(keyword==='con')
+  {
+    $('#conFilter').val(id);
+    setCookie('conFilter', id);
+  }
+  otable.fnFilter('');
 }
 
 function resetFilters()
 {
   $('#scanFilter').val(0);
   $('#conFilter').val(0);
-  $('#filterCBoxOpen').attr('checked',false);
+  $('#openCBoxFilter').attr('checked',false);
 }

@@ -288,3 +288,8 @@ img.deleted {
 .ui-state-active .ui-button-text .browse-upload-all-on {
   color: black;
 }
+
+.decTypeWip {
+  border-color: red;
+  border-width: 5px;
+}
