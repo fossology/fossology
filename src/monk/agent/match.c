@@ -1,6 +1,6 @@
 /*
-Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Authors: Daniele Fognini, Andreas Wuerl, Marion Deveaud
+Copyright (C) 2013-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -273,12 +273,8 @@ static int licenseIncludes(const License* big, const License* small) {
   return 0;
 }
 
-static int oneLicenseIncludesTheOther(const License* thisLicense, const License* otherLicense) {
-  return licenseIncludes(thisLicense, otherLicense) || licenseIncludes(otherLicense, thisLicense);
-}
-
-static int licensesCanNotOverlap(const License* thisLicense, const License* otherLicense) {
-  return thisLicense->refId == otherLicense->refId || !(oneLicenseIncludesTheOther(thisLicense, otherLicense));
+int licensesDiffer(const License *thisLicense, const License *otherLicense) {
+	return (thisLicense->refId != otherLicense->refId);
 }
 
 /* N.B. this is only a partial order of matches
@@ -291,7 +287,10 @@ static int licensesCanNotOverlap(const License* thisLicense, const License* othe
 int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
   const int thisIncludesOther = match_includes(thisMatch, otherMatch);
   const int otherIncludesThis = match_includes(otherMatch, thisMatch);
+  const License *thisLicense = thisMatch->license;
+  const License *otherLicense = otherMatch->license;
 
+  //Verify if matches overlap
   if (thisIncludesOther || otherIncludesThis) {
     if (match_isFull(thisMatch) && thisIncludesOther) {
       return 1;
@@ -300,9 +299,21 @@ int match_partialComparator(const Match* thisMatch, const Match* otherMatch) {
       return -1;
     }
 
-    if (licensesCanNotOverlap(thisMatch->license, otherMatch->license)) {
-      return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
+    //Verify if licenses overlap
+    if (licensesDiffer(thisLicense, otherLicense)) {
+      if (licenseIncludes(thisLicense, otherLicense)) {
+        return 1;
+      }
+      if (licenseIncludes(otherLicense, thisLicense)) {
+        return -1;
+      }
+      if (match_isFull(otherMatch) && thisIncludesOther) {
+        //a complete different license is included in this match
+        return 0;
+      }
     }
+
+    return (compareMatchByRank(thisMatch, otherMatch) >= 0) ? 1 : -1;
   }
   return 0;
 }
