@@ -69,9 +69,9 @@ class AjaxBrowse extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    $groupId = $_SESSION[Auth::GROUP_ID];
+    $groupId = Auth::getGroupId();
     $gup = $this->dbManager->getSingleRow('SELECT group_perm FROM group_user_member WHERE user_fk=$1 AND group_fk=$2',
-        array($_SESSION[Auth::USER_ID], $groupId), __METHOD__ . '.user_perm');
+        array(Auth::getUserId(), $groupId), __METHOD__ . '.user_perm');
     if (!$gup)
     {
       throw new \Exception('You are assigned to wrong group.');
@@ -294,7 +294,7 @@ class AjaxBrowse extends DefaultPlugin
    */
   private function getListOfUploadsOfFolder(Request $request)
   {
-    $uploadBrowseProxy = new UploadBrowseProxy($_SESSION[Auth::GROUP_ID], $this->userPerm, $this->dbManager);
+    $uploadBrowseProxy = new UploadBrowseProxy(Auth::getGroupId(), $this->userPerm, $this->dbManager);
     $params = array($request->get('folder'));
     $partQuery = $uploadBrowseProxy->getFolderPartialQuery($params);
     

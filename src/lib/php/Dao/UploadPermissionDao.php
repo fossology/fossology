@@ -40,8 +40,18 @@ class UploadPermissionDao extends Object
   public function isAccessible($uploadId, $groupId) 
   {
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
-        array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>Auth::PERM_NONE;
+        array($uploadId, $groupId), __METHOD__.'.group_perm');
+    if ($perm && $perm['perm'] > Auth::PERM_NONE) {
+      return true;
+    }
+    
+    if (!isset($_SESSION) || !array_key_exists(Auth::USER_LEVEL, $_SESSION) || $_SESSION[Auth::USER_LEVEL] === Auth::PERM_NONE) {
+      return false;
+    }
+
+    $uploadPub = $this->dbManager->getSingleRow('SELECT public_perm FROM upload WHERE upload_pk=$1 AND public_perm>$2',
+            array($uploadId,Auth::PERM_NONE),__METHOD__.'.public_perm');
+    return !empty($uploadPub);
   }
   
   public function isEditable($uploadId, $groupId) 
