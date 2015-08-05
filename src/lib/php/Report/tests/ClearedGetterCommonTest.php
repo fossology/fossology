@@ -35,9 +35,10 @@ class TestClearedGetter extends ClearedGetterCommon
   protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null)
   {
     return array(
-      array("risk" => "5", "content" => "1", "text" => "t1", "comments" => "c1", "uploadtree_pk" => 1),
+      array("risk" => "5", "content" => "1", "text" => "t1", "comments" => "c1", "textfinding" => "tf1", "description" => "d1" ,"uploadtree_pk" => 1),
       array("risk" => "4", "content" => "1", "text" => "t2", "comments" => "c1", "uploadtree_pk" => 2),
       array("risk" => "4", "content" => "2", "text" => "t3", "comments" => "c3", "uploadtree_pk" => 3),
+      array("risk" => "3", "content" => "1", "text" => "t4", "comments" => "c4", "textfinding" => "tf1", "description" => "d2" ,"uploadtree_pk" => 4),
     );
   }
 }
@@ -117,15 +118,34 @@ class ClearedCommonReportTest extends \PHPUnit_Framework_TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(4, $uploadTreeTableName, $parentId)
+         ->andReturn("a/4");
+
     $statements = $this->clearedGetterTest->getCleared($uploadId);
     $expected = array(
       "statements" => array(
         array(
           "risk" => "5", 
           "content" => "1",
-          "text" => "t1",
+          "text" => "d1",
           "comments" => "c1",
           "files" => array("a/1", "a/2")
+        ),
+        array(
+          "risk" => "5", 
+          "content" => "tf1",
+          "text" => "d1",
+          "comments" => "c1",
+          "files" => array("a/1")
+        ),
+        array(
+          "risk" => "3", 
+          "content" => "tf1",
+          "text" => "d2",
+          "comments" => "c4",
+          "files" => array("a/4")
         ),
         array(
           "risk" => "4", 
@@ -171,14 +191,19 @@ class ClearedCommonReportTest extends \PHPUnit_Framework_TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
+    $this->treeDao
+         ->shouldReceive('getFullPath')
+         ->with(4, $uploadTreeTableName, $parentId)
+         ->andReturn("a/4");
+
     $tester = new TestClearedGetter("text");
     $statements = $tester->getCleared($uploadId);
     $expected = array(
       "statements" => array(
         array(
           "risk" => "5", 
-          "content" => "1",
-          "text" => "t1",
+          "content" => "tf1",
+          "text" => "d1",
           "comments" => "c1",
           "files" => array("a/1")
         ),
@@ -195,6 +220,13 @@ class ClearedCommonReportTest extends \PHPUnit_Framework_TestCase
           "text" => "t3",
           "comments" => "c3",
           "files" => array("a/b/1")
+        ),
+        array(
+          "risk" => "3", 
+          "content" => "tf1",
+          "text" => "d1",
+          "comments" => "c1",
+          "files" => array("a/4")
         )
       )
     );

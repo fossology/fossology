@@ -165,7 +165,7 @@ abstract class ClearedGetterCommon
           $statements[] = $singleStatement;
         }
       }
-      if(!empty($statement['textfinding']) && !in_array($statement['textfinding'], $findings)){
+      if(!empty($statement['textfinding'])){
         $findings[$fileName] = array(
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
