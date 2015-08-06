@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,152 +17,94 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-/**
- * \file agent-bucket.php
- * \brief schedule the bucket agent
- */
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\AgentPlugin;
 
-define("TITLE_agent_bucket", _("Bucket Analysis"));
-
-class agent_bucket extends FO_Plugin {
-  function __construct()
-  {
+class BucketAgentPlugin extends AgentPlugin
+{
+  public function __construct() {
     $this->Name = "agent_bucket";
-    $this->Title = TITLE_agent_bucket;
-  //   $this->MenuList   = "Jobs::Agents::Bucket Analysis";
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->AgentName = "buckets";   // agent.agent_name
+    $this->Title = _("Bucket Analysis");
+    $this->AgentName = "buckets";
+
     parent::__construct();
   }
-  
-  /**
-   * \brief Register additional menus.
-   */
-  function RegisterMenus() 
-  {
-    global $SysConf;
 
-    if ($this->State != PLUGIN_STATE_READY) {
-      return (0);
-    } // don't run
-
-    /* Get the users.default_bucketpool_fk */
-    $AuthRec = GetArrayval('auth', $SysConf);
-    if (empty($AuthRec)) return 0;
-
-    $user_pk = $SysConf['auth']['UserId'];
-
-    /* Unless the user is authenticated, we can't do anything. */
-    if (empty($user_pk)) return 0;
-
-    /* Get users default bucketpool so we know which bucketpool to use. */
-    $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
-    $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
-    if (empty($default_bucketpool_fk)) return 0;
-
-    /* fake menu item used to identify plugin agents */
-    menu_insert("Agents::" . $this->Title, 0, $this->Name);
-  }
-
-
-/**
- * \brief Check if the upload has results from this agent.
- *
- * \param $upload_pk
- *
- * \returns
- * 0 = no
- * 1 = yes, from latest agent version
- * 2 = yes, from older agent version
- */
-function AgentHasResults($upload_pk) 
-{
-  global $SysConf;
-
-  /* Get the users.default_bucketpool_fk */
-  $user_pk = $SysConf['auth']['UserId'];
-
-  /* Unless the user is authenticated, we can't do anything. */
-  if (empty($user_pk)) return 0;
-
-  /* Get users default bucketpool so we know which bucketpool to use. */
-  $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
-  $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
-  if (empty($default_bucketpool_fk)) return 0;
-
-  /* get the latest nomos agent_pk */
-  $Latest_nomos_agent_pk = GetAgentKey("nomos", "Nomos license scanner");
-
-  /* get the latest bucket agent_pk */
-  $Latest_bucket_agent_pk = GetAgentKey($this->AgentName, "Bucket scanner");
-
-  if (empty($Latest_nomos_agent_pk) || empty($Latest_bucket_agent_pk)) return 0; // no any nomos or bucket agent in agent table
-
-  /* see if the latest nomos and bucket agents have scaned this upload for this bucketpool */
-  $bucket_arsRec = GetSingleRec("bucket_ars", "where bucketpool_fk='$default_bucketpool_fk' and upload_fk='$upload_pk' and nomosagent_fk='$Latest_nomos_agent_pk' and agent_fk='$Latest_bucket_agent_pk' and ars_success='true'");
-  if (!empty($bucket_arsRec)) return 1;
-
-  /* see if older nomos and/or bucket agents have scaned this upload for this bucketpool */
-  $bucket_arsRec = GetSingleRec("bucket_ars", "where bucketpool_fk='$default_bucketpool_fk' and upload_fk='$upload_pk' and ars_success='true'");
-  if (!empty($bucket_arsRec)) return 2;
-
-  return (0);
-} // AgentHasResults()
-
-  /**
-   * \brief Queue the bucket agent.
-   *
-   * \param $job_pk
-   * \param $upload_pk - upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * \returns
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   */
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
-  {
-    global $Plugins;
-    global $SysConf;
-    $Dep = array();
-    $jqDeps = array();
-    $EmptyDeps = array();
-
-    /* Is the user authenticated?  If not, then fail
-     * because we won't know which bucketpool to use.
-     */ 
-    $user_pk = $SysConf['auth']['UserId'];
-    if (empty($user_pk))
-    {
-      $ErrorMsg = _("Session is unauthenticated, bucket agent cannot run without knowing who the user is.");
-      return(-1);
+  protected function getDefaultBucketPool()
+  {  
+    $user_pk = Auth::getUserId();
+    if (empty($user_pk)) {
+      return 0;
     }
 
-    /* get the default_bucketpool_fk from the users record */
-    $usersRec = GetSingleRec("users", "where user_pk='$user_pk'");
-    $default_bucketpool_fk = $usersRec['default_bucketpool_fk'];
+    /* @var $dbManager DbManager */
+    $dbManager = $GLOBALS['container']->get('db.manager');
+    $usersRec = $dbManager->getSingleRow('SELECT default_bucketpool_fk FROM users WHERE user_pk=$1', array($user_pk));
+    return $usersRec['default_bucketpool_fk'];
+  }
+
+  function preInstall()
+  {
+    $bucketPool = $this->getDefaultBucketPool();
+    if (!empty($bucketPool))
+    {
+      menu_insert("Agents::" . $this->Title, 0, $this->Name);
+    }
+  }
+
+  /**
+   * @override
+   * @param int $uploadId
+   */
+  public function AgentHasResults($uploadId=0) 
+  {
+    $default_bucketpool_fk = $this->getDefaultBucketPool();
+    if (empty($default_bucketpool_fk)) {
+      return 0;
+    }
+    /* @var $agentDao AgentDao */
+    $agentDao = $GLOBALS['container']->get('dao.agent');
+    $latestNomosAgentId = $agentDao->getCurrentAgentId("nomos", "Nomos license scanner");
+    if (empty($latestNomosAgentId)) {
+      return 0;
+    }
+    $latestBucketAgentId = $agentDao->getCurrentAgentId($this->AgentName, "Bucket scanner");
+    if (empty($latestBucketAgentId)) {
+      return 0;
+    }
+    /* @var $dbManager DbManager */
+    $dbManager = $GLOBALS['container']->get('db.manager');
+
+    $bucketLatestArsRec = $dbManager->getSingleRow("SELECT * FROM bucket_ars WHERE bucketpool_fk=$1 AND upload_fk=$2 AND nomosagent_fk=$3 and agent_fk=$4 AND ars_success=$5",
+            array($default_bucketpool_fk,$uploadId,$latestNomosAgentId,$latestBucketAgentId,$dbManager->booleanToDb(true)),
+            __METHOD__.'.latestNomosAndBucketScannedThisPool');
+    if (!empty($bucketLatestArsRec)) return 1;
+
+    $bucketOldArsRec = $dbManager->getSingleRow("SELECT * FROM bucket_ars WHERE bucketpool_fk=$1 AND upload_fk=$2 AND ars_success=$3",
+            array($default_bucketpool_fk,$uploadId,$dbManager->booleanToDb(true)),
+            __METHOD__.'.anyBucketScannedThisPool');
+    if (!empty($bucketOldArsRec)) return 2;
+
+    return 0;
+  }
+
+  
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  {
+    $default_bucketpool_fk = $this->getDefaultBucketPool();
     if (!$default_bucketpool_fk)
     {
-      $ErrorMsg = _("User does not have a default bucketpool.  Bucket agent cannot be scheduled without this.");
+      $errorMsg = _("User does not have a default bucketpool.  Bucket agent cannot be scheduled without this.");
       return (-1);
     }
 
-    /* schedule buckets */
-    /* queue up dependencies */
-    $Dependencies[] = "agent_nomos";
-    $Dependencies[] = "agent_pkgagent";
-    $jqargs = "bppk=$default_bucketpool_fk, upk=$upload_pk";
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies, $jqargs);
-  } // AgentAdd()
-
-  /**
-   * \brief There is no Output() form for buckets.
-   */
-  function Output() {
-      return;
+    $dependencies[] = "agent_nomos";
+    $dependencies[] = "agent_pkgagent";
+    $jqargs = "bppk=$default_bucketpool_fk, upk=$uploadId";
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs);
   }
 }
-$NewPlugin = new agent_bucket;
+
+register_plugin(new BucketAgentPlugin());

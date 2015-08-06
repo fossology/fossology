@@ -74,12 +74,42 @@ class ReportAgent extends Agent
   /** @var UserDao */
   private $userDao;
 
+  /** @var rowHeight */
+  private $rowHeight = 500;
+
   /** @var tablestyle */
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
                               "cellSpacing" => 5
-                             );
+                             );  
+
+  /** @var thTextStyle */
+  private $thStyle = array("bgColor" => "E0E0E0", 
+                           "valign" => "center"
+                          );
+
+  /** @var thTextStyle */
+  private $thTextStyle = array("size" => 12, 
+                               "align" => "center", 
+                               "bold" => true
+                              );
+
+  /** @var licenseColumn */
+  private $licenseColumn = array("size" => "10", 
+                                 "bold" => true
+                                );
+
+  /** @var licenseTextColumn */
+  private $licenseTextColumn = array("name" => "Courier New", 
+                                     "size" => 10, 
+                                     "bold" => false
+                                    );
+
+  /** @var filePathColumn */
+  private $filePathColumn = array("size" => "10", 
+                                  "bold" => false
+                                 );
   
   function __construct()
   {
@@ -377,20 +407,17 @@ class ReportAgent extends Agent
    */ 
   private function globalLicenseTable(Section $section, $mainLicenses)
   {
-    $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addTitle(htmlspecialchars("Main Licenses"), 2);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($rowHeight);
-    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
-    $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
-    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
+    $table->addRow($this->rowHeight);
+    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
+    $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
+    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
     
     if(!empty($mainLicenses)){
       foreach($mainLicenses as $licenseMain){
@@ -400,193 +427,128 @@ class ReportAgent extends Agent
           $styleColumn = array("bgColor" => "FEFF99");
         else
           $styleColumn = array("bgColor" => "FFFFFF");
-        $table->addRow($rowHeight);
-        $cell1 = $table->addCell($firstColLen, $styleColumn, "pStyle");
-        $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), null, "pStyle");
-        $cell2 = $table->addCell($secondColLen, "pStyle");
+        $table->addRow($this->rowHeight);
+        $cell1 = $table->addCell($firstColLen, $styleColumn);
+        $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen);
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
-        $cell2->addText($licenseText,null, "pStyle");
+        $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         if(!empty($licenseMain["files"])){
-          $cell3 = $table->addCell($thirdColLen, $styleColumn, "pStyle");
+          $cell3 = $table->addCell($thirdColLen, $styleColumn);
           foreach($licenseMain["files"] as $fileName){
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
-        }
-        else{
-          $cell3 = $table->addCell($thirdColLen, $styleColumn, "pStyle")->addText("");
+        }else{
+          $cell3 = $table->addCell($thirdColLen, $styleColumn)->addText("");
         }
       }
     }
     else{
-      $table->addRow($rowHeight);
-      $table->addCell($firstColLen, "pStyle")->addText("");
-      $table->addCell($secondColLen, "pStyle")->addText("");
-      $table->addCell($thirdColLen, "pStyle")->addText("");
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
     }
     $section->addTextBreak(); 
   }
 
   /**
-   * @brief This function lists out the red licenses
+   * @brief This function lists out the bulk licenses,
+   * comments of identified licenses
    * @param Section section
    * @param $title
    * @param $licenses
    * @param $rowHead
    */ 
-  private function redOSSLicenseTable(Section $section, $title, $licenses, $rowHead = "")
+  private function bulkLicenseTable(Section $section, $title, $licenses, $rowHead="")
   {
-    $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
-    $thirdColLen = 4000;
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
-    $redRowStyle = array("bgColor" => "F9A7B0");  
+    $thirdColLen = 4000;  
 
     $section->addTitle(htmlspecialchars($title), 2);
     $table = $section->addTable($this->tablestyle);
-    $table->addRow("500");
-    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
-
-    if(empty($rowHead)){  
-      $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
-    }
-    else{  
-      $table->addCell($secondColLen, $firstRowStyle)->addText($rowHead, $firstRowTextStyle);
-    }
-    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
+    $table->addRow($this->rowHeight);
+    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
+    if(empty($rowHead)){
+      $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
+    }else{
+      $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
+    } 
+    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
 
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
-        if($licenseStatement['risk'] == "4" || $licenseStatement['risk'] == "5"){
-          $table->addRow($rowHeight);
-          $cell1 = $table->addCell($firstColLen, $redRowStyle, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), null, "pStyle");
-          $cell2 = $table->addCell($secondColLen, "pStyle"); 
-          // replace new line character
-          $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
-          $cell3 = $table->addCell($thirdColLen, $redRowStyle, "pStyle");
-          foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
-          }
-        }else{ continue; }
+        $table->addRow($this->rowHeight);
+        $cell1 = $table->addCell($firstColLen, null, "pStyle"); 
+        $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen, "pStyle"); 
+        // replace new line character
+        $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
+        $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
+        $cell3 = $table->addCell($thirdColLen, null, "pStyle");
+        foreach($licenseStatement["files"] as $fileName){ 
+          $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
+        }
       }
     }else{
-      $table->addRow($rowHeight);
-      $table->addCell($firstColLen, "pStyle")->addText("");
-      $table->addCell($secondColLen, "pStyle")->addText("");
-      $table->addCell($thirdColLen, "pStyle")->addText("");
-    }
-    $section->addTextBreak(); 
-  }
-
-  /**
-   * @brief This function lists out the yellow licenses
-   * @param Section section
-   * @param $title
-   * @param $licenses
-   * @param $rowHead
-   */ 
-  private function yellowOSSLicenseTable(Section $section, $title, $licenses, $rowHead = "")
-  {
-    $rowHeight = 500;
-    $firstColLen = 2000;
-    $secondColLen = 9500;
-    $thirdColLen = 4000;
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
-    $yellowRowStyle = array("bgColor" => "FEFF99");
-
-    $section->addTitle(htmlspecialchars($title), 2);
-    $table = $section->addTable($this->tablestyle);
-    $table->addRow("500");
-    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
-
-    if(empty($rowHead)){  
-      $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
-    }
-    else{  
-      $table->addCell($secondColLen, $firstRowStyle)->addText($rowHead, $firstRowTextStyle);
-    }
-    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
-
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
-        if($licenseStatement['risk'] == "2" || $licenseStatement['risk'] == "3"){
-          $table->addRow($rowHeight);
-          $cell1 = $table->addCell($firstColLen, $yellowRowStyle, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), null, "pStyle");
-          $cell2 = $table->addCell($secondColLen, "pStyle"); 
-          // replace new line character
-          $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
-          $cell3 = $table->addCell($thirdColLen, $yellowRowStyle, "pStyle");
-          foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
-          }
-        }else{ continue; }
-      }
-    }else{
-      $table->addRow($rowHeight);
-      $table->addCell($firstColLen, "pStyle")->addText("");
-      $table->addCell($secondColLen, "pStyle")->addText("");
-      $table->addCell($thirdColLen, "pStyle")->addText("");
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
     }
     $section->addTextBreak(); 
   }
   
   /**
-   * @brief This function lists out the white licenses
+   * @brief This function lists out the red, white & yellow licenses
    * @param Section section
    * @param $title
    * @param $licenses
-   * @param $rowHead
+   * @param $riskarray
    */ 
-  private function licensesTable(Section $section, $title, $licenses, $rowHead = "")
+  private function licensesTable(Section $section, $title, $licenses, $riskarray)
   {
-    $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addTitle(htmlspecialchars($title), 2);
+
     $table = $section->addTable($this->tablestyle);
-    $table->addRow("500");
-    $table->addCell($firstColLen, $firstRowStyle)->addText("License", $firstRowTextStyle);
+    $table->addRow($this->rowHeight);
+    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
 
     if(empty($rowHead)){  
-      $table->addCell($secondColLen, $firstRowStyle)->addText("License text", $firstRowTextStyle);
+      $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
     }
     else{  
-      $table->addCell($secondColLen, $firstRowStyle)->addText($rowHead, $firstRowTextStyle);
+      $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
     }
-    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
+    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
 
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
-        if(empty($licenseStatement['risk']) || $licenseStatement['risk'] == "0" || $licenseStatement['risk'] == "1"){
-          $table->addRow($rowHeight);
-          $cell1 = $table->addCell($firstColLen, "pStyle"); 
-          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED),null, "pStyle");
-          $cell2 = $table->addCell($secondColLen, "pStyle"); 
+        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){ 
+          $table->addRow($this->rowHeight);
+          $cell1 = $table->addCell($firstColLen, $riskarray['color']); 
+          $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
+          $cell2 = $table->addCell($secondColLen); 
           // replace new line character
           $licenseText = str_replace("\n", "<w:br/>", htmlspecialchars($licenseStatement["text"], ENT_DISALLOWED));
-          $cell2->addText($licenseText, null, "pStyle");
-          $cell3 = $table->addCell($thirdColLen, "pStyle");
+          $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
+          $cell3 = $table->addCell($thirdColLen, $riskarray['color']);
           foreach($licenseStatement["files"] as $fileName){ 
-            $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }else{ continue; }
       }
     }else{
-      $table->addRow($rowHeight);
-      $table->addCell($firstColLen, "pStyle")->addText("");
-      $table->addCell($secondColLen, "pStyle")->addText("");
-      $table->addCell($thirdColLen, "pStyle")->addText("");
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
     }
     $section->addTextBreak(); 
   }
@@ -596,28 +558,24 @@ class ReportAgent extends Agent
    */ 
   private function acknowledgementTable(Section $section)
   {
-    $rowHeight = 500;
     $firstColLen = 3500;
     $secondColLen = 8000;
     $thirdColLen = 4000;
-
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
     
     $section->addTitle(htmlspecialchars("Acknowledgements"), 2);
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($rowHeight);
-    $cell1 = $table->addCell($firstColLen, $firstRowStyle); 
-    $cell1->addText(htmlspecialchars("ID of acknowledgements"), $firstRowTextStyle);
-    $cell2 = $table->addCell($secondColLen,$firstRowStyle); 
-    $cell2->addText(htmlspecialchars("Text of acknowledgements"), $firstRowTextStyle);
-    $cell3 = $table->addCell($thirdColLen,$firstRowStyle);
-    $cell3->addText(htmlspecialchars("Reference to the license"), $firstRowTextStyle);
+    $table->addRow($this->rowHeight);
+    $cell1 = $table->addCell($firstColLen, $this->thStyle); 
+    $cell1->addText(htmlspecialchars("ID of acknowledgements"), $this->thTextStyle);
+    $cell2 = $table->addCell($secondColLen, $this->thStyle); 
+    $cell2->addText(htmlspecialchars("Text of acknowledgements"), $this->thTextStyle);
+    $cell3 = $table->addCell($thirdColLen, $this->thStyle);
+    $cell3->addText(htmlspecialchars("Reference to the license"), $this->thTextStyle);
 
-    $table->addRow($rowHeight);
-    $table->addCell($firstColLen, "pStyle")->addText("");
-    $table->addCell($secondColLen, "pStyle")->addText("");
-    $table->addCell($thirdColLen, "pStyle")->addText("");
+    $table->addRow($this->rowHeight);
+    $table->addCell($firstColLen)->addText("");
+    $table->addCell($secondColLen)->addText("");
+    $table->addCell($thirdColLen)->addText("");
 
     $section->addTextBreak(); 
   }
@@ -631,38 +589,36 @@ class ReportAgent extends Agent
    */
   private function getRowsAndColumnsForCEI(Section $section, $title, $statementsCEI)
   {
-    $rowHeight = 50;
+    $smallRowHeight = 50;
     $firstColLen = 6500;
     $secondColLen = 5000;
     $thirdColLen = 4000;
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
 
     $section->addTitle(htmlspecialchars($title), 2);
 
     $table = $section->addTable($this->tablestyle);
 
-    $table->addRow("500");
-    $table->addCell($firstColLen, $firstRowStyle)->addText("Statements", $firstRowTextStyle);
-    $table->addCell($secondColLen, $firstRowStyle)->addText("Comments", $firstRowTextStyle);
-    $table->addCell($thirdColLen, $firstRowStyle)->addText("File path", $firstRowTextStyle);
+    $table->addRow($this->rowHeight);
+    $table->addCell($firstColLen, $this->thStyle)->addText("Statements", $this->thTextStyle);
+    $table->addCell($secondColLen, $this->thStyle)->addText("Comments", $this->thTextStyle);
+    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
     if(!empty($statementsCEI)){
       foreach($statementsCEI as $statements){
-        $table->addRow($rowHeight, "pStyle");
-        $cell1 = $table->addCell($firstColLen, "pStyle"); 
-        $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED),null, "pStyle");
-        $cell2 = $table->addCell($secondColLen, "pStyle");
-        $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), null, "pStyle");
-        $cell3 = $table->addCell($thirdColLen, "pStyle");
+        $table->addRow($smallRowHeight);
+        $cell1 = $table->addCell($firstColLen); 
+        $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        $cell2 = $table->addCell($secondColLen);
+        $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        $cell3 = $table->addCell($thirdColLen);
         foreach($statements['files'] as $fileName){ 
-          $cell3->addText(htmlspecialchars($fileName), null, "pStyle");
+          $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
     }else{
-      $table->addRow("500");
-      $table->addCell($firstColLen, "pStyle")->addText("");
-      $table->addCell($secondColLen, "pStyle")->addText("");
-      $table->addCell($thirdColLen, "pStyle")->addText("");
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText("");
+      $table->addCell($secondColLen)->addText("");
+      $table->addCell($thirdColLen)->addText("");
     }
     $section->addTextBreak(); 
   }
@@ -675,18 +631,15 @@ class ReportAgent extends Agent
    */
   private function getRowsAndColumnsForIrre(Section $section, $title, $licensesIrre)
   {
-    $thColor = array("bgColor" => "E0E0E0");
-    $thText = array("size" => 12, "bold" => true);
-    $rowWidth = 500;
     $firstColLen = 6500;
     $secondColLen = 9000;
 
     $section->addTitle(htmlspecialchars($title), 2);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($rowWidth, "pStyle");
-    $cell = $table->addCell($firstColLen, $thColor)->addText(htmlspecialchars("Path"), $thText);
-    $cell = $table->addCell($secondColLen, $thColor)->addText(htmlspecialchars("Files"), $thText);
+    $table->addRow($this->rowHeight);
+    $cell = $table->addCell($firstColLen, $this->thStyle)->addText("Path", $this->thTextStyle);
+    $cell = $table->addCell($secondColLen, $this->thStyle)->addText("Files", $this->thTextStyle);
     if(!empty($licensesIrre)){    
       foreach($licensesIrre as $statements){
         $table->addRow($rowWidth, "pStyle");
@@ -694,11 +647,11 @@ class ReportAgent extends Agent
         $cell1->addText(htmlspecialchars($statements['content']),null, "pStyle");
         $cell2 = $table->addCell($secondColLen);
         foreach($statements['files'] as $fileName){
-          $cell2->addText(htmlspecialchars($fileName),null, "pStyle");
+          $cell2->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
     }else{
-      $table->addRow($rowWidth);
+      $table->addRow($this->rowHeight);
       $table->addCell($firstColLen, "pStyle")->addText("");
       $table->addCell($secondColLen, "pStyle")->addText("");
     }
@@ -713,22 +666,18 @@ class ReportAgent extends Agent
    */
   private function licenseHistogram(Section $section, $parentItem, $groupId)
   {
-    $rowHeight = 500;
     $firstColLen = 2000;
     $secondColLen = 2000;
     $thirdColLen = 5000;
 
-    $firstRowStyle = array("bgColor" => "E0E0E0", "textAlign" => "center");
-    $firstRowTextStyle = array("size" => 12, "align" => "center", "bold" => true);
-    
     $section->addTitle(htmlspecialchars("Results of License Scan"), 2);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($rowHeight);
+    $table->addRow($this->rowHeight);
 
-    $table->addCell($firstColLen, $firstRowStyle)->addText(htmlspecialchars("Scanner Count"), $firstRowTextStyle);
-    $table->addCell($secondColLen, $firstRowStyle)->addText(htmlspecialchars("Edited Count"), $firstRowTextStyle);
-    $table->addCell($thirdColLen, $firstRowStyle)->addText(htmlspecialchars("License Name"), $firstRowTextStyle);
+    $table->addCell($firstColLen, $this->thStyle)->addText("Scanner count", $this->thTextStyle);
+    $table->addCell($secondColLen, $this->thStyle)->addText("Edited count", $this->thTextStyle);
+    $table->addCell($thirdColLen, $this->thStyle)->addText("License name", $this->thTextStyle);
 
     $scannerLicenseHistogram = $this->licenseDao->getLicenseHistogram($parentItem);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($parentItem, $groupId);
@@ -738,10 +687,10 @@ class ReportAgent extends Agent
       $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
       $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
 
-      $table->addRow($rowHeight);
-      $table->addCell($firstColLen, "pStyle")->addText(htmlspecialchars($count));
-      $table->addCell($secondColLen, "pStyle")->addText(htmlspecialchars($editedCount));
-      $table->addCell($thirdColLen, "pStyle")->addText(htmlspecialchars($licenseShortName));
+      $table->addRow($this->rowHeight);
+      $table->addCell($firstColLen)->addText($count, "pStyle");
+      $table->addCell($secondColLen)->addText($editedCount, "pStyle");
+      $table->addCell($thirdColLen)->addText(htmlspecialchars($licenseShortName), "pStyle");
     }
     $section->addTextBreak();
   }
@@ -818,10 +767,10 @@ class ReportAgent extends Agent
     $sR->todoObliList($section);
  
     /* For other todolist */
-    $sR->forOtherTodos($section);
+    $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
     /* Basic for clearing report */
-    $sR->basicForClearingReport($section);
+    //$sR->basicForClearingReport($section);
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
@@ -831,19 +780,18 @@ class ReportAgent extends Agent
 
     /* Display licenses(red) name,text and files */
     $heading = "Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses";
-    $this->redOSSLicenseTable($section, $heading, $contents['licenses']['statements']);
+    $redLicense = array("color" => array("bgColor" => "F9A7B0"), "riskLevel" => array("5", "4")); 
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $redLicense);
 
     /* Display licenses(yellow) name,text and files */
     $heading = "Other OSS Licenses (yellow) - additional obligations to common rules";
-    $this->yellowOSSLicenseTable($section, $heading, $contents['licenses']['statements']);
+    $yellowLicense = array("color" => array("bgColor" => "FEFF99"), "riskLevel" => array("3", "2"));
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $yellowLicense);
 
     /* Display licenses(white) name,text and files */
     $heading = "Other OSS Licenses (white) - only common rules";  
-    $this->licensesTable($section, $heading, $contents['licenses']['statements']);
-
-    /* Display Bulk findings name,text and files */
-    $heading = "Bulk Findings";
-    $this->licensesTable($section, $heading, $contents['bulkLicenses']['statements']);
+    $whiteLicense = array("color" => array("bgColor" => "FFFFFF"), "riskLevel" => array("", "0", "1"));
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense);
 
     /* Display acknowledgement */
     $this->acknowledgementTable($section);
@@ -854,11 +802,21 @@ class ReportAgent extends Agent
 
     /* Display Ecc statements and files */
     $heading = "Export Restrictions";
+    $section->addBookmark("eccInternalLink");
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements']);
 
     /* Display IP statements and files */
     $heading = "Intellectual Property";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
+
+    /* Display Bulk findings name,text and files */
+    $heading = "Bulk Findings";
+    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
+
+    /* Display NON Functional Licenses license files */
+    $heading = "Non Functional Licenses";
+    $sR->getNonFunctionalLicenses($section, $heading);
+
 
     /* Display irrelavant license files */
     $heading = "Irrelevant Files";
@@ -867,7 +825,8 @@ class ReportAgent extends Agent
     /* Display comments entered for report */
     $heading = "Notes";  
     $rowHead = "Comment Entered";
-    $this->licensesTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
+    $this->bulkLicenseTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
+
 
     /* Footer starts */
     $sR->reportFooter($phpWord, $section);

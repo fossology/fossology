@@ -17,7 +17,7 @@
 ***********************************************************/
 
 use Fossology\Lib\Dao\UserDao;
-use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
@@ -64,6 +64,6 @@ $groupId = $SysConf['auth']['GroupId'];
 $userDao = $GLOBALS['container']->get("dao.user");
 $destGroupId = $userDao->getGroupIdByName($opts["destgroup"]);
 
-/* @var $uploadDao UploadDao */
-$uploadDao = $GLOBALS['container']->get("dao.upload");
-$uploadDao->makeAccessibleToGroup($uploadId, $destGroupId);
+/* @var $uploadPermDao UploadPermissionDao */
+$uploadpermDao = $GLOBALS['container']->get("dao.upload.permission");
+$uploadpermDao->makeAccessibleToGroup($uploadId, $destGroupId);

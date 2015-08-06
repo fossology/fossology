@@ -147,14 +147,14 @@ abstract class AgentPlugin extends Object implements Plugin
     if (is_array($dependency))
     {
       $pluginName = $dependency['name'];
-      $depArgs = $dependency['args'];
-      $preJq = array_key_exists(self::PRE_JOB_QUEUE, $dependency) ? $dependency[self::PRE_JOB_QUEUE] : 0;
+      $depArgs = array_key_exists('args', $dependency) ? $dependency['args'] : null;
+      $preJq = array_key_exists(self::PRE_JOB_QUEUE, $dependency) ? $dependency[self::PRE_JOB_QUEUE] : array();
     }
     else
     {
       $pluginName = $dependency;
       $depArgs = null;
-      $preJq = 0;
+      $preJq = array();
     }
     $depPlugin = plugin_find($pluginName);
     if (!$depPlugin)
@@ -162,13 +162,8 @@ abstract class AgentPlugin extends Object implements Plugin
       $errorMsg = "Invalid plugin name: $pluginName, (implicitAgentAdd())";
       return -1;
     }
-    $jqId = $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $depArgs);
-    if($preJq>0 && $jqId>0)
-    {
-      $dbManager = $GLOBALS['container']->get('db.manager');
-      $dbManager->insertTableRow('jobdepends',array('jdep_jq_fk'=>$jqId,'jdep_jq_depends_fk'=>$preJq));
-    }
-    return $jqId;
+
+    return $depPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $preJq, $depArgs);
   }
 
   function __toString()

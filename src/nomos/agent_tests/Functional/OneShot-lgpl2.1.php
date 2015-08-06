@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,39 +16,20 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/**
- * \brief Perform a one-shot license analysis on a glpv2.1 license
- *
- * License returned should be LGPL_v2.1
- *
- * @version "$Id$"
- *
- * Created on March 1, 2012
- */
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
+require_once ('CommonCliTest.php');
 
-
-class OneShotgplv21Test extends PHPUnit_Framework_TestCase
+class OneShotgplv21Test extends CommonCliTest
 {
-  public $nomos;
-  public $gplv21;
-
-  function setUp()
+  public function testOneShotgplv21()
   {
-    $this->gplv21 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gplv2.1';
-    $this->assertFileExists($this->gplv21,"OneShotgplv21Test FAILURE! $this->gplv21 not found\n");
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-  }
-
-  function testOneShotgplv21()
-  {
-    $last = exec("$this->nomos $this->gplv21 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
+    $gplv21 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gplv2.1';
+    $this->assertFileExists($gplv21,"OneShotgplv21Test FAILURE! $gplv21 not found\n");
+    
+    list($output,) = $this->runNomos("",array($gplv21));
+    list(,$fname,,,$license) = explode(' ', $output);
     $this->assertEquals($fname, 'gplv2.1', "Error filename $fname does not equal gplv2.1");
-    $this->assertEquals($license, 'LGPL-2.1', "Error license does not equal LGPL_v2.1,
+    $this->assertEquals(trim($license), 'LGPL-2.1', "Error license does not equal LGPL_v2.1,
        $license was returned");
   }
 }

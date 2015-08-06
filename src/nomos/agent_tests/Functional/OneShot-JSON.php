@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,32 +16,19 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-/**
- * \brief Perform a one-shot on JSON file
- *
- */
+require_once ('CommonCliTest.php');
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
-
-
-class OneShot_JSON extends PHPUnit_Framework_TestCase
+class OneShot_JSON extends CommonCliTest
 {
-  public $nomos;
   public $tested_file;
-
-  function setUp()
-  {
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-  }
 
   function testOneShot_JSON()
   {
-    $this->tested_file = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/jslint.js';
+    $this->tested_file = dirname(dirname(dirname(__DIR__))).'/testing/dataFiles/TestData/licenses/jslint.js';
     $license_report = "JSON";
-    $last = exec("$this->nomos $this->tested_file 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
-    $this->assertEquals($license, $license_report);
+    
+    list($output,) = $this->runNomos("",array($this->tested_file));
+    list(,,,,$license) = explode(' ', $output);
+    $this->assertEquals(trim($license), $license_report);
   }
 }

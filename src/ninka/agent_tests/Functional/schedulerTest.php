@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
@@ -41,6 +42,9 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
   private $licenseDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
+
 
   public function setUp()
   {
@@ -49,7 +53,8 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("NinkaSchedulerTest");
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
   }
   
   public function tearDown()

@@ -21,16 +21,17 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
+use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Proxy\LatestScannerProxy;
 use Fossology\Lib\Util\Object;
 
 class AgentLicenseEventProcessor extends Object
 {
-
+  private $latestAgentMapCache = array();
   /** @var LicenseDao */
   private $licenseDao;
-
   /** @var AgentDao */
   private $agentDao;
 
@@ -86,6 +87,10 @@ class AgentLicenseEventProcessor extends Object
     return $this->filterLatestScannerDetectedMatches($agentDetectedLicenses, $itemTreeBounds->getUploadId());
   }
 
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return LicenseMatch[][][] map licenseId->agentName->licenseMatches
+   */
   public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
   {
     $agentDetectedLicenses = array();
@@ -120,12 +125,25 @@ class AgentLicenseEventProcessor extends Object
     {
       return array();
     }
-
-    $latestScannerProxy = new \Fossology\Lib\Proxy\LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
-    $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
     
+    $latestAgentIdPerAgent = $this->getLatestAgentIdPerAgent($uploadId, $agentNames);
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
+  }
+  
+  private function getLatestAgentIdPerAgent($uploadId, $agentNames)
+  {
+    if(!array_key_exists($uploadId,$this->latestAgentMapCache)
+            || count(array_diff_key($agentNames, $this->latestAgentMapCache[$uploadId]))>0)
+    {
+      $latestScannerProxy = new LatestScannerProxy($uploadId, $agentNames, "latest_scanner$uploadId");
+      $latestAgentIdPerAgent = $latestScannerProxy->getNameToIdMap();
+      foreach($latestAgentIdPerAgent as $agentName=>$agentMap)
+      {
+        $this->latestAgentMapCache[$uploadId][$agentName] = $agentMap;
+      }
+    }
+    return $this->latestAgentMapCache[$uploadId];
   }
   
   /**

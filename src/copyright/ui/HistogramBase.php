@@ -178,7 +178,7 @@ abstract class HistogramBase extends FO_Plugin {
       $OutBuf .= "<div id='msgdiv'>\n";
       $OutBuf .= _("No data available.");
       $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
-      $OutBuf .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_copyright \")'>\n";
+      $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_{$this->agentName}')\">\n";
       $OutBuf .= "</input>";
       $OutBuf .= "</div> \n";
       $OutBuf .= "</form>\n";
@@ -192,7 +192,7 @@ abstract class HistogramBase extends FO_Plugin {
     /** change the copyright  result when selecting one version of copyright */
     if (!empty($AgentSelect))
     {
-      $action = Traceback_uri() . "?mod=copyright-hist&upload=$uploadId&item=$item";
+      $action = Traceback_uri() . '?mod=' . GetParm('mod',PARM_RAW) . Traceback_parm_keep(array('upload','item'));
 
       $OutBuf .= "<script type='text/javascript'>
         function addArsGo(formid, selectid)

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,73 +16,28 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-/**
- * \file agent_unpack.php
- * \brief the unpack ui, and add unpack job, joqueue
- */
 
-define("TITLE_agent_unpack", _("Schedule an Unpack"));
+use Fossology\Lib\Plugin\AgentPlugin;
 
-class agent_unpack extends FO_Plugin
+class UnpackAgentPlugin extends AgentPlugin
 {
-  public $Name       = "agent_unpack";
-  public $Title      = TITLE_agent_unpack;
-  // public $MenuList   = "Jobs::Agents::Unpack";
-  public $Version    = "1.0";
-  public $Dependency = array();
-  public $DBaccess   = PLUGIN_DB_WRITE;
-  public $AgentName = "ununpack";   // agent.agent_name
+  public function __construct() {
+    $this->Name = "agent_unpack";
+    $this->Title = _("Schedule an Unpack");
+    $this->AgentName = "ununpack";
 
-
-  /**
-   * \brief register additional menus.
-   */
-  function RegisterMenus()
-  {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
-    } // don't run
-    menu_insert("Agents::" . $this->Title,0,$this->Name);
+    parent::__construct();
   }
 
-  /**
-   * \brief Check if the upload has already been successfully unpacked.
-   *
-   * \param $upload_pk
-   *
-   * \returns:
-   * - 0 = no
-   * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version (does not apply to adj2nest)
-   **/
-  function AgentHasResults($upload_pk)
+  function AgentHasResults($uploadId=0)
   {
-    return CheckARS($upload_pk, "ununpack", "Archive unpacker", "ununpack_ars");
-  } // AgentHasResults()
-
-
-  /**
-   * \brief Queue the unpack and adj2nest agents.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
-   *  - It is already queued
-   *  - It has already been run by the latest agent version
-   *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
-   *        This is for dependencies that this plugin cannot know about ahead of time.
-   *
-   * \returns
-   * - jq_pk Successfully queued
-   * -   0   Not queued, latest version of agent has previously run successfully
-   * -  -1   Not queued, error, error string in $ErrorMsg
-   **/
-  function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
+    return CheckARS($uploadId, "ununpack", "Archive unpacker", "ununpack_ars");
+  }
+  
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    return CommonAgentAdd($this, $job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-  } // AgentAdd()
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, '');
+  }
+}
 
-};
-$NewPlugin = new agent_unpack;
-
+register_plugin(new UnpackAgentPlugin());

@@ -1,6 +1,7 @@
 <?php
 /*
  Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -15,20 +16,39 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+require_once ('CommonCliTest.php');
 
-/**
- * cli-h
- * \brief get usage message from nomos.
- *
- */
-
-class cli1Test extends PHPUnit_Framework_TestCase
+class cli1Test extends CommonCliTest
 {
+  function setUp()
+  {
+    $this->testDb = new TestPgDb("nomosfun".time());
+    $this->agentDir = dirname(dirname(__DIR__))."/";
+    $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
+
+    $sysConf = $this->testDb->getFossSysConf();
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->install($this->agentDir);
+
+    $this->testDb->createSequences(array(), true);
+    $this->testDb->createPlainTables(array(), true);
+    $this->testDb->alterTables(array(), true);
+  }
+
+  public function tearDown()
+  {
+    $this->testInstaller->uninstall($this->agentDir);
+    $this->testInstaller->clear();
+    $this->testInstaller->rmRepo();
+    $this->testDb = null;
+  }
+  
   public function testHelp()
   {
     $nomos = dirname(dirname(__DIR__)) . '/agent/nomos';
-    // run it
-    $last = exec("$nomos -h 2>&1", $out, $rtn);
+    list($output,$retCode) = $this->runNomos($args="-h");
+    $out = explode("\n", $output);
     $usage = "Usage: $nomos [options] [file [file [...]]";
     $this->assertEquals($usage, $out[0]);
   }

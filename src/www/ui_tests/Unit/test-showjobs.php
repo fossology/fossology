@@ -42,8 +42,8 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
    * \todo use testing DB, poplulate data
    */
   function test_ShowJobDB() {
-    global $newPlugin;
-    $res = $newPlugin->ShowJobDB(1);
+    global $NewPlugin;
+    $res = $NewPlugin->ShowJobDB(1);
   }
 
 
@@ -52,8 +52,8 @@ class test_showjobs extends PHPUnit_Framework_TestCase {
    * \todo use testing DB, poplulate data
    */
   function test_Uploads2Jobs() {
-    global $newPlugin;
-    $res = $newPlugin->Uploads2Jobs(array(6));
+    global $NewPlugin;
+    $res = $NewPlugin->Uploads2Jobs(array(6));
   }
 
   /**

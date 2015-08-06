@@ -63,19 +63,11 @@ class DeciderAgentPlugin extends AgentPlugin
      * @param int $uploadId
      * @param string $errorMsg
      * @param Request $request
-     * @param string[] $agentList  //check!
      * @return string
      */
-  public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request, $agentList)
+  public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
-    $dependencies[] = "agent_adj2nest";
-    
-    if(in_array('agent_reuser',$dependencies))
-    {
-      $reuserAgent = plugin_find('agent_reuser');
-      $reuserJobId = $reuserAgent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
-      $dependencies[] = $reuserJobId;
-    }
+    $dependencies = array();
    
     $rules = $request->get('deciderRules') ?: array();
     $rulebits = 0;
@@ -97,7 +89,10 @@ class DeciderAgentPlugin extends AgentPlugin
         case 'reuseBulk':
           $dependencies[] = 'agent_reuser';
           $rulebits |= 0x4;
-          break;          
+          break;
+        case 'wipScannerUpdates':
+          $this->addScannerDependencies($dependencies, $request);
+          $rulebits |= 0x8;
       }
     }
     
@@ -110,9 +105,25 @@ class DeciderAgentPlugin extends AgentPlugin
     return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies), $args);
   }
   
+  protected function addScannerDependencies(&$dependencies, Request $request)
+  {
+    $agentList = $request->get('agents') ?: array();
+    foreach (array('agent_nomos', 'agent_monk', 'agent_ninka') as $agentName) {
+      if (in_array($agentName, $dependencies)) {
+        continue;
+      }
+      if ($request->get('Check_'.$agentName)) {
+        $dependencies[] = $agentName;
+        continue;
+      }
+      if (in_array($agentName, $agentList)) {
+        $dependencies[] = $agentName;
+      }
+    }
+  }
   
   /**
-   * @overwrite
+   * @override
    */
   public function preInstall()
   {

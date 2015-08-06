@@ -29,6 +29,7 @@ install:
 before_script:
  - cd src/
  - composer install --dev
+ - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && (y y | sudo cpan -T Spreadsheet::WriteExcel) && sudo cpan -T DBD::SQLite && perl Makefile.PL && sudo ln -s $(pwd)/bin/ninka /usr/bin/ninka && export PERL5LIB=$(pwd)/lib && cd ../.. 
  - cd ..
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
@@ -39,21 +40,21 @@ env:
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - MAKETARGETS='all test-lib'
   matrix: 
-   - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk'
+   - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.5 CXX=clang++-3.5
-   - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk'
-   - CC=gcc-4.4 CXX=g++-4.4 MAKETARGETS='all test-lib test-monk'
+   - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+   - CC=gcc-4.4 CXX=g++-4.4 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-4.6 CXX=g++-4.6
    - CC=gcc-4.8 CXX=g++-4.8
    - CC=gcc-4.9 CXX=g++-4.9
-   - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk'
+   - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
 
 matrix:
   include:
     - php: 5.3
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/' MAKETARGETS='build-lib VERSIONFILE build-cli'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.4
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5

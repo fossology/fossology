@@ -19,20 +19,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Reuser\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\TreeDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
+use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
-
 use Monolog\Logger;
 
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
@@ -55,6 +56,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $clearingDecisionFilter;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
   /** @var HighlightDao */
   private $highlightDao;
   /** @var Mock|TreeDao */
@@ -73,11 +76,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("ReuserSchedulerTest");
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
-    $this->treeDao = \Mockery::mock(\Fossology\Lib\Dao\TreeDao::classname());
+    $this->treeDao = \Mockery::mock(TreeDao::classname());
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 

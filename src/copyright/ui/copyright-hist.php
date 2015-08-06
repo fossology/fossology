@@ -40,33 +40,23 @@ class CopyrightHistogram extends HistogramBase {
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
-    $type = 'statement';
-    $description = _("Copyright");
+    $typeDescriptionPairs = array(
+            'statement' => _("Copyright"),
+            'email' => _("Email"),
+            'url' => _("URL"),
+            'author' => _("Author")
+      );
+    $tableVars = array();
+    $output = array();
+    foreach($typeDescriptionPairs as $type=>$description)
+    {
+      list($out, $vars) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+      $tableVars[$type] = $vars;
+      $output[] = $out;
+    }
 
-    $tableVars=array();
-
-    list($VCopyright, $varsCopyright)  =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type]=$varsCopyright;
-
-    $type = 'email';
-    $description = _("Email");
-
-    list($VEmail, $varsEmail) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type]=$varsEmail;
-
-    $type = 'url';
-    $description = _("URL");
-
-    list($VUrl, $varsURL) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type]=$varsURL;
-
-    $type = 'author';
-    $description = _("Author");
-
-    list($VAuthor, $varsAuthor) =  $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type]=$varsAuthor;
-
-    return array( $VCopyright, $VEmail, $VUrl, $VAuthor, $tableVars);
+    $output[] = $tableVars;
+    return $output;
   }
 
 

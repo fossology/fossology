@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -51,7 +50,8 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     }
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
     $logger->shouldReceive('debug');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $uploadPermissionDao = M::mock('Fossology\Lib\Dao\UploadPermissionDao');
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $uploadPermissionDao);
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -308,7 +308,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         array(3652, 3651, 32, 0, 536888320, 3, 74, 'uploadDaoTest'),
 
         array(3653, 3652, 32, 3287, $isFile, 4, 5, 'A'),
-        // * B_NoLic 6:7
+        array(3663, 3652, 32, 3287, $isContainer, 6, 7, 'B'),
         array(3668, 3652, 32, 3294, $isFile, 8, 9, 'C'),
         array(3682, 3652, 32, 0, $isContainer, 10, 16, 'D'),
         array(3683, 3682, 32, 3303, $isFile, 11, 12, 'E'),
@@ -320,7 +320,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
         // * H/K_NoLic 21:22
         array(3661, 3652, 32, 0, $isContainer, 24, 37, 'L'),
         array(3666, 3661, 32, 0, $isContainer, 25, 28, 'L1'),
-        // * L/L1/L1a_NoLic 26:27
+        array(3667, 3666, 32, 0, $isContainer, 26, 27, 'L1a'),  // * L/L1/L1a_NoLic 26:27
         array(3664, 3661, 32, 0, $isContainer, 29, 32, 'L2'),
         array(3665, 3664, 32, 3292, $isFile, 30, 31, 'L2a'),
         array(3662, 3661, 32, 0, $isContainer, 33, 36, 'L3'),
@@ -460,27 +460,27 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $hashes = $this->uploadDao->getUploadHashes(2);
     assertThat($hashes,equalTo(array('md5'=>'F703E0197FB6C5BD0C8DFDCC115A0231','sha1'=>'5DAFC9C82988A81413B995210B668CF5CF5975FF')));
   }
-  
-  public function testmakeAccessibleToGroup()
+   
+  public function testGetFatItem()
   {
-    $this->testDb->createPlainTables(array('perm_upload','group_user_member'));
-    $userId = 501;
-    $groupId = 601;
-    $groupIdAlternative = 602;
-    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
-    $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupIdAlternative,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
+    $this->prepareUploadTree($this->getTestFileStructure());
+    $isContainer = 536888320;
+    $itemM1a = 13655;
+    $this->prepareUploadTree(array(array($itemM1a, 3655, 32, 0, $isContainer, 39+0, 40-0, 'M1a')));
+    $this->dbManager->queryOnce('UPDATE uploadtree SET realparent=parent WHERE ufile_mode&(1<<28)=0',__METHOD__.'.fixRealparent');
     
-    $unaccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId=1, $groupId);
-    assertThat($unaccessibleIsAccessible,equalTo(false));
+    $fatA = $this->uploadDao->getFatItemId($itemA=3653, 32, 'uploadtree');
+    assertThat($fatA,equalTo($itemA));
+    $fatB = $this->uploadDao->getFatItemId($itemBEmpty=3663, 32, 'uploadtree');
+    assertThat($fatB, equalTo($itemBEmpty));
+    $fatD = $this->uploadDao->getFatItemId($itemDFolder=3682, 32, 'uploadtree');
+    assertThat($fatD, equalTo($itemDFolder));          
+    $fatL1 = $this->uploadDao->getFatItemId($itemL1ToFolder=3666, 32, 'uploadtree');
+    assertThat($fatL1, equalTo(3667));        
+    $fatL2 = $this->uploadDao->getFatItemId($itemL2ToItem=3664, 32, 'uploadtree');
+    assertThat($fatL2, equalTo(3665));
     
-    $this->uploadDao->makeAccessibleToGroup($uploadId, $groupId, Auth::PERM_WRITE);
-    $accessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupId);
-    assertThat($accessibleIsAccessible,equalTo(true));
-    $stillUnaccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupIdAlternative);
-    assertThat($stillUnaccessibleIsAccessible,equalTo(false));
-    
-    $this->uploadDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
-    $nowAccessibleIsAccessible = $this->uploadDao->isAccessible($uploadId, $groupIdAlternative);
-    assertThat($nowAccessibleIsAccessible,equalTo(true));
+    $fatM = $this->uploadDao->getFatItemId(3654, 32, 'uploadtree');
+    assertThat($fatM, equalTo($itemM1a));
   }
 }

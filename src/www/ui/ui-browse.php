@@ -114,7 +114,7 @@ class ui_browse extends FO_Plugin
     $ShowSomething = 0;
     $V .= "<table class='text' style='border-collapse: collapse' border=0 padding=0>\n";
     $stmtGetFirstChild = __METHOD__.'.getFirstChild';
-    $dbManager->prepare($stmtGetFirstChild,'SELECT uploadtree_pk FROM uploadtree WHERE parent=$1 limit 1');
+    $dbManager->prepare($stmtGetFirstChild,"SELECT uploadtree_pk FROM $uploadtree_tablename WHERE parent=$1 limit 1");
     foreach ($Results as $Row)
     {
       if (empty($Row['uploadtree_pk'])) continue;
@@ -144,30 +144,17 @@ class ui_browse extends FO_Plugin
           $V .= "<td>&nbsp;</td>";
         }
       }
-      /* Display item */
-      $V .= "<td>";
-      if (Iscontainer($Row['ufile_mode']))
+      
+      $displayItem = Isdir($Row['ufile_mode']) ? "$Name/" : $Name;
+      if(!empty($Link))
       {
-        $V .= "<b>";
-      }
-      if (!empty($Link))
-      {
-        $V .= "<a href='$Link'>";
-      }
-      $V .= $Name;
-      if (Isdir($Row['ufile_mode']))
-      {
-        $V .= "/";
-      }
-      if (!empty($Link))
-      {
-        $V .= "</a>";
+        $displayItem = "<a href=\"$Link\">$displayItem</a>";
       }
       if (Iscontainer($Row['ufile_mode']))
       {
-        $V .= "</b>";
+        $displayItem = "<b>$displayItem</b>";
       }
-      $V .= "</td>\n";
+      $V .= "<td>$displayItem</td>\n";
 
       if (!Iscontainer($Row['ufile_mode']))
         $V .= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
@@ -176,7 +163,6 @@ class ui_browse extends FO_Plugin
       else
         $V .= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
 
-      $V .= "</td>";
     } /* foreach($Results as $Row) */
     $V .= "</table>\n";
     if (!$ShowSomething)
@@ -281,43 +267,51 @@ class ui_browse extends FO_Plugin
 
   /**
    * @brief kludge for plugins not supplying a folder parameter.
-   * Find what folder this upload is in.  Error if in multiple folders.
+   * Find what folder this upload is in.
    */
   private function getFolderId($uploadId)
   {
+    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     if (empty($uploadId))
     {
-      return GetUserRootFolder();
+      return $rootFolder->getId();
     }
+    
     global $container;
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $container->get('db.manager');
     $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
     if ($uploadExists['cnt']< 1)
     {
       throw new Exception("This upload no longer exists on this system.");
     }
-    $dbManager->prepare($stmt=__METHOD__.'.parent',
-           $sql = "select parent_fk from foldercontents where child_id=$1 and foldercontents_mode=$2");
-    $result = $dbManager->execute($stmt,array($uploadId,2));
-    $allParents = $dbManager->fetchAll($result);
-    $dbManager->freeResult($result);
-    if (count($allParents) > 1)
+    
+    
+    $folderTreeCte = $this->folderDao->getFolderTreeCte($rootFolder);
+    
+    $parent = $dbManager->getSingleRow(
+           $folderTreeCte." SELECT ft.folder_pk FROM foldercontents fc LEFT JOIN folder_tree ft ON fc.parent_fk=ft.folder_pk "
+            . "WHERE child_id=$2 AND foldercontents_mode=$3 ORDER BY depth LIMIT 1",
+               array($rootFolder->getId(), $uploadId, FolderDao::MODE_UPLOAD),
+            __METHOD__.'.parent');
+    if (!$parent)
     {
-      Fatal("Upload $uploadId found in multiple folders.", __FILE__, __LINE__);
+      throw new Exception("Upload $uploadId missing from foldercontents in your foldertree.");
     }
-    if (count($allParents) < 1)
-    {
-      Fatal("Upload $uploadId missing from foldercontents.", __FILE__, __LINE__);
-    }
-    return $allParents[0]['parent_fk'];
+    return $parent['folder_pk'];
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $Folder
+   * @param int $Upload
+   * @return string
+   */
   function outputItemHtml($uploadTreeId, $Folder, $Upload)
   {
     global $container;
     $dbManager = $container->get('db.manager');
-    $show = 'detail';
+    $show = 'quick';
     $html = '';
     $uploadtree_tablename = "";
     if (!empty($uploadTreeId))

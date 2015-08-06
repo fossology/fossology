@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,18 +20,12 @@
  * \brief Perform a one-shot license analysis on multiple files
  *
  * License returned should be: See the array $Results below.
- *
- * @version "$Id$"
- *
- * Created on March 1, 2012
  */
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
+require_once ('CommonCliTest.php');
 
-
-class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
+class OneShotMultiFileTest extends CommonCliTest
 {
-  public $nomos;
   public $files;
   public $Results = array(
     'Affero-v1.0' => 'AGPL-1.0',
@@ -80,20 +75,16 @@ class OneShotMultiFileTest extends PHPUnit_Framework_TestCase
   	'jslint.js' => 'JSON',
   );
 
-  function setUp()
+  public function testOneShotmultiFile()
   {
     $this->files = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/*';
     /* check to see if the files exist and load up the array */
     $this->gplv3 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gpl-3.0.txt';
     $this->assertTrue(file_exists(dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/'));
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-  }
 
-  function testOneShotmultiFile()
-  {
-    $last = exec("$this->nomos $this->files 2>&1", $out, $rtn);
+    list($output,) = $this->runNomos($this->files);
+    $out = explode("\n", trim($output));
+
     foreach($out as $nomosResults)
     {
       list(,$fileName,,,$licenses) = preg_split('/[\s]+/', $nomosResults);

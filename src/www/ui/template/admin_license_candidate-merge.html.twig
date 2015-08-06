@@ -5,6 +5,10 @@
    This file is offered as-is, without any warranty.
 #}
 {% extends "include/base.html.twig" %}
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="css/highlights.css"/>
+{% endblock %}
 
 {% block content %}
   {{ parent() }}
@@ -28,7 +32,7 @@
     </tr>
     <tr>
       <td valign="top">{{ 'Reference text'|trans }}:</td>
-      <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text|e }}</div></td>
+      <td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ rf_text }}</div></td>
       {% if suggest_rf %}<td><div style="overflow-y:scroll;max-height:450px;margin:0;">{{ suggest_text }}</div></td>{% endif %}
     </tr>
     <tr style="background-color:#F5F5DC;">

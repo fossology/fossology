@@ -38,7 +38,8 @@ class DeciderAgent extends Agent
   const RULES_NOMOS_IN_MONK = 0x1;
   const RULES_NOMOS_MONK_NINKA = 0x2;
   const RULES_BULK_REUSE = 0x4;
-  const RULES_ALL = 0x7; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
+  const RULES_WIP_SCANNER_UPDATES = 0x8;
+  const RULES_ALL = 0xf; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int */
   private $activeRules;
@@ -79,25 +80,12 @@ class DeciderAgent extends Agent
     $args = $this->args;
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
-
-    $groupId = $this->groupId;
-
+    
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
-      $itemTreeBounds = $item->getItemTreeBounds();
-      $unMappedMatches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
-      $matches = $this->remapByProjectedId($unMappedMatches);
-
-      $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
-      $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
-
-      if (null!==$lastDecision || 0<count($currentEvents))
-      {
-        $this->heartbeat(0);
-        continue;
-      }
-      $this->processItem($item, $matches);
+      $process = $this->processItem($item);
+      $this->heartbeat($process);
     }
 
     if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
@@ -109,24 +97,76 @@ class DeciderAgent extends Agent
     return true;
   }
 
-  private function processItem(Item $item, $matches)
+  private function processItem(Item $item)
   {
     $itemTreeBounds = $item->getItemTreeBounds();
+    
+    $unMappedMatches = $this->agentLicenseEventProcessor->getLatestScannerDetectedMatches($itemTreeBounds);
+    $projectedScannerMatches = $this->remapByProjectedId($unMappedMatches);
+
+    $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $this->groupId);
+    
+    if (null!==$lastDecision && $lastDecision->getType()==DecisionTypes::IRRELEVANT) {
+      return 0;
+    }
+
+    $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $this->groupId);
+
+    $markAsWip = false;
+    if(null!==$lastDecision && $projectedScannerMatches && ($this->activeRules&self::RULES_WIP_SCANNER_UPDATES)== self::RULES_WIP_SCANNER_UPDATES)
+    {
+      $licensesFromDecision = array();
+      foreach($lastDecision->getClearingLicenses() as $clearingLicense)
+      {
+        $licenseIdFromEvent = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+        $licensesFromDecision[$licenseIdFromEvent] = $licenseIdFromEvent;
+      }
+      $markAsWip = $this->existsUnhandledMatch($projectedScannerMatches,$licensesFromDecision);
+    }
+
+    if(null!==$lastDecision && $markAsWip)
+    {
+      $this->clearingDao->markDecisionAsWip($item->getId(), $this->userId, $this->groupId);
+      return 1;
+    }
+    
+    if (null!==$lastDecision || 0<count($currentEvents))
+    {
+      return 0;
+    }
+
     $haveDecided = false;
     
     if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
     {
-      $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $projectedScannerMatches);
     }
     
     if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
     {
-      $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $matches);
+      $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $projectedScannerMatches);
+    }
+    
+    if (!$haveDecided && $markAsWip)
+    {
+      $this->clearingDao->markDecisionAsWip($item->getId(), $this->userId, $this->groupId);
     }
 
-    $this->heartbeat($haveDecided ? 1 : 0);
+    return ($haveDecided||$markAsWip ? 1 : 0);
   }
 
+  private function existsUnhandledMatch($projectedScannerMatches, $licensesFromDecision)
+  {
+    foreach(array_keys($projectedScannerMatches) as $projectedLicenseId)
+    {
+      if(!array_key_exists($projectedLicenseId, $licensesFromDecision))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+      
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param LicenseMatch[] $matches

@@ -44,15 +44,17 @@ class CopyrightDao extends Object
   /**
    * @param int $uploadTreeId
    * @param string $tableName
+   * @param int $agentId
    * @param array $typeToHighlightTypeMap
    * @throws \Exception
    * @return Highlight[]
    */
-  public function getHighlights($uploadTreeId, $tableName="copyright" ,$typeToHighlightTypeMap=array(
-                                                                        'statement' => Highlight::COPYRIGHT,
-                                                                        'email' => Highlight::EMAIL,
-                                                                        'url' => Highlight::URL,
-                                                                        'author' => Highlight::AUTHOR)
+  public function getHighlights($uploadTreeId, $tableName="copyright", $agentId=0,
+          $typeToHighlightTypeMap=array(
+                                          'statement' => Highlight::COPYRIGHT,
+                                          'email' => Highlight::EMAIL,
+                                          'url' => Highlight::URL,
+                                          'author' => Highlight::AUTHOR)
    )
   {
     $pFileId = 0;
@@ -68,9 +70,15 @@ class CopyrightDao extends Object
     }
 
     $statementName = __METHOD__.$tableName;
-    $this->dbManager->prepare($statementName,
-        "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL and pfile_fk=$1");
-    $result = $this->dbManager->execute($statementName, array($pFileId));
+    $sql = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1";
+    $params = array($pFileId);
+    if($agentId!=0) {
+      $statementName .= '.agentId';
+      $sql .= ' AND agent_fk=$2';
+      $params[] = $agentId;
+    }
+    $this->dbManager->prepare($statementName,$sql);
+    $result = $this->dbManager->execute($statementName, $params);
 
     $highlights = array();
     while ($row = $this->dbManager->fetchArray($result))
@@ -266,5 +274,4 @@ class CopyrightDao extends Object
     $resource = $this->dbManager->execute($stmt, $params);
     $this->dbManager->freeResult($resource);
   }
-  
 }

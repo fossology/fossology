@@ -1,3 +1,34 @@
+fossology (2.7.0-ng) unstable; urgency=low
+
+  * Bug
+    * [SOSS-327] - Division by zero at every update of ETA clogs log file
+    * [SOSS-328] - SPDX2 generation tends to crash at cleared Uploads
+    * [SOSS-329] - SPDX2 generated file includes data from other uploads
+    * [SOSS-330] - Basic Report does not list license texts
+  * Story
+    * [SOSS-38] - add php setup to web component postinstall script
+    * [SOSS-39] - create debian package of ninka including license name patches
+    * [SOSS-53] - additional Nomos licenses
+    * [SOSS-55] - Another license: Truecrypt License
+    * [SOSS-76] - Folder view: "Concluded files with no license information"
+    * [SOSS-83] - Ununpack agent issues for e2fsprogs-1.42.4.tar.gz
+    * [SOSS-117] - Exclude "irrelevant" files from decider agent?
+    * [SOSS-170] - Copyright scanner finds many false positives
+    * [SOSS-224] - SW360 Integration: Component (Release) Metadata
+    * [SOSS-225] - SW360 Integration: License / Obligations Database Call for Obligations in Clearing Report
+    * [SOSS-314] - ClearText erases "//" from URL, also "* " would be good
+    * [SOSS-316] - Bulk scan not matching with toybox
+    * [SOSS-317] - Avoid double step browing in hierachy view of license browser for tar-ed uploads
+    * [SOSS-318] - New Feature: Assigning New Group to an Upload
+    * [SOSS-319] - Basic Report Crashes because of Key Value Pair
+    * [SOSS-335] - Many Copyright False Positives in Binary / image files
+  * Task
+    * [SOSS-79] - scanner should mark decision as WIP if other licenses are introduced
+    * [SOSS-279] - remove CommonAgentAdd
+    * [SOSS-324] - Show ECC finding in relevant section in Clearing report
+
+ -- Steffen Weber <steffen.weber@tngtech.com>  Thu, 23 Jul 2015 16:34:24 +0200
+
 fossology (2.6.0-ng) unstable; urgency=low
 
   * Story

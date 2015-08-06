@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2015, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 
 class ClearingDecisionFilter
 {
@@ -31,11 +32,15 @@ class ClearingDecisionFilter
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
-    /** @var ClearingDecision[][] $clearingDecisionsByItemId */
+    /* @var $clearingDecisionsByItemId ClearingDecision[][] */
     $clearingDecisionsMapped = array();
 
     foreach ($clearingDecisions as $clearingDecision)
     {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
+      {
+        continue;
+      }
       $itemId = $clearingDecision->getUploadTreeId();
       $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();

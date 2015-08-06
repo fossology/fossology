@@ -282,7 +282,7 @@ void convertWhitespaceToSpaceAndRemoveSpecialChars(char* buf, int isCR )
   {
     if ((*cp == '\302') && (*(cp + 1) == '\251'))
     {
-      cp += 2;
+      cp += 1;
       continue;
     }
     if (*cp & (char) 0x80)

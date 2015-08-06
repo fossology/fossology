@@ -27,6 +27,10 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
@@ -55,6 +59,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $agentLicenseEventProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UploadPermissionDao */
+  private $uploadPermDao;
   /** @var HighlightDao */
   private $highlightDao;
   /** @var SchedulerTestRunnerCli */
@@ -69,7 +75,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
-    $this->uploadDao = new UploadDao($this->dbManager, $logger);
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
@@ -510,7 +517,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   }
   
   
-  /** @group xFunctional */
+  /** @group Functional */
   public function testDeciderRealBulkReuseShouldScheduleMonkBulk()
   {
     $this->runnerBulkReuseShouldScheduleMonkBulk($this->runnerMock);
@@ -551,13 +558,97 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
-/*
-    $this->dbManager->prepare($statementName=__METHOD__, 'SELECT jq_job_fk FROM jobqueue WHERE jq_type=$1');
-    $res = $this->dbManager->execute($statementName, array('monkbulk'));
-    $allBulkJobs = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    assertThat($allBulkJobs, arrayContainingInAnyOrder(array('jq_job_fk'=>$jobId),array('jq_job_fk'=>$otherJob)));
-*/
+
     $this->rmRepo();
   }
+  
+  /** @group Functional */
+  public function testDeciderRealShouldMakeDecisionAsWipIfUnhandledScannerEvent()
+  {
+    $this->runnerShouldMakeDecisionAsWipIfUnhandledScannerEvent($this->runnerMock);
+  }
+
+  private function runnerShouldMakeDecisionAsWipIfUnhandledScannerEvent($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+    $monkAgentId = 5;
+    
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licId1 = $licenseRef1->getId();
+    
+    $pfile = 4;
+    $jobId = 16;
+    $groupId = 2;
+    $userId = 2;
+    $itemId = 7;
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+
+    /* insert NoLicenseKnown decisions */    
+    $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
+            . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
+    $isWipBeforeDecider = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    assertThat($isWipBeforeDecider, equalTo(false));
+    
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
+    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
+            . " VALUES ($jobId, 2, 'decider', '2', '2015-06-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, '-r8')");
+
+    list($success,$output,$retCode) = $runner->run($uploadId=1, $userId, $groupId, $jobId, $args='-r8');
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+    
+    $isWip = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    assertThat($isWip, equalTo(true));
+
+    $this->rmRepo();
+  }
+  
+  /** @group xFunctional */
+  public function testDeciderRealShouldMakeNoDecisionForIrrelevantFiles()
+  {
+    $this->runnerDeciderRealShouldMakeNoDecisionForIrrelevantFiles($this->runnerMock);
+  }
+
+  private function runnerDeciderRealShouldMakeNoDecisionForIrrelevantFiles($runner)
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+    $monkAgentId = 5;
+    
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licId1 = $licenseRef1->getId();
+    
+    $pfile = 4;
+    $jobId = 16;
+    $groupId = 2;
+    $userId = 2;
+    $itemId = 7;
+    $itemTreeBounds = new ItemTreeBounds($itemId, 'uploadtree_a', $uploadId=1, 15, 16);
+
+    $this->dbManager->queryOnce("DELETE FROM license_file");
+
+    /* insert NoLicenseKnown decisions */    
+    $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
+            . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IRRELEVANT.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
+    $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+    $lastClearingId = $lastDecision->getClearingId();
+    
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
+    $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
+            . " VALUES ($jobId, 2, 'decider', '2', '2015-06-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, '-r8')");
+
+    list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, '');
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
+    
+    $newDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
+    assertThat($newDecision->getClearingId(), equalTo($lastClearingId));
+
+    $this->rmRepo();
+  }
+  
 }

@@ -269,3 +269,27 @@ img.deleted {
 .nobreaktext {
   white-space: nowrap;
 }
+
+.browse-upload-checkbox {
+  vertical-align: bottom;
+  margin:0px;
+}
+
+.ui-button-text .browse-upload-all-off {
+  color: black;
+}
+.ui-button-text .browse-upload-all-on {
+  color: white;
+}
+
+.ui-state-active .ui-button-text .browse-upload-all-off {
+  color: #cccccc;
+}
+.ui-state-active .ui-button-text .browse-upload-all-on {
+  color: black;
+}
+
+.decTypeWip {
+  border-color: red;
+  border-width: 5px;
+}

@@ -147,7 +147,7 @@ class FolderDao extends Object
   WHERE f.folder_pk=fc.child_id AND foldercontents_mode=".self::MODE_FOLDER." AND fc.parent_fk = ft.folder_pk AND NOT cycle_detected
 )";
   }
-
+    
   public function getFolderStructure($parentId=null) {
     $statementName = __METHOD__ . ($parentId ? '.relativeToParent' : '');
     $parameters = $parentId ? array($parentId) : array();
@@ -389,5 +389,18 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     }
     $this->dbManager->freeResult($res);
     return $results;
+  }
+  
+  /**
+   * @param int $folderId
+   * @return Folder|null
+   */
+  public function getFolder($folderId)
+  {
+    $folderRow = $this->dbManager->getSingleRow('SELECT * FROM folder WHERE folder_pk = $1', array($folderId));
+    if (!$folderRow) {
+      return null;
+    }
+    return new Folder($folderRow['folder_pk'],$folderRow['folder_name'],$folderRow['folder_desc'],$folderRow['folder_perm']);
   }
 }

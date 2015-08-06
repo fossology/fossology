@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,36 +20,25 @@
  * \brief Perform a one-shot license analysis on a glpv3 license
  *
  * License returned should be FSF,GPL_v3,Public-domain
- *
- * @version "$Id$"
- *
- * Created on March 1, 2012
  */
 
-require_once (dirname(dirname(dirname(dirname(__FILE__)))).'/testing/lib/createRC.php');
+require_once ('CommonCliTest.php');
 
-
-class OneShotgpl3Test extends PHPUnit_Framework_TestCase
+class OneShotgpl3Test extends CommonCliTest
 {
-  public $nomos;
   public $gplv3;
 
-  function setUp()
+  public function testOneShotgplv3()
   {
     /* check to see if the file exists */
     $this->gplv3 = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/gpl-3.0.txt';
     $this->assertFileExists($this->gplv3,"OneShotgplv21Test FAILURE! $this->gplv3 not found\n");
-    createRC();
-    $sysconf = getenv('SYSCONFDIR');
-    $this->nomos = $sysconf . '/mods-enabled/nomos/agent/nomos';
-  }
 
-  function testOneShotgplv3()
-  {
-    $last = exec("$this->nomos $this->gplv3 2>&1", $out, $rtn);
-    list(,$fname,,,$license) = explode(' ', implode($out));
+    list($output,) = $this->runNomos("",array($this->gplv3));
+    list(,$fname,,,$license) = explode(' ', $output);
+
     $this->assertEquals($fname, 'gpl-3.0.txt', "Error filename $fname does not equal gpl-3.0.txt");
-    $this->assertEquals($license, 'GPL-3.0',
+    $this->assertEquals(trim($license), 'GPL-3.0',
       "Error license does not equal FSF,GPL_v3. $license was returned");
   }
 }

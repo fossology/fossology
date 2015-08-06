@@ -1,6 +1,5 @@
 <?php
 /***********************************************************
- * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  * Copyright (C) 2014-2015, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
@@ -16,6 +15,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+
+
+namespace Fossology\Ninka\Ui;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
