@@ -18,7 +18,7 @@ installation packages for Debian, RHEL/CentOS, Ubuntu, and Fedora, and a source 
 
   http://fossology.org/releases
   
-For installation instructions see http://www.fossology.org/projects/fossology/wiki/Sysadmin_Documentation
+For installation instructions see http://www.fossology.org/projects/fossology/wiki
 
 ## Documentation
 We are currently migrating our documentation to github.  At this stage you can find general documentation at:
