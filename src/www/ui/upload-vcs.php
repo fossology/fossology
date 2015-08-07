@@ -171,7 +171,7 @@ class upload_vcs extends FO_Plugin {
       $GetURL = 'http://';
     }
     /* Display instructions */
-    $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+    $text22 = _("To manage your own group permissions go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
     $V .= "<p><b>$text22</b><p>";
     $V.= _("You can upload source code from a version control system; one risk is that FOSSology will store your username/password of a repository to database, also run checkout source code from command line with username and password explicitly.");
     /* Display the form */
