@@ -66,15 +66,15 @@ class Sw360Component
     if(!empty($getComponents)){
       foreach($getComponents as $getComponent){
         $releasesT = $getComponent->releases;
-	foreach($releasesT as $releaseT){
-	  if(intval($releaseT->fossologyId) == $uploadId){
+        foreach($releasesT as $releaseT){
+          if(intval($releaseT->fossologyId) == $uploadId){
             $collectionArray = array(
               "Community" => $getComponent->homepage,
               "Component" => $releaseT->name,
               "Version" => $releaseT->version,
               "Source URL" => $releaseT->downloadurl,
               "Release date" => $releaseT->releaseDate
-	    );
+            );
             return $collectionArray;
           }
         }
