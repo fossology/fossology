@@ -25,7 +25,7 @@
     <spdx:licenseConcluded>
       <spdx:DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
-        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res }}"/>
+        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}"/>
 {% endfor %}
       </spdx:DisjunctiveLicenseSet>
     </spdx:licenseConcluded>
@@ -33,15 +33,14 @@
 {% if scannerLicenses is empty %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}{% for res in scannerLicenses %}
-    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res }}" />
+    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}" />
 {% endfor %}{% endif %}
-    <spdx:copyrightText>
 {% if copyrights is empty %}
-      NOASSERTION
-{% else %}{% for cp in copyrights %}
+    <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+{% else %}    <spdx:copyrightText>{% for cp in copyrights %}
       {{ cp|replace({'\f':''})|e }}
 {% endfor %}
-{% endif %}
     </spdx:copyrightText>
+{% endif %}
   </spdx:File>
 </spdx:hasFile>
