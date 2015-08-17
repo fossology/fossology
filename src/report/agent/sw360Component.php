@@ -62,29 +62,23 @@ class Sw360Component
 
   function processGetComponent($uploadId)
   { 
-    $flag = false; 
     $getComponents = $this->sw360GetComponent($uploadId);
     if(!empty($getComponents)){
       foreach($getComponents as $getComponent){
         $releasesT = $getComponent->releases;
-        foreach($releasesT as $releaseT){
-          if(intval($releaseT->fossologyId) == $uploadId){
-            $flag = True;
-            break;
+	foreach($releasesT as $releaseT){
+	  if(intval($releaseT->fossologyId) == $uploadId){
+            $collectionArray = array(
+              "Community" => $getComponent->homepage,
+              "Component" => $releaseT->name,
+              "Version" => $releaseT->version,
+              "Source URL" => $releaseT->downloadurl,
+              "Release date" => $releaseT->releaseDate
+	    );
+            return $collectionArray;
           }
         }
       }
-      if($flag === false){
-        return null;
-      }
-      $collectionArray = array(
-        "Community" => $getComponent->homepage,
-        "Component" => $releaseT->name,
-        "Version" => $releaseT->version,
-        "Source URL" => $releaseT->downloadurl,
-        "Release date" => $releaseT->releaseDate
-      );
-      return $collectionArray;
     } 
     return null;
   }
