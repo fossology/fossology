@@ -9,6 +9,8 @@ workflow.  In one click you can generate an SPDX file, or a ReadMe with all the 
 FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will 
 get rescanned.  This is a big time saver for large projects.
 
+[Check out Who Uses FOSSology!](http://www.fossology.org/projects/fossology/wiki/WhoUsesFOSSology)
+
 FOSSology does not give legal advice.
 http://fossology.org/
 
