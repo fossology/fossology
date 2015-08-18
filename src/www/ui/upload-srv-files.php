@@ -214,7 +214,8 @@ class upload_srv_files extends FO_Plugin {
       }
     }
     /* Display instructions */
-    $text22 = _("Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your uploaded files.  To manage your own group go into Admin > Groups > Manage Group Users.  To manage permissions for this one upload, go to Admin > Upload Permissions");
+    $text22 = _("To manage your own group permissions go into Admin > Groups > Manage Group Users.  To manage permissions for this on
+e upload, go to Admin > Upload Permissions");
     $V .= "<p><b>$text22</b><p>";
 
     $V.= _("This option permits uploading a file, set of files, or a directory from the web server to FOSSology.\n");
