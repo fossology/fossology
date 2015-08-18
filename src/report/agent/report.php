@@ -713,7 +713,7 @@ class ReportAgent extends Agent
     $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
     /* Basic for clearing report */
-    $sR->basicForClearingReport($section);
+    //$sR->basicForClearingReport($section);
 
     /* Display scan results and edited results */
     $this->licenseHistogram($section, $parentItem, $groupId);
@@ -736,10 +736,6 @@ class ReportAgent extends Agent
     $whiteLicense = array("color" => array("bgColor" => "FFFFFF"), "riskLevel" => array("", "0", "1"));
     $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense);
 
-    /* Display Bulk findings name,text and files */
-    $heading = "Bulk Findings";
-    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
-
     /* Display acknowledgement */
     $this->acknowledgementTable($section);
 
@@ -756,6 +752,15 @@ class ReportAgent extends Agent
     $heading = "Intellectual Property";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
 
+    /* Display Bulk findings name,text and files */
+    $heading = "Bulk Findings";
+    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
+
+    /* Display NON Functional Licenses license files */
+    $heading = "Non Functional Licenses";
+    $sR->getNonFunctionalLicenses($section, $heading);
+
+
     /* Display irrelavant license files */
     $heading = "Irrelevant Files";
     $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements']);
@@ -764,6 +769,7 @@ class ReportAgent extends Agent
     $heading = "Notes";  
     $rowHead = "Comment Entered";
     $this->bulkLicenseTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
+
 
     /* Footer starts */
     $sR->reportFooter($phpWord, $section);
