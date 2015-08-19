@@ -145,7 +145,7 @@ class ReportAgent extends Agent
     $this->heartbeat(count($licenseComments["statements"]));
     $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licensesIrre["statements"]));
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
     $this->heartbeat(count($copyrights["statements"]));
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($ecc["statements"]));
