@@ -139,12 +139,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $toolJarFile = __DIR__.'/spdx-tools-2.0.2-jar-with-dependencies.jar';
     $this->pullSpdxTools($toolJarFile);
 
-    $tagFile = __DIR__."/out.tag";
-    exec("java -jar $toolJarFile RdfToTag $filepath $tagFile");
-    
-    $this->assertFileExists($tagFile, 'SPDXTools failed');
-    assertThat(filesize($tagFile),is(greaterThan(42)));
-    unlink($tagFile);
+    $verification = exec("java -jar $toolJarFile Verify $filepath");
+    assertThat($verification,equalTo('This SPDX Document is valid.'));
   }
   
   protected function pullSpdxTools($jarFile)

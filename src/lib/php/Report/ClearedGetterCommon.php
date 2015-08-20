@@ -114,7 +114,7 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
-  protected function groupStatements($ungrupedStatements, $extended)
+  protected function groupStatements($ungrupedStatements, $extended, $agentcall)
   {
     $statements = array();
     $findings = array();
@@ -131,6 +131,9 @@ abstract class ClearedGetterCommon
         if ($description === null) {
           $text = "";
         } else {
+          //$agentcall only have copyright so making it empty for other agents
+          if(!empty($textfinding) && empty($agentcall)) 
+            $content = $textfinding;
           $text = $description;
         }
       }
@@ -165,7 +168,7 @@ abstract class ClearedGetterCommon
           $statements[] = $singleStatement;
         }
       }
-      if(!empty($statement['textfinding'])){
+      if(!empty($statement['textfinding']) && !empty($agentcall)){
         $findings[$fileName] = array(
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
@@ -191,12 +194,12 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null, $extended=true)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements, $extended);
+    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall);
     return array("statements" => array_values($statements));
   }
   

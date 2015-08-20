@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -106,7 +107,7 @@ class SpdxTwoAgent extends Agent
       $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
       $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
     }
-
+    
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString('spdx-package.xml.twig',array(
         'uploadId'=>$uploadId,
@@ -115,6 +116,7 @@ class SpdxTwoAgent extends Agent
         'uploadName'=>$upload->getFilename(),
         'sha1'=>$hashes['sha1'],
         'md5'=>$hashes['md5'],
+        'verificationCode'=>$this->getVerificationCode($upload),
         'mainLicenses'=>$mainLicenses,
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
@@ -299,6 +301,33 @@ class SpdxTwoAgent extends Agent
     $this->dbManager->freeResult($res);
     return $licenseTexts;
   }
+
+  /**
+   * @param UploadTree $upload
+   * @return string
+   */
+  protected function getVerificationCode(Upload $upload)
+  {
+    $stmt = __METHOD__;
+    $param = array();
+    if ($upload->getTreeTableName()=='uploadtree_a')
+    {
+      $sql = $upload->getTreeTableName().' WHERE upload_fk=$1 AND';
+      $param[] = $upload->getId();
+    }
+    else
+    {
+      $sql = $upload->getTreeTableName().' AND';
+      $stmt .= '.'.$upload->getTreeTableName();
+    }
+      
+    $sql = "SELECT STRING_AGG(lower_sha1,'') concat_sha1 FROM 
+       (SELECT LOWER(pfile_sha1) lower_sha1 FROM pfile, $sql pfile_fk=pfile_pk ORDER BY pfile_sha1) templist";
+    $filelistPack = $this->dbManager->getSingleRow($sql,$param,$stmt);
+    
+    return sha1($filelistPack['concat_sha1']);
+  }
+
 }
 
 $agent = new SpdxTwoAgent();
