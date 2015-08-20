@@ -54,7 +54,6 @@ class Sw360Component
       }
     catch (TException $tx) {
       print 'TException: '.$tx->getMessage()."\n";
-      print $tx->getTraceAsString();  
     }
       
     return $getComponent;

@@ -60,7 +60,6 @@ class Sw360License
 
     catch (TException $tx) {
       print 'TException: '.$tx->getMessage()."\n";
-      print $tx->getTraceAsString();
     }
     return $results;
   }
