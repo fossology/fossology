@@ -869,7 +869,7 @@ int	FindCmd	(char *Filename)
       strcpy(TypeBuf,"application/x-zip");
     }
   } /* if was x-exe */
-  else if (strstr(Type, "application/x-tar"))
+  else if (strstr(Type, "application/x-tar") || strstr(Type, "application/x-xz"))
   {
     if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
       return(-1); /* bad tar! (Yes, they do happen) */
