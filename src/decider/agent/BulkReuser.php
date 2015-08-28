@@ -73,7 +73,7 @@ class BulkReuser extends Object
       $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
       $row = $this->dbManager->fetchArray($res);
       $this->dbManager->freeResult($res);
-      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>array(AGENT_DECIDER_NAME));
+      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>array('agent_decider'));
     }
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $dependecies);
