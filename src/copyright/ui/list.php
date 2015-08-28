@@ -171,7 +171,7 @@ class copyright_list extends FO_Plugin
       }
 
       /* apply filters */
-      if (($filter == "nolics") and ($rf_clause))
+      if (($filter == "nolic") and ($rf_clause))
       {
         /* discard file unless it has no license */
         $sql = "select rf_fk from license_file where ($rf_clause) and pfile_fk={$row['pf']}";
