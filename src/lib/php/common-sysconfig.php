@@ -267,6 +267,22 @@ function Populate_sysconfig()
   . CONFIG_TYPE_TEXT .
                     ",'Number', null, '$contextDesc', null";
 
+  $Variable = "Sw360ServerIpAddress";
+  $contextNamePrompt = _("SW360 Server IP");
+  $contextValue = "127.0.0.1";
+  $contextDesc = _("Current SW360 Server IP Address");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'SW360IpPort', null, '$contextDesc', null";
+
+  $Variable = "Sw360ServerPortAddress";
+  $contextNamePrompt = _("SW360 Server Port");
+  $contextValue = "4085";
+  $contextDesc = _("Current SW360 Server Port Address");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'SW360IpPort', null, '$contextDesc', null";
+
   $Variable = "BlockSizeHex";
   $hexPrompt = _("Chars per page in hex view");
   $hexDesc = _("Number of characters per page in hex view");

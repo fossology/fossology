@@ -35,6 +35,8 @@ use PhpOffice\PhpWord\IOFactory;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
+include_once(__DIR__ . "/sw360Licenses.php");
+include_once(__DIR__ . "/sw360Component.php");
 
 class ReportAgent extends Agent
 {
@@ -161,8 +163,6 @@ class ReportAgent extends Agent
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
                      );
-
-    $contents = $this->identifiedGlobalLicenses($contents);
    
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
@@ -251,12 +251,12 @@ class ReportAgent extends Agent
   /**
    * @brief Design the summaryTable of the report
    * @param Section $section
-   * @param string $packageName 
+   * @param string $uploadId 
    * @param string $userName
    * @param array mainLicenses
    * @param int $timestamp
    */        
-  private function summaryTable(Section $section, $packageName, $userName, $mainLicenses, $timestamp)
+  private function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $timestamp)
   {         
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 14, "bold" => true);
@@ -278,6 +278,9 @@ class ReportAgent extends Agent
       }
       $allMainLicenses = rtrim($allMainLicenses, ", ");
     }
+    
+    $cComponent = new Sw360Component();
+    $newSw360Component= $cComponent->processGetComponent($uploadId);
     
     $table = $section->addTable($this->tablestyle);
     
@@ -316,39 +319,84 @@ class ReportAgent extends Agent
     $cell->addCheckBox("inprogress", htmlspecialchars(" in progress"), $checkBoxStyle, "pStyle");
     $cell->addCheckBox("release", htmlspecialchars(" release"), $checkBoxStyle, "pStyle");
 
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $firstRowStyle, "pStyle");
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Community"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" <URL>"), $firstRowStyle2, "pStyle");
+    if(!empty($newSw360Component)){
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $firstRowStyle, "pStyle");
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Community"), $firstRowStyle1, "pStyle");
+      if(!empty($newSw360Component["Community"])){
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Community"]), null, "pStyle");
+      }
+      else{
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), $firstRowStyle2, "pStyle");
+      }
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, "pStyle");
 
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowContinue);
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars($packageName), null, "pStyle");
-
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowContinue);
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(""), null, "pStyle");
-
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowContinue);
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Source URL"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(""), null, "pStyle");
-
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowContinue);
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Release date"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(""), null, "pStyle");
-
-    $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellRowContinue);
-    $cell = $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Main license(s)"), $firstRowStyle1, "pStyle");
-    if(!empty($allMainLicenses)){
-      $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allMainLicenses."), $firstRowStyle2, "pStyle");
+      if(!empty($newSw360Component["Component"])){
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Component"]), null, "pStyle");
+      }
+      else{
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      }
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
+    
+      if(!empty($newSw360Component["Version"])){
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Version"]), null, "pStyle");
+      }
+      else{
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      }
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Source URL"), $firstRowStyle1, "pStyle");
+   
+      if(!empty($newSw360Component["Source URL"])){
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Source URL"]), null, "pStyle");
+      }
+      else{
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      }
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Release date"), $firstRowStyle1, "pStyle");
+    
+      if(!empty($newSw360Component["Release date"])){
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Release date"]), null, "pStyle");
+      }
+      else{
+        $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      }
     }
     else{
-      $cell = $table->addCell($cellThirdLen)->addText(htmlspecialchars("Main License(s) Not selected."), $firstRowStyle2, "pStyle");
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, "pStyle");
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Source URL"), $firstRowStyle1, "pStyle");
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+      $table->addRow($rowWidth);
+      $table->addCell($cellFirstLen, $cellRowContinue);
+      $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Release date"), $firstRowStyle1, "pStyle");
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("N.A"), null, "pStyle");
+    }
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Main license(s)"), $firstRowStyle1, "pStyle");
+    if(!empty($allMainLicenses)){
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allMainLicenses."), $firstRowStyle2, "pStyle");
+    }
+    else{
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars("Main License(s) Not selected."), $firstRowStyle2, "pStyle");
     }
     $section->addTextBreak();
   }
@@ -647,6 +695,7 @@ class ReportAgent extends Agent
     $section->addTextBreak();
   }
 
+
   /**
    * @param array $contents
    * @param int $uploadId
@@ -681,6 +730,12 @@ class ReportAgent extends Agent
     $section = $phpWord->addSection($docLayout);
 
     $sR = new ReportStatic($timestamp);
+    
+    $licenseObli = new Sw360License();
+    
+    $groupName = $this->userDao->getGroupNameById($groupId);
+    
+    $results = $licenseObli->sw360GetLicense($uploadId, $groupName, $contents['licenses']['statements']);
 
     /* Header starts */
     $sR->reportHeader($section);
@@ -688,8 +743,10 @@ class ReportAgent extends Agent
     /* Main heading starts*/
     $sR->reportTitle($section);
 
-    /* Summary table */
-    $this->summaryTable($section, $packageName, $userName, $contents['licensesMain']['statements'], $timestamp);
+    $contents = $this-> identifiedGlobalLicenses($contents);
+    
+    /* Summery table */
+    $this->summaryTable($section, $uploadId, $userName, $contents['licensesMain']['statements'], $timestamp);
 
     /* clearing protocol change log table */
     $sR->clearingProtocolChangeLogTable($section);
@@ -704,7 +761,7 @@ class ReportAgent extends Agent
     $sR->todoTable($section);
 
     /* Todoobligation table */
-    $sR->todoObliTable($section);
+    $sR->todoObliTable($section, $results);
 
     /* Todoobligation list */
     $sR->todoObliList($section);

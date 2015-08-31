@@ -479,7 +479,7 @@ class UploadDao extends Object
         array($uploadId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
-  
+
   /**
    * @param int $itemId
    * @param string $uploadId
