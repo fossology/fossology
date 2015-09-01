@@ -198,15 +198,19 @@ class showjobs extends FO_Plugin
       $this->vars['jobId'] = $job;
       $this->vars['uploadName'] = $this->showJobDB($job);
     }else{
-      $allusersval=GetParm("allusers",PARM_INTEGER);
+      $allusersval = GetParm("allusers",PARM_INTEGER);
       if(!$allusersval) $allusersval = 0;
       $this->vars['allusersval'] = $allusersval;
       if(!$page) $page=0;
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
-      $this->vars['injectedFoot'] = $_GET['injectedFoot'];
-      $this->vars['message'] = $_GET['injectedMessage'];
+      $injectedFoot = $_GET['injectedFoot'];
+      if(!$injectedFoot) $injectedFoot = NULL;
+      $this->vars['injectedFoot'] = $injectedFoot;
+      $injectedMessage = $_GET['injectedMessage'];
+      if(!$injectedMessage) $injectedMessage = NULL;
+      $this->vars['message'] = $injectedMessage;
     }
   }
 
