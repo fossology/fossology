@@ -322,7 +322,7 @@ class admin_license_file extends FO_Plugin
     $row['rf_text_updatable'] = $this->dbManager->booleanFromDb($row['rf_text_updatable'])?'true':'false';
     $row['risk_level'] = $row['rf_risk'];
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
-    $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos");
+    $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos", "3"=>"Unconcrete License");
 
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 

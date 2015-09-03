@@ -33,13 +33,18 @@ class License extends LicenseRef
    * @var string
    */
   private $risk;
+  /**
+   * @var string
+   */
+  private $detectorType;
 
-  function __construct($id, $shortName, $fullName, $risk, $text, $url)
+  function __construct($id, $shortName, $fullName, $risk, $text, $url, $detectorType)
   {
     parent::__construct($id, $shortName, $fullName);
     $this->text = $text;
     $this->url = $url;
     $this->risk = $risk;
+    $this->detectorType = $detectorType;
   }
 
   /**
@@ -48,6 +53,14 @@ class License extends LicenseRef
   public function getRisk()
   {
     return $this->risk;
+  }
+
+  /**
+   * @return int
+   */
+  public function getDetectorType()
+  {
+    return $this->detectorType;
   }
 
   /**

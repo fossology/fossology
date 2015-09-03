@@ -246,7 +246,12 @@ class AjaxClearingView extends FO_Plugin
         $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
 
-      $reportInfoField = nl2br(htmlspecialchars($reportInfo));
+      $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
+      if(empty($reportInfo) && $detectorType == 2){
+        $reportInfoField = '<span class = "ishavingnotext" style = "color:red;font-weight:bold;">License by Nomos</span>';
+      }else{
+        $reportInfoField = nl2br(htmlspecialchars($reportInfo));
+      }
       $commentField = nl2br(htmlspecialchars($comment));
 
       $id = "$uploadTreeId,$licenseId";
