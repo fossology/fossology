@@ -6146,7 +6146,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /** German Free Software License */
-  if (INFILE(_TITLE_D_FSL_10))
+  if (INFILE(_TITLE_D_FSL_10) || INFILE(_TITLE_D_FSL_DE1_10) || INFILE(_TITLE_D_FSL_DE2_10) || INFILE(_TITLE_D_FSL_DE3_10) || INFILE(_TITLE_D_FSL_DE4_10))
   {
     INTERESTING("D-FSL-1.0");
     lmem[_mGPL] = 1;
