@@ -405,7 +405,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_MYSQL_EXCEPT) || INFILE(_PHR_FREE_LIBRE)) {
     if (INFILE(_TITLE_ALFRESCO)) {
-      INTERESTING("Alfresco/FLOSS");
+      INTERESTING("Alfresco.FLOSS");
     }
     else if (HASTEXT(_TEXT_ALFRESCO, 0)) {
       INTERESTING("Alfresco");
@@ -415,7 +415,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING("MySQL-0.3");
       }
       else {
-        INTERESTING("MySQL/FLOSS");
+        INTERESTING("MySQL.FLOSS");
       }
     }
     else {
@@ -458,7 +458,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("RealNetworks-EULA");
     }
     else if (INFILE(_LT_HELIX_TITLE)) {
-      INTERESTING("Helix/RealNetworks-EULA");
+      INTERESTING("Helix.RealNetworks-EULA");
     }
   }
   cleanLicenceBuffer();
@@ -832,7 +832,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_BSD_NONC)) {
     if (INFILE(_CR_BSDCAL)) {
-      INTERESTING(lDebug ? "BSD(NonC)" : "BSD(non-commercial)");
+      INTERESTING(lDebug ? "BSD(NonC)" : "BSD.non-commercial");
     }
     else {
       INTERESTING(lDebug ? "BSD-style(NonC)" : "Non-commercial");
@@ -1843,7 +1843,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
   else if (HASTEXT(_LT_BSD_OR_MIT, REG_EXTENDED)) {
-    INTERESTING("MIT/BSD");
+    INTERESTING("MIT.BSD");
     lmem[_mMIT] = 1;
   }
   else if (HASTEXT(_LT_BSD_AND_MIT, REG_EXTENDED)) {
@@ -1853,7 +1853,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
         INFILE(_LT_MIT_5) || INFILE(_LT_MIT_6) || INFILE(_LT_MIT_7))) { 
     if(INFILE(_LT_MIT_NO_EVIL)) {
-      INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
+      INTERESTING(lDebug ? "MIT-style.no evil" : "JSON");
       lmem[_mMIT] = 1;
     } else if (INFILE(_LT_Imlib2)) {
       INTERESTING("Imlib2");
@@ -2345,10 +2345,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Libpng");
   }
   else if (INFILE(_LT_JPEG_1)) {
-    INTERESTING(lDebug ? "JPEG(1)" : "JPEG/netpbm");
+    INTERESTING(lDebug ? "JPEG(1)" : "JPEG.netpbm");
   }
   else if (INFILE(_LT_JPEG_2)) {
-    INTERESTING(lDebug ? "JPEG(2)" : "JPEG/netpbm");
+    INTERESTING(lDebug ? "JPEG(2)" : "JPEG.netpbm");
   }
   else if (INFILE(_LT_PNG_ZLIB_1) && NOT_INFILE(_TITLE_ZOPE)) {
     INTERESTING(lDebug ? "ZLIB(1)" : "Zlib");
@@ -2457,11 +2457,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_TPL10)) {
-      INTERESTING(lDebug ? "TPL(v1.0#1)" : "MPL/TPL-1.0");
+      INTERESTING(lDebug ? "TPL(v1.0#1)" : "MPL.TPL-1.0");
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_TITLE_TPL)) {
-      INTERESTING(lDebug ? "TPL(#1)" : "MPL/TPL");
+      INTERESTING(lDebug ? "TPL(#1)" : "MPL.TPL");
       lmem[_mMPL] = 1;
     }
     else if (INFILE(_PHR_CDDL)) {
@@ -3303,7 +3303,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Trolltech");
   }
   else if (INFILE(_LT_QT_COMMref)) {
-    INTERESTING("QT(Commercial)");
+    INTERESTING("QT.Commercial");
   }
   cleanLicenceBuffer();
   /*
@@ -3852,7 +3852,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("USC(Non-commercial)");
     }
     else {
-      INTERESTING(lDebug ? "NonC(5)" : "Non-commercial!");
+      INTERESTING(lDebug ? "NonC(5)" : "Non-commercial");
     }
   }
   else if (INFILE(_LT_USC)) {
@@ -4085,7 +4085,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_RH_PKGS)) {
     if (INFILE(_LT_RH_NONCOMMERCIAL)) {
-      INTERESTING(lDebug ? "RH(NC)" : "RedHat(Non-commercial)");
+      INTERESTING(lDebug ? "RH(NC)" : "RedHat.Non-commercial");
       lmem[_mREDHAT] = 1;
     }
     else if (INFILE(_LT_RH_FEDORA)) {
@@ -4324,7 +4324,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   else if (INFILE(_LT_ATT_NONCOMMERC1) || INFILE(_LT_ATT_NONCOMMERC2)) {
-    INTERESTING("ATT(Non-commercial)");
+    INTERESTING("ATT.Non-commercial");
   }
   /*
    * Unix System Laboratories
@@ -5136,7 +5136,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Genivia
    */
   if (INFILE(_LT_GENIVIAref)) {
-    INTERESTING("Genivia(Commercial)");
+    INTERESTING("Genivia.Commercial");
   }
   cleanLicenceBuffer();
   /*
@@ -5670,7 +5670,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("WTI(Not-free)");
     }
     else {
-      INTERESTING("Not-Free!");
+      INTERESTING("Not-Free");
     }
   }
   cleanLicenceBuffer();
@@ -5824,18 +5824,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_USGOVT_1)) {
     if (INFILE(_CR_URA)) {
-      MEDINTEREST("URA(gov't)");
+      MEDINTEREST("URA(govt)");
     } else {
-      MEDINTEREST(lDebug ? "Govt-Wk(1)" : "Gov't-work");
+      MEDINTEREST(lDebug ? "Govt-Wk(1)" : "Govt-work");
     }
   }
   else if (INFILE(_LT_USGOVT_2)) {
-    MEDINTEREST(lDebug ? "Govt-Wk(2)" : "Gov't-work");
+    MEDINTEREST(lDebug ? "Govt-Wk(2)" : "Govt-work");
   } else if (INFILE(_LT_USGOVT_RIGHTS1) && INFILE(_LT_PUBLIC)) {
-    MEDINTEREST(lDebug ? "US-Govt(1)" : "Gov't-rights");
+    MEDINTEREST(lDebug ? "US-Govt(1)" : "Govt-rights");
   }
   else if (INFILE(_LT_USGOVT_RIGHTS2)) {
-    MEDINTEREST(lDebug ? "US-Govt(2)" : "Gov't-rights");
+    MEDINTEREST(lDebug ? "US-Govt(2)" : "Govt-rights");
   }
   cleanLicenceBuffer();
   /*
@@ -6280,7 +6280,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   cleanLicenceBuffer();
   /** AndroidSDK-Commercial license */
   if (INFILE(_LT_GOOGLE_SDK)) {
-    INTERESTING("AndroidSDK(Commercial)");
+    INTERESTING("AndroidSDK.Commercial");
   }
   cleanLicenceBuffer();
 
@@ -6359,21 +6359,21 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     if (maxInterest != IL_HIGH && !HASKW(kwbm, _KW_public_domain) &&
         NOT_INFILE(_PHR_COMMERC_NONCOMM)) {
       if (INFILE(_LT_NONCOMMERCIAL_1)) {
-        INTERESTING(lDebug ? "NonC(1)" : "Non-commercial!");
+        INTERESTING(lDebug ? "NonC(1)" : "Non-commercial");
       }
       else if (INFILE(_LT_ZZNON_COMMERC1)) {
-        INTERESTING(lDebug ? "NonC(2)" : "Non-commercial!");
+        INTERESTING(lDebug ? "NonC(2)" : "Non-commercial");
       }
       else if (INFILE(_LT_ZZNON_COMMERC2)) {
-        INTERESTING(lDebug ? "NonC(3)" : "Non-commercial!");
+        INTERESTING(lDebug ? "NonC(3)" : "Non-commercial");
       }
       else if (HASTEXT(_TEXT_COMMERC, 0) &&
           INFILE(_PHR_NONCOMMERCIAL)) {
-        INTERESTING(lDebug ? "NonC(4)" : "Non-commercial!");
+        INTERESTING(lDebug ? "NonC(4)" : "Non-commercial");
       }
     }
   if (INFILE(_LT_NOT_OPENSOURCE)) {
-    INTERESTING("Not-OpenSource!");
+    INTERESTING("Not-OpenSource");
   }
   listClear(&whereList, NO);      /* again, clear "unused" matches */
   cleanLicenceBuffer();
@@ -6384,15 +6384,15 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   if (maxInterest != IL_HIGH) { /* if (*licStr == NULL_CHAR) { */
     j = 0;  /* just a flag */
     if (INFILE(_LT_GEN_PROPRIETARY_1)) {
-      INTERESTING(lDebug ? "Prop(1)" : "Proprietary!");
+      INTERESTING(lDebug ? "Prop(1)" : "Proprietary");
       j++;
     }
     else if (INFILE(_LT_GEN_PROPRIETARY_2)) {
-      INTERESTING(lDebug ? "Prop(2)" : "Proprietary!");
+      INTERESTING(lDebug ? "Prop(2)" : "Proprietary");
       j++;
     }
     else if (INFILE(_LT_GEN_PROPRIETARY_3)) {
-      INTERESTING(lDebug ? "Prop(3)" : "Proprietary!");
+      INTERESTING(lDebug ? "Prop(3)" : "Proprietary");
       j++;
     }
     if (j) {
@@ -6419,16 +6419,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (HASTEXT(_LT_COMMERCIAL_3, REG_EXTENDED)) {
       if (HASTEXT(_LT_COMMERCIAL_Intel, REG_EXTENDED)) {
-        INTERESTING("Intel(Commercial)");
+        INTERESTING("Intel.Commercial");
       } else if (HASTEXT(_LT_COMMERCIAL_Broadcom, REG_EXTENDED)) {
-        INTERESTING("Broadcom(Commercial)");
+        INTERESTING("Broadcom.Commercial");
       } else {
         INTERESTING(lDebug ? "COMM(3)" : "COMMERCIAL");
       }
     }
     else if (INFILE(_LT_COMMERCIAL_4)) {
       if (HASTEXT(_LT_COMMERCIAL_Android_Fraunhofer, 0)) {
-        INTERESTING("AndroidFraunhofer(Commercial)");
+        INTERESTING("AndroidFraunhofer.Commercial");
       } else {
         INTERESTING(lDebug ? "COMM(4)" : "COMMERCIAL");
       }
@@ -6437,19 +6437,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "PurchBook" : "COMMERCIAL");
     }
     if (INFILE(_LT_NONPROFIT_1)) {
-      MEDINTEREST(lDebug ? "NonP(1)" : "Non-profit!");
+      MEDINTEREST(lDebug ? "NonP(1)" : "Non-profit");
     }
     else if (!lmem[_mPYTH_TEXT] && HASTEXT(_TEXT_PROFIT, 0) &&
         INFILE(_PHR_NONPROFIT)) {
       if (!(lmem[_fIETF] + lmem[_fDOC])) {
-        MEDINTEREST(lDebug ? "NonP(2)" : "Non-profit!");
+        MEDINTEREST(lDebug ? "NonP(2)" : "Non-profit");
       }
     }
     if (INFILE(_PHR_NO_SALE)) {
-      MEDINTEREST("Not-for-sale!");
+      MEDINTEREST("Not-for-sale");
     }
     if (!lmem[_mALADDIN] && INFILE(_PHR_NOT_OPEN)) {
-      MEDINTEREST("NOT-Open-Source!");
+      MEDINTEREST("NOT-Open-Source");
     }
     if (HASKW(kwbm, _KW_patent) && INFILE(_PHR_PATENT) && NOT_INFILE(_PHR_PATENT_NOT)) {
       MEDINTEREST("Patent-ref");
@@ -8616,7 +8616,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
         (void) sprintf(name, "Gen-CPY-%d", ++i);
         INTERESTING(name);
       } else {
-        INTERESTING("See-file(COPYING)");
+        INTERESTING("See-file.COPYING");
       }
       return;
     }
@@ -8628,7 +8628,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
         (void) sprintf(name, "Gen-CPY-%d", ++i);
         INTERESTING(name);
       } else {
-        INTERESTING("See-file(LICENSE)");
+        INTERESTING("See-file.LICENSE");
       }
       return;
     }
@@ -8640,7 +8640,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
         (void) sprintf(name, "Gen-CPY-%d", ++i);
         INTERESTING(name);
       } else {
-        INTERESTING("See-file(README)");
+        INTERESTING("See-file.README");
       }
       return;
     }
@@ -8652,20 +8652,20 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
         (void) sprintf(name, "Gen-CPY-%d", ++i);
         INTERESTING(name);
       } else {
-        INTERESTING("See-doc(OTHER)");
+        INTERESTING("See-doc.OTHER");
       }
       return;
     }
   }
   /* */
   if (INFILE(_LT_SEE_OUTPUT_1)) {
-    INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style(EXECUTE)");
+    INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style.EXECUTE");
   }
 #if 0
   else if (INFILE(_LT_SEE_OUTPUT_2)) {
-    INTERESTING(lDebug ? "Gen-EXC-2" : "Free-SW(run-COMMAND)");
+    INTERESTING(lDebug ? "Gen-EXC-2" : "Free-SW.run-COMMAND");
   } else if (INFILE(_LT_SEE_OUTPUT_3)) {
-    INTERESTING(lDebug ? "Gen-EXC-3" : "Free-SW(run-COMMAND)");
+    INTERESTING(lDebug ? "Gen-EXC-3" : "Free-SW.run-COMMAND");
   }
 #endif
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
@@ -8678,160 +8678,160 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
 
 #ifdef OLD_VERSION
   if (INFILE(_LT_SEE_COPYING_1)) {
-    INTERESTING(lDebug ? "Gen-CPY-1" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-1" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_2)) {
-    INTERESTING(lDebug ? "Gen-CPY-2" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-2" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_3)) {
-    INTERESTING(lDebug ? "Gen-CPY-3" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-3" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_4)) {
-    INTERESTING(lDebug ? "Gen-CPY-4" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-4" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_5)) {
-    INTERESTING(lDebug ? "Gen-CPY-5" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-5" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_6)) {
-    INTERESTING(lDebug ? "Gen-CPY-6" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-6" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_7)) {
-    INTERESTING(lDebug ? "Gen-CPY-7" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-7" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_8)) {
-    INTERESTING(lDebug ? "Gen-CPY-8" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-8" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_9)) {
-    INTERESTING(lDebug ? "Gen-CPY-9" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-9" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_10)) {
-    INTERESTING(lDebug ? "Gen-CPY-10" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-10" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_LAST1)) {
-    INTERESTING(lDebug ? "Gen-CPY-L1" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-L1" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_COPYING_LAST2)) {
-    INTERESTING(lDebug ? "Gen-CPY-L2" : "See-file(COPYING)");
+    INTERESTING(lDebug ? "Gen-CPY-L2" : "See-file.COPYING");
   }
   else if (INFILE(_LT_SEE_LICENSE_1)) {
-    INTERESTING(lDebug ? "Gen-LIC-1" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-1" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_2)) {
-    INTERESTING(lDebug ? "Gen-LIC-2" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-2" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_3)) {
-    INTERESTING(lDebug ? "Gen-LIC-3" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-3" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_4)) {
-    INTERESTING(lDebug ? "Gen-LIC-4" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-4" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_5)) {
-    INTERESTING(lDebug ? "Gen-LIC-5" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-5" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_6)) {
-    INTERESTING(lDebug ? "Gen-LIC-6" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-6" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_7)) {
-    INTERESTING(lDebug ? "Gen-LIC-7" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-7" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_8)) {
-    INTERESTING(lDebug ? "Gen-LIC-8" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-8" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_9)) {
-    INTERESTING(lDebug ? "Gen-LIC-9" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-9" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_10)) {
-    INTERESTING(lDebug ? "Gen-LIC-10" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-10" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_LAST1)) {
-    INTERESTING(lDebug ? "Gen-LIC-L1" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-L1" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_LICENSE_LAST2)) {
-    INTERESTING(lDebug ? "Gen-LIC-L2" : "See-file(LICENSE)");
+    INTERESTING(lDebug ? "Gen-LIC-L2" : "See-file.LICENSE");
   }
   else if (INFILE(_LT_SEE_README_1)) {
-    INTERESTING(lDebug ? "Gen-RDM-1" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-1" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_2)) {
-    INTERESTING(lDebug ? "Gen-RDM-2" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-2" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_3)) {
-    INTERESTING(lDebug ? "Gen-RDM-3" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-3" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_4)) {
-    INTERESTING(lDebug ? "Gen-RDM-4" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-4" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_5)) {
-    INTERESTING(lDebug ? "Gen-RDM-5" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-5" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_6)) {
-    INTERESTING(lDebug ? "Gen-RDM-6" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-6" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_7)) {
-    INTERESTING(lDebug ? "Gen-RDM-7" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-7" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_LAST1)) {
-    INTERESTING(lDebug ? "Gen-RDM-L1" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-L1" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_README_LAST2)) {
-    INTERESTING(lDebug ? "Gen-RDM-L2" : "See-file(README)");
+    INTERESTING(lDebug ? "Gen-RDM-L2" : "See-file.README");
   }
   else if (INFILE(_LT_SEE_OTHER_1)) {
-    INTERESTING(lDebug ? "Gen-OTH-1" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-1" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_2)) {
-    INTERESTING(lDebug ? "Gen-OTH-2" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-2" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_3)) {
-    INTERESTING(lDebug ? "Gen-OTH-3" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-3" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_4)) {
-    INTERESTING(lDebug ? "Gen-OTH-4" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-4" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_5)) {
-    INTERESTING(lDebug ? "Gen-OTH-5" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-5" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_6)) {
-    INTERESTING(lDebug ? "Gen-OTH-6" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-6" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_7)) {
-    INTERESTING(lDebug ? "Gen-OTH-7" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-7" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_8)) {
-    INTERESTING(lDebug ? "Gen-OTH-8" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-8" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_9)) {
-    INTERESTING(lDebug ? "Gen-OTH-9" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-9" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_10)) {
-    INTERESTING(lDebug ? "Gen-OTH-10" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-10" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_11)) {
-    INTERESTING(lDebug ? "Gen-OTH-11" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-11" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_12)) {
-    INTERESTING(lDebug ? "Gen-OTH-12" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-12" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_13)) {
-    INTERESTING(lDebug ? "Gen-OTH-13" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-13" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_14)) {
-    INTERESTING(lDebug ? "Gen-OTH-14" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-14" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_15)) {
-    INTERESTING(lDebug ? "Gen-OTH-15" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-15" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_LAST1)) {
-    INTERESTING(lDebug ? "Gen-OTH-L1" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-L1" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_LAST2)) {
-    INTERESTING(lDebug ? "Gen-OTH-L2" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-L2" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OTHER_LAST3)) {
-    INTERESTING(lDebug ? "Gen-OTH-L3" : "See-doc(OTHER)");
+    INTERESTING(lDebug ? "Gen-OTH-L3" : "See-doc.OTHER");
   }
   else if (INFILE(_LT_SEE_OUTPUT_1)) {
-    INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style(interactive)");
+    INTERESTING(lDebug ? "Gen-EXC-1" : "GNU-style.interactive");
   }
   return;
 #endif  /* OLD_VERSION */
