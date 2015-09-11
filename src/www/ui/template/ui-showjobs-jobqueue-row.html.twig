@@ -43,7 +43,7 @@
       {% if endText == "Paused" %}
         [<a href="{{ uriFull }}&action=restart&jobid={{ jqId }}" title="{{ 'Un-Pause this job'|trans }}">{{ 'Unpause'|trans }}</a>]
       {% else %}
-        [<a href="{{ uriFull }}&action=pause&jobid={{ jqId }}" title="{{ 'Pause this job'|trans }}">{{ 'Unpause'|trans }}</a>]
+        [<a href="{{ uriFull }}&action=pause&jobid={{ jqId }}" title="{{ 'Pause this job'|trans }}">{{ 'Pause'|trans }}</a>]
       {% endif %}
       [<a href="{{ uriFull }}&action=cancel&jobid={{ jqId }}" title="{{ 'Cancel this job'|trans }}">{{ 'Cancel'|trans }}</a>]
     {% elseif download and isReady %}
