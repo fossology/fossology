@@ -317,7 +317,7 @@ class SpdxTwoAgent extends Agent
     }
     else
     {
-      $sql = $upload->getTreeTableName().' AND';
+      $sql = $upload->getTreeTableName().' WHERE';
       $stmt .= '.'.$upload->getTreeTableName();
     }
       
