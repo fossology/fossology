@@ -101,14 +101,32 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
       return -1;
     }
   }
-
+  
   /** @group Functional */
-  public function testReport()
+  public function testReportForNormalUploadtreeTable()
   {
     $this->setUpTables();
     $this->setUpRepo();
+    $this->runAndTestReport();
+  }
 
-    list($success,$output,$retCode) = $this->runnerCli->run($uploadId=1, $this->userId, $this->groupId, $jobId=7);
+  /** @group Functional */
+  public function testReportForSpecialUploadtreeTable()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+    
+    $uploadId = 1;
+    $this->dbManager->queryOnce("ALTER TABLE uploadtree_a RENAME TO uploadtree_$uploadId", __METHOD__.'.alterUploadtree');
+    $this->dbManager->getSingleRow("UPDATE upload SET uploadtree_tablename=$1 WHERE upload_pk=$2",
+            array("uploadtree_$uploadId",$uploadId),__METHOD__.'.alterUpload');
+    
+    $this->runAndTestReport($uploadId);
+  }
+  
+  public function runAndTestReport($uploadId=1)
+  {
+    list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId=7);
 
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat( 'report failed: "'.$output.'"', $retCode, equalTo(0));

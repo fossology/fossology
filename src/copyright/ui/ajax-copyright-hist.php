@@ -170,7 +170,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $join = "";
     $filterQuery = "";
-    if ($type == 'statement' && $filter == "nolics")
+    if ($type == 'statement' && $filter == "nolic")
     {
       $noLicStr = "No_license_found";
       $voidLicStr = "Void";
