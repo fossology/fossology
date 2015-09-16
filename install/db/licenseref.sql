@@ -42122,7 +42122,7 @@ permitted only if each of the following conditions of 1-6 are met:
    USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 $Revision: 1.11 $ $Date: 2004/05/18 01:26:24 $', 'http://www.sendmail.org/~ca/email/sm-X/LICENSE', NULL, NULL, NULL, 'Sendmail', NULL, NULL, NULL, '', NULL, false, false, false, '42c7540cab891e2746585c2fca09bdff', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel', 'Intel Open Source License 
 
 
 Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
