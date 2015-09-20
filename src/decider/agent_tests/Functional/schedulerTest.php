@@ -128,7 +128,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars','copyright_ars'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
