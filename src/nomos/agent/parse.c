@@ -401,11 +401,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   showLTCache("LTSR-results INIT-SCAN:");
 #endif  /* LTSR_DEBUG */
   /*
-   * MySQL/FLOSS exception
+   * MySQL.FLOSS exception
    */
   if (INFILE(_LT_MYSQL_EXCEPT) || INFILE(_PHR_FREE_LIBRE)) {
     if (INFILE(_TITLE_ALFRESCO)) {
-      INTERESTING("Alfresco.FLOSS");
+      INTERESTING("Alfresco-FLOSS");
     }
     else if (HASTEXT(_TEXT_ALFRESCO, 0)) {
       INTERESTING("Alfresco");
@@ -1853,7 +1853,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_MIT_0) && (INFILE(_LT_MIT_2) || INFILE(_LT_MIT_3) || INFILE(_LT_MIT_4) || 
         INFILE(_LT_MIT_5) || INFILE(_LT_MIT_6) || INFILE(_LT_MIT_7))) { 
     if(INFILE(_LT_MIT_NO_EVIL)) {
-      INTERESTING(lDebug ? "MIT-style.no evil" : "JSON");
+      INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
       lmem[_mMIT] = 1;
     } else if (INFILE(_LT_Imlib2)) {
       INTERESTING("Imlib2");
@@ -2045,7 +2045,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("OpenGroup-Proprietary");
     }
     else {
-      INTERESTING("Proprietary!");
+      INTERESTING("Proprietary");
     }
   }
   else if (INFILE(_LT_X11_1)) {
@@ -2726,7 +2726,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Santa Cruz Operation (SCO)
    */
   if (INFILE(_LT_SCO_COMM) && INFILE(_CR_SCO)) {
-    INTERESTING("SCO(commercial)");
+    INTERESTING("SCO.commercial");
   }
   cleanLicenceBuffer();
   /*
@@ -2926,7 +2926,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Intel(6)" : "Intel");
     }
     else if (INFILE(_LT_INTEL_RESTRICT)) {
-      INTERESTING("Intel(RESTRICTED)");
+      INTERESTING("Intel.RESTRICTED");
     }
   }
   else if (INFILE(_LT_INTEL_5)) {
@@ -3094,11 +3094,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mSUN] = 1;
     }
     else if (INFILE(_LT_SUN_NC)) {
-      INTERESTING("Sun(Non-commercial)");
+      INTERESTING("Sun.Non-commercial");
       lmem[_mSUN] = 1;
     }
     else if (INFILE(_LT_SUNrestrict)) {
-      INTERESTING("Sun(RESTRICTED)");
+      INTERESTING("Sun.RESTRICTED");
       lmem[_mSUN] = 1;
     }
     else if (INFILE(_LT_SUN_BCLA_1) && INFILE(_TITLE_SUN_BCLA)) {
@@ -3607,7 +3607,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * ADAPTEC
    */
   if (INFILE(_LT_ADAPTEC_OBJ)) {
-    INTERESTING("Adaptec(RESTRICTED)");
+    INTERESTING("Adaptec.RESTRICTED");
   }
   else if (INFILE(_CR_ADAPTEC) && INFILE(_LT_ADAPTEC_GPL)) {
     INTERESTING("Adaptec-GPL");
@@ -3758,7 +3758,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_UW1)) {
     if (INFILE(_CR_UWASHINGTON)) {
-      INTERESTING("U-Wash(Free-Fork)");
+      INTERESTING("U-Wash.Free-Fork");
     }
     else {
       INTERESTING(lDebug ? "U-Wash-style(1)" : "U-Wash-style");
@@ -3849,7 +3849,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   else if (INFILE(_LT_USC_NC)) {
     if (INFILE(_CR_USC)) {
-      INTERESTING("USC(Non-commercial)");
+      INTERESTING("USC.Non-commercial");
     }
     else {
       INTERESTING(lDebug ? "NonC(5)" : "Non-commercial");
@@ -3963,7 +3963,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * Sleepycat NON-Commerical
    */
   else if (INFILE(_LT_SLEEPYCAT_NC)) {
-    INTERESTING("Sleepycat(Non-commercial)");
+    INTERESTING("Sleepycat.Non-commercial");
   }
   cleanLicenceBuffer();
   /*
@@ -4030,10 +4030,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Apple(4)" : "Apple-EULA");
     }
     else if (INFILE(_LT_APPLE_FONTFORGE)) {
-      INTERESTING("Apple(FontForge)");
+      INTERESTING("Apple.FontForge");
     }
     else if (INFILE(_LT_APPLE_SAMPLE)) {
-      INTERESTING("Apple(Sample)");
+      INTERESTING("Apple.Sample");
     }
     else if (INFILE(_LT_APSLref1) || INFILE(_LT_APSLref2) ||
         INFILE(_TITLE_APSL)) {
@@ -4124,7 +4124,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * SUSE/Novell/UnitedLinux
    */
   if (INFILE(_CR_SUSE) && INFILE(_PHR_YAST_CR)) {
-    INTERESTING("YaST(SuSE)");
+    INTERESTING("YaST.SuSE");
   }
   else if (INFILE(_TITLE_NOVELL_EULA)) {
     INTERESTING("Novell-EULA");
@@ -4213,7 +4213,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      * AGFA Monotype
      */
     if (INFILE(_LT_AGFA)) {
-      INTERESTING("AGFA(RESTRICTED)");
+      INTERESTING("AGFA.RESTRICTED");
     }
     else if (INFILE(_LT_AGFA_EULA)) {
       INTERESTING("AGFA-EULA");
@@ -4266,7 +4266,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING("Baekmuk-Font");
     }
     else if (INFILE(_LT_BAEKMUK_2)) {
-      INTERESTING("Baekmuk(Hwan)");
+      INTERESTING("Baekmuk.Hwan");
     }
     cleanLicenceBuffer();
     /*
@@ -5653,7 +5653,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Lachman-Proprietary");
   }
   else if (INFILE(_LT_IOSOFT_SRCONLY)) {
-    INTERESTING("IoSoft(COMMERCIAL)");
+    INTERESTING("IoSoft.COMMERCIAL");
   }
   cleanLicenceBuffer();
   /*
@@ -5667,7 +5667,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   else if (INFILE(_PHR_NOT_FREE_SW)) {
     if (INFILE(_LT_NOT_FREE) && INFILE(_CR_WTI)) {
-      INTERESTING("WTI(Not-free)");
+      INTERESTING("WTI.Not-free");
     }
     else {
       INTERESTING("Not-Free");
@@ -5824,7 +5824,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_USGOVT_1)) {
     if (INFILE(_CR_URA)) {
-      MEDINTEREST("URA(govt)");
+      MEDINTEREST("URA.govt");
     } else {
       MEDINTEREST(lDebug ? "Govt-Wk(1)" : "Govt-work");
     }
