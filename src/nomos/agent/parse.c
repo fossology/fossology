@@ -405,7 +405,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_MYSQL_EXCEPT) || INFILE(_PHR_FREE_LIBRE)) {
     if (INFILE(_TITLE_ALFRESCO)) {
-      INTERESTING("Alfresco.FLOSS");
+      INTERESTING("Alfresco-FLOSS");
     }
     else if (HASTEXT(_TEXT_ALFRESCO, 0)) {
       INTERESTING("Alfresco");
@@ -5824,7 +5824,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_USGOVT_1)) {
     if (INFILE(_CR_URA)) {
-      MEDINTEREST("URA(govt)");
+      MEDINTEREST("URA.govt");
     } else {
       MEDINTEREST(lDebug ? "Govt-Wk(1)" : "Govt-work");
     }
