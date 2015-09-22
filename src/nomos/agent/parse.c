@@ -5553,22 +5553,22 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
-   * O'Reilly and Associates
+   * OReilly and Associates
    */
   if (INFILE(_LT_OREILLY_1)) {
     if (INFILE(_CR_OREILLY)) {
-      INTERESTING("O'Reilly");
+      INTERESTING("OReilly");
     }
     else {
-      INTERESTING("O'Reilly-style");
+      INTERESTING("OReilly-style");
     }
   }
   else if (INFILE(_LT_OREILLY_2)) {
     if (INFILE(_CR_OREILLY)) {
-      INTERESTING(lDebug ? "O'Reilly-2" : "O'Reilly");
+      INTERESTING(lDebug ? "OReilly-2" : "OReilly");
     }
     else {
-      INTERESTING(lDebug ? "OReilly-st-2" : "O'Reilly-style");
+      INTERESTING(lDebug ? "OReilly-st-2" : "OReilly-style");
     }
   }
   cleanLicenceBuffer();
