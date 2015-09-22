@@ -36606,7 +36606,7 @@ To accomplish this, add the phrase `Distribution of substantively modified versi
 B. To prohibit any publication of this work or derivative works in whole or in part in standard (paper) book form for commercial purposes unless prior permission is obtained from the copyright holder. 
 
 To accomplish this, add the phrase ''Distribution of the work or derivative of the work in any standard (paper) book form is prohibited unless prior permission is obtained from the copyright holder.'' to the license reference or copy. ', 'http://www.opencontent.org/openpub/', NULL, NULL, NULL, 'Open Publication License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd59b6f101a8fd1e7ac453186f0768c4d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix/RealNetworks-EULA', 'Helix DNA Technology Binary Research Use License
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix.RealNetworks-EULA', 'Helix DNA Technology Binary Research Use License
 
 REDISTRIBUTION NOT PERMITTED
 
@@ -37407,7 +37407,7 @@ You will need to comply with the Broadcast TOS at http://www.skype.com/legal/ter
 YOU EXPRESSLY ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT AND UNDERSTAND THE RIGHTS, OBLIGATIONS, TERMS AND CONDITIONS SET FORTH HEREIN. BY CLICKING ON THE ACCEPT BUTTON AND/OR CONTINUING TO INSTALL THE SKYPE SOFTWARE, YOU EXPRESSLY CONSENT TO BE BOUND BY ITS TERMS AND CONDITIONS AND GRANT TO SKYPE THE RIGHTS SET FORTH HEREIN.
 
 © Skype – Last revised: August 2009', 'http://www.skype.com/intl/en-us/legal/eula/', NULL, NULL, NULL, 'Skype EULA', NULL, NULL, NULL, '', NULL, false, false, false, '76cd66f51760a868bb7a9275b9b9fd84', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (257, 'QT(Commercial)', 'Qt COMMERCIAL LICENSE AGREEMENT
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (257, 'QT.Commercial', 'Qt COMMERCIAL LICENSE AGREEMENT
 Agreement version 3.8
 This Qt Commercial License Agreement (“Agreement”) is a legal agreement between Nokia
 Inc. ("Nokia"), with its registered office at 102 Corporate Park Drive, White Plains, NY
