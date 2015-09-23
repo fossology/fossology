@@ -110,8 +110,9 @@ class ReportAgent extends Agent
   private $filePathColumn = array("size" => "10", 
                                   "bold" => false
                                  );
+  private $groupBy;
   
-  function __construct()
+  function __construct($groupBy = "content")
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
     $this->ipClearedGetter = new XpClearedGetter("ip", "skipcontent", true);
@@ -127,32 +128,121 @@ class ReportAgent extends Agent
     $this->licenseDao = $this->container->get("dao.license");
     $this->clearingDao = $this->container->get("dao.clearing");
     $this->userDao = $this->container->get("dao.user");
+    $this->groupBy = $groupBy;
   }
 
+  private function groupStatements(&$ungrupedStatements, $extended, $agentcall)
+  {
+    $statements = array();
+    $findings = array();
+    $countLoop = 0;
+    $thousandLoop = 0; 
+    foreach($ungrupedStatements as $statement) {
+      $content = convertToUTF8(htmlspecialchars($statement['content'], ENT_DISALLOWED), false);
+      $comments = convertToUTF8($statement['comments'], false);
+      $fileName = $statement['fileName'];
+
+      if (!array_key_exists('text', $statement))
+      {
+        $description = $statement['description'];
+        $textfinding = $statement['textfinding'];
+
+        if ($description === null) {
+          $text = "";
+        } else {
+          //$agentcall only have copyright so making it empty for other agents
+          if(!empty($textfinding) && empty($agentcall)) 
+            $content = $textfinding;
+          $text = $description;
+        }
+      }
+      else
+      {
+        $text = $statement['text'];
+      }
+
+      $groupBy = $statement[$this->groupBy];
+
+      if(empty($comments) && array_key_exists($groupBy, $statements))
+      {
+          $currentFiles = &$statements[$groupBy]['files'];
+          if (!in_array($fileName, $currentFiles))
+            $currentFiles[] = $fileName;
+      }
+      else {
+        $singleStatement = array(
+            "content" => convertToUTF8($content, false),
+            "text" => convertToUTF8($text, false),
+            "files" => array($fileName)
+          );
+        if ($extended) {
+          $singleStatement["comments"] = convertToUTF8($comments, false);
+          $singleStatement["risk"] =  $statement['risk'];
+        }
+
+        if (empty($comments)) {
+          $statements[$groupBy] = $singleStatement;
+        }
+        else {
+          $statements[] = $singleStatement;
+        }
+      }
+      if(!empty($statement['textfinding']) && !empty($agentcall)){
+        $findings[$fileName] = array(
+            "content" => convertToUTF8($statement['textfinding'], false),
+            "text" => convertToUTF8($text, false),
+            "files" => array($fileName)
+          );
+        if ($extended) {
+          $findings[$fileName]["comments"] = convertToUTF8($comments, false);
+        }
+      }
+      //To keep the schedular alive for large files 
+      $countLoop += 1;
+      if(is_int($countLoop/10000)) {
+        $thousandLoop++;
+        $this->heartbeat(1);
+      }
+    }
+    if(!empty($findings)){
+      $statements = array_merge($findings, $statements);
+    }
+
+    arsort($statements);
+    $actualHeartbeat = count($statements) - $thousandLoop ; 
+    $this->heartbeat($actualHeartbeat);
+    return array("statements" => array_values($statements));
+  }
 
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
     $userId = $this->userId; 
 
-    $this->heartbeat(0);
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenses["statements"]));
+    $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
+    $licenses = $this->groupStatements($ungrupedStatements, $extended, $agentCall);
+    
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesMain["statements"]));
-    $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($bulkLicenses["statements"]));
+    
+    $ungrupedStatements = $this->bulkMatchesGetter->getUnCleared($uploadId, $groupId);
+    $bulkLicenses = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    
     $this->licenseClearedGetter->setOnlyComments(true);
-    $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenseComments["statements"]));
-    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesIrre["statements"]));
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
+    $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
+    $licenseComments = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    
+    $ungrupedStatements = $this->licenseIrrelevantGetter->getUnCleared($uploadId, $groupId);
+    $licensesIrre = $this->groupStatements($ungrupedStatements, $extended,$agentCall); 
+    
+    $ungrupedStatements = $this->cpClearedGetter->getUnCleared($uploadId, $groupId, true, "copyright");
+    $copyrights = $this->groupStatements($ungrupedStatements, true, "copyright");
     $this->heartbeat(count($copyrights["statements"]));
-    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($ecc["statements"]));
-    $ip = $this->ipClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($ip["statements"]));
+    
+    $ungrupedStatements = $this->eccClearedGetter->getUnCleared($uploadId, $groupId);
+    $ecc = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    
+    $ungrupedStatements = $this->ipClearedGetter->getUnCleared($uploadId, $groupId);
+    $ip = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
@@ -163,11 +253,42 @@ class ReportAgent extends Agent
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
                      );
-   
+    $this->folderCreate();   
     $this->writeReport($contents, $uploadId, $groupId, $userId);
+    $this->cleanup();
     return true;
   }
 
+  private function folderCreate()
+  {
+    $tempDir = "/tmp/report/";
+    $folders = array("/tmp/report/docProps/", "/tmp/report/_rels/", "/tmp/report/word/", "/tmp/report/word/_rels/","/tmp/report/word/theme");
+    if(!is_dir($tempDir)) {
+      mkdir($tempDir, 0777, true);
+    }
+    else{
+      $this->cleanup();
+    }
+    foreach($folders as $folder)
+    {
+      if(!is_dir($folder)) {
+        mkdir($folder, 0777, true);
+      }
+    } 
+  }
+
+  private function cleanup()
+  {
+    $tempDir = "/tmp/report/";
+    if(!is_dir($tempDir)) {
+      return ;
+    }
+    else{
+      $cmd = "cd /tmp/report && rm -rf *";    
+      system($cmd,$ret);
+    }
+  }  
+    
   /**
    * @brief setting default heading styles and paragraphstyles
    * @param PhpWord $phpWord

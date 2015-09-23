@@ -194,6 +194,14 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
+  public function getUnCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
+  {
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
+    $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
+    return $ungrupedStatements;
+  }
+  
   public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
