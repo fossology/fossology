@@ -8055,6 +8055,22 @@ k
 %KEY%	"licen[cs]e"
 %STR%	"German Free Software Licen[cs]e"
 #
+%ENTRY% _TITLE_D_FSL_DE1_10
+%KEY%	"Lizenz"
+%STR%	"Deutsche Freie Software Lizenz"
+#
+%ENTRY% _TITLE_D_FSL_DE2_10
+%KEY%	"Vermerke"
+%STR%	"Vermerke im Source Code"
+#
+%ENTRY% _TITLE_D_FSL_DE3_10
+%KEY%	"Lizenz"
+%STR%	"Text dieser Lizenz in deutlich wahrnehmbarer Weise"
+#
+%ENTRY% _TITLE_D_FSL_DE4_10
+%KEY%	"Pflichten"
+%STR%	"Pflichten beim Vertrieb im Object Code"
+#
 %ENTRY% _TITLE_WORDNET
 %KEY%	"licen[cs]e"
 %STR%	"wordnet =FEW= 3\.?0 =SOME= software and database is being provided to you =SOME= by princeton university under the following licen[cs]e"
