@@ -52,7 +52,6 @@ RegexConfProvider::RegexConfProvider(const bool isVerbosityDebug)
   glblIsVerbosityDebug = isVerbosityDebug;
 }
 
-//TODO: move to configParserUtils??
 bool RegexConfProvider::getRegexConfStream(const string& identity,
                                            /*out*/ ifstream& stream)
 {

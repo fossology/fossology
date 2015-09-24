@@ -19,12 +19,6 @@
 #ifndef REGEXCONFPROVIDER_HPP_
 #define REGEXCONFPROVIDER_HPP_
 
-#include "identity.hpp"
-
-#define AGENT_NAME IDENTITY ///< the name of the agent, used to get agent key
-#define AGENT_DESC IDENTITY " agent" ///< what program this is
-#define AGENT_ARS  IDENTITY "_ars"
-
 #include <string>
 #include <vector>
 #include <map>
@@ -33,8 +27,6 @@
 #include <iostream>
 
 #include "regexConfParser.hpp"
-
-// #include "regex.hpp"
 
 std::string getRegexConfFile(const std::string& identity);
 

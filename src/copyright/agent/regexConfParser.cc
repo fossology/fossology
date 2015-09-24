@@ -46,8 +46,6 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
                     const std::string& regexDesc,
                     const bool isVerbosityDebug)
 {
-  // rx::regex whitespaceLine = rx::regex("^[[:space:]]*$", rx::regex_constants::icase);
-
   if (regexDesc[0] == '#')
     return;
 
@@ -60,11 +58,9 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
       if (isVerbosityDebug)
         cout << "loaded or updated regex definition: " << key << " -> \"" << value << "\"" << endl;
     } else {
-      // if (! rx::regex_match(regexDesc,whitespaceLine))
       cout << "empty regex definition in conf: \"" << regexDesc << "\"" << endl;
     }
   } else {
-    // if (! rx::regex_match(regexDesc,whitespaceLine))
     cout << "bad regex definition in conf: \"" << regexDesc << "\"" << endl;
   }
 }
