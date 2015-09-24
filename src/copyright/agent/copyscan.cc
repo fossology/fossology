@@ -31,15 +31,15 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 #define COPYSYM "(?:\\(c\\)|&copy;|\xA9|\xC2\xA9" "|\\$\xB8|\xE2\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E)"
 
   RegexConfProvider::instance()->maybeLoad("copyright");
-  rx::regex regCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT").c_str(),
+  rx::regex regCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT"),
                          rx::regex_constants::icase);
     
-  rx::regex regException(RegexConfProvider::instance()->getRegexValue("copyright","REG_EXCEPTION").c_str(),
+  rx::regex regException(RegexConfProvider::instance()->getRegexValue("copyright","REG_EXCEPTION"),
                          rx::regex_constants::icase);
   // [^\0] is a hack: is supposed to mean "any character"
-  rx::regex regNonBlank(RegexConfProvider::instance()->getRegexValue("copyright","REG_NON_BLANK").c_str());
+  rx::regex regNonBlank(RegexConfProvider::instance()->getRegexValue("copyright","REG_NON_BLANK"));
     
-  rx::regex regSimpleCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_SIMPLE_COPYRIGHT").c_str(),
+  rx::regex regSimpleCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
                                rx::regex_constants::icase);
   
   string::const_iterator begin = s.begin();

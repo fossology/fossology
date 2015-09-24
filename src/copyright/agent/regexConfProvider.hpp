@@ -49,8 +49,8 @@ public:
     RegexConfProvider::_instance = 0;
   }
 
-  std::string getRegexValue(const std::string name,
-                            const std::string key);
+  const char* getRegexValue(const std::string name,
+                      const std::string key);
 
   RegexDict getRegexDict(const std::string identity);
 

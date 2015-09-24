@@ -36,7 +36,7 @@ const char* regAuthor::getType(){
 const char* regAuthor::getRegex(const bool isVerbosityDebug) {
   std::string key("AUTHOR");
   RegexConfProvider::instance(isVerbosityDebug)->maybeLoad("copyright");
-  return RegexConfProvider::instance()->getRegexValue("copyright",key).c_str();
+  return RegexConfProvider::instance()->getRegexValue("copyright",key);
 };
 
 const char* regURL::getType(){
@@ -46,7 +46,7 @@ const char* regURL::getType(){
 const char* regURL::getRegex(const bool isVerbosityDebug) {
   std::string key("URL");
   RegexConfProvider::instance(isVerbosityDebug)->maybeLoad("copyright");
-  return RegexConfProvider::instance()->getRegexValue("copyright",key).c_str();
+  return RegexConfProvider::instance()->getRegexValue("copyright",key);
 };
 
 
@@ -57,7 +57,7 @@ const char* regEmail::getType(){
 const char* regEmail::getRegex(const bool isVerbosityDebug) {
   std::string key("EMAILRGX");
   RegexConfProvider::instance(isVerbosityDebug)->maybeLoad("copyright");
-  return RegexConfProvider::instance()->getRegexValue("copyright",key).c_str();
+  return RegexConfProvider::instance()->getRegexValue("copyright",key);
 };
 
 
@@ -71,6 +71,6 @@ const  char* regEcc::getType(){
 const char* regEcc::getRegex(const bool isVerbosityDebug) {
   std::string key("ECC");
   RegexConfProvider::instance(isVerbosityDebug)->maybeLoad("ecc");
-  return RegexConfProvider::instance()->getRegexValue("ecc",key).c_str();
+  return RegexConfProvider::instance()->getRegexValue("ecc",key);
 };
 

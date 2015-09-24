@@ -86,8 +86,9 @@ RegexDict RegexConfProvider::getRegexDict(const string identity)
   return glblRegexMap[identity];
 }
 
-string RegexConfProvider::getRegexValue(const string identity,
-                                        const string key)
+const char* RegexConfProvider::getRegexValue(const string identity,
+                                       const string key)
 {
-  return getRegexDict(identity)[key];
+  string returnString(getRegexDict(identity)[key]);
+  return returnString.c_str();
 }

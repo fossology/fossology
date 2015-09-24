@@ -37,15 +37,18 @@ private:
                     const string& testString,
                     const string& testKey)
   {
+    string testIdentity("testIdentity");
+    
     // reset RegexConfProvider instance
     RegexConfProvider::resetInstance();
 
     // load parse test-stream
-    RegexConfProvider::instance()->maybeLoad("test",testStream);
+    RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
 
     // test RegexConfProvider
-    CPPUNIT_ASSERT_EQUAL(testString,
-                         RegexConfProvider::instance()->getRegexValue("test",testKey));
+    CPPUNIT_ASSERT_EQUAL(0,
+                         strcmp(testString.c_str(),
+                                RegexConfProvider::instance()->getRegexValue(testIdentity,testKey)));
   }
 
 protected:
