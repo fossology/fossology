@@ -153,50 +153,24 @@ static void addDefaultScanners(CopyrightState& state)
     state.addScanner(new hCopyrightScanner());
 
   if (types & 1<<1)
-    state.addScanner(new regexScanner(regURL::getRegex(), regURL::getType()));
+    state.addScanner(new regexScanner(regURL::getRegex(state.getCliOptions().isVerbosityDebug()),
+                                      regURL::getType()));
 
   if (types & 1<<2)
-    state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType(), 1));
+    state.addScanner(new regexScanner(regEmail::getRegex(state.getCliOptions().isVerbosityDebug()),
+                                      regEmail::getType(),
+                                      1));
 
   if (types & 1<<3)
-    state.addScanner(new regexScanner(regAuthor::getRegex(), regAuthor::getType()));
+    state.addScanner(new regexScanner(regAuthor::getRegex(state.getCliOptions().isVerbosityDebug()),
+                                      regAuthor::getType()));
 #endif
 
 #ifdef IDENTITY_ECC
   if (types & 1<<0)
-    state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
+    state.addScanner(new regexScanner(regEcc::getRegex(state.getCliOptions().isVerbosityDebug()),
+                                      regEcc::getType()));
 #endif
-}
-
-static std::string getRegexConfFile(const std::string& identity)
-{
-  return std::string(sysconfigdir) + "/mods-enabled/" + identity +  "/agent/scanners.conf";
-}
-
-static void addConfFileScanners(CopyrightState& state)
-{
-  std::string confFile = getRegexConfFile(IDENTITY);
-  ifstream stream(confFile);
-  if (stream)
-  {
-    for (std::string line; std::getline(stream, line); )
-    {
-      scanner* sc = makeRegexScanner(line, IDENTITY);
-      if (sc)
-      {
-        if (state.getCliOptions().isVerbosityDebug())
-          cout << "loaded scanner definition: " << line << endl;
-        state.addScanner(sc);
-      }
-      else
-      {
-        cout << "bad scanner definition in conf: " << line << endl;
-      }
-    }
-  } else {
-    if (state.getCliOptions().isVerbosityDebug())
-      cout << "cannot open scanner definition in conf: " << confFile << endl;
-  }
 }
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
@@ -231,7 +205,6 @@ CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
   CopyrightState state(agentID, std::move(cliOptions));
 
   addDefaultScanners(state);
-  addConfFileScanners(state);
 
   return state;
 }
