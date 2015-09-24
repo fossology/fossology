@@ -22,26 +22,30 @@
 
 namespace regURL
 {
-  const char* getRegex();
+  const char* getRegex(const bool isVerbosityDebug);
+  // const char* getRegex() { return regURL::getRegex(false); }
   const char* getType();
 }
 
 
 namespace regEmail
 {
-  const char* getRegex();
+  const char* getRegex(const bool isVerbosityDebug);
+  // const char* getRegex() { return regEmail::getRegex(false); }
   const char* getType();
 }
 
 namespace regAuthor
 {
-  const char* getRegex();
+  const char* getRegex(const bool isVerbosityDebug);
+  // const char* getRegex() { return regAuthor::getRegex(false); }
   const char* getType();
 }
 
 namespace regEcc
 {
-  const char* getRegex();
+  const char* getRegex(const bool isVerbosityDebug);
+  // const char* getRegex() { return regEcc::getRegex(false); }
   const char* getType();
 }
 
