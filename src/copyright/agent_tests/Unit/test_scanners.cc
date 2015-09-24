@@ -99,7 +99,7 @@ protected:
   
   void regAuthorTest()
   {
-    regexScanner sc(regAuthor::getRegex(), regAuthor::getType());
+    regexScanner sc(regAuthor::getRegex(false), regAuthor::getType());
     scannerTest(sc, testContent, regAuthor::getType(), {
       "Written by: me, myself and Irene.",
       "Authors all the people at ABC",
@@ -108,17 +108,17 @@ protected:
   }
 
   void regEccTest () {
-    regexScanner sc(regEcc::getRegex(), regEcc::getType());
+    regexScanner sc(regEcc::getRegex(false), regEcc::getType());
     scannerTest(sc, testContent, regEcc::getType(), { "space vehicle designed by NASA" });
   }
 
   void regUrlTest () {
-    regexScanner sc(regURL::getRegex(), regURL::getType());
+    regexScanner sc(regURL::getRegex(false), regURL::getType());
     scannerTest(sc, testContent, regURL::getType(), { "http://mysite.org/FAQ" });
   }
 
   void regEmailTest () {
-    regexScanner sc(regEmail::getRegex(), regEmail::getType(), 1);
+    regexScanner sc(regEmail::getRegex(false), regEmail::getType(), 1);
     scannerTest(sc, testContent, regEmail::getType(), { "info@mysite.org", "benj@debian.org" });
   }
 };
