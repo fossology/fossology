@@ -44,7 +44,7 @@ private:
 
     // load parse test-stream
     RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
-
+    
     // test RegexConfProvider
     CPPUNIT_ASSERT_EQUAL(0,
                          strcmp(testString.c_str(),
@@ -67,7 +67,7 @@ protected:
     string testKey = "TEST";
     string testLine =
       testKey + "=" + "Lorem \n" +
-      testKey + "=@@" + testKey + "@@Ipsum\n";
+      testKey + "=__" + testKey + "__Ipsum\n";
     istringstream testStream(testLine);
 
     scannerTest(testStream,testString,testKey);
@@ -79,8 +79,8 @@ protected:
     string testLine =
       string("SPACE= \n") +
       "INFIX2=su\n" +
-      "INFIX1=rem@@SPACE@@I\n" +
-      testKey + "=Lo@@INFIX1@@p@@INFIX2@@m\n";
+      "INFIX1=rem__SPACE__I\n" +
+      testKey + "=Lo__INFIX1__p__INFIX2__m\n";
     istringstream testStream(testLine);
 
     scannerTest(testStream,testString,testKey);

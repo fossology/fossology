@@ -68,7 +68,7 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
 string replaceTokens(/*in*/ RegexDict& regexDict,
                      const string& constInput)
 {
-#define RGX_SEPARATOR "@@"
+#define RGX_SEPARATOR "__"
 #define RGX_SEPARATOR_LEN 2
 
   string input(constInput);
