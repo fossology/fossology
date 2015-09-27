@@ -33,7 +33,7 @@ class regexConfProviderTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE_END ();
 
 private:
-  void scannerTest (istringstream& testStream,
+  void regexConfProviderTest (istringstream& testStream,
                     const string& testString,
                     const string& testKey)
   {
@@ -46,9 +46,9 @@ private:
     RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
     
     // test RegexConfProvider
-    CPPUNIT_ASSERT_EQUAL(0,
-                         strcmp(testString.c_str(),
-                                RegexConfProvider::instance()->getRegexValue(testIdentity,testKey)));
+    CPPUNIT_ASSERT_MESSAGE("The generated string schould match the expected string",
+                           0 == strcmp(testString.c_str(),
+                                       RegexConfProvider::instance()->getRegexValue(testIdentity,testKey)));
   }
 
 protected:
@@ -59,8 +59,9 @@ protected:
     string testLine = testKey + "=" + testString + "\n";
     istringstream testStream(testLine);
 
-    scannerTest(testStream,testString,testKey);
+    regexConfProviderTest(testStream,testString,testKey);
   }
+
   void simpleReplacementTest()
   {
     string testString = "Lorem Ipsum";
@@ -70,8 +71,9 @@ protected:
       testKey + "=__" + testKey + "__Ipsum\n";
     istringstream testStream(testLine);
 
-    scannerTest(testStream,testString,testKey);
+    regexConfProviderTest(testStream,testString,testKey);
   }
+
   void multipleReplacementTest()
   {
     string testString = "Lorem Ipsum";
@@ -83,7 +85,29 @@ protected:
       testKey + "=Lo__INFIX1__p__INFIX2__m\n";
     istringstream testStream(testLine);
 
-    scannerTest(testStream,testString,testKey);
+    regexConfProviderTest(testStream,testString,testKey);
+  }
+
+  void testForInfiniteRecursion()
+  {
+    string testString = "Lorem Ipsum";
+    string testKey = "TEST";
+    string testLine =
+      string("LOREM=Lorem__LOREM__ \n") +
+      testKey + "=__LOREM__Ipsum\n";
+    istringstream testStream(testLine);
+
+    string testIdentity("testIdentity");
+    
+    // reset RegexConfProvider instance
+    RegexConfProvider::resetInstance();
+
+    // load parse test-stream
+    RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
+
+    // evaluate and verify, that recursion does not appear
+    CPPUNIT_ASSERT_MESSAGE("This should just terminate (the return value is not specified)",
+                           RegexConfProvider::instance()->getRegexValue(testIdentity,testKey));
   }
 };
 
