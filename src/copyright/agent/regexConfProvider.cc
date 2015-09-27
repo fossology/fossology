@@ -38,11 +38,16 @@ string getRegexConfFile(const string& identity)
   string confInInstallDir((sysconfigdir ? string(sysconfigdir) : "/usr/local/share/fossology/")
                           + "/mods-enabled/" + identity +  "/agent/" + identity + ".conf");
 
-  if(testIfFileExists( confInSameDir )){
+  if(testIfFileExists( confInSameDir ))
+  {
     return confInSameDir;
-  }else if(testIfFileExists( confRelativeToTestDir )){
+  }
+  else if(testIfFileExists( confRelativeToTestDir ))
+  {
     return confRelativeToTestDir;
-  }else{
+  }
+  else
+  {
     return confInInstallDir;
   }
 }
@@ -67,10 +72,13 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
 void RegexConfProvider::maybeLoad(const char* identity)
 {
   ifstream stream;
-  if (getRegexConfStream(identity, stream)) {
+  if (getRegexConfStream(identity, stream))
+  {
     glblRegexMap[identity] = readConfStreamToDict(stream, glblIsVerbosityDebug);
     stream.close();
-  } else {
+  }
+  else
+  {
     cout << "cannot open regex definitions in conf: " << getRegexConfFile(identity) << endl;
   }
 }

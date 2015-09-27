@@ -51,16 +51,22 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
 
   istringstream is_line(regexDesc);
   string key, value;
-  if (getline(is_line, key, '=')) {
-    if(getline(is_line, value)) {
+  if (getline(is_line, key, '='))
+  {
+    if(getline(is_line, value))
+    {
       value=replaceTokens(regexDict, value);
       regexDict[key]=value;
       if (isVerbosityDebug)
         cout << "loaded or updated regex definition: " << key << " -> \"" << value << "\"" << endl;
-    } else {
+    }
+    else
+    {
       cout << "empty regex definition in conf: \"" << regexDesc << "\"" << endl;
     }
-  } else {
+  }
+  else
+  {
     cout << "bad regex definition in conf: \"" << regexDesc << "\"" << endl;
   }
 }
@@ -68,7 +74,8 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
 string replaceTokens(/*in*/ RegexDict& regexDict,
                      const string& constInput)
 {
-#define RGX_SEPARATOR "__"
+#define RGX_SEPARATOR_LEFT "__"
+#define RGX_SEPARATOR_RIGHT RGX_SEPARATOR_LEFT
 #define RGX_SEPARATOR_LEN 2
 
   string input(constInput);
@@ -76,15 +83,19 @@ string replaceTokens(/*in*/ RegexDict& regexDict,
 
   size_t pos = 0;
   string token;
-  while ((pos = input.find(RGX_SEPARATOR)) != string::npos) { // find start of token
+  while ((pos = input.find(RGX_SEPARATOR_LEFT)) != string::npos) // find start of the next token
+  {
     output << input.substr(0, pos);
     input.erase(0, pos + RGX_SEPARATOR_LEN);
 
-    if ((pos = input.find(RGX_SEPARATOR)) != string::npos) { // find end of token
+    if ((pos = input.find(RGX_SEPARATOR_RIGHT)) != string::npos) // find end of token
+    {
       output << regexDict[input.substr(0, pos)];
       input.erase(0, pos + RGX_SEPARATOR_LEN);
 
-    }else{
+    }
+    else
+    {
       cout << "uneven number of delimiters: " << constInput << endl;
     }
   }
