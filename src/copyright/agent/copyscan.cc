@@ -27,9 +27,6 @@ const string copyrightType("statement");
 
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {
-  // Find copyright statements in stream str
-#define COPYSYM "(?:\\(c\\)|&copy;|\xA9|\xC2\xA9" "|\\$\xB8|\xE2\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E)"
-
   RegexConfProvider::instance()->maybeLoad("copyright");
   rx::regex regCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT"),
                          rx::regex_constants::icase);
@@ -83,7 +80,9 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         // Truncate
         out.push_back(match(foundPos - begin, (foundPos - begin) + 998, copyrightType));
       else
+      {
         out.push_back(match(foundPos - begin, j - begin, copyrightType));
+      }
       pos = j;
     }
     else
