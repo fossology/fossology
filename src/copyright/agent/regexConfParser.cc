@@ -22,27 +22,27 @@
 
 using namespace std;
 
-RegexDict readConfStreamToDict(std::istringstream& stream,
+RegexMap readConfStreamToMap(std::istringstream& stream,
                                const bool isVerbosityDebug)
 {
-  map<string, string> regexDict;
+  map<string, string> regexMap;
   for (string line; getline(stream, line); )
-    addRegexToDict(regexDict, line, isVerbosityDebug);
+    addRegexToMap(regexMap, line, isVerbosityDebug);
 
-  return regexDict;
+  return regexMap;
 }
 
-RegexDict readConfStreamToDict(std::ifstream& stream,
+RegexMap readConfStreamToMap(std::ifstream& stream,
                                const bool isVerbosityDebug)
 {
-  map<string, string> regexDict;
+  map<string, string> regexMap;
   for (string line; getline(stream, line); )
-    addRegexToDict(regexDict, line, isVerbosityDebug);
+    addRegexToMap(regexMap, line, isVerbosityDebug);
   stream.close();
-  return regexDict;
+  return regexMap;
 }
 
-void addRegexToDict(/*in and out*/ RegexDict& regexDict,
+void addRegexToMap(/*in and out*/ RegexMap& regexMap,
                     const std::string& regexDesc,
                     const bool isVerbosityDebug)
 {
@@ -55,8 +55,8 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
   {
     if(getline(is_line, value))
     {
-      value=replaceTokens(regexDict, value);
-      regexDict[key]=value;
+      value=replaceTokens(regexMap, value);
+      regexMap[key]=value;
       if (isVerbosityDebug)
         cout << "loaded or updated regex definition: " << key << " -> \"" << value << "\"" << endl;
     }
@@ -71,7 +71,7 @@ void addRegexToDict(/*in and out*/ RegexDict& regexDict,
   }
 }
 
-string replaceTokens(/*in*/ RegexDict& regexDict,
+string replaceTokens(/*in*/ RegexMap& regexMap,
                      const string& constInput)
 {
 #define RGX_SEPARATOR_LEFT "__"
@@ -90,7 +90,7 @@ string replaceTokens(/*in*/ RegexDict& regexDict,
 
     if ((pos = input.find(RGX_SEPARATOR_RIGHT)) != string::npos) // find end of token
     {
-      output << regexDict[input.substr(0, pos)];
+      output << regexMap[input.substr(0, pos)];
       input.erase(0, pos + RGX_SEPARATOR_LEN);
 
     }

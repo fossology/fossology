@@ -27,19 +27,19 @@ extern "C" {
 #include "libfossology.h"
 }
 
-typedef std::map<std::string, std::string> RegexDict;
+typedef std::map<std::string, std::string> RegexMap;
 
-RegexDict readConfStreamToDict(std::istringstream& stream,
+RegexMap readConfStreamToMap(std::istringstream& stream,
                                const bool isVerbosityDebug = false);
 
-RegexDict readConfStreamToDict(std::ifstream& stream,
+RegexMap readConfStreamToMap(std::ifstream& stream,
                                const bool isVerbosityDebug = false);
 
-void addRegexToDict(/*in and out*/ RegexDict& oldDict,
+void addRegexToMap(/*in and out*/ RegexMap& oldMap,
                     const std::string& regexDesc,
                     const bool isVerbosityDebug = false);
 
-std::string replaceTokens(/*in*/ RegexDict& dict,
+std::string replaceTokens(/*in*/ RegexMap& dict,
                           const std::string& constInput);
 
 #endif /* REGEXCONFPARSER_HPP_ */

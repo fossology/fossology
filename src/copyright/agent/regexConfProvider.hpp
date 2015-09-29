@@ -49,13 +49,11 @@ public:
     RegexConfProvider::_instance = 0;
   }
 
-  const char* getRegexValue(const std::string name,
+  const char* getRegexValue(const std::string& name,
                       const std::string key);
 
-  RegexDict getRegexDict(const std::string identity);
-
   void maybeLoad(const char* identity);
-  void maybeLoad(const std::string identity,
+  void maybeLoad(const std::string& identity,
                  std::istringstream& stream);
 
 private:
@@ -64,17 +62,19 @@ private:
   class RegexConfProviderGuard
   {
   public:
-    ~RegexConfProviderGuard() {
-      if ( NULL != RegexConfProvider::_instance ) {
+    ~RegexConfProviderGuard()
+    {
+      if ( NULL != RegexConfProvider::_instance )
+      {
         delete RegexConfProvider::_instance;
         RegexConfProvider::_instance = NULL;
       }
     }
   };
 
-  std::map<std::string,RegexDict> glblRegexMap;
+  std::map<std::string,RegexMap> _regexMap;
 
-  bool glblIsVerbosityDebug;
+  bool _isVerbosityDebug;
 
   bool getRegexConfStream(const std::string& identity,
                           /*out*/ std::ifstream& stream);

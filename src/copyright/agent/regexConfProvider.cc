@@ -32,9 +32,9 @@ bool testIfFileExists(const string& filename)
 string getRegexConfFile(const string& identity)
 {
   string confInSameDir(identity + ".conf");
-  
+
   string confRelativeToTestDir("../../agent/" + identity + ".conf");
-  
+
   string confInInstallDir((sysconfigdir ? string(sysconfigdir) : "/usr/local/share/fossology/")
                           + "/mods-enabled/" + identity +  "/agent/" + identity + ".conf");
 
@@ -54,7 +54,7 @@ string getRegexConfFile(const string& identity)
 
 RegexConfProvider::RegexConfProvider(const bool isVerbosityDebug)
 {
-  glblIsVerbosityDebug = isVerbosityDebug;
+  _isVerbosityDebug = isVerbosityDebug;
 }
 
 bool RegexConfProvider::getRegexConfStream(const string& identity,
@@ -62,7 +62,7 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
 {
   string confFile = getRegexConfFile(identity);
 
-  if (glblIsVerbosityDebug)
+  if (_isVerbosityDebug)
     cout << "try to open conf: " << confFile << endl;
   stream.open(confFile.c_str());
 
@@ -71,32 +71,57 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
 
 void RegexConfProvider::maybeLoad(const char* identity)
 {
-  ifstream stream;
-  if (getRegexConfStream(identity, stream))
+  if (_regexMap.find(identity) == _regexMap.end())
   {
-    glblRegexMap[identity] = readConfStreamToDict(stream, glblIsVerbosityDebug);
-    stream.close();
-  }
-  else
-  {
-    cout << "cannot open regex definitions in conf: " << getRegexConfFile(identity) << endl;
+#pragma omp critical(glblRegexMap)
+    {
+      if (_regexMap.find(identity) == _regexMap.end())
+      {
+        ifstream stream;
+        if (getRegexConfStream(identity, stream))
+        {
+          _regexMap[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
+          stream.close();
+        }
+        else
+        {
+          cout << "cannot open regex definitions in conf: " << getRegexConfFile(identity) << endl;
+        }
+      }
+      else if (_isVerbosityDebug)
+      {
+        cout << "the identity " << identity << " is already loaded" << endl;
+      }
+    }
   }
 }
 
-void RegexConfProvider::maybeLoad(const string identity,
+void RegexConfProvider::maybeLoad(const string& identity,
                                   istringstream& stream)
 {
-  glblRegexMap[identity] = readConfStreamToDict(stream, glblIsVerbosityDebug);
+  if (_regexMap.find(identity) == _regexMap.end())
+  {
+#pragma omp critical(_regexMap)
+    {
+      if (_regexMap.find(identity) == _regexMap.end())
+      {
+        _regexMap[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
+      }
+      else if (_isVerbosityDebug)
+      {
+        cout << "the identity " << identity << " is already loaded" << endl;
+      }
+    }
+  }
 }
 
-RegexDict RegexConfProvider::getRegexDict(const string identity)
+const char* RegexConfProvider::getRegexValue(const string& identity,
+                                             const string key)
 {
-  return glblRegexMap[identity];
-}
-
-const char* RegexConfProvider::getRegexValue(const string identity,
-                                       const string key)
-{
-  string returnString(getRegexDict(identity)[key]);
-  return returnString.c_str();
+  const string* rv;
+#pragma omp critical(_regexMap)
+  {
+    rv = &(_regexMap[identity][key]);
+  }
+  return (*rv).c_str();
 }
