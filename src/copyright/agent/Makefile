@@ -25,7 +25,7 @@ EXE_COV = $(EXE_COP)_cov
 
 
 
-OBJECTS = copyright.o regscan.o scanners.o regTypes.o cleanEntries.o regexConfProvider.o regexConfParser.o
+OBJECTS = copyright.o regscan.o scanners.o cleanEntries.o regexConfProvider.o regexConfParser.o
 OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
 OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
 

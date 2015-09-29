@@ -69,7 +69,7 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
   return stream.is_open();
 }
 
-void RegexConfProvider::maybeLoad(const char* identity)
+void RegexConfProvider::maybeLoad(const std::string& identity)
 {
   if (_regexMap.find(identity) == _regexMap.end())
   {

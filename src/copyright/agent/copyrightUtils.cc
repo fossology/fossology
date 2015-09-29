@@ -20,6 +20,7 @@
 #include <boost/program_options.hpp>
 
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -153,23 +154,18 @@ static void addDefaultScanners(CopyrightState& state)
     state.addScanner(new hCopyrightScanner());
 
   if (types & 1<<1)
-    state.addScanner(new regexScanner(regURL::getRegex(state.getCliOptions().isVerbosityDebug()),
-                                      regURL::getType()));
+    state.addScanner(new regexScanner("url", "copyright"));
 
   if (types & 1<<2)
-    state.addScanner(new regexScanner(regEmail::getRegex(state.getCliOptions().isVerbosityDebug()),
-                                      regEmail::getType(),
-                                      1));
+    state.addScanner(new regexScanner("email", "copyright", 1));
 
   if (types & 1<<3)
-    state.addScanner(new regexScanner(regAuthor::getRegex(state.getCliOptions().isVerbosityDebug()),
-                                      regAuthor::getType()));
+    state.addScanner(new regexScanner("author", "copyright"));
 #endif
 
 #ifdef IDENTITY_ECC
   if (types & 1<<0)
-    state.addScanner(new regexScanner(regEcc::getRegex(state.getCliOptions().isVerbosityDebug()),
-                                      regEcc::getType()));
+    state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
 }
 
@@ -190,9 +186,9 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
     if (match.length(3) == 0)
       return 0; // nullptr
 
-    std::string regexPattern(match.str(3));
-
-    return new regexScanner(regexPattern, type, regId);
+    std::istringstream stream;
+    stream.str(type + "=" + match.str(3));
+    return new regexScanner(type, stream, regId);
   }
   return 0; // nullptr
 }

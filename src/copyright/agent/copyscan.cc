@@ -17,27 +17,29 @@
  */
 
 #include "copyscan.hpp"
-#include "regex.hpp"
 #include <cctype>
 #include <algorithm>
-
 #include "regexConfProvider.hpp"
 
 const string copyrightType("statement");
 
-void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
+
+hCopyrightScanner::hCopyrightScanner()
 {
   RegexConfProvider::instance()->maybeLoad("copyright");
-  rx::regex regCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT"),
-                         rx::regex_constants::icase);
-    
-  rx::regex regException(RegexConfProvider::instance()->getRegexValue("copyright","REG_EXCEPTION"),
-                         rx::regex_constants::icase);
-  // [^\0] is a hack: is supposed to mean "any character"
-  rx::regex regNonBlank(RegexConfProvider::instance()->getRegexValue("copyright","REG_NON_BLANK"));
-    
-  rx::regex regSimpleCopyright(RegexConfProvider::instance()->getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
-                               rx::regex_constants::icase);
+  regCopyright = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT"),
+                        rx::regex_constants::icase);
+  
+  regException = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_EXCEPTION"),
+               rx::regex_constants::icase);
+  regNonBlank = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_NON_BLANK"));
+  
+  regSimpleCopyright = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
+                     rx::regex_constants::icase);
+}
+
+void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
+{
   
   string::const_iterator begin = s.begin();
   string::const_iterator pos = begin;

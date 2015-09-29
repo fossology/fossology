@@ -23,7 +23,7 @@
 using namespace std;
 
 RegexMap readConfStreamToMap(std::istringstream& stream,
-                               const bool isVerbosityDebug)
+                             const bool isVerbosityDebug)
 {
   map<string, string> regexMap;
   for (string line; getline(stream, line); )
@@ -33,7 +33,7 @@ RegexMap readConfStreamToMap(std::istringstream& stream,
 }
 
 RegexMap readConfStreamToMap(std::ifstream& stream,
-                               const bool isVerbosityDebug)
+                             const bool isVerbosityDebug)
 {
   map<string, string> regexMap;
   for (string line; getline(stream, line); )
@@ -43,8 +43,8 @@ RegexMap readConfStreamToMap(std::ifstream& stream,
 }
 
 void addRegexToMap(/*in and out*/ RegexMap& regexMap,
-                    const std::string& regexDesc,
-                    const bool isVerbosityDebug)
+                   const std::string& regexDesc,
+                   const bool isVerbosityDebug)
 {
   if (regexDesc[0] == '#')
     return;

@@ -52,7 +52,7 @@ public:
   const char* getRegexValue(const std::string& name,
                       const std::string key);
 
-  void maybeLoad(const char* identity);
+  void maybeLoad(const std::string& identity);
   void maybeLoad(const std::string& identity,
                  std::istringstream& stream);
 
