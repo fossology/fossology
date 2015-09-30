@@ -236,7 +236,6 @@ class ReportAgent extends Agent
     
     $ungrupedStatements = $this->cpClearedGetter->getUnCleared($uploadId, $groupId, true, "copyright");
     $copyrights = $this->groupStatements($ungrupedStatements, true, "copyright");
-    $this->heartbeat(count($copyrights["statements"]));
     
     $ungrupedStatements = $this->eccClearedGetter->getUnCleared($uploadId, $groupId);
     $ecc = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
@@ -253,42 +252,10 @@ class ReportAgent extends Agent
                       "licensesIrre" => $licensesIrre,
                       "licensesMain" => $licensesMain
                      );
-    $this->folderCreate();   
     $this->writeReport($contents, $uploadId, $groupId, $userId);
-    $this->cleanup();
     return true;
   }
 
-  private function folderCreate()
-  {
-    $tempDir = "/tmp/report/";
-    $folders = array("/tmp/report/docProps/", "/tmp/report/_rels/", "/tmp/report/word/", "/tmp/report/word/_rels/","/tmp/report/word/theme");
-    if(!is_dir($tempDir)) {
-      mkdir($tempDir, 0777, true);
-    }
-    else{
-      $this->cleanup();
-    }
-    foreach($folders as $folder)
-    {
-      if(!is_dir($folder)) {
-        mkdir($folder, 0777, true);
-      }
-    } 
-  }
-
-  private function cleanup()
-  {
-    $tempDir = "/tmp/report/";
-    if(!is_dir($tempDir)) {
-      return ;
-    }
-    else{
-      $cmd = "cd /tmp/report && rm -rf *";    
-      system($cmd,$ret);
-    }
-  }  
-    
   /**
    * @brief setting default heading styles and paragraphstyles
    * @param PhpWord $phpWord
@@ -956,7 +923,7 @@ class ReportAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
-    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s",$timestamp).".docx" ;  
+    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
 

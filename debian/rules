@@ -85,6 +85,7 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src composer_install
+	cp $(CURDIR)/Word2007.php $(CURDIR)/debian/fossology-common/usr/share/fossology/vendor/phpoffice/phpword/src/PhpWord/Writer/
 	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 
