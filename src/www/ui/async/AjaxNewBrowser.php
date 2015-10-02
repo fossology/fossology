@@ -247,7 +247,7 @@ class AjaxNewBrowser extends DefaultPlugin
     $noLicenseUploadTreeView->materialize();
     $noLicenseUploadTreeView->unmaterialize();
 
-    $baseUri = Traceback_uri().'?mod=license'.Traceback_parm_keep(array('upload','folder','show'));
+    $baseUri = Traceback_uri().'?mod=newBrowse'.Traceback_parm_keep(array('upload','folder','show'));
 
     $tableData = array();    
     global $Plugins;

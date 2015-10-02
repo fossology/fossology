@@ -18,13 +18,10 @@
  ***********************************************************/
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -46,12 +43,8 @@ class ui_new_browse extends DefaultPlugin
   private $uploadDao;
   /** @var LicenseDao */
   private $licenseDao;
-  /** @var ClearingDao */
-  private $clearingDao;
   /** @var AgentDao */
   private $agentDao;
-  /** @var ClearingDecisionFilter */
-  private $clearingFilter;
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
@@ -59,7 +52,7 @@ class ui_new_browse extends DefaultPlugin
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("newBrowser"),
+        self::TITLE => _("newBrowse"),
         self::DEPENDENCIES => array("browse", "view"),
         self::PERMISSION => Auth::PERM_READ
     ));
@@ -67,9 +60,7 @@ class ui_new_browse extends DefaultPlugin
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->licenseDao = $container->get('dao.license');
-    $this->clearingDao = $container->get('dao.clearing');
     $this->agentDao = $container->get('dao.agent');
-    $this->clearingFilter = $container->get('businessrules.clearing_decision_filter');
   }
 
   /**
@@ -138,8 +129,12 @@ class ui_new_browse extends DefaultPlugin
 
     $vars['content'] = js_url();
 
+    /*
+     * clear cache to see changes (while development)!
+     */
     $this->renderer->clearTemplateCache();
     $this->renderer->clearCacheFiles();
+
     return $this->render("new-browse.html.twig",$this->mergeWithDefault($vars));
   }
 
@@ -170,7 +165,6 @@ class ui_new_browse extends DefaultPlugin
     
     if(!empty($agentMap))
     {
-      $licVars = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
       $vars = array_merge($vars, $licVars);
     }
 
@@ -211,104 +205,6 @@ class ui_new_browse extends DefaultPlugin
     return $vars;
   }
 
-
-  /**
-   * @param $uploadTreeId
-   * @param $tagId
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int|int[] $agentIds
-   * @param ClearingDecision []
-   * @return array
-   */
-  private function createLicenseHistogram($uploadTreeId, $tagId, ItemTreeBounds $itemTreeBounds, $agentIds, $groupId)
-  {
-    $fileCount = $this->uploadDao->countPlainFiles($itemTreeBounds);
-    $licenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $agentIds);
-    $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
-
-    $agentId = GetParm('agentId', PARM_INTEGER);
-    $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
-    if ($tagId)
-    {
-      $licListUri .= "&tag=$tagId";
-    }
-    if ($agentId)
-    {
-      $licListUri .= "&agentId=$agentId";
-    }
-    
-    /* Write license histogram to $VLic  */
-    list($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount)
-        = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri);
-    
-    $uniqueLicenseCount = count($tableData);
-    $scannerUniqueLicenseCount = count( $licenseHistogram );
-    $editedUniqueLicenseCount = count($editedLicensesHist);
-    $noScannerLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $licenseHistogram)
-            ? $licenseHistogram[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
-    $editedNoLicenseFoundCount = array_key_exists(LicenseDao::NO_LICENSE_FOUND, $editedLicensesHist)
-            ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
-
-    $vars = array('tableDataJson'=>json_encode($tableData),
-        'uniqueLicenseCount'=>$uniqueLicenseCount,
-        'fileCount'=>$fileCount,
-        'scannerUniqueLicenseCount'=>$scannerUniqueLicenseCount,
-        'editedUniqueLicenseCount'=>$editedUniqueLicenseCount,
-        'scannerLicenseCount'=> $totalScannerLicenseCount,
-        'editedLicenseCount'=> $editedTotalLicenseCount-$editedNoLicenseFoundCount,
-        'noScannerLicenseFoundCount'=>$noScannerLicenseFoundCount,
-        'editedNoLicenseFoundCount'=>$editedNoLicenseFoundCount,
-        'scannerLicenses'=>$licenseHistogram,
-        'editedLicenses'=>$editedLicensesHist
-        );
-
-    return $vars;
-  }
-
-  /**
-   * @param array $scannerLics
-   * @param array $editedLics
-   * @param string
-   * @return array
-   * @todo convert to template
-   */
-  protected function createLicenseHistogramJSarray($scannerLics, $editedLics, $licListUri)
-  {
-    $allScannerLicenseNames = array_keys($scannerLics);
-    $allEditedLicenseNames = array_keys($editedLics);
-
-    $allLicNames = array_unique(array_merge($allScannerLicenseNames, $allEditedLicenseNames));
-    $realLicNames = array_diff($allLicNames, array(LicenseDao::NO_LICENSE_FOUND));
-
-    $totalScannerLicenseCount = 0;
-    $editedTotalLicenseCount = 0;
-
-    $tableData = array();
-    foreach ($realLicNames as $licenseShortName)
-    {
-      $count = 0;
-      if (array_key_exists($licenseShortName, $scannerLics))
-      {
-        $count = $scannerLics[$licenseShortName]['unique'];
-        $rfId = $scannerLics[$licenseShortName]['rf_pk'];
-      }
-      else
-      {
-        $rfId = $editedLics[$licenseShortName]['rf_pk'];
-      }
-      $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName]['count'] : 0;
-
-      $totalScannerLicenseCount += $count;
-      $editedTotalLicenseCount += $editedCount;
-
-      $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" . urlencode($licenseShortName) . "'>$count</a>": "0";
-      $editedLink = ($editedCount > 0) ? $editedCount : "0";
-
-      $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId));
-    }
-
-    return array($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount);
-  }
 
   /**
    * @param string $templateName
