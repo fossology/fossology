@@ -37,9 +37,9 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief browse a directory to display all licenses in this directory
  */
 
-class ui_cached_browse extends DefaultPlugin
+class ui_new_browse extends DefaultPlugin
 {
-  const NAME = "cachedBrowse";
+  const NAME = "newBrowse";
   
   private $uploadtree_tablename = "";
   /** @var UploadDao */
@@ -59,7 +59,7 @@ class ui_cached_browse extends DefaultPlugin
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Cached Browser"),
+        self::TITLE => _("newBrowser"),
         self::DEPENDENCIES => array("browse", "view"),
         self::PERMISSION => Auth::PERM_READ
     ));
@@ -92,7 +92,7 @@ class ui_cached_browse extends DefaultPlugin
     }
     else
     {
-      $text = _("cached browser");
+      $text = _("new browser");
       menu_insert("Browse::$menuName", 100, $URI, $text);
       menu_insert("View::$menuName", 100, $viewLicenseURI, $text);
     }
@@ -140,7 +140,7 @@ class ui_cached_browse extends DefaultPlugin
 
     $this->renderer->clearTemplateCache();
     $this->renderer->clearCacheFiles();
-    return $this->render("cached-browse.html.twig",$this->mergeWithDefault($vars));
+    return $this->render("new-browse.html.twig",$this->mergeWithDefault($vars));
   }
 
 
@@ -321,4 +321,4 @@ class ui_cached_browse extends DefaultPlugin
   }  
 }
 
-register_plugin(new ui_cached_browse());
+register_plugin(new ui_new_browse());

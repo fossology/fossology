@@ -19,15 +19,11 @@
 
 namespace Fossology\UI\Ajax;
 
-use ClearingView;
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -42,42 +38,32 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief browse a directory to display all licenses in this directory
  */
 
-class CachedAjaxBrowser extends DefaultPlugin
+class AjaxNewBrowser extends DefaultPlugin
 {
-  const NAME = "cached_ajax_browser";
+  const NAME = "ajax_new_browser";
   
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
   /** @var LicenseDao */
   private $licenseDao;
-  /** @var ClearingDao */
-  private $clearingDao;
   /** @var AgentDao */
   private $agentDao;
-  /** @var ClearingDecisionFilter */
-  private $clearingFilter;
   /** @var LicenseMap */
   private $licenseProjector;
-  /** @var array [uploadtree_id]=>cnt */
-  private $filesThatShouldStillBeCleared;
-  /** @var array [uploadtree_id]=>cnt */
-  private $filesToBeCleared;
   /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Ajax: Cached Browser"),
-        self::DEPENDENCIES => array("cachedBrowse"),
+        self::TITLE => _("Ajax: newBrowser"),
+        self::DEPENDENCIES => array("newBrowse"),
         self::PERMISSION => Auth::PERM_READ
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
     $this->licenseDao = $this->getObject('dao.license');
-    $this->clearingDao = $this->getObject('dao.clearing');
     $this->agentDao = $this->getObject('dao.agent');
-    $this->clearingFilter = $this->getObject('businessrules.clearing_decision_filter');
   }
 
   /**
@@ -189,7 +175,6 @@ class CachedAjaxBrowser extends DefaultPlugin
     {
       $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
       $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
-      $options[UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED] = true;
     }
     
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
@@ -253,24 +238,6 @@ class CachedAjaxBrowser extends DefaultPlugin
       }
     }
 
-    $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
-
-    $alreadyClearedUploadTreeView->materialize();
-    if (!$isFlat)
-    {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    }
-    else
-    {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
-    $alreadyClearedUploadTreeView->unmaterialize();
-
     $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
         $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
                          UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
@@ -278,23 +245,12 @@ class CachedAjaxBrowser extends DefaultPlugin
         $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
     $noLicenseUploadTreeView->materialize();
-    if (!$isFlat)
-    {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    }
-    else
-    {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
     $noLicenseUploadTreeView->unmaterialize();
 
-    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
-    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
     $baseUri = Traceback_uri().'?mod=license'.Traceback_parm_keep(array('upload','folder','show'));
 
     $tableData = array();    
     global $Plugins;
-    $ModLicView = &$Plugins[plugin_find_id("view-license")];
     $latestSuccessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     foreach ($descendants as $child)
     {
@@ -302,7 +258,7 @@ class CachedAjaxBrowser extends DefaultPlugin
       {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $baseUri, $ModLicView, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $baseUri, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
     }
     
     $vars['fileData'] = $tableData;
@@ -316,20 +272,19 @@ class CachedAjaxBrowser extends DefaultPlugin
    * @param int $selectedAgentId
    * @param array $pfileLicenses
    * @param int $groupId
-   * @param ClearingDecision[][] $editedMappedLicenses
    * @param string $uri
-   * @param null|ClearingView $ModLicView
    * @param array $UniqueTagArray
    * @param boolean $isFlat
    * @param int[] $latestSuccessfulAgentIds
    * @return array
    */
-  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $editedMappedLicenses, $uri, $ModLicView, &$UniqueTagArray, $isFlat, $latestSuccessfulAgentIds)
+  private function createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $uri, &$UniqueTagArray, $isFlat, $latestSuccessfulAgentIds)
   {
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
     $linkUri = '';
-    if (!empty($fileId) && !empty($ModLicView))
+    // if (!empty($fileId) && !empty($ModLicView))
+    if (!empty($fileId))
     {
       $linkUri = Traceback_uri();
       $linkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
@@ -383,7 +338,6 @@ class CachedAjaxBrowser extends DefaultPlugin
     {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
-      $editedLicenses = $this->clearingDao->getClearedLicenses($childItemTreeBounds, $groupId);
     } else
     {
       $licenseEntries = array();
@@ -406,27 +360,8 @@ class CachedAjaxBrowser extends DefaultPlugin
           $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
         }
       }
-
-      /* @var $decision ClearingDecision */
-      if (false !== ($decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$childUploadTreeId, $fileId)))
-      {
-        $editedLicenses = $decision->getPositiveLicenses();
-      }
-      else
-      {
-        $editedLicenses = array();
-      }
     }
     
-    $concludedLicenses = array();
-    /** @var LicenseRef $licenseRef */
-    foreach($editedLicenses as $licenseRef){
-      $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
-      $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(),$licenseRef->getShortName());
-      $concludedLicenses[$projectedId] = $projectedName;
-    }
-
-    $editedLicenseList = implode(', ', $concludedLicenses);
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
@@ -440,19 +375,8 @@ class CachedAjaxBrowser extends DefaultPlugin
       $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
 
-    $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
-        , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
-
-    $filesToBeCleared = array_key_exists($childItemTreeBounds->getItemId()
-        , $this->filesToBeCleared) ? $this->filesToBeCleared[$childItemTreeBounds->getItemId()] : 0;
-
-    $filesCleared = $filesToBeCleared - $filesThatShouldStillBeCleared;
-
-    $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
-
     return array($fileName, $licenseList, $fileListLinks);
-    // return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   } 
 }
 
-register_plugin(new CachedAjaxBrowser());
+register_plugin(new AjaxNewBrowser());
