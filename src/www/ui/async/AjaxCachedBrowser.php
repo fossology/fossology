@@ -450,7 +450,8 @@ class CachedAjaxBrowser extends DefaultPlugin
 
     $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
 
-    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
+    return array($fileName, $licenseList, $fileListLinks);
+    // return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   } 
 }
 
