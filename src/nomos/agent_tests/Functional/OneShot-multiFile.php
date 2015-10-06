@@ -55,7 +55,7 @@ class OneShotMultiFileTest extends CommonCliTest
     'BSD_style_u.txt' => 'BSD-3-Clause',
     'BSD_style_v.txt' => 'BSD-style',
     'BSD_style_w.txt' => 'BSD-style',
-    'BSD_style_x.txt' => 'BSD-style,Gov\'t-work',
+    'BSD_style_x.txt' => 'BSD-style,Govt-work',
     'BSD_style_y.txt' => 'PHP-3.0',
     'BSD_style_z.txt' => 'OLDAP-2.3',
   	'FILEgpl3.0' => 'GPL-3.0+',
