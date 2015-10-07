@@ -205,11 +205,11 @@ class showjobs extends FO_Plugin
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
-      $injectedFoot = $_GET['injectedFoot'];
-      if(!$injectedFoot) $injectedFoot = NULL;
+      $injectedFoot = GetParm("injectedFoot",PARM_TEXT);
+      if(!$injectedFoot) $injectedFoot = null;
       $this->vars['injectedFoot'] = $injectedFoot;
-      $injectedMessage = $_GET['injectedMessage'];
-      if(!$injectedMessage) $injectedMessage = NULL;
+      $injectedMessage = GetParm("injectedMessage",PARM_TEXT);
+      if(!$injectedMessage) $injectedMessage = null;
       $this->vars['message'] = $injectedMessage;
     }
   }
