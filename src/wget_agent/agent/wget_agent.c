@@ -415,7 +415,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         rc_system = system(CMD); // delete all empty directories downloaded
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
         memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
+        snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ ", TempFile, TempFilePath);
       }
       else
       {
@@ -528,7 +528,7 @@ int GetVersionControl()
     return 1;
   }
 
-  snprintf(command,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", GlobalTempFile, TempFileDirectory);
+  snprintf(command,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ ", GlobalTempFile, TempFileDirectory);
   rc = system(command);
   if (rc != 0)
   {
@@ -700,7 +700,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s >/dev/null 2>&1", TempFile, Path, GlobalParam);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s ", TempFile, Path, GlobalParam);
     rc_system = system(CMD);
     if (!WIFEXITED(rc_system)) 
     {
@@ -720,7 +720,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
       return 0;
     }
     memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./  > /dev/null 2>&1 && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./ && rm -rf %s/temp ", TempFile, TempFileDir, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
