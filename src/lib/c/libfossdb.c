@@ -157,7 +157,7 @@ PGconn* fo_dbconnect(char* DBConfFile, char** ErrorBuf)
         CMD[i] ='*';
       }
       snprintf(*ErrorBuf, ERRBUFSIZE,
-        "ERROR: Unable to connect to the database\n   Connection string: '%s'\n   Connection status: '%d'\n", CMD, PQstatus(pgConn));
+        "ERROR: Unable to connect to the database\n  Connection string: '%s'\n  Connection status: '%d'\n  Check: /usr/local/etc/fossology/Db.conf\n", CMD, PQstatus(pgConn));
     }
     return (NULL);
   }
