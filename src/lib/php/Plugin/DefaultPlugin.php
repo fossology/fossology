@@ -21,6 +21,7 @@ namespace Fossology\Lib\Plugin;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,6 +52,8 @@ abstract class DefaultPlugin implements Plugin
   private $logger;
   /** @var Menu */
   private $menu;
+  /** @var MicroMenu */
+  protected $microMenu;
   /** @var string */
   private $name;
   /** @var string */
@@ -89,6 +92,7 @@ abstract class DefaultPlugin implements Plugin
     $this->renderer = $this->getObject('twig.environment');
     $this->logger = $this->getObject('logger');
     $this->menu = $this->getObject('ui.component.menu');
+    $this->microMenu = $this->getObject('ui.component.micro-menu');
   }
 
   private function setParameter($key, $value)

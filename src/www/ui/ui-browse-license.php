@@ -77,6 +77,7 @@ class ui_browse_license extends DefaultPlugin
    */
   function RegisterMenus()
   {
+    return 0;
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("upload", "item"));
 
@@ -88,13 +89,16 @@ class ui_browse_license extends DefaultPlugin
     $menuName = $this->Title;
     if (GetParm("mod", PARM_STRING) == self::NAME)
     {
-      menu_insert("Browse::$menuName", 100);
+      menu_insert("Browse::$menuName", 99);
+      menu_insert("View::$menuName", 99);
+      menu_insert("View-Meta::$menuName", 99);
     }
     else
     {
       $text = _("license histogram");
-      menu_insert("Browse::$menuName", 100, $URI, $text);
-      menu_insert("View::$menuName", 100, $viewLicenseURI, $text);
+      menu_insert("Browse::$menuName", 99, $URI, $text);
+      menu_insert("View::$menuName", 99, $viewLicenseURI, $text);
+      menu_insert("View-Meta::$menuName", 99, $viewLicenseURI, $text);
     }
   }
 
