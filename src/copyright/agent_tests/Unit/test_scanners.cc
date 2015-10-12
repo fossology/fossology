@@ -21,7 +21,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "regex.hpp"
 #include "regscan.hpp"
 #include "copyrightUtils.hpp"
-#include "regTypes.hpp"
 #include <list>
 #include <cstring>
 #include <ostream>
@@ -99,8 +98,8 @@ protected:
   
   void regAuthorTest()
   {
-    regexScanner sc(regAuthor::getRegex(), regAuthor::getType());
-    scannerTest(sc, testContent, regAuthor::getType(), {
+    regexScanner sc("author", "copyright");
+    scannerTest(sc, testContent, "author", {
       "Written by: me, myself and Irene.",
       "Authors all the people at ABC",
       "maintained by benjamin drieu <benj@debian.org>"
@@ -108,18 +107,18 @@ protected:
   }
 
   void regEccTest () {
-    regexScanner sc(regEcc::getRegex(), regEcc::getType());
-    scannerTest(sc, testContent, regEcc::getType(), { "space vehicle designed by NASA" });
+    regexScanner sc("ecc", "ecc");
+    scannerTest(sc, testContent, "ecc", { "space vehicle designed by NASA" });
   }
 
   void regUrlTest () {
-    regexScanner sc(regURL::getRegex(), regURL::getType());
-    scannerTest(sc, testContent, regURL::getType(), { "http://mysite.org/FAQ" });
+    regexScanner sc("url", "copyright");
+    scannerTest(sc, testContent, "url", { "http://mysite.org/FAQ" });
   }
 
   void regEmailTest () {
-    regexScanner sc(regEmail::getRegex(), regEmail::getType(), 1);
-    scannerTest(sc, testContent, regEmail::getType(), { "info@mysite.org", "benj@debian.org" });
+    regexScanner sc("email", "copyright",1);
+    scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
   }
 };
 
