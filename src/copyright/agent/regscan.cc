@@ -25,9 +25,9 @@ regexScanner::regexScanner(const string& type,
     _identity(identity),
     _index(index)
 {
-  RegexConfProvider::instance()->maybeLoad(_identity);
-  _reg = rx::regex(RegexConfProvider::instance()->getRegexValue(_identity,
-                                                                _type),
+  RegexConfProvider rcp;
+  rcp.maybeLoad(_identity);
+  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
                    rx::regex_constants::icase);
 }
 
@@ -38,9 +38,9 @@ regexScanner::regexScanner(const string& type,
     _identity(type),
     _index(index)
 {
-  RegexConfProvider::instance()->maybeLoad(_identity,stream);
-  _reg = rx::regex(RegexConfProvider::instance()->getRegexValue(_identity,
-                                                                _type),
+  RegexConfProvider rcp;
+  rcp.maybeLoad(_identity,stream);
+  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
                    rx::regex_constants::icase);
 }
 

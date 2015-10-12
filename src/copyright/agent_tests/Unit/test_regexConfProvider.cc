@@ -39,16 +39,15 @@ private:
   {
     string testIdentity("testIdentity");
     
-    // reset RegexConfProvider instance
-    RegexConfProvider::resetInstance();
+    RegexConfProvider rcp;
 
     // load parse test-stream
-    RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
+    rcp.maybeLoad(testIdentity,testStream);
     
     // test RegexConfProvider
     CPPUNIT_ASSERT_MESSAGE("The generated string schould match the expected string",
                            0 == strcmp(testString.c_str(),
-                                       RegexConfProvider::instance()->getRegexValue(testIdentity,testKey)));
+                                       rcp.getRegexValue(testIdentity,testKey)));
   }
 
 protected:
@@ -99,15 +98,14 @@ protected:
 
     string testIdentity("testIdentity");
     
-    // reset RegexConfProvider instance
-    RegexConfProvider::resetInstance();
+    RegexConfProvider rcp;
 
     // load parse test-stream
-    RegexConfProvider::instance()->maybeLoad(testIdentity,testStream);
+    rcp.maybeLoad(testIdentity,testStream);
 
     // evaluate and verify, that recursion does not appear
     CPPUNIT_ASSERT_MESSAGE("This should just terminate (the return value is not specified)",
-                           RegexConfProvider::instance()->getRegexValue(testIdentity,testKey));
+                           rcp.getRegexValue(testIdentity,testKey));
   }
 };
 

@@ -26,15 +26,17 @@ const string copyrightType("statement");
 
 hCopyrightScanner::hCopyrightScanner()
 {
-  RegexConfProvider::instance()->maybeLoad("copyright");
-  regCopyright = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_COPYRIGHT"),
+  RegexConfProvider rcp;
+  rcp.maybeLoad("copyright");
+
+  regCopyright = rx::regex(rcp.getRegexValue("copyright","REG_COPYRIGHT"),
                         rx::regex_constants::icase);
   
-  regException = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_EXCEPTION"),
+  regException = rx::regex(rcp.getRegexValue("copyright","REG_EXCEPTION"),
                rx::regex_constants::icase);
-  regNonBlank = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_NON_BLANK"));
+  regNonBlank = rx::regex(rcp.getRegexValue("copyright","REG_NON_BLANK"));
   
-  regSimpleCopyright = rx::regex(RegexConfProvider::instance()->getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
+  regSimpleCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
                      rx::regex_constants::icase);
 }
 

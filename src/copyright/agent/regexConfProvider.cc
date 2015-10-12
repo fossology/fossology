@@ -19,7 +19,7 @@
 
 using namespace std;
 
-RegexConfProvider* RegexConfProvider::_instance = 0;
+map<string,RegexMap> RegexConfProvider::_regexMapMap = {};
 
 bool testIfFileExists(const string& filename)
 {
@@ -53,9 +53,7 @@ string getRegexConfFile(const string& identity)
 }
 
 RegexConfProvider::RegexConfProvider(const bool isVerbosityDebug)
-{
-  _isVerbosityDebug = isVerbosityDebug;
-}
+  : _isVerbosityDebug(isVerbosityDebug) {}
 
 bool RegexConfProvider::getRegexConfStream(const string& identity,
                                            /*out*/ ifstream& stream)
@@ -71,16 +69,17 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
 
 void RegexConfProvider::maybeLoad(const std::string& identity)
 {
-  if (_regexMap.find(identity) == _regexMap.end())
+  map<string,RegexMap>& rmm = RegexConfProvider::_regexMapMap;
+  if (rmm.find(identity) == rmm.end())
   {
-#pragma omp critical(glblRegexMap)
+#pragma omp critical(rmm)
     {
-      if (_regexMap.find(identity) == _regexMap.end())
+      if (rmm.find(identity) == rmm.end())
       {
         ifstream stream;
         if (getRegexConfStream(identity, stream))
         {
-          _regexMap[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
+          rmm[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
           stream.close();
         }
         else
@@ -99,13 +98,14 @@ void RegexConfProvider::maybeLoad(const std::string& identity)
 void RegexConfProvider::maybeLoad(const string& identity,
                                   istringstream& stream)
 {
-  if (_regexMap.find(identity) == _regexMap.end())
+  map<string,RegexMap>& rmm = RegexConfProvider::_regexMapMap;
+  if (rmm.find(identity) == rmm.end())
   {
-#pragma omp critical(_regexMap)
+#pragma omp critical(rmm)
     {
-      if (_regexMap.find(identity) == _regexMap.end())
+      if (rmm.find(identity) == rmm.end())
       {
-        _regexMap[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
+        rmm[identity] = readConfStreamToMap(stream, _isVerbosityDebug);
       }
       else if (_isVerbosityDebug)
       {
@@ -116,12 +116,13 @@ void RegexConfProvider::maybeLoad(const string& identity,
 }
 
 const char* RegexConfProvider::getRegexValue(const string& identity,
-                                             const string key)
+                                             const string& key)
 {
   const string* rv;
-#pragma omp critical(_regexMap)
+  map<string,RegexMap> rmm = RegexConfProvider::_regexMapMap;
+#pragma omp critical(rmm)
   {
-    rv = &(_regexMap[identity][key]);
+    rv = &(rmm[identity][key]);
   }
   return (*rv).c_str();
 }

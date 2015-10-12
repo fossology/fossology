@@ -30,49 +30,20 @@
 
 std::string getRegexConfFile(const std::string& identity);
 
-#define DEFAULT_DEBUG_VERBOSITY false
 class RegexConfProvider
 {
 public:
-  static RegexConfProvider* _instance;
-  static RegexConfProvider* instance (const bool isVerbosityDebug = DEFAULT_DEBUG_VERBOSITY)
-  {
-    static RegexConfProviderGuard g;
-    if (!_instance)
-      _instance = new RegexConfProvider (isVerbosityDebug);
-    return _instance;
-  }
-  static void resetInstance()
-  {
-    if(RegexConfProvider::_instance)
-      delete RegexConfProvider::_instance;
-    RegexConfProvider::_instance = 0;
-  }
-
-  const char* getRegexValue(const std::string& name,
-                      const std::string key);
+  explicit RegexConfProvider(const bool isVerbosityDebug = false);
 
   void maybeLoad(const std::string& identity);
   void maybeLoad(const std::string& identity,
                  std::istringstream& stream);
 
-private:
-  RegexConfProvider(const bool isVerbosityDebug);
-  ~RegexConfProvider () { }
-  class RegexConfProviderGuard
-  {
-  public:
-    ~RegexConfProviderGuard()
-    {
-      if ( NULL != RegexConfProvider::_instance )
-      {
-        delete RegexConfProvider::_instance;
-        RegexConfProvider::_instance = NULL;
-      }
-    }
-  };
+  const char* getRegexValue(const std::string& name,
+                            const std::string& key);
 
-  std::map<std::string,RegexMap> _regexMap;
+private:
+  static std::map<std::string,RegexMap> _regexMapMap;
 
   bool _isVerbosityDebug;
 
