@@ -121,6 +121,33 @@ class DeciderJobAgent extends Agent {
     return true;
   }
 
+  private function noLicensesCheck(&$detectedLicenses, &$removedLicenses)
+  {
+    $noLicenses = false;
+    if ($detectedLicenses[0]->getLicenseId() == 507)
+    {
+      return true;
+    }
+
+    foreach ($detectedLicenses as $dlic)
+    {
+      $noLicenses = false;
+      foreach ($removedLicenses as $rlic)
+      {
+        if ($dlic->getLicenseId() == $rlic->getLicenseId())
+        {
+          $noLicenses = true;
+          break;
+        }
+      }
+      if (!$noLicenses)
+      {
+        break;
+      }
+    }
+    return $noLicenses;
+  }
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
@@ -144,20 +171,23 @@ class DeciderJobAgent extends Agent {
     if ($createDecision)
     {
       /* Do not add/change concluded license if:
-	     - agent has detected No_license_found, and
+	     - agent has detected No_license_found, or
+         - user has concluded that there is no valid license in a file, or
          - concluded license has already been added */
       list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
-
       $concludedLicenseExist = false;
+      $allDetectedLicensesRemoved = false;
       foreach ($concludedLicenses as $license) {
         if ($license->hasClearingEvent()) {
           $concludedLicenseExist = true;
-          continue;
+          break;
         }
       }
-      $detectedFileLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
 
-      if ($detectedFileLicenses[0]->getLicenseId() != 507 && !$concludedLicenseExist) {
+      $detectedFileLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+      $allDetectedLicensesRemoved = $this->noLicensesCheck($detectedFileLicenses, $removedLicenses);
+
+      if (!$allDetectedLicensesRemoved && !$concludedLicenseExist) {
         $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
       }
 
