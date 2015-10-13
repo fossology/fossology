@@ -140,8 +140,24 @@ PGconn* fo_dbconnect(char* DBConfFile, char** ErrorBuf)
     *ErrorBuf = malloc(ERRBUFSIZE);
     if (*ErrorBuf)
     {
+      int i = 0;
+      const char sep[2]= "=";
+      char *catchPass = NULL;
+      char CMDCopy[10240];     
+      int len = strlen(CMD);
+      memset(CMDCopy, '\0', sizeof(CMDCopy));
+      memcpy(CMDCopy, CMD , len);
+      char *pass = strtok(CMDCopy, sep);
+      while (pass != NULL){
+         catchPass = pass;
+         pass = strtok(NULL, sep);
+      }
+      int pLen = strlen(catchPass);  
+      for(i = (len - pLen); i < len; i++){
+        CMD[i] ='*';
+      }
       snprintf(*ErrorBuf, ERRBUFSIZE,
-        "ERROR: Unable to connect to the database\n   Connection string: '%s'\n   Connection status: '%d'\n", CMD, PQstatus(pgConn));
+        "ERROR: Unable to connect to the database\n  Connection string: '%s'\n  Connection status: '%d'\n  Check: /usr/local/etc/fossology/Db.conf\n", CMD, PQstatus(pgConn));
     }
     return (NULL);
   }
