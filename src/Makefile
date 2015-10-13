@@ -83,6 +83,7 @@ composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
 	(cd $(DESTDIR)$(MODDIR); composer install -q --no-dev)
+	(cp ../Word2007.php $(DESTDIR)$(MODDIR)/vendor/phpoffice/phpword/src/PhpWord/Writer/)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
