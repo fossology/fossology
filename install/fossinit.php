@@ -287,9 +287,17 @@ if($sysconfig['Release'] == '2.6.3')
 {
   require_once("$LIBEXECDIR/dbmigrate_real-parent.php");
 }
-if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1')
+
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1' || $sysconfig['Release']=='2.6.3.2'))
 {
-  $sysconfig['Release'] = '2.6.3.2';
+  require_once("$LIBEXECDIR/fo_mapping_license.php");
+  print "Rename license (using $LIBEXECDIR) for SPDX validity\n";
+  renameLicensesForSpdxValidation($Verbose);
+}
+
+if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1' || $sysconfig['Release']=='2.6.3.2')
+{
+  $sysconfig['Release'] = '2.6.3.3';
 }
 
 $dbManager->begin();

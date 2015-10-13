@@ -203,7 +203,7 @@ function Migrate_21_22($Verbose)
     if (empty($matches[1]) || (5 > strlen($matches[1]) && $matches[1] <= $version230)) {
       require_once("$LIBEXECDIR/fo_mapping_license.php");
       print "Rename license in $LIBEXECDIR\n";
-      Rename_Licenses($Verbose);
+      renameLicenses21to22($Verbose);
     }
   }
 

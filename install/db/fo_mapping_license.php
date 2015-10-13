@@ -42,12 +42,11 @@ if (empty($options) || !is_array($options))
 }
 */
 
-function Rename_Licenses($Verbose)
+function renameLicenses21to22($verbose)
 {
-  global $PG_CONN;
-/** PLEASE PUT THE LICENSE MAP THERE */
-/** will replace old_shortname with new_shortname in the later process */
-$shortname_array = array(
+  /** PLEASE PUT THE LICENSE MAP THERE */
+  /** will replace old_shortname with new_shortname in the later process */
+  $shortname_array = array(
     /* old_shortname => new_shortname */
     'Adaptive' => 'APL-1.0',
     'Adaptive_v1.0' => 'APL-1.0',
@@ -386,39 +385,102 @@ $shortname_array = array(
     'ZPL2.0'  =>  'ZPL-2.0',
     'ZPL2.1'  =>  'ZPL-2.1'
     );
-
-foreach ($shortname_array as $old_shortname => $new_shortname)
-{
-  $old_rf_pk = check_shortname($old_shortname);
-  $new_rf_pk = check_shortname($new_shortname);
-  if (-1 != $old_rf_pk && -1 != $new_rf_pk)
-  {
-    $res = update_license($old_rf_pk, $new_rf_pk);
-    if (0 == $res) 
-    {
-      if($Verbose)
-        print "update successfully, substitute rf_id(license_name) from $old_rf_pk($old_shortname) to $new_rf_pk($new_shortname).\n";
-    }
-  }
-  else if (-1 != $old_rf_pk && -1 == $new_rf_pk)
-  {
-    $res =  change_license_name($old_shortname, $new_shortname);
-    if (0 == $res)
-    {
-      if($Verbose)
-        print "change license name successfully, substitute license shortname from $old_shortname to $new_shortname.\n";
-    }
-
-  } 
-  else if (-1 == $old_rf_pk)
-  {
-    if($Verbose)
-      print "the $old_shortname is not existing.\n";
-  }
+  renameLicense($shortname_array, $verbose);
 }
 
-if($Verbose)
-  print "End!\n";
+function renameLicensesForSpdxValidation($verbose)
+{
+  $shortname_array = array(
+     'Adaptec(RESTRICTED)' => 'Adaptec.RESTRICTED',
+     'AGFA(RESTRICTED)' => 'AGFA.RESTRICTED',
+     'Alfresco/FLOSS' => 'Alfresco-FLOSS',
+     'AndroidSDK(Commercial)' => 'AndroidSDK.Commercial',
+     'AndroidFraunhofer(Commercial)' => 'AndroidFraunhofer.Commercial',
+     'Apple(FontForge)' => 'Apple.FontForge',
+     'Apple(Sample)' => 'Apple.Sample', 
+     'ATT-Source_v1.2d' => 'ATT-Source-1.2d',
+     'ATT(Non-commercial)' => 'ATT.Non-commercial', 
+     'Baekmuk(Hwan)' => 'Baekmuk.Hwan',
+     'Broadcom(Commercial)' => 'Broadcom.Commercial',
+     'BSD(non-commercial)' => 'BSD.non-commercial',
+     'Genivia(Commercial)' => 'Genivia.Commercial',
+     "Gov''t-work" => 'Govt-work',
+     "Gov''t-rights" => 'Govt-rights',
+     'GNU-style(EXECUTE)' => 'GNU-style.EXECUTE',
+     'GNU-style(interactive)' => 'GNU-style.interactive',
+     'Helix/RealNetworks EULA' => 'Helix.RealNetworks-EULA',
+     'Helix/RealNetworks-EULA' => 'Helix.RealNetworks-EULA',
+     'Intel(Commercial)' => 'Intel.Commercial',
+     'Intel(RESTRICTED)' => 'Intel.RESTRICTED',
+     'IoSoft(COMMERCIAL)' => 'IoSoft.COMMERCIAL',
+     'JPEG/netpbm' => 'JPEG.netpbm',
+     'MIT/BSD' => 'MIT.BSD',
+     'MPL/TPL_v1.0' => 'MPL.TPL-1.0',
+     'MPL/TPL' => 'MPL.TPL',
+     'MySQL/FLOSS' => 'MySQL.FLOSS',
+     'Non-commercial!' => 'Non-commercial',
+     'Non-profit!' => 'Non-profit',
+     'Not-Free!' => 'Not-Free',
+     'Not-for-sale!' => 'Not-for-sale',
+     'Not-OpenSource!' => 'Not-OpenSource', 
+     "O''Reilly" => 'OReilly',
+     "O''Reilly-style" => 'OReilly-style',
+     'Proprietary!' => 'Proprietary',
+     'QT' => 'QT.Commercial', 
+     'Qt(Commercial)' => 'QT.Commercial',
+     'QT(Commercial)' => 'QT.Commercial', 
+     'RedHat(Non-commercial)' => 'RedHat.Non-commercial',
+     'SCO(commercial)' => 'SCO.commercial',
+     'See-doc(OTHER)' => 'See-doc.OTHER',
+     'See-file(COPYING)' => 'See-file.COPYING',
+     'See-file(LICENSE)' => 'See-file.LICENSE',
+     'See-file(README)' => 'See-file.README',  
+     'Sun(Non-commercial)'  =>  'Sun.Non-commercial',
+     'Sun(RESTRICTED)'  =>  'Sun.RESTRICTED',
+     "URA(gov''t)"  =>  'URA.govt',
+     'U-Wash(Free-Fork)'  =>  'U-Wash.Free-Fork',
+     'USC(Non-commercial)'  =>  'USC.Non-commercial',
+     'WTI(Not-free)'  =>  'WTI.Not-free',
+     'YaST(SuSE)'  =>  'YaST.SuSE'
+      );
+  renameLicenses($shortname_array, $verbose);
+}
+  
+
+function renameLicenses($shortname_array, $Verbose)
+{
+  foreach ($shortname_array as $old_shortname => $new_shortname)
+  {
+    $old_rf_pk = check_shortname($old_shortname);
+    $new_rf_pk = check_shortname($new_shortname);
+    if (-1 != $old_rf_pk && -1 != $new_rf_pk)
+    {
+      $res = update_license($old_rf_pk, $new_rf_pk);
+      if (0 == $res) 
+      {
+        if($Verbose)
+          print "update successfully, substitute rf_id(license_name) from $old_rf_pk($old_shortname) to $new_rf_pk($new_shortname).\n";
+      }
+    }
+    else if (-1 != $old_rf_pk && -1 == $new_rf_pk)
+    {
+      $res =  change_license_name($old_shortname, $new_shortname);
+      if (0 == $res)
+      {
+        if($Verbose)
+          print "change license name successfully, substitute license shortname from $old_shortname to $new_shortname.\n";
+      }
+
+    } 
+    else if (-1 == $old_rf_pk)
+    {
+      if($Verbose)
+        print "the $old_shortname is not existing.\n";
+    }
+  }
+
+  if($Verbose)
+    print "End!\n";
 }
 
 /** 
@@ -508,5 +570,3 @@ function change_license_name($old_shortname, $new_shortname)
 
   return 0;
 }
-
-?>

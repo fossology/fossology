@@ -20,11 +20,15 @@
 #define COPYSCAN_HPP_
 
 #include "scanners.hpp"
+#include "regex.hpp"
 
 class hCopyrightScanner : public scanner
 {
 public:
   void ScanString(const string& s, list<match>& results) const;
+  hCopyrightScanner();
+private:
+  rx::regex regCopyright, regException, regNonBlank, regSimpleCopyright;
 } ;
 
 #endif
