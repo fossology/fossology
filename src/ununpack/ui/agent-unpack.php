@@ -36,6 +36,13 @@ class UnpackAgentPlugin extends AgentPlugin
   
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
+
+    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
+    if ($jobQueueId != 0)
+    {
+       return $jobQueueId;
+    }
+
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, '');
   }
 }
