@@ -18,7 +18,7 @@ CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm  -lst
 
 EXE = test_copyright
 
-OBJECTS = test_regex.o test_scanners.o
+OBJECTS = test_regex.o test_scanners.o test_regexConfProvider.o
 OBJECTS_ACC = test_accuracy.o
 COVERAGE =
 

@@ -17,33 +17,31 @@
  */
 
 #include "copyscan.hpp"
-#include "regex.hpp"
 #include <cctype>
 #include <algorithm>
+#include "regexConfProvider.hpp"
 
 const string copyrightType("statement");
 
+
+hCopyrightScanner::hCopyrightScanner()
+{
+  RegexConfProvider rcp;
+  rcp.maybeLoad("copyright");
+
+  regCopyright = rx::regex(rcp.getRegexValue("copyright","REG_COPYRIGHT"),
+                        rx::regex_constants::icase);
+  
+  regException = rx::regex(rcp.getRegexValue("copyright","REG_EXCEPTION"),
+               rx::regex_constants::icase);
+  regNonBlank = rx::regex(rcp.getRegexValue("copyright","REG_NON_BLANK"));
+  
+  regSimpleCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
+                     rx::regex_constants::icase);
+}
+
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {
-  // Find copyright statements in stream str
-#define COPYSYM "(?:\\(c\\)|&copy;|\xA9|\xC2\xA9" "|\\$\xB8|\xE2\x92\xB8|\\$\xD2|\xE2\x93\x92" "|\\$\x9E|\xE2\x92\x9E)"
-
-  rx::regex regCopyright(
-    "\\bcopyright(?:ed|s)?[[:space:]:]|"
-    COPYSYM "[ \t]+([[:alnum:] ][^\\0]{0,2}){5,}",
-    rx::regex_constants::icase);
-    
-  rx::regex regException(
-    "\\bcopyrights?(?:[ \t/\\\\\\*\\+#\"\\.-]+)(?:licen[cs]es?|notices?|holders?|and|statements?|owners?)[ \t\\.,][^\\0]*",
-      rx::regex_constants::icase);
-  // [^\0] is a hack: is supposed to mean "any character"
-  rx::regex regNonBlank(
-    ".*(?:[[:alpha:]][[:alpha:]]|[[:digit:]][[:digit:]]).*"
-    );
-    
-  rx::regex regSimpleCopyright(
-    "\\bcopyright\\b|" COPYSYM,
-    rx::regex_constants::icase);
   
   string::const_iterator begin = s.begin();
   string::const_iterator pos = begin;
@@ -86,7 +84,9 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
         // Truncate
         out.push_back(match(foundPos - begin, (foundPos - begin) + 998, copyrightType));
       else
+      {
         out.push_back(match(foundPos - begin, j - begin, copyrightType));
+      }
       pos = j;
     }
     else

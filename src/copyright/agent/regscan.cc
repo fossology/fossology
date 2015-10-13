@@ -18,15 +18,31 @@
 
 #include "regscan.hpp"
 
+regexScanner::regexScanner(const string& type,
+                           const string& identity,
+                           int index)
+  : _type(type),
+    _identity(identity),
+    _index(index)
+{
+  RegexConfProvider rcp;
+  rcp.maybeLoad(_identity);
+  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
+                   rx::regex_constants::icase);
+}
 
-
-regexScanner::regexScanner(const string& sReg, const string& t)
-  : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(0)
-{ }
-
-regexScanner::regexScanner(const string& sReg, const string& t, int idx)
-  : reg(rx::regex(sReg, rx::regex_constants::icase)), type(t), index(idx)
-{ }
+regexScanner::regexScanner(const string& type,
+                           std::istringstream& stream,
+                           int index)
+  : _type(type),
+    _identity(type),
+    _index(index)
+{
+  RegexConfProvider rcp;
+  rcp.maybeLoad(_identity,stream);
+  _reg = rx::regex(rcp.getRegexValue(_identity, _type),
+                   rx::regex_constants::icase);
+}
 
 void regexScanner::ScanString(const string& s, list<match>& results) const
 {
@@ -39,10 +55,12 @@ void regexScanner::ScanString(const string& s, list<match>& results) const
   {
     // Find next match
     rx::smatch res;
-    if (rx::regex_search(pos, end, res, reg))
+    if (rx::regex_search(pos, end, res, _reg))
     {
       // Found match
-      results.push_back(match(intPos + res.position(index), intPos + res.position(index) + res.length(index), type));
+      results.push_back(match(intPos + res.position(_index),
+                              intPos + res.position(_index) + res.length(_index),
+                              _type));
       pos = res[0].second;
       intPos += res.position() + res.length();
     }
