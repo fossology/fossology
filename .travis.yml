@@ -25,11 +25,12 @@ install:
         libboost-regex-dev libboost-program-options-dev
  - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
+ - sudo apt-get install liblocal-lib-perl
 
 before_script:
  - cd src/
  - composer install --dev
- - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && (y y | sudo cpan -T Spreadsheet::WriteExcel) && sudo cpan -T DBD::SQLite && perl Makefile.PL && sudo ln -s $(pwd)/bin/ninka /usr/bin/ninka && export PERL5LIB=$(pwd)/lib && cd ../.. 
+ - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && (y y | sudo cpan -T Spreadsheet::WriteExcel) && sudo cpan -T ExtUtils::MakeMaker && sudo cpan -T DBD::SQLite && perl Makefile.PL && sudo ln -s $(pwd)/bin/ninka /usr/bin/ninka && export PERL5LIB=$(pwd)/lib && cd ../.. 
  - cd ..
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
