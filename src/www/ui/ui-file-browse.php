@@ -34,9 +34,9 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief browse a directory to display all licenses in this directory
  */
 
-class ui_new_browse extends DefaultPlugin
+class ui_file_browse extends DefaultPlugin
 {
-  const NAME = "newBrowse";
+  const NAME = "fileBrowse";
   
   private $uploadtree_tablename = "";
   /** @var UploadDao */
@@ -52,7 +52,7 @@ class ui_new_browse extends DefaultPlugin
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("newBrowse"),
+        self::TITLE => _("File Browse"),
         self::DEPENDENCIES => array("browse", "view"),
         self::PERMISSION => Auth::PERM_READ
     ));
@@ -83,7 +83,7 @@ class ui_new_browse extends DefaultPlugin
     }
     else
     {
-      $text = _("new browser");
+      $text = _("File browser");
       menu_insert("Browse::$menuName", 100, $URI, $text);
       menu_insert("View::$menuName", 100, $viewLicenseURI, $text);
     }
@@ -135,7 +135,7 @@ class ui_new_browse extends DefaultPlugin
     $this->renderer->clearTemplateCache();
     $this->renderer->clearCacheFiles();
 
-    return $this->render("new-browse.html.twig",$this->mergeWithDefault($vars));
+    return $this->render("file-browse.html.twig",$this->mergeWithDefault($vars));
   }
 
 
@@ -217,4 +217,4 @@ class ui_new_browse extends DefaultPlugin
   }  
 }
 
-register_plugin(new ui_new_browse());
+register_plugin(new ui_file_browse());

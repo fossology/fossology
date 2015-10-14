@@ -8,7 +8,7 @@
 function createDirlistTable() {
   var dirlistTableConfig = {
     "bServerSide": true,
-    "sAjaxSource": "?mod=ajax_new_browser",
+    "sAjaxSource": "?mod=ajax_file_browser",
     "fnServerData": function (sSource, aoData, fnCallback) {
       aoData.push({"name": "upload", "value": {{ uploadId }} });
       aoData.push({"name": "item", "value": {{ itemId }} });

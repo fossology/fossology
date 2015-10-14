@@ -38,9 +38,9 @@ use Symfony\Component\HttpFoundation\Response;
  * \brief browse a directory to display all licenses in this directory
  */
 
-class AjaxNewBrowser extends DefaultPlugin
+class AjaxFileBrowser extends DefaultPlugin
 {
-  const NAME = "ajax_new_browser";
+  const NAME = "ajax_file_browser";
   
   private $uploadtree_tablename = "";
   /** @var UploadDao */
@@ -56,8 +56,8 @@ class AjaxNewBrowser extends DefaultPlugin
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("Ajax: newBrowser"),
-        self::DEPENDENCIES => array("newBrowse"),
+        self::TITLE => _("Ajax: File Browser"),
+        self::DEPENDENCIES => array("fileBrowse"),
         self::PERMISSION => Auth::PERM_READ
     ));
 
@@ -247,7 +247,7 @@ class AjaxNewBrowser extends DefaultPlugin
     $noLicenseUploadTreeView->materialize();
     $noLicenseUploadTreeView->unmaterialize();
 
-    $baseUri = Traceback_uri().'?mod=newBrowse'.Traceback_parm_keep(array('upload','folder','show'));
+    $baseUri = Traceback_uri().'?mod=fileBrowse'.Traceback_parm_keep(array('upload','folder','show'));
 
     $tableData = array();    
     global $Plugins;
@@ -379,4 +379,4 @@ class AjaxNewBrowser extends DefaultPlugin
   } 
 }
 
-register_plugin(new AjaxNewBrowser());
+register_plugin(new AjaxFileBrowser());
