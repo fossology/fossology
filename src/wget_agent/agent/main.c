@@ -248,7 +248,7 @@ int main  (int argc, char *argv[])
         {
           if (!Archivefs(GlobalURL, GlobalTempFile, TempFileDir, Status))
           {
-            LOG_FATAL("Failed to archieve. GlobalURL, GlobalTempFile, TempFileDir are: %s, %s, %s, "
+            LOG_FATAL("Failed to archive. GlobalURL, GlobalTempFile, TempFileDir are: %s, %s, %s, "
                "Mode is: %lo (octal)\n", GlobalURL, GlobalTempFile, TempFileDir, (unsigned long) Status.st_mode);
             SafeExit(50);
           }
