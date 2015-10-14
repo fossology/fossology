@@ -141,8 +141,8 @@ PGconn* fo_dbconnect(char* DBConfFile, char** ErrorBuf)
     if (*ErrorBuf)
     {
       int i = 0;
-      const char pass[9]= "password";
-      for(i = ((strstr(CMD,pass) - CMD) + strlen(pass) + 1); i < strlen(CMD); i++){
+      const char pass[10]= "password=";
+      for(i = strstr(CMD,pass) - CMD + strlen(pass); i < strlen(CMD); i++){
         if(CMD[i] == ' '){
           break;
         }
