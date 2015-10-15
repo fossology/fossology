@@ -511,11 +511,11 @@ function update_license($old_rf_pk, $new_rf_pk)
   pg_free_result($result_license_file);
 
   /* Check if license_file_audit table exists */
-  $sql = "select * from pg_tables where tablename like 'license_file_audit';";
+  $sql = "select count(tablename) from pg_tables where tablename like 'license_file_audit';";
   $result_count_license_file_audit = pg_query($PG_CONN, $sql);
   DBCheckResult($result_count_license_file_audit, $sql, __FILE__, __LINE__);
-  $row = pg_num_rows($result_count_license_file_audit);
-  if($row > 0){
+  $row = pg_fetch_row($result_count_license_file_audit);
+  if($row[0] > 0){
     /* Update license_file_audit table, substituting the old_rf_id  with the new_rf_id */
     $sql = "update license_file_audit set rf_fk = $new_rf_pk where rf_fk = $old_rf_pk;";
     $result_license_file_audit = pg_query($PG_CONN, $sql);
