@@ -415,7 +415,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         rc_system = system(CMD); // delete all empty directories downloaded
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
         memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
+        snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
       }
       else
       {
@@ -528,7 +528,7 @@ int GetVersionControl()
     return 1;
   }
 
-  snprintf(command,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, TempFileDirectory);
+  snprintf(command,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, TempFileDirectory);
   rc = system(command);
   if (rc != 0)
   {
@@ -700,7 +700,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s 1>/dev/null", TempFile, Path, GlobalParam);
+    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ %s 1>/dev/null", TempFile, Path, GlobalParam);
     rc_system = system(CMD);
     if (!WIFEXITED(rc_system)) 
     {
@@ -712,7 +712,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     memset(CMD, '\0', MAXCMD);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p %s/temp  > /dev/null 2>&1 && cp -r %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r \"%s\"  '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
@@ -720,7 +720,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
       return 0;
     }
     memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
