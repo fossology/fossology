@@ -334,13 +334,13 @@ class AjaxFileBrowser extends DefaultPlugin
     /* show licenses under file name */
     $childItemTreeBounds = 
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
+    $licenseEntries = array();
     if ($isContainer)
     {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
     } else
     {
-      $licenseEntries = array();
       if (array_key_exists($fileId, $pfileLicenses))
       {
         foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)

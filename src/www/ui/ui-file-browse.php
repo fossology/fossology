@@ -69,7 +69,7 @@ class ui_file_browse extends DefaultPlugin
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("upload", "item"));
+    $URI = $this->Name . Traceback_parm_keep(array("upload", "item", "show"));
 
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
@@ -79,7 +79,7 @@ class ui_file_browse extends DefaultPlugin
     $menuName = $this->Title;
     if (GetParm("mod", PARM_STRING) == self::NAME)
     {
-      menu_insert("CBrowse::$menuName", 100);
+      menu_insert("Browse::$menuName", 100);
     }
     else
     {
