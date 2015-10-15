@@ -712,7 +712,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     memset(CMD, '\0', MAXCMD);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p %s/temp  > /dev/null 2>&1 && cp -r %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r \"%s\"  '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
