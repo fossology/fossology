@@ -52,7 +52,7 @@ class ui_file_browse extends DefaultPlugin
   
   public function __construct() {
     parent::__construct(self::NAME, array(
-        self::TITLE => _("File Browse"),
+        self::TITLE => _("File Browser"),
         self::DEPENDENCIES => array("browse", "view"),
         self::PERMISSION => Auth::PERM_READ
     ));
@@ -83,7 +83,7 @@ class ui_file_browse extends DefaultPlugin
     }
     else
     {
-      $text = _("File browser");
+      $text = _("File Browser");
       menu_insert("Browse::$menuName", 100, $URI, $text);
       menu_insert("View::$menuName", 100, $viewLicenseURI, $text);
     }
@@ -111,7 +111,7 @@ class ui_file_browse extends DefaultPlugin
     }
     $vars['itemId'] = $item;    
     
-    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
+    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "File Browser", -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
