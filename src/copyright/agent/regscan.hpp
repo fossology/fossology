@@ -21,16 +21,24 @@
 
 #include "scanners.hpp"
 #include "regex.hpp"
+#include "regexConfProvider.hpp"
+#include <sstream>
 
 class regexScanner : public scanner
 {
-  rx::regex reg;
-  const string type;
-  int index;
+  rx::regex _reg;
+  const string _type, _identity;
+  int _index;
+
 public:
   void ScanString(const string& str, list<match>& results) const;
-  regexScanner(const string& sReg, const string& t);
-  regexScanner(const string& sReg, const string& t, int idx);
+
+  regexScanner(const string& type,
+               const string& identity,
+               int index = 0);
+  regexScanner(const string& type,
+               std::istringstream& stream,
+               int index = 0);
 } ;
 
 

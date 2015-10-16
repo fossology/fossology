@@ -141,11 +141,13 @@ class TestPgDb extends TestAbstractDb
         continue;
       }
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
+      $sqlAddArray = array();
       foreach ($tableCols as $attributes)
       {
         $sqlAdd = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
-        $this->dbManager->queryOnce($sqlAdd);
+        $sqlAddArray[] = $sqlAdd;
       }
+      $this->dbManager->queryOnce(implode(";\n",$sqlAddArray));
     }
   }
   
