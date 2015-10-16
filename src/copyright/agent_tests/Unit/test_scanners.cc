@@ -108,8 +108,8 @@ protected:
   }
 
   void regIPTest () {
-    regexScanner sc(regIp::getRegex(), regIp::getType());
-    scannerTest(sc, testContent, regIp::getType(), { "US patents 1 , 2 ,3" });
+    regexScanner sc("ip", "ip");
+    scannerTest(sc, testContent, "ip", { "US patents 1 , 2 ,3" });
   }
 
   void regEccTest () {

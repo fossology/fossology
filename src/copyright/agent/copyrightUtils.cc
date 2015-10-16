@@ -165,7 +165,7 @@ static void addDefaultScanners(CopyrightState& state)
 
 #ifdef IDENTITY_IP
   if (types & 1<<0)
-    state.addScanner(new regexScanner(regIp::getRegex(), regIp::getType()));
+    state.addScanner(new regexScanner("ip", "ip"));
 #endif
 
 #ifdef IDENTITY_ECC
