@@ -139,24 +139,6 @@ class AjaxFileBrowser extends DefaultPlugin
       $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getItemId());
     }
     
-    $searchMap = array();
-    foreach(explode(' ',GetParm('sSearch', PARM_RAW)) as $pair)
-    {
-      $a = explode(':',$pair);
-      if (count($a) == 1) {
-        $searchMap['head'] = $pair;
-      }
-      else {
-        $searchMap[$a[0]] = $a[1];
-      }
-    }
-    
-    if( ($rfId=GetParm('scanFilter',PARM_INTEGER))>0 )
-    {
-      $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
-      $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
-    }
-    
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
 
     $vars['iTotalDisplayRecords'] = $descendantView->count();
@@ -217,15 +199,6 @@ class AjaxFileBrowser extends DefaultPlugin
         }
       }
     }
-
-    $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
-    $noLicenseUploadTreeView->materialize();
-    $noLicenseUploadTreeView->unmaterialize();
 
     $baseUri = Traceback_uri().'?mod=fileBrowse'.Traceback_parm_keep(array('upload','folder','show'));
 

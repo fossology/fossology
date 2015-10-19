@@ -15,8 +15,6 @@ function createDirlistTable() {
       aoData.push({"name": "totalRecords", "value": {{ iTotalRecords }} });
       aoData.push({"name": "agentId", "value": {{ agentId|default(0) }} });
       aoData.push({"name": "scanFilter", "value": $('#scanFilter').val() });
-      aoData.push({"name": "conFilter", "value": $('#conFilter').val() });
-      aoData.push({"name": "openCBoxFilter", "value": $('#openCBoxFilter').prop('checked')});
       {% if isFlat %}aoData.push({"name": "flatten", "value": "yes" });{% endif %}
       $.getJSON(sSource, aoData, fnCallback)
         .fail(failed)
@@ -28,7 +26,7 @@ function createDirlistTable() {
     },
     "aoColumns": [{"sTitle":"Files","sClass":"left"},
         {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka)","sClass":"left","bSortable":false},
-        {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
+        {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false}],
     "iDisplayLength": 25,
     "bProcessing": true,
     "bStateSave": true,
