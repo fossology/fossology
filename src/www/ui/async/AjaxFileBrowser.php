@@ -151,30 +151,10 @@ class AjaxFileBrowser extends DefaultPlugin
       }
     }
     
-    
-    if(array_key_exists('ext', $searchMap) && strlen($searchMap['ext'])>=1)
-    {
-      $options[UploadTreeProxy::OPT_EXT] = $searchMap['ext'];
-    }
-    if(array_key_exists('head', $searchMap) && strlen($searchMap['head'])>=1)
-    {
-      $options[UploadTreeProxy::OPT_HEAD] = $searchMap['head'];
-    }
     if( ($rfId=GetParm('scanFilter',PARM_INTEGER))>0 )
     {
       $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
       $options[UploadTreeProxy::OPT_SCAN_REF] = $rfId;
-    }
-    if( ($rfId=GetParm('conFilter',PARM_INTEGER))>0 )
-    {
-      $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
-      $options[UploadTreeProxy::OPT_CONCLUDE_REF] = $rfId;
-    }
-    $openFilter = GetParm('openCBoxFilter',PARM_RAW);
-    if($openFilter=='true' || $openFilter=='checked')
-    {
-      $options[UploadTreeProxy::OPT_AGENT_SET] = $selectedScanners;
-      $options[UploadTreeProxy::OPT_GROUP_ID] = Auth::getGroupId();
     }
     
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
@@ -283,7 +263,6 @@ class AjaxFileBrowser extends DefaultPlugin
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
     $linkUri = '';
-    // if (!empty($fileId) && !empty($ModLicView))
     if (!empty($fileId))
     {
       $linkUri = Traceback_uri();
@@ -298,17 +277,11 @@ class AjaxFileBrowser extends DefaultPlugin
     $isContainer = Iscontainer($child['ufile_mode']);
     if($isContainer && !$isFlat)
     {
-      $fatChild = $this->uploadDao->getFatItemArray($child['uploadtree_pk'], $uploadId, $this->uploadtree_tablename);
-      $uploadtree_pk = $fatChild['item_id'];
+      $uploadtree_pk = $child['uploadtree_pk'];
       $linkUri = "$uri&item=" . $uploadtree_pk;
       if ($selectedAgentId)
       {
         $linkUri .= "&agentId=$selectedAgentId";
-      }
-      $child['ufile_name'] = $fatChild['ufile_name'];
-      if( !Iscontainer($fatChild['ufile_mode']) )
-      {
-        $isContainer = false;
       }
     }
     else if ($isContainer)
@@ -366,13 +339,14 @@ class AjaxFileBrowser extends DefaultPlugin
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
-    $getTextEditUser = _("Edit");
-    $fileListLinks .= "[<a href='#' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
-
-    if($isContainer)
+    if (! $isContainer)
     {
-      $getTextEditBulk = _("Bulk");
-      $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+      $text = _("Copyright/Email/Url");
+      $fileListLinks .= "[<a href='" . Traceback_uri() . "?mod=copyright-view&upload=$uploadId&item=$childUploadTreeId' >$text</a>]";
+      $text = _("ReadMe_OSS");
+      $fileListLinks .= "[<a href='" . Traceback_uri() . "?mod=ui_readmeoss&upload=$uploadId&item=$childUploadTreeId' >$text</a>]";
+      $text = _("SPDX");
+      $fileListLinks .= "[<a href='" . Traceback_uri() . "?mod=ui_spdx2&upload=$uploadId&item=$childUploadTreeId' >$text</a>]";
     }
 
     return array($fileName, $licenseList, $fileListLinks);

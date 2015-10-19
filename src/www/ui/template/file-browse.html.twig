@@ -12,6 +12,7 @@
       <td style="padding-left:18px; vertical-align:top; height:100%; width:75%">
         <table border="0" id="dirlist" class="semibordered">
           <thead>
+            {% if scannerLicenses is not empty %}
             <tr>
               <th></th>
               <th>
@@ -24,6 +25,7 @@
               </th>
               <th></th>
             </tr>
+            {% endif %}
             <tr><th></th><th></th><th></th></tr>
           </thead>
           <tbody></tbody>

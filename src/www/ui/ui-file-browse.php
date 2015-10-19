@@ -68,6 +68,9 @@ class ui_file_browse extends DefaultPlugin
    */
   function RegisterMenus()
   {
+    $text = _("File Browser");
+    menu_insert("Browse-Pfile::File Browser", 20, 'fileBrowse', $text);
+
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("upload", "item", "show"));
 
@@ -79,13 +82,16 @@ class ui_file_browse extends DefaultPlugin
     $menuName = $this->Title;
     if (GetParm("mod", PARM_STRING) == self::NAME)
     {
-      menu_insert("Browse::$menuName", 100);
+      menu_insert("Browse::$menuName", 98);
+      menu_insert("View::$menuName", 98);
+      menu_insert("View-Meta::$menuName", 98); 
     }
     else
     {
       $text = _("File Browser");
-      menu_insert("Browse::$menuName", 100, $URI, $text);
-      menu_insert("View::$menuName", 100, $viewLicenseURI, $text);
+      menu_insert("Browse::$menuName", 98, $URI, $text);
+      menu_insert("View::$menuName", 98, $viewLicenseURI, $text);
+      menu_insert("View-Meta::$menuName", 98, $viewLicenseURI, $text);
     }
   }
 
@@ -96,7 +102,8 @@ class ui_file_browse extends DefaultPlugin
   protected function handle(Request $request) {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
-    if (!$this->uploadDao->isAccessible($upload, $groupId)) {
+    if (!$this->uploadDao->isAccessible($upload, $groupId))
+    {
       return $this->flushContent(_("Permission Denied"));
     }
 
@@ -110,9 +117,6 @@ class ui_file_browse extends DefaultPlugin
       $item = $this->uploadDao->getFatItemId($item,$upload,$this->uploadtree_tablename);
     }
     $vars['itemId'] = $item;    
-    
-    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "File Browser", -1, '', '', $this->uploadtree_tablename);
-    $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
@@ -126,14 +130,12 @@ class ui_file_browse extends DefaultPlugin
       return $histVars;
     }
     $vars = array_merge($vars, $histVars);
+ 
+    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
+
+    // $vars['scannerLicenses'] = $this->licenseDao->getLicenseHistogram($itemTreeBounds);
 
     $vars['content'] = js_url();
-
-    /*
-     * clear cache to see changes (while development)!
-     */
-    $this->renderer->clearTemplateCache();
-    $this->renderer->clearCacheFiles();
 
     return $this->render("file-browse.html.twig",$this->mergeWithDefault($vars));
   }
@@ -156,8 +158,7 @@ class ui_file_browse extends DefaultPlugin
     $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
     $agentMap = $scanJobProxy->getAgentMap();
     
-    $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
-                  'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm(),
+    $vars = array('agentId' => $selectedAgentId,
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
 
