@@ -48,6 +48,7 @@ $shortname_array = array(
     /* old_shortname => new_shortname */
     'Adaptive', 'APL-1.0',
     'Adaptive_v1.0' => 'APL-1.0',
+    'Adaptec(RESTRICTED)' => 'Adaptec.RESTRICTED',
     'Adobe-AFM' => 'AdobeAFM', /** replace */
     'AdobeAFM' => 'Adobe-AFM', /** change */
     'Affero'   => 'AGPL',
@@ -68,7 +69,11 @@ $shortname_array = array(
     'AGPL 3.0' => 'AGPL-3.0',
     'Against-DRM' => 'AgainstDRM', /** replace */
     'AgainstDRM' => 'Against-DRM', /** change */
+    'AGFA(RESTRICTED)' => 'AGFA.RESTRICTED',
     'Alfresco FLOSS' => 'Alfresco-FLOSS',
+    'Alfresco/FLOSS' => 'Alfresco-FLOSS',
+    'AndroidSDK(Commercial)' => 'AndroidSDK.Commercial',
+    'AndroidFraunhofer(Commercial)' => 'AndroidFraunhofer.Commercial',
     'Apache 1.1' => 'Apache-1.1',
     'Apache2.0' => 'Apache-2.0',
     'Apache_v1.0' => 'Apache-1.0',
@@ -76,6 +81,8 @@ $shortname_array = array(
     'Apache_v2.0' => 'Apache-2.0',
     'Apache_v2-possibility' => 'Apache-2.0-possibility',
     'Apple' => 'APSL-2.0',
+    'Apple(FontForge)' => 'Apple.FontForge',
+    'Apple(Sample)' => 'Apple.Sample',
     'APSL1.0' => 'APSL-1.0',
     'APSL1.1' => 'APSL-1.1',
     'APSL1.2' => 'APSL-1.2',
@@ -90,14 +97,18 @@ $shortname_array = array(
     'Artistic_v2.0' => 'Artistic-2.0',
     'Ascender' => 'Ascender-EULA',
     'ATI EULA' => 'ATI-EULA',
-    'ATT-Source_v1.2d' => 'ATT-Source-1.2d', 
+    'ATT-Source_v1.2d' => 'ATT-Source-1.2d',
+    'ATT(Non-commercial)' => 'ATT.Non-commercial', 
+    'Baekmuk(Hwan)' => 'Baekmuk.Hwan',
     'BitTorrent' => 'BitTorrent-1.1',
     'BitTorrent1.0' => 'BitTorrent-1.0',
     'BitTorrent_v1.1' => 'BitTorrent-1.1',
     'Boost' => 'BSL-1.0',
     'Boost-style' => 'BST-style',
     'Boost_v1.0' => 'BST-1.0',
+    'Broadcom(Commercial)' => 'Broadcom.Commercial',
     'BSD Doc' => 'BSD-Doc',
+    'BSD(non-commercial)' => 'BSD.non-commercial',
     'CA1.1' => 'CATOSL-1.1',
     'CCA' => 'CC-BY',
     'CCA1.0' => 'CC-BY-1.0',
@@ -161,6 +172,7 @@ $shortname_array = array(
     'Freetype' => 'FTL',
     'FreeType' => 'FTL',
     'Freetype-style' => 'FTL-style',
+    'Genivia(Commercial)' => 'Genivia.Commercial',
     'GFDL' => 'GFDL-1.1',
     'GFDL1.2' => 'GFDL-1.2',
     'GFDL1.3' => 'GFDL-1.3',
@@ -169,6 +181,10 @@ $shortname_array = array(
     'GFDL_v1.2' => 'GFDL-1.2',
     'GFDL_v1.2+' => 'GFDL-1.2+',
     'Ghostscript-GPL_v1.1' => 'Ghostscript-GPL-1.1',
+    "Gov''t-work" => 'Govt-work',
+    "Gov''t-rights" => 'Govt-rights',
+    'GNU-style(EXECUTE)' => 'GNU-style.EXECUTE',
+    'GNU-style(interactive)' => 'GNU-style.interactive',
     'GPL1.0' => 'GPL-1.0',
     'GPL2.0' => 'GPL-2.0',
     'GPL3.0' => 'GPL-3.0',
@@ -186,16 +202,20 @@ $shortname_array = array(
     'GPL_v3+' => 'GPL-3.0+',
     'gSOAP' => 'gSOAP-1.3a',
     'gSOAP_v1.3' => 'gSOAP-1.3b',
-    'Helix/RealNetworks EULA' => 'Helix/RealNetworks-EULA',
+    'Helix/RealNetworks EULA' => 'Helix.RealNetworks-EULA',
+    'Helix/RealNetworks-EULA' => 'Helix.RealNetworks-EULA',
     'IBM' => 'IPL-1.0',
     'IBM-PL' => 'IPL',
     'IBM-PL_v1.0' => 'IPL-1.0',
     'IDPL_v1.0' => 'IDPL-1.0',
     'InnerNet_v2.00' => 'InnerNet-2.00',
     'Intel-EULA' => 'Intel',
-    'Intel' => 'Intel-EULA',
+    'Intel(Commercial)' => 'Intel.Commercial',
+    'Intel(RESTRICTED)' => 'Intel.RESTRICTED',
     'Interbase-PL' => 'Interbase',
+    'IoSoft(COMMERCIAL)' => 'IoSoft.COMMERCIAL',
     'Jabber' => 'Jabber-1.0',
+    'JPEG/netpbm' => 'JPEG.netpbm',
     'LaTeX1.0' => 'LPPL-1.0',
     'LaTeX1.1' => 'LPPL-1.1',
     'LaTeX1.2' => 'LPPL-1.2',
@@ -240,6 +260,7 @@ $shortname_array = array(
     'Majordomo' => 'Majordomo-1.1',
     'Majordomo_v1.1' => 'Majordomo-1.1',
     'MetroLink1.0' => 'MetroLink-1.0',
+    'MIT/BSD' => 'MIT.BSD',
     'Motosoto_v0.9.1' => 'Motosoto',
     'Mozilla1.0' => 'MPL-1.0',
     'Mozilla1.1' => 'MPL-1.1',
@@ -248,7 +269,8 @@ $shortname_array = array(
     'MozillaEULA3.0' => 'MPL-EULA-3.0', 
     'MPL-EULA_v1.1' => 'MPL-EULA-1.1',
     'MPL-EULA_v3.0' => 'MPL-EULA-3.0',
-    'MPL/TPL_v1.0' => 'MPL/TPL-1.0',
+    'MPL/TPL_v1.0' => 'MPL.TPL-1.0',
+    'MPL/TPL' => 'MPL.TPL',
     'MPL_v1.0' => 'MPL-1.0',  
     'MPL_v1.1' => 'MPL-1.1',
     'MPL_v1.1+' => 'MPL-1.1+',
@@ -261,6 +283,7 @@ $shortname_array = array(
     'Ms-PL' => 'MS-PL',
     'Ms-RL' => 'MS-RL',
     'MySQL_v0.3' => 'MySQL-0.3',
+    'MySQL/FLOSS' => 'MySQL.FLOSS',
     'NASA1.3' => 'NASA-1.3',  
     'NASA_v1.3' => 'NASA-1.3',  
     'Naumen' => 'NAUMEN',  /** replace */
@@ -272,6 +295,11 @@ $shortname_array = array(
     'Netscape1.1' => 'NPL-1.1',
     'Nokia_v1.0a' => 'Nokia-1.0a',
     'NoLicenseFound' => 'No_license_found',
+    'Non-commercial!' => 'Non-commercial',
+    'Non-profit!' => 'Non-profit',
+    'Not-Free!' => 'Not-Free',
+    'Not-for-sale!' => 'Not-for-sale',
+    'Not-OpenSource!' => 'Not-OpenSource',
     'NPL_v1.0' => 'NPL-1.0',  
     'NPL_v1.1' => 'NPL-1.1',
     'Nvidia-EULA' => 'NvidiaEULA', /** replace */
@@ -296,6 +324,8 @@ $shortname_array = array(
     'OpenSoftware3.0' => 'OSL-3.0',
     'Oracle-Dev' => 'OracleDev',
     'OracleDev' => 'Oracle-Dev',  
+    "O''Reilly" => 'OReilly',
+    "O''Reilly-style" => 'OReilly-style',
     'OSL_v1.0' => 'OSL-1.0',
     'OSL_v1.1' => 'OSL-1.1',
     'OSL_v2.0' => 'OSL-2.0',
@@ -310,6 +340,7 @@ $shortname_array = array(
     'PHP_v3.01' => 'PHP-3.01',
     'Pixware-EULA' => 'Pixware',  /** replace */
     'Pixware' => 'Pixware-EULA',  /** change */
+    'Proprietary!' => 'Proprietary',
     'Public-Use_v1.0' => 'Public-Use-1.0',  
     'Python2.0.1' => 'Python-2.0.1',
     'Python2.1.3' => 'Python-2.1.3',
@@ -331,13 +362,15 @@ $shortname_array = array(
     'Python_v2.4.4' => 'Python-2.4.4',  
     'QPL' => 'QPL-1.0', 
     'QPL_v1.0' => 'QPL-1.0',  
-    'QT' => 'QT(Commercial)', 
-    'Qt(Commercial)' => 'QT(Commercial)', 
+    'QT' => 'QT.Commercial', 
+    'Qt(Commercial)' => 'QT.Commercial',
+    'QT(Commercial)' => 'QT.Commercial', 
     'RCSL_v3.0' => 'RCSL',  
     'RealNetworks-EULA' => 'RealNetworks',  /** replace */
     'RealNetworks' => 'RealNetworks-EULA',  /** change */
     'RedHat-EULA' => 'RedHatEULA',   /** replace */
     'RedHatEULA' => 'RedHat-EULA',   /** change */
+    'RedHat(Non-commercial)' => 'RedHat.Non-commercial',
     'Ricoh' => 'RSCPL', 
     'Ricoh_v1.0' => 'RSCPL-1.0',  
     'RPL1.1' => 'RPL-1.1',  
@@ -349,6 +382,11 @@ $shortname_array = array(
     'SCSL-TSA_v1.0' => 'SCSL-TSA-1.0',  
     'SCSL_v2.3' => 'SCSL-2.3',  
     'SCSL_v3.0' => 'SCSL-3.0',  
+    'SCO(commercial)' => 'SCO.commercial',
+    'See-doc(OTHER)' => 'See-doc.OTHER',
+    'See-file(COPYING)' => 'See-file.COPYING',
+    'See-file(LICENSE)' => 'See-file.LICENSE',
+    'See-file(README)' => 'See-file.README',  
     'SGI-2.0' => 'SGI-B-2.0', 
     'SGI-B' => 'SGI-B-1.0', 
     'SGI-B1.1' => 'SGI-B-1.1',  
@@ -368,15 +406,22 @@ $shortname_array = array(
     'SugarCRM'  =>  'SugarCRM-1.1.3',
     'SunPL1.0'  =>  'SPL-1.0',
     'Sun-PL_v1.0'  =>  'SPL-1.0',
+    'Sun(Non-commercial)'  =>  'Sun.Non-commercial',
+    'Sun(RESTRICTED)'  =>  'Sun.RESTRICTED',
     'TrollTech'  =>  'Trolltech',
     'UCWare'  =>  'UCWare-EULA',
+    "URA(gov''t)"  =>  'URA.govt',
+    'U-Wash(Free-Fork)'  =>  'U-Wash.Free-Fork',
+    'USC(Non-commercial)'  =>  'USC.Non-commercial',
     'Vim'  =>  'VIM',
     'VMWare'  =>  'VMWare-EULA',
     'Vovida'  =>  'VSL-1.0',
+    'WTI(Not-free)'  =>  'WTI.Not-free',
     'wxWindows'  =>  'WXwindows',
     'Ximian_v1.0'  =>  'Ximian-1.0',
     'Yahoo-EULA'  =>  'Yahoo',  /** replace */
     'Yahoo'  =>  'Yahoo-EULA',  /** change */
+    'YaST(SuSE)'  =>  'YaST.SuSE',
     'Zend_v2.0'  =>  'Zend-2.0',
     'ZLib'  =>  'Zlib',
     'ZoneAlarm'  =>  'ZoneAlarm-EULA',
@@ -429,7 +474,7 @@ print "End!\n";
 function check_shortname($shortname)
 {
   global $PG_CONN;
-  $sql = "SELECT rf_pk from license_ref where rf_shortname = '$shortname'";
+  $sql = "SELECT rf_pk from license_ref where rf_shortname = '".$shortname."'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -465,12 +510,18 @@ function update_license($old_rf_pk, $new_rf_pk)
   DBCheckResult($result_license_file, $sql, __FILE__, __LINE__);
   pg_free_result($result_license_file);
 
-  /* Update license_file_audit table, substituting the old_rf_id  with the new_rf_id */
-  $sql = "update license_file_audit set rf_fk = $new_rf_pk where rf_fk = $old_rf_pk;";
-  $result_license_file_audit = pg_query($PG_CONN, $sql);
-  DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
-  pg_free_result($result_license_file_audit);
-
+  /* Check if license_file_audit table exists */
+  $sql = "select count(tablename) from pg_tables where tablename like 'license_file_audit';";
+  $result_count_license_file_audit = pg_query($PG_CONN, $sql);
+  DBCheckResult($result_count_license_file_audit, $sql, __FILE__, __LINE__);
+  $row = pg_fetch_row($result_count_license_file_audit);
+  if($row[0] > 0){
+    /* Update license_file_audit table, substituting the old_rf_id  with the new_rf_id */
+    $sql = "update license_file_audit set rf_fk = $new_rf_pk where rf_fk = $old_rf_pk;";
+    $result_license_file_audit = pg_query($PG_CONN, $sql);
+    DBCheckResult($result_license_file_audit, $sql, __FILE__, __LINE__);
+    pg_free_result($result_license_file_audit);
+  }
 
   /** delete data of old license */
   $sql = "DELETE FROM license_ref where rf_pk = $old_rf_pk;";
@@ -499,7 +550,7 @@ function change_license_name($old_shortname, $new_shortname)
 {
   global $PG_CONN;
 
-  $sql = "update license_ref set rf_shortname = '$new_shortname' where rf_shortname = '$old_shortname';";
+  $sql = "update license_ref set rf_shortname = '".$new_shortname."' where rf_shortname = '".$old_shortname."';";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);

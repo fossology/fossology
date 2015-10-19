@@ -24,7 +24,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 class UploadUrlPage extends UploadPageBase
 {
-  const NAME = "upload_url22";
+  const NAME = 'upload_url';
   
   const NAME_PARAM = 'name';
   const ACCEPT_PARAM = 'accept';

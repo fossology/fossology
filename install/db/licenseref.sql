@@ -36606,7 +36606,7 @@ To accomplish this, add the phrase `Distribution of substantively modified versi
 B. To prohibit any publication of this work or derivative works in whole or in part in standard (paper) book form for commercial purposes unless prior permission is obtained from the copyright holder. 
 
 To accomplish this, add the phrase ''Distribution of the work or derivative of the work in any standard (paper) book form is prohibited unless prior permission is obtained from the copyright holder.'' to the license reference or copy. ', 'http://www.opencontent.org/openpub/', NULL, NULL, NULL, 'Open Publication License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'd59b6f101a8fd1e7ac453186f0768c4d', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix/RealNetworks-EULA', 'Helix DNA Technology Binary Research Use License
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (228, 'Helix.RealNetworks-EULA', 'Helix DNA Technology Binary Research Use License
 
 REDISTRIBUTION NOT PERMITTED
 
@@ -37407,7 +37407,7 @@ You will need to comply with the Broadcast TOS at http://www.skype.com/legal/ter
 YOU EXPRESSLY ACKNOWLEDGE THAT YOU HAVE READ THIS AGREEMENT AND UNDERSTAND THE RIGHTS, OBLIGATIONS, TERMS AND CONDITIONS SET FORTH HEREIN. BY CLICKING ON THE ACCEPT BUTTON AND/OR CONTINUING TO INSTALL THE SKYPE SOFTWARE, YOU EXPRESSLY CONSENT TO BE BOUND BY ITS TERMS AND CONDITIONS AND GRANT TO SKYPE THE RIGHTS SET FORTH HEREIN.
 
 © Skype – Last revised: August 2009', 'http://www.skype.com/intl/en-us/legal/eula/', NULL, NULL, NULL, 'Skype EULA', NULL, NULL, NULL, '', NULL, false, false, false, '76cd66f51760a868bb7a9275b9b9fd84', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (257, 'QT(Commercial)', 'Qt COMMERCIAL LICENSE AGREEMENT
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (257, 'QT.Commercial', 'Qt COMMERCIAL LICENSE AGREEMENT
 Agreement version 3.8
 This Qt Commercial License Agreement (“Agreement”) is a legal agreement between Nokia
 Inc. ("Nokia"), with its registered office at 102 Corporate Park Drive, White Plains, NY
@@ -42122,7 +42122,7 @@ permitted only if each of the following conditions of 1-6 are met:
    USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 $Revision: 1.11 $ $Date: 2004/05/18 01:26:24 $', 'http://www.sendmail.org/~ca/email/sm-X/LICENSE', NULL, NULL, NULL, 'Sendmail', NULL, NULL, NULL, '', NULL, false, false, false, '42c7540cab891e2746585c2fca09bdff', 1);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel-EULA', 'Intel Open Source License 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (490, 'Intel', 'Intel Open Source License 
 
 
 Copyright (c) 1996-2000 Intel Corporation All rights reserved. 
@@ -42621,3 +42621,408 @@ Permission is granted to anyone to use this software for any purpose, including 
 1. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
 2. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.', 'http://www.truecrypt.org', NULL, NULL, NULL, 'TrueCrypt License Version 3.0', NULL, NULL, NULL, '', NULL, false, true, true, 'e7292558b9ea2a2a2d23010e742d6bc4', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (561, 'Artistic-1.0-cl8', 'The Artistic License
+
+Preamble
+
+The intent of this document is to state the conditions under which a Package may be copied, such that the Copyright Holder maintains some semblance of artistic control over the development of the package, while giving the users of the package the right to use and distribute the Package in a more-or-less customary fashion, plus the right to make reasonable modifications.
+
+Definitions:
+
+"Package" refers to the collection of files distributed by the Copyright Holder, and derivatives of that collection of files created through textual modification.
+
+"Standard Version" refers to such a Package if it has not been modified, or has been modified in accordance with the wishes of the Copyright Holder.
+
+"Copyright Holder" is whoever is named in the copyright or copyrights for the package.
+
+"You" is you, if you''re thinking about copying or distributing this Package.
+
+"Reasonable copying fee" is whatever you can justify on the basis of media cost, duplication charges, time of people involved, and so on. (You will not be required to justify it to the Copyright Holder, but only to the computing community at large as a market that must bear the fee.)
+
+"Freely Available" means that no fee is charged for the item itself, though there may be fees involved in handling the item. It also means that recipients of the item may redistribute it under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form of the Standard Version of this Package without restriction, provided that you duplicate all of the original copyright notices and associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications derived from the Public Domain or from the Copyright Holder. A Package modified in such a way shall still be considered the Standard Version.
+
+3. You may otherwise modify your copy of this Package in any way, provided that you insert a prominent notice in each changed file stating how and when you changed that file, and provided that you do at least ONE of the following:
+
+a) place your modifications in the Public Domain or otherwise make them Freely Available, such as by posting said modifications to Usenet or an equivalent medium, or placing the modifications on a major archive site such as ftp.uu.net, or by allowing the Copyright Holder to include your modifications in the Standard Version of the Package.
+b) use the modified Package only within your corporation or organization.
+c) rename any non-standard executables so the names do not conflict with standard executables, which must also be provided, and provide a separate manual page for each non-standard executable that clearly documents how it differs from the Standard Version.
+d) make other distribution arrangements with the Copyright Holder.
+
+4. You may distribute the programs of this Package in object code or executable form, provided that you do at least ONE of the following:
+
+a) distribute a Standard Version of the executables and library files, together with instructions (in the manual page or equivalent) on where to get the Standard Version.
+b) accompany the distribution with the machine-readable source of the Package with your modifications.
+c) accompany any non-standard executables with their corresponding Standard Version executables, giving the non-standard executables non-standard names, and clearly documenting the differences in manual pages (or equivalent), together with instructions on where to get the Standard Version.
+d) make other distribution arrangements with the Copyright Holder.
+
+5. You may charge a reasonable copying fee for any distribution of this Package. You may charge any fee you choose for support of this Package. You may not charge a fee for this Package itself. However, you may distribute this Package in aggregate with other (possibly commercial) programs as part of a larger (possibly commercial) software distribution provided that you do not advertise this Package as a product of your own.
+
+6. The scripts and library files supplied as input to or produced as output from the programs of this Package do not automatically fall under the copyright of this Package, but belong to whomever generated them, and may be sold commercially, and may be aggregated with this Package.
+
+7. C or perl subroutines supplied by you and linked into this Package shall not be considered part of this Package.
+
+8.Aggregation of this Package with a commercial distribution is always permitted provided that the use of this Package is embedded; that is, when no overt attempt is made to make this Package''s interfaces visible to the end user of the commercial distribution. Such use shall not be construed as a distribution of this Package.
+
+9. The name of the Copyright Holder may not be used to endorse or promote products derived from this software without specific prior written permission.
+
+10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.', 'http://opensource.org/licenses/Artistic-1.0', NULL, NULL, NULL, 'Artistic License 1.0 w/clause 8', NULL, NULL, NULL, '', NULL, false, false, false, '7be51c35290840f52006dfe3413d78c6', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (562, 'Artistic-1.0-Perl', 'The "Artistic License"
+
+Preamble
+
+The intent of this document is to state the conditions under which a Package may be copied, such that the Copyright Holder maintains some semblance of artistic control over the development of the package, while giving the users of the package the right to use and distribute the Package in a more-or-less customary fashion, plus the right to make reasonable modifications.
+
+Definitions:
+
+"Package" refers to the collection of files distributed by the Copyright Holder, and derivatives of that collection of files created through textual modification.
+
+"Standard Version" refers to such a Package if it has not been modified, or has been modified in accordance with the wishes of the Copyright Holder as specified below.
+
+"Copyright Holder" is whoever is named in the copyright or copyrights for the package.
+
+"You" is you, if you''re thinking about copying or distributing this Package.
+
+"Reasonable copying fee" is whatever you can justify on the basis of media cost, duplication charges, time of people involved, and so on. (You will not be required to justify it to the Copyright Holder, but only to the computing community at large as a market that must bear the fee.)
+
+"Freely Available" means that no fee is charged for the item itself, though there may be fees involved in handling the item. It also means that recipients of the item may redistribute it under the same conditions they received it.
+
+1. You may make and give away verbatim copies of the source form of the Standard Version of this Package without restriction, provided that you duplicate all of the original copyright notices and associated disclaimers.
+
+2. You may apply bug fixes, portability fixes and other modifications derived from the Public Domain or from the Copyright Holder. A Package modified in such a way shall still be considered the Standard Version.
+
+3. You may otherwise modify your copy of this Package in any way, provided that you insert a prominent notice in each changed file stating how and when you changed that file, and provided that you do at least ONE of the following:
+
+a) place your modifications in the Public Domain or otherwise make them Freely Available, such as by posting said modifications to Usenet or an equivalent medium, or placing the modifications on a major archive site such as uunet.uu.net, or by allowing the Copyright Holder to include your modifications in the Standard Version of the Package.
+b) use the modified Package only within your corporation or organization.
+c) rename any non-standard executables so the names do not conflict with standard executables, which must also be provided, and provide a separate manual page for each non-standard executable that clearly documents how it differs from the Standard Version.
+d) make other distribution arrangements with the Copyright Holder.
+
+4. You may distribute the programs of this Package in object code or executable form, provided that you do at least ONE of the following:
+
+a) distribute a Standard Version of the executables and library files, together with instructions (in the manual page or equivalent) on where to get the Standard Version.
+b) accompany the distribution with the machine-readable source of the Package with your modifications.
+c) give non-standard executables non-standard names, and clearly document the differences in manual pages (or equivalent), together with instructions on where to get the Standard Version.
+d) make other distribution arrangements with the Copyright Holder.
+
+5. You may charge a reasonable copying fee for any distribution of this Package. You may charge any fee you choose for support of this Package. You may not charge a fee for this Package itself. However, you may distribute this Package in aggregate with other (possibly commercial) programs as part of a larger (possibly commercial) software distribution provided that you do not advertise this Package as a product of your own. You may embed this Package''s interpreter within an executable of yours (by linking); this shall be construed as a mere form of aggregation, provided that the complete Standard Version of the interpreter is so embedded.
+
+6. The scripts and library files supplied as input to or produced as output from the programs of this Package do not automatically fall under the copyright of this Package, but belong to whoever generated them, and may be sold commercially, and may be aggregated with this Package. If such scripts or library files are aggregated with this Package via the so-called "undump" or "unexec" methods of producing a binary executable image, then distribution of such an image shall neither be construed as a distribution of this Package nor shall it fall under the restrictions of Paragraphs 3 and 4, provided that you do not represent such an executable image as a Standard Version of this Package.
+
+7. C subroutines (or comparably compiled subroutines in other languages) supplied by you and linked into this Package in order to emulate subroutines and variables of the language defined by this Package shall not be considered part of this Package, but are the equivalent of input as in Paragraph 6, provided these subroutines do not change the language in any way that would cause it to fail the regression tests for the language.
+
+8. Aggregation of this Package with a commercial distribution is always permitted provided that the use of this Package is embedded; that is, when no overt attempt is made to make this Package''s interfaces visible to the end user of the commercial distribution. Such use shall not be construed as a distribution of this Package.
+
+9. The name of the Copyright Holder may not be used to endorse or promote products derived from this software without specific prior written permission.
+
+10. THIS PACKAGE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.', 'http://dev.perl.org/licenses/artistic.html', NULL, NULL, NULL, 'Artistic License 1.0 (Perl)', NULL, NULL, NULL, '', NULL, false, false, false, 'b4a24dfcbec4eb6fbab1a309123d4817', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (563, 'D-FSL-1.0', 'Deutsche Freie Software Lizenz
+
+(c) Ministerium für Wissenschaft und Forschung Nordrhein-Westfalen 2004
+
+Erstellt von Axel Metzger und Till Jaeger, Institut für Rechtsfragen der Freien und Open Source Software - (http://www.ifross.de).
+
+Präambel
+
+Software ist mehr als ein Wirtschaftsgut. Sie ist die technische Grundlage der Informationsgesellschaft. Die Frage der Teilhabe der Allgemeinheit ist deswegen von besonderer Bedeutung. Herkömmlich lizenzierte Programme werden nur im Object Code vertrieben, der Nutzer darf das Programm weder verändern noch weitergeben. Das Lizenzmodell der Freien Software (synonym "Open Source Software") gewährt Ihnen dagegen umfassende Freiheiten im Umgang mit dem Programm. Die Deutsche Freie Software Lizenz folgt diesem Lizenzmodell. Sie gewährt Ihnen das Recht, das Programm in umfassender Weise zu nutzen. Es ist Ihnen gestattet, das Programm nach Ihren Vorstellungen zu verändern, in veränderter oder unveränderter Form zu vervielfältigen, zu verbreiten und öffentlich zugänglich zu machen. Diese Rechte werden unentgeltlich eingeräumt.
+
+Die Deutsche Freie Software Lizenz verbindet die Rechtseinräumung allerdings mit Pflichten, die dem Zweck dienen, das freie Zirkulieren des Programms und aller veröffentlichten Fortentwicklungen zu sichern. Wenn Sie das Programm verbreiten oder öffentlich zugänglich machen, dann müssen Sie jedem, der das Programm von Ihnen erhält, eine Kopie dieser Lizenz mitliefern und den Zugriff auf den Source Code ermöglichen. Eine weitere Pflicht betrifft Fortentwicklungen des Programms. Änderungen am Programm, die Sie öffentlich verbreiten oder zugänglich machen, müssen nach den Bestimmungen dieser Lizenz frei gegeben werden.
+
+Die Deutsche Freie Software Lizenz nimmt auf die besonderen Anforderungen des deutschen und europäischen Rechts Rücksicht. Sie ist zweisprachig gestaltet und damit auch auf den internationalen Vertrieb ausgerichtet.
+
+§ 0 Definitionen
+
+Dokumentation: Die Beschreibung des Aufbaus und/oder der Struktur der Programmierung und/oder der Funktionalitäten des Programms, unabhängig davon, ob sie im Source Code oder gesondert vorgenommen wird.
+
+Lizenz: Die zwischen dem Lizenzgeber und Ihnen geschlossene Vereinbarung mit dem Inhalt der "Deutschen Freien Software Lizenz" bzw. das Angebot hierzu.
+
+Lizenznehmer: Jede natürliche oder juristische Person, die die Lizenz angenommen hat.
+
+Programm: Jedes Computerprogramm, das von den Rechtsinhabern nach den Bestimmungen dieser Lizenz verbreitet oder öffentlich zugänglich gemacht worden ist.
+
+Object Code: Die maschinenlesbare, übersetzte Form des Programms.
+
+Öffentlich: Nicht nur an einen bestimmten Personenkreis gerichtet, der persönlich oder durch die Zugehörigkeit zu einer juristischen Person oder einem öffentlichen Träger miteinander verbunden ist.
+
+Öffentlich zugänglich machen: Die öffentliche Weitergabe des Programms in unkörperlicher Form, insbesondere das Bereithalten zum Download in Datennetzen.
+
+Rechtsinhaber: Der bzw. die Urheber oder sonstigen Inhaber der ausschließlichen Nutzungsrechte an dem Programm.
+
+Source Code: Die für Menschen lesbare, in Programmiersprache dargestellte Form des Programms.
+
+Verändern: Jede Erweiterung, Kürzung und Bearbeitung des Programms, insbesondere Weiterentwicklungen.
+
+Verbreiten: Die öffentliche Weitergabe körperlicher Vervielfältigungsstücke, insbesondere auf Datenträgern oder in Verbindung mit Hardware.
+
+Vollständiger Source Code: Der Source Code in der für die Erstellung bzw. die Bearbeitung benutzten Form zusammen mit den zur Übersetzung und Installation erforderlichen Konfigurationsdateien und Software-Werkzeugen, sofern diese in der benötigten Form nicht allgemein gebräuchlich (z.B. Standard-Kompiler) oder für jedermann lizenzgebührenfrei im Internet abrufbar sind.
+
+§ 1 Rechte
+
+(1) Sie dürfen das Programm in unveränderter Form vervielfältigen, verbreiten und öffentlich zugänglich machen.
+
+(2) Sie dürfen das Programm verändern und entsprechend veränderte Versionen vervielfältigen, verbreiten und öffentlich zugänglich machen. Gestattet ist auch die Kombination des Programms oder Teilen hiervon mit anderen Programmen.
+
+(3) Sie erhalten die Rechte unentgeltlich.
+
+§ 2 Pflichten beim Vertrieb
+
+(1) Wenn Sie das Programm verbreiten oder öffentlich zugänglich machen, sei es in unveränderter oder veränderter Form, sei es in einer Kombination mit anderen Programmen oder in Verbindung mit Hardware, dann müssen sie mitliefern:
+1. alle Vermerke im Source Code und/oder Object Code, die auf diese Lizenz hinweisen;
+2. alle Vermerke im Source Code und/oder Object Code, die über die Urheber des Programms Auskunft geben;
+3. einen für den Empfänger deutlich wahrnehmbaren Hinweis auf diese Lizenz und die Internetadresse http://www.d-fsl.de;
+4. den vollständigen Text dieser Lizenz in deutlich wahrnehmbarer Weise.
+
+(2) Wenn bei der Installation des Programms und/oder beim Programmstart Lizenz- und/oder Vertragsbedingungen angezeigt werden, dann müssen
+1. diese Lizenz,
+2. ein Hinweis auf diese Lizenz und
+3. ein Hinweis auf den oder die Rechtsinhaber an den ersten unter dieser Lizenz nutzbaren Programmbestandteilen
+ebenfalls angezeigt werden.
+
+(3) Sie dürfen die Nutzung des Programms nicht von Pflichten oder Bedingungen abhängig machen, die nicht in dieser Lizenz vorgesehen sind.
+
+(4) Sofern Sie mit dem Programm eine Dokumentation erhalten haben, muss diese Dokumentation entsprechend mitgeliefert werden, es sei denn, die freie Mitlieferung der Dokumentation ist Ihnen aufgrund der Lizenz für die Dokumentation nicht gestattet.
+
+§ 3 Weitere Pflichten beim Vertrieb veränderter Versionen
+
+(1) Veränderte Versionen des Programms dürfen Sie nur unter den Bedingungen dieser Lizenz verbreiten oder öffentlich zugänglich machen, so dass Dritte das veränderte Programm insgesamt unter dieser Lizenz nutzen können.
+
+(2) Wird das Programm oder ein Teil hiervon mit einem anderen Programm kombiniert, gilt auch die Kombination insgesamt als eine veränderte Version des Programms, es sei denn, das andere Programm ist formal und inhaltlich eigenständig. Ein anderes Programm ist dann als eigenständig anzusehen, wenn es die folgenden Voraussetzungen alle erfüllt:
+1. Der Source Code der kombinierten Programme muss jeweils in eigenen Dateien vorhanden sein, die keine Bestandteile des anderen Teils enthalten, die über die zur Programmkombination üblichen und erforderlichen Informationen über den anderen Teil hinausgehen, wobei der Source Code des anderen Programms nicht mitgeliefert werden muss.
+2. Der mit dem Programm kombinierte Teil muss auch dann sinnvoll nutzbar sein, wenn er nicht mit dem Programm kombiniert wird, und zwar entweder alleine oder mit sonstigen Programmen. Was als "sinnvoll nutzbar" anzusehen ist, richtet sich nach der Auffassung der betroffenen Fachkreise. Zu den betroffenen Fachkreisen gehören alle Personen, die das Programm oder Programme mit vergleichbarer Funktionalität entwickeln, benutzen, verbreiten oder öffentlich zugänglich machen.
+
+(3) Wenn Sie das Programm oder einen Teil hiervon - verändert oder unverändert - zusammen mit einem anderen Programm verbreiten oder öffentlich zugänglich machen, das unter der GNU General Public License (GPL) lizenziert wird, darf das Programm auch unter den Bedingungen der GPL genutzt werden, sofern es mit dem anderen Programm ein "derivative work" im Sinne der GPL bildet. Dabei sollen die Hinweise auf diese Lizenz entfernt und durch einen Hinweis auf die GPL ersetzt werden. Ob bei der Zusammenstellung ein "derivate work" im Sinne der GPL entsteht, beurteilt sich nach Ziffer 2 b) der GPL. Diese Bestimmung lautet: "You must cause any work that you distribute or publish, that in whole or in part contains or is derived from the Program or any part thereof, to be licensed as a whole at no charge to all third parties under the terms of this License." Die GPL kann abgerufen werden unter http://www.fsf.org/licenses/gpl.
+
+(4) Wenn Sie das Programm in einer veränderten Form verbreiten oder öffentlich zugänglich machen, müssen Sie im Source Code einen Hinweis mit den Änderungen aufnehmen und mit dem Datum der Änderung versehen. Der Hinweis muss erkennen lassen, welche Änderungen vorgenommen wurden und bestehende Vermerke, die über die Urheber des Programms Auskunft geben, übernehmen. Dies gilt unabhängig davon, ob Sie einen eigenen Urhebervermerk hinzufügen. Anstelle eines Hinweises im Source Code können Sie auch ein Versionskontrollsystem verwenden oder weiterführen, sofern dieses mitverbreitet wird oder öffentlich zugänglich ist.
+
+(5) Sie dürfen von Dritten für die Einräumung eines einfachen Nutzungsrechts an veränderten Versionen des Programms kein Entgelt verlangen.
+
+(6) Wenn Sie an der veränderten Version des Programms ein anderes Schutzrecht als ein Urheberrecht erwerben, insbesondere ein Patent oder Gebrauchsmuster, lizenzieren Sie dieses Schutzrecht für veränderte und unveränderte Versionen des Programms in dem Umfang, der erforderlich ist, um die Rechte aus dieser Lizenz wahrnehmen zu können.
+
+§ 4 Weitere Pflichten beim Vertrieb im Object Code
+
+(1) Wenn Sie das Programm nur im Object Code verbreiten, dann müssen Sie zusätzlich zu den in § 2 und § 3 geregelten Pflichten entweder
+1. den vollständigen Source Code im Internet öffentlich zugänglich machen und bei der Verbreitung des Object Codes deutlich auf die vollständige Internetadresse hinweisen, unter der der Source Code abgerufen werden kann oder
+2. den vollständigen Source Code auf einem hierfür üblichen Datenträger unter Beachtung der §§ 2 und 3 mitverbreiten.
+
+(2) Wenn Sie das Programm im Object Code öffentlich zugänglich machen, dann müssen Sie zusätzlich zu den in § 2 und § 3 geregelten Pflichten den vollständigen Source Code im Internet öffentlich zugänglich machen und dabei deutlich auf die vollständige Internetadresse hinweisen.
+
+(3) Sofern Sie mit dem Programm eine Dokumentation erhalten haben, muss diese Dokumentation entsprechend der Absätze 1 und 2 mitgeliefert werden, es sei denn, die freie Mitlieferung der Dokumentation ist Ihnen aufgrund der Lizenz für die Dokumentation nicht gestattet.
+
+§ 5 Vertragsschluss
+
+(1) Mit dieser Lizenz wird Ihnen und jeder anderen Person ein Angebot auf Abschluss eines Vertrages über die Nutzung des Programms unter den Bedingungen der Deutschen Freien Softwarelizenz unterbreitet.
+
+(2) Sie dürfen das Programm nach den jeweils anwendbaren gesetzlichen Vorschriften bestimmungsgemäß benutzen, ohne dass es der Annahme dieser Lizenz bedarf. Dieses Recht umfasst in der Europäischen Union und in den meisten anderen Rechtsordnungen insbesondere die folgenden Befugnisse:
+1. das Programm ablaufen zu lassen sowie die Erstellung von hierfür erforderlichen Vervielfältigungen im Haupt- und Arbeitsspeicher;
+2. das Erstellen einer Sicherungskopie;
+3. die Fehlerberichtigung;
+4. die Weitergabe einer rechtmäßig erworbenen körperlichen Kopie des Programms.
+
+(3) Sie erklären Ihre Zustimmung zum Abschluss dieser Lizenz, indem Sie das Programm verbreiten, öffentlich zugänglich machen, verändern oder in einer Weise vervielfältigen, die über die bestimmungsgemäße Nutzung im Sinne von Absatz 2 hinausgeht. Ab diesem Zeitpunkt ist diese Lizenz als rechtlich verbindlicher Vertrag zwischen den Rechtsinhabern und Ihnen geschlossen, ohne dass es eines Zugangs der Annahmeerklärung bei den Rechtsinhabern bedarf.
+
+(4) Sie und jeder andere Lizenznehmer erhalten die Rechte aus dieser Lizenz direkt von den Rechtsinhabern. Eine Unterlizenzierung oder Übertragung der Rechte ist nicht gestattet.
+
+§ 6 Beendigung der Rechte bei Zuwiderhandlung
+
+(1) Jede Verletzung Ihrer Verpflichtungen aus dieser Lizenz führt zu einer automatischen Beendigung Ihrer Rechte aus dieser Lizenz.
+
+(2) Die Rechte Dritter, die das Programm oder Rechte an dem Programm von Ihnen erhalten haben, bleiben hiervon unberührt.
+
+§ 7 Haftung und Gewährleistung
+
+(1) Für entgegenstehende Rechte Dritter haften die Rechtsinhaber nur, sofern sie Kenntnis von diesen Rechten hatten, ohne Sie zu informieren.
+
+(2) Die Haftung für Fehler und sonstige Mängel des Programms richtet sich nach den außerhalb dieser Lizenz getroffenen Vereinbarungen zwischen Ihnen und den Rechtsinhabern oder, wenn eine solche Vereinbarung nicht existiert, nach den gesetzlichen Regelungen.
+
+§ 8 Verträge mit Dritten
+
+(1) Diese Lizenz regelt nur die Beziehung zwischen Ihnen und den Rechtsinhabern. Sie ist nicht Bestandteil der Verträge zwischen Ihnen und Dritten.
+
+(2) Die Lizenz beschränkt Sie nicht in der Freiheit, mit Dritten, die von Ihnen Kopien des Programms erhalten oder Leistungen in Anspruch nehmen, die im Zusammenhang mit dem Programm stehen, Verträge beliebigen Inhalts zu schließen, sofern Sie dabei Ihren Verpflichtungen aus dieser Lizenz nachkommen und die Rechte der Dritten aus dieser Lizenz nicht beeinträchtigt werden. Insbesondere dürfen Sie für die Überlassung des Programms oder sonstige Leistungen ein Entgelt verlangen.
+
+(3) Diese Lizenz verpflichtet Sie nicht, das Programm an Dritte weiterzugeben. Es steht Ihnen frei zu entscheiden, wem Sie das Programm zugänglich machen. Sie dürfen aber die weitere Nutzung durch Dritte nicht durch den Einsatz technischer Schutzmaßnahmen, insbesondere durch den Einsatz von Kopierschutzvorrichtungen jeglicher Art, verhindern oder erschweren. Eine passwortgeschützte Zugangsbeschränkung oder die Nutzung in einem Intranet wird nicht als technische Schutzmaßnahme angesehen.
+
+§ 9 Text der Lizenz
+
+(1) Diese Lizenz ist in deutscher und englischer Sprache abgefasst. Beide Fassungen sind gleich verbindlich. Es wird unterstellt, dass die in der Lizenz verwandten Begriffe in beiden Fassungen dieselbe Bedeutung haben. Ergeben sich dennoch Unterschiede, so ist die Bedeutung maßgeblich, welche die Fassungen unter Berücksichtigung des Ziels und Zwecks der Lizenz am besten miteinander in Einklang bringt.
+
+(2) Der Lizenzrat der Deutschen Freien Software Lizenz kann mit verbindlicher Wirkung neue Versionen der Lizenz in Kraft setzen, soweit dies erforderlich und zumutbar ist. Neue Versionen der Lizenz werden auf der Internetseite http://www.d-fsl.de mit einer eindeutigen Versionsnummer veröffentlicht. Die neue Version der Lizenz erlangt für Sie verbindliche Wirkung, wenn Sie von deren Veröffentlichung Kenntnis genommen haben. Gesetzliche Rechtsbehelfe gegen die Änderung der Lizenz werden durch die vorstehenden Bestimmungen nicht beschränkt.
+
+(3) Sie dürfen diese Lizenz in unveränderter Form vervielfältigen, verbreiten und öffentlich zugänglich machen.
+
+§ 10 Anwendbares Recht
+
+Auf diese Lizenz findet deutsches Recht Anwendung.
+
+
+Anhang: Wie unterstellen Sie ein Programm der Deutschen Freien Software Lizenz?
+Um jedermann den Abschluss dieser Lizenz zu ermöglichen, wird empfohlen, das Programm mit folgendem Hinweis auf die Lizenz zu versehen:
+
+"Copyright (C) 20[jj] [Name des Rechtsinhabers].
+
+Dieses Programm kann durch jedermann gemäß den Bestimmungen der Deutschen Freien Software Lizenz genutzt werden.
+
+Die Lizenz kann unter http://www.d-fsl.de abgerufen werden."', 'http://www.dipp.nrw.de/d-fsl/index_html/lizenzen/de/D-FSL-1_0_de.txt', NULL, NULL, NULL, 'GNU General Public License', NULL, NULL, NULL, '', NULL, false, false, false, '1899cb922af9857069381a10e9360db9', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (564, 'SISSL-1.2', 'SUN INDUSTRY STANDARDS SOURCE LICENSE
+Version 1.2
+ 1.0 DEFINITIONS
+
+1.1 Commercial Use means distribution or otherwise making the Original Code available to a third party.
+
+1.2 Contributor Version means the combination of the Original Code, and the Modifications made by that particular Contributor.
+
+1.3 Electronic Distribution Mechanism means a mechanism generally accepted in the software development community for the electronic transfer of data.
+
+1.4 Executable means Original Code in any form other than Source Code.
+
+1.5 Initial Developer means the individual or entity identified as the Initial Developer in the Source Code notice required by Exhibit A.
+
+1.6 Larger Work means a work which combines Original Code or portions thereof with code not governed by the terms of this License.
+
+1.7 License means this document.
+
+1.8 Licensable means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
+
+1.9 Modifications means any addition to or deletion from the substance or structure of either the Original Code or any previous Modifications. A Modification is:
+
+A. Any addition to or deletion from the contents of a file containing Original Code or previous Modifications.
+
+B. Any new file that contains any part of the Original Code or previous Modifications.
+
+1.10 Original Code means Source Code of computer software code which is described in the Source Code notice required by Exhibit A as Original Code.
+
+1.11 Patent Claims means any patent claim(s), now owned or hereafter acquired, including without limitation, method, process, and apparatus claims, in any patent Licensable by grantor.
+
+1.12 Source Code means the preferred form of the Original Code for making modifications to it, including all modules it contains, plus any associated interface definition files, or scripts used to control compilation and installation of an Executable.
+
+1.13 Standards means the standards identified in Exhibit B.
+
+1.14 You (or Your) means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License or a future version of this License issued under Section 6.1. For legal entities, You includes any entity which controls, is controlled by, or is under common control with You. For purposes of this definition, control means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.
+
+2.0 SOURCE CODE LICENSE
+
+2.1 The Initial Developer Grant The Initial Developer hereby grants You a world-wide, royalty-free, non-exclusive license, subject to third party intellectual property claims:
+
+(a)under intellectual property rights (other than patent or trademark) Licensable by Initial Developer to use, reproduce, modify, display, perform, sublicense and distribute the Original Code (or portions thereof) with or without Modifications, and/or as part of a Larger Work; and
+
+(b) under Patents Claims infringed by the making, using or selling of Original Code, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Code (or portions thereof).
+
+(c) the licenses granted in this Section 2.1(a) and (b) are effective on the date Initial Developer first distributes Original Code under the terms of this License.
+
+(d) Notwithstanding Section 2.1(b) above, no patent license is granted: 1) for code that You delete from the Original Code; 2) separate from the Original Code; or 3) for infringements caused by: i) the modification of the Original Code or ii) the combination of the Original Code with other software or devices, including but not limited to Modifications.
+
+3.0 DISTRIBUTION OBLIGATIONS
+
+3.1 Application of License. The Source Code version of Original Code may be distributed only under the terms of this License or a future version of this License released under Section 6.1, and You must include a copy of this License with every copy of the Source Code You distribute. You may not offer or impose any terms on any Source Code version that alters or restricts the applicable version of this License or the recipients rights hereunder. Your license for shipment of the Contributor Version is conditioned upon Your full compliance with this Section. The Modifications which You create must comply with all requirements set out by the Standards body in effect one hundred twenty (120) days before You ship the Contributor Version. In the event that the Modifications do not meet such requirements, You agree to publish either (i) any deviation from the Standards protocol resulting from implementation of Your Modifications and a reference implementation of Your Modifications or (ii) Your Modifications in Source Code form, and to make any such deviation and reference implementation or Modifications available to all third parties under the same terms a this license on a royalty free basis within thirty (30) days of Your first customer shipment of Your Modifications. Additionally, in the event that the Modifications you create do not meet the requirements set out in this Section, You agree to comply with the Standards requirements set out in Exhibit B.
+
+3.2 Required Notices. You must duplicate the notice in Exhibit A in each file of the Source Code. If it is not possible to put such notice in a particular Source Code file due to its structure, then You must include such notice in a location (such as a relevant directory) where a user would be likely to look for such a notice. If You created one or more Modification(s) You may add Your name as a Contributor to the notice described in Exhibit A. You must also duplicate this License in any documentation for the Source Code where You describe recipients rights or ownership rights relating to Initial Code.
+
+You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Your version of the Code. However, You may do so only on Your own behalf, and not on behalf of the Initial Developer. You must make it absolutely clear than any such warranty, support, indemnity or liability obligation is offered by You alone, and You hereby agree to indemnify the Initial Developer for any liability incurred by the Initial Developer as a result of warranty, support, indemnity or liability terms You offer.
+
+3.3 Distribution of Executable Versions. You may distribute Original Code in Executable and Source form only if the requirements of Sections 3.1 and 3.2 have been met for that Original Code, and if You include a notice stating that the Source Code version of the Original Code is available under the terms of this License. The notice must be conspicuously included in any notice in an Executable or Source versions, related documentation or collateral in which You describe recipients rights relating to the Original Code. You may distribute the Executable and Source versions of Your version of the Code or ownership rights under a license of Your choice, which may contain terms different from this License, provided that You are in compliance with the terms of this License. If You distribute the Executable and Source versions under a different license You must make it absolutely clear that any terms which differ from this License are offered by You alone, not by the Initial Developer. You hereby agree to indemnify the Initial Developer for any liability incurred by the Initial Developer as a result of any such terms You offer.
+
+3.4 Larger Works. You may create a Larger Work by combining Original Code with other code not governed by the terms of this License and distribute the Larger Work as a single product. In such a case, You must make sure the requirements of this License are fulfilled for the Original Code.
+
+4.0 INABILITY TO COMPLY DUE TO STATUTE OR REGULATION
+
+If it is impossible for You to comply with any of the terms of this License with respect to some or all of the Original Code due to statute, judicial order, or regulation then You must: (a) comply with the terms of this License to the maximum extent possible; and (b) describe the limitations and the code they affect. Such description must be included in the LEGAL file described in Section 3.2 and must be included with all distributions of the Source Code. Except to the extent prohibited by statute or regulation, such description must be sufficiently detailed for a recipient of ordinary skill to be able to understand it.
+
+5.0 APPLICATION OF THIS LICENSE
+
+This License applies to code to which the Initial Developer has attached the notice in Exhibit A and to related Modifications as set out in Section 3.1.
+
+6.0 VERSIONS OF THE LICENSE
+
+6.1 New Versions. Sun may publish revised and/or new versions of the License from time to time. Each version will be given a distinguishing version number.
+
+6.2 Effect of New Versions. Once Original Code has been published under a particular version of the License, You may always continue to use it under the terms of that version. You may also choose to use such Original Code under the terms of any subsequent version of the License published by Sun. No one other than Sun has the right to modify the terms applicable to Original Code.
+
+7.0 DISCLAIMER OF WARRANTY
+
+ORIGINAL CODE IS PROVIDED UNDER THIS LICENSE ON AN AS IS BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT THE ORIGINAL CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE ORIGINAL CODE IS WITH YOU. SHOULD ANY ORIGINAL CODE PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY ORIGINAL CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+8.0 TERMINATION
+
+8.1 This License and the rights granted hereunder will terminate automatically if You fail to comply with terms herein and fail to cure such breach within 30 days of becoming aware of the breach. All sublicenses to the Original Code which are properly granted shall survive any termination of this License. Provisions which, by their nature, must remain in effect beyond the termination of this License shall survive. 8.2 In the event of termination under Section 8.1 above, all end user license agreements (excluding distributors and resellers) which have been validly granted by You or any distributor hereunder prior to termination shall survive termination.
+
+
+EXHIBIT A - Sun Industry Standards Source License
+
+"The contents of this file are subject to the Sun Industry Standards Source License Version 1.2 (the License); You
+may not use this file except in compliance with the License."
+
+"You may obtain a copy of the License at gridengine.sunsource.net/license.html"
+
+"Software distributed under the License is distributed on an AS IS basis, WITHOUT WARRANTY OF ANY KIND, either express or
+implied. See the License for the specific language governing rights and limitations under the License."
+
+"The Original Code is Grid Engine."
+
+"The Initial Developer of the Original Code is:
+Sun Microsystems, Inc."
+
+"Portions created by: Sun Microsystems, Inc. are Copyright (C) 2001 Sun Microsystems, Inc."
+
+"All Rights Reserved."
+
+"Contributor(s):__________________________________"
+
+EXHIBIT B - Standards
+
+1.0 Requirements for project Standards. The requirements for project Standards are version-dependent and are defined at: Grid Engine standards.
+
+2.0 Additional requirements. The additional requirements pursuant to Section 3.1 are defined as:
+
+2.1 Naming Conventions. If any of your Modifications do not meet the requirements of the Standard, then you must change the product name so that Grid Engine, gridengine, gridengine.sunsource, and similar naming conventions are not used.
+
+2.2 Compliance Claims. If any of your Modifications do not meet the requirements of the Standards you may not claim, directly or indirectly, that your implementation of the Standards is compliant.', 'http://gridscheduler.sourceforge.net/Gridengine_SISSL_license.html', NULL, NULL, NULL, 'Sun Industry Standards Source License v1.2', NULL, NULL, NULL, '', NULL, false, false, false, 'da61af7f5508091ac27538ec6a8e150d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (565, 'YPL-1.0', 'Yahoo! Public License, Version 1.0 (YPL)
+
+This Yahoo! Public License (this "Agreement") is a legal agreement that describes the terms under which Yahoo! Inc., a Delaware corporation having its principal place of business at 701 First Avenue, Sunnyvale, California 94089 ("Yahoo!") will provide software to you via download or otherwise ("Software"). By using the Software, you, an individual or an entity ("You") agree to the terms of this Agreement.
+
+In consideration of the mutual promises and upon the terms and conditions set forth below, the parties agree as follows:
+
+1. Grant of Copyright License
+
+1.1 - Subject to the terms and conditions of this Agreement, Yahoo! hereby grants to You, under any and all of its copyright interest in and to the Software, a royalty-free, non-exclusive, non-transferable license to copy, modify, compile, execute, and distribute the Software and Modifications. For the purposes of this Agreement, any change to, addition to, or abridgement of the Software made by You is a "Modification;" however, any file You add to the Software that does not contain any part of the Software is not a "Modification."
+
+1.2 - If You are an individual acting on behalf of a corporation or other entity, Your use of the Software or any Modification is subject to Your having the authority to bind such corporation or entity to this Agreement. Providing copies to persons within such corporation or entity is not considered distribution for purposes of this Agreement.
+
+1.3 - For the Software or any Modification You distribute in source code format, You must do so only under the terms of this Agreement, and You must include a complete copy of this Agreement with Your distribution. With respect to any Modification You distribute in source code format, the terms of this Agreement will apply to You in the same way those terms apply to Yahoo! with respect to the Software. In other words, when You are distributing Modifications under this Agreement, You "stand in the shoes" of Yahoo! in terms of the rights You grant and how the terms and conditions apply to You and the licensees of Your Modifications. Notwithstanding the foregoing, when You "stand in the shoes" of Yahoo!, You are not subject to the jurisdiction provision under Section 7, which requires all disputes under this Agreement to be subject to the jurisdiction of federal or state courts of northern California.
+
+1.4 - For the Software or any Modification You distribute in compiled or object code format, You must also provide recipients with access to the Software or Modification in source code format along with a complete copy of this Agreement. The distribution of the Software or Modifications in compiled or object code format may be under a license of Your choice, provided that You are in compliance with the terms of this Agreement. In addition, You must make absolutely clear that any license terms applying to such Software or Modification that differ from this Agreement are offered by You alone and not by Yahoo!, and that such license does not restrict recipients from exercising rights in the source code to the Software granted by Yahoo! under this Agreement or rights in the source code to any Modification granted by You as described in Section 1.3.
+
+1.5 - This Agreement does not limit Your right to distribute files that are entirely Your own work (i.e., which do not incorporate any portion of the Software and are not Modifications) under any terms You choose.
+
+2. Support
+Yahoo! has no obligation to provide technical support or updates to You. Nothing in this Agreement requires Yahoo! to enter into any license with You for any other edition of the Software.
+
+3. Intellectual Property Rights
+
+3.1 - Except for the license expressly granted under copyright in Section 1.1, no rights, licenses or forbearances are granted or may arise in relation to this Agreement whether expressly, by implication, exhaustion, estoppel or otherwise. All rights, including all intellectual property rights, that are not expressly granted under this Agreement are hereby reserved.
+
+3.2 - In any copy of the Software or in any Modification you create, You must retain and reproduce, any and all copyright, patent, trademark, and attribution notices that are included in the Software in the same form as they appear in the Software. This includes the preservation of attribution notices in the form of trademarks or logos that exist within a user interface of the Software.
+
+3.3 - This license does not grant You rights to use any party''s name, logo, or trademarks, except solely as necessary to comply with Section 3.2.
+
+4. Disclaimer of Warranties
+THE SOFTWARE IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND. YAHOO! MAKES NO WARRANTIES, WHETHER EXPRESS, IMPLIED, OR STATUTORY REGARDING OR RELATING TO THE SOFTWARE. SPECIFICALLY, YAHOO! DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR FREE OR WILL PERFORM IN AN UNINTERRUPTED MANNER. TO THE GREATEST EXTENT ALLOWED BY LAW, YAHOO! SPECIFICALLY DISCLAIMS ALL IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE (EVEN IF YAHOO! HAD BEEN INFORMED OF SUCH PURPOSE), AND NONINFRINGEMENT WITH RESPECT TO THE SOFTWARE, ANY MODIFICATIONS THERETO AND WITH RESPECT TO THE USE OF THE FOREGOING.
+
+5. Limitation of Liability
+IN NO EVENT WILL YAHOO! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES OF ANY KIND (INCLUDING WITHOUT LIMITATION LOSS OF PROFITS, LOSS OF USE, BUSINESS INTERRUPTION, LOSS OF DATA, COST OF COVER) IN CONNECTION WITH OR ARISING OUT OF OR RELATING TO THE FURNISHING, PERFORMANCE OR USE OF THE SOFTWARE OR ANY OTHER RIGHTS GRANTED HEREUNDER, WHETHER ALLEGED AS A BREACH OF CONTRACT OR TORTIOUS CONDUCT, INCLUDING NEGLIGENCE, AND EVEN IF YAHOO! HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+6. Term and Termination
+
+6.1 - This Agreement will continue in effect unless and until terminated earlier pursuant to this Section 6.
+
+6.2 - In the event Yahoo! determines that You have breached this Agreement, Yahoo! may terminate this Agreement.
+
+6.3 - All licenses granted hereunder shall terminate upon the termination of this Agreement. Termination will be in addition to any rights and remedies available to Yahoo! at law or equity or under this Agreement.
+
+6.4 - Termination of this Agreement will not affect the provisions regarding reservation of rights (Section 3.1), provisions disclaiming or limiting Yahoo!''s liability (Sections 4 and 5), Termination (Section 6) or Miscellaneous (Section 7), which provisions will survive termination of this Agreement.
+
+7. Miscellaneous
+This Agreement contains the entire agreement of the parties with respect to the subject matter of this Agreement and supersedes all previous communications, representations, understandings and agreements, either oral or written, between the parties with respect to said subject matter. The relationship of the parties hereunder is that of independent contractors, and this Agreement will not be construed as creating an agency, partnership, joint venture or any other form of legal association between the parties. If any term, condition, or provision in this Agreement is found to be invalid, unlawful or unenforceable to any extent, this Agreement will be construed in a manner that most closely effectuates the intent of this Agreement. Such invalid term, condition or provision will be severed from the remaining terms, conditions and provisions, which will continue to be valid and enforceable to the fullest extent permitted by law. This Agreement will be interpreted and construed in accordance with the laws of the State of California and the United States of America, without regard to conflict of law principles. The U.N. Convention on Contracts for the International Sale of Goods shall not apply to this Agreement. All disputes arising out of this Agreement involving Yahoo! or any of its subsidiaries shall be subject to the jurisdiction of the federal or state courts of northern California, with venue lying in Santa Clara County, California. No rights may be assigned, no obligations may be delegated, and this Agreement may not be transferred by You, in whole or in part, whether voluntary or by operation of law, including by way of sale of assets, merger or consolidation, without the prior written consent of Yahoo!, and any purported assignment, delegation or transfer without such consent shall be void ab initio. Any waiver of the provisions of this Agreement or of a party''s rights or remedies under this Agreement must be in writing to be effective. Failure, neglect or delay by a party to enforce the provisions of this Agreement or its rights or remedies at any time, will not be construed or be deemed to be a waiver of such party''s rights under this Agreement and will not in any way affect the validity of the whole or any part of this Agreement or prejudice such party''s right to take subsequent action.', 'https://www.zimbra.com/license/yahoo_public_license_1.0.html', NULL, NULL, NULL, 'Yahoo! Public License v1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'fd7abc878a3e880577a2a7f9e42f8951', 1);
