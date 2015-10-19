@@ -133,7 +133,13 @@ class ui_file_browse extends DefaultPlugin
  
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
 
-    // $vars['scannerLicenses'] = $this->licenseDao->getLicenseHistogram($itemTreeBounds);
+    $allLicensesPre = $this->licenseDao->getLicenseArray();
+    $allLicenses = array();
+    foreach ($allLicensesPre as $value)
+    {
+      $allLicenses[$value['shortname']] = array('rf_pk' => $value['id']);
+    }
+    $vars['scannerLicenses'] = $allLicenses;
 
     $vars['content'] = js_url();
 
@@ -163,11 +169,6 @@ class ui_file_browse extends DefaultPlugin
                   'scanners'=>$scannerVars);
 
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
-    
-    if(!empty($agentMap))
-    {
-      $vars = array_merge($vars, $licVars);
-    }
 
     $this->licenseProjector = new LicenseMap($this->getObject('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     $dirVars = $this->countFileListing($itemTreeBounds);
