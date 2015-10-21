@@ -77,7 +77,6 @@ class ui_browse_license extends DefaultPlugin
    */
   function RegisterMenus()
   {
-    return 0;
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("upload", "item"));
 
