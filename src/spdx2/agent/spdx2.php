@@ -83,6 +83,33 @@ class SpdxTwoAgent extends Agent
     $this->writeReport($packageNodes, $uploadId);
     return true;    
   }
+
+  protected function getOutputFormat()
+  {
+    $outputFormat = "spdx2";
+    if (GetParm("outputFormat", PARM_STRING) == "dep5")
+    {
+     $outputFormat = "dep5";
+    }
+
+    return $outputFormat;
+  }
+
+  protected function getTemplateFile($partname)
+  {
+    $outputFormat = $this->getOutputFormat();
+    $prefix = $outputFormat . "-";
+    $postfix = ".twig";
+    switch ($outputFormat) {
+    case "spdx2":
+      $postfix = ".xml" . $postfix;
+      break;
+    case "dep5":
+      $prefix = $prefix . "copyright-";
+      break;
+    }
+    return $prefix . $partname . $postfix;
+  }
   
   protected function renderPackage($uploadId)
   {
@@ -109,7 +136,7 @@ class SpdxTwoAgent extends Agent
     }
     
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
-    return $this->renderString('spdx-package.xml.twig',array(
+    return $this->renderString($this->getTemplateFile('package'),array(
         'uploadId'=>$uploadId,
         'uri'=>$this->uri,
         'packageName'=>$upload->getFilename(),
@@ -215,8 +242,18 @@ class SpdxTwoAgent extends Agent
     $upload = $this->uploadDao->getUpload($uploadId);
     $packageName = $upload->getFilename();
 
+    $outputFormat=$this->getOutputFormat();
+
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. "SPDX2_".$packageName.'_'.time().".rdf" ;
+    $fileName = $fileBase. strtoupper($outputFormat)."_".$packageName.'_'.time();
+    switch ($outputFormat) {
+    case "spdx2":
+      $fileName = $fileName .".rdf" ;
+      break;
+    case "dep5":
+      $fileName = $fileName .".txt" ;
+      break;
+    }
     
     $this->uri = $fileName;
   }
@@ -230,7 +267,7 @@ class SpdxTwoAgent extends Agent
     }
     umask(0133);
     
-    $message = $this->renderString('spdx-document.xml.twig',array(
+    $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName'=>$fileBase,
         'uri'=>$this->uri,
         'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
@@ -270,7 +307,7 @@ class SpdxTwoAgent extends Agent
         $this->heartbeat($filesProceeded);
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $content .= $this->renderString('spdx-file.xml.twig',array(
+      $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
           'md5'=>$hashes['md5'],

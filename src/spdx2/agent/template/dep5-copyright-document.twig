@@ -6,14 +6,26 @@
 #}
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/       
 Upstream-Name: {{ documentName }}
+Upstream-Contact: 
+Source: 
+Disclaimer: 
+Copyright: 
 License:{% for res in mainLicenses %} {{ res }}
 {% endfor %}
 {% if licenseComments %}Comment: {{ licenseComments }}
 {% else %}
-Comment: created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}
+Comment: created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z') }} with FOSSology
 {% endif %}
 
 {# File Paragraphes #}
 {{ packageNodes }}
 
 {# Stand-alone License Paragraphes #}
+{% for licenseId,extractedText in licenseTexts %}
+License: {{ licenseId }}
+ {{ extractedText|replace({'\f':''})|e|replace({'\r\n':'\n'})
+                                      |replace({'\n\n':'\n.\n'})
+                                      |replace({'\n\n':'\n.\n'})
+                                      |replace({'\n':'\n '}) }}
+
+{% endfor %}

@@ -12,28 +12,25 @@ Copyright: ##Hole_To_Fill##
 {% endfor %}{% endif %}
 {% if concludedLicenses is empty %}
 {% if scannerLicenses|length == 1 %}
-License: {% scannerLicenses.1 %}
+License: {{ scannerLicenses[0] }}
 {% else %}
 License: ##Hole_To_Fill##
 {% endif %}
-{% else %}License:{% for res in concludedLicenses %} {{ res|replace({'\n\n':'\n.\n'})
-                                                           |replace({'\n\n':'\n.\n'})
-                                                           |replace({'\n':'\n '}) }}
+{% else %}License:{% for res in concludedLicenses %} {{ res }}
 {% endfor %}
 {% endif %}
 Comment: fileId={{ fileId }}
  .
- sha1={{ sha1 }}
-md5={{ md5 }}
+  sha1={{ sha1 }}
+  md5={{ md5 }}
 {% if scannerLicenses is not empty %}
  .
 {% if scannerLicenses|length == 1 %}
  License guesed by the scanners!
 {% else %}
- .
  Scanners found the following licenses:
 {% for res in scannerLicenses %}
- {{ res }}
+  * {{ res }}
 {% endfor %}
 {% endif %}
 {% endif %}
