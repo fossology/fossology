@@ -554,8 +554,8 @@ return;
       $V .= "<font class='text'>\n";
 
       $Children = GetNonArtifactChildren($Item, $this->uploadtree_tablename);
-      if (count($Children) == 0) // no children, display View micromenu
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"View", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+      if (count($Children) == 0) // no children, display View-Meta micromenu
+        $V .= Dir2Browse($this->Name,$Item,NULL,1,"View-Meta", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
       else // has children, display Browse micormenu
         $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 
