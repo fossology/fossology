@@ -8,16 +8,16 @@
 Files: {{ fileName }}
 {% if copyrights is empty %}
 Copyright: ##Hole_To_Fill##
-{% else %}Copyright:{% for copyright in copyrights %} {{ copyright|replace({'\f':''}) }}
-{% endfor %}{% endif %}
-{% if concludedLicenses is empty %}
-{% if scannerLicenses|length == 1 %}
-{# if only one license was found by the scanners, assume that it was correct but mention that in the comment #}
-License: {{ scannerLicenses[0]|replace({' ':'-'}) }}
-{% else %}
-License: ##Hole_To_Fill##
+{% else %}Copyright: {{ copyrights|join('\n           ') }}
 {% endif %}
-{% else %}License: {{ concludedlicenses|join('UNIQUESTRINGTOREPLACE')
+{% if concludedLicenses is empty and scannerLicenses is empty %}
+License: ##Hole_To_Fill##
+{% elseif concludedLicenses is empty %}
+License: {{ scannerLicenses|join('UNIQUESTRINGTOREPLACE')
+                                     |replace({' ':'-'})
+                                     |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
+{% else %}
+License: {{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
                                        |replace({' ':'-'})
                                        |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
 {% endif %}
@@ -25,14 +25,9 @@ Comment: fileId={{ fileId }}
  .
   sha1={{ sha1 }}
   md5={{ md5 }}
+{% if concludedLicenses is empty %}
 {% if scannerLicenses is not empty %}
  .
-{% if scannerLicenses|length == 1 %}
  License guesed by the scanners!
-{% else %}
- Scanners found the following licenses:
-{% for res in scannerLicenses %}
-  * {{ res }}
-{% endfor %}
 {% endif %}
 {% endif %}

@@ -10,22 +10,22 @@ Upstream-Contact:
 Source: 
 Disclaimer: 
 Copyright: 
-License:{% for res in mainLicenses %} {{ res }}
-{% endfor %}
-{% if licenseComments %}Comment: {{ licenseComments }}
-{% else %}
-Comment: created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z') }} with FOSSology
-{% endif %}
+License: {{ mainLicenses|join('UNIQUESTRINGTOREPLACE')
+                        |replace({' ':'-'})
+                        |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
+Comment: {% if licenseComments %}
+ {{ licenseComments }}
+ .
 
-{# File Paragraphes #}
+{% endif %} created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z') }} with FOSSology
+{# File Paragraphes: #}
 {{ packageNodes }}
-
-{# Stand-alone License Paragraphes #}
+{# Stand-alone License Paragraphes: #}
 {% for licenseId,extractedText in licenseTexts %}
-License: {{ licenseId }}
- {{ extractedText|replace({'\f':''})|e|replace({'\r\n':'\n'})
-                                      |replace({'\n\n':'\n.\n'})
-                                      |replace({'\n\n':'\n.\n'})
-                                      |replace({'\n':'\n '}) }}
 
+License: {{ licenseId }}
+ {{ extractedText|replace({'\f':''})|replace({'\r\n':'\n'})
+                                    |replace({'\n\n':'\n.\n'})
+                                    |replace({'\n\n':'\n.\n'})
+                                    |replace({'\n':'\n '}) }}
 {% endfor %}
