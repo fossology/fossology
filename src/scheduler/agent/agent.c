@@ -526,6 +526,57 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
+ * Parses the jq_cmd_args string and returns an array of args.
+ *
+ * This function will modify jq_cmd_args!
+ *
+ * @param jq_cmd_args  the string of arguments of the form:
+ *                     "--arg1=val1 --arg2 ..."
+ * @param max_cmd_args maximal number of cmd args
+ * @param argc         return: returns the number of arguments parsed
+ * @param argv         return: the parsed arguments
+ */
+static void jq_cmd_args_parse(char *jq_cmd_args, int max_cmd_args, int* argc, char*** argv)
+{
+  int idx = *argc;
+  int len = strlen(jq_cmd_args);
+  char needle[2] = " ";
+  char *ptr;
+
+  if (! jq_cmd_args)
+    return;
+
+  if (jq_cmd_args[0] != '-' || jq_cmd_args[1] != '-')
+  {
+    (*argv)[idx++] = jq_cmd_args;
+    (*argc) = idx;
+    return;
+  }
+  
+  ptr = strtok(jq_cmd_args, needle);
+  while(ptr != NULL && idx < max_cmd_args)
+  {
+    if (ptr[0] == '-' && ptr[1] == '-')
+    {
+      *(*argv + idx) = malloc(sizeof(char) * len);
+      if (*(*argv + idx) == NULL){
+        *(*argv + idx++) = strdup(ptr);
+        (*argc) = idx;
+        return;
+      }
+      strcpy(*(*argv + idx++), ptr);
+    }
+    else
+    {
+      strcat(*(*argv + --idx), " ");
+      strcat(*(*argv + idx++), ptr);
+    }
+    ptr = strtok(NULL, needle);
+  }
+  (*argc) = idx;
+}
+
+/**
  * Parses the shell command that is found in the configuration file.
  *
  * @param confdir  the configuration directory for FOSSology
@@ -579,9 +630,9 @@ static void shell_parse(char* confdir, int user_id, int group_id, char* input, c
   (*argv)[idx++] = g_strdup_printf("--userID=%d", user_id);
   (*argv)[idx++] = g_strdup_printf("--groupID=%d", group_id);
   (*argv)[idx++] = "--scheduler_start";
-  if (jq_cmd_args)
-    (*argv)[idx++] = jq_cmd_args;
   (*argc) = idx;
+
+  jq_cmd_args_parse(jq_cmd_args, MAX_CMD_ARGS, argc, argv);
 }
 
 /**
