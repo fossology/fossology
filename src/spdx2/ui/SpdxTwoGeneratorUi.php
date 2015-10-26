@@ -27,6 +27,9 @@ use Symfony\Component\HttpFoundation\Request;
 class SpdxTwoGeneratorUi extends DefaultPlugin
 {
   const NAME = 'ui_spdx2';
+  const DEFAULT_OUTPUT_FORMAT = "spdx2";
+  /** @var string */
+  protected $outputFormat;
   
   function __construct()
   {
@@ -43,6 +46,9 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     menu_insert("Browse-Pfile::SPDX", 0, self::NAME, $text);
     
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
+    
+    $text = _("Generate Debian Copyright file");
+    menu_insert("Browse-Pfile::DEP5", 0, self::NAME . '&outputFormat=deb5', $text);
   }
 
   protected function handle(Request $request)
@@ -107,6 +113,10 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $spdxTwoAgent = plugin_find('agent_spdx2');
     $userId = Auth::getUserId();
     $jqCmdArgs = $spdxTwoAgent->uploadsAdd($addUploads);
+    if (strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
+    {
+      $jqCmdArgs = '--outputFormat=' . $this->outputFormat . ' ' . $jqCmdArgs;
+    }
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';

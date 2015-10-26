@@ -37,6 +37,8 @@ include_once(__DIR__ . "/services.php");
 class SpdxTwoAgent extends Agent
 {
   const UPLOAD_ADDS = "uploadsAdd";
+  const OUTPUT_FORMAT = "outputFormat";
+  const DEFAULT_OUTPUT_FORMAT = "spdx2";
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDao */
@@ -53,6 +55,8 @@ class SpdxTwoAgent extends Agent
   protected $includedLicenseIds = array();
   /** @var string */
   protected $uri;
+  /** @var string */
+  protected $outputFormat;
 
   function __construct()
   {
@@ -65,16 +69,19 @@ class SpdxTwoAgent extends Agent
     $this->renderer->setCache(false);
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
+    $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT.'::';
   }
-
 
   function processUploadId($uploadId)
   {
+    $args = $this->args;
+    $this->outputFormat = array_key_exists(self::OUTPUT_FORMAT,$args) ? $args[self::OUTPUT_FORMAT] : self::DEFAULT_OUTPUT_FORMAT;
+
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
     
     $packageNodes = $this->renderPackage($uploadId);
-    $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$this->args) ? explode(',',$this->args[self::UPLOAD_ADDS]) : array();
+    $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     foreach($additionalUploadIds as $additionalId)
     {
       $packageNodes .= $this->renderPackage($additionalId);
@@ -84,23 +91,11 @@ class SpdxTwoAgent extends Agent
     return true;    
   }
 
-  protected function getOutputFormat()
-  {
-    $outputFormat = "spdx2";
-    if (GetParm("outputFormat", PARM_STRING) == "dep5")
-    {
-     $outputFormat = "dep5";
-    }
-
-    return $outputFormat;
-  }
-
   protected function getTemplateFile($partname)
   {
-    $outputFormat = $this->getOutputFormat();
-    $prefix = $outputFormat . "-";
+    $prefix = $this->outputFormat . "-";
     $postfix = ".twig";
-    switch ($outputFormat) {
+    switch ($this->outputFormat) {
     case "spdx2":
       $postfix = ".xml" . $postfix;
       break;
@@ -109,6 +104,20 @@ class SpdxTwoAgent extends Agent
       break;
     }
     return $prefix . $partname . $postfix;
+  }
+  
+  protected function getUri($fileBase,$packageName)
+  {
+    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
+    switch ($this->outputFormat) {
+    case "spdx2":
+      $fileName = $fileName .".rdf" ;
+      break;
+    case "dep5":
+      $fileName = $fileName .".txt" ;
+      break;
+    }
+    return $fileName;
   }
   
   protected function renderPackage($uploadId)
@@ -242,22 +251,11 @@ class SpdxTwoAgent extends Agent
     $upload = $this->uploadDao->getUpload($uploadId);
     $packageName = $upload->getFilename();
 
-    $outputFormat=$this->getOutputFormat();
-
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    $fileName = $fileBase. strtoupper($outputFormat)."_".$packageName.'_'.time();
-    switch ($outputFormat) {
-    case "spdx2":
-      $fileName = $fileName .".rdf" ;
-      break;
-    case "dep5":
-      $fileName = $fileName .".txt" ;
-      break;
-    }
     
-    $this->uri = $fileName;
+    $this->uri = $this->getUri($fileBase,$packageName);
   }
-  
+
   protected function writeReport($packageNodes, $uploadId)
   {
     $fileBase = dirname($this->uri);
