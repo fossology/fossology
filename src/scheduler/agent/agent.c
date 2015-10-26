@@ -528,8 +528,6 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 /**
  * Parses the jq_cmd_args string and returns an array of args.
  *
- * This function will modify jq_cmd_args!
- *
  * @param jq_cmd_args  the string of arguments of the form:
  *                     "--arg1=val1 --arg2 ..."
  * @param max_cmd_args maximal number of cmd args
@@ -541,26 +539,28 @@ static void jq_cmd_args_parse(char *jq_cmd_args, int max_cmd_args, int* argc, ch
   int idx = *argc;
   int len = strlen(jq_cmd_args);
   char needle[2] = " ";
-  char *ptr;
+  char *ptr, *saveptr, *jq_cmd_args_dup;
 
   if (! jq_cmd_args)
     return;
 
-  if (jq_cmd_args[0] != '-' || jq_cmd_args[1] != '-')
+  if (len < 2 || jq_cmd_args[0] != '-' || jq_cmd_args[1] != '-')
   {
     (*argv)[idx++] = jq_cmd_args;
     (*argc) = idx;
     return;
   }
+
+  jq_cmd_args_dup = g_strdup(jq_cmd_args);
   
-  ptr = strtok(jq_cmd_args, needle);
+  ptr = strtok_r(jq_cmd_args_dup, needle, &saveptr);
   while(ptr != NULL && idx < max_cmd_args)
   {
-    if (ptr[0] == '-' && ptr[1] == '-')
+    if (strlen(ptr) >= 2 && ptr[0] == '-' && ptr[1] == '-')
     {
       *(*argv + idx) = malloc(sizeof(char) * len);
       if (*(*argv + idx) == NULL){
-        *(*argv + idx++) = strdup(ptr);
+        *(*argv + idx++) = g_strdup(ptr);
         (*argc) = idx;
         return;
       }
@@ -571,7 +571,7 @@ static void jq_cmd_args_parse(char *jq_cmd_args, int max_cmd_args, int* argc, ch
       strcat(*(*argv + --idx), " ");
       strcat(*(*argv + idx++), ptr);
     }
-    ptr = strtok(NULL, needle);
+    ptr = strtok_r(NULL, needle, &saveptr);
   }
   (*argc) = idx;
 }
