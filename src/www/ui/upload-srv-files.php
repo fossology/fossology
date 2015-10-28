@@ -35,41 +35,119 @@ class upload_srv_files extends FO_Plugin {
     parent::__construct();
   }
 
-  /** 
-   * \brief chck if one file/dir has one permission
+  /**
+   * \brief checks, whether a string contains some special character without
+   * escaping
    *
-   * \param $path - file path
-   * \param $server - host name
-   * \param $permission - permission x/r/w
+   * \param $str - the string to check
+   * \param $char - the character to search for
    *
-   * \return 1: yes; 0: no
+   * \return boolean
    */
-  function remote_file_permission($path, $server = 'localhost', $persmission = 'r')
+  function str_contains_notescaped_char($str, $char)
   {
-    /** local file */
-    if ($server === 'localhost' || empty($server))
-    { 
-      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
-      return @fopen($temp_path, $persmission);
-    } else return 1;  // don't do the file permission check if the file is not on the web server
+    $pos = 0;
+    while ($pos < strlen($str) &&
+           ($pos = strpos($str,$char,$pos)) !== FALSE)
+    {
+      foreach(range(($pos++) -1, 1, -2) as $tpos)
+      {
+        if ($tpos > 0 && $str[$tpos] !== '\\')
+          break;
+        if ($tpos > 1 && $str[$tpos - 1] !== '\\')
+          continue 2;
+      }
+      return TRUE;
+    }
+    return FALSE;
   }
 
-  /** 
-   * \brief chck if one file/dir exist or not
+  /**
+   * \brief checks, whether a path is a pattern from the perspective of a shell
    *
-   * \param $path - file path
-   * \param $server - host name
+   * \param $path - the path to check
    *
-   * \return 1: exist; 0: not
+   * \return boolean
    */
-  function remote_file_exists($path, $server = 'localhost')
+  function path_is_pattern($path)
   {
-    /** local file */
-    if ($server === 'localhost' || empty($server)) 
+    return $this->str_contains_notescaped_char($path, '*')
+      || $this->str_contains_notescaped_char($path, '?')
+      || $this->str_contains_notescaped_char($path, '[')
+      || $this->str_contains_notescaped_char($path, '{');
+  }
+
+  /**
+   * \brief checks, whether a path contains substrings, which could enable it to
+   * escape his prefix
+   *
+   * \param $path - the path to check
+   *
+   * \return boolean
+   */
+  function path_is_evil($path)
+  {
+    return $this->str_contains_notescaped_char($path, '$')
+      || strpos($path,'..')!==FALSE;
+  }
+
+  /**
+   * \brief normalizes an path and returns FALSE on errors
+   *
+   * \param $path - the path to normalize
+   * \param $appendix - optional parameter, which is used for the recursive call
+   *
+   * \return normalized path on success
+   *         FALSE on error
+   *
+   */
+  function normalize_path($path, $appendix="")
+  {
+    if(strpos($path,'/')===FALSE || $path === '/')
+      return FALSE;
+    if($this->path_is_pattern($path))
     {
-      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
-      return file_exists($temp_path);
-    } else return 1;  // don't do the file exist check if the file is not on the web server
+      $bpath = basename($path);
+      if ($this->path_is_evil($bpath))
+        return FALSE;
+
+      return $this->normalize_path(dirname($path),
+                                   $bpath . ($appendix == '' ?
+                                             '' :
+                                             '/' . $appendix));
+    }
+    else
+    {
+      $rpath = realpath($path);
+      if ($rpath === FALSE)
+        return FALSE;
+      // if (!@fopen($rpath, 'r'))
+      //   return FALSE;
+      return $rpath . ($appendix == '' ?
+                       '' :
+                       '/' . $appendix);
+    }
+  }
+
+  /**
+   *
+   * \brief checks, whether a normalized path starts with an path in the
+   * whiteliste
+   *
+   * \param $path - the path to check
+   *
+   * \return boolean
+   *
+   */
+  function check_by_whitelist($path)
+  {
+    // TODO: get whitelist from configuration file / DB
+    $whitelist = ["/tmp"];
+
+    foreach ($whitelist as $item)
+      if (substr($path,0,strlen($item)) === $item)
+        return TRUE;
+    return FALSE;
   }
 
   /**
@@ -82,15 +160,27 @@ class upload_srv_files extends FO_Plugin {
    *        passed on as -A option to cp2foss.
    * \param $Desc - optional description for the upload
    * \param $Name - optional Name for the upload
+   * \param $HostName -
    * \param $public_perm public permission on the upload
    *
    * \return NULL on success, string on failure.
    */
-  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm) {
+  function Upload($FolderPk, $SourceFiles, $GroupNames, $Desc, $Name, $HostName, $public_perm)
+  {
     global $Plugins;
 
     $FolderPath = FolderGetName($FolderPk);
-    $SourceFiles = trim($SourceFiles);
+    $SourceFiles = $this->normalize_path(trim($SourceFiles));
+    if ($SourceFiles == FALSE)
+    {
+      $text = _("failed to normalize/validate given path");
+      return ($text);
+    }
+    if ($this->check_by_whitelist($SourceFiles) == FALSE)
+    {
+      $text = _("no suitable prefix found in the whitelist");
+      return ($text);
+    }
 
     // $FolderPath = str_replace('\\','\\\\',$FolderPath);
     // $FolderPath = str_replace('"','\"',$FolderPath);
@@ -118,24 +208,19 @@ class upload_srv_files extends FO_Plugin {
     $SourceFiles = str_replace('$', '\$', $SourceFiles);
     $SourceFiles = str_replace('|', '\|', $SourceFiles);
     $SourceFiles = str_replace(' ', '\ ', $SourceFiles);
-    $SourceFiles = str_replace("\t", "\\\t", $SourceFiles);
+    $SourceFiles = str_replace("\t", "\\t", $SourceFiles);
     /* Add the job to the queue */
     // create the job
-    $ShortName = basename($Name);
-    if (empty($ShortName)) {
+    if(!$this->path_is_pattern($Name))
+    {
+      $ShortName = basename($Name);
+      if (empty($ShortName)) {
+        $ShortName = $Name;
+      }
+    }
+    else
+    {
       $ShortName = $Name;
-    }
-    $wildcardpath = strstr($SourceFiles, '*');
-    /** check if the file/directory is existed (the path does not include wildcards) */
-    if (empty($wildcardpath) && !$this->remote_file_exists($SourceFiles, $HostName)) {
-      $text = _("'$SourceFiles' does not exist.\n");
-      return $text;
-    }
-
-    /** check if has the read permission */
-    if (empty($wildcardpath) && !$this->remote_file_permission($SourceFiles, $HostName, "r")) {
-      $text = _("Have no READ permission on '$SourceFiles'.\n");
-      return $text;
     }
 
     // Create an upload record.
@@ -163,7 +248,7 @@ class upload_srv_files extends FO_Plugin {
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
     $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array("wget_agent"));
     if ($ununpack_jq_pk < 0) return $ErrorMsg;
-    
+
     $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
     $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $uploadpk, $ErrorMsg, array());
     if ($adj2nest_jq_pk < 0) return $ErrorMsg;
