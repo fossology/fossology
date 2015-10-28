@@ -36,11 +36,6 @@ class MonkBulkAgentPlugin extends AgentPlugin
 
   function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $bulkId='')
   {
-    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
-    if ($jobQueueId != 0)
-    {
-      return $jobQueueId;
-    }
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $bulkId);
   }
 }
