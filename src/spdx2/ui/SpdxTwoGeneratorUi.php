@@ -29,12 +29,19 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
   const NAME = 'ui_spdx2';
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
   /** @var string */
-  protected $outputFormat;
+  protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
   
   function __construct()
   {
+    $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
+    if (strcmp($possibleOutputFormat,"") !== 0 &&
+        strcmp($possibleOutputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0 &&
+        ctype_alnum($possibleOutputFormat))
+    {
+      $this->outputFormat = $possibleOutputFormat;
+    }
     parent::__construct(self::NAME, array(
-        self::TITLE => _("SPDX generation"),
+        self::TITLE => _(strtoupper($this->outputFormat) . " generation"),
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));
@@ -48,11 +55,12 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
     
     $text = _("Generate Debian Copyright file");
-    menu_insert("Browse-Pfile::DEP5", 0, self::NAME . '&outputFormat=deb5', $text);
+    menu_insert("Browse-Pfile::DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
   protected function handle(Request $request)
   {
+
     $groupId = Auth::getGroupId();
     $uploadIds = $request->get('uploads') ?: array();
     $uploadIds[] = intval($request->get('upload'));
@@ -96,8 +104,8 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
-                  'reportType' => "SPDX 2");
-    $text = sprintf(_("Generating SPDX v2.0 report for '%s'"), $upload->getFilename());
+                  'reportType' => strtoupper($this->outputFormat));
+    $text = sprintf(_("Generating ". strtoupper($this->outputFormat) . " report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
     $content = $this->renderer->loadTemplate("report.html.twig")->render($vars);
     $message = '<h3 id="jobResult"></h3>';
@@ -113,11 +121,12 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $spdxTwoAgent = plugin_find('agent_spdx2');
     $userId = Auth::getUserId();
     $jqCmdArgs = $spdxTwoAgent->uploadsAdd($addUploads);
-    if (strcmp($this->outputFormat,"") !== 0 &&
-        strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
+
+    if (strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
     {
       $jqCmdArgs = '--outputFormat=' . $this->outputFormat . ' ' . $jqCmdArgs;
     }
+    
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';

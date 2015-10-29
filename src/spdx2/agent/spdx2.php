@@ -37,7 +37,7 @@ include_once(__DIR__ . "/services.php");
 class SpdxTwoAgent extends Agent
 {
 
-  const OUTPUT_FORMAT = "outputFormat";
+  const OUTPUT_FORMAT_KEY = "outputFormat";
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
   const AVAILABLE_OUTPUT_FORMATS = "spdx2,dep5";
   const UPLOAD_ADDS = "uploadsAdd";
@@ -72,17 +72,20 @@ class SpdxTwoAgent extends Agent
     $this->renderer->setCache(false);
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
-    $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT.'::';
+    $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
   }
 
   function processUploadId($uploadId)
   {
     $args = $this->args;
 
-    if(array_key_exists(self::OUTPUT_FORMAT,$args) &&
-       in_array($args[self::OUTPUT_FORMAT], explode(',',self::AVAILABLE_OUTPUT_FORMATS)))
+    if(array_key_exists(self::OUTPUT_FORMAT_KEY,$args))
     {
-      $this->outputFormat = $args[self::OUTPUT_FORMAT];
+      $possibleOutputFormat = trim($args[self::OUTPUT_FORMAT_KEY]);
+      if(in_array($possibleOutputFormat, explode(',',self::AVAILABLE_OUTPUT_FORMATS)))
+      {
+        $this->outputFormat = $possibleOutputFormat;
+      }
     }
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
