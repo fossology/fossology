@@ -36,9 +36,12 @@ include_once(__DIR__ . "/services.php");
 
 class SpdxTwoAgent extends Agent
 {
-  const UPLOAD_ADDS = "uploadsAdd";
+
   const OUTPUT_FORMAT = "outputFormat";
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,dep5";
+  const UPLOAD_ADDS = "uploadsAdd";
+
   /** @var UploadDao */
   private $uploadDao;
   /** @var ClearingDao */
@@ -56,7 +59,7 @@ class SpdxTwoAgent extends Agent
   /** @var string */
   protected $uri;
   /** @var string */
-  protected $outputFormat;
+  protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
   function __construct()
   {
@@ -75,27 +78,32 @@ class SpdxTwoAgent extends Agent
   function processUploadId($uploadId)
   {
     $args = $this->args;
-    $this->outputFormat = array_key_exists(self::OUTPUT_FORMAT,$args) ? $args[self::OUTPUT_FORMAT] : self::DEFAULT_OUTPUT_FORMAT;
 
+    if(array_key_exists(self::OUTPUT_FORMAT,$args) &&
+       in_array($args[self::OUTPUT_FORMAT], explode(',',self::AVAILABLE_OUTPUT_FORMATS)))
+    {
+      $this->outputFormat = $args[self::OUTPUT_FORMAT];
+    }
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::REPORT, true);
     $this->computeUri($uploadId);
-    
+
     $packageNodes = $this->renderPackage($uploadId);
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
     foreach($additionalUploadIds as $additionalId)
     {
       $packageNodes .= $this->renderPackage($additionalId);
     }
-   
+
     $this->writeReport($packageNodes, $uploadId);
-    return true;    
+    return true;
   }
 
   protected function getTemplateFile($partname)
   {
     $prefix = $this->outputFormat . "-";
     $postfix = ".twig";
-    switch ($this->outputFormat) {
+    switch ($this->outputFormat)
+    {
     case "spdx2":
       $postfix = ".xml" . $postfix;
       break;
@@ -105,11 +113,12 @@ class SpdxTwoAgent extends Agent
     }
     return $prefix . $partname . $postfix;
   }
-  
+
   protected function getUri($fileBase,$packageName)
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
-    switch ($this->outputFormat) {
+    switch ($this->outputFormat)
+    {
     case "spdx2":
       $fileName = $fileName .".rdf" ;
       break;
@@ -119,7 +128,7 @@ class SpdxTwoAgent extends Agent
     }
     return $fileName;
   }
-  
+
   protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -127,14 +136,14 @@ class SpdxTwoAgent extends Agent
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
     $this->heartbeat(0);
     $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
-    
+
     $licenseComment = $this->addScannerResults($filesWithLicenses, $itemTreeBounds);
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(count($filesWithLicenses));
-    
+
     $upload = $this->uploadDao->getUpload($uploadId);
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
-    
+
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     $mainLicenses = array();
     foreach($mainLicenseIds as $licId)
@@ -143,7 +152,7 @@ class SpdxTwoAgent extends Agent
       $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
       $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
     }
-    
+
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString($this->getTemplateFile('package'),array(
         'uploadId'=>$uploadId,
@@ -177,7 +186,7 @@ class SpdxTwoAgent extends Agent
       {
         continue;
       }
-      
+
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
         if ($clearingLicense->isRemoved())
         {
@@ -185,7 +194,7 @@ class SpdxTwoAgent extends Agent
         }
         $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
         $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = 
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
                                                  $this->licenseMap->getProjectedShortname($reportedLicenseId);
       }
     }
@@ -233,7 +242,7 @@ class SpdxTwoAgent extends Agent
     $this->dbManager->freeResult($res);
     return "licenseInfoInFile determined by Scanners $selectedScanners";
   }
-  
+
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
     /* @var $copyrightDao CopyrightDao */
@@ -243,7 +252,7 @@ class SpdxTwoAgent extends Agent
     foreach ($allEntries as $finding) {
       $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content']);
     }
-  }       
+  }
 
   protected function computeUri($uploadId)
   {
@@ -252,19 +261,19 @@ class SpdxTwoAgent extends Agent
     $packageName = $upload->getFilename();
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-    
+
     $this->uri = $this->getUri($fileBase,$packageName);
   }
 
   protected function writeReport($packageNodes, $uploadId)
   {
     $fileBase = dirname($this->uri);
-            
+
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
-    
+
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName'=>$fileBase,
         'uri'=>$this->uri,
@@ -291,8 +300,8 @@ class SpdxTwoAgent extends Agent
   protected function renderString($templateName, $vars)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
-  }  
-  
+  }
+
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
     $filesProceeded = 0;
@@ -355,11 +364,11 @@ class SpdxTwoAgent extends Agent
       $sql = $upload->getTreeTableName().' WHERE';
       $stmt .= '.'.$upload->getTreeTableName();
     }
-      
-    $sql = "SELECT STRING_AGG(lower_sha1,'') concat_sha1 FROM 
+
+    $sql = "SELECT STRING_AGG(lower_sha1,'') concat_sha1 FROM
        (SELECT LOWER(pfile_sha1) lower_sha1 FROM pfile, $sql pfile_fk=pfile_pk ORDER BY pfile_sha1) templist";
     $filelistPack = $this->dbManager->getSingleRow($sql,$param,$stmt);
-    
+
     return sha1($filelistPack['concat_sha1']);
   }
 

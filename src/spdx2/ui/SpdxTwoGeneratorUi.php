@@ -113,7 +113,8 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $spdxTwoAgent = plugin_find('agent_spdx2');
     $userId = Auth::getUserId();
     $jqCmdArgs = $spdxTwoAgent->uploadsAdd($addUploads);
-    if (strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
+    if (strcmp($this->outputFormat,"") !== 0 &&
+        strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
     {
       $jqCmdArgs = '--outputFormat=' . $this->outputFormat . ' ' . $jqCmdArgs;
     }
