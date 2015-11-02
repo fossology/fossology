@@ -47,7 +47,9 @@
         {{ aContent }}  
       {% endfor %}
     </ol>
-    <p>{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    <p>
+      {% block uploadText %}
+      {% endblock %}
     </p>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
