@@ -20,6 +20,7 @@
 #include <boost/program_options.hpp>
 
 #include <iostream>
+#include <sstream>
 
 using namespace std;
 
@@ -153,55 +154,24 @@ static void addDefaultScanners(CopyrightState& state)
     state.addScanner(new hCopyrightScanner());
 
   if (types & 1<<1)
-    state.addScanner(new regexScanner(regURL::getRegex(), regURL::getType()));
+    state.addScanner(new regexScanner("url", "copyright"));
 
   if (types & 1<<2)
-    state.addScanner(new regexScanner(regEmail::getRegex(), regEmail::getType(), 1));
+    state.addScanner(new regexScanner("email", "copyright", 1));
 
   if (types & 1<<3)
-    state.addScanner(new regexScanner(regAuthor::getRegex(), regAuthor::getType()));
+    state.addScanner(new regexScanner("author", "copyright"));
 #endif
 
 #ifdef IDENTITY_IP
   if (types & 1<<0)
-    state.addScanner(new regexScanner(regIp::getRegex(), regIp::getType()));
+    state.addScanner(new regexScanner("ip", "ip"));
 #endif
 
 #ifdef IDENTITY_ECC
   if (types & 1<<0)
-    state.addScanner(new regexScanner(regEcc::getRegex(), regEcc::getType()));
+    state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
-}
-
-static std::string getRegexConfFile(const std::string& identity)
-{
-  return std::string(sysconfigdir) + "/mods-enabled/" + identity +  "/agent/scanners.conf";
-}
-
-static void addConfFileScanners(CopyrightState& state)
-{
-  std::string confFile = getRegexConfFile(IDENTITY);
-  ifstream stream(confFile);
-  if (stream)
-  {
-    for (std::string line; std::getline(stream, line); )
-    {
-      scanner* sc = makeRegexScanner(line, IDENTITY);
-      if (sc)
-      {
-        if (state.getCliOptions().isVerbosityDebug())
-          cout << "loaded scanner definition: " << line << endl;
-        state.addScanner(sc);
-      }
-      else
-      {
-        cout << "bad scanner definition in conf: " << line << endl;
-      }
-    }
-  } else {
-    if (state.getCliOptions().isVerbosityDebug())
-      cout << "cannot open scanner definition in conf: " << confFile << endl;
-  }
 }
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
@@ -221,9 +191,9 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
     if (match.length(3) == 0)
       return 0; // nullptr
 
-    std::string regexPattern(match.str(3));
-
-    return new regexScanner(regexPattern, type, regId);
+    std::istringstream stream;
+    stream.str(type + "=" + match.str(3));
+    return new regexScanner(type, stream, regId);
   }
   return 0; // nullptr
 }
@@ -236,7 +206,6 @@ CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
   CopyrightState state(agentID, std::move(cliOptions));
 
   addDefaultScanners(state);
-  addConfFileScanners(state);
 
   return state;
 }

@@ -76,6 +76,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $agentDir = dirname(dirname(__DIR__));
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION-copyright $sysConf/mods-enabled/$agentName/VERSION");
+    system("install -D $agentDir/agent/copyright.conf  $sysConf/mods-enabled/$agentName/agent/copyright.conf");
     $pCmd = "echo $uploadId | $execDir/$agentName -c $sysConf --scheduler_start";
     $pipeFd = popen($pCmd, "r");
     $this->assertTrue($pipeFd !== false, 'running copyright failed');
@@ -87,6 +88,8 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $retCode = pclose($pipeFd);
 
     unlink("$sysConf/mods-enabled/$agentName/VERSION");
+    unlink("$sysConf/mods-enabled/$agentName/agent/copyright.conf");
+    rmdir("$sysConf/mods-enabled/$agentName/agent/");
     rmdir("$sysConf/mods-enabled/$agentName");
     rmdir("$sysConf/mods-enabled");
     unlink($sysConf."/fossology.conf");

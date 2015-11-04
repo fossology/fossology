@@ -33,5 +33,8 @@
             "Fossology\\UI\\Page\\": "www/ui/page"
         },
         "classmap": [ "lib/thrift/gen-php" ]
+    },
+    "config":{
+       "process-timeout" : 2000
     }
 }

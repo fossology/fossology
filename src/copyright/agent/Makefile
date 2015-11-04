@@ -27,7 +27,7 @@ EXE_COV = $(EXE_COP)_cov
 
 
 
-OBJECTS = copyright.o regscan.o scanners.o regTypes.o cleanEntries.o
+OBJECTS = copyright.o regscan.o scanners.o cleanEntries.o regexConfProvider.o regexConfParser.o
 OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
 OBJECTS_IP = copyrightUtils_ip.o copyrightState_ip.o database_ip.o
 OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
@@ -60,7 +60,7 @@ $(CXXFOLIB):
 
 libcopyright.a: $(OBJECTS) $(OBJECTS_COP)
 	ar cvr $@ $(OBJECTS) $(OBJECTS_COP)
-	
+
 libcopyright_cov.a: $(COVERAGE) $(COVERAGE_COP)
 	ar cvr $@ $(COVERAGE) $(COVERAGE_COP)
 
@@ -70,16 +70,16 @@ libcopyright_cov.a: $(COVERAGE) $(COVERAGE_COP)
 
 $(OBJECTS): %.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF) $<
-	
+
 $(OBJECTS_COP): %_cop.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_COP) $(DEF) -o $@ $<
 	
 $(OBJECTS_IP): %_ip.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_IP) $(DEF)  -o $@ $<
-	
+
 $(OBJECTS_ECC): %_ecc.o: %.cc $(HEADERS)
 	$(CXX) -c $(CXXFLAGS_LOCAL) $(DEF_ID_ECC) $(DEF) -o $@ $<
-	
+
 $(COVERAGE_COP): %_cop_cov.o: %.cc $(HEADERS)
 	$(CXX) -c $< $(CXXFLAGS_LOCAL) $(FLAG_COV) $(DEF_ID_COP) $(DEF) $(DEFS) -o $@
 
@@ -93,6 +93,7 @@ $(COVERAGE): %_cov.o: %.cc $(HEADERS)
 install: $(EXE)
 	for mod_name in $(EXE); do \
 		$(INSTALL_PROGRAM) $$mod_name $(DESTDIR)$(MODDIR)/$$mod_name/agent/$$mod_name; \
+		$(INSTALL_DATA) $$mod_name.conf $(DESTDIR)$(MODDIR)/$$mod_name/agent/$$mod_name.conf; \
 	done
 
 uninstall:
