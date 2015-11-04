@@ -32,6 +32,7 @@ use Fossology\Lib\Report\LicenseMainGetter;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Element\Section;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Shared\Html;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
@@ -681,7 +682,9 @@ class ReportAgent extends Agent
     $firstColLen = 6500;
     $secondColLen = 5000;
     $thirdColLen = 4000;
-
+    
+    $html = new Html;
+    
     $section->addTitle(htmlspecialchars($title), 2);
 
     $table = $section->addTable($this->tablestyle);
@@ -694,7 +697,7 @@ class ReportAgent extends Agent
       foreach($statementsCEI as $statements){
         $table->addRow($smallRowHeight);
         $cell1 = $table->addCell($firstColLen); 
-        $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
         $cell2 = $table->addCell($secondColLen);
         $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
