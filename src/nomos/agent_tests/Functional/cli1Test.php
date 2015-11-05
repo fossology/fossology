@@ -19,31 +19,7 @@
 require_once ('CommonCliTest.php');
 
 class cli1Test extends CommonCliTest
-{
-  function setUp()
-  {
-    $this->testDb = new TestPgDb("nomosfun".time());
-    $this->agentDir = dirname(dirname(__DIR__))."/";
-    $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
-
-    $sysConf = $this->testDb->getFossSysConf();
-    $this->testInstaller = new TestInstaller($sysConf);
-    $this->testInstaller->init();
-    $this->testInstaller->install($this->agentDir);
-
-    $this->testDb->createSequences(array(), true);
-    $this->testDb->createPlainTables(array(), true);
-    $this->testDb->alterTables(array(), true);
-  }
-
-  public function tearDown()
-  {
-    $this->testInstaller->uninstall($this->agentDir);
-    $this->testInstaller->clear();
-    $this->testInstaller->rmRepo();
-    $this->testDb = null;
-  }
-  
+{ 
   public function testHelp()
   {
     $nomos = dirname(dirname(__DIR__)) . '/agent/nomos';
