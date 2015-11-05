@@ -252,6 +252,7 @@ class UploadTreeProxy extends DbViewProxy
       case "noCopyright":
       case "noIp":
       case "noEcc":
+      case "noKeyword":
 
         $queryCondition = self::getQueryCondition($skipThese, $groupId, $agentFilter)." ".$additionalCondition;
         if ('uploadtree_a' == $uploadTreeTableName)
@@ -321,6 +322,8 @@ class UploadTreeProxy extends DbViewProxy
         return "EXISTS (SELECT ct_pk FROM ip cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":
         return "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
+      case "noKeyword":
+        return "EXISTS (SELECT ct_pk FROM keyword cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
     }
   }
 

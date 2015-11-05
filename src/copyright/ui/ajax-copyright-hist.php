@@ -228,6 +228,10 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       case "ecc" :
         $tableName = "ecc";
         break;
+      case "keyword" :
+        $tableName = "keyword";
+        $filter="none";
+        break;
       default:
         $tableName = "copyright";
     }

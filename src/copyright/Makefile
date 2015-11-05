@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAMES = copyright ip ecc
+MOD_NAMES = copyright ip ecc keyword
 
 DIRS = agent ui
 TESTDIR = agent_tests

@@ -38,6 +38,7 @@ class Highlight extends Object
   const AUTHOR = "A";
   const IP = "I";
   const ECC = "X";
+  const KEYWORDOTHERS = "KW";
   const UNDEFINED = "any";
 
   /**

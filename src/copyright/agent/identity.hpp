@@ -20,6 +20,7 @@
 #ifndef IDENTITY_HPP
 #define IDENTITY_HPP
 
+#ifndef IDENTITY_KW
 #ifndef IDENTITY_ECC
 #ifndef IDENTITY_IP
 #ifndef IDENTITY_COPYRIGHT
@@ -27,28 +28,46 @@
 #endif
 #endif
 #endif
+#endif
 
-#ifndef IDENTITY_ECC
- #ifndef IDENTITY_IP
-  #ifdef IDENTITY_COPYRIGHT
-   #define IDENTITY "copyright"
-   #define MAX_TYPES 4
-  #else
-   #error
+#ifndef IDENTITY_KW
+ #ifndef IDENTITY_ECC
+  #ifndef IDENTITY_IP
+   #ifdef IDENTITY_COPYRIGHT
+    #define IDENTITY "copyright"
+    #define MAX_TYPES 4
+   #else
+    #error
+   #endif
+   #else
+    #ifndef IDENTITY_COPYRIGHT
+    #define IDENTITY "ip"
+    #define MAX_TYPES 1
+   #else
+    #error
+   #endif
   #endif
  #else
-  #ifndef IDENTITY_COPYRIGHT
-   #define IDENTITY "ip"
-   #define MAX_TYPES 1
+  #ifndef IDENTITY_IP
+   #ifndef IDENTITY_COPYRIGHT
+    #define IDENTITY "ecc"
+    #define MAX_TYPES 1
+   #else
+    #error
+   #endif
   #else
    #error
   #endif
  #endif
 #else
- #ifndef IDENTITY_IP
-  #ifndef IDENTITY_COPYRIGHT
-   #define IDENTITY "ecc"
-   #define MAX_TYPES 1
+ #ifndef IDENTITY_ECC
+  #ifndef IDENTITY_IP
+   #ifndef IDENTITY_COPYRIGHT
+    #define IDENTITY "keyword"
+    #define MAX_TYPES 1
+   #else
+    #error
+   #endif
   #else
    #error
   #endif
