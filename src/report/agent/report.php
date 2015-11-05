@@ -216,28 +216,27 @@ class ReportAgent extends Agent
     $userId = $this->userId; 
 
     $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
-    $licenses = $this->groupStatements($ungrupedStatements, $extended, $agentCall);
+    $licenses = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
     
     $ungrupedStatements = $this->bulkMatchesGetter->getUnCleared($uploadId, $groupId);
-    $bulkLicenses = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $bulkLicenses = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $this->licenseClearedGetter->setOnlyComments(true);
     $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
-    $licenseComments = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $licenseComments = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
-    $ungrupedStatements = $this->licenseIrrelevantGetter->getUnCleared($uploadId, $groupId);
-    $licensesIrre = $this->groupStatements($ungrupedStatements, $extended,$agentCall); 
-    
+    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
+
     $ungrupedStatements = $this->cpClearedGetter->getUnCleared($uploadId, $groupId, true, "copyright");
     $copyrights = $this->groupStatements($ungrupedStatements, true, "copyright");
     
     $ungrupedStatements = $this->eccClearedGetter->getUnCleared($uploadId, $groupId);
-    $ecc = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $ecc = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $ungrupedStatements = $this->ipClearedGetter->getUnCleared($uploadId, $groupId);
-    $ip = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $ip = $this->groupStatements($ungrupedStatements, true, $agentCall);
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
