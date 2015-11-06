@@ -38,6 +38,22 @@ class UploadSrvPage extends UploadPageBase
     ));
   }
 
+  function check_if_host_is_allowed($host)
+  {
+    global $SysConf;
+    $sysConfig = $SysConf['SYSCONFIG'];
+    if(array_key_exists('UploadFromServerAllowedHosts',$sysConfig)){
+      $hostListPre = $sysConfig['UploadFromServerAllowedHosts'];
+      $hostList = explode(':',$hostListPre);
+    }
+    else
+    {
+      $hostList = ["localhost"];
+    }
+
+    return in_array($host,$hostList);
+   }
+
   /**
    * \brief checks, whether a normalized path starts with an path in the
    * whiteliste
@@ -49,11 +65,19 @@ class UploadSrvPage extends UploadPageBase
    */
   function check_by_whitelist($path)
   {
-    // TODO: get whitelist from configuration file / DB
-    $whitelist = ["/tmp"];
+    global $SysConf;
+    $sysConfig = $SysConf['SYSCONFIG'];
+    if(array_key_exists('UploadFromServerWhitelist',$sysConfig)){
+      $whitelistPre = $sysConfig['UploadFromServerWhitelist'];
+      $whitelist = explode(':',$whitelistPre);
+    }
+    else
+    {
+      $whitelist = ["/tmp"];
+    }
 
     foreach ($whitelist as $item)
-      if (substr($path,0,strlen($item)) === $item)
+      if (substr($path,0,strlen($item)) === trim($item))
         return TRUE;
     return FALSE;
    }
@@ -74,8 +98,6 @@ class UploadSrvPage extends UploadPageBase
    */
   protected function handleUpload(Request $request)
   {
-    global $MODDIR;
-    global $SYSCONFDIR;
     global $Plugins;
 
     define("UPLOAD_ERR_INVALID_FOLDER_PK", 100);
@@ -108,6 +130,11 @@ class UploadSrvPage extends UploadPageBase
     if(preg_match('/[^a-z.0-9]/i', $host))
     {
       $text = _("The given host is not valid.");
+      return array(false, $text, $description);
+    }
+    if(! $this->check_if_host_is_allowed($host))
+    {
+      $text = _("You are not allowed to upload from the chosen host.");
       return array(false, $text, $description);
     }
 
