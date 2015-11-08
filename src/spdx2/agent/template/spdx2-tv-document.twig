@@ -1,0 +1,60 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+##-------------------------
+## SPDX Document Information
+##-------------------------
+
+SPDXID: SPDXRef-DOCUMENT
+SPDXVersion: SPDX-2.0
+DataLicense: CC0-1.0
+LicenseListVersion: 2.0
+
+##-------------------------
+## Creation Information
+##-------------------------
+
+Creator: Person: {{ userName }}
+Creator: Organization: {{ organisation }}
+Creator: Tool: spxd2
+Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}{# date('c') for ISO 8601 is not parsed by spdxTool #}
+
+##-------------------------
+## Document Information
+##-------------------------
+
+DocumentName: {{ documentName }}
+CreatorComment: <text>
+This document was created using SPDX 2.0 using licenses from Fossology.
+</text>
+
+##-------------------------
+## Package Information
+##-------------------------
+{{ packageNodes }}
+
+##-------------------------
+## License Information
+##-------------------------
+
+{% for licenseId,extractedText in licenseTexts %}
+LicenseID: LicenseRef-{{ licenseId|replace(' ','-') }}
+ExtractedText: <text> {{ extractedText|replace({'\f':''}) }} </text>
+  
+{% endfor %}
+{#
+##-------------------------
+## Review Information
+##-------------------------
+
+Reviewer: Person: Suzanne Reviewer
+ReviewDate: 2011-03-13T00:00:00Z
+ReviewComment: <text>Another example reviewer.</text>
+
+Reviewer: Person: Joe Reviewer
+ReviewDate: 2010-02-10T00:00:00Z
+ReviewComment: <text>This is just an example.  Some of the non-standard licenses look like they are actually BSD 3 clause licenses</text>
+#}

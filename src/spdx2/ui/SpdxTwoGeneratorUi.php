@@ -51,6 +51,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
   {
     $text = _("Generate SPDX");
     menu_insert("Browse-Pfile::SPDX", 0, self::NAME, $text);
+    menu_insert("Browse-Pfile::SPDX-TV", 0, self::NAME . '&outputFormat=spdx2-tv', $text);
     
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
     

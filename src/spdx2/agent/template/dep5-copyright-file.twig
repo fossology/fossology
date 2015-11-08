@@ -14,12 +14,12 @@ Copyright: ##Hole_To_Fill##
 License: ##Hole_To_Fill##
 {% elseif concludedLicenses is empty %}
 License: {{ scannerLicenses|join('UNIQUESTRINGTOREPLACE')
-                                     |replace({' ':'-'})
-                                     |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
+                           |replace({' ':'-'})
+                           |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
 {% else %}
 License: {{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
-                                       |replace({' ':'-'})
-                                       |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
+                             |replace({' ':'-'})
+                             |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
 {% endif %}
 Comment: fileId={{ fileId }}
  .

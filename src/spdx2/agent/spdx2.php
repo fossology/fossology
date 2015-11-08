@@ -39,7 +39,7 @@ class SpdxTwoAgent extends Agent
 
   const OUTPUT_FORMAT_KEY = "outputFormat";
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
-  const AVAILABLE_OUTPUT_FORMATS = "spdx2,dep5";
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2-tv,dep5";
   const UPLOAD_ADDS = "uploadsAdd";
 
   /** @var UploadDao */
@@ -110,6 +110,8 @@ class SpdxTwoAgent extends Agent
     case "spdx2":
       $postfix = ".xml" . $postfix;
       break;
+    case "spdx2-tv":
+      break;
     case "dep5":
       $prefix = $prefix . "copyright-";
       break;
@@ -124,6 +126,9 @@ class SpdxTwoAgent extends Agent
     {
     case "spdx2":
       $fileName = $fileName .".rdf" ;
+      break;
+    case "spdx2-tv":
+      $fileName = $fileName .".txt" ;
       break;
     case "dep5":
       $fileName = $fileName .".txt" ;
@@ -202,6 +207,43 @@ class SpdxTwoAgent extends Agent
       }
     }
     return $filesWithLicenses;
+  }
+
+  protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
+  {
+    foreach($licenses as $licens)
+    {
+      if (! array_key_exists($licens, $filesWithLicenses))
+      {
+        $filesWithLicenses[$licens]['files']=array();
+        $filesWithLicenses[$licens]['copyrights']=array();
+      }
+      $filesWithLicenses[$licens]['files'][$file] = $fullPath;
+      $filesWithLicenses[$licens]['copyrights'][] = $copyrights;
+    }
+  }
+  
+  protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName)
+  {
+    $licensesWithFiles = array();
+    $treeDao = $this->container->get('dao.tree');
+    foreach($filesWithLicenses as $fileId=>$licenses)
+    {
+      $fullPath = $treeDao->getFullPath($fileId,$treeTableName);
+      if(!empty($licenses['concluded']) && count($licenses['concluded'])>0)
+      {
+        $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
+      }
+      elseif(!empty($licenses['scanner']))
+      {
+        $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['scanner'],$licenses['copyrights'],$fileId,$fullPath);
+      }
+      else
+      {
+        $this->toLicensesWithFilesAdder($licensesWithFiles,array("no License"),$licenses['copyrights'],$fileId,$fullPath);
+      }
+    }
+    return $licensesWithFiles;
   }
 
   /**
