@@ -5,29 +5,11 @@
    This file is offered as-is, without any warranty.
 #}
 
-Files: {{ fileName }}
-{% if copyrights is empty %}
-Copyright: ##Hole_To_Fill##
-{% else %}Copyright: {{ copyrights|join('\n           ') }}
+Files: {{ fileNames|join('\n       ') }}
+{% if copyrights is not empty %}
+Copyright: {{ copyrights|join('\n           ') }}
 {% endif %}
-{% if concludedLicenses is empty and scannerLicenses is empty %}
-License: ##Hole_To_Fill##
-{% elseif concludedLicenses is empty %}
-License: {{ scannerLicenses|join('UNIQUESTRINGTOREPLACE')
-                           |replace({' ':'-'})
-                           |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
-{% else %}
-License: {{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
-                             |replace({' ':'-'})
-                             |replace({'UNIQUESTRINGTOREPLACE':' or '}) }}
-{% endif %}
-Comment: fileId={{ fileId }}
- .
-  sha1={{ sha1 }}
-  md5={{ md5 }}
-{% if concludedLicenses is empty %}
-{% if scannerLicenses is not empty %}
- .
- License guesed by the scanners!
-{% endif %}
+License: {{ license }}
+{% if comment is not empty %}
+Comment: {{ comment }}
 {% endif %}

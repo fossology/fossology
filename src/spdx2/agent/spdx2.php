@@ -209,26 +209,47 @@ class SpdxTwoAgent extends Agent
     return $filesWithLicenses;
   }
 
+  /**
+   * @param string[][][] $filesWithLicenses
+   * @param string[] $licenses
+   * @param string[] $copyrights
+   * @param string $file
+   * @param string $gullPath
+   */
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
-    foreach($licenses as $licens)
+    sort($licenses);
+    $key = implode(" or ", $licenses);
+
+    if (! array_key_exists($key, $filesWithLicenses))
     {
-      if (! array_key_exists($licens, $filesWithLicenses))
-      {
-        $filesWithLicenses[$licens]['files']=array();
-        $filesWithLicenses[$licens]['copyrights']=array();
-      }
-      $filesWithLicenses[$licens]['files'][$file] = $fullPath;
-      $filesWithLicenses[$licens]['copyrights'][] = $copyrights;
+      $filesWithLicenses[$key]['files']=array();
+      $filesWithLicenses[$key]['copyrights']=array();
+    }
+
+    $filesWithLicenses[$key]['files'][$file] = $fullPath;
+    foreach($copyrights as $copyright){
+      if(!in_array($copyright, $filesWithLicenses[$key]['copyrights']))
+        $filesWithLicenses[$key]['copyrights'][] = $copyright;
     }
   }
-  
+
+  /**
+   * @param string[][][] $filesWithLicenses
+   * @param string $treeTableName
+   */
   protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName)
   {
     $licensesWithFiles = array();
     $treeDao = $this->container->get('dao.tree');
+    $filesProceeded = 0;
     foreach($filesWithLicenses as $fileId=>$licenses)
     {
+      $filesProceeded += 1;
+      if(($filesProceeded&2047)==0)
+      {
+        $this->heartbeat(count($filesProceeded));
+      }
       $fullPath = $treeDao->getFullPath($fileId,$treeTableName);
       if(!empty($licenses['concluded']) && count($licenses['concluded'])>0)
       {
@@ -236,11 +257,13 @@ class SpdxTwoAgent extends Agent
       }
       elseif(!empty($licenses['scanner']))
       {
-        $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['scanner'],$licenses['copyrights'],$fileId,$fullPath);
+        $msgLicense = "public-domain (scanners found: " . implode(' or ',$licenses['scanner']). ")";
+        $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
       else
       {
-        $this->toLicensesWithFilesAdder($licensesWithFiles,array("no License"),$licenses['copyrights'],$fileId,$fullPath);
+        $msgLicense = "public-domain";
+        $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
     }
     return $licensesWithFiles;
@@ -349,11 +372,24 @@ class SpdxTwoAgent extends Agent
 
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
-    $filesProceeded = 0;
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
+    if (strcmp($this->outputFormat, "dep5")!==0)
+    {
+      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $treeDao);
+    }
+    else
+    {
+      return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName, $treeDao);
+    }
+  }
+
+  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $treeDao)
+  {
+    $filesProceeded = 0;
     $content = '';
-    foreach($filesWithLicenses as $fileId=>$licenses) {
+    foreach($filesWithLicenses as $fileId=>$licenses)
+    {
       $filesProceeded += 1;
       if(($filesProceeded&2047)==0){
         $this->heartbeat($filesProceeded);
@@ -367,8 +403,37 @@ class SpdxTwoAgent extends Agent
           'fileName'=>$treeDao->getFullPath($fileId,$treeTableName),
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
-          'copyrights'=>$licenses['copyrights'])
-              );
+          'copyrights'=>$licenses['copyrights']));
+    }
+    return $content;
+  }
+
+  protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName, $treeDao)
+  {
+    $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
+
+    $content = '';
+    $lastStep = 0;
+    foreach($licensesWithFiles as $licenseId=>$entry)
+    {
+      $filesProceeded += count($entry['files']);
+      if($filesProceeded&(~2047) > $lastStep)
+      {
+        $this->heartbeat($filesProceeded);
+        $lastStep = $filesProceeded&(~2047) + 2048;
+      }
+
+      $comment = "";
+      if (strrpos($licenseId, "public-domain (scanners found: ", -strlen($licenseId)) !== false) {
+        $comment = substr($licenseId,15,strlen($licenseId)-16);
+        $licenseId = "public-domain";
+      }
+
+      $content .= $this->renderString($this->getTemplateFile('file'),array(
+          'fileNames'=>$entry['files'],
+          'license'=>$licenseId,
+          'copyrights'=>$entry['copyrights'],
+          'comment'=>$comment));
     }
     return $content;
   }
