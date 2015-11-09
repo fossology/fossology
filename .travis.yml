@@ -40,6 +40,7 @@ env:
    - PHPTESTSUITE='Fossology PhpUnit Agent Test Suite'
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - MAKETARGETS='all test-lib'
+   - TESTNAME=""
   matrix: 
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.5 CXX=clang++-3.5
@@ -62,10 +63,45 @@ matrix:
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.6
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
+
+    - env: TESTNAME="make install"
+      compiler: gcc
+      script:
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
+       - cd src/
+       - sudo composer install --dev
+       - sudo composer self-update
+       - cd ..
+       - sudo make install
+       - sudo /usr/local/lib/fossology/fo-postinstall
+    - env: TESTNAME="Unit Test (gcc)"
+      compiler: gcc
+      before_script:
+       - sudo apt-get install libcunit1-dev libcunit1-doc php5-xsl 
+       - cd src/
+       - composer install --dev
+       - composer self-update
+       - cd ..
+       - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
+       - echo "localhost:*:*:fossologytest:fossologytest" > ~/.pgpass
+       - chmod 0600 ~/.pgpass
+       - cat ~/.pgpass
+      script:
+       - make
+       - curl -sS https://getcomposer.org/installer | php
+       - sudo mv composer.phar /usr/local/bin/composer
+       - cd src/
+       - sudo composer install --dev 
+       - sudo composer self-update
+       - cd ..
+       - sudo make install
+       - sudo /usr/local/lib/fossology/fo-postinstall
+       - cd src/testing/unit
+       - sudo ./runAgentUnit.php
   allow_failures:
     - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
-
 script:
  - set -e
  - $CHECKBEFORE

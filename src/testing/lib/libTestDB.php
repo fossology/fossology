@@ -173,13 +173,13 @@ function TestDBInit($path=NULL, $dbName)
   $result = NULL;
   $lastUp = NULL;
   $sysc = getenv('SYSCONFDIR');
-  $fossInit = __DIR__ . '/../../../install/fossinit.php';
+  $fossInit = '/usr/local/lib/fossology/fossinit.php';
   $upOut = array();
   $cmd="$fossInit -d $dbName -f $path";
   $last = exec($cmd, $upOut, $upRtn);
   //echo "DB: schema up output is:\n" . implode("\n",$upOut) . "\n";
 
-  if($upRtn != 0)
+  if($upRtn != 0 && $upRtn != 26)
   {
     return(implode("\n", $upOut) . "\n");
   }
