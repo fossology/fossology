@@ -48,7 +48,7 @@ class HighlightRenderer extends Object
             Highlight::BULK => 'hi-bulk',
             Highlight::IP => 'hi-ip',
             Highlight::ECC => 'hi-mediumorchid',
-	    Highlight::KEYWORDOTHERS => 'hi-teal'
+            Highlight::KEYWORDOTHERS => 'hi-teal'
           );
   
   /**
