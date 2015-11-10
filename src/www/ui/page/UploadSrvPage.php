@@ -138,15 +138,8 @@ class UploadSrvPage extends UploadPageBase
       return array(false, $text, $description);
     }
 
-    if(!$this->path_is_pattern($sourceFiles))
-    {
-      $shortName = basename($sourceFiles);
-      if (empty($shortName))
-      {
-        $shortName = $sourceFiles;
-      }
-    }
-    else
+    $shortName = basename($sourceFiles);
+    if (empty($shortName))
     {
       $shortName = $sourceFiles;
     }
