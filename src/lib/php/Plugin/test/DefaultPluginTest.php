@@ -112,7 +112,7 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
     $this->logger = M::mock('Monolog\Logger');
 
     $container->shouldReceive('get')->with('ui.component.menu')->andReturn($this->menu);
-    $container->shouldReceive('get')->with('ui.component.micro-menu')->andReturn($this->microMenu);
+    $container->shouldReceive('get')->with('ui.component.micromenu')->andReturn($this->microMenu);
     $container->shouldReceive('get')->with('twig.environment')->andReturn($this->twigEnvironment);
     $container->shouldReceive('get')->with('logger')->andReturn($this->logger);
     $container->shouldReceive('get')->with('session')->andReturn($this->session);

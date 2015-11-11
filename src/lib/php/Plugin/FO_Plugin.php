@@ -214,7 +214,7 @@ class FO_Plugin implements Plugin
 
     global $container;
     $this->menu = $container->get('ui.component.menu');
-    $this->microMenu = $container->get('ui.component.micro-menu');
+    $this->microMenu = $container->get('ui.component.micromenu');
     $this->renderer = $container->get('twig.environment');
   }
 

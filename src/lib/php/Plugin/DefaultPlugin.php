@@ -92,7 +92,7 @@ abstract class DefaultPlugin implements Plugin
     $this->renderer = $this->getObject('twig.environment');
     $this->logger = $this->getObject('logger');
     $this->menu = $this->getObject('ui.component.menu');
-    $this->microMenu = $this->getObject('ui.component.micro-menu');
+    $this->microMenu = $this->getObject('ui.component.micromenu');
   }
 
   private function setParameter($key, $value)
