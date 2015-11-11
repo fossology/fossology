@@ -58,7 +58,7 @@ class TestLiteDb extends TestAbstractDb
 
     global $container;
     $logger = $container->get('logger');
-    $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
+    $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/db.sqlite.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
     
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);

@@ -79,7 +79,7 @@ class test_common_license_file extends PHPUnit_Framework_TestCase
     $PG_CONN = DBconnect($db_conf);
 
     $logger = new Monolog\Logger('default');
-    $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.sqlite.log';
+    $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/db.sqlite.log';
     $logger->pushHandler(new Monolog\Handler\StreamHandler($this->logFileName, Monolog\Logger::ERROR));
     $this->dbManager = new ModernDbManager($logger);
     $this->dbManager->setDriver(new Fossology\Lib\Db\Driver\Postgres($PG_CONN));
