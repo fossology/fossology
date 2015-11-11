@@ -56,6 +56,7 @@ class EccView extends Xpview
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (!empty($itemId) && !empty($uploadId)) {
       $menuText = "ECC";
+      $tooltipText = "Export Control Classification";
       $menuPosition = 56;
       $URI = EccView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
       $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
