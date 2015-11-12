@@ -274,13 +274,18 @@ class UserDao extends Object
         array($userId, $groupId), __FUNCTION__);
   }
 
-  public function getUserAndDefaultGroupByUserName($userName) {
+  public function getUserAndDefaultGroupByUserName($userName, $entitlement=false) {
+    $searchEmail = " ";
+    if($entitlement){
+      $searchEmail = " OR user_email=$1";
+    }
     $userRow = $this->dbManager->getSingleRow(
-        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
+        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1$searchEmail",
         array($userName), __FUNCTION__);
     if(empty($userRow)) {
       throw new \Exception('invalid user name');
     }
+    $userRow['entitlement'] = $entitlement;
     if ($userRow['group_fk']) {
       return $userRow;
     }
