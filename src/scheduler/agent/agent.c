@@ -541,7 +541,7 @@ static void jq_cmd_args_parse(char *jq_cmd_args, int max_cmd_args, int* argc, ch
   char needle[2] = " ";
   char *ptr, *saveptr, *jq_cmd_args_dup;
 
-  if (! jq_cmd_args)
+  if (jq_cmd_args == NULL)
     return;
 
   if (len < 2 || jq_cmd_args[0] != '-' || jq_cmd_args[1] != '-')
