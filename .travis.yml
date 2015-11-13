@@ -26,6 +26,8 @@ install:
  - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
  - sudo apt-get install liblocal-lib-perl
+ - sudo mkdir -p /var/local/cache/fossology
+ - sudo chown $(whoami) /var/local/cache/fossology
 
 before_script:
  - cd src/

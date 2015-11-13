@@ -25,6 +25,12 @@ use Fossology\UI\Page\HomePage;
  * @brief This is the main guts of the UI: Find the plugin and run it.
  */
 
+/* initialize session variable to run test in cli mode */
+if (!isset($_SESSION))
+{
+  $_SESSION = array();
+}
+
 $startTime = microtime(true);
 require_once(__DIR__ . "/../../lib/php/bootstrap.php");
 
