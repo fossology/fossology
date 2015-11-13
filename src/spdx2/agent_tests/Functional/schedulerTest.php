@@ -41,7 +41,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("spdx2test");
     $this->dbManager = $this->testDb->getDbManager();
@@ -52,7 +52,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->agentDir = dirname(dirname(__DIR__));
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

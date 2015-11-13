@@ -31,7 +31,7 @@ class PagedTextResultTest extends \PHPUnit_Framework_TestCase {
   /** @var PagedTextResult */
   private $pagedTextResult;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->pagedTextResult = new PagedTextResult(self::START_OFFSET);
   }

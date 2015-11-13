@@ -34,7 +34,7 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
   /** @var UserDao */
   private $userDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
@@ -43,7 +43,7 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
   
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

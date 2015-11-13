@@ -69,7 +69,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("deciderJobSched".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -89,7 +89,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

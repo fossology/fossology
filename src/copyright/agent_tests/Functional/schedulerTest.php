@@ -46,7 +46,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
   /** @var CopyrightDao */
   private $copyrightDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("copyrightSched".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -59,7 +59,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

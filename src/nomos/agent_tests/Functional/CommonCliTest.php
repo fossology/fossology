@@ -28,7 +28,7 @@ class CommonCliTest extends PHPUnit_Framework_TestCase
   /** @var string */
   protected $agentDir;
   
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("nomosfun".time());
     $this->agentDir = dirname(dirname(__DIR__));
@@ -44,7 +44,7 @@ class CommonCliTest extends PHPUnit_Framework_TestCase
     $this->testDb->alterTables(array('license_ref'), false);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testInstaller->uninstall($this->agentDir);
     $this->testInstaller->clear();

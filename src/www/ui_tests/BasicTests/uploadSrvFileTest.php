@@ -33,9 +33,7 @@ class uploadSrvFileTest extends fossologyTestCase {
 
   public $mybrowser;
 
-  public function setUp() {
-
-    global $URL;
+  protected function setUp() {
     $this->Login();
     $this->CreateFolder(1, 'SrvUploads', 'Folder for upload from server tests');
   }
@@ -51,5 +49,4 @@ class uploadSrvFileTest extends fossologyTestCase {
 
     $this->uploadServer('SrvUploads', $File, $Filedescription, null, 'all');
   }
-};
-?>
+}

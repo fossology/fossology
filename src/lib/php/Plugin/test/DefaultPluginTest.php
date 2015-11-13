@@ -96,7 +96,7 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
   /** @var TestPlugin */
   private $plugin;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
@@ -112,12 +112,12 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
     $container->shouldReceive('get')->with('logger')->andReturn($this->logger);
     $container->shouldReceive('get')->with('session')->andReturn($this->session);
     $this->container = $container;
-    $GLOBAL['container'] = $container;
+    $GLOBALS['container'] = $container;
 
     $this->plugin = new TestPlugin($this->name);
   }
 
-  public function tearDown() {
+  protected function tearDown() {
     M::close();
   }
 
