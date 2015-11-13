@@ -11,6 +11,7 @@
     <testsuite name="Fossology PhpUnit Test Suite">
       <directory suffix="Test.php">lib/php</directory>
       <file>cli/tests/test_fo_copyright_list.php</file>
+      <file>www/ui_tests/startUpTest.php</file>
     </testsuite>
 
     <testsuite name="Fossology PhpUnit Agent Test Suite">
