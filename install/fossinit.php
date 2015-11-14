@@ -295,9 +295,9 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release']=='2.6.3
   renameLicensesForSpdxValidation($Verbose);
 }
 
-if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1' || $sysconfig['Release']=='2.6.3.2')
+if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1' || $sysconfig['Release']=='2.6.3.2' || $sysconfig['Release'] == '2.6.3.3')
 {
-  $sysconfig['Release'] = '2.6.3.3';
+  $sysconfig['Release'] = '3.0.0';
 }
 
 $dbManager->begin();
