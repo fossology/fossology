@@ -39,7 +39,7 @@ class SpdxTwoAgent extends Agent
 
   const OUTPUT_FORMAT_KEY = "outputFormat";
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
-  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2-tv,dep5";
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5";
   const UPLOAD_ADDS = "uploadsAdd";
 
   /** @var UploadDao */
@@ -75,9 +75,50 @@ class SpdxTwoAgent extends Agent
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
   }
 
+  /**
+   * @param string[] $args
+   * @param string $key1
+   * @param string $key2
+   *
+   * @return string[] $args
+   */
+  protected function preWorkOnArgsFlp($args,$key1,$key2)
+  {
+    $needle = ' --'.$key2.'=';
+    if (strpos($args[$key1],$needle) !== false) {
+      $exploded = explode($needle,$args[$key1]);
+      $args[$key1] = trim($exploded[0]);
+      $args[$key2] = trim($exploded[1]);
+    }
+    return $args;
+  }
+
+  /**
+   * @param string[] $args
+   *
+   * @return string[] $args
+   */
+  protected function preWorkOnArgs($args)
+  {
+    if ((!array_key_exists(self::OUTPUT_FORMAT_KEY,$args)
+         || $args[self::OUTPUT_FORMAT_KEY] === "")
+        && array_key_exists(self::UPLOAD_ADDS,$args))
+    {
+      $args = $this->preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+    }
+    else
+    {
+      if (!array_key_exists(self::UPLOAD_ADDS,$args) || $args[self::UPLOAD_ADDS] === "")
+      {
+        $args = $this->preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+      }
+    }
+    return $args;
+  }
+
   function processUploadId($uploadId)
   {
-    $args = $this->args;
+    $args = $this->preWorkOnArgs($this->args);
 
     if(array_key_exists(self::OUTPUT_FORMAT_KEY,$args))
     {
@@ -110,7 +151,7 @@ class SpdxTwoAgent extends Agent
     case "spdx2":
       $postfix = ".xml" . $postfix;
       break;
-    case "spdx2-tv":
+    case "spdx2tv":
       break;
     case "dep5":
       $prefix = $prefix . "copyright-";
@@ -127,7 +168,7 @@ class SpdxTwoAgent extends Agent
     case "spdx2":
       $fileName = $fileName .".rdf" ;
       break;
-    case "spdx2-tv":
+    case "spdx2tv":
       $fileName = $fileName .".txt" ;
       break;
     case "dep5":
@@ -257,12 +298,12 @@ class SpdxTwoAgent extends Agent
       }
       elseif(!empty($licenses['scanner']))
       {
-        $msgLicense = "public-domain (scanners found: " . implode(' or ',$licenses['scanner']). ")";
+        $msgLicense = "NoLicenseConcluded (scanners found: " . implode(' or ',$licenses['scanner']). ")";
         $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
       else
       {
-        $msgLicense = "public-domain";
+        $msgLicense = "NoLicenseFound";
         $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
     }
@@ -395,12 +436,15 @@ class SpdxTwoAgent extends Agent
         $this->heartbeat($filesProceeded);
       }
       $hashes = $treeDao->getItemHashes($fileId);
+      $fileName = $treeDao->getFullPath($fileId,$treeTableName);
       $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
           'md5'=>$hashes['md5'],
           'uri'=>$this->uri,
-          'fileName'=>$treeDao->getFullPath($fileId,$treeTableName),
+          'fileName'=>$fileName,
+          'fileDirName'=>dirname($fileName),
+          'fileBaseName'=>basename($fileName),
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights']));
@@ -424,9 +468,9 @@ class SpdxTwoAgent extends Agent
       }
 
       $comment = "";
-      if (strrpos($licenseId, "public-domain (scanners found: ", -strlen($licenseId)) !== false) {
-        $comment = substr($licenseId,15,strlen($licenseId)-16);
-        $licenseId = "public-domain";
+      if (strrpos($licenseId, "NoLicenseConcluded (scanners found: ", -strlen($licenseId)) !== false) {
+        $comment = substr($licenseId,20,strlen($licenseId)-21);
+        $licenseId = "NoLicenseConcluded";
       }
 
       $content .= $this->renderString($this->getTemplateFile('file'),array(

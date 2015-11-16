@@ -5,9 +5,10 @@
    This file is offered as-is, without any warranty.
 #}
 
-RelationshipComment: {# TODO #}
+{# RelationshipComment: #}
 PackageName: {{ packageName }}
 PackageFileName: {{ uploadName }}
+SPDXID: SPDXRef-upload{{ uploadId }}
 PackageDownloadLocation: NOASSERTION
 PackageVerificationCode: {{ verificationCode }}
 PackageChecksum: SHA1: {{ sha1 }}
@@ -18,16 +19,13 @@ PackageChecksum: MD5: {{ md5  }}
 PackageLicenseConcluded: NOASSERTION
 {% else %}
 PackageLicenseConcluded: (LicenseRef-{{ mainLicenses|join('UNIQUESTRINGTOREPLACE')
-                                         |replace({' ':'-'})
-                                         |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
+                                                    |replace({' ':'-'})
+                                                    |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
 {% endif %}
 {% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments }} </text>
 {% endif %}
-  <spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
-    <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId }}">
-        <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
-        <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+LicenseInfoFromFiles: NOASSERTION
+CopyrightText: NOASSERTION
 
 ##--------------------------
 ## File Information

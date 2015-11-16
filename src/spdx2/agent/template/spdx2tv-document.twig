@@ -28,7 +28,7 @@ Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}{# date('c') for ISO 8601 is not par
 
 DocumentName: {{ documentName }}
 CreatorComment: <text>
-This document was created using SPDX 2.0 using licenses from Fossology.
+This document was created using licenses and an generator from Fossology.
 </text>
 
 ##-------------------------
@@ -45,16 +45,3 @@ LicenseID: LicenseRef-{{ licenseId|replace(' ','-') }}
 ExtractedText: <text> {{ extractedText|replace({'\f':''}) }} </text>
   
 {% endfor %}
-{#
-##-------------------------
-## Review Information
-##-------------------------
-
-Reviewer: Person: Suzanne Reviewer
-ReviewDate: 2011-03-13T00:00:00Z
-ReviewComment: <text>Another example reviewer.</text>
-
-Reviewer: Person: Joe Reviewer
-ReviewDate: 2010-02-10T00:00:00Z
-ReviewComment: <text>This is just an example.  Some of the non-standard licenses look like they are actually BSD 3 clause licenses</text>
-#}

@@ -154,9 +154,9 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     }
     return array($jobId,$jobQueueId);
   }
-  
+
   protected function getUpload($uploadId, $groupId)
-  {  
+  {
     if ($uploadId <=0)
     {
       throw new Exception(_("parameter error: $uploadId"));
