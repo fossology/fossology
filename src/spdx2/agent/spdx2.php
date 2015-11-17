@@ -133,12 +133,14 @@ class SpdxTwoAgent extends Agent
 
     $packageNodes = $this->renderPackage($uploadId);
     $additionalUploadIds = array_key_exists(self::UPLOAD_ADDS,$args) ? explode(',',$args[self::UPLOAD_ADDS]) : array();
+    $packageIds = array($uploadId);
     foreach($additionalUploadIds as $additionalId)
     {
       $packageNodes .= $this->renderPackage($additionalId);
+      $packageIds[] = $additionalId;
     }
 
-    $this->writeReport($packageNodes, $uploadId);
+    $this->writeReport($packageNodes, $packageIds, $uploadId);
     return true;
   }
 
@@ -169,7 +171,7 @@ class SpdxTwoAgent extends Agent
       $fileName = $fileName .".rdf" ;
       break;
     case "spdx2tv":
-      $fileName = $fileName .".txt" ;
+      $fileName = $fileName .".spdx" ;
       break;
     case "dep5":
       $fileName = $fileName .".txt" ;
@@ -374,7 +376,7 @@ class SpdxTwoAgent extends Agent
     $this->uri = $this->getUri($fileBase,$packageName);
   }
 
-  protected function writeReport($packageNodes, $uploadId)
+  protected function writeReport($packageNodes, $packageIds, $uploadId)
   {
     $fileBase = dirname($this->uri);
 
@@ -389,6 +391,7 @@ class SpdxTwoAgent extends Agent
         'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
         'organisation'=>'',
         'packageNodes'=>$packageNodes,
+        'packageIds'=>$packageIds,
         'licenseTexts'=>$this->getLicenseTexts())
             );
     file_put_contents($this->uri, $message);

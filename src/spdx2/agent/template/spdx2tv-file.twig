@@ -7,8 +7,8 @@
 
 ##File
 
-fileName: {{fileBaseName }}
-FilePath: {{ fileDirName }}
+FileName: {{ fileName }}
+SPDXID: SPDXRef-item{{ fileId }}
 {# FileType: OTHER #}
 FileChecksum: SHA1: {{ sha1 }}
 FileChecksum: MD5: {{ md5 }}
@@ -20,15 +20,15 @@ LicenseConcluded: (LicenseRef-{{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
                                                   |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
 {% endif %}
 {% if scannerLicenses is empty %}
-LicenseInfoInFile: NONE
+LicenseInfoInFile: NOASSERTION
 {% else %}
-LicenseInfoInFile: (LicenseRef-{{ scannerLicenses|join('UNIQUESTRINGTOREPLACE')
-                                                 |replace({' ':'-'})
-                                                 |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
+{% for lic in  scannerLicenses %}
+LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
+{% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
-{% if copyrights is empty %}
-FileCopyrightText: NONE
+{% if copyright is empty %}
+FileCopyrightText: NOASSERTION
 {% else %}
 FileCopyrightText: {{ copyright|join('\n')|replace({'\f':''}) }}
 {% endif %}

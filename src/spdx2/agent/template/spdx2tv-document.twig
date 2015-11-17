@@ -4,36 +4,38 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-##-------------------------
-## SPDX Document Information
-##-------------------------
-
-SPDXID: SPDXRef-DOCUMENT
 SPDXVersion: SPDX-2.0
 DataLicense: CC0-1.0
-LicenseListVersion: 2.0
-
-##-------------------------
-## Creation Information
-##-------------------------
-
-Creator: Person: {{ userName }}
-Creator: Organization: {{ organisation }}
-Creator: Tool: spxd2
-Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}{# date('c') for ISO 8601 is not parsed by spdxTool #}
 
 ##-------------------------
 ## Document Information
 ##-------------------------
 
+DocumentNamespace: {{ uri }}
 DocumentName: {{ documentName }}
+SPDXID: SPDXRef-DOCUMENT
+
+##-------------------------
+## Creation Information
+##-------------------------
+
+Creator: Tool: spxd2
+Creator: Person: {{ userName }}
+Creator: Organization: {{ organisation }}
 CreatorComment: <text>
-This document was created using licenses and an generator from Fossology.
+This document was created using licens information and an generator from Fossology.
 </text>
+Created: {{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}
+LicenseListVersion: 2.0
 
 ##-------------------------
 ## Package Information
 ##-------------------------
+
+{% for packageId, in packageIds %}
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-{{ packageId }}
+{% endfor %}
+
 {{ packageNodes }}
 
 ##-------------------------
@@ -42,6 +44,7 @@ This document was created using licenses and an generator from Fossology.
 
 {% for licenseId,extractedText in licenseTexts %}
 LicenseID: LicenseRef-{{ licenseId|replace(' ','-') }}
+LicenseName: {{ licenseId|replace(' ','-') }}
 ExtractedText: <text> {{ extractedText|replace({'\f':''}) }} </text>
   
 {% endfor %}

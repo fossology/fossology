@@ -30,7 +30,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
   const DEFAULT_OUTPUT_FORMAT = "spdx2";
   /** @var string */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
-  
+
   function __construct()
   {
     $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
@@ -49,12 +49,13 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
   function preInstall()
   {
-    $text = _("Generate SPDX");
-    menu_insert("Browse-Pfile::SPDX", 0, self::NAME, $text);
-    menu_insert("Browse-Pfile::SPDX-TV", 0, self::NAME . '&outputFormat=spdx2-tv', $text);
-    
-    menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
-    
+    $text = _("Generate SPDX2");
+    menu_insert("Browse-Pfile::SPDX2", 0, self::NAME, $text);
+    menu_insert("UploadMulti::Generate&nbsp;SPDX2", 0, self::NAME, $text);
+
+    $text = _("Generate SPDX2 in Tag/Value format");
+    menu_insert("Browse-Pfile::SPDX2&nbsp;Tag/Value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+
     $text = _("Generate Debian Copyright file");
     menu_insert("Browse-Pfile::DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
   }
@@ -115,19 +116,22 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $showJobsPlugin->OutputOpen();
     return $showJobsPlugin->getResponse();
   }
-  
+
+  protected function uploadsAdd($uploads)
+  {
+    if (count($uploads) == 0) {
+      return '';
+    }
+    return '--uploadsAdd='. implode(',', array_keys($uploads));
+  }
+
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
     $uploadId = $upload->getId();
-    $spdxTwoAgent = plugin_find('agent_spdx2');
+    $spdxTwoAgent = plugin_find('agent_'.$this->outputFormat);
     $userId = Auth::getUserId();
-    $jqCmdArgs = $spdxTwoAgent->uploadsAdd($addUploads);
+    $jqCmdArgs = $this->uploadsAdd($addUploads);
 
-    if (strcmp($this->outputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0)
-    {
-      $jqCmdArgs = '--outputFormat=' . $this->outputFormat . ' ' . $jqCmdArgs;
-    }
-    
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';

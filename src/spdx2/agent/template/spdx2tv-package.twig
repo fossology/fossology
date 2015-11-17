@@ -17,15 +17,19 @@ PackageChecksum: MD5: {{ md5  }}
 {# PackageChecksum: SSDEEP: #}
 {% if mainLicenses is empty %}
 PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
 {% else %}
 PackageLicenseConcluded: (LicenseRef-{{ mainLicenses|join('UNIQUESTRINGTOREPLACE')
                                                     |replace({' ':'-'})
                                                     |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
+PackageLicenseDeclared: (LicenseRef-{{ mainLicenses|join('UNIQUESTRINGTOREPLACE')
+                                                   |replace({' ':'-'})
+                                                   |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
 {% endif %}
 {% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments }} </text>
 {% endif %}
-LicenseInfoFromFiles: NOASSERTION
-CopyrightText: NOASSERTION
+PackageLicenseInfoFromFiles: NOASSERTION
+PackageCopyrightText: NOASSERTION
 
 ##--------------------------
 ## File Information
