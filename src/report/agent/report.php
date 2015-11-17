@@ -115,7 +115,7 @@ class ReportAgent extends Agent
   
   function __construct($groupBy = "content")
   {
-    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
     $this->ipClearedGetter = new XpClearedGetter("ip", "skipcontent", true);
     $this->eccClearedGetter = new XpClearedGetter("ecc", "skipcontent", true);
     $this->licenseClearedGetter = new LicenseClearedGetter();
