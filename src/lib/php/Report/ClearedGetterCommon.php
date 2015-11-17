@@ -119,7 +119,8 @@ abstract class ClearedGetterCommon
     $statements = array();
     $findings = array();
     foreach($ungrupedStatements as $statement) {
-      $content = convertToUTF8(htmlspecialchars($statement['content'], ENT_DISALLOWED), false);
+      $content = convertToUTF8($statement['content'], false);
+      $content = htmlspecialchars($content, ENT_DISALLOWED);
       $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
 
