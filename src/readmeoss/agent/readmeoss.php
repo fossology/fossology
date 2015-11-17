@@ -40,7 +40,7 @@ class ReadmeOssAgent extends Agent
 
   function __construct()
   {
-    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
     $this->licenseClearedGetter = new LicenseClearedGetter();
 
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
