@@ -257,14 +257,14 @@ class SpdxTwoAgent extends Agent
    * @param string[] $licenses
    * @param string[] $copyrights
    * @param string $file
-   * @param string $gullPath
+   * @param string $fullPath
    */
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
     sort($licenses);
     $key = implode(" or ", $licenses);
 
-    if (! array_key_exists($key, $filesWithLicenses))
+    if (!array_key_exists($key, $filesWithLicenses))
     {
       $filesWithLicenses[$key]['files']=array();
       $filesWithLicenses[$key]['copyrights']=array();
@@ -274,8 +274,8 @@ class SpdxTwoAgent extends Agent
     foreach($copyrights as $copyright){
       if(!in_array($copyright, $filesWithLicenses[$key]['copyrights']))
         $filesWithLicenses[$key]['copyrights'][] = $copyright;
+      }
     }
-  }
 
   /**
    * @param string[][][] $filesWithLicenses
@@ -416,20 +416,21 @@ class SpdxTwoAgent extends Agent
 
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
-    /* @var $treeDao TreeDao */
-    $treeDao = $this->container->get('dao.tree');
     if (strcmp($this->outputFormat, "dep5")!==0)
     {
-      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $treeDao);
+      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName);
     }
     else
     {
-      return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName, $treeDao);
+      return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
     }
   }
 
-  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $treeDao)
+  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
   {
+    /* @var $treeDao TreeDao */
+    $treeDao = $this->container->get('dao.tree');
+    
     $filesProceeded = 0;
     $content = '';
     foreach($filesWithLicenses as $fileId=>$licenses)
@@ -455,7 +456,7 @@ class SpdxTwoAgent extends Agent
     return $content;
   }
 
-  protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName, $treeDao)
+  protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName)
   {
     $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
 
