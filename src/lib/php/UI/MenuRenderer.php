@@ -41,10 +41,11 @@ class MenuRenderer extends Object
         $entry = $Val->HTML;
       }
       else if (!empty($Val->URI)) {
-        if (!empty($uploadId) && "tag" == $Val->URI)
-        {
+        if (!empty($uploadId) && "tag" == $Val->URI) {
           $tagstatus = TagStatus($uploadId);
-          if (0 == $tagstatus) break; // tagging on this upload is disabled
+          if (0 == $tagstatus) {  // tagging on this upload is disabled
+            break;
+          }
         }
 
         $entry = '<option value="' . Traceback_uri() . '?mod=' . $Val->URI . '&' . $parm . '"';

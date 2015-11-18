@@ -64,7 +64,6 @@ class AjaxAdminScheduler extends DefaultPlugin
       $text2 = _("Select a verbosity level");
       $V = $content."<br>$text2: <select name='level_list' id='level_list'>$verbose_list_option</select>";
     }
-
     else if('agents' == $operation)
     {
       /** @var DbManager */
@@ -103,14 +102,11 @@ class AjaxAdminScheduler extends DefaultPlugin
         $job_array[0] = "scheduler";
       }
     }
-    if ('pause' == $type)
-      $job_array = GetJobList("tart");
-    if ('restart' == $type)
+    if ('pause' == $type) {
+      $job_array = GetJobList("Started");
+    }
+    if ('restart' == $type) {
       $job_array = GetJobList("Paused");
-    $job_options = array();
-    foreach($job_array as $job_id)
-    {
-      $job_option[$job_id] = $job_id;
     }
     return $job_array;
   }
