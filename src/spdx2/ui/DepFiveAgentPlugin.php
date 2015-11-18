@@ -20,12 +20,12 @@ namespace Fossology\SpdxTwo;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
-class SpdxTwoAgentPlugin extends AgentPlugin
+class DepFiveAgentPlugin extends AgentPlugin
 {
   public function __construct() {
-    $this->Name = "agent_spdx2";
-    $this->Title =  _("SPDX2 generation");
-    $this->AgentName = "spdx2";
+    $this->Name = "agent_dep5";
+    $this->Title =  _("DEP5 copyright file generation");
+    $this->AgentName = "dep5";
     
     parent::__construct();
   }
@@ -44,4 +44,4 @@ class SpdxTwoAgentPlugin extends AgentPlugin
   }
 }
 
-register_plugin(new SpdxTwoAgentPlugin());
+register_plugin(new DepFiveAgentPlugin());

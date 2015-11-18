@@ -39,7 +39,7 @@ class ReadMeOssPlugin extends DefaultPlugin
   function preInstall()
   {
     $text = _("Generate ReadMe_OSS");
-    menu_insert("Browse-Pfile::ReadMe_OSS", 0, self::NAME, $text);
+    menu_insert("Browse-Pfile::Export&nbsp;ReadMe_OSS", 0, self::NAME, $text);
     
     menu_insert("UploadMulti::Generate&nbsp;ReadMe_OSS", 0, self::NAME, $text);
   }
