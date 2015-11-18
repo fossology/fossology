@@ -85,16 +85,11 @@ class ReportAgent extends Agent
                               "cellSpacing" => 5
                              );  
 
-  /** @var thTextStyle */
-  private $thStyle = array("bgColor" => "E0E0E0", 
-                           "valign" => "center"
-                          );
-
-  /** @var thTextStyle */
-  private $thTextStyle = array("size" => 12, 
-                               "align" => "center", 
-                               "bold" => true
-                              );
+  /** @var subHeadingStyle */
+  private $subHeadingStyle = array("size" => 9, 
+                                   "align" => "center",
+                                   "bold" => true
+                                  );
 
   /** @var licenseColumn */
   private $licenseColumn = array("size" => "10", 
@@ -222,28 +217,27 @@ class ReportAgent extends Agent
     $userId = $this->userId; 
 
     $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
-    $licenses = $this->groupStatements($ungrupedStatements, $extended, $agentCall);
+    $licenses = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
     
     $ungrupedStatements = $this->bulkMatchesGetter->getUnCleared($uploadId, $groupId);
-    $bulkLicenses = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $bulkLicenses = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $this->licenseClearedGetter->setOnlyComments(true);
     $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
-    $licenseComments = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $licenseComments = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
-    $ungrupedStatements = $this->licenseIrrelevantGetter->getUnCleared($uploadId, $groupId);
-    $licensesIrre = $this->groupStatements($ungrupedStatements, $extended,$agentCall); 
-    
+    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
+
     $ungrupedStatements = $this->cpClearedGetter->getUnCleared($uploadId, $groupId, true, "copyright");
     $copyrights = $this->groupStatements($ungrupedStatements, true, "copyright");
     
     $ungrupedStatements = $this->eccClearedGetter->getUnCleared($uploadId, $groupId);
-    $ecc = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $ecc = $this->groupStatements($ungrupedStatements, true, $agentCall);
     
     $ungrupedStatements = $this->ipClearedGetter->getUnCleared($uploadId, $groupId);
-    $ip = $this->groupStatements($ungrupedStatements, $extended,$agentCall);
+    $ip = $this->groupStatements($ungrupedStatements, true, $agentCall);
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
@@ -495,20 +489,16 @@ class ReportAgent extends Agent
    * @param Section $section 
    * @param array $mainLicenses 
    */ 
-  private function globalLicenseTable(Section $section, $mainLicenses)
+  private function globalLicenseTable(Section $section, $mainLicenses, $titleSubHeading)
   {
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
 
-    $section->addTitle(htmlspecialchars("Main Licenses"), 2);
+    $section->addTitle(htmlspecialchars("Main Licenses"), 2); 
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
-    $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
-    $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
-    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
-    
+    $table = $section->addTable($this->tablestyle);    
     if(!empty($mainLicenses)){
       foreach($mainLicenses as $licenseMain){
         if($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5")
@@ -551,23 +541,16 @@ class ReportAgent extends Agent
    * @param $licenses
    * @param $rowHead
    */ 
-  private function bulkLicenseTable(Section $section, $title, $licenses, $rowHead="")
+  private function bulkLicenseTable(Section $section, $title, $licenses, $titleSubHeading)
   {
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;  
 
     $section->addTitle(htmlspecialchars($title), 2);
-    $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
-    if(empty($rowHead)){
-      $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
-    }else{
-      $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
-    } 
-    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
+    $table = $section->addTable($this->tablestyle);
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
         $table->addRow($this->rowHeight);
@@ -598,29 +581,21 @@ class ReportAgent extends Agent
    * @param $licenses
    * @param $riskarray
    */ 
-  private function licensesTable(Section $section, $title, $licenses, $riskarray)
+  private function licensesTable(Section $section, $title, $licenses, $riskarray, $titleSubHeading)
   {
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
+    $emptyFlag = false;
 
     $section->addTitle(htmlspecialchars($title), 2);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $table->addCell($firstColLen, $this->thStyle)->addText("License", $this->thTextStyle);
-
-    if(empty($rowHead)){  
-      $table->addCell($secondColLen, $this->thStyle)->addText("License text", $this->thTextStyle);
-    }
-    else{  
-      $table->addCell($secondColLen, $this->thStyle)->addText($rowHead, $this->thTextStyle);
-    }
-    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
-
     if(!empty($licenses)){
       foreach($licenses as $licenseStatement){
-        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){ 
+        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){
+          $emptyFlag = true;
           $table->addRow($this->rowHeight);
           $cell1 = $table->addCell($firstColLen, $riskarray['color']); 
           $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
@@ -634,7 +609,9 @@ class ReportAgent extends Agent
           }
         }else{ continue; }
       }
-    }else{
+    }
+
+    if(empty($emptyFlag)){ 
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -646,22 +623,16 @@ class ReportAgent extends Agent
   /**
    * @param Section $section
    */ 
-  private function acknowledgementTable(Section $section)
+  private function acknowledgementTable(Section $section, $titleSubHeading)
   {
     $firstColLen = 3500;
     $secondColLen = 8000;
     $thirdColLen = 4000;
     
     $section->addTitle(htmlspecialchars("Acknowledgements"), 2);
-    $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $cell1 = $table->addCell($firstColLen, $this->thStyle); 
-    $cell1->addText(htmlspecialchars("ID of acknowledgements"), $this->thTextStyle);
-    $cell2 = $table->addCell($secondColLen, $this->thStyle); 
-    $cell2->addText(htmlspecialchars("Text of acknowledgements"), $this->thTextStyle);
-    $cell3 = $table->addCell($thirdColLen, $this->thStyle);
-    $cell3->addText(htmlspecialchars("Reference to the license"), $this->thTextStyle);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
+    $table = $section->addTable($this->tablestyle);
     $table->addRow($this->rowHeight);
     $table->addCell($firstColLen)->addText("");
     $table->addCell($secondColLen)->addText("");
@@ -677,7 +648,7 @@ class ReportAgent extends Agent
    * @param string $title 
    * @param array $statementsCEI
    */
-  private function getRowsAndColumnsForCEI(Section $section, $title, $statementsCEI)
+  private function getRowsAndColumnsForCEI(Section $section, $title, $statementsCEI, $titleSubHeading)
   {
     $smallRowHeight = 50;
     $firstColLen = 6500;
@@ -687,13 +658,9 @@ class ReportAgent extends Agent
     $html = new Html;
     
     $section->addTitle(htmlspecialchars($title), 2);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-
-    $table->addRow($this->rowHeight);
-    $table->addCell($firstColLen, $this->thStyle)->addText("Statements", $this->thTextStyle);
-    $table->addCell($secondColLen, $this->thStyle)->addText("Comments", $this->thTextStyle);
-    $table->addCell($thirdColLen, $this->thStyle)->addText("File path", $this->thTextStyle);
     if(!empty($statementsCEI)){
       foreach($statementsCEI as $statements){
         $table->addRow($smallRowHeight);
@@ -721,17 +688,15 @@ class ReportAgent extends Agent
    * @param String $title 
    * @param array $licensesIrre
    */
-  private function getRowsAndColumnsForIrre(Section $section, $title, $licensesIrre)
+  private function getRowsAndColumnsForIrre(Section $section, $title, $licensesIrre, $titleSubHeading)
   {
     $firstColLen = 6500;
     $secondColLen = 9000;
 
     $section->addTitle(htmlspecialchars($title), 2);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-    $cell = $table->addCell($firstColLen, $this->thStyle)->addText("Path", $this->thTextStyle);
-    $cell = $table->addCell($secondColLen, $this->thStyle)->addText("Files", $this->thTextStyle);
     if(!empty($licensesIrre)){    
       foreach($licensesIrre as $statements){
         $table->addRow($rowWidth, "pStyle");
@@ -756,21 +721,16 @@ class ReportAgent extends Agent
    * @param ItemTreeBounds $parentItem 
    * @param int $groupId
    */
-  private function licenseHistogram(Section $section, $parentItem, $groupId)
+  private function licenseHistogram(Section $section, $parentItem, $groupId, $titleSubHeading)
   {
     $firstColLen = 2000;
     $secondColLen = 2000;
     $thirdColLen = 5000;
 
     $section->addTitle(htmlspecialchars("Results of License Scan"), 2);
+    $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    $table->addRow($this->rowHeight);
-
-    $table->addCell($firstColLen, $this->thStyle)->addText("Scanner count", $this->thTextStyle);
-    $table->addCell($secondColLen, $this->thStyle)->addText("Edited count", $this->thTextStyle);
-    $table->addCell($thirdColLen, $this->thStyle)->addText("License name", $this->thTextStyle);
-
     $scannerLicenseHistogram = $this->licenseDao->getLicenseHistogram($parentItem);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($parentItem, $groupId);
     $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
@@ -835,7 +795,7 @@ class ReportAgent extends Agent
     /* Main heading starts*/
     $sR->reportTitle($section);
 
-    $contents = $this-> identifiedGlobalLicenses($contents);
+    $contents = $this->identifiedGlobalLicenses($contents);
     
     /* Summery table */
     $this->summaryTable($section, $uploadId, $userName, $contents['licensesMain']['statements'], $timestamp);
@@ -861,49 +821,50 @@ class ReportAgent extends Agent
     /* For other todolist */
     $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
-    /* Basic for clearing report */
-    //$sR->basicForClearingReport($section);
-
     /* Display scan results and edited results */
-    $this->licenseHistogram($section, $parentItem, $groupId);
+    $titleSubHeadingHistogram = "(Scanner count, edited count, License name)";
+    $this->licenseHistogram($section, $parentItem, $groupId, $titleSubHeadingHistogram);
 
     /* Display global licenses */
-    $this->globalLicenseTable($section, $contents['licensesMain']['statements']);
+    $titleSubHeadingLicense = "(License name, License text, File path)";
+    $this->globalLicenseTable($section, $contents['licensesMain']['statements'], $titleSubHeadingLicense);
 
     /* Display licenses(red) name,text and files */
     $heading = "Other OSS Licenses (red) - strong copy left Effect or Do not Use Licenses";
     $redLicense = array("color" => array("bgColor" => "F9A7B0"), "riskLevel" => array("5", "4")); 
-    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $redLicense);
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $redLicense, $titleSubHeadingLicense);
 
     /* Display licenses(yellow) name,text and files */
     $heading = "Other OSS Licenses (yellow) - additional obligations to common rules";
     $yellowLicense = array("color" => array("bgColor" => "FEFF99"), "riskLevel" => array("3", "2"));
-    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $yellowLicense);
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $yellowLicense, $titleSubHeadingLicense);
 
     /* Display licenses(white) name,text and files */
     $heading = "Other OSS Licenses (white) - only common rules";  
     $whiteLicense = array("color" => array("bgColor" => "FFFFFF"), "riskLevel" => array("", "0", "1"));
-    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense);
+    $this->licensesTable($section, $heading, $contents['licenses']['statements'], $whiteLicense, $titleSubHeadingLicense);
 
     /* Display acknowledgement */
-    $this->acknowledgementTable($section);
+    $titleSubHeadingAcknowledgement = "(ID of acknowledgements, Text of acknowledgements, Reference to the license)";
+    $this->acknowledgementTable($section, $titleSubHeadingAcknowledgement);
 
     /* Display copyright statements and files */
     $heading = "Copyrights";
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements']);
+    $titleSubHeadingCEI = "(Statements, Comments, File path)";
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements'], $titleSubHeadingCEI);
 
     /* Display Ecc statements and files */
     $heading = "Export Restrictions";
     $section->addBookmark("eccInternalLink");
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements']);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements'], $titleSubHeadingCEI);
 
     /* Display IP statements and files */
     $heading = "Intellectual Property";
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements']);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['ip']['statements'], $titleSubHeadingCEI);
 
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
-    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements']);
+    $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements'], $titleSubHeadingLicense);
 
     /* Display NON Functional Licenses license files */
     $heading = "Non Functional Licenses";
@@ -912,12 +873,13 @@ class ReportAgent extends Agent
 
     /* Display irrelavant license files */
     $heading = "Irrelevant Files";
-    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements']);
+    $titleSubHeadingIrre = "(Path, Files)";
+    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesIrre']['statements'], $titleSubHeadingIrre);
 
     /* Display comments entered for report */
-    $heading = "Notes";  
-    $rowHead = "Comment Entered";
-    $this->bulkLicenseTable($section, $heading, $contents['licenseComments']['statements'], $rowHead);
+    $heading = "Notes";
+    $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
+    $this->bulkLicenseTable($section, $heading, $contents['licenseComments']['statements'], $titleSubHeadingNotes);
 
 
     /* Footer starts */

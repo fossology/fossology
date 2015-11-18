@@ -182,11 +182,11 @@ class ReportStatic
 
     $rowWidth = 200;
     $rowWidth2 = 300;
-    $cellFirstLen = 5000;
-    $cellSecondLen = 5000;
-    $cellThirdLen = 3000;
-    $cellFourthLen = 3000;
-    $cellFifthLen = 3000;
+    $cellFirstLen = 4300;
+    $cellSecondLen = 4300;
+    $cellThirdLen = 2300;
+    $cellFourthLen = 2300;
+    $cellFifthLen = 2300;
 
     $section->addTitle(htmlspecialchars($heading), 2);
     $section->addText(htmlspecialchars($infoText), $infoTextStyle);
@@ -545,7 +545,7 @@ class ReportStatic
     $subHeadingStyle2 = array("size" => 10, "color" => "000000");
     $subHeading = "File list with specific obligations ";
     $subHeading1 = 'This is an optional chapter. it is oprional and should be used in special cases. if you just have a simple license as Apache-2.0 you must put in the note "not applicable"';
-    $subHeading2 = "Depending of the license additional license conditions to the Common Rules in computer 4.1. exist. Here is the list of all licenses found in this component with additional rules.";
+    $subHeading2 = "Depending of the license additional license conditions to the Common Rules in chapter 4.1 exist. Here is the list of all licenses found in this component with additional rules.";
 
     $section->addTitle(htmlspecialchars($subHeading), 3);
     $section->addText(htmlspecialchars($subHeading1), $subHeadingStyle1);
