@@ -50,14 +50,14 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
   function preInstall()
   {
     $text = _("Generate SPDX2");
-    menu_insert("Browse-Pfile::SPDX2", 0, self::NAME, $text);
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX2", 0, self::NAME, $text);
     menu_insert("UploadMulti::Generate&nbsp;SPDX2", 0, self::NAME, $text);
 
     $text = _("Generate SPDX2 in Tag/Value format");
-    menu_insert("Browse-Pfile::SPDX2&nbsp;Tag/Value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX2&nbsp;Tag/Value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
 
     $text = _("Generate Debian Copyright file");
-    menu_insert("Browse-Pfile::DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
   protected function handle(Request $request)
