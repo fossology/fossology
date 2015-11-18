@@ -150,14 +150,14 @@ class SpdxTwoAgent extends Agent
     $postfix = ".twig";
     switch ($this->outputFormat)
     {
-    case "spdx2":
-      $postfix = ".xml" . $postfix;
-      break;
-    case "spdx2tv":
-      break;
-    case "dep5":
-      $prefix = $prefix . "copyright-";
-      break;
+      case "spdx2":
+        $postfix = ".xml" . $postfix;
+        break;
+      case "spdx2tv":
+        break;
+      case "dep5":
+        $prefix = $prefix . "copyright-";
+        break;
     }
     return $prefix . $partname . $postfix;
   }
@@ -167,15 +167,15 @@ class SpdxTwoAgent extends Agent
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
     switch ($this->outputFormat)
     {
-    case "spdx2":
-      $fileName = $fileName .".rdf" ;
-      break;
-    case "spdx2tv":
-      $fileName = $fileName .".spdx" ;
-      break;
-    case "dep5":
-      $fileName = $fileName .".txt" ;
-      break;
+      case "spdx2":
+        $fileName = $fileName .".rdf" ;
+        break;
+      case "spdx2tv":
+        $fileName = $fileName .".spdx" ;
+        break;
+      case "dep5":
+        $fileName = $fileName .".txt" ;
+        break;
     }
     return $fileName;
   }
