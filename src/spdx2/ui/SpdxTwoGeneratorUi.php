@@ -49,12 +49,12 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
   function preInstall()
   {
-    $text = _("Generate SPDX2");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX2", 0, self::NAME, $text);
-    menu_insert("UploadMulti::Generate&nbsp;SPDX2", 0, self::NAME, $text);
+    $text = _("Generate SPDX report");
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;RDF", 0, self::NAME, $text);
+    menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
 
-    $text = _("Generate SPDX2 in Tag/Value format");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX2&nbsp;Tag/Value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+    $text = _("Generate SPDX report in tag:value format");
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
 
     $text = _("Generate Debian Copyright file");
     menu_insert("Browse-Pfile::Export&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
@@ -106,8 +106,8 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
 
     $vars = array('jqPk' => $jobQueueId,
                   'downloadLink' => Traceback_uri(). "?mod=download&report=".$jobId,
-                  'reportType' => strtoupper($this->outputFormat));
-    $text = sprintf(_("Generating ". strtoupper($this->outputFormat) . " report for '%s'"), $upload->getFilename());
+                  'reportType' => $this->outputFormat);
+    $text = sprintf(_("Generating ". $this->outputFormat . " report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
     $content = $this->renderer->loadTemplate("report.html.twig")->render($vars);
     $message = '<h3 id="jobResult"></h3>';
