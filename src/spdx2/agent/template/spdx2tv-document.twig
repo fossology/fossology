@@ -32,7 +32,7 @@ LicenseListVersion: 2.0
 ## Package Information
 ##-------------------------
 
-{% for packageId, in packageIds %}
+{% for packageId in packageIds %}
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-{{ packageId }}
 {% endfor %}
 
