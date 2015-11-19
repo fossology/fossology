@@ -49,6 +49,7 @@ src/copyright/agent/copyright
 src/copyright/agent/copyright_cov
 src/copyright/agent/ecc
 src/copyright/agent/ip
+src/copyright/agent/keyword
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
 src/copyright/agent_tests/results

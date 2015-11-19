@@ -235,6 +235,9 @@ class Xpview extends DefaultPlugin
     $text = _("View Export Control and Customs info");
     menu_insert("Clearing::ECC", 33, "ecc-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
 
+    $text = _("View Keyword info");
+    menu_insert("Clearing::Keyword", 32, "keyword-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
+
     $text = _("View file information");
     menu_insert("Clearing::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
 

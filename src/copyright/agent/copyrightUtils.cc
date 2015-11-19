@@ -172,6 +172,11 @@ static void addDefaultScanners(CopyrightState& state)
   if (types & 1<<0)
     state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
+
+#ifdef IDENTITY_KW
+  if (types & 1<<0)
+    state.addScanner(new regexScanner("keyword", "keyword"));
+#endif
 }
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {

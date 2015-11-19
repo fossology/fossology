@@ -310,6 +310,9 @@ class copyright_list extends FO_Plugin
         case "ecc":
           $TypeStr = _("export restriction");
           break;
+        case "keyword":
+          $TypeStr = _("Keyword Analysis");
+          break;
       }
       $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
@@ -404,6 +407,11 @@ class copyright_list extends FO_Plugin
         $tableName = "ecc";
         $modBack = "ecc-hist";
         $viewName = "ecc-view";
+        break;
+      case "keyword" :
+        $tableName = "keyword";
+        $modBack = "keyword-hist";
+        $viewName = "keyword-view";
         break;
       default:
         $tableName = "copyright";
