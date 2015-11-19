@@ -15,8 +15,9 @@
 {% block fileselect %}
 <li>
   <label for="{{ vcstypeField }}">
-    {{ 'Select the type of version control system:'| trans }}:
+    {{ 'Select the type of version control system'| trans }}:
   </label>
+  <br/>
   <select name="{{ vcstypeField }}">
     <option value='SVN'>SVN</option>
     <option value='Git'>Git</option>

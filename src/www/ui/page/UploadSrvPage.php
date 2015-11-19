@@ -80,7 +80,44 @@ class UploadSrvPage extends UploadPageBase
       if (substr($path,0,strlen($item)) === trim($item))
         return TRUE;
     return FALSE;
-   }
+  }
+
+  /**
+   * \brief chck if one file/dir has one permission
+   *
+   * \param $path - file path
+   * \param $server - host name
+   * \param $permission - permission x/r/w
+   *
+   * \return 1: yes; 0: no
+   */
+  function remote_file_permission($path, $server = 'localhost', $persmission = 'r')
+  {
+    /** local file */
+    if ($server === 'localhost' || empty($server))
+    {
+      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
+      return @fopen($temp_path, $persmission);
+    } else return 1;  // don't do the file permission check if the file is not on the web server
+  }
+
+  /**
+   * \brief chck if one file/dir exist or not
+   *
+   * \param $path - file path
+   * \param $server - host name
+   *
+   * \return 1: exist; 0: not
+   */
+  function remote_file_exists($path, $server = 'localhost')
+  {
+    /** local file */
+    if ($server === 'localhost' || empty($server))
+    {
+      $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
+      return file_exists($temp_path);
+    } else return 1;  // don't do the file exist check if the file is not on the web server
+  }
 
   /**
    * @param Request $request
@@ -162,6 +199,14 @@ class UploadSrvPage extends UploadPageBase
       $text = _("no suitable prefix found in the whitelist") . ", " . _("you are not allowed to upload this file");
       return array(false, $text, $description);
     }
+    if (!$this->path_is_pattern($sourceFiles) && !$this->remote_file_exists($sourceFiles, $host)) {
+      $text = _("'$sourceFiles' does not exist.\n");
+      return array(false, $text, $description);
+    }
+    if (!$this->path_is_pattern($sourceFiles) && !$this->remote_file_permission($sourceFiles, $host, "r")) {
+      $text = _("Have no READ permission on '$sourceFiles'.\n");
+      return array(false, $text, $description);
+    }
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
@@ -185,7 +230,6 @@ class UploadSrvPage extends UploadPageBase
 
     $jq_args = "$uploadId - $sourceFiles";
 
-    $host = 
     $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, "no", NULL, $host);
     if (empty($jobqueuepk)) {
       $text = _("Failed to insert task 'wget' into job queue");

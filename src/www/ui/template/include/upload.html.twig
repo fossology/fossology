@@ -20,6 +20,7 @@
     <ol>
       <li>
         <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded files:'| trans }}
+          <br/>
           {% include 'components/select-folder.html.twig' with {'name': folderParameterName} %}
         </label>
       </li>
