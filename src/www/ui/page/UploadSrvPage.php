@@ -77,8 +77,12 @@ class UploadSrvPage extends UploadPageBase
     }
 
     foreach ($whitelist as $item)
+    {
       if (substr($path,0,strlen($item)) === trim($item))
+      {
         return TRUE;
+      }
+    }
     return FALSE;
   }
 
@@ -98,7 +102,11 @@ class UploadSrvPage extends UploadPageBase
     {
       $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
       return @fopen($temp_path, $persmission);
-    } else return 1;  // don't do the file permission check if the file is not on the web server
+    }
+    else
+    {
+      return 1;  // don't do the file permission check if the file is not on the web server
+    }
   }
 
   /**
@@ -116,7 +124,11 @@ class UploadSrvPage extends UploadPageBase
     {
       $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
       return file_exists($temp_path);
-    } else return 1;  // don't do the file exist check if the file is not on the web server
+    }
+    else
+    {
+      return 1;  // don't do the file exist check if the file is not on the web server
+    }
   }
 
   /**
