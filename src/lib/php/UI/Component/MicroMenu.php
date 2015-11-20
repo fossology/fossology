@@ -52,8 +52,9 @@ class MicroMenu
     if (in_array($selectedFormat, $this->formatOptions)) {
       return $selectedFormat;
     }
-    if (empty($itemId))
+    if (empty($itemId)) {
       return self::FORMAT_FLOW;
+    }
     else {
       $mimeType = GetMimeType($itemId);
       list($type, $dummy) = explode("/", $mimeType, 2);
