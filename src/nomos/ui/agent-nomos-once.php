@@ -127,8 +127,8 @@ class agent_nomos_once extends FO_Plugin
          * the data from coming through.  Or there was an apache redirect,
          * which removes the POST data.
          */
-        $text = _("FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit.");
-        echo $text;
+        $tooltipText = _("FATAL: your file did not get passed throught.  Make sure this page wasn't a result of a web server redirect, or that it didn't exceed your php POST limit.");
+        echo $tooltipText;
       }
     }
 
@@ -143,12 +143,13 @@ class agent_nomos_once extends FO_Plugin
           "format",
           "item"
         ));
-        menu_insert("View::[BREAK]", 100);
-        $text = _("One-shot License, real-time license analysis");
-        menu_insert("View::One-Shot License", 101, $URI, $text);
-        menu_insert("View-Meta::[BREAK]", 100);
-        $text = _("Nomos One-shot, real-time license analysis");
-        menu_insert("View-Meta::One-Shot License", 101, $URI, $text);
+        $menuText = "One-Shot License";
+        $menuPosition = 100;
+        $tooltipText = _("One-shot License, real-time license analysis");
+        menu_insert("View::[BREAK]", $menuPosition);
+        menu_insert("View::{$menuText}", $menuPosition + 1, $URI, $tooltipText);
+        menu_insert("View-Meta::[BREAK]", $menuPosition);
+        menu_insert("View-Meta::{$menuText}", $menuPosition + 1, $URI, $tooltipText);
       }
     }
   } // RegisterMenus()
