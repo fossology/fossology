@@ -190,7 +190,7 @@ class SpdxTwoAgent extends Agent
 
     $licenseComment = $this->addScannerResults($filesWithLicenses, $itemTreeBounds);
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
-    $this->heartbeat(count($filesWithLicenses));
+    $this->heartbeat(0);
 
     $upload = $this->uploadDao->getUpload($uploadId);
     $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
@@ -231,7 +231,7 @@ class SpdxTwoAgent extends Agent
       $clearingsProceeded += 1;
       if(($clearingsProceeded&2047)==0)
       {
-        $this->heartbeat(count($filesWithLicenses));
+        $this->heartbeat(0);
       }
       if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
       {
@@ -292,7 +292,7 @@ class SpdxTwoAgent extends Agent
       $filesProceeded += 1;
       if(($filesProceeded&2047)==0)
       {
-        $this->heartbeat(count($filesProceeded));
+        $this->heartbeat(0);
       }
       $fullPath = $treeDao->getFullPath($fileId,$treeTableName);
       if(!empty($licenses['concluded']) && count($licenses['concluded'])>0)
@@ -433,12 +433,15 @@ class SpdxTwoAgent extends Agent
     $treeDao = $this->container->get('dao.tree');
     
     $filesProceeded = 0;
+    $lastValue = 0;
     $content = '';
     foreach($filesWithLicenses as $fileId=>$licenses)
     {
       $filesProceeded += 1;
-      if(($filesProceeded&2047)==0){
-        $this->heartbeat($filesProceeded);
+      if(($filesProceeded&2047)==0)
+      {
+        $this->heartbeat($filesProceeded - $lastValue);
+        $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
       $fileName = $treeDao->getFullPath($fileId,$treeTableName);
@@ -454,6 +457,7 @@ class SpdxTwoAgent extends Agent
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights']));
     }
+        $this->heartbeat($filesProceeded - $lastValue);
     return $content;
   }
 
@@ -462,14 +466,17 @@ class SpdxTwoAgent extends Agent
     $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
 
     $content = '';
+    $filesProceeded = 0;
     $lastStep = 0;
+    $lastValue = 0;
     foreach($licensesWithFiles as $licenseId=>$entry)
     {
       $filesProceeded += count($entry['files']);
       if($filesProceeded&(~2047) > $lastStep)
       {
-        $this->heartbeat($filesProceeded);
+        $this->heartbeat($filesProceeded - $lastValue);
         $lastStep = $filesProceeded&(~2047) + 2048;
+        $lastValue = $filesProceeded;
       }
 
       $comment = "";
@@ -484,6 +491,7 @@ class SpdxTwoAgent extends Agent
           'copyrights'=>$entry['copyrights'],
           'comment'=>$comment));
     }
+    $this->heartbeat($filesProceeded - $lastValue);
     return $content;
   }
 
