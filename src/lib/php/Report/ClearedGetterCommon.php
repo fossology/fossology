@@ -131,8 +131,9 @@ abstract class ClearedGetterCommon
         if ($description === null) {
           $text = "";
         } else {
-          if(!empty($textfinding))
+          if (!empty($textfinding)) {
             $content = $textfinding;
+          }
           $text = $description;
         }
       }
@@ -143,29 +144,28 @@ abstract class ClearedGetterCommon
 
       $groupBy = $statement[$this->groupBy];
 
-      if(empty($comments))
-      {
-        if (array_key_exists($groupBy, $statements))
-        {
+      if (empty($comments)) {
+        if (array_key_exists($groupBy, $statements)) {
           $currentFiles = &$statements[$groupBy]['files'];
-          if (!in_array($fileName, $currentFiles))
+          if (!in_array($fileName, $currentFiles)) {
             $currentFiles[] = $fileName;
-        }else{
+          }
+        } else {
           $statements[$groupBy] = array(
-            "content" => convertToUTF8($content, false),
-            "text" => convertToUTF8($text, false),
-            "comments" => convertToUTF8($comments, false),
-            "files" => array($fileName)
+              "content" => convertToUTF8($content, false),
+              "text" => convertToUTF8($text, false),
+              "comments" => convertToUTF8($comments, false),
+              "files" => array($fileName)
           );
         }
-      }else{
-          $statements[] = array(
+      } else {
+        $statements[] = array(
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "comments" => convertToUTF8($comments, false),
             "files" => array($fileName)
-          );
-      } 
+        );
+      }
     }
     arsort($statements);
     return $statements;

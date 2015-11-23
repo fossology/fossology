@@ -22,12 +22,13 @@ namespace Fossology\Lib\Util;
 class StringOperationTest extends \PHPUnit_Framework_TestCase
 {
   
-  public function setUp()
+  protected function setUp()
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown() {
+  protected function tearDown()
+  {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 

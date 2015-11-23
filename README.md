@@ -1,6 +1,7 @@
 # FOSSology
 
 [![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.png)](https://travis-ci.org/fossology/fossology/)
+[![Stories in Ready](https://badge.waffle.io/fossology/fossology.svg?label=ready&title=Ready)](http://waffle.io/fossology/fossology)
 
 ## About
 FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright

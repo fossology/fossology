@@ -22,6 +22,7 @@ namespace Fossology\Lib\Plugin;
 use Exception;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 use Mockery as M;
@@ -93,10 +94,13 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
   /** @var Menu|M\MockInterface */
   private $menu;
 
+  /** @var MicroMenu|M\MockInterface */
+  private $microMenu;
+
   /** @var TestPlugin */
   private $plugin;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
@@ -108,16 +112,17 @@ class DefaultPluginTest extends \PHPUnit_Framework_TestCase
     $this->logger = M::mock('Monolog\Logger');
 
     $container->shouldReceive('get')->with('ui.component.menu')->andReturn($this->menu);
+    $container->shouldReceive('get')->with('ui.component.micromenu')->andReturn($this->microMenu);
     $container->shouldReceive('get')->with('twig.environment')->andReturn($this->twigEnvironment);
     $container->shouldReceive('get')->with('logger')->andReturn($this->logger);
     $container->shouldReceive('get')->with('session')->andReturn($this->session);
     $this->container = $container;
-    $GLOBAL['container'] = $container;
+    $GLOBALS['container'] = $container;
 
     $this->plugin = new TestPlugin($this->name);
   }
 
-  public function tearDown() {
+  protected function tearDown() {
     M::close();
   }
 

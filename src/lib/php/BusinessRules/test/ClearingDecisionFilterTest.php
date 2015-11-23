@@ -28,11 +28,11 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
 
-  public function setUp() {
+  protected function setUp() {
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
   }
 
-  public function tearDown() {
+  protected function tearDown() {
     M::close();
   }
 

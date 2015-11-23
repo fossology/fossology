@@ -26,7 +26,7 @@ class AgentRefTest extends \PHPUnit_Framework_TestCase
   /** @var AgentRef */
   private $agentRef;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->agentRef = new AgentRef($this->agentId, $this->agentName, $this->agentRevision);
   }

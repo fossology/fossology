@@ -66,7 +66,9 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
     ConfigInit($sys_conf, $SysConf);
     $this->assertEquals("FOSSology Support",  $SysConf['SYSCONFIG']['SupportEmailSubject']);
     $hostname = exec("hostname -f");
-    if (empty($hostname)) $hostname = "localhost";
+    if (empty($hostname)) {
+      $hostname = "localhost";
+    }
     $FOSSologyURL = $hostname."/repo/";
     $this->assertEquals($FOSSologyURL,  $SysConf['SYSCONFIG']['FOSSologyURL']);
     $this->tearDownDb();

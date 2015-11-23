@@ -29,7 +29,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
   private $dbViewDao;
   private $dbManagerMock;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->dbViewDao = new DbViewProxy($this->dbViewQuery, $this->dbViewName);
     global $container;
@@ -38,7 +38,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     M::close();
   }

@@ -46,7 +46,7 @@ class LicenseMatchTest extends \PHPUnit_Framework_TestCase
   /** @var LicenseMatch */
   private $licenseMatch;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->id = 8;
     $this->shortName = "testSN";
@@ -67,7 +67,7 @@ class LicenseMatchTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

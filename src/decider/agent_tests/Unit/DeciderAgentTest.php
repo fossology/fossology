@@ -45,7 +45,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
 {
   private $highlightDao;
   
-  public function setUp()
+  protected function setUp()
   {
     global $container;
     $this->highlightDao = M::mock(HighlightDao::classname());
@@ -58,7 +58,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

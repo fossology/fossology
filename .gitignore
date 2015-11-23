@@ -29,7 +29,9 @@ src/cli/cp2foss.1
 src/cli/cp2foss.html
 src/cli/cp2foss.txt
 src/cli/fo_bucket_list
+src/cli/fo_chmod
 src/cli/fo_copyright_list
+src/cli/fo_folder
 src/cli/fo_nomos_license_list
 src/cli/fo_wrapper.php
 src/cli/fossjobs
