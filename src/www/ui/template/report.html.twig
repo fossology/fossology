@@ -9,7 +9,7 @@
     var resultEntity = $("#jobResult");
 
     function linkDownloadReport() {
-      resultEntity.html("<a href='{{ downloadLink }}'>Download {{ reportType }}</a>");
+      resultEntity.html("<a href='{{ downloadLink }}'>Download {{ reportType }} report</a>");
       window.location = "{{ downloadLink }}";
     }
     function genereationFailed(jqPk) {
@@ -21,7 +21,7 @@
       var jqPk = {{ jqPk }};
       if (jqPk > 0)
       {
-        resultEntity.html("{{ reportType }} generation scheduled as " + linkToJob(jqPk));
+        resultEntity.html("{{ reportType }} report generation scheduled as " + linkToJob(jqPk));
         queueUpdateCheck(jqPk, linkDownloadReport, genereationFailed);
       }
       else

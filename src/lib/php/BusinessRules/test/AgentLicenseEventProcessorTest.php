@@ -40,7 +40,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   private $latestScanners = array(array('agent_pk'=>23,'agent_name'=>'nomos'),
                     array('agent_pk'=>22,'agent_name'=>'monk'));
 
-  public function setUp()
+  protected function setUp()
   {
     $this->licenseDao = M::mock(LicenseDao::classname());
     $this->agentsDao = M::mock(AgentDao::classname());
@@ -60,7 +60,7 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     M::close();
   }

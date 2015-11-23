@@ -133,8 +133,9 @@ abstract class ClearedGetterCommon
           $text = "";
         } else {
           //$agentcall only have copyright so making it empty for other agents
-          if(!empty($textfinding) && empty($agentcall)) 
+          if(!empty($textfinding) && empty($agentcall)) {
             $content = $textfinding;
+          }
           $text = $description;
         }
       }
@@ -150,8 +151,7 @@ abstract class ClearedGetterCommon
           $currentFiles = &$statements[$groupBy]['files'];
           if (!in_array($fileName, $currentFiles))
             $currentFiles[] = $fileName;
-      }
-      else {
+      } else {
         $singleStatement = array(
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
@@ -180,9 +180,9 @@ abstract class ClearedGetterCommon
         }
       }
     }
-    if(!empty($findings))
+    if(!empty($findings)){
       $statements = array_merge($findings, $statements);
-
+    }
     arsort($statements);
     return $statements;
   }

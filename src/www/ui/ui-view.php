@@ -21,6 +21,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\TextFragment;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\TextRenderer;
 use Monolog\Logger;
@@ -71,26 +72,24 @@ class ui_view extends FO_Plugin
    */
   function RegisterMenus()
   {
-    $text = _("View file contents");
-    menu_insert("Browse-Pfile::View", 10, $this->Name, $text);
+    $tooltipText = _("View file contents");
+    menu_insert("Browse-Pfile::View", 10, $this->Name, $tooltipText);
     // For the Browse menu, permit switching between detail and summary.
 
     $itemId = GetParm("item", PARM_INTEGER);
-    $textFormat = $this->getFormatParameter($itemId);
+    $textFormat = $this->microMenu->getFormatParameter($itemId);
     $pageNumber = GetParm("page", PARM_INTEGER);
-    $this->addFormatMenuEntries($textFormat, $pageNumber);
+    $this->microMenu->addFormatMenuEntries($textFormat, $pageNumber);
 
     $URI = Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
-    if (GetParm("mod", PARM_STRING) == $this->Name)
+    $menuPosition = 59;
+    $menuText = "View";
+    $tooltipText = _("View file contents");
+    $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->Name, $this->Name . $URI, $tooltipText);
+
+    if (GetParm("mod", PARM_STRING) != $this->Name)
     {
-      menu_insert("View::View", 2);
-      menu_insert("View-Meta::View", 2);
-    } else
-    {
-      $text = _("View file contents");
-      menu_insert("View::View", 2, $this->Name . $URI, $text);
-      menu_insert("View-Meta::View", 2, $this->Name . $URI, $text);
-      menu_insert("Browse::View", -2, $this->Name . $URI, $text);
+      menu_insert("Browse::{$menuText}", -2, $this->Name . $URI, $tooltipText);
       menu_insert("Browse::[BREAK]", -1);
     }
   } // RegisterMenus()
@@ -165,6 +164,7 @@ class ui_view extends FO_Plugin
   {
     print $this->getText($inputFile,$startOffset,$Flowed,$outputLength,$splitPositions,$insertBacklink);
   }
+
   /**
    * \brief Given a file handle, display "strings" of the file.
    */
@@ -321,7 +321,7 @@ class ui_view extends FO_Plugin
     /* Display file contents */
     $output="";
     $openedFin = False;
-    $Format = $this->getFormatParameter($Item);
+    $Format = $this->microMenu->getFormatParameter($Item);
     if (empty($inputFile))
     {
       $inputFile = @fopen(RepPathItem($Item), "rb");
@@ -450,107 +450,6 @@ class ui_view extends FO_Plugin
   public function Output()
   {
     return $this->ShowView(NULL, "browse");
-  }
-
-  /**
-   * @param $itemId
-   * @return string
-   */
-  public function getFormatParameter($itemId=NULL)
-  {
-    switch (GetParm("format", PARM_STRING))
-    {
-      case 'hex':
-        $format = 'hex';
-        break;
-      case 'text':
-        $format = 'text';
-        break;
-      case 'flow':
-        $format = 'flow';
-        break;
-      default:
-        /* Determine default show based on mime type */
-        if (empty($itemId))
-          $format = 'flow';
-        else
-        {
-          $Meta = GetMimeType($itemId);
-          list($type, $dummy) = explode("/", $Meta, 2);
-          if ($type == 'text')
-          {
-            $format = 'text';
-          } else {
-            $format = 'flow';
-          }
-        }
-        break;
-    }
-    return $format;
-  }
-
-  /**
-   * @param $textFormat
-   * @return string
-   */
-  public function addFormatMenuEntries($textFormat, $pageNumber, $menuName="View")
-  {
-    $URI = Traceback_parm();
-    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
-    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
-
-    $pageNumberHex = NULL;
-    $pageNumberText = NULL;
-
-    /***********************************
-     * If there is paging, compute page conversions.
-     ***********************************/
-    switch ($textFormat)
-    {
-      case 'hex':
-        $pageNumberHex = $pageNumber;
-        $pageNumberText = intval($pageNumber * $this->blockSizeHex / $this->blockSizeText);
-        break;
-      case 'text':
-      case 'flow':
-        $pageNumberText = $pageNumber;
-        $pageNumberHex = intval($pageNumber * $this->blockSizeText / $this->blockSizeHex);
-        break;
-    }
-
-    menu_insert("$menuName::[BREAK]", -1);
-    switch ($textFormat)
-    {
-      case "hex":
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Hex", -10);
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-      case "text":
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        menu_insert("$menuName::Text", -11);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-      case "flow":
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        menu_insert("$menuName::Formatted", -12);
-        break;
-      default:
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-    }
   }
 
 }

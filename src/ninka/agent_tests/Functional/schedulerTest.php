@@ -45,8 +45,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
   /** @var UploadPermissionDao */
   private $uploadPermDao;
 
-
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("ninkaSched".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -57,7 +56,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
   }
   
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

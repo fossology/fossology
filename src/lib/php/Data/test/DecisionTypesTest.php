@@ -22,7 +22,7 @@ namespace Fossology\Lib\Data;
 use Fossology\Lib\Test\EnumMapTestBase;
 
 class DecisionTypesTest extends EnumMapTestBase {
-  public function setUp() {
+  protected function setUp() {
     $this->setTypes(new DecisionTypes());
   }
 

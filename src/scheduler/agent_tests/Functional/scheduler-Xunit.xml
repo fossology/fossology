@@ -1,0 +1,25 @@
+<?xml version="1.0" ?>
+<testsuites>
+  <testsuite assertions="3" errors="0" failures="0" name="JustStop" tests="1" time="57.2221210003">
+    <testcase assertions="3" class="scheduler stop" name="scheduler stop" time="5.02937698364"/>
+  </testsuite>
+  <testsuite assertions="3" errors="0" failures="0" name="TestAgents" tests="3" time="53.2339968681">
+    <testcase assertions="1" class="agents" name="agents" time="0.00806188583374"/>
+    <testcase assertions="1" class="status" name="status" time="0.00788283348083"/>
+    <testcase assertions="1" class="load" name="load" time="0.00815200805664"/>
+  </testsuite>
+  <testsuite assertions="6" errors="0" failures="0" name="Stop/Die" tests="2" time="12.0779461861">
+    <testcase assertions="3" class="scheduler stop" name="scheduler stop" time="5.0335149765"/>
+    <testcase assertions="3" class="scheduler die" name="scheduler die" time="5.02836608887"/>
+  </testsuite>
+  <testsuite assertions="3" errors="0" failures="1" name="RealAgents" tests="3" time="3.0415930748">
+    <testcase assertions="1" class="agents" name="agents" time="0.00740218162537">
+      <failure type="ResultMismatch">expected: 'adj2nest buckets copyright decider deciderjob delagent ecc maintagent mimetype monk monkbulk nomos pkgagent reuser ununpack wget_agent' != result: 'adj2nest buckets copyright decider deciderjob delagent ecc maintagent mimetype monk monkbulk ninka nomos pkgagent readmeoss reuser spdx2 ununpack wget_agent'</failure>
+    </testcase>
+    <testcase assertions="1" class="status" name="status" time="0.0069420337677"/>
+    <testcase assertions="1" class="load" name="load" time="0.00861716270447"/>
+  </testsuite>
+  <testsuite assertions="3" errors="0" failures="0" name="StopRealAgents" tests="1" time="7.0493080616">
+    <testcase assertions="3" class="Real Stop" name="Real Stop" time="5.02209091187"/>
+  </testsuite>
+</testsuites>

@@ -42,27 +42,6 @@ function js_url()
 
 
 /**
- * \brief Generate a popup alert window.
- *
- * \param $Message - the message to alert
- *
- * \return the html to alert (with embeded javascript) 
- */
-function PopupAlert($Message) {
-  if (!empty($_SESSION['NoPopup']) && ($_SESSION['NoPopup'] == 1))
-  {
-    $HTML = "<H3>" . htmlentities($Message,ENT_QUOTES) . "</H3>\n";
-  }
-  else
-  {
-    $HTML  = "<script language='javascript'>\n";
-    $HTML .= "alert('" . htmlentities($Message,ENT_QUOTES) . "');\n";
-    $HTML .= "</script>";
-  }
-  return($HTML);
-} // PopupAlert()
-
-/**
  * \brief Display a message.  This is used to convey the results of button push like
  * upload, submit, analyze, create, etc.
  *
@@ -77,7 +56,6 @@ function displayMessage($Message,$keep=NULL) {
   $HTML .= "\n<div id='dmessage'>";
   $text = _("Close");
   $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
-//  $HTML .= htmlentities($Message,ENT_QUOTES) . "\n";
   $HTML .= $Message;
   $HTML .= $keep . "\n</p>";
   $HTML .= "  <hr>\n";
@@ -159,6 +137,4 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
   }
 
   return($HTML);
-} // ActiveHTTPscript()
-
-?>
+}

@@ -34,7 +34,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
   /** @var UploadDao */
   private $uploadDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
@@ -56,7 +56,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

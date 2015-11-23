@@ -187,11 +187,13 @@ class agent_copyright_once extends FO_Plugin {
       {
         menu_insert("Main::Upload::One-Shot Copyright/Email/URL", $this->MenuOrder, $this->Name, $this->MenuTarget);
 
-        $text = _("Copyright/Email/URL One-shot, real-time analysis");
-        menu_insert("View::[BREAK]", 100);
-        menu_insert("View::One-Shot Copyright/Email/URL", 101, $this->Name, $text);
-        menu_insert("View-Meta::[BREAK]", 100);
-        menu_insert("View-Meta::One-Shot Copyright/Email/URL", 101, $this->Name, $text);
+        $tooltipText = _("Copyright/Email/URL One-shot, real-time analysis");
+        $menuText = "One-Shot Copyright/Email/URL";
+        $menuPosition = 100;
+        menu_insert("View::[BREAK]", $menuPosition);
+        menu_insert("View::{$menuText}", $menuPosition + 1, $this->Name, $tooltipText);
+        menu_insert("View-Meta::[BREAK]", $menuPosition);
+        menu_insert("View-Meta::{$menuText}", $menuPosition + 1, $this->Name, $tooltipText);
       }
     }
   } // RegisterMenus()

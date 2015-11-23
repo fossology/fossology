@@ -22,7 +22,7 @@ class NomosFunTest extends CommonCliTest
   /** @var string */
   protected $testdir;
 
-  public function setUp()
+  protected function setUp()
   {
     parent::setUp();
 
