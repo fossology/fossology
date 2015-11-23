@@ -57,7 +57,7 @@ class KeywordView extends Xpview
       $menuText = "keyword";
       $tooltipText = "keyword Analysis";
       $menuPosition = 56;
-      $URI = EccView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+      $URI = KeywordView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
       $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
     $licId = GetParm("lic", PARM_INTEGER);

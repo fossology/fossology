@@ -58,7 +58,7 @@ class IpView extends Xpview
       $menuText = "Patent";
       $tooltipText = "patent Analysis";
       $menuPosition = 56;
-      $URI = EccView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+      $URI = IpView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
       $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
     $licId = GetParm("lic", PARM_INTEGER);
