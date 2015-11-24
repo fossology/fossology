@@ -219,6 +219,10 @@ class UploadSrvPage extends UploadPageBase
       $text = _("Have no READ permission on '$sourceFiles'.\n");
       return array(false, $text, $description);
     }
+    if (!$this->path_is_pattern($sourceFiles) && is_file($sourceFiles) && filesize($sourceFiles) <= 0) {
+      $text = _("You can not upload an empty file.\n");
+      return array(false, $text, $description);
+    }
 
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
