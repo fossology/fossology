@@ -38,6 +38,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
 ";
 
 $upload = $item = "";
+$typeCopyright = array("statement","email","url");
 
 $longopts = array("user:", "password:", "type:", "container:");
 $options = getopt("c:u:t:hx:X:", $longopts);
@@ -77,7 +78,13 @@ foreach($options as $option => $value)
       $passwd = $value;
       break;
     case 'type':
-      $cpLister->setType($value);
+      if(empty($value) || in_array($value, $typeCopyright)){
+        $cpLister->setType($value);
+      }else{
+        print "Invalid argument '$value' for type.\n";
+        print $Usage;
+        return 1;
+      }
       break;
     case 'container':
       $cpLister->setContainerInclusion($value);
