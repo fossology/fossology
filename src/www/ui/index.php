@@ -25,6 +25,9 @@ use Fossology\UI\Page\HomePage;
  * @brief This is the main guts of the UI: Find the plugin and run it.
  */
 
+//print Document Type Definition
+print "<!DOCTYPE html>";
+
 /* initialize session variable to run test in cli mode */
 if (!isset($_SESSION))
 {
