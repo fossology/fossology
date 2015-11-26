@@ -148,9 +148,10 @@ abstract class ClearedGetterCommon
 
       if(empty($comments) && array_key_exists($groupBy, $statements))
       {
-          $currentFiles = &$statements[$groupBy]['files'];
-          if (!in_array($fileName, $currentFiles))
-            $currentFiles[] = $fileName;
+        $currentFiles = &$statements[$groupBy]['files'];
+        if (!in_array($fileName, $currentFiles)){
+          $currentFiles[] = $fileName;
+        }
       } else {
         $singleStatement = array(
             "content" => convertToUTF8($content, false),
