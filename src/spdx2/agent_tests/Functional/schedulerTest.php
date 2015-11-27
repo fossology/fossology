@@ -83,10 +83,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'));
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'));
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight'));
     
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
-    // $this->testDb->insertData_license_ref();
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
 
@@ -96,10 +95,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
     {
       return intval($matches[1]);
-    } else
-    {
-      return -1;
     }
+    return -1;
   }
   
   /** @group Functional */

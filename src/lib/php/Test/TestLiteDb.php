@@ -86,7 +86,7 @@ class TestLiteDb extends TestAbstractDb
     $Schema = array();
     require($coreSchemaFile);
     foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if( $invert^!in_array($tableName, $tableList) ){
+      if ($invert^!in_array($tableName, $tableList) || array_key_exists($tableName, $Schema['INHERITS'])){
         continue;
       }
       $columns = array();
@@ -98,7 +98,6 @@ class TestLiteDb extends TestAbstractDb
         $columns[$alterSql[3]] = "$alterSql[3] " . $alterSql[4];
       }
       $createSql = "CREATE TABLE $tableName (" . implode(',', $columns) . ')';
-      error_log($createSql,3,'/tmp/error.log');
       $this->dbManager->queryOnce($createSql);
     }
   }
