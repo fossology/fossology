@@ -8,32 +8,32 @@
 
 {% block content %}
 
-  <table width='800px' border='0'>
+  <table width='750px' border='0'>
     <tr>
       <td valign='top'>
         <h3 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
           {{ 'Bulk Recognition'| trans }}
         </h3>
-        <blockquote>
-          <p><font face="Arial, Helvetica, sans-serif">
-          {{ 'Going through an upload on a file by file basis can turn into an endless
+        <font face="Arial, Helvetica, sans-serif">
+          <p>
+          {{ 'Going through an upload on a file by file basis can turn into an almost endless
             task when considering larger packages, such as the Linux kernel, the open
             office source code or the boost library.'| trans }}
-          <br>
-          {{ 'In fact, in well organized projects, the license information will stay the
-          same across many files. Then, the idea of bulk-setting clearing decisions is
+          <p>
+          {{ 'However, in many projects, the license information will stay the
+          same across many files. Then, the idea of bulk-wise processing files is
           obvious considering a high number of files with exactly same license texts.'| trans }}
-          <br>
+          <p>
           {{ 'With bulk recognition, the user defines a text phrase and associates a
-          license entry or removal in the table of associated licenses for this file. In
-          other words, the user can define that at every file, where the given text is
-          found, the application shall either add or remove a license entry from the
+          license entry or removal in the table of associated licenses for this file. 
+          Then, at every file, where the given text is
+          found, the application either adds or removes a license entry from the
           license table.'| trans }}
-          <br>
+          <p>
           {{ 'The case of removal allows for the correction of scanner findings that are
           found among a number of files. The addition of a license entry will add license
           entry if this license has not been identified by scanner before. '| trans }}
-          <br>
+          <p>
           {{ 'Internally, the application will do three things on the files in the scope
           (either entire upload or current folder):'| trans }}
 		  <ul>
@@ -51,7 +51,114 @@
 		   </li>
 		   </ul>
           <p>
-        </blockquote>
+          {{ 'Bulk recognition allows for batch processing all files in the upload at once
+          when the licensing text stays the same.'| trans }}
+        <h4 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
+          {{ 'Single License Bulk Recognition'| trans }}
+        </h4>
+        <p>
+        {{ 'The single file bulk recognition is obvious. Imagine the following example
+        from zlib (<code>contrib/ dotzlib/ DotZLib/ ChecksumImpl.cs</code>):'| trans }}
+        <p>
+        <code>
+//
+// © Copyright Henrik Ravn 2004
+//
+// Use, modification and distribution are subject to the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+//
+using System;
+using System.Runtime.InteropServices;
+using System.Text;
+
+namespace DotZLib ...
+        </code>
+        <p>
+        {{ 'There are 9 files in zlib with the same header information about licensing.
+        The Nomos scanner identifies every occurrence of this header as a BSL-1.0
+        licensing. The goal is now to confirm this finding. The bulk scan be used in the
+        following way by clicking the button "Bulk Recognition...":'| trans }}
+        <ol>
+		   <li>
+			{{ 'Copy the text phrase <code>Use, modification and distribution are
+			subject to the Boost Software License, Version 1.0.</code> from the source
+			file display on the right.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Paste the test into the reference text field.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Make sure that the BSL-1.0 (Boost Software License) is selected.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Select “Add License” (plus sign).'| trans }}
+		   </li>
+		   <li>
+			{{ 'Run bulk scan on the entire upload.'| trans }}
+		   </li>
+		</ol>
+		<p>
+        {{ 'As a result, the bulk scan will create a license entry for the files, where
+        the text phrase is matching. Then, the decider will see that a (Nomos) scanner
+        finding is confirmed by the bulk scan and creates a clearing decision for all
+        matching files. '| trans }}
+        <h4 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
+          {{ 'Multi License Bulk Recognition'| trans }}
+        </h4>
+        <p>
+        {{ 'Imagine the following case form zlib ( <code>adler32.c</code> ):'| trans }}
+        <p>
+        <code>
+/* adler32.c -- compute the Adler-32 checksum of a data stream
+ * Copyright (C) 1995-2011 Mark Adler
+ * For conditions of distribution and use, see copyright notice in zlib.h
+ */
+
+/* @(#) $Id$ */
+
+#include "zutil.h"
+        </code>
+        <p>
+        {{ 'The Nomos scanner will result in a “zlib possibility” finding, meaning that
+        the Nomos does not exectyl now, if the zlib license is actually relevant here. 
+        In this case, the user wishes to do:'| trans }}
+        <ol>
+		   <li>
+			{{ 'Remove the zlib-possibility finding.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Add the zlib license as license entry.'| trans }}
+		   </li>
+		</ol>
+		<p>
+        {{ 'The way to perform that is the following:'| trans }}
+        <ol>
+		   <li>
+			{{ 'Copy the text phrase from the source file display on the right.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Paste the into the reference text.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Select “Add License” (plus sign).'| trans }}
+		   </li>
+		   <li>
+			{{ 'Make sure that the zlib license is selected.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Select “Remove License” (minus sign).'| trans }}
+		   </li>
+		   <li>
+			{{ 'Make sure that the zlib-possibilty is selected.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Run bulk scan on the entire upload.'| trans }}
+		   </li>		   
+		</ol>
+		<p>
+        {{ 'The result is a clearing decision set for all files with this statement
+        is set automatically.'| trans }}
+        </font>
         </td>
       <td><img src="{{ SiteURI }}images/white.png"></td>
     </tr>
