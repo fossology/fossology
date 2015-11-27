@@ -637,6 +637,7 @@ INSERT INTO clearing_decision (
               INNER JOIN license_set_bulk lsb ON lsb.lrb_fk = lrb_pk
               INNER JOIN license_ref lrf ON lsb.rf_fk = lrf.rf_pk
             ORDER BY lrb_pk";
+
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt, $params);
     
@@ -646,14 +647,14 @@ INSERT INTO clearing_decision (
       $bulkRun = $row['lrb_pk'];
       if (!array_key_exists($bulkRun, $bulks))
       {
-      $bulks[$bulkRun] = array(
-          "bulkId" => $row['lrb_pk'],
-          "id" => $row['ce_pk'],
-          "text" => $row['text'],
-          "matched" => $this->dbManager->booleanFromDb($row['matched']),
-          "tried" => $this->dbManager->booleanFromDb($row['tried']),
-          "removedLicenses" => array(),
-          "addedLicenses" => array());
+        $bulks[$bulkRun] = array(
+            "bulkId" => $row['lrb_pk'],
+            "id" => $row['ce_pk'],
+            "text" => $row['text'],
+            "matched" => $this->dbManager->booleanFromDb($row['matched']),
+            "tried" => $this->dbManager->booleanFromDb($row['tried']),
+            "removedLicenses" => array(),
+            "addedLicenses" => array());
       }
       $key = $this->dbManager->booleanFromDb($row['removing']) ? 'removedLicenses' : 'addedLicenses';
       $bulks[$bulkRun][$key][] = $row['rf_shortname'];
