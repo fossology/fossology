@@ -154,7 +154,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     $aaData = array();
     while ($row = $dbManager->fetchArray($res))
     {
-      $link = Traceback_uri() . '?mod=' . Traceback_parm() . '&rf=' . $row['rf_pk'];
+      $link = Traceback_uri() . '?mod=' . self::NAME . '&rf=' . $row['rf_pk'];
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $aaData[] = array($edit, htmlentities($row['rf_shortname']),
           htmlentities($row['rf_fullname']),
