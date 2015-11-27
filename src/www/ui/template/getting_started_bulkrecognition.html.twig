@@ -60,8 +60,7 @@
         {{ 'The single file bulk recognition is obvious. Imagine the following example
         from zlib (<code>contrib/ dotzlib/ DotZLib/ ChecksumImpl.cs</code>):'| trans }}
         <p>
-        <code>
-//
+        <pre>
 // © Copyright Henrik Ravn 2004
 //
 // Use, modification and distribution are subject to the Boost Software License, Version 1.0.
@@ -72,7 +71,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 
 namespace DotZLib ...
-        </code>
+        </pre>
         <p>
         {{ 'There are 9 files in zlib with the same header information about licensing.
         The Nomos scanner identifies every occurrence of this header as a BSL-1.0
@@ -108,7 +107,7 @@ namespace DotZLib ...
         <p>
         {{ 'Imagine the following case form zlib ( <code>adler32.c</code> ):'| trans }}
         <p>
-        <code>
+        <pre>
 /* adler32.c -- compute the Adler-32 checksum of a data stream
  * Copyright (C) 1995-2011 Mark Adler
  * For conditions of distribution and use, see copyright notice in zlib.h
@@ -117,7 +116,7 @@ namespace DotZLib ...
 /* @(#) $Id$ */
 
 #include "zutil.h"
-        </code>
+        </pre>
         <p>
         {{ 'The Nomos scanner will result in a “zlib possibility” finding, meaning that
         the Nomos does not exectyl now, if the zlib license is actually relevant here. 
