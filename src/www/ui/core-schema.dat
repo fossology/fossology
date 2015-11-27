@@ -894,6 +894,7 @@
   $Schema["TABLE"]["license_ref"]["rf_risk"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_risk\" IS 'risk level';";
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_risk\" int4";
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_risk\" DROP NOT NULL;";
+
   
 
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key';";
