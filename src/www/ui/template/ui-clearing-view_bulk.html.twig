@@ -11,19 +11,41 @@
     <br/>
     {{ 'Hint'|trans }}: {{ 'New license candidates can be added via'|trans }}
     <a href="?mod=advice_license">{{ 'menu Organize&raquo;Licenses'|trans }}</a><br/>
-    <select id="bulkAction">
-      <option value="add">{{ 'Add license'| trans }}</option>
-      <option value="remove">{{ 'Remove license'| trans }}</option>
-    </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
 
-    <span id="bulkExistingLicense">
-      <select id="bulkLicense" style="min-width:200px" >
-        {% for license in licenseArray %}
-          <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
-        {% endfor %}
-      </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
-      <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show license'| trans }}</button>
-    </span>
+    <table>
+      <tr>
+        <td style="padding-right:20px">
+          <span id="bulkExistingLicense">
+            <select id="bulkLicense" style="min-width:200px" >
+              {% for license in licenseArray %}
+                <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
+              {% endfor %}
+            </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
+          </span>
+        </td>
+        <td style="padding-right:20px">
+          <a href="#" id="bulkFormAddLicense" style="font-size:20px;"><img src="images/icons/add_16.png" title="append job to add selected license" alt="+"/></a>
+          <a href="#" id="bulkFormRmLicense" style="font-size:20px;"><img src="images/icons/remove_16.png" title="append job to remove selected license" alt="-"/></a>
+          <img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
+        </td>
+        <td>
+          <button type="button" onclick="popUpLicenseText('{{ bulkUri }}&rf=', '{{ 'License Text'| trans }}');">{{ 'Show license'| trans }}</button>
+        </td>
+      </tr>
+    </table>
+
+    <table id="bulkFormTable" class="dataTable" style="border: 1px solid black;">
+      <thead>
+        <hr id="bulkFormTableHead">
+          <th style="border-right:1px dashed black;">Action</th>
+          <th>License</th>
+          <th></th>
+        </hr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+
     <br/>
     {{ 'Reference text'| trans }}:<br/>
     <textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>

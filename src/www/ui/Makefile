@@ -56,6 +56,7 @@ install:
 	fi
 	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
 	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
+	rm -rf $(CACHEDIR)/*
 
 uninstall:
 	rm -rf $(DESTDIR)$(WEBDIR)
