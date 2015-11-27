@@ -45,8 +45,9 @@ class GettingStartedPage extends DefaultPlugin
   {
     $topMenuList = "Main::" . "Help::Getting Started";
     $menuOrder = 0;
-    menu_insert($topMenuList.'::Overview', $menuOrder-10, $this->getName()."&show=welcome");
+    menu_insert($topMenuList.'::Overview', $menuOrder-20, $this->getName()."&show=welcome");
     menu_insert($topMenuList.'::License Browser', $menuOrder, $this->getName()."&show=licensebrowser");
+    menu_insert($topMenuList.'::Bulk Recognition', $menuOrder, $this->getName()."&show=bulkrecognition");
   }
   
   /**
@@ -58,6 +59,9 @@ class GettingStartedPage extends DefaultPlugin
     $show = $request->get('show');
     if ($show=='licensebrowser'){
       return $this->render("getting_started_licensebrowser.html.twig");
+    }
+    if ($show=='bulkrecognition'){
+      return $this->render("getting_started_bulkrecognition.html.twig");
     }
     $login = _("Login");
     if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))

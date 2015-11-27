@@ -1,0 +1,60 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <table width='800px' border='0'>
+    <tr>
+      <td valign='top'>
+        <h3 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
+          {{ 'Bulk Recognition'| trans }}
+        </h3>
+        <blockquote>
+          <p><font face="Arial, Helvetica, sans-serif">
+          {{ 'Going through an upload on a file by file basis can turn into an endless
+            task when considering larger packages, such as the Linux kernel, the open
+            office source code or the boost library.'| trans }}
+          <br>
+          {{ 'In fact, in well organized projects, the license information will stay the
+          same across many files. Then, the idea of bulk-setting clearing decisions is
+          obvious considering a high number of files with exactly same license texts.'| trans }}
+          <br>
+          {{ 'With bulk recognition, the user defines a text phrase and associates a
+          license entry or removal in the table of associated licenses for this file. In
+          other words, the user can define that at every file, where the given text is
+          found, the application shall either add or remove a license entry from the
+          license table.'| trans }}
+          <br>
+          {{ 'The case of removal allows for the correction of scanner findings that are
+          found among a number of files. The addition of a license entry will add license
+          entry if this license has not been identified by scanner before. '| trans }}
+          <br>
+          {{ 'Internally, the application will do three things on the files in the scope
+          (either entire upload or current folder):'| trans }}
+		  <ul>
+		   <li>
+			{{ 'Match the given text in the files using the Monk text similarity agent.
+			Matching requires 100% similarity.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Add a license entry “bulk finding” in the list of licenses associated
+			for this file.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Run a decider agent that creates clearing decision if all license entries
+			for a file form pairs of scan result and bulk findings.'| trans }}
+		   </li>
+		   </ul>
+          <p>
+        </blockquote>
+        </td>
+      <td><img src="{{ SiteURI }}images/white.png"></td>
+    </tr>
+  </table>
+
+{% endblock %}

@@ -8,42 +8,151 @@
 
 {% block content %}
 
-  <p>
-    {{ 'On the top, you see for each scanner'| trans }}
-    ...
-  <ul>
-    <li>
-      {{ 'if it ever run on this upload'| trans }}
-    </li>
-    <li>
-      {{ 'the revision of the latest results'| trans }}
-    </li>
-    <li>
-      {{ 'the newest revision'| trans }}
-    </li>
-    <li>
-      {{ 'a link to restart the scanner if latest results are not from newest revision'| trans }}
-    </li>
-  </ul>
-  {{ 'If there are results from different revisions, you can select the results of these runs.'| trans }}
-</p>
-
-<p>
-  {{ '
-        On the left side, you see a list of all found licenses.
-        The counters show how often a license is found by scanners and how often it was concluded.
-        Click on the license name to search for where the license is found in the file listing.
-    '| trans }}
-</p>
-
-<p>
-  {{ '
-        On the right side, you see a list of all files or directories in the current directory.
-        You also the licenses found by any scanner and what scanners found it.
-        Also old results may be included if they differ from current revision of the scanner.
-        Results from an older version are marked.
-        You can search for any string in the file names or license names.
-    '| trans }}
-</p>
+  <table width='800px' border='0'>
+    <tr>
+      <td valign='top'>
+        <h3 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
+          {{ 'The License Browser'| trans }}
+        </h3>
+        <blockquote>
+          <p><font face="Arial, Helvetica, sans-serif">
+            {{ 'The license browser allows for – browsing license information in files. 
+            The license browser has two main views:'| trans }}
+          <br>
+		  <ul>
+		   <li>
+			{{ 'A single file view.'| trans }}
+		   </li>
+		   <li>
+			{{ 'An aggregated view of the license situation at the selected level in the
+			folder hierarchy.'| trans }}
+		   </li>
+		  </ul>
+          <p>
+        </blockquote>
+        <h4 style="color:#CC0000; font-family:Verdana, Arial, Helvetica, sans-serif;">
+          {{ 'The Single File View'| trans }}
+        </h4>
+        <p><font face="Arial, Helvetica, sans-serif">
+            {{ 'In the single file view, the user can review the license situation of an
+            individual file. The view is split into two parts:'| trans }}
+          <br>
+		  <ul>
+		   <li>
+			{{ 'On the left side, the file contents are displayed with highlighted license
+			relevant text.'| trans }}
+		   </li>
+		   <li>
+			{{ 'On the right side, the user has controls to navigate between files, manage
+			detected licenses and issue bulk scans.'| trans }}
+		   </li>
+		  </ul>
+		  <br>
+		  {{ 'Navigation in the single file view allows the user to go forward and backwards 
+		  between files in the file hierarchy. The order of elements is alphabetically.
+		  The user can choose between three settings for navigation:'| trans }}
+		  <ul>
+		   <li>
+			{{ 'Go through all files.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Go through files only where license relevant information was detected.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Go through files only where license relevant information was detected and
+			no clearing decision has been created so far.'| trans }}
+		   </li>
+		  </ul>
+		  {{ 'From a workflow point of view, it makes sense only to review files where
+		  license relevant information was found and no clearing decision has been created
+		  so far. If the user walks through a new upload without existing clearing decisions,
+		  all next files will not a have a clearing decision of course.'| trans }}
+		  <br>
+		  Below the navigation element, the user can select a clearing decision type:
+		  <ul>
+		   <li>
+			{{ 'No license found.'| trans }}
+		   </li>
+		   <li>
+			{{ 'To be discussed.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Irrelevant.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Identified.'| trans }}
+		   </li>
+		  </ul>
+		  {{ 'The term no license found means that a user cannot identify a license
+		  relevant statement in this file. From a legal point of view there is an
+		  important difference between “no license known” and “this file has no license”.
+		  Therefore “no license known” is preferred.'| trans }}
+		  <br>
+		  {{ 'To be discussed allows the user to mark a file for later discussion.
+		  This setting helps users to organize their tasks.'| trans }}
+		  <br>
+		  {{ 'Irrelevant means that a file has license information, however, the license
+		  information is irrelevant as a clearing decision. This covers the case, if the
+		  organization plans to deliver binaries only and the file under clearing is about
+		  setting up a unit test system – something that will not go into the
+		  distribution.'| trans }}
+		  <br>
+		  {{ 'In most cases the user will choose the identified setting, meaning that the
+		  license selection shown in the table will form a clearing decision.'| trans }}
+		  <br>
+		  {{ 'A clearing decision is the user statement that the file is licensed under
+		  one or more licenses as expressed in the table. The clearing will be saved for
+		  the file with this hash value and can be reused on user preference for future
+		  uploads (or future occurrences of a file with the same hash). Along with the
+		  licenses, the clearing decision contains the user id, the id of the group which
+		  the user has selected and the date.'| trans }}
+		  <br>
+		  {{ 'The table of licenses contains license selections from different sources:'| trans }}
+		  <br>
+		  <ul>
+		   <li>
+			{{ 'Licenses from the scanner findings, such as the Nomos, the Monk and the
+			Ninka scanner.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Licenses that were identified using the bulk feature.'| trans }}
+		   </li>
+		   <li>
+			{{ 'User decisions, i.e. licenses selected by the user.'| trans }}
+		   </li>
+		  </ul>
+		  {{ 'The bulk feature is explained in a different section.'| trans }}
+		  <br>
+		  {{ 'The user can select licenses from a list, of the desired license is not
+		  among the scanner findings. A list of licenses will appear when clicking
+		  the button.'| trans }}
+		  <br>
+		  {{ 'The table itself has five columns'| trans }}
+		  <ul>
+		   <li>
+			{{ 'The referring license short name. Clicking on the name opens a separate
+			window with this short name.'| trans }}
+		   </li>
+		   <li>
+			{{ 'The source for this license entry, denoting either the agent, or the bulk
+			or a user decision as source.'| trans }}
+		   </li>
+		   <li>
+			{{ 'A user can paste-in a custom license text in the text column. This custom
+			text is used for reporting instead of the reference text found in the database.'| trans }}
+		   </li>
+		   <li>
+			{{ 'A comment filed which allows leaving a comment per license decision.'| trans }}
+		   </li>
+		   <li>
+			{{ 'Action that allows for deleting a license entry or setting a license to
+			a main license.'| trans }}
+		   </li>
+		  </ul>
+          <p>
+      </td>
+      <td><img src="{{ SiteURI }}images/white.png"></td>
+    </tr>
+  </table>
 
 {% endblock %}
