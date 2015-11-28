@@ -28,10 +28,13 @@ sudo dpkg-reconfigure locales
 
 sudo apt-get update -qq -y
 
-sudo apt-get install -qq curl php5
+sudo apt-get install -qq curl php5 git libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
 
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/bin/composer
+
+# install ninka
+/vagrant/install/scripts/install-ninka.sh
 
 date > /etc/vagrant.provisioned
 
