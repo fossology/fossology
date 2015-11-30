@@ -648,7 +648,7 @@ int UnlinkContent (long child, long parent, int mode)
 /**
  * \brief ListFolders(): List every folder.
  */
-void ListFolders ()
+void ListFolders (int user_id)
 {
   int i,j,MaxRow;
   long Fid;	/* folder ids */
@@ -657,7 +657,17 @@ void ListFolders ()
   char *Desc;
   char SQL[MAXSQL];
   PGresult *result;
+  int cnt = 0;
 
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"select count(*) from users where user_pk = %d and user_perm >= 1;",user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  cnt = atol(PQgetvalue(result,0,0));
+  if(user_id != 0 && cnt == 0){ 
+    LOG_FATAL("user does not have the permsssion to view the folder list.\n");
+    exit(-1);
+  }
   printf("# Folders\n");
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_name from folder where folder_pk =1;");
@@ -851,7 +861,7 @@ int ReadParameter (char *Parm)
   else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
   else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
   else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
+  else if ((Type==2) && (Target==3))	{ ListFolders(0); rc=1; }
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);

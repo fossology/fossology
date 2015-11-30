@@ -144,7 +144,7 @@ int main (int argc, char *argv[])
   fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
   
   if (ListProj) ListUploads(user_id, user_perm);
-  if (ListFolder) ListFolders();
+  if (ListFolder) ListFolders(user_id);
 
   alarm(60);  /* from this point on, handle the alarm */
   if (DelUpload) 
