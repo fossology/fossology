@@ -27,8 +27,8 @@ LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
-{% if copyright is empty %}
+{% if copyrights is empty %}
 FileCopyrightText: NOASSERTION
 {% else %}
-FileCopyrightText: {{ copyright|join('\n')|replace({'\f':''}) }}
+FileCopyrightText: {{ copyrights|join('\n')|replace({'\f':''}) }}
 {% endif %}

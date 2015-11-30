@@ -26,13 +26,14 @@ install:
  - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
  - sudo apt-get install liblocal-lib-perl
+ - sudo apt-get install libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
  - sudo mkdir -p /var/local/cache/fossology
  - sudo chown $(whoami) /var/local/cache/fossology
 
 before_script:
  - cd src/
  - composer install --dev
- - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && (y y | sudo cpan -T Spreadsheet::WriteExcel) && sudo cpan -T ExtUtils::MakeMaker && sudo cpan -T DBD::SQLite && perl Makefile.PL && sudo ln -s $(pwd)/bin/ninka /usr/bin/ninka && export PERL5LIB=$(pwd)/lib && cd ../.. 
+ - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && perl Makefile.PL && make && sudo make install && cd ../..
  - cd ..
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
