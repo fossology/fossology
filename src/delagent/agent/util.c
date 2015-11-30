@@ -875,7 +875,7 @@ int check_permission_del(long upload_id, int user_id, int user_perm)
   PGresult *result = NULL;
   int count = 0;
 
-  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld;", upload_id);
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload join users on (users.user_pk = upload.user_fk or users.user_perm = 10) where upload_pk = %ld and users.user_pk = %d;", upload_id, user_id);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
   count = atoi(PQgetvalue(result, 0, 0)); 
@@ -930,7 +930,7 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   }
   else return -1;
   int i = 0;
-  char temp[2] = {0};
+  char temp[256] = {0};
   for (i = 0; i < strlen((char *)hash_value); i++)
   {
     sprintf(temp, "%02x", hash_value[i]);
