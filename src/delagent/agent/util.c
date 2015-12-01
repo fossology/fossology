@@ -923,6 +923,9 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  if (!PQntuples(result)){
+    return 0;
+  }
   strcpy(user_seed, PQgetvalue(result, 0, 0));
   strcpy(pass_hash_valid, PQgetvalue(result, 0, 1));
   *user_perm = atoi(PQgetvalue(result, 0, 2));
