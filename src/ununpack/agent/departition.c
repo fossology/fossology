@@ -43,9 +43,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-char Version[]=SVN_REV;
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
+char Version[]=COMMIT_HASH;
 #endif
 
 int	Test=0;	/* set to 0 to extract, 1 to just be verbose */

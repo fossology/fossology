@@ -38,8 +38,8 @@
 
 #include "finder.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="mimetype build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="mimetype build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="mimetype build version: NULL.\n";
 #endif
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
   PGresult *result;
   char sqlbuf[1024];
   int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[MAXCMD];
                            
@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
     }
   }
 
-  SVN_REV = fo_sysconfig("mimetype", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("mimetype", "COMMIT_HASH");
   VERSION = fo_sysconfig("mimetype", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   Agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 

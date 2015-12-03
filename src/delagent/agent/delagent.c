@@ -24,8 +24,8 @@
  */
 #include "delagent.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="delagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="delagent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="delagent build version: NULL.\n";
 #endif
@@ -79,7 +79,7 @@ int main (int argc, char *argv[])
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *Parm = NULL;
   //int Agent_pk = 0;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
   int option_index = 0;
@@ -137,9 +137,9 @@ int main (int argc, char *argv[])
     exit(-1);
   }
 
-  SVN_REV = fo_sysconfig("delagent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("delagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("delagent", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
   

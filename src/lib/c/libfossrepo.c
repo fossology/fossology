@@ -38,8 +38,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 #endif
 
 
-#ifdef SVN_REV
-char LibraryRepoBuildVersion[]="Library libfossrepo Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char LibraryRepoBuildVersion[]="Library libfossrepo Build version: " COMMIT_HASH ".\n";
 #endif
 
 #define MAXHOSTNAMELEN        64
