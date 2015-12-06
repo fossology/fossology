@@ -48,10 +48,19 @@ class HomePage extends DefaultPlugin
     $vars = array('isSecure' => $request->isSecure());
     if (array_key_exists('User', $_SESSION) && $_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
-      $vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+      if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
+      {
+        $vars['protocol'] = "HTTPS";
+      }
+      else
+      {
+        $vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+      }
+
       $vars['referrer'] = "?mod=browse";
       $vars['authUrl'] = "?mod=auth";
     }
+
     return $this->render("home.html.twig", $this->mergeWithDefault($vars));
   }
 }
