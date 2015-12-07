@@ -34,6 +34,8 @@ class core_auth extends FO_Plugin
   private $userDao;
   /** @var Session */
   private $session;
+  /** @var entitlementLogout */
+  private $entitlementLogout = "https://rs.entitlement.siemens.com/GetAccess/Logout";
 
   function __construct()
   {
@@ -105,7 +107,9 @@ class core_auth extends FO_Plugin
     if (!empty($_SESSION['time']))
     {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+      if (@$_SESSION['time'] + (60 * 480) < $Now){
+          $this->updateSession("", true);
+      }
     }
 
     $_SESSION['time'] = $Now;
@@ -115,7 +119,7 @@ class core_auth extends FO_Plugin
     } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
     {
       /* Sessions are not transferable. */
-      $this->updateSession("");
+      $this->updateSession("", true);
       $_SESSION['ip'] = $this->getIP();
     }
 
@@ -128,7 +132,7 @@ class core_auth extends FO_Plugin
       }
       if (time() >= @$_SESSION['time_check'])
       {
-        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
+        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME], @$_SESSION['entitlementCheck']);
         /* Check for instant logouts */
         if (empty($row['user_pass']))
         {
@@ -137,7 +141,7 @@ class core_auth extends FO_Plugin
         $this->updateSession($row);
       }
     } else
-      $this->updateSession("");
+      $this->updateSession("", true);
 
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION[Auth::USER_LEVEL]);
@@ -148,8 +152,9 @@ class core_auth extends FO_Plugin
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
+   * \Entitlement variable if false then update vice versa.
    */
-  function updateSession($userRow)
+  function updateSession($userRow, $entitlement=false)
   {
     global $SysConf;
 
@@ -172,6 +177,8 @@ class core_auth extends FO_Plugin
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $_SESSION['GroupName'] = $userRow['group_name'];
+    if(!$entitlement)
+      $_SESSION['entitlementCheck'] = $userRow['entitlement'];
   }
 
   /**
@@ -202,9 +209,16 @@ class core_auth extends FO_Plugin
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+    $entitlement = GetParm("entitlement", PARM_TEXT);
+    $SCMAIL = GetParm("HTTP_SCMAIL", PARM_TEXT);
+
     if (empty($referrer))
     {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
+    }
+    if (empty($SCMAIL))
+    {
+      $SCMAIL = GetArrayVal('HTTP_SCMAIL', $_SERVER);
     }
     $referrerQuery = parse_url($referrer,PHP_URL_QUERY);
     if($referrerQuery) {
@@ -214,11 +228,22 @@ class core_auth extends FO_Plugin
         $referrer = Traceback_uri();
       }
     }
-
-    $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    if(!empty($SCMAIL) && empty($userName)){
+      $entitlement = true; // To test in the server
+      $validLogin = $this->checkUsernameAndPassword($SCMAIL, "", $entitlement);
+    }else{
+      $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    }
     if ($validLogin)
     {
-      return new RedirectResponse($referrer);
+      if(empty($referrer)){
+        if(plugin_find_id('browse') < 0){
+          $newReferrer = Traceback_uri() . '?mod=' . 'browse' . '&entitlement=true';
+        }
+        return new RedirectResponse($newReferrer);
+      }else{
+        return new RedirectResponse($referrer);
+      }
     }
 
     $initPluginId = plugin_find_id("init");
@@ -241,10 +266,13 @@ class core_auth extends FO_Plugin
    */
   function OutputOpen()
   {
-    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
-    {
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User"){
+      if($_SESSION['entitlementCheck']){
+        $Uri = $this->entitlementLogout;
+      }else{
+        $Uri = Traceback_uri();
+      }
       $this->updateSession("");
-      $Uri = Traceback_uri();
       header("Location: $Uri");
       exit;
     }
@@ -257,7 +285,7 @@ class core_auth extends FO_Plugin
    *
    * @return boolean
    */
-  function checkUsernameAndPassword($userName, $password)
+  function checkUsernameAndPassword($userName, $password, $entitlement=false)
   {
     if (empty($userName) || $userName == 'Default User')
     {
@@ -265,7 +293,7 @@ class core_auth extends FO_Plugin
     }
     try
     {
-      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName, $entitlement);
     }
     catch(Exception $e)
     {
@@ -277,24 +305,26 @@ class core_auth extends FO_Plugin
       return false;
     }
 
-    /* Check the password -- only if a password exists */
-    if (!empty($row['user_seed']) && !empty($row['user_pass']))
+    if(!$entitlement)
     {
-      $passwordHash = sha1($row['user_seed'] . $password);
-      if (strcmp($passwordHash, $row['user_pass']) != 0)
+      /* Check the password -- only if a password exists */
+      if (!empty($row['user_seed']) && !empty($row['user_pass']))
       {
+        $passwordHash = sha1($row['user_seed'] . $password);
+        if (strcmp($passwordHash, $row['user_pass']) != 0)
+        {
+          return false;
+        }
+      } else if (!empty($row['user_seed']))
+      {
+        /* Seed with no password hash = no login */
+        return false;
+      } else if (!empty($password))
+      {
+        /* empty password required */
         return false;
       }
-    } else if (!empty($row['user_seed']))
-    {
-      /* Seed with no password hash = no login */
-      return false;
-    } else if (!empty($password))
-    {
-      /* empty password required */
-      return false;
     }
-
     /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
