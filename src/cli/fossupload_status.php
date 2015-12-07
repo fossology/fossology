@@ -33,7 +33,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --password  = password
   --groupname = a group the user belongs to (default active group)
   --uploadId  = id of upload
-  ";
+";
 
 $opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:"));
 

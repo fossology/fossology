@@ -385,7 +385,7 @@ function renameLicenses21to22($verbose)
     'ZPL2.0'  =>  'ZPL-2.0',
     'ZPL2.1'  =>  'ZPL-2.1'
     );
-  renameLicense($shortname_array, $verbose);
+  renameLicenses($shortname_array, $verbose);
 }
 
 function renameLicensesForSpdxValidation($verbose)
