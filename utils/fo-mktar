@@ -69,6 +69,7 @@ fi
 
 # Create the tar
 (
+cd ..
 if [ -f "$TARBASE.tar.gz" ]; then
    echo "WARNING: ../$TARBASE.tar.gz exists, removing"
    rm -f "$TARBASE.tar.gz"
