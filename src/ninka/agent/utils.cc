@@ -29,11 +29,11 @@ State getState(DbManager& dbManager)
 
 int queryAgentId(DbManager& dbManager)
 {
-  char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
+  char* COMMIT_HASH = fo_sysconfig(AGENT_NAME, "COMMIT_HASH");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
   char* agentRevision;
 
-  if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV))
+  if (!asprintf(&agentRevision, "%s.%s", VERSION, COMMIT_HASH))
     bail(-1);
 
   int agentId = fo_GetAgentKey(dbManager.getConnection(), AGENT_NAME, 0, agentRevision, AGENT_DESC);

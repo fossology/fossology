@@ -91,7 +91,7 @@ void fo_heartbeat()
 /**
 * @brief Checks that the agent is already in the agent table.
 *
-* This uses the VERSION and SVN_REV in the system configuration information to
+* This uses the VERSION and COMMIT_HASH in the system configuration information to
 * determine if a new agent record needs to be created for this agent in the
 * database.
 */
@@ -102,7 +102,7 @@ void fo_check_agentdb(PGconn* db_conn)
 
   db_sql = g_strdup_printf(sql_check, module_name,
     fo_config_get(sysconfig, module_name, "VERSION", NULL),
-    fo_config_get(sysconfig, module_name, "SVN_REV", NULL));
+    fo_config_get(sysconfig, module_name, "COMMIT_HASH", NULL));
   db_result = PQexec(db_conn, db_sql);
   if (PQresultStatus(db_result) != PGRES_TUPLES_OK)
   {
@@ -122,7 +122,7 @@ void fo_check_agentdb(PGconn* db_conn)
 
     db_sql = g_strdup_printf(sql_insert, module_name,
       fo_config_get(sysconfig, module_name, "VERSION", NULL),
-      fo_config_get(sysconfig, module_name, "SVN_REV", NULL),
+      fo_config_get(sysconfig, module_name, "COMMIT_HASH", NULL),
       fo_config_get(sysconfig, module_name, "DESCRIPTION", NULL));
     db_result = PQexec(db_conn, db_sql);
     if (PQresultStatus(db_result) != PGRES_COMMAND_OK)

@@ -48,7 +48,7 @@ $(EXES): %: %.c $(FOLIB)
 		mkdir -p $(MODDIR)/$@/agent; \
 	fi
 	$(CC) $< -o $(MODDIR)/$@/agent/$@ $(CFLAGS_LOCAL) $(FO_LDFLAGS)
-	@echo "[$@]\nVERSION=test\nSVN_REV=0M" > $(MODDIR)/$@/VERSION
+	@echo "[$@]\nVERSION=test\nCOMMIT_HASH=0M" > $(MODDIR)/$@/VERSION
 	@echo "[default]\ncommand=$@\nmax=-1\nspecial[]=\n" > $(MODDIR)/$@/$@.conf
 
 $(FO_CONF): $(V_LIST)

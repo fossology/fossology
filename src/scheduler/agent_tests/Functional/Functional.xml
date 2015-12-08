@@ -52,7 +52,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
   
     <!-- Stop the scheduler and make sure it isn't running anymore -->
@@ -82,7 +82,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
     <!-- Test that the correct agents passed the startup test -->
@@ -94,7 +94,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     <!-- Test that the scheduler has the correct status -->
     <test name = "status">
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </test>
     
     <!-- Test that the host load is correct for no running agents -->
@@ -152,7 +152,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
     <!-- Test that the correct agents passed the startup test -->
@@ -164,7 +164,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     <!-- Test that the scheduler has the correct status -->
     <test name = "status">
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </test>
     
     <!-- Test that the host load is correct for no running agents -->
@@ -188,7 +188,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
                  cli       = "{agentdir}/fo_cli"/>
     <setup>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
   
     <test name="Real Stop">
@@ -222,7 +222,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
       <upload file="{pwd}/testing/dataFiles/TestData/archives/3files.tar.bz2"/>
       <schedule upload="{upload_pk:0}"/>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
      
     <test name = "finished">
@@ -266,7 +266,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
         <schedule upload="{upload_pk:{i}}"/>
       </loop>
       <sequential command="{cli}" params="--config={config} -S" retval="0"
-                  result="scheduler:{pids:0} revision:{BUILD:SVN_REV} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
+                  result="scheduler:{pids:0} revision:{BUILD:COMMIT_HASH} daemon:0 jobs:0 log:{log} port:{FOSSOLOGY:port} verbose:952"/>
     </setup>
     
     <test name = "check completion">

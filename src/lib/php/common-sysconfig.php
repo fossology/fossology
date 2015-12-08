@@ -57,7 +57,7 @@ define("CONFIG_TYPE_TEXTAREA", 3);
  * For example:
  *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
  *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
- *  -  $SysConf[VERSION][SVN_REV] => "4467M"
+ *  -  $SysConf[VERSION][COMMIT_HASH] => "4467M"
  *
  * \Note Since so many files expect directory paths that used to be in pathinclude.php
  * to be global, this function will define the same globals (everything in the 

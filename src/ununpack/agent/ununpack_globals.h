@@ -17,9 +17,9 @@
 #ifndef UNUNPACK_GLOBALS_H
 #define UNUNPACK_GLOBALS_H
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
-char Version[]=SVN_REV;
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
+char Version[]=COMMIT_HASH;
 #else
 char Version[]="0.9.9";
 #endif

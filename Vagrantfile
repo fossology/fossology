@@ -33,6 +33,9 @@ sudo apt-get install -qq curl php5 git libspreadsheet-writeexcel-perl libdbd-sql
 curl -sS https://getcomposer.org/installer | php
 sudo mv composer.phar /usr/bin/composer
 
+# install spdx-tools
+/vagrant/install/scripts/install-spdx-tools.sh
+
 # install ninka
 /vagrant/install/scripts/install-ninka.sh
 
@@ -48,6 +51,9 @@ sudo /usr/local/lib/fossology/fo-postinstall
 sudo /etc/init.d/fossology start
 
 sudo cp /vagrant/install/src-install-apache-example.conf  /etc/apache2/conf-enabled/fossology.conf
+
+# increase upload size
+sudo /vagrant/install/scripts/php-conf-fix.sh --overwrite
 
 sudo /etc/init.d/apache2 restart
 

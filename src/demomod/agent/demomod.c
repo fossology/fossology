@@ -33,8 +33,8 @@
 
 #include "demomod.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="demomod build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="demomod build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="demomod build version: NULL.\n";
 #endif
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   char sqlbuf[512];
   int agent_pk = 0;
   int user_pk = 0;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
   int upload_pk = 0;
@@ -70,9 +70,9 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
-  SVN_REV = fo_sysconfig("demomod", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("demomod", "COMMIT_HASH");
   VERSION = fo_sysconfig("demomod", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), Unused, agent_rev, agentDesc);
 
   /* command line options */
