@@ -322,14 +322,19 @@ class ReportAgent extends Agent
    */        
   function identifiedGlobalLicenses($contents)
   {
-    $lenLicenses = count($contents["licenses"]["statements"]);
-    $lenLicensesMain = count($contents["licensesMain"]["statements"]) ;
-    for($j=0; $j<$lenLicensesMain; $j++){
-      for($i=0; $i<$lenLicenses; $i++){
-        if(!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"]))
-        {
-          $contents["licensesMain"]["statements"][$j]["files"] = $contents["licenses"]["statements"][$i]["files"];
-          unset($contents["licenses"]["statements"][$i]);
+    $lenTotalLics = count($contents["licenses"]["statements"]);
+    // both of this variables have same value but used for different operations
+    $lenMainLics = $lenLicsMain = count($contents["licensesMain"]["statements"]);
+    for($j=0; $j<$lenLicsMain; $j++){
+      for($i=0; $i<$lenTotalLics; $i++){
+        if(!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"])){
+          if(!strcmp($contents["licenses"]["statements"][$i]["text"], $contents["licensesMain"]["statements"][$j]["text"])){
+            $contents["licensesMain"]["statements"][$j]["files"] = $contents["licenses"]["statements"][$i]["files"];
+          } else {
+            $lenMainLics++;
+            $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licenses"]["statements"][$i];
+          }
+          unset($contents["licenses"]["statements"][$i]);          
         }
       }
     }
@@ -505,12 +510,13 @@ class ReportAgent extends Agent
     $table = $section->addTable($this->tablestyle);    
     if(!empty($mainLicenses)){
       foreach($mainLicenses as $licenseMain){
-        if($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5")
+        if($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5"){
           $styleColumn = array("bgColor" => "F9A7B0");
-        elseif($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3")
+        } elseif($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3"){
           $styleColumn = array("bgColor" => "FEFF99");
-        else
+        } else {
           $styleColumn = array("bgColor" => "FFFFFF");
+        }
         $table->addRow($this->rowHeight);
         $cell1 = $table->addCell($firstColLen, $styleColumn);
         $cell1->addText(htmlspecialchars($licenseMain["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
