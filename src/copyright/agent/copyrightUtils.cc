@@ -26,10 +26,10 @@ using namespace std;
 
 void queryAgentId(int& agent, PGconn* dbConn)
 {
-  char* SVN_REV = fo_sysconfig(AGENT_NAME, "SVN_REV");
+  char* COMMIT_HASH = fo_sysconfig(AGENT_NAME, "COMMIT_HASH");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
   char* agentRevision;
-  if (!asprintf(&agentRevision, "%s.%s", VERSION, SVN_REV))
+  if (!asprintf(&agentRevision, "%s.%s", VERSION, COMMIT_HASH))
   {
     exit(-1);
   };

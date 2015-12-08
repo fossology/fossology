@@ -47,8 +47,8 @@ char SQL[256];
 #define myBUFSIZ  2048
 
 /*
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 */
 
@@ -149,7 +149,7 @@ int	main	(int argc, char *argv[])
   int   user_pk;
   long  UploadPK=-1;
 
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
 
@@ -159,11 +159,11 @@ int	main	(int argc, char *argv[])
 /*
   Version reporting.
 */
-  SVN_REV = fo_sysconfig("regexscan", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("regexscan", "COMMIT_HASH");
   VERSION = fo_sysconfig("regexscan", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
 #ifdef REGEX_DEBUG
-  fprintf(stdout, "regexscan reports version info as '%s.%s'.\n", VERSION, SVN_REV);
+  fprintf(stdout, "regexscan reports version info as '%s.%s'.\n", VERSION, COMMIT_HASH);
 #endif
 
   /* Process command-line */

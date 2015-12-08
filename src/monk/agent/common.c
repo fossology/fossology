@@ -32,9 +32,9 @@ void bail(MonkState* state, int exitval) {
 }
 
 void queryAgentId(MonkState* state, const char* agentName, const char* agentDesc) {
-  char* svnRev = fo_sysconfig(agentName, "SVN_REV");
+  char* commitHash = fo_sysconfig(agentName, "COMMIT_HASH");
   char* version = fo_sysconfig(agentName, "VERSION");
-  gchar* agentRevision = g_strdup_printf("%s.%s", version, svnRev);
+  gchar* agentRevision = g_strdup_printf("%s.%s", version, commitHash);
 
   int agentId = fo_GetAgentKey(fo_dbManager_getWrappedConnection(state->dbManager),
                                agentName, 0, agentRevision, agentDesc);

@@ -56,9 +56,9 @@ class core_debug_fileloc extends FO_Plugin
   public function Output()
   {
     global $BINDIR, $LIBDIR, $LIBEXECDIR, $INCLUDEDIR, $LOGDIR,
-    $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $SVN_REV;
+    $SYSCONFDIR, $PROJECTSTATEDIR, $PROJECT, $VERSION, $COMMIT_HASH;
     $varray = array("BINDIR", "LIBDIR", "LIBEXECDIR", "INCLUDEDIR", "LOGDIR",
-           "SYSCONFDIR", "PROJECTSTATEDIR", "PROJECT", "VERSION", "SVN_REV");
+           "SYSCONFDIR", "PROJECTSTATEDIR", "PROJECT", "VERSION", "COMMIT_HASH");
     global $MenuList;
     $V = "";
     $text = _(" Variable");

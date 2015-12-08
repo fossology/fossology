@@ -29,8 +29,8 @@
 
 #include "maintagent.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="maintagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="maintagent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="maintagent build version: NULL.\n";
 #endif
@@ -43,7 +43,7 @@ PGconn    *pgConn = 0;        // database connection
 int main(int argc, char **argv) 
 {
   int cmdopt;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
 
@@ -53,9 +53,9 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
-  SVN_REV = fo_sysconfig("maintagent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("maintagent", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
 
   int ValidateFoldersExe = 0;
   int VerifyFilePermsExe = 0;
