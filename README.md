@@ -36,6 +36,10 @@ There is also a #fossology IRC channel on the freenode IRC network if
 you'd like to talk to other FOSSology users and developers.
 See [Contact Us](http://www.fossology.org/projects/fossology/wiki/Contact_Us)
 
+## Contributing
+
+We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md)
+
 ## License
 FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-public-license-v2)
 
