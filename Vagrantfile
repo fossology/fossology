@@ -49,6 +49,9 @@ sudo /etc/init.d/fossology start
 
 sudo cp /vagrant/install/src-install-apache-example.conf  /etc/apache2/conf-enabled/fossology.conf
 
+# increase upload size
+sudo /vagrant/install/scripts/php-conf-fix.sh --overwrite
+
 sudo /etc/init.d/apache2 restart
 
 echo "use your FOSSology at http://localhost:8081/repo/"
