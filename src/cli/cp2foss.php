@@ -100,7 +100,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -R         = (deprecated and ignored)
     -w         = (deprecated and ignored)
     -W         = (deprecated and ignored)
-  ";
+";
 /* Load command-line options */
 global $PG_CONN;
 $Verbose = 0;
