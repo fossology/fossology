@@ -227,7 +227,16 @@ class core_auth extends FO_Plugin
       global $Plugins;
       $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
-    $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
+    {
+      $this->vars['protocol'] = "HTTPS";
+    }
+    else
+    {
+      $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
+    }
+
     $this->vars['referrer'] = $referrer;
     $this->vars['loginFailure'] = !empty($userName) || !empty($password);
     if (!empty($userName) && $userName!='Default User') {

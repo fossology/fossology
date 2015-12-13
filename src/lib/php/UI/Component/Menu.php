@@ -283,7 +283,7 @@ class Menu extends Object
       $vars['versionInfo'] = array(
           'version' => $SysConf['BUILD']['VERSION'],
           'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
-          'commitHash' => $SysConf['BUILD']['COMMIT'],
+          'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
           'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
       );
     }

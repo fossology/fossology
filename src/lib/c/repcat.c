@@ -24,8 +24,8 @@ stdout = data from file.
 #include <stdio.h>
 #include "libfossrepo.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
 int main(int argc, char* argv[])

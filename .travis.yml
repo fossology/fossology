@@ -35,6 +35,7 @@ before_script:
  - composer install --dev
  - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && perl Makefile.PL && make && sudo make install && cd ../..
  - cd ..
+ - install/scripts/install-spdx-tools.sh
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
  
@@ -82,5 +83,6 @@ script:
  - set -e
  - $CHECKBEFORE
  - make $MAKETARGETS
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
  - set +e

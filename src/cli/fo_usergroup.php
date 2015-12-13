@@ -36,7 +36,7 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
   --permlvl   = group permission level (-1: None, ".UserDao::USER.": User, ".UserDao::ADMIN.": Admin, ".UserDao::ADVISOR.": Advisor)
   --accesslvl   = user database permission level (".Auth::PERM_NONE.": None, ".Auth::PERM_READ.": Read, ".Auth::PERM_WRITE.": Write, ".Auth::PERM_ADMIN.": Admin)
   --folder  = root folder
-  ";
+";
 $opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:', 'accesslvl:', 'folder:'));
 
 if(array_key_exists('h',$opts))
