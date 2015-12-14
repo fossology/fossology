@@ -126,7 +126,7 @@ class ReportAgent extends Agent
     $this->userDao = $this->container->get("dao.user");
   }
 
-  private function groupStatements(&$ungrupedStatements, $extended, $agentCall)
+  private function groupStatements(&$ungrupedStatements, $extended, $agentCall="")
   {
     $statements = array();
     $findings = array();
@@ -146,7 +146,7 @@ class ReportAgent extends Agent
         if ($description === null) {
           $text = "";
         } else {
-          if(!empty($textfinding) && $agentCall == "copyright"){ 
+          if(!empty($textfinding) && empty($agentCall)){ 
             $content = $textfinding;
           }
           $text = $description;
@@ -226,11 +226,11 @@ class ReportAgent extends Agent
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
     
     $ungrupedStatements = $this->bulkMatchesGetter->getUnCleared($uploadId, $groupId);
-    $bulkLicenses = $this->groupStatements($ungrupedStatements, true, $agentCall);
+    $bulkLicenses = $this->groupStatements($ungrupedStatements, true);
     
     $this->licenseClearedGetter->setOnlyComments(true);
     $ungrupedStatements = $this->licenseClearedGetter->getUnCleared($uploadId, $groupId);
-    $licenseComments = $this->groupStatements($ungrupedStatements, true, $agentCall);
+    $licenseComments = $this->groupStatements($ungrupedStatements, true);
     
     $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
 
@@ -238,10 +238,10 @@ class ReportAgent extends Agent
     $copyrights = $this->groupStatements($ungrupedStatements, true, "copyright");
     
     $ungrupedStatements = $this->eccClearedGetter->getUnCleared($uploadId, $groupId);
-    $ecc = $this->groupStatements($ungrupedStatements, true, $agentCall);
+    $ecc = $this->groupStatements($ungrupedStatements, true);
     
     $ungrupedStatements = $this->ipClearedGetter->getUnCleared($uploadId, $groupId);
-    $ip = $this->groupStatements($ungrupedStatements, true, $agentCall);
+    $ip = $this->groupStatements($ungrupedStatements, true);
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
