@@ -219,8 +219,12 @@ class ui_download extends FO_Plugin
     $session = $container->get('session');
     $session->save();
 
+    $filenameFallback = str_replace('%','_',$filename);
+    $filenameFallback = str_replace('/','_',$filenameFallback);
+    $filenameFallback = str_replace('\\','_',$filenameFallback);
+
     $response = new BinaryFileResponse($path);
-    $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename);
+    $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, $filenameFallback);
     if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx')
     {
       $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
