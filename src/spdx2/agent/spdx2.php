@@ -396,10 +396,9 @@ class SpdxTwoAgent extends Agent
         'licenseTexts'=>$this->getLicenseTexts())
             );
 
-    // To ensure the file is valid, replace copyright unicode symbols with (c),
-    // and any other non-printable characters with a question mark.
-    $message = preg_replace('/(\xA9|\xC2\xA9|\$\xB8|\xE2\x92\xB8|\$\xD2|\xE2\x93\x92|\$\x9E|\xE2\x92\x9E)/','(c)',$message);
-    $message = preg_replace('/[^ -~\n]/','?',$message);
+    // To ensure the file is valid, replace any non-printable characters with a question mark.
+    // 'Non-printable' is ASCII < 0x20 (excluding \r and \n) and 0x7F (delete).
+    $message = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
 
     file_put_contents($this->uri, $message);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
