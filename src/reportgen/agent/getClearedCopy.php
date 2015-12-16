@@ -27,7 +27,7 @@ class CopyClearedGetter extends \Fossology\Lib\Report\XpClearedGetter
 
   public function __construct()
   {
-    parent::__construct("copyright", "statement", false);
+    parent::__construct("copyright", "statement", false, "(content ilike 'Copyright%' OR content ilike '(c)%')");
   }
 }
 

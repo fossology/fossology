@@ -441,7 +441,7 @@ class admin_license_file extends FO_Plugin
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
         rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
-        rf_detector_type) 
+        rf_detector_type, rf_risk) 
           VALUES (
               $1, $2, $3, $4, $5, $6, $md5term, $7, $8, $9, $10) RETURNING rf_pk";
     $this->dbManager->prepare($stmt,$sql);

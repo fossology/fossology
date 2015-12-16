@@ -37,7 +37,7 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
   private $licenseDecisionResult;
   
 
-  public function setUp()
+  protected function setUp()
   {
     $this->licenseRef = M::mock(LicenseRef::classname());
     $this->clearingEvent = M::mock(ClearingEvent::classname());
@@ -48,7 +48,7 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

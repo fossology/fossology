@@ -30,7 +30,7 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
   --delimiter = delimiter, default is ','
   --enclosure = enclosure, default is '\"'
   --csv       = csv file to import
-  ";
+";
 $opts = getopt("h", array('username:', 'password:', 'delimiter:', 'enclosure:', "csv:"));
 
 if(array_key_exists('h',$opts))

@@ -31,23 +31,23 @@ fi
 ######################################################################
 # Package things up
 
-if [ ! -f "VERSIONSTRING" ]; then
+if [ ! -f "Makefile.conf" ]; then
    echo "ERROR: This utility must be run from the top of the fossology source tree."
    exit 1
 fi
 
-VERSION="`cat VERSIONSTRING`"
+VERSION="`git describe --tags > /dev/null 2>&1 && git describe --tags | head -1`"
 
-# GIT_REV is the last revision from git info.  This is used for packaging.
-GIT_REV="`git show | head -1 | awk '{print substr($2,1,6)}'`"
+# COMMIT_HASH is the last revision from git info.  This is used for packaging.
+COMMIT_HASH="`git show | head -1 | awk '{print substr($2,1,6)}'`"
 
 TARBASE="fossology-$VERSION"
 # Check for command-line for subversion
 if [ "$1" = "-s" ]; then
-   TARBASE="fossology-$VERSION-$GIT_REV"
+   TARBASE="fossology-$VERSION-$COMMIT_HASH"
 fi
 
-echo "*** Packaging $VERSION (git $GIT_REV) into $TARBASE ***"
+echo "*** Packaging $VERSION (git $COMMIT_HASH) into $TARBASE ***"
 
 if [ -d "../$TARBASE" ]; then
    echo "WARNING: ../$TARBASE exists, removing"
@@ -58,7 +58,7 @@ if [ -d "../$TARBASE" ]; then
    fi
 fi
 
-echo "*** Exporting git version $GIT_REV to ../$TARBASE ***"
+echo "*** Exporting git version $COMMIT_HASH to ../$TARBASE ***"
 mkdir "../$TARBASE"
 cp -r . "../$TARBASE"
 find "../$TARBASE" | grep .git | xargs rm -rf
@@ -66,17 +66,6 @@ if [ $? != 0 ]; then
    echo "ERROR: git export failed."
    exit 3
 fi
-
-# Process the directory
-(
-cd "../$TARBASE"
-
-echo "*** Storing git version in Makefile.conf ***"
-# Remove the dependency on git; make the version static.
-cp Makefile.conf Makefile.conf.git
-sed -e "s@SVN_REV=\`git .*\`@SVN_REV=${GIT_REV}@" Makefile.conf.git > Makefile.conf
-#rm Makefile.conf.git
-)
 
 # Create the tar
 (

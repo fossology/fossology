@@ -494,7 +494,7 @@ int	Traverse	(char *Filename, char *Basename,
         strcat(Queue[Index].ChildRecurse,".unpacked");
         strcat(CI.PartnameNew,".unpacked");
         Queue[Index].PI.ChildRecurseArtifact=1;
-        if ((CMD[CI.PI.Cmd].Type == CMD_PACK))
+        if (CMD[CI.PI.Cmd].Type == CMD_PACK)
         {
           CI.IsCompressed = 1;
         }

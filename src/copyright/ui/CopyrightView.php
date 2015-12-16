@@ -17,10 +17,9 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use Fossology\Lib\Dao\AgentDao;
-use Fossology\Lib\Data\Highlight;
+namespace Fossology\Agent\Copyright\UI;
 
-require_once('Xpview.php');
+use Fossology\Lib\Data\Highlight;
 
 class CopyrightView extends Xpview
 {
@@ -43,7 +42,7 @@ class CopyrightView extends Xpview
         'email' => Highlight::EMAIL,
         'url' => Highlight::URL,
         'author' => Highlight::AUTHOR);
-    parent::__construct(self::NAME,array(
+    parent::__construct(self::NAME, array(
         self::TITLE => _("View Copyright/Email/Url Analysis")
     ));
   }
@@ -59,9 +58,7 @@ class CopyrightView extends Xpview
   {
     if (empty($agentId))
     {
-      /** @var AgentDao $agentDao */
-      $agentDao = $GLOBALS['container']->get('dao.agent');
-      $agentMap = $agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
+      $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
     }
     

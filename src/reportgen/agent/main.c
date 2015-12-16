@@ -40,8 +40,8 @@
 #include <libpq-fe.h>
 
 
-#ifdef SVN_REV_S
-char BuildVersion[] = "reportgen build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[] = "reportgen build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[] = "reportgen build version: NULL.\n";
 #endif
@@ -497,7 +497,7 @@ int main(int argc, char** argv) {
 
   char agent_rev[myBUFSIZ];
   char *agent_desc = "reportgen agent";
-  char *SVN_REV = NULL;
+  char *COMMIT_HASH = NULL;
   char *VERSION = NULL;
   long agent_pk = 0;
   int user_pk = 0;
@@ -508,9 +508,9 @@ int main(int argc, char** argv) {
   fo_scheduler_connect(&argc, argv, &pgConn);
   dbManager = fo_dbManager_new(pgConn);
 
-  SVN_REV = fo_sysconfig("reportgen", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("reportgen", "COMMIT_HASH");
   VERSION = fo_sysconfig("reportgen", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
 
   agent_pk = fo_GetAgentKey(pgConn, AGENT_NAME, 0, agent_rev, agent_desc);
   user_pk = fo_scheduler_userID();

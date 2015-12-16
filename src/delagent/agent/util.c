@@ -648,7 +648,7 @@ int UnlinkContent (long child, long parent, int mode)
 /**
  * \brief ListFolders(): List every folder.
  */
-void ListFolders ()
+void ListFolders (int user_id)
 {
   int i,j,MaxRow;
   long Fid;	/* folder ids */
@@ -657,7 +657,17 @@ void ListFolders ()
   char *Desc;
   char SQL[MAXSQL];
   PGresult *result;
+  int cnt = 0;
 
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"select count(*) from users where user_pk = %d and user_perm >= 1;",user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  cnt = atol(PQgetvalue(result,0,0));
+  if(user_id != 0 && cnt == 0){ 
+    LOG_FATAL("user does not have the permsssion to view the folder list.\n");
+    exit(-1);
+  }
   printf("# Folders\n");
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_name from folder where folder_pk =1;");
@@ -851,7 +861,7 @@ int ReadParameter (char *Parm)
   else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
   else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
   else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(); rc=1; }
+  else if ((Type==2) && (Target==3))	{ ListFolders(0); rc=1; }
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);
@@ -875,7 +885,7 @@ int check_permission_del(long upload_id, int user_id, int user_perm)
   PGresult *result = NULL;
   int count = 0;
 
-  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload where upload_pk = %ld;", upload_id);
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload join users on (users.user_pk = upload.user_fk or users.user_perm = 10) where upload_pk = %ld and users.user_pk = %d;", upload_id, user_id);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
   count = atoi(PQgetvalue(result, 0, 0)); 
@@ -913,6 +923,9 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  if (!PQntuples(result)){
+    return 0;
+  }
   strcpy(user_seed, PQgetvalue(result, 0, 0));
   strcpy(pass_hash_valid, PQgetvalue(result, 0, 1));
   *user_perm = atoi(PQgetvalue(result, 0, 2));
@@ -930,7 +943,7 @@ int authentication(char *user, char * password, int *user_id, int *user_perm)
   }
   else return -1;
   int i = 0;
-  char temp[2] = {0};
+  char temp[256] = {0};
   for (i = 0; i < strlen((char *)hash_value); i++)
   {
     sprintf(temp, "%02x", hash_value[i]);

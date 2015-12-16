@@ -21,8 +21,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 #include <stdio.h>
 #include "libfossology.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
 int main(int argc, char* argv[])

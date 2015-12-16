@@ -58,8 +58,9 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
       if (array_key_exists($dirName, $statements))
       {
         $currentFiles = &$statements[$dirName]['files'];
-        if (!in_array($baseName, $currentFiles))
+        if (!in_array($baseName, $currentFiles)){
           $currentFiles[] = $baseName;
+        }
       }
       else
       {

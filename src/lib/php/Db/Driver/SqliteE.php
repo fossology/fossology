@@ -54,10 +54,12 @@ class SqliteE implements Driver
       $paramCnt++;
       $sqlStatement = str_replace($pgStyleVar, $this->varPrefix . chr(64 + $paramCnt), $sqlStatement);
       $pgStyleVar = '$' . ($paramCnt + 1);
-      if ($paramCnt == 9) break; // limited number of replaced place holders
+      if ($paramCnt == 9) {  // limited number of replaced place holders
+        break;
+      }
     }
-    $sqlStatement = str_replace(' ONLY ',' ',$sqlStatement);
-    $stmt = $this->dbConnection->prepare($sqlStatement);
+    $sqlStatementWithoutPostgresKeyWord = str_replace(' ONLY ',' ',$sqlStatement);
+    $stmt = $this->dbConnection->prepare($sqlStatementWithoutPostgresKeyWord);
     $this->preparedStmt[$statementName] = & $stmt;
     return $stmt;
   }

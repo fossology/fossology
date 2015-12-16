@@ -170,7 +170,7 @@ class Menu extends Object
       $output .= "\n/* CSS for Depth $depth */\n";
       $label = "ul#menu-" . $depth;
       $output .= $label . "\n";
-      $output .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg1; width:100%; height:24px; font:normal 10pt verdana, arial, helvetica; font-weight: bold; }\n";
+      $output .= "  { z-index:0; margin:0; padding:0px; list-style:none; background:$FOSSbg1; width:100%; height:24px; font:normal 14px verdana, arial, helvetica; font-weight: bold; }\n";
       $label .= " li";
       $output .= $label . "\n";
       $output .= "  { float:left; margin:0; padding:0px; display:block; position:relative; width:auto; border:0px solid #000; }\n";
@@ -279,13 +279,15 @@ class Menu extends Object
     $vars['isLoginPage'] = GetParm("mod", PARM_STRING)=='auth';
 
     global $SysConf;
-    $vars['versionInfo'] = array(
-        'version' => $SysConf['BUILD']['VERSION'],
-        'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
-        'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
-        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
-    );
-    
+    if (array_key_exists('BUILD', $SysConf)) {
+      $vars['versionInfo'] = array(
+          'version' => $SysConf['BUILD']['VERSION'],
+          'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
+          'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
+          'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+      );
+    }
+
     if(!$vars['isLoggedOut'])
     {
       $this->mergeUserLoginVars($vars);

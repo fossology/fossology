@@ -36,8 +36,8 @@
 
 #include "libfossology.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
 #define MAXCMD  2048
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
   int pfile_count = 0;
   int Agent_pk = 0;
   int ars_pk = 0;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[MAXCMD];
 
@@ -218,9 +218,9 @@ int main(int argc, char *argv[])
     exit(-1);
   }
 
-  SVN_REV = fo_sysconfig("wc_agent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("wc_agent", "COMMIT_HASH");
   VERSION = fo_sysconfig("wc_agent", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
 
   Agent_pk = fo_GetAgentKey(pgConn , basename(argv[0]), 0, agent_rev, agent_desc);
 

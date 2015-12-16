@@ -22,8 +22,8 @@
 #include "ununpack.h"
 #include "ununpack_globals.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="ununpack build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="ununpack build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="ununpack build version: NULL.\n";
 #endif
@@ -45,7 +45,7 @@ int	main(int argc, char *argv[])
   char *ListOutName=NULL;
   char *Fname = NULL;
   char *FnameCheck = NULL;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[PATH_MAX];
   struct stat Stat;
@@ -121,9 +121,9 @@ int	main(int argc, char *argv[])
       SafeExit(100);
     }
         
-    SVN_REV = fo_sysconfig(AgentName, "SVN_REV");
+    COMMIT_HASH = fo_sysconfig(AgentName, "COMMIT_HASH");
     VERSION = fo_sysconfig(AgentName, "VERSION");
-    sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+    sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
     /* Get the unpack agent key */
     agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), agent_rev,
                               "Unpacks archives (iso, tar, etc)");

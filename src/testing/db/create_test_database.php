@@ -453,7 +453,7 @@ $fo_version_fh = fopen("$testing_temp_dir/VERSION", 'w')
     or die("FAIL: Could not open $testing_temp_dir/VERSION for writing\n");
 fwrite($fo_version_fh, "[BUILD]\n");
 fwrite($fo_version_fh, "VERSION=trunk\n");
-fwrite($fo_version_fh, "SVN_REV=0000\n");
+fwrite($fo_version_fh, "COMMIT_HASH=0000\n");
 $build_date = date("Y/m/d H:i");
 fwrite($fo_version_fh, "BUILD_DATE=$build_date\n");
 fclose($fo_version_fh);

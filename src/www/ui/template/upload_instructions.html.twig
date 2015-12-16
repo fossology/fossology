@@ -1,0 +1,83 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+{% block content %}
+  {{ 'Select optional analysis'| trans }}
+  {{ 'FOSSology has many options for importing and uploading files for analysis.'| trans }}
+  {{ 'The options vary based on <i>where</i> the data to upload is located.'| trans }}
+  {{ 'The data may be located:'| trans }}
+  <ul>
+    <li>
+      <b>
+        {{ 'On your browser system'| trans }}
+      </b>.
+      {{ 'Use the'| trans }}
+      <a href='{{ URI }}?mod=upload_file'>{{ 'Upload File'| trans }}</a>
+      {{ 'option to select and upload the file.'| trans }}
+      <ul>
+        <li>
+      {{ 'While this can be very convenient (particularly if the file is not readily accessible online),'| trans }}
+      {{ 'uploading via your web browser can be slow for large files,'| trans }}
+      {{ 'and files larger than 650 Megabytes may not be uploadable.'| trans }}
+        </li>
+      </ul>
+    </li>
+    <li>
+      <b>
+        {{ 'On a remote server'| trans }}
+      </b>.
+      {{ 'Use the'| trans }}
+      <a href='{{ URI }}?mod=upload_url'>{{ 'Upload from URL'| trans }}</a>
+      {{ 'option to specify a remote server.'| trans }}
+      <ul>
+        <li>
+      {{ 'This is the most flexible option, but the URL must denote a publicly accessible HTTP, HTTPS, or FTP location.'| trans }}
+        </li>
+        <li>
+      {{ 'URLs that require authentication or human interactions cannot be downloaded through this automated system.'| trans }}
+        </li>
+      </ul>
+    </li>
+    <li>
+      <b>
+        {{ 'On the FOSSology web server'| trans }}
+      </b>.
+      {{ 'Use the'| trans }}
+      <a href='{{ URI }}?mod=upload_srv_files'> {{ 'Upload from Server'| trans }} </a>
+      {{ 'option to specify a file or path on the server.'| trans }}
+      <ul>
+        <li>
+          {{ 'This option is intended for developers who have mounted directories containing source trees.'| trans }}
+        </li>
+        <li>
+          {{ 'The directory must be accessible via the web server\'s user.'| trans }}
+        </li>
+        <li>
+          {{ 'The list of allowed folders can be modified in '| trans }}
+      <a href='{{ URI }}?mod=foconfig'> {{ 'Configuration Variables '| trans }}</a>.
+        </li>
+      </ul>
+    </li>
+    <li>
+      <b>
+        {{ 'On the version control system'| trans }}
+      </b>.
+      {{ 'Use the'| trans }}
+      <a href='{{ URI }}?mod=upload_vcs'>
+        {{ 'Upload from Version Control System'| trans }}
+      </a>
+      {{ 'option to specify URL of a repo.'| trans }}
+    </li>
+  </ul>
+  {{ 'If your system is configured to use multiple agent servers, the data area must be'| trans }}
+  {{ 'mounted and accessible to the FOSSology user (fossy) on every agent system.  See'| trans }}
+  {{ 'the section'| trans }}
+  <em>
+    {{ 'Configuring the Scheduler in the '| trans }}
+  </em>
+  <a href="http://www.fossology.org/projects/fossology/wiki/Sched-20">{{ 'Scheduler documentation'| trans }}</a>.
+{% endblock %}

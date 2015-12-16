@@ -29,7 +29,7 @@ class LicenseMapTest extends \PHPUnit_Framework_TestCase
   private $groupId = 101;
 
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb();
     $this->testDb->createPlainTables(array('license_ref','license_map'));
@@ -43,7 +43,7 @@ class LicenseMapTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

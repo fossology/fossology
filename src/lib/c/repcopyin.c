@@ -28,8 +28,8 @@ stdin can be pairs of files, or xml.
 #include <ctype.h>
 #include "libfossrepo.h"
 
-#ifdef SVN_REV
-char BuildVersion[]="Build version: " SVN_REV ".\n";
+#ifdef COMMIT_HASH
+char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
 /*** GLOBALS (for stats ***/

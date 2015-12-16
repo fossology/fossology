@@ -62,8 +62,8 @@
 #define MAXCMD 4096
 char SQL[256];
 
-#ifdef SVN_REV_S
-char BuildVersion[]="adj2nest build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="adj2nest build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="adj2nest build version: NULL.\n";
 #endif

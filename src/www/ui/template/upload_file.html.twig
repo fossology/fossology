@@ -24,3 +24,7 @@
   <input name="{{ fileInputName }}" type="file"/><br/>
 </li>
 {% endblock %}
+
+{% block uploadText %}
+  {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+{% endblock %}

@@ -48,7 +48,7 @@ void DeleteLicense(long UploadId);
 void DeleteUpload(long UploadId);
 void ListFoldersRecurse(long Parent, int Depth, long Row, int DelFlag);
 int UnlinkContent (long child, long parent, int mode);
-void ListFolders();
+void ListFolders(int user_id);
 void ListUploads (int user_id, int user_perm);
 void DeleteFolder(long FolderId);
 int ReadParameter(char *Parm);

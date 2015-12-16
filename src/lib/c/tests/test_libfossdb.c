@@ -31,8 +31,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <CUnit/CUnit.h>
 
-#ifndef SVN_REV
-#define SVN_REV "SVN_REV Unknown"
+#ifndef COMMIT_HASH
+#define COMMIT_HASH "COMMIT_HASH Unknown"
 #endif
 
 extern char* dbConf;
