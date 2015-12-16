@@ -397,8 +397,8 @@ class SpdxTwoAgent extends Agent
             );
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
-    // 'Non-printable' is ASCII < 0x20 (excluding \r and \n) and 0x7F (delete).
-    $message = preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
+    // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
+    $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
 
     file_put_contents($this->uri, $message);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
