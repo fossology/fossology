@@ -241,7 +241,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
 
   public function createFolder($folderName, $folderDescription, $parentId)
   {
-    $folderId = $this->dbManager->insertTableRow("folder", array("folder_name"=>$folderName, "folder_desc"=>$folderDescription), null, 'folder_pk');
+    $folderId = $this->dbManager->insertTableRow("folder", array("folder_name"=>$folderName, "user_fk"=>Auth::getUserId(), "folder_desc"=>$folderDescription), null, 'folder_pk');
     $this->insertFolderContents($parentId, self::MODE_FOLDER, $folderId);
     return $folderId;
   }

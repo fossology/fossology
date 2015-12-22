@@ -38,7 +38,7 @@ class admin_folder_delete extends FO_Plugin {
    * \param $folderpk - the folder_pk to remove
    * \return NULL on success, string on failure.
    */
-  function Delete($folderpk, $Depends = NULL) 
+  function Delete($folderpk, $userId) 
   {
     /* Can't remove top folder */
     if ($folderpk == FolderGetTop()) {
@@ -48,7 +48,6 @@ class admin_folder_delete extends FO_Plugin {
     /* Get the folder's name */
     $FolderName = FolderGetName($folderpk);
     /* Prepare the job: job "Delete" */
-    $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName");
     if (empty($jobpk) || ($jobpk < 0)) {
@@ -79,22 +78,27 @@ class admin_folder_delete extends FO_Plugin {
     /* If this is a POST, then process the request. */
     $folder = GetParm('folder', PARM_INTEGER);
     if (!empty($folder)) {
-      $rc = $this->Delete($folder);
-      $sql = "SELECT * FROM folder where folder_pk = '$folder';";
+      $userId = Auth::getUserId();
+      $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = '$folder' and users.user_pk = $userId;";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $Folder = pg_fetch_assoc($result);
       pg_free_result($result);
-      if (empty($rc)) {
-        /* Need to refresh the screen */
-        $text = _("Deletion of folder ");
-        $text1 = _(" added to job queue");
-        $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
-      }
-      else {
-        $text = _("Deletion of ");
-        $text1 = _(" failed: ");
-        $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
+      if(!empty($Folder['folder_name'])){
+        $rc = $this->Delete($folder, $userId);
+        if (empty($rc)) {
+          /* Need to refresh the screen */
+          $text = _("Deletion of folder ");
+          $text1 = _(" added to job queue");
+          $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
+        }else{
+          $text = _("Deletion of ");
+          $text1 = _(" failed: ");
+          $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
+        }
+      }else{
+        $text = _("Cannot delete this folder :: Permission denied");
+        $this->vars['message'] = $text;
       }
     }
     $V.= "<form method='post'>\n"; // no url = this url
