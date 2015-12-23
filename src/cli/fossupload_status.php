@@ -38,7 +38,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
 $opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:"));
 
 if (!array_key_exists("uploadId", $opts)) {
-  echo "no uploadId supplied";
+  echo "no uploadId supplied\n";
   exit (1);
 }
 $uploadId = $opts["uploadId"];

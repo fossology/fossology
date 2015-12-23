@@ -21,12 +21,13 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
-use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
-define("TITLE_changeLicenseBulk", _("Private: schedule a bulk scan from post"));
-
-class changeLicenseBulk extends FO_Plugin
+class ChangeLicenseBulk extends DefaultPlugin
 {
+  const NAME = "change-license-bulk";
   /** @var LicenseDao */
   private $licenseDao;
   /** @var DbManager */
@@ -36,64 +37,66 @@ class changeLicenseBulk extends FO_Plugin
 
   function __construct()
   {
-    $this->Name = "change-license-bulk";
-    $this->Title = TITLE_changeLicenseBulk;
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->OutputType = 'JSON';
-    $this->LoginFlag = 0;
-    $this->NoMenu = 0;
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Private: schedule a bulk scan from post"),
+        self::PERMISSION => Auth::PERM_WRITE
+    ));
 
-    parent::__construct();
-
-    global $container;
-    $this->licenseDao = $container->get('dao.license');
-    $this->uploadDao = $container->get('dao.upload');
-    $this->dbManager = $container->get('db.manager');
+    $this->dbManager = $this->getObject('db.manager');
+    $this->licenseDao = $this->getObject('dao.license');
+    $this->uploadDao = $this->getObject('dao.upload');
   }
 
-  function Output()
+  /**
+   * @param Request $request
+   * @return Response
+   */
+  protected function handle(Request $request)
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
-      throw new \Fossology\Lib\Exception("plugin " . $this->Name . " is not ready");
-    }
-
-    $uploadTreeId = intval($_POST['uploadTreeId']);
+    $uploadTreeId = intval($request->get('uploadTreeId'));
     if ($uploadTreeId <= 0)
     {
-      return new Response(json_encode(array("error" => 'bad request')), 500, array('Content-type'=>'text/json'));
+      return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     try
     {
-      $jobQueueId = $this->getJobQueueId($uploadTreeId);
+      $jobQueueId = $this->getJobQueueId($uploadTreeId, $request);
     } catch (Exception $ex)
     {
       $errorMsg = $ex->getMessage();
-      return new Response(json_encode(array("error" => $errorMsg)), 500, array('Content-type'=>'text/json'));
+      return new JsonResponse(array("error" => $errorMsg), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
     ReportCachePurgeAll();
     
-    return new Response(json_encode(array("jqid" => $jobQueueId)), Response::HTTP_OK, array('Content-type'=>'text/json'));
+    return new JsonResponse(array("jqid" => $jobQueueId));
   }
 
-  private function getJobQueueId($uploadTreeId)
+  /**
+   * 
+   * @param int $uploadTreeId
+   * @param Request $request
+   * @return int $jobQueueId
+   */
+  private function getJobQueueId($uploadTreeId, Request $request)
   {
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId);
     $uploadId = intval($uploadEntry['upload_fk']);
-    if ($uploadId <= 0)
+    $userId = Auth::getUserId();
+    $groupId = Auth::getGroupId();
+    
+    if ($uploadId <= 0 || !$this->uploadDao->isAccessible($uploadId, $groupId))
     {
       throw new Exception('permission denied');
     }
 
-    $bulkScope = filter_input(INPUT_POST, 'bulkScope');
+    $bulkScope = $request->get('bulkScope');
     switch ($bulkScope)
     {
       case 'u':
         $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-        $row = $this->dbManager->getSingleRow("SELECT uploadtree_pk FROM $uploadTreeTable WHERE upload_fk = $1 ORDER BY uploadtree_pk LIMIT 1",
-            array($uploadId), __METHOD__ . "adam" . $uploadTreeTable);
-        $uploadTreeId = $row['uploadtree_pk'];
+        $topBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTable);
+        $uploadTreeId = $topBounds->getItemId();
         break;
 
       case 'f':
@@ -107,13 +110,14 @@ class changeLicenseBulk extends FO_Plugin
         throw new InvalidArgumentException('bad scope request');
     }
 
-    $userId = Auth::getUserId();
-    $groupId = Auth::getGroupId();
-    $refText = filter_input(INPUT_POST, 'refText');
-    $action = filter_input(INPUT_POST, 'bulkAction');
-    $licenseId = GetParm('licenseId', PARM_INTEGER);
-    $removing = ($action === 'remove');
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText);
+    $refText = $request->get('refText');
+    $actions = $request->get('bulkAction');
+    $licenseRemovals = array();
+    foreach($actions as $licenseAction)
+    {
+      $licenseRemovals[$licenseAction['licenseId']] = ($licenseAction['action']=='remove');
+    }
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText);
 
     if ($bulkId <= 0)
     {
@@ -125,7 +129,7 @@ class changeLicenseBulk extends FO_Plugin
     /** @var DeciderJobAgentPlugin $deciderPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $bulkId));
-    $conflictStrategyId = intval(filter_input(INPUT_POST, 'forceDecision'));
+    $conflictStrategyId = intval($request->get('forceDecision'));
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
 
@@ -135,8 +139,6 @@ class changeLicenseBulk extends FO_Plugin
     }
     return $jqId;
   }
-
 }
 
-$NewPlugin = new changeLicenseBulk;
-$NewPlugin->Initialize();
+register_plugin(new ChangeLicenseBulk());
