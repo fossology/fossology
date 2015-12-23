@@ -46,12 +46,12 @@ extern PGconn* db_conn;
 
 void DeleteLicense(long UploadId);
 void DeleteUpload(long UploadId);
-void ListFoldersRecurse(long Parent, int Depth, long Row, int DelFlag);
+void ListFoldersRecurse(long Parent, int Depth, long Row, int DelFlag, int user_id);
 int UnlinkContent (long child, long parent, int mode);
 void ListFolders(int user_id);
 void ListUploads (int user_id, int user_perm);
-void DeleteFolder(long FolderId);
-int ReadParameter(char *Parm);
+void DeleteFolder(long FolderId, int user_id);
+int ReadParameter(char *Parm, int user_id);
 void Usage(char *Name);
 int authentication(char *user, char * password, int *user_id, int *user_perm);
 int check_permission_del(long upload_id, int user_id, int user_perm);
