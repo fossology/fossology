@@ -557,8 +557,8 @@ int	main	(int argc, char *argv[])
   /* connect to scheduler.  Noop if not run from scheduler.  */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  COMMIT_HASH = fo_sysconfig("delagent", "COMMIT_HASH");
-  VERSION = fo_sysconfig("delagent", "VERSION");
+  COMMIT_HASH = fo_sysconfig("adj2nest", "COMMIT_HASH");
+  VERSION = fo_sysconfig("adj2nest", "VERSION");
   sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
