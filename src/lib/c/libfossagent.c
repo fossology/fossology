@@ -139,6 +139,7 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
   int Agent_pk = -1;    /* agent identifier */
   char sql[256];
   char sqlselect[256];
+  char sqlupdate[256];
   PGresult* result;
 
   /* get the exact agent rec requested */
@@ -160,6 +161,12 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
   }
 
   Agent_pk = atol(PQgetvalue(result, 0, 0));
+  /* Check If agent_desc is null*/
+  if(PQgetvalue(result, 0, 3) == NULL){
+    PQclear(result);
+    sprintf(sqlupdate, "UPDATE agent SET agent_desc = E'%s' where agent_pk = '%d'",agent_desc, Agent_pk);        
+    result = PQexec(pgConn, sqlupdate);
+  }
   PQclear(result);
   return Agent_pk;
 } /* fo_GetAgentKey() */
