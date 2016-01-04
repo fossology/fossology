@@ -278,7 +278,7 @@ FUNCTION int GetUploadPerm(PGconn* pgConn, long UploadPk, int user_pk)
 {
   PGresult* result;
   char SQL[1024];
-  int perm;
+  int permDB, permUser=0, permPublic=0;
 
   /* Check the users PLUGIN_DB level.  PLUGIN_DB_ADMIN are superusers. */
   snprintf(SQL, sizeof(SQL), "select user_perm from users where user_pk='%d'", user_pk);
@@ -287,18 +287,37 @@ FUNCTION int GetUploadPerm(PGconn* pgConn, long UploadPk, int user_pk)
   if (PQntuples(result) < 1)
   {
     LOG_ERROR("No records returned in %s", SQL);
-    return 0;
+    return PERM_NONE;
   }
-  perm = atoi(PQgetvalue(result, 0, 0));
+  permDB = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
-  if (perm >= PLUGIN_DB_ADMIN) return (PERM_ADMIN);
+  if (permDB >= PLUGIN_DB_ADMIN)
+  {
+    return PERM_ADMIN;
+  }
 
   /* Get the user permission level */
   snprintf(SQL, sizeof(SQL), "select max(perm) as perm from perm_upload, group_user_member where perm_upload.upload_fk=%ld and user_fk=%d and group_user_member.group_fk=perm_upload.group_fk", UploadPk, user_pk);
   result = PQexec(pgConn, SQL);
+  if (!fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)
+    && PQntuples(result) > 0)
+  {
+    permUser = atoi(PQgetvalue(result, 0, 0));
+  }
+  PQclear(result);
+
+  /* Get the public permission level */
+  snprintf(SQL, sizeof(SQL), "select public_perm from upload where upload_pk=%ld", UploadPk);
+  result = PQexec(pgConn, SQL);
   fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__);
-  perm = atoi(PQgetvalue(result, 0, 0));
-  return (PERM_ADMIN);
+  if (!fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)
+    && PQntuples(result) > 0)
+  {
+    permPublic = atoi(PQgetvalue(result, 0, 0));
+  }
+  PQclear(result);
+  
+  return ( permUser > permPublic ) ? permUser : permPublic;
 }
 
 
