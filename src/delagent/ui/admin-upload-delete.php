@@ -39,6 +39,33 @@ class admin_upload_delete extends FO_Plugin {
   }
 
   /**
+   * \brief Given a folder_pk, try to add a job after checking permissions.
+   * \param $uploadpk - the upload(upload_id) you want to delete
+   *
+   * \return string with the message.
+   */
+  function TryToDelete($uploadpk) {
+    if (! GetUploadPerm($uploadpk) >= Auth::PERM_WRITE) {
+      $text=_("You dont have permissions to delete the upload");
+      return DisplayMessage($text);
+    }
+
+    $rc = $this->Delete($uploadpk);
+
+    if (! empty($rc)) {
+      $text=_("Deletion Scheduling failed: ");
+      return DisplayMessage($text.$rc);
+    }
+
+    /* Need to refresh the screen */
+    $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
+    $LinkText = _("View Jobs");
+    $text=_("Deletion added to job queue.");
+    $msg = "$text <a href=$URL>$LinkText</a>";
+    return displayMessage($msg);
+  }
+
+  /**
    * \brief Given a folder_pk, add a job.
    * \param $uploadpk - the upload(upload_id) you want to delete
    * \param $Depends - Depends is not used for now
@@ -85,19 +112,7 @@ class admin_upload_delete extends FO_Plugin {
     /* If this is a POST, then process the request. */
     $uploadpk = GetParm('upload', PARM_INTEGER);
     if (!empty($uploadpk)) {
-      $rc = $this->Delete($uploadpk);
-      if (empty($rc)) {
-        /* Need to refresh the screen */
-        $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
-        $LinkText = _("View Jobs");
-        $text=_("Deletion added to job queue.");
-        $msg = "$text <a href=$URL>$LinkText</a>";
-        $V.= displayMessage($msg);
-      }
-      else {
-        $text=_("Deletion Scheduling failed: ");
-        $V.= DisplayMessage($text.$rc);
-      }
+      $V.= $this->TryToDelete($uploadpk);
     }
     /* Create the AJAX (Active HTTP) javascript for doing the reply
      and showing the response. */
