@@ -533,7 +533,6 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag, int user
   char *Desc;
   PGresult *result;
   char SQL[MAXSQL];
-  int count = 0;
 
   /* Find all folders with this parent and recurse */
   memset(SQL,'\0',sizeof(SQL));
@@ -593,12 +592,7 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag, int user
       if (DelFlag==0)
         break;
 
-      memset(SQL,'\0',sizeof(SQL));
-      snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = %ld and users.user_pk = %d;",Parent,user_id);
-      result = PQexec(db_conn, SQL);
-      if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-      count = atol(PQgetvalue(result,0,0));
-      if(count == 0){ 
+      if(check_permission_folder_del(Parent, user_id) == 0){
         LOG_FATAL("Folder does not exist (or) Permission denied to delete this folder.\n");
         break;
       }
@@ -998,3 +992,27 @@ void Usage (char *Name)
   fprintf(stderr,"  --user|-n # :: user name\n");
   fprintf(stderr,"  --password|-p # :: password\n");
 } /* Usage() */
+
+/**
+ * \brief check if the folder can be deleted, that is the user have
+ * the permissin to delte this folder
+ * 
+ * \param long parent - folder_pk
+ * \param char user_id - user_id
+ * 
+ * \return 0: cannot be deleted;
+ */
+int check_permission_folder_del(long parent, int user_id)
+{
+  char SQL[MAXSQL];
+  PGresult *result;
+  int count = 0;
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = %ld and users.user_pk = %d;",parent,user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  count = atol(PQgetvalue(result,0,0));
+
+  return count;
+}
