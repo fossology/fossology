@@ -42,11 +42,11 @@ if(array_key_exists('h', $opts))
 }
 
 if (!array_key_exists("uploadId", $opts)) {
-  echo "no uploadId supplied";
+  echo "no uploadId supplied\n";
   exit (1);
 }
 if (!array_key_exists("destgroup", $opts)) {
-  echo "no destgroup supplied";
+  echo "no destgroup supplied\n";
   exit (1);
 }
 $uploadId = $opts["uploadId"];
