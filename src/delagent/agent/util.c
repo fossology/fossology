@@ -593,7 +593,7 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag, int user
         break;
 
       if(check_permission_folder_del(Parent, user_id) == 0){
-        LOG_FATAL("Folder does not exist (or) Permission denied to delete this folder.\n");
+        printf("WARN: Folder does not exist (or) Permission denied to delete this folder.\n");
         break;
       }
 

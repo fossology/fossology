@@ -142,6 +142,11 @@ int main (int argc, char *argv[])
   sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
+
+  if(Scheduler == 1 && user_id == -1){
+    /* get user_id for user who queued the agent */
+    user_id = fo_scheduler_userID();
+  }
   
   if (ListProj) ListUploads(user_id, user_perm);
   if (ListFolder) ListFolders(user_id);
