@@ -56,7 +56,7 @@ function account_check(&$user, &$passwd, &$group = "")
   /** get username/passwd from ~/.fossology.rc */
   $user_passwd_file = getenv("HOME") . "/.fossology.rc";
   if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
-    $user_passwd_array = parse_ini_file($user_passwd_file, true);
+    $user_passwd_array = parse_ini_file($user_passwd_file, true, INI_SCANNER_RAW);
 
     /* get username and password from conf file */
     if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
