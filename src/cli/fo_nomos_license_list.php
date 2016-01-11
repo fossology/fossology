@@ -34,7 +34,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
                          'mac' and it should exclude all files in any directory containing the substring 'mac'
                          '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
-  ";
+";
 $upload = ""; // upload id
 $item = ""; // uploadtree id
 $showContainer = 0; // include container or not, 1: yes, 0: no (default)

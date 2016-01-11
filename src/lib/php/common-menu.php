@@ -20,6 +20,7 @@
  * \brief common menu functions
  */
 const MENU_PATH_SEPARATOR = "::";
+const MENU_BREAK = "[BREAK]";
 
 /**
  * \brief
@@ -196,11 +197,11 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
   if ($menuItemsExist) {
     foreach($menuItems as &$menuItem) {
       // need to escape the [ ] or the string will not match
-      if (!strcmp($menuItem->Name, $pathElement) && strcmp($menuItem->Name, "\\[BREAK\\]")) {
+      if (!strcmp($menuItem->Name, $pathElement) && strcmp($menuItem->Name, MENU_BREAK)) {
         $currentMenuItem = $menuItem;
         break;
       }
-      else if (!strcmp($menuItem->Name, "\\[BREAK\\]") && ($menuItem->Order == $LastOrder)) {
+      else if (!strcmp($menuItem->Name, MENU_BREAK) && ($menuItem->Order == $LastOrder)) {
         $currentMenuItem = $menuItem;
         break;
       }
@@ -348,14 +349,22 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
   $First = 1;
   if (!empty($Menu)) {
     foreach($Menu as $Val) {
-      if ($Val->Name == "[BREAK]") {
+      if ($Val->Name == MENU_BREAK) {
         if (!$First) {
-          $V.= " &nbsp;&nbsp;&bull;&nbsp;&nbsp; ";
+          $V .= " &nbsp;&nbsp;&bull;";
+          if ($showFullName) {
+            $V .= getFullNameAddition($Val);
+          }
+          $V .= "&nbsp;&nbsp; ";
         }
         $First = 1;
       }
       else if (!empty($Val->HTML)) {
         $V.= $Val->HTML;
+        if ($showFullName) {
+          $V .= getFullNameAddition($Val);
+
+        }
         $First = 0;
       }
       else if (!empty($Val->URI)) {
@@ -368,7 +377,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
         }
         $V.= ">";
         if ($showFullName) {
-          $V.= $Val->FullName . "(" . $Val->Order . ")";
+          $V.= $Val->FullName . getFullNameAddition($Val);
         }
         else {
           $V.= $Val->Name;
@@ -381,7 +390,7 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
           $V.= " | ";
         }
         if ($showFullName) {
-          $V.= $Val->FullName . "(" . $Val->Order . ")";
+          $V.= $Val->FullName . getFullNameAddition($Val);
         }
         else {
           $V.= $Val->Name;
@@ -399,6 +408,15 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
   }
   $menu_to_1html_counter++;
   return ("<div id='menu1html-$menu_to_1html_counter' align='right' style='padding:0px 5px 0px 5px'><small>$V</small></div>");
+}
+
+/**
+ * @param $menu menu
+ * @return string
+ */
+function getFullNameAddition(menu $menu)
+{
+  return "(" . $menu->Order . ")";
 } // menu_to_1html()
 
 

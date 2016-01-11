@@ -41,23 +41,36 @@ class ui_view_info extends FO_Plugin
    */
   function RegisterMenus()
   {
-    $text = _("View file information");
-    menu_insert("Browse-Pfile::Info",5,$this->Name,$text);
+    $tooltipText = _("View file information");
+    menu_insert("Browse-Pfile::Info",5,$this->Name,$tooltipText);
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
+
+    $menuPosition = 60;
+    $menuText = "Info";
     if (GetParm("mod",PARM_STRING) == $this->Name)
     {
-      menu_insert("View::Info",1);
-      menu_insert("View-Meta::Info",1);
+      menu_insert("View::[BREAK]", 61);
+      menu_insert("View::[BREAK]", 50);
+      menu_insert("View::{$menuText}", $menuPosition);
+      menu_insert("View-Meta::[BREAK]", 61);
+      menu_insert("View-Meta::[BREAK]", 50);
+      menu_insert("View-Meta::{$menuText}", $menuPosition);
+
       menu_insert("Browse::Info",-3);
     }
     else
     {
-      $text = _("View information about this file");
-      menu_insert("View::Info",1,$URI,$text);
-      menu_insert("View-Meta::Info",1,$URI,$text);
-      menu_insert("Browse::Info",-3,$URI,$text);
+      $tooltipText = _("View information about this file");
+      menu_insert("View::[BREAK]", 61);
+      menu_insert("View::[BREAK]", 50);
+      menu_insert("View::{$menuText}", $menuPosition, $URI, $tooltipText);
+      menu_insert("View-Meta::[BREAK]", 61);
+      menu_insert("View-Meta::[BREAK]", 50);
+      menu_insert("View-Meta::{$menuText}", $menuPosition, $URI, $tooltipText);
+
+      menu_insert("Browse::Info", -3, $URI, $tooltipText);
     }
   } // RegisterMenus()
 

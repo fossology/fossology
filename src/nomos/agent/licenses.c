@@ -32,6 +32,8 @@
 #include <time.h>
 #include <signal.h>
 #include <libgen.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #include "nomos.h"
 #include "licenses.h"
@@ -950,6 +952,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   char *fileName;
   char *textp;
   item_t *p;
+  char realPathOfTarget[PATH_MAX];
 
 #ifdef	PROC_TRACE
   traceFunc("== saveLicenseData(%p, %d, %d, %d, %d)\n", scores, nCand,
@@ -1170,10 +1173,14 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   /* DBug: printf("saveLicenseData on return gl.initwd is:%s\n",gl.initwd); */
   if(cur.cliMode) 
   {
-    if (optionIsSet(OPTS_LONG_CMD_OUTPUT))
-      printf("File %s contains license(s) %s", cur.targetFile, cur.compLic);
+    if (optionIsSet(OPTS_LONG_CMD_OUTPUT) && realpath(cur.targetFile, realPathOfTarget))
+    {
+      printf("File %s contains license(s) %s", realPathOfTarget, cur.compLic);
+    }
     else
+    {
       printf("File %s contains license(s) %s", basename(cur.targetFile), cur.compLic);
+    }
     printHighlightInfo(cur.keywordPositions, cur.theMatches);
   }
   return;

@@ -8,4 +8,4 @@
  without any warranty.
  */
 define("AGENT_VERSION", "{$VERSION}");
-define("AGENT_REV", "{$SVN_REV}");
+define("AGENT_REV", "{$COMMIT_HASH}");

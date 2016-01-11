@@ -19,6 +19,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\UI\Component\MicroMenu;
 
 class ui_buckets extends FO_Plugin
 {
@@ -102,26 +103,16 @@ class ui_buckets extends FO_Plugin
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("format","page","upload","item","bp"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
     $bucketpool_pk = GetParm("bp",PARM_INTEGER);
     if (!empty($Item) && !empty($Upload))
     {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
-        menu_insert("Browse::Bucket Browser",1);
-        menu_insert("View::Bucket Browser",1);
-        //menu_insert("Browse::[BREAK]",100);
-        $text = _("Clear");
-        //menu_insert("Browse::Clear",101,NULL,NULL,NULL,"<a href='javascript:LicColor(\"\",\"\",\"\",\"\");'>$text</a>");
-      }
-      else
-      {
-        $text = _("Browse by buckets");
-        menu_insert("Browse::Bucket Browser",10,$URI,$text);
-        menu_insert("View::Bucket Browser",10,$URI,$text);
-      }
+      $menuText = "Bucket";
+      $menuPosition = 55;
+      $URI = $this->Name . Traceback_parm_keep(array("format","page","upload","item","bp"));
+      $tooltipText = _("Browse by buckets");
+      $this->microMenu->insert(array(MicroMenu::VIEW_META, MicroMenu::VIEW), $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
   } // RegisterMenus()
 
@@ -563,8 +554,8 @@ return;
       $V .= "<font class='text'>\n";
 
       $Children = GetNonArtifactChildren($Item, $this->uploadtree_tablename);
-      if (count($Children) == 0) // no children, display View micromenu
-        $V .= Dir2Browse($this->Name,$Item,NULL,1,"View", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
+      if (count($Children) == 0) // no children, display View-Meta micromenu
+        $V .= Dir2Browse($this->Name,$Item,NULL,1,"View-Meta", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
       else // has children, display Browse micormenu
         $V .= Dir2Browse($this->Name,$Item,NULL,1,"Browse", -1, '', '', $this->uploadtree_tablename) . "<P />\n";
 

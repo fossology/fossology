@@ -19,6 +19,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\Plugin;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\UI\Component\Menu;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -103,6 +104,9 @@ class FO_Plugin implements Plugin
 
   /** @var Menu */
   private $menu;
+
+  /** @var MicroMenu */
+  protected $microMenu;
 
   /** @var Twig_Environment */
   protected $renderer;
@@ -210,6 +214,7 @@ class FO_Plugin implements Plugin
 
     global $container;
     $this->menu = $container->get('ui.component.menu');
+    $this->microMenu = $container->get('ui.component.micromenu');
     $this->renderer = $container->get('twig.environment');
   }
 

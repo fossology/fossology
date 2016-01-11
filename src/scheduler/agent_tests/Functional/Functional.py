@@ -406,7 +406,7 @@ class testsuite:
     config.readfp(open(dir + "/VERSION"))
     
     self.defines["BUILD"]["VERSION"] = config.get("BUILD", "VERSION")
-    self.defines["BUILD"]["SVN_REV"] = config.get("BUILD", "SVN_REV")
+    self.defines["BUILD"]["COMMIT_HASH"] = config.get("BUILD", "COMMIT_HASH")
     self.defines["BUILD"]["BUILD_DATE"] = config.get("BUILD", "BUILD_DATE")
     
     return (1, 0)

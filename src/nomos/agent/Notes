@@ -73,7 +73,7 @@ Questions
 ---------
 
 - Where the hell is checkstrings script? Do we want it?
-- SVN_REV #ifdef stolen from other agent code. Where does this get
+- COMMIT_HASH #ifdef stolen from other agent code. Where does this get
   #defined?
 - Why does nomos set the LANG environment variable?
 - Implications of removing custom magic file?

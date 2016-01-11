@@ -82,6 +82,7 @@ class UploadFilePage extends UploadPageBase
     
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
+    $description = $this->basicShEscaping($description);
     $uploadedFile = $request->files->get(self::FILE_INPUT_NAME);
 
     if ($uploadedFile === null)
@@ -110,6 +111,7 @@ class UploadFilePage extends UploadPageBase
     }
 
     $originalFileName = $uploadedFile->getClientOriginalName();
+    $originalFileName = $this->basicShEscaping($originalFileName);
 
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;

@@ -30,8 +30,8 @@
  */
 #include "pkgagent.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="pkgagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="pkgagent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="pkgagent build version: NULL.\n";
 #endif
@@ -84,7 +84,7 @@ int	main	(int argc, char *argv[])
   int rv;
   PGresult *ars_result;
   char sqlbuf[1024];
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[MAXCMD];
   int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
@@ -94,9 +94,9 @@ int	main	(int argc, char *argv[])
   //glb_rpmpi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   //glb_debpi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
 
-  SVN_REV = fo_sysconfig("pkgagent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("pkgagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("pkgagent", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   Agent_pk = fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* Process command-line */

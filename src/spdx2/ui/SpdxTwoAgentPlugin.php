@@ -24,7 +24,7 @@ class SpdxTwoAgentPlugin extends AgentPlugin
 {
   public function __construct() {
     $this->Name = "agent_spdx2";
-    $this->Title =  _("SPDX generation");
+    $this->Title =  _("SPDX2 generation");
     $this->AgentName = "spdx2";
     
     parent::__construct();

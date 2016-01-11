@@ -141,6 +141,7 @@ class fo_libschema
     $this->applySequences();
     $this->applyTables();
     $this->applyInheritedRelations();
+    $this->applyTables(true);
     $this->updateSequences();
     $this->applyViews();
     $this->dropConstraints();
@@ -218,7 +219,7 @@ class fo_libschema
   /************************************/
   /* Add tables/columns (dependent on sequences for default values) */
   /************************************/
-  function applyTables()
+  function applyTables($inherits=false)
   {
     if (empty($this->schema['TABLE']))
     {
@@ -226,7 +227,7 @@ class fo_libschema
     }
     foreach ($this->schema['TABLE'] as $table => $columns)
     {
-      if (empty($table))
+      if (empty($table) || $inherits^array_key_exists($table,$this->schema['INHERITS']) )
       {
         continue;
       }
@@ -611,8 +612,8 @@ class fo_libschema
            $sequence = $matches[1];
            $referencedSequencesInTableColumns[$sequence] = array("table" => $Table, "column" => $Column);
         }
-        }
-          }
+      }
+    }
     $this->dbman->freeResult($result);
 
     return $referencedSequencesInTableColumns;

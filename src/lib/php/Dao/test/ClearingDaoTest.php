@@ -48,7 +48,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   private $groupId = 601;
 
 
-  public function setUp()
+  protected function setUp()
   {
     $this->uploadDao = M::mock(UploadDao::classname());
 
@@ -70,6 +70,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
             'highlight_bulk',
             'license_ref',
             'license_ref_bulk',
+            'license_set_bulk',
             'users',
             'uploadtree'
         ));
@@ -137,8 +138,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     );
     foreach ($bulkLicArray as $params)
     {
-      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk, group_fk', $params, $logStmt = 'insert.bulkref');
+      $paramsRef = array($params[0], $params[2], $params[4], $params[5], $params[6]);
+      $paramsSet = array($params[0], $params[1], $params[3]);
+      $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_text, upload_fk, uploadtree_fk, group_fk', $paramsRef, 'insert.bulkref');
+      $this->dbManager->insertInto('license_set_bulk', 'lrb_fk, rf_fk, removing', $paramsSet, 'insert.bulkset');
     }
+    
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -262,6 +267,20 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $watchOtherNow = $this->clearingDao->isDecisionWip(303, $groupId);
     assertThat($watchOtherNow,is(FALSE));
   }
+  
+  private function collectBulkLicenses($bulks)
+  {
+    $bulkLics = array();
+    foreach($bulks as $bulk) {
+      if (array_key_exists('removedLicenses', $bulk)) {
+        $bulkLics = array_merge($bulkLics, $bulk['removedLicenses']);
+      }
+      if (array_key_exists('addedLicenses', $bulk)) {
+        $bulkLics = array_merge($bulkLics, $bulk['addedLicenses']);
+      }
+    }
+    return $bulkLics;
+  }
 
   public function testBulkHistoryWithoutMatches()
   {
@@ -274,9 +293,9 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
     $bulkText = array_map(function($bulk){ return $bulk['text']; }, $bulks);
-    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
+
     assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
-    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($this->collectBulkLicenses($bulks), arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
     assertThat($bulkText, arrayContaining('TextFOO', 'TextBAR', 'TextBAZ', 'TextBAZ', 'TextQUX'));
   }
 
@@ -306,13 +325,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
-    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
-    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return count($bulk['removedLicenses'])>0; }, $bulks);
     $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
 
     assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null));
     assertThat($bulkMatched, arrayContaining(true, false, false, true, false));
-    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
+    assertThat($this->collectBulkLicenses($bulks), arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true));
   }
@@ -330,13 +348,12 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
     $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
     $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
-    $bulkLics = array_map(function($bulk){ return $bulk['lic']; }, $bulks);
-    $bulkLicDirs = array_map(function($bulk){ return $bulk['removing']; }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){ return count($bulk['removedLicenses'])>0; }, $bulks);
     $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
 
     assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null, null));
     assertThat($bulkMatched, arrayContaining(true, false, false, true, false, false));
-    assertThat($bulkLics, arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX', 'FOO'));
+    assertThat($this->collectBulkLicenses($bulks), arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX', 'FOO'));
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }

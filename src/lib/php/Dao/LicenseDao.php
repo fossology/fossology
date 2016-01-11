@@ -447,25 +447,32 @@ class LicenseDao extends Object
    * @param int $userId
    * @param int $groupId
    * @param int $uploadTreeId
-   * @param int $licenseId
-   * @param bool $removing
+   * @param bool[] $licenseRemovals
    * @param string $refText
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-      VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-        array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText),
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text)
+      VALUES ($1,$2,$3,$4) RETURNING lrb_pk",
+        array($userId, $groupId, $uploadTreeId, $refText),
         __METHOD__ . '.getLrb'
     );
-
     if ($licenseRefBulkIdResult === false)
     {
       return -1;
     }
-    return $licenseRefBulkIdResult['lrb_pk'];
+    $bulkId = $licenseRefBulkIdResult['lrb_pk'];
+    
+    $stmt = __METHOD__ . '.insertAction';
+    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES ($1,$2,$3)");
+    foreach($licenseRemovals as $licenseId=>$removing)
+    {
+      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing)));
+    }
+
+    return $bulkId ;
   }
 
   /**

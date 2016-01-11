@@ -31,8 +31,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* cunit includes */
 #include <libfocunit.h>
 
-#ifndef SVN_REV
-#define SVN_REV "SVN_REV Unknown"
+#ifndef COMMIT_HASH
+#define COMMIT_HASH "COMMIT_HASH Unknown"
 #endif
 
 /* ************************************************************************** */
@@ -148,7 +148,7 @@ void signal_connect_version()
   FO_ASSERT_FALSE(valid);
   FO_ASSERT_PTR_NOT_NULL(fgets(buffer, sizeof(buffer), read_from));
   buffer[strlen(buffer) - 1] = '\0';
-  FO_ASSERT_STRING_EQUAL(buffer, SVN_REV);
+  FO_ASSERT_STRING_EQUAL(buffer, COMMIT_HASH);
 
   write_con("CLOSE\n");
 }
@@ -209,7 +209,7 @@ void test_scheduler_connect()
   memset(buffer, '\0', sizeof(buffer));
   tmp = fgets(buffer, sizeof(buffer), read_from);
   FO_ASSERT_PTR_NOT_NULL(tmp);
-  FO_ASSERT_STRING_EQUAL(buffer, SVN_REV);
+  FO_ASSERT_STRING_EQUAL(buffer, COMMIT_HASH);
 
   tmp = fgets(buffer, sizeof(buffer), read_from);
   FO_ASSERT_PTR_NOT_NULL(tmp);

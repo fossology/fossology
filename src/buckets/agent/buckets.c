@@ -37,8 +37,8 @@ int debug = 0;
 int DEB_SOURCE;
 int DEB_BINARY;
 
-#ifdef SVN_REV_S
-char BuildVersion[]="buckets build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="buckets build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="buckets build version: NULL.\n";
 #endif
@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   int hasPrules;
   int user_pk = 0;
   char *bucketpool_name;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char *uploadtree_tablename;
   char agent_rev[myBUFSIZ];
@@ -175,9 +175,9 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
-  SVN_REV = fo_sysconfig("buckets", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("buckets", "COMMIT_HASH");
   VERSION = fo_sysconfig("buckets", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), uploadtree.upload_fk, agent_rev, agentDesc);
 
   /*** Initialize the license_ref table cache ***/

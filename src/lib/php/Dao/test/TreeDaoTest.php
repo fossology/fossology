@@ -31,7 +31,7 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
   /** @var TreeDao */
   private $treeDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
@@ -49,7 +49,7 @@ class TreeDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
         

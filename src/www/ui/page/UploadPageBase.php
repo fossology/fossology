@@ -143,4 +143,129 @@ abstract class UploadPageBase extends DefaultPlugin
     }
     return $message;
   }
+
+  /**
+   * \brief checks, whether a string contains some special character without
+   * escaping
+   *
+   * \param $str - the string to check
+   * \param $char - the character to search for
+   
+   * \return boolean
+   */
+  function str_contains_notescaped_char($str, $char)
+  {
+    $pos = 0;
+    while ($pos < strlen($str) &&
+           ($pos = strpos($str,$char,$pos)) !== FALSE)
+    {
+      foreach(range(($pos++) -1, 1, -2) as $tpos)
+      {
+        if ($tpos > 0 && $str[$tpos] !== '\\')
+        {
+          break;
+        }
+        if ($tpos > 1 && $str[$tpos - 1] !== '\\')
+        {
+          continue 2;
+        }
+      }
+      return TRUE;
+    }
+    return FALSE;
+  }
+
+  /**
+   * \brief checks, whether a path is a pattern from the perspective of a shell
+   *
+   * \param $path - the path to check
+   *
+   * \return boolean
+   */
+  function path_is_pattern($path)
+  {
+    return $this->str_contains_notescaped_char($path, '*')
+      || $this->str_contains_notescaped_char($path, '?')
+      || $this->str_contains_notescaped_char($path, '[')
+      || $this->str_contains_notescaped_char($path, '{');
+  }
+
+  /**
+   * \brief checks, whether a path contains substrings, which could enable it to
+   * escape his prefix
+   *
+   * \param $path - the path to check
+   *
+   * \return boolean
+   */
+  protected function path_can_escape($path)
+  {
+    return $this->str_contains_notescaped_char($path, '$')
+      || strpos($path,'..')!==FALSE;
+  }
+
+  /**
+   * \brief normalizes an path and returns FALSE on errors
+   *
+   * \param $path - the path to normalize
+   * \param $appendix - optional parameter, which is used for the recursive call
+   *
+   * \return normalized path on success
+   *         FALSE on error
+   *
+   */
+  function normalize_path($path, $host="localhost", $appendix="")
+  {
+    if(strpos($path,'/')===FALSE || $path === '/')
+    {
+      return FALSE;
+    }
+    if($this->path_is_pattern($path))
+    {
+      $bpath = basename($path);
+      if ($this->path_can_escape($bpath))
+      {
+        return FALSE;
+      }
+
+      if(strcmp($host,"localhost") === 0)
+      {
+        return $this->normalize_path(dirname($path),
+                                     $host,
+                                     $bpath . ($appendix == '' ?
+                                               '' :
+                                               '/' . $appendix));
+      }
+      else
+      {
+        if($this->path_can_escape($path))
+        {
+          return FALSE;
+        }
+        return $path . ($appendix == '' ?
+                        '' :
+                        '/' . $appendix);
+      }
+    }
+    else
+    {
+      $rpath = realpath($path);
+      if ($rpath === FALSE)
+      {
+        return FALSE;
+      }
+      return $rpath . ($appendix == '' ?
+                       '' :
+                       '/' . $appendix);
+    }
+  }
+
+  function basicShEscaping($str)
+  {
+    $str = str_replace('\\', '\\\\', $str);
+    $str = str_replace('"', '\"', $str);
+    $str = str_replace('`', '\`', $str);
+    $str = str_replace('$', '\$', $str);
+    return $str;
+  }
 }

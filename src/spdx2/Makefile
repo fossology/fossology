@@ -10,6 +10,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 MOD_NAME = spdx2
+MOD_NAMES = spdx2 spdx2tv dep5
 
 DIRS = agent ui
 TESTDIRS = agent_tests
@@ -31,17 +32,23 @@ VERSIONFILE:
 
 install: all
 	$(call DIR_LOOP,install)
-	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION
-	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf
 	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
-	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
-		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
-	fi
+	for MOD in $(MOD_NAMES); do \
+		$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$$MOD/VERSION; \
+		if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD; then \
+			ln -s $(MODDIR)/$$MOD $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+		fi; \
+		$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$$MOD/; \
+		$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$$MOD_NAME/VERSION; \
+		$(INSTALL_DATA) $$MOD.conf $(DESTDIR)$(MODDIR)/$$MOD/$$MOD.conf; \
+	done
 
 uninstall:
 	$(call DIR_LOOP,uninstall)
-	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)
-	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)
+	for MOD in $(MOD_NAMES); do \
+		rm -rf $(DESTDIR)$(MODDIR)/$$MOD; \
+		rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD; \
+	done
 
 clean:
 	$(call DIR_LOOP,clean)

@@ -66,7 +66,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
   /** @var TreeDao|MockInterface */
   private $treeDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->uploadDao = M::mock(UploadDao::classname());
     $this->treeDao = M::mock(TreeDao::classname());
@@ -79,7 +79,7 @@ class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

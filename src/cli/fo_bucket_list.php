@@ -38,7 +38,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
                          'mac' and it should exclude all files in any directory containing the substring 'mac'
                          '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
-  ";
+";
 
 $upload = $item = $bucket = $bucket_agent = $nomos_agent = "";
 

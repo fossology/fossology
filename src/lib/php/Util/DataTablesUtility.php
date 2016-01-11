@@ -89,9 +89,13 @@ class DataTablesUtility extends Object
     {
       $colNumber = $search[0];
       $order = $search[1];
-      if (in_array($colNumber, $sortedCols)) continue;
+      if (in_array($colNumber, $sortedCols)) {
+        continue;
+      }
       $isSortable = $inputArray['bSortable_' . $colNumber];
-      if ($isSortable !== "true") continue;
+      if ($isSortable !== "true") {
+        continue;
+      }
 
       $name = $columNamesInDatabase[$colNumber];
       $orderArray[] = $name . " " . $order;

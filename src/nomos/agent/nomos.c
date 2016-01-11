@@ -42,8 +42,8 @@ int Verbose = 0;
 
 #define FUNCTION
 
-#ifdef SVN_REV_S
-char BuildVersion[]="nomos build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="nomos build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[] = "nomos build version: NULL.\n";
 #endif
@@ -267,7 +267,7 @@ int main(int argc, char **argv)
   char sErrorBuf[1024];
   char *agent_desc = "License Scanner";
   char **files_to_be_scanned; /**< The list of files to scan */
-  char *SVN_REV = NULL;
+  char *COMMIT_HASH = NULL;
   char *VERSION = NULL;
   char agent_rev[myBUFSIZ];
   cacheroot_t cacheroot;
@@ -291,9 +291,9 @@ int main(int argc, char **argv)
 
   files_to_be_scanned = calloc(argc, sizeof(char *));
 
-  SVN_REV = fo_sysconfig("nomos", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("nomos", "COMMIT_HASH");
   VERSION = fo_sysconfig("nomos", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
 
   gl.agentPk = fo_GetAgentKey(gl.pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 

@@ -1,6 +1,7 @@
 # FOSSology
 
 [![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.png)](https://travis-ci.org/fossology/fossology/)
+[![Stories in Ready](https://badge.waffle.io/fossology/fossology.svg?label=ready&title=Ready)](http://waffle.io/fossology/fossology)
 
 ## About
 FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright
@@ -34,6 +35,10 @@ all users to join the mailing list and participate in discussions.
 There is also a #fossology IRC channel on the freenode IRC network if
 you'd like to talk to other FOSSology users and developers.
 See [Contact Us](http://www.fossology.org/projects/fossology/wiki/Contact_Us)
+
+## Contributing
+
+We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-public-license-v2)

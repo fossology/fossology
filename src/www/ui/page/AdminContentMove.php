@@ -34,7 +34,7 @@ class AdminContentMove extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Move upload or folder"),
         self::MENU_LIST => "Organize::Folders::Move or Copy",
-        self::PERMISSION => Auth::PERM_ADMIN,
+        self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => TRUE
     ));
     $this->folderDao = $this->getObject('dao.folder');

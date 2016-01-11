@@ -32,14 +32,14 @@ class ScanJobProxyTest extends \PHPUnit_Framework_TestCase
   /** @var ScanJobProxy */
   private $scanJobProxy;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->agentDaoMock = M::mock(AgentDao::classname());
     $this->scanJobProxy = new ScanJobProxy($this->agentDaoMock,$this->uploadId);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

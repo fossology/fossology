@@ -32,7 +32,7 @@ class PagedHexResultTest extends \PHPUnit_Framework_TestCase
    */
   private $result;
 
-  public function setUp()
+  protected function setUp()
   {
     $highlightState = M::mock(HighlightState::className());
     $highlightState->shouldReceive("openExistingElements")->withAnyArgs()->andReturn("");
@@ -40,7 +40,7 @@ class PagedHexResultTest extends \PHPUnit_Framework_TestCase
     $this->result = new PagedHexResult(self::START_OFFSET, $highlightState);
   }
 
-  function tearDown()
+  protected function tearDown()
   {
     M::close();
   }
