@@ -38,8 +38,9 @@ class BulkMatchesGetter extends ClearedGetterCommon
 
     $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
-    $allLicenses = "";
+
     foreach($bulkHistory as $bulk) {
+      $allLicenses = "";
       $bulkId = $bulk['bulkId'];
       foreach($bulk['removedLicenses'] as $removedLics){
         $allLicenses .= ($removedLics ? "[remove] " : "") . $removedLics.', ';
