@@ -33,13 +33,14 @@ class TimingLoggerTest extends \PHPUnit_Framework_TestCase
 {
   private $logger;
   
-  public function setUp()
+  protected function setUp()
   {
     $this->logger = M::mock('Monolog\Logger');
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown() {
+  protected function tearDown()
+  {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }

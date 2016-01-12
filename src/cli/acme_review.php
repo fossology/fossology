@@ -299,7 +299,7 @@ class acme_review extends FO_Plugin
     $spdx .= '      <specVersion>SPDX-1.1</specVersion>' . "\n";
     $spdx .= '      <dataLicense rdf:about="http://spdx.org/licenses/PDDL-1.0" />' . "\n";
     $spdx .= '      <CreationInfo>' . "\n";
-    $spdx .= " <creator>Tool: FOSSology v " . $SysConf['BUILD']['VERSION'] . " svn " . $SysConf['BUILD']['SVN_REV'] . "</creator>\n";
+    $spdx .= " <creator>Tool: FOSSology v " . $SysConf['BUILD']['VERSION'] . " svn " . $SysConf['BUILD']['COMMIT_HASH'] . "</creator>\n";
     $spdx .= "<created>" . date('c') . "</created>\n";   // date-time in ISO 8601 format
     $spdx .= '</CreationInfo>' . "\n";
 

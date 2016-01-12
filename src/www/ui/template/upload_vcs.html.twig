@@ -1,0 +1,56 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/upload.html.twig" %}
+
+{% block description %}
+  <p>
+    {{ 'You can upload source code from a version control system; one risk is that FOSSology will store your username/password of a repository to database, also run checkout source code from command line with username and password explicitly' | trans }} 
+  </p>
+{% endblock %}
+
+{% block fileselect %}
+<li>
+  <label for="{{ vcstypeField }}">
+    {{ 'Select the type of version control system'| trans }}:
+  </label>
+  <br/>
+  <select name="{{ vcstypeField }}">
+    <option value='SVN'>SVN</option>
+    <option value='Git'>Git</option>
+  </select>
+</li>
+<li>
+  <label for="{{ geturlField }}">
+    {{ 'Enter the URL of the repo'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ geturlField }}" type="text" size="120" value="http://"/><br/>
+  The URL can begin with HTTP://, HTTPS:// . When do git upload, if https url fails, please try http URL.
+</li>
+<li>
+  <label for="{{ usernameField }}">
+    {{ '(Optional) Username'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ usernameField }}" type="text" size="60"/><br/>
+</li>
+<li>
+  <label for="{{ passwdField }}">
+    {{ '(Optional) Password'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ passwdField }}" type="password" size="60"/><br/>
+</li>
+<li>
+  <label for="{{ nameField }}">
+    {{ '(Optional) Enter a viewable name for this file (directory):'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ nameField }}" type="text" size="120"/><br/>
+  <b>{{ 'NOTE' | trans }}:</b>  {{ 'If no name is provided, then the uploaded file (directory) name will be used.' | trans }}
+</li>
+{% endblock %}

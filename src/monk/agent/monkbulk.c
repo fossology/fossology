@@ -16,7 +16,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#include <libfossology.h>
+#include <stdlib.h>
+
+#include "libfossology.h"
 
 #include "monkbulk.h"
 #include "database.h"
@@ -73,6 +75,8 @@ int setLeftAndRight(MonkState* state) {
 
 void bulkArguments_contents_free(BulkArguments* bulkArguments);
 
+BulkAction** queryBulkActions(MonkState* state, long bulkId);
+
 int queryBulkArguments(MonkState* state, long bulkId) {
   int result = 0;
 
@@ -80,7 +84,7 @@ int queryBulkArguments(MonkState* state, long bulkId) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "queryBulkArguments",
-      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_fk, lrb.rf_text, lrb.removing "
+      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_text "
       "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
       "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",
@@ -91,18 +95,16 @@ int queryBulkArguments(MonkState* state, long bulkId) {
 
   if (bulkArgumentsResult) {
     if (PQntuples(bulkArgumentsResult)==1) {
-      BulkArguments* bulkArguments = malloc(sizeof(BulkArguments));
+      BulkArguments* bulkArguments = (BulkArguments*)malloc(sizeof(BulkArguments));
 
-      int i = 0;
-      bulkArguments->uploadId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->uploadTreeId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->licenseId = atol(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, i++));
-      bulkArguments->removing = (strcmp(PQgetvalue(bulkArgumentsResult, 0, i), "t") == 0);
-
+      int column = 0;
+      bulkArguments->uploadId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
+      bulkArguments->uploadTreeId = atol(PQgetvalue(bulkArgumentsResult, 0, column++));
+      bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
+      bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
+      bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, column++));
       bulkArguments->bulkId = bulkId;
+      bulkArguments->actions = queryBulkActions(state, bulkId);
       bulkArguments->jobId = fo_scheduler_jobId();
 
       state->ptr = bulkArguments;
@@ -121,7 +123,46 @@ int queryBulkArguments(MonkState* state, long bulkId) {
   return result;
 }
 
+BulkAction** queryBulkActions(MonkState* state, long bulkId) {
+
+  PGresult* bulkActionsResult = fo_dbManager_ExecPrepared(
+    fo_dbManager_PrepareStamement(
+      state->dbManager,
+      "queryBulkActions",
+      "SELECT rf_fk, removing FROM license_set_bulk WHERE lrb_fk = $1",
+  long
+  ),
+  bulkId
+  );
+
+  int numberOfRows = bulkActionsResult ? PQntuples(bulkActionsResult) : 0;
+  BulkAction** bulkActions = (BulkAction**)malloc((numberOfRows + 1) * sizeof(BulkAction*));
+
+  int row;
+  for (row = 0; row < numberOfRows; row++) {
+    int column = 0;
+    BulkAction *action = (BulkAction *) malloc(sizeof(BulkAction));
+    action->licenseId = atoi(PQgetvalue(bulkActionsResult, row, column++));
+    action->removing = (strcmp(PQgetvalue(bulkActionsResult, row, column++), "t") == 0);
+    bulkActions[row] = action;
+  }
+  bulkActions[row] = NULL;
+
+  if (bulkActionsResult) {
+    PQclear(bulkActionsResult);
+  }
+  
+  return bulkActions;
+}
+
 void bulkArguments_contents_free(BulkArguments* bulkArguments) {
+
+  BulkAction **bulkActions = bulkArguments->actions;
+  for (int i=0; bulkActions[i] != NULL; i++) {
+    free(bulkActions[i]);
+  }
+  free(bulkActions);
+
   g_free(bulkArguments->refText);
 
   free(bulkArguments);
@@ -249,76 +290,80 @@ int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches)
 
   BulkArguments* bulkArguments = state->ptr;
 
-  long licenseId = bulkArguments->licenseId;
-
   if (!fo_dbManager_begin(state->dbManager))
     return 0;
 
-  PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      state->dbManager,
-      "saveBulkResult:decision",
-      "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed)"
-      " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7"
-      " FROM uploadtree"
-      " WHERE upload_fk = $8 AND pfile_fk = $1 AND lft BETWEEN $9 AND $10"
-      "RETURNING clearing_event_pk",
-      long, int, int, int, int, long, int,
-      int, long, long
+  BulkAction **actions = bulkArguments->actions; 
+  for (int i = 0; actions[i] != NULL; i++) {
+    BulkAction* action = actions[i];
+
+    PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
+            fo_dbManager_PrepareStamement(
+                    state->dbManager,
+                    "saveBulkResult:decision",
+                    "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed)"
+                            " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7"
+                            " FROM uploadtree"
+                            " WHERE upload_fk = $8 AND pfile_fk = $1 AND lft BETWEEN $9 AND $10"
+                            "RETURNING clearing_event_pk",
+    long, int, int, int, int, long, int,
+    int, long, long
     ),
     file->id,
 
-    bulkArguments->userId,
-    bulkArguments->groupId,
-    bulkArguments->jobId,
-    BULK_DECISION_TYPE,
-    licenseId,
-    bulkArguments->removing ? 1 : 0,
+            bulkArguments->userId,
+            bulkArguments->groupId,
+            bulkArguments->jobId,
+            BULK_DECISION_TYPE,
+            action->licenseId,
+            action->removing ? 1 : 0,
 
-    bulkArguments->uploadId,
-    bulkArguments->uploadTreeLeft,
-    bulkArguments->uploadTreeRight
-  );
+            bulkArguments->uploadId,
+            bulkArguments->uploadTreeLeft,
+            bulkArguments->uploadTreeRight
+    );
 
-  if (licenseDecisionIds) {
-    for (int i=0; i<PQntuples(licenseDecisionIds);i++) {
-      long licenseDecisionEventId = atol(PQgetvalue(licenseDecisionIds,i,0));
+    if (licenseDecisionIds) {
+      for (int i=0; i<PQntuples(licenseDecisionIds);i++) {
+        long licenseDecisionEventId = atol(PQgetvalue(licenseDecisionIds,i,0));
 
-      for (guint j=0; j<matches->len; j++) {
-        Match* match = match_array_index(matches, j);
+        for (guint j=0; j<matches->len; j++) {
+          Match* match = match_array_index(matches, j);
 
-        if (match->type != MATCH_TYPE_FULL)
-          continue;
+          if (match->type != MATCH_TYPE_FULL)
+            continue;
 
-        DiffPoint* highlightTokens = match->ptr.full;
-        DiffPoint highlight = getFullHighlightFor(file->tokens, highlightTokens->start, highlightTokens->length);
+          DiffPoint* highlightTokens = match->ptr.full;
+          DiffPoint highlight = getFullHighlightFor(file->tokens, highlightTokens->start, highlightTokens->length);
 
-        PGresult* highlightResult = fo_dbManager_ExecPrepared(
-          fo_dbManager_PrepareStamement(
-            state->dbManager,
-            "saveBulkResult:highlight",
-            "INSERT INTO highlight_bulk(clearing_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
-            long, long, size_t, size_t
+          PGresult* highlightResult = fo_dbManager_ExecPrepared(
+                  fo_dbManager_PrepareStamement(
+                          state->dbManager,
+                          "saveBulkResult:highlight",
+                          "INSERT INTO highlight_bulk(clearing_event_fk, lrb_fk, start, len) VALUES($1,$2,$3,$4)",
+          long, long, size_t, size_t
           ),
           licenseDecisionEventId,
-          bulkArguments->bulkId,
-          highlight.start,
-          highlight.length
-        );
+                  bulkArguments->bulkId,
+                  highlight.start,
+                  highlight.length
+          );
 
-        if (highlightResult) {
-          PQclear(highlightResult);
-        } else {
-          fo_dbManager_rollback(state->dbManager);
-          return 0;
+          if (highlightResult) {
+            PQclear(highlightResult);
+          } else {
+            fo_dbManager_rollback(state->dbManager);
+            return 0;
+          }
         }
       }
+      PQclear(licenseDecisionIds);
+    } else {
+      fo_dbManager_rollback(state->dbManager);
+      return 0;
     }
-    PQclear(licenseDecisionIds);
-  } else {
-    fo_dbManager_rollback(state->dbManager);
-    return 0;
   }
+
 
   return fo_dbManager_commit(state->dbManager);
 }

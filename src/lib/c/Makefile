@@ -17,10 +17,10 @@ OBJS = libfossscheduler.o libfossdb.o libfossagent.o libfossrepo.o sqlCopy.o fos
 COVERAGE = $(OBJS:%.o=%_cov.o)
 
 all: $(LIB) $(VARS) $(EXE)
-	@echo "make $(LIB)"
-
+	
 $(LIB): $(OBJS) $(VARS)
 	$(AR) cr $@ $(OBJS)
+	@echo "make $(LIB)"
 
 libfossology_cov.a: $(COVERAGE)
 	$(AR) cr $@ $(COVERAGE)

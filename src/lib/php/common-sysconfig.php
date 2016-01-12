@@ -57,7 +57,7 @@ define("CONFIG_TYPE_TEXTAREA", 3);
  * For example:
  *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
  *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
- *  -  $SysConf[VERSION][SVN_REV] => "4467M"
+ *  -  $SysConf[VERSION][COMMIT_HASH] => "4467M"
  *
  * \Note Since so many files expect directory paths that used to be in pathinclude.php
  * to be global, this function will define the same globals (everything in the 
@@ -276,6 +276,23 @@ function Populate_sysconfig()
   $textPrompt = _("Chars per page in text view");
   $textDesc = _("Number of characters per page in text view");
   $ValueArray[$Variable] = "'$Variable', '81920', '$textPrompt', " . CONFIG_TYPE_TEXT . ",'Number', 5, '$textDesc', null";
+
+  /*  "Upload from server"-configuration  */
+  $Variable = "UploadFromServerWhitelist";
+  $contextNamePrompt = _("Whitelist for serverupload");
+  $contextValue = "/tmp";
+  $contextDesc = _("List of allowed prefixes for upload, separated by \":\" (colon)");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'UploadFromServer', 5, '$contextDesc', null";
+  $Variable = "UploadFromServerAllowedHosts";
+  $contextNamePrompt = _("List of allowed hosts for serverupload");
+  $contextValue = "localhost";
+  $contextDesc = _("List of allowed hosts for upload, separated by \":\" (colon)");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'UploadFromServer', 5, '$contextDesc', null";
+
   
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.

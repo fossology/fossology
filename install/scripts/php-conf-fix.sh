@@ -8,7 +8,7 @@ echo 'Automated php.ini configuration adjustments'
 echo
 phpIni=/etc/php5/apache2/php.ini
 if [ -e $phpIni ]
-    then
+then
     echo 'Copies php.ini to current directory and creates a backup file'
     echo 'Modifies it and then displays variance for confirmation.'
     cp $phpIni php.ini.orig
@@ -26,8 +26,14 @@ if [ -e $phpIni ]
     echo
     echo 'Display the changes made'
     diff php.ini.orig php.ini
-    echo 'If these are OK you should copy php.ini back and restart apache'
+    echo $1
+    if [ "$1" == "--overwrite" ]
+    then
+        cp -f php.ini $phpIni
     else
+        echo 'If these are OK you should copy php.ini back and restart apache'
+    fi
+else
     echo 'php.ini was not located as expected. Please adjust phpIni to suit.'
 fi
 

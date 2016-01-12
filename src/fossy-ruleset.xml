@@ -18,5 +18,6 @@
 
   <rule ref="Generic.PHP.LowerCaseKeyword"/>
   <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+  <rule ref="Generic.ControlStructures.InlineControlStructure"/>
 
 </ruleset>
