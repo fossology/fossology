@@ -139,10 +139,11 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
   int Agent_pk = -1;    /* agent identifier */
   char sql[256];
   char sqlselect[256];
+  char sqlupdate[256];
   PGresult* result;
 
   /* get the exact agent rec requested */
-  sprintf(sqlselect, "SELECT agent_pk FROM agent WHERE agent_name ='%s' order by agent_ts desc limit 1",
+  sprintf(sqlselect, "SELECT agent_pk,agent_desc FROM agent WHERE agent_name ='%s' order by agent_ts desc limit 1",
     agent_name);
   result = PQexec(pgConn, sqlselect);
   if (fo_checkPQresult(pgConn, result, sqlselect, __FILE__, __LINE__)) return 0;
@@ -160,6 +161,12 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
   }
 
   Agent_pk = atol(PQgetvalue(result, 0, 0));
+  /* Compare agent_desc */
+  if(!(strcmp(PQgetvalue(result, 0, 1),agent_desc) == 0)){
+    PQclear(result);
+    sprintf(sqlupdate, "UPDATE agent SET agent_desc = E'%s' where agent_pk = '%d'",agent_desc, Agent_pk);        
+    result = PQexec(pgConn, sqlupdate);
+  }
   PQclear(result);
   return Agent_pk;
 } /* fo_GetAgentKey() */
