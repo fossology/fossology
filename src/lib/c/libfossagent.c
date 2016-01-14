@@ -161,7 +161,7 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
   }
 
   Agent_pk = atol(PQgetvalue(result, 0, 0));
-  /* Check If agent_desc is null*/
+  /* Compare agent_desc */
   if(!(strcmp(PQgetvalue(result, 0, 1),agent_desc) == 0)){
     PQclear(result);
     sprintf(sqlupdate, "UPDATE agent SET agent_desc = E'%s' where agent_pk = '%d'",agent_desc, Agent_pk);        

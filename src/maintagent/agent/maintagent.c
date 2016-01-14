@@ -57,7 +57,7 @@ int main(int argc, char **argv)
   COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("maintagent", "VERSION");
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
-  /* Get the Agent Key from the DB */
+  /* insert/update agent data if necessary */
   fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   int ValidateFoldersExe = 0;
