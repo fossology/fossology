@@ -294,7 +294,6 @@ class search extends FO_Plugin
   function HTMLResults($UploadtreeRecs, $Page, $GETvars)
   {
     $Outbuf = "";
-    $PageChoices = "";
     $Count = count($UploadtreeRecs);
     if ($Count == 0)
     {
@@ -308,7 +307,9 @@ class search extends FO_Plugin
       $Outbuf .= $PageChoices;
     }
     else
+    {
       $PageChoices = "";
+    }
     $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
 
     /* put page menu at the bottom, too */

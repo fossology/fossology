@@ -223,8 +223,6 @@ class AjaxShowJobs extends FO_Plugin
     /* Now display the summary */
     /*****************************************************************/
 
-    $job=-1;
-    
     $uploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:white;'";
     $noUploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:black;'";
     $jobStyle = "style='font:bold 8pt verdana, arial, helvetica; background:lavender; color:black;'";
@@ -269,33 +267,25 @@ class AjaxShowJobs extends FO_Plugin
           $allusers = GetParm("allusers",PARM_INTEGER);
           if ($allusers > 0){
             $statementName = __METHOD__."UploadRec";
-            $uploadRec = $dbManager->getSingleRow(
-            "select * from upload where upload_pk=$1",
-            array($job['job']['job_upload_fk']),
-            $statementName
-            );
+            $uploadRec = $dbManager->getSingleRow("select * from upload where upload_pk=$1",
+                array($job['job']['job_upload_fk']),
+                $statementName);
 
             if (!empty($uploadRec['user_fk'])){
               $statementName = __METHOD__."UserRec";
-              $userRec = $dbManager->getSingleRow(
-              "select * from users where user_pk=$1",
-              array($uploadRec['user_fk']),
-              $statementName
-              );
-              $userName = "&nbsp;&nbsp;&nbsp;($userRec[user_name])";
+              $userRec = $dbManager->getSingleRow("select * from users where user_pk=$1",
+                  array($uploadRec['user_fk']),
+                  $statementName);
             }else{
               $statementName = __METHOD__."UserRec1";
-              $userRec = $dbManager->getSingleRow(
-              "select * from users where user_pk=$1",
-              array($job['job']['job_user_fk']),
-              $statementName
-              );
-              $userName = "&nbsp;&nbsp;&nbsp;($userRec[user_name])";
+              $userRec = $dbManager->getSingleRow("select * from users where user_pk=$1",
+                  array($job['job']['job_user_fk']),
+                  $statementName);
             }
-
+            $userName = "&nbsp;&nbsp;&nbsp;(" . htmlentities($userRec[user_name], ENT_QUOTES) . ")";
           }
 
-          $outBuf .= $uploadName . $userName;
+          $outBuf .= htmlentities($uploadName, ENT_QUOTES) . $userName;
           if (!empty($uploadDesc)) $outBuf .= " (" . $uploadDesc . ")";
           $outBuf .= "</a>";
           $outBuf .= "</th>";

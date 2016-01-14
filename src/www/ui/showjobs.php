@@ -132,7 +132,6 @@ class showjobs extends FO_Plugin
 
   public function Output()
   {
-    $v="";
     $page = "";
     $uploadPk = GetParm('upload',PARM_INTEGER);
     if (empty($uploadPk)){ 
@@ -147,11 +146,10 @@ class showjobs extends FO_Plugin
 
     $this->vars['uploadId']= $uploadPk;
     // micro menus
-    $v .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
+    menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
     /* Process any actions */
     if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
-
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
@@ -159,11 +157,8 @@ class showjobs extends FO_Plugin
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
       }
-      $page = GetParm('page',PARM_INTEGER);
-      if (empty($page)) $page = 0;
-      $jqtype = GetParm("jqtype",PARM_STRING);
+      $page = GetParm('page',PARM_INTEGER) ?: 0;
       $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
-      $job = GetParm('job',PARM_INTEGER);
       switch($action)
       {
         case 'pause':
@@ -194,6 +189,7 @@ class showjobs extends FO_Plugin
           break;
       }
     }
+    $job = GetParm('job',PARM_INTEGER);
     if (!empty($job)){
       $this->vars['jobId'] = $job;
       $this->vars['uploadName'] = $this->showJobDB($job);
