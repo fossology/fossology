@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_folder_properties", _("Edit Folder Properties"));
 
 class folder_properties extends FO_Plugin {
