@@ -136,8 +136,6 @@ class user_del extends FO_Plugin
       $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
       $V .= "<form name='formy' method='POST'>\n"; // no url = this url
       $V .= _("To delete a user, enter the following information:<P />\n");
-      $Style = "<tr><td colspan=3 style='background:black;'></td></tr><tr>";
-      $Val = htmlentities(GetParm('userid',PARM_TEXT),ENT_QUOTES);
       $V .= "<ol>\n";
       $V .= _("<li>Select the user to delete.<br />");
       $V .= "<select name='userid'>\n";
