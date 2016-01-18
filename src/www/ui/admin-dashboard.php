@@ -76,8 +76,6 @@ class dashboard extends FO_Plugin
    */
   function DatabaseContents()
   {
-    global $PG_CONN;
-
     $V = "<table border=1>\n";
 
     $head1 = _("Metric");
@@ -170,7 +168,6 @@ function GetLastAnalyzeTime($TableName)
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
-    $connection_count = '';
     $connection_count = $row['val'];
     pg_free_result($result);
 
@@ -182,8 +179,6 @@ function GetLastAnalyzeTime($TableName)
     $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
     pg_free_result($result);
 
     $V .= "</table>\n";
@@ -206,14 +201,6 @@ function GetLastAnalyzeTime($TableName)
     $head3 = _("Started");
     $head4 = _("Elapsed");
     $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
-
-    /**** Version ****/
-    $sql = "SELECT * from version();";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $version = explode(' ', $row['version'], 3);
 
     // Get the current query column name in pg_stat_activity
     $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
