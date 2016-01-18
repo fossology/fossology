@@ -38,6 +38,7 @@ int	main(int argc, char *argv[])
   char *NewDir=".";
   char *AgentName = "ununpack";
   char *AgentARSName = "ununpack_ars";
+  char *agent_desc = "Unpacks archives (iso, tar, etc)";
   int   Recurse=0;
   int   ars_pk = 0;
   int   user_pk = 0;
@@ -125,8 +126,7 @@ int	main(int argc, char *argv[])
     VERSION = fo_sysconfig(AgentName, "VERSION");
     sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
     /* Get the unpack agent key */
-    agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), agent_rev,
-                              "Unpacks archives (iso, tar, etc)");
+    agent_pk = fo_GetAgentKey(pgConn, AgentName, atoi(Upload_Pk), agent_rev,agent_desc);
 
     InitCmd();
 
