@@ -56,5 +56,6 @@ void Usage(char *Name);
 int authentication(char *user, char * password, int *user_id, int *user_perm);
 int check_permission_del(long upload_id, int user_id, int user_perm);
 int check_permission_folder_del(long parent, int user_id);
+int check_child_folder_del(long parent, int user_id);
 
 #endif /* _DELAGENT_H */
