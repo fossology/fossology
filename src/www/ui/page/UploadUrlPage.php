@@ -19,7 +19,6 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Plugin\AgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
 class UploadUrlPage extends UploadPageBase
@@ -59,7 +58,7 @@ class UploadUrlPage extends UploadPageBase
     {
       return array(false, _("Invalid URL"), $description);
     }
-    $getUrl = $this->basicShEscaping($getUrl);
+    $getURL = $this->basicShEscaping($getURL);
 
     $name = $request->get(self::NAME_PARAM);
     if (empty($name)) {

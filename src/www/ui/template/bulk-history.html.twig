@@ -14,8 +14,18 @@
     <tr class="{{ cycle(['odd','even'], loop.index0) }}{% if row.matched %} match{% endif %}{% if not row.tried %} inactive{% endif %}">
       <td>
           <table>
-            <td><img class='{% if row.removing %}deleted{% else %}added{% endif %}' src='images/space_16.png'></td>
-            <td>{{ row.lic|e }}</td>
+            {% if row.addedLicenses is not empty %}
+            <tr>
+              <td><img class='added' src='images/space_16.png'></td>
+              <td>{{ row.addedLicenses|join(', ')|e }}</td>
+            </tr>
+            {% endif %}
+            {% if row.removedLicenses is not empty %}
+            <tr>
+              <td><img class='deleted' src='images/space_16.png'></td>
+              <td>{{ row.removedLicenses|join(', ')|e }}</td>
+            </tr>
+            {% endif %}
           </table>
       </td>
       <td>

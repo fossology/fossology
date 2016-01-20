@@ -48,7 +48,7 @@ class UploadSrvPage extends UploadPageBase
     }
     else
     {
-      $hostList = ["localhost"];
+      $hostList = array("localhost");
     }
 
     return in_array($host,$hostList);

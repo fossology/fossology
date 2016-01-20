@@ -30,6 +30,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define BULK_DECISION_SCOPE "upload"
 
 typedef struct {
+    long licenseId;
+    int removing;
+} BulkAction;
+
+typedef struct {
   long bulkId;
   long uploadTreeId;
   long uploadTreeLeft;
@@ -37,10 +42,10 @@ typedef struct {
   long licenseId;
   int uploadId;
   int jobId;
-  int removing;
   int userId;
   int groupId;
   char* refText;
+  BulkAction** actions;
 } BulkArguments;
 
 #endif // MONK_AGENT_BULK_H

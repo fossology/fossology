@@ -46,6 +46,7 @@ int main(int argc, char **argv)
   char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
+  char *agent_desc = "Maintenance Agent";
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -56,6 +57,8 @@ int main(int argc, char **argv)
   COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("maintagent", "VERSION");
   snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
+  /* insert/update agent data if necessary */
+  fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   int ValidateFoldersExe = 0;
   int VerifyFilePermsExe = 0;

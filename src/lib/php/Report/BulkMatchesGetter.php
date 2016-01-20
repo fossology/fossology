@@ -40,10 +40,15 @@ class BulkMatchesGetter extends ClearedGetterCommon
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
 
     foreach($bulkHistory as $bulk) {
+      $allLicenses = "";
       $bulkId = $bulk['bulkId'];
-      $licenseShortName = $bulk['lic'];
-      $removing = $bulk['removing'];
-
+      foreach($bulk['removedLicenses'] as $removedLics){
+        $allLicenses .= ($removedLics ? "[remove] " : "") . $removedLics.', ';
+      }
+      foreach($bulk['addedLicenses'] as $addedLics){
+        $allLicenses .= ($addedLics ? "[add] " : "") . $addedLics.', ';
+      }
+      $allLicenses = trim($allLicenses, ', ');
       $content = $bulk['text'];
 
       foreach ($this->clearingDao->getBulkMatches($bulkId,$groupId) as $bulkMatch)
@@ -53,7 +58,7 @@ class BulkMatchesGetter extends ClearedGetterCommon
         $result[] = array(
           'bulkId' => $bulkId,
           'content' => $content,
-          'textfinding' => ($removing ? "[remove] " : "") . $licenseShortName,
+          'textfinding' => $allLicenses,
           'description' => $content,
           'uploadtree_pk' => $uploadTreeId
         );
