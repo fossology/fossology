@@ -291,13 +291,15 @@ class ui_view extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return "s";
+      $output = "Invalid plugin state: " . $this->State;
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload,Auth::getGroupId()))
     {
-      return 'denied';
+      $output = "Access denied";
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $Item = GetParm("item", PARM_INTEGER);
@@ -305,7 +307,8 @@ class ui_view extends FO_Plugin
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     if (!$inputFile && empty($Item))
     {
-      return "invalid input file";
+      $output = "invalid input file";
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
@@ -330,7 +333,8 @@ class ui_view extends FO_Plugin
       }
       if (empty($inputFile))
       {
-        return $this->outputWhenFileNotInRepo($Upload, $Item);
+        $output = $this->outputWhenFileNotInRepo($Upload, $Item);
+        return $getPageMenuInline ? array("Error", $output) : $output;
       }
     }
     rewind($inputFile);
