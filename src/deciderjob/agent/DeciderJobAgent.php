@@ -149,15 +149,18 @@ class DeciderJobAgent extends Agent {
       list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
 
       $concludedLicenseExist = false;
-      foreach ($concludedLicenses as $license) {
-        if ($license->hasClearingEvent()) {
+      foreach ($concludedLicenses as $license) 
+      {
+        if ($license->hasClearingEvent()) 
+        {
           $concludedLicenseExist = true;
           continue;
         }
       }
       $detectedFileLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
 
-      if ($detectedFileLicenses[0]->getLicenseId() != 507 && !$concludedLicenseExist) {
+      if ($detectedFileLicenses[0]->getLicenseId() != 507 && !$concludedLicenseExist) 
+      {
         $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
       }
 
