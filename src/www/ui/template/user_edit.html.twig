@@ -43,14 +43,14 @@
         </select></td>
       </tr>
       <tr class="classic">
-        <th width="25%">{{ "Blank the user's account. This will will set the password to a blank password."|trans }}</th>
-        <td><input type="checkbox" name="_blank_pass" {% if isBlankPassword %}checked{% endif %}/></td>
+        <th width="25%">{{ "Require no password."|trans }}</th>
+        <td><input type="checkbox" name="_blank_pass" id="blank_pass" {% if isBlankPassword %}checked="checked" disabled="disabled"{% endif %}/></td>
       </tr>
     {% endif %}
     
     <tr class="classic">
       <th width="25%">{{ "Password."|trans }}</th>
-      <td><input type="password" name="_pass1" size="20"/></td>
+      <td><input type="password" name="_pass1" size="20" id="pass1"/></td>
     </tr>
     <tr class="classic">
       <th width='25%'>{{ "Re-enter password."|trans }}</th>
@@ -77,5 +77,14 @@
       var uri = '{{ refreshUri }}' + '&newuser=' + val ;
       window.location.assign(uri);
     }
+   
+    {% if isBlankPassword %}
+    $(document).ready(function(){
+      $("#pass1").keyup(function (){
+        var isBlank = ($(this).val()==='');
+        $("#blank_pass").prop("checked", isBlank);
+      });
+    });
+    {% endif %}
   </script>
 {% endblock %}
