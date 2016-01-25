@@ -137,7 +137,7 @@ class foconfig extends FO_Plugin
           {
             if (!strcmp($validation_function, 'check_boolean'))
             {
-              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are \\'true\\' and \\'false\\'.");
+              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
               echo "<script>alert('$warning_msg');</script>";
             }
             else if  (strpos($validation_function, "url"))

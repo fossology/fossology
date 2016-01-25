@@ -51,8 +51,8 @@ class admin_tag extends FO_Plugin
       $text = _("TagName must be specified. Tag Not created.");
       return ($text);
     }
-    if(!preg_match('/^[A-Za-z0-9_~\-!@#\$%\^&\*\(\)]+$/i', $tag_name)){
-      $text = _("A Tag is only allowed to contain characters from <b>".htmlentities("A-Za-z0-9_~-!@#$%^&*()")."</b>. Tag Not created.");
+    if(!preg_match('/^[A-Za-z0-9_~\-!@#\$%\^\*\.\(\)]+$/i', $tag_name)){
+      $text = _("A Tag is only allowed to contain characters from <b>".htmlentities("A-Za-z0-9_~-!@#$%^*.()")."</b>. Tag Not created.");
       return ($text);
     }
 
@@ -64,9 +64,7 @@ class admin_tag extends FO_Plugin
     {
       pg_free_result($result);
 
-      $Val = str_replace("'", "''", $tag_name);
-      $Val1 = str_replace("'", "''", $tag_desc);
-      $sql = "INSERT INTO tag (tag,tag_desc) VALUES ('".pg_escape_string($Val)."', '".pg_escape_string($Val1)."');";
+      $sql = "INSERT INTO tag (tag,tag_desc) VALUES ('".pg_escape_string($tag_name)."', '".pg_escape_string($tag_desc)."');";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
     }

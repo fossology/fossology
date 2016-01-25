@@ -6,7 +6,7 @@
 <form method='post'>
     <ol>
         <li> {{ "Select the folder to edit:"|trans }}
-            <select name='oldfolderid' onChange='window.location.href="{{ onchangeURI }}" + this.value'>
+            <select name="oldfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value">
                 {{ folderListOption }} FolderListOption(-1, 0, 1, $FolderSelectId);
             </select>
             <P />
@@ -14,14 +14,14 @@
         <li>
             {{ "Change folder name:"|trans }}
             <br/>
-            <INPUT type='text' name='newname' size=40 value="{{ folder_name|e }}" />
+            <INPUT type="text" name="newname" size=40 value="{{ folder_name|e }}" />
             <P />
         </li>
         <li>
             {{ "Change folder description:"|trans }}
             <br/>
-            <INPUT type='text' name='newdesc' size=60 value="{{ folder_desc|e }}" />
+            <INPUT type="text" name="newdesc" size="60" value="{{ folder_desc|e }}" />
         </li>
     </ol>
-    <input type='submit' value='{{ "Edit"|trans }}!'>
+    <input type="submit" value="{{ "Edit"|trans }}!">
 </form>

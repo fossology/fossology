@@ -100,7 +100,7 @@ class ui_view_info extends FO_Plugin
         INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         LIMIT 1;";
-      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__.md5($sql));
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
       $V .= "<table border=1>\n";
       $text = _("Attribute");
       $text1 = _("Value");
@@ -148,8 +148,8 @@ class ui_view_info extends FO_Plugin
         AND pfile_pk IN
         (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
         LIMIT $2 OFFSET $3";
-    $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-    $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Item,$Max,$Offset));
+    $this->dbManager->prepare(__METHOD__."getListOfFiles",$sql);
+    $result = $this->dbManager->execute(__METHOD__,array($Item,$Max,$Offset));
     $Count = pg_num_rows($result);
     if (($Page > 0) || ($Count >= $Max))
     {
@@ -200,8 +200,8 @@ class ui_view_info extends FO_Plugin
 
     /* display mimetype */
     $sql = "SELECT * FROM uploadtree where uploadtree_pk = $1";
-    $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-    $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Item));
+    $this->dbManager->prepare(__METHOD__."DisplayMimetype",$sql);
+    $result = $this->dbManager->execute(__METHOD__."getUploadTree",array($Item));
     if (pg_num_rows($result))
     {
       $row = pg_fetch_assoc($result);
@@ -225,8 +225,8 @@ class ui_view_info extends FO_Plugin
     if (!empty($row['pfile_fk']))
     {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
-      $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-      $result = $this->dbManager->execute(__METHOD__.md5($sql),array($row[pfile_fk]));
+      $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
+      $result = $this->dbManager->execute(__METHOD__."getMimetype",array($row[pfile_fk]));
       if (pg_num_rows($result))
       {
         $pmRow = pg_fetch_assoc($result);
@@ -238,7 +238,7 @@ class ui_view_info extends FO_Plugin
 
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
-    $row = $this->dbManager->getSingleRow($sql,array($row[upload_fk]),__METHOD__.md5($sql));
+    $row = $this->dbManager->getSingleRow($sql,array($row[upload_fk]),__METHOD__."getUploadOrigin");
     if ($row)
     {
 
@@ -259,7 +259,7 @@ class ui_view_info extends FO_Plugin
 
     /* display upload owner*/
     $sql = "SELECT user_name from users, upload  where user_pk = user_fk and upload_pk = $1";
-    $row = $this->dbManager->getSingleRow($sql,array($Upload),__METHOD__.md5($sql));
+    $row = $this->dbManager->getSingleRow($sql,array($Upload),__METHOD__."getUploadOwner");
 
     $text = _("Added by");
     $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
@@ -322,7 +322,7 @@ class ui_view_info extends FO_Plugin
      Check if pkgagent disabled
      ***********************************/
     $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
-    $row = $this->dbManager->getSingleRow($sql,array(),__METHOD__.md5($sql));
+    $row = $this->dbManager->getSingleRow($sql,array(),__METHOD__."checkPkgagentDisabled");
     if (isset($row) && ($row['agent_enabled']== 'f')){return;}
 
     /**********************************
@@ -333,8 +333,8 @@ class ui_view_info extends FO_Plugin
 
     /* If pkgagent_ars table didn't exists, don't show the result. */
     $sql = "SELECT typlen  FROM pg_type where typname='pkgagent_ars' limit 1;";
-    $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-    $result = $this->dbManager->execute(__METHOD__.md5($sql),array());
+    $this->dbManager->prepare(__METHOD__."displayPackageInfo",$sql);
+    $result = $this->dbManager->execute(__METHOD__."displayPackageInfo",array());
     $numrows = pg_num_rows($result);
     $this->dbManager->freeResult($result);
     if ($numrows <= 0)
@@ -374,8 +374,8 @@ class ui_view_info extends FO_Plugin
         INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
-    $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-    $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Item));
+    $this->dbManager->prepare(__METHOD__."getMimetypeName",$sql);
+    $result = $this->dbManager->execute(__METHOD__."getMimetypeName",array($Item));
     while ($row = pg_fetch_assoc($result))
     {
       if (!empty($row['mimetype_name']))
@@ -392,7 +392,7 @@ class ui_view_info extends FO_Plugin
                 FROM pkg_rpm
                 INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
-      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__.md5($sql));
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."getRPMPackageInfo");
       if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
       {
         $V .= _("RPM Binary Package");
@@ -421,8 +421,8 @@ class ui_view_info extends FO_Plugin
         } 
 
         $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $1;";
-        $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-        $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Require));
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -445,7 +445,7 @@ class ui_view_info extends FO_Plugin
                 FROM pkg_deb
                 INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__.md5($sql));
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianBinaryPackageInfo");
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -467,8 +467,8 @@ class ui_view_info extends FO_Plugin
         pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
-        $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-        $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Require));
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -491,7 +491,7 @@ class ui_view_info extends FO_Plugin
                 FROM pkg_deb
                 INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__.md5($sql));
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianSourcePakcageInfo");
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -513,8 +513,8 @@ class ui_view_info extends FO_Plugin
         pg_free_result($result);
 
         $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
-        $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-        $result = $this->dbManager->execute(__METHOD__.md5($sql),array($Require));
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -567,8 +567,8 @@ class ui_view_info extends FO_Plugin
         AND uploadtree.lft >= $2 AND uploadtree.rgt <= $3 UNION SELECT * FROM uploadtree INNER JOIN
         (SELECT * FROM tag_uploadtree,tag WHERE tag_pk = tag_fk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk
         WHERE uploadtree.upload_fk = $1 AND uploadtree.lft >= $2 AND uploadtree.rgt <= $3 ORDER BY ufile_name";
-    $this->dbManager->prepare(__METHOD__.md5($sql),$sql);
-    $result = $this->dbManager->execute(__METHOD__.md5($sql),array($upload_pk, $lft,$rgt));
+    $this->dbManager->prepare(__METHOD__,$sql);
+    $result = $this->dbManager->execute(__METHOD__,array($upload_pk, $lft,$rgt));
     if (pg_num_rows($result) > 0)
     {
       $VT .= "<table border=1>\n";

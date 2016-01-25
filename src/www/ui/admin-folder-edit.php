@@ -44,7 +44,7 @@ class folder_properties extends FO_Plugin {
    */
   function Edit($FolderId, $NewName, $NewDesc) {
     $sql = 'SELECT * FROM folder where folder_pk = $1;';
-    $Row = $this->dbManager->getSingleRow($sql,array($FolderId),__METHOD__.md5($sql));
+    $Row = $this->dbManager->getSingleRow($sql,array($FolderId),__METHOD__."Get");
     /* If the folder does not exist. */
     if ($Row['folder_pk'] != $FolderId) {
       return (0);
@@ -65,7 +65,7 @@ class folder_properties extends FO_Plugin {
     }
     /* Change the properties */
     $sql = 'UPDATE folder SET folder_name = $1, folder_desc = $2 WHERE folder_pk = $3;';
-    $this->dbManager->getSingleRow($sql,array($NewName, $NewDesc, $FolderId),__METHOD__.md5($sql));
+    $this->dbManager->getSingleRow($sql,array($NewName, $NewDesc, $FolderId),__METHOD__."Set");
     return (1);
   }
 
@@ -92,7 +92,7 @@ class folder_properties extends FO_Plugin {
     }
     /* Get the folder info */
     $sql = 'SELECT * FROM folder WHERE folder_pk = $1;';
-    $Folder = $this->dbManager->getSingleRow($sql,array($FolderSelectId),__METHOD__.md5($sql));
+    $Folder = $this->dbManager->getSingleRow($sql,array($FolderSelectId),__METHOD__."getFolderRow");
 
     /* Display the form */
     $formVars["onchangeURI"] = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";

@@ -140,8 +140,6 @@ class showjobs extends FO_Plugin
     }
 
     $this->vars['uploadId']= $uploadPk;
-    // micro menus
-    menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
     /* Process any actions */
     if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
@@ -179,9 +177,6 @@ class showjobs extends FO_Plugin
           $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
           if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
           echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
-          break;
-
-        default:
           break;
       }
     }

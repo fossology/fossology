@@ -85,7 +85,7 @@ class admin_folder_delete extends FO_Plugin {
     if (!empty($folder)) {
       $rc = $this->Delete($folder);
       $sql = "SELECT * FROM folder where folder_pk = $1;";
-      $Folder = $this->dbManager->getSingleRow($sql,array($folder),__METHOD__.md5($sql));
+      $Folder = $this->dbManager->getSingleRow($sql,array($folder),__METHOD__."GetRowWithFolderName");
       if (empty($rc)) {
         /* Need to refresh the screen */
         $text = _("Deletion of folder ");
