@@ -142,6 +142,11 @@ int main (int argc, char *argv[])
   sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
+
+  if(Scheduler == 1 && user_id == -1){
+    /* get user_id for user who queued the agent */
+    user_id = fo_scheduler_userID();
+  }
   
   if (ListProj) ListUploads(user_id, user_perm);
   if (ListFolder) ListFolders(user_id);
@@ -157,7 +162,7 @@ int main (int argc, char *argv[])
     DeleteUpload(DelUpload); 
     fprintf(stdout, "The upload '%ld' is deleted by the user '%s'.\n", DelUpload, user_name);
   }
-  if (DelFolder) { DeleteFolder(DelFolder); }
+  if (DelFolder) { DeleteFolder(DelFolder, user_id); }
   if (DelLicense) { DeleteLicense(DelLicense); }
 
   /* process from the scheduler */
@@ -167,7 +172,7 @@ int main (int argc, char *argv[])
     {
       Parm = fo_scheduler_current();
       
-      if (ReadParameter(Parm) < 0)
+      if (ReadParameter(Parm, user_id) < 0)
         exit(-1);
     }
   }

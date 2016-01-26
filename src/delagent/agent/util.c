@@ -525,7 +525,7 @@ void DeleteUpload (long UploadId)
  * \param int DelFlag 0=no del, 1=del if unique parent, 2=del unconditional
  *
  */
-void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
+void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag, int user_id)
 {
   int r,MaxRow;
   long Fid;
@@ -562,9 +562,9 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
         Desc = PQgetvalue(result,r,3);
         if (Desc && Desc[0]) printf(" (%s)",Desc);
         printf("\n");
-        ListFoldersRecurse(Fid,Depth+1,Parent,0);
+        ListFoldersRecurse(Fid,Depth+1,Parent,0,user_id);
       }
-      else ListFoldersRecurse(Fid,Depth+1,Parent,1);
+      else ListFoldersRecurse(Fid,Depth+1,Parent,1,user_id);
     }
     else
     {
@@ -588,9 +588,11 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
     case 0:	/* it's an upload */
       break;
     default:	/* it's a folder */
-        LOG_FATAL("folder id=%ld will be deleted with flag %d\n",Parent,DelFlag);
       if (DelFlag==0)
         break;
+
+      LOG_FATAL("folder id=%ld will be deleted with flag %d\n",Parent,DelFlag);
+
       if (DelFlag==1 && UnlinkContent(Parent,Row,1))
       {
         break;
@@ -681,7 +683,7 @@ void ListFolders (int user_id)
   snprintf(SQL,sizeof(SQL),"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-  ListFoldersRecurse(1,1,-1,0);
+  ListFoldersRecurse(1,1,-1,0,user_id);
 
   /* Find detached folders */
   MaxRow = PQntuples(result);
@@ -702,7 +704,7 @@ void ListFolders (int user_id)
       Desc = PQgetvalue(result,i,3);
       if (Desc && Desc[0]) printf(" (%s)",Desc);
       printf("\n");
-      ListFoldersRecurse(Fid,1,i,0);
+      ListFoldersRecurse(Fid,1,i,0,user_id);
     }
   }
 
@@ -780,9 +782,17 @@ void ListUploads (int user_id, int user_perm)
  * 
  * \param long FolderId the fold id to delete
  **/
-void DeleteFolder (long FolderId)
+void DeleteFolder (long FolderId, int user_id)
 {
-  ListFoldersRecurse(FolderId,0,-1,2);
+  if(check_permission_folder_del(FolderId, user_id) == 0){
+    printf("WARN: Folder does not exist (or) Permission denied to delete folder '%ld'.\n", FolderId);
+    exit(-1);
+  }else if(check_child_folder_del(FolderId, user_id) == 0){
+    printf("WARN: You dont have permissions to delete sub folders (or) uploads in sub folders.\n");
+    exit(-1);
+  }else{
+    ListFoldersRecurse(FolderId,0,-1,2,user_id);
+  }
 #if 0
   /** Disabled: Database will take care of this **/
   MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
@@ -803,7 +813,7 @@ void DeleteFolder (long FolderId)
  * \return 0 on OK, -1 on failure.
  *
  **/
-int ReadParameter (char *Parm)
+int ReadParameter (char *Parm, int user_id)
 {
   char FullLine[MAXLINE];
   char *L;
@@ -858,10 +868,10 @@ int ReadParameter (char *Parm)
   /* Handle the request */
   if ((Type==1) && (Target==1))	{ DeleteUpload(Id); rc=1; }
   else if ((Type==1) && (Target==2))	{ DeleteLicense(Id); rc=1; }
-  else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
+  else if ((Type==1) && (Target==3))	{ DeleteFolder(Id, user_id); rc=1; }
   else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
   else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(0); rc=1; }
+  else if ((Type==2) && (Target==3))	{ ListFolders(user_id); rc=1; }
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);
@@ -986,3 +996,104 @@ void Usage (char *Name)
   fprintf(stderr,"  --user|-n # :: user name\n");
   fprintf(stderr,"  --password|-p # :: password\n");
 } /* Usage() */
+
+/**
+ * \brief check if the uploads in a folder can be deleted, that is the user have
+ * the permissin to delte this the child folders aswell
+ * 
+ * \param long parent - folder_pk
+ * \param char user_id - user_id
+ * 
+ * \return 0: cannot be deleted 1: can be deleted;
+ */
+int check_upload_folder_del(long parent, int user_id)
+{
+  char SQL[MAXSQL];
+  PGresult *result;
+  int count = 0;
+  int i = 0;
+  long upload_id = 0;
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT upload_pk FROM folderlist WHERE folder_pk is null AND parent = %ld;",parent);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  count = PQntuples(result);
+  if (count == 0){
+    return 1;
+  }
+  for(i = 0; i < count; i++){
+    upload_id = atol(PQgetvalue(result, 0, i));
+     if(check_permission_del(upload_id,user_id,0) == -2){
+       return 0;
+     }
+  }
+  return 1;
+}
+
+/**
+ * \brief check if the child folder can be deleted, that is the user have
+ * the permissin to delte this the child folders aswell
+ * 
+ * \param long parent - folder_pk
+ * \param char user_id - user_id
+ * 
+ * \return 0: cannot be deleted 1: can be deleted;
+ */
+int check_child_folder_del(long parent, int user_id)
+{
+  char SQL[MAXSQL];
+  PGresult *result;
+  int count = 0;
+  int i = 0;
+  long child = 0;
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT child_id FROM foldercontents WHERE foldercontents_mode = 1 and parent_fk = %ld;",parent);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  count = PQntuples(result);
+  if (count == 0){
+    return 1;
+  }
+  for(i = 0; i < count; i++){
+    child = atol(PQgetvalue(result, 0, i));
+    if(check_permission_folder_del(child, user_id) == 0){
+      return 0;
+    }else{
+      if(check_child_folder_del(child, user_id) == 0){
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+/**
+ * \brief check if the folder can be deleted, that is the user have
+ * the permissin to delte this folder
+ * 
+ * \param long parent - folder_pk
+ * \param char user_id - user_id
+ * 
+ * \return 0: cannot be deleted;
+ */
+int check_permission_folder_del(long parent, int user_id)
+{
+  char SQL[MAXSQL];
+  PGresult *result;
+  int count = 0;
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = %ld and users.user_pk = %d;",parent,user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  count = atol(PQgetvalue(result,0,0));
+  if(count == 0){
+   return 0;
+  } 
+  if(check_upload_folder_del(parent, user_id) == 0){
+    return 0;
+  }
+  return count;
+}
