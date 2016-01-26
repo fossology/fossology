@@ -28,103 +28,306 @@ int Verbose = 0;
 int Test = 0;
 PGconn* db_conn = NULL;        // the connection to Database
 
+int verbosePrintf (const char *format, ...)
+{
+  va_list arg;
+  int done = 0;
+
+	if (Verbose)
+	{
+		va_start (arg, format);
+		done = vprintf(format, arg);
+		va_end (arg);
+	}
+
+  return done;
+}
+
+/**
+ * \brief if this account is valid
+ *
+ * \param char *user - user name
+ * \param char *password - password
+ * \param int *user_id - will be set to the id of the user
+ * \param int *user_perm - will be set to the permission level of the user
+ *
+ * \return 1: yes, valid; -1: failure; 0: invalid
+ */
+int authentication(char *user, char *password, int *user_id, int *user_perm)
+{
+  if (NULL == user || NULL == password)
+	{
+		return 0;
+	}
+  char SQL[MAXSQL] = {0};
+  PGresult *result;
+  char user_seed[myBUFSIZ] = {0};
+  char pass_hash_valid[myBUFSIZ] = {0};
+  unsigned char hash_value[myBUFSIZ] = {0};
+  char pass_hash_actual[myBUFSIZ] = {0};
+
+  /** get user_seed, user_pass on one specified user */
+  snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+  {
+    return -1;
+  }
+  if (!PQntuples(result)){
+    return 0;
+  }
+  strcpy(user_seed, PQgetvalue(result, 0, 0));
+  strcpy(pass_hash_valid, PQgetvalue(result, 0, 1));
+  *user_perm = atoi(PQgetvalue(result, 0, 2));
+  *user_id = atoi(PQgetvalue(result, 0, 3));
+  PQclear(result);
+  if (user_seed[0] && pass_hash_valid[0])
+  {
+    strcat(user_seed, password);  // get the hash code on seed+pass
+    SHA1((unsigned char *)user_seed, strlen(user_seed), hash_value);
+    if (!hash_value[0])
+    {
+      LOG_FATAL("ERROR, failed to get sha1 value\n");
+      return -1;
+    }
+  }
+  else
+	{
+		return -1;
+	}
+  int i = 0;
+  char temp[256] = {0};
+  for (i = 0; i < strlen((char *)hash_value); i++)
+  {
+    sprintf(temp, "%02x", hash_value[i]);
+    strcat(pass_hash_actual, temp);
+  }
+  if (strcmp(pass_hash_valid, pass_hash_actual) == 0)
+  {
+    return 1;
+  }
+  else
+	{
+		return -1;
+	}
+}
+
+/**
+ * \brief check if the upload can be deleted, that is the user have
+ * the permission to delete this upload
+ *
+ * \param long upload_id - upload id
+ * \param char *user_name - user name
+ *
+ * \return 1: yes, can be deleted;
+ *         0: can not be deleted
+ *        -1: failure;
+ *        -2: does not exist;
+ */
+int check_permission_upload(long upload_id, int user_id, int user_perm)
+{
+  char SQL[MAXSQL] = {0};;
+  PGresult *result = NULL;
+  int count = 0;
+
+  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload join users on (users.user_pk = upload.user_fk or users.user_perm = 10) where upload_pk = %ld and users.user_pk = %d;", upload_id, user_id);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  count = atoi(PQgetvalue(result, 0, 0));
+  if (count == 0) return -2; // this upload does not exist
+
+  /* Check Permissions */
+  if (GetUploadPerm(db_conn, upload_id, user_id) < PERM_WRITE)
+  {
+    LOG_ERROR("You have no update permissions on upload %ld", upload_id);
+    return 0; // can not be deleted
+  }
+
+  return 1; // can be deleted
+}
+
+/**
+ * \brief check if the upload can be deleted, that is the user have
+ * the permission to delete this upload
+ *
+ * \param long upload_id - upload id
+ * \param char *user_name - user name
+ *
+ * \return 1: yes, can be deleted;
+ *         0: can not be deleted
+ *        -1: failure;
+ *        -2: does not exist;
+ */
+int check_permission_folder(long folder_id, int user_id, int user_perm)
+{
+	char SQL[MAXSQL];
+	PGresult *result;
+	int count = 0;
+
+	memset(SQL,'\0',sizeof(SQL));
+	snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = %ld and users.user_pk = %d;",parent,user_id);
+	result = PQexec(db_conn, SQL);
+	if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+	count = atol(PQgetvalue(result,0,0));
+	if(count == 0){
+		return 0; // can not be deleted
+	}
+	return 1; // can be deleted
+}
+
+/**
+ * \brief check if the upload can be deleted, that is the user have
+ * the permissoin to delete this upload
+ *
+ * \param long upload_id - upload id
+ * \param char *user_name - user name
+ *
+ * \return 1: yes, can be deleted;
+ *         0: can not be deleted
+ *        -1: failure;
+ *        -2: does not exist;
+ */
+int check_permission_license(long license_id, int user_id, int user_perm)
+{
+
+  if (user_perm != PERM_ADMIN)
+  {
+    /* if (Verbose) { printf("only admin is allowed to delete licenses\n"); } */
+    return 0; // can not be deleted
+  }
+  return 1; // can be deleted
+}
+
+
 /**
  * \brief DeleteLicense()
- * 
+ *
  *   Given an upload ID, delete all licenses associated with it.
  *   The DoBegin flag determines whether BEGIN/COMMIT should be called.
  *   Do this if you want to reschedule license analysis.
  *
  * \param long UploadId the upload id
+ *
+ * \return 1: success; 0: fail
  */
-void DeleteLicense (long UploadId)
+int DeleteLicense (long UploadId, int user_perm)
 {
   char TempTable[256];
   char SQL[MAXSQL];
   PGresult *result;
   long items=0;
 
+  if (1 != check_permission_upload(UploadId, user_perm))
+  {
+    return 0;
+  }
+
   if (Verbose) { printf("Deleting licenses for upload %ld\n",UploadId); }
 
   result = PQexec(db_conn, "SET statement_timeout = 0;"); /* no timeout */
-  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 0;", __FILE__, __LINE__)) exit(-1);
-  PQclear(result);  
-  result = PQexec(db_conn, "BEGIN;");
-  if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 0;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
-  
+  result = PQexec(db_conn, "BEGIN;");
+  if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
+  PQclear(result);
+
   memset(TempTable,'\0',sizeof(TempTable));
   snprintf(TempTable,sizeof(TempTable),"DelLic_%ld",UploadId);
 
   /* Create the temp table */
-  if (Verbose) { printf("# Creating temp table: %s\n",TempTable); }
+  verbosePrintf("# Creating temp table: %s\n",TempTable);
 
   /* Get the list of pfiles to process */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT(pfile_fk) FROM uploadtree WHERE upload_fk = '%ld' ;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   items = PQntuples(result);
   PQclear(result);
   /***********************************************/
   /* delete pfile licenses */
-  if (Verbose) { printf("# Deleting licenses\n"); }
+	verbosePrintf("# Deleting licenses\n");
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_status WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM agent_lic_meta WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   fo_scheduler_heart(items);
 
   /***********************************************/
   /* Commit the change! */
-  if (Verbose) { printf("# Delete completed\n"); }
+  verbosePrintf("# Delete completed\n");
   if (Test)
   {
     result = PQexec(db_conn, "ROLLBACK;");
-    if (fo_checkPQcommand(db_conn, result, "ROLLBACK", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "ROLLBACK", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
   }
   else
   {
     result = PQexec(db_conn, "COMMIT;");
-    if (fo_checkPQcommand(db_conn, result, "COMMIT", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "COMMIT", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
-#if 0
-    /** Disabled: DB will take care of this **/
-    if (Verbose) { printf("# Running vacuum and analyze\n"); }
-    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_status;");
-    MyDBaccess(DB,"VACUUM ANALYZE agent_lic_meta;");
-#endif
   }
   result = PQexec(db_conn, "SET statement_timeout = 120000;");
-  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 120000;", __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 120000;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
-  if (Verbose) { printf("Deleted licenses for upload %ld\n",UploadId); }
+  verbosePrintf("Deleted licenses for upload %ld\n",UploadId);
+
+  return 1; /* success */
 } /* DeleteLicense() */
 
 /**
  * \brief DeleteUpload()
- *  
+ *
  *  Given an upload ID, delete it.
  *
  *  param long UploadId the upload id
+ *
+ * \return 1: success; 0: fail
  */
-void DeleteUpload (long UploadId)
+int DeleteUpload (long UploadId, int user_id, int user_perm)
 {
   char *S;
   int Row,MaxRow;
@@ -132,14 +335,25 @@ void DeleteUpload (long UploadId)
   PGresult *result, *pfile_result;
   char SQL[MAXSQL];
 
+  if (1 != check_permission_upload(UploadId, user_id, user_perm))
+  {
+    return 0;
+  }
+
   if (Verbose) { printf("Deleting upload %ld\n",UploadId); }
   result = PQexec(db_conn, "SET statement_timeout = 0;"); /* no timeout */
-  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 0;", __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 0;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
   result = PQexec(db_conn, "BEGIN;");
-  if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
- 
+
   memset(TempTable,'\0',sizeof(TempTable));
   snprintf(TempTable,sizeof(TempTable),"DelUp_%ld",UploadId);
 
@@ -157,14 +371,20 @@ void DeleteUpload (long UploadId)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
   PQclear(result);
   */
- 
+
   if (!Test)
   {
     /* The UI depends on uploadtree and folders for navigation.
 	   Delete them now to block timeouts from the UI. */
-    if (Verbose) { printf("# COMMIT;\n"); }
+    if (Verbose)
+		{
+			printf("# COMMIT;\n");
+		}
     result = PQexec(db_conn, "COMMIT;");
-    if (fo_checkPQcommand(db_conn, result, "COMMIT;", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "COMMIT;", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
     //if (Verbose) { printf("# BEGIN;\n"); }
     //result = PQexec(db_conn, "BEGIN;");
@@ -182,20 +402,29 @@ void DeleteUpload (long UploadId)
   if (Verbose) { printf("# Getting list of pfiles to delete\n"); }
   snprintf(SQL,sizeof(SQL),"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO %s_pfile FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   /* Remove pfiles with reuse */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM %s_pfile USING uploadtree WHERE pfile_pk = uploadtree.pfile_fk AND uploadtree.upload_fk != %ld;",TempTable,UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT COUNT(*) FROM %s_pfile;",TempTable);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   if (Verbose) { printf("# Created pfile table: %ld entries\n",atol(PQgetvalue(result,0,0))); }
   PQclear(result);
 
@@ -204,7 +433,10 @@ void DeleteUpload (long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT * FROM %s_pfile ORDER BY pfile_pk;",TempTable);
   pfile_result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, pfile_result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, pfile_result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   MaxRow = PQntuples(pfile_result);
 
   /***********************************************/
@@ -244,7 +476,10 @@ void DeleteUpload (long UploadId)
   {
     if (Verbose) { printf("# BEGIN;\n"); }
     result = PQexec(db_conn, "BEGIN;");
-    if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "BEGIN;", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
   }
   /* Delete the upload from the folder-contents table */
@@ -252,7 +487,10 @@ void DeleteUpload (long UploadId)
   if (Verbose) { printf("# Deleting foldercontents\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   /***********************************************/
@@ -277,7 +515,7 @@ void DeleteUpload (long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM attrib USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
-  
+
   if (Verbose) { printf("# Deleting pkg_deb_req\n"); }
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM pkg_deb_req USING pkg_deb,%s_pfile WHERE pkg_fk = pkg_pk AND pfile_fk = pfile_pk;",TempTable);
@@ -306,7 +544,7 @@ void DeleteUpload (long UploadId)
 
   */
   /* These table cascade deleted with upload table
-  
+
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting nomos_ars\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM nomos_ars WHERE upload_fk = %ld;",UploadId);
@@ -331,7 +569,7 @@ void DeleteUpload (long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM copyright USING %s_pfile WHERE pfile_fk = pfile_pk;",TempTable);
   MyDBaccess(DB,SQL);
-  
+
   */
 
   /***********************************************/
@@ -345,7 +583,7 @@ void DeleteUpload (long UploadId)
    by the delete process.)
    The solution is to delete the jobqueue LAST, so the scheduler won't hang.
    *****/
-  /* Cascade delete with upload table */ 
+  /* Cascade delete with upload table */
 
   /***********************************************/
   /* Delete the actual upload */
@@ -355,38 +593,50 @@ void DeleteUpload (long UploadId)
   snprintf(SQL,sizeof(SQL),"DELETE FROM uploadtree WHERE upload_fk = %ld;",UploadId);
   MyDBaccess(DB,SQL);
   */
- 
+
   /* Delete the bucket_container record as it can't be cascade delete with upload table */
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting bucket_container\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM bucket_container USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
   /* Delete the tag_uploadtree record as it can't be cascade delete with upload table */
   memset(SQL,'\0',sizeof(SQL));
   if (Verbose) { printf("# Deleting tag_uploadtree\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM tag_uploadtree USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
- 
+
   /* Delete uploadtree_nnn table */
   char uploadtree_tablename[1024];
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   if (PQntuples(result))
   {
     strcpy(uploadtree_tablename, PQgetvalue(result, 0, 0));
     PQclear(result);
-    if (strcasecmp(uploadtree_tablename,"uploadtree_a")) 
+    if (strcasecmp(uploadtree_tablename,"uploadtree_a"))
     {
       memset(SQL,'\0',sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"DROP TABLE %s;", uploadtree_tablename);
       result = PQexec(db_conn, SQL);
-      if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+      if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+			{
+				exit(-1);
+			}
       PQclear(result);
     }
   }
@@ -395,7 +645,10 @@ void DeleteUpload (long UploadId)
   if (Verbose) { printf("# Deleting upload\n"); }
   snprintf(SQL,sizeof(SQL),"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   /***********************************************/
@@ -447,16 +700,25 @@ void DeleteUpload (long UploadId)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DELETE FROM pfile USING %s_pfile WHERE pfile.pfile_pk = %s_pfile.pfile_pk;",TempTable,TempTable);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"DROP TABLE %s_pfile;",TempTable);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   result = PQexec(db_conn, "SET statement_timeout = 120000;");
-  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 120000;", __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQcommand(db_conn, result, "SET statement_timeout = 120000;", __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   PQclear(result);
 
   if (Verbose) { printf("Deleted upload %ld from DB, now doing repository.\n",UploadId); }
@@ -465,19 +727,28 @@ void DeleteUpload (long UploadId)
   {
     if (Verbose) { printf("# ROLLBACK\n"); }
     result = PQexec(db_conn, "ROLLBACK;");
-    if (fo_checkPQcommand(db_conn, result, "ROLLBACK", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "ROLLBACK", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
     memset(SQL,'\0',sizeof(SQL));
     snprintf(SQL,sizeof(SQL),"DROP TABLE %s_pfile;",TempTable);
     result = PQexec(db_conn, SQL);
-    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
   }
   else
   {
     if (Verbose) { printf("# COMMIT\n"); }
     result = PQexec(db_conn, "COMMIT;");
-    if (fo_checkPQcommand(db_conn, result, "COMMIT", __FILE__, __LINE__)) exit(-1);
+    if (fo_checkPQcommand(db_conn, result, "COMMIT", __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
     PQclear(result);
   }
  /***********************************************/
@@ -510,12 +781,49 @@ void DeleteUpload (long UploadId)
   }
   PQclear(pfile_result);
   */
-  if (Verbose) { printf("Deleted upload %ld\n",UploadId); }
+  verbosePrintf("Deleted upload %ld\n",UploadId);
+
+  return 1; /* success */
 } /* DeleteUpload() */
 
 /**
+ * \brief remove link between parent and (child,mode) if there are other parents
+ */
+int UnlinkContent (long child, long parent, int mode, int user_id, int user_perm)
+{
+  PGresult *result;
+  char SQL[MAXSQL];
+  int cnt;
+
+	// TODO: add permission checks
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
+  result = PQexec(db_conn, SQL);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
+  cnt = atol(PQgetvalue(result,0,0));
+  PQclear(result);
+  if(cnt>1 && !Test)
+  {
+    memset(SQL,'\0',sizeof(SQL));
+    snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode=%d AND child_id =%ld AND parent_fk=%ld",mode,child,parent);
+    result = PQexec(db_conn, SQL);
+    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
+    PQclear(result);
+    return 1;
+  }
+  return 0;
+}
+
+/**
  * \brief ListFoldersRecurse(): Draw folder tree.
- *  
+ *
  *   if DelFlag is set, then all child uploads are
  *   deleted and the folders are deleted.
  *
@@ -524,8 +832,10 @@ void DeleteUpload (long UploadId)
  * \param long Row grandparent (used to unlink if multiple grandparents)
  * \param int DelFlag 0=no del, 1=del if unique parent, 2=del unconditional
  *
+ * \return 1: success; 0: fail
+ *
  */
-void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
+int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
 {
   int r,MaxRow;
   long Fid;
@@ -534,13 +844,20 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
   PGresult *result;
   char SQL[MAXSQL];
 
+	if(DelFlag && 0 >= check_permission_folder(Parent, user_id, user_perm)){
+		return 0;
+	}
+
   /* Find all folders with this parent and recurse */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_pk,foldercontents_mode,name,description,upload_pk FROM folderlist "
           "WHERE parent=%ld "
           "ORDER BY name,parent,folder_pk",Parent);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   MaxRow = PQntuples(result);
   for(r=0; r < MaxRow; r++)
   {
@@ -562,18 +879,17 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
         Desc = PQgetvalue(result,r,3);
         if (Desc && Desc[0]) printf(" (%s)",Desc);
         printf("\n");
-        ListFoldersRecurse(Fid,Depth+1,Parent,0);
       }
-      else ListFoldersRecurse(Fid,Depth+1,Parent,1);
+      ListFoldersRecurse(Fid,Depth+1,Parent,DelFlag,user_id,user_perm);
     }
     else
     {
-      if (DelFlag==1 && UnlinkContent(atol(PQgetvalue(result,r,4)),Parent,2))
+      if (DelFlag==1 && UnlinkContent(atol(PQgetvalue(result,r,4)),Parent,2,user_id,user_perm))
       {
         continue;
-      } 
+      }
       if (DelFlag)
-        DeleteUpload(atol(PQgetvalue(result,r,4)));
+        DeleteUpload(atol(PQgetvalue(result,r,4)),user_id,user_perm);
       else
         printf("%4s :: Contains: %s\n","--",PQgetvalue(result,r,2));
     }
@@ -583,15 +899,20 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
   switch(Parent)
   {
     case 1:	/* skip default parent */
-      printf("INFO: Default folder not deleted.\n");
+      if (DelFlag!=0)
+			{
+				printf("INFO: Default folder not deleted.\n");
+			}
       break;
     case 0:	/* it's an upload */
       break;
     default:	/* it's a folder */
-        LOG_FATAL("folder id=%ld will be deleted with flag %d\n",Parent,DelFlag);
       if (DelFlag==0)
+			{
         break;
-      if (DelFlag==1 && UnlinkContent(Parent,Row,1))
+			}
+			printf("INFO: folder id=%ld will be deleted with flag %d\n",Parent,DelFlag);
+			if (DelFlag==1 && UnlinkContent(Parent,Row,1,user_id,user_perm))
       {
         break;
       }
@@ -601,7 +922,10 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
       else
       {
         result = PQexec(db_conn, SQL);
-        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+				{
+					exit(-1);
+				}
         PQclear(result);
       }
 
@@ -611,44 +935,21 @@ void ListFoldersRecurse	(long Parent, int Depth, long Row, int DelFlag)
       else
       {
         result = PQexec(db_conn, SQL);
-        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+        if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
+				{
+					exit(-1);
+				}
         PQclear(result);
       }
   } /* switch() */
+
+  return 1; /* success */
 } /* ListFoldersRecurse() */
-
-
-/**
- * \brief remove link between parent and (child,mode) if there are other parents
- */
-int UnlinkContent (long child, long parent, int mode)
-{
-  PGresult *result;
-  char SQL[MAXSQL];
-  int cnt;
-
-  memset(SQL,'\0',sizeof(SQL));
-  snprintf(SQL,sizeof(SQL),"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
-  result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-  cnt = atol(PQgetvalue(result,0,0));
-  PQclear(result);
-  if(cnt>1 && !Test)
-  {
-    memset(SQL,'\0',sizeof(SQL));
-    snprintf(SQL,sizeof(SQL),"DELETE FROM foldercontents WHERE foldercontents_mode=%d AND child_id =%ld AND parent_fk=%ld",mode,child,parent);
-    result = PQexec(db_conn, SQL);
-    if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-    PQclear(result);
-    return 1;
-  }
-  return 0;
-}
 
 /**
  * \brief ListFolders(): List every folder.
  */
-void ListFolders (int user_id)
+void ListFolders (int user_id, int user_perm)
 {
   int i,j,MaxRow;
   long Fid;	/* folder ids */
@@ -662,9 +963,12 @@ void ListFolders (int user_id)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"select count(*) from users where user_pk = %d and user_perm >= 1;",user_id);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
   cnt = atol(PQgetvalue(result,0,0));
-  if(user_id != 0 && cnt == 0){ 
+  if(user_id != 0 && cnt == 0){
     LOG_FATAL("user does not have the permsssion to view the folder list.\n");
     exit(-1);
   }
@@ -672,7 +976,10 @@ void ListFolders (int user_id)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_name from folder where folder_pk =1;");
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
 
   printf("%4d :: %s\n", 1, PQgetvalue(result,0,0));
   PQclear(result);
@@ -680,8 +987,11 @@ void ListFolders (int user_id)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;");
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
-  ListFoldersRecurse(1,1,-1,0);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
+  ListFoldersRecurse(1,1,-1,0,user_id,user_perm);
 
   /* Find detached folders */
   MaxRow = PQntuples(result);
@@ -702,7 +1012,7 @@ void ListFolders (int user_id)
       Desc = PQgetvalue(result,i,3);
       if (Desc && Desc[0]) printf(" (%s)",Desc);
       printf("\n");
-      ListFoldersRecurse(Fid,1,i,0);
+      ListFoldersRecurse(Fid,1,i,0,user_id,user_perm);
     }
   }
 
@@ -747,13 +1057,16 @@ void ListUploads (int user_id, int user_perm)
   printf("# Uploads\n");
   memset(SQL,'\0',sizeof(SQL));
   memset(sub_SQL,'\0',sizeof(sub_SQL));
-  if (user_perm != ADMIN_PERM)
+  if (user_perm != PERM_ADMIN)
   {
     snprintf(sub_SQL, sizeof(sub_SQL), "where user_fk=%d", user_id);
   }
   snprintf(SQL,sizeof(SQL),"SELECT upload_pk,upload_desc,upload_filename FROM upload %s ORDER BY upload_pk;", sub_SQL);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+	{
+		exit(-1);
+	}
 
   /* list each value */
   MaxRow = PQntuples(result);
@@ -777,33 +1090,63 @@ void ListUploads (int user_id, int user_perm)
  *
  *  Given a folder ID, delete it AND recursively delete everything below it!
  *  This includes upload deletion!
- * 
+ *
  * \param long FolderId the fold id to delete
+ *
+ * \return 1: success; 0: fail
+ *
  **/
-void DeleteFolder (long FolderId)
+int DeleteFolder (long FolderId, int user_id, int user_perm)
 {
-  ListFoldersRecurse(FolderId,0,-1,2);
-#if 0
-  /** Disabled: Database will take care of this **/
-  MyDBaccess(DB,"VACUUM ANALYZE foldercontents;");
-  MyDBaccess(DB,"VACUUM ANALYZE folder;");
-#endif
+  return ListFoldersRecurse(FolderId,0,-1,2,user_id,user_perm);
 } /* DeleteFolder() */
 
 /**********************************************************************/
 
+void DoSchedulerTasks(){
+  char *Parm = NULL;
+  char SQL[MAXSQL];
+  PGresult *result;
+  int user_id = -1;
+  int user_perm = -1;
+
+	while(fo_scheduler_next())
+	{
+		Parm = fo_scheduler_current();
+		user_id = fo_scheduler_userID();
+
+		/* get perm level of user */
+		snprintf(SQL,sizeof(SQL),"SELECT user_perm from users where user_pk='%d';", user_id);
+		result = PQexec(db_conn, SQL);
+		if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+		{
+			exit(-1);
+		}
+		if (!PQntuples(result))
+		{
+			exit(-1);
+		}
+		user_perm = atoi(PQgetvalue(result, 0, 0));
+
+		if (ReadParameter(Parm, user_id, user_perm) < 0)
+		{
+			exit(-1);
+		}
+	}
+}
+
 /**
  * \brief ReadParameter()
- * 
+ *
  *  Read Parameter from scheduler.
  *  Process line elements.
  *
  * \param char *Parm the parameter string
- * 
+ *
  * \return 0 on OK, -1 on failure.
  *
  **/
-int ReadParameter (char *Parm)
+int ReadParameter (char *Parm, int user_id, int user_perm)
 {
   char FullLine[MAXLINE];
   char *L;
@@ -856,12 +1199,28 @@ int ReadParameter (char *Parm)
   Id = atol(L);
 
   /* Handle the request */
-  if ((Type==1) && (Target==1))	{ DeleteUpload(Id); rc=1; }
-  else if ((Type==1) && (Target==2))	{ DeleteLicense(Id); rc=1; }
-  else if ((Type==1) && (Target==3))	{ DeleteFolder(Id); rc=1; }
-  else if ((Type==2) && (Target==1))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==2))	{ ListUploads(0, ADMIN_PERM); rc=1; }
-  else if ((Type==2) && (Target==3))	{ ListFolders(0); rc=1; }
+  if ((Type==1) && (Target==1))
+	{
+		rc = DeleteUpload(Id, user_id, user_perm);
+	}
+  else if ((Type==1) && (Target==2))
+	{
+		rc = DeleteLicense(Id, user_perm);
+	}
+  else if ((Type==1) && (Target==3))
+	{
+		rc = DeleteFolder(Id, user_id, user_perm);
+	}
+  else if (((Type==2) && (Target==1)) || ((Type==2) && (Target==2)))
+	{
+		ListUploads(0, PERM_ADMIN);
+		rc = 1;
+	}
+  else if ((Type==2) && (Target==3))
+	{
+		ListFolders(user_id, user_perm);
+		rc = 1;
+	}
   else
   {
     LOG_FATAL("Unknown command: '%s'\n",Parm);
@@ -869,120 +1228,3 @@ int ReadParameter (char *Parm)
 
   return(rc);
 } /* ReadParameter() */
-
-/**
- * \brief check if the upload can be deleted, that is the user have
- * the permissin to delte this upload
- * 
- * \param long upload_id - upload id
- * \param char *user_name - user name
- * 
- * \return 1: yes, can be deleted; -1: failure; 0: can not be deleted
- */
-int check_permission_del(long upload_id, int user_id, int user_perm) 
-{
-  char SQL[MAXSQL] = {0};;
-  PGresult *result = NULL;
-  int count = 0;
-
-  snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload join users on (users.user_pk = upload.user_fk or users.user_perm = 10) where upload_pk = %ld and users.user_pk = %d;", upload_id, user_id);
-  result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
-  count = atoi(PQgetvalue(result, 0, 0)); 
-  if (count == 0) return -2; // this upload does not exist
-
-  /* Check Permissions */
-  if (GetUploadPerm(db_conn, upload_id, user_id) < PERM_WRITE)
-  {
-    LOG_ERROR("You have no update permissions on upload %ld", upload_id);
-    return 0;
-  }
-
-  return 1; // can be deleted
-}
-
-/**
- * \brief if this account is valid
- * 
- * \param char *user - ussr name 
- * \param char *password - password
- *
- * \return 1: yes, valid; -1: failure; 0: invalid
- */
-int authentication(char *user, char * password, int *user_id, int *user_perm)
-{
-  if (NULL == user || NULL == password)   return 0;
-  char SQL[MAXSQL] = {0};
-  PGresult *result;
-  char user_seed[myBUFSIZ] = {0};
-  char pass_hash_valid[myBUFSIZ] = {0};
-  unsigned char hash_value[myBUFSIZ] = {0};
-  char pass_hash_actual[myBUFSIZ] = {0};
-
-  /** get user_seed, user_pass on one specified user */
-  snprintf(SQL,sizeof(SQL),"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
-  result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
-  if (!PQntuples(result)){
-    return 0;
-  }
-  strcpy(user_seed, PQgetvalue(result, 0, 0));
-  strcpy(pass_hash_valid, PQgetvalue(result, 0, 1));
-  *user_perm = atoi(PQgetvalue(result, 0, 2));
-  *user_id = atoi(PQgetvalue(result, 0, 3));
-  PQclear(result);
-  if (user_seed[0] && pass_hash_valid[0]) 
-  {
-    strcat(user_seed, password);  // get the hash code on seed+pass
-    SHA1((unsigned char *)user_seed, strlen(user_seed), hash_value); 
-    if (!hash_value[0])
-    {
-      LOG_FATAL("ERROR, failed to get sha1 value\n");
-      return -1;
-    }
-  }
-  else return -1;
-  int i = 0;
-  char temp[256] = {0};
-  for (i = 0; i < strlen((char *)hash_value); i++)
-  {
-    sprintf(temp, "%02x", hash_value[i]);
-    strcat(pass_hash_actual, temp); 
-  }
-  if (strcmp(pass_hash_valid, pass_hash_actual) == 0)
-  {
-    return 1;
-  } 
-  else return -1;
-}
-
-/***********************************************
- Usage():
- Command line options allow you to write the agent so it works
- stand alone, in addition to working with the scheduler.
- This simplifies code development and testing.
- So if you have options, have a Usage().
- Here are some suggested options (in addition to the program
- specific options you may already have).
- ***********************************************/
-void Usage (char *Name)
-{
-  fprintf(stderr,"Usage: %s [options]\n",Name);
-  fprintf(stderr,"  List or delete uploads.\n");
-  fprintf(stderr,"  Options\n");
-  fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
-  fprintf(stderr,"  -u   :: List uploads IDs.\n");
-  fprintf(stderr,"  -U # :: Delete upload ID.\n");
-  //fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
-  fprintf(stderr,"  -f   :: List folder IDs.\n");
-  fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
-  fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
-  fprintf(stderr,"          every upload and folder in the navigation tree.\n");
-  fprintf(stderr,"  -s   :: Run from the scheduler.\n");
-  fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
-  fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
-  fprintf(stderr,"  -c # :: Specify the directory for the system configuration\n");
-  fprintf(stderr,"  -V   :: print the version info, then exit.\n");
-  fprintf(stderr,"  --user|-n # :: user name\n");
-  fprintf(stderr,"  --password|-p # :: password\n");
-} /* Usage() */

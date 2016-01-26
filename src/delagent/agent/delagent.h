@@ -42,18 +42,28 @@ extern PGconn* db_conn;
 #define MAXSQL  1024
 #define MAXLINE 1024
 #define myBUFSIZ 2048
-#define ADMIN_PERM 10
 
-void DeleteLicense(long UploadId);
-void DeleteUpload(long UploadId);
-void ListFoldersRecurse(long Parent, int Depth, long Row, int DelFlag);
-int UnlinkContent (long child, long parent, int mode);
-void ListFolders(int user_id);
-void ListUploads (int user_id, int user_perm);
-void DeleteFolder(long FolderId);
-int ReadParameter(char *Parm);
-void Usage(char *Name);
+/* authentication and permission checking */
 int authentication(char *user, char * password, int *user_id, int *user_perm);
-int check_permission_del(long upload_id, int user_id, int user_perm);
+
+int check_permission_upload(long upload_id, int user_id, int user_perm);
+int check_permission_folder(long folder_id, int user_id, int user_perm);
+int check_permission_license(long license_id, int user_id, int user_perm);
+
+/* functions that list things */
+void ListFolders(int user_id, int user_perm);
+void ListUploads(int user_id, int user_perm);
+
+/* function that delete actual things */
+int DeleteLicense(long UploadId, int user_perm);
+int DeleteUpload(long UploadId, int user_id, int user_perm);
+int DeleteFolder(long FolderId, int user_id, int user_perm);
+
+/* for usage from scheduler */
+void DoSchedulerTasks();
+int ReadParameter(char *Parm, int user_id, int user_perm);
+
+/* misc */
+void Usage(char *Name);
 
 #endif /* _DELAGENT_H */

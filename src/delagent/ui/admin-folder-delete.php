@@ -83,7 +83,7 @@ class admin_folder_delete extends FO_Plugin {
     $folder = GetParm('folder', PARM_INTEGER);
     if (!empty($folder)) {
       $userId = Auth::getUserId();
-      $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = '$1' and users.user_pk = $2;";
+      $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
       $Folder = $this->dbManager->getSingleRow($sql,array($folder,$userId),__METHOD__."GetRowWithFolderName");
       if(!empty($Folder['folder_name'])){
         $rc = $this->Delete($folder, $userId);
