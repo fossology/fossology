@@ -48,7 +48,7 @@ int authentication(char *user, char * password, int *user_id, int *user_perm);
 
 int check_permission_upload(long upload_id, int user_id, int user_perm);
 int check_permission_folder(long folder_id, int user_id, int user_perm);
-int check_permission_license(long license_id, int user_id, int user_perm);
+int check_permission_license(long license_id, int user_perm);
 
 /* functions that list things */
 void ListFolders(int user_id, int user_perm);
@@ -61,7 +61,6 @@ int DeleteFolder(long FolderId, int user_id, int user_perm);
 
 /* for usage from scheduler */
 void DoSchedulerTasks();
-int ReadParameter(char *Parm, int user_id, int user_perm);
 
 /* misc */
 void Usage(char *Name);

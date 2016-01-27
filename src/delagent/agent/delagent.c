@@ -121,7 +121,6 @@ int main (int argc, char *argv[])
   int Scheduler=0; /* should it run from the scheduler? */
   int GotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
-  //int Agent_pk = 0;
   char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
@@ -132,9 +131,9 @@ int main (int argc, char *argv[])
   int user_perm = -1;
   int returnedCode = 0;
 
-	fo_scheduler_connect(&argc, argv, &db_conn);
+  fo_scheduler_connect(&argc, argv, &db_conn);
 
-	static struct option long_options[] =
+  static struct option long_options[] =
   {
     {"user", required_argument, 0, 'n'},
     {"password", required_argument, 0, 'p'},
@@ -190,7 +189,7 @@ int main (int argc, char *argv[])
         break; /* handled by fo_scheduler_connect() */
       case 'V':
         printf("%s", BuildVersion);
-				PQfinish(db_conn);
+        PQfinish(db_conn);
         return(0);
       default:
         Usage(argv[0]);
@@ -250,10 +249,10 @@ int main (int argc, char *argv[])
   else
   {
     /* process from the scheduler */
-		DoSchedulerTasks();
-	}
-	fo_scheduler_disconnect(0);
+    DoSchedulerTasks();
+  }
+  fo_scheduler_disconnect(0);
 
-	PQfinish(db_conn);
+  PQfinish(db_conn);
   return(0);
 } /* main() */
