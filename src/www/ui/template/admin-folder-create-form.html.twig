@@ -1,0 +1,29 @@
+{# Copyright 2016 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<form method='POST'>
+    <ol>
+        <li>
+            {{ "Select the parent folder:"|trans }}
+            <select name='parentid'>
+                {{ folderOptions }}
+            </select>
+            <P />
+        </li>
+        <li>
+            {{ "Enter the new folder name:"|trans }}
+            <br/>
+            <INPUT type='text' name='newname' size=40 />
+            <P />
+        </li>
+        <li>
+            {{ "Enter a meaningful description:"|trans }}
+            <br/>
+            <INPUT type='text' name='description' size=80 />
+        </li>
+    </ol>
+    <input type='submit' value='{{ "Create"|trans }}!'>
+</form>

@@ -1,6 +1,7 @@
 <?php
 
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 
@@ -21,6 +22,10 @@ use Fossology\Lib\Auth\Auth;
 define("TITLE_admin_folder_delete", _("Delete Folder"));
 
 class admin_folder_delete extends FO_Plugin {
+
+  /** @var DbManager */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name = "admin_folder_delete";
@@ -29,6 +34,7 @@ class admin_folder_delete extends FO_Plugin {
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -74,17 +80,12 @@ class admin_folder_delete extends FO_Plugin {
    * \brief Generate the text for this plugin.
    */
   public function Output() {
-    global $PG_CONN;
-    $V = "";
     /* If this is a POST, then process the request. */
     $folder = GetParm('folder', PARM_INTEGER);
     if (!empty($folder)) {
       $rc = $this->Delete($folder);
-      $sql = "SELECT * FROM folder where folder_pk = '$folder';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $Folder = pg_fetch_assoc($result);
-      pg_free_result($result);
+      $sql = "SELECT * FROM folder where folder_pk = $1;";
+      $Folder = $this->dbManager->getSingleRow($sql,array($folder),__METHOD__."GetRowWithFolderName");
       if (empty($rc)) {
         /* Need to refresh the screen */
         $text = _("Deletion of folder ");
@@ -97,7 +98,8 @@ class admin_folder_delete extends FO_Plugin {
         $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
       }
     }
-    $V.= "<form method='post'>\n"; // no url = this url
+
+    $V= "<form method='post'>\n"; // no url = this url
     $text  =  _("Select the folder to");
     $text1 = _("delete");
     $V.= "$text <em>$text1</em>.\n";
@@ -123,7 +125,6 @@ class admin_folder_delete extends FO_Plugin {
     $text = _("Delete");
     $V.= "<input type='submit' value='$text!'>\n";
     $V.= "</form>\n";
-
     return $V;
   }
 }

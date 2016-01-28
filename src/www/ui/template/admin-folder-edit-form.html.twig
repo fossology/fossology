@@ -1,0 +1,27 @@
+<p>
+    {{ "The folder properties that can be changed are the folder name and description."|trans }}
+    {{ "First select the folder to edit. Then enter the new values."|trans }}
+    {{ "If no value is entered, then the corresponding field will not be changed."|trans }}
+</p>
+<form method='post'>
+    <ol>
+        <li> {{ "Select the folder to edit:"|trans }}
+            <select name="oldfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value">
+                {{ folderListOption }} FolderListOption(-1, 0, 1, $FolderSelectId);
+            </select>
+            <P />
+        </li>
+        <li>
+            {{ "Change folder name:"|trans }}
+            <br/>
+            <INPUT type="text" name="newname" size=40 value="{{ folder_name|e }}" />
+            <P />
+        </li>
+        <li>
+            {{ "Change folder description:"|trans }}
+            <br/>
+            <INPUT type="text" name="newdesc" size="60" value="{{ folder_desc|e }}" />
+        </li>
+    </ol>
+    <input type="submit" value="{{ "Edit"|trans }}!">
+</form>
