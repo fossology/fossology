@@ -220,7 +220,7 @@ class UploadTreeProxy extends DbViewProxy
   private static function getDefaultUploadTreeView($uploadId, $uploadTreeTableName, $additionalCondition='')
   {
     $condition = "";
-    if ('uploadtree_a' == $uploadTreeTableName)
+    if ('uploadtree' === $uploadTreeTableName || 'uploadtree_a' == $uploadTreeTableName)
     {
       $condition = " WHERE ut.upload_fk=$uploadId $additionalCondition";
     }
@@ -255,7 +255,7 @@ class UploadTreeProxy extends DbViewProxy
       case "noKeyword":
 
         $queryCondition = self::getQueryCondition($skipThese, $groupId, $agentFilter)." ".$additionalCondition;
-        if ('uploadtree_a' == $uploadTreeTableName)
+        if ('uploadtree' === $uploadTreeTableName || 'uploadtree_a' == $uploadTreeTableName)
         {
           $queryCondition = "ut.upload_fk=$uploadId AND ($queryCondition)";
         }
