@@ -20,9 +20,6 @@
 use Fossology\Lib\Util\TimingLogger;
 use Fossology\UI\Page\HomePage;
 
-ini_set('display_errors', 'On');
-error_reporting(E_ALL | E_STRICT);
-
 /**
  * @file index.php
  * @brief This is the main guts of the UI: Find the plugin and run it.
