@@ -73,7 +73,7 @@ class UploadSrvPage extends UploadPageBase
     }
     else
     {
-      $whitelist = ["/tmp"];
+      $whitelist = array("/tmp");
     }
 
     foreach ($whitelist as $item)
@@ -285,3 +285,4 @@ class UploadSrvPage extends UploadPageBase
   }
 }
 register_plugin(new UploadSrvPage());
+
