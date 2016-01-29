@@ -47,8 +47,6 @@ class admin_upload_delete extends FO_Plugin {
    */
   function Delete($uploadpk, $Depends = NULL) 
   {
-    global $SysConf;
-
     /* Prepare the job: job "Delete" */
     $user_pk = Auth::getUserId();
     $group_pk = Auth::getGroupId();

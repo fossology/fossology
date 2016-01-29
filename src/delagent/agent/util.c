@@ -72,7 +72,8 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
   {
     return -1;
   }
-  if (!PQntuples(result)){
+  if (!PQntuples(result))
+  {
     return 0;
   }
   strcpy(user_seed, PQgetvalue(result, 0, 0));
@@ -101,14 +102,7 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
     sprintf(temp, "%02x", hash_value[i]);
     strcat(pass_hash_actual, temp);
   }
-  if (strcmp(pass_hash_valid, pass_hash_actual) == 0)
-  {
-    return 1;
-  }
-  else
-  {
-    return -1;
-  }
+  return strcmp(pass_hash_valid, pass_hash_actual) == 0;
 }
 
 /**
@@ -131,9 +125,15 @@ int check_permission_upload(long upload_id, int user_id, int user_perm)
 
   snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM upload join users on (users.user_pk = upload.user_fk or users.user_perm = 10) where upload_pk = %ld and users.user_pk = %d;", upload_id, user_id);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) return -1;
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+  {
+    return -1;
+  }
   count = atoi(PQgetvalue(result, 0, 0));
-  if (count == 0) return -2; // this upload does not exist
+  if (count == 0)
+  {
+    return -2; // this upload does not exist
+  }
 
   /* Check Permissions */
   if (GetUploadPerm(db_conn, upload_id, user_id) < PERM_WRITE)
@@ -155,7 +155,6 @@ int check_permission_upload(long upload_id, int user_id, int user_perm)
  * \return 1: yes, can be deleted;
  *         0: can not be deleted
  *        -1: failure;
- *        -2: does not exist;
  */
 int check_permission_folder(long folder_id, int user_id, int user_perm)
 {
@@ -166,7 +165,10 @@ int check_permission_folder(long folder_id, int user_id, int user_perm)
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL),"SELECT count(*) FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = %ld and users.user_pk = %d;",folder_id,user_id);
   result = PQexec(db_conn, SQL);
-  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
+  if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
+  {
+    exit(-1);
+  }
   count = atol(PQgetvalue(result,0,0));
   if(count == 0){
     return 0; // can not be deleted
@@ -190,7 +192,7 @@ int check_permission_license(long license_id, int user_perm)
 {
   if (user_perm != PERM_ADMIN)
   {
-    /* if (Verbose) { printf("only admin is allowed to delete licenses\n"); } */
+    verbosePrintf("only admin is allowed to delete licenses\n");
     return 0; // can not be deleted
   }
   return 1; // can be deleted
@@ -333,7 +335,12 @@ int DeleteUpload (long UploadId, int user_id, int user_perm)
   PGresult *result, *pfile_result;
   char SQL[MAXSQL];
 
-  if (1 != check_permission_upload(UploadId, user_id, user_perm))
+  int permission_upload = check_permission_upload(UploadId, user_id, user_perm);
+  if (permission_upload == -2)
+  {
+    return 1;
+  }
+  else if (1 != permission_upload)
   {
     return 0;
   }
@@ -786,6 +793,10 @@ int DeleteUpload (long UploadId, int user_id, int user_perm)
 
 /**
  * \brief remove link between parent and (child,mode) if there are other parents
+ *
+ * \return 1: successfully deleted link (other link existed);
+ *         0: was not able to delete the link (no other link to this upload existed)
+ *
  */
 int UnlinkContent (long child, long parent, int mode, int user_id, int user_perm)
 {
@@ -893,13 +904,8 @@ int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     }
     else
     {
-      if (DelFlag==1)
+      if (DelFlag==1 && UnlinkContent(atol(PQgetvalue(result,r,4)),Parent,2,user_id,user_perm)==1)
       {
-        rc = UnlinkContent(atol(PQgetvalue(result,r,4)),Parent,2,user_id,user_perm);
-        if (rc == 0)
-        {
-          return 0;
-        }
         continue;
       }
       if (DelFlag)
@@ -961,7 +967,10 @@ int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
 
       memset(SQL,'\0',sizeof(SQL));
       snprintf(SQL,sizeof(SQL),"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
-      if (Test) printf("TEST: %s\n",SQL);
+      if (Test)
+      {
+        printf("TEST: %s\n",SQL);
+      }
       else
       {
         result = PQexec(db_conn, SQL);
@@ -1092,8 +1101,6 @@ void ListFolders (int user_id, int user_perm)
   ListFoldersRecurse(1,1,-1,0,user_id,user_perm);
 
   ListFoldersFindDetatched(user_id, user_perm);
-
-  PQclear(result);
 } /* ListFolders() */
 
 /**
@@ -1268,15 +1275,12 @@ void DoSchedulerTasks()
     /* get perm level of user */
     snprintf(SQL,sizeof(SQL),"SELECT user_perm from users where user_pk='%d';", user_id);
     result = PQexec(db_conn, SQL);
-    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
-    {
-      exit(-1);
-    }
-    if (!PQntuples(result))
+    if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__) || !PQntuples(result))
     {
       exit(-1);
     }
     user_perm = atoi(PQgetvalue(result, 0, 0));
+    PQclear(result);
 
     if (ReadAndProcessParameter(Parm, user_id, user_perm) < 0)
     {
