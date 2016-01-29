@@ -435,7 +435,7 @@ class admin_license_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    $md5term = (empty($rf_text) || stristr($rf_text, "License by Nomos")) ? 'null' : "md5('$rf_text')";
+    $md5term = (empty($rf_text) || stristr($rf_text, "License by Nomos")) ? 'null' : 'md5($7)';
     $stmt = __METHOD__.'.rf';
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
