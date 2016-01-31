@@ -266,7 +266,9 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
     $P = &$Path[$p];
     if (empty($P['ufile_name'])) { continue; }
     $UploadtreePk = $P['uploadtree_pk'];
-
+    if ($p > 0) {
+      $V .= "/";
+    }
     if (!empty($LinkLast) || ($P != $Last))
     {
       if ($P == $Last)
