@@ -1,5 +1,6 @@
 /********************************************************
  Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015-2016 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -46,7 +47,9 @@ extern PGconn* db_conn;
 /* authentication and permission checking */
 int authentication(char *user, char * password, int *user_id, int *user_perm);
 
-int check_permission_upload(long upload_id, int user_id, int user_perm);
+int check_permission_upload(int wantedPermissions, long upload_id, int user_id, int user_perm);
+int check_read_permission_upload(long upload_id, int user_id, int user_perm);
+int check_write_permission_upload(long upload_id, int user_id, int user_perm);
 int check_permission_folder(long folder_id, int user_id, int user_perm);
 int check_permission_license(long license_id, int user_perm);
 
