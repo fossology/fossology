@@ -151,7 +151,7 @@ int main (int argc, char *argv[])
   {
     if (1 != check_permission_del(DelUpload, user_id, user_perm))
     {
-      LOG_FATAL("You '%s' does not have the permsssion to delete the upload '%ld', or the upload '%ld' does not exist.\n", user_name, DelUpload, DelUpload);
+      LOG_FATAL("User '%s' does not have the permsssion to delete the upload '%ld', or the upload '%ld' does not exist.\n", user_name, DelUpload, DelUpload);
       exit(-1);
     }
     DeleteUpload(DelUpload); 
