@@ -55,6 +55,15 @@ class UserEditPage extends DefaultPlugin
     $SessionUserRec = $this->GetUserRec($user_pk);
     $SessionIsAdmin = $this->IsSessionAdmin($SessionUserRec);
 
+    $user_pk_to_modify = intval($request->get('user_pk'));
+    if (!($SessionIsAdmin or
+          empty($user_pk_to_modify) or
+          $user_pk == $user_pk_to_modify))
+    {
+      $vars['content'] = _("Your request is not valid.");
+      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+    }
+
     $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
 
     /* If this is a POST (the submit button was clicked), then process the request. */
@@ -62,7 +71,7 @@ class UserEditPage extends DefaultPlugin
     if (!empty($BtnText)) 
     {
       /* Get the form data to in an associated array */
-      $UserRec = $this->CreateUserRec("");
+      $UserRec = $this->CreateUserRec($request, "");
 
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
       if (empty($rv)) 
@@ -71,7 +80,7 @@ class UserEditPage extends DefaultPlugin
         $vars['message'] = "User $UserRec[user_name] updated.";
 
         /* Reread the user record as update verification */
-        $UserRec = $this->CreateUserRec($UserRec['user_pk']);
+        $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
       }
       else 
       {
@@ -81,7 +90,7 @@ class UserEditPage extends DefaultPlugin
     else  
     {
       $NewUserpk = intval($request->get('newuser'));
-      $UserRec = empty($NewUserpk) ? $this->CreateUserRec($user_pk) : $this->CreateUserRec($NewUserpk);
+      $UserRec = empty($NewUserpk) ? $this->CreateUserRec($request, $user_pk) : $this->CreateUserRec($request, $NewUserpk);
     }
     
     /* display the edit form with the requested user data */
@@ -98,7 +107,7 @@ class UserEditPage extends DefaultPlugin
    * \param $SessionIsAdmin - Boolean: This session is by an admin
    * \return the text of the display form on success, or error on failure.
    */
-  private function DisplayForm($UserRec, $SessionIsAdmin) 
+  private function DisplayForm($UserRec, $SessionIsAdmin)
   {
     $vars = array('isSessionAdmin' => $SessionIsAdmin,
                   'userId' => $UserRec['user_pk']);
@@ -108,7 +117,7 @@ class UserEditPage extends DefaultPlugin
      */
     if ($SessionIsAdmin)
     {
-      $stmt = __METHOD__ . '.asSssionAdmin';
+      $stmt = __METHOD__ . '.asSessionAdmin';
       $sql = "SELECT * FROM users ORDER BY user_name";
       $this->dbManager->prepare($stmt, $sql);
       $res = $this->dbManager->execute($stmt);
@@ -275,7 +284,7 @@ class UserEditPage extends DefaultPlugin
    *         users table.  These additional fields start with an underscore (_pass1, _pass2, _blank_pass)
    *         that come from the edit form.
    */
-  function CreateUserRec($user_pk="") 
+  function CreateUserRec(Request $request, $user_pk="") 
   {
     /* If a $user_pk was given, use it to read the user db record.
      * Otherwise, use the form data.
@@ -290,13 +299,13 @@ class UserEditPage extends DefaultPlugin
     else
     {
       $UserRec = array();
-      $UserRec['user_pk'] = GetParm('user_pk', PARM_TEXT);
-      $UserRec['user_name'] = GetParm('user_name', PARM_TEXT);
-      $UserRec['root_folder_fk'] = GetParm('root_folder_fk', PARM_INTEGER);
-      $UserRec['user_desc'] = GetParm('user_desc', PARM_TEXT);
+      $UserRec['user_pk'] = intval($request->get('user_pk'));
+      $UserRec['user_name'] = stripslashes($request->get('user_name'));
+      $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
+      $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
 
-      $UserRec['_pass1'] = GetParm('_pass1', PARM_TEXT);
-      $UserRec['_pass2'] = GetParm('_pass2', PARM_TEXT);
+      $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
+      $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
       if (!empty($UserRec['_pass1']))
       {
         $UserRec['user_seed'] = rand() . rand();
@@ -306,7 +315,7 @@ class UserEditPage extends DefaultPlugin
       else
       {
         $UserRec['user_pass'] = "";
-        $UserRec['_blank_pass'] = GetParm("_blank_pass", PARM_TEXT);
+        $UserRec['_blank_pass'] = stripslashes($request->get("_blank_pass"));
         if (empty($UserRec['_blank_pass']))  // check for blank password
         {
           // get the stored seed
@@ -315,14 +324,14 @@ class UserEditPage extends DefaultPlugin
         }
       }
 
-      $UserRec['user_perm'] = GetParm('user_perm', PARM_INTEGER);
-      $UserRec['user_email'] = GetParm('user_email', PARM_TEXT);
-      $UserRec['email_notify'] = GetParm('email_notify', PARM_TEXT);
+      $UserRec['user_perm'] = intval($request->get('user_perm'));
+      $UserRec['user_email'] = stripslashes($request->get('user_email'));
+      $UserRec['email_notify'] = stripslashes($request->get('email_notify'));
       if (!empty($UserRec['email_notify'])) {
         $UserRec['email_notify'] = 'y';
       }
       $UserRec['user_agent_list'] = userAgents();
-      $UserRec['default_bucketpool_fk'] = GetParm("default_bucketpool_fk", PARM_INTEGER);
+      $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
     }
     return $UserRec;
   }
