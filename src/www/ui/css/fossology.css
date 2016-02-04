@@ -293,3 +293,9 @@ img.deleted {
   border-color: red;
   border-width: 5px;
 }
+
+tr.classic {
+  border:1px solid black;
+  text-align:left;
+  background:lightyellow;
+}

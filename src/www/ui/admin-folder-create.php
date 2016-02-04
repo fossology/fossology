@@ -73,7 +73,6 @@ class folder_create extends FO_Plugin
    */
   public function Output()
   {
-    $V = "";
     /* If this is a POST, then process the request. */
     $ParentId = GetParm('parentid', PARM_INTEGER);
     $NewFolder = GetParm('newname', PARM_TEXT);
@@ -86,35 +85,20 @@ class folder_create extends FO_Plugin
         /* Need to refresh the screen */
         $text = _("Folder");
         $text1 = _("Created");
-        $this->vars['message'] = "$text $NewFolder $text1";
+        $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
       }
       else if ($rc == 4)
       {
         $text = _("Folder");
         $text1 = _("Exists");
-        $this->vars['message'] = "$text $NewFolder $text1";
+        $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
       }
     }
-    /* Display the form */
-    $V .= "<form method='POST'>\n"; // no url = this url
-    $V .= "<ol>\n";
-    $text = _("Select the parent folder:  \n");
-    $V .= "<li>$text";
-    $V .= "<select name='parentid'>\n";
+
     $root_folder_pk = GetUserRootFolder();
-    $V.= FolderListOption($root_folder_pk, 0);
-    $V .= "</select><P />\n";
-    $text = _("Enter the new folder name:  \n");
-    $V .= "<li>$text";
-    $V .= "<INPUT type='text' name='newname' size=40 />\n<br>";
-    $text = _("Enter a meaningful description:  \n");
-    $V .= "<br><li>$text";
-    $V .= "<INPUT type='text' name='description' size=80 />\n";
-    $V .= "</ol>\n";
-    $text = _("Create");
-    $V .= "<input type='submit' value='$text!'>\n";
-    $V .= "</form>\n";
-    return $V;
+    $formVars["folderOptions"] = FolderListOption($root_folder_pk, 0);
+
+    return $this->renderString("admin-folder-create-form.html.twig",$formVars);
   }
 }
 $NewPlugin = new folder_create;

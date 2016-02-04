@@ -249,8 +249,6 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
     }
   }
 
-  $FirstPath=1; /* every firstpath belongs on a new line */
-
   /* Print the upload, itself (on the next line since it is not a folder) */
   if (count($Path) == -1)
   {
@@ -258,48 +256,40 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
     $UploadName = htmlentities($Path[0]['ufile_name']);
     $UploadtreePk =  $Path[0]['uploadtree_pk'];
     $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload&item=$UploadtreePk'>$UploadName</a></b>";
-    // $FirstPath=0;
   }
   else
   $V .= "<br>";
 
   /* Show the path within the upload */
-  if ($FirstPath!=0)
+  for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
   {
-    for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
+    $P = &$Path[$p];
+    if (empty($P['ufile_name'])) { continue; }
+    $UploadtreePk = $P['uploadtree_pk'];
+    if ($p > 0) {
+      $V .= "/";
+    }
+    if (!empty($LinkLast) || ($P != $Last))
     {
-      $P = &$Path[$p];
-      if (empty($P['ufile_name'])) { continue; }
-      $UploadtreePk = $P['uploadtree_pk'];
+      if ($P == $Last)
+      {
+        $Uri = Traceback_uri() . "?mod=$LinkLast";
+      }
+      $V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . $UploadtreePk . "'>";
+    }
 
-      if (!$FirstPath) { $V .= "/ "; }
-      if (!empty($LinkLast) || ($P != $Last))
-      {
-        if ($P == $Last)
-        {
-          $Uri = Traceback_uri() . "?mod=$LinkLast";
-        }
-        $V .= "<a href='$Uri&upload=" . $P['upload_fk'] . $Opt . "&item=" . $UploadtreePk . "'>";
-      }
+    if (Isdir($P['ufile_mode']))
+    {
+      $V .= $P['ufile_name'];
+    }
+    else
+    {
+      $V .= "<b>" . $P['ufile_name'] . "</b>";
+    }
 
-      if (Isdir($P['ufile_mode']))
-      {
-        $V .= $P['ufile_name'];
-      }
-      else
-      {
-        if (!$FirstPath && Iscontainer($P['ufile_mode']))
-        {
-          $V .= "<br>\n&nbsp;&nbsp;";
-        }
-        $V .= "<b>" . $P['ufile_name'] . "</b>";
-      }
-
-      if (!empty($LinkLast) || ($P != $Last))
-      {
-        $V .= "</a>";
-      }
-      $FirstPath = 0;
+    if (!empty($LinkLast) || ($P != $Last))
+    {
+      $V .= "</a>";
     }
   }
   $V .= "</font>\n";
@@ -309,7 +299,6 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
     $MenuDepth = 0; /* unused: depth of micro menu */
     $V .= menu_to_1html(menu_find($ShowMicro,$MenuDepth),1);
   }
-
 
   if ($Enumerate >= 0)
   {
@@ -446,21 +435,18 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
     if ((IsDir($R['ufile_mode'])) || (Iscontainer($R['ufile_mode'])))
     {
       $V .= "<P />\n";
-      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,
-      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfDirPlugin,1,NULL,$Count,$Phrase,$Licenses,$uploadtree_tablename) . "\n";
     }
     else if ($R['pfile_fk'] != $LastPfilePk)
     {
       $V .= "<P />\n";
-      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,NULL,$Count,$Phrase,$Licenses,$uploadtree_tablename) . "\n";
       $LastPfilePk = $R['pfile_fk'];
     }
     else
     {
       $V .= "<div style='margin-left:2em;'>";
-      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,
-      NULL,$Count,$Phrase, $Licenses, $uploadtree_tablename) . "\n";
+      $V .= Dir2Browse("browse",$R['uploadtree_pk'],$IfFilePlugin,1,NULL,$Count,$Phrase,$Licenses,$uploadtree_tablename) . "\n";
       $V .= "</div>";
     }
     $Count++;

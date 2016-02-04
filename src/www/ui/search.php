@@ -61,8 +61,7 @@ class search extends FO_Plugin
         menu_insert("Browse::Search", 1);
       }
       else {
-        $text = _("Search");
-        menu_insert("Browse::Search", 1, $URI, $text);
+        menu_insert("Browse::Search", 1, $URI, $this->MenuList);
       }
     }
   } // RegisterMenus()
@@ -76,7 +75,7 @@ class search extends FO_Plugin
    * \param $Page     display page number
    * \param $SizeMin  Minimum file size, -1 if unused
    * \param $SizeMax  Maximum file size, -1 if unused
-   * \param $searchtype "containers" or "allfiles"
+   * \param $searchtype "containers", "directory" or "allfiles"
    * \return array of uploadtree recs.  Each record contains uploadtree_pk, parent, 
    *         upload_fk, pfile_fk, ufile_mode, and ufile_name
    */
@@ -109,20 +108,22 @@ class search extends FO_Plugin
     /* Start the result select stmt */
     $SQL = "SELECT DISTINCT uploadtree_pk, parent, upload_fk, uploadtree.pfile_fk, ufile_mode, ufile_name FROM uploadtree";
 
-    if (!empty($License))
-    {
-      $SQL .= ", ( SELECT license_ref.rf_shortname, license_file.rf_fk, license_file.pfile_fk
+    if ($searchtype != "directory") {
+      if (!empty($License))
+      {
+        $SQL .= ", ( SELECT license_ref.rf_shortname, license_file.rf_fk, license_file.pfile_fk
                   FROM license_file JOIN license_ref ON license_file.rf_fk = license_ref.rf_pk) AS pfile_ref";
-    }
-    if (!empty($Copyright))
-    {
-      $SQL .= ",copyright";
+      }
+      if (!empty($Copyright))
+      {
+        $SQL .= ",copyright";
+      }
     }
 
     /* Figure out the tag_pk's of interest */
     if (!empty($tag))
     {
-      $sql = "select tag_pk from tag where tag ilike '$tag'";
+      $sql = "select tag_pk from tag where tag ilike '" . pg_escape_string($tag) . "'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       if (pg_num_rows($result) < 1)
@@ -208,9 +209,8 @@ class search extends FO_Plugin
 
     if ($Filename) 
     {
-      $Filename = str_replace("'","''",$Filename); // protect DB
-      if ($NeedAnd) $SQL .= " AND"; 
-      $SQL .= " ufile_name ilike '$Filename'";
+      if ($NeedAnd) $SQL .= " AND";
+      $SQL .= " ufile_name ilike '". pg_escape_string($Filename) . "'";
       $NeedAnd=1;
     }
 
@@ -236,13 +236,13 @@ class search extends FO_Plugin
     }
 
     /* search only containers */
-    $dir_ufile_mode = 536888320;
-    if ($searchtype == 'containers') 
+    if ($searchtype == 'containers')
     {
       if ($NeedAnd) $SQL .= " AND"; 
       $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
       $NeedAnd=1;
     }
+    $dir_ufile_mode = 536888320;
     if ($searchtype == 'directory')
     {
       if ($NeedAnd) $SQL .= " AND"; 
@@ -251,17 +251,17 @@ class search extends FO_Plugin
     }
 
     /** license and copyright */
-    if (!empty($License))
-    {
-      if ($NeedAnd) $SQL .= " AND"; 
+    if ($searchtype != "directory") {
+      if (!empty($License)) {
+        if ($NeedAnd) $SQL .= " AND";
 
-      $SQL .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '$License'";
-      $NeedAnd=1;
-    }
-    if (!empty($Copyright))
-    {
-      if ($NeedAnd) $SQL .= " AND"; 
-      $SQL .= " uploadtree.pfile_fk=copyright.pfile_fk and copyright.content ilike '%$Copyright%'";
+        $SQL .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '" . pg_escape_string($License) . "'";
+        $NeedAnd = 1;
+      }
+      if (!empty($Copyright)) {
+        if ($NeedAnd) $SQL .= " AND";
+        $SQL .= " uploadtree.pfile_fk=copyright.pfile_fk and copyright.content ilike '%" . pg_escape_string($Copyright) . "%'";
+      }
     }
 
     $Offset = $Page * $this->MaxPerPage;
@@ -294,7 +294,6 @@ class search extends FO_Plugin
   function HTMLResults($UploadtreeRecs, $Page, $GETvars)
   {
     $Outbuf = "";
-    $PageChoices = "";
     $Count = count($UploadtreeRecs);
     if ($Count == 0)
     {
@@ -308,7 +307,9 @@ class search extends FO_Plugin
       $Outbuf .= $PageChoices;
     }
     else
+    {
       $PageChoices = "";
+    }
     $Outbuf .= UploadtreeFileList($UploadtreeRecs, "browse","view",$Page*$this->MaxPerPage + 1);
 
     /* put page menu at the bottom, too */
@@ -324,33 +325,41 @@ class search extends FO_Plugin
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) { return; }
-    global $Plugins;
+    if ($this->OutputType != 'HTML') { return; }
 
+    $this->vars['baseuri'] = Traceback_uri();
     $CriteriaCount = 0;
-    $V="";
     $GETvars="";
-    $Item = GetParm("item",PARM_INTEGER);
-    
-    if ($this->OutputType != 'HTML')
-    {
-      return;
-    }
 
+    $Item = GetParm("item",PARM_INTEGER);
     /* Show path if searching an item tree  (don't show on global searches) */
     if ($Item) 
     {
-      $V .= Dir2Browse($this->Name,$Item,NULL,1,NULL) . "<P />\n";
+      $this->vars['pathOfItem'] = Dir2Browse($this->Name,$Item,NULL,1,NULL) . "<P />\n";
       $GETvars .= "&item=$Item";
     }
 
     $searchtype = GetParm("searchtype",PARM_STRING);
     $GETvars .= "&searchtype=" . urlencode($searchtype);
+    if ($searchtype == 'containers')
+    {
+      $this->vars["ContainersChecked"] = "checked=\"checked\"";
+    }
+    else if ($searchtype == 'directory')
+    {
+      $this->vars["DirectoryChecked"] = "checked=\"checked\"";
+    }
+    else
+    {
+      $this->vars["AllFilesChecked"] = "checked=\"checked\"";
+    }
 
     $Filename = GetParm("filename",PARM_RAW);
     if (!empty($Filename)) 
     {
       $CriteriaCount++;
       $GETvars .= "&filename=" . urlencode($Filename);
+      $this->vars["Filename"] = $Filename;
     }
 
     $tag = GetParm("tag",PARM_RAW);
@@ -358,6 +367,7 @@ class search extends FO_Plugin
     {
       $CriteriaCount++;
       $GETvars .= "&tag=" . urlencode($tag);
+      $this->vars["tag"] = $tag;
     }
 
     $SizeMin = GetParm("sizemin",PARM_TEXT);
@@ -366,6 +376,7 @@ class search extends FO_Plugin
       $SizeMin=intval($SizeMin); 
       $CriteriaCount++;
       $GETvars .= "&sizemin=$SizeMin";
+      $this->vars["SizeMin"] = $SizeMin;
     }
 
     $SizeMax = GetParm("sizemax",PARM_TEXT);
@@ -374,6 +385,7 @@ class search extends FO_Plugin
       $SizeMax=intval($SizeMax); 
       $CriteriaCount++;
       $GETvars .= "&sizemax=$SizeMax";
+      $this->vars["SizeMax"] = $SizeMax;
     }
 
     $License = GetParm("license",PARM_RAW);
@@ -381,94 +393,38 @@ class search extends FO_Plugin
     {
       $CriteriaCount++;
       $GETvars .= "&license=" . urlencode($License);
+      $this->vars["License"] = $License;
     }
+
     $Copyright = GetParm("copyright",PARM_RAW);
     if (!empty($Copyright))
     {
       $CriteriaCount++;
       $GETvars .= "&copyright=" . urlencode($Copyright);
+      $this->vars["Copyright"] = $Copyright;
     }
 
     $Page = GetParm("page",PARM_INTEGER);
 
-    /*******  Input form  *******/
-    $V .= "<form action='" . Traceback_uri() . "?mod=" . $this->Name . "' method='POST'>\n";
-
-    /* searchtype:  'allfiles' or 'containers' */
-    $ContainersChecked = "";
-    $DirectoryChecked = "";
-    $AllFilesChecked = "";
-    if ($searchtype == 'containers') 
-      $ContainersChecked = "checked=\"checked\"";
-    else if ($searchtype == 'directory')
-      $DirectoryChecked = "checked=\"checked\"";
-    else
-      $AllFilesChecked = "checked=\"checked\"";
-    $text = _("Limit search to (Note: can not limit license and copyright search on containers)");
-    $text1 = _("Containers only (rpms, tars, isos, etc), including directories.");
-    $V .= "<u><i><b>$text:</b></i></u><br> <input type='radio' name='searchtype' value='containers' $ContainersChecked><b>$text1</b>\n";
-    $text2 = _("Containers only (rpms, tars, isos, etc), excluding directories.");
-    $V .= "<br> <input type='radio' name='searchtype' value='directory' $DirectoryChecked><b>$text2</b>\n";
-    $text3 = _("All Files");
-    $V .= "<br> <input type='radio' name='searchtype' value='allfiles' $AllFilesChecked><b>$text3</b>\n";
-
-    $V .= "<p><u><i><b>" . _("You must choose one or more search criteria (not case sensitive).") . "</b></i></u>";
-    $V .= "<ul>\n";
-
-    /* filename */
-    $text = _("Enter the filename to find: ");
-    $V .= "<li><b>$text</b>";
-    $V .= "<INPUT type='text' name='filename' size='40' value='" . htmlentities($Filename) . "'>\n";
-    $V .= "<br>" . _("You can use '%' as a wild-card. ");
-    $V .= _("For example, '%v3.war', or 'mypkg%.tar'.");
-
-    /* tag  */
-    $text = _("Tag to find");
-    $V .= "<li><b>$text:</b>  <input name='tag' size='30' value='" . htmlentities($tag) . "'>\n";
-
-    /* file size >= */
-    $text = _("File size is");
-    $text1 = _(" bytes\n");
-    $V .= "<li><b>$text &ge; </b><input name='sizemin' size=10 value='$SizeMin'>$text1";
-
-    /* file size <= */
-    $text = _("File size is");
-    $text1 = _(" bytes\n");
-    $V .= "<li><b>$text &le; </b><input name='sizemax' size=10 value='$SizeMax'>$text1";
-    $V .= "</ul>\n";
-
-    $V .= "<ul>\n";
-
-    $V .= "<p><u><i><b>" . _("You may also choose one or more optional search filters (not case sensitive).") . "</b></i></u>";
-    /* license */
-    $text = _("License");
-    $V .= "<li><b>$text: </b><input name='license' value='$License'>";
-    $V .= "<br>" . _("For example, 'AGPL%'.");
-    $text = _("Copyright");
-    $V .= "<li><b>$text: </b><input name='copyright' value='$Copyright'>";
-    $V .= "<br>" . _("For example, 'fsf'.");
-
-    $V .= "</ul>\n";
-
-    $V .= "<input type='hidden' name='item' value='$Item'>\n";
-    $text = _("Search");
-    $V .= "<input type='submit' value='$text'>\n";
-    $V .= "</form>\n";
-    /*******  END Input form  *******/
+    $this->vars["postUrl"] = Traceback_uri() . "?mod=" . self::getName();
 
     if ($CriteriaCount)
     {
       if (empty($Page)) { $Page = 0; }
-      $V .= "<hr>\n";
+      $html = "<hr>\n";
       $text = _("Files matching");
-      $V .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
+      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
       $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
-      $V .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
-    } 
-
-    $this->vars['content'] = $V;
+      $html .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
+      $this->vars["result"] = $html;
+    }
   }
 
+  public function getTemplateName()
+  {
+    return "ui-search.html.twig";
+  }
 }
+
 $NewPlugin = new search;
 $NewPlugin->Initialize();

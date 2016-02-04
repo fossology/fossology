@@ -16,9 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_folder_properties", _("Edit Folder Properties"));
 
 class folder_properties extends FO_Plugin {
+
+  /** @var DbManager */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name = "folder_properties";
@@ -27,6 +33,7 @@ class folder_properties extends FO_Plugin {
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -36,13 +43,8 @@ class folder_properties extends FO_Plugin {
    * \return 1 if changed, 0 if failed.
    */
   function Edit($FolderId, $NewName, $NewDesc) {
-    global $Plugins;
-    global $PG_CONN;
-    $sql = "SELECT * FROM folder where folder_pk = '$FolderId';"; 
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $Row = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $sql = 'SELECT * FROM folder where folder_pk = $1;';
+    $Row = $this->dbManager->getSingleRow($sql,array($FolderId),__METHOD__."Get");
     /* If the folder does not exist. */
     if ($Row['folder_pk'] != $FolderId) {
       return (0);
@@ -60,19 +62,10 @@ class folder_properties extends FO_Plugin {
     }
     else {
       return (0); // $FolderId is empty
-
     }
     /* Change the properties */
-    /** Block SQL injection by protecting single quotes **/
-    $NewFolder = "";
-    $NewName = str_replace("'", "''", $NewName); // PostgreSQL quoting
-    $NewFolder = htmlentities($NewFolder); // for a clean display
-    $NewDesc = str_replace("'", "''", $NewDesc); // PostgreSQL quoting
-    $Sql = "UPDATE folder SET folder_name = '$NewName', folder_desc = '$NewDesc'
-         WHERE folder_pk = '$FolderId';";
-    $result = pg_query($PG_CONN, $Sql);
-    DBCheckResult($result, $Sql, __FILE__, __LINE__);
-    pg_free_result($result);
+    $sql = 'UPDATE folder SET folder_name = $1, folder_desc = $2 WHERE folder_pk = $3;';
+    $this->dbManager->getSingleRow($sql,array($NewName, $NewDesc, $FolderId),__METHOD__."Set");
     return (1);
   }
 
@@ -80,9 +73,6 @@ class folder_properties extends FO_Plugin {
    * \brief Generate the text for this plugin.
    */
   public function Output() {
-    $V = "";
-    global $PG_CONN;
-
     /* If this is a POST, then process the request. */
     $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
     if (empty($FolderSelectId)) {
@@ -97,38 +87,19 @@ class folder_properties extends FO_Plugin {
       if ($rc == 1) {
         /* Need to refresh the screen */
         $text=_("Folder Properties changed");
-        $V.= displayMessage($text);
+        $this->vars["message"] = $text;
       }
     }
-    $V.= _("<p>The folder properties that can be changed are the folder name and
-       description.  First select the folder to edit. Then enter the new values.
-       If no value is entered, then the corresponding field will not be changed.</p>");
     /* Get the folder info */
-    $sql = "SELECT * FROM folder WHERE folder_pk = '$FolderSelectId';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $Folder = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $sql = 'SELECT * FROM folder WHERE folder_pk = $1;';
+    $Folder = $this->dbManager->getSingleRow($sql,array($FolderSelectId),__METHOD__."getFolderRow");
+
     /* Display the form */
-    $V.= "<form method='post'>\n"; // no url = this url
-    $V.= "<ol>\n";
-    $text = _("Select the folder to edit:  \n");
-    $V.= "<li>$text";
-    $Uri = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
-    $V.= "<select name='oldfolderid' onChange='window.location.href=\"$Uri\" + this.value'>\n";
-    $V.= FolderListOption(-1, 0, 1, $FolderSelectId);
-    $V.= "</select><P />\n";
-    $text = _("Change folder name:  \n");
-    $V.= "<li>$text";
-    $V.= "<INPUT type='text' name='newname' size=40 value=\"" . htmlentities($Folder['folder_name'], ENT_COMPAT) . "\" />\n";
-    $text = _("Change folder description: \n");
-    $V.= "<P /><li>$text";
-    $V.= "<INPUT type='text' name='newdesc' size=60 value=\"" . htmlentities($Folder['folder_desc'], ENT_COMPAT) . "\" />\n";
-    $V.= "</ol>\n";
-    $text = _("Edit");
-    $V.= "<input type='submit' value='$text!'>\n";
-    $V.= "</form>\n";
-    return $V;
+    $formVars["onchangeURI"] = Traceback_uri() . "?mod=" . $this->Name . "&selectfolderid=";
+    $formVars["folderListOption"] = FolderListOption(-1, 0, 1, $FolderSelectId);
+    $formVars["folder_name"] = $Folder['folder_name'];
+    $formVars["folder_desc"] = $Folder['folder_desc'];
+    return $this->renderString("admin-folder-edit-form.html.twig",$formVars);
   }
 }
 $NewPlugin = new folder_properties;

@@ -27,10 +27,10 @@ class admin_tag extends FO_Plugin
 {
   function __construct()
   {
-    $this->Name       = "admin_tag";
-    $this->Title      = TITLE_admin_tag;
+    $this->Name     = "admin_tag";
+    $this->Title    = TITLE_admin_tag;
     $this->MenuList = "Admin::Tag::Create Tag";
-    $this->Version = "1.3";
+    $this->Version  = "1.3";
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();
   }
@@ -51,27 +51,27 @@ class admin_tag extends FO_Plugin
       $text = _("TagName must be specified. Tag Not created.");
       return ($text);
     }
+    if(!preg_match('/^[A-Za-z0-9_~\-!@#\$%\^\*\.\(\)]+$/i', $tag_name)){
+      $text = _("A Tag is only allowed to contain characters from <b>".htmlentities("A-Za-z0-9_~-!@#$%^*.()")."</b>. Tag Not created.");
+      return ($text);
+    }
 
     /* See if the tag already exists */
-    $sql = "SELECT * FROM tag WHERE tag = '$tag_name'";
+    $sql = "SELECT * FROM tag WHERE tag = '".pg_escape_string($tag_name)."'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
     {
       pg_free_result($result);
 
-      $Val = str_replace("'", "''", $tag_name);
-      $Val1 = str_replace("'", "''", $tag_desc);
-      $sql = "INSERT INTO tag (tag,tag_desc) VALUES ('$Val', '$Val1');";
+      $sql = "INSERT INTO tag (tag,tag_desc) VALUES ('".pg_escape_string($tag_name)."', '".pg_escape_string($tag_desc)."');";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      pg_free_result($result);
-    }else{
-      pg_free_result($result);
     }
-    
+    pg_free_result($result);
+
     /* Make sure it was added */
-    $sql = "SELECT * FROM tag WHERE tag = '$tag_name' LIMIT 1;";
+    $sql = "SELECT * FROM tag WHERE tag = '".pg_escape_string($tag_name)."' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     if (pg_num_rows($result) < 1)
@@ -80,9 +80,6 @@ class admin_tag extends FO_Plugin
       $text = _("Failed to create tag.");
       return ($text);
     }
-
-    $row = pg_fetch_assoc($result);
-    $tag_pk = $row["tag_pk"];
     pg_free_result($result);
 
     return (NULL);
@@ -94,7 +91,6 @@ class admin_tag extends FO_Plugin
   function ShowExistTags()
   {
     global $PG_CONN;
-    $VE = "";
     $VE = _("<h3>Current Tags:</h3>\n");
     $sql = "SELECT tag_pk, tag, tag_desc FROM tag ORDER BY tag_pk desc;";
     $result = pg_query($PG_CONN, $sql);
@@ -108,7 +104,7 @@ class admin_tag extends FO_Plugin
       $VE .= "<tr><th>$text1</th><th>$text2</th><th>$text3</th></tr>\n";
       while ($row = pg_fetch_assoc($result))
       {
-        $VE .= "<tr><td align='center'>" . $row['tag_pk'] . "</td><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td>";
+        $VE .= "<tr><td align='center'>" . $row['tag_pk'] . "</td><td align='center'>" . htmlspecialchars($row['tag']) . "</td><td align='center'>" . htmlspecialchars($row['tag_desc']) . "</td>";
       }
       $VE .= "</table><p>\n";
     }
@@ -159,7 +155,7 @@ class admin_tag extends FO_Plugin
     $V .= $this->ShowExistTags();
     return $V;
   }
-
 }
+
 $NewPlugin = new admin_tag;
 $NewPlugin->Initialize();

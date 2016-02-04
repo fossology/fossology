@@ -76,7 +76,7 @@ dist:
 	utils/fo-mktar
 
 empty-cache:
-	rm -rf $(CACHEDIR)/*
+	$(MAKE) -C $(FOWWWDIR) empty-cache
 
 %:
 	$(MAKE) -C $(FOSRCDIR) $@
