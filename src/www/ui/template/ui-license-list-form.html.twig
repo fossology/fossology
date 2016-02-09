@@ -1,0 +1,67 @@
+{# Copyright 2016 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<form method='POST'>
+  <ol>
+    <li>
+      <span>
+        {{ "Which agents do you want to include?"|trans }}
+      </span>
+      <ul>
+        <li>
+            <label>
+            <input type="checkbox" name="agentToInclude_monk" value="yes" {% if agentToInclude_monk %}checked{% endif %}>
+            Monk
+            </label>
+        </li>
+        <li>
+            <label>
+            <input type="checkbox" name="agentToInclude_nomos" value="yes" {% if agentToInclude_nomos %}checked{% endif %}>
+            Nomos
+            </label>
+        </li>
+        <li>
+            <label>
+            <input type="checkbox" name="agentToInclude_ninka" value="yes" {% if agentToInclude_ninka %}checked{% endif %}>
+            Ninka
+            </label>
+        </li>
+      </ul>
+    </li>
+    <li>
+      <label>
+        <input type="checkbox" name="doNotIncludeSubfolder" value="yes" {% if not includeSubfolder %}checked{% endif %}>
+        Do not include subdirectories?
+      </label>
+    </li>
+    <li>
+      <label>
+        <input type="checkbox" name="showContainers" value="yes" {% if showContainers %}checked{% endif %}>
+        Show directories and containers?
+      </label>
+    </li>
+    <li>
+      <label>
+        Exclude:
+        <input name="exclude" value="{{ exclude|e }}">
+        <br/>
+        Exclude files containing some substring in the path. 'mac' and it should
+        exclude all files and directories containing the substring 'mac'.
+      </label>
+    </li>
+    <li>
+      <label>
+        <input type="checkbox" name="output" value="dltext" {% if dltext %}checked{% endif %}>
+        Download list after creation?
+      </label>
+    </li>
+  </ol>
+  With this tool you will only be able to obtain a list with at maximum {{ NomostListNum }} entries.
+  For a full list run fo_nomos_license_list from the command line.
+  This Limit can be modified by the administrator.
+  <br/>
+  <input type='submit' value='{{ "Generate list"|trans }}'>
+</form>

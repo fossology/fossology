@@ -111,7 +111,7 @@ if (empty($return_value))
 
 
 /**
- * @brief get ninka license list of one specified uploadtree_id
+ * @brief get monk license list of one specified uploadtree_id
  *
  * @param int $uploadtree_pk - uploadtree id
  * @param int $upload_pk - upload id
@@ -135,8 +135,8 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
       $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
   }
 
-  /* get last ninka agent_pk that has data for this upload */
-  $AgentRec = AgentARSList("ninka_ars", $upload_pk, 1);
+  /* get last monk agent_pk that has data for this upload */
+  $AgentRec = AgentARSList("monk_ars", $upload_pk, 1);
   if ($AgentRec === false)
   {
     echo _("No data available \n");
