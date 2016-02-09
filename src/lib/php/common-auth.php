@@ -89,9 +89,10 @@ function account_check(&$user, &$passwd, &$group = "")
 
   if (!empty($user)) {
     $userDao = $GLOBALS['container']->get('dao.user');
-    $row = $userDao->getUserAndDefaultGroupByUserName($user);
-    if(false === $row) {
-      echo "User name is invalid.\n";
+    try {
+      $row = $userDao->getUserAndDefaultGroupByUserName($user);
+    }catch (Exception $e) {
+      echo $e->getMessage(), "\n";
       exit(1);
     }
     $userId = $row['user_pk'];
