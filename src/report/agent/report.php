@@ -675,7 +675,12 @@ class ReportAgent extends Agent
       foreach($statementsCEI as $statements){
         $table->addRow($smallRowHeight);
         $cell1 = $table->addCell($firstColLen); 
-        $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        if($title === "Copyrights"){
+          $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        }
+        else{
+          $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        }
         $cell2 = $table->addCell($secondColLen);
         $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
