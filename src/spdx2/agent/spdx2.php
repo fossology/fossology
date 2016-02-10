@@ -262,7 +262,7 @@ class SpdxTwoAgent extends Agent
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
     sort($licenses);
-    $key = implode(" or ", $licenses);
+    $key = implode(" and ", $licenses);
 
     if (!array_key_exists($key, $filesWithLicenses))
     {
@@ -301,7 +301,7 @@ class SpdxTwoAgent extends Agent
       }
       elseif(!empty($licenses['scanner']))
       {
-        $msgLicense = "NoLicenseConcluded (scanners found: " . implode(' or ',$licenses['scanner']). ")";
+        $msgLicense = "NoLicenseConcluded (scanners found: " . implode(' and ',$licenses['scanner']). ")";
         $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
       else
