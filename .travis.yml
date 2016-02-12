@@ -86,3 +86,8 @@ script:
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
  - set +e
+
+after_script:
+ - mkdir build
+ - mkdir build/logs
+ - php src/vendor/bin/coveralls -vv -x clover.xml
