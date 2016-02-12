@@ -359,10 +359,10 @@ class UserDao extends Object
     return $groupNowExists['group_pk'];
   }
 
-  public function addGroupMembership($groupId, $userId)
+  public function addGroupMembership($groupId, $userId, $groupPerm=1)
   {
     $this->dbManager->insertTableRow('group_user_member',
-            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>1));
+            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>$groupPerm));
   }
   
   /**
