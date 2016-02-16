@@ -21,6 +21,7 @@ namespace Fossology\DeciderJob\Test;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
+use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
@@ -85,7 +86,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->licenseDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -249,6 +250,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $clearingDao = M::mock(ClearingDao::classname());
     $uploadDao = M::mock(UploadDao::classname());
     $highlightDao = M::mock(HighlightDao::classname());
+    $licenseDao = M::mock(LicenseDao::classname());
     $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
     $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
 
@@ -302,8 +304,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
             ->with($bounds1, $groupId, array(), anything())->andReturn(false);
     $decisionProcessor->shouldReceive('makeDecisionFromLastEvents')
             ->with($bounds1, $userId, $groupId, DecisionTypes::IDENTIFIED, false, array());
+    $decisionProcessor->shouldReceive('getCurrentClearings')
+            ->with($bounds1, $groupId, LicenseMap::CONCLUSION);
+    $licenseDao->shouldReceive('getAgentFileLicenseMatches')
+            ->with($bounds1);
 
-    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $highlightDao, $decisionProcessor, $agentLicenseEventProcessor);
+    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $highlightDao, $licenseDao, $decisionProcessor, $agentLicenseEventProcessor);
 
     list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, $args="");
 
