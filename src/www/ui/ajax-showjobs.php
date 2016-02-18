@@ -198,7 +198,7 @@ class AjaxShowJobs extends FO_Plugin
    * @param $jobData
    * @return Returns an upload job status in html
    **/
-  protected function show($jobData, $page)
+  protected function show($jobData, $page, $allusers)
   {
     global $container;
     /** @var DbManager */
@@ -341,16 +341,18 @@ class AjaxShowJobs extends FO_Plugin
       /* Job queue */
       foreach ($job['jobqueue'] as $jq_pk => $jobqueueRec){
         $varJobQueueRow = array('jqId'=>$jq_pk,
-            'jobId'=>$jobqueueRec['jq_job_fk'],
-            'class'=>$this->getClass($jobqueueRec),
-            'uriFull'=>$uriFull,
-            'depends'=>$jobqueueRec['jdep_jq_depends_fk'] ? $jobqueueRec['depends'] : array(),
-            'status'=>$jobqueueRec['jq_endtext'],
-            'agentName'=>$jobqueueRec['jq_type'],
-            'itemsProcessed'=>$jobqueueRec['jq_itemsprocessed'],
-            'startTime'=>substr($jobqueueRec['jq_starttime'], 0, 16),
-            'endTime'=>empty($jobqueueRec["jq_endtime"]) ? '' : substr($jobqueueRec['jq_endtime'], 0, 16),
-            'endText'=>$jobqueueRec['jq_endtext']);
+                                'jobId'=>$jobqueueRec['jq_job_fk'],
+                                'class'=>$this->getClass($jobqueueRec),
+                                'uriFull'=>$uriFull,
+                                'depends'=>$jobqueueRec['jdep_jq_depends_fk'] ? $jobqueueRec['depends'] : array(),
+                                'status'=>$jobqueueRec['jq_endtext'],
+                                'agentName'=>$jobqueueRec['jq_type'],
+                                'itemsProcessed'=>$jobqueueRec['jq_itemsprocessed'],
+                                'startTime'=>substr($jobqueueRec['jq_starttime'], 0, 16),
+                                'endTime'=>empty($jobqueueRec["jq_endtime"]) ? '' : substr($jobqueueRec['jq_endtime'], 0, 16),
+                                'endText'=>$jobqueueRec['jq_endtext'],
+                                'page'=>$page,
+                                'allusers'=>$allusers);
 
         if (!empty($jobqueueRec["jq_endtime"])) {
           $numSecs = strtotime($jobqueueRec['jq_endtime']) - strtotime($jobqueueRec['jq_starttime']);
@@ -478,6 +480,7 @@ class AjaxShowJobs extends FO_Plugin
   {
     $page = GetParm('page', PARM_INTEGER);
     
+    $allusers = 0;
     if ($uploadPk>0){
         $upload_pks = array($uploadPk);
         $jobs = $this->showJobsDao->uploads2Jobs($upload_pks, $page);
@@ -488,7 +491,7 @@ class AjaxShowJobs extends FO_Plugin
     $jobsInfo = $this->showJobsDao->getJobInfo($jobs, $page);
     usort($jobsInfo, array($this,"compareJobsInfo"));
       
-    $showJobData = $this->show($jobsInfo, $page);
+    $showJobData = $this->show($jobsInfo, $page, $allusers);
     return new JsonResponse($showJobData);
   } /* getJobs()*/
 
