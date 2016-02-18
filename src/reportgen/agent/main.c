@@ -165,6 +165,8 @@ int createdir(char* path) {
       return 0;
     }
   }
+  chmod(path,02770);
+
   return 1;
 }
 
