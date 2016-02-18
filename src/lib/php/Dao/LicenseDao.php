@@ -324,7 +324,7 @@ class LicenseDao extends Object
                                                    $selectedAgentIds=null,
                                                    $includeSubfolders=true,
                                                    $excluding='',
-                                                   $ignore=0)
+                                                   $ignore=false)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -399,7 +399,7 @@ ORDER BY lft asc
       {
         continue;
       }
-      
+
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
       $path = implode($pathStack,'/');
       $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore);
