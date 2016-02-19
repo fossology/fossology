@@ -180,6 +180,31 @@ class SpdxTwoAgent extends Agent
     return $fileName;
   }
 
+  /**
+   * @param string[] $licenses
+   * @return string
+   */
+  protected function implodeLicenses($licenses)
+  {
+    sort($licenses);
+    if(count($licenses) == 3 &&
+       ($index = array_search("Dual-license",$licenses)) !== false)
+    {
+      return $licenses[$index===0?1:0] . " or " . $licenses[$index===1?2:1];
+    }
+    else
+    {
+      $licenses = array_map(function ($license){
+        if(strpos($license, " or ") !== false){
+          return "(" . $license . ")";
+        }else{
+          return $license;
+        }
+      },$licenses);
+      return implode(" and ", $licenses);
+    }
+  }
+
   protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -214,6 +239,7 @@ class SpdxTwoAgent extends Agent
         'md5'=>$hashes['md5'],
         'verificationCode'=>$this->getVerificationCode($upload),
         'mainLicenses'=>$mainLicenses,
+        'mainLicense'=>$this->implodeLicenses($mainLicenses),
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
@@ -261,8 +287,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
-    sort($licenses);
-    $key = implode(" and ", $licenses);
+    $key = $this->implodeLicenses($licenses);
 
     if (!array_key_exists($key, $filesWithLicenses))
     {
@@ -301,7 +326,8 @@ class SpdxTwoAgent extends Agent
       }
       elseif(!empty($licenses['scanner']))
       {
-        $msgLicense = "NoLicenseConcluded (scanners found: " . implode(' and ',$licenses['scanner']). ")";
+        $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
+        $msgLicense = "NoLicenseConcluded (scanners found: " . $implodedLicenses . ")";
         $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
       else
