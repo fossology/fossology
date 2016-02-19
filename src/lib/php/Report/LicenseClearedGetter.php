@@ -134,7 +134,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
   }
   /**
    * @param int $uploadId, $groupId
-   * @return Risk
+   * @return scannerLicenseHistogram, editedLicensesHist
    */
   protected function getHistogram($uploadId, $groupId)
   {
