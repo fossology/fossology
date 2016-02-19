@@ -331,7 +331,7 @@ class SpdxTwoAgent extends Agent
     $selectedScanners = '{'.implode(',',$scannerIds).'}';
     $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
-    $sql = "SELECT uploadtree_pk,rf_fk FROM $tableName ut, license_file
+    $sql = "SELECT DISTINCT uploadtree_pk,rf_fk FROM $tableName ut, license_file
       WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
     $param = array($selectedScanners);
     if ($tableName == 'uploadtree_a') {
@@ -436,7 +436,7 @@ class SpdxTwoAgent extends Agent
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
-    
+
     $filesProceeded = 0;
     $lastValue = 0;
     $content = '';
