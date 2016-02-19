@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Data\License;
 
 class LicenseClearedGetter extends ClearedGetterCommon
@@ -33,14 +34,19 @@ class LicenseClearedGetter extends ClearedGetterCommon
   private $clearingDao;
   /** @var LicenseDao */
   private $licenseDao;
+  /** @var AgentDao */
+  private $agentDao;
   /** @var string[] */
   private $licenseCache = array();
+  /** @var agentNames */
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
 
   public function __construct() {
     global $container;
 
     $this->clearingDao = $container->get('dao.clearing');
     $this->licenseDao = $container->get('dao.license');
+    $this->agentDao = $container->get('dao.agent');
 
     parent::__construct($groupBy = 'text');
   }
@@ -125,5 +131,20 @@ class LicenseClearedGetter extends ClearedGetterCommon
       $this->licenseCache[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
     }
     return $this->licenseCache[$licenseId]->getRisk();
+  }
+  /**
+   * @param int $uploadId, $groupId
+   * @return Risk
+   */
+  protected function getHistogram($uploadId, $groupId)
+  {
+    $scannerAgents = array_keys($this->agentNames);
+    $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
+    $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
+    $allAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $scannerLicenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $allAgentIds);
+    $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
+    return array("scannerLicenseHistogram" => $scannerLicenseHistogram, "editedLicensesHist" => $editedLicensesHist);
   }
 }

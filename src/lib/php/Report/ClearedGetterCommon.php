@@ -213,6 +213,10 @@ abstract class ClearedGetterCommon
     return array("statements" => array_values($statements));
   }
   
+  public function getLicenseHistogramForReport($uploadId, $groupId)
+  {
+    return $this->getHistogram($uploadId, $groupId);
+  }
   public function cJson($uploadId, $groupId=null)
   {
     $json = json_encode($this->getCleared($uploadId, $groupId, false));
