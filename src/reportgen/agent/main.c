@@ -82,7 +82,6 @@ char* gettargetdir(char* pckgname) {
 }
 
 int zipdir(char* name) {
-  umask(S_IWGRP | S_IWOTH);
   pid_t child_pid;
   int status;
   char* cmd[6];
@@ -165,7 +164,6 @@ int createdir(char* path) {
       return 0;
     }
   }
-  chmod(path,02770);
 
   return 1;
 }
@@ -526,6 +524,7 @@ int main(int argc, char** argv) {
       continue;
     }
     checkdest();
+    umask(022);
     char* localtime1 = gettime();
     char* formattedtime = replaceunderscore(localtime1);
 
