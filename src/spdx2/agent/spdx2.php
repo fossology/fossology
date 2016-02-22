@@ -324,7 +324,7 @@ class SpdxTwoAgent extends Agent
       {
         $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
       }
-      elseif(!empty($licenses['scanner']))
+      elseif(!empty($licenses['scanner']) && count($licenses['scanner'])>0)
       {
         $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
         $msgLicense = "NoLicenseConcluded (scanners found: " . $implodedLicenses . ")";
@@ -388,7 +388,7 @@ class SpdxTwoAgent extends Agent
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='statement');
     foreach ($allEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content']);
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
     }
   }
 

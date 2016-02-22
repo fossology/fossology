@@ -6,7 +6,7 @@
 #}
 <spdx:hasFile>
   <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId }}">
-    <spdx:fileName>{{ fileName }}</spdx:fileName>
+    <spdx:fileName>{{ fileName|e }}</spdx:fileName>
     <spdx:checksum>
       <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
@@ -25,7 +25,7 @@
     <spdx:licenseConcluded>
       <spdx:DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
-        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}"/>
+        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|e }}"/>
 {% endfor %}
       </spdx:DisjunctiveLicenseSet>
     </spdx:licenseConcluded>
@@ -37,10 +37,12 @@
 {% endfor %}{% endif %}
 {% if copyrights is empty %}
     <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
-{% else %}    <spdx:copyrightText>{% for cp in copyrights %}
-      {{ cp|replace({'\f':''})|e }}
+{% else %}    <spdx:copyrightText><![CDATA[
+{% for cp in copyrights %}
+      {{ cp|replace({'\f':''})
+           |replace({']]>':']]]]><![CDATA[>'}) }}
 {% endfor %}
-    </spdx:copyrightText>
+    ]]></spdx:copyrightText>
 {% endif %}
   </spdx:File>
 </spdx:hasFile>

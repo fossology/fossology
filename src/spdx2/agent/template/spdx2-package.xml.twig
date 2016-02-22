@@ -36,7 +36,9 @@
   {% endfor %}
           </spdx:DisjunctiveLicenseSet>
         </spdx:licenseConcluded>
-        {% if licenseComments %}<spdx:licenseComments>{{ licenseComments }}</spdx:licenseComments>
+        {% if licenseComments %}<spdx:licenseComments><![CDATA[
+          {{ licenseComments|replace({']]>':']]><![CDATA[>'}) }}
+        ]]></spdx:licenseComments>
         <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
