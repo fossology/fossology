@@ -232,6 +232,7 @@ class ClearingDao extends Object
     $clearingsWithLicensesArray = array();
 
     $previousClearingId = -1;
+    $previousItemId = -1;
     $clearingEvents = array();
     $clearingEventCache = array();
     $clearingDecisionBuilder = ClearingDecisionBuilder::create();
@@ -239,6 +240,7 @@ class ClearingDao extends Object
     while ($row = $this->dbManager->fetchArray($result))
     {
       $clearingId = $row['id'];
+      $itemId = $row['itemid'];
       $licenseId = $row['license_id'];
       $eventId = $row['event_id'];
       $licenseShortName = $row['shortname'];
@@ -251,7 +253,7 @@ class ClearingDao extends Object
       $comment = $row['comment'];
       $reportInfo = $row['reportinfo'];
 
-      if ($clearingId !== $previousClearingId)
+      if ($clearingId !== $previousClearingId && $itemId !== $previousItemId)
       {
         //store the old one
         if (!$firstMatch)
@@ -262,10 +264,11 @@ class ClearingDao extends Object
         $firstMatch = false;
         //prepare the new one
         $previousClearingId = $clearingId;
+        $previousItemId = $itemId;
         $clearingEvents = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
             ->setClearingId($row['id'])
-            ->setUploadTreeId($row['itemid'])
+            ->setUploadTreeId($itemId)
             ->setPfileId($row['pfile_id'])
             ->setUserName($row['user_name'])
             ->setUserId($row['user_id'])
