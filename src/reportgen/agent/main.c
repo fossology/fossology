@@ -82,7 +82,6 @@ char* gettargetdir(char* pckgname) {
 }
 
 int zipdir(char* name) {
-  umask(S_IWGRP | S_IWOTH);
   pid_t child_pid;
   int status;
   char* cmd[6];
@@ -155,7 +154,7 @@ int createdir(char* path) {
   char CMD[500];
   DIR* dir = NULL;
 
-  snprintf(CMD, 499, "mkdir -p '%s' >/dev/null 2>&1", path);
+  snprintf(CMD, 499, "mkdir -p -m 777 '%s' >/dev/null 2>&1", path);
   dir = opendir(path);
   if (dir) {
     closedir(dir);
@@ -165,6 +164,7 @@ int createdir(char* path) {
       return 0;
     }
   }
+
   return 1;
 }
 
@@ -186,7 +186,7 @@ int createdirinner(char* path) {
 }
 
 int checkdest() {
-  char* CMD = "mkdir -p '" DESTFLDR "' >/dev/null 2>&1";
+  char* CMD = "mkdir -p -m 777'" DESTFLDR "' >/dev/null 2>&1";
   DIR* dir = NULL;
   dir = opendir(DESTFLDR);
   if (dir) {
@@ -524,6 +524,7 @@ int main(int argc, char** argv) {
       continue;
     }
     checkdest();
+    umask(022);
     char* localtime1 = gettime();
     char* formattedtime = replaceunderscore(localtime1);
 

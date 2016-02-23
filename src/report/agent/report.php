@@ -675,7 +675,12 @@ class ReportAgent extends Agent
       foreach($statementsCEI as $statements){
         $table->addRow($smallRowHeight);
         $cell1 = $table->addCell($firstColLen); 
-        $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        if($title === "Copyrights"){
+          $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        }
+        else{
+          $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        }
         $cell2 = $table->addCell($secondColLen);
         $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
@@ -899,6 +904,7 @@ class ReportAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
+    umask(0133);
     $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
