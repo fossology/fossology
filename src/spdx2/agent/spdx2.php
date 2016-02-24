@@ -210,10 +210,9 @@ class SpdxTwoAgent extends Agent
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
     $this->heartbeat(0);
 
-    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
+    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($itemTreeBounds);
     $this->heartbeat(0);
 
     $this->addClearingStatus($filesWithLicenses,$itemTreeBounds);
@@ -233,7 +232,7 @@ class SpdxTwoAgent extends Agent
     foreach($mainLicenseIds as $licId)
     {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
-      $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+      $this->includedLicenseIds[$reportedLicenseId] = true;
       $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
     }
 
@@ -257,11 +256,14 @@ class SpdxTwoAgent extends Agent
    * @param ClearingDecision[] $clearingDecisions
    * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
    */
-  protected function getFilesWithLicensesFromClearings(&$clearingDecisions)
+  protected function getFilesWithLicensesFromClearings($itemTreeBounds)
   {
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
+
     $filesWithLicenses = array();
     $clearingsProceeded = 0;
-    foreach ($clearingDecisions as $clearingDecision) {
+    foreach ($clearingDecisions as $clearingDecision)
+    {
       $clearingsProceeded += 1;
       if(($clearingsProceeded&2047)==0)
       {
@@ -272,15 +274,29 @@ class SpdxTwoAgent extends Agent
         continue;
       }
 
-      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+      foreach ($clearingDecision->getClearingEvents() as $clearingEvent)
+      {
+        $clearingLicense = $clearingEvent->getClearingLicense();
         if ($clearingLicense->isRemoved())
         {
           continue;
         }
-        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
-                $this->licenseMap->getProjectedShortname($reportedLicenseId);
+
+        if($clearingEvent->getReportinfo())
+        {
+          $customLicenseText = $clearingEvent->getReportinfo();
+          $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
+                                    '-' . md5($customLicenseText);
+          $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
+        }
+        else
+        {
+          $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+          $this->includedLicenseIds[$reportedLicenseId] = true;
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
+              $this->licenseMap->getProjectedShortname($reportedLicenseId);
+        }
       }
     }
     return $filesWithLicenses;
@@ -398,7 +414,7 @@ class SpdxTwoAgent extends Agent
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
         $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+        $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
     $this->dbManager->freeResult($res);
@@ -585,10 +601,19 @@ class SpdxTwoAgent extends Agent
     $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
     $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
     $res = $this->dbManager->execute($stmt);
+
     while($row=$this->dbManager->fetchArray($res))
     {
-      if (array_key_exists($row['rf_pk'], $this->includedLicenseIds)) {
+      if (array_key_exists($row['rf_pk'], $this->includedLicenseIds))
+      {
         $licenseTexts[$row['rf_shortname']] = $row['rf_text'];
+      }
+    }
+    foreach($this->includedLicenseIds as $license => $customText)
+    {
+      if (true !== $customText)
+      {
+        $licenseTexts[$license] = $customText;
       }
     }
     $this->dbManager->freeResult($res);
