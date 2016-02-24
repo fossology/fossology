@@ -9,26 +9,30 @@
     <spdx:fileName>{{ fileName|e }}</spdx:fileName>
     <spdx:checksum>
       <spdx:Checksum>
-        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1" />
         <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
     <spdx:checksum> 
       <spdx:Checksum>
-        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5"/>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
         <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
+{% if isCleared %}
 {% if concludedLicenses is empty %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
 {% else %}
     <spdx:licenseConcluded>
       <spdx:DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
-        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|e }}"/>
+        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|e }}" />
 {% endfor %}
       </spdx:DisjunctiveLicenseSet>
     </spdx:licenseConcluded>
+{% endif %}
+{% else %}
+    <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% endif %}
 {% if scannerLicenses is empty %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
