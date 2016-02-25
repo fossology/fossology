@@ -138,6 +138,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
    */
   protected function getHistogram($uploadId, $groupId)
   {
+    $LicenseHistArray = array();
     $scannerAgents = array_keys($this->agentNames);
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
     $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
@@ -145,6 +146,15 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $scannerLicenseHistogram = $this->licenseDao->getLicenseHistogram($itemTreeBounds, $allAgentIds);
     $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($itemTreeBounds, $groupId);
-    return array("scannerLicenseHistogram" => $scannerLicenseHistogram, "editedLicensesHist" => $editedLicensesHist);
+    $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
+
+    foreach($totalLicenses as $licenseShortName){
+      if (array_key_exists($licenseShortName, $scannerLicenseHistogram)){
+        $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
+      }
+      $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
+      $LicenseHistArray[] = array("scannerCount" => $count, "editedCount" => $editedCount, "licenseShortname" => $licenseShortName);
+    }
+    return $LicenseHistArray;
   }
 }

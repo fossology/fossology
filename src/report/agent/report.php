@@ -734,18 +734,12 @@ class ReportAgent extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    $totalLicenses = array_unique(array_merge(array_keys($dataHistogram['scannerLicenseHistogram']), array_keys($dataHistogram['editedLicensesHist'])));
 
-    foreach($totalLicenses as $licenseShortName){
-      if (array_key_exists($licenseShortName, $dataHistogram['scannerLicenseHistogram'])){
-        $count = $dataHistogram['scannerLicenseHistogram'][$licenseShortName]['unique'];
-      }
-      $editedCount = array_key_exists($licenseShortName, $dataHistogram['editedLicensesHist']) ? $dataHistogram['editedLicensesHist'][$licenseShortName]['count'] : 0;
-
+    foreach($dataHistogram as $licenseData){
       $table->addRow($this->rowHeight);
-      $table->addCell($firstColLen)->addText($count, "pStyle");
-      $table->addCell($secondColLen)->addText($editedCount, "pStyle");
-      $table->addCell($thirdColLen)->addText(htmlspecialchars($licenseShortName), "pStyle");
+      $table->addCell($firstColLen)->addText($licenseData['scannerCount'], "pStyle");
+      $table->addCell($secondColLen)->addText($licenseData['editedCount'], "pStyle");
+      $table->addCell($thirdColLen)->addText(htmlspecialchars($licenseData['licenseShortname']), "pStyle");
     }
     $section->addTextBreak();
   }
@@ -824,8 +818,8 @@ class ReportAgent extends Agent
     $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
     /* Display scan results and edited results */
-    $titleSubHeadingHistogram = "(Scanner count, edited count, License name)";
-    $this->licenseHistogram($section, $contents['licensesHist'], $titleSubHeadingHistogram);
+    $titleSubHeadingHistogram = "(Scanner count, Concluded license count, License name)";
+    $this->licenseHistogram($section, $contents['licensesHist']['statements'], $titleSubHeadingHistogram);
 
     /* Display global licenses */
     $titleSubHeadingLicense = "(License name, License text, File path)";
