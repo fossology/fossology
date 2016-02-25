@@ -438,6 +438,58 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
   return result;
 }
 
+int addRowsFromJson_Histogram(rg_table* table, json_object* jobj, const char* keyName) {
+  if ((jobj == NULL) || is_error(jobj))
+  {
+    printf("json object is ill-formatted\n");
+    return 0;
+  }
+
+  int result = 0;
+
+  if (!json_object_is_type(jobj, json_type_object)) {
+    printf("expected object but type is %d\n", json_object_get_type(jobj));
+    return 0;
+  }
+
+  json_object_object_foreach(jobj, key, val) {
+    if ((strcmp(keyName, key) == 0) && json_object_is_type(val, json_type_array)) {
+      int length = json_object_array_length(val);
+
+      for (int j = 0; j < length; j++) {
+        json_object* val1 = json_object_array_get_idx(val, j);
+        if (!json_object_is_type(val1, json_type_object)) {
+          printf("wrong type for index %d in '%s'\n", j, key);
+          return 0;
+        }
+        const char*  scannerCount = NULL;
+        const char*  editedCount = NULL;
+        const char* licenseShortname = NULL;
+
+        json_object_object_foreach(val1, key2, val2) {
+          if (((strcmp(key2, "scannerCount")) == 0) && json_object_is_type(val2, json_type_int)) {
+            scannerCount = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "editedCount")) == 0) && json_object_is_type(val2, json_type_int)) {
+            editedCount = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "licenseShortname")) == 0) && json_object_is_type(val2, json_type_string)) {
+            licenseShortname = json_object_get_string(val2);
+          }
+          else {
+            printf("unexpected key/typeof(value) pair for key '%s'\n", key2);
+            return 0;
+          }
+        }
+        table_addRow(table, scannerCount, editedCount, licenseShortname);
+      }
+      result = 1;
+    }
+  }
+
+  return result;
+}
+
 void fillTableFromJson(rg_table* table, const char* json) {
   json_object* jobj = json_tokener_parse(json);
 
@@ -693,45 +745,22 @@ int main(int argc, char** argv) {
      */
     mxml_node_t* p5 = createnumsection(body, "0", "2");
     addparaheading(p5, NULL, "Results of License Scan", "0", "2");
+    rg_table* tableLicenseHistogram = table_new(body, 3, "1638", "3000", "5000");
 
-    rg_table* tableHistog = table_new(body, 3, "1638", "3000", "5000");
-    table_addRow(tableHistog, "Number of Occurrences", "License Short Name", "License Name");
+    table_addRow(tableLicenseHistogram,"Scanner Count", "Concluded License Count", "License Name");
+    {
+      char* jsonHistogram = getLicenseHistogram(uploadId, groupId);
+      json_object * jobjt = json_tokener_parse(jsonHistogram);
 
-    PGresult* histogram =
-            fo_dbManager_ExecPrepared(
-            fo_dbManager_PrepareStamement(
-            dbManager,
-            "scanResultHistogram",
-            "SELECT COUNT(*),rf_shortname,rf_fullname FROM"
-            " license_file_ref LEFT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk "
-            "WHERE uploadtree.upload_fk = $1 "
-            "GROUP BY rf_shortname, rf_fullname "
-            "ORDER BY count DESC",
-            int),
-            uploadId
-            );
-
-    if (histogram) {
-      int count = PQntuples(histogram);
-
-      for (int i = 0; i < count; i++) {
-        table_addRow(tableHistog,
-                PQgetvalue(histogram, i, 0),
-                PQgetvalue(histogram, i, 1),
-                PQgetvalue(histogram, i, 2)
-                );
+      if (!addRowsFromJson_Histogram(tableLicenseHistogram, jobjt, "statements")) {
+        printf("cannot parse json string: %s\n", jsonHistogram);
+        fo_scheduler_disconnect(1);
+        exit(1);
       }
 
-      PQclear(histogram);
+      json_object_put(jobjt);
+      g_free(jsonHistogram);
     }
-    else {
-      printf("FATAL: could not get histogram\n");
-      fo_scheduler_disconnect(5);
-      exit(5);
-    }
-    table_free(tableHistog);
-
-    
     
     addparaheading(createnumsection(body, "0", "2"), NULL, "Main Licenses", "0", "2");
 
