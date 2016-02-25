@@ -118,12 +118,12 @@ function GetLastAnalyzeTimeOrVacTime($queryPart,$TableName)
 
 function GetLastVacTime($TableName)
 {
-  return GetLastAnalyzeTimeOrVacTime("last_vacuum, last_autovacuum",$TableName);
+  return $this->GetLastAnalyzeTimeOrVacTime("last_vacuum, last_autovacuum",$TableName);
 }
   
 function GetLastAnalyzeTime($TableName)
 {
-  return GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",$TableName);
+  return $this->GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",$TableName);
 }
 
 
