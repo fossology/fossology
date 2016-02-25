@@ -5,7 +5,7 @@
    This file is offered as-is, without any warranty.
 #}
 <spdx:hasFile>
-  <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId }}">
+  <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId|url_encode }}">
     <spdx:fileName>{{ fileName|e }}</spdx:fileName>
     <spdx:checksum>
       <spdx:Checksum>
@@ -20,13 +20,13 @@
       </spdx:Checksum>
     </spdx:checksum>
 {% if isCleared %}
-{% if concludedLicenses is empty %}
+{% if concludedLicenses|default is empty %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#none" />
 {% else %}
     <spdx:licenseConcluded>
       <spdx:DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
-        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|e }}" />
+        <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|url_encode }}" />
 {% endfor %}
       </spdx:DisjunctiveLicenseSet>
     </spdx:licenseConcluded>
@@ -34,12 +34,12 @@
 {% else %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% endif %}
-{% if scannerLicenses is empty %}
+{% if scannerLicenses|default is empty %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}{% for res in scannerLicenses %}
-    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}" />
+    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|url_encode }}" />
 {% endfor %}{% endif %}
-{% if copyrights is empty %}
+{% if copyrights|default is empty %}
     <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}    <spdx:copyrightText><![CDATA[
 {% for cp in copyrights %}

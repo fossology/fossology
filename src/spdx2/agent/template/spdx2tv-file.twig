@@ -13,7 +13,7 @@ SPDXID: SPDXRef-item{{ fileId }}
 FileChecksum: SHA1: {{ sha1 }}
 FileChecksum: MD5: {{ md5 }}
 {% if isCleared %}
-{% if concludedLicenses is empty %}
+{% if concludedLicenses|default is empty %}
 LicenseConcluded: NONE
 {% else %}
 LicenseConcluded: LicenseRef-{{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
@@ -23,7 +23,7 @@ LicenseConcluded: LicenseRef-{{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
 {% else %}
 LicenseConcluded: NOASSERTION
 {% endif %}
-{% if scannerLicenses is empty %}
+{% if scannerLicenses|default is empty %}
 LicenseInfoInFile: NOASSERTION
 {% else %}
 {% for lic in  scannerLicenses %}
@@ -31,8 +31,10 @@ LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
-{% if copyrights is empty %}
+{% if copyrights|default is empty %}
 FileCopyrightText: NONE
 {% else %}
-FileCopyrightText: {{ copyrights|join('\n')|replace({'\f':''}) }}
-{% endif %}
+FileCopyrightText: <text> {{ copyrights|join('\n')
+                                       |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                       |replace({'\f':''}) }} </text>
+{% endif %} 

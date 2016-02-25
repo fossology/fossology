@@ -8,7 +8,7 @@
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
     <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId }}">
+      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
@@ -32,7 +32,7 @@
         <spdx:licenseConcluded>
           <spdx:DisjunctiveLicenseSet>
   {% for res in mainLicenses %}
-            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}" />
+            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|url_encode }}" />
   {% endfor %}
           </spdx:DisjunctiveLicenseSet>
         </spdx:licenseConcluded>

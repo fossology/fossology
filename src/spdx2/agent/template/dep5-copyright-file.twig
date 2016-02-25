@@ -6,10 +6,10 @@
 #}
 
 Files: {{ fileNames|join('\n       ') }}
-{% if copyrights is not empty %}
+{% if copyrights|default is not empty %}
 Copyright: {{ copyrights|join('\n           ') }}
 {% endif %}
 License: {{ license }}
-{% if comment is not empty %}
+{% if comment|default is not empty %}
 Comment: {{ comment }}
 {% endif %}

@@ -25,7 +25,7 @@
   </rdfs:comment>
   {% for licenseId,extractedText in licenseTexts %}
   <spdx:hasExtractedLicensingInfo>
-    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#LicenseRef-{{ licenseId|replace(' ','-')|e }}">
+    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#LicenseRef-{{ licenseId|replace(' ','-')|url_encode }}">
       <spdx:licenseId>LicenseRef-{{ licenseId|replace(' ','-')|e }}</spdx:licenseId>
       <spdx:extractedText><![CDATA[
 {{ extractedText|replace({'\f':''})
