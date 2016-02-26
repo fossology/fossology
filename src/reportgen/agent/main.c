@@ -467,10 +467,10 @@ int addRowsFromJson_Histogram(rg_table* table, json_object* jobj, const char* ke
         const char* licenseShortname = NULL;
 
         json_object_object_foreach(val1, key2, val2) {
-          if (((strcmp(key2, "scannerCount")) == 0) && json_object_is_type(val2, json_type_int)) {
+          if (((strcmp(key2, "scannerCount")) == 0) && (json_object_is_type(val2, json_type_int) || json_object_is_type(val2, json_type_string))) {
             scannerCount = json_object_get_string(val2);
           }
-          else if (((strcmp(key2, "editedCount")) == 0) && json_object_is_type(val2, json_type_int)) {
+          else if (((strcmp(key2, "editedCount")) == 0) && (json_object_is_type(val2, json_type_int) || json_object_is_type(val2, json_type_string))) {
             editedCount = json_object_get_string(val2);
           }
           else if (((strcmp(key2, "licenseShortname")) == 0) && json_object_is_type(val2, json_type_string)) {
@@ -780,12 +780,10 @@ int main(int argc, char** argv) {
       g_free(jsonMainLicense);
     }
     
-
-
     addparaheading(createnumsection(body, "0", "2"), NULL, "Other Licenses - DO NOT USE", "0", "2");
     addparaheading(createnumsection(body, "0", "2"), NULL, "Other Licenses", "0", "2");
-    //table 3 for other license data
 
+    //table 3 for other license data
     rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
     table_addRow(tableOthers, "license", "text", "files");
     {
@@ -869,12 +867,8 @@ int main(int argc, char** argv) {
       g_free(jsonEcc);
     }
 
-    
     mxml_node_t* pirrelevant = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(pirrelevant, NULL, "Irrelevant files", "0", "2");
-    
-    
-    
     
     rg_table* tableIrrelevant = table_new(body, 2, "3000", "2000");
     table_addRow(tableIrrelevant, "Path", "files");
@@ -892,14 +886,15 @@ int main(int argc, char** argv) {
       g_free(jsonIrrelevant);
     }
     
-
-    
     mxml_node_t* p11 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p11, NULL, "ToDos", "0", "2");
+
     mxml_node_t* p111 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p111, NULL, "Readme_OSS", "1", "2");
+
     mxml_node_t* p11b = (mxml_node_t*) createnumsection(body, "2", "2");
     addparaheading(p11b, NULL, "Add all copyrights to README_OSS", "2", "2");
+
     mxml_node_t* p11b1 = (mxml_node_t*) createnumsection(body, "2", "2");
     addparaheading(p11b1, NULL, "All license (global and others - see above) including copyright notice and disclaimer of warranty must be added to the README_OSS file", "2", "2");
 
@@ -909,7 +904,6 @@ int main(int argc, char** argv) {
     mxml_node_t* p113 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p113, NULL, "Technical or other obligations", "1", "2");
 
-    
     mxml_node_t* p12 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p12, NULL, "Notes", "0", "2");
     
@@ -949,12 +943,10 @@ int main(int argc, char** argv) {
     strcpy(xmlfilename, filexmlpath);
     strcat(xmlfilename, HEADERXML);
     FILE* F = fopen(xmlfilename, "w");
-
     fclose(F);
 
     hdrf = fopen(xmlfilename, "w");
     free(xmlfilename);
-
 
     xmlfilename = (char*) malloc(sizeof (char)*(strlen(filexmlpath) + strlen(FOOTERXML) + 1));
     strcpy(xmlfilename, filexmlpath);
