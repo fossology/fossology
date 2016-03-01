@@ -98,9 +98,9 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
   char SQL[MAXSQL] = {0};
   PGresult *result;
   char user_seed[myBUFSIZ] = {0};
-  char pass_hash_valid[myBUFSIZ] = {0};
-  unsigned char hash_value[myBUFSIZ] = {0};
-  char pass_hash_actual[myBUFSIZ] = {0};
+  char pass_hash_valid[41] = {0};
+  unsigned char pass_hash_actual_raw[21] = {0};
+  char pass_hash_actual[41] = {0};
 
   /** get user_seed, user_pass on one specified user */
   snprintf(SQL,MAXSQL,"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
@@ -121,12 +121,7 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
   if (user_seed[0] && pass_hash_valid[0])
   {
     strcat(user_seed, password);  // get the hash code on seed+pass
-    SHA1((unsigned char *)user_seed, strlen(user_seed), hash_value);
-    if (!hash_value[0])
-    {
-      LOG_FATAL("ERROR, failed to get sha1 value\n");
-      return -1;
-    }
+    SHA1((unsigned char *)user_seed, strlen(user_seed), pass_hash_actual_raw);
   }
   else
   {
@@ -134,9 +129,9 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
   }
   int i = 0;
   char temp[256] = {0};
-  for (i = 0; i < strlen((char *)hash_value); i++)
+  for (i = 0; i < 20; i++)
   {
-    snprintf(temp, 256, "%02x", hash_value[i]);
+    snprintf(temp, 256, "%02x", pass_hash_actual_raw[i]);
     strcat(pass_hash_actual, temp);
   }
   return strcmp(pass_hash_valid, pass_hash_actual) == 0;
