@@ -10,8 +10,8 @@ VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
 EXE = reportgen
-EXE_COPY = getCleared.php getClearedCopy.php getClearedIp.php getClearedEcc.php getBulkMatches.php getKeywords.php getIrrelevant.php getMainLicense.php getClearedComment.php
-WRAP = getCleared getClearedCopy getClearedIp getClearedEcc getBulkMatches getKeywords getIrrelevant getMainLicense getClearedComment
+EXE_COPY = getCleared.php getClearedCopy.php getClearedIp.php getClearedEcc.php getBulkMatches.php getKeywords.php getIrrelevant.php getMainLicense.php getClearedComment.php getLicenseHistogram.php
+WRAP = getCleared getClearedCopy getClearedIp getClearedEcc getBulkMatches getKeywords getIrrelevant getMainLicense getClearedComment getLicenseHistogram
 
 CFLAGS_LOCAL  = -std=c99 $(FO_CFLAGS) -I. `pkg-config json --cflags` -DINSTALLDIR='"$(DESTDIR)$(MODDIR)/$(EXE)/agent"'
 DEF           = -DDATADIR='"$(MODDIR)"'

@@ -34,6 +34,7 @@
 #define GETCLEAREDECC  INSTALLDIR "/getClearedEcc -u %d"
 #define GETIRRELEVANTCMD   INSTALLDIR "/getIrrelevant -u %d --gId=%d"
 #define GETMAINLICENSECMD   INSTALLDIR "/getMainLicense -u %d --gId=%d"
+#define GETLICENSEHISTOGRAMCMD   INSTALLDIR "/getLicenseHistogram -u %d --gId=%d"
 #define GETCLEAREDCOMMENTCMD   INSTALLDIR "/getClearedComment -u %d --gId=%d"
 
 static char* pipeRun(const char* cmdLineFmt, ...)
@@ -100,6 +101,11 @@ char* getIrrelevant(int uploadId, int groupId)
 char* getMainLicense(int uploadId, int groupId)
 {
   return pipeRun(GETMAINLICENSECMD, uploadId, groupId);
+}
+
+char* getLicenseHistogram(int uploadId, int groupId)
+{
+  return pipeRun(GETLICENSEHISTOGRAMCMD, uploadId, groupId);
 }
 
 char* getClearedComment(int uploadId, int groupId)

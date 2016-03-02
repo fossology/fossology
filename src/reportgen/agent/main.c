@@ -438,6 +438,58 @@ int addRowsFromJson_ContentTextFiles(rg_table* table, json_object* jobj, const c
   return result;
 }
 
+int addRowsFromJson_Histogram(rg_table* table, json_object* jobj, const char* keyName) {
+  if ((jobj == NULL) || is_error(jobj))
+  {
+    printf("json object is ill-formatted\n");
+    return 0;
+  }
+
+  int result = 0;
+
+  if (!json_object_is_type(jobj, json_type_object)) {
+    printf("expected object but type is %d\n", json_object_get_type(jobj));
+    return 0;
+  }
+
+  json_object_object_foreach(jobj, key, val) {
+    if ((strcmp(keyName, key) == 0) && json_object_is_type(val, json_type_array)) {
+      int length = json_object_array_length(val);
+
+      for (int j = 0; j < length; j++) {
+        json_object* val1 = json_object_array_get_idx(val, j);
+        if (!json_object_is_type(val1, json_type_object)) {
+          printf("wrong type for index %d in '%s'\n", j, key);
+          return 0;
+        }
+        const char*  scannerCount = NULL;
+        const char*  editedCount = NULL;
+        const char* licenseShortname = NULL;
+
+        json_object_object_foreach(val1, key2, val2) {
+          if (((strcmp(key2, "scannerCount")) == 0) && (json_object_is_type(val2, json_type_int) || json_object_is_type(val2, json_type_string))) {
+            scannerCount = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "editedCount")) == 0) && (json_object_is_type(val2, json_type_int) || json_object_is_type(val2, json_type_string))) {
+            editedCount = json_object_get_string(val2);
+          }
+          else if (((strcmp(key2, "licenseShortname")) == 0) && json_object_is_type(val2, json_type_string)) {
+            licenseShortname = json_object_get_string(val2);
+          }
+          else {
+            printf("unexpected key/typeof(value) pair for key '%s'\n", key2);
+            return 0;
+          }
+        }
+        table_addRow(table, scannerCount, editedCount, licenseShortname);
+      }
+      result = 1;
+    }
+  }
+
+  return result;
+}
+
 void fillTableFromJson(rg_table* table, const char* json) {
   json_object* jobj = json_tokener_parse(json);
 
@@ -694,45 +746,22 @@ int main(int argc, char** argv) {
      */
     mxml_node_t* p5 = createnumsection(body, "0", "2");
     addparaheading(p5, NULL, "Results of License Scan", "0", "2");
+    rg_table* tableLicenseHistogram = table_new(body, 3, "1638", "3000", "5000");
 
-    rg_table* tableHistog = table_new(body, 3, "1638", "3000", "5000");
-    table_addRow(tableHistog, "Number of Occurrences", "License Short Name", "License Name");
+    table_addRow(tableLicenseHistogram,"Scanner Count", "Concluded License Count", "License Name");
+    {
+      char* jsonHistogram = getLicenseHistogram(uploadId, groupId);
+      json_object * jobjt = json_tokener_parse(jsonHistogram);
 
-    PGresult* histogram =
-            fo_dbManager_ExecPrepared(
-            fo_dbManager_PrepareStamement(
-            dbManager,
-            "scanResultHistogram",
-            "SELECT COUNT(*),rf_shortname,rf_fullname FROM"
-            " license_file_ref LEFT JOIN uploadtree ON license_file_ref.pfile_fk = uploadtree.pfile_fk "
-            "WHERE uploadtree.upload_fk = $1 "
-            "GROUP BY rf_shortname, rf_fullname "
-            "ORDER BY count DESC",
-            int),
-            uploadId
-            );
-
-    if (histogram) {
-      int count = PQntuples(histogram);
-
-      for (int i = 0; i < count; i++) {
-        table_addRow(tableHistog,
-                PQgetvalue(histogram, i, 0),
-                PQgetvalue(histogram, i, 1),
-                PQgetvalue(histogram, i, 2)
-                );
+      if (!addRowsFromJson_Histogram(tableLicenseHistogram, jobjt, "statements")) {
+        printf("cannot parse json string: %s\n", jsonHistogram);
+        fo_scheduler_disconnect(1);
+        exit(1);
       }
 
-      PQclear(histogram);
+      json_object_put(jobjt);
+      g_free(jsonHistogram);
     }
-    else {
-      printf("FATAL: could not get histogram\n");
-      fo_scheduler_disconnect(5);
-      exit(5);
-    }
-    table_free(tableHistog);
-
-    
     
     addparaheading(createnumsection(body, "0", "2"), NULL, "Main Licenses", "0", "2");
 
@@ -752,12 +781,10 @@ int main(int argc, char** argv) {
       g_free(jsonMainLicense);
     }
     
-
-
     addparaheading(createnumsection(body, "0", "2"), NULL, "Other Licenses - DO NOT USE", "0", "2");
     addparaheading(createnumsection(body, "0", "2"), NULL, "Other Licenses", "0", "2");
-    //table 3 for other license data
 
+    //table 3 for other license data
     rg_table* tableOthers = table_new(body, 3, "2000", "5638", "2000");
     table_addRow(tableOthers, "license", "text", "files");
     {
@@ -841,12 +868,8 @@ int main(int argc, char** argv) {
       g_free(jsonEcc);
     }
 
-    
     mxml_node_t* pirrelevant = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(pirrelevant, NULL, "Irrelevant files", "0", "2");
-    
-    
-    
     
     rg_table* tableIrrelevant = table_new(body, 2, "3000", "2000");
     table_addRow(tableIrrelevant, "Path", "files");
@@ -864,14 +887,15 @@ int main(int argc, char** argv) {
       g_free(jsonIrrelevant);
     }
     
-
-    
     mxml_node_t* p11 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p11, NULL, "ToDos", "0", "2");
+
     mxml_node_t* p111 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p111, NULL, "Readme_OSS", "1", "2");
+
     mxml_node_t* p11b = (mxml_node_t*) createnumsection(body, "2", "2");
     addparaheading(p11b, NULL, "Add all copyrights to README_OSS", "2", "2");
+
     mxml_node_t* p11b1 = (mxml_node_t*) createnumsection(body, "2", "2");
     addparaheading(p11b1, NULL, "All license (global and others - see above) including copyright notice and disclaimer of warranty must be added to the README_OSS file", "2", "2");
 
@@ -881,7 +905,6 @@ int main(int argc, char** argv) {
     mxml_node_t* p113 = (mxml_node_t*) createnumsection(body, "1", "2");
     addparaheading(p113, NULL, "Technical or other obligations", "1", "2");
 
-    
     mxml_node_t* p12 = (mxml_node_t*) createnumsection(body, "0", "2");
     addparaheading(p12, NULL, "Notes", "0", "2");
     
@@ -921,12 +944,10 @@ int main(int argc, char** argv) {
     strcpy(xmlfilename, filexmlpath);
     strcat(xmlfilename, HEADERXML);
     FILE* F = fopen(xmlfilename, "w");
-
     fclose(F);
 
     hdrf = fopen(xmlfilename, "w");
     free(xmlfilename);
-
 
     xmlfilename = (char*) malloc(sizeof (char)*(strlen(filexmlpath) + strlen(FOOTERXML) + 1));
     strcpy(xmlfilename, filexmlpath);
