@@ -101,9 +101,11 @@ INSERT INTO copyright (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_star
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (5, 8, 1, true, NULL, '2014-08-07 09:57:20.634464+00', '2014-08-07 09:57:20.642878+00');
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (11, 8, 2, true, NULL, '2014-08-07 09:57:27.86361+00', '2014-08-07 09:57:27.869927+00');
 INSERT INTO folder (folder_pk, folder_name, folder_desc, folder_perm) VALUES (1, 'Software Repository', 'Top Folder', NULL);
-INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (1, 1, 0, 0);
-INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (2, 1, 2, 1);
-INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (3, 1, 2, 2);
+INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (2, 1, 0, 0);
+INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (3, 1, 2, 1);
+INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (4, 1, 2, 2);
+INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (5, 1, 2, 3);
+
 INSERT INTO groups (group_pk, group_name) VALUES (1, 'Default User');
 INSERT INTO groups (group_pk, group_name) VALUES (2, 'fossy');
 INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm) VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', NULL, NULL, 'simple', NULL, NULL);
@@ -666,28 +668,33 @@ INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES (11, 9);
 INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES (12, 9);
 INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES (13, 9);
 INSERT INTO jobdepends (jdep_jq_fk, jdep_jq_depends_fk) VALUES (14, 9);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (1, 544, 5, 100, '2014-08-07 09:57:20.795329+00', 3, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (2, 199, 5, 100, '2014-08-07 09:57:20.857918+00', 4, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (3, 454, 5, 100, '2014-08-07 09:57:20.860774+00', 5, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (4, 202, 5, 100, '2014-08-07 09:57:20.944647+00', 6, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (5, 544, 6, NULL, '2014-08-07 09:57:20.950099+00', 3, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (6, 200, 5, 100, '2014-08-07 09:57:21.006306+00', 7, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (7, 247, 5, 100, '2014-08-07 09:57:21.015006+00', 8, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (8, 199, 6, NULL, '2014-08-07 09:57:21.170537+00', 4, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (9, 504, 6, NULL, '2014-08-07 09:57:21.171168+00', 4, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (10, 454, 6, NULL, '2014-08-07 09:57:21.26285+00', 5, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (11, 202, 6, NULL, '2014-08-07 09:57:21.466138+00', 6, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (12, 559, 6, NULL, '2014-08-07 09:57:21.714958+00', 7, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (13, 498, 6, NULL, '2014-08-07 09:57:21.715495+00', 7, 1, NULL, NULL, NULL, NULL);
-INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (14, 560, 6, NULL, '2014-08-07 09:57:21.775579+00', 8, 1, NULL, NULL, NULL, NULL);
+
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (1, 544, 5, 100, '2014-08-07 09:57:20.795329+00', 3, 1, NULL, NULL, NULL, NULL); -- Monk ACE
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (5, 544, 6, NULL, '2014-08-07 09:57:20.950099+00', 3, 1, NULL, NULL, NULL, NULL); -- Nomos ACE
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (2, 199, 5, 100, '2014-08-07 09:57:20.857918+00', 4, 1, NULL, NULL, NULL, NULL); -- Monk 3DFX
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (8, 199, 6, NULL, '2014-08-07 09:57:21.170537+00', 4, 1, NULL, NULL, NULL, NULL); -- Nomos 3DFX
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (9, 504, 6, NULL, '2014-08-07 09:57:21.171168+00', 4, 1, NULL, NULL, NULL, NULL); -- Nomos GPL
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (3, 454, 5, 100, '2014-08-07 09:57:20.860774+00', 5, 1, NULL, NULL, NULL, NULL); -- Monk AAL
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (10, 454, 6, NULL, '2014-08-07 09:57:21.26285+00', 5, 1, NULL, NULL, NULL, NULL); -- Nomos AAL
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (4, 202, 5, 100, '2014-08-07 09:57:20.944647+00', 6, 1, NULL, NULL, NULL, NULL); -- Monk AFL-1.1
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (11, 202, 6, NULL, '2014-08-07 09:57:21.466138+00', 6, 1, NULL, NULL, NULL, NULL); -- Nomos AFL-1.1
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (12, 559, 6, NULL, '2014-08-07 09:57:21.714958+00', 7, 1, NULL, NULL, NULL, NULL); -- Nomos info-zip ???
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (6, 200, 5, 100, '2014-08-07 09:57:21.006306+00', 7, 1, NULL, NULL, NULL, NULL); -- Monk Adaptec
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (13, 498, 6, NULL, '2014-08-07 09:57:21.715495+00', 7, 1, NULL, NULL, NULL, NULL); -- Nomos UnclassifiedLicense ???
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (7, 247, 5, 100, '2014-08-07 09:57:21.015006+00', 8, 1, NULL, NULL, NULL, NULL); -- Monk Adobe
+INSERT INTO license_file (fl_pk, rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk, server_fk, fl_ref_start_byte, fl_ref_end_byte, fl_start_byte, fl_end_byte) VALUES (14, 560, 6, NULL, '2014-08-07 09:57:21.775579+00', 8, 1, NULL, NULL, NULL, NULL); -- Nomos TrueCrypt-3.0 ???
+
 INSERT INTO mimetype_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (3, 1, 1, true, NULL, '2014-08-07 09:57:20.475587+00', '2014-08-07 09:57:20.593476+00');
 INSERT INTO mimetype_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (8, 1, 2, true, NULL, '2014-08-07 09:57:27.733091+00', '2014-08-07 09:57:27.77946+00');
 INSERT INTO monk_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (6, 5, 1, true, NULL, '2014-08-07 09:57:20.771017+00', '2014-08-07 09:57:21.017807+00');
 INSERT INTO monk_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (12, 5, 2, true, NULL, '2014-08-07 09:57:27.956509+00', '2014-08-07 09:57:28.126352+00');
 INSERT INTO nomos_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (4, 6, 1, true, NULL, '2014-08-07 09:57:20.552821+00', '2014-08-07 09:57:21.784538+00');
 INSERT INTO nomos_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (10, 6, 2, true, NULL, '2014-08-07 09:57:27.818686+00', '2014-08-07 09:57:27.823032+00');
+
 INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES (1, 10, 1, 2);
 INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES (2, 10, 2, 2);
+INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES (3, 10, 3, 2); -- C.zip added
+
 INSERT INTO pkgagent_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (2, 11, 1, true, NULL, '2014-08-07 09:57:20.46257+00', '2014-08-07 09:57:20.507679+00');
 INSERT INTO pkgagent_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (9, 11, 2, true, NULL, '2014-08-07 09:57:27.749887+00', '2014-08-07 09:57:27.770628+00');
 INSERT INTO sysconfig (sysconfig_pk, variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function) VALUES (1, 'SupportEmailLabel', 'Support', 'Support Email Label', 2, 'Support', 1, 'e.g. "Support"<br>Text that the user clicks on to create a new support email. This new email will be preaddressed to this support email address and subject.  HTML is ok.', '');
@@ -700,39 +707,41 @@ INSERT INTO sysconfig (sysconfig_pk, variablename, conf_value, ui_label, vartype
 INSERT INTO sysconfig (sysconfig_pk, variablename, conf_value, ui_label, vartype, group_name, group_order, description, validation_function) VALUES (8, 'NomostListNum', '2200', 'Number of Nomost List', 2, 'Number', 4, 'For the Nomos List/Nomost List Download, you can set the number of lines to list/download. Default 2200.', NULL);
 INSERT INTO ununpack_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (1, 4, 1, true, NULL, '2014-08-07 09:57:19.274091+00', '2014-08-07 09:57:19.337462+00');
 INSERT INTO ununpack_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (7, 4, 2, true, NULL, '2014-08-07 09:57:26.579377+00', '2014-08-07 09:57:26.628617+00');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (2, 1, 1, 2, 268469248, 2, 3, 'artifact.meta');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (10, 9, 1, 6, 32768, 7, 8, 'AFL-1.1');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (11, 9, 1, 7, 32768, 9, 10, 'Adaptec');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (12, 9, 1, 8, 32768, 11, 12, 'Adobe');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (9, 4, 1, 0, 536888320, 6, 13, '2');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (7, 5, 1, 4, 32768, 15, 16, '3DFX');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (6, 5, 1, 3, 32768, 17, 18, 'ACE');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (8, 5, 1, 5, 32768, 19, 20, 'AAL');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (5, 4, 1, 0, 536888320, 14, 21, '1');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (4, 3, 1, 0, 536888320, 5, 22, 'A');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (3, 1, 1, 0, 805323776, 4, 23, 'artifact.dir');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (1, NULL, 1, 1, 536904704, 1, 24, 'A.zip');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (14, 13, 2, 10, 268469248, 2, 3, 'artifact.meta');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (22, 21, 2, 3, 32768, 7, 8, 'ACE_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (23, 21, 2, 4, 32768, 9, 10, '3DFX_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (24, 21, 2, 5, 32768, 11, 12, 'AAL_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (21, 16, 2, 0, 536888320, 6, 13, '1b');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (19, 17, 2, 8, 32768, 15, 16, 'Adobe_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (18, 17, 2, 7, 32768, 17, 18, 'Adaptec_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (20, 17, 2, 6, 32768, 19, 20, 'AFL-1.1_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (17, 16, 2, 0, 536888320, 14, 21, '2b');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (16, 15, 2, 0, 536888320, 5, 22, 'B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (15, 13, 2, 0, 805323776, 4, 23, 'artifact.dir');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (13, NULL, 2, 9, 536904704, 1, 24, 'B.zip');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (34, 33, 3, 10, 268469248, 2, 3, 'artifact.meta');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (42, 41, 3, 3, 32768, 7, 8, 'ACE_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (43, 41, 3, 4, 32768, 9, 10, '3DFX_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (44, 41, 3, 5, 32768, 11, 12, 'AAL_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (41, 36, 3, 0, 536888320, 6, 13, '1b');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (39, 37, 3, 8, 32768, 15, 16, 'Adobe_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (38, 37, 3, 7, 32768, 17, 18, 'Adaptec_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (40, 37, 3, 6, 32768, 19, 20, 'AFL-1.1_B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (37, 36, 3, 0, 536888320, 14, 21, '2b');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (36, 35, 3, 0, 536888320, 5, 22, 'B');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (35, 33, 3, 0, 805323776, 4, 23, 'artifact.dir');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (33, NULL, 3, 9, 536904704, 1, 24, 'C.zip');
+
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (1, NULL, NULL, 1, 1, 536904704, 1, 24, 'A.zip');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (2, 1, 1, 1, 2, 268469248, 2, 3, 'artifact.meta');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (3, 1, 1, 1, 0, 805323776, 4, 23, 'artifact.dir');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (4, 3, 1, 1, 0, 536888320, 5, 22, 'A');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (5, 4, 4, 1, 0, 536888320, 14, 21, '1');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (6, 5, 5, 1, 3, 32768, 17, 18, 'ACE');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (7, 5, 5, 1, 4, 32768, 15, 16, '3DFX');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (8, 5, 5, 1, 5, 32768, 19, 20, 'AAL');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (9, 4, 4, 1, 0, 536888320, 6, 13, '2');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (10, 9, 9, 1, 6, 32768, 7, 8, 'AFL-1.1');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (11, 9, 9, 1, 7, 32768, 9, 10, 'Adaptec');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (12, 9, 9, 1, 8, 32768, 11, 12, 'Adobe');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (13, NULL, NULL, 2, 9, 536904704, 1, 24, 'B.zip');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (14, 13, 13, 2, 10, 268469248, 2, 3, 'artifact.meta');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (15, 13, 13, 2, 0, 805323776, 4, 23, 'artifact.dir');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (16, 15, 13, 2, 0, 536888320, 5, 22, 'B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (17, 16, 16, 2, 0, 536888320, 14, 21, '2b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (18, 17, 17, 2, 7, 32768, 17, 18, 'Adaptec_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (19, 17, 17, 2, 8, 32768, 15, 16, 'Adobe_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (20, 17, 17, 2, 6, 32768, 19, 20, 'AFL-1.1_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (21, 16, 16, 2, 0, 536888320, 6, 13, '1b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (22, 21, 21, 2, 3, 32768, 7, 8, 'ACE_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (23, 21, 21, 2, 4, 32768, 9, 10, '3DFX_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (24, 21, 21, 2, 5, 32768, 11, 12, 'AAL_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (33, NULL, NULL, 3, 9, 536904704, 1, 24, 'C.zip');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (34, 33, 33, 3, 10, 268469248, 2, 3, 'artifact.meta');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (35, 33, 33, 3, 0, 805323776, 4, 23, 'artifact.dir');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (36, 35, 33, 3, 0, 536888320, 5, 22, 'B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (37, 36, 36, 3, 0, 536888320, 14, 21, '2b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (38, 37, 37, 3, 7, 32768, 17, 18, 'Adaptec_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (39, 37, 37, 3, 8, 32768, 15, 16, 'Adobe_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (40, 37, 37, 3, 6, 32768, 19, 20, 'AFL-1.1_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (41, 36, 36, 3, 0, 536888320, 6, 13, '1b');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (42, 41, 41, 3, 3, 32768, 7, 8, 'ACE_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (43, 41, 41, 3, 4, 32768, 9, 10, '3DFX_B');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, realparent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (44, 41, 41, 3, 5, 32768, 11, 12, 'AAL_B');
+
