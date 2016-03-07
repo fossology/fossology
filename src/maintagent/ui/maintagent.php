@@ -93,7 +93,8 @@ class maintagent extends FO_Plugin {
                      "D"=>_("Vacuum Analyze the database."),
               //       "U"=>_("Process expired uploads (slow)."),
               //       "Z"=>_("Remove orphaned files from the repository (slow)."),
-                     "v"=>_("verbose (turns on debugging output)")
+                     "v"=>_("verbose (turns on debugging output)"),
+                     "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use).")
                     );
     $V = "";
 

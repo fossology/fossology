@@ -68,8 +68,9 @@ int main(int argc, char **argv)
   int VacAnalyzeExe = 0;
   int ProcessExpiredExe = 0;
   int RemoveOrphanedFilesExe = 0;
+  int reIndexAllTablesExe = 0;
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghpNPRTUZivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -189,6 +190,12 @@ int main(int argc, char **argv)
             RemoveOrphanedFiles();
             RemoveOrphanedFilesExe = 1;
           } 
+          break;
+      case 'I': /* Remove orphaned files from the repository (slow) */
+          if(reIndexAllTablesExe == 0){   
+            reIndexAllTables();
+            reIndexAllTablesExe = 1;
+          }
           break;
       case 'i': /* "Initialize" */
             ExitNow(0);

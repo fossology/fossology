@@ -313,3 +313,30 @@ FUNCTION void NormalizeUploadPriorities()
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }
+/**
+ * @brief reindex of all indexes in fossology database
+  * @returns void but writes status to stdout
+ */
+FUNCTION void reIndexAllTables()
+{
+  PGresult* result; // the result of the database access
+  char SQL[100];
+  long StartTime, EndTime;
+  char *sql= "SELECT table_catalog FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public' AND (table_name SIMILAR TO 'upload%') LIMIT 1";
+
+  StartTime = (long)time(0);
+
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__)) exit(-214);
+
+  memset(SQL,'\0',sizeof(SQL));
+  snprintf(SQL,sizeof(SQL),"REINDEX DATABASE %s;", PQgetvalue(result, 0, 0));
+  PQclear(result);
+  result = PQexec(pgConn, SQL);
+  
+  EndTime = (long)time(0);
+  printf("Time taken for reindexing the database : %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}

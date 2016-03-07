@@ -51,5 +51,6 @@ void ProcessExpired();
 void RemoveOrphanedFiles();
 void DeleteOrphanGold();
 void NormalizeUploadPriorities();
+void reIndexAllTables();
 
 #endif /* _DEMOMOD_H */
