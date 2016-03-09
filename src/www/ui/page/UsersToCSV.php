@@ -23,15 +23,15 @@ use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminLicenseToCSV extends DefaultPlugin
+class UsersToCSV extends DefaultPlugin
 {
-  const NAME = "admin_license_to_csv";
+  const NAME = "user_to_csv";
 
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::TITLE => "Admin License CSV Export",
-        self::MENU_LIST => "Admin::License Admin::CSV Export",
+        self::TITLE => "User CSV Export",
+        self::MENU_LIST => "Admin::Users::CSV Export",
         self::REQUIRES_LOGIN => true,
         self::PERMISSION => Auth::PERM_ADMIN
     ));
@@ -43,11 +43,12 @@ class AdminLicenseToCSV extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    $licenseCsvExport = new \Fossology\Lib\Application\LicenseCsvExport($this->getObject('db.manager'));
-    $content = $licenseCsvExport->createCsv(intval($request->get('rf')));
+    $usersCsvExport = new \Fossology\Lib\Application\UsersCsvExport($this->getObject('db.manager'));
+    $content = $usersCsvExport->createCsv(intval($request->get('rf')));
  
     $headers = array(
-        'Content-type' => 'text/csv, charset=utf-8',
+        'Content-type' => 'text/csv, charset=UTF-8',
+        'Content-Disposition' => 'attachment, filename=file.csv',
         'Pragma' => 'no-cache',
         'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
         'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
@@ -57,4 +58,4 @@ class AdminLicenseToCSV extends DefaultPlugin
 
 }
 
-register_plugin(new AdminLicenseToCSV());
+register_plugin(new UsersToCSV());
