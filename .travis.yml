@@ -88,6 +88,5 @@ script:
  - set +e
 
 after_script:
- - mkdir build
- - mkdir build/logs
+ - mkdir -p build/logs
  - php src/vendor/bin/coveralls -vv -x clover.xml
