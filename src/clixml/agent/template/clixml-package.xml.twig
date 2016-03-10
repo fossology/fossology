@@ -1,0 +1,47 @@
+{# Copyright 2015 Siemens AG
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<spdx:relationship>
+  <spdx:Relationship>
+    <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
+    <spdx:relatedSpdxElement>
+      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId }}">
+        <spdx:name>{{ packageName }}</spdx:name>
+        <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
+        <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:packageVerificationCode>
+          <spdx:PackageVerificationCode>
+          <spdx:packageVerificationCodeValue>{{ verificationCode }}</spdx:packageVerificationCodeValue>
+          </spdx:PackageVerificationCode>
+        </spdx:packageVerificationCode>
+        <spdx:checksum>
+          <spdx:Checksum>
+            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+            <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <spdx:checksum> 
+          <spdx:Checksum>
+            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5"/>
+            <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
+          </spdx:Checksum>
+        </spdx:checksum>
+        <spdx:licenseConcluded>
+          <spdx:DisjunctiveLicenseSet>
+  {% for res in mainLicenses %}
+            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}"/>
+  {% endfor %}
+          </spdx:DisjunctiveLicenseSet>
+        </spdx:licenseConcluded>
+        {% if licenseComments %}<spdx:licenseComments>{{ licenseComments }}</spdx:licenseComments>
+        <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        <spdx:copyrightText rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        {{ fileNodes|replace({'\n':'\n          '}) }}
+      </spdx:Package>
+    </spdx:relatedSpdxElement>
+  </spdx:Relationship>
+</spdx:relationship>
