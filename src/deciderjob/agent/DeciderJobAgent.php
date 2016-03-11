@@ -88,7 +88,6 @@ class DeciderJobAgent extends Agent {
       $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
       foreach($this->loopContainedItems($containerBounds) as $itemTreeBounds)
       {
-      	$events = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
       	$this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
     }
@@ -124,10 +123,10 @@ class DeciderJobAgent extends Agent {
 
   private function noLicensesCheck(&$detectedLicenses, &$removedLicenses)
   {
-  	$noLicenses = false;
-  	if (count($detectedLicenses) == 0)
-  	{
-  		return true;
+    $noLicenses = false;
+    if (count($detectedLicenses) == 0)
+    {
+      return true;
   	}
     if ($detectedLicenses[0]->getLicenseId() == 507)
     {
@@ -159,7 +158,7 @@ class DeciderJobAgent extends Agent {
    */
   protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
   {
-  	$this->dbManager->begin();
+    $this->dbManager->begin();
 
     $itemId = $itemTreeBounds->getItemId();
 
@@ -175,10 +174,12 @@ class DeciderJobAgent extends Agent {
 
     if ($createDecision)
     {
-      /* Do not add/change concluded license if:
-         - agent has detected No_license_found, or
-         - user has concluded that there is no valid license in a file, or
-         - concluded license has already been added */
+    /* 
+      Do not add/change concluded license if:
+      - agent has detected No_license_found, or
+      - user has concluded that there is no valid license in a file, or
+      - concluded license has already been added 
+    */
       list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
       $concludedLicenseExist = false;
       $allDetectedLicensesRemoved = false;
