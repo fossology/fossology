@@ -117,6 +117,10 @@ class SpdxTwoAgent extends Agent
     return $args;
   }
 
+  /**
+   * @param int $uploadId
+   * @return bool
+   */
   function processUploadId($uploadId)
   {
     $args = $this->preWorkOnArgs($this->args);
@@ -145,6 +149,10 @@ class SpdxTwoAgent extends Agent
     return true;
   }
 
+  /**
+   * @param string $partname
+   * @return string
+   */
   protected function getTemplateFile($partname)
   {
     $prefix = $this->outputFormat . "-";
@@ -163,6 +171,11 @@ class SpdxTwoAgent extends Agent
     return $prefix . $partname . $postfix;
   }
 
+  /**
+   * @param string $fileBase
+   * @param string $packageName
+   * @return string
+   */
   protected function getUri($fileBase,$packageName)
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
@@ -206,6 +219,10 @@ class SpdxTwoAgent extends Agent
     }
   }
 
+  /**
+   * @param int $uploadId
+   * @return string
+   */
   protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -253,10 +270,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param ClearingDecision[] $clearingDecisions
+   * @param ItemTreeBounds $itemTreeBounds
    * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
    */
-  protected function getFilesWithLicensesFromClearings($itemTreeBounds)
+  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
   {
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
 
@@ -380,10 +397,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] $filesWithLicenses
+   * @param string[][][] &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
    */
-  protected function addScannerResults(&$filesWithLicenses, $itemTreeBounds)
+  protected function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds)
   {
     $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array_keys($this->agentNames);
@@ -421,6 +438,11 @@ class SpdxTwoAgent extends Agent
     return "licenseInfoInFile determined by Scanners $selectedScanners";
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param int $uploadId
+   * @return string
+   */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
     /* @var $copyrightDao CopyrightDao */
@@ -432,7 +454,11 @@ class SpdxTwoAgent extends Agent
     }
   }
 
-  protected function addClearingStatus(&$filesWithLicenses,$itemTreeBounds)
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param ItemTreeBounds $itemTreeBounds
+   */
+  protected function addClearingStatus(&$filesWithLicenses,ItemTreeBounds $itemTreeBounds)
   {
     $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
         array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
@@ -452,6 +478,9 @@ class SpdxTwoAgent extends Agent
     }
   }
 
+  /**
+   * @param int $uploadId
+   */
   protected function computeUri($uploadId)
   {
     global $SysConf;
@@ -463,7 +492,12 @@ class SpdxTwoAgent extends Agent
     $this->uri = $this->getUri($fileBase,$packageName);
   }
 
-  protected function writeReport($packageNodes, $packageIds, $uploadId)
+  /**
+   * @param string[] $packageNodes
+   * @param int[] $packageIds
+   * @param int $uploadId
+   */
+  protected function writeReport(&$packageNodes, $packageIds, $uploadId)
   {
     $fileBase = dirname($this->uri);
 
@@ -490,6 +524,11 @@ class SpdxTwoAgent extends Agent
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }
 
+  /**
+   * @param int $uploadId
+   * @param int $jobId
+   * @param string $fileName
+   */
   protected function updateReportTable($uploadId, $jobId, $fileName){
     $this->dbManager->insertTableRow('reportgen',
             array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
@@ -518,6 +557,11 @@ class SpdxTwoAgent extends Agent
     }
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param string $treeTableName
+   * @return string
+   */
   protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
   {
     /* @var $treeDao TreeDao */
@@ -553,6 +597,11 @@ class SpdxTwoAgent extends Agent
     return $content;
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param string $treeTableName
+   * @return string
+   */
   protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName)
   {
     $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
