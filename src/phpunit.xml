@@ -4,7 +4,7 @@
     <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
   <logging>
-    <log type="coverage-html" target="../testReport" charset="UTF-8" highlight="false"/>
+    <log type="coverage-clover" target="../clover.xml" charset="UTF-8" highlight="false"/>
   </logging>
 
   <testsuites>
@@ -26,7 +26,7 @@
   </testsuites>
 
   <filter>
-    <whitelist addUncoveredFilesFromWhitelist="true">
+    <whitelist addUncoveredFilesFromWhitelist="true" processUncoveredFilesFromWhitelist="false">
       <directory suffix=".php">.</directory>
       <exclude>
         <directory suffix="Test.php">.</directory>
