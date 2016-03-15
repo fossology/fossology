@@ -191,7 +191,7 @@ int main(int argc, char **argv)
             RemoveOrphanedFilesExe = 1;
           } 
           break;
-      case 'I': /* Remove orphaned files from the repository (slow) */
+      case 'I': /* Reindexing of database */
           if(reIndexAllTablesExe == 0){   
             reIndexAllTables();
             reIndexAllTablesExe = 1;

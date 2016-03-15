@@ -333,6 +333,7 @@ FUNCTION void reIndexAllTables()
   snprintf(SQL,sizeof(SQL),"REINDEX DATABASE %s;", PQgetvalue(result, 0, 0));
   PQclear(result);
   result = PQexec(pgConn, SQL);
+  if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) ExitNow(-215);
   
   EndTime = (long)time(0);
   printf("Time taken for reindexing the database : %ld seconds\n", EndTime-StartTime);
