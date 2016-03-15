@@ -7,11 +7,11 @@
 
 <tr class="{{ class }}">
   <td>
-    <a href="{{ uriFull }}&show=job&job={{ jqId }}">{{ jqId }}</a>
+    <a href="{{ uriFull }}&job={{ jqId }}">{{ jqId }}</a>
     {% if depends is not empty %}
       {% for depend_jq_pk in depends %}{#
       #}{% if loop.index0==0 %} / {% else %}, {% endif %}
-        <a href="{{ uriFull }}&show=job&job={{ depend_jq_pk }}">{{ depend_jq_pk }}</a>{#
+        <a href="{{ uriFull }}&job={{ depend_jq_pk }}">{{ depend_jq_pk }}</a>{#
       #}{% endfor %}
     {% endif %}
   </td>
