@@ -90,36 +90,25 @@ class showjobs extends FO_Plugin
 
     if (!empty($row["job_upload_fk"])){
       /* get the upload filename */
-      $statementName = __METHOD__."upload_filenameforShowJobDB";
-      $dbManager->prepare($statementName, "select upload_filename from upload where upload_pk =$1");
-      $uploadresult = $dbManager->execute($statementName, array($row['job_upload_fk']));
-      $uploadRow = $dbManager->fetchArray($uploadresult);
-      if (empty($uploadRow)){
+      $uploadFileName = $this->uploadDao->getUpload($row['job_upload_fk'])->getFilename();
+      if (empty($uploadFileName)){
         /* upload has been deleted so try to get the job name from the original upload job record */
         $jobName = $this->showJobsDao->getJobName($row["job_upload_fk"]);
-        $upload_filename = "Deleted " . $jobName;
-      }else{
-        $upload_filename = $uploadRow['upload_filename'];
+        $uploadFileName = "Deleted " . $jobName;
       }
-      $dbManager->freeResult($uploadresult);
 
       if (empty($row['jq_pk'])){ 
-        return _("Job history record is no longer available"); 
+        return _("Job history record is no longer available");
       }
 
       $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['job_upload_fk']);
 
       /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-      $statementName = __METHOD__."uploadtreeRec";
-      $uploadtreeRec = $dbManager->getSingleRow(
-          "select * from $uploadtree_tablename where parent is NULL and upload_fk=$1",
-          array($row['job_upload_fk']),
-          $statementName);
-      $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
+      $uploadtree_pk = $this->uploadDao->getParentItemBounds($row['job_upload_fk'],$uploadtree_tablename)->getItemId();
     }
     /* upload file name link to browse */
     if (!empty($row['job_upload_fk'])){
-      $uploadTreeName = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $upload_filename . "</a>";
+      $uploadTreeName = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
       return $uploadTreeName;
     }    
   } // showJobDB()
@@ -192,8 +181,8 @@ class showjobs extends FO_Plugin
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
-      $this->vars['injectedFoot'] = $_GET['injectedFoot'];
-      $this->vars['message'] = $_GET['injectedMessage'];
+      $this->vars['injectedFoot'] = GetParm("injectedFoot",PARM_TEXT);
+      $this->vars['message'] = GetParm("injectedMessage",PARM_TEXT);
     }
   }
 

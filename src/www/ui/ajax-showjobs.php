@@ -29,10 +29,16 @@ define("TITLE_ajaxShowJobs", _("ShowJobs"));
 class AjaxShowJobs extends FO_Plugin
 {
   const MAX_LOG_OUTPUT = 32768;
+
+  /** @var dbManager */
+  private $dbManager;
+
   /** @var ShowJobsDao */
   private $showJobsDao;
+
   /** @var UserDao */
   private $userDao;
+
   /** @var int $maxUploadsPerPage max number of uploads to display on a page */
   private $maxUploadsPerPage = 10;
 
@@ -49,6 +55,7 @@ class AjaxShowJobs extends FO_Plugin
     global $container;
     $this->showJobsDao = $container->get('dao.show_jobs');
     $this->userDao = $container->get('dao.user');
+    $this->dbManager = $container->get('db.manager');
 
     parent::__construct();
   }
@@ -84,11 +91,7 @@ class AjaxShowJobs extends FO_Plugin
    * @return Return job and jobqueue record data in an html table.
    **/
   protected function showJobDB($job_pk)
-  {
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-    
+  {    
     $i=0;
     $fields=array('jq_pk'=>'jq_pk',
                   'job_pk'=>'jq_job_fk',
@@ -109,11 +112,11 @@ class AjaxShowJobs extends FO_Plugin
     $uri = Traceback_uri() . "?mod=showjobs&upload=";
 
     $statementName = __METHOD__."ShowJobDBforjob";
-    $dbManager->prepare($statementName,
+    $this->dbManager->prepare($statementName,
     "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1");
-    $result = $dbManager->execute($statementName, array($job_pk));
-    $row = $dbManager->fetchArray($result);
-    $dbManager->freeResult($result);
+    $result = $this->dbManager->execute($statementName, array($job_pk));
+    $row = $this->dbManager->fetchArray($result);
+    $this->dbManager->freeResult($result);
 
     $table = array();
     foreach($fields as $labelKey=>$field){
@@ -200,10 +203,6 @@ class AjaxShowJobs extends FO_Plugin
    **/
   protected function show($jobData, $page, $allusers)
   {
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-
     $outBuf = '';
     $pagination = '';
     $numJobs = count($jobData);
@@ -264,25 +263,18 @@ class AjaxShowJobs extends FO_Plugin
           
           /* get $userName if all jobs are shown */
           $userName = "";
-          $allusers = GetParm("allusers",PARM_INTEGER);
           if ($allusers > 0){
             $statementName = __METHOD__."UploadRec";
-            $uploadRec = $dbManager->getSingleRow("select * from upload where upload_pk=$1",
+            $uploadRec = $this->dbManager->getSingleRow("select user_fk from upload where upload_pk=$1",
                 array($job['job']['job_upload_fk']),
                 $statementName);
 
             if (!empty($uploadRec['user_fk'])){
-              $statementName = __METHOD__."UserRec";
-              $userRec = $dbManager->getSingleRow("select * from users where user_pk=$1",
-                  array($uploadRec['user_fk']),
-                  $statementName);
+              $userName = $this->userDao->getUserName($uploadRec['user_fk']);
             }else{
-              $statementName = __METHOD__."UserRec1";
-              $userRec = $dbManager->getSingleRow("select * from users where user_pk=$1",
-                  array($job['job']['job_user_fk']),
-                  $statementName);
+              $userName = $this->userDao->getUserName($job['job']['job_user_fk']);
             }
-            $userName = "&nbsp;&nbsp;&nbsp;(" . htmlentities($userRec[user_name], ENT_QUOTES) . ")";
+            $userName = "&nbsp;&nbsp;&nbsp;(" . htmlentities($userName, ENT_QUOTES) . ")";
           }
 
           $outBuf .= htmlentities($uploadName, ENT_QUOTES) . $userName;
