@@ -146,7 +146,7 @@ class showjobs extends FO_Plugin
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
-      if (!empty($uploadPk) && !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
+      if (!(empty($uploadPk) || $uploadPk === -1) && !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
       }
