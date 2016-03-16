@@ -2761,6 +2761,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<derivative\>"
 %STR%	"hereby granted provided that licen[cs]ee provides a licen[cs]e to IBM corp to use copy modify and/?o?r? distribute derivative works"
 #
+%ENTRY%	_LT_ICU_1
+%KEY%	"licen[cs]"
+%STR%	"available under =FEW= ICU license =FEW= ICU 1\.?8\.?1 and later"
+#
 %ENTRY%	_LT_ID_EULA
 %KEY%	"licen[cs]"
 %STR%	"this limited use software licen[cs]e agreement the agreement is a legal agreement between you the end-user and Id software inc"
@@ -7276,6 +7280,10 @@ k
 %ENTRY%	_TITLE_IBM_PL
 %KEY%	"licen[cs]"
 %STR%	"ibm public licen[cs]e =FEW= version"
+#
+%ENTRY%	_TITLE_ICU
+%KEY%	"licen[cs]"
+%STR%	"ICU License =FEW= ICU 1\.?8\.?1 and later"
 #
 %ENTRY%	_TITLE_IDPL_V10
 %KEY%	"licen[cs]"

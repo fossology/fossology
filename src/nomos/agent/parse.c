@@ -1945,7 +1945,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "MIT(3)" : "MIT");
       }
       else {
-        INTERESTING(lDebug ? "MIT-style(2)" : "MIT-style");
+        if (INFILE(_TITLE_ICU)) {
+          INTERESTING(lDebug ? "MIT-style(2)" : "ICU");
+        }
+        else {
+          INTERESTING(lDebug ? "MIT-style(2)" : "MIT-style");
+        }
       }
       lmem[_mMIT] = 1;
     }
@@ -5927,17 +5932,33 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      INTERESTING("Cygnus-eCos-1.0");
   }
   cleanLicenceBuffer();
+  /**
+   * EDL-1.0
+   */
   if (INFILE(_TITLE_EDL_V10)) {
      INTERESTING("EDL-1.0");
   }
   cleanLicenceBuffer();
+  /**
+   * HSQLDB
+   */
   if (INFILE(_LT_HSQLDB)) {
      INTERESTING("HSQLDB");
   }
   cleanLicenceBuffer();
+  /**
+   * OpenMap
+   */
   if (INFILE(_TITLE_OPENMAP)) {
      INTERESTING("OpenMap");
  	 lmem[_fPDDL] = 1;
+  }
+  cleanLicenceBuffer();
+  /**
+   * ICU 1.8.1
+   */
+  if (INFILE(_LT_ICU_1)) {
+     INTERESTING("ICU");
   }
   cleanLicenceBuffer();
   /*
