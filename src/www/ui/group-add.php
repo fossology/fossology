@@ -31,7 +31,7 @@ class group_add extends FO_Plugin {
     $this->Name = "group_add";
     $this->Title = TITLE_add_group;
     $this->MenuList = "Admin::Groups::Add Group";
-    $this->DBaccess = PLUGIN_DB_WRITE;
+    $this->DBaccess = PLUGIN_DB_ADMIN;
     $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
     parent::__construct();
   }
