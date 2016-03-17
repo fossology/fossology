@@ -1,6 +1,4 @@
 <?php
-
-use Fossology\Lib\Auth\Auth;
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
 
@@ -19,6 +17,8 @@ use Fossology\Lib\Auth\Auth;
 ***********************************************************/
 
 define("TITLE_maintagent", _("FOSSology Maintenance"));
+
+use Fossology\Lib\Auth\Auth;
 
 /**
  * \class maintagent extend from FO_Plugin
@@ -74,7 +74,6 @@ class maintagent extends FO_Plugin {
 
   /**
    * \brief Display the input form
-   *
    * \param
    * \returns HTML in string
    **/
@@ -93,6 +92,7 @@ class maintagent extends FO_Plugin {
                      "D"=>_("Vacuum Analyze the database."),
               //       "U"=>_("Process expired uploads (slow)."),
               //       "Z"=>_("Remove orphaned files from the repository (slow)."),
+                     "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
                      "v"=>_("verbose (turns on debugging output)")
                     );
     $V = "";
