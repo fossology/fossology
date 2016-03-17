@@ -152,6 +152,7 @@ class fo_libschema
     $this->applyConstraints();
     error_reporting($errlev); /* return to previous error reporting level */
     $this->makeFunctions();
+    $this->applyClusters();
     /* Reload current since CASCADE during migration may have changed things */
     $this->getCurrSchema();
     $this->dropViews($catalog);
@@ -196,7 +197,26 @@ class fo_libschema
       }
     }
   }
+  /************************************/
+  /* Add clusters */
+  /************************************/
+  function applyClusters()
+  {
+    if (empty($this->schema['CLUSTER']))
+    {
+      return;
+    }
+    foreach ($this->schema['CLUSTER'] as $name => $sql)
+    {
+      if (empty($name)) continue;
 
+      if(!array_key_exists('CLUSTER', $this->currSchema)
+        || !array_key_exists($name, $this->currSchema['CLUSTER']))
+      {
+        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . "." . $name . ".CREATE");
+      }
+    }
+  }
   /************************************/
   /* Add sequences */
   /************************************/
