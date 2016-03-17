@@ -71,47 +71,42 @@ class showjobs extends FO_Plugin
 
 
   /**
-   * @brief Returns geeky scan details about the jobqueue item
+   * @brief Returns uploadname as link for geeky scan
    * @param $job_pk
-   * @return Return job and jobqueue record data in an html table.
+   * @return uploadname
    **/
-  function showJobDB($job_pk)
+  function getUploadNameForGeekyScan($job_pk)
   {
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-    
-    $statementName = __METHOD__."ShowJobDBforjob";
-    $dbManager->prepare($statementName,
-        "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $1");
-    $result = $dbManager->execute($statementName, array($job_pk));
-    $row = $dbManager->fetchArray($result);
-    $dbManager->freeResult($result);
+    $row = $this->showJobsDao->getDataForASingleJob($job_pk);
 
-    if (!empty($row["job_upload_fk"])){
-      /* get the upload filename */
-      $uploadFileName = $this->uploadDao->getUpload($row['job_upload_fk'])->getFilename();
-      if (empty($uploadFileName)){
-        /* upload has been deleted so try to get the job name from the original upload job record */
-        $jobName = $this->showJobsDao->getJobName($row["job_upload_fk"]);
-        $uploadFileName = "Deleted " . $jobName;
-      }
-
-      if (empty($row['jq_pk'])){ 
-        return _("Job history record is no longer available");
-      }
-
-      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['job_upload_fk']);
-
-      /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-      $uploadtree_pk = $this->uploadDao->getParentItemBounds($row['job_upload_fk'],$uploadtree_tablename)->getItemId();
+    if (empty($row["job_upload_fk"])){
+      return '';
     }
+
+    if (empty($row['jq_pk'])){
+      return _("Job history record is no longer available");
+    }
+
+    /* get the upload filename */
+    $uploadFileName = htmlspecialchars($this->uploadDao->getUpload($row['job_upload_fk'])->getFilename());
+    if (empty($uploadFileName)){
+      /* upload has been deleted so try to get the job name from the original upload job record */
+      $jobName = $this->showJobsDao->getJobName($row["job_upload_fk"]);
+      $uploadFileName = "Deleted " . $jobName;
+    }
+
+    $uploadtree_pk = -1;
+    /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
+    try {
+      $uploadtree_pk = $this->uploadDao->getUploadParent($row['job_upload_fk']);
+    }catch (Exception $e) {
+      echo $e->getMessage(), "\n";
+    }
+
     /* upload file name link to browse */
-    if (!empty($row['job_upload_fk'])){
-      $uploadTreeName = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
-      return $uploadTreeName;
-    }    
-  } // showJobDB()
+    $uploadNameLink = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
+    return $uploadNameLink;
+  } // getUploadNameForGeekyScan()
 
 
   public function Output()
@@ -172,7 +167,7 @@ class showjobs extends FO_Plugin
     $job = GetParm('job',PARM_INTEGER);
     if (!empty($job)){
       $this->vars['jobId'] = $job;
-      $this->vars['uploadName'] = $this->showJobDB($job);
+      $this->vars['uploadName'] = $this->getUploadNameForGeekyScan($job);
     }else{
       $allusersval=GetParm("allusers",PARM_INTEGER);
       if(!$allusersval) $allusersval = 0;

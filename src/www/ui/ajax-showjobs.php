@@ -90,7 +90,7 @@ class AjaxShowJobs extends FO_Plugin
    * @param $job_pk
    * @return Return job and jobqueue record data in an html table.
    **/
-  protected function showJobDB($job_pk)
+  protected function getGeekyScanDetailsForJob($job_pk)
   {    
     $i=0;
     $fields=array('jq_pk'=>'jq_pk',
@@ -111,12 +111,7 @@ class AjaxShowJobs extends FO_Plugin
                   'Log'=>'jq_log');
     $uri = Traceback_uri() . "?mod=showjobs&upload=";
 
-    $statementName = __METHOD__."ShowJobDBforjob";
-    $this->dbManager->prepare($statementName,
-    "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1");
-    $result = $this->dbManager->execute($statementName, array($job_pk));
-    $row = $this->dbManager->fetchArray($result);
-    $this->dbManager->freeResult($result);
+    $row = $this->showJobsDao->getDataForASingleJob($job_pk);
 
     $table = array();
     foreach($fields as $labelKey=>$field){
@@ -194,17 +189,18 @@ class AjaxShowJobs extends FO_Plugin
                                   'iTotalRecords' => count($tableData),
                                   'iTotalDisplayRecords' => count($tableData)));
     
-  } // showJobDB()
+  } /* getGeekyScanDetailsForJob() */
 
   /**
    * @brief Returns an upload job status in html
-   * @param $jobData
+   * @param $jobData, $page, $allusers
    * @return Returns an upload job status in html
    **/
-  protected function show($jobData, $page, $allusers)
+  protected function getShowJobsForEachJob($jobData, $page, $allusers)
   {
     $outBuf = '';
     $pagination = '';
+    $uploadtree_pk = 0;
     $numJobs = count($jobData);
     if ($numJobs == 0){
       return array('showJobsData' => "There are no jobs to display");
@@ -391,7 +387,7 @@ class AjaxShowJobs extends FO_Plugin
     }
 
     return array('showJobsData' => $outBuf, 'pagination' => $pagination);
-  }
+  } /* getShowJobsForEachJob() */
 
   /**
    * @brief Are there any unfinished jobqueues in this job?
@@ -477,7 +473,7 @@ class AjaxShowJobs extends FO_Plugin
     $jobsInfo = $this->showJobsDao->getJobInfo($jobs, $page);
     usort($jobsInfo, array($this,"compareJobsInfo"));
       
-    $showJobData = $this->show($jobsInfo, $page, $allusers);
+    $showJobData = $this->getShowJobsForEachJob($jobsInfo, $page, $allusers);
     return new JsonResponse($showJobData);
   } /* getJobs()*/
 
@@ -506,7 +502,7 @@ class AjaxShowJobs extends FO_Plugin
         break;
       case "showSingleJob":
         $job_pk1 = GetParm('jobId',PARM_INTEGER);
-        return $this->showJobDB($job_pk1);
+        return $this->getGeekyScanDetailsForJob($job_pk1);
     }
   }
 }
