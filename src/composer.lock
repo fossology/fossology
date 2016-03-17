@@ -120,12 +120,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "b5063937fab6fdfb7bacc00bc8c0cd7ee0c50070"
+                "reference": "0ca496cbe208fc37c4cf3415ebb3056e0963115b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/b5063937fab6fdfb7bacc00bc8c0cd7ee0c50070",
-                "reference": "b5063937fab6fdfb7bacc00bc8c0cd7ee0c50070",
+                "url": "https://api.github.com/repos/symfony/config/zipball/0ca496cbe208fc37c4cf3415ebb3056e0963115b",
+                "reference": "0ca496cbe208fc37c4cf3415ebb3056e0963115b",
                 "shasum": ""
             },
             "require": {
