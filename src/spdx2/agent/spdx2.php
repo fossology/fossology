@@ -30,6 +30,7 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
@@ -116,6 +117,10 @@ class SpdxTwoAgent extends Agent
     return $args;
   }
 
+  /**
+   * @param int $uploadId
+   * @return bool
+   */
   function processUploadId($uploadId)
   {
     $args = $this->preWorkOnArgs($this->args);
@@ -144,6 +149,10 @@ class SpdxTwoAgent extends Agent
     return true;
   }
 
+  /**
+   * @param string $partname
+   * @return string
+   */
   protected function getTemplateFile($partname)
   {
     $prefix = $this->outputFormat . "-";
@@ -162,6 +171,11 @@ class SpdxTwoAgent extends Agent
     return $prefix . $partname . $postfix;
   }
 
+  /**
+   * @param string $fileBase
+   * @param string $packageName
+   * @return string
+   */
   protected function getUri($fileBase,$packageName)
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
@@ -180,15 +194,50 @@ class SpdxTwoAgent extends Agent
     return $fileName;
   }
 
+  /**
+   * @param string[] $licenses
+   * @return string
+   */
+  protected function implodeLicenses($licenses)
+  {
+    sort($licenses);
+    if(count($licenses) == 3 &&
+       ($index = array_search("Dual-license",$licenses)) !== false)
+    {
+      return $licenses[$index===0?1:0] . " or " . $licenses[$index===1?2:1];
+    }
+    else
+    {
+      $licenses = array_map(function ($license){
+        if(strpos($license, " or ") !== false){
+          return "(" . $license . ")";
+        }else{
+          return $license;
+        }
+      },$licenses);
+      return implode(" and ", $licenses);
+    }
+  }
+
+  /**
+   * @param int $uploadId
+   * @return string
+   */
   protected function renderPackage($uploadId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
     $this->heartbeat(0);
-    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($clearingDecisions);
+
+    $filesWithLicenses = $this->getFilesWithLicensesFromClearings($itemTreeBounds);
+    $this->heartbeat(0);
+
+    $this->addClearingStatus($filesWithLicenses,$itemTreeBounds);
+    $this->heartbeat(0);
 
     $licenseComment = $this->addScannerResults($filesWithLicenses, $itemTreeBounds);
+    $this->heartbeat(0);
+
     $this->addCopyrightResults($filesWithLicenses, $uploadId);
     $this->heartbeat(0);
 
@@ -200,7 +249,7 @@ class SpdxTwoAgent extends Agent
     foreach($mainLicenseIds as $licId)
     {
       $reportedLicenseId = $this->licenseMap->getProjectedId($licId);
-      $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+      $this->includedLicenseIds[$reportedLicenseId] = true;
       $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
     }
 
@@ -214,20 +263,24 @@ class SpdxTwoAgent extends Agent
         'md5'=>$hashes['md5'],
         'verificationCode'=>$this->getVerificationCode($upload),
         'mainLicenses'=>$mainLicenses,
+        'mainLicense'=>$this->implodeLicenses($mainLicenses),
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
   }
 
   /**
-   * @param ClearingDecision[] $clearingDecisions
+   * @param ItemTreeBounds $itemTreeBounds
    * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
    */
-  protected function getFilesWithLicensesFromClearings(&$clearingDecisions)
+  protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
   {
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
+
     $filesWithLicenses = array();
     $clearingsProceeded = 0;
-    foreach ($clearingDecisions as $clearingDecision) {
+    foreach ($clearingDecisions as $clearingDecision)
+    {
       $clearingsProceeded += 1;
       if(($clearingsProceeded&2047)==0)
       {
@@ -238,15 +291,29 @@ class SpdxTwoAgent extends Agent
         continue;
       }
 
-      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+      foreach ($clearingDecision->getClearingEvents() as $clearingEvent)
+      {
+        $clearingLicense = $clearingEvent->getClearingLicense();
         if ($clearingLicense->isRemoved())
         {
           continue;
         }
-        $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
-                                                 $this->licenseMap->getProjectedShortname($reportedLicenseId);
+
+        if($clearingEvent->getReportinfo())
+        {
+          $customLicenseText = $clearingEvent->getReportinfo();
+          $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
+                                    '-' . md5($customLicenseText);
+          $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
+        }
+        else
+        {
+          $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
+          $this->includedLicenseIds[$reportedLicenseId] = true;
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
+              $this->licenseMap->getProjectedShortname($reportedLicenseId);
+        }
       }
     }
     return $filesWithLicenses;
@@ -261,8 +328,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
-    sort($licenses);
-    $key = implode(" or ", $licenses);
+    $key = $this->implodeLicenses($licenses);
 
     if (!array_key_exists($key, $filesWithLicenses))
     {
@@ -299,25 +365,42 @@ class SpdxTwoAgent extends Agent
       {
         $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
       }
-      elseif(!empty($licenses['scanner']))
-      {
-        $msgLicense = "NoLicenseConcluded (scanners found: " . implode(' or ',$licenses['scanner']). ")";
-        $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
-      }
       else
       {
-        $msgLicense = "NoLicenseFound";
-        $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
+          if(!empty($licenses['scanner']) && count($licenses['scanner'])>0)
+          {
+              $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
+              if($licenses['isCleared'])
+              {
+                  $msgLicense = "None (scanners found: " . $implodedLicenses . ")";
+              }
+              else
+              {
+                  $msgLicense = "NoLicenseConcluded (scanners found: " . $implodedLicenses . ")";
+              }
+          }
+          else
+          {
+              if($licenses['isCleared'])
+              {
+                  $msgLicense = "None";
+              }
+              else
+              {
+                  $msgLicense = "NoLicenseConcluded";
+              }
+          }
+          $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
     }
     return $licensesWithFiles;
   }
 
   /**
-   * @param string[][][] $filesWithLicenses
+   * @param string[][][] &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
    */
-  protected function addScannerResults(&$filesWithLicenses, $itemTreeBounds)
+  protected function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds)
   {
     $uploadId = $itemTreeBounds->getUploadId();
     $scannerAgents = array_keys($this->agentNames);
@@ -331,7 +414,7 @@ class SpdxTwoAgent extends Agent
     $selectedScanners = '{'.implode(',',$scannerIds).'}';
     $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
-    $sql = "SELECT uploadtree_pk,rf_fk FROM $tableName ut, license_file
+    $sql = "SELECT DISTINCT uploadtree_pk,rf_fk FROM $tableName ut, license_file
       WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
     $param = array($selectedScanners);
     if ($tableName == 'uploadtree_a') {
@@ -348,24 +431,56 @@ class SpdxTwoAgent extends Agent
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
         $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
-        $this->includedLicenseIds[$reportedLicenseId] = $reportedLicenseId;
+        $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
     $this->dbManager->freeResult($res);
     return "licenseInfoInFile determined by Scanners $selectedScanners";
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param int $uploadId
+   * @return string
+   */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
     /* @var $copyrightDao CopyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='skipcontent'); //, $onlyCleared=true, DecisionTypes::IDENTIFIED, 'textfinding!=\'\'');
+    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='statement');
     foreach ($allEntries as $finding) {
-      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content']);
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
     }
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param ItemTreeBounds $itemTreeBounds
+   */
+  protected function addClearingStatus(&$filesWithLicenses,ItemTreeBounds $itemTreeBounds)
+  {
+    $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
+        array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
+              UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
+              UploadTreeProxy::OPT_GROUP_ID => $this->groupId),
+        $itemTreeBounds->getUploadTreeTableName(),
+        'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
+
+    $alreadyClearedUploadTreeView->materialize();
+    $filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
+    $alreadyClearedUploadTreeView->unmaterialize();
+
+    $uploadTreeIds = array_keys($filesWithLicenses);
+    foreach($uploadTreeIds as $uploadTreeId)
+    {
+      $filesWithLicenses[$uploadTreeId]['isCleared'] = false == array_key_exists($uploadTreeId,$filesThatShouldStillBeCleared);
+    }
+  }
+
+  /**
+   * @param int $uploadId
+   */
   protected function computeUri($uploadId)
   {
     global $SysConf;
@@ -377,7 +492,12 @@ class SpdxTwoAgent extends Agent
     $this->uri = $this->getUri($fileBase,$packageName);
   }
 
-  protected function writeReport($packageNodes, $packageIds, $uploadId)
+  /**
+   * @param string[] $packageNodes
+   * @param int[] $packageIds
+   * @param int $uploadId
+   */
+  protected function writeReport(&$packageNodes, $packageIds, $uploadId)
   {
     $fileBase = dirname($this->uri);
 
@@ -404,6 +524,11 @@ class SpdxTwoAgent extends Agent
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }
 
+  /**
+   * @param int $uploadId
+   * @param int $jobId
+   * @param string $fileName
+   */
   protected function updateReportTable($uploadId, $jobId, $fileName){
     $this->dbManager->insertTableRow('reportgen',
             array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$fileName),
@@ -432,11 +557,16 @@ class SpdxTwoAgent extends Agent
     }
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param string $treeTableName
+   * @return string
+   */
   protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
-    
+
     $filesProceeded = 0;
     $lastValue = 0;
     $content = '';
@@ -458,6 +588,7 @@ class SpdxTwoAgent extends Agent
           'fileName'=>$fileName,
           'fileDirName'=>dirname($fileName),
           'fileBaseName'=>basename($fileName),
+          'isCleared'=>$licenses['isCleared'],
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights']));
@@ -466,6 +597,11 @@ class SpdxTwoAgent extends Agent
     return $content;
   }
 
+  /**
+   * @param string[][][] &$filesWithLicenses
+   * @param string $treeTableName
+   * @return string
+   */
   protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName)
   {
     $licensesWithFiles = $this->toLicensesWithFiles($filesWithLicenses, $treeTableName);
@@ -485,9 +621,15 @@ class SpdxTwoAgent extends Agent
       }
 
       $comment = "";
-      if (strrpos($licenseId, "NoLicenseConcluded (scanners found: ", -strlen($licenseId)) !== false) {
+      if (strrpos($licenseId, "NoLicenseConcluded (scanners found: ", -strlen($licenseId)) !== false)
+      {
         $comment = substr($licenseId,20,strlen($licenseId)-21);
         $licenseId = "NoLicenseConcluded";
+      }
+      elseif (strrpos($licenseId, "None (scanners found: ", -strlen($licenseId)) !== false)
+      {
+        $comment = substr($licenseId,6,strlen($licenseId)-7);
+        $licenseId = "None";
       }
 
       $content .= $this->renderString($this->getTemplateFile('file'),array(
@@ -508,10 +650,19 @@ class SpdxTwoAgent extends Agent
     $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
     $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
     $res = $this->dbManager->execute($stmt);
+
     while($row=$this->dbManager->fetchArray($res))
     {
-      if (array_key_exists($row['rf_pk'], $this->includedLicenseIds)) {
+      if (array_key_exists($row['rf_pk'], $this->includedLicenseIds))
+      {
         $licenseTexts[$row['rf_shortname']] = $row['rf_text'];
+      }
+    }
+    foreach($this->includedLicenseIds as $license => $customText)
+    {
+      if (true !== $customText)
+      {
+        $licenseTexts[$license] = $customText;
       }
     }
     $this->dbManager->freeResult($res);
