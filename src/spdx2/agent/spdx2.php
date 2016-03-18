@@ -367,30 +367,30 @@ class SpdxTwoAgent extends Agent
       }
       else
       {
-          if(!empty($licenses['scanner']) && count($licenses['scanner'])>0)
+        if(!empty($licenses['scanner']) && count($licenses['scanner'])>0)
+        {
+          $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
+          if($licenses['isCleared'])
           {
-              $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
-              if($licenses['isCleared'])
-              {
-                  $msgLicense = "None (scanners found: " . $implodedLicenses . ")";
-              }
-              else
-              {
-                  $msgLicense = "NoLicenseConcluded (scanners found: " . $implodedLicenses . ")";
-              }
+            $msgLicense = "None (scanners found: " . $implodedLicenses . ")";
           }
           else
           {
-              if($licenses['isCleared'])
-              {
-                  $msgLicense = "None";
-              }
-              else
-              {
-                  $msgLicense = "NoLicenseConcluded";
-              }
+              $msgLicense = "NoLicenseConcluded (scanners found: " . $implodedLicenses . ")";
           }
-          $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
+        }
+        else
+        {
+          if($licenses['isCleared'])
+          {
+            $msgLicense = "None";
+          }
+          else
+          {
+            $msgLicense = "NoLicenseConcluded";
+          }
+        }
+        $this->toLicensesWithFilesAdder($licensesWithFiles,array($msgLicense),$licenses['copyrights'],$fileId,$fullPath);
       }
     }
     return $licensesWithFiles;
