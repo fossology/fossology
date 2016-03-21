@@ -18,9 +18,7 @@
 namespace Fossology\clixml;
 
 use Fossology\Lib\Agent\Agent;
-use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\XpClearedGetter;
@@ -41,8 +39,6 @@ class CliXml extends Agent
 
   /** @var UploadDao */
   private $uploadDao;
-  /** @var ClearingDao */
-  private $clearingDao;
   /** @var DbManager */
   protected $dbManager;
   /** @var Twig_Environment */
@@ -65,7 +61,6 @@ class CliXml extends Agent
     parent::__construct('clixml', AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
-    $this->clearingDao = $this->container->get('dao.clearing');
     $this->dbManager = $this->container->get('db.manager');
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
@@ -142,7 +137,7 @@ class CliXml extends Agent
     $packageIds = array($uploadId);
     foreach($additionalUploadIds as $additionalId)
     {
-      $contents .= $this->renderPackage($additionalId, $groupId, $userId);
+      $contents .= $this->renderPackage($additionalId, $groupId);
       $packageIds[] = $additionalId;
     }
 
@@ -189,7 +184,15 @@ class CliXml extends Agent
                       "licensesMain" => $licensesMain["statements"]
                      );
     $contents = $this->typecheck($contents);        
-    return $contents;
+    $message = $this->renderString($this->getTemplateFile('file'),array(
+        'documentName'=>$this->packageName,
+        'uri'=>$this->uri,
+        'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
+        'organisation'=>'',
+        'contents'=>$contents,
+        'packageIds'=>$packageIds)
+            );
+    return $message;
   }
 
   protected function typecheck($contents)
@@ -239,19 +242,12 @@ class CliXml extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
-    $message = $this->renderString($this->getTemplateFile('document'),array(
-        'documentName'=>$this->packageName,
-        'uri'=>$this->uri,
-        'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
-        'organisation'=>'',
-        'contents'=>$contents,
-        'packageIds'=>$packageIds)
-            );
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
     $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
 
+    $message = $this->renderString($this->getTemplateFile('document'),array('content' => $contents));
     file_put_contents($this->uri, $message);
     $this->updateReportTable($uploadId, $this->jobId, $this->uri);
   }

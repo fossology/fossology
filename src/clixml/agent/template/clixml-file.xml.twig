@@ -1,0 +1,39 @@
+<ComponentLicenseInformation component="{{ documentName }}" creator="{{ userName }}" date="{{ 'now'|date('Y-m-d')}}" toolUsed="FOSSologyNG" componentID="">
+{% for licenses in contents %}
+  {% if licenses %}
+   {% for ids in licenses %}
+    {% if ids.text %}
+<license type="{{ids.risk}}" name="{{ids.content}}" spdxidentifier="n/a">
+<content><![CDATA[{{ids.text}}]]></content>
+<Files><![CDATA[
+      {% for id in ids.files %}
+	  {% if id %}
+          {{id}}
+	  {% endif %}
+      {% endfor %}
+      ]]></Files>
+</license>
+     {% endif %}
+  {% endfor %}
+  {% endif %}
+{% endfor %}
+
+{% for copyrights in contents %}
+ {% if copyrights %}
+  {% for idc in copyrights %}
+    {% if idc.contentCopy %}
+<copyright>
+<content><![CDATA[{{idc.contentCopy}}]]></content>
+<Files><![CDATA[
+      {% for fi in idc.files %}
+	{% if fi %}
+          {{fi}}
+	{% endif %}
+      {% endfor %}
+      ]]></Files>
+</copyright>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+</ComponentLicenseInformation>

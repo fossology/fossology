@@ -165,6 +165,8 @@ variable.list
 /src/copyright/agent_tests/Unit/results.html
 /src/report/agent/version.php
 /src/report/agent/report
+/src/clixml/agent/version.php
+/src/clixml/agent/clixml
 /testReport/
 /src/readmeoss/agent/version.php
 /src/reuser/agent/version.php

@@ -24,7 +24,7 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
-class SpdxTwoGeneratorUi extends DefaultPlugin
+class CliXmlGeneratorUi extends DefaultPlugin
 {
   const NAME = 'ui_clixml';
   const DEFAULT_OUTPUT_FORMAT = "clixml";
@@ -176,4 +176,4 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
   }
 }
 
-register_plugin(new SpdxTwoGeneratorUi());
+register_plugin(new CliXmlGeneratorUi());
