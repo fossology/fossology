@@ -8,7 +8,7 @@
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
     <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId }}">
+      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
@@ -19,24 +19,26 @@
         </spdx:packageVerificationCode>
         <spdx:checksum>
           <spdx:Checksum>
-            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1"/>
+            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1" />
             <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
         <spdx:checksum> 
           <spdx:Checksum>
-            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5"/>
+            <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
             <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
         <spdx:licenseConcluded>
           <spdx:DisjunctiveLicenseSet>
   {% for res in mainLicenses %}
-            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-') }}"/>
+            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|url_encode }}" />
   {% endfor %}
           </spdx:DisjunctiveLicenseSet>
         </spdx:licenseConcluded>
-        {% if licenseComments %}<spdx:licenseComments>{{ licenseComments }}</spdx:licenseComments>
+        {% if licenseComments %}<spdx:licenseComments><![CDATA[
+          {{ licenseComments|replace({']]>':']]><![CDATA[>'}) }}
+        ]]></spdx:licenseComments>
         <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         {% endif %}<spdx:licenseDeclared rdf:resource="http://spdx.org/rdf/terms#noassertion" />
         <spdx:licenseInfoFromFiles rdf:resource="http://spdx.org/rdf/terms#noassertion" />

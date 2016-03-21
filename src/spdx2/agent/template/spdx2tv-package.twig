@@ -15,7 +15,7 @@ PackageChecksum: SHA1: {{ sha1 }}
 {# PackageChecksum: SHA256: #}
 PackageChecksum: MD5: {{ md5  }}
 {# PackageChecksum: SSDEEP: #}
-{% if mainLicenses is empty %}
+{% if mainLicenses|default is empty %}
 PackageLicenseConcluded: NOASSERTION
 PackageLicenseDeclared: NOASSERTION
 {% else %}
@@ -26,7 +26,7 @@ PackageLicenseDeclared: (LicenseRef-{{ mainLicenses|join('UNIQUESTRINGTOREPLACE'
                                                    |replace({' ':'-'})
                                                    |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }})
 {% endif %}
-{% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments }} </text>
+{% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'}) }} </text>
 {% endif %}
 PackageLicenseInfoFromFiles: NOASSERTION
 PackageCopyrightText: NOASSERTION

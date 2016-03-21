@@ -31,7 +31,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $userId = 2;
   /** @var int */
   private $groupId = 2;
-  
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */
@@ -48,7 +48,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
-    
+
     $this->agentDir = dirname(dirname(__DIR__));
   }
 
@@ -80,11 +80,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createPlainTables(array(),true);
     $this->testDb->createInheritedTables();
     $this->dbManager->queryOnce("CREATE TABLE copyright_ars () INHERITS (ars_master)");
-    
+
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight'));
-    
+
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
@@ -98,7 +98,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     }
     return -1;
   }
-  
+
   /** @group Functional */
   public function testReportForNormalUploadtreeTable()
   {
@@ -112,15 +112,15 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $this->setUpTables();
     $this->setUpRepo();
-    
+
     $uploadId = 1;
     $this->dbManager->queryOnce("ALTER TABLE uploadtree_a RENAME TO uploadtree_$uploadId", __METHOD__.'.alterUploadtree');
     $this->dbManager->getSingleRow("UPDATE upload SET uploadtree_tablename=$1 WHERE upload_pk=$2",
             array("uploadtree_$uploadId",$uploadId),__METHOD__.'.alterUpload');
-    
+
     $this->runAndTestReport($uploadId);
   }
-  
+
   public function runAndTestReport($uploadId=1)
   {
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId=7);
@@ -128,36 +128,41 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat( 'report failed: "'.$output.'"', $retCode, equalTo(0));
     assertThat($this->getHeartCount($output), greaterThan(0));
-    
+
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId), "reportFileName");
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
     assertThat(file_exists($filepath),equalTo(true));
-    $copyrightStatement = 'condor-admin@cs.wisc.edu';
+
+    $copyrightStatement = 'Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved';
     assertThat(file_get_contents($filepath), stringContainsInOrder($copyrightStatement));
+
+    $email = 'condor-admin@cs.wisc.edu';
+    assertThat(file_get_contents($filepath), not(stringContainsInOrder($email)));
+
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
-    
+
     $this->verifyRdf($filepath);
     unlink($filepath);
     $this->rmRepo();
   }
-  
+
   protected function verifyRdf($filepath)
   {
     $lines = '';
     $returnVar = 0;
     exec('which java', $lines, $returnVar);
     $this->assertEquals(0,$returnVar,'java required for this test');
-    
+
     $toolJarFile = __DIR__.'/spdx-tools-2.0.2-jar-with-dependencies.jar';
     $this->pullSpdxTools($toolJarFile);
 
     $verification = exec("java -jar $toolJarFile Verify $filepath");
     assertThat($verification,equalTo('This SPDX Document is valid.'));
   }
-  
+
   protected function pullSpdxTools($jarFile)
   {
     if(!file_exists($jarFile))
