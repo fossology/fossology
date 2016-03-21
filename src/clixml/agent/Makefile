@@ -39,9 +39,6 @@ install: all
 	echo "Making wrapper for $(MOD_NAME)"
 	ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$(MOD_NAME)
 	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/{} \;
-	for MOD in $(MOD_NAMES); do \
-		$(INSTALL_PROGRAM) agent.sh $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR)/$$MOD.sh; \
-	done
 
 uninstall:
 	for MOD in $(MOD_NAMES); do \
