@@ -52,19 +52,24 @@ class showjobs extends FO_Plugin
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
 
-    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN) return;
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
+    {
+      $URIpart = $this->Name . Traceback_parm_keep(array( "page")) . "&allusers=";
 
-    if (GetParm("mod", PARM_STRING) == $this->Name){
-      /* Set micro menu to select either all users or this user */
-      $allusers = GetParm("allusers",PARM_INTEGER);
-      if ($allusers == 0){
-        $text = _("Show uploads from all users");
-        $URI = $this->Name . Traceback_parm_keep(array( "page" )) . "&allusers=1";
-      }else{
-        $text = _("Show only your own uploads");
-        $URI = $this->Name . Traceback_parm_keep(array( "page")) . "&allusers=0";
+      menu_insert("Main::Jobs::All Recent Jobs",$this->MenuOrder -2,$URIpart . '1', $this->MenuTarget);
+
+      if (GetParm("mod", PARM_STRING) == $this->Name){
+        /* Set micro menu to select either all users or this user */
+        $allusers = GetParm("allusers",PARM_INTEGER);
+        if ($allusers == 0){
+          $text = _("Show uploads from all users");
+          $URI = $URIpart . "1";
+        }else{
+          $text = _("Show only your own uploads");
+          $URI = $URIpart . "0";
+        }
+        menu_insert("showjobs::$text", 1, $URI, $text);
       }
-      menu_insert("showjobs::$text", 1, $URI, $text);
     }
 
   } // RegisterMenus()
