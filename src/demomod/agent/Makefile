@@ -1,5 +1,6 @@
 #####################################################################
 # Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2016 Siemens AG
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,8 +19,8 @@ TOP=../../..
 VARS=$(TOP)/Makefile.conf
 include $(VARS)
 
-DEF=-DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-LOCAL_CFLAGS= $(DEF) $(DEFS)
+CFLAGS_LOCAL = $(FO_CFLAGS) -Werror
+CFLAGS_LOCALO = $(FO_CFLAGS)
 
 EXE=demomod
 OBJS=usage.o utils.o process.o
@@ -28,17 +29,14 @@ HDRS=demomod.h
 all: $(EXE)
 	@echo "make demomod agent"
 
-$(EXE): demomod.c $(FOLIB) $(OBJS) $(HDRS)
-	$(CC) demomod.c $(OBJS) -lpq $(LOCAL_CFLAGS) -o $@
+demomod: demomod.o $(OBJS)
+	$(CC) demomod.o $(OBJS) $(CFLAGS_LOCAL) $(FO_LDFLAGS) -o $@
 
-usage.o: $(HDRS) usage.c
-	$(CC) -c $(LOCAL_CFLAGS) usage.c
+demomod.o: demomod.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
 
-utils.o: $(HDRS) utils.c
-	$(CC) -c $(LOCAL_CFLAGS) utils.c
-
-process.o: $(HDRS) process.c
-	$(CC) -c $(LOCAL_CFLAGS) process.c
+$(OBJS): %.o: %.c $(HDRS) $(DB) $(VARS)
+	$(CC) -c $< $(CFLAGS_DBO) $(FO_CFLAGS)
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
@@ -54,4 +52,4 @@ uninstall:
 clean:
 	rm -f $(EXE) *.o core
 
-.PHONY: all install uninstall clean test $(FOLIB) coverage
+.PHONY: all install uninstall clean $(FOLIB)
