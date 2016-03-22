@@ -130,6 +130,8 @@ variable.list
 /src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar
 /src/spdx2/agent/version.php
 /src/spdx2/agent/spdx2
+src/spdx2Import/agent/spdx2Import
+src/spdx2Import/agent/version.php
 /src/ninka/agent_tests/Functional/ninka
 /src/ninka/agent_tests/Unit/test_ninka
 /src/ninka/agent/ninka

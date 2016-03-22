@@ -375,6 +375,9 @@ class AjaxShowJobs extends FO_Plugin
           case 'dep5':
             $varJobQueueRow['download'] = "DEP5 copyright file";
             break;
+          case 'spdx2Import':
+            $varJobQueueRow['download'] = "uploaded SPDX2 report";
+            break;
           default:
             $varJobQueueRow['download'] = "";
         }

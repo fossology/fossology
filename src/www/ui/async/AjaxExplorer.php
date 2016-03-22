@@ -64,7 +64,7 @@ class AjaxExplorer extends DefaultPlugin
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'spdx2Import' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(

@@ -1,0 +1,4 @@
+<?php
+define("AGENT_SPDX2IMPORT_NAME", "spdx2Import");
+define("AGENT_SPDX2IMPORT_VERSION", "{$VERSION}");
+define("AGENT_SPDX2IMPORT_REV", "{$COMMIT_HASH}");

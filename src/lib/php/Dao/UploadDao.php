@@ -513,4 +513,134 @@ class UploadDao extends Object
     $itemRow = $this->getFatItemArray($itemId,$uploadId,$uploadtreeTablename);
     return $itemRow['item_id'];
   }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
+   */
+  public function getPFileDataPerFileName(ItemTreeBounds $itemTreeBounds)
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array();
+
+    $param[] = $itemTreeBounds->getLeft();
+    $param[] = $itemTreeBounds->getRight();
+    $condition = " lft BETWEEN $1 AND $2";
+    $condition .= " AND (ufile_mode & (1<<28)) = 0";
+
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND upload_fk=$".count($param);
+    }
+
+    $sql = "
+SELECT ufile_name, lft, rgt, ufile_mode,
+       pfile_pk, pfile_md5, pfile_sha1
+FROM $uploadTreeTableName
+  LEFT JOIN pfile
+    ON pfile_fk = pfile_pk
+WHERE $condition
+ORDER BY lft asc
+";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
+    $pfilePerFileName = array();
+
+    $row = $this->dbManager->fetchArray($result);
+    $pathStack = array($row['ufile_name']);
+    $rgtStack = array($row['rgt']);
+    $lastLft = $row['lft'];
+    $this->addToPFilePerFileName($pfilePerFileName, $pathStack, $row);
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      if ($row['lft'] < $lastLft)
+      {
+        continue;
+      }
+
+      $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
+      $this->addToPFilePerFileName($pfilePerFileName, $pathStack, $row);
+    }
+    $this->dbManager->freeResult($result);
+    return $pfilePerFileName;
+  }
+
+  private function updateStackState(&$pathStack, &$rgtStack, &$lastLft, $row)
+  {
+    if ($row['lft'] >= $lastLft)
+    {
+      while(count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1])
+      {
+        array_pop($pathStack);
+        array_pop($rgtStack);
+      }
+      if ($row['lft'] > $lastLft)
+      {
+        array_push($pathStack, $row['ufile_name']);
+        array_push($rgtStack, $row['rgt']);
+        $lastLft = $row['lft'];
+      }
+    }
+  }
+
+  private function addToPFilePerFileName(&$pfilePerFileName, $pathStack, $row)
+  {
+    if (($row['ufile_mode']&(1<<29)) == 0)
+    {
+      $path = implode($pathStack,'/');
+      $pfilePerFileName[$path]['pfile_pk'] = $row['pfile_pk'];
+      $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
+      $pfilePerFileName[$path]['sha1'] = $row['pfile_sha1'];
+    }
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param String $hashAlgo
+   * @return array
+   */
+  public function getPFileDataPerHashAlgo(ItemTreeBounds $itemTreeBounds, $hashAlgo="sha1")
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array();
+
+    $param[] = $itemTreeBounds->getLeft();
+    $param[] = $itemTreeBounds->getRight();
+    $condition = " lft BETWEEN $1 AND $2";
+    $condition .= " AND (ufile_mode & (1<<28)) = 0";
+
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND upload_fk=$".count($param);
+    }
+    $condition .= " AND pfile_$hashAlgo NOT NULL";
+
+    $sql = "
+SELECT pfile_fk, ufile_mode, pfile_$hashAlgo as hash
+FROM $uploadTreeTableName
+  LEFT JOIN pfile
+    ON pfile_fk = pfile_pk
+WHERE $condition
+ORDER BY lft asc
+";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
+
+    $pfilePerHashAlgo = array();
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      if (($row['ufile_mode']&(1<<29)) == 0)
+      {
+        $pfilePerHashAlgo[$row['hash']] = $row['pfile_fk'];
+      }
+    }
+    $this->dbManager->freeResult($result);
+    return $pfilePerHashAlgo;
+  }
 }

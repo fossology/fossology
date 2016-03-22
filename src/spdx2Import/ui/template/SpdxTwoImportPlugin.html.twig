@@ -1,0 +1,46 @@
+{# Copyright 2015-2016 Siemens AG
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <form enctype="multipart/form-data" name="formy" method="post">
+    <ol>
+      <li>{{ 'Select the folder that contains the upload'|trans }}:
+        {% include 'components/select-folder.html.twig' with {'name': 'oldfolderid', 'id': 'oldfolderid', 'selected': folderId} %}
+      </li>
+      <li>{{ "Select the upload you wish to edit"|trans }}:
+        {% if uploadId is not empty %}<input type="hidden" name="upload_pk" value="{{ uploadId }}" />
+          {% import "include/macros.html.twig" as macro %}
+          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction) }}
+        {% else %}
+          {{ 'No upload available in this folder'|trans }}
+        {% endif %}
+      </li>
+      <li>{{ 'Select SPDX2 RDF report to upload'|trans }}:
+        <input name="spdxReport" type="file" />
+      </li>
+    </ol>
+    <input type="submit" value="{{ 'Upload and Import!'|trans }}" />
+  </form>
+
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+   function js_url(val, url)
+   {
+     window.location.assign(url+val);
+   }
+
+   $(document).ready(function() {
+     $('#oldfolderid').change(function(){
+       window.location.href = "{{ baseUri }}" + $(this).val();
+     });
+   });
+  </script>
+{% endblock %}
