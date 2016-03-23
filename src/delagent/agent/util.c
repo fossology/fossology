@@ -103,8 +103,11 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
   char pass_hash_actual[41] = {0};
 
   /** get user_seed, user_pass on one specified user */
-  snprintf(SQL,MAXSQL,"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name='%s';", user);
-  result = PQexec(db_conn, SQL);
+  snprintf(SQL,MAXSQL,"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name=$1;");
+  const char *values[1] = {user};
+  int lengths[1] = {strlen(user)};
+  int binary[1] = {0};
+  result = PQexecParams(db_conn, SQL, 1, NULL, values, lengths, binary, 0);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     return -1;
