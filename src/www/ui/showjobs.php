@@ -23,6 +23,7 @@ define("TITLE_showjobs", _("Show Jobs"));
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Db\DbManager;
 
 class showjobs extends FO_Plugin
@@ -31,6 +32,8 @@ class showjobs extends FO_Plugin
   private $showJobsDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var JobDao */
+  private $jobDao;
 
   function __construct()
   {
@@ -43,6 +46,7 @@ class showjobs extends FO_Plugin
     global $container;
     $this->showJobsDao = $container->get('dao.show_jobs');
     $this->uploadDao = $container->get('dao.upload');
+    $this->jobDao = $container->get('dao.job');
 
     parent::__construct();
   }
@@ -118,10 +122,12 @@ class showjobs extends FO_Plugin
   {
     $page = "";
     $uploadPk = GetParm('upload',PARM_INTEGER);
-    if (empty($uploadPk)){ 
-      $uploadPk = -1; 
+    if (empty($uploadPk))
+    {
+      $uploadPk = -1;
     }
-    elseif($uploadPk>0){
+    elseif($uploadPk>0)
+    {
       if (!$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
@@ -135,10 +141,16 @@ class showjobs extends FO_Plugin
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
-      if (!(empty($uploadPk) || $uploadPk === -1) && !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
+
+      if (!($uploadPk === -1 &&
+            ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN ||
+             $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
+          !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId()))
+      {
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
       }
+
       $page = GetParm('page',PARM_INTEGER) ?: 0;
       $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
       switch($action)
