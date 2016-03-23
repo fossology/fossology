@@ -54,18 +54,18 @@ int check_permission_folder(long folder_id, int user_id, int user_perm);
 int check_permission_license(long license_id, int user_perm);
 
 /* functions that list things */
-void ListFolders(int user_id, int user_perm);
-void ListUploads(int user_id, int user_perm);
+void listFolders(int user_id, int user_perm);
+void listUploads(int user_id, int user_perm);
 
 /* function that delete actual things */
-int DeleteLicense(long UploadId, int user_perm);
-int DeleteUpload(long UploadId, int user_id, int user_perm);
-int DeleteFolder(long FolderId, int user_id, int user_perm);
+int deleteLicense(long UploadId, int user_perm);
+int deleteUpload(long UploadId, int user_id, int user_perm);
+int deleteFolder(long FolderId, int user_id, int user_perm);
 
 /* for usage from scheduler */
-void DoSchedulerTasks();
+void doSchedulerTasks();
 
 /* misc */
-void Usage(char *Name);
+void usage(char *Name);
 
 #endif /* _DELAGENT_H */

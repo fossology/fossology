@@ -29,7 +29,7 @@ int Verbose = 0;
 int Test = 0;
 PGconn* db_conn = NULL;        // the connection to Database
 
-int verbosePrintf (const char *format, ...)
+int printfInCaseOfVerbosity (const char *format, ...)
 {
   va_list arg;
   int done = 0;
@@ -55,11 +55,11 @@ PGresult * PQexecCheck(const char *desc, char *SQL, char *file, const int line)
 
   if(desc == NULL)
   {
-    verbosePrintf("# %s:%i: %s\n", file, line, SQL);
+    printfInCaseOfVerbosity("# %s:%i: %s\n", file, line, SQL);
   }
   else
   {
-    verbosePrintf("# %s:%i: %s (%s)\n", file, line, desc, SQL);
+    printfInCaseOfVerbosity("# %s:%i: %s (%s)\n", file, line, desc, SQL);
   }
 
   result = PQexec(db_conn, SQL);
@@ -151,7 +151,7 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
  */
 int check_permission_upload(int wanted_permissions, long upload_id, int user_id, int user_perm)
 {
-  int perms = GetUploadPermP(db_conn, upload_id, user_id, user_perm);
+  int perms = getEffectivePermissionOnUpload(db_conn, upload_id, user_id, user_perm);
   if (perms > 0)
   {
     if (perms < wanted_permissions)
@@ -226,7 +226,7 @@ int check_write_permission_license(long license_id, int user_perm)
 {
   if (user_perm != PERM_ADMIN)
   {
-    verbosePrintf("only admin is allowed to delete licenses\n");
+    printfInCaseOfVerbosity("only admin is allowed to delete licenses\n");
     return 0; // can not be deleted
   }
   return 1; // can be deleted
@@ -234,7 +234,7 @@ int check_write_permission_license(long license_id, int user_perm)
 
 
 /**
- * \brief DeleteLicense()
+ * \brief deleteLicense()
  *
  *   Given an upload ID, delete all licenses associated with it.
  *   The DoBegin flag determines whether BEGIN/COMMIT should be called.
@@ -247,7 +247,7 @@ int check_write_permission_license(long license_id, int user_perm)
  *        -1: failure;
  *        -2: does not exist
  */
-int DeleteLicense (long UploadId, int user_perm)
+int deleteLicense (long UploadId, int user_perm)
 {
   char SQL[MAXSQL];
   PGresult *result;
@@ -259,7 +259,7 @@ int DeleteLicense (long UploadId, int user_perm)
     return permission_license;
   }
 
-  verbosePrintf("Deleting licenses for upload %ld\n",UploadId);
+  printfInCaseOfVerbosity("Deleting licenses for upload %ld\n",UploadId);
   PQexecCheckClear(NULL, "SET statement_timeout = 0;", __FILE__, __LINE__);
   PQexecCheckClear(NULL, "BEGIN;", __FILE__, __LINE__);
 
@@ -274,7 +274,7 @@ int DeleteLicense (long UploadId, int user_perm)
   PQclear(result);
   /***********************************************/
   /* delete pfile licenses */
-  verbosePrintf("# Deleting licenses\n");
+  printfInCaseOfVerbosity("# Deleting licenses\n");
   snprintf(SQL,MAXSQL,"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
   PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
 
@@ -288,7 +288,7 @@ int DeleteLicense (long UploadId, int user_perm)
 
   /***********************************************/
   /* Commit the change! */
-  verbosePrintf("# Delete completed\n");
+  printfInCaseOfVerbosity("# Delete completed\n");
   if (Test)
   {
     PQexecCheckClear(NULL, "ROLLBACK;", __FILE__, __LINE__);
@@ -299,13 +299,13 @@ int DeleteLicense (long UploadId, int user_perm)
   }
   PQexecCheckClear(NULL, "SET statement_timeout = 120000;", __FILE__, __LINE__);
 
-  verbosePrintf("Deleted licenses for upload %ld\n",UploadId);
+  printfInCaseOfVerbosity("Deleted licenses for upload %ld\n",UploadId);
 
   return 1; /* success */
-} /* DeleteLicense() */
+} /* deleteLicense() */
 
 /**
- * \brief DeleteUpload()
+ * \brief deleteUpload()
  *
 *  Given an upload ID, delete it.
  *
@@ -316,7 +316,7 @@ int DeleteLicense (long UploadId, int user_perm)
  *        -1: failure;
  *        -2: does not exist
  */
-int DeleteUpload (long UploadId, int user_id, int user_perm)
+int deleteUpload (long UploadId, int user_id, int user_perm)
 {
   char *S;
   int Row,MaxRow;
@@ -469,7 +469,7 @@ int DeleteUpload (long UploadId, int user_id, int user_perm)
 
   PQexecCheckClear(NULL, "SET statement_timeout = 120000;", __FILE__, __LINE__);
 
-  verbosePrintf("Deleted upload %ld from DB, now doing repository.\n",UploadId);
+  printfInCaseOfVerbosity("Deleted upload %ld from DB, now doing repository.\n",UploadId);
 
   if (Test)
   {
@@ -483,10 +483,10 @@ int DeleteUpload (long UploadId, int user_id, int user_perm)
     PQexecCheckClear(NULL, "COMMIT", __FILE__, __LINE__);
   }
 
-  verbosePrintf("Deleted upload %ld\n",UploadId);
+  printfInCaseOfVerbosity("Deleted upload %ld\n",UploadId);
 
   return 1; /* success */
-} /* DeleteUpload() */
+} /* deleteUpload() */
 
 /**
  * \brief remove link between parent and (child,mode) if there are other parents
@@ -521,7 +521,7 @@ int UnlinkContent (long child, long parent, int mode, int user_id, int user_perm
 }
 
 /**
- * \brief ListFoldersRecurse(): Draw folder tree.
+ * \brief listFoldersRecurse(): Draw folder tree.
  *
  *   if DelFlag is set, then all child uploads are
  *   deleted and the folders are deleted.
@@ -535,7 +535,7 @@ int UnlinkContent (long child, long parent, int mode, int user_id, int user_perm
  *         0: fail
  *
  */
-int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
+int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
 {
   int r,MaxRow;
   long Fid;
@@ -583,7 +583,7 @@ int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
         }
         printf("\n");
       }
-      rc = ListFoldersRecurse(Fid,Depth+1,Parent,DelFlag,user_id,user_perm);
+      rc = listFoldersRecurse(Fid,Depth+1,Parent,DelFlag,user_id,user_perm);
       if (rc < 1)
       {
         if (DelFlag)
@@ -601,7 +601,7 @@ int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
       }
       if (DelFlag)
       {
-        rc = DeleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
+        rc = deleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
         if (rc < 1)
         {
           printf("Deleting the folder failed since it contains uploads you can't delete.");
@@ -669,9 +669,9 @@ int ListFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
   } /* switch() */
 
   return 1; /* success */
-} /* ListFoldersRecurse() */
+} /* listFoldersRecurse() */
 
-void ListFoldersFindDetatchedFolders(PGresult *result, int user_id, int user_perm)
+void listFoldersFindDetatchedFolders(PGresult *result, int user_id, int user_perm)
 {
   int DetachFlag=0;
   int i,j;
@@ -706,12 +706,12 @@ void ListFoldersFindDetatchedFolders(PGresult *result, int user_id, int user_per
         printf(" (%s)",Desc);
       }
       printf("\n");
-      ListFoldersRecurse(Fid,1,i,0,user_id,user_perm);
+      listFoldersRecurse(Fid,1,i,0,user_id,user_perm);
     }
   }
 }
 
-void ListFoldersFindDetatchedUploads(PGresult *result, int user_id, int user_perm)
+void listFoldersFindDetatchedUploads(PGresult *result, int user_id, int user_perm)
 {
   int DetachFlag=0;
   int i,j;
@@ -751,7 +751,7 @@ void ListFoldersFindDetatchedUploads(PGresult *result, int user_id, int user_per
   }
 }
 
-void ListFoldersFindDetatched(int user_id, int user_perm)
+void listFoldersFindDetatched(int user_id, int user_perm)
 {
   char SQL[MAXSQL];
   PGresult *result;
@@ -762,16 +762,16 @@ void ListFoldersFindDetatched(int user_id, int user_perm)
   {
     exit(-1);
   }
-  ListFoldersFindDetatchedFolders(result, user_id, user_perm);
-  ListFoldersFindDetatchedUploads(result, user_id, user_perm);
+  listFoldersFindDetatchedFolders(result, user_id, user_perm);
+  listFoldersFindDetatchedUploads(result, user_id, user_perm);
 
   PQclear(result);
 }
 
 /**
- * \brief ListFolders(): List every folder.
+ * \brief listFolders(): List every folder.
  */
-void ListFolders (int user_id, int user_perm)
+void listFolders (int user_id, int user_perm)
 {
   char SQL[MAXSQL];
   PGresult *result;
@@ -792,17 +792,17 @@ void ListFolders (int user_id, int user_perm)
   printf("%4d :: %s\n", 1, PQgetvalue(result,0,0));
   PQclear(result);
 
-  ListFoldersRecurse(1,1,-1,0,user_id,user_perm);
+  listFoldersRecurse(1,1,-1,0,user_id,user_perm);
 
-  ListFoldersFindDetatched(user_id, user_perm);
-} /* ListFolders() */
+  listFoldersFindDetatched(user_id, user_perm);
+} /* listFolders() */
 
 /**
- * \brief ListUploads(): List every upload ID.
+ * \brief listUploads(): List every upload ID.
  *
  * \char *user_name - user name
  */
-void ListUploads (int user_id, int user_perm)
+void listUploads (int user_id, int user_perm)
 {
   int Row,MaxRow;
   long NewPid;
@@ -832,10 +832,10 @@ void ListUploads (int user_id, int user_perm)
     }
   }
   PQclear(result);
-} /* ListUploads() */
+} /* listUploads() */
 
 /**
- * \brief DeleteFolder()
+ * \brief deleteFolder()
  *
  *  Given a folder ID, delete it AND recursively delete everything below it!
  *  This includes upload deletion!
@@ -846,15 +846,15 @@ void ListUploads (int user_id, int user_perm)
  *         0: fail
  *
  **/
-int DeleteFolder(long FolderId, int user_id, int user_perm)
+int deleteFolder(long FolderId, int user_id, int user_perm)
 {
-  return ListFoldersRecurse(FolderId,0,-1,2,user_id,user_perm);
-} /* DeleteFolder() */
+  return listFoldersRecurse(FolderId,0,-1,2,user_id,user_perm);
+} /* deleteFolder() */
 
 /**********************************************************************/
 
 /**
- * \brief ReadAndProcessParameter()
+ * \brief readAndProcessParameter()
  *
  *  Read Parameter from scheduler.
  *  Process line elements.
@@ -867,7 +867,7 @@ int DeleteFolder(long FolderId, int user_id, int user_perm)
  *        -2: does not exist
  *
  **/
-int ReadAndProcessParameter (char *Parm, int user_id, int user_perm)
+int readAndProcessParameter (char *Parm, int user_id, int user_perm)
 {
   char *L;
   int rc=0;     /* assume no data */
@@ -919,24 +919,24 @@ int ReadAndProcessParameter (char *Parm, int user_id, int user_perm)
   /* Handle the request */
   if ((Type==1) && (Target==1))
   {
-    rc = DeleteUpload(Id, user_id, user_perm);
+    rc = deleteUpload(Id, user_id, user_perm);
   }
   else if ((Type==1) && (Target==2))
   {
-    rc = DeleteLicense(Id, user_perm);
+    rc = deleteLicense(Id, user_perm);
   }
   else if ((Type==1) && (Target==3))
   {
-    rc = DeleteFolder(Id, user_id, user_perm);
+    rc = deleteFolder(Id, user_id, user_perm);
   }
   else if (((Type==2) && (Target==1)) || ((Type==2) && (Target==2)))
   {
-    ListUploads(0, PERM_ADMIN);
+    listUploads(0, PERM_ADMIN);
     rc = 1;
   }
   else if ((Type==2) && (Target==3))
   {
-    ListFolders(user_id, user_perm);
+    listFolders(user_id, user_perm);
     rc = 1;
   }
   else
@@ -945,9 +945,9 @@ int ReadAndProcessParameter (char *Parm, int user_id, int user_perm)
   }
 
   return(rc);
-} /* ReadAndProcessParameter() */
+} /* readAndProcessParameter() */
 
-void DoSchedulerTasks()
+void doSchedulerTasks()
 {
   char *Parm = NULL;
   char SQL[MAXSQL];
@@ -970,7 +970,7 @@ void DoSchedulerTasks()
     user_perm = atoi(PQgetvalue(result, 0, 0));
     PQclear(result);
 
-    int returnCode = ReadAndProcessParameter(Parm, user_id, user_perm);
+    int returnCode = readAndProcessParameter(Parm, user_id, user_perm);
     if (returnCode <= 0)
     {
       /* Loglevel is to high, but scheduler expects FATAL log message before exit */

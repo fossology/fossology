@@ -284,7 +284,7 @@ FUNCTION int min(int user_perm, int permExternal)
 *
 * \return permission (PERM_) this user has for UploadPk
 */
-FUNCTION int GetUploadPermP(PGconn* pgConn, long UploadPk, int user_pk, int user_perm)
+FUNCTION int getEffectivePermissionOnUpload(PGconn* pgConn, long UploadPk, int user_pk, int user_perm)
 {
   PGresult* result;
   char SQL[1024];
@@ -356,7 +356,7 @@ FUNCTION int GetUploadPerm(PGconn* pgConn, long UploadPk, int user_pk)
     return PERM_ADMIN;
   }
 
-  return GetUploadPermP(pgConn, UploadPk, user_pk, user_perm);
+  return getEffectivePermissionOnUpload(pgConn, UploadPk, user_pk, user_perm);
 }
 
 

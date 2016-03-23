@@ -33,15 +33,15 @@ char BuildVersion[]="delagent build version: NULL.\n";
 
 
 /***********************************************
- Usage():
+ usage():
  Command line options allow you to write the agent so it works
  stand alone, in addition to working with the scheduler.
  This simplifies code development and testing.
- So if you have options, have a Usage().
+ So if you have options, have a usage().
  Here are some suggested options (in addition to the program
  specific options you may already have).
  ***********************************************/
-void Usage (char *Name)
+void usage (char *Name)
 {
   fprintf(stderr,"Usage: %s [options]\n",Name);
   fprintf(stderr,"  List or delete uploads.\n");
@@ -61,7 +61,7 @@ void Usage (char *Name)
   fprintf(stderr,"  -V   :: print the version info, then exit.\n");
   fprintf(stderr,"  --user|-n # :: user name\n");
   fprintf(stderr,"  --password|-p # :: password\n");
-} /* Usage() */
+} /* usage() */
 
 void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedCode)
 {
@@ -121,10 +121,10 @@ void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedC
 int main (int argc, char *argv[])
 {
   int c;
-  int ListProj=0, ListFolder=0;
-  long DelUpload=0, DelFolder=0, DelLicense=0;
-  int Scheduler=0; /* should it run from the scheduler? */
-  int GotArg=0;
+  int listProj=0, listFolder=0;
+  long delUpload=0, delFolder=0, delLicense=0;
+  int scheduler=0; /* should it run from the scheduler? */
+  int gotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
   char *COMMIT_HASH;
   char *VERSION;
@@ -160,55 +160,55 @@ int main (int argc, char *argv[])
         PQfinish(db_conn);
         return(0);
       case 'f':
-        ListFolder=1;
-        GotArg=1;
+        listFolder=1;
+        gotArg=1;
         break;
       case 'F':
-        DelFolder=atol(optarg);
-        GotArg=1;
+        delFolder=atol(optarg);
+        gotArg=1;
         break;
       case 'L':
-        DelLicense=atol(optarg);
-        GotArg=1;
+        delLicense=atol(optarg);
+        gotArg=1;
         break;
       case 's':
-        Scheduler=1;
-        GotArg=1;
+        scheduler=1;
+        gotArg=1;
         break;
       case 'T':
         Test++;
         break;
       case 'u':
-        ListProj=1;
-        GotArg=1;
+        listProj=1;
+        gotArg=1;
         break;
       case 'U':
-        DelUpload=atol(optarg);
-        GotArg=1;
+        delUpload=atol(optarg);
+        gotArg=1;
         break;
       case 'v':
         Verbose++;
         break;
       case 'c':
-        GotArg=1;
+        gotArg=1;
         break; /* handled by fo_scheduler_connect() */
       case 'V':
         printf("%s", BuildVersion);
         PQfinish(db_conn);
         return(0);
       default:
-        Usage(argv[0]);
+        usage(argv[0]);
         exit(-1);
     }
   }
 
-  if (!GotArg)
+  if (!gotArg)
   {
-    Usage(argv[0]);
+    usage(argv[0]);
     exit(-1);
   }
 
-  if (Scheduler != 1)
+  if (scheduler != 1)
   {
     if (1 != authentication(user_name, password, &user_id, &user_perm))
     {
@@ -222,39 +222,39 @@ int main (int argc, char *argv[])
     /* Get the Agent Key from the DB */
     fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
 
-    if (ListProj)
+    if (listProj)
     {
-      ListUploads(user_id, user_perm);
+      listUploads(user_id, user_perm);
     }
-    if (ListFolder)
+    if (listFolder)
     {
-      ListFolders(user_id, user_perm);
+      listFolders(user_id, user_perm);
     }
 
     alarm(60);  /* from this point on, handle the alarm */
-    if (DelUpload)
+    if (delUpload)
     {
-      returnedCode = DeleteUpload(DelUpload, user_id, user_perm);
+      returnedCode = deleteUpload(delUpload, user_id, user_perm);
 
-      writeMessageAfterDelete("upload", DelUpload, user_name, returnedCode);
+      writeMessageAfterDelete("upload", delUpload, user_name, returnedCode);
     }
-    if (DelFolder)
+    if (delFolder)
     {
-      returnedCode = DeleteFolder(DelFolder, user_id, user_perm);
+      returnedCode = deleteFolder(delFolder, user_id, user_perm);
 
-      writeMessageAfterDelete("folder", DelFolder, user_name, returnedCode);
+      writeMessageAfterDelete("folder", delFolder, user_name, returnedCode);
     }
-    if (DelLicense)
+    if (delLicense)
     {
-      returnedCode = DeleteLicense(DelLicense, user_perm);
+      returnedCode = deleteLicense(delLicense, user_perm);
 
-      writeMessageAfterDelete("license", DelLicense, user_name, returnedCode);
+      writeMessageAfterDelete("license", delLicense, user_name, returnedCode);
     }
   }
   else
   {
     /* process from the scheduler */
-    DoSchedulerTasks();
+    doSchedulerTasks();
   }
   fo_scheduler_disconnect(0);
 
