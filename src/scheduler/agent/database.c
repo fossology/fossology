@@ -193,7 +193,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
    */
   else if(strcmp(m_str, "SCHEDULERLOG") == 0)
   {
-    g_string_append_printf(ret, "http://%s?mod=showjobs&show=job&job=%d",
+    g_string_append_printf(ret, "http://%s?mod=showjobs&job=%d",
         fossy_url, job->id);
   }
 

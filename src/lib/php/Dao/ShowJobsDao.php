@@ -307,4 +307,19 @@ class ShowJobsDao extends Object
     } 
   }/* getEstimatedTime() */
 
+  /** 
+   * @brief Return total Job data with time elapsed
+   * @param $job_pk
+   * @return $row
+   */
+  public function getDataForASingleJob($job_pk)
+  {
+    $statementName = __METHOD__."getDataForASingleJob";
+    $this->dbManager->prepare($statementName,
+    "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1");
+    $result = $this->dbManager->execute($statementName, array($job_pk));
+    $row = $this->dbManager->fetchArray($result);
+    $this->dbManager->freeResult($result);
+    return $row;
+  } /* getDataForASingleJob */
 }
