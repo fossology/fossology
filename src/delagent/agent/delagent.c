@@ -65,18 +65,14 @@ void usage (char *Name)
 
 void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedCode)
 {
-  if (1 == returnedCode)
+  if (0 == returnedCode)
   {
     fprintf(stdout, "The %s '%ld' is deleted by the user '%s'.\n", kind, id, user_name);
-  }
-  else if (2 == returnedCode)
-  {
-    fprintf(stdout, "The %s '%ld' could not be found by the user '%s'.\n", kind, id, user_name);
   }
   else
   {
     fprintf(stdout, "Deletion failed: user '%s' does not have the permsssion to delete the %s '%ld', or the %s '%ld' does not exist.\n", user_name, kind, id, kind, id);
-    exit(-1);
+    exit(returnedCode);
   }
 }
 
@@ -210,7 +206,7 @@ int main (int argc, char *argv[])
 
   if (scheduler != 1)
   {
-    if (1 != authentication(user_name, password, &user_id, &user_perm))
+    if (0 != authentication(user_name, password, &user_id, &user_perm))
     {
       LOG_FATAL("User name or password is invalid.\n");
       exit(-1);
@@ -224,11 +220,19 @@ int main (int argc, char *argv[])
 
     if (listProj)
     {
-      listUploads(user_id, user_perm);
+      returnedCode = listUploads(user_id, user_perm);
+    }
+    if (returnedCode < 0)
+    {
+      return returnedCode;
     }
     if (listFolder)
     {
-      listFolders(user_id, user_perm);
+      returnedCode = listFolders(user_id, user_perm);
+    }
+    if (returnedCode < 0)
+    {
+      return returnedCode;
     }
 
     alarm(60);  /* from this point on, handle the alarm */
@@ -259,5 +263,5 @@ int main (int argc, char *argv[])
   fo_scheduler_disconnect(0);
 
   PQfinish(db_conn);
-  return(0);
+  return(returnedCode);
 } /* main() */

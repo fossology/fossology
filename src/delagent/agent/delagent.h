@@ -54,8 +54,8 @@ int check_permission_folder(long folder_id, int user_id, int user_perm);
 int check_permission_license(long license_id, int user_perm);
 
 /* functions that list things */
-void listFolders(int user_id, int user_perm);
-void listUploads(int user_id, int user_perm);
+int listFolders(int user_id, int user_perm);
+int listUploads(int user_id, int user_perm);
 
 /* function that delete actual things */
 int deleteLicense(long UploadId, int user_perm);
