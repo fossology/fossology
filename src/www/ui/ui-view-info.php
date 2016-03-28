@@ -149,7 +149,7 @@ class ui_view_info extends FO_Plugin
         (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
         LIMIT $2 OFFSET $3";
     $this->dbManager->prepare(__METHOD__."getListOfFiles",$sql);
-    $result = $this->dbManager->execute(__METHOD__,array($Item,$Max,$Offset));
+    $result = $this->dbManager->execute(__METHOD__."getListOfFiles",array($Item,$Max,$Offset));
     $Count = pg_num_rows($result);
     if (($Page > 0) || ($Count >= $Max))
     {
@@ -201,7 +201,7 @@ class ui_view_info extends FO_Plugin
     /* display mimetype */
     $sql = "SELECT * FROM uploadtree where uploadtree_pk = $1";
     $this->dbManager->prepare(__METHOD__."DisplayMimetype",$sql);
-    $result = $this->dbManager->execute(__METHOD__."getUploadTree",array($Item));
+    $result = $this->dbManager->execute(__METHOD__."DisplayMimetype",array($Item));
     if (pg_num_rows($result))
     {
       $row = pg_fetch_assoc($result);
@@ -226,7 +226,7 @@ class ui_view_info extends FO_Plugin
     {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
       $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
-      $result = $this->dbManager->execute(__METHOD__."getMimetype",array($row[pfile_fk]));
+      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row[pfile_fk]));
       if (pg_num_rows($result))
       {
         $pmRow = pg_fetch_assoc($result);

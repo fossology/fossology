@@ -77,5 +77,5 @@ function queueUpdateCheck(jqPk, callbacksucess, callbackfail) {
 
 
 function linkToJob(jqPk) {
-  return "<a href='?mod=showjobs&show=job&job=" + jqPk + "'>job #" + jqPk + "</a>";
+  return "<a href='?mod=showjobs&job=" + jqPk + "'>job #" + jqPk + "</a>";
 }
