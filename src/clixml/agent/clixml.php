@@ -179,11 +179,12 @@ class CliXml extends Agent
     $this->heartbeat(count($licensesMain["statements"]));
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($copyrights["statements"]));
-    $contents = array("licenses" => $licenses["statements"],
-                      "copyrights" => $copyrights["statements"],
-                      "licensesMain" => $licensesMain["statements"]
+    $contents = array("licensesMain" => $licensesMain["statements"],
+                      "licenses" => $licenses["statements"],
+                      "copyrights" => $copyrights["statements"]
                      );
-    $contents = $this->typecheck($contents);        
+    $contents = $this->reArrangeContent($contents);        
+    print_r($contents);
     $message = $this->renderString($this->getTemplateFile('file'),array(
         'documentName'=>$this->packageName,
         'uri'=>$this->uri,
@@ -195,33 +196,76 @@ class CliXml extends Agent
     return $message;
   }
 
-  protected function typecheck($contents)
+  protected function riskMapping($contents, $licenseG=false)
   {
-    $lenTotalLics = count($contents["licenses"]);
-    for($i=0; $i<$lenTotalLics; $i++){
-      
-      $testVariable = $contents["licenses"][$i]["risk"];
+    if ($licenseG == true){
+      $lenTotalLics = count($contents["licenses"]);
+      $mapRisk = &$contents["licenses"];
+    }
+    else {
+      $lenTotalLics = count($contents["licensesMain"]);
+      $mapRisk = &$contents["licensesMain"];
+    }
 
-      if($testVariable == "0" || $testVariable == "1" || $testVariable == null) 
-      {
-        $testVaribale = "white";  
+    for($i = 0; $i < $lenTotalLics; $i++){
+      if($mapRisk[$i]["risk"] == "0" || $mapRisk[$i]["risk"] == "1" || $mapRisk[$i]["risk"] == null){
+        $mapRisk[$i]["risk"] = 'other';  
       }
-      if($$testVariable == "2" || $$testVariable == "3"){
-        $testVariable = "YELLOW";  
+      else if($mapRisk[$i]["risk"] == "2" || $mapRisk[$i]["risk"] == "3"){
+        $mapRisk[$i]["risk"] = 'otheryellow';  
       }
-      if($$testVariable == "4" ||$testVariable == "5"){
-        $$testVariable = "red";  
+      else if($mapRisk[$i]["risk"] == "4" || $mapRisk[$i]["risk"] == "5"){
+        $mapRisk[$i]["risk"] = "red";  
       }
     }
+    return $contents; 
+  }
+  
+  
+  protected function reArrangeMainLic($contents)
+  {
+    $lenTotalLics = count($contents["licenses"]);
+    // both of this variables have same value but used for different operations
+    $lenMainLics = $lenLicsMain = count($contents["licensesMain"]);
+    for($j=0; $j<$lenLicsMain; $j++){
+      for($i=0; $i<$lenTotalLics; $i++){
+	if(!strcmp($contents["licenses"][$i]["content"], $contents["licensesMain"][$j]["content"])){
+	  if(!strcmp($contents["licenses"][$i]["text"], $contents["licensesMain"][$j]["text"])){
+	     $contents["licensesMain"][$j]["files"] = $contents["licenses"][$i]["files"];
+	  } else {
+            $lenMainLics++;
+            $contents["licensesMain"][$lenMainLics] = $contents["licenses"][$i];
+	  }   
+          unset($contents["licenses"][$i]);    
+        }   
+      }   
+    }
+
+    $lenMainLicenses=count($contents["licensesMain"]);    
+    for($i=0; $i<$lenMainLicenses; $i++){
+      $contents["licensesMain"][$i]["contentMain"] = $contents["licensesMain"][$i]["content"];
+      $contents["licensesMain"][$i]["textMain"] = $contents["licensesMain"][$i]["text"];
+      $contents["licensesMain"][$i]["riskMain"] = $contents["licensesMain"][$i]["risk"];
+        unset($contents["licensesMain"][$i]["content"]);
+        unset($contents["licensesMain"][$i]["text"]);
+        unset($contents["licensesMain"][$i]["risk"]);
+    }
+    return $contents;
+  }
+
+  protected function reArrangeContent($contents)
+  {
+    $contents = $this->riskMapping($contents);
+    $contents = $this->riskMapping($contents,$licenseG=true );
 
     $lenCopyrights=count($contents["copyrights"]);    
     for($i=0; $i<$lenCopyrights; $i++){
       $contents["copyrights"][$i]["contentCopy"] = $contents["copyrights"][$i]["content"];
         unset($contents["copyrights"][$i]["content"]);
     }
+    $contents = $this->reArrangeMainLic($contents);
     return $contents;
   }
-
 
   protected function computeUri($uploadId)
   {
@@ -268,6 +312,7 @@ class CliXml extends Agent
     return $this->renderer->loadTemplate($templateName)->render($vars);
   }
 }
+
 $agent = new CliXml();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
