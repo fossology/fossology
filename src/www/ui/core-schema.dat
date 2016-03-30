@@ -543,6 +543,10 @@
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL";
 
+  $Schema["TABLE"]["folder"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["folder"]["user_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["folder"]["user_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
   $Schema["TABLE"]["folder"]["folder_desc"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_desc"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_desc\" text";
   $Schema["TABLE"]["folder"]["folder_desc"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_desc\" DROP NOT NULL";
