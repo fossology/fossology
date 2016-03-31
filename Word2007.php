@@ -148,50 +148,42 @@ class Word2007 extends AbstractWriter implements WriterInterface
 	system($cmd,$ret);
 	copy("$this->tempDir/report.zip", "$fileNameOrg");
  	unlink("$this->tempDir/report.zip");
-	if(!$this->cleanup($this->tempDir))
-	{
-	  echo "Directory Not found\n";
-	}
-        // Close zip archive and cleanup temp file
+	$this->cleanup($this->tempDir);
+	  
+	// Close zip archive and cleanup temp file
         $zip->close();
         $this->cleanupTempFile();
     }
 
     private function folderCreate($tempDir)
     {
-      $folders = array("$tempDir/docProps/", "$tempDir/_rels/", "$tempDir/word/", "$tempDir/word/_rels/","$tempDir/word/theme");
-
-      if(!is_dir($tempDir)) {
-        mkdir($tempDir, 0777, true);
-      }   
-      else{
-	if(!$this->cleanup($tempDir))
-	{
-	   echo "Unable to create report structure\n";
-	}
-      }   
-      chmod($tempDir, 0777);
-      foreach($folders as $folder)
-      {   
-         if(!is_dir($folder)) {
-           mkdir($folder, 0777, true);
+        $folders = array("$tempDir/docProps/", "$tempDir/_rels/", "$tempDir/word/", "$tempDir/word/_rels/","$tempDir/word/theme");
+        $oneUp = dirname($tempDir);
+        if(is_dir($oneUp)) {
+	    $this->cleanup($tempDir); 
+            mkdir($tempDir, 0777, true);
         }   
-        chmod($folder, 0777);
-      }   
+        else{
+            mkdir($tempDir, 0777, true);
+        }   
+        foreach($folders as $folder) {   
+            if(!is_dir($folder)) {
+                mkdir($folder, 0777, true);
+            }   
+        }   
     }
 
     private function cleanup($tempDir)
     {
-       if(!is_dir($tempDir)) {
-          return false;
-       }   
+        $oneUp = dirname($tempDir);
+        if (is_dir($oneUp)){
+            $cmd = "rm -rf $oneUp";    
+	    system($cmd,$ret);
+	    return true;
+       } 
        else{
-	 $folderToCleanUp = basename($tempDir);
-	 $oneUp = dirname($tempDir);
-         $cmd = "cd $oneUp && rm -rf $folderToCleanUp";    
-	 system($cmd,$ret);
-	 return true;
-       }   
+           echo "Failed to delete Directory\n";
+       }  
      }   
 
 
