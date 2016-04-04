@@ -94,7 +94,7 @@ class ReportGenerator extends DefaultPlugin
   function preInstall()
   {
     $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Basic&nbsp;Report", 0, self::NAME, $text);
+    menu_insert("Browse-Pfile::Export&nbsp;Basic&nbsp;Report", 0, self::NAME, $text);
   }
 }
 
