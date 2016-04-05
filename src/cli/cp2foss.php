@@ -174,16 +174,15 @@ function GetFolder($FolderPath, $Parent = NULL) {
     return (GetFolder($folderTail, $Parent));
   }
   /* See if it exists */
-  $SQLFolder = str_replace("'", "''", $folderHead);
   $SQL = "SELECT folder_pk FROM folder
   INNER JOIN foldercontents ON child_id = folder_pk
   AND foldercontents_mode = '1'
-  WHERE foldercontents.parent_fk = $1 AND folder_name=$2";
+  WHERE foldercontents.parent_fk = $1 AND folder_name = $2";
   if ($Verbose) {
-    print "SQL=\n$SQL $1=$Parent $2=$SQLFolder\n";
+    print "SQL=\n$SQL\n$1=$Parent\n$2=$folderHead\n";
   }
 
-  $row = $dbManager->getSingleRow($SQL, array($Parent, $SQLFolder), __METHOD__.".GetFolder.exists");
+  $row = $dbManager->getSingleRow($SQL, array($Parent, $folderHead), __METHOD__.".GetFolder.exists");
   if (empty($row)) {
     /* Need to create folder */
     global $Plugins;
@@ -197,7 +196,7 @@ function GetFolder($FolderPath, $Parent = NULL) {
     }
     if (!$Test) {
       $P->create($Parent, $folderHead, "");
-      $row = $dbManager->getSingleRow($SQL, array($Parent, $SQLFolder), __METHOD__.".GetFolder.exists");
+      $row = $dbManager->getSingleRow($SQL, array($Parent, $folderHead), __METHOD__.".GetFolder.exists");
     }
   }
   $Parent = $row['folder_pk'];
