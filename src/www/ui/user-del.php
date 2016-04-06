@@ -152,7 +152,7 @@ class user_del extends FO_Plugin
       $V .= "</ol>\n";
 
       $text = _("Delete");
-      $V .= "<input type='submit' value='$text!'>\n";
+      $V .= "<input type='submit' value='$text'>\n";
       $V .= "</form>\n";
     }
     pg_free_result($result);
