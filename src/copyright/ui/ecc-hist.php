@@ -78,7 +78,7 @@ class EccHistogram  extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::ECC",1);
+        menu_insert("Browse::ECC",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else
@@ -104,4 +104,3 @@ class EccHistogram  extends HistogramBase {
 }
 
 $NewPlugin = new EccHistogram;
-//$NewPlugin->Initialize();
