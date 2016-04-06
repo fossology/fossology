@@ -179,7 +179,7 @@ class admin_upload_delete extends FO_Plugin {
     $V.= "</div>\n";
     $V.= "</ol>\n";
     $text = _("Delete");
-    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
     return $V;
   }
