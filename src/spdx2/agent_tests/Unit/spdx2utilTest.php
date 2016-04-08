@@ -22,6 +22,18 @@ require_once(__DIR__ . '/../../agent/spdx2utils.php');
 
 class spdx2Test extends \PHPUnit_Framework_TestCase
 {
+  private $assertCountBefore;
+
+  protected function setUp()
+  {
+    $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+  }
+
+  protected function tearDown()
+  {
+    $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
+  }
+
   public function testPreWorkOnArgsFlpZero()
   {
     $args = array();
@@ -42,133 +54,33 @@ class spdx2Test extends \PHPUnit_Framework_TestCase
     assertThat($result["key2"], equalTo("anotherValue"));
   }
 
-  public function testImplodeLicensesEmpty()
+  public function provideLicenseSet()
   {
-    assertThat(SpdxTwoUtils::implodeLicenses(null), equalTo(""));
-    assertThat(SpdxTwoUtils::implodeLicenses(array()), equalTo(""));
+    return array(
+        'null' => array(null, '',  ''),
+        'empty array' => array(array(), '', ''),
+        'empty array but prefix' => array(array(), 'pre', ''),
+        'single license'=>array(array("LIC1"), '', 'LIC1'),
+        'multiple licenses' => array(array("LIC1","LIC2","LIC3"), '', 'LIC1 AND LIC2 AND LIC3'),
+        'dual license 1st pos' => array(array("Dual-license", "LIC2", "LIC3"), '', 'LIC2 OR LIC3'),
+        'dual license 2nd pos' => array(array("LIC1", "Dual-license", "LIC3"), '', 'LIC1 OR LIC3'),
+        'dual license 3rd pos' => array(array("LIC1", "LIC2", "Dual-license"), '',  'LIC1 OR LIC2'),
+        'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"), 'pre-', 'pre-LIC1 OR pre-LIC2'),
+        'multiple dualLicense' => array(array("LIC1","LIC2 OR LIC3"),  '', '(LIC2 OR LIC3) AND LIC1'),
+        'multiple dualLicense with prefix' => array(array("LIC1","LIC2 OR LIC3"), 'pre-', '(LIC2 OR LIC3) AND pre-LIC1'),
+        'dual multi license' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), '', '(LIC2 OR LIC3) OR LIC1'),
+        'dual multi license with prefix' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), 'pre-', '(LIC2 OR LIC3) OR pre-LIC1'),
+    );
   }
 
-  public function testImplodeLicensesSingle()
+  /**
+   * @dataProvider provideLicenseSet
+   * @param array $lics
+   * @param string $prefix
+   * @param string $expected
+   */
+  public function testImplodeLicenses($lics, $prefix, $expected)
   {
-    assertThat(SpdxTwoUtils::implodeLicenses(array("LIC1")), equalTo("LIC1"));
-  }
-
-  public function testImplodeLicensesMultiple()
-  {
-    $lics = array("LIC1","LIC2","LIC3");
-    $result = SpdxTwoUtils::implodeLicenses($lics);
-    // should be something like "LIC1 AND LIC2 AND LIC3"
-
-    $exploded = array_map("trim", explode("AND",$result));
-    foreach ($exploded as $e)
-    {
-      assertThat(in_array($e,$lics,true), equalTo(true));
-    }
-    foreach ($lics as $l)
-    {
-      assertThat(in_array($l, $exploded, true), equalTo(true));
-    }
-  }
-
-  public function testImplodeLicensesDualLicense()
-  {
-    $lics = array("LIC1", "Dual-license", "LIC3");
-    $result = SpdxTwoUtils::implodeLicenses($lics);
-    // should be something like "LIC1 OR LIC3"
-
-    $exploded = array_map("trim", explode("OR",$result));
-    foreach ($exploded as $e)
-    {
-      assertThat(in_array($e,$lics,true));
-    }
-    foreach ($lics as $l)
-    {
-      if ($l !== "Dual-license")
-      {
-        assertThat(in_array($l, $exploded, true));
-      }
-    }
-  }
-
-  public function testImplodeLicensesMultipleAndImplodedDualLicense()
-  {
-    $lics = array("LIC1","LIC2 OR LIC3");
-    $result = SpdxTwoUtils::implodeLicenses($lics);
-    // should be something like "LIC1 AND (LIC2 OR LIC3)"
-
-    $exploded = array_map("trim", explode("AND",$result));
-    foreach ($exploded as $e)
-    {
-      if(strpos($e, " OR ") !== false)
-      {
-        $eWithoutBraces = trim(substr($e,1,-1));
-        assertThat(in_array($eWithoutBraces,$lics,true));
-      }
-      else
-      {
-        assertThat(in_array($e,$lics,true));
-      }
-    }
-    foreach ($lics as $l)
-    {
-      if(strpos($l, " OR ") !== false)
-      {
-        $lWithBraces = "($l)";
-        assertThat(in_array($lWithBraces,$exploded,true));
-      }
-      else
-      {
-        assertThat(in_array($l, $exploded, true));
-      }
-    }
-  }
-
-  public function testPrefixImplodeLicensesMultipleAndImplodedDualLicense()
-  {
-    $lics = array("LIC1","pre-LIC2 OR pre-LIC3");
-    $prefix = "pre-";
-    $result = SpdxTwoUtils::implodeLicenses($lics, $prefix);
-    // should be something like "pre-LIC1 AND (pre-LIC2 OR pre-LIC3)"
-
-    $exploded = array_map("trim", explode("AND",$result));
-    foreach ($exploded as $e)
-    {
-      if(strpos($e, " OR ") !== false)
-      {
-        $eWithoutBraces = trim(substr($e,1,-1));
-        assertThat(in_array($eWithoutBraces,$lics,true));
-      }
-      else
-      {
-        assertThat(in_array(substr($e,strlen($prefix)),$lics,true));
-      }
-    }
-    foreach ($lics as $l)
-    {
-      if(strpos($l, " OR ") !== false)
-      {
-        $lWithBraces = "($l)";
-        assertThat(in_array($lWithBraces,$exploded,true));
-      }
-      else
-      {
-        assertThat(in_array($prefix.$l, $exploded, true));
-      }
-    }
-  }
-
-  public function testImplodeLicensesDualLicenseAndImplodedDualLicense()
-  {
-    $lics = array("LIC1","LIC2 OR LIC3", "Dual-license");
-    $result = SpdxTwoUtils::implodeLicenses($lics);
-    // should be something like "LIC1 OR (LIC2 OR LIC3)"
-
-    foreach ($lics as $l)
-    {
-      if ($l !== "Dual-license")
-      {
-        assertThat(strpos($result, $l) !== false);
-      }
-    }
+    assertThat(SpdxTwoUtils::implodeLicenses($lics, $prefix), equalTo($expected));
   }
 }
