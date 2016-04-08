@@ -166,7 +166,7 @@ if [ $RUNTIME ]; then
          apt-get $YesOpt install apache2 libapache2-mod-php5
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
             libxml2 \
-            binutils php-gettext \
+            binutils php-gettext php5-curl \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils upx-ucl \
             unrar-free unzip p7zip-full p7zip wget \
@@ -242,19 +242,19 @@ if [ $RUNTIME ]; then
          # 4=Nahant* 5=Tikanga*
          if [ $YesOpt ]; then
            YesOpt='-y'
-         fi
+         fi                           
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql php-process\
             smtpdaemon \
             file libxml2 \
-            binutils
+            binutils 
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
-
+   
    which composer
     if [ $? -eq 0  ]; then
         if [ $OFFLINE -eq 0 ]; then
@@ -299,8 +299,8 @@ fi
 if [ ! -z "$YesOpt" ]; then
   options="$options -y"
 fi
-BASEDIR=$(dirname $0)
+BASEDIR=$(dirname $0) 
 mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides
-install_mod_deps $mods_dir
-
+install_mod_deps $mods_dir 
+ 
 ########################################################################
