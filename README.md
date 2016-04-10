@@ -24,6 +24,32 @@ installation packages for Debian, RHEL/CentOS, Ubuntu, and Fedora, and a source 
   
 For installation instructions see http://www.fossology.org/projects/fossology/wiki
 
+## Docker
+FOSSology comes with a Dockerfile allowing the containerized execution
+both as single instance or in combination with an external PostgreSQL database.
+**Note:** It is strongly recommended to use an external database for production
+use, since the the standalone image does not take care of data persistency.
+
+A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following command:
+``` sh
+docker run -p 8081:80 fossology/fossology
+```
+
+Execution with external database container can be done using Docker Compose.
+The Docker Compose file is located under the `/install` folder can can be run using following command:
+``` sh
+cd install
+docker-compose up
+```
+
+The Docker image allows configuration of it's database connection over a set of environment variables.
+
+- **FOSSOLOGY_DB_HOST:** Hostname of the PostgreSQL database server.
+  An integrated PostgreSQL instance is used if not defined or set to `localhost`.
+- **FOSSOLOGY_DB_NAME:** Name of the PostgreSQL database. Defaults to `fossology`.
+- **FOSSOLOGY_DB_USER:** User to be used for PostgreSQL connection. Defaults to `fossy`.
+- **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
+
 ## Documentation
 We are currently migrating our documentation to github.  At this stage you can find general documentation at:
 http://www.fossology.org/projects/fossology/wiki/User_Documentation
