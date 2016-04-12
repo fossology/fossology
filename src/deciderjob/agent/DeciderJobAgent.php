@@ -121,37 +121,55 @@ class DeciderJobAgent extends Agent {
     return true;
   }
 
-  private function noLicensesCheck(&$detectedLicenses, &$removedLicenses)
+  /**
+   * \brief Check if a new clearing decision can be added
+   * 
+   * Clearing is not allowd if:
+   *   - concluded license has already been added, or
+   *   - agent has detected No_license_found, or
+   *   - user has concluded that there is no valid license in a file
+   *
+   * @param $itemTreeBounds
+   * @param $userId
+   * @param $groupId
+   * @param $eventsFromJob
+   * @return boolean
+   */
+  private function isClearingAllowed($itemTreeBounds, $userId, $groupId, $eventsFromJob)
   {
-    $noLicenses = false;
-    if (count($detectedLicenses) == 0)
+    $detectedLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+    list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+    if (!is_null($concludedLicenses))
     {
-      return true;
-  	}
-    if ($detectedLicenses[0]->getLicenseId() == 507)
-    {
-      return true;
-    }
-
-    foreach ($detectedLicenses as $dlic)
-    {
-      $noLicenses = false;
-      foreach ($removedLicenses as $rlic)
+      foreach ($concludedLicenses as $license)
       {
-        if ($dlic->getLicenseId() == $rlic->getLicenseId())
+        $event = $license->getClearingEvent();
+        if (!is_null($event))
         {
-          $noLicenses = true;
-          break;
+          // If enventId related to the concluded lisense is not in current jobs
+          // event list, then the conclusion already exist and new evenst are discarded
+          $eventId = $event->getEventId();
+          if (array_search($eventId, $eventsFromJob) == false)
+          {
+            return false;
+          }
         }
       }
-      if (!$noLicenses)
-      {
-        break;
-      }
     }
-    return $noLicenses;
+    
+    // In some test cases variables can be null which make test cases to fail
+    if (is_null($detectedLicenses) || is_null($removedLicenses) || count($detectedLicenses) == 0)
+    {
+      return false;
+    }
+    if ($detectedLicenses[0]->getLicenseId() == 507)
+    {
+      return false;
+    }
+    
+    return true;
   }
-
+  
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
@@ -171,65 +189,30 @@ class DeciderJobAgent extends Agent {
       default:
         $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
     }
-
     if ($createDecision)
     {
-    /* 
-      Do not add/change concluded license if:
-      - agent has detected No_license_found, or
-      - user has concluded that there is no valid license in a file, or
-      - concluded license has already been added 
-    */
-      list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
-      $concludedLicenseExist = false;
-      $allDetectedLicensesRemoved = false;
-      if (!is_null($concludedLicenses))
+      if ($this->isClearingAllowed($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob))
       {
-      	foreach ($concludedLicenses as $license) 
+        if ( $this->clearingDao->isClearingEventRemove(current($additionalEventsFromThisJob)) )
         {
-        	if ($license->hasAgentDecisionEvent()) 
+          foreach ($additionalEventsFromThisJob as $eventId)
           {
-          	// Ensure that decision has been done earlier
-          	$event = $license->getClearingEvent();
-          	if (!is_null($event))
-          	{
-          		$eventId = $license->getClearingEvent()->getEventId();
-							if ( ! in_array($eventId, $additionalEventsFromThisJob) )
-          		{
-          			$concludedLicenseExist = true;
-          			break;
-          		}
-          	}
+            $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
           }
+          $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
         }
-      }
-      $detectedFileLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
-      if (!is_null($detectedFileLicenses) && !is_null($removedLicenses))
-      {
-      	$allDetectedLicensesRemoved = $this->noLicensesCheck($detectedFileLicenses, $removedLicenses);
-      	if (!$allDetectedLicensesRemoved && !$concludedLicenseExist) 
+        else
         {
-        	if ( $this->clearingDao->isClearingEventRemove(current($additionalEventsFromThisJob)) ) 
-          {
-						foreach ($additionalEventsFromThisJob as $eventId)
-						{
-							$this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
-						}
-          	$this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
-          }
-          else 
-          {
-          	$this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId,  DecisionTypes::IDENTIFIED,
-          			$this->decisionIsGlobal, $additionalEventsFromThisJob);
-          }
+          $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId,  DecisionTypes::IDENTIFIED,
+              $this->decisionIsGlobal, $additionalEventsFromThisJob);
         }
       }
     }
     else
     {
-    	foreach ($additionalEventsFromThisJob as $eventId)
+      foreach ($additionalEventsFromThisJob as $eventId)
       {
-        $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
+				$this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
       }
       $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
     }
