@@ -123,7 +123,7 @@ class DeciderJobAgent extends Agent {
 
   /**
    * \brief Check if a new clearing decision can be added
-   * 
+   *
    * Clearing is not allowd if:
    *   - concluded license has already been added, or
    *   - agent has detected No_license_found, or
@@ -156,7 +156,7 @@ class DeciderJobAgent extends Agent {
         }
       }
     }
-    
+
     // In some test cases variables can be null which make test cases to fail
     if (is_null($detectedLicenses) || is_null($removedLicenses) || count($detectedLicenses) == 0)
     {
@@ -166,10 +166,10 @@ class DeciderJobAgent extends Agent {
     {
       return false;
     }
-    
+
     return true;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
@@ -212,7 +212,7 @@ class DeciderJobAgent extends Agent {
     {
       foreach ($additionalEventsFromThisJob as $eventId)
       {
-				$this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
+        $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
       }
       $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
     }
