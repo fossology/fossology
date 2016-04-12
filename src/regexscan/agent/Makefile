@@ -1,5 +1,6 @@
 ######################################################################
 # Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2016 Siemens AG
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -18,24 +19,29 @@
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
-CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-EXE = regexscan
 
-$(EXE): regexscan.c $(FOLIB) $(VARS)
-	$(CC) $< $(FO_CFLAGS) $(FO_LDFLAGS) -o $@
+CFLAGS_LOCAL = $(FO_CFLAGS) -Werror
+CFLAGS_LOCALO = $(FO_CFLAGS)
+
+EXE=regexscan
 
 all: $(EXE)
 
-$(EXE): regexscan.c $(FOLIB) $(VARS)
-	$(CC) $< $(CFLAGS_LOCAL) -o $@
+regexscan: regexscan.o 
+	$(CC) regexscan.o $(CFLAGS_LOCAL) $(FO_LDFLAGS) -o $@
+
+regexscan.o: regexscan.c $(DB) $(REPO) $(AGENTLIB) $(VARS)
+	$(CC) -c $< $(CFLAGS_LOCALO) $(DEFS)
 
 $(FOLIB):
 	$(MAKE) -C $(FOLIBDIR)
 
 install: all
+	@echo "make regexscan agent install"
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
 
 uninstall:
+	@echo "make regexscan agent uninstall"
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 clean:
