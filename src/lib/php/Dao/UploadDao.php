@@ -536,7 +536,7 @@ class UploadDao extends Object
     }
 
     $sql = "
-SELECT ufile_name, lft, rgt, ufile_mode,
+SELECT ufile_name, uploadtree_pk, lft, rgt, ufile_mode,
        pfile_pk, pfile_md5, pfile_sha1
 FROM $uploadTreeTableName
   LEFT JOIN pfile
@@ -592,6 +592,7 @@ ORDER BY lft asc
     {
       $path = implode($pathStack,'/');
       $pfilePerFileName[$path]['pfile_pk'] = $row['pfile_pk'];
+      $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
       $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
       $pfilePerFileName[$path]['sha1'] = $row['pfile_sha1'];
     }
@@ -621,7 +622,7 @@ ORDER BY lft asc
     $condition .= " AND pfile_$hashAlgo NOT NULL";
 
     $sql = "
-SELECT pfile_fk, ufile_mode, pfile_$hashAlgo as hash
+SELECT pfile_fk, uploadtree_pk, ufile_mode, pfile_$hashAlgo as hash
 FROM $uploadTreeTableName
   LEFT JOIN pfile
     ON pfile_fk = pfile_pk
@@ -637,7 +638,8 @@ ORDER BY lft asc
     {
       if (($row['ufile_mode']&(1<<29)) == 0)
       {
-        $pfilePerHashAlgo[$row['hash']] = $row['pfile_fk'];
+        $pfilePerHashAlgo[$row['hash']] = array('pfile_pk' => $row['pfile_fk'],
+                                                'uploadtree_pk' => $row['uploadtree_pk']);
       }
     }
     $this->dbManager->freeResult($result);

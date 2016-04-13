@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 
 use EasyRdf_Graph;
 
@@ -31,8 +32,11 @@ include_once(__DIR__ . "/services.php");
 class SpdxTwoImportAgent extends Agent
 {
   const TERMS = 'http://spdx.org/rdf/terms#';
+  const SYNTAX_NS = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
   const REPORT_KEY = "spdxReport";
 
+  /** @var ClearingDao */
+  private $clearingDao;
   /** @var UploadDao */
   private $uploadDao;
   /** @var LicenseDao */
@@ -47,6 +51,7 @@ class SpdxTwoImportAgent extends Agent
   function __construct()
   {
     parent::__construct(AGENT_SPDX2IMPORT_NAME, AGENT_SPDX2IMPORT_VERSION, AGENT_SPDX2IMPORT_REV);
+    $this->clearingDao = $this->container->get('dao.clearing');
     $this->uploadDao = $this->container->get('dao.upload');
     $this->licenseDao = $this->container->get('dao.license');
     $this->permissionDao = $this->container->get('dao.upload.permission');
@@ -73,7 +78,6 @@ class SpdxTwoImportAgent extends Agent
 
   function processUploadId($uploadId)
   {
-    echo "Start working on Upload: $uploadId\n";
     $this->heartbeat(0);
 
     $args = $this->args;
@@ -84,17 +88,13 @@ class SpdxTwoImportAgent extends Agent
     }
 
     $spdxReportPre = array_key_exists(self::REPORT_KEY,$args) ? $args[self::REPORT_KEY] : ""; 
-    if($spdxReportPre)
-    {
-      echo "The SPDX report filename is: ".htmlspecialchars($spdxReportPre)."\n";
-    }
     global $SysConf;
     $fileBase = $SysConf['FOSSOLOGY']['path']."/SPDX2Import/";
     $spdxReport = $fileBase.$spdxReportPre;
     if(empty($spdxReportPre) || !is_readable($spdxReport))
     {
       echo "No SPDX report was uploaded\n";
-      echo "Maybe the permissions on ".htmlspeciealchars($fileBase)." are not sufficient\n";
+      echo "Maybe the permissions on ".htmlspecialchars($fileBase)." are not sufficient\n";
       return false;
     }
 
@@ -134,11 +134,27 @@ class SpdxTwoImportAgent extends Agent
   }
 
   // or $kind='licenseInfoInFile'
-  private static function getLicenseInfoForFile(&$properties, $kind='licenseConcluded')
+  private static function getLicenseInfoForFile(&$properties, $kind='licenseConcluded', &$index=null)
   {
     $func = function($value) { return $value['value']; };
     $key = self::TERMS . $kind;
-    return array_map($func, $properties[$key]);
+
+    if($properties[$key][0]['type'] === 'uri')
+    {
+      return array_map($func, $properties[$key]);
+    }
+    else if($properties[$key][0]['type'] === 'bnode' &&
+            array_key_exists($properties[$key][0]['value'],$index))
+    {
+      $conclusion = ($index[$properties[$key][0]['value']]);
+      if ($conclusion[self::SYNTAX_NS . 'type'][0]['value'] == self::TERMS . 'DisjunctiveLicenseSet' &&
+        array_key_exists(self::TERMS . 'member',$conclusion))
+      {
+        return array_map($func, $conclusion[self::TERMS . 'member']);
+      }
+    }
+    echo "the license info type ".$properties[$key][0]['type']." is not supported";
+    return array();
   }
 
   private static function getCopyrightInfoForFile(&$properties)
@@ -251,7 +267,7 @@ class SpdxTwoImportAgent extends Agent
     if(strpos(' ', $licenseExpr) !== false)
     {
       $exploded = explode(' ', $licenseExpr);
-      $shortnamess = array_map(array(&$this, "getLicenseIdsFromLicenseExpression"), $exploded);
+      $shortnamess = array_map(array(&$this, "getShortnamesFromLicenseExpression"), $exploded);
       $collectedShortnames = array();
       foreach ($shortnamess as $shortnames)
       {
@@ -261,29 +277,51 @@ class SpdxTwoImportAgent extends Agent
     }
     else if($licenseExpr == "OR")
     {
-      return array($this->getLicenseIdsFromLicenseExpression("Dual-license"));
+      return array("Dual-license");
     }
     else if(substr($licenseExpr, 0, strlen($licensePrefix)) === $licensePrefix)
     {
-      return array(substr($licenseExpr, strlen($licensePrefix)));
+      return array(urldecode(substr($licenseExpr, strlen($licensePrefix))));
     }
-    return array($licenseExpr);
+    return array(urldecode($licenseExpr));
   }
 
-  private function insertFoundLicenseInfoToDB($licenseExpressions, $pfile_fk, $asConclusion=false)
+  private function insertFoundLicenseInfoToDB(&$licenseExpressions, &$entry, $asConclusion=false)
   {
     foreach($licenseExpressions as $licenseExpr)
     {
       $shortnames = $this->getShortnamesFromLicenseExpression($licenseExpr);
       foreach($shortnames as $shortname)
       {
+        if($shortname == "noassertion")
+        {
+          continue;
+        }
         $lic = $this->licenseDao->getLicenseByShortName($shortname);
         if($lic !== null)
         {
           $this->heartbeat(1);
-          $this->saveAsLicenseFindingToDB($lic->getId(), $pfile_fk);
-          echo "file $pfile_fk contains $lic\n";
-          // $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId=0);
+          if($asConclusion)
+          {
+            $this->clearingDao->insertClearingEvent($entry['uploadtree_pk'],
+                                                    $this->userId,
+                                                    $this->groupId,
+                                                    $lic->getId(),
+                                                    false,
+                                                    ClearingEventTypes::IMPORT,
+                                                    '', // reportInfo
+                                                    'Imported from SPDX2 report', // comment
+                                                    $this->jobId);
+          }
+          else
+          {
+            $this->saveAsLicenseFindingToDB($lic->getId(), $entry['pfile_pk']);
+          }
+        }
+        else
+        {
+          echo "No license with shortname=\"$shortname\" found\n";
+          // TODO: create license candidate from information in SPDX
         }
       }
     }
@@ -319,7 +357,7 @@ class SpdxTwoImportAgent extends Agent
       __METHOD__."forSpdx2Import");
   }
 
-  public function walkAllFiles($SPDXfilename, $upload_pk)
+  public function walkAllFiles($SPDXfilename, $upload_pk, $addConcludedLicsAsConclusion=falseq)
   {
     // Prepare data from SPDX import
     $index = $this->graphToIndex($this->loadGraph($SPDXfilename));
@@ -347,11 +385,11 @@ class SpdxTwoImportAgent extends Agent
         continue;
       }
 
-      $licenseInfosInFile = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseInfoInFile'));
-      $this->insertFoundLicenseInfoToDB($licenseInfosInFile, $entry['pfile_pk']);
+      $licenseInfosInFile = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseInfoInFile', $index));
+      $this->insertFoundLicenseInfoToDB($licenseInfosInFile, $entry);
 
-      $licensesConcluded = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseConcluded'));
-      $this->insertFoundLicenseInfoToDB($licensesConcluded, $entry['pfile_pk']);
+      $licensesConcluded = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseConcluded', $index));
+      $this->insertFoundLicenseInfoToDB($licensesConcluded, $entry, $addConcludedLicsAsConclusion);
 
       $copyrightText = self::getCopyrightInfoForFile($properties);
       $this->insertFoundCopyrightInfoToDB($copyrightText, $entry['pfile_pk']);
