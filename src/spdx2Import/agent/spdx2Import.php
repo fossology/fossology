@@ -137,8 +137,15 @@ class SpdxTwoImportAgent extends Agent
   private static function getLicenseInfoForFile(&$properties, $kind='licenseConcluded')
   {
     $func = function($value) { return $value['value']; };
-    $key = self::TERMS . '' . $kind;
+    $key = self::TERMS . $kind;
     return array_map($func, $properties[$key]);
+  }
+
+  private static function getCopyrightInfoForFile(&$properties)
+  {
+    $func = function($value) { return $value['value']; };
+    $key = self::TERMS . "copyrightText";
+    return array_map($func, $properties[$key])[0];
   }
 
   private static function getHashesMap(&$index, &$property)
@@ -263,7 +270,7 @@ class SpdxTwoImportAgent extends Agent
     return array($licenseExpr);
   }
 
-  private function insertFoundItemsToDB($licenseExpressions, $pfile_fk, $asConclusion=false, $percentage=100)
+  private function insertFoundLicenseInfoToDB($licenseExpressions, $pfile_fk, $asConclusion=false)
   {
     foreach($licenseExpressions as $licenseExpr)
     {
@@ -274,18 +281,41 @@ class SpdxTwoImportAgent extends Agent
         if($lic !== null)
         {
           $this->heartbeat(1);
-          $this->saveAsFindingToDB($lic->getId(), $this->agent_pk, $pfile_fk, $percentage);
+          $this->saveAsLicenseFindingToDB($lic->getId(), $pfile_fk);
+          echo "file $pfile_fk contains $lic\n";
           // $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId=0);
         }
       }
     }
   }
 
-  private function saveAsFindingToDB($licenseId, $agent_fk, $pfile_fk, $percent)
+  private function saveAsLicenseFindingToDB($licenseId, $pfile_fk)
   {
     return $this->dbManager->getSingleRow(
-      "insert into license_file(rf_fk, agent_fk, pfile_fk, rf_match_pct) values($1,$2,$3,$4) RETURNING fl_pk",
-      array($licenseId, $agent_fk, $pfile_fk, $percent),
+      "insert into license_file(rf_fk, agent_fk, pfile_fk) values($1,$2,$3) RETURNING fl_pk",
+      array($licenseId, $this->agent_pk, $pfile_fk),
+      __METHOD__."forSpdx2Import");
+  }
+
+  private function insertFoundCopyrightInfoToDB($copyrightText, $pfile_fk)
+  {
+    $copyrightLines = array_map("trim", explode("\n",$copyrightText));
+    foreach ($copyrightLines as $copyrightLine)
+    {
+      if(empty($copyrightLine))
+      {
+        continue;
+      }
+
+      $this->saveAsCopyrightFindingToDB($copyrightLine, $pfile_fk);
+    }
+  }
+
+  private function saveAsCopyrightFindingToDB($content, $pfile_fk)
+  {
+    return $this->dbManager->getSingleRow(
+      "insert into copyright(agent_fk, pfile_fk, content, hash, type) values($1,$2,$3,md5($3),$4) RETURNING ct_pk",
+      array($this->agent_pk, $pfile_fk, $content, "statement"),
       __METHOD__."forSpdx2Import");
   }
 
@@ -318,12 +348,13 @@ class SpdxTwoImportAgent extends Agent
       }
 
       $licenseInfosInFile = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseInfoInFile'));
-      $this->insertFoundItemsToDB($licenseInfosInFile, $entry['pfile_pk']);
+      $this->insertFoundLicenseInfoToDB($licenseInfosInFile, $entry['pfile_pk']);
 
       $licensesConcluded = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseConcluded'));
-      $this->insertFoundItemsToDB($licensesConcluded, $entry['pfile_pk']);
+      $this->insertFoundLicenseInfoToDB($licensesConcluded, $entry['pfile_pk']);
 
-
+      $copyrightText = self::getCopyrightInfoForFile($properties);
+      $this->insertFoundCopyrightInfoToDB($copyrightText, $entry['pfile_pk']);
     }
   }
 
