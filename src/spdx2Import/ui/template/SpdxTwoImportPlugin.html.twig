@@ -20,8 +20,17 @@ This file is offered as-is, without any warranty.
           {{ 'No upload available in this folder'|trans }}
         {% endif %}
       </li>
-      <li>{{ 'Select SPDX2 RDF report to upload'|trans }}:
-        <input name="spdxReport" type="file" />
+      <li>
+        <label>
+          {{ 'Select SPDX2 RDF report to upload'|trans }}:
+          <input name="spdxReport" type="file" />
+        </label>
+      </li>
+      <li>
+        <label>
+           <input type="checkbox" name="addConcludedLicensesAs" value="conclusion">
+           {{ 'Add concluded licenses as conclusions'|trans }}?
+        </label>
       </li>
     </ol>
     <input type="submit" value="{{ 'Upload and Import!'|trans }}" />

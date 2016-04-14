@@ -34,6 +34,7 @@ class SpdxTwoImportAgent extends Agent
   const TERMS = 'http://spdx.org/rdf/terms#';
   const SYNTAX_NS = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
   const REPORT_KEY = "spdxReport";
+  const ACLA_KEY = "addConcludedLicensesAs";
 
   /** @var ClearingDao */
   private $clearingDao;
@@ -57,6 +58,7 @@ class SpdxTwoImportAgent extends Agent
     $this->permissionDao = $this->container->get('dao.upload.permission');
     $this->dbManager = $this->container->get('db.manager');
     $this->agentSpecifLongOptions[] = self::REPORT_KEY.':';
+    $this->agentSpecifLongOptions[] = self::ACLA_KEY.':';
 
     $this->setAgent_PK();
   }
@@ -76,11 +78,33 @@ class SpdxTwoImportAgent extends Agent
     $this->agent_pk = intval($row['agent_pk']);
   }
 
+  /**
+   * @param string[] $args
+   * @param string $key1
+   * @param string $key2
+   *
+   * @return string[] $args
+   *
+   * Duplicate of function in file ../../spdx2/agent/spdx2utils.php
+   */
+  static private function preWorkOnArgsFlp($args,$key1,$key2)
+  {
+    $needle = ' --'.$key2.'=';
+    if (is_array($args) &&
+        array_key_exists($key1, $args) &&
+        strpos($args[$key1],$needle) !== false) {
+      $exploded = explode($needle,$args[$key1]);
+      $args[$key1] = trim($exploded[0]);
+      $args[$key2] = trim($exploded[1]);
+    }
+    return $args;
+  }
+
   function processUploadId($uploadId)
   {
     $this->heartbeat(0);
 
-    $args = $this->args;
+    $args = self::preWorkOnArgsFlp($this->args, self::REPORT_KEY, self::ACLA_KEY);
 
     $groupId = $this->groupId;
     if (!$this->permissionDao->isEditable($uploadId, $groupId)) {
@@ -102,7 +126,9 @@ class SpdxTwoImportAgent extends Agent
             array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$spdxReport),
             __METHOD__.'addToReportgen');
 
-    $this->walkAllFiles($spdxReport,$uploadId);
+    $addConcludedLicsAsConclusion = array_key_exists(self::ACLA_KEY,$args) ? $args[self::ACLA_KEY] === "true" : false; 
+
+    $this->walkAllFiles($spdxReport,$uploadId,$addConcludedLicsAsConclusion);
 
     return true;
   }

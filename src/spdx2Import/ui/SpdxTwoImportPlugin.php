@@ -61,6 +61,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     }
     else
     {
+      // TODO: get value of addConcludedLicensesAs from request and add result to `runImport`
       $jobMetaData = $this->runImport($uploadId, $_FILES['spdxReport']);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();
@@ -116,10 +117,14 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     return $this->render('SpdxTwoImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }
 
-  protected function runImport($uploadId, $spdxReport)
+  protected function runImport($uploadId, $spdxReport, $addConcludedLicAsConclusion=false)
   {
     $spdx2ImportAgent = plugin_find('agent_spdx2Import');
     $jqCmdArgs = $spdx2ImportAgent->addSpdxReport($spdxReport);
+    if($addConcludedLicAsConclusion)
+    {
+      $jqCmdArgs .= " --addConcludedLicensesAs=true";
+    }
 
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
