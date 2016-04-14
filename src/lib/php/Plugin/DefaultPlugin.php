@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2016, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -381,7 +381,8 @@ abstract class DefaultPlugin implements Plugin
           'version' => $SysConf['BUILD']['VERSION'],
           'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
           'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
-          'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+          'commitDate' => $SysConf['BUILD']['COMMIT_DATE'],
+          'branchName' => $SysConf['BUILD']['BRANCH']
       );
     }
 
@@ -418,6 +419,4 @@ abstract class DefaultPlugin implements Plugin
   {
     return getStringRepresentation(get_object_vars($this), get_class($this));
   }
-
-
 }

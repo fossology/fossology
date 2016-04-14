@@ -94,7 +94,7 @@ class CopyrightHistogram extends HistogramBase {
       else
       {
         $text = _("View copyright/email/url histogram");
-        menu_insert("Browse::Copyright/Email/URL",10,$URI,$text);
+        menu_insert("Browse::Copyright/Email/URL",1,$URI,$text);
       }
     }
   }

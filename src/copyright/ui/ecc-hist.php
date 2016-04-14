@@ -84,7 +84,7 @@ class EccHistogram  extends HistogramBase {
       else
       {
         $text = _("View ECC histogram");
-        menu_insert("Browse::ECC",10,$URI,$text);
+        menu_insert("Browse::ECC",1,$URI,$text);
       }
     }
   } // RegisterMenus()
