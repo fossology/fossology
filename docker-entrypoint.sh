@@ -27,6 +27,15 @@ if [ "$FOSSOLOGY_DB_PASSWORD" ]; then
 	db_password="$FOSSOLOGY_DB_PASSWORD"
 fi
 
+testForPostgres(){
+    PGPASSWORD=$db_password psql -h "$db_host" "$db_name" "$db_user" -c '\l' >/dev/null
+    return $?
+}
+until testForPostgres; do
+    >&2 echo "Postgres is unavailable - sleeping"
+    sleep 1
+done
+
 # Write configuration
 cat <<EOM > /usr/local/etc/fossology/Db.conf
 dbname=$db_name;
