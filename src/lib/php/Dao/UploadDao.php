@@ -603,7 +603,7 @@ ORDER BY lft asc
    * @param String $hashAlgo
    * @return array
    */
-  public function getPFileDataPerHashAlgo(ItemTreeBounds $itemTreeBounds, $hashAlgo="sha1")
+  public function getPFilesDataPerHashAlgo(ItemTreeBounds $itemTreeBounds, $hashAlgo="sha1")
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -619,7 +619,7 @@ ORDER BY lft asc
       $param[] = $itemTreeBounds->getUploadId();
       $condition .= " AND upload_fk=$".count($param);
     }
-    $condition .= " AND pfile_$hashAlgo NOT NULL";
+    $condition .= " AND pfile_$hashAlgo IS NOT NULL";
 
     $sql = "
 SELECT pfile_fk, uploadtree_pk, ufile_mode, pfile_$hashAlgo as hash
@@ -638,8 +638,8 @@ ORDER BY lft asc
     {
       if (($row['ufile_mode']&(1<<29)) == 0)
       {
-        $pfilePerHashAlgo[$row['hash']] = array('pfile_pk' => $row['pfile_fk'],
-                                                'uploadtree_pk' => $row['uploadtree_pk']);
+        $pfilePerHashAlgo[$row['hash']][] = array('pfile_pk' => $row['pfile_fk'],
+                                                  'uploadtree_pk' => $row['uploadtree_pk']);
       }
     }
     $this->dbManager->freeResult($result);

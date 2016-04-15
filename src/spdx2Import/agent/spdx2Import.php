@@ -168,6 +168,10 @@ class SpdxTwoImportAgent extends Agent
   {
     $key = self::TERMS . 'checksum';
     $func = function($value) { return $value['value']; };
+    if(!array_key_exists($key, $property))
+    {
+      return array();
+    }
     $hashKeys = array_map($func, $property[$key]);
 
     $hashes = array();
@@ -245,7 +249,7 @@ class SpdxTwoImportAgent extends Agent
     return $graph->toRdfPhp();
   }
 
-  private function getPFilePerFileName($upload_pk)
+  private function getItemTreeBounds($upload_pk)
   {
     $uploadtreeTablename = GetUploadtreeTableName($upload_pk);
 
@@ -255,9 +259,7 @@ class SpdxTwoImportAgent extends Agent
       __METHOD__.'.find.uploadtree.to.use.in.browse.link');
     $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
     /** @var ItemTreeBounds */
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
-
-    return $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
+    return $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   }
 
   private function getShortnamesFromLicenseExpression($licenseExpr)
@@ -286,7 +288,7 @@ class SpdxTwoImportAgent extends Agent
     return array(urldecode($licenseExpr));
   }
 
-  private function insertFoundLicenseInfoToDB(&$licenseExpressions, &$entry, $asConclusion=false)
+  private function insertFoundLicenseInfoToDB(&$licenseExpressions, &$entries, $asConclusion=false)
   {
     foreach($licenseExpressions as $licenseExpr)
     {
@@ -300,22 +302,25 @@ class SpdxTwoImportAgent extends Agent
         $lic = $this->licenseDao->getLicenseByShortName($shortname);
         if($lic !== null)
         {
-          $this->heartbeat(1);
-          if($asConclusion)
+          foreach ($entries as $entry)
           {
-            $this->clearingDao->insertClearingEvent($entry['uploadtree_pk'],
-                                                    $this->userId,
-                                                    $this->groupId,
-                                                    $lic->getId(),
-                                                    false,
-                                                    ClearingEventTypes::IMPORT,
-                                                    '', // reportInfo
-                                                    'Imported from SPDX2 report', // comment
-                                                    $this->jobId);
-          }
-          else
-          {
-            $this->saveAsLicenseFindingToDB($lic->getId(), $entry['pfile_pk']);
+            $this->heartbeat(1);
+            if($asConclusion)
+            {
+              $this->clearingDao->insertClearingEvent($entry['uploadtree_pk'],
+                                                      $this->userId,
+                                                      $this->groupId,
+                                                      $lic->getId(),
+                                                      false,
+                                                      ClearingEventTypes::IMPORT,
+                                                      '', // reportInfo
+                                                      'Imported from SPDX2 report', // comment
+                                                      $this->jobId);
+            }
+            else
+            {
+              $this->saveAsLicenseFindingToDB($lic->getId(), $entry['pfile_pk']);
+            }
           }
         }
         else
@@ -335,7 +340,7 @@ class SpdxTwoImportAgent extends Agent
       __METHOD__."forSpdx2Import");
   }
 
-  private function insertFoundCopyrightInfoToDB($copyrightText, $pfile_fk)
+  private function insertFoundCopyrightInfoToDB($copyrightText, $entries)
   {
     $copyrightLines = array_map("trim", explode("\n",$copyrightText));
     foreach ($copyrightLines as $copyrightLine)
@@ -345,7 +350,10 @@ class SpdxTwoImportAgent extends Agent
         continue;
       }
 
-      $this->saveAsCopyrightFindingToDB($copyrightLine, $pfile_fk);
+      foreach ($entries as $entry)
+      {
+        $this->saveAsCopyrightFindingToDB($copyrightLine, $entry['pfile_pk']);
+      }
     }
   }
 
@@ -357,48 +365,74 @@ class SpdxTwoImportAgent extends Agent
       __METHOD__."forSpdx2Import");
   }
 
-  public function walkAllFiles($SPDXfilename, $upload_pk, $addConcludedLicsAsConclusion=falseq)
+  static private function getEntriesForHash(&$index, &$property, &$properties, &$pfilePerHash, $hashAlgo)
+  {
+      if (!self::isPropertyAFile($properties))
+      {
+        return null;
+      }
+
+      $actualHashes = self::getHashesMap($index, $properties);
+      $hash = $actualHashes[$hashAlgo];
+      if(!array_key_exists($hash, $pfilePerHash))
+      {
+        return null;
+      }
+      return $pfilePerHash[$hash];
+  }
+
+  static private function getEntriesForFilenameAndHashes(&$index, &$property, &$properties, &$pfilePerFileName)
+  {
+    if (!self::isPropertyAFile($properties))
+    {
+      return null;
+    }
+
+    $filename = self::getFileName($properties);
+    if(!array_key_exists($filename, $pfilePerFileName))
+    {
+      return null;
+    }
+
+    $entry = $pfilePerFileName[$filename];
+    if(!self::doHashesMatch($index, $properties, $entry))
+    {
+      echo $filename . " has different hashes\n";
+      return null;
+    }
+    return array($entry);
+  }
+
+  public function walkAllFiles($SPDXfilename, $upload_pk, $addConcludedLicsAsConclusion=false)
   {
     // Prepare data from SPDX import
     $index = $this->graphToIndex($this->loadGraph($SPDXfilename));
 
     // Prepare data from DB
-    $pfilePerFileName = $this->getPFilePerFileName($upload_pk);
+    $itemTreeBounds = $this->getItemTreeBounds($upload_pk);
+    $pfilePerHash = $this->uploadDao->getPFilesDataPerHashAlgo($itemTreeBounds, 'sha1');
+    // for more restrictive check by filename and all hashes
+    // $pfilePerFileName = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
 
     foreach ($index as $subject => $properties)
     {
-      if (!self::isPropertyAFile($properties))
+      $entries = self::getEntriesForHash($index, $property, $properties, $pfilePerHash, 'sha1');
+      // for more restrictive check by filename and all hashes
+      // $entries = self::getEntriesForFilenameAndHashes($index, $property, $properties, $pfilePerFileName)
+      if ($entries === null)
       {
-        continue;
-      }
-
-      $filename = self::getFileName($properties);
-      if(!array_key_exists($filename, $pfilePerFileName))
-      {
-        continue;
-      }
-
-      $entry = $pfilePerFileName[$filename];
-      if(!self::doHashesMatch($index, $properties, $entry))
-      {
-        echo $filename . " has different hashes\n";
         continue;
       }
 
       $licenseInfosInFile = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseInfoInFile', $index));
-      $this->insertFoundLicenseInfoToDB($licenseInfosInFile, $entry);
+      $this->insertFoundLicenseInfoToDB($licenseInfosInFile, $entries);
 
       $licensesConcluded = self::stripPrefixes(self::getLicenseInfoForFile($properties, 'licenseConcluded', $index));
-      $this->insertFoundLicenseInfoToDB($licensesConcluded, $entry, $addConcludedLicsAsConclusion);
+      $this->insertFoundLicenseInfoToDB($licensesConcluded, $entries, $addConcludedLicsAsConclusion);
 
       $copyrightText = self::getCopyrightInfoForFile($properties);
-      $this->insertFoundCopyrightInfoToDB($copyrightText, $entry['pfile_pk']);
+      $this->insertFoundCopyrightInfoToDB($copyrightText, $entries);
     }
-  }
-
-  function dump($graph)
-  {
-    echo $graph->dump();
   }
 }
 
