@@ -78,7 +78,7 @@ class IpHistogram  extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::Patents",1);
+        menu_insert("Browse::Patents",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else

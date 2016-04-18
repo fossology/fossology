@@ -21,7 +21,7 @@
       {% if versionInfo %}<br/>
         {# versionInfo contains all the variables defined at build time in the [BUILD] section of /VERSION #}
         {% set extractVersion = versionInfo.version|split('-') %}
-        <span id="versionInfo" style="font-size: xx-small; color: gray;">Version: [{{ extractVersion[0] }}], Branch: [{{ versionInfo.branchName }}], Commit: [#{{ versionInfo.commitHash }}] {{ versionInfo.commitDate }} built @ {{ versionInfo.buildDate }}</span>
+        <span id="versionInfo" style="font-size: xx-small; color: gray;">Version: [{{ extractVersion[0] }}-{{ extractVersion[1] }}], Branch: [{{ versionInfo.branchName }}], Commit: [#{{ versionInfo.commitHash }}] {{ versionInfo.commitDate }} built @ {{ versionInfo.buildDate }}</span>
       {% endif %}</td>
     <td align="right" valign="bottom">
       {% if isLoggedOut %}
