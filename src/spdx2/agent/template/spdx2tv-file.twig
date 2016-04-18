@@ -16,9 +16,7 @@ FileChecksum: MD5: {{ md5 }}
 {% if concludedLicenses|default is empty %}
 LicenseConcluded: NONE
 {% else %}
-LicenseConcluded: LicenseRef-{{ concludedLicenses|join('UNIQUESTRINGTOREPLACE')
-                                                 |replace({' ':'-'})
-                                                 |replace({'UNIQUESTRINGTOREPLACE':' OR LicenseRef-'}) }}
+LicenseConcluded: {{ concludedLicense }}
 {% endif%}
 {% else %}
 LicenseConcluded: NOASSERTION

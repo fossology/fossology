@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015, Siemens AG
+ * Copyright (C) 2015-2016, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,6 +31,8 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+
+include_once(__DIR__ . "/spdx2utils.php");
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
@@ -78,24 +80,6 @@ class SpdxTwoAgent extends Agent
 
   /**
    * @param string[] $args
-   * @param string $key1
-   * @param string $key2
-   *
-   * @return string[] $args
-   */
-  protected function preWorkOnArgsFlp($args,$key1,$key2)
-  {
-    $needle = ' --'.$key2.'=';
-    if (strpos($args[$key1],$needle) !== false) {
-      $exploded = explode($needle,$args[$key1]);
-      $args[$key1] = trim($exploded[0]);
-      $args[$key2] = trim($exploded[1]);
-    }
-    return $args;
-  }
-
-  /**
-   * @param string[] $args
    *
    * @return string[] $args
    */
@@ -105,13 +89,13 @@ class SpdxTwoAgent extends Agent
          || $args[self::OUTPUT_FORMAT_KEY] === "")
         && array_key_exists(self::UPLOAD_ADDS,$args))
     {
-      $args = $this->preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+      $args = SpdxTwoUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
     }
     else
     {
       if (!array_key_exists(self::UPLOAD_ADDS,$args) || $args[self::UPLOAD_ADDS] === "")
       {
-        $args = $this->preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
+        $args = SpdxTwoUtils::preWorkOnArgsFlp($args,self::UPLOAD_ADDS,self::OUTPUT_FORMAT_KEY);
       }
     }
     return $args;
@@ -195,31 +179,6 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[] $licenses
-   * @return string
-   */
-  protected function implodeLicenses($licenses)
-  {
-    sort($licenses);
-    if(count($licenses) == 3 &&
-       ($index = array_search("Dual-license",$licenses)) !== false)
-    {
-      return $licenses[$index===0?1:0] . " or " . $licenses[$index===1?2:1];
-    }
-    else
-    {
-      $licenses = array_map(function ($license){
-        if(strpos($license, " or ") !== false){
-          return "(" . $license . ")";
-        }else{
-          return $license;
-        }
-      },$licenses);
-      return implode(" and ", $licenses);
-    }
-  }
-
-  /**
    * @param int $uploadId
    * @return string
    */
@@ -263,7 +222,7 @@ class SpdxTwoAgent extends Agent
         'md5'=>$hashes['md5'],
         'verificationCode'=>$this->getVerificationCode($upload),
         'mainLicenses'=>$mainLicenses,
-        'mainLicense'=>$this->implodeLicenses($mainLicenses),
+        'mainLicense'=>SpdxTwoUtils::implodeLicenses($mainLicenses, "LicenseRef-"),
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
@@ -328,7 +287,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function toLicensesWithFilesAdder(&$filesWithLicenses, $licenses, $copyrights, $file, $fullPath)
   {
-    $key = $this->implodeLicenses($licenses);
+    $key = SpdxTwoUtils::implodeLicenses($licenses);
 
     if (!array_key_exists($key, $filesWithLicenses))
     {
@@ -369,7 +328,7 @@ class SpdxTwoAgent extends Agent
       {
         if(!empty($licenses['scanner']) && count($licenses['scanner'])>0)
         {
-          $implodedLicenses = $this->implodeLicenses($licenses['scanner']);
+          $implodedLicenses = SpdxTwoUtils::implodeLicenses($licenses['scanner']);
           if($licenses['isCleared'])
           {
             $msgLicense = "None (scanners found: " . $implodedLicenses . ")";
@@ -589,6 +548,7 @@ class SpdxTwoAgent extends Agent
           'fileDirName'=>dirname($fileName),
           'fileBaseName'=>basename($fileName),
           'isCleared'=>$licenses['isCleared'],
+          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], "LicenseRef-"),
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights']));

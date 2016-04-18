@@ -112,7 +112,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
   {
     LOG_FATAL("demomod passed invalid upload, upload_pk = %d", upload_pk);
     return(-110);
-}
+  }
 
   /* If the last character of the uploadtree_tablename is a digit, then we don't need upload_fk
    * in the query (because the table only has that uplaod).

@@ -116,8 +116,6 @@ html, body
   border-left: 1px dashed #222233;
 }
 
-
-
 .simpleTable {
   border:1px solid black;
   border-collapse:collapse;
@@ -277,16 +275,20 @@ img.deleted {
 
 .ui-button-text .browse-upload-all-off {
   color: black;
+  font-weight: bold;
 }
 .ui-button-text .browse-upload-all-on {
-  color: white;
+  color: black;
+  font-weight: normal;
 }
 
 .ui-state-active .ui-button-text .browse-upload-all-off {
-  color: #cccccc;
+  color: black;
+  font-weight: normal;
 }
 .ui-state-active .ui-button-text .browse-upload-all-on {
   color: black;
+  font-weight: bold;
 }
 
 .decTypeWip {

@@ -1,4 +1,4 @@
-### 3.1.0-RC1 (March 31st, 2016)
+### 3.1.0-RC1 (April 15th, 2016)
 
 #### Refactoring
 
@@ -8,6 +8,7 @@
 
 #### New Larger Features
 
+* New Dockerfile also used for Docker Hub, including composed containers with separate DB server
 * DEP5 / debian-copyright file generation
 * Adding tag-value format for the SPDX2 generation 
 * More efficient UI for bulk scan with multiple licenses at the same time
@@ -38,6 +39,9 @@
 * fix(ui) repair issue mentioned in #660 
 * fix(ui) repair prepared statement in `admin-license-file.php` 
 * fix(ui-download) add $filenameFallback solve #589 
+* fix(ui) added branch name and separated version into string
+* fix(license-browser) menu order with ECC and other corrected
+* fix(upload-browser) visibility issues with selection of "entire folder"
 
 #### Corrections on the Application Functionality
 

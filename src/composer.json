@@ -41,8 +41,8 @@
     },
     "config": {
         "platform": {
-            "php": "5.3.3",
+            "php": "5.3.3"
+        },
         "process-timeout" : 2000
-        }
     }
 }

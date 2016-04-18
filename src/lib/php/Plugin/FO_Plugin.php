@@ -361,7 +361,8 @@ class FO_Plugin implements Plugin
         'version' => $SysConf['BUILD']['VERSION'],
         'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
         'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
-        'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+        'commitDate' => $SysConf['BUILD']['COMMIT_DATE'],
+        'branchName' => $SysConf['BUILD']['BRANCH']
     );
 
   } // OutputOpen()
@@ -506,5 +507,4 @@ class FO_Plugin implements Plugin
   {
     return getStringRepresentation(get_object_vars($this), get_class($this));
   }
-
 }
