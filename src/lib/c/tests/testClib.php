@@ -35,12 +35,12 @@ class TestCLib extends \PHPUnit_Framework_TestCase
   /** @var TestPgDb */
   private $testDb;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("testlibc".time());
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb = null;
   }

@@ -14,27 +14,27 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- ***************************************************************/
+***************************************************************/
 /**
- \file demomod.c
- \brief FOSSology demonstration agent
+   \file demomod.c
+   \brief FOSSology demonstration agent
 
- This is the agent for the demomod FOSSology module.
- The purpose of this is to show the structure of an agent.  So, by design,
- it does very little.  
- 
- Given an upload_pk, this agent simply reads the first 32 bytes of each file and records
- them in the demomod table.
+   This is the agent for the demomod FOSSology module.
+   The purpose of this is to show the structure of an agent.  So, by design,
+   it does very little.
 
- The way permissions work on this agent is that if it runs from the scheduler, 
- the normal fossology upload permissions are checked.  However, if demomod agent runs from
- the command line, no permissions are checked and the output is to stdout, not the database.
- */
+   Given an upload_pk, this agent simply reads the first 32 bytes of each file and records
+   them in the demomod table.
+
+   The way permissions work on this agent is that if it runs from the scheduler,
+   the normal fossology upload permissions are checked.  However, if demomod agent runs from
+   the command line, no permissions are checked and the output is to stdout, not the database.
+*/
 
 #include "demomod.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="demomod build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="demomod build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="demomod build version: NULL.\n";
 #endif
@@ -45,7 +45,7 @@ PGconn    *pgConn = 0;        // database connection
 
 
 /****************************************************/
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   char *agentDesc = "demomod demonstration module";
   char *AgentARSName = "demomod_ars";
@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   char sqlbuf[512];
   int agent_pk = 0;
   int user_pk = 0;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
   int upload_pk = 0;
@@ -67,31 +67,31 @@ int main(int argc, char **argv)
   fo_scheduler_connect(&argc, argv, &pgConn);
   user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
 
-  /* get agent pk 
+  /* get agent pk
    * Note, if GetAgentKey fails, this process will exit.
    */
-  SVN_REV = fo_sysconfig("demomod", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("demomod", "COMMIT_HASH");
   VERSION = fo_sysconfig("demomod", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
   agent_pk = fo_GetAgentKey(pgConn, basename(argv[0]), Unused, agent_rev, agentDesc);
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "ivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "ivVc:")) != -1)
   {
-    switch (cmdopt) 
+    switch (cmdopt)
     {
-      case 'i': /* "Initialize" */
-            ExitNow(0);
-      case 'v': /* verbose output for debugging  */
-          agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
-            break;
-      case 'V': /* print version info */
-            printf("%s", BuildVersion);           
-            ExitNow(0);
-      case 'c': break; /* handled by fo_scheduler_connect() */
-      default:
-            Usage(argv[0]);
-            ExitNow(-1);
+    case 'i': /* "Initialize" */
+      ExitNow(0);
+    case 'v': /* verbose output for debugging  */
+      agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
+      break;
+    case 'V': /* print version info */
+      printf("%s", BuildVersion);
+      ExitNow(0);
+    case 'c': break; /* handled by fo_scheduler_connect() */
+    default:
+      Usage(argv[0]);
+      ExitNow(-1);
     }
   }
 
@@ -111,14 +111,14 @@ int main(int argc, char **argv)
 
     /* It isn't necessary to use a loop here because this agent only reads one item
      * from the scheduler, the upload_pk.  However, it is possible to queue jobs such
-     * that the scheduler will pass multiple data items into an agent, so I'm just 
+     * that the scheduler will pass multiple data items into an agent, so I'm just
      * going to use a 'while' even though for demomod it will only run once.
      */
     while(fo_scheduler_next())
     {
       upload_pk = atoi(fo_scheduler_current());
       LOG_VERBOSE("demomod upload_pk is %d\n", upload_pk);
-      if (upload_pk ==0) 
+      if (upload_pk ==0)
       {
         LOG_ERROR("demomod was passed a zero upload_pk.  This is an invalid key.");
         ExitNow(-2);
@@ -136,9 +136,9 @@ int main(int argc, char **argv)
        * check if demomod has already been run on this upload.
        */
       snprintf(sqlbuf, sizeof(sqlbuf),
-        "select ars_pk from %s,agent where agent_pk=agent_fk and ars_success=true \
+               "select ars_pk from %s,agent where agent_pk=agent_fk and ars_success=true \
             and upload_fk='%d' and agent_fk='%d'",
-        AgentARSName, upload_pk, agent_pk);
+               AgentARSName, upload_pk, agent_pk);
       ars_result = PQexec(pgConn, sqlbuf);
       if (fo_checkPQresult(pgConn, ars_result, sqlbuf, __FILE__, __LINE__)) break;
       if (PQntuples(ars_result) > 0)

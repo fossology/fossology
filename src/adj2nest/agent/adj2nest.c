@@ -60,10 +60,11 @@
 #include "libfossology.h"
 
 #define MAXCMD 4096
+#define myBUFSIZ 2048
 char SQL[256];
 
-#ifdef SVN_REV_S
-char BuildVersion[]="adj2nest build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="adj2nest build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="adj2nest build version: NULL.\n";
 #endif
@@ -548,9 +549,19 @@ int	main	(int argc, char *argv[])
   long *uploads_to_scan;
   int  upload_count = 0;
   int  user_pk;
+  char *agent_desc = "Adj2nest Agent";
+  char *COMMIT_HASH;
+  char *VERSION;
+  char agent_rev[myBUFSIZ];
 
   /* connect to scheduler.  Noop if not run from scheduler.  */
   fo_scheduler_connect(&argc, argv, &pgConn);
+
+  COMMIT_HASH = fo_sysconfig("adj2nest", "COMMIT_HASH");
+  VERSION = fo_sysconfig("adj2nest", "VERSION");
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
+  /* Get the Agent Key from the DB */
+  fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   /* for list of upload_pk's from the command line */
   uploads_to_scan = calloc(argc, sizeof(long));

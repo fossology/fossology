@@ -19,12 +19,15 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 
 class ui_view_info extends FO_Plugin
 {
   /** @var UploadDao */
   private $uploadDao;
-  
+  /** @var DbManager */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name       = "view_info";
@@ -34,6 +37,7 @@ class ui_view_info extends FO_Plugin
     $this->LoginFlag  = 0;
     parent::__construct();
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -41,23 +45,36 @@ class ui_view_info extends FO_Plugin
    */
   function RegisterMenus()
   {
-    $text = _("View file information");
-    menu_insert("Browse-Pfile::Info",5,$this->Name,$text);
+    $tooltipText = _("View file information");
+    menu_insert("Browse-Pfile::Info",5,$this->Name,$tooltipText);
     // For the Browse menu, permit switching between detail and summary.
     $Parm = Traceback_parm_keep(array("upload","item","format"));
     $URI = $this->Name . $Parm;
+
+    $menuPosition = 60;
+    $menuText = "Info";
     if (GetParm("mod",PARM_STRING) == $this->Name)
     {
-      menu_insert("View::Info",1);
-      menu_insert("View-Meta::Info",1);
+      menu_insert("View::[BREAK]", 61);
+      menu_insert("View::[BREAK]", 50);
+      menu_insert("View::{$menuText}", $menuPosition);
+      menu_insert("View-Meta::[BREAK]", 61);
+      menu_insert("View-Meta::[BREAK]", 50);
+      menu_insert("View-Meta::{$menuText}", $menuPosition);
+
       menu_insert("Browse::Info",-3);
     }
     else
     {
-      $text = _("View information about this file");
-      menu_insert("View::Info",1,$URI,$text);
-      menu_insert("View-Meta::Info",1,$URI,$text);
-      menu_insert("Browse::Info",-3,$URI,$text);
+      $tooltipText = _("View information about this file");
+      menu_insert("View::[BREAK]", 61);
+      menu_insert("View::[BREAK]", 50);
+      menu_insert("View::{$menuText}", $menuPosition, $URI, $tooltipText);
+      menu_insert("View-Meta::[BREAK]", 61);
+      menu_insert("View-Meta::[BREAK]", 50);
+      menu_insert("View-Meta::{$menuText}", $menuPosition, $URI, $tooltipText);
+
+      menu_insert("Browse::Info", -3, $URI, $tooltipText);
     }
   } // RegisterMenus()
 
@@ -66,13 +83,11 @@ class ui_view_info extends FO_Plugin
    */
   function ShowView($Upload, $Item, $ShowMenu=0)
   {
-    global $PG_CONN;
     $V = "";
     if (empty($Upload) || empty($Item)) { return; }
 
     $Page = GetParm("page",PARM_INTEGER);
     if (empty($Page)) { $Page=0; }
-    $Max = 50;
 
     /**********************************
      List File Info
@@ -82,13 +97,10 @@ class ui_view_info extends FO_Plugin
       $text = _("Repository Locator");
       $V .= "<H2>$text</H2>\n";
       $sql = "SELECT * FROM uploadtree
-        INNER JOIN pfile ON uploadtree_pk = $Item
+        INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         LIMIT 1;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $R = pg_fetch_assoc($result);
-      pg_free_result($result);
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
       $V .= "<table border=1>\n";
       $text = _("Attribute");
       $text1 = _("Value");
@@ -118,7 +130,6 @@ class ui_view_info extends FO_Plugin
    */
   function ShowSightings($Upload, $Item)
   {
-    global $PG_CONN;
     $V = "";
     if (empty($Upload) || empty($Item)) { return; }
 
@@ -135,10 +146,10 @@ class ui_view_info extends FO_Plugin
     $sql = "SELECT * FROM pfile,uploadtree
         WHERE pfile_pk=pfile_fk
         AND pfile_pk IN
-        (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $Item)
-        LIMIT $Max OFFSET $Offset";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+        (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
+        LIMIT $2 OFFSET $3";
+    $this->dbManager->prepare(__METHOD__."getListOfFiles",$sql);
+    $result = $this->dbManager->execute(__METHOD__."getListOfFiles",array($Item,$Max,$Offset));
     $Count = pg_num_rows($result);
     if (($Page > 0) || ($Count >= $Max))
     {
@@ -170,7 +181,6 @@ class ui_view_info extends FO_Plugin
    */
   function ShowMetaView($Upload, $Item)
   {
-    global $PG_CONN;
     $V = "";
     $Count = 1;
     if (empty($Item) || empty($Upload))
@@ -189,9 +199,9 @@ class ui_view_info extends FO_Plugin
     $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
     /* display mimetype */
-    $sql = "SELECT * FROM uploadtree where uploadtree_pk = $Item";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $sql = "SELECT * FROM uploadtree where uploadtree_pk = $1";
+    $this->dbManager->prepare(__METHOD__."DisplayMimetype",$sql);
+    $result = $this->dbManager->execute(__METHOD__."DisplayMimetype",array($Item));
     if (pg_num_rows($result))
     {
       $row = pg_fetch_assoc($result);
@@ -209,30 +219,28 @@ class ui_view_info extends FO_Plugin
       $text = _("File does not exist in database");
       return $text;
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
 
     /* get mimetype */
     if (!empty($row['pfile_fk']))
     {
-      $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $row[pfile_fk] and pfile_mimetypefk=mimetype_pk";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
+      $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
+      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row[pfile_fk]));
       if (pg_num_rows($result))
       {
         $pmRow = pg_fetch_assoc($result);
         $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
         $V .= "</td><td>" . htmlentities($pmRow['mimetype_name']) . "</td></tr>\n";
       }
-      pg_free_result($result);
+      $this->dbManager->freeResult($result);
     }
 
     /* display upload origin */
-    $sql = "select * from upload where upload_pk='$row[upload_fk]'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result))
+    $sql = "select * from upload where upload_pk=$1";
+    $row = $this->dbManager->getSingleRow($sql,array($row[upload_fk]),__METHOD__."getUploadOrigin");
+    if ($row)
     {
-      $row = pg_fetch_assoc($result);
 
       /* upload source */
       if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL: ");
@@ -247,14 +255,11 @@ class ui_view_info extends FO_Plugin
       $ts = $row['upload_ts'];
       $V .= "<td>" . substr($ts, 0, strrpos($ts, '.')) . "</td></tr>\n";
     }
-    pg_free_result($result);
       /* display where it was uploaded from */
 
     /* display upload owner*/
-    $sql = "SELECT user_name from users, upload  where user_pk = user_fk and upload_pk = '$Upload'";
-    $result = pg_query($PG_CONN, $sql);
-    $row = pg_fetch_assoc($result);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $sql = "SELECT user_name from users, upload  where user_pk = user_fk and upload_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql,array($Upload),__METHOD__."getUploadOwner");
 
     $text = _("Added by");
     $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
@@ -270,7 +275,6 @@ class ui_view_info extends FO_Plugin
    */
   function ShowPackageInfo($Upload, $Item, $ShowMenu=0)
   {
-    global $PG_CONN;
     $V = "";
     $Require = "";
     $MIMETYPE = "";
@@ -318,10 +322,7 @@ class ui_view_info extends FO_Plugin
      Check if pkgagent disabled
      ***********************************/
     $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $row = $this->dbManager->getSingleRow($sql,array(),__METHOD__."checkPkgagentDisabled");
     if (isset($row) && ($row['agent_enabled']== 'f')){return;}
 
     /**********************************
@@ -332,10 +333,10 @@ class ui_view_info extends FO_Plugin
 
     /* If pkgagent_ars table didn't exists, don't show the result. */
     $sql = "SELECT typlen  FROM pg_type where typname='pkgagent_ars' limit 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $this->dbManager->prepare(__METHOD__."displayPackageInfo",$sql);
+    $result = $this->dbManager->execute(__METHOD__."displayPackageInfo",array());
     $numrows = pg_num_rows($result);
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
     if ($numrows <= 0)
     {
       $V .= _("No data available. Use Jobs > Agents to schedule a pkgagent scan.");
@@ -370,11 +371,11 @@ class ui_view_info extends FO_Plugin
     }
     $sql = "SELECT mimetype_name
         FROM uploadtree
-        INNER JOIN pfile ON uploadtree_pk = $Item
+        INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $this->dbManager->prepare(__METHOD__."getMimetypeName",$sql);
+    $result = $this->dbManager->execute(__METHOD__."getMimetypeName",array($Item));
     while ($row = pg_fetch_assoc($result))
     {
       if (!empty($row['mimetype_name']))
@@ -382,19 +383,16 @@ class ui_view_info extends FO_Plugin
         $MIMETYPE = $row['mimetype_name'];
       }
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
 
     /** RPM Package Info **/
     if ($MIMETYPE == "application/x-rpm")
     {
       $sql = "SELECT *
                 FROM pkg_rpm
-                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-      $R = pg_fetch_assoc($result);
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."getRPMPackageInfo");
       if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
       {
         $V .= _("RPM Binary Package");
@@ -421,11 +419,10 @@ class ui_view_info extends FO_Plugin
           $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
           $Count++;
         } 
-        pg_free_result($result);
 
-        $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $Require;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $1;";
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -436,11 +433,9 @@ class ui_view_info extends FO_Plugin
           $V .= "</td><td>$Val</td></tr>\n";
           $Count++;
         }
-        pg_free_result($result);
+        $this->dbManager->freeResult($result);
       }
       $V .= "</table>\n";
-      $Count--;
-
     }
     else if ($MIMETYPE == "application/x-debian-package")
     {
@@ -448,10 +443,9 @@ class ui_view_info extends FO_Plugin
 
       $sql = "SELECT *
                 FROM pkg_deb
-                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianBinaryPackageInfo");
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -460,9 +454,8 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      if (pg_num_rows($result))
+      if ($R)
       {
-        $R = pg_fetch_assoc($result);
         $Require = $R['pkg_pk'];
         foreach ($deb_binary_info as $key=>$value)
         {
@@ -473,9 +466,9 @@ class ui_view_info extends FO_Plugin
         }
         pg_free_result($result);
 
-        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -486,10 +479,9 @@ class ui_view_info extends FO_Plugin
           $V .= "</td><td>$Val</td></tr>\n";
           $Count++;
         }
-        pg_free_result($result);
+        $this->dbManager->freeResult($result);
       }
       $V .= "</table>\n";
-      $Count--;
     }
     else if ($MIMETYPE == "application/x-debian-source")
     {
@@ -497,10 +489,9 @@ class ui_view_info extends FO_Plugin
 
       $sql = "SELECT *
                 FROM pkg_deb
-                INNER JOIN uploadtree ON uploadtree_pk = $Item
+                INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_deb.pfile_fk;";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianSourcePakcageInfo");
       $Count=1;
 
       $V .= "<table border='1'>\n";
@@ -509,9 +500,8 @@ class ui_view_info extends FO_Plugin
       $text2 = _("Value");
       $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
 
-      if (pg_num_rows($result))
+      if ($R)
       {
-        $R = pg_fetch_assoc($result);
         $Require = $R['pkg_pk'];
         foreach ($deb_source_info as $key=>$value)
         {
@@ -522,9 +512,9 @@ class ui_view_info extends FO_Plugin
         }
         pg_free_result($result);
 
-        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $Require;";
-        $result = pg_query($PG_CONN, $sql);
-        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $sql = "SELECT * FROM pkg_deb_req WHERE pkg_fk = $1;";
+        $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
+        $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
         while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
         {
@@ -535,10 +525,9 @@ class ui_view_info extends FO_Plugin
           $V .= "</td><td>$Val</td></tr>\n";
           $Count++;
         }
-        pg_free_result($result);
+        $this->dbManager->freeResult($result);
       }
       $V .= "</table>\n";
-      $Count--;
     }
     else
     {
@@ -573,10 +562,13 @@ class ui_view_info extends FO_Plugin
       $text = _("Upload data is unavailable.  It needs to be unpacked.");
       return "<h2>$text uploadtree_pk: $Item</h2>";
     }
-    global $PG_CONN;
-    $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag WHERE tag_pk = tag_fk) T ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt UNION SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_uploadtree,tag WHERE tag_pk = tag_fk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk WHERE uploadtree.upload_fk = $upload_pk AND uploadtree.lft >= $lft AND uploadtree.rgt <= $rgt ORDER BY ufile_name";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag WHERE tag_pk = tag_fk) T
+        ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $1
+        AND uploadtree.lft >= $2 AND uploadtree.rgt <= $3 UNION SELECT * FROM uploadtree INNER JOIN
+        (SELECT * FROM tag_uploadtree,tag WHERE tag_pk = tag_fk) T ON uploadtree.uploadtree_pk = T.uploadtree_fk
+        WHERE uploadtree.upload_fk = $1 AND uploadtree.lft >= $2 AND uploadtree.rgt <= $3 ORDER BY ufile_name";
+    $this->dbManager->prepare(__METHOD__,$sql);
+    $result = $this->dbManager->execute(__METHOD__,array($upload_pk, $lft,$rgt));
     if (pg_num_rows($result) > 0)
     {
       $VT .= "<table border=1>\n";
@@ -595,7 +587,7 @@ class ui_view_info extends FO_Plugin
       }
       $VT .= "</table><p>\n";
     }
-    pg_free_result($result);
+    $this->dbManager->freeResult($result);
 
     return $VT;
   }

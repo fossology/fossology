@@ -19,12 +19,11 @@
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Plugin\AgentPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
 class UploadUrlPage extends UploadPageBase
 {
-  const NAME = "upload_url22";
+  const NAME = 'upload_url';
   
   const NAME_PARAM = 'name';
   const ACCEPT_PARAM = 'accept';
@@ -46,6 +45,7 @@ class UploadUrlPage extends UploadPageBase
   {
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
+    $description = $this->basicShEscaping($description);
     
     $getUrlThatMightIncludeSpaces = trim($request->get(self::GETURL_PARAM));
     $getURL = str_replace(" ", "%20", $getUrlThatMightIncludeSpaces);
@@ -58,6 +58,7 @@ class UploadUrlPage extends UploadPageBase
     {
       return array(false, _("Invalid URL"), $description);
     }
+    $getURL = $this->basicShEscaping($getURL);
 
     $name = $request->get(self::NAME_PARAM);
     if (empty($name)) {
@@ -81,15 +82,17 @@ class UploadUrlPage extends UploadPageBase
       return array(false, $text, $description);
     }
 
-    $level = $request->get(self::LEVEL_PARAM);
-    if (empty($level) && !is_numeric($level) || $level < 0)
+    $level = intval($request->get(self::LEVEL_PARAM));
+    if ($level < 0)
     {
       $level = 1;
     }
 
     /* first trim, then get rid of whitespaces before and after each comma letter */
     $accept = preg_replace('/\s*,\s*/', ',', trim($request->get(self::ACCEPT_PARAM)));
+    $accept = $this->basicShEscaping($accept);
     $reject = preg_replace('/\s*,\s*/', ',', trim($request->get(self::REJECT_PARAM)));
+    $reject = $this->basicShEscaping($reject);
     
     /* Create the job: job "wget" */
     $jobId = JobAddJob($userId, $groupId, "wget", $uploadId);

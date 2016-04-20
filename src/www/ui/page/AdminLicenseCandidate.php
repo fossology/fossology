@@ -142,29 +142,19 @@ class AdminLicenseCandidate extends DefaultPlugin
     return $this->render('admin_license_candidate-merge.html.twig', $this->mergeWithDefault($vars));
   }
   
-  /**
-   * @overwrite
-   */
-  protected function mergeWithDefault($vars)
-  {
-    $allVars = array_merge($this->getDefaultVars(), $vars);
-    $allVars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
-    return $allVars;
-  }
-
   private function getArrayArrayData()
   {
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,group_name,group_pk "
             . "FROM license_candidate, groups "
             . "WHERE group_pk=group_fk AND marydone";
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $dbManager->prepare($stmt = __METHOD__, $sql);
     $res = $dbManager->execute($stmt);
     $aaData = array();
     while ($row = $dbManager->fetchArray($res))
     {
-      $link = Traceback_uri() . '?mod=' . Traceback_parm() . '&rf=' . $row['rf_pk'];
+      $link = Traceback_uri() . '?mod=' . self::NAME . '&rf=' . $row['rf_pk'];
       $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
       $aaData[] = array($edit, htmlentities($row['rf_shortname']),
           htmlentities($row['rf_fullname']),
@@ -189,7 +179,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     {
       $sql .= " FROM $table WHERE rf_pk=$1";
     }
-    /** @var DbManager */
+    /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $row = $dbManager->getSingleRow($sql, array($licId), __METHOD__.".$table");
     return $row;

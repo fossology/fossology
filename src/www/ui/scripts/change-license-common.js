@@ -111,10 +111,8 @@ function scheduledDeciderError (responseobject, resultEntity) {
 
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   var post_data = {
-    "bulkAction": $('#bulkAction').val(),
+    "bulkAction": getBulkFormTableContent(),
     "refText": $('#bulkRefText').val(),
-    "licenseId": $('#bulkLicense').val(),
-    "shortname": $('#shortname').val(),
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0
@@ -160,22 +158,26 @@ function popUpLicenseText(popUpUri, title) {
   window.open(popUpUri + sel, title, 'width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');
 }
 
-function markAsModified() {
-    // TODO: use class to set border styling
-    $('#decTypeSet').css('border-color', 'red').css('border-width', '5px');
-}
-
-function addLicense(uploadId, uploadTreeId, licenseId) {
-  $.getJSON("?mod=conclude-license&do=addLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
+function modifyLicense(doWhat ,uploadId, uploadTreeId, licenseId) {
+  $.getJSON("?mod=conclude-license&do=" + doWhat + "&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
-      if(data){
-        markAsModified();
+      if(data) {
+        $('#decTypeSet').addClass('decTypeWip');
       }
       var table = createClearingTable();
       table.fnDraw(false);
     })
     .fail(failed);
 }
+
+function addLicense(uploadId, uploadTreeId, licenseId) {
+  modifyLicense('addLicense', uploadId, uploadTreeId, licenseId);
+}
+
+function removeLicense(uploadId, uploadTreeId, licenseId) {
+  modifyLicense('removeLicense', uploadId, uploadTreeId, licenseId);
+}
+
 
 function makeMainLicense(uploadId, licenseId) {
   $.getJSON("?mod=conclude-license&do=makeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
@@ -196,16 +198,4 @@ function removeMainLicense(uploadId,licenseId) {
       })
       .fail(failed);
   }
-}
-
-function removeLicense(uploadId, uploadTreeId, licenseId) {
-  $.getJSON("?mod=conclude-license&do=removeLicense&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
-    .done(function (data) {
-      if(data) {
-        markAsModified();
-      }
-      var table = createClearingTable();
-      table.fnDraw(false);
-    })
-    .fail(failed);
 }

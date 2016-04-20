@@ -39,7 +39,7 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
   
   private $job_pks = array(2,1);
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = &$this->testDb->getDbManager();
@@ -80,7 +80,7 @@ class ShowJobsDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

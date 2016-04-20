@@ -1,0 +1,29 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/       
+Upstream-Name: {{ documentName }}
+Upstream-Contact: 
+Source: 
+Disclaimer: <text> This file is offered as-is, without any warranty. </text>
+Copyright: 
+License: {{ mainLicense }}
+Comment: {% if licenseComments %}
+ {{ licenseComments }}
+ .
+
+{% endif %} created on {{ 'now'|date('Y-m-d\\TH:i:s\\Z') }} with FOSSology
+{# File Paragraphes: #}
+{{ packageNodes }}
+{# Stand-alone License Paragraphes: #}
+{% for licenseId,extractedText in licenseTexts %}
+
+License: {{ licenseId }}
+ {{ extractedText|replace({'\f':''})|replace({'\r\n':'\n'})
+                                    |replace({'\n\n':'\n.\n'})
+                                    |replace({'\n\n':'\n.\n'})
+                                    |replace({'\n':'\n '}) }}
+{% endfor %}

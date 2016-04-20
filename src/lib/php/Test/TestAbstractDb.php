@@ -141,14 +141,14 @@ abstract class TestAbstractDb
     $Schema = array();
     require($coreSchemaFile);
     $attributeKey = "ALTER";
-    foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if( $invert^!in_array($tableName, $tableList) ){
+    foreach ($Schema['TABLE'] as $tableName => $tableCols) {
+      if ($invert ^ !in_array($tableName, $tableList)) {
         continue;
       }
-      foreach ($tableCols as $attributes)
-      {
-        if (array_key_exists($attributeKey, $attributes))
+      foreach ($tableCols as $attributes) {
+        if (array_key_exists($attributeKey, $attributes)) {
           $this->dbManager->queryOnce($attributes[$attributeKey]);
+        }
       }
     }
   }

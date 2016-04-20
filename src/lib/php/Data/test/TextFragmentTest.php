@@ -30,7 +30,7 @@ class TextFragmentTest extends \PHPUnit_Framework_TestCase
    */
   private $fragment;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->fragment = new TextFragment(self::START_OFFSET, self::CONTENT);
   }

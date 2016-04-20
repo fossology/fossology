@@ -146,6 +146,8 @@ without any warranty.
         <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu">
             <argument type="service" id="twig.environment"/>
         </service>
+        <service id="ui.component.micromenu" class="Fossology\Lib\UI\Component\MicroMenu">
+        </service>
         <service id="ui.folder.nav" class="Fossology\Lib\UI\FolderNav">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.folder"/>

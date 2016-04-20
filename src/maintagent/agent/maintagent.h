@@ -15,8 +15,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ***************************************************************/
-#ifndef _DEMOMOD_H
-#define _DEMOMOD_H 1
+#ifndef _MAINTAGENT_H
+#define _MAINTAGENT_H 1
 #include <stdio.h>
 #include <stdlib.h>
 #include <libgen.h>
@@ -51,5 +51,6 @@ void ProcessExpired();
 void RemoveOrphanedFiles();
 void DeleteOrphanGold();
 void NormalizeUploadPriorities();
+void reIndexAllTables();
 
-#endif /* _DEMOMOD_H */
+#endif /* _MAINTAGENT_H */

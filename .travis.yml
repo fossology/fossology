@@ -17,20 +17,25 @@ install:
  - sudo apt-get update -qq
  - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
  - sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev
-        libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
-        apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
-        binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
-        rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
-        libpq-dev libcunit1-dev libcppunit-dev
-        libboost-regex-dev libboost-program-options-dev
+ - sudo apt-get install -qq libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
+ - sudo apt-get install -qq apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
+ - sudo apt-get install -qq binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
+ - sudo apt-get install -qq rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
+ - sudo apt-get install -qq libpq-dev libcunit1-dev libcppunit-dev
+ - sudo apt-get install -qq libboost-regex-dev libboost-program-options-dev
  - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
+ - sudo apt-get install liblocal-lib-perl
+ - sudo apt-get install libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
+ - sudo mkdir -p /var/local/cache/fossology
+ - sudo chown $(whoami) /var/local/cache/fossology
 
 before_script:
  - cd src/
  - composer install --dev
- - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && (y y | sudo cpan -T Spreadsheet::WriteExcel) && sudo cpan -T DBD::SQLite && perl Makefile.PL && sudo ln -s $(pwd)/bin/ninka /usr/bin/ninka && export PERL5LIB=$(pwd)/lib && cd ../.. 
+ - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && perl Makefile.PL && make && sudo make install && cd ../..
  - cd ..
+ - install/scripts/install-spdx-tools.sh
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
  
@@ -50,11 +55,17 @@ env:
    - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+   - CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
+      CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
+
 
 matrix:
   include:
     - php: 5.3
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/' MAKETARGETS='build-lib VERSIONFILE build-cli'
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/ src/spdx2 src/monk'
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.4
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5
@@ -64,10 +75,18 @@ matrix:
   allow_failures:
     - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+    - env: CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
+        CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
+
 
 script:
  - set -e
  - $CHECKBEFORE
  - make $MAKETARGETS
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
  - set +e
+
+after_script:
+ - mkdir -p build/logs
+ - php src/vendor/bin/coveralls -vv -x clover.xml

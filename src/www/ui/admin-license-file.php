@@ -165,21 +165,20 @@ class admin_license_file extends FO_Plugin
     global $PG_CONN;
 
     $ob = "";     // output buffer
-    $whereextra = "";  // additional stuff for where sql where clause
 
     // look at all
     if ($namestr == "All")
-    $where = "";
+      $where = "";
     else
-    $where = "where rf_shortname like '$namestr%' ";
+      $where = "where rf_shortname like '". pg_escape_string($namestr) ."' ";
 
     // $filter is one of these: "All", "done", "notdone"
     if ($filter != "all")
     {
       if (empty($where))
-      $where .= "where ";
+        $where .= "where ";
       else
-      $where .= " and ";
+        $where .= " and ";
       if ($filter == "done") $where .= " marydone=true";
       if ($filter == "notdone") $where .= " marydone=false";
     }
@@ -222,9 +221,9 @@ class admin_license_file extends FO_Plugin
     while ($row = pg_fetch_assoc($result))
     {
       if ($lineno++ % 2)
-      $style = "style='background-color:lavender'";
+        $style = "style='background-color:lavender'";
       else
-      $style = "";
+        $style = "";
       $ob .= "<tr $style>";
 
       // Edit button brings up full screen edit of all license_ref fields
@@ -436,12 +435,12 @@ class admin_license_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    $md5term = (empty($rf_text) || stristr($rf_text, "License by Nomos")) ? 'null' : "md5('$rf_text')";
+    $md5term = (empty($rf_text) || stristr($rf_text, "License by Nomos")) ? 'null' : 'md5($7)';
     $stmt = __METHOD__.'.rf';
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
         rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
-        rf_detector_type) 
+        rf_detector_type, rf_risk) 
           VALUES (
               $1, $2, $3, $4, $5, $6, $md5term, $7, $8, $9, $10) RETURNING rf_pk";
     $this->dbManager->prepare($stmt,$sql);

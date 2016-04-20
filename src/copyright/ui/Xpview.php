@@ -17,15 +17,20 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+namespace Fossology\Agent\Copyright\UI;
+
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightRenderer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use ui_view;
 
 class Xpview extends DefaultPlugin
 {
@@ -39,6 +44,8 @@ class Xpview extends DefaultPlugin
   protected $uploadDao;
   /** @var CopyrightDao */
   protected $copyrightDao;
+  /** @var AgentDao */
+  protected $agentDao;
   /** @var HighlightRenderer */
   protected $highlightRenderer;
   /** @var DecisionTypes */
@@ -63,14 +70,14 @@ class Xpview extends DefaultPlugin
     $mergedParams = array_merge($params, array(self::DEPENDENCIES=>array("browse", "view"),
                                        self::PERMISSION=> Auth::PERM_READ));
     
-    parent::__construct($name,$mergedParams);
+    parent::__construct($name, $mergedParams);
     $this->agentName = $this->tableName;
     
     $this->uploadDao = $this->getObject('dao.upload');
     $this->copyrightDao = $this->getObject('dao.copyright');
+    $this->agentDao = $this->getObject('dao.agent');
     $this->highlightRenderer = $this->getObject('view.highlight_renderer');
     $this->decisionTypes = $this->getObject('decision.types');
-    
   }
   
 
@@ -109,7 +116,7 @@ class Xpview extends DefaultPlugin
       }
       $uploadTreeId = $uploadTree->getId();
 
-      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->getName() . Traceback_parm_keep(array('show','upload')) . "&item=$uploadTreeId");
     }
     if (empty($uploadTreeId))
     {
@@ -117,7 +124,7 @@ class Xpview extends DefaultPlugin
     }
 
     $copyrightDecisionMap = $this->decisionTypes->getMap();
-    $vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "Clearing", -1, '', '', $uploadTreeTableName);
+    $vars['micromenu'] = Dir2Browse($this->modBack, $uploadTreeId, NULL, $showBox = 0, "View", -1, '', '', $uploadTreeTableName);
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
     $changed= GetParm("changedSomething", PARM_STRING);
@@ -133,7 +140,7 @@ class Xpview extends DefaultPlugin
           $description, $textFinding, $comment);
     }
 
-    $scanJobProxy = new ScanJobProxy($this->getObject('dao.agent'), $uploadId);
+    $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
     $scanJobProxy->createAgentStatus(array($this->agentName));
     $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     $highlights = array();
@@ -219,53 +226,23 @@ class Xpview extends DefaultPlugin
    */
   function RegisterMenus()
   {
-    $text = _("Copyright/Email/Url/Author");
-    menu_insert("Browse-Pfile::Copyright/Email/Url", 0, 'copyright-view', $text);
+    $tooltipText = _("Copyright/Email/Url/Author");
+    menu_insert("Browse-Pfile::Copyright/Email/Url", 0, 'copyright-view', $tooltipText);
     
-    // For this menu, I prefer having this in one place
-    $text = _("Set the concluded licenses for this upload");
-    menu_insert("Clearing::Licenses", 36, "view-license" . Traceback_parm_keep(array("upload", "item", "show")), $text);
-
-    $text = _("View Copyright/Email/Url info");
-    menu_insert("Clearing::Copyright", 35, "copyright-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
-
-    $text = _("View Export Control and Customs info");
-    menu_insert("Clearing::ECC", 33, "ecc-view" . Traceback_parm_keep(array("show", "format", "page", "upload", "item")), $text);
-
-    $text = _("View file information");
-    menu_insert("Clearing::Info", 3, "view_info" . Traceback_parm_keep(array("upload", "item", "format")), $text);
-
-    $text = _("Browse by buckets");
-    menu_insert("Clearing::Bucket Browser", 4, "bucketbrowser" . Traceback_parm_keep(array("format", "page", "upload", "item", "bp"), $text));
-    $text = _("Copyright/Email/URL One-shot, real-time analysis");
-    menu_insert("Clearing::One-Shot Copyright/Email/URL",2, "agent_copyright_once", $text);
-    $text = _("Nomos One-shot, real-time license analysis");
-    menu_insert("Clearing::One-Shot License", 2, "agent_nomos_once" . Traceback_parm_keep(array("format", "item")), $text);
-
-    menu_insert("Clearing::[BREAK]", 6);
-
-    /** @var ui_view $view */
-    $view = plugin_find("view");
     $itemId = GetParm("item", PARM_INTEGER);
-    $textFormat = $view->getFormatParameter($itemId);
+    $textFormat = $this->microMenu->getFormatParameter($itemId);
     $pageNumber = GetParm("page", PARM_INTEGER);
-    $view->addFormatMenuEntries($textFormat, $pageNumber, "Clearing");
+    $this->microMenu->addFormatMenuEntries($textFormat, $pageNumber);
 
     // For all other menus, permit coming back here.
-    $URI = CopyrightView::NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $uploadId = GetParm("upload", PARM_INTEGER);
     if (!empty($itemId) && !empty($uploadId))
     {
-      if (GetParm("mod", PARM_STRING) == $this->Name)
-      {
-        menu_insert("View::View Copyright/Email/Url/Author", 1);
-        menu_insert("View-Meta::View Copyright/Email/Url/Author", 1);
-      } else
-      {
-        $text = _("View Copyright/Email/Url/Author info");
-        menu_insert("View::Copyright", 1, $URI, $text);
-        menu_insert("View-Meta::Copyright", 1, $URI, $text);
-      }
+      $menuText = "Copyright/Email/Url/Author";
+      $menuPosition = 57;
+      $tooltipText = _("View Copyright/Email/Url/Author info");
+      $URI = $this->getName() . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+      $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
     $licId = GetParm("lic", PARM_INTEGER);
     if (!empty($licId))

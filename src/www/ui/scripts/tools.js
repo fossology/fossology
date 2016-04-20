@@ -17,6 +17,7 @@
  */
 
 function setCookie(cookieName, cookieValue, exdays) {
+  exdays = typeof exdays !== 'undefined' ? exdays : 1;
   var date = new Date();
   date.setTime(date.getTime() + (exdays * 24 * 60 * 60 * 1000));
   var expires = "expires=" + date.toUTCString();

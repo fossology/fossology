@@ -21,14 +21,10 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\TextFragment;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\TextRenderer;
 use Monolog\Logger;
-
-define("VIEW_BLOCK_HEX", 8192);
-define("VIEW_BLOCK_TEXT", 10 * VIEW_BLOCK_HEX);
-define("MAXHIGHLIGHTCOLOR", 8);
-define("TITLE_ui_view", _("View File"));
 
 class ui_view extends FO_Plugin
 {
@@ -41,17 +37,28 @@ class ui_view extends FO_Plugin
   private $highlightProcessor;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var int */
+  protected $blockSizeHex = 8192;
+  /** @var int */
+  protected $blockSizeText = 81920;
+  
 
   function __construct()
   {
     $this->Name = self::NAME;
-    $this->Title = TITLE_ui_view;
-    $this->Version = "1.0";
+    $this->Title = _("View File");
     $this->Dependency = array("browse");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
 
     parent::__construct();
+
+    if (array_key_exists('BlockSizeHex', $GLOBALS['SysConf']['SYSCONFIG'])) {
+      $this->blockSizeHex = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeHex']);
+    }
+    if (array_key_exists('BlockSizeText', $GLOBALS['SysConf']['SYSCONFIG'])) {
+      $this->blockSizeText = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeText']);
+    }
 
     global $container;
     $this->logger = $container->get("logger");
@@ -65,26 +72,24 @@ class ui_view extends FO_Plugin
    */
   function RegisterMenus()
   {
-    $text = _("View file contents");
-    menu_insert("Browse-Pfile::View", 10, $this->Name, $text);
+    $tooltipText = _("View file contents");
+    menu_insert("Browse-Pfile::View", 10, $this->Name, $tooltipText);
     // For the Browse menu, permit switching between detail and summary.
 
     $itemId = GetParm("item", PARM_INTEGER);
-    $textFormat = $this->getFormatParameter($itemId);
+    $textFormat = $this->microMenu->getFormatParameter($itemId);
     $pageNumber = GetParm("page", PARM_INTEGER);
-    $this->addFormatMenuEntries($textFormat, $pageNumber);
+    $this->microMenu->addFormatMenuEntries($textFormat, $pageNumber);
 
     $URI = Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
-    if (GetParm("mod", PARM_STRING) == $this->Name)
+    $menuPosition = 59;
+    $menuText = "View";
+    $tooltipText = _("View file contents");
+    $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->Name, $this->Name . $URI, $tooltipText);
+
+    if (GetParm("mod", PARM_STRING) != $this->Name)
     {
-      menu_insert("View::View", 2);
-      menu_insert("View-Meta::View", 2);
-    } else
-    {
-      $text = _("View file contents");
-      menu_insert("View::View", 2, $this->Name . $URI, $text);
-      menu_insert("View-Meta::View", 2, $this->Name . $URI, $text);
-      menu_insert("Browse::View", -2, $this->Name . $URI, $text);
+      menu_insert("Browse::{$menuText}", -2, $this->Name . $URI, $tooltipText);
       menu_insert("Browse::[BREAK]", -1);
     }
   } // RegisterMenus()
@@ -159,6 +164,7 @@ class ui_view extends FO_Plugin
   {
     print $this->getText($inputFile,$startOffset,$Flowed,$outputLength,$splitPositions,$insertBacklink);
   }
+
   /**
    * \brief Given a file handle, display "strings" of the file.
    */
@@ -285,14 +291,15 @@ class ui_view extends FO_Plugin
   {
     if ($this->State != PLUGIN_STATE_READY)
     {
-      return "s";
+      $output = "Invalid plugin state: " . $this->State;
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
-    global $Plugins;
 
     $Upload = GetParm("upload", PARM_INTEGER);
     if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload,Auth::getGroupId()))
     {
-      return 'denied';
+      $output = "Access denied";
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $Item = GetParm("item", PARM_INTEGER);
@@ -300,7 +307,8 @@ class ui_view extends FO_Plugin
     $licenseId = GetParm("licenseId", PARM_INTEGER);
     if (!$inputFile && empty($Item))
     {
-      return "invalid input file";
+      $output = "invalid input file";
+      return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
@@ -316,63 +324,23 @@ class ui_view extends FO_Plugin
     /* Display file contents */
     $output="";
     $openedFin = False;
-    $Format = $this->getFormatParameter($Item);
+    $Format = $this->microMenu->getFormatParameter($Item);
     if (empty($inputFile))
     {
       $inputFile = @fopen(RepPathItem($Item), "rb");
-      if ($inputFile) $openedFin = true;
+      if ($inputFile) {
+        $openedFin = true;
+      }
       if (empty($inputFile))
       {
-        /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
-        /** BEGIN **/
-        /* If this is a POST, then process the request. */
-        $uploadunpack = GetParm('uploadunpack', PARM_INTEGER);
-        $uploadpk = $Upload;
-        $flag = 0;
-
-        $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        $state = $P->CheckStatus($uploadpk, "reunpack", "ununpack");
-        //print "<p>$state</p>";
-        if ($state == 0 || $state == 2)
-        {
-          if (!empty($uploadunpack))
-          {
-            $rc = $P->AgentAdd($uploadpk);
-            if (empty($rc))
-            {
-              /* Need to refresh the screen */
-              $text = _("Unpack added to job queue");
-              $this->vars['message'] = $text;
-              $flag = 1;
-              $text = _("Reunpack job is running: you can see it in");
-              $text1 = _("jobqueue");
-              print "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-            } else
-            {
-              $text = _("Unpack of Upload failed");
-              $this->vars['message'] = "$text: $rc";
-            }
-          }
-        }
-        else
-        {
-          $flag = 1;
-          $text = _("Reunpack job is running: you can see it in");
-          $text1 = _("jobqueue");
-          $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-        }
-        $text = _("File contents are not available in the repository.");
-        $output .=  "$text\n";
-        $P = & $Plugins[plugin_find_id("ui_reunpack")];
-        $output .=  $P->ShowReunpackView($Item, $flag);
-        return $output;
+        $output = $this->outputWhenFileNotInRepo($Upload, $Item);
+        return $getPageMenuInline ? array("Error", $output) : $output;
       }
-      /** END **/
     }
     rewind($inputFile);
     $Uri = preg_replace('/&page=[0-9]*/', '', Traceback());
 
-    $blockSize = $Format == 'hex' ? VIEW_BLOCK_HEX : VIEW_BLOCK_TEXT;
+    $blockSize = $Format == 'hex' ? $this->blockSizeHex : $this->blockSizeText;
     
     if(!isset($Page) && !empty($licenseId))
     {
@@ -418,10 +386,10 @@ class ui_view extends FO_Plugin
 
     if ($Format == 'hex')
     {
-       $output .= $this->getHex($inputFile, $PageSize, VIEW_BLOCK_HEX, $splitPositions);
+       $output .= $this->getHex($inputFile, $PageSize, $this->blockSizeHex, $splitPositions);
     } else
     {
-      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, VIEW_BLOCK_TEXT, $splitPositions, $insertBacklink);
+      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, $this->blockSizeText, $splitPositions, $insertBacklink);
     }
     
     if (!empty($PageMenu) and !$getPageMenuInline)
@@ -433,116 +401,59 @@ class ui_view extends FO_Plugin
     {
       fclose($inputFile);
     }
-    if($getPageMenuInline)
-      return array($PageMenu, $output);
-    else
-      return $output;
+    
+    return $getPageMenuInline ? array($PageMenu, $output) : $output;
   }
 
+  
+  /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
+  protected function outputWhenFileNotInRepo($uploadpk, $item)
+  {
+    global $Plugins;
+    $reunpackPlugin = & $Plugins[plugin_find_id("ui_reunpack")];
+    $state = $reunpackPlugin->CheckStatus($uploadpk, "reunpack", "ununpack");
+
+    /* If this is a POST, then process the request. */
+    $uploadunpack = GetParm('uploadunpack', PARM_INTEGER);
+    $flag = 0;
+    $output = '';
+
+    if ($state != 0 && $state != 2)
+    {
+      $flag = 1;
+      $text = _("Reunpack job is running: you can see it in");
+      $text1 = _("jobqueue");
+      $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+    }
+    elseif (!empty($uploadunpack))
+    {
+      $rc = $reunpackPlugin->AgentAdd($uploadpk);
+      if (empty($rc))
+      {
+        /* Need to refresh the screen */
+        $this->vars['message'] =  _("Unpack added to job queue");
+        $flag = 1;
+        $text = _("Reunpack job is running: you can see it in");
+        $text1 = _("jobqueue");
+        $output .= "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
+      }
+      else
+      {
+        $text = _("Unpack of Upload failed");
+        $this->vars['message'] = "$text: $rc";
+      }
+    }
+
+    $text = _("File contents are not available in the repository.");
+    $output .=  "$text\n";
+    $output .=  $reunpackPlugin->ShowReunpackView($item, $flag);
+    return $output;
+  }
+  
+  
   public function Output()
   {
     return $this->ShowView(NULL, "browse");
-  }
-
-  /**
-   * @param $itemId
-   * @return string
-   */
-  public function getFormatParameter($itemId=NULL)
-  {
-    switch (GetParm("format", PARM_STRING))
-    {
-      case 'hex':
-        $format = 'hex';
-        break;
-      case 'text':
-        $format = 'text';
-        break;
-      case 'flow':
-        $format = 'flow';
-        break;
-      default:
-        /* Determine default show based on mime type */
-        if (empty($itemId))
-          $format = 'flow';
-        else
-        {
-          $Meta = GetMimeType($itemId);
-          list($type, $dummy) = explode("/", $Meta, 2);
-          if ($type == 'text')
-          {
-            $format = 'text';
-          } else {
-            $format = 'flow';
-          }
-        }
-        break;
-    }
-    return $format;
-  }
-
-  /**
-   * @param $textFormat
-   * @return string
-   */
-  public function addFormatMenuEntries($textFormat, $pageNumber, $menuName="View")
-  {
-    $URI = Traceback_parm();
-    $URI = preg_replace("/&format=[a-zA-Z0-9]*/", "", $URI);
-    $URI = preg_replace("/&page=[0-9]*/", "", $URI);
-
-    $pageNumberHex = NULL;
-    $pageNumberText = NULL;
-
-    /***********************************
-     * If there is paging, compute page conversions.
-     ***********************************/
-    switch ($textFormat)
-    {
-      case 'hex':
-        $pageNumberHex = $pageNumber;
-        $pageNumberText = intval($pageNumber * VIEW_BLOCK_HEX / VIEW_BLOCK_TEXT);
-        break;
-      case 'text':
-      case 'flow':
-        $pageNumberText = $pageNumber;
-        $pageNumberHex = intval($pageNumber * VIEW_BLOCK_TEXT / VIEW_BLOCK_HEX);
-        break;
-    }
-
-    menu_insert("$menuName::[BREAK]", -1);
-    switch ($textFormat)
-    {
-      case "hex":
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Hex", -10);
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-      case "text":
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        menu_insert("$menuName::Text", -11);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-      case "flow":
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        menu_insert("$menuName::Formatted", -12);
-        break;
-      default:
-        $text = _("View as a hex dump");
-        menu_insert("$menuName::Hex", -10, "$URI&format=hex&page=$pageNumberHex", $text);
-        $text = _("View as unformatted text");
-        menu_insert("$menuName::Text", -11, "$URI&format=text&page=$pageNumberText", $text);
-        $text = _("View as formatted text");
-        menu_insert("$menuName::Formatted", -12, "$URI&format=flow&page=$pageNumberText", $text);
-        break;
-    }
   }
 
 }

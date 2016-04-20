@@ -57,24 +57,24 @@ class ShowJobsDao extends Object
   {
     $jobArray = array();
     $jobCount = count($upload_pks);
-    if ($jobCount == 0) return $jobArray;
+    if ($jobCount == 0) {
+      return $jobArray;
+    }
 
     /* calculate index of starting upload_pk */
-    if (empty($page)) 
-      $offset = 0; 
-    else 
-      $offset = $page * $this->maxUploadsPerPage;
+    $offset = empty($page) ? 0 : $page * $this->maxUploadsPerPage;
 
     /* Get the job_pk's for each for each upload_pk */
     $lastOffset = ($jobCount < $this->maxUploadsPerPage) ? $offset+$jobCount : $this->maxUploadsPerPage;
     $statementName = __METHOD__."upload_pkforjob";
-    $this->dbManager->prepare($statementName,
-    "SELECT job_pk FROM job WHERE job_upload_fk=$1 ORDER BY job_pk ASC");
+    $this->dbManager->prepare($statementName, "SELECT job_pk FROM job WHERE job_upload_fk=$1 ORDER BY job_pk ASC");
     for(; $offset < $lastOffset; $offset++){
       $upload_pk = $upload_pks[$offset];
 
       $result = $this->dbManager->execute($statementName, array($upload_pk));
-      while($row = $this->dbManager->fetchArray($result)) $jobArray[] = $row['job_pk'];
+      while ($row = $this->dbManager->fetchArray($result)) {
+        $jobArray[] = $row['job_pk'];
+      }
       $this->dbManager->freeResult($result);
     }
     return $jobArray;
@@ -94,10 +94,7 @@ class ShowJobsDao extends Object
            array($uploadId),
            $statementName
     );
-    if (!empty($row['job_name']))
-      return $row['job_name'];
-    else
-      return $uploadId; 
+    return (empty($row['job_name']) ? $uploadId : $row['job_name']);
   } /* getJobName */
 
   /**
@@ -111,22 +108,21 @@ class ShowJobsDao extends Object
   {
     $jobArray = array();
 
-    if ($allusers == 0) 
-      $allusers_str = "job_user_fk='".Auth::getUserId()."' and ";
-    else
-      $allusers_str = "";
+    $allusers_str = ($allusers == 0) ? "job_user_fk='".Auth::getUserId()."' and " : $allusers_str = "";
     
     $statementName = __METHOD__."$allusers_str";
     $this->dbManager->prepare($statementName,
     "SELECT job_pk, job_upload_fk FROM job WHERE $allusers_str job_queued >= (now() - interval '".$this->nhours." hours') ORDER BY job_queued DESC");
     $result = $this->dbManager->execute($statementName);
-    while($row = $this->dbManager->fetchArray($result)){
-      if (!empty($row['job_upload_fk'])){
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if (!empty($row['job_upload_fk'])) {
         $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], Auth::getGroupId());
-        if (!$uploadIsAccessible) { continue; }
+        if (!$uploadIsAccessible) {
+          continue;
+        }
       }
       $jobArray[] = $row['job_pk'];
-    }  
+    }
     $this->dbManager->freeResult($result);
 
     return $jobArray;
@@ -311,4 +307,19 @@ class ShowJobsDao extends Object
     } 
   }/* getEstimatedTime() */
 
+  /** 
+   * @brief Return total Job data with time elapsed
+   * @param $job_pk
+   * @return $row
+   */
+  public function getDataForASingleJob($job_pk)
+  {
+    $statementName = __METHOD__."getDataForASingleJob";
+    $this->dbManager->prepare($statementName,
+    "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1");
+    $result = $this->dbManager->execute($statementName, array($job_pk));
+    $row = $this->dbManager->fetchArray($result);
+    $this->dbManager->freeResult($result);
+    return $row;
+  } /* getDataForASingleJob */
 }

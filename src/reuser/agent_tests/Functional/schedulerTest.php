@@ -33,6 +33,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
@@ -48,6 +49,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $testDb;
   /** @var DbManager */
   private $dbManager;
+  /** @var TestInstaller */
+  private $testInstaller;
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -69,7 +72,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("reuserSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -89,7 +92,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -102,37 +105,15 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
-
-    $confFile = $sysConf."/fossology.conf";
-    $fakeInstallationDir = "$sysConf/inst";
-    $libDir = dirname(dirname(dirname(__DIR__)))."/lib";
-
-    $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n[DIRECTORIES]\nMODDIR = $fakeInstallationDir";
-    file_put_contents($confFile, $config);
-    if (!is_dir($fakeInstallationDir))
-    {
-      mkdir($fakeInstallationDir, 0777, true);
-      system("ln -sf $libDir $fakeInstallationDir/lib");
-      if (!is_dir("$fakeInstallationDir/www/ui")) {
-        mkdir("$fakeInstallationDir/www/ui/", 0777, true);
-        touch("$fakeInstallationDir/www/ui/ui-menus.php");
-      }
-    }
-
-    $topDir = dirname(dirname(dirname(dirname(__DIR__))));
-    system("install -D $topDir/VERSION $sysConf");
-
-    $testRepoDir = "$libDir/php/Test/";
-    system("cp -a $testRepoDir/repo $sysConf/");
+    $this->testInstaller = new TestInstaller($sysConf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
   }
 
   private function rmRepo()
   {
-    $sysConf = $this->testDb->getFossSysConf();
-    system("rm $sysConf/repo -rf");
-    system("rm $sysConf/inst -rf");
-    unlink($sysConf."/VERSION");
-    unlink($sysConf."/fossology.conf");
+    $this->testInstaller->rmRepo();
+    $this->testInstaller->clear();
   }
 
   private function setUpTables()
@@ -143,10 +124,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
-    $this->testDb->createInheritedArsTables(array('nomos','monk'));
+    $this->testDb->createInheritedArsTables(array('monk'));
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','monk_ars'), false);
+    $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }

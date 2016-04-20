@@ -35,14 +35,14 @@ class ItemTest extends \PHPUnit_Framework_TestCase
   /** @var Item */
   private $item;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
 
     $this->item = new Item($this->itemTreeBounds, $this->parentId, $this->fileId, $this->fileMode, $this->fileName);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     M::close();
   }

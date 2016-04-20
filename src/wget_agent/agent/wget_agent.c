@@ -61,7 +61,7 @@ int IsFile(char *Fname, int Link)
  * \brief Closes the connection to the server, free the database connection, and exit.
  *
  * \param int rc - exit value
- */ 
+ */
 void  SafeExit(int rc)
 {
   if (pgConn) PQfinish(pgConn);
@@ -110,9 +110,9 @@ void DBLoadGold()
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
-  if ((int)ForceGroup > 0) 
-  { 
-    rc = chown(GlobalTempFile,-1,ForceGroup); 
+  if ((int)ForceGroup > 0)
+  {
+    rc = chown(GlobalTempFile,-1,ForceGroup);
     if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno))
   }
 
@@ -143,9 +143,9 @@ void DBLoadGold()
     }
     /* Put the file in the "files" repository too */
     Path = fo_RepMkPath("gold",Unique);
-    if ((int)ForceGroup >= 0) 
-    { 
-      rc = chown(Path,-1,ForceGroup); 
+    if ((int)ForceGroup >= 0)
+    {
+      rc = chown(Path,-1,ForceGroup);
       if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
     }
   } /* if GlobalImportGold */
@@ -168,12 +168,12 @@ void DBLoadGold()
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
-  if ((int)ForceGroup >= 0) 
-  { 
-    rc = chown(Path,-1,ForceGroup); 
+  if ((int)ForceGroup >= 0)
+  {
+    rc = chown(Path,-1,ForceGroup);
     if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
   }
-  if (Path != GlobalTempFile) 
+  if (Path != GlobalTempFile)
   {
     if(Path)
     {
@@ -252,7 +252,7 @@ void DBLoadGold()
  * \brief Given a URL string, taint-protect it.
  *
  * \param char *Sin - the source URL
- * \param char *Sout - the tainted URL  
+ * \param char *Sout - the tainted URL
  *
  * \return 1=tainted, 0=failed to taint
  */
@@ -296,12 +296,12 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   memset(TempFileDirectory,'\0',MAXCMD);
   memset(DeleteTempDirCmd,'\0',MAXCMD);
-  
+
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", TempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 #if 1
-  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off -k";
+  char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
   /* wget < 1.10 does not support "--no-check-certificate" */
   char WgetArgs[]="--progress=dot -rc -np -e robots=off";
@@ -351,7 +351,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
   if (GlobalProxy[3] && GlobalProxy[3][0])
   {
-    snprintf(no_proxy, MAXCMD-1, "-e no_proxy=%s", GlobalProxy[3]);
+    snprintf(no_proxy, MAXCMD-1, "-e no_proxy='%s'", GlobalProxy[3]);
   }
 
   if (TempFile && TempFile[0])
@@ -366,19 +366,19 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
         proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam, no_proxy);
   }
-  else 
+  else
   {
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
         proxy, WgetArgs,TaintedURL, GlobalParam, no_proxy);
   }
   /* the command is like
-  ". /usr/local/etc/fossology/Proxy.conf; 
-     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -k -P 
+  ". /usr/local/etc/fossology/Proxy.conf;
+     /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -P
      '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
   LOG_VERBOSE0("CMD: %s", CMD);
-  rc = system(CMD); 
+  rc = system(CMD);
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
@@ -415,7 +415,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         rc_system = system(CMD); // delete all empty directories downloaded
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
         memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", TempFile, TempFilePath);
+        snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
       }
       else
       {
@@ -434,7 +434,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     else
     {
       memset(CMD,'\0',MAXCMD);
-      snprintf(CMD,MAXCMD-1, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile); 
+      snprintf(CMD,MAXCMD-1, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile);
       rc_system = system(CMD);
       if (rc_system != 0)
       {
@@ -445,7 +445,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
     }
-  } 
+  }
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
   {
@@ -465,7 +465,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
 /**
  * \brief get source code from version control system
- * 
+ *
  * \return int - 0: successful; others: fail
  */
 int GetVersionControl()
@@ -483,7 +483,7 @@ int GetVersionControl()
   homeenv = getenv("HOME");
   if(NULL == homeenv) resethome = 1;
 
-  /* We need HOME to point to where .gitconfig is installed 
+  /* We need HOME to point to where .gitconfig is installed
    * path is the repository path and .gitconfig is installed in its parent directory
    */
   snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
@@ -528,7 +528,7 @@ int GetVersionControl()
     return 1;
   }
 
-  snprintf(command,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ >/dev/null 2>&1", GlobalTempFile, TempFileDirectory);
+  snprintf(command,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, TempFileDirectory);
   rc = system(command);
   if (rc != 0)
   {
@@ -598,7 +598,7 @@ void    SetEnv  (char *S, char *TempFileDir)
     if ((S[SLen] == '\\') && isprint(S[SLen+1])) // in file path, if include '\ ', that mean this file name include spaces
     {
       LOG_FATAL("S[SLen] is:%c\n", S[SLen]);
-      GlobalURL[GLen++] = ' '; 
+      GlobalURL[GLen++] = ' ';
       SLen += 2;
       continue;
     }
@@ -673,11 +673,11 @@ char *PathCheck(char *DirPath)
 }
 
 /**
- * \brief if the path(fs) is a directory, create a tar file from files(dir) in a directory 
+ * \brief if the path(fs) is a directory, create a tar file from files(dir) in a directory
  * to the temporary directory
  * if the path(fs) is a file, copy the file to the temporary directory
  *
- * \param char *Path - the fs will be handled, directory(file) you want to upload from server 
+ * \param char *Path - the fs will be handled, directory(file) you want to upload from server
  * \param char *TempFile - the tar(reguler) file name
  * \param struct stat Status - the status of Path
  *
@@ -690,7 +690,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 
   snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
   rc_system = system(CMD);
-  if (!WIFEXITED(rc_system)) 
+  if (!WIFEXITED(rc_system))
   {
     LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
     systemError(__LINE__, rc_system, CMD)
@@ -700,9 +700,9 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C '%s' ./ %s >/dev/null 2>&1", TempFile, Path, GlobalParam);
+    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ %s 1>/dev/null", TempFile, Path, GlobalParam);
     rc_system = system(CMD);
-    if (!WIFEXITED(rc_system)) 
+    if (!WIFEXITED(rc_system))
     {
       systemError(__LINE__, rc_system, CMD)
       return 0;
@@ -712,7 +712,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     memset(CMD, '\0', MAXCMD);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p %s/temp  > /dev/null 2>&1 && cp %s  %s/temp > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r %s '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
@@ -720,7 +720,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
       return 0;
     }
     memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cvvf  '%s' -C %s/temp ./  > /dev/null 2>&1 && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
+    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
     rc_system = system(CMD);
     if (rc_system != 0)
     {
@@ -743,7 +743,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   return 1;
 }
 
-/** 
+/**
  * \brief get proxy from fossology.conf
  */
 void GetProxy()
@@ -773,7 +773,7 @@ void GetProxy()
   GlobalProxy[i] = fo_config_get(sysconfig, "FOSSOLOGY", "no_proxy", &error4);
   trim(GlobalProxy[i++]);
 
-  
+
   if (GlobalProxy[0] && GlobalProxy[0][0])
   {
     http_proxy_port = strrchr(GlobalProxy[0], ':');
@@ -783,7 +783,7 @@ void GetProxy()
     if (http_proxy_port && http_proxy_port[0])
     {
       /* exclude '/' in http_proxy_port and 'http://' in http_proxy_host */
-      http_temp = strchr(http_proxy_port, '/'); 
+      http_temp = strchr(http_proxy_port, '/');
       if (http_temp && http_temp[0])
       {
         count_temp = http_temp - http_proxy_port;

@@ -232,6 +232,7 @@ class ClearingDao extends Object
     $clearingsWithLicensesArray = array();
 
     $previousClearingId = -1;
+    $previousItemId = -1;
     $clearingEvents = array();
     $clearingEventCache = array();
     $clearingDecisionBuilder = ClearingDecisionBuilder::create();
@@ -239,6 +240,7 @@ class ClearingDao extends Object
     while ($row = $this->dbManager->fetchArray($result))
     {
       $clearingId = $row['id'];
+      $itemId = $row['itemid'];
       $licenseId = $row['license_id'];
       $eventId = $row['event_id'];
       $licenseShortName = $row['shortname'];
@@ -251,7 +253,7 @@ class ClearingDao extends Object
       $comment = $row['comment'];
       $reportInfo = $row['reportinfo'];
 
-      if ($clearingId !== $previousClearingId)
+      if ($clearingId !== $previousClearingId && $itemId !== $previousItemId)
       {
         //store the old one
         if (!$firstMatch)
@@ -262,10 +264,11 @@ class ClearingDao extends Object
         $firstMatch = false;
         //prepare the new one
         $previousClearingId = $clearingId;
+        $previousItemId = $itemId;
         $clearingEvents = array();
         $clearingDecisionBuilder = ClearingDecisionBuilder::create()
             ->setClearingId($row['id'])
-            ->setUploadTreeId($row['itemid'])
+            ->setUploadTreeId($itemId)
             ->setPfileId($row['pfile_id'])
             ->setUserName($row['user_name'])
             ->setUserId($row['user_id'])
@@ -468,6 +471,18 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($this->dbManager->execute($stmt, array($eventId, $itemId, $userId, $groupId)));
   }
 
+  /**
+   * @param int $uploadTreeId
+   * @param int $userId
+   * @param int $groupId
+   * @param int $licenseId
+   * @param bool $isRemoved
+   * @param int $type ClearingEventTypes
+   * @param string $reportInfo
+   * @param string $comment
+   * @param int $jobId
+   * @return int $clearing_event_pk
+   */
   public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId=0)
   {
     $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
@@ -582,7 +597,7 @@ INSERT INTO clearing_decision (
    * @param ItemTreeBounds $itemTreeBound
    * @param int $groupId
    * @param boolean $onlyTried
-   * @return array[] where array has keys ("bulkId","id","text","lic","removing","matched","tried")
+   * @return array[] where array has keys ("bulkId","id","text","matched","tried","removedLicenses","addedLicenses")
    */
   public function getBulkHistory(ItemTreeBounds $itemTreeBound, $groupId, $onlyTried = true)
   {
@@ -602,45 +617,50 @@ INSERT INTO clearing_decision (
       $stmt .= ".tried";
     }
 
-    $sql = "with alltried as (
-            select lr.lrb_pk,
-              ce.clearing_event_pk ce_pk, lr.rf_text, lrf.rf_shortname, removing,
-              ce.uploadtree_fk,
-              $triedExpr as tried
-              from license_ref_bulk lr
-              left join highlight_bulk h on lrb_fk = lrb_pk
-              left join clearing_event ce on ce.clearing_event_pk = h.clearing_event_fk
-              left join $uploadTreeTableName ut on ut.uploadtree_pk = ce.uploadtree_fk
-              inner join $uploadTreeTableName ut2 on ut2.uploadtree_pk = lr.uploadtree_fk
-              inner join license_ref lrf on lr.rf_fk = lrf.rf_pk
-              where ut2.upload_fk = $1 AND lr.group_fk = $4
+    $sql = "WITH alltried AS (
+            SELECT lr.lrb_pk, ce.clearing_event_pk ce_pk, lr.rf_text, ce.uploadtree_fk,
+              $triedExpr AS tried
+            FROM license_ref_bulk lr
+              LEFT JOIN highlight_bulk h ON lrb_fk = lrb_pk
+              LEFT JOIN clearing_event ce ON ce.clearing_event_pk = h.clearing_event_fk
+              LEFT JOIN $uploadTreeTableName ut ON ut.uploadtree_pk = ce.uploadtree_fk
+              INNER JOIN $uploadTreeTableName ut2 ON ut2.uploadtree_pk = lr.uploadtree_fk
+            WHERE ut2.upload_fk = $1 AND lr.group_fk = $4
               $triedFilter
-              order by lr.lrb_pk
-            )
-            SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text as text, rf_shortname as lic, removing, tried, matched
+              ORDER BY lr.lrb_pk
+            ), aggregated_tried AS (
+            SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text AS text, tried, matched
             FROM (
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, true as matched FROM alltried WHERE uploadtree_fk = $2
+              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text, tried, true AS matched FROM alltried WHERE uploadtree_fk = $2
               UNION ALL
-              SELECT distinct on(lrb_pk) lrb_pk, ce_pk, rf_text, rf_shortname, removing, tried, false as matched FROM alltried WHERE uploadtree_fk != $2 or uploadtree_fk is NULL
-            ) AS result ORDER BY lrb_pk, matched DESC";
+              SELECT DISTINCT ON(lrb_pk) lrb_pk, ce_pk, rf_text, tried, false AS matched FROM alltried WHERE uploadtree_fk != $2 OR uploadtree_fk IS NULL
+            ) AS result ORDER BY lrb_pk, matched DESC)
+            SELECT lrb_pk, text, rf_shortname, removing, tried, ce_pk, matched
+            FROM aggregated_tried
+              INNER JOIN license_set_bulk lsb ON lsb.lrb_fk = lrb_pk
+              INNER JOIN license_ref lrf ON lsb.rf_fk = lrf.rf_pk
+            ORDER BY lrb_pk";
 
     $this->dbManager->prepare($stmt, $sql);
-
     $res = $this->dbManager->execute($stmt, $params);
-
+    
     $bulks = array();
-
     while ($row = $this->dbManager->fetchArray($res))
     {
-      $bulks[] = array(
-          "bulkId" => $row['lrb_pk'],
-          "id" => $row['ce_pk'],
-          "text" => $row['text'],
-          "lic" => $row['lic'],
-          "removing" => $this->dbManager->booleanFromDb($row['removing']),
-          "matched" => $this->dbManager->booleanFromDb($row['matched']),
-          "tried" => $this->dbManager->booleanFromDb($row['tried'])
-      );
+      $bulkRun = $row['lrb_pk'];
+      if (!array_key_exists($bulkRun, $bulks))
+      {
+        $bulks[$bulkRun] = array(
+            "bulkId" => $row['lrb_pk'],
+            "id" => $row['ce_pk'],
+            "text" => $row['text'],
+            "matched" => $this->dbManager->booleanFromDb($row['matched']),
+            "tried" => $this->dbManager->booleanFromDb($row['tried']),
+            "removedLicenses" => array(),
+            "addedLicenses" => array());
+      }
+      $key = $this->dbManager->booleanFromDb($row['removing']) ? 'removedLicenses' : 'addedLicenses';
+      $bulks[$bulkRun][$key][] = $row['rf_shortname'];
     }
 
     $this->dbManager->freeResult($res);
@@ -783,25 +803,4 @@ INSERT INTO clearing_decision (
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
             array($uploadId,$groupId,$licenseId));
   }
-
-  /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int $groupId
-   * @param bool $onlyCurrent
-   * @return ClearingDecision[]
-   */
-  function getIrrelevantFilesFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
-  {
-    $statementName = __METHOD__;
-    $params = array();
-    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params);
-    $params[] = DecisionTypes::IRRELEVANT;
-    $sql = "$decisionsCte SELECT itemid uploadtree_pk FROM decision WHERE type_id=$".count($params);
-    $this->dbManager->prepare($statementName, $sql);
-    $res = $this->dbManager->execute($statementName, $params);
-    $irrelevantFiles = $this->dbManager->fetchAll($res);
-    $this->dbManager->freeResult($res);
-    return $irrelevantFiles;
-  }
-  
 }

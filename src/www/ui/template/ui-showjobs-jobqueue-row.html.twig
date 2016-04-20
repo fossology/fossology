@@ -7,11 +7,11 @@
 
 <tr class="{{ class }}">
   <td>
-    <a href="{{ uriFull }}&show=job&job={{ jqId }}">{{ jqId }}</a>
+    <a href="{{ uriFull }}&job={{ jqId }}">{{ jqId }}</a>
     {% if depends is not empty %}
       {% for depend_jq_pk in depends %}{#
       #}{% if loop.index0==0 %} / {% else %}, {% endif %}
-        <a href="{{ uriFull }}&show=job&job={{ depend_jq_pk }}">{{ depend_jq_pk }}</a>{#
+        <a href="{{ uriFull }}&job={{ depend_jq_pk }}">{{ depend_jq_pk }}</a>{#
       #}{% endfor %}
     {% endif %}
   </td>
@@ -41,11 +41,11 @@
   <td class="jobAction">
     {% if canDoActions and isInProgress %}
       {% if endText == "Paused" %}
-        [<a href="{{ uriFull }}&action=restart&jobid={{ jqId }}" title="{{ 'Un-Pause this job'|trans }}">{{ 'Unpause'|trans }}</a>]
+        [<a href="{{ uriFull }}&action=restart&jobid={{ jqId }}{% if page != 0 %}&page={{ page }}{% endif %}{% if allusers != 0 %}&allusers={{ allusers }}{% endif %}" title="{{ 'Un-Pause this job'|trans }}">{{ 'Unpause'|trans }}</a>]
       {% else %}
-        [<a href="{{ uriFull }}&action=pause&jobid={{ jqId }}" title="{{ 'Pause this job'|trans }}">{{ 'Unpause'|trans }}</a>]
+        [<a href="{{ uriFull }}&action=pause&jobid={{ jqId }}{% if page != 0 %}&page={{ page }}{% endif %}{% if allusers != 0 %}&allusers={{ allusers }}{% endif %}" title="{{ 'Pause this job'|trans }}">{{ 'Pause'|trans }}</a>]
       {% endif %}
-      [<a href="{{ uriFull }}&action=cancel&jobid={{ jqId }}" title="{{ 'Cancel this job'|trans }}">{{ 'Cancel'|trans }}</a>]
+      [<a href="{{ uriFull }}&action=cancel&jobid={{ jqId }}{% if page != 0 %}&page={{ page }}{% endif %}{% if allusers != 0 %}&allusers={{ allusers }}{% endif %}" title="{{ 'Cancel this job'|trans }}">{{ 'Cancel'|trans }}</a>]
     {% elseif download and isReady %}
       [<a href="?mod=download&report={{ jobId }}">Download {{ download }}</a>]
     {% endif %}

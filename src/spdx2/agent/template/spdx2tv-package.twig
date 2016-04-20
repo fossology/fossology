@@ -1,0 +1,33 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+{# RelationshipComment: #}
+PackageName: {{ packageName }}
+PackageFileName: {{ uploadName }}
+SPDXID: SPDXRef-upload{{ uploadId }}
+PackageDownloadLocation: NOASSERTION
+PackageVerificationCode: {{ verificationCode }}
+PackageChecksum: SHA1: {{ sha1 }}
+{# PackageChecksum: SHA256: #}
+PackageChecksum: MD5: {{ md5  }}
+{# PackageChecksum: SSDEEP: #}
+{% if mainLicenses|default is empty %}
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+{% else %}
+PackageLicenseConcluded: {{ mainLicense }}
+PackageLicenseDeclared: {{ mainLicense }}
+{% endif %}
+{% if licenseComments %}PackageLicenseComments: <text> {{ licenseComments|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'}) }} </text>
+{% endif %}
+PackageLicenseInfoFromFiles: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+##--------------------------
+## File Information
+##--------------------------
+{{ fileNodes }}

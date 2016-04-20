@@ -47,8 +47,8 @@ int parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd)
         state->verbosity++;
         break;
        case 'V':
-#ifdef SVN_REV_S
-        printf(AGENT_NAME " version " VERSION_S " r(" SVN_REV_S ")\n");
+#ifdef COMMIT_HASH_S
+        printf(AGENT_NAME " version " VERSION_S " r(" COMMIT_HASH_S ")\n");
 #else
         printf(AGENT_NAME " (no version available)\n");
 #endif

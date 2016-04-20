@@ -36,9 +36,7 @@ class uploadWEMailTest extends fossologyTestCase {
 
   public $mybrowser;
 
-  public function setUp() {
-    global $URL;
-
+  protected function setUp() {
     $this->Login();
     $this->CreateFolder(1, 'Enote', 'Folder for Email notification uploads');
   }
@@ -105,5 +103,4 @@ class uploadWEMailTest extends fossologyTestCase {
       $this->fail("checkEmailNotification failed, is local email configured?\n");
     }
   }
-};
-?>
+}

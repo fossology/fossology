@@ -34,7 +34,7 @@ RMFILES = FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|c
 all:
 #	php5 fo-render.php m
 
-install:
+install: empty-cache
 	@mkdir -p $(DESTDIR)$(WEBDIR)/ui
 	@for dir in $(DIRS); do \
 		mkdir -p $(DESTDIR)$(WEBDIR)/ui/$$dir; \
@@ -56,6 +56,9 @@ install:
 	fi
 	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
 	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
+
+empty-cache:
+	rm -rf $(CACHEDIR)/*
 
 uninstall:
 	rm -rf $(DESTDIR)$(WEBDIR)

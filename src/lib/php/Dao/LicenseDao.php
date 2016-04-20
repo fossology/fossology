@@ -33,7 +33,7 @@ use Monolog\Logger;
 class LicenseDao extends Object
 {
   const NO_LICENSE_FOUND = 'No_license_found';
-  
+
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */
@@ -60,7 +60,7 @@ class LicenseDao extends Object
     $statementName = __METHOD__ . ".$uploadTreeTableName.$usageId";
     $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     if($usageId==LicenseMap::TRIVIAL)
-    {    
+    {
       $licenseJoin = "ONLY license_ref mlr ON license_file.rf_fk = mlr.rf_pk";
     }
     else
@@ -183,8 +183,8 @@ class LicenseDao extends Object
     $this->dbManager->freeResult($result);
     return $licenseRefs;
   }
-  
-  
+
+
   /**
    * @return LicenseRef[]
    */
@@ -224,7 +224,7 @@ class LicenseDao extends Object
     $this->dbManager->freeResult($result);
     return $licenseRefs;
   }
-  
+
 
   /**
    * @return array
@@ -249,7 +249,7 @@ class LicenseDao extends Object
     return $licenseRefs;
   }
 
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $selectedAgentId
@@ -273,6 +273,7 @@ class LicenseDao extends Object
         $condition .= " AND ufile_name BETWEEN $4 and $5";
         $param[] = $nameRange[0];
         $param[] = $nameRange[1];
+        $statementName .= ".nameRange";
       }
     }
     else
@@ -309,6 +310,135 @@ class LicenseDao extends Object
 
     $this->dbManager->freeResult($result);
     return $licensesPerFileId;
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param Array(int) $selectedAgentIds
+   * @param bool $includeSubFolders
+   * @param String $excluding
+   * @param bool $ignore ignore files without license
+   * @return array
+   */
+  public function getLicensesPerFileNameForAgentId(ItemTreeBounds $itemTreeBounds,
+                                                   $selectedAgentIds=null,
+                                                   $includeSubfolders=true,
+                                                   $excluding='',
+                                                   $ignore=false)
+  {
+    $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
+    $statementName = __METHOD__ . '.' . $uploadTreeTableName;
+    $param = array();
+
+    $condition = " (ufile_mode & (1<<28)) = 0";
+    if ($includeSubfolders)
+    {
+      $param[] = $itemTreeBounds->getLeft();
+      $param[] = $itemTreeBounds->getRight();
+      $condition .= " AND lft BETWEEN $1 AND $2";
+      $statementName .= ".subfolders";
+    }
+    else
+    {
+      $param[] = $itemTreeBounds->getItemId();
+      $condition .= " AND realparent = $1";
+    }
+
+    if ('uploadtree_a' == $uploadTreeTableName)
+    {
+      $param[] = $itemTreeBounds->getUploadId();
+      $condition .= " AND upload_fk=$".count($param);
+    }
+
+    $agentSelect = "";
+    if ($selectedAgentIds !== null)
+    {
+      $statementName .= ".".count($selectedAgentIds)."agents";
+      $agentSelect = "WHERE agent_fk IS NULL";
+      foreach($selectedAgentIds as $selectedAgentId)
+      {
+        $param[] = $selectedAgentId;
+        $agentSelect .= " OR agent_fk = $".count($param);
+      }
+    }
+
+    $sql = "
+SELECT ufile_name, lft, rgt, ufile_mode,
+       rf_shortname, agent_fk
+FROM (SELECT
+        ufile_name,
+        lft, rgt, ufile_mode, pfile_fk
+      FROM $uploadTreeTableName
+      WHERE $condition) AS subselect1
+LEFT JOIN (SELECT rf_shortname,pfile_fk,agent_fk
+           FROM license_file, license_ref
+           WHERE rf_fk = rf_pk) AS subselect2
+  ON subselect1.pfile_fk = subselect2.pfile_fk
+$agentSelect
+ORDER BY lft asc
+";
+
+    $this->dbManager->prepare($statementName, $sql);
+    $result = $this->dbManager->execute($statementName, $param);
+    $licensesPerFileName = array();
+
+    $row = $this->dbManager->fetchArray($result);
+    $pathStack = array($row['ufile_name']);
+    $rgtStack = array($row['rgt']);
+    $lastLft = $row['lft'];
+    $path = implode($pathStack,'/');
+    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore);
+    while ($row = $this->dbManager->fetchArray($result))
+    {
+      if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding))
+      {
+        $lastLft = $row['rgt'] + 1;
+        continue;
+      }
+      if ($row['lft'] < $lastLft)
+      {
+        continue;
+      }
+
+      $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
+      $path = implode($pathStack,'/');
+      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore);
+    }
+    $this->dbManager->freeResult($result);
+    return array_reverse($licensesPerFileName);
+  }
+
+  private function updateStackState(&$pathStack, &$rgtStack, &$lastLft, $row)
+  {
+    if ($row['lft'] >= $lastLft)
+    {
+      while(count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1])
+      {
+        array_pop($pathStack);
+        array_pop($rgtStack);
+      }
+      if ($row['lft'] > $lastLft)
+      {
+        array_push($pathStack, $row['ufile_name']);
+        array_push($rgtStack, $row['rgt']);
+        $lastLft = $row['lft'];
+      }
+    }
+  }
+
+  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore)
+  {
+    if (($row['ufile_mode']&(1<<29)) ==0)
+    {
+      if($row['rf_shortname'])
+      {
+        $licensesPerFileName[$path][] = $row['rf_shortname'];
+      }
+    }
+    else if (!$ignore)
+    {
+      $licensesPerFileName[$path] = false;
+    }
   }
 
   /**
@@ -366,7 +496,7 @@ class LicenseDao extends Object
                 }, $filterLicenses)) . ")";
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
-    
+
     $agentFilter = '';
     if(is_array($latestSuccessfulAgentIds))
     {
@@ -447,30 +577,37 @@ class LicenseDao extends Object
    * @param int $userId
    * @param int $groupId
    * @param int $uploadTreeId
-   * @param int $licenseId
-   * @param bool $removing
+   * @param bool[] $licenseRemovals
    * @param string $refText
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseId, $removing, $refText)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_fk, removing, rf_text)
-      VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
-        array($userId, $groupId, $uploadTreeId, $licenseId, $this->dbManager->booleanToDb($removing), $refText),
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text)
+      VALUES ($1,$2,$3,$4) RETURNING lrb_pk",
+        array($userId, $groupId, $uploadTreeId, $refText),
         __METHOD__ . '.getLrb'
     );
-
     if ($licenseRefBulkIdResult === false)
     {
       return -1;
     }
-    return $licenseRefBulkIdResult['lrb_pk'];
+    $bulkId = $licenseRefBulkIdResult['lrb_pk'];
+
+    $stmt = __METHOD__ . '.insertAction';
+    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES ($1,$2,$3)");
+    foreach($licenseRemovals as $licenseId=>$removing)
+    {
+      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing)));
+    }
+
+    return $bulkId ;
   }
 
   /**
    * @param string $newShortname
-   * @param int $groupId 
+   * @param int $groupId
    * @return bool
    */
   public function isNewLicense($newShortname, $groupId)
@@ -506,7 +643,7 @@ class LicenseDao extends Object
     $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, marydone=$6, rf_risk=$7 WHERE rf_pk=$1',
         array($rf_pk, $shortname, $fullname, $rfText, $url, $marydone, $riskLvl), __METHOD__);
   }
-  
+
   public function getLicenseParentById($licenseId, $groupId=null)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",

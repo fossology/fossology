@@ -32,9 +32,7 @@ class HighlightProcessor extends Object
   const ENTRY = 'entry';
   const REF_TEXT_MAX_LENGTH = 100;
 
-  /**
-   * @var LicenseDao
-   */
+  /** @var LicenseDao  */
   private $licenseDao;
 
   public function __construct(LicenseDao $licenseDao)
@@ -242,14 +240,14 @@ class HighlightProcessor extends Object
    */
   private function startAndLengthFirstSorter(Highlight $a, Highlight $b)
   {
-    if ($a->getStart() < $b->getStart())
+    if ($a->getStart() < $b->getStart()) {
       return -1;
-    else if ($a->getStart() > $b->getStart())
+    } else if ($a->getStart() > $b->getStart()) {
       return 1;
-    else if ($a->getEnd() > $b->getEnd())
+    } else if ($a->getEnd() > $b->getEnd()) {
       return -1;
-    else
-      return ($a->getEnd() == $b->getEnd()) ? 0 : 1;
+    }
+    return ($a->getEnd() == $b->getEnd()) ? 0 : 1;
   }
 
   private function splitPositionEntrySorter(SplitPosition $a, SplitPosition $b)

@@ -8,11 +8,7 @@
 
 {% block content %}
   <p>
-    <b>
-      {{ 'Starting in FOSSology v 2.2 only your group and any other group you assign will have access to your
-            uploaded files.'| trans }}
-    </b>
-    {{ 'To manage your own group go into'| trans }}
+    {{ 'To manage your own group permissions go into'| trans }}
     <b>Admin &gt; Groups &gt; Manage Group Users</b>.
     {{ 'To manage permissions for this one upload, go to'| trans }}
     <b>Admin &gt; Upload Permissions</b>.
@@ -24,6 +20,7 @@
     <ol>
       <li>
         <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded files:'| trans }}
+          <br/>
           {% include 'components/select-folder.html.twig' with {'name': folderParameterName} %}
         </label>
       </li>
@@ -51,7 +48,9 @@
         {{ aContent }}  
       {% endfor %}
     </ol>
-    <p>{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+    <p>
+      {% block uploadText %}
+      {% endblock %}
     </p>
 
     <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>

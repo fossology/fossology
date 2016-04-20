@@ -141,6 +141,7 @@ class fo_libschema
     $this->applySequences();
     $this->applyTables();
     $this->applyInheritedRelations();
+    $this->applyTables(true);
     $this->updateSequences();
     $this->applyViews();
     $this->dropConstraints();
@@ -151,6 +152,7 @@ class fo_libschema
     $this->applyConstraints();
     error_reporting($errlev); /* return to previous error reporting level */
     $this->makeFunctions();
+    $this->applyClusters();
     /* Reload current since CASCADE during migration may have changed things */
     $this->getCurrSchema();
     $this->dropViews($catalog);
@@ -195,7 +197,26 @@ class fo_libschema
       }
     }
   }
+  /************************************/
+  /* Add clusters */
+  /************************************/
+  function applyClusters()
+  {
+    if (empty($this->schema['CLUSTER']))
+    {
+      return;
+    }
+    foreach ($this->schema['CLUSTER'] as $name => $sql)
+    {
+      if (empty($name)) continue;
 
+      if(!array_key_exists('CLUSTER', $this->currSchema)
+        || !array_key_exists($name, $this->currSchema['CLUSTER']))
+      {
+        $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . "." . $name . ".CREATE");
+      }
+    }
+  }
   /************************************/
   /* Add sequences */
   /************************************/
@@ -218,7 +239,7 @@ class fo_libschema
   /************************************/
   /* Add tables/columns (dependent on sequences for default values) */
   /************************************/
-  function applyTables()
+  function applyTables($inherits=false)
   {
     if (empty($this->schema['TABLE']))
     {
@@ -226,7 +247,7 @@ class fo_libschema
     }
     foreach ($this->schema['TABLE'] as $table => $columns)
     {
-      if (empty($table))
+      if (empty($table) || $inherits^array_key_exists($table,$this->schema['INHERITS']) )
       {
         continue;
       }
@@ -611,8 +632,8 @@ class fo_libschema
            $sequence = $matches[1];
            $referencedSequencesInTableColumns[$sequence] = array("table" => $Table, "column" => $Column);
         }
-        }
-          }
+      }
+    }
     $this->dbman->freeResult($result);
 
     return $referencedSequencesInTableColumns;

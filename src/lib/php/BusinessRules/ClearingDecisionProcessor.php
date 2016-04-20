@@ -114,13 +114,14 @@ class ClearingDecisionProcessor extends Object
   private function clearingDecisionIsDifferentFrom(ClearingDecision $decision, $type, $scope, $clearingEventIds)
   {
     $clearingEvents = $decision->getClearingEvents();
-    if (count($clearingEvents) != count($clearingEventIds))
+    if (count($clearingEvents) != count($clearingEventIds)) {
       return true;
+    }
 
-    foreach ($clearingEvents as $clearingEvent)
-    {
-      if (false === array_search($clearingEvent->getEventId(), $clearingEventIds))
+    foreach ($clearingEvents as $clearingEvent) {
+      if (false === array_search($clearingEvent->getEventId(), $clearingEventIds)) {
         return true;
+      }
     }
     return ($type !== $decision->getType()) || ($scope !== $decision->getScope());
   }

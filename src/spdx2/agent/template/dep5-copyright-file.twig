@@ -1,0 +1,15 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+Files: {{ fileNames|join('\n       ') }}
+{% if copyrights|default is not empty %}
+Copyright: {{ copyrights|join('\n           ') }}
+{% endif %}
+License: {{ license }}
+{% if comment|default is not empty %}
+Comment: {{ comment }}
+{% endif %}

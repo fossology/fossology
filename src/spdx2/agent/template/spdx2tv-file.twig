@@ -1,0 +1,38 @@
+{# Copyright 2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+##File
+
+FileName: {{ fileName }}
+SPDXID: SPDXRef-item{{ fileId }}
+{# FileType: OTHER #}
+FileChecksum: SHA1: {{ sha1 }}
+FileChecksum: MD5: {{ md5 }}
+{% if isCleared %}
+{% if concludedLicenses|default is empty %}
+LicenseConcluded: NONE
+{% else %}
+LicenseConcluded: {{ concludedLicense }}
+{% endif%}
+{% else %}
+LicenseConcluded: NOASSERTION
+{% endif %}
+{% if scannerLicenses|default is empty %}
+LicenseInfoInFile: NOASSERTION
+{% else %}
+{% for lic in  scannerLicenses %}
+LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
+{% endfor %}
+{% endif %}
+{# FileSize: 48 Kb (49173 bytes) #}
+{% if copyrights|default is empty %}
+FileCopyrightText: NONE
+{% else %}
+FileCopyrightText: <text> {{ copyrights|join('\n')
+                                       |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                       |replace({'\f':''}) }} </text>
+{% endif %} 

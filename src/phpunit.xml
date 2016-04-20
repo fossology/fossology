@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <phpunit bootstrap="./phpunit-bootstrap.php" colors="true">
   <php>
-    <env name="SYSCONFDIR" value="/usr/local/etc/fossology/"/>
+    <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
   <logging>
-    <log type="coverage-html" target="../testReport" charset="UTF-8" highlight="false"/>
+    <log type="coverage-clover" target="../clover.xml" charset="UTF-8" highlight="false"/>
   </logging>
 
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
+      <file>www/ui_tests/startUpTest.php</file>
       <directory suffix="Test.php">lib/php</directory>
       <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
 
     <testsuite name="Fossology PhpUnit Agent Test Suite">
+      <directory suffix="Test.php">copyright/agent_tests/Functional</directory>
       <directory suffix="Test.php">decider/agent_tests</directory>
       <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
       <directory suffix="Test.php">monk/agent_tests/Functional</directory>
       <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
-      <directory suffix="Test.php">spdx2/agent_tests/Functional</directory>
+      <directory suffix="Test.php">spdx2/agent_tests</directory>
     </testsuite>
 
   </testsuites>
 
   <filter>
-    <whitelist addUncoveredFilesFromWhitelist="true">
+    <whitelist addUncoveredFilesFromWhitelist="true" processUncoveredFilesFromWhitelist="false">
       <directory suffix=".php">.</directory>
       <exclude>
         <directory suffix="Test.php">.</directory>

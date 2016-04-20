@@ -40,7 +40,7 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
   /** @var string */
   private $uri;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->folderDao = M::mock(FolderDao::classname());
     $this->dbManager = M::mock(DbManager::classname());
@@ -49,7 +49,7 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

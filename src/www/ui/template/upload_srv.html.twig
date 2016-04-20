@@ -1,0 +1,35 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/upload.html.twig" %}
+
+{% block description %}
+  <p>
+    {{ 'This option permits uploading a files from the server.'| trans }}
+  </p>
+{% endblock %}
+
+{% block fileselect %}
+<li>
+  <label for="{{ sourceFilesField }}">
+    {{ 'Enter the file path'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ sourceFilesField }}" type="text" size="120"/><br/>
+  NOTE: <strong>Contents under a directory will be recursively included.</strong>
+  '*' is supported to select multiple files (e.g. *.txt).
+</li>
+{% if hostlist|length > 0 %}
+<li>
+  <label for="host">
+    {{ 'Choose a host'| trans }}:
+  </label>
+  <select name='host'>
+    {{ hostlist }}
+  </select>
+</li>
+{% endif %}
+{% endblock %}

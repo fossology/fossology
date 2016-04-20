@@ -29,16 +29,23 @@ global $Plugins;
 error_reporting(E_NOTICE & E_STRICT);
 
 $Usage = "Usage: " . basename($argv[0]) . " [options]
+  --help      = display this help text
   --username  = user name
   --password  = password
   --groupname = a group the user belongs to (default active group)
   --uploadId  = id of upload
-  ";
+";
 
-$opts = getopt("c:", array("username:", "groupname:", "uploadId:", "password:"));
+$opts = getopt("c:", array("help", "username:", "groupname:", "uploadId:", "password:"));
+
+if (array_key_exists("help", $opts)) {
+  echo $Usage;
+  exit (1);
+}
 
 if (!array_key_exists("uploadId", $opts)) {
-  echo "no uploadId supplied";
+  echo "no uploadId supplied\n";
+  echo $Usage;
   exit (1);
 }
 $uploadId = $opts["uploadId"];

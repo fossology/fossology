@@ -23,6 +23,7 @@ define("TITLE_showjobs", _("Show Jobs"));
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\JobDao;
 use Fossology\Lib\Db\DbManager;
 
 class showjobs extends FO_Plugin
@@ -31,6 +32,8 @@ class showjobs extends FO_Plugin
   private $showJobsDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var JobDao */
+  private $jobDao;
 
   function __construct()
   {
@@ -43,6 +46,7 @@ class showjobs extends FO_Plugin
     global $container;
     $this->showJobsDao = $container->get('dao.show_jobs');
     $this->uploadDao = $container->get('dao.upload');
+    $this->jobDao = $container->get('dao.job');
 
     parent::__construct();
   }
@@ -52,93 +56,78 @@ class showjobs extends FO_Plugin
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
 
-    if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN) return;
+    if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
+    {
+      $URIpart = $this->Name . Traceback_parm_keep(array( "page")) . "&allusers=";
 
-    if (GetParm("mod", PARM_STRING) == $this->Name){
-      /* Set micro menu to select either all users or this user */
-      $allusers = GetParm("allusers",PARM_INTEGER);
-      if ($allusers == 0){
-        $text = _("Show uploads from all users");
-        $URI = $this->Name . Traceback_parm_keep(array( "page" )) . "&allusers=1";
-      }else{
-        $text = _("Show only your own uploads");
-        $URI = $this->Name . Traceback_parm_keep(array( "page")) . "&allusers=0";
+      menu_insert("Main::Jobs::All Recent Jobs",$this->MenuOrder -2,$URIpart . '1', $this->MenuTarget);
+
+      if (GetParm("mod", PARM_STRING) == $this->Name){
+        /* Set micro menu to select either all users or this user */
+        $allusers = GetParm("allusers",PARM_INTEGER);
+        if ($allusers == 0){
+          $text = _("Show uploads from all users");
+          $URI = $URIpart . "1";
+        }else{
+          $text = _("Show only your own uploads");
+          $URI = $URIpart . "0";
+        }
+        menu_insert("showjobs::$text", 1, $URI, $text);
       }
-      menu_insert("showjobs::$text", 1, $URI, $text);
     }
 
   } // RegisterMenus()
 
 
   /**
-   * @brief Returns geeky scan details about the jobqueue item
+   * @brief Returns uploadname as link for geeky scan
    * @param $job_pk
-   * @return Return job and jobqueue record data in an html table.
+   * @return uploadname
    **/
-  function showJobDB($job_pk)
+  function getUploadNameForGeekyScan($job_pk)
   {
-    global $container;
-    /** @var DbManager */
-    $dbManager = $container->get('db.manager');
-    
-    $statementName = __METHOD__."ShowJobDBforjob";
-    $dbManager->prepare($statementName,
-    "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk = $1");
-    $result = $dbManager->execute($statementName, array($job_pk));
-    $row = $dbManager->fetchArray($result);
-    $dbManager->freeResult($result);
+    $row = $this->showJobsDao->getDataForASingleJob($job_pk);
 
-    if (!empty($row["job_upload_fk"])){
-      /* get the upload filename */
-      $statementName = __METHOD__."upload_filenameforShowJobDB";
-      $dbManager->prepare($statementName,
-      "select upload_filename, upload_desc from upload where upload_pk =$1");
-      $uploadresult = $dbManager->execute($statementName, array($row['job_upload_fk']));
-      $uploadRow = $dbManager->fetchArray($uploadresult);
-      if (empty($uploadRow)){
-        /* upload has been deleted so try to get the job name from the original upload job record */
-        $jobName = $this->showJobsDao->getJobName($row["job_upload_fk"]);
-        $upload_filename = "Deleted " . $jobName;
-        $upload_desc = '';
-      }else{
-        $upload_filename = $uploadRow['upload_filename'];
-        $upload_desc = $uploadRow['upload_desc'];
-      }
-      $dbManager->freeResult($uploadresult);
-
-      if (empty($row['jq_pk'])){ 
-        return _("Job history record is no longer available"); 
-      }
-
-      $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($row['job_upload_fk']);
-
-      /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
-      $statementName = __METHOD__."uploadtreeRec";
-      $uploadtreeRec = $dbManager->getSingleRow(
-      "select * from $uploadtree_tablename where parent is NULL and upload_fk=$1",
-      array($row['job_upload_fk']),
-      $statementName
-      );
-      $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
+    if (empty($row["job_upload_fk"])){
+      return '';
     }
+
+    if (empty($row['jq_pk'])){
+      return _("Job history record is no longer available");
+    }
+
+    /* get the upload filename */
+    $uploadFileName = htmlspecialchars($this->uploadDao->getUpload($row['job_upload_fk'])->getFilename());
+    if (empty($uploadFileName)){
+      /* upload has been deleted so try to get the job name from the original upload job record */
+      $jobName = $this->showJobsDao->getJobName($row["job_upload_fk"]);
+      $uploadFileName = "Deleted " . $jobName;
+    }
+
+    $uploadtree_pk = -1;
+    /* Find the uploadtree_pk for this upload so that it can be used in the browse link */
+    try {
+      $uploadtree_pk = $this->uploadDao->getUploadParent($row['job_upload_fk']);
+    }catch (Exception $e) {
+      echo $e->getMessage(), "\n";
+    }
+
     /* upload file name link to browse */
-    if (!empty($row['job_upload_fk'])){
-      $uploadTreeName = "";      
-      $uploadTreeName = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $upload_filename . "</a>";
-      return $uploadTreeName;
-    }    
-  } // showJobDB()
+    $uploadNameLink = "<a title='Click to browse this upload' href='" . Traceback_uri() . "?mod=browse&upload=" . $row['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>" . $uploadFileName . "</a>";
+    return $uploadNameLink;
+  } // getUploadNameForGeekyScan()
 
 
   public function Output()
   {
-    $v="";
     $page = "";
     $uploadPk = GetParm('upload',PARM_INTEGER);
-    if (empty($uploadPk)){ 
-      $uploadPk = -1; 
+    if (empty($uploadPk))
+    {
+      $uploadPk = -1;
     }
-    elseif($uploadPk>0){
+    elseif($uploadPk>0)
+    {
       if (!$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
@@ -146,24 +135,24 @@ class showjobs extends FO_Plugin
     }
 
     $this->vars['uploadId']= $uploadPk;
-    // micro menus
-    $v .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
 
     /* Process any actions */
     if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
-
       $jq_pk = GetParm("jobid",PARM_INTEGER);
       $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
-      if (!empty($uploadPk) && !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
+
+      if (!($uploadPk === -1 &&
+            ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN ||
+             $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
+          !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId()))
+      {
         $text = _("Permission Denied");
         return "<h2>$text</h2>";
       }
-      $page = GetParm('page',PARM_INTEGER);
-      if (empty($page)) $page = 0;
-      $jqtype = GetParm("jqtype",PARM_STRING);
+
+      $page = GetParm('page',PARM_INTEGER) ?: 0;
       $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
-      $job = GetParm('job',PARM_INTEGER);
       switch($action)
       {
         case 'pause':
@@ -190,13 +179,12 @@ class showjobs extends FO_Plugin
           if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
           echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
-        default:
-          break;
       }
     }
+    $job = GetParm('job',PARM_INTEGER);
     if (!empty($job)){
       $this->vars['jobId'] = $job;
-      $this->vars['uploadName'] = $this->showJobDB($job);
+      $this->vars['uploadName'] = $this->getUploadNameForGeekyScan($job);
     }else{
       $allusersval=GetParm("allusers",PARM_INTEGER);
       if(!$allusersval) $allusersval = 0;
@@ -205,8 +193,8 @@ class showjobs extends FO_Plugin
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  
-      $this->vars['injectedFoot'] = $_GET['injectedFoot'];
-      $this->vars['message'] = $_GET['injectedMessage'];
+      $this->vars['injectedFoot'] = GetParm("injectedFoot",PARM_TEXT);
+      $this->vars['message'] = GetParm("injectedMessage",PARM_TEXT);
     }
   }
 

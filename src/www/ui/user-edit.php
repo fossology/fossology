@@ -16,17 +16,88 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-class user_edit extends FO_Plugin {
-  
-  public function __construct()
-  {
-    $this->Name = "user_edit";
-    $this->Title = _("Edit User Account");
-    $this->MenuList = "Admin::Users::Edit User Account";
-    $this->DBaccess = PLUGIN_DB_WRITE;
-    $this->LoginFlag = 1;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Plugin\DefaultPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
-    parent::__construct();
+class UserEditPage extends DefaultPlugin
+{
+  const NAME = "user_edit";
+
+  /** @var DbManager */
+  private $dbManager;
+
+  function __construct()
+  {
+    parent::__construct(self::NAME, array(
+        self::TITLE => _("Edit User Account"),
+        self::MENU_LIST => 'Admin::Users::Edit User Account',
+        self::REQUIRES_LOGIN => true,
+        self::PERMISSION => Auth::PERM_WRITE
+    ));
+
+    $this->dbManager = $this->getObject('db.manager');
+  }
+  
+  /**
+   * @brief Allow user to change their account settings (users db table).  
+   *        If the user is an Admin, they can change settings for any user.\n
+   *        This is called in the following circumstances:\n
+   *        1) User clicks on Admin > Edit User Account\n
+   *        2) User has chosen a user to edit from the 'userid' select list  \n
+   *        3) User hit submit to update user data\n
+   */
+  protected function handle(Request $request)
+  {
+    /* Is the session owner an admin?  */
+    $user_pk = Auth::getUserId();
+    $SessionUserRec = $this->GetUserRec($user_pk);
+    $SessionIsAdmin = $this->IsSessionAdmin($SessionUserRec);
+
+    $user_pk_to_modify = intval($request->get('user_pk'));
+    if (!($SessionIsAdmin or
+          empty($user_pk_to_modify) or
+          $user_pk == $user_pk_to_modify))
+    {
+      $vars['content'] = _("Your request is not valid.");
+      return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
+    }
+
+    $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
+
+    /* If this is a POST (the submit button was clicked), then process the request. */
+    $BtnText = $request->get('UpdateBtn');
+    if (!empty($BtnText)) 
+    {
+      /* Get the form data to in an associated array */
+      $UserRec = $this->CreateUserRec($request, "");
+
+      $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
+      if (empty($rv)) 
+      {
+        // Successful db update
+        $vars['message'] = "User $UserRec[user_name] updated.";
+
+        /* Reread the user record as update verification */
+        $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
+      }
+      else 
+      {
+        $vars['message'] = $rv;
+      }
+    }
+    else  
+    {
+      $NewUserpk = intval($request->get('newuser'));
+      $UserRec = empty($NewUserpk) ? $this->CreateUserRec($request, $user_pk) : $this->CreateUserRec($request, $NewUserpk);
+    }
+    
+    /* display the edit form with the requested user data */
+    $vars = array_merge($vars, $this->DisplayForm($UserRec, $SessionIsAdmin));
+    $vars['userId'] = $UserRec['user_pk'];
+
+    return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
 
   /**
@@ -36,145 +107,53 @@ class user_edit extends FO_Plugin {
    * \param $SessionIsAdmin - Boolean: This session is by an admin
    * \return the text of the display form on success, or error on failure.
    */
-  function DisplayForm($UserRec, $SessionIsAdmin) 
+  private function DisplayForm($UserRec, $SessionIsAdmin)
   {
-    global $PG_CONN;
-    $OutS = "";  // Output string
-
-    /* Build HTML form */
-    $OutS .= "<form name='user_edit' method='POST'>\n";
-    $OutS .= "<p><input type='hidden' name='user_pk' value='$UserRec[user_pk]'/></p>";
-    $OutS .= "<p />\n";
-
-    if ($SessionIsAdmin)
-    {
-      $OutS .= _("Select the user to edit: ");
-      $OutS .= "<select name='userid' onchange='RefreshPage(this.value);'>\n";
-    }
+    $vars = array('isSessionAdmin' => $SessionIsAdmin,
+                  'userId' => $UserRec['user_pk']);
 
     /* For Admins, get the list of all users 
      * For non-admins, only show themself
      */
     if ($SessionIsAdmin)
-      $sql = "SELECT * FROM users ORDER BY user_name;";
-    else
-      $sql = "SELECT * FROM users WHERE user_pk='" . $UserRec['user_pk'] . "' ORDER BY user_name;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result))
     {
-      $Selected =  ($row['user_pk'] == $UserRec['user_pk']) ? "Selected" : "";
-      $OutS .= "<option $Selected value='" . $row['user_pk'] . "'>";
-      $OutS .= htmlentities($row['user_name']);
-      $OutS .= "</option>\n";
+      $stmt = __METHOD__ . '.asSessionAdmin';
+      $sql = "SELECT * FROM users ORDER BY user_name";
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt);
+      $allUsers = array();
+      while ($row = $this->dbManager->fetchArray($res))
+      {
+        $allUsers[$row['user_pk']] = htmlentities($row['user_name']);
+      }
+      $this->dbManager->freeResult($res);
+      $vars['allUsers'] = $allUsers;
     }
-    pg_free_result($result);
-    $OutS .= "</select><hr>\n";
-
-    $TableStyle = "style='border:1px solid black; border-collapse: collapse; '";
-    $TRStyle = "style='border:1px solid black; text-align:left; background:lightyellow;'";
-    $OutS .= "<table $TableStyle width='100%'>";
-
-    $Field = "user_name";
-    $Val = htmlentities($UserRec[$Field], ENT_QUOTES);
-    $text = _("Username.");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type='text' value='$Val' name='$Field' size=20></td>\n";
-    $OutS .= "</tr>\n";
-
-    $Field = "user_desc";
-    $Val = htmlentities($UserRec[$Field], ENT_QUOTES);
-    $text = _("Description (name, contact, or other information).  This may be blank.");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type='text' value='$Val' name='$Field' size=60></td>\n";
-    $OutS .= "</tr>\n";
-
-    $Field = "user_email";
-    $Val = htmlentities($UserRec[$Field], ENT_QUOTES);
-    $text = _("Email address. This may be blank.");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type='text' value='$Val' name='$Field' size=60></td>\n";
-    $OutS .= "</tr>\n";
-
-    $Field = "email_notify";
-    $Checked = ($UserRec[$Field] == 'y') ? "checked" : "";
-    $text = _("E-mail notification on job completion");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type=checkbox name='$Field' $Checked></td>";
-    $OutS .= "</tr>\n";
-
+    
+    $vars['userName'] = $UserRec['user_name'];
+    $vars['userDescription'] = $UserRec['user_desc'];
+    $vars['userEMail'] = $UserRec["user_email"];
+    $vars['eMailNotification'] = ($UserRec['email_notify'] == 'y');
+    
     if ($SessionIsAdmin)
     {
-      $Field = "user_perm";
-      $Val = htmlentities($UserRec[$Field], ENT_QUOTES);
-      $text = _("Select the user's access level.");
-      $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-      $OutS .= "<td><select name='$Field'>\n";
-      $text1 = _("None (very basic, no database access)");
-      $text2 = _("Read-only (read, but no writes or downloads)");
-      $text4 = _("Read-Write (read, download, or edit information)");
-      $text9 = _("Full Administrator (all access including adding and deleting users)");
-      $OutS .= "<option " . (($Val==PLUGIN_DB_NONE)?"selected":"") . " value='" . PLUGIN_DB_NONE . "'>$text1</option>\n";
-      $OutS .= "<option " . (($Val==PLUGIN_DB_READ)?"selected":"") . " value='" . PLUGIN_DB_READ . "'>$text2</option>\n";
-      $OutS .= "<option " . (($Val==PLUGIN_DB_WRITE)?"selected":"") . " value='" . PLUGIN_DB_WRITE . "'>$text4</option>\n";
-      $OutS .= "<option " . (($Val==PLUGIN_DB_ADMIN)?"selected":"") . " value='" . PLUGIN_DB_ADMIN . "'>$text9</option>\n";
-      $OutS .= "</select></td>\n";
-      $OutS .= "</tr>\n";
+      $vars['allAccessLevels'] = array(
+          PLUGIN_DB_NONE => _("None (very basic, no database access)"),
+          PLUGIN_DB_READ => _("Read-only (read, but no writes or downloads)"),
+          PLUGIN_DB_WRITE => _("Read-Write (read, download, or edit information)"),
+          PLUGIN_DB_ADMIN => _("Full Administrator (all access including adding and deleting users)")
+        );
+      $vars['accessLevel'] = $UserRec['user_perm'];
+   
+      $SelectedFolderPk = $UserRec['root_folder_fk'];
+      $vars['folderListOption'] = FolderListOption($ParentFolder = -1, $Depth = 0, $IncludeTop = 1, $SelectedFolderPk);
     }
 
-    if ($SessionIsAdmin)
-    {
-      $Field = "root_folder_fk";
-      $Val = htmlentities($UserRec[$Field], ENT_QUOTES);
-      $text = _("Select the user's top-level folder. Access is restricted to this folder.");
-      $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-      $OutS .= "<td><select name='$Field'>";
-      $ParentFolder = -1;
-      $Depth = 0;
-      $IncludeTop = 1;  // include top level folder in selecet list
-      $SelectedFolderPk = $UserRec[$Field];
-      $OutS .= FolderListOption($ParentFolder, $Depth, $IncludeTop, $SelectedFolderPk);
-      $OutS .= "</select></td>\n";
-      $OutS .= "</tr>\n";
-    }
-
-    if ($SessionIsAdmin)
-    {
-      $Checked = ($UserRec['_blank_pass'] == 'on') ? "checked" : "";
-      $text = _("Blank the user's account. This will will set the password to a blank password.");
-      $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-      $OutS .= "<td><input type='checkbox' name='_blank_pass' $Checked ></td>\n";
-      $OutS .= "</tr>\n";
-    }
-
-    $text = _("Password.");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type='password' name='_pass1' size=20></td>\n";
-    $OutS .= "</tr>\n";
-    $text = _("Re-enter password.");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td><input type='password' name='_pass2' size=20></td>\n";
-    $OutS .= "</tr>\n";
-
-    $Field = "user_agent_list";
-    $text = _("Default agents selected when uploading data. ");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th><td>";
-    $OutS .= AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
-    $OutS .= "</td></tr>\n";
-
-    $Field = "default_bucketpool_fk";
-    $text = _("Default bucket pool");
-    $OutS .= "<tr $TRStyle><th width='25%'>$text</th>";
-    $OutS .= "<td>";
-    $OutS .= SelectBucketPool($UserRec[$Field]);
-    $OutS .= "</td></tr>\n";
-    $OutS .= "</table><P />";
-
-    $text = _("Update Account");
-    $OutS .= "<input type='submit' name='UpdateBtn' value='$text'>\n";
-    $OutS .= "</form>\n";
-
-    return $OutS;
+    $vars['isBlankPassword'] = ($UserRec['_blank_pass'] == 'on');
+    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
+    $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
+    
+    return $vars;
   }
 
   /**
@@ -191,29 +170,41 @@ class user_edit extends FO_Plugin {
 
     /**** Validations ****/
     /* Make sure we have a user_pk */
-    if (empty($UserRec['user_pk'])) $Errors .= "<li>" . _("Consistency error (User_pk missing).  Please start over.");
+    if (empty($UserRec['user_pk'])) {
+      $Errors .= "<li>" . _("Consistency error (User_pk missing).  Please start over.");
+    }
 
     /* Make sure username looks valid */
-    if (empty($UserRec['user_name'])) $Errors .= "<li>" . _("Username must be specified.");
+    if (empty($UserRec['user_name'])) {
+      $Errors .= "<li>" . _("Username must be specified.");
+    }
 
     /* Verify the user_name is not a duplicate  */
     $CheckUserRec = GetSingleRec("users", "WHERE user_name='$UserRec[user_name]'");
-    if ((!empty($CheckUserRec)) and ($CheckUserRec['user_pk'] != $UserRec['user_pk']))
+    if ((!empty($CheckUserRec)) and ( $CheckUserRec['user_pk'] != $UserRec['user_pk'])) {
       $Errors .= "<li>" . _("Username is not unique.");
+    }
 
     /* Make sure password matches */
-    if ($UserRec['_pass1'] != $UserRec['_pass2']) $Errors .= "<li>". _("Passwords do not match.");
+    if ($UserRec['_pass1'] != $UserRec['_pass2']) {
+      $Errors .= "<li>" . _("Passwords do not match.");
+    }
 
     /* Make sure email looks valid */
     $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $UserRec['user_email']);
-    if ($Check != $UserRec['user_email']) $Errors .= "<li>". _("Invalid email address.");
+    if ($Check != $UserRec['user_email']) {
+      $Errors .= "<li>" . _("Invalid email address.");
+    }
 
     /* Did they specify a password and also request a blank password?  */
-    if (!empty($UserRec['_blank_pass']) and (!empty($UserRec['_pass1']) or !empty($UserRec['_pass2'])))
+    if (!empty($UserRec['_blank_pass']) and ( !empty($UserRec['_pass1']) or ! empty($UserRec['_pass2']))) {
       $Errors .= "<li>" . _("You cannot specify both a password and a blank password.");
+    }
 
     /* If we have any errors, return them */
-    if (!empty($Errors)) return _("Errors") . ":<ol>$Errors </ol>";
+    if (!empty($Errors)) {
+      return _("Errors") . ":<ol>$Errors </ol>";
+    }
 
 
     /**** Update the users database record ****/
@@ -234,12 +225,11 @@ class user_edit extends FO_Plugin {
     $first = TRUE;
     foreach($UserRec as $key=>$val)
     {
-      if ($key[0] == '_') continue;
-      if ($key == "user_pk") continue;
-      if (!$SessionIsAdmin) 
-      {
-        if ($key == "user_perm") continue;
-        if ($key == "root_folder_fk") continue;
+      if ($key[0] == '_' || $key == "user_pk") {
+        continue;
+      }
+      if (!$SessionIsAdmin && ($key == "user_perm" || $key == "root_folder_fk")) {
+        continue;
       }
 
       if (!$first) $sql .= ",";
@@ -280,10 +270,9 @@ class user_edit extends FO_Plugin {
    * 
    * \return TRUE if the session user is an admin.  Otherwise, return FALSE
    */
-  function IsSessionAdmin($UserRec) 
+  private function IsSessionAdmin($UserRec) 
   {
-    if ($UserRec['user_perm'] == PLUGIN_DB_ADMIN) return TRUE;
-    return FALSE;
+    return ($UserRec['user_perm'] == PLUGIN_DB_ADMIN);
   }
 
   /**
@@ -295,7 +284,7 @@ class user_edit extends FO_Plugin {
    *         users table.  These additional fields start with an underscore (_pass1, _pass2, _blank_pass)
    *         that come from the edit form.
    */
-  function CreateUserRec($user_pk="") 
+  function CreateUserRec(Request $request, $user_pk="") 
   {
     /* If a $user_pk was given, use it to read the user db record.
      * Otherwise, use the form data.
@@ -310,13 +299,13 @@ class user_edit extends FO_Plugin {
     else
     {
       $UserRec = array();
-      $UserRec['user_pk'] = GetParm('user_pk', PARM_TEXT);
-      $UserRec['user_name'] = GetParm('user_name', PARM_TEXT);
-      $UserRec['root_folder_fk'] = GetParm('root_folder_fk', PARM_INTEGER);
-      $UserRec['user_desc'] = GetParm('user_desc', PARM_TEXT);
+      $UserRec['user_pk'] = intval($request->get('user_pk'));
+      $UserRec['user_name'] = stripslashes($request->get('user_name'));
+      $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
+      $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
 
-      $UserRec['_pass1'] = GetParm('_pass1', PARM_TEXT);
-      $UserRec['_pass2'] = GetParm('_pass2', PARM_TEXT);
+      $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
+      $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
       if (!empty($UserRec['_pass1']))
       {
         $UserRec['user_seed'] = rand() . rand();
@@ -326,7 +315,7 @@ class user_edit extends FO_Plugin {
       else
       {
         $UserRec['user_pass'] = "";
-        $UserRec['_blank_pass'] = GetParm("_blank_pass", PARM_TEXT);
+        $UserRec['_blank_pass'] = stripslashes($request->get("_blank_pass"));
         if (empty($UserRec['_blank_pass']))  // check for blank password
         {
           // get the stored seed
@@ -335,84 +324,17 @@ class user_edit extends FO_Plugin {
         }
       }
 
-      $UserRec['user_perm'] = GetParm('user_perm', PARM_INTEGER);
-      $UserRec['user_email'] = GetParm('user_email', PARM_TEXT);
-      $UserRec['email_notify'] = GetParm('email_notify', PARM_TEXT);
-      if (!empty($UserRec['email_notify'])) $UserRec['email_notify'] = 'y';
+      $UserRec['user_perm'] = intval($request->get('user_perm'));
+      $UserRec['user_email'] = stripslashes($request->get('user_email'));
+      $UserRec['email_notify'] = stripslashes($request->get('email_notify'));
+      if (!empty($UserRec['email_notify'])) {
+        $UserRec['email_notify'] = 'y';
+      }
       $UserRec['user_agent_list'] = userAgents();
-      $UserRec['default_bucketpool_fk'] = GetParm("default_bucketpool_fk", PARM_INTEGER);
+      $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
     }
     return $UserRec;
   }
-
-  /**
-   * \brief Allow user to change their account settings (users db table).  
-   *        If the user is an Admin, they can change settings for any user.\n
-   *        This is called in the following circumstances:\n
-   *        1) User clicks on Admin > Edit User Account\n
-   *        2) User has chosen a user to edit from the 'userid' select list  \n
-   *        3) User hit submit to update user data\n
-   */
-  function Output()
-  {
-    if ($this->State != PLUGIN_STATE_READY) {
-      return;
-    }
-    /* Is the session owner an admin?  */
-    $user_pk = $_SESSION['UserId'];
-    $SessionUserRec = $this->GetUserRec($user_pk);
-    $SessionIsAdmin = $this->IsSessionAdmin($SessionUserRec);
-
-    $V = "";
-
-    /* script to refresh this page with the selected user data (newuser=user_pk) */
-    $uri = Traceback_uri() . "?mod=$this->Name";
-    $V .= "<script language='javascript'>\n";
-    $V .= "function RefreshPage(val) {";
-    $V .=  "var uri = '$uri' + '&newuser=' + val ;";
-    $V .=  "window.location.assign(uri);";
-    $V .= "}";
-    $V .= "</script>\n";
-
-
-    /* If this is a POST (the submit button was clicked), then process the request. */
-    $BtnText = GetParm('UpdateBtn', PARM_TEXT);
-    if (!empty($BtnText)) 
-    {
-      /* Get the form data to in an associated array */
-      $UserRec = $this->CreateUserRec("");
-
-      $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
-      if (empty($rv)) 
-      {
-        // Successful db update
-        $V .= displayMessage("User $UserRec[user_name] updated.");
-
-        /* Reread the user record as update verification */
-        $UserRec = $this->CreateUserRec($UserRec['user_pk']);
-      }
-      else 
-      {
-        // Unsuccessful so display errors
-        $V .= displayMessage($rv);
-      }
-    }
-    else  
-    {
-      // was a new user record requested (admin only)?
-      $NewUserpk = GetParm('newuser', PARM_INTEGER);
-      if (!empty($NewUserpk)) 
-        $UserRec = $this->CreateUserRec($NewUserpk);
-      else
-        $UserRec = $this->CreateUserRec($user_pk);  // initial call from menu
-    }
-    
-    /* display the edit form with the requested user data */
-    $V .= $this->DisplayForm($UserRec, $SessionIsAdmin);
-
-    if (!$this->OutputToStdout) { return ($V); }
-
-    return $V;
-  }
 }
-$NewPlugin = new user_edit;
+
+register_plugin(new UserEditPage());

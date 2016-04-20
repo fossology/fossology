@@ -21,21 +21,14 @@ namespace Fossology\Lib\Data;
 
 
 class LicenseTest extends \PHPUnit_Framework_TestCase {
-  /**
-   * @var string
-   */
+  /** @var string */
   private $text;
-  /**
-   * @var string
-   */
+  /** @var string */
   private $url;
-
-  /**
-   * @var License
-   */
+  /** @var License */
   private $license;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->text = "The License text";
     $this->url = "http://www.fossology.org";

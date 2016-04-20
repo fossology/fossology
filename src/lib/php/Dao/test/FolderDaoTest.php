@@ -32,7 +32,7 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
   /** @var FolderDao */
   private $folderDao;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
@@ -48,7 +48,7 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
@@ -193,6 +193,15 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(0));
     $this->dbManager->insertTableRow('foldercontents',array('foldercontents_mode'=> FolderDao::MODE_FOLDER,'parent_fk'=>$folderA,'child_id'=>$folderC));
     assertThat($this->folderDao->getRemovableContents($folderA),arrayWithSize(1));
-
+  }
+  
+  public function testGetFolder()
+  {
+    $this->folderDao->ensureTopLevelFolder();
+    $goodFolder = $this->folderDao->getFolder(FolderDao::TOP_LEVEL);
+    assertThat($goodFolder, is(anInstanceOf(\Fossology\Lib\Data\Folder\Folder::classname())));
+    assertThat($goodFolder->getId(), equalTo(FolderDao::TOP_LEVEL));
+    $badFolder = $this->folderDao->getFolder(987);
+    assertThat($badFolder, is(nullValue()));
   }
 }

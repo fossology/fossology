@@ -56,7 +56,7 @@ function account_check(&$user, &$passwd, &$group = "")
   /** get username/passwd from ~/.fossology.rc */
   $user_passwd_file = getenv("HOME") . "/.fossology.rc";
   if (empty($user) && empty($passwd) && file_exists($user_passwd_file)) {
-    $user_passwd_array = parse_ini_file($user_passwd_file, true);
+    $user_passwd_array = parse_ini_file($user_passwd_file, true, INI_SCANNER_RAW);
 
     /* get username and password from conf file */
     if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
@@ -89,9 +89,10 @@ function account_check(&$user, &$passwd, &$group = "")
 
   if (!empty($user)) {
     $userDao = $GLOBALS['container']->get('dao.user');
-    $row = $userDao->getUserAndDefaultGroupByUserName($user);
-    if(false === $row) {
-      echo "User name is invalid.\n";
+    try {
+      $row = $userDao->getUserAndDefaultGroupByUserName($user);
+    }catch (Exception $e) {
+      echo $e->getMessage(), "\n";
       exit(1);
     }
     $userId = $row['user_pk'];
@@ -143,29 +144,38 @@ function account_check(&$user, &$passwd, &$group = "")
  */
 function read_permission($upload, $user)
 {
-  global $PG_CONN;
   $ADMIN_PERMISSION = 10;
+  $dbManager = $GLOBALS['container']->get('db.manager');
 
   /** check if the user if the owner of this upload */
-  $SQL = "SELECT * FROM upload where upload_pk = $upload and user_fk = (SELECT user_pk from users where user_name = '$user');";
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  if(!empty($row)) {
+  $row = $dbManager->getSingleRow(
+    "SELECT 1
+    FROM upload INNER JOIN users ON users.user_pk = upload.user_fk
+    WHERE users.user_name = $1 AND upload.upload_pk = $2",
+    array($user, $upload),
+    __METHOD__.".checkUpload"
+  );
+
+  if (!empty($row)) {
+    /** user has permission */
     return 1;
   }
 
   /** check if the user is administrator */
-  $SQL = "SELECT * FROM users where user_name = '$user' and user_perm = $ADMIN_PERMISSION;";
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-  if(!empty($row)) {
+  $row = $dbManager->getSingleRow(
+    "SELECT 1
+    FROM users
+    WHERE user_name = $1 AND user_perm = $2",
+    array($user, $ADMIN_PERMISSION),
+    __METHOD__.".checkPerm"
+  );
+
+  if (!empty($row)) {
+    /** user has permission */
     return 1;
   }
 
+  /** user does not have permission */
   return 0;
 }
   

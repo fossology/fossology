@@ -146,7 +146,8 @@ if ($dbManager->existsTable('sysconfig'))
   print "Old release was $sysconfig[Release]\n";
 }
 
-$migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'));
+$migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','type_fk','comment'),
+        'license_ref_bulk'=>array('rf_fk','removing'));
 if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
 {
   $dbManager->queryOnce('begin; 
@@ -252,7 +253,9 @@ if($isUpdating && empty($sysconfig['Release'])) {
     {
       sleep(1);
       $line = fread($handle,1);
-      if($line) break;
+      if ($line) {
+        break;
+      }
     }
     if(trim($line) != 'i')
     {
@@ -287,9 +290,25 @@ if($sysconfig['Release'] == '2.6.3')
 {
   require_once("$LIBEXECDIR/dbmigrate_real-parent.php");
 }
-if($sysconfig['Release']=='2.6.3' || $sysconfig['Release']=='2.6.3.1')
+
+$expiredDbReleases = array('2.6.3', '2.6.3.1', '2.6.3.2');
+if($isUpdating && (empty($sysconfig['Release']) || in_array($sysconfig['Release'], $expiredDbReleases)))
 {
-  $sysconfig['Release'] = '2.6.3.2';
+  require_once("$LIBEXECDIR/fo_mapping_license.php");
+  print "Rename license (using $LIBEXECDIR) for SPDX validity\n";
+  renameLicensesForSpdxValidation($Verbose);
+}
+
+$expiredDbReleases[] = '2.6.3.3';
+$expiredDbReleases[] = '3.0.0';
+if($isUpdating && (empty($sysconfig['Release']) || in_array($sysconfig['Release'], $expiredDbReleases)))
+{
+  require_once("$LIBEXECDIR/dbmigrate_bulk_license.php");
+}
+
+if(in_array($sysconfig['Release'], $expiredDbReleases))
+{
+  $sysconfig['Release'] = '3.0.1';
 }
 
 $dbManager->begin();

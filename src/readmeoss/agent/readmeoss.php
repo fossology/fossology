@@ -17,8 +17,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-define("README_AGENT_NAME", "readmeoss");
-
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
@@ -35,12 +33,12 @@ class ReadmeOssAgent extends Agent
   private $cpClearedGetter;
   /** @var UploadDao */
   private $uploadDao;
-  /** @var int[] */ 
+  /** @var int[] */
   protected $additionalUploadIds = array();
 
   function __construct()
   {
-    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false, "content ilike 'Copyright%'");
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
     $this->licenseClearedGetter = new LicenseClearedGetter();
 
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
@@ -65,7 +63,7 @@ class ReadmeOssAgent extends Agent
     $this->heartbeat(0);
     $licenseStmts = array();
     $copyrightStmts = array();
-            
+
     foreach($uploadIds as $addUploadId)
     {
       if (!$this->uploadDao->isAccessible($addUploadId, $groupId)) {
@@ -136,9 +134,9 @@ class ReadmeOssAgent extends Agent
       $output .= $break;
       $output .= "<notices>";
     }else{
-       $output .= "Copyright notices";
-       $output .= $break; 
-       $output .= $copyrights;
+      $output .= "Copyright notices";
+      $output .= $break;
+      $output .= $copyrights;
     }
     return $output;
   }

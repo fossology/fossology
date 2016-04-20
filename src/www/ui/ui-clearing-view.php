@@ -34,6 +34,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\HighlightRenderer;
 use Monolog\Logger;
@@ -235,7 +236,7 @@ class ClearingView extends FO_Plugin
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "View-Meta", -1, '', '', $uploadTreeTableName);
+    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "View", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;
     /** @var ui_view $view */
@@ -340,7 +341,6 @@ class ClearingView extends FO_Plugin
     $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
     $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
     
-    $this->vars['styles'] .= "<link rel='stylesheet' href='css/highlights.css'>\n";
     return $this->render("ui-clearing-view.html.twig");
   }
 
@@ -378,9 +378,15 @@ class ClearingView extends FO_Plugin
    */
   function RegisterMenus()
   {
-    $text = _("Set the concluded licenses for this upload");
-    menu_insert("Browse-Pfile::Clearing", 0, $this->Name, $text);
-    menu_insert("View::Audit", 35, $this->Name . Traceback_parm_keep(array("upload", "item", "show")), $text);
+    $menuText="Licenses";
+    $menuPosition = 58;
+    $uri = $this->Name . Traceback_parm_keep(array("upload", "item", "show"));
+    $tooltipText = _("Set the concluded licenses for this upload");
+    $this->microMenu->insert(array(MicroMenu::VIEW, MicroMenu::VIEW_META), $menuText, $menuPosition, $this->Name, $uri, $tooltipText );
+
+    if (GetParm("mod", PARM_STRING) != $this->Name) {
+      menu_insert("Browse-Pfile::$menuText", 0, $this->Name, $tooltipText);
+    }
     return 0;
   }
 

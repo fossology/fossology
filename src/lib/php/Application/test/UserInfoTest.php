@@ -24,7 +24,7 @@ class UserInfoTest extends \PHPUnit_Framework_TestCase {
   /** @var UserInfo */
   private $userInfo;
 
-  public function setUp() {
+  protected function setUp() {
     $this->userInfo = new UserInfo();
   }
 

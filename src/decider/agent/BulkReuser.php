@@ -65,15 +65,20 @@ class BulkReuser extends Object
     /* @var $deciderPlugin DeciderJobAgentPlugin */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array();
-    $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_fk,rf_text,removing,upload_fk,uploadtree_fk) "
-            . "SELECT $1 AS user_fk, $2 AS group_fk,rf_fk,rf_text,removing,$3 AS upload_fk, $4 as uploadtree_fk
-              FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk";
+    $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk) "
+            . "SELECT $1 AS user_fk, $2 AS group_fk,rf_text,$3 AS upload_fk, $4 as uploadtree_fk
+              FROM license_ref_bulk WHERE lrb_pk=$5 RETURNING lrb_pk, $5 as lrb_origin";
+    $sqlLic = "INSERT INTO license_set_bulk (lrb_fk,rf_fk,removing) "
+            ."SELECT $1 as lrb_fk,rf_fk,removing FROM license_set_bulk WHERE lrb_fk=$2";
     $this->dbManager->prepare($stmt=__METHOD__.'cloneBulk', $sql);
+    $this->dbManager->prepare($stmtLic=__METHOD__.'cloneBulkLic', $sqlLic);
     foreach($bulkIds as $bulkId) {
       $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
       $row = $this->dbManager->fetchArray($res);
       $this->dbManager->freeResult($res);
-      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>array(AGENT_DECIDER_NAME));
+      $resLic = $this->dbManager->execute($stmtLic,array($row['lrb_pk'],$row['lrb_origin']));
+      $this->dbManager->freeResult($resLic);  
+      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>array('agent_decider'));
     }
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $dependecies);

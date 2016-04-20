@@ -68,7 +68,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
-  public function setUp()
+  protected function setUp()
   {
     $this->testDb = new TestPgDb("deciderSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -92,7 +92,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
-  public function tearDown()
+  protected function tearDown()
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -119,16 +119,16 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
+    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey','jobqueue_jq_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars','copyright_ars'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
@@ -523,7 +523,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->runnerBulkReuseShouldScheduleMonkBulk($this->runnerMock);
   }
 
-  private function runnerBulkReuseShouldScheduleMonkBulk($runner)
+  private function  runnerBulkReuseShouldScheduleMonkBulk($runner)
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -548,7 +548,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO job (job_pk, job_queued, job_priority, job_upload_fk, job_user_fk, job_group_fk)"
             . " VALUES ($otherJob, '2014-08-07 09:22:22.718312+00', 0, 1, 2, $groupId)");
     
-    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_fk, rf_text, removing, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, $licId1, 'foo bar', 'f', 1, 7)");
+    $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 7)");
+    $this->dbManager->queryOnce("INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES (123456, $licId1, 'f')");
     
     $this->dbManager->queryOnce("INSERT INTO upload_reuse (upload_fk, reused_upload_fk, group_fk, reused_group_fk, reuse_mode)"
             . " VALUES (2, 1, $groupId, $groupId, 0)");

@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Monk\UI;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\License;
@@ -46,7 +47,8 @@ class OneShot extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => "One-Shot Monk",
         self::MENU_LIST => "Upload::One-Shot Monk",
-        self::REQUIRES_LOGIN => false
+        self::PERMISSION => Auth::PERM_WRITE,
+        self::REQUIRES_LOGIN => true
     ));
 
     $this->highlightProcessor = $this->getObject('view.highlight_processor');

@@ -88,7 +88,7 @@ class CopyrightHistogram extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::Copyright/Email/URL",1);
+        menu_insert("Browse::Copyright/Email/URL",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else

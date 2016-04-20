@@ -12,9 +12,9 @@ include $(VARS)
 
 MOD_NAME = spdx2
 MOD_SUBDIR = agent
+MOD_NAMES = spdx2 spdx2tv dep5
 
-EXE=spdx2.php version.php services.php
-WRAP=spdx2
+EXE=spdx2.php version.php services.php spdx2utils.php
 
 all: version.php spdx2
 
@@ -29,24 +29,27 @@ spdx2:
 	ln -sf $(FOCLIDIR)/fo_wrapper.php $(MOD_NAME)
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/
+	for MOD in $(MOD_NAMES); do \
+		$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR)/; \
+	done
 	for file in $(EXE); do \
 		echo "installing $$file"; \
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
 	done
-	for file in $(WRAP); do \
-		echo "Making wrapper for $$file"; \
-		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
-	done
+	echo "Making wrapper for $(MOD_NAME)"
+	ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$(MOD_NAME)
 	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/{} \;
+	for MOD in $(MOD_NAMES); do \
+		$(INSTALL_PROGRAM) agent.sh $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR)/$$MOD.sh; \
+	done
 
 uninstall:
-	for file in $(WRAP); do \
-		rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
+	for MOD in $(MOD_NAMES); do \
+		rm -rf $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR); \
 	done
 
 clean:
-	rm -f core version.php $(WRAP)
+	rm -f core version.php $(MOD_NAME)
 
 .PHONY: all install uninstall clean
 

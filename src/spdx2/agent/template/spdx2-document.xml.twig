@@ -13,21 +13,24 @@
   <spdx:creationInfo>
     <spdx:CreationInfo>
       <spdx:licenseListVersion>2.0</spdx:licenseListVersion> 
-      <spdx:creator>Person: {{ userName }}</spdx:creator>
-      <spdx:creator>Organization: {{ organisation }}</spdx:creator>
+      <spdx:creator>Person: {{ userName|e }}</spdx:creator>
+      <spdx:creator>Organization: {{ organisation|e }}</spdx:creator>
       <spdx:creator>Tool: spxd2</spdx:creator>
       <spdx:created>{{ 'now'|date('Y-m-d\\TH:i:s\\Z')}}{# date('c') for ISO 8601 is not parsed by spdxTool #}</spdx:created>
     </spdx:CreationInfo>
   </spdx:creationInfo>
-  <spdx:name>{{ documentName }}</spdx:name>
+  <spdx:name>{{ documentName|e }}</spdx:name>
   <rdfs:comment> 
-    This document was created using SPDX 2.0 using licenses from Fossology.
+    This document was created using license informations and a generator from Fossology.
   </rdfs:comment>
   {% for licenseId,extractedText in licenseTexts %}
   <spdx:hasExtractedLicensingInfo>
-    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#LicenseRef-{{ licenseId }}">
-      <spdx:licenseId>LicenseRef-{{ licenseId }}</spdx:licenseId>
-      <spdx:extractedText>{{ extractedText|replace({'\f':''})|e }}</spdx:extractedText>
+    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#LicenseRef-{{ licenseId|replace(' ','-')|url_encode }}">
+      <spdx:licenseId>LicenseRef-{{ licenseId|replace(' ','-')|e }}</spdx:licenseId>
+      <spdx:extractedText><![CDATA[
+{{ extractedText|replace({'\f':''})
+                |replace({']]>':']]]]><![CDATA[>'}) }}
+      ]]></spdx:extractedText>
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>
   {% endfor %}

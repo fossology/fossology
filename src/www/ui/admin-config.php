@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_foconfig", _("Configuration Variables"));
 
 /**
@@ -25,6 +27,8 @@ define("TITLE_foconfig", _("Configuration Variables"));
 class foconfig extends FO_Plugin
 {
   var $CreateAttempts = 0;
+  /** @var DbManager */
+  private $dbManager;
 
   function __construct()
   {
@@ -34,6 +38,7 @@ class foconfig extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->PluginLevel = 50;    // run before 'regular' plugins
     parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -96,13 +101,9 @@ class foconfig extends FO_Plugin
    */
   function Output()
   {
-    global $PG_CONN;
-    global $Plugins;
-
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    if (empty($PG_CONN)) return;
 
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
@@ -117,13 +118,9 @@ class foconfig extends FO_Plugin
         if ($VarValue != $oldarray[$VarName])
         {
           /* get validation_function row from sysconfig table */
-          $sql = "select validation_function, ui_label from sysconfig where variablename='".pg_escape_string($VarName)."';";
-          $result = pg_query($PG_CONN, $sql);
-          DBCheckResult($result, $sql, __FILE__, __LINE__);
-          $sys_array = pg_fetch_assoc($result);
+          $sys_array = $this->dbManager->getSingleRow("select validation_function, ui_label from sysconfig where variablename=$1",array($VarName),__METHOD__.'.getVarNameData');
           $validation_function = $sys_array['validation_function'];
           $ui_label = $sys_array['ui_label'];
-          pg_free_result($result);
           $is_empty = empty($validation_function);
           /* 1. the validation_function is empty
            2. the validation_function is not empty, and after checking, the value is valid
@@ -131,12 +128,7 @@ class foconfig extends FO_Plugin
           */
           if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
           {
-            $sql = "update sysconfig set conf_value='" .
-            pg_escape_string($VarValue) .
-              "' where variablename='$VarName'";
-            $result = pg_query($PG_CONN, $sql);
-            DBCheckResult($result, $sql, __FILE__, __LINE__);
-            pg_free_result($result);
+            $this->dbManager->getSingleRow("update sysconfig set conf_value=$1 where variablename=$2",array($VarValue,$VarName),__METHOD__.'.setVarNameData');
             if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
             $UpdateMsg .= $VarName;
           }
@@ -145,7 +137,7 @@ class foconfig extends FO_Plugin
           {
             if (!strcmp($validation_function, 'check_boolean'))
             {
-              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are \'true\' and \'false\'.");
+              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
               echo "<script>alert('$warning_msg');</script>";
             }
             else if  (strpos($validation_function, "url"))
@@ -156,7 +148,7 @@ class foconfig extends FO_Plugin
           }
         }
       }
-      if (!empty($UpdateMsg)) $UpdateMsg .= " updated.";
+      if (!empty($UpdateMsg)) $UpdateMsg .= _(" updated.");
     }
 
     $OutBuf = '';

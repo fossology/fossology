@@ -25,8 +25,8 @@
 #define _GNU_SOURCE
 #include "wget_agent.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="wget_agent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="wget_agent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="wget_agent build version: NULL.\n";
 #endif
@@ -91,7 +91,7 @@ int main  (int argc, char *argv[])
   GlobalUploadKey = -1;
   int upload_pk = 0;           // the upload primary key
   //int Agent_pk;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[MAXCMD];
 
@@ -164,9 +164,9 @@ int main  (int argc, char *argv[])
     SafeExit(0);
   }
   
-  SVN_REV = fo_sysconfig("wget_agent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("wget_agent", "COMMIT_HASH");
   VERSION = fo_sysconfig("wget_agent", "VERSION");
-  sprintf(agent_rev, "%s.%s", VERSION, SVN_REV);
+  sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
   /* Get the Agent Key from the DB */
   fo_GetAgentKey(pgConn, basename(argv[0]), GlobalUploadKey, agent_rev, agent_desc);
 
@@ -248,7 +248,7 @@ int main  (int argc, char *argv[])
         {
           if (!Archivefs(GlobalURL, GlobalTempFile, TempFileDir, Status))
           {
-            LOG_FATAL("Failed to archieve. GlobalURL, GlobalTempFile, TempFileDir are: %s, %s, %s, "
+            LOG_FATAL("Failed to archive. GlobalURL, GlobalTempFile, TempFileDir are: %s, %s, %s, "
                "Mode is: %lo (octal)\n", GlobalURL, GlobalTempFile, TempFileDir, (unsigned long) Status.st_mode);
             SafeExit(50);
           }

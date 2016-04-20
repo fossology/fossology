@@ -131,21 +131,23 @@ class TestPgDb extends TestAbstractDb
    * @param array $tableList
    * @param bool $invert 
    */
-  public function createPlainTables($tableList, $invert=FALSE)
+  public function createPlainTables($tableList, $invert=false)
   {
     $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
     $Schema = array();
     require($coreSchemaFile);
     foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if( $invert^!in_array($tableName, $tableList) ){
+      if ($invert^!in_array($tableName, $tableList) || array_key_exists($tableName, $Schema['INHERITS'])){
         continue;
       }
       $this->dbManager->queryOnce("CREATE TABLE \"$tableName\" ()");
+      $sqlAddArray = array();
       foreach ($tableCols as $attributes)
       {
         $sqlAdd = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
-        $this->dbManager->queryOnce($sqlAdd);
+        $sqlAddArray[] = $sqlAdd;
       }
+      $this->dbManager->queryOnce(implode(";\n",$sqlAddArray));
     }
   }
   

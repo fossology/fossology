@@ -30,7 +30,8 @@ class upload_properties extends FO_Plugin
   /** @var DbManager */
   private $dbManager;
   /** @var FolderDao */
-          
+  private $folderDao;
+
   function __construct()
   {
     $this->Name = "upload_properties";

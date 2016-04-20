@@ -100,7 +100,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     -R         = (deprecated and ignored)
     -w         = (deprecated and ignored)
     -W         = (deprecated and ignored)
-  ";
+";
 /* Load command-line options */
 global $PG_CONN;
 $Verbose = 0;
@@ -156,7 +156,7 @@ function GetBucketFolder($UploadName, $BucketGroupSize) {
  * This is recursive!
  */
 function GetFolder($FolderPath, $Parent = NULL) {
-  global $PG_CONN;
+  $dbManager = $GLOBALS['container']->get('db.manager');
   global $Verbose;
   global $Test;
   if (empty($Parent)) {
@@ -174,20 +174,16 @@ function GetFolder($FolderPath, $Parent = NULL) {
     return (GetFolder($folderTail, $Parent));
   }
   /* See if it exists */
-  $SQLFolder = str_replace("'", "''", $folderHead);
-  $SQL = "SELECT * FROM folder
+  $SQL = "SELECT folder_pk FROM folder
   INNER JOIN foldercontents ON child_id = folder_pk
   AND foldercontents_mode = '1'
-  WHERE foldercontents.parent_fk = '$Parent' AND folder_name='$SQLFolder'";
+  WHERE foldercontents.parent_fk = $1 AND folder_name = $2";
   if ($Verbose) {
-    print "SQL=\n$SQL\n";
+    print "SQL=\n$SQL\n$1=$Parent\n$2=$folderHead\n";
   }
-  $result = pg_query($PG_CONN, $SQL);
-  DBCheckResult($result, $SQL, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  $row_count = pg_num_rows($result);
 
-  if ($row_count <= 0) {
+  $row = $dbManager->getSingleRow($SQL, array($Parent, $folderHead), __METHOD__.".GetFolder.exists");
+  if (empty($row)) {
     /* Need to create folder */
     global $Plugins;
     $P = & $Plugins[plugin_find_id("folder_create") ];
@@ -199,15 +195,11 @@ function GetFolder($FolderPath, $Parent = NULL) {
       print "Folder not found: Creating $folderHead\n";
     }
     if (!$Test) {
-      $P->Create($Parent, $folderHead, "");
-      pg_free_result($result);
-      $result = pg_query($PG_CONN, $SQL);
-      DBCheckResult($result, $SQL, __FILE__, __LINE__);
-      $row = pg_fetch_assoc($result);
+      $P->create($Parent, $folderHead, "");
+      $row = $dbManager->getSingleRow($SQL, array($Parent, $folderHead), __METHOD__.".GetFolder.exists");
     }
   }
   $Parent = $row['folder_pk'];
-  pg_free_result($result);
   return (GetFolder($folderTail, $Parent));
 } /* GetFolder() */
 
@@ -222,13 +214,13 @@ function GetFolder($FolderPath, $Parent = NULL) {
  * \return 1: error, 0: success
  */
 function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription, $TarSource = NULL) {
+  $dbManager = $GLOBALS['container']->get('db.manager');
   global $Verbose;
   global $Test;
   global $QueueList;
   global $fossjobs_command;
   global $public_flag;
   global $SysConf;
-  global $PG_CONN;
   global $VCS;
   global $vcsuser;
   global $vcspass;
@@ -359,15 +351,13 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     $waitCount = 0;
     while ($working && ($waitCount++ < 30)) {
       sleep(3);
-      $SQL = "select * from jobqueue inner join job on job.job_pk = jobqueue.jq_job_fk where job_upload_fk = '$UploadPk' and jq_end_bits = 0 and jq_type = 'wget_agent'";
+      $SQL = "select 1 from jobqueue inner join job on job.job_pk = jobqueue.jq_job_fk where job_upload_fk = $1 and jq_end_bits = 0 and jq_type = 'wget_agent'";
 
-      $result = pg_query($PG_CONN, $SQL);
-      DBCheckResult($result, $SQL, __FILE__, __LINE__);
-      $row_count = pg_num_rows($result);
-      pg_free_result($result);
-      if ($row_count == 0) {
+      $row = $dbManager->getSingleRow($SQL, array($UploadPk), __METHOD__.".UploadOne");
+      if (empty($row)) {
         $working = false;
       }
+
     }
     if ($working) {
       echo "Gave up waiting for copy completion. Is the scheduler running?";

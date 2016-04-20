@@ -19,9 +19,14 @@
 
 define("TITLE_dashboard", _("Dashboard"));
 
+use Fossology\Lib\Db\DbManager;
+
 class dashboard extends FO_Plugin
 {
   protected $pgVersion;
+  
+  /** @var DbManager */
+  private $dbManager;
   
   function __construct()
   {
@@ -30,6 +35,7 @@ class dashboard extends FO_Plugin
     $this->MenuList   = "Admin::Dashboard";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -38,16 +44,11 @@ class dashboard extends FO_Plugin
    */
   function DatabaseContentsRow($TableName, $TableLabel)
   {
-    global $PG_CONN;
-
-    // $sql = "SELECT count(*) AS val FROM $TableName;";  too slow on big tables, use pg_class which will be accurate as of last ANALYZE
-    //$sql = "select reltuples as val from pg_class where relname='$TableName'"; this doesn't handle uploadtree
-    $sql = "select sum(reltuples) as val from pg_class where relname like '$TableName' and reltype !=0";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow(
+      "select sum(reltuples) as val from pg_class where relname like $1 and reltype !=0",
+      array($TableName),
+      __METHOD__);
     $item_count = $row['val'];
-    pg_free_result($result);
 
     $V = "<tr><td>$TableLabel</td>";
     $V .= "<td align='right'>" . number_format($item_count,0,"",",") . "</td>";
@@ -76,8 +77,6 @@ class dashboard extends FO_Plugin
    */
   function DatabaseContents()
   {
-    global $PG_CONN;
-
     $V = "<table border=1>\n";
 
     $head1 = _("Metric");
@@ -109,29 +108,22 @@ class dashboard extends FO_Plugin
     return $V;
   }
 
-function GetLastVacTime($TableName)
+function GetLastAnalyzeTimeOrVacTime($queryPart,$TableName)
 {
-  global $PG_CONN;
-  
-  $sql = "select greatest(last_vacuum, last_autovacuum) as lasttime from pg_stat_all_tables where schemaname = 'public' and relname like '$TableName'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
+  $sql = "select greatest($queryPart) as lasttime from pg_stat_all_tables where schemaname = 'public' and relname like $1";
+  $row = $this->dbManager->getSingleRow($sql, array($TableName), __METHOD__);
 
   return $row["lasttime"];
 }
+
+function GetLastVacTime($TableName)
+{
+  return $this->GetLastAnalyzeTimeOrVacTime("last_vacuum, last_autovacuum",$TableName);
+}
+  
 function GetLastAnalyzeTime($TableName)
 {
-  global $PG_CONN;
-  
-  $sql = "select greatest(last_analyze, last_autoanalyze) as lasttime from pg_stat_all_tables where schemaname = 'public' and relname like '$TableName'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
-
-  return $row["lasttime"];
+  return $this->GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",$TableName);
 }
 
 
@@ -141,7 +133,6 @@ function GetLastAnalyzeTime($TableName)
    */
   function DatabaseMetrics()
   {
-    global $PG_CONN;
 
     $V = "<table border=1>\n";
     $text = _("Metric");
@@ -150,11 +141,8 @@ function GetLastAnalyzeTime($TableName)
 
     /* Database size */
     $sql = "SELECT pg_database_size('fossology') as val;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
+    $row = $this->dbManager->getSingleRow($sql, array(), __METHOD__."get_Size");
     $Size = HumanSize($row['val']);
-    pg_free_result($result);
     $text = _("FOSSology database size");
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'> $Size </td></tr>\n";
@@ -167,24 +155,14 @@ function GetLastAnalyzeTime($TableName)
     /**** Query stats ****/
     // count current queries
     $sql = "SELECT count(*) AS val FROM pg_stat_activity";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $connection_count = '';
+    $row = $this->dbManager->getSingleRow($sql, array(), __METHOD__."get_connection_count");
     $connection_count = $row['val'];
-    pg_free_result($result);
 
     /**** Active connection count ****/
     $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
     $text = _("Active database connections");
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
-    $sql = "SELECT count(*) AS val FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    $item_count = $row['val'];
-    pg_free_result($result);
 
     $V .= "</table>\n";
 
@@ -198,8 +176,6 @@ function GetLastAnalyzeTime($TableName)
    */
   function DatabaseQueries()
   {
-    global $PG_CONN;
-
     $V = "<table border=1>\n";
     $head1 = _("PID");
     $head2 = _("Query");
@@ -207,21 +183,14 @@ function GetLastAnalyzeTime($TableName)
     $head4 = _("Elapsed");
     $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
 
-    /**** Version ****/
-    $sql = "SELECT * from version();";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    $version = explode(' ', $row['version'], 3);
-
-    // Get the current query column name in pg_stat_activity
     $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
     $procpid = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "pid" : "procpid";
-
     $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+    $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;
+    $this->dbManager->prepare($statementName,$sql);
+    $result = $this->dbManager->execute($statementName, array());
+    
     if (pg_num_rows($result) > 1)
     {
       while ($row = pg_fetch_assoc($result))

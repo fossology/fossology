@@ -29,8 +29,8 @@
 
 #include "maintagent.h"
 
-#ifdef SVN_REV_S
-char BuildVersion[]="maintagent build version: " VERSION_S " r(" SVN_REV_S ").\n";
+#ifdef COMMIT_HASH_S
+char BuildVersion[]="maintagent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
 char BuildVersion[]="maintagent build version: NULL.\n";
 #endif
@@ -43,9 +43,10 @@ PGconn    *pgConn = 0;        // database connection
 int main(int argc, char **argv) 
 {
   int cmdopt;
-  char *SVN_REV;
+  char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[myBUFSIZ];
+  char *agent_desc = "Maintenance Agent";
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -53,9 +54,11 @@ int main(int argc, char **argv)
   /* get agent pk 
    * Note, if GetAgentKey fails, this process will exit.
    */
-  SVN_REV = fo_sysconfig("maintagent", "SVN_REV");
+  COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("maintagent", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, SVN_REV);
+  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
+  /* insert/update agent data if necessary */
+  fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
 
   int ValidateFoldersExe = 0;
   int VerifyFilePermsExe = 0;
@@ -65,8 +68,9 @@ int main(int argc, char **argv)
   int VacAnalyzeExe = 0;
   int ProcessExpiredExe = 0;
   int RemoveOrphanedFilesExe = 0;
+  int reIndexAllTablesExe = 0;
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghpNPRTUZivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1) 
   {
     switch (cmdopt) 
     {
@@ -186,6 +190,12 @@ int main(int argc, char **argv)
             RemoveOrphanedFiles();
             RemoveOrphanedFilesExe = 1;
           } 
+          break;
+      case 'I': /* Reindexing of database */
+          if(reIndexAllTablesExe == 0){   
+            reIndexAllTables();
+            reIndexAllTablesExe = 1;
+          }
           break;
       case 'i': /* "Initialize" */
             ExitNow(0);
