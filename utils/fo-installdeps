@@ -214,11 +214,7 @@ if [ $RUNTIME ]; then
             postgresql \
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
-<<<<<<< HEAD
             libxml2 libmxml json-c zip \
-=======
-            libxml2 \
->>>>>>> master
             binutils
 
          # enable, possible init, and start postgresql
@@ -255,13 +251,8 @@ if [ $RUNTIME ]; then
             postgresql \
             php php-pear php-pgsql php-process\
             smtpdaemon \
-<<<<<<< HEAD
             file libxml2 libmxml1 json-c zip\
             binutils 
-=======
-            file libxml2 \
-            binutils
->>>>>>> master
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
