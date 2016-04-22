@@ -129,17 +129,17 @@ class showjobs extends FO_Plugin
     elseif($uploadPk>0)
     {
       if (!$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
-        $text = _("Permission Denied");
-        return "<h2>$text</h2>";
+        $this->vars['message'] = _("Permission Denied");
+        return;
       }
     }
 
     $this->vars['uploadId']= $uploadPk;
 
     /* Process any actions */
-    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
+    $action = GetParm("action",PARM_STRING);
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE && !empty($action)){
       $jq_pk = GetParm("jobid",PARM_INTEGER);
-      $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
 
       if (!($uploadPk === -1 &&
@@ -147,14 +147,14 @@ class showjobs extends FO_Plugin
              $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
           !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId()))
       {
-        $text = _("Permission Denied");
-        return "<h2>$text</h2>";
+        $this->vars['message'] = _("Permission Denied to perform action");
       }
-
-      $page = GetParm('page',PARM_INTEGER) ?: 0;
-      $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
-      switch($action)
+      else
       {
+        $page = GetParm('page',PARM_INTEGER) ?: 0;
+        $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
+        switch($action)
+        {
         case 'pause':
           if (empty($jq_pk)) break;
           $command = "pause $jq_pk";
@@ -179,6 +179,7 @@ class showjobs extends FO_Plugin
           if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
           echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
+        }
       }
     }
     $job = GetParm('job',PARM_INTEGER);
