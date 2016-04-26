@@ -36,5 +36,6 @@ char* getMatches(int uploadId, int groupId);
 char* getKeywords(int uploadId);
 char* getIrrelevant(int uploadId, int groupId);
 char* getMainLicense(int uploadId, int groupId);
+char* getLicenseHistogram(int uploadId, int groupId);
 char* getClearedComment(int uploadId, int groupId);
 #endif

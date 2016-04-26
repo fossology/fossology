@@ -170,11 +170,13 @@ class Word2007 extends AbstractWriter implements WriterInterface
 	   echo "Unable to create report structure\n";
 	}
       }   
+      chmod($tempDir, 0777);
       foreach($folders as $folder)
       {   
          if(!is_dir($folder)) {
            mkdir($folder, 0777, true);
         }   
+        chmod($folder, 0777);
       }   
     }
 

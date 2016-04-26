@@ -21,8 +21,6 @@ define("REPORT_AGENT_NAME", "report");
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
-use Fossology\Lib\Dao\ClearingDao;
-use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
@@ -65,12 +63,6 @@ class ReportAgent extends Agent
 
   /** @var UploadDao */
   private $uploadDao;
-
-  /** @var LicenseDao */
-  private $licenseDao;
-
-  /** @var ClearingDao */
-  private $clearingDao;
 
   /** @var UserDao */
   private $userDao;
@@ -121,8 +113,6 @@ class ReportAgent extends Agent
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get("dao.upload");
-    $this->licenseDao = $this->container->get("dao.license");
-    $this->clearingDao = $this->container->get("dao.clearing");
     $this->userDao = $this->container->get("dao.user");
   }
 
@@ -224,6 +214,8 @@ class ReportAgent extends Agent
     $licenses = $this->groupStatements($ungrupedStatements, true, "license");
     
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
+
+    $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
     
     $ungrupedStatements = $this->bulkMatchesGetter->getUnCleared($uploadId, $groupId);
     $bulkLicenses = $this->groupStatements($ungrupedStatements, true);
@@ -250,7 +242,8 @@ class ReportAgent extends Agent
                       "ecc" => $ecc,
                       "ip" => $ip,
                       "licensesIrre" => $licensesIrre,
-                      "licensesMain" => $licensesMain
+                      "licensesMain" => $licensesMain,
+                      "licensesHist" => $licensesHist
                      );
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
@@ -675,7 +668,12 @@ class ReportAgent extends Agent
       foreach($statementsCEI as $statements){
         $table->addRow($smallRowHeight);
         $cell1 = $table->addCell($firstColLen); 
-        $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        if($title === "Copyrights"){
+          $html->addHtml($cell1, htmlspecialchars($statements['content'], ENT_DISALLOWED));
+        }
+        else{
+          $cell1->addText(htmlspecialchars($statements['content'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+        }
         $cell2 = $table->addCell($secondColLen);
         $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
@@ -731,7 +729,7 @@ class ReportAgent extends Agent
    * @param ItemTreeBounds $parentItem 
    * @param int $groupId
    */
-  private function licenseHistogram(Section $section, $parentItem, $groupId, $titleSubHeading)
+  private function licenseHistogram(Section $section, $dataHistogram, $titleSubHeading)
   {
     $firstColLen = 2000;
     $secondColLen = 2000;
@@ -741,18 +739,12 @@ class ReportAgent extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    $scannerLicenseHistogram = $this->licenseDao->getLicenseHistogram($parentItem);
-    $editedLicensesHist = $this->clearingDao->getClearedLicenseIdAndMultiplicities($parentItem, $groupId);
-    $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
 
-    foreach($totalLicenses as $licenseShortName){
-      $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
-      $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
-
+    foreach($dataHistogram as $licenseData){
       $table->addRow($this->rowHeight);
-      $table->addCell($firstColLen)->addText($count, "pStyle");
-      $table->addCell($secondColLen)->addText($editedCount, "pStyle");
-      $table->addCell($thirdColLen)->addText(htmlspecialchars($licenseShortName), "pStyle");
+      $table->addCell($firstColLen)->addText($licenseData['scannerCount'], "pStyle");
+      $table->addCell($secondColLen)->addText($licenseData['editedCount'], "pStyle");
+      $table->addCell($thirdColLen)->addText(htmlspecialchars($licenseData['licenseShortname']), "pStyle");
     }
     $section->addTextBreak();
   }
@@ -769,7 +761,6 @@ class ReportAgent extends Agent
     global $SysConf;
 
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
-    $parentItem = $this->uploadDao->getParentItemBounds($uploadId);
     $docLayout = array("orientation" => "landscape", 
                        "marginLeft" => "950", 
                        "marginRight" => "950", 
@@ -832,8 +823,8 @@ class ReportAgent extends Agent
     $sR->forOtherTodos($section, count($contents['ecc']['statements']));
 
     /* Display scan results and edited results */
-    $titleSubHeadingHistogram = "(Scanner count, edited count, License name)";
-    $this->licenseHistogram($section, $parentItem, $groupId, $titleSubHeadingHistogram);
+    $titleSubHeadingHistogram = "(Scanner count, Concluded license count, License name)";
+    $this->licenseHistogram($section, $contents['licensesHist']['statements'], $titleSubHeadingHistogram);
 
     /* Display global licenses */
     $titleSubHeadingLicense = "(License name, License text, File path)";
@@ -899,6 +890,7 @@ class ReportAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
+    umask(0133);
     $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
