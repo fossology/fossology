@@ -17,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file admin_upload_delete.php
@@ -29,7 +30,11 @@ define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
  * \class admin_upload_delete extend from FO_Plugin
  * \brief delete a upload, certainly, you need the permission 
  */
-class admin_upload_delete extends FO_Plugin {
+class admin_upload_delete extends FO_Plugin 
+{
+  /** @var UploadDao */
+  private $uploadDao;
+
   function __construct()
   {
     $this->Name = "admin_upload_delete";
@@ -37,6 +42,9 @@ class admin_upload_delete extends FO_Plugin {
     $this->MenuList = "Organize::Uploads::Delete Uploaded File";
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
   }
 
   /**
@@ -46,7 +54,7 @@ class admin_upload_delete extends FO_Plugin {
    * \return string with the message.
    */
   function TryToDelete($uploadpk) {
-    if (! GetUploadPerm($uploadpk) >= Auth::PERM_WRITE) {
+    if(!$this->uploadDao->isAccessible($uploadpk, Auth::getGroupId())){
       $text=_("You dont have permissions to delete the upload");
       return DisplayMessage($text);
     }
