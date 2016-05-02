@@ -14,7 +14,7 @@ MOD_NAME = spdx2
 MOD_SUBDIR = agent
 MOD_NAMES = spdx2 spdx2tv dep5
 
-EXE=spdx2.php version.php services.php
+EXE=spdx2.php version.php services.php spdx2utils.php
 
 all: version.php spdx2
 

@@ -1,0 +1,129 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+    {{ pathOfItem }}
+
+    <form action='{{ postUrl }}' method='POST'>
+        <u>
+            <i>
+                <b>
+                    {{ "Limit search to" | trans }}:
+                </b>
+            </i>
+        </u>
+        <br>
+        <input type='radio' name='searchtype' value='containers' {{ ContainersChecked }} onclick="setReadonlyForFilters(false);">
+        <b>
+            {{ "Containers only (rpms, tars, isos, etc), including directories." | trans }}
+        </b>
+        <br>
+        <input type='radio' name='searchtype' value='directory' {{ DirectoryChecked }} onclick="setReadonlyForFilters(true);">
+        <b>
+            {{ "Containers only (rpms, tars, isos, etc), excluding directories." | trans }}
+        </b>
+        The filtering for license or copyright is not supported in this case.
+        <br>
+        <input type='radio' name='searchtype' value='allfiles' {{ AllFilesChecked }} onclick="setReadonlyForFilters(false);">
+        <b>
+            {{ "All Files" | trans }}
+        </b>
+
+        <p>
+            <u>
+                <i>
+                    <b>
+                        {{ "You must choose one or more search criteria (not case sensitive)." | trans }}
+                    </b>
+                </i>
+            </u>
+        <ul>
+            <li>
+                <b>
+                    {{ "Enter the filename to find: " | trans }}
+                </b>
+                <INPUT type='text' name='filename' size='40' value='{{ Filename|e }}'>
+                <br>
+                {{ "You can use '%' as a wild-card. " | trans }}
+                {{ "For example, '%v3.war', or 'mypkg%.tar'." | trans }}
+            </li>
+            <li>
+                <b>
+                    {{ "Tag to find" | trans }}:
+                </b>
+                <input name='tag' size='30' value='{{ tag|e }}'>
+            </li>
+            <li>
+                <b>
+                    {{ "File size is" | trans }} &ge;
+                </b>
+                <input name='sizemin' size=10 value='{{ SizeMin }}'> {{ " bytes" | trans}};
+            </li>
+            <li>
+                <b>
+                    {{ "File size is" | trans }} &le;
+                </b>
+                <input name='sizemax' size=10 value='{{ SizeMax }}'> {{ " bytes" | trans }}
+            </li>
+        </ul>
+
+        <p>
+            <u>
+                <i>
+                    <b>
+                        {{ "You may also choose one or more optional search filters (not case sensitive)." | trans }}
+                    </b>
+                </i>
+            </u>
+        </p>
+        <ul>
+            <li>
+                <b>
+                    {{ "License" | trans }}:
+                </b>
+                <input name='license' value='{{ License }}'>
+                <br>
+                {{ "For example, 'AGPL%'." | trans }}
+            </li>
+            <li>
+                <b>
+                    {{ "Copyright" | trans }}:
+                </b>
+                <input name='copyright' value='{{ Copyright }}'>
+                <br>
+                {{ "For example, 'fsf'." | trans }}
+            </li>
+        </ul>
+
+        <input type='hidden' name='item' value='{{ Item }}'>
+        <input type='submit' value='{{ "Search" | trans }}'>
+    </form>
+
+    {{ result }}
+{% endblock %}
+
+{% block foot %}
+    {{ parent() }}
+    <script type="text/javascript">
+        function setReadonlyForFilters(isDisabled) {
+            function getBackgroundColor() {
+                if (isDisabled) return "#ccc";
+                else return "#fff";
+            }
+            $("[name='license']").prop('readonly', isDisabled)
+                    .css('background',getBackgroundColor());
+            $("[name='copyright']").prop('readonly', isDisabled)
+                    .css('background',getBackgroundColor());
+        }
+        {% if DirectoryChecked is not empty %}
+        $( document ).ready(function() {
+            setReadonlyForFilters(true);
+        });
+        {% endif %}
+    </script>
+{% endblock %}

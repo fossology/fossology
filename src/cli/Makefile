@@ -8,9 +8,10 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 WRAP = cp2foss \
-       fossjobs schema-export \
-       fo_nomos_license_list fo_copyright_list fo_bucket_list \
-       fossupload_status fo_usergroup fo_import_licenses fo_chmod fo_folder
+	fossjobs schema-export \
+	fo_monk_licnese_list fo_nomos_license_list fo_ninka_license_list \
+	fo_copyright_list fo_bucket_list \
+	fossupload_status fo_usergroup fo_import_licenses fo_chmod fo_folder
 COPY = $(WRAP:=.php)
 
 DOCS = cp2foss.pod fossjobs.pod

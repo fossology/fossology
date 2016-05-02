@@ -16,9 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Db\DbManager;
+
 define("TITLE_user_add", _("Add A User"));
 
 class user_add extends FO_Plugin {
+
+  /** @var DbManager */
+  private $dbManager;
+
   function __construct()
   {
     $this->Name = "user_add";
@@ -26,6 +32,7 @@ class user_add extends FO_Plugin {
     $this->MenuList = "Admin::Users::Add";
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -60,9 +67,6 @@ class user_add extends FO_Plugin {
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
-    $new_upload_group_fk = GetParm('new_upload_group_fk', PARM_INTEGER);
-    $new_upload_perm = GetParm('new_upload_perm', PARM_INTEGER);
-    $uiChoice = GetParm('whichui', PARM_TEXT);
 
 
     /* Make sure username looks valid */
@@ -88,11 +92,8 @@ class user_add extends FO_Plugin {
       return ($text);
     }
     /* See if the user already exists (better not!) */
-    $sql = "SELECT * FROM users WHERE user_name = '$User' LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
+    $row = $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1 LIMIT 1;",
+        array($User), $stmt = __METHOD__ . ".getUserIfExisting");
     if (!empty($row['user_name'])) {
       $text = _("User already exists.  Not added.");
       return ($text);
@@ -107,15 +108,6 @@ class user_add extends FO_Plugin {
     elseif(empty($Email)) {
       $Email_notify = '';
     }
-
-    /* Add the user */
-    if($uiChoice != 'simple')
-    {
-      $uiChoice = 'original';
-    }
-
-    if (empty($new_upload_group_fk)) $new_upload_group_fk = 'NULL';
-    if (empty($new_upload_perm)) $new_upload_perm = 'NULL';
 
     $ErrMsg = add_user($User,$Desc,$Seed,$Hash,$Perm,$Email,
                        $Email_notify,$agentList,$Folder, $default_bucketpool_fk);

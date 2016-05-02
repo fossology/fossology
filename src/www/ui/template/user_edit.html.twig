@@ -1,0 +1,90 @@
+{# Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <form name="user_edit" method="POST">
+  <input type="hidden" name="user_pk" value="{{ userId }}"/>
+  {%  if isSessionAdmin %}
+    {{ "Select the user to edit"|trans }}:
+    {% import "include/macros.html.twig" as macro %}
+    {{ macro.select('userid', allUsers, 'userid', userId, ' onchange="RefreshPage(this.value);"') }}
+  {% endif %}
+    
+  <table style="border:1px solid black; border-collapse: collapse;" width="100%">
+    <tr class="classic">
+      <th width="25%">{{ "Username."|trans }}</th>
+      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20"></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
+      <td><input type="text" value="{{ userDescription|e }}" name="user_desc" size="60"></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">{{ "Email address."|trans }} {{ "This may be blank."|trans }}</th>
+      <td><input type="text" value="{{ userEMail|e }}" name="user_email" size="60"></td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">{{ "E-mail notification on job completion"|trans }}</th>
+      <td><input type="checkbox" name="email_notify" {% if eMailNotification %}checked{% endif %}></td>
+    </tr>
+    
+    {%  if isSessionAdmin %}
+      <tr class="classic">
+        <th width="25%">{{ "Select the user's access level."|trans }}</th>
+        <td>{{ macro.select('user_perm', allAccessLevels, 'user_perm', accessLevel) }}</td>
+      </tr>
+      <tr class="classic">
+        <th width="25%">{{ "Select the user's top-level folder. Access is restricted to this folder."|trans }}</th>
+        <td><select name="root_folder_fk">
+          {{ folderListOption }}
+        </select></td>
+      </tr>
+      <tr class="classic">
+        <th width="25%">{{ "Require no password."|trans }}</th>
+        <td><input type="checkbox" name="_blank_pass" id="blank_pass" {% if isBlankPassword %}checked="checked" disabled="disabled"{% endif %}/></td>
+      </tr>
+    {% endif %}
+    
+    <tr class="classic">
+      <th width="25%">{{ "Password."|trans }}</th>
+      <td><input type="password" name="_pass1" size="20" id="pass1"/></td>
+    </tr>
+    <tr class="classic">
+      <th width='25%'>{{ "Re-enter password."|trans }}</th>
+      <td><input type="password" name="_pass2" size="20"/></td>
+    </tr>
+    <tr class="classic">
+      <th width='25%'>{{ 'Default agents selected when uploading data.'|trans }}</th>
+      <td>{{ agentSelector }}</td>
+    </tr>
+    <tr class="classic">
+      <th width="25%">{{ "Default bucket pool"| trans }}</th>
+      <td>{{ bucketPool }}</td>
+    </tr>
+  </table>
+  <input type="submit" name="UpdateBtn" value="{{ 'Update Account'|trans }}"/>
+  </form>
+{% endblock %}
+
+
+{% block foot %}
+  {{ parent() }}
+  <script language="javascript">
+    function RefreshPage(val) {
+      var uri = '{{ refreshUri }}' + '&newuser=' + val ;
+      window.location.assign(uri);
+    }
+   
+    {% if isBlankPassword %}
+    $(document).ready(function(){
+      $("#pass1").keyup(function (){
+        var isBlank = ($(this).val()==='');
+        $("#blank_pass").prop("checked", isBlank);
+      });
+    });
+    {% endif %}
+  </script>
+{% endblock %}

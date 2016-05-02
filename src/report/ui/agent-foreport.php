@@ -93,12 +93,8 @@ class FoReportGenerator extends DefaultPlugin
   function preInstall()
   {
     $text = _("Generate Report");
-    menu_insert("Browse-Pfile::Extended&nbsp;Report", 0, self::NAME, $text);
-    $parm = Traceback_parm_keep(array("upload"));
-    $uri = $this->Name . $parm;
-
-    menu_insert("Browse::Report",1,$uri,$text);
+    menu_insert("Browse-Pfile::Export&nbsp;Extended&nbsp;Report", 0, self::NAME, $text);
   }
-  }
+}
 
 register_plugin(new FoReportGenerator());

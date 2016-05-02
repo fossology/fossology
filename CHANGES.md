@@ -1,3 +1,97 @@
+### 3.1.0-RC1 (April 15th, 2016)
+
+#### Refactoring
+
+* refactor(ui) rewrite upload pages 
+* refactor(ui) rewrite/refactor delagent and fix #273 
+* refactor(ui) escape strings which become HTML or SQL 
+
+#### New Larger Features
+
+* New Dockerfile also used for Docker Hub, including composed containers with separate DB server
+* DEP5 / debian-copyright file generation
+* Adding tag-value format for the SPDX2 generation 
+* More efficient UI for bulk scan with multiple licenses at the same time
+
+#### New Smaller Features
+
+* feature(CONTRIBUTING.md) create initial CONTRIBUTING.md to support github feature
+* feature(database) add reindexing option to maintenance agent, as turned out necessary
+* feature(database) add some indexes and clusters to database 
+* feature(infrastructure) add coverage coverage, adding badge to README.md
+* feature(license-list) improve UI for allowing more agents 
+* feature(spdx-tools) install spdx-tools script for vagrant and travis 
+* feature(ui) add security check to `user-edit.php` 
+* feature(ui) allow users to move and copy their uploads 
+* feature(vagrant) increase upload size setting
+* feature(vagrant) support proxy from host_ip:3128 
+
+#### Corrections on the (PHP) UI
+
+* fix(ui) fix ui-view error reporting [#615] 
+* fix(ui) fo_copyright_list - bad error checking, - bad error message #277 and #276 
+* fix(ui) handled exception in common-auth.php for incorrect username 
+* fix(ui) mark decisions as irrelevant from file tree [edit] option for uploads 
+* fix(ui) password handling for adding users improved
+* fix(ui) #635: add parameter to URLs for showjobs 
+* fix(ui) only admin should be able to create groups 
+* fix(ui) repair error, which emerges in PHP <= 5.4 
+* fix(ui) repair issue mentioned in #660 
+* fix(ui) repair prepared statement in `admin-license-file.php` 
+* fix(ui-download) add $filenameFallback solve #589 
+* fix(ui) added branch name and separated version into string
+* fix(license-browser) menu order with ECC and other corrected
+* fix(upload-browser) visibility issues with selection of "entire folder"
+
+#### Corrections on the Application Functionality
+
+* fix(agents) fossupload_status print usage on error or --help 
+* fix(agents) repair the calls of `heartbeat` #560
+* fix(composer) replace hash with correct one 
+* fix(copyright) fixing listing of copyrights at Readme export 
+* fix(copyright) increase maximum length of TLD's 
+* fix(copyrights) removed extra where condition which leads to miss copyright statements
+* fix(dashboard) missing $this-> in method call 
+* fix(delagent) any user who is not the owner can delete any folder via /delagent -F 
+* fix(delagent) delagent error message wording 
+* fix(monk) fix one shot functionality
+* fix(nomos) #340 correct path output on command line use
+* fix(nomos) Remove extra spaces from the end of usage messages 
+* fix(reuse) Corrected lrb_ori to lrb_origin in bulkreuser 
+* fix(security) SQL injection vulnerability in read_permission 
+* fix(showjobs) correct view  for `&upload=-1` in the URL
+* fix(spdx2) Remove control characters from SPDX output #591
+* fix(spdx2) fix several bugs in DEP5 and SPDX2 reports 
+* fix(ununpack) remove extraneous parentheses 
+* fix(wget_agent) fix issue #298 
+* fix(wget_agent) fix issue #298 
+
+#### Corrections to the Database, Deployment, Tests and Framework
+
+* fix(infrastructure) agent_desc not being initialized in install 
+* fix(infrastrcuture) add to vagrant support for ninka 
+* fix(infrastructure) Added DTD to index file to prevent phpunit test case failure 
+* fix(infrastructure) add fo_chmod and fo_folder to .gitignore 
+* fix(infrastructure) emoved SVN_REV from files and replaced Commit with commit_hash #331 
+* fix(infrastructure) error which emerges in PHP <= 5.4 
+* fix(infrastructure) improved protocol inference #580
+* fix(infrastructure) Missing newline in fossupload_status utility 
+* fix(infrastructure) Missing newlines in fo_chmod error messages 
+* fix(infrastructure) reading of .fossology.rc for not parsing values 
+* fix(infrastructure) remove duplicate test and fix #579 
+* fix(infrastructure) SVN_REV and added branch name in version file #331 
+* fix(infrastructure) Write correct version of DB-scheme to DB 
+* fix(travis) `apt-get install -qq ...` times out 
+* fix(travis) use debian perl instead of cpan 
+
+#### Closed Issues for this Release
+
+In order to see the issues that were closed so far for this release candidate, please refer to the github page:
+
+https://github.com/fossology/fossology/issues?q=milestone%3A3.1.0+sort%3Acreated-asc+is%3Aclosed
+
+Please note that you will find some of the issues open for 3.1.0 milestone - the goal of the release candidate is testing and wrapping things up, and as such the issue space for 3.1.0 will be cleaned up soon.
+
 ### 3.0.0 (November 5th, 2015)
 
 * Correction of wildcard handling with the wget agent

@@ -284,7 +284,8 @@ class Menu extends Object
           'version' => $SysConf['BUILD']['VERSION'],
           'buildDate' => $SysConf['BUILD']['BUILD_DATE'],
           'commitHash' => $SysConf['BUILD']['COMMIT_HASH'],
-          'commitDate' => $SysConf['BUILD']['COMMIT_DATE']
+          'commitDate' => $SysConf['BUILD']['COMMIT_DATE'],
+          'branchName' => $SysConf['BUILD']['BRANCH']
       );
     }
 
@@ -327,4 +328,3 @@ class Menu extends Object
     }
   }
 }
-

@@ -290,5 +290,5 @@ if (array_key_exists("D", $options))
   $checked_list_str = implode(",", $checked_list);
 
   /** scheduling delagent tasks on upload ids */
-  QueueUploadsOnDelagents($checked_list_str, $Verbose);
+  QueueUploadsOnDelagents($checked_list_str);
 }

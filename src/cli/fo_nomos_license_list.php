@@ -17,6 +17,8 @@
  ***********************************************************/
 
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\LicenseDao;
 
 require_once("$MODDIR/lib/php/common-cli.php");
 cli_Init();
@@ -121,6 +123,10 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
 {
   /* @var $dbManager DbManager */  
   $dbManager = $GLOBALS['container']->get('db.manager');
+  /* @var $uploadDao UploadDao */  
+  $uploadDao = $GLOBALS['container']->get("dao.upload");
+  /* @var $licenseDao LicenseDao */  
+  $licenseDao = $GLOBALS['container']->get("dao.license");
   
   if (empty($uploadtree_pk)) {
       $uploadtreeRec = $dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$1',
@@ -131,57 +137,36 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
 
   /* get last nomos agent_pk that has data for this upload */
   $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-  $agent_pk = $AgentRec[0]["agent_fk"];
   if ($AgentRec === false)
   {
-    echo _("No data available \n");
+    echo _("No data available\n");
     return;
   }
+  $agent_pk = $AgentRec[0]["agent_fk"];
 
-  $bottomItem = $dbManager->getSingleRow("SELECT upload_fk, ufile_name path, lft, rgt FROM uploadtree WHERE uploadtree_pk=$1",
-          array($uploadtree_pk),__METHOD__.'.get.top.of.tree');
-  $bottomItem['uploadtree_pk'] = $uploadtree_pk;
-  $bottomItem['include'] = empty($excluding) || false===strpos("/$bottomItem[path]/", $excluding);
-  $pathStack = array();
+  $uploadtreeTablename = GetUploadtreeTableName($upload_pk);
+  /** @var ItemTreeBounds */
+  $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
+  $licensesPerFileName = $licenseDao->getLicensesPerFileNameForAgentId(
+    $itemTreeBounds, array($agent_pk), true, array(), $excluding, $ignore);
 
-  $uploadtree_tablename = GetUploadtreeTableName($bottomItem['upload_fk']);
-  $sql = "SELECT uploadtree_pk, ufile_name, lft, rgt, ufile_mode FROM $uploadtree_tablename
-              WHERE (lft BETWEEN $1 AND $2) AND (ufile_mode & (1<<28)) = 0";
-  $params = array($bottomItem['lft']+1,$bottomItem['rgt']);
-  $stmt = __METHOD__.'.loop.through';
-  if ($uploadtree_tablename=='uploadtree_a')
+  foreach($licensesPerFileName as $fileName => $licenseNames)
   {
-    $sql .= ' AND upload_fk=$3';
-    $params[] = $bottomItem['upload_fk'];
-    $stmt .= '.ut_a';
-  }
-  $sql .= ' ORDER BY lft';
-  $dbManager->prepare($stmt, $sql);
-  $res = $dbManager->execute($stmt,$params);
-  while($item=$dbManager->fetchArray($res)) {
-    while ($bottomItem['rgt']<=$item['lft'])
+    if ((!$ignore || $licenseNames !== false && $licenseNames !== array()))
     {
-      $bottomItem = array_pop($pathStack);
-    }
-    if (!$bottomItem['include']) {
-      continue;
-    }
-    $item['path'] = "$bottomItem[path]/$item[ufile_name]";
-    if (($item['ufile_mode']&(1<<29)) ==0) {
-      $license_name = GetFileLicenses_string($agent_pk, 0, $item['uploadtree_pk'], $uploadtree_tablename);
-      if (!$ignore || ( !empty($license_name) && 'No_license_found' != $license_name) ) {
-        print("$item[path]: $license_name\n");
+      if ($licenseNames !== false)
+      {
+        print($fileName .': '.implode($licenseNames,', ')."\n");
       }
-      continue;
+      else
+      {
+        if ($showContainer)
+        {
+          print($filename."\n");
+        }
+      }
     }
-    $item['include'] = $bottomItem['include'] && (empty($excluding) || false===strpos("/$item[ufile_name]/", $excluding) );
-    if ($item['include'] && $showContainer) {
-      print("$item[path]\n");
-    }
-    array_push($pathStack, $bottomItem);
-    $bottomItem = $item;
   }
-  $dbManager->freeResult($res);
 }
 
 /** get license information for this uploadtree */

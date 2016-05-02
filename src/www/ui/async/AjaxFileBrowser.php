@@ -203,7 +203,6 @@ class AjaxFileBrowser extends DefaultPlugin
     $baseUri = Traceback_uri().'?mod=fileBrowse'.Traceback_parm_keep(array('upload','folder','show'));
 
     $tableData = array();    
-    global $Plugins;
     $latestSuccessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     foreach ($descendants as $child)
     {
@@ -269,7 +268,7 @@ class AjaxFileBrowser extends DefaultPlugin
 
     /* Populate the output ($VF) - file list */
     /* id of each element is its uploadtree_pk */
-    $fileName = $child['ufile_name'];
+    $fileName = htmlspecialchars($child['ufile_name']);
     if ($isContainer)
     {
       $fileName = "<a href='$linkUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";

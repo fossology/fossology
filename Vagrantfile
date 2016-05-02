@@ -68,22 +68,31 @@ Vagrant.configure("2") do |config|
   config.vm.box = "trusty64"
   config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
 
-  config.vm.provider :virtualbox do |vbox|
-    vbox.customize ["modifyvm", :id, "--memory", "1024"]
+  config.vm.provider "virtualbox" do |vbox|
+    vbox.customize ["modifyvm", :id, "--memory", "4096"]
     vbox.customize ["modifyvm", :id, "--cpus", "2"]
   end
 
-  config.vm.network :forwarded_port, guest: 80, host: 8081
+  config.vm.network "forwarded_port", guest: 80, host: 8081
+  config.vm.network "forwarded_port", guest: 5432, host: 5432
 
   # use proxy from host if environment variable PROXY=true
   if ENV['PROXY']
     if ENV['PROXY'] == 'true'
-      config.vm.provision :shell, :inline => $add_proxy_settings
+      config.vm.provision "shell" do |s|
+        s.inline = $add_proxy_settings
+      end
     end
   end
 
   # call the script
-  config.vm.provision :shell, :inline => $build_and_test
+  config.vm.provision "shell" do |s|
+    s.inline = $build_and_test
+  end
+  
+  config.vm.provision "shell", run: "always" do |s|
+    s.inline = "service fossology start"
+  end
 
   # fix "stdin: is not a tty" issue
 #  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"

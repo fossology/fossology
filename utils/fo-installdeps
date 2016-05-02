@@ -53,7 +53,7 @@ while true; do
       -b|--buildtime) BUILDTIME=1; shift;;
       -e|--everything) EVERYTHING=1; shift;;
       -o|--offline) OFFLINE=1; shift;;
-      -y) 
+      -y)
          YesOpt=" -y "; shift;;
       -h|--help)
          echo "Usage: fo-installdeps [options]";
@@ -124,14 +124,14 @@ if [ $BUILDTIME ]; then
          # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
          if [ $YesOpt ]; then
            YesOpt='-y'
-         fi                 
+         fi
          yum $YesOpt groupinstall "Development Tools"
          yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libmxml-dev json-c \
             libxml2 \
-            boost-devel 
+            boost-devel
          ;;
       Mandriva)
          # 2008.1 tested
@@ -144,7 +144,7 @@ if [ $BUILDTIME ]; then
          # 4=Nahant* 5=Tikanga*
          if [ $YesOpt ]; then
            YesOpt='-y'
-         fi                     
+         fi
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
@@ -168,8 +168,13 @@ if [ $RUNTIME ]; then
         echo "doing runtime"
          apt-get $YesOpt install apache2 libapache2-mod-php5
          apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
-            libxml2 libmxml1 libjson0 zip \
-            binutils php-gettext
+            libxml2 \
+            binutils php-gettext \
+            cabextract cpio sleuthkit genisoimage \
+            poppler-utils upx-ucl \
+            unrar-free unzip p7zip-full p7zip wget \
+            subversion git \
+            dpkg-dev
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
@@ -203,7 +208,7 @@ if [ $RUNTIME ]; then
       Fedora)
          if [ $YesOpt ]; then
            YesOpt='-y'
-         fi                  
+         fi
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
@@ -240,7 +245,7 @@ if [ $RUNTIME ]; then
          # 4=Nahant* 5=Tikanga*
          if [ $YesOpt ]; then
            YesOpt='-y'
-         fi                           
+         fi
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
@@ -252,7 +257,7 @@ if [ $RUNTIME ]; then
          echo "    available in RHEL please install from upstream sources.";;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
-   
+
    which composer
     if [ $? -eq 0  ]; then
         if [ $OFFLINE -eq 0 ]; then
@@ -297,8 +302,8 @@ fi
 if [ ! -z "$YesOpt" ]; then
   options="$options -y"
 fi
-BASEDIR=$(dirname $0) 
+BASEDIR=$(dirname $0)
 mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides
-install_mod_deps $mods_dir 
- 
+install_mod_deps $mods_dir
+
 ########################################################################

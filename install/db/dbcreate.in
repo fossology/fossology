@@ -5,6 +5,11 @@
 # This script checks to see if the the fossology db exists and if not
 # then creates it.
 
+if [ "$FOSSOLOGY_DB_HOST" ]; then
+  echo "NOTE: using external DB on host $FOSSOLOGY_DB_HOST"
+  exit 0
+fi
+
 echo "*** Setting up the FOSSology database ***"
 
 # At some point this is where we could dynamically set the db password

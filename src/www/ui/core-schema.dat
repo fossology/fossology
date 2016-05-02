@@ -543,6 +543,10 @@
   $Schema["TABLE"]["folder"]["folder_name"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_name\" text";
   $Schema["TABLE"]["folder"]["folder_name"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_name\" SET NOT NULL";
 
+  $Schema["TABLE"]["folder"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["folder"]["user_fk"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"user_fk\" int4";
+  $Schema["TABLE"]["folder"]["user_fk"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
+
   $Schema["TABLE"]["folder"]["folder_desc"]["DESC"] = "";
   $Schema["TABLE"]["folder"]["folder_desc"]["ADD"] = "ALTER TABLE \"folder\" ADD COLUMN \"folder_desc\" text";
   $Schema["TABLE"]["folder"]["folder_desc"]["ALTER"] = "ALTER TABLE \"folder\" ALTER COLUMN \"folder_desc\" DROP NOT NULL";
@@ -1769,6 +1773,7 @@
 
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_pfile_fk_scope_idx"] = "CREATE INDEX clearing_decision_pfile_fk_scope_idx ON clearing_decision USING btree (pfile_fk, scope);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_clearing_fk_idx"] = "CREATE INDEX clearing_decision_event_clearing_fk_idx ON clearing_decision_event USING btree (clearing_decision_fk);";
 
@@ -1795,10 +1800,19 @@
 
   $Schema["INDEX"]["highlight_keyword"]["highlight_keyword_pfile_fk_idx"] = "CREATE INDEX highlight_keyword_pfile_fk_idx ON highlight_keyword USING btree (pfile_fk);";
 
+  $Schema["INDEX"]["highlight_bulk"]["highlight_bulk_clearing_event_fk_idx"] = "CREATE INDEX highlight_bulk_clearing_event_fk_idx ON highlight_bulk USING btree (clearing_event_fk);";
+  $Schema["INDEX"]["highlight_bulk"]["highlight_bulk_lrb_fk_idx"] = "CREATE INDEX highlight_bulk_lrb_fk_idx ON highlight_bulk USING btree (lrb_fk);";
+
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
+  $Schema["INDEX"]["license_file"]["lf_agent_fk"] = "CREATE INDEX lf_agent_fk ON license_file USING btree (agent_fk);";
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
+
+  $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_uploadtree_fk_idx"] = "CREATE INDEX license_ref_bulk_uploadtree_fk_idx ON license_ref_bulk USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["license_ref_bulk"]["license_ref_bulk_group_fk_idx"] = "CREATE INDEX license_ref_bulk_group_fk_idx ON license_ref_bulk USING btree (group_fk);";
+
+  $Schema["INDEX"]["license_set_bulk"]["license_set_bulk_lrb_fk_idx"] = "CREATE INDEX license_set_bulk_lrb_fk_idx ON license_set_bulk USING btree (lrb_fk);";
 
   $Schema["INDEX"]["perm_upload"]["group_fk_idx"] = "CREATE INDEX group_fk_idx ON perm_upload USING btree (group_fk);";
   $Schema["INDEX"]["perm_upload"]["upload_fk_idx"] = "CREATE INDEX upload_fk_idx ON perm_upload USING btree (upload_fk);";
@@ -1817,6 +1831,11 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_pfile_fk_idx"] = "CREATE INDEX uploadtree_a_pfile_fk_idx ON uploadtree_a USING btree (pfile_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_idx"] = "CREATE INDEX uploadtree_a_upload_fk_idx ON uploadtree_a USING btree (upload_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
+
+  $Schema["CLUSTER"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" CLUSTER ON \"upload_pkey_idx\";";
+  $Schema["CLUSTER"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" CLUSTER ON \"ufile_rel_pkey\";";
+  $Schema["CLUSTER"]["highlight_keyword_pfile_fk_idx"] = "ALTER TABLE \"highlight_keyword\" CLUSTER ON \"highlight_keyword_pfile_fk_idx\";";
+  $Schema["CLUSTER"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" CLUSTER ON \"clearing_decision_pkey\";";
 
   $Schema["INHERITS"]["uploadtree_a"] = "uploadtree";
   $Schema["INHERITS"]["readmeoss_ars"] = "ars_master";

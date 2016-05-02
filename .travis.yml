@@ -17,12 +17,12 @@ install:
  - sudo apt-get update -qq
  - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
  - sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev
-        libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
-        apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
-        binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
-        rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
-        libpq-dev libcunit1-dev libcppunit-dev
-        libboost-regex-dev libboost-program-options-dev
+ - sudo apt-get install -qq libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
+ - sudo apt-get install -qq apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
+ - sudo apt-get install -qq binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
+ - sudo apt-get install -qq rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
+ - sudo apt-get install -qq libpq-dev libcunit1-dev libcppunit-dev
+ - sudo apt-get install -qq libboost-regex-dev libboost-program-options-dev
  - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
  - sudo apt-get install -qq cppcheck
  - sudo apt-get install liblocal-lib-perl
@@ -86,3 +86,7 @@ script:
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
  - set +e
+
+after_script:
+ - mkdir -p build/logs
+ - php src/vendor/bin/coveralls -vv -x clover.xml

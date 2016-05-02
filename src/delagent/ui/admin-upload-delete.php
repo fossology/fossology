@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2015-2016 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file admin_upload_delete.php
@@ -28,7 +30,11 @@ define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
  * \class admin_upload_delete extend from FO_Plugin
  * \brief delete a upload, certainly, you need the permission 
  */
-class admin_upload_delete extends FO_Plugin {
+class admin_upload_delete extends FO_Plugin 
+{
+  /** @var UploadDao */
+  private $uploadDao;
+
   function __construct()
   {
     $this->Name = "admin_upload_delete";
@@ -36,6 +42,36 @@ class admin_upload_delete extends FO_Plugin {
     $this->MenuList = "Organize::Uploads::Delete Uploaded File";
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
+
+    global $container;
+    $this->uploadDao = $container->get('dao.upload');
+  }
+
+  /**
+   * \brief Given a folder_pk, try to add a job after checking permissions.
+   * \param $uploadpk - the upload(upload_id) you want to delete
+   *
+   * \return string with the message.
+   */
+  function TryToDelete($uploadpk) {
+    if(!$this->uploadDao->isAccessible($uploadpk, Auth::getGroupId())){
+      $text=_("You dont have permissions to delete the upload");
+      return DisplayMessage($text);
+    }
+
+    $rc = $this->Delete($uploadpk);
+
+    if (! empty($rc)) {
+      $text=_("Deletion Scheduling failed: ");
+      return DisplayMessage($text.$rc);
+    }
+
+    /* Need to refresh the screen */
+    $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
+    $LinkText = _("View Jobs");
+    $text=_("Deletion added to job queue.");
+    $msg = "$text <a href=$URL>$LinkText</a>";
+    return displayMessage($msg);
   }
 
   /**
@@ -47,8 +83,6 @@ class admin_upload_delete extends FO_Plugin {
    */
   function Delete($uploadpk, $Depends = NULL) 
   {
-    global $SysConf;
-
     /* Prepare the job: job "Delete" */
     $user_pk = Auth::getUserId();
     $group_pk = Auth::getGroupId();
@@ -87,19 +121,7 @@ class admin_upload_delete extends FO_Plugin {
     /* If this is a POST, then process the request. */
     $uploadpk = GetParm('upload', PARM_INTEGER);
     if (!empty($uploadpk)) {
-      $rc = $this->Delete($uploadpk);
-      if (empty($rc)) {
-        /* Need to refresh the screen */
-        $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
-        $LinkText = _("View Jobs");
-        $text=_("Deletion added to job queue.");
-        $msg = "$text <a href=$URL>$LinkText</a>";
-        $V.= displayMessage($msg);
-      }
-      else {
-        $text=_("Deletion Scheduling failed: ");
-        $V.= DisplayMessage($text.$rc);
-      }
+      $V.= $this->TryToDelete($uploadpk);
     }
     /* Create the AJAX (Active HTTP) javascript for doing the reply
      and showing the response. */
@@ -165,7 +187,7 @@ class admin_upload_delete extends FO_Plugin {
     $V.= "</div>\n";
     $V.= "</ol>\n";
     $text = _("Delete");
-    $V.= "<input type='submit' value='$text!'>\n";
+    $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
     return $V;
   }
