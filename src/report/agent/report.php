@@ -890,7 +890,7 @@ class ReportAgent extends Agent
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
-    umask(0133);
+    umask(0022);
     $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;  
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
