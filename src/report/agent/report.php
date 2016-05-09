@@ -761,6 +761,12 @@ class ReportAgent extends Agent
     global $SysConf;
 
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
+    //replace '(',')',' ' with '_' to avoid conflict while creating report.
+    $packageName = str_replace('(','_',$packageName);
+    $packageName = str_replace(' ','_',$packageName);
+    $packageName = str_replace(')','_',$packageName);
+
+    $parentItem = $this->uploadDao->getParentItemBounds($uploadId);
     $docLayout = array("orientation" => "landscape", 
                        "marginLeft" => "950", 
                        "marginRight" => "950", 
