@@ -4,46 +4,9 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "e5bcad9ce2b20f855a9ecccb223451f2",
-    "content-hash": "86cb6d9bd5f7457a20fbd79711c36810",
+    "hash": "9a201f5fb22bf27f49869a66936cfacd",
+    "content-hash": "c27bc999332bc2a65a0ded58159d0ddc",
     "packages": [
-        {
-            "name": "apache/thrift",
-            "version": "0.9.2",
-            "source": {
-                "type": "git",
-                "url": "https://git-wip-us.apache.org/repos/asf/thrift.git",
-                "reference": "91e955aac256f34d177b40bf73997eddda461456"
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-0": {
-                    "Thrift": "lib/php/lib/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "Apache Thrift Developers",
-                    "email": "dev@thrift.apache.org",
-                    "homepage": "http://thrift.apache.org"
-                }
-            ],
-            "description": "Apache Thrift RPC system",
-            "homepage": "http://thrift.apache.org/",
-            "time": "2014-11-05 02:12:20"
-        },
         {
             "name": "monolog/monolog",
             "version": "1.10.0",
