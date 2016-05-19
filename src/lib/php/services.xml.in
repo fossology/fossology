@@ -142,6 +142,10 @@ without any warranty.
         <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport">
             <argument type="service" id="db.manager"/>
         </service>
+
+        <service id="app.users_csv_import" class="Fossology\Lib\Application\UsersCsvImport">
+            <argument type="service" id="db.manager"/>
+        </service>
     
         <service id="ui.component.menu" class="Fossology\Lib\UI\Component\Menu">
             <argument type="service" id="twig.environment"/>
