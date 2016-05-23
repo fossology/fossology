@@ -48,7 +48,7 @@ class UsersToCSV extends DefaultPlugin
  
     $headers = array(
         'Content-type' => 'text/csv, charset=UTF-8',
-        'Content-Disposition' => 'attachment, filename=file.csv',
+        'Content-Disposition' => 'attachment; filename=file.csv',
         'Pragma' => 'no-cache',
         'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
         'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
