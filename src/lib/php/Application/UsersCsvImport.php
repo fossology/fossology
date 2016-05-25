@@ -182,16 +182,25 @@ class UsersCsvImport {
    */
   private function handleCsvFolders($rootFolder)
   {
+    $rootFolder = trim($rootFolder);
     /* Get Top Folder */
-    $TopFolder = FolderGetTop();
-    /* Check if the same folder already exist top folder */
-    $folderWithSameNameUnderParent = $this->folderDao->getFolderId($rootFolder, $TopFolder);
-    if (empty($folderWithSameNameUnderParent)){
-      $root_folder_fk = $this->folderDao->createFolder($rootFolder, $rootFolder, $TopFolder);
-    }else{
-      $root_folder_fk = $folderWithSameNameUnderParent;
+    $topFolder = FolderGetTop();
+    if(!empty($rootFolder)){
+      $checkIfTopFolder = $this->dbManager->getSingleRow(
+        "SELECT folder_pk FROM folder WHERE folder_name = $1",
+        array($rootFolder),__METHOD__.'.CheckIfTopFolder'.$rootFolder);
+      if($topFolder != $checkIfTopFolder['folder_pk']){
+        /* Check if the same folder already exist top folder */
+        $folderWithSameNameUnderParent = $this->folderDao->getFolderId($rootFolder, $topFolder);
+        if (empty($folderWithSameNameUnderParent)){
+          $rootFolderFk = $this->folderDao->createFolder($rootFolder, $rootFolder, $topFolder);
+        }else{
+          $rootFolderFk = $folderWithSameNameUnderParent;
+        }
+        return $rootFolderFk;
+      }
     }
-    return $root_folder_fk;
+    return $topFolder;
   }
 
   /**
