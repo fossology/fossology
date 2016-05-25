@@ -10,11 +10,13 @@
 
 # user variables
 BACKUPDIR=/home/fossy/backup               # Directory on the backup server to store backup data
-KEY=/srv/fossology/.ssh/id_dsa             # ssh public key about backup user 'fossy' 
+KEY=/home/fossy/.ssh/id_dsa             # ssh public key about backup user 'fossy' 
 SOURCEDIR=/srv/fossology/                  # Source directory to backup 
 PGBACKUPDIR=/srv/fossology/db              # Directory to store database backup data
-BACKUPUSER=fossy@192.168.10.129            # Backup user and hostname/ip
-EXCLUDES=(./backup_include_a ./backup_include_b)     # Exclude files to exclude or include backup directory and files
+
+BACKUPUSER=fossy@139.25.105.20           # Backup user and hostname/ip
+PORT=2299
+EXCLUDES=(/home/fossy/script/backup_include_a /home/fossy/script/backup_include_b)     # Exclude files to exclude or include backup directory and files
 # path variables
 CP=/bin/cp;
 MK=/bin/mkdir;
@@ -91,7 +93,7 @@ if [ $REPOFIRST ]; then
 
    i=0
    for EXCLUDE in ${EXCLUDES[@]};do
-   	su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
+   	su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -p $PORT -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
    	pids[i]=$!
         if [ $VERBOSE ]; then
    	   echo "${pids[i]} is Running"		
@@ -148,7 +150,7 @@ if [ $DBBACKUP ]; then
       if [ $VERBOSE ]; then
          echo "Postgres backup directory $PGBACKUPDIR does not exist!Creating..."
       fi
-      $MK $PGBACKUPDIR	
+      $MK $PGBACKUPDIR
       if [ $VERBOSE ]; then
          echo "Create Postgres backup directory $PGBACKUPDIR success!"
       fi
@@ -159,7 +161,7 @@ if [ $DBBACKUP ]; then
    fi
    
    su postgres -c 'pg_dumpall' | gzip > $PGBACKUPDIR/fo_dbbackup.gz
-
+   /bin/chown -R fossy:fossy $PGBACKUPDIR
    if [ $? -ne 0 ];then
       echo "Database backup failed!"
       exit 1
@@ -170,6 +172,8 @@ if [ $DBBACKUP ]; then
 fi
 
 # Step3 Backup database and repository to Remote Server
+
+
 if [ $REPOBACKUP ]; then
    if [ $VERBOSE ]; then
       echo "Begin 2nd backup Repository"
@@ -177,8 +181,11 @@ if [ $REPOBACKUP ]; then
    NOW=`$DATE '+%Y-%m'-%d_%H:%M`
    MKDIR=$BACKUPDIR/$NOW/
 
+   ## delete old backup
+   $SSH -i $KEY -p $PORT $BACKUPUSER "rm -rf `find $BACKUPDIR/* -type d -mtime +7`" -p $PORT
+
    #create new backupdir
-   $SSH -i $KEY $BACKUPUSER "$MK $MKDIR"
+   $SSH -i $KEY -p $PORT $BACKUPUSER "$MK $MKDIR" -p $PORT
 
    #check ssh mkdir correct
    if [ $? -ne 0 ];then
@@ -192,7 +199,7 @@ if [ $REPOBACKUP ]; then
    fi
    i=0
    for EXCLUDE in ${EXCLUDES[@]};do
-        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
+        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -p $PORT -i $KEY\" $SOURCEDIR $BACKUPUSER:/$BACKUPDIR/current" &
         pids[i]=$!
         if [ $VERBOSE ]; then
            echo "${pids[i]} is Running"            
@@ -219,7 +226,7 @@ if [ $REPOBACKUP ]; then
       $DATE '+%Y-%m'-%d_%H:%M:%S
    fi
    # Update the mtime to refelct the snapshot time
-   su fossy -c "$SSH -i $KEY $BACKUPUSER \"$TOUCH $BACKUPDIR/current\""
+   su fossy -c "$SSH -p $PORT -i $KEY $BACKUPUSER \"$TOUCH $BACKUPDIR/current\""
    
    if [ $? -ne 0 ];then
       echo "SSH Touch directory  failed!"
@@ -242,7 +249,7 @@ if [ $FOSTART ]; then
       echo "FOSSology scheduler start failed!"
      
       # Make hardlink copy
-      su fossy -c "$SSH -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""
+      su fossy -c "$SSH -p $PORT -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""
       if [ $? -ne 0 ];then
          echo "Make hardlink copy failed!"
          exit 1
@@ -258,7 +265,7 @@ if [ $FOSTART ]; then
       echo "FOSSology scheduler start successful!"
    fi
    # Make hardlink copy
-   su fossy -c "$SSH -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""   
+   su fossy -c "$SSH -p $PORT -i $KEY $BACKUPUSER \"$CP -al $BACKUPDIR/current/* $MKDIR\""   
    if [ $? -ne 0 ];then
       echo "Make hardlink copy failed!"
       exit 1

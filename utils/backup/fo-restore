@@ -9,12 +9,13 @@
 
 # user variables
 BACKUPDIR=/home/fossy/backup               # Directory on the backup server to store backup data
-KEY=/srv/fossology/.ssh/id_dsa             # ssh public key about backup user 'fossy'
+KEY=/home/fossy/.ssh/id_dsa             # ssh public key about backup user 'fossy'
 SOURCEDIR=/srv/fossology/                  # Source directory
-PGBACKUPDIR=/srv/fossology/db              # Directory to store database backup data
-BACKUPUSER=fossy@192.168.10.129            # Backup user and hostname/ip
-EXCLUDES=(./backup_include_a ./backup_include_b)     # Exclude files to exclude or include backup directory and files
-TEMPDIR=/tmp
+PORT=2299
+PGBACKUPDIR=/home/fossy/script/db              # Directory to store database backup data
+BACKUPUSER=fossy@139.25.105.20            # Backup user and hostname/ip
+EXCLUDES=(/home/fossy/script/backup_include_a /home/fossy/script/backup_include_b)     # Exclude files to exclude or include backup directory and files
+TEMPDIR=/home/fossy/script/temp
 RESTOREDIR=current                         # sub directory under $BACKUPDIR to restore from
 # path variables
 CP=/bin/cp;
@@ -123,7 +124,7 @@ if [ $REPORESTORE ]; then
    fi
    i=0
    for EXCLUDE in ${EXCLUDES[@]};do
-        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -i $KEY\" $BACKUPUSER:/$BACKUPDIR/$RESTOREDIR/ $SOURCEDIR" &
+        su fossy -c "$RSYNC -a --delete --exclude-from=\"$EXCLUDE\" -e \"$SSH -p $PORT -i $KEY\" $BACKUPUSER:/$BACKUPDIR/$RESTOREDIR/ $SOURCEDIR" &
         pids[i]=$!
         if [ $VERBOSE ]; then
            echo "${pids[i]} is Running"            
@@ -161,6 +162,7 @@ if [ $DBRESTORE ]; then
          echo "Postgres backup directory $PGBACKUPDIR does not exist!Creating..."
       fi
       $MK $PGBACKUPDIR
+      chown root:fossy $PGBACKUPDIR
       if [ $VERBOSE ]; then
          echo "Create Postgres backup directory $PGBACKUPDIR success!"
       fi
@@ -170,12 +172,12 @@ if [ $DBRESTORE ]; then
       exit 1
    fi
 
-   /etc/init.d/postgresql-8.3 restart
+   /etc/init.d/postgresql restart
    su postgres -c "dropdb fossology"	
-
-   gunzip -c $PGBACKUPDIR/fo_dbbackup.gz > $TEMPDIR/fo_dbbackup
+   su fossy -c "cd $TEMPDIR && gunzip -c $PGBACKUPDIR/fo_dbbackup.gz > $TEMPDIR/fo_dbbackup"
    su postgres -c "psql -f $TEMPDIR/fo_dbbackup"
-   rm -rf $TEMPDIR/fo_dbbackup
+
+   su fossy -c "cd $TEMPDIR && rm -rf $TEMPDIR/fo_dbbackup"
 
    if [ $? -ne 0 ];then
       echo "Database restore failed!"
@@ -187,7 +189,7 @@ if [ $DBRESTORE ]; then
 fi
 
 if [ $ONLYGOLD ]; then
-   ./fo-restore.php
+   su root -c "/home/fossy/script/fo-restore.php"
    if [ $? -ne 0 ];then
       echo "Running fo-restore.php script failed!"
       exit 1

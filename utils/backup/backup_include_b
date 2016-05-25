@@ -1,9 +1,11 @@
 + /repository/
 - /*
 + /repository/localhost/
++ /repository/report/
 - /repository/*
 + /repository/localhost/files/
 + /repository/localhost/gold/
 - /repository/localhost/*
 + /repository/localhost/files/[a-f]*
++ /repository/localhost/files/report/
 - /repository/localhost/files/*
