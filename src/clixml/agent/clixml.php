@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright (C) 2015, Siemens AG
+ * Copyright (C) 2016, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,10 +43,6 @@ class CliXml extends Agent
   protected $dbManager;
   /** @var Twig_Environment */
   protected $renderer;
-  /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
-  /** @var array */
-  protected $includedLicenseIds = array();
   /** @var string */
   protected $uri;
   /** @var string */
@@ -88,7 +84,6 @@ class CliXml extends Agent
       $args[$key1] = trim($exploded[0]);
       $args[$key2] = trim($exploded[1]);
     }
-
     return $args;
   }
 
@@ -149,24 +144,14 @@ class CliXml extends Agent
   {
     $prefix = $this->outputFormat . "-";
     $postfix = ".twig";
-    switch ($this->outputFormat)
-    {
-      case "clixml":
-        $postfix = ".xml" . $postfix;
-        break;
-    }
+    $postfix = ".xml" . $postfix;
     return $prefix . $partname . $postfix;
   }
 
   protected function getUri($fileBase,$packageName)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
-    switch ($this->outputFormat)
-    {
-      case "clixml":
-        $fileName = $fileName .".xml" ;
-        break;
-    }
+    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d-H:i:s");
+    $fileName = $fileName .".xml" ;
     return $fileName;
   }
 
