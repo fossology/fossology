@@ -150,7 +150,7 @@ class CliXml extends Agent
 
   protected function getUri($fileBase,$packageName)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d-H:i:s");
+    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
     $fileName = $fileName .".xml" ;
     return $fileName;
   }
