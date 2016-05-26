@@ -169,7 +169,6 @@ class CliXml extends Agent
                       "copyrights" => $copyrights["statements"]
                      );
     $contents = $this->reArrangeContent($contents);        
-    print_r($contents);
     $message = $this->renderString($this->getTemplateFile('file'),array(
         'documentName'=>$this->packageName,
         'uri'=>$this->uri,
