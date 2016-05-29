@@ -778,7 +778,7 @@ class ReportAgent extends Agent
     $phpWord = new PhpWord();
 
     /* Get start time */
-    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) ts FROM jobqueue WHERE jq_pk=$1", array($this->jobId));
+    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) ts FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
     $userName = $this->userDao->getUserName($userId);
 
