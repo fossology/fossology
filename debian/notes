@@ -56,5 +56,6 @@ So that that results in the following packages and relationships:
   * fossology-reportgen Depends on fossology-common
   * fossology-report Depends on fossology-common
   * fossology-readmeoss Depends on fossology-common and fossology-copyright
+  * fossology-clixml Depends on fossology-common
   * fossology-reuser Depends on fossology-common
   * fossology-spdx2 Depends on fossology-common
