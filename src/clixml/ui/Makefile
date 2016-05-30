@@ -12,7 +12,6 @@ include $(VARS)
 MOD_NAME = clixml
 MOD_SUBDIR = ui
 GENERAL_FILES = CliXmlAgentPlugin.php CliXmlGeneratorUi.php
-MOD_NAMES = clixml
 
 all:
 	@echo "nothing to do"
@@ -22,14 +21,10 @@ install:
 	for file in $(GENERAL_FILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR); \
 	done
-	for MOD in $(MOD_NAMES); do \
-		mkdir -p $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR); \
-	done
+
 
 uninstall:
-	for MOD in $(MOD_NAMES); do \
-		rm -rf $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR); \
-	done
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 
 
 clean:

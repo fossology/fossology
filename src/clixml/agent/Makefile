@@ -12,7 +12,7 @@ include $(VARS)
 
 MOD_NAME = clixml
 MOD_SUBDIR = agent
-MOD_NAMES = clixml
+
 
 EXE=clixml.php version.php services.php
 
@@ -29,9 +29,7 @@ clixml:
 	ln -sf $(FOCLIDIR)/fo_wrapper.php $(MOD_NAME)
 
 install: all
-	for MOD in $(MOD_NAMES); do \
-		$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR)/; \
-	done
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR)/ 
 	for file in $(EXE); do \
 		echo "installing $$file"; \
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
@@ -41,7 +39,7 @@ install: all
 	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/{} \;
 
 uninstall:
-	for MOD in $(MOD_NAMES); do \
+	for MOD in $(MOD_NAME); do \
 		rm -rf $(DESTDIR)$(MODDIR)/$$MOD/$(MOD_SUBDIR); \
 	done
 
