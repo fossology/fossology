@@ -16,7 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 /**
  * \file ui-list-lic-files.php
@@ -29,11 +32,34 @@ define("TITLE_license_list_files", _("List Files for License"));
 
 class LicenseListFiles extends FO_Plugin
 {
-  var $Name = "license_list_files";
-  var $Title = TITLE_license_list_files;
-  var $Dependency = array("browse", "view");
-  var $DBaccess = PLUGIN_DB_READ;
-  var $LoginFlag = 0;
+  /** @var DbManager */
+  private $dbManager;
+
+  /** @var UploadDao */
+  private $uploadDao;
+
+  /** @var LicenseDao */
+  private $licenseDao;
+
+  /** @var AgentDao */
+  private $agentDao;
+
+  /** @var Array */
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+
+  function __construct()
+  {
+    $this->Name = "license_list_files";
+    $this->Title = TITLE_license_list_files;
+    $this->Dependency = array("browse", "view");
+    $this->DBaccess = PLUGIN_DB_READ;
+    $this->LoginFlag = 0;
+    parent::__construct();
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->licenseDao = $GLOBALS['container']->get('dao.license');
+    $this->agentDao = $GLOBALS['container']->get('dao.agent');
+  }
 
   /**
    * \brief Customize submenus.
@@ -47,14 +73,13 @@ class LicenseListFiles extends FO_Plugin
 
     // micro-menu
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    $rf_shortname = GetParm("lic", PARM_STRING);
+    $rf_shortname = GetParm("lic", PARM_RAW);
     $Excl = GetParm("excl", PARM_RAW);
-    $URL = $this->Name . "&item=$uploadtree_pk&lic=$rf_shortname&page=-1";
+    $URL = $this->Name . "&item=$uploadtree_pk&lic=".urlencode($rf_shortname)."&page=-1";
     if (!empty($Excl)) $URL .= "&excl=$Excl";
     $text = _("Show All Files");
     menu_insert($this->Name . "::Show All", 0, $URL, $text);
   } // RegisterMenus()
-
 
   /**
    * \brief Display the loaded menu and plugins.
@@ -81,11 +106,7 @@ class LicenseListFiles extends FO_Plugin
 
     // Get upload_pk and $uploadtree_tablename
     $UploadtreeRec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtree_pk");
-
-    global $container;
-    /** @var UploadDao */
-    $uploadDao = $container->get('dao.upload');
-    $uploadtree_tablename = $uploadDao->getUploadtreeTableName($UploadtreeRec['upload_fk']);
+    $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($UploadtreeRec['upload_fk']);
 
     // micro menus
     $V = menu_to_1html(menu_find($this->Name, $MenuDepth), 0);
@@ -99,7 +120,10 @@ class LicenseListFiles extends FO_Plugin
     $agentId = GetParm('agentId', PARM_INTEGER);
     if (empty($agentId))
     {
-      $agentId = "any";
+      $scannerAgents = array_keys($this->agentNames);
+      $scanJobProxy = new ScanJobProxy($this->agentDao, $UploadtreeRec['upload_fk']);
+      $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
+      $agentId = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
     $CountArray = $this->countFilesWithLicense($agentId, $rf_shortname, $uploadtree_pk, $tag_pk, $uploadtree_tablename);
 
@@ -114,7 +138,8 @@ class LicenseListFiles extends FO_Plugin
 
       $text = _("files found");
       $text2 = _("with license");
-      $V .= "$Unique $text $text2 <b>$rf_shortname</b>";
+      $text3 = _("files are unique with same file hash.");
+      $V .= "Total $Count $text $text2 <b>$rf_shortname</b>, $Unique $text3";
       if ($Count < $Max) $Max = $Count;
       $limit = ($Page < 0) ? "ALL" : $Max;
       $order = " order by ufile_name asc";
@@ -244,12 +269,10 @@ class LicenseListFiles extends FO_Plugin
     return $V;
   }
 
-  
-  
   /**
    * @brief Cloned from commen-license-file.php to refactor it
    * 
-   * \param $agent_pk - agent id
+   * \param $agent_pk - agent id or array(agent id)
    * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
    * \param $uploadtree_pk - sets scope of request
    * \param $uploadtree_tablename
@@ -258,18 +281,12 @@ class LicenseListFiles extends FO_Plugin
    */
   protected function countFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $tag_pk, $uploadtree_tablename)
   {
-    global $container;
-    /* @var $licenseDao LicenseDao */
-    $licenseDao = $container->get('dao.license');
-    $license = $licenseDao->getLicenseByShortname($rf_shortname);
+    $license = $this->licenseDao->getLicenseByShortname($rf_shortname);
     if (null == $license)
     {
       return array();
     }
-    /* @var $uploadDao UploadDao */
-    $uploadDao = $container->get('dao.upload');
-    $itemBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtree_tablename);
-    $dbManager = $container->get('db.manager');
+    $itemBounds = $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtree_tablename);
             
     $viewRelavantFiles = "SELECT pfile_fk as PF, uploadtree_pk, ufile_name FROM $uploadtree_tablename";
     $params = array();
@@ -293,19 +310,23 @@ class LicenseListFiles extends FO_Plugin
     $sql = "SELECT count(license_file.pfile_fk) as count, count(distinct license_file.pfile_fk) as unique
           FROM license_file, ($viewRelavantFiles) as SS
           WHERE PF=license_file.pfile_fk AND rf_fk = $".count($params);
-    if($agent_pk != "any")
+
+    if (is_array($agent_pk))
+    {
+      $params[] = '{' . implode(',', $agent_pk) . '}';
+      $sql .= ' AND agent_fk=ANY($'.count($params).')';
+      $stmt .= '.agents';
+    }
+    elseif (!empty($agent_pk))
     {
       $params[] = $agent_pk;
       $sql .= " AND agent_fk=$".count($params);
       $stmt .= '.agent';
     }
 
-    $RetArray = $dbManager->getSingleRow($sql,$params,$stmt);
+    $RetArray = $this->dbManager->getSingleRow($sql,$params,$stmt);
     return $RetArray;
   }
- 
 }
-
-
 $NewPlugin = new LicenseListFiles;
 $NewPlugin->Initialize();
