@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2015-2016, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -208,6 +208,8 @@ class admin_license_file extends FO_Plugin
     $ob .= "<th>$text</th>";
     $text = _("Checked");
     $ob .= "<th>$text</th>";
+    $text = _("Active");
+    $ob .= "<th>$text</th>";
     $text = _("Shortname");
     $ob .= "<th>$text</th>";
     $text = _("Fullname");
@@ -235,15 +237,16 @@ class admin_license_file extends FO_Plugin
            "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
       $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
-
       $text = _("$marydone");
       $ob .= "<td align=center>$text</td>";
-
-      $ob .= "<td>$row[rf_shortname]</td>";
-      $ob .= "<td>$row[rf_fullname]</td>";
+      $rf_active = ($row['rf_active'] == 't') ? "Yes" : "No";
+      $text = _("$rf_active");
+      $ob .= "<td align=center>$text</td>";
+      $ob .= "<td align=center>$row[rf_shortname]</td>";
+      $ob .= "<td align=left>$row[rf_fullname]</td>";
       $vetext = htmlspecialchars($row['rf_text']);
       $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
-      $ob .= "<td>$row[rf_url]</td>";
+      $ob .= "<td align=left>$row[rf_url]</td>";
       $ob .= "</tr>";
     }
     pg_free_result($result);
