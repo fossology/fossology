@@ -1,0 +1,58 @@
+{# Copyright 2016 Siemens AG
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+ #}
+
+<ComponentLicenseInformation component="{{ documentName }}" creator="{{ userName }}" date="{{ 'now'|date('d.m.Y')}}" baseDoc="" toolUsed="FOSSologyNG" componentID="">
+{% for licensesMain in contents %}
+{% if licensesMain %}
+{% for ids in licensesMain %}
+{% if ids.textMain %}
+<License type="global" name="{{ids.contentMain}}" spdxidentifier="n/a">
+<Content><![CDATA[{{ids.textMain}}
+]]></Content>
+<Files><![CDATA[{% for id in ids.files %}{% if id %}{{id}}
+{% endif %}
+{% endfor %}
+]]></Files>
+</License>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% for licenses in contents %}
+{% if licenses %}
+{% for ids in licenses %}
+{% if ids.text %}
+<License type="{{ids.risk}}" name="{{ids.content}}" spdxidentifier="n/a">
+<Content><![CDATA[{{ids.text}}
+]]></Content>
+<Files><![CDATA[{% for id in ids.files %}{% if id %}{{id}}
+{% endif %}
+{% endfor %}
+]]></Files>
+</License>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+
+{% for copyrights in contents %}
+{% if copyrights %}
+{% for idc in copyrights %}
+{% if idc.contentCopy %}
+<Copyright>
+<Content><![CDATA[{{idc.contentCopy}}
+]]></Content>
+<Files><![CDATA[{% for fi in idc.files %}{% if fi %}{{fi}}
+{% endif %}
+{% endfor %}
+]]></Files>
+</Copyright>
+{% endif %}
+{% endfor %}
+{% endif %}
+{% endfor %}
+</ComponentLicenseInformation>
