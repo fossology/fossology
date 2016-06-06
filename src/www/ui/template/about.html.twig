@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2016 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -7,7 +7,6 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-
     <p>
         <b> {{ "FOSSology version" | trans }} {{ versionInfo.version }} ({{ 'code revision' | trans }} {{ versionInfo.commitHash }})</b>
         {{ "with" | trans }} {{ licenseCount }} {{ "known licenses in database" |trans }}
@@ -22,5 +21,21 @@
         This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<br/>
         You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
     </p>
+    
+    {% if latestVersion %}
+      <p>
+        {{ 'The'|trans }} <a href="https://github.com/fossology/fossology/releases/tag/{{ latestVersion.tag_name }}">
+           {{ 'latest version'|trans }} <b>{{ latestVersion.tag_name }}</b></a>
+         {{ 'was created at'|trans }} {{ latestVersion.created_at }}
+         {{ 'and is ready for'|trans }} <a href="{{ latestVersion.zipball_url }}">{{ 'download'|trans }}</a>.
+      </p>
+    {% endif %}
+    {% if latestCommit %}
+      <p>
+         {{ 'The latest Github commit'|trans }} {{ lastestCommit }}
+         {% if lastestCommit!=versionInfo.commitHash %}{{ 'is not installed'|trans }}{% 
+          else %}{{ 'is not installed'|trans }}{%endif%}.
+     </p>
+   {% endif %}
 {% endblock %}
 
