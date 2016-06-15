@@ -20,10 +20,10 @@
 /**************************************************************
  runBuild v2.0
 
- Script to create packages use Project-Builder.
+ Script to create packages using Project-Builder (http://project-builder.org)
 
  --------------------------------------------------------------------
- NOTE:  This script is _HIGHLY_ customized for the internal fossology
+ NOTE:  This script is _HIGHLY_ customized for the legacy fossology
         team's package build environment.  It is _EXTREMELY UNLIKELY_
         that it will work outside of this environment.  If you would 
         like to build packages for FOSSology, it is not hard, and
@@ -96,7 +96,7 @@ for ($i = 1;$i < $argc;$i++) {
   } /* for each parameter */
 
   if (empty($Version)) {
-    $Version = "2.2.0";
+    $Version = "3.0.0";
   }
 
   /* Create new version of fossology project */
@@ -112,31 +112,40 @@ for ($i = 1;$i < $argc;$i++) {
     print "CMD=$Cmd\n";
   }
   system($Cmd);
-  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.svn");
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.git");
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.gitignore");
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.travis.yml");
   system("cd /home/build/pb/projects/fossology/pbconf/$Version/");
   if ($Trunk) {
-    $Cmd = "svn co http://svn.code.sf.net/p/fossology/code/trunk/fossology/packaging/ /home/build/pb/projects/fossology/pbconf/$Version/";
+    $Cmd = "git clone https://github.com/fossology/fossology.git /home/build/pb/projects/fossology/pbconf/$Version/";
   } else {
-    $Cmd = "svn co http://svn.code.sf.net/p/fossology/code/tags/2.2.0/packaging/ /home/build/pb/projects/fossology/pbconf/$Version/";
+    $Cmd = "git clone https://github.com/fossology/fossology.git /home/build/pb/projects/fossology/pbconf/$Version/";
   }
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
-  system($Cmd); 
+  system($Cmd);
+  if ($Trunk) {}
+  else {
+    system("cd /home/build/pb/projects/fossology/pbconf/$Version/; git checkout $Version;");
+  } 
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/.git");
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/[CHLMRVisu]*");
   system("mkdir /home/build/pb/projects/fossology/pbconf/$Version/fossology");
-  system("mv /home/build/pb/projects/fossology/pbconf/$Version/deb /home/build/pb/projects/fossology/pbconf/$Version/rpm /home/build/pb/projects/fossology/pbconf/$Version/pbcl /home/build/pb/projects/fossology/pbconf/$Version/fossology");
- 
+  system("mv /home/build/pb/projects/fossology/pbconf/$Version/packaging/deb /home/build/pb/projects/fossology/pbconf/$Version/packaging/rpm /home/build/pb/projects/fossology/pbconf/$Version/packaging/pbcl /home/build/pb/projects/fossology/pbconf/$Version/fossology");
+  system("mv /home/build/pb/projects/fossology/pbconf/$Version/packaging/* /home/build/pb/projects/fossology/pbconf/$Version");
+  system("rm -rf /home/build/pb/projects/fossology/pbconf/$Version/packaging");
   /* Checkout source code for build */
   $Cmd = "pb -p fossology -r $Version sbx2build";
   if ($Verbose) {
     print "CMD=$Cmd\n";
   }
 
-  /* if exist source code, svn update */
+  /* if source code exists, git update */
   if (file_exists("/home/build/pb/projects/fossology/$Version/")){
-    system("rm /home/build/pb/projects/fossology/$Version/Makefile.conf");
-    system("svn update /home/build/pb/projects/fossology/$Version/");
+    system("rm -rf /home/build/pb/projects/fossology/$Version/");
   }  
+
   //system("perl -pi -e 's/#pbconfurl/pbconfurl/' /home/build/.pbrc");
   //system("perl -pi -e 's/1.4.1~rc1\//1.4.1~rc1/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
   // prevnt annoying warnings from date() by setting the timezone
@@ -152,6 +161,7 @@ for ($i = 1;$i < $argc;$i++) {
     system("perl -pi -e 's/$Version\//$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
     system("perl -pi -e 's/\/var\/ftp\/pub\/fossology/\/var\/ftp\/pub\/fossology\/$Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
     system("perl -pi -e 's/projver fossology = trunk/projver fossology = $Version/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");
+    system("perl -pi -e 's/testver fossology = true/testver fossology = false/' /home/build/pb/projects/fossology/pbconf/$Version/fossology.pb");  
   }
   system($Cmd);
   //system("perl -pi -e 's/pbconfurl/#pbconfurl/' /home/build/.pbrc");
@@ -168,15 +178,15 @@ for ($i = 1;$i < $argc;$i++) {
 
   /* update dataFiles */
   if ($Trunk){
-    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
-    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
-    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
-    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/testing\/$showtime\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
+    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/testing\/$showtime\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
+    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/testing\/$showtime\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
+    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/testing\/$showtime\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
+    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/testing\/$showtime\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   } else {
-    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
-    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
-    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
-    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.usa.hp.com\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
+    system("perl -pi -e 's/^(deb.*debian\/)/deb = \"deb http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/debian\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/debian.ini");
+    system("perl -pi -e 's/^(deb.*ubuntu\/)/deb = \"deb http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/ubuntu\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/ubuntu.ini");
+    system("perl -pi -e 's/^(yum.*rhel\/)/yum = \"http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/rhel\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/redhat.ini");
+    system("perl -pi -e 's/^(yum.*fedora\/15\/)/yum = \"http:\/\/fossbuild.ftc.hpecorp.net\/fossology\/$Version\/fedora\/15\//' /home/build/pb/fossology/trunk/fossology/src/testing/dataFiles/pkginstall/fedora.ini");
   }
 
   // update a copy of the current packages on the build machine 
