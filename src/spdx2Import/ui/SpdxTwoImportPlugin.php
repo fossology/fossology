@@ -47,6 +47,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
   {
     $text = _("Import SPDX2 RDF");
     menu_insert("Browse-Pfile::Import&nbsp;SPDX2&nbsp;RDF", 0, self::NAME, $text);
+    menu_insert("Main::Upload::Import&nbsp;SPDX2&nbsp;RDF", 0, self::NAME, $text);
   }
 
   protected function handle(Request $request)
@@ -61,8 +62,8 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     }
     else
     {
-      // TODO: get value of addConcludedLicensesAs from request and add result to `runImport`
-      $jobMetaData = $this->runImport($uploadId, $_FILES['spdxReport']);
+      $addConcludedLicensesAs = $request->get('addConcludedLicensesAs') == 'conclusion' ? true : false;
+      $jobMetaData = $this->runImport($uploadId, $_FILES['spdxReport'],$addConcludedLicensesAs);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();
       return $showJobsPlugin->getResponse();
