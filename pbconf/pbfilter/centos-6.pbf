@@ -13,10 +13,11 @@ filter PBGRP = Applications/Engineering
 filter PBLIC = GPLv2
 
 # PBDEP is replaced by the list of dependencies
-filter PBDEP = cabextract genisoimage upx sleuthkit file
+filter PBDEP = cabextract,genisoimage,sleuthkit,file
+filter PBREC = Recommends: upx
 
 # PBBUILDDEP is replaced by the list of build dependencies
-filter PBBUILDDEP = file-libs file-devel perl-Text-Template perl-podlators
+filter PBBUILDDEP = perl-Text-Template,perl-podlators
 
 # PBSUF is replaced by the package suffix ($pbsuf'} in code)
 #filter PBSUF = %{dist}

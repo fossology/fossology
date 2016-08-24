@@ -1,0 +1,339 @@
+fossology (3.0.0~rc1-1) unstable; urgency=low
+
+  * unofficial build version
+
+ -- bcornec <bruno.cornec@hpe.com>  Fri, 26 Aug 2016 16:35:55 +0800
+
+fossology (2.7.0-ng) unstable; urgency=low
+
+  * Bug
+    * [SOSS-327] - Division by zero at every update of ETA clogs log file
+    * [SOSS-328] - SPDX2 generation tends to crash at cleared Uploads
+    * [SOSS-329] - SPDX2 generated file includes data from other uploads
+    * [SOSS-330] - Basic Report does not list license texts
+  * Story
+    * [SOSS-38] - add php setup to web component postinstall script
+    * [SOSS-39] - create debian package of ninka including license name patches
+    * [SOSS-53] - additional Nomos licenses
+    * [SOSS-55] - Another license: Truecrypt License
+    * [SOSS-76] - Folder view: "Concluded files with no license information"
+    * [SOSS-83] - Ununpack agent issues for e2fsprogs-1.42.4.tar.gz
+    * [SOSS-117] - Exclude "irrelevant" files from decider agent?
+    * [SOSS-170] - Copyright scanner finds many false positives
+    * [SOSS-224] - SW360 Integration: Component (Release) Metadata
+    * [SOSS-225] - SW360 Integration: License / Obligations Database Call for Obligations in Clearing Report
+    * [SOSS-314] - ClearText erases "//" from URL, also "* " would be good
+    * [SOSS-316] - Bulk scan not matching with toybox
+    * [SOSS-317] - Avoid double step browing in hierachy view of license browser for tar-ed uploads
+    * [SOSS-318] - New Feature: Assigning New Group to an Upload
+    * [SOSS-319] - Basic Report Crashes because of Key Value Pair
+    * [SOSS-335] - Many Copyright False Positives in Binary / image files
+  * Task
+    * [SOSS-79] - scanner should mark decision as WIP if other licenses are introduced
+    * [SOSS-279] - remove CommonAgentAdd
+    * [SOSS-324] - Show ECC finding in relevant section in Clearing report
+
+ -- Steffen Weber <steffen.weber@tngtech.com>  Thu, 23 Jul 2015 16:34:24 +0200
+
+fossology (2.6.0-ng) unstable; urgency=low
+
+  * Story
+    * [SOSS-73] - Add tool tip for explanation of clearing status
+    * [SOSS-100] - remove code duplications from Fossology\Lib\Util\CopyrightLister
+    * [SOSS-103] - harmonize license IDs between Ninka and Monk
+    * [SOSS-223] - adding risk level to licenses
+    * [SOSS-257] - create SPDX Export as Clearing Report alternative
+    * [SOSS-270] - ReadMeOSS for whole folder
+    * [SOSS-276] - undo copyright remove
+    * [SOSS-278] - cleanup makefile variables
+    * [SOSS-282] - add more escape charaters to Monk / Bulk scanning
+    * [SOSS-291] - aymlink Support
+    * [SOSS-301] - enhancement to Extended Report
+  * Task
+    * [SOSS-309] - monk should be able to match searches with as few as 2 tokens
+    * [SOSS-172] - migrate GetUploadPerm to a method in UploadDao
+    * [SOSS-206] - contrib ninka
+    * [SOSS-283] - adding risk level in report
+
+ -- Steffen Weber <steffen.weber@tngtech.com>  Thu, 25 Jun 2015 18:48:38 +0200
+
+fossology (2.5.0-ng) unstable; urgency=low
+
+  * Story
+    * [SOSS-27] - include table with found copyright statements in the copyright file view
+    * [SOSS-47] - create postinstall sanity check for fossology
+    * [SOSS-51] - add progress statistics (e.g. ETA) in jobs view
+    * [SOSS-106] - Enable automatic clearing decision based on voting approach
+    * [SOSS-108] - bulk history does not filter events based on group
+    * [SOSS-117] - Exclude "irrelevant" files from decider agent?
+    * [SOSS-133] - Add "Generate report for this upload" link to folder view
+    * [SOSS-135] - contribute clearing view to community version
+    * [SOSS-153] - add db migration to community contribution
+    * [SOSS-192] - Corrections in "New Clearing View" Pull request
+    * [SOSS-195] - Filtering down to "Legal" copyrights misses legal copyright
+    * [SOSS-196] - Suggestions for Bulk Scans Workflow
+    * [SOSS-199] - Display Text for Report in "Change Concluded License" View
+    * [SOSS-200] - Command line tool to create a user, groups and add the user to groups
+    * [SOSS-210] - Import skipped with existing text - please add rf-source
+    * [SOSS-213] - Generated (Word) report fails if there are weird characters generated
+    * [SOSS-218] - Add main license setting / remove the "global setting"
+    * [SOSS-219] - New Report Template
+    * [SOSS-222] - Estimated Time of Arrival
+    * [SOSS-226] - Trust clearing decisions between fossology user groups
+    * [SOSS-228] - Reuse Bulk Scans of one Component for another component
+    * [SOSS-231] - Enhanced Reuse
+    * [SOSS-237] - bulk neutral placeholder for removed text
+    * [SOSS-269] - Improve Element Description on the Upload Page
+  * Task
+    * [SOSS-13] - Generate Readmeoss from Multiple Uploads
+    * [SOSS-119] - Create new section in report with list of all "irrelevant" files/folders
+    * [SOSS-202] - contrib bulkmonk + decider
+    * [SOSS-203] - contrib copyright + ecc
+    * [SOSS-204] - contrib reuser
+    * [SOSS-207] - contrib license csv im-/export
+    * [SOSS-208] - contrib cli tools
+    * [SOSS-209] - contrib readmeoss
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Tue, 12 May 2015 10:25:45 +0100
+
+fossology (2.4.1-ng) unstable; urgency=low
+
+  * bugfix
+    * correct UserLevel for AdminDeleteGroup 
+  *improvements
+    * [SOSS-194] copyright agents works with umlauts
+  * new feature
+    * [SOSS-200] cli to create user, group and membership
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 9 Mar 2015 11:31:45 +0100
+
+fossology (2.4.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [issue #384] - fix Dashboard failure for Postgres>=9.2
+    * [issue #392] - fix cp2foss with option
+    * [...] - queryCondition did not fully restrict group permission
+    * [...] - 'Edit Uploaded File Properties' did not work correctly with subfolders
+
+  * improvements
+    * [SOSS-150] - File navigation performance issues
+    * [SOSS-171] - group base upload browse view
+    * [...] - codesniffer to check code style in Fossology\Lib
+    * [SOSS-197] - Highlight the Nomos Catchwords (aka seedwords, single word phrases)
+    * [SOSS-37] - common agent plugin
+    * [SOSS-111] - LATEST run of all available agents
+    * [SOSS-122] - allow browse-license even without scanner results
+
+  * new features
+    * [SOSS-115] - Set whole folder as "irrelevant"
+    * [SOSS-118] - Add new license UI: Add "License full text for report" field
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Thu, 5 Mar 2015 14:30:00 +0100
+
+
+fossology (2.3.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [SOSS-120] - Default folder for uploads = user default folder
+    * [SOSS-169] - File Clearing view start will all files
+    * [SOSS-132] - libboost-program-options dependency not installed by fo-installdeps
+    * [SOSS-102] - Line breaks in single file clearing
+    * [SOSS-129] - Package reuse does not work when "Software Repository" Folder is empty
+    * [SOSS-131] - (C) not detected as copyright
+
+  * new features
+    * [SOSS-15] - Decider decides if Monk and Nomos find same license and Nomos did not find anything else
+    * [SOSS-105] - Clearing Status: View elements in histogram view of license browser
+
+ -- Steffen Weber <steffen.weber.ext@siemens.com>  Mon, 1 Jan 2015 12:00:00 +0100
+
+fossology (2.2.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [SOSS-75] - License comments do not appear in report
+    * [SOSS-95] - add foreign key constraint for uploadtree_fk in table clearing_event
+    * [SOSS-96] - fix license event comment & report text editing
+    * [SOSS-101] - refactor Fossology\Lib\Agent\Agent to use AgentsDao for database operations
+    * [SOSS-102] - Line breaks in single file clearing
+    * [SOSS-109] - Support the large license set
+
+  * improvements
+    * [SOSS-110] - no remove events are created for existing user license decisions when selecting no license known
+    * [SOSS-112] - separate monk agent for bulk operations
+
+  * new features
+    * [SOSS-104] - contribute new template enabled plugin baseclass
+
+ -- Andreas Wuerl <andreas.wuerl.ext@siemens.com>  Fri, 19 Dec 2014 08:00:00 +0100
+
+fossology (2.1.0-ng) unstable; urgency=low
+
+  * bugfixes
+    * [SOSS-42] - Added license not saved
+    * [SOSS-2] - fix prev/next button target determination
+    * [SOSS-94] - filter relevant clearing decisions in clearing history view
+
+  * improvements
+    * [SOSS-31] - Adjustments on Report generation
+    * [SOSS-36] - refactor copyright agent to more modern c++
+    * [SOSS-72] - add tests for ClearingDecisionProcessor
+
+  * new features
+    * [SOSS-17] - add "package" scope for clearing decision
+    * [SOSS-18] - analyze how "package" relation between uploads can be established
+    * [SOSS-30] - create simple debian package build for fossology ng
+    * [SOSS-67] - Showing Bulk Scan Text Phrases in UI
+    * [SOSS-68] - Text Phrase Listing in Report
+    * [SOSS-69] - Allow for Adding New Licenses for Group
+    * [SOSS-78] - create plugin baseclass for template based plugins
+    * [SOSS-81] - enable caching of templates
+    * [SOSS-82] - enable caching of dependency injection container
+    * [SOSS-11] - Bulk: maybe special characters could be filtered out for scan
+    * [SOSS-16] - Login Fields already on Startup Page
+    * [SOSS-21] - fix bulk scan decision logic
+
+ -- Andreas Wuerl <andreas.wuerl.ext@siemens.com>  Fri, 21 Nov 2014 08:00:00 +0100
+
+fossology (2.0.0-1) unstable; urgency=low
+
+  * New upstream release
+  * New package structure
+
+ -- madong <madong@bl480c1>  Fri, 08 Jun 2012 15:35:55 +0800
+
+fossology (2.0.0~rc3-1) unstable; urgency=low
+
+  * Release candidate 3 for v2.0
+
+ -- madong <madong@bl480c-1>  Fri, 01 Jun 2012 15:22:47 +0800
+
+fossology (2.0.0~rc1-1) unstable; urgency=low
+
+  * The first release candidate for v2.0
+
+ -- madong <madong@bl480c-1>  Wed, 02 May 2012 15:22:47 +0800
+
+fossology (1.4.1-1) unstable; urgency=low
+
+  * New upstream release
+  * Bug Fix release
+  * Use project-builder to create deb
+
+ -- Mark Donohoe <markd@localhost.localdomain>  Thu, 30 Jun 2011 17:27:23 -0700
+
+fossology (1.4.0-1) unstable; urgency=low
+
+  * New upstream release
+  * New Comparison tool
+  * Simplified User Interface
+  * authentication using Siteminder
+  * Multiple file upload from URL
+  * Bugs fix
+  
+ -- Mark Donohoe <markd@localhost.localdomain>  Thu, 05 May 2011 17:55:09 -0700
+
+fossology (1.3.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Groups
+  * File Tagging
+  * Copyright agent replaced
+  * Fixed a cp2foss authentication bug
+  * fixed unpack defects and made some improvements
+
+ -- Mark Donohoe <markd@steezy>  Fri, 07 Jan 2011 10:35:08 -0800
+
+fossology (1.2.1~SVNBUILD-1) unstable; urgency=low
+
+  * unofficial build version
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 06 Aug 2010 16:53:49 -0700
+
+fossology (1.2.0-2) unstable; urgency=low
+
+  * added upstream fixes to 1.2.0 that will go in 1.2.1
+    - fix pkgagent bug, svn#3363
+    - free temp name string on fopen error condition, svn#3362
+    - fix too many open files bug, svn#3361
+    - add error checking to fopen, svn#3359
+    - fix pkgagent dsc parsing, svn#3358
+    - fix copyright wrong variable name, svn#3355
+    - bucket agent fixes, svn#3351-3353
+    - fix missing copyright database, svn#3348
+    - init script restart output, svn#3346
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 06 Aug 2010 15:12:18 -0700
+
+fossology (1.2.0-1) unstable; urgency=low
+
+  * New upstream release
+  * Added build-dep on python-pyrex, python, and python-dev, and
+     fossology-common depends on python due to libfosspython.
+  * Add python Depends to agent packages.
+  * Update standards version.
+  * Make references to licenses in copyright more specific.
+  * Add upstream SVN#3338 fix for ununpack p7zip.
+
+ -- Matt Taggart <taggart@debian.org>  Tue, 20 Jul 2010 16:20:31 -0700
+
+fossology (1.1.0-2) unstable; urgency=low
+
+  * Acknowledge NMU
+   - Replace depends on xpdf-utils with poppler-utils (Closes: #550653 )
+  * fix description to actually be a proper sentence (Closes: #539716 )
+  * change fossology-db to better explain that it will create the db
+    (Closes: #540252 )
+  * fix typo in init script Provides (will be in next upstream)
+      (Closes: #541854 )
+  * Build against PostgreSQL 8.4. (Closes: #559582 )
+  * patch from upstream SVN 2848 to build libs with -fPIC
+  * patch from upstream SVN 2484 to make selftest not check agent timestamps
+  * fix some lintian warnings and update to Policy 3.8.4
+  * patch from upstream SVN 2585 and 2605 to fix fo_notify
+
+ -- Matt Taggart <taggart@debian.org>  Fri, 09 Apr 2010 00:29:34 -0700
+
+fossology (1.1.0-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Replace depends on xpdf-utils with poppler-utils (Closes: #550653)
+
+ -- Alexander Reichle-Schmehl <tolimar@debian.org>  Fri, 22 Jan 2010 23:31:16 +0100
+
+fossology (1.1.0-1) unstable; urgency=low
+
+  * New upstream release (Closes: #521864, #531864, #531866 )
+  * fossology-scheduler-single now automatically gives the user a new
+    Scheduler.conf, to ensure that new agents get added.
+    fossology-scheduler still warns the user to review.
+  * Added mail-transport-agent Suggests since the new, but optional,
+    fo-notify needs sendmail(1).
+
+ -- Matt Taggart <taggart@debian.org>  Thu, 16 Jul 2009 09:56:05 -0700
+
+fossology (1.0.0-2) unstable; urgency=low
+
+  * Add explicit agents dependency on libextractor-plugins since
+    shlibdeps doesn't automatically figure it out.
+  * Add pointer in copyright to lgpl, thanks Frank Lichtenheld.
+
+ -- Matt Taggart <taggart@debian.org>  Mon, 26 Jan 2009 13:31:23 -0800
+
+fossology (1.0.0-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Matt Taggart <taggart@debian.org>  Wed, 17 Dec 2008 13:48:56 -0800
+
+fossology (1.0.0~rc2-1) unstable; urgency=low
+
+  * Upstream 1.0.0 release candidate 2
+
+ -- Matt Taggart <taggart@debian.org>  Tue, 02 Dec 2008 15:47:37 -0800
+
+fossology (1.0.0~rc1-1) unstable; urgency=low
+
+  * Upstream 1.0.0 release candidate 1
+
+ -- Matt Taggart <taggart@debian.org>  Wed, 12 Nov 2008 03:01:48 -0800
+

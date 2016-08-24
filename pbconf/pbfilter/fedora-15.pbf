@@ -13,20 +13,24 @@ filter PBGRP = Applications/Engineering
 filter PBLIC = GPLv2
 
 # PBDEP is replaced by the list of dependencies
-filter PBDEP = file php-xml 
+filter PBDEP = cabextract,genisoimage,sleuthkit,file
+filter PBREC = Recommends: upx
 
 # PBBUILDDEP is replaced by the list of build dependencies
-filter PBBUILDDEP = perl-Text-Template subversion file
-# libextractor and perl-Text-Template available as rpmforge packages
+filter PBBUILDDEP = file-libs,file-devel,perl-Text-Template
 
 # PBSUF is replaced by the package suffix ($pbsuf'} in code)
-filter PBSUF = .el6
+#filter PBSUF = %{dist}
+filter PBSUF = $pb->{'suf'}
 
 # PBOBS is replaced by the Obsolete line
 #filter PBOBS =
 
 filter PBPHPINI = /etc/php.ini
+
+#PBFEDORAD is on fedora system need initial DB
 filter PBFEDORAD = /etc/init.d/postgresql initdb
+
 #PBPGHBA is change pg_hba files
-filter PBPGHBA = perl -pi -e 's|(host\s+all\s+all\s+127.0.0.1/32\s+ident\s+sameuser)|#$1|' /var/lib/pgsql/data/pg_hba.conf
+filter PBPGHBA = perl -pi -e 's|(host\s+all\s+all\s+127.0.0.1/32\s+ident)|#$1|' /var/lib/pgsql/data/pg_hba.conf
 filter PBPGHBB = perl -pi -e 's|(host\s+all\s+all\s+::1/128\s+ident)|#$1|' /var/lib/pgsql/data/pg_hba.conf
