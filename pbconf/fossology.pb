@@ -43,10 +43,8 @@ sshport fossology = 22
 #
 # Global version/tag for the project
 #
-projver fossology = trunk
+projver fossology = 3.1.0
 projtag fossology = 1
-# Hash of valid version names
-version fossology = trunk
 
 # Is it a test version or a production version
 testver fossology = true
@@ -54,6 +52,7 @@ testver fossology = true
 # Additional repository to add at build time
 # addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
 # addrepo centos-4-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo
+addrepo centos-7-x86_64 = https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 # Adapt to your needs:
 # Optional if you need to overwrite the global values above
@@ -61,7 +60,7 @@ testver fossology = true
 #pkgver fossology = stable
 #pkgtag fossology = 3
 # Hash of default package/package directory
-defpkgdir fossology =  
+defpkgdir fossology =
 # Hash of additional package/package directory
 #extpkgdir minor-pkg = dir-minor-pkg
 

@@ -31,6 +31,10 @@ build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp  
 
 	# Add here commands to compile the arch part of the package.
+	# This is not clean again
+	make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} composer_download
+	#
+	@dpkg-parsechangelog | sed -n -e 's/^Version: //p' > VERSIONSTRING
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var -C src/nomos/agent/ -f Makefile.sa
 	touch $@
@@ -84,28 +88,12 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src composer_install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/decider install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/deciderjob install
+	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
+	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/www install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/readmeoss install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/reuser install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/ninka install
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-web \
-           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/spdx2 install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-wgetagent \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
@@ -150,7 +138,33 @@ install-arch:
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monk \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/monk install
+           -C src/monk install-monk
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-monkbulk \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/monk install-monkbulk
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ninka \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/ninka install
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/decider install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-deciderjob \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/deciderjob install
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/reuser install
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-spdx2 \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/spdx2 install
+
+	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
+	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 
 	dh_install -s
 # Must not depend on anything. This is to be called by

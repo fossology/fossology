@@ -11,26 +11,28 @@ Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
-BuildRequires:  postgresql-devel >= 8.1.11 glib2-devel libxml2 gcc make perl rpm-devel pcre-devel openssl-devel gcc-c++ php boost-devel PBBUILDDEP
+#Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
+BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
 Summary:        FOSSology is a licenses exploration tool
 
 %package common
-Requires:       php >= 5.1.6 php-pear >= 5.16 php-pgsql >= 5.1.6 php-process php-mbstring PBDEP
+Requires:       php >= 5.1.6,php-pear >= 5.16,php-pgsql >= 5.1.6,php-process,php-mbstring,PBDEP
 Summary:        Architecture for analyzing software, common files
 Group:          PBGRP
 
 %package web
-Requires:       fossology-common fossology-db fossology-monk httpd
+Requires:       fossology-common,fossology-db,fossology-decider
 Summary:        Architecture for analyzing software, web interface
 Group:          PBGRP
 
 %package db
-Requires:       postgresql >= 8.1.11 postgresql-server >= 8.1.11
+Requires:       postgresql >= 8.1.11,postgresql-server >= 8.1.11
 Summary:        Architecture for analyzing software, database
 Group:          PBGRP
 
 %package ununpack
-Requires:       fossology-common libxml2 binutils bzip2 cpio mkisofs poppler-utils rpm tar unzip gzip p7zip-plugins perl file which
+Requires:       fossology-common,libxml2,binutils,bzip2,cpio,mkisofs,poppler-utils,rpm,tar,unzip,gzip,p7zip-plugins,perl,file,which
+PBREC
 Summary:        Architecture for analyzing software, ununpack and adj2nest
 Group:          PBGRP
 
@@ -40,17 +42,17 @@ Summary:        Architecture for analyzing software, scheduler
 Group:          PBGRP
 
 %package copyright
-Requires:       fossology-common pcre
+Requires:       fossology-common,pcre
 Summary:        Architecture for analyzing software, copyright
 Group:          PBGRP
 
 %package buckets
-Requires:       fossology-nomos fossology-pkgagent
+Requires:       fossology-nomos,fossology-pkgagent
 Summary:        Architecture for analyzing software, buckets
 Group:          PBGRP
 
 %package mimetype
-Requires:       fossology-common file-libs
+Requires:       fossology-common,file-libs
 Summary:        Architecture for analyzing software, mimetype
 Group:          PBGRP
 
@@ -60,7 +62,7 @@ Summary:        Architecture for analyzing software, nomos
 Group:          PBGRP
 
 %package pkgagent
-Requires:       fossology-common rpm
+Requires:       fossology-common,rpm
 Summary:        Architecture for analyzing software, pkgagent
 Group:          PBGRP
 
@@ -70,7 +72,7 @@ Summary:        Architecture for analyzing software, delagent
 Group:          PBGRP
 
 %package wgetagent
-Requires:       fossology-common wget subversion git
+Requires:       fossology-common,wget,subversion,git
 Summary:        Architecture for analyzing software, wget_agent
 Group:          PBGRP
 
@@ -79,9 +81,40 @@ Requires:       fossology-web
 Summary:        Architecture for analyzing software, debug
 Group:          PBGRP
 
+%package spdx2
+Requires:       fossology-web
+Summary:        SPDX and DEP5 extensions
+Group:          PBGRP
+
+%package ninka
+Requires:       fossology-common
+#Recommends:     ninka >=1.2
+Summary:        Architecture for analyzing software, Ninka
+Group:          PBGRP
+
+%package decider
+Requires:       fossology-common
+Summary:        Architecture for analyzing software, decider
+Group:          PBGRP
+
+%package deciderjob
+Requires:       fossology-common
+Summary:        Architecture for analyzing software, deciderjob
+Group:          PBGRP
+
+%package reuser
+Requires:       fossology-common
+Summary:        Architecture for reusing clearing result of other uploads, reuser
+Group:          PBGRP
+
 %package monk
 Requires:       fossology-common
-Summary:        Architecture for analyzing software, monk
+Summary:        Architecture for reusing clearing result of other uploads, monk
+Group:          PBGRP
+
+%package monkbulk
+Requires:       fossology-common
+Summary:        Architecture for reusing clearing result of other uploads, monkbulk
 Group:          PBGRP
 
 %description
@@ -132,12 +165,32 @@ This package contains the delagent agent programs and their resources.
 %description debug
 This package contains the debug UI.
 
+%description spdx2
+This package contains the SPDX v2 agent programs and their resources.
+
+%description ninka
+This package contains the ninka wrapper agent programs and their resources.
+
+%description decider
+This package contains the decider agent programs and their resources.
+
+%description deciderjob
+This package contains the deciderjob agent programs and their resources.
+
+%description reuser
+This package contains the reuser agent programs and their resources.
+
 %description monk
 This package contains the monk agent programs and their resources.
+
+%description monkbulk
+This package contains the monkbulk agent programs and their resources.
 
 %prep
 %setup -q
 #PBPATCHCMD
+# This is not clean, but should allow to work menawhild a better solution is found
+make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} composer_download
 
 %build
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
@@ -145,7 +198,6 @@ make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
 
 %install
-%{__rm} -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/nomos/agent/ -f Makefile.sa install
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
@@ -156,7 +208,7 @@ make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology 
 #	Options FollowSymLinks MultiViews
 #	Order allow,deny
 #	Allow from all
-#	# uncomment to turn on php error reporting 
+#	# uncomment to turn on php error reporting
 #	#php_flag display_errors on
 #	#php_value error_reporting 2039
 #</Directory>
@@ -188,18 +240,15 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %dir %{_datadir}/PBPROJ
 %{_usr}/lib/PBPROJ/*
 %{_datadir}/PBPROJ/lib/*
+%{_datadir}/PBPROJ/VERSION
 %{_bindir}/*
 %{_includedir}/*
 %{_mandir}/man1/*
 %{_sysconfdir}/PBPROJ/mods-enabled/maintagent
-%{_sysconfdir}/PBPROJ/mods-enabled/decider
-%{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
 %{_datadir}/PBPROJ/maintagent/*
 %{_datadir}/PBPROJ/composer.json
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
-%{_datadir}/PBPROJ/decider/*
-%{_datadir}/PBPROJ/deciderjob/*
 
 %files db
 %defattr(-,root,root)
@@ -208,33 +257,53 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files web
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/www
 %{_sysconfdir}/PBPROJ/mods-enabled/www
 %{_datadir}/PBPROJ/www/*
 %{_sysconfdir}/PBPROJ/mods-enabled/www-page
 %{_sysconfdir}/PBPROJ/mods-enabled/www-async
 %{_sysconfdir}/PBPROJ/mods-enabled/readmeoss
-%{_sysconfdir}/PBPROJ/mods-enabled/reuser
-%{_sysconfdir}/PBPROJ/mods-enabled/ninka
-%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_datadir}/PBPROJ/readmeoss/*
-%{_datadir}/PBPROJ/reuser/*
+
+%files ninka
+%{_sysconfdir}/PBPROJ/mods-enabled/ninka
 %{_datadir}/PBPROJ/ninka/*
-%{_datadir}/PBPROJ/spdx2/*
+
+%files decider
+%dir %{_datadir}/PBPROJ/decider
+%{_sysconfdir}/PBPROJ/mods-enabled/decider
+%{_datadir}/PBPROJ/decider/*
+
+%files deciderjob
+%dir %{_datadir}/PBPROJ/deciderjob
+%{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
+%{_datadir}/PBPROJ/deciderjob/*
+
+%files reuser
+%dir %{_datadir}/PBPROJ/reuser
+%{_sysconfdir}/PBPROJ/mods-enabled/reuser
+%{_datadir}/PBPROJ/reuser/*
+
+%files monk
+%dir %{_datadir}/PBPROJ/monk
+%{_sysconfdir}/PBPROJ/mods-enabled/monk
+%{_datadir}/PBPROJ/monk/*
+
+%files monkbulk
+%dir %{_datadir}/PBPROJ/monkbulk
+%{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
+%{_datadir}/PBPROJ/monkbulk/*
 
 %files scheduler
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/scheduler
 %{_sysconfdir}/PBPROJ/mods-enabled/scheduler
 %{_sysconfdir}/init.d/*
 %{_datadir}/PBPROJ/scheduler/*
 
 %files ununpack
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/ununpack
 %{_sysconfdir}/PBPROJ/mods-enabled/ununpack
 %{_sysconfdir}/PBPROJ/mods-enabled/adj2nest
 %{_datadir}/PBPROJ/ununpack/*
@@ -243,15 +312,13 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files wgetagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/wget_agent
 %{_sysconfdir}/PBPROJ/mods-enabled/wget_agent
 %{_datadir}/PBPROJ/wget_agent/*
 
 %files copyright
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/copyright
 %{_sysconfdir}/PBPROJ/mods-enabled/copyright
 %{_sysconfdir}/PBPROJ/mods-enabled/ecc
 %{_datadir}/PBPROJ/copyright/*
@@ -259,54 +326,48 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files buckets
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/buckets
 %{_sysconfdir}/PBPROJ/mods-enabled/buckets
 %{_datadir}/PBPROJ/buckets/*
 
 %files nomos
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/nomos
 %{_sysconfdir}/PBPROJ/mods-enabled/nomos
 %{_datadir}/PBPROJ/nomos/*
 
 %files mimetype
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/mimetype
 %{_sysconfdir}/PBPROJ/mods-enabled/mimetype
 %{_datadir}/PBPROJ/mimetype/*
 
 %files pkgagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/pkgagent
 %{_sysconfdir}/PBPROJ/mods-enabled/pkgagent
 %{_datadir}/PBPROJ/pkgagent/*
 
 %files delagent
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/delagent
 %{_sysconfdir}/PBPROJ/mods-enabled/delagent
 %{_datadir}/PBPROJ/delagent/*
 
 %files debug
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
+%dir %{_datadir}/PBPROJ/debug
 %{_sysconfdir}/PBPROJ/mods-enabled/debug
 %{_datadir}/PBPROJ/debug/*
 
-%files monk
+%files spdx2
 %defattr(-,root,root)
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
-%dir %{_datadir}/PBPROJ
-%{_sysconfdir}/PBPROJ/mods-enabled/monk
-%{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
-%{_datadir}/PBPROJ/monk/*
-%{_datadir}/PBPROJ/monkbulk/*
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2
+%{_sysconfdir}/PBPROJ/mods-enabled/dep5
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2tv
+%{_datadir}/PBPROJ/spdx2/*
+%{_datadir}/PBPROJ/dep5/*
+%{_datadir}/PBPROJ/spdx2tv/*
 
 %post common
 # Run the postinstall script
