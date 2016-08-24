@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2015 Siemens AG
+ * Copyright (C) 2015-2016 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Omines\OAuth2\Client\Provider\Gitlab;
 
 define("TITLE_core_auth", _("Login"));
 
@@ -105,7 +106,9 @@ class core_auth extends FO_Plugin
     if (!empty($_SESSION['time']))
     {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+      if (@$_SESSION['time'] + (60 * 480) < $Now){
+          $this->updateSession("", true);
+      }
     }
 
     $_SESSION['time'] = $Now;
@@ -115,7 +118,7 @@ class core_auth extends FO_Plugin
     } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
     {
       /* Sessions are not transferable. */
-      $this->updateSession("");
+      $this->updateSession("", true);
       $_SESSION['ip'] = $this->getIP();
     }
 
@@ -128,7 +131,7 @@ class core_auth extends FO_Plugin
       }
       if (time() >= @$_SESSION['time_check'])
       {
-        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
+        $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME], @$_SESSION['oAuthClientCheck']);
         /* Check for instant logouts */
         if (empty($row['user_pass']))
         {
@@ -137,7 +140,7 @@ class core_auth extends FO_Plugin
         $this->updateSession($row);
       }
     } else
-      $this->updateSession("");
+      $this->updateSession("", true);
 
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION[Auth::USER_LEVEL]);
@@ -148,8 +151,9 @@ class core_auth extends FO_Plugin
    * \brief Set $_SESSION and $SysConf user variables
    * \param $UserRow users table row, if empty, use Default User
    * \return void, updates globals $_SESSION and $SysConf[auth][UserId] variables
+   * \oAuthClient variable if false then update vice versa.
    */
-  function updateSession($userRow)
+  function updateSession($userRow, $oAuthClient=false)
   {
     global $SysConf;
 
@@ -172,6 +176,8 @@ class core_auth extends FO_Plugin
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
     $_SESSION['GroupName'] = $userRow['group_name'];
+    if(!$oAuthClient)
+      $_SESSION['oAuthClientCheck'] = $userRow['oAuthClient'];
   }
 
   /**
@@ -202,6 +208,28 @@ class core_auth extends FO_Plugin
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+    $oAuthClient = GetParm("oAuthClient", PARM_TEXT);
+    $getEmail = GetParm("HTTP_SCMAIL", PARM_TEXT);
+    $providerCheck = GetParm("providerCheck", PARM_TEXT);
+
+    if(!empty($providerCheck) && empty($getEmail)){
+      global $SysConf;
+      $domainOauth = "https://gitlab.com";
+      if(!empty($SysConf['SYSCONFIG']['GitlabDomainURL'])){
+        $domainOauth = $SysConf['SYSCONFIG']['GitlabDomainURL'];
+      }
+      $provider = new Gitlab([
+        "clientId"                => $SysConf['SYSCONFIG']['GitlabAppIdOauth'],
+        "clientSecret"            => $SysConf['SYSCONFIG']['GitlabSecretOauth'],
+        "redirectUri"             => $SysConf['SYSCONFIG']['RedirectOauthURL'],
+        "domain"                  => $domainOauth
+      ]);
+      $authorizationUrl = $provider->getAuthorizationUrl();
+      $_SESSION['oauth2state'] = $provider->getState();
+      header('Location: ' . $authorizationUrl);
+      exit;
+    }
+
     if (empty($referrer))
     {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
@@ -214,8 +242,13 @@ class core_auth extends FO_Plugin
         $referrer = Traceback_uri();
       }
     }
+    if(!empty($getEmail) && empty($userName)){
+      $oAuthClient = true; // To test in the server
+      $validLogin = $this->checkUsernameAndPassword($getEmail, "", $oAuthClient);
+    }else{
+      $validLogin = $this->checkUsernameAndPassword($userName, $password);
+    }
 
-    $validLogin = $this->checkUsernameAndPassword($userName, $password);
     if ($validLogin)
     {
       return new RedirectResponse($referrer);
@@ -242,6 +275,12 @@ class core_auth extends FO_Plugin
     if (!empty($userName) && $userName!='Default User') {
       $this->vars['userName'] = $userName;
     }
+    global $SysConf;
+    if(!empty($SysConf['SYSCONFIG']['GitlabAppIdOauth'])){
+      $this->vars['providerExist'] = "Gitlab";
+    }else{
+      $this->vars['providerExist'] = 0;
+    }
     return $this->render('login.html.twig',$this->vars);
   }
 
@@ -250,10 +289,10 @@ class core_auth extends FO_Plugin
    */
   function OutputOpen()
   {
-    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
-    {
-      $this->updateSession("");
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User"){
       $Uri = Traceback_uri();
+      $this->updateSession("");
+      $_SESSION['oauth2state'] = "";
       header("Location: $Uri");
       exit;
     }
@@ -266,7 +305,7 @@ class core_auth extends FO_Plugin
    *
    * @return boolean
    */
-  function checkUsernameAndPassword($userName, $password)
+  function checkUsernameAndPassword($userName, $password, $oAuthClient=false)
   {
     if (empty($userName) || $userName == 'Default User')
     {
@@ -274,7 +313,7 @@ class core_auth extends FO_Plugin
     }
     try
     {
-      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName, $oAuthClient);
     }
     catch(Exception $e)
     {
@@ -286,24 +325,26 @@ class core_auth extends FO_Plugin
       return false;
     }
 
-    /* Check the password -- only if a password exists */
-    if (!empty($row['user_seed']) && !empty($row['user_pass']))
+    if(!$oAuthClient)
     {
-      $passwordHash = sha1($row['user_seed'] . $password);
-      if (strcmp($passwordHash, $row['user_pass']) != 0)
+      /* Check the password -- only if a password exists */
+      if (!empty($row['user_seed']) && !empty($row['user_pass']))
       {
+        $passwordHash = sha1($row['user_seed'] . $password);
+        if (strcmp($passwordHash, $row['user_pass']) != 0)
+        {
+          return false;
+        }
+      } else if (!empty($row['user_seed']))
+      {
+        /* Seed with no password hash = no login */
+        return false;
+      } else if (!empty($password))
+      {
+        /* empty password required */
         return false;
       }
-    } else if (!empty($row['user_seed']))
-    {
-      /* Seed with no password hash = no login */
-      return false;
-    } else if (!empty($password))
-    {
-      /* empty password required */
-      return false;
     }
-
     /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
@@ -327,7 +368,6 @@ class core_auth extends FO_Plugin
     }
     return true;
   }
-
 }
 
 $NewPlugin = new core_auth;

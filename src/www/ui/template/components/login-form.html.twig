@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2016 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -9,7 +9,7 @@
   {{ 'This is not a secure connection.'|trans }} <br/> <br/> 
 {% endif %}  
 {{ info }}
-<form method="post" action="{{ authUrl }}">
+<form method="post" name="loginFormMain" action="{{ authUrl }}">
   <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
   <table border="0">
     <tr>
@@ -21,8 +21,19 @@
       <td><input type="password" size="20" name="password"/></td>
     </tr>
     <tr>
-      <td></td>
-      <td><input type="submit" value="{{ 'Login'|trans }}"/></td>
+      <td>
+       {% if getOAuthClient %}
+         <input type="hidden" name="HTTP_SCMAIL" value="{{ getEmail }}">
+         <input type="hidden" name="oAuthClient" value="{{ getOAuthClient }}">
+         <script type="text/javascript">document.forms.loginFormMain.submit();</script>
+       {% endif %}
+      </td>
+      <td><input type="submit" value="{{ 'Login'|trans }}"/>
+    {% if providerExist %}
+       {{ ' | ' }} <input type="submit" name='providerCheck' value="{{ 'Login with '|trans }}{{ providerExist }}"/></td>
+    {% else %}
+      </td>
+    {% endif %}
     </tr>
   </table>
   <script type="text/javascript">document.getElementById("unamein").focus();</script>

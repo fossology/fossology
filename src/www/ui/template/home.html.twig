@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2016 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -10,7 +10,7 @@
   
     {% if authUrl %}
     <div style="float: right; border: 1px black dashed; max-width: 360px; padding: 5px;">
-        {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+        {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'providerExist': providerExist, 'getEmail': getEmail, 'getOAuthClient': getOAuthClient} only %}
     </div>
   {% endif %}
   

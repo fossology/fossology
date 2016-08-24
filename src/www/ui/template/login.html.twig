@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2016 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -10,5 +10,5 @@
     {% if loginFailure %}
       {{ 'The combination of user name and password was not found.'|trans }}<br/><br/> 
     {% endif %}
-    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName} only %}
+    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName, 'providerExist': providerExist} only %}
 {% endblock %}

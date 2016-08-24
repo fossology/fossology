@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2016 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -26,6 +27,7 @@
 define("CONFIG_TYPE_INT", 1);
 define("CONFIG_TYPE_TEXT", 2);
 define("CONFIG_TYPE_TEXTAREA", 3);
+define("CONFIG_TYPE_PASSWORD", 4);
 //}@
 
 
@@ -214,6 +216,27 @@ function Populate_sysconfig()
   $ValueArray[$Variable] = "'$Variable', 'FOSSology Support', '$SupportEmailSubjectPrompt',"
   . CONFIG_TYPE_TEXT .
                     ",'Support', 3, '$SupportEmailSubjectDesc', ''";
+
+  /* oAuth2 Service */
+  $Variable = "GitlabAppIdOauth";
+  $GitlabAppIdOauthPrompt = _('Gitlab Application Id');
+  $GitlabAppIdOauthDesc = _('e.g. "e0ec21b9f4b21adc76f185962b52bdfc13af134a"<br>Applicationid generated while registering your application.');
+  $ValueArray[$Variable] = "'$Variable', null, '$GitlabAppIdOauthPrompt', ". CONFIG_TYPE_TEXT .",'OauthSupport', 1, '$GitlabAppIdOauthDesc', ''";
+
+  $Variable = "GitlabSecretOauth";
+  $GitlabSecretOauthPrompt = _('Gitlab Secret');
+  $GitlabSecretOauthDesc = _('e.g. "cf13476f185b9f4b2e0ec962b52211adbdfc13aa"<br>Secret generated while registering your application.');
+  $ValueArray[$Variable] = "'$Variable', null, '$GitlabSecretOauthPrompt',". CONFIG_TYPE_PASSWORD .",'OauthSupport', 2, '$GitlabSecretOauthDesc', ''";
+
+  $Variable = "RedirectOauthURL";
+  $RedirectOauthURLPrompt = _('Redirect URL');
+  $RedirectOauthURLDesc = _('e.g. "http://fossology.application.url.com"<br> "URL of your fossology application."');
+  $ValueArray[$Variable] = "'$Variable', null, '$RedirectOauthURLPrompt',". CONFIG_TYPE_TEXT .",'OauthSupport', 3, '$RedirectOauthURLDesc', ''";
+
+  $Variable = "GitlabDomainURL";
+  $GitlabDomainURLPrompt = _('Gitlab Domain URL');
+  $GitlabDomainURLDesc = _('e.g. "http://gitlab.myhost.com"<br> "Base URL for self-hosted gitlab application(this feild is optional)."');
+  $ValueArray[$Variable] = "'$Variable', null, '$GitlabDomainURLPrompt',". CONFIG_TYPE_TEXT .",'OauthSupport', 4, '$GitlabDomainURLDesc', ''";
 
   /*  Banner Message */
   $Variable = "BannerMsg";
