@@ -1695,6 +1695,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       else if (INFILE(_LT_GPL_EXCEPT_ECOS)) {
         INTERESTING("eCos-2.0");
       }
+      else if (INFILE(_LT_GPL_EXCEPT_OPENSSL)) {
+        INTERESTING("OpenSSL-exception");
+      }
     }
     /* checking for FSF */
     if (INFILE(_LT_FSF_1)) {
@@ -1942,7 +1945,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "MIT(3)" : "MIT");
       }
       else {
-        INTERESTING(lDebug ? "MIT-style(2)" : "MIT-style");
+        if (INFILE(_TITLE_ICU)) {
+          INTERESTING(lDebug ? "MIT-style(2)" : "ICU");
+        }
+        else {
+          INTERESTING(lDebug ? "MIT-style(2)" : "MIT-style");
+        }
       }
       lmem[_mMIT] = 1;
     }
@@ -2541,7 +2549,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_RHeCos_v11)) {
       INTERESTING("RHeCos-1.1");
-    } else if (INFILE(_TITLE_H2_V10)) {
+    } 
+    else if (INFILE(_TITLE_CYGNUS_ECOS_V10)) {
+      INTERESTING("Cygnus-eCos-1.0");
+    }
+    else if (INFILE(_TITLE_H2_V10)) {
       INTERESTING("H2-1.0");
     }
     else {
@@ -3065,7 +3077,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * SUN Microsystems
    */
   if (!lmem[_mSUN] && (INFILE(_CR_SUN) || INFILE(_TEXT_MICROSYSTEMS))) {
-    if (INFILE(_LT_SUN_PROPRIETARY)) {
+    if (INFILE(_LT_SUN_PROPRIETARY) || INFILE(_LT_SUN_PROPRIETARY_2) || INFILE(_LT_SUN_PROPRIETARY_3)) {
       INTERESTING(lDebug ? "Sun(Prop)" : "Sun-Proprietary");
       lmem[_mSUN] = 1;
     }
@@ -3074,7 +3086,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_mSUN] = 1;
     }
     else if (INFILE(_LT_SUN_2)) {
-      INTERESTING(lDebug ? "Sun(4)" : "Sun");
+      INTERESTING(lDebug ? "Sun(4)" : "Sun-Proprietary");
       lmem[_mSUN] = 1;
     }
     else if (INFILE(_LT_SUN_3)) {
@@ -5910,6 +5922,43 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_LT_CRYPTOGAMS)) {
     INTERESTING("Cryptogams");
+  }
+  cleanLicenceBuffer();
+  /**
+   * Cygnus-eCos-1.0
+   * Note, Cygnus-eCos title is also checked in MPL section
+   */
+  if (INFILE(_TITLE_CYGNUS_ECOS_V10)) {
+     INTERESTING("Cygnus-eCos-1.0");
+  }
+  cleanLicenceBuffer();
+  /**
+   * EDL-1.0
+   */
+  if (INFILE(_TITLE_EDL_V10)) {
+     INTERESTING("EDL-1.0");
+  }
+  cleanLicenceBuffer();
+  /**
+   * HSQLDB
+   */
+  if (INFILE(_LT_HSQLDB)) {
+     INTERESTING("HSQLDB");
+  }
+  cleanLicenceBuffer();
+  /**
+   * OpenMap
+   */
+  if (INFILE(_TITLE_OPENMAP)) {
+     INTERESTING("OpenMap");
+ 	 lmem[_fPDDL] = 1;
+  }
+  cleanLicenceBuffer();
+  /**
+   * ICU 1.8.1
+   */
+  if (INFILE(_LT_ICU_1)) {
+     INTERESTING("ICU");
   }
   cleanLicenceBuffer();
   /*
