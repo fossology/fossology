@@ -77,10 +77,11 @@ $(CLEANDIRS):
 phpvendors:
 	composer install -q
 
+phpvendors-no-dev:
+	composer install -q --no-dev
+
 composer_install:
-	@echo "current dir: '$${PWD}'"
-	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); composer install -q --no-dev)
+	cp -r vendor $(DESTDIR)$(MODDIR)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
