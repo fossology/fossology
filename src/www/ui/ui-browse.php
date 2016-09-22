@@ -226,6 +226,13 @@ class ui_browse extends FO_Plugin
     $Upload = GetParm("upload", PARM_INTEGER);  // upload_pk to browse
     $Item = GetParm("item", PARM_INTEGER);  // uploadtree_pk to browse
 
+    /* check if $folder_pk is accessible to logged in user */
+    if(!empty($folder_pk) && !$this->folderDao->isFolderAccessible($folder_pk))
+    {
+      $this->vars['message'] = _("Permission Denied");
+      return $this->render('include/base.html.twig');
+    }
+
     /* check permission if $Upload is given */
     if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload, Auth::getGroupId()))
     {
