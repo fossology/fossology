@@ -31,6 +31,8 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\License;
 
 include_once(__DIR__ . "/spdx2utils.php");
 
@@ -49,6 +51,8 @@ class SpdxTwoAgent extends Agent
   private $uploadDao;
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var LicenseDao */
+  private $licenseDao;
   /** @var DbManager */
   protected $dbManager;
   /** @var Twig_Environment */
@@ -70,6 +74,7 @@ class SpdxTwoAgent extends Agent
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->licenseDao = $this->container->get('dao.license');
     $this->dbManager = $this->container->get('db.manager');
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
@@ -258,6 +263,12 @@ class SpdxTwoAgent extends Agent
           continue;
         }
 
+        $spdxCheck = $this->dbManager->booleanFromDb($this->licenseDao->getLicenseById($clearingLicense->getLicenseId(), $this->groupId)->getSpdxCompatible());
+        if($spdxCheck){
+          $prefix = "";
+        }else{
+          $prefix = "LicenseRef-";
+        }
         if($clearingEvent->getReportinfo())
         {
           $customLicenseText = $clearingEvent->getReportinfo();
@@ -265,13 +276,14 @@ class SpdxTwoAgent extends Agent
                                     '-' . md5($customLicenseText);
           $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['prefix'][$reportedLicenseShortname] = $prefix;
         }
         else
         {
           $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
           $this->includedLicenseIds[$reportedLicenseId] = true;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] =
-              $this->licenseMap->getProjectedShortname($reportedLicenseId);
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
+          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['prefix'][$this->licenseMap->getProjectedShortname($reportedLicenseId)] = $prefix;
         }
       }
     }
@@ -548,7 +560,7 @@ class SpdxTwoAgent extends Agent
           'fileDirName'=>dirname($fileName),
           'fileBaseName'=>basename($fileName),
           'isCleared'=>$licenses['isCleared'],
-          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], "LicenseRef-"),
+          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], $licenses['prefix']),
           'concludedLicenses'=>$licenses['concluded'],
           'scannerLicenses'=>$licenses['scanner'],
           'copyrights'=>$licenses['copyrights']));

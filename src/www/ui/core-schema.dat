@@ -899,6 +899,10 @@
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_risk\" int4";
   $Schema["TABLE"]["license_ref"]["rf_risk"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_risk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_spdx_compatible\" IS 'change this to true if you want the reference of license to be removed from spdx reports'";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_compatible\" bool DEFAULT false";
+  $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_compatible\" SET NOT NULL, ALTER COLUMN \"rf_spdx_compatible\" SET DEFAULT false";
+
 
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
