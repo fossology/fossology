@@ -60,6 +60,9 @@ class SpdxTwoUtils
       }
       else
       {
+        if(is_array($prefix)){
+          $prefix = $prefix[$license];
+        }
         if(substr($license, 0, strlen($prefix)) === $prefix)
         {
           return $license;
