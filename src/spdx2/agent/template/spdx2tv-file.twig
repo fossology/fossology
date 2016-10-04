@@ -25,7 +25,7 @@ LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NOASSERTION
 {% else %}
 {% for lic in  scannerLicenses %}
-LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
+LicenseInfoInFile: {{ lic|replace({' ':'-'})}}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}

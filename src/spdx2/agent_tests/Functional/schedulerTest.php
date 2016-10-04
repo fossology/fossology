@@ -126,7 +126,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId=7);
 
     assertThat('cannot run runner', $success, equalTo(true));
-    assertThat( 'report failed: "'.$output.'"', $retCode, equalTo(0));
+    assertThat('report failed: "'.$output.'"', $retCode, equalTo(0));
     assertThat($this->getHeartCount($output), greaterThan(0));
 
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId), "reportFileName");
@@ -156,19 +156,34 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     exec('which java', $lines, $returnVar);
     $this->assertEquals(0,$returnVar,'java required for this test');
 
-    $toolJarFile = __DIR__.'/spdx-tools-2.0.2-jar-with-dependencies.jar';
-    $this->pullSpdxTools($toolJarFile);
+    $toolJarFile = $this->pullSpdxTools();
 
     $verification = exec("java -jar $toolJarFile Verify $filepath");
     assertThat($verification,equalTo('This SPDX Document is valid.'));
   }
 
-  protected function pullSpdxTools($jarFile)
+  protected function pullSpdxTools()
   {
+    $version='2.1.0';
+    $tag='v'.$version;
+
+    $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
+    $jarFile = __DIR__.'/'.$jarFileBasename;
     if(!file_exists($jarFile))
     {
-      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/V2.0.2/spdx-tools-2.0.2-jar-with-dependencies.jar', 'r'));
+      $zipFileBasename='SPDXTools-'.$tag.'.zip';
+      $zipFile=__DIR__.'/'.$zipFileBasename;
+      if(!file_exists($zipFile))
+      {
+        file_put_contents($zipFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$zipFileBasename, 'r'));
+
+      }
+      $this->assertFileExists($zipFile, 'could not download SPDXTools');
+
+      system('unzip -n -d '.__DIR__.' '.$zipFile);
+      rename (__DIR__.'/SPDXTools-'.$tag.'/'.$jarFileBasename, $jarFile);
     }
-    $this->assertFileExists($jarFile, 'could not download SPDXTools');
+    $this->assertFileExists($jarFile, 'could not extract SPDXTools');
+    return $jarFile;
   }
 }

@@ -64,9 +64,16 @@ class SpdxTwoAgent extends Agent
   /** @var array */
   protected $includedLicenseIds = array();
   /** @var string */
+  protected $filebasename = null;
+  /** @var string */
   protected $uri;
   /** @var string */
+  protected $filename;
+  /** @var string */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
+
+  /** @var callable */
+  protected $spdxValidityChecker = null;
 
   function __construct()
   {
@@ -81,6 +88,18 @@ class SpdxTwoAgent extends Agent
 
     $this->agentSpecifLongOptions[] = self::UPLOAD_ADDS.':';
     $this->agentSpecifLongOptions[] = self::OUTPUT_FORMAT_KEY.':';
+
+    $dbManager = $this->dbManager;
+    $licenseDao = $this->licenseDao;
+    $groupId = $this->groupId;
+    $this->spdxValidityChecker = function ($licenseShortname) use ($dbManager, $licenseDao, $groupId) {
+      $lic = $licenseDao->getLicenseByShortName($licenseShortname, $groupId);
+      if ($lic === null)
+      {
+        return false;
+      }
+      return $dbManager->booleanFromDb($lic->getSpdxCompatible());
+    };
   }
 
   /**
@@ -160,27 +179,49 @@ class SpdxTwoAgent extends Agent
     return $prefix . $partname . $postfix;
   }
 
+  protected function getFileBasename($packageName)
+  {
+    if($this->filebasename == null) {
+      $fileName = strtoupper($this->outputFormat)."_".$packageName.'_'.time();
+      switch ($this->outputFormat)
+      {
+        case "spdx2":
+          $fileName = $fileName .".rdf";
+          break;
+        case "spdx2tv":
+          $fileName = $fileName .".spdx";
+          break;
+        case "dep5":
+          $fileName = $fileName .".txt";
+          break;
+      }
+      $this->filebasename = $fileName;
+    }
+    return $this->filebasename;
+  }
+
+  protected function getFileName($packageName)
+  {
+    global $SysConf;
+    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
+    return $fileBase. $this->getFileBasename($packageName);
+  }
+
   /**
    * @param string $fileBase
    * @param string $packageName
    * @return string
    */
-  protected function getUri($fileBase,$packageName)
+  protected function getUri($packageName)
   {
-    $fileName = $fileBase. strtoupper($this->outputFormat)."_".$packageName.'_'.time();
-    switch ($this->outputFormat)
+    global $SysConf;
+    $url=$SysConf['SYSCONFIG']['FOSSologyURL'];
+    if (substr( $url, 0, 4 ) !== "http")
     {
-      case "spdx2":
-        $fileName = $fileName .".rdf" ;
-        break;
-      case "spdx2tv":
-        $fileName = $fileName .".spdx" ;
-        break;
-      case "dep5":
-        $fileName = $fileName .".txt" ;
-        break;
+      $url="http://".$url;
     }
-    return $fileName;
+
+    return $url . $this->getFileBasename($packageName);
   }
 
   /**
@@ -217,6 +258,10 @@ class SpdxTwoAgent extends Agent
       $mainLicenses[] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
     }
 
+    if (strcmp($this->outputFormat, "dep5")!==0) {
+      $mainLicenses = SpdxTwoUtils::addPrefixOnDemandList($mainLicenses, $this->spdxValidityChecker);
+    }
+
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString($this->getTemplateFile('package'),array(
         'uploadId'=>$uploadId,
@@ -227,7 +272,7 @@ class SpdxTwoAgent extends Agent
         'md5'=>$hashes['md5'],
         'verificationCode'=>$this->getVerificationCode($upload),
         'mainLicenses'=>$mainLicenses,
-        'mainLicense'=>SpdxTwoUtils::implodeLicenses($mainLicenses, "LicenseRef-"),
+        'mainLicense'=>SpdxTwoUtils::implodeLicenses($mainLicenses, $this->spdxValidityChecker),
         'licenseComments'=>$licenseComment,
         'fileNodes'=>$fileNodes)
             );
@@ -263,12 +308,6 @@ class SpdxTwoAgent extends Agent
           continue;
         }
 
-        $spdxCheck = $this->dbManager->booleanFromDb($this->licenseDao->getLicenseById($clearingLicense->getLicenseId(), $this->groupId)->getSpdxCompatible());
-        if($spdxCheck){
-          $prefix = "";
-        }else{
-          $prefix = "LicenseRef-";
-        }
         if($clearingEvent->getReportinfo())
         {
           $customLicenseText = $clearingEvent->getReportinfo();
@@ -276,14 +315,12 @@ class SpdxTwoAgent extends Agent
                                     '-' . md5($customLicenseText);
           $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['prefix'][$reportedLicenseShortname] = $prefix;
         }
         else
         {
           $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
           $this->includedLicenseIds[$reportedLicenseId] = true;
           $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['prefix'][$this->licenseMap->getProjectedShortname($reportedLicenseId)] = $prefix;
         }
       }
     }
@@ -380,7 +417,7 @@ class SpdxTwoAgent extends Agent
     $scannerIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     if(empty($scannerIds))
     {
-      return;
+      return "";
     }
     $selectedScanners = '{'.implode(',',$scannerIds).'}';
     $tableName = $itemTreeBounds->getUploadTreeTableName();
@@ -401,7 +438,6 @@ class SpdxTwoAgent extends Agent
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
-        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
         $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
@@ -454,28 +490,31 @@ class SpdxTwoAgent extends Agent
    */
   protected function computeUri($uploadId)
   {
-    global $SysConf;
     $upload = $this->uploadDao->getUpload($uploadId);
     $packageName = $upload->getFilename();
 
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
-
-    $this->uri = $this->getUri($fileBase,$packageName);
+    $this->uri = $this->getUri($packageName);
+    $this->filename = $this->getFileName($packageName);
   }
 
   /**
-   * @param string[] $packageNodes
+   * @param string $packageNodes
    * @param int[] $packageIds
    * @param int $uploadId
    */
   protected function writeReport(&$packageNodes, $packageIds, $uploadId)
   {
-    $fileBase = dirname($this->uri);
+    $fileBase = dirname($this->filename);
 
     if(!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
+
+    $licenseTexts=$this->getLicenseTexts();
+    if (strcmp($this->outputFormat, "dep5")!==0) {
+      $licenseTexts = SpdxTwoUtils::addPrefixOnDemandKeys($licenseTexts, $this->spdxValidityChecker);
+    }
 
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName'=>$fileBase,
@@ -484,15 +523,15 @@ class SpdxTwoAgent extends Agent
         'organisation'=>'',
         'packageNodes'=>$packageNodes,
         'packageIds'=>$packageIds,
-        'licenseTexts'=>$this->getLicenseTexts())
+        'licenseTexts'=>$licenseTexts)
             );
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
     $message = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/','?',$message);
 
-    file_put_contents($this->uri, $message);
-    $this->updateReportTable($uploadId, $this->jobId, $this->uri);
+    file_put_contents($this->filename, $message);
+    $this->updateReportTable($uploadId, $this->jobId, $this->filename);
   }
 
   /**
@@ -551,6 +590,14 @@ class SpdxTwoAgent extends Agent
       }
       $hashes = $treeDao->getItemHashes($fileId);
       $fileName = $treeDao->getFullPath($fileId,$treeTableName);
+      if(!is_array($licenses['concluded']))
+      {
+        $licenses['concluded'] = array();
+      }
+      if(!is_array($licenses['scanner']))
+      {
+        $licenses['scanner'] = array();
+      }
       $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
@@ -560,12 +607,12 @@ class SpdxTwoAgent extends Agent
           'fileDirName'=>dirname($fileName),
           'fileBaseName'=>basename($fileName),
           'isCleared'=>$licenses['isCleared'],
-          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], $licenses['prefix']),
-          'concludedLicenses'=>$licenses['concluded'],
-          'scannerLicenses'=>$licenses['scanner'],
+          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], $this->spdxValidityChecker),
+          'concludedLicenses'=> SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
+          'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights'=>$licenses['copyrights']));
     }
-        $this->heartbeat($filesProceeded - $lastValue);
+    $this->heartbeat($filesProceeded - $lastValue);
     return $content;
   }
 

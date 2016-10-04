@@ -32,7 +32,11 @@
         <spdx:licenseConcluded>
           <spdx:DisjunctiveLicenseSet>
   {% for res in mainLicenses %}
-            <spdx:member rdf:resource="{{ uri }}#LicenseRef-{{ res|replace(' ','-')|url_encode }}" />
+  {% if res starts with 'LicenseRef-' %}
+            <spdx:member rdf:resource="{{ uri }}#{{ res|replace(' ','-')|url_encode }}" />
+  {% else %}
+            <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace(' ','-')|url_encode }}" />
+  {% endif %}
   {% endfor %}
           </spdx:DisjunctiveLicenseSet>
         </spdx:licenseConcluded>

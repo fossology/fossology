@@ -56,20 +56,25 @@ class spdx2Test extends \PHPUnit_Framework_TestCase
 
   public function provideLicenseSet()
   {
+    $constTrue = function ($licId) { return true; };
+    $constFalse = function ($licId) { return false; };
+
     return array(
-        'null' => array(null, '',  ''),
-        'empty array' => array(array(), '', ''),
-        'empty array but prefix' => array(array(), 'pre', ''),
-        'single license'=>array(array("LIC1"), '', 'LIC1'),
-        'multiple licenses' => array(array("LIC1","LIC2","LIC3"), '', 'LIC1 AND LIC2 AND LIC3'),
-        'dual license 1st pos' => array(array("Dual-license", "LIC2", "LIC3"), '', 'LIC2 OR LIC3'),
-        'dual license 2nd pos' => array(array("LIC1", "Dual-license", "LIC3"), '', 'LIC1 OR LIC3'),
-        'dual license 3rd pos' => array(array("LIC1", "LIC2", "Dual-license"), '',  'LIC1 OR LIC2'),
-        'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"), 'pre-', 'pre-LIC1 OR pre-LIC2'),
-        'multiple dualLicense' => array(array("LIC1","LIC2 OR LIC3"),  '', '(LIC2 OR LIC3) AND LIC1'),
-        'multiple dualLicense with prefix' => array(array("LIC1","LIC2 OR LIC3"), 'pre-', '(LIC2 OR LIC3) AND pre-LIC1'),
-        'dual multi license' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), '', '(LIC2 OR LIC3) OR LIC1'),
-        'dual multi license with prefix' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), 'pre-', '(LIC2 OR LIC3) OR pre-LIC1'),
+        'null' => array(null, $constTrue,  ''),
+        'empty array' => array(array(), $constTrue, ''),
+        'empty array but prefix' => array(array(), $constFalse, ''),
+        'single license' => array(array("LIC1"), $constTrue, 'LIC1'),
+        'multiple licenses' => array(array("LIC1","LIC2","LIC3"), $constTrue, 'LIC1 AND LIC2 AND LIC3'),
+        'dual license 1st pos' => array(array("Dual-license", "LIC2", "LIC3"), $constTrue, 'LIC2 OR LIC3'),
+        'dual license 2nd pos' => array(array("LIC1", "Dual-license", "LIC3"), $constTrue, 'LIC1 OR LIC3'),
+        'dual license 3rd pos' => array(array("LIC1", "LIC2", "Dual-license"), $constTrue,  'LIC1 OR LIC2'),
+        'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"), function ($licId) { return $licId === 'LIC2';}, SpdxTwoUtils::$prefix.'LIC1 OR LIC2'),
+        'dual license with prefix' => array(array("LIC1","LIC2", "Dual-license"), function ($licId) { return $licId === 'LIC1';}, 'LIC1 OR '.SpdxTwoUtils::$prefix.'LIC2'),
+        'dual license with prefix ($constFalse)' => array(array("LIC1","LIC2", "Dual-license"), $constFalse, SpdxTwoUtils::$prefix.'LIC1 OR '.SpdxTwoUtils::$prefix.'LIC2'),
+        'multiple dualLicense' => array(array("LIC1","LIC2 OR LIC3"),  $constTrue, '(LIC2 OR LIC3) AND LIC1'),
+        'multiple dualLicense with prefix' => array(array("LIC1","LIC2 OR LIC3"), $constFalse, '(LIC2 OR LIC3) AND '.SpdxTwoUtils::$prefix.'LIC1'),
+        'dual multi license' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), $constTrue, '(LIC2 OR LIC3) OR LIC1'),
+        'dual multi license with prefix' => array(array("LIC1","LIC2 OR LIC3", "Dual-license"), $constFalse, '(LIC2 OR LIC3) OR '.SpdxTwoUtils::$prefix.'LIC1'),
     );
   }
 

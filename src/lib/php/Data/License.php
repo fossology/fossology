@@ -38,7 +38,7 @@ class License extends LicenseRef
    */
   private $spdxCompatible;
 
-  function __construct($id, $shortName, $fullName, $risk, $text, $url, $spdxCompatible)
+  function __construct($id, $shortName, $fullName, $risk, $text, $url, $spdxCompatible = false)
   {
     parent::__construct($id, $shortName, $fullName);
     $this->text = $text;
