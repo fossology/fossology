@@ -55,8 +55,9 @@ class SpdxTwoUtils
     }
     else
     {
-      if(is_callable($spdxValidityChecker) &&
-          call_user_func($spdxValidityChecker, $license))
+      if($spdxValidityChecker === null ||
+          (is_callable($spdxValidityChecker) &&
+              call_user_func($spdxValidityChecker, $license)))
       {
         return $license;
       }
