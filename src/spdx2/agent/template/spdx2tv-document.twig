@@ -43,7 +43,7 @@ Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
 ##-------------------------
 
 {% for licenseId,extractedText in licenseTexts %}
-LicenseID: LicenseRef-{{ licenseId|replace(' ','-') }}
+LicenseID: {{ licenseId|replace(' ','-') }}
 LicenseName: {{ licenseId|replace(' ','-') }}
 ExtractedText: <text> {{ extractedText|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                       |replace({'\f':''}) }} </text>

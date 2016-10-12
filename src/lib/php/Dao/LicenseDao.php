@@ -536,20 +536,20 @@ ORDER BY lft asc
   private function getLicenseByCondition($condition, $param, $groupId=null)
   {
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk FROM ONLY license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM ONLY license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
     if (false === $row && isset($groupId))
     {
       $param[] = $groupId;
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk FROM license_candidate WHERE $condition AND group_fk=$".count($param),
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM license_candidate WHERE $condition AND group_fk=$".count($param),
         $param, __METHOD__ . ".$condition.group");
     }
     if (false === $row)
     {
       return null;
     }
-    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url']);
+    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'], $row['rf_spdx_compatible']);
     return $license;
   }
 

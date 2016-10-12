@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2016 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -18,6 +18,10 @@
     <tr>
       <td align="right">{{ 'Checked'|trans }}</td>
       <td align="left">{{ macro.select('marydone',boolYesNoMap,'marydone',marydone) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'SPDX Compatible'|trans }}</td>
+      <td align="left">{{ macro.select('rf_spdx_compatible',boolYesNoMap,'rf_spdx_compatible',rf_spdx_compatible) }}</td>
     </tr>
     <tr>
       <td align="right">{{ "Short name"|trans }}</td>
