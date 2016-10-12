@@ -2007,6 +2007,14 @@
 %KEY% "permi[st]"
 %STR% "permission is granted for =FEW= all use providing that this copyright is (properly )?acknowledged"
 #
+%ENTRY% _LT_FREE_91
+%KEY% "software"
+%STR% "free software you can (re)distribute it and =FEW= modify it as you like"
+#
+%ENTRY% _LT_FREE_92
+%KEY% "permi[st]"
+%STR% "(re)distribution and use in source and binary forms are freely permitted =SOME= copyright notice =SOME= (is|are) duplicated"
+#
 %ALIAS%	_FREE_last_other
 %ALIAS%	_FREECLAIM_last
 #
@@ -2275,6 +2283,10 @@
 %ENTRY%	_LT_GPL_EXCEPT_ECOS
 %KEY%	"licen[cs]"
 %STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file or you compile this file and link it =SOME= this file does not by itself cause the resulting work to be covered by the GNU General Public License"
+#
+%ENTRY%	_LT_GPL_EXCEPT_OPENSSL
+%KEY%	"openssl"
+%STR%	"as (an additional|a special) (exemption|exception) you are allowed to compile (&|and) link against the OpenSSL libraries"
 #
 %ENTRY%	_LT_GPL_UPX_EXCEPT
 %KEY%	"distribut"
@@ -2591,6 +2603,11 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_HELIX_TITLE
 %KEY%	"licen[cs]"
 %STR%	"helix DNA technology binary research use licen[cs]e"
+#
+%ENTRY%	_LT_HSQLDB
+%KEY%	"licen[cs]"
+%STR%	"can be distributed (and used|) according to HSQLDB License"
+#
 #####
 # DELETED: ... customer will provide HP with reasonably detailed information
 # regarding any intended disassembly or decompilation
@@ -2743,6 +2760,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_IBM_RECIP
 %KEY%	"\<derivative\>"
 %STR%	"hereby granted provided that licen[cs]ee provides a licen[cs]e to IBM corp to use copy modify and/?o?r? distribute derivative works"
+#
+%ENTRY%	_LT_ICU_1
+%KEY%	"licen[cs]"
+%STR%	"available under =FEW= ICU license =FEW= ICU 1\.?8\.?1 and later"
 #
 %ENTRY%	_LT_ID_EULA
 %KEY%	"licen[cs]"
@@ -4642,6 +4663,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_SUN_PROPRIETARY
 %KEY%	"licen[cs]"
 %STR%	"sun considers =SOME= an unpublished proprietary trade secret and it is available only under strict licen[cs]e provisions"
+#
+%ENTRY%	_LT_SUN_PROPRIETARY_2
+%KEY%	"licen[cs]"
+%STR%	"\<sun\> =SOME= (proprietary|confidential) =SOME= use is subject to licen[cs]e terms"
+#
+%ENTRY%	_LT_SUN_PROPRIETARY_3
+%KEY%	"licen[cs]"
+%STR%	"\<sun\> =SOME= (proprietary|confidential) =SOME= you shall not disclose such confidential information =FEW= use it only in accordance with =FEW= licen[cs]e (terms|agreement)"
 #
 %ENTRY%	_LT_SUN_SCA
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6726,6 +6755,14 @@ k
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"apache =FEW= licen[cs]e"
 #
+%ENTRY%	_TITLE_CYGNUS_ECOS_V10
+%KEY%	"licen[cs]"
+%STR%	"Cygnus eCos Public License Version 1\.?0"
+#
+%ENTRY%	_TITLE_EDL_V10
+%KEY%	"licen[cs]"
+%STR%	"Eclipse Distribution License[ -](v |v|)1\.?0"
+#
 %ENTRY%	_TITLE_ATI_EULA
 %KEY%	"\<(end[ -]user|eula)\>"
 %STR%	"ati software end[ -]user licen[cs]e agreement"
@@ -6781,6 +6818,10 @@ k
 %ENTRY%	_TITLE_NC_SA_V40
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution-noncommercial-sharealike 4\.?0"
+#
+%ENTRY%	_TITLE_OPENMAP
+%KEY%	"licen[cs]"
+%STR%	"OpenMap Software License Agreement"
 #
 %ENTRY%	_TITLE_SA_V10
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
@@ -7239,6 +7280,10 @@ k
 %ENTRY%	_TITLE_IBM_PL
 %KEY%	"licen[cs]"
 %STR%	"ibm public licen[cs]e =FEW= version"
+#
+%ENTRY%	_TITLE_ICU
+%KEY%	"licen[cs]"
+%STR%	"ICU License =FEW= ICU 1\.?8\.?1 and later"
 #
 %ENTRY%	_TITLE_IDPL_V10
 %KEY%	"licen[cs]"

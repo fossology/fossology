@@ -33,11 +33,11 @@
       {% endfor %}
     </fieldset>
     <br/>
-    {{ 'Description'| trans }}: <br/>
+    {{ 'Description'| trans }}<img src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="description" style="width:90%" class="supervised">{{ description }}</textarea><br/>
-    {{ 'Text finding'| trans }}: <br/>
+    {{ 'Text finding'| trans }}<img src="images/info_16.png" title="{{ 'Exact text finding, if the regular expression match is wrong not matching everything, too much'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="textFinding" style="width:90%" class="supervised">{{ textFinding }}</textarea><br/>
-    {{ 'Comment'| trans }}: <br/>
+    {{ 'Comment'| trans }}<img src="images/info_16.png" title="{{ 'A user can place comment for leaving a notice that ma be viewed by other users on Fossology'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="comment" style="width:90%" class="supervised">{{ comment }}</textarea><br/>
 
   </div>

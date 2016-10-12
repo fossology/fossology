@@ -43026,3 +43026,736 @@ IN NO EVENT WILL YAHOO! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
 
 7. Miscellaneous
 This Agreement contains the entire agreement of the parties with respect to the subject matter of this Agreement and supersedes all previous communications, representations, understandings and agreements, either oral or written, between the parties with respect to said subject matter. The relationship of the parties hereunder is that of independent contractors, and this Agreement will not be construed as creating an agency, partnership, joint venture or any other form of legal association between the parties. If any term, condition, or provision in this Agreement is found to be invalid, unlawful or unenforceable to any extent, this Agreement will be construed in a manner that most closely effectuates the intent of this Agreement. Such invalid term, condition or provision will be severed from the remaining terms, conditions and provisions, which will continue to be valid and enforceable to the fullest extent permitted by law. This Agreement will be interpreted and construed in accordance with the laws of the State of California and the United States of America, without regard to conflict of law principles. The U.N. Convention on Contracts for the International Sale of Goods shall not apply to this Agreement. All disputes arising out of this Agreement involving Yahoo! or any of its subsidiaries shall be subject to the jurisdiction of the federal or state courts of northern California, with venue lying in Santa Clara County, California. No rights may be assigned, no obligations may be delegated, and this Agreement may not be transferred by You, in whole or in part, whether voluntary or by operation of law, including by way of sale of assets, merger or consolidation, without the prior written consent of Yahoo!, and any purported assignment, delegation or transfer without such consent shall be void ab initio. Any waiver of the provisions of this Agreement or of a party''s rights or remedies under this Agreement must be in writing to be effective. Failure, neglect or delay by a party to enforce the provisions of this Agreement or its rights or remedies at any time, will not be construed or be deemed to be a waiver of such party''s rights under this Agreement and will not in any way affect the validity of the whole or any part of this Agreement or prejudice such party''s right to take subsequent action.', 'https://www.zimbra.com/license/yahoo_public_license_1.0.html', NULL, NULL, NULL, 'Yahoo! Public License v1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'fd7abc878a3e880577a2a7f9e42f8951', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (566, 'Cygnus-eCos-1.0', 'CYGNUS ECOS PUBLIC LICENSE    Version 1.0
+
+
+1. DEFINITIONS.
+
+     1.1. "Contributor" means each entity that creates or
+contributes to the creation of Modifications.
+
+     1.2. "Contributor Version" means the combination of
+the Original Code, prior Modifications used by a
+Contributor, and the Modifications made by that particular
+Contributor.
+
+     1.3. "Covered Code" means the Original Code or
+Modifications or the combination of the Original Code and
+Modifications, in each case including portions thereof.
+
+     1.4. "Electronic Distribution Mechanism" means a
+mechanism generally accepted in the software development
+community for the electronic transfer of data.
+
+     1.5. "Executable" means Covered Code in any form other
+than Source Code.
+
+     1.6. "Initial Developer" means the individual or
+entity identified as the Initial Developer in the Source
+Code notice required by Exhibit A.
+
+     1.7. "Larger Work" means a work which combines Covered
+Code or portions thereof with code not governed by the terms
+of this License.
+
+     1.8. "License" means this document.
+
+     1.9. "Modifications" means any addition to or deletion
+from the substance or structure of either the Original Code
+or any previous Modifications. When Covered Code is released
+as a series of files, a Modification is:
+
+          A. Any addition to or deletion from the contents
+of a file containing Original Code or previous
+Modifications.
+
+          B. Any new file that contains any part of the
+Original Code or previous Modifications.
+
+     1.10. "Original Code" means Source Code of computer
+software code which is described in the Source Code notice
+required by Exhibit A as Original Code, and which, at the
+time of its release under this License is not already
+Covered Code governed by this License.
+
+     1.11. "Source Code" means the preferred form of the
+Covered Code for making modifications to it, including all
+modules it contains, plus any associated interface
+definition files, scripts used to control compilation and
+installation of an Executable, or a list of source code
+differential comparisons against either the Original Code or
+another well known, available Covered Code of the
+Contributor''s choice. The Source Code can be in a compressed
+or archival form, provided the appropriate decompression or
+de-archiving software is widely available for no charge.
+
+     1.12. "You" means an individual or a legal entity
+exercising rights under, and complying with all of the terms
+of, this License or a future version of this License issued
+under Section 6.1. For legal entities, "You" includes any
+entity which controls, is controlled by, or is under common
+control with You. For purposes of this definition,
+"control" means (a) the power, direct or indirect, to cause
+the direction or management of such entity, whether by
+contract or otherwise, or (b) ownership of fifty percent
+(50%) or more of the outstanding shares or beneficial
+ownership of such entity.
+
+     1.13. "Cygnus''s Branded Code" is code that Cygnus
+Solutions ("Cygnus") distributes and/or permits others to
+distribute under different terms than the Cygnus eCos Public
+License. Cygnus''s Branded Code may contain part or all of
+the Covered Code.
+
+2. SOURCE CODE LICENSE.
+
+     2.1. The Initial Developer Grant.
+     The Initial Developer hereby grants You a world-wide,
+royalty-free, non-exclusive license, subject to third party
+intellectual property claims:
+
+          (a) to use, reproduce, modify, display, perform,
+sublicense and distribute the Original Code (or portions
+thereof) with or without Modifications, or as part of a
+Larger Work; and
+
+          (b) under patents now or hereafter owned or
+controlled by Initial Developer, to make, have made, use and
+sell ("Utilize") the Original Code (or portions thereof),
+but solely to the extent that any such patent is reasonably
+necessary to enable You to Utilize the Original Code (or
+portions thereof) and not to any greater extent that may be
+necessary to Utilize further Modifications or combinations.
+
+     2.2. Contributor Grant.
+     Each Contributor hereby grants You a world-wide,
+royalty-free, non-exclusive license, subject to third party
+intellectual property claims:
+
+          (a) to use, reproduce, modify, display, perform,
+sublicense and distribute the Modifications created by such
+Contributor (or portions thereof) either on an unmodified
+basis, with other Modifications, as Covered Code or as part
+of a Larger Work; and
+
+          (b) under patents now or hereafter owned or
+controlled by Contributor, to Utilize the Contributor
+Version (or portions thereof), but solely to the extent that
+any such patent is reasonably necessary to enable You to
+Utilize the Contributor Version (or portions thereof), and
+not to any greater extent that may be necessary to Utilize
+further Modifications or combinations.
+
+3. DISTRIBUTION OBLIGATIONS.
+
+     3.1. Application of License.
+     The Modifications which You create or to which You
+contribute are governed by the terms of this License,
+including without limitation Section 2.2. The Source Code
+version of Covered Code may be distributed only under the
+terms of this License or a future version of this License
+released under Section 6.1, and You must include a copy of
+this License with every copy of the Source Code You
+distribute. You may not offer or impose any terms on any
+Source Code version that alters or restricts the applicable
+version of this License or the recipients'' rights hereunder.
+However, You may include an additional document offering the
+additional rights described in Section 3.5.
+
+     3.2. Availability of Source Code.
+     Any Modification which You create or to which You
+contribute must be made available in Source Code form under
+the terms of this License via an accepted Electronic
+Distribution Mechanism to anyone to whom you made an
+Executable version available and to the Initial Developer;
+and if made available via Electronic Distribution Mechanism,
+must remain available for at least twelve (12) months after
+the date it initially became available, or at least six (6)
+months after a subsequent version of that particular
+Modification has been made available to such recipients. You
+are responsible for ensuring that the Source Code version
+remains available even if the Electronic Distribution
+Mechanism is maintained by a third party. You are
+responsible for notifying the Initial Developer of the
+Modification and the location of the Source if a contact
+means is provided. Cygnus will be acting as maintainer of
+the Source and may provide an Electronic Distribution
+mechanism for the Modification to be made available. You can
+contact Cygnus to make the Modification available and to
+notify the Initial Developer. (http://sourceware.cygnus.com/ecos)
+
+     3.3. Description of Modifications.
+     You must cause all Covered Code to which you contribute
+to contain a file documenting the changes You made to create
+that Covered Code and the date of any change. You must
+include a prominent statement that the Modification is
+derived, directly or indirectly, from Original Code provided
+by the Initial Developer and including the name of the
+Initial Developer in (a) the Source Code, and (b) in any
+notice in an Executable version or related documentation in
+which You describe the origin or ownership of the Covered
+Code.
+
+     3.4. Intellectual Property Matters
+
+          (a) Third Party Claims.
+          If You have knowledge that a party claims an
+intellectual property right in particular functionality or
+code (or its utilization under this License), you must
+include a text file with the source code distribution titled
+"LEGAL" which describes the claim and the party making the
+claim in sufficient detail that a recipient will know whom
+to contact. If you obtain such knowledge after You make Your
+Modification available as described in Section 3.2, You
+shall promptly modify the LEGAL file in all copies You make
+available thereafter and shall take other steps (such as
+notifying appropriate mailing lists or newsgroups)
+reasonably calculated to inform those who received the
+Covered Code that new knowledge has been obtained.
+
+          (b) Contributor APIs.
+          If Your Modification is an application programming
+interface and You own or control patents which are
+reasonably necessary to implement that API, you must also
+include this information in the LEGAL file.
+
+     3.5. Required Notices.
+     You must duplicate the notice in Exhibit A in each file
+of the Source Code, and this License in any documentation
+for the Source Code, where You describe recipients'' rights
+relating to Covered Code. If You created one or more
+Modification(s), You may add your name as a Contributor to
+the Source Code. If it is not possible to put such notice in
+a particular Source Code file due to its structure, then you
+must include such notice in a location (such as a relevant
+directory file) where a user would be likely to look for
+such a notice. You may choose to offer, and to charge a fee
+for, warranty, support, indemnity or liability obligations
+to one or more recipients of Covered Code.
+     However, You may do so only on Your own behalf, and not
+on behalf of the Initial Developer or any Contributor. You
+must make it absolutely clear that any such warranty,
+support, indemnity or liability obligation is offered by You
+alone, and You hereby agree to indemnify the Initial
+Developer and every Contributor for any liability incurred
+by the Initial Developer or such Contributor as a result of
+warranty, support, indemnity or liability terms You offer.
+
+     3.6. Distribution of Executable Versions.
+     You may distribute Covered Code in Executable form only
+if the requirements of Section 3.1-3.5 have been met for
+that Covered Code, and if You include a notice stating that
+the Source Code version of the Covered Code is available
+under the terms of this License, including a description of
+how and where You have fulfilled the obligations of Section
+3.2. The notice must be conspicuously included in any notice
+in an Executable version, related documentation or
+collateral in which You describe recipients'' rights relating
+to the Covered Code. You may distribute the Executable
+version of Covered Code under a license of Your choice,
+which may contain terms different from this License,
+provided that You are in compliance with the terms of this
+License and that the license for the Executable version does
+not attempt to limit or alter the recipient''s rights in the
+Source Code version from the rights set forth in this
+License. If You distribute the Executable version under a
+different license You must make it absolutely clear that any
+terms which differ from this License are offered by You
+alone, not by the Initial Developer or any Contributor. You
+hereby agree to indemnify the Initial Developer and every
+Contributor for any liability incurred by the Initial
+Developer or such Contributor as a result of any such terms
+You offer.
+     If you distribute executable versions containing
+Covered Code, you must reproduce the notice in Exhibit B in
+the documentation and/or other materials provided with the
+product.
+
+     3.7. Larger Works.
+     You may create a Larger Work by combining Covered Code
+with other code not governed by the terms of this License
+and distribute the Larger Work as a single product. In such
+a case, You must make sure the requirements of this License
+are fulfilled for the Covered Code.
+
+4. INABILITY TO COMPLY DUE TO STATUTE OR REGULATION.
+
+     If it is impossible for You to comply with any of the
+terms of this License with respect to some or all of the
+Covered Code due to statute or regulation then You must: (a)
+comply with the terms of this License to the maximum extent
+possible; (b) cite the statute or regulation that prohibits
+you from adhering to the license; and (c) describe the
+limitations and the code they affect. Such description must
+be included in the LEGAL file described in Section 3.4 and
+must be included with all distributions of the Source Code.
+Except to the extent prohibited by statute or regulation,
+such description must be sufficiently detailed for a
+recipient of ordinary skill to be able to understand it. You
+must submit this LEGAL file to Cygnus for review, and You
+will not be able use the covered code in any means until
+permission is granted from Cygnus to allow for the inability
+to comply due to statute or regulation.
+
+5. APPLICATION OF THIS LICENSE.
+
+     This License applies to code to which the Initial
+Developer has attached the notice in Exhibit A, and to
+related Covered Code.
+      Cygnus may include Covered Code in products without
+such additional products becoming subject to the terms of
+this License, and may license such additional products on
+different terms from those contained in this License.
+     Cygnus may license the Source Code of Cygnus''s Branded
+Code without Cygnus''s Branded Code becoming subject to the
+terms of this License, and may license Cygnus''s Branded Code
+on different terms from those contained in this License.
+Contact Cygnus for details of alternate licensing terms
+available.
+
+6. VERSIONS OF THE LICENSE.
+
+     6.1. New Versions.
+     Cygnus may publish revised and/or new versions of the
+License from time to time. Each version will be given a
+distinguishing version number.
+
+     6.2. Effect of New Versions.
+     Once Covered Code has been published under a particular
+version of the License, You may always continue to use it
+under the terms of that version. You may also choose to use
+such Covered Code under the terms of any subsequent version
+of the License published by Cygnus. No one other than Cygnus
+has the right to modify the terms applicable to Covered Code
+beyond what is granted under this and subsequent Licenses.
+
+     6.3. Derivative Works.
+     If you create or use a modified version of this License
+(which you may only do in order to apply it to code which is
+not already Covered Code governed by this License), you must
+(a) rename Your license so that the phrases "ECOS", "eCos",
+"Cygnus", "CPL" or any confusingly similar phrase do not
+appear anywhere in your license and (b) otherwise make it
+clear that your version of the license contains terms which
+differ from the eCos Public License and Cygnus Public
+License. (Filling in the name of the Initial Developer,
+Original Code or Contributor in the notice described in
+Exhibit A shall not of themselves be deemed to be
+modifications of this License.)
+
+7. DISCLAIMER OF WARRANTY.
+
+     COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN "AS
+IS" BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED
+OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT
+THE COVERED CODE IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A
+PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO
+THE QUALITY AND PERFORMANCE OF THE COVERED CODE IS WITH YOU.
+SHOULD ANY COVERED CODE PROVE DEFECTIVE IN ANY RESPECT, YOU
+(NOT THE INITIAL DEVELOPER OR ANY OTHER CONTRIBUTOR) ASSUME
+THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION.
+THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF
+THIS LICENSE. NO USE OF ANY COVERED CODE IS AUTHORIZED
+HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+8. TERMINATION.
+
+     This License and the rights granted hereunder will
+terminate automatically if You fail to comply with terms
+herein and fail to cure such breach within 30 days of
+becoming aware of the breach. All sublicenses to the Covered
+Code which are properly granted shall survive any
+termination of this License. Provisions which, by their
+nature, must remain in effect beyond the termination of this
+License shall survive.
+
+9. LIMITATION OF LIABILITY.
+
+     UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY,
+WHETHER TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE,
+SHALL THE INITIAL DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY
+DISTRIBUTOR OF COVERED CODE, OR ANY SUPPLIER OF ANY OF SUCH
+PARTIES, BE LIABLE TO YOU OR ANY OTHER PERSON FOR ANY
+INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF
+ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR
+LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR
+MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR
+LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE
+POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY
+SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY
+RESULTING FROM SUCH PARTY''S NEGLIGENCE TO THE EXTENT
+APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS
+DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR
+CONSEQUENTIAL DAMAGES, SO THAT EXCLUSION AND LIMITATION MAY
+NOT APPLY TO YOU.
+
+10. U.S. GOVERNMENT END USERS.
+
+     The Covered Code is a "commercial item," as that term
+is defined in 48 C.F.R. 2.101 (Oct. 1995), consisting of
+"commercial computer software" and "commercial computer
+software documentation," as such terms are used in 48
+C.F.R. 12.212 (Sept. 1995). Consistent with 48 C.F.R. 12.212
+and 48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995), all
+U.S. Government End Users acquire Covered Code with only
+those rights set forth herein.
+
+11. MISCELLANEOUS.
+
+     This License represents the complete agreement
+concerning subject matter hereof. If any provision of this
+License is held to be unenforceable, such provision shall be
+reformed only to the extent necessary to make it
+enforceable. This License shall be governed by California
+law provisions (except to the extent applicable law, if any,
+provides otherwise), excluding its conflict-of-law
+provisions. With respect to disputes in which at least one
+party is a citizen of, or an entity chartered or registered
+to do business in, the United States of America: (a) unless
+otherwise agreed in writing, all disputes relating to this
+License (excepting any dispute relating to intellectual
+property rights) shall be subject to final and binding
+arbitration, with the losing party paying all costs of
+arbitration; (b) any arbitration relating to this Agreement
+shall be held in Santa Clara County, California, under the
+auspices of JAMS/EndDispute; and (c) any litigation relating
+to this Agreement shall be subject to the jurisdiction of
+the Federal Courts of the Northern District of California,
+with venue lying in Santa Clara County, California, with the
+losing party responsible for costs, including without
+limitation, court costs and reasonable attorneys fees and
+expenses. The application of the United Nations Convention
+on Contracts for the International Sale of Goods is
+expressly excluded. Any law or regulation which provides
+that the language of a contract shall be construed against
+the drafter shall not apply to this License.
+
+12. RESPONSIBILITY FOR CLAIMS.
+
+     Except in cases where another Contributor has failed to
+comply with Section 3.4, You are responsible for damages
+arising, directly or indirectly, out of Your utilization of
+rights under this License, based on the number of copies of
+Covered Code you made available, the revenues you received
+from utilizing such rights, and other relevant factors. You
+agree to work with affected parties to distribute
+responsibility on an equitable basis.
+
+13. ADDITIONAL TERMS APPLICABLE TO THE CYGNUS ECOS PUBLIC
+LICENSE.
+
+      Nothing in this License shall be interpreted to
+prohibit Cygnus from licensing under different terms than
+this License any code which Cygnus otherwise would have a
+right to license.
+
+      Cygnus and logo - This License does not grant any
+rights to use the trademark Cygnus, the Cygnus logo,
+eCos logo, even if such marks are included in the Original
+Code. You may contact Cygnus for permission to display the
+Cygnus and eCos marks in either the documentation or the
+Executable version beyond that required in Exhibit B.
+
+     Inability to Comply Due to Contractual Obligation - To
+the extent that Cygnus is limited contractually from making
+third party code available under this License, Cygnus may
+choose to integrate such third party code into Covered Code
+without being required to distribute such third party code
+in Source Code form, even if such third party code would
+otherwise be considered "Modifications" under this License.
+
+EXHIBIT A.
+
+"The contents of this file are subject to the Cygnus eCos Public License
+Version 1.0 (the "License"); you may not use this file except in
+compliance with the License.  You may obtain a copy of the License at
+http://sourceware.cygnus.com/ecos
+
+Software distributed under the License is distributed on an "AS IS"
+basis, WITHOUT WARRANTY OF ANY KIND, either express or implied.  See the
+License for the specific language governing rights and limitations under
+the License.
+
+The Original Code is eCos - Embedded Cygnus Operating System, released
+September 30, 1998.
+
+The Initial Developer of the Original Code is Cygnus.  Portions created
+by Cygnus are Copyright (C) 1998 Cygnus Solutions.  All Rights Reserved."
+
+EXHIBIT B.
+
+Part of the software embedded in this product is eCos -
+Embedded Cygnus Operating System, a trademark of Cygnus
+Solutions. Portions created by Cygnus are Copyright (C) 1998
+Cygnus Solutions (http://www.cygnus.com). All Rights
+Reserved.
+
+THE SOFTWARE IN THIS PRODUCT WAS IN PART PROVIDED BY CYGNUS
+SOLUTIONS AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT(INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://ecos.sourceware.org/docs-1.1/tutorials/ecos-tutorial/cygnus-ecos-public-license.html', NULL, NULL, NULL, 'CYGNUS ECOS PUBLIC LICENSE  Version 1.0', NULL, NULL, NULL, '', NULL, false, false, false, '803c365cd7f1caf38ffc9460729c2918', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (567, 'EDL-1.0', 'Eclipse Distribution License - v 1.0
+
+Copyright (c) 2007, Eclipse Foundation, Inc. and its licensors.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+  Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+  Neither the name of the Eclipse Foundation, Inc. nor the names of its
+  contributors may be used to endorse or promote products derived from this
+  software without specific prior written permission. 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'https://eclipse.org/org/documents/edl-v10.php', NULL, NULL, NULL, 'Eclipse Distribution License 1.0', NULL, NULL, NULL, '', NULL, false, false, false, 'f884f92aba4435c790b3384708894e30', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (568, 'HSQLDB', 'COPYRIGHTS AND LICENSES (based on BSD License)
+
+For work developed by the HSQL Development Group:
+
+Copyright (c) 2001-2010, The HSQL Development Group
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+Neither the name of the HSQL Development Group nor the names of its
+contributors may be used to endorse or promote products derived from this
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL HSQL DEVELOPMENT GROUP, HSQLDB.ORG,
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+For work originally developed by the Hypersonic SQL Group:
+
+Copyright (c) 1995-2000 by the Hypersonic SQL Group.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+Neither the name of the Hypersonic SQL Group nor the names of its
+contributors may be used to endorse or promote products derived from this
+software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE HYPERSONIC SQL GROUP,
+OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This software consists of voluntary contributions made by many individuals on behalf of the
+Hypersonic SQL Group.', 'http://hsqldb.org/web/hsqlLicense.html', NULL, NULL, NULL, 'Hypersonic SQL License', NULL, NULL, NULL, '', NULL, false, false, false, '98e13e8c08599823c140580e01d12411', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (569, 'OpenMap', 'OpenMap Software License Agreement
+               ----------------------------------
+
+This Agreement sets forth the terms and conditions under which
+the software known as OpenMap(tm) will be licensed by BBN
+Technologies ("BBN") to you ("Licensee"), and by which Derivative 
+Works (as hereafter defined) of OpenMap will be licensed by you to BBN.
+
+Definitions:
+
+ "Derivative Work(s)" shall mean any revision, enhancement,
+ modification, translation, abridgement, condensation or
+ expansion created by Licensee or BBN that is based upon the
+ Software or a portion thereof that would be a copyright
+ infringement if prepared without the authorization of the
+ copyright owners of the Software or portion thereof.
+
+ "OpenMap" shall mean a programmer''s toolkit for building map
+ based applications as originally created by BBN, and any
+ Derivative Works thereof as created by either BBN or Licensee,
+ but shall include only those Derivative Works BBN has approved
+ for inclusion into, and BBN has integrated into OpenMap.
+
+ "Standard Version" shall mean OpenMap, as originally created by
+ BBN.
+
+ "Software" shall mean OpenMap and the Derivative Works created
+ by Licensee and the collection of files distributed by the
+ Licensee with OpenMap, and the collection of files created
+ through textual modifications.
+
+ "Copyright Holder" is whoever is named in the copyright or
+ copyrights for the Derivative Works.
+
+ "Licensee" is you, only if you agree to be bound by the terms
+ and conditions set forth in this Agreement.
+
+ "Reasonable copying fee" is whatever you can justify on the
+ basis of media cost, duplication charges, time of people
+ involved.
+
+ "Freely Available" means that no fee is charged for the item
+ itself, though there may be fees involved in handling the item.
+ It also means that recipients of the item may redistribute it
+ under the same conditions that they received it.
+
+1. BBN maintains all rights, title and interest in and to
+OpenMap, including all applicable copyrights, trade secrets,
+patents and other intellectual rights therein.  Licensee hereby
+grants to BBN all right, title and interest into the compilation
+of OpenMap.  Licensee shall own all rights, title and interest
+into the Derivative Works created by Licensee (subject to the
+compilation ownership by BBN).
+
+2. BBN hereby grants to Licensee a royalty free, worldwide right
+and license to use, copy, distribute and make Derivative Works of
+OpenMap, and sublicensing rights of any of the foregoing in
+accordance with the terms and conditions of this Agreement,
+provided that you duplicate all of the original copyright notices
+and associated disclaimers.
+
+3. Licensee hereby grants to BBN a royalty free, worldwide right
+and license to use, copy, distribute and make Derivative Works of
+Derivative Works created by Licensee and sublicensing rights of
+any of the foregoing.
+
+4. Licensee''s right to create Derivative Works in the Software is
+subject to Licensee agreement to insert a prominent notice in
+each changed file stating how and when you changed that file, and
+provided that you do at least ONE of the following:
+
+    a) place your modifications in the Public Domain or otherwise
+       make them Freely Available, such as by posting said
+       modifications to Usenet or an equivalent medium, or
+       placing the modifications on a major archive site and by
+       providing your modifications to the Copyright Holder.
+
+    b) use the modified Package only within your corporation or
+       organization.
+
+    c) rename any non-standard executables so the names do not
+       conflict with standard executables, which must also be
+       provided, and provide a separate manual page for each
+       non-standard executable that clearly documents how it
+       differs from OpenMap.
+
+    d) make other distribution arrangements with the Copyright
+       Holder.
+
+5. Licensee may distribute the programs of this Software in
+object code or executable form, provided that you do at least ONE
+of the following:
+
+    a) distribute an OpenMap version of the executables and
+       library files, together with instructions (in the manual
+       page or equivalent) on where to get OpenMap.
+
+    b) accompany the distribution with the machine-readable
+       source code with your modifications.
+
+    c) accompany any non-standard executables with their
+       corresponding OpenMap executables, giving the non-standard
+       executables non-standard names, and clearly documenting
+       the differences in manual pages (or equivalent), together
+       with instructions on where to get OpenMap.
+
+    d) make other distribution arrangements with the Copyright
+       Holder.
+
+6. You may charge a reasonable copying fee for any distribution
+of this Software.  You may charge any fee you choose for support
+of this Software.  You may not charge a fee for this Software
+itself.  However, you may distribute this Software in aggregate
+with other (possibly commercial) programs as part of a larger
+(possibly commercial) software distribution provided that you do
+not advertise this Software as a product of your own.
+
+7. The data and images supplied as input to or produced as output
+from the Software do not automatically fall under the copyright
+of this Software, but belong to whomever generated them, and may
+be sold commercially, and may be aggregated with this Software.
+
+8. BBN makes no representation about the suitability of OpenMap
+for any purposes.  BBN shall have no duty or requirement to
+include any Derivative Works into OpenMap.
+
+9. Each party hereto represents and warrants that they have the
+full unrestricted right to grant all rights and licenses granted
+to the other party herein.
+
+10. THIS PACKAGE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY
+KIND, WHETHER EXPRESS OR IMPLIED, INCLUDING (BUT NOT LIMITED TO)
+ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND
+WITHOUT ANY WARRANTIES AS TO NONINFRINGEMENT.
+
+11. IN NO EVENT SHALL COPYRIGHT HOLDER BE LIABLE FOR ANY DIRECT,
+SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES WHATSOEVER RESULTING
+FROM LOSS OF USE OF DATA OR PROFITS, WHETHER IN AN ACTION OF
+CONTRACT, NEGLIGENCE OR OTHER TORTIOUS CONDUCT, ARISING OUT OF OR
+IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS PACKAGE.
+
+12. Without limitation of the foregoing, You agree to commit no
+act which, directly or indirectly, would violate any U.S. law,
+regulation, or treaty, or any other international treaty or
+agreement to which the United States adheres or with which the
+United States complies, relating to the export or re-export of
+any commodities, software, or technical data.', 'http://openmap.bbn.com/license.html', NULL, NULL, NULL, 'OpenMap Software License Agreement', NULL, NULL, NULL, '', NULL, false, false, false, '89015c5655cd0d79f06401597f16530d', 1);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type) VALUES (570, 'ICU', 'ICU License - ICU 1.8.1 and later
+
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1995-2014 International Business Machines Corporation and others
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, provided that the above copyright notice(s) and this permission notice appear in all copies of the Software and that both the above copyright notice(s) and this permission notice appear in supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.', 'http://spdx.org/licenses/ICU.html', NULL, NULL, NULL, 'ICU License', NULL, NULL, NULL, '', NULL, false, false, false, 'bb42da3af8e468d74b626e9fa7d4d80d', 1);

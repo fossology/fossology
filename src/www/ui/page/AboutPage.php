@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2016, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\RepositoryApi;
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +36,7 @@ class AboutPage extends DefaultPlugin
   /** @var LicenseDao $licenseDao */
   private $licenseDao;
 
-  function __construct()
+  public function __construct()
   {
     parent::__construct(self::NAME, array(
         self::TITLE => "About Fossology",
@@ -50,12 +52,23 @@ class AboutPage extends DefaultPlugin
    * @return Response
    */
   protected function handle(Request $request)
-  {
+  {   
     $vars = array(
         'licenseCount' => $this->licenseDao->getLicenseCount(),
         'project' => _("FOSSology"),
-        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014-2015 Siemens AG."),
+        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014-2016 Siemens AG."),
     );
+    
+    if (Auth::isAdmin()) {
+      $repositoryApi = new RepositoryApi();
+      $latestRelease = $repositoryApi->getLatestRelease();
+      $commits = $repositoryApi->getCommitsOfLastDays(30);
+      $commit = empty($commits) ? '' : substr($commits[0]['sha'],0,6);
+
+      $vars = array_merge($vars, array(
+          'latestVersion' => $latestRelease,
+          'lastestCommit' => $commit));
+    }
 
     return $this->render('about.html.twig', $this->mergeWithDefault($vars));
   }

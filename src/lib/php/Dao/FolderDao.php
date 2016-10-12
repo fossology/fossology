@@ -403,4 +403,19 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     }
     return new Folder($folderRow['folder_pk'],$folderRow['folder_name'],$folderRow['folder_desc'],$folderRow['folder_perm']);
   }
+  
+  /**
+   * @param int $folderId
+   * @return true|false
+   */
+  public function isFolderAccessible($folderId)
+  {
+    $allUserFolders = array();
+    $rootFolder = $this->getRootFolder(Auth::getUserId())->getId();
+    GetFolderArray($rootFolder,$allUserFolders);
+    if(in_array($folderId, array_keys($allUserFolders))){
+      return true;
+    }
+    return false;
+  }
 }

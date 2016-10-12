@@ -21,18 +21,26 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\XpClearedGetter;
+use Fossology\Lib\Report\LicenseMainGetter;
 
 include_once(__DIR__ . "/version.php");
 
 class ReadmeOssAgent extends Agent
 {
   const UPLOAD_ADDS = "uploadsAdd";
+
   /** @var LicenseClearedGetter  */
   private $licenseClearedGetter;
+
   /** @var XpClearedGetter */
   private $cpClearedGetter;
+
+  /** @var LicenseMainGetter  */
+  private $licenseMainGetter;
+
   /** @var UploadDao */
   private $uploadDao;
+
   /** @var int[] */
   protected $additionalUploadIds = array();
 
@@ -40,6 +48,7 @@ class ReadmeOssAgent extends Agent
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
     $this->licenseClearedGetter = new LicenseClearedGetter();
+    $this->licenseMainGetter = new LicenseMainGetter();
 
     parent::__construct(README_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -75,6 +84,9 @@ class ReadmeOssAgent extends Agent
       $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId);
       $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
       $this->heartbeat(count($moreCopyrights['statements']));
+      $moreMainLicenses = $this->licenseMainGetter->getCleared($addUploadId, $groupId);
+      $licenseStmts = array_merge($licenseStmts, $moreMainLicenses['statements']);
+      $this->heartbeat(count($moreMainLicenses['statements']));
     }
 
     $contents = array('licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts );
@@ -116,11 +128,11 @@ class ReadmeOssAgent extends Agent
 
   private function generateReport($contents, $packageName)
   {
-    $separator1 = "=======================================================================================================================";
-    $separator2 = "-----------------------------------------------------------------------------------------------------------------------";
-    $break = "\r\n\r\n";
+    $separator1 = str_repeat("=", 120);
+    $separator2 = str_repeat("-", 120);
+    $break = str_repeat("\r\n", 2);
 
-    $output = $separator1 . $break . $packageName . $break;
+    $output = $separator1 . $break . $packageName . $break . $separator2 . $break;
     foreach($contents['licenses'] as $licenseStatement){
       $output .= $licenseStatement['text'] . $break;
       $output .= $separator2 . $break;

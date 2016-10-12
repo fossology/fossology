@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015-2016 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -51,7 +51,6 @@ class showjobs extends FO_Plugin
     parent::__construct();
   }
 
-
   function RegisterMenus()
   {
     menu_insert("Main::Jobs::My Recent Jobs",$this->MenuOrder -1,$this->Name, $this->MenuTarget);
@@ -77,7 +76,6 @@ class showjobs extends FO_Plugin
     }
 
   } // RegisterMenus()
-
 
   /**
    * @brief Returns uploadname as link for geeky scan
@@ -117,7 +115,6 @@ class showjobs extends FO_Plugin
     return $uploadNameLink;
   } // getUploadNameForGeekyScan()
 
-
   public function Output()
   {
     $page = "";
@@ -129,17 +126,17 @@ class showjobs extends FO_Plugin
     elseif($uploadPk>0)
     {
       if (!$this->uploadDao->isEditable($uploadPk, Auth::getGroupId())){
-        $text = _("Permission Denied");
-        return "<h2>$text</h2>";
+        $this->vars['message'] = _("Permission Denied");
+        return;
       }
     }
-
     $this->vars['uploadId']= $uploadPk;
 
     /* Process any actions */
-    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE){
+    $action = GetParm("action",PARM_STRING);
+    $page = GetParm('page',PARM_INTEGER) ?: 0;
+    if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE && !empty($action)){
       $jq_pk = GetParm("jobid",PARM_INTEGER);
-      $action = GetParm("action",PARM_STRING);
       $uploadPk = GetParm("upload",PARM_INTEGER);
 
       if (!($uploadPk === -1 &&
@@ -147,14 +144,13 @@ class showjobs extends FO_Plugin
              $this->jobDao->hasActionPermissionsOnJob($jq_pk, Auth::getUserId(), Auth::getGroupId()))) &&
           !$this->uploadDao->isEditable($uploadPk, Auth::getGroupId()))
       {
-        $text = _("Permission Denied");
-        return "<h2>$text</h2>";
+        $this->vars['message'] = _("Permission Denied to perform action");
       }
-
-      $page = GetParm('page',PARM_INTEGER) ?: 0;
-      $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
-      switch($action)
+      else
       {
+        $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
+        switch($action)
+        {
         case 'pause':
           if (empty($jq_pk)) break;
           $command = "pause $jq_pk";
@@ -179,6 +175,7 @@ class showjobs extends FO_Plugin
           if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
           echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
+        }
       }
     }
     $job = GetParm('job',PARM_INTEGER);
@@ -198,7 +195,6 @@ class showjobs extends FO_Plugin
     }
   }
 
-
   /**
    * @brief getTimeToRefresh() get the refresh time from DB.
    * @Returns time in seconds to refresh the jobs.
@@ -208,7 +204,6 @@ class showjobs extends FO_Plugin
     global $SysConf;
     return $SysConf['SYSCONFIG']['ShowJobsAutoRefresh'];
   } /* getTimeToRefresh() */
-
 
   public function getTemplateName()
   {
@@ -220,7 +215,6 @@ class showjobs extends FO_Plugin
       return "ui-job-show.html.twig";
     }
   }
-
 }
 
 $NewPlugin = new showjobs;
