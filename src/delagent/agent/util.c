@@ -605,8 +605,7 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     }
     else
     {
-      rc = unlinkContent(Parent,Row,1,user_id,user_perm);
-      if (DelFlag==1 && rc == 0)
+      if (DelFlag==1 && unlinkContent(Parent,Row,1,user_id,user_perm)==0)
       {
         continue;
       }
