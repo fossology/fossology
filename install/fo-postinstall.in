@@ -10,6 +10,8 @@
 
 ## Options parsing and setup
 # parse options
+# set -x
+
 OPTS=`getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,help -n 'fo-postinstall' -- "$@"`
 
 if [ $? != 0 ]; then
@@ -70,12 +72,14 @@ if [ $EVERYTHING ]; then
    LICENSEREF=1
 fi
 
-# This must run as root.
-if [ `id -u` != "0" ] ; then
-   echo "ERROR: fo-postinstall must run as root."
-   echo "Aborting."
-   exit 1
-fi
+onlyAllowedAsRoot() \{
+   # This must run as root.
+   if [ `id -u` != "0" ] ; then
+      echo "ERROR: fo-postinstall must run as root."
+      echo "Aborting."
+      exit 1
+   fi
+\}
 
 
 readConfigVal() \{
@@ -106,6 +110,7 @@ else
 fi
 
 if [ $COMMON ]; then
+   onlyAllowedAsRoot
    echo "*** Running postinstall for common actions***"
 
    ## check path to repo
@@ -235,7 +240,6 @@ fi
 
 if [ $DATABASE ]; then
    {$LIBEXECDIR}/dbcreate
-
 fi # end of DATABASE
 
 if [ $LICENSEREF ]; then
@@ -246,6 +250,7 @@ fi # end of license reference
 ########################################################################
 
 if [ $AGENT ]; then
+   onlyAllowedAsRoot
    # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
    chown -R {$PROJECTUSER}:$PROJECTGROUP {$MODDIR}
    #chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
@@ -274,6 +279,7 @@ fi # end of AGENT
 ########################################################################
 
 if [ $SCHEDULERONLY ]; then
+   onlyAllowedAsRoot
    echo "*** Setting up scheduler ***"
 
    # Create the scheduler log directory.
@@ -291,6 +297,7 @@ fi # end of SCHEDULERONLY
 
 ########################################################################
 if [ $WEBONLY ]; then
+   onlyAllowedAsRoot
    if [ $LICENSEREF == 0 ] ; then
      echo "*** Initializing database tables ***"
      {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}

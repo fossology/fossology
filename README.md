@@ -32,7 +32,7 @@ use, since the the standalone image does not take care of data persistency.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following command:
 ``` sh
-docker run -p 8081:80 fossology/fossology
+docker run -p 8081:8081 fossology/fossology
 ```
 
 Execution with external database container can be done using Docker Compose.
