@@ -80,6 +80,11 @@ class foconfig extends FO_Plugin
           $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
           $OutBuf .= "<br>$row[description]";
           break;
+        case CONFIG_TYPE_PASSWORD:
+          $ConfVal = htmlentities($row['conf_value']);
+          $OutBuf .= "<INPUT type='password' name='new[$row[variablename]]' size='70' value='$ConfVal' title='$row[description]' $InputStyle>";
+          $OutBuf .= "<br>$row[description]";
+          break;
         default:
           $OutBuf .= "Invalid configuration variable.  Unknown type.";
       }

@@ -274,13 +274,18 @@ class UserDao extends Object
         array($userId, $groupId), __FUNCTION__);
   }
 
-  public function getUserAndDefaultGroupByUserName($userName) {
+  public function getUserAndDefaultGroupByUserName($userName, $oAuthClient=false) {
+    $searchEmail = " ";
+    if($oAuthClient){
+      $searchEmail = " OR user_email=$1";
+    }
     $userRow = $this->dbManager->getSingleRow(
-        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
+        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1$searchEmail",
         array($userName), __FUNCTION__);
     if(empty($userRow)) {
       throw new \Exception('invalid user name');
     }
+    $userRow['oAuthClient'] = $oAuthClient;
     if ($userRow['group_fk']) {
       return $userRow;
     }
@@ -354,10 +359,10 @@ class UserDao extends Object
     return $groupNowExists['group_pk'];
   }
 
-  public function addGroupMembership($groupId, $userId)
+  public function addGroupMembership($groupId, $userId, $groupPerm=1)
   {
     $this->dbManager->insertTableRow('group_user_member',
-            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>1));
+            array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>$groupPerm));
   }
   
   /**
