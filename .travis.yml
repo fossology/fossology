@@ -47,12 +47,10 @@ env:
    - MAKETARGETS='all test-lib'
   matrix:
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=clang-3.5 CXX=clang++-3.5
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-4.4 CXX=g++-4.4 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-4.6 CXX=g++-4.6
-   - CC=gcc-4.8 CXX=g++-4.8
-   - CC=gcc-4.9 CXX=g++-4.9
+   - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
+   - CC=gcc-4.8 CXX=g++-4.8 MAKETARGETS='all test-lib test-monk test-nomos'
+   - CC=gcc-4.9 CXX=g++-4.9 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
