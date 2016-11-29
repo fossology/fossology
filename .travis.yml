@@ -4,7 +4,8 @@
 # build FOSSology on Travis CI - https://travis-ci.org/
 
 language: php
-
+php:
+  - '5.6'
 addons:
  - postgresql: "9.3"
 cache:
@@ -38,13 +39,13 @@ before_script:
  - install/scripts/install-spdx-tools.sh
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
- 
+
 env:
-  global: 
+  global:
    - PHPTESTSUITE='Fossology PhpUnit Agent Test Suite'
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - MAKETARGETS='all test-lib'
-  matrix: 
+  matrix:
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.5 CXX=clang++-3.5
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
@@ -61,23 +62,22 @@ env:
 
 matrix:
   include:
-    - php: 5.3
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/ src/spdx2 src/monk'
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.4
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.6
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/ src/spdx2 src/monk'
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 7.0
       env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
   allow_failures:
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
     - env: CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
         CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
-
+    - php: 7.0
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
 
 script:
  - set -e
