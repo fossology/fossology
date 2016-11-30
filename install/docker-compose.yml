@@ -1,5 +1,6 @@
 # FOSSology Docker Compose file
 # Copyright Siemens AG 2016, fabio.huser@siemens.com
+# Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -8,22 +9,39 @@
 #
 # Description: Recipe for setting up a multi container FOSSology
 #              Docker setup with separate Database instance
-
-web:
-  build: ..
-  environment:
-    - FOSSOLOGY_DB_HOST=db
-    - FOSSOLOGY_DB_NAME=fossology
-    - FOSSOLOGY_DB_USER=fossy
-    - FOSSOLOGY_DB_PASSWORD=fossy
-  ports:
-    - 8081:80
-  links:
-    - db
-db:
-  image: postgres
-  environment:
-    - POSTGRES_DB=fossology
-    - POSTGRES_USER=fossy
-    - POSTGRES_PASSWORD=fossy
-    - POSTGRES_INITDB_ARGS='-E SQL_ASCII'
+version: '2'
+services:
+  fossology-scheduler:
+    extends:
+      file: docker-compose.base.yml
+      service: fossology
+    environment:
+      - FOSSOLOGY_DB_PASSWORD=fossy
+    command: scheduler
+    links:
+      - fossology-db
+    # volumes:
+    #   - ./_repository:/srv/fossology/repository/
+  fossology-web:
+    extends:
+      file: docker-compose.base.yml
+      service: fossology
+    environment:
+      - FOSSOLOGY_DB_PASSWORD=fossy
+      - FOSSOLOGY_SCHEDULER_HOST=fossology-scheduler
+    command: web
+    ports:
+      - 8081:8081
+    links:
+      - fossology-db
+      - fossology-scheduler
+    volumes_from:
+      - fossology-scheduler
+  fossology-db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=fossology
+      - POSTGRES_USER=fossy
+      - POSTGRES_PASSWORD=fossy
+      - POSTGRES_INITDB_ARGS='-E SQL_ASCII'

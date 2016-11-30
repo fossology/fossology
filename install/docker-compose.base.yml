@@ -1,0 +1,26 @@
+# FOSSology Docker Compose file
+# Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+#
+# Description: Base recipe for setting up a multi container FOSSology
+#              Docker setup with separate Database instance
+
+version: '2'
+services:
+  fossology:
+    build:
+      context: ..
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: fossology
+    restart: unless-stopped
+    environment:
+      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
