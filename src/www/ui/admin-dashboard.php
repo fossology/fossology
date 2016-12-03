@@ -150,7 +150,7 @@ function GetLastAnalyzeTime($TableName)
     /**** Version ****/
     $text = _("Postgresql version");
     $V .= "<tr><td>$text</td>";
-    $V .= "<td align='right'> {$this->pgVersion[server]} </td></tr>\n";
+    $V .= "<td align='right'> {$this->pgVersion['server']} </td></tr>\n";
 
     /**** Query stats ****/
     // count current queries
