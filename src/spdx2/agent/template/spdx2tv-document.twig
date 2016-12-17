@@ -42,10 +42,10 @@ Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
 ## License Information
 ##-------------------------
 
-{% for licenseId,extractedText in licenseTexts %}
+{% for licenseId,extractedText in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
 LicenseID: {{ licenseId|replace(' ','-') }}
 LicenseName: {{ licenseId|replace(' ','-') }}
 ExtractedText: <text> {{ extractedText|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                       |replace({'\f':''}) }} </text>
 
-{% endfor %}
+{% endif %}{% endfor %}
