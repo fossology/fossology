@@ -519,7 +519,7 @@ class SpdxTwoAgent extends Agent
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName'=>$fileBase,
         'uri'=>$this->uri,
-        'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
+        'userName'=>$this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
         'organisation'=>'',
         'packageNodes'=>$packageNodes,
         'packageIds'=>$packageIds,
