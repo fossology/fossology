@@ -20,8 +20,12 @@ SPDXID: SPDXRef-DOCUMENT
 ##-------------------------
 
 Creator: Tool: spxd2
+{% if userName is not empty %}
 Creator: Person: {{ userName }}
+{% endif %}
+{% if organization is not empty %}
 Creator: Organization: {{ organisation }}
+{% endif %}
 CreatorComment: <text>
 This document was created using license informations and a generator from Fossology.
 </text>
