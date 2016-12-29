@@ -419,12 +419,11 @@ class SpdxTwoAgent extends Agent
     {
       return "";
     }
-    $selectedScanners = '{'.implode(',',$scannerIds).'}';
     $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
     $sql = "SELECT DISTINCT uploadtree_pk,rf_fk FROM $tableName ut, license_file
       WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
-    $param = array($selectedScanners);
+    $param = array('{'.implode(',',$scannerIds).'}');
     if ($tableName == 'uploadtree_a') {
       $param[] = $uploadId;
       $sql .= " AND upload_fk=$".count($param);
@@ -442,7 +441,13 @@ class SpdxTwoAgent extends Agent
       }
     }
     $this->dbManager->freeResult($res);
-    return "licenseInfoInFile determined by Scanners $selectedScanners";
+
+    $agentDao = $this->agentDao;
+    $func = function($scannerId) use ($agentDao) {
+      return $agentDao->getAgentName($scannerId)." (".$agentDao->getAgentRev($scannerId).")";
+    };
+    $scannerNames = array_map($func, $scannerIds);
+    return "licenseInfoInFile determined by Scanners:\n - ".implode("\n - ",$scannerNames);
   }
 
   /**
