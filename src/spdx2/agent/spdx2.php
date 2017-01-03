@@ -208,7 +208,6 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string $fileBase
    * @param string $packageName
    * @return string
    */
@@ -437,6 +436,7 @@ class SpdxTwoAgent extends Agent
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
+        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
         $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
