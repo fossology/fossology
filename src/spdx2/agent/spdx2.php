@@ -264,7 +264,7 @@ class SpdxTwoAgent extends Agent
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString($this->getTemplateFile('package'),array(
-        'uploadId'=>$uploadId,
+        'packageId'=>$uploadId,
         'uri'=>$this->uri,
         'packageName'=>$upload->getFilename(),
         'uploadName'=>$upload->getFilename(),

@@ -8,7 +8,7 @@
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
     <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId|url_encode }}">
+      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ packageId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
