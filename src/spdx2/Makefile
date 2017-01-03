@@ -22,7 +22,7 @@ all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	$(MAKE) -C $(TESTDIR) test
+	$(call DIR_LOOP,test)
 
 coverage: all
 	@echo "nothing to do"

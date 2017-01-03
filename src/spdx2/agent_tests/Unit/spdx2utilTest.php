@@ -54,7 +54,63 @@ class spdx2Test extends \PHPUnit_Framework_TestCase
     assertThat($result["key2"], equalTo("anotherValue"));
   }
 
-  public function provideLicenseSet()
+  public function testAddPrefixOnDemandNoChecker()
+  {
+    assertThat(SpdxTwoUtils::addPrefixOnDemand("LIC1"), equalTo("LIC1"));
+  }
+
+  public function provideLicenseSetAddPrefixOnDemand()
+  {
+    $constTrue = function ($licId) { return true; };
+    $constFalse = function ($licId) { return false; };
+
+    return array(
+        'null' => array("LIC1", null, "LIC1"),
+        'const false' => array("LIC1", $constFalse, SpdxTwoUtils::$prefix . "LIC1"),
+        'const true' => array("LIC1", $constTrue, "LIC1")
+    );
+  }
+
+  /**
+   * @dataProvider provideLicenseSetAddPrefixOnDemand
+   * @param string $licenseId
+   * @param closure $checker
+   * @param string $expected
+   */
+  public function testAddPrefixOnDemand($licenseId, $checker, $expected)
+  {
+    assertThat(SpdxTwoUtils::addPrefixOnDemand($licenseId, $checker), equalTo($expected));
+  }
+
+  public function provideLicenseSetAddPrefixOnDemandList()
+  {
+    $constTrue = function ($licId) { return true; };
+    $constFalse = function ($licId) { return false; };
+
+    return array(
+        'single with null' => array(array("LIC1"), null, array("LIC1")),
+        'single with const false' => array(array("LIC1"), $constFalse, array(SpdxTwoUtils::$prefix . "LIC1")),
+        'single with const true' => array(array("LIC1"), $constTrue, array("LIC1")),
+        'multiple with null' => array(array("LIC1","LIC2","LIC3"), null, array("LIC1", "LIC2", "LIC3")),
+        'multiple with const false' => array(array("LIC1","LIC2","LIC3"), $constFalse, array(SpdxTwoUtils::$prefix . "LIC1", SpdxTwoUtils::$prefix . "LIC2", SpdxTwoUtils::$prefix . "LIC3")),
+        'multiple with const true' => array(array("LIC1","LIC2","LIC3"), $constTrue, array("LIC1","LIC2","LIC3")),
+        'two licenses with one prefix (A)' => array(array("LIC1","LIC2"), function ($licId) { return $licId === 'LIC2';}, array(SpdxTwoUtils::$prefix.'LIC1', 'LIC2')),
+        'two licenses with one prefix (2)' => array(array("LIC1","LIC2"), function ($licId) { return $licId === 'LIC1';}, array('LIC1', SpdxTwoUtils::$prefix.'LIC2'))
+    );
+  }
+
+  /**
+   * @dataProvider provideLicenseSetAddPrefixOnDemandList
+   * @param array $licenseIds
+   * @param closure $checker
+   * @param string $expected
+   */
+  public function testAddPrefixOnDemandList($licenseIds, $checker, $expected)
+  {
+    assertThat(SpdxTwoUtils::addPrefixOnDemandList($licenseIds, $checker), equalTo($expected));
+  }
+
+  public function provideLicenseSetImplodeLicenses()
   {
     $constTrue = function ($licId) { return true; };
     $constFalse = function ($licId) { return false; };
@@ -79,7 +135,7 @@ class spdx2Test extends \PHPUnit_Framework_TestCase
   }
 
   /**
-   * @dataProvider provideLicenseSet
+   * @dataProvider provideLicenseSetImplodeLicenses
    * @param array $lics
    * @param string $prefix
    * @param string $expected
