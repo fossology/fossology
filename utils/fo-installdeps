@@ -115,6 +115,7 @@ if [ $BUILDTIME ]; then
               isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
               precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
               trusty|jessie) apt-get $YesOpt install postgresql-server-dev-9.3;;
+              xenial) apt-get $YesOpt install postgresql-server-dev-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -189,6 +190,8 @@ if [ $RUNTIME ]; then
                  apt-get $YesOpt install postgresql-9.1;;
               trusty|jessie)
                  apt-get $YesOpt install postgresql-9.3;;
+              xenial)
+                 apt-get $YesOpt install postgresql-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
