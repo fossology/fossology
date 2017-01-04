@@ -119,10 +119,9 @@ const char* RegexConfProvider::getRegexValue(const string& identity,
                                              const string& key)
 {
   const string* rv;
-  map<string,RegexMap> rmm = RegexConfProvider::_regexMapMap;
 #pragma omp critical(rmm)
   {
-    rv = &(rmm[identity][key]);
+    rv = &(RegexConfProvider::_regexMapMap[identity][key]);
   }
   return (*rv).c_str();
 }
