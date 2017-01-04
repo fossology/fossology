@@ -66,6 +66,9 @@ $(CLEANDIRS):
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
 
+phpvendors-no-dev:
+	$(MAKE) -C $(FOSRCDIR) phpvendors-no-dev
+
 # release stuff
 tar: dist-testing
 dist-testing:
