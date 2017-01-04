@@ -75,12 +75,16 @@ $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
 phpvendors:
-	composer install -q
+	$(BUILDDIRS)/composer install -q
+
+composer_download:
+	curl -sS https://getcomposer.org/installer | php
+	mv composer.phar $(BUILDDIRS)/composer
 
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); composer install -q --no-dev)
+	(cd $(DESTDIR)$(MODDIR); $(BUILDDIRS)/composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
