@@ -17,7 +17,7 @@ filter PBDEP = cabextract,genisoimage,sleuthkit,file
 #filter PBREC = Recommends: upx
 
 # PBBUILDDEP is replaced by the list of build dependencies
-filter PBBUILDDEP = perl-Text-Template,perl-podlators
+filter PBBUILDDEP = perl-Text-Template,perl-podlators,file-devel
 
 # PBSUF is replaced by the package suffix ($pbsuf'} in code)
 #filter PBSUF = %{dist}
