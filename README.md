@@ -32,8 +32,10 @@ use, since the the standalone image does not take care of data persistency.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following command:
 ``` sh
-docker run -p 8081:8081 fossology/fossology
+docker run -p 8081:80 fossology/fossology
 ```
+
+The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy passwd fossy.
 
 Execution with external database container can be done using Docker Compose.
 The Docker Compose file is located under the `/install` folder can can be run using following command:
