@@ -367,7 +367,7 @@ class SpdxTwoAgent extends Agent
       {
         $this->heartbeat(0);
       }
-      $fullPath = $treeDao->getFullPath($fileId,$treeTableName);
+      $fullPath = $treeDao->getFullPath($fileId,$treeTableName,0,true);
       if(!empty($licenses['concluded']) && count($licenses['concluded'])>0)
       {
         $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
@@ -594,7 +594,7 @@ class SpdxTwoAgent extends Agent
         $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $fileName = $treeDao->getFullPath($fileId,$treeTableName);
+      $fileName = $treeDao->getFullPath($fileId,$treeTableName,0,true);
       if(!is_array($licenses['concluded']))
       {
         $licenses['concluded'] = array();

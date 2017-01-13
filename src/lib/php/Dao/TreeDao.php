@@ -36,7 +36,7 @@ class TreeDao extends Object
     $this->logger = new Logger(self::className());
   }
 
-  public function getFullPath($itemId, $tableName, $parentId=0)
+  public function getFullPath($itemId, $tableName, $parentId=0, $dropArtifactPrefix=false)
   {
     $statementName = __METHOD__.".".$tableName;
 
@@ -56,10 +56,12 @@ class TreeDao extends Object
     }
 
     $row = $this->dbManager->getSingleRow(
-       $sql= "
-        WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, file_path, cycle) AS (
+        $sql= "
+        WITH RECURSIVE file_tree(uploadtree_pk, parent, ufile_name, path, prev_ufile_mode, artifact_path_prefix, file_path, cycle) AS (
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             ARRAY[ut.uploadtree_pk],
+            ut.ufile_mode,
+            '',
             CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN ut.ufile_name ELSE '' END,
             false
           FROM $tableName ut
@@ -67,20 +69,41 @@ class TreeDao extends Object
         UNION ALL
           SELECT ut.uploadtree_pk, ut.parent, ut.ufile_name,
             path || ut.uploadtree_pk,
-            CASE WHEN ut.ufile_mode & (1<<28) = 0 THEN ut.ufile_name || '/' || file_path ELSE file_path END,
+            ut.ufile_mode,
+            CASE WHEN prev_ufile_mode & (1<<28) = 0
+             THEN
+              CASE WHEN ut.ufile_mode & (1<<28) = 0
+               THEN ''
+               ELSE artifact_path_prefix
+              END
+             ELSE
+              CASE WHEN ut.ufile_mode & (1<<28) = 0
+               THEN ut.ufile_name || '/' || artifact_path_prefix
+               ELSE artifact_path_prefix
+              END
+            END,
+            CASE WHEN (prev_ufile_mode & (1<<28) = 0 and ut.ufile_mode & (1<<28) = 0)
+             THEN ut.ufile_name || '/' || artifact_path_prefix || file_path
+             ELSE file_path
+            END,
             (ut.uploadtree_pk = ANY(path)) $parentLoopCondition
           FROM $tableName ut, file_tree ft
           WHERE ut.uploadtree_pk = ft.parent AND NOT cycle
         )
-        SELECT file_path from file_tree WHERE parent $parentClause",
+        SELECT artifact_path_prefix, file_path from file_tree WHERE parent $parentClause",
         $params, $statementName);
 
     if (false === $row) {
       throw new \Exception("could not find path of $itemId:\n$sql--".print_r($params,true));
     }
 
-    return $row['file_path'];
+    if(! $dropArtifactPrefix)
+    {
+      return $row['artifact_path_prefix'].$row['file_path'];
+    }else{
+      return $row['file_path'];
   }
+}
 
   public function getMinimalCoveringItem($uploadId, $tableName)
   {
