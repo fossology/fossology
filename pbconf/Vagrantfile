@@ -1,5 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+
+#
+# original script by maximilian.huber@tngtech.com
+# additions by michael.c.jaeger@siemens.com
+#
+# SPDX-License-Identifier: GPL-2.0
+#
+# this script starts a VM in order to run project builder inside
+# for development and debugging
+#
+
+#
+# std vagrant setup
+#
 Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
 
@@ -9,7 +23,11 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.synced_folder "..", "/home/vagrant/prj/fossology", type: "rsync"
+  config.vm.network "forwarded_port", guest: 80, host: 8081
 
+#
+# part to prepare dependencies
+#
   config.vm.provision "shell" do |s|
     s.inline = <<SCRIPT
 set -ex
@@ -52,7 +70,11 @@ systemctl start docker
 
 SCRIPT
   end
-
+  
+#
+# checking out and preparing project builder
+# note that triple backslashes are because of cat and vagrant escaping
+#
   config.vm.provision "shell" do |s|
     s.privileged = false
     s.inline = <<SCRIPT
@@ -79,13 +101,28 @@ PBRC
 ################################################################################
 # sbx = sandbox
 # actually, sbx2pkg is included in sbx2pkg2ins
-pb -t -p fossology sbx2build   fossology
-pb -p    fossology build2prep  fossology
-#   pb -t -p fossology sbx2pkg  fossology
-pb -t -p fossology sbx2pkg2ins fossology
+for pkg in "fossology-composer" "fossology"; do
+    pb -t -p fossology sbx2build   $pkg
+    pb -p    fossology build2prep  $pkg
+#   pb -t -p fossology sbx2pkg     $pkg
+    pb -t -p fossology sbx2pkg2ins $pkg
+done
+
+SCRIPT
+  end
+  
+#
+# applying some work around
+#
+  config.vm.provision "shell" do |s|
+    s.privileged = false
+    s.inline = <<SCRIPT
+    
+# uahhh: disabling SELinux
+# remove if the https://github.com/fossology/fossology/issues/727
+setenforce 0
 
 SCRIPT
   end
 
-  config.vm.network "forwarded_port", guest: 80, host: 8081
 end
