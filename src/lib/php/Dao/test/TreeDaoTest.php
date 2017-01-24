@@ -1,7 +1,8 @@
 <?php
 /*
 Copyright (C) 2014-2015, Siemens AG
-Author: Steffen Weber, Johannes Najjar
+Copyright (C) 2017 TNG Technology Consulting GmbH
+Author: Steffen Weber, Johannes Najjar, Maximilian Huber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

@@ -1,7 +1,8 @@
 <?php
 /*
 Copyright (C) 2014-2015, Siemens AG
-Authors: Andreas Würl, Steffen Weber
+Copyright (C) 2017 TNG Technology Consulting GmbH
+Authors: Andreas Würl, Steffen Weber, Maximilian Huber
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
