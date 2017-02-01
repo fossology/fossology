@@ -4,7 +4,7 @@
 
 TOP = ..
 VARS = $(TOP)/Makefile.conf
-COMPOSERTMP = /tmp/composer
+COMPOSERTMP = $(TOP)/tmp/composer
 include $(VARS)
 
 # the directories we do things in by default
@@ -86,7 +86,7 @@ composer_download:
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); $(COMPOSERTMP)/composer install -q --no-dev)
+	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null ; $(COMPOSERTMP)/composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
