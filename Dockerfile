@@ -32,9 +32,7 @@ RUN set -x \
  && /fossology/install/scripts/php-conf-fix.sh --overwrite \
  && /fossology/utils/fo-installdeps -e -y \
  && $_cleanup
-RUN curl -sS https://getcomposer.org/installer | php && \
-	mkdir /tmp/composer && \
-    mv composer.phar /tmp/composer/composer
+RUN make composer_install
 
 ADD . .
 RUN chmod +x /fossology/docker-entrypoint.sh
