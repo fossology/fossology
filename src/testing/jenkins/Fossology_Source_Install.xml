@@ -88,7 +88,7 @@ else
     yum clean all;
     yum -y install lsb wget git php php-process;
     setenforce 0;
-    wget -e http_proxy=http://web-proxy.cce.hp.com:8088 http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
+    wget http://dl.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm;
     rpm -ivh epel-release-6-8.noarch.rpm;
     sed &apos;s/#baseurl=/baseurl=/&apos; /etc/yum.repos.d/epel.repo &gt; /etc/yum.repos.d/epel.repo.new
     sed &apos;s/mirrorlist=/#mirrorlist=/&apos; /etc/yum.repos.d/epel.repo.new &gt; /etc/yum.repos.d/epel.repo.new1
@@ -100,19 +100,20 @@ else
   fi
 fi
 #svn info;
-#echo http-proxy-host = web-proxy.cce.hp.com &gt;&gt; ~/.subversion/servers;
+#echo http-proxy-host = xxx &gt;&gt; ~/.subversion/servers;
 #echo http-proxy-port = 8088 &gt;&gt; ~/.subversion/servers;
 #svn co https://svn.code.sf.net/p/fossology/code/trunk/fossology;
-git config --global http.proxy &quot;http://web-proxy.cce.hp.com:8088&quot;;
+git config --global http.proxy &quot;http://xxx:8088&quot;;
 #git config pack.windowMemory 10m;
 #git config pack.packSizeLimit 20m;
-git config --global https.proxy &quot;http://web-proxy.cce.hp.com:8088&quot;;
+git config --global https.proxy &quot;http://xxx:8088&quot;;
 git clone --depth 1 https://github.com/fossology/fossology.git fossology;
 pwd;
-export http_proxy=http://web-proxy.cce.hp.com:8088/
+export http_proxy=http://xxx:8088/
 cd ./fossology/;
+mypwd=`pwd`;
 ./utils/fo-installdeps -e -y;
-curl -sS --proxy http://web-proxy.cce.hp.com:8088 https://getcomposer.org/installer | php &amp;&amp; mv composer.phar /usr/local/bin/composer;
+./utils/fo-update-composer ./utils/composer;
 make;
 make install;
 service postgresql initdb;
@@ -128,7 +129,7 @@ cat /etc/issue |grep -iE &apos;ubuntu 12.04&apos;;
 if [ $? -eq 0 ] ; then
   cp ../../composer.json /srv/fossology/test4packageinstall;
   cd /srv/fossology/test4packageinstall;
-  composer install;
+  $mypwd/utils/composer install;
   ./vendor/phpunit/phpunit/phpunit.php test_cp2foss.php
 else
   cd /srv/fossology/test4packageinstall;

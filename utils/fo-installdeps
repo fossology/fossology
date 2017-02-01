@@ -258,21 +258,6 @@ if [ $RUNTIME ]; then
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
    
-   which composer
-    if [ $? -eq 0  ]; then
-        if [ $OFFLINE -eq 0 ]; then
-            composer selfupdate
-        else
-           echo "WARNING: composer is not updated due to the offline switch"
-        fi
-    else
-        if [ $OFFLINE -eq 0 ]; then
-            curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
-        else
-            echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
-            echo "Please run the equivalent of 'curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer'"
-        fi
-    fi
 fi
 
 ########################################################################

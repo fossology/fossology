@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ _"$1" = _"" ]; then
+	echo "Syntax: $0 /path/to/composer"
+fi
+
+if [ -x "$1" ]; then
+	echo "Updating an existing $1..."
+	"$1" selfupdate
+else
+	echo "Installing composer under $1..."
+	curl -sS https://getcomposer.org/installer | php && mv composer.phar "$1"
+fi
