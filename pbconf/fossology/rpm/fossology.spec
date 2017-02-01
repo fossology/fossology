@@ -190,8 +190,6 @@ This package contains the monkbulk agent programs and their resources.
 %prep
 %setup -q -n %{name}-%{version}PBEXTDIR
 #PBPATCHCMD
-# This is not clean, but should allow to work menawhild a better solution is found
-make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} composer_download
 
 %build
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
