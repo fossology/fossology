@@ -42,6 +42,10 @@ echo "lets go!"
 cd /vagrant
 
 ./utils/fo-installdeps -e -y
+
+export COMPOSERPATH=/vagrant/utils
+./utils/fo-update-composer $COMPOSERPATH/composer
+
 make CFLAGS=-I/usr/include/glib-2.0
 sudo make install
 sudo /usr/local/lib/fossology/fo-postinstall
