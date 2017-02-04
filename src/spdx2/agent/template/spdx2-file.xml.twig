@@ -10,13 +10,13 @@
     <spdx:checksum>
       <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1" />
-        <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
+        <spdx:checksumValue>{{ sha1 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
     <spdx:checksum> 
       <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
-        <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
+        <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
 {% if isCleared %}

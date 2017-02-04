@@ -23,7 +23,7 @@
   <rdfs:comment> 
     This document was created using license informations and a generator from Fossology.
   </rdfs:comment>
-{% for licenseId,extractedText in licenseTexts %}
+{% for licenseId,extractedText in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
   <spdx:hasExtractedLicensingInfo>
 {% if licenseId starts with 'LicenseRef-' %}
     <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#{{ licenseId|replace(' ','-')|url_encode }}">
@@ -37,7 +37,7 @@
       ]]></spdx:extractedText>
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>
-{% endfor %}
+{% endif %}{% endfor %}
   {{ packageNodes|replace({'\n':'\n  '}) }}
 </spdx:SpdxDocument>
 </rdf:RDF>

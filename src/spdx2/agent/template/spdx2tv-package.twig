@@ -5,15 +5,14 @@
    This file is offered as-is, without any warranty.
 #}
 
-{# RelationshipComment: #}
 PackageName: {{ packageName }}
 PackageFileName: {{ uploadName }}
-SPDXID: SPDXRef-upload{{ uploadId }}
+SPDXID: SPDXRef-upload{{ packageId }}
 PackageDownloadLocation: NOASSERTION
 PackageVerificationCode: {{ verificationCode }}
-PackageChecksum: SHA1: {{ sha1 }}
+PackageChecksum: SHA1: {{ sha1 | lower }}
 {# PackageChecksum: SHA256: #}
-PackageChecksum: MD5: {{ md5  }}
+PackageChecksum: MD5: {{ md5 | lower }}
 {# PackageChecksum: SSDEEP: #}
 {% if mainLicenses|default is empty %}
 PackageLicenseConcluded: NOASSERTION
@@ -26,6 +25,9 @@ PackageLicenseDeclared: {{ mainLicense }}
 {% endif %}
 PackageLicenseInfoFromFiles: NOASSERTION
 PackageCopyrightText: NOASSERTION
+
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
+{# RelationshipComment: #}
 
 ##--------------------------
 ## File Information
