@@ -47,7 +47,6 @@ export COMPOSERABSPATH=/vagrant/utils
 ./utils/fo-update-composer $COMPOSERABSPATH/composer
 
 make CFLAGS=-I/usr/include/glib-2.0
-sudo make composer_download
 sudo make composer_install
 sudo make install
 sudo /usr/local/lib/fossology/fo-postinstall
