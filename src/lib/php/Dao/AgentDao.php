@@ -308,4 +308,14 @@ class AgentDao extends Object
     $row = $this->dbManager->getSingleRow("SELECT agent_name FROM agent WHERE agent_enabled AND agent_pk=$1", array($agentId));
     return ($row===false)?false:$row['agent_name'];
   }
-} 
+
+  /**
+   * @param int $agentId
+   * @return string
+   */
+  public function getAgentRev($agentId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT agent_rev FROM agent WHERE agent_enabled AND agent_pk=$1", array($agentId));
+    return ($row===false)?false:$row['agent_rev'];
+  }
+}

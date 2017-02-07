@@ -1,6 +1,7 @@
 <?php
 /*
  * Copyright (C) 2015-2016, Siemens AG
+ * Copyright (C) 2017 TNG Technology Consulting GmbH
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -208,7 +209,6 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string $fileBase
    * @param string $packageName
    * @return string
    */
@@ -264,7 +264,7 @@ class SpdxTwoAgent extends Agent
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString($this->getTemplateFile('package'),array(
-        'uploadId'=>$uploadId,
+        'packageId'=>$uploadId,
         'uri'=>$this->uri,
         'packageName'=>$upload->getFilename(),
         'uploadName'=>$upload->getFilename(),
@@ -368,7 +368,7 @@ class SpdxTwoAgent extends Agent
       {
         $this->heartbeat(0);
       }
-      $fullPath = $treeDao->getFullPath($fileId,$treeTableName);
+      $fullPath = $treeDao->getFullPath($fileId,$treeTableName,0,true);
       if(!empty($licenses['concluded']) && count($licenses['concluded'])>0)
       {
         $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
@@ -419,12 +419,11 @@ class SpdxTwoAgent extends Agent
     {
       return "";
     }
-    $selectedScanners = '{'.implode(',',$scannerIds).'}';
     $tableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__ .'.scanner_findings';
     $sql = "SELECT DISTINCT uploadtree_pk,rf_fk FROM $tableName ut, license_file
       WHERE ut.pfile_fk=license_file.pfile_fk AND rf_fk IS NOT NULL AND agent_fk=any($1)";
-    $param = array($selectedScanners);
+    $param = array('{'.implode(',',$scannerIds).'}');
     if ($tableName == 'uploadtree_a') {
       $param[] = $uploadId;
       $sql .= " AND upload_fk=$".count($param);
@@ -438,11 +437,18 @@ class SpdxTwoAgent extends Agent
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
       if ($shortName != 'No_license_found' && $shortName != 'Void') {
+        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
         $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
     $this->dbManager->freeResult($res);
-    return "licenseInfoInFile determined by Scanners $selectedScanners";
+
+    $agentDao = $this->agentDao;
+    $func = function($scannerId) use ($agentDao) {
+      return $agentDao->getAgentName($scannerId)." (".$agentDao->getAgentRev($scannerId).")";
+    };
+    $scannerNames = array_map($func, $scannerIds);
+    return "licenseInfoInFile determined by Scanners:\n - ".implode("\n - ",$scannerNames);
   }
 
   /**
@@ -519,7 +525,7 @@ class SpdxTwoAgent extends Agent
     $message = $this->renderString($this->getTemplateFile('document'),array(
         'documentName'=>$fileBase,
         'uri'=>$this->uri,
-        'userName'=>$this->container->get('dao.user')->getUserName($this->userId),
+        'userName'=>$this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
         'organisation'=>'',
         'packageNodes'=>$packageNodes,
         'packageIds'=>$packageIds,
@@ -589,7 +595,7 @@ class SpdxTwoAgent extends Agent
         $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $fileName = $treeDao->getFullPath($fileId,$treeTableName);
+      $fileName = $treeDao->getFullPath($fileId,$treeTableName,0,true);
       if(!is_array($licenses['concluded']))
       {
         $licenses['concluded'] = array();

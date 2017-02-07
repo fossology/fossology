@@ -20,8 +20,12 @@ SPDXID: SPDXRef-DOCUMENT
 ##-------------------------
 
 Creator: Tool: spxd2
+{% if userName is not empty %}
 Creator: Person: {{ userName }}
+{% endif %}
+{% if organization is not empty %}
 Creator: Organization: {{ organisation }}
+{% endif %}
 CreatorComment: <text>
 This document was created using license informations and a generator from Fossology.
 </text>
@@ -32,20 +36,16 @@ LicenseListVersion: 2.0
 ## Package Information
 ##-------------------------
 
-{% for packageId in packageIds %}
-Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
-{% endfor %}
-
 {{ packageNodes }}
 
 ##-------------------------
 ## License Information
 ##-------------------------
 
-{% for licenseId,extractedText in licenseTexts %}
+{% for licenseId,extractedText in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
 LicenseID: {{ licenseId|replace(' ','-') }}
 LicenseName: {{ licenseId|replace(' ','-') }}
 ExtractedText: <text> {{ extractedText|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                       |replace({'\f':''}) }} </text>
 
-{% endfor %}
+{% endif %}{% endfor %}

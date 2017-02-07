@@ -8,7 +8,7 @@
   <spdx:Relationship>
     <spdx:relationshipType rdf:resource="http://spdx.org/rdf/terms#relationshipType_describes" />
     <spdx:relatedSpdxElement>
-      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ uploadId|url_encode }}">
+      <spdx:Package rdf:about="{{ uri }}#SPDXRef-upload{{ packageId|url_encode }}">
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
@@ -20,13 +20,13 @@
         <spdx:checksum>
           <spdx:Checksum>
             <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha1" />
-            <spdx:checksumValue>{{ sha1 }}</spdx:checksumValue>
+            <spdx:checksumValue>{{ sha1 | lower }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
         <spdx:checksum> 
           <spdx:Checksum>
             <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
-            <spdx:checksumValue>{{ md5 }}</spdx:checksumValue>
+            <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
           </spdx:Checksum>
         </spdx:checksum>
         <spdx:licenseConcluded>
