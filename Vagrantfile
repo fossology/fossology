@@ -43,8 +43,8 @@ cd /vagrant
 
 ./utils/fo-installdeps -e -y
 
-export COMPOSERPATH=/vagrant/utils
-./utils/fo-update-composer $COMPOSERPATH/composer
+export COMPOSERABSPATH=/vagrant/utils
+./utils/fo-update-composer $COMPOSERABSPATH/composer
 
 make CFLAGS=-I/usr/include/glib-2.0
 sudo make install

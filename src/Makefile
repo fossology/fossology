@@ -75,12 +75,12 @@ $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
 phpvendors:
-	$(COMPOSERPATH)/composer install -q
+	$(COMPOSERABSPATH)/composer install -q
 
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null ; $(COMPOSERPATH)/composer install -q --no-dev)
+	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null ; $(COMPOSERABSPATH)/composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
