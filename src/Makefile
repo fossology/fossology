@@ -49,7 +49,8 @@ $(BUILDDIRS):
 	$(MAKE) -s -C $(@:build-%=%)
 
 # install depends on everything being built first
-install: all $(INSTALLDIRS) composer_install
+install: install_offline composer_install
+install_offline: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -s -C $(@:install-%=%) install
 
