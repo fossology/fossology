@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Reuser;
+namespace Fossology\Reuser\Agent;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
@@ -30,6 +30,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Reuser\Ui\ReuserAgentPlugin;
 
 include_once(__DIR__ . "/version.php");
 
@@ -75,14 +76,41 @@ class ReuserAgent extends Agent
       {
         continue;
       }
-      if (empty($reuseMode)) {
-        $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      } else {
+      if($reuseMode & ReuserAgentPlugin::REUSE_ENHANCED){
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+      }
+      elseif($reuseMode & ReuserAgentPlugin::REUSE_MAIN){
+        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
+        $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+      }
+      elseif($reuseMode & ReuserAgentPlugin::REUSE_ENH_MAIN){
+        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
+        $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
+      }
+      else{
+        $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
     }
     return true;
   }  
+
+  protected function reuseMainLicense($uploadId, $groupId, $reusedUploadId, $reusedGroupId)
+  {
+    $mainLicenseIds = $this->clearingDao->getMainLicenseIds($reusedUploadId, $reusedGroupId);
+    if(!empty($mainLicenseIds))
+    {
+      foreach($mainLicenseIds as $mainLicenseId)
+      {
+        if(in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))){
+          continue;
+        }
+        else{
+          $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
+        }
+      }
+    }
+    return true;
+  }
 
   protected function processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId)
   {
