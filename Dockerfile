@@ -16,6 +16,7 @@ WORKDIR /fossology
 ENV _update="apt-get update"
 ENV _install="apt-get install -y --no-install-recommends"
 ENV _cleanup="eval apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*"
+ENV COMPOSERABSPATH=/fossology/utils
 
 RUN set -x \
  && $_update && $_install \
@@ -32,8 +33,10 @@ RUN set -x \
  && /fossology/install/scripts/php-conf-fix.sh --overwrite \
  && /fossology/utils/fo-installdeps -e -y \
  && $_cleanup
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
+
+ADD utils/fo-update-composer utils/fo-update-composer
+RUN set -x \
+ && /fossology/utils/fo-update-composer $COMPOSERABSPATH/composer
 
 ADD . .
 RUN chmod +x /fossology/docker-entrypoint.sh

@@ -4,7 +4,6 @@
 
 TOP = ..
 VARS = $(TOP)/Makefile.conf
-COMPOSERTMP = /tmp/composer
 include $(VARS)
 
 # the directories we do things in by default
@@ -49,7 +48,7 @@ $(BUILDDIRS):
 	$(MAKE) -s -C $(@:build-%=%)
 
 # install depends on everything being built first
-install: all $(INSTALLDIRS) composer_install
+install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(MAKE) -s -C $(@:install-%=%) install
 
@@ -76,17 +75,12 @@ $(CLEANDIRS):
 	$(MAKE) -s -C $(@:clean-%=%) clean
 
 phpvendors:
-	$(COMPOSERTMP)/composer install -q
-
-composer_download:
-	curl -sS https://getcomposer.org/installer | php
-	mkdir -p $(COMPOSERTMP)
-	mv composer.phar $(COMPOSERTMP)/composer
+	$(COMPOSERABSPATH)/composer install -q
 
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); $(COMPOSERTMP)/composer install -q --no-dev)
+	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null ; $(COMPOSERABSPATH)/composer install -q --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)
