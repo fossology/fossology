@@ -30,8 +30,7 @@ sudo apt-get update -qq -y
 
 sudo apt-get install -qq curl php5 git libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
 
-curl -sS https://getcomposer.org/installer | php
-sudo mv composer.phar /usr/bin/composer
+# sudo /vagrant/install/install_composer.sh
 
 # install spdx-tools
 /vagrant/install/scripts/install-spdx-tools.sh
@@ -47,8 +46,6 @@ cd /vagrant
 ./utils/fo-installdeps -e -y
 
 make CFLAGS=-I/usr/include/glib-2.0
-sudo make composer_download
-sudo make composer_install
 sudo make install
 sudo /usr/local/lib/fossology/fo-postinstall
 sudo /etc/init.d/fossology start

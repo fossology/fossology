@@ -38,7 +38,7 @@ yum install -y wget git
 wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 rpm -Uvh epel-release-latest-7.noarch.rpm
 
-# install composer
+# install projectbuilder
 wget http://ftp.project-builder.org/centos/7/x86_64/pb.repo
 cp pb.repo /etc/yum.repos.d/
 
@@ -47,10 +47,6 @@ cp pb.repo /etc/yum.repos.d/
 # yum install -y project-builder --nogpgcheck
 yum update -y
 yum install -y project-builder
-
-# install build dependencies
-yum install -y redhat-lsb
-/home/vagrant/prj/fossology/utils/fo-installdeps -e -y
 
 # adding docker install info for prepping the project builder installation runs
 cat > /etc/yum.repos.d/docker.repo << EOF
@@ -70,7 +66,7 @@ systemctl start docker
 
 SCRIPT
   end
-  
+
 #
 # checking out and preparing project builder
 # note that triple backslashes are because of cat and vagrant escaping
@@ -100,24 +96,20 @@ PBRC
 
 ################################################################################
 # sbx = sandbox
-# actually, sbx2pkg is included in sbx2pkg2ins
-for pkg in "fossology-composer" "fossology"; do
-    pb -t -p fossology sbx2build   $pkg
-    pb -p    fossology build2prep  $pkg
-#   pb -t -p fossology sbx2pkg     $pkg
-    pb -t -p fossology sbx2pkg2ins $pkg
-done
+pb -t -p fossology sbx2build   fossology
+pb    -p fossology build2prep  fossology
+# pb -t -p fossology sbx2pkg     fossology # actually, sbx2pkg is included in sbx2pkg2ins
+pb -t -p fossology sbx2pkg2ins fossology
 
 SCRIPT
   end
-  
+
 #
 # applying some work around
 #
   config.vm.provision "shell" do |s|
     s.privileged = false
     s.inline = <<SCRIPT
-    
 # uahhh: disabling SELinux
 # remove if the https://github.com/fossology/fossology/issues/727
 setenforce 0
