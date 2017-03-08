@@ -24,3 +24,4 @@ services:
       - FOSSOLOGY_DB_HOST=fossology-db
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
+    user: fossy

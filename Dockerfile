@@ -82,6 +82,5 @@ EXPOSE 8081
 
 ################################################################################
 VOLUME /srv/fossology/repository/
-USER fossy
 
 ENTRYPOINT ["/fossology/docker-entrypoint.sh"]
