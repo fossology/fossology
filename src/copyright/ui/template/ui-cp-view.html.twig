@@ -64,9 +64,11 @@
   {{ script }}
   
   {% include "copyrighthist_scripts.html.twig" %}
-  <script language="javascript">
-  {% set table=statement %}
-  {% include "histTable.js.twig" with table %}
-  </script>
+  {% if agentName == "copyright" %}
+    <script language="javascript">
+    {% set table=statement %}
+    {% include "histTable.js.twig" with table %}
+    </script>
+  {%endif%}
 {% endblock %}
 
