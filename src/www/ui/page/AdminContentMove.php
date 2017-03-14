@@ -84,7 +84,6 @@ class AdminContentMove extends DefaultPlugin
     $uiFolderNav = $this->getObject('ui.folder.nav');
     $vars['folderTree'] = $uiFolderNav->showFolderTree($rootFolderId);
     $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
-   
     return $this->render('admin_content_move.html.twig', $this->mergeWithDefault($vars));
   }
 }
