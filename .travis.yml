@@ -31,6 +31,11 @@ install:
  - sudo mkdir -p /var/local/cache/fossology
  - sudo chown $(whoami) /var/local/cache/fossology
 
+sudo: required
+
+services:
+  - docker
+
 before_script:
  - cd src/
  - composer install --dev
@@ -46,6 +51,7 @@ env:
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - MAKETARGETS='all test-lib'
   matrix:
+   - PHPTESTSUITE='Docker test' CHECKBEFORE='src/testing/docker/travis_docker_test.sh' MAKETARGETS=''
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
@@ -56,7 +62,6 @@ env:
    - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
    - CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
       CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
-
 
 matrix:
   include:
