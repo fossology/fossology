@@ -11,6 +11,11 @@ addons:
 cache:
  - apt
 
+sudo: required
+
+services:
+  - docker
+
 install:
  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
  - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
@@ -44,8 +49,11 @@ env:
   global:
    - PHPTESTSUITE='Fossology PhpUnit Agent Test Suite'
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
+   - if [[ -z "$PHPTESTSUITE" ]]; then exit 0; fi
    - MAKETARGETS='all test-lib'
   matrix:
+   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/default-docker-test.sh' MAKETARGETS=''
+   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/docker-compose-test.sh' MAKETARGETS=''
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
