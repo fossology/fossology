@@ -21,11 +21,11 @@ HDRS = nomos.h $(OBJS:.o=.h) _autodefs.h
 #CFLAGS_LOCAL = -DSTANDALONE -g -O2 -Wall -D_FILE_OFFSET_BITS=64
 CFLAGS_LOCAL = -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 `pkg-config glib-2.0 --cflags --libs`
 
-all: encode nomos
+all: encode $(EXE)
 
 debug: nomos-gl
 
-nomos: nomos.o $(OBJS) $(GENOBJS)
+$(EXE): nomos.o $(OBJS) $(GENOBJS)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) -o $(EXE)
 
 nomos.o: nomos.c $(HDRS) $(DB) $(REPO) $(AGENTLIB) $(VARS)
