@@ -93,15 +93,14 @@ class user_add extends FO_Plugin {
     }
 
     /* Make sure email looks valid */
-    $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
-
-    if ($Check != $Email) {
+    if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
+    {
       $text = _("Invalid email address.  Not added.");
       return ($text);
     }
     
     /* Make sure email is unique */
-    $email_count = $this->dbManager->getSingleRow("SELECT COUNT(*) as count FROM users WHERE user_email = '".$Email."';")["count"];
+    $email_count = $this->dbManager->getSingleRow("SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;", array($Email))["count"];
     if ($email_count > 0) {
       $text = _("Email address already exists.  Not added.");
       return ($text);
