@@ -226,7 +226,7 @@ class ui_view_info extends FO_Plugin
     {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
       $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
-      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row[pfile_fk]));
+      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row['pfile_fk']));
       if (pg_num_rows($result))
       {
         $pmRow = pg_fetch_assoc($result);
@@ -238,7 +238,7 @@ class ui_view_info extends FO_Plugin
 
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
-    $row = $this->dbManager->getSingleRow($sql,array($row[upload_fk]),__METHOD__."getUploadOrigin");
+    $row = $this->dbManager->getSingleRow($sql,array($row['upload_fk']),__METHOD__."getUploadOrigin");
     if ($row)
     {
 
