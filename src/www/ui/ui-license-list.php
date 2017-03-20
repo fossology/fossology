@@ -108,6 +108,7 @@ class ui_license_list extends FO_Plugin
 
     /* how many lines of data do you want to display */
     $currentNum = 0;
+    $lines = [];
     foreach($licensesPerFileName as $fileName => $licenseNames){
       if ($licenseNames !== false && count($licenseNames) > 0) {
         if(++$currentNum > $NomostListNum){
