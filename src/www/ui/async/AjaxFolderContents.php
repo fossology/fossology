@@ -20,6 +20,7 @@ namespace Fossology\UI\Ajax;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -49,8 +50,12 @@ class AjaxFolderContents extends DefaultPlugin
     $childUploads = $folderDao->getFolderChildUploads($folderId, Auth::getGroupId());
     foreach($childUploads as $upload)
     {
-      $results[$upload['foldercontents_pk']] = $upload['upload_filename'];
+      $uploadStatus = new UploadStatus();
+      $uploadDate = explode(".",$upload['upload_ts'])[0];
+      $uploadStatus = " (" . $uploadStatus->getTypeName($upload['status_fk']) . ")";
+      $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . $uploadDate . $uploadStatus;
     }
+
     if(!$request->get('removable'))
     {
       return new JsonResponse($results);
