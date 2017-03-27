@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  * Author: Daniele Fognini, Johannes Najjar, Steffen Weber
  *
  * This program is free software; you can redistribute it and/or
@@ -278,6 +278,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
     $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class=\"delete\" src=\"images/space_16.png\"><span hidden='true' id='update$type$hash'></span>";
+    $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     return $output;
   }
 
@@ -313,9 +314,6 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   protected function doUndo($itemId, $hash, $type) {
     $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
     $cpTable = $this->getTableName($type);
-    if ($cpTable != 'copyright') {
-      return new Response('There is not undo for ' . $cpTable, Response::HTTP_NOT_IMPLEMENTED, array('Content-type' => 'text/plain'));
-    }
     $this->copyrightDao->rollbackTable($item, $hash, Auth::getUserId(), $cpTable);
     return new Response('Successfully restored', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }

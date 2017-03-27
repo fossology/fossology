@@ -1,3 +1,9 @@
+{# Copyright 2014-2017 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
 function createTable{{ table.type }}() {
   var otable = $('#copyright{{ table.type }}').dataTable({
     "bServerSide": true,
@@ -16,7 +22,8 @@ function createTable{{ table.type }}() {
     "aoColumns": [
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
       { "sTitle": "{{ table.description }}", "sClass": "left"},
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
     ],
     "aaSorting": {{ table.sorting }},
     "iDisplayLength": 50,
@@ -43,6 +50,19 @@ function createTable{{ table.type }}() {
     },
     "sSuccessResponse": "success"
   });
+
+  $('#selectDelete{{ table.type }}').change(function () {
+    $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#deleteSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      delete{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    });
+  });
+
   return otable;
 }
 
@@ -71,6 +91,7 @@ function undo{{ table.type }}(upload, item, hash, kind) {
       success: function(data) { 
         $("#delete{{ table.type }}" + hash).show();
         $("#update{{ table.type }}" + hash).html('').show();
+        $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);
       },
       error: function() { alert('error'); }
   });
