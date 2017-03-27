@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2017, Siemens AG
  * Author: Daniele Fognini, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify
@@ -122,6 +122,7 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
     {"type", "text", ""}, //TODO removed constrain: "CHECK (type in ('statement', 'email', 'url'))"},
     {"copy_startbyte", "integer", ""},
     {"copy_endbyte", "integer", ""},
+    {"is_enabled", "boolean", "NOT NULL DEFAULT TRUE"},
   };
 
 bool CopyrightDatabaseHandler::createTableAgentFindings() const

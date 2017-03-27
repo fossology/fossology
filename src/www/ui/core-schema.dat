@@ -389,38 +389,9 @@
   $Schema["TABLE"]["copyright"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"copy_endbyte\" int4";
   $Schema["TABLE"]["copyright"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL";
 
-
-  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"ct_fk\" int4";
-  $Schema["TABLE"]["copyright_audit"]["ct_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"ct_fk\" DROP NOT NULL";
-
-  $Schema["TABLE"]["copyright_audit"]["oldtext"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["oldtext"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"oldtext\" text";
-  $Schema["TABLE"]["copyright_audit"]["oldtext"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"oldtext\" DROP NOT NULL";
-
-  $Schema["TABLE"]["copyright_audit"]["user_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["user_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"user_fk\" int4";
-  $Schema["TABLE"]["copyright_audit"]["user_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"user_fk\" DROP NOT NULL";
-
-  $Schema["TABLE"]["copyright_audit"]["date"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["date"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"date\" timestamptz DEFAULT now()";
-  $Schema["TABLE"]["copyright_audit"]["date"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"date\" SET NOT NULL, ALTER COLUMN \"date\" SET DEFAULT now()";
-
-  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"ca_pk\" int4 DEFAULT nextval('copyright_audit_ca_pk_seq'::regclass)";
-  $Schema["TABLE"]["copyright_audit"]["ca_pk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"ca_pk\" SET NOT NULL, ALTER COLUMN \"ca_pk\" SET DEFAULT nextval('copyright_audit_ca_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"upload_fk\" int4";
-  $Schema["TABLE"]["copyright_audit"]["upload_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"upload_fk\" DROP NOT NULL";
-
-  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"uploadtree_pk\" int4";
-  $Schema["TABLE"]["copyright_audit"]["uploadtree_pk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"uploadtree_pk\" DROP NOT NULL";
-
-  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ADD"] = "ALTER TABLE \"copyright_audit\" ADD COLUMN \"pfile_fk\" int4";
-  $Schema["TABLE"]["copyright_audit"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"copyright_audit\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL";
+  $Schema["TABLE"]["copyright"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"copyright\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["copyright"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["copyright"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["copyright_decision"]["copyright_decision_pk"]["DESC"] = "";
@@ -483,6 +454,10 @@
   $Schema["TABLE"]["ecc"]["copy_endbyte"]["DESC"] = "";
   $Schema["TABLE"]["ecc"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"copy_endbyte\" int4";
   $Schema["TABLE"]["ecc"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ecc"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ecc\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["ecc"]["is_enabled"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["ecc"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["DESC"] = "";
@@ -1654,9 +1629,6 @@
 
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"clearing_decision_clearing_decision_pk_seq\"";
   $Schema["SEQUENCE"]["clearing_decision_clearing_decision_pk_seq"]["UPDATE"] = "SELECT setval('clearing_decision_clearing_decision_pk_seq',(SELECT greatest(1,max(clearing_decision_pk)) val FROM clearing_decision))";
-
-  $Schema["SEQUENCE"]["copyright_audit_ca_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_audit_ca_pk_seq\"";
-  $Schema["SEQUENCE"]["copyright_audit_ca_pk_seq"]["UPDATE"] = "SELECT setval('copyright_audit_ca_pk_seq',(SELECT greatest(1,max(ca_pk)) val FROM copyright_audit))";
 
   $Schema["SEQUENCE"]["license_map_license_map_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_map_license_map_pk_seq\"";
   $Schema["SEQUENCE"]["license_map_license_map_pk_seq"]["UPDATE"] = "SELECT setval('license_map_license_map_pk_seq',(SELECT greatest(1,max(license_map_pk)) val FROM license_map))";

@@ -116,43 +116,43 @@ INSERT INTO clearing_event VALUES (8, 4, 485, false, 2, 2, NULL, 3, '', 'Here is
 
 
 INSERT INTO copyright VALUES (1, 15, 4, 'Copyright:
-', '82b9c4a898c9c8e7dd3b2f12c9efe2f1', 'statement', 85, 96);
+', '82b9c4a898c9c8e7dd3b2f12c9efe2f1', 'statement', 85, 96, 'true');
 INSERT INTO copyright VALUES (2, 15, 4, 'Copyright 2004 XXX 3dfx Interactive. conspicuously and appropriately publish on each copy of a derivative work">
-', '257e7a16fdea45af00db34b34901297e', 'statement', 98, 212);
-INSERT INTO copyright VALUES (3, 15, 2, 'Copyright © 1990-2007 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved. For more information contact: Condor Team, Attention: Professor Miron Livny, Dept of Computer Sciences, 1210 W. Dayton St., Madison, WI 53706-1685, (608) 262-0856 or miron@cs.wisc.edu.', '38fed8260a51272cce26cb9a9e8ae150', 'statement', 288, 605);
-INSERT INTO copyright VALUES (4, 15, 2, 'Copyright (c) 1999 University of Chicago and The University of Southern California. All Rights Reserved.', '838e7addcd532fd109fcf9046b830fcb', 'statement', 6315, 6419);
-INSERT INTO copyright VALUES (5, 15, 2, 'http://www.condorproject.org/', '7b3bded8d05be4f8f286137d781671c5', 'url', 816, 845);
-INSERT INTO copyright VALUES (6, 15, 2, 'http://www.condorproject.org/)"', '5f99b6394b68ba3efd6355d001cf5c9c', 'url', 1537, 1568);
-INSERT INTO copyright VALUES (7, 15, 2, 'http://pages.cs.wisc.edu/~miron/miron.html', '8c35167907ce1778906c09d05ecf2008', 'url', 6096, 6138);
-INSERT INTO copyright VALUES (8, 15, 2, 'http://www.globus.org/)', '01792705aacafab69309d1a5b10a1ff3', 'url', 6238, 6261);
-INSERT INTO copyright VALUES (9, 15, 2, 'http://www.gnu.org/software/libc/', '0083c8b416c911ebd402eb58b58d6aee', 'url', 6569, 6602);
-INSERT INTO copyright VALUES (10, 15, 2, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 587, 604);
-INSERT INTO copyright VALUES (11, 15, 2, 'condor-admin@cs.wisc.edu', '330bfb156248b5c4a07d7bb14b2e7b86', 'email', 2245, 2269);
-INSERT INTO copyright VALUES (12, 15, 2, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 6078, 6095);
-INSERT INTO copyright VALUES (13, 15, 2, 'CONTRIBUTORS', '98f07bc20cb66328be238119df96c490', 'author', 3686, 3698);
-INSERT INTO copyright VALUES (14, 15, 2, 'CONTRIBUTORS MAKE NO REPRESENTATION THAT THE SOFTWARE, MODIFICATIONS, ENHANCEMENTS OR DERIVATIVE WORKS THEREOF, WILL NOT INFRINGE ANY PATENT, COPYRIGHT, TRADEMARK, TRADE SECRET OR OTHER PROPRIETARY RIGHT.', 'f024c21e035ed961f01c504644199975', 'author', 3931, 4135);
-INSERT INTO copyright VALUES (15, 15, 2, 'CONTRIBUTORS SHALL HAVE NO LIABILITY TO LICENSEE OR OTHER PERSONS FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS, OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY OF CONTRACT, WARRANTY, TORT', '9d35c5020b1a224f65a49c8615821d91', 'author', 4196, 4560);
+', '257e7a16fdea45af00db34b34901297e', 'statement', 98, 212, 'true');
+INSERT INTO copyright VALUES (3, 15, 2, 'Copyright © 1990-2007 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved. For more information contact: Condor Team, Attention: Professor Miron Livny, Dept of Computer Sciences, 1210 W. Dayton St., Madison, WI 53706-1685, (608) 262-0856 or miron@cs.wisc.edu.', '38fed8260a51272cce26cb9a9e8ae150', 'statement', 288, 605, 'true');
+INSERT INTO copyright VALUES (4, 15, 2, 'Copyright (c) 1999 University of Chicago and The University of Southern California. All Rights Reserved.', '838e7addcd532fd109fcf9046b830fcb', 'statement', 6315, 6419, 'true');
+INSERT INTO copyright VALUES (5, 15, 2, 'http://www.condorproject.org/', '7b3bded8d05be4f8f286137d781671c5', 'url', 816, 845, 'true');
+INSERT INTO copyright VALUES (6, 15, 2, 'http://www.condorproject.org/)"', '5f99b6394b68ba3efd6355d001cf5c9c', 'url', 1537, 1568, 'true');
+INSERT INTO copyright VALUES (7, 15, 2, 'http://pages.cs.wisc.edu/~miron/miron.html', '8c35167907ce1778906c09d05ecf2008', 'url', 6096, 6138, 'true');
+INSERT INTO copyright VALUES (8, 15, 2, 'http://www.globus.org/)', '01792705aacafab69309d1a5b10a1ff3', 'url', 6238, 6261, 'true');
+INSERT INTO copyright VALUES (9, 15, 2, 'http://www.gnu.org/software/libc/', '0083c8b416c911ebd402eb58b58d6aee', 'url', 6569, 6602, 'true');
+INSERT INTO copyright VALUES (10, 15, 2, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 587, 604, 'true');
+INSERT INTO copyright VALUES (11, 15, 2, 'condor-admin@cs.wisc.edu', '330bfb156248b5c4a07d7bb14b2e7b86', 'email', 2245, 2269, 'true');
+INSERT INTO copyright VALUES (12, 15, 2, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 6078, 6095, 'true');
+INSERT INTO copyright VALUES (13, 15, 2, 'CONTRIBUTORS', '98f07bc20cb66328be238119df96c490', 'author', 3686, 3698, 'true');
+INSERT INTO copyright VALUES (14, 15, 2, 'CONTRIBUTORS MAKE NO REPRESENTATION THAT THE SOFTWARE, MODIFICATIONS, ENHANCEMENTS OR DERIVATIVE WORKS THEREOF, WILL NOT INFRINGE ANY PATENT, COPYRIGHT, TRADEMARK, TRADE SECRET OR OTHER PROPRIETARY RIGHT.', 'f024c21e035ed961f01c504644199975', 'author', 3931, 4135, 'true');
+INSERT INTO copyright VALUES (15, 15, 2, 'CONTRIBUTORS SHALL HAVE NO LIABILITY TO LICENSEE OR OTHER PERSONS FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS, OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY OF CONTRACT, WARRANTY, TORT', '9d35c5020b1a224f65a49c8615821d91', 'author', 4196, 4560, 'true');
 INSERT INTO copyright VALUES (16, 15, 5, 'Copyright:
-', '82b9c4a898c9c8e7dd3b2f12c9efe2f1', 'statement', 79, 90);
+', '82b9c4a898c9c8e7dd3b2f12c9efe2f1', 'statement', 79, 90, 'true');
 INSERT INTO copyright VALUES (17, 15, 5, 'Copyright 2004 XXX 3dfx Interactive. conspicuously and appropriately publish on each copy of a derivative work">
-', '257e7a16fdea45af00db34b34901297e', 'statement', 92, 206);
-INSERT INTO copyright VALUES (18, 15, 6, 'Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.', 'b3a0b78c4f3bda49400c03e2dc4af2fe', 'statement', 343, 426);
-INSERT INTO copyright VALUES (19, 15, 6, 'phk@login.dknet.dk', 'be9a31b6132e46a413774b36859fb540', 'email', 1685, 1703);
-INSERT INTO copyright VALUES (20, 15, 6, 'andersen@uclibc.org', 'b80a70781d6e6a7bba4953b6ecd2e214', 'email', 2185, 2204);
-INSERT INTO copyright VALUES (21, 15, 3, 'Copyright (c) 1990-2006 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved. For more information contact: Condor Team, Attention: Professor Miron Livny, Dept of Computer Sciences, 1210 W. Dayton St., Madison, WI 53706-1685, 608) 262-0856 or miron@cs.wisc.edu.', '80b1b708b6c123ebcbab66818e432351', 'statement', 54, 370);
-INSERT INTO copyright VALUES (23, 15, 3, 'http://www.condorproject.org/', '7b3bded8d05be4f8f286137d781671c5', 'url', 820, 849);
-INSERT INTO copyright VALUES (24, 15, 3, 'http://www.condorproject.org/)"', '5f99b6394b68ba3efd6355d001cf5c9c', 'url', 1545, 1576);
-INSERT INTO copyright VALUES (25, 15, 3, 'http://www.cs.wisc.edu/~miron/miron.html', 'a9731964cbb7701ae0191d610f8d2224', 'url', 6363, 6403);
-INSERT INTO copyright VALUES (26, 15, 3, 'http://www.globus.org/)', '01792705aacafab69309d1a5b10a1ff3', 'url', 6509, 6532);
-INSERT INTO copyright VALUES (27, 15, 3, 'http://www.gnu.org/software/libc/', '0083c8b416c911ebd402eb58b58d6aee', 'url', 6858, 6891);
-INSERT INTO copyright VALUES (28, 15, 3, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 352, 369);
-INSERT INTO copyright VALUES (29, 15, 3, 'condor-admin@cs.wisc.edu', '330bfb156248b5c4a07d7bb14b2e7b86', 'email', 2295, 2319);
-INSERT INTO copyright VALUES (30, 15, 3, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 6345, 6362);
-INSERT INTO copyright VALUES (31, 15, 3, 'authority', '873e9c0b50183b613336eea1020f4369', 'author', 570, 579);
-INSERT INTO copyright VALUES (32, 15, 3, 'Contributors and the University', '1b9da6873af4fafcecb86a7778e976b8', 'author', 730, 761);
-INSERT INTO copyright VALUES (33, 15, 3, 'CONTRIBUTORS AND THE UNIVERSITY', 'ef6a95f6baea2c6f551161de39c4a67f', 'author', 3826, 3863);
-INSERT INTO copyright VALUES (34, 15, 3, 'CONTRIBUTORS AND THE UNIVERSITY MAKE NO REPRESENTATION THAT THE', '57d9c9d62a47e75d9f90ba05c82748e5', 'author', 4120, 4183);
-INSERT INTO copyright VALUES (35, 15, 3, 'CONTRIBUTORS AND ANY OTHER OFFICER', '1cb39133d8d92e45813cd58562660ee1', 'author', 4426, 4460);
+', '257e7a16fdea45af00db34b34901297e', 'statement', 92, 206, 'true');
+INSERT INTO copyright VALUES (18, 15, 6, 'Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.', 'b3a0b78c4f3bda49400c03e2dc4af2fe', 'statement', 343, 426, 'true');
+INSERT INTO copyright VALUES (19, 15, 6, 'phk@login.dknet.dk', 'be9a31b6132e46a413774b36859fb540', 'email', 1685, 1703, 'true');
+INSERT INTO copyright VALUES (20, 15, 6, 'andersen@uclibc.org', 'b80a70781d6e6a7bba4953b6ecd2e214', 'email', 2185, 2204, 'true');
+INSERT INTO copyright VALUES (21, 15, 3, 'Copyright (c) 1990-2006 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved. For more information contact: Condor Team, Attention: Professor Miron Livny, Dept of Computer Sciences, 1210 W. Dayton St., Madison, WI 53706-1685, 608) 262-0856 or miron@cs.wisc.edu.', '80b1b708b6c123ebcbab66818e432351', 'statement', 54, 370, 'true');
+INSERT INTO copyright VALUES (23, 15, 3, 'http://www.condorproject.org/', '7b3bded8d05be4f8f286137d781671c5', 'url', 820, 849, 'true');
+INSERT INTO copyright VALUES (24, 15, 3, 'http://www.condorproject.org/)"', '5f99b6394b68ba3efd6355d001cf5c9c', 'url', 1545, 1576, 'true');
+INSERT INTO copyright VALUES (25, 15, 3, 'http://www.cs.wisc.edu/~miron/miron.html', 'a9731964cbb7701ae0191d610f8d2224', 'url', 6363, 6403, 'true');
+INSERT INTO copyright VALUES (26, 15, 3, 'http://www.globus.org/)', '01792705aacafab69309d1a5b10a1ff3', 'url', 6509, 6532, 'true');
+INSERT INTO copyright VALUES (27, 15, 3, 'http://www.gnu.org/software/libc/', '0083c8b416c911ebd402eb58b58d6aee', 'url', 6858, 6891, 'true');
+INSERT INTO copyright VALUES (28, 15, 3, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 352, 369, 'true');
+INSERT INTO copyright VALUES (29, 15, 3, 'condor-admin@cs.wisc.edu', '330bfb156248b5c4a07d7bb14b2e7b86', 'email', 2295, 2319, 'true');
+INSERT INTO copyright VALUES (30, 15, 3, 'miron@cs.wisc.edu', '1102feddb903c81db7bd06a95548f49f', 'email', 6345, 6362, 'true');
+INSERT INTO copyright VALUES (31, 15, 3, 'authority', '873e9c0b50183b613336eea1020f4369', 'author', 570, 579, 'true');
+INSERT INTO copyright VALUES (32, 15, 3, 'Contributors and the University', '1b9da6873af4fafcecb86a7778e976b8', 'author', 730, 761, 'true');
+INSERT INTO copyright VALUES (33, 15, 3, 'CONTRIBUTORS AND THE UNIVERSITY', 'ef6a95f6baea2c6f551161de39c4a67f', 'author', 3826, 3863, 'true');
+INSERT INTO copyright VALUES (34, 15, 3, 'CONTRIBUTORS AND THE UNIVERSITY MAKE NO REPRESENTATION THAT THE', '57d9c9d62a47e75d9f90ba05c82748e5', 'author', 4120, 4183, 'true');
+INSERT INTO copyright VALUES (35, 15, 3, 'CONTRIBUTORS AND ANY OTHER OFFICER', '1cb39133d8d92e45813cd58562660ee1', 'author', 4426, 4460, 'true');
 
 
 INSERT INTO copyright_ars VALUES (2, 15, 1, true, NULL, '2015-05-04 11:43:17.244277+02', '2015-05-04 11:43:17.304726+02');
