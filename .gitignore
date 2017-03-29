@@ -137,3 +137,9 @@ variable.list
 /src/cli/fo_ninka_license_list
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
+src/testing/selenium/node_modules/
+src/testing/selenium/npm-debug.log
+src/testing/selenium/data/empty.txt
+src/testing/selenium/data/index.html
+src/testing/selenium/data/index.js
+src/testing/selenium/data/test.zip
