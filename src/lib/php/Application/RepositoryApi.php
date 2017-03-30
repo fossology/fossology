@@ -32,7 +32,7 @@ class RepositoryApi {
         CURLOPT_HTTPHEADER => array('User-Agent: fossology')
         );
     curl_setopt_array($handle, $curlopt);
-
+    curl_setopt($handle, CURLOPT_TIMEOUT, 2);
     $response = curl_exec($handle);
     if ($response !== false) {
       $headerSize = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
