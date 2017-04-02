@@ -132,7 +132,8 @@ if (!file_exists($SchemaFilePath))
 }
 
 require_once("$MODDIR/lib/php/libschema.php");
-$libschema->setDriver(new Postgres($PG_CONN));
+$pgDriver = new Postgres($PG_CONN);
+$libschema->setDriver($pgDriver);
 $previousSchema = $libschema->getCurrSchema();
 $isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
 /* @var $dbManager DbManager */
