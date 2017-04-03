@@ -560,13 +560,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     return 1;
   }
 
-  snprintf(SQLFolder, MAXSQLFolder,"SELECT COUNT(*) FROM folderlist WHERE folder_pk=%ld",Parent);
-  resultFolder = PQexec(db_conn, SQLFolder);
-  count= atoi(PQgetvalue(resultFolder,0,0));
-  /* Find all folders with this parent and recurse */
+  /* Find all folders with this parent and recurse, but don't show uploads, if they also exist in other directories */
   snprintf(SQL,MAXSQL,"SELECT folder_pk,foldercontents_mode,name,description,upload_pk FROM folderlist "
-          "WHERE parent=%ld "
-          "ORDER BY name,parent,folder_pk",Parent);
+          "WHERE parent=%ld AND upload_pk NOT IN (SELECT upload_pk FROM folderlist WHERE parent!=%ld GROUP BY upload_pk HAVING COUNT(*) > 0) "
+          "ORDER BY name,parent,folder_pk",Parent,Parent);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
