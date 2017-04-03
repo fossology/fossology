@@ -51,8 +51,8 @@ env:
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
    - MAKETARGETS='all test-lib'
   matrix:
-   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/default-docker-test.sh' MAKETARGETS=''
-   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/docker-compose-test.sh' MAKETARGETS=''
+   - DOCKERTEST='Default' CHECKBEFORE='src/testing/docker/default-docker-test.sh' MAKETARGETS=''
+   - DOCKERTEST='docker-compose' CHECKBEFORE='src/testing/docker/docker-compose-test.sh' MAKETARGETS=''
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
@@ -89,12 +89,12 @@ matrix:
 script:
  - set -e
  - $CHECKBEFORE
- - 'if [[ -n "$PHPTESTSUITE" ]]; then
+ - if [ -z "$DOCKERTEST" ]; then
  - make $MAKETARGETS
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ~5; fi
  - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
- - fi'
+ - fi
  - set +e
 
 after_script:
