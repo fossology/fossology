@@ -14,6 +14,7 @@ services:
   fossology:
     build:
       context: ..
+      dockerfile: install/docker-compose.Dockerfile
       args:
         - http_proxy
         - https_proxy
