@@ -28,8 +28,13 @@ install:
  - sudo apt-get install -qq cppcheck
  - sudo apt-get install liblocal-lib-perl
  - sudo apt-get install libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
+ # To resolve ninka build dependency
+ - git clone --branch release-1.1104 https://github.com/dagolden/IO-CaptureOutput.git
+ - cd IO-CaptureOutput && perl Makefile.PL && make && make test && sudo make install && cd ..
+ - rm -rf IO-CaptureOutput
  - sudo mkdir -p /var/local/cache/fossology
  - sudo chown $(whoami) /var/local/cache/fossology
+
 
 before_script:
  - cd src/
