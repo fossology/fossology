@@ -33,9 +33,9 @@ install:
 before_script:
  - cd src/
  - composer install --dev
- - cd vendor/ && git clone https://github.com/dmgerman/ninka.git && cd ninka/ && perl Makefile.PL && make && sudo make install && cd ../..
  - cd ..
  - install/scripts/install-spdx-tools.sh
+ - install/scripts/install-ninka.sh
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
  
