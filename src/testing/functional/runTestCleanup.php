@@ -39,7 +39,7 @@ $date = date('Y-m-d');
 $time = date('h.i.s-a');
 print "Starting Cleanup Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Test Clean Up');
+$test = new TestSuite('Fossology Test Clean Up');
 $test->addTestFile('testCleanUp.php');
 
 if (TextReporter::inCli())

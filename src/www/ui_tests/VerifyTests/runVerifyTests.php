@@ -37,7 +37,7 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Verify Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo UI Verification Functional tests');
+$test = new TestSuite('Fossology Repo UI Verification Functional tests');
 //$test->addTestFile('browseUploadedTest.php');
 $test->addTestFile('OneShot-lgpl2.1.php');
 $test->addTestFile('OneShot-lgpl2.1-T.php');

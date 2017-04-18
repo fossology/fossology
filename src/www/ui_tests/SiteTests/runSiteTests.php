@@ -41,7 +41,7 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Site Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo Site UI tests');
+$test = new TestSuite('Fossology Repo Site UI tests');
 $test->addTestFile('AboutMenuTest.php');
 $test->addTestFile('login.php');
 $test->addTestFile('SearchMenuTest.php');

@@ -53,7 +53,7 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "Starting Upload-Prep Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo UI Upload-Prep Test');
+$test = new TestSuite('Fossology Repo UI Upload-Prep Test');
 $test->addTestFile('uptd.php');
 
 $test->run(new JUnitXMLReporter());
