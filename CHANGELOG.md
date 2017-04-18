@@ -1,3 +1,69 @@
+### 3.1.0 (April 2017)
+
+#### Smaller Features
+
+* feat(nomos): add and correct nomos licenses
+* feat(users): apply correct email validation
+* feat(spdx2): allow licenses to be spdx compatible and adapt the templates enhancement needs review
+
+#### Corrections
+
+* fix(ninka): ninka needs a new dependency
+* fix(docker): use a simpler Dockerfile for standalone build 
+* fix(browsefolder): added a check to see, if the folder is accessible
+* fix(copyright): invalid pointer to regex
+* fix(copyrightandeccview): added tooltip next to description
+* fix(cp2foss): Refactor common perms
+* fix(deshboard): Missing quotes around string literal
+* fix(docker): change Dockerfile, docker run command
+* fix(install): xenial support for postgres  in progress
+* fix(make): do not place composer at `/tmp/composer/composer`
+* fix(readme): Corrected the issue with mainlicense which was not displayed in readmeoss
+* fix(scripts) : update timezone info to php.ini  bug needs review
+* fix(setup): PHP warnings
+* fix(spdx): fixes a list of SPDX compatibility bugs
+* fix(test): fix copyright character
+* fix(test): phpunit-bootstrap doesn't find Hamcrest  Category: Testing
+* fix(ui): Added recent agent_pk in the place of any agent_pk
+* fix(unpacking): fix unpacking of mime-type application/java-archive
+* fix(user-creation): email needs to be unique and required
+* fix(www): correct ETA in all job view
+* fix(www): PHP warnings
+* fix(cleanup): remove HACKING, install_locations.xls, build.xml 
+* fix(spdx): typo in template and bump LicenseListVersion
+* fix(spdx): add files with no license found to generated output format
+
+#### Improvements on Infrastructure and Testing
+
+* chore(changelog): rename CHANGES.md to CHANGELOG.md
+* chore(doc): update documentation, change releases link to Github
+* chore(docker): docker usage information
+* chore(docker): refactor dockerfiles, splitting containers, avoid rebuilding, etc.
+* chore(gitignore): update gitignore
+* chore(make): Fix a typo
+* chore(make): Fix target name for stanalone nomos
+* chore(php): remove 5.3, set 5.6, add 7.0 to travis-ci
+* chore(setup): Set Postgres driver using variable reference
+* chore(testing): travis php7.1, phpunit5 for php56
+* chore(travis): remove gcc-4.4,clang-3.5, MAKETARGETS for gcc variants
+
+#### Improvements on Packaging
+
+* chore(packaging): first import of a pbconf tree
+* chore(packaging): Fix EPEL dependency
+* chore(packaging): updating existing debian packaging for current fossology  enhancement needs review
+* chore(packaging): vagrant test file and config for httpd 2.4  enhancement
+* chore(packaging): various enhancements with project builder
+
+### 3.1.0-RC2 (May 21st, 2016)
+
+#### Corrections
+
+* feat(conf): added header/copyright information
+* fix(showjob): Fixed problem with pagination and jobs not shown properly
+* fix(showjobs): permission test left function to early and fixed jobs not shown properly
+* fix(docker): only wait for postgresql if not on localhost bug
+
 ### 3.1.0-RC1 (April 15th, 2016)
 
 #### Refactoring
