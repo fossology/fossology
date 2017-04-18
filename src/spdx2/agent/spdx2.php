@@ -78,7 +78,15 @@ class SpdxTwoAgent extends Agent
 
   function __construct()
   {
-    parent::__construct('spdx2', AGENT_VERSION, AGENT_REV);
+    // deduce the agent name from the command line arguments
+    $args = getopt("", array(self::OUTPUT_FORMAT_KEY.'::'));
+    $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
+    if (empty($agentName))
+    {
+        $agentName = self::DEFAULT_OUTPUT_FORMAT;
+    }
+
+    parent::__construct($agentName, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
