@@ -1077,7 +1077,8 @@ if (empty($dbManager) || !($dbManager instanceof DbManager))
   $logger = new Logger(__FILE__);
   $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
   $dbManager = new ModernDbManager($logger);
-  $dbManager->setDriver(new Postgres($PG_CONN));
+  $pgDriver = new Postgres($PG_CONN);
+  $dbManager->setDriver($pgDriver);
 }
 /* simulate the old functions*/
 $libschema = new fo_libschema($dbManager);

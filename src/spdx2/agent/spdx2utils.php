@@ -19,6 +19,8 @@ namespace Fossology\SpdxTwo;
 
 class SpdxTwoUtils
 {
+  static public $prefix = "LicenseRef-";
+
   /**
    * @param string[] $args
    * @param string $key1
@@ -40,40 +42,73 @@ class SpdxTwoUtils
   }
 
   /**
-   * @param string[] $licenses
-   * @param string="" $prefix
+   * @param string $license
+   * @param callable $spdxValidityChecker
    *
    * @return string
    */
-  static public function implodeLicenses($licenses, $prefix="")
+  static public function addPrefixOnDemand($license, $spdxValidityChecker = null)
+  {
+    if(strpos($license, " OR ") !== false)
+    {
+      return "(" . $license . ")";
+    }
+    else
+    {
+      if($spdxValidityChecker === null ||
+          (is_callable($spdxValidityChecker) &&
+              call_user_func($spdxValidityChecker, $license)))
+      {
+        return $license;
+      }
+      else
+      {
+        return self::$prefix . $license;
+      }
+    }
+  }
+
+  static public function addPrefixOnDemandKeys($licenses, $spdxValidityChecker = null)
+  {
+    $ret = array();
+    foreach($licenses as $license=>$text)
+    {
+      $ret[self::addPrefixOnDemand($license, $spdxValidityChecker)] = $text;
+    }
+    return $ret;
+  }
+
+  static public function addPrefixOnDemandList($licenses, $spdxValidityChecker = null)
+  {
+    return array_map(function ($license) use ($spdxValidityChecker)
+    {
+      return SpdxTwoUtils::addPrefixOnDemand($license, $spdxValidityChecker);
+    },$licenses);
+  }
+
+  /**
+   * @param string[] $licenses
+   * @param callable $spdxValidityChecker
+   *
+   * @return string
+   */
+  static public function implodeLicenses($licenses, $spdxValidityChecker = null)
   {
     if(!$licenses || !is_array($licenses) || sizeof($licenses) == 0)
     {
       return "";
     }
 
-    $licenses = array_map(function ($license) use ($prefix)
-    {
-      if(strpos($license, " OR ") !== false)
-      {
-        return "(" . $license . ")";
-      }
-      else
-      {
-        if(substr($license, 0, strlen($prefix)) === $prefix)
-        {
-          return $license;
-        }
-        else
-        {
-          return $prefix . $license;
-        }
-      }
-    },$licenses);
+    $licenses = self::addPrefixOnDemandList($licenses, $spdxValidityChecker);
     sort($licenses, SORT_NATURAL | SORT_FLAG_CASE);
 
     if(count($licenses) == 3 &&
-       ($index = array_search($prefix . "Dual-license",$licenses)) !== false)
+       ($index = array_search("Dual-license",$licenses)) !== false)
+    {
+      return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
+    }
+    elseif(count($licenses) == 3 &&
+        ($index = array_search(self::$prefix . "Dual-license",$licenses)) !== false)
     {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
     }

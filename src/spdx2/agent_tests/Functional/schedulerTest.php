@@ -1,6 +1,7 @@
 <?php
 /*
 Copyright (C) 2015, Siemens AG
+Copyright (C) 2017 TNG Technology Consulting GmbH
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -100,15 +101,15 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   }
 
   /** @group Functional */
-  public function testReportForNormalUploadtreeTable()
+  public function testSpdxForNormalUploadtreeTable()
   {
     $this->setUpTables();
     $this->setUpRepo();
-    $this->runAndTestReport();
+    $this->runAndTestReportRDF();
   }
 
   /** @group Functional */
-  public function testReportForSpecialUploadtreeTable()
+  public function testSpdxForSpecialUploadtreeTable()
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -118,23 +119,34 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->getSingleRow("UPDATE upload SET uploadtree_tablename=$1 WHERE upload_pk=$2",
             array("uploadtree_$uploadId",$uploadId),__METHOD__.'.alterUpload');
 
-    $this->runAndTestReport($uploadId);
+    $this->runAndTestReportRDF($uploadId);
   }
 
-  public function runAndTestReport($uploadId=1)
-  {
-    list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId=7);
+  public function runJobFromJobque($uploadId, $jobId){
+    list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId);
 
     assertThat('cannot run runner', $success, equalTo(true));
-    assertThat( 'report failed: "'.$output.'"', $retCode, equalTo(0));
+    assertThat('report failed: "'.$output.'"', $retCode, equalTo(0));
     assertThat($this->getHeartCount($output), greaterThan(0));
+  }
 
+  public function getReportFilepathFromJob($uploadId, $jobId){
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId), "reportFileName");
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
     assertThat($filepath, endsWith('.rdf'));
     assertThat(file_exists($filepath),equalTo(true));
+
+    return $filepath;
+  }
+
+  public function runAndTestReportRDF($uploadId=1)
+  {
+    $jobId=7;
+
+    $this->runJobFromJobque($uploadId, $jobId);
+    $filepath = $this->getReportFilepathFromJob($uploadId, $jobId);
 
     $copyrightStatement = 'Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved';
     assertThat(file_get_contents($filepath), stringContainsInOrder($copyrightStatement));
@@ -145,30 +157,49 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
 
     $this->verifyRdf($filepath);
-    unlink($filepath);
     $this->rmRepo();
   }
-
+  
   protected function verifyRdf($filepath)
   {
+    $toolJarFile = $this->pullSpdxTools();
+
+    $verification = exec("java -jar $toolJarFile Verify $filepath");
+    assertThat($verification,equalTo('This SPDX Document is valid.'));
+    unlink($filepath);
+  }
+
+  protected function pullSpdxTools()
+  {
+    $this-> verifyJavaIsInstalled();
+
+    $version='2.1.0';
+    $tag='v'.$version;
+
+    $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
+    $jarFile = __DIR__.'/'.$jarFileBasename;
+    if(!file_exists($jarFile))
+    {
+      $zipFileBasename='SPDXTools-'.$tag.'.zip';
+      $zipFile=__DIR__.'/'.$zipFileBasename;
+      if(!file_exists($zipFile))
+      {
+        file_put_contents($zipFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$zipFileBasename, 'r'));
+
+      }
+      $this->assertFileExists($zipFile, 'could not download SPDXTools');
+
+      system('unzip -n -d '.__DIR__.' '.$zipFile);
+      rename (__DIR__.'/SPDXTools-'.$tag.'/'.$jarFileBasename, $jarFile);
+    }
+    $this->assertFileExists($jarFile, 'could not extract SPDXTools');
+    return $jarFile;
+  }
+
+  protected function verifyJavaIsInstalled(){
     $lines = '';
     $returnVar = 0;
     exec('which java', $lines, $returnVar);
     $this->assertEquals(0,$returnVar,'java required for this test');
-
-    $toolJarFile = __DIR__.'/spdx-tools-2.0.2-jar-with-dependencies.jar';
-    $this->pullSpdxTools($toolJarFile);
-
-    $verification = exec("java -jar $toolJarFile Verify $filepath");
-    assertThat($verification,equalTo('This SPDX Document is valid.'));
-  }
-
-  protected function pullSpdxTools($jarFile)
-  {
-    if(!file_exists($jarFile))
-    {
-      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/V2.0.2/spdx-tools-2.0.2-jar-with-dependencies.jar', 'r'));
-    }
-    $this->assertFileExists($jarFile, 'could not download SPDXTools');
   }
 }

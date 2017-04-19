@@ -101,7 +101,8 @@ function ConfigInit($sysconfdir, &$SysConf)
   $PG_CONN = DBconnect($sysconfdir);
 
   global $container;
-  $container->get('db.manager')->setDriver(new \Fossology\Lib\Db\Driver\Postgres($PG_CONN));
+  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($PG_CONN);
+  $container->get('db.manager')->setDriver($postgresDriver);
 
   /**************** read/create/populate the sysconfig table *********/
   /* create if sysconfig table if it doesn't exist */

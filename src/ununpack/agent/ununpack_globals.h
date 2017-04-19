@@ -98,8 +98,9 @@ cmdlist CMD[] =
 /* 28 */{ "application/x-debian-source","dpkg-source","-x","'%s' >/dev/null 2>&1","",CMD_DEB,1,0177000,0177000, },
 /* 29 */{ "application/x-xz","tar","-JxSf",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177777, },
 /* 30 */{ "application/jar","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
-/* 31 */{ "application/x-dosexec","7z","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
-/* 32 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
+/* 31 */{ "application/java-archive","unzip","-q -P none -o","-x / >/dev/null 2>&1","unzip -Zhzv '%s' > '%s'",CMD_ARC,1,0177000,0177000, },
+/* 32 */{ "application/x-dosexec","7z","x -y -pjunk",">/dev/null 2>&1","",CMD_ARC,1,0177000,0177000, },
+/* 33 */{ "","","",">/dev/null 2>&1","",CMD_DEFAULT,1,0177000,0177000, },
   { NULL,NULL,NULL,NULL,NULL,-1,-1,0177000,0177000, },
 };
 #endif

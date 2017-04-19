@@ -85,12 +85,27 @@ class user_add extends FO_Plugin {
       $text = _("Passwords did not match. Not added.");
       return ($text);
     }
+    
+    if(empty($Email))
+    {
+      $text = _("Email must be specified. Not added.");
+      return ($text);
+    }
+
     /* Make sure email looks valid */
-    $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $Email);
-    if ($Check != $Email) {
+    if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
+    {
       $text = _("Invalid email address.  Not added.");
       return ($text);
     }
+    
+    /* Make sure email is unique */
+    $email_count = $this->dbManager->getSingleRow("SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;", array($Email))["count"];
+    if ($email_count > 0) {
+      $text = _("Email address already exists.  Not added.");
+      return ($text);
+    }
+
     /* See if the user already exists (better not!) */
     $row = $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1 LIMIT 1;",
         array($User), $stmt = __METHOD__ . ".getUserIfExisting");
@@ -146,7 +161,7 @@ class user_add extends FO_Plugin {
     $V.= "<td><input type='text' name='description' value='$Val' size=60></td>\n";
     $V.= "</tr>\n";
     $Val = htmlentities(GetParm('email', PARM_TEXT), ENT_QUOTES);
-    $text = _("Email address (optional)");
+    $text = _("Email address");
     $V .= "$Style<th>$text</th>\n";
     $V.= "<td><input type='text' name='email' value='$Val' size=60></td>\n";
     $V.= "</tr>\n";

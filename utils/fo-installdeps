@@ -1,4 +1,4 @@
-
+#!/usr/bin/env bash
 # FOSSology fo-installdeps script
 # Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
 # This program is free software; you can redistribute it and/or
@@ -114,7 +114,9 @@ if [ $BUILDTIME ]; then
               lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
               isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
               precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
-              trusty|jessie) apt-get $YesOpt install postgresql-server-dev-9.3;;
+              trusty) apt-get $YesOpt install postgresql-server-dev-9.3;;
+              jessie) apt-get $YesOpt install postgresql-server-dev-9.4;;
+              xenial) apt-get $YesOpt install postgresql-server-dev-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -187,8 +189,12 @@ if [ $RUNTIME ]; then
                  apt-get $YesOpt install postgresql-8.4;;
               precise|oneiric|quantal|raring|saucy)
                  apt-get $YesOpt install postgresql-9.1;;
-              trusty|jessie)
+              trusty)
                  apt-get $YesOpt install postgresql-9.3;;
+              jessie)
+                 apt-get $YesOpt install postgresql-9.4;;
+              xenial)
+                 apt-get $YesOpt install postgresql-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -255,21 +261,12 @@ if [ $RUNTIME ]; then
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
    
-   which composer
-    if [ $? -eq 0  ]; then
-        if [ $OFFLINE -eq 0 ]; then
-            composer selfupdate
-        else
-           echo "WARNING: composer is not updated due to the offline switch"
-        fi
-    else
-        if [ $OFFLINE -eq 0 ]; then
-            curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
-        else
-            echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
-            echo "Please run the equivalent of 'curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer'"
-        fi
-    fi
+   if [ $OFFLINE -eq 0 ]; then
+       "$( dirname "$0" )/install_composer.sh"
+   else
+       echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
+       echo "Please run the equivalent of 'sudo ./utils/install_composer.sh'"
+   fi
 fi
 
 ########################################################################

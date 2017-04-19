@@ -161,6 +161,7 @@ class Xpview extends DefaultPlugin
     list($pageMenu, $textView)  = $theView;
 
     list($description,$textFinding,$comment, $decisionType)=$this->copyrightDao->getDecision($this->decisionTableName ,$uploadEntry['pfile_fk']);
+    $vars['agentName'] = $this->agentName;
     $vars['description'] = $description;
     $vars['textFinding'] = $textFinding;
     $vars['comment'] = $comment;
@@ -181,7 +182,6 @@ class Xpview extends DefaultPlugin
     
     $agentId = intval($request->get("agent"));
     $vars = array_merge($vars,$this->additionalVars($uploadId, $uploadTreeId, $agentId));
-    
     return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
   }
   

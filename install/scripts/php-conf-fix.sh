@@ -6,7 +6,17 @@
 #
 echo 'Automated php.ini configuration adjustments'
 echo
-phpIni=/etc/php5/apache2/php.ini
+if [ -f /etc/redhat-release ]; then
+    phpIni=/etc/php.ini
+    TIMEZONE=`readlink /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
+else
+    phpIni=/etc/php5/apache2/php.ini
+    TIMEZONE=`cat /etc/timezone`
+fi
+if [ -z $TIMEZONE ]; then
+    TIMEZONE="America/Denver"
+fi
+
 if [ -e $phpIni ]
 then
     echo 'Copies php.ini to current directory and creates a backup file'
@@ -22,6 +32,8 @@ then
     sed -i 's/^\(post_max_size\s*=\s*\).*$/\1701M/' php.ini
     echo 'Setting max upload filesize to 700M'
     sed -i 's/^\(upload_max_filesize\s*=\s*\).*$/\1700M/' php.ini
+    echo "Setting timezone to $TIMEZONE"
+    sed -i "s%.*date.timezone =.*%date.timezone = $TIMEZONE%" php.ini
     echo 'php.ini adjusted!'
     echo
     echo 'Display the changes made'

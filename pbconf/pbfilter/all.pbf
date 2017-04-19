@@ -1,0 +1,62 @@
+#
+# $Id$
+#
+# Filter for all files
+#
+#
+# PBREPO is replaced by the root URL to access the repository
+filter PBREPO = $pb->{'repo'}
+
+# PBSRC is replaced by the source package format
+filter PBSRC = src/%{srcname}-%{version}$pb->{'extdir'}.tar.gz
+
+# PBVER is replaced by the version ($pb->{'ver'} in code)
+filter PBVER = $pb->{'ver'}
+
+# PBDATE is replaced by the date ($pb->{'date'} in code)
+filter PBDATE = $pb->{'date'}
+
+# PBEXTDIR is replaced by the date ($pb->{'extdir'} in code)
+filter PBEXTDIR = $pb->{'extdir'}
+
+# PBPATCHSRC is replaced by the patches names if value is yes. Patches are located under the pbpatch dir of the pkg.
+#filter PBPATCHSRC = yes
+
+# PBPATCHCMD is replaced by the patches commands if value is yes
+#filter PBPATCHCMD = yes
+
+# PBTAG is replaced by the tag ($pb->{'tag'} in code)
+filter PBTAG = $pb->{'tag'}
+
+# PBREV is replaced by the revision ($pb->{'rev'} in code)
+filter PBREV = $pb->{'rev'}
+
+# PBREALPKG is replaced by the package name ($pb->{'realpkg'} in code)
+filter PBREALPKG = $pb->{'realpkg'}
+
+# PBPKG is replaced by the package name ($pb->{'pkg'} in code)
+filter PBPKG = $pb->{'pkg'}
+
+# PBPROJ is replaced by the project name ($pb->{'proj'} in code)
+filter PBPROJ = $pb->{'proj'}
+
+# PBPACKAGER is replaced by the packager name ($pb->{'packager'} in code)
+filter PBPACKAGER = $pb->{'packager'}
+
+# PBDESC contains the description of the package
+filter PBDESC = An open and modular architecture for analyzing software. Currently specializing on license detection.
+
+# PBURL contains the URL of the Web site of the project
+filter PBURL = http://www.fossology.org
+
+# PBLOG is replaced by the changelog if value is yes
+# and should be last as when used we need the %pb hash filled
+filter PBLOG = yes
+
+# By default no build dependencies
+filter PBBUILDDEP = 
+
+# For fedora system
+filter PBFEDORAD = 
+filter PBPGHBB = 
+filter PBSTOP = stop 

@@ -10,8 +10,8 @@
 FileName: {{ fileName }}
 SPDXID: SPDXRef-item{{ fileId }}
 {# FileType: OTHER #}
-FileChecksum: SHA1: {{ sha1 }}
-FileChecksum: MD5: {{ md5 }}
+FileChecksum: SHA1: {{ sha1 | lower }}
+FileChecksum: MD5: {{ md5 | lower }}
 {% if isCleared %}
 {% if concludedLicenses|default is empty %}
 LicenseConcluded: NONE
@@ -25,7 +25,7 @@ LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NOASSERTION
 {% else %}
 {% for lic in  scannerLicenses %}
-LicenseInfoInFile: LicenseRef-{{ lic|replace({' ':'-'})}}
+LicenseInfoInFile: {{ lic|replace({' ':'-'})}}
 {% endfor %}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
