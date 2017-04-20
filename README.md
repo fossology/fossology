@@ -6,11 +6,7 @@
 
 ## About
 
-FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright
-and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance
-workflow.  In one click you can generate an SPDX file, or a ReadMe with all the copyrights notices from your software.
-FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will
-get rescanned.  This is a big time saver for large projects.
+FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance workflow. In one click you can generate an SPDX file, or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
 
 [Check out Who Uses FOSSology!](http://www.fossology.org/projects/fossology/wiki/WhoUsesFOSSology)
 
@@ -19,7 +15,7 @@ http://fossology.org/
 
 ## Requirements
 
-The PHP versions 5.5.9 to 5.6.x are supported to work for FOSSology.
+The PHP versions 5.5.9 to 5.6.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.4 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
 ## Installation
 
@@ -77,14 +73,63 @@ See [Contact Us](https://www.fossology.org/get-started)
 
 We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## License
+## Licensing
+
+The original FOSSology source code and associated documentation
+including these web pages are Copyright (C) 2007-2012 HP Development
+Company, L.P. In the past years, other contributors added source code 
+and documentation to the project, see the NOTICES file or the referring
+files for more information.
+
+Any modifications or additions to source code or documentation
+contributed to the FOSSology project are Copyright (C) the contributor,
+and should be noted as such in the comments section of the modified file(s).
 
 FOSSology is licensed under [GPL-2.0](https://tldrlegal.com/license/gnu-general-public-license-v2)
 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; version 2 of the License
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program; if not, write to the Free Software Foundation, Inc.,
+    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+Exception:
+
+All of the FOSSology source code is licensed under the terms of the GNU
+General Public License version 2, with the following exceptions:
+
+libfossdb and libfossrepo libraries are licensed under the terms of
+the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.com/license/gnu-lesser-general-public-license-v2.1-(lgpl-2.1)).
+
+    This library are free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+    02110-1301  USA
+
+Please see the files COPYING and COPYING.LGPL included with this
+software for the full text of these licenses.
+
 ## Screenshots
 
-![Concluding a license](/examples/Concludeb.jpg)
+![Browsing](examples/Browseb.jpg)
 
-![Browsing](/examples/Browseb.jpg)
+![LicenseBrowser](examples/LicenseBrowserb.jpg)
 
-![LicenseBrowser](/examples/LicenseBrowserb.jpg)
+![Concluding a license](examples/Concludeb.jpg)
