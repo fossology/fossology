@@ -49,6 +49,10 @@ class SpdxTwoUtils
    */
   static public function addPrefixOnDemand($license, $spdxValidityChecker = null)
   {
+    if(empty($license) || $license === "NOASSERTION")
+    {
+      return "NOASSERTION";
+    }
     if(strpos($license, " OR ") !== false)
     {
       return "(" . $license . ")";
