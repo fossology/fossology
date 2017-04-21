@@ -28,6 +28,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Dao\LicenseDao;
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
@@ -48,6 +49,8 @@ class DeciderJobAgent extends Agent {
   private $clearingDao;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var LicenseDao */
+  private $licenseDao;
   /** @var int */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
   /** @var DecisionTypes */
@@ -67,6 +70,7 @@ class DeciderJobAgent extends Agent {
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
+    $this->licenseDao = $this->container->get('dao.license');
 
     $this->agentSpecifOptions = "k:";
     $this->licenseMapUsage = $licenseMapUsage;
@@ -117,6 +121,33 @@ class DeciderJobAgent extends Agent {
     return true;
   }
 
+  private function noLicensesCheck(&$detectedLicenses, &$removedLicenses)
+  {
+    $noLicenses = false;
+    if ($detectedLicenses[0]->getLicenseId() == 507)
+    {
+      return true;
+    }
+
+    foreach ($detectedLicenses as $dlic)
+    {
+      $noLicenses = false;
+      foreach ($removedLicenses as $rlic)
+      {
+        if ($dlic->getLicenseId() == $rlic->getLicenseId())
+        {
+          $noLicenses = true;
+          break;
+        }
+      }
+      if (!$noLicenses)
+      {
+        break;
+      }
+    }
+    return $noLicenses;
+  }
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
@@ -139,7 +170,27 @@ class DeciderJobAgent extends Agent {
 
     if ($createDecision)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
+      /* Do not add/change concluded license if:
+	     - agent has detected No_license_found, or
+         - user has concluded that there is no valid license in a file, or
+         - concluded license has already been added */
+      list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+      $concludedLicenseExist = false;
+      $allDetectedLicensesRemoved = false;
+      foreach ($concludedLicenses as $license) {
+        if ($license->hasClearingEvent()) {
+          $concludedLicenseExist = true;
+          break;
+        }
+      }
+
+      $detectedFileLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+      $allDetectedLicensesRemoved = $this->noLicensesCheck($detectedFileLicenses, $removedLicenses);
+
+      if (!$allDetectedLicensesRemoved && !$concludedLicenseExist) {
+        $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
+      }
+
     }
     else
     {
