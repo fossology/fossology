@@ -1,0 +1,45 @@
+{# Copyright 2014-2017 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+<form name="Updatefm" action="{{ actionUri }}" method="post">
+  <input type="hidden" name="ob_pk" value="{{ ob_pk }}"/>
+  <input type="hidden" name="{% if ob_pk %}updateit{% else %}addit{% endif %}" value="true"/>
+  <table>
+    {% import 'include/macros.html.twig' as macro %}
+    <tr>
+      <td align="right">{{ 'Active'|trans }}</td>
+      <td align="left">{{ macro.select('ob_active',boolYesNoMap,'ob_active',ob_active) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Obligation Topic'|trans }}
+        {% if isReadOnly %}
+          ({{ 'read only'|trans }}){% endif %}
+      </td>
+      <td><input type="text" name="ob_topic" value="{{ ob_topic|e }}" size="30"></td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Obligation Text'|trans }}
+        {% if isReadOnly %}
+          ({{ 'read only'|trans }}){% endif %}
+      </td>
+      <td>
+        <textarea name="ob_text" rows="10" cols="80" {% if isReadOnly %} readonly="readonly" {% endif %}>{{ ob_text|e }}</textarea>
+      </td>
+    </tr>
+    <tr>
+      <td align="right">{{ "Associated Licenses"|trans }}</td>
+      <td align="left">{{ macro.selectwitharray(licenseSelectorName, licenseShortnames, licenseSelectorId, licnames, 'style="min-width:420px;"', 5) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Text Updatable'|trans }}</td>
+      <td align="left">{{ macro.select('ob_text_updatable',boolYesNoMap,'ob_text_updatable',ob_text_updatable) }}</td>
+    </tr>
+  </table>
+  {% if obId %}
+    <a href="?mod=admin_obligation_to_csv&amp;ob={{ obId }}" class="buttonLink">{{ 'Export as CSV'|trans }}</a>
+  {% endif %}
+  <input type="submit" value="{% if obId %}{{ 'Update'|trans }}{% else %}{{ 'Add obligation'|trans }}{% endif %}"/>
+</form>

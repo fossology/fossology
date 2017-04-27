@@ -42,3 +42,23 @@
     {% endfor %}
   </select>
 {% endmacro %}
+
+{% macro selectwitharray(name, options, id, selected, action, size) %}
+  {% if size is not defined %}
+    {% set size = 0 %}
+  {% endif %}
+  <select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}{% if size > 0  %} multiple="multiple" size="{{ size }}"{% endif %}{% if action is defined %}
+    {{ action}}{% endif %}>
+    {% for key, value in options %}
+      {% set selectedflag = false %}
+      {% for num, license in selected %}
+        {% if license == value %}
+          {% set selectedflag = true %}
+        {% endif %}
+      {% endfor %}
+      <option value="{{ key }}" {% if selectedflag %}selected="selected"{% endif %}>
+      {{ value|e }}
+      </option>
+    {% endfor %}
+  </select>
+{% endmacro %}
