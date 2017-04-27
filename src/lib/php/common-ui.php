@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017 Siemens, AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,11 +32,12 @@ use Symfony\Component\HttpFoundation\Session\Session;
  * \param $SelElt - True (default) if $SelectedVal is a value False if $SelectedVal is a key
  * \param $Options - Optional.  Options to add to the select statment.
  * For example, "id=myid onclick= ..."
+ * \param $ReturnKey - True (default) return the Key as value, if False return the Value
  *
- * \return a string of select html 
+ * \return a string of select html
  */
 function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-$FirstEmpty=false, $SelElt=true, $Options="")
+$FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
@@ -46,7 +48,10 @@ $FirstEmpty=false, $SelElt=true, $Options="")
     $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
     else
     $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    if ($ReturnKey == true)
     $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    else
+    $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
   }
   $str .= "</select>";
   return $str;
@@ -104,12 +109,12 @@ function HumanSize( $bytes )
   }
   return(round($bytes, 2) . ' PB');
 }
- 
+
 /**
  * \brief get File Extension (text after last period)
  *
  * \param $fname - file name
- * 
+ *
  * \return the file extension of the specified file name
  */
 function GetFileExt($fname)
@@ -123,7 +128,7 @@ function GetFileExt($fname)
 /**
  * \brief get the value from a array(map)
  *
- * \param $Key - key 
+ * \param $Key - key
  * \param $Arr - Whithin the Array, you can get value according to the key
  *
  * \return an array value, or "" if the array key does not exist
@@ -162,7 +167,7 @@ function HostListOption()
  * \param $text - text to download as file
  * \param $name - file name
  * \param $contentType - download file Content-Type
- * 
+ *
  * \return True on success, error message on failure.
  */
 function DownloadString2File($text, $name, $contentType)
@@ -193,7 +198,7 @@ function DownloadString2File($text, $name, $contentType)
  *        If upload_pk does not exist, return "uploadtree".
  *
  * \param $upload_pk
- * 
+ *
  * \return uploadtree table name
  */
 function GetUploadtreeTableName($upload_pk)
@@ -211,7 +216,7 @@ function GetUploadtreeTableName($upload_pk)
 
 /**
  * \brief get Upload Name thourgh upload id
- * 
+ *
  * \param $upload_id - upload ID
  *
  * \return upload name
@@ -246,7 +251,7 @@ function GetUploadID($uploadtreeid)
  *
  * \param $upload - upload id
  *
- * \return return 1st uploadtree id 
+ * \return return 1st uploadtree id
  */
 function Get1stUploadtreeID($upload)
 {

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017 Siemens, AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -35,7 +36,7 @@
  *
  * If $Options is empty, then connection parameters will be read from Db.conf.
  *
- * \return 
+ * \return
  *   Success: $PG_CONN, the postgres connection object
  *   Failure: Error message is printed
  **/
@@ -94,8 +95,8 @@ function DBconnect($sysconfdir, $options="", $exitOnFail=true)
    \param $Where   SQL where clause e.g. "where uploadtree_pk=2".
                    Though a WHERE clause is the typical use, $Where
                    can really be any options following the sql tablename.
-   \return 
-       Associative array for this record.  
+   \return
+       Associative array for this record.
        May be empty if no record found.
  **/
 function GetSingleRec($Table, $Where="")
@@ -141,6 +142,48 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
   while ($row = pg_fetch_assoc($result))
   {
     $ResArray[$row[$KeyCol]] = $row[$ValCol];
+  }
+  return $ResArray;
+}
+
+/**
+ * \brief Create an array by using table
+ *        rows to source the values.
+ *
+ * \param $Table   tablename
+ * \param $ValCol  Value column name in $Table
+ * \param $Uniq    Sort out duplicates
+ * \param $Where   SQL where clause (optional)
+ *                 This can really be any clause following the
+ *                 table name in the sql
+ *
+ * \return
+ *  Array[Key] = Val for each row in the table
+ *  May be empty if no table rows or Where results
+ *  in no rows.
+ **/
+function DB2ValArray($Table, $ValCol, $Uniq=false, $Where="")
+{
+  global $PG_CONN;
+
+  $ResArray = array();
+
+  if ($Uniq)
+  {
+    $sql = "SELECT DISTINCT $ValCol from $Table $Where";
+  }
+  else
+  {
+    $sql = "SELECT $ValCol from $Table $Where";
+  }
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+
+  $i = 0;
+  while ($row = pg_fetch_assoc($result))
+  {
+    $ResArray[$i] = $row[$ValCol];
+    ++$i;
   }
   return $ResArray;
 }
