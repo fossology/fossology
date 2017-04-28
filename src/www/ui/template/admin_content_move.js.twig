@@ -21,6 +21,7 @@ $(document).ready(function() {
             option.value = key;
             folderchild.append(option);
           });
+          sortList('#foldercontent option');
         })
         .fail(failed);
     return false;

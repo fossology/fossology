@@ -154,9 +154,9 @@ class FolderDao extends Object
     $this->dbManager->prepare($statementName, $this->getFolderTreeCte($parentId)
             . " SELECT folder_pk, parent_fk, folder_name, folder_desc, folder_perm, depth FROM folder_tree ORDER BY name_path");
     $res = $this->dbManager->execute($statementName, $parameters);
-  
+
     $userGroupMap = $this->userDao->getUserGroupMap(Auth::getUserId());
-    
+
     $results = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
