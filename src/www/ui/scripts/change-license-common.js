@@ -109,10 +109,36 @@ function scheduledDeciderError (responseobject, resultEntity) {
   resultEntity.show();
 }
 
+function isUserError(bulkActions, refText) {
+    var errorText = "";
+    if(bulkActions.length < 1) {
+        errorText += "No licenses to bulk scan selected\n";
+    }
+
+    if(refText.trim().split(" ").length < 2) {
+        errorText += "Reference text needs to be at least 2 words long"
+    }
+
+    //show errors to user
+    if(errorText.length > 0) {
+      alert("Bulk scan not scheduled: \n\n"+errorText);
+      return true;
+    }
+    return false;
+}
+
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
+  var bulkActions = getBulkFormTableContent();
+  var refText = $('#bulkRefText').val();
+
+  //checks for user errors
+  if(isUserError(bulkActions, refText)) {
+    return;
+  }
+  
   var post_data = {
-    "bulkAction": getBulkFormTableContent(),
-    "refText": $('#bulkRefText').val(),
+    "bulkAction": bulkActions,
+    "refText": refText,
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0
