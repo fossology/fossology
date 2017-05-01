@@ -31,14 +31,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <getopt.h>
 #include <libgen.h>
+#include <glib.h>
 
 /* ************************************************************************** */
 /* **** Locals ************************************************************** */
 /* ************************************************************************** */
 
-int items_processed; ///< the number of items processed by the agent
+volatile gint items_processed; ///< the number of items processed by the agent
+volatile int alive;           ///< if the agent has updated with a hearbeat
 char buffer[2048];    ///< the last thing received from the scheduler
-int alive;           ///< if the agent has updated with a hearbeat
 int valid;           ///< if the information stored in buffer is valid
 int sscheduler;      ///< whether the agent was started by the scheduler
 int userID;          ///< the id of the user that created the job
@@ -81,7 +82,9 @@ int agent_verbose;
 */
 void fo_heartbeat()
 {
-  fprintf(stdout, "HEART: %d %d\n", items_processed, alive);
+  int processed = g_atomic_int_get(&items_processed);
+  // TODO these functions are not safe for a signal handler
+  fprintf(stdout, "HEART: %d %d\n", processed, alive);
   fflush(stdout);
   fflush(stderr);
   alarm(ALARM_SECS);
@@ -156,7 +159,7 @@ void fo_check_agentdb(PGconn* db_conn)
 */
 void fo_scheduler_heart(int i)
 {
-  items_processed += i;
+  g_atomic_int_add(&items_processed, i);
   alive = TRUE;
 
   fflush(stdout);
