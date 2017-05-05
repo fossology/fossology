@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  * Author: J.Najjar
  *
  * This program is free software; you can redistribute it and/or
@@ -60,7 +60,11 @@ abstract class HistogramBase extends FO_Plugin {
         "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" => $filter, "description" => $description);
 
     //TODO template this! For now I just template the js
-    $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/>";
+    $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/><br/>
+               <div>
+                <a style='cursor: pointer; margin-left:10px;'id='deleteSelected".$type."' class='buttonLink'>Mark selected rows for deletion</a>
+               </div>  
+              <br/>";
 
     return array($output, $out);
   }

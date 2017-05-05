@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  * Author: Daniele Fognini, Johannes Najjar, Steffen Weber
  *
  * This program is free software; you can redistribute it and/or
@@ -177,7 +177,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     {
       // No filter, nothing to do
     }
-    $params = array($left, $right, $type, $agentId);
+    $params = array($left, $right, $type, $agentId, 'true');
 
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
@@ -188,6 +188,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
         "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND cp.type = $3 " .
         "AND cp.agent_fk= $4 " .
+        "AND cp.is_enabled= $5 " .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
@@ -278,6 +279,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
     $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class=\"delete\" src=\"images/space_16.png\"><span hidden='true' id='update$type$hash'></span>";
+    $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     return $output;
   }
 
@@ -306,17 +308,14 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   {
     $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
     $cpTable = $this->getTableName($type);
-    $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable);
+    $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable, 'delete');
     return new Response('Successfully deleted', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 
   protected function doUndo($itemId, $hash, $type) {
     $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);
     $cpTable = $this->getTableName($type);
-    if ($cpTable != 'copyright') {
-      return new Response('There is not undo for ' . $cpTable, Response::HTTP_NOT_IMPLEMENTED, array('Content-type' => 'text/plain'));
-    }
-    $this->copyrightDao->rollbackTable($item, $hash, Auth::getUserId(), $cpTable);
+    $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable, 'rollback');
     return new Response('Successfully restored', Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Daniele Fognini, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -102,7 +102,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('copyright','copyright_audit','uploadtree','copyright_decision'));
+    $this->testDb->createPlainTables(array('copyright','uploadtree','copyright_decision'));
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->insertData(array('copyright','uploadtree_a'));
 
@@ -270,11 +270,6 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
-    
-    $audit = $this->dbManager->getSingleRow('SELECT * FROM copyright_audit WHERE ct_fk=$1',array($ctPk),__METHOD__.'.audit');
-    assertThat($audit, hasKeyValuePair('ct_fk',$ctPk));
-    assertThat($audit, hasKeyValuePair('oldtext','modified versions of this software. you must, however, include this copyright statement along with any code built using doc software that you release. no copyright statement needs to be provided if you'));
-    assertThat($audit, hasKeyValuePair('user_fk',$userId));
 
     $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE ct_pk=$1',array($ctPk),__METHOD__.'.cp');
     assertThat($updatedCp['content'],is(equalTo($content)));
@@ -291,7 +286,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
-    $copyrightDao->updateTable($item, $hash2, $content='', 55);
+    $copyrightDao->updateTable($item, $hash2, $content='', 55, 'copyright', 'delete');
     
     $remainingEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $remainingCount = count($remainingEntries);
