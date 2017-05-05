@@ -4453,10 +4453,18 @@ e /* (INFILE(j)) */
 # DELETED: if you modify the DNSsafe software itself you cannot modify its
 # documented API ... including the right to use any patents or other
 # intellectual property that your modifications depend upon
-#####
-%ENTRY%	_LT_RSA_5
+##### 
+%ENTRY% _LT_RSA_5
 %KEY%	"distribut"
 %STR%	"and you must grant RSA Data Security the right to use modify and distribute your modifications"
+#
+%ENTRY% _LT_RSA_CRYPTOKI_1
+%KEY%   "cryptographic"
+%STR%   "Cryptographic Token Interface"
+#
+%ENTRY% _LT_RSA_CRYPTOKI_2
+%KEY%   "licen[cs]"
+%STR%   "Licen[cs]e is also granted to make and use derivative works provided that such works are identified as derived from the RSA Security Inc"
 #####
 # DELETED: ... of the software but belong to whomever generated them and
 # may be sold commercially and may be aggregated with this software
