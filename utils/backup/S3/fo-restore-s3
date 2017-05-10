@@ -1,0 +1,81 @@
+#!/bin/bash
+# Copyright (C) Siemens AG 2017
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source ${DIR}/before
+set -x
+
+if [[ ${1} = "-l" ]]; then
+  LOGGING=${2}
+  if [[ -z "${LOGGING}" ]]; then
+    echo "Please specify a file, where to save the log file to"
+    exit 1
+  else
+    exec &> >(tee -a ${LOGGING})
+  fi
+fi
+
+echo Starting restore at `date`
+
+#### stop fossology scheduler
+echo "Stopping fossology scheduler..."
+/etc/init.d/fossology stop
+
+#### stop apache2
+echo "Stopping apache2..."
+/etc/init.d/apache2 stop
+
+echo "Start removing old data at `date`. Starting in 10 seconds..."
+sleep 10
+${DIR}/../../fo-cleanold --delete-repository --delete-database
+
+#### sync full tar
+echo Done removing old data. Starting download+extracting of "${FILENAME}" at `date`
+${DIR}/venv/bin/aws ${ENDPOINT} s3 cp --expected-size 200000000000 --sse AES256 "${AWS_BACKUP_LOCATION}" - | tar --warning=no-timestamp -xzf - -C /
+
+echo Checking diff of repository at `date`
+AWS_TMP_DIFF_LOCATION=`mktemp`
+CURRENT_TMP_DIFF_LOCATION=`mktemp`
+
+#### Copy diff from S3 to tmp
+${DIR}/venv/bin/aws s3 cp --sse AES256 "${AWS_DIFF_LOCATION}" "${AWS_TMP_DIFF_LOCATION}"
+find /srv/fossology/repository/ -type f -exec du -h {} \; | sort -n > "${CURRENT_TMP_DIFF_LOCATION}"
+echo 'Comparing diff of repository...'
+
+if cmp -s "${CURRENT_TMP_DIFF_LOCATION}" "${AWS_TMP_DIFF_LOCATION}"
+then
+  echo "Repository diff check successful. Continuing..."
+else
+  echo Diffs are different!!!
+  echo Continuing anyway...!
+fi
+
+echo Done download of full archive. Start restoring database at `date`
+mv /srv/fossology/database.txt "${TMP_FILE}"
+chmod 777 "${TMP_FILE}"
+
+/etc/init.d/postgresql restart
+
+if [[ -n "${LOGGING}" ]]; then
+  echo --------- Start database log ---------
+  su - postgres -c "psql -f ${TMP_FILE}"
+  echo --------- End database log ---------
+else
+  su - postgres -c "psql -f ${TMP_FILE}" > /dev/null 2>&1
+fi
+
+echo Done restoring database. Restore script done at `date`
+${DIR}/after
+rm ${TMP_FILE}
+rm ${CURRENT_TMP_DIFF_LOCATION}
+rm ${AWS_TMP_DIFF_LOCATION}

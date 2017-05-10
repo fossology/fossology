@@ -1,0 +1,53 @@
+#!/bin/bash
+# Copyright Siemens AG 2017
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+#
+
+TMP_FILE=`mktemp`
+
+if [[ $(id -u) -ne 0 ]]; then
+ echo "Please run as root"
+ exit 1
+fi
+
+if [[ -z "${BUCKET}" ]]; then
+ echo "Please set the BUCKET variable to the name of your S3 Bucket"
+ exit 1
+fi
+
+### Filename to restore from. Hostname is used, if none set
+if [[ -z "${FILENAME}" ]]; then
+ FILENAME=${HOSTNAME}.tar
+elif [[ "${FILENAME}" != *tar ]]; then
+ FILENAME=${FILENAME}.tar
+fi
+
+### for debugging e.g. local AWS S3 Bucket
+if [[ -n "${ENDPOINT}" ]]; then
+  ENDPOINT="--"${ENDPOINT}
+else
+  ENDPOINT=""
+fi
+
+${DIR}/install
+
+#### check for AWS config file
+if [[ ! -f ~/.aws/config ]]
+then
+	${DIR}/venv/bin/aws configure
+fi
+
+AWS_BACKUP_LOCATION="s3://${BUCKET}/${FILENAME}"
+AWS_DIFF_LOCATION="${AWS_BACKUP_LOCATION}-repo-diff.txt"
+
+#### stop fossology scheduler
+echo "Stopping fossology scheduler..."
+/etc/init.d/fossology stop
+
+#### stop apache2
+echo "Stopping apache2..."
+/etc/init.d/apache2 stop
