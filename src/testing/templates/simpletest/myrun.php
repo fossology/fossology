@@ -39,7 +39,7 @@ require_once SIMPLE_TEST . 'web_tester.php';
 
 require_once ('TestEnvironment.php');
 
-$test = & new TestSuite("Sample Fossology test");
+$test = new TestSuite("Sample Fossology test");
 $test->addTestFile('mytest.php');
 /*
  * leave the code below alone, it allows the tests to be run either by

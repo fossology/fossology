@@ -44,7 +44,7 @@ require_once('testClasses/timer.php');
 /* replace the TestSuite string with one that describes what the test suite is */
 $start = new timer();
 print "Starting xxxx Tests at: " . date('r') . "\n";
-$test = & new TestSuite("Run Fossology tests");
+$test = new TestSuite("Run Fossology tests");
 /*
  * To run a test use addTestFile method. as many tests as needed can be run this way.
  * Just keep adding more $test->addTestFile(sometest) lines to this

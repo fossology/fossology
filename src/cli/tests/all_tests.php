@@ -30,7 +30,7 @@ require_once('/usr/local/simpletest/reporter.php');
 
 $command = '/usr/local/bin/test.cp2foss';
 
-$test = &new TestSuite('cp2foss Test Suite');
+$test = new TestSuite('cp2foss Test Suite');
 // parameters tests valid and invalid inputs
 //echo "Running Parameter Tests\n";
 $test->addTestFile('parameters.php');

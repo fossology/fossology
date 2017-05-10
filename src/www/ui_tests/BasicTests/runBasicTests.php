@@ -37,7 +37,7 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "\nStarting Basic Functional Tests on: " . $date . " at " . $time . "\n";
 print "Using Svn Version:$Svn\n";
-$test = &new TestSuite('Fossology Repo UI Basic Functional tests');
+$test = new TestSuite('Fossology Repo UI Basic Functional tests');
 // Must run BasicSetup first, it creates the folder the other tests need.
 $test->addTestFile('BasicSetup.php');
 $test->addTestFile('UploadFileTest.php');
