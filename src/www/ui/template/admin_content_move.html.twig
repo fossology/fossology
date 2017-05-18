@@ -22,8 +22,8 @@
       <form name="formy" method="post">
         <input type="hidden" name="fromFolder" id="fromFolder" value="-1"/>
 
-        <label for="foldercontent">{{ 'Select the upload or folder you wish to move'|trans }}:<br/>
-          <select name="foldercontent" id="foldercontent" size="20">
+        <label for="foldercontent">{{ 'Select uploads or folders you wish to move'|trans }}:<br/>
+          <select name="foldercontent[]" id="foldercontent" multiple="multiple" size="20">
           </select>
         </label>
         <br/>

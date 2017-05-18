@@ -13,6 +13,7 @@ $('#{{ reuseFolderSelectorName }}').change(function () {
           option.value = key;
           packageForReuse.append(option);
         });
+        sortList('#{{ uploadToReuseSelectorName }} option');
       })
       .fail(failed);
 });

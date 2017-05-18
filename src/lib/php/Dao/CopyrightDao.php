@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -171,7 +171,7 @@ class CopyrightDao extends Object
             ON C.pfile_fk = UT.pfile_fk
             $joinType JOIN $tableNameDecision CD
             ON C.pfile_fk = CD.pfile_fk
-            WHERE C.content IS NOT NULL AND C.content!='' $whereClause  
+            WHERE C.content IS NOT NULL AND C.content!='' AND C.is_enabled='true' $whereClause  
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
 
     if ($clearingTypeClause !== null)
@@ -212,57 +212,29 @@ class CopyrightDao extends Object
    * @param int $userId
    * @param string $cpTable
    */
-  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright')
+  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright', $action='')
   {
     $itemTable = $item->getUploadTreeTableName();
     $stmt = __METHOD__.".$cpTable.$itemTable";
-    $params = array($hash,$item->getLeft(),$item->getRight(),$content);
-    $sql = "UPDATE $cpTable AS cpr SET content = $4, hash = md5($4)
+    $params = array();
+
+    if($action == "delete") {
+      $cpBoolValue = "is_enabled='false'";
+      $params = array($hash,$item->getLeft(),$item->getRight());
+    } else if($action == "rollback") {
+      $cpBoolValue = "is_enabled='true'";
+      $params = array($hash,$item->getLeft(),$item->getRight());
+    } else {
+      $cpBoolValue = "content = $4, hash = md5($4), is_enabled='true'";
+      $params = array($hash,$item->getLeft(),$item->getRight(),$content);
+    }
+
+    $sql = "UPDATE $cpTable AS cpr SET $cpBoolValue
             FROM $cpTable as cp
             INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
             WHERE cpr.ct_pk = cp.ct_pk
               AND cp.hash =$1
               AND ( ut.lft BETWEEN $2 AND $3 )";
-    if ('uploadtree_a' == $item->getUploadTreeTableName())
-    {
-      $params[] = $item->getUploadId();
-      $sql .= " AND ut.upload_fk=$".count($params);
-      $stmt .= '.upload';
-    }
-    
-    $this->dbManager->prepare($stmt, "$sql RETURNING cp.* ");
-    $oldData = $this->dbManager->execute($stmt, $params);
-
-    if($cpTable == "copyright")
-    {
-      while ($row = $this->dbManager->fetchArray($oldData))
-      {
-        $this->dbManager->insertTableRow('copyright_audit',
-                array('ct_fk'=>$row['ct_pk'],'oldtext'=>$row['content'],'user_fk'=>$userId,'upload_fk'=>$item->getUploadId(), 'uploadtree_pk'=>$item->getItemId(), 'pfile_fk'=>$row['pfile_fk']),
-                __METHOD__ . "writeHist");
-      }
-    }
-    $this->dbManager->freeResult($oldData);
-  }
-  
-  /**
-   * @param ItemTreeBounds $item
-   * @param string $hash
-   * @param int $userId
-   * @param string $cpTable
-   */
-  public function rollbackTable($item, $hash, $userId, $cpTable='copyright')
-  {
-    $itemTable = $item->getUploadTreeTableName();
-    $stmt = __METHOD__.".$cpTable.$itemTable";
-    $params = array($hash,$item->getLeft(),$item->getRight(),$userId);
-    $sql = "UPDATE $cpTable AS cpr SET content = cpa.oldtext, hash = $1
-            FROM ".$cpTable."_audit as cpa, $itemTable AS ut
-            WHERE cpr.pfile_fk = ut.pfile_fk
-              AND cpr.ct_pk = cpa.ct_fk
-              AND md5(cpa.oldtext) = $1
-              AND ( ut.lft BETWEEN $2 AND $3 )
-              AND cpa.user_fk=$4";
     if ('uploadtree_a' == $item->getUploadTreeTableName())
     {
       $params[] = $item->getUploadId();

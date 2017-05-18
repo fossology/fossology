@@ -112,7 +112,7 @@ class fossologyTest extends WebTestCase
       return($this->mybrowser);
     }
     else {
-      $browser = & new SimpleBrowser();
+      $browser = new SimpleBrowser();
       if(is_object($browser)) {
         $this->setBrowser($browser);
       }
@@ -491,7 +491,7 @@ class fossologyTest extends WebTestCase
       $LastUploads[$file] = $uploadId;
     }
     $lastUp = &$LastUploads;
-    $sorted = arsort(&$lastUp);
+    $sorted = arsort($lastUp);
     //$sorted = arsort(&$LastUploads);
     if(!empty($all)) {
       //print "uploads is:\n";print_r($Uploads) . "\n";

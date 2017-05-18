@@ -57,34 +57,43 @@ class AdminContentMove extends DefaultPlugin
   {
     $userId = Auth::getUserId();
     $vars = array();
-    
-    $folderContentId = intval($request->get('foldercontent'));
+
+    $folderContentIds = $request->get('foldercontent');
     $parentFolderId = intval($request->get('toFolder'));
-    if ($folderContentId && $parentFolderId && $request->get('copy'))
+    $isCopyRequest = $request->get('copy');
+    for ($i = 0; $i < sizeof($folderContentIds); $i++)
     {
-      try{
-        $this->folderDao->copyContent($folderContentId, $parentFolderId);
+      $folderContentId = intval($folderContentIds[$i]);
+      if ($folderContentId && $parentFolderId && $isCopyRequest)
+      {
+        try
+        {
+           $this->folderDao->copyContent($folderContentId, $parentFolderId);
+        }
+        catch (Exception $ex)
+        {
+           $vars['message'] = $ex->getMessage();
+        }
       }
-      catch (Exception $ex) {
-        $vars['message'] = $ex->getMessage();
+      elseif ($folderContentId && $parentFolderId)
+      {
+        try
+        {
+           $this->folderDao->moveContent($folderContentId, $parentFolderId);
+        }
+        catch (Exception $ex)
+        {
+           $vars['message'] = $ex->getMessage();
+        }
       }
     }
-    elseif ($folderContentId && $parentFolderId)
-    {
-      try{
-        $this->folderDao->moveContent($folderContentId, $parentFolderId);
-      }
-      catch (Exception $ex) {
-        $vars['message'] = $ex->getMessage();
-      }
-    }
-    
+
+
     $rootFolderId = $this->folderDao->getRootFolder($userId)->getId();
     /* @var $uiFolderNav FolderNav */
     $uiFolderNav = $this->getObject('ui.folder.nav');
     $vars['folderTree'] = $uiFolderNav->showFolderTree($rootFolderId);
     $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
-   
     return $this->render('admin_content_move.html.twig', $this->mergeWithDefault($vars));
   }
 }

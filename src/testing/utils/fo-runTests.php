@@ -145,7 +145,7 @@ $date = date('Y-m-d');
 $time = date('h:i:s-a');
 print "Starting $suite on: " . $date . " at " . $time . "\n";
 //print "Using Svn Version:$Svn\n";
-$Runtest = & new TestSuite("Fossology tests $Title");
+$Runtest = new TestSuite("Fossology tests $Title");
 /*
  * tests will run serially...
  *

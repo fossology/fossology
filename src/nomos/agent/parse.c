@@ -4218,6 +4218,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_RSA_5)) {
     INTERESTING(lDebug ? "RSA(5)" : "RSA-DNS");
   }
+  else if (INFILE (_LT_RSA_CRYPTOKI_1) && INFILE(_LT_RSA_CRYPTOKI_2)){
+    INTERESTING("RSA-Cryptoki");
+  }
   cleanLicenceBuffer();
   /* Some licenses only deal with fonts */
   if (HASTEXT(_TEXT_FONT, 0)) {

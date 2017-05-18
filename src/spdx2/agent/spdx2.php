@@ -78,7 +78,15 @@ class SpdxTwoAgent extends Agent
 
   function __construct()
   {
-    parent::__construct('spdx2', AGENT_VERSION, AGENT_REV);
+    // deduce the agent name from the command line arguments
+    $args = getopt("", array(self::OUTPUT_FORMAT_KEY.'::'));
+    $agentName = trim($args[self::OUTPUT_FORMAT_KEY]);
+    if (empty($agentName))
+    {
+        $agentName = self::DEFAULT_OUTPUT_FORMAT;
+    }
+
+    parent::__construct($agentName, AGENT_VERSION, AGENT_REV);
 
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
@@ -436,8 +444,12 @@ class SpdxTwoAgent extends Agent
     {
       $reportedLicenseId = $this->licenseMap->getProjectedId($row['rf_fk']);
       $shortName = $this->licenseMap->getProjectedShortname($reportedLicenseId);
-      if ($shortName != 'No_license_found' && $shortName != 'Void') {
-        $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
+      if ($shortName != 'Void') {
+        if($shortName != 'No_license_found'){
+          $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = $shortName;
+        }else{
+          $filesWithLicenses[$row['uploadtree_pk']]['scanner'][] = "";
+        }
         $this->includedLicenseIds[$reportedLicenseId] = true;
       }
     }
