@@ -19,14 +19,14 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_copyrightHistogram", _("Copyright Browser"));
+define("TITLE_emailHistogram", _("Email/URL/Author Browser"));
 
-class CopyrightHistogram extends HistogramBase {
+class EmailHistogram extends HistogramBase {
   function __construct()
   {
-    $this->Name = "copyright-hist";
-    $this->Title = TITLE_copyrightHistogram;
-    $this->viewName = "copyright-view";
+    $this->Name = "email-hist";
+    $this->Title = TITLE_emailHistogram;
+    $this->viewName = "email-view";
     $this->agentName = "copyright";
     parent::__construct();
   }
@@ -40,14 +40,20 @@ class CopyrightHistogram extends HistogramBase {
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
-    $type = 'statement';
-    $description = _("Copyright");
-
+    $typeDescriptionPairs = array(
+            'email' => _("Email"),
+            'url' => _("URL"),
+            'author' => _("Author")
+      );
     $tableVars = array();
     $output = array();
-    list($out, $vars) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type] = $vars;
-    $output[] = $out;
+    foreach($typeDescriptionPairs as $type=>$description)
+    {
+      list($out, $vars) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
+      $tableVars[$type] = $vars;
+      $output[] = $out;
+    }
+
     $output[] = $tableVars;
     return $output;
   }
@@ -63,10 +69,11 @@ class CopyrightHistogram extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VCopyright, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
+    list($VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
-    $out = $this->renderString('copyrighthist_tables.html.twig', 
-            array('contCopyright'=>$VCopyright, 'fileList'=>$VF));
+    $out = $this->renderString('emailhist_tables.html.twig', 
+            array('contEmail'=>$VEmail, 'contUrl'=>$VUrl, 'contAuthor'=>$VAuthor,
+                'fileList'=>$VF));
     return array($out, $tableVars);
   }
 
@@ -80,13 +87,13 @@ class CopyrightHistogram extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::Copyright",10);
+        menu_insert("Browse::Email/URL/Author",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else
       {
-        $text = _("View copyright histogram");
-        menu_insert("Browse::Copyright",10,$URI,$text);
+        $text = _("View email/URL/author histogram");
+        menu_insert("Browse::Email/URL/Author",10,$URI,$text);
       }
     }
   }
@@ -96,11 +103,13 @@ class CopyrightHistogram extends HistogramBase {
     return "
 
     $(document).ready(function() {
-      tableCopyright =  createTablestatement();
+      tableEmail = createTableemail();
+      tableUrl = createTableurl();
+      tableAuthor = createTableauthor();
     } );
     ";
   }
 
 }
 
-$NewPlugin = new CopyrightHistogram;
+$NewPlugin = new EmailHistogram;
