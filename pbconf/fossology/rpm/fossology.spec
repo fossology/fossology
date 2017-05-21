@@ -191,20 +191,34 @@ This package contains the monkbulk agent programs and their resources.
 %setup -q -n %{name}-%{version}PBEXTDIR
 #PBPATCHCMD
 
-mkdir -p /tmp/composer/
-utils/install_composer.sh /tmp/composer/
-COMPOSER_PHAR=/tmp/composer/composer
+mkdir -p ~/composer/
+utils/install_composer.sh ~/composer/
+COMPOSER_PHAR=~/composer/composer
 
-make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} composer_install
+# make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} composer_install
 
 %build
+COMPOSER_PHAR=~/composer/composer 
+
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
 
 %install
+COMPOSER_PHAR=~/composer/composer
+
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install_offline
+
+make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C install/ -f Makefile install
+
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/nomos/agent/ -f Makefile.sa install
+
+# not so elegant, emulating writing composer file
+cp src/composer.json $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+cp src/composer.lock $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+cp src/vedor $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+
+
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
 #cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
 #Alias /repo/ /usr/share/PBPROJ/www/
@@ -227,15 +241,16 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 %files
 %defattr(-,root,root)
-%doc ChangeLog
-%doc COPYING COPYING.LGPL HACKING README.md install/INSTALL install/INSTALL.multi LICENSE
+# %doc ChangeLog # mcj todo not existing anymore, right?
+%doc COPYING COPYING.LGPL README.md install/INSTALL install/INSTALL.multi NOTICES CONTRIBUTING.md CHANGELOG.md
 
 %files common
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/cron.d/*
 %config(noreplace) %{_sysconfdir}/PBPROJ/Db.conf
 %config(noreplace) %{_sysconfdir}/PBPROJ/fossology.conf
-%config(noreplace) %{_sysconfdir}/PBPROJ/VERSION
+# mcj todo needs to be reactivated again switched off for debugging
+# %config(noreplace) %{_sysconfdir}/PBPROJ/VERSION
 %config(noreplace) %{_sysconfdir}/PBPROJ/sampleheader.txt
 %config(noreplace) %{_sysconfdir}/PBPROJ/samplefooter.txt
 %dir %{_sysconfdir}/PBPROJ/mods-enabled

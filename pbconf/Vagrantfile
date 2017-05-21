@@ -64,6 +64,14 @@ yum install -y docker-engine
 # ... starting docker
 systemctl start docker
 
+# installing composer things # todo check if the docker commands are needed
+# cd ~/prj/fossology
+mkdir -p ~/composer/
+~/prj/fossology/utils/install_composer.sh ~/composer/
+export COMPOSER_PHAR=~/composer/composer
+mkdir ~/prj/fossology/src/vendor
+make DESTDIR=/home/vagrant/prj/fossology/src/ MODDIR=vendor/ composer_install
+
 SCRIPT
   end
 
@@ -93,6 +101,8 @@ pbconfurl fossology = git+https://github.com/fossology/fossology.git
 pbconfdir fossology = \\\$ENV{'HOME'}/prj/fossology/pbconf
 
 PBRC
+
+
 
 ################################################################################
 # sbx = sandbox
