@@ -593,6 +593,18 @@ INSERT INTO clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::WIP);
   }
 
+  public function isDecisionTBD($uploadTreeId, $groupId)
+  {
+    $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND group_fk = $2 ORDER BY date_added DESC LIMIT 1";
+    $latestDec = $this->dbManager->getSingleRow($sql, array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
+    if ($latestDec === false)
+    {
+      return false;
+    }
+    return ($latestDec['decision_type'] == DecisionTypes::TO_BE_DISCUSSED);
+  }
+
+
   /**
    * @param ItemTreeBounds $itemTreeBound
    * @param int $groupId
