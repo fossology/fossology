@@ -31,10 +31,14 @@ function createDirlistTable() {
         {"sTitle":"Edited Results","sClass":"left","bSortable":false},
         {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSortable":false,"bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
             if(type!='display') return data;
-            if (data==='green'){
-              return '<img alt="done" src="images/green.png" class="icon-small"/>';
+            switch (data){
+              case 'green':
+                return '<img alt="done" src="images/green.png" class="icon-small"/>';
+              case 'yellow':
+                return '<img alt="done" src="images/yellow.png" class="icon-small"/>';
+              default:
+                return '<img alt="not done" src="images/red.png" class="icon-small"/>';
             }
-            return '<img alt="not done" src="images/red.png" class="icon-small"/>';
           }
         },
         {"sTitle":"Files Cleared","sClass":"center","bSortable":false,"bSearchable":false},
