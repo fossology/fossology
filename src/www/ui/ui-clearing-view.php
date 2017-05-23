@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -270,7 +270,7 @@ class ClearingView extends FO_Plugin
     $clearingDecisions = null;
     if ($isSingleFile || $hasWritePermission)
     {
-      $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false);
+      $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false, true);
     }
 
     if ($isSingleFile && $hasWritePermission)
