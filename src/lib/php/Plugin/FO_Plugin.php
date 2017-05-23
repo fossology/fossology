@@ -341,6 +341,7 @@ class FO_Plugin implements Plugin
 
     $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/select2.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
@@ -406,7 +407,7 @@ class FO_Plugin implements Plugin
       $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
-    
+
     return $response;
   }
 
@@ -434,8 +435,18 @@ class FO_Plugin implements Plugin
   public function renderString($templateName, $vars = null)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
-  }  
-  
+  }
+
+  /**
+   * @brief Render JavaScript in the template's footer
+   *
+   * @param string $scripts
+   */
+  public function renderScripts($scripts)
+  {
+    $this->vars['scripts'] = $scripts;
+  }
+
   /**
    * @param string $templateName
    * @param array $vars
