@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -251,11 +251,11 @@ class AjaxClearingView extends FO_Plugin
 
       $id = "$uploadTreeId,$licenseId";
       $table[$licenseShortName] = array('DT_RowId' => $id,
-          '0' => $licenseShortNameWithLink,
-          '1' => implode("<br/>", $types),
-          '2' => $reportInfoField,
-          '3' => $commentField,
-          '4' => $actionLink);
+          '0' => $actionLink,
+          '1' => $licenseShortNameWithLink,
+          '2' => implode("<br/>", $types),
+          '3' => $reportInfoField,
+          '4' => $commentField);
     }
 
     foreach ($removedLicenses as $licenseShortName => $clearingResult)
@@ -273,11 +273,11 @@ class AjaxClearingView extends FO_Plugin
         $id = implode(',', $idArray);
         $table[$licenseShortName] = array('DT_RowId' => $id,
             'DT_RowClass' => 'removed',
-            '0' => $licenseShortNameWithLink,
-            '1' => implode("<br/>", $agents),
-            '2' => "-",
+            '0' => $actionLink,
+            '1' => $licenseShortNameWithLink,
+            '2' => implode("<br/>", $agents),
             '3' => "-",
-            '4' => $actionLink);
+            '4' => "-",);
       }
     }
 
