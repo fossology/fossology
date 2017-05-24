@@ -45,7 +45,7 @@ class admin_folder_delete extends FO_Plugin {
    * \param $folderpk - the folder_pk to remove
    * \return NULL on success, string on failure.
    */
-  function Delete($folderpk, $userId) 
+  function Delete($folderpk, $userId, $dbManager)
   {
     $splitFolder = explode(" ",$folderpk);
     /* Can't remove top folder */
@@ -57,7 +57,7 @@ class admin_folder_delete extends FO_Plugin {
     $FolderName = FolderGetName($splitFolder[1]);
     /* Prepare the job: job "Delete" */
     $groupId = Auth::getGroupId();
-    $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName");
+    $jobpk = JobAddJob($userId, $groupId, "Delete Folder: $FolderName", $dbManager);
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);
@@ -89,7 +89,7 @@ class admin_folder_delete extends FO_Plugin {
       $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
       $Folder = $this->dbManager->getSingleRow($sql,array($splitFolder[1],$userId),__METHOD__."GetRowWithFolderName");
       if(!empty($Folder['folder_name'])){
-        $rc = $this->Delete($folder, $userId);
+        $rc = $this->Delete($folder, $userId, $this->dbManager);
         if (empty($rc)) {
           /* Need to refresh the screen */
           $text = _("Deletion of folder ");

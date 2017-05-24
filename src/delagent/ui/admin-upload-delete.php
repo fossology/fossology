@@ -25,6 +25,8 @@ use \delagent\ui\DeleteResponse;
  * \file admin_upload_delete.php
  * \brief delete a upload
  */
+
+require_once "delete-helper.php";
 define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
 
 /**
@@ -56,12 +58,15 @@ class admin_upload_delete extends FO_Plugin
    */
   function TryToDelete($uploadpk)
   {
+    $user_pk = Auth::getUserId();
+    $group_pk = Auth::getGroupId();
+
     if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())){
       $returnMessage = DeleteMessages::NO_PERMISSION;
       return new DeleteResponse($returnMessage);
     }
 
-    $rc = $this->Delete(intval($uploadpk));
+    $rc = DeleteUpload(intval($uploadpk), $user_pk, $group_pk);
 
     if (! empty($rc)) {
       $returnMessage = DeleteMessages::SCHEDULING_FAILED;
@@ -76,97 +81,7 @@ class admin_upload_delete extends FO_Plugin
       " <a href=$URL>$LinkText</a>");
   }
 
-  /**
-   * \brief Given a folder_pk, add a job.
-   * \param $uploadpk - the upload(upload_id) you want to delete
-   * \param $Depends - Depends is not used for now
-   *
-   * \return NULL on success, string on failure.
-   */
-  function Delete($uploadpk, $Depends = NULL) 
-  {
-    /* Prepare the job: job "Delete" */
-    $user_pk = Auth::getUserId();
-    $group_pk = Auth::getGroupId();
-    $jobpk = JobAddJob($user_pk, $group_pk, "Delete", intval($uploadpk));
-    if (empty($jobpk) || ($jobpk < 0)) {
-      $text = _("Failed to create job record");
-      return ($text);
-    }
-    /* Add job: job "Delete" has jobqueue item "delagent" */
-    $jqargs = "DELETE UPLOAD $uploadpk";
-    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
-    if (empty($jobqueuepk)) {
-      $text = _("Failed to place delete in job queue");
-      return ($text);
-    }
-
-    /* Tell the scheduler to check the queue. */
-    $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success) 
-    {
-      $error_msg = _("Is the scheduler running? Your jobs have been added to job queue.");
-      $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
-      $LinkText = _("View Jobs");
-      $msg = "$error_msg <a href=$URL>$LinkText</a>";
-      return $msg; 
-    }
-    return (NULL);
-  } // Delete()
-
-  /**
-   * @param $uploadpks
-   * @brief starts deletion and handles error messages
-   * @return string
-   */
-  function initDeletion($uploadpks)
-  {
-    if(sizeof($uploadpks) <= 0)
-    {
-      return DisplayMessage("No uploads selected");
-    }
-
-    $V = "";
-    $errorMessages = [];
-    $deleteResponse = NULL;
-    for($i=0; $i < sizeof($uploadpks); $i++)
-    {
-      $deleteResponse = $this->TryToDelete(intval($uploadpks[$i]));
-
-      if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
-      {
-        $errorMessages[] = $deleteResponse;
-      }
-    }
-
-    if(sizeof($uploadpks) == 1)
-    {
-      $V .= DisplayMessage($deleteResponse->getDeleteMessageString().$deleteResponse->getAdditionalMessage());
-    }
-    else
-    {
-      $displayMessage = "";
-
-      if(in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages))
-      {
-        $displayMessage .= "<br/>Scheduling failed for " .
-          array_count_values($errorMessages)[DeleteMessages::SCHEDULING_FAILED] . " uploads<br/>";
-      }
-
-      if(in_array(DeleteMessages::NO_PERMISSION, $errorMessages))
-      {
-        $displayMessage .= "No permission to delete " .
-          array_count_values($errorMessages)[DeleteMessages::NO_PERMISSION]. " uploads<br/>";
-      }
-
-      $displayMessage .= "Deletion of " .
-        (sizeof($uploadpks)-sizeof($errorMessages)) . " projects queued";
-      $V .= DisplayMessage($displayMessage);
-    }
-    return $V;
-  }
-
-  /**
+  /*
    * \brief Generate the text for this plugin.
    */
   public function Output()
@@ -176,7 +91,8 @@ class admin_upload_delete extends FO_Plugin
     $uploadpks = GetParm('upload', PARM_RAW);
     if (!empty($uploadpks))
     {
-      $V .= $this->initDeletion($uploadpks);
+      $V .= initDeletion($uploadpks);
+
     }
     /* Create the AJAX (Active HTTP) javascript for doing the reply
      and showing the response. */

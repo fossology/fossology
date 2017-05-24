@@ -215,10 +215,8 @@ use Fossology\Lib\Auth\Auth;
    * \param $group_pk
    * Returns NULL on success, string on failure.
    */
-  function DeleteGroup($group_pk) 
+  function DeleteGroup($group_pk, $PG_CONN)
   {
-    global $PG_CONN;
-
     $user_pk = Auth::getUserId();
 
     /* Make sure groupname looks valid */

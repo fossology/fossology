@@ -10,12 +10,13 @@
         "without any warranty."
     ],
     "require": {
-        "monolog/monolog": "1.10.*",
-        "symfony/config": "2.6.*",
-        "symfony/http-foundation": "2.6.*",
-        "symfony/dependency-injection": "2.6.*",
+        "monolog/monolog": "1.22.*",
+        "symfony/config": "3.3.*",
+        "symfony/http-foundation": "3.3.*",
+        "symfony/dependency-injection": "3.3.*",
         "twig/twig": "1.*",
-        "twig/extensions": "1.*"
+        "twig/extensions": "1.*",
+        "silex/silex": "2.1.0"
     },
 
     "require-dev": {
