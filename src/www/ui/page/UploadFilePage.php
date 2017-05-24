@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -120,8 +120,10 @@ class UploadFilePage extends UploadPageBase
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
+    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+    file_put_contents("/home/uawet3g4/test/filename.txt",json_encode($originalFileName));
+    file_put_contents("/home/uawet3g4/test/request.txt",json_encode($request));
     if (empty($uploadId))
     {
       return array(false, _("Failed to insert upload record"), $description);
@@ -150,9 +152,9 @@ class UploadFilePage extends UploadPageBase
       }
       return array(false, $message, $description);
     }
-    
+
     $message = $this->postUploadAddJobs($request, $originalFileName, $uploadId);
-        
+
     return array(true, $message, $description);
   }
 
