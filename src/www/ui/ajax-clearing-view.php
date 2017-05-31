@@ -28,6 +28,8 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
@@ -59,6 +61,8 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDecisionEventProcessor;
   /** @var UrlBuilder */
   private $urlBuilder;
+  /** @var DecisionTypes */
+  private $decisionTypes;
 
   function __construct()
   {
@@ -82,10 +86,47 @@ class AjaxClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->urlBuilder = $container->get('view.url_builder');
-
+    $this->decisionTypes = $container->get('decision.types');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
+  /**
+   * @param int $groupId
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @return string
+   */
+  protected function doClearingHistory($groupId, $uploadId, $uploadTreeId)
+  {
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+
+    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false, true);
+
+    $table = array();
+    $scope = new DecisionScopes();
+    foreach ($clearingDecWithLicenses as $clearingDecision)
+    {
+      $licenseOutputs = array();
+      foreach ($clearingDecision->getClearingLicenses() as $lic)
+      {
+        $shortName = $lic->getShortName();
+        $licenseOutputs[$shortName] = $lic->isRemoved() ? "<span style=\"color:red\">$shortName</span>" : $shortName;
+      }
+      ksort($licenseOutputs, SORT_STRING);
+      $row = array(
+          '0' => date('Y-m-d', $clearingDecision->getTimeStamp()),
+          '1' => $clearingDecision->getUserName(),
+          '2' => $scope->getTypeName($clearingDecision->getScope()),
+          '3' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
+          '4' => implode(", ", $licenseOutputs));
+      $table[] = $row;
+    }
+    return array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $table,
+            'iTotalRecords' => count($table),
+            'iTotalDisplayRecords' => count($table));
+  }
 
   /**
    * @param boolean $orderAscending
@@ -192,6 +233,9 @@ class AjaxClearingView extends FO_Plugin
           $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what, $changeTo);
         }
         return $this->createPlainResponse("success");
+
+      case "showClearingHistory":
+        return new JsonResponse($this->doClearingHistory($groupId, $uploadId, $uploadTreeId));
 
       default:
         return $this->createPlainResponse("fail");
