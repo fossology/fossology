@@ -77,11 +77,43 @@ addLicenseTableConfig = {
   "bFilter": true
 };
 
+addClearingHistoryColumns = [
+  {"sTitle": "{{ 'Date'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Username'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Scope'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Type'| trans }}", "sClass": "left", "bSortable": false},
+  {"sTitle": "{{ 'Licenses'| trans }}", "sClass": "left", "bSortable": false}
+];
+
+addClearingHistoryTableConfig = {
+  "bServerSide": true,
+  "sAjaxSource": "?mod=conclude-license&do=showClearingHistory",
+  "fnServerData": function (sSource, aoData, fnCallback) {
+    aoData.push({"name": "upload", "value": uploadId});
+    aoData.push({"name": "item", "value": itemId});
+    $.getJSON(sSource, aoData, fnCallback).fail(failed);
+  },
+  "aoColumns": addClearingHistoryColumns,
+  "iDisplayLength": 25,
+  "bProcessing": true,
+  "bStateSave": true,
+  "sCookiePrefix" : "fossology_",
+  "bRetrieve": false,
+  "bPaginate": false,
+  "bFilter": false,
+  "bDestroy": true
+};
+
+
 function createLicenseSelectionTable() {
   otable = $('#licenseSelectionTable').dataTable(addLicenseTableConfig);
   return otable;
 }
 
+function createClearingHistoryDataTable() {
+  otable = $('#ClearingHistoryDataModalTable').dataTable(addClearingHistoryTableConfig);
+  return otable;
+}
 $(document).ready(function () {
   createClearingTable();
   createLicenseSelectionTable();

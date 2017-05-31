@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2017 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -64,10 +64,12 @@
       {{ 'Bulk Recognition ...'| trans }}
     </button><img src="images/info_16.png" title="{{ 'Adding or removing a license based on a text fragment that is searched for across the relevant files'|trans }}" alt="" class="info-bullet"/>
     &nbsp;
-    <span id="bulkIdResult" name="bulkIdResult" hidden></span>
-
+    <button type="button" onclick="openClearingHistoryDataModal();">
+      {{ 'Clearing History ...'| trans }}
+    </button><img src="images/info_16.png" title="{{ 'View the clearing history for this file: The table will show which user added or removed license results for this particular file in order to create a clearing decision. Clearing decisions are created when the user clicks on the button "Submit" or on the go next and go previous buttons'|trans }}" alt="" class="info-bullet"/>
+    &nbsp;
     <br/>
-
+    <span id="bulkIdResult" name="bulkIdResult" hidden></span>
     <div style="padding-top: 10px;">
 
       <div class="modal" id="userModal" hidden>
@@ -75,52 +77,17 @@
           {{ macro.table("licenseSelectionTable") }}
         </div>
       </div>
+
+      <div class="modal" id="ClearingHistoryDataModal" hidden>
+        <div style="padding-bottom: 10px;">
+          {{ macro.table("ClearingHistoryDataModalTable") }}
+        </div>
+      </div>
       {% include 'ui-clearing-view_bulk.html.twig' %}
     </div>
   {% endif %}
 
 </div>
-
-{% if clearingHistory %}
-  <div class="groupBox">
-
-    <h3>
-      {{ 'Clearing History'| trans }}
-    </h3>
-
-    <div class="scrollable2">
-      <table border="1" cellpadding="5px" id="clearingHistoryTable" name="clearingHistoryTable">
-        <tr>
-          <th>
-            {{ 'Date'| trans }}
-          </th>
-          <th>
-            {{ 'Username'| trans }}
-          </th>
-          <th>
-            {{ 'Scope'| trans }}
-          </th>
-          <th>
-            {{ 'Type'| trans }}
-          </th>
-          <th>
-            {{ 'Licenses'| trans }}
-          </th>
-        </tr>
-        {% for row in clearingHistory %}
-          <tr>
-            <td>{{ row.date|round(0)|date('Y-m-d') }}</td>
-            <td>{{ row.username }}</td>
-            <td>{{ row.scope }}</td>
-            <td>{{ row.type }}</td>
-            <td>{{ row.licenses }}</td>
-          </tr>
-        {% endfor %}
-      </table>
-    </div>
-  </div>
-{% endif %}
-
 <div class="groupBox" id="bulkHistory" {% if not bulkHistory %}hidden{% endif %}>
 
 <h3>
