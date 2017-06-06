@@ -243,6 +243,24 @@ class AjaxClearingView extends FO_Plugin
   }
 
   /**
+   * @param id $uploadtreeid,$licenseid
+   * @return string with attr
+   */
+  protected function getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $forValue, $what, $detectorType=0)
+  {
+     $classAttr = "color:#000000;";
+     $value = "Click to add";
+     if(empty($forValue) && $detectorType == 2 && $what == 2){
+       $classAttr = "color:red;font-weight:bold;";
+     }
+ 
+     if(!empty($forValue)) {
+       $value = substr(ltrim($forValue, " \t\n"), 0, 15)."...";
+     }
+    return "<a href=\"javascript:;\" style='$classAttr' id='clearingsForSingleFile$licenseId$what' onclick=\"openTextModel($uploadTreeId, $licenseId, $what);\" title='".htmlspecialchars($forValue, ENT_QUOTES)."'>$value</a>";
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param boolean $orderAscending
@@ -289,11 +307,10 @@ class AjaxClearingView extends FO_Plugin
         $tooltip = _('Click to select this as a main license for the upload.');
         $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
-
-      $reportInfoField = nl2br(htmlspecialchars($reportInfo));
-      $commentField = nl2br(htmlspecialchars($comment));
-
+      $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
       $id = "$uploadTreeId,$licenseId";
+      $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2, $detectorType);
+      $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 3);
       $table[$licenseShortName] = array('DT_RowId' => $id,
           '0' => $actionLink,
           '1' => $licenseShortNameWithLink,
@@ -321,7 +338,7 @@ class AjaxClearingView extends FO_Plugin
             '1' => $licenseShortNameWithLink,
             '2' => implode("<br/>", $agents),
             '3' => "-",
-            '4' => "-",);
+            '4' => "-");
       }
     }
 
