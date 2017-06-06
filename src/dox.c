@@ -168,6 +168,7 @@
  * -# \subpage maintagent
  * -# \subpage mimetype
  * -# \subpage nomos
+ * -# \subpage ojo
  * -# \subpage pkgagent
  * -# \subpage readmeoss
  * -# \subpage reuser
