@@ -26,7 +26,24 @@ echo "Provisioning system to compile, test and develop."
 # fix "dpkg-reconfigure: unable to re-open stdin: No file or directory" issue
 sudo dpkg-reconfigure locales
 
-sudo apt-get update -qq -y
+# use proxy from host
+# just create a file PROXY within src root folder to enable it
+if [ -f /vagrant/PROXY ] ; then
+  # get gateway of running VM and set proxy info within global profile
+  echo 'export host_ip="`netstat -rn | grep "^0.0.0.0 " | cut -d " " -f10`"' >> /etc/profile.d/proxy.sh
+  echo 'export ftp_proxy="http://$host_ip:3128"'                             >> /etc/profile.d/proxy.sh
+  echo 'export http_proxy="http://$host_ip:3128"'                            >> /etc/profile.d/proxy.sh
+  echo 'export https_proxy="https://$host_ip:3128"'                          >> /etc/profile.d/proxy.sh
+
+  # load the proxy within current shell
+  . /etc/profile.d/proxy.sh
+
+  if ! sudo grep -q http_proxy /etc/sudoers; then
+    sudo su -c 'sed -i "s/env_reset/env_reset\\nDefaults\\tenv_keep = \\"http_proxy https_proxy ftp_proxy\\"/" /etc/sudoers'
+  fi
+fi
+
+sudo apt-get update -y
 
 sudo apt-get install -qq curl php5 git libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
 
