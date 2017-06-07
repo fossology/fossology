@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,9 +45,10 @@ class AdminObligationToCSV extends DefaultPlugin
   {
     $obligationCsvExport = new \Fossology\Lib\Application\ObligationCsvExport($this->getObject('db.manager'));
     $content = $obligationCsvExport->createCsv(intval($request->get('rf')));
-
+    $fileName = "fossology-obligations-export-".date("YMj-Gis");
     $headers = array(
-        'Content-type' => 'text/csv',
+        'Content-type' => 'text/csv, charset=UTF-8',
+        'Content-Disposition' => 'attachment; filename='.$fileName.'.csv',
         'Pragma' => 'no-cache',
         'Cache-Control' => 'no-cache, must-revalidate, maxage=1, post-check=0, pre-check=0',
         'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT');
