@@ -2,7 +2,7 @@
  delagent: Remove an upload from the DB and repository
 
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -54,6 +54,7 @@ void usage (char *Name)
   fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
   fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
   fprintf(stderr,"          every upload and folder in the navigation tree.\n");
+  fprintf(stderr,"          use -P to indicate parent of the copied folder.\n");
   fprintf(stderr,"  -s   :: Run from the scheduler.\n");
   fprintf(stderr,"  -T   :: TEST -- do not update the DB or delete any files (just pretend)\n");
   fprintf(stderr,"  -v   :: Verbose (-vv for more verbose)\n");
@@ -118,7 +119,7 @@ int main (int argc, char *argv[])
 {
   int c;
   int listProj=0, listFolder=0;
-  long delUpload=0, delFolder=0, delLicense=0;
+  long delUpload=0, delFolder=0, delLicense=0, delFolderParent=0;
   int scheduler=0; /* should it run from the scheduler? */
   int gotArg=0;
   char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
@@ -141,7 +142,7 @@ int main (int argc, char *argv[])
     {0, 0, 0, 0}
   };
 
-  while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:vVc:h",
+  while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:P:vVc:h",
          long_options, &option_index)) != -1)
   {
     switch (c)
@@ -165,6 +166,10 @@ int main (int argc, char *argv[])
         break;
       case 'L':
         delLicense=atol(optarg);
+        gotArg=1;
+        break;
+      case 'P':
+        delFolderParent=atol(optarg);
         gotArg=1;
         break;
       case 's':
@@ -244,7 +249,7 @@ int main (int argc, char *argv[])
     }
     if (delFolder)
     {
-      returnedCode = deleteFolder(delFolder, user_id, user_perm);
+      returnedCode = deleteFolder(delFolder, delFolderParent, user_id, user_perm);
 
       writeMessageAfterDelete("folder", delFolder, user_name, returnedCode);
     }
