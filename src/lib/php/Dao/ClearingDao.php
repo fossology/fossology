@@ -817,4 +817,34 @@ INSERT INTO clearing_decision (
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
             array($uploadId,$groupId,$licenseId));
   }
+
+  /**
+   * @param int $eventId
+   * @return boolean
+   */
+  public function isClearingEventRemove($eventId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT removed FROM clearing_event WHERE clearing_event_pk=$1";
+
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt, array($eventId));
+
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+
+    if ( strncmp($row['removed'], 'f', 1) == 0 )
+    {
+      return false;
+    }
+    elseif ( strncmp($row['removed'], 't', 1) == 0 )
+    {
+      return true;
+    }
+    else
+    {
+      return NULL;
+    }
+  }
+
 }

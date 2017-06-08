@@ -84,7 +84,7 @@ abstract class TestAbstractDb
     return $sql;
   }
   
-  public function insertData_license_ref($limit=140)
+  public function insertData_license_ref($limit=NULL)
   {
     $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
     $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
@@ -96,9 +96,12 @@ abstract class TestAbstractDb
     {
       $sql = $this->queryConverter($splitted[$i]);
       $this->dbManager->queryOnce($delimiter.$sql);
-      if ($i > $limit)
+      if (!is_null($limit))
       {
-        break;
+        if ($i > $limit)
+        {
+          break;
+        }
       }
     }
   }

@@ -28,6 +28,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Dao\LicenseDao;
 
 define("CLEARING_DECISION_IS_GLOBAL", false);
 
@@ -48,6 +49,8 @@ class DeciderJobAgent extends Agent {
   private $clearingDao;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var LicenseDao */
+  private $licenseDao;
   /** @var int */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
   /** @var DecisionTypes */
@@ -67,6 +70,7 @@ class DeciderJobAgent extends Agent {
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
+    $this->licenseDao = $this->container->get('dao.license');
 
     $this->agentSpecifOptions = "k:";
     $this->licenseMapUsage = $licenseMapUsage;
@@ -84,7 +88,7 @@ class DeciderJobAgent extends Agent {
       $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
       foreach($this->loopContainedItems($containerBounds) as $itemTreeBounds)
       {
-        $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
+      	$this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
     }
   }
@@ -118,6 +122,55 @@ class DeciderJobAgent extends Agent {
   }
 
   /**
+   * \brief Check if a new clearing decision can be added
+   *
+   * Clearing is not allowd if:
+   *   - concluded license has already been added, or
+   *   - agent has detected No_license_found, or
+   *   - user has concluded that there is no valid license in a file
+   *
+   * @param $itemTreeBounds
+   * @param $userId
+   * @param $groupId
+   * @param $eventsFromJob
+   * @return boolean
+   */
+  private function isClearingAllowed($itemTreeBounds, $userId, $groupId, $eventsFromJob)
+  {
+    $detectedLicenses = $this->licenseDao->getAgentFileLicenseMatches($itemTreeBounds);
+    list($concludedLicenses, $removedLicenses) = $this->clearingDecisionProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
+    if (!is_null($concludedLicenses))
+    {
+      foreach ($concludedLicenses as $license)
+      {
+        $event = $license->getClearingEvent();
+        if (!is_null($event))
+        {
+          // If enventId related to the concluded lisense is not in current jobs
+          // event list, then the conclusion already exist and new evenst are discarded
+          $eventId = $event->getEventId();
+          if (array_search($eventId, $eventsFromJob) == false)
+          {
+            return false;
+          }
+        }
+      }
+    }
+
+    // In some test cases variables can be null which make test cases to fail
+    if (is_null($detectedLicenses) || is_null($removedLicenses) || count($detectedLicenses) == 0)
+    {
+      return false;
+    }
+    if ($detectedLicenses[0]->getLicenseId() == 507)
+    {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
    */
@@ -136,10 +189,24 @@ class DeciderJobAgent extends Agent {
       default:
         $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
     }
-
     if ($createDecision)
     {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
+      if ($this->isClearingAllowed($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob))
+      {
+        if ( $this->clearingDao->isClearingEventRemove(current($additionalEventsFromThisJob)) )
+        {
+          foreach ($additionalEventsFromThisJob as $eventId)
+          {
+            $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
+          }
+          $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);
+        }
+        else
+        {
+          $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId,  DecisionTypes::IDENTIFIED,
+              $this->decisionIsGlobal, $additionalEventsFromThisJob);
+        }
+      }
     }
     else
     {

@@ -28,8 +28,6 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
@@ -85,7 +83,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->licenseDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -161,15 +159,16 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $jobId = 42;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
 
     $addedLicenses = array($licenseRef1, $licenseRef2);
 
     assertThat($addedLicenses, not(arrayContaining(null)));
 
-    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=3, $licenseRef1->getId(), false);
-    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId, 5, $groupId, $licenseRef2->getId(), true);
+    /* uploadtree_pk 23 refers to 3DFX_B file in upload 2 (B.zip) in B/1b folder*/
+    $eventId1 = $this->clearingDao->insertClearingEvent($originallyClearedItemId=23, $userId=2, $groupId=2, $licenseRef1->getId(), false);
+    $eventId2 = $this->clearingDao->insertClearingEvent($originallyClearedItemId, $userId, $groupId, $licenseRef2->getId(), true);
 
     $this->dbManager->queryOnce("UPDATE clearing_event SET job_fk=$jobId");
 
@@ -189,6 +188,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     /** @var ClearingDecision $deciderMadeDecision*/
     $deciderMadeDecision = $decisions[0];
 
+    /* Ensure that 3DFX license is removed and GPL is concluded */
     foreach ($deciderMadeDecision->getClearingEvents() as $event) {
       assertThat($event->getEventId(), is(anyOf($addedEventIds)));
     }
@@ -218,6 +218,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $licId1 = $licenseRef1->getId();
 
     $agentNomosId = 6;
+    /* pfile 4 refers to 3DFX file in upload 1 (A.zip) and folder A/1 */
     $pfile = 4;
 
     $this->dbManager->queryOnce("DELETE FROM license_file");
@@ -225,7 +226,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,18,3)");
 
-    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=6, $groupId=4, $jobId=31, $args="");
+    /* uploadId 1 includes pfile 4 */
+    list($success,$output,$retCode) = $runner->run($uploadId=1, $userId=2, $groupId=2, $jobId=31, $args="");
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
@@ -239,101 +241,27 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
-  public function testDeciderScanWithTwoEventAndNoAgentShouldMakeADecision()
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $dbManager = M::mock(DbManager::classname());
-    $agentDao = M::mock(AgentDao::classname());
-    $clearingDao = M::mock(ClearingDao::classname());
-    $uploadDao = M::mock(UploadDao::classname());
-    $highlightDao = M::mock(HighlightDao::classname());
-    $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
-    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
-
-    $uploadId = 13243;
-
-    /*mock for Agent class **/
-    $agentDao->shouldReceive('arsTableExists')->andReturn(true);
-    $agentDao->shouldReceive('getCurrentAgentId')->andReturn($agentId=24);
-    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId)->andReturn($arsId=2);
-    $agentDao->shouldReceive('writeArsRecord')->with(anything(), $agentId, $uploadId, $arsId, true)->andReturn(0);
-
-    $jobId = 42;
-    $groupId = 6;
-    $userId = 2;
-
-    $itemIds = array(4343, 43);
-
-    $bounds0 = M::mock(ItemTreeBounds::classname());
-    $bounds0->shouldReceive('getItemId')->andReturn($itemIds[0]);
-    $bounds0->shouldReceive('containsFiles')->andReturn(false);
-    $bounds1 = M::mock(ItemTreeBounds::classname());
-    $bounds1->shouldReceive('getItemId')->andReturn($itemIds[1]);
-    $bounds1->shouldReceive('containsFiles')->andReturn(false);
-    $bounds = array($bounds0, $bounds1);
-
-    $uploadDao->shouldReceive('getItemTreeBounds')->with($itemIds[0])->andReturn($bounds[0]);
-    $uploadDao->shouldReceive('getItemTreeBounds')->with($itemIds[1])->andReturn($bounds[1]);
-
-    $clearingDao->shouldReceive('getEventIdsOfJob')->with($jobId)
-            ->andReturn(array($itemIds[0] => array(), $itemIds[1] => array()));
-
-    $dbManager->shouldReceive('begin')->times(count($itemIds));
-    $dbManager->shouldReceive('commit')->times(count($itemIds));
-
-    /* dummy expectations needed for unmockable LicenseMap constructor */
-    $dbManager->shouldReceive('prepare');
-    $res = M::Mock(DbManager::classname());
-    $dbManager->shouldReceive('execute')->andReturn($res);
-    $row1 = array('rf_fk' => 2334, 'parent_fk' => 1);
-    $row2 = array('rf_fk' => 2333, 'parent_fk' => 1);
-    $dbManager->shouldReceive('fetchArray')->with($res)->andReturn($row1, $row2, false);
-    $dbManager->shouldReceive('freeResult')->with($res);
-    /* /expectations for LicenseMap */
-
-    $decisionProcessor->shouldReceive('hasUnhandledScannerDetectedLicenses')
-            ->with($bounds0, $groupId, array(), anything())->andReturn(true);
-    $clearingDao->shouldReceive('markDecisionAsWip')
-            ->with($itemIds[0], $userId, $groupId);
-
-    $decisionProcessor->shouldReceive('hasUnhandledScannerDetectedLicenses')
-            ->with($bounds1, $groupId, array(), anything())->andReturn(false);
-    $decisionProcessor->shouldReceive('makeDecisionFromLastEvents')
-            ->with($bounds1, $userId, $groupId, DecisionTypes::IDENTIFIED, false, array());
-
-    $runner = new SchedulerTestRunnerMock($dbManager, $agentDao, $clearingDao, $uploadDao, $highlightDao, $decisionProcessor, $agentLicenseEventProcessor);
-
-    list($success,$output,$retCode) = $runner->run($uploadId, $userId, $groupId, $jobId, $args="");
-
-    $this->assertTrue($success, 'cannot run decider');
-    $this->assertEquals($retCode, 0, 'decider failed: '.$output);
-    assertThat($this->getHeartCount($output), equalTo(count($itemIds)));
-
-    $this->rmRepo();
-  }
 
   /** @group Functional */
   public function testDeciderMockedScanWithForceDecision()
   {
-    $this->runnerDeciderScanWithForceDecision($this->runnerMock);
+    $this->runnerDeciderScanWithoutDecision($this->runnerMock);
   }
 
   /** @group Functional */
   public function testDeciderRealScanWithForceDecision()
   {
-    $this->runnerDeciderScanWithForceDecision($this->runnerCli);
+    $this->runnerDeciderScanWithoutDecision($this->runnerCli);
   }
 
-  private function runnerDeciderScanWithForceDecision($runner)
+  private function runnerDeciderScanWithoutDecision($runner)
   {
     $this->setUpTables();
     $this->setUpRepo();
 
     $jobId = 42;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL")->getRef();
     $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
 
     $agentLicId = $this->licenseDao->getLicenseByShortName("Adaptec")->getRef()->getId();
@@ -342,22 +270,26 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     assertThat($addedLicenses, not(arrayContaining(null)));
 
-    $agentId = 5;
+    $agentId = 5; // Monk
+    /* pfile_pk 4 refers to 3DFX file in upload 1 (A.zip) and 3DFX_B file in upload 2 (B.zip), it has GPL and 3DFX licenses */
     $pfile = 4;
-
+		/* Adaptec license is added to a file */
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$agentLicId,$pfile,$agentId)");
 
+    /* $itemId 23 (uploadtree_pk) refers to 3DFX_B file in upload 2 (B.zip) in B/1b folder 
+     * uploadtree_pk 7 in upload 1 refers to same pfile_pk 4 */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId=23);
     assertThat($this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds), is(not(emptyArray())));
 
-    $eventId1 = $this->clearingDao->insertClearingEvent($itemId, $userId=2, $groupId=3, $licenseRef1->getId(), false);
-    $eventId2 = $this->clearingDao->insertClearingEvent($itemId, 5, $groupId, $licenseRef2->getId(), true);
+    $eventId1 = $this->clearingDao->insertClearingEvent($itemId, $userId=2, $groupId=2, $licenseRef1->getId(), false);
+    /* There is no user 5, replaced with 2 */
+    $eventId2 = $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseRef2->getId(), true);
 
     $this->dbManager->queryOnce("UPDATE clearing_event SET job_fk=$jobId");
 
     $addedEventIds = array($eventId1, $eventId2);
 
-    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId, $groupId, $jobId, $args="-k1");
+    list($success,$output,$retCode) = $runner->run($uploadId=2, $userId, $groupId, $jobId, $args="");
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed: '.$output);
@@ -365,20 +297,62 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+		// No decision is made because there is no conclusion for Adaptec license
+    assertThat($decisions, is(arrayWithSize(0)));
+    
+    $this->rmRepo();
+  }
+
+  public function testRunnerDeciderScanWithDecision()
+  {
+    $this->setUpTables();
+    $this->setUpRepo();
+
+    $jobId = 42;
+
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+
+    $licenseId3 = $this->licenseDao->getLicenseByShortName("Adaptec")->getRef()->getId();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("Adaptec")->getRef();
+    
+    $addedLicenses = array($licenseRef1, $licenseRef2);
+
+    assertThat($addedLicenses, not(arrayContaining(null)));
+
+    $agentId = 5; // Monk
+    /* pfile_pk 4 refers to 3DFX file in upload 1 (A.zip) and 3DFX_B file in upload 2 (B.zip), it has GPL and 3DFX licenses */
+    $pfile = 4;
+		/* Adaptec license is added to a file */
+    $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222, $licenseId3, $pfile,$agentId)");
+
+    /* $itemId 23 (uploadtree_pk) refers to 3DFX_B file in upload 2 (B.zip) in B/1b folder 
+     * uploadtree_pk 7 in upload 1 refers to same pfile_pk 4 */
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId=23);
+    assertThat($this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds), is(not(emptyArray())));
+
+    /* Conclude GPL */
+    $eventId1 = $this->clearingDao->insertClearingEvent($itemId, $userId=2, $groupId=2, $licenseRef1->getId(), false);
+    /* Remove 3DFX */
+    $eventId2 = $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseRef2->getId(), true);
+    /* Conclude Adaptec */
+    $eventId3 = $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseRef3->getId(), false);
+    
+    $this->dbManager->queryOnce("UPDATE clearing_event SET job_fk=$jobId");
+
+    $addedEventIds = array($eventId1, $eventId2);
+
+    list($success,$output,$retCode) = $this->runnerMock->run($uploadId=2, $userId, $groupId, $jobId, $args="");
+
+    $this->assertTrue($success, 'cannot run runner');
+    $this->assertEquals($retCode, 0, 'decider failed: '.$output);
+    assertThat($this->getHeartCount($output), equalTo(1));
+
+    $uploadBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $decisions = $this->clearingDao->getFileClearingsFolder($uploadBounds, $groupId);
+		// GPL and Adaptec licenses concluded
     assertThat($decisions, is(arrayWithSize(1)));
-
-    /** @var ClearingDecision $deciderMadeDecision */
-    $deciderMadeDecision = $decisions[0];
-
-    $eventIds = array();
-    foreach ($deciderMadeDecision->getClearingEvents() as $event) {
-      $eventIds[] = $event->getEventId();
-    }
-
-    assertThat($eventIds, arrayValue($addedEventIds[0]));
-    assertThat($eventIds, arrayValue($addedEventIds[1]));
-    assertThat($eventIds, arrayWithSize(1+count($addedEventIds)));
-
+    
     $this->rmRepo();
   }
 

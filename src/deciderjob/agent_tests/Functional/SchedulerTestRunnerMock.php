@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -51,14 +52,17 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $decisionTypes;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var LicenseDao */
+  private $licenseDao;
 
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao,
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao, LicenseDao $licenseDao,
     ClearingDecisionProcessor $clearingDecisionProcessor, AgentLicenseEventProcessor $agentLicenseEventProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->agentDao = $agentDao;
     $this->uploadDao = $uploadDao;
     $this->highlightDao = $highlightDao;
+    $this->licenseDao = $licenseDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
@@ -87,6 +91,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
+    $container->shouldReceive('get')->with('dao.license')->andReturn($this->licenseDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
