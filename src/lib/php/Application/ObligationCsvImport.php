@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -150,33 +150,40 @@ class ObligationCsvImport {
     $dbManager->freeResult($resi);
 
     $associatedLicenses = "";
-    $licenses = explode(";",$row['licnames']);
-    foreach ($licenses as $license)
+    if (empty($row['licnames']))
     {
-      $licId = $this->obligationMap->getIdFromShortname($license);
-      if ($licId == '0')
-      {
-        $message = _("ERROR: License with shortname '$license' not found in the DB. Obligation not updated.");
-        return "<b>$message</b><p>";
-      }
-
-      if ($this->obligationMap->isLicenseAssociated($new['ob_pk'],$licId))
-      {
-        continue;
-      }
-
-      $this->obligationMap->associateLicenseWithObligation($new['ob_pk'],$licId);
-      if ($associatedLicenses == "")
-      {
-        $associatedLicenses = "$license";
-      }
-      else
-      {
-        $associatedLicenses .= ";$license";
-      }
+      $return = "Obligation topic '$row[topic]' was added without being associated with any license.";
     }
+    else
+    {
+      $licenses = explode(";",$row['licnames']);
+      foreach ($licenses as $license)
+      {
+        $licId = $this->obligationMap->getIdFromShortname($license);
+        if ($licId == '0')
+        {
+          $message = _("ERROR: License with shortname '$license' not found in the DB. Obligation not updated.");
+          return "<b>$message</b><p>";
+        }
 
-    $return = "Obligation topic '$row[topic]' was added and associated with licenses '$associatedLicenses' in DB";
+        if ($this->obligationMap->isLicenseAssociated($new['ob_pk'],$licId))
+        {
+          continue;
+        }
+
+        $this->obligationMap->associateLicenseWithObligation($new['ob_pk'],$licId);
+        if ($associatedLicenses == "")
+        {
+          $associatedLicenses = "$license";
+        }
+        else
+        {
+          $associatedLicenses .= ";$license";
+        }
+      }
+
+      $return = "Obligation topic '$row[topic]' was added and associated with licenses '$associatedLicenses' in DB";
+    }
 
     return $return;
   }
