@@ -52,7 +52,7 @@ class ObligationCsvExport {
   public function createCsv($ob=0)
   {
     $csvarray = array();
-    $sql = "SELECT ob_pk, ob_topic,ob_text
+    $sql = "SELECT ob_pk,ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment
             FROM obligation_ref;";
     if ($ob>0)
     {
@@ -61,8 +61,10 @@ class ObligationCsvExport {
       $row = $this->dbManager->getSingleRow($sql,$stmt);
       $vars = $row ? array( $row ) : array();
       $liclist = $this->obligationMap->getLicenseList($ob);
+      $candidatelist = $this->obligationMap->getLicenseList($ob, True);
       array_shift($vars);
       array_push($vars,$liclist);
+      array_push($vars,$candidatelist);
       $csvarray = $vars;
     }
     else
@@ -76,15 +78,17 @@ class ObligationCsvExport {
       foreach ($vars as $row)
       {
         $liclist = $this->obligationMap->getLicenseList($row['ob_pk']);
+        $candidatelist = $this->obligationMap->getLicenseList($row['ob_pk'], True);
         array_shift($row);
         array_push($row,$liclist);
+        array_push($row,$candidatelist);
         array_push($csvarray,$row);
       }
     }
 
     $out = fopen('php://output', 'w');
     ob_start();
-    $head = array('Obligation or Risk topic','Full Text','Associated Licenses');
+    $head = array('Type','Obligation or Risk topic','Full Text','Classification','Apply on modified source code','Comment','Associated Licenses','Associated candidate Licenses');
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
     foreach($csvarray as $row)
     {
