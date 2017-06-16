@@ -33,7 +33,7 @@ class LicenseTest extends \PHPUnit_Framework_TestCase {
     $this->text = "The License text";
     $this->url = "http://www.fossology.org";
 
-    $this->license = new License(8,"testSN", "testFN", 4, $this->text, $this->url);
+    $this->license = new License(8,"testSN", "testFN", 4, $this->text, $this->url, 1);
   }
 
   public function testText()

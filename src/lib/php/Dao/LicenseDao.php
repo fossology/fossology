@@ -540,21 +540,30 @@ ORDER BY lft asc
    */
   private function getLicenseByCondition($condition, $param, $groupId=null)
   {
+    $extraCondition = "";
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM ONLY license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_detector_type, rf_spdx_compatible FROM ONLY license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
     if (false === $row && isset($groupId))
     {
-      $param[] = $groupId;
+      $userId = (isset($_SESSION) && array_key_exists('UserId', $_SESSION)) ? $_SESSION['UserId'] : 0;
+      if(!empty($userId)){
+        $param[] = $userId;
+        $extraCondition = "AND group_fk IN (SELECT group_fk FROM group_user_member WHERE user_fk=$".count($param).")";
+      }
+      if(is_int($groupId) && empty($userId)){
+        $param[] = $groupId;
+        $extraCondition = "AND group_fk=$".count($param);
+      }
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM license_candidate WHERE $condition AND group_fk=$".count($param),
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_detector_type, rf_spdx_compatible FROM license_candidate WHERE $condition $extraCondition",
         $param, __METHOD__ . ".$condition.group");
     }
     if (false === $row)
     {
       return null;
     }
-    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'], $row['rf_spdx_compatible']);
+    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'], $row['rf_detector_type'], $row['rf_spdx_compatible']);
     return $license;
   }
 

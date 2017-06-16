@@ -82,6 +82,7 @@ table
   min-width: 14px;
   padding: 0 7px;
   margin: 0 5px 0 0;
+  cursor: pointer;
   border-radius: 3px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   background: #efefef; /* Old browsers */
@@ -255,8 +256,8 @@ img.deleted {
 }
 
 .activeEditText textarea{
-  min-width: 30em;
-  min-height: 7em;
+  min-width: 7em;
+  min-height: 5em;
 }
 
 .info-bullet {
