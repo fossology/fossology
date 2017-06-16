@@ -541,14 +541,13 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
  */
 int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
 {
-  int r,MaxRow,count;
+  int r,MaxRow;
+  int count = 0;
   long Fid;
   int i;
   char *Desc;
   PGresult *result;
-  PGresult *resultFolder;
   char SQL[MAXSQL];
-  char SQLFolder[MAXSQLFolder];
   int rc;
 
   rc = check_write_permission_folder(Parent, user_id, user_perm);
