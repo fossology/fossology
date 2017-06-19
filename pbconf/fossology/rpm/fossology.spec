@@ -273,7 +273,7 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 cp install/scripts/php-conf-fix.sh $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 # manually add the version file
-cp $RPM_BUILD_ROOT%{_usr}/share/PBPROJ/VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
+cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 
 #rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/PBPROJ
 
