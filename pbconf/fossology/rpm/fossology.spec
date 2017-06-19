@@ -236,7 +236,6 @@ utils/install_composer.sh $RPM_BUILD_DIR/composer/
 #
 
 %build
-COMPOSER_PHAR=/home/vagrant/composer/composer 
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
