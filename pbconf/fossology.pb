@@ -61,7 +61,7 @@ testver fossology = true
 #
 #addrepo centos-5-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el5.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/5/pb.repo
 #addrepo centos-4-x86_64 = http://packages.sw.be/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.x86_64.rpm,ftp://ftp.project-builder.org/test/centos/4/pb.repo
-addrepo centos-7-x86_64 = http://ftp.project-builder.org/centos/7/x86_64/pb.repo,https://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-10.noarch.rpm
+addrepo centos-7-x86_64 = http://ftp.project-builder.org/centos/7/x86_64/pb.repo,https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 
 #
 # Adapt to your needs:

@@ -20,7 +20,7 @@ Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent fossology-decider fossology-spdx2 fossology-reuser
-#Recommends:		fossology-decider, fossology-spdx2, fossology-reuse,fossology-ninka
+#Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
 BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,php-mbstring,php-xml,curl,PBBUILDDEP
 Summary:        FOSSology is a license compliance analysis  tool
 
@@ -236,6 +236,7 @@ utils/install_composer.sh $RPM_BUILD_DIR/composer/
 #
 
 %build
+COMPOSER_PHAR=/home/vagrant/composer/composer 
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
@@ -274,6 +275,7 @@ cp install/scripts/php-conf-fix.sh $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 
 # manually add the version file
 cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
+#cp $RPM_BUILD_ROOT%{_usr}/share/PBPROJ/VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 
 #rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/PBPROJ
 

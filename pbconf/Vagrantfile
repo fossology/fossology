@@ -40,8 +40,8 @@ wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 rpm -Uvh epel-release-latest-7.noarch.rpm
 
 # install projectbuilder
-wget http://ftp.project-builder.org/centos/7/x86_64/pb.repo
-cp pb.repo /etc/yum.repos.d/
+wget http://ftp.project-builder.org/test/centos/7/x86_64/pb-test.repo
+cp pb-test.repo /etc/yum.repos.d/
 
 # not using gpg checking is not recommended
 # yum update -y --nogpgcheck
@@ -49,10 +49,7 @@ cp pb.repo /etc/yum.repos.d/
 yum update -y
 
 # installs for projectbuilder
-yum install -y project-builder
-yum install -y subversion
-yum install -y perl-ExtUtils-MakeMaker
-yum install -y createrepo
+yum install -y project-builder subversion perl-ExtUtils-MakeMaker createrepo 
 
 # Fix a Fedora-26 issue
 cat >> /etc/pb/pb.conf << EOF
@@ -83,7 +80,7 @@ systemctl start docker
 # cd /home/vagrant/prj/fossology
 mkdir -p /home/vagrant/composer/
 /home/vagrant/prj/fossology/utils/install_composer.sh /home/vagrant/composer/
-mkdir /home/vagrant/prj/fossology/src/vendor
+mkdir -p /home/vagrant/prj/fossology/src/vendor
 chown vagrant:vagrant /home/vagrant/prj/fossology/src/vendor
 
 # preparing the transfer of the packages by ssh
