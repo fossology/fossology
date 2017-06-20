@@ -13,7 +13,7 @@ docker create --name fossology-test --net fossology-testnet --ip 172.18.0.22 fos
 docker start fossology-test
 
 #### is container running
-docker ps | grep -q fossology-test
+docker ps | grep fossology-test
 
 #### fossology needs up to 15 seconds to startup
 sleep 15
@@ -23,3 +23,4 @@ curl -L -s http://172.18.0.22/repo/ | grep -q "<title>Getting Started with FOSSo
 
 #### test whether the scheduler is running
 docker exec -it fossology-test /usr/local/share/fossology/scheduler/agent/fo_cli -S
+

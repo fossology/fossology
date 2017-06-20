@@ -116,6 +116,7 @@ if [ $BUILDTIME ]; then
               precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
               trusty) apt-get $YesOpt install postgresql-server-dev-9.3;;
               jessie) apt-get $YesOpt install postgresql-server-dev-9.4;;
+              stretch) apt-get $YesOpt install postgresql;;
               xenial) apt-get $YesOpt install postgresql-server-dev-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
@@ -165,10 +166,16 @@ if [ $RUNTIME ]; then
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
         echo "doing runtime"
-         apt-get $YesOpt install apache2 libapache2-mod-php5
-         apt-get $YesOpt install php5 php5-pgsql php-pear php5-cli \
+        case "$CODENAME" in
+         stretch|Xenial|Yakkety|Zesty)
+          apt-get $YesOpt install php7.0 apache2 php7.0-pgsql php7.0-cli php7.0-curl;;
+         *)
+          apt-get $YesOpt install apache2 libapache2-mod-php5 php5-curl php5-cli php5 php5-pgsql;;
+        esac
+
+         apt-get $YesOpt install php-pear  \
             libxml2 \
-            binutils php-gettext php5-curl \
+            binutils php-gettext  \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils upx-ucl \
             unrar-free unzip p7zip-full p7zip wget \
@@ -193,6 +200,8 @@ if [ $RUNTIME ]; then
                  apt-get $YesOpt install postgresql-9.3;;
               jessie)
                  apt-get $YesOpt install postgresql-9.4;;
+              stretch|Xenial|Yakkety|Zesty)
+                 apt-get $YesOpt install postgresql;;
               xenial)
                  apt-get $YesOpt install postgresql-9.5;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
