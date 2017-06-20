@@ -20,6 +20,7 @@ namespace Fossology\SpdxTwo;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\TreeDao;
@@ -54,12 +55,15 @@ class SpdxTwoAgent extends Agent
   private $clearingDao;
   /** @var LicenseDao */
   private $licenseDao;
+  /** @var ClearingDecisionFilter */
+  private $clearingFilter;
   /** @var DbManager */
   protected $dbManager;
   /** @var Twig_Environment */
   protected $renderer;
   /** @var LicenseMap */
   private $licenseMap;
+  private $licenseProjector;
   /** @var array */
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
   /** @var array */
@@ -91,6 +95,8 @@ class SpdxTwoAgent extends Agent
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->licenseDao = $this->container->get('dao.license');
+    $this->clearingFilter = $this->container->get('businessrules.clearing_decision_filter');
+    $this->licenseProjector = new LicenseMap($this->container->get('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     $this->dbManager = $this->container->get('db.manager');
     $this->renderer = $this->container->get('twig.environment');
     $this->renderer->setCache(false);
@@ -292,46 +298,60 @@ class SpdxTwoAgent extends Agent
    */
   protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
   {
+    // Get array with uploadtree and pfile IDs for all files only (omit directories)
+    $stmt = __METHOD__;
+    $sql = "SELECT uploadtree_pk, pfile_fk, ufile_mode FROM ";
+    $sql .= $itemTreeBounds->getUploadTreeTableName();
+    $sql .= " WHERE upload_fk=$1 AND pfile_fk != 0";
+    $this->dbManager->prepare($stmt, $sql);
+    $itbUploadId = $itemTreeBounds -> getUploadId();
+    $param = array();
+    $param[] = $itbUploadId;
+    $res = $this->dbManager->execute($stmt,$param);
+
+    $fileEntries = array();
+    while($row=$this->dbManager->fetchArray($res))
+    {
+      $uploadtree_pk = $row['uploadtree_pk'];
+      $pfile_fk = $row['pfile_fk'];
+      $ufile_mode = intval($row['ufile_mode']);
+      // filter out non-file entries
+      $bitmask = (1 << 29) | (1 << 28) | (1 << 27) | (1 << 26) | (1 << 18);
+      if (($ufile_mode & $bitmask) == 0) {
+        $fileEntries[$uploadtree_pk] = $pfile_fk;
+      }
+    }
+    $this->dbManager->freeResult($res);
+
     $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $this->groupId);
+    $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($clearingDecisions);
 
     $filesWithLicenses = array();
-    $clearingsProceeded = 0;
-    foreach ($clearingDecisions as $clearingDecision)
+    $filesProceeded = 0;
+    foreach ($fileEntries as $uploadtree_pk=>$pfile_fk)
     {
-      $clearingsProceeded += 1;
-      if(($clearingsProceeded&2047)==0)
+      $filesProceeded += 1;
+      if(($filesProceeded&2047)==0)
       {
         $this->heartbeat(0);
       }
-      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
-        continue;
-      }
 
-      foreach ($clearingDecision->getClearingEvents() as $clearingEvent)
-      {
-        $clearingLicense = $clearingEvent->getClearingLicense();
-        if ($clearingLicense->isRemoved())
-        {
-          continue;
+      // based on Fossology src/www/ui/async/AjaxExplorer.php:createFileDataRow()
+      $decision = $this->clearingFilter->getDecisionOf($editedMappedLicenses,$uploadtree_pk,$pfile_fk);
+      if ($decision !== false) {
+        $concludedLicenses = array();
+        $result_lics = $decision->getPositiveLicenses();
+        foreach ($result_lics as $licenseRef) {
+          $projectedId = $this->licenseProjector->getProjectedId($licenseRef->getId());
+          $projectedName = $this->licenseProjector->getProjectedShortname($licenseRef->getId(), $licenseRef->getShortName());
+          $concludedLicenses[$projectedId] = $projectedName;
         }
-
-        if($clearingEvent->getReportinfo())
-        {
-          $customLicenseText = $clearingEvent->getReportinfo();
-          $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
-                                    '-' . md5($customLicenseText);
-          $this->includedLicenseIds[$reportedLicenseShortname] = $customLicenseText;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $reportedLicenseShortname;
-        }
-        else
-        {
-          $reportedLicenseId = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
-          $this->includedLicenseIds[$reportedLicenseId] = true;
-          $filesWithLicenses[$clearingDecision->getUploadTreeId()]['concluded'][] = $this->licenseMap->getProjectedShortname($reportedLicenseId);
-        }
+        $filesWithLicenses[$uploadtree_pk]['concluded'] = $concludedLicenses;
+      } else {
+        $filesWithLicenses[$uploadtree_pk]['concluded'] = array();
       }
     }
+
     return $filesWithLicenses;
   }
 
