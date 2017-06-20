@@ -8,7 +8,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:stable
+FROM debian:8.8
 
 MAINTAINER Fossology <fossology@fossology.org>
 
