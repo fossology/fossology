@@ -75,6 +75,13 @@ if [ `id -u` != "0" ] ; then
    exit 1
 fi
 
+# We can not detect distro without lsb_release.
+if [ -z "`which lsb_release 2> /dev/null`" ] ; then
+   echo "ERROR: fo-installdeps requires the 'lsb_release' program to be installed."
+   echo "Aborting."
+   exit 1
+fi
+
 if [ $EVERYTHING ]; then
    echo "*** Installing both runtime and buildtime dependencies ***"
    RUNTIME=1
@@ -150,6 +157,19 @@ if [ $BUILDTIME ]; then
             gcc make file libxml2 \
             perl-Text-Template subversion \
             boost-devel
+         ;;
+      Arch|Parabola|ManjaroLinux)
+         if [ $YesOpt ]; then
+           YesOpt='--noconfirm'
+         fi
+         pacman -S --needed $YesOpt rpm-org
+         if [ "$?" != "0" ]; then
+           echo "ERROR: 'rpmlib.h' and the 'rpm' program from the 'rpm-org' AUR package"
+           echo "       https://aur.archlinux.org/packages/rpm-org/"
+           exit 1
+         fi
+         pacman -S --needed $YesOpt base-devel boost composer libxml2 perl-text-template \
+                                    postgresql subversion
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -257,7 +277,16 @@ if [ $RUNTIME ]; then
             file libxml2 \
             binutils 
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
-         echo "    available in RHEL please install from upstream sources.";;
+         echo "    available in RHEL please install from upstream sources."
+         ;;
+      Arch|Parabola|ManjaroLinux)
+         if [ $YesOpt ]; then
+           YesOpt='--noconfirm'
+         fi
+         pacman -S --needed $YesOpt binutils bzip2 cabextract cdrkit cpio gzip libxml2 \
+                                    p7zip php-apache php-pgsql poppler postgresql \
+                                    sleuthkit upx tar unzip
+         ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
    
