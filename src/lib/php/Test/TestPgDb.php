@@ -62,7 +62,6 @@ class TestPgDb extends TestAbstractDb
     $this->dbManager = $container->get('db.manager');
     $postgres = new Postgres($this->connection);
     $this->dbManager->setDriver($postgres);
-    $this->dbManager = $container->get('db.manager');
     $this->dbManager->queryOnce("DEALLOCATE ALL");
     $this->dropAllTables();
     $this->dropAllSequences();

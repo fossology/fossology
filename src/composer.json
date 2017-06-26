@@ -15,8 +15,7 @@
         "symfony/http-foundation": "2.6.*",
         "symfony/dependency-injection": "2.6.*",
         "twig/twig": "1.*",
-        "twig/extensions": "1.*",
-        "phpunit/phpunit": "~5"
+        "twig/extensions": "1.*"
     },
 
     "require-dev": {
@@ -24,7 +23,8 @@
         "hamcrest/hamcrest-php": "1.1.*",
         "squizlabs/php_codesniffer": "1.*",
         "sebastian/phpcpd": "2.*",
-        "satooshi/php-coveralls": "1.0.*"
+        "satooshi/php-coveralls": "1.0.*",
+        "phpunit/phpunit": "~5"
     },
 
     "autoload": {

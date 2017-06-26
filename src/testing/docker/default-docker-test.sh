@@ -13,7 +13,7 @@ docker create --name fossology-test --net fossology-testnet --ip 172.18.0.22 fos
 docker start fossology-test
 
 #### is container running
-docker ps | grep fossology-test
+docker ps | grep -q fossology-test
 
 #### fossology needs up to 15 seconds to startup
 sleep 15
