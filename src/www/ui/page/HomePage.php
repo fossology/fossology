@@ -21,6 +21,7 @@ namespace Fossology\UI\Page;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use OpenIDConnectClient;
 
 /**
  * @brief about page on UI
@@ -46,6 +47,7 @@ class HomePage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $vars = array('isSecure' => $request->isSecure());
+
     if (array_key_exists('User', $_SESSION) && $_SESSION['User']=="Default User" && plugin_find_id("auth")>=0)
     {
       if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
@@ -61,6 +63,27 @@ class HomePage extends DefaultPlugin
       $vars['authUrl'] = "?mod=auth";
     }
 
+    global $SysConf;
+    if(isset($SysConf["OPENID_CONNECT"]))
+    {
+      $openIdConnect = $SysConf["OPENID_CONNECT"];
+      $provider_name = $openIdConnect["provider_name"];
+      $provider_url = $openIdConnect["provider_url"];
+      $client_id = $openIdConnect["client_id"];
+      $client_secret = $openIdConnect["client_secret"];
+      $redirect_url = $openIdConnect["redirect_url"];
+      $claim = $openIdConnect["claim"];
+      if (!empty($provider_name) && !empty($provider_url)
+        && !empty($client_id) && !empty($client_secret)
+        && !empty($redirect_url) && !empty($claim))
+      {
+        $vars['provider_name'] = $provider_name;
+      }
+      else
+      {
+        $vars['provider_name'] = 0;
+      }
+    }
     return $this->render("home.html.twig", $this->mergeWithDefault($vars));
   }
 }

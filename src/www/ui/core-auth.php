@@ -194,31 +194,95 @@ class core_auth extends FO_Plugin
     return (@$_SERVER['REMOTE_ADDR']);
   }
 
-  /**
-   * \brief This is only called when the user logs out.
-   */
   public function Output()
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
+    $openidProviderLogin = GetParm("openidProviderLogin", PARM_TEXT);
+
+    global $SysConf;
+    $openIdConnect = $SysConf["OPENID_CONNECT"];
+    $provider_name = $openIdConnect["provider_name"];
+    $provider_url = $openIdConnect["provider_url"];
+    $client_id = $openIdConnect["client_id"];
+    $client_secret = $openIdConnect["client_secret"];
+    $redirect_url = $openIdConnect["redirect_url"];
+    $claim = $openIdConnect["claim"];
+
+    $isOpenIDLogin = !empty($_GET["code"]) || !empty($openidProviderLogin);
+    if($isOpenIDLogin)
+    {
+
+      $client = new OpenIDConnectClient($provider_url, $client_id, $client_secret);
+      $client->setRedirectURL($redirect_url);
+      $client->authenticate();
+      try
+      {
+        $userName = $client->requestUserInfo($claim);
+      }
+      catch(Exception $e)
+      {
+        return false;
+      }
+
+      $validLogin = $this->checkOpenIDUser($userName);
+
+      if($validLogin)
+      {
+        $referrer = "?mod=home";
+      }
+      else
+      {
+        /**
+         * redirect the user to the auth page to signal
+         * login failure
+         */
+        $referrer = "?mod=auth";
+      }
+    }
+    else
+    {
+      $validLogin = $this->checkUsernameAndPassword($userName, $password);
+
+      $this->vars['loginFailure'] = !empty($userName) || !empty($password);
+      if (!empty($userName) && $userName != 'Default User')
+      {
+        $this->vars['userName'] = $userName;
+      }
+    }
+
     if (empty($referrer))
     {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
-    $referrerQuery = parse_url($referrer,PHP_URL_QUERY);
-    if($referrerQuery) {
+
+    /**
+     * redirects the user to the auth page, incase of failed OpenId Login or failed
+     * normal login
+     */
+    if($validLogin || $isOpenIDLogin)
+    {
+      return new RedirectResponse($referrer);
+    }
+
+    $referrerQuery = parse_url($referrer, PHP_URL_QUERY);
+    if ($referrerQuery)
+    {
       $params = array();
-      parse_str($referrerQuery,$params);
-      if (array_key_exists('mod', $params) && $params['mod'] == $this->Name) {
+      parse_str($referrerQuery, $params);
+      if (array_key_exists('mod', $params) && $params['mod'] == $this->Name)
+      {
         $referrer = Traceback_uri();
       }
     }
 
-    $validLogin = $this->checkUsernameAndPassword($userName, $password);
-    if ($validLogin)
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
     {
-      return new RedirectResponse($referrer);
+      $this->vars['protocol'] = "HTTPS";
+    } else
+    {
+      $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     }
 
     $initPluginId = plugin_find_id("init");
@@ -227,20 +291,12 @@ class core_auth extends FO_Plugin
       global $Plugins;
       $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
-
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
-    {
-      $this->vars['protocol'] = "HTTPS";
-    }
-    else
-    {
-      $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
-    }
-
     $this->vars['referrer'] = $referrer;
-    $this->vars['loginFailure'] = !empty($userName) || !empty($password);
-    if (!empty($userName) && $userName!='Default User') {
-      $this->vars['userName'] = $userName;
+    if(!empty($provider_name) && !empty($provider_url)
+      && !empty($client_id) && !empty($client_secret)
+      && !empty($redirect_url) && !empty($claim))
+    {
+      $this->vars['provider_name'] = $provider_name;
     }
     return $this->render('login.html.twig',$this->vars);
   }
@@ -260,6 +316,20 @@ class core_auth extends FO_Plugin
     parent::OutputOpen();
   }
 
+  function checkOpenIDUser($userName)
+  {
+    try
+    {
+      $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
+    }
+    catch(Exception $e)
+    {
+      return false;
+    }
+
+    $this->completeAuth($row);
+    return true;
+  }
 
   /**
    * \brief See if a username/password is valid.
@@ -303,7 +373,12 @@ class core_auth extends FO_Plugin
       /* empty password required */
       return false;
     }
+    $this->completeAuth($row);
+    return true;
+  }
 
+  private function completeAuth($row)
+  {
     /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
@@ -325,7 +400,6 @@ class core_auth extends FO_Plugin
     {
       $_SESSION['NoPopup'] = 0;
     }
-    return true;
   }
 
 }
