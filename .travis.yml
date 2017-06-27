@@ -1,4 +1,4 @@
-# Copyright Siemens AG, 2014-2015
+# Copyright Siemens AG, 2014-2017
 # SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
@@ -54,6 +54,7 @@ env:
   matrix:
    - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/default-docker-test.sh' MAKETARGETS=''
    - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/docker-compose-test.sh' MAKETARGETS=''
+   - PHPTESTSUITE= CHECKBEFORE='src/testing/travis/check-changelog.sh' MAKETARGETS=''
    - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
    - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
