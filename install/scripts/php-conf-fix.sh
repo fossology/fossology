@@ -18,6 +18,8 @@ elif [ -f ${PHP5_PATH} ]; then
     TIMEZONE=`cat /etc/timezone`
 elif [ -f ${PHP7_PATH} ]; then
     phpIni=${PHP7_PATH}
+else
+    phpIni=/etc/php5/apache2/php.ini
     TIMEZONE=`cat /etc/timezone`
 fi
 
