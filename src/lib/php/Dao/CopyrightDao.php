@@ -70,12 +70,18 @@ class CopyrightDao extends Object
     }
 
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1";
     $params = array($pFileId);
-    if($agentId!=0) {
+    $addAgentValue = "";
+    if(!empty($agentId)) {
       $statementName .= '.agentId';
-      $sql .= ' AND agent_fk=$2';
+      $addAgentValue = ' AND agent_fk=$2';
       $params[] = $agentId;
+    }
+    $getHighlightForTableName = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
+    if($tableName != "copyright"){
+      $sql = $getHighlightForTableName;
+    }else{
+      $sql = "$getHighlightForTableName UNION SELECT * FROM author WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
     }
     $this->dbManager->prepare($statementName,$sql);
     $result = $this->dbManager->execute($statementName, $params);

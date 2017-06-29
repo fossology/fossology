@@ -300,15 +300,22 @@ bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long i
 
 bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 {
+  std::string tableName = IDENTITY;
+ 
+  if("author" == entry.type ||
+     "email" == entry.type ||
+     "url" == entry.type){
+    tableName = "author";
+   }
+
   return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
-      "insertInDatabase",
-      "INSERT INTO "
-      IDENTITY
-      "(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)"
-        " VALUES($1,$2,$3,md5($3),$4,$5,$6)",
-      long, long, char*, char*, int, int
+      ("insertInDatabaseFor" + tableName).c_str(),
+      ("INSERT INTO "+ tableName +
+      "(agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte)" +
+        " VALUES($1,$2,$3,md5($3),$4,$5,$6)").c_str(),
+        long, long, char*, char*, int, int
     ),
     entry.agent_fk, entry.pfile_fk,
     entry.content.c_str(),
