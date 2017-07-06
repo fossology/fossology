@@ -411,10 +411,10 @@ class search extends FO_Plugin
     if ($CriteriaCount)
     {
       if (empty($Page)) { $Page = 0; }
-      $html = "<hr>\n";
-      $text = _("Files matching");
-      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
       $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+      $html = "<hr>\n";
+      $text = sizeof($UploadtreeRecs) . " " . _("Files matching");
+      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
       $html .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
       $this->vars["result"] = $html;
     }
