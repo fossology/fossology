@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -19,12 +19,12 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
-
+use \delagent\ui\DeleteMessages;
+use \delagent\ui\DeleteResponse;
 /**
  * \file admin_upload_delete.php
  * \brief delete a upload
  */
-
 define("TITLE_admin_upload_delete", _("Delete Uploaded File"));
 
 /**
@@ -54,25 +54,26 @@ class admin_upload_delete extends FO_Plugin
    *
    * \return string with the message.
    */
-  function TryToDelete($uploadpk) {
+  function TryToDelete($uploadpk)
+  {
     if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())){
-      $text=_("You dont have permissions to delete the upload");
-      return DisplayMessage($text);
+      $returnMessage = DeleteMessages::NO_PERMISSION;
+      return new DeleteResponse($returnMessage);
     }
 
-    $rc = $this->Delete($uploadpk);
+    $rc = $this->Delete(intval($uploadpk));
 
     if (! empty($rc)) {
-      $text=_("Deletion Scheduling failed: ");
-      return DisplayMessage($text.$rc);
+      $returnMessage = DeleteMessages::SCHEDULING_FAILED;
+      return new DeleteResponse($returnMessage);
     }
 
     /* Need to refresh the screen */
     $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
     $LinkText = _("View Jobs");
-    $text=_("Deletion added to job queue.");
-    $msg = "$text <a href=$URL>$LinkText</a>";
-    return displayMessage($msg);
+    $returnMessage = DeleteMessages::SUCCESS;
+    return new DeleteResponse($returnMessage,
+      " <a href=$URL>$LinkText</a>");
   }
 
   /**
@@ -87,7 +88,7 @@ class admin_upload_delete extends FO_Plugin
     /* Prepare the job: job "Delete" */
     $user_pk = Auth::getUserId();
     $group_pk = Auth::getGroupId();
-    $jobpk = JobAddJob($user_pk, $group_pk, "Delete", $uploadpk);
+    $jobpk = JobAddJob($user_pk, $group_pk, "Delete", intval($uploadpk));
     if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to create job record");
       return ($text);
@@ -114,27 +115,81 @@ class admin_upload_delete extends FO_Plugin
   } // Delete()
 
   /**
+   * @param $uploadpks
+   * @brief starts deletion and handles error messages
+   * @return string
+   */
+  function initDeletion($uploadpks)
+  {
+    if(sizeof($uploadpks) <= 0)
+    {
+      return DisplayMessage("No uploads selected");
+    }
+
+    $V = "";
+    $errorMessages = [];
+    $deleteResponse = NULL;
+    for($i=0; $i < sizeof($uploadpks); $i++)
+    {
+      $deleteResponse = $this->TryToDelete(intval($uploadpks[$i]));
+
+      if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
+      {
+        $errorMessages[] = $deleteResponse;
+      }
+    }
+
+    if(sizeof($uploadpks) == 1)
+    {
+      $V .= DisplayMessage($deleteResponse->getDeleteMessageString().$deleteResponse->getAdditionalMessage());
+    }
+    else
+    {
+      $displayMessage = "";
+
+      if(in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages))
+      {
+        $displayMessage .= "<br/>Scheduling failed for " .
+          array_count_values($errorMessages)[DeleteMessages::SCHEDULING_FAILED] . " uploads<br/>";
+      }
+
+      if(in_array(DeleteMessages::NO_PERMISSION, $errorMessages))
+      {
+        $displayMessage .= "No permission to delete " .
+          array_count_values($errorMessages)[DeleteMessages::NO_PERMISSION]. " uploads<br/>";
+      }
+
+      $displayMessage .= "Deletion of " .
+        (sizeof($uploadpks)-sizeof($errorMessages)) . " projects queued";
+      $V .= DisplayMessage($displayMessage);
+    }
+    return $V;
+  }
+
+  /**
    * \brief Generate the text for this plugin.
    */
   public function Output()
   {
     $V = "";
     /* If this is a POST, then process the request. */
-    $uploadpk = GetParm('upload', PARM_INTEGER);
-    if (!empty($uploadpk)) {
-      $V.= $this->TryToDelete($uploadpk);
+    $uploadpks = GetParm('upload', PARM_RAW);
+    if (!empty($uploadpks))
+    {
+      $V .= $this->initDeletion($uploadpks);
     }
     /* Create the AJAX (Active HTTP) javascript for doing the reply
      and showing the response. */
     $V.= ActiveHTTPscript("Uploads");
     $V.= "<script language='javascript'>\n";
+
     $V.= "function Uploads_Reply()\n";
     $V.= "  {\n";
     $V.= "  if ((Uploads.readyState==4) && (Uploads.status==200))\n";
     $V.= "    {\n";
     /* Remove all options */
     //$V.= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
-    $V.= "    document.getElementById('uploaddiv').innerHTML = '<BR><select name=\'upload\' size=\'10\'>' + Uploads.responseText + '</select><P />';\n";
+    $V.= "    document.getElementById('uploaddiv').innerHTML = '<BR><select name=\'upload\' multiple=multiple size=\'10\'>' + Uploads.responseText + '</select><P />';\n";
     /* Add new options */
     $V.= "    }\n";
     $V.= "  }\n";
@@ -171,7 +226,7 @@ class admin_upload_delete extends FO_Plugin
     $text = _("Select the uploaded project to delete:");
     $V.= "<li>$text";
     $V.= "<div id='uploaddiv'>\n";
-    $V.= "<BR><select name='upload' size='10'>\n";
+    $V.= "<BR><select multiple='multiple' name='upload[]' size='10'>\n";
     $List = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach($List as $L) {
       $V.= "<option value='" . $L['upload_pk'] . "'>";
