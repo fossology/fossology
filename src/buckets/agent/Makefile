@@ -20,7 +20,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 DEF = -DPROJECTSTATEDIR='"$(PROJECTSTATEDIR)"' -DDATADIR='"$(DATADIR)"'
-CFLAGS_LOCAL = $(DEF) $(FO_CFLAGS) $(DEFS)
+CFLAGS_LOCAL = $(DEF) $(FO_CFLAGS) $(DEFS) -fPIC
 
 EXE = buckets
 OBJS = validate.o inits.o liccache.o walk.o leaf.o match.o container.o child.o write.c
