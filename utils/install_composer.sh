@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Copyright (C) 2017 Maximilian Huber
+# Copyright (C) 2017 Siemens AG
 # based on documentation found at https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 
 ################################################################################
 ## Configuration:
 # commit hash of https://github.com/composer/getcomposer.org
 
-current_github_hash="5fd32f776359b8714e2647ab4cd8a7bed5f3714d"
+current_github_hash="a488222dad0b6eaaa211ed9a21f016bb706b2980"
 # version of composer (must be present in https://github.com/composer/getcomposer.org/tree/${current_github_hash}/web/download)
-version="1.3.2"
+version="1.4.2"
 
 ##
 ################################################################################
