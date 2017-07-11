@@ -12,9 +12,10 @@
 # https://github.com/fossology/fossology/blob/master/CONTRIBUTING.md#user-content-git-commit-conventions
 
 set -e
+git fetch --unshallow
 curl https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh | bash
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 nvm install v6
-npm install --save-dev conventional-changelog-lint
+npm install conventional-changelog-lint
 node_modules/conventional-changelog-lint/distribution/cli.js --from=master
