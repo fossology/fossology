@@ -27,25 +27,55 @@ This file is offered as-is, without any warranty.
         </label>
       </li>
       <li>
-        <label>
-           <input type="checkbox" name="addConcludedLicensesAs" value="conclusion">
-           {{ 'Add concluded licenses as conclusions'|trans }}?
-        </label>
+        {{ 'Select how the information should be imported:'|trans }}
+        <ul>
+          <li>
+            {{ 'Add the License Info as findings from'|trans }}
+            <ul>
+              <li>
+                <label>
+                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseInfoInFile" selected/>
+                  SPDX tag of type licenseInfoInFile
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseConcluded" />
+                  SPDX tag of type licenseConcluded
+                </label>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <label>
+              <input type="checkbox" name="addConcludedAsDecisions" value="addConcludedAsDecisions" selected/>
+              {{ 'Add concluded licenses as decisions'|trans }}
+            </label>
+          </li>
+          <li>
+            {{ 'Add the Copyright Information by'|trans }}
+            <ul>
+              <li>
+                <input type="radio" id="overwrite" name="addCopyrightBy" value="overwrite"> <label for="overwrite">overwriting</label>
+              </li>
+              <li>
+                <input type="radio" id="add" name="addCopyrightBy" value="add" selected> <label for="add">adding</label>
+              </li>
+              <li>
+                <input type="radio" id="ignore" name="addCopyrightBy" value="ignore"> <label for="ignore">ignoring</label>
+              </li>
+            </ul>
+          </li>
+        </ul>
       </li>
     </ol>
-    <input type="submit" value="{{ 'Upload and Import!'|trans }}" />
+    <input type="submit" value="{{ 'Upload and Import'|trans }}" />
   </form>
-
 {% endblock %}
 
 {% block foot %}
   {{ parent() }}
   <script type="text/javascript">
-   function js_url(val, url)
-   {
-     window.location.assign(url+val);
-   }
-
    $(document).ready(function() {
      $('#oldfolderid').change(function(){
        window.location.href = "{{ baseUri }}" + $(this).val();

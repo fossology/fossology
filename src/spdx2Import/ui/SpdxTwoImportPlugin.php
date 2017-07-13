@@ -62,7 +62,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     }
     else
     {
-      $addConcludedLicensesAs = $request->get('addConcludedLicensesAs') == 'conclusion' ? true : false;
+      $addConcludedLicensesAs = $request->get('addConcludedAsDecisions') == 'addConcludedAsDecisions' ? true : false;
       $jobMetaData = $this->runImport($uploadId, $_FILES['spdxReport'],$addConcludedLicensesAs);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();

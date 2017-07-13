@@ -638,8 +638,8 @@ ORDER BY lft asc
     {
       if (($row['ufile_mode']&(1<<29)) == 0)
       {
-        $pfilePerHashAlgo[$row['hash']][] = array('pfile_pk' => $row['pfile_fk'],
-                                                  'uploadtree_pk' => $row['uploadtree_pk']);
+        $pfilePerHashAlgo[strtolower($row['hash'])][] = array('pfile_pk' => $row['pfile_fk'],
+                                                              'uploadtree_pk' => $row['uploadtree_pk']);
       }
     }
     $this->dbManager->freeResult($result);

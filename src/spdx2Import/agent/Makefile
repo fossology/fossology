@@ -12,7 +12,7 @@ include $(VARS)
 
 MODNAME = spdx2Import
 
-EXE = spdx2Import.php version.php services.php
+EXE = spdx2Import.php SpdxTwoImportAgent.php SpdxTwoImportSource.php SpdxTwoImportSink.php SpdxTwoImportHelper.php version.php services.php
 WRAP = spdx2Import
 all: version.php spdx2Import
 
