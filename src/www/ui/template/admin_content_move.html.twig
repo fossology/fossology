@@ -8,6 +8,7 @@
 {% block styles %}
   {{ parent() }}
   <link rel="stylesheet" href="css/jquery.treeview.css"/>
+  <link rel="stylesheet" href="css/select2.min.css"/>
 {% endblock %}
 
 {% block content %}
@@ -30,7 +31,7 @@
         <br/>
 
         <label for="toFolder">{{ 'Select the folder where the content shall be placed'| trans }}:<br/>
-          {% include 'components/select-folder.html.twig' with {'name':'toFolder'} %}
+          {% include 'components/select-folder.html.twig' with {'name':'toFolder', 'id': 'toFolder'}  %}
         </label>
         <br/>
         <br/>
@@ -47,5 +48,13 @@
   {{ parent() }}
   <script src="scripts/tools.js" type="text/javascript"></script>
   <script src="scripts/jquery.treeview.js" type="text/javascript"></script>
+  <script src="scripts/select2.full.min.js" type="text/javascript"></script>
+  <script>
+    $(document).ready(function () {
+      $('#toFolder').select2({
+        "placeholder": "Select folder"
+      });
+    });
+  </script>
   <script type="text/javascript">{% include 'admin_content_move.js.twig' %}</script>
 {% endblock %}
