@@ -94,6 +94,12 @@ if [ $BUILDTIME ]; then
       yum $YesOpt install \
         glib2-devel
       ;;
+    Arch|Parabola|ManjaroLinux)
+      if [ $YesOpt ]; then
+        YesOpt='--noconfirm'
+      fi
+      pacman -S --needed $YesOpt glib2
+      ;;
     *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
   esac
 fi
@@ -116,6 +122,13 @@ if [ $RUNTIME ]; then
       yum $YesOpt install \
         glib2
       ;;
+    Arch|Parabola|ManjaroLinux)
+      if [ $YesOpt ]; then
+        YesOpt='--noconfirm'
+      fi
+      pacman -S --needed $YesOpt glib2
+      ;;
+    *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
   esac
 fi
 
