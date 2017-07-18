@@ -216,7 +216,9 @@ class admin_upload_delete extends FO_Plugin
     $V.= "<ol>\n";
     $text = _("Select the folder containing the file to delete: ");
     $V.= "<li>$text";
-    $V.= "<select name='folder' ";
+    $V.= "<br />";
+    $V.= "<select id='folder_select' name='folder' ";
+
     $V.= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=-1' ";
     $V.= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
 
@@ -245,6 +247,14 @@ class admin_upload_delete extends FO_Plugin
     $text = _("Delete");
     $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
+
+    $V.= <<<'EOT'
+    <script>
+      window.onload = function() {
+          $('#folder_select').select2();
+      }
+    </script>
+EOT;
     return $V;
   }
 }
