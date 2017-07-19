@@ -311,3 +311,21 @@ tr.classic {
   width: 25%;
 }
 
+td.dashboard {
+  vertical-align: top;
+  horiz-align: center;
+  padding-right: 10%;
+}
+
+table.infoTable {
+  max-width: 50%;
+}
+
+div.infoTable {
+  height: 100px;
+  overflow-y: scroll;
+}
+
+#databaseTable {
+  width: 100%;
+}

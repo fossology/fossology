@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -120,7 +120,52 @@ function GetLastVacTime($TableName)
 {
   return $this->GetLastAnalyzeTimeOrVacTime("last_vacuum, last_autovacuum",$TableName);
 }
+
+function GetPHPInfoTable()
+{
+  $PHP_VERSION = phpversion();
+  $loadedModules = get_loaded_extensions();
+
+  $table = "
+<table class='infoTable' border=1>
+  <tr>
+    <th>
+      Info
+    </th>
+    <th>
+        Value
+    </th>
+  </tr>
+  <tbody>
+    <tr>
+      <td>
+      PHP Version
+      </td>
+      <td>
+      $PHP_VERSION
+      </td>
+    </tr>
+    <tr>
+      <td>
+      Loaded Extensions
+      </td>
+      <td><div class='infoTable'>";
+     foreach ($loadedModules as $currentExtensionName)
+     {
+
+       $currentVersion = phpversion($currentExtensionName);
+       $table.=$currentExtensionName.": ".$currentVersion."<br />";
+     }
+
+    $table .="</div></td>
+    </tr>
+  </tbody>
+</table>
   
+  ";
+  return $table;
+}
+
 function GetLastAnalyzeTime($TableName)
 {
   return $this->GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",$TableName);
@@ -159,7 +204,6 @@ function GetLastAnalyzeTime($TableName)
     $connection_count = $row['val'];
 
     /**** Active connection count ****/
-    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
     $text = _("Active database connections");
     $V .= "<tr><td>$text</td>";
     $V .= "<td align='right'>" . number_format($connection_count,0,"",",") . "</td></tr>\n";
@@ -176,7 +220,7 @@ function GetLastAnalyzeTime($TableName)
    */
   function DatabaseQueries()
   {
-    $V = "<table border=1>\n";
+    $V = "<table border=1 id='databaseTable'>\n";
     $head1 = _("PID");
     $head2 = _("Query");
     $head3 = _("Started");
@@ -197,16 +241,16 @@ function GetLastAnalyzeTime($TableName)
       {
         if ($row[$current_query] == $sql) continue;  // Don't display this query
         $V .= "<tr>";
-        $V .= "<td>$row[processid]</td>";
-        $V .= "<td>" . htmlspecialchars($row[$current_query]) . "</td>";
+        $V .= "<td class='dashboard'>$row[processid]</td>";
+        $V .= "<td class='dashboard'>" . htmlspecialchars($row[$current_query]) . "</td>";
         $StartTime = substr($row['query_start'], 0, 19);
-        $V .= "<td>$StartTime</td>";
-        $V .= "<td>$row[elapsed]</td>";
+        $V .= "<td class='dashboard'>$StartTime</td>";
+        $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
       }
     }
     else
-      $V .= "<tr><td colspan=4>There are no active FOSSology queries</td></tr>";
+      $V .= "<tr><td class='dashboard' colspan=4>There are no active FOSSology queries</td></tr>";
 
     pg_free_result($result);
     $V .= "</table>\n";
@@ -308,25 +352,43 @@ function GetLastAnalyzeTime($TableName)
     $this->pgVersion = pg_version($PG_CONN);
     
     $V="";
-    $V .= "<table border=0 width='100%'><tr>\n";
+    $V .= "<table style='width: 100%;' border=0>\n";
+    $V .= "<tr>";
     $V .= "<td valign='top'>\n";
     $text = _("Database Contents");
     $V .= "<h2>$text</h2>\n";
     $V .= $this->DatabaseContents();
     $V .= "</td>";
-    $V .= "<td valign='top'>\n";
+
+    $V .= "<td class='dashboard'>\n";
     $text = _("Database Metrics");
     $V .= "<h2>$text</h2>\n";
     $V .= $this->DatabaseMetrics();
     $V .= "</td>";
-    $V .= "</tr></table>\n";
+    $V .= "</tr>";
+
+    $V .= "<tr>";
+    $V .= "<td class='dashboard'>";
     $text = _("Active FOSSology queries");
     $V .= "<h2>$text</h2>\n";
     $V .= $this->DatabaseQueries();
+    $V .= "</td>";
+
+    $V .= "<td class='dashboard'>";
+    $text = _("PHP Info");
+    $V .= "<h2>$text</h2>\n";
+    $V .= $this->GetPHPInfoTable();
+    $V .= "</td>";
+    $V .= "</tr>";
+
+    $V .= "<tr>";
+    $V .= "<td class='dashboard'>";
     $text = _("Disk Space");
     $V .= "<h2>$text</h2>\n";
     $V .= $this->DiskFree();
-
+    $V .= "</td>";
+    $V .= "</tr>";
+    $V .= "</table>\n";
     return $V;
   }
   
