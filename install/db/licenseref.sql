@@ -4265,7 +4265,7 @@ Portions created by ______________________ are Copyright (C) ___________________
 Contributor(s): ______________________________________.
 
 NOTE: THE TEXT OF THIS EXHIBIT A MAY DIFFER SLIGHTLY FROM THE TEXT OF THE NOTICES IN THE SOURCE CODE FILES OF THE ORIGINAL CODE. YOU SHOULD USE THE TEXT OF THIS EXHIBIT A RATHER THAN THE TEXT FOUND IN THE ORIGINAL CODE SOURCE CODE FOR YOUR MODIFICATIONS.', 'http://www.terracotta.org/legal/terracotta-public-license', NULL, NULL, NULL, 'Terracotta Public License', NULL, NULL, NULL, '', NULL, false, true, false, '7778c72d705d02c59966c0c6770b9a55', 1, false);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (199, '3DFX', '1. PREAMBLE 
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (199, 'Glide', '1. PREAMBLE 
 
 This license is for software that provides a 3D graphics application 
 program interface (API).The license is intended to offer terms similar 

@@ -4396,7 +4396,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_CR_3DFX_1) || INFILE(_CR_3DFX_2)) {
     if (INFILE(_LT_GLIDE_3DFX)) {
-      INTERESTING("3DFX");
+      INTERESTING("Glide");
     }
     else if (INFILE(_LT_GLIDE_GPL)) {
       INTERESTING("3DFX-PL");
