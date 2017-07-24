@@ -705,7 +705,7 @@ INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (11, 9, 1, 7, 32768, 9, 10, 'Adaptec');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (12, 9, 1, 8, 32768, 11, 12, 'Adobe');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (9, 4, 1, 0, 536888320, 6, 13, '2');
-INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (7, 5, 1, 4, 32768, 15, 16, '3DFX');
+INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (7, 5, 1, 4, 32768, 15, 16, 'Glide');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (6, 5, 1, 3, 32768, 17, 18, 'ACE');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (8, 5, 1, 5, 32768, 19, 20, 'AAL');
 INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES (5, 4, 1, 0, 536888320, 14, 21, '1');

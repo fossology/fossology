@@ -312,6 +312,31 @@ if(in_array($sysconfig['Release'], $expiredDbReleases))
   $sysconfig['Release'] = '3.0.1';
 }
 
+// Update '3dfx' licence shortname to 'Glide'. Since shortname is used as an
+// identifier, this is not done as part of the licenseref updates.
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0.1'))
+{
+  $dbManager->begin();
+  $row = $dbManager->getSingleRow("
+    SELECT rf1.rf_pk AS id_3dfx,
+           rf2.rf_pk AS id_glide
+    FROM license_ref rf1
+      INNER JOIN license_ref rf2 USING (rf_fullname)
+    WHERE rf1.rf_shortname='3DFX'
+      AND rf2.rf_shortname='Glide'
+    LIMIT 1", array(), 'old.3dfx.rf_pk');
+  if (count($row))
+  {
+    $id_3dfx = intval($row['id_3dfx']);
+    $id_glide = intval($row['id_glide']);
+    $dbManager->queryOnce("DELETE FROM license_ref WHERE rf_pk=$id_glide");
+    $dbManager->queryOnce("UPDATE license_ref SET rf_shortname='Glide' WHERE rf_pk=$id_3dfx");
+  }
+  $dbManager->commit();
+
+  $sysconfig['Release'] = "3.0.2";
+}
+
 $dbManager->begin();
 $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),$sqlLog='drop.sysconfig.release');
 $dbManager->insertTableRow('sysconfig',
