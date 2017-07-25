@@ -342,7 +342,8 @@ $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Re
 $dbManager->insertTableRow('sysconfig',
         array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
 $dbManager->commit();
-
+/* email/url/author data migration to other table */
+require_once("$LIBEXECDIR/dbmigrate_copyright-author.php");
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);
