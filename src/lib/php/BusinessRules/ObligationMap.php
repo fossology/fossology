@@ -39,12 +39,12 @@ class ObligationMap extends Object
     {
       $sql = "SELECT rf_shortname from license_candidate;";
       $stmt = __METHOD__.".rf_candidate_shortnames";
-      }
+    }
     else
     {
       $sql = "SELECT rf_shortname from license_ref;";
       $stmt = __METHOD__.".rf_shortnames";
-      }
+    }
     $this->dbManager->prepare($stmt,$sql);
     $res = $this->dbManager->execute($stmt);
     $vars = $this->dbManager->fetchAll($res);
@@ -98,7 +98,7 @@ class ObligationMap extends Object
     {
       $sql = "SELECT rf_fk FROM obligation_candidate_map WHERE ob_fk=$obId;";
       $stmt = __METHOD__.".om_candidate_$obId";
-      }
+    }
     else
     {
       $sql = "SELECT rf_fk FROM obligation_license_map WHERE ob_fk=$obId;";
@@ -142,8 +142,9 @@ class ObligationMap extends Object
     $vars = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
 
-    if (!empty($vars))
+    if (!empty($vars)) {
       return true;
+    }
 
     return false;
   }

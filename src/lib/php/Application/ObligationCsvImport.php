@@ -154,10 +154,12 @@ class ObligationCsvImport {
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
 
-    if (!empty($row['licnames']))
+    if (!empty($row['licnames'])) {
       $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
-    if (!empty($row['candidatenames']))
+    }
+    if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
+    }
 
     $return .= "Obligation topic '$row[topic]' was added and associated with ";
     $return .= $associatedLicenses ? " licenses '$associatedLicenses'" : "";

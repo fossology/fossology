@@ -136,8 +136,9 @@ class admin_obligation_file extends FO_Plugin
     }
 
     $V .= $this->Inputfm();
-    if (@$_POST['req_topic'])
+    if (@$_POST['req_topic']) {
       $V .= $this->ObligationTopic($_POST['req_topic']);
+    }
     return $V;
   }
 
@@ -184,10 +185,11 @@ class admin_obligation_file extends FO_Plugin
     $ob = "";     // output buffer
 
     // look at all
-    if ($topic == "All")
+    if ($topic == "All") {
       $where = "";
-    else
+    } else {
       $where = "WHERE ob_topic='". pg_escape_string($topic) ."' ";
+    }
 
     $sql = "SELECT * FROM ONLY obligation_ref $where ORDER BY ob_pk";
     $result = pg_query($PG_CONN, $sql);
@@ -232,10 +234,11 @@ class admin_obligation_file extends FO_Plugin
     $lineno = 0;
     while ($row = pg_fetch_assoc($result))
     {
-      if ($lineno++ % 2)
+      if ($lineno++ % 2) {
         $style = "style='background-color:lavender'";
-      else
+      } else {
         $style = "";
+      }
       $ob .= "<tr $style>";
 
       $associatedLicenses = $this->obligationMap->getLicenseList($row['ob_pk']);
@@ -278,8 +281,9 @@ class admin_obligation_file extends FO_Plugin
 
     if (0 < count($_POST)) {
       $ob_pk_update = $_POST['ob_pk'];
-      if (!empty($ob_pk)) $ob_pk_update = $ob_pk;
-      else if (empty($ob_pk_update)) $ob_pk_update = $_GET['ob_pk'];
+      if (!empty($ob_pk)) { $ob_pk_update = $ob_pk;
+      } else if (empty($ob_pk_update)) { $ob_pk_update = $_GET['ob_pk'];
+      }
     }
 
     $vars['actionUri'] = "?mod=" . $this->Name."&ob_pk=$ob_pk_update";
@@ -501,14 +505,16 @@ class admin_obligation_file extends FO_Plugin
       {
         $licId = $this->obligationMap->getIdFromShortname($license,$candidate);
         $res = $this->obligationMap->isLicenseAssociated($obId,$licId,$candidate);
-        if ($res)
+        if ($res) {
           continue;
+        }
 
         $this->obligationMap->associateLicenseWithObligation($obId,$licId,$candidate);
-        if ($licList == "")
+        if ($licList == "") {
           $licList = "$license";
-        else
+        } else {
           $licList .= ";$license";
+        }
 
       }
       return $licList;
@@ -530,10 +536,11 @@ class admin_obligation_file extends FO_Plugin
     $unassociatedLicenses = "";
     $licenses = $this->obligationMap->getLicenseList($obId,$candidate);
     $current = explode(";",$licenses);
-    if (!empty($shortnames))
+    if (!empty($shortnames)) {
       $obsoleteLicenses = array_diff($current,$shortnames);
-    else
+    } else {
       $obsoleteLicenses = $current;
+    }
 
     if ($obsoleteLicenses)
     {
@@ -541,10 +548,11 @@ class admin_obligation_file extends FO_Plugin
       {
         $licId = $this->obligationMap->getIdFromShortname($toBeRemoved,$candidate);
         $this->obligationMap->unassociateLicenseFromObligation($obId,$licId,$candidate);
-        if ($unassociatedLicenses == "")
+        if ($unassociatedLicenses == "") {
           $unassociatedLicenses = "$toBeRemoved";
-        else
+        } else {
           $unassociatedLicenses .= ";$toBeRemoved";
+        }
       }
     }
 
