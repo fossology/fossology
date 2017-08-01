@@ -23,18 +23,18 @@ This file is offered as-is, without any warranty.
       <li>
         <label>
           {{ 'Select SPDX2 RDF report to upload'|trans }}:
-          <input name="spdxReport" type="file" />
+          <input id="importUploadFileChooser" name="spdxReport" type="file" />
         </label>
       </li>
       <li>
         {{ 'Select how the information should be imported:'|trans }}
         <ul>
-          <li>
+          <li style="color: gray;">
             {{ 'Add the License Info as findings from'|trans }}
             <ul>
               <li>
                 <label>
-                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseInfoInFile" selected/>
+                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseInfoInFile" checked="checked"/>
                   SPDX tag of type licenseInfoInFile
                 </label>
               </li>
@@ -48,18 +48,32 @@ This file is offered as-is, without any warranty.
           </li>
           <li>
             <label>
-              <input type="checkbox" name="addConcludedAsDecisions" value="addConcludedAsDecisions" selected/>
+              <input type="checkbox" name="addConcludedAsDecisions" value="addConcludedAsDecisions" checked="checked"/>
               {{ 'Add concluded licenses as decisions'|trans }}
             </label>
+            <ul style="color: gray;">
+              <li>
+                <label>
+                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="addConcludedAsDecisionsOverwrite"/>
+                  {{ 'also overwrite existing decissions'|trans }}
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="addConcludedAsDecisionsTBD" value="addConcludedAsDecisionsTBD" checked="checked"/>
+                  {{ 'import as "to be discussed"'|trans }}
+                </label>
+              </li>
+            </ul>
           </li>
-          <li>
+          <li style="color: gray;">
             {{ 'Add the Copyright Information by'|trans }}
             <ul>
               <li>
                 <input type="radio" id="overwrite" name="addCopyrightBy" value="overwrite"> <label for="overwrite">overwriting</label>
               </li>
               <li>
-                <input type="radio" id="add" name="addCopyrightBy" value="add" selected> <label for="add">adding</label>
+                <input type="radio" id="add" name="addCopyrightBy" value="add" checked="checked"> <label for="add">adding</label>
               </li>
               <li>
                 <input type="radio" id="ignore" name="addCopyrightBy" value="ignore"> <label for="ignore">ignoring</label>
@@ -69,7 +83,7 @@ This file is offered as-is, without any warranty.
         </ul>
       </li>
     </ol>
-    <input type="submit" value="{{ 'Upload and Import'|trans }}" />
+    <input id="importSubmitButton" type="submit" value="{{ 'Upload and Import'|trans }}" disabled="disabled" />
   </form>
 {% endblock %}
 
@@ -79,6 +93,9 @@ This file is offered as-is, without any warranty.
    $(document).ready(function() {
      $('#oldfolderid').change(function(){
        window.location.href = "{{ baseUri }}" + $(this).val();
+     });
+     $('#importUploadFileChooser').change(function(){
+       $('#importSubmitButton').prop('disabled', !$(this).val());
      });
    });
   </script>

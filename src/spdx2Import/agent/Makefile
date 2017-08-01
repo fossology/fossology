@@ -12,7 +12,7 @@ include $(VARS)
 
 MODNAME = spdx2Import
 
-EXE = spdx2Import.php SpdxTwoImportAgent.php SpdxTwoImportSource.php SpdxTwoImportSink.php SpdxTwoImportHelper.php version.php services.php
+EXE = *.php
 WRAP = spdx2Import
 all: version.php spdx2Import
 
@@ -21,7 +21,7 @@ version.php: version-process_php
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
-spdx2Import: 
+spdx2Import:
 	@echo "making locally runnable decider (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
 	ln -sf $(FOCLIDIR)/fo_wrapper.php spdx2Import

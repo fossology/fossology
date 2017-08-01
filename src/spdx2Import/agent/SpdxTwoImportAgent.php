@@ -21,28 +21,33 @@ use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
-include_once(__DIR__ . "/SpdxTwoImportSource.php");
-include_once(__DIR__ . "/SpdxTwoImportSink.php");
-include_once(__DIR__ . "/SpdxTwoImportHelper.php");
+require_once 'SpdxTwoImportSource.php';
+require_once 'SpdxTwoImportSink.php';
+require_once 'SpdxTwoImportHelper.php';
+require_once 'SpdxTwoImportConfiguration.php';
 
 use EasyRdf_Graph;
 
-include_once(__DIR__ . "/version.php");
-include_once(__DIR__ . "/services.php");
+require_once 'version.php';
+require_once 'services.php';
 
 class SpdxTwoImportAgent extends Agent
 {
   const REPORT_KEY = "spdxReport";
   const ACLA_KEY = "addConcludedLicensesAs";
 
-  /** @var SpdxTwoImportSink */
-  private $sink;
   /** @var UploadDao */
   private $uploadDao;
   /** @var UploadPermissionDao */
   private $permissionDao;
   /** @var DbManager */
   protected $dbManager;
+  /** @var LicenseDao */
+  protected $licenseDao;
+  /** @var ClearingDao */
+  protected $clearingDao;
+
+  protected $agent_pk;
 
   function __construct()
   {
@@ -53,16 +58,15 @@ class SpdxTwoImportAgent extends Agent
     $this->agentSpecifLongOptions[] = self::REPORT_KEY.':';
     $this->agentSpecifLongOptions[] = self::ACLA_KEY.':';
 
-    $agent_pk = $this->getAgent_PK();
+    $this->setAgent_PK();
 
     /** @var LicenseDao */
-    $licenseDao = $this->container->get('dao.license');
+    $this->licenseDao = $this->container->get('dao.license');
     /** @var ClearingDao */
-    $clearingDao = $this->container->get('dao.clearing');
-    $this->sink = new SpdxTwoImportSink($agent_pk, $licenseDao, $clearingDao, $this->dbManager);
+    $this->clearingDao = $this->container->get('dao.clearing');
   }
 
-  private function getAgent_PK()
+  private function setAgent_PK()
   {
     // should be already set in $this->agentId?
     $row = $this->dbManager->getSingleRow(
@@ -74,7 +78,7 @@ class SpdxTwoImportAgent extends Agent
     {
       throw new Exception("agent_pk could not be determined");
     }
-    return intval($row['agent_pk']);
+    $this->agent_pk = intval($row['agent_pk']);
   }
 
   /**
@@ -105,8 +109,7 @@ class SpdxTwoImportAgent extends Agent
 
     $args = self::preWorkOnArgsFlp($this->args, self::REPORT_KEY, self::ACLA_KEY);
 
-    $groupId = $this->groupId;
-    if (!$this->permissionDao->isEditable($uploadId, $groupId)) {
+    if (!$this->permissionDao->isEditable($uploadId, $this->groupId)) {
       return false;
     }
 
@@ -121,10 +124,9 @@ class SpdxTwoImportAgent extends Agent
       return false;
     }
 
-    // TODO: is the fllowing code necessary?
-    // $this->dbManager->insertTableRow('reportgen',
-    //         array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$spdxReport),
-    //         __METHOD__.'addToReportgen');
+    $this->dbManager->insertTableRow('reportgen',
+            array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$spdxReport),
+            __METHOD__.'addToReportgen');
 
     $addConcludedLicsAsConclusion = array_key_exists(self::ACLA_KEY,$args) ? $args[self::ACLA_KEY] === "true" : false;
 
@@ -146,7 +148,7 @@ class SpdxTwoImportAgent extends Agent
     return $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   }
 
-  static private function getEntriesForHash(&$hashMap, &$pfilePerHash, $hashAlgo)
+  static private function getEntriesForHash(&$hashMap, &$pfilesPerHash, $hashAlgo)
   {
     if(!array_key_exists($hashAlgo, $hashMap))
     {
@@ -154,44 +156,42 @@ class SpdxTwoImportAgent extends Agent
     }
 
     $hash = strtolower($hashMap[$hashAlgo]);
-    if(!array_key_exists($hash, $pfilePerHash))
+    if(!array_key_exists($hash, $pfilesPerHash))
     {
       return null;
     }
-    return $pfilePerHash[$hash];
+    return $pfilesPerHash[$hash];
   }
 
   public function walkAllFiles($SPDXfilename, $upload_pk, $addConcludedLicsAsConclusion=false)
   {
+    $configuration = new SpdxTwoImportConfiguration();
+    /** @var SpdxTwoImportSink */
+    $sink = new SpdxTwoImportSink($this->agent_pk, $this->licenseDao, $this->clearingDao, $this->dbManager,
+                                  $this->groupId, $this->userId, $this->jobId, $configuration);
+
     // Prepare data from SPDX import
     /** @var SpdxTwoImportSource */
     $source = new SpdxTwoImportSource($SPDXfilename);
 
     // Prepare data from DB
     $itemTreeBounds = $this->getItemTreeBounds($upload_pk);
-    $pfilePerHash = $this->uploadDao->getPFilesDataPerHashAlgo($itemTreeBounds, 'sha1');
+    $pfilesPerHash = $this->uploadDao->getPFilesDataPerHashAlgo($itemTreeBounds, 'sha1');
 
     foreach ($source->getAllFileIds() as $fileId)
     {
-      $this->heartbeat(1);
       $hashMap = $source->getHashesMap($fileId);
-      $entries = self::getEntriesForHash($hashMap, $pfilePerHash, 'sha1');
-      if ($entries === null ||
-          sizeof($entries) === 0)
+      $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
+      $this->heartbeat(sizeof($pfiles));
+      if ($pfiles === null || sizeof($pfiles) === 0)
       {
         print "no match for file: " . $fileId . "\n";
         continue;
       }
 
-      $licenseInfosInFile = $source->getLicenseInfoInFileForFile($fileId);
-      $this->sink->insertFoundLicenseInfoToDB($licenseInfosInFile, $entries, $this->groupId);
-
-      $licensesConcluded = $source->getConcludedLicenseInfoForFile($fileId);
-      $this->sink->insertFoundLicenseInfoToDB($licensesConcluded, $entries, $this->groupId,
-                                              $addConcludedLicsAsConclusion, $this->userId, $this->jobId);
-
-      $copyrightTexts = $source->getCopyrightTextsForFile($fileId);
-      $this->sink->insertFoundCopyrightTextsToDB($copyrightTexts, $entries);
+      $data = $source->getDataForFile($fileId)
+            ->setPfiles($pfiles);
+      $sink->handleData($data);
     }
   }
 }

@@ -19,6 +19,8 @@ namespace Fossology\SpdxTwoImport;
 
 use Fossology\Lib\Data\License;
 use EasyRdf_Graph;
+require_once 'SpdxTwoImportData.php';
+require_once 'SpdxTwoImportDataItem.php';
 
 class SpdxTwoImportSource
 {
@@ -72,6 +74,7 @@ class SpdxTwoImportSource
 
     return is_array ($property) &&
       array_key_exists($key, $property) &&
+      sizeof($property[$key]) === 1 &&
       $property[$key][0]['type'] === "uri" &&
       $property[$key][0]['value'] === $target;
   }
@@ -107,14 +110,14 @@ class SpdxTwoImportSource
     return $hashes;
   }
 
-  private function getValue($propertyOrId, $key)
+  private function getValue($propertyOrId, $key, $default=null)
   {
     $values = $this->getValues($propertyOrId, $key);
     if(sizeof($values) === 1)
     {
       return $values[0];
     }
-    return false;
+    return $default;
   }
 
   private function getValues($propertyOrId, $key)
@@ -160,14 +163,22 @@ class SpdxTwoImportSource
       }
       return $values;
     }
-    return false;
+    return array();
   }
 
+  /**
+   * @param $propertyId
+   * @return array
+   */
   public function getConcludedLicenseInfoForFile($propertyId)
   {
     return $this->getLicenseInfoForFile($propertyId, 'licenseConcluded');
   }
 
+  /**
+   * @param $propertyId
+   * @return array
+   */
   public function getLicenseInfoInFileForFile($propertyId)
   {
     return $this->getLicenseInfoForFile($propertyId, 'licenseInfoInFile');
@@ -185,89 +196,110 @@ class SpdxTwoImportSource
     }
   }
 
-  private function parseLicenseIds($licenseIds, &$output)
+  private function parseLicenseId($licenseId)
   {
-    foreach($licenseIds as $licenseId)
+    if (!is_string($licenseId))
     {
-      if (strtolower($licenseId) === self::TERMS."noassertion" ||
-          strtolower($licenseId) === "http://spdx.org/licenses/noassertion")
-      {
-        continue;
-      }
+      echo "ERROR: Id not a string: ".$licenseId."\n";
+      print_r($licenseId);
+      return array();
+    }
+    if (strtolower($licenseId) === self::TERMS."noassertion" ||
+        strtolower($licenseId) === "http://spdx.org/licenses/noassertion")
+    {
+      return array();
+    }
 
-      $license = $this->index[$licenseId];
+    $license = $this->index[$licenseId];
 
-      if ($license)
-      {
-        $this->parseLicense($license, $output);
-      }
-      else
-      {
-        if(substr($licenseId, 0, strlen(self::SPDX_URL)) === self::SPDX_URL)
-        {
-          $spdxId = urldecode(substr($licenseId, strlen(self::SPDX_URL)));
-          $output[$spdxId] = null;
-        }
-      }
+    if ($license)
+    {
+      return $this->parseLicense($license);
+    }
+    elseif(substr($licenseId, 0, strlen(self::SPDX_URL)) === self::SPDX_URL)
+    {
+      $spdxId = urldecode(substr($licenseId, strlen(self::SPDX_URL)));
+      $item = new SpdxTwoImportDataItem($spdxId);
+      return array($item);
+    }
+    else
+    {
+      echo "ERROR: can not handle license with ID=".$licenseId."\n";
+      return array();
     }
   }
 
-  private function parseLicense($license, &$output)
+  private function parseLicense($license)
   {
-    if(!$license)
-    {
-      return;
-    }
     if (is_string($license))
     {
-      $this->parseLicenseIds([$license], $output);
+      return $this->parseLicenseId($license);
     }
     elseif ($this->isPropertyOfType($license, 'ExtractedLicensingInfo'))
     {
       $licenseId = $this->stripLicenseRefPrefix($this->getValue($license,'licenseId'));
-      $output[$licenseId] = new License(
-        $licenseId,
-        $licenseId,
-        $this->getValue($license,'name'),
-        "",
-        $this->getValue($license,'extractedText'),
-        $this->getValues($license,'seeAlso')[0],
-        "", // TODO
-        strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
+
+      if(strlen($licenseId) > 33 &&
+         substr($licenseId, -33, 1) === "-" &&
+         ctype_alnum(substr($licenseId, -32)))
+      {
+        $licenseId = substr($licenseId, 0, -33);
+        $item = new SpdxTwoImportDataItem($licenseId);
+        $item->setCustomText($this->getValue($license,'extractedText'));
+        return array($item);
+
+      }
+      else
+      {
+        $item = new SpdxTwoImportDataItem($licenseId);
+        $item->setLicenseCandidate($this->getValue($license,'name', $licenseId),
+                                   $this->getValue($license,'extractedText'),
+                                   strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
+        return array($item);
+      }
     }
     elseif ($this->isPropertyOfType($license, 'License'))
     {
       $licenseId = $this->stripLicenseRefPrefix($this->getValue($license,'licenseId'));
-      $output[$licenseId] = new License(
-        $licenseId,
-        $licenseId,
-        $this->getValue($license,'name'),
-        "",
-        $this->getValue($license,'licenseText'),
-        $this->getValues($license,'seeAlso')[0],
-        "", // TODO
-        strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
+      $item = new SpdxTwoImportDataItem($licenseId);
+      $item->setLicenseCandidate($this->getValue($license,'name', $licenseId),
+                                 $this->getValue($license,'licenseText'),
+                                 strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
+      return array($item);
     }
-    elseif ($this->isPropertyOfType($license, 'DisjunctiveLicenseSet'))
+    elseif ($this->isPropertyOfType($license, 'DisjunctiveLicenseSet') ||
+            $this->isPropertyOfType($license, 'ConjunctiveLicenseSet')
+    )
     {
-      $subLicenseIds = $this->getValues($license, 'member');
-      if (sizeof($subLicenseIds) > 1)
+      $output = array();
+      $subLicenses = $this->getValues($license, 'member');
+      if (sizeof($subLicenses) > 1 &&
+          $this->isPropertyOfType($license, 'DisjunctiveLicenseSet'))
       {
-        $output["Dual-license"] = null;
+        $output[] = new SpdxTwoImportDataItem("Dual-license");
       }
-      $this->parseLicenseIds($subLicenseIds, $output);
-    }
-    elseif ($this->isPropertyOfType($license, 'ConjunctiveLicenseSet'))
-    {
-      $subLicenseIds = $this->getValues($license, 'member');
-      $this->parseLicenseIds($subLicenseIds, $output);
+      foreach($subLicenses as $subLicense)
+      {
+        $innerOutput = $this->parseLicense($subLicense);
+        foreach($innerOutput as $innerItem)
+        {
+          $output[] = $innerItem;
+        }
+      }
+      return $output;
     }
     else
     {
       echo "ERROR: can not handle license=[".$license."] of type=[".gettype($license)."]\n"; // TODO
+      return array();
     }
   }
 
+  /**
+   * @param $propertyId
+   * @param $kind
+   * @return array
+   */
   private function getLicenseInfoForFile($propertyId, $kind)
   {
     $property = $this->index[$propertyId];
@@ -276,7 +308,11 @@ class SpdxTwoImportSource
     $output = array();
     foreach ($licenses as $license)
     {
-      $this->parseLicense($license, $output);
+      $innerOutput = $this->parseLicense($license);
+      foreach($innerOutput as $innerItem)
+      {
+        $output[] = $innerItem;
+      }
     }
     return $output;
   }
@@ -286,4 +322,10 @@ class SpdxTwoImportSource
     return array_map('trim', $this->getValues($propertyId, "copyrightText"));
   }
 
+  public function getDataForFile($propertyId)
+  {
+    return new SpdxTwoImportData($this->getLicenseInfoInFileForFile($propertyId),
+                                 $this->getConcludedLicenseInfoForFile($propertyId),
+                                 $this->getCopyrightTextsForFile($propertyId));
+  }
 }

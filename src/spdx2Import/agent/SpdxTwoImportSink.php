@@ -17,11 +17,14 @@
  */
 namespace Fossology\SpdxTwoImport;
 
+use Fossology\Lib\Data\License;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\SpdxTwoImport\SpdxTwoImportHelper;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
+
+require_once 'SpdxTwoImportConfiguration.php';
 
 class SpdxTwoImportSink
 {
@@ -33,24 +36,93 @@ class SpdxTwoImportSink
   /** @var DbManager */
   protected $dbManager;
 
-  private $agent_pk;
+  /** @var int */
+  protected $agent_pk = -1;
+  /** @var int */
+  protected $groupId = -1;
+  /** @var int */
+  protected $userId = -1;
+  /** @var int */
+  protected $jobId = -1;
 
-  function __construct($agent_pk, $licenseDao, $clearingDao, $dbManager)
+  /** @var SpdxTwoImportConfiguration */
+  protected $configuration;
+
+  /**
+   * SpdxTwoImportSink constructor.
+   * @param $agent_pk
+   * @param $licenseDao
+   * @param $clearingDao
+   * @param $dbManager
+   * @param $groupId
+   * @param $userId
+   * @param $jobId
+   * @param $configuration
+   */
+  function __construct($agent_pk, $licenseDao, $clearingDao, $dbManager, $groupId, $userId, $jobId, $configuration)
   {
-    $this->licenseDao = $licenseDao;
     $this->clearingDao = $clearingDao;
+    $this->licenseDao = $licenseDao;
     $this->dbManager = $dbManager;
     $this->agent_pk = $agent_pk;
+    $this->groupId = $groupId;
+    $this->userId = $userId;
+    $this->jobId = $jobId;
+
+    $this->configuration = $configuration;
   }
 
-  // public function insertFoundLicenseConclusionToDB(&$licenseExpressions, &$entries,
-  //                                                  $userId=0, $groupId=0, $jobId=0)
-  // {
-  //   $this->insertFoundLicenseInfoToDB($licenseExpressions, $entries, true, $userId, $groupId, $jobId);
-  // }
-
-  public function getIdForLicenseOrCreateIt($licenseShortName, $licenseCandidate, $groupId)
+  /**
+   * @param SpdxTwoImportData $data
+   */
+  public function handleData($data)
   {
+    $pfiles = $data->getPfiles();
+    if(sizeof($pfiles) === 0)
+    {
+      return;
+    }
+
+    $licenseInfosInFile = $data->getLicenseInfosInFile();
+    $licensesConcluded = $data->getLicensesConcluded();
+
+    $licensePKsInFile = array();
+    foreach($licenseInfosInFile as $dataItem)
+    {
+      if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
+      {
+        continue;
+      }
+      $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
+      $licensePKsInFile[] = $licenseId;
+    }
+
+    $licensePKsConcluded = array();
+    foreach ($licensesConcluded as $dataItem)
+    {
+      if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
+      {
+        continue;
+      }
+      $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
+      $licensePKsConcluded[$licenseId] = $dataItem->getCustomText();
+    }
+
+    $this->insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles);
+
+    $this->insertFoundCopyrightTextsToDB($data->getCopyrightTexts(),
+      $data->getPfiles());
+  }
+
+  /**
+   * @param SpdxTwoImportDataItem $dataItem
+   * @param $groupId
+   * @return int
+   * @throws \Exception
+   */
+  public function getIdForDataItemOrCreateLicense($dataItem , $groupId)
+  {
+    $licenseShortName = $dataItem->getLicenseId();
     $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
     if ($license !== null)
     {
@@ -60,10 +132,11 @@ class SpdxTwoImportSink
     {
       throw new \Exception('shortname already in use');
     }
-    elseif ($licenseCandidate)
+    elseif ($dataItem->isSetLicenseCandidate())
     {
+      $licenseCandidate = $dataItem->getLicenseCandidate();
       echo "INFO: No license with shortname=\"$licenseShortName\" found ... ";
-      if(true) // TODO
+      if($this->configuration->isCreateLicensesAsCandidate())
       {
         echo "Creating it as license candidate ...\n";
         $licenseId = $this->licenseDao->insertUploadLicense($licenseShortName, $licenseCandidate->getText(), $groupId);
@@ -73,7 +146,7 @@ class SpdxTwoImportSink
           $licenseCandidate->getFullName(),
           $licenseCandidate->getText(),
           $licenseCandidate->getUrl(),
-          "Created for Spdx2Import",
+          "Created for Spdx2Import with jobId=[".$this->jobId."]",
           false,
           0);
         return $licenseId;
@@ -81,73 +154,108 @@ class SpdxTwoImportSink
       else
       {
         echo "creating it as license ...\n";
+        $licenseText = trim($licenseCandidate->getText());
         return $this->dbManager->getSingleRow(
           "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
-          array($licenseCandidate->getShortName(), $licenseCandidate->getText(), $licenseCandidate->getSpdxCompatible()),
+          array($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getSpdxCompatible()),
           __METHOD__.".addLicense" )[0];
       }
-
     }
     return -1;
   }
 
-  public function insertFoundLicenseInfoToDB(&$licenseExpressions, &$entries, $groupId,
-                                             $asConclusion=false, $userId=0, $jobId=0)
+  /**
+   * @param array $licensePKsInFile
+   * @param array $licensePKsConcluded
+   * @param array $pfiles
+   */
+  private function insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles)
   {
-    foreach ($licenseExpressions as $licenseShortName => $licenseCandidate)
+    $this->saveAsLicenseFindingToDB($licensePKsInFile, $pfiles);
+
+    if($this->configuration->isCreateConcludedLicensesAsFindings())
     {
-      if (strcasecmp($licenseShortName, "noassertion") == 0 || sizeof($entries) == 0)
-      {
-        continue;
-      }
+      $this->saveAsLicenseFindingToDB($licensePKsConcluded, $pfiles);
+    }
 
-      $licenseId = $this->getIdForLicenseOrCreateIt($licenseShortName, $licenseCandidate, $groupId);
-      if ($licenseId == -1)
+    if($this->configuration->isCreateConcludedLicensesAsConclusions())
+    {
+      $removeLicenseIds = array(); // TODO
+      foreach ($licensePKsInFile as $licenseId)
       {
-        continue;
-      }
-
-      foreach ($entries as $entry)
-      {
-        if ($asConclusion && $userId && $groupId && $jobId)
+        if(! array_key_exists($licenseId,$licensePKsConcluded))
         {
-          $this->saveAsLicenseConclutionToDB($licenseId, $entry,
-                                             $userId, $groupId, $jobId);
+          $removeLicenseIds[] = $licenseId;
         }
-        $this->saveAsLicenseFindingToDB($licenseId, $entry['pfile_pk']);
       }
+      $this->saveAsDecisionToDB($licensePKsConcluded, $removeLicenseIds, $pfiles);
     }
   }
 
-  private function saveAsLicenseConclutionToDB($licenseId, $entry,
-                                               $userId, $groupId, $jobId)
+  /**
+   * @param array $addLicenseIds
+   * @param array $removeLicenseIds
+   * @param array $pfiles
+   */
+  private function saveAsDecisionToDB($addLicenseIds, $removeLicenseIds, $pfiles)
   {
-    echo "add decision $licenseId to " . $entry['uploadtree_pk'] . "\n";
-    $eventId = $this->clearingDao->insertClearingEvent(
-      $entry['uploadtree_pk'],
-      $userId,
-      $groupId,
-      $licenseId,
-      false,
-      ClearingEventTypes::IMPORT,
-      '', // reportInfo
-      'Imported from SPDX2 report', // comment
-      $jobId);
-    $this->clearingDao->createDecisionFromEvents(
-      $entry['uploadtree_pk'],
-      $userId,
-      $groupId,
-      DecisionTypes::IDENTIFIED,
-      DecisionScopes::ITEM,
-      [$eventId]);
+    foreach ($pfiles as $pfile)
+    {
+      $eventIds = array();
+      foreach ($addLicenseIds as $licenseId => $licenseText)
+      {
+        echo "add decision $licenseId to " . $pfile['uploadtree_pk'] . "\n";
+        $eventIds[] = $this->clearingDao->insertClearingEvent(
+          $pfile['uploadtree_pk'],
+          $this->userId,
+          $this->groupId,
+          $licenseId,
+          false,
+          ClearingEventTypes::IMPORT,
+          trim($licenseText),
+          '', // comment
+          $this->jobId);
+      }
+      foreach ($removeLicenseIds as $licenseId)
+      {
+        echo "remove decision $licenseId from " . $pfile['uploadtree_pk'] . "\n";
+        $eventIds[] = $this->clearingDao->insertClearingEvent(
+          $pfile['uploadtree_pk'],
+          $this->userId,
+          $this->groupId,
+          $licenseId,
+          true,
+          ClearingEventTypes::IMPORT,
+          $licenseText,
+          '', // comment
+          $this->jobId);
+      }
+      $this->clearingDao->createDecisionFromEvents(
+        $pfile['uploadtree_pk'],
+        $this->userId,
+        $this->groupId,
+        $this->configuration->getConcludeLicenseDecisionType(),
+        DecisionScopes::ITEM,
+        $eventIds);
+    }
   }
 
-  private function saveAsLicenseFindingToDB($licenseId, $pfile_fk)
+  /**
+   * @param array $licenseIds
+   * @param array $pfiles
+   */
+  private function saveAsLicenseFindingToDB($licenseIds, $pfiles)
   {
-    return $this->dbManager->getSingleRow(
-      "INSERT INTO license_file (rf_fk, agent_fk, pfile_fk) VALUES ($1,$2,$3) RETURNING fl_pk",
-      array($licenseId, $this->agent_pk, $pfile_fk),
-      __METHOD__."forSpdx2Import");
+    foreach ($pfiles as $pfile)
+    {
+      foreach($licenseIds as $licenseId)
+      {
+        $this->dbManager->getSingleRow(
+          "INSERT INTO license_file (rf_fk, agent_fk, pfile_fk) VALUES ($1,$2,$3) RETURNING fl_pk",
+          array($licenseId, $this->agent_pk, $pfile['pfile_pk']),
+          __METHOD__."forSpdx2Import");
+      }
+    }
   }
 
   public function insertFoundCopyrightTextsToDB($copyrightTexts, $entries)
@@ -170,7 +278,7 @@ class SpdxTwoImportSink
 
       foreach ($entries as $entry)
       {
-        $this->saveAsCopyrightFindingToDB($copyrightLine, $entry['pfile_pk']);
+        $this->saveAsCopyrightFindingToDB(trim($copyrightLine), $entry['pfile_pk']);
       }
     }
   }
