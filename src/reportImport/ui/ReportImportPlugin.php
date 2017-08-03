@@ -23,9 +23,9 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
-class SpdxTwoImportPlugin extends DefaultPlugin
+class ReportImportPlugin extends DefaultPlugin
 {
-  const NAME = 'ui_spdx2Import';
+  const NAME = 'ui_reportImport';
 
   /** @var UploadDao */
   private $uploadDao;
@@ -35,7 +35,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-      self::TITLE => _("SPDX2 Import"),
+      self::TITLE => _("Report Import"),
       self::PERMISSION => Auth::PERM_WRITE,
       self::REQUIRES_LOGIN => TRUE
     ));
@@ -45,25 +45,25 @@ class SpdxTwoImportPlugin extends DefaultPlugin
 
   function preInstall()
   {
-    $text = _("Import SPDX2 RDF");
-    menu_insert("Browse-Pfile::Import&nbsp;SPDX2&nbsp;RDF", 0, self::NAME, $text);
-    menu_insert("Main::Upload::Import&nbsp;SPDX2&nbsp;RDF", 0, self::NAME, $text);
+    $text = _("Import Report");
+    menu_insert("Browse-Pfile::Import&nbsp;Report", 0, self::NAME, $text);
+    menu_insert("Main::Upload::Import&nbsp;Report", 0, self::NAME, $text);
   }
 
   protected function handle(Request $request)
   {
-    $spdxReport = intval($request->get('spdxReport'));
+    $report = intval($request->get('report'));
     $uploadId = intval(GetArrayVal("upload_pk", $_POST));
     if (empty($uploadId) ||
-        !array_key_exists('spdxReport',$_FILES) ||
-        sizeof($_FILES['spdxReport']['name']) != 1)
+        !array_key_exists('report',$_FILES) ||
+        sizeof($_FILES['report']['name']) != 1)
     {
       return $this->showUiToChoose($uploadId);
     }
     else
     {
       $addConcludedLicensesAs = $request->get('addConcludedAsDecisions') == 'addConcludedAsDecisions' ? true : false;
-      $jobMetaData = $this->runImport($uploadId, $_FILES['spdxReport'],$addConcludedLicensesAs);
+      $jobMetaData = $this->runImport($uploadId, $_FILES['report'],$addConcludedLicensesAs);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();
       return $showJobsPlugin->getResponse();
@@ -115,13 +115,13 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     $baseFolderUri = $vars['baseUri']."$folder_pk&upload=";
     $vars['uploadAction'] = "onchange=\"js_url(this.value, '$baseFolderUri')\"";
 
-    return $this->render('SpdxTwoImportPlugin.html.twig', $this->mergeWithDefault($vars));
+    return $this->render('ReportImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }
 
-  protected function runImport($uploadId, $spdxReport, $addConcludedLicAsConclusion=false)
+  protected function runImport($uploadId, $report, $addConcludedLicAsConclusion=false)
   {
-    $spdx2ImportAgent = plugin_find('agent_spdx2Import');
-    $jqCmdArgs = $spdx2ImportAgent->addSpdxReport($spdxReport);
+    $reportImportAgent = plugin_find('agent_reportImport');
+    $jqCmdArgs = $reportImportAgent->addReport($report);
     if($addConcludedLicAsConclusion)
     {
       $jqCmdArgs .= " --addConcludedLicensesAs=true";
@@ -132,7 +132,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     $dbManager = $this->getObject('db.manager');
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';
-    $params = array($spdx2ImportAgent->AgentName,$uploadId,$userId,$groupId);
+    $params = array($reportImportAgent->AgentName,$uploadId,$userId,$groupId);
     $log = __METHOD__;
     if ($jqCmdArgs) {
       $sql .= ' AND jq_cmd_args=$5';
@@ -151,7 +151,7 @@ class SpdxTwoImportPlugin extends DefaultPlugin
     $upload = $this->getUpload($uploadId, $groupId);
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jobQueueId = $spdx2ImportAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
+    $jobQueueId = $reportImportAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
     if ($jobQueueId<0)
     {
       throw new Exception(_("Cannot schedule").": ".$error);
@@ -179,4 +179,4 @@ class SpdxTwoImportPlugin extends DefaultPlugin
   }
 }
 
-register_plugin(new SpdxTwoImportPlugin());
+register_plugin(new ReportImportPlugin());

@@ -18,12 +18,12 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
-class SpdxTwoImportAgentPlugin extends AgentPlugin
+class ReportImportAgentPlugin extends AgentPlugin
 {
   public function __construct() {
-    $this->Name = "agent_spdx2Import";
-    $this->Title =  _("SPDX2 importing");
-    $this->AgentName = "spdx2Import";
+    $this->Name = "agent_reportImport";
+    $this->Title =  _("Report Import");
+    $this->AgentName = "reportImport";
 
     parent::__construct();
   }
@@ -33,35 +33,35 @@ class SpdxTwoImportAgentPlugin extends AgentPlugin
     // no AgentCheckBox
   }
 
-  public function addSpdxReport($spdxReport)
+  public function addReport($report)
   {
-    if ($spdxReport &&
-        is_array($spdxReport) &&
-        array_key_exists('error',$spdxReport) &&
-        $spdxReport['error'] == UPLOAD_ERR_OK)
+    if ($report &&
+        is_array($report) &&
+        array_key_exists('error',$report) &&
+        $report['error'] == UPLOAD_ERR_OK)
     {
-      if(!file_exists($spdxReport['tmp_name']))
+      if(!file_exists($report['tmp_name']))
       {
         throw new Exception('Uploaded tmpfile not found');
       }
 
       global $SysConf;
-      $fileBase = $SysConf['FOSSOLOGY']['path']."/SPDX2Import/";
+      $fileBase = $SysConf['FOSSOLOGY']['path']."/ReportImport/";
       if (!is_dir($fileBase))
       {
         mkdir($fileBase,0755,true);
       }
       // TODO: validate filename
-      $targetFile = time().'_'.rand().'_'.$spdxReport['name'];
-      if (move_uploaded_file($spdxReport['tmp_name'], $fileBase.$targetFile))
+      $targetFile = time().'_'.rand().'_'.$report['name'];
+      if (move_uploaded_file($report['tmp_name'], $fileBase.$targetFile))
       {
-        return '--spdxReport='.$targetFile;
+        return '--report='.$targetFile;
       }
-    }elseif($spdxReport && is_string($spdxReport)){
-      return '--spdxReport='.$spdxReport;
+    }elseif($report && is_string($report)){
+      return '--report='.$report;
     }
     return '';
   }
 }
 
-register_plugin(new SpdxTwoImportAgentPlugin());
+register_plugin(new ReportImportAgentPlugin());

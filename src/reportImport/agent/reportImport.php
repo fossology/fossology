@@ -15,13 +15,11 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-namespace Fossology\SpdxTwoImport;
+namespace Fossology\ReportImport;
 
-// error_reporting(E_ALL); // TODO: remove
+include_once(__DIR__ . "/ReportImportAgent.php");
 
-include_once(__DIR__ . "/SpdxTwoImportAgent.php");
-
-$agent = new SpdxTwoImportAgent();
+$agent = new ReportImportAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
 $agent->scheduler_disconnect(0);

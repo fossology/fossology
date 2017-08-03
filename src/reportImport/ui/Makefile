@@ -9,7 +9,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = spdx2Import
+MOD_NAME = reportImport
 MOD_SUBDIR = ui
 
 all:

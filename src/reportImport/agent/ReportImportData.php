@@ -15,9 +15,9 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-namespace Fossology\SpdxTwoImport;
+namespace Fossology\ReportImport;
 
-class SpdxTwoImportData
+class ReportImportData
 {
 
   /** @var  array */
@@ -70,7 +70,7 @@ class SpdxTwoImportData
 
   /**
    * @param mixed $pfiles
-   * @return SpdxTwoImportData
+   * @return ReportImportData
    */
   public function setPfiles($pfiles)
   {

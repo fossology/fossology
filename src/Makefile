@@ -28,7 +28,7 @@ DIRS = \
 	reuser \
 	scheduler \
 	spdx2 \
-	spdx2Import \
+	reportImport \
 	ununpack \
 	wget_agent \
 	www

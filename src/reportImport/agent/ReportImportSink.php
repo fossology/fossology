@@ -15,18 +15,18 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-namespace Fossology\SpdxTwoImport;
+namespace Fossology\ReportImport;
 
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\SpdxTwoImport\SpdxTwoImportHelper;
+use Fossology\ReportImport\ReportImportHelper;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 
-require_once 'SpdxTwoImportConfiguration.php';
+require_once 'ReportImportConfiguration.php';
 
-class SpdxTwoImportSink
+class ReportImportSink
 {
 
   /** @var LicenseDao */
@@ -45,11 +45,11 @@ class SpdxTwoImportSink
   /** @var int */
   protected $jobId = -1;
 
-  /** @var SpdxTwoImportConfiguration */
+  /** @var ReportImportConfiguration */
   protected $configuration;
 
   /**
-   * SpdxTwoImportSink constructor.
+   * ReportImportSink constructor.
    * @param $agent_pk
    * @param $licenseDao
    * @param $clearingDao
@@ -73,7 +73,7 @@ class SpdxTwoImportSink
   }
 
   /**
-   * @param SpdxTwoImportData $data
+   * @param ReportImportData $data
    */
   public function handleData($data)
   {
@@ -115,7 +115,7 @@ class SpdxTwoImportSink
   }
 
   /**
-   * @param SpdxTwoImportDataItem $dataItem
+   * @param ReportImportDataItem $dataItem
    * @param $groupId
    * @return int
    * @throws \Exception
@@ -146,7 +146,7 @@ class SpdxTwoImportSink
           $licenseCandidate->getFullName(),
           $licenseCandidate->getText(),
           $licenseCandidate->getUrl(),
-          "Created for Spdx2Import with jobId=[".$this->jobId."]",
+          "Created for ReportImport with jobId=[".$this->jobId."]",
           false,
           0);
         return $licenseId;
@@ -253,7 +253,7 @@ class SpdxTwoImportSink
         $this->dbManager->getSingleRow(
           "INSERT INTO license_file (rf_fk, agent_fk, pfile_fk) VALUES ($1,$2,$3) RETURNING fl_pk",
           array($licenseId, $this->agent_pk, $pfile['pfile_pk']),
-          __METHOD__."forSpdx2Import");
+          __METHOD__."forReportImport");
       }
     }
   }
@@ -288,6 +288,6 @@ class SpdxTwoImportSink
     return $this->dbManager->getSingleRow(
       "insert into copyright(agent_fk, pfile_fk, content, hash, type) values($1,$2,$3,md5($3),$4) RETURNING ct_pk",
       array($this->agent_pk, $pfile_fk, $content, "statement"),
-      __METHOD__."forSpdx2Import");
+      __METHOD__."forReportImport");
   }
 }

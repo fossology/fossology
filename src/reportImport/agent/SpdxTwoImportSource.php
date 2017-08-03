@@ -15,12 +15,12 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-namespace Fossology\SpdxTwoImport;
+namespace Fossology\ReportImport;
 
 use Fossology\Lib\Data\License;
 use EasyRdf_Graph;
-require_once 'SpdxTwoImportData.php';
-require_once 'SpdxTwoImportDataItem.php';
+require_once 'ReportImportData.php';
+require_once 'ReportImportDataItem.php';
 
 class SpdxTwoImportSource
 {
@@ -219,7 +219,7 @@ class SpdxTwoImportSource
     elseif(substr($licenseId, 0, strlen(self::SPDX_URL)) === self::SPDX_URL)
     {
       $spdxId = urldecode(substr($licenseId, strlen(self::SPDX_URL)));
-      $item = new SpdxTwoImportDataItem($spdxId);
+      $item = new ReportImportDataItem($spdxId);
       return array($item);
     }
     else
@@ -244,14 +244,14 @@ class SpdxTwoImportSource
          ctype_alnum(substr($licenseId, -32)))
       {
         $licenseId = substr($licenseId, 0, -33);
-        $item = new SpdxTwoImportDataItem($licenseId);
+        $item = new ReportImportDataItem($licenseId);
         $item->setCustomText($this->getValue($license,'extractedText'));
         return array($item);
 
       }
       else
       {
-        $item = new SpdxTwoImportDataItem($licenseId);
+        $item = new ReportImportDataItem($licenseId);
         $item->setLicenseCandidate($this->getValue($license,'name', $licenseId),
                                    $this->getValue($license,'extractedText'),
                                    strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
@@ -261,7 +261,7 @@ class SpdxTwoImportSource
     elseif ($this->isPropertyOfType($license, 'License'))
     {
       $licenseId = $this->stripLicenseRefPrefix($this->getValue($license,'licenseId'));
-      $item = new SpdxTwoImportDataItem($licenseId);
+      $item = new ReportImportDataItem($licenseId);
       $item->setLicenseCandidate($this->getValue($license,'name', $licenseId),
                                  $this->getValue($license,'licenseText'),
                                  strpos($this->getValue($license,'licenseId'), $this->licenseRefPrefix));
@@ -276,7 +276,7 @@ class SpdxTwoImportSource
       if (sizeof($subLicenses) > 1 &&
           $this->isPropertyOfType($license, 'DisjunctiveLicenseSet'))
       {
-        $output[] = new SpdxTwoImportDataItem("Dual-license");
+        $output[] = new ReportImportDataItem("Dual-license");
       }
       foreach($subLicenses as $subLicense)
       {
@@ -324,7 +324,7 @@ class SpdxTwoImportSource
 
   public function getDataForFile($propertyId)
   {
-    return new SpdxTwoImportData($this->getLicenseInfoInFileForFile($propertyId),
+    return new ReportImportData($this->getLicenseInfoInFileForFile($propertyId),
                                  $this->getConcludedLicenseInfoForFile($propertyId),
                                  $this->getCopyrightTextsForFile($propertyId));
   }

@@ -10,21 +10,21 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-MODNAME = spdx2Import
+MODNAME = reportImport
 
 EXE = *.php
-WRAP = spdx2Import
-all: version.php spdx2Import
+WRAP = reportImport
+all: version.php reportImport
 
 version.php: version-process_php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 
-spdx2Import:
+reportImport:
 	@echo "making locally runnable decider (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
-	ln -sf $(FOCLIDIR)/fo_wrapper.php spdx2Import
+	ln -sf $(FOCLIDIR)/fo_wrapper.php reportImport
 
 services.xml:
 	$(MAKE) -C $(FOLIBPHPDIR) services.xml

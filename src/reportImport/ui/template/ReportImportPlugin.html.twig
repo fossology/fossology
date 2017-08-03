@@ -22,8 +22,16 @@ This file is offered as-is, without any warranty.
       </li>
       <li>
         <label>
-          {{ 'Select SPDX2 RDF report to upload'|trans }}:
-          <input id="importUploadFileChooser" name="spdxReport" type="file" />
+          {{ 'Select report to upload'|trans }}:
+          <input id="importUploadFileChooser" name="report" type="file" />
+        </label>
+      </li>
+      <li>
+        <label>
+          {{ 'Select report type'|trans }}:
+           <select name="reportType" size="1">
+             <option>SPDX RDF</option>
+           </select>
         </label>
       </li>
       <li>

@@ -15,25 +15,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-namespace Fossology\SpdxTwoImport;
+namespace Fossology\ReportImport;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
 require_once 'SpdxTwoImportSource.php';
-require_once 'SpdxTwoImportSink.php';
-require_once 'SpdxTwoImportHelper.php';
-require_once 'SpdxTwoImportConfiguration.php';
+require_once 'ReportImportSink.php';
+require_once 'ReportImportHelper.php';
+require_once 'ReportImportConfiguration.php';
 
 use EasyRdf_Graph;
 
 require_once 'version.php';
 require_once 'services.php';
 
-class SpdxTwoImportAgent extends Agent
+class ReportImportAgent extends Agent
 {
-  const REPORT_KEY = "spdxReport";
+  const REPORT_KEY = "report";
   const ACLA_KEY = "addConcludedLicensesAs";
 
   /** @var UploadDao */
@@ -51,7 +51,7 @@ class SpdxTwoImportAgent extends Agent
 
   function __construct()
   {
-    parent::__construct(AGENT_SPDX2IMPORT_NAME, AGENT_SPDX2IMPORT_VERSION, AGENT_SPDX2IMPORT_REV);
+    parent::__construct(AGENT_REPORTIMPORT_NAME, AGENT_REPORTIMPORT_VERSION, AGENT_REPORTIMPORT_REV);
     $this->uploadDao = $this->container->get('dao.upload');
     $this->permissionDao = $this->container->get('dao.upload.permission');
     $this->dbManager = $this->container->get('db.manager');
@@ -71,12 +71,12 @@ class SpdxTwoImportAgent extends Agent
     // should be already set in $this->agentId?
     $row = $this->dbManager->getSingleRow(
       "SELECT agent_pk FROM agent WHERE agent_name = $1 order by agent_ts desc limit 1",
-      array(AGENT_SPDX2IMPORT_NAME), __METHOD__."select"
+      array(AGENT_REPORTIMPORT_NAME), __METHOD__."select"
     );
 
     if ($row === false)
     {
-      throw new Exception("agent_pk could not be determined");
+      throw new \Exception("agent_pk could not be determined");
     }
     $this->agent_pk = intval($row['agent_pk']);
   }
@@ -113,24 +113,24 @@ class SpdxTwoImportAgent extends Agent
       return false;
     }
 
-    $spdxReportPre = array_key_exists(self::REPORT_KEY,$args) ? $args[self::REPORT_KEY] : "";
+    $reportPre = array_key_exists(self::REPORT_KEY,$args) ? $args[self::REPORT_KEY] : "";
     global $SysConf;
-    $fileBase = $SysConf['FOSSOLOGY']['path']."/SPDX2Import/";
-    $spdxReport = $fileBase.$spdxReportPre;
-    if(empty($spdxReportPre) || !is_readable($spdxReport))
+    $fileBase = $SysConf['FOSSOLOGY']['path']."/ReportImport/";
+    $report = $fileBase.$reportPre;
+    if(empty($reportPre) || !is_readable($report))
     {
-      echo "No SPDX report was uploaded\n";
+      echo "No report was uploaded\n";
       echo "Maybe the permissions on ".htmlspecialchars($fileBase)." are not sufficient\n";
       return false;
     }
 
     $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$spdxReport),
+            array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$report),
             __METHOD__.'addToReportgen');
 
     $addConcludedLicsAsConclusion = array_key_exists(self::ACLA_KEY,$args) ? $args[self::ACLA_KEY] === "true" : false;
 
-    $this->walkAllFiles($spdxReport, $uploadId, $addConcludedLicsAsConclusion);
+    $this->walkAllFiles($report, $uploadId, $addConcludedLicsAsConclusion);
 
     return true;
   }
@@ -163,16 +163,16 @@ class SpdxTwoImportAgent extends Agent
     return $pfilesPerHash[$hash];
   }
 
-  public function walkAllFiles($SPDXfilename, $upload_pk, $addConcludedLicsAsConclusion=false)
+  public function walkAllFiles($reportFilename, $upload_pk, $addConcludedLicsAsConclusion=false)
   {
-    $configuration = new SpdxTwoImportConfiguration();
-    /** @var SpdxTwoImportSink */
-    $sink = new SpdxTwoImportSink($this->agent_pk, $this->licenseDao, $this->clearingDao, $this->dbManager,
+    $configuration = new ReportImportConfiguration();
+    /** @var ReportImportSink */
+    $sink = new ReportImportSink($this->agent_pk, $this->licenseDao, $this->clearingDao, $this->dbManager,
                                   $this->groupId, $this->userId, $this->jobId, $configuration);
 
     // Prepare data from SPDX import
     /** @var SpdxTwoImportSource */
-    $source = new SpdxTwoImportSource($SPDXfilename);
+    $source = new SpdxTwoImportSource($reportFilename);
 
     // Prepare data from DB
     $itemTreeBounds = $this->getItemTreeBounds($upload_pk);
