@@ -53,23 +53,24 @@ class SpdxTwoUtils
     {
       return "NOASSERTION";
     }
+
     if(strpos($license, " OR ") !== false)
     {
       return "(" . $license . ")";
     }
-    else
+
+    if($spdxValidityChecker === null ||
+        (is_callable($spdxValidityChecker) &&
+            call_user_func($spdxValidityChecker, $license)))
     {
-      if($spdxValidityChecker === null ||
-          (is_callable($spdxValidityChecker) &&
-              call_user_func($spdxValidityChecker, $license)))
-      {
-        return $license;
-      }
-      else
-      {
-        return self::$prefix . $license;
-      }
+      return $license;
     }
+
+    // if we get here, we're using a non-standard SPDX license
+    // make sure our license text conforms to the SPDX specifications
+    $license = preg_replace('/[^a-zA-Z0-9\-\_\.\+]/','-',$license);
+    $license = preg_replace('/\+(?!$)/','-',$license);
+    return self::$prefix . $license;
   }
 
   static public function addPrefixOnDemandKeys($licenses, $spdxValidityChecker = null)

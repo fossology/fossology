@@ -68,7 +68,11 @@ class spdx2Test extends \PHPUnit_Framework_TestCase
     return array(
         'null' => array("LIC1", null, "LIC1"),
         'const false' => array("LIC1", $constFalse, SpdxTwoUtils::$prefix . "LIC1"),
-        'const true' => array("LIC1", $constTrue, "LIC1")
+        'const true' => array("LIC1", $constTrue, "LIC1"),
+        'invalid plus' => array("abc+123", $constFalse, SpdxTwoUtils::$prefix . "abc-123"),
+        'other invalid chars' => array("to do?", $constFalse, SpdxTwoUtils::$prefix . "to-do-"),
+        'valid plus' => array("this+that_more+", $constFalse, SpdxTwoUtils::$prefix . "this-that_more+"),
+        'valid periods' => array("name.with.dots.", $constFalse, SpdxTwoUtils::$prefix . "name.with.dots.")
     );
   }
 
