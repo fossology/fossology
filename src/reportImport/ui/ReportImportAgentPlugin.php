@@ -20,6 +20,9 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class ReportImportAgentPlugin extends AgentPlugin
 {
+  const KEYS = [ 'addConcludedAsDecisions', 'addLicenseInfoFromInfoInFile', 'addLicenseInfoFromConcluded', 'addConcludedAsDecisionsOverwrite', 'addConcludedAsDecisionsTBD', 'addCopyrights' ];
+  const REPORT_TYPE_KEY = "reportType";
+
   public function __construct() {
     $this->Name = "agent_reportImport";
     $this->Title =  _("Report Import");
@@ -31,6 +34,24 @@ class ReportImportAgentPlugin extends AgentPlugin
   function preInstall()
   {
     // no AgentCheckBox
+  }
+
+  public function setAdditionalJqCmdArgs($request)
+  {
+    $additionalJqCmdArgs = "";
+
+    foreach(self::KEYS as $key) {
+      if($request->get($key) === "true")
+      {
+        $additionalJqCmdArgs .= " --".$key."=true";
+      }
+    }
+    if($request->get(self::REPORT_TYPE_KEY) !== NULL)
+    {
+      $additionalJqCmdArgs .= " --".self::REPORT_TYPE_KEY."=".$request->get("reportType");
+    }
+
+    return $additionalJqCmdArgs;
   }
 
   public function addReport($report)

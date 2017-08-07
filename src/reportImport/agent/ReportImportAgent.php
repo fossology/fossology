@@ -34,7 +34,8 @@ require_once 'services.php';
 class ReportImportAgent extends Agent
 {
   const REPORT_KEY = "report";
-  const ACLA_KEY = "addConcludedLicensesAs";
+  const ACLA_KEY = "addConcludedAsDecisions";
+  const KEYS = [ self::ACLA_KEY, 'addLicenseInfoFromInfoInFile', 'addLicenseInfoFromConcluded', 'addConcludedAsDecisionsOverwrite', 'addConcludedAsDecisionsTBD' ];
 
   /** @var UploadDao */
   private $uploadDao;
@@ -83,37 +84,47 @@ class ReportImportAgent extends Agent
 
   /**
    * @param string[] $args
-   * @param string $key1
-   * @param string $key2
+   * @param string $longArgsKey
    *
    * @return string[] $args
    *
    * Duplicate of function in file ../../spdx2/agent/spdx2utils.php
    */
-  static private function preWorkOnArgsFlp($args,$key1,$key2)
+  static private function preWorkOnArgsFlp(&$args,$longArgsKey)
   {
-    $needle = ' --'.$key2.'=';
     if (is_array($args) &&
-        array_key_exists($key1, $args) &&
-        strpos($args[$key1],$needle) !== false) {
-      $exploded = explode($needle,$args[$key1]);
-      $args[$key1] = trim($exploded[0]);
-      $args[$key2] = trim($exploded[1]);
+      array_key_exists($longArgsKey, $args)){
+      echo "DEBUG: unrefined \$longArgs are: ".$args[$longArgsKey]."\n";
+      $chunks = explode(" --", $args[$longArgsKey]);
+      if(sizeof(chunks > 1))
+      {
+        $args[$longArgsKey] = $chunks[0];
+        foreach(array_slice($chunks, 1) as $chunk)
+        {
+          if (strpos($chunk, '=') !== false)
+          {
+            list($key, $value) = explode('=', $chunk, 2);
+            $args[$key] = $value;
+          }
+          else
+          {
+            $args[$chunk] = true;
+          }
+        }
+      }
     }
-    return $args;
   }
 
   function processUploadId($uploadId)
   {
     $this->heartbeat(0);
 
-    $args = self::preWorkOnArgsFlp($this->args, self::REPORT_KEY, self::ACLA_KEY);
-
+    self::preWorkOnArgsFlp($this->args, self::REPORT_KEY);
     if (!$this->permissionDao->isEditable($uploadId, $this->groupId)) {
       return false;
     }
 
-    $reportPre = array_key_exists(self::REPORT_KEY,$args) ? $args[self::REPORT_KEY] : "";
+    $reportPre = array_key_exists(self::REPORT_KEY,$this->args) ? $this->args[self::REPORT_KEY] : "";
     global $SysConf;
     $fileBase = $SysConf['FOSSOLOGY']['path']."/ReportImport/";
     $report = $fileBase.$reportPre;
@@ -128,9 +139,9 @@ class ReportImportAgent extends Agent
             array('upload_fk'=>$uploadId, 'job_fk'=>$this->jobId, 'filepath'=>$report),
             __METHOD__.'addToReportgen');
 
-    $addConcludedLicsAsConclusion = array_key_exists(self::ACLA_KEY,$args) ? $args[self::ACLA_KEY] === "true" : false;
+    $configuration = new ReportImportConfiguration($this->args);
 
-    $this->walkAllFiles($report, $uploadId, $addConcludedLicsAsConclusion);
+    $this->walkAllFiles($report, $uploadId, $configuration);
 
     return true;
   }
@@ -163,16 +174,30 @@ class ReportImportAgent extends Agent
     return $pfilesPerHash[$hash];
   }
 
-  public function walkAllFiles($reportFilename, $upload_pk, $addConcludedLicsAsConclusion=false)
+  /**
+   * @param string $reportFilename
+   * @param ReportImportConfiguration $configuration
+   * @return SpdxTwoImportSource
+   */
+  private function getImportSource($reportFilename, $configuration)
   {
-    $configuration = new ReportImportConfiguration();
+    if($configuration->getReportType() === "spdx-rdf")
+    {
+      return new SpdxTwoImportSource($reportFilename);
+    }
+    else
+    {
+      echo "ERROR: can not handle report of type=[" . $configuration->getReportType() . "]\n";
+    }
+  }
+
+  public function walkAllFiles($reportFilename, $upload_pk, $configuration)
+  {
+    $source = $this->getImportSource($reportFilename, $configuration);
+
     /** @var ReportImportSink */
     $sink = new ReportImportSink($this->agent_pk, $this->licenseDao, $this->clearingDao, $this->dbManager,
                                   $this->groupId, $this->userId, $this->jobId, $configuration);
-
-    // Prepare data from SPDX import
-    /** @var SpdxTwoImportSource */
-    $source = new SpdxTwoImportSource($reportFilename);
 
     // Prepare data from DB
     $itemTreeBounds = $this->getItemTreeBounds($upload_pk);

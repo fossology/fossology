@@ -83,35 +83,43 @@ class ReportImportSink
       return;
     }
 
-    $licenseInfosInFile = $data->getLicenseInfosInFile();
-    $licensesConcluded = $data->getLicensesConcluded();
-
-    $licensePKsInFile = array();
-    foreach($licenseInfosInFile as $dataItem)
+    if($this->configuration->isCreateLicensesInfosAsFindings() ||
+       $this->configuration->isCreateConcludedLicensesAsFindings() ||
+       $this->configuration->isCreateConcludedLicensesAsConclusions())
     {
-      if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
-      {
-        continue;
-      }
-      $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
-      $licensePKsInFile[] = $licenseId;
-    }
+      $licenseInfosInFile = $data->getLicenseInfosInFile();
+      $licensesConcluded = $data->getLicensesConcluded();
 
-    $licensePKsConcluded = array();
-    foreach ($licensesConcluded as $dataItem)
-    {
-      if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
+      $licensePKsInFile = array();
+      foreach($licenseInfosInFile as $dataItem)
       {
-        continue;
+        if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
+        {
+          continue;
+        }
+        $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
+        $licensePKsInFile[] = $licenseId;
       }
-      $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
+
+      $licensePKsConcluded = array();
+      foreach ($licensesConcluded as $dataItem)
+      {
+        if (strcasecmp($dataItem->getLicenseId(), "noassertion") == 0)
+        {
+          continue;
+        }
+        $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
       $licensePKsConcluded[$licenseId] = $dataItem->getCustomText();
+      }
+
+      $this->insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles);
     }
 
-    $this->insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles);
-
-    $this->insertFoundCopyrightTextsToDB($data->getCopyrightTexts(),
-      $data->getPfiles());
+    if($this->configuration->isAddCopyrightInformation())
+    {
+      $this->insertFoundCopyrightTextsToDB($data->getCopyrightTexts(),
+        $data->getPfiles());
+    }
   }
 
   /**

@@ -30,25 +30,25 @@ This file is offered as-is, without any warranty.
         <label>
           {{ 'Select report type'|trans }}:
            <select name="reportType" size="1">
-             <option>SPDX RDF</option>
+             <option value="spdx-rdf">SPDX RDF</option>
            </select>
         </label>
       </li>
       <li>
         {{ 'Select how the information should be imported:'|trans }}
         <ul>
-          <li style="color: gray;">
+          <li>
             {{ 'Add the License Info as findings from'|trans }}
             <ul>
               <li>
                 <label>
-                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseInfoInFile" checked="checked"/>
+                  <input type="checkbox" name="addLicenseInfoFromInfoInFile" value="true" checked="checked"/>
                   SPDX tag of type licenseInfoInFile
                 </label>
               </li>
               <li>
                 <label>
-                  <input type="checkbox" name="addLicenseInfoFrom" value="licenseConcluded" />
+                  <input type="checkbox" name="addLicenseInfoFromConcluded" value="true" />
                   SPDX tag of type licenseConcluded
                 </label>
               </li>
@@ -56,37 +56,38 @@ This file is offered as-is, without any warranty.
           </li>
           <li>
             <label>
-              <input type="checkbox" name="addConcludedAsDecisions" value="addConcludedAsDecisions" checked="checked"/>
+              <input type="checkbox" name="addConcludedAsDecisions" value="true" checked="checked"/>
               {{ 'Add concluded licenses as decisions'|trans }}
             </label>
-            <ul style="color: gray;">
-              <li>
+            <ul>
+              <li style="color: gray;">
                 <label>
-                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="addConcludedAsDecisionsOverwrite"/>
+                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="true"/>
                   {{ 'also overwrite existing decissions'|trans }}
                 </label>
               </li>
               <li>
                 <label>
-                  <input type="checkbox" name="addConcludedAsDecisionsTBD" value="addConcludedAsDecisionsTBD" checked="checked"/>
+                  <input type="checkbox" name="addConcludedAsDecisionsTBD" value="true" checked="checked"/>
                   {{ 'import as "to be discussed"'|trans }}
                 </label>
               </li>
             </ul>
           </li>
-          <li style="color: gray;">
-            {{ 'Add the Copyright Information by'|trans }}
-            <ul>
-              <li>
-                <input type="radio" id="overwrite" name="addCopyrightBy" value="overwrite"> <label for="overwrite">overwriting</label>
-              </li>
-              <li>
-                <input type="radio" id="add" name="addCopyrightBy" value="add" checked="checked"> <label for="add">adding</label>
-              </li>
-              <li>
-                <input type="radio" id="ignore" name="addCopyrightBy" value="ignore"> <label for="ignore">ignoring</label>
-              </li>
-            </ul>
+          <li>
+            <input type="checkbox" name="addCopyrights" value="true"/>
+            {{ 'Add the Copyright Information'|trans }}
+            {#<ul>#}
+              {#<li>#}
+                {#<input type="radio" id="overwrite" name="addCopyrightBy" value="overwrite"> <label for="overwrite">overwriting</label>#}
+              {#</li>#}
+              {#<li>#}
+                {#<input type="radio" id="add" name="addCopyrightBy" value="add" checked="checked"> <label for="add">adding</label>#}
+              {#</li>#}
+              {#<li>#}
+                {#<input type="radio" id="ignore" name="addCopyrightBy" value="ignore"> <label for="ignore">ignoring</label>#}
+              {#</li>#}
+            {#</ul>#}
           </li>
         </ul>
       </li>

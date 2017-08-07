@@ -62,8 +62,8 @@ class ReportImportPlugin extends DefaultPlugin
     }
     else
     {
-      $addConcludedLicensesAs = $request->get('addConcludedAsDecisions') == 'addConcludedAsDecisions' ? true : false;
-      $jobMetaData = $this->runImport($uploadId, $_FILES['report'],$addConcludedLicensesAs);
+
+      $jobMetaData = $this->runImport($uploadId, $_FILES['report'], $request);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();
       return $showJobsPlugin->getResponse();
@@ -118,14 +118,12 @@ class ReportImportPlugin extends DefaultPlugin
     return $this->render('ReportImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }
 
-  protected function runImport($uploadId, $report, $addConcludedLicAsConclusion=false)
+  protected function runImport($uploadId, $report, $request)
   {
     $reportImportAgent = plugin_find('agent_reportImport');
+
     $jqCmdArgs = $reportImportAgent->addReport($report);
-    if($addConcludedLicAsConclusion)
-    {
-      $jqCmdArgs .= " --addConcludedLicensesAs=true";
-    }
+    $jqCmdArgs .= $reportImportAgent->setAdditionalJqCmdArgs($request);
 
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
@@ -133,17 +131,17 @@ class ReportImportPlugin extends DefaultPlugin
     $sql = 'SELECT jq_pk,job_pk FROM jobqueue, job '
          . 'WHERE jq_job_fk=job_pk AND jq_type=$1 AND job_group_fk=$4 AND job_user_fk=$3 AND jq_args=$2 AND jq_endtime IS NULL';
     $params = array($reportImportAgent->AgentName,$uploadId,$userId,$groupId);
-    $log = __METHOD__;
+    $statementName = __METHOD__;
     if ($jqCmdArgs) {
       $sql .= ' AND jq_cmd_args=$5';
       $params[] = $jqCmdArgs;
-      $log .= '.args';
+      $statementName .= '.args';
     }
     else {
       $sql .= ' AND jq_cmd_args IS NULL';
     }
 
-    $scheduled = $dbManager->getSingleRow($sql,$params,$log);
+    $scheduled = $dbManager->getSingleRow($sql,$params,$statementName);
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }

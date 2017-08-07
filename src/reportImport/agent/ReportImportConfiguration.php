@@ -21,20 +21,71 @@ use Fossology\Lib\Data\DecisionTypes;
 
 class ReportImportConfiguration
 {
+  const KEYS = [
+    'addConcludedAsDecisions', // => $createConcludedLicensesAsConclusions
+    'addLicenseInfoFromInfoInFile', // => $createLicensesInfosAsFindings
+    'addLicenseInfoFromConcluded', // => $createConcludedLicensesAsFindings
+    'addConcludedAsDecisionsOverwrite', // => $overwriteDecisions
+    'addCopyrights', // => $addCopyrightInformation
+    'addConcludedAsDecisionsTBD' // => $concludeLicenseDecisionType
+  ];
+  const REPORT_TYPE_KEY = "reportType";
+
   protected $createLicensesAsCandidate = true;
   protected $createLicensesInfosAsFindings = true;
   protected $createConcludedLicensesAsFindings = false;
   protected $createConcludedLicensesAsConclusions = true;
+  protected $overwriteDecisions = false;
+  protected $addCopyrightInformation = false;
   protected $concludeLicenseDecisionType = DecisionTypes::IDENTIFIED;
+  protected $reportType = "spdx-rdf";
 
-  function __construct()
+  private function getFromArgs($args, $num)
   {
+    return array_key_exists(self::KEYS[$num],$args) ? $args[self::KEYS[$num]] === "true" : false;
   }
 
-  public function addAsTBD()
+  function __construct($args)
   {
-    $this->concludeLicenseDecisionType = DecisionTypes::TO_BE_DISCUSSED;
-    return $this;
+    $this->createConcludedLicensesAsConclusions = $this->getFromArgs($args,0);
+    $this->createLicensesInfosAsFindings = $this->getFromArgs($args,1);
+    $this->createConcludedLicensesAsFindings = $this->getFromArgs($args,2);
+    $this->overwriteDecisions = $this->getFromArgs($args,3);
+    $this->addCopyrightInformation = $this->getFromArgs($args,4);
+
+    $addConcludedAsDecisionsTBD = $this->getFromArgs($args,5);
+    if($addConcludedAsDecisionsTBD)
+    {
+      $this->concludeLicenseDecisionType = DecisionTypes::TO_BE_DISCUSSED;
+    }
+
+    if(array_key_exists(self::REPORT_TYPE_KEY,$args))
+    {
+      $this->reportType = $args[self::REPORT_TYPE_KEY];
+    }
+
+    $this->echoConfiguration();
+  }
+
+  private function var_dump($mixed = null) {
+    ob_start();
+    var_dump($mixed);
+    $dump = ob_get_contents();
+    ob_end_clean();
+    return $dump;
+  }
+
+  public function echoConfiguration()
+  {
+    echo   "DEBUG: \$createLicensesAsCandidate is: "           .$this->var_dump($this->createLicensesAsCandidate);
+    echo "\nDEBUG: \$createLicensesInfosAsFindings is: "       .$this->var_dump($this->createLicensesInfosAsFindings);
+    echo "\nDEBUG: \$createConcludedLicensesAsFindings is: "   .$this->var_dump($this->createConcludedLicensesAsFindings);
+    echo "\nDEBUG: \$createConcludedLicensesAsConclusions is: ".$this->var_dump($this->createConcludedLicensesAsConclusions);
+    echo "\nDEBUG: \$overwriteDecisions is: "                  .$this->var_dump($this->overwriteDecisions);
+    echo "\nDEBUG: \$addCopyrightInformation is: "             .$this->var_dump($this->addCopyrightInformation);
+    echo "\nDEBUG: \$concludeLicenseDecisionType is: "         .$this->var_dump($this->concludeLicenseDecisionType);
+    echo "\nDEBUG: \$reportType is: "                          .$this->var_dump($this->reportType);
+    echo "\n";
   }
 
   /**
@@ -75,5 +126,39 @@ class ReportImportConfiguration
   public function getConcludeLicenseDecisionType()
   {
     return $this->concludeLicenseDecisionType;
+  }
+
+  /**
+   * @param bool $createConcludedLicensesAsConclusions
+   * @return ReportImportConfiguration
+   */
+  public function setCreateConcludedLicensesAsConclusions($createConcludedLicensesAsConclusions)
+  {
+    $this->createConcludedLicensesAsConclusions = $createConcludedLicensesAsConclusions;
+    return $this;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isOverwriteDecisions()
+  {
+    return $this->overwriteDecisions;
+  }
+
+  /**
+   * @return string
+   */
+  public function getReportType()
+  {
+    return $this->reportType;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isAddCopyrightInformation()
+  {
+    return $this->addCopyrightInformation;
   }
 }
