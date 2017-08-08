@@ -12,6 +12,10 @@
 
 set -e
 
+if [ "$1" == "true" ]; then
+  exit 0
+fi
+
 db_host="localhost"
 db_name="fossology"
 db_user="fossy"
