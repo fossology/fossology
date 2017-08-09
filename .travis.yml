@@ -4,6 +4,7 @@
 # build FOSSology on Travis CI - https://travis-ci.org/
 
 language: php
+dist: trusty
 php:
   - '5.6'
 addons:
@@ -22,82 +23,183 @@ install:
  - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main'
  - sudo apt-get update -qq
  - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
- - sudo apt-get install -qq debhelper libglib2.0-dev libmagic-dev libxml2-dev
- - sudo apt-get install -qq libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
- - sudo apt-get install -qq apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
- - sudo apt-get install -qq binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
- - sudo apt-get install -qq rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
- - sudo apt-get install -qq libpq-dev libcunit1-dev libcppunit-dev
- - sudo apt-get install -qq libboost-regex-dev libboost-program-options-dev
- - sudo apt-get install $CXX $CC --force-yes || sudo apt-get install $CC --force-yes
- - sudo apt-get install -qq cppcheck
- - sudo apt-get install liblocal-lib-perl
- - sudo apt-get install libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
- - sudo mkdir -p /var/local/cache/fossology
- - sudo chown $(whoami) /var/local/cache/fossology
-
-before_script:
- - cd src/
- - composer install --dev
- - cd ..
+ - sudo apt-get install -q -y debhelper libglib2.0-dev libmagic-dev libxml2-dev
+                              libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
+                              apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
+                              binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
+                              rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
+                              libpq-dev libcunit1-dev libcppunit-dev
+                              libboost-regex-dev libboost-program-options-dev
+                              liblocal-lib-perl libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
+ - sudo apt-get install -q -y --allow-unauthenticated $CXX $CC || sudo apt-get install -q -y --allow-unauthenticated $CC
+ - sudo apt-get install -q -y cppcheck
+ - ( cd src && composer install --dev )
  - install/scripts/install-spdx-tools.sh
  - install/scripts/install-ninka.sh
+
+before_script:
+ - sudo mkdir -p /var/local/cache/fossology
+ - sudo chown $(whoami) /var/local/cache/fossology
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
 
 env:
   global:
-   - PHPTESTSUITE='Fossology PhpUnit Agent Test Suite'
+   - PHPTESTSUITE=''
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/'
-   - if [[ -z "$PHPTESTSUITE" ]]; then exit 0; fi
    - MAKETARGETS='all test-lib'
-  matrix:
-   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/default-docker-test.sh' MAKETARGETS=''
-   - PHPTESTSUITE= CHECKBEFORE='src/testing/docker/docker-compose-test.sh' MAKETARGETS=''
-   - PHPTESTSUITE= CHECKBEFORE='src/testing/travis/check-changelog.sh' MAKETARGETS=''
-   - CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-4.8 CXX=g++-4.8 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-4.9 CXX=g++-4.9 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
-   - CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-   - CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
-   - CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
-      CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
-
-
-matrix:
-  include:
-    - php: 5.4
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 5.5
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 5.6
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE='src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml src/lib/php/*/ src/www/ui/page/ src/www/ui/async/ src/spdx2 src/monk'
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.0
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-  allow_failures:
-    - env: CHECKBEFORE='src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/'
-        CC=gcc-5 CXX=g++-5 MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.0
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.1
-      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
 
 script:
  - set -e
  - src/testing/syntax/syntaxtest.sh
- - $CHECKBEFORE
- - make $MAKETARGETS
+ - if [[ ! -z "$CHECKBEFORE" ]]; then $CHECKBEFORE; fi
+ - if [[ ! -z "$MAKETARGETS" ]]; then make $MAKETARGETS; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ~5; fi
- - phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"
+ - if [[ ! -z "$PHPTESTSUITE" ]]; then phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
  - set +e
 
 after_script:
  - mkdir -p build/logs
  - php src/vendor/bin/coveralls -vv -x clover.xml
+
+matrix:
+  include:
+
+################################################################################
+## general tests
+    - env: TEST=default-docker-test
+      before_script:
+      install: 
+      script:
+        - src/testing/docker/default-docker-test.sh
+      after_script:
+    - env: TEST=docker-compose-test
+      before_script:
+      install: 
+      script: src/testing/docker/docker-compose-test.sh
+      after_script:
+    - env: TEST=check-changelog
+      before_script:
+      install: 
+      script: src/testing/travis/check-changelog.sh
+      after_script:
+
+################################################################################
+## C/C++ and phpunit agent tests
+#### with PHP 5.6
+    - env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=gcc-4.6 CXX=g++-4.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=gcc-4.8 CXX=g++-4.8 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=gcc-4.9 CXX=g++-4.9 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+      after_script:
+    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+      after_script:
+#### with PHP 7.0
+    - php: 7.0 # allowed failure
+      env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.0 # allowed failure
+      env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      6after_script:
+    - php: 7.0 # allowed failure
+      env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.0 # allowed failure
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+      after_script:
+#### with PHP 7.1
+    - php: 7.1 # allowed failure
+      env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.1 # allowed failure
+      env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      6after_script:
+    - php: 7.1 # allowed failure
+      env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.1 # allowed failure
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+      after_script:
+
+################################################################################
+## PHP tests
+#### PHP: PhpUnit Tests
+    - php: 5.4
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 5.5
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 5.6
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 7.0 # allowed failure
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 7.1 # allowed failure
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+#### PHP: phpcpd
+    - script: # allowed failure
+        - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+      after_script:
+
+################################################################################
+  allow_failures:
+    - php: 7.0
+      env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.0
+      env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      6after_script:
+    - php: 7.0
+      env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.0
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+      after_script:
+    - php: 7.1
+      env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.1
+      env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
+      6after_script:
+    - php: 7.1
+      env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
+      after_script:
+    - php: 7.1
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+      after_script:
+    - script:
+        - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+      after_script:
+    - php: 7.0
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
+    - php: 7.1
+      env:
+        PHPTESTSUITE='Fossology PhpUnit Test Suite'
+        CHECKBEFORE=''
+        MAKETARGETS='build-lib VERSIONFILE build-cli'
