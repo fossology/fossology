@@ -393,17 +393,24 @@ int processMatches(MonkState* state, const File* file, const GArray* matches, co
     return callbacks->onAll(state, file, matches);
   }
 
+  callbacks->onBeginOutput(state);
+
   const guint matchCount = matches->len;
 
+  int result = 1;
   if (matchCount == 0) {
-    return callbacks->onNo(state, file);
+    result = callbacks->onNo(state, file);
   }
 
-  int result = 1;
   for (guint matchIndex = 0; result && (matchIndex < matchCount); matchIndex++) {
     const Match* match = match_array_index(matches, matchIndex);
     result &= processMatch(state, file, match, callbacks);
+    if (matchIndex != matchCount - 1) {
+      callbacks->onBetweenIndividualOutputs(state);
+    }
   }
+
+  callbacks->onEndOutput(state);
 
   return result;
 }

@@ -183,6 +183,7 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
   -h   :: help \(print this message\), then exit\.
   -c   :: specify the directory for the system configuration\.
   -v   :: verbose output\.
+  -J   :: JSON output.
   file :: scan file and print licenses detected within it\.
   no file :: process data from the scheduler\.
   -V   :: print the version info, then exit\./";

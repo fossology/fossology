@@ -24,7 +24,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "common.h"
 
 MatchCallbacks schedulerCallbacks =
-  { .onNo = sched_onNoMatch, .onFull = sched_onFullMatch, .onDiff = sched_onDiffMatch, .ignore = sched_ignore};
+  { .onNo = sched_onNoMatch,
+    .onFull = sched_onFullMatch,
+    .onDiff = sched_onDiffMatch,
+    .onBeginOutput = sched_noop,
+    .onBetweenIndividualOutputs = sched_noop,
+    .onEndOutput = sched_noop,
+    .ignore = sched_ignore
+  };
 
 int processUploadId(MonkState* state, int uploadId, Licenses* licenses) {
   PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);

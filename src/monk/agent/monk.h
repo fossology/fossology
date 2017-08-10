@@ -54,6 +54,7 @@ typedef struct {
   int agentId;
   int scanMode;
   int verbosity;
+  int json;
   void* ptr;
 } MonkState;
 
