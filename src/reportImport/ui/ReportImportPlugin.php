@@ -27,6 +27,8 @@ class ReportImportPlugin extends DefaultPlugin
 {
   const NAME = 'ui_reportImport';
 
+  /** @var UserDao */
+  private $userDao;
   /** @var UploadDao */
   private $uploadDao;
   /** @var FolderDao */
@@ -39,6 +41,7 @@ class ReportImportPlugin extends DefaultPlugin
       self::PERMISSION => Auth::PERM_WRITE,
       self::REQUIRES_LOGIN => TRUE
     ));
+    $this->userDao = $GLOBALS['container']->get('dao.user');
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
@@ -74,6 +77,7 @@ class ReportImportPlugin extends DefaultPlugin
   {
     $vars=array();
     $groupId = Auth::getGroupId();
+    $vars['userIsAdmin'] = Auth::isAdmin();
 
     $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     $folder_pk = GetParm('folder', PARM_INTEGER);

@@ -18,6 +18,7 @@
 namespace Fossology\ReportImport;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Db\DbManager;
@@ -39,6 +40,8 @@ class ReportImportAgent extends Agent
 
   /** @var UploadDao */
   private $uploadDao;
+  /** @var UserDao */
+  private $userDao;
   /** @var UploadPermissionDao */
   private $permissionDao;
   /** @var DbManager */
@@ -56,15 +59,13 @@ class ReportImportAgent extends Agent
     $this->uploadDao = $this->container->get('dao.upload');
     $this->permissionDao = $this->container->get('dao.upload.permission');
     $this->dbManager = $this->container->get('db.manager');
+    $this->userDao = $this->container->get('dao.user');
+    $this->licenseDao = $this->container->get('dao.license');
+    $this->clearingDao = $this->container->get('dao.clearing');
     $this->agentSpecifLongOptions[] = self::REPORT_KEY.':';
     $this->agentSpecifLongOptions[] = self::ACLA_KEY.':';
 
     $this->setAgent_PK();
-
-    /** @var LicenseDao */
-    $this->licenseDao = $this->container->get('dao.license');
-    /** @var ClearingDao */
-    $this->clearingDao = $this->container->get('dao.clearing');
   }
 
   private function setAgent_PK()
@@ -196,8 +197,8 @@ class ReportImportAgent extends Agent
     $source = $this->getImportSource($reportFilename, $configuration);
 
     /** @var ReportImportSink */
-    $sink = new ReportImportSink($this->agent_pk, $this->licenseDao, $this->clearingDao, $this->dbManager,
-                                  $this->groupId, $this->userId, $this->jobId, $configuration);
+    $sink = new ReportImportSink($this->agent_pk, $this->userDao, $this->licenseDao, $this->clearingDao,
+                                 $this->dbManager, $this->groupId, $this->userId, $this->jobId, $configuration);
 
     // Prepare data from DB
     $itemTreeBounds = $this->getItemTreeBounds($upload_pk);

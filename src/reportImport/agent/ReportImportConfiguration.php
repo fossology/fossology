@@ -27,7 +27,8 @@ class ReportImportConfiguration
     'addLicenseInfoFromConcluded', // => $createConcludedLicensesAsFindings
     'addConcludedAsDecisionsOverwrite', // => $overwriteDecisions
     'addCopyrights', // => $addCopyrightInformation
-    'addConcludedAsDecisionsTBD' // => $concludeLicenseDecisionType
+    'addConcludedAsDecisionsTBD', // => $concludeLicenseDecisionType
+    'addNewLicensesAs' // => $createLicensesAsCandidate
   ];
   const REPORT_TYPE_KEY = "reportType";
 
@@ -40,9 +41,9 @@ class ReportImportConfiguration
   protected $concludeLicenseDecisionType = DecisionTypes::IDENTIFIED;
   protected $reportType = "spdx-rdf";
 
-  private function getFromArgs($args, $num)
+  private function getFromArgs($args, $num, $expected="true")
   {
-    return array_key_exists(self::KEYS[$num],$args) ? $args[self::KEYS[$num]] === "true" : false;
+    return array_key_exists(self::KEYS[$num],$args) ? $args[self::KEYS[$num]] === $expected : false;
   }
 
   function __construct($args)
@@ -58,6 +59,8 @@ class ReportImportConfiguration
     {
       $this->concludeLicenseDecisionType = DecisionTypes::TO_BE_DISCUSSED;
     }
+
+    $this->createLicensesAsCandidate = $this->getFromArgs($args, 6, "candidate");
 
     if(array_key_exists(self::REPORT_TYPE_KEY,$args))
     {

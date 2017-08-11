@@ -17,7 +17,9 @@
  */
 namespace Fossology\ReportImport;
 
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\ReportImport\ReportImportHelper;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
@@ -29,6 +31,8 @@ require_once 'ReportImportConfiguration.php';
 class ReportImportSink
 {
 
+  /** @var UserDao */
+  private $userDao;
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -44,6 +48,8 @@ class ReportImportSink
   protected $userId = -1;
   /** @var int */
   protected $jobId = -1;
+  /** @var bool */
+  protected $nserIsAdmin = false;
 
   /** @var ReportImportConfiguration */
   protected $configuration;
@@ -51,6 +57,7 @@ class ReportImportSink
   /**
    * ReportImportSink constructor.
    * @param $agent_pk
+   * @param $userDao
    * @param $licenseDao
    * @param $clearingDao
    * @param $dbManager
@@ -59,8 +66,9 @@ class ReportImportSink
    * @param $jobId
    * @param $configuration
    */
-  function __construct($agent_pk, $licenseDao, $clearingDao, $dbManager, $groupId, $userId, $jobId, $configuration)
+  function __construct($agent_pk, $userDao, $licenseDao, $clearingDao, $dbManager, $groupId, $userId, $jobId, $configuration)
   {
+    $this->userDao = $userDao;
     $this->clearingDao = $clearingDao;
     $this->licenseDao = $licenseDao;
     $this->dbManager = $dbManager;
@@ -70,6 +78,9 @@ class ReportImportSink
     $this->jobId = $jobId;
 
     $this->configuration = $configuration;
+
+    $userRow = $userDao->getUserByPk($userId);
+    $this->userIsAdmin = $userRow["user_perm"] >= PLUGIN_DB_ADMIN;
   }
 
   /**
@@ -109,7 +120,7 @@ class ReportImportSink
           continue;
         }
         $licenseId = $this->getIdForDataItemOrCreateLicense($dataItem, $this->groupId);
-      $licensePKsConcluded[$licenseId] = $dataItem->getCustomText();
+        $licensePKsConcluded[$licenseId] = $dataItem->getCustomText();
       }
 
       $this->insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles);
@@ -128,7 +139,7 @@ class ReportImportSink
    * @return int
    * @throws \Exception
    */
-  public function getIdForDataItemOrCreateLicense($dataItem , $groupId)
+  public function getIdForDataItemOrCreateLicense($dataItem, $groupId)
   {
     $licenseShortName = $dataItem->getLicenseId();
     $license = $this->licenseDao->getLicenseByShortName($licenseShortName, $groupId);
@@ -144,7 +155,8 @@ class ReportImportSink
     {
       $licenseCandidate = $dataItem->getLicenseCandidate();
       echo "INFO: No license with shortname=\"$licenseShortName\" found ... ";
-      if($this->configuration->isCreateLicensesAsCandidate())
+
+      if($this->configuration->isCreateLicensesAsCandidate() || !$this->userIsAdmin)
       {
         echo "Creating it as license candidate ...\n";
         $licenseId = $this->licenseDao->insertUploadLicense($licenseShortName, $licenseCandidate->getText(), $groupId);
@@ -163,10 +175,12 @@ class ReportImportSink
       {
         echo "creating it as license ...\n";
         $licenseText = trim($licenseCandidate->getText());
-        return $this->dbManager->getSingleRow(
+        // TODO: move to LicenseDao
+        $row = $this->dbManager->getSingleRow(
           "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
           array($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getSpdxCompatible()),
-          __METHOD__.".addLicense" )[0];
+          __METHOD__.".addLicense" );
+        return $row["rf_pk"];
       }
     }
     return -1;
@@ -179,11 +193,14 @@ class ReportImportSink
    */
   private function insertLicenseInformationToDB($licensePKsInFile, $licensePKsConcluded, $pfiles)
   {
-    $this->saveAsLicenseFindingToDB($licensePKsInFile, $pfiles);
+    if($this->configuration->isCreateLicensesInfosAsFindings())
+    {
+      $this->saveAsLicenseFindingToDB($licensePKsInFile, $pfiles);
+    }
 
     if($this->configuration->isCreateConcludedLicensesAsFindings())
     {
-      $this->saveAsLicenseFindingToDB($licensePKsConcluded, $pfiles);
+      $this->saveAsLicenseFindingToDB(array_keys($licensePKsConcluded), $pfiles);
     }
 
     if($this->configuration->isCreateConcludedLicensesAsConclusions())

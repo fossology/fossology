@@ -1,4 +1,4 @@
-{# Copyright 2015-2016 Siemens AG
+{# Copyright 2015-2017 Siemens AG
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -38,6 +38,21 @@ This file is offered as-is, without any warranty.
         {{ 'Select how the information should be imported:'|trans }}
         <ul>
           <li>
+            {{ 'Create new licenses as'|trans }}
+            <ul>
+              <li>
+                <input type="radio" id="addNewLicensesAs-candidate" name="addNewLicensesAs" value="candidate" checked="checked">
+                <label for="addNewLicensesAs-candidate">license candidate</label>
+              </li>
+              {% if userIsAdmin %}
+              <li>
+                <input type="radio" id="addNewLicensesAs-license" name="addNewLicensesAs" value="license">
+                <label for="addNewLicensesAs-license">new license</label>
+              </li>
+              {% endif %}
+            </ul>
+          </li>
+          <li>
             {{ 'Add the License Info as findings from'|trans }}
             <ul>
               <li>
@@ -62,7 +77,7 @@ This file is offered as-is, without any warranty.
             <ul>
               <li style="color: gray;">
                 <label>
-                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="true"/>
+                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="true" checked="checked" onclick="return false;"/>
                   {{ 'also overwrite existing decissions'|trans }}
                 </label>
               </li>

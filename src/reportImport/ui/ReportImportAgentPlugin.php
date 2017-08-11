@@ -20,7 +20,15 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class ReportImportAgentPlugin extends AgentPlugin
 {
-  const KEYS = [ 'addConcludedAsDecisions', 'addLicenseInfoFromInfoInFile', 'addLicenseInfoFromConcluded', 'addConcludedAsDecisionsOverwrite', 'addConcludedAsDecisionsTBD', 'addCopyrights' ];
+  const KEYS = [
+    'addConcludedAsDecisions',
+    'addLicenseInfoFromInfoInFile',
+    'addLicenseInfoFromConcluded',
+    'addConcludedAsDecisionsOverwrite',
+    'addConcludedAsDecisionsTBD',
+    'addCopyrights',
+    'addNewLicensesAs'
+    ];
   const REPORT_TYPE_KEY = "reportType";
 
   public function __construct() {
