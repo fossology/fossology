@@ -30,7 +30,6 @@ class ReportImportConfiguration
     'addConcludedAsDecisionsTBD', // => $concludeLicenseDecisionType
     'addNewLicensesAs' // => $createLicensesAsCandidate
   ];
-  const REPORT_TYPE_KEY = "reportType";
 
   protected $createLicensesAsCandidate = true;
   protected $createLicensesInfosAsFindings = true;
@@ -39,7 +38,6 @@ class ReportImportConfiguration
   protected $overwriteDecisions = false;
   protected $addCopyrightInformation = false;
   protected $concludeLicenseDecisionType = DecisionTypes::IDENTIFIED;
-  protected $reportType = "spdx-rdf";
 
   private function getFromArgs($args, $num, $expected="true")
   {
@@ -62,11 +60,6 @@ class ReportImportConfiguration
 
     $this->createLicensesAsCandidate = $this->getFromArgs($args, 6, "candidate");
 
-    if(array_key_exists(self::REPORT_TYPE_KEY,$args))
-    {
-      $this->reportType = $args[self::REPORT_TYPE_KEY];
-    }
-
     $this->echoConfiguration();
   }
 
@@ -87,7 +80,6 @@ class ReportImportConfiguration
     echo "\nDEBUG: \$overwriteDecisions is: "                  .$this->var_dump($this->overwriteDecisions);
     echo "\nDEBUG: \$addCopyrightInformation is: "             .$this->var_dump($this->addCopyrightInformation);
     echo "\nDEBUG: \$concludeLicenseDecisionType is: "         .$this->var_dump($this->concludeLicenseDecisionType);
-    echo "\nDEBUG: \$reportType is: "                          .$this->var_dump($this->reportType);
     echo "\n";
   }
 
@@ -147,14 +139,6 @@ class ReportImportConfiguration
   public function isOverwriteDecisions()
   {
     return $this->overwriteDecisions;
-  }
-
-  /**
-   * @return string
-   */
-  public function getReportType()
-  {
-    return $this->reportType;
   }
 
   /**

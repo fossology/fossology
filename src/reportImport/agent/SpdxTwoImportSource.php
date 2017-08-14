@@ -21,8 +21,9 @@ use Fossology\Lib\Data\License;
 use EasyRdf_Graph;
 require_once 'ReportImportData.php';
 require_once 'ReportImportDataItem.php';
+require_once 'ImportSource.php';
 
-class SpdxTwoImportSource
+class SpdxTwoImportSource implements ImportSource
 {
   const TERMS = 'http://spdx.org/rdf/terms#';
   const SPDX_URL = 'http://spdx.org/licenses/';
@@ -55,18 +56,26 @@ class SpdxTwoImportSource
     return $graph->toRdfPhp();
   }
 
-  public function getAllFileIds()
+  /**
+   * @return array
+   */
+  public function getAllFiles()
   {
     $fileIds = array();
     foreach ($this->index as $subject => $property){
       if ($this->isPropertyAFile($property))
       {
-        $fileIds[] = $subject;
+        $fileIds[$subject] = $this->getFileName($property);
       }
     }
     return $fileIds;
   }
 
+  /**
+   * @param $property
+   * @param $type
+   * @return bool
+   */
   private function isPropertyOfType(&$property, $type)
   {
     $key = self::SYNTAX_NS . 'type';
@@ -79,19 +88,27 @@ class SpdxTwoImportSource
       $property[$key][0]['value'] === $target;
   }
 
+  /**
+   * @param $property
+   * @return bool
+   */
   private function isPropertyAFile(&$property)
   {
     return $this->isPropertyOfType($property, 'File');
   }
 
-  public function getHashesMap($propertyId)
+  /**
+   * @param $fileid
+   * @return array
+   */
+  public function getHashesMap($fileid)
   {
     if ($this->isPropertyAFile($property))
     {
       return array();
     }
 
-    $hashItems = $this->getValues($propertyId, 'checksum');
+    $hashItems = $this->getValues($fileid, 'checksum');
 
     $hashes = array();
     $keyAlgo = self::TERMS . 'algorithm';
@@ -110,6 +127,12 @@ class SpdxTwoImportSource
     return $hashes;
   }
 
+  /**
+   * @param $propertyOrId
+   * @param $key
+   * @param null $default
+   * @return mixed|null
+   */
   private function getValue($propertyOrId, $key, $default=null)
   {
     $values = $this->getValues($propertyOrId, $key);
@@ -120,6 +143,11 @@ class SpdxTwoImportSource
     return $default;
   }
 
+  /**
+   * @param $propertyOrId
+   * @param $key
+   * @return array
+   */
   private function getValues($propertyOrId, $key)
   {
     if (is_string($propertyOrId))
@@ -164,6 +192,15 @@ class SpdxTwoImportSource
       return $values;
     }
     return array();
+  }
+
+  /**
+   * @param $propertyOrId
+   * @return mixed|null
+   */
+  private function getFileName($propertyOrId)
+  {
+    return $this->getValue($propertyOrId, 'fileName');
   }
 
   /**
@@ -317,7 +354,7 @@ class SpdxTwoImportSource
     return $output;
   }
 
-  public function getCopyrightTextsForFile($propertyId)
+  private function getCopyrightTextsForFile($propertyId)
   {
     return array_map('trim', $this->getValues($propertyId, "copyrightText"));
   }

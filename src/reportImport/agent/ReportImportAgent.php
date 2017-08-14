@@ -18,11 +18,15 @@
 namespace Fossology\ReportImport;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 require_once 'SpdxTwoImportSource.php';
+require_once 'XmlImportSource.php';
 require_once 'ReportImportSink.php';
 require_once 'ReportImportHelper.php';
 require_once 'ReportImportConfiguration.php';
@@ -87,8 +91,6 @@ class ReportImportAgent extends Agent
    * @param string[] $args
    * @param string $longArgsKey
    *
-   * @return string[] $args
-   *
    * Duplicate of function in file ../../spdx2/agent/spdx2utils.php
    */
   static private function preWorkOnArgsFlp(&$args,$longArgsKey)
@@ -97,7 +99,7 @@ class ReportImportAgent extends Agent
       array_key_exists($longArgsKey, $args)){
       echo "DEBUG: unrefined \$longArgs are: ".$args[$longArgsKey]."\n";
       $chunks = explode(" --", $args[$longArgsKey]);
-      if(sizeof(chunks > 1))
+      if(sizeof($chunks > 1))
       {
         $args[$longArgsKey] = $chunks[0];
         foreach(array_slice($chunks, 1) as $chunk)
@@ -160,17 +162,38 @@ class ReportImportAgent extends Agent
     return $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   }
 
+  static private function getEntriesForFilename($filename, &$pfilesPerFileName)
+  {
+    if(array_key_exists($filename, $pfilesPerFileName))
+    {
+      return array($pfilesPerFileName[$filename]);
+    }
+    $length = strlen($filename);
+    if($length > 3)
+    {
+      foreach(array_keys($pfilesPerFileName) as $key)
+      {
+        if(substr($key, -$length) === $filename)
+        {
+          echo "INFO: match [".$filename."] with [".$key."]\n";
+          return array($pfilesPerFileName[$key]);
+        }
+      }
+    }
+    return array();
+  }
+
   static private function getEntriesForHash(&$hashMap, &$pfilesPerHash, $hashAlgo)
   {
     if(!array_key_exists($hashAlgo, $hashMap))
     {
-      return null;
+      return array();
     }
 
     $hash = strtolower($hashMap[$hashAlgo]);
     if(!array_key_exists($hash, $pfilesPerHash))
     {
-      return null;
+      return array();
     }
     return $pfilesPerHash[$hash];
   }
@@ -182,18 +205,26 @@ class ReportImportAgent extends Agent
    */
   private function getImportSource($reportFilename, $configuration)
   {
-    if($configuration->getReportType() === "spdx-rdf")
+
+    if(substr($reportFilename, -4) === ".xml")
+    {
+      return new XmlImportSource($reportFilename);
+    }
+    elseif(substr($reportFilename, -4) === ".rdf")
     {
       return new SpdxTwoImportSource($reportFilename);
     }
     else
     {
       echo "ERROR: can not handle report of type=[" . $configuration->getReportType() . "]\n";
+      // TODO: fail here
+      return null;
     }
   }
 
   public function walkAllFiles($reportFilename, $upload_pk, $configuration)
   {
+    /** @var ReportImportSource */
     $source = $this->getImportSource($reportFilename, $configuration);
 
     /** @var ReportImportSink */
@@ -202,18 +233,33 @@ class ReportImportAgent extends Agent
 
     // Prepare data from DB
     $itemTreeBounds = $this->getItemTreeBounds($upload_pk);
+    $pfilePerFileName = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
     $pfilesPerHash = $this->uploadDao->getPFilesDataPerHashAlgo($itemTreeBounds, 'sha1');
 
-    foreach ($source->getAllFileIds() as $fileId)
+    foreach ($source->getAllFiles() as $fileId => $fileName)
     {
-      $hashMap = $source->getHashesMap($fileId);
-      $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
-      $this->heartbeat(sizeof($pfiles));
+
+      $pfiles = array();
+      if(true) // TODO
+      {
+        $pfiles = self::getEntriesForFilename($fileName, $pfilePerFileName);
+      }
+      if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0 && ($pfiles === null || sizeof($pfiles) === 0))
+      {
+        $hashMap = $source->getHashesMap($fileId);
+        if ($hashMap !== null && sizeof($hashMap) > 0)
+        {
+          print "INFO: fallback to hash-matching for fileId=[".$fileId."] with filename=[".$fileName."]\n";
+          $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
+        }
+      }
       if ($pfiles === null || sizeof($pfiles) === 0)
       {
-        print "no match for file: " . $fileId . "\n";
+        print "WARN: no match for fileId=[".$fileId."] with filename=[".$fileName."]\n";
         continue;
       }
+
+      $this->heartbeat(sizeof($pfiles));
 
       $data = $source->getDataForFile($fileId)
             ->setPfiles($pfiles);

@@ -153,9 +153,9 @@ class ReportImportSink
     }
     elseif ($dataItem->isSetLicenseCandidate())
     {
-      $licenseCandidate = $dataItem->getLicenseCandidate();
       echo "INFO: No license with shortname=\"$licenseShortName\" found ... ";
 
+      $licenseCandidate = $dataItem->getLicenseCandidate();
       if($this->configuration->isCreateLicensesAsCandidate() || !$this->userIsAdmin)
       {
         echo "Creating it as license candidate ...\n";
@@ -175,12 +175,7 @@ class ReportImportSink
       {
         echo "creating it as license ...\n";
         $licenseText = trim($licenseCandidate->getText());
-        // TODO: move to LicenseDao
-        $row = $this->dbManager->getSingleRow(
-          "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
-          array($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getSpdxCompatible()),
-          __METHOD__.".addLicense" );
-        return $row["rf_pk"];
+        return $this->licenseDao->insertLicense($licenseCandidate->getShortName(), $licenseText, $licenseCandidate->getSpdxCompatible());
       }
     }
     return -1;
@@ -224,6 +219,11 @@ class ReportImportSink
    */
   private function saveAsDecisionToDB($addLicenseIds, $removeLicenseIds, $pfiles)
   {
+    if(sizeof($addLicenseIds) == 0)
+    {
+      return;
+    }
+
     foreach ($pfiles as $pfile)
     {
       $eventIds = array();

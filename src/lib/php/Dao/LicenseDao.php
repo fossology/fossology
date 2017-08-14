@@ -633,6 +633,21 @@ ORDER BY lft asc
   }
 
   /**
+   * @param $shortname
+   * @param $refText
+   * @param bool $spdxCompatible
+   * @return mixed
+   */
+  public function insertLicense($shortname, $refText, $spdxCompatible = false)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
+      array($shortname, $refText, $spdxCompatible ? 1 : 0),
+      __METHOD__.".addLicense" );
+    return $row["rf_pk"];
+  }
+
+  /**
    * @param string $newShortname
    * @param string $refText
    * @return int Id of license candidate

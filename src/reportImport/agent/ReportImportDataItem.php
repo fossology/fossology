@@ -41,8 +41,15 @@ class ReportImportDataItem
     return $this;
   }
 
+  /**
+   * @param $name
+   * @param $text
+   * @param bool $spdxCompatible
+   * @return $this
+   */
   public function setLicenseCandidate($name, $text, $spdxCompatible)
   {
+    $spdxCompatible = $spdxCompatible == true;
     $this->licenseCandidate = new License(
       $this->licenseId,
       $this->licenseId,

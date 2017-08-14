@@ -29,7 +29,6 @@ class ReportImportAgentPlugin extends AgentPlugin
     'addCopyrights',
     'addNewLicensesAs'
     ];
-  const REPORT_TYPE_KEY = "reportType";
 
   public function __construct() {
     $this->Name = "agent_reportImport";
@@ -49,14 +48,10 @@ class ReportImportAgentPlugin extends AgentPlugin
     $additionalJqCmdArgs = "";
 
     foreach(self::KEYS as $key) {
-      if($request->get($key) === "true")
+      if($request->get($key) !== NULL)
       {
-        $additionalJqCmdArgs .= " --".$key."=true";
+        $additionalJqCmdArgs .= " --".$key."=".$request->get($key);
       }
-    }
-    if($request->get(self::REPORT_TYPE_KEY) !== NULL)
-    {
-      $additionalJqCmdArgs .= " --".self::REPORT_TYPE_KEY."=".$request->get("reportType");
     }
 
     return $additionalJqCmdArgs;
