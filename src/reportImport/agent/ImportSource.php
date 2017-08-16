@@ -25,11 +25,18 @@ interface ImportSource
    * @return array
    */
   public function getAllFiles();
+
+  /**
+   * @return bool
+   */
+  public function parse();
+
   /**
    * @param $fileid
    * @return array
    */
   public function getHashesMap($fileid);
+
   /**
    * @param $fileid
    * @return array

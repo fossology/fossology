@@ -29,6 +29,10 @@ class SpdxTwoImportSource implements ImportSource
   const SPDX_URL = 'http://spdx.org/licenses/';
   const SYNTAX_NS = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
 
+  /** @var  string */
+  private $filename;
+  /** @var  string */
+  private $uri;
   /** @var EasyRdf_Graph */
   private $graph;
   /** @var array */
@@ -38,9 +42,18 @@ class SpdxTwoImportSource implements ImportSource
 
   function __construct($filename, $uri = null)
   {
-    $this->graph = $this->loadGraph($filename, $uri);
+    $this->filename = $filename;
+    $this->uri = $uri;
+  }
+
+  /**
+   * @return bool
+   */
+  public function parse()
+  {
+    $this->graph = $this->loadGraph($this->filename, $this->uri);
     $this->index = $this->loadIndex($this->graph);
-    // $resources = $this->graph->resources(); // TODO it might be also worth to look at $graph->resources();
+    return true;
   }
 
   private function loadGraph($filename, $uri = null)
@@ -186,7 +199,7 @@ class SpdxTwoImportSource implements ImportSource
         }
         else
         {
-          echo "ERROR: can not handle entry=[".$entry."] of type=[" . $entry['type'] . "]\n"; // TODO
+          error_log("ERROR: can not handle entry=[".$entry."] of type=[" . $entry['type'] . "]");
         }
       }
       return $values;
@@ -237,8 +250,7 @@ class SpdxTwoImportSource implements ImportSource
   {
     if (!is_string($licenseId))
     {
-      echo "ERROR: Id not a string: ".$licenseId."\n";
-      print_r($licenseId);
+      error_log("ERROR: Id not a string: ".$licenseId);
       return array();
     }
     if (strtolower($licenseId) === self::TERMS."noassertion" ||
@@ -261,7 +273,7 @@ class SpdxTwoImportSource implements ImportSource
     }
     else
     {
-      echo "ERROR: can not handle license with ID=".$licenseId."\n";
+      error_log("ERROR: can not handle license with ID=".$licenseId);
       return array();
     }
   }
@@ -327,7 +339,7 @@ class SpdxTwoImportSource implements ImportSource
     }
     else
     {
-      echo "ERROR: can not handle license=[".$license."] of type=[".gettype($license)."]\n"; // TODO
+      error_log("ERROR: can not handle license=[".$license."] of type=[".gettype($license)."]");
       return array();
     }
   }

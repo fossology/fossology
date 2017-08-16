@@ -200,7 +200,7 @@ class ReportImportSink
 
     if($this->configuration->isCreateConcludedLicensesAsConclusions())
     {
-      $removeLicenseIds = array(); // TODO
+      $removeLicenseIds = array();
       foreach ($licensePKsInFile as $licenseId)
       {
         if(! array_key_exists($licenseId,$licensePKsConcluded))

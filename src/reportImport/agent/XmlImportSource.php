@@ -24,6 +24,8 @@ require_once 'ImportSource.php';
 
 class XmlImportSource implements ImportSource
 {
+  /** @var  string */
+  private $filename;
   /** @var SimpleXMLElement */
   private $xml;
 
@@ -36,7 +38,15 @@ class XmlImportSource implements ImportSource
    */
   function __construct($filename)
   {
-    $this->xml = simplexml_load_file($filename, null, LIBXML_NOCDATA);
+    $this->filename = $filename;
+  }
+
+  /**
+   * @return bool
+   */
+  public function parse()
+  {
+    $this->xml = simplexml_load_file($this->filename, null, LIBXML_NOCDATA);
 
     /** @var \SimpleXMLElement[] */
     $licenses = $this->xml->xpath("License");
@@ -45,6 +55,8 @@ class XmlImportSource implements ImportSource
 
     $this->parseLicenseInformation($licenses);
     $this->parseCopyrightInformation($copyrights);
+
+    return true;
   }
 
   /**

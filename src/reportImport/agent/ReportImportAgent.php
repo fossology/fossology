@@ -200,32 +200,41 @@ class ReportImportAgent extends Agent
 
   /**
    * @param string $reportFilename
-   * @param ReportImportConfiguration $configuration
    * @return SpdxTwoImportSource
    */
-  private function getImportSource($reportFilename, $configuration)
+  private function getImportSource($reportFilename)
   {
 
     if(substr($reportFilename, -4) === ".xml")
     {
-      return new XmlImportSource($reportFilename);
+      $importSource = new XmlImportSource($reportFilename);
+      if($importSource->parse())
+      {
+        return $importSource;
+      }
     }
-    elseif(substr($reportFilename, -4) === ".rdf")
+
+    if(substr($reportFilename, -4) === ".rdf")
     {
-      return new SpdxTwoImportSource($reportFilename);
+      $importSource = new SpdxTwoImportSource($reportFilename);
+      if($importSource->parse())
+      {
+        return $importSource;
+      }
     }
-    else
-    {
-      echo "ERROR: can not handle report of type=[" . $configuration->getReportType() . "]\n";
-      // TODO: fail here
-      return null;
-    }
+
+    error_log("ERROR: can not handle report");
+    return NULL; // TODO: fail here
   }
 
   public function walkAllFiles($reportFilename, $upload_pk, $configuration)
   {
     /** @var ReportImportSource */
-    $source = $this->getImportSource($reportFilename, $configuration);
+    $source = $this->getImportSource($reportFilename);
+    if($source === NULL)
+    {
+      return;
+    }
 
     /** @var ReportImportSink */
     $sink = new ReportImportSink($this->agent_pk, $this->userDao, $this->licenseDao, $this->clearingDao,
