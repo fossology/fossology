@@ -74,6 +74,8 @@ RUN set -x \
 RUN set -x \
  && chmod -R o+r /etc/apache2 \
  && mkdir -p /var/log/apache2/ \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/error.log \
  && chown -R fossy:fossy /var/log/apache2/ \
  && chown -R fossy:fossy /var/run/apache2/ \
  && chown -R fossy:fossy /var/lock/apache2/
