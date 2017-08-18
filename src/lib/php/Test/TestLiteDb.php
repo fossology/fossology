@@ -63,7 +63,8 @@ class TestLiteDb extends TestAbstractDb
     
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
-    $container->get('db.manager')->setDriver(new SqliteE($sqlite3Connection));
+    $sqliteDriver = new SqliteE($sqlite3Connection);
+    $container->get('db.manager')->setDriver($sqliteDriver);
     $this->dbManager = $container->get('db.manager');
   }
   
