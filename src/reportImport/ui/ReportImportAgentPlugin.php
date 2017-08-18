@@ -20,7 +20,7 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class ReportImportAgentPlugin extends AgentPlugin
 {
-  const KEYS = [
+  private static $keys = array(
     'addConcludedAsDecisions',
     'addLicenseInfoFromInfoInFile',
     'addLicenseInfoFromConcluded',
@@ -28,7 +28,7 @@ class ReportImportAgentPlugin extends AgentPlugin
     'addConcludedAsDecisionsTBD',
     'addCopyrights',
     'addNewLicensesAs'
-    ];
+  );
 
   public function __construct() {
     $this->Name = "agent_reportImport";
@@ -47,7 +47,7 @@ class ReportImportAgentPlugin extends AgentPlugin
   {
     $additionalJqCmdArgs = "";
 
-    foreach(self::KEYS as $key) {
+    foreach($this->keys as $key) {
       if($request->get($key) !== NULL)
       {
         $additionalJqCmdArgs .= " --".$key."=".$request->get($key);

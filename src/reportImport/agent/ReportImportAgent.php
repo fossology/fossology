@@ -40,7 +40,6 @@ class ReportImportAgent extends Agent
 {
   const REPORT_KEY = "report";
   const ACLA_KEY = "addConcludedAsDecisions";
-  const KEYS = [ self::ACLA_KEY, 'addLicenseInfoFromInfoInFile', 'addLicenseInfoFromConcluded', 'addConcludedAsDecisionsOverwrite', 'addConcludedAsDecisionsTBD' ];
 
   /** @var UploadDao */
   private $uploadDao;

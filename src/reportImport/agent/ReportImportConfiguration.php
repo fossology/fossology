@@ -21,7 +21,7 @@ use Fossology\Lib\Data\DecisionTypes;
 
 class ReportImportConfiguration
 {
-  const KEYS = [
+  private static $keys = array(
     'addConcludedAsDecisions', // => $createConcludedLicensesAsConclusions
     'addLicenseInfoFromInfoInFile', // => $createLicensesInfosAsFindings
     'addLicenseInfoFromConcluded', // => $createConcludedLicensesAsFindings
@@ -29,7 +29,7 @@ class ReportImportConfiguration
     'addCopyrights', // => $addCopyrightInformation
     'addConcludedAsDecisionsTBD', // => $concludeLicenseDecisionType
     'addNewLicensesAs' // => $createLicensesAsCandidate
-  ];
+  );
 
   protected $createLicensesAsCandidate = true;
   protected $createLicensesInfosAsFindings = true;
@@ -41,7 +41,7 @@ class ReportImportConfiguration
 
   private function getFromArgs($args, $num, $expected="true")
   {
-    return array_key_exists(self::KEYS[$num],$args) ? $args[self::KEYS[$num]] === $expected : false;
+    return array_key_exists($this->keys[$num],$args) ? $args[$this->keys[$num]] === $expected : false;
   }
 
   function __construct($args)
