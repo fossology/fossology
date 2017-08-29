@@ -101,7 +101,7 @@ class ObligationMap extends Object
     }
     else
     {
-      $sql = "SELECT rf_fk FROM obligation_license_map WHERE ob_fk=$obId;";
+      $sql = "SELECT rf_fk FROM obligation_map WHERE ob_fk=$obId;";
       $stmt = __METHOD__.".om_license_$obId";
     }
     $this->dbManager->prepare($stmt,$sql);
@@ -134,7 +134,7 @@ class ObligationMap extends Object
     }
     else
     {
-      $sql = "SELECT * from obligation_license_map where ob_fk = $1 and rf_fk = $2;";
+      $sql = "SELECT * from obligation_map where ob_fk = $1 and rf_fk = $2;";
       $stmt = __METHOD__.".om_testlicense_$obId";
     }
     $this->dbManager->prepare($stmt,$sql);
@@ -159,7 +159,7 @@ class ObligationMap extends Object
     }
     else
     {
-      $sql = "INSERT INTO obligation_license_map (ob_fk, rf_fk) VALUES ($1, $2)";
+      $sql = "INSERT INTO obligation_map (ob_fk, rf_fk) VALUES ($1, $2)";
       $stmt = __METHOD__.".om_addlicense_$obId";
     }
     $this->dbManager->prepare($stmt,$sql);
@@ -179,7 +179,7 @@ class ObligationMap extends Object
       }
       else
       {
-        $sql = "DELETE FROM obligation_license_map WHERE ob_fk=$1";
+        $sql = "DELETE FROM obligation_map WHERE ob_fk=$1";
       }
       $stmt = __METHOD__.".omdel_all";
       $this->dbManager->prepare($stmt,$sql);
@@ -193,7 +193,7 @@ class ObligationMap extends Object
       }
       else
       {
-        $sql = "DELETE FROM obligation_license_map WHERE ob_fk=$1 AND rf_fk=$2";
+        $sql = "DELETE FROM obligation_map WHERE ob_fk=$1 AND rf_fk=$2";
       }
       $stmt = __METHOD__.".omdel_$licId";
       $this->dbManager->prepare($stmt,$sql);

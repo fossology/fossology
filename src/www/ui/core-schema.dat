@@ -930,17 +930,17 @@
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_name\" text";
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_name\" SET NOT NULL";
 
-  $Schema["TABLE"]["obligation_license_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_license_map\".\"om_pk\" IS 'Primary Key'";
-  $Schema["TABLE"]["obligation_license_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_license_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_license_map_om_pk_seq'::regclass)";
-  $Schema["TABLE"]["obligation_license_map"]["om_pk"]["ALTER"] = "ALTER TABLE \"obligation_license_map\" ALTER COLUMN \"om_pk\" SET NOT NULL, ALTER COLUMN \"om_pk\" SET DEFAULT nextval('obligation_license_map_om_pk_seq'::regclass)";
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"om_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"om_pk\" SET NOT NULL, ALTER COLUMN \"om_pk\" SET DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["obligation_license_map"]["ob_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_license_map\".\"ob_fk\" IS 'Obligation topic key as in obligation_ref'";
-  $Schema["TABLE"]["obligation_license_map"]["ob_fk"]["ADD"] = "ALTER TABLE \"obligation_license_map\" ADD COLUMN \"ob_fk\" int8";
-  $Schema["TABLE"]["obligation_license_map"]["ob_fk"]["ALTER"] = "ALTER TABLE \"obligation_license_map\" ALTER COLUMN \"ob_fk\" SET NOT NULL";
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"ob_fk\" IS 'Obligation topic key as in obligation_ref'";
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"ob_fk\" int8";
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"ob_fk\" SET NOT NULL";
 
-  $Schema["TABLE"]["obligation_license_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_license_map\".\"rf_fk\" IS 'Reference license key as in rf_license'";
-  $Schema["TABLE"]["obligation_license_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_license_map\" ADD COLUMN \"rf_fk\" int8";
-  $Schema["TABLE"]["obligation_license_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_license_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"rf_fk\" IS 'Reference license key as in rf_license'";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"rf_fk\" int8";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 
   $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_candidate_map\".\"om_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_candidate_map_om_pk_seq'::regclass)";
@@ -1650,8 +1650,8 @@
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\"";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["UPDATE"] = "SELECT setval('mimetype_mimetype_pk_seq',(SELECT greatest(1,max(mimetype_pk)) val FROM mimetype))";
 
-  $Schema["SEQUENCE"]["obligation_license_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_license_map_om_pk_seq\"";
-  $Schema["SEQUENCE"]["obligation_license_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_license_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_license_map))";
+  $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_map_om_pk_seq\"";
+  $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_map))";
 
   $Schema["SEQUENCE"]["obligation_candidate_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_candidate_map_om_pk_seq\"";
   $Schema["SEQUENCE"]["obligation_candidate_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_candidate_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_candidate_map))";
