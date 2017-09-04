@@ -91,5 +91,10 @@ footer  = samplefooter.txt
 subject = FOSSology scan complete
 client  = /usr/bin/mailx
 
-
-
+[OPENID_CONNECT]
+provider_url =
+provider_name =
+client_id =
+client_secret =
+redirect_url =
+claim =

@@ -21,8 +21,10 @@
       <td><input type="password" size="20" name="password"/></td>
     </tr>
     <tr>
-      <td></td>
       <td><input type="submit" value="{{ 'Login'|trans }}"/></td>
+        {% if provider_name %}
+      <td><input type="submit" name='openidProviderLogin' value="{{ 'Login with '|trans }}{{ provider_name }}"/></td>
+      {% endif %}
     </tr>
   </table>
   <script type="text/javascript">document.getElementById("unamein").focus();</script>
