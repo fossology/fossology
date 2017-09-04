@@ -47,7 +47,7 @@ class ReportImportAgentPlugin extends AgentPlugin
   {
     $additionalJqCmdArgs = "";
 
-    foreach($this->keys as $key) {
+    foreach(self::$keys as $key) {
       if($request->get($key) !== NULL)
       {
         $additionalJqCmdArgs .= " --".$key."=".$request->get($key);

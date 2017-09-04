@@ -41,7 +41,7 @@ class ReportImportConfiguration
 
   private function getFromArgs($args, $num, $expected="true")
   {
-    return array_key_exists($this->keys[$num],$args) ? $args[$this->keys[$num]] === $expected : false;
+    return array_key_exists(self::$keys[$num],$args) ? $args[self::$keys[$num]] === $expected : false;
   }
 
   function __construct($args)

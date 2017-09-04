@@ -161,6 +161,43 @@ class ReportImportAgent extends Agent
     return $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   }
 
+  static private function getEntries($fileId, $fileName, &$pfilePerFileName, &$hashMap=NULL, &$pfilesPerHash=NULL, $hashAlgo="sha1")
+  {
+    $pfilesByFilename = self::getEntriesForFilename($fileName, $pfilePerFileName);
+
+    if (($pfilesByFilename !== null || sizeof($pfilesByFilename) === 0))
+    {
+      if ( $hashMap !== null && sizeof($hashMap) > 0 )
+      {
+        $pfiles = array();
+        foreach ($pfilesByFilename as $pfile)
+        {
+          if (strtolower($pfile[$hashAlgo]) !== strtolower($hashMap[$hashAlgo]))
+          {
+            print "INFO: the file with fileName=[$fileName] does not match the hash of pfile_pk=[" . $pfile['pfile_pk'] . "] and uploadtree_pk=[" . $pfile['uploadtree_pk'] . "]\n";
+          }
+          else
+          {
+            $pfiles[] = $pfile;
+          }
+        }
+        return $pfiles;
+      }
+      else
+      {
+        return $pfilesByFilename;
+      }
+    }
+
+    if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0 &&
+      $hashMap !== null && sizeof($hashMap) > 0 )
+    {
+      return self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
+    }
+
+    return array();
+  }
+
   static private function getEntriesForFilename($filename, &$pfilesPerFileName)
   {
     if(array_key_exists($filename, $pfilesPerFileName))
@@ -174,7 +211,7 @@ class ReportImportAgent extends Agent
       {
         if(substr($key, -$length) === $filename)
         {
-          echo "INFO: match [".$filename."] with [".$key."]\n";
+          //echo "INFO: match [".$filename."] with [".$key."]\n";
           return array($pfilesPerFileName[$key]);
         }
       }
@@ -248,19 +285,39 @@ class ReportImportAgent extends Agent
     {
 
       $pfiles = array();
-      if(true) // TODO
-      {
-        $pfiles = self::getEntriesForFilename($fileName, $pfilePerFileName);
-      }
-      if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0 && ($pfiles === null || sizeof($pfiles) === 0))
+
+      $hashMap = NULL;
+      if ($pfilesPerHash !== NULL && sizeof($pfilesPerHash) > 0)
       {
         $hashMap = $source->getHashesMap($fileId);
-        if ($hashMap !== null && sizeof($hashMap) > 0)
-        {
-          print "INFO: fallback to hash-matching for fileId=[".$fileId."] with filename=[".$fileName."]\n";
-          $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
-        }
       }
+
+      $pfiles = self::getEntries($fileId,
+        $fileName, $pfilePerFileName,
+        $hashMap, $pfilesPerHash, 'sha1');
+
+//      if(true) // TODO
+//      {
+//        $pfiles = self::getEntriesForFilename($fileName, $pfilePerFileName);
+//        if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0){
+//          foreach ($pfiles as $pfile){
+//            $hashMap = $source->getHashesMap($fileId);
+//            if ($hashMap !== null && sizeof($hashMap) > 0)
+//            {
+//              // verify via hashMap
+//            }
+//          }
+//        }
+//      }
+//      if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0 && ($pfiles === null || sizeof($pfiles) === 0))
+//      {
+//        $hashMap = $source->getHashesMap($fileId);
+//        if ($hashMap !== null && sizeof($hashMap) > 0)
+//        {
+//          print "INFO: fallback to hash-matching for fileId=[".$fileId."] with filename=[".$fileName."]\n";
+//          $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
+//        }
+//      }
       if ($pfiles === null || sizeof($pfiles) === 0)
       {
         print "WARN: no match for fileId=[".$fileId."] with filename=[".$fileName."]\n";
