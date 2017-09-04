@@ -25,5 +25,6 @@ int sched_onNoMatch(MonkState* state, const File* file);
 int sched_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo);
 int sched_onDiffMatch(MonkState* state, const File* file, const License* license, const DiffResult* diffResult);
 int sched_ignore(MonkState* state, const File* file);
+int sched_noop(MonkState* state);
 
 #endif // MONK_AGENT_SCHEDULER_H

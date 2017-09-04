@@ -412,6 +412,10 @@ int ignore(MonkState* state, const File* file) {
   return doIgnore;
 }
 
+int noop(MonkState* state) {
+  return 1;
+}
+
 void doProcessTest(MatchCallbacks* expectedCallbacks)
 {
   File* file = getFileWithText("^e^a^b^c^d^e");
@@ -432,7 +436,16 @@ void test_processMatchesIgnores() {
   expectOnDiff = 0;
   expectOnFull = 0;
   expectOnNo = 0;
-  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+  MatchCallbacks expectedCallbacks =
+    { .ignore = ignore,
+      .onAll = onAll,
+      .onDiff = onDiff,
+      .onFull = onFull,
+      .onNo = onNo,
+      .onBeginOutput = noop,
+      .onBetweenIndividualOutputs = noop,
+      .onEndOutput = noop
+    };
 
   doProcessTest(&expectedCallbacks);
 }
@@ -443,7 +456,16 @@ void test_processMatchesUsesOnAllIfDefined() {
   expectOnDiff = 0;
   expectOnFull = 0;
   expectOnNo = 0;
-  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+  MatchCallbacks expectedCallbacks =
+    { .ignore = ignore,
+      .onAll = onAll,
+      .onDiff = onDiff,
+      .onFull = onFull,
+      .onNo = onNo,
+      .onBeginOutput = noop,
+      .onBetweenIndividualOutputs = noop,
+      .onEndOutput = noop
+    };
 
   doProcessTest(&expectedCallbacks);
 }
@@ -454,7 +476,15 @@ void test_processMatchesUsesOnFullIfOnAllNotDefined() {
   expectOnDiff = 0;
   expectOnFull = 1;
   expectOnNo = 0;
-  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+  MatchCallbacks expectedCallbacks =
+    { .ignore = ignore,
+      .onDiff = onDiff,
+      .onFull = onFull,
+      .onNo = onNo,
+      .onBeginOutput = noop,
+      .onBetweenIndividualOutputs = noop,
+      .onEndOutput = noop
+    };
 
   doProcessTest(&expectedCallbacks);
 }
@@ -465,7 +495,15 @@ void test_processMatchesUsesOnNoOnNoMatches() {
   expectOnDiff = 0;
   expectOnFull = 0;
   expectOnNo = 1;
-  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+  MatchCallbacks expectedCallbacks =
+    { .ignore = ignore,
+      .onDiff = onDiff,
+      .onFull = onFull,
+      .onNo = onNo,
+      .onBeginOutput = noop,
+      .onBetweenIndividualOutputs = noop,
+      .onEndOutput = noop
+    };
 
   GArray* matches = g_array_new(FALSE, FALSE, 1);
 
@@ -482,7 +520,16 @@ void test_processMatchesUsesOnAllForNoMatches() {
   expectOnDiff = 0;
   expectOnFull = 0;
   expectOnNo = 0;
-  MatchCallbacks expectedCallbacks = { .ignore = ignore, .onAll = onAll, .onDiff = onDiff, .onFull = onFull, .onNo = onNo};
+  MatchCallbacks expectedCallbacks =
+    { .ignore = ignore,
+      .onAll = onAll,
+      .onDiff = onDiff,
+      .onFull = onFull,
+      .onNo = onNo,
+      .onBeginOutput = noop,
+      .onBetweenIndividualOutputs = noop,
+      .onEndOutput = noop
+    };
 
   GArray* matches = g_array_new(FALSE, FALSE, 1);
 

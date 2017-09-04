@@ -90,3 +90,10 @@ int sched_ignore(MonkState* state, const File* file)
 {
   return hasAlreadyResultsFor(state->dbManager, state->agentId, file->id);
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int sched_noop(MonkState* state) {
+  return 1;
+}
+#pragma GCC diagnostic pop
