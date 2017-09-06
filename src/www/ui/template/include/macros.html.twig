@@ -43,6 +43,23 @@
   </select>
 {% endmacro %}
 
+{% macro selectsingle(name, options, id, selected, action, size) %}
+  {% if selected is not defined %}
+    {% set selected = -1 %}
+  {% endif %}
+  {% if size is not defined %}
+    {% set size = 0 %}
+  {% endif %}
+  <select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}{% if size > 0  %} size="{{ size }}"{% endif %}{% if action is defined %}
+    {{ action}}{% endif %}>
+    {% for key, value in options %}
+      <option value="{{ key }}"{% if selected == key %} selected="selected"{% endif %}>
+        {{ value|e }}
+      </option>
+    {% endfor %}
+  </select>
+{% endmacro %}
+
 {% macro selectwitharray(name, options, id, selected, action, size) %}
   {% if size is not defined %}
     {% set size = 0 %}
