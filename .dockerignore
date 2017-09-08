@@ -1,4 +1,3 @@
-.git
 install/docker-compose*
 !install/docker-compose.docker-entrypoint.sh
 fossology310-source.spdx
