@@ -4,10 +4,33 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-function createTable{{ table.type }}() {
-  var otable = $('#copyright{{ table.type }}').dataTable({
+
+function createTableBase{{ table.type }}(activated) {
+  var aoColumns = [
+      { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
+      { "sTitle": "{{ table.description }}", "sClass": "left"}
+    ]
+  if (activated)
+  {
+    var id = '#copyright{{ table.type }}';
+    var action = 'getData'
+    aoColumns = aoColumns.concat([
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
+  }
+  else
+  {
+    var id = '#copyright{{ table.type }}deactivated';
+    var action = 'getDeactivatedData'
+    aoColumns = aoColumns.concat([
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+    ]);
+  }
+
+  return $(id).dataTable({
     "bServerSide": true,
-    "sAjaxSource": "?mod=ajax-copyright-hist&action=getData",
+    "sAjaxSource": "?mod=ajax-copyright-hist&action=" + action,
     "fnServerData": function (sSource, aoData, fnCallback) {
       aoData.push({ "name":"upload", "value": "{{ table.uploadId }}" });
       aoData.push({ "name":"item", "value": "{{ table.uploadTreeId }}" });
@@ -19,19 +42,18 @@ function createTable{{ table.type }}() {
           window.location.href = "?mod=auth";
       });
     },
-    "aoColumns": [
-      { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
-      { "sTitle": "{{ table.description }}", "sClass": "left"},
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
-    ],
+    "aoColumns": aoColumns,
     "aaSorting": {{ table.sorting }},
     "iDisplayLength": 50,
     "bProcessing": true,
     "bStateSave": true,
     "sCookiePrefix": "fossology_",
     "bRetrieve": true
-  }).makeEditable({
+  });
+}
+
+function createTable{{ table.type }}() {
+  var enabledTable = createTableBase{{ table.type }}(true).makeEditable({
     "sReadOnlyCellClass": "read_only",
     "sSelectedRowClass": "selectedRow",
     "sUpdateURL": "?mod=ajax-copyright-hist&action=update&type={{ table.type }}",
@@ -51,6 +73,8 @@ function createTable{{ table.type }}() {
     "sSuccessResponse": "success"
   });
 
+  createTableBase{{ table.type }}(false);
+
   $('#selectDelete{{ table.type }}').change(function () {
     $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
   });
@@ -63,7 +87,7 @@ function createTable{{ table.type }}() {
     });
   });
 
-  return otable;
+  return enabledTable;
 }
 
 function delete{{ table.type }}(upload, item, hash, kind) {
@@ -74,9 +98,7 @@ function delete{{ table.type }}(upload, item, hash, kind) {
     data: { id : upload + ',' + item + ',' + hash + ',' + kind },
       success: function(data) {
         $("#delete{{ table.type }}" + hash).hide();
-        var updateElement = $("#update{{ table.type }}" + hash);
-        updateElement.html('deleted [<a href="#" onclick="event.preventDefault();undo{{ table.type }}(' +upload + ',' + item + ',\'' + hash + '\',\'' + kind + '\');return false;">Undo</a>]');
-        updateElement.show();
+        $("#update{{ table.type }}" + hash).show();
       },
       error: function() { alert('error'); }
   });
@@ -90,7 +112,7 @@ function undo{{ table.type }}(upload, item, hash, kind) {
     data: { id : upload + ',' + item + ',' + hash + ',' + kind },
       success: function(data) { 
         $("#delete{{ table.type }}" + hash).show();
-        $("#update{{ table.type }}" + hash).html('').show();
+        $("#update{{ table.type }}" + hash).hide();
         $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);
       },
       error: function() { alert('error'); }

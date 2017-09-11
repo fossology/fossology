@@ -222,24 +222,24 @@ class CopyrightDao extends Object
   {
     $itemTable = $item->getUploadTreeTableName();
     $stmt = __METHOD__.".$cpTable.$itemTable";
-    $params = array();
+    $params = array($hash,$item->getLeft(),$item->getRight());
 
     if($action == "delete") {
-      $cpBoolValue = "is_enabled='false'";
-      $params = array($hash,$item->getLeft(),$item->getRight());
+      $setSql = "is_enabled='false'";
+      $stmt .= '.delete';
     } else if($action == "rollback") {
-      $cpBoolValue = "is_enabled='true'";
-      $params = array($hash,$item->getLeft(),$item->getRight());
+      $setSql = "is_enabled='true'";
+      $stmt .= '.rollback';
     } else {
-      $cpBoolValue = "content = $4, hash = md5($4), is_enabled='true'";
-      $params = array($hash,$item->getLeft(),$item->getRight(),$content);
+      $setSql = "content = $4, hash = md5($4), is_enabled='true'";
+      $params[] = $content;
     }
 
-    $sql = "UPDATE $cpTable AS cpr SET $cpBoolValue
+    $sql = "UPDATE $cpTable AS cpr SET $setSql
             FROM $cpTable as cp
             INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
             WHERE cpr.ct_pk = cp.ct_pk
-              AND cp.hash =$1
+              AND cp.hash = $1
               AND ( ut.lft BETWEEN $2 AND $3 )";
     if ('uploadtree_a' == $item->getUploadTreeTableName())
     {

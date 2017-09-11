@@ -7,25 +7,22 @@
 <table border="0" width="100%">
 <tr>
   <td valign="top">
-    <a name="emails"></a>{{'Jump to'|trans}}:
-    <a href="#urls">{{'URLs'|trans}}</a> | 
-    <a href="#authors">{{'Authors or Maintainers'|trans}}</a>
-    <br/>
-    {{ contEmail }}
-    <br/>
-    
-    <a name="urls"></a>{{'Jump to'|trans}}:
-    <a href="#emails">{{'Emails'|trans}}</a> | 
-    <a href="#authors">{{'Authors or Maintainers'|trans}}</a>
-    <br/>
-    {{ contUrl }}
-    <br/>
-
-    <a name="authors"></a>{{'Jump to'|trans}}:
-    <a href="#emails">{{'Emails'|trans}}</a> | 
-    <a href="#urls">{{'URLs'|trans}}</a>
-    <br/>
-    {{ contAuthor }}
+    <div id="EmailUrlAuthorTabs">
+      <ul>
+        <li><a href="#EmailTab">Email</a></li>
+        <li><a href="#UrlTab">URL</a></li>
+        <li><a href="#AuthorTab">Author</a></li>
+      </ul>
+      <div id="EmailTab">
+        {{ contEmail }}
+      </div>
+      <div id="UrlTab">
+        {{ contUrl }}
+      </div>
+      <div id="AuthorTab">
+        {{ contAuthor }}
+      </div>
+    </div>
   </td>
   <td valign="top">{{ fileList }}</td>
 </tr>

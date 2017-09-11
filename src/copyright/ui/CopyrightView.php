@@ -68,7 +68,7 @@ class CopyrightView extends Xpview
 
     $vars = array('statement'=>$tableVars,
         'content' => "$output\n",
-        'script' => '<script>$(document).ready(function() { tableCopyright = createTablestatement(); } );</script>');
+        'script' => '<script>$(document).ready(function() { createTablestatement(); } );</script>');
     return $vars;
   }
   
