@@ -84,6 +84,27 @@ abstract class DbManager extends Object
   abstract public function prepare($statementName, $sqlStatement);
 
   /**
+   * Note: this builds a query which is not useable with SQLite
+   * one should use SqLiteE::nsertPreparedAndReturn() instead
+   *
+   * @param $statementName
+   * @param $sqlStatement
+   * @param $params
+   * @param $returning
+   * @return mixed
+   */
+  public function insertPreparedAndReturn($statementName, $sqlStatement, $params, $returning)
+  {
+    $sqlStatement .= " RETURNING $returning";
+    $statementName .= ".returning:$returning";
+    $this->prepare($statementName,$sqlStatement);
+    $res = $this->execute($statementName,$params);
+    $return = $this->fetchArray($res);
+    $this->freeResult($res);
+    return $return[$returning];
+  }
+
+  /**
    * @param string $statementName statement name
    * @param array $params parameters
    * @throws \Exception
@@ -142,6 +163,30 @@ abstract class DbManager extends Object
     $row = $this->dbDriver->fetchArray($res);
     $this->dbDriver->freeResult($res);
     return $row;
+  }
+
+  /**
+   * @param $sqlStatement
+   * @param array $params
+   * @param string $statementName
+   * @return array
+   */
+  public function getRows($sqlStatement, $params = array(), $statementName = "")
+  {
+    if (empty($statementName))
+    {
+      $backtrace = debug_backtrace();
+      $caller = $backtrace[1];
+      $statementName = (array_key_exists('class', $caller) ? "$caller[class]::" : '') . "$caller[function]";
+    }
+    if (!array_key_exists($statementName, $this->preparedStatements))
+    {
+      $this->prepare($statementName, $sqlStatement);
+    }
+    $res = $this->execute($statementName, $params);
+    $rows = $this->dbDriver->fetchAll($res);
+    $this->dbDriver->freeResult($res);
+    return $rows;
   }
 
   /**
@@ -258,6 +303,18 @@ abstract class DbManager extends Object
     return $this->dbDriver->booleanToDb($booleanValue);
   }
 
+  private function cleanupParamsArray($params)
+  {
+    $nParams = sizeof($params);
+    for($i=0; $i<$nParams; $i++){
+      if(is_bool($params[$i]))
+      {
+        $params[$i] = $this->dbDriver->booleanToDb($params[$i]);
+      }
+    }
+    return $params;
+  }
+
   /**
    * @param string
    * @param string
@@ -268,7 +325,7 @@ abstract class DbManager extends Object
   {
     if (empty($sqlLog))
     {
-      $sqlLog = __METHOD__ . ".$tableName.$keys";
+      $sqlLog = __METHOD__ . ".$tableName.$keys" . (empty($returning) ? "" : md5($returning));
     }
     $sql = "INSERT INTO $tableName ($keys) VALUES (";
     $nKeys = substr_count($keys,',')+1;
@@ -277,15 +334,10 @@ abstract class DbManager extends Object
       $sql .= '$'.$i.',';
     }
     $sql .= '$'.$nKeys.')';
-    for($i=0;$i<$nKeys;$i++){
-      if(is_bool($params[$i]))
-      {
-        $params[$i] = $this->dbDriver->booleanToDb($params[$i]);
-      }
-    }
+    $params = $this->cleanupParamsArray($params);
     if(!empty($returning))
     {
-      return $this->dbDriver->insertPreparedAndReturn($sqlLog, $sql, $params, $returning);
+      return $this->insertPreparedAndReturn($sqlLog, $sql, $params, $returning);
     }
     $this->prepare($sqlLog,$sql);
     $res = $this->execute($sqlLog,$params);
@@ -304,9 +356,36 @@ abstract class DbManager extends Object
     $keys = implode(',',array_keys($assocParams));
     if (empty($sqlLog))
     {
-      $sqlLog = __METHOD__ . ".$tableName.$keys";
+      $sqlLog = __METHOD__ . ".$tableName.$keys" . (empty($returning) ? "" : md5($returning));
     }
     return $this->insertInto($tableName, $keys, $params, $sqlLog, $returning);
+  }
+
+  public function updateTableRow($tableName, $assocParams, $idColName, $id, $sqlLog='')
+  {
+    $params = array_values($assocParams);
+    $keys = array_keys($assocParams);
+    $nKeys = sizeof($keys);
+
+    if (empty($sqlLog))
+    {
+      $sqlLog = __METHOD__ . ".$tableName.$keys";
+    }
+
+    $sql = "UPDATE $tableName SET";
+    for ($i = 1; $i < $nKeys; $i++)
+    {
+      $sql .= " ".$keys[$i - 1].' = $'.$i.",";
+    }
+    $sql .= " ".$keys[$nKeys - 1].' = $'.$nKeys;
+    $sql .= " WHERE $idColName = \$".($nKeys + 1);
+
+    $params[] = $id;
+    $params = $this->cleanupParamsArray($params);
+
+    $this->prepare($sqlLog,$sql);
+    $res = $this->execute($sqlLog,$params);
+    $this->freeResult($res);
   }
 
   /**
@@ -321,5 +400,20 @@ abstract class DbManager extends Object
       throw new \Exception("invalid table name '$tableName'");
     }
     return $this->dbDriver->existsTable($tableName);
+  }
+
+  /**
+   * @param $tableName
+   * @param $columnName
+   * @throws \Exception
+   * @return bool
+   */
+  public function existsColumn($tableName, $columnName)
+  {
+    if(!preg_match('/^[a-z0-9_]+$/i',$columnName))
+    {
+      throw new \Exception("invalid column name '$columnName'");
+    }
+    return $this->existsTable($tableName) && $this->dbDriver->existsColumn($tableName, $columnName);
   }
 }

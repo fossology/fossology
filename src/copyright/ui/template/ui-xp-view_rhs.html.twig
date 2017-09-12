@@ -1,5 +1,5 @@
 
-<form method="post" id= {{ formName }}>
+<form method="post" id="{{ formName }}">
   <input name="lastItem" id="lastItem" type="hidden" value="{{ itemId }}"/>
   <input name="upload" id="upload" type="hidden" value="{{ uploadId }}"/>
   <input name="changedSomething" id="changedSomething" type="hidden" value="false"/>
@@ -15,11 +15,12 @@
       <td>
         <p>
           <input type="radio" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
-          <input type="radio" name="FileSelection" id="FileSelection" value= {{ skipOption }}> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
+          <input type="radio" name="FileSelection" id="FileSelection" value="{{ skipOption }}"> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
         </p>
       </td>
     </tr>
   </table>
+  <span id="editingExistingWarning" hidden><b>You are editing an existing decision. [<a href="#" onclick="event.preventDefault();clearDecisionEditing();">clear</a>]</b></span>
   <div class="groupBox">
     <fieldset style="display:inline">
       <legend>
@@ -33,12 +34,102 @@
       {% endfor %}
     </fieldset>
     <br/>
+    <input type="number" name="decision_pk" value="-1" hidden>
     {{ 'Description'| trans }}<img src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="description" style="width:90%" class="supervised">{{ description }}</textarea><br/>
     {{ 'Text finding'| trans }}<img src="images/info_16.png" title="{{ 'Exact text finding, if the regular expression match is wrong not matching everything, too much'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="textFinding" style="width:90%" class="supervised">{{ textFinding }}</textarea><br/>
     {{ 'Comment'| trans }}<img src="images/info_16.png" title="{{ 'A user can place comment for leaving a notice that ma be viewed by other users on Fossology'|trans }}" alt="" class="info-bullet"/>: <br/>
     <textarea rows="2" name="comment" style="width:90%" class="supervised">{{ comment }}</textarea><br/>
-
   </div>
 </form>
+
+{% if decisions is not empty %}
+  <h3>Current decisions:</h3>
+  <table id="decisionTable" width="100%">
+    <thead><tr>
+      <th>Textfinding</th>
+      <th class="read_only">Info</th>
+      <th class="read_only">Actions</th>
+    </tr></thead>
+    <tbody>
+    {% for row in decisions %}
+      <tr>
+        <td>
+          {{ row.textfinding|e }}
+        </td>
+        <td>
+          <b>Type:</b> {{ clearingTypes[row.clearing_decision_type_fk]|e }}
+          {% if row.description is not empty %}
+            <br/><b>Description:</b> {{ row.description|e }}
+          {% endif %}
+          {% if row.comment is not empty %}
+            <br/><b>Comment:</b> {{ row.comment|e }}
+          {% endif %}
+        </td>
+        <td id="actionsOf{{ row.copyright_decision_pk }}">
+          <span class="basicActions">
+            <img src="images/button_edit.png" onclick="editDecision({{ row.copyright_decision_pk }}, '{{ row.textfinding|e('js') }}', '{{ row.description|e('js') }}', '{{ row.comment|e('js') }}', {{ row.clearing_decision_type_fk }});">
+            <img class="delete" src="images/space_16.png" onclick="deleteDecision({{ row.copyright_decision_pk }});">
+          </span>
+          <span class="undoActions" hidden>
+            deleted [<a href="#" onclick="event.preventDefault();undoDecision({{ row.copyright_decision_pk }});">undo</a>]
+          </span>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <script>
+    function editDecision(pk, textfinding, description, comment, decision_type_fk){
+      $("#{{ formName }} input[name='decision_pk']").val(pk);
+      $("#{{ formName }} textarea[name='textFinding']").val(textfinding);
+      $("#{{ formName }} textarea[name='description']").val(description);
+      $("#{{ formName }} textarea[name='comment']").val(comment);
+      $("#{{ formName }} input[name='clearingTypes'][value='" + decision_type_fk + "']").prop("checked", true);
+      $("#editingExistingWarning").show();
+    }
+
+    function clearDecisionEditing(){
+      $("#{{ formName }} input[name='decision_pk']").val(-1);
+      $("#{{ formName }} textarea[name='textFinding']").val("");
+      $("#{{ formName }} textarea[name='description']").val("");
+      $("#{{ formName }} textarea[name='comment']").val("");
+      $("#editingExistingWarning").hide();
+    }
+
+    function deleteDecision(pk) {
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: '?mod=ajax-copyright-hist&action=deletedecision&type={{ agentName }}',
+        data: { decision : pk
+              , upload : '{{ uploadId }}'
+              , pfile : '{{ pfile }}'
+              , uploadTreePk : '{{ itemId }}'},
+        success: function(data) {
+          $("#actionsOf" + pk + " .basicActions").hide();
+          $("#actionsOf" + pk + " .undoActions").show();
+        },
+        error: function() { alert('error'); }
+      });
+    }
+
+    function undoDecision(pk) {
+      $.ajax({
+        type: 'POST',
+        dataType: 'json',
+        url: '?mod=ajax-copyright-hist&action=undodecision&type={{ agentName }}',
+        data: { decision : pk
+          , upload : '{{ uploadId }}'
+          , pfile : '{{ pfile }}'
+          , uploadTreePk : '{{ itemId }}'},
+        success: function(data) {
+          $("#actionsOf" + pk + " .basicActions").show();
+          $("#actionsOf" + pk + " .undoActions").hide();
+        },
+        error: function() { alert('error'); }
+      });
+    }
+  </script>
+{% endif %}

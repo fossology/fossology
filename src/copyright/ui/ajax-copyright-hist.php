@@ -71,17 +71,18 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     }
 
     $action = GetParm("action", PARM_STRING);
-    $id = GetParm("id", PARM_STRING);
     $upload = GetParm("upload", PARM_INTEGER);
-    
-    if( ($action=="update" || $action=="delete") && !isset($id))
+    $type = GetParm("type", PARM_STRING);
+
+    if ($action=="update" || $action=="delete")
     {
-      $text = _("Wrong request");
-      return "<h2>$text</h2>";
+      $item = GetParm("item", PARM_INTEGER);
+      $hash = GetParm("hash", PARM_STRING);
     }
-    else if (isset($id))
+    else if ($action=="deletedecision" || $action=="undodecision")
     {
-       list($upload, $item, $hash, $type) = explode(",", $id);
+      $decision = GetParm("decision", PARM_INTEGER);
+      $pfile = GetParm("pfile", PARM_INTEGER);
     }
     
     /* check upload permissions */
@@ -102,6 +103,10 @@ class CopyrightHistogramProcessPost extends FO_Plugin
          return $this->doDelete($item, $hash, $type);
       case "undo":
          return $this->doUndo($item, $hash, $type);
+      case "deletedecision":
+        return $this->doDeleteDecision($decision, $pfile, $type);
+      case "undodecision":
+        return $this->doUndoDecision($decision, $pfile, $type);
     }
 
   }
@@ -320,6 +325,16 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $cpTable = $this->getTableName($type);
     $this->copyrightDao->updateTable($item, $hash, '', Auth::getUserId(), $cpTable, 'rollback');
     return new Response('Successfully restored', Response::HTTP_OK, array('Content-type'=>'text/plain'));
+  }
+
+  protected function doDeleteDecision($decisionId, $pfileId, $type) {
+    $this->copyrightDao->removeDecision($type."_decision", $pfileId, $decisionId);
+    return new JsonResponse(array("msg" => $decisionId . " .. " . $pfileId  . " .. " . $type));
+  }
+
+  protected function doUndoDecision($decisionId, $pfileId, $type) {
+    $this->copyrightDao->undoDecision($type."_decision", $pfileId, $decisionId);
+    return new JsonResponse(array("msg" => $decisionId . " .. " . $pfileId  . " .. " . $type));
   }
 
 }

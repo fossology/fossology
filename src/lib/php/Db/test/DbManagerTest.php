@@ -115,10 +115,13 @@ abstract class DbManagerTest extends \PHPUnit_Framework_TestCase
   
   function testInsertTableRowReturning()
   {
-    $this->driver->shouldReceive('insertPreparedAndReturn')
-            ->withArgs(array(anything(),'/insert into europe \(animal\) values \(\$1\)/i',array('mouse'),'id'))
-            ->andReturnUsing(function($stmt,$sql,$params,$colName){ return ($colName=='id') ? 23 : -1;});
+    $this->driver->shouldReceive('query');
+    $this->driver->shouldReceive('prepare');
+    $this->driver->shouldReceive('execute')->with("logging.returning:id", array("mouse"))->andReturn();
+    $this->driver->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array("id" => 23, "animal" => "mouse"));
+    $this->driver->shouldReceive('freeResult')->withAnyArgs();
+
     $returnId = $this->dbManager->insertInto('europe', 'animal', array('mouse'), $log='logging', 'id');
     assertThat($returnId,equalTo(23));
   }
-} 
+}

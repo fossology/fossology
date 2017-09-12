@@ -187,7 +187,10 @@ class Postgres implements Driver
   public function existsTable($tableName)
   {
     $dbName = pg_dbname($this->dbConnection);
-    $sql = "SELECT count(*) cnt FROM information_schema.tables WHERE table_catalog='$dbName' AND table_name='". strtolower($tableName) . "'";
+    $sql = "SELECT count(*) cnt
+              FROM information_schema.tables
+             WHERE table_catalog='$dbName'
+               AND table_name='". strtolower($tableName) . "'";
     $res = pg_query($this->dbConnection, $sql);
     if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
     {
@@ -201,16 +204,45 @@ class Postgres implements Driver
     pg_free_result($res);
     return($row['cnt']>0);
   }
-  
+
+  /**
+   * @param $tableName
+   * @param $columnName
+   * @throws \Exception
+   * @return bool
+   */
+  public function existsColumn($tableName, $columnName)
+  {
+    $dbName = pg_dbname($this->dbConnection);
+    $sql = "SELECT count(*) cnt
+              FROM information_schema.columns
+             WHERE table_catalog='$dbName'
+               AND table_name='". strtolower($tableName) . "'
+               AND column_name='". strtolower($columnName) . "'";
+    $res = pg_query($this->dbConnection, $sql);
+    if (!$res && pg_connection_status($this->dbConnection)===PGSQL_CONNECTION_OK)
+    {
+      throw new \Exception(pg_last_error($this->dbConnection));
+    }
+    else if(!$res)
+    {
+      throw new \Exception('DB connection lost');
+    }
+    $row = pg_fetch_assoc($res);
+    pg_free_result($res);
+    return($row['cnt']>0);
+  }
+
   /**
    * @param string $stmt
    * @param string $sql
    * @param array $params
    * @param string $colName
+   * @return mixed
    */
   public function insertPreparedAndReturn($stmt, $sql, $params, $colName)
   {
-    $sql .= "RETURNING $colName";
+    $sql .= " RETURNING $colName";
     $stmt .= ".returning:$colName";
     $this->prepare($stmt,$sql);
     $res = $this->execute($stmt,$params);

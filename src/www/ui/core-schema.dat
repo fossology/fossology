@@ -422,6 +422,10 @@
   $Schema["TABLE"]["copyright_decision"]["comment"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["copyright_decision"]["comment"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
 
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"copyright_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
 
   $Schema["TABLE"]["author"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
@@ -524,6 +528,10 @@
   $Schema["TABLE"]["ecc_decision"]["comment"]["DESC"] = "";
   $Schema["TABLE"]["ecc_decision"]["comment"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["ecc_decision"]["comment"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ecc_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";

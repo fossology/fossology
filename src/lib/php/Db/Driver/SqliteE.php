@@ -212,7 +212,18 @@ class SqliteE implements Driver
     }
     return($row['cnt']>0);
   }
-  
+
+  /**
+   * @param $tableName
+   * @param $columnName
+   * @return bool
+   */
+  public function existsColumn($tableName, $columnName)
+  {
+    // TODO: Implement existsColumn() method.
+    throw new \Exception("Method not implemented yet!");
+  }
+
   /**
    * @param string $stmt
    * @param string $sql

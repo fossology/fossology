@@ -237,7 +237,8 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
-    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $decisionId = $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
+    $copyrightDao->removeDecision("copyright_decision", 4, $decisionId);
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
     $this->assertEquals(0, count($entries));
