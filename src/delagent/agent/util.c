@@ -1,6 +1,6 @@
 /********************************************************
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -506,7 +506,6 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
   int cnt;
 
   // TODO: add permission checks
-
   snprintf(SQL,MAXSQL,"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
@@ -543,6 +542,7 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
 int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_id, int user_perm)
 {
   int r,MaxRow;
+  int count = 0;
   long Fid;
   int i;
   char *Desc;
@@ -559,10 +559,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     return 1;
   }
 
-  /* Find all folders with this parent and recurse */
+  /* Find all folders with this parent and recurse, but don't show uploads, if they also exist in other directories */
   snprintf(SQL,MAXSQL,"SELECT folder_pk,foldercontents_mode,name,description,upload_pk FROM folderlist "
-          "WHERE parent=%ld "
-          "ORDER BY name,parent,folder_pk",Parent);
+          "WHERE parent=%ld AND upload_pk NOT IN (SELECT upload_pk FROM folderlist WHERE parent!=%ld GROUP BY upload_pk HAVING COUNT(*) > 0) "
+          "ORDER BY name,parent,folder_pk",Parent,Parent);
   result = PQexec(db_conn, SQL);
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
@@ -594,7 +594,7 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
         printf("\n");
       }
       rc = listFoldersRecurse(Fid,Depth+1,Parent,DelFlag,user_id,user_perm);
-      if (rc < 1)
+      if (rc < 0)
       {
         if (DelFlag)
         {
@@ -605,8 +605,7 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
     }
     else
     {
-      rc = unlinkContent(Parent,Row,1,user_id,user_perm);
-      if (DelFlag==1 && rc == 0)
+      if (DelFlag==1 && unlinkContent(Parent,Row,1,user_id,user_perm)==0)
       {
         continue;
       }
@@ -616,15 +615,18 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
       }
       if (DelFlag)
       {
-        rc = deleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
-        if (rc < 0)
-        {
-          return rc;
-        }
-        if (rc != 0)
-        {
-          printf("Deleting the folder failed since it contains uploads you can't delete.");
-          return rc;
+        if(count < 2)
+        {  
+          rc = deleteUpload(atol(PQgetvalue(result,r,4)),user_id, user_perm);
+          if (rc < 0)
+          {
+            return rc;
+          }
+          if (rc != 0)
+          {
+            printf("Deleting the folder failed since it contains uploads you can't delete.");
+            return rc;
+          }
         }
       }
       else
@@ -675,7 +677,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
           return rc;
         }
       }
-      snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",Parent);
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND parent_fk=%ld AND child_id=%ld",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE foldercontents_mode=1 AND child_id=%ld",Parent);
       if (Test)
       {
         printf("TEST: %s\n",SQL);
@@ -684,8 +689,10 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
       {
         PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
       }
-
-      snprintf(SQL,MAXSQL,"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
+      if(Row > 0)
+        snprintf(SQL,MAXSQL,"DELETE FROM folder f USING foldercontents fc WHERE  f.folder_pk = fc.child_id AND fc.parent_fk='%ld' AND f.folder_pk = '%ld';",Row,Parent);
+      else
+        snprintf(SQL,MAXSQL,"DELETE FROM folder WHERE folder_pk = '%ld';",Parent);
       if (Test)
       {
         printf("TEST: %s\n",SQL);
@@ -909,9 +916,10 @@ int listUploads (int user_id, int user_perm)
  *        -1: failure
  *
  **/
-int deleteFolder(long FolderId, int user_id, int user_perm)
+int deleteFolder(long cFolder, long pFolder,  int user_id, int user_perm)
 {
-  return listFoldersRecurse(FolderId,0,-1,2,user_id,user_perm);
+  if(pFolder == 0) pFolder= -1 ;
+  return listFoldersRecurse(cFolder, 0,pFolder,2,user_id,user_perm);
 } /* deleteFolder() */
 
 /**********************************************************************/
@@ -936,7 +944,11 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
   int rc=0;     /* assume no data */
   int Type=0; /* 0=undefined; 1=delete; 2=list */
   int Target=0; /* 0=undefined; 1=upload; 2=license; 3=folder */
-  long Id;
+  const char s[2] = " ";
+  char *token;
+  char a[15];
+  long fd[2];
+  int i = 0, len = 0;
 
   if (!Parm)
   {
@@ -976,21 +988,30 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
     Target=3; /* folder */
     L+=6;
   }
-  while(isspace(L[0])) L++;
-  Id = atol(L);
+
+  len = strlen(L);
+  memcpy(a, L,len); 
+  token = strtok(a, s);
+   
+  while( token != NULL ) 
+  {   
+    fd[i] = atol(token);
+    token = strtok(NULL, s);
+    i++;
+  }
 
   /* Handle the request */
   if ((Type==1) && (Target==1))
   {
-    rc = deleteUpload(Id, user_id, user_perm);
+    rc = deleteUpload(fd[0], user_id, user_perm);
   }
   else if ((Type==1) && (Target==2))
   {
-    rc = deleteLicense(Id, user_perm);
+    rc = deleteLicense(fd[0], user_perm);
   }
   else if ((Type==1) && (Target==3))
   {
-    rc = deleteFolder(Id, user_id, user_perm);
+    rc = deleteFolder(fd[1],fd[0], user_id, user_perm);
   }
   else if (((Type==2) && (Target==1)) || ((Type==2) && (Target==2)))
   {

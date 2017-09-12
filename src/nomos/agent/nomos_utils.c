@@ -531,6 +531,7 @@ FUNCTION void Usage(char *Name)
   printf("  -c   :: specify the directory for the system configuration.\n");
   printf("  -l   :: print full file path (command line only).\n");
   printf("  -v   :: verbose (-vv = more verbose)\n");
+  printf("  -J   :: output in JSON\n");
   printf("  -S   :: print Highlightinfo to stdout \n");
   printf("  file :: if files are listed, print the licenses detected within them.\n");
   printf("  no file :: process data from the scheduler.\n");

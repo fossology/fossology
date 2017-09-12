@@ -84,7 +84,13 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
           "files",
           boost::program_options::value< vector<string> >(),
           "files to scan"
-        );
+        )
+#ifndef DISABLE_JSON
+        (
+          "json,J", "output JSON"
+        )
+#endif
+    ;
 
   boost::program_options::positional_options_description p;
   p.add("files", -1);
@@ -110,8 +116,9 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
     }
 
     unsigned long verbosity = vm.count("verbose");
+    bool json = vm.count("json") > 0 ? true : false;
 
-    dest = CliOptions(verbosity, type);
+    dest = CliOptions(verbosity, type, json);
 
     if (vm.count("regex"))
     {

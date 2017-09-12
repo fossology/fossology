@@ -1,6 +1,6 @@
 /********************************************************
  Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -41,6 +41,7 @@ extern int Test;
 extern PGconn* db_conn;
 
 #define MAXSQL  1024
+#define MAXSQLFolder 1024
 #define MAXLINE 1024
 #define myBUFSIZ 2048
 
@@ -60,7 +61,7 @@ int listUploads(int user_id, int user_perm);
 /* function that delete actual things */
 int deleteLicense(long UploadId, int user_perm);
 int deleteUpload(long UploadId, int user_id, int user_perm);
-int deleteFolder(long FolderId, int user_id, int user_perm);
+int deleteFolder(long cFolder, long pFolder, int user_id, int user_perm);
 
 /* for usage from scheduler */
 void doSchedulerTasks();

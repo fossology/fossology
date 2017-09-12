@@ -42,9 +42,10 @@ const std::list<unptr::shared_ptr<scanner>>& CopyrightState::getScanners() const
   return scanners;
 }
 
-CliOptions::CliOptions(int verbosity, unsigned int type) :
+CliOptions::CliOptions(int verbosity, unsigned int type, bool json) :
   verbosity(verbosity),
   optType(type),
+  json(json),
   cliScanners()
 {
 }
@@ -79,5 +80,10 @@ bool CliOptions::isVerbosityDebug() const
 void CliOptions::addScanner(scanner* sc)
 {
   cliScanners.push_back(unptr::shared_ptr<scanner>(sc));
+}
+
+bool CliOptions::doJsonOutput() const
+{
+  return json;
 }
 

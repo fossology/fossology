@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -324,7 +324,8 @@ class LicenseDao extends Object
                                                    $selectedAgentIds=null,
                                                    $includeSubfolders=true,
                                                    $excluding='',
-                                                   $ignore=false)
+                                                   $ignore=false,
+                                                   $includeUploadTreePk=false)
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -363,10 +364,10 @@ class LicenseDao extends Object
     }
 
     $sql = "
-SELECT ufile_name, lft, rgt, ufile_mode,
+SELECT uploadtree_pk, ufile_name, lft, rgt, ufile_mode,
        rf_shortname, agent_fk
 FROM (SELECT
-        ufile_name,
+        uploadtree_pk, ufile_name,
         lft, rgt, ufile_mode, pfile_fk
       FROM $uploadTreeTableName
       WHERE $condition) AS subselect1
@@ -387,7 +388,7 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $path = implode($pathStack,'/');
-    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore);
+    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
     while ($row = $this->dbManager->fetchArray($result))
     {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding))
@@ -402,7 +403,7 @@ ORDER BY lft asc
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
       $path = implode($pathStack,'/');
-      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore);
+      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
     }
     $this->dbManager->freeResult($result);
     return array_reverse($licensesPerFileName);
@@ -426,13 +427,17 @@ ORDER BY lft asc
     }
   }
 
-  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore)
+  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk)
   {
     if (($row['ufile_mode']&(1<<29)) ==0)
     {
       if($row['rf_shortname'])
-      {
-        $licensesPerFileName[$path][] = $row['rf_shortname'];
+      { 
+        if($includeUploadTreePk){
+          $licensesPerFileName[$path][$row['uploadtree_pk']][] = $row['rf_shortname'];
+        }else{
+          $licensesPerFileName[$path][] = $row['rf_shortname'];
+        }
       }
     }
     else if (!$ignore)
@@ -535,21 +540,30 @@ ORDER BY lft asc
    */
   private function getLicenseByCondition($condition, $param, $groupId=null)
   {
+    $extraCondition = "";
     $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM ONLY license_ref WHERE $condition",
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_detector_type, rf_spdx_compatible FROM ONLY license_ref WHERE $condition",
         $param, __METHOD__ . ".$condition.only");
     if (false === $row && isset($groupId))
     {
-      $param[] = $groupId;
+      $userId = (isset($_SESSION) && array_key_exists('UserId', $_SESSION)) ? $_SESSION['UserId'] : 0;
+      if(!empty($userId)){
+        $param[] = $userId;
+        $extraCondition = "AND group_fk IN (SELECT group_fk FROM group_user_member WHERE user_fk=$".count($param).")";
+      }
+      if(is_int($groupId) && empty($userId)){
+        $param[] = $groupId;
+        $extraCondition = "AND group_fk=$".count($param);
+      }
       $row = $this->dbManager->getSingleRow(
-        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_spdx_compatible FROM license_candidate WHERE $condition AND group_fk=$".count($param),
+        "SELECT rf_pk, rf_shortname, rf_fullname, rf_text, rf_url, rf_risk, rf_detector_type, rf_spdx_compatible FROM license_candidate WHERE $condition $extraCondition",
         $param, __METHOD__ . ".$condition.group");
     }
     if (false === $row)
     {
       return null;
     }
-    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'], $row['rf_spdx_compatible']);
+    $license = new License(intval($row['rf_pk']), $row['rf_shortname'], $row['rf_fullname'], $row['rf_risk'], $row['rf_text'], $row['rf_url'], $row['rf_detector_type'], $row['rf_spdx_compatible']);
     return $license;
   }
 

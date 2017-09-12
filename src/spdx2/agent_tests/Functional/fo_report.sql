@@ -538,7 +538,7 @@ INSERT INTO license_file VALUES (10, 560, 1, NULL, '2015-05-04 11:43:18.064022+0
 INSERT INTO license_file VALUES (11, 561, 1, NULL, '2015-05-04 11:43:18.066447+02', 6, 1, NULL, NULL, NULL, NULL);
 
 
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (485, 'lic A', 'Text of license A.', 'http://www.opensource.org', NULL, NULL, NULL, 'License A', NULL, NULL, NULL, '', NULL, false, false, false, 'eb59014579b4dda6991d5e9838506749', 1, NULL);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (485, 'lic A', 'Text of license A.', 'http://www.opensource.org', NULL, NULL, NULL, 'License A', NULL, NULL, NULL, '', NULL, false, true, false, 'eb59014579b4dda6991d5e9838506749', 1, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (272, 'lic B', 'License by Nomos.', NULL, NULL, NULL, NULL, 'License B', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_source) VALUES (199, 'lic C', 'License by Nomos
 and new line.', NULL, NULL, NULL, NULL, 'License C', NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 2, NULL);
@@ -578,7 +578,7 @@ INSERT INTO upload_clearing_license VALUES (1, 2, 199);
 
 INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (7, 6, 6, 1, 4, 33188, 4, 5, 'test1.dtd');
 INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (8, 6, 6, 1, 5, 33188, 6, 7, 'test2.dtd');
-INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (6, 1, 2, 1, 0, 536888320, 3, 8, '3DFX');
+INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (6, 1, 2, 1, 0, 536888320, 3, 8, 'Glide');
 INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (10, 9, 9, 1, 6, 33188, 10, 11, 'hash_md5prime.c');
 INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (9, 1, 2, 1, 0, 536888320, 9, 12, 'Beerware');
 INSERT INTO uploadtree_a (uploadtree_pk,realparent,parent,upload_fk,pfile_fk,ufile_mode,lft,rgt,ufile_name) VALUES (4, 3, 3, 1, 2, 33188, 14, 15, 'Condor-1.0');

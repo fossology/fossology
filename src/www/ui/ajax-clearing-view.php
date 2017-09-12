@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -28,6 +28,8 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\View\HighlightProcessor;
 use Fossology\Lib\View\UrlBuilder;
 use Monolog\Logger;
@@ -59,6 +61,8 @@ class AjaxClearingView extends FO_Plugin
   private $clearingDecisionEventProcessor;
   /** @var UrlBuilder */
   private $urlBuilder;
+  /** @var DecisionTypes */
+  private $decisionTypes;
 
   function __construct()
   {
@@ -82,10 +86,47 @@ class AjaxClearingView extends FO_Plugin
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightProcessor = $container->get("view.highlight_processor");
     $this->urlBuilder = $container->get('view.url_builder');
-
+    $this->decisionTypes = $container->get('decision.types');
     $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
   }
 
+  /**
+   * @param int $groupId
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @return string
+   */
+  protected function doClearingHistory($groupId, $uploadId, $uploadTreeId)
+  {
+    $itemTreeBounds = $this->uploadDao->getItemTreeBoundsFromUploadId($uploadTreeId, $uploadId);
+
+    $clearingDecWithLicenses = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false, true);
+
+    $table = array();
+    $scope = new DecisionScopes();
+    foreach ($clearingDecWithLicenses as $clearingDecision)
+    {
+      $licenseOutputs = array();
+      foreach ($clearingDecision->getClearingLicenses() as $lic)
+      {
+        $shortName = $lic->getShortName();
+        $licenseOutputs[$shortName] = $lic->isRemoved() ? "<span style=\"color:red\">$shortName</span>" : $shortName;
+      }
+      ksort($licenseOutputs, SORT_STRING);
+      $row = array(
+          '0' => date('Y-m-d', $clearingDecision->getTimeStamp()),
+          '1' => $clearingDecision->getUserName(),
+          '2' => $scope->getTypeName($clearingDecision->getScope()),
+          '3' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
+          '4' => implode(", ", $licenseOutputs));
+      $table[] = $row;
+    }
+    return array(
+            'sEcho' => intval($_GET['sEcho']),
+            'aaData' => $table,
+            'iTotalRecords' => count($table),
+            'iTotalDisplayRecords' => count($table));
+  }
 
   /**
    * @param boolean $orderAscending
@@ -193,9 +234,30 @@ class AjaxClearingView extends FO_Plugin
         }
         return $this->createPlainResponse("success");
 
+      case "showClearingHistory":
+        return new JsonResponse($this->doClearingHistory($groupId, $uploadId, $uploadTreeId));
+
       default:
         return $this->createPlainResponse("fail");
     }
+  }
+
+  /**
+   * @param id $uploadtreeid,$licenseid
+   * @return string with attr
+   */
+  protected function getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $forValue, $what, $detectorType=0)
+  {
+     $classAttr = "color:#000000;";
+     $value = "Click to add";
+     if(empty($forValue) && $detectorType == 2 && $what == 2){
+       $classAttr = "color:red;font-weight:bold;";
+     }
+ 
+     if(!empty($forValue)) {
+       $value = substr(ltrim($forValue, " \t\n"), 0, 15)."...";
+     }
+    return "<a href=\"javascript:;\" style='$classAttr' id='clearingsForSingleFile$licenseId$what' onclick=\"openTextModel($uploadTreeId, $licenseId, $what);\" title='".htmlspecialchars($forValue, ENT_QUOTES)."'>$value</a>";
   }
 
   /**
@@ -245,17 +307,16 @@ class AjaxClearingView extends FO_Plugin
         $tooltip = _('Click to select this as a main license for the upload.');
         $actionLink .= " <a href=\"javascript:;\" onclick=\"makeMainLicense($uploadId, $licenseId);\"><img src=\"images/icons/star_16.png\" alt=\"noMainLicense\" title=\"$tooltip\" border=\"0\"/></a>";
       }
-
-      $reportInfoField = nl2br(htmlspecialchars($reportInfo));
-      $commentField = nl2br(htmlspecialchars($comment));
-
+      $detectorType = $this->licenseDao->getLicenseById($clearingResult->getLicenseId(), $groupId)->getDetectorType();
       $id = "$uploadTreeId,$licenseId";
+      $reportInfoField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $reportInfo, 2, $detectorType);
+      $commentField = $this->getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $comment, 3);
       $table[$licenseShortName] = array('DT_RowId' => $id,
-          '0' => $licenseShortNameWithLink,
-          '1' => implode("<br/>", $types),
-          '2' => $reportInfoField,
-          '3' => $commentField,
-          '4' => $actionLink);
+          '0' => $actionLink,
+          '1' => $licenseShortNameWithLink,
+          '2' => implode("<br/>", $types),
+          '3' => $reportInfoField,
+          '4' => $commentField);
     }
 
     foreach ($removedLicenses as $licenseShortName => $clearingResult)
@@ -273,11 +334,11 @@ class AjaxClearingView extends FO_Plugin
         $id = implode(',', $idArray);
         $table[$licenseShortName] = array('DT_RowId' => $id,
             'DT_RowClass' => 'removed',
-            '0' => $licenseShortNameWithLink,
-            '1' => implode("<br/>", $agents),
-            '2' => "-",
+            '0' => $actionLink,
+            '1' => $licenseShortNameWithLink,
+            '2' => implode("<br/>", $agents),
             '3' => "-",
-            '4' => $actionLink);
+            '4' => "-");
       }
     }
 

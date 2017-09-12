@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -300,15 +300,9 @@ class ClearingView extends FO_Plugin
       $this->vars['auditDenied'] = true;
     }
 
-    $clearingHistory = array();
     $selectedClearingType = false;
-    if ($hasWritePermission)
-    {
-      $clearingHistory = $this->getClearingHistory($clearingDecisions);
-    }
-    if (count($clearingHistory) > 0)
-    {
-      $selectedClearingType = $this->decisionTypes->getTypeByName($clearingHistory[0]['type']);
+    if(!empty($clearingDecisions)){
+      $selectedClearingType = $clearingDecisions[0]->getType();
     }
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId);
 
@@ -323,7 +317,6 @@ class ClearingView extends FO_Plugin
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
-    $this->vars['clearingHistory'] = $clearingHistory;
     $this->vars['bulkHistory'] = $bulkHistory;
 
     $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
@@ -342,35 +335,6 @@ class ClearingView extends FO_Plugin
     $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
     
     return $this->render("ui-clearing-view.html.twig");
-  }
-
-
-  /**
-   * @param ClearingDecision[] $clearingDecWithLicenses
-   * @return array
-   */
-  private function getClearingHistory($clearingDecWithLicenses)
-  {
-    $table = array();
-    $scope = new DecisionScopes();
-    foreach ($clearingDecWithLicenses as $clearingDecision)
-    {
-      $licenseOutputs = array();
-      foreach ($clearingDecision->getClearingLicenses() as $lic)
-      {
-        $shortName = $lic->getShortName();
-        $licenseOutputs[$shortName] = $lic->isRemoved() ? "<span style=\"color:red\">$shortName</span>" : $shortName;
-      }
-      ksort($licenseOutputs, SORT_STRING);
-      $row = array(
-          'date' => $clearingDecision->getTimeStamp(),
-          'username' => $clearingDecision->getUserName(),
-          'scope' => $scope->getTypeName($clearingDecision->getScope()),
-          'type' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
-          'licenses' => implode(", ", $licenseOutputs));
-      $table[] = $row;
-    }
-    return $table;
   }
 
   /*

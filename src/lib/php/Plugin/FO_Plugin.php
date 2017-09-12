@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -339,9 +339,10 @@ class FO_Plugin implements Plugin
       $this->vars['title'] = htmlentities($this->Title);
     }
 
-    $styles = "<link rel='stylesheet' href='css/fossology.css'>\n";
-    $styles .= "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
+    $styles = "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/select2.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/fossology.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
@@ -406,7 +407,7 @@ class FO_Plugin implements Plugin
       $response = $this->render($this->getTemplateName());
     }
     ob_end_clean();
-    
+
     return $response;
   }
 
@@ -434,8 +435,18 @@ class FO_Plugin implements Plugin
   public function renderString($templateName, $vars = null)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
-  }  
-  
+  }
+
+  /**
+   * @brief Render JavaScript in the template's footer
+   *
+   * @param string $scripts
+   */
+  public function renderScripts($scripts)
+  {
+    $this->vars['scripts'] = $scripts;
+  }
+
   /**
    * @param string $templateName
    * @param array $vars

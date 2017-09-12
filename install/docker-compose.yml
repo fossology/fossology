@@ -1,6 +1,6 @@
 # FOSSology Docker Compose file
 # Copyright Siemens AG 2016, fabio.huser@siemens.com
-# Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
+# Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -11,24 +11,52 @@
 #              Docker setup with separate Database instance
 version: '2'
 services:
-  fossology-scheduler:
-    extends:
-      file: docker-compose.base.yml
-      service: fossology
+
+################################################################################
+  fossology-base-image:
+    build:
+      context: ..
+      dockerfile: install/docker-compose.Dockerfile
+      args:
+        - http_proxy
+        - https_proxy
+        - no_proxy
+    image: fossology
+    restart: "no" 
     environment:
+      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
+    user: fossy
+    command: "true"
+
+################################################################################
+  fossology-scheduler:
+    image: fossology
+    restart: unless-stopped
+    environment:
+      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
+    user: fossy
     command: scheduler
     links:
       - fossology-db
     # volumes:
     #   - ./_repository:/srv/fossology/repository/
+
+################################################################################
   fossology-web:
-    extends:
-      file: docker-compose.base.yml
-      service: fossology
+    image: fossology
+    restart: unless-stopped
     environment:
+      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_NAME=fossology
+      - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
       - FOSSOLOGY_SCHEDULER_HOST=fossology-scheduler
+    user: fossy
     command: web
     ports:
       - 8081:8081
@@ -37,6 +65,8 @@ services:
       - fossology-scheduler
     volumes_from:
       - fossology-scheduler
+      
+################################################################################
   fossology-db:
     image: postgres
     restart: unless-stopped

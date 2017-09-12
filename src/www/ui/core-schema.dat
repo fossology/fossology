@@ -423,6 +423,43 @@
   $Schema["TABLE"]["copyright_decision"]["comment"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["author"]["ct_pk"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["ct_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["author"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["agent_fk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"agent_fk\" int8";
+  $Schema["TABLE"]["author"]["agent_fk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"agent_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["author"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["pfile_fk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["author"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["author"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["content"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["author"]["content"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["hash"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["author"]["hash"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["type"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"type\" text";
+  $Schema["TABLE"]["author"]["type"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"type\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author"]["copy_startbyte"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["copy_startbyte"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"copy_startbyte\" int4";
+  $Schema["TABLE"]["author"]["copy_startbyte"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"copy_startbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author"]["copy_endbyte"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"copy_endbyte\" int4";
+  $Schema["TABLE"]["author"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"author\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["author"]["is_enabled"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["author"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
   $Schema["TABLE"]["ecc"]["ct_pk"]["DESC"] = "";
   $Schema["TABLE"]["ecc"]["ct_pk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
   $Schema["TABLE"]["ecc"]["ct_pk"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
@@ -883,7 +920,7 @@
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
-  
+
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
@@ -929,6 +966,42 @@
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["DESC"] = "";
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_name\" text";
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"om_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
+  $Schema["TABLE"]["obligation_map"]["om_pk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"om_pk\" SET NOT NULL, ALTER COLUMN \"om_pk\" SET DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"ob_fk\" IS 'Obligation topic key as in obligation_ref'";
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"ob_fk\" int8";
+  $Schema["TABLE"]["obligation_map"]["ob_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"ob_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"rf_fk\" IS 'Reference license key as in rf_license'";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"rf_fk\" int8";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_pk\" int8 DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
+  $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_pk\" SET NOT NULL, ALTER COLUMN \"ob_pk\" SET DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_topic"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_topic\" IS 'Include notices, Copyleft effect, ...'";
+  $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_topic\" text";
+  $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_topic\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_text"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text\" IS 'Obligation text'";
+  $Schema["TABLE"]["obligation_ref"]["ob_text"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_text\" text";
+  $Schema["TABLE"]["obligation_ref"]["ob_text"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_text\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_active"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_active\" IS 'change this to false if you don''t want this obligation to be used in new reports'";
+  $Schema["TABLE"]["obligation_ref"]["ob_active"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_active\" bool DEFAULT true";
+  $Schema["TABLE"]["obligation_ref"]["ob_active"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_active\" SET NOT NULL, ALTER COLUMN \"ob_active\" SET DEFAULT true";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text_updatable\" IS 'true if the obligation text can be updated'";
+  $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_text_updatable\" bool DEFAULT false";
+  $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_text_updatable\" SET NOT NULL, ALTER COLUMN \"ob_text_updatable\" SET DEFAULT false";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_md5"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_md5\" IS 'md5 of the obligation text, used to keep duplicates out of the system'";
+  $Schema["TABLE"]["obligation_ref"]["ob_md5"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_md5\" char(32)";
+  $Schema["TABLE"]["obligation_ref"]["ob_md5"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_md5\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["package"]["package_pk"]["DESC"] = "";
@@ -1586,6 +1659,12 @@
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"mimetype_mimetype_pk_seq\"";
   $Schema["SEQUENCE"]["mimetype_mimetype_pk_seq"]["UPDATE"] = "SELECT setval('mimetype_mimetype_pk_seq',(SELECT greatest(1,max(mimetype_pk)) val FROM mimetype))";
 
+  $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_map_om_pk_seq\"";
+  $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_map))";
+
+  $Schema["SEQUENCE"]["obligation_ref_ob_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_ref_ob_pk_seq\"";
+  $Schema["SEQUENCE"]["obligation_ref_ob_pk_seq"]["UPDATE"] = "SELECT setval('obligation_ref_ob_pk_seq',(SELECT greatest(1,max(ob_pk)) val FROM obligation_ref))";
+
   $Schema["SEQUENCE"]["pfile_pfile_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"pfile_pfile_pk_seq\"";
   $Schema["SEQUENCE"]["pfile_pfile_pk_seq"]["UPDATE"] = "SELECT setval('pfile_pfile_pk_seq',(SELECT greatest(1,max(pfile_pk)) val FROM pfile))";
 
@@ -1656,6 +1735,7 @@
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
@@ -1764,6 +1844,9 @@
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_user_fk_index"] = "CREATE INDEX copyright_decision_user_fk_index ON copyright_decision USING btree (user_fk);";
 
+  $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
+  $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
+
   $Schema["INDEX"]["ecc"]["ecc_agent_fk_index"] = "CREATE INDEX ecc_agent_fk_index ON ecc USING btree (agent_fk);";
   $Schema["INDEX"]["ecc"]["ecc_hash_index"] = "CREATE INDEX ecc_hash_index ON ecc USING btree (hash);";
   $Schema["INDEX"]["ecc"]["ecc_pfile_fk_index"] = "CREATE INDEX ecc_pfile_fk_index ON ecc USING btree (pfile_fk);";
@@ -1822,4 +1905,3 @@
   $Schema["INHERITS"]["nomos_ars"] = "ars_master";
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
   $Schema["INHERITS"]["license_candidate"] = "license_ref";
-

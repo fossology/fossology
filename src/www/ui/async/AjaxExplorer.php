@@ -450,6 +450,10 @@ class AjaxExplorer extends DefaultPlugin
 
     $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
 
+    // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
+    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
+    $img = $isDecisionTBD ? 'yellow' : $img;
+
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   } 
 }

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017, Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -31,22 +32,26 @@ use Symfony\Component\HttpFoundation\Session\Session;
  * \param $SelElt - True (default) if $SelectedVal is a value False if $SelectedVal is a key
  * \param $Options - Optional.  Options to add to the select statment.
  * For example, "id=myid onclick= ..."
+ * \param $ReturnKey - True (default) return the Key as value, if False return the Value
  *
  * \return a string of select html 
  */
-function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
-$FirstEmpty=false, $SelElt=true, $Options="")
+function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "", 
+$FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
-
+  
   foreach ($KeyValArray as $key => $val)
   {
     if ($SelElt == true)
     $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
     else
     $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    if ($ReturnKey == true)
     $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    else
+    $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
   }
   $str .= "</select>";
   return $str;

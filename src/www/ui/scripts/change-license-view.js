@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
  
  This program is free software; you can redistribute it and/or
@@ -21,12 +21,12 @@ var defaultType;
 
 
 function clearingSuccess(data) {
-  $('#clearingHistoryTable').html(data.tableClearing);
   $('#recentLicenseClearing').html(data.recentLicenseClearing);
 }
 
 function openBulkModal() {
   $('#userModal').hide();
+  $('#ClearingHistoryDataModal').hide();
   $('#bulkModal').toggle();
 }
 
@@ -36,6 +36,7 @@ function closeBulkModal() {
 
 function openUserModal() {
   $('#bulkModal').hide();
+  $('#ClearingHistoryDataModal').hide();
   $('#userModal').toggle();
   if ($('#userModal').is(":visible")) {
     $('#licenseSelectionTable_filter label input').focus();
@@ -44,6 +45,17 @@ function openUserModal() {
 
 function closeUserModal() {
   $('#userModal').hide();
+}
+
+function openClearingHistoryDataModal() {
+  $('#bulkModal').hide();
+  $('#userModal').hide();
+  $('#ClearingHistoryDataModal').toggle();
+  createClearingHistoryDataTable();
+}
+
+function closeClearingHistoryDataModal() {
+  $('#ClearingHistoryDataModal').hide();
 }
 
 function reloadClearingTable() {

@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2016, Siemens AG
+ Copyright (C) 2015-2017, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -208,6 +208,8 @@ class admin_license_file extends FO_Plugin
     $ob .= "<th>$text</th>";
     $text = _("Checked");
     $ob .= "<th>$text</th>";
+    $text = _("Active");
+    $ob .= "<th>$text</th>";
     $text = _("SPDX Compatible");
     $ob .= "<th>$text</th>";
     $text = _("Shortname");
@@ -237,8 +239,10 @@ class admin_license_file extends FO_Plugin
            "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
       $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
-
       $text = _("$marydone");
+      $ob .= "<td align=center>$text</td>";
+      $rf_active = ($row['rf_active'] == 't') ? "Yes" : "No";
+      $text = _("$rf_active");
       $ob .= "<td align=center>$text</td>";
       $rf_spdx_compatible = ($row['rf_spdx_compatible'] == 't') ? "Yes" : "No";
       $text = _("$rf_spdx_compatible");
@@ -308,7 +312,7 @@ class admin_license_file extends FO_Plugin
     }
     else
     {
-      $row = array('rf_active' =>'t', 'marydone'=>'f', 'rf_text_updatable'=>'t', 'rf_parent'=>0, 'rf_report'=>0, 'rf_risk', 'rf_spdx_compatible'=>'f');
+      $row = array('rf_active' =>'t', 'marydone'=>'f', 'rf_text_updatable'=>'t', 'rf_parent'=>0, 'rf_report'=>0, 'rf_risk'=>0, 'rf_spdx_compatible'=>'f');
     }
     
     foreach(array_keys($row) as $key)
@@ -326,7 +330,7 @@ class admin_license_file extends FO_Plugin
     $row['risk_level'] = $row['rf_risk'];
     $row['rf_spdx_compatible'] = $this->dbManager->booleanFromDb($row['rf_spdx_compatible'])?'true':'false';
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
-    $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos");
+    $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos", "3"=>"Unconcrete License");
 
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
@@ -339,7 +343,7 @@ class admin_license_file extends FO_Plugin
   private function isShortnameBlocked($rfId,$shortname,$text)
   {
     $sql = "SELECT count(*) from license_ref where rf_pk <> $1 and (LOWER(rf_shortname) = LOWER($2) or (rf_text <> ''
-      and rf_text = $3 and LOWER(rf_text) NOT LIKE 'license by nomos'))";
+      and rf_text = $3 and LOWER(rf_text) NOT LIKE 'license by nomos.'))";
     $check_count = $this->dbManager->getSingleRow($sql,array($rfId,$shortname,$text),__METHOD__.'.countLicensesByNomos');
     return (0 < $check_count['count']);
   }

@@ -339,7 +339,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "VSNvhilc:d:n:")) != -1)
+  while ((c = getopt(argc, argv, "VJSNvhilc:d:n:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -352,6 +352,9 @@ int main(int argc, char **argv)
         break;
       case 'v':
         Verbose++; break;
+    case 'J':
+      gl.progOpts |= OPTS_JSON_OUTPUT;
+      break;
     case 'S':
       gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
       break;

@@ -32,6 +32,7 @@ class CliOptions
 private:
   int verbosity;
   unsigned int optType;
+  bool json;
   std::list<unptr::shared_ptr<scanner>> cliScanners;
 
 public:
@@ -39,10 +40,12 @@ public:
 
   unsigned int getOptType() const;
 
+  bool doJsonOutput() const;
+
   void addScanner(scanner* regexDesc);
   std::list<unptr::shared_ptr<scanner>> extractScanners();
 
-  CliOptions(int verbosity, unsigned int type);
+  CliOptions(int verbosity, unsigned int type, bool json);
   CliOptions();
 };
 

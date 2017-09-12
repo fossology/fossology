@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -62,6 +62,33 @@ class ClearingDecisionFilter
 
     return $clearingDecisionsMapped;
   }
+
+
+  /**
+   * @param ClearingDecision[] $clearingDecisions
+   * @return ClearingDecision[]
+   */
+  public function filterCurrentClearingDecisionsForLicenseList($clearingDecisions)
+  {
+    $clearingDecisionsForLicList = array();
+
+    foreach ($clearingDecisions as $clearingDecision){
+
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT){
+        continue;
+      }
+
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()){
+          continue;
+        }
+        $itemId = $clearingDecision->getUploadTreeId();
+        $clearingDecisionsForLicList[$itemId][] = $clearingLicense->getShortName();
+      }
+    }
+    return $clearingDecisionsForLicList;
+  }
+
 
   /**
    * @param ClearingDecision[] $clearingDecisions

@@ -202,8 +202,24 @@ GROUP BY group_fk
     $this->dbManager->freeResult($res);
     return $results;
   }
-  
-  
+
+  public function getAllFolderIds()
+  {
+    $statementName = __METHOD__;
+    $this->dbManager->prepare($statementName, "SELECT DISTINCT folder_pk FROM folder");
+    $res = $this->dbManager->execute($statementName);
+    $results = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+
+    $allIds = array();
+    for($i=0; $i < sizeof($results); $i++)
+    {
+      array_push($allIds, intval($results[$i]['folder_pk']));
+    }
+
+    return $allIds;
+  }
+
   public function getFolderChildUploads($parentId, $trustGroupId)
   {
     $statementName = __METHOD__;

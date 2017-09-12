@@ -162,7 +162,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $jobId = 42;
 
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
 
     $addedLicenses = array($licenseRef1, $licenseRef2);
 
@@ -334,7 +334,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $jobId = 42;
 
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
 
     $agentLicId = $this->licenseDao->getLicenseByShortName("Adaptec")->getRef()->getId();
 

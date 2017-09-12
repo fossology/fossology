@@ -34,7 +34,10 @@ HEADERS = $(OBJECTS:%.o=%.hpp) $(OBJECTS_COP:%_cop.o=%.hpp)
 COVERAGE = $(OBJECTS:.o=_cov.o)
 COVERAGE_COP = $(OBJECTS_COP:.o=_cov.o)
 
-all: $(CXXFOLIB) $(EXE)
+all: json.hpp $(CXXFOLIB) $(EXE)
+
+json.hpp:
+	$(TOP)/install/scripts/install-json-hpp.sh
 
 $(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
 	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
@@ -93,6 +96,6 @@ uninstall:
 	done
 
 clean:
-	rm -f $(EXE) *.o *.a *.gcno *.gcda core
+	rm -f $(EXE) *.o *.a *.gcno *.gcda core json.hpp
 
 .PHONY: all install uninstall clean

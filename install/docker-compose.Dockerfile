@@ -1,6 +1,6 @@
 # FOSSology Dockerfile
 # Copyright Siemens AG 2016, fabio.huser@siemens.com
-# Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
+# Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:stable
+FROM debian:8.8
 MAINTAINER Fossology <fossology@fossology.org>
 WORKDIR /fossology
 

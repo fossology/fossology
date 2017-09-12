@@ -1,6 +1,6 @@
 /***********************************************************
  Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015-2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -82,6 +82,7 @@ table
   min-width: 14px;
   padding: 0 7px;
   margin: 0 5px 0 0;
+  cursor: pointer;
   border-radius: 3px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   background: #efefef; /* Old browsers */
@@ -255,8 +256,8 @@ img.deleted {
 }
 
 .activeEditText textarea{
-  min-width: 30em;
-  min-height: 7em;
+  min-width: 7em;
+  min-height: 5em;
 }
 
 .info-bullet {
@@ -300,4 +301,31 @@ tr.classic {
   border:1px solid black;
   text-align:left;
   background:lightyellow;
+}
+
+#toFolder {
+  width: 100%;
+}
+
+#folder_select {
+  width: 25%;
+}
+
+td.dashboard {
+  vertical-align: top;
+  horiz-align: center;
+  padding-right: 10%;
+}
+
+table.infoTable {
+  max-width: 50%;
+}
+
+div.infoTable {
+  height: 100px;
+  overflow-y: scroll;
+}
+
+#databaseTable {
+  width: 100%;
 }

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar, Steffen Weber 
  
  This program is free software; you can redistribute it and/or
@@ -41,7 +41,7 @@ function htmlOptionsFromJsArray(pListBox, options) {
   }
 }
 
-function sortList(pListBox) {
+function sortLicenseList(pListBox) {
   var options = jsArrayFromHtmlOptions(pListBox);
   options.sort(compareText);
   if (options.length == 0)
@@ -55,15 +55,15 @@ function compareText(opt1, opt2) {
 
 function moveLicense(theSelFrom, theSelTo) {
   var selLength = theSelFrom.length;
-  var i;
-  for (i = selLength - 1; i >= 0; i--) {
+  for (var i = selLength - 1; i >= 0; i--) {
     if (theSelFrom.options[i].selected) {
       theSelTo.appendChild(theSelFrom.options[i].cloneNode(true));
       theSelFrom[i] = null;
     }
   }
-  sortList(theSelFrom);
-  sortList(theSelTo);
+
+  sortLicenseList(theSelFrom);
+  sortLicenseList(theSelTo);
 }
 
 
@@ -177,7 +177,6 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
   });
 
 }
-
 
 function popUpLicenseText(popUpUri, title) {
   sel = $("#bulkLicense :selected").val();

@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2015, Siemens AG
+Copyright (C) 2013-2017, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -61,13 +61,13 @@ int database_setUpFunc() {
   }
 
   if (!fo_dbManager_tableExists(dbManager, "license_ref")) {
-    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_detector_type int)",);
+    doOrReturnError("CREATE TABLE license_ref(rf_pk int, rf_shortname text, rf_text text, rf_active bool, rf_detector_type int)",);
   }
 
-  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', 1)",);
-  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text ,rf_detector_type) "
-                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', 1)",);
+  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text, rf_active ,rf_detector_type) "
+                    "VALUES (1, 'GPL-3.0', 'gnu general public license version 3,', true, 1)",);
+  doOrReturnError("INSERT INTO license_ref(rf_pk, rf_shortname, rf_text, rf_active ,rf_detector_type) "
+                    "VALUES (2, 'GPL-2.0', 'gnu general public license, version 2', true, 1)",);
 
   return 0;
 }

@@ -1173,15 +1173,29 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   /* DBug: printf("saveLicenseData on return gl.initwd is:%s\n",gl.initwd); */
   if(cur.cliMode) 
   {
-    if (optionIsSet(OPTS_LONG_CMD_OUTPUT) && realpath(cur.targetFile, realPathOfTarget))
-    {
-      printf("File %s contains license(s) %s", realPathOfTarget, cur.compLic);
+    if (gl.progOpts & OPTS_JSON_OUTPUT) {
+      printf("[");
+      parseLicenseList();
+      size_t i = 0;
+      while (cur.licenseList[i] != NULL) {
+        printf("\"%s\"", cur.licenseList[i]);
+        if (cur.licenseList[i+1] != NULL) {
+          printf(",");
+        }
+        ++i;
+      }
+      printf("]");
+    } else {
+      if (optionIsSet(OPTS_LONG_CMD_OUTPUT) && realpath(cur.targetFile, realPathOfTarget))
+        {
+          printf("File %s contains license(s) %s", realPathOfTarget, cur.compLic);
+        }
+      else
+        {
+          printf("File %s contains license(s) %s", basename(cur.targetFile), cur.compLic);
+        }
+      printHighlightInfo(cur.keywordPositions, cur.theMatches);
     }
-    else
-    {
-      printf("File %s contains license(s) %s", basename(cur.targetFile), cur.compLic);
-    }
-    printHighlightInfo(cur.keywordPositions, cur.theMatches);
   }
   return;
 } /* saveLicenseData */

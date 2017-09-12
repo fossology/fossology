@@ -195,7 +195,7 @@ class SpdxTwoAgent extends Agent
       switch ($this->outputFormat)
       {
         case "spdx2":
-          $fileName = $fileName .".rdf";
+          $fileName = $fileName ."-spdx.rdf";
           break;
         case "spdx2tv":
           $fileName = $fileName .".spdx";

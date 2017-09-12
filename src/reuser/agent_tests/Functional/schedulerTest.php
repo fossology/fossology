@@ -184,7 +184,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   protected function insertDecisionFromTwoEvents($scope=DecisionScopes::ITEM,$originallyClearedItemId=23)
   {
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("3DFX")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("Glide")->getRef();
     
     $addedLicenses = array($licenseRef1, $licenseRef2);
     assertThat($addedLicenses, not(arrayContaining(null)));

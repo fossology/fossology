@@ -36,14 +36,19 @@ class License extends LicenseRef
   /**
    * @var string
    */
+  private $detectorType;
+  /**
+   * @var string
+   */
   private $spdxCompatible;
 
-  function __construct($id, $shortName, $fullName, $risk, $text, $url, $spdxCompatible = false)
+  function __construct($id, $shortName, $fullName, $risk, $text, $url, $detectorType, $spdxCompatible = false)
   {
     parent::__construct($id, $shortName, $fullName);
     $this->text = $text;
     $this->url = $url;
     $this->risk = $risk;
+    $this->detectorType = $detectorType;
     $this->spdxCompatible = $spdxCompatible;
   }
 
@@ -53,6 +58,14 @@ class License extends LicenseRef
   public function getRisk()
   {
     return $this->risk;
+  }
+
+  /**
+   * @return int
+   */
+  public function getDetectorType()
+  {
+    return $this->detectorType;
   }
 
   /**

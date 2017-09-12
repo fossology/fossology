@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2015, Siemens AG
+Copyright (C) 2013-2017, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, 
 PGresult* queryAllLicenses(fo_dbManager* dbManager) {
   return fo_dbManager_Exec_printf(
     dbManager,
-    "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1"
+    "select rf_pk, rf_shortname from " LICENSE_REF_TABLE " where rf_detector_type = 1 and rf_active = 'true'"
   );
 }
 

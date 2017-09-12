@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -55,6 +55,11 @@ class FolderDaoTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = null;
   }
 
+  public function testGetAllFolderIds()
+  {
+    $this->testDb->insertData(array('folder'));
+    assertThat(sizeof($this->folderDao->getAllFolderIds())>0);
+  }
 
   public function testHasTopLevelFolder_yes()
   {

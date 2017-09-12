@@ -42,6 +42,9 @@ typedef struct {
   int (*onNo)(MonkState* state, const File* file);
   int (*onFull)(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo);
   int (*onDiff)(MonkState* state, const File* file, const License* license, const DiffResult* diffResult);
+  int (*onBeginOutput)(MonkState* state);
+  int (*onBetweenIndividualOutputs)(MonkState* state);
+  int (*onEndOutput)(MonkState* state);
   int (*ignore)(MonkState* state, const File* file);
 } MatchCallbacks;
 

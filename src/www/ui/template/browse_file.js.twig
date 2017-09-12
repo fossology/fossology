@@ -1,4 +1,4 @@
-{# Copyright 2015 Siemens AG
+{# Copyright 2015-2017 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -31,15 +31,18 @@ function createDirlistTable() {
         {"sTitle":"Edited Results","sClass":"left","bSortable":false},
         {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSortable":false,"bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
             if(type!='display') return data;
-            if (data==='green'){
-              return '<img alt="done" src="images/green.png" class="icon-small"/>';
+            switch (data){
+              case 'green':
+                return '<img alt="done" src="images/green.png" class="icon-small"/>';
+              case 'yellow':
+                return '<img alt="done" src="images/yellow.png" class="icon-small"/>';
+              default:
+                return '<img alt="not done" src="images/red.png" class="icon-small"/>';
             }
-            return '<img alt="not done" src="images/red.png" class="icon-small"/>';
           }
         },
         {"sTitle":"Files Cleared","sClass":"center","bSortable":false,"bSearchable":false},
         {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
-    "iDisplayLength": 25,
     "bProcessing": true,
     "bStateSave": true,
     "sCookiePrefix" : "fossology_",
