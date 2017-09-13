@@ -95,18 +95,32 @@ class changeLicenseProcessPost extends FO_Plugin
     $decisionMark = @$_POST['decisionMark'];
     if(!empty($decisionMark))
     {
-      $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
-      /** @var ItemTreeBounds */
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
-      $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
-      if (empty($errMsg))
-      {
-        return new JsonResponse(array('result'=>'success'));
+      if(!is_array($itemId)){
+        $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
+      }else{
+        foreach($itemId as $uploadTreeId){
+          $responseMsg = $this->doMarkIrrelevant($uploadTreeId, $groupId, $userId);
+          if(!empty($responseMsg)){
+            return $responseMsg;
+          }
+        }
       }
-      return $this->errorJson($errMsg,$errMsg);
+      if(!empty($responseMsg)){
+        return $responseMsg;
+      }
+      return new JsonResponse(array('result'=>'success'));      
     }
 
     return $this->doEdit($userId,$groupId,$itemId);
+  }
+
+  function doMarkIrrelevant($itemId, $groupId, $userId)
+  {
+    $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
+    /** @var ItemTreeBounds */
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
+    $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+    return $errMsg;
   }
 
   function doEdit($userId,$groupId,$itemId)
