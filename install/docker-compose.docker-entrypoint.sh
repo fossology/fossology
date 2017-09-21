@@ -87,7 +87,7 @@ elif [[ $# = 1 && "$1" == "scheduler" ]]; then
     --verbose=3 \
     --reset
 elif [[ $# = 1 && "$1" == "web" ]]; then
-  exec /usr/sbin/apache2ctl -D FOREGROUND
+  exec /usr/sbin/apache2ctl -e info -D FOREGROUND
 else
   exec "$@"
 fi
