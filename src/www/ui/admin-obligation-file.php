@@ -78,6 +78,21 @@ class admin_obligation_file extends FO_Plugin
     $V = ""; // menu_to_1html(menu_find($this->Name, $MenuDepth),0);
     $errorstr = "Obligation or risk not added";
 
+    // Delete db record
+    if (@$_POST["del"])
+    {
+      if (@$_POST["del"] == 'y')
+      {
+        $V .= $this->Deldb();
+      }
+      else
+      {
+        $V .= "<p>Obligation has not been deleted.</p>";
+      }
+      $V .= $this->Inputfm();
+      return $V;
+    }
+
     // update the db
     if (@$_POST["updateit"])
     {
@@ -121,8 +136,9 @@ class admin_obligation_file extends FO_Plugin
     }
 
     $V .= $this->Inputfm();
-    if (@$_POST['req_topic'])
+    if (@$_POST['req_topic']) {
       $V .= $this->ObligationTopic($_POST['req_topic']);
+    }
     return $V;
   }
 
@@ -169,10 +185,11 @@ class admin_obligation_file extends FO_Plugin
     $ob = "";     // output buffer
 
     // look at all
-    if ($topic == "All")
+    if ($topic == "All") {
       $where = "";
-    else
+    } else {
       $where = "WHERE ob_topic='". pg_escape_string($topic) ."' ";
+    }
 
     $sql = "SELECT * FROM ONLY obligation_ref $where ORDER BY ob_pk";
     $result = pg_query($PG_CONN, $sql);
@@ -197,23 +214,35 @@ class admin_obligation_file extends FO_Plugin
     $ob .= "<tr>";
     $text = _("Edit");
     $ob .= "<th>$text</th>";
+    $text = _("Type");
+    $ob .= "<th>$text</th>";
     $text = _("Topic");
     $ob .= "<th>$text</th>";
     $text = _("Text");
     $ob .= "<th>$text</th>";
-    $text = _("Associated Licenses");
+    $text = _("Classification");
+    $ob .= "<th>$text</th>";
+    $text = _("Apply on modified code");
+    $ob .= "<th>$text</th>";
+    $text = _("Comment");
+    $ob .= "<th>$text</th>";
+    $text = _("Associated licenses");
+    $ob .= "<th>$text</th>";
+    $text = _("Associated candidate licenses");
     $ob .= "<th>$text</th>";
     $ob .= "</tr>";
     $lineno = 0;
     while ($row = pg_fetch_assoc($result))
     {
-      if ($lineno++ % 2)
+      if ($lineno++ % 2) {
         $style = "style='background-color:lavender'";
-      else
+      } else {
         $style = "";
+      }
       $ob .= "<tr $style>";
 
       $associatedLicenses = $this->obligationMap->getLicenseList($row['ob_pk']);
+      $candidateLicenses = $this->obligationMap->getLicenseList($row['ob_pk'],True);
 
       // Edit button brings up full screen edit of all license_ref fields
       $ob .= "<td align=center><a href='";
@@ -222,10 +251,16 @@ class admin_obligation_file extends FO_Plugin
            "&ob_pk=$row[ob_pk]' >'".
            "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
+      $ob .= "<td align=left>$row[ob_type]</td>";
       $ob .= "<td align=left>$row[ob_topic]</td>";
       $vetext = htmlspecialchars($row['ob_text']);
       $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
+      $ob .= "<td align=left>$row[ob_classification]</td>";
+      $ob .= "<td align=center>$row[ob_modifications]</td>";
+      $vetext = htmlspecialchars($row['ob_comment']);
+      $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
       $ob .= "<td align=center>$associatedLicenses</td>";
+      $ob .= "<td align=center>$candidateLicenses</td>";
       $ob .= "</tr>";
     }
     pg_free_result($result);
@@ -246,8 +281,9 @@ class admin_obligation_file extends FO_Plugin
 
     if (0 < count($_POST)) {
       $ob_pk_update = $_POST['ob_pk'];
-      if (!empty($ob_pk)) $ob_pk_update = $ob_pk;
-      else if (empty($ob_pk_update)) $ob_pk_update = $_GET['ob_pk'];
+      if (!empty($ob_pk)) { $ob_pk_update = $ob_pk;
+      } else if (empty($ob_pk_update)) { $ob_pk_update = $_GET['ob_pk'];
+      }
     }
 
     $vars['actionUri'] = "?mod=" . $this->Name."&ob_pk=$ob_pk_update";
@@ -264,10 +300,12 @@ class admin_obligation_file extends FO_Plugin
 
       $associatedLicenses = $this->obligationMap->getLicenseList($ob_pk);
       $vars['licnames'] = explode(";",$associatedLicenses);
+      $candidateLicenses = $this->obligationMap->getLicenseList($ob_pk, True);
+      $vars['candidatenames'] = explode(";",$candidateLicenses);
     }
     else
     {
-      $row = array('ob_active' =>'t', 'ob_text_updatable'=>'t');
+      $row = array('ob_active' =>'t', 'ob_modifications' =>'No', 'ob_text_updatable'=>'t');
     }
 
     foreach(array_keys($row) as $key)
@@ -279,6 +317,7 @@ class admin_obligation_file extends FO_Plugin
     }
 
     $vars['boolYesNoMap'] = array("true"=>"Yes", "false"=>"No");
+    $vars['YesNoMap'] = array("Yes"=>"Yes", "No"=>"No");
     $row['ob_active'] = $this->dbManager->booleanFromDb($row['ob_active'])?'true':'false';
     $row['ob_text_updatable'] = $this->dbManager->booleanFromDb($row['ob_text_updatable'])?'true':'false';
     $vars['isReadOnly'] = !(empty($ob_pk) || $row['ob_text_updatable']=='true');
@@ -286,21 +325,46 @@ class admin_obligation_file extends FO_Plugin
     $vars['obId'] = $ob_pk?:$ob_pk_update;
 
     // get list of known license shortnames
-    $licenseMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
-    $reportLicenses = $licenseMap->getTopLevelLicenseRefs();
-    $vars['licenseShortnames'] = array();
-    foreach ($reportLicenses as $licRef)
-    {
-      $vars['licenseShortnames'][$licRef->getShortName()] = $licRef->getShortName();
-    }
+    $vars['licenseShortnames'] = $this->obligationMap->getAvailableShortnames();
     natcasesort($vars['licenseShortnames']);
 
+    // get list of candidate shortnames
+    $vars['candidateShortnames'] = $this->obligationMap->getAvailableShortnames(true);
+    natcasesort($vars['candidateShortnames']);
+
+    // build obligation type and classification arrays
+    //TODO Add colors $dbManager->risksFromDB
+    $vars['obligationClassification'] = array("green"=>"green", "white"=>"white", "yellow"=>"yellow", "red"=>"red");
+    $vars['obligationTypes'] = array("Obligation"=>"Obligation", "Restriction"=>"Restriction", "Risk"=>"Risk", "Right"=>"Right");
+
+    // build scripts
     $vars['licenseSelectorName'] = 'licenseSelector[]';
     $vars['licenseSelectorId'] = 'licenseSelectorId';
+    $vars['candidateSelectorName'] = 'candidateSelector[]';
+    $vars['candidateSelectorId'] = 'candidateSelectorId';
     $scripts = "<script src='scripts/tools.js' type='text/javascript'></script>
       <script src='scripts/select2.full.min.js'></script>
       <script type='text/javascript'>
-        $('#licenseSelectorId').select2({'placeholder': 'Select license associated with this obligation'});
+        $('#licenseSelectorId').select2({'placeholder': 'Select licenses associated with this obligation'});
+      </script>
+      <script type='text/javascript'>
+        $('#candidateSelectorId').select2({'placeholder': 'Select candidate licenses associated with this obligation'});
+      </script>
+      <script type='text/javascript'>
+        function confirmDeletion() {
+
+          var updateform = document.forms['Updatefm'];
+          var delinput = document.createElement('input');
+          delinput.name = 'del';
+
+          if (confirm('Are you sure?')) {
+            delinput.value = 'y';
+          }
+          else {
+            delinput.value = 'n';
+          }
+          updateform.appendChild(delinput);
+        }
       </script>";
 
     $this->renderScripts($scripts);
@@ -318,7 +382,10 @@ class admin_obligation_file extends FO_Plugin
     $obId = intval($_POST['ob_pk']);
     $topic = trim($_POST['ob_topic']);
     $licnames = $_POST['licenseSelector'];
+    $candidatenames = $_POST['candidateSelector'];
     $text = trim($_POST['ob_text']);
+    $comment = trim($_POST['ob_comment']);
+
     if (empty($topic)) {
       $text = _("ERROR: The obligation topic is empty.");
       return "<b>$text</b><p>";
@@ -330,51 +397,26 @@ class admin_obligation_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    $md5term = empty($text) ? 'null' : 'md5($5)';
-    $sql = "UPDATE obligation_ref SET
-        ob_active=$2, ob_topic=$3, ob_text_updatable=$4, ob_text=$5,
-        ob_md5=$md5term WHERE ob_pk=$1";
-    $params = array($obId,
-        $_POST['ob_active'],$topic,$_POST['ob_text_updatable'],$text);
+    $md5term = empty($text) ? 'null' : 'md5($6)';
+    $sql = "UPDATE obligation_ref SET ob_active=$2, ob_type=$3, ob_modifications=$4, ob_topic=$5, ob_md5=$md5term, ob_text=$6, ob_classification=$7, ob_text_updatable=$8, ob_comment=$9 WHERE ob_pk=$1";
+    $params = array($obId,       $_POST['ob_active'],$_POST['ob_type'],$_POST['ob_modifications'],$topic,$text,$_POST['ob_classification'],$_POST['ob_text_updatable'],$comment);
     $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
-    # Add new licenses
-    $associatedLicenses = "";
-    foreach ($licnames as $license)
-    {
-      $licId = $this->obligationMap->getIdFromShortname($license);
-      if ($this->obligationMap->isLicenseAssociated($obId,$licId))
-        continue;
+    // Add new licenses and new candiate licenses
+    $newAssociatedLicenses = $this->addNewLicenses($licnames,$obId);
+    $newCandidateLicenses = $this->addNewLicenses($candidatenames,$obId,true);
 
-      $this->obligationMap->associateLicenseWithObligation($obId,$licId);
-      if ($associatedLicenses == "")
-        $associatedLicenses = "$license";
-      else
-        $associatedLicenses .= ";$license";
-    }
+    // Remove licenses that shouldn't be associated with the obligation any more
+    $unassociatedLicenses = $this->removeLicenses($licnames,$obId);
+    $unassociatedCandidateLicenses = $this->removeLicenses($candidatenames,$obId,true);
 
-    # Remove licenses that shouldn't be associated with the obligation any more
-    $unassociatedLicenses = "";
-    $allAssociatedLicenses = $this->obligationMap->getLicenseList($obId);
-    $allLicenses = explode(";", $allAssociatedLicenses);
-    $obsoleteLicenses = array_diff($allLicenses, $licnames);
-    foreach ($obsoleteLicenses as $toBeRemoved)
-    {
-      $licId = $this->obligationMap->getIdFromShortname($toBeRemoved);
-      $this->obligationMap->unassociateLicenseFromObligation($obId,$licId);
-      if ($unassociatedLicenses == "")
-        $unassociatedLicenses = "$toBeRemoved";
-      else
-        $unassociatedLicenses .= ";$toBeRemoved";
-    }
-
-    $ob = "Obligation '$_POST[ob_topic]' associated with licenses ";
-    if ($associatedLicenses != '')
-      $ob .=  "(+) '$associatedLicenses' ";
-    if ($unassociatedLicenses != '')
-      $ob .=  "(-) '$unassociatedLicenses' ";
-    $ob .= "updated.<p>";
+    $ob .= "Obligation '$topic' was updated -  ";
+    $ob .= $newAssociatedLicenses ? "New licenses: '$newAssociatedLicenses' - " : "";
+    $ob .= $newCandidateLicenses ? "New candidate licenses:  '$newCandidateLicenses' - " : "";
+    $ob .= $unassociatedLicenses ? "Removed licenses: '$unassociatedLicenses' - " : "";
+    $ob .= $unassociatedCandidateLicenses ? "Removed candidate licenses: '$unassociatedCandidateLicenses'" : "";
+    $ob .= "</p>";
     return $ob;
   }
 
@@ -386,57 +428,137 @@ class admin_obligation_file extends FO_Plugin
    */
   function Adddb()
   {
-    $ob_topic = trim($_POST['ob_topic']);
+    $topic = trim($_POST['ob_topic']);
     $licnames = $_POST['licenseSelector'];
-    $ob_text = trim($_POST['ob_text']);
+    $candidatenames = $_POST['candidateSelector'];
+    $text = trim($_POST['ob_text']);
+    $comment = trim($_POST['ob_comment']);
 
-    if (empty($ob_topic)) {
+    if (empty($topic)) {
       $text = _("ERROR: The obligation topic is empty.");
       return "<b>$text</b><p>";
     }
 
-    if (empty($licnames)) {
-      $text = _("ERROR: There are no licenses associated with this topic.");
-      return "<b>$text</b><p>";
+    if (empty($licnames) && empty($candidatenames)) {
+      $message = _("ERROR: There are no licenses associated with this topic.");
+      return "<b>$message</b><p>";
     }
 
-    if ($this->isObligationTopicAndTextBlocked(0,$ob_topic,$ob_text))
+    if ($this->isObligationTopicAndTextBlocked(0,$topic,$text))
     {
-      $text = _("ERROR: The obligation topic and text already exist in the obligation list. Obligation not added.");
-      return "<b>$text</b><p>";
+      $message = _("ERROR: The obligation topic and text already exist in the obligation list. Obligation not added.");
+      return "<b>$message</b><p>";
     }
 
-    $md5term = empty($ob_text) ? 'null' : 'md5($3)';
+    $md5term = empty($text) ? 'null' : 'md5($5)';
     $stmt = __METHOD__.'.ob';
-    $sql = "INSERT into obligation_ref (ob_active, ob_topic, ob_md5, ob_text, ob_text_updatable) VALUES ($1, $2, $md5term, $3, $4) RETURNING ob_pk";
+    $sql = "INSERT into obligation_ref (ob_active, ob_type, ob_modifications, ob_topic, ob_md5, ob_text, ob_classification, ob_text_updatable, ob_comment) VALUES ($1, $2, $3, $4, $md5term, $5, $6, $7, $8) RETURNING ob_pk";
     $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($_POST['ob_active'],$ob_topic,$ob_text, $_POST['ob_text_updatable']));
+    $res = $this->dbManager->execute($stmt,array($_POST['ob_active'],$_POST['ob_type'],$_POST['ob_modifications'],$topic,$text, $_POST['ob_classification'],$_POST['ob_text_updatable'],$comment));
     $row = $this->dbManager->fetchArray($res);
     $obId = $row['ob_pk'];
 
-    $associatedLicenses = "";
-    foreach ($licnames as $license)
+    $associatedLicenses = $this->addNewLicenses($licnames, $obId);
+    $candidateLicenses = $this->addNewLicenses($candidatenames, $obId, True);
+
+    $message .= "Obligation '$topic' associated with: ";
+    $message .= $associatedLicenses ? "licenses '$associatedLicenses' " : "";
+    $message .= ($associatedLicenses && $candidateLicenses) ? "and " : "";
+    $message .= $candidateLicenses ? "candidates licenses '$candidateLicenses' " : "";
+    $message .= "(id=$obId) was added.<p>";
+    return $message;
+  }
+
+  /**
+   * \brief Remove obligation_ref from the database
+   * and unassociate licenses.
+   *
+   * \return True
+   */
+  function Deldb()
+  {
+    $stmt = __METHOD__.'.delob';
+    $sql = "DELETE FROM obligation_ref WHERE ob_pk=$1";
+    $this->dbManager->prepare($stmt,$sql);
+    $res = $this->dbManager->execute($stmt,array($_POST['ob_pk']));
+
+    $this->obligationMap->unassociateLicenseFromObligation($_POST['ob_pk']);
+
+    return "<p>Obligation has been deleted.</p>";
+  }
+
+  /**
+   * \brief Associate selected licenses to the obligation
+   *
+   * @param string  $licList - the list of licences to be returned
+   *        array   $shortnames - new licenses to be associated
+   *        int     $obId - obligation being processed
+   *        boolean $candidate - do we handle candidate licenses?
+   * @return string the list of associated licences
+   */
+  function addNewLicenses($shortnames,$obId,$candidate=false)
+  {
+    if (!empty($shortnames))
     {
-      $licId = $this->obligationMap->getIdFromShortname($license);
-      if ($licId == '0')
+      $licList = "";
+      foreach ($shortnames as $license)
       {
-        $message = _("ERROR: License with shortname '$license' not found in the DB. Obligation not updated.");
-        return "<b>$message</b><p>";
+        $licId = $this->obligationMap->getIdFromShortname($license,$candidate);
+        $res = $this->obligationMap->isLicenseAssociated($obId,$licId,$candidate);
+        if ($res) {
+          continue;
+        }
+
+        $this->obligationMap->associateLicenseWithObligation($obId,$licId,$candidate);
+        if ($licList == "") {
+          $licList = "$license";
+        } else {
+          $licList .= ";$license";
+        }
+
       }
-
-      if ($this->obligationMap->isLicenseAssociated($obId,$licId))
-        continue;
-
-      $this->obligationMap->associateLicenseWithObligation($obId,$licId);
-      if ($associatedLicenses == "")
-        $associatedLicenses = "$license";
-      else
-        $associatedLicenses .= ";$license";
+      return $licList;
     }
 
-    $ob = "Obligation '$_POST[ob_topic]' associated with licenses '$associatedLicenses' (id=$obId) added.<p>";
-    return $ob;
+    return "";
   }
+
+  /**
+   * \brief Unassociate selected licenses to the obligation
+   *
+   * @param array   $shortnames - new licenses to be associated
+   *        int     $obId - obligation being processed
+   *        boolean $candidate - do we handle candidate licenses?
+   * @return string the list of associated licences
+   */
+  function removeLicenses($shortnames,$obId,$candidate=false)
+  {
+    $unassociatedLicenses = "";
+    $licenses = $this->obligationMap->getLicenseList($obId,$candidate);
+    $current = explode(";",$licenses);
+    if (!empty($shortnames)) {
+      $obsoleteLicenses = array_diff($current,$shortnames);
+    } else {
+      $obsoleteLicenses = $current;
+    }
+
+    if ($obsoleteLicenses)
+    {
+      foreach ($obsoleteLicenses as $toBeRemoved)
+      {
+        $licId = $this->obligationMap->getIdFromShortname($toBeRemoved,$candidate);
+        $this->obligationMap->unassociateLicenseFromObligation($obId,$licId,$candidate);
+        if ($unassociatedLicenses == "") {
+          $unassociatedLicenses = "$toBeRemoved";
+        } else {
+          $unassociatedLicenses .= ";$toBeRemoved";
+        }
+      }
+    }
+
+    return $unassociatedLicenses;
+  }
+
 
 }
 

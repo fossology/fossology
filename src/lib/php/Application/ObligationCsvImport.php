@@ -32,9 +32,14 @@ class ObligationCsvImport {
   protected $headrow = null;
   /** @var array */
   protected $alias = array(
+      'type'=>array('type','Type'),
       'topic'=>array('topic','Obligation or Risk topic'),
       'text'=>array('text','Full Text'),
-      'licnames'=>array('licnames','Associated Licenses')
+      'classification'=>array('classification','Classification'),
+      'modifications'=>array('modifications','Apply on modified source code'),
+      'comment'=>array('comment','Comment'),
+      'licnames'=>array('licnames','Associated Licenses'),
+      'candidatenames'=>array('candidatenames','Associated candidate Licenses')
     );
 
   public function __construct(DbManager $dbManager)
@@ -98,7 +103,7 @@ class ObligationCsvImport {
     }
 
     $mRow = array();
-    foreach( array('topic','text','licnames') as $needle){
+    foreach( array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle){
       $mRow[$needle] = $row[$this->headrow[$needle]];
     }
 
@@ -108,7 +113,7 @@ class ObligationCsvImport {
   private function handleHeadCsv($row)
   {
     $headrow = array();
-    foreach( array('topic','text','licnames') as $needle){
+    foreach( array('type','topic','text','classification','modifications','comment','licnames','candidatenames') as $needle){
       $col = ArrayOperation::multiSearch($this->alias[$needle], $row);
       if (false === $col)
       {
@@ -136,42 +141,62 @@ class ObligationCsvImport {
     /* @var $dbManager DbManager */
     $dbManager = $this->dbManager;
     $exists = $this->getKeyFromTopicAndText($row);
+
     if ($exists !== false)
     {
       return "Obligation topic '$row[topic]' with text '$row[text]' already exists in DB (id=".$exists.")";
     }
 
     $stmtInsert = __METHOD__.'.insert';
-    $dbManager->prepare($stmtInsert,'INSERT INTO obligation_ref (ob_topic,ob_text,ob_md5)'
-            . ' VALUES ($1,$2,md5($2)) RETURNING ob_pk');
-    $resi = $dbManager->execute($stmtInsert,
-            array($row['topic'],$row['text']));
+    $dbManager->prepare($stmtInsert,'INSERT INTO obligation_ref (ob_type,ob_topic,ob_text,ob_classification,ob_modifications,ob_comment,ob_md5)'
+            . ' VALUES ($1,$2,$3,$4,$5,$6,md5($3)) RETURNING ob_pk');
+    $resi = $dbManager->execute($stmtInsert,array($row['type'],$row['topic'],$row['text'],$row['classification'],$row['modifications'],$row['comment']));
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
 
+    if (!empty($row['licnames'])) {
+      $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
+    }
+    if (!empty($row['candidatenames'])) {
+      $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
+    }
+
+    $return .= "Obligation topic '$row[topic]' was added and associated with ";
+    $return .= $associatedLicenses ? " licenses '$associatedLicenses'" : "";
+    $return .= ($associatedLicenses && $candidateLicenses) ? " and " : "";
+    $return .= $candidateLicenses ? " candidate licenses '$candidateLicenses'" : "";
+    $return .= ".";
+
+    return $return;
+  }
+
+  /**
+   * \brief Associate selected licenses to the obligation
+   *
+   * @param array   $licList - list of licenses to be associated
+   *        int     $obPk - the id of the newly created obligation
+   *        boolean $candidate - do we handle candidate licenses?
+   * @return string the list of associated licences
+   */
+  function AssociateWithLicenses($licList, $obPk, $candidate=False)
+  {
     $associatedLicenses = "";
-    if (empty($row['licnames']))
+    if ($candidate == False && empty($licList))
     {
       $return = "Obligation topic '$row[topic]' was added without being associated with any license.";
     }
     else
     {
-      $licenses = explode(";",$row['licnames']);
+      $licenses = explode(";",$licList);
       foreach ($licenses as $license)
       {
-        $licId = $this->obligationMap->getIdFromShortname($license);
-        if ($licId == '0')
-        {
-          $message = _("ERROR: License with shortname '$license' not found in the DB. Obligation not updated.");
-          return "<b>$message</b><p>";
-        }
-
-        if ($this->obligationMap->isLicenseAssociated($new['ob_pk'],$licId))
+        $licId = $this->obligationMap->getIdFromShortname($license, $candidate);
+        if ($this->obligationMap->isLicenseAssociated($obPk, $licId, $candidate))
         {
           continue;
         }
 
-        $this->obligationMap->associateLicenseWithObligation($new['ob_pk'],$licId);
+        $this->obligationMap->associateLicenseWithObligation($obPk, $licId, $candidate);
         if ($associatedLicenses == "")
         {
           $associatedLicenses = "$license";
@@ -182,10 +207,8 @@ class ObligationCsvImport {
         }
       }
 
-      $return = "Obligation topic '$row[topic]' was added and associated with licenses '$associatedLicenses' in DB";
+      return $associatedLicenses;
     }
-
-    return $return;
   }
 
 }
