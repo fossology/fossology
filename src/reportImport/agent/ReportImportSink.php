@@ -18,6 +18,7 @@
 namespace Fossology\ReportImport;
 
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Dao\LicenseDao;
@@ -37,6 +38,8 @@ class ReportImportSink
   private $licenseDao;
   /** @var ClearingDao */
   private $clearingDao;
+  /** @var CopyrightDao */
+  private $copyrightDao;
   /** @var DbManager */
   protected $dbManager;
 
@@ -66,11 +69,12 @@ class ReportImportSink
    * @param $jobId
    * @param $configuration
    */
-  function __construct($agent_pk, $userDao, $licenseDao, $clearingDao, $dbManager, $groupId, $userId, $jobId, $configuration)
+  function __construct($agent_pk, $userDao, $licenseDao, $clearingDao, $copyrightDao, $dbManager, $groupId, $userId, $jobId, $configuration)
   {
     $this->userDao = $userDao;
     $this->clearingDao = $clearingDao;
     $this->licenseDao = $licenseDao;
+    $this->copyrightDao = $copyrightDao;
     $this->dbManager = $dbManager;
     $this->agent_pk = $agent_pk;
     $this->groupId = $groupId;
@@ -310,9 +314,7 @@ class ReportImportSink
 
   private function saveAsCopyrightFindingToDB($content, $pfile_fk)
   {
-    return $this->dbManager->getSingleRow(
-      "insert into copyright(agent_fk, pfile_fk, content, hash, type) values($1,$2,$3,md5($3),$4) RETURNING ct_pk",
-      array($this->agent_pk, $pfile_fk, $content, "statement"),
-      __METHOD__."forReportImport");
+    $this->copyrightDao->saveDecision("copyright_decision", $pfile_fk, $this->userId , DecisionTypes::IDENTIFIED,
+      "", $content, "imported via reportImport");
   }
 }

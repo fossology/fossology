@@ -53,6 +53,8 @@ class ReportImportAgent extends Agent
   protected $licenseDao;
   /** @var ClearingDao */
   protected $clearingDao;
+  /** @var CopyrightDao */
+  private $copyrightDao;
 
   protected $agent_pk;
 
@@ -65,6 +67,7 @@ class ReportImportAgent extends Agent
     $this->userDao = $this->container->get('dao.user');
     $this->licenseDao = $this->container->get('dao.license');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->copyrightDao = $this->container->get('dao.copyright');
     $this->agentSpecifLongOptions[] = self::REPORT_KEY.':';
     $this->agentSpecifLongOptions[] = self::ACLA_KEY.':';
 
@@ -273,7 +276,7 @@ class ReportImportAgent extends Agent
     }
 
     /** @var ReportImportSink */
-    $sink = new ReportImportSink($this->agent_pk, $this->userDao, $this->licenseDao, $this->clearingDao,
+    $sink = new ReportImportSink($this->agent_pk, $this->userDao, $this->licenseDao, $this->clearingDao, $this->copyrightDao,
                                  $this->dbManager, $this->groupId, $this->userId, $this->jobId, $configuration);
 
     // Prepare data from DB
