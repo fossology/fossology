@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -93,7 +93,8 @@ class changeLicenseProcessPost extends FO_Plugin
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
-    if(!empty($decisionMark))
+
+    if(!empty($decisionMark) && $decisionMark == "irrelevant")
     {
       if(!is_array($itemId)){
         $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
@@ -109,6 +110,19 @@ class changeLicenseProcessPost extends FO_Plugin
         return $responseMsg;
       }
       return new JsonResponse(array('result'=>'success'));      
+    }
+
+    if(!empty($decisionMark) && $decisionMark == "deleteIrrelevant")
+    {
+      $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
+      /** @var ItemTreeBounds */
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
+      $errMsg = $this->clearingDao->deleteIrrelevantDecisionsFromDirectory($itemTreeBounds,$groupId,$userId);
+      if (empty($errMsg))
+      {
+        return new JsonResponse(array('result'=>'success'));
+      }
+      return $this->errorJson($errMsg,$errMsg);
     }
 
     return $this->doEdit($userId,$groupId,$itemId);
@@ -183,5 +197,3 @@ class changeLicenseProcessPost extends FO_Plugin
 
 $NewPlugin = new changeLicenseProcessPost;
 $NewPlugin->Initialize();
-
-
