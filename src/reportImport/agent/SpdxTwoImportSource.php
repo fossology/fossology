@@ -246,6 +246,12 @@ class SpdxTwoImportSource implements ImportSource
     }
   }
 
+  private function isNotNoassertion($str)
+  {
+    return ! ( strtolower($str) === self::TERMS."noassertion" ||
+               strtolower($str) === "http://spdx.org/licenses/noassertion" );
+  }
+
   private function parseLicenseId($licenseId)
   {
     if (!is_string($licenseId))
@@ -337,6 +343,27 @@ class SpdxTwoImportSource implements ImportSource
       }
       return $output;
     }
+    elseif ($this->isPropertyOfType($license, 'OrLaterOperator'))
+    {
+      $output = array();
+      $subLicenses = $this->getValues($license, 'member');
+      foreach($subLicenses as $subLicense) {
+        /** @var ReportImportDataItem[] $innerOutput */
+        $innerOutput = $this->parseLicense($subLicense);
+        foreach($innerOutput as $innerItem)
+        {
+          /** @var License $innerLicenseCandidate */
+          $item = new ReportImportDataItem($innerItem->getLicenseId() . "+");
+
+          $innerLicenseCandidate = $innerItem->getLicenseCandidate();
+          $item->setLicenseCandidate($innerLicenseCandidate->getFullName() . " or later",
+            $innerLicenseCandidate->getText(),
+            false);
+          $output[] = $item;
+        }
+      }
+      return $output;
+    }
     else
     {
       error_log("ERROR: can not handle license=[".$license."] of type=[".gettype($license)."]");
@@ -368,7 +395,11 @@ class SpdxTwoImportSource implements ImportSource
 
   private function getCopyrightTextsForFile($propertyId)
   {
-    return array_map('trim', $this->getValues($propertyId, "copyrightText"));
+    return array_filter(
+      array_map(
+        'trim',
+        $this->getValues($propertyId, "copyrightText")) ,
+      array($this, "isNotNoassertion"));
   }
 
   public function getDataForFile($propertyId)

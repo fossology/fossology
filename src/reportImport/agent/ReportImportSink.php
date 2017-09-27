@@ -314,6 +314,14 @@ class ReportImportSink
 
   private function saveAsCopyrightFindingToDB($content, $pfile_fk)
   {
+    $curDecisions = $this->copyrightDao->getDecisions("copyright_decision", $pfile_fk);
+    foreach ($curDecisions as $decision)
+    {
+      if($decision['textfinding'] == $content){
+        return;
+      }
+    }
+
     $this->copyrightDao->saveDecision("copyright_decision", $pfile_fk, $this->userId , DecisionTypes::IDENTIFIED,
       "", $content, "imported via reportImport");
   }

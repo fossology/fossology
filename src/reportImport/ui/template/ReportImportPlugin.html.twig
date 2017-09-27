@@ -35,6 +35,10 @@ This file is offered as-is, without any warranty.
               <li>
                 <input type="radio" id="addNewLicensesAs-candidate" name="addNewLicensesAs" value="candidate" checked="checked">
                 <label for="addNewLicensesAs-candidate">license candidate</label>
+                <br/>
+                <span>
+                  Note: license candidates as scanner findings are currently not handled correctly in the UI
+                </span>
               </li>
               {% if userIsAdmin %}
               <li>
@@ -83,18 +87,7 @@ This file is offered as-is, without any warranty.
           </li>
           <li>
             <input type="checkbox" name="addCopyrights" value="true"/>
-            {{ 'Add the Copyright Information'|trans }}
-            {#<ul>#}
-              {#<li>#}
-                {#<input type="radio" id="overwrite" name="addCopyrightBy" value="overwrite"> <label for="overwrite">overwriting</label>#}
-              {#</li>#}
-              {#<li>#}
-                {#<input type="radio" id="add" name="addCopyrightBy" value="add" checked="checked"> <label for="add">adding</label>#}
-              {#</li>#}
-              {#<li>#}
-                {#<input type="radio" id="ignore" name="addCopyrightBy" value="ignore"> <label for="ignore">ignoring</label>#}
-              {#</li>#}
-            {#</ul>#}
+            {{ 'Add the copyright information as textfindings'|trans }}
           </li>
         </ul>
       </li>
