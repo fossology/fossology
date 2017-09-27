@@ -70,13 +70,13 @@ matrix:
 ## general tests
     - env: TEST=default-docker-test
       before_script:
-      install: 
+      install:
       script:
         - src/testing/docker/default-docker-test.sh
       after_script:
     - env: TEST=docker-compose-test
       before_script:
-      install: 
+      install:
       script: src/testing/docker/docker-compose-test.sh
       after_script:
     - env: TEST=check-changelog
@@ -110,16 +110,16 @@ matrix:
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
       after_script:
 #### with PHP 7.0
-    - php: 7.0 # allowed failure
+    - php: 7.0
       env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
-    - php: 7.0 # allowed failure
+    - php: 7.0
       env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
       6after_script:
-    - php: 7.0 # allowed failure
+    - php: 7.0
       env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
-    - php: 7.0 # allowed failure
+    - php: 7.0
       env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
       after_script:
 #### with PHP 7.1
@@ -154,12 +154,12 @@ matrix:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
         CHECKBEFORE=''
         MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.0 # allowed failure
+    - php: 7.0
       env:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
         CHECKBEFORE=''
         MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.1 # allowed failure
+    - php: 7.1
       env:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
         CHECKBEFORE=''
@@ -171,18 +171,6 @@ matrix:
 
 ################################################################################
   allow_failures:
-    - php: 7.0
-      env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
-      after_script:
-    - php: 7.0
-      env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-      6after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
     - php: 7.1
       env: CC=gcc CXX=g++ MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
@@ -198,11 +186,6 @@ matrix:
     - script:
         - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
       after_script:
-    - php: 7.0
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 7.1
       env:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'

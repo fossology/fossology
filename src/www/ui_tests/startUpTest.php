@@ -22,7 +22,7 @@ class StartUpTest extends \PHPUnit_Framework_TestCase
   protected function setUp()
   {
     $this->pageContent = '';
-    $p = popen('php5  '. dirname(__DIR__).'/ui/index.php 2>&1', 'r');
+    $p = popen('php  '. dirname(__DIR__).'/ui/index.php 2>&1', 'r');
     while (!feof($p)) {
       $line = fgets($p, 1000);
       $this->pageContent .= $line;

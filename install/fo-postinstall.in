@@ -321,6 +321,8 @@ if [ $WEBONLY ]; then
      usermod -G $PROJECTGROUP -a apache
    fi
 
+   /etc/init.d/apache2 reload
+
 fi # end of WEBONLY
 
 ########################################################################

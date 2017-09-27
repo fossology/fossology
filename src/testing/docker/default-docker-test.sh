@@ -23,3 +23,4 @@ curl -L -s http://172.18.0.22/repo/ | grep -q "<title>Getting Started with FOSSo
 
 #### test whether the scheduler is running
 docker exec -it fossology-test /usr/local/share/fossology/scheduler/agent/fo_cli -S
+

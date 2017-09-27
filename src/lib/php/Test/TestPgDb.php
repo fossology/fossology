@@ -59,8 +59,9 @@ class TestPgDb extends TestAbstractDb
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . 'db.pg.log';
     $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));
 
-    $container->get('db.manager')->setDriver(new Postgres($this->connection));
     $this->dbManager = $container->get('db.manager');
+    $postgres = new Postgres($this->connection);
+    $this->dbManager->setDriver($postgres);
     $this->dbManager->queryOnce("DEALLOCATE ALL");
     $this->dropAllTables();
     $this->dropAllSequences();
