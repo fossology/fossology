@@ -37,6 +37,7 @@ class RestHelper
   private $uploadPermissionDao;
   private $folderDao;
   private $userDao;
+  private $authHelper;
 
   /**
    * RestHelper constructor.
@@ -50,39 +51,7 @@ class RestHelper
     $this->uploadDao = new UploadDao($this->dbHelper->getDbManager(), $this->logger, $this->uploadPermissionDao);
     $this->userDao = new UserDao($this->dbHelper->getDbManager(), $this->logger);
     $this->folderDao = new FolderDao($this->dbHelper->getDbManager(), $this->userDao, $this->uploadDao);
-
-  }
-
-  public function hasUserAccess($username, $context = "default")
-  {
-    $this->authorizeUser("fossy", "fossy");
-    if($context == "admin")
-    {
-      //do something else
-    }
-    return true;
-  }
-
-  public function authorizeUser($username, $password)
-  {
-    $_SESSION['UserLevel'] = $username;
-    define("PLUGIN_DB_ADMIN",0);
-    $_SESSION['api_key'] = "SIMPLE_API_KEY";
-    $GLOBALS['SysConf']['auth'] = 3;
-  }
-
-  public function getUserId()
-  {
-    //TODO provide some way for the user to authorize!
-    //Currently user fossy is logged in id=3
-    return 3;
-  }
-
-  public function getGroupId()
-  {
-    //TODO provide some way for the user to authorize!
-    //Currently user fossy is logged in id=3
-    return 3;
+    $this->authHelper = new AuthHelper($this->userDao);
   }
 
   /**
@@ -122,6 +91,15 @@ class RestHelper
   }
 
   /**
+   * @return UserDao
+   */
+  public function getUserDao()
+  {
+    return $this->userDao;
+  }
+
+
+  /**
    * @return UploadPermissionDao
    */
 
@@ -129,4 +107,14 @@ class RestHelper
   {
     return $this->uploadPermissionDao;
   }
+
+  /**
+   * @return AuthHelper
+   */
+  public function getAuthHelper()
+  {
+    return $this->authHelper;
+  }
+
+
 }

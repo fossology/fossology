@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 require_once '/usr/local/share/fossology/vendor/autoload.php';
+use Fossology\Lib\Auth\Auth;
 require_once "helper/RestHelper.php";
 require_once "models/InfoType.php";
 require_once "models/ScanOptions.php";
@@ -29,6 +30,7 @@ require_once "helper/DbHelper.php";
 require_once "/usr/local/share/fossology/www/ui/search-helper.php";
 require_once "/usr/local/share/fossology/lib/php/common.php";
 require_once "/usr/local/share/fossology/www/ui/agent-add.php";
+require_once "/usr/local/share/fossology/www/ui/auth-helper.php";
 
 //TODO: REMOVE ERROR_DISPLAY
 ini_set('display_errors', 1);
@@ -57,16 +59,18 @@ $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
 {
   $restHelper = new RestHelper();
   $dbHelper = new DbHelper();
-
+  $username = $request->headers->get("Php-Auth-User");
+  $password = $request->headers->get("Php-Auth-Pw");
   //checks if user has access to this functionality
-  if($restHelper->hasUserAccess("username"))
+  if($restHelper->getAuthHelper()->checkUsernameAndPassword($username, $password))
   {
     //get the id from the fossology user
     if (is_numeric($id))
     {
       if($dbHelper->doesIdExist("upload","upload_pk", $id))
       {
-        return new Response(json_encode($dbHelper->getUploads($restHelper->getUserId(), $id), JSON_PRETTY_PRINT));
+        return new Response(json_encode($dbHelper->getUploads($_SESSION["_sf2_attributes"][Auth::USER_ID], $id),
+                            JSON_PRETTY_PRINT));
       }
       else
       {
@@ -85,6 +89,7 @@ $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
     $error = new Info(403, "No authorized to GET upload with id " . $id, InfoType::ERROR);
     return new Response($error->getJSON(), $error->getCode());
   }
+
 });
 
 $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
