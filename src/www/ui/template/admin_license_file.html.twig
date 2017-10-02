@@ -1,0 +1,43 @@
+{# Copyright 2017 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% block content %}
+  <p>{{ dataMessage }}</p>
+  <table id='adminLicenseTable' rules='rows' width='100%' cellpadding='3'>
+    <thead>
+      <tr>
+        <th>Edit</th>
+        <th>Checked</th>
+        <th>SPDX Compatible</th>
+        <th>Shortname</th>
+        <th>Fullname</th>
+        <th>Text</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+  </table>
+{% endblock %}
+
+{% block foot %}
+  {% include "include/foot.html.twig" %}
+  <script>
+    function createLicenseTable() {
+      var data = JSON.parse(atob("{{ data }}"));
+      $('#adminLicenseTable').DataTable({
+        //base64 decode
+        data: data,
+        deferRender: true,
+        responsive: true,
+        scroller: true
+      });
+    }
+
+    $(document).ready(function () {
+      createLicenseTable();
+    });
+
+  </script>
+{% endblock %}
