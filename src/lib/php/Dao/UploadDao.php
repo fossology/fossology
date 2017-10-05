@@ -645,4 +645,25 @@ ORDER BY lft asc
     $this->dbManager->freeResult($result);
     return $pfilePerHashAlgo;
   }
+
+ 
+   /* @param int $uploadId
+   * @return array
+   */
+  public function getReportInfo($uploadId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT * FROM report_info where upload_fk=$1";
+    $this->dbManager->prepare(__METHOD__,$sql);
+    $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    if(empty($row)){
+      $this->dbManager->begin();
+      $stmt = __METHOD__.'ifempty';
+      $sql = "INSERT INTO report_info (upload_fk) VALUES ($1) RETURNING *";
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+      $this->dbManager->commit();
+    }
+    return $row;
+  }
 }

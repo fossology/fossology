@@ -678,4 +678,22 @@ ORDER BY lft asc
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
             array(LicenseMap::CONCLUSION,$licenseId), $groupId);
   }
+  /**
+   * @return array
+   **/
+  public function getLicenseObligations($licenseLists)
+  {
+    if(!empty($licenseLists)){
+      $licenseList = implode (",",$licenseLists);
+      $statementName = __METHOD__;
+      $this->dbManager->prepare($statementName,
+            "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, rf_shortname FROM obligation_ref
+             JOIN obligation_map ON obligation_map.ob_fk=obligation_ref.ob_pk
+             JOIN license_ref ON obligation_map.rf_fk=license_ref.rf_pk WHERE ob_active='t' and rf_fk in ($licenseList)");
+      $result = $this->dbManager->execute($statementName, array());
+      $ObligationRef = $this->dbManager->fetchAll($result);
+      $this->dbManager->freeResult($result);
+      return $ObligationRef;
+    }
+  }
 }

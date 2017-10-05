@@ -158,6 +158,9 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/readmeoss install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-unifiedreport \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/unifiedreport install
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install

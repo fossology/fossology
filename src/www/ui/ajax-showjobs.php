@@ -377,6 +377,8 @@ class AjaxShowJobs extends FO_Plugin
             break;
           case 'reportImport':
             $varJobQueueRow['download'] = "uploaded SPDX2 report";
+          case 'unifiedreport':
+            $varJobQueueRow['download'] = "Unified Report";
             break;
           default:
             $varJobQueueRow['download'] = "";
