@@ -73,13 +73,13 @@ class ReportImportConfiguration
 
   public function echoConfiguration()
   {
-    echo   "DEBUG: \$createLicensesAsCandidate is: "           .$this->var_dump($this->createLicensesAsCandidate);
-    echo "\nDEBUG: \$createLicensesInfosAsFindings is: "       .$this->var_dump($this->createLicensesInfosAsFindings);
-    echo "\nDEBUG: \$createConcludedLicensesAsFindings is: "   .$this->var_dump($this->createConcludedLicensesAsFindings);
-    echo "\nDEBUG: \$createConcludedLicensesAsConclusions is: ".$this->var_dump($this->createConcludedLicensesAsConclusions);
-    echo "\nDEBUG: \$overwriteDecisions is: "                  .$this->var_dump($this->overwriteDecisions);
-    echo "\nDEBUG: \$addCopyrightInformation is: "             .$this->var_dump($this->addCopyrightInformation);
-    echo "\nDEBUG: \$concludeLicenseDecisionType is: "         .$this->var_dump($this->concludeLicenseDecisionType);
+    echo   "INFO: \$createLicensesAsCandidate is: "           .$this->var_dump($this->createLicensesAsCandidate);
+    echo "\nINFO: \$createLicensesInfosAsFindings is: "       .$this->var_dump($this->createLicensesInfosAsFindings);
+    echo "\nINFO: \$createConcludedLicensesAsFindings is: "   .$this->var_dump($this->createConcludedLicensesAsFindings);
+    echo "\nINFO: \$createConcludedLicensesAsConclusions is: ".$this->var_dump($this->createConcludedLicensesAsConclusions);
+    echo "\nINFO: \$overwriteDecisions is: "                  .$this->var_dump($this->overwriteDecisions);
+    echo "\nINFO: \$addCopyrightInformation is: "             .$this->var_dump($this->addCopyrightInformation);
+    echo "\nINFO: \$concludeLicenseDecisionType is: "         .$this->var_dump($this->concludeLicenseDecisionType);
     echo "\n";
   }
 

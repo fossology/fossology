@@ -214,7 +214,6 @@ class ReportImportAgent extends Agent
       {
         if(substr($key, -$length) === $filename)
         {
-          //echo "INFO: match [".$filename."] with [".$key."]\n";
           return array($pfilesPerFileName[$key]);
         }
       }
@@ -240,6 +239,7 @@ class ReportImportAgent extends Agent
   /**
    * @param string $reportFilename
    * @return SpdxTwoImportSource
+   * @throws \Exception
    */
   private function getImportSource($reportFilename)
   {
@@ -263,7 +263,7 @@ class ReportImportAgent extends Agent
     }
 
     error_log("ERROR: can not handle report");
-    return NULL; // TODO: fail here
+    throw new \Exception("unsupported report type with filename: $reportFilename");
   }
 
   public function walkAllFiles($reportFilename, $upload_pk, $configuration)
@@ -286,9 +286,6 @@ class ReportImportAgent extends Agent
 
     foreach ($source->getAllFiles() as $fileId => $fileName)
     {
-
-      $pfiles = array();
-
       $hashMap = NULL;
       if ($pfilesPerHash !== NULL && sizeof($pfilesPerHash) > 0)
       {
@@ -299,28 +296,6 @@ class ReportImportAgent extends Agent
         $fileName, $pfilePerFileName,
         $hashMap, $pfilesPerHash, 'sha1');
 
-//      if(true) // TODO
-//      {
-//        $pfiles = self::getEntriesForFilename($fileName, $pfilePerFileName);
-//        if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0){
-//          foreach ($pfiles as $pfile){
-//            $hashMap = $source->getHashesMap($fileId);
-//            if ($hashMap !== null && sizeof($hashMap) > 0)
-//            {
-//              // verify via hashMap
-//            }
-//          }
-//        }
-//      }
-//      if ($pfilesPerHash !== null && sizeof($pfilesPerHash) > 0 && ($pfiles === null || sizeof($pfiles) === 0))
-//      {
-//        $hashMap = $source->getHashesMap($fileId);
-//        if ($hashMap !== null && sizeof($hashMap) > 0)
-//        {
-//          print "INFO: fallback to hash-matching for fileId=[".$fileId."] with filename=[".$fileName."]\n";
-//          $pfiles = self::getEntriesForHash($hashMap, $pfilesPerHash, 'sha1');
-//        }
-//      }
       if ($pfiles === null || sizeof($pfiles) === 0)
       {
         print "WARN: no match for fileId=[".$fileId."] with filename=[".$fileName."]\n";

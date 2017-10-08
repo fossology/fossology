@@ -13,7 +13,7 @@ This file is offered as-is, without any warranty.
         {% include 'components/select-folder.html.twig' with {'name': 'oldfolderid', 'id': 'oldfolderid', 'selected': folderId} %}
       </li>
       <li>{{ "Select the upload you wish to edit"|trans }}:
-        {% if uploadId is not empty %}<input type="hidden" name="upload_pk" value="{{ uploadId }}" />
+        {% if uploadList is not empty %}
           {% import "include/macros.html.twig" as macro %}
           {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction) }}
         {% else %}

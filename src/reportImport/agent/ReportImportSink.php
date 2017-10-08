@@ -233,7 +233,7 @@ class ReportImportSink
       $eventIds = array();
       foreach ($addLicenseIds as $licenseId => $licenseText)
       {
-        echo "add decision $licenseId to " . $pfile['uploadtree_pk'] . "\n";
+        // echo "add decision $licenseId to " . $pfile['uploadtree_pk'] . "\n";
         $eventIds[] = $this->clearingDao->insertClearingEvent(
           $pfile['uploadtree_pk'],
           $this->userId,
@@ -247,7 +247,7 @@ class ReportImportSink
       }
       foreach ($removeLicenseIds as $licenseId)
       {
-        echo "remove decision $licenseId from " . $pfile['uploadtree_pk'] . "\n";
+        // echo "remove decision $licenseId from " . $pfile['uploadtree_pk'] . "\n";
         $eventIds[] = $this->clearingDao->insertClearingEvent(
           $pfile['uploadtree_pk'],
           $this->userId,

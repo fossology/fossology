@@ -27,8 +27,6 @@ class ReportImportPlugin extends DefaultPlugin
 {
   const NAME = 'ui_reportImport';
 
-  /** @var UserDao */
-  private $userDao;
   /** @var UploadDao */
   private $uploadDao;
   /** @var FolderDao */
@@ -41,7 +39,6 @@ class ReportImportPlugin extends DefaultPlugin
       self::PERMISSION => Auth::PERM_WRITE,
       self::REQUIRES_LOGIN => TRUE
     ));
-    $this->userDao = $GLOBALS['container']->get('dao.user');
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
@@ -55,17 +52,15 @@ class ReportImportPlugin extends DefaultPlugin
 
   protected function handle(Request $request)
   {
-    $report = intval($request->get('report'));
-    $uploadId = intval(GetArrayVal("upload_pk", $_POST));
+    $uploadId = intval(GetArrayVal("uploadselect", $_POST));
     if (empty($uploadId) ||
         !array_key_exists('report',$_FILES) ||
         sizeof($_FILES['report']['name']) != 1)
     {
-      return $this->showUiToChoose($uploadId);
+      return $this->showUiToChoose();
     }
     else
     {
-
       $jobMetaData = $this->runImport($uploadId, $_FILES['report'], $request);
       $showJobsPlugin = \plugin_find('showjobs');
       $showJobsPlugin->OutputOpen();
@@ -73,7 +68,7 @@ class ReportImportPlugin extends DefaultPlugin
     }
   }
 
-  protected function showUiToChoose($uploadId)
+  protected function showUiToChoose()
   {
     $vars=array();
     $groupId = Auth::getGroupId();
@@ -102,9 +97,7 @@ class ReportImportPlugin extends DefaultPlugin
     }
     $vars['uploadList'] = $uploadsById;
 
-    if (empty($uploadId)) {
-      $uploadId = GetParm('upload', PARM_INTEGER);
-    }
+    $uploadId = GetParm('upload', PARM_INTEGER);
     if (empty($uploadId))
     {
       reset($uploadsById);
