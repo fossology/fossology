@@ -518,6 +518,8 @@ class UnifiedReport extends Agent
   {
     global $SysConf;
 
+    $userName = $this->userDao->getUserName($userId);
+    $groupName = $this->userDao->getGroupNameById($groupId);
     $packageName = $this->uploadDao->getUpload($uploadId)->getFilename();
     //replace '(',')',' ' with '_' to avoid conflict while creating report.
     $packageName = str_replace('(','_',$packageName);
@@ -536,9 +538,12 @@ class UnifiedReport extends Agent
     $phpWord = new PhpWord();
 
     /* Get start time */
-    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) ts FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
+    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) AS ts, jq_cmd_args FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
-    $userName = $this->userDao->getUserName($userId);
+    $packageUri = "";
+    if(!empty($jobInfo['jq_cmd_args'])){
+     $packageUri = trim($jobInfo['jq_cmd_args'])."?mod=showjobs&upload=".$uploadId;
+    }
 
     /* Applying document properties and styling */
     $this->documentSettingsAndStyles($phpWord, $timestamp, $userName);
@@ -559,8 +564,7 @@ class UnifiedReport extends Agent
     $contents = $this->identifiedGlobalLicenses($contents);
     
     /* Summery table */
-    $reportSummarySection->summaryTable($section, $uploadId, $userName, $contents['licensesMain']['statements'], $contents['licenses']['statements'],$contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp);
-
+    $reportSummarySection->summaryTable($section, $uploadId, $userName, $contents['licensesMain']['statements'], $contents['licenses']['statements'],$contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
     
     /* Assessment summery table */
     $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);

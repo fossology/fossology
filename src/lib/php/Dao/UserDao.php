@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  * Author: J. Najjar, S. Weber, A. Wührl
  *
  * This program is free software; you can redistribute it and/or
@@ -383,6 +383,19 @@ class UserDao extends Object
     return $userRow['user_name'];
   }
 
+  /**
+   * @param $groupId
+   * @return array
+   */
+  public function getGroupNameById($groupId)
+  {
+    $groupRow =  $this->dbManager->getSingleRow("SELECT group_name FROM groups WHERE group_pk = $1",array($groupId),__METHOD__);
+    if (empty($groupRow))
+    {
+      throw new \Exception('Error: GroupId ='. $groupId .' not a member of a valid group.');
+    }
+    return $groupRow['group_name'];
+  }
 
   /**
    * @param int $userId

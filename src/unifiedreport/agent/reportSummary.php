@@ -68,13 +68,11 @@ class ReportSummary
    * @param array mainLicenses
    * @param int $timestamp
    */        
-  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp)
+  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri)
   {
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 14, "bold" => true);
     $firstRowStyle1 = array("size" => 12, "bold" => true);
-    $firstRowStyle2 = array("size" => 12, "bold" => false);
-    $checkBoxStyle = array("size" => 10, "bold" => false);
 
     $cellRowSpan = array("vMerge" => "restart", "valign" => "top");
     $cellColSpan = array("gridSpan" => 3, "valign" => "center");
@@ -109,8 +107,7 @@ class ReportSummary
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d", $timestamp)."  ".$userName." "), null, "pStyle");
-      
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d", $timestamp)."  ".$userName." (".$groupName.") "), null, "pStyle");      
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Reviewed by (opt.)"),$firstRowStyle1, "pStyle");
@@ -188,6 +185,11 @@ class ReportSummary
     else{
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("License(s) Not Identified."), null, "pStyle");
     }
+
+    $table->addRow($rowWidth2);
+    $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars("Fossology Upload/Package Link"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".$packageUri.""), null, "pStyle");
 
     $table->addRow($rowWidth2);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
