@@ -1,8 +1,11 @@
 <?php
 
+require_once dirname(dirname(dirname(__FILE__))) . "/www/ui/api/helper/DbHelper.php";
+require_once 'common-db.php';
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use Fossology\Lib\Db\DbManager;
+use www\ui\api\helper\DbHelper;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
@@ -67,7 +70,13 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
 {
   global $container;
 
+
   $dbManager = $container->get('db.manager');
+  if(empty($dbManager))
+  {
+    $dbHelper = new DbHelper();
+    $dbManager = $dbHelper->getDbManager();
+  }
   /* check all required inputs */
   if (empty($userId) or empty($job_name) or empty($filename) or
       empty($UploadMode) or empty($folder_pk)) return;
@@ -103,15 +112,17 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
  * @param $job_name
  * @param $upload_pk (optional)
  * @param $priority  (optional default 0)
- *
  * @return int $job_pk the job primary key
  */
 function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 {
   global $container;
 
-  /** @var DbManager $dbManager */
-  $dbManager = $container->get('db.manager');
+  if(empty($dbManager))
+  {
+    $dbHelper = new DbHelper();
+    $dbManager = $dbHelper->getDbManager();
+  }
 
   $upload_pk_val = empty($upload_pk) ? null : $upload_pk;
 
@@ -157,13 +168,20 @@ function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL, $jq_cmd_args=NULL)
 {
   global $PG_CONN;
+
+  if(empty($PG_CONN))
+  {
+    $dbHelper = new DbHelper();
+    $PG_CONN = $dbHelper->getPGCONN();
+  }
+
   $jq_args = pg_escape_string($jq_args);
   $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
   if (is_array($Depends)) 
   {
-    foreach($Depends as $Dependency) 
+    foreach($Depends as $Dependency)
     {
       if (empty($Dependency)) continue;
 

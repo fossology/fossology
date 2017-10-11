@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+require_once "user-del-helper.php";
 define("TITLE_user_del", _("Delete A User"));
 
 use \Fossology\Lib\Auth\Auth;
@@ -37,65 +39,6 @@ class user_del extends FO_Plugin
   }
 
   /**
-   * \brief Delete a user.
-   * 
-   * \return NULL on success, string on failure.
-   */
-  function Delete($UserId)
-  {
-    global $PG_CONN;
-    /* See if the user already exists */
-    $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $row = pg_fetch_assoc($result);
-    pg_free_result($result);
-    if (empty($row['user_name']))
-    {
-      $text = _("User does not exist.");
-      return($text);
-    }
-
-    /* Delete the users group 
-     * First look up the users group_pk
-     */
-    $sql = "SELECT group_pk FROM groups WHERE group_name = '$row[user_name]' LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $GroupRow = pg_fetch_assoc($result);
-    pg_free_result($result);
-
-    /* Delete all the group user members for this user_pk */
-    $sql = "DELETE FROM group_user_member WHERE user_fk = '$UserId'";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /* Delete the user */
-    $sql = "DELETE FROM users WHERE user_pk = '$UserId';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    /* Now delete their group */
-    DeleteGroup($GroupRow['group_pk']);
-
-    /* Make sure it was deleted */
-    $sql = "SELECT * FROM users WHERE user_name = '$UserId' LIMIT 1;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    $rowCount = pg_num_rows($result);
-    pg_free_result($result);
-    if ($rowCount != 0)
-    {
-      $text = _("Failed to delete user.");
-      return($text);
-    }
-
-    return(NULL);
-  } // Delete()
-
-  /**
    * \brief Generate the text for this plugin.
    */
   public function Output()
@@ -108,7 +51,7 @@ class user_del extends FO_Plugin
     if (!empty($User))
     {
       if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = $this->Delete($User); }
+      else { $rc = DeleteUser($User, $PG_CONN); }
       if (empty($rc))
       {
         /* Need to refresh the screen */

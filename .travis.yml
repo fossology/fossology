@@ -84,7 +84,7 @@ matrix:
         - master
       before_script:
         - git fetch --unshallow
-      install: 
+      install:
       script:
         - cd src/testing/travis/
         - ./check-changelog.sh

@@ -1,0 +1,496 @@
+# Copyright (C) Siemens AG 2017
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+swagger: '2.0'
+info:
+  title: FOSSology API
+  description: Automate your fossology instance using this API
+  version: "1.0.0"
+host: localhost
+schemes:
+  - https
+basePath: /repo/api/v1
+securityDefinitions:
+  UserSecurity:
+    type: basic
+security:
+  - UserSecurity: []
+
+produces:
+  - application/json
+paths:
+  /uploads/{id}:
+    get:
+      tags:
+        - Upload
+        - Organize
+      summary: Get single upload by id
+      description:
+        Returns an array with single upload
+      parameters:
+        - name: id
+          required: true
+          description: Id of the upload
+          in: path
+          type: number
+          format: int
+      responses:
+        200:
+          description: Get upload
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Upload'
+        400:
+          description: Bad request, id NaN etc.
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Info'
+    delete:
+      tags:
+        - Upload
+        - Organize
+      summary: Delete upload by id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          type: number
+          format: int
+      responses:
+        202:
+          description: Upload will be deleted
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad request, id NaN etc.
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Info'
+    patch:
+      tags:
+        - Upload
+        - Organize
+      parameters:
+        - name: id
+          description: uploadid
+          in: path
+          required: true
+          type: number
+        - name: folder_id
+          description: folder, where upload is located (change this to move upload)
+          in: header
+          required: false
+          type: string
+      responses:
+        202:
+          description: Upload will be moved
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad request, id NaN etc.
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Info'
+    put:
+      tags:
+        - Upload
+        - Organize
+      description: Can be used to copy uploads
+      parameters:
+        - name: id
+          description: uploadid
+          in: path
+          required: true
+          type: number
+        - name: folder_id
+          description: Folder Id, where upload should be copied to
+          in: header
+          required: true
+          type: number
+      responses:
+        202:
+          description: Upload will be copied
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Id not found
+          schema:
+            $ref: '#/definitions/Info'
+
+  /uploads:
+    get:
+      tags:
+        - Upload
+      summary: Uploads
+      description: |
+        The uploads endpoint returns all uploads
+      responses:
+        200:
+          description: An array of uploads
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Upload'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Info'
+  /search:
+      get:
+        tags:
+          - Search
+        parameters:
+          - name: searchType
+            # use 'allfiles', if not given
+            required: false
+            description: Limit search to
+            in: header
+            type: string
+            enum:
+              - directory
+              - containers
+              - allfiles
+          - name: filename
+            description: Filename to find, can contain % as wild-card
+            required: false
+            in: header
+            type: string
+          - name: tag
+            description: Tag to find
+            required: false
+            in: header
+            type: string
+          - name: filesizemin
+            description: Min filesize in bytes
+            required: false
+            in: header
+            type: number
+          - name: filesizemax
+            description: Max filesize in bytes
+            required: false
+            in: header
+            type: number
+          - name: license
+            description: License search filter
+            required: false
+            in: header
+            type: string
+          - name: copyright
+            description: Copyright search filter
+            required: false
+            in: header
+            type: string
+        responses:
+          200:
+            description: OK
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/SearchResults'
+          400:
+            description: Bad request, at least 1 parameter must be provider for search
+            schema:
+              $ref: '#/definitions/Info'
+          401:
+            description: Unauthorized, no authentification provided
+            schema:
+              $ref: '#/definitions/Info'
+  /users:
+      get:
+        tags:
+          - User
+          - Admin
+        responses:
+          200:
+            description: OK
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Info'
+          401:
+            description: Unauthorized, no authentification provided
+            schema:
+              $ref: '#/definitions/Info'
+          403:
+            description: Forbidden, no access to all users
+            schema:
+              $ref: '#/definitions/Info'
+  /jobs:
+      get:
+        tags:
+        - Job
+        summary: Gets all jobs
+        description: Returns all jobs with their status
+        parameters:
+          - name: limit
+            required: false
+            type: number
+            format: int
+            in: header
+        responses:
+          200:
+            description: OK
+            schema:
+              type: array
+              items:
+                $ref: '#/definitions/Job'
+          400:
+            description: Bad request
+            schema:
+              $ref: '#/definitions/Info'
+          401:
+            description: Unauthorized, no authentification provided
+            schema:
+              $ref: '#/definitions/Info'
+          403:
+            description: Forbidden, no access to jobs
+            schema:
+              $ref: '#/definitions/Info'
+      post:
+        tags:
+          - Job
+        summary: Schedule an Analysis
+        description:  Schedule an Analysis of an existing upload
+        parameters:
+          # This could also be omitted, because there are no real folders
+          - name: folder_id
+            in: header
+            required: true
+            type: number
+            format: int
+          - name: upload_id
+            in: header
+            required: true
+            type: number
+            format: int
+          - name: scan_options
+            required: true
+            in: body
+            schema:
+              $ref: '#/definitions/ScanOptions'
+        responses:
+          204:
+            description: Job Scheduled
+          400:
+            description: Bad request
+            schema:
+              $ref: '#/definitions/Info'
+          401:
+            description: Unauthorized, no authentification provided
+            schema:
+              $ref: '#/definitions/Info'
+          403:
+            description: Forbidden, no access to job
+            schema:
+              $ref: '#/definitions/Info'
+          404:
+            description: Not found
+            schema:
+              $ref: '#/definitions/Info'
+definitions:
+  SearchResults:
+    type: object
+    properties:
+      upload:
+        $ref: '#/definitions/Upload'
+      uploadTreeId:
+        type: number
+        format: int
+      filename:
+        type: string
+        description: Filename of the treeItem
+  LicenseDecider:
+    type: object
+    properties:
+      nomos_monk:
+        type: boolean
+        description: Scanners matches if all Nomos findings are within the Monk findings.
+      bulk_reused:
+        type: boolean
+        description: Bulk phrases from reused packages.
+      new_scanner:
+        type: boolean
+        description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
+  ScanOptions:
+    type: object
+    properties:
+      analysis:
+        $ref: '#/definitions/Analysis'
+      decider:
+        $ref: '#/definitions/LicenseDecider'
+      reuse:
+        description: UploadId to reuse
+        type: number
+        format: int
+  Upload:
+    type: object
+    properties:
+      folderid:
+        type: number
+        format: int
+        description: The folder id, where the upload is located
+      id:
+        type: number
+        format: int
+        description: Upload id of the upload.
+      description:
+        type: string
+        description: Description of the upload.
+      uploadname:
+        type: string
+        description: Display name of the upload.
+      uploaddate:
+        type: string
+        description: Date, when the file was uploaded.
+      filesize:
+        type: number
+        description: Filesize in Bytes.
+  Job:
+    type: object
+    properties:
+      job_id:
+        type: number
+        format: int
+      status:
+        type: string
+      filename:
+        type: string
+      eta:
+        type: string
+  Info:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      type:
+        type: string
+  User:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id of the user
+      name:
+        type: string
+        description: username
+      description:
+        type: string
+        description: description of the user
+      email:
+        type: string
+        description: email of the user, needs to be unique and is required
+      accessLevel:
+        type: string
+        enum:
+          - none
+          - read_only
+          - read_write
+          - admin
+      root_folder_id:
+        type: number
+        format: int
+        description: root folder id of the user
+      password:
+        type: string
+        description: password of the user. This will be null, if not needed
+      emailNotification:
+        type: boolean
+        description: enable email notification when upload scan completes
+      agents:
+        $ref: '#/definitions/Analysis'
+  Analysis:
+    type: object
+    properties:
+      bucket:
+        type: boolean
+        description: Should bucket analysis be run on this upload
+      copyright_email_author:
+        type: boolean
+        description: Should Copyright/Email/URL/Author Analysis be run on this upload.
+      ecc:
+        type: boolean
+        description: Should ECC Analysis be run on this upload.
+      ip:
+        type: boolean
+        description: Should IP Analysis be run on this upload.
+      keyword:
+        type: boolean
+        description: Should keyword Analysis be run on this upload.
+      mime:
+        type: boolean
+        description: Should MIME Analysis be run on this upload.
+      monk:
+        type: boolean
+        description: Should Monk Analysis be run on this upload.
+      nomos:
+        type: boolean
+        description: Should Nomos Analysis be run on this upload.
+      package:
+        type: boolean
+        description: Should Package Analysis be run on this upload.
