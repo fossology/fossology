@@ -60,12 +60,24 @@ function createDirlistTable() {
   };
 
   otable = $('#dirlist').dataTable(dirlistTableConfig);
+
 }
 
 $(document).ready(function () {
   createDirlistTable();
   $(document).tooltip();
   $("#lichistogram_length select").css('text-align','right');
-  $("#dirlist_length select").css('text-align','right');  
+  $("#dirlist_length select").css('text-align','right');
+
+  $('#markIrrelevant').click(function () {
+    var currentArray = [];
+    $("input:checkbox[id=selectedForIrrelevant]:checked").each(function() {
+      getCurrentVal = $(this).val();
+      if(jQuery.inArray(getCurrentVal, currentArray) < 0 && getCurrentVal != ""){
+        currentArray.push(getCurrentVal);
+      }
+    });
+    markDecisions(currentArray);
+  });
 });
 

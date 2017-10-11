@@ -76,11 +76,18 @@ function performPostRequest(doRemove) {
   });
 }
 
-function markDecisions() {
-  var data = {
-    "uploadTreeId": $('#uploadTreeId').val(),
-    "decisionMark": 'irrelevant'
-  };
+function markDecisions(uploadTreeIdForMultiple) {
+  if(Array.isArray(uploadTreeIdForMultiple)){
+    var data = {
+      "uploadTreeId": uploadTreeIdForMultiple,
+      "decisionMark": 'irrelevant'
+    };
+  }else{
+    var data = {
+      "uploadTreeId": $('#uploadTreeId').val(),
+      "decisionMark": 'irrelevant'
+    };
+  }
   resultEntity = $('bulkIdResult');
   $.ajax({
     type: "POST",
