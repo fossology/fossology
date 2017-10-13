@@ -247,6 +247,15 @@ class UserDao extends Object
   }
 
   /**
+   * @param $userPk
+   * @return array
+   */
+  public function getUserByPk($userPk)
+  {
+    return $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_pk = $1", array($userPk), __FUNCTION__);
+  }
+
+  /**
    * @param $groupName
    * @return array
    */

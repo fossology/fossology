@@ -265,7 +265,7 @@ function GetAgentKey($agentName, $agentDesc)
 
 
 /**
- * \deprecated  Use AgentesDao->AgentARSList
+ * \deprecated  Use AgentesDao->agentARSList
  * \brief
  *  The purpose of this function is to return an array of
  *  _ars records for an agent so that the latest agent_pk(s)
@@ -288,25 +288,10 @@ function GetAgentKey($agentName, $agentDesc)
 function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere="")
 {
   global $PG_CONN;
-
-  if (!DB_TableExists($TableName)) return false;
-
-  $LimitClause = "";
-  if ($limit > 0) $LimitClause = " limit $limit";
-  if ($agent_fk)
-  $agentCond = " and agent_fk='$agent_fk' ";
-  else
-  $agentCond = "";
-
-  $sql = "SELECT * FROM $TableName, agent
-           WHERE agent_pk=agent_fk and ars_success=true and upload_fk='$upload_pk' and agent_enabled=true
-           $agentCond $ExtraWhere
-           order by agent_ts desc $LimitClause";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $resultArray =  pg_fetch_all($result);
-  pg_free_result($result);
-  return $resultArray;
+  global $container;
+  /** @var AgentDao $agentDao */
+  $agentDao = $container->get('dao.agent');
+  return $agentDao->agentARSList($TableName, $upload_pk, $limit, $agent_fk, $ExtraWhere);
 }
 
 

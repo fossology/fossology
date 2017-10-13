@@ -61,7 +61,7 @@ class SpdxTwoAgent extends Agent
   /** @var LicenseMap */
   private $licenseMap;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   /** @var array */
   protected $includedLicenseIds = array();
   /** @var string */

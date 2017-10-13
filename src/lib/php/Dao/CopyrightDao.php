@@ -100,11 +100,52 @@ class CopyrightDao extends Object
     return $highlights;
   }
 
-  public function saveDecision($tableName,$pfileId, $userId , $clearingType,
-                                         $description, $textFinding, $comment){
+  /**
+   * @param $tableName
+   * @param $pfileId
+   * @param $userId
+   * @param $clearingType
+   * @param $description
+   * @param $textFinding
+   * @param $comment
+   * @param int $decision_pk
+   * @return int copyright_decision_pk of decision
+   */
+  public function saveDecision($tableName, $pfileId, $userId , $clearingType,
+                               $description, $textFinding, $comment, $decision_pk=-1)
+  {
     $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
         'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
-    $this->dbManager->insertTableRow($tableName, $assocParams, $sqlLog=__METHOD__);
+    if ($decision_pk <= 0)
+    {
+      return $this->dbManager->insertTableRow($tableName, $assocParams, __METHOD__.'Insert.'.$tableName, 'copyright_decision_pk');
+    }
+    else
+    {
+      $assocParams['is_enabled'] = True;
+      $this->dbManager->updateTableRow($tableName, $assocParams, "copyright_decision_pk", $decision_pk, __METHOD__.'Update.'.$tableName);
+      return $decision_pk;
+    }
+  }
+
+  public function removeDecision($tableName,$pfileId, $decisionId)
+  {
+    $this->dbManager->prepare(__METHOD__,
+      "UPDATE $tableName
+        SET is_enabled = 'f'
+      WHERE copyright_decision_pk = $1
+        AND pfile_fk = $2");
+    $this->dbManager->execute(__METHOD__, array($decisionId, $pfileId));
+  }
+
+  public function undoDecision($tableName,$pfileId, $decisionId)
+  {
+    $this->dbManager->prepare(__METHOD__,
+      "UPDATE $tableName
+        SET is_enabled = 't'
+      WHERE copyright_decision_pk = $1
+        AND pfile_fk = $2");
+    $this->dbManager->execute(__METHOD__, array($decisionId, $pfileId));
   }
 
   public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
@@ -121,11 +162,6 @@ class CopyrightDao extends Object
       $params []= $uploadId;
       $whereClause .= " AND UT.upload_fk = $".count($params);
       $statementName .= ".withUI";
-    }
-    if($type == "skipcontent"){
-      $distinctContent = "";
-    }else{
-      $distinctContent = ", C.content";
     }
     if ($type !== null && $type != "skipcontent")
     {
@@ -163,22 +199,25 @@ class CopyrightDao extends Object
 
     if ($extrawhere !== null)
     {
-      $whereClause .= " AND ". $extrawhere;
+      $whereClause .= "AND ". $extrawhere;
       $statementName .= "._".$extrawhere."_";
     }
 
-    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk$distinctContent)
+    $latestInfo = "SELECT DISTINCT ON(CD.pfile_fk, UT.uploadtree_pk, C.content, CD.textfinding)
              CD.description as description, CD.textfinding as textfinding,
              CD.comment as comments, UT.uploadtree_pk as uploadtree_pk,
              CD.clearing_decision_type_fk AS clearing_decision_type_fk,
              C.content AS content
             FROM $tableName C
             INNER JOIN $uploadTreeTableName UT
-            ON C.pfile_fk = UT.pfile_fk
-            $joinType JOIN $tableNameDecision CD
-            ON C.pfile_fk = CD.pfile_fk
-            WHERE C.content IS NOT NULL AND C.content!='' AND C.is_enabled='true' $whereClause  
-            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.copyright_decision_pk DESC";
+              ON C.pfile_fk = UT.pfile_fk
+            $joinType JOIN (SELECT * FROM $tableNameDecision WHERE is_enabled='true') AS CD
+              ON C.pfile_fk = CD.pfile_fk
+            WHERE C.content IS NOT NULL
+              AND C.content!=''
+              AND C.is_enabled='true'
+              $whereClause
+            ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.textfinding, CD.copyright_decision_pk DESC";
 
     if ($clearingTypeClause !== null)
     {
@@ -197,18 +236,18 @@ class CopyrightDao extends Object
     return $result;
   }
 
-  public function getDecision($tableName,$pfileId){
-
+  /**
+   * @param $tableName
+   * @param $pfileId
+   * @return array
+   */
+  public function getDecisions($tableName,$pfileId)
+  {
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * FROM $tableName where pfile_fk = $1 order by copyright_decision_pk desc limit 1";
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by copyright_decision_pk desc";
+    $params = array($pfileId);
 
-    $res = $this->dbManager->getSingleRow($sql,array($pfileId),$statementName);
-
-    $description = $res['description'];
-    $textFinding = $res['textfinding'];
-    $comment = $res['comment'];
-    $decisionType = $res['clearing_decision_type_fk'];
-    return array($description,$textFinding,$comment, $decisionType);
+    return $this->dbManager->getRows($sql, $params, $statementName);
   }
 
   /**

@@ -191,7 +191,7 @@ else
 }
 
 /* initialize the license_ref table */
-if ($UpdateLiceneseRef) 
+if ($UpdateLiceneseRef)
 {
   $row = $dbManager->getSingleRow("SELECT count(*) FROM license_ref",array(),'license_ref.count');
   if ($row['count'] >  0) {
@@ -337,6 +337,13 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0
   $sysconfig['Release'] = "3.0.2";
 }
 
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0.2'))
+{
+  require_once("$LIBEXECDIR/dbmigrate_multiple_copyright_decisions.php");
+
+  $sysconfig['Release'] = "3.1.0";
+}
+
 $dbManager->begin();
 $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),$sqlLog='drop.sysconfig.release');
 $dbManager->insertTableRow('sysconfig',
@@ -378,20 +385,20 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
-  
+
   $dbManager->queryOnce("BEGIN");
   $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
   /* create a new temp table structure only - license_ref_2 */
   $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
 
-  /** import licenseref.sql */  
+  /** import licenseref.sql */
   $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
   $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
   $dbManager->queryOnce($sqlstmts);
-  
+
   $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
-  
+
   $dbManager->prepare(__METHOD__.'.licenseRefByShortname','SELECT * from license_ref where rf_shortname=$1');
   /** traverse all records in user's license_ref table, update or insert */
   while ($row = pg_fetch_assoc($result_new))

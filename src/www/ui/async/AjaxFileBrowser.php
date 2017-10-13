@@ -52,7 +52,7 @@ class AjaxFileBrowser extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(

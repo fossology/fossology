@@ -46,9 +46,6 @@ class ClearingEvent extends Object implements LicenseClearing
    * @param int $groupId
    * @param int $eventType
    * @param ClearingLicense $clearingLicense
-   * @param boolean $removed
-   * @param string $reportinfo
-   * @param string $comment
    */
   public function __construct($eventId, $uploadTreeId, $timestamp, $userId, $groupId, $eventType, ClearingLicense $clearingLicense)
   {

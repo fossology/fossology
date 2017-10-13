@@ -71,7 +71,10 @@ function delete{{ table.type }}(upload, item, hash, kind) {
     type: 'POST',
     dataType: 'text',
     url: '?mod=ajax-copyright-hist&action=delete&type={{ table.type }}',
-    data: { id : upload + ',' + item + ',' + hash + ',' + kind },
+    data: { upload : upload
+          , item : item
+          , hash : hash
+          , type : kind },
       success: function(data) {
         $("#delete{{ table.type }}" + hash).hide();
         var updateElement = $("#update{{ table.type }}" + hash);

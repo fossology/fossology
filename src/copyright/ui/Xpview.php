@@ -136,8 +136,9 @@ class Xpview extends DefaultPlugin
       $description = $_POST['description'];
       $textFinding = $_POST['textFinding'];
       $comment = $_POST['comment'];
+      $decision_pk = $_POST['decision_pk'];
       $this->copyrightDao->saveDecision($this->decisionTableName ,$lastUploadEntry['pfile_fk'], $userId , $clearingType,
-          $description, $textFinding, $comment);
+        $description, $textFinding, $comment, $decision_pk);
     }
 
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
@@ -160,14 +161,13 @@ class Xpview extends DefaultPlugin
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
 
-    list($description,$textFinding,$comment, $decisionType)=$this->copyrightDao->getDecision($this->decisionTableName ,$uploadEntry['pfile_fk']);
-    $vars['agentName'] = $this->agentName;
-    $vars['description'] = $description;
-    $vars['textFinding'] = $textFinding;
-    $vars['comment'] = $comment;
+    $decisions = $this->copyrightDao->getDecisions($this->decisionTableName ,$uploadEntry['pfile_fk']);
 
+    $vars['agentName'] = $this->agentName;
+    $vars['decisions'] = $decisions;
     $vars['itemId'] = $uploadTreeId;
     $vars['uploadId'] = $uploadId;
+    $vars['pfile'] = $uploadEntry['pfile_fk'];
     $vars['pageMenu'] = $pageMenu;
     $vars['textView'] = $textView;
     $vars['legendBox'] = $this->legendBox();
@@ -176,7 +176,6 @@ class Xpview extends DefaultPlugin
     $vars['formName'] = "CopyRightForm";
     $vars['ajaxAction'] = $this->ajaxAction;
     $vars['skipOption'] =$this->skipOption;
-    $vars['selectedClearingType'] = $decisionType;
     $vars['clearingTypes'] = $copyrightDecisionMap;
     $vars['xptext'] = $this->xptext;
     

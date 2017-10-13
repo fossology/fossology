@@ -1,0 +1,111 @@
+{# Copyright 2015-2017 Siemens AG
+
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <form enctype="multipart/form-data" name="formy" method="post">
+    <ol>
+      <li>{{ 'Select the folder that contains the upload'|trans }}:
+        {% include 'components/select-folder.html.twig' with {'name': 'oldfolderid', 'id': 'oldfolderid', 'selected': folderId} %}
+      </li>
+      <li>{{ "Select the upload you wish to edit"|trans }}:
+        {% if uploadList is not empty %}
+          {% import "include/macros.html.twig" as macro %}
+          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction) }}
+        {% else %}
+          {{ 'No upload available in this folder'|trans }}
+        {% endif %}
+      </li>
+      <li>
+        <label>
+          {{ 'Select report to upload'|trans }}:
+          <input id="importUploadFileChooser" name="report" type="file" />
+        </label>
+      </li>
+      <li>
+        {{ 'Select how the information should be imported:'|trans }}
+        <ul>
+          <li>
+            {{ 'Create new licenses as'|trans }}
+            <ul>
+              <li>
+                <input type="radio" id="addNewLicensesAs-candidate" name="addNewLicensesAs" value="candidate" checked="checked">
+                <label for="addNewLicensesAs-candidate">license candidate</label>
+                <br/>
+                <span>
+                  Note: license candidates as scanner findings are currently not handled correctly in the UI
+                </span>
+              </li>
+              {% if userIsAdmin %}
+              <li>
+                <input type="radio" id="addNewLicensesAs-license" name="addNewLicensesAs" value="license">
+                <label for="addNewLicensesAs-license">new license</label>
+              </li>
+              {% endif %}
+            </ul>
+          </li>
+          <li>
+            {{ 'Add the License Info as findings from'|trans }}
+            <ul>
+              <li>
+                <label>
+                  <input type="checkbox" name="addLicenseInfoFromInfoInFile" value="true" checked="checked"/>
+                  SPDX tag of type licenseInfoInFile
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="addLicenseInfoFromConcluded" value="true" />
+                  SPDX tag of type licenseConcluded
+                </label>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <label>
+              <input type="checkbox" name="addConcludedAsDecisions" value="true" checked="checked"/>
+              {{ 'Add concluded licenses as decisions'|trans }}
+            </label>
+            <ul>
+              <li style="color: gray;">
+                <label>
+                  <input type="checkbox" name="addConcludedAsDecisionsOverwrite" value="true" checked="checked" onclick="return false;"/>
+                  {{ 'also overwrite existing decissions'|trans }}
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="addConcludedAsDecisionsTBD" value="true" checked="checked"/>
+                  {{ 'import as "to be discussed"'|trans }}
+                </label>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <input type="checkbox" name="addCopyrights" value="true"/>
+            {{ 'Add the copyright information as textfindings'|trans }}
+          </li>
+        </ul>
+      </li>
+    </ol>
+    <input id="importSubmitButton" type="submit" value="{{ 'Upload and Import'|trans }}" disabled="disabled" />
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+   $(document).ready(function() {
+     $('#oldfolderid').change(function(){
+       window.location.href = "{{ baseUri }}" + $(this).val();
+     });
+     $('#importUploadFileChooser').change(function(){
+       $('#importSubmitButton').prop('disabled', !$(this).val());
+     });
+   });
+  </script>
+{% endblock %}

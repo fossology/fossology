@@ -544,11 +544,14 @@ INSERT INTO clearing_decision (
   }
 
   /**
-   * @param $licenseId
-   * @param $licenseShortName
-   * @param $licenseName
+   * @param int $eventId
+   * @param int $userId
+   * @param int $groupId
+   * @param int $licenseRef
    * @param $licenseIsRemoved
-   * @param $clearingLicenses
+   * @param $type
+   * @param $reportInfo
+   * @param string $comment
    * @return ClearingEvent
    */
   protected function buildClearingEvent($eventId, $userId, $groupId, $licenseRef, $licenseIsRemoved, $type, $reportInfo, $comment)

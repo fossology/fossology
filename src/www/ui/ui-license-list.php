@@ -108,7 +108,7 @@ class ui_license_list extends FO_Plugin
 
   function getAgentPksFromRequest($upload_pk)
   {
-    $agents = array("monk","nomos","ninka");
+    $agents = array("monk","nomos","ninka","reportImport");
     $agent_pks = array();
 
     foreach($agents as $agent)
