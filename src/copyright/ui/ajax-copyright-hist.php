@@ -84,7 +84,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       $decision = GetParm("decision", PARM_INTEGER);
       $pfile = GetParm("pfile", PARM_INTEGER);
     }
-    
+
     /* check upload permissions */
     if (!$this->uploadDao->isAccessible($upload, Auth::getGroupId()))
     {
@@ -92,11 +92,13 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       return "<h2>$text</h2>";
     }
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
-    
+
     switch($action)
     {
       case "getData":
          return $this->doGetData($upload);
+      case "getDeactivatedData":
+        return $this->doGetData($upload, false);
       case "update":
          return $this->doUpdate($item, $hash, $type);
       case "delete":
@@ -112,9 +114,11 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   }
 
   /**
+   * @param $upload
+   * @param bool $activated
    * @return string
    */
-  protected function doGetData($upload)
+  protected function doGetData($upload, $activated = true)
   {
     $item = GetParm("item", PARM_INTEGER);
     $agent_pk = GetParm("agent", PARM_STRING);
@@ -123,7 +127,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $listPage = "copyright-list";
 
     header('Content-type: text/json');
-    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->getTableData($upload, $item, $agent_pk, $type,$listPage, $filter);
+    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->getTableData($upload, $item, $agent_pk, $type,$listPage, $filter, $activated);
     return new JsonResponse(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $aaData,
@@ -133,15 +137,25 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     );
   }
 
-  private function getTableData($upload, $item, $agent_pk, $type,$listPage, $filter)
+  /**
+   * @param $upload
+   * @param $item
+   * @param $agent_pk
+   * @param $type
+   * @param $listPage
+   * @param $filter
+   * @param bool $activated
+   * @return array
+   */
+  private function getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated = true)
   {
-    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter);
+    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter, $activated);
     $aaData = array();
     if (!empty($rows))
     {
       foreach ($rows as $row)
       {
-        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type,$listPage, $filter);
+        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type,$listPage, $filter, $activated);
       }
     }
 
@@ -149,7 +163,17 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
   }
 
-  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter)
+  /**
+   * @param $upload_pk
+   * @param $item
+   * @param $uploadTreeTableName
+   * @param $agentId
+   * @param $type
+   * @param $filter
+   * @param bool $activated
+   * @return array
+   */
+  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true)
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
@@ -182,7 +206,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     {
       // No filter, nothing to do
     }
-    $params = array($left, $right, $type, $agentId, 'true');
+    $params = array($left, $right, $type, $agentId);
 
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
@@ -193,7 +217,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
         "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND cp.type = $3 " .
         "AND cp.agent_fk= $4 " .
-        "AND cp.is_enabled= $5 " .
+        "AND cp.is_enabled=" . ($activated ? 'true' : 'false') .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
 
@@ -201,11 +225,11 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $countQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery $totalFilter $grouping) as K";
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
-        $filterParms, __METHOD__.$tableName . ".count");
+        $filterParms, __METHOD__.$tableName . ".count" . ($activated ? '' : '_deactivated'));
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
     $countAllQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery$grouping) as K";
-    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all");
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
     $iTotalRecords = $iTotalRecordsRow['count'];
 
     $range = "";
@@ -216,7 +240,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $sql = "SELECT content, hash, count(*) as copyright_count  " .
         $unorderedQuery . $totalFilter . " GROUP BY content, hash " . $orderString . $range;
-    $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName;
+    $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName . ($activated ? '' : '_deactivated');
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement, $filterParms);
     $rows = $this->dbManager->fetchAll($result);
@@ -262,17 +286,36 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return ' AND CP.content ilike $'.count($filterParams).' ';
   }
 
+
+  private function getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated = true)
+  {
+    $act = "<img";
+    if(!$activated)
+    {
+      $act .= " hidden='true'";
+    }
+    $act .= " id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class=\"delete\" src=\"images/space_16.png\">";
+    $act .= "<span";
+    if($activated) {
+      $act .= " hidden='true'";
+    }
+    $act .= " id='update$type$hash'>deactivated [<a href=\"#\" id='undo$type$hash' onClick='undo$type($upload,$uploadTreeId,\"$hash\",\"$type\");return false;'>Undo</a>]</span>";
+    return $act;
+  }
+
   /**
    * @param $row
    * @param $uploadTreeId
    * @param $upload
    * @param $agentId
    * @param $type
+   * @param $listPage
    * @param string $filter
-   * @internal param bool $normalizeString
+   * @param bool $activated
    * @return array
+   * @internal param bool $normalizeString
    */
-  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "")
+  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true)
   {
     $hash = $row['hash'];
     $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type" );
@@ -286,8 +329,11 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
     $output['0'] = $link;
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = "<img id='delete$type$hash' onClick='delete$type($upload,$uploadTreeId,\"$hash\",\"$type\");' class=\"delete\" src=\"images/space_16.png\"><span hidden='true' id='update$type$hash'></span>";
-    $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+    $output['2'] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated);
+    if($activated)
+    {
+      $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
+    }
     return $output;
   }
 

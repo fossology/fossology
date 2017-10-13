@@ -60,11 +60,20 @@ abstract class HistogramBase extends FO_Plugin {
         "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" => $filter, "description" => $description);
 
     //TODO template this! For now I just template the js
-    $output = "<div><table border=1 width='100%' id='copyright".$type."'></table></div><br/><br/>
+    $typeDescriptor = "";
+    if($type !== "statement")
+    {
+      $typeDescriptor = $type;
+    }
+    $output = "<h4>Activated $typeDescriptor statements:</h4>
+               <div><table border=1 width='100%' id='copyright".$type."'></table></div>
+               <br/><br/>
                <div>
                 <a style='cursor: pointer; margin-left:10px;'id='deleteSelected".$type."' class='buttonLink'>Mark selected rows for deletion</a>
-               </div>  
-              <br/>";
+               <br/><br/>
+               <h4>Deactivated $typeDescriptor statements:</h4>
+               </div>
+               <div><table border=1 width='100%' id='copyright".$type."deactivated'></table></div>";
 
     return array($output, $out);
   }

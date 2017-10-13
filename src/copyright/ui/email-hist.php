@@ -106,7 +106,8 @@ class EmailHistogram extends HistogramBase {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
-    } );
+      $(\"#EmailUrlAuthorTabs\").tabs();
+    });
     ";
   }
 
