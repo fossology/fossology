@@ -684,7 +684,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function getLicenseTexts() {
     $licenseTexts = array();
-    $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
+    $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_fullname','rf_text')));
     $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
     $res = $this->dbManager->execute($stmt);
 
@@ -692,14 +692,18 @@ class SpdxTwoAgent extends Agent
     {
       if (array_key_exists($row['rf_pk'], $this->includedLicenseIds))
       {
-        $licenseTexts[$row['rf_shortname']] = $row['rf_text'];
+        $licenseTexts[$row['rf_shortname']] = array(
+          'text' => $row['rf_text'],
+          'name' => $row['rf_fullname'] ?: $row['rf_shortname']);
       }
     }
     foreach($this->includedLicenseIds as $license => $customText)
     {
       if (true !== $customText)
       {
-        $licenseTexts[$license] = $customText;
+        $licenseTexts[$license] = array(
+          'text' => $customText,
+          'name' => $license);
       }
     }
     $this->dbManager->freeResult($res);
