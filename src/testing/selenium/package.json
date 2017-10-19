@@ -1,0 +1,13 @@
+{
+  "name": "fossology_ui_tests",
+  "version": "1.0.0",
+  "dependencies": {
+    "protractor": "5.1.2"
+  },
+  "scripts": {
+    "setup": "./setup.sh",
+    "test": "node_modules/protractor/bin/protractor test/conf.js",
+    "test-multiple": "./multiple_run_tests.sh",
+    "start": "npm run setup && npm run test"
+  }
+}

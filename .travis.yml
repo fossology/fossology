@@ -89,6 +89,10 @@ matrix:
         - cd src/testing/travis/
         - ./check-changelog.sh
       after_script:
+    - env: TEST=E2E Tests # allowed failure
+      before_script:
+      install:
+      script: src/testing/selenium/travis_start.sh
 
 ################################################################################
 ## C/C++ and phpunit agent tests
@@ -163,6 +167,10 @@ matrix:
     - script: # allowed failure
         - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
       after_script:
+    - env: TEST=E2E Tests # allowed failure
+      before_script:
+      install:
+      script: src/testing/selenium/travis_start.sh
 
 ################################################################################
   allow_failures:
@@ -186,3 +194,18 @@ matrix:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
         CHECKBEFORE=''
         MAKETARGETS='build-lib VERSIONFILE build-cli'
+      env: PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
+
+script:
+ - set -e
+ - src/testing/syntax/syntaxtest.sh
+ - $CHECKBEFORE
+ - make $MAKETARGETS
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ~5; fi
+ - if [[ -n ${PHPTESTSUITE} ]]; then phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
+ - set +e
+
+after_script:
+ - mkdir -p build/logs
+ - php src/vendor/bin/coveralls -vv -x clover.xml
