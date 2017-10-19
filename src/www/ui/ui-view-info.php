@@ -592,6 +592,91 @@ class ui_view_info extends FO_Plugin
     return $VT;
   }
 
+  function ShowReportInfo($Upload)
+  {
+    $VT = "";
+    $text = _("Report Info");
+    $VT .= "<H2>$text</H2>\n";
+
+    $row = $this->uploadDao->getReportInfo($Upload);
+ 
+    if (!empty($row))
+    {
+      $reviewedBy = $row['ri_reviewed'];
+      $reportRel = $row['ri_report_rel'];
+      $community = $row['ri_community'];
+      $component = $row['ri_component'];
+      $version = $row['ri_version'];
+      $relDate = $row['ri_release_date'];
+      $sw360Link = $row['ri_sw360_link'];
+      $footerNote = $row['ri_footer'];
+      $generalAssesment = $row['ri_general_assesment'];
+      $gaAdditional = $row['ri_ga_additional'];
+      $gaRisk = $row['ri_ga_risk'];
+      $gaSelectionList = explode(',', $row['ri_ga_checkbox_selection']);
+    }
+
+    $VT .= "<form action='' name='formReportInfo' method='post'>";
+    $VT .= "<table border=1 width='50%' >\n";
+    $text = _("Attribute");
+    $text2 = _("Info");
+    $VT .= "<tr><th>$text</th><th>$text2</th></tr>\n";
+    $footer = "Copyright Text(report Footer)";
+    $VT .= "<tr><td align='left'>" . $footer . "</td><td align='left'> <input type='Text' name='footerNote' style='width:99%' value='". $footerNote ."'></td>";
+    $attrib1 = "Reviewed by (opt.)";
+    $VT .= "<tr><td align='left'>" . $attrib1 . "</td><td align='left'> <input type='Text' name='reviewedBy' style='width:99%' value='". $reviewedBy ."'></td>";
+    $attrib2 = "Report release date";
+    $VT .= "<tr><td align='left'>" . $attrib2 . "</td><td align='left'><input type='Text' name='reportRel' style='width:99%' value='". $reportRel ."'></td>";
+    $attrib3 = "Community";
+    $VT .= "<tr><td align='left'>" . $attrib3 . "</td><td align='left'><input type='Text' name='community' style='width:99%' value='". $community . "'></td>";
+    $attrib4 = "Component";
+    $VT .= "<tr><td align='left'>" . $attrib4 . "</td><td align='left'><input type='Text' name='component' style='width:99%' value='". $component . "'></td>";
+    $attrib5 = "Version";
+    $VT .= "<tr><td align='left'>" . $attrib5 . "</td><td align='left'><input type='Text' name='version' style='width:99%' value='". $version . "'></td>";
+    $attrib6 = "Release date";
+    $VT .= "<tr><td align='left'>" . $attrib6 . "</td><td align='left'><input type='Text' name='relDate' style='width:99%' value='". $relDate . "'></td>";
+    $attrib7 = "Mainline /SW360 Portal Link";
+    $VT .= "<tr><td align='left'>" . $attrib7 . "</td><td align='left'><input type='Text' name='sw360Link' style='width:99%' value='" . $sw360Link . "'></td>";
+    $attrib8 = "General assessment";
+    $VT .= "<tr><td align='left'>" . $attrib8 . "</td><td align='left'><input type='Text' name='generalAssesment' style='width:99%' value='" . $generalAssesment . "'></td>";
+    $attrib9 = "Source / binary integration notes";
+    $nonCritical = "no critical files found, source code and binaries can be used as is";
+    $critical = "critical files found, source code needs to be adapted and binaries possibly re-built";
+    if(empty($gaSelectionList[0])) $gaSelectionList[0] = '';
+    if(empty($gaSelectionList[1])) $gaSelectionList[1] = '';
+    $VT .= "<tr><td align='left'>" . $attrib9 . "</td><td align='left'><input type='checkbox' name='nonCritical' $gaSelectionList[0]>$nonCritical</br><input type='checkbox' name='critical' $gaSelectionList[1]>$critical</td>";
+    $attrib10 = "Dependency notes";
+    $noDependency = "no dependencies found, neither in source code nor in binaries";
+    $dependencySource = "dependencies found in source code (see obligations)";
+    $dependencyBinary = "dependencies found in binaries (see obligations)";
+
+    if(empty($gaSelectionList[2])) $gaSelectionList[2] = '';
+    if(empty($gaSelectionList[3])) $gaSelectionList[3] = '';
+    if(empty($gaSelectionList[4])) $gaSelectionList[4] = '';
+    $VT .= "<tr><td align='left'>" . $attrib10 . "</td><td align='left'><input type='checkbox' name='noDependency' $gaSelectionList[2]>$noDependency</br><input type='checkbox' name='dependencySource' $gaSelectionList[3]>$dependencySource</br><input type='checkbox' name='dependencyBinary' $gaSelectionList[4]>$dependencyBinary</td>";
+    $attrib11 = "Export restrictions by copyright owner";
+    $noExportRestriction = "no export restrictions found";
+    $exportRestriction = "export restrictions found (see obligations)";
+    if(empty($gaSelectionList[5])) $gaSelectionList[5] = '';
+    if(empty($gaSelectionList[6])) $gaSelectionList[6] = '';
+    $VT .= "<tr><td align='left'>" . $attrib11 . "</td><td align='left'><input type='checkbox' name='noExportRestriction' $gaSelectionList[5]>$noExportRestriction </br><input type='checkbox' name='exportRestriction' $gaSelectionList[6]>$exportRestriction</td>";
+    $attrib12 = "Restrictions for use (e.g. not for Nuclear Power) by copyright owner";
+    $noRestriction = "no restrictions for use found";
+    $restrictionForUse = "restrictions for use found (see obligations)";
+    if(empty($gaSelectionList[7])) $gaSelectionList[7] = '';
+    if(empty($gaSelectionList[8])) $gaSelectionList[8] = '';
+    $VT .= "<tr><td align='left'>" . $attrib12 . "</td><td align='left'><input type='checkbox' name='noRestriction' $gaSelectionList[7]>$noRestriction</br><input type='checkbox' name='restrictionForUse' $gaSelectionList[8]>$restrictionForUse</td>";
+    $attrib13 = "Additional notes";
+    $VT .= "<tr><td align='left'>" . $attrib13 . "</td><td align='left'><input type='Text' name='gaAdditional' style='width:99%' value='" . $gaAdditional . "'></td>";
+    $attrib14 = "General Risks (optional)";
+    $VT .= "<tr><td align='left'>" . $attrib14 . "</td><td align='left'><input type='Text' name='gaRisk' style='width:99%' value='" . $gaRisk . "'></td>";
+    $VT .= "<tr><td align='center' colspan='2' ><input type='submit' name='submitReportInfo' value='Submit' /></td></tr>";
+    $VT .= "</table><p>\n";
+    $VT .= "</form>";
+
+    return $VT;
+  }
+
   public function Output()
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
@@ -599,8 +684,40 @@ class ui_view_info extends FO_Plugin
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
-    
+
+    $submitReportInfo = GetParm("submitReportInfo", PARM_STRING);
+
+    if(isset($submitReportInfo)){
+      $reviewedBy = GetParm('reviewedBy', PARM_TEXT);
+      $footerNote = GetParm('footerNote', PARM_TEXT);
+      $reportRel = GetParm('reportRel', PARM_TEXT);
+      $community = GetParm('community', PARM_TEXT);
+      $component = GetParm('component', PARM_TEXT);
+      $version = GetParm('version', PARM_TEXT);
+      $relDate = GetParm('relDate', PARM_TEXT);
+      $sw360Link = GetParm('sw360Link', PARM_TEXT);
+      $generalAssesment = GetParm('generalAssesment', PARM_TEXT);
+      $nonCritical = empty(GetParm("nonCritical", PARM_STRING)) ? "unchecked" : "checked";
+      $critical = empty(GetParm("critical", PARM_STRING)) ? "unchecked" : "checked";
+      $noDependency = empty(GetParm("noDependency", PARM_STRING)) ? "unchecked" : "checked";
+      $dependencySource = empty(GetParm("dependencySource", PARM_STRING)) ? "unchecked" : "checked";
+      $dependencyBinary = empty(GetParm("dependencyBinary", PARM_STRING)) ? "unchecked" : "checked";
+      $noExportRestriction = empty(GetParm("noExportRestriction", PARM_STRING)) ? "unchecked" : "checked";
+      $exportRestriction = empty(GetParm("exportRestriction", PARM_STRING)) ? "unchecked" : "checked";
+      $noRestriction = empty(GetParm("noRestriction", PARM_STRING)) ? "unchecked" : "checked";
+      $restrictionForUse = empty(GetParm("restrictionForUse", PARM_STRING)) ? "unchecked" : "checked";
+      $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
+      $gaRisk = GetParm('gaRisk', PARM_TEXT);
+      $gaList = array($nonCritical, $critical, $noDependency, $dependencySource,$dependencyBinary,$noExportRestriction,$exportRestriction, $noRestriction, $restrictionForUse);
+      $gaSelectionList = implode(",", $gaList);
+      $sql = "UPDATE report_info SET ri_reviewed=$2, ri_footer=$3, ri_report_rel=$4, ri_community=$5, ri_component=$6,ri_version=$7, ri_release_date=$8, ri_sw360_link=$9, ri_general_assesment=$10, ri_ga_additional=$11,ri_ga_risk=$12,ri_ga_checkbox_selection=$13 WHERE upload_fk=$1;";
+      $this->dbManager->prepare(__METHOD__."updateReportInfoData",$sql);
+      $result = $this->dbManager->execute(__METHOD__."updateReportInfoData",array($uploadId, $reviewedBy, $footerNote, $reportRel, $community, $component, $version, $relDate, $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $gaSelectionList));
+      $this->dbManager->freeResult($result);
+    }
+
     $V="";
+    $V .= $this->ShowReportInfo($uploadId);
     $V .= $this->ShowTagInfo($uploadId, $itemId);
     $V .= $this->ShowPackageinfo($uploadId, $itemId, 1);
     $V .= $this->ShowMetaView($uploadId, $itemId);

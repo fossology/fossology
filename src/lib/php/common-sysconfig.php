@@ -268,6 +268,29 @@ function Populate_sysconfig()
   . CONFIG_TYPE_TEXT .
                     ",'Number', null, '$contextDesc', null";
 
+  /* Report Header Text */
+  $Variable = "ReportHeaderText";
+  $contextNamePrompt = _("Report Header Text");
+  $contextValue = "FOSSology";
+  $contextDesc = _("Report Header Text at right side corner");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXT .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "CommonObligation";
+  $contextNamePrompt = _("Common Obligation");
+  $contextValue = "";
+  $contextDesc = _("Common Obligation Text, add line break with \n at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "AdditionalObligation";
+  $contextNamePrompt = _("Additional Obligation");
+  $contextValue = "";
+  $contextDesc = _("Additional Obligation Text, add line break with \n at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
+
   $Variable = "BlockSizeHex";
   $hexPrompt = _("Chars per page in hex view");
   $hexDesc = _("Number of characters per page in hex view");

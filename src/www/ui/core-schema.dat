@@ -1613,7 +1613,61 @@
   $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4";
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
+  $Schema["TABLE"]["report_info"]["ri_pk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_pk\" SET NOT NULL, ALTER COLUMN \"ri_pk\" SET DEFAULT nextval('report_info_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["report_info"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["upload_fk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["report_info"]["upload_fk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_reviewed\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_reviewed\" SET NOT NULL, ALTER COLUMN \"ri_reviewed\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_footer"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_footer"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_footer\" text DEFAULT 'Your Organization'";
+  $Schema["TABLE"]["report_info"]["ri_footer"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_footer\" SET NOT NULL, ALTER COLUMN \"ri_footer\" SET DEFAULT 'Your Organization'";
+
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_report_rel\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_report_rel\" SET NOT NULL, ALTER COLUMN \"ri_report_rel\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_community"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_community"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_community\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_community"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_community\" SET NOT NULL, ALTER COLUMN \"ri_community\" SET DEFAULT 'NA'";  
+
+  $Schema["TABLE"]["report_info"]["ri_component"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_component"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_component"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component\" SET NOT NULL, ALTER COLUMN \"ri_component\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_version"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_version"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_version\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_version"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_version\" SET NOT NULL, ALTER COLUMN \"ri_version\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_release_date\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_release_date\" SET NOT NULL, ALTER COLUMN \"ri_release_date\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_sw360_link\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_sw360_link\" SET NOT NULL, ALTER COLUMN \"ri_sw360_link\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_general_assesment\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_general_assesment\" SET NOT NULL, ALTER COLUMN \"ri_general_assesment\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_additional\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_additional\" SET NOT NULL, ALTER COLUMN \"ri_ga_additional\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_risk\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_risk\" SET NOT NULL, ALTER COLUMN \"ri_ga_risk\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_checkbox_selection\" text";
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_checkbox_selection\" DROP NOT NULL";
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
@@ -1736,6 +1790,9 @@
 
   $Schema["SEQUENCE"]["users_user_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"users_user_pk_seq\"";
   $Schema["SEQUENCE"]["users_user_pk_seq"]["UPDATE"] = "SELECT setval('users_user_pk_seq',(SELECT greatest(1,max(user_pk)) val FROM users))";
+
+  $Schema["SEQUENCE"]["report_info_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"report_info_pk_seq\"";
+  $Schema["SEQUENCE"]["report_info_pk_seq"]["UPDATE"] = "SELECT setval('report_info_pk_seq',(SELECT greatest(1,max(ri_pk)) val FROM report_info))";
 
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\"";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"]["UPDATE"] = "SELECT setval('file_picker_file_picker_pk_seq',(SELECT greatest(1,max(file_picker_pk)) val FROM file_picker))";

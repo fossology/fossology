@@ -820,4 +820,32 @@ INSERT INTO clearing_decision (
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
             array($uploadId,$groupId,$licenseId));
   }
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param bool $onlyCurrent
+   * @return ClearingDecision[]
+   */
+  function getIrrelevantFilesFolder(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true)
+  {
+    $statementName = __METHOD__;
+    $params = array();
+    $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params);
+    $params[] = DecisionTypes::IRRELEVANT;
+    $sql = "$decisionsCte
+            SELECT
+	    itemid as uploadtree_pk,
+            lr.rf_shortname AS shortname,
+	    comment
+            FROM decision
+            LEFT JOIN clearing_decision_event cde ON cde.clearing_decision_fk = decision.id
+            LEFT JOIN clearing_event ce ON ce.clearing_event_pk = cde.clearing_event_fk
+            LEFT JOIN license_ref lr ON lr.rf_pk = ce.rf_fk
+            WHERE type_id=$".count($params);
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName, $params);
+    $irrelevantFiles = $this->dbManager->fetchAll($res);
+    $this->dbManager->freeResult($res);
+    return $irrelevantFiles;
+  }
 }

@@ -139,11 +139,6 @@ matrix:
 ################################################################################
 ## PHP tests
 #### PHP: PhpUnit Tests
-    - php: 5.4
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.5
       env:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'

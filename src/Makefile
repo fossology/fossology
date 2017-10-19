@@ -25,6 +25,7 @@ DIRS = \
 	nomos \
 	pkgagent \
 	readmeoss \
+	unifiedreport \
 	reuser \
 	scheduler \
 	spdx2 \
