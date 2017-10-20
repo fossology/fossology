@@ -79,11 +79,6 @@ matrix:
       install:
       script: src/testing/docker/docker-compose-test.sh
       after_script:
-    - env: TEST=check-changelog
-      before_script:
-      install: 
-      script: src/testing/travis/check-changelog.sh
-      after_script:
 
 ################################################################################
 ## C/C++ and phpunit agent tests
