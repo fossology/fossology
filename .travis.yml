@@ -80,14 +80,9 @@ matrix:
       script: src/testing/docker/docker-compose-test.sh
       after_script:
     - env: TEST=check-changelog
-      except:
-        - master
       before_script:
-        - git fetch --unshallow
       install: 
-      script:
-        - cd src/testing/travis/
-        - ./check-changelog.sh
+      script: src/testing/travis/check-changelog.sh
       after_script:
 
 ################################################################################
