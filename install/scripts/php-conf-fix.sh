@@ -12,7 +12,7 @@ echo 'Automated php.ini configuration adjustments'
 echo
 if [ -f /etc/redhat-release ]; then
     phpIni=/etc/php.ini
-    TIMEZONE=`readlink /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
+    TIMEZONE=`readlink -f /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
 elif [ -f ${PHP5_PATH} ]; then
     phpIni=${PHP5_PATH}
     TIMEZONE=`cat /etc/timezone`

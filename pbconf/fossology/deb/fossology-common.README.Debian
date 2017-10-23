@@ -1,5 +1,8 @@
 FOSSology for Debian
 --------------------
+
+(to be updated, text is from 2008)
+
 FOSSology is a web based application. In addition to installing the
 fossology packages you need to configure some other services on your
 system like a webserver and database. Then you access FOSSology with

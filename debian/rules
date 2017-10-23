@@ -87,6 +87,12 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src composer_install
+	mkdir -p ~/composer/
+	utils/install_composer.sh ~/composer/
+	COMPOSER_PHAR=~/composer/composer
+	# emulating writing composer file, TODO see if that is really needed now
+	cp src/composer.json $(CURDIR)/debian/fossology-common
+	cp src/composer.lock $(CURDIR)/debian/fossology-common
 	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 
