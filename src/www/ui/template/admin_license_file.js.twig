@@ -1,0 +1,122 @@
+{# Copyright 2017 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+$(document).ready(function () {
+    createLicenseTable();
+
+    //
+    //  Set up asynchronous loading of complete license texts
+    //
+
+    // Note: At this point one has to use delegated event handlers.
+    //  Ordinaray handlers are only registered for elements that exist in the DOM at the time of registration
+    //  Datatable pagination breaks this as ordinary handlers are only registered for elements of the one visible table page.
+    $('#adminLicenseTable').on('mouseover', '.licenseTextArea', function() {
+        if( $(this).data('textloaded')==false ) {
+            setLicenseText($(this).data('licenseid'), $(this).attr('id'))
+            $(this).data('textloaded',true);
+        }
+
+    });
+});
+
+function setLicenseText(licenseID, textareaID) {
+    $.ajax({
+        type: "GET",
+        data: {getLicenseText : true, licenseID: licenseID},
+        url: "?mod=admin_license",
+        success: function (data) {
+            $('#'+textareaID).val(data);
+        },
+        error: function () {
+            $('#'+textareaID).val("Error loading the license text");
+        }
+    });
+}
+
+function getDataForTable() {
+    var result = [];
+
+    {% for entry in data %}
+    result.push({
+        "edit":               [ "{{ entry['rf_pk'] }}", "{{ entry['marydone'] }}", "{{ entry['rf_shortname']|escape('js') }}"],
+        "marydone":           "{{ entry['marydone'] }}",
+        "rf_pk":              "{{ entry['rf_pk'] }}",
+        "rf_spdx_compatible": "{{ entry['rf_spdx_compatible'] }}",
+        "rf_shortname":       "{{ entry['rf_shortname']|escape('js') }}",
+        "rf_fullname":        "{{ entry['rf_fullname']|escape('js') }}",
+        "rf_text":            [ "{{ entry['rf_pk'] }}", "{{ entry['rf_text'][:120]|escape('js') }}" ],
+        "rf_url":             "{{ entry['rf_url'] }}"
+    });
+    {% endfor %}
+
+    return result;
+}
+
+//
+//  Set up License table
+//
+
+
+function createLicenseTable() {
+    $('#adminLicenseTable').DataTable({
+        data: getDataForTable(),
+        dom: "lBrtip",
+        deferRender: true,
+        responsive: true,
+        scroller: true,
+        columns: [
+            {title: "Edit", data: "edit", defaultContent: "", render: renderEdit},
+            {title: "Checked", data: "marydone", defaultContent: "", render: renderBoolean},
+            {title: "SPDX Compatible", data: "rf_spdx_compatible", defaultContent: "", render: renderBoolean},
+            {title: "Shortname", data: "rf_shortname", defaultContent: ""},
+            {title: "Fullname", data: "rf_fullname", defaultContent: ""},
+            {title: "Text", data: "rf_text", defaultContent: "", render: renderLicenseText},
+            {title: "URL", data: "rf_url", defaultContent: "", render: renderLink}
+        ],
+    });
+
+    //
+    // Render functions
+    //
+
+    function renderBoolean(b) {
+        if(b=="t") {
+            return "Yes";
+        } else if(b=="f") {
+            return "No"
+        } else {
+            return null;
+        }
+    }
+
+    function renderEdit(data) {
+        var rf_pk = data[0];
+        var marydone = data[1];
+        var rf_shortname = data[2];
+
+        return "<a href=\"{{ tracebackURI }}?mod=admin_license&rf_pk=" + rf_pk + "&req_marydone=" + marydone + "&req_shortname=" + rf_shortname + "\" >"
+            + "<img border=0 src=\"{{ tracebackURI }}images/button_edit.png\">" +
+            "</a>";
+    }
+
+    function renderLink(url) {
+        return "<a href=\"" + url + "\">" + url + "</a>";
+    }
+
+    function renderLicenseText(data) {
+        var licenseID = data[0];
+        var licenseText = data[1];
+
+
+        return "<textarea readonly class=\"licenseTextArea\" id=\"licenseTextArea" + licenseID + "\" " +
+            "data-licenseid=\"" + licenseID + "\" data-textloaded=\"false\" " +
+            "rows=\"3\" cols=\"40\">" +
+            licenseText +
+            "</textarea>";
+    }
+}

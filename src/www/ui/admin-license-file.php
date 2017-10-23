@@ -99,12 +99,26 @@ class admin_license_file extends FO_Plugin
       return $this->Updatefm($rf_pk);
     }
 
-    $V .= $this->Inputfm();
+    // return a license text
+    if (@$_GET["getLicenseText"])
+    {
+      if (@$_GET["licenseID"])
+      {
+        $licenseText = $this->getLicenseTextForID(@$_GET["licenseID"]);
+        if (!$licenseText)
+        {
+          return new Response("Error in querying license text.", Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+        }
+        return new Response($licenseText, Response::HTTP_OK, array('Content-type'=>'text/plain'));
+      }
+    }
+
     if (@$_POST["req_shortname"])
     {
-      $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
+      $this->vars += $this->getLicenseListData($_POST["req_shortname"], $_POST["req_marydone"]);
     }
-    return $V;
+    $this->vars['Inputfm'] = $this->Inputfm();
+    return $this->render('admin_license_file.html.twig');
   }
 
   /**
@@ -150,44 +164,12 @@ class admin_license_file extends FO_Plugin
     return $V;
   }
 
-  private function getLicenseData($where, $filter, $namestr)
+
+  private function getLicenseData($where)
   {
-    global $PG_CONN;
-    $tableBodyData = [];
-
     $sql = "select * from ONLY license_ref $where order by rf_shortname";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-    if (pg_num_rows($result) == 0)
-    {
-      pg_free_result($result);
-      return NULL;
-    }
-
-    while ($row = pg_fetch_assoc($result))
-    {
-      $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
-
-      $rf_spdx_compatible = ($row['rf_spdx_compatible'] == 't') ? "Yes" : "No";
-      $vetext = $row['rf_text'];
-      $row = array(
-        "<td align=center><a href='".Traceback_uri() . "?mod=" . $this->Name .
-        "&rf_pk=$row[rf_pk]&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
-        "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>",
-        $marydone,
-        $rf_spdx_compatible,
-        "$row[rf_shortname]",
-        "$row[rf_fullname]",
-        "<textarea readonly rows='3' cols='40'>$vetext</textarea>",
-        "$row[rf_url]"
-      );
-
-      $tableBodyData[] = $row;
-    }
-
-    pg_free_result($result);
-    return $tableBodyData;
+    return $this->dbManager->getRows($sql);
   }
 
   /**
@@ -198,16 +180,17 @@ class admin_license_file extends FO_Plugin
    *
    * \return The input form as a string
    */
-  function LicenseList($namestr, $filter)
+  function getLicenseListData($namestr, $filter)
   {
     // look at all
     if ($namestr == "All")
       $where = "";
     else
-        $where = "where rf_shortname like '". pg_escape_string($namestr) ."' ";
+      $where = "where rf_shortname like '". pg_escape_string($namestr) ."%' ";
 
-    // $filter is one of these: "All", "done", "notdone"
-    if ($filter != "all") {
+    // $filter is one of these: "all", "done", "notdone"
+    if ($filter != "all")
+    {
       if (empty($where))
         $where .= "where ";
       else
@@ -216,8 +199,8 @@ class admin_license_file extends FO_Plugin
       if ($filter == "notdone") $where .= " marydone=false";
     }
 
-    $data = $this->getLicenseData($where, $filter, $namestr);
-    if($data == NULL)
+    $data = $this->getLicenseData($where);
+    if(!$data)
     {
       $dataMessage = _("No licenses matching the filter and name pattern were found");
     }
@@ -226,19 +209,17 @@ class admin_license_file extends FO_Plugin
       $dataSize = sizeof($data);
       $plural = "";
 
-      if(sizeof($data) > 1)
+      if($dataSize > 1)
         $plural = "s";
       $dataMessage = $dataSize . _(" License$plural found");
     }
 
     $vars = array(
-      'data' => base64_encode(json_encode($data)),
+      'data' => $data,
       'dataMessage' => $dataMessage,
-      'message' => "");
-    $string = $this->renderString('admin_license_file.html.twig', $vars);
-    file_put_contents("/home/max/test/test.txt", $string);
-    var_dump($string);
-    return $string;
+      'message' => "",
+      'tracebackURI' => Traceback_uri());
+    return $vars;
   }
 
   function Updatefm($rf_pk)
@@ -524,6 +505,18 @@ class admin_license_file extends FO_Plugin
     }
 
     return ($familynamearray);
+  }
+
+  private function getLicenseTextForID($licenseID)
+  {
+    $sql = "select rf_text from license_ref where rf_pk=$1";
+    $result = $this->dbManager->getSingleRow($sql, array($licenseID));
+
+    if(!$result)
+    {
+      return false;
+    }
+    return $result['rf_text'];
   }
 
 }
