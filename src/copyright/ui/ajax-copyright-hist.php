@@ -72,18 +72,19 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $action = GetParm("action", PARM_STRING);
     $upload = GetParm("upload", PARM_INTEGER);
-    $type = GetParm("type", PARM_STRING);
 
-    if ($action=="update" || $action=="delete")
-    {
-      $item = GetParm("item", PARM_INTEGER);
-      $hash = GetParm("hash", PARM_STRING);
-    }
-    else if ($action=="deletedecision" || $action=="undodecision")
+    if ($action=="deletedecision" || $action=="undodecision")
     {
       $decision = GetParm("decision", PARM_INTEGER);
       $pfile = GetParm("pfile", PARM_INTEGER);
+      $type = GetParm("type", PARM_STRING);
     }
+    else if($action=="update" || $action=="delete" || $action=="undo")
+    {
+      $id = GetParm("id", PARM_STRING);
+      list($upload, $item, $hash, $type) = explode(",", $id);
+    }
+
 
     /* check upload permissions */
     if (!$this->uploadDao->isAccessible($upload, Auth::getGroupId()))
