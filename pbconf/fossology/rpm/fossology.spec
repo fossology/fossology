@@ -21,7 +21,7 @@ Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent fossology-decider fossology-spdx2 fossology-reuser
 #Recommends:		fossology-decider, fossology-spdx2, fossology-reuse,fossology-ninka
-BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
+BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,php-mbstring,php-xml,curl,PBBUILDDEP
 Summary:        FOSSology is a license compliance analysis  tool
 
 #
@@ -130,6 +130,16 @@ Requires:       fossology-common
 Summary:        Architecture for reusing clearing result of other uploads, monkbulk
 Group:          PBGRP
 
+%package unifiedreport
+Requires:       fossology-common
+Summary:        Unified report Agent
+Group:          PBGRP
+
+%package reportimport
+Requires:       fossology-common
+Summary:        Report Import Agent
+Group:          PBGRP
+
 #
 # description
 #
@@ -202,6 +212,12 @@ This package contains the monk agent programs and their resources.
 
 %description monkbulk
 This package contains the monkbulk agent programs and their resources.
+
+%description unifiedreport
+This package contains the unified report agent programs and their resources.
+
+%description reportimport
+This package contains the report import agent programs and their resources.
 
 #
 # prep
@@ -301,6 +317,18 @@ cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 %{_datadir}/PBPROJ/composer.json
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
+
+%files unifiedreport
+%{_sysconfdir}/PBPROJ/mods-enabled/unifiedreport
+%{_datadir}/PBPROJ/unifiedreport/*
+%{_datadir}/PBPROJ/unifiedreport/ui/*
+%{_datadir}/PBPROJ/unifiedreport/agent/*
+
+%files reportimport
+%{_sysconfdir}/PBPROJ/mods-enabled/reportImport
+%{_datadir}/PBPROJ/reportImport/*
+%{_datadir}/PBPROJ/reportImport/agent/*
+%{_datadir}/PBPROJ/reportImport/ui/*
 
 %files db
 %defattr(-,root,root)
@@ -551,6 +579,7 @@ fi
 %post monkbulk
 # Run the postinstall script
 /usr/lib/PBPROJ/fo-postinstall --agent
+
 
 chkconfig --add PBPROJ
 /etc/init.d/PBPROJ start
