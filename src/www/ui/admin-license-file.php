@@ -19,6 +19,7 @@
 
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
+use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_admin_license_file", _("License Administration"));
 
@@ -33,6 +34,7 @@ class admin_license_file extends FO_Plugin
     $this->Title      = TITLE_admin_license_file;
     $this->MenuList   = "Admin::License Admin";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->vars       = array();
     parent::__construct();
     
     $this->dbManager = $GLOBALS['container']->get('db.manager');
@@ -63,42 +65,40 @@ class admin_license_file extends FO_Plugin
     if (@$_POST["updateit"])
     {
       $resultstr = $this->Updatedb($_POST);
-      $V .= $resultstr;
       if (strstr($resultstr, $errorstr)) {
-        $V .= $this->Updatefm(0);
+        return $this->Updatefm(0);
       }
       else {
+        $V .= $resultstr;
         $V .= $this->Inputfm();
+        return $V;
       }
-      return $V;
     }
 
     if (@$_REQUEST['add'] == 'y')
     {
-      $V .= $this->Updatefm(0);
-      return $V;
+      return $this->Updatefm(0);
     }
 
     // Add new rec to db
     if (@$_POST["addit"])
     {
       $resultstr = $this->Adddb($_POST);
-      $V .= $resultstr;
       if (strstr($resultstr, $errorstr)) {
-        $V .= $this->Updatefm(0);
+        return $this->Updatefm(0);
       }
       else {
+        $V .= $resultstr;
         $V .= $this->Inputfm();
+        return $V;
       }
-      return $V;
     }
 
     // bring up the update form
     $rf_pk = @$_REQUEST['rf_pk'];
     if ($rf_pk)
     {
-      $V .= $this->Updatefm($rf_pk);
-      return $V;
+      return $this->Updatefm($rf_pk);
     }
 
     $V .= $this->Inputfm();
@@ -260,12 +260,18 @@ class admin_license_file extends FO_Plugin
   }
 
 
+  function Updatefm($rf_pk)
+  {
+    $this->vars += $this->getUpdatefmData($rf_pk);
+    return $this->render('admin_license-upload_form.html.twig');
+  }
+
   /**
    * @brief Update forms
    * @param int $rf_pk - for the license to update, empty to add
    * @return string The input form
    */
-  function Updatefm($rf_pk)
+  function getUpdatefmData($rf_pk)
   {
     $vars = array();
 
@@ -322,7 +328,7 @@ class admin_license_file extends FO_Plugin
         $row[$key] = $_POST[$key];
       }
     }
-    
+
     $vars['boolYesNoMap'] = array("true"=>"Yes", "false"=>"No");
     $row['rf_active'] = $this->dbManager->booleanFromDb($row['rf_active'])?'true':'false';
     $row['marydone'] = $this->dbManager->booleanFromDb($row['marydone'])?'true':'false';
@@ -334,8 +340,7 @@ class admin_license_file extends FO_Plugin
 
     $vars['rfId'] = $rf_pk?:$rf_pk_update;
 
-    $allVars = array_merge($vars,$row);
-    return $this->renderString('admin_license-upload_form.html.twig', $allVars);
+    return array_merge($vars,$row);
   }
 
 

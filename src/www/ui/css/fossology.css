@@ -320,8 +320,46 @@ div.infoTable {
 #databaseTable {
   width: 100%;
 }
+
 .candidateFileList{
   height: 200px;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.riskLevelBox {
+  height: 25px;
+  width: 25px;
+  padding: 0 4px;
+  font-weight: bold;
+  line-height: 25px;
+  text-align: center;
+  border-bottom-left-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.riskLevelBackgroud0 {
+  background: #ffffff;
+}
+
+.riskLevelBackgroud1 {
+  background: #87cfff;
+}
+
+.riskLevelBackgroud2 {
+  background: #00d10d;
+}
+
+.riskLevelBackgroud3 {
+  background: #f2e600;
+}
+
+.riskLevelBackgroud4 {
+  background: #f17d00
+}
+
+.riskLevelBackgroud5 {
+  background: #e95850;
 }

@@ -4,6 +4,10 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
 <form name="Updatefm" action="{{ actionUri }}" method="post">
   <input type="hidden" name="req_marydone" value="{{ req_marydone }}"/>
   <input type="hidden" name="req_shortname" value="{{ req_shortname }}"/>
@@ -72,3 +76,10 @@
   {% endif %}
   <input type="submit" value="{% if rfId %}{{ 'Update'|trans }}{% else %}{{ 'Add license'|trans }}{% endif %}"/>
 </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  {% set riskSelectId = 'risk_level' %}
+  <script>{% include "riskLevel_select.js.twig" %}</script>
+{% endblock %}
