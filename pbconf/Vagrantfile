@@ -36,8 +36,8 @@ set -ex
 yum install -y wget git
 
 # install EPEL
-wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-rpm -Uvh epel-release-latest-7.noarch.rpm
+wget https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+rpm -Uvh epel-release-7-11.noarch.rpm
 
 # install projectbuilder
 wget http://ftp.project-builder.org/test/centos/7/x86_64/pb-test.repo
@@ -140,8 +140,8 @@ PBRC
 # docker based generation here
 
 # maybe not all of the distros are relevant
-# DISTRO_LIST="ubuntu-14.10-x86_64 ubuntu-16.04-x86_64 ubuntu-16.10-x86_64 ubuntu-17.04-x86_64 debian-7-x86_64 debian-8-x86_64 debian-9-x86_64 fedora-21-x86_64 fedora-22-x86_64 fedora-23-x86_64 fedora-24-x86_64 fedora-25-x86_64 fedora-26-x86_64 centos-6-x86_64 centos-7-x86_64 mageia-5-x86_64 mageia-6-x86_64 opensuse-42.1-x86_64 opensuse-42.2-x86_64 opensuse-42.3-x86_64 gentoo-nover-x86_64"
-DISTRO_LIST="centos-7-x86_64 fedora-25-x86_64"
+# DISTRO_LIST="ubuntu-16.04-x86_64 ubuntu-16.10-x86_64 ubuntu-17.04-x86_64 debian-8-x86_64 debian-9-x86_64 fedora-25-x86_64 fedora-26-x86_64 centos-6-x86_64 centos-7-x86_64 mageia-6-x86_64 opensuse-42.2-x86_64 opensuse-42.3-x86_64"
+DISTRO_LIST="centos-7-x86_64"
 
 # some logic for command line ops here
 #DISTRO=$1

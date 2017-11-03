@@ -11,4 +11,4 @@ filter PBDEBCOMP = 7
 
 filter PBBUILDDEP = postgresql-server-dev-9.6,libjson-c-dev
 filter PBDEP = postgresql (>= 8.1) | postgresql-9.6
-filter PBPHPCLI = php-cli
+filter PBPHPCLI = php-cli,php-mbstring,php-xml
