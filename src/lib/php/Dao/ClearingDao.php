@@ -820,6 +820,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',
             array($uploadId,$groupId,$licenseId));
   }
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -847,5 +848,45 @@ INSERT INTO clearing_decision (
     $irrelevantFiles = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
     return $irrelevantFiles;
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param int $licenseId
+   */
+  public function removeClearingEventForRemovedJob(ItemTreeBounds $itemTreeBounds, $groupId, $licenseId)
+  {
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight(), $groupId, $licenseId);
+    $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) != 0)";
+
+    $sql = 'WITH rowsToDelete AS
+              (
+                SELECT clearing_event_pk, removed, date_added
+                  FROM clearing_event ce
+                 INNER JOIN uploadtree ut ON ce.uploadtree_fk = ut.uploadtree_pk
+                 WHERE '.$condition.'
+                   AND group_fk=$3
+                   AND rf_fk=$4
+                   AND ce.job_fk IS NOT NULL
+              )
+            DELETE FROM clearing_event
+             WHERE EXISTS
+              (
+                SELECT clearing_event_pk
+                  FROM rowsToDelete rd
+                  JOIN
+                    (
+                      SELECT MAX(date_added) AS date_added
+                        FROM rowsToDelete ORDER BY date_added DESC LIMIT 1
+                    ) AS rtd
+                    ON rd.date_added = rtd.date_added WHERE rd.removed=true
+              )
+              AND clearing_event_pk IN
+              (
+                SELECT clearing_event_pk
+                  FROM rowsToDelete
+              );';
+    $this->dbManager->getSingleRow($sql, $params, $sqlLog = __METHOD__);
   }
 }

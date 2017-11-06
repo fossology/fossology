@@ -86,6 +86,7 @@ class DeciderJobAgent extends Agent {
       {
         $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
+      $this->clearingDao->removeClearingEventForRemovedJob($containerBounds, $groupId, key($additionalEventsFromThisJob));
     }
   }
 
