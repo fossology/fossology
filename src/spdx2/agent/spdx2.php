@@ -351,7 +351,9 @@ class SpdxTwoAgent extends Agent
       $filesWithLicenses[$key]['files']=array();
       $filesWithLicenses[$key]['copyrights']=array();
     }
-
+    if(empty($copyrights)){
+      $copyrights = array();
+    }
     $filesWithLicenses[$key]['files'][$file] = $fullPath;
     foreach ($copyrights as $copyright) {
       if (!in_array($copyright, $filesWithLicenses[$key]['copyrights'])) {
