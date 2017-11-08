@@ -1935,6 +1935,7 @@
 
   $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_hash_idx"] = "CREATE INDEX copyright_hash_idx ON copyright using btree (hash,pfile_fk);";
 
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_clearing_decision_type_fk_index"] = "CREATE INDEX copyright_decision_clearing_decision_type_fk_index ON copyright_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
