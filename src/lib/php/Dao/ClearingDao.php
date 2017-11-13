@@ -382,9 +382,9 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @return ClearingEvent[] sorted by ts_added
    */
-  public function getRelevantClearingEvents($itemTreeBounds, $groupId)
+  public function getRelevantClearingEvents($itemTreeBounds, $groupId, $includeSubFolders=true)
   {
-    $decision = $this->getFileClearingsFolder($itemTreeBounds, $groupId, $onlyCurrent=true);
+    $decision = $this->getFileClearingsFolder($itemTreeBounds, $groupId, $includeSubFolders, $onlyCurrent=true);
     $events = array();
     $date = 0;
 
