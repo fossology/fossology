@@ -155,6 +155,11 @@
 #####
 # License Text entries start here...
 #####
+#
+%ENTRY%	_LT_3GPP
+%KEY%	"licen[cs]"
+%STR%	"3gpp organizational partners =SOME= permission to distribute modify and use this file under the standard license terms"
+#
 %ENTRY%	_LT_Imlib2
 %KEY%	"licen[cs]"
 %STR%	"this license does not apply to any software that links to the libraries provided by this software"
@@ -175,6 +180,14 @@
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]ed under (sil open font license|sil ofl) =FEW= 1\.?1"
 #
+%ENTRY%	_LT_ABSTYLES_1
+%KEY%	"permi[st]"
+%STR%	"permission is granted to make and distribute verbatim copies of this document provided that the copyright notice and this permission notice are preserved"
+#
+%ENTRY%	_LT_ABSTYLES_2
+%KEY%	"permi[st]"
+%STR%	"permission is granted to copy and distribute modified versions of this document under the conditions for verbatim copying"
+#
 %ENTRY%	_LT_ACAA_RIGHTS
 %KEY%	"so(ftware|urce)"
 %STR%	"ada conformity assessment authority ACAA (obtained|holds) unlimited rights in the software and documentation contained herein"
@@ -190,6 +203,10 @@
 %ENTRY%	_LT_ADAPTEC_GPL
 %KEY%	"licen[cs]"
 %STR%	"in whole or in part in conjunction with r?e?-?distribution of software governed by the general public licen[cs]e"
+#
+%ENTRY% _LT_ANT_BSD_RESTRICTION
+%KEY%   "distribut"
+%STR%   "following actions are prohibited =FEW= redistribution of source code containing the ANT\+ network key"
 #
 %ENTRY%	_LT_ANTLR
 %KEY%	"so(ftware|urce)"
@@ -247,6 +264,14 @@
 %ENTRY%	_LT_ADOBE_AFM
 %KEY%	"distribut"
 %STR%	"may be used copied and/?o?r? r?e?-?distributed for any purpose and without charge with or without modification provided that all copyright notices are retained"
+#
+%ENTRY%	_LT_ADOBE_AFMPARSE_1
+%KEY%	"distribut"
+%STR%	"may be freely copied and redistributed as long as"
+#
+%ENTRY%	_LT_ADOBE_AFMPARSE_2
+%KEY%	"notice"
+%STR%	"if the file has been modified in any way a notice of such modification is conspicuously indicated"
 #####
 # DELETED (below): ... provided this copyright notice is maintained intact
 # and that the contents of this file are not altered in any way from its
@@ -259,6 +284,14 @@
 %ENTRY%	_LT_ADOBE_EULA
 %KEY%	"licen[cs]"
 %STR%	"and is subject to all restrictions on such code as contained in the end[ -]user licen[cs]e agreement accompanying this product"
+#
+%ENTRY%	_LT_ADOBE_GLYPH_1
+%KEY%	=NULL=
+%STR%	"No modification, editing or other alteration of this document is allowed"
+#
+%ENTRY%	_LT_ADOBE_GLYPH_2
+%KEY%	"permi[st]"
+%STR%	"permission is hereby granted free of charge to any person obtaining a copy of this documentation file to create their own derivative works"
 #
 %ENTRY%	_LT_ADOBE_OTHER
 %KEY%	"distribut"
@@ -275,10 +308,15 @@
 %ENTRY%	_LT_ADOBE_SUB
 %KEY%	"licen[cs]"
 %STR%	"adobe grants =FEW= a licen[cs]e under its copyrights to use reproduce display and distribute the Software for any purpose and without fee provided"
-#####
-# DELETED: by contrast the ... to make sure the software is free for all
-# its users
-#####
+#
+%ENTRY%	_LT_ADSL
+%KEY%	"distribut"
+%STR%	"you may copy display modify and redistribute the software code either by itself or as incorporated into your code provided =FEW= you do not remove any proprietary notices"
+#
+%ENTRY%	_LT_NOT_ADVERTISING
+%KEY%	"permi[st]"
+%STR%	"not be used in advertising =SOME= without =FEW= permission"
+#
 %ENTRY%	_LT_AFFERO1
 %KEY%	"so(ftware|urce)"
 %STR%	"affero (general p|p)ublic licen[cs]e is intended to guarantee your freedom to share and change free software"
@@ -381,6 +419,10 @@
 %KEY%	"distribut"
 %STR%	"regardless of the media upon which it is distributed the software is licen[cs]ed to you for use solely in conjunction with AMD hardware products"
 #
+%ENTRY%	_LT_AMPAS
+%KEY%	"licen[cs]"
+%STR%	"nothing in this license shall be deemed to grant any rights to trademarks copyrights patents trade secrets or any other intellectual property of A\.?M\.?P\.?A\.?S\.?"
+#
 %ENTRY%	_LT_AOL_EULA
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"constitutes your acceptance and agreement with america online inc aol as follows"
@@ -392,6 +434,18 @@
 %ENTRY%	_LT_APACHE_2
 %KEY%	"permi[st]"
 %STR%	"r?e?-?distribution of this document is permitted provided that the following conditions are met 1 r?e?-?distributions must retain the above copyright notice this list of conditions and the following disclaimer"
+#
+%ENTRY%	_LT_APACHE_11_CLAUSE_3
+%KEY%	"distribut"
+%STR%	"documentation included with the r?e?distribution =FEW= must include the following acknowledge?ment"
+#
+%ENTRY%	_LT_APACHE_11_CLAUSE_4
+%KEY%	"software"
+%STR%	"endorse or promote products derived from this software without prior written permission"
+#
+%ENTRY%	_LT_APACHE_11_CLAUSE_5
+%KEY%	"software"
+%STR%	"products derived from this software may not be called"
 #####
 # DELETED: ... copy modify distribute and licen[cs]e this software and its
 # documentation for any purpose provided that existing copyright notices
@@ -410,13 +464,29 @@
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= apach(e|e software) licen[cs]e"
 #
+%ENTRY%	_LT_APACHEref4
+%KEY%	"licen[cs]"
+%STR%	"the terms of the apache License"
+#
 %ENTRY%	_LT_APACHESTYLEref
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (apache[ -]style|apache[ -]type|apache-?ish|apache[ -]like) licen[cs]e"
 #
-%ENTRY% _LT_APACHE_V2ref 
+%ENTRY% _LT_APACHE_V2ref1
 %KEY% "licen[cs]"
 %STR% "licen[cs]e(:?) apache( |-)2\.?0"
+#
+%ENTRY% _LT_APACHE_V2ref2
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed under (the )?apache( |-)2\.?0"
+#
+%ENTRY% _LT_APACHE_V2ref3
+%KEY% "\<under\>"
+%STR% "(licen[cs]ed|is) under (the )?apache v2"
+#
+%ENTRY% _LT_APACHE_V2ref4
+%KEY% "licen[cs]"
+%STR% "(covered by|(is|released) under) (an |the )?apache( |-)2\.?0 licen[cs]e"
 #####
 # DELETED: ... =ANY= in consideration of your agreement to the following
 # terms and your use installation modification or re-?distribution
@@ -571,7 +641,7 @@
 #
 %ENTRY%	_LT_ASL20ref
 %KEY%	"\<ap(ache|ple)\>"
-%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )2\.?0"
+%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )2\.?0?"
 #
 %ENTRY%	_LT_ASL20ref_2
 %KEY%	"\<ap(ache|ple)\>"
@@ -809,7 +879,7 @@
 #
 %ENTRY%	_LT_BSDref1
 %KEY%	"licen[cs]"
-%STR%	"governed by =SOME= BSD =SOME= licen[cs]e"
+%STR%	"(governed|consumed) by =SOME= BSD =SOME= licen[cs]e"
 #
 %ENTRY%	_LT_BSDref2
 %KEY%	"distribut"
@@ -849,6 +919,18 @@
 %KEY% "licen[cs]"
 %STR% "(re)?distribution and (use|modifications) (is|are) (allowed|permitted) (according|subject) to =FEW= bsd license"
 #
+%ENTRY%	_LT_BSDref11
+%KEY%	"licen[cs]"
+%STR%	"(dual|available via) =FEW= BSD license"
+#
+%ENTRY%	_LT_BSDref12
+%KEY%	"\<under\>"
+%STR%	"r?e?licensed? =FEW= under the (more )?permissive =SOME= 3-clause( |-)bsd"
+#
+%ENTRY%	_LT_BSDref13
+%KEY%	=NULL=
+%STR%	"licen([cs]ed?|sing) =FEW= 3-clause( |-)bsd"
+#
 %ENTRY%	_LT_BSDSTYLEref1
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (BSD[ -]style|BSD[ -]type|BSD-?ish|BSD[ -]like) licen[cs]e"
@@ -861,9 +943,13 @@
 %KEY%	"distribut"
 %STR%	"free distribution and use =SOME= in both source and binary form is allowed =SOME= provided"
 #
-%ENTRY%	_LT_BSDSTYLEref4
+%ENTRY%	_LT_BSD_HTMLAREA_1
 %KEY%	"licen[cs]"
 %STR%	"htmlArea license"
+#
+%ENTRY%	_LT_BSD_HTMLAREA_2
+%KEY%	"distribut"
+%STR%	"distributed under the same terms as htmlArea itself"
 #####
 # ORIGINAL with those EXPENSIVE wild-cards:
 # re-?distribution -and use in source and binary forms =ANY= (is|are)
@@ -873,7 +959,7 @@
 #####
 %ENTRY%	_LT_BSD_1
 %KEY%	"distribut"
-%STR%	"r?e?-?distribution and/?o?r? use in source and binary form(s|s =SOME= with or without modi(fi|.?)catio?ns?) (is|are) (permitted|permitted for any purpose) provided that"
+%STR%	"r?e?-?distribution and/?o?r? use in source and binary form(s|s =SOME= with or without modi(fi|.?)catio?ns?) (is|are) (permitted|permitted for any purpose) provid(ed|ing) that"
 #####
 # There are a couple of different forms of this licen[cs]e, and some copies
 # of the licensing terms use "it's" in the text (which gets changed to
@@ -888,7 +974,7 @@
 #####
 %ENTRY%	_LT_BSD_2
 %KEY%	"permi[st]"
-%STR%	"permission to use copy modify and/?o?r? distribute this software and =FEW= documentation for any purpose and without fee is hereby granted"
+%STR%	"permission to use copy modify and/?o?r? distribute this (python )?software and =FEW= documentation for any purpose (and )?(with or )?without fee (or royalty )?is hereby granted"
 #####
 # DELETED: ... =SOME= copyright =SOME= notices? this list of conditions
 # and the following disclaimer in the documentation and/or other materials
@@ -962,15 +1048,15 @@
 #
 %ENTRY%	_LT_BSD_CLAUSE_0
 %KEY%	"permi[st]"
-%STR%	"redistribution and use in source and binary forms\,? with or without modification\,? are permitted provided that the following conditions are met"
+%STR%	"redistribution and use in source and binary forms\,? with or without modification\,? are permitted provid(ed|ing) that the following conditions are met"
 #
 %ENTRY%	_LT_BSD_CLAUSE_1
 %KEY%	"copyright"
-%STR%	"redistributions of source code must retain the above copyright notice\,? this list of conditions and the following disclaimer"
+%STR%	"redistributions? of source code must retain the above copyright notice\,? (unmodified )?this list of conditions and the following disclaimer"
 #
 %ENTRY%	_LT_BSD_CLAUSE_2
 %KEY%	"copyright"
-%STR%	"redistributions in binary form must reproduce the above copyright notice\,? this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution"
+%STR%	"redistributions? in binary form must reproduc[et] the above copyright notice\,? this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution"
 #
 %ENTRY%	_LT_BSD_CLAUSE_3
 %KEY%	"software"
@@ -978,7 +1064,11 @@
 #
 %ENTRY%	_LT_BSD_CLAUSE_4
 %KEY%	"software"
-%STR%	"names? =FEW= be used to endorse or promote products derived from this software without (specific )?(prior )?written permission"
+%STR%	"names? =SOME= may (not )?be used to endorse or promote products derived from this software without (specific )?(prior )?written permission"
+#
+%ENTRY%	_LT_BSD_CLAUSE_4_LONG
+%KEY%	"software"
+%STR%	"neither the names? =SOME= n?or (its|their) (respective )?contributors may be used to endorse or promote products derived from this software without (specific )?(prior )?written permission"
 #
 %ENTRY%	_LT_XML_DB_V10
 %KEY%	"software"
@@ -999,6 +1089,14 @@
 %ENTRY%	_LT_BSD_OR_MIT
 %KEY% =NULL=
 %STR%	"available via the MIT (or|\/) =FEW= BSD licenses?"
+#
+%ENTRY%	_PHR_BZIP2_3
+%KEY% "copyright"
+%STR%	"version 1\.?0\.?5 =FEW= copyright =FEW= julian seward"
+#
+%ENTRY%	_PHR_BZIP2_4
+%KEY% =NULL=
+%STR%	"bzip2 =FEW= libbzip2 =FEW= version 1.0.6"
 #
 %ENTRY%	_LT_UC
 %KEY% "copyright"	
@@ -1049,13 +1147,19 @@
 %KEY%	"distribut"
 %STR%	"if you alter transform or build upon this work you may distribute the resulting work only under the same or similar licen[cs]e"
 #
-%ENTRY%	_LT_CCA_SAref
+%ENTRY%	_LT_CCA_SAref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]alike =FEW= licen[cs]e"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]?alike =FEW= licen[cs]e"
+#
+%ENTRY%	_LT_CCA_SAref2
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]e =FEW= (creative commons |cc( |-))by-sa"
+#
 # CC v 3.0 share alike wording
 %ENTRY%	_LT_CCA_SA_30
 %KEY%	"Adaptation"
 %STR%	"You may not offer or impose any terms on the Adaptation that restrict"
+#
 # CC v 3.0 non commercial wording
 %ENTRY%	_LT_CCA_NC_30
 %KEY%	"commercial"
@@ -1172,6 +1276,18 @@
 %KEY%	=NULL=
 %STR%	"disclosed =ANY= without =FEW= prior =SOME= written permission"
 #####
+%ENTRY%	_LT_COMMERCIAL_4
+%KEY%	"license"
+%STR%	"software license for =SOME= code"
+#####
+%ENTRY%	_LT_COMMERCIAL_5
+%KEY%	"license"
+%STR%	"((may|can)|( be|)) used? (this file |)in accordance with the commercial license agreement"
+#####
+%ENTRY%	_LT_COMMERCIAL_6
+%KEY%	"license"
+%STR%	"commercial use of =FEW= requires a license"
+#####
 %ENTRY%	_LT_COMMERCIAL_Intel
 %KEY%	=NULL=
 %STR%	"copyright =SOME= Intel Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
@@ -1179,10 +1295,6 @@
 %ENTRY%	_LT_COMMERCIAL_Broadcom
 %KEY%	=NULL=
 %STR%	"copyright =SOME= Broadcom Corporation =ANY= disclosed =ANY= without =FEW= prior =SOME= written permission"
-#####
-%ENTRY%	_LT_COMMERCIAL_4
-%KEY%	"license"
-%STR%	"software license for =SOME= code"
 #####
 %ENTRY%	_LT_COMMERCIAL_Android_Fraunhofer
 %KEY%	=NULL=
@@ -1234,6 +1346,14 @@
 %ENTRY%	_LT_CMU_6
 %KEY%	"licen[cs]"
 %STR%	"permission to use copy modify and/?o?r? licen[cs]e this software and its documentation for any purpose is hereby granted without fee subject"
+#
+%ENTRY%	_LT_CMU_7
+%KEY%	"permi[st]"
+%STR%	"provided that the above copyright notice appears? in all copies and that both that copyright notice and this permission notice appears? in supporting documentation"
+#
+%ENTRY%	_LT_CMU_8
+%KEY%	"permi[st]"
+%STR%	"copying and distribution is by permission of carnegie mellon and stanford university"
 #
 %ENTRY%	_LT_COMTROL
 %KEY%	"distribut"
@@ -1291,6 +1411,10 @@
 %ENTRY% _LT_CRYPTOGAMS
 %KEY% "licen[cs]"
 %STR% "licensed under =FEW= cryptogams license"
+#
+%ENTRY% _LT_CRYSTALSTACKER
+%KEY% =NULL=
+%STR% "Crystal.?Stacker is freeware"
 #
 %ENTRY%	_LT_CUPS
 %KEY%	"\<under\>"
@@ -1391,7 +1515,7 @@
 #
 %ENTRY%	_LT_DUAL_LICENSE_1
 %KEY%	"licen[cs]"
-%STR%	"(\<dual\>|multiple)[ -]licensed under"
+%STR%	"(\<dual\>|multi(ple)?)[ -]licensed (and may be used )?under"
 #
 %ENTRY%	_LT_DUAL_LICENSE_2
 %KEY%	"licen[cs]"
@@ -1400,7 +1524,7 @@
 %ENTRY%	_LT_DUAL_LICENSE_3
 %NOCHECK%
 %KEY%	"licen[cs]"
-%STR%	"alternatively =SOME= (this file|this software|this product|this library) may be (used|r?e?-?distributed) under the terms"
+%STR%	"alternatively =SOME= (this|the) (file|software|product|library|code) may be (used|r?e?-?distributed) =FEW= under the terms"
 #
 %ENTRY%	_LT_DUAL_LICENSE_3_EXHIBIT
 %NOCHECK%
@@ -1421,9 +1545,9 @@
 %STR%	"either under the terms of =SOME= or"
 #
 %ENTRY%	_LT_DUAL_LICENSE_7
-%NOCHECK%
+#%NOCHECK%
 %KEY%	"licen[cs]"
-%STR%	"may be optionally licenced under"
+%STR%	"may be optionally licen[cs]ed under"
 #
 %ENTRY%	_LT_DUAL_LICENSE_8
 %NOCHECK%
@@ -1441,11 +1565,133 @@
 %ENTRY%	_LT_DUAL_LICENSE_11
 %NOCHECK%
 %KEY%	"licen[cs]"
-%STR%	"alternatively =SOME= may r?e?-?distribute (this file|this software|this product|this library) =FEW= under the terms"
+%STR%	"alternatively =SOME= (may|can) r?e?-?distribute (this file|this software|this product|this library) =FEW= under the terms"
 #
 %ENTRY%	_LT_DUAL_LICENSE_12
 %KEY%	"licen[cs]"
 %STR%	"alternative license =SOME= if you prefer you can use"
+#
+%ENTRY%	_LT_DUAL_LICENSE_13
+%KEY%	"licen[cs]"
+%STR%	"dual MIT/BSD license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_14
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= dual BSD/GPL"
+#
+%ENTRY%	_LT_DUAL_LICENSE_15
+%KEY%	"licen[cs]"
+%STR%	"(license(:?))? (BSD|MIT) or =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_16
+%NOCHECK%
+%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"MIT/GPLv2 lic"
+#
+%ENTRY%	_LT_DUAL_LICENSE_17
+%KEY%	"distribut"
+%STR%	"you (can|may) r?e?distribute =FEW= under the terms of either =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_18
+%KEY%	"licen[cs]"
+%STR%	"this (software|program) is available to you under a choice of one of two licenses"
+#
+%ENTRY%	_LT_DUAL_LICENSE_19
+%KEY%	"licen[cs]"
+%STR%	"this (file|software|program) is (provided|licensed) under a dual (BSD/GPLv2|GPLv2 or BSD) license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_20
+%KEY%	"licen[cs]"
+%STR%	"is available under any (one )?of two licenses =FEW= license in use must be one of these two"
+#
+%ENTRY%	_LT_DUAL_LICENSE_21
+%KEY%	"licen[cs]"
+%STR%	"you may =FEW= r?e?distribute this code under either of these licenses"
+#
+%ENTRY%	_LT_DUAL_LICENSE_22
+%KEY%	"licen[cs]"
+%STR%	"dual licensed under the GPL or LGPL version 2 licenses"
+#
+%ENTRY%	_LT_DUAL_LICENSE_23
+%KEY%	"distribut"
+%STR%	"you (may|can) r?e?distribute (it|file|program|sw) =FEW= modify it under the terms of either"
+#
+%ENTRY%	_LT_DUAL_LICENSE_24
+%KEY%	"licen[cs]"
+%STR%	"this (file|software|program) is available to you under your choice of =FEW= licenses"
+#
+%ENTRY%	_LT_DUAL_LICENSE_25
+%KEY%	"licen[cs]"
+%STR%	"released using a dual license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_26
+%KEY%	"licen[cs]"
+%STR%	"released under both =FEW= and =FEW= licenses? either license (may|can) be used"
+#
+%ENTRY%	_LT_DUAL_LICENSE_27
+%NOCHECK%
+%KEY%	"licen[cs]"
+%STR%	"alternatively this (file|software|product|library) is available under =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_28
+%KEY%	"licen[cs]"
+%STR%	"either under the terms of =SOME= license (version|) =SOME= or at your option under =SOME= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_29
+%KEY%	"licen[cs]"
+%STR%	"under the terms of either =SOME= license =FEW= or =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_30
+%KEY%	"licen[cs]"
+%STR%	"this (code|program|file) (may|can) be (used|r?e?distributed) under either of the following two licences"
+#
+%ENTRY%	_LT_DUAL_LICENSE_31
+%KEY%	"licen[cs]"
+%STR%	"under a \<dual\> =FEW= or =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_32
+%KEY%	"licen[cs]"
+%STR%	"(licensed|distributed|available) under =FEW= license or L?GPL"
+#
+%ENTRY%	_LT_DUAL_LICENSE_33
+%KEY%	"distribut"
+%STR%	"alternatively r?e?distribution and use =SOME= (is|are) permitted provided that"
+#
+%ENTRY%	_LT_DUAL_LICENSE_34
+%KEY%	"licen[cs]"
+%STR%	"FreeRTOS =FEW= uses a dual license model"
+#
+%ENTRY%	_LT_DUAL_LICENSE_35
+%KEY%	=NULL=
+%STR%	"this work is provided under the GPL or LGPL at your choice"
+#
+%ENTRY%	_LT_DUAL_LICENSE_36
+%KEY%	"licen[cs]"
+%STR%	"licensed (to you )?under (your )?choice of =FEW= license =FEW= or =FEW= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_37
+%KEY%	"licen[cs]"
+%STR%	"contents of this file are subject to the terms of either =FEW= license =FEW= or =SOME= license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_38
+%KEY%	"licen[cs]"
+%STR%	"you (may|can) choose between two licenses"
+#
+%ENTRY%	_LT_DUAL_LICENSE_39
+%KEY%	"licen[cs]"
+%STR%	"is licensed under dual license"
+#
+%ENTRY%	_LT_DUAL_LICENSE_40
+%KEY%	"licen[cs]"
+%STR%	"available (under|via) =FEW= license =FEW= or =FEW= license"
+#
+%ENTRY%	_LT_SUBSEQUENT_VERSION
+%KEY%	"licen[cs]"
+%STR%	"under the terms of either =SOME= license =FEW= or =FEW= (subsequent|later|new) version =FEW= license"
+#
+%ENTRY%	_LT_MPL_SECONDARY_LICENSE
+%KEY%	"licen[cs]"
+%STR%	"under the terms of either this License or such Secondary License"
 #
 %ENTRY%	_LT_DYADE
 %KEY%	"so(ftware|urce)"
@@ -1478,6 +1724,10 @@
 %ENTRY%	_LT_ECLIPSEref
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= eclipse public licen[cs]e"
+#
+%ENTRY%	_LT_ECLIPSEref_2
+%KEY%	"licen[cs]"
+%STR%	"license(:?|d under) eclipse public licen[cs]e =FEW= 1\.?0"
 #
 #####
 # DELETED: permission is ... this software and its documentation without
@@ -2015,6 +2265,34 @@
 %KEY% "permi[st]"
 %STR% "(re)distribution and use in source and binary forms are freely permitted =SOME= copyright notice =SOME= (is|are) duplicated"
 #
+%ENTRY% _LT_FREE_93
+%KEY% "distribut"
+%STR% "author grants irrevocable permission =FEW= to use modify and distribute =FEW= in any way that does not diminish the rights of anyone else to use modify and distribute"
+#
+%ENTRY% _LT_FREE_94
+%KEY% "permi[st]"
+%STR% "permission is granted to r?e?-?distribute =FEW= in any (manner|way) provid(ed|ing) (that |)this (copyright |)notice (remains intact|(is (not modified|acknowledged|not removed)))"
+#
+%ENTRY% _LT_FREE_95
+%KEY% "distribut"
+%STR% "freely distributable without licensing fees"
+#
+%ENTRY% _LT_FREE_96
+%KEY% "software"
+%STR% "rights are granted to use this software in any way =FEW= this notice is not removed"
+#
+%ENTRY% _LT_FREE_97
+%KEY% "software"
+%STR% "can be included in commercial software packages =FEW= we only ask that proper credit be given to the authors"
+#
+%ENTRY% _LT_FREE_98
+%KEY% "licen[cs]"
+%STR% "perpetual unlimited permission to copy modify and relicense"
+#
+%ENTRY% _LT_FREE_99
+%KEY% "distribut"
+%STR% "may be used and distributed freely for any purposes? there is no warranty"
+#
 %ALIAS%	_FREE_last_other
 %ALIAS%	_FREECLAIM_last
 #
@@ -2148,6 +2426,14 @@
 %ENTRY%	_LT_GEN_PROPRIETARY_3
 %KEY%	"permi[st]"
 %STR%	"((can|do|shall|may|must) not|cannot) (use|r?e?-?distribute|copy|modify|sell) =FEW= without (prior w|w)ritten permission"
+#
+%ENTRY%	_LT_GEN_PROPRIETARY_4
+%KEY%	  "licen[cs]"
+%STR%	  "(use|(re)distribution|disclosure) =SOME= is limited by =SOME= license agreement"
+#
+%ENTRY%	_LT_GEN_PROPRIETARY_5
+%KEY%	  "\<proprietary\>"
+%STR%	  "this program is proprietary"
 #####
 # Almost identical to GPLref6 (the " ?" construct (below) IS INTENTONAL
 #####
@@ -2203,6 +2489,14 @@
 %KEY%	"distribut"
 %STR%	"may only be used modified and r?e?-?distributed under the terms of the (emacs|gphoto) project licen[cs]e"
 #
+%ENTRY%	_LT_GNUPLOT_1
+%KEY%	"distribut"
+%STR%	"not the right to distribute the complete modified source code"
+#
+%ENTRY%	_LT_GNUPLOT_2
+%KEY%	"distribut"
+%STR%	"distribute =FEW= source modifications from the released version in the form of a patch file"
+#
 %ENTRY%	_LT_GOOGLE_1
 %KEY%	"(condit|vers)ion"
 %STR%	"these terms of service apply to the executable code version of google"
@@ -2244,9 +2538,17 @@
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"gpl (plus|with) a( special|n|n added) exception"
 #
+%ENTRY%	_LT_GPL_EXCEPT_4
+%KEY%	"licen[cs]"
+%STR%	"in addition to the permissions in the GNU (general p|p)ublic licen[cs]e =FEW= gives you unlimited permission to link the compiled version"
+#
+%ENTRY%	_LT_GPL_EXCEPT_5
+%KEY%	"licen[cs]"
+%STR%	"compile this file and link it with other files to produce an executable this file does not by itself cause the resulting executable to be covered by the GNU (general p|p)ublic licen[cs]e"
+#
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_1
 %KEY%	"classpath"
-%STR%	"classpath (linking)? exception"
+%STR%	"classpath (linking )?exception"
 #
 %ENTRY%	_LT_GPL_EXCEPT_CLASSPATH_2
 %KEY%	"produce"
@@ -2280,13 +2582,29 @@
 %KEY%	"bison"
 %STR%	"bison =FEW= distribute =FEW= under terms of your choice"
 #
-%ENTRY%	_LT_GPL_EXCEPT_ECOS
+%ENTRY%	_LT_GPL_EXCEPT_ECOS_1
+%KEY%	"exception"
+%STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file =FEW= and link it"
+#
+%ENTRY%	_LT_GPL_EXCEPT_ECOS_2
 %KEY%	"licen[cs]"
-%STR%	"as a special exception if other files instantiate templates or use macros or inline functions from this file or you compile this file and link it =SOME= this file does not by itself cause the resulting work to be covered by the GNU General Public License"
+%STR%	"this file does not by itself cause the resulting work to be covered by the gnu general public license"
+#
+%ENTRY%	_LT_GPL_EXCEPT_FREERTOS_1
+%KEY%	"distribut"
+%STR%	"modification to the GPL is included to allow you =FEW= distribute a combined work that includes FreeRTOS without =FEW= obliged to provide the source code for proprietary components"
+#
+%ENTRY%	_LT_GPL_EXCEPT_FREERTOS_2
+%KEY%	"licen[cs]"
+%STR%	"copyright holders of FreeRTOS give you permission to link FreeRTOS with independent modules to produce a statically linked executable regardless of the license terms of these independent modules and to copy and distribute the resulting executable under terms of your choice"
 #
 %ENTRY%	_LT_GPL_EXCEPT_OPENSSL
 %KEY%	"openssl"
 %STR%	"as (an additional|a special) (exemption|exception) you are allowed to compile (&|and) link against the OpenSSL libraries"
+#
+%ENTRY%	_LT_GPL_SWI_PROLOG_EXCEPT
+%KEY%	  "exception"
+%STR%	  "as a special exception if you link (this library|program) with other files compiled with a free software compiler =SOME= does not by itself cause the resulting executable to be covered"
 #
 %ENTRY%	_LT_GPL_UPX_EXCEPT
 %KEY%	"distribut"
@@ -2319,7 +2637,7 @@
 #
 %ENTRY%	_LT_GPL_NAMED2
 %KEY%	"gpl"
-%STR%	"(under|terms|releas) ==SOME== (^l|^a)gpl"
+%STR%	"(under|terms|releas) ==SOME== [^al]gpl"
 #
 # To catch things like "this is GPL".
 %ENTRY%	_LT_GPL_NAMED3
@@ -2333,16 +2651,20 @@
 #
 %ENTRY%	_LT_GPL_V2_NAMED_ref1
 %KEY%	"gpl"
-%STR%	"gpl( )?v2"
+%STR%	"[^l]gpl( )?v2"
 #
 %ENTRY%	_LT_GPL_V2_NAMED_later
 %KEY%	"gpl"
-%STR%	"gpl-2\+"
+%STR%	"[^l]gpl(-|v)2\.?0?\+"
 #
 # To catch things like "this is GPLV3".
 %ENTRY%	_LT_GPL_V3_NAMED
 %KEY%	"gpl"
 %STR%	"\<gplv3\>"
+#
+%ENTRY%	_LT_GPL_V3_NAMED_later
+%KEY%	"gpl"
+%STR%	"[^l]gpl(-|v)3\.?0?\+"
 #
 %ENTRY%	_LT_GPL_NAMED3_EXHIBIT
 %KEY%	"licen[cs]"
@@ -2434,10 +2756,16 @@
 %ENTRY%	_LT_GPLref12
 %KEY%	"\<under\>"
 %STR%	"you may (r?e?-?distribute|reproduce and/or modify) it under the terms of =ANY= GNU (general p|p)ublic"
-e /* (INFILE(j)) */
+#
+####
+# The wording in GPLref13 is very strange and unfortunately there are not test cases related to it.
+# 'public license' phrase should not be identified as GPL, it is all too wide.
+#  gnu added before it as in ref14 and ref15
+####
 %ENTRY%	_LT_GPLref13
 %KEY%	"licen[cs]"
-%STR%	"(change|add|update|convert|switch|swap) =SOME= licen[cs]e =FEW= ([^l]gpl|(general p|p)ublic licen[cs]e)"
+#%STR%	"(change|add|update|convert|switch|swap) =SOME= licen[cs]e =FEW= ([^l]gpl|(general p|p)ublic licen[cs]e)"
+%STR%	"(change|add|update|convert|switch|swap) =SOME= licen[cs]e =FEW= ([^l]gpl|gnu (general p|p)ublic licen[cs]e)"
 #
 %ENTRY%	_LT_GPLref14
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -2501,6 +2829,22 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR% "licen[cs]ed under (the )?((general p|p)ublic|general purpose) licen[cs]e (version |v)2"
 #
+%ENTRY%	_LT_GPL_V2_ref2
+%KEY%	"licen[cs]"
+%STR% "(re)?distribute =FEW= modify =FEW= under (the )?terms of version 2 =FEW= the (gnu )?((general p|p)ublic|general purpose) licen[cs]e"
+#
+%ENTRY%	_LT_GPL_V2_ref3
+%KEY%	"licen[cs]"
+%STR%	"licensed under the GPL =FEW= version 2 license"
+#
+%ENTRY%	_LT_GPL_V2_ref4
+%KEY%	"licen[cs]"
+%STR% "licen[cs]ed under (the )?(gnu )?((general p|p)ublic|general purpose) licen[cs]e 2\.?0"
+#
+%ENTRY%	_LT_GPL_V2_ref5
+%KEY%	"\<under\>"
+%STR%	"released under version 2 of the (gnu )?gpl"
+#
 %ENTRY%	_LT_GPL_V3_ref
 %KEY%	"licen[cs]"
 %STR% "licen[cs]ed under (the )?((general p|p)ublic|general purpose) licen[cs]e (version |v)3"
@@ -2542,7 +2886,7 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"this license =FEW= refers to version 3 of the =FEW= GNU =FEW= general public license"
 #
-%ENTRY%	_LT_GPL3ref31
+%ENTRY%	_LT_GPL3ref4
 %KEY%	"licen[cs]"
 %STR%	"this license =FEW= refers to version 3 of the GNU general public license"
 #
@@ -2604,9 +2948,21 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"helix DNA technology binary research use licen[cs]e"
 #
-%ENTRY%	_LT_HSQLDB
+%ENTRY%	_LT_HSQLDB_1
 %KEY%	"licen[cs]"
-%STR%	"can be distributed (and used )?according to HSQLDB License"
+%STR%	"can be distributed (and used )?according to HSQLDB license"
+#
+%ENTRY%	_LT_HSQLDB_2
+%KEY%	"licen[cs]"
+%STR%	"distribution is permitted under the terms of the HSQLDB license"
+#
+###
+# KEY has to set "permi[st]" because the string in which STR is searched
+# is truncated with KEY "licen[cs]" in a way that STR is not matched
+# in all cases, see test case hsqldb-ref4.txt
+%ENTRY%	_LT_HSQLDB_3
+%KEY%	"permi[st]"
+%STR%	"permission is granted to distribute =SOME= under the terms of the HSQLDB license"
 #
 #####
 # DELETED: ... customer will provide HP with reasonably detailed information
@@ -2723,6 +3079,14 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e subject to the licen[cs]e given below to use copy modify and/?o?r? distribute =SOME= for any purpose and without fee is hereby granted"
 #
+%ENTRY%	_LT_IBM_4
+%KEY%	"permi[st]"
+%STR%	"grants permission under its copyrights to use copy modify and distribute this software with or without fee provided that the above copyright notice =SOME= appear in all copies"
+#
+%ENTRY%	_LT_IBM_AS_IS
+%KEY%	"so(ftware|urce)"
+%STR%	"this source and object code has been made available to you by IBM on an as-is basis"
+#
 %ENTRY%	_LT_IBM_COURIER
 %KEY%	"permi[st]"
 %STR%	"hereby granted permission under the terms of the IBM/MIT X Consortium Courier Typefont agreement to execute reproduce distribute display market sell and otherwise transfer"
@@ -2809,6 +3173,18 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_IETF_4
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"modified in any way such as by removing the copyright notice"
+#
+%ENTRY%	_LT_IETF_5
+%KEY%	"permi[st]"
+%STR%	"limited permissions granted above are perpetual and will not be revoked by the Internet Society"
+#
+%ENTRY%	_LT_IETF_6
+%KEY%	"legal"
+%STR%	"this document is subject to =FEW= the ietf trust.?s legal provisions relating to ietf documents"
+#
+%ENTRY%	_LT_IETF_7
+%KEY%	"copyright"
+%STR%	"person.?s.? controlling the copyright in some of this material may not have granted the IETF Trust the right to allow modifications"
 #
 %ENTRY%	_LT_IMAGEMAGICK
 %KEY%	"so(ftware|urce)"
@@ -2961,6 +3337,10 @@ e /* (INFILE(j)) */
 %KEY% "permit"
 %STR%   "intel cannot permit any manipulation by third parties of the software provided in binary format with the wireless wlan adapters"
 #
+%ENTRY% _LT_INTEL_ACPI
+%KEY% "licen[cs]"
+%STR% "Intel grants free of charge to any person =FEW= obtaining a copy of the source code =SOME= irrevocable perpetual worldwide license under Intel.s copyrights (in|for) the (base )?code distributed =FEW= by Intel =FEW= to copy make derivatives distribute use and display any portion of the (covered )?code in any form with the right to sublicense such rights"
+#
 %ENTRY%	_LT_INTERLINK_EULA
 %KEY%	"legal"
 %STR%	"this end[ -]user licen[cs]e agreement eula is a legal agreement between you either an individual or an entity and interlink networks inc for the product identified above"
@@ -2992,6 +3372,14 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_IPTC
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]ee recognises the licen[cs]or as the sole owner of the intellectual property protected by the trademark"
+#
+%ENTRY%	_LT_ITU_T_1
+%KEY%	"licen[cs]"
+%STR%	"source code and all of its derivations is subject to the itu-t general public license"
+#
+%ENTRY%	_LT_ITU_T_2
+%KEY%	"licen[cs]"
+%STR%	"license agreement applies to =SOME= ITU-T Software Tool Library"
 #
 %ENTRY%	_LT_IRONDOC
 %KEY%	"permi[st]"
@@ -3163,17 +3551,21 @@ e /* (INFILE(j)) */
 #####
 # DELETED: ... =SOME= in any format
 #####
-%ENTRY%	_LT_LDP
+%ENTRY%	_LT_LDPL
 %KEY%	"distribut"
 %STR%	"please freely copy and/?o?r? distribute sell or give away"
 #
-%ENTRY%	_LT_LDPref1
+%ENTRY%	_LT_LDPLref1
 %KEY%	"distribut"
 %STR%	"distributed under the terms =SOME= (ldp|linux documentation project)"
 #
-%ENTRY%	_LT_LDPref2
+%ENTRY%	_LT_LDPLref2
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]ed under the =FEW= (ldp|linux documentation project)"
+#
+%ENTRY%	_LT_LDPLref3
+%KEY%	"licen[cs]"
+%STR%	"you (may|can) copy r?e?distribute (and|or) modify under the terms of the ldp general public license"
 #
 %ENTRY%	_LT_LEGATO_1
 %KEY%	"restrict"
@@ -3201,7 +3593,7 @@ e /* (INFILE(j)) */
 #####
 %ENTRY%	_LT_LGPLref2
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code) =SOME= under =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code) =SOME= under =SOME= (lgpl|lesser GNU (general p|p)ublic licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
 #
 %ENTRY%	_LT_LGPLref3
 %KEY%	"(condit|vers)ion"
@@ -3262,6 +3654,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<under\>"
 %STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))(([v-]?| ?version) ?)3"
 #
+%ENTRY% _LT_LGPL3_ref_later
+%KEY% "licen[cs]"
+%STR% "licen[cs]e:? lgplv3\+"
+#
 %ENTRY%	_LT_LGPL_NAMED
 %KEY%	"licen[cs]"
 %STR%	"licen[cs]e (GNU (lgpl|lesser GNU general public licen[cs]e|(library|lesser) (g?eneral p|p)ublic licen[cs]e))"
@@ -3272,7 +3668,7 @@ e /* (INFILE(j)) */
 # To catch things like "this is LGPL".
 %ENTRY%	_LT_LGPL_NAMED2
 %KEY%	"lgpl"
-%STR%	"\<lgpl\>"
+%STR%	"[^-_]\<lgpl\>"
 #
 %ENTRY%	_LT_LGPL_OR
 %NOCHECK%
@@ -3357,6 +3753,10 @@ e /* (INFILE(j)) */
 #####
 # DELETED: ... =SOME= obtaining a copy
 #####
+%ENTRY%	_LT_MIROS_PREAMBLE
+%KEY%	"copyright"
+%STR%	"provided that these terms and disclaimer and all copyright notices are retained or reproduced in an accompanying document"
+#
 %ENTRY%	_LT_MIT_0
 %KEY%	"so(ftware|urce)"
 %STR%	"the software is provided =FEW= without warranty of any kind =FEW= express or implied =FEW= including but not limited to the warranties of merchantability =FEW= fitness for a particular purpose and noninfringement =FEW= in no event shall the =FEW= be liable for any claim =FEW= damages or other liability =FEW= whether in an action of contract =FEW= tort or otherwise =FEW= arising from =FEW= out of or in connection with the software or the use or other dealings in the software"
@@ -3367,7 +3767,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MIT_2
 %KEY%	"restrict"
-%STR%	"without restriction including without limitation the rights? to use copy modify merge publish distribute sublicen[cs]e and/or sell copies of"
+%STR%	"without restriction including without limitation (on )?the rights? to use copy modify merge publish distribute sub.?licen[cs]e and/or sell copies of"
 #####
 # This one is similar to several BSD footprints, minus the "with or without
 # fee" and such...
@@ -3381,7 +3781,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MIT_4
 %KEY%	"permi[st]"
-%STR%	"permission to use copy modify and/?o?r? distribute this program for any purpose and without fee is hereby granted provided that this copyright and permission notice appear on all copies"
+%STR%	"permission to use copy modify and/?o?r? distribute this (software|program) for any purpose (with or|and) without fee is hereby granted provided that (the above|this) copyright (notice|) and (this|) permission notice appear (in|on) all copies"
 #
 %ENTRY%	_LT_MIT_5
 %KEY%	"permi[st]"
@@ -3389,7 +3789,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MIT_6
 %KEY%	"permi[st]"
-%STR%	"permission to use copy modify distribute and/?o?r? sell this software and its documentation for any purpose is hereby granted without fee provided t(hat the|he) (above|below) copyright notices? appears? in all copies"
+%STR%	"permission to use copy modify distribute and/?o?r? (sell|(sub)licen[cs]e) this software and its documentation for any purpose (and without fee )?is hereby granted (without fee )?provided t(hat the|he) (above|below) copyright notices? appears? in all copies"
 #####
 # DELETED: permission to use copy modify distribute and sell this software
 # and its documentation for any purpose =SOME= is ...
@@ -3427,6 +3827,14 @@ e /* (INFILE(j)) */
 %KEY%	"so(ftware|urce)"
 %STR%	"regarding the apple software or its use and operation alone or in combination with your products"
 #
+%ENTRY%	_LT_MIT_14
+%KEY%	"permi[st]"
+%STR%	"permission is granted free of charge to copy modify use and distribute this software provided you include =FEW= this notice in all copies"
+#
+%ENTRY%	_LT_MIT_13
+%KEY%	"permi[st]"
+%STR%	"copyright notice and this permission notice =FEW= shall be included in all copies"
+#
 %ENTRY% _LT_MIT_NO_EVIL
 %KEY% "evil"
 %STR% "(no|not|don't be) evil"
@@ -3437,22 +3845,35 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MITref1
 %KEY%	"\<under\>"
-%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
+# THIS STR IS VERY WIDE, REMOVE PERMANENTLY LATER IF NO PROBLEMS OCCUR
+#%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
+# DETECTION MADE MUCH STRICTER
+%STR%	"(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under =FEW= \<mit\> =FEW= licen[cs]e"
 #
 %ENTRY%	_LT_MITref2
 %KEY%	"licen[cs]"
-%STR%	"licen[cs]e is the MIT licen[cs]e"
-#
-%ENTRY%	_LT_MITref4
-%KEY%	"licen[cs]"
-%STR%	"licen[cs]ed under =FEW= MIT"
+%STR%	"licen[cs]e is the mit licen[cs]e"
 #
 %ENTRY%	_LT_MITref3
 %KEY%	"licen[cs]"
-%STR% "licen[cs]e(:?) =FEW= and MIT"
-#####
-# DELETED: ... =SOME= accompanied by this header"
-#####
+%STR% "licen[cs]e(:?) =FEW= and \<mit\>"
+#
+%ENTRY%	_LT_MITref4
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]ed under =FEW= \<mit\>"
+#
+%ENTRY%	_LT_MITref5
+%KEY%	"licen[cs]"
+%STR%	"governed by =FEW= mit.license"
+#
+%ENTRY%	_LT_MITref6
+%KEY%	"licen[cs]"
+%STR% "\<mit\> (check|see) (the )?licen[cs]e"
+#
+%ENTRY%	_LT_MITref7
+%KEY%	"licen[cs]"
+%STR% "licen[cs]e(:?) \<mit\>"
+#
 %ENTRY%	_LT_MITEM
 %KEY%	"distribut"
 %STR%	"may be freely copied and/?o?r? r?e?-?distributed provided"
@@ -3517,6 +3938,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(distribute|develop|offere?d?|licen[cs]ed|available|protected|covered|provided|subject|comes) =SOME= (\<[:space:]mpl[:space:]\>|mozilla public licen[cs]e)"
 #
+%ENTRY%	_LT_MPL20_ref
+%KEY%	"licen[cs]"
+%STR%	"licensed under (the )?MPL( |-)2\.?0"
+#
 %ENTRY%	_LT_MPL_OR
 %NOCHECK%
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
@@ -3572,6 +3997,10 @@ e /* (INFILE(j)) */
 %KEY%	"\<micros(oft|ystems)\>"
 %STR%	"these licen[cs]e terms are an agreement between =SOME= microsoft cor(p|poration) =SOME= and you"
 #
+%ENTRY%	_LT_MSCORP_EULA_6
+%KEY%	"\<micros(oft|ystems)\>"
+%STR%	"subject to the terms =FEW= Microsoft end(-| )user license agreement"
+#
 %ENTRY%	_LT_MSCORP_INDEMNIFY
 %KEY%	"\<micros(oft|ystems)\>"
 %STR%	"you agree to indemnify hold harmless and defend microsoft and its suppliers from and against any claims or lawsuits"
@@ -3606,7 +4035,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_MSCORPref1
 %KEY%	"distribut"
-%STR%	"program is linked with (and uses )?microsoft distributable code"
+%STR%	"program is linked with (|and uses) microsoft distributable code"
 #
 %ENTRY%	_LT_MSCORP_PLref1
 %KEY%	"licen[cs]"
@@ -3615,6 +4044,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_MSCORP_PLref2
 %KEY%	"\<under\>"
 %STR%	"(distribu|offere?d?|released?|licen[cs]ed?|available|protected|provided|published) =SOME= under =SOME= microsoft (permissive|public) licen[cs]e"
+#
+%ENTRY%	_LT_MSCORP_PLref3
+%KEY%	"licen[cs]"
+%STR%	"subject to (the )?microsoft (permissive|public) licen[cs]e"
 #####
 # DELETED: ... your products maintaining your products or enhancing the
 # interoperability of your products with the software and specifically
@@ -3767,19 +4200,23 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_NTP
 %KEY%	"permi[st]"
-%STR%	"permission to use copy modify and distribute this software and its documentation for any purpose with or without fee is hereby granted provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation"
+%STR%	"permission to use copy modify and distribute this software and its documentation for any purpose (with or|and) without fee is hereby granted provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation"
 #
 %ENTRY%	_LT_NVIDIA
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"hereby granted a non-?exclusive,? royalty-free copyright (and design patent)? licen[cs]e"
 #
-%ENTRY%	_LT_NVIDIA_EULA
+%ENTRY%	_LT_NVIDIA_EULA_1
 %KEY%	"so(ftware|urce)"
 %STR%	"NVIDIA hereby grants customer the following non-exclusive non-transferable right to use the software with the following limitations"
 #
 %ENTRY%	_LT_NVIDIA_EULA_2
 %KEY%	"so(ftware|urce)"
 %STR%	"NVIDIA Corporation =FEW= supplies this software to you in consideration of your agreement to the following terms"
+#
+%ENTRY%	_LT_NVIDIA_EULA_3
+%KEY%	"licen[cs]"
+%STR%	"NVIDIA grants you a personal non-exclusive license under NVIDIA.s copyrights =SOME= to use reproduce modify and redistribute the NVIDIA Software with or without modifications in source and/or binary forms"
 #####
 # DELETED: hereby grant you a non-?exclusive world-?wide no-charge
 # transferable licen[cs]e to ... and distribute internally and externally
@@ -4098,9 +4535,17 @@ e /* (INFILE(j)) */
 %KEY% "licen[cs]" 
 %STR% "exhibit [abc] =ANY= licen[cs]e zlib" 
 #
+%ENTRY% _LT_WORDNET
+%KEY%	"licen[cs]e"
+%STR%	"wordnet =FEW= 3\.?0 =SOME= software and database is being provided to you =SOME= by princeton university under the following licen[cs]e"
+#
 %ENTRY% _LT_WXWINDOWS
 %KEY% "licen[cs]" 
 %STR% "wxwindows licen[cs]e"
+#
+%ENTRY% _LT_WXWINDOWS_31
+%KEY% "licen[cs]"
+%STR% "under the terms of (the) wxwindows library licen[cs]e (v\.? ?|version )3\.?1"
 #
 %ENTRY% _LT_INFO_ZIP
 %KEY% "licen[cs]" 
@@ -4130,6 +4575,10 @@ e /* (INFILE(j)) */
 #%STR%	"copyright-only dedication =SOME= or public[ -]domain cert"
 %STR%	"to the best of his knowledge the work of authorship identified is in the \<public\>[ -]domain of the country from which the work is published"
 #
+%ENTRY%	_LT_PURDUE
+%KEY%	"permi[st]"
+%STR%	"permission is granted to anyone to use this software for any purpose on any computer system"
+#
 %ENTRY%	_LT_UNLIN
 %KEY%	"public"
 %STR%	"free (,|and) unencumbered =FEW= public domain"
@@ -4145,7 +4594,7 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_PUBDOM_1
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 #%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]domain"
-%STR%	"(licen[cs]e|under|in|is|are|to|withi?n?|contain) =SOME= \<public\>[ -]\<domain\>"
+%STR%	"(licen[cs]e|under|\<in\>|\<is\>|are|\<i?n?to\>|withi?n?|contain) =SOME= \<public\>[ -]\<domain\>"
 #
 %ENTRY%	_LT_PUBDOM_2
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
@@ -4191,9 +4640,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_PUBDOM_NOTclaim
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
-#%STR%	"not =FEW= (under|in|is|are|to) =SOME= \<public\>[ -]domain"
-#%STR%	"not =FEW= (under|in|to) =SOME= \<public\>[ -]domain"
-%STR%	"\<not\> (covered|under|in|to) =FEW= \<public\>[ -]\<domain\>"
+%STR%	"(\<not\>|[-_\*]not[-_\*]) (covered|under|in|to) =FEW= \<public\>[ -]\<domain\>"
 
 #####
 # DELETED: the purpose of this document is to enable rightsholders to place
@@ -4248,8 +4695,9 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"licensed to PSF under (a |the )?contributor agreement"
 #
-##%ENTRY%	_LT_PYTHON22ref
-##%KEY%	"licen[cs]"
+%ENTRY%	_LT_PYTHON22ref
+%KEY%	"licen[cs]"
+%STR%	"license for python 2\.?2"
 ##%STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected) =SOME= python 2\.?2 licen[cs]e"
 #
 %ENTRY%	_LT_PYTHONref1
@@ -4268,9 +4716,17 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected) =SOME= python-style licen[cs]e"
 #
-%ENTRY%	_LT_CNRI_PYTHON
+%ENTRY%	_LT_CNRI_JYTHON
+%KEY%	"licen[cs]"
+%STR%	"JPython =FEW= is made available subject to the terms and conditions in CNRI.s license agreement"
+#
+%ENTRY%	_LT_CNRI_PYTHON_1
 %KEY%	"licen[cs]"
 %STR%	"cnri open source license agreement"
+#
+%ENTRY%	_LT_CNRI_PYTHON_2
+%KEY%	"licen[cs]"
+%STR%	"cnri(.s)? python 1\.?6 license"
 #
 %ENTRY%	_LT_CNRI_PYTHON_GPL
 %KEY%	"licen[cs]"
@@ -4453,7 +4909,7 @@ e /* (INFILE(j)) */
 # DELETED: if you modify the DNSsafe software itself you cannot modify its
 # documented API ... including the right to use any patents or other
 # intellectual property that your modifications depend upon
-##### 
+#####
 %ENTRY% _LT_RSA_5
 %KEY%	"distribut"
 %STR%	"and you must grant RSA Data Security the right to use modify and distribute your modifications"
@@ -4527,6 +4983,14 @@ e /* (INFILE(j)) */
 %KEY%	"licen[cs]"
 %STR%	"see the GNU (lesser|library) general public licen[cs]e for (more|full) details"
 #
+%ENTRY%	_PHR_SGI_LIBTIFF
+%KEY%	=NULL=
+#####
+# This string is used in HASTEXT, for some reason string cannot be searched over new line
+# therefore =FEW= is needed to skip nl
+#####
+%STR%	"names =FEW= Sam Leffler and Silicon Graphics may not be used in any advertising"
+#
 %ENTRY%	_LT_SGI_1
 %KEY%	"permi[st]"
 %STR%	"permission to use copy modify distribute and/?o?r? sell this software and its documentation for any purpose is hereby granted without fee provided t(hat the|hat i the|he) above copyright notices? and this permission notice appear in all copies"
@@ -4538,6 +5002,22 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_SGI_2
 %KEY%	"permi[st]"
 %STR%	"made subject to an alternative licen[cs]e as permitted"
+#####
+# .gl files comments starts with _C_ string which is recognized as
+# a normal string. Therefore a special cases are needed to identify
+# SGI-B-x.y licenses. These are only used together with _LT_SGI_2
+#####
+%ENTRY%	_LT_SGI_V10
+%KEY%	"licen[cs]"
+%STR%	"sgi =FEW= software licen[cs]e b (v|version )1\.?0"
+#
+%ENTRY%	_LT_SGI_V11
+%KEY%	"licen[cs]"
+%STR%	"sgi =FEW= software licen[cs]e b (v|version )1\.?1"
+#
+%ENTRY%	_LT_SGI_V20
+%KEY%	"licen[cs]"
+%STR%	"sgi =FEW= software licen[cs]e b (v|version )2\.?0"
 #####
 # UNIQUE: provided that you include the entirety of this reservation of rights
 #####
@@ -4582,6 +5062,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_SLEEPYCAT_NC
 %KEY%	"permi[st]"
 %STR%	"permission to use this publication or portions of this publication is granted by sleepycat software"
+#
+%ENTRY%	_LT_SLEEPYCAT_1
+%KEY%	"distribut"
+%STR%	"r?e?distributions in any form must be accompanied by information on how to obtain complete source code for =FEW= and any accompanying software that uses"
 #
 %ENTRY%	_LT_SNIA_PL
 %KEY%	"so(ftware|urce)"
@@ -4708,7 +5192,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_SUN_PRO
 %KEY%	"\<micros(oft|ystems)\>"
-%STR%	"developed at sunpro a sun microsystems inc business permission to use copy modify and/?o?r? distribute this =FEW= is freely granted"
+%STR%	"developed at (sunpro|sunsoft) a sun microsystems inc business permission to use copy modify and/?o?r? distribute this =FEW= is freely granted"
 #####
 # DELETED: ... it to anyone else except as part of a product or program
 # developed by the user
@@ -4760,6 +5244,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_SUN_6
 %KEY%	"distribut"
 %STR%	"non-exclusive rights to r?e?-?distribute modify translate and use this software in source and binary forms in whole or in part is hereby granted provided that the above copyright notice"
+#
+%ENTRY%	_LT_SUN_FREE
+%KEY%	"restrict"
+%STR%	"is provided for unrestricted use users may copy or modify this source code without charge"
 #####
 # DELETED: ... as individual graphics or as a collection as part of
 # software code or programs that you develop provided that i this copyright
@@ -4783,6 +5271,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_SYBASE
 %KEY%	"licen[cs]"
 %STR%	"retain and reproduce a copy of this licen[cs]e"
+#
+%ENTRY%	_LT_TCL
+%KEY%	"software"
+%STR%	"this software is copyrighted by the Regents of the University of California Sun Microsystem =FEW= Scriptics Corporation =SOME= and other parties =SOME= apply to all files associated with the software unless explicitly disclaimed in individual files"
 #####
 # DELETED: ... distribute this software and its documentation for
 # any purpose and without fee provided that
@@ -4794,6 +5286,10 @@ e /* (INFILE(j)) */
 %ENTRY%	_LT_TEX_EXCEPT
 %KEY%	"so(ftware|urce)"
 %STR%	"as a special exception when this file is read by TeX when processing a TeXinfo source document you may use the result without restriction"
+#
+%ENTRY%	_LT_TMATE
+%KEY%	"distribut"
+%STR%	"distributions? in any form must be accompanied by information on how to obtain complete source code for the software that uses SVNKit"
 #
 %ENTRY%	_LT_TPLref
 %KEY%	"licen[cs]"
@@ -4876,9 +5372,25 @@ e /* (INFILE(j)) */
 %KEY%	"\<files?\>"
 %STR%	"Unicode inc hereby grants the right to freely use the information supplied in this file in the creation of products supporting the unicode standard and to make copies"
 #
+%ENTRY%	_LT_UNICODE_4
+%KEY%	"distribut"
+%STR%	"distributed under the terms of use in =FEW= www\.?unicode\.?org/copyright\.?html"
+#
+%ENTRY%	_LT_UNICODE_TOU
+%KEY%	"distribut"
+%STR%	"any person is hereby authorized =FEW= to view use reproduce and distribute all documents and files solely for informational purposes in the creation of products supporting the unicode standard"
+#
 %ENTRY%	_URL_UNICODE
 %KEY%	"\<terms\>"
 %STR%	"w?w?w?\.?unicode\.?org/terms_of_use\.?html"
+#
+%ENTRY%	_TITLE_UNICODE
+%KEY%	"licen[cs]"
+%STR%	"unicode (inc\.? )license agreement"
+#
+%ENTRY%	_TITLE_UNICODE_TOU
+%KEY%	"\<terms\>"
+%STR%	"Unicode Terms of Use"
 #
 %ENTRY%	_LT_UNIDEX
 %KEY%	"grants"
@@ -4904,14 +5416,6 @@ e /* (INFILE(j)) */
 %KEY%	"distribut"
 %STR%	"use copy modify and/?o?r? distribute this software and its documentation in source and binary forms for non-?commercial purposes"
 #
-%ENTRY%	_LT_USL_EUR
-%KEY%	"permi[st]"
-%STR%	"permission to use copy modify and/?o?r? distribute this software for any purpose and without fee is hereby granted provided that the above copyright notice appear in all copies"
-#####
-# DELETED: permission to use copy modify and distribute =SOME= is
-# hereby granted provided that ... notices and 2 re-?distributions
-# including binaries
-#####
 %ENTRY%	_LT_UUTAH
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"1 source code retains these copyright permission and disclaimer"
@@ -5036,7 +5540,7 @@ e /* (INFILE(j)) */
 #
 %ENTRY%	_LT_W3Cref3
 %KEY%	"so(ftware|urce)"
-%STR%	"published (under|under the) w3c software copyright notice and licen[cs]e"
+%STR%	"(published|licensed) (under|under the) w3c software (copyright notice and )?licen[cs]e"
 #
 %ENTRY%	_LT_W3Cref4
 %KEY%	"so(ftware|urce)"
@@ -5387,7 +5891,7 @@ k
 #####
 %ENTRY% _LT_SEE_COPYING_LICENSE_1
 %KEY% =NULL=
-%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in|at) =FEW= (details|license|distribut|information|foder|directory|https?|ftp)"
+%STR% "see =FEW= (copyright notices?|license|legal notices?|copying|copyright\.?txt|license\.?txt|readme\.?txt|file) =FEW= (for|with|in|at) =FEW= (details|licens(e|ing)|distribut|information|foder|directory|https?|ftp)"
 #
 %ENTRY% _LT_SEE_COPYING_LICENSE_2
 %KEY% =NULL=
@@ -5527,7 +6031,7 @@ k
 #
 %ENTRY%	_LT_SEE_OTHER_11
 %KEY%	"(Â©|\(c\)|copyright|\<c\>[^+:]|&copy)"
-%STR%	"see =FEW= for Copyright information"
+%STR%	"see =FEW= for (the |)copyright (information|notice)"
 #
 %ENTRY%	_LT_SEE_OTHER_12
 %KEY%	"copyright"
@@ -5544,6 +6048,10 @@ k
 %ENTRY% _LT_SEE_OTHER_15
 %KEY% "so(ftware|urce)"
 %STR% "see the source for copying conditions"
+#
+%ENTRY% _LT_SEE_OTHER_16
+%KEY% "copyright"
+%STR% "for conditions? =FEW= and use see (the |)copyright notice"
 #
 #####
 # These MUST be the last 3 checks for license references in some "other" place
@@ -5622,6 +6130,10 @@ k
 %ENTRY% _LT_SEE_LICENSE_15
 %KEY% "licen[cs]"
 %STR% "distribute =FEW= under the terms =FEW= found in LICENSE\.?txt"
+#
+%ENTRY% _LT_SEE_LICENSE_16
+%KEY% "licen[cs]"
+%STR% "covered by the license in the accompanying file named LICENSE"
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
@@ -5762,7 +6274,7 @@ k
 #
 %ENTRY%  _LT_Sendmail_title
 %KEY%  "licen"
-%STR%  "unless a different license is obtained directly from Sendmail"
+%STR%  "unless a different license is obtained (directly )?from Sendmail"
 #
 %ENTRY% _LT_TAPJOY
 %KEY% "licen[cs]e"
@@ -5787,6 +6299,7 @@ k
 # NOTE about copyrights: they all _used_ to include "copyright =SOME="
 # prepended to them.  As a performance optimization, that text was cut.
 #####
+#
 %ENTRY%	_CR_3DFX_1
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= 3dfx interactive"
@@ -5823,6 +6336,10 @@ k
 %ENTRY%	_CR_ALADDIN
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= aladdin enterprises"
+#
+%ENTRY%	_CR_AMAZON
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= amazon"
 #
 %ENTRY%	_CR_AMD
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5975,6 +6492,11 @@ k
 %ENTRY% _CR_CRYPTOGAMS
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= cryptogams"
+#
+# Curl code is copyrighted by Daniel Stenberg
+%ENTRY%	_CR_CURL
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =FEW= daniel stenberg"
 #
 %ENTRY%	_CR_CYBERNEKO
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6333,6 +6855,10 @@ k
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= openvision technologies"
 #
+%ENTRY%	_CR_ORACLE
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= oracle"
+#
 %ENTRY%	_CR_OREILLY
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= o ?reilly (and|&) associates"
@@ -6380,6 +6906,10 @@ k
 %ENTRY%	_CR_PUBDOM
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= public[ -]domain"
+#
+%ENTRY%	_CR_PURDUE
+%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= purdue research foundation"
 #####
 # Python copyrights are various
 #####
@@ -6443,7 +6973,7 @@ k
 #
 %ENTRY%	_CR_SPI
 %KEY%	"so(ftware|urce)"
-%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= software in the public interest inc"
+%STR%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (software in the public interest inc|\<spi\>)"
 #
 %ENTRY%	_CR_SPIKESOURCE
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -6635,6 +7165,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"adobe systems =SOME= software licen[cs]e agreement"
 #
+%ENTRY%	_TITLE_ADOBE_DNG
+%KEY%	=NULL=
+%STR%	"DNG SDK License Agreement"
+#
 %ENTRY%	_TITLE_ADOBE_SRC
 %KEY%	"licen[cs]"
 %STR%	"adobe systems =SOME= source code licen[cs]e agreement"
@@ -6763,13 +7297,29 @@ k
 %KEY%	"\<ap(ache|ple)\>"
 %STR%	"apache =FEW= licen[cs]e"
 #
+%ENTRY%	_TITLE_COPYLEFT_NEXT_030
+%KEY%	"licen[cs]"
+%STR%	"copyleft-next 0\.?3\.?0 =FEW= license release date 2013-05-16"
+#
+%ENTRY%	_TITLE_COPYLEFT_NEXT_031
+%KEY%	"licen[cs]"
+%STR%	"copyleft-next 0\.?3\.?1 =FEW= license release date 2016-04-29"
+#
+%ENTRY%	_PHR_COPYLEFT_NEXT_PARA1
+%KEY%	"licen[cs]"
+%STR%	"license grants no trademark license"
+#
+%ENTRY%	_PHR_COPYLEFT_NEXT_PARA3
+%KEY%	"distribut"
+%STR%	"conditions for distributing derived works outbound gpl compatibility"
+#
 %ENTRY%	_TITLE_CYGNUS_ECOS_V10
 %KEY%	"licen[cs]"
 %STR%	"Cygnus eCos Public License Version 1\.?0"
 #
 %ENTRY%	_TITLE_EDL_V10
 %KEY%	"licen[cs]"
-%STR%	"Eclipse Distribution License[ -](v |v)?1\.?0"
+%STR%	"Eclipse Distribution License[ -](v |v|)1\.?0"
 #
 %ENTRY%	_TITLE_ATI_EULA
 %KEY%	"\<(end[ -]user|eula)\>"
@@ -7175,27 +7725,41 @@ k
 %KEY%	"(docume|warra)nt"
 %STR%	"gnu free documentation licen[cs]e"
 #
+%ENTRY%	_TITLE_GFDL_V11_FULL_LICENSE
+%KEY%	"(docume|warra)nt"
+%STR%	"gnu free documentation licen[cs]e (v|version )1\.?1 mar"
+#
 %ENTRY%	_TITLE_GFDL_V11_ONLY
 %KEY%	"(docume|warra)nt"
-#%STR%	"(v|[^_]version )1\.?1 March 2000"
-%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?1 mar"
+%STR%	"gnu free documentation licen[cs]e =FEW= (v|version )1\.?1"
 #
 %ENTRY%	_TITLE_GFDL_V11_OR_LATER
 %KEY%	"(docume|warra)nt"
-%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?1 or =FEW= (later|newer|subsequent|more recent)"
+#
+%ENTRY%	_TITLE_GFDL_V12_FULL_LICENSE
+%KEY%	"(docume|warra)nt"
+%STR%	"gnu free documentation licen[cs]e (v|version )1\.?2 nov"
 #
 %ENTRY%	_TITLE_GFDL_V12_ONLY
 %KEY%	"(docume|warra)nt"
-#%STR%	"(v|[^_]version )1\.?2 November 2002"
-%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?2 nov"
+%STR%	"gnu free documentation licen[cs]e =FEW= (v|version )1\.?2"
+#
+%ENTRY%	_TITLE_GFDL_V12_OR_LATER
+%KEY%	"(docume|warra)nt"
+%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?2 or =FEW= (later|newer|subsequent|more recent)"
+#
+%ENTRY%	_TITLE_GFDL_V13_FULL_LICENSE
+%KEY%	"(docume|warra)nt"
+%STR%	"gnu free documentation ?licen[cs]e (v|version )1\.?3 3 nov"
 #
 %ENTRY%	_TITLE_GFDL_V13_ONLY
 %KEY%	"(docume|warra)nt"
 %STR%	"gnu free documentation ?licen[cs]e =FEW= (v|version )1\.?3"
 #
-%ENTRY%	_TITLE_GFDL_V12_OR_LATER
+%ENTRY%	_TITLE_GFDL_V13_OR_LATER
 %KEY%	"(docume|warra)nt"
-%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"gnu free documentation ?licen[cs](e|e gfdl) (v|version )1\.?3 or =FEW= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_GPDL
 %KEY%	"(docume|warra)nt"
@@ -7211,7 +7775,7 @@ k
 #
 %ENTRY%	_TITLE_GPL3_ref1
 %KEY%	"gpl"
-%STR%	"gpl (v|version )3 (license|text)"
+%STR%	"[^l]gpl (v|version )3 (license|text)"
 #
 %ENTRY%	_TITLE_GPL3_ref2
 %KEY%	"licen[cs]"
@@ -7223,15 +7787,15 @@ k
 #
 %ENTRY% _TITLE_GPL3_ref3_later
 %KEY% "licen[cs]"
-%STR% "licen[cs]e(:?) gplv3\+"
+%STR% "licen[cs]e(:?) gplv3\.?0?\+"
 #
 %ENTRY% _TITLE_GPL3_ref4_later
 %KEY%  "licen[cs]"
-%STR%  "license =SOME= (gplv3\+|gnu gpl version 3 or later)"
+%STR%  "license =SOME= ([^l]gplv3\.?0?\+|gnu gpl version 3 or later)"
 #
 %ENTRY%	_TITLE_GPL2_ref1
 %KEY%	"gpl"
-%STR%	"gpl (v|version )2 (license|text)"
+%STR%	"[^l]gpl (v|version )2 (license|text)"
 #
 %ENTRY%	_TITLE_GPL2_ref2
 %KEY%	"licen[cs]"
@@ -7244,6 +7808,10 @@ k
 %ENTRY%	_TITLE_MODULE_LICENSE
 %KEY%	"licen[cs]"
 %STR%	"MODULE_LICENSE"
+#
+%ENTRY%	_TITLE_MODULE_LICENSE_GPL
+%KEY%	"licen[cs]"
+%STR%	"MODULE_LICENSE\(?\"?.GPL"
 #
 %ENTRY%	_TITLE_GPL_KDE
 %KEY%	"licen[cs]"
@@ -7313,6 +7881,10 @@ k
 %KEY%	"\<(end[ -]user|eula)\>"
 %STR%	"end[ -]user licen[cs]e agreement interlink networks"
 #
+%ENTRY%	_TITLE_ITU_T
+%KEY%	"licen[cs]"
+%STR%	"ITU-T software tools General Public License"
+#
 %ENTRY%	_TITLE_JABBER
 %KEY%	"licen[cs]"
 %STR%	"jabber open source licen[cs]e"
@@ -7357,11 +7929,11 @@ k
 %KEY%	"licen[cs]"
 %STR%	"(LaTeX project public licen[cs]e|lppl) =FEW= (v|version )1\.?3c"
 #
-%ENTRY%	_TITLE_LDP1A
+%ENTRY%	_TITLE_LDPL1A
 %KEY%	"licen[cs]"
 %STR%	"ldp general public licen[cs]e =FEW= (v|version )1a =SOME= november 1998"
 #
-%ENTRY%	_TITLE_LDP20
+%ENTRY%	_TITLE_LDPL20
 %KEY%	"(docume|warra)nt"
 %STR%	"linux documentation project licen[cs]e =FEW= v2\.?0 =SOME= january 1998"
 #
@@ -7425,11 +7997,11 @@ k
 #
 %ENTRY%	_TITLE_MIT
 %KEY%	"licen[cs]"
-%STR%	"MIT licen[cs]e"
+%STR%	"\<MIT\> licen[cs]e"
 #
 %ENTRY%	_TITLE_MIT_EXHIBIT
 %KEY%	"licen[cs]"
-%STR%	"exhibit [abc] =ANY= MIT licen[cs]e"
+%STR%	"exhibit [abc] =ANY= \<MIT\> licen[cs]e"
 #
 %ENTRY%	_TITLE_MOTOSOTO091
 %KEY%	"licen[cs]"
@@ -7455,7 +8027,7 @@ k
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
 %STR%	"(mozilla|netscape) public licen[cs]e"
 #
-%ENTRY%	_TITLE_RHeCos_v11
+%ENTRY%	_TITLE_RHeCos_V11
 %KEY%	"licen[cs]"
 %STR%	"red hat ecos public license (version |v)1\.?1"
 #
@@ -7469,19 +8041,23 @@ k
 #
 %ENTRY%	_TITLE_MPL10
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla public licen[cs]e (1\.?0|(\<mpl\> |v|version )1\.?0)"
+#%STR%	"mozilla public licen[cs]e (1\.?0|(\<mpl\> |v|version )1\.?0)"
+%STR%	"mozilla public licen[cs]e (1\.?0|(mpl |)((v\.? ?|version )1\.?0))"
 #
 %ENTRY%	_TITLE_MPL11
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla public licen[cs]e (1\.?1|(\<mpl\> |v|version )1\.?1)"
+#%STR%	"mozilla public licen[cs]e (1\.?1|(\<mpl\> |v|version )1\.?1)"
+%STR%	"mozilla public licen[cs]e (1\.?1|(mpl |)((v\.? ?|version )1\.?1))"
 #
 %ENTRY%	_TITLE_MPL11_OR_LATER
 %KEY%	"licen[cs]"
-%STR%	"mozilla public licen[cs]e (1\.?1|(\<mpl\> |v|version )1\.?1) =SOME= or =SOME= (newer|later|subsequent|more recent)"
+#%STR%	"mozilla public licen[cs]e (1\.?1|(\<mpl\> |v|version )1\.?1) =SOME= or =SOME= (newer|later|subsequent|more recent)"
+%STR%	"mozilla public licen[cs]e (1\.?1|(mpl |)((v\.? ?|version )1\.?1)) =SOME= or =SOME= (newer|later|subsequent|more recent)"
 #
 %ENTRY%	_TITLE_MPL20
 %KEY%	"\<([mn]pl|mozilla|netscape)\>"
-%STR%	"mozilla public licen[cs]e (2\.?0|(\<mpl\> |v|version )2\.?0)"
+#%STR%	"mozilla public licen[cs]e (2\.?0|(\<mpl\> |v\.? ?|version )2\.?0)"
+%STR%	"mozilla public licen[cs]e (2\.?0|(mpl |)((v\.? ?|version )2\.?0))"
 #
 %ENTRY%	_TITLE_MPL20_EXCEPTION
 %KEY%	"licen[cs]"
@@ -7743,6 +8319,14 @@ k
 %KEY%	"licen[cs]"
 %STR%	"Compatible Licences =ANY= open (source|software) licen[cs]e[^s] =FEW= (3\.?0|(osl |v|version )3\.?0)"
 #
+%ENTRY%	_TITLE_OZPLB_10
+%KEY%	"licen[cs]"
+%STR%	"australian public licence b =FEW= version 1.0"
+#
+%ENTRY%	_TITLE_OZPLB_11
+%KEY%	"licen[cs]"
+%STR%	"australian public licence b =FEW= version 1.1"
+#
 %ENTRY%	_TITLE_PDDL
 %KEY%	"licen[cs]"
 %STR%	"open data commons =FEW= public domain dedication =FEW= licen[cs]e"
@@ -7899,6 +8483,10 @@ k
 %KEY%	"licen[cs]"
 %STR%	"realnetworks public source licen[cs]e"
 #
+%ENTRY%	_TITLE_SCEA
+%KEY%	"licen[cs]"
+%STR%	"scea shared source license"
+#
 %ENTRY%	_TITLE_SCSL_V23
 %KEY%	"licen[cs]"
 %STR%	"sun community source licen[cs]e (v|version )2\.?3"
@@ -7978,6 +8566,14 @@ k
 %ENTRY%	_TITLE_SYBASE10
 %KEY%	"p(atent|roduc|rofit|roject|ublic)"
 %STR%	"sybase open watcom public licen[cs]e (v|version )1\.?0"
+#
+%ENTRY%	_TITLE_TCL
+%KEY%   "licen[cs]"
+%STR%   "Tcl/Tk License"
+#
+%ENTRY%	_TITLE_TMATE
+%KEY%	"licen[cs]"
+%STR%	"tmate open source license"
 #
 %ENTRY%	_TITLE_TPL10
 %KEY%	"licen[cs]"
@@ -8126,7 +8722,7 @@ k
 #
 %ENTRY% _TITLE_WORDNET
 %KEY%	"licen[cs]e"
-%STR%	"wordnet =FEW= 3\.?0 =SOME= software and database is being provided to you =SOME= by princeton university under the following licen[cs]e"
+%STR%	"wordnet 3\.?0 license"
 #
 %ENTRY% _TITLE_OPEN_CASCADE
 %KEY%	"licen[cs]e"
@@ -8187,6 +8783,10 @@ k
 %KEY% =NULL=
 %STR%	"provided that the complete Standard Version of the interpreter is so embedded"
 #
+%ENTRY%	_PHR_ASL11
+%KEY%	"licen[cs]"
+%STR%	"licensed under (the )?apache software license version 1\.?1"
+#
 %ENTRY%	_PHR_ATTRIBUTION
 %KEY%	"a(gree|ttribut|vailabl|uthor)"
 %STR%	"attribution =SOME= (present|provide|display|include)"
@@ -8195,6 +8795,26 @@ k
 %KEY%	"licen[cs]"
 %STR%	"boost software licen[cs]e (v|version )1\.?0"
 #
+%ENTRY%	_PHR_BSD_3_CLAUSE_1
+%KEY%	"licen[cs]"
+%STR%	"BSD(-| )3(-| )clause license"
+#
+%ENTRY%	_PHR_BSD_3_CLAUSE_2
+%KEY%	"licen[cs]"
+%STR%	"3(-| )clause BSD license"
+#
+%ENTRY%	_PHR_BSD_3_CLAUSE_3
+%KEY%	"licen[cs]"
+%STR%	"license =FEW= BSD.3-Clause"
+#
+%ENTRY%	_PHR_BSD_2_CLAUSE_1
+%KEY%	"licen[cs]"
+%STR%	"licen[cs]e =FEW= BSD.2-Clause"
+#
+%ENTRY%	_PHR_BSD_2_CLAUSE_2
+%KEY%	"licen[cs]"
+%STR%	"2(-| )clause BSD license"
+#
 %ENTRY%	_PHR_CDDL
 %KEY%	"distribut"
 %STR%	"common development and distribution licen[cs]e"
@@ -8202,6 +8822,14 @@ k
 %ENTRY%	_PHR_COMMERC_NONCOMM
 %KEY%	"commerc"
 %STR%	"(commerciall?y? (and|or|and/or) non[ -]?commerc|non[ -]?commerciall?y? (and|or|and/or) commerc)"
+#
+%ENTRY%	_PHR_COPYLEFT_NEXT_030
+%KEY%	"licen[cs]"
+%STR%	"(r?e?distributed|available|licensed) under copyleft-next( |-)0\.?3\.?0 (licen[cs]e|)"
+#
+%ENTRY%	_PHR_COPYLEFT_NEXT_031
+%KEY%	"licen[cs]"
+%STR%	"(r?e?distributed|available|licensed) under copyleft-next( |-)0\.?3\.?1 (licen[cs]e|)"
 #
 %ENTRY%	_PHR_EULA
 %KEY%	"\<(end[ -]user|eula)\>"
@@ -8289,13 +8917,33 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))"
 #
+%ENTRY%	_PHR_GPL2_ONLY_1
+%KEY%	"(\<gnu|free\>)"
+%STR%	"version 2 of (the )?gnu general public license"
+#
+%ENTRY%	_PHR_GPL2_ONLY_2
+%KEY%	"(\<gnu|free\>)"
+%STR%	"gnu general public license =SOME= version 2 of the license and no later version"
+#
+%ENTRY%	_PHR_GPL2_ONLY_3
+%KEY%	"l?gpl"
+%STR%	"released under the GPL v2 =FEW= and only v2 not any later version"
+#
+%ENTRY%	_PHR_GPL2_ONLY_4
+%KEY%	"licen[cs]"
+%STR%	"spdx.license =FEW= GPL-2\.?0[^+]"
+#
+%ENTRY%	_PHR_GPL2_ONLY_5
+%KEY%	"licen[cs]"
+%STR%	"licensed under gnu general public licen[cs]e 2\.?0[^+]"
+#
 %ENTRY%	_PHR_GPL2_OR_GPL3
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) or (\<v? ?3\.?0?\>|[^_-]versions? (three|\<3\.?0?\>)|gpl[_-]?v?3)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) or (\<v? ?3\.?0?\>|[^_-]versions? (three|\<3\.?0?\>)|[^l]gpl[_-]?v?3)"
 #
 %ENTRY%	_PHR_GPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|gpl[_-]?v?2) =SOME= (or|Alternatively) =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v2\.?0?\>|[^_-]versions? (two|\<2\.?0?\>))|[^l]gpl[_-]?v?2) =SOME= (\<or\>|alternatively|and) =FEW= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8303,7 +8951,7 @@ k
 #
 %ENTRY%	_PHR_GPL21_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?1\>|[^_-]versions? (\<2\.?1\>))|gpl[_-]?v?2\.?1) =SOME= or =SOME= (later|newer|subsequent|more recent)"
+%STR%	"(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =FEW= (\<v2\.?1\>|[^_-]versions? (\<2\.?1\>))|[^l]gpl[_-]?v?2\.?1) =SOME= or =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8315,11 +8963,11 @@ k
 #
 %ENTRY%	_PHR_GPL3_ONLY_ref2
 %KEY%	"licen[cs]"
-%STR%	"under the terms of the gnu general public licen[cs]e version 3"
+%STR%	"under (the terms of )?the gnu general public licen[cs]e version 3"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%  "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|gpl[_-]?v?3) =SOME= \<or\> =SOME= (later|newer|subsequent|more recent)"
+%STR%  "(([^l-]gp(l|l licen[cs]e)|gnu (general p|p)ublic licen[cs]e) =SOME= (\<v3\.?0?\>|[^_-]versions? (three|\<3\>))|[^l]gpl[_-]?v?3) =SOME= \<or\> =SOME= (later|newer|subsequent|more recent)"
 #
 %ENTRY%	_PHR_GPL3_OR_LATER_ref1
 %KEY%	"licen[cs]"
@@ -8345,9 +8993,17 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"may be r?e?-?distributed (as|in) (a G|G)PL package"
 #
+%ENTRY%	_PHR_GPL_COMPAT_3
+%KEY%	"\<under\>"
+%STR%	"under (a |the )?gpl.compatible license"
+#
 %ENTRY%	_PHR_GPL_DESCRIPTIONS
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(pure|full|completely|exclusively|entirely) gpl"
+#
+%ENTRY%	_PHR_GPL_GHOSTSCRIPT
+%KEY%	=NULL=
+%STR%	"<meta name=\"Producer\" content=\"GPL Ghostscript [0-9]{1,2}\.?[0-9]{1,2}\".?>"
 #
 %ENTRY%	_PHR_HISTORICAL
 %KEY%	"permi[st]"
@@ -8360,6 +9016,14 @@ k
 %ENTRY%	_PHR_IETF_DRAFT
 %KEY%	"(docume|warra)nt"
 %STR%	"this document is an internet-draft and is in full conformance"
+#
+%ENTRY%	_PHR_ISC
+%KEY%	"licen[se]"
+%STR%	"(licensed|distributed|available) under =FEW= \<isc\> licen[cs]e"
+#
+%ENTRY%	_PHR_JYTHON_NOTGPL
+%KEY%	"licen[se]"
+%STR%	"originally licensed under the gnu public license the package is now covered by the jython software license"
 #
 %ENTRY%	_PHR_KDE_FILE
 %KEY%	"\<files?\>"
@@ -8465,9 +9129,17 @@ k
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =FEW= (v|[^_-]version )2"
 #
+%ENTRY%	_PHR_LGPL2_ONLY_ref1
+%KEY%	"licen[cs]"
+%STR%	"under =FEW= (v|[^_-]version )2\.?0? =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e"
+#
 %ENTRY%	_PHR_LGPL2_OR_LATER
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+#
+%ENTRY% _PHR_LGPL2_OR_LATER_2
+%KEY%  "(\<gnu|free\>|l?gpl)"
+%STR%  "lgpl(-|v)2\.?0?\+"
 #
 %ENTRY%	_PHR_LGPL21_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8477,9 +9149,29 @@ k
 %KEY%	"licen[cs]"
 %STR%	"under =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e\,? =SOME= (v|[^_-]version )2\.?1"
 #
-%ENTRY%	_PHR_LGPL21_OR_LATER
+%ENTRY%	_PHR_LGPL21_ONLY_ref2
+%KEY%	"licen[cs]"
+%STR%	"under =FEW= (v|[^_-]version )2\.?1 =FEW= (gnu (lesser|library)|(lesser|library) gnu) (general p|p)ublic licen[cs]e"
+#
+%ENTRY%	_PHR_LGPL21_ONLY_ref3
+%KEY%	"(\<gnu|free\>)"
+%STR%	"lgpl as published by the free software foundation (v|version )2\.?1"
+#
+%ENTRY%	_PHR_LGPL21_ONLY_ref4
+%KEY%	"(\<gnu|free\>|l?gpl)"
+%STR%  "gnu (lesser|library) (general p|p)ublic licen[cs]e 2\.?1"
+#
+%ENTRY%	_PHR_LGPL21_OR_LATER_1
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"(lgp(l|l licen[cs]e)|gnu (lesser|library|lesser lesser) (general p|p)ublic licen[cs]e) =SOME= (v|[^_-]version )2\.?1 =SOME= or =SOME= (later|newer|subsequent|more recent)"
+#
+%ENTRY%	_PHR_LGPL21_OR_LATER_2
+%KEY%	"licen[cs]"
+%STR% "licen[cs]e =FEW= lgpl v?2\.?1 or later"
+#
+%ENTRY%	_PHR_LGPL21_OR_LATER_3
+%KEY%	=NULL=
+%STR%	"lgpl( v|v|-)2\.1\+"
 #
 %ENTRY%	_PHR_LGPL3_ONLY
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8605,6 +9297,10 @@ k
 %ENTRY%	_PHR_NO_WARRANTY_11
 %KEY%	"licen[cs]"
 %STR%	"is licen[cs]ed free of charge (and t|t)here is no warranty for"
+#
+%ENTRY%	_PHR_NO_WARRANTY_12
+%KEY%	"(docume|warra)nt"
+%STR%	"disclaims all warranties with regard to this software"
 %ALIAS%	_NO_WARRANTY_last
 #
 %ENTRY%	_PHR_NOT_OPEN
@@ -8688,10 +9384,6 @@ k
 %ENTRY%	_PHR_SCF_HOWTO
 %KEY%	"so(ftware|urce)"
 %STR%	"scientific computing with free GNU/linux software HOWTO"
-#
-%ENTRY%	_PHR_SUN_TM
-%KEY%	"\<micros(oft|ystems)\>"
-%STR%	"trademark =SOME= of sun microsystems"
 #####
 # DELETED: provided with restricted right =ANY= use duplication or
 # disclosure by =SOME= ...
@@ -8703,6 +9395,10 @@ k
 %ENTRY%	_PHR_WXWINDOWS
 %KEY%	"licen[cs]"
 %STR%	"wxwindows library licen[cs]e"
+#
+%ENTRY%	_PHR_WXWINDOWS_31
+%KEY%	"licen[cs]"
+%STR%	"wxwindows library licen[cs]e (v\.? ?|version )3\.?1"
 #
 %ENTRY%	_PHR_YAST_CR
 %KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -8724,14 +9420,22 @@ k
 %KEY%	"licen[cs]"
 %STR%	"license =FEW= creative commons =FEW= attribution\,? share-?alike"
 #
-%ENTRY%	_PHR_TCL
-%KEY%	"software"
-%STR%	"this software is copyrighted by the Regents of the University of California =SOME= ActiveState Corporation and other parties =SOME= apply to all files associated with the software unless explicitly disclaimed in individual files"
+%ENTRY%	_PHR_X11_1
+%KEY%	"licen[cs]"
+%STR%	"licensed under =FEW= X11 license"
+#
+%ENTRY%	_PHR_X11_2
+%KEY%	"licen[cs]"
+%STR%	"spdx.license =FEW= X11"
 #
 %ENTRY%	_TEXT_ADOBE_FRAME
 %KEY%	=NULL=
 #%STR%	"(adobe systems|frame technology)"
 %STR%	"(\<adobe\>|frame technology)"
+#
+%ENTRY%	_TEXT_ALTERED_SOURCE
+%KEY% =NULL=
+%STR%	"altered (source )?versions must be plainly marked"
 #
 %ENTRY%	_TEXT_ALFRESCO
 %KEY%	=NULL=
@@ -8844,7 +9548,6 @@ k
 %ENTRY%	_TEXT_GPLV2
 %KEY%	"(\<gnu|free\>|l?gpl)"
 %STR%	"[^l-]gpl[ _-]?v?2"
-#%STR%	"[^l-]gpl([_-]?v?2| v?2[^0-9])"
 #
 %ENTRY%	_TEXT_GPLV3_NOT_FILTER
 %KEY%	"(\<gnu|free\>|l?gpl)"
@@ -8862,7 +9565,7 @@ k
 # License specifier in Debian copyright file
 %ENTRY%	_TEXT_GPLV3_CR
 %KEY%	"licen[cs]e"
-%STR%	"licen[cs]e =FEW= GPL-3"
+%STR%	"licen[cs]e =FEW= [^L]GPL-3"
 #
 %ENTRY%	_TEXT_GHOSTSCRIPT
 %KEY%	=NULL=
@@ -8956,7 +9659,7 @@ k
 #
 %ENTRY%	_TEXT_NOT_GPLV3_DRAFT
 %KEY%	"(\<gnu|free\>|l?gpl)"
-%STR%	"gplv3 draft proceed"
+%STR%	"[^l]gplv3 draft proceed"
 #
 %ENTRY%	_TEXT_NOT_LIBSTDC
 %KEY%	=NULL=
@@ -8969,6 +9672,10 @@ k
 ##%ENTRY%	_TEXT_OPENMKT
 ##%KEY%	=NULL=
 ##%STR%	"open market"
+#
+%ENTRY%	_TEXT_ORIGIN
+%KEY% =NULL=
+%STR%	"the origin of this software must not be misrepresented"
 #
 %ENTRY%	_TEXT_PERMISSION
 %KEY%	"permi[st]"
@@ -9030,10 +9737,12 @@ k
 %STR%	"trade[ -]?dress"
 %ALIAS%	_HOT_tradedress
 #
-%ENTRY%	_TEXT_TRADEMARK
-%KEY%	=NULL=
-%STR%	"trademark"
-%ALIAS%	_HOT_trademark
+### TODO Remove this phrase permanently later
+#%ENTRY%	_TEXT_TRADEMARK
+#%KEY%	=NULL=
+#%STR%	"trademark"
+#%ALIAS%	_HOT_trademark
+###
 #
 %ENTRY%	_TEXT_XEROX
 %KEY%	=NULL=
@@ -9138,6 +9847,14 @@ k
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?apache\.?org/licen[cs]e-2\.?0"
 #
+%ENTRY%	_URL_APACHE_20_1
+%KEY%	"licen[cs]"
+%STR%	"w?w?w?\.?apache\.?org/licen[cs]es?/licen[cs]e-?2\.?0"
+#
+%ENTRY%	_URL_APACHE_20_2
+%KEY%	"licen[cs]"
+%STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/apache-?2\.?0"
+#
 %ENTRY%	_URL_APSL
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/apsl"
@@ -9153,14 +9870,6 @@ k
 %ENTRY%	_URL_ASL_2
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/apache"
-#
-%ENTRY%	_URL_ASL_V2_1
-%KEY%	"licen[cs]"
-%STR%	"w?w?w?\.?apache\.?org/licen[cs]es?/licen[cs]e-?2\.?0"
-#
-%ENTRY%	_URL_ASL_V2_2
-%KEY%	"licen[cs]"
-%STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/apache-?2\.?0"
 #
 %ENTRY%	_URL_BOOST_10
 %KEY%	"licen[cs]"
@@ -9197,6 +9906,10 @@ k
 %ENTRY%	_URL_CCA_SA_V10
 %KEY%	"licen[cs]"
 %STR%	"creativecommons\.?org/licen[cs]es/by-sa/1\.?0"
+#
+%ENTRY%	_URL_CCA_SA_V20
+%KEY%	"licen[cs]"
+%STR%	"creativecommons\.?org/licen[cs]es/by-sa/2\.?0"
 #
 %ENTRY%	_URL_CCA_SA_V25
 %KEY%	"licen[cs]"
@@ -9252,7 +9965,7 @@ k
 #
 %ENTRY%	_URL_CDDL_V1
 %KEY%	"licen[cs]"
-%STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/cddlv?1"
+%STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/cddl(v|-)?1"
 #
 %ENTRY%	_URL_CDDL
 %KEY%	"licen[cs]"
@@ -9309,6 +10022,10 @@ k
 %ENTRY%	_URL_IBM_PL
 %KEY%	"licen[cs]"
 %STR%	"w?w?w?\.?opensource\.?org/licen[cs]es?/ibmpl"
+#
+%ENTRY%	_URL_ICU
+%KEY%	=NULL=
+%STR%	"www\.?icu-project\.?org"
 #
 %ENTRY%	_URL_IMAGEMAGICK
 %KEY%	"licen[cs]"
@@ -9430,6 +10147,10 @@ k
 %KEY%	"legal"
 %STR%	"w?w?w?\.?w3c?\.?org/consortium/legal"
 #
+%ENTRY%	_URL_W3C_20021231
+%KEY%	"legal"
+%STR%	"w?w?w?\.?w3c?\.?org/consortium/legal/2002/copyright-software-20021231"
+#
 # Zend license
 %ENTRY%   _URL_ZEND
 %KEY% "licen[cs]"
@@ -9478,7 +10199,7 @@ k
 #
 %ENTRY%	_MIN_BSD
 %KEY%	"licen[cs]"
-%STR%	"(BSD lic-instance|(bsd|berkeley) =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= (bsd|berkeley))"
+%STR%	"(BSD lic-instance|(newbsd|\<bsd|berkeley) =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= (newbsd|\<bsd|berkeley))"
 #
 %ENTRY%	_MIN_CMU
 %KEY%	"licen[cs]"
@@ -9620,7 +10341,7 @@ k
 #
 %ENTRY%	_MIN2_BSD
 %KEY%	"so(ftware|urce)"
-%STR%	"(BSD src-instance|(bsd|berkeley) =FEW= \<source\>|\<source\> =FEW= (bsd|berkeley))"
+%STR%	"(BSD src-instance|(newbsd|\<bsd|berkeley) =FEW= \<source\>|\<source\> =FEW= (newbsd|\<bsd|berkeley))"
 #
 %ENTRY%	_MIN2_CMU
 %KEY%	"so(ftware|urce)"
@@ -9696,7 +10417,7 @@ k
 #
 %ENTRY%	_MIN2_MSCORP
 %KEY%	"so(ftware|urce)"
-%STR%	"(Microsoft src-instance|(\<microsoft\>|\<ms\>) =FEW= \<source\>|\<source\> =FEW= (\<microsoft\>|\<ms\>))"
+%STR%	"(Microsoft src-instance|(\<microsoft\>|(^|[[:space:]])ms($|[[:space:]])) =FEW= \<source\>|\<source\> =FEW= (\<microsoft\>|(^|[[:space:]])ms($|[[:space:]])))"
 #
 %ENTRY%	_MIN2_OPENGROUP
 %KEY%	"so(ftware|urce)"
@@ -9708,7 +10429,7 @@ k
 #
 %ENTRY%	_MIN2_PHP
 %KEY%	"so(ftware|urce)"
-%STR%	"(PHP src-instance|\<php\> =FEW= \<source\>|\<source\> =FEW= \<php\>)"
+%STR%	"(PHP src-instance|((^|[[:space:]])php($|[[:space:]])) =FEW= \<source\>|\<source\> =FEW= ((^|[[:space:]])php($|[[:space:]])))"
 #
 %ENTRY%	_MIN2_RSA
 %KEY%	"so(ftware|urce)"
@@ -9716,7 +10437,7 @@ k
 #
 %ENTRY%	_MIN2_SUN
 %KEY%	"so(ftware|urce)"
-%STR%	"(Sun src-instance|\<sun\> =FEW= \<source\>|\<source\> =FEW= \<sun\>)"
+%STR%	"(Sun src-instance|(^|[[:space:]])sun($|[[:space:]]) =FEW= \<source\>|\<source\> =FEW= (^|[[:space:]])sun($|[[:space:]]))"
 #
 %ENTRY%	_MIN2_W3C
 %KEY%	"so(ftware|urce)"
