@@ -144,7 +144,7 @@ class ClearingDecisionProcessor extends Object
 
     $itemId = $itemBounds->getItemId();
 
-    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId);
+    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, $includeSubFolders=false);
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       $type = DecisionTypes::IDENTIFIED;
