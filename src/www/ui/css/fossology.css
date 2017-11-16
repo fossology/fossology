@@ -329,3 +329,8 @@ div.infoTable {
 #databaseTable {
   width: 100%;
 }
+.candidateFileList{
+  height: 200px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

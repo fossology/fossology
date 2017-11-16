@@ -294,11 +294,11 @@ class AdminLicenseCandidate extends DefaultPlugin
       return new Response('true', Response::HTTP_OK, array('Content-type'=>'text/plain'));
     }else{
       $treeDao = $this->getObject('dao.tree');
-      $message = "<ol style='padding-left:1em;'>";
+      $message = "<div class='candidateFileList'><ol>";
       foreach($dataFetch as $cnt => $uploadTreeFk){
         $message .= "<li>".$treeDao->getFullPath($uploadTreeFk['uploadtree_fk'], 'uploadtree')."</li>";
       }
-      $message .= "</ol>";
+      $message .= "</ol></div>";
       return new Response($message, Response::HTTP_OK, array('Content-type'=>'text/plain'));  
     }
   }
