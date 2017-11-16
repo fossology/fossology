@@ -263,8 +263,10 @@ class ClearingDao extends Object
 
         $firstMatch = false;
         //prepare the new one
-        $previousClearingId = $clearingId;
-        if(!$forClearingHistory){
+        if($forClearingHistory){
+          $previousClearingId = $clearingId;
+        }
+        else{
           $previousItemId = $itemId;
         }
         $clearingEvents = array();
