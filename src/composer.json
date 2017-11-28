@@ -17,7 +17,7 @@
         "twig/twig": "1.*",
         "twig/extensions": "1.*",
         "easyrdf/easyrdf": "0.9.*",
-        "phpoffice/phpword": "0.12.0"
+        "phpoffice/phpword": "v0.13.*"
     },
 
     "require-dev": {

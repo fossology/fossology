@@ -58,7 +58,7 @@ target="$install_dir/$filename"
 # do the install
 
 echo "composer $version will be installed to: $target (this will override any old executable)"
-wget -q \
-     -O "$target" \
+curl -s \
+     -o "$target" -L \
      "https://github.com/composer/getcomposer.org/raw/$current_github_hash/web/download/$version/composer.phar"
 chmod +x "$target"
