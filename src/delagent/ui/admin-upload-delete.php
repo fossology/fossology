@@ -173,7 +173,7 @@ class admin_upload_delete extends FO_Plugin
   {
     $V = "";
     /* If this is a POST, then process the request. */
-    $uploadpks = GetParm('upload', PARM_RAW);
+    $uploadpks = GetParm('uploads', PARM_RAW);
     if (!empty($uploadpks))
     {
       $V .= $this->initDeletion($uploadpks);
@@ -189,7 +189,7 @@ class admin_upload_delete extends FO_Plugin
     $V.= "    {\n";
     /* Remove all options */
     //$V.= "    document.formy.upload.innerHTML = Uploads.responseText;\n";
-    $V.= "    document.getElementById('uploaddiv').innerHTML = '<BR><select name=\'upload\' multiple=multiple size=\'10\'>' + Uploads.responseText + '</select><P />';\n";
+    $V.= "    document.getElementById('uploaddiv').innerHTML = '<BR><select name=\'uploads\' multiple=multiple size=\'10\'>' + Uploads.responseText + '</select><P />';\n";
     /* Add new options */
     $V.= "    }\n";
     $V.= "  }\n";
@@ -228,7 +228,7 @@ class admin_upload_delete extends FO_Plugin
     $text = _("Select the uploaded project to delete:");
     $V.= "<li>$text";
     $V.= "<div id='uploaddiv'>\n";
-    $V.= "<BR><select multiple='multiple' name='upload[]' size='10'>\n";
+    $V.= "<BR><select multiple='multiple' name='uploads[]' size='10'>\n";
     $List = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach($List as $L) {
       $V.= "<option value='" . $L['upload_pk'] . "'>";
