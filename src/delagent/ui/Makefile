@@ -22,12 +22,25 @@ include $(VARS)
 MOD_NAME = delagent
 MOD_SUBDIR = ui
 
+OBSOLETEFILES = admin-upload-delete.php
+UIFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html|twig)$$"`
+DIRS = Page template
+DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
+
 all:
 	@echo "nothing to do"
 
 install:
+	@for file in $(UIFILES); do \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
+	done
 	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	@for file in $(OBSOLETEFILES); do \
+		rm -f $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
+		rm -f $$file; \
+	done
+	@ln -sfn $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/Page $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)-page
 
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
