@@ -1,0 +1,53 @@
+{% extends "include/base.html.twig" %}
+     
+
+{% block content %}
+  <form name="formy" method="post">
+    {{ "Select the uploaded file to"|trans }} <em>{{ "delete"|trans }}</em>
+    <ul>
+      <li>{{ "This will"|trans }} <em>{{ "delete"|trans }}</em> {{ "the upload file!"|trans }}</li>
+      <li>{{ "Be very careful with your selection since you can delete a lot of work!"| trans }}</li>
+      <li>{{ "All analysis only associated with the deleted upload file will also be deleted."|trans }}</li>
+      <li>{{ "THERE IS NO UNDELETE. When you select something to delete, it will be removed from the database and file repository."|trans }}</li>
+    </ul>
+    <p>{{ "Select the uploaded file to delete:"|trans }}</p>
+    <ol>
+      <li>{{ "Select the folder containing the file to delete"|trans }}:
+        <select name='folder' 
+        onLoad='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=-1")'
+        onChange='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=" + this.value)'>
+       {{ rootFolderListOptions }}
+        </select>
+      </li>
+      <li>{{ "Select the uploaded project to delete"|trans }}:
+        <div id="uploaddiv">
+          <br/>
+           {% import "include/macros.html.twig" as macro %}
+           {{ macro.select('uploads[]',uploadList,'uploads',-1,'',10) }}
+        </div>
+      </li>      
+    </ol>
+  <input type="submit" value="{{ 'Delete'|trans }}"/>
+</form>
+  
+{% endblock %}
+
+
+{% block foot %}
+  {{ parent() }}
+  {{ uploadScript }}
+  
+    <script>
+      window.onload = function() {
+          $('#folder_select').select2();
+      };
+
+      function Uploads_Reply()
+      {
+        if ((Uploads.readyState===4) && (Uploads.status===200))
+        {
+          document.getElementById('uploaddiv').innerHTML = '<br><select name=\'uploads[]\' multiple=\'multiple\' size=\'10\'>' + Uploads.responseText + '</select><p/>';
+        }
+      }
+    </script>
+{% endblock %}
