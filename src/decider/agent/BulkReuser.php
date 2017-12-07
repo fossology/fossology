@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2015-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -34,31 +34,9 @@ class BulkReuser extends Object
   {
     $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
-
-  protected function getBulkIds($uploadId, $groupId, $userId)
-  {
-    $sql = "SELECT jq_args FROM upload_reuse, jobqueue, job 
-           WHERE upload_fk=$1 AND group_fk=$2
-             AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)
-             AND jq_type=$4 AND jq_job_fk=job_pk
-             AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk";
-    $stmt = __METHOD__;
-    $this->dbManager->prepare($stmt, $sql);
-    $res = $this->dbManager->execute($stmt,array($uploadId, $groupId, $userId,'monkbulk'));
-    $bulkIds = array();
-    while($row=  $this->dbManager->fetchArray($res))
-    {
-      $bulkIds = array_merge($bulkIds,explode("\n", $row['jq_args']));      
-    }
-    $this->dbManager->freeResult($res);
-    return array_unique($bulkIds);
-  }
   
-  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $jobId) {
-    $bulkIds = $this->getBulkIds($uploadId, $groupId, $userId);
-    if (count($bulkIds) == 0) {
-      return 0;
-    }
+  public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency)
+  {
     /* @var $uploadDao UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
     $topItem = $uploadDao->getUploadParent($uploadId);
@@ -72,21 +50,23 @@ class BulkReuser extends Object
             ."SELECT $1 as lrb_fk,rf_fk,removing FROM license_set_bulk WHERE lrb_fk=$2";
     $this->dbManager->prepare($stmt=__METHOD__.'cloneBulk', $sql);
     $this->dbManager->prepare($stmtLic=__METHOD__.'cloneBulkLic', $sqlLic);
-    foreach($bulkIds as $bulkId) {
-      $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
-      $row = $this->dbManager->fetchArray($res);
-      $this->dbManager->freeResult($res);
-      $resLic = $this->dbManager->execute($stmtLic,array($row['lrb_pk'],$row['lrb_origin']));
-      $this->dbManager->freeResult($resLic);  
-      $dependecies[] = array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk'], AgentPlugin::PRE_JOB_QUEUE=>array('agent_decider'));
-    }
+    $res = $this->dbManager->execute($stmt,array($userId,$groupId,$uploadId,$topItem, $bulkId));
+    $row = $this->dbManager->fetchArray($res);
+    $this->dbManager->freeResult($res);
+    $resLic = $this->dbManager->execute($stmtLic,array($row['lrb_pk'],$row['lrb_origin']));
+    $this->dbManager->freeResult($resLic);
+    $upload = $uploadDao->getUpload($uploadId);
+    $uploadName = $upload->getFilename();
+    $job_pk = \JobAddJob($userId, $groupId, $uploadName, $uploadId);
+    /** @var DeciderJobAgentPlugin $deciderPlugin */
+    $deciderPlugin = plugin_find("agent_deciderjob");
+    $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']));
     $errorMsg = '';
-    $jqId = $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, $dependecies);
-    if (!empty($errorMsg))
-    {
-      throw new Exception($errorMsg);
+    $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies);
+
+    if (!empty($errorMsg)) {
+      throw new Exception(str_replace('<br>', "\n", $errorMsg));
     }
     return $jqId;
   }
-
 }
