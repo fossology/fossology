@@ -49,5 +49,8 @@
     {% elseif download and isReady %}
       [<a href="?mod=download&report={{ jobId }}">Download {{ download }}</a>]
     {% endif %}
+    {% if isNoOfMonkBulk is defined %}
+    [{{ 'Count : '|trans }}<a href="#" title="isNoOfMonkBulk">{{ isNoOfMonkBulk }}</a>]
+    {% endif %}
   </td>
 </tr>
