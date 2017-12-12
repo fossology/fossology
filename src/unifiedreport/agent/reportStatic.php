@@ -225,13 +225,25 @@ class ReportStatic
 
 
   /**
+   * @param string $text
+   * @return array $texts
+   */
+  protected function reArrangeObligationText($text)
+  {
+    $texts = explode(PHP_EOL, $text);
+    return $texts;
+  }
+
+
+  /**
    * @param Section $section 
    */ 
   function todoTable(Section $section)
   {
     global $SysConf;
-    $text1 = $SysConf['SYSCONFIG']["CommonObligation"];
-    $text2 = $SysConf['SYSCONFIG']["AdditionalObligation"];
+    $textCommonObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["CommonObligation"]);
+    $textAdditionalObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["AdditionalObligation"]);
+    $textObligationAndRisk = $this->reArrangeObligationText($SysConf['SYSCONFIG']["ObligationAndRisk"]);
 
     $rowStyle = array("bgColor" => "E0E0E0", "spaceBefore" => 0, "spaceAfter" => 0, "spacing" => 0);
     $secondRowColorStyle = array("color" => "008000");
@@ -252,10 +264,12 @@ class ReportStatic
 
     $r1c1 = "2.1.1";
     $r2c1 = "2.1.2";
+    $r3c1 = "2.1.3";
 
     $r1c2 = "Documentation of license conditions and copyright notices in product documentation (License Notice File / README_OSS) is provided by this component clearing report:";
     $r2c2 = "Additional Common Obligations:";
-    $r2c3 = "Need to be ensured by the distributing party:";
+    $r2c21 = "Need to be ensured by the distributing party:";
+    $r3c2 = "Obligations and risk assessment regarding distribution";
 
     $table = $section->addTable($this->tablestyle);
 
@@ -266,34 +280,48 @@ class ReportStatic
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen);
     $cell = $table->addCell($secondColLen);
-    if (!empty($text1) && strpos($text1, '\n')!==FALSE){
-      $texts = explode('\n', $text1);
-      foreach($texts as $text){
-        $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
-      }
+    if(empty($textCommonObligation)){
+      $cell->addText(htmlspecialchars($textCommonObligation), $secondRowColorStyle, "pStyle");
     }
     else{
-      $cell->addText(htmlspecialchars($text1),$secondRowColorStyle , "pStyle");
+      foreach($textCommonObligation as $text){
+        $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
+      }
     }
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r2c1), $rowTextStyleLeft, "pStyle");
     $cell = $table->addCell($secondColLen, $rowStyle);
     $cell->addText(htmlspecialchars($r2c2), $rowTextStyleRightBold, "pStyle");
-    $cell->addText(htmlspecialchars($r2c3), $rowTextStyleRightBold, "pStyle");
+    $cell->addText(htmlspecialchars($r2c21), $rowTextStyleRightBold, "pStyle");
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen);
     $cell = $table->addCell($secondColLen);
-    if (!empty($text1) && strpos($text2, '\n')!==FALSE){
-      $texts = explode('\n', $text2);
-      foreach($texts as $text){
+    if (empty($textAdditionalObligation)){
+      $cell->addText(htmlspecialchars($textAdditionalObligation), null, "pStyle");
+    }
+    else{
+      foreach($textAdditionalObligation as $text){
         $cell->addText(htmlspecialchars($text), null, "pStyle");
       }
     }
-    else{
-      $cell->addText(htmlspecialchars($text2), null, "pStyle");
+    $table->addRow($rowWidth);
+    $cell = $table->addCell($firstColLen, $rowStyle)->addText(htmlspecialchars($r3c1), $rowTextStyleLeft, "pStyle");
+    $cell = $table->addCell($secondColLen, $rowStyle)->addText(htmlspecialchars($r3c2), $rowTextStyleRightBold, "pStyle");
+
+    $table->addRow($rowWidth);
+    $cell = $table->addCell($firstColLen);
+    $cell = $table->addCell($secondColLen);
+    if(empty($textObligationAndRisk)){
+      $cell->addText(htmlspecialchars($textObligationAndRisk), $secondRowColorStyle, "pStyle");
     }
+    else{
+      foreach($textObligationAndRisk as $text){
+        $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
+      }
+    }
+
     $section->addTextBreak();
   }
 
@@ -334,10 +362,11 @@ class ReportStatic
 
     if(!empty($obligations)){
       foreach($obligations as $obligation){
-          $table->addRow($rowWidth);
-          $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]), $firstRowTextStyle);
+        $table->addRow($rowWidth);
+        $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]), $firstRowTextStyle);
           $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars(implode(",",$obligation["license"])));
-          $table->addCell($thirdColLen)->addText(htmlspecialchars($obligation["text"]));
+          $obligationText = str_replace("\n", "<w:br/>", htmlspecialchars($obligation["text"], ENT_DISALLOWED));
+          $table->addCell($thirdColLen)->addText($obligationText);
       }
     }
     else{
