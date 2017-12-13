@@ -677,6 +677,30 @@ class ui_view_info extends FO_Plugin
     return $VT;
   }
 
+  /**
+    * @param array $checkBoxListParams
+    * @return $cbSelectionList
+   */
+
+  protected function getCheckBoxSelectionList($checkBoxListParams)
+  {
+    foreach($checkBoxListParams as $checkBoxListParam)
+    {
+      $ret = GetParm($checkBoxListParam, PARM_STRING);
+      if(empty($ret))
+      {
+        $cbList[] = "unchecked";
+      }
+      else
+      {
+        $cbList[] = "checked";
+      }
+    }
+    $cbSelectionList = implode(",", $cbList);
+
+    return $cbSelectionList;
+  }
+
   public function Output()
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
@@ -697,22 +721,13 @@ class ui_view_info extends FO_Plugin
       $relDate = GetParm('relDate', PARM_TEXT);
       $sw360Link = GetParm('sw360Link', PARM_TEXT);
       $generalAssesment = GetParm('generalAssesment', PARM_TEXT);
-      $nonCritical = empty(GetParm("nonCritical", PARM_STRING)) ? "unchecked" : "checked";
-      $critical = empty(GetParm("critical", PARM_STRING)) ? "unchecked" : "checked";
-      $noDependency = empty(GetParm("noDependency", PARM_STRING)) ? "unchecked" : "checked";
-      $dependencySource = empty(GetParm("dependencySource", PARM_STRING)) ? "unchecked" : "checked";
-      $dependencyBinary = empty(GetParm("dependencyBinary", PARM_STRING)) ? "unchecked" : "checked";
-      $noExportRestriction = empty(GetParm("noExportRestriction", PARM_STRING)) ? "unchecked" : "checked";
-      $exportRestriction = empty(GetParm("exportRestriction", PARM_STRING)) ? "unchecked" : "checked";
-      $noRestriction = empty(GetParm("noRestriction", PARM_STRING)) ? "unchecked" : "checked";
-      $restrictionForUse = empty(GetParm("restrictionForUse", PARM_STRING)) ? "unchecked" : "checked";
+      $checkBoxListParams = array("nonCritical","critical","noDependency","dependencySource","dependencyBinary","noExportRestriction","exportRestriction","noRestriction","restrictionForUse");
+      $cbSelectionList = $this->getCheckBoxSelectionList($checkBoxListParams);
       $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
       $gaRisk = GetParm('gaRisk', PARM_TEXT);
-      $gaList = array($nonCritical, $critical, $noDependency, $dependencySource,$dependencyBinary,$noExportRestriction,$exportRestriction, $noRestriction, $restrictionForUse);
-      $gaSelectionList = implode(",", $gaList);
       $sql = "UPDATE report_info SET ri_reviewed=$2, ri_footer=$3, ri_report_rel=$4, ri_community=$5, ri_component=$6,ri_version=$7, ri_release_date=$8, ri_sw360_link=$9, ri_general_assesment=$10, ri_ga_additional=$11,ri_ga_risk=$12,ri_ga_checkbox_selection=$13 WHERE upload_fk=$1;";
       $this->dbManager->prepare(__METHOD__."updateReportInfoData",$sql);
-      $result = $this->dbManager->execute(__METHOD__."updateReportInfoData",array($uploadId, $reviewedBy, $footerNote, $reportRel, $community, $component, $version, $relDate, $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $gaSelectionList));
+      $result = $this->dbManager->execute(__METHOD__."updateReportInfoData",array($uploadId, $reviewedBy, $footerNote, $reportRel, $community, $component, $version, $relDate, $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $cbSelectionList));
       $this->dbManager->freeResult($result);
     }
 
