@@ -306,10 +306,12 @@ function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere
 function LatestAgentpk($upload_pk, $arsTableName)
 {
   $AgentRec = AgentARSList($arsTableName, $upload_pk, 1);
-  if ($AgentRec === false)
+
+  if (empty($AgentRec)) {
     $Agent_pk = 0;
-  else
+  } else {
     $Agent_pk = intval($AgentRec[0]['agent_fk']);
+  }
   return $Agent_pk;
 }
 
