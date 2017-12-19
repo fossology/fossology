@@ -3,7 +3,7 @@
 
 #
 # original script by maximilian.huber@tngtech.com
-# additions by michael.c.jaeger@siemens.com
+# additions by bruno.cornec@hpe.com michael.c.jaeger@siemens.com
 #
 # SPDX-License-Identifier: GPL-2.0
 #
@@ -23,7 +23,8 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.synced_folder "..", "/home/vagrant/prj/fossology", type: "rsync"
-  config.vm.network "forwarded_port", guest: 80, host: 8081
+  config.vm.synced_folder "../target", "/home/vagrant/repo", type: "rsync", create: true
+  config.vm.network "forwarded_port", guest: 80, host: 8082
 
 #
 # part to prepare dependencies
@@ -35,18 +36,25 @@ set -ex
 yum install -y wget git
 
 # install EPEL
-wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-rpm -Uvh epel-release-latest-7.noarch.rpm
+wget https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+rpm -Uvh epel-release-7-11.noarch.rpm
 
 # install projectbuilder
-wget http://ftp.project-builder.org/centos/7/x86_64/pb.repo
-cp pb.repo /etc/yum.repos.d/
+wget http://ftp.project-builder.org/test/centos/7/x86_64/pb-test.repo
+cp pb-test.repo /etc/yum.repos.d/
 
 # not using gpg checking is not recommended
 # yum update -y --nogpgcheck
 # yum install -y project-builder --nogpgcheck
 yum update -y
-yum install -y project-builder
+
+# installs for projectbuilder
+yum install -y project-builder subversion perl-ExtUtils-MakeMaker createrepo 
+
+# Fix a Fedora-26 issue
+cat >> /etc/pb/pb.conf << EOF
+osupd fedora-26 = sudo /usr/bin/dnf makecache; sudo /usr/bin/dnf -y update
+EOF
 
 # adding docker install info for prepping the project builder installation runs
 cat > /etc/yum.repos.d/docker.repo << EOF
@@ -61,8 +69,28 @@ EOF
 # ... then installing docker
 yum install -y docker-engine
 
+# some modification of docker settings to run under user vagrant
+sed -i 's/dockerd$/dockerd -G vagrant/' /usr/lib/systemd/system/docker.service
+systemctl daemon-reload
+
 # ... starting docker
 systemctl start docker
+
+# ... installing composer things
+# cd /home/vagrant/prj/fossology
+mkdir -p /home/vagrant/composer/
+/home/vagrant/prj/fossology/utils/install_composer.sh /home/vagrant/composer/
+mkdir -p /home/vagrant/prj/fossology/src/vendor
+chown vagrant:vagrant /home/vagrant/prj/fossology/src/vendor
+
+# preparing the transfer of the packages by ssh
+ssh-keygen -t rsa -N "" -q -f /home/vagrant/.ssh/id_rsa
+chown vagrant:vagrant /home/vagrant/.ssh/id_rsa
+chown vagrant:vagrant /home/vagrant/.ssh/id_rsa.pub
+cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys 
+chmod 600 /home/vagrant/.ssh/authorized_keys
+mkdir -p /home/vagrant/repo
+chown vagrant:vagrant /home/vagrant/repo
 
 SCRIPT
   end
@@ -87,32 +115,101 @@ cat<<PBRC > $HOME/.pbrc
 pbdefdir default = \\\$ENV{HOME}/cache-project-builder
 pbstoponerr default = true
 
-pburl fossology = git+https://github.com/fossology/fossology.git
-pbdefdir fossology =  \\\$ENV{'HOME'}/prj
-pbconfurl fossology = git+https://github.com/fossology/fossology.git
+# you need to swith depending on how you checked out fossology.git
+pburl fossology = git+ssh://git@github.com:fossology/fossology.git
+#pburl fossology = git+https://github.com/fossology/fossology.git
+pbconfurl fossology = git+ssh://git@github.com:fossology/fossology.git
+#pbconfurl fossology = git+https://github.com/fossology/fossology.git
+
+pbdefdir fossology = \\\$ENV{'HOME'}/prj
 pbconfdir fossology = \\\$ENV{'HOME'}/prj/fossology/pbconf
+
+pburl pb = svn://svn.project-builder.org/pb
+pbdefdir pb = \\\$ENV{'HOME'}
+pbconfurl pb = svn://svn.project-builder.org/pb/pbconf
+pbconfdir pb = \\\$ENV{'HOME'}/pb/pbconf
+
+sshhost fossology = localhost
+sshlogin fossology = vagrant
+sshdir fossology = /home/vagrant/repo
+sshport fossology = 22
 
 PBRC
 
 ################################################################################
-# sbx = sandbox
-pb -t -p fossology sbx2build   fossology
-pb    -p fossology build2prep  fossology
-# pb -t -p fossology sbx2pkg     fossology # actually, sbx2pkg is included in sbx2pkg2ins
-pb -t -p fossology sbx2pkg2ins fossology
+# docker based generation here
+
+# maybe not all of the distros are relevant
+# DISTRO_LIST="ubuntu-16.04-x86_64 ubuntu-16.10-x86_64 ubuntu-17.04-x86_64 debian-8-x86_64 debian-9-x86_64 fedora-25-x86_64 fedora-26-x86_64 centos-6-x86_64 centos-7-x86_64 mageia-6-x86_64 opensuse-42.2-x86_64 opensuse-42.3-x86_64"
+DISTRO_LIST="centos-7-x86_64"
+
+# some logic for command line ops here
+#DISTRO=$1
+#DISTROVER=$2
+#if [ "_$DISTRO" != "_" ]; then
+#DISTRO_LIST=$DISTRO-$DISTROVER-x86_64
+#fi
+
+VELIST=`echo $DISTRO_LIST | sed 's/ /,/g'`
+
+# note that velist and vepath should be set to default , not only project builder ('pb')
+cat >> $HOME/.pbrc << EOF
+velist default = $VELIST
+velogin default = pb
+vepath default = /tmp
+vetype default = docker
+dockerrepository default = pb
+EOF
+
+# Setup repos
+pb -p pb -r 0.14.6 sbx2pkg2ins
+# useless, instead use sbx2prepve
+pb -p fossology sbx2build
+
+# the grand for loop for the different distros
+for DISTRO in $DISTRO_LIST; do
+NAME=`pbdistrocheck $DISTRO | grep -E '^Name:' | awk '{print $2}'`
+VER=`pbdistrocheck $DISTRO | grep -E '^Ver:' | awk '{print $2}'`
+ARCH=`pbdistrocheck $DISTRO | grep -E '^Arch:' | awk '{print $2}'`
+pb -p pb -m $DISTRO newve -i ${NAME}:$VER
+pb -p pb -m $DISTRO sbx2setupve
+pb -p fossology -m $DISTRO prepve
+pb -p fossology -m $DISTRO build2ve
+done
+
+################################################################################
+#sbx = sandbox
+
+# git checkout could be done here if need for overwrite is needed ...
+
+# Give the ref to where composer is on the VM
+# adding componser binary to path
+
+export PATH=/home/vagrant/composer/:$PATH
+
+# and provide the variable to the make file
+#export COMPOSER_PHAR=/home/vagrant/composer/composer
+
+# commands for single distro generation 
+#pb -t -p fossology sbx2build   fossology
+#pb    -p fossology build2prep  fossology
+
+# actually, sbx2pkg is included in sbx2pkg2ins
+#pb -t -p fossology sbx2pkg     fossology 
+#pb -t -p fossology sbx2pkg2ins fossology
 
 SCRIPT
   end
 
 #
-# applying some work around
+# applying some work around for selinux
 #
   config.vm.provision "shell" do |s|
     s.privileged = false
     s.inline = <<SCRIPT
-# uahhh: disabling SELinux
+# todo disabling SELinux only at first start is needed but should be put in policies
 # remove if the https://github.com/fossology/fossology/issues/727
-setenforce 0
+sudo setenforce 0
 
 SCRIPT
   end
