@@ -107,7 +107,7 @@ class UnifiedReport extends Agent
   function __construct()
   {
     $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
-    $this->eccClearedGetter = new XpClearedGetter("ecc", "skipcontent", true);
+    $this->eccClearedGetter = new XpClearedGetter("ecc", "ecc");
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
     $this->bulkMatchesGetter = new BulkMatchesGetter();
@@ -153,7 +153,7 @@ class UnifiedReport extends Agent
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
     $this->heartbeat(count($copyrights["statements"]));
 
-    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId);
+    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
     $this->heartbeat(count($ecc["statements"]));
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
@@ -424,16 +424,18 @@ class UnifiedReport extends Agent
     $table = $section->addTable($this->tablestyle);
     if(!empty($statementsCEI)){
       foreach($statementsCEI as $statements){
-        $table->addRow($smallRowHeight);
-        $cell1 = $table->addCell($firstColLen); 
-        $text = html_entity_decode($statements['content']);	
-        $cell1->addText(htmlspecialchars($text, ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
-        $cell2 = $table->addCell($secondColLen);
-        $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
-        $cell3 = $table->addCell($thirdColLen);
-        asort($statements["files"]);
-        foreach($statements['files'] as $fileName){ 
-          $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
+        if(!empty($statements['content'])){
+          $table->addRow($smallRowHeight);
+          $cell1 = $table->addCell($firstColLen);
+          $text = html_entity_decode($statements['content']);
+          $cell1->addText(htmlspecialchars($text, ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+          $cell2 = $table->addCell($secondColLen);
+          $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
+          $cell3 = $table->addCell($thirdColLen);
+          asort($statements["files"]);
+          foreach($statements['files'] as $fileName){
+            $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
+          }
         }
       }
     }else{

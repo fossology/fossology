@@ -46,7 +46,7 @@ class ReadmeOssAgent extends Agent
 
   function __construct()
   {
-    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
 
@@ -81,7 +81,7 @@ class ReadmeOssAgent extends Agent
       $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $groupId);
       $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
       $this->heartbeat(count($moreLicenses['statements']));
-      $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId);
+      $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId, true, "copyright");
       $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
       $this->heartbeat(count($moreCopyrights['statements']));
       $moreMainLicenses = $this->licenseMainGetter->getCleared($addUploadId, $groupId);
