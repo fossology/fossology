@@ -147,3 +147,19 @@ function Traceback_dir()
   $V = substr($V,0,$i);
   return($V);
 } // Traceback_uri()
+
+/**
+ * \brief Get the total url without query
+ */
+function tracebackTotalUri()
+{
+  if(!empty(@$_SERVER['HTTPS']) && $_SERVER['HTTPS'] != 'off' && $_SERVER['HTTPS'] == 'on' ||
+     @$_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https'){
+    $protoUri = 'https://';
+  }else{
+    $protoUri = 'http://';
+  }
+  $portUri = (@$_SERVER["SERVER_PORT"] == "80") ? "" : (":".@$_SERVER["SERVER_PORT"]);
+  $V = $protoUri.@$_SERVER['SERVER_NAME'].$portUri.Traceback_uri();
+  return($V);
+} // tracebackTotalUri()

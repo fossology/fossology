@@ -46,7 +46,7 @@ class ObligationsToLicenses
   **/
   function getObligations($licenseStatements, $mainLicenseStatements, $uploadId, $groupId)
   {
-    $licenseIds = $this->contentOnly($licenseStatements);
+    $licenseIds = $this->contentOnly($licenseStatements) ?: array();
     $mainLicenseIds = $this->contentOnly($mainLicenseStatements);
 
     if(!empty($mainLicenseIds)){
@@ -57,12 +57,12 @@ class ObligationsToLicenses
     }
 
     $bulkAddIds = $this->getBulkAddLicenseList($uploadId, $groupId);
-    $obligations = $this->licenseDao->getLicenseObligations($allLicenseIds);
+    $obligations = $this->licenseDao->getLicenseObligations($allLicenseIds) ?: array();
     $onlyLicenseIdsWithObligation = array_column($obligations, 'rf_fk');
     if(!empty($bulkAddIds)){
       $onlyLicenseIdsWithObligation = array_unique(array_merge($onlyLicenseIdsWithObligation, $bulkAddIds));
     }
-    $licenseWithoutObligations = array_diff($allLicenseIds, $onlyLicenseIdsWithObligation);
+    $licenseWithoutObligations = array_diff($allLicenseIds, $onlyLicenseIdsWithObligation) ?: array();
     foreach($licenseWithoutObligations as $licenseWithoutObligation){
       $license = $this->licenseDao->getLicenseById($licenseWithoutObligation);
       if(!empty($license)){

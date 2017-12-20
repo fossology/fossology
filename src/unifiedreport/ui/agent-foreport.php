@@ -49,7 +49,7 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     $userId = Auth::getUserId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array());
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), tracebackTotalUri());
 
     if ($jobQueueId<0)
     {
