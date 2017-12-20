@@ -229,8 +229,8 @@ GROUP BY group_fk
 SELECT u.*,uc.*,fc.foldercontents_pk FROM foldercontents fc
   INNER JOIN upload u ON u.upload_pk = fc.child_id
   INNER JOIN upload_clearing uc ON u.upload_pk=uc.upload_fk AND uc.group_fk=$2
-WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND u.upload_mode = 104
-");
+WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND ((u.upload_mode & 96) = 96);");
+    //upload_mode&96 => unpack and adj2nest completed successfully
     $res = $this->dbManager->execute($statementName, $parameters);
     $results = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
