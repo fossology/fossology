@@ -14,18 +14,23 @@
 
     <table>
       <tr>
-        <td style="padding-right:20px">
-          <span id="bulkExistingLicense">
-            <select id="bulkLicense" style="min-width:200px" >
+        <td id="bulkExistingLicense">
+            <select id="bulkLicense" style="width:100%" >
               {% for license in licenseArray %}
                 <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
               {% endfor %}
-            </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
-          </span>
+            </select>
         </td>
-        <td style="padding-right:20px">
+        <td>
+          <img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
+        </td>
+        <td style="padding:0px 3px 0px 3px">
           <a href="#" id="bulkFormAddLicense" style="font-size:20px;"><img src="images/icons/add_16.png" title="append job to add selected license" alt="+"/></a>
+        </td>
+        <td style="padding:0px 3px 0px 3px">
           <a href="#" id="bulkFormRmLicense" style="font-size:20px;"><img src="images/icons/remove_16.png" title="append job to remove selected license" alt="-"/></a>
+        </td>
+        <td>
           <img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
         </td>
         <td>
@@ -48,7 +53,7 @@
 
     <br/>
     {{ 'Reference text'| trans }}:<br/>
-    <textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
+    <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" style="width:100%"></textarea><br>
     <select name="bulkScope" id="bulkScope">
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
       <option value="f">{{ 'scan only current Folder'| trans }}</option>
