@@ -758,41 +758,82 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @param int $userId
    */
-  protected function markDirectoryAsIrrelevantIfScannerDetected(ItemTreeBounds $itemTreeBounds,$groupId,$userId)
+  public function deleteIrrelevantDecisionsFromDirectory(ItemTreeBounds $itemTreeBounds,$groupId,$userId)
   {
-    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight(), $userId, $groupId, DecisionTypes::IRRELEVANT, DecisionScopes::ITEM);
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
-                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
-                     UploadTreeProxy::OPT_GROUP_ID=>'$4');
-    $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
-    $statementName = __METHOD__ ;
-    $sql = $uploadTreeProxy->asCte()
-        .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) 
-          SELECT uploadtree_pk itemid,pfile_fk pfile_id, $3, $4, $5, $6 FROM UploadTreeView';
-    $this->dbManager->prepare($statementName, $sql);
-    $res = $this->dbManager->execute($statementName,$params);
-    $this->dbManager->freeResult($res);
-  }  
-    
+    $this->markDirectoryAsIrrelevantIfScannerDetected($itemTreeBounds, $groupId, $userId, true);
+    $this->markDirectoryAsIrrelevantIfUserEdited($itemTreeBounds, $groupId, $userId, true);
+  }
+  
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
    */
-  protected function markDirectoryAsIrrelevantIfUserEdited(ItemTreeBounds $itemTreeBounds,$groupId,$userId) 
+  protected function markDirectoryAsIrrelevantIfScannerDetected(ItemTreeBounds $itemTreeBounds,$groupId,$userId,$removeDecision=false)
+  {
+    $statementName = __METHOD__ ;
+    $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
+    $params[] = $groupId;
+    $a = count($params);
+    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>'noLicense',
+                     UploadTreeProxy::OPT_ITEM_FILTER=>' AND (lft BETWEEN $1 AND $2)',
+                     UploadTreeProxy::OPT_GROUP_ID=>'$'.$a.'');
+    $uploadTreeProxy = new UploadTreeProxy($itemTreeBounds->getUploadId(), $options, $itemTreeBounds->getUploadTreeTableName());
+    if(!$removeDecision) {
+      $params[] = $userId;
+      $params[] = DecisionTypes::IRRELEVANT;
+      $params[] = DecisionScopes::ITEM;
+      $sql = $uploadTreeProxy->asCte()
+          .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope)
+             SELECT uploadtree_pk itemid,pfile_fk pfile_id, $'.($a+1).', $'.$a.', $'.($a+2).', $'.($a+3).'
+               FROM UploadTreeView WHERE NOT EXISTS (
+             SELECT uploadtree_fk FROM clearing_decision
+              WHERE decision_type=$'.($a+2).' AND uploadtree_fk=UploadTreeView.uploadtree_pk)';
+    } else {
+      $params[] = DecisionTypes::IRRELEVANT;
+      $sql = $uploadTreeProxy->asCte()
+          .' DELETE FROM clearing_decision WHERE clearing_decision_pk IN (
+             SELECT clearing_decision_pk
+               FROM clearing_decision cd INNER JOIN (
+             SELECT MAX(date_added) AS date_added, uploadtree_fk
+               FROM clearing_decision WHERE uploadtree_fk IN (
+             SELECT uploadtree_pk FROM UploadTreeView) GROUP BY uploadtree_fk) cd2 ON cd.uploadtree_fk = cd2.uploadtree_fk
+                AND cd.date_added = cd2.date_added AND decision_type = $'.($a+1).')';
+    }
+    $this->dbManager->prepare($statementName, $sql);
+    $res = $this->dbManager->execute($statementName,$params);
+    $this->dbManager->freeResult($res);
+  }
+
+  /**
+   * @param ItemTreeBounds $itemTreeBounds
+   * @param int $groupId
+   * @param int $userId
+   */
+  protected function markDirectoryAsIrrelevantIfUserEdited(ItemTreeBounds $itemTreeBounds,$groupId,$userId,$removeDecision=false) 
   {
     $statementName = __METHOD__ ;
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
-    $params[] = $userId; 
-    $a = count($params);
-    $params[] = $groupId;
-    $params[] = DecisionTypes::IRRELEVANT;
-    $params[] = DecisionScopes::ITEM;
-    $this->dbManager->prepare($statementName, $decisionsCte
-        .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope) 
-          SELECT itemid,pfile_id, $'.$a.', $'.($a+1).', $'.($a+2).', $'.($a+3).' FROM allDecs ad WHERE type_id!=$'.($a+2));
+    if(!$removeDecision) {
+      $params[] = $userId; 
+      $a = count($params);
+      $params[] = $groupId;
+      $params[] = DecisionTypes::IRRELEVANT;
+      $params[] = DecisionScopes::ITEM;
+      $this->dbManager->prepare($statementName, $decisionsCte
+          .' INSERT INTO clearing_decision (uploadtree_fk,pfile_fk,user_fk,group_fk,decision_type,scope)
+             SELECT itemid,pfile_id, $'.$a.', $'.($a+1).', $'.($a+2).', $'.($a+3).'
+               FROM allDecs ad WHERE type_id != $'.($a+2));
+    } else {
+      $params[] = DecisionTypes::IRRELEVANT;
+      $a = count($params);
+      $this->dbManager->prepare($statementName, $decisionsCte
+          .' DELETE FROM clearing_decision WHERE decision_type = $'.$a.' 
+                AND clearing_decision_pk IN (
+             SELECT id FROM allDecs WHERE type_id = $'.$a.')');
+    }
     $res = $this->dbManager->execute($statementName,$params);
     $this->dbManager->freeResult($res);
   }
