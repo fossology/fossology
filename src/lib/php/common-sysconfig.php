@@ -279,14 +279,21 @@ function Populate_sysconfig()
   $Variable = "CommonObligation";
   $contextNamePrompt = _("Common Obligation");
   $contextValue = "";
-  $contextDesc = _("Common Obligation Text, add line break with \n at the end of the line");
+  $contextDesc = _("Common Obligation Text, add line break at the end of the line");
   $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
   . CONFIG_TYPE_TEXTAREA .
                     ",'ReportText', null, '$contextDesc', null";
   $Variable = "AdditionalObligation";
   $contextNamePrompt = _("Additional Obligation");
   $contextValue = "";
-  $contextDesc = _("Additional Obligation Text, add line break with \n at the end of the line");
+  $contextDesc = _("Additional Obligation Text, add line break at the end of the line");
+  $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
+  . CONFIG_TYPE_TEXTAREA .
+                    ",'ReportText', null, '$contextDesc', null";
+  $Variable = "ObligationAndRisk";
+  $contextNamePrompt = _("Obligation And Risk Assessment");
+  $contextValue = "";
+  $contextDesc = _("Obligations and risk assessment, add line break at the end of the line");
   $ValueArray[$Variable] = "'$Variable', '$contextValue', '$contextNamePrompt', "
   . CONFIG_TYPE_TEXTAREA .
                     ",'ReportText', null, '$contextDesc', null";
