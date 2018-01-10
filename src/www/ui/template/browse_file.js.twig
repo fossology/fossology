@@ -42,7 +42,7 @@ function createDirlistTable() {
           }
         },
         {"sTitle":"Files Cleared","sClass":"center","bSortable":false,"bSearchable":false},
-        {"sTitle":"Actions","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
+        {"sTitle":"Actions <input type='checkbox' id='selectMarkIrrelevant'>","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
     "bProcessing": true,
     "bStateSave": true,
     "sCookiePrefix" : "fossology_",
@@ -68,6 +68,18 @@ $(document).ready(function () {
   $(document).tooltip();
   $("#lichistogram_length select").css('text-align','right');
   $("#dirlist_length select").css('text-align','right');
+
+  $('#selectMarkIrrelevant').change(function (){
+    if($(this).is(":checked")) {
+      $("input:checkbox[id=selectedForIrrelevant]").each(function() {
+        $(this).prop("checked",true);
+      });
+    } else {
+      $("input:checkbox[id=selectedForIrrelevant]").each(function() {
+        $(this).prop("checked",false);
+      });
+    }
+  });
 
   $('#markIrrelevant').click(function () {
     var currentArray = [];
