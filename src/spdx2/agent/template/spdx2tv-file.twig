@@ -30,7 +30,7 @@ LicenseInfoInFile: {{ lic|replace({' ':'-'})}}
 {% endif %}
 {# FileSize: 48 Kb (49173 bytes) #}
 {% if copyrights|default is empty %}
-FileCopyrightText: NONE
+FileCopyrightText: NOASSERTION
 {% else %}
 FileCopyrightText: <text> {{ copyrights|join('\n')
                                        |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
