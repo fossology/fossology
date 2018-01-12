@@ -110,10 +110,10 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->alterTables(array('copyright','copyright_decision'));
   }
 
-  private function searchContent($array, $content)
+  private function searchContent($array, $content, $key='content')
   {
     foreach($array as $entry) {
-      if ($entry['content'] === $content) {
+      if ($entry[$key] === $content) {
         return true;
       }
     }
@@ -130,6 +130,18 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $this->assertEquals(14, count($entries));
     $this->assertTrue($this->searchContent($entries,"info@3dfx.com"));
+  }
+
+  public function testGetAllEntriesReport()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $entries = $copyrightDao->getAllEntriesReport("copyright", 1, "uploadtree_a");
+    $this->assertEquals(15, count($entries));
+    $this->assertTrue($this->searchContent($entries,"copyright 3dfx interactive, inc. 1999, all rights reserved this \n"));
   }
 
   public function testGetAllEntriesOnlyStatementsAndIndentifyedIfCleared()
@@ -165,6 +177,20 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
 
     $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED);
     $this->assertEquals(0, count($entries));
+  }
+
+  public function testGetAllEntriesForReport_afterADecision()
+  {
+    $this->setUpClearingTables();
+
+    $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
+
+    $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment"); // pfile_fk=4 => uploadtree_pk=7
+    $entries = $copyrightDao->getAllEntriesReport("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED);
+    $this->assertTrue($this->searchContent($entries, "desc", 'description'));
+    $this->assertTrue($this->searchContent($entries, "text", 'textfinding'));
+    $this->assertTrue($this->searchContent($entries, "comment", 'comments'));
   }
 
   public function testGetAllEntriesOnlyStatementsAndOnlyClearedIndentifyed_afterADecision()
