@@ -167,7 +167,7 @@ if [ $RUNTIME ]; then
         echo "doing runtime"
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
-            libxml2 \
+            libxml2 php-zip\
             binutils php-gettext \
             cabextract cpio sleuthkit genisoimage \
             poppler-utils upx-ucl \
@@ -252,7 +252,7 @@ if [ $RUNTIME ]; then
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
-            php php-pear php-pgsql php-process\
+            php php-pear php-pgsql php-process php-zip\
             smtpdaemon \
             file libxml2 \
             binutils 
