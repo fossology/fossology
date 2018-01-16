@@ -144,7 +144,7 @@ class ObligationCsvImport {
 
     if ($exists !== false)
     {
-      return "Obligation topic '$row[topic]' with text '$row[text]' already exists in DB (id=".$exists.")";
+      return "Obligation topic '$row[topic]' already exists in DB (id=".$exists.").\n";
     }
 
     $stmtInsert = __METHOD__.'.insert';
@@ -154,20 +154,22 @@ class ObligationCsvImport {
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
 
+    $associatedLicenses = "";
+    $candidateLicenses = "";
     if (!empty($row['licnames'])) {
       $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
+    } else {
+      $associatedLicenses = "";
     }
     if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
     }
 
-    $return .= "Obligation topic '$row[topic]' was added and associated with ";
-    $return .= $associatedLicenses ? " licenses '$associatedLicenses'" : "";
-    $return .= ($associatedLicenses && $candidateLicenses) ? " and " : "";
-    $return .= $candidateLicenses ? " candidate licenses '$candidateLicenses'" : "";
-    $return .= ".";
-
-    return $return;
+    $message = "License association results for obligation '$row[topic]':\n";
+    $message .= "$associatedLicenses";
+    $message .= "$candidateLicenses";
+    $message .= "Obligation with id=$new[ob_pk] was added successfully.\n";
+    return $message;
   }
 
   /**
@@ -181,34 +183,56 @@ class ObligationCsvImport {
   function AssociateWithLicenses($licList, $obPk, $candidate=False)
   {
     $associatedLicenses = "";
-    if ($candidate == False && empty($licList))
-    {
-      $return = "Obligation topic '$row[topic]' was added without being associated with any license.";
-    }
-    else
-    {
-      $licenses = explode(";",$licList);
-      foreach ($licenses as $license)
-      {
-        $licId = $this->obligationMap->getIdFromShortname($license, $candidate);
-        if ($this->obligationMap->isLicenseAssociated($obPk, $licId, $candidate))
-        {
-          continue;
-        }
+    $message = "";
 
+    $licenses = explode(";",$licList);
+    foreach ($licenses as $license)
+    {
+      $licId = $this->obligationMap->getIdFromShortname($license, $candidate);
+      if ($this->obligationMap->isLicenseAssociated($obPk, $licId, $candidate))
+      {
+        continue;
+      }
+
+      if (!empty($licId))
+      {
         $this->obligationMap->associateLicenseWithObligation($obPk, $licId, $candidate);
         if ($associatedLicenses == "")
         {
           $associatedLicenses = "$license";
-        }
-        else
-        {
+        } else {
           $associatedLicenses .= ";$license";
         }
+      } else {
+        if ($message == "")
+        {
+          $message = "License $license could not be found in the DB.\n";
+        } else {
+          $message .= "License $license could not be found in the DB.\n";
+        }
       }
-
-      return $associatedLicenses;
     }
-  }
 
+    if (!empty($associatedLicenses))
+    {
+      if ($message == "")
+      {
+        $message = "$associatedLicenses were associated.\n";
+      } else {
+        $message .= "$associatedLicenses were associated.\n";
+      }
+    } else {
+      if ($message == "")
+      {
+        $message = "No ";
+        $message .= $candidate ? "candidate": "";
+        $message .= "licenses were associated.\n";
+      } else {
+        $message .= "No ";
+        $message .= $candidate ? "candidate": "";
+        $message .= "licenses were associated.\n";
+      }
+    }
+    return $message;
+  }
 }
