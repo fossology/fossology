@@ -31,20 +31,24 @@ all:
 	@echo "nothing to do"
 
 install:
+	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
+	@for dir in $(DIRS); do \
+		mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$dir; \
+	done
 	@for file in $(UIFILES); do \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
 	done
-	mkdir -p $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
 	@for file in $(OBSOLETEFILES); do \
 		rm -f $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
 		rm -f $$file; \
 	done
-	@ln -sfn $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/Page $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)-page
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled
+	ln -sfn $(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/Page $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)-page
 
 uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)
-
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME)-page
 clean:
 	@echo "nothing to do"
 
