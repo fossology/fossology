@@ -192,9 +192,9 @@ if [ $RUNTIME ]; then
               jessie)
                  apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
               xenial|yakkety)
-                 apt-get $YesOpt install postgresql-9.5 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+                 apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-zip;;
               stretch|buster|sid|zesty|artful)
-                 apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml;;
+                 apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -252,7 +252,7 @@ if [ $RUNTIME ]; then
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
-            php php-pear php-pgsql php-process\
+            php php-pear php-pgsql php-process \
             smtpdaemon \
             file libxml2 \
             binutils 
