@@ -373,7 +373,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
     return $contents;
   }
   
-  protected function isRemovableContent($childId,$mode)
+  public function isRemovableContent($childId,$mode)
   {
     $sql = "SELECT count(parent_fk) FROM foldercontents WHERE child_id=$1 AND foldercontents_mode=$2";
     $parentCounter = $this->dbManager->getSingleRow($sql,array($childId,$mode),__METHOD__);
@@ -388,6 +388,12 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " .self::MODE_UPLOAD. " AND
       $sql = "DELETE FROM foldercontents WHERE foldercontents_pk=$1";
       $this->dbManager->getSingleRow($sql,array($folderContentId),__METHOD__);
     }
+  }
+
+  public function removeContentById($uploadpk, $folderId)
+  {
+    $sql = "DELETE FROM foldercontents WHERE child_id=$1 AND parent_fk=$2 AND foldercontents_mode=$3";
+    $this->dbManager->getSingleRow($sql,array($uploadpk, $folderId,2),__METHOD__);
   }
   
   public function getFolderChildFolders($folderId)
