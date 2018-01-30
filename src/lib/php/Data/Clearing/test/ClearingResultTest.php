@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -146,12 +146,28 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
     $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getReportinfo(), is($reportInfo));
   }
+
+
+  public function testGetAcknowledgementWithClearingEvent()
+  {
+    $acknowledgement = "<acknowledgement>";
+    $this->clearingEvent->shouldReceive("getAcknowledgement")->once()->andReturn($acknowledgement);
+    $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getAcknowledgement(), is($acknowledgement));
+  }
   
   public function testGetReportInfoWithoutClearingEvent()
   {
     $reportInfo = "";
     $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getReportinfo(), is($reportInfo));
+  }
+
+  public function testGetAcknowledgementWithoutClearingEvent()
+  {
+    $acknowledgement = "";
+    $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
+    assertThat($this->licenseDecisionResult->getAcknowledgement(), is($acknowledgement));
   }
 
   public function testIsRemoved()

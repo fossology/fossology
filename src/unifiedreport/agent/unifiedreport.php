@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Shaheem Azmal, anupam.ghosh@siemens.com
- Copyright (C) 2017, Siemens AG
+ Copyright (C) 2017-2018, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -140,6 +140,10 @@ class UnifiedReport extends Agent
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($bulkLicenses["statements"]));
 
+    $this->licenseClearedGetter->setOnlyAcknowledgements(true);
+    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
+    $this->heartbeat(count($licenseAcknowledgements["statements"]));
+
     $this->licenseClearedGetter->setOnlyComments(true);
     $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licenseComments["statements"]));
@@ -161,6 +165,7 @@ class UnifiedReport extends Agent
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
+                      "licenseAcknowledgements" => $licenseAcknowledgements,
                       "licenseComments" => $licenseComments,
                       "copyrights" => $copyrights,
                       "ecc" => $ecc,
@@ -229,7 +234,7 @@ class UnifiedReport extends Agent
     $properties->setCreator($userName);
     $properties->setCompany("Your Organisation");
     $properties->setTitle("Clearing Report");
-    $properties->setDescription("OSS clearing report by FOSSologyNG tool");
+    $properties->setDescription("OSS clearing report by Fossology tool");
     $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Your Organisation");
   }
 
@@ -580,7 +585,7 @@ class UnifiedReport extends Agent
     /* Display acknowledgement */
     $heading = "Acknowledgements";
     $titleSubHeadingAcknowledgement = "(Reference to the license, Text of acknowledgements, File path)";
-    $this->bulkLicenseTable($section, $heading, null, $titleSubHeadingAcknowledgement);
+    $this->bulkLicenseTable($section, $heading, $contents['licenseAcknowledgements']['statements'], $titleSubHeadingAcknowledgement);
 
     /* Display Ecc statements and files */
     $heading = "Export Restrictions";
