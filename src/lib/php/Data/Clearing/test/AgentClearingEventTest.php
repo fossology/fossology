@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -88,6 +88,10 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
 
   public function testGetReportinfo() {
     assertThat($this->agentClearingEvent->getReportinfo(), is(""));
+  }
+
+  public function testGetAcknowledgement() {
+    assertThat($this->agentClearingEvent->getAcknowledgement(), is(""));
   }
 
   public function testIsRemoved() {

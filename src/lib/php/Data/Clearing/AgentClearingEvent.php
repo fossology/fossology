@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -105,6 +105,14 @@ class AgentClearingEvent extends Object implements LicenseClearing {
    * @return string
    */
   public function getReportinfo()
+  {
+    return "";
+  }
+
+  /**
+   * @return string
+   */
+  public function getAcknowledgement()
   {
     return "";
   }

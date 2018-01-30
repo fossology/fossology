@@ -104,14 +104,15 @@ INSERT INTO clearing_decision_event VALUES (8, 16);
 
 
 
-INSERT INTO clearing_event VALUES (1, 4, 485, false, 2, 2, NULL, 3, '', '', '2015-05-04 11:43:18.276425+02');
-INSERT INTO clearing_event VALUES (2, 5, 272, false, 2, 2, NULL, 3, '', '', '2015-05-04 11:43:18.297719+02');
-INSERT INTO clearing_event VALUES (3, 10, 561, true, 2, 2, NULL, 1, '', '', '2015-05-04 11:44:07.229472+02');
-INSERT INTO clearing_event VALUES (4, 10, 560, false, 2, 2, NULL, 3, '', '', '2015-05-04 11:44:10.097161+02');
-INSERT INTO clearing_event VALUES (5, 7, 199, false, 2, 2, NULL, 3, '', '', '2015-05-04 11:45:30.851906+02');
-INSERT INTO clearing_event VALUES (6, 8, 199, false, 2, 2, NULL, 3, '', '', '2015-05-04 11:45:34.941938+02');
-INSERT INTO clearing_event VALUES (7, 5, 272, false, 2, 2, NULL, 3, 'all Nomos findings are within the Monk findings', '', '2015-05-04 11:46:22.698323+02');
-INSERT INTO clearing_event VALUES (8, 4, 485, false, 2, 2, NULL, 3, '', 'Here is an alternative license text.', '2015-05-04 11:47:09.615748+02');
+INSERT INTO clearing_event VALUES (1, 4, 485, false, 2, 2, NULL, 3, '', '', '', '2015-05-04 11:43:18.276425+02');
+INSERT INTO clearing_event VALUES (2, 5, 272, false, 2, 2, NULL, 3, '', '', '', '2015-05-04 11:43:18.297719+02');
+INSERT INTO clearing_event VALUES (3, 10, 561, true, 2, 2, NULL, 1, '', '', '', '2015-05-04 11:44:07.229472+02');
+INSERT INTO clearing_event VALUES (4, 10, 560, false, 2, 2, NULL, 3, '', '', '', '2015-05-04 11:44:10.097161+02');
+INSERT INTO clearing_event VALUES (5, 7, 199, false, 2, 2, NULL, 3, '', '', '', '2015-05-04 11:45:30.851906+02');
+INSERT INTO clearing_event VALUES (6, 8, 199, false, 2, 2, NULL, 3, '', '', '', '2015-05-04 11:45:34.941938+02');
+INSERT INTO clearing_event VALUES (7, 5, 272, false, 2, 2, NULL, 3, 'all Nomos findings are within the Monk findings', '', '', '2015-05-04 11:46:22.698323+02');
+INSERT INTO clearing_event VALUES (8, 4, 485, false, 2, 2, NULL, 3, '', 'Here is an alternative license text.', '', '2015-05-04 11:47:09.615748+02');
+INSERT INTO clearing_event VALUES (9, 4, 485, false, 2, 2, NULL, 3, '', '', 'Here is an acknowledgement.', '2015-05-04 11:47:09.615748+02');
 
 
 
