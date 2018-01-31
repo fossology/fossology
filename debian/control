@@ -2,13 +2,13 @@ Source: fossology
 Section: utils
 Priority: extra
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjson0-dev, php5-cli
+Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjson0-dev|libjson-c-dev, php5-cli|php7.0-cli
 Standards-Version: 3.9.1
 Homepage: http://fossology.org
 
 Package: fossology-dev
 Architecture: any
-Depends: php5-cli
+Depends: php5-cli|php7.0-cli
 Description: architecture for analyzing software, development utils
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -37,7 +37,7 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: php5-pgsql, php-pear, php5-cli, php5-json, ${shlibs:Depends}, ${misc:Depends}
+Depends: php5-pgsql|php7.0-pgsql, php-pear, php5-cli|php7.0-cli, php5-json|php7.0-json, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -50,7 +50,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5, ${misc:Depends}
+Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5|libapache2-mod-php7.0, ${misc:Depends}
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
