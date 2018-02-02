@@ -153,14 +153,15 @@ class ObligationCsvImport {
     $resi = $dbManager->execute($stmtInsert,array($row['type'],$row['topic'],$row['text'],$row['classification'],$row['modifications'],$row['comment']));
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
-
+    $associatedLicenses = "";
+    $candidateLicenses = "";
     if (!empty($row['licnames'])) {
       $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
     }
     if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
     }
-
+    $return = "";
     $return .= "Obligation topic '$row[topic]' was added and associated with ";
     $return .= $associatedLicenses ? " licenses '$associatedLicenses'" : "";
     $return .= ($associatedLicenses && $candidateLicenses) ? " and " : "";
