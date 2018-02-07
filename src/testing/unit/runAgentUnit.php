@@ -314,18 +314,6 @@ foreach($unitList as $unitTest)
     //echo "Error: there were errors for make coverage for $unitTest\n";
     $failures++;
   }
-  // lib has phpunit tests
-  if($other == 'lib')
-  {
-    // change lib/php to lib-php
-    $chgUnit = preg_replace('#/#', '-', $unitTest);
-    $libc = "lib-c";
-    /** ignore lib/c tests */
-    if($libc != $chgUnit && processXunit($chgUnit) === FALSE)
-    {
-      echo "Error: Could not process lib-php-Xunit.xml file\n";
-    }
-  }
   backToParent('../../..');
 } // foreach
 
