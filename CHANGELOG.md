@@ -1,4 +1,4 @@
-### 3.2.0 (February 2017)
+### 3.2.0 (February 2018)
 
 #### Features
 
