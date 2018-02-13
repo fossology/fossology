@@ -5,6 +5,8 @@
   <input type="checkbox" id="searchInFolder"/> {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
   {% include 'reuse-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
   <br/>
-  {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }} <br />
-  <input type="checkbox" name="reuseMode"/> {{ 'enhanced reuse (slower)'|trans }}<img src="images/info_16.png" title="{{'will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
+  <input type="checkbox" name="reuseMode[]" value="reuseEnhanced"/> {{ 'enhanced reuse (slower)'|trans }}<img src="images/info_16.png" title="{{'will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
+  <input type="checkbox" name="reuseMode[]" value="reuseMain"/> {{ 'reuse main license/s'|trans }}<img src="images/info_16.png" title="{{'will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+  {{ 'Upload to reuse'|trans }}:<br/>
+  {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
 </li>
