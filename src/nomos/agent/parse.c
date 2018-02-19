@@ -3481,7 +3481,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    */
   if (INFILE(_TEXT_IBM)) {
     if (INFILE(_LT_IBM_RECIP)) {
-      INTERESTING("IBM-copyleft");
+      INTERESTING("IBM-reciprocal");
     }
     else if (INFILE(_LT_IBM_4)) {
       INTERESTING(lDebug ? "IBM(4)" : "IBM-dhcp");
@@ -4809,9 +4809,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "Unicode(3)" : "Unicode");
     }
     else if (URL_INFILE(_URL_UNICODE)) {
-      INTERESTING(lDebug ? "Unicode(5)" : "Unicode");
+      INTERESTING(lDebug ? "Unicode(5)" : "Unicode-TOU");
     }
-    else if (INFILE(_TITLE_UNICODE_TOU) && _LT_UNICODE_TOU) {
+    else if (INFILE(_TITLE_UNICODE_TOU) && INFILE(_LT_UNICODE_TOU)) {
       INTERESTING("Unicode-TOU");
     }
     cleanLicenceBuffer();
