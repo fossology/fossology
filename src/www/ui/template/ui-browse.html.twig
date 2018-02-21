@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2018 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -67,10 +67,10 @@
         {% if multiUploadAgents is not empty %}
           <input type="hidden" name="mod" id="mod" value=""/>
           {{ 'Select'|trans }}
-          <input type="checkbox" name="folder" id="browse-upload-all" value="{{ folderId }}"/>
-          <label for="browse-upload-all">
-            <span class="browse-upload-all-on">{{ 'Whole folder'|trans }}</span> |
-            <span class="browse-upload-all-off">{{ 'Marked uploads'|trans }}</span>
+          <input type="checkbox" name="folder" checked="checked" id="browse-upload-all" value="{{ folderId }}"/>
+          <label class="ui-button-text" id="browse-upload-all-label" for="browse-upload-all">
+            <span id="wholeFolder" class="browse-upload-all-on">{{ 'Whole folder'|trans }}</span> |
+            <span id="markedUpload" class="browse-upload-all-off">{{ 'Marked uploads'|trans }}</span>
           </label>
           {{ 'to run'|trans }}:
           {% for muAgent,muDesc in multiUploadAgents %}

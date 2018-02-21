@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015-2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -149,7 +149,12 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }
-    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
+    if(empty($jqCmdArgs)) {
+      $jobName = $upload->getFilename();
+    } else {
+      $jobName = "Multi File SPDX2";
+    }
+    $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";
     $jobQueueId = $spdxTwoAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
     if ($jobQueueId<0)

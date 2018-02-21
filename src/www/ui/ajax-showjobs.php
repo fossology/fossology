@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2015-2018, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>, 
          Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -232,6 +232,10 @@ class AjaxShowJobs extends FO_Plugin
       /* Upload  */
       if (!empty($job["upload"])){
         $uploadName = GetArrayVal("upload_filename", $job["upload"]);
+        $jobName = $job["job"]["job_name"];
+        if($uploadName !== $jobName){
+          $uploadName = $jobName;
+        }
         $uploadDesc = GetArrayVal("upload_desc", $job["upload"]);
         $upload_pk = GetArrayVal("upload_pk", $job["upload"]);
         $jobId = GetArrayVal("job_pk", $job["job"]);
