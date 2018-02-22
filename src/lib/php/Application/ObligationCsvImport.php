@@ -131,6 +131,29 @@ class ObligationCsvImport {
     return ($row === false) ? false : $row['ob_pk'];
   }
 
+  private function compareLicList ($exists, $listFromCsv, $candidate, $row)
+  {
+    $getList = $this->obligationMap->getLicenseList($exists, $candidate);
+    $listFromDb = $this->reArrangeString($getList);
+    $listFromCsv = $this->reArrangeString($listFromCsv);
+    $diff = strcmp($listFromDb, $listFromCsv);
+    return $diff;
+  }
+
+  private function reArrangeString($string)
+  {
+    $string = explode(";", $string);
+    sort($string);
+    $string = implode(",", $string);
+    return $string;
+  }
+
+  private function clearListFromDb($exists, $candidate)
+  {
+    $licId = 0;
+    $this->obligationMap->unassociateLicenseFromObligation($exists, $licId, $candidate);
+    return true;
+  }
 
   /**
    * @param array $row
@@ -141,10 +164,32 @@ class ObligationCsvImport {
     /* @var $dbManager DbManager */
     $dbManager = $this->dbManager;
     $exists = $this->getKeyFromTopicAndText($row);
-
+    $msg = "";
     if ($exists !== false)
     {
-      return "Obligation topic '$row[topic]' already exists in DB (id=".$exists.").\n";
+      $msg = "Obligation topic '$row[topic]' already exists in DB (id=".$exists."),";
+      if ( $this->compareLicList($exists, $row['licnames'], false, $row) === 0 ) {
+        $msg .=" No Changes in AssociateLicense";
+      }
+      else {
+        $this->clearListFromDb($exists, false);
+        if (!empty ($row['licnames'] ) ) {
+          $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $exists, false);
+        }
+        $msg .=" Updated AssociatedLicense license";
+      }
+      if($this->compareLicList($exists, $row['candidatenames'], True, $row) === 0) {
+        $msg .=" No Changes in CandidateLicense";
+      }
+      else {
+        $this->clearListFromDb($exists, $listFromCsv, true);
+        if(!empty($row['candidatenames'])) {
+          $associatedLicenses = $this->AssociateWithLicenses($row['candidatenames'], $exists, True);
+        }
+        $msg .=" Updated CandidateLicense";
+      }
+      $this->updateOtherFields($exists, $row);
+      return $msg."\n";
     }
 
     $stmtInsert = __METHOD__.'.insert';
@@ -235,4 +280,12 @@ class ObligationCsvImport {
     }
     return $message;
   }
+
+  function updateOtherFields($exists, $row)
+  {
+    $this->dbManager->getSingleRow('UPDATE obligation_ref SET ob_classification=$2, ob_modifications=$3, ob_comment=$4 where ob_pk=$1',
+      array($exists, $row['classification'], $row['modifications'], $row['comment']),
+      __METHOD__ . '.updateOtherOb');
+  }
+
 }
