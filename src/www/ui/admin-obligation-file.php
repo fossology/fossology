@@ -433,6 +433,7 @@ class admin_obligation_file extends FO_Plugin
     $candidatenames = $_POST['candidateSelector'];
     $text = trim($_POST['ob_text']);
     $comment = trim($_POST['ob_comment']);
+    $message = "";
 
     if (empty($topic)) {
       $text = _("ERROR: The obligation topic is empty.");
