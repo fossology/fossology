@@ -131,7 +131,7 @@ class ObligationCsvImport {
     return ($row === false) ? false : $row['ob_pk'];
   }
 
-  private function compareLicList ($exists, $listFromCsv, $candidate, $row)
+  private function compareLicList($exists, $listFromCsv, $candidate, $row)
   {
     $getList = $this->obligationMap->getLicenseList($exists, $candidate);
     $listFromDb = $this->reArrangeString($getList);
@@ -164,6 +164,9 @@ class ObligationCsvImport {
     /* @var $dbManager DbManager */
     $dbManager = $this->dbManager;
     $exists = $this->getKeyFromTopicAndText($row);
+    $associatedLicenses = "";
+    $candidateLicenses = "";
+    $listFromCsv = "";
     $msg = "";
     if ($exists !== false)
     {
@@ -182,7 +185,7 @@ class ObligationCsvImport {
         $msg .=" No Changes in CandidateLicense";
       }
       else {
-        $this->clearListFromDb($exists, $listFromCsv, true);
+        $this->clearListFromDb($exists, $listFromCsv);
         if(!empty($row['candidatenames'])) {
           $associatedLicenses = $this->AssociateWithLicenses($row['candidatenames'], $exists, True);
         }
@@ -199,13 +202,9 @@ class ObligationCsvImport {
     $new = $dbManager->fetchArray($resi);
     $dbManager->freeResult($resi);
 
-    $associatedLicenses = "";
-    $candidateLicenses = "";
     if (!empty($row['licnames'])) {
       $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
-    } else {
-      $associatedLicenses = "";
-    }
+    } 
     if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
     }
@@ -249,34 +248,17 @@ class ObligationCsvImport {
           $associatedLicenses .= ";$license";
         }
       } else {
-        if ($message == "")
-        {
-          $message = "License $license could not be found in the DB.\n";
-        } else {
-          $message .= "License $license could not be found in the DB.\n";
-        }
+        $message .= "License $license could not be found in the DB.\n";
       }
     }
 
     if (!empty($associatedLicenses))
     {
-      if ($message == "")
-      {
-        $message = "$associatedLicenses were associated.\n";
-      } else {
-        $message .= "$associatedLicenses were associated.\n";
-      }
+      $message .= "$associatedLicenses were associated.\n";
     } else {
-      if ($message == "")
-      {
-        $message = "No ";
-        $message .= $candidate ? "candidate": "";
-        $message .= "licenses were associated.\n";
-      } else {
-        $message .= "No ";
-        $message .= $candidate ? "candidate": "";
-        $message .= "licenses were associated.\n";
-      }
+      $message .= "No ";
+      $message .= $candidate ? "candidate": "";
+      $message .= "licenses were associated.\n";
     }
     return $message;
   }
@@ -287,5 +269,4 @@ class ObligationCsvImport {
       array($exists, $row['classification'], $row['modifications'], $row['comment']),
       __METHOD__ . '.updateOtherOb');
   }
-
 }
