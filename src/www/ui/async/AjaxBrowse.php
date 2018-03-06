@@ -54,9 +54,9 @@ class AjaxBrowse extends DefaultPlugin
   function __construct()
   {
     parent::__construct(self::NAME, array(
-        self::PERMISSION => Auth::PERM_READ
-      ));
-        
+      self::REQUIRES_LOGIN => false,
+      self::PERMISSION => Auth::PERM_READ
+    ));
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->userDao = $container->get('dao.user');
