@@ -700,7 +700,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
   if (S_ISDIR(Status.st_mode)) /** directory? */
   {
     memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ %s 1>/dev/null", TempFile, Path, GlobalParam);
+    snprintf(CMD,MAXCMD-1, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
     rc_system = system(CMD);
     if (!WIFEXITED(rc_system))
     {
