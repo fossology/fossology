@@ -54,6 +54,27 @@ The Docker image allows configuration of it's database connection over a set of 
 - **FOSSOLOGY_DB_USER:** User to be used for PostgreSQL connection. Defaults to `fossy`.
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
 
+## Vagrant
+
+FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
+
+**Pre-requisites:**  Vagrant >= 2.x and Virtualbox >= 5.2.x
+
+**Steps:**
+
+```    
+git clone https://github.com/fossology/fossology
+cd fossology/
+vagrant up
+```
+
+The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/) and user can login the credentials using 
+
+```
+user: fossy
+pass: fossy
+```
+
 ## Documentation
 
 We are currently migrating our documentation to github.  At this stage you can find general documentation at:
