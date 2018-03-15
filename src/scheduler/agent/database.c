@@ -1,6 +1,6 @@
 /* **************************************************************
 Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2015 Siemens AG
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <agent.h>
 #include <database.h>
 #include <logging.h>
+#include <emailformatter.h>
 
 /* other library includes */
 #include <libfossdb.h>
@@ -91,9 +92,10 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   gchar* sql   = NULL;
   gchar* fossy_url = args->foss_url;
   job_t* job       = args->job;
+  GPtrArray* rows  = NULL;
   // TODO belongs to $DB if statement gchar* table, * column;
   PGresult* db_result;
-  // TODO belongs to $DB if statement guint i;
+  guint i;
 
   /* $UPLOADNAME
    *
@@ -213,7 +215,33 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     }
     else
     {
-      g_string_append(ret, PQgetvalue(db_result, 0, 0));
+      rows = g_ptr_array_new();
+      GString *foldername = g_string_new(PQgetvalue(db_result, 0, 0));
+      guint folder_pk = atoi(PQget(db_result, 0, "folder_pk"));
+      g_ptr_array_add(rows, foldername);
+      PQclear(db_result);
+      g_free(sql);
+      sql = g_strdup_printf(parent_folder_name, folder_pk);
+      db_result = database_exec(args->scheduler, sql);
+      while(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) == 1)
+      {
+        GString *foldername = g_string_new(PQgetvalue(db_result, 0, 0));
+        guint folder_pk = atoi(PQget(db_result, 0, "folder_pk"));
+        g_ptr_array_add(rows, foldername);
+        PQclear(db_result);
+        g_free(sql);
+        sql = g_strdup_printf(parent_folder_name, folder_pk);
+        db_result = database_exec(args->scheduler, sql);
+      }
+      for(i = rows->len - 1; i > 0; i--)
+      {
+        GString *folder = g_ptr_array_index(rows, i);
+        g_string_append(ret, folder->str);
+        g_string_append(ret, " / ");
+      }
+      GString *folder = g_ptr_array_index(rows, 0);
+      g_string_append(ret, folder->str);
+      g_ptr_array_free(rows, TRUE);
     }
 
     PQclear(db_result);
@@ -235,6 +263,46 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
             job_status_strings[job->status]);
         break;
     }
+  }
+
+  /* $AGENTSTATUS
+   *
+   * Appends the list of agents run with their status.
+   *
+   */
+  else if(strcmp(m_str, "AGENTSTATUS") == 0)
+  {
+    sql = g_strdup_printf(jobsql_jobinfo, job->id);
+    db_result = database_exec(args->scheduler, sql);
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    {
+      g_string_append_printf(ret,
+                "[ERROR: unable to select agent info for job %d]", job->id);
+    }
+    else
+    {
+      rows = g_ptr_array_sized_new(PQntuples(db_result));
+      /* check for any failed jobs */
+      for(i = 0; i < PQntuples(db_result) && ret; i++)
+      {
+        agent_info *data = (agent_info *)calloc(1, sizeof(agent_info));
+        data->id = atoi(PQget(db_result, i, "jq_pk"));
+        data->agent = g_string_new(PQget(db_result, i, "jq_type"));
+        if(atoi(PQget(db_result, i, "jq_end_bits")) == 1)
+        {
+          data->status = TRUE;
+        }
+        else
+        {
+          data->status = FALSE;
+        }
+        g_ptr_array_add(rows, data);
+      }
+      g_string_append(ret, email_format_text(rows, fossy_url));
+      g_ptr_array_free(rows, TRUE);
+    }
+    PQclear(db_result);
+    g_free(sql);
   }
 
   /* $DB.table.column
@@ -531,6 +599,8 @@ void email_init(scheduler_t* scheduler)
 	email_notify = 1;
 	scheduler->email_command = fo_config_get(scheduler->sysconfig, "EMAILNOTIFY",
 	    "client", &error);
+        g_strdelimit(scheduler->email_command, "\"", ' ');
+        g_strstrip(scheduler->email_command);
 	if(error)
 	  scheduler->email_command = DEFAULT_COMMAND;
 	if(error && error->code == fo_missing_key)

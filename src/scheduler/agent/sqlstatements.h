@@ -1,6 +1,6 @@
 /* **************************************************************
 Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2015 Siemens AG
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -48,11 +48,16 @@ const char* upload_common =
     "   WHERE job.job_upload_fk = %d;";
 
 const char* folder_name =
-    " SELECT folder_name FROM folder "
+    " SELECT folder_name, folder_pk FROM folder "
     "   LEFT JOIN foldercontents ON folder_pk = foldercontents.parent_fk "
     "   LEFT JOIN job ON child_id = job_upload_fk "
     "   LEFT JOIN jobqueue ON jq_job_fk = job_pk "
     "   WHERE jq_pk = %d;";
+
+const char* parent_folder_name =
+    " SELECT folder_name, folder_pk FROM folder "
+    "   INNER JOIN foldercontents ON folder_pk=foldercontents.parent_fk "
+    "   WHERE child_id = %d AND foldercontents_mode = 1;";
 
 const char* upload_name =
     " SELECT upload_filename FROM upload "
@@ -175,6 +180,13 @@ const char* jobsql_resetqueue =
     "      jq_endtext=null, "
     "      jq_schedinfo=null "
     "  WHERE jq_endtime is NULL;";
+
+const char* jobsql_jobinfo =
+    " SELECT * FROM jobqueue "
+    "   WHERE jq_job_fk = ( "
+    "     SELECT jq_job_fk FROM jobqueue "
+    "       WHERE jq_pk = %d "
+    "   );";
 
 #endif /* SQLSTATEMENTS_H */
 

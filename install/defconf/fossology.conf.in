@@ -89,7 +89,6 @@ LOGDIR=/var/log/$PROJECT
 header  = sampleheader.txt
 footer  = samplefooter.txt
 subject = FOSSology scan complete
-client  = /usr/bin/mailx
-
+client  = "/usr/bin/mailx -S smtp='smtp.gmail.com:587' -S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user='user@gmail.com' -S smtp-auth-password='password' -S ssl-verify=ignore"
 
 
