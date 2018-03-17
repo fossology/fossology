@@ -1,0 +1,54 @@
+Copyright (C) 2013-2014 University of Nebraska at Omaha
+
+
+About
+=====
+FOSSology + Antelink is a plug in servcie for FOSSology.
+The project build on the concept from Bob.Gobeille@HP's prototype of 
+fetching project information from Antelink public server.
+In this project, it leverages Antelink knowledge base to 
+serve FOSSology scanned software components and presents these 
+components' license and project hierarchy information.
+There is much more information available on the website for related projects:
+FOSSology project
+
+  http://fossology.org/
+Antelink project
+  http://www.antelink.com/
+
+Installation
+============
+FOSSology + Antelink is available for  multiple versions of Linux. 
+The following modules are need to deploy in FOSSology project folder:
+
+#Deploy the following 3 modules to .../fossology/www/ui
+./acme_fetch.php		--> provide web interface to call fo_antelink.php module which fetches information from Antelink knowledge base
+./acme_files.php		--> display file level license and project information under selected project
+./acme_review.php		--> display identified projects information in selected software components
+					Here two view are provided ->
+					"low level" shows all projects information identified in software components, no hierarchy information is presented;
+					"high level" shows projects information identified in current hierarchy of software components;
+
+#Deploy the following 3 modules to .../etc/fossology/
+./fo_antelink.php	--> fetch information from Antelink knowledge base
+./acme.key		--> a key to access Antepedia Computing Machinery Engine. Please contact Antelink support team to gain key
+
+#Set up datatables:
+execute ./acme_db.sql to create tables for FOSSology + Antelink service
+
+Documentation
+=============
+To use use FOSSology + Antelink service for you MUST gain acme.key BEFORE
+ *        running this plugin on an upload!
+You need activate acme module by commenting the "return;" line before initializing plugin.
+For example, in acme_fetch.php
+the line "return;  // prevent anyone from seeing this plugin" before "$NewPlugin = new acme_fetch;"
+need to be commented.
+Before commenting
+"return;  // prevent anyone from seeing this plugin"
+After commenting
+"//return;  // prevent anyone from seeing this plugin"
+
+Now you can use access the service from FOSSology "Browser" page.
+
+Please refer to /utils/acme/ACME_Manual.xlsx for details
