@@ -70,7 +70,8 @@ class AjaxExplorer extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: License Browser"),
         self::DEPENDENCIES => array("license"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');

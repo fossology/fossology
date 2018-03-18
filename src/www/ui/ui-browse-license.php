@@ -61,7 +61,8 @@ class ui_browse_license extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("License Browser"),
         self::DEPENDENCIES => array("browse", "view"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     global $container;
