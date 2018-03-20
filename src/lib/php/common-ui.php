@@ -215,7 +215,7 @@ function GetUploadtreeTableName($upload_pk)
 }
 
 /**
- * \brief get Upload Name thourgh upload id
+ * \brief get Upload Name through upload id
  * 
  * \param $upload_id - upload ID
  *
