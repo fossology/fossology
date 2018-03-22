@@ -22,7 +22,7 @@ use Fossology\Lib\Dao\UploadDao;
 
 class search extends FO_Plugin
 {
-  protected $MaxPerPage  = 100;  /* maximum number of result items per page */
+  protected $MaxPerPage  = 10;  /* maximum number of result items per page */
   /** @var UploadDao */
   private $uploadDao;
   
@@ -76,14 +76,14 @@ class search extends FO_Plugin
    * \param $SizeMin  Minimum file size, -1 if unused
    * \param $SizeMax  Maximum file size, -1 if unused
    * \param $searchtype "containers", "directory" or "allfiles"
-   * \return array of uploadtree recs.  Each record contains uploadtree_pk, parent, 
-   *         upload_fk, pfile_fk, ufile_mode, and ufile_name
+   * \return array of uploadtree recs and total uploadtree recs count. Each record contains uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, and ufile_name
    */
   function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype, $License, $Copyright)
   {
     global $PG_CONN;
     $UploadtreeRecs = array();  // uploadtree record array to return
     $totalUploadtreeRecs = array();  // total uploadtree record array to return
+    $totalUploadtreeRecsCount = 0;
     $NeedTagfileTable = true;
     $NeedTaguploadtreeTable = true;
 
@@ -102,7 +102,7 @@ class search extends FO_Plugin
  
        /* Check upload permission */
        if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId())) {
-        return array($UploadtreeRecs, $totalUploadtreeRecs);
+        return array($UploadtreeRecs, $totalUploadtreeRecsCount);
       }
     }
 
@@ -131,7 +131,7 @@ class search extends FO_Plugin
       {
         /* tag doesn't match anything, so no results are possible */
         pg_free_result($result);
-        return array($UploadtreeRecs, $totalUploadtreeRecs);
+        return array($UploadtreeRecs, $totalUploadtreeRecsCount);
       }
 
       /* Make a list of the tag_pk's that satisfy the criteria */
@@ -281,21 +281,9 @@ class search extends FO_Plugin
     }
     pg_free_result($result);
 
-    $SQL .= " LIMIT $this->MaxPerPage OFFSET $Offset;";
-    $result = pg_query($PG_CONN, $SQL);
-    DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    if (pg_num_rows($result)) 
-    {
-      while ($row = pg_fetch_assoc($result))
-      {
-        if (!$this->uploadDao->isAccessible($row['upload_fk'], Auth::getGroupId())) {
-          continue;
-        }
-        $UploadtreeRecs[] = $row;
-      }
-    }
-    pg_free_result($result);
-    return array($UploadtreeRecs, $totalUploadtreeRecs);
+    $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $this->MaxPerPage);
+    $totalUploadtreeRecsCount = sizeof($totalUploadtreeRecs);
+    return array($UploadtreeRecs, $totalUploadtreeRecsCount);
   } // GetResults()
 
 
@@ -426,13 +414,13 @@ class search extends FO_Plugin
     if ($CriteriaCount)
     {
       if (empty($Page)) { $Page = 0; }
-      $result = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+      $UploadtreeRecsResult = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
       $html = "<hr>\n";
       $message = _("The indented search results are same files in different folders");
       $html .= "<H4>$message</H4>\n";
-      $text = sizeof($result[1]) . " " . _("Files matching");
+      $text = $UploadtreeRecsResult[1] . " " . _("Files matching");
       $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-      $html .= $this->HTMLResults($result[0], $Page, $GETvars, $License, $Copyright);
+      $html .= $this->HTMLResults($UploadtreeRecsResult[0], $Page, $GETvars, $License, $Copyright);
       $this->vars["result"] = $html;
     }
   }
