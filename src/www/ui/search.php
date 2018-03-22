@@ -22,7 +22,7 @@ use Fossology\Lib\Dao\UploadDao;
 
 class search extends FO_Plugin
 {
-  protected $MaxPerPage  = 10;  /* maximum number of result items per page */
+  protected $MaxPerPage  = 100;  /* maximum number of result items per page */
   /** @var UploadDao */
   private $uploadDao;
   
@@ -82,8 +82,8 @@ class search extends FO_Plugin
   {
     global $PG_CONN;
     $UploadtreeRecs = array();  // uploadtree record array to return
-    $totalUploadtreeRecs = array();  // total uploadtree record array to return
-    $totalUploadtreeRecsCount = 0;
+    $totalUploadtreeRecs = array();  // total uploadtree record array
+    $totalUploadtreeRecsCount = 0; // total uploadtree records count to return
     $NeedTagfileTable = true;
     $NeedTaguploadtreeTable = true;
 
