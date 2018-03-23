@@ -1,4 +1,4 @@
-# Copyright Siemens AG, 2014-2017
+# Copyright Siemens AG, 2014-2018
 # SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
@@ -54,9 +54,10 @@ script:
  - src/testing/syntax/syntaxtest.sh
  - if [[ ! -z "$CHECKBEFORE" ]]; then $CHECKBEFORE; fi
  - if [[ ! -z "$MAKETARGETS" ]]; then make $MAKETARGETS; fi
- - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.5" ]]; then composer require --dev --no-update phpunit/phpunit ~4; fi
- - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ~5; fi
- - if [[ ! -z "$PHPTESTSUITE" ]]; then phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
+ - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
+ - if [[ ! -z "$PHPTESTSUITE" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
  - set +e
 
 after_script:
@@ -105,7 +106,7 @@ matrix:
       after_script:
     - php: 7.0
       env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-      6after_script:
+      after_script:
     - php: 7.0
       env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
@@ -118,7 +119,7 @@ matrix:
       after_script:
     - php: 7.1 # allowed failure
       env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-      6after_script:
+      after_script:
     - php: 7.1 # allowed failure
       env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
@@ -129,11 +130,6 @@ matrix:
 ################################################################################
 ## PHP tests
 #### PHP: PhpUnit Tests
-    - php: 5.5
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
     - php: 5.6
       env:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
@@ -161,7 +157,7 @@ matrix:
       after_script:
     - php: 7.1
       env: CC=clang-3.6 CXX=clang++-3.6 MAKETARGETS='all test-lib test-monk test-nomos'
-      6after_script:
+      after_script:
     - php: 7.1
       env: CC=gcc-5 CXX=g++-5 MAKETARGETS='all test-lib test-monk test-nomos'
       after_script:
@@ -176,3 +172,4 @@ matrix:
         PHPTESTSUITE='Fossology PhpUnit Test Suite'
         CHECKBEFORE=''
         MAKETARGETS='build-lib VERSIONFILE build-cli'
+
