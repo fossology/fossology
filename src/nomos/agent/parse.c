@@ -3160,7 +3160,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Intel-WLAN");
   }
   else if (INFILE(_LT_INTEL_ACPI)) {
-    INTERESTING("Intel-acpi");
+    INTERESTING("Intel-ACPI");
   }
   else if (HASTEXT(_TEXT_INTELCORP, 0)) {
     if (INFILE(_LT_INTEL_1)) {
