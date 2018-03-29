@@ -20,6 +20,7 @@ namespace Fossology\DelAgent\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -29,8 +30,13 @@ use Fossology\DelAgent\UI\DeleteResponse;
 class AdminUploadDelete extends DefaultPlugin
 {
   const NAME = "admin_upload_delete";
+
   /** @var UploadDao */
   private $uploadDao;
+
+  /** @var FolderDao */
+  private $folderDao;
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -42,6 +48,7 @@ class AdminUploadDelete extends DefaultPlugin
     
     global $container;
     $this->uploadDao = $container->get('dao.upload');
+    $this->folderDao = $container->get('dao.folder');
   }
 
   
@@ -85,9 +92,11 @@ class AdminUploadDelete extends DefaultPlugin
     $vars = array();
     
     $uploadpks = $request->get('uploads');
+    $folderId = $request->get('folder');
+
     if (!empty($uploadpks))
     {
-      $vars['message'] = $this->initDeletion($uploadpks);
+      $vars['message'] = $this->initDeletion($uploadpks, $folderId);
     }
 
     $vars['uploadScript'] = ActiveHTTPscript("Uploads");
@@ -113,12 +122,12 @@ class AdminUploadDelete extends DefaultPlugin
   }
   
   
-    /**
+  /**
    * @param int[] $uploadpks
    * @brief starts deletion and handles error messages
    * @return string
    */
-  private function initDeletion($uploadpks)
+  private function initDeletion($uploadpks, $folderId)
   {
     if(sizeof($uploadpks) <= 0)
     {
@@ -129,7 +138,7 @@ class AdminUploadDelete extends DefaultPlugin
     $deleteResponse = NULL;
     foreach($uploadpks as $uploadPk)
     {
-      $deleteResponse = $this->TryToDelete(intval($uploadPk));
+      $deleteResponse = $this->TryToDelete(intval($uploadPk), $folderId);
 
       if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
       {
@@ -165,14 +174,20 @@ class AdminUploadDelete extends DefaultPlugin
    *
    * \return string with the message.
    */
-  private function TryToDelete($uploadpk)
+  private function TryToDelete($uploadpk, $folderId)
   {
-    if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())){
+    if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
       $returnMessage = DeleteMessages::NO_PERMISSION;
       return new DeleteResponse($returnMessage);
     }
 
-    $rc = $this->delete(intval($uploadpk));
+    if(!empty($this->folderDao->isRemovableContent($uploadpk,2))) {
+      $this->folderDao->removeContentById($uploadpk, $folderId);
+      $returnMessage = DeleteMessages::SUCCESS;
+      return new DeleteResponse($returnMessage);
+    } else {
+      $rc = $this->delete(intval($uploadpk));
+    }
 
     if (! empty($rc)) {
       $returnMessage = DeleteMessages::SCHEDULING_FAILED;
@@ -187,6 +202,5 @@ class AdminUploadDelete extends DefaultPlugin
       " <a href=$URL>$LinkText</a>");
   }
 }
-
 
 register_plugin(new AdminUploadDelete());
