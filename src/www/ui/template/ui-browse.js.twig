@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2018 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -67,13 +67,18 @@ $(document).ready(function() {
     $('#browse-upload-all').val(folder);
     return false;
   });
-  $('#browse-upload-all').button().change(function event(){
+  $('#browse-upload-all').button().change(function ( event ){
+    $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
     var wholeFolder = $(this).prop('checked');
-    if(wholeFolder)
-      $(this).switchClass('browse-upload-all-off','browse-upload-all-on');
-    else
-      $(this).switchClass('browse-upload-all-om','browse-upload-all-off');
+    if(wholeFolder) {
+      $('#wholeFolder').switchClass('browse-upload-all-off','browse-upload-all-on');
+      $('#markedUpload').switchClass('browse-upload-all-on','browse-upload-all-off');
+    } else {
+      $('#wholeFolder').switchClass('browse-upload-all-on','browse-upload-all-off');
+      $('#markedUpload').switchClass('browse-upload-all-off','browse-upload-all-on');
+    }
   });
+  $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
 });
 
 $('#nav-hider').click(function() {
