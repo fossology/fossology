@@ -22,6 +22,14 @@
   NOTE: <strong>Contents under a directory will be recursively included.</strong>
   '*' is supported to select multiple files (e.g. *.txt).
 </li>
+<li>
+  <label for="{{ nameField }}">
+    {{ '(Optional) Enter a viewable name for this file or directory'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ nameField }}" type="text" size="120"/><br/>
+  {{ 'Note: If no name is provided, then the uploaded file (directory) name will be used.' |trans }}
+</li>
 {% if hostlist|length > 0 %}
 <li>
   <label for="host">
