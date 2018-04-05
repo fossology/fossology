@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Authors: Andreas Würl, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -34,6 +34,12 @@ require_once(dirname(dirname(__FILE__)) . "/common-dir.php");
 
 class UploadDao extends Object
 {
+
+  const REUSE_NONE = 0;
+  const REUSE_ENHANCED = 2;
+  const REUSE_MAIN = 4;
+  const REUSE_ENH_MAIN = 8;
+
   /** @var DbManager */
   private $dbManager;
   /** @var Logger */

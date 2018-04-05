@@ -35,7 +35,6 @@
             "Fossology\\Agent\\Copyright\\UI\\": "copyright/ui",
             "Fossology\\DeciderJob\\UI\\": "deciderjob/ui",
             "Fossology\\Decider\\UI\\": "decider/ui",
-            "Fossology\\Reuser\\Ui\\": "reuser/ui",
             "Fossology\\DelAgent\\UI\\": "delagent/ui",
             "Fossology\\UI\\Page\\": "www/ui/page"
         }

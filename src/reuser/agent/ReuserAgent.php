@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2018, Siemens AG
  Author: Daniele Fognini, Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-namespace Fossology\Reuser\Agent;
+namespace Fossology\Reuser;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
@@ -30,7 +30,6 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Util\ArrayOperation;
-use Fossology\Reuser\Ui\ReuserAgentPlugin;
 
 include_once(__DIR__ . "/version.php");
 
@@ -76,14 +75,14 @@ class ReuserAgent extends Agent
       {
         continue;
       }
-      if($reuseMode & ReuserAgentPlugin::REUSE_ENHANCED){
+      if($reuseMode & UploadDao::REUSE_ENHANCED){
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
-      elseif($reuseMode & ReuserAgentPlugin::REUSE_MAIN){
+      elseif($reuseMode & UploadDao::REUSE_MAIN){
         $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
         $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
-      elseif($reuseMode & ReuserAgentPlugin::REUSE_ENH_MAIN){
+      elseif($reuseMode & UploadDao::REUSE_ENH_MAIN){
         $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }

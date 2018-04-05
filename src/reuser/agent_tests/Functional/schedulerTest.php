@@ -243,16 +243,16 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   /** @group Functional */
   public function testReuserMockedScanWithALocalClearing()
   {
-    $this->runnerReuserScanWithALocalClearing($this->runnerMock);
+    $this->runnerReuserScanWithALocalClearing($this->runnerMock,1);
   }
 
   /** @group Functional */
   public function testReuserRealScanWithALocalClearing()
   {
-    $this->runnerReuserScanWithALocalClearing($this->runnerCli);
+    $this->runnerReuserScanWithALocalClearing($this->runnerCli,1);
   }
 
-  private function runnerReuserScanWithALocalClearing($runner)
+  private function runnerReuserScanWithALocalClearing($runner, $heartBeat=0)
   {
     $this->setUpTables();
     $this->setUpRepo();
@@ -269,8 +269,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'reuser failed: '.$output);
-
-    assertThat($this->getHeartCount($output), equalTo(1));
+    assertThat($this->getHeartCount($output), equalTo($heartBeat));
 
     $newUploadClearings = $this->getFilteredClearings($uploadId, $this->groupId);
     $potentiallyReusableClearings = $this->getFilteredClearings($reusedUpload, $this->groupId);
@@ -443,10 +442,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     /*reuse main license*/
     $this->clearingDao->makeMainLicense($uploadId=2, $this->groupId, $mainLicenseId=402);
     $mainLicenseIdForReuse = $this->clearingDao->getMainLicenseIds($reusedUploadId=2, $this->groupId);
-    $this->clearingDao->makeMainLicense($uploadId=3, $this->groupId, $mainLicenseIdForReuse);
+    $mainLicenseIdForReuseSingle = array_values($mainLicenseIdForReuse);
+    $this->clearingDao->makeMainLicense($uploadId=3, $this->groupId, $mainLicenseIdForReuseSingle[0]);
     $mainLicense=$this->clearingDao->getMainLicenseIds($uploadId=3, $this->groupId);
-    assertEquals(array_values($mainLicenseIdForReuse), array_values($mainLicense));
-
+    $mainLicenseSingle = array_values($mainLicense);
+    $this->assertEquals($mainLicenseIdForReuseSingle, $mainLicenseSingle);
     $this->rmRepo();
   }
   
