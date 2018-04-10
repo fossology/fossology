@@ -2,6 +2,8 @@
 #/*********************************************************************
 #Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 #
+#Copyright (C) 2018 Siemens AG
+#
 #This program is free software; you can redistribute it and/or
 #modify it under the terms of the GNU General Public License
 #version 2 as published by the Free Software Foundation.
@@ -18,21 +20,11 @@
 
 REPODIR=$1
 
-FOSSYGID=`id -Gn`
-FOSSYUID=`echo $FOSSYGID |grep -c 'fossy'`
-if [ $FOSSYUID -ne 1 ];then
-  echo "Must be fossy to run this script."
-  exit 1
-fi
-
-#echo $UID
-#echo $REPODIR
-
 if [ ! -d $REPODIR/localhost/ ]; then
   mkdir -p $REPODIR/localhost/
 fi
 
-tar -xf ../testdata/testrepo_gold.tar -C $REPODIR/localhost/
-tar -xf ../testdata/testrepo_files.tar -C $REPODIR/localhost/
+tar -xf ../testdata/testrepo_gold.tar.gz -C $REPODIR/localhost/
+tar -xf ../testdata/testrepo_files.tar.gz -C $REPODIR/localhost/
 
 echo "Create Test Repository success!"

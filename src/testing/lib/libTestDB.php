@@ -126,7 +126,7 @@ function RestoreFile($filename)
 
 /**
  * \brief change the default repo location to one to use for testing.  If no path is supplied,
- * then the default path of /srv/fossology/testRepo will be used.  This will change the path in
+ * then the default path of /srv/fossologyTestRepo will be used.  This will change the path in
  * the installed fossology.conf file.
  *
  * @param string $repoPath, the optional fully qualified path to the test repo.

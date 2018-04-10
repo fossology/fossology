@@ -49,6 +49,7 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase
 
     $this->testDb->createSequences(array(), true);
     $this->testDb->createPlainTables(array(), true);
+    $this->testDb->createInheritedTables(array());
     $this->testDb->alterTables(array(), true);
   }
 
@@ -70,10 +71,10 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase
     $UNUNPACK_CMD = $this->agentDir . "/agent/ununpack";
     if (!empty($TEST_RESULT_PATH))
       exec("/bin/rm -rf $TEST_RESULT_PATH");
-    $command = "$UNUNPACK_CMD -qCRs $TEST_DATA_PATH/523.iso -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
+    $command = "$UNUNPACK_CMD -qCRs $TEST_DATA_PATH/test.iso -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
     $last = exec($command, $usageOut, $rtn);
     $this->assertNotEquals($rtn, 0);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/523.iso.dir/523SFP/QMFGOEM.TXT");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip");
   }
 
   /* test null-file */
@@ -85,9 +86,9 @@ class cliParamsTest4UnunpackExcption extends PHPUnit_Framework_TestCase
     $UNUNPACK_CMD = $this->agentDir . "/agent/ununpack";
     if (!empty($TEST_RESULT_PATH))
       exec("/bin/rm -rf $TEST_RESULT_PATH");
-    $command = "$UNUNPACK_CMD -qCR $TEST_DATA_PATH/null-file -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
+    $command = "$UNUNPACK_CMD -qCR $TEST_DATA_PATH/null_file -d $TEST_RESULT_PATH -c $fossology_testconfig > /dev/null 2>&1";
     $last = exec($command, $usageOut, $rtn);
     $this->assertNotEquals($rtn, 0);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/null-file.dir/");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/null_file.dir/");
   }
 }

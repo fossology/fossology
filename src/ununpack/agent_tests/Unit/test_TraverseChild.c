@@ -37,17 +37,17 @@ void testTraverseChild4IsoFile()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
-  
-  Filename = "../test-data/testdata4unpack/imagefile.iso";
-  MkDirs("./test-result/imagefile.iso.dir/");
+
+  Filename = "../testdata/test.iso";
+  MkDirs("./test-result/test.iso.dir/");
   lstat(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
   strcpy(CITemp.Partdir, NewDir);
-  strcpy(CITemp.Partname, "imagefile.iso");
-  strcpy(CITemp.PartnameNew, "imagefile.iso.dir");
-  CITemp.Stat = Stat; 
+  strcpy(CITemp.Partname, "test.iso");
+  strcpy(CITemp.PartnameNew, "test.iso.dir");
+  CITemp.Stat = Stat;
   CITemp.PI.Cmd = 21;
   CITemp.PI.StartTime =  1287725739;
   CITemp.PI.EndTime =  1287725739;
@@ -59,7 +59,7 @@ void testTraverseChild4IsoFile()
   CITemp.uploadtree_pk = 0;
   CITemp.pfile_pk = 0;
   CITemp.ufile_mode = 0;
-  strcpy(Queue[0].ChildRecurse, "./test-result/imagefile.iso.dir");
+  strcpy(Queue[0].ChildRecurse, "./test-result/test.iso.dir");
   /* test TraverseChild */
   int Pid;
   Pid = fork();
@@ -69,22 +69,8 @@ void testTraverseChild4IsoFile()
   } else
   {
     ParentWait();
-    int rc = 0;
-    char commands[250];
-    sprintf(commands, "isoinfo -f -R -i '%s' | grep ';1' > /dev/null ", Filename);
-    rc = system(commands);
-    if (0 != rc)
-    {
-      exists = file_dir_exists("./test-result/imagefile.iso.dir/test.jar");
-      FO_ASSERT_EQUAL(exists, 1); // existing  
-      exists = file_dir_exists("./test-result/imagefile.iso.dir/test.jar.dir");
-      FO_ASSERT_EQUAL(exists, 0); // not existing
-    }
-    else
-    {
-      exists = file_dir_exists("./test-result/imagefile.iso.dir/TEST.JAR;1");
-      FO_ASSERT_EQUAL(exists, 1); // existing  
-    }
+    exists = file_dir_exists("./test-result/test.iso.dir/test1.zip.tar.dir/test1.zip");
+    FO_ASSERT_EQUAL(exists, 1); // existing
   }
 }
 
@@ -96,15 +82,15 @@ void testTraverseChild4DebianSourceFile()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
 
-  Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  Filename = "../testdata/test_1-1.dsc";
   //  MkDirs("./test-result/fcitx_3.6.2-1.dsc.dir/");
   lstat(Filename, &Stat);
   ContainerInfo CITemp;
   memset(&CITemp,0,sizeof(ContainerInfo));
   strcpy(CITemp.Source, Filename);
   strcpy(CITemp.Partdir, NewDir);
-  strcpy(CITemp.Partname, "fcitx_3.6.2-1.dsc");
-  strcpy(CITemp.PartnameNew, "fcitx_3.6.2-1.dsc.dir");
+  strcpy(CITemp.Partname, "test_1-1.dsc");
+  strcpy(CITemp.PartnameNew, "test_1-1.dsc.dir");
   ParentInfo PITemp = {28, 1287725739, 1287725739, 0};
   CITemp.Stat = Stat;
   CITemp.PI = PITemp;
@@ -125,20 +111,20 @@ void testTraverseChild4DebianSourceFile()
   } else
   {
     ParentWait();
-    exists = file_dir_exists("./test-result/fcitx_3.6.2-1.dsc.dir/debian/README.Debian");
+    exists = file_dir_exists("./test-result/test_1-1.dsc.dir/debian/README.Debian");
     FO_ASSERT_EQUAL(exists, 1); // existing
   }
 }
 
 /**
- * @brief test the partition file 
+ * @brief test the partition file
  */
 void testTraverseChild4PartitionFile()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
 
-  Filename = "../test-data/testdata4unpack/vmlinuz-2.6.26-2-686";
+  Filename = "../testdata/vmlinuz-2.6.26-2-686";
   MkDirs("./test-result/vmlinuz-2.6.26-2-686.dir/");
   strcpy(Queue[0].ChildRecurse, "./test-result/vmlinuz-2.6.26-2-686.dir/");
   lstat(Filename, &Stat);
@@ -174,6 +160,6 @@ CU_TestInfo TraverseChild_testcases[] =
 {
   {"TraverseChild for iso file:", testTraverseChild4IsoFile},
   {"TraverseChild for debian source file:", testTraverseChild4DebianSourceFile},
-  {"TraverseChild for departition:", testTraverseChild4PartitionFile},
+  // {"TraverseChild for departition:", testTraverseChild4PartitionFile},
   CU_TEST_INFO_NULL
 };

@@ -1,5 +1,6 @@
 /*********************************************************************
 Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -61,6 +62,18 @@ int PkgagentDBClean()
 }
 
 /* create test suite */
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] = {
+    {"Testing the function GetFieldValue:", NULL, NULL, NULL, NULL, testcases_GetFieldValue},
+    //{"Testing the function ProcessUpload:", NULL, NULL, NULL, NULL, testcases_ProcessUpload},
+    {"Testing the function RecordMetadataDEB:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_RecordMetadataDEB},
+    {"Testing the function GetMetadataDebSource:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadataDebSource},
+    {"Testing the function RecordMetadataRPM:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_RecordMetadataRPM},
+    {"Testing the function GetMetadataDebBinary:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadataDebBinary},
+    {"Testing the function GetMetadata:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadata},
+    CU_SUITE_INFO_NULL
+};
+#else
 CU_SuiteInfo suites[] = {
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
@@ -71,6 +84,7 @@ CU_SuiteInfo suites[] = {
     {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
+#endif
 
 int main( int argc, char *argv[] )
 {

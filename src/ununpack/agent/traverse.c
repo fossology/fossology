@@ -1,6 +1,7 @@
 /*******************************************************************
  Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
- 
+ Copyright (C) 2018 Siemens AG
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -206,11 +207,15 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
     /* if command failed but we want to continue anyway */
     /** Note: CMD_DEFAULT will never get here because rc==0 **/
     if (strstr(CMD[CI->PI.Cmd].Cmd, "unzip") && (rc == 82))
+    {
       LOG_ERROR("pfile %s Command %s failed on: %s, Password required.",
-        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
+        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source);
+    }
     else
+    {
       LOG_ERROR("pfile %s Command %s failed on: %s",
-        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source)
+        Pfile_Pk, CMD[CI->PI.Cmd].Cmd, CI->Source);
+    }
     if (ForceContinue) rc=-1;
   }
   exit(rc);
@@ -236,12 +241,12 @@ int CountFilename(char *Pathname, char *Dirname)
   NameLen = strlen(FullDirname);
 
   sp = Pathname;
-  while (((sp = strstr(sp, FullDirname)) != NULL)) 
+  while (((sp = strstr(sp, FullDirname)) != NULL))
   {
     FoundCount++;
     sp += NameLen;
   }
-  
+
   free(FullDirname);
   return(FoundCount);
 }
@@ -276,9 +281,9 @@ int	Traverse	(char *Filename, char *Basename,
   if (Verbose > 0) LOG_DEBUG("Traverse(%s) -- %s",Filename,Label)
 
   /* to prevent infinitely recursive test archives, count how many times the basename
-     occurs in Filename.  If over MaxRepeatingName, then return 0 
+     occurs in Filename.  If over MaxRepeatingName, then return 0
    */
-  if (CountFilename(Filename, basename(Filename)) >= MaxRepeatingName) 
+  if (CountFilename(Filename, basename(Filename)) >= MaxRepeatingName)
   {
     LOG_NOTICE("Traverse() recursion terminating due to max directory repetition: %s", Filename);
     return 0;

@@ -1,4 +1,4 @@
-# Copyright Siemens AG 2014, 2015
+# Copyright Siemens AG 2014, 2018
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -15,7 +15,7 @@ LOCALAGENTDIR = ../../agent
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTDBDIR = $(TOP)/src/testing/db/c
 TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
-TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
+TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 
 LDFLAGS_LOCAL = $(FO_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
 CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(FO_CFLAGS) $(TEST_CFLAGS)

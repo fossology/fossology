@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2018, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -161,19 +161,19 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   int file_number = 0;
   while ((dirent_handler = readdir(dir_handler)) != NULL)
   {
-    /* get the file path, form the file path /dir_name/file_name, 
+    /* get the file path, form the file path /dir_name/file_name,
        e.g. dir_name is '/tmp' file_name is 'test_file_1.txt', form one path '/tmp/test_file_1.txt' */
-    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name); 
+    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name);
 
-    if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return 
+    if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return
     {
       LOG_FATAL("Unable to stat file: %s, error message: %s\n", filename_buf, strerror(errno)) ;
       closedir(dir_handler);
       return;
     }
 
-    /** 1) do not travel '..', '.' directory 
-        2) when the file type is directory, travel it 
+    /** 1) do not travel '..', '.' directory
+        2) when the file type is directory, travel it
         3) when the file type is reguler file, write it into temp files on average (value from -n) */
     if (strcmp (dirent_handler->d_name, "..") != 0 && strcmp (dirent_handler->d_name, ".") != 0)
     {
@@ -183,7 +183,8 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
         list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
       }
       else {
-        sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
+        strcat(filename_buf, "\n");  // add one new line character by the end of one file path, one line is one file path
+        //sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
         /* write on average process_count */
         file_number = *distribute_count%process_count;
         fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);
@@ -197,9 +198,9 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   closedir(dir_handler);
 }
 
-/** 
+/**
  * \brief read line by line, then call processFile to grab license line by line
- * 
+ *
  * \param file_number - while temp path file do you want to read and process
  * \param FILE **pFile - file descriptor array
  */
@@ -258,7 +259,7 @@ void myFork(int proc_num, FILE **pFile) {
   }
 }
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   int i;
   int c;
@@ -473,7 +474,7 @@ int main(int argc, char **argv)
       }
     }
     else {
-      if (0 != process_count) 
+      if (0 != process_count)
       {
         printf("Warning: -n {nprocs} ONLY works with -d {directory}.\n");
       }
@@ -487,6 +488,7 @@ int main(int argc, char **argv)
   }
 
   lrcache_free(&cacheroot);  // for valgrind
+  free(files_to_be_scanned);
 
   /* Normal Exit */
   Bail(0);

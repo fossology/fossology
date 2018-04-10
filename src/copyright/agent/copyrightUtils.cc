@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2018, Siemens AG
  * Author: Daniele Fognini, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ void bail(int exitval)
 
 bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
-  unsigned type;
+  unsigned type = 0;
 
   boost::program_options::options_description desc(IDENTITY ": recognized options");
   desc.add_options()

@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -72,6 +73,10 @@ int main(int argc, char **argv)
     printf("\\%o", str[i] & 0xff);
   }
   printf("\\0\"}\n");
+
+  if (fp != stdin) {
+    fclose(fp);
+  }
 
   return 0;
 }

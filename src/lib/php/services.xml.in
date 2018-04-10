@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Copyright Siemens AG 2014-2015
+Copyright Siemens AG 2014-2018
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
@@ -75,10 +75,6 @@ without any warranty.
             <argument type="service" id="logger"/>
         </service>
         <service id="dao.job" class="Fossology\Lib\Dao\JobDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="logger"/>
-        </service>
-        <service id="dao.user" class="Fossology\Lib\Dao\UserDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>

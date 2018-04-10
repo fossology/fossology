@@ -143,10 +143,10 @@
     global $SYSCONF_DIR;
     global $REPO_NAME;
     add_proxy(); // add proxy
-    if (is_dir("/srv/fossology/$REPO_NAME")) {
-      exec("sudo chmod 2770 /srv/fossology/$REPO_NAME"); // change mode to 2770
-      exec("sudo chown fossy /srv/fossology/$REPO_NAME -R"); // change owner of REPO to fossy
-      exec("sudo chgrp fossy /srv/fossology/$REPO_NAME -R"); // change grp of REPO to fossy
+    if (is_dir("/srv/fossologyTestRepo/$REPO_NAME")) {
+      exec("sudo chmod 2770 /srv/fossologyTestRepo/$REPO_NAME"); // change mode to 2770
+      exec("sudo chown fossy /srv/fossologyTestRepo/$REPO_NAME -R"); // change owner of REPO to fossy
+      exec("sudo chgrp fossy /srv/fossologyTestRepo/$REPO_NAME -R"); // change grp of REPO to fossy
     }
     if (is_dir($SYSCONF_DIR)) {
       exec("sudo chown fossy $SYSCONF_DIR -R"); // change owner of sysconfdir to fossy

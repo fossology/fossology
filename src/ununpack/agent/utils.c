@@ -1,6 +1,7 @@
 /*******************************************************************
  Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
- 
+ Copyright (C) 2018 Siemens AG
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -18,14 +19,14 @@
 #include "externs.h"
 
 enum BITS {
-  BITS_PROJECT = 27, 
+  BITS_PROJECT = 27,
   BITS_ARTIFACT = 28,
   BITS_CONTAINER = 29
 };
 
 
 /**
- * @brief Test if the file is a compression bomb.  
+ * @brief Test if the file is a compression bomb.
  *        If the size of FileName is a factor of InflateSize more than the
  *        size of the directory containing it, then it is a bomb.
  * @param FileName pathname to file
@@ -71,7 +72,7 @@ int IsInflatedFile(char *FileName, int InflateSize)
  */
 void	SafeExit	(int rc)
 {
-  if (pgConn) PQfinish(pgConn); 
+  if (pgConn) PQfinish(pgConn);
   fo_scheduler_disconnect(rc);
   exit(rc);
 } /* SafeExit() */
@@ -121,7 +122,7 @@ void	InitCmd	()
     result =  PQexec(pgConn, SQL); /* SELECT */
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(1);
     else if (PQntuples(result) > 0) /* if there is a value */
-    {  
+    {
       CMD[i].DBindex = atol(PQgetvalue(result,0,0));
       PQclear(result);
     }
@@ -132,7 +133,7 @@ void	InitCmd	()
       snprintf(SQL,MAXSQL,"INSERT INTO mimetype (mimetype_name) VALUES ('%s');",CMD[i].Magic);
       result =  PQexec(pgConn, SQL); /* INSERT INTO mimetype */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(2);
-      else 
+      else
       {
         PQclear(result);
         goto ReGetCmd;
@@ -250,7 +251,7 @@ int MkDirs (char *Fname)
       {
         if (!S_ISDIR(Status.st_mode))
         {
-          LOG_FATAL("'%s' is not a directory.",Dir)
+          LOG_FATAL("'%s' is not a directory.",Dir);
           SafeExit(3);
         }
       }
@@ -260,7 +261,7 @@ int MkDirs (char *Fname)
         if (rc && (errno == EEXIST)) rc=0;
         if (rc)
         {
-          LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
+          LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno));
           SafeExit(4);
         }
         chmod(Dir,02770);
@@ -272,7 +273,7 @@ int MkDirs (char *Fname)
   if (rc && (errno == EEXIST)) rc=0;
   if (rc)
   {
-    LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno))
+    LOG_FATAL("mkdir %s' failed, error: %s",Dir,strerror(errno));
     SafeExit(5);
   }
   chmod(Dir,02770);
@@ -408,7 +409,7 @@ int	IsExe	(char *Exe, int Quiet)
     strcat(TestCmd,Exe);
     if (IsFile(TestCmd,1))	return(1); /* found it! */
   }
-  if (!Quiet) LOG_WARNING("%s not found in $PATH",Exe)
+  if (!Quiet) LOG_WARNING("%s not found in $PATH",Exe);
   return(0); /* not in path */
 } /* IsExe() */
 
@@ -435,7 +436,7 @@ int	CopyFile	(char *Src, char *Dst)
   Fin = open(Src,O_RDONLY);
   if (Fin == -1)
   {
-    LOG_FATAL("Unable to open source '%s'",Src)
+    LOG_FATAL("Unable to open source '%s'",Src);
     SafeExit(22);
   }
 
@@ -451,7 +452,7 @@ int	CopyFile	(char *Src, char *Dst)
   Fout = open(Dst,O_WRONLY|O_CREAT|O_TRUNC,Stat.st_mode);
   if (Fout == -1)
   {
-    LOG_FATAL("Unable to open target '%s'",Dst)
+    LOG_FATAL("Unable to open target '%s'",Dst);
     close(Fin);
     SafeExit(23);
   }
@@ -460,8 +461,8 @@ int	CopyFile	(char *Src, char *Dst)
   Mmap = mmap(0,LenIn,PROT_READ,MAP_PRIVATE,Fin,0);
   if (Mmap == NULL)
   {
-    LOG_FATAL("pfile %s Unable to process file.",Pfile_Pk)
-    LOG_WARNING("pfile %s Mmap failed during copy.",Pfile_Pk)
+    LOG_FATAL("pfile %s Unable to process file.",Pfile_Pk);
+    LOG_WARNING("pfile %s Mmap failed during copy.",Pfile_Pk);
     rc=1;
     goto CopyFileEnd;
   }
@@ -510,7 +511,7 @@ int     ParentWait      ()
   {
     if (!ForceContinue)
     {
-      LOG_FATAL("Child had unnatural death")
+      LOG_FATAL("Child had unnatural death");
       SafeExit(6);
     }
     Queue[i].ChildCorrupt=1;
@@ -521,8 +522,8 @@ int     ParentWait      ()
   {
     if (!ForceContinue)
     {
-      LOG_FATAL("Child had non-zero status: %d",Status)
-      LOG_FATAL("Child was to recurse on %s",Queue[i].ChildRecurse)
+      LOG_FATAL("Child had non-zero status: %d",Status);
+      LOG_FATAL("Child was to recurse on %s",Queue[i].ChildRecurse);
       SafeExit(10);
     }
     Queue[i].ChildCorrupt=1;
@@ -614,20 +615,28 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   if (Verbose)
   {
     if (Where && Out)
-      LOG_DEBUG("Extracting %s: %s > %s",Cmd,File,Out)
-    else 
-    if (Where) 
-      LOG_DEBUG("Extracting %s in %s: %s\n",Cmd,Where,File)
-    else 
-      LOG_DEBUG("Testing %s: %s\n",Cmd,File)
+    {
+      LOG_DEBUG("Extracting %s: %s > %s",Cmd,File,Out);
+    }
+    else
+    {
+      if (Where)
+      {
+        LOG_DEBUG("Extracting %s in %s: %s\n",Cmd,Where,File);
+      }
+      else
+      {
+        LOG_DEBUG("Testing %s: %s\n",Cmd,File);
+      }
+    }
   }
 
   if (getcwd(CWD,sizeof(CWD)) == NULL)
   {
-    LOG_FATAL("directory name longer than %d characters",(int)sizeof(CWD))
+    LOG_FATAL("directory name longer than %d characters",(int)sizeof(CWD));
     SafeExit(24);
   }
-  if (Verbose > 1) LOG_DEBUG("CWD: %s\n",CWD);
+  if (Verbose > 1){ LOG_DEBUG("CWD: %s\n",CWD);}
   if ((Where != NULL) && (Where[0] != '\0'))
   {
     if (chdir(Where) != 0)
@@ -635,11 +644,11 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
       MkDir(Where);
       if (chdir(Where) != 0)
       {
-        LOG_FATAL("Unable to access directory '%s'",Where)
+        LOG_FATAL("Unable to access directory '%s'",Where);
         SafeExit(25);
       }
     }
-    if (Verbose > 1) LOG_DEBUG("CWD: %s",Where)
+    if (Verbose > 1) LOG_DEBUG("CWD: %s",Where);
   }
 
   /* CMD: Cmd CmdPre 'CWD/File' CmdPost */
@@ -665,16 +674,16 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   rc = system(Cmd1);
   if (WIFSIGNALED(rc))
   {
-    LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1)
+    LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1);
     SafeExit(8);
   }
   if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
   else rc=-1;
-  if (Verbose) LOG_DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc)
+  if (Verbose) LOG_DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc);
 
   if(chdir(CWD) != 0)
-    LOG_ERROR("Unable to change directory to %s", CWD)
-  if (Verbose > 1) LOG_DEBUG("CWD: %s",CWD)
+    LOG_ERROR("Unable to change directory to %s", CWD);
+  if (Verbose > 1) LOG_DEBUG("CWD: %s",CWD);
   return(rc);
 } /* RunCommand() */
 
@@ -689,7 +698,7 @@ int InitMagic()
   MagicCookie = magic_open(MAGIC_MIME);
   if (MagicCookie == NULL)
   {
-    LOG_FATAL("Failed to initialize magic cookie")
+    LOG_FATAL("Failed to initialize magic cookie");
     SafeExit(9);
   }
   return magic_load(MagicCookie,NULL);
@@ -715,22 +724,22 @@ int IsDebianSourceFile(char *Filename)
   {
     if (strcmp(pExt, ".dsc")==0)
     {
-      /* read the first 500 characters of the file to verify that 
+      /* read the first 500 characters of the file to verify that
       * it really is a debian source file
       */
       if ((fp = fopen(Filename, "r")) == NULL) return 0;
-      j=0;	
+      j=0;
       while ((c = fgetc(fp)) != EOF && j < 500 ){
         line[j]=c;
         j++;
       }
       fclose(fp);
-      if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) || 
+      if ((strstr(line, "-----BEGIN PGP SIGNED MESSAGE-----") && strstr(line,"Source:")) ||
           (strstr(line, "Format:") && strstr(line, "Source:") && strstr(line, "Version:")))
       {
         return 1;
       }
-    }	
+    }
   }
   return 0;
 }
@@ -773,7 +782,7 @@ void OctetType(char *Filename, char *TypeBuf)
     if(rc3==0)
     {
       LOG_ERROR("'%s' cannot be unpacked, password required.",Filename);
-      return;  
+      return;
     }
   }
   if ((rc1 || rc2)==0)
@@ -849,13 +858,13 @@ int	FindCmd	(char *Filename)
   strncpy(TypeBuf, Type, sizeof(TypeBuf));
   TypeBuf[255] = 0;  /* make sure TypeBuf is null terminated */
 
-  if (strstr(Type, "octet" )) 
+  if (strstr(Type, "octet" ))
   {
     OctetType(Filename, TypeBuf);
   }
   else
   if (IsDebianSourceFile(Filename)) strcpy(TypeBuf,"application/x-debian-source");
-  else 
+  else
   if (strstr(Type, "msword") || strstr(Type, "vnd.ms"))
      strcpy(TypeBuf, "application/x-7z-w-compressed");
   else
@@ -875,8 +884,8 @@ int	FindCmd	(char *Filename)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
 
-  /* Match Type (mimetype from magic or from special processing above to determine 
-   * the command for Filename 
+  /* Match Type (mimetype from magic or from special processing above to determine
+   * the command for Filename
    */
   Match=-1;
   for(i=0; (CMD[i].Cmd != NULL) && (Match == -1); i++)
@@ -887,7 +896,7 @@ int	FindCmd	(char *Filename)
       Match=i; /* done! */
     }
     else
-      if (!strstr(TypeBuf, CMD[i].Magic)) 
+      if (!strstr(TypeBuf, CMD[i].Magic))
       {
         continue; /* not a match */
       }
@@ -897,10 +906,15 @@ int	FindCmd	(char *Filename)
   if (Verbose > 0)
   {
     /* no match */
-    if (Match == -1) LOG_DEBUG("MISS: Type=%s  %s",TypeBuf,Filename)
-    else LOG_DEBUG("MATCH: Type=%d  %s %s %s %s",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost)
+    if (Match == -1)
+    {
+      LOG_DEBUG("MISS: Type=%s  %s",TypeBuf,Filename);
+    }
+    else
+    {
+      LOG_DEBUG("MATCH: Type=%d  %s %s %s %s",CMD[Match].Type,CMD[Match].Cmd,CMD[Match].CmdPre,Filename,CMD[Match].CmdPost);
+    }
   }
-
   return(Match);
 } /* FindCmd() */
 
@@ -952,13 +966,13 @@ dirlist *	MakeDirList	(char *Fullname)
     dhead = (dirlist *)malloc(sizeof(dirlist));
     if (!dhead)
     {
-      LOG_FATAL("Failed to allocate dirlist memory")
+      LOG_FATAL("Failed to allocate dirlist memory");
       SafeExit(10);
     }
     dhead->Name = (char *)malloc(strlen(Entry->d_name)+1);
     if (!dhead->Name)
     {
-      LOG_FATAL("Failed to allocate dirlist.Name memory")
+      LOG_FATAL("Failed to allocate dirlist.Name memory");
       SafeExit(11);
     }
     memset(dhead->Name,'\0',strlen(Entry->d_name)+1);
@@ -1049,11 +1063,11 @@ void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
  **/
 void	DebugContainerInfo	(ContainerInfo *CI)
 {
-  LOG_DEBUG("Container:")
-  printf("  Source: %s\n",CI->Source); 
-  printf("  Partdir: %s\n",CI->Partdir); 
-  printf("  Partname: %s\n",CI->Partname); 
-  printf("  PartnameNew: %s\n",CI->PartnameNew); 
+  LOG_DEBUG("Container:");
+  printf("  Source: %s\n",CI->Source);
+  printf("  Partdir: %s\n",CI->Partdir);
+  printf("  Partname: %s\n",CI->Partname);
+  printf("  PartnameNew: %s\n",CI->PartnameNew);
   printf("  TopContainer: %d\n",CI->TopContainer);
   printf("  HasChild: %d\n",CI->HasChild);
   printf("  Pruned: %d\n",CI->Pruned);
@@ -1133,7 +1147,7 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   if (Val)
   {
     CI->pfile_pk = atol(Val);
-    if (Verbose) LOG_DEBUG("pfile_pk = %ld",CI->pfile_pk)
+    if (Verbose) LOG_DEBUG("pfile_pk = %ld",CI->pfile_pk);
     /* For backwards compatibility... Do we need to update the mimetype? */
     if ((CMD[CI->PI.Cmd].DBindex > 0) &&
         (atol(PQgetvalue(result,0,1)) != CMD[CI->PI.Cmd].DBindex))
@@ -1209,14 +1223,18 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
       strcpy(UfileName,"artifact.meta");
     else /* Don't know what it is */
       strcpy(UfileName,"artifact");
-    strncpy(CI->Partname,UfileName,sizeof(CI->Partname)-1);  
+    strncpy(CI->Partname,UfileName,sizeof(CI->Partname)-1);
   }
 
   PQescapeStringConn(pgConn, EscBuf, CI->Partname, strlen(CI->Partname), &error);
   if (error)
-      LOG_WARNING("Error escaping filename with multibyte character set (%s).", CI->Partname)
+  {
+      LOG_WARNING("Error escaping filename with multibyte character set (%s).", CI->Partname);
+  }
   else
+  {
     strncpy(UfileName, EscBuf, sizeof(UfileName));
+  }
 
   // Begin add by vincent
   if(ReunpackSwitch)
@@ -1257,7 +1275,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(20);
     CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
     PQclear(result);
-  } 
+  }
   //End add by Vincent
   TotalItems++;
   fo_scheduler_heart(1);
@@ -1287,12 +1305,12 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
     {
       if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
       {
-        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid)
+        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid);
         SafeExit(21);
       }
     }
     if (Verbose) LOG_DEBUG("Repository[%s]: insert '%s' as '%s'",
-        REP_FILES,CI->Source,Fuid)
+        REP_FILES,CI->Source,Fuid);
   }
 
   /* PERFORMANCE NOTE:

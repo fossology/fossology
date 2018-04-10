@@ -12,7 +12,7 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf 
 
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(AGENTDIR) -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(AGENTDIR) -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB)
 EXE = run_tests
 
@@ -38,8 +38,20 @@ OBJS =	run_tests.o \
 FOCUNIT = libfocunit.a
 
 # list of the external test data files required by this test
-# UNLIKE MOST OTHER TESTS, these will be found in ../
-TEST_FILES = unpack-test-data.tar.bz2
+# UNLIKE MOST OTHER TESTS, these will be found in ../testdata
+TEST_FILES = circularlinks.tar null_file test1.zip.tar.gz test.cab test.cpio.gz testdir.tar.gz test.iso test.jar test.pdf
+TEST_FILES += fossI16L335U29.tar.bz2 test.tar.Z testtwo.zip test.zip emptydirs.tar Test-0001.rar test.ar test.cpio test.deb
+TEST_FILES += test_1-1.dsc test.msi test.rar test.rpm test_1.orig.tar.gz testthree.zip test.z fossI16L518.7z
+TEST_FILES += libununpack.a test.exe test_1-1.debian.tar.xz ext2file.fs ext3file.fs fatfile.fs ntfsfile.fs
+
+../testdata/libununpack.a:
+	ln -sf $(AGENTDIR)/libununpack.a ../testdata/libununpack.a
+
+../testdata/fossI16L335U29.tar.bz2:
+	ln -sf ../../../testing/dataFiles/TestData/archives/fossI16L335U29.tar.bz2 ../testdata/fossI16L335U29.tar.bz2
+
+../testdata/fossI16L518.7z:
+	ln -sf ../../../testing/dataFiles/TestData/archives/fossI16L518.7z ../testdata/fossI16L518.7z
 
 all: $(EXE)
 
@@ -49,35 +61,19 @@ $(EXE): libununpack.a $(FOLIB) $(OBJS) $(VARS) $(FOCUNIT)
 $(OBJS): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
-# target to retrieve remote test data if it doesn't already exist
-# make sure your /etc/wgetrc file is configured correctly!
+# target to get test data and test ununpack on them
 testdata:
-	@echo "Retrieve test files"
-	@# for each test file specified, look for it in ../testdata
-	@# if it exists, do nothing.
-	@# if it does not exist, look in /var/www/testfiles
-	@# if not in /var/www/testfiles, wget it from fossology.org
-	@$(foreach test_file, $(TEST_FILES), \
-		if [ -e ../$(test_file) ]; then \
-			echo "../$(test_file) exists"; \
-		elif [ -e /var/www/testfiles/$(test_file) ]; then \
-			echo "$(test_file) found in /var/www/testfiles"; \
-			cp /var/www/testfiles/$(test_file) ../; \
-		else \
-			echo "$(test_file) does not exist. need to wget from fossology.org"; \
-			wget --directory-prefix=../ http://www.fossology.org/testdata/$(test_file); \
-		fi; \
-	)
+	@echo "Unpacking test files"
+	@cd ../testdata && tar -xvjf testdata.tar.bz2
+	$(foreach test_file, $(TEST_FILES), ../testdata/testit.sh ../testdata/$(test_file) ;)
 
 $(FOCUNIT):
 	$(MAKE) -C $(CUNIT_LIB_DIR) $@
 
-test: all testdata
-	cd ..; tar -xf unpack-test-data.tar.bz2
+test: all testdata $(TEST_FILES:%=../testdata/%)
 	./$(EXE)
 
 coverage: testdata $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
-	cd ..; tar -xf unpack-test-data.tar.bz2
 	$(CC) -o $(EXE) $(OBJS) $(AGENTDIR)/libununpack_cov.a $(FLAG_COV) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL); \
 	./$(EXE)
 
@@ -88,7 +84,8 @@ libununpack.a:
 	$(MAKE) -C $(AGENTDIR) $@
 
 clean:
-	rm -rf $(EXE) *.o core *.xml *.txt results test-result ../unpack-test-data.tar.bz2 ../test-data
+	rm -rf $(EXE) *.o core *.xml *.txt results test-result *.dir *.unpacked
+	rm -rf $(TEST_FILES:%=../testdata/%) $(TEST_FILES)
 
 .PHONY: all test coverage clean libununpack_cov.a libununpack.a
 

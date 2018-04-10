@@ -89,7 +89,7 @@ int  DBCheckMimeInit()
     exit(-1);
   }
   PQclear(result);
- 
+
   /* select upload_pk */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"SELECT upload_pk FROM upload WHERE pfile_fk = '%ld';",
@@ -222,8 +222,8 @@ int DBCheckMimeClean()
 /* test functions */
 
 /**
- * \brief for function DBCheckMime 
- * the file is a c source file  
+ * \brief for function DBCheckMime
+ * the file is a c source file
  */
 void testDBCheckMime()
 {
@@ -233,7 +233,7 @@ void testDBCheckMime()
   char mimetype_name[] = "application/octet-stream";
   int pfile_mimetypefk = 0;
   int mimetype_id = -1;
-  
+
   DBCheckMime(file_path);
   /** get　mimetype_pk from table mimetype */
   memset(SQL,'\0',sizeof(SQL));
@@ -246,7 +246,7 @@ void testDBCheckMime()
   }
   mimetype_id = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
-  
+
   /** get mimetype id from pfile */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL)-1,"SELECT pfile_mimetypefk FROM pfile WHERE pfile_pk= %ld;", pfile_pk);
@@ -273,7 +273,7 @@ void testDBCheckMime()
 }
 
 /**
- * \brief testcases for function DBCheckMime 
+ * \brief testcases for function DBCheckMime
  */
 CU_TestInfo testcases_DBCheckMime[] =
 {

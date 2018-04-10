@@ -56,7 +56,7 @@ void test_string_is_num()
   int res = 0;
   char* str = "a";
   char* str1 = "1";
- 
+
   res = string_is_num(str);
   FO_ASSERT_EQUAL(res, 0);
 
@@ -75,7 +75,7 @@ void test_scheduler_daemonize()
   database_init(scheduler);
   FO_ASSERT_PTR_NOT_NULL(scheduler->db_conn);
 
-  //res = scheduler_daemonize(scheduler);
+  res = scheduler_daemonize(scheduler);
   FO_ASSERT_EQUAL(res, 0);
 
   res = kill_scheduler(1);
@@ -100,7 +100,7 @@ void test_scheduler_clear_config()
   FO_ASSERT_PTR_NULL(scheduler->host_url);
   FO_ASSERT_PTR_NULL(scheduler->email_subject);
   FO_ASSERT_PTR_NULL(scheduler->sysconfig);
-  
+
   scheduler_destroy(scheduler);
 }
 /*
@@ -138,7 +138,7 @@ void test_database_update_job()
   database_update_job(scheduler, job, JB_PAUSED);
   //job = g_tree_lookup(scheduler->job_list, &params->second);
   FO_ASSERT_STRING_EQUAL(job_status_strings[job->status], "JOB_NOT_AVAILABLE");
- 
+
   g_free(params);
   scheduler_destroy(scheduler);
 }
@@ -181,7 +181,7 @@ void test_database_job()
   database_job_priority(scheduler, job, 1);
 
   g_free(params);
-  scheduler_destroy(scheduler);  
+  scheduler_destroy(scheduler);
 }
 
 void test_email_notify()
@@ -200,8 +200,8 @@ void test_email_notify()
   jq_pk = Prepare_Testing_Data(scheduler);
   job = job_init(scheduler->job_list, scheduler->job_queue, "ununpack", "localhost", -1, 0, 0, 0, NULL);
   job->id = jq_pk;
- 
-  database_update_job(scheduler, job, JB_FAILED); 
+
+  database_update_job(scheduler, job, JB_FAILED);
   FO_ASSERT_STRING_EQUAL(job_status_strings[job->status], "JOB_CHECKEDOUT");
 
   scheduler_destroy(scheduler);

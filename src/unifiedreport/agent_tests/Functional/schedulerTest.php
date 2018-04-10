@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+Copyright (C) 2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $userId = 2;
   /** @var int */
   private $groupId = 2;
-  
+
   /** @var TestPgDb */
   private $testDb;
   /** @var DbManager */
@@ -80,7 +80,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->createInheritedArsTables(array('copyright','monk','nomos'));
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
-    
+
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     // $this->testDb->insertData_license_ref();
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
@@ -109,7 +109,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat( 'report failed: "'.$output.'"', $retCode, equalTo(0));
     assertThat($this->getHeartCount($output), greaterThan(0));
-    
+
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId), "reportFileName");
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
     assertThat($row, hasKeyValuePair('job_fk', $jobId));

@@ -148,6 +148,6 @@ class TestDbFactory
     {
       unlink($filename);
     }
-    rmdir($sys_conf);
+    exec("rm -rf $sys_conf");
   }
 }

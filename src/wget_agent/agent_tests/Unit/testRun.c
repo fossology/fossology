@@ -1,5 +1,6 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -25,6 +26,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /**
  * \brief all test suites for wget agent
  */
+
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] = {
+    // for wget_agent.c
+#if 0
+#endif
+    {"GetURL", NULL, NULL, (CU_SetUpFunc)GetURLInit, (CU_TearDownFunc)GetURLClean, testcases_GetURL},
+    {"SetEnv", NULL, NULL, (CU_SetUpFunc)SetEnvInit, (CU_TearDownFunc)SetEnvClean, testcases_SetEnv},
+    {"Utiliies", NULL, NULL, NULL, NULL, testcases_Utiliies},
+    {"DBLoadGold", NULL, NULL, (CU_SetUpFunc)DBLoadGoldInit, (CU_TearDownFunc)DBLoadGoldClean, testcases_DBLoadGold},
+    CU_SUITE_INFO_NULL
+};
+#else
 CU_SuiteInfo suites[] = {
     // for wget_agent.c
 #if 0
@@ -35,6 +49,7 @@ CU_SuiteInfo suites[] = {
     {"DBLoadGold", DBLoadGoldInit, DBLoadGoldClean, testcases_DBLoadGold},
     CU_SUITE_INFO_NULL
 };
+#endif
 
 /*
  * \brief  main test function

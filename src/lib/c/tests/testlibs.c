@@ -1,6 +1,6 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2015 Siemens AG
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -36,6 +36,17 @@ extern CU_TestInfo libfossdbmanager_testcases[];
 * array of every test suite. There should be at least one test suite for every
 * library includes in libfossology.
 */
+
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] =
+  {
+    {"Testing libfossdb", NULL, NULL, NULL, NULL, libfossdb_testcases},
+    {"Testing fossconfig", NULL, NULL, NULL, NULL, fossconfig_testcases},
+    {"Testing libfossdbmanger", NULL, NULL, NULL, NULL, libfossdbmanager_testcases},
+    // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
+    CU_SUITE_INFO_NULL
+  };
+#else
 CU_SuiteInfo suites[] =
   {
     {"Testing libfossdb", NULL, NULL, libfossdb_testcases},
@@ -44,6 +55,7 @@ CU_SuiteInfo suites[] =
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
   };
+#endif
 
 /* ************************************************************************** */
 /* **** main function ******************************************************* */

@@ -20,8 +20,8 @@
 /**
  * \brief test the wget agent thu command line.
  * NOTICE: the option -l,  default as 0, maximum recursion depth (0 for infinite).
-           is different with from upload from url on user interface(default as 1)
- * @group wget agent 
+ *         is different with from upload from url on user interface(default as 1)
+ * @group wget agent
  */
 
 $TEST_RESULT_PATH = "./test_result";
@@ -30,10 +30,11 @@ $TEST_RESULT_PATH = "./test_result";
  * \class cliParamsTest4Wget - test wget agent from cli
  */
 class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
-   
+
   public $WGET_PATH = "";
   public $DB_COMMAND = "";
   public $DB_NAME = "";
+  public $SYSCONF_DIR = "";
 
   /* initialization */
   protected function setUp() {
@@ -42,10 +43,42 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $DB_NAME;
     global $db_conf;
     global $REPO_NAME;
+    global $SYSCONF_DIR;
 
     $db_conf = "";
 
-    $DB_COMMAND  = "../../../testing/db/createTestDB.php";
+    $cwd = getcwd();
+    $SYSCONF_DIR = "$cwd/testconf";
+    $confFile = "fossology.conf";
+    $agentDir = "$cwd/../..";
+
+    exec("rm -rf $SYSCONF_DIR");
+    if(!mkdir($SYSCONF_DIR)) {
+      die("Unable to create $SYSCONF_DIR");
+    }
+    $confFile_fh = fopen("$SYSCONF_DIR/$confFile", 'w')
+    or die("FAIL: Could not open $SYSCONF_DIR/$confFile for writing\n");
+    fwrite($confFile_fh, ";fossology.conf for testing\n");
+    fwrite($confFile_fh, "[FOSSOLOGY]\nport = 24693\n");
+    fwrite($confFile_fh, "address = localhost\n");
+    fwrite($confFile_fh, "depth = 0\n");
+    fwrite($confFile_fh, "path = $SYSCONF_DIR\n");
+    fwrite($confFile_fh, "[HOSTS]\n");
+    fwrite($confFile_fh, "localhost = localhost AGENT_DIR 10\n");
+    fwrite($confFile_fh, "[REPOSITORY]\n");
+    fwrite($confFile_fh, "localhost = * 00 ff\n");
+    fwrite($confFile_fh, "[DIRECTORIES]\n");
+    fwrite($confFile_fh, "PROJECTUSER=fossy\n");
+    fwrite($confFile_fh, "PROJECTGROUP=fossy\n");
+    fwrite($confFile_fh, "MODDIR=$cwd/../../..\n");
+    fwrite($confFile_fh, 'LIBEXECDIR=$MODDIR/../install/db' . "\n");
+    fwrite($confFile_fh, "LOGDIR=$SYSCONF_DIR\n");
+    fclose($confFile_fh);
+    symlink("$cwd/../../../../VERSION", "$SYSCONF_DIR/VERSION");
+    mkdir("$SYSCONF_DIR/mods-enabled");
+    symlink($agentDir, "$SYSCONF_DIR/mods-enabled/wget_agent");
+
+    $DB_COMMAND  = "../../../testing/db/createTestDB.php -c $SYSCONF_DIR";
     exec($DB_COMMAND, $dbout, $rc);
     if (0 != $rc)
     {
@@ -77,56 +110,54 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
 
   /**
 	 * \brief download one dir(one url), under this direcotry, also having other directory(s)
-   * level is 0, accept rpm, reject fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm
+   * level is 0, accept rpm, reject fossology-common-3.0.0-1.fc20.x86_64.rpm,fossology-debuginfo-3.0.0-1.fc20.x86_64.rpm,
+   * fossology-web-3.0.0-1.fc20.x86_64.rpm,fossology-3.0.0-1.fc20.src.rpm
    */
   function testDownloadDirHasChildDirLevel0(){
-    print "Starting test functional wget agent \n";
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
-    
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/rpms/fedora/10/ -A rpm -R fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm  -d $TEST_RESULT_PATH";
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/ -A rpm -R fossology-common-3.0.0-1.fc20.x86_64.rpm,fossology-debuginfo-3.0.0-1.fc20.x86_64.rpm,fossology-web-3.0.0-1.fc20.x86_64.rpm,fossology-3.0.0-1.fc20.src.rpm -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/i386/fossology-debuginfo-1.2.0-1.fc10.i386.rpm");
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/x86_64/fossology-devel-1.2.0-1.fc10.x86_64.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/SRPMS/fossology-1.2.1-1.fc10.src.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-3.0.0-1.fc20.x86_64.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-wgetagent-3.0.0-1.fc20.x86_64.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/fedora/20/x86_64/fossology-debuginfo-3.0.0-1.fc20.x86_64.rpm");
   }
 
-  /** 
+  /**
 	 * \brief download one dir(one url), under this direcotry, having no other directory(s), having several files
-   * default level as 0, accept gz, reject fossology* files
+   * default level as 0, accept deb, reject fossology-* files
    */
   function testDownloadDirHasNoChildDirLevel0(){
-    print "Starting test functional wget agent 1 \n";
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
-    
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/debian/2.0.0/ -A gz -R fossology*  -d $TEST_RESULT_PATH";
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/ -A deb -R fossology-*  -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/Packages.gz");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/  fossology_2.0.0-1.tar.gz");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/fossology_3.0.0-1_i386.deb");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/3.0.0/debian/7.0/fossology-ununpack_3.0.0-1_amd64.deb");
   }
 
-  /** 
+  /**
 	 * \brief download one dir(one url), under this direcotry, also having other directory(s)
-   * level is 1, accept rpm, reject fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm
+   * level is 1, accept rpm, reject fossology-2.0.0-1.fc15.src.rpm, fossology-common-2.0.0-1.fc15.x86_64.rpm
    * because the level is 1, so can not download the files under url/dir(s)/, just download the directory(s) under url/
    */
   function testDownloadDirHasChildDirLevel1(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/rpms/fedora/10/ -A rpm -R fossology-1.2.1-1.fc10.src.rpm,fossology-1.2.0-1.fc10.src.rpm -l 1 -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/ -A rpm -R fossology-2.0.0-1.fc15.src.rpm,fossology-common-2.0.0-1.fc15.x86_64.rpm -l 1 -d $TEST_RESULT_PATH";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/i386/fossology-debuginfo-1.2.0-1.fc10.i386.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/x86_64/fossology-devel-1.2.0-1.fc10.x86_64.rpm");
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/i386");
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/x86_64");
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/SRPMS");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-common-2.0.0-1.fc15.x86_64.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/x86_64/fossology-common-2.0.0-1.fc15.x86_64.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/x86_64");
   }
 
   /**
@@ -136,13 +167,13 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testDownloadDirCurrentDirLevel0(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/fossology-ununpack_2.0.0-1_i386.deb";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-db-2.0.0-1.fc15.i386.rpm";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileExists("www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/fossology-ununpack_2.0.0-1_i386.deb");
-    exec("/bin/rm -rf 'www.fossology.org'");
+    $this->assertFileExists("mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-db-2.0.0-1.fc15.i386.rpm");
+    exec("/bin/rm -rf 'mirrors.kernel.org'");
   }
 
   /**
@@ -161,20 +192,20 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     exec("/bin/rm -rf 'test result(special)'");
   }
 
-  /** 
+  /**
 	 * \brief download one dir(one url)
-   * level is 2, accept fossology*, reject fossology-1.2.0-1.fc10.src.rpm,fossology-1.2.1-1.fc10.src.rpm files
+   * level is 2, accept fossology*, reject fossology-2.0.0-1.fc15.i386.rpm, fossology-2.0.0-1.fc15.src.rpm files
    */
   function testDownloadAcceptRejectType1(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/rpms/fedora/10/SRPMS/ -A fossology* -R fossology-1.2.0-1.fc10.src.rpm,fossology-1.2.1-1.fc10.src.rpm -d $TEST_RESULT_PATH -l 2";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/ -A fossology* -R fossology-2.0.0-1.fc15.i386.rpm,fossology-2.0.0-1.fc15.src.rpm -d $TEST_RESULT_PATH -l 2";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/SRPMS/fossology-1.1.0-1.fc10.src.rpm");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/rpms/fedora/10/SRPMS/fossology-1.2.1-1.fc10.src.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-pkgagent-2.0.0-1.fc15.i386.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Fedora/15/i386/fossology-2.0.0-1.fc15.src.rpm");
   }
 
   /**
@@ -184,14 +215,13 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
   function testtDownloadAcceptRejectType2(){
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    $this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
+    //$this->change_proxy('http_proxy', 'web-proxy.cce.hp.com:8088');
 
-    $command = "$WGET_PATH http://www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/ -A fossology-scheduler_2.0.0* -R gz,fossology-scheduler_2.0.0-1_i386* -d $TEST_RESULT_PATH -l 1";
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/ -A fossology-scheduler_2.0.0* -R gz,fossology-scheduler_2.0.0-1_i386* -d $TEST_RESULT_PATH -l 1";
     //print "command is:$command\n";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/fossology-scheduler_2.0.0-1_amd64.deb");
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/wgetagent/debian/2.0.0/squeeze/fossology-scheduler_2.0.0-1_i386.deb");
-    print "ending test functional wget agent \n";
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_amd64.deb");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-scheduler_2.0.0-1_i386.deb");
   }
 
   /**
@@ -232,7 +262,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
     // ftp_proxy
-    $this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
+    //$this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
     $command = "$WGET_PATH ftp://ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz  -d $TEST_RESULT_PATH";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz");
@@ -246,16 +276,16 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
     // http_proxy
-    $this->change_proxy("http_proxy", "web-proxy.cce.hp.com:8088");
-    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm  -d $TEST_RESULT_PATH";
+    //$this->change_proxy("http_proxy", "web-proxy.cce.hp.com:8088");
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/fedora/10/x86_64/fossology-1.1.0-1.fc10.x86_64.rpm");
+    $this->assertFileExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb");
 
     // no proxy
-    $this->change_proxy("no_proxy", "fossology.org");
-    $command = "$WGET_PATH http://www.fossology.org/testdata/rpms/fedora/13/i386/fossology-1.4.1-1.fc13.i686.rpm  -d $TEST_RESULT_PATH";
+    //$this->change_proxy("no_proxy", "fossology.org");
+    $command = "$WGET_PATH https://mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileNotExists("$TEST_RESULT_PATH/www.fossology.org/testdata/rpms/fedora/13/i386/fossology-1.4.1-1.fc13.i686.rpm");
+    $this->assertFileNotExists("$TEST_RESULT_PATH/mirrors.kernel.org/fossology/releases/2.0.0/Debian/squeeze/6.0/fossology-mimetype_2.0.0-1_amd64.deb");
   }
 
   /**
@@ -267,7 +297,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $WGET_PATH;
 
     // https_proxy
-    $this->change_proxy("https_proxy", "web-proxy.cce.hp.com:8088");
+    //$this->change_proxy("https_proxy", "web-proxy.cce.hp.com:8088");
     $command = "$WGET_PATH https://www.google.com/images/srpr/nav_logo80.png -l 1 -d $TEST_RESULT_PATH";
     exec($command);
     $this->assertFileExists("$TEST_RESULT_PATH/www.google.com/images/srpr/nav_logo80.png");
@@ -280,9 +310,10 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $TEST_RESULT_PATH;
     global $DB_COMMAND;
     global $DB_NAME;
+    global $SYSCONF_DIR;
 
     // delete the directory ./test_result
-    exec("/bin/rm -rf $TEST_RESULT_PATH");
+    exec("/bin/rm -rf $TEST_RESULT_PATH $SYSCONF_DIR");
     // remove the sysconf/db/repo
     exec("$DB_COMMAND -d $DB_NAME");
   }

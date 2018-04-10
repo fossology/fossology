@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Daniele Fognini, Steffen Weber
 
 This program is free software; you can redistribute it and/or
@@ -113,8 +113,10 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
   private function searchContent($array, $content, $key='content')
   {
     foreach($array as $entry) {
-      if ($entry[$key] === $content) {
-        return true;
+      if(array_key_exists($key, $entry)) {
+        if ($entry[$key] === $content) {
+          return true;
+        }
       }
     }
     return false;

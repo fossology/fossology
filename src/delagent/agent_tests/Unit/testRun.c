@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 #include "testRun.h"
@@ -38,8 +39,16 @@ int DelagentDBInit()
 {
   char CMD[256];
   int rc;
- 
-  rc = create_db_repo_sysconf(0, "delagent");
+
+  char cwd[2048];
+  char* confDir = NULL;
+
+  if(getcwd(cwd, sizeof(cwd)) != NULL)
+  {
+    confDir = createTestConfDir(cwd, "delagent");
+  }
+
+  rc = create_db_repo_sysconf(0, "delagent", confDir);
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");
@@ -50,15 +59,15 @@ int DelagentDBInit()
 
   memset(CMD, '\0', sizeof(CMD));
   //sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
-  sprintf(CMD, "pg_restore -Ufossy -d %s ../testdata/testdb_all.tar", get_db_name());
+  sprintf(CMD, "pg_restore -e -Ufossy -d %s ../testdata/testdb_all.tar", get_db_name());
   printf("restore database command: %s\n", CMD);
-  rc = system(CMD); 
-  //if (rc != 0)
-  //{
-  //  printf("Database initialize ERROR!\n");
-  //  DelagentClean();
-  //  return -1; 
-  //}
+  rc = system(CMD);
+  if (WEXITSTATUS(rc) != 0)
+  {
+    printf("Database initialize ERROR!\n");
+    DelagentClean();
+    return -1;
+  }
 
   return 0;
 }

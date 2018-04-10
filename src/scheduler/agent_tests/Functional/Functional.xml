@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+Copyright (C) 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -158,7 +159,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
     <!-- Test that the correct agents passed the startup test -->
     <test name = "agents">
       <sequential command="{cli}" params="--config={config} -a" retval="0"
-                  result="adj2nest buckets copyright decider deciderjob delagent ecc maintagent mimetype monk monkbulk nomos pkgagent reuser ununpack wget_agent"/>
+                  result="adj2nest buckets copyright decider deciderjob delagent ecc maintagent mimetype monk monkbulk ninka nomos pkgagent readmeoss reuser spdx2 ununpack wget_agent"/>
     </test>
     
     <!-- Test that the scheduler has the correct status -->

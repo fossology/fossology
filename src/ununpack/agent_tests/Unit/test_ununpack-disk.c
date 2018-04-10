@@ -27,12 +27,12 @@ void testExtractDisk4Ext2()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/ext2test-image";
-  MkDirs("./test-result/ext2test-image.dir");
-  Result = ExtractDisk(Filename, "ext", "./test-result/ext2test-image.dir");
-  exists = file_dir_exists("./test-result/ext2test-image.dir/ununpack.c");
-  FO_ASSERT_EQUAL(Result, 0); 
-  FO_ASSERT_EQUAL(exists, 1); 
+  Filename = "../testdata/ext2file.fs";
+  MkDirs("./test-result/ext2file.fs.dir");
+  Result = ExtractDisk(Filename, "ext", "./test-result/ext2file.fs.dir");
+  exists = file_dir_exists("./test-result/ext2file.fs.dir/testtwo.zip");
+  FO_ASSERT_EQUAL(Result, 0);
+  FO_ASSERT_EQUAL(exists, 1);
 }
 
 /**
@@ -43,42 +43,42 @@ void testExtractDisk4Ext3()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/ext3test-image";
-  MkDirs("./test-result/ext3test-image.dir");
-  Result = ExtractDisk(Filename, "ext", "./test-result/ext3test-image.dir");
-  exists = file_dir_exists("./test-result/ext3test-image.dir/libfossagent.a");
+  Filename = "../testdata/ext3file.fs";
+  MkDirs("./test-result/ext3file.fs");
+  Result = ExtractDisk(Filename, "ext", "./test-result/ext3file.fs.dir");
+  exists = file_dir_exists("./test-result/ext3file.fs.dir/testtwo.zip");
   FO_ASSERT_EQUAL(Result, 0);
   FO_ASSERT_EQUAL(exists, 1);
 }
 
 /**
- * @brief unpack disk image, ext2, FStype is unknowed
+ * @brief unpack disk image, ext2, FStype is unknowned
  */
 void testExtractDisk4Ext2FstypeUnknow()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/ext2test-image";
-  MkDirs("./test-result/ext2test-image.dir");
-  Result = ExtractDisk(Filename, "", "./test-result/ext2test-image.dir");
-  exists = file_dir_exists("./test-result/ext2test-image.dir/ununpack.c");
+  Filename = "../testdata/ext2file.fs";
+  MkDirs("./test-result/ext2file.fs.dir");
+  Result = ExtractDisk(Filename, "", "./test-result/ext2file.fs.dir");
+  exists = file_dir_exists("./test-result/ext2file.fs.dir/testtwo.zip");
   FO_ASSERT_EQUAL(Result, 1);
   FO_ASSERT_EQUAL(exists, 0);
 }
 
 /**
- * @brief unpack disk image, fat 
+ * @brief unpack disk image, fat
  */
 void testExtractDisk4Fat()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/fattest-image";
-  MkDirs("./test-result/fattest-image.dir");
-  Result = ExtractDisk(Filename, "fat", "./test-result/fattest-image.dir");
-  exists = file_dir_exists("./test-result/fattest-image.dir/ununpack.c");
+  Filename = "../testdata/fatfile.fs";
+  MkDirs("./test-result/fatfile.fs.dir");
+  Result = ExtractDisk(Filename, "fat", "./test-result/fatfile.fs.dir");
+  exists = file_dir_exists("./test-result/fatfile.fs.dir/testtwo.zip");
   FO_ASSERT_EQUAL(Result, 0);
   FO_ASSERT_EQUAL(exists, 1);
 }
@@ -91,10 +91,10 @@ void testExtractDisk4Ntfs()
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/ntfstest-image";
-  MkDirs("./test-result/ntfstest-image.dir");
-  Result = ExtractDisk(Filename, "ntfs", "./test-result/ntfstest-image.dir");
-  exists = file_dir_exists("./test-result/ntfstest-image.dir/ununpack.c");
+  Filename = "../testdata/ntfsfile.fs";
+  MkDirs("./test-result/ntfsfile.fs.dir");
+  Result = ExtractDisk(Filename, "ntfs", "./test-result/ntfsfile.fs.dir");
+  exists = file_dir_exists("./test-result/ntfsfile.fs.dir/testtwo.zip");
   FO_ASSERT_EQUAL(Result, 0);
   FO_ASSERT_EQUAL(exists, 1);
 }
@@ -129,9 +129,9 @@ void testFatDiskName1()
 {
   strcpy(Name, "Fossology\0");
   FatDiskName(Name);
-  FO_ASSERT_EQUAL(strcmp(Name, "fossology"), 0); 
+  FO_ASSERT_EQUAL(strcmp(Name, "fossology"), 0);
 }
- 
+
 void testFatDiskName2()
 {
   strcpy(Name, "Fosso\0");
@@ -167,8 +167,8 @@ CU_TestInfo ununpack_disk_testcases[] =
   {"ExtractDisk: ext2 image:", testExtractDisk4Ext2},
   {"ExtractDisk: ext3 image:", testExtractDisk4Ext3},
   {"ExtractDisk: ext2 image, fs type is unknowed:", testExtractDisk4Ext2FstypeUnknow},
-  {"ExtractDisk: fat image:", testExtractDisk4Fat}, 
-  //    {"ExtractDisk: nfts image:", testExtractDisk4Ntfs},
+  {"ExtractDisk: fat image:", testExtractDisk4Fat},
+  {"ExtractDisk: nfts image:", testExtractDisk4Ntfs},
   {"FatDiskName: 1:", testFatDiskName1},
   {"FatDiskName: 2:", testFatDiskName2},
   {"FatDiskName: 3:", testFatDiskName3},

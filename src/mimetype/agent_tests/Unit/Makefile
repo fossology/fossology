@@ -1,5 +1,6 @@
 # FOSSology Makefile - test for mimetype
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2018 Siemens AG
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
@@ -10,8 +11,7 @@ LOCALAGENTDIR = ../../agent
 CUNIT_LIB_DIR = $(TOP)/src/testing/lib/c
 CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit -I $(CUNIT_LIB_DIR)
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
-TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
-
+TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 
 LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB)
 CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ $(CUNIT_LIB) $(TEST_LIB)

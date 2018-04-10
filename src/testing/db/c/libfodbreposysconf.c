@@ -17,13 +17,17 @@
 ************************************************************** */
 /**
  * \file libfodbreposysconf.c
- * \brief api for db, sysconfig, repo. 
+ * \brief api for db, sysconfig, repo.
  *        you can create/drop a DB/sysconfig/repo
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include <libfossscheduler.h>
 #include <libfossdb.h>
@@ -122,7 +126,7 @@ void dropTestEnvironment(fo_dbManager* dbManager, const char* srcDir, const char
 
 /**
  * \brief get command output
- * 
+ *
  * \param char *command - the command will be executed
  */
 static void command_output(char* command) {
@@ -150,15 +154,15 @@ static void command_output(char* command) {
   return;
 }
 
-/** 
- * \biref create DB, the db name looks linke fosstestxxxxx
+/**
+ * \biref create DB, the db name looks like fosstestxxxxx
  *
  * \param int type - 0 on create db, sysconf dir and repository, the db is empty
  *                   1 on create db, sysconf dir and repository, the db is initialized
  *
  * \return 0 on sucess, other on failure
  */
-int create_db_repo_sysconf(int type, char* agent_name) {
+int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
 #if 0
   char *sysconfdir;
   /** get sysconfig dir from ENV */
@@ -169,7 +173,13 @@ int create_db_repo_sysconf(int type, char* agent_name) {
     return 1;
   }
 #endif
+
   char CMD[ARRAY_LENGTH] = "../../../testing/db/createTestDB.php";
+  if(sysconfdir != NULL)
+  {
+    sprintf(CMD, "%s -c %s", CMD, sysconfdir);
+  }
+
   if (1 == type) {
     command_output(CMD);
   }
@@ -191,7 +201,7 @@ int create_db_repo_sysconf(int type, char* agent_name) {
 
 /**
  * \brief drop db, sysconfig dir and repo
- * 
+ *
  * \param char *DBName - the db name, looks like fosstestxxxx
  */
 void drop_db_repo_sysconf(char* DBName) {
@@ -241,7 +251,7 @@ char* get_db_name() {
 /**
  * \brief get sysconfig dir path just created by  create_db_repo_sysconf()
  *
- * \return the sysconfig dir path 
+ * \return the sysconfig dir path
  */
 char* get_sysconfdir() {
 #ifdef TEST
@@ -281,6 +291,78 @@ char* get_repodir() {
   printf("RepoDir is:%s\n", RepoDir);
 #endif
   return RepoDir;
+}
+
+/**
+ * \brief create a dummy sysConfDir for a given agent
+ *
+ * \param char* cwd       - Current directory of the agent's Unit test
+ * \param char* agentName - Name of the agent for which the directory is to be created
+ *
+ * \return repo path
+ */
+char *createTestConfDir(char* cwd, char* agentName)
+{
+  struct stat st = {0};
+  int rc;
+  char CMD[2048];
+  FILE *testConfFile;
+
+  char *confDir = malloc((strlen(cwd) + 10) * sizeof(char));
+  char confFile[1024];
+  char agentDir[1024];
+
+  if(cwd == NULL || agentName == NULL || cwd[0] == '\0' || agentName[0] == '\0')
+  {
+    return NULL;
+  }
+
+  sprintf(confDir, "%s/testconf", cwd);
+  sprintf(confFile, "%s/fossology.conf", confDir);
+  sprintf(agentDir, "%s/../..", cwd);
+
+  if (stat(confDir, &st) == -1)
+  {
+    mkdir(confDir, 0775);
+  }
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "%s/mods-enabled/%s", confDir, agentName);
+  if (stat(CMD, &st) == -1)
+  {
+    mkdir(CMD, 0775);
+  }
+
+  testConfFile = fopen(confFile,"w");
+  fprintf(testConfFile, ";fossology.conf for testing\n");
+  fprintf(testConfFile, "[FOSSOLOGY]\nport = 24693\n");
+  fprintf(testConfFile, "address = localhost\n");
+  fprintf(testConfFile, "depth = 0\n");
+  fprintf(testConfFile, "path = %s\n", confDir);
+  fprintf(testConfFile, "[HOSTS]\n");
+  fprintf(testConfFile, "localhost = localhost AGENT_DIR 10\n");
+  fprintf(testConfFile, "[REPOSITORY]\n");
+  fprintf(testConfFile, "localhost = * 00 ff\n");
+  fprintf(testConfFile, "[DIRECTORIES]\n");
+  fprintf(testConfFile, "PROJECTUSER=fossy\n");
+  fprintf(testConfFile, "PROJECTGROUP=fossy\n");
+  fprintf(testConfFile, "MODDIR=%s/../../../..\n", cwd);
+  fprintf(testConfFile, "LOGDIR=%s\n", confDir);
+  fclose(testConfFile);
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "install -D ../../../../VERSION %s/VERSION", confDir);
+  rc = system(CMD);
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "install -D %s/VERSION %s/mods-enabled/%s/VERSION", agentDir, confDir, agentName);
+  rc = system(CMD);
+
+  memset(CMD, '\0', sizeof(CMD));
+  sprintf(CMD, "ln -fs %s/agent %s/mods-enabled/%s", agentDir, confDir, agentName);
+  rc = system(CMD);
+
+  return confDir;
 }
 
 #if 0

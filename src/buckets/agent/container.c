@@ -1,6 +1,8 @@
 /***************************************************************
  Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
 
+ Copyright (C) 2018 Siemens AG
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -21,7 +23,7 @@ extern int debug;
 
 
 /**
- * \brief given a container uploadtree_pk and bucketdef, determine what buckets 
+ * \brief given a container uploadtree_pk and bucketdef, determine what buckets
  * the container is in.
  *
  * A container is in all the buckets of its children (recursive).
@@ -30,10 +32,10 @@ extern int debug;
  * recursion in walkTree().
  *
  * \param PGconn $pgConn  postgresql connection
- * \param pbucketdef_t $bucketDefArray  
+ * \param pbucketdef_t $bucketDefArray
  * \param int $uploadtree_pk
  *
- * \return zero terminated array of bucket_pk's for this uploadtree_pk (may contain 
+ * \return zero terminated array of bucket_pk's for this uploadtree_pk (may contain
  *        no elements).  This must be free'd by the caller.
  *
  * Note: It's tempting to just have walkTree() remember all the child buckets.
@@ -57,7 +59,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
 
   /*** Create the return array ***/
   /* count how many elements are in in_bucketDefArray.
-     This won't be needed after implementing pbucketpool_t 
+     This won't be needed after implementing pbucketpool_t
    */
   for (pbucketDefArray = bucketDefArray; pbucketDefArray->bucket_pk; pbucketDefArray++)
     numBucketDefs++;
@@ -66,7 +68,7 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
   bucket_pk_list = calloc(numBucketDefs+1, sizeof(int));
   if (bucket_pk_list == 0)
   {
-    printf("FATAL: %s(%d) out of memory allocating int array of %d ints\n", 
+    printf("FATAL: %s(%d) out of memory allocating int array of %d ints\n",
            fcnName, __LINE__, numBucketDefs+1);
     return 0;
   }
@@ -77,9 +79,13 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
     "SELECT lft,rgt,upload_fk FROM uploadtree WHERE uploadtree_pk ='%d'",
     uploadtree_pk);
   result = PQexec(pgConn, sql);
-  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__))
+  {
+    free(bucket_pk_list);
+    return 0;
+  }
   numLics = PQntuples(result);
-  if (numLics == 0) 
+  if (numLics == 0)
   {
     if (debug) printf("%s(%d): uploadtree_pk %d %s returned no recs.\n",__FILE__, __LINE__,uploadtree_pk, sql);
     PQclear(result);
@@ -108,9 +114,13 @@ FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
          bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
   if (debug) printf("%s(%d): Find buckets in container for uploadtree_pk %d\n%s\n",__FILE__, __LINE__,uploadtree_pk, sql);
   result = PQexec(pgConn, sql);
-  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
+  if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__))
+  {
+    free(bucket_pk_list);
+    return 0;
+  }
   numLics = PQntuples(result);
-  if (numLics == 0) 
+  if (numLics == 0)
   {
     PQclear(result);
     return bucket_pk_list;

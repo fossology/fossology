@@ -1,5 +1,6 @@
 # FOSSology Makefile - test for wget_agent
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+# Copyright (C) 2018 Siemens AG
 
 TOP = ../../../../
 VARS = $(TOP)/Makefile.conf
@@ -12,7 +13,7 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf
 
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq $(CUNIT_LIB) -lcunit $(TEST_LIB)
 
 EXE = test_wget_agent

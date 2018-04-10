@@ -1,6 +1,8 @@
 /**************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
+Copyright (C) 2018 Siemens AG
+
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
 License version 2.1 as published by the Free Software Foundation.
@@ -72,7 +74,10 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
   /* Allocate the structure */
   pCopy = malloc(sizeof(sqlCopy_t));
   if (!pCopy)
-  ERROR_RETURN("sqlCopy malloc")
+  {
+    va_end(ColumnNameArg);
+    ERROR_RETURN("sqlCopy malloc")
+  }
 
   /* Allocate storage for the data buffer */
   if (BufSize < 1) BufSize = 1;
@@ -85,6 +90,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
   if ((!pCopy->DataBuf) || (!pCopy->TableName))
   {
     fo_sqlCopyDestroy(pCopy, 0);
+    va_end(ColumnNameArg);
     ERROR_RETURN("sqlCopyCreate")
   }
 
@@ -112,6 +118,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
     else
     {
       fo_sqlCopyDestroy(pCopy, 0);
+      va_arg(ColumnNameArg, int);
       ERROR_RETURN("pCopy->ColumnNames size too small")
     }
   }

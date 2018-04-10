@@ -1,5 +1,5 @@
 ######################################################################
-# Copyright Siemens AG 2014
+# Copyright Siemens AG 2018
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -16,7 +16,7 @@ LOCALAGENTDIR = ../../agent
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lfocunit -lcunit 
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I$(TESTDIR) -std=c99
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I$(TESTDIR) -std=c99 -DCU_VERSION_P=$(CUNIT_VERSION)
 LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(TESTLIB)
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_nomos

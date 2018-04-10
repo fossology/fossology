@@ -1,6 +1,8 @@
 ######################################################################
 # Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
 #
+# Copyright (C) 2018 Siemens AG
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -24,7 +26,7 @@ SRCDIR = ..
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTDBDIR = $(TOP)/src/testing/db/c
-TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
+TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 TEST_LDFLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
 
 CFLAGS_LOCAL = $(FO_CFLAGS) $(TEST_CFLAGS) -I$(SRCDIR) -I../

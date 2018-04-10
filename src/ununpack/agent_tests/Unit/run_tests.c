@@ -24,7 +24,6 @@ char *Filename = "";
 char *NewDir = "./test-result";
 int Recurse = -1;
 int exists = 0; // default not exists
-magic_t MagicCookie;
 char *DBConfFile = NULL;
 
 /* ************************************************************************** */
@@ -48,7 +47,45 @@ extern CU_TestInfo PathCheck_testcases[];
 extern CU_TestInfo DBInsertPfile_testcases[];
 extern CU_TestInfo DBInsertUploadTree_testcases[];
 
-CU_SuiteInfo suites[] = 
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] =
+{
+  // ununpack-ar.c
+  {"ExtractAR", NULL, NULL, NULL, NULL, ExtractAR_testcases},
+
+  // ununpack-iso.c
+  {"ununpack-iso", NULL, NULL, NULL, NULL, ununpack_iso_testcases},
+
+  // ununpack-disk.c
+  {"ununpack-disk", NULL, NULL, (CU_SetUpFunc)FatDiskNameInit, (CU_TearDownFunc)FatDiskNameClean, ununpack_disk_testcases},
+
+  // utils.c
+  {"CopyFile", NULL, NULL, (CU_SetUpFunc)CopyFileInit, (CU_TearDownFunc)CopyFileClean, CopyFile_testcases},
+  // TODO not working {"FindCmd", NULL, NULL, NULL, NULL, FindCmd_testcases},
+  {"Prune", NULL, NULL, (CU_SetUpFunc)PruneInit, (CU_TearDownFunc)PruneClean, Prune_testcases},
+  {"RunCommand", NULL, NULL, NULL, NULL, RunCommand_testcases},
+  {"TaintString", NULL, NULL, NULL, NULL, TaintString_testcases},
+  {"IsFunctions", NULL, NULL, NULL, NULL, IsFunctions_testcases},
+  {"ContainerInfo", NULL, NULL, NULL, NULL, ContainerInfo_testcases},
+  {"PathCheck", NULL, NULL, NULL, NULL, PathCheck_testcases},
+  //{"DBInsert", DBInsertInit, DBInsertClean, DBInsert_testcases},
+
+  // traverse.c
+  {"Traverse", NULL, NULL, (CU_SetUpFunc)TraverseInit, (CU_TearDownFunc)TraverseClean, Traverse_testcases},
+  {"TraverseChild", NULL, NULL, (CU_SetUpFunc)TraverseChildInit, NULL, TraverseChild_testcases},
+  {"TraverseStart", NULL, NULL, (CU_SetUpFunc)TraverseStartInit, (CU_TearDownFunc)TraverseStartClean, TraverseStart_testcases},
+
+  // checksum.c
+  {"checksum", NULL, NULL, NULL, NULL, Checksum_testcases},
+
+  //utils.c
+  {"DBInsertPfile", NULL, NULL, (CU_SetUpFunc)DBInsertInit, (CU_TearDownFunc)DBInsertClean, DBInsertPfile_testcases},
+  {"DBInsertUploadTree", NULL, NULL, (CU_SetUpFunc)DBInsertInit, (CU_TearDownFunc)DBInsertClean, DBInsertUploadTree_testcases},
+
+  CU_SUITE_INFO_NULL
+};
+#else
+CU_SuiteInfo suites[] =
 {
   // ununpack-ar.c
   {"ExtractAR", NULL, NULL, ExtractAR_testcases},
@@ -80,11 +117,11 @@ CU_SuiteInfo suites[] =
 
   //utils.c
   {"DBInsertPfile", DBInsertInit, DBInsertClean, DBInsertPfile_testcases},
-  {"DBInsertUploadTree", DBInsertInit, DBInsertClean, DBInsertUploadTree_testcases}, 
+  {"DBInsertUploadTree", DBInsertInit, DBInsertClean, DBInsertUploadTree_testcases},
 
   CU_SUITE_INFO_NULL
 };
-
+#endif
 
 /**
  * @brief test if a file or directory exists
@@ -120,7 +157,3 @@ int main(int argc, char** argv)
   dropTestEnvironment(dbManager, AGENT_DIR, "ununpack");
   return(rc);
 }
-
-
-
-

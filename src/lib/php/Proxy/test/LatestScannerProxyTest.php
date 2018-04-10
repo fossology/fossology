@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+Copyright (C) 2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -26,6 +26,9 @@ class LatestScannerProxyTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestLiteDb */
   private $testDb;
+  /** @var assertCountBefore */
+  private $assertCountBefore;
+
   
   protected function setUp()
   {

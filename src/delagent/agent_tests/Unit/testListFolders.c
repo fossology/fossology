@@ -1,6 +1,8 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
+Copyright (C) 2018 Siemens AG
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -33,11 +35,13 @@ void testListFolders()
 {
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int rc;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  ListFolders();
+  rc = listFolders(3, 10);
   PQfinish(db_conn);
+  CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListFolders PASS!");
 }
 /**
@@ -47,12 +51,14 @@ void testListUploads()
 {
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int rc;
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  ListUploads(2, 10);
+  rc = listUploads(3, 10);
 
   PQfinish(db_conn);
+  CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListUploads PASS!");
 }
 
