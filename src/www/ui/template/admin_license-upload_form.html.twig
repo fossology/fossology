@@ -29,7 +29,11 @@
     </tr>
     <tr>
       <td align="right">{{ "Short name"|trans }}</td>
-      <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30"> ({{ 'must be unique'|trans }})</td>
+      {% if rfId %}
+        <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30" readonly> ({{ 'must be unique'|trans }})</td>
+      {% else %}
+        <td><input type="text" name="rf_shortname" value="{{ rf_shortname|e }}" size="30"> ({{ 'must be unique'|trans }})</td>
+      {% endif %}
     </tr>
     <tr>
       <td align="right">{{ "Full name"|trans }}</td>
