@@ -6284,6 +6284,10 @@ k
 %KEY% "agreement"
 %STR% "the tapjoy =SOME= you agree that you have =SOME= agree to be bound by =FEW= and are authorized to bind the entity on whose behalf you are entering into this agreement"
 #
+%ENTRY% _LT_GENERIC_UNCLASSIFIED
+%KEY% "licen[cs]e"
+%STR% "licen[cs](e|ed) under the term"
+#
 ##%ENTRY%	_LT_SEEK_1
 ##%KEY%	"(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 ##%STR%	"&copy"
