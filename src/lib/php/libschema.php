@@ -377,7 +377,7 @@ class fo_libschema
     }
     foreach ($this->currSchema['INDEX'] as $table => $IndexInfo)
     {
-      if (empty($table) || empty($this->schema['TABLE'][$table]))
+      if (empty($table) || (empty($this->schema['TABLE'][$table]) && empty($this->schema['INHERITS'][$table])))
       {
         continue;
       }
