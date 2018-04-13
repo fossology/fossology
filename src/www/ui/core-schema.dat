@@ -352,6 +352,10 @@
   $Schema["TABLE"]["clearing_event"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"reportinfo\" text";
   $Schema["TABLE"]["clearing_event"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"reportinfo\" DROP NOT NULL";
 
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"acknowledgement\" IS 'public comment'";
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
   $Schema["TABLE"]["clearing_event"]["date_added"]["DESC"] = "";
   $Schema["TABLE"]["clearing_event"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
   $Schema["TABLE"]["clearing_event"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -45,6 +45,8 @@ class ClearingDecisionBuilder extends Object
   private $comment;
   /** @var string */
   private $reportinfo;
+  /** @var string */
+  private $acknowledgement;
   /** @var int */
   private $scope;
   /** @var int */
@@ -187,6 +189,7 @@ class ClearingDecisionBuilder extends Object
     $this->type = $clearingDecision->getType();
     $this->comment = $clearingDecision->getComment();
     $this->reportinfo = $clearingDecision->getReportinfo();
+    $this->acknowledgement = $clearingDecision->getAcknowledgement();
     $this->scope = $clearingDecision->getScope();
     $this->timeStamp = $clearingDecision->getTimeStamp();
   }
@@ -204,7 +207,7 @@ class ClearingDecisionBuilder extends Object
 
     return new ClearingDecision($this->sameFolder, $this->clearingId,
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
-        $this->timeStamp, $this->clearingEvents, $this->reportinfo, $this->comment);
+        $this->timeStamp, $this->clearingEvents, $this->reportinfo, $this->comment, $this->acknowledgement);
   }
 
 }

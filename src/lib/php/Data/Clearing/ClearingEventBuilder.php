@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015, Siemens AG
+ * Copyright (C) 2014-2018, Siemens AG
  * Author: J.Najjar
  *
  * This program is free software; you can redistribute it and/or
@@ -45,6 +45,8 @@ class ClearingEventBuilder extends Object
   private $reportinfo;
   /** @var string */
   private $comment;
+  /** @var string */
+  private $acknowledgement;
 
   public function __construct()
   {
@@ -58,6 +60,7 @@ class ClearingEventBuilder extends Object
     $this->removed = false;
     $this->reportinfo = "";
     $this->comment = "";
+    $this->acknowledgement = "";
   }
 
   public static function create()
@@ -70,9 +73,8 @@ class ClearingEventBuilder extends Object
    */
   public function build()
   {
-    $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->eventType, $this->reportinfo, $this->comment );
-    return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->timeStamp?: time(), $this->userId,
-        $this->groupId, $this->eventType, $clearingLicense);
+    $clearingLicense = new ClearingLicense($this->licenseRef, $this->removed, $this->eventType, $this->reportinfo, $this->comment, $this->acknowledgement);
+    return new ClearingEvent($this->eventId, $this->uploadTreeId, $this->timeStamp?: time(), $this->userId, $this->groupId, $this->eventType, $clearingLicense);
   }
 
   /**
@@ -155,6 +157,15 @@ class ClearingEventBuilder extends Object
     return $this;
   }
 
+  /**
+   * @param string $acknowledgement
+   * @return $this
+   */
+  public function setAcknowledgement($acknowledgement)
+  {
+    $this->acknowledgement = $acknowledgement;
+    return $this;
+  }
   /**
    * @param int $uploadTreeId
    * @return $this
