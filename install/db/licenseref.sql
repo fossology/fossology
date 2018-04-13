@@ -6682,7 +6682,7 @@ are not prohibited by any legal instrument, including but not limited to contrac
 
 2) The right to link non-Open Source applications with pre-installed versions of the Licensed Software: You may link applications with binary pre-installed versions of the Licensed Software, provided that such applications have been developed and are deployed in accordance with the terms and conditions of the Qt Commercial License Agreement.
 ', 'http://doc.trolltech.com/4.3/license-gpl-exceptions.html', NULL, NULL, NULL, 'Trolltech GPL Exception 1.1', NULL, NULL, NULL, '', NULL, false, true, true, '0da1a47ef1495e251e04ba21583624c4', 1, false);
-INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (247, 'Adobe', 'Adobe Systems Incorporated(r) Source Code License Agreement
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (247, 'Adobe-2006', 'Adobe Systems Incorporated(r) Source Code License Agreement
 Copyright(c) 2006 Adobe Systems Incorporated. All rights reserved.
 
 Please read this Source Code License Agreement carefully before using
@@ -6710,7 +6710,7 @@ OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOURCE CODE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-', 'http://fedoraproject.org/wiki/Licensing/AdobeLicense', NULL, NULL, NULL, 'Adobe Source Code License Agreement', NULL, NULL, NULL, '', NULL, false, true, false, 'ba29fac4653014dee12e7ff21c3f961b', 1, true);
+', 'http://fedoraproject.org/wiki/Licensing/AdobeLicense', NULL, NULL, NULL, 'Adobe Systems Incorporated Source Code License Agreement', NULL, NULL, NULL, '', NULL, false, true, false, 'ba29fac4653014dee12e7ff21c3f961b', 1, true);
 INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (245, 'Alfresco-FLOSS', 'Version 0.5, 30 August 2006
 
 Exception Intent
@@ -43265,4 +43265,196 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.', 'http://spdx.org/licenses/ICU.html', NULL, NULL, NULL, 'ICU License', NULL, NULL, NULL, '', NULL, false, true, false, 'bb42da3af8e468d74b626e9fa7d4d80d', 1, true);
+Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.', 'http://spdx.org/licenses/ICU.html', NULL, NULL, NULL, 'ICU License', NULL, NULL, NULL, NULL, '', false, true, false, 'bb42da3af8e468d74b626e9fa7d4d80d', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (571, 'Abstyles', 'This is APREAMBL.TEX, version 1.10e, written by Hans-Hermann Bode
+(HHBODE@DOSUNI1.BITNET), for the BibTeX ''adaptable'' family, version 1.10.
+See the file APREAMBL.DOC for a detailed documentation.
+
+This program is distributed WITHOUT ANY WARRANTY, express or implied.
+
+Copyright (C) 1991, 1992 Hans-Hermann Bode
+
+Permission is granted to make and distribute verbatim copies of this document provided that the copyright notice and this permission notice are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this document under the conditions for verbatim copying, provided that the entire resulting derived work is distributed under the terms of a permission notice identical to this one.', 'https://fedoraproject.org/wiki/Licensing/Abstyles', NULL, NULL, NULL, 'Abstyles License', NULL, NULL, NULL, '', NULL, false, true, true, '54a6170eace3f6dac17bb2f82754ba7f', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (572, 'APAFML', 'Copyright (c) 1985, 1987, 1989, 1990, 1991, 1992, 1993, 1997 Adobe Systems Incorporated. All Rights Reserved.
+
+This file and the 14 PostScript(R) AFM files it accompanies may be used, copied, and distributed for any purpose and without charge, with or without modification, provided that all copyright notices are retained; that the AFM files are not distributed without this file; that all modifications to this file or any of the AFM files are prominently noted in the modified file(s); and that this paragraph is not modified. Adobe Systems has no responsibility or obligation to support the use of the AFM files.', 'https://fedoraproject.org/wiki/Licensing/AdobePostscriptAFM', NULL, NULL, NULL, 'Adobe Postscript AFM License', NULL, NULL, NULL, '', NULL, false, true, true, '7a08c1d5cc0f8a43d4a02d65fab6e22e', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (573, 'Adobe-Glyph', 'Copyright (c) 1997,1998,2002,2007 Adobe Systems Incorporated
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this documentation file to use, copy, publish, distribute, sublicense, and/or sell copies of the documentation, and to permit others to do the same, provided that:
+
+    - No modification, editing or other alteration of this document is allowed; and
+    - The above copyright notice and this permission notice shall be included in all copies of the documentation.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this documentation file, to create their own derivative works from the content of this document to use, copy, publish, distribute, sublicense, and/or sell the derivative works, and to permit others to do the same, provided that the derived work is not represented as being a copy or version of this document.
+
+Adobe shall not be liable to any party for any loss of revenue or profit or for indirect, incidental, special, consequential, or other similar damages, whether based on tort (including without limitation negligence or strict liability), contract or other legal or equitable grounds even if Adobe has been advised or had reason to know of the possibility of such damages. The Adobe materials are provided on an "AS IS" basis. Adobe specifically disclaims all express, statutory, or implied warranties relating to the Adobe materials, including but not limited to those concerning merchantability or fitness for a particular purpose or non-infringement of any third party rights regarding the Adobe materials.', 'https://fedoraproject.org/wiki/Licensing/MIT#AdobeGlyph', NULL, NULL, NULL, 'Adobe Glyph List License', NULL, NULL, NULL, '', NULL, false, true, true, '63efd1ffbdc668473811e0d55f91286e', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (574, 'Afmparse', '(C) 1988, 1989 by Adobe Systems Incorporated. All rights reserved.
+
+This file may be freely copied and redistributed as long as:
+
+    1) This entire notice continues to be included in the file,
+    2) If the file has been modified in any way, a notice of such modification is conspicuously indicated.
+
+PostScript, Display PostScript, and Adobe are registered trademarks of Adobe Systems Incorporated.
+
+THE INFORMATION BELOW IS FURNISHED AS IS, IS SUBJECT TO CHANGE WITHOUT NOTICE, AND SHOULD NOT BE CONSTRUED AS A COMMITMENT BY ADOBE SYSTEMS INCORPORATED. ADOBE SYSTEMS INCORPORATED ASSUMES NO RESPONSIBILITY OR LIABILITY FOR ANY ERRORS OR INACCURACIES, MAKES NO WARRANTY OF ANY KIND (EXPRESS, IMPLIED OR STATUTORY) WITH RESPECT TO THIS INFORMATION, AND EXPRESSLY DISCLAIMS ANY AND ALL WARRANTIES OF MERCHANTABILITY, FITNESS FOR PARTICULAR PURPOSES AND NONINFRINGEMENT OF THIRD PARTY RIGHTS.', 'https://fedoraproject.org/wiki/Licensing/Afmparse', NULL, NULL, NULL, 'Afmparse License', NULL, NULL, NULL, '', NULL, false, true, true, '04f4e9ad108b998fd052271dade3a517', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (575, 'AMPAS', 'Copyright (c) 2006 Academy of Motion Picture Arts and Sciences ("A.M.P.A.S."). Portions contributed by others as indicated. All rights reserved.
+
+A world-wide, royalty-free, non-exclusive right to distribute, copy, modify, create derivatives, and use, in source and binary forms, is hereby granted, subject to acceptance of this license. Performance of any of the aforementioned acts indicates acceptance to be bound by the following terms and conditions:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the Disclaimer of Warranty.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the Disclaimer of Warranty in the documentation and/or other materials provided with the distribution.
+    * Nothing in this license shall be deemed to grant any rights to trademarks, copyrights, patents, trade secrets or any other intellectual property of A.M.P.A.S. or any contributors, except as expressly stated herein, and neither the name of A.M.P.A.S. nor of any other contributors to this software, may be used to endorse or promote products derived from this software without specific prior written permission of A.M.P.A.S. or contributor, as appropriate.
+
+This license shall be governed by the laws of the State of California, and subject to the jurisdiction of the courts therein.
+
+Disclaimer of Warranty: THIS SOFTWARE IS PROVIDED BY A.M.P.A.S. AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT ARE DISCLAIMED. IN NO EVENT SHALL A.M.P.A.S., ANY CONTRIBUTORS OR DISTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'https://fedoraproject.org/wiki/Licensing/BSD#AMPASBSD', NULL, NULL, NULL, 'Academy of Motion Picture Arts and Sciences BSD', NULL, NULL, NULL, '', NULL, false, true, true, 'c08ca41f8f5bf20008e3441a8abd58e7', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (576, 'bzip2-1.0.5', 'Version 1.0.5 of 10 December 2007
+
+Copyright © 1996-2007 Julian Seward
+
+This program, bzip2, the associated library libbzip2, and all documentation, are copyright © 1996-2007 Julian Seward. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    • Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    • The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+    • Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+    • The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+PATENTS: To the best of my knowledge, bzip2 and libbzip2 do not use any patented algorithms. However, I do not have the resources to carry out a patent search. Therefore I cannot give any guarantee of the above statement.', 'http://bzip.org/1.0.5/bzip2-manual-1.0.5.html', NULL, NULL, NULL, 'bzip2 and libbzip2 License v1.0.5', NULL, NULL, NULL, '', NULL, false, true, true, '900102057724b65707e5467f57e622f9', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (577, 'bzip2-1.0.6', 'This program, "bzip2", the associated library "libbzip2", and all documentation, are copyright (C) 1996-2010 Julian R Seward. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    2. The origin of this software must not be misrepresented; you must not claim that you wrote the original software. If you use this software in a product, an acknowledgment in the product documentation would be appreciated but is not required.
+    3. Altered source versions must be plainly marked as such, and must not be misrepresented as being the original software.
+    4. The name of the author may not be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Julian Seward, jseward@bzip.org bzip2/libbzip2 version 1.0.6 of 6 September 2010', 'https://github.com/asimonov-im/bzip2/blob/master/LICENSE', NULL, NULL, NULL, 'bzip2 and libbzip2 License v1.0.6', NULL, NULL, NULL, 'The bzip2.org website only shows version 1.0.5 of the license.', NULL, false, true, true, '9545998ad0362a4af046921a40a5b465', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (578, 'CrystalStacker', 'Crystal Stacker is freeware. This means you can pass copies around freely provided you include this document in it''s original form in your distribution. Please see the "Contacting Us" section of this document if you need to contact us for any reason.
+
+Disclaimer
+
+NewCreature Design makes no guarantees regarding the Crystal Stacker software. We are not responsible for damages caused by it, though the software is not known to cause any problems. If you have trouble with the software, see the "Contacting Us" section of this document.
+
+The source code is provided as-is and you may do with it whatsoever you please provided that you include this file in its unmodified form with any new distribution. NewCreature Design makes no gaurantees regarding the usability of the source but are willing to help with any problems you might run into. Please see the "Contacting Us" section of this document if you need to get in touch with us about any issues you have regarding the source.', 'https://fedoraproject.org/wiki/Licensing:CrystalStacker?rd=Licensing/CrystalStacker', NULL, NULL, NULL, 'CrystalStacker License', NULL, NULL, NULL, '', NULL, false, true, true, 'd93dee0d11742aa64d04dafeb9ad789d', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (579, 'curl', 'COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 1996 - 2015, Daniel Stenberg, <daniel@haxx.se>.
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software for any purpose with or without fee is hereby granted, provided that the above copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall not be used in advertising or otherwise to promote the sale, use or other dealings in this Software without prior written authorization of the copyright holder.', 'https://github.com/bagder/curl/blob/master/COPYING', NULL, NULL, NULL, 'curl License', NULL, NULL, NULL, '', NULL, false, true, true, 'f7adb1397db248527ffed14d947e445c', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (580, 'gnuplot', 'Copyright 1986 - 1993, 1998, 2004 Thomas Williams, Colin Kelley
+
+Permission to use, copy, and distribute this software and its documentation for any purpose with or without fee is hereby granted, provided that the above copyright notice appear in all copies and that both that copyright notice and this permission notice appear in supporting documentation.
+
+Permission to modify the software is granted, but not the right to distribute the complete modified source code. Modifications are to be distributed as patches to the released version. Permission to distribute binaries produced by compiling modified sources is granted, provided you
+
+    1. distribute the corresponding source modifications from the released version in the form of a patch file along with the binaries,
+    2. add special version identification to distinguish your version in addition to the base release version number,
+    3. provide your name and address as the primary contact for the support of your modified version, and
+    4. retain our contact information in regard to use of the base software.
+
+Permission to distribute the released version of the source code along with corresponding source modifications in the form of a patch file is granted with same provisions 2 through 4 for binary distributions.
+
+This software is provided "as is" without express or implied warranty to the extent permitted by applicable law.', 'https://fedoraproject.org/wiki/Licensing/Gnuplot', NULL, NULL, NULL, 'gnuplot License', NULL, NULL, NULL, '', NULL, false, true, true, '182e2362b4a93fdcf8618d5fe56eed15', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (581, 'MIT-CMU', 'Copyright 1989, 1991, 1992 by Carnegie Mellon University
+
+Derivative Work - 1996, 1998-2000 Copyright 1996, 1998-2000 The Regents of the University of California
+
+All Rights Reserved
+
+Permission to use, copy, modify and distribute this software and its documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appears in all copies and that both that copyright notice and this permission notice appear in supporting documentation, and that the name of CMU and The Regents of the University of California not be used in advertising or publicity pertaining to distribution of the software without specific written permission.
+
+CMU AND THE REGENTS OF THE UNIVERSITY OF CALIFORNIA DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL CMU OR THE REGENTS OF THE UNIVERSITY OF CALIFORNIA BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM THE LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing:MIT?rd=Licensing/MIT#CMU_Style', NULL, NULL, NULL, 'CMU License', NULL, NULL, NULL, '', NULL, false, true, true, 'eb43e944f7c6c200de1d01dde11dac67', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (582, 'TCL', 'This software is copyrighted by the Regents of the University of California, Sun Microsystems, Inc., Scriptics Corporation, ActiveState Corporation and other parties. The following terms apply to all files associated with the software unless explicitly disclaimed in individual files.
+
+The authors hereby grant permission to use, copy, modify, distribute, and license this software and its documentation for any purpose, provided that existing copyright notices are retained in all copies and that this notice is included verbatim in any distributions. No written agreement, license, or royalty fee is required for any of the authorized uses. Modifications to this software may be copyrighted by their authors and need not follow the licensing terms described here, provided that the new terms are clearly indicated on the first page of each file where they apply.
+
+IN NO EVENT SHALL THE AUTHORS OR DISTRIBUTORS BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE, ITS DOCUMENTATION, OR ANY DERIVATIVES THEREOF, EVEN IF THE AUTHORS HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+THE AUTHORS AND DISTRIBUTORS SPECIFICALLY DISCLAIM ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+GOVERNMENT USE: If you are acquiring this software on behalf of the U.S. government, the Government shall have only "Restricted Rights" in the software and related documentation as defined in the Federal Acquisition Regulations (FARs) in Clause 52.227.19 (c) (2). If you are acquiring the software on behalf of the Department of Defense, the software shall be classified as "Commercial Computer Software" and the Government shall have only "Restricted Rights" as defined in Clause 252.227-7013 (c) (1) of DFARs. Notwithstanding the foregoing, the authors grant the U.S. Government and others acting in its behalf permission to use and distribute the software in accordance with the terms specified in this license.', 'http://www.tcl.tk/software/tcltk/license.html', NULL, NULL, NULL, 'TCL/TK License', NULL, NULL, NULL, '', NULL, false, true, true, '5f7b23ac10d8f7cde16737bc896bb6fb', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (583, 'TMate', 'The TMate Open Source License.
+
+This license applies to all portions of TMate SVNKit library, which are not externally-maintained libraries (e.g. Ganymed SSH library).
+
+All the source code and compiled classes in package org.tigris.subversion.javahl except SvnClient class are covered by the license in JAVAHL-LICENSE file
+
+Copyright (c) 2004-2012 TMate Software. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+    * Redistributions in any form must be accompanied by information on how to obtain complete source code for the software that uses SVNKit and any accompanying software that uses the software that uses SVNKit. The source code must either be included in the distribution or be available for no more than the cost of distribution plus a nominal fee, and must be freely redistributable under reasonable conditions. For an executable file, complete source code means the source code for all modules it contains. It does not include source code for modules or files that typically accompany the major components of the operating system on which the executable file runs.
+    * Redistribution in any form without redistributing source code for software that uses SVNKit is possible only when such redistribution is explictly permitted by TMate Software. Please, contact TMate Software at support@svnkit.com to get such permission.
+
+THIS SOFTWARE IS PROVIDED BY TMATE SOFTWARE ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT, ARE DISCLAIMED.
+
+IN NO EVENT SHALL TMATE SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'http://svnkit.com/license.html', NULL, NULL, NULL, 'TMate Open Source License', NULL, NULL, NULL, '', NULL, false, true, true, '8ac99ea6e3fdade632b72c6d351e2c03', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (584, 'Intel-ACPI', 'ACPI - Software License Agreement
+
+Software License Agreement IMPORTANT - READ BEFORE COPYING, INSTALLING OR USING.
+
+Do not use or load this software and any associated materials (collectively, the "Software") until you have carefully read the following terms and conditions. By loading or using the Software, you agree to the terms of this Agreement. If you do not wish to so agree, do not install or use the Software.
+
+    1. COPYRIGHT NOTICE Some or all of this work - Copyright © 1999-2005, Intel Corp. All rights reserved.
+    2. LICENSE
+        2.1. This is your license from Intel Corp. under its intellectual property rights. You may have additional license terms from the party that provided you this software, covering your right to use that party''s intellectual property rights.
+        2.2. Intel grants, free of charge, to any person ("Licensee") obtaining a copy of the source code appearing in this file ("Covered Code") an irrevocable, perpetual, worldwide license under Intel''s copyrights in the base code distributed originally by Intel ("Original Intel Code") to copy, make derivatives, distribute, use and display any portion of the Covered Code in any form, with the right to sublicense such rights; and
+        2.3. Intel grants Licensee a non-exclusive and non-transferable patent license (with the right to sublicense), under only those claims of Intel patents that are infringed by the Original Intel Code, to make, use, sell, offer to sell, and import the Covered Code and derivative works thereof solely to the minimum extent necessary to exercise the above copyright license, and in no event shall the patent license extend to any additions to or modifications of the Original Intel Code. No other license or right is granted directly or by implication, estoppel or otherwise; The above copyright and patent license is granted only if the following conditions are met:
+    3. CONDITIONS
+        3.1. Redistribution of Source with Rights to Further Distribute Source. Redistribution of source code of any substantial portion of the Covered Code or modification with rights to further distribute source must include the above Copyright Notice, the above License, this list of Conditions, and the following Disclaimer and Export Compliance provision. In addition, Licensee must cause all Covered Code to which Licensee contributes to contain a file documenting the changes Licensee made to create that Covered Code and the date of any change. Licensee must include in that file the documentation of any changes made by any predecessor Licensee. Licensee must include a prominent statement that the modification is derived, directly or indirectly, from Original Intel Code.
+        3.2. Redistribution of Source with no Rights to Further Distribute Source. Redistribution of source code of any substantial portion of the Covered Code or modification without rights to further distribute source must include the following Disclaimer and Export Compliance provision in the documentation and/or other materials provided with distribution. In addition, Licensee may not authorize further sublicense of source of any portion of the Covered Code, and must include terms to the effect that the license from Licensee to its licensee is limited to the intellectual property embodied in the software Licensee provides to its licensee, and not to intellectual property embodied in modifications its licensee may make.
+        3.3. Redistribution of Executable. Redistribution in executable form of any substantial portion of the Covered Code or modification must reproduce the above Copyright Notice, and the following Disclaimer and Export Compliance provision in the documentation and/or other materials provided with the distribution.
+        3.4. Intel retains all right, title, and interest in and to the Original Intel Code.
+        3.5. Neither the name Intel nor any other trademark owned or controlled by Intel shall be used in advertising or otherwise to promote the sale, use or other dealings in products derived from or relating to the Covered Code without prior written authorization from Intel.
+    4. DISCLAIMER AND EXPORT COMPLIANCE
+        4.1. INTEL MAKES NO WARRANTY OF ANY KIND REGARDING ANY SOFTWARE PROVIDED HERE. ANY SOFTWARE ORIGINATING FROM INTEL OR DERIVED FROM INTEL SOFTWARE IS PROVIDED "AS IS," AND INTEL WILL NOT PROVIDE ANY SUPPORT, ASSISTANCE, INSTALLATION, TRAINING OR OTHER SERVICES. INTEL WILL NOT PROVIDE ANY UPDATES, ENHANCEMENTS OR EXTENSIONS. INTEL SPECIFICALLY DISCLAIMS ANY IMPLIED WARRANTIES OF MERCHANTABILITY, NONINFRINGEMENT AND FITNESS FOR A PARTICULAR PURPOSE.
+        4.2. IN NO EVENT SHALL INTEL HAVE ANY LIABILITY TO LICENSEE, ITS LICENSEES OR ANY OTHER THIRD PARTY, FOR ANY LOST PROFITS, LOST DATA, LOSS OF USE OR COSTS OF PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES, OR FOR ANY INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THIS AGREEMENT, UNDER ANY CAUSE OF ACTION OR THEORY OF LIABILITY, AND IRRESPECTIVE OF WHETHER INTEL HAS ADVANCE NOTICE OF THE POSSIBILITY OF SUCH DAMAGES. THESE LIMITATIONS SHALL APPLY NOTWITHSTANDING THE FAILURE OF THE ESSENTIAL PURPOSE OF ANY LIMITED REMEDY.
+        4.3. Licensee shall not export, either directly or indirectly, any of this software or system incorporating such software without first obtaining any required license or other approval from the U. S. Department of Commerce or any other agency or department of the United States Government. In the event Licensee exports any such software from the United States or re-exports any such software from a foreign destination, Licensee shall ensure that the distribution and export/re-export of the software is in compliance with all laws, regulations, orders, or other restrictions of the U.S. Export Administration Regulations. Licensee agrees that neither it nor any of its subsidiaries will export/re-export any technical data, process, software, or service, directly or indirectly, to any country for which the United States government or any agency thereof requires an export license, other governmental approval, or letter of assurance, without first obtaining such license, approval or letter.', 'https://fedoraproject.org/wiki/Licensing/Intel_ACPI_Software_License_Agreement', NULL, NULL, NULL, 'Intel ACPI Software License Agreement', NULL, NULL, NULL, '', NULL, false, true, true, '8a1608fe437cb0e661f0560267e56fa7', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (585, 'SCEA', 'SCEA Shared Source License 1.0
+
+Terms and Conditions:
+
+    1. Definitions:
+
+    "Software" shall mean the software and related documentation, whether in Source or Object Form, made available under this SCEA Shared Source license ("License"), that is indicated by a copyright notice file included in the source files or attached or accompanying the source files.
+
+    "Licensor" shall mean Sony Computer Entertainment America, Inc. (herein "SCEA")
+
+    "Object Code" or "Object Form" shall mean any form that results from translation or transformation of Source Code, including but not limited to compiled object code or conversions to other forms intended for machine execution.
+    "Source Code" or "Source Form" shall have the plain meaning generally accepted in the software industry, including but not limited to software source code, documentation source, header and configuration files.
+
+    "You" or "Your" shall mean you as an individual or as a company, or whichever form under which you are exercising rights under this License.
+    2. License Grant.
+
+    Licensor hereby grants to You, free of charge subject to the terms and conditions of this License, an irrevocable, non-exclusive, worldwide, perpetual, and royalty-free license to use, modify, reproduce, distribute, publicly perform or display the Software in Object or Source Form .
+    3. No Right to File for Patent.
+    In exchange for the rights that are granted to You free of charge under this License, You agree that You will not file for any patent application, seek copyright protection or take any other action that might otherwise impair the ownership rights in and to the Software that may belong to SCEA or any of the other contributors/authors of the Software.
+    4. Contributions.
+
+    SCEA welcomes contributions in form of modifications, optimizations, tools or documentation designed to improve or expand the performance and scope of the Software (collectively "Contributions"). Per the terms of this License You are free to modify the Software and those modifications would belong to You. You may however wish to donate Your Contributions to SCEA for consideration for inclusion into the Software. For the avoidance of doubt, if You elect to send Your Contributions to SCEA, You are doing so voluntarily and are giving the Contributions to SCEA and its parent company Sony Computer Entertainment, Inc., free of charge, to use, modify or distribute in any form or in any manner. SCEA acknowledges that if You make a donation of Your Contributions to SCEA, such Contributions shall not exclusively belong to SCEA or its parent company and such donation shall not be to Your exclusion. SCEA, in its sole discretion, shall determine whether or not to include Your donated Contributions into the Software, in whole, in part, or as modified by SCEA. Should SCEA elect to include any such Contributions into the Software, it shall do so at its own risk and may elect to give credit or special thanks to any such contributors in the attached copyright notice. However, if any of Your contributions are included into the Software, they will become part of the Software and will be distributed under the terms and conditions of this License. Further, if Your donated Contributions are integrated into the Software then Sony Computer Entertainment, Inc. shall become the copyright owner of the Software now containing Your contributions and SCEA would be the Licensor.
+    5. Redistribution in Source Form
+
+    You may redistribute copies of the Software, modifications or derivatives thereof in Source Code Form, provided that You:
+        a. Include a copy of this License and any copyright notices with source
+        b. Identify modifications if any were made to the Software
+        c. Include a copy of all documentation accompanying the Software and modifications made by You
+    6. Redistribution in Object Form
+
+    If You redistribute copies of the Software, modifications or derivatives thereof in Object Form only (as incorporated into finished goods, i.e. end user applications) then You will not have a duty to include any copies of the code, this License, copyright notices, other attributions or documentation.', 'http://research.scea.com/scea_shared_source_license.html', NULL, NULL, NULL, 'SCEA Shared Source License', NULL, NULL, NULL, '', NULL, false, true, true, 'd3dcf0db7283c1bd99d46fc9bb70922b', 1, true);
