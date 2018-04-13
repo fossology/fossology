@@ -359,11 +359,10 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
   /* Get the list of pfiles to delete */
   /** These are all pfiles in the upload_fk that only appear once. **/
   snprintf(SQL,MAXSQL,"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO %s FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
-  PQexecCheckClear("Getting list of pfiles to delete",
-                 SQL, __FILE__, __LINE__);
+  PQexecCheckClear("Getting list of pfiles to delete", SQL, __FILE__, __LINE__);
 
-  /* Remove pfiles with reuse */
-  snprintf(SQL,MAXSQL,"DELETE FROM uploadtree USING %s WHERE pfile_pk = uploadtree.pfile_fk AND uploadtree.upload_fk != %ld;",TempTable,UploadId);
+  /* Remove pfiles which are reused by other uploads */
+  snprintf(SQL, MAXSQL, "DELETE FROM %s WHERE pfile_pk IN (SELECT pfile_pk FROM %s INNER JOIN uploadtree ON pfile_pk = pfile_fk WHERE upload_fk != %ld)", TempTable, TempTable, UploadId);
   PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
 
   if (Verbose)
@@ -460,6 +459,10 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
 
   snprintf(SQL,MAXSQL,"DELETE FROM upload WHERE upload_pk = %ld;",UploadId);
   PQexecCheckClear("Deleting upload", SQL, __FILE__, __LINE__);
+
+  /* delete from uploadtree table. */
+  snprintf(SQL, MAXSQL, "DELETE FROM uploadtree WHERE upload_fk = %ld;", UploadId);
+  PQexecCheckClear("Deleting from uploadtree", SQL, __FILE__, __LINE__);
 
   /***********************************************/
   /* delete from pfile is SLOW due to constraint checking.
