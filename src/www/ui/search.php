@@ -76,13 +76,14 @@ class search extends FO_Plugin
    * \param $SizeMin  Minimum file size, -1 if unused
    * \param $SizeMax  Maximum file size, -1 if unused
    * \param $searchtype "containers", "directory" or "allfiles"
-   * \return array of uploadtree recs.  Each record contains uploadtree_pk, parent, 
-   *         upload_fk, pfile_fk, ufile_mode, and ufile_name
+   * \return array of uploadtree recs and total uploadtree recs count. Each record contains uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, and ufile_name
    */
   function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype, $License, $Copyright)
   {
     global $PG_CONN;
     $UploadtreeRecs = array();  // uploadtree record array to return
+    $totalUploadtreeRecs = array();  // total uploadtree record array
+    $totalUploadtreeRecsCount = 0; // total uploadtree records count to return
     $NeedTagfileTable = true;
     $NeedTaguploadtreeTable = true;
 
@@ -101,7 +102,7 @@ class search extends FO_Plugin
  
        /* Check upload permission */
        if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId())) {
-        return $UploadtreeRecs;
+        return array($UploadtreeRecs, $totalUploadtreeRecsCount);
       }
     }
 
@@ -130,7 +131,7 @@ class search extends FO_Plugin
       {
         /* tag doesn't match anything, so no results are possible */
         pg_free_result($result);
-        return $UploadtreeRecs;
+        return array($UploadtreeRecs, $totalUploadtreeRecsCount);
       }
 
       /* Make a list of the tag_pk's that satisfy the criteria */
@@ -266,7 +267,6 @@ class search extends FO_Plugin
 
     $Offset = $Page * $this->MaxPerPage;
     $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk";
-    $SQL .= " LIMIT $this->MaxPerPage OFFSET $Offset;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
     if (pg_num_rows($result)) 
@@ -276,11 +276,14 @@ class search extends FO_Plugin
         if (!$this->uploadDao->isAccessible($row['upload_fk'], Auth::getGroupId())) {
           continue;
         }
-        $UploadtreeRecs[] = $row;
+        $totalUploadtreeRecs[] = $row;
       }
     }
     pg_free_result($result);
-    return($UploadtreeRecs);
+
+    $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $this->MaxPerPage);
+    $totalUploadtreeRecsCount = sizeof($totalUploadtreeRecs);
+    return array($UploadtreeRecs, $totalUploadtreeRecsCount);
   } // GetResults()
 
 
@@ -411,11 +414,13 @@ class search extends FO_Plugin
     if ($CriteriaCount)
     {
       if (empty($Page)) { $Page = 0; }
-      $UploadtreeRecs = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
+      $UploadtreeRecsResult = $this->GetResults($Item,$Filename,$tag,$Page,$SizeMin,$SizeMax,$searchtype,$License, $Copyright);
       $html = "<hr>\n";
-      $text = sizeof($UploadtreeRecs) . " " . _("Files matching");
+      $message = _("The indented search results are same files in different folders");
+      $html .= "<H4>$message</H4>\n";
+      $text = $UploadtreeRecsResult[1] . " " . _("Files matching");
       $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
-      $html .= $this->HTMLResults($UploadtreeRecs, $Page, $GETvars, $License, $Copyright);
+      $html .= $this->HTMLResults($UploadtreeRecsResult[0], $Page, $GETvars, $License, $Copyright);
       $this->vars["result"] = $html;
     }
   }
