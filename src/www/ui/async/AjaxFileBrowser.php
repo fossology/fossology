@@ -58,7 +58,8 @@ class AjaxFileBrowser extends DefaultPlugin
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: File Browser"),
         self::DEPENDENCIES => array("fileBrowse"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
