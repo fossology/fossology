@@ -30,6 +30,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Util\ArrayOperation;
+use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 
 include_once(__DIR__ . "/version.php");
 
@@ -226,7 +227,15 @@ class ReuserAgent extends Agent
     /** @var ClearingEvent $clearingEvent */
     foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent)
     {
-      $clearingEventIdsToCopy[] = $clearingEvent->getEventId();
+      $licenseId = $clearingEvent->getLicenseId();
+      $uploadTreeId = $itemId;
+      $isRemoved = $clearingEvent->isRemoved();
+      $type = ClearingEventTypes::USER;
+      $reportInfo = $clearingEvent->getReportinfo();
+      $comment = $clearingEvent->getComment();
+      $acknowledgement = $clearingEvent->getAcknowledgement();
+      $jobId = $this->jobId;
+      $clearingEventIdsToCopy[] = $this->clearingDao->insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type, $reportInfo, $comment, $acknowledgement, $jobId);
     }
 
     $this->clearingDao->createDecisionFromEvents(
