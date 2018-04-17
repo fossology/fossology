@@ -917,4 +917,32 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
     return $irrelevantFiles;
   }
+
+  /**
+   * @param int $uploadId
+   * @param int $groupId
+   * @param int $userId
+   */
+  public function getPreviousBulkIds($uploadId, $groupId, $userId, $onlyCount=0)
+  {
+    $stmt = __METHOD__;
+    $bulkIds = array();
+    $sql = "SELECT jq_args FROM upload_reuse, jobqueue, job
+            WHERE upload_fk=$1 AND group_fk=$2
+             AND EXISTS(SELECT * FROM group_user_member gum WHERE gum.group_fk=upload_reuse.group_fk AND gum.user_fk=$3)
+             AND jq_type=$4 AND jq_job_fk=job_pk
+             AND job_upload_fk=reused_upload_fk AND job_group_fk=reused_group_fk";
+    $this->dbManager->prepare($stmt, $sql);
+    $res = $this->dbManager->execute($stmt,array($uploadId, $groupId, $userId,'monkbulk'));
+    while($row=  $this->dbManager->fetchArray($res))
+    {
+      $bulkIds = array_merge($bulkIds,explode("\n", $row['jq_args']));
+    }
+    $this->dbManager->freeResult($res);
+    if(empty($onlyCount)) {
+      return array_unique($bulkIds);
+    } else {
+      return count(array_unique($bulkIds));
+    }
+  }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2015-2018, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>, 
          Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -244,10 +244,10 @@ class ShowJobsDao extends Object
    * @param int $job_pk
    * @param string $jq_Type
    * @param float $filesPerSec
-   * @param int $uploadId 
-   * @return Returns empty if estimated time is 0 else returns time. 
+   * @param int $uploadId
+   * @return Returns empty if estimated time is 0 else returns time.
    **/
-  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0, $uploadId=0)
+  public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0, $uploadId=0, $timeInSec=0)
   {
     if(!empty($uploadId)) {
       $itemCount = $this->dbManager->getSingleRow(
@@ -265,10 +265,10 @@ class ShowJobsDao extends Object
       );
     }
 
-    if(!empty($itemCount['jq_itemsprocessed'])){
+    if(!empty($itemCount['jq_itemsprocessed']) && $jq_Type !== 'decider') {
 
-      $selectCol = "jq_type, jq_endtime, jq_starttime, jq_itemsprocessed"; 
-      if(empty($jq_Type)){ 
+      $selectCol = "jq_type, jq_endtime, jq_starttime, jq_itemsprocessed";
+      if(empty($jq_Type)) {
         $removeType = "jq_type NOT LIKE 'ununpack' AND jq_type NOT LIKE 'reportgen' AND jq_type NOT LIKE 'decider' AND";
         /* get starttime endtime and jobtype form jobqueue for a jobid except $removeType */
         $statementName = __METHOD__."$selectCol.$removeType";
@@ -285,13 +285,13 @@ class ShowJobsDao extends Object
 
       while($row = $this->dbManager->fetchArray($result)){
         $timeOfCompletion = 0;
-        if(empty($row['jq_endtime']) && !empty($row['jq_starttime'])) { // for agent started and not ended 
+        if(empty($row['jq_endtime']) && !empty($row['jq_starttime'])) { // for agent started and not ended
           if(empty($filesPerSec)) {
             $burnTime = time() - strtotime($row['jq_starttime']);
             $filesPerSec = $this->getNumItemsPerSec($row['jq_itemsprocessed'], $burnTime);
           }
 
-          if(!empty($filesPerSec)) {           
+          if(!empty($filesPerSec)) {
             $timeOfCompletion = ($itemCount['jq_itemsprocessed'] - $row['jq_itemsprocessed']) / $filesPerSec;
           }
           array_push($estimatedArray, $timeOfCompletion);
@@ -299,12 +299,14 @@ class ShowJobsDao extends Object
       }
       if(empty($estimatedArray)) {
         return "";
-      }
-      else {
+      } else {
         $estimatedTime = round(max($estimatedArray)); // collecting max agent time in seconds
-        return intval($estimatedTime/3600).gmdate(":i:s", $estimatedTime);  // convert seconds to time and return     
-      } 
-    } 
+        if(!empty($timeInSec)) {
+          return intval(!empty($estimatedTime) ? $estimatedTime : 0);
+        }
+        return intval($estimatedTime/3600).gmdate(":i:s", $estimatedTime);  // convert seconds to time and return
+      }
+    }
   }/* getEstimatedTime() */
 
   /** 
@@ -312,14 +314,53 @@ class ShowJobsDao extends Object
    * @param $job_pk
    * @return $row
    */
-  public function getDataForASingleJob($job_pk)
+  public function getDataForASingleJob($jq_pk)
   {
     $statementName = __METHOD__."getDataForASingleJob";
     $this->dbManager->prepare($statementName,
     "SELECT *, jq_endtime-jq_starttime as elapsed FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1");
-    $result = $this->dbManager->execute($statementName, array($job_pk));
+    $result = $this->dbManager->execute($statementName, array($jq_pk));
     $row = $this->dbManager->fetchArray($result);
     $this->dbManager->freeResult($result);
     return $row;
   } /* getDataForASingleJob */
+
+  /** 
+   * @brief Return boolean
+   * @param $jq_pk
+   */
+  public function getJobStatus($jqPk)
+  {
+    $statementName = __METHOD__."forjq_pk";
+    $row = $this->dbManager->getSingleRow(
+           "SELECT jq_end_bits FROM jobqueue WHERE jq_pk = $1",
+           array($jqPk),
+           $statementName
+    );
+    if($row['jq_end_bits'] == 1 || $row['jq_end_bits'] == 2) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * @brief Return array
+   * @param $jobId
+   * @param $jqType
+   */
+  public function getItemsProcessedForDecider($jqType, $jobId)
+  {
+    $statementName = __METHOD__."forjqTypeAndjobId";
+    $row = $this->dbManager->getSingleRow(
+           "SELECT jq_itemsprocessed, job.job_upload_fk FROM jobqueue JOIN job ON jobqueue.jq_job_fk = job.job_pk WHERE jq_type = $1 AND jq_end_bits = 0 AND jq_job_fk IN (SELECT job_pk FROM job WHERE job_upload_fk = (SELECT job_upload_fk FROM job WHERE job_pk = $2 LIMIT 1)) LIMIT 1",
+           array($jqType, $jobId),
+           $statementName
+    );
+    if(!empty($row['jq_itemsprocessed'])) {
+      return array($row['jq_itemsprocessed'], $row['job_upload_fk']);
+    } else {
+      return array();
+    }
+  }
 }

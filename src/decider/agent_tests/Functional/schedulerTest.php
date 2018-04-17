@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -28,6 +28,7 @@ use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
@@ -63,6 +64,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $uploadPermDao;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var ShowJobsDao */
+  private $showJobsDao;
   /** @var SchedulerTestRunnerCli */
   private $runnerCli;
   /** @var SchedulerTestRunnerMock */
@@ -82,13 +85,14 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $agentDao);
     $clearingEventProcessor = new ClearingEventProcessor();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+    $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
     $this->clearingDecisionProcessor = new ClearingDecisionProcessor($this->clearingDao, $this->agentLicenseEventProcessor, $clearingEventProcessor, $this->dbManager);
 
     global $container;
     $container = M::mock('ContainerBuilder');
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->highlightDao, $this->showJobsDao, $this->clearingDecisionProcessor, $this->agentLicenseEventProcessor);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -99,6 +103,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = null;
     $this->licenseDao = null;
     $this->highlightDao = null;
+    $this->showJobsDao = null;
     $this->clearingDao = null;
     M::close();
   }

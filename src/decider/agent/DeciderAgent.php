@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2018, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Dao\ShowJobsDao;
 
 include_once(__DIR__ . "/version.php");
 
@@ -53,6 +54,8 @@ class DeciderAgent extends Agent
   private $clearingDao;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var ShowJobsDao */
+  private $showJobsDao;
   /** @var DecisionTypes */
   private $decisionTypes;
   /** @var LicenseMap */
@@ -67,6 +70,7 @@ class DeciderAgent extends Agent
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
     $this->highlightDao = $this->container->get('dao.highlight');
+    $this->showJobsDao = $this->container->get('dao.show_jobs');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
@@ -80,20 +84,43 @@ class DeciderAgent extends Agent
     $args = $this->args;
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
-    
+
+    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE))
+    {
+      $bulkReuser = new BulkReuser();
+      $bulkIds = $this->clearingDao->getPreviousBulkIds($uploadId, $this->groupId, $this->userId);
+      if (count($bulkIds) == 0) {
+        return true;
+      }
+      $jqId=0;
+      $minTime="4";
+      $maxTime="60";
+      foreach($bulkIds as $bulkId) {
+        $jqId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $bulkId, $jqId);
+        $this->heartbeat(1);
+        if(!empty($jqId)) {
+          $jqIdRow = $this->showJobsDao->getDataForASingleJob($jqId);
+          while($this->showJobsDao->getJobStatus($jqId)) {
+            $this->heartbeat(0);
+            $timeInSec = $this->showJobsDao->getEstimatedTime($jqIdRow['jq_job_fk'],'',0,0,1);
+            if($timeInSec > $maxTime) {
+              sleep($maxTime);
+            } else if($timeInSec < $minTime) {
+              sleep($minTime);
+            } else {
+              sleep($timeInSec);
+            }
+          }
+        }
+      }
+    }
+
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
     {
       $process = $this->processItem($item);
       $this->heartbeat($process);
     }
-
-    if (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)
-    {
-      $bulkReuser = new BulkReuser();
-      $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $this->jobId);
-    }
-    
     return true;
   }
 
