@@ -1,6 +1,6 @@
 /* **************************************************************
 Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2018 Siemens AG
+Copyright (C) 2015, 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -47,7 +47,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   email_notify = 0;        \
   error = NULL; }
 
-#define EMAIL_BUILD_CMD "%s -s '%s' %s"
+#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\""
 #define DEFAULT_FOOTER  "\""
 #define DEFAULT_SUBJECT "FOSSology scan complete\n"
@@ -418,14 +418,19 @@ static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
 static void email_notification(scheduler_t* scheduler, job_t* job)
 {
   PGresult* db_result;
-  int j_id = job->id;;
+  PGresult* db_result_smtp;
+  int j_id = job->id;
   int upload_id;
   int status;
+  int i;
   char* val;
   char* final_cmd;
+  char* temp_smtpvariable = NULL;
   char sql[1024];
+  GHashTable* smtpvariables;
   FILE* mail_io;
   GString* email_txt;
+  GString* client_cmd;
   job_status curr_status = job->status;
   email_replace_args args;
 
@@ -496,18 +501,88 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
       val = email_txt->str;
     }
 
+    sprintf(sql, "%s", smtp_values);
+    db_result_smtp = database_exec(scheduler, sql);
+    if(PQresultStatus(db_result_smtp) != PGRES_TUPLES_OK || PQntuples(db_result_smtp) == 0)
+    {
+      PQ_ERROR(db_result_smtp, "unable to get conf variables for SMTP from sysconfig");
+      if(scheduler->parse_db_email != NULL)
+        g_free(val);
+      g_string_free(email_txt, TRUE);
+      return;
+    }
+    client_cmd = g_string_new("");
+    smtpvariables = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    for(i = 0; i < PQntuples(db_result_smtp); i++)
+    {
+      if(PQget(db_result_smtp, i, "conf_value")[0])  //Not empty
+      {
+        g_hash_table_insert(smtpvariables, g_strdup(PQget(db_result_smtp, i, "variablename")),
+                            g_strdup(PQget(db_result_smtp, i, "conf_value")));
+      }
+    }
+    PQclear(db_result_smtp);
+    if(g_hash_table_contains(smtpvariables, "SMTPHostName") && g_hash_table_contains(smtpvariables, "SMTPPort"))
+    {
+      g_string_append_printf(client_cmd, " -S smtp='%s:%s'", (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"),
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
+    }
+    if(g_hash_table_contains(smtpvariables, "SMTPStartTls"))
+    {
+      temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls");
+      if(g_strcmp0(temp_smtpvariable, "1") == 0)
+      {
+        g_string_append_printf(client_cmd, " -S smtp-use-starttls");
+      }
+    }
+    if(g_hash_table_contains(smtpvariables, "SMTPAuth"))
+    {
+      temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPAuth");
+      if(g_strcmp0(temp_smtpvariable, "L") == 0)
+      {
+        g_string_append_printf(client_cmd, " -S smtp-auth=login");
+      }
+      else if(g_strcmp0(temp_smtpvariable, "P") == 0)
+      {
+        g_string_append_printf(client_cmd, " -S smtp-auth=plain");
+      }
+    }
+    if(g_hash_table_contains(smtpvariables, "SMTPAuthUser"))
+    {
+      g_string_append_printf(client_cmd, " -S smtp-auth-user='%s' -S from='%s'",
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"),
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"));
+    }
+    if(g_hash_table_contains(smtpvariables, "SMTPAuthPasswd"))
+    {
+      g_string_append_printf(client_cmd, " -S smtp-auth-password='%s'",
+         (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
+    }
+    if(g_hash_table_contains(smtpvariables, "SMTPSslVerify"))
+    {
+      temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPSslVerify");
+      g_string_append(client_cmd, " -S ssl-verify=");
+      if(g_strcmp0(temp_smtpvariable, "I") == 0)
+      {
+        g_string_append(client_cmd, "ignore");
+      }
+      else if(g_strcmp0(temp_smtpvariable, "S") == 0)
+      {
+        g_string_append(client_cmd, "strict");
+      }
+      else if(g_strcmp0(temp_smtpvariable, "W") == 0)
+      {
+        g_string_append(client_cmd, "warn");
+      }
+    }
+    g_hash_table_destroy(smtpvariables);
+
     final_cmd = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
-        scheduler->email_subject, PQget(db_result, 0, "user_email"));
+                client_cmd->str, scheduler->email_subject, PQget(db_result, 0, "user_email"));
 
     if((mail_io = popen(final_cmd, "w")) != NULL)
     {
       fprintf(mail_io, "%s", val);
-
-      /* Removed these two putc() calls to address Bug#1989 and remove the garbage from the footer... Paul Guttmann
-      putc(-1,   mail_io);
-      putc('\n', mail_io);
-      */
-
       pclose(mail_io);
     }
     else
@@ -521,6 +596,8 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
       g_free(val);
     g_free(final_cmd);
     g_string_free(email_txt, TRUE);
+    g_string_free(client_cmd, TRUE);
+    g_free(temp_smtpvariable);
   }
 
   PQclear(db_result);
@@ -599,8 +676,6 @@ void email_init(scheduler_t* scheduler)
 	email_notify = 1;
 	scheduler->email_command = fo_config_get(scheduler->sysconfig, "EMAILNOTIFY",
 	    "client", &error);
-        g_strdelimit(scheduler->email_command, "\"", ' ');
-        g_strstrip(scheduler->email_command);
 	if(error)
 	  scheduler->email_command = DEFAULT_COMMAND;
 	if(error && error->code == fo_missing_key)

@@ -1,6 +1,6 @@
 /* **************************************************************
 Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2018 Siemens AG
+Copyright (C) 2015, 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -187,6 +187,10 @@ const char* jobsql_jobinfo =
     "     SELECT jq_job_fk FROM jobqueue "
     "       WHERE jq_pk = %d "
     "   );";
+
+const char* smtp_values =
+    " SELECT conf_value, variablename FROM sysconfig "
+    "   WHERE variablename LIKE 'SMTP%';";
 
 #endif /* SQLSTATEMENTS_H */
 
