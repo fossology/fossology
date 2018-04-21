@@ -432,8 +432,8 @@
 
 
   $Schema["TABLE"]["author"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["author"]["ct_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('author_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["ct_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('author_ct_pk_seq'::regclass)";
 
   $Schema["TABLE"]["author"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["agent_fk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"agent_fk\" int8";
@@ -1818,6 +1818,9 @@
   $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_ct_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["UPDATE"] = "SELECT setval('ecc_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM ecc))";
 
+  $Schema["SEQUENCE"]["author_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_ct_pk_seq\"";
+  $Schema["SEQUENCE"]["author_ct_pk_seq"]["UPDATE"] = "SELECT setval('author_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM author))";
+
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_decision_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM ecc_decision))";
 
@@ -1836,6 +1839,8 @@
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["author_pfile_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["author_agent_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
@@ -1893,6 +1898,7 @@
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["copyright_agent_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_user_fk"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_user_fk\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
@@ -1938,7 +1944,7 @@
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_fk_idx ON clearing_event USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_group_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_group_fk_idx ON clearing_event USING btree (uploadtree_fk, group_fk, date_added);";
 
-  $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_agent_fk_idx"] = "CREATE INDEX copyright_agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright using btree (hash, pfile_fk);";
 

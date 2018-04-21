@@ -5,12 +5,12 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -265,20 +265,30 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
   std::string uploadTreeTableName = queryUploadTreeTableName(uploadId);
 
   QueryResult queryResult = dbManager.queryPrintf(
-    "SELECT pfile_pk"
-      " FROM ("
-      "  SELECT distinct(pfile_fk) AS PF"
-      "  FROM %s"
-      "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
-      " ) AS SS "
-      "left outer join %s on (PF = pfile_fk and agent_fk = %d) "
-      "inner join pfile on (PF = pfile_pk) "
-      "WHERE ct_pk IS null or agent_fk <> %d",
+      "SELECT pfile_pk"
+            " FROM ("
+            "  SELECT distinct(pfile_fk) AS PF"
+            "  FROM %s"
+            "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
+            " ) AS SS "
+            "LEFT OUTER JOIN %s on (PF = pfile_fk AND agent_fk = %d) "
+#ifdef IDENTITY_COPYRIGHT
+            "LEFT OUTER JOIN author AS au ON (PF = au.pfile_fk AND au.agent_fk = %d) "
+#endif
+            "INNER JOIN pfile on (PF = pfile_pk) "
+#ifdef IDENTITY_COPYRIGHT
+            "WHERE (copyright.ct_pk IS NULL AND au.ct_pk IS NULL) OR copyright.agent_fk <> %d OR au.agent_fk <> %d",
+#else
+            "WHERE ct_pk IS NULL OR agent_fk <> %d",
+#endif
     uploadTreeTableName.c_str(),
     uploadId,
     IDENTITY,
-    agentId,
     agentId
+#ifdef IDENTITY_COPYRIGHT
+    , agentId, agentId
+#endif
+    , agentId
   );
 
   return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
@@ -302,7 +312,7 @@ bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long i
 bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 {
   std::string tableName = IDENTITY;
- 
+
   if("author" == entry.type ||
      "email" == entry.type ||
      "url" == entry.type){
