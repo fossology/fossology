@@ -1,0 +1,70 @@
+{#
+Copyright (C) 2018 Siemens AG
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#}
+
+function checkWildCard() {
+  var sourceField = $('input[name={{ sourceFilesField }}]').val();
+  if(sourceField.match(/[*?%$]+/)) {
+    var note = $('label[for={{ nameField }}]');
+    var newNote = note.html().replace("({{ 'Optional'|trans }}) ","");
+    note.html(newNote);
+    $('input[name={{ nameField }}]')
+      .prop('required',true)
+      .prop('title',"{{ 'Since the file path contains a wildchar, it is necessary to provide a name'|trans }}")
+      .tooltip({
+        position: {
+          my: "left top",
+          at: "right+5 top-5",
+          collision: "none",
+          using: function( position, feedback ) {
+            $( this ).css( position );
+            $( this ).addClass( "ui-state-error" );
+            $( this ).children().addClass( "ui-state-error-text" );
+          }
+        }
+      });
+    return true;
+  }
+  else {
+    var note = $('label[for={{ nameField }}]');
+    if ( note.html().indexOf("({{ 'Optional'|trans }}) ") === -1) {
+      var newNote = "({{ 'Optional'|trans }}) " + note.html();
+      note.html(newNote);
+    }
+    $('input[name={{ nameField }}]')
+      .prop('required',false)
+      .prop('title',"")
+      .tooltip({});
+    return false;
+  }
+}
+
+$('input[name={{ sourceFilesField }}]').on('input propertychange paste', function() {
+  checkWildCard();
+});
+
+$("form").submit(function( event ) {
+  if( checkWildCard() ) {
+    var nameField = $( "input[name={{ nameField }}]" );
+    if( nameField.val() !== "" ) {
+      return;
+    } else {
+      event.preventDefault();
+      nameField.tooltip("open");
+      nameField.focus();
+    }
+  }
+});
