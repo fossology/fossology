@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2017, Siemens AG
+ Copyright (C) 2015-2018, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ class admin_license_file extends FO_Plugin
 {
   /** @var DbManager */
   private $dbManager;
-  
+
   function __construct()
   {
     $this->Name       = "admin_license";
@@ -36,7 +36,7 @@ class admin_license_file extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->vars       = array();
     parent::__construct();
-    
+
     $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
@@ -60,18 +60,17 @@ class admin_license_file extends FO_Plugin
   {
     $V = ""; // menu_to_1html(menu_find($this->Name, $MenuDepth),0);
     $errorstr = "License not added";
-    
+
     // update the db
     if (@$_POST["updateit"])
     {
       $resultstr = $this->Updatedb($_POST);
+      $this->vars['message'] = $resultstr;
       if (strstr($resultstr, $errorstr)) {
         return $this->Updatefm(0);
       }
       else {
-        $V .= $resultstr;
-        $V .= $this->Inputfm();
-        return $V;
+        return $this->Inputfm();
       }
     }
 
@@ -84,13 +83,12 @@ class admin_license_file extends FO_Plugin
     if (@$_POST["addit"])
     {
       $resultstr = $this->Adddb($_POST);
+      $this->vars['message'] = $resultstr;
       if (strstr($resultstr, $errorstr)) {
         return $this->Updatefm(0);
       }
       else {
-        $V .= $resultstr;
-        $V .= $this->Inputfm();
-        return $V;
+        return $this->Inputfm();
       }
     }
 
@@ -154,7 +152,7 @@ class admin_license_file extends FO_Plugin
 
   /**
    * \brief Build the input form
-   * 
+   *
    * \param $namestr - license family name
    * \param $filter - marydone value requested
    *
@@ -170,11 +168,10 @@ class admin_license_file extends FO_Plugin
     if ($namestr == "All")
       $where = "";
     else
-      $where = "where rf_shortname like '". pg_escape_string($namestr) ."' ";
+        $where = "where rf_shortname like '". pg_escape_string($namestr) ."' ";
 
     // $filter is one of these: "All", "done", "notdone"
-    if ($filter != "all")
-    {
+    if ($filter != "all") {
       if (empty($where))
         $where .= "where ";
       else
@@ -201,8 +198,11 @@ class admin_license_file extends FO_Plugin
     $plural = (pg_num_rows($result) == 1) ? "" : "s";
     $ob .= pg_num_rows($result) . " license$plural found.";
 
+    $style = "style='position: -webkit-sticky;position: -moz-sticky;position: -ms-sticky;"
+           . "position: -o-sticky;position: sticky;top: 0;";
     //$ob .= "<table style='border: thin dotted gray'>";
     $ob .= "<table rules='rows' cellpadding='3'>";
+    $ob .= "<thead $style'>";
     $ob .= "<tr>";
     $text = _("Edit");
     $ob .= "<th>$text</th>";
@@ -220,7 +220,8 @@ class admin_license_file extends FO_Plugin
     $ob .= "<th>$text</th>";
     $text = _("URL");
     $ob .= "<th>$text</th>";
-    $ob .= "</tr>";
+    $ob .= "</tr></thead>";
+    $ob .= "<tbody>";
     $lineno = 0;
     while ($row = pg_fetch_assoc($result))
     {
@@ -234,9 +235,9 @@ class admin_license_file extends FO_Plugin
       $ob .= "<td align=center><a href='";
       $ob .= Traceback_uri();
       $ob .= "?mod=" . $this->Name .
-           "&rf_pk=$row[rf_pk]".
-           "&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
-           "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
+      "&rf_pk=$row[rf_pk]".
+      "&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
+      "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
       $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
       $text = _("$marydone");
@@ -251,19 +252,18 @@ class admin_license_file extends FO_Plugin
       $ob .= "<td align=left>$row[rf_fullname]</td>";
       $vetext = htmlspecialchars($row['rf_text']);
       $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
-      $ob .= "<td align=left>$row[rf_url]</td>";
+      $ob .= "<td align=left><a href='$row[rf_url]' target='_blank'>$row[rf_url]</a></td>";
       $ob .= "</tr>";
     }
     pg_free_result($result);
-    $ob .= "</table>";
+    $ob .= "</tbody></table>";
     return $ob;
   }
-
 
   function Updatefm($rf_pk)
   {
     $this->vars += $this->getUpdatefmData($rf_pk);
-    return $this->render('admin_license-upload_form.html.twig');
+    return $this->render('admin_license-upload_form.html.twig', $this->vars);
   }
 
   /**
@@ -283,10 +283,13 @@ class admin_license_file extends FO_Plugin
       else if (empty($rf_pk_update)) $rf_pk_update = $_GET['rf_pk'];
     }
 
-    $vars['actionUri'] = "?mod=" . $this->Name."&rf_pk=$rf_pk_update";
-    $vars['req_marydone'] = array_key_exists('req_marydone', $_GET) ? $_GET['req_marydone']:'';
-    $vars['req_shortname'] = array_key_exists('req_shortname', $_GET) ? $_GET['req_shortname']:'';
-    $vars['risk_level'] = array_key_exists('risk_level', $_GET) ? intval($_GET['risk_level']) : 0;
+    $vars['actionUri'] = "?mod=" . $this->Name . "&rf_pk=$rf_pk_update";
+    $vars['req_marydone'] = array_key_exists('req_marydone', $_POST) ? $_POST['req_marydone'] : '';
+    $vars['req_shortname'] = array_key_exists('req_shortname', $_POST) ? $_POST['req_shortname'] : '';
+    $vars['req_marydone'] = array_key_exists('req_marydone', $_POST) ? $_POST['req_marydone'] : '';
+    $vars['rf_shortname'] = array_key_exists('rf_shortname', $_POST) ? $_POST['rf_shortname'] : '';
+    $vars['rf_fullname'] = array_key_exists('rf_fullname', $_POST) ? $_POST['rf_fullname'] : '';
+    $vars['rf_text'] = array_key_exists('rf_text', $_POST) ? $_POST['rf_text'] : '';
 
     $parentMap = new LicenseMap($this->dbManager, 0, LicenseMap::CONCLUSION);
     $parentLicenes = $parentMap->getTopLevelLicenseRefs();
@@ -295,7 +298,7 @@ class admin_license_file extends FO_Plugin
     {
       $vars['parentMap'][$licRef->getId()] = $licRef->getShortName();
     }
-    
+
     $reportMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
     $reportLicenes = $reportMap->getTopLevelLicenseRefs();
     $vars['reportMap'] = array(0=>'[self]');
@@ -303,8 +306,8 @@ class admin_license_file extends FO_Plugin
     {
       $vars['reportMap'][$licRef->getId()] = $licRef->getShortName();
     }
-    
-    if ($rf_pk)  // true if this is an update
+
+    if ($rf_pk > 0)  // true if this is an update
     {
       $row = $this->dbManager->getSingleRow("SELECT * FROM ONLY license_ref WHERE rf_pk=$1", array($rf_pk),__METHOD__.'.forUpdate');
       if ($row === false)
@@ -318,9 +321,10 @@ class admin_license_file extends FO_Plugin
     }
     else
     {
-      $row = array('rf_active' =>'t', 'marydone'=>'f', 'rf_text_updatable'=>'t', 'rf_parent'=>0, 'rf_report'=>0, 'rf_risk'=>0, 'rf_spdx_compatible'=>'f');
+      $row = array('rf_active' =>'t', 'marydone'=>'f', 'rf_text_updatable'=>'t', 'rf_parent'=>0, 'rf_report'=>0, 'rf_risk'=>0,
+        'rf_spdx_compatible'=>'f', 'rf_url'=>'', 'rf_detector_type'=>1, 'rf_notes'=>'');
     }
-    
+
     foreach(array_keys($row) as $key)
     {
       if (array_key_exists($key, $_POST))
@@ -330,11 +334,11 @@ class admin_license_file extends FO_Plugin
     }
 
     $vars['boolYesNoMap'] = array("true"=>"Yes", "false"=>"No");
-    $row['rf_active'] = $this->dbManager->booleanFromDb($row['rf_active'])?'true':'false';
-    $row['marydone'] = $this->dbManager->booleanFromDb($row['marydone'])?'true':'false';
-    $row['rf_text_updatable'] = $this->dbManager->booleanFromDb($row['rf_text_updatable'])?'true':'false';
-    $row['risk_level'] = $row['rf_risk'];
-    $row['rf_spdx_compatible'] = $this->dbManager->booleanFromDb($row['rf_spdx_compatible'])?'true':'false';
+    $row['rf_active'] = $this->isTrue($row['rf_active']) ? 'true' : 'false';
+    $row['marydone'] = $this->isTrue($row['marydone']) ? 'true' : 'false';
+    $row['rf_text_updatable'] = $this->isTrue($row['rf_text_updatable']) ? 'true' : 'false';
+    $row['rf_spdx_compatible'] = $this->isTrue($row['rf_spdx_compatible']) ? 'true' : 'false';
+    $vars['risk_level'] = array_key_exists('risk_level', $_POST) ? intval($_POST['risk_level']) : $row['rf_risk'];
     $vars['isReadOnly'] = !(empty($rf_pk) || $row['rf_text_updatable']=='true');
     $vars['detectorTypes'] = array("1"=>"Reference License", "2"=>"Nomos", "3"=>"Unconcrete License");
 
@@ -343,6 +347,20 @@ class admin_license_file extends FO_Plugin
     return array_merge($vars,$row);
   }
 
+  /** @brief Check if a variable is true
+   * @param mixed $value
+   * @return boolean
+   */
+  private function isTrue($value)
+  {
+    if (is_bool($value)) {
+      return $value;
+    }
+    else {
+      $value = strtolower($value);
+      return ($value === 't' || $value === 'true');
+    }
+  }
 
   /** @brief check if shortname or license text of this license is existing */
   private function isShortnameBlocked($rfId,$shortname,$text)
@@ -352,7 +370,6 @@ class admin_license_file extends FO_Plugin
     $check_count = $this->dbManager->getSingleRow($sql,array($rfId,$shortname,$text),__METHOD__.'.countLicensesByNomos');
     return (0 < $check_count['count']);
   }
-
 
   /** @brief check if shortname is changed */
   private function isShortNameExists($rfId, $shortname)
@@ -365,7 +382,6 @@ class admin_license_file extends FO_Plugin
       return 0;
     }
   }
-
 
   /**
    * \brief Update the database
@@ -385,7 +401,7 @@ class admin_license_file extends FO_Plugin
     $riskLvl = intval($_POST['risk_level']);
 
     if (empty($shortname)) {
-      $text = _("ERROR: The license shortname is empty.");
+      $text = _("ERROR: The license shortname is empty. License not added.");
       return "<b>$text</b><p>";
     }
 
@@ -393,7 +409,7 @@ class admin_license_file extends FO_Plugin
       $text = _("ERROR: The shortname can not be changed. License not added.");
       return "<b>$text</b><p>";
     }
-    
+
     $md5term = (empty($text) || stristr($text, "License by Nomos")) ? 'null' : 'md5($10)';
     $sql = "UPDATE license_ref SET
         rf_active=$2, marydone=$3,  rf_shortname=$4, rf_fullname=$5,
@@ -401,9 +417,9 @@ class admin_license_file extends FO_Plugin
         rf_md5=$md5term, rf_risk=$11, rf_spdx_compatible=$12
           WHERE rf_pk=$1";
     $params = array($rfId,
-        $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
-        $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
-        $riskLvl,$_POST['rf_spdx_compatible']);
+      $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
+      $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
+      $riskLvl,$_POST['rf_spdx_compatible']);
     $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
@@ -415,9 +431,9 @@ class admin_license_file extends FO_Plugin
       $this->dbManager->prepare($stmtDel,'DELETE FROM license_map WHERE rf_fk=$1 AND usage=$2');
       $this->dbManager->execute($stmtDel,array($rfId, LicenseMap::CONCLUSION));
       $this->dbManager->insertTableRow('license_map',
-              array('rf_fk'=>$rfId,'rf_parent'=>$parent,'usage'=>LicenseMap::CONCLUSION));
+        array('rf_fk'=>$rfId,'rf_parent'=>$parent,'usage'=>LicenseMap::CONCLUSION));
     }
-   
+
     $reportMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
     $reportLicenses = $parentMap->getTopLevelLicenseRefs();
     if(array_key_exists($report, $reportLicenses) && $report!=$reportMap->getProjectedId($rfId))
@@ -426,9 +442,9 @@ class admin_license_file extends FO_Plugin
       $this->dbManager->prepare($stmtDel,'DELETE FROM license_map WHERE rf_fk=$1 AND usage=$2');
       $this->dbManager->execute($stmtDel,array($rfId, LicenseMap::REPORT));
       $this->dbManager->insertTableRow('license_map',
-              array('rf_fk'=>$rfId,'rf_parent'=>$report,'usage'=>LicenseMap::REPORT));
+        array('rf_fk'=>$rfId,'rf_parent'=>$report,'usage'=>LicenseMap::REPORT));
     }
-    
+
     $ob = "License $_POST[rf_shortname] updated.<p>";
     return $ob;
   }
@@ -449,15 +465,15 @@ class admin_license_file extends FO_Plugin
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
-    
+
     if (empty($rf_shortname)) {
-      $text = _("ERROR: The license shortname is empty.");
+      $text = _("ERROR: The license shortname is empty. License not added.");
       return "<b>$text</b><p>";
     }
 
     if ($this->isShortnameBlocked(0,$rf_shortname,$rf_text))
     {
-      $text = _("ERROR: The shortname or license text already exist in the license list.  License not added.");
+      $text = _("ERROR: The shortname or license text already exist in the license list. License not added.");
       return "<b>$text</b><p>";
     }
 
@@ -466,12 +482,12 @@ class admin_license_file extends FO_Plugin
     $sql = "INSERT into license_ref (
         rf_active, marydone, rf_shortname, rf_fullname,
         rf_url, rf_notes, rf_md5, rf_text, rf_text_updatable,
-        rf_detector_type, rf_risk, rf_spdx_compatible) 
+        rf_detector_type, rf_risk, rf_spdx_compatible)
           VALUES (
               $1, $2, $3, $4, $5, $6, $md5term, $7, $8, $9, $10, $11) RETURNING rf_pk";
     $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($_POST['rf_active'],$_POST['marydone'],$rf_shortname,$rf_fullname, 
-        $rf_url, $rf_notes, $rf_text,$_POST['rf_text_updatable'], $_POST['rf_detector_type'], $riskLvl, $_POST['rf_spdx_compatible']));
+    $res = $this->dbManager->execute($stmt,array($_POST['rf_active'],$_POST['marydone'],$rf_shortname,$rf_fullname,
+      $rf_url, $rf_notes, $rf_text,$_POST['rf_text_updatable'], $_POST['rf_detector_type'], $riskLvl, $_POST['rf_spdx_compatible']));
     $row = $this->dbManager->fetchArray($res);
     $rfId = $row['rf_pk'];
 
@@ -480,15 +496,15 @@ class admin_license_file extends FO_Plugin
     if(array_key_exists($parent, $parentLicenses))
     {
       $this->dbManager->insertTableRow('license_map',
-              array('rf_fk'=>$rfId,'rf_parent'=>$parent,'usage'=>LicenseMap::CONCLUSION));
+        array('rf_fk'=>$rfId,'rf_parent'=>$parent,'usage'=>LicenseMap::CONCLUSION));
     }
-    
+
     $reportMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
     $reportLicenses = $reportMap->getTopLevelLicenseRefs();
     if(array_key_exists($report, $reportLicenses))
     {
       $this->dbManager->insertTableRow('license_map',
-              array('rf_fk'=>$rfId,'rf_parent'=>$report,'usage'=>LicenseMap::REPORT));
+        array('rf_fk'=>$rfId,'rf_parent'=>$report,'usage'=>LicenseMap::REPORT));
     }
 
     $ob = "License $_POST[rf_shortname] (id=$rfId) added.<p>";
@@ -502,7 +518,7 @@ class admin_license_file extends FO_Plugin
    * \return an array of family names based on the
    * license_ref.shortname.
    * A family name is the name before most punctuation.
-   * 
+   *
    * \example the family name of "GPL V2" is "GPL"
    */
   function FamilyNames()
@@ -515,7 +531,7 @@ class admin_license_file extends FO_Plugin
     {
       // start with exceptions
       if (($shortname == "No_license_found")
-      || ($shortname == "Unknown license"))
+        || ($shortname == "Unknown license"))
       {
         $familynamearray[$shortname] = $shortname;
       }
