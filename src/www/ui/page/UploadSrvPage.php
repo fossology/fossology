@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -190,12 +190,19 @@ class UploadSrvPage extends UploadPageBase
     }
 
     $name = $request->get(self::NAME_PARAM);
-    if (empty($name)) 
+
+    if((preg_match('/[*?%$]+/', $sourceFiles)) && empty($name))
+    {
+      $text = _("The file path contains a wildchar, you must provide a name for the upload.");
+      return array(false, $text, $description);
+    }
+
+    if (empty($name))
     {
       $name = basename($sourceFiles);
     }
-    $shortName = basename($name);
-    if (empty($shortName)) 
+    $shortName = $this->basicShEscaping(basename($name));
+    if (empty($shortName))
     {
       $shortName = $name;
     }
@@ -292,4 +299,3 @@ class UploadSrvPage extends UploadPageBase
   }
 }
 register_plugin(new UploadSrvPage());
-

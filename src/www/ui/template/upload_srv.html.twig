@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2018 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -24,7 +24,7 @@
 </li>
 <li>
   <label for="{{ nameField }}">
-    {{ '(Optional) Enter a viewable name for this file or directory'| trans }}:
+    ({{ 'Optional'|trans }}) {{ 'Enter a viewable name for this file or directory'| trans }}:
   </label>
   <br/>
   <input name="{{ nameField }}" type="text" size="120"/><br/>
@@ -40,4 +40,9 @@
   </select>
 </li>
 {% endif %}
+{% endblock %}
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript"> {% include "upload_srv.js.twig" %} </script>
+  {{ injectedFoot }}
 {% endblock %}
