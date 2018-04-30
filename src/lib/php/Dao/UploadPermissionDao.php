@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+Copyright (C) 2015-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -80,11 +80,15 @@ class UploadPermissionDao extends Object
     if (null === $perm) {
       $perm = Auth::PERM_ADMIN;
     }
-    $this->dbManager->getSingleRow("INSERT INTO perm_upload (perm, upload_fk, group_fk) "
-            . "SELECT $1 perm, $2 upload_fk, gum.group_fk"
-            . " FROM group_user_member gum LEFT JOIN perm_upload ON perm_upload.group_fk=gum.group_fk AND upload_fk=$2"
-            . " WHERE perm_upload IS NULL AND gum.user_fk=$3",
-               array($perm, $uploadId, $userId), __METHOD__.'.insert');
+
+    $this->dbManager->getSingleRow("INSERT INTO perm_upload (group_fk, perm, upload_fk)
+                                    SELECT DISTINCT(gum.group_fk), $perm perm, $uploadId upload_fk
+                                      FROM group_user_member gum
+                                      LEFT JOIN perm_upload ON perm_upload.group_fk=gum.group_fk
+                                       AND upload_fk=$uploadId
+                                     WHERE perm_upload IS NULL AND gum.user_fk=$userId",
+                                    array(), __METHOD__.'.insert');
+
   }
  
   public function updatePermissionId($permId, $permLevel)
