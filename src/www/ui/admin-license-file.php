@@ -352,7 +352,21 @@ class admin_license_file extends FO_Plugin
     $check_count = $this->dbManager->getSingleRow($sql,array($rfId,$shortname,$text),__METHOD__.'.countLicensesByNomos');
     return (0 < $check_count['count']);
   }
-  
+
+
+  /** @brief check if shortname is changed */
+  private function isShortNameExists($rfId, $shortname)
+  {
+    $sql = "SELECT LOWER(rf_shortname) AS rf_shortname FROM license_ref WHERE rf_pk=$1";
+    $row = $this->dbManager->getSingleRow($sql,array($rfId),__METHOD__.'.DoNotChnageShortName');
+    if ($row['rf_shortname'] === strtolower($shortname)) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+
   /**
    * \brief Update the database
    *
@@ -375,9 +389,8 @@ class admin_license_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    if ($this->isShortnameBlocked($rfId,$shortname,$text))
-    {
-      $text = _("ERROR: The shortname or license text already exist in the license list.  License not added.");
+    if (!$this->isShortNameExists($rfId,$shortname)) {
+      $text = _("ERROR: The shortname can not be changed. License not added.");
       return "<b>$text</b><p>";
     }
     
