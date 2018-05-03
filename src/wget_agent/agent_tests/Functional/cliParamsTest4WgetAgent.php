@@ -227,9 +227,9 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     return; // TODO ignore this test case, because it is flaky on travis
     // ftp_proxy
     //$this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
-    $command = "$WGET_PATH ftp://ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz  -d $TEST_RESULT_PATH";
+    $command = "$WGET_PATH ftp://releases.ubuntu.com/releases/trusty/SHA1SUMS  -d $TEST_RESULT_PATH";
     exec($command);
-    $this->assertFileExists("$TEST_RESULT_PATH/ftp.gnu.org/gnu/wget/wget-1.10.1.tar.gz");
+    $this->assertFileExists("$TEST_RESULT_PATH/releases.ubuntu.com/releases/trusty/SHA1SUMS");
   }
 
   /**

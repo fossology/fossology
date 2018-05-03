@@ -19,8 +19,10 @@ services:
 
 install:
  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
- - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
- - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main'
+ - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty main'
+ - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+ - sudo add-apt-repository 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-6.0 main'
+ - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
  - sudo apt-get update -qq
  - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
  - sudo apt-get install -q -y debhelper libglib2.0-dev libmagic-dev libxml2-dev
@@ -31,7 +33,7 @@ install:
                               libpq-dev libcunit1-dev libcppunit-dev
                               libboost-regex-dev libboost-program-options-dev
                               liblocal-lib-perl libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
- - sudo apt-get install -q -y --allow-unauthenticated $CXX $CC || sudo apt-get install -q -y --allow-unauthenticated $CC
+ - sudo apt-get install -q -y $CXX $CC || sudo apt-get install -q -y $CC
  - sudo apt-get install -q -y cppcheck
  - ( cd src && composer install --dev )
  - install/scripts/install-spdx-tools.sh
@@ -52,7 +54,7 @@ env:
   global:
    - PHPTESTSUITE=''
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
-   - MAKETARGETS='all test-adj2nest test-buckets test-cli test-copyright test-debug test-decider test-deciderjob test-delagent test-lib test-maintagent test-mimetype test-monk test-nomos test-pkgagent test-readmeoss test-reportImport test-reuser test-spdx2 test-unifiedreport test-wget_agent test-www'
+   - MAKETARGETS='all test'
 
 script:
  - set -e

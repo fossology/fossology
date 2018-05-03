@@ -37,7 +37,7 @@ utils: build-utils
 # generate the VERSION file
 TOP = .
 VERSIONFILE:
-	$(call WriteVERSIONFile,"BUILD")
+	@$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)

@@ -13,7 +13,7 @@ address = localhost
 depth = 3
 
 ; REPLACEMENT for RepPath.conf
-path = /srv/fossology/repository
+path = /srv/fossologyTestRepo/repository
 
 ; REPLACEMENT for Hosts.conf
 ; set up the set of hosts available to analyze files. If there is an entry

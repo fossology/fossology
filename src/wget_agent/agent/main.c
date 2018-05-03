@@ -228,7 +228,7 @@ int main  (int argc, char *argv[])
         char TempDir[MAXCMD];
         memset(TempDir,'\0',MAXCMD);
         snprintf(TempDir, MAXCMD-1, "%s/wget", TempFileDir); // /var/local/lib/fossology/agents/wget
-        struct stat Status;
+        struct stat Status = {};
 
         if (GlobalType[0])
         {
