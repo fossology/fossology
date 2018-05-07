@@ -28,33 +28,55 @@ use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Data\DecisionTypes;
 
 
 global $container;
-$container = M::mock('ContainerBuilder');
-$container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn(M::mock(DbManager::classname()));
-$agentDao = M::mock(AgentDao::classname());
-$agentDao->shouldReceive('getCurrentAgentId')->andReturn(1234);
-$container->shouldReceive('get')->withArgs(array('dao.agent'))->andReturn($agentDao);
 require_once(__DIR__ . '/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 require_once(__DIR__ . '/../../agent/DeciderAgent.php');
 
 
 class DeciderAgentTest extends \PHPUnit_Framework_TestCase
 {
+  /** @var DbManager */
+  private $dbManager;
+  /** @var ClearingDao */
+  private $clearingDao;
+  /** @var ClearingDecisionProcessor */
+  private $clearingDecisionProcessor;
+  /** @var AgentLicenseEventProcessor */
+  private $agentLicenseEventProcessor;
+  /** @var UploadDao */
+  private $uploadDao;
+  /** @var HighlightDao */
   private $highlightDao;
-  
+  /** @var ShowJobsDao */
+  private $showJobsDao;
+
   protected function setUp()
   {
     global $container;
+    $container = M::mock('ContainerBuilder');
+    $this->dbManager = M::mock(DbManager::classname());
+    $this->agentDao = M::mock(AgentDao::classname());
+    $this->agentDao->shouldReceive('getCurrentAgentId')->andReturn(1234);
     $this->highlightDao = M::mock(HighlightDao::classname());
-    $container->shouldReceive('get')->withArgs(array('dao.highlight'))->andReturn($this->highlightDao);
-    $container->shouldReceive('get')->withArgs(array('dao.upload'))->andReturn(M::mock(UploadDao::classname()));
-    $container->shouldReceive('get')->withArgs(array('dao.clearing'))->andReturn(M::mock(ClearingDao::classname()));
+    $this->uploadDao = M::mock(UploadDao::classname());
+    $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
+    $this->clearingDao = M::mock(ClearingDao::classname());
+    $this->clearingDecisionProcessor = M::mock(ClearingDecisionProcessor::classname());
+    $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
+
+    $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
+    $container->shouldReceive('get')->withArgs(array('dao.agent'))->andReturn($this->agentDao);
+    $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
+    $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
+    $container->shouldReceive('get')->withArgs(array('dao.upload'))->andReturn($this->uploadDao);
+    $container->shouldReceive('get')->withArgs(array('dao.clearing'))->andReturn($this->clearingDao);
     $container->shouldReceive('get')->withArgs(array('decision.types'))->andReturn(M::mock(DecisionTypes::classname()));
-    $container->shouldReceive('get')->withArgs(array('businessrules.clearing_decision_processor'))->andReturn(M::mock(ClearingDecisionProcessor::classname()));
-    $container->shouldReceive('get')->withArgs(array('businessrules.agent_license_event_processor'))->andReturn(M::mock(AgentLicenseEventProcessor::classname()));
+    $container->shouldReceive('get')->withArgs(array('businessrules.clearing_decision_processor'))->andReturn($this->clearingDecisionProcessor);
+    $container->shouldReceive('get')->withArgs(array('businessrules.agent_license_event_processor'))->andReturn($this->agentLicenseEventProcessor);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -68,10 +90,10 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
   {
     $deciderAgent = new DeciderAgent();
 
-    $reflection = new \ReflectionClass($deciderAgent); 
+    $reflection = new \ReflectionClass($deciderAgent);
     $method = $reflection->getMethod('areNomosMatchesInsideAMonkMatch');
     $method->setAccessible(true);
-    
+
     $licenseMatches = array();
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
@@ -80,7 +102,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
   {
     $deciderAgent = new DeciderAgent();
 
-    $reflection = new \ReflectionClass($deciderAgent); 
+    $reflection = new \ReflectionClass($deciderAgent);
     $method = $reflection->getMethod('areNomosMatchesInsideAMonkMatch');
     $method->setAccessible(true);
 
@@ -95,7 +117,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
   {
     $deciderAgent = new DeciderAgent();
 
-    $reflection = new \ReflectionClass($deciderAgent); 
+    $reflection = new \ReflectionClass($deciderAgent);
     $method = $reflection->getMethod('areNomosMatchesInsideAMonkMatch');
     $method->setAccessible(true);
 
@@ -105,12 +127,12 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
         );
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
-  
+
   public function testAreNomosMatchesInsideAMonkMatchIfNotFit()
   {
     $deciderAgent = new DeciderAgent();
 
-    $reflection = new \ReflectionClass($deciderAgent); 
+    $reflection = new \ReflectionClass($deciderAgent);
     $method = $reflection->getMethod('areNomosMatchesInsideAMonkMatch');
     $method->setAccessible(true);
     $monkId = 1;
@@ -121,12 +143,12 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
             'nomos'=>array($this->createLicenseMatch('nomos',$nomosId)));
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
-  
+
   public function testAreNomosMatchesInsideAMonkMatchIfFit()
   {
     $deciderAgent = new DeciderAgent();
 
-    $reflection = new \ReflectionClass($deciderAgent); 
+    $reflection = new \ReflectionClass($deciderAgent);
     $method = $reflection->getMethod('areNomosMatchesInsideAMonkMatch');
     $method->setAccessible(true);
     $monkId = 1;
@@ -138,7 +160,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(true) );
   }
 
-  
+
   /**
    * @return M\MockInterface
    */
@@ -148,7 +170,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $licenseMatch->shouldReceive("getLicenseFileId")->withNoArgs()->andReturn($matchId);
     return $licenseMatch;
   }
-  
+
   public function testAreNomosMonkNinkaAgreed_notIfOnlyTwoOfThem()
   {
     $deciderAgent = new DeciderAgent();
@@ -158,7 +180,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areNomosMonkNinkaAgreed', array($licenseMatches));
     assertThat($agree, equalTo(false) );
   }
-  
+
   public function testAreNomosMonkNinkaAgreed_alsoMultiMatch()
   {
     $deciderAgent = new DeciderAgent();
@@ -170,7 +192,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     assertThat($agree, equalTo(true) );
   }
 
-  
+
   public function testAreNomosMonkNinkaAgreed_notIfAnyOther()
   {
     $deciderAgent = new DeciderAgent();
@@ -182,7 +204,7 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $agree = Reflectory::invokeObjectsMethodnameWith($deciderAgent, 'areNomosMonkNinkaAgreed', array($licenseMatches));
     assertThat($agree, equalTo(false) );
   }
-  
+
   /**
    * @return M\MockInterface
    */
@@ -192,6 +214,5 @@ class DeciderAgentTest extends \PHPUnit_Framework_TestCase
     $licenseMatch->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     return $licenseMatch;
   }
-  
+
 }
- 

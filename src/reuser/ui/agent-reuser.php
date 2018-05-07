@@ -31,17 +31,17 @@ class ReuserAgentPlugin extends AgentPlugin
 
   /** @var UploadDao */
   private $uploadDao;
-  
+
   public function __construct() {
     $this->Name = "agent_reuser";
     $this->Title =  _("Reuse of License Clearing");
     $this->AgentName = "reuser";
 
     parent::__construct();
-    
+
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
-  } 
-  
+  }
+
   public function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
   {
     parent::doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs, $jq_cmd_args);
@@ -55,7 +55,7 @@ class ReuserAgentPlugin extends AgentPlugin
     $reuserPlugin = plugin_find('plugin_reuser');
     return $reuserPlugin->renderContent($vars);
   }
-  
+
   /**
    * @param array $vars
    * @return string
@@ -64,13 +64,13 @@ class ReuserAgentPlugin extends AgentPlugin
     $reuserPlugin = plugin_find('plugin_reuser');
     return $reuserPlugin->renderFoot($vars);
   }
-  
-  
+
+
   public function preInstall()
   {
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
   }
-  
+
   /**
    * @param int $jobId
    * @param int $uploadId
@@ -89,7 +89,7 @@ class ReuserAgentPlugin extends AgentPlugin
       return -1;
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
-    
+
     $getReuseValue = $request->get('reuseMode');
 
     $reuseMode = UploadDao::REUSE_NONE;
@@ -109,10 +109,10 @@ class ReuserAgentPlugin extends AgentPlugin
     }
 
     $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode);
-    
+
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
   }
-  
+
   /**
    * @param int $uploadId
    * @param int $reuseUploadId

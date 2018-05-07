@@ -73,7 +73,7 @@ void test_GetFieldValue_noseparator()
   int ValueMax = 1024;
   char *predictField = "name";
   char *predictValue = "=larry, very good";
-  char Separator = NULL;
+  char Separator = '\0';
   char *Result = GetFieldValue(Sin, Field, FieldMax, Value, ValueMax, Separator);
   //printf("test_GetFieldValue_noseparator Result is:%s, field is: %s, value is:%s\n", Result, Field, Value);
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));

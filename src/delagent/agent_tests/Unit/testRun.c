@@ -1,6 +1,8 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
+Copyright (C) 2018, Siemens AG
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -18,6 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 #include "CUnit/CUnit.h"
 #include "CUnit/Automated.h"
 #include "testRun.h"
@@ -31,6 +34,29 @@ char *DBConfFile = NULL;
 
 extern CU_SuiteInfo suites[];
 
+char* getUser()
+{
+  char CMD[200], *user;
+  FILE *db_conf;
+  int len;
+  memset(CMD, '\0', sizeof(CMD));
+  user = malloc(20 * sizeof(char));
+  memset(user, '\0', 20);
+
+  sprintf(CMD, "awk -F \"=\" '/user/ {print $2}' %s | tr -d '; '", DBConfFile);
+  db_conf = popen(CMD, "r");
+  if (db_conf != NULL)
+  {
+    if(fgets(user, sizeof(user)-1, db_conf) != NULL)
+    {
+      len = strlen(user);
+      user[len-1] = '\0';
+    }
+  }
+  pclose(db_conf);
+  return user;
+}
+
 /**
  * \brief initialize db
  */
@@ -38,8 +64,16 @@ int DelagentDBInit()
 {
   char CMD[256];
   int rc;
- 
-  rc = create_db_repo_sysconf(0, "delagent");
+
+  char cwd[2048];
+  char* confDir = NULL;
+
+  if(getcwd(cwd, sizeof(cwd)) != NULL)
+  {
+    confDir = createTestConfDir(cwd, "delagent");
+  }
+
+  rc = create_db_repo_sysconf(0, "delagent", confDir);
   if (rc != 0)
   {
     printf("Database initialize ERROR!\n");
@@ -49,16 +83,14 @@ int DelagentDBInit()
   DBConfFile = get_dbconf();
 
   memset(CMD, '\0', sizeof(CMD));
-  //sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
-  sprintf(CMD, "pg_restore -Ufossy -d %s ../testdata/testdb_all.tar", get_db_name());
-  printf("restore database command: %s\n", CMD);
-  rc = system(CMD); 
-  //if (rc != 0)
-  //{
-  //  printf("Database initialize ERROR!\n");
-  //  DelagentClean();
-  //  return -1; 
-  //}
+  sprintf(CMD, "psql -U %s -d %s < ../testdata/testdb_all.sql >/dev/null", getUser(), get_db_name());
+  rc = system(CMD);
+  if (WEXITSTATUS(rc) != 0)
+  {
+    printf("Database initialize ERROR!\n");
+    DelagentClean();
+    return -1;
+  }
 
   return 0;
 }

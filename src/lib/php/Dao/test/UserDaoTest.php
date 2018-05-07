@@ -33,6 +33,8 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
   private $logger;
   /** @var UserDao */
   private $userDao;
+  /** @var assertCountBefore */
+  private $assertCountBefore;
 
   protected function setUp()
   {
@@ -98,7 +100,7 @@ class UserDaoTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData(array('groups'));
     $groupId = $this->userDao->addGroup($groupName='newGroup');
     $row = $this->dbManager->getSingleRow('SELECT group_name FROM groups WHERE group_pk=$1',array($groupId));
-    assertThat($row['group_name'], equalTo($groupName));    
+    assertThat($row['group_name'], equalTo($groupName));
   }
   
   /**

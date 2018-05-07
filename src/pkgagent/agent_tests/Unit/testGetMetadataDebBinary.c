@@ -47,6 +47,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -58,6 +59,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare mimetype information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -67,6 +69,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare mimetype information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -76,6 +79,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare mimetype information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -88,6 +92,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -99,6 +104,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -111,6 +117,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   pi->pFileFk = atoi(PQgetvalue(result, 0, 0));
@@ -124,6 +131,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   control_pfilepk = atoi(PQgetvalue(result, 0, 0));
@@ -137,6 +145,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     exit(-1);
   }
   PQclear(result);
@@ -147,6 +156,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   upload_pk = atoi(PQgetvalue(result, 0, 0));
@@ -160,6 +170,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -171,6 +182,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -181,6 +193,7 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -203,7 +216,7 @@ int prepare_Repository()
     {
       printf("Failed to import %s\n", Source);
       return (-1);
-    }  
+    }
   }
   return (0);
 }
@@ -214,7 +227,7 @@ int prepare_Repository()
  * \param db_conn the database connection
  * \param pi the pointer of debpkginfo
  * \param upload_pk
- * 
+ *
  * \return 0 on OK, -1 on failure
  */
 int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
@@ -228,6 +241,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -238,6 +252,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove mimetype information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -248,6 +263,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -258,6 +274,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -268,6 +285,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -278,6 +296,7 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Remove pfile database 'control' ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
@@ -288,11 +307,12 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
     return (-1);
   }
   PQclear(result);
 
-  return (0);  
+  return (0);
 }
 
 /**
@@ -315,7 +335,7 @@ int remove_Repository()
 }
 
 /**
- * \brief Test pkgagent.c GetMetadataDebBinary function 
+ * \brief Test pkgagent.c GetMetadataDebBinary function
  * get debian binary package info
  */
 void test_GetMetadataDebBinary()
@@ -326,21 +346,22 @@ void test_GetMetadataDebBinary()
   char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  memset(pi, 0, sizeof(struct debpkginfo));
   int predictValue = 0;
 
   /* perpare testing data in database */
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  
+
   upload_pk = prepare_Database(db_conn, pi);
   if (upload_pk == -1)
     CU_FAIL_FATAL("Prepare database data ERROR!");
-    
+
   if (prepare_Repository() == -1)
   {
     remove_Database(db_conn, pi, upload_pk);
     CU_FAIL_FATAL("Prepare repository data ERROR!");
   }
-     
+
   /* Test GetMetadataDebBinary function */
   int Result = GetMetadataDebBinary(upload_pk, pi);
   //printf("GetMetadataDebBinary Result is:%d\n", Result);
@@ -373,21 +394,22 @@ void test_GetMetadataDebBinary()
 }
 
 /**
- * \brief Test pkgagent.c GetMetadataDebBinary function 
+ * \brief Test pkgagent.c GetMetadataDebBinary function
  * with no upload_pk in database
  */
 void test_GetMetadataDebBinary_no_uploadpk()
 {
   struct debpkginfo *pi;
   long upload_pk = 0;
-  char *ErrorBuf;  
-  
+  char *ErrorBuf;
+
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  memset(pi, 0, sizeof(struct debpkginfo));
   int predictValue = -1;
-  
+
   /* perpare testing data in database */
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf); 
- 
+  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+
   /* Test GetMetadataDebBinary function */
   int Result = GetMetadataDebBinary(upload_pk, pi);
   CU_ASSERT_EQUAL(Result, predictValue);
@@ -403,7 +425,7 @@ void test_GetMetadataDebBinary_no_uploadpk()
 
 /**
  * \brief Test pkgagent.c ProcessUpload function
- * give the upload_pk of debian binary package, 
+ * give the upload_pk of debian binary package,
  * get the package information about this upload id
  */
 void test_ProcessUpload()
@@ -414,7 +436,8 @@ void test_ProcessUpload()
 
   int predictValue = 0;
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
- 
+  memset(pi, 0, sizeof(struct debpkginfo));
+
   /* perpare testing data in database */
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
 
@@ -427,11 +450,11 @@ void test_ProcessUpload()
     remove_Database(db_conn, pi, upload_pk);
     CU_FAIL_FATAL("Prepare repository data ERROR!");
   }
-  
+
   /* Test ProcessUpload function */
   int Result = ProcessUpload(upload_pk);
   printf("ProcessUpload Result is:%d\n", Result);
- 
+
   CU_ASSERT_EQUAL(Result, predictValue);
 
   /* Clear testing data in database */
@@ -440,7 +463,7 @@ void test_ProcessUpload()
   if (remove_Repository() == -1)
     CU_FAIL_FATAL("Remove repository data ERROR!");
 
-  PQfinish(db_conn); 
+  PQfinish(db_conn);
   memset(pi, 0, sizeof(struct debpkginfo));
   free(pi);
 }

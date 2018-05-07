@@ -36,12 +36,13 @@ void test_GetMetadata_normal()
   char *ErrorBuf;
 
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  memset(pi, 0, sizeof(struct rpmpkginfo));
   int predictValue = 0;
   rpmReadConfigFiles(NULL, NULL);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadata(pkg, pi);
   //printf("test_GetMetadata Result is:%d\n", Result);
-  //printf("test_GetMetadata Result is temp:%s\n", pi->pkgArch); 
+  //printf("test_GetMetadata Result is temp:%s\n", pi->pkgArch);
   CU_ASSERT_STRING_EQUAL(pi->pkgName, "fossology");
   CU_ASSERT_STRING_EQUAL(pi->pkgArch, "i386");
   CU_ASSERT_STRING_EQUAL(pi->version, "1.2.0");
@@ -74,6 +75,7 @@ void test_GetMetadata_wrong_testfile()
   char *pkg = "../testdata/fossology_1.4.1.dsc";
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  memset(pi, 0, sizeof(struct rpmpkginfo));
   int predictValue = -1;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
@@ -88,7 +90,7 @@ void test_GetMetadata_wrong_testfile()
 #endif /* After RPM4.4 version*/
   rpmFreeMacros(NULL);
   memset(pi, 0, sizeof(struct rpmpkginfo));
-  free(pi); 
+  free(pi);
   CU_ASSERT_EQUAL(Result, predictValue);
 }
 
@@ -103,6 +105,7 @@ void test_GetMetadata_no_testfile()
   char *ErrorBuf;
 
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  memset(pi, 0, sizeof(struct rpmpkginfo));
   int predictValue = -1;
   rpmReadConfigFiles(NULL, NULL);
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);

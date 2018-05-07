@@ -60,32 +60,32 @@ int GetURLClean()
 /* test functions */
 
 /**
- * \brief the URL is one file 
+ * \brief the URL is one file
  * TempFileDir is ./test_result
  * TempFile is empty
  */
 void testGetURLNormal_URLIsOneFile()
 {
-  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/mkpackages");
+  strcpy(URL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/fossology.sources.list");
   strcpy(TempFileDir, "./test_result");
-  GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/www.fossology.org/testdata/wgetagent/ */
-  int existed = file_dir_existed("./test_result/www.fossology.org/testdata/wgetagent/mkpackages");
+  GetURL(TempFile, URL, TempFileDir); /* download the file mkpackages into ./test_result/ */
+  int existed = file_dir_existed("./test_result/mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/fossology.sources.list");
   CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 
 /**
- * \brief the URL is one dir 
+ * \brief the URL is one dir
  * TempFileDir is ./test_result
  * TempFile is not empty
  */
 void testGetURLAbnormal_URLIsOneDir()
 {
-  strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/debian/2.0.0/");
+  strcpy(GlobalParam, "-l 1 -A *.list -R *.deb");
+  strcpy(URL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
   strcpy(TempFileDir, "./test_result/");
-  strcpy(TempFile, "./test_result/wget.tar");
-  GetURL(TempFile, URL, TempFileDir); 
-  int existed = file_dir_existed("./test_result/wget.tar");
+  strcpy(TempFile, "./test_result/fossology.sources.list");
+  GetURL(TempFile, URL, TempFileDir);
+  int existed = file_dir_existed("./test_result/fossology.sources.list");
   CU_ASSERT_EQUAL(existed, 1); /* the file downloaded? */
 }
 

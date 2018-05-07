@@ -50,7 +50,7 @@ class fo_libschema
   {
     $this->dbman = $dbManager;
   }
-  
+
   function setDriver(Driver &$dbDriver)
   {
     $this->dbman->setDriver($dbDriver);
@@ -253,7 +253,7 @@ class fo_libschema
       }
       if (!DB_TableExists($table))
       {
-        $sql = "CREATE TABLE \"$table\" ()";
+        $sql = "CREATE TABLE IF NOT EXISTS \"$table\" ()";
         $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $table);
       }
       foreach ($columns as $column => $modification)
@@ -540,7 +540,7 @@ class fo_libschema
     unset($this->currSchema['TABLEID']);
     return $this->currSchema;
   }
-  
+
   function addInheritedRelations()
   {
     $sql = "SELECT class.relname AS table, daddy.relname AS inherits_from

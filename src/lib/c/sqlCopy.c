@@ -18,12 +18,12 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 /*!
  * \file sqlCopy.c
  * \brief sqlCopy buffers sql inserts and performs batch copy's
- *        to the database.  Why do this?  Because this method is 
+ *        to the database.  Why do this?  Because this method is
  *        roughtly 15x faster than individual sql inserts for a
  *        typical fossology table insert.
  *
- * Note that data to be inserted is stored in memory (pCopy->DataBuf), 
- * not an external file.  So the caller should give some consideration 
+ * Note that data to be inserted is stored in memory (pCopy->DataBuf),
+ * not an external file.  So the caller should give some consideration
  * to the number of records buffered.
  *
  *\code
@@ -38,7 +38,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
  *
  * Two other functions may also come in handy:
  * 1. fo_sqlCopyExecute() will execute the copy to database immediately.
- * 2. fo_sqlCopyPrint() will print the sqlCopy structure. 
+ * 2. fo_sqlCopyPrint() will print the sqlCopy structure.
  *    It is good for debugging.
 \endcode
  */
@@ -46,7 +46,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 #include "sqlCopy.h"
 
 /*!
- \brief Constructor for sqlCopy_struct.  
+ \brief Constructor for sqlCopy_struct.
 
  \param PGconn  Database connection
  \param TableName
@@ -72,7 +72,10 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
   /* Allocate the structure */
   pCopy = malloc(sizeof(sqlCopy_t));
   if (!pCopy)
-  ERROR_RETURN("sqlCopy malloc")
+  {
+    va_end(ColumnNameArg);
+    ERROR_RETURN("sqlCopy malloc")
+  }
 
   /* Allocate storage for the data buffer */
   if (BufSize < 1) BufSize = 1;
@@ -85,6 +88,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
   if ((!pCopy->DataBuf) || (!pCopy->TableName))
   {
     fo_sqlCopyDestroy(pCopy, 0);
+    va_end(ColumnNameArg);
     ERROR_RETURN("sqlCopyCreate")
   }
 
@@ -112,6 +116,7 @@ psqlCopy_t fo_sqlCopyCreate(PGconn* pGconn, char* TableName, int BufSize, int Nu
     else
     {
       fo_sqlCopyDestroy(pCopy, 0);
+      va_end(ColumnNameArg);
       ERROR_RETURN("pCopy->ColumnNames size too small")
     }
   }
@@ -129,14 +134,14 @@ int tmp_printhex(char * str)
 #endif
 
 /*!
- \brief Add a data row to an sqlCopy 
+ \brief Add a data row to an sqlCopy
  Use '\N' to pass in a null
 
  \param pCopy Pointer to sqlCopy struct
  \param DataRow Row to insert
 
 \verbatim
- The fields in DataRow needs to be tab delimited.  
+ The fields in DataRow needs to be tab delimited.
  All strings should be escaped with PQescapeStringConn()
 
  For example, to insert a row with two character fields and an
@@ -166,7 +171,7 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow)
     dptr++;
   }
 
-  /* Substitute any literal '\n' or '\r' for string "\n", "\r" 
+  /* Substitute any literal '\n' or '\r' for string "\n", "\r"
    * (except for trailing \n which is required)
    */
   if (rncount)
@@ -304,7 +309,7 @@ void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 
 
 /*!
- \brief Print the sqlCopy_struct.  
+ \brief Print the sqlCopy_struct.
  This is used for debugging.
 
  \param pCopy Pointer to sqlCopy struct

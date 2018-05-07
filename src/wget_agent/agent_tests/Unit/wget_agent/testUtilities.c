@@ -28,12 +28,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* test functions */
 
 /**
- * \brief for function IsFile 
+ * \brief for function IsFile
  * a file
  */
 void testIsFileNormal_RegulerFile()
 {
-  system("echo 'hello world' > ./test.file");
+  int pid = system("echo 'hello world' > ./test.file");
+  if (WIFEXITED(pid)) pid = WEXITSTATUS(pid);
+  else pid = -1;
   char Fname[] = "./test.file";
   int isFile = IsFile(Fname, 1);
   CU_ASSERT_EQUAL(isFile, 1);
@@ -46,12 +48,14 @@ void testIsFileNormal_RegulerFile()
  */
 void testIsFileNormal_SymLink()
 {
-  system("echo 'hello world' > ./test.file");
+  int pid = system("echo 'hello world' > ./test.file");
+  if (WIFEXITED(pid)) pid = WEXITSTATUS(pid);
+  else pid = -1;
   char Fname[] = "./test.file";
   int isFile = IsFile(Fname, 0);
   CU_ASSERT_EQUAL(isFile, 1);
   char NewFname[] = "./link.file";
-  symlink(Fname, NewFname);
+  pid = symlink(Fname, NewFname);
   isFile = IsFile(NewFname, 1);
   CU_ASSERT_EQUAL(isFile, 1);
 #if 0
@@ -80,7 +84,7 @@ void testGetPositionNormal()
 }
 
 /**
- * \brief for function TaintURL 
+ * \brief for function TaintURL
  */
 void testTaintURL()
 {
@@ -101,7 +105,7 @@ void testTaintURL()
 
 /**
  * \brief for function PathCheck()
- * 
+ *
  * \note free the pointer from PathCheck()
  */
 void test_PathCheck()

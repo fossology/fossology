@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 void testPathCheck()
 {
-  char *DirPath = "%H%R/testdata4unpack!%U";
+  char *DirPath = "%H%R/!%U";
   char *NewPath = NULL;
   char HostName[1024];
   char TmpPath[1024];
@@ -31,7 +31,7 @@ void testPathCheck()
   subs = strstr(NewPath, "!");
   gethostname(HostName, sizeof(HostName));
 
-  snprintf(TmpPath, sizeof(TmpPath), "%s%s%s%s", HostName,fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL),"/testdata4unpack", subs);
+  snprintf(TmpPath, sizeof(TmpPath), "%s%s%s%s", HostName,fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL),"/", subs);
   FO_ASSERT_STRING_EQUAL(NewPath, TmpPath);
 }
 

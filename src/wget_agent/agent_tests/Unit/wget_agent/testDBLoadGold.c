@@ -53,17 +53,17 @@ int  DBLoadGoldInit()
 
   pgConn = fo_dbManager_getWrappedConnection(dbManager);
 
-  strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/debian/");
+  strcpy(GlobalParam, "-l 1 -A *.list -R *.deb");
+  strcpy(URL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
   strcpy(TempFileDir, "./test_result/");
-  strcpy(TempFile, "./test_result/wget.tar");
+  strcpy(TempFile, "./test_result/fossology.sources.list");
   GetURL(TempFile, URL, TempFileDir);
-  strcpy(GlobalTempFile,"./test_result/wget.tar");
-  strcpy(GlobalURL, "http://www.fossology.org/testdata/wgetagent/debian/");
+  strcpy(GlobalTempFile,"./test_result/fossology.sources.list");
+  strcpy(GlobalURL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
 
   /** delete the record that upload_filename is wget.tar, pre testing */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'wget.tar';");
+  snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -74,7 +74,7 @@ int  DBLoadGoldInit()
 
   /** insert upload wget.tar */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('wget.tar',40,now());");
+  snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('fossology.sources.list',40,now());");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -84,7 +84,7 @@ int  DBLoadGoldInit()
   PQclear(result);
   /** get upload id */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"SELECT upload_pk from upload where upload_filename = 'wget.tar';");
+  snprintf(SQL,MAXCMD,"SELECT upload_pk from upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -151,12 +151,12 @@ int DBLoadGoldClean()
  */
 void string_tolower(char *string)
 {
-  int length = strlen(string);  
+  int length = strlen(string);
   int i = 0;
-  for (i = 0; i < length; i++)  
-  {  
-    string[i] = tolower(string[i]);  
-  }   
+  for (i = 0; i < length; i++)
+  {
+    string[i] = tolower(string[i]);
+  }
 }
 
 /* test functions */

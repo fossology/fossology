@@ -32,9 +32,9 @@ extern char *DBConfFile;
 int  DBInsertInit()
 {
   char *ErrorBuf;
-  char *upload_filename = "argmatch.c.gz";
+  char *upload_filename = "test_1.orig.tar.gz";
   int upload_mode = 104;
-  char *upload_origin = "argmatch.c.gz";
+  char *upload_origin = "test_1.orig.tar.gz";
   char *tmp;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -43,7 +43,7 @@ int  DBInsertInit()
     LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
- 
+
   /** insert upload info */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"INSERT INTO upload (upload_filename,upload_mode,upload_origin) VALUES ('%s', %d, '%s');",upload_filename, upload_mode, upload_origin);
@@ -53,7 +53,7 @@ int  DBInsertInit()
     printf("Insert upload information ERROR!\n");
     return (-1);
   }
-  PQclear(result); 
+  PQclear(result);
 
   /* select the upload pk */
   memset(SQL,'\0',MAXSQL);
@@ -143,10 +143,10 @@ void testDBInsertPfile()
   ContainerInfo *CI = NULL;
   struct stat Stat = {0};
   ParentInfo PI = {0, 1287725739, 1287725739, 0, 0};
-  ContainerInfo CITest = {"../test-data/testdata4unpack/argmatch.c.gz", "./test-result/", "argmatch.c.gz", "argmatch.c.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
+  ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/", "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
-  char *Fuid = "657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.2920";
-  int result = DBInsertPfile(CI, Fuid);  
+  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1312";
+  int result = DBInsertPfile(CI, Fuid);
   CU_ASSERT_EQUAL(result, 1);
 }
 
@@ -158,7 +158,7 @@ void testDBInsertUploadTree()
   ContainerInfo *CI = NULL;
   struct stat Stat = {0};
   ParentInfo PI = {0, 1287725739, 1287725739, 0, 0};
-  ContainerInfo CITest = {"../test-data/testdata4unpack/argmatch.c.gz", "./test-result/", "argmatch.c.gz", "argmatch.c.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
+  ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/", "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
   int result = DBInsertUploadTree(CI, 1);
   CU_ASSERT_EQUAL(result, 0);

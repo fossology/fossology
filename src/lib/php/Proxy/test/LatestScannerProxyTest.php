@@ -26,6 +26,9 @@ class LatestScannerProxyTest extends \PHPUnit_Framework_TestCase
 {
   /** @var TestLiteDb */
   private $testDb;
+  /** @var assertCountBefore */
+  private $assertCountBefore;
+
   
   protected function setUp()
   {

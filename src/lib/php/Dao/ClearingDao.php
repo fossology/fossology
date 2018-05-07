@@ -403,7 +403,7 @@ INSERT INTO clearing_decision (
 
     $stmt = __METHOD__;
     $sql = 'SELECT rf_fk,rf_shortname,rf_fullname,clearing_event_pk,comment,type_fk,removed,reportinfo,acknowledgement, EXTRACT(EPOCH FROM date_added) AS ts_added
-             FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk 
+             FROM clearing_event LEFT JOIN license_ref ON rf_fk=rf_pk
              WHERE uploadtree_fk=$1 AND group_fk=$2 AND date_added>to_timestamp($3)
              ORDER BY clearing_event_pk ASC';
     $this->dbManager->prepare($stmt, $sql);
@@ -672,7 +672,7 @@ INSERT INTO clearing_decision (
 
     $this->dbManager->prepare($stmt, $sql);
     $res = $this->dbManager->execute($stmt, $params);
-    
+
     $bulks = array();
     while ($row = $this->dbManager->fetchArray($res))
     {
@@ -713,7 +713,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
     return $result;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -751,7 +751,7 @@ INSERT INTO clearing_decision (
 
     return $multiplicity;
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -762,7 +762,7 @@ INSERT INTO clearing_decision (
     $this->markDirectoryAsIrrelevantIfScannerDetected($itemTreeBounds, $groupId, $userId);
     $this->markDirectoryAsIrrelevantIfUserEdited($itemTreeBounds, $groupId, $userId);
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -773,7 +773,7 @@ INSERT INTO clearing_decision (
     $this->markDirectoryAsIrrelevantIfScannerDetected($itemTreeBounds, $groupId, $userId, true);
     $this->markDirectoryAsIrrelevantIfUserEdited($itemTreeBounds, $groupId, $userId, true);
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
@@ -820,14 +820,14 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @param int $userId
    */
-  protected function markDirectoryAsIrrelevantIfUserEdited(ItemTreeBounds $itemTreeBounds,$groupId,$userId,$removeDecision=false) 
+  protected function markDirectoryAsIrrelevantIfUserEdited(ItemTreeBounds $itemTreeBounds,$groupId,$userId,$removeDecision=false)
   {
     $statementName = __METHOD__ ;
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     $condition = "ut.lft BETWEEN $1 AND $2";
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent=true, $statementName, $params, $condition);
     if(!$removeDecision) {
-      $params[] = $userId; 
+      $params[] = $userId;
       $a = count($params);
       $params[] = $groupId;
       $params[] = DecisionTypes::IRRELEVANT;
@@ -840,14 +840,14 @@ INSERT INTO clearing_decision (
       $params[] = DecisionTypes::IRRELEVANT;
       $a = count($params);
       $this->dbManager->prepare($statementName, $decisionsCte
-          .' DELETE FROM clearing_decision WHERE decision_type = $'.$a.' 
+          .' DELETE FROM clearing_decision WHERE decision_type = $'.$a.'
                 AND clearing_decision_pk IN (
              SELECT id FROM allDecs WHERE type_id = $'.$a.')');
     }
     $res = $this->dbManager->execute($statementName,$params);
     $this->dbManager->freeResult($res);
   }
-  
+
   /**
    * @param uploadId
    * @param int $groupId
@@ -866,7 +866,7 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
     return $ids;
   }
-  
+
   /**
    * @param $uploadId
    * @param int $groupId
@@ -882,7 +882,7 @@ INSERT INTO clearing_decision (
    * @param uploadId
    * @param int $groupId
    * @param int $licenseId
-   */  
+   */
   public function removeMainLicense($uploadId, $groupId, $licenseId)
   {
     $this->dbManager->getSingleRow('DELETE FROM upload_clearing_license WHERE upload_fk=$1 AND group_fk=$2 AND rf_fk=$3',

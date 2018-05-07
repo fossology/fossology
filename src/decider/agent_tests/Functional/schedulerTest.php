@@ -49,7 +49,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private $dbManager;
   /** @var TestInstaller */
   private $testInstaller;
-  
+
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -125,10 +125,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey','jobqueue_jq_pk_seq'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey','jobqueue_jq_pk_seq','job_job_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue','job'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
@@ -520,8 +520,8 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->rmRepo();
   }
-  
-  
+
+
   /** @group Functional */
   public function testDeciderRealBulkReuseShouldScheduleMonkBulk()
   {
@@ -532,10 +532,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   {
     $this->setUpTables();
     $this->setUpRepo();
-    
+
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
     $licId1 = $licenseRef1->getId();
-    
+
     $agentBulk = 6;
     $pfile = 4;
     $jobId = 16;
@@ -546,19 +546,19 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$agentBulk)");
     $this->dbManager->queryOnce("INSERT INTO highlight (fl_fk,start,len) VALUES(12222,12,3)");
     $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
-            . " VALUES ($jobId, 2, 'decider', '2', '2014-08-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
+            . " VALUES ($jobId, 2, 'decider', '123456', '2014-08-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
 
     $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
-            . " VALUES ($jobId-1, $otherJob, 'monkbulk', '2', '2014-08-07 09:22:22.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
+            . " VALUES ($jobId-1, $otherJob, 'monkbulk', '123456', '2014-08-07 09:22:22.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, NULL)");
     $this->dbManager->queryOnce("INSERT INTO job (job_pk, job_queued, job_priority, job_upload_fk, job_user_fk, job_group_fk)"
             . " VALUES ($otherJob, '2014-08-07 09:22:22.718312+00', 0, 1, 2, $groupId)");
-    
+
     $this->dbManager->queryOnce("INSERT INTO license_ref_bulk (lrb_pk, user_fk, group_fk, rf_text, upload_fk, uploadtree_fk) VALUES (123456, 2, $groupId, 'foo bar', 1, 7)");
     $this->dbManager->queryOnce("INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES (123456, $licId1, 'f')");
-    
+
     $this->dbManager->queryOnce("INSERT INTO upload_reuse (upload_fk, reused_upload_fk, group_fk, reused_group_fk, reuse_mode)"
             . " VALUES (2, 1, $groupId, $groupId, 0)");
-    
+
     require_once 'HelperPluginMock.php';
     list($success,$output,$retCode) = $runner->run($uploadId=2, $userId=2, $groupId, $jobId, $args='-r4');
 
@@ -567,7 +567,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->rmRepo();
   }
-  
+
   /** @group Functional */
   public function testDeciderRealShouldMakeDecisionAsWipIfUnhandledScannerEvent()
   {
@@ -579,10 +579,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
     $monkAgentId = 5;
-    
+
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
     $licId1 = $licenseRef1->getId();
-    
+
     $pfile = 4;
     $jobId = 16;
     $groupId = 2;
@@ -591,12 +591,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->dbManager->queryOnce("DELETE FROM license_file");
 
-    /* insert NoLicenseKnown decisions */    
+    /* insert NoLicenseKnown decisions */
     $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
             . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
     $isWipBeforeDecider = $this->clearingDao->isDecisionWip($itemId, $groupId);
     assertThat($isWipBeforeDecider, equalTo(false));
-    
+
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
     $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
             . " VALUES ($jobId, 2, 'decider', '2', '2015-06-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, '-r8')");
@@ -605,13 +605,13 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
-    
+
     $isWip = $this->clearingDao->isDecisionWip($itemId, $groupId);
     assertThat($isWip, equalTo(true));
 
     $this->rmRepo();
   }
-  
+
   /** @group xFunctional */
   public function testDeciderRealShouldMakeNoDecisionForIrrelevantFiles()
   {
@@ -623,10 +623,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
     $monkAgentId = 5;
-    
+
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
     $licId1 = $licenseRef1->getId();
-    
+
     $pfile = 4;
     $jobId = 16;
     $groupId = 2;
@@ -636,12 +636,12 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->dbManager->queryOnce("DELETE FROM license_file");
 
-    /* insert NoLicenseKnown decisions */    
+    /* insert NoLicenseKnown decisions */
     $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
             . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IRRELEVANT.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
     $lastDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
     $lastClearingId = $lastDecision->getClearingId();
-    
+
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
     $this->dbManager->queryOnce("INSERT INTO jobqueue (jq_pk, jq_job_fk, jq_type, jq_args, jq_starttime, jq_endtime, jq_endtext, jq_end_bits, jq_schedinfo, jq_itemsprocessed, jq_log, jq_runonpfile, jq_host, jq_cmd_args)"
             . " VALUES ($jobId, 2, 'decider', '2', '2015-06-07 09:57:27.718312+00', NULL, '', 0, NULL, 6, NULL, NULL, NULL, '-r8')");
@@ -650,11 +650,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
-    
+
     $newDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
     assertThat($newDecision->getClearingId(), equalTo($lastClearingId));
 
     $this->rmRepo();
   }
-  
+
 }

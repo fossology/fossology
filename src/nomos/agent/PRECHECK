@@ -158,7 +158,7 @@ void preloadResults(char *filetext, char *ltsr)
 #ifdef	PROC_TRACE_SWITCH
     if (gl.ptswitch)
 #endif	/* PROC_TRACE_SWITCH */
-	printf("== preloadResults(%p, %p, %d, %d)\n", filetext, ltsr);
+	printf("== preloadResults(%p, %p,)\n", filetext, ltsr);
 #endif	/* PROC_TRACE */
 /* */
 @EOF@

@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     exit(-1);
   }
 
-  /* first argument is the number of rows to test, 
+  /* first argument is the number of rows to test,
    * the second is the number of bytes to use for col_text
    * third is the Copy data buffer size
    */
@@ -80,6 +80,7 @@ int main(int argc, char** argv)
   DataBuf = calloc(datasize, sizeof(char));
   if (!DataBuf)
   {
+    free(col_text);
     ERROR_RETURN("Allocating test data buffer failed.")
     exit(-2);
   }

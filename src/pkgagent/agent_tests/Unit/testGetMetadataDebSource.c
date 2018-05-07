@@ -37,6 +37,7 @@ void test_GetMetadataDebSource()
   char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  memset(pi, 0, sizeof(struct debpkginfo));
   int predictValue = 0;
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   strcpy(pi->version, "");
@@ -72,11 +73,12 @@ void test_GetMetadataDebSource_wrong_testfile()
   char *ErrorBuf;
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  memset(pi, 0, sizeof(struct debpkginfo));
   int predictValue = 0; /* FIXED: seems pkgagent have bug here. */
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   int Result = GetMetadataDebSource(repFile, pi);
   //printf("GetMetadataDebSource Result is:%d\n", Result);
- 
+
   PQfinish(db_conn);
   int i;
   for(i=0; i< pi->dep_size;i++)

@@ -66,7 +66,7 @@ else
    fi
   
    echo "DB: before su to postgres"
-   su postgres -c "psql < $TESTROOT/$fossSql"
+   su postgres -c "psql < ./$fossSql"
    if [ $? != 0 ] ; then
       echo "ERROR: Database failed during configuration."
       exit 3

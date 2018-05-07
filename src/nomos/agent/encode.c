@@ -73,5 +73,9 @@ int main(int argc, char **argv)
   }
   printf("\\0\"}\n");
 
+  if (fp != stdin) {
+    fclose(fp);
+  }
+
   return 0;
 }

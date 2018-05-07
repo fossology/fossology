@@ -1,6 +1,6 @@
 /************************************************************
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -111,8 +111,8 @@ int	CountDigits	(uint64_t Num)
   uint64_t Val=10;
   int Digits=1;
   for(Val=10; (Val > 0) && (Val < Num); Val = Val * 10)
-  	{
-	Digits++;
+  {
+    Digits++;
 	}
   /* printf("%d has %d digits\n",Num,Digits); */
   return(Digits);

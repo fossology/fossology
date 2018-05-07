@@ -46,6 +46,7 @@ void test_RecordMetadataRPM()
   snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)100);
 
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
+  memset(pi, 0, sizeof(struct rpmpkginfo));
   int predictValue = 0;
 
   /* perpare testing data in database */
@@ -56,6 +57,8 @@ void test_RecordMetadataRPM()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -66,7 +69,9 @@ void test_RecordMetadataRPM()
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pfile information ERROR!\n");
-    exit(-1); 
+    PQclear(result);
+    free(pi);
+    exit(-1);
   }
   pi->pFileFk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
@@ -105,6 +110,8 @@ void test_RecordMetadataRPM()
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pkg information ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 1), "Test Pkg");
@@ -123,6 +130,8 @@ void test_RecordMetadataRPM()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Clear pkg_rpm_req test data ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -141,6 +150,8 @@ void test_RecordMetadataRPM()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Clear pfile test data ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);

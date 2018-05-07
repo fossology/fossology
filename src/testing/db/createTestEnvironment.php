@@ -43,6 +43,7 @@ if (array_key_exists("f", $opts)) {
   $testPgDb = new Fossology\Lib\Test\TestPgDb($testDbFactory->getDbName($sysConfDir), $sysConfDir);
   $testPgDb->createSequences(array(), true);
   $testPgDb->createPlainTables(array(), true);
+  $testPgDb->createInheritedTables(array());
   $testPgDb->alterTables(array(), true);
   $testPgDb->createInheritedTables(array('uploadtree_a'));
 }

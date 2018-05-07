@@ -21,7 +21,7 @@ namespace Fossology\Decider;
 use Mockery as M;
 
 $deciderPlugin = M::mock();//'Fossology\\DeciderJob\\UI\\DeciderJobAgentPlugin');
-$deciderPlugin->shouldReceive('AgentAdd')->withArgs(array(16,2,anything(), arrayWithSize(1)))->once();
+$deciderPlugin->shouldReceive('AgentAdd')->withArgs(array("1",2,anything(), arrayWithSize(1)))->once();
 $GLOBALS['xyyzzzDeciderJob'] = $deciderPlugin;
 function plugin_find($x){
   return $GLOBALS['xyyzzzDeciderJob'];

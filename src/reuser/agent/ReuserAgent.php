@@ -92,7 +92,7 @@ class ReuserAgent extends Agent
       }
     }
     return true;
-  }  
+  }
 
   protected function reuseMainLicense($uploadId, $groupId, $reusedUploadId, $reusedGroupId)
   {
@@ -175,7 +175,7 @@ class ReuserAgent extends Agent
     foreach($clearingDecisionsToImport as $clearingDecision)
     {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
-    
+
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),$itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       while($row = $this->dbManager->fetchArray($res))
       {
@@ -185,7 +185,7 @@ class ReuserAgent extends Agent
       $this->dbManager->freeResult($res);
     }
   }
-  
+
   protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
   {
     $diffLevel = system("diff $reusedPath $newPath | wc -l");
@@ -199,7 +199,7 @@ class ReuserAgent extends Agent
       $this->heartbeat(1);
     }
   }
-  
+
   /**
    * @param ClearingDecision[] $clearingDecisions
    * @return ClearingDecision[]

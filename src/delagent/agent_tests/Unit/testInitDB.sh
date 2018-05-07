@@ -31,7 +31,7 @@ fi
 touch $HOME/connectdb.exp
 echo '#!/usr/bin/expect' > $HOME/connectdb.exp
 echo 'set timeout 30' >> $HOME/connectdb.exp
-echo 'spawn pg_restore -U fossy -d '$DBName' ../testdata/testdb_all.tar' >> $HOME/connectdb.exp
+echo 'spawn psql -Ufossy -d '$DBName' < ../testdata/testdb_all.sql >/dev/null' >> $HOME/connectdb.exp
 echo 'expect "Password:"' >> $HOME/connectdb.exp
 echo 'send "fossy\r"' >> $HOME/connectdb.exp
 echo 'interact' >> $HOME/connectdb.exp
