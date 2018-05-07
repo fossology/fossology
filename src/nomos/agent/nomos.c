@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2018, Siemens AG
+ Copyright (C) 2014, 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -184,7 +184,6 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
       }
       else {
         strcat(filename_buf, "\n");  // add one new line character by the end of one file path, one line is one file path
-        //sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
         /* write on average process_count */
         file_number = *distribute_count%process_count;
         fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);

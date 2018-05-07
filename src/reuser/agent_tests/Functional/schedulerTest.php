@@ -387,9 +387,6 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     /* upload 3 in the test db is the same as upload 2 -> items 13-24 in upload 2 correspond to 33-44 */
     $reusingUploadItemShift = 20;
 
-    $this->dbManager->queryOnce("UPDATE uploadtree_a SET pfile_fk=351 WHERE uploadtree_pk=$originallyClearedItemId+$reusingUploadItemShift",
-            __METHOD__.'.minorChange');
-
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId,$reuseMode=2);
 
     $repoPath = $this->testDb->getFossSysConf().'/repo/files/';

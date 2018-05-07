@@ -1,8 +1,6 @@
 ######################################################################
 # Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
 #
-# Copyright (C) 2018 Siemens AG
-#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -38,7 +36,7 @@ TEST_OBJ = testListFolders.o testDeleteFolders.o
 # these are the external test data files needed by the tests
 # at the moment they will be found in the delagent/ directory, but this
 # may change as we organize the test data in a more consistent way
-TEST_FILES = testdb_all.tar testrepo_files.tar.gz testrepo_gold.tar.gz
+TEST_FILES = testdb_all.sql testrepo_files.tar.gz testrepo_gold.tar.gz
 
 all: $(EXE)
 
@@ -46,10 +44,10 @@ $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLI
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $<
+	$(CC) -c $(CFLAGS_LOCAL) -I $(CUNIT_LIB_DIR) -I $(TEST_LIB_DIR) $<
 
 $(TEST_OBJ): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $< -o $@
+	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
 test: all $(TEST_FILES:%=../testdata/%)
 	./$(EXE)

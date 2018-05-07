@@ -65,12 +65,11 @@ $(OBJS): %.o: %.c
 testdata:
 	@echo "Unpacking test files"
 	@cd ../testdata && tar -xvjf testdata.tar.bz2
-	$(foreach test_file, $(TEST_FILES), ../testdata/testit.sh ../testdata/$(test_file) ;)
 
 $(FOCUNIT):
 	$(MAKE) -C $(CUNIT_LIB_DIR) $@
 
-test: all testdata $(TEST_FILES:%=../testdata/%)
+test: all testdata setupDB testUnunpack dropDB
 	./$(EXE)
 
 coverage: testdata $(OBJS) libununpack_cov.a $(VARS) $(FOLIB)
@@ -83,9 +82,19 @@ libununpack_cov.a:
 libununpack.a:
 	$(MAKE) -C $(AGENTDIR) $@
 
+setupDB: ../testdata/setupDb.sh
+	../testdata/setupDb.sh
+
+dropDB: ../testdata/dropDb.sh
+	../testdata/dropDb.sh
+
+testUnunpack: $(TEST_FILES:%=../testdata/%)
+	$(foreach test_file, $(TEST_FILES), ../testdata/testit.sh ../testdata/$(test_file) ;)
+
 clean:
 	rm -rf $(EXE) *.o core *.xml *.txt results test-result *.dir *.unpacked
 	rm -rf $(TEST_FILES:%=../testdata/%) $(TEST_FILES)
+	rm -rf ../testdata/*.dir ../testdata/*.xml ../testdata/*.meta
 
 .PHONY: all test coverage clean libununpack_cov.a libununpack.a
 

@@ -34,6 +34,5 @@ coverage:
 
 clean:
 	$(call DIR_LOOP,clean)
-	rm -rf testdata/*.dir testdata/*.xml testdata/*.meta
 
 .PHONY: all test coverage clean

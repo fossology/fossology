@@ -44,12 +44,15 @@ before_script:
  - sudo chown $(whoami) /srv/fossologyTestRepo
  - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
  - psql -c "create database fossology;" -U postgres
+ - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
+ - echo "localhost:*:*:fossy:fossy" >> ~/.pgpass && echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
+ - chmod 0600 ~/.pgpass
 
 env:
   global:
    - PHPTESTSUITE=''
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
-   - MAKETARGETS='all test'
+   - MAKETARGETS='all test-adj2nest test-buckets test-cli test-copyright test-debug test-decider test-deciderjob test-delagent test-lib test-maintagent test-mimetype test-monk test-nomos test-pkgagent test-readmeoss test-reportImport test-reuser test-spdx2 test-unifiedreport test-wget_agent test-www'
 
 script:
  - set -e

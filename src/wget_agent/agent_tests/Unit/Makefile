@@ -1,6 +1,5 @@
 # FOSSology Makefile - test for wget_agent
 # Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-# Copyright (C) 2018 Siemens AG
 
 TOP = ../../../../
 VARS = $(TOP)/Makefile.conf

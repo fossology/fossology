@@ -1,6 +1,5 @@
 # FOSSology Makefile - test for agents/pkgagent
 # Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
-# Copyright (C) 2018 Siemens AG
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf

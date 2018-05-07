@@ -1,7 +1,6 @@
 #!/bin/bash
 # FOSSology dbcreate script
 # Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
-# Copyright (C) 2018 Siemens AG
 #
 # This script checks to see if the the fossology db exists and if not
 # then creates it.

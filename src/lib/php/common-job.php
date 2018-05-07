@@ -25,24 +25,24 @@ use Fossology\Lib\Db\DbManager;
  * \brief library of functions used by the ui to manage jobs.
  *        Jobs information is stored in the jobs, jobdepends,
  *        and jobqueue tables.
- * 
+ *
  * Terminology:
  * Scheduled jobs are divided into a specific heirarchy.
- * 
+ *
  * "Job"
  * This is the Job container and is saved in a database
- * job record.  
+ * job record.
  *
  * "JobQueue"
- * There may be several tasks to perform for a job.  
+ * There may be several tasks to perform for a job.
  * For example, a job may be composed of
  * an unpack task, an adj2nest task, and a nomos task.
  * Each job task is specified in a database jobqueue record.
- * 
+ *
  * JobQueue tasks may have dependencies upon the completion of
  * other JobQueue tasks.  The jobdepends tables keep those
  * parent child relationships.
- * 
+ *
  **/
 
 
@@ -136,7 +136,7 @@ function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
     $stmtName
   );
 
-  return ($row['job_pk']);
+  return intval($row['job_pk']);
 } // JobAddJob()
 
 
@@ -161,9 +161,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
-  if (is_array($Depends)) 
+  if (is_array($Depends))
   {
-    foreach($Depends as $Dependency) 
+    foreach($Depends as $Dependency)
     {
       if (empty($Dependency)) continue;
 
@@ -194,7 +194,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
-   
+
   /* Find the jobqueue that was just added */
   $jq_pk = GetLastSeq("jobqueue_jq_pk_seq", "jobqueue");
   if (empty($jq_pk))
@@ -207,9 +207,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   }
 
   /* Add dependencies */
-  if (is_array($Depends)) 
+  if (is_array($Depends))
   {
-    foreach($Depends as $Dependency) 
+    foreach($Depends as $Dependency)
     {
       if (empty($Dependency))
       {
@@ -233,7 +233,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
 
 
 /**
- * \brief Gets the list of jobqueue records with the requested $status 
+ * \brief Gets the list of jobqueue records with the requested $status
  *
  * \param string $status - the status might be:
  *        Started, Completed, Restart, Failed, Paused, etc
@@ -276,13 +276,13 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
   $user_pk = Auth::getUserId();
   $group_pk = Auth::getGroupId();
 
-  if (empty($upload_pk_list)) 
+  if (empty($upload_pk_list))
   {
     return;
   }
   // Schedule them
   $agent_count = count($agent_list);
-  foreach(explode(",", $upload_pk_list) as $upload_pk) 
+  foreach(explode(",", $upload_pk_list) as $upload_pk)
   {
     if (empty($upload_pk))  continue;
 
@@ -302,21 +302,21 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 
     // don't exit on AgentAdd failure, or all the agents requested will
     // not get scheduled.
-    for ($ac = 0;$ac < $agent_count;$ac++) 
+    for ($ac = 0;$ac < $agent_count;$ac++)
     {
       $agentname = $agent_list[$ac]->URI;
-      if (!empty($agentname)) 
+      if (!empty($agentname))
       {
         $Agent = & $Plugins[plugin_find_id($agentname) ];
         $Dependencies = "";
         $ErrorMsg = "already queued!";
         $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-        if ($agent_jq_pk <= 0) 
+        if ($agent_jq_pk <= 0)
         {
           echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
           echo "WARNING message: $ErrorMsg\n";
-        } 
-        else if ($Verbose) 
+        }
+        else if ($Verbose)
         {
           $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk";
           $result = pg_query($PG_CONN, $SQL);
@@ -374,7 +374,7 @@ function QueueUploadsOnDelagents($upload_pk_list)
  * \param $job_pk    - the job to be checked
  * \param $AgentName - the agent name (from agent.agent_name)
  *
- * \return 
+ * \return
  * jq_pk of scheduled jobqueue
  * or 0 = not scheduled
  */
@@ -419,7 +419,7 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
  * \param $upload_pk
  * \param $ErrorMsg - error message on failure
  * \param $Dependencies - array of named dependencies. Each array element is the plugin name.
- *         For example,  array(agent_adj2nest, agent_pkgagent).  
+ *         For example,  array(agent_adj2nest, agent_pkgagent).
  *         Typically, this will just be array(agent_adj2nest).
  * \param $jqargs (optional) jobqueue.jq_args
  *

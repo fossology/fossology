@@ -1,8 +1,6 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
-Copyright (C) 2018 Siemens AG
-
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -124,7 +122,7 @@ CU_TestInfo testcases_DeleteFolders[] =
 #endif
 {"Testing the function DeleteFolders:", testDeleteFolders},
 {"Testing the function DeleteUploads:", testDeleteUploads},
-//{"Testing the function DeleteLicenses:", testDeleteLicenses},
+// TODO fix #1057 {"Testing the function DeleteLicenses:", testDeleteLicenses},
   CU_TEST_INFO_NULL
 };
 

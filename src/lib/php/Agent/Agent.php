@@ -89,7 +89,7 @@ abstract class Agent extends Object
     $shortOpts = $schedulerHandledOpts . $this->agentSpecifOptions;
 
     $args = getopt($shortOpts, $longOpts);
-    
+
     $this->schedulerMode = (array_key_exists("scheduler_start", $args));
 
     $this->userId = $args['userID'];

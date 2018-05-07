@@ -1,6 +1,5 @@
 /***************************************************************
  Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License

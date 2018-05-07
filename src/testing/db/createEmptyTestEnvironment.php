@@ -68,8 +68,12 @@ function setupTestEnv($workingDir, $agent, $agentTable=true)
   $test_name = $matches[1];
   $db_conf = $dbout[0];
   $version_array = parse_ini_file("$db_conf/VERSION");
-  $DB_NAME = "fosstest".$test_name;
-  $PG_CONN = pg_connect("host=localhost port=5432 dbname=$DB_NAME user=fossy password=fossy")
+  $db_array = parse_ini_file("$db_conf/Db.conf");
+  $DB_NAME = $db_array["dbname"];
+  $db_user = $db_array["user"];
+  $db_pass = $db_array["password"];
+  $db_host = $db_array["host"];
+  $PG_CONN = pg_connect("host=$db_host port=5432 dbname=$DB_NAME user=$db_user password=$db_pass")
   or die("Could not connect");
 
   if($agentTable == true) {

@@ -2,7 +2,6 @@
 <?php
 /*
  Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -400,7 +399,7 @@ foreach ($src_dirs as $src_dir) {
 }
 */
 
-$des_dir = "/usr/local/etc/fossology/mods-enabled/";
+$des_dir = "/srv/fossologyTestRepo/testConf/mods-enabled/";
 if (is_dir($des_dir)) {
   symlink($des_dir, "$mods_enabled_dir")
     or die("FAIL - could not create symlink for $des_dir\n");
@@ -499,7 +498,7 @@ require_once(__DIR__ . '/../../lib/php/common-cache.php');
 // our makefile interface
 debug("Applying the FOSSOlogy schema to test database via ApplySchema()");
 ob_start();
-$apply_result = ApplySchema($core_schema_dat_file);
+$apply_result = ApplySchema($core_schema_dat_file, false, $test_db_name);
 
 // then re-assign the previous PG_CONN, if there was one
 if (isset($previous_PG_CONN)) {
@@ -532,11 +531,12 @@ $folder_sql = "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 
 pg_query($test_db_conn, $folder_sql)
     or die("FAIL: could not change folder sequence\n");
 
-$LIBEXECDIR = "/usr/local/lib/fossology/";
-$MODDIR = "/usr/local/share/fossology/";
+$LIBEXECDIR = "$fo_base_dir/lib/";
+$MODDIR = "$fo_base_dir/";
 /* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
-require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
-require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
+require_once(__DIR__ . '/../../lib/php/libschema.php');
+require_once(__DIR__ . "/../../../install/db/dbmigrate_2.0-2.1.php"); // hardcode for now
+require_once(__DIR__ . "/../../../install/db/dbmigrate_2.1-2.2.php"); // hardcode for now
 $Verbose = 0;
 Migrate_20_21($Verbose);
 Migrate_21_22($Verbose);

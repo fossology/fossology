@@ -1,6 +1,8 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
+Copyright (C) 2018, Siemens AG
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -32,6 +34,29 @@ char *DBConfFile = NULL;
 
 extern CU_SuiteInfo suites[];
 
+char* getUser()
+{
+  char CMD[200], *user;
+  FILE *db_conf;
+  int len;
+  memset(CMD, '\0', sizeof(CMD));
+  user = malloc(20 * sizeof(char));
+  memset(user, '\0', 20);
+
+  sprintf(CMD, "awk -F \"=\" '/user/ {print $2}' %s | tr -d '; '", DBConfFile);
+  db_conf = popen(CMD, "r");
+  if (db_conf != NULL)
+  {
+    if(fgets(user, sizeof(user)-1, db_conf) != NULL)
+    {
+      len = strlen(user);
+      user[len-1] = '\0';
+    }
+  }
+  pclose(db_conf);
+  return user;
+}
+
 /**
  * \brief initialize db
  */
@@ -58,9 +83,7 @@ int DelagentDBInit()
   DBConfFile = get_dbconf();
 
   memset(CMD, '\0', sizeof(CMD));
-  //sprintf(CMD, "sh testInitDB.sh %s", get_db_name());
-  sprintf(CMD, "pg_restore -e -Ufossy -d %s ../testdata/testdb_all.tar", get_db_name());
-  printf("restore database command: %s\n", CMD);
+  sprintf(CMD, "psql -U %s -d %s < ../testdata/testdb_all.sql >/dev/null", getUser(), get_db_name());
   rc = system(CMD);
   if (WEXITSTATUS(rc) != 0)
   {

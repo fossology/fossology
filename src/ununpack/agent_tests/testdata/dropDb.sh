@@ -14,6 +14,12 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-finalConf=$(awk -F "=" '/finalConf/ {print $2}' testVariables.var | tr -d '; ')
+# Remove the test config directory
 
-../../agent/ununpack -c $finalConf -Cv -d . -R -L ./$1.xml $1
+user=$(awk -F "=" '/user/ {print $2}' testVariables.var | tr -d '; ')
+confDir=$(awk -F "=" '/confDir/ {print $2}' testVariables.var | tr -d '; ')
+finalConf=$(awk -F "=" '/finalConf/ {print $2}' testVariables.var | tr -d '; ')
+dbname=$(awk -F "=" '/dbname/ {print $2}' testVariables.var | tr -d '; ')
+
+psql -c "DROP DATABASE $dbname;" postgres $user
+rm -rf $confDir $finalConf testVariables.var
