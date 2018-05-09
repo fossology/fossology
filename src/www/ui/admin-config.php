@@ -80,6 +80,31 @@ class foconfig extends FO_Plugin
           $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
           $OutBuf .= "<br>$row[description]";
           break;
+        case CONFIG_TYPE_PASSWORD:
+          $ConfVal = htmlentities($row['conf_value']);
+          $OutBuf .= "<INPUT type='password' name='new[$row[variablename]]' size='70' value='$ConfVal' title='$row[description]' $InputStyle>";
+          $OutBuf .= "<br>$row[description]";
+          break;
+        case CONFIG_TYPE_DROP:
+          $ConfVal = htmlentities($row['conf_value']);
+          $Options = explode("|",$row['option_value']);
+          $OutBuf .= "<select name='new[$row[variablename]]' title='$row[description]' $InputStyle>";
+          foreach($Options as $Option)
+          {
+            $matches = array();
+            preg_match('/(\\w+)[{](.*)[}]/', $Option, $matches);
+            $Option_display = $matches[1];
+            $Option_value   = $matches[2];
+            $OutBuf .= "<option $InputStyle value='$Option_value' ";
+            if($ConfVal == $Option_value)
+            {
+              $OutBuf .= "selected";
+            }
+            $OutBuf .= ">$Option_display</option>";
+          }
+          $OutBuf .= "</select>";
+          $OutBuf .= "<br>$row[description]";
+          break;
         default:
           $OutBuf .= "Invalid configuration variable.  Unknown type.";
       }

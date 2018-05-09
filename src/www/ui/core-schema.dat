@@ -1314,7 +1314,7 @@
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"ui_label\" varchar(60)";
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"ui_label\" SET NOT NULL";
 
-  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea'";
+  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown'";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"vartype\" int4";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"vartype\" SET NOT NULL";
 
@@ -1333,6 +1333,10 @@
   $Schema["TABLE"]["sysconfig"]["validation_function"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"validation_function\" IS 'Name of function to validate input. Not currently implemented.'";
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"validation_function\" varchar(40) DEFAULT NULL::character varying";
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"validation_function\" DROP NOT NULL, ALTER COLUMN \"validation_function\" SET DEFAULT NULL::character varying";
+  
+  $Schema["TABLE"]["sysconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" character varying(40) DEFAULT NULL";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL";
 
 
   $Schema["TABLE"]["tag"]["tag_pk"]["DESC"] = "";
