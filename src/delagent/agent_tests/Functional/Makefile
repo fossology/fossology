@@ -24,7 +24,7 @@ AGENTDIR = ../../agent
 
 # the list of external test data files required by this test
 # these will be found in ../testdata/
-TEST_FILES = testdb_all.sql
+TEST_FILES = testdb_all.gz
 
 all:
 	$(MAKE) -C $(AGENTDIR) $@

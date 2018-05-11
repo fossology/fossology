@@ -143,14 +143,14 @@ if(array_key_exists('d', $Options))
   }
   // check that postgresql is running
   //$ckCmd = "sudo su postgres -c 'echo \\\q | psql'";
-  $ckCmd = "psql -c '\q' fossology -U fossy";
+  $ckCmd = "psql -c '\q' postgres -U fossy";
   $lastCmd = exec($ckCmd, $ckOut, $ckRtn);
   if($ckRtn != 0)
   {
     echo "ERROR: postgresql isn't running, not deleting database $dropName\n";
     exit(1);
   }
-  $existCmd = "psql -l  fossology -U fossy|grep -q $dropName";
+  $existCmd = "psql -l postgres -U fossy|grep -q $dropName";
   $lastExist = exec($existCmd, $existkOut, $existRtn);
   if($existRtn == 0)
   {

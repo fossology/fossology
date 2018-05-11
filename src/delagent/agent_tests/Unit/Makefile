@@ -36,7 +36,7 @@ TEST_OBJ = testListFolders.o testDeleteFolders.o
 # these are the external test data files needed by the tests
 # at the moment they will be found in the delagent/ directory, but this
 # may change as we organize the test data in a more consistent way
-TEST_FILES = testdb_all.sql testrepo_files.tar.gz testrepo_gold.tar.gz
+TEST_FILES = testdb_all.gz testrepo_files.tar.gz testrepo_gold.tar.gz
 
 all: $(EXE)
 
