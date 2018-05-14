@@ -1,7 +1,7 @@
 <?php
 /*
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2015, 2018 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -884,7 +884,7 @@ class fo_libschema
       /* UNIQUE constraints also include indexes. */
       if (empty($this->currSchema['CONSTRAINT'][$row['index']]))
       {
-        $this->currSchema['INDEX'][$row['table']][$row['index']] = $row['define'] . ";";
+        $this->currSchema['INDEX'][$row['table']][$row['index']] = str_replace("public.".$row['table']." ", $row['table']." ", $row['define']) . ";";
       }
     }
     $this->dbman->freeResult($result);
