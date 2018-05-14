@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     {
       int uploadId = atoi(fo_scheduler_current());
 
-      if (uploadId == 0) continue;
+      if (uploadId <= 0) continue;
 
       int arsId = writeARS(state, 0, uploadId, 0, dbManager);
 

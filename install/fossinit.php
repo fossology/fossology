@@ -161,6 +161,11 @@ if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
     COMMIT;',__FILE__.'.rebuild.uploadtree_a');
 }
 
+if($dbManager->existsTable("author"))
+{
+  require_once("$LIBEXECDIR/resequence_author_table.php"); // If table exists, clean up for Schema
+}
+
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {

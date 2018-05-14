@@ -28,8 +28,8 @@
 
     echo "Insert email/url/author data from copyright to author table... \nIt takes some time depending number of columns... \n";
 
-    $dbManager->queryOnce("INSERT INTO author (ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled) 
-                           SELECT ct_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled 
+    $dbManager->queryOnce("INSERT INTO author (agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled) 
+                           SELECT agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled 
                            FROM copyright WHERE type <> 'statement' AND content IS NOT NULL;");
     $countInsertedAuthorColumns = $dbManager->getSingleRow("SELECT count(*) FROM author au INNER JOIN copyright co 
                            ON au.pfile_fk = co.pfile_fk WHERE au.ct_pk = co.ct_pk AND au.content = co.content;",array(),'getCountInsertedAuthorColumns');      
