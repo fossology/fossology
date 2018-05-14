@@ -18,10 +18,13 @@
 
 
 /**
- * \brief reinsert the old email/url/author to new author table
- * and delete the same from copyright table
- */
-
+ * @file dbmigrate_copyright-author.php
+ * @brief Reinsert the old email/url/author to new author table
+ *        and delete the same from copyright table.
+ *        It migrates from 3.1.0 to 3.2.0
+ *
+ * This should be called after fossinit calls apply_schema.
+ **/
   $countAuthorColumns = $dbManager->getSingleRow("SELECT count(*) FROM copyright WHERE type <> 'statement' AND content IS NOT NULL;",array(),'getCountAuthorColumns');
 
   if($countAuthorColumns['count'] > 0){
@@ -40,3 +43,4 @@
       echo "Something went wrong please execute the postinstall again...\n";
     }
   }
+}

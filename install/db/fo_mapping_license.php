@@ -18,15 +18,18 @@
  ***********************************************************/
 
 /**
- * \brief replase the old license shortname with new license shortname
- */
+ * @file fo_mapping_license.php
+ * @brief Replase the old license shortname with new license shortname
+ *
+ * This should be called by fossinit and dbmigrate_2.1-2.2.
+ **/
 
-/**
+/*
 $PREFIX = "/usr/local/";
 require_once("$PREFIX/share/fossology/lib/php/common.php");
 */
 
-/**
+/*
 $Usage = "Usage: " . basename($argv[0]) . "
   -s old license
   -t new license
@@ -42,10 +45,17 @@ if (empty($options) || !is_array($options))
 }
 */
 
+/**
+ * \brief Create map of old_shortname to new_shortname for 2.1 to 2.2
+ *        and call renameLicenses
+ *
+ * \param boolean $verbose Print job info if TRUE
+ */
+
 function renameLicenses21to22($verbose)
 {
-  /** PLEASE PUT THE LICENSE MAP THERE */
-  /** will replace old_shortname with new_shortname in the later process */
+  /* PLEASE PUT THE LICENSE MAP THERE */
+  /* will replace old_shortname with new_shortname in the later process */
   $shortname_array = array(
     /* old_shortname => new_shortname */
     'Adaptive' => 'APL-1.0',
@@ -388,6 +398,12 @@ function renameLicenses21to22($verbose)
   renameLicenses($shortname_array, $verbose);
 }
 
+/**
+ * \brief Create map of old_shortname to new_shortname for SPDX
+ *        and call renameLicenses
+ *
+ * \param boolean $verbose Print job info if TRUE
+ */
 function renameLicensesForSpdxValidation($verbose)
 {
   $shortname_array = array(
@@ -446,7 +462,12 @@ function renameLicensesForSpdxValidation($verbose)
   renameLicenses($shortname_array, $verbose);
 }
   
-
+/**
+ * \brief Rename old shortname to new shortname
+ *
+ * \param mixed $shortname_array Map of short names [old_shortname]=>new_shortname
+ * \param boolean $Verbose Print job info if TRUE
+ */
 function renameLicenses($shortname_array, $Verbose)
 {
   foreach ($shortname_array as $old_shortname => $new_shortname)
@@ -486,9 +507,9 @@ function renameLicenses($shortname_array, $Verbose)
 /** 
  * \brief check if the shortname is existing in license_ref table
  * 
- * \param $shortname - the license which you want to check 
+ * \param string $shortname - the license which you want to check 
  *
- * \return rf_id on existing; -1 on not existing
+ * \return int rf_id on existing; -1 on not existing
  */
 function check_shortname($shortname)
 {
@@ -508,10 +529,10 @@ function check_shortname($shortname)
  * 2) update license_file_audit set rf_fk=new_rf_pk where rf_fk=old_rf_pk
  * 3) delete from license_ref where rf_pk=old_rf_pk
  *
- * \param $old_rf_pk - the rf_pk of old license shortname
- * \param $new_rf_pk - the rf_pk of new license shortname
+ * \param int $old_rf_pk - the rf_pk of old license shortname
+ * \param int $new_rf_pk - the rf_pk of new license shortname
  * 
- * \return 0 on sucess 
+ * \return int 0 on sucess 
  */
 function update_license($old_rf_pk, $new_rf_pk)
 {
@@ -560,10 +581,10 @@ function update_license($old_rf_pk, $new_rf_pk)
 /**
  * \brief change license shortname
  *
- * \param $old_shortname - old license shortname
- * \param $new_shortname - new license shortname
+ * \param string $old_shortname - old license shortname
+ * \param string $new_shortname - new license shortname
  * 
- * \return 0 on sucess
+ * \return int 0 on sucess
  */
 function change_license_name($old_shortname, $new_shortname)
 {

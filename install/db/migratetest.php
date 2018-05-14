@@ -22,7 +22,7 @@
  * @file migratetest.php
  * @brief Test migration function
  *
- * @return 0 for success, 1 for failure.
+ * @return int 0 for success, 1 for failure.
  **/
 
 /* Initialize the program configuration variables */
@@ -77,9 +77,9 @@ exit(0);
  *
  * Any errors are fatal.  A text message will be printed followed by an exit(1)
  *
- * \param $sysconfdir Typically from the caller's -c command line parameter
+ * \param string $sysconfdir Typically from the caller's -c command line parameter
  *
- * \return the $SysConf array of values.  The first array dimension
+ * \return mixed the $SysConf array of values.  The first array dimension
  * is the group, the second is the variable name.
  * For example:
  *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/

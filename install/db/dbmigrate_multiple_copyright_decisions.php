@@ -16,11 +16,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-
 /**
- * \brief add a new column `is_enabled` to decisions
- * this is by default false except for the most recent decision which is active
- */
+ * @file dbmigrate_multiple_copyright_decisions.php
+ * @brief Add a new column `is_enabled` to decisions.
+ *        This is by default false except for the most recent decision which is active
+ *        It migrates from 3.1.0 to 3.2.0
+ *
+ * This should be called after fossinit calls apply_schema.
+ **/
 
 function addBooleanColumnTo($dbManager, $tableName, $columnName = 'is_enabled')
 {
