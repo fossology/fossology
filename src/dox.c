@@ -4,6 +4,7 @@
 
 /*!
  * \mainpage Overview of FOSSology
+ * \tableofcontents
  * Main source directory
  *
  * More developer information can be found at http://www.fossology.org/projects/fossology/wiki/Developer_Documentation
@@ -45,4 +46,7 @@
  * \subsection submodconf module.conf
  * Contains configurations required by module.
  * \subsection subscripts scripts/
+ *
+ * \section agents Current agents in FOSSology
+ *   -# \subpage adj2nest
  */
