@@ -17,18 +17,16 @@
 ***********************************************************/
 
 /**
- * \file ajax-filebucket.php
- * \brief  This plugin finds all the uploadtree_pk's in the first directory
+ * @file ajax-filebucket.php
+ * This plugin finds all the uploadtree_pk's in the first directory
  * level under a parent, that contains a given bucket.
+ *
  * GET args: \n
  *  item        parent uploadtree_pk \n
  *  bucket_pk   bucket_pk \n
  *
  * ajax usage: \n
  *  http://...?mod=ajax_filebucket&item=23456&bucket_pk=27
- *
- * \return a comma delimited string of bucket_pk followed by uploadtree_pks:
- * "12,999,123,456"
  */
 
 define("TITLE_ajax_filebucket", _("List Uploads as Options"));
@@ -45,7 +43,10 @@ class ajax_filebucket extends FO_Plugin
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
+   * @return string a comma delimited string of bucket_pk followed by uploadtree_pks:
+   * "12,999,123,456"
+   * @see FO_Plugin::Output()
    */
   function Output()
   {

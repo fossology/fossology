@@ -21,22 +21,35 @@
 
  The bucket agent uses user rules (see bucket table) to classify
  files into user categories (buckets).
+ \page buckets Buckets agent
+ \tableofcontents
+
+ The bucket agent uses user rules (see bucket table) to classify
+ files into user categories (buckets).
 
  Containers are in all the buckets of their contents.
 
  Packages, like all other container, are in the buckets of their children.
  In addition, packages can have their own rules that will place them in
  additional buckets.
+
+
+ \section source Agent source
+   - \link src/buckets/agent \endlink
+   - \link src/buckets/ui \endlink
  */
 
 #include "buckets.h"
 
+/** Print debug messages */
 int debug = 0;
 
-/* global mimetype_pk's for Debian source and binary packages */
+/** global mimetype_pk's for Debian source packages */
 int DEB_SOURCE;
+/** global mimetype_pk's for Debian binary packages */
 int DEB_BINARY;
 
+/** Bucket agent build version */
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="buckets build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else

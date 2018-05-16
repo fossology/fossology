@@ -26,8 +26,8 @@ extern int debug;
 /**
  * \brief Verify that all the values in array A are also in B
  *
- * \param int *arrayA   null terminated array of ints
- * \param int *arrayB   null terminated array of ints
+ * \param arrayA   null terminated array of ints
+ * \param arrayB   null terminated array of ints
  *
  * \return true (!0) if all the elements in A are also in B
  * else return false (0)
@@ -56,8 +56,8 @@ FUNCTION int arrayAinB(int *arrayA, int *arrayB)
 /**
  * \brief Verify that all the value A is a member of array B
  *
- * \param int  intA     int to match
- * \param int *arrayB   null terminated array of ints
+ * \param intA     int to match
+ * \param arrayB   null terminated array of ints
  *
  * \return true (!0) if intA is in B
  * else return false (0)
@@ -82,15 +82,15 @@ FUNCTION int intAinB(int intA, int *arrayB)
  * This works by running the sql (must be select) and
  * returning the first column of the first row. \n
  * The sql should make this the primary key. \n
- * This could be used to simply return the first column 
+ * This could be used to simply return the first column
  * of the first result for any query.
  *
- * \param PGconn $pgConn  Database connection object
- * \param char $sql   sql must select a single column, value in first row is returned.
+ * \param pgConn  Database connection object
+ * \param sql     sql must select a single column, value in first row is returned.
  *
  * \return primary key, or 0 if it doesn't exist
  *
- * NOTE: This function writes error to stdout
+ * \note This function writes error to stdout
  */
 FUNCTION int validate_pk(PGconn *pgConn, char *sql)
 {
@@ -106,8 +106,12 @@ FUNCTION int validate_pk(PGconn *pgConn, char *sql)
   return pk;
 }
 
-
-FUNCTION void Usage(char *Name) 
+/**
+ * Print usage of bucket agent
+ *
+ * \param Name Absolute path of agent
+ */
+FUNCTION void Usage(char *Name)
 {
   printf("Usage: %s [debug options]\n", Name);
   printf("  Debug options are:\n");
@@ -130,16 +134,16 @@ FUNCTION void Usage(char *Name)
 
 /**
  * \brief Has this pfile or uploadtree_pk already been bucket processed?
- * This only works if the bucket has been recorded in table 
+ * This only works if the bucket has been recorded in table
  * bucket_file, or bucket_container.
  *
- * \param PGconn $pgConn     postgresql connection
- * \param int agent_pk       bucket agent_pk
- * \param int nomos_agent_pk nomos agent_pk
- * \param int pfile_pk  
- * \param int uploadtree_pk  
- * \param int bucketpool_pk  
- * \param int bucket_pk      may be zero (to skip bucket_pk check)
+ * \param pgConn         postgresql connection
+ * \param agent_pk       bucket agent_pk
+ * \param nomos_agent_pk nomos agent_pk
+ * \param pfile_pk       pfile id which was processed
+ * \param uploadtree_pk  upload tree id
+ * \param bucketpool_pk  bucket pool id
+ * \param bucket_pk      may be zero (to skip bucket_pk check)
  *
  * \return 1=yes, 0=no
  */
@@ -151,7 +155,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfi
   char sqlbuf[512];
   PGresult *result;
 
-  /* Skip file if it has already been processed for buckets. 
+  /* Skip file if it has already been processed for buckets.
      See if this pfile or uploadtree_pk has any buckets. */
   if (bucket_pk)
   {
@@ -163,7 +167,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfi
      select bf_pk from bucket_container, bucket_def \
       where uploadtree_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_pk=%d and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk, bucket_pk, 
+    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk, bucket_pk,
     uploadtree_pk, agent_pk, nomos_agent_pk, bucketpool_pk, bucket_pk);
   }
   else
@@ -176,7 +180,7 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfi
      select bf_pk from bucket_container, bucket_def \
       where uploadtree_fk=%d and agent_fk=%d and nomosagent_fk=%d and bucketpool_fk=%d \
             and bucket_fk=bucket_pk limit 1",
-    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk, 
+    pfile_pk, agent_pk, nomos_agent_pk, bucketpool_pk,
     uploadtree_pk, agent_pk, nomos_agent_pk, bucketpool_pk);
   }
   result = PQexec(pgConn, sqlbuf);
@@ -192,23 +196,23 @@ FUNCTION int processed(PGconn *pgConn, int agent_pk, int nomos_agent_pk, int pfi
 /**
  * \brief Has this upload already been bucket processed?
  * This function checks buckets_ars to see if the upload has
- * been processed.  
- * 
- * \param PGconn $pgConn  postgresql connection
- * \param int $bucketagent_pk   bucket agent ID
- * \param int $nomosagent_pk    nomos agent ID
- * \param int $pfile_pk  
- * \param int $uploadtree_pk  
- * \param int $bucketpool_pk  
+ * been processed.
+ *
+ * \param pgConn  postgresql connection
+ * \param bucketagent_pk   bucket agent ID
+ * \param nomosagent_pk    nomos agent ID
+ * \param pfile_pk
+ * \param uploadtree_pk
+ * \param bucketpool_pk
  *
  * \return 1=yes upload has been processed \n
  *        0=upload has not been processed
  *
- * Note: This could also cross check with the bucket_file
- * and bucket_container recs but doesn't at this time.  
+ * \note This could also cross check with the bucket_file
+ * and bucket_container recs but doesn't at this time.
  * This is the reason for the unused function args.
  */
-FUNCTION int UploadProcessed(PGconn *pgConn, int bucketagent_pk, int nomosagent_pk, 
+FUNCTION int UploadProcessed(PGconn *pgConn, int bucketagent_pk, int nomosagent_pk,
                              int pfile_pk, int uploadtree_pk,
                              int upload_pk, int bucketpool_pk)
 {

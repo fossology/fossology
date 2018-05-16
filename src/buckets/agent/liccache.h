@@ -33,18 +33,25 @@
 
 #define FUNCTION
 
-/* shortname cache very simple nonresizing hash table */
+/**
+ * struct cachenode
+ * Shortname cache node
+ */
 struct cachenode
 {
-  char *rf_shortname;
-  long  rf_pk;
+  char *rf_shortname;    /**< License short name */
+  long  rf_pk;           /**< License id */
 };
 typedef struct cachenode cachenode_t;
 
+/**
+ * struct cacheroot
+ * Shortname cache, very simple non-resizing hash table
+ */
 struct cacheroot
 {
-  int maxnodes;
-  cachenode_t *nodes;
+  int maxnodes;          /**< Max nodes in table */
+  cachenode_t *nodes;    /**< Nodes in table */
 };
 typedef struct cacheroot cacheroot_t;
 
