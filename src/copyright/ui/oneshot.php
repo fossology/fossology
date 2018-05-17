@@ -24,6 +24,10 @@ use Fossology\Lib\Auth\Auth;
 
 define("TITLE_agent_copyright_once", _("One-Shot Copyright/Email/URL Analysis"));
 
+/**
+ * @class agent_copyright_once
+ * @brief One-Shot plugin for Copyright/Email/URL Analysis
+ */
 class agent_copyright_once extends FO_Plugin {
 
   function __construct()
@@ -46,7 +50,7 @@ class agent_copyright_once extends FO_Plugin {
 
   /**
    * \brief Analyze one uploaded file.
-   * \param $Highlight - if copyright info lines would be highlight, now always yes
+   * \return string
    */
   function AnalyzeOne() {
     global $Plugins;
@@ -134,8 +138,9 @@ class agent_copyright_once extends FO_Plugin {
   /**
    * \brief Change the type of output
    *  based on user-supplied parameters.
-   * 
-   * \brief return 1 on success.
+   *
+   * \return int 1 on success.
+   * @see FO_Plugin::RegisterMenus()
    */
   function RegisterMenus() {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -199,7 +204,8 @@ class agent_copyright_once extends FO_Plugin {
   } // RegisterMenus()
 
   /**
-   * \brief Generate the text for this plugin.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   function Output() {
     if ($this->State != PLUGIN_STATE_READY) {
@@ -248,6 +254,10 @@ class agent_copyright_once extends FO_Plugin {
     // $_FILES['licfile'] = NULL;
   }
 
+  /**
+   * @brief Form and help content for plugin
+   * @return string The HTML content
+   */
   protected function htmlContent()
   {
     $V = _("This analyzer allows you to upload a single file for copyright/email/url analysis.\n");

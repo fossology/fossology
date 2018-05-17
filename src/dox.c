@@ -50,4 +50,5 @@
  * \section agents Current agents in FOSSology
  *   -# \subpage adj2nest
  *   -# \subpage buckets
+ *   -# \subpage copyright
  */
