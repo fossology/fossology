@@ -70,6 +70,10 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
   }
 
+  /**
+   * @copydoc SchedulerTestRunner::run()
+   * @see SchedulerTestRunner::run()
+   */
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $GLOBALS['userId'] = $userId;
@@ -101,7 +105,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
-    
+
     $exitval = 0;
 
     ob_start();
@@ -112,5 +116,5 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     return array(true, $output, $exitval);
   }
-  
+
 }

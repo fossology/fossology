@@ -50,4 +50,5 @@
  *   -# \subpage adj2nest
  *   -# \subpage buckets
  *   -# \subpage copyright
+ *   -# \subpage decider
  */

@@ -36,6 +36,10 @@ global $container;
 require_once(__DIR__ . '/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 require_once(__DIR__ . '/../../agent/DeciderAgent.php');
 
+/**
+ * @class DeciderAgentTest
+ * @breif Unit test for DeciderAgent
+ */
 class DeciderAgentTest extends \PHPUnit\Framework\TestCase
 {
   /** @var DbManager */
@@ -53,6 +57,10 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
   /** @var ShowJobsDao */
   private $showJobsDao;
 
+  /**
+   * @brief Setup test objects, database and repo
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   protected function setUp()
   {
     global $container;
@@ -79,12 +87,22 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
+  /**
+   * @brief Remove test objects
+   * @see PHPUnit_Framework_TestCase::tearDown()
+   */
   protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
+  /**
+   * @test
+   * -# Create empty license matches
+   * -# Test if DeciderAgent::areNomosMatchesInsideAMonkMatch()
+   * returns false
+   */
   public function testAreNomosMatchesInsideAMonkMatchIfNoneAtAll()
   {
     $deciderAgent = new DeciderAgent();
@@ -97,6 +115,12 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
 
+  /**
+   * @test
+   * -# Create nomos license match only
+   * -# Test if DeciderAgent::areNomosMatchesInsideAMonkMatch()
+   * returns false
+   */
   public function testAreNomosMatchesInsideAMonkMatchIfNoMonk()
   {
     $deciderAgent = new DeciderAgent();
@@ -112,6 +136,12 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
 
+  /**
+   * @test
+   * -# Create monk license matche only
+   * -# Test if DeciderAgent::areNomosMatchesInsideAMonkMatch()
+   * returns false
+   */
   public function testAreNomosMatchesInsideAMonkMatchIfNoNomos()
   {
     $deciderAgent = new DeciderAgent();
@@ -127,6 +157,14 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
 
+  /**
+   * @test
+   * -# Create monk license match
+   * -# Create nomos license match bigger than monk
+   * license match
+   * -# Test if DeciderAgent::areNomosMatchesInsideAMonkMatch()
+   * returns false
+   */
   public function testAreNomosMatchesInsideAMonkMatchIfNotFit()
   {
     $deciderAgent = new DeciderAgent();
@@ -143,6 +181,13 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     assertThat( $method->invoke($deciderAgent,$licenseMatches), equalTo(false) );
   }
 
+  /**
+   * @test
+   * -# Create monk license match
+   * -# Create nomos license match inside monk match
+   * -# Test if DeciderAgent::areNomosMatchesInsideAMonkMatch()
+   * returns true
+   */
   public function testAreNomosMatchesInsideAMonkMatchIfFit()
   {
     $deciderAgent = new DeciderAgent();
@@ -161,7 +206,11 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
 
 
   /**
-   * @return M\MockInterface
+   * @brief Create mock LicenseMatch object with getLicenseFileId returning
+   * $matchId
+   * @param string $agentName
+   * @param int    $matchId
+   * @return Mockery::MockInterface
    */
   protected function createLicenseMatch($agentName, $matchId)
   {
@@ -170,6 +219,12 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     return $licenseMatch;
   }
 
+  /**
+   * @test
+   * -# Create monk and nomos license match only
+   * -# Test if DeciderAgent::areNomosMonkNinkaAgreed()
+   * returns false
+   */
   public function testAreNomosMonkNinkaAgreed_notIfOnlyTwoOfThem()
   {
     $deciderAgent = new DeciderAgent();
@@ -180,6 +235,13 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     assertThat($agree, equalTo(false) );
   }
 
+  /**
+   * @test
+   * -# Create monk, nomos and ninka license match
+   * -# Add multiple match for an agent with the same license id
+   * -# Test if DeciderAgent::areNomosMonkNinkaAgreed()
+   * returns true
+   */
   public function testAreNomosMonkNinkaAgreed_alsoMultiMatch()
   {
     $deciderAgent = new DeciderAgent();
@@ -192,6 +254,13 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
   }
 
 
+  /**
+   * @test
+   * -# Create monk, nomos and ninka license match
+   * -# Add multiple match for an agent with the different license id
+   * -# Test if DeciderAgent::areNomosMonkNinkaAgreed()
+   * returns false
+   */
   public function testAreNomosMonkNinkaAgreed_notIfAnyOther()
   {
     $deciderAgent = new DeciderAgent();
@@ -205,7 +274,10 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @return M\MockInterface
+   * @brief Create mock LicenseMatch object with getLicenseId returning
+   * $licId
+   * @param int $licId
+   * @return Mockery::MockInterface
    */
   protected function createLicenseMatchWithLicId($licId)
   {
