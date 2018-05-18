@@ -18,6 +18,10 @@
 
 define("TITLE_core_debug_menus", _("Debug Menus"));
 
+/**
+ * @class core_debug_menus
+ * @brief Plugin to debug menus
+ */
 class core_debug_menus extends FO_Plugin
 {
   function __construct()
@@ -30,8 +34,10 @@ class core_debug_menus extends FO_Plugin
   }
 
   /**
-   * \brief This is where we check for
+   * @brief This is where we check for
    * changes to the full-debug setting.
+   * @copydoc FO_Plugin::PostInitialize()
+   * @see FO_Plugin::PostInitialize()
    */
   function PostInitialize()
   {
@@ -68,8 +74,10 @@ class core_debug_menus extends FO_Plugin
   } // PostInitialize()
 
   /**
-   * \brief display the full menu as an ordered list.
+   * @brief Display the full menu as an ordered list.
    * This is recursive.
+   * @param array $Menu Menu object to print
+   * @return string HTML ordered list
    */
   function Menu2HTML(&$Menu)
   {
@@ -90,7 +98,8 @@ class core_debug_menus extends FO_Plugin
   }
 
   /**
-   * \brief display the loaded menu and plugins.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   function Output()
   {
@@ -114,7 +123,11 @@ class core_debug_menus extends FO_Plugin
     }
     print $output;
   }
-   
+
+  /**
+   * @brief Get the output as HTML
+   * @return string HTML output
+   */
   protected function htmlContent()
   {
     $V = '';

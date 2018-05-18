@@ -5,7 +5,6 @@
 /*!
  * \mainpage Overview of FOSSology
  * \tableofcontents
- * Main source directory
  *
  * More developer information can be found at http://www.fossology.org/projects/fossology/wiki/Developer_Documentation
  *
