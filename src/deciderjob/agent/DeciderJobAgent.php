@@ -16,7 +16,31 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
+/**
+ * @file DeciderJobAgent.php
+ * @brief Decider agent
+ * @page deciderjob Decider Job
+ * @tableofcontents
+ *
+ * The agent apply the decisions found by Monk Bulk run.
+ *
+ * -# Get the clearing events for the given upload.
+ * -# Get every item for the upload
+ *   -# If there are new events or force run
+ *     -# Create decisions based on events
+ *   -# Otherwise copy events and mark them as WIP
+ *
+ * @note DeciderJobAgent (`agent_deciderjob`) must be added as a dependency to
+ * the monk bulk while scheduling the `agent_monk_bulk job`
+ * @section source Agent source
+ *   - @link src/deciderjob/agent @endlink
+ *   - @link src/deciderjob/ui @endlink
+ *   - Functional test cases @link src/deciderjob/agent_tests/Functional @endlink
+ */
+/**
+ * @namespace Fossology::DeciderJob
+ * @brief Namespace of DeciderJob agent
+ */
 namespace Fossology\DeciderJob;
 
 use Fossology\Lib\Agent\Agent;
@@ -33,28 +57,52 @@ define("CLEARING_DECISION_IS_GLOBAL", false);
 
 include_once(__DIR__ . "/version.php");
 
+/**
+ * @class DeciderJobAgent
+ * @brief Get the decision from Monk bulk and apply decisions
+ */
 class DeciderJobAgent extends Agent {
   const FORCE_DECISION = 1;
 
-  /** @var int */
+  /** @var int $conflictStrategyId
+   * Conflict resolution strategy to be used (0=>unhandled events,1=>force)
+   */
   private $conflictStrategyId;
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
-  /** @var ClearingDecisionProcessor */
+  /** @var ClearingDecisionProcessor $clearingDecisionProcessor
+   * ClearingDecisionProcessor to be used
+   */
   private $clearingDecisionProcessor;
-  /** @var AgentLicenseEventProcessor */
+  /** @var AgentLicenseEventProcessor $agentLicenseEventProcessor
+   * AgentLicenseEventProcessor to be used
+   */
   private $agentLicenseEventProcessor;
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
   private $clearingDao;
-  /** @var HighlightDao */
+  /** @var HighlightDao $highlightDao
+   * HighlightDao object
+   */
   private $highlightDao;
-  /** @var int */
+  /** @var boolean $decisionIsGlobal
+   * If the decision is global
+   */
   private $decisionIsGlobal = CLEARING_DECISION_IS_GLOBAL;
-  /** @var DecisionTypes */
+  /** @var DecisionTypes $decisionTypes
+   * DecisionTypes object
+   */
   private $decisionTypes;
-  /** @var LicenseMap */
+  /** @var LicenseMap $licenseMap
+   * LicenseMap object
+   */
   private $licenseMap = null;
-  /** @var int */
+  /** @var int $licenseMapUsage
+   * @see LicenseMap
+   */
   private $licenseMapUsage = null;
 
   function __construct($licenseMapUsage=null)
@@ -72,6 +120,9 @@ class DeciderJobAgent extends Agent {
     $this->licenseMapUsage = $licenseMapUsage;
   }
 
+  /**
+   * @brief Process clearing events of current job handled by agent
+   */
   function processClearingEventOfCurrentJob()
   {
     $userId = $this->userId;
@@ -89,6 +140,11 @@ class DeciderJobAgent extends Agent {
     }
   }
 
+  /**
+   * @brief Get items contained inside an item tree
+   * @param ItemTreeBounds $itemTreeBounds Item tree to be looped
+   * @return ItemTreeBounds Array of items inside given item tree
+   */
   private function loopContainedItems($itemTreeBounds)
   {
     if (!$itemTreeBounds->containsFiles())
@@ -105,6 +161,10 @@ class DeciderJobAgent extends Agent {
     return $result;
   }
 
+  /**
+   * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
+   */
   function processUploadId($uploadId)
   {
     $args = $this->args;
@@ -118,8 +178,11 @@ class DeciderJobAgent extends Agent {
   }
 
   /**
+   * @brief Get an item, process events and create new decisions
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $userId
+   * @param int $groupId
+   * @param array $additionalEventsFromThisJob
    */
   protected function processClearingEventsForItem(ItemTreeBounds $itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob)
   {

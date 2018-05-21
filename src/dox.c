@@ -51,4 +51,5 @@
  *   -# \subpage buckets
  *   -# \subpage copyright
  *   -# \subpage decider
+ *   -# \subpage deciderjob
  */

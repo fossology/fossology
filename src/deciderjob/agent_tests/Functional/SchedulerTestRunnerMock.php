@@ -33,6 +33,10 @@ include_once(__DIR__.'/SchedulerTestRunner.php');
 
 include_once(dirname(dirname(__DIR__)).'/agent/DeciderJobAgent.php');
 
+/**
+ * @class SchedulerTestRunnerMock
+ * @brief Mock for scheduler inputs
+ */
 class SchedulerTestRunnerMock implements SchedulerTestRunner
 {
   /** @var DbManager */
@@ -65,6 +69,15 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
   }
 
+  /**
+   * @brief Mock as agent was called from scheduler
+   * @param int $uploadId
+   * @param int $userId
+   * @param int $groupId
+   * @param int $jobId
+   * @param string $args
+   * @return array Run success code, agent output, agent return code
+   */
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $GLOBALS['userId'] = $userId;
