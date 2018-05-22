@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2018, Siemens AG
  * Author: Daniele Fognini, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify
@@ -174,6 +174,10 @@ static void addDefaultScanners(CopyrightState& state)
   if (types & 1<<0)
     state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
+#ifdef IDENTITY_KW
+  if (types & 1<<0)
+    state.addScanner(new regexScanner("keyword", "keyword"));
+#endif
 }
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
@@ -240,11 +244,6 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
         return false;
       };
     }
-  }
-
-  if (count == 0)
-  {
-    copyrightDatabaseHandler.insertNoResultInDatabase(agentId, pFileId);
   }
 
   return copyrightDatabaseHandler.commit();

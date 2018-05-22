@@ -338,7 +338,7 @@ class CopyrightDao extends Object
   public function getDecisions($tableName,$pfileId)
   {
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by copyright_decision_pk desc";
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by keyword_decision_pk desc";
     $params = array($pfileId);
 
     return $this->dbManager->getRows($sql, $params, $statementName);

@@ -55,6 +55,7 @@ oneTimeSetUp()
   cp `pwd`/../../../../install/defconf/Db.conf $confDir/Db.conf
   mkdir -p $confDir/mods-enabled/copyright
   mkdir -p $confDir/mods-enabled/ecc
+  mkdir -p $confDir/mods-enabled/keyword
   cp ../../../../VERSION $confDir/VERSION
   cp $agentDir/agent/copyright $confDir/mods-enabled/copyright/copyright
   cp $agentDir/agent/copyright.conf $confDir/mods-enabled/copyright/copyright.conf
@@ -62,6 +63,9 @@ oneTimeSetUp()
   cp $agentDir/agent/ecc $confDir/mods-enabled/ecc/ecc
   cp $agentDir/agent/ecc.conf $confDir/mods-enabled/ecc/ecc.conf
   cp $agentDir/VERSION-ecc $confDir/mods-enabled/ecc/VERSION
+  cp $agentDir/agent/keyword $confDir/mods-enabled/keyword/
+  cp $agentDir/agent/keyword.conf $confDir/mods-enabled/keyword/keyword.conf
+  cp $agentDir/VERSION-keyword $confDir/mods-enabled/keyword/VERSION
   finalConf=$(/usr/bin/php ../../../testing/db/createTestDB.php -c $confDir -e)
   _dbSetup
 }

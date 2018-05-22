@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2013-2016 Siemens AG
+ Copyright (C) 2013-2016, 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -296,6 +296,9 @@ class copyright_list extends FO_Plugin
         case "ecc":
           $TypeStr = _("export restriction");
           break;
+        case "keyword":
+          $TypeStr = _("Keyword Analysis");
+          break;
       }
       $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
@@ -384,6 +387,11 @@ class copyright_list extends FO_Plugin
         $tableName = "ecc";
         $modBack = "ecc-hist";
         $viewName = "ecc-view";
+        break;
+      case "keyword" :
+        $tableName = "keyword";
+        $modBack = "keyword-hist";
+        $viewName = "keyword-view";
         break;
       case "statement" :
         $tableName = "copyright";

@@ -42,6 +42,7 @@ class AjaxClearingView extends FO_Plugin
   const OPTION_SKIP_FILE_COPYRIGHT = "option_skipFileCopyRight";
   const OPTION_SKIP_FILE_IP = "option_skipFileIp";
   const OPTION_SKIP_FILE_ECC = "option_skipFileEcc";
+  const OPTION_SKIP_FILE_KEYWORD = "option_skipFileKeyword";
 
   /** @var UploadDao */
   private $uploadDao;
@@ -221,6 +222,7 @@ class AjaxClearingView extends FO_Plugin
       case "setNextPrevCopyRight":
       case "setNextPrevIp":
       case "setNextPrevEcc":
+      case "setNextPrevKeyword":
         return new JsonResponse($this->doNextPrev($action, $uploadId, $uploadTreeId, $groupId));
 
       case "updateClearings":
@@ -255,15 +257,15 @@ class AjaxClearingView extends FO_Plugin
    */
   protected function getBuildClearingsForSingleFile($uploadTreeId, $licenseId, $forValue, $what, $detectorType=0)
   {
-     $classAttr = "color:#000000;";
-     $value = "Click to add";
-     if(empty($forValue) && $detectorType == 2 && $what == 2){
-       $classAttr = "color:red;font-weight:bold;";
-     }
+    $classAttr = "color:#000000;";
+    $value = "Click to add";
+    if(empty($forValue) && $detectorType == 2 && $what == 2) {
+      $classAttr = "color:red;font-weight:bold;";
+    }
  
-     if(!empty($forValue)) {
-       $value = substr(ltrim($forValue, " \t\n"), 0, 15)."...";
-     }
+    if(!empty($forValue)) {
+      $value = substr(ltrim($forValue, " \t\n"), 0, 15)."...";
+    }
     return "<a href=\"javascript:;\" style='$classAttr' id='clearingsForSingleFile$licenseId$what' onclick=\"openTextModel($uploadTreeId, $licenseId, $what);\" title='".htmlspecialchars($forValue, ENT_QUOTES)."'>$value</a>";
   }
 
@@ -440,6 +442,10 @@ class AjaxClearingView extends FO_Plugin
       case "setNextPrevEcc":
         $modName = "ecc-view";
         $opt = self::OPTION_SKIP_FILE_ECC;
+        break;
+      case "setNextPrevKeyword":
+        $modName = "keyword-view";
+        $opt = self::OPTION_SKIP_FILE_KEYWORD;
         break;
     }
 
