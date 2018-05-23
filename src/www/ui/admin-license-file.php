@@ -82,7 +82,7 @@ class admin_license_file extends FO_Plugin
     // Add new rec to db
     if (@$_POST["addit"])
     {
-      $resultstr = $this->Adddb($_POST);
+      $resultstr = $this->Adddb();
       $this->vars['message'] = $resultstr;
       if (strstr($resultstr, $errorstr)) {
         return $this->Updatefm(0);

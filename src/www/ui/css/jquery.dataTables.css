@@ -29,6 +29,16 @@ table.dataTable tfoot th {
   font-weight: bold;
 }
 
+.footAsHead {
+  display: table-header-group;
+}
+
+table.dataTable tfoot input {
+  width: 100%;
+  padding: 3px;
+  box-sizing: border-box;
+}
+
 table.dataTable td {
   padding: 3px 10px;
 }

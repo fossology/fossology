@@ -13,6 +13,12 @@
   <p>{{ dataMessage }}</p>
   {% if data %}
   <table id='adminLicenseTable' rules='rows' width='100%' cellpadding='3'>
+    <tfoot class="footAsHead">
+      <tr style="background:lightsteelblue">
+        <td><strong>Search:</strong></td><td></td>
+        <td></td><th>Shortname</th><th>Fullname</th><th>Text</th><th>URL</th>
+      </tr>
+    </tfoot>
   </table>
   {% endif %}
 {% endblock %}
