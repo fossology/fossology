@@ -1950,7 +1950,7 @@
 
   $Schema["INDEX"]["copyright"]["copyright_agent_fk_idx"] = "CREATE INDEX copyright_agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
-  $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright using btree (hash, pfile_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_clearing_decision_type_fk_index"] = "CREATE INDEX copyright_decision_clearing_decision_type_fk_index ON copyright_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
@@ -1958,12 +1958,12 @@
 
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
-  $Schema["INDEX"]["author"]["author_pfile_hash_idx"] = "CREATE INDEX author_pfile_hash_idx ON author using btree (hash, pfile_fk);";
+  $Schema["INDEX"]["author"]["author_pfile_hash_idx"] = "CREATE INDEX author_pfile_hash_idx ON author USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["ecc"]["ecc_agent_fk_index"] = "CREATE INDEX ecc_agent_fk_index ON ecc USING btree (agent_fk);";
   $Schema["INDEX"]["ecc"]["ecc_hash_index"] = "CREATE INDEX ecc_hash_index ON ecc USING btree (hash);";
   $Schema["INDEX"]["ecc"]["ecc_pfile_fk_index"] = "CREATE INDEX ecc_pfile_fk_index ON ecc USING btree (pfile_fk);";
-  $Schema["INDEX"]["ecc"]["ecc_pfile_hash_idx"] = "CREATE INDEX ecc_pfile_hash_idx ON ecc using btree (hash, pfile_fk);";
+  $Schema["INDEX"]["ecc"]["ecc_pfile_hash_idx"] = "CREATE INDEX ecc_pfile_hash_idx ON ecc USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_clearing_decision_type_fk_index"] = "CREATE INDEX ecc_decision_clearing_decision_type_fk_index ON ecc_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_fk_index"] = "CREATE INDEX ecc_decision_pfile_fk_index ON ecc_decision USING btree (pfile_fk);";
@@ -2009,8 +2009,8 @@
 
   $Schema["CLUSTER"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" CLUSTER ON \"upload_pkey_idx\";";
   $Schema["CLUSTER"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" CLUSTER ON \"ufile_rel_pkey\";";
-  $Schema["CLUSTER"]["highlight_keyword_pfile_fk_idx"] = "ALTER TABLE \"highlight_keyword\" CLUSTER ON \"highlight_keyword_pfile_fk_idx\";";
   $Schema["CLUSTER"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" CLUSTER ON \"clearing_decision_pkey\";";
+  $Schema["CLUSTER"]["highlight_keyword_pfile_fk_idx"] = "ALTER TABLE \"highlight_keyword\" CLUSTER ON \"highlight_keyword_pfile_fk_idx\";";
 
   $Schema["INHERITS"]["uploadtree_a"] = "uploadtree";
   $Schema["INHERITS"]["readmeoss_ars"] = "ars_master";
