@@ -1,6 +1,6 @@
 <?php
 /**
- * @file services.php
+ * @file
  * @brief Add the template path of decider twig templates
  * to twig.loader
  * @see Twig_Loader_Filesystem

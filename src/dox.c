@@ -52,4 +52,5 @@
  *   -# \subpage copyright
  *   -# \subpage decider
  *   -# \subpage deciderjob
+ *   -# \subpage delagent
  */

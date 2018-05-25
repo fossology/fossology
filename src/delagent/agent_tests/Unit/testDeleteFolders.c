@@ -30,6 +30,9 @@ static PGresult *result = NULL;
 
 /**
  * \brief for function DeleteFolders
+ * \test
+ * -# Give a folder id to deleteFolder()
+ * -# Check for return code
  */
 void testDeleteFolders()
 {
@@ -49,6 +52,10 @@ void testDeleteFolders()
 
 /**
  * \brief for function DeleteUploads
+ * \test
+ * -# Delete an upload using deleteUpload() and check for the return
+ * -# Check if the upload is delete from database
+ * -# Check if the copyrights for the given upload is also deleted
  */
 void testDeleteUploads()
 {
@@ -102,6 +109,10 @@ void testDeleteUploads()
 
 /**
  * \brief for function DeleteLicenses
+ * \test
+ * -# Delete licenses for a given upload using deleteLicense()
+ * -# Check for the return code
+ * \todo Fix issue 1057
  */
 void testDeleteLicenses()
 {

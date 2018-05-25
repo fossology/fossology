@@ -19,9 +19,25 @@
  ********************************************************/
 /**
  * \file delagent.c
- * \brief main for delagent
+ * \brief Delagent to delete uploaded packages
  *
  * delagent: Remove an upload from the DB and repository
+ * \page delagent Delagent
+ * \tableofcontents
+ *
+ * Delagent deletes the packages by upload id and folder id.
+ *
+ * Agent lists all the uploads inside the given folder and delete them one by
+ * one when deleting by folder.
+ *
+ * While deleting by upload, the agent list all files contained in the upload
+ * and delete every file from the DB and filesystem as well as relevant
+ * decisions for the upload.
+ * \section source Agent source
+ *   - \link src/delagent/agent \endlink
+ *   - \link src/delagent/ui \endlink
+ *   - Functional test cases \link src/delagent/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/delagent/agent_tests/Unit \endlink
  */
 #include "delagent.h"
 
@@ -33,13 +49,15 @@ char BuildVersion[]="delagent build version: NULL.\n";
 
 
 /***********************************************
- usage():
+ \brief Print agent usage for the user
+
  Command line options allow you to write the agent so it works
  stand alone, in addition to working with the scheduler.
  This simplifies code development and testing.
  So if you have options, have a usage().
  Here are some suggested options (in addition to the program
  specific options you may already have).
+ \param Name Absolute path of the agent called by the user.
  ***********************************************/
 void usage (char *Name)
 {
@@ -64,6 +82,13 @@ void usage (char *Name)
   fprintf(stderr,"  --password|-p # :: password\n");
 } /* usage() */
 
+/**
+ * \brief Write message to user after success/failure
+ * \param kind Upload/Folder
+ * \param id   Upload/Folder id
+ * \param user_name User created the request
+ * \param returnedCode Code returned by agent
+ */
 void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedCode)
 {
   if (0 == returnedCode)
@@ -84,31 +109,33 @@ void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedC
  *   1. Command Line :: delete/list upload/folder/license from the command line
  *   2. Agent Based  :: run from the scheduler
  *
+ * \htmlonly <pre>
  * +-----------------------+
  * | Command Line Analysis |
  * +-----------------------+
- *
+ * </pre> \endhtmlonly
  * List or delete uploads.
- *   -h            :: help (print this message), then exit.
- *   -i            :: Initialize the DB
- *   -u            :: List uploads IDs.
- *   -U #          :: Delete upload ID.
- *   -L #          :: Delete ALL licenses associated with upload ID.
- *   -f            :: List folder IDs.
- *   -F #          :: Delete folder ID and all uploads under this folder.
- *   -T            :: TEST -- do not update the DB or delete any files (just pretend).
- *   -v            :: Verbose (-vv for more verbose).
- *   -V            :: print the version info, then exit.
- *   -c SYSCONFDIR :: Specify the directory for the system configuration.
- *   --user #      :: user name
- *   --password #  :: password
+ *  - -h            :: help (print this message), then exit.
+ *  - -i            :: Initialize the DB
+ *  - -u            :: List uploads IDs.
+ *  - -U #          :: Delete upload ID.
+ *  - -f            :: List folder IDs.
+ *  - -F #          :: Delete folder ID and all uploads under this folder.
+ *  - -T            :: TEST -- do not update the DB or delete any files (just pretend).
+ *  - -v            :: Verbose (-vv for more verbose).
+ *  - -V            :: print the version info, then exit.
+ *  - -c SYSCONFDIR :: Specify the directory for the system configuration.
+ *  - --user #      :: user name
+ *  - --password #  :: password
  *
+ * \htmlonly <pre>
  * +----------------------+
  * | Agent Based Analysis |
  * +----------------------+
+ * </pre> \endhtmlonly
  *
  * To run the delagent as an agent
- *   -s :: Run from the scheduler
+ *  - -s :: Run from the scheduler
  *
  *
  * \param argc the number of command line arguments
