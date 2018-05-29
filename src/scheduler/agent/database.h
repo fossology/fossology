@@ -51,5 +51,6 @@ void database_update_job(scheduler_t* db_conn, job_t* j, job_status status);
 void database_job_processed(int j_id, int number);
 void database_job_log(int j_id, char* log_name);
 void database_job_priority(scheduler_t* scheduler, job_t* job, int priority);
+char* get_email_command(scheduler_t* scheduler, char* user_email);
 
 #endif /* DATABASE_H_INCLUDE */
