@@ -29,6 +29,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  *
  * The agent runs in multi-threaded mode and creates a new thread for
  * every pfile for faster processing.
+ *
+ * \section actions Supported actions
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -h [--help] | Shows help |
+ * | -T [--type] arg (=15) | Type of regex to try |
+ * | -v [--verbose] | Increase verbosity |
+ * | --regex arg | User defined Regex to search: |
+ * || `[{name=cli}@@][{matchingGroup=0}@@]{regex}` |
+ * || e.g. 'linux@@1@@(linus) torvalds' |
+ * | --files arg | Files to scan |
+ * | -J [--json] | Output JSON |
  * \section source Agent source
  *   - \link src/copyright/agent \endlink
  *   - \link src/copyright/ui \endlink

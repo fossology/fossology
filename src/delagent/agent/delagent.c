@@ -33,6 +33,25 @@
  * While deleting by upload, the agent list all files contained in the upload
  * and delete every file from the DB and filesystem as well as relevant
  * decisions for the upload.
+ *
+ * \section actions Supported actions
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -i   | Initialize the DB, then exit |
+ * | -u   | List uploads IDs |
+ * | -U # | Delete upload ID |
+ * | -f   | List folder IDs |
+ * | -F # | Delete folder ID and all uploads under this folder |
+ * |      | Folder '1' is the default folder.  '-F 1' will delete |
+ * |      | every upload and folder in the navigation tree |
+ * |      | use -P to indicate parent of the copied folder |
+ * | -s   | Run from the scheduler |
+ * | -T   | TEST -- do not update the DB or delete any files (just pretend) |
+ * | -v   | Verbose (-vv for more verbose) |
+ * | -c # | Specify the directory for the system configuration |
+ * | -V   | print the version info, then exit |
+ * | --user\|-n # | user name |
+ * | --password\|-p # | password |
  * \section source Agent source
  *   - \link src/delagent/agent \endlink
  *   - \link src/delagent/ui \endlink

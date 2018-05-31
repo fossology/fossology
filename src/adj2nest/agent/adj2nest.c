@@ -50,6 +50,19 @@
      - Track the right by counting each visited node.
    - Update the DB.
 
+ \section actions Supported actions
+ Command line flag|Description|
+ ---:|:---|
+  -h|Help (print this message), then exit|
+  -i|Initialize the database, then exit|
+  -a|Run on ALL uploads that have no nested set records|
+  -c SYSCONFDIR|Specify the directory for the system configuration|
+  -v|Verbose (-vv = more verbose)|
+  -u|list all upload ids, then exit|
+  no file|Process upload ids from the scheduler|
+  id|Process upload ids from the command-line|
+  -V|Print the version info, then exit|
+
  \section note NOTE:
  The first id is "1", not "0".
  Every node is assumed to have a NULL child!
