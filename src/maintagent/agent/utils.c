@@ -16,14 +16,14 @@
 
  ***************************************************************/
 /**
- * \file utils.c
+ * \file
  * \brief Miscellaneous utility functions for maintagent
  */
 
 #include "maintagent.h"
 
 /**********  Globals  *************/
-extern PGconn    *pgConn;        // database connection
+extern PGconn    *pgConn;        ///< database connection
 
 
 /**
@@ -33,7 +33,7 @@ extern PGconn    *pgConn;        // database connection
  * @param ExitVal Exit value
  * @returns void Calls exit()
  */
-FUNCTION void ExitNow(int ExitVal) 
+FUNCTION void ExitNow(int ExitVal)
 {
   if (pgConn) PQfinish(pgConn);
 

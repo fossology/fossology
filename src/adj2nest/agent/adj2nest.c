@@ -21,8 +21,8 @@
 
 /**
  \file adj2nest.c
- \tableofcontents
  \page adj2nest adj2nest
+ \tableofcontents
  \section brief Working of adj2nest
  Convert an adjacency list to a nested set and update user permissions to the upload.
  Ununpack creates an adjacency list: every child knows it's parent.

@@ -46,11 +46,19 @@
  * Contains configurations required by module.
  * \subsection subscripts scripts/
  *
- * \section agents Current agents in FOSSology
- *   -# \subpage adj2nest
- *   -# \subpage buckets
- *   -# \subpage copyright
- *   -# \subpage decider
- *   -# \subpage deciderjob
- *   -# \subpage delagent
+ * \section agents Agents
+ * \ref agentlist
+ */
+
+/*!
+ * \page agentlist Agents in FOSSology
+ * \tableofcontents
+ * \section agents Agents in FOSSology
+ * -# \subpage adj2nest
+ * -# \subpage buckets
+ * -# \subpage copyright
+ * -# \subpage decider
+ * -# \subpage deciderjob
+ * -# \subpage delagent
+ * -# \subpage maintagent
  */
