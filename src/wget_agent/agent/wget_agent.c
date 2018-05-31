@@ -20,30 +20,27 @@
 
 /**
  * \file wget_agent.c
+ * \brief wget_agent: Retrieve a file and put it in the database.
  */
 
 #include "wget_agent.h"
 
 char SQL[MAXCMD];
 
-/* for the DB */
-PGconn *pgConn = NULL;
-/* input for this system */
-long GlobalUploadKey=-1;
-char GlobalTempFile[MAXCMD];
-char GlobalURL[MAXCMD];
-char GlobalType[MAXCMD];
-char GlobalParam[MAXCMD];
-char *GlobalProxy[6];
-char GlobalHttpProxy[MAXCMD];
-int GlobalImportGold=1; /* set to 0 to not store file in gold repository */
-gid_t ForceGroup=-1;
+PGconn *pgConn = NULL;        ///< For the DB
+long GlobalUploadKey=-1;      ///< Input for this system
+char GlobalTempFile[MAXCMD];  ///< Temp file to be used
+char GlobalURL[MAXCMD];       ///< URL to download
+char GlobalType[MAXCMD];      ///< Type of download (FILE/version control)
+char GlobalParam[MAXCMD];     ///< Additional parameters
+char *GlobalProxy[6];         ///< Proxy from fossology.conf
+char GlobalHttpProxy[MAXCMD]; ///< HTTP proxy command to use
+int GlobalImportGold=1;       ///< Set to 0 to not store file in gold repository
+gid_t ForceGroup=-1;          ///< Set to group id to be used for download files
 
 /**
  * \brief Given a filename, is it a file?
- *
- * \param int Link - should it follow symbolic links?
- *
+ * \param Link Should it follow symbolic links?
  * \return int 1=yes, 0=no.
  */
 int IsFile(char *Fname, int Link)
@@ -59,8 +56,7 @@ int IsFile(char *Fname, int Link)
 
 /**
  * \brief Closes the connection to the server, free the database connection, and exit.
- *
- * \param int rc - exit value
+ * \param rc Exit value
  */
 void  SafeExit(int rc)
 {
@@ -71,9 +67,7 @@ void  SafeExit(int rc)
 
 /**
  * \brief Get the position (ending + 1) of http|https|ftp:// of one url
- *
- * \param char *URL - the URL
- *
+ * \param URL The URL
  * \return the position (ending + 1) of http|https|ftp:// of one url
  *         E.g. http://fossology.org, return 7
  */
@@ -87,6 +81,10 @@ int GetPosition(char *URL)
 
 /**
  * \brief Insert a file into the database and repository.
+ *
+ * Copy the downloaded file to gold repository according to
+ * the checksum and change the owner if ForceGroup is set.
+ * Then insert in upload and pfile tables.
  */
 void DBLoadGold()
 {
@@ -113,7 +111,7 @@ void DBLoadGold()
   if ((int)ForceGroup > 0)
   {
     rc = chown(GlobalTempFile,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno))
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", GlobalTempFile, strerror(errno));
   }
 
   if (!Sum)
@@ -146,7 +144,7 @@ void DBLoadGold()
     if ((int)ForceGroup >= 0)
     {
       rc = chown(Path,-1,ForceGroup);
-      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+      if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
     }
   } /* if GlobalImportGold */
   else /* if !GlobalImportGold */
@@ -171,7 +169,7 @@ void DBLoadGold()
   if ((int)ForceGroup >= 0)
   {
     rc = chown(Path,-1,ForceGroup);
-    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno))
+    if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
   }
   if (Path != GlobalTempFile)
   {
@@ -183,11 +181,11 @@ void DBLoadGold()
   }
 
   /* Now update the DB */
-  /** Break out the sha1, md5, len components **/
+  /* Break out the sha1, md5, len components **/
   SHA1 = Unique;
   MD5 = Unique+41; /* 40 for sha1 + 1 for '.' */
   Len = Unique+41+33; /* 32 for md5 + 1 for '.' */
-  /** Set the pfile **/
+  /* Set the pfile */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
       SHA1,MD5,Len);
@@ -250,10 +248,9 @@ void DBLoadGold()
 
 /**
  * \brief Given a URL string, taint-protect it.
- *
- * \param char *Sin - the source URL
- * \param char *Sout - the tainted URL
- *
+ * \param[in]  Sin The source URL
+ * \param[out] Sout The tainted URL
+ * \param[in]  SoutSize The capacity of Sout
  * \return 1=tainted, 0=failed to taint
  */
 int TaintURL(char *Sin, char *Sout, int SoutSize)
@@ -278,12 +275,13 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
 
 /**
  * \brief Do the wget.
- *
- * \param char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
- *                        when running from command, this parameter is null, e.g. //srv/fossology/repository/localhost/wget/wget.32732
- * \param char *URL - the url you want to download
- * \param char *TempFileDir - where you want to store your downloaded file(directory)
- *
+ * \param TempFile
+ * \parblock
+ * Used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file.
+ * When running from command, this parameter is null, e.g. /srv/fossology/repository/localhost/wget/wget.32732
+ * \endparblock
+ * \param URL The url you want to download
+ * \param TempFileDir Where you want to store your downloaded file(directory)
  * \return int, 0 on success, non-zero on failure.
  */
 int GetURL(char *TempFile, char *URL, char *TempFileDir)
@@ -297,7 +295,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   memset(TempFileDirectory,'\0',MAXCMD);
   memset(DeleteTempDirCmd,'\0',MAXCMD);
 
-  /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
+  /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", TempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 #if 1
@@ -314,7 +312,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
 
   memset(CMD,'\0',MAXCMD);
-  /***
+  /*
    Wget options:
    --progress=dot :: display a new line as it progresses.
    --no-check-certificate :: download HTTPS files even if the cert cannot
@@ -324,7 +322,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
      prevent downloads.  In reality, 99.9% of bad certs are because the
      admin did not notice that they expired and not because of a hijacking
      attempt.
-   ***/
+   */
 
   struct stat sb;
   int rc_system =0;
@@ -456,7 +454,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     SafeExit(15);
   }
 
-  /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
   rc_system = system(DeleteTempDirCmd);
   if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
@@ -464,8 +462,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 } /* GetURL() */
 
 /**
- * \brief get source code from version control system
- *
+ * \brief Get source code from version control system
  * \return int - 0: successful; others: fail
  */
 int GetVersionControl()
@@ -488,7 +485,7 @@ int GetVersionControl()
   snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
   setenv("HOME", TempHome, 1);
 
-  /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
+  /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 
@@ -505,11 +502,13 @@ int GetVersionControl()
   {
     command = GetVersionControlCommand(-1);
     systemError(__LINE__, rc, command)
-    /** for user fossy */
-    /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
-    /** svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ **/
+    /** for user fossy
+    \code git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git
+    svn: svn checkout --config-option servers:global:http-proxy-host=web-proxy.cce.hp.com --config-option servers:global:http-proxy-port=8088 https://svn.code.sf.net/p/fossology/code/trunk/fossology/utils/ \endcode
+    */
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
-    rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    rc_system = system(DeleteTempDirCmd);
     if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     return 1;
   }
@@ -519,13 +518,15 @@ int GetVersionControl()
   if (rc != 0)
   {
     systemError(__LINE__, rc_system, DeleteTempDirCmd)
-    rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+    rc_system = system(DeleteTempDirCmd);
     if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
     return 1;
   }
 
-  rc_system = system(DeleteTempDirCmd); /** remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
+  rc_system = system(DeleteTempDirCmd);
   if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
 
   return 0; // succeed to retrieve source
@@ -533,10 +534,10 @@ int GetVersionControl()
 
 /**
  * \brief Convert input pairs into globals.
- *        This functions taints the parameters as needed.
  *
- * \param char *S - the parameters for wget_aget have 2 parts, one is from scheduler, that is S
- * \param char *TempFileDir - the parameters for wget_aget have 2 parts, one is from wget_agent.conf, that is TempFileDir
+ * This functions taints the parameters as needed.
+ * \param S The parameters for wget_aget have 2 parts, one is from scheduler, that is S
+ * \param TempFileDir The parameters for wget_aget have 2 parts, one is from wget_agent.conf, that is TempFileDir
  */
 void    SetEnv  (char *S, char *TempFileDir)
 {
@@ -621,10 +622,12 @@ void    SetEnv  (char *S, char *TempFileDir)
 
 
 /**
- * @brief Check if path contains a "%H". If so, substitute the hostname.
- * @parm DirPath Directory path.
- * @returns new directory path
- **/
+ * \brief Check if path contains a "%H", "%R".
+ *
+ * Substitute the "%H" with hostname and "%R" with repo location.
+ * \parm DirPath Directory path.
+ * \returns new directory path
+ */
 char *PathCheck(char *DirPath)
 {
   char *NewPath;
@@ -659,13 +662,16 @@ char *PathCheck(char *DirPath)
 }
 
 /**
- * \brief if the path(fs) is a directory, create a tar file from files(dir) in a directory
- * to the temporary directory
- * if the path(fs) is a file, copy the file to the temporary directory
+ * \brief Copy downloaded files to temporary directory
  *
- * \param char *Path - the fs will be handled, directory(file) you want to upload from server
- * \param char *TempFile - the tar(reguler) file name
- * \param struct stat Status - the status of Path
+ * If the path(fs) is a directory, create a tar file from files(dir) in a directory
+ * to the temporary directory.
+ *
+ * If the path(fs) is a file, copy the file to the temporary directory
+ * \param Path The fs will be handled, directory(file) you want to upload from server
+ * \param TempFile The tar(regular) file name
+ * \param TempFileDir Temporary directory path
+ * \param Status The status of Path
  *
  * \return 1 on sucess, 0 on failure
  */
@@ -683,7 +689,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
     return 0;
   }
 
-  if (S_ISDIR(Status.st_mode)) /** directory? */
+  if (S_ISDIR(Status.st_mode)) /* directory? */
   {
     memset(CMD,'\0', MAXCMD);
     snprintf(CMD,MAXCMD-1, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
@@ -713,7 +719,7 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
       systemError(__LINE__, rc_system, CMD)
       return 0;
     }
-  } else if(S_ISREG(Status.st_mode)) /** regular file? */
+  } else if(S_ISREG(Status.st_mode)) /* regular file? */
   {
     memset(CMD, '\0', MAXCMD);
     snprintf(CMD,MAXCMD-1, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
@@ -724,13 +730,15 @@ int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
       return 0;
     }
   }
-  else return 0; /** neither a directory nor a regular file */
+  else return 0; /* neither a directory nor a regular file */
 
   return 1;
 }
 
 /**
- * \brief get proxy from fossology.conf
+ * \brief Get proxy from fossology.conf
+ *
+ * Get proxy from fossology.conf and copy in GlobalProxy array
  */
 void GetProxy()
 {
@@ -790,8 +798,7 @@ void GetProxy()
 
 /**
  * \brief Here are some suggested options
- *
- * \param char *Name - the name of the executable, ususlly it is wget_agent
+ * \param Name The name of the executable, usually it is wget_agent
  */
 void Usage(char *Name)
 {
@@ -817,7 +824,9 @@ void Usage(char *Name)
 } /* Usage() */
 
  /**
-  * \brief translate authentication of git clone
+  * \brief Translate authentication of git clone
+  *
+  * Translate authentication of git clone
   * from http://git.code.sf.net/p/fossology/fossology.git --username --password password (input)
   * to http://username:password@git.code.sf.net/p/fossology/fossology.git
   */

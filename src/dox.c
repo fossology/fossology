@@ -61,4 +61,21 @@
  * -# \subpage deciderjob
  * -# \subpage delagent
  * -# \subpage maintagent
+ * -# \subpage wget_agent
+ */
+
+/* General directory definitions */
+/**
+ * \dir Functional
+ * \brief Contains functional test cases
+ * \dir Unit
+ * \brief Contains unit test cases
+ * \dir agent
+ * \brief Contains agent's source code
+ * \dir agent_tests
+ * \brief Contains agent's test cases
+ * \dir ui
+ * \brief Contains UI modules of the agent
+ * \dir ui_tests
+ * \brief Contains test cases for UI modules
  */
