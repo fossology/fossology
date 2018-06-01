@@ -34,24 +34,24 @@ char BuildVersion[]="wget_agent build version: NULL.\n";
 /**
  * \page wget_agent Wget Agent
  * \tableofcontents
- * \section about About Wget_agent
+ * \section wget_agentabout About Wget_agent
  * Wget agent is use to get files from FTP, FTPS, HTTP, HTTPS, GIT and SVN.
  * It supports major flags of the GNU Wget.
  *
- * \section useage Ways to use Wget agent
+ * \section wget_agentuseage Ways to use Wget agent
  * There are 3 ways to use the wget_agent:
  * -# Command Line download: download one file or one directory from the command line
  * -# Agent Based download: run from the scheduler
  * -# Command Line locally to import the file(directory):
  *     - Import one file or one directory from the command line, used by upload from file and upload from server
  *
- * \subsection clid Command Line download
+ * \subsection wget_agentclid Command Line download
  *
  * To download one file or one directory from the command line:
  *   example:
  *   \code ./wget_agent http://www.aaa.com/bbb \endcode
  *
- * \subsection agentbased Agent Based
+ * \subsection wget_agentagentbased Agent Based
  *
  * To download one file or one directory (one URL )from the scheduler:
  *   example:
@@ -64,13 +64,13 @@ char BuildVersion[]="wget_agent build version: NULL.\n";
  *     \b '/var/local/lib/fossology/agent' is directory for downloaded file(directory)
  *     storage temporarily, after all file(directory) is dowloaded, move them into repo
  *
- * \subsection cliimport Command Line locally to import the file(directory)
+ * \subsection wget_agentcliimport Command Line locally to import the file(directory)
  *
  * To Import one file or one directory from the command line into repo:
  *   example:
  *   \code ./wget_agent -g fossy -k $uploadpk '$UploadedFile' \endcode
  *
- * \section actions Supported actions
+ * \section wget_agentactions Supported actions
   | Command line flag | Description |
   | ---: | :--- |
   | -h | Help (print this message), then exit |
@@ -91,7 +91,7 @@ char BuildVersion[]="wget_agent build version: NULL.\n";
   |     |   if OBJ and Key are provided, then it is inserted into |
   |     |   the DB and repository |
   | no file | process data from the scheduler |
-  \section source Agent source
+  \section wget_agentsource Agent source
  *   - \link src/wget_agent/agent \endlink
  *   - \link src/wget_agent/ui \endlink
  *   - Functional test cases \link src/wget_agent/agent_tests/Functional \endlink

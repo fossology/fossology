@@ -24,7 +24,7 @@
  * delagent: Remove an upload from the DB and repository
  * \page delagent Delagent
  * \tableofcontents
- *
+ * \section delagentabout About delagent
  * Delagent deletes the packages by upload id and folder id.
  *
  * Agent lists all the uploads inside the given folder and delete them one by
@@ -34,7 +34,7 @@
  * and delete every file from the DB and filesystem as well as relevant
  * decisions for the upload.
  *
- * \section actions Supported actions
+ * \section delagentactions Supported actions
  * | Command line flag | Description |
  * | ---: | :--- |
  * | -i   | Initialize the DB, then exit |
@@ -52,7 +52,7 @@
  * | -V   | print the version info, then exit |
  * | --user\|-n # | user name |
  * | --password\|-p # | password |
- * \section source Agent source
+ * \section delagentsource Agent source
  *   - \link src/delagent/agent \endlink
  *   - \link src/delagent/ui \endlink
  *   - Functional test cases \link src/delagent/agent_tests/Functional \endlink

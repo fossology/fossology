@@ -22,9 +22,9 @@
  \page maintagent Maintenance agent
  \tableofcontents
 
- \section about About
+ \section maintagentabout About
  This agent performs a variety of maintenance and repair functions.
- \section actions Supported actions
+ \section maintagentactions Supported actions
  Commandline flag|Description|
  ---:|:---|
  -a|Run all non slow maintenance operations|
@@ -48,7 +48,7 @@
 
   Anyone with execute access can run this agent. This makes it easy to put in a cron job.
   If run from the FOSSology UI, you must be an admin.
-  \section source Agent source
+  \section maintagentsource Agent source
    - \link src/maintagent/agent \endlink
    - \link src/maintagent/ui \endlink
  */

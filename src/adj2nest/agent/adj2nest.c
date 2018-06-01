@@ -23,7 +23,7 @@
  \file adj2nest.c
  \page adj2nest adj2nest
  \tableofcontents
- \section brief Working of adj2nest
+ \section adj2nestbrief Working of adj2nest
  Convert an adjacency list to a nested set and update user permissions to the upload.
  Ununpack creates an adjacency list: every child knows it's parent.
 
@@ -41,7 +41,7 @@
  All sets are ordered, so every parent knows the range
  of sets that form every child.
 
- \section method Method:
+ \section adj2nestmethod Method:
  - Select all keys and parents from uploadtree where they are in the upload_fk.
  - Build a tree that changes "child knows parent" to "parent knows child".
  - Walk the tree. (depth-first)
@@ -50,7 +50,7 @@
      - Track the right by counting each visited node.
    - Update the DB.
 
- \section actions Supported actions
+ \section adj2nestactions Supported actions
  Command line flag|Description|
  ---:|:---|
   -h|Help (print this message), then exit|
@@ -63,14 +63,14 @@
   id|Process upload ids from the command-line|
   -V|Print the version info, then exit|
 
- \section note NOTE:
+ \section adj2nestnote NOTE:
  The first id is "1", not "0".
  Every node is assumed to have a NULL child!
    - If there are n nodes, then the top-most range is [1,2*n]
    - Every left and every right value is unique.
    - The left part of the range is the same as the node's ID number.
 
- \section source Agent source
+ \section sadj2nestource Agent source
    - \link src/adj2nest/agent \endlink
    - \link src/adj2nest/ui \endlink
  */

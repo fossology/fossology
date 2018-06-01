@@ -33,7 +33,7 @@
  In addition, packages can have their own rules that will place them in
  additional buckets.
 
- \section actions Supported actions
+ \section bucketsactions Supported actions
  Command line flag|Description|
  ---:|:---|
  -i|Initialize the database, then exit|
@@ -57,7 +57,7 @@
  are read from stdin, one comma delimited pair per line.
  For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.
  This is the normal execution from the scheduler.
- \section source Agent source
+ \section bucketssource Agent source
    - \link src/buckets/agent \endlink
    - \link src/buckets/ui \endlink
  */

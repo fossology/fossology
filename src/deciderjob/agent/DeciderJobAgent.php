@@ -21,7 +21,7 @@
  * @brief Decider agent
  * @page deciderjob Decider Job
  * @tableofcontents
- *
+ * @section deciderjobabout About decider job
  * The agent apply the decisions found by Monk Bulk run.
  *
  * -# Get the clearing events for the given upload.
@@ -32,7 +32,7 @@
  *
  * @note DeciderJobAgent (`agent_deciderjob`) must be added as a dependency to
  * the monk bulk while scheduling the `agent_monk_bulk job`
- * @section source Agent source
+ * @section deciderjobsource Agent source
  *   - @link src/deciderjob/agent @endlink
  *   - @link src/deciderjob/ui @endlink
  *   - Functional test cases @link src/deciderjob/agent_tests/Functional @endlink

@@ -19,7 +19,7 @@
  * \brief Get the mimetype for a package.
  * \page mimetype MimeType agent
  * \tableofcontents
- * \section about About
+ * \section mimetypeabout About mimetype agent
  * Lots of different agents generate mimetype information, but they have
  * limitations.
  *
@@ -42,7 +42,7 @@
  *     special types than regular magic(5).
  *  -# If ununpack did not find a mimetype, then use magic(5).
  *
- *  \section actions Supported actions
+ *  \section mimetypeactions Supported actions
  * | Command line flag | Description |
  * | ---: | :--- |
  * | -h | Help (print this message), then exit |
@@ -54,7 +54,7 @@
  * | file | If files are listed, display their mimetype |
  * | no file | Process data from the scheduler |
  *
- * \section source Agent source
+ * \section mimetypesource Agent source
  *   - \link src/mimetype/agent \endlink
  *   - \link src/mimetype/ui \endlink
  *   - Functional test cases \link src/mimetype/agent_tests/Functional \endlink

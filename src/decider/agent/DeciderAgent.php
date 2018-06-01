@@ -21,7 +21,7 @@
  * @brief Decider agent
  * @page decider Decider Agent
  * @tableofcontents
- *
+ * @section deciderabout About decider agent
  * While uploading a new package user has an option to auto conclude a license
  * on a file in the package based on following conditions:
  * - If all Nomos findings are within the Monk findings
@@ -41,7 +41,7 @@
  *   Decisions were marked as work in progress in reused upload
  *   and new scanner finds additional licenses.
  *
- * @section source Agent source
+ * @section decidersource Agent source
  *   - @link src/decider/agent @endlink
  *   - @link src/decider/ui @endlink
  *   - Functional test cases @link src/decider/agent_tests/Functional @endlink
