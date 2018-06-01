@@ -21,12 +21,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern char *DBConfFile;
 /**
- * \file testGetMetadata.c
+ * \file
  * \brief unit test for GetMetadata function
  */
 
 /**
  * \brief Test pkgagent.c Function GetMetadata() Normal parameter
+ * \test
+ * -# Load a known RPM package using GetMetadata()
+ * -# Check if the meta data are parsed properly
  */
 void test_GetMetadata_normal()
 {
@@ -67,6 +70,9 @@ void test_GetMetadata_normal()
 
 /**
  * \brief Test pkgagent.c Function GetMetadata() Wrong test file
+ * \test
+ * -# Load a Debian package using GetMetadata()
+ * -# The function should return -1
  */
 void test_GetMetadata_wrong_testfile()
 {
@@ -92,6 +98,9 @@ void test_GetMetadata_wrong_testfile()
 
 /**
  * \brief Test pkgagent.c Function GetMetadata() with No test file
+ * \test
+ * -# Pass NULL to GetMetadata() for pkg
+ * -# Function should return -1
  */
 void test_GetMetadata_no_testfile()
 {

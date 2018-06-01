@@ -62,6 +62,7 @@
  * -# \subpage delagent
  * -# \subpage maintagent
  * -# \subpage mimetype
+ * -# \subpage pkgagent
  * -# \subpage wget_agent
  */
 

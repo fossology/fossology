@@ -21,13 +21,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 extern char *DBConfFile;
 /**
- * \file testGetMetadataDebSource.c
+ * \file
  * \brief unit test for GetMetadataDebSource function
  */
 
 /**
  * \brief Test pkgagent.c Function GetMetadataDebSource()
  * get debian source package info from .dsc file
+ * \test
+ * -# Pass Debian source \c ".dsc" to GetMetadataDebSource()
+ * -# Check if meta data parsed properly
  */
 void test_GetMetadataDebSource()
 {
@@ -65,6 +68,10 @@ void test_GetMetadataDebSource()
 /**
  * \brief Test pkgagent.c Function GetMetadataDebSource()
  * test get debian source info from wrong dsc file.
+ * \test
+ * -# Pass wrong file to GetMetadataDebSource()
+ * -# Check if function return -1
+ * \todo Needs fix
  */
 void test_GetMetadataDebSource_wrong_testfile()
 {

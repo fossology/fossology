@@ -16,8 +16,8 @@
 
  ***************************************************************/
 /**
- * \file pkgagent.c
- * \brief local function of pkgagent
+ * \file
+ * \brief Local function of pkgagent
  *
  * The package metadata agent puts data about each package (rpm and deb) into the database.
  *
@@ -31,7 +31,7 @@
 #include "pkgagent.h"
 
 int Verbose = 0;
-PGconn* db_conn = NULL;        // the connection to Database
+PGconn* db_conn = NULL;        ///< The connection to Database
 
 /** Array of RPMTAG */
 int tag[15] = { RPMTAG_NAME,
@@ -54,11 +54,11 @@ int tag[15] = { RPMTAG_NAME,
 /**
  * \brief Escaping special characters(single quote)
  *
- *  Escaping special characters, so that they cannot cause any harm
+ *  Escaping special characters, so that they cannot cause any harm.
  *
- * \param sourceString the source string need to escape
- * \param escString the string after excape
- * \param esclen the string length need to escape
+ * \param[in]  sourceString The source string need to escape
+ * \param[out] escString The string after excape
+ * \param[in]  esclen The string length need to escape
  */
 void EscapeString (char *sourceString, char *escString, int esclen)
 {
@@ -99,16 +99,14 @@ void EscapeString (char *sourceString, char *escString, int esclen)
 }
 
 /**
- * \brief GetFieldValue()
+ * \brief Given a string that contains field='value' pairs, save the items.
  *
- * Given a string that contains field='value' pairs, save the items.
- *
- * \param char *Sin
- * \param char *Field
- * \param int FieldMax
- * \param char *Value
- * \param int ValueMax
- * \param char Separator
+ * \param[in]  Sin       String to parse
+ * \param[out] Field     Field string
+ * \param[in]  FieldMax  Field capacity
+ * \param[out] Value     Value string
+ * \param[in]  ValueMax  Value capacity
+ * \param[in]  Separator Separator to use
  *
  * \return pointer to start of next field, or NULL at \0.
  */
@@ -169,12 +167,8 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 
 
 /**
- * \brief ProcessUpload (long upload_pk)
- *
- * Get all pfile need to processed use upload_pk
- *
- * \param upload_pk the upload_pk send from scheduler
- *
+ * \brief Get all pfile need to processed use upload_pk
+ * \param upload_pk The upload_pk send from scheduler
  * \return 0 on OK, -1 on failure.
  */
 int ProcessUpload (long upload_pk)
@@ -197,9 +191,10 @@ int ProcessUpload (long upload_pk)
 
   rpmReadConfigFiles(NULL, NULL);
 
-  /*  "pkgagent" needs to know what? */
+  /* "pkgagent" needs to know what? */
 
-  /*  "pkgagent" needs to know the mimetype for 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
+  /* "pkgagent" needs to know the mimetype for
+   * 'application/x-rpm' and 'application/x-debian-package' and 'application/x-debian-source'*/
   snprintf(sqlbuf, sizeof(sqlbuf), "SELECT mimetype_pk FROM mimetype WHERE mimetype_name = 'application/x-rpm' LIMIT 1;");
   result = PQexec(db_conn, sqlbuf);
   if (fo_checkPQresult(db_conn, result, sqlbuf, __FILE__, __LINE__))
@@ -409,12 +404,9 @@ int ProcessUpload (long upload_pk)
 }/*ProcessUpload (long upload_pk)*/
 
 /**
- * \brief ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
- *
- * get RPM package info from rpm file header use rpm library
- *
- * \param Header header rpm header
- * \param struct *pi rpmpkginfo global pointer
+ * \brief Get RPM package info from rpm file header use rpm library
+ * \param header rpm header
+ * \param[out] pi rpmpkginfo global pointer
  */
 void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 {
@@ -513,13 +505,9 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
 } /* ReadHeaderInfo(Header header, struct rpmpkginfo *pi) */
 
 /**
- * \brief GetMetadata(char *pkg, struct rpmpkginfo *pi)
- *
- * Get RPM package info.
- *
- * \param char *pkg path of repo pfile
- * \param struct rpmpkginfo *pi rpmpkginfo global pointer
- *
+ * \brief Get RPM package info.
+ * \param pkg Path of repo pfile
+ * \param[out] pi rpmpkginfo global pointer
  * \return 0 on OK, -1 on failure.
  */
 int GetMetadata (char *pkg, struct rpmpkginfo *pi)
@@ -576,12 +564,8 @@ int GetMetadata (char *pkg, struct rpmpkginfo *pi)
 } /* GetMetadata(char *pkg, struct rpmpkginfo *pi) */
 
 /**
- * \brief RecordMetadata(struct rpmpkginfo *pi)
- *
- * Store rpm package info into database
- *
- * \param struct rpmpkginfo *pi
- *
+ * \brief Store rpm package info into database
+ * \param pi
  * \return 0 on OK, -1 on failure.
  */
 int RecordMetadataRPM (struct rpmpkginfo *pi)
@@ -602,7 +586,11 @@ int RecordMetadataRPM (struct rpmpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
 
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),trim(pi->summary),trim(pi->description),pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_rpm (pkg_name,pkg_alias,pkg_arch,version,rpm_filename,license,pkg_group,packager,release,build_date,vendor,url,source_rpm,summary,description,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",
+        trim(pi->pkgName),trim(pi->pkgAlias),trim(pi->pkgArch),trim(pi->version),
+        trim(pi->rpmFilename),trim(pi->license),trim(pi->group),trim(pi->packager),
+        trim(pi->release),pi->buildDate,trim(pi->vendor),trim(pi->url),trim(pi->sourceRPM),
+        trim(pi->summary),trim(pi->description),pi->pFileFk);
     result = PQexec(db_conn, SQL);
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__))
     {
@@ -639,13 +627,10 @@ int RecordMetadataRPM (struct rpmpkginfo *pi)
 
 
 /**
- * \brief ParseDebFile(char *Sin, char *Field, char *Value)
- *
- * parse debian bianry control file with Field/Value pairs
- *
- * \param char *Sin the string to parse
- * \param char *Field the Field part of pairs
- * \param char *Value the Value part of pairs
+ * \brief Parse Debian binary control file with Field/Value pairs
+ * \param Sin the string to parse
+ * \param[out] Field the Field part of pairs
+ * \param[out] Value the Value part of pairs
  *
  * \return the string after parse
  */
@@ -685,13 +670,9 @@ char * ParseDebFile(char *Sin, char *Field, char *Value)
 } /* ParseDebFile(char *Sin, char *Field, char *Value) */
 
 /**
- * \brief GetMetadataDebBinary(long upload_pk, struct debpkginfo *pi)
- *
- * get debian binary package info
- *
+ * \brief Get debian binary package info
  * \param upload_pk the upload_pk
  * \param pi the global pointor of debpkginfo
- *
  * \return 0 on OK, -1 on failure.
  */
 int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
@@ -838,12 +819,8 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
 }/* GetMetadataDebBinary(struct debpkginfo *pi) */
 
 /**
- * \brief RecordMetadataDEB(struct debpkginfo *pi)
- *
- * Store debian package info into database
- *
+ * \brief Store debian package info into database
  * \param pi the global pointor of debpkginfo
- *
  * \return 0 on OK, -1 on failure.
  */
 int RecordMetadataDEB (struct debpkginfo *pi)
@@ -864,7 +841,11 @@ int RecordMetadataDEB (struct debpkginfo *pi)
     if (fo_checkPQcommand(db_conn, result, SQL, __FILE__, __LINE__)) exit(-1);
     PQclear(result);
 
-    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
+    snprintf(SQL,sizeof(SQL),"INSERT INTO pkg_deb (pkg_name,pkg_arch,version,maintainer,installed_size,section,priority,homepage,source,summary,description,format,uploaders,standards_version,pfile_fk) values (E'%s',E'%s',E'%s',E'%s',%d,E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',E'%s',%ld);",
+        trim(pi->pkgName),trim(pi->pkgArch),trim(pi->version),trim(pi->maintainer),
+        pi->installedSize,trim(pi->section),trim(pi->priority),trim(pi->homepage),
+        trim(pi->source),trim(pi->summary),trim(pi->description),trim(pi->format),
+        trim(pi->uploaders),trim(pi->standardsVersion),pi->pFileFk);
     result = PQexec(db_conn, SQL);
     // ignore error
     if ((result==0) || ((PQresultStatus(result) != PGRES_COMMAND_OK)))
@@ -910,14 +891,11 @@ int RecordMetadataDEB (struct debpkginfo *pi)
 }/* RecordMetadataDEB(struct debpkginfo *pi) */
 
 /**
- * \brief GetMetadataDebSource(char *repFile, struct debpkginfo *pi)
- *
- * get debian source package info from .dsc file
- *
+ * \brief Get debian source package info from .dsc file
  * \param repFile the pfile path name
- * \param pi the global pointor of debpkginfo
- *
+ * \param[out] pi the global pointor of debpkginfo
  * \return 0 on OK, -1 on failure.
+ * \todo Check if file is really Debian source
  */
 int GetMetadataDebSource (char *repFile, struct debpkginfo *pi)
 {
