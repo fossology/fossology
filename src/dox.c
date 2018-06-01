@@ -61,6 +61,7 @@
  * -# \subpage deciderjob
  * -# \subpage delagent
  * -# \subpage maintagent
+ * -# \subpage mimetype
  * -# \subpage wget_agent
  */
 

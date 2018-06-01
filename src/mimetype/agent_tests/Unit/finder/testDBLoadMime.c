@@ -21,15 +21,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testDBLoadMime.c
- * \brief testing for the function DBLoadMime
+ * \file
+ * \brief Testing for the function DBLoadMime
  */
 
 extern void DBLoadMime();
 extern char *DBConfFile;
 
 /**
- * \brief initialize
+ * \brief initialize DB
  */
 int  DBLoadMimeInit()
 {
@@ -59,14 +59,17 @@ int DBLoadMimeClean()
 /* test functions */
 
 /**
- * \brief for function DBLoadMime
+ * \brief for function DBLoadMime()
+ * \test
+ * -# Call DBLoadMime()
+ * -# Check if MaxDBMime equals actual count in mimetype table
  */
 void testDBLoadMime()
 {
   char SQL[MAXCMD] = {0};
   PGresult *result = NULL;
   char mimetype_name[] = "application/octet-stream";
-  /** delete the record mimetype_name is application/octet-stream in mimetype */
+  /* delete the record mimetype_name is application/octet-stream in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -86,9 +89,9 @@ void testDBLoadMime()
   }
   PQclear(result);
   MaxDBMime = 0;
-  /** exectue the tested function */
+  /* exectue the tested function */
   DBLoadMime();
-  /** select the record mimetype_name is application/octet-stream */
+  /* select the record mimetype_name is application/octet-stream */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "SELECT mimetype_name from mimetype where mimetype_name = ('%s');", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -101,11 +104,11 @@ void testDBLoadMime()
   PQclear(result);
 
   CU_ASSERT_EQUAL(MaxDBMime, count);
-  /** delete the record mimetype_name is application/octet-stream in mimetype */
+  /* delete the record mimetype_name is application/octet-stream in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);
-  /** reset the evn, that is clear all data in mimetype */
+  /* reset the evn, that is clear all data in mimetype */
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__))
   {
     PQfinish(pgConn);
