@@ -79,7 +79,7 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     $db_array = parse_ini_file("$DB_CONF/Db.conf");
     $db_user = $db_array["user"];
 
-    exec("psql -U $db_user -d $DB_NAME < ../testdata/testdb_all.sql >/dev/null");
+    exec("gunzip -c ../testdata/testdb_all.gz | psql -U $db_user -d $DB_NAME >/dev/null");
 
     $sql = "SELECT upload_pk, upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $sql);
@@ -110,24 +110,24 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     $db_array = parse_ini_file("$DB_CONF/Db.conf");
     $db_user = $db_array["user"];
 
-    exec("psql -U $db_user -d $DB_NAME < ../testdata/testdb_all.sql >/dev/null");
+    exec("gunzip -c ../testdata/testdb_all.gz | psql -U $db_user -d $DB_NAME >/dev/null");
 
     $sql = "SELECT folder_pk,parent,name,description,upload_pk FROM folderlist ORDER BY name,parent,folder_pk;";
     $result = pg_query($PG_CONN, $sql);
     if (pg_num_rows($result) > 0){
       $row = pg_fetch_assoc($result);
-      $expected = "        -- :: Contains: " . $row["name"];
+      $expected = "     -- :: Contains: " . $row["name"];
     }
     pg_free_result($result);
     $command = "$EXE_PATH -f -n fossy -p fossy";
     exec($command, $out, $rtn);
     #print $expected . "\n";
     #print $out[1] . "\n";
-    $this->assertStringStartsWith($expected, $out[3]);
+    $this->assertStringStartsWith($expected, $out[2]);
   }
 
   /**
-   * \brief test delagent -U 85
+   * \brief test delagent -U 2
    */
   function testDelagentUpload(){
     global $EXE_PATH;
@@ -135,21 +135,21 @@ class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
     global $DB_NAME;
     global $DB_CONF;
 
-    $expected = "The upload '85' is deleted by the user 'fossy'.";
+    $expected = "The upload '2' is deleted by the user 'fossy'.";
 
     $db_array = parse_ini_file("$DB_CONF/Db.conf");
     $db_user = $db_array["user"];
 
-    exec("psql -U $db_user -d $DB_NAME < ../testdata/testdb_all.sql >/dev/null");
-    $sql = "UPDATE upload SET user_fk = 2;";
+    exec("gunzip -c ../testdata/testdb_all.gz | psql -U $db_user -d $DB_NAME >/dev/null");
+    $sql = "UPDATE upload SET user_fk = 3;";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
 
-    $command = "$EXE_PATH -U 85 -n fossy -p fossy";
+    $command = "$EXE_PATH -U 2 -n fossy -p fossy";
     exec($command, $out, $rtn);
     #print $expected . "\n";
     #print $out[1] . "\n";
-    $sql = "SELECT upload_fk, uploadtree_pk FROM bucket_container, uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = 85;";
+    $sql = "SELECT upload_fk, uploadtree_pk FROM bucket_container, uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = 2;";
     $result = pg_query($PG_CONN, $sql);
     if (pg_num_rows($result) > 0){
       $this->assertFalse("bucket_container records not deleted!");

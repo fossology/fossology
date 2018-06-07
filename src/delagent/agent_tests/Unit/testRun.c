@@ -83,7 +83,7 @@ int DelagentDBInit()
   DBConfFile = get_dbconf();
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "psql -U %s -d %s < ../testdata/testdb_all.sql >/dev/null", getUser(), get_db_name());
+  sprintf(CMD, "gunzip -c ../testdata/testdb_all.gz | psql -U %s -d %s >/dev/null", getUser(), get_db_name());
   rc = system(CMD);
   if (WEXITSTATUS(rc) != 0)
   {

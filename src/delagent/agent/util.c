@@ -166,6 +166,10 @@ int check_permission_upload(int wanted_permissions, long upload_id, int user_id,
       return 0;
     }
   }
+  else if (perms == 0)
+  {
+    return 1;
+  }
   return perms;
 }
 
@@ -1026,11 +1030,11 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
   }
 
   len = strlen(L);
-  memcpy(a, L,len); 
+  memcpy(a, L,len);
   token = strtok(a, s);
-   
-  while( token != NULL ) 
-  {   
+
+  while( token != NULL )
+  {
     fd[i] = atol(token);
     token = strtok(NULL, s);
     i++;

@@ -40,7 +40,7 @@ void testDeleteFolders()
 
   db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  rc = deleteFolder(1, FolderId, 3, 10);
+  rc = deleteFolder(3, FolderId, 3, 10);
 
   PQfinish(db_conn);
   CU_ASSERT_EQUAL(rc, 0);
@@ -90,6 +90,11 @@ void testDeleteUploads()
     CU_ASSERT_EQUAL(PQntuples(result),0);
   }
   PQclear(result);
+
+  /** Check false input */
+  UploadId = 4;
+  rc = deleteUpload(UploadId, 2, 10);
+  CU_ASSERT_NOT_EQUAL(rc, 0);
 
   PQfinish(db_conn);
   CU_PASS("DeleteUploads PASS!");
