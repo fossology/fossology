@@ -483,7 +483,7 @@ FUNCTION void parseLicenseList()
   }
 
   /* check for a single name  FIX THIS!*/
-  if (strstr(cur.compLic, ",") == NULL_CHAR)
+  if (strstr(cur.compLic, ",") == NULL)
   {
     cur.licenseList[0] = cur.compLic;
     cur.licenseList[1] = NULL;
