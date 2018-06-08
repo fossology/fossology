@@ -598,7 +598,7 @@ static void listDoubleSize(list_t *l) {
     l->items = newptr;
   }
   l->size *= 2;
-  memFree(newptr, MTAG_DOUBLED);
+
   return;
 }
 

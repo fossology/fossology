@@ -183,7 +183,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
         list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
       }
       else {
-        strcat(filename_buf, "\n");  // add one new line character by the end of one file path, one line is one file path
+        sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
         /* write on average process_count */
         file_number = *distribute_count%process_count;
         fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);
@@ -487,7 +487,6 @@ int main(int argc, char **argv)
   }
 
   lrcache_free(&cacheroot);  // for valgrind
-  free(files_to_be_scanned);
 
   /* Normal Exit */
   Bail(0);
