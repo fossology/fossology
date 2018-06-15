@@ -11126,6 +11126,9 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_LT_GPL_UPX_EXCEPT) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
     INTERESTING("UPX-exception");
   }
+  else if (INFILE(_LT_linking_exception_2) || (INFILE(_LT_linking_exception_3) && INFILE(_LT_GPL_EXCEPT_7))) {
+    INTERESTING("linking-exception");
+  }
   else if (INFILE(_LT_GPL_EXCEPT_1)) {
     INTERESTING(lDebug ? "GPL-except-1" : "GPL-exception");
   }
@@ -11140,9 +11143,6 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_LT_GPL_EXCEPT_7)) {
     INTERESTING("gnu-javamail-exception");
-  }
-  else if (INFILE(_LT_linking_exception_2)) {
-    INTERESTING("linking-exception");
   }
   else if (INFILE(_LT_GPL_SWI_PROLOG_EXCEPT)) {
     INTERESTING(lDebug ? "GPL-swi-prolog" : "GPL-with-swipl-exception");

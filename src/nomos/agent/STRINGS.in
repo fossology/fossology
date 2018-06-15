@@ -3853,6 +3853,11 @@
 %KEY% "permi[st]"
 %STR% "as a special exception =SOME= g(ive you|rant) permission to link =FEW= with independent modules to produce"
 #
+%ENTRY% _LT_linking_exception_3
+%NOCHECK%
+%KEY% "licen[cs]e"
+%STR% "if you link this library with other files (some of which are )?compiled with GCC"
+#
 %ENTRY% _LT_LINUXDOC
 %KEY% "distribut"
 %STR% "linuxdoc =FEW= itself does not have any limitations and it (can|may) be freely used modified and r?e?-?distributed"
