@@ -63,6 +63,7 @@
  * -# \subpage maintagent
  * -# \subpage mimetype
  * -# \subpage pkgagent
+ * -# \subpage readmeoss
  * -# \subpage wget_agent
  */
 
