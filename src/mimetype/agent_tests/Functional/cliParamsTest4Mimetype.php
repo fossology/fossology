@@ -137,7 +137,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     global $EXE_PATH;
     global $PG_CONN;
 
-    $mimeType = "text/x-c";
+    $mimeType = "text/x-makefile";
     /* delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
     $result = pg_query($PG_CONN, $sql);
@@ -147,10 +147,10 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
     /* the file is one c source file */
-    $filePath = "../../agent/mimetype.c";
+    $filePath = "./Makefile";
     $command = "$EXE_PATH $filePath";
     exec($command, $out, $rtn);
-    $expected_string = "text/x-c : mimetype_pk=10000";
+    $expected_string = "text/x-makefile : mimetype_pk=10000";
     $this->assertStringStartsWith($expected_string, $out[0]);
 
     /* delete test data post testing */
