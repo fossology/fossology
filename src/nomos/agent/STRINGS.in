@@ -4167,7 +4167,7 @@
 %ENTRY% _LT_MPLref2
 %NOCHECK%
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
-%STR% "(distribute|develop|offere?d?|licen[cs]ed|available|protected|covered|provided|subject|comes) =SOME= (\<[:space:]mpl[:space:]\>|mozilla public licen[cs]e)"
+%STR% "(distribute|develop|offere?d?|licen[cs]ed|available|protected|covered|provided|subject|comes) =SOME= ([[:space:]]mpl\>|mozilla public licen[cs]e)"
 #
 %ENTRY% _LT_MPL20_ref
 %KEY% "licen[cs]"
@@ -4176,7 +4176,7 @@
 %ENTRY% _LT_MPL_OR
 %NOCHECK%
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
-%STR% "\<(either|or|alternately)\> =FEW= (\<[:space:]mpl[:space:]\>|mozilla public licen[cs]e)"
+%STR% "\<(either|or|alternately)\> =FEW= ([[:space:]]mpl\>|mozilla public licen[cs]e)"
 #
 %ENTRY% _LT_MPL_SECONDARY
 %NOCHECK%
