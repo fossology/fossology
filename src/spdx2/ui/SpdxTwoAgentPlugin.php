@@ -15,26 +15,42 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
+/**
+ * @dir
+ * @brief UI for SPDX2 agent
+ */
 namespace Fossology\SpdxTwo;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @class SpdxTwoAgentPlugin
+ * @brief Generate SPDX2 report for multiple uploads
+ */
 class SpdxTwoAgentPlugin extends AgentPlugin
 {
   public function __construct() {
     $this->Name = "agent_spdx2";
     $this->Title =  _("SPDX2 generation");
     $this->AgentName = "spdx2";
-    
+
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   */
   function preInstall()
   {
     // no AgentCheckBox
   }
-  
+
+  /**
+   * @brief Add uploads to report
+   * @param array $uploads Array of upload ids
+   * @return string
+   */
   public function uploadsAdd($uploads)
   {
     if (count($uploads) == 0) {

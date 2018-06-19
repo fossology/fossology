@@ -178,7 +178,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Run the test
-   *
+   * @test
    * -# Setup test tables
    * -# Setup test repo
    * -# Run copyright on upload id 1

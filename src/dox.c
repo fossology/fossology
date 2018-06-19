@@ -64,6 +64,7 @@
  * -# \subpage mimetype
  * -# \subpage pkgagent
  * -# \subpage readmeoss
+ * -# \subpage spdx2
  * -# \subpage wget_agent
  */
 
