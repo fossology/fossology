@@ -23,9 +23,15 @@ use Fossology\Lib\Test\TestPgDb;
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
 
+/**
+ * @class SchedulerTestRunnerCli
+ * @brief Handles scheduler interaction
+ */
 class SchedulerTestRunnerCli implements SchedulerTestRunner
 {
-  /** @var TestPgDb */
+  /** @var TestPgDb $testDb
+   * Test DB
+   */
   private $testDb;
 
   public function __construct(TestPgDb $testDb)

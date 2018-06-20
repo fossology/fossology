@@ -16,7 +16,86 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/**
+ * @dir
+ * @brief Source for Unified report agent
+ * @file
+ * @brief Source for Unified report agent
+ * @page unifiedreport Unified report agent
+ * @tableofcontents
+ * @section unifiedreportabout About Unified report agent
+ * Unified report agent generates a `.docx`. The document follows
+ * following pattern.
+ * - Clearing information (department, report date, etc.)
+ * - Component information (version, hash, main license, fossology link, etc.)
+ * -# Assessment Summary
+ *     Contains information like source notes, dependency notes, ECC, etc.
+ * -# Required license compliance tasks
+ *     -# Common obligations, restrictions and risks
+ *     -# Additional obligations, restrictions & risks beyond common rules
+ * -# Acknowledgements
+ *     Every acknowledgements entered by the user during clearing.
+ * -# Export Restrictions
+ *     Contains findings of ECC.
+ * -# Notes
+ *     -# Notes on individual files
+ *
+ *         Comments added during clearing
+ * -# Results of License Scan
+ *
+ *     Count of agent findings, concluded license and corresponding license name.
+ * -# Main Licenses
+ *
+ *     List of License name, license text and file path for every global/main
+ *     license marked during clearing.
+ * -# Other OSS Licenses (Red)
+ *
+ *     Licenses which should be avoided (risk level 4-5)
+ * -# Other OSS Licenses (Yellow)
+ *
+ *     Licenses with limited rules (risk level 2-3)
+ * -# Other OSS Licenses (White)
+ *
+ *     Common licenses (risk level 0-1)
+ * -# Overview of all licenses
+ *
+ *     List of licenses found with obligation
+ * -# Copyrights
+ *
+ *     List of copyright statements, comments and file path.
+ * -# Bulk findings
+ *
+ *     Monk bulk findings
+ * -# Non Functional Licenses
+ *
+ *     Licenses which are not applicable on binary.
+ * -# Irrelevant Files
+ *
+ *     Files marked as irrelevant during clearing
+ *     -# Comment for irrelevant files
+ * -# Clearing Protocol Change Log
+ *
+ *     Organization specific.
+ *
+ * Along with all this information, every page contains the header set using
+ * `Report Header Text` under Configuration Variables. And the footer contains
+ * organization name, report generation timestamp, FOSSology version used and
+ * page number.
+ *
+ * @section unifiedreportactions Supported actions
+ * Currently, unified report agent does not support CLI commands and read only
+ * from scheduler.
+ *
+ * @section unifiedreportsource Agent source
+ *   - @link src/unifiedreport/agent @endlink
+ *   - @link src/unifiedreport/ui @endlink
+ *   - Functional test cases \link src/unifiedreport/agent_tests/Functional @endlink
+ */
 
+/**
+ * @var string REPORT_AGENT_NAME
+ * Agent name
+ */
 define("REPORT_AGENT_NAME", "unifiedreport");
 
 use Fossology\Lib\Agent\Agent;
@@ -38,70 +117,109 @@ include_once(__DIR__ . "/reportStatic.php");
 include_once(__DIR__ . "/reportSummary.php");
 include_once(__DIR__ . "/obligations.php");
 
+/**
+ * @class UnifiedReport
+ * @brief Generates unified report
+ */
 class UnifiedReport extends Agent
 {
-  /** @var LicenseClearedGetter  */
+  /** @var LicenseClearedGetter $licenseClearedGetter
+   * LicenseClearedGetter object
+   */
   private $licenseClearedGetter;
 
-  /** @var LicenseMainGetter  */
+  /** @var LicenseMainGetter $licenseMainGetter
+   * LicenseMainGetter object
+   */
   private $licenseMainGetter;
-  /** @var LicenseClearedGetter  */
 
-  /** @var cpClearedGetter */
+  /** @var cpClearedGetter $cpClearedGetter
+   * Copyright clearance object
+   */
   private $cpClearedGetter;
 
-  /** @var eccClearedGetter */
+  /** @var eccClearedGetter $eccClearedGetter
+   * ECC clearance object
+   */
   private $eccClearedGetter;
 
-  /** @var LicenseIrrelevantGetter*/
+  /** @var LicenseIrrelevantGetter $licenseIrrelevantGetter
+   * LicenseIrrelevantGetter object
+   */
   private $licenseIrrelevantGetter;
 
-  /** @var BulkMatchesGetter  */
+  /** @var BulkMatchesGetter $bulkMatchesGetter
+   * BulkMatchesGetter object
+   */
   private $bulkMatchesGetter;
 
-  /** @var licenseIrrelevantCommentGetter  */
+  /** @var licenseIrrelevantCommentGetter $licenseIrrelevantCommentGetter
+   * licenseIrrelevantCommentGetter object
+   */
   private $licenseIrrelevantCommentGetter;
 
-  /** @var otherGetter  */
+  /** @var OtherGetter $otherGetter
+   * otherGetter object
+   */
   private $otherGetter;
 
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
 
-  /** @var UserDao */
+  /** @var UserDao $userDao
+   * UserDao object
+   */
   private $userDao;
 
-  /** @var rowHeight */
+  /** @var int $rowHeight
+   * Row height for table
+   */
   private $rowHeight = 500;
 
-  /** @var tablestyle */
+  /** @var array $tablestyle
+   * Table style attributes
+   */
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
                               "cellSpacing" => 5
                              );
 
-  /** @var subHeadingStyle */
+  /** @var array $subHeadingStyle
+   * Sub heading style attributes
+   */
   private $subHeadingStyle = array("size" => 9,
                                    "align" => "center",
                                    "bold" => true
                                   );
 
-  /** @var licenseColumn */
+  /** @var array $licenseColumn
+   * License column style attributes
+   */
   private $licenseColumn = array("size" => "9",
                                  "bold" => true
                                 );
 
-  /** @var licenseTextColumn */
+  /** @var array $licenseTextColumn
+   * License column text style attributes
+   */
   private $licenseTextColumn = array("name" => "Courier New",
                                      "size" => 9,
                                      "bold" => false
                                     );
 
-  /** @var filePathColumn */
+  /** @var array $filePathColumn
+   * File path column style attributes
+   */
   private $filePathColumn = array("size" => "9",
                                   "bold" => false
                                  );
+
+  /** @var string $groupBy
+   * @todo Unused variable
+   */
   private $groupBy;
 
   function __construct()
@@ -121,6 +239,10 @@ class UnifiedReport extends Agent
     $this->userDao = $this->container->get("dao.user");
   }
 
+  /**
+   * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
+   */
   function processUploadId($uploadId)
   {
     $groupId = $this->groupId;
@@ -180,10 +302,10 @@ class UnifiedReport extends Agent
   }
 
   /**
-   * @brief setting default heading styles and paragraphstyles
-   * @param PhpWord $phpWord
-   * @param int $timestamp
-   * @param int $userId
+   * @brief Setting default heading styles and paragraph styles
+   * @param[in,out] PhpWord &$phpWord PhpWord object
+   * @param int $timestamp            Report gen timestamp
+   * @param string $userName          User generating the report
    */
   private function documentSettingsAndStyles(PhpWord &$phpWord, $timestamp, $userName)
   {
@@ -240,8 +362,8 @@ class UnifiedReport extends Agent
 
 
   /**
-   * @brief identifiedGlobalLicenses() copy identified global licenses
-   * @param array $contents
+   * @brief Copy identified global licenses
+   * @param[int,out] array $contents
    * @return array $contents with identified global license path
    */
   function identifiedGlobalLicenses($contents)
@@ -277,8 +399,10 @@ class UnifiedReport extends Agent
 
 
   /**
+   * @brief Generate global license table
    * @param Section $section
    * @param array $mainLicenses
+   * @param array $titleSubHeading
    */
   private function globalLicenseTable(Section $section, $mainLicenses, $titleSubHeading)
   {
@@ -329,10 +453,10 @@ class UnifiedReport extends Agent
   /**
    * @brief This function lists out the bulk licenses,
    * comments of identified licenses
-   * @param Section section
-   * @param $title
-   * @param $licenses
-   * @param $rowHead
+   * @param Section $section
+   * @param string $title
+   * @param array $licenses
+   * @param array $titleSubHeading
    */
   private function bulkLicenseTable(Section $section, $title, $licenses, $titleSubHeading)
   {
@@ -371,10 +495,11 @@ class UnifiedReport extends Agent
 
   /**
    * @brief This function lists out the red, white & yellow licenses
-   * @param Section section
-   * @param $title
-   * @param $licenses
-   * @param $riskarray
+   * @param Section $section
+   * @param string $title
+   * @param array $licenses
+   * @param array $riskarray
+   * @param array $titleSubHeading
    */
   private function licensesTable(Section $section, $title, $licenses, $riskarray, $titleSubHeading)
   {
@@ -417,10 +542,12 @@ class UnifiedReport extends Agent
   }
 
   /**
-   * @brief copyright or ecc table.
+   * @brief Copyright or ecc table.
    * @param Section $section
    * @param string $title
    * @param array $statementsCEI
+   * @param array $titleSubHeading
+   * @param string $text
    */
   private function getRowsAndColumnsForCEI(Section $section, $title, $statementsCEI, $titleSubHeading, $text="")
   {
@@ -463,10 +590,11 @@ class UnifiedReport extends Agent
   }
 
   /**
-   * @brief irrelavant files in report.
+   * @brief Irrelevant files in report.
    * @param Section $section
-   * @param String $title
+   * @param string $title
    * @param array $licensesIrre
+   * @param array $titleSubHeading
    */
   private function getRowsAndColumnsForIrre(Section $section, $title, $licensesIrre, $titleSubHeading)
   {
@@ -499,10 +627,10 @@ class UnifiedReport extends Agent
   }
 
   /**
-   * @brief license histogram into report.
+   * @brief License histogram into report.
    * @param Section $section
-   * @param ItemTreeBounds $parentItem
-   * @param int $groupId
+   * @param array $dataHistogram
+   * @param array $titleSubHeading
    */
   private function licenseHistogram(Section $section, $dataHistogram, $titleSubHeading)
   {
@@ -526,6 +654,11 @@ class UnifiedReport extends Agent
 
 
   /**
+   * @brief Writes the report to a file
+   *
+   * The file name is of format `<packageName>_clearing_report_<D_M_d_m_Y_h_i_s>.docx`.
+   *
+   * The docx format used is Word2007.
    * @param array $contents
    * @param int $uploadId
    * @param int $groupId
@@ -555,7 +688,8 @@ class UnifiedReport extends Agent
     $phpWord = new PhpWord();
 
     /* Get start time */
-    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) AS ts, jq_cmd_args FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
+    $jobInfo = $this->dbManager->getSingleRow("SELECT extract(epoch from jq_starttime) "
+              ." AS ts, jq_cmd_args FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
     $packageUri = "";
     if(!empty($jobInfo['jq_cmd_args'])){
@@ -573,7 +707,8 @@ class UnifiedReport extends Agent
 
     $licenseObligation = new ObligationsToLicenses();
 
-    list($obligations, $whiteLists) = $licenseObligation->getObligations($contents['licenses']['statements'], $contents['licensesMain']['statements'], $uploadId, $groupId);
+    list($obligations, $whiteLists) = $licenseObligation->getObligations($contents['licenses']['statements'],
+      $contents['licensesMain']['statements'], $uploadId, $groupId);
 
     /* Header starts */
     $reportStaticSection->reportHeader($section);
@@ -581,7 +716,9 @@ class UnifiedReport extends Agent
     $contents = $this->identifiedGlobalLicenses($contents);
 
     /* Summery table */
-    $reportSummarySection->summaryTable($section, $uploadId, $userName, $contents['licensesMain']['statements'], $contents['licenses']['statements'],$contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
+    $reportSummarySection->summaryTable($section, $uploadId, $userName,
+      $contents['licensesMain']['statements'], $contents['licenses']['statements'],
+      $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
 
     /* Assessment summery table */
     $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
@@ -601,7 +738,13 @@ class UnifiedReport extends Agent
     $heading = "Export Restrictions";
     $titleSubHeadingCEI = "(Statements, Comments, File path)";
     $section->addBookmark("eccInternalLink");
-    $textEcc ="The content of this paragraph is not the result of the evaluation of the export control experts (the ECCN). It contains information found by the scanner which shall be taken in consideration by the export control experts during the evaluation process. If the scanner identifies an ECCN it will be listed here. (NOTE: The ECCN is seen as an attribute of the component release and thus it shall be present in the component catalogue.)";
+    $textEcc ="The content of this paragraph is not the result of the evaluation"
+             ." of the export control experts (the ECCN). It contains information"
+             ." found by the scanner which shall be taken in consideration by"
+             ." the export control experts during the evaluation process. If"
+             ." the scanner identifies an ECCN it will be listed here. (NOTE:"
+             ." The ECCN is seen as an attribute of the component release and"
+             ." thus it shall be present in the component catalogue.";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['ecc']['statements'], $titleSubHeadingCEI, $textEcc);
 
     /* Display comments entered for report */
@@ -674,7 +817,7 @@ class UnifiedReport extends Agent
       mkdir($fileBase, 0777, true);
     }
     umask(0022);
-    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx" ;
+    $fileName = $fileBase. "$packageName"."_clearing_report_".date("D_M_d_m_Y_h_i_s").".docx";
     $objWriter = IOFactory::createWriter($phpWord, "Word2007");
     $objWriter->save($fileName);
 
@@ -683,12 +826,15 @@ class UnifiedReport extends Agent
 
 
   /**
-   * @brief update database with generated report path.
-   * @param $uploadId, $jobId, $filename
+   * @brief Update database with generated report path.
+   * @param int $uploadId
+   * @param int $jobId
+   * @param string $filename
    */
   private function updateReportTable($uploadId, $jobId, $filename)
   {
-    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)", array($uploadId, $jobId, $filename), __METHOD__);
+    $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
+      array($uploadId, $jobId, $filename), __METHOD__);
   }
 
 }

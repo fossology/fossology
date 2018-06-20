@@ -5,12 +5,12 @@
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -19,35 +19,45 @@
 use PhpOffice\PhpWord\Element\Section;
 use \PhpOffice\PhpWord\Style;
 
+/**
+ * @class ReportSummary
+ * @brief Handles report summary
+ */
 class ReportSummary
 {
-  /** @var uploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
 
-  /** @var tablestyle */
+  /** @var array $tablestyle
+   * Table style attributes
+   */
   private $tablestyle = array("borderSize" => 2,
                               "name" => "Arial",
                               "borderColor" => "000000",
                               "cellSpacing" => 5
-                             );  
+                             );
 
-  /** @var subHeadingStyle */
-  private $subHeadingStyle = array("size" => 9, 
+  /** @var array $subHeadingStyle
+   * Sub heading style attributes
+   */
+  private $subHeadingStyle = array("size" => 9,
                                    "align" => "center",
                                    "bold" => true
                                   );
-  
+
   public function __construct()
   {
-    global $container; 
+    global $container;
     $this->uploadDao = $container->get('dao.upload');
   }
 
   /**
-  * @brief accumulateLicenses() remove the duplicate licenses.
-  * @param array $licenses.
-  * @return comma seaparated license shortname.
-  */        
+   * @brief Remove the duplicate licenses.
+   * @param array $licenses.
+   * @return string Comma separated license shortname.
+   */
   private function accumulateLicenses($licenses)
   {
     if(!empty($licenses)){
@@ -59,15 +69,20 @@ class ReportSummary
     }
     return $allOtherLicenses;
   }
-    
-   /**
+
+  /**
    * @brief Design the summaryTable of the report
    * @param Section $section
-   * @param string $uploadId 
+   * @param int $uploadId
    * @param string $userName
-   * @param array mainLicenses
+   * @param array $mainLicenses
+   * @param array $licenses
+   * @param array $histLicenses
+   * @param string $otherStatement
    * @param int $timestamp
-   */        
+   * @param string $groupName
+   * @param string $packageUri
+   */
   function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri)
   {
     $cellRowContinue = array("vMerge" => "continue");
@@ -81,7 +96,7 @@ class ReportSummary
     $rowWidth2 = 400;
     $cellFirstLen = 2500;
     $cellSecondLen = 3800;
-    $cellThirdLen = 5500; 
+    $cellThirdLen = 5500;
 
     $allMainLicenses = $this->accumulateLicenses($mainLicenses);
     $allOtherLicenses = $this->accumulateLicenses($licenses);
@@ -92,22 +107,24 @@ class ReportSummary
       }
       $allHistLicenses = rtrim($allHistLicenses, ", ");
     }
-    
+
     $newSw360Component = array();
     $table = $section->addTable($this->tablestyle);
-    
+
     $table->addRow($rowWidth);
-    $table->addCell($cellFirstLen, $cellColSpan)->addText(htmlspecialchars(" OSS Component Clearing report"), $firstRowStyle, "pStyle");
-    
+    $table->addCell($cellFirstLen, $cellColSpan)->addText(htmlspecialchars(" OSS Component Clearing report"),
+      $firstRowStyle, "pStyle");
+
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Clearing Information"), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Department"), $firstRowStyle1, "pStyle");
     $table->addCell($cellThirdLen)->addText(htmlspecialchars(" FOSSology Generation"), null, "pStyle");
-    
+
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" ".date("Y/m/d", $timestamp)."  ".$userName." (".$groupName.") "), null, "pStyle");      
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" "
+      .date("Y/m/d", $timestamp)."  ".$userName." (".$groupName.") "), null, "pStyle");
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Reviewed by (opt.)"),$firstRowStyle1, "pStyle");
@@ -140,7 +157,7 @@ class ReportSummary
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
-    
+
     if(!empty($newSw360Component["Version"])){
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Version"]), null, "pStyle");
     }
@@ -150,22 +167,22 @@ class ReportSummary
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component hash (SHA-1)"), $firstRowStyle1, "pStyle");
-      
+
     $componentHash = $this->uploadDao->getUploadHashes($uploadId);
 
     $table->addCell($cellThirdLen)->addText(htmlspecialchars($componentHash["sha1"]), null, "pStyle");
-     
+
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Release date"), $firstRowStyle1, "pStyle");
-    
+
     if(!empty($newSw360Component["Release date"])){
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Release date"]), null, "pStyle");
     }
     else{
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_release_date']), null, "pStyle");
     }
-    
+
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Main license(s)"), $firstRowStyle1, "pStyle");
@@ -195,7 +212,7 @@ class ReportSummary
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars("SW360 Portal Link"), $firstRowStyle1, "pStyle");
     $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_sw360_link']), null, "pStyle");
-    
+
     $table->addRow($rowWidth2);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars("Result of License Scan"), $firstRowStyle1, "pStyle");
@@ -209,6 +226,6 @@ class ReportSummary
 
     $section->addTextBreak();
     $section->addTextBreak();
-  } 
+  }
 
 }

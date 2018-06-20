@@ -65,6 +65,7 @@
  * -# \subpage pkgagent
  * -# \subpage readmeoss
  * -# \subpage spdx2
+ * -# \subpage unifiedreport
  * -# \subpage wget_agent
  */
 
