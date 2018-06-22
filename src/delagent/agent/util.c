@@ -483,14 +483,11 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
 
   if (Test)
   {
-    PQexecCheckClear(NULL, "ROLLBACK", __FILE__, __LINE__);
-
-    snprintf(SQL,MAXSQL,"DROP TABLE %s;",TempTable);
-    PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
+    PQexecCheckClear(NULL, "ROLLBACK;", __FILE__, __LINE__);
   }
   else
   {
-    PQexecCheckClear(NULL, "COMMIT", __FILE__, __LINE__);
+    PQexecCheckClear(NULL, "COMMIT;", __FILE__, __LINE__);
   }
 
   printfInCaseOfVerbosity("Deleted upload %ld\n",UploadId);
