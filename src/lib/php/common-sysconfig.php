@@ -397,6 +397,21 @@ function Populate_sysconfig()
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
     }
+    else  // Values exist, update them
+    {
+      $cols = array_map('trim', explode(",", $Columns));
+      $vals = array_map('trim', explode(",", $Values));
+      $UpdateString = [];
+      foreach ($cols as $index => $Column)
+      {
+        if ($index != 0 && $index != 1) // Skip variablename and conf_value
+          $UpdateString[] = $Column . "=" . $vals[$index];
+      }
+      $sql = "UPDATE sysconfig SET ". implode(",", $UpdateString) ." WHERE variablename='$Variable';";
+      $result = pg_query($PG_CONN, $sql);
+      DBCheckResult($result, $sql, __FILE__, __LINE__);
+      pg_free_result($result);
+    }
     unset($VarRec);
   }
 }
@@ -412,7 +427,8 @@ function Create_option_value()
   global $PG_CONN;
 
   /* If sysconfig exists, then we are done */
-  $sql = "SELECT column_name FROM information_schema.columns WHERE table_name='sysconfig' and column_name='option_value' limit 1;";
+  $sql = "SELECT column_name FROM information_schema.columns WHERE "
+       . "table_name='sysconfig' and column_name='option_value' limit 1;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $numrows = pg_num_rows($result);
@@ -427,9 +443,8 @@ function Create_option_value()
   pg_free_result($result);
 
   /* Document columns */
-  $sql = "
-COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...';
-    ";
+  $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
+       . "provide options in format op1{val1}|op2{val2}|...';";
   /* this is a non critical update */
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);

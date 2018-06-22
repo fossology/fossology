@@ -41,6 +41,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define AGENT_BINARY "%s/%s/%s/agent/%s"
 #define AGENT_CONF "mods-enabled"
 
+/**
+ * Check if PGresult is not NULL. Then call PQclear and set result as NULL
+ * to prevent multiple calls.
+ */
+#define SafePQclear(pgres)  if (pgres) {PQclear(pgres); pgres = NULL;}
+
 /* ************************************************************************** */
 /* *** Scheduler structure ************************************************** */
 /* ************************************************************************** */

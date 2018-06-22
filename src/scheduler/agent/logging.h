@@ -91,7 +91,7 @@ extern log_t* main_log;
             lprintf(main_log, __VA_ARGS__); \
             lprintf(main_log, "\n"); \
             lprintf(main_log, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
-            PQclear(pg_r)
+            SafePQclear(pg_r)
 
 /** Macros that is called when a notification is generated */
 #define TEST_NOTIFY verbose > 0

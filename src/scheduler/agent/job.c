@@ -203,7 +203,7 @@ void job_destroy(job_t* job)
 
   if(job->db_result != NULL)
   {
-    PQclear(job->db_result);
+    SafePQclear(job->db_result);
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
     g_mutex_clear(job->lock);
@@ -574,7 +574,7 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
   }
   else
   {
-    PQclear(job->db_result);
+    SafePQclear(job->db_result);
     job->db_result = database_exec(scheduler, job->data);
     job->idx = 0;
 
