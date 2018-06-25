@@ -64,6 +64,7 @@
  * -# \subpage mimetype
  * -# \subpage pkgagent
  * -# \subpage readmeoss
+ * -# \subpage reuser
  * -# \subpage spdx2
  * -# \subpage unifiedreport
  * -# \subpage wget_agent
