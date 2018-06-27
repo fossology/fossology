@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for TraverseChild()
+ */
 extern unpackqueue Queue[MAXCHILD+1];    /* manage children */
 
 int Index = 0;
@@ -32,6 +35,10 @@ int  TraverseChildInit()
 
 /**
  * @brief ununpack iso file
+ * \test
+ * -# Create a ContainerInfor for an ISO file
+ * -# Pass it to TraverseChild()
+ * -# Check if files are unpacked
  */
 void testTraverseChild4IsoFile()
 {
@@ -76,6 +83,10 @@ void testTraverseChild4IsoFile()
 
 /**
  * @brief unpack debian source
+ * \test
+ * -# Create a ContainerInfor for a DSC file
+ * -# Pass it to TraverseChild()
+ * -# Check if files are unpacked
  */
 void testTraverseChild4DebianSourceFile()
 {
@@ -118,6 +129,11 @@ void testTraverseChild4DebianSourceFile()
 
 /**
  * @brief test the partition file
+ * \test
+ * -# Create a ContainerInfor for a partition files
+ * -# Pass it to TraverseChild()
+ * -# Check if files are unpacked
+ * \todo Test file does not exists
  */
 void testTraverseChild4PartitionFile()
 {

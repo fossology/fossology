@@ -1,8 +1,8 @@
 /*******************************************************************
  Ununpack: The universal unpacker.
- 
+
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -56,98 +56,108 @@
 #define MAXSQL  4096
 #define PATH_MAX 4096
 
+/**
+ * \brief Classification of tools to use
+ */
 enum cmdtype
-  {
-  CMD_NULL=0,	/* no command */
-  CMD_PACK,	/* packed file (i.e., compressed) */
-  CMD_RPM,	/* RPM is a special case of CMD_PACK */
-  CMD_ARC,	/* archive (contains many files) */
-  CMD_AR,	/* ar archive (special case CMD_ARC) */
-  CMD_PARTITION, /* File system partition table (special case CMD_ARC) */
-  CMD_ISO,	/* ISO9660 */
-  CMD_DISK,	/* File system disk */
-  CMD_DEB,	/* Debian source package */
-  CMD_DEFAULT	/* Default action */
-  };
+{
+  CMD_NULL=0,       /** No command */
+  CMD_PACK,	        /** Packed file (i.e., compressed) */
+  CMD_RPM,	        /** RPM is a special case of CMD_PACK */
+  CMD_ARC,	        /** Archive (contains many files) */
+  CMD_AR,	          /** Ar archive (special case CMD_ARC) */
+  CMD_PARTITION,    /** File system partition table (special case CMD_ARC) */
+  CMD_ISO,	        /** ISO9660 */
+  CMD_DISK,	        /** File system disk */
+  CMD_DEB,	        /** Debian source package */
+  CMD_DEFAULT	      /** Default action */
+};
 
 typedef enum cmdtype cmdtype;
-/* ParentInfo relates to the command being executed.
-   It is common information needed by Traverse() and stored in CommandInfo
-   and Queue structures. */
+/**
+ * ParentInfo relates to the command being executed.
+ * It is common information needed by Traverse() and stored in CommandInfo
+ * and Queue structures.
+ */
 struct ParentInfo
 {
-    int Cmd;      /* index into command table used to run this */
-    time_t StartTime;     /* time when command started */
-    time_t EndTime;       /* time when command ended */
-    int ChildRecurseArtifact; /* child is an artifact -- don't log to XML */
-    long uploadtree_pk; /* if DB is enabled, this is the parent */
+    int Cmd;              /** Index into command table used to run this */
+    time_t StartTime;     /** Time when command started */
+    time_t EndTime;       /** Time when command ended */
+    int ChildRecurseArtifact; /** Child is an artifact -- don't log to XML */
+    long uploadtree_pk;   /** If DB is enabled, this is the parent */
 };
 typedef struct ParentInfo ParentInfo;
 
+/**
+ * \brief Queue for files to be unpacked
+ */
 struct unpackqueue
 {
-    int ChildPid; /* set to 0 if this record is not in use */
-    char ChildRecurse[FILENAME_MAX+1]; /* file (or directory) to recurse on */
-    int ChildStatus;  /* return code from child */
-    int ChildCorrupt; /* return status from child */
-    int ChildEnd; /* flag: 0=recurse, 1=don't recurse */
-    int ChildHasChild;  /* is the child likely to have children? */
-    struct stat ChildStat;
-    ParentInfo PI;
+    int ChildPid;           /** Set to 0 if this record is not in use */
+    char ChildRecurse[FILENAME_MAX+1]; /** File (or directory) to recurse on */
+    int ChildStatus;        /** Return code from child */
+    int ChildCorrupt;       /** Return status from child */
+    int ChildEnd;           /** Flag: 0=recurse, 1=don't recurse */
+    int ChildHasChild;      /** Is the child likely to have children? */
+    struct stat ChildStat;  /** Stat structure of child */
+    ParentInfo PI;          /** Parent info ptr */
 };
 typedef struct unpackqueue unpackqueue;
 
+/**
+ * \brief Directory linked list
+ */
 struct dirlist
 {
-    char *Name;
-    struct dirlist *Next;
+    char *Name;             /** Name of current directory */
+    struct dirlist *Next;   /** Link to next directory */
 };
 typedef struct dirlist dirlist;
 
-/************************************
- ContainerInfo: stucture for storing
- information about a particular file.
- ************************************/
+/**
+ * \brief Structure for storing
+ * information about a particular file.
+ */
 struct ContainerInfo
 {
-    char Source[FILENAME_MAX];  /* Full source filename */
-    char Partdir[FILENAME_MAX];  /* directory name */
-    char Partname[FILENAME_MAX];  /* filename without directory */
-    char PartnameNew[FILENAME_MAX];  /* new filename without directory */
-    int TopContainer; /* flag: 1=yes (so Stat is meaningless), 0=no */
-    int HasChild; /* Can this a container have children? (include directories) */
-    int Pruned; /* no longer exists due to pruning */
-    int Corrupt;  /* is this container/file known to be corrupted? */
-    struct stat Stat;
-    ParentInfo PI;
-    int Artifact; /* this container is an artifact -- don't log to XML */
-    int IsDir; /* this container is a directory */
-    int IsCompressed; /* this container is compressed */
-    long uploadtree_pk; /* uploadtree of this item */
-    long pfile_pk;  /* pfile of this item */
-    long ufile_mode;  /* ufile_mode of this item */
+    char Source[FILENAME_MAX];      /** Full source filename */
+    char Partdir[FILENAME_MAX];     /** Directory name */
+    char Partname[FILENAME_MAX];    /** Filename without directory */
+    char PartnameNew[FILENAME_MAX]; /** New filename without directory */
+    int TopContainer;               /** Flag: 1=yes (so Stat is meaningless), 0=no */
+    int HasChild;                   /** Can this a container have children? (include directories) */
+    int Pruned;                     /** No longer exists due to pruning */
+    int Corrupt;                    /** Is this container/file known to be corrupted? */
+    struct stat Stat;               /** Stat structure of the file */
+    ParentInfo PI;                  /** Parent Info ptr */
+    int Artifact;                   /** This container is an artifact -- don't log to XML */
+    int IsDir;                      /** This container is a directory */
+    int IsCompressed;               /** This container is compressed */
+    long uploadtree_pk;             /** Uploadtree of this item */
+    long pfile_pk;                  /** Pfile of this item */
+    long ufile_mode;                /** Ufile_mode of this item */
 };
 typedef struct ContainerInfo ContainerInfo;
 
+/**
+ * \brief Command table's single row
+ * \sa CMD
+ * \note Use "%s" to mean "output name" -- only allow once "%s"
+ * \note CMD get concatenated: cmd cmdpre sourcefile cmdpost
+ */
 struct cmdlist
 {
-   char * Magic;
-/* use "%s" to mean "output name" -- only allow once "%s" */
-/** CMD get concatenated: cmd cmdpre sourcefile cmdpost **/
-   char * Cmd;
-   char * CmdPre;
-   char * CmdPost;
-/* MetaCmd is used to extract meta info.  Use '%s' for the filename. */
-   char * MetaCmd;
-/* Type: 0=compressed 1=packed 2=iso9660 3=disk */
-   cmdtype Type;
-/* Status 0=unavailable */
-   int Status;
-/* ModeMask -- Stat(2) st_mode mask for directories and regular files */
-   int ModeMaskDir;
-   int ModeMaskReg;
-/* For correlating with the DB */
-   long DBindex;
+   char * Magic;      /** Ptr to magic */
+   char * Cmd;        /** Command to run */
+   char * CmdPre;     /** Prefix for Cmd */
+   char * CmdPost;    /** Postfix for Cmd */
+   char * MetaCmd;    /** Used to extract meta info. Use '%s' for the filename. */
+   cmdtype Type;      /** Type: 0=compressed 1=packed 2=iso9660 3=disk */
+   int Status;        /** Status 0=unavailable */
+   int ModeMaskDir;   /** ModeMask -- Stat(2) st_mode mask for directories */
+   int ModeMaskReg;   /** ModeMask -- Stat(2) st_mode mask for regular files */
+   long DBindex;      /** For correlating with the DB */
 };
 typedef struct cmdlist cmdlist;
 

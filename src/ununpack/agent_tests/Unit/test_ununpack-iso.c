@@ -15,12 +15,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for ExtractISO()
+ */
 /* locals */
 static int Result = 0;
 
 /**
  * @brief unpack iso file
+ * \test
+ * -# Pass an ISO to ExtractISO()
+ * -# Check if function returns 0 and files are unpacked
  */
 void testExtractISO()
 {
@@ -38,6 +44,9 @@ void testExtractISO()
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Pass an empty strings to ExtractISO()
+ * -# Check if function returns 1
  */
 void testExtractISO4EmptyParameters()
 {
@@ -50,6 +59,9 @@ void testExtractISO4EmptyParameters()
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Pass a non ISO to ExtractISO()
+ * -# Check if function returns 1 and files are not unpacked
  */
 void testExtractISO4ErrorParameters()
 {

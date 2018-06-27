@@ -2,7 +2,7 @@
  checksum.h - Checksum computation header file
 
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -33,21 +33,27 @@
 
 #include "libfossology.h"
 
+/**
+ * \brief Store check sum of a file
+ */
 struct Cksum
-  {
-  uint8_t MD5digest[16];
-  uint8_t SHA1digest[20];
-  uint64_t DataLen;
-  };
+{
+  uint8_t MD5digest[16];    ///< MD5 digest of the file
+  uint8_t SHA1digest[20];   ///< SHA1 digest of the file
+  uint64_t DataLen;         ///< Size of the file
+};
 typedef struct Cksum Cksum;
 
+/**
+ * \brief Store file handler and mmap of a file
+ */
 struct CksumFile
-  {
-  int FileHandle;
-  unsigned char *Mmap;
-  uint64_t MmapSize;	/* size of mmap */
-  uint64_t MmapOffset;	/* index into mmap */
-  };
+{
+  int FileHandle;           ///< File handler for the file
+  unsigned char *Mmap;      ///< Mmap of the file
+  uint64_t MmapSize;	      ///< Size of mmap
+  uint64_t MmapOffset;  	  ///< Index into mmap
+};
 typedef struct CksumFile CksumFile;
 
 CksumFile *	SumOpenFile	(char *Fname);

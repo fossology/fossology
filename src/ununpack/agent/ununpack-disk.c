@@ -1,6 +1,6 @@
 /*******************************************************************
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -25,20 +25,24 @@
 
 #include <utime.h>
 
+/**
+ * \brief Structure to hold permission about an inode
+ */
 struct permlist
 {
-    char *inode;
-    struct utimbuf Times;
-    int perm; /* inode permissions */
-    struct permlist *Next;
+  char *inode;            /** Current inode */
+  struct utimbuf Times;   /** File times */
+  int perm;               /** inode permissions */
+  struct permlist *Next;  /** Link to next permlist */
 };
 typedef struct permlist permlist;
 
 
 /**
  * \brief Special handling for FAT names.
+ *
  *  -  Convert to lowercase.
- *  -  remove any short name (name in parenthesis).
+ *  -  Remove any short name (name in parenthesis).
  * \param Name Filename
  **/
 void	FatDiskName	(char *Name)
@@ -63,7 +67,7 @@ void	FatDiskName	(char *Name)
 } /* FatDiskName() */
 
 /**
- * \brief deallocate perms
+ * \brief Deallocate perms
  * \param List permlist
  **/
 void	FreeDiskPerms	(permlist *List)
@@ -176,8 +180,8 @@ permlist *	ExtractDiskPerms	(char *FStype, char *Source)
 
 /**
  * \brief Determine if two inodes are the same.
- *        Strings MUST be null terminated!
- *        Valid characters: 0-9 and hyphen.
+ * \note Strings MUST be null terminated!
+ * \note Valid characters: 0-9 and hyphen.
  * \param Inode1
  * \param Inode2
  * \return 1 on match, 0 on miss.
@@ -205,8 +209,8 @@ int	SameInode	(char *Inode1, char *Inode2)
  *        permissions on the file, and free the memory.
  * \param inode
  * \param List permlist
- * \param Destination = target directory containing file
- * \param Target = filename (may also include path components)
+ * \param Destination Target directory containing file
+ * \param Target Filename (may also include path components)
  * \return new permlist or NULL on error
  **/
 permlist *	SetDiskPerm	(char *inode, permlist *List,
@@ -278,15 +282,19 @@ permlist *	SetDiskPerm	(char *inode, permlist *List,
 /**
  * \brief Given a disk image, type of system, and
  *        a directory, extract all files!
- *        This can handle any filesystem supported by fls/icat.
- *        Special: FAT is case-insensitive, so everything is converted to lowercase.
- *        NOTE: This spawns multiple processes.
- *        Uses the following external commands: fls icat
- *        icat and fls are from the package "sleuthkit".
+ *
+ * This can handle any filesystem supported by fls/icat.
+ *
+ * \b Special: FAT is case-insensitive, so everything is converted to lowercase.
+ *
+ * Uses the following external commands: `fls icat`
+ *
+ * `icat` and `fls` are from the package "sleuthkit".
+ * \note This spawns multiple processes.
  * \param Source
  * \param FStype  filesystem type
  * \param Destination
- * \return 0 on success, non-zero on failure. 
+ * \return 0 on success, non-zero on failure.
  **/
 int	ExtractDisk	(char *Source, char *FStype, char *Destination)
 {
@@ -303,7 +311,7 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   char TempInode[FILENAME_MAX], TempDest[FILENAME_MAX], TempS[FILENAME_MAX];
   permlist *Perms;
 
-  /* judge if the parameters are empty */ 
+  /* judge if the parameters are empty */
   if ((NULL == FStype) || (!strcmp(FStype, "")) || (NULL == Source) || (!strcmp(Source, "")) || (NULL == Destination) || (!strcmp(Destination, "")))
     return 1;
 
@@ -350,11 +358,11 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   pclose(Fin);
 
   /* Get disk permissions */
-  /** NOTE: Do this AFTER making directories because:
+  /* NOTE: Do this AFTER making directories because:
       (1) We know extraction will work.
       (2) If we chmod before extraction then directory may not allow writing
       NOTE: Permissions on NTFS file systems looks broken in fls!
-   **/
+   */
   {
     Perms = ExtractDiskPerms(FStype,TempSource);
     if (!Perms)
@@ -509,7 +517,7 @@ int	ExtractDisk	(char *Source, char *FStype, char *Destination)
   pclose(Fin);
 
   /* all done! */
-  /** if done right, Perms should be null.  But just in case... **/
+  /* if done right, Perms should be null.  But just in case... */
   FreeDiskPerms(Perms);
   return(0);
 } /* ExtractDisk() */

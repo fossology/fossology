@@ -15,13 +15,20 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for ExtractAR()
+ */
 /* locals */
 static int Result = 0;
 
 
- /** @brief unpack archive library file
- **/
+ /**
+  * @brief unpack archive library file
+  * \test
+  * -# Try to extract `.ar` library file using ExtractAR()
+  * -# Check if the files are unpacked
+  */
 void testExtractAR4ArchiveLibraryFile()
 {
   deleteTmpFiles("./test-result/");
@@ -37,6 +44,9 @@ void testExtractAR4ArchiveLibraryFile()
 
 /**
  * @brief unpack deb file
+ * \test
+ * -# Try to extract `.deb` archives using ExtractAR()
+ * -# Check if the files are unpacked
  */
 void testExtractAR4DebFile()
 {
@@ -53,6 +63,9 @@ void testExtractAR4DebFile()
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Call ExtractAR() with empty parameters
+ * -# Check if the function return NOT OK
  */
 void testExtractAR4EmptyParameters()
 {
@@ -65,6 +78,9 @@ void testExtractAR4EmptyParameters()
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Try to extract `.rpm` archives using ExtractAR()
+ * -# Check if the function return NOT OK
  */
 void testExtractAR4ErrorParameters()
 {
