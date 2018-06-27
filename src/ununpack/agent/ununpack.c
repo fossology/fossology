@@ -243,7 +243,7 @@ int	main(int argc, char *argv[])
     ars_pk = fo_WriteARS(pgConn, ars_pk, atoi(Upload_Pk), agent_pk, AgentARSName, 0, 0);
 
     /* Get Pfile path and Pfile_Pk, from Upload_Pk */
-  snprintf(SQL,MAXSQL,
+    snprintf(SQL,MAXSQL,
         "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk, pfile_size FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'",
            Upload_Pk);
     result =  PQexec(pgConn, SQL);

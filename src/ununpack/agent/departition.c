@@ -327,19 +327,20 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
     Size= MBR[i+12] + MBR[i+13]*256 + MBR[i+14]*256*256 + MBR[i+15]*256*256*256;
     if (Type != 0) /* Type 0 is unused */
     {
-      printf("Partition: (Active=%d,Type=%x)\n",ActiveFlag & 0x80,Type);
-      printf("           HSC Start=%d,%d,%d\n",Head[0],Sec[0],Cyl[0]);
-      printf("           HSC End  =%d,%d,%d\n",Head[1],Sec[1],Cyl[1]);
-      printf("           Sector: Start=%llu (%08llx)  End=%llu (%08llx)\n",
-          (unsigned long long)Start,(unsigned long long)Start,
-          (unsigned long long)Start+Size,(unsigned long long)Start+Size);
-      printf("           Byte: Logical start= %llu (%08llx)\n",
-          (unsigned long long)MBRStart+(Start)*SectorSize,
-          (unsigned long long)MBRStart+(Start)*SectorSize);
-      printf("           Byte: Logical end  = %llu (%08llx)\n",
-          (unsigned long long)MBRStart+(Size+Start)*SectorSize,
-          (unsigned long long)MBRStart+(Size+Start)*SectorSize);
-
+      if (Verbose > 1)
+      {
+        printf("Partition: (Active=%d,Type=%x)\n",ActiveFlag & 0x80,Type);
+        printf("           HSC Start=%d,%d,%d\n",Head[0],Sec[0],Cyl[0]);
+        printf("           HSC End  =%d,%d,%d\n",Head[1],Sec[1],Cyl[1]);
+        printf("           Sector: Start=%llu (%08llx)  End=%llu (%08llx)\n",
+            (unsigned long long)Start,(unsigned long long)Start,(unsigned long long)Start+Size,(unsigned long long)Start+Size);
+        printf("           Byte: Logical start= %llu (%08llx)\n",
+            (unsigned long long)MBRStart+(Start)*SectorSize,
+            (unsigned long long)MBRStart+(Start)*SectorSize);
+        printf("           Byte: Logical end  = %llu (%08llx)\n",
+            (unsigned long long)MBRStart+(Size+Start)*SectorSize,
+            (unsigned long long)MBRStart+(Size+Start)*SectorSize);
+      }
       if (Start == 0) /* if it is a Linux kernel */
       {
         ExtractKernel(Fin);

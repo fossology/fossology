@@ -614,6 +614,25 @@ void	CheckCommands	(int Show)
 } /* CheckCommands() */
 
 /**
+ * @brief Prints the message from program on
+ *  the error log
+ * @param message message to be printed
+ * @param rc      program return value
+ *************************************************/
+void AddToErrorLog (char *message, int *rc)
+{
+  if(*rc != 0)
+  {
+    LOG_ERROR("RC: %d, error: %s", *rc, message);
+  }
+  else if(Verbose)
+  {
+    LOG_DEBUG("%s", message);
+  }
+  g_free(message);
+} /* AddToErrorLog() */
+
+/**
  * @brief Try a command and return command code.
  *
  * Command becomes:
@@ -637,6 +656,9 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
   char TempFile[FILENAME_MAX];
   char TempCwd[FILENAME_MAX];
   char TempPost[FILENAME_MAX];
+  FILE *prog;
+  GPtrArray *progMessages;
+  char *progMessage;
 
   if (!Cmd) return(0); /* nothing to do */
 
@@ -699,20 +721,35 @@ int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     snprintf(Cmd1,sizeof(Cmd1),"%s %s '%s' %s",
         Cmd,TempPre,TempFile,TempPost);
   }
-  rc = system(Cmd1);
+  prog = popen(Cmd1, "r");
+  if(!prog)
+  {
+    LOG_ERROR("Unable to start command %s", Cmd1);
+    SafeExit(8);
+  }
+  progMessages = g_ptr_array_new();
+  progMessage  = calloc(2048, sizeof(char));
+  while (ReadLine(prog, progMessage, 2048) >= 0) {
+    g_ptr_array_add(progMessages, g_strdup(progMessage));
+  }
+  free(progMessage);
+  rc = pclose(prog);
   if (WIFSIGNALED(rc))
   {
     LOG_ERROR("Process killed by signal (%d): %s",WTERMSIG(rc),Cmd1);
     SafeExit(8);
   }
-  if (WIFEXITED(rc)) rc = WEXITSTATUS(rc);
-  else rc=-1;
-  if (Verbose) LOG_DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc);
+  rc = WEXITSTATUS(rc);
+  g_ptr_array_foreach(progMessages, (GFunc)AddToErrorLog, &rc);
+  g_ptr_array_free(progMessages, TRUE);
+
+  if (Verbose) LOG_DEBUG("in %s -- %s ; rc=%d",Where,Cmd1,rc)
 
   if(chdir(CWD) != 0)
     LOG_ERROR("Unable to change directory to %s", CWD);
   if (Verbose > 1) LOG_DEBUG("CWD: %s",CWD);
   return(rc);
+
 } /* RunCommand() */
 
 
@@ -803,11 +840,11 @@ void OctetType(char *Filename, char *TypeBuf)
   }
 
   /* 7zr can handle many formats (including isos), so try this first */
-  rc1 = RunCommand("7z","l -y ",Filename,">/dev/null 2>&1",NULL,NULL);
-  rc2 = RunCommand("7z","t -y -pjunk",Filename,">/dev/null 2>&1",NULL,NULL);
+  rc1 = RunCommand("7z","l -y ",Filename,"2>&1",NULL,NULL);
+  rc2 = RunCommand("7z","t -y -pjunk",Filename,"2>&1",NULL,NULL);
   if(rc2!=0)
   {
-    rc3 = RunCommand("7z","t -y -pjunk",Filename,"|grep 'Wrong password' >/dev/null 2>&1",NULL,NULL);
+    rc3 = RunCommand("7z","t -y -pjunk",Filename,"|grep 'Wrong password' 2>&1",NULL,NULL);
     if(rc3==0)
     {
       LOG_ERROR("'%s' cannot be unpacked, password required.",Filename);
@@ -901,7 +938,7 @@ int	FindCmd	(char *Filename)
   if (strstr(Type, "application/x-exe") ||
       strstr(Type, "application/x-shellscript"))
   {
-    rc = RunCommand("unzip","-q -l",Filename,">/dev/null 2>&1",NULL,NULL);
+    rc = RunCommand("unzip","-q -l",Filename,"2>&1",NULL,NULL);
     if ((rc==0) || (rc==1) || (rc==2) || (rc==51))
     {
       strcpy(TypeBuf,"application/x-zip");
@@ -909,7 +946,7 @@ int	FindCmd	(char *Filename)
   } /* if was x-exe */
   else if (strstr(Type, "application/x-tar"))
   {
-    if (RunCommand("tar","-tf",Filename,">/dev/null 2>&1",NULL,NULL) != 0)
+    if (RunCommand("tar","-tf",Filename,"2>&1",NULL,NULL) != 0)
       return(-1); /* bad tar! (Yes, they do happen) */
   } /* if was x-tar */
 
