@@ -177,7 +177,10 @@
  *
  * \page exampleagents Example agents to begin with
  * \tableofcontents
+ * How to create new agent: [GitHub wiki](https://github.com/fossology/fossology/wiki/How-To-Create-An-Agent)
+ * \section demoagents Demo agent sources
  * -# \subpage demomod
+ * -# \subpage wcagent
  * -# \subpage regexscan
  */
 
