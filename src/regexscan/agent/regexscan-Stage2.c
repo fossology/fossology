@@ -15,19 +15,19 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- -------------------------------------------
-
- regexscan - A Fossology agent creation "Tutorial" in multiple stages.
-   This is stage 2 and demonstrates the fundamental agent requirements:
-
-    1. Connect to database
-    2. Connect to Scheduler
-    3. Process -r as a regex argument
-    4. Process filename and report regex scan results
-    5. Terminate
-
  ***************************************************************/
+/**
+ * \file
+ * \brief Stage 2 demonstration
+ *
+ * This is stage 2 and demonstrates the fundamental agent requirements:
+ * -# Connect to database
+ * -# Connect to Scheduler
+ * -# Process -r as a regex argument
+ * -# Process filename and report regex scan results
+ * -# Terminate
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -52,11 +52,15 @@ char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 */
 
-PGconn *pgConn = NULL;  // Database connection
+PGconn *pgConn = NULL;  ///< Database connection
 
-/*********************************************************
- *********************************************************/
-
+/**
+ * \brief Regex scanner
+ * \param regexStr    String containing the regex
+ * \param scanFilePtr Handle for file to scan
+ * \param fileName    String name of file to scan
+ * \return 0 = OK, otherwise error code
+ */
 int regexScan(char *regexStr, FILE *scanFilePtr, char *fileName)
 {
   int retCode;
@@ -85,7 +89,8 @@ int regexScan(char *regexStr, FILE *scanFilePtr, char *fileName)
     retCode = regexec(&regex, textBuff, 1, rm, 0);  /* nmatch = 1, matchptr = rm */
     if (!retCode)
     {
-      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n", fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
+      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n",
+              fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
       puts(msgBuff);
       if (!match)
       {
