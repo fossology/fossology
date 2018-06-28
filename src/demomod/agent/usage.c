@@ -16,13 +16,13 @@
 
  ***************************************************************/
 /**
- * \file usage.c
+ * \file
  * \brief Print agent usage statement
  */
 
 #include "demomod.h"
 
-FUNCTION void Usage(char *Name) 
+FUNCTION void Usage(char *Name)
 {
   printf("Usage: %s [options] file1 file2 ...\n", Name);
   printf("  -i   :: Initialize the database, then exit.\n");

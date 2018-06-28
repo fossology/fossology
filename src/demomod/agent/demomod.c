@@ -19,16 +19,31 @@
    \file demomod.c
    \brief FOSSology demonstration agent
 
-   This is the agent for the demomod FOSSology module.
-   The purpose of this is to show the structure of an agent.  So, by design,
-   it does very little.
+  \page demomod Demonstration agent
+  \tableofcontents
+  \section demomodabout About Demonstration agent
+  This is the agent for the demomod FOSSology module.
+  The purpose of this is to show the structure of an agent.  So, by design,
+  it does very little.
 
-   Given an upload_pk, this agent simply reads the first 32 bytes of each file and records
-   them in the demomod table.
+  Given an upload_pk, this agent simply reads the first 32 bytes of each file and records
+  them in the demomod table.
 
-   The way permissions work on this agent is that if it runs from the scheduler,
-   the normal fossology upload permissions are checked.  However, if demomod agent runs from
-   the command line, no permissions are checked and the output is to stdout, not the database.
+  The way permissions work on this agent is that if it runs from the scheduler,
+  the normal fossology upload permissions are checked.  However, if demomod agent runs from
+  the command line, no permissions are checked and the output is to stdout, not the database.
+  \section demomodactions Supported actions
+  Usage: `demomod [options] file1 file2 ...`
+  | Command line flag | Description |
+  | ---: | :--- |
+  | -i   | Initialize the database, then exit. |
+  | -v   | Verbose (turns on debugging output). |
+  | -V   | Print the version info, then exit. |
+  | -c SYSCONFDIR | System Config directory (used by testing system). |
+  | filename  | Filename to process with regex |
+  \section demomodsource Agent source
+    - \link src/demomod/agent \endlink
+    - \link src/demomod/ui \endlink
 */
 
 #include "demomod.h"
@@ -40,8 +55,8 @@ char BuildVersion[]="demomod build version: NULL.\n";
 #endif
 
 /**********  Globals  *************/
-psqlCopy_t psqlcpy = 0;        // fo_sqlCopy struct used for fast data insertion
-PGconn    *pgConn = 0;        // database connection
+psqlCopy_t psqlcpy = 0;        ///< fo_sqlCopy struct used for fast data insertion
+PGconn    *pgConn = 0;         ///< Database connection
 
 
 /****************************************************/
@@ -83,7 +98,7 @@ int main(int argc, char **argv)
     case 'i': /* "Initialize" */
       ExitNow(0);
     case 'v': /* verbose output for debugging  */
-      agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
+      agent_verbose++;   // global agent verbose flag. Can be changed in running agent by the scheduler on each fo_scheduler_next() call
       break;
     case 'V': /* print version info */
       printf("%s", BuildVersion);

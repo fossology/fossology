@@ -177,6 +177,7 @@
  *
  * \page exampleagents Example agents to begin with
  * \tableofcontents
+ * -# \subpage demomod
  * -# \subpage regexscan
  */
 
