@@ -142,3 +142,77 @@ sense for any commit, e.g.
     Acked-by:
     Sponsored-by:
 ```
+
+## Pull requests
+
+Pull requests with patches, improvements, new features are a great help.
+Please keep them clean from unwanted commits.
+
+Follow the steps to get your work included in the project.
+
+1. [Fork](https://help.github.com/fork-a-repo/) the project, clone your fork,
+   and add the fossology remote:
+
+   ```bash
+   # Clone your fork of the repo into the current directory
+   git clone https://github.com/<your-username>/fossology.git
+   # Navigate to the cloned directory
+   cd fossology
+   # Assign the original repo to a remote called "upstream"
+   git remote add upstream https://github.com/fossology/fossology.git
+   ```
+
+2. Get the latest changes from upstream:
+
+   ```bash
+   git checkout master
+   git pull upstream master
+   ```
+
+3. Create a new branch from the main master branch to contain your changes.
+   Best way is to call is to follow the type described in **Git Commit Conventions**
+   stated above: `<type>/<scope>-<topic>`
+
+   ```bash
+   git checkout -b <topic-branch-name>
+   ```
+
+   Example:
+
+   ```bash
+   git checkout -b fix/buckets-undefined-index
+   ```
+   
+   Or
+   
+   ```bash
+   git checkout -b fix/issue-###
+   ```
+
+4. It's coding time!
+   Please respect the coding convention: [Coding guidelines](https://github.com/fossology/fossology/wiki/Coding-Style)
+   
+   Commit your changes in logical chunks. Please adhere to **Git Commit Conventions**
+   and [Coding guidelines](https://github.com/fossology/fossology/wiki/Coding-Style)
+   or your code is unlikely be merged into the main project.
+   Use Git's [interactive rebase](https://help.github.com/articles/interactive-rebase)
+   feature to tidy up your commits before making them public.
+
+5. Locally merge (or rebase) the upstream master branch into your topic branch:
+
+   ```bash
+   git pull [--rebase] upstream master
+   ```
+
+6. Push your topic branch up to your fork:
+
+   ```bash
+   git push origin <topic-branch-name>
+   ```
+
+7. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
+    with a clear title and description against the `master` branch.
+
+**IMPORTANT**: By submitting a patch, you agree to allow the project owners to
+license your work under the terms of the [GPLv2](LICENSE) (if it
+includes code changes).
