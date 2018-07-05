@@ -17,25 +17,3 @@ Describe the steps followed by you and your expected results after following the
 #### Screenshots
 
 If applicable, add screenshots to help explain your problem.
-
-### Versions
-
-* Last commit id on master:
-* Operating System (lsb_release -a):
-
-### Logs
-
-Any logs (if applicable) genereated in
-
-#### Fossology logs
-
-Logs generated under /var/log/fossology/fossology.log
-
-#### Apache logs
-
-Logs generated under /var/log/apache2/error.log
-
-#### Job logs
-
-Logs generated under Geeky Scan Details (Job history => click on agent's job id)
-
