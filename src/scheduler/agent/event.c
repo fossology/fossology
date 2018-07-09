@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ************************************************************** */
+/**
+ * \file
+ * \brief Event handling operations
+ */
 
 /* local includes */
 #include <event.h>
@@ -29,10 +33,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Local(private) fields *********************************************** */
 /* ************************************************************************** */
 
-/* the event loop is a singleton, this is the only actual event loop */
+/**
+ * \var event_loop_t vl_singleton
+ * The event loop is a singleton, this is the only actual event loop
+ */
 event_loop_t vl_singleton;
 
-/* flag used to check if the event loop has been created */
+/**
+ * \var int el_created
+ * Flag used to check if the event loop has been created
+ */
 int el_created = 0;
 
 /**
@@ -41,6 +51,7 @@ int el_created = 0;
  * yet, it will create and return the event loop. If it has been created, this
  * function will simple return it to the caller. This first call to this
  * function should be made from the thread that will be running the event loop.
+ *
  * This is to prevent confusion on if the event loop has been created.
  *
  * @return
@@ -68,7 +79,7 @@ event_loop_t* event_loop_get()
  * the queue to prevent race conditions. This will lock the queue, and wait if
  * the queue is full.
  *
- * @param vl the event loop to add the event to
+ * @param event_loop the event loop to add the event to
  * @param e the event to put into the event loop
  * @return true if the item was succesfully added, false otherwise
  */
@@ -84,7 +95,7 @@ int event_loop_put(event_loop_t* event_loop, event_t* e)
  * the queue to prevent race conditions. This will lock the queue, and wait if
  * the queue is full.
  *
- * @param vl the event loop to get the event out of
+ * @param event_loop the event loop to get the event out of
  * @return the next event in the event loop, NULL if the event loop has ended
  */
 event_t* event_loop_take(event_loop_t* event_loop)
@@ -134,6 +145,9 @@ event_t* event_loop_take(event_loop_t* event_loop)
  *
  * @param func the function to call when the event is executed
  * @param arg the arguements for the function.
+ * @param name name of the event
+ * @param source_name source file name creating the event
+ * @param source_line line number of the source file creating the event
  * @return the new event wrapper for the function and arguments
  */
 event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name, char* source_name, uint16_t source_line)
@@ -150,7 +164,7 @@ event_t* event_init(void(*func)(scheduler_t*, void*), void* arg, char* name, cha
 }
 
 /**
- * free any memory associated with an event
+ * @brief Free any memory associated with an event
  *
  * @param e the event to destroy
  */
@@ -164,8 +178,9 @@ void event_destroy(event_t* e)
 }
 
 /**
- * frees any memeory associated with the event queue. Any events that are in the
- * queue when this gets called will be freed as well.
+ * @brief Frees any memory associated with the event queue.
+ *
+ * Any events that are in the queue when this gets called will be freed as well.
  */
 void event_loop_destroy()
 {
@@ -184,6 +199,9 @@ void event_loop_destroy()
  *
  * @param func
  * @param args
+ * @param name name of the event
+ * @param s_name source file name creating the event
+ * @param s_line line number of the source file creating the event
  */
 void event_signal_ext(void* func, void* args, char* name, char* s_name, uint16_t s_line)
 {
@@ -192,11 +210,14 @@ void event_signal_ext(void* func, void* args, char* name, char* s_name, uint16_t
 }
 
 /**
- * Enters the event loop. This function will not return until another threads
+ * @brief Enters the event loop.
+ *
+ * This function will not return until another threads
  * chooses to terminate the event loop. Essentially this function should not
  * return until the program is ready to exit. There should also only be one
  * thread working on this part of the event loop.
  *
+ * @param scheduler   scheduler reference to to be notified
  * @param update_call a function that is called every time an event is processed
  * @param signal_call a function that is called once a second
  * @return this function will return an error code:
@@ -251,11 +272,11 @@ int event_loop_enter(scheduler_t* scheduler,
 }
 
 /**
- * stops the event loop from executing. This will wake up any threads that are
+ * @brief Stops the event loop from executing.
+ *
+ * This will wake up any threads that are
  * waiting on either a push into the event loop, or are trying to take from
  * the event loop and the put() and take() functions will return errors.
- *
- * @param vl the event loop to terminate
  */
 void event_loop_terminate()
 {
@@ -265,5 +286,3 @@ void event_loop_terminate()
   event_loop->occupied = 0;
   event_signal(NULL, NULL);
 }
-
-

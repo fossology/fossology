@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Scheduler interface operations
+ */
 
 /* local includes */
 #include <agent.h>
@@ -54,14 +58,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * Data needed to manage the connection between the scheudler any type of interface.
+ * Data needed to manage the connection between the scheduler any type of interface.
  * This includes the thread, the socket and the GInputStream and GOutputStream
  */
 typedef struct interface_connection
 {
-    GSocketConnection* conn;  ///< the socket that is our connection
-    GInputStream*  istr;      ///< stream to read from the interface
-    GOutputStream* ostr;      ///< stream to write to the interface
+    GSocketConnection* conn;  ///< The socket that is our connection
+    GInputStream*  istr;      ///< Stream to read from the interface
+    GOutputStream* ostr;      ///< Stream to write to the interface
 } interface_connection;
 
 /* ************************************************************************** */
@@ -69,9 +73,10 @@ typedef struct interface_connection
 /* ************************************************************************** */
 
 /**
- * Given a new sockect, this will create the interface connection structure.
+ * Given a new socket, this will create the interface connection structure.
  *
- * @param conn the socket that this interface is connected to
+ * @param conn    The socket that this interface is connected to
+ * @param threads Thread pool handling sockets
  * @return the newly allocated and populated interface connection
  */
 static interface_connection* interface_conn_init(
@@ -88,8 +93,9 @@ static interface_connection* interface_conn_init(
 }
 
 /**
- * free the memory associated with an interface connection. It is important to
- * note that this will block until the thread associated with the interface has
+ * @brief Free the memory associated with an interface connection.
+ *
+ * @note This will block until the thread associated with the interface has
  * closed correctly.
  *
  * @param inter the interface_connection that should be freed
@@ -101,26 +107,31 @@ static void interface_conn_destroy(interface_connection* inter)
 }
 
 /**
- * function that will run the thread associated with a particular interface
- * instance. Since multiple different command line a graphical user interfaces
- * can exists simultatiously, this allows the scheduler to quickly perform any
+ * @brief Function that will run the thread associated with a particular interface
+ * instance.
+ *
+ * Since multiple different command line a graphical user interfaces
+ * can exists simultaneously, this allows the scheduler to quickly perform any
  * requests.
  *
- * handle commands:
- *     exit: close connection with scheduler
- *     kill: kill a particular job
- *     load: get the host status
- *    close: shutdown the scheduler
- *    pause: pause a job that is currently running
- *   reload: reload configuration information
- *   status: request status for scheduler or job
- *  restart: restart a paused job
- *  verbose: change verbose level for scheduler or job
- * priority: change the priority of job
- * database: check the database job queue
+ * Handle commands:
  *
- * @param  param   pointer to the interface_connection structure
- * @param  unused  currently not used to pass any information
+ * | Command | Description |
+ * | ---: | :--- |
+ * |     exit | Close connection with scheduler |
+ * |     kill | Kill a particular job |
+ * |     load | Get the host status |
+ * |    close | Shutdown the scheduler |
+ * |    pause | Pause a job that is currently running |
+ * |   reload | Reload configuration information |
+ * |   status | Request status for scheduler or job |
+ * |  restart | Restart a paused job |
+ * |  verbose | Change verbose level for scheduler or job |
+ * | priority | Change the priority of job |
+ * | database | Check the database job queue |
+ *
+ * @param  conn      Pointer to the interface_connection structure
+ * @param  scheduler Pointer to the relevant scheduler structure
  * @return not currently used
  */
 void interface_thread(interface_connection* conn, scheduler_t* scheduler)
@@ -483,12 +494,13 @@ void interface_thread(interface_connection* conn, scheduler_t* scheduler)
 }
 
 /**
- * function that will listen for new connections to the server sockets. This
- * creates a g_socket_listener and will loop waiting for new connections until
+ * @brief Function that will listen for new connections to the server sockets.
+ *
+ * This creates a g_socket_listener and will loop waiting for new connections until
  * the scheduler is closed.
  *
- * @param  unused
- * @return unused
+ * @param  scheduler Relevant scheduler structure
+ * @return (void*)0 on failure, (void*)1 on success
  */
 void* interface_listen_thread(scheduler_t* scheduler)
 {
@@ -541,7 +553,7 @@ void* interface_listen_thread(scheduler_t* scheduler)
 /* ************************************************************************** */
 
 /**
- * @brief Create the interface thread and thread pool that handle ui connections
+ * @brief Create the interface thread and thread pool that handle UI connections
  *
  * The GUI and the CLI use a socket connection to communicate with the
  * scheduler. This function creates the socket connection as well as everything
@@ -579,7 +591,7 @@ void interface_init(scheduler_t* scheduler)
 }
 
 /**
- * @brief Closes the server socket and thread pool that service ui connections
+ * @brief Closes the server socket and thread pool that service UI connections
  *
  * @note If interface_destroy() is called before interface_init(), then it will
  *       be a no-op.

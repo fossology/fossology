@@ -1,5 +1,4 @@
-/*
- **************************************************************
+/* **************************************************************
  Copyright (C) 2018 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
@@ -15,7 +14,12 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- **************************************************************
+ ************************************************************** */
+/**
+ * \file
+ * \brief Format email body for a list of agents and their status
+ *
+ * The file can further be enhanced for different formats like HTML, XML, etc.
  */
 
 #include <agent.h>

@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test for scheduler operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -35,6 +39,12 @@ int Prepare_Testing_Data_Scheduler(scheduler_t * scheduler)
 /* **** scheduler function tests ******************************************** */
 /* ************************************************************************** */
 
+/**
+ * \brief Test for scheduler_sig_handle()
+ * \test
+ * -# Initialize scheduler and database
+ * -# Call scheduler_sig_handle() and scheduler_signal()
+ */
 void test_scheduler_sig_handle()
 {
   scheduler_t* scheduler;
@@ -51,6 +61,12 @@ void test_scheduler_sig_handle()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for string_is_num()
+ * \test
+ * -# Call string_is_num() on a text, the return should be 0 (FALSE)
+ * -# Call string_is_num() on a number, the return should be 1 (TRUE)
+ */
 void test_string_is_num()
 {
   int res = 0;
@@ -64,6 +80,13 @@ void test_string_is_num()
   FO_ASSERT_EQUAL(res, 1);
 }
 
+/**
+ * \brief Test for scheduler_daemonize()
+ * \test
+ * -# Initialize scheduler and database
+ * -# Call scheduler_daemonize(), the return should be OK
+ * -# Call kill_scheduler(), the return should be -1
+ */
 void test_scheduler_daemonize()
 {
   scheduler_t* scheduler;
@@ -84,6 +107,13 @@ void test_scheduler_daemonize()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for scheduler_clear_config()
+ * \test
+ * -# Initialize scheduler and database
+ * -# Call scheduler_clear_config()
+ * -# Check for config pointers to be NULL
+ */
 void test_scheduler_clear_config()
 {
   scheduler_t* scheduler;

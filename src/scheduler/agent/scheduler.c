@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Scheduler operations
+ */
 
 /* local includes */
 #include <libfossrepo.h>
@@ -45,6 +49,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
+/**
+ * Test if error is not NULL then print it to the log.
+ */
 #define TEST_ERROR(error, ...)                                     \
   if(error)                                                        \
   {                                                                \
@@ -58,11 +65,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   }
 
 /* global flags */
-int verbose = 0;
-int closing = 0;
+int verbose = 0;        ///< The verbose level
+int closing = 0;        ///< Set if scheduler is shutting down
 
-/* pointer to the main thread */
-GThread* main_thread;
+GThread* main_thread;   ///< Pointer to the main thread
 
 #define SELECT_DECLS(type, name, l_op, w_op, val) type CONF_##name = val;
 CONF_VARIABLES_TYPES(SELECT_DECLS)
@@ -81,24 +87,27 @@ CONF_VARIABLES_TYPES(SELECT_DECLS)
 int sigmask = 0;
 
 /**
- * Handles any signals sent to the scheduler that are not SIGCHLD.
+ * @brief Handles any signals sent to the scheduler that are not SIGCHLD.
  *
  * Currently Handles:
- *   SIGCHLD: scheduler will handle to death of the child process or agent
- *   SIGALRM: scheduler will run agent updates and database updates
- *   SIGTERM: scheduler will gracefully shut down
- *   SIGQUIT: scheduler will forcefully shut down
- *   SIGHIP:  scheduler will reload configuration data
+ *
+ * | Signal | Effect |
+ * | ---: | :--- |
+ * | SIGCHLD | Scheduler will handle to death of the child process or agent |
+ * | SIGALRM | Scheduler will run agent updates and database updates |
+ * | SIGTERM | Scheduler will gracefully shut down |
+ * | SIGQUIT | Scheduler will forcefully shut down |
+ * |  SIGHIP | Scheduler will reload configuration data |
  *
  * @param signo  the number of the signal that was sent
  */
 void scheduler_sig_handle(int signo)
 {
-  /* Anywhere you see a "#if __GNUC__" the code is checking if gcc is the
-   * compiler. This is because the __sync... set of functions are the gcc
+  /* Anywhere you see a "#if __GNUC__" the code is checking if GCC is the
+   * compiler. This is because the __sync... set of functions are the GCC
    * version of atomics.
    *
-   * This means that if you aren't compiling with gcc, you can have a race
+   * This means that if you aren't compiling with GCC, you can have a race
    * condition that results in a signal being lost during the
    * signal_scheduler() function.
    *
@@ -108,7 +117,7 @@ void scheduler_sig_handle(int signo)
    *   3. signal_scheduler() clears sigmask by setting it to 0
    *
    * In this set of events, a signal has been lost. If this is a sigchld this
-   * could be very bad as a job could never get marked as finsihed.
+   * could be very bad as a job could never get marked as finished.
    */
   switch(signo)
   {
@@ -128,7 +137,7 @@ void scheduler_sig_handle(int signo)
 }
 
 /**
- * @brief function that handles certain signals being delivered to the scheduler
+ * @brief Function that handles certain signals being delivered to the scheduler
  *
  * This function is called every time the event loop attempts to take something
  * from the event queue. It will also get called once a second regardless of if
@@ -138,6 +147,8 @@ void scheduler_sig_handle(int signo)
  * received since the last time it was called. The sigmask variable should
  * always be accessed atomically since it is accessed by the event loop thread
  * as well as the signal handlers.
+ *
+ * @param scheduler Scheduler to sent signal to
  */
 void scheduler_signal(scheduler_t* scheduler)
 {
@@ -196,7 +207,7 @@ void scheduler_signal(scheduler_t* scheduler)
   /* signal: SIGQUIT
    *
    * A SIGQUIT has been received. Queue a scheduler_close_event so that the
-   * scheduler will imediately stop running. This will cause all the agents to
+   * scheduler will immediately stop running. This will cause all the agents to
    * be forcefully killed.
    */
   if(mask & MASK_SIGQUIT)
@@ -239,10 +250,12 @@ void scheduler_signal(scheduler_t* scheduler)
 /**
  * @brief Create a new scheduler object.
  *
- * This will initalize everything to a point where it can be used. All regular
+ * This will initialize everything to a point where it can be used. All regular
  * expressions, GTree's and the job_queue will be correctly created.
  *
- * @return a new scheduler_t* that can be further populated
+ * @param sysconfigdir  Directory containing the fossology.conf
+ * @param log           Log file to log messages to
+ * @return A new scheduler_t* that can be further populated
  */
 scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log)
 {
@@ -354,11 +367,11 @@ scheduler_t* scheduler_init(gchar* sysconfigdir, log_t* log)
  * structures.
  *
  * @param scheduler
+ * @todo Interface close
+ * @todo Repo close
  */
 void scheduler_destroy(scheduler_t* scheduler)
 {
-  // TODO interface close
-  // TODO repo close
 
   event_loop_destroy();
 
@@ -389,7 +402,7 @@ void scheduler_destroy(scheduler_t* scheduler)
   g_tree_unref(scheduler->job_list);
 
   if (scheduler->db_conn) PQfinish(scheduler->db_conn);
-  
+
   g_free(scheduler);
 }
 
@@ -401,13 +414,12 @@ void scheduler_destroy(scheduler_t* scheduler)
  * is executed. Therefore the code should be light weight since it will be run
  * very frequently.
  *
- * @TODO:
- *   currently this will only grab a job and create a single agent to execute
+ * @todo Currently this will only grab a job and create a single agent to execute
  *   the job.
  *
- *   @TODO: allow for runonpfile jobs to have multiple agents based on size
- *   @TODO: allow for job preemption. The scheduler can pause jobs, allow it
- *   @TODO: allow for specific hosts to be chosen.
+ * @todo Allow for runonpfile jobs to have multiple agents based on size
+ * @todo Allow for job preemption. The scheduler can pause jobs, allow it
+ * @todo Allow for specific hosts to be chosen.
  */
 void scheduler_update(scheduler_t* scheduler)
 {
@@ -457,7 +469,7 @@ void scheduler_update(scheduler_t* scheduler)
       {
         host = g_tree_lookup(scheduler->host_list, job->required_host);
         if(host != NULL)
-        { 
+        {
           if(!(host->running < host->max))
           {
           job = NULL;
@@ -520,6 +532,9 @@ void scheduler_update(scheduler_t* scheduler)
  * Correctly set the project user and group. The fossology scheduler must run as
  * the user specified by PROJECT_USER and PROJECT_GROUP since the agents must be
  * able to connect to the database. This ensures that that happens correctly.
+ *
+ * @param process_name
+ * @param config
  */
 void set_usr_grp(gchar* process_name, fo_conf* config)
 {
@@ -631,7 +646,7 @@ int kill_scheduler(int force)
 }
 
 /**
- * @brief clears any information that is loaded when loading the configuration
+ * @brief Clears any information that is loaded when loading the configuration
  *
  * @param scheduler  the scheduler to reset the information on
  */
@@ -666,9 +681,9 @@ void scheduler_clear_config(scheduler_t* scheduler)
 /**
  * @brief GTraverseFunc used by g_tree_clear to collect all the keys in a tree
  *
- * @param key    the current key
- * @param value  the value mapped to the current key
- * @param data   a GList** that the key will be appended to
+ * @param key    The current key
+ * @param value  The value mapped to the current key
+ * @param data   A GList** that the key will be appended to
  * @return       Always returns 0
  */
 static gboolean g_tree_collect(gpointer key, gpointer value, gpointer data)
@@ -703,17 +718,17 @@ void g_tree_clear(GTree* tree)
  *
  * This loads and saves the results as a new meta_agent. This assumes that the
  * configuration file for the agent includes the following key/value pairs:
- *   1. command: the command that will be used to start the agent
- *   2. max: the maximum number of this agent that can run at once
- *   3. special: anything that is special about the agent
+ * -# command: The command that will be used to start the agent
+ * -# max:     The maximum number of this agent that can run at once
+ * -# special: Anything that is special about the agent
  */
 void scheduler_agent_config(scheduler_t* scheduler)
 {
   DIR* dp;                  // directory pointer used to load meta agents;
   struct dirent* ep;        // information about directory
   gchar* dirname;           // holds the name of the current configuration file
-  uint8_t max = -1;             // the number of agents to a host or number of one type running
-  uint32_t special = 0;          // anything that is special about the agent (EXCLUSIVE)
+  uint8_t max = -1;         // the number of agents to a host or number of one type running
+  uint32_t special = 0;     // anything that is special about the agent (EXCLUSIVE)
   int32_t i;
   gchar* name;
   gchar* cmd;
@@ -929,7 +944,7 @@ void scheduler_foss_config(scheduler_t* scheduler)
 }
 
 /**
- * @brief daemonizes the scheduler
+ * @brief Daemonizes the scheduler
  *
  * This will make sure that the pid that is maintained in the scheduler struct
  * is correct during the daemonizing process.
@@ -1000,7 +1015,7 @@ void scheduler_test_agents(scheduler_t* scheduler, void* unused)
 }
 
 /**
- * Checks if a string is entirely composed of numeric characters
+ * @brief Checks if a string is entirely composed of numeric characters
  *
  * @param str the string to test
  * @return TRUE if the string is entirely numeric, FALSE otherwise
@@ -1022,7 +1037,7 @@ gint string_is_num(gchar* str)
  * @param a The first string
  * @param b The second string
  * @param user_data unused in this function
- * @return integral value idicating the relatioship between the two strings
+ * @return Integral value indicating the relationship between the two strings
  */
 gint string_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 {

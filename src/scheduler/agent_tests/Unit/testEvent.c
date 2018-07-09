@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test for event operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -28,28 +32,47 @@ extern int el_created;
 
 extern event_loop_t* event_loop_get();
 
-void* sample_args;
-int   call_num;
-int   samp_num;
-char* s_name = NULL;
-uint16_t s_line = 0;
+void* sample_args;    ///< Sample args to pass
+int   call_num;       ///< Number of callback calls
+int   samp_num;       ///< Number of sample event calls
+char* s_name = NULL;  ///< Sample source file name
+uint16_t s_line = 0;  ///< Sample source line number
 
-
+/**
+ * \brief Sample event
+ *
+ * Increase samp_num on every call
+ */
 void sample_event(scheduler_t* scheduler, void* args)
 {
   samp_num++;
 }
 
+/**
+ * \brief Sample event 2
+ *
+ * Decrease samp_num on every call
+ */
 void other_event(void* args)
 {
   samp_num--;
 }
 
+/**
+ * \brief Sample callback function
+ *
+ * Increases call_num on every call
+ */
 void sample_callback(scheduler_t* scheduler)
 {
   call_num++;
 }
 
+/**
+ * \brief Terminate event
+ *
+ * Calls event_loop_terminate()
+ */
 void terminate_event(void* args)
 {
   event_loop_terminate();
@@ -58,7 +81,16 @@ void terminate_event(void* args)
 /* ************************************************************************** */
 /* **** meta agent function tests ******************************************* */
 /* ************************************************************************** */
-
+/**
+ * \brief Test for event_loop_get()
+ * \test
+ * -# Check if no event loop is created
+ * -# Get the vl_addr and call event_loop_get()
+ * -# Check if vl_addr and event loop are equal
+ * -# Check if event loop is created and is not occupied or terminated
+ * -# Call event_loop_get() one more time
+ * -# Check if value return matches previous values
+ */
 void test_event_loop_get()
 {
   FO_ASSERT_FALSE(el_created);
@@ -78,6 +110,12 @@ void test_event_loop_get()
   FO_ASSERT_PTR_EQUAL(vl, ol);
 }
 
+/**
+ * \brief Test for event_init()
+ * \test
+ * -# Call event_init() with appropriate values to create an event
+ * -# Check if the event created have appropriate values
+ */
 void test_event_init()
 {
   scheduler_t* scheduler;
@@ -97,6 +135,12 @@ void test_event_init()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_signal_ext()
+ * \test
+ * -# Call event_signal_ext() with appropriate values to create an event
+ * -# Check if the event created have appropriate values
+ */
 void test_event_signal_ext()
 {
   scheduler_t* scheduler;
@@ -118,6 +162,14 @@ void test_event_signal_ext()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_signal()
+ * \test
+ * -# Use the macro event_signal() to create an event
+ * -# Get the new event from event loop
+ * -# Check if the event get the name `"sample_event"` and have proper function
+ * and argument assigned
+ */
 void test_event_signal()
 {
   scheduler_t* scheduler;
@@ -138,6 +190,13 @@ void test_event_signal()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_loop_enter()
+ * \test
+ * -# Generate several events using event_signal()
+ * -# Get the return value from event_loop_enter() with sample_callback as argument
+ * -# Check the return value and count of callback calls
+ */
 void test_event_loop_enter()
 {
   scheduler_t* scheduler;
@@ -214,6 +273,15 @@ void test_event_loop_enter()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_loop_enter() with terminate_event
+ * \test
+ * -# Call event_signal() with terminate_event() callback
+ * -# Get the return value from event_loop_enter() with NULL as the parameters
+ * -# Check the return value is `0x0`
+ * -# Check if the occupied is false for event_loop
+ * -# Check if terminated is true for event_loop
+ */
 void test_event_loop_terminate()
 {
   int retval = 0;
@@ -234,6 +302,14 @@ void test_event_loop_terminate()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_loop_take()
+ * \test
+ * -# Get an event_loop from event_loop_get()
+ * -# Set the occupied and terminated values for the event_loop
+ * -# Pass the event_loop to event_loop_take()
+ * -# Check the return value is NULL
+ */
 void test_event_loop_take()
 {
   event_t* retval;
@@ -253,6 +329,13 @@ void test_event_loop_take()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for event_loop_put()
+ * \test
+ * -# Pass sample_event and sample_args to event_signal()
+ * -# Check if the event loop gets the values in the queue
+ * -# Call event_loop_put()
+ */
 void test_event_loop_put()
 {
   scheduler_t* scheduler;

@@ -170,6 +170,7 @@
  * -# \subpage pkgagent
  * -# \subpage readmeoss
  * -# \subpage reuser
+ * -# \subpage scheduler
  * -# \subpage spdx2
  * -# \subpage unifiedreport
  * -# \subpage ununpack

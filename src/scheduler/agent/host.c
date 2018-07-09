@@ -15,6 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 ************************************************************** */
+/**
+ * \file
+ * \brief Host related operations
+ */
 
 /* local includes */
 #include <host.h>
@@ -26,12 +30,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* ************************************************************************** */
 
 /**
- * GTraversFunction that allows the information for all hosts to be printed
+ * @brief GTraversFunction that allows the information for all hosts to be printed
  *
  * @param host_name  the string name of the host
- * @param h          the host struct paired with the name
+ * @param host       the host struct paired with the name
  * @param ostr       the output stream that the info will be printed to
  * @return 0 to cause the traversal to continue
+ * @sa host_print()
  */
 static int print_host_all(gchar* host_name, host_t* host, GOutputStream* ostr)
 {
@@ -44,12 +49,13 @@ static int print_host_all(gchar* host_name, host_t* host, GOutputStream* ostr)
 /* ************************************************************************** */
 
 /**
- * @brief creates a new host, and adds it to the host list.
+ * @brief Creates a new host, and adds it to the host list.
  *
  * @param name        The name of the host
  * @param address     Address that can be passed to ssh when starting agent on host
  * @param agent_dir   The location of agent binaries on the host
  * @param max         The max number of agent that can run on this host
+ * @returns New host
  */
 host_t* host_init(char* name, char* address, char* agent_dir, int max)
 {
@@ -65,9 +71,9 @@ host_t* host_init(char* name, char* address, char* agent_dir, int max)
 }
 
 /**
- * @brief frees and uninitializes any memory associated with the host struct
+ * @brief Frees and uninitializes any memory associated with the host struct
  *
- * @param h  the host to free the memory for.
+ * @param host The host to free the memory for.
  */
 void host_destroy(host_t* host)
 {
@@ -101,9 +107,9 @@ void host_insert(host_t* host, scheduler_t* scheduler)
 }
 
 /**
- * Increase the number of running agents on a host by 1
+ * @brief Increase the number of running agents on a host by 1
  *
- * @param h the relevant host
+ * @param host The relevant host
  */
 void host_increase_load(host_t* host)
 {
@@ -112,9 +118,9 @@ void host_increase_load(host_t* host)
 }
 
 /**
- * Decrease the number of running agents on a hsot by 1
+ * @brief Decrease the number of running agents on a host by 1
  *
- * @param h the relevant host
+ * @param host the relevant host
  */
 void host_decrease_load(host_t* host)
 {
@@ -123,9 +129,9 @@ void host_decrease_load(host_t* host)
 }
 
 /**
- * Prints the information about a host to the output stream
+ * @brief Prints the information about a host to the output stream
  *
- * @param h     the relevant host
+ * @param host  the relevant host
  * @param ostr  the output stream to write to
  */
 void host_print(host_t* host, GOutputStream* ostr)
@@ -143,6 +149,7 @@ void host_print(host_t* host, GOutputStream* ostr)
  * Gets a host for which there are at least num agents available to start
  * new agents on.
  *
+ * @param queue GList of available hosts
  * @param num the number of agents to start on the host
  * @return the host with that number of available slots, NULL if none exist
  */
@@ -170,9 +177,11 @@ host_t* get_host(GList** queue, uint8_t num)
 }
 
 /**
+ * @brief Prints the host information to ostr
  *
- *
+ * @param host_list
  * @param ostr
+ * @sa print_host_all()
  */
 void print_host_load(GTree* host_list, GOutputStream* ostr)
 {

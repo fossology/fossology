@@ -47,6 +47,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define SAG_LOCAL      (1 << 3) ///< This agent should only run on localhost
 
 /**
+ * \file
+ * \brief Header file with agent related operations
+ */
+/**
  * Implementation of x macros used for the creation of the agent status enum.
  * This is used so that if a new agent status is needed, it can be added here
  * and all relevant declarations can be changed.
@@ -76,7 +80,7 @@ typedef enum { AGENT_STATUS_TYPES(SELECT_ENUM) } agent_status;
 extern const char* agent_status_strings[];
 
 /**
- * TODO
+ * \todo
  */
 typedef int agent_pk;
 

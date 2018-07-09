@@ -22,11 +22,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * @file multi_connect.c
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This agent will
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This agent will
  *        call fo_scheduler_connect() twice. There is technically nothing that
  *        should disallow this currently.
  *
- * This is a working agent
+ * @note This is a working agent
  */
 
 int main(int argc, char** argv)
