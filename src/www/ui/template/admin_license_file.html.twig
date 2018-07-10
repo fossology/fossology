@@ -1,0 +1,32 @@
+{# Copyright 2017 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  {{ Inputfm }}
+
+  <p>{{ dataMessage }}</p>
+  {% if data %}
+  <table id='adminLicenseTable' rules='rows' width='100%' cellpadding='3'>
+    <tfoot class="footAsHead">
+      <tr style="background:lightsteelblue">
+        <td><strong>Search:</strong></td><td></td>
+        <td></td><th>Shortname</th><th>Fullname</th><th>Text</th><th>URL</th>
+      </tr>
+    </tfoot>
+  </table>
+  {% endif %}
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script src="scripts/jquery.dataTables.min.js"></script>
+  {% if data %}
+  <script type="text/javascript"> {% include 'admin_license_file.js.twig' %}</script>
+  {% endif %}
+{% endblock %}
