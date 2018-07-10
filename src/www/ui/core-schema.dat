@@ -970,18 +970,6 @@
   $Schema["TABLE"]["license_set_bulk"]["lrb_fk"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"lrb_fk\" int8";
   $Schema["TABLE"]["license_set_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"lrb_fk\" SET NOT NULL";
 
-  $Schema["TABLE"]["license_set_bulk"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"comment\" IS 'User comment'";
-  $Schema["TABLE"]["license_set_bulk"]["comment"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"comment\" text";
-  $Schema["TABLE"]["license_set_bulk"]["comment"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"comment\" DROP NOT NULL";
-
-  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"reportinfo\" IS 'public comment'";
-  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"reportinfo\" text";
-  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"reportinfo\" DROP NOT NULL";
-
-  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"acknowledgement\" IS 'public comment'";
-  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"acknowledgement\" text";
-  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_pk\" int4 DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass)";

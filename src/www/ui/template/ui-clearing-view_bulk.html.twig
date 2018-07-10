@@ -1,19 +1,9 @@
-{# Copyright 2014-2015,2018 Siemens AG
+{# Copyright 2014-2015 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-  <div class="modal" id="textModal" hidden>
-    <form name="addOrRemoveText">
-      <div>{{ 'Please enter the text phrase:'|trans }}</div>
-      <textarea id="referenceText" style="overflow:auto;width:100%;height:80px;" name="referenceText"></textarea>
-      <br/><br/>
-      <a class="buttonLink" style="width:7em;" onclick="submitTextModal();">OK</a>  &nbsp; &nbsp;
-      <a class="buttonLink" style="width:7em;" onclick="closeTextModal();">{{ 'Cancel'|trans }}</a>
-    </form>
-  </div>
-
 <div class="modal" id="bulkModal" hidden>
   <form name="bulkForm">
     <h2>{{ 'Bulk recognition'| trans }}</h2>
@@ -49,14 +39,11 @@
       </tr>
     </table>
 
-    <table id="bulkFormTable" class="dataTable" border="1">
+    <table id="bulkFormTable" class="dataTable" style="border: 1px solid black;">
       <thead>
         <hr id="bulkFormTableHead">
-          <th>Action</th>
+          <th style="border-right:1px dashed black;">Action</th>
           <th>License</th>
-          <th>License Text</th>
-          <th>Acknowledgement</th>
-          <th>Comment</th>
           <th></th>
         </hr>
       </thead>

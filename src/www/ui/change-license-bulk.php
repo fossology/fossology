@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015,2018 Siemens AG
+ * Copyright (C) 2014-2015 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -112,11 +112,10 @@ class ChangeLicenseBulk extends DefaultPlugin
 
     $refText = $request->get('refText');
     $actions = $request->get('bulkAction');
-
     $licenseRemovals = array();
     foreach($actions as $licenseAction)
     {
-      $licenseRemovals[$licenseAction['licenseId']] = array(($licenseAction['action']=='Remove'), $licenseAction['comment'], $licenseAction['reportinfo'], $licenseAction['acknowledgement']);
+      $licenseRemovals[$licenseAction['licenseId']] = ($licenseAction['action']=='remove');
     }
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText);
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2018, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -610,10 +610,10 @@ ORDER BY lft asc
     $bulkId = $licenseRefBulkIdResult['lrb_pk'];
 
     $stmt = __METHOD__ . '.insertAction';
-    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) VALUES ($1,$2,$3,$4,$5,$6)");
+    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES ($1,$2,$3)");
     foreach($licenseRemovals as $licenseId=>$removing)
     {
-      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing[0]), $removing[1], $removing[2], $removing[3]));
+      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing)));
     }
 
     return $bulkId ;

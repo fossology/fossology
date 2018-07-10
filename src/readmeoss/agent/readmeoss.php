@@ -156,7 +156,7 @@ class ReadmeOssAgent extends Agent
       if($extract == 'text') {
         $outData .= $statements["content"] . $break;
       }
-      $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
+      $outData .= $statements[$extract] . $break;
       if(!empty($addSeparator)) {
         $outData .= $addSeparator . $break;
       }

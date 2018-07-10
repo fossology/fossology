@@ -1,4 +1,4 @@
-{# Copyright 2014-2018 Siemens AG
+{# Copyright 2014-2017 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -11,6 +11,16 @@
 {% endblock %}
 
 {% block content %}
+  <div class="modal" id="textModal" hidden>
+    <form name="addOrRemoveText">
+      <div>{{ 'Please enter the text phrase:'|trans }}</div>
+      <textarea id="referenceText" style="overflow:auto;width:100%;height:80px;" name="referenceText"></textarea>
+      <br/><br/>
+      <a class="buttonLink" style="width:7em;" onclick="submitTextModal();">OK</a>  &nbsp; &nbsp;
+      <a class="buttonLink" style="width:7em;" onclick="closeTextModal();">{{ 'Cancel'|trans }}</a>
+    </form>
+  </div>
+
   <div id="leftrightalignment" name="leftrightalignment">
     <table border="0" style="padding:0px; height:100%; width:100%">
       <tr>
