@@ -82,7 +82,7 @@ class admin_license_file extends FO_Plugin
     // Add new rec to db
     if (@$_POST["addit"])
     {
-      $resultstr = $this->Adddb($_POST);
+      $resultstr = $this->Adddb();
       $this->vars['message'] = $resultstr;
       if (strstr($resultstr, $errorstr)) {
         return $this->Updatefm(0);
@@ -99,11 +99,26 @@ class admin_license_file extends FO_Plugin
       return $this->Updatefm($rf_pk);
     }
 
-    $V .= $this->Inputfm();
-    if (@$_POST["req_shortname"])
-      $V .= $this->LicenseList($_POST["req_shortname"], $_POST["req_marydone"]);
+    // return a license text
+    if (@$_GET["getLicenseText"])
+    {
+      if (@$_GET["licenseID"])
+      {
+        $licenseText = $this->getLicenseTextForID(@$_GET["licenseID"]);
+        if (!$licenseText)
+        {
+          return new Response("Error in querying license text.", Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+        }
+        return new Response($licenseText, Response::HTTP_OK, array('Content-type'=>'text/plain'));
+      }
+    }
 
-    return $V;
+    if (@$_POST["req_shortname"])
+    {
+      $this->vars += $this->getLicenseListData($_POST["req_shortname"], $_POST["req_marydone"]);
+    }
+    $this->vars['Inputfm'] = $this->Inputfm();
+    return $this->render('admin_license_file.html.twig');
   }
 
   /**
@@ -120,7 +135,7 @@ class admin_license_file extends FO_Plugin
     // all are optional
     $V.= "<p>";
     $V.= _("Filter: ");
-    $V.= "<SELECT name='req_marydone'>\n";
+    $V.= "<select name='req_marydone'>\n";
     $Selected =  (@$_REQUEST['req_marydone'] == 'all') ? " SELECTED ": "";
     $text = _("All");
     $V.= "<option value='all' $Selected> $text </option>";
@@ -130,7 +145,7 @@ class admin_license_file extends FO_Plugin
     $Selected =  (@$_REQUEST['req_marydone'] == 'notdone') ? " SELECTED ": "";
     $text = _("Not Checked");
     $V.= "<option value='notdone' $Selected> $text </option>";
-    $V.= "</SELECT>";
+    $V.= "</select>";
     $V.= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 
     // by short name -ajax-> fullname
@@ -150,6 +165,13 @@ class admin_license_file extends FO_Plugin
   }
 
 
+  private function getLicenseData($where)
+  {
+    $sql = "select * from ONLY license_ref $where order by rf_shortname";
+
+    return $this->dbManager->getRows($sql);
+  }
+
   /**
    * \brief Build the input form
    *
@@ -158,20 +180,17 @@ class admin_license_file extends FO_Plugin
    *
    * \return The input form as a string
    */
-  function LicenseList($namestr, $filter)
+  function getLicenseListData($namestr, $filter)
   {
-    global $PG_CONN;
-
-    $ob = "";     // output buffer
-
     // look at all
     if ($namestr == "All")
       $where = "";
     else
-        $where = "where rf_shortname like '". pg_escape_string($namestr) ."' ";
+      $where = "where rf_shortname like '". pg_escape_string($namestr) ."%' ";
 
-    // $filter is one of these: "All", "done", "notdone"
-    if ($filter != "all") {
+    // $filter is one of these: "all", "done", "notdone"
+    if ($filter != "all")
+    {
       if (empty($where))
         $where .= "where ";
       else
@@ -180,84 +199,27 @@ class admin_license_file extends FO_Plugin
       if ($filter == "notdone") $where .= " marydone=false";
     }
 
-    $sql = "select * from ONLY license_ref $where order by rf_shortname";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-
-    // print simple message if we have no results
-    if (pg_num_rows($result) == 0)
+    $data = $this->getLicenseData($where);
+    if(!$data)
     {
-      $text = _("No licenses matching the filter");
-      $text1 = _("and name pattern");
-      $text2 = _("were found");
-      $ob .= "<br>$text ($filter) $text1 ($namestr) $text2.<br>";
-      pg_free_result($result);
-      return $ob;
+      $dataMessage = _("No licenses matching the filter and name pattern were found");
+    }
+    else
+    {
+      $dataSize = sizeof($data);
+      $plural = "";
+
+      if($dataSize > 1)
+        $plural = "s";
+      $dataMessage = $dataSize . _(" License$plural found");
     }
 
-    $plural = (pg_num_rows($result) == 1) ? "" : "s";
-    $ob .= pg_num_rows($result) . " license$plural found.";
-
-    $style = "style='position: -webkit-sticky;position: -moz-sticky;position: -ms-sticky;"
-           . "position: -o-sticky;position: sticky;top: 0;";
-    //$ob .= "<table style='border: thin dotted gray'>";
-    $ob .= "<table rules='rows' cellpadding='3'>";
-    $ob .= "<thead $style'>";
-    $ob .= "<tr>";
-    $text = _("Edit");
-    $ob .= "<th>$text</th>";
-    $text = _("Checked");
-    $ob .= "<th>$text</th>";
-    $text = _("Active");
-    $ob .= "<th>$text</th>";
-    $text = _("SPDX Compatible");
-    $ob .= "<th>$text</th>";
-    $text = _("Shortname");
-    $ob .= "<th>$text</th>";
-    $text = _("Fullname");
-    $ob .= "<th>$text</th>";
-    $text = _("Text");
-    $ob .= "<th>$text</th>";
-    $text = _("URL");
-    $ob .= "<th>$text</th>";
-    $ob .= "</tr></thead>";
-    $ob .= "<tbody>";
-    $lineno = 0;
-    while ($row = pg_fetch_assoc($result))
-    {
-      if ($lineno++ % 2)
-        $style = "style='background-color:lavender'";
-      else
-        $style = "";
-      $ob .= "<tr $style>";
-
-      // Edit button brings up full screen edit of all license_ref fields
-      $ob .= "<td align=center><a href='";
-      $ob .= Traceback_uri();
-      $ob .= "?mod=" . $this->Name .
-      "&rf_pk=$row[rf_pk]".
-      "&req_marydone=$_REQUEST[req_marydone]&req_shortname=$_REQUEST[req_shortname]' >".
-      "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
-
-      $marydone = ($row['marydone'] == 't') ? "Yes" : "No";
-      $text = _("$marydone");
-      $ob .= "<td align=center>$text</td>";
-      $rf_active = ($row['rf_active'] == 't') ? "Yes" : "No";
-      $text = _("$rf_active");
-      $ob .= "<td align=center>$text</td>";
-      $rf_spdx_compatible = ($row['rf_spdx_compatible'] == 't') ? "Yes" : "No";
-      $text = _("$rf_spdx_compatible");
-      $ob .= "<td align=center>$text</td>";
-      $ob .= "<td align=center>$row[rf_shortname]</td>";
-      $ob .= "<td align=left>$row[rf_fullname]</td>";
-      $vetext = htmlspecialchars($row['rf_text']);
-      $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
-      $ob .= "<td align=left><a href='$row[rf_url]' target='_blank'>$row[rf_url]</a></td>";
-      $ob .= "</tr>";
-    }
-    pg_free_result($result);
-    $ob .= "</tbody></table>";
-    return $ob;
+    $vars = array(
+      'data' => $data,
+      'dataMessage' => $dataMessage,
+      'message' => "",
+      'tracebackURI' => Traceback_uri());
+    return $vars;
   }
 
   function Updatefm($rf_pk)
@@ -543,6 +505,18 @@ class admin_license_file extends FO_Plugin
     }
 
     return ($familynamearray);
+  }
+
+  private function getLicenseTextForID($licenseID)
+  {
+    $sql = "select rf_text from license_ref where rf_pk=$1";
+    $result = $this->dbManager->getSingleRow($sql, array($licenseID));
+
+    if(!$result)
+    {
+      return false;
+    }
+    return $result['rf_text'];
   }
 
 }

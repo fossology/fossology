@@ -43458,3 +43458,103 @@ Terms and Conditions:
     6. Redistribution in Object Form
 
     If You redistribute copies of the Software, modifications or derivatives thereof in Object Form only (as incorporated into finished goods, i.e. end user applications) then You will not have a duty to include any copies of the code, this License, copyright notices, other attributions or documentation.', 'http://research.scea.com/scea_shared_source_license.html', NULL, NULL, NULL, 'SCEA Shared Source License', NULL, NULL, NULL, '', NULL, false, true, true, 'd3dcf0db7283c1bd99d46fc9bb70922b', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (586, 'RSA-Cryptoki', 'DISCLAIMER
+Regarding the header / include files:
+License to copy and use this software is granted provided that it is identified as "RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki)" in all material mentioning or referencing this software or this function.
+License is also granted to make and use derivative works provided that such works are identified as "derived from the RSA Security Inc. PKCS #11 Cryptographic Token Interface (Cryptoki)" in all material mentioning or referencing the derived work.
+This software is provided “AS IS” and RSA Security, Inc. disclaims all warranties including but not limited to the implied warranty of merchantability, fitness for a particular purpose, and noninfringement.
+Regarding reference implementations:
+RSA Laboratories is providing links to external reference implementations for the benefit of PKCS #11 developers. RSA Laboratories has not verified or reviewed these implementations and therefore can make no statement regarding their conformance to the current PKCS #11 specification. RSA Laboratories also makes no representations regarding intellectual property coverage or ownership of the reference implementations. The implementations may also be subject to regulations on the import, export and/or use of cryptography. Resolution of these issues is the responsibility of the user.', 'https://www.cryptsoft.com/pkcs11doc/STANDARD/include/v211/cryptoki.h', NULL, NULL, NULL, 'RSA-Cryptoki License', NULL, NULL, NULL, '', NULL, false, true, false, '54bf3643be25d2dd33e9932864029461', 1, false);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (587, '0BSD', 'Copyright (C) 2006 by Rob Landley <rob@landley.net>
+
+Permission to use, copy, modify, and/or distribute this software for any purpose with or without fee is hereby granted.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.', 'http://landley.net/toybox/license.html', NULL, NULL, NULL, 'BSD Zero Clause License', NULL, NULL, NULL, '', NULL, false, true, false, '98848c21ca0fedf7229abb509071a66f', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (588, 'BSD-1-Clause', 'Copyright (c) <year> <owner> All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+THIS SOFTWARE IS PROVIDED BY Berkeley Software Design, Inc. "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL Berkeley Software Design, Inc. BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'https://svnweb.freebsd.org/base/head/include/ifaddrs.h?revision=326823', NULL, NULL, NULL, 'BSD 1-Clause License', NULL, NULL, NULL, '', NULL, false, true, false, 'd0b5c00a96e989069a8315f64ee0fe6b', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (589, 'MIT-advertising', 'Copyright (C) 2000-2008 Carsten Haitzler, Geoff Harrison and various contributors Copyright (C) 2004-2008 Kim Woelders
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies of the Software, its documentation and marketing & publicity materials, and acknowledgment shall be given in the documentation, materials and software packages that this Software was used.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing/MIT_With_Advertising', NULL, NULL, NULL, 'Enlightenment License (e16)', NULL, NULL, NULL, 'This license is a modified version of the common MIT license, with an additional advertising clause', NULL, false, true, false, '0f358dd6677661d482934070c7eeaeec', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (590, 'MIT-enna', 'Copyright (C) 2000 Carsten Haitzler and various contributors (see AUTHORS)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies of the Software and its Copyright notices. In addition publicly documented acknowledgment must be given that this software has been used if no source code of this software is made available publicly. This includes acknowledgments in either Copyright notices, Manuals, Publicity and Marketing documents or any documentation provided with any product containing this software. This License does not apply to any software that links to the libraries provided by this software (statically or dynamically), but only to the software provided.
+
+Please see the COPYING.PLAIN for a plain-english explanation of this notice and it''s intent.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing/MIT#enna', NULL, NULL, NULL, 'enna License', NULL, NULL, NULL, '', NULL, false, true, false, '837570c48d6e224a531b1c5cb31f6831', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (591, 'MIT-feh', 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies of the Software and its documentation and acknowledgment shall be given in the documentation and software packages that this Software was used.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing/MIT#feh', NULL, NULL, NULL, 'feh License', NULL, NULL, NULL, '', NULL, false, true, false, '031c73abe1c92133bd0f02f41a6a5d11', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (592, 'MITNFA', 'Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+Distributions of all or part of the Software intended to be used by the recipients as they would use the unmodified Software, containing modifications that substantially alter, remove, or disable functionality of the Software, outside of the documented configuration mechanisms provided by the Software, shall be modified such that the Original Author''s bug reporting email addresses and urls are either replaced with the contact information of the parties responsible for the changes, or removed entirely.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing/MITNFA', NULL, NULL, NULL, 'MIT +no-false-attribs license', NULL, NULL, NULL, '', NULL, false, true, false, 'ae098e6f49fc0720cbe27319dffe2f48', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (593, 'mpich2', 'COPYRIGHT
+
+The following is a notice of limited availability of the code, and disclaimer which must be included in the prologue of the code and in all source listings of the code.
+
+Copyright Notice
++ 2002 University of Chicago
+
+Permission is hereby granted to use, reproduce, prepare derivative works, and to redistribute to others. This software was authored by:
+
+Argonne National Laboratory Group W. Gropp: (630) 252-4318; FAX: (630) 252-5986; e-mail: gropp@mcs.anl.gov E. Lusk: (630) 252-7852; FAX: (630) 252-5986; e-mail: lusk@mcs.anl.gov Mathematics and Computer Science Division Argonne National Laboratory, Argonne IL 60439
+
+GOVERNMENT LICENSE
+
+Portions of this material resulted from work developed under a U.S. Government Contract and are subject to the following license: the Government is granted for itself and others acting on its behalf a paid-up, nonexclusive, irrevocable worldwide license in this computer software to reproduce, prepare derivative works, and perform publicly and display publicly.
+
+DISCLAIMER
+
+This computer code material was prepared, in part, as an account of work sponsored by an agency of the United States Government. Neither the United States, nor the University of Chicago, nor any of their employees, makes any warranty express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.', 'https://fedoraproject.org/wiki/Licensing/MIT', NULL, NULL, NULL, 'mpich2 License', NULL, NULL, NULL, '', NULL, false, true, false, 'f30403bda2a18f780f897079cd662d57', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (594, 'MTLL', 'Software License for MTL
+
+Copyright (c) 2007 The Trustees of Indiana University.
+2008 Dresden University of Technology and the Trustees of Indiana University.
+2010 SimuNova UG (haftungsbeschränkt), www.simunova.com.
+All rights reserved.
+Authors: Peter Gottschling and Andrew Lumsdaine
+
+This file is part of the Matrix Template Library
+
+Dresden University of Technology -- short TUD -- and Indiana University -- short IU -- have the exclusive rights to license this product under the following license.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    1. All redistributions of source code must retain the above copyright notice, the list of authors in the original source code, this list of conditions and the disclaimer listed in this license;
+    2. All redistributions in binary form must reproduce the above copyright notice, this list of conditions and the disclaimer listed in this license in the documentation and/or other materials provided with the distribution;
+    3. Any documentation included with all redistributions must include the following acknowledgement:
+    "This product includes software developed at the University of Notre Dame, the Pervasive Technology Labs at Indiana University, and Dresden University of Technology. For technical information contact Andrew Lumsdaine at the Pervasive Technology Labs at Indiana University. For administrative and license questions contact the Advanced Research and Technology Institute at 1100 Waterway Blvd. Indianapolis, Indiana 46202, phone 317-274-5905, fax 317-274-5902."
+    Alternatively, this acknowledgement may appear in the software itself, and wherever such third-party acknowledgments normally appear.
+    4. The name "MTL" shall not be used to endorse or promote products derived from this software without prior written permission from IU or TUD. For written permission, please contact Indiana University Advanced Research & Technology Institute.
+    5. Products derived from this software may not be called "MTL", nor may "MTL" appear in their name, without prior written permission of Indiana University Advanced Research & Technology Institute.
+
+TUD and IU provide no reassurances that the source code provided does not infringe the patent or any other intellectual property rights of any other entity. TUD and IU disclaim any liability to any recipient for claims brought by any other entity based on infringement of intellectual property rights or otherwise.
+
+LICENSEE UNDERSTANDS THAT SOFTWARE IS PROVIDED "AS IS" FOR WHICH NO WARRANTIES AS TO CAPABILITIES OR ACCURACY ARE MADE. DRESDEN UNIVERSITY OF TECHNOLOGY AND INDIANA UNIVERSITY GIVE NO WARRANTIES AND MAKE NO REPRESENTATION THAT SOFTWARE IS FREE OF INFRINGEMENT OF THIRD PARTY PATENT, COPYRIGHT, OR OTHER PROPRIETARY RIGHTS. DRESDEN UNIVERSITY OF TECHNOLOGY AND INDIANA UNIVERSITY MAKE NO WARRANTIES THAT SOFTWARE IS FREE FROM "BUGS", "VIRUSES", "TROJAN HORSES", "TRAP DOORS", "WORMS", OR OTHER HARMFUL CODE. LICENSEE ASSUMES THE ENTIRE RISK AS TO THE PERFORMANCE OF SOFTWARE AND/OR ASSOCIATED MATERIALS, AND TO THE PERFORMANCE AND VALIDITY OF INFORMATION GENERATED USING SOFTWARE.', 'https://fedoraproject.org/wiki/Licensing/Matrix_Template_Library_License', NULL, NULL, NULL, 'Matrix Template Library License', NULL, NULL, NULL, '', NULL, false, true, false, 'cfed8339d3eb7f50479a5267d182730a', 1, true);
+INSERT INTO license_ref (rf_pk, rf_shortname, rf_text, rf_url, rf_add_date, rf_copyleft, "rf_OSIapproved", rf_fullname, "rf_FSFfree", "rf_GPLv2compatible", "rf_GPLv3compatible", rf_notes, "rf_Fedora", marydone, rf_active, rf_text_updatable, rf_md5, rf_detector_type, rf_spdx_compatible) VALUES (595, 'Mup', 'Copyright (c) 1995-2012 by Arkkra Enterprises. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following DISCLAIMER.
+    2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following DISCLAIMER in the documentation and/or other materials provided with the distribution.
+    3. Any additions, deletions, or changes to the original files must be clearly indicated in accompanying documentation. including the reasons for the changes, and the names of those who made the modifications.
+
+DISCLAIMER
+
+THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.', 'https://fedoraproject.org/wiki/Licensing/Mup', NULL, NULL, NULL, 'Mup License', NULL, NULL, NULL, '', NULL, false, true, false, 'e731fe3c4ebf3894bedfacd10e3a4cab', 1, true);
