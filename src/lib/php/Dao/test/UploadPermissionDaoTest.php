@@ -51,7 +51,7 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
     $logger->shouldReceive('debug');
     $this->uploadPermissionDao = new UploadPermissionDao($this->dbManager, $logger);
-    
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -61,7 +61,7 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb = null;
     $this->dbManager = null;
   }
-  
+
   public function testmakeAccessibleToGroup()
   {
     $this->testDb->createPlainTables(array('perm_upload','group_user_member'));
@@ -70,21 +70,21 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $groupIdAlternative = 602;
     $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
     $this->dbManager->insertTableRow('group_user_member', array('group_fk'=>$groupIdAlternative,'user_fk'=>$userId,'group_perm'=>Auth::PERM_READ));
-    
+
     $unaccessibleIsAccessible = $this->uploadPermissionDao->isAccessible($uploadId=1, $groupId);
     assertThat($unaccessibleIsAccessible,equalTo(false));
-    
+
     $this->uploadPermissionDao->makeAccessibleToGroup($uploadId, $groupId, Auth::PERM_WRITE);
     $accessibleIsAccessible = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
     assertThat($accessibleIsAccessible,equalTo(true));
     $stillUnaccessibleIsAccessible = $this->uploadPermissionDao->isAccessible($uploadId, $groupIdAlternative);
     assertThat($stillUnaccessibleIsAccessible,equalTo(false));
-    
+
     $this->uploadPermissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId);
     $nowAccessibleIsAccessible = $this->uploadPermissionDao->isAccessible($uploadId, $groupIdAlternative);
     assertThat($nowAccessibleIsAccessible,equalTo(true));
   }
-  
+
   public function testDeletePermissionId()
   {
     $this->testDb->createPlainTables(array('perm_upload'));
@@ -95,7 +95,7 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $accessibleAfter = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
     assertThat($accessibleAfter,equalTo(false));
   }
-  
+
   public function testUpdatePermissionId()
   {
     $this->testDb->createPlainTables(array('perm_upload'));
@@ -123,14 +123,14 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $accessibleNomore = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
     assertThat($accessibleNomore,equalTo(false));
   }
-  
+
   public function testGetPublicPermission()
   {
     $this->testDb->insertData(array('upload'));
     $perm = $this->uploadPermissionDao->getPublicPermission(3);
     assertThat($perm,equalTo(0));
   }
-  
+
   public function testGetPermissionGroups()
   {
     $this->testDb->createPlainTables(array('perm_upload','groups'));
@@ -138,16 +138,16 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $permissionGroups = $this->uploadPermissionDao->getPermissionGroups(1);
     assertThat($permissionGroups,is(array(2=>array('perm_upload_pk'=>1, 'perm'=>10, 'group_pk'=>2, 'group_name'=>'fossy'))));
   }
-  
+
   public function testAccessibilityViaNone()
   {
     $this->testDb->createPlainTables(array('perm_upload','groups'));
     $this->testDb->insertData(array('groups'));
-    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;    
+    $_SESSION[Auth::USER_LEVEL] = Auth::PERM_NONE;
     $accessibilityWithBadGroup = $this->uploadPermissionDao->isAccessible($uploadId=2, $groupId=2);
     assertThat($accessibilityWithBadGroup, equalTo(false));
   }
-    
+
   public function testAccessibilityViaGroup()
   {
     $this->testDb->createPlainTables(array('perm_upload','groups'));
@@ -156,8 +156,8 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $accessibilityByGroup = $this->uploadPermissionDao->isAccessible($uploadId=2, $groupId=2);
     assertThat($accessibilityByGroup, equalTo(true));
   }
-  
-  
+
+
   public function testAccessibilityViaPublicForUnqualifiedUser()
   {
     $this->testDb->createPlainTables(array('perm_upload','groups'));
@@ -170,7 +170,7 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $accessibilityByPublic = $this->uploadPermissionDao->isAccessible($uploadId, $groupId);
     assertThat($accessibilityByPublic, equalTo(false));
   }
-  
+
   public function testAccessibilityViaPublicForQualifiedUser()
   {
     $this->testDb->createPlainTables(array('perm_upload','groups'));

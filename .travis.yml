@@ -9,6 +9,7 @@ php:
   - 7.0
   - 5.6
   - 7.1
+  - 7.2
 addons:
   apt:
     packages: &default_packages
@@ -64,6 +65,7 @@ script:
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
   - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
   - if [[ ! -z "${CHECKBEFORE}" ]]; then ${CHECKBEFORE}; fi
   - if [[ ! -z "${MAKETARGETS}" ]]; then make ${MAKETARGETS}; fi
   - if [[ ! -z "${PHPTESTSUITE}" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="${PHPTESTSUITE}"; fi
@@ -121,7 +123,9 @@ matrix:
             - *default_packages
             - clang-3.6
   ## PHP: phpcpd ##
-    - script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+    - name: PHP-CPD
+      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
   allow_failures:
     - script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
     - php: 7.1
+    - php: 7.2

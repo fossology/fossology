@@ -36,7 +36,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
-  
+
   public function testGetKeyFromShortname()
   {
     $testDb = new TestLiteDb();
@@ -47,11 +47,11 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $dbManager = &$testDb->getDbManager();
     $dbManager->insertTableRow('license_ref', array('rf_pk'=>$knownId,'rf_shortname'=>$shortname));
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-    
+
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'getKeyFromShortname', array($shortname)), equalTo($knownId));
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'getKeyFromShortname', array("no $shortname")), equalTo(false));
   }
-  
+
   public function testHandleCsvLicense()
   {
     $dbManager = M::mock(DbManager::class);
@@ -68,7 +68,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
     $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>102));
-    
+
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
         array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
     $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
@@ -82,12 +82,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
             array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'','risk'=>1,
                 'parent_shortname'=>null,'report_shortname'=>'licZ')));
     assertThat($returnF, is("Inserted 'licF' in DB reporting 'licZ'"));
-    
+
     $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnC, is("Inserted 'licC' in DB"));
-    
+
     $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
@@ -97,30 +97,30 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
             array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'','risk'=>false,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
-    
+
     $returnG = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licG','fullname'=>'liceG','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
                 'parent_shortname'=>null,'report_shortname'=>null,'risk'=>false)));
     assertThat($returnG, is("Text of 'licG' already used for 'licD', updated the source"));
-    
+
     $returnH = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licH','fullname'=>'liceH','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
                 'parent_shortname'=>null,'report_shortname'=>null,'risk'=>3)));
     assertThat($returnH, is("Text of 'licH' already used for 'licD', updated the source, updated the risk level"));
   }
-  
+
   public function testHandleHeadCsv()
   {
     $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-  
+
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text','fullname','notes','bar'))),
             is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false,'risk'=>0) ) );
-    
+
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('Short Name','URL','text','fullname','notes','Foreign ID'))),
             is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5,'risk'=>false) ) );
   }
-   
+
   /**
    * @expectedException Exception
    */
@@ -130,36 +130,36 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text')));
   }
-  
+
   public function testSetDelimiter()
   {
     $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-    
+
     $licenseCsvImport->setDelimiter('|');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('|'));
-    
+
     $licenseCsvImport->setDelimiter('<>');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
   }
-  
+
   public function testSetEnclosure()
   {
     $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-    
+
     $licenseCsvImport->setEnclosure('|');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure') ,is('|'));
-    
+
     $licenseCsvImport->setEnclosure('<>');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
   }
-  
+
   public function testHandleCsv()
   {
     $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
-    
+
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('shortname','foo','text','fullname','notes')));
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'headrow'),is(notNullValue()));
 
@@ -172,8 +172,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('licA','bar','txA','liceA','noteA')));
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'nkMap'),is(array('licA'=>101)));
   }
-  
-  
+
+
   public function testHandleFileIfFileNotExists()
   {
     $dbManager = M::mock(DbManager::class);
@@ -181,7 +181,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists');
     assertThat($msg, is(equalTo(_('Internal error'))));
   }
-  
+
   public function testHandleFileIfFileIsNotParsable()
   {
     $dbManager = M::mock(DbManager::class);
@@ -202,5 +202,4 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat($msg, startsWith( _('head okay')));
     unlink($filename);
   }
-  
 }

@@ -21,7 +21,6 @@ namespace Fossology\Lib\Data\Package;
 use Fossology\Lib\Data\Upload\Upload;
 use Mockery as M;
 
-
 class PackageTest extends \PHPUnit\Framework\TestCase {
 
   private $id = 123;

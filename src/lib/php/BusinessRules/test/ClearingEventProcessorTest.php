@@ -19,11 +19,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\Clearing\ClearingEvent;
-use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
+use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
-
 
 class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
 {
@@ -52,7 +51,7 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
     $this->addedLicense = M::mock(ClearingLicense::class);
     $this->addedLicense->shouldReceive("getShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedLicense->shouldReceive("getId")->withNoArgs()->andReturn($this->addedId);
-    
+
     $this->addedEvent = M::mock(ClearingEvent::class);
     $this->addedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedEvent->shouldReceive("getLicenseId")->withNoArgs()->andReturn($this->addedId);

@@ -20,15 +20,15 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\ClearingDecision;
+use Fossology\Lib\Data\DecisionScopes;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Clearing\AgentClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Fossology\Lib\Data\Clearing\ClearingResult;
-use Fossology\Lib\Data\ClearingDecision;
-use Fossology\Lib\Data\DecisionScopes;
-use Fossology\Lib\Data\DecisionTypes;
-use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -299,7 +299,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 
     $this->clearingDao->shouldReceive("insertClearingEvent")
             ->never();
-    
+
     $this->clearingDao->shouldReceive("createDecisionFromEvents")
             ->once()
             ->with($this->uploadTreeId, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, DecisionScopes::ITEM,
@@ -390,7 +390,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
         ->andReturn($scannerResults);
 
     $licenseId = $licenseRef->getId();
-    
+
     $addedEvent = $this->createClearingEvent(123, $this->timestamp, $licenseId, $licenseRef->getShortName(), $licenseRef->getFullName());
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
         ->with($this->itemTreeBounds, $this->groupId)
@@ -453,7 +453,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
         ->with($this->itemTreeBounds,LicenseMap::TRIVIAL)->andReturn($scannerResults);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId);
-    
+
     assertThat($hasUnhandledScannerDetectedLicenses);
   }
 
@@ -491,7 +491,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 
     assertThat($hasUnhandledScannerDetectedLicenses, is(True));
   }
-  
+
   public function testGetUnhandledScannerDetectedLicensesWithMappedMatch()
   {
     /** @var LicenseRef $licenseRef */
@@ -508,7 +508,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
     $licenseMap = M::mock(LicenseMap::class);
     $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {return $id;});
     $licenseMap->shouldReceive('getUsage')->andReturn(LicenseMap::CONCLUSION);
-    
+
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId, array(), $licenseMap);
 
     assertThat( $hasUnhandledScannerDetectedLicenses, is(False) );
@@ -541,7 +541,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
     $licenseRef = new LicenseRef($licenseId, $licenseShortname, $licenseFullName);
 
     $agentRef = M::mock(AgentRef::class);
-    
+
     $scannerEvents = array(
       $licenseId => array(new AgentClearingEvent($licenseRef, $agentRef, self::MATCH_ID, self::PERCENTAGE))
     );

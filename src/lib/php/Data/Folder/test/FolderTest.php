@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Folder;
 
-
 class FolderTest extends \PHPUnit\Framework\TestCase {
 
   /** @var int */

@@ -282,7 +282,7 @@ class HighlightProcessorTest extends \PHPUnit\Framework\TestCase
             new Highlight(7, 9, Highlight::KEYWORD, 'ref2', 0, 0)
         )));
   }
-  
+
   function testFlattenHighlightWithOverlappingEntriesThatHaveEqualEnd()
   {
     $highlight1 = new Highlight(5, 10, Highlight::MATCH, 'ref1', 0, 0);

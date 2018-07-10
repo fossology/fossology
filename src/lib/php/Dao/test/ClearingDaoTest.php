@@ -19,17 +19,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
+use Monolog\Logger;
+use Monolog\Handler\ErrorLogHandler;
 use Mockery as M;
 use Mockery\MockInterface;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Logger;
 
 class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 {
@@ -74,7 +74,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
             'users',
             'uploadtree'
         ));
-    
+
     $this->testDb->createInheritedTables();
 
     $userArray = array(
@@ -143,8 +143,8 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
       $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_text, upload_fk, uploadtree_fk, group_fk', $paramsRef, 'insert.bulkref');
       $this->dbManager->insertInto('license_set_bulk', 'lrb_fk, rf_fk, removing', $paramsSet, 'insert.bulkset');
     }
-    
-    
+
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -267,7 +267,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $watchOtherNow = $this->clearingDao->isDecisionWip(303, $groupId);
     assertThat($watchOtherNow,is(FALSE));
   }
-  
+
   private function collectBulkLicenses($bulks)
   {
     $bulkLics = array();
@@ -357,7 +357,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($bulkLicDirs, arrayContaining(false, false, true, false, true, true));
     assertThat($bulkTried, arrayContaining(true, true, true, true, true, false));
   }
-  
+
   public function testGetClearedLicenseMultiplicities()
   {
     $user = 1;
@@ -377,11 +377,11 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getRight')->andReturn(8);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
-            
+
     $map = $this->clearingDao->getClearedLicenseIdAndMultiplicities($treeBounds, $groupId);
     assertThat($map, is(array('FOO'=>array('count'=>2,'shortname'=>'FOO','rf_pk'=>401))));
   }
-  
+
   public function testGetClearedLicenses()
   {
     $user = 1;
@@ -401,48 +401,48 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getRight')->andReturn(8);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
-            
+
     $map = $this->clearingDao->getClearedLicenses($treeBounds, $groupId);
     assertThat($map, equalTo(array(new LicenseRef($rf,'FOO','foo full'))));
   }
 
-  
+
   public function testMainLicenseIds()
   {
     $this->testDb->createPlainTables(array('upload_clearing_license'));
     $uploadId = 101;
     $mainLicIdsInitially = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdsInitially, is(emptyArray()));
-    
+
     $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId=402);
     $mainLicIdsAfterAddingOne = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdsAfterAddingOne, arrayContaining(array($licenseId)));
-    
+
     $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId);
     $mainLicIdsAfterAddingOneTwice = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdsAfterAddingOneTwice, is(arrayWithSize(1)));
-    
+
     $this->clearingDao->makeMainLicense($uploadId,$this->groupId,$licenseId2=403);
     $mainLicIdsAfterAddingOther = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdsAfterAddingOther, arrayContainingInAnyOrder(array($licenseId,$licenseId2)));
-    
+
     $this->clearingDao->removeMainLicense($uploadId,$this->groupId,$licenseId2);
     $mainLicIdsAfterRemovingOne = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdsAfterRemovingOne, is(arrayWithSize(1)));
-    
+
     $this->clearingDao->removeMainLicense($uploadId,$this->groupId,$licenseId2);
     $mainLicIdAfterRemovingSomethingNotInSet = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdAfterRemovingSomethingNotInSet, is(arrayWithSize(1)));
-    
+
     $this->clearingDao->removeMainLicense($uploadId,$this->groupId+1,$licenseId);
     $mainLicIdAfterInsertToOtherGroup = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdAfterInsertToOtherGroup, is(arrayWithSize(1)));
-    
+
     $this->clearingDao->removeMainLicense($uploadId+1,$this->groupId,$licenseId);
     $mainLicIdAfterInsertToOtherUpload = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     assertThat($mainLicIdAfterInsertToOtherUpload, is(arrayWithSize(1)));
   }
-  
+
   public function testupdateClearingEvent()
   {
     $this->testDb->createSequences(array('clearing_event_clearing_event_pk_seq'));
@@ -452,7 +452,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao->updateClearingEvent($uploadTreeId=301, $userId=1, $groupId=1, $licenseId=402, $what='comment', $changeCom='abc123');
     $rowPast = $this->dbManager->getSingleRow('SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2 ORDER BY clearing_event_pk DESC LIMIT 1',array($uploadTreeId,$licenseId),__METHOD__.'beforeReportinfo');
     assertThat($rowPast['comment'],equalTo($changeCom));
-    
+
     $this->clearingDao->updateClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $what='reportinfo', $changeRep='def456');
     $rowFuture = $this->dbManager->getSingleRow('SELECT * FROM clearing_event WHERE uploadtree_fk=$1 AND rf_fk=$2 ORDER BY clearing_event_pk DESC LIMIT 1',array($uploadTreeId,$licenseId),__METHOD__.'afterReportinfo');
     assertThat($rowFuture['comment'],equalTo($changeCom));

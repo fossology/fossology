@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Text;
 
-
 class EncodingConverterTest extends \PHPUnit\Framework\TestCase
 {
 

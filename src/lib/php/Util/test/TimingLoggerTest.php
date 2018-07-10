@@ -32,7 +32,7 @@ class HackedTimingLogger extends TimingLogger
 class TimingLoggerTest extends \PHPUnit\Framework\TestCase
 {
   private $logger;
-  
+
   protected function setUp()
   {
     $this->logger = M::mock('Monolog\Logger');
@@ -75,5 +75,5 @@ class TimingLoggerTest extends \PHPUnit\Framework\TestCase
     $hackedTimingLogger->timestamp = $endTime;
     $hackedTimingLogger->toc($text,$watch);
   }
-  
+
 }

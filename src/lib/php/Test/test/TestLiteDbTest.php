@@ -25,19 +25,19 @@ class TestLiteDbTest extends \PHPUnit\Framework\TestCase
     $testDb = new TestLiteDb();
     $this->assertInstanceOf('Fossology\Lib\Db\DbManager', $testDb->getDbManager());
   }
-  
+
   public function testCreatePlainTables()
   {
     $testDb = new TestLiteDb();
     $testDb->createPlainTables(array('tag'));
     $dbManager = $testDb->getDbManager();
-    
+
     $dbManager->queryOnce("insert into tag (tag_pk,tag,tag_desc) values (1,'hello','world')");
     $tag1 = $dbManager->getSingleRow('select * from tag where tag_pk=1');
     assertThat($tag1,hasKey('tag_desc'));
     assertThat($tag1['tag_desc'],is('world'));
   }
-  
+
   public function testInsertData()
   {
     $testDb = new TestLiteDb();
@@ -47,6 +47,6 @@ class TestLiteDbTest extends \PHPUnit\Framework\TestCase
     assertThat($tag1,hasKey('perm'));
     assertThat($tag1['perm'],is(10));
   }
-  
-  
+
+
 }

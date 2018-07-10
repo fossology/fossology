@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
-/** 
+/**
  * @todo remove this file and change Makefile
  */
 

@@ -18,18 +18,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Plugin;
 
-
 use Exception;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\UI\Component\Menu;
 use Fossology\Lib\UI\Component\MicroMenu;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
-use Mockery as M;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
-
+use Mockery as M;
 
 class TestPlugin extends DefaultPlugin
 {
@@ -207,7 +205,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
 
     assertThat($request->getSession(), is($this->session));
   }
-  
+
   public function testIsLoggedIn()
   {
     global $_SESSION;
@@ -220,4 +218,4 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(3);
   }
 }
- 
+

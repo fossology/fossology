@@ -34,7 +34,7 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
     // print "Starting unit test for common-dir.php\n";
     print('.');
   }
-  
+
   /**
    * \brief clean the env
    */
@@ -82,7 +82,7 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
   {
     $this->assertEquals(GetFileExt('autodestroy.exe.bak'),'bak');
   }
-  
+
    /**
    * \brief test for DirMode2String
    */
@@ -94,5 +94,5 @@ class test_common_dir extends \PHPUnit\Framework\TestCase
     $result = DirMode2String(0644);
     $this->assertEquals("---rw-r--r--", $result);
   }
- 
+
 }

@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-
 class MonkCliTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */

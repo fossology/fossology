@@ -47,7 +47,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
-  
+
   function testProjectedIdOfUnmappedIdIsIdItself()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
@@ -61,26 +61,26 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $licenseId = 3;
     assertThat($licenseMap->getProjectedId($licenseId),is($licenseId));
   }
-  
+
   function testProjectedIdOfUnmappedIdIsParentId()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
     $licenseMap->getGroupId();
     assertThat($licenseMap->getProjectedId(2),is(1));
   }
-  
+
   function testProjectedShortNameOfMappedId()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
     assertThat($licenseMap->getProjectedShortName(2),is('One'));
   }
-  
+
   function testProjectedIdOfMappedIdIsIdItselfIfTrivialMap()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::TRIVIAL);
     assertThat($licenseMap->getProjectedId(2),is(2));
   }
- 
+
   function testGetTopLevelLicenseRefs()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::CONCLUSION);
@@ -88,8 +88,8 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($topLevelLicenses,hasItemInArray(new LicenseRef(1,'One','One-1')));
     assertThat($topLevelLicenses, not(hasKeyInArray(2)));
   }
-  
-  
+
+
   public function testGetMappedLicenseRefView()
   {
     $this->testDb = new TestPgDb();
@@ -102,7 +102,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->insertTableRow('license_candidate',
             array('rf_pk'=>3,'rf_shortname'=>'Three','rf_fullname'=>'Three-3','group_fk'=>$this->groupId));
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
-    
+
     $view = LicenseMap::getMappedLicenseRefView(LicenseMap::CONCLUSION);
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,$view);
@@ -116,7 +116,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     );
     assertThat($map,containsInAnyOrder($expected));
   }
- 
+
   public function testFullMap()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId+1, LicenseMap::CONCLUSION, true);
@@ -124,7 +124,7 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($map,hasItemInArray(array('rf_fk'=>1,'parent_shortname'=>'One','rf_parent'=>1)));
     assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','rf_parent'=>1)));
   }
-  
+
   public function testFullMapWithCandidates()
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId, LicenseMap::CONCLUSION, true);
@@ -133,5 +133,5 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','rf_parent'=>1)));
     assertThat($map,hasItemInArray(array('rf_fk'=>3,'parent_shortname'=>'Three','rf_parent'=>3)));
   }
-  
+
 }
