@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2015,2018 Siemens AG
+ Copyright (C) 2015, Siemens AG
  Author: maximilian.huber@tngtech.com
 
  This program is free software; you can redistribute it and/or
@@ -20,15 +20,11 @@ var bulkFormTableContent = (function(){
     var content = [];
     function updateTable(){
         var s = "";
-        var uploadTreeId = $('#uploadTreeId').val();
         for (i = 0; i < content.length; ++i) {
             s += "<tr class=\"" + ((i % 2 == 1) ? "even" : "odd") + "\">"
-               +    "<td align=\"center\">" + content[i].action + "</td>"
+               +    "<td style=\"border-right:1px dashed black;\">" + content[i].action + "</td>"
                +    "<td>" + content[i].licenseName + "</td>"
-               +    "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "reportinfoBulk' onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'reportinfo', 'Bulk');\" title=''>Click to add</a></td>"
-               +    "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "acknowledgementBulk' onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'acknowledgement', 'Bulk');\" title=''>Click to add</a></td>"
-               +    "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "commentBulk' onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'comment', 'Bulk');\" title=''>Click to add</a></td>"
-               +    "<td><a href='#' onclick='bulkFormTableContent[2](" + content[i].licenseId + ")'><img src=\"images/icons/remove_16.png\" title=\"remove selected license row\" alt=\"-\"/></a></td>" 
+               +    "<td align=\"right\"><a href='#' onclick='bulkFormTableContent[2](" + content[i].licenseId + ")'>[remove row]</a></td>"
                + "</tr>";
         }
         $('#bulkFormTable tbody').html(s);
@@ -52,7 +48,7 @@ var bulkFormTableContent = (function(){
             content.push({
                 licenseId: lic,
                 licenseName: $('#bulkLicense option:selected').text(),
-                action: "Add"
+                action: "add"
             });
         }
         updateTable();
@@ -64,7 +60,7 @@ var bulkFormTableContent = (function(){
             content.push({
                 licenseId: lic,
                 licenseName: $('#bulkLicense option:selected').text(),
-                action: "Remove"
+                action: "remove"
             });
         }
         updateTable();

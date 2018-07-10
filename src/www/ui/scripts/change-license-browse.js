@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2017, Siemens AG
  Author: Daniele Fognini, Johannes Najjar
  
  This program is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@ var userModal;
 var removed = false;
 
 $(document).ready(function () {
-  bulkModal = $('#bulkModal').plainModal({child: textModal});
+  bulkModal = $('#bulkModal').plainModal();
   userModal = $('#userModal').plainModal();
   clearingHistoryDataModal = $('#ClearingHistoryDataModal').plainModal();
 });

@@ -146,3 +146,11 @@ the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.
 
 Please see the files COPYING and COPYING.LGPL included with this
 software for the full text of these licenses.
+
+## Screenshots
+
+![Browsing](examples/Browseb.jpg)
+
+![LicenseBrowser](examples/LicenseBrowserb.jpg)
+
+![Concluding a license](examples/Concludeb.jpg)
