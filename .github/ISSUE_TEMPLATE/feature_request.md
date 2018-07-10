@@ -17,4 +17,3 @@ Describe the steps followed by you and your expected results after following the
 #### Screenshots
 
 If applicable, add screenshots to help explain your problem.
-
