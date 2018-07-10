@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2017, Siemens AG
+ Copyright (C) 2014-2018, Siemens AG
  Author: Daniele Fognini, Johannes Najjar, Steffen Weber 
  
  This program is free software; you can redistribute it and/or
@@ -130,6 +130,12 @@ function isUserError(bulkActions, refText) {
 function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   var bulkActions = getBulkFormTableContent();
   var refText = $('#bulkRefText').val();
+  var i;
+  for (i = 0; i < bulkActions.length; i++) {
+    bulkActions[i]["reportinfo"] = $("#"+bulkActions[i].licenseId+"reportinfoBulk").attr('title');
+    bulkActions[i]["acknowledgement"] = $("#"+bulkActions[i].licenseId+"acknowledgementBulk").attr('title');
+    bulkActions[i]["comment"] = $("#"+bulkActions[i].licenseId+"commentBulk").attr('title');
+  }
 
   //checks for user errors
   if(isUserError(bulkActions, refText)) {
@@ -224,3 +230,65 @@ function removeMainLicense(uploadId,licenseId) {
       .fail(failed);
   }
 }
+function openTextModel(uploadTreeId, licenseId, what, type) {
+  if(type === undefined) {
+    type = 0;
+  }
+  if(type == 0) {
+    clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
+    idLicUploadTree = uploadTreeId+','+licenseId;
+    whatCol = what;
+    $("#referenceText").val(clearingsForSingleFile);
+    textModal.plainModal('open');
+  } else {
+    $("#referenceText").val($("#"+licenseId+what+type).attr('title'));
+    whatCol = what;
+    whatLicId = licenseId;
+    textModal.plainModal('open');
+  }
+  whatType = type;
+}
+
+function closeTextModal() {
+  textModal.plainModal('close');
+}
+
+function submitTextModal(){
+  if(whatType == 0) {
+    var post_data = {
+      "id": idLicUploadTree,
+      "columnId": whatCol,
+      "value": $("#referenceText").val()
+    };
+    $.ajax({
+      type: "POST",
+      url: "?mod=conclude-license&do=updateClearings",
+      data: post_data,
+      success: doOnSuccess
+    });
+  } else {
+    textModal.plainModal('close');
+    $("#"+ whatLicId + whatCol +"Bulk").attr('title', $("#referenceText").val());
+    referenceText = $("#referenceText").val().trim();
+    if(referenceText !== null && referenceText !== '') {
+      $("#"+ whatLicId + whatCol + whatType).html($("#"+ whatLicId + whatCol + whatType).attr('title').slice(0, 10) + "...");
+    } else {
+      $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
+    }
+  }
+}
+
+function doOnSuccess() {
+  textModal.plainModal('close');
+  $('#decTypeSet').addClass('decTypeWip');
+  oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
+  oTable.fnDraw(false);
+}
+$(document).ready(function () {
+  textModal = $('#textModal').plainModal();
+  $('#textModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
+    }
+  });
+});

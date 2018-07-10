@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2014, Siemens AG
+Copyright (C) 2013-2014,2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -32,6 +32,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 typedef struct {
     long licenseId;
     int removing;
+    char* comment;
+    char* reportinfo;
+    char* acknowledgement;
 } BulkAction;
 
 typedef struct {
