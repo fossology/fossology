@@ -269,7 +269,7 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
             " FROM ("
             "  SELECT distinct(pfile_fk) AS PF"
             "  FROM %s"
-            "   WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
+            "  WHERE upload_fk = %d and (ufile_mode&x'3C000000'::int)=0"
             " ) AS SS "
             "LEFT OUTER JOIN %s on (PF = pfile_fk AND agent_fk = %d) "
 #ifdef IDENTITY_COPYRIGHT
@@ -277,7 +277,7 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
 #endif
             "INNER JOIN pfile on (PF = pfile_pk) "
 #ifdef IDENTITY_COPYRIGHT
-            "WHERE (copyright.ct_pk IS NULL AND au.ct_pk IS NULL) OR copyright.agent_fk <> %d OR au.agent_fk <> %d",
+            "WHERE copyright.ct_pk IS NULL AND au.ct_pk IS NULL",
 #else
             "WHERE ct_pk IS NULL OR agent_fk <> %d",
 #endif
