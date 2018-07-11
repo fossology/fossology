@@ -442,6 +442,7 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   for (i = 0; i < 14; i++) {
     memset(fmt, 0, sizeof(fmt));
     strcat( fmt, "%{");
+#ifdef _RPM_4_4
     strcat( fmt, tagName(tag[i]));
     strcat( fmt, "}\n");
 
@@ -449,6 +450,15 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     if (msgstr != NULL){
       trim(msgstr);
       printf("%s:%s\n",tagName(tag[i]),msgstr);
+#else /* RPM4.4 version*/
+    strcat( fmt, rpmTagGetName(tag[i]));
+    strcat( fmt, "}\n");
+
+    msgstr = headerFormat(header, fmt, &errstr);
+    if (msgstr != NULL){
+      trim(msgstr);
+      printf("%s:%s\n",rpmTagGetName(tag[i]),msgstr);
+#endif /* After RPM4.4 version*/
       switch (tag[i]) {
         case RPMTAG_NAME:
           EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
