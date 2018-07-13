@@ -361,11 +361,9 @@ int ProcessUpload (long upload_pk)
         RecordMetadataRPM(pi);
       }
       /* free memory */
-#ifdef _RPM_4_4_COMPAT
       int i;
       for(i=0; i< pi->req_size;i++)
         free(pi->requires[i]);
-#endif /* After RPM4.4 version*/
       free(pi->requires);
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
@@ -403,9 +401,7 @@ int ProcessUpload (long upload_pk)
     fo_scheduler_heart(1);
   }
   PQclear(result);
-#ifdef _RPM_4_4_COMPAT
   rpmFreeCrypto();
-#endif /* After RPM4.4 version*/
   rpmFreeMacros(NULL);
   free(pi);
   free(dpi);
@@ -429,28 +425,12 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
   long *tp,t;
   int header_status;
 
-#ifdef _RPM_4_4
-  void* pointer;
-  int_32 type, data_size;
-#endif /* RPM4.4 version*/
-
-#ifdef _RPM_4_4_COMPAT
   struct rpmtd_s req;
   rpm_count_t data_size;
-#endif /* After RPM4.4 version*/
 
   for (i = 0; i < 14; i++) {
     memset(fmt, 0, sizeof(fmt));
     strcat( fmt, "%{");
-#ifdef _RPM_4_4
-    strcat( fmt, tagName(tag[i]));
-    strcat( fmt, "}\n");
-
-    msgstr = headerSprintf(header, fmt, rpmTagTable, rpmHeaderFormats, &errstr);
-    if (msgstr != NULL){
-      trim(msgstr);
-      printf("%s:%s\n",tagName(tag[i]),msgstr);
-#else /* RPM4.4 version*/
     strcat( fmt, rpmTagGetName(tag[i]));
     strcat( fmt, "}\n");
 
@@ -458,7 +438,6 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     if (msgstr != NULL){
       trim(msgstr);
       printf("%s:%s\n",rpmTagGetName(tag[i]),msgstr);
-#endif /* After RPM4.4 version*/
       switch (tag[i]) {
         case RPMTAG_NAME:
           EscapeString(msgstr, pi->pkgName, sizeof(pi->pkgName));
@@ -511,16 +490,6 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     free((void *)msgstr);
   }
   if (Verbose > 1) { printf("Name:%s\n",pi->pkgName);}
-#ifdef _RPM_4_4
-  header_status = headerGetEntry(header,tag[14],&type,&pointer,&data_size);
-  if (header_status) {
-    if (type == RPM_STRING_ARRAY_TYPE) {
-      pi->requires = (char **) pointer;
-      pi->req_size = data_size;
-    }
-  }
-#endif/* RPM4.4 version*/
-#ifdef _RPM_4_4_COMPAT
   header_status = headerGet(header, tag[14], &req, HEADERGET_DEFAULT);
   if (header_status) {
     data_size = rpmtdCount(&req);
@@ -533,7 +502,6 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
     pi->req_size = data_size;
     rpmtdFreeData(&req);
   }
-#endif/* After RPM4.4 version*/
 
   if (Verbose > 1) {
     printf("Size:%d\n",pi->req_size);
