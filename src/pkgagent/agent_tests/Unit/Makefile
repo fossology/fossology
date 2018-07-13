@@ -14,8 +14,6 @@ TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf
 CFLAGS_LOCAL = -I/usr/include/rpm $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 LDFLAGS_LOCAL = -lrpm $(FO_LDFLAGS) -lcunit $(CUNIT_LIB) $(TEST_LIB) -lrpmio
 EXE = test_pkgagent
-CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
-CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 TEST_OBJ = testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o
 
 all: $(EXE)
@@ -36,15 +34,7 @@ $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $<
 
 testGetMetadata.o: testGetMetadata.c
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
-		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
-	else \
-		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
-		else \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
-		fi \
-	fi
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 cunit_lib:
 	$(MAKE) -C $(CUNIT_LIB_DIR)
