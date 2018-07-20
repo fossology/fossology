@@ -114,7 +114,7 @@ if [[ $BUILDTIME ]]; then
               stretch|buster|sid)
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
               bionic)
-                apt-get "$YesOpt" install postgresql-server-dev-10;;
+                apt-get $YesOpt install postgresql-server-dev-10;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi

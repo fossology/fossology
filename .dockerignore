@@ -10,6 +10,7 @@ fossology310-source.spdx
 *.md
 LICENSE
 NOTICES*
+Dockerfile
 docker-compose.yml
 
 Vagrantfile
