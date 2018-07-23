@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:jessie as builder
+FROM debian:jessie-slim as builder
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
@@ -46,7 +46,7 @@ RUN /fossology/utils/install_composer.sh
 RUN make install clean
 
 
-FROM debian:jessie
+FROM debian:jessie-slim
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
@@ -55,7 +55,9 @@ COPY --from=builder /fossology/dependencies-for-runtime /fossology
 
 WORKDIR /fossology
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+# Fix for Postgres and other packages in slim variant
+RUN mkdir /usr/share/man/man1 /usr/share/man/man7 \
+ && DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       curl \
       lsb-release \
