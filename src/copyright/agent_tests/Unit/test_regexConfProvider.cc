@@ -29,6 +29,7 @@ class regexConfProviderTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (simpleTest);
   CPPUNIT_TEST (simpleReplacementTest);
   CPPUNIT_TEST (multipleReplacementTest);
+  CPPUNIT_TEST (testForInfiniteRecursion);
 
   CPPUNIT_TEST_SUITE_END ();
 
@@ -38,12 +39,12 @@ private:
                     const string& testKey)
   {
     string testIdentity("testIdentity");
-    
+
     RegexConfProvider rcp;
 
     // load parse test-stream
     rcp.maybeLoad(testIdentity,testStream);
-    
+
     // test RegexConfProvider
     CPPUNIT_ASSERT_MESSAGE("The generated string schould match the expected string",
                            0 == strcmp(testString.c_str(),
@@ -97,7 +98,7 @@ protected:
     istringstream testStream(testLine);
 
     string testIdentity("testIdentity");
-    
+
     RegexConfProvider rcp;
 
     // load parse test-stream

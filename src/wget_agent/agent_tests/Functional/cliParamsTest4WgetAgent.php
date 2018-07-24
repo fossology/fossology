@@ -224,7 +224,7 @@ class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
     global $db_conf;
     global $TEST_RESULT_PATH;
     global $WGET_PATH;
-    return; // TODO ignore this test case, because it is flaky on travis
+    //return; // TODO ignore this test case, because it is flaky on travis
     // ftp_proxy
     //$this->change_proxy("ftp_proxy", "web-proxy.cce.hp.com:8088");
     $command = "$WGET_PATH ftp://releases.ubuntu.com/releases/trusty/SHA1SUMS  -d $TEST_RESULT_PATH";
