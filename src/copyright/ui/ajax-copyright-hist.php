@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2017 Siemens AG
+ * Copyright (C) 2014-2018 Siemens AG
  * Author: Daniele Fognini, Johannes Najjar, Steffen Weber
  *
  * This program is free software; you can redistribute it and/or
@@ -257,6 +257,10 @@ class CopyrightHistogramProcessPost extends FO_Plugin
       case "ecc" :
         $tableName = "ecc";
         break;
+      case "keyword" :
+        $tableName = "keyword";
+        $filter="none";
+        break;
       case "statement" :
         $tableName = "copyright";
         break;
@@ -353,7 +357,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   /**
    * @param int $itemId
    * @param string
-   * @param string 'copyright'|'ecc'
+   * @param string 'copyright'|'ecc'| 'Keyword'
    * @return string
    */
   protected function doUpdate($itemId, $hash, $type)

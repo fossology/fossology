@@ -1,5 +1,5 @@
 /*********************************************************************
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2015, 2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -49,7 +49,8 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "visit http://mysite.org/FAQ or write to info@mysite.org\n\n"
   "maintained by benjamin drieu <benj@debian.org>\n\n"
   "* Copyright (c) 1989, 1993\n" // Really just one newline here!
-  "* The Regents of the University of California. All rights reserved.";
+  "* The Regents of the University of California. All rights reserved.\n\n"
+  "to be licensed as a whole";
   
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
@@ -58,6 +59,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (regEccTest);
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
+  CPPUNIT_TEST (regKeywordTest);
 
   CPPUNIT_TEST_SUITE_END ();
 
@@ -119,6 +121,10 @@ protected:
   void regEmailTest () {
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
+  }
+  void regKeywordTest () {
+    regexScanner sc("keyword", "keyword");
+    scannerTest(sc, testContent, "keyword", {"patent", "licensed as"});
   }
 };
 

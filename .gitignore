@@ -48,6 +48,7 @@ src/cli/fo_import_licenses
 src/cli/fo_usergroup
 src/cli/fossupload_status
 src/copyright/agent/copyright
+src/copyright/agent/keyword
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
 src/delagent/agent/delagent
@@ -128,6 +129,7 @@ variable.list
 /src/reuser/agent/version.php
 /src/copyright/agent/ecc
 /src/copyright/VERSION-ecc
+/src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
 /src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar*
 /src/spdx2/agent/version.php

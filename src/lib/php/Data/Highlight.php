@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, 2018 Siemens AG
 Authors: Andreas Würl, Daniele Fognini
 
 This program is free software; you can redistribute it and/or
@@ -38,6 +38,7 @@ class Highlight extends Object
   const AUTHOR = "A";
   const IP = "I";
   const ECC = "X";
+  const KEYWORDOTHERS = "KW";
   const UNDEFINED = "any";
 
   /**
@@ -217,4 +218,4 @@ class Highlight extends Object
       .")";
   }
 
-} 
+}

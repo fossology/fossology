@@ -19,7 +19,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAMES = copyright ecc
+MOD_NAMES = copyright ecc keyword
 MOD_SUBDIR = ui
 
 all:
@@ -35,6 +35,7 @@ install:
 	#TODO this is broken but currently works
 	$(INSTALL_DATA) ./*.php $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)
 	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-ecc.php
+	rm $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/agent-keyword.php
 	find template/ -type f -exec $(INSTALL_DATA) {} $(DESTDIR)$(MODDIR)/copyright/$(MOD_SUBDIR)/{} \;
 
 uninstall:
