@@ -1,6 +1,6 @@
 /*
 
-Copyright Siemens AG 2014
+Copyright Siemens AG 2014,2018
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
@@ -12,7 +12,7 @@ without any warranty.
 table.dataTable {
   margin: 0 auto;
   clear: both;
-  width: 100%;
+  width: 100% !important;
 }
 
 table.dataTable thead th {
@@ -59,6 +59,7 @@ table.dataTable th.right {
 
 table.dataTable tr.odd { background-color: #E2E4FF; }
 table.dataTable tr.even { background-color: white; }
+table.dataTable tr.odd.removed { background-color: #ef9e9c}
 
 table.dataTable tr.odd td.sorting_1 { background-color: #D3D6FF; }
 table.dataTable tr.odd td.sorting_2 { background-color: #DADCFF; }
