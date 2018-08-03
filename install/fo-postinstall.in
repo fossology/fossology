@@ -20,6 +20,8 @@ Usage: fo-postinstall [options]
   -l or --licenseref      : update the license_ref table with fossology supplied licenses
   -c or --common          : common actions
   -h or --help            : this help text
+ Special options
+  --no-running-database   : omit all database operations
 EOF
 \}
 
@@ -31,10 +33,11 @@ EVERYTHING=''
 OVERWRITE=''
 LICENSEREF=''
 COMMON=''
+RUNNINGDATABASE=true
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -57,13 +60,14 @@ while true; do
       -o|--overwrite)        OVERWRITE=true; shift;;
       -l|--licenseref)       LICENSEREF=true; shift;;
       -c|--common)           COMMON=true; shift;;
+      --no-running-database) RUNNINGDATABASE=''; shift;;
       -h|--help)             show_help; exit;;
       --)                    shift; break;;
-      *)                     echo >&2 "ERROR: option $1 not recognised"; exit 1;;
+      *)                     echo "Error: option $1 not recognised"; exit 1;;
    esac
 done
 
-set -o nounset
+set -o errexit -o nounset -o pipefail
 
 if [[ $EVERYTHING ]]; then
    echo "*** Running postinstall for everything ***"
@@ -212,11 +216,11 @@ fi
 
 ########################################################################
 
-if [[ $DATABASE ]]; then
+if [[ $DATABASE && $RUNNINGDATABASE ]]; then
    {$LIBEXECDIR}/dbcreate
 fi # end of DATABASE
 
-if [[ $LICENSEREF ]]; then
+if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
    echo "*** update the database and license_ref table ***"
    {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
 fi # end of license reference
@@ -227,10 +231,12 @@ if [[ $AGENT ]]; then
    must_run_as_root
    # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
    chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
-   chown --quiet {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h {$MAN1DIR}/cp2foss.1 {$MAN1DIR}/fossjobs.1
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h {$MAN1DIR}/cp2foss.1 {$MAN1DIR}/fossjobs.1
+fi
 
+if [[ $AGENT && $RUNNINGDATABASE ]]; then
    if ! {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}; then
-     echo >&2 "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
+     echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
      exit 1
    fi
    echo "Database connectivity is good."
