@@ -107,22 +107,19 @@ if [ $BUILDTIME ]; then
          POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
-              lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
-              squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
-              wheezy) apt-get $YesOpt install $YesOpt postgresql-server-dev-9.1;;
-              lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
-              isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
-              precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
-              trusty) apt-get $YesOpt install postgresql-server-dev-9.3;;
-              jessie) apt-get $YesOpt install postgresql-server-dev-9.4;;
-              xenial|yakkety) apt-get $YesOpt install postgresql-server-dev-9.5;;
-              stretch|buster|sid|zesty|artful) apt-get $YesOpt install postgresql-server-dev-9.6;;
+              trusty)
+                apt-get $YesOpt install postgresql-server-dev-9.3;;
+              jessie)
+                apt-get $YesOpt install postgresql-server-dev-9.4;;
+              xenial)
+                apt-get $YesOpt install postgresql-server-dev-9.5;;
+              stretch|buster|sid)
+                apt-get $YesOpt install postgresql-server-dev-9.6;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
          ;;
       Fedora)
-         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
          if [ $YesOpt ]; then
            YesOpt='-y'
          fi
@@ -133,15 +130,7 @@ if [ $BUILDTIME ]; then
             libxml2 \
             boost-devel
          ;;
-      Mandriva)
-         # 2008.1 tested
-         urpmi \
-            postgresql-devel \
-            libxml2 \
-            perl-Text-Template subversion gcc make perl
-         ;;
       RedHatEnterprise*|CentOS)
-         # 4=Nahant* 5=Tikanga*
          if [ $YesOpt ]; then
            YesOpt='-y'
          fi
@@ -177,36 +166,17 @@ if [ $RUNTIME ]; then
          POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
          if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
            case "$CODENAME" in
-              squeeze)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              wheezy)
-                 apt-get $YesOpt install postgresql-9.1 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              lucid|natty)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              isadora)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              precise|oneiric|quantal|raring|saucy)
-                 apt-get $YesOpt install postgresql-9.1 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
               trusty)
                  apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
               jessie)
                  apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              xenial|yakkety)
+              xenial)
                  apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-zip;;
-              stretch|buster|sid|zesty|artful)
+              stretch|buster|sid)
                  apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
            esac
          fi
-         ;;
-      Mandriva)
-         [ $AGENT ] || urpmi postgresql-server httpd
-            urpmi php php-pear php-pgsql postgresql \
-               libxml2 \
-               cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
-               mkisofs p7zip poppler-utils rpm tar unzip gzip
-         echo "NOTE: unrar is available in PLF, please install it via urpmi if"
-         echo "   the repository is configured or from http://plf.zarb.org/packages.php"
          ;;
       Fedora)
          if [ $YesOpt ]; then
@@ -218,7 +188,8 @@ if [ $RUNTIME ]; then
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
             libxml2 \
-            binutils mailx
+            binutils mailx \
+            sleuthkit
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -227,25 +198,10 @@ if [ $RUNTIME ]; then
          fi
          /sbin/service postgresql start
 
-         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
-         case "$CODENAME" in
-            Werwolf|Sulphur)
-               echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
-               echo "   please install from upstream sources.";;
-            Cambridge|Rawhide|Leonidas|Constantine)
-               yum $YesOpt install sleuthkit
-               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
-               echo "   please install from upstream sources."
-	       ;;
-            *) echo "ERROR: Unknown Fedora release, please report a bug. Attempting to install anyway";
-               yum install sleuthkit
-               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
-               echo "   please install from upstream sources."
-               ;;
-         esac
+         echo "NOTE: unrar is not available in Fedora release $CODENAME,"
+         echo "   please install from upstream sources."
          ;;
       RedHatEnterprise*|CentOS)
-         # 4=Nahant* 5=Tikanga*
          if [ $YesOpt ]; then
            YesOpt='-y'
          fi                           
