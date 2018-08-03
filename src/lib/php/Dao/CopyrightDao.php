@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -77,11 +77,12 @@ class CopyrightDao extends Object
       $addAgentValue = ' AND agent_fk=$2';
       $params[] = $agentId;
     }
-    $getHighlightForTableName = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
+    $columnsToSelect = "type, content, copy_startbyte, copy_endbyte";
+    $getHighlightForTableName = "SELECT $columnsToSelect FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
     if($tableName != "copyright"){
       $sql = $getHighlightForTableName;
     }else{
-      $sql = "$getHighlightForTableName UNION SELECT * FROM author WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
+      $sql = "$getHighlightForTableName UNION SELECT $columnsToSelect FROM author WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
     }
     $this->dbManager->prepare($statementName,$sql);
     $result = $this->dbManager->execute($statementName, $params);
@@ -338,7 +339,8 @@ class CopyrightDao extends Object
   public function getDecisions($tableName,$pfileId)
   {
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by keyword_decision_pk desc";
+    $orderTablePk = $tableName.'_pk';
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by $orderTablePk desc";
     $params = array($pfileId);
 
     return $this->dbManager->getRows($sql, $params, $statementName);
