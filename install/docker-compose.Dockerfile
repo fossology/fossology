@@ -25,9 +25,17 @@ RUN set -x \
        postgresql \
  && $_cleanup
 
-ADD utils/fo-installdeps utils/fo-installdeps
-ADD install/scripts/php-conf-fix.sh install/scripts/php-conf-fix.sh
-ADD utils/install_composer.sh utils/install_composer.sh
+COPY ./utils/fo-installdeps ./utils/fo-installdeps
+COPY ./utils/utils.sh ./utils/utils.sh
+COPY ./src/delagent/mod_deps ./src/delagent/
+COPY ./src/mimetype/mod_deps ./src/mimetype/
+COPY ./src/pkgagent/mod_deps ./src/pkgagent/
+COPY ./src/scheduler/mod_deps ./src/scheduler/
+COPY ./src/ununpack/mod_deps ./src/ununpack/
+COPY ./src/wget_agent/mod_deps ./src/wget_agent/
+COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
+COPY ./utils/install_composer.sh ./utils/install_composer.sh
+
 RUN set -x \
  && $_update \
  && /fossology/utils/fo-installdeps -e -y \
@@ -35,7 +43,7 @@ RUN set -x \
  && /fossology/install/scripts/php-conf-fix.sh --overwrite \
  && /fossology/utils/install_composer.sh
 
-ADD . .
+COPY . .
 RUN chmod +x /fossology/install/docker-compose.docker-entrypoint.sh
 RUN set -x \
  && make install \
