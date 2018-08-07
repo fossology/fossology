@@ -52,7 +52,7 @@ public:
 class CopyrightState
 {
 public:
-  CopyrightState(int agentId, CliOptions&& cliOptions);
+  CopyrightState(CliOptions&& cliOptions);
 
   int getAgentId() const;
 
@@ -64,7 +64,6 @@ public:
   const CliOptions& getCliOptions() const;
 
 private:
-  int agentId;
   const CliOptions cliOptions;
   std::list<unptr::shared_ptr<scanner>> scanners;
 };

@@ -24,7 +24,7 @@
 
 using namespace std;
 
-void queryAgentId(int& agent, PGconn* dbConn)
+int queryAgentId(PGconn* dbConn)
 {
   char* COMMIT_HASH = fo_sysconfig(AGENT_NAME, "COMMIT_HASH");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
@@ -40,7 +40,7 @@ void queryAgentId(int& agent, PGconn* dbConn)
 
   if (agentId > 0)
   {
-    agent = agentId;
+    return agentId;
   }
   else
   {
@@ -48,9 +48,9 @@ void queryAgentId(int& agent, PGconn* dbConn)
   }
 }
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
+int writeARS(int agentId, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
 {
-  return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, state.getAgentId(), AGENT_ARS, NULL, success);
+  return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, agentId, AGENT_ARS, NULL, success);
 }
 
 void bail(int exitval)
@@ -90,6 +90,21 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
           "json,J", "output JSON"
         )
 #endif
+        (
+          "config,c", boost::program_options::value<string>(), "path to the sysconfigdir"
+        )
+        (
+          "scheduler_start", "specifies, that the command was called by the scheduler"
+        )
+        (
+          "userID", boost::program_options::value<int>(), "the id of the user that created the job (only in combination with --scheduler_start)"
+        )
+        (
+          "groupID", boost::program_options::value<int>(), "the id of the group of the user that created the job (only in combination with --scheduler_start)"
+        )
+        (
+          "jobId", boost::program_options::value<int>(), "the id of the job (only in combination with --scheduler_start)"
+        )
     ;
 
   boost::program_options::positional_options_description p;
@@ -107,7 +122,7 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
     if ((vm.count("help") > 0) || (type > ALL_TYPES))
     {
       cout << desc << endl;
-      return false;
+      exit(0);
     }
 
     if (vm.count("files"))
@@ -204,13 +219,9 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
   return 0; // nullptr
 }
 
-CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
+CopyrightState getState(CliOptions&& cliOptions)
 {
-  int agentID;
-  queryAgentId(agentID, dbManager.getConnection());
-
-  CopyrightState state(agentID, std::move(cliOptions));
-
+  CopyrightState state(std::move(cliOptions));
   addDefaultScanners(state);
 
   return state;
@@ -249,7 +260,7 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
   return copyrightDatabaseHandler.commit();
 }
 
-void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
+void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, int agentId, CopyrightDatabaseHandler& databaseHandler)
 {
   list<match> l;
   const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
@@ -257,10 +268,10 @@ void matchFileWithLicenses(const string& sContent, unsigned long pFileId, Copyri
   {
     (*sc)->ScanString(sContent, l);
   }
-  saveToDatabase(sContent, l, pFileId, state.getAgentId(), databaseHandler);
+  saveToDatabase(sContent, l, pFileId, agentId, databaseHandler);
 }
 
-void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
+void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
 {
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
@@ -280,7 +291,7 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
     string s;
     ReadFileToString(fileName, s);
 
-    matchFileWithLicenses(s, pFileId, state, databaseHandler);
+    matchFileWithLicenses(s, pFileId, state, agentId, databaseHandler);
 
     free(fileName);
     free(pFile);
@@ -292,9 +303,9 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   }
 }
 
-bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& databaseHandler)
+bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& databaseHandler)
 {
-  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(state.getAgentId(), uploadId);
+  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(agentId, uploadId);
 
 #pragma omp parallel
   {
@@ -311,7 +322,7 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
         continue;
       }
 
-      matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler);
+      matchPFileWithLicenses(state, agentId, pFileId, threadLocalDatabaseHandler);
 
       fo_scheduler_heart(1);
     }
