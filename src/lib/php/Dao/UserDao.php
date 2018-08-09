@@ -23,24 +23,30 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\Object;
 use Monolog\Logger;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 class UserDao extends Object
 {
   const USER = 0;
   const ADMIN = 1;
   const ADVISOR = 2;
-  
+
   const SUPER_USER = 'fossy';
 
   /* @var DbManager */
   private $dbManager;
   /* @var Logger */
   private $logger;
+  /** @var Session */
+  private $session;
 
   function __construct(DbManager $dbManager, Logger $logger)
   {
     $this->dbManager = $dbManager;
     $this->logger = $logger;
+
+    global $container;
+    $this->session = $container->get('session');
   }
 
   /**
@@ -64,7 +70,7 @@ class UserDao extends Object
     $this->dbManager->freeResult($res);
     return $userChoices;
   }
-  
+
   /**
    * @brief get array of groups that this user has admin access to
    * @param int $userId
@@ -89,7 +95,7 @@ class UserDao extends Object
     $this->dbManager->freeResult($res);
     return $groupMap;
   }
-  
+
   /**
    * @brief get array of groups that this user has admin access to
    * @param int $userId
@@ -108,7 +114,7 @@ class UserDao extends Object
     $this->dbManager->freeResult($res);
     return $groupMap;
   }
-  
+
   /**
    * @brief get array of groups that this user has admin access to
    * @param int $userId
@@ -146,8 +152,12 @@ class UserDao extends Object
    * @throws \Exception
    * @return bool true on success
    */
-  function deleteGroup($groupId) 
+  function deleteGroup($groupId)
   {
+    if (!$this->session->isStarted()) {
+      $this->session->setName('Login');
+      $this->session->start();
+    }
     $groupArray = $this->dbManager->getSingleRow('SELECT group_pk, group_name FROM groups WHERE group_pk=$1',
             array($groupId),__METHOD__.'.exists');
     if ($groupArray===false)
@@ -183,18 +193,23 @@ class UserDao extends Object
     $this->dbManager->getSingleRow("DELETE FROM groups WHERE group_pk=$1",array($groupId),__METHOD__.'.delete');
     $this->dbManager->commit();
 
+    $newGroupId= $this->dbManager->getSingleRow("SELECT group_fk FROM users WHERE user_pk=$1",
+      array($this->session->get(AUTH::USER_ID)), __METHOD__.'.group_after_update');
+    $_SESSION[Auth::GROUP_ID] = $newGroupId['group_fk'];
+    $this->session->set(Auth::GROUP_ID, $newGroupId['group_fk']);
+
     return true;
   }
 
   function updateUserTable() {
     $statementBasename = __FUNCTION__;
-    $this->dbManager->getSingleRow("UPDATE users SET user_seed = $1 WHERE user_seed IS NULL;", 
-            array(rand()), 
+    $this->dbManager->getSingleRow("UPDATE users SET user_seed = $1 WHERE user_seed IS NULL;",
+            array(rand()),
             $statementBasename . '.randomizeEmptySeeds');
 
     /* No users with no seed and no perm -- make them read-only */
-    $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1 WHERE user_perm IS NULL;", 
-            array(PLUGIN_DB_READ), 
+    $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1 WHERE user_perm IS NULL;",
+            array(PLUGIN_DB_READ),
             $statementBasename . '.setDefaultPermission');
     /* There must always be at least one default user. */
     $defaultUser = $this->getUserByName('Default User');
@@ -264,7 +279,7 @@ class UserDao extends Object
     $row = $this->dbManager->getSingleRow("SELECT * FROM groups WHERE group_name = $1", array($groupName), __FUNCTION__);
     return $row['group_pk'];
   }
-  
+
   /**
    * @param $permission
    * @return array
@@ -299,7 +314,7 @@ class UserDao extends Object
     $userRow['group_name'] = $groupRow['group_name'];
     return $userRow;
   }
-  
+
   /**
    * @param int $userId
    * @param string $groupName
@@ -368,7 +383,7 @@ class UserDao extends Object
     $this->dbManager->insertTableRow('group_user_member',
             array('group_fk'=>$groupId,'user_fk'=>$userId,'group_perm'=>1));
   }
-  
+
   /**
    * @param int $userId
    * @return string
