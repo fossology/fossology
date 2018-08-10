@@ -10,29 +10,12 @@
 #
 # Description: startup helper script for the FOSSology Docker container
 
-set -e
+set -o errexit -o nounset -o pipefail
 
-if [ "$1" == "true" ]; then
-  exit 0
-fi
-
-db_host="localhost"
-db_name="fossology"
-db_user="fossy"
-db_password="fossy"
-
-if [ "$FOSSOLOGY_DB_HOST" ]; then
-  db_host="$FOSSOLOGY_DB_HOST"
-fi
-if [ "$FOSSOLOGY_DB_NAME" ]; then
-  db_name="$FOSSOLOGY_DB_NAME"
-fi
-if [ "$FOSSOLOGY_DB_USER" ]; then
-  db_user="$FOSSOLOGY_DB_USER"
-fi
-if [ "$FOSSOLOGY_DB_PASSWORD" ]; then
-  db_password="$FOSSOLOGY_DB_PASSWORD"
-fi
+db_host="${FOSSOLOGY_DB_HOST:-localhost}"
+db_name="${FOSSOLOGY_DB_NAME:-fossology}"
+db_user="${FOSSOLOGY_DB_USER:-fossy}"
+db_password="${FOSSOLOGY_DB_PASSWORD:-fossy}"
 
 # Write configuration
 cat <<EOM > /usr/local/etc/fossology/Db.conf
@@ -46,7 +29,7 @@ sed -i 's/address = .*/address = '"${FOSSOLOGY_SCHEDULER_HOST:-localhost}"'/' \
     /usr/local/etc/fossology/fossology.conf
 
 # Startup DB if needed or wait for external DB
-if [ "$db_host" = 'localhost' ]; then
+if [[ $db_host == 'localhost' ]]; then
   echo '*****************************************************'
   echo 'WARNING: No database host was set and therefore the'
   echo 'internal database without persistency will be used.'
@@ -55,18 +38,18 @@ if [ "$db_host" = 'localhost' ]; then
   sleep 5
   /etc/init.d/postgresql start
 else
-  testForPostgres(){
+  test_for_postgres() {
     PGPASSWORD=$db_password psql -h "$db_host" "$db_name" "$db_user" -c '\l' >/dev/null
     return $?
   }
-  until testForPostgres; do
+  until test_for_postgres; do
     >&2 echo "Postgres is unavailable - sleeping"
     sleep 1
   done
 fi
 
 # Setup environment
-if [[ $# = 0 || ( $# = 1 && "$1" == "scheduler" ) ]]; then
+if [[ $# -eq 0 || ($# -eq 1 && "$1" == "scheduler") ]]; then
   /usr/local/lib/fossology/fo-postinstall --database --licenseref
 fi
 
@@ -74,19 +57,19 @@ fi
 echo
 echo 'Fossology initialisation complete; Starting up...'
 echo
-if [ $# -eq 0 ]; then
+if [[ $# -eq 0 ]]; then
   /etc/init.d/fossology start
   /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \
     --reset &
   /usr/sbin/apache2ctl -D FOREGROUND
-elif [[ $# = 1 && "$1" == "scheduler" ]]; then
+elif [[ $# -eq 1 && "$1" == "scheduler" ]]; then
   exec /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \
     --reset
-elif [[ $# = 1 && "$1" == "web" ]]; then
+elif [[ $# -eq 1 && "$1" == "web" ]]; then
   exec /usr/sbin/apache2ctl -e info -D FOREGROUND
 else
   exec "$@"
