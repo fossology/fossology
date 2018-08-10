@@ -1,6 +1,21 @@
-install/docker-compose*
-!install/docker-compose.docker-entrypoint.sh
 fossology310-source.spdx
+
+################################################################################
+# omit rebuilding after changing some unrelated files.
+.editorconfig
+.github
+.gitignore
+.travis.yml
+
+*.md
+LICENSE
+NOTICES*
+docker-compose.yml
+
+Vagrantfile
+
+# omit rebuilding after changing the docker tests.
+src/testing/docker
 
 ################################################################################
 # from gitignore:

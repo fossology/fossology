@@ -11,10 +11,10 @@
 #              Docker setup with separate Database instance
 version: '3'
 services:
-  fossology-scheduler:
+  scheduler:
     build:
-      context: ..
-      dockerfile: install/docker-compose.Dockerfile
+      context: .
+      dockerfile: Dockerfile
       args:
       - http_proxy
       - https_proxy
@@ -22,20 +22,20 @@ services:
     image: fossology
     restart: unless-stopped
     environment:
-      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_HOST=db
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
     user: fossy
     command: scheduler
     depends_on:
-      - fossology-db
+      - db
     volumes:
       - repository:/srv/fossology/repository/
-  fossology-web:
+  web:
     build:
-      context: ..
-      dockerfile: install/docker-compose.Dockerfile
+      context: .
+      dockerfile: Dockerfile
       args:
       - http_proxy
       - https_proxy
@@ -43,20 +43,20 @@ services:
     image: fossology
     restart: unless-stopped
     environment:
-      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_HOST=db
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
-      - FOSSOLOGY_SCHEDULER_HOST=fossology-scheduler
+      - FOSSOLOGY_SCHEDULER_HOST=scheduler
     command: web
     ports:
       - 8081:80
     depends_on:
-      - fossology-db
-      - fossology-scheduler
+      - db
+      - scheduler
     volumes:
       - repository:/srv/fossology/repository/
-  fossology-db:
+  db:
     image: postgres
     restart: unless-stopped
     environment:
