@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define AGENT_NAME "monk" ///< the name of the agent, used to get agent key
 #define AGENT_DESC "monk agent" ///< what program this is
-#define AGENT_ARS  "monk_ars" 
+#define AGENT_ARS  "monk_ars"
 
 #define MODE_SCHEDULER 1
 #define MODE_CLI 2

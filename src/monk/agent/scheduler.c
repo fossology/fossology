@@ -18,7 +18,100 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "scheduler.h"
 
+#include "common.h"
 #include "database.h"
+
+MatchCallbacks schedulerCallbacks =
+  { .onNo = sched_onNoMatch,
+    .onFull = sched_onFullMatch,
+    .onDiff = sched_onDiffMatch,
+    .onBeginOutput = sched_noop,
+    .onBetweenIndividualOutputs = sched_noop,
+    .onEndOutput = sched_noop,
+    .ignore = sched_ignore
+  };
+
+int processUploadId(MonkState* state, int uploadId, const Licenses* licenses) {
+  PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
+
+  if (!fileIdResult)
+    return 0;
+
+  if (PQntuples(fileIdResult) == 0) {
+    PQclear(fileIdResult);
+    fo_scheduler_heart(0);
+    return 1;
+  }
+
+  int threadError = 0;
+#ifdef MONK_MULTI_THREAD
+  #pragma omp parallel
+#endif
+  {
+    MonkState threadLocalStateStore = *state;
+    MonkState* threadLocalState = &threadLocalStateStore;
+
+    threadLocalState->dbManager = fo_dbManager_fork(state->dbManager);
+    if (threadLocalState->dbManager) {
+      int count = PQntuples(fileIdResult);
+#ifdef MONK_MULTI_THREAD
+      #pragma omp for schedule(dynamic)
+#endif
+      for (int i = 0; i < count; i++) {
+        if (threadError)
+          continue;
+
+        long pFileId = atol(PQgetvalue(fileIdResult, i, 0));
+
+        if ((pFileId <= 0) || hasAlreadyResultsFor(threadLocalState->dbManager, threadLocalState->agentId, pFileId))
+        {
+          fo_scheduler_heart(0);
+          continue;
+        }
+
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses, &schedulerCallbacks)) {
+          fo_scheduler_heart(1);
+        } else {
+          fo_scheduler_heart(0);
+          threadError = 1;
+        }
+      }
+      fo_dbManager_finish(threadLocalState->dbManager);
+    } else {
+      threadError = 1;
+    }
+  }
+  PQclear(fileIdResult);
+
+  return !threadError;
+}
+
+int handleSchedulerMode(MonkState* state, const Licenses* licenses) {
+  /* scheduler mode */
+  state->scanMode = MODE_SCHEDULER;
+  queryAgentId(state, AGENT_NAME, AGENT_DESC);
+
+  while (fo_scheduler_next() != NULL) {
+    int uploadId = atoi(fo_scheduler_current());
+
+    if (uploadId == 0) continue;
+
+    int arsId = fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
+                            0, uploadId, state->agentId, AGENT_ARS, NULL, 0);
+
+    if (arsId<=0)
+      bail(state, 1);
+
+    if (!processUploadId(state, uploadId, licenses))
+      bail(state, 2);
+
+    fo_WriteARS(fo_dbManager_getWrappedConnection(state->dbManager),
+                arsId, uploadId, state->agentId, AGENT_ARS, NULL, 1);
+  }
+  fo_scheduler_heart(0);
+
+  return 1;
+}
 
 int sched_onNoMatch(MonkState* state, const File* file) {
   return saveNoResultToDb(state->dbManager, state->agentId, file->id);
