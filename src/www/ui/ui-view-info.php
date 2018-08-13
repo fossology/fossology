@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -617,59 +617,76 @@ class ui_view_info extends FO_Plugin
     }
 
     $VT .= "<form action='' name='formReportInfo' method='post'>";
-    $VT .= "<table border=1 width='50%' >\n";
+    $VT .= "<table border=1>\n";
+    $withTrStart = "<tr><td align='left'>";
+    $withTdStart = "</td><td align='left'>";
+    $withTdTrEnd = "</td></tr>";
     $text = _("Attribute");
     $text2 = _("Info");
     $VT .= "<tr><th>$text</th><th>$text2</th></tr>\n";
     $footer = "Copyright Text(report Footer)";
-    $VT .= "<tr><td align='left'>" . $footer . "</td><td align='left'> <input type='Text' name='footerNote' style='width:99%' value='". $footerNote ."'></td>";
+    $VT .= $withTrStart . $footer . $withTdStart ."<input type='Text' name='footerNote' style='width:98%' value='".$footerNote."'>".$withTdTrEnd;
+
     $attrib1 = "Reviewed by (opt.)";
-    $VT .= "<tr><td align='left'>" . $attrib1 . "</td><td align='left'> <input type='Text' name='reviewedBy' style='width:99%' value='". $reviewedBy ."'></td>";
+    $VT .= $withTrStart . $attrib1 . $withTdStart ."<input type='Text' name='reviewedBy' style='width:98%' value='". $reviewedBy ."'>".$withTdTrEnd;
+
     $attrib2 = "Report release date";
-    $VT .= "<tr><td align='left'>" . $attrib2 . "</td><td align='left'><input type='Text' name='reportRel' style='width:99%' value='". $reportRel ."'></td>";
+    $VT .= $withTrStart . $attrib2 . $withTdStart ."<input type='Text' name='reportRel' style='width:98%' value='". $reportRel ."'>".$withTdTrEnd;
+
     $attrib3 = "Community";
-    $VT .= "<tr><td align='left'>" . $attrib3 . "</td><td align='left'><input type='Text' name='community' style='width:99%' value='". $community . "'></td>";
+    $VT .= $withTrStart . $attrib3 . $withTdStart ."<input type='Text' name='community' style='width:98%' value='". $community . "'>".$withTdTrEnd;
+
     $attrib4 = "Component";
-    $VT .= "<tr><td align='left'>" . $attrib4 . "</td><td align='left'><input type='Text' name='component' style='width:99%' value='". $component . "'></td>";
+    $VT .= $withTrStart . $attrib4 . $withTdStart ."<input type='Text' name='component' style='width:98%' value='". $component . "'>".$withTdTrEnd;
+
     $attrib5 = "Version";
-    $VT .= "<tr><td align='left'>" . $attrib5 . "</td><td align='left'><input type='Text' name='version' style='width:99%' value='". $version . "'></td>";
+    $VT .= $withTrStart . $attrib5 . $withTdStart ."<input type='Text' name='version' style='width:98%' value='". $version . "'>".$withTdTrEnd;
+
     $attrib6 = "Release date";
-    $VT .= "<tr><td align='left'>" . $attrib6 . "</td><td align='left'><input type='Text' name='relDate' style='width:99%' value='". $relDate . "'></td>";
+    $VT .= $withTrStart . $attrib6 . $withTdStart ."<input type='Text' name='relDate' style='width:98%' value='". $relDate . "'>".$withTdTrEnd;
+
     $attrib7 = "Mainline /SW360 Portal Link";
-    $VT .= "<tr><td align='left'>" . $attrib7 . "</td><td align='left'><input type='Text' name='sw360Link' style='width:99%' value='" . $sw360Link . "'></td>";
+    $VT .= $withTrStart . $attrib7 . $withTdStart ."<input type='Text' name='sw360Link' style='width:98%' value='" . $sw360Link . "'>".$withTdTrEnd;
+
     $attrib8 = "General assessment";
-    $VT .= "<tr><td align='left'>" . $attrib8 . "</td><td align='left'><input type='Text' name='generalAssesment' style='width:99%' value='" . $generalAssesment . "'></td>";
+    $VT .= $withTrStart . $attrib8 . $withTdStart ."<input type='Text' name='generalAssesment' style='width:98%' value='" . $generalAssesment . "'>".$withTdTrEnd;
+
     $attrib9 = "Source / binary integration notes";
     $nonCritical = "no critical files found, source code and binaries can be used as is";
     $critical = "critical files found, source code needs to be adapted and binaries possibly re-built";
     if(empty($gaSelectionList[0])) $gaSelectionList[0] = '';
     if(empty($gaSelectionList[1])) $gaSelectionList[1] = '';
-    $VT .= "<tr><td align='left'>" . $attrib9 . "</td><td align='left'><input type='checkbox' name='nonCritical' $gaSelectionList[0]>$nonCritical</br><input type='checkbox' name='critical' $gaSelectionList[1]>$critical</td>";
+    $VT .= $withTrStart . $attrib9 . $withTdStart . "<input type='checkbox' name='nonCritical' $gaSelectionList[0]>$nonCritical</br><input type='checkbox' name='critical' $gaSelectionList[1]>$critical".$withTdTrEnd;
+
     $attrib10 = "Dependency notes";
     $noDependency = "no dependencies found, neither in source code nor in binaries";
     $dependencySource = "dependencies found in source code (see obligations)";
     $dependencyBinary = "dependencies found in binaries (see obligations)";
-
     if(empty($gaSelectionList[2])) $gaSelectionList[2] = '';
     if(empty($gaSelectionList[3])) $gaSelectionList[3] = '';
     if(empty($gaSelectionList[4])) $gaSelectionList[4] = '';
-    $VT .= "<tr><td align='left'>" . $attrib10 . "</td><td align='left'><input type='checkbox' name='noDependency' $gaSelectionList[2]>$noDependency</br><input type='checkbox' name='dependencySource' $gaSelectionList[3]>$dependencySource</br><input type='checkbox' name='dependencyBinary' $gaSelectionList[4]>$dependencyBinary</td>";
+    $VT .= $withTrStart . $attrib10 . $withTdStart . "<input type='checkbox' name='noDependency' $gaSelectionList[2]>$noDependency</br><input type='checkbox' name='dependencySource' $gaSelectionList[3]>$dependencySource</br><input type='checkbox' name='dependencyBinary' $gaSelectionList[4]>$dependencyBinary".$withTdTrEnd;
+
     $attrib11 = "Export restrictions by copyright owner";
     $noExportRestriction = "no export restrictions found";
     $exportRestriction = "export restrictions found (see obligations)";
     if(empty($gaSelectionList[5])) $gaSelectionList[5] = '';
     if(empty($gaSelectionList[6])) $gaSelectionList[6] = '';
-    $VT .= "<tr><td align='left'>" . $attrib11 . "</td><td align='left'><input type='checkbox' name='noExportRestriction' $gaSelectionList[5]>$noExportRestriction </br><input type='checkbox' name='exportRestriction' $gaSelectionList[6]>$exportRestriction</td>";
-    $attrib12 = "Restrictions for use (e.g. not for Nuclear Power) by copyright owner";
+    $VT .= $withTrStart . $attrib11 . $withTdStart . "<input type='checkbox' name='noExportRestriction' $gaSelectionList[5]>$noExportRestriction </br><input type='checkbox' name='exportRestriction' $gaSelectionList[6]>$exportRestriction".$withTdTrEnd;
+
+    $attrib12 = "Restrictions for use by copyright owner \n<br/> (e.g. not for Nuclear Power)";
     $noRestriction = "no restrictions for use found";
     $restrictionForUse = "restrictions for use found (see obligations)";
     if(empty($gaSelectionList[7])) $gaSelectionList[7] = '';
     if(empty($gaSelectionList[8])) $gaSelectionList[8] = '';
-    $VT .= "<tr><td align='left'>" . $attrib12 . "</td><td align='left'><input type='checkbox' name='noRestriction' $gaSelectionList[7]>$noRestriction</br><input type='checkbox' name='restrictionForUse' $gaSelectionList[8]>$restrictionForUse</td>";
+    $VT .= $withTrStart . $attrib12 . $withTdStart . "<input type='checkbox' name='noRestriction' $gaSelectionList[7]>$noRestriction</br><input type='checkbox' name='restrictionForUse' $gaSelectionList[8]>$restrictionForUse".$withTdTrEnd;
+
     $attrib13 = "Additional notes";
-    $VT .= "<tr><td align='left'>" . $attrib13 . "</td><td align='left'><input type='Text' name='gaAdditional' style='width:99%' value='" . $gaAdditional . "'></td>";
+    $VT .= $withTrStart . $attrib13 . $withTdStart . "<textarea style='overflow:auto;width:98%;height:80px;' name='gaAdditional'>" . $gaAdditional . "</textarea>".$withTdTrEnd;
+
     $attrib14 = "General Risks (optional)";
-    $VT .= "<tr><td align='left'>" . $attrib14 . "</td><td align='left'><input type='Text' name='gaRisk' style='width:99%' value='" . $gaRisk . "'></td>";
+    $VT .= $withTrStart . $attrib14 . $withTdStart . "<textarea style='overflow:auto;width:98%;height:80px;' name='gaRisk'>" . $gaRisk . "</textarea>".$withTdTrEnd;
+
     $VT .= "<tr><td align='center' colspan='2' ><input type='submit' name='submitReportInfo' value='Submit' /></td></tr>";
     $VT .= "</table><p>\n";
     $VT .= "</form>";
