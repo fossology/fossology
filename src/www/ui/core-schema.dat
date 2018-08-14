@@ -1777,7 +1777,7 @@
   $Schema["SEQUENCE"]["agent_runstatus_ars_pk_seq"]["UPDATE"] = "SELECT setval('agent_runstatus_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM agent_runstatus))";
 
   $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"nomos_ars_ars_pk_seq\"";
-  $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["UPDATE"] = "SELECT setval('nomos_ars_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM bucket_ars))";
+  $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["UPDATE"] = "SELECT setval('nomos_ars_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM ars_master))";
 
   $Schema["SEQUENCE"]["attachments_attachment_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"attachments_attachment_pk_seq\"";
   $Schema["SEQUENCE"]["attachments_attachment_pk_seq"]["UPDATE"] = "SELECT setval('attachments_attachment_pk_seq',(SELECT greatest(1,max(attachment_pk)) val FROM attachments))";
