@@ -8,19 +8,20 @@
 # without any warranty.
 #
 # Description: Easy install script for fossology. Goes through the steps on the Fossology wiki
+touch / 2>/dev/null || SUDO=sudo
 set -e
 cd "$(dirname $(readlink -f "${BASH_SOURCE[0]}"))"/..
-sudo utils/fo-cleanold
+$SUDO utils/fo-cleanold
 make clean
-sudo utils/fo-installdeps
+$SUDO utils/fo-installdeps
 make
-sudo make install
-sudo /usr/local/lib/fossology/fo-postinstall
-sudo cp install/src-install-apache-example.conf /etc/apache2/sites-available/fossology.conf
-sudo ln -s /etc/apache2/sites-available/fossology.conf /etc/apache2/sites-enabled/fossology.conf
-sudo install/scripts/php-conf-fix.sh --overwrite
-sudo /etc/init.d/apache2 restart
-sudo /etc/init.d/fossology restart
+$SUDO make install
+$SUDO /usr/local/lib/fossology/fo-postinstall
+$SUDO cp install/src-install-apache-example.conf /etc/apache2/sites-available/fossology.conf
+$SUDO ln -s /etc/apache2/sites-available/fossology.conf /etc/apache2/sites-enabled/fossology.conf
+$SUDO install/scripts/php-conf-fix.sh --overwrite
+$SUDO /etc/init.d/apache2 restart
+$SUDO /etc/init.d/fossology restart
 
 # open fossology page, if X server is installed
 if [ -n ${DISPLAY} ]
