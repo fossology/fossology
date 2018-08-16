@@ -22,6 +22,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "scheduler.h"
 #include "cli.h"
 #include "common.h"
+#include "serialize.h"
 #include <getopt.h>
 
 void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
@@ -58,6 +59,14 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
       case 'J':
         state->json = 1;
         break;
+      case 's':
+        state->scanMode = MODE_EXPORT_KOWLEDGEBASE;
+        state->knowledgebaseFile = optarg;
+        break;
+      case 'k':
+        state->scanMode = MODE_CLI_OFFLINE;
+        state->knowledgebaseFile = optarg;
+        break;
       case 'h':
       case '?':
         printf("Usage:\n"
@@ -70,6 +79,15 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
                "                  -J          :: JSON output.\n"
                "                  file        :: scan file and print licenses detected within it.\n"
                "                  -V          :: print the version info, then exit.\n"
+               "\nSave knowledgebase to knowledgebaseFile for offline usage without db:\n");
+        printf("       %s [options] -s knowledgebaseFile\n", argv[0]);
+        printf("               options:\n"
+               "                  -c config   :: specify the directory for the system configuration.\n"
+               "\nUse previously saved knowledgebaseFile for offline usage without db.\n");
+        printf("       %s -k knowledgebaseFile [options] file [file [...]]\n", argv[0]);
+        printf("               options:\n"
+               "                  -J          :: JSON output.\n"
+               "                  file        :: scan file and print licenses detected within it.\n"
                "\nThe following should only be called by the FOSSology scheduler:\n");
         printf("       %s --scheduler_start [options]\n", argv[0]);
         printf("               options:\n"
@@ -82,8 +100,14 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
     }
   }
   *fileOptInd = optind;
-  if (optind < argc) {
+  if (optind < argc && state->scanMode != MODE_CLI_OFFLINE) {
     state->scanMode = MODE_CLI;
+  }
+  if((state->scanMode == MODE_CLI_OFFLINE ||
+      state->scanMode == MODE_EXPORT_KOWLEDGEBASE) &&
+     state->knowledgebaseFile == NULL) {
+    fprintf( stderr, "necessary path to knowledgebase file not provided\n");
+    bail(state,4);
   }
 }
 
@@ -93,6 +117,7 @@ int main(int argc, char** argv) {
                            .agentId = 0,
                            .scanMode = 0,
                            .verbosity = 0,
+                           .knowledgebaseFile = NULL,
                            .json = 0,
                            .ptr = NULL };
   MonkState* state = &stateStore;
@@ -103,18 +128,24 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  int oldArgc = argc;
-  fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
-  fileOptInd = fileOptInd - oldArgc + argc;
+  Licenses* licenses;
+  if (state->scanMode != MODE_CLI_OFFLINE) {
+    int oldArgc = argc;
+    fo_scheduler_connect_dbMan(&argc, argv, &(state->dbManager));
+    fileOptInd = fileOptInd - oldArgc + argc;
 
-  PGresult* licensesResult = queryAllLicenses(state->dbManager);
-  Licenses* licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
-  PQclear(licensesResult);
+    PGresult* licensesResult = queryAllLicenses(state->dbManager);
+    licenses = extractLicenses(state->dbManager, licensesResult, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+    PQclear(licensesResult);
+  } else {
+    licenses = deserializeFromFile(state->knowledgebaseFile, MIN_ADJACENT_MATCHES, MAX_LEADING_DIFF);
+  }
 
   if (state->scanMode == MODE_SCHEDULER) {
     wasSuccessful = handleSchedulerMode(state, licenses);
     scheduler_disconnect(state, ! wasSuccessful);
-  } else if (state->scanMode == MODE_CLI) {
+  } else if (state->scanMode == MODE_CLI ||
+             state->scanMode == MODE_CLI_OFFLINE) {
     /* we no longer need a database connection */
     if (state->dbManager != NULL) {
       scheduler_disconnect(state, 0);
@@ -122,6 +153,9 @@ int main(int argc, char** argv) {
     state->dbManager = NULL;
 
     wasSuccessful = handleCliMode(state, licenses, argc, argv, fileOptInd);
+  } else if (state->scanMode == MODE_EXPORT_KOWLEDGEBASE) {
+    printf("Write knowledgebase to %s\n", state->knowledgebaseFile);
+    wasSuccessful = serializeToFile(licenses, state->knowledgebaseFile);
   }
 
   licenses_free(licenses);
