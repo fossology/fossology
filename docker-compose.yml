@@ -9,65 +9,54 @@
 #
 # Description: Recipe for setting up a multi container FOSSology
 #              Docker setup with separate Database instance
-version: '2'
+version: '3'
 services:
-
-################################################################################
-  fossology-base-image:
+  scheduler:
     build:
-      context: ..
-      dockerfile: install/docker-compose.Dockerfile
+      context: .
+      dockerfile: Dockerfile
       args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
-    image: fossology
-    restart: "no" 
-    environment:
-      - FOSSOLOGY_DB_HOST=fossology-db
-      - FOSSOLOGY_DB_NAME=fossology
-      - FOSSOLOGY_DB_USER=fossy
-    user: fossy
-    command: "true"
-
-################################################################################
-  fossology-scheduler:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     image: fossology
     restart: unless-stopped
     environment:
-      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_HOST=db
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
     user: fossy
     command: scheduler
-    links:
-      - fossology-db
-    # volumes:
-    #   - ./_repository:/srv/fossology/repository/
-
-################################################################################
-  fossology-web:
+    depends_on:
+      - db
+    volumes:
+      - repository:/srv/fossology/repository/
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     image: fossology
     restart: unless-stopped
     environment:
-      - FOSSOLOGY_DB_HOST=fossology-db
+      - FOSSOLOGY_DB_HOST=db
       - FOSSOLOGY_DB_NAME=fossology
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
-      - FOSSOLOGY_SCHEDULER_HOST=fossology-scheduler
-    user: fossy
+      - FOSSOLOGY_SCHEDULER_HOST=scheduler
     command: web
     ports:
-      - 8081:8081
-    links:
-      - fossology-db
-      - fossology-scheduler
-    volumes_from:
-      - fossology-scheduler
-      
-################################################################################
-  fossology-db:
+      - 8081:80
+    depends_on:
+      - db
+      - scheduler
+    volumes:
+      - repository:/srv/fossology/repository/
+  db:
     image: postgres
     restart: unless-stopped
     environment:
@@ -75,3 +64,6 @@ services:
       - POSTGRES_USER=fossy
       - POSTGRES_PASSWORD=fossy
       - POSTGRES_INITDB_ARGS='-E SQL_ASCII'
+
+volumes:
+  repository:
