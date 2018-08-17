@@ -25,18 +25,18 @@ AGENTDIR = ../../agent/
 # list of the external test data files required by this test
 # UNLIKE MOST OTHER TESTS, these will be found in ../testdata/
 TEST_FILES = circularlinks.tar null_file test1.zip.tar.gz test.cab test.cpio.gz testdir.tar.gz test.iso test.jar test.pdf
-TEST_FILES += fossI16L335U29.tar.bz2 test.tar.Z testtwo.zip test.zip emptydirs.tar Test-0001.rar test.ar test.cpio test.deb
+TEST_FILES += fossI16L335U29.tar.bz2 test.tar.Z testtwo.zip test.zip emptydirs.tar test.ar test.cpio test.deb
 TEST_FILES += test_1-1.dsc test.msi test.rar test.rpm test_1.orig.tar.gz testthree.zip test.z fossI16L518.7z
 TEST_FILES += libununpack.a test.exe test_1-1.debian.tar.xz ext2file.fs ext3file.fs fatfile.fs ntfsfile.fs
 
 ../testdata/libununpack.a:
-	ln -sf $(AGENTDIR)/libununpack.a ../testdata/libununpack.a
+	cp $(AGENTDIR)/libununpack.a ../testdata/libununpack.a
 
 ../testdata/fossI16L335U29.tar.bz2:
-	ln -sf ../../../testing/dataFiles/TestData/archives/fossI16L335U29.tar.bz2 ../testdata/fossI16L335U29.tar.bz2
+	cp ../../../testing/dataFiles/TestData/archives/fossI16L335U29.tar.bz2 ../testdata/fossI16L335U29.tar.bz2
 
 ../testdata/fossI16L518.7z:
-	ln -sf ../../../testing/dataFiles/TestData/archives/fossI16L518.7z ../testdata/fossI16L518.7z
+	cp ../../../testing/dataFiles/TestData/archives/fossI16L518.7z ../testdata/fossI16L518.7z
 
 test: agent test-run
 

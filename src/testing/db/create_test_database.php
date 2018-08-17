@@ -348,11 +348,9 @@ fclose($db_conf_fh);
 /* now create a mods-enabled directory to contain symlinks to the
    agents in the current working copy of fossology */
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
-/*
+
 mkdir($mods_enabled_dir, 0755, TRUE)
     or die("FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n");
-*/
-
 
 /* here we have to do the work that each of the agents' 'make install'
    targets would normally do, but since we want the tests to be able
@@ -366,7 +364,6 @@ mkdir($mods_enabled_dir, 0755, TRUE)
 $fo_base_dir = realpath(__DIR__ . '/../..');
 $src_dirs = scandir($fo_base_dir);
 
-/*
 foreach ($src_dirs as $src_dir) {
     $full_src_dir = $fo_base_dir . "/" . $src_dir;
     // skip dotted directories, lib/, cli/, and other irrelevant directories
@@ -397,8 +394,8 @@ foreach ($src_dirs as $src_dir) {
             or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");
     }
 }
-*/
 
+/*
 $des_dir = "/srv/fossologyTestRepo/testConf/mods-enabled/";
 if (is_dir($des_dir)) {
   symlink($des_dir, "$mods_enabled_dir")
@@ -407,6 +404,7 @@ if (is_dir($des_dir)) {
 else {
   print "please run make install from source before do the test.\n";
 }
+*/
 
 /* Now let's set up a test repository location, which is just an empty
    subdirectory within our temporary testing system config directory */
@@ -452,7 +450,7 @@ fclose($fo_conf_fh);
 $fo_version_fh = fopen("$testing_temp_dir/VERSION", 'w')
     or die("FAIL: Could not open $testing_temp_dir/VERSION for writing\n");
 fwrite($fo_version_fh, "[BUILD]\n");
-fwrite($fo_version_fh, "VERSION=trunk\n");
+fwrite($fo_version_fh, "VERSION=test\n");
 fwrite($fo_version_fh, "COMMIT_HASH=0000\n");
 $build_date = date("Y/m/d H:i");
 fwrite($fo_version_fh, "BUILD_DATE=$build_date\n");
