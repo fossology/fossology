@@ -470,8 +470,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
  */
 int GetVersionControl()
 {
-  char Type[][4] = {"SVN", "Git", "CVS"};
-  char command[MAXCMD] = {0};
+  char *command = NULL;
   char TempFileDirectory[MAXCMD];
   char DeleteTempDirCmd[MAXCMD];
   char TempHome[MAXCMD];
@@ -493,21 +492,7 @@ int GetVersionControl()
   sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
   sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
 
-  if (0 == strcmp(GlobalType, Type[0]))
-  {
-    if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
-    else
-      sprintf(command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
-  }
-  else if (0 == strcmp(GlobalType, Type[1]))
-  {
-    replace_url_with_auth();
-    if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
-    else
-      sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
-  }
+  command = GetVersionControlCommand(1);
 
   rc = system(command);
 
@@ -518,6 +503,7 @@ int GetVersionControl()
 
   if (rc != 0)
   {
+    command = GetVersionControlCommand(-1);
     systemError(__LINE__, rc, command)
     /** for user fossy */
     /** git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git */
@@ -866,4 +852,94 @@ void replace_url_with_auth()
     snprintf(GlobalURL, FILEPATH, "%s%s:%s@%s", http, username, password, URI);
     memset(GlobalParam,'\0',MAXCMD);
   }
+}
+
+/**
+ * \brief Get the username from GlobalParam and create new parameters without password
+ */
+void MaskPassword()
+{
+  const char needle[] = " ";
+  int index = 0;
+  int secondIndex = 0;
+  char *username = NULL;
+  char *token = NULL;
+  char newParam[MAXCMD];
+  char *beg = NULL;
+  char *end = NULL;
+
+  memset(newParam, '\0', MAXCMD);
+  // SVN if parameters exists
+  if (strstr(GlobalParam, "password") && strstr(GlobalParam, "username")) {
+    /* get the first token */
+    token = strtok(GlobalParam, needle);
+    /* walk through other tokens */
+    while( token != NULL )
+    {
+      if (1 == index) {  //username is the first parameter
+        username = token;
+        break;
+      }
+      token = strtok(NULL, needle);
+      index++;
+    }
+    // Create new parameters with masked password
+    sprintf(newParam, " --username %s --password ****", username);
+    memset(GlobalParam, '\0', MAXCMD);
+    strcpy(GlobalParam, newParam);
+  }
+  // GIT
+  else {
+    // First : from http://
+    index = strcspn(GlobalURL, ":");
+    // Second after username
+    secondIndex = strcspn(GlobalURL + index + 1, ":");
+    index = index + secondIndex + 1;
+    if(index < strlen(GlobalURL)) {  // Contains second :
+      beg = (char *)malloc(index + 2);
+      memset(beg, '\0', index + 2);
+      strncpy(beg, GlobalURL, index + 1);
+      // Place where password ends
+      end = strchr(GlobalURL, '@');
+      sprintf(newParam, "%s****%s", beg, end);
+      strcpy(GlobalURL, newParam);
+    }
+  }
+}
+
+/**
+ * \brief get the command to run to get files from version control system
+ * \param int withPassword true to make command with actual or false to mask password
+ * \return char* null terminated string
+ */
+char* GetVersionControlCommand(int withPassword)
+{
+  char Type[][4] = {"SVN", "Git", "CVS"};
+  char *command = NULL;
+  char TempFileDirectory[MAXCMD];
+
+  /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
+  sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
+
+  command = (char *)malloc(MAXCMD);
+  memset(command,'\0',MAXCMD);
+
+  if(withPassword < 0) MaskPassword();
+  if (0 == strcmp(GlobalType, Type[0]))
+  {
+    if (GlobalProxy[0] && GlobalProxy[0][0])
+      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
+    else
+      sprintf(command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+  }
+  else if (0 == strcmp(GlobalType, Type[1]))
+  {
+    replace_url_with_auth();
+    if (GlobalProxy[0] && GlobalProxy[0][0])
+      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+    else
+      sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+  }
+
+  return command;
 }

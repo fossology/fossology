@@ -121,5 +121,9 @@ void GetProxy();
 
 void replace_url_with_auth();
 
+void MaskPassword();
+
+char* GetVersionControlCommand(int withPassword);
+
 #endif /* _WGET_AGENT_H */
 
