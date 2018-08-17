@@ -31,6 +31,8 @@ defconf/fossology.conf:	defconf/fossology.conf-process
 # create dbcreate
 	$(MAKE) -s -C db
 
+install_offline: install
+
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
 	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
