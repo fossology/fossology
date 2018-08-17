@@ -59,7 +59,7 @@ table.dataTable th.right {
 
 table.dataTable tr.odd { background-color: #E2E4FF; }
 table.dataTable tr.even { background-color: white; }
-table.dataTable tr.odd.removed { background-color: #ef9e9c}
+table.dataTable tr.removed { background-color: #ef9e9c}
 
 table.dataTable tr.odd td.sorting_1 { background-color: #D3D6FF; }
 table.dataTable tr.odd td.sorting_2 { background-color: #DADCFF; }
