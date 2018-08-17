@@ -57,7 +57,8 @@ RUN set -x \
 # scheduler related
 RUN /usr/local/lib/fossology/fo-postinstall \
         --agent \
-        --scheduler-only
+        --scheduler-only \
+        --no-running-database
 
 RUN set -x \
  && mkdir -p /var/log/fossology \
@@ -70,7 +71,7 @@ RUN set -x \
 # web related
 RUN /usr/local/lib/fossology/fo-postinstall \
         --web-only \
- && systemctl disable apache2
+        --no-running-database
 
 RUN set -x \
  && cp /fossology/install/src-install-apache-example.conf \
