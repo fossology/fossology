@@ -215,7 +215,7 @@ CU_TestInfo tests_scheduler[] =
 {
     {"Test scheduler_sig_handle",       test_scheduler_sig_handle       },
     {"Test string is number",       test_string_is_num       },
-//TODO not working  {"Test scheduler_daemonize",       test_scheduler_daemonize       },
+    {"Test scheduler_daemonize",       test_scheduler_daemonize       },
     {"Test scheduler_clear_config",       test_scheduler_clear_config       },
     CU_TEST_INFO_NULL
 };

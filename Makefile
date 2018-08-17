@@ -37,7 +37,7 @@ utils: build-utils
 # generate the VERSION file
 TOP = .
 VERSIONFILE:
-	@$(call WriteVERSIONFile,"BUILD")
+	$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
@@ -50,7 +50,7 @@ $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
 
 # test depends on everything being built first
-test: all preparetest $(TESTDIRS)
+test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 
@@ -65,9 +65,6 @@ $(CLEANDIRS):
 
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
-
-preparetest: ./utils/prepare-test
-	./utils/prepare-test
 
 # release stuff
 tar: dist-testing
@@ -86,5 +83,5 @@ empty-cache:
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
-.PHONY: all install uninstall clean test utils preparetest
+.PHONY: all install uninstall clean test utils
 .PHONY: dist dist-testing tar tar-release
