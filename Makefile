@@ -66,9 +66,6 @@ $(CLEANDIRS):
 phpvendors:
 	$(MAKE) -C $(FOSRCDIR) phpvendors
 
-preparetest: ./utils/prepare-test
-	./utils/prepare-test -y -a
-
 # release stuff
 tar: dist-testing
 dist-testing:

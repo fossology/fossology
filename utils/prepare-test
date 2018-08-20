@@ -27,6 +27,8 @@ show_help() {
   cat <<EOF
 Usage: prepare-test [options]
   -a              : Accept the warning prompt
+  -f              : Create fossy user in Database
+  -t              : Create fossologytest user in Database
   -y              : Automatic yes to prompts
   -h              : This help text
 EOF
@@ -41,7 +43,10 @@ DISTRO=$(lsb_release --id --short)
 # it without being careful can destroy your system.
 #
 YesOpt=''
-WarnAccept=''
+
+# Setting default options
+CreateFossy="N"
+CreateFossyTest="N"
 
 cat <<EOF
 ****************************************************************************
@@ -56,10 +61,16 @@ cat <<EOF
 
 EOF
 
-while getopts ":ayh" o; do
+while getopts ":aftyh" o; do
   case "${o}" in
     a)
-      WarnAccept='Y'
+      WarnAccept="Y"
+      ;;
+    f)
+      CreateFossy="Y"
+      ;;
+    t)
+      CreateFossyTest="Y"
       ;;
     y)
       YesOpt='-y'
@@ -71,42 +82,36 @@ while getopts ":ayh" o; do
    esac
 done
 
-if echo ${WarnAccept} | grep -q -e "^[yYnN]$" ; then
-  answer="${WarnAccept}"
-else
-  read -r -n 1 -p "Are you sure run this script?(Y/n) " answer
-  if [[ -z ${answer} ]]; then
-    answer="Y"
+if [[ -z ${WarnAccept} ]]; then
+  read -r -n 1 -p "Are you sure run this script?(y/N) " WarnAccept
+  if [[ -z ${WarnAccept} ]]; then
+    WarnAccept="N"
   fi
 fi
 
-echo ""
+echo
 
-while true
-do
-  case $answer in
-    [yY]* )
-      sudo mkdir -p /var/local/cache/fossology
-      sudo chown "$(whoami)" /var/local/cache/fossology
-      sudo mkdir -p /srv/fossologyTestRepo
-      sudo chown "$(whoami)" /srv/fossologyTestRepo
-      sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true
-      sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\"|psql" || true
-      sudo su postgres -c "echo 'CREATE DATABASE fossology' | psql -Ufossy" || true
-      echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
-      echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
-      chmod 0600 ~/.pgpass
-      case "$DISTRO" in
-        Debian|Ubuntu|LinuxMint)
-          sudo apt-get install -q -y cppcheck ;;
-        Fedora|RedHatEnterprise*|CentOS)
-          yum "$YesOpt" install cppcheck ;;
-      esac
-      break
-      ;;
-
-    [nN]* ) exit;;
-
-    * ) echo "Please answer as y or n."; break ;;
+if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
+  sudo mkdir -p /var/local/cache/fossology
+  sudo chown "$(whoami)" /var/local/cache/fossology
+  sudo mkdir -p /srv/fossologyTestRepo
+  sudo chown "$(whoami)" /srv/fossologyTestRepo
+  if [[ "${CreateFossy}" == "Y" ]]; then
+    sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
+    echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
+    sudo su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+  fi
+  if [[ "${CreateFossyTest}" == "Y" ]]; then
+    testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
+    sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+    echo "localhost:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
+  fi
+  case "${DISTRO}" in
+    Debian|Ubuntu|LinuxMint)
+      sudo apt-get install -q "${YesOpt}" cppcheck ;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum "${YesOpt}" install cppcheck ;;
   esac
-done
+fi
