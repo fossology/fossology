@@ -23,14 +23,90 @@
 # canonical location for such info, then fix it there first and also
 # update this file and the INSTALL document.
 
-sudo mkdir -p /var/local/cache/fossology
-sudo chown $(whoami) /var/local/cache/fossology
-sudo mkdir -p /srv/fossologyTestRepo
-sudo chown $(whoami) /srv/fossologyTestRepo
-sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true
-sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\"|psql" || true
-sudo su postgres -c "echo 'CREATE DATABASE fossology' | psql -Ufossy" || true
-echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
-echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
-chmod 0600 ~/.pgpass
-sudo apt-get install -q -y cppcheck
+show_help() {
+  cat <<EOF
+Usage: prepare-test [options]
+  -a              : Accept the warning prompt
+  -y              : Automatic yes to prompts
+  -h              : This help text
+EOF
+}
+
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+WarnAccept=''
+
+cat <<EOF
+****************************************************************************
+* Please note, the script changes the owner of /var/local/cache/fossology! *
+* Also creates a test repo under /srv/fossologyTestRepo.                   *
+* Creates a PostgreSQL user fossy and fossologytest and stores password    *
+* under ~/.pgpass                                                          *
+****************************************************************************
+* NOTE: Above changes may break your current installation!!                *
+* NOTE: Please do not run on a productive instance!!                       *
+****************************************************************************
+
+EOF
+
+while getopts ":ayh" o; do
+  case "${o}" in
+    a)
+      WarnAccept='Y'
+      ;;
+    y)
+      YesOpt='-y'
+      ;;
+    h)
+      show_help; exit;;
+    *)
+      show_help; exit 1;;
+   esac
+done
+
+if echo ${WarnAccept} | grep -q -e "^[yYnN]$" ; then
+  answer="${WarnAccept}"
+else
+  read -r -n 1 -p "Are you sure run this script?(Y/n) " answer
+  if [[ -z ${answer} ]]; then
+    answer="Y"
+  fi
+fi
+
+echo ""
+
+while true
+do
+  case $answer in
+    [yY]* )
+      sudo mkdir -p /var/local/cache/fossology
+      sudo chown "$(whoami)" /var/local/cache/fossology
+      sudo mkdir -p /srv/fossologyTestRepo
+      sudo chown "$(whoami)" /srv/fossologyTestRepo
+      sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true
+      sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';\"|psql" || true
+      sudo su postgres -c "echo 'CREATE DATABASE fossology' | psql -Ufossy" || true
+      echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
+      echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
+      chmod 0600 ~/.pgpass
+      case "$DISTRO" in
+        Debian|Ubuntu|LinuxMint)
+          sudo apt-get install -q -y cppcheck ;;
+        Fedora|RedHatEnterprise*|CentOS)
+          yum "$YesOpt" install cppcheck ;;
+      esac
+      break
+      ;;
+
+    [nN]* ) exit;;
+
+    * ) echo "Please answer as y or n."; break ;;
+  esac
+done
