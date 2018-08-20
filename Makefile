@@ -50,7 +50,7 @@ $(UNINSTALLDIRS):
 	$(MAKE) -C $(@:uninstall-%=%) uninstall
 
 # test depends on everything being built first
-test: all preparetest $(TESTDIRS)
+test: all $(TESTDIRS)
 $(TESTDIRS):
 	$(MAKE) -C $(@:test-%=%) test
 

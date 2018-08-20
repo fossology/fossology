@@ -54,7 +54,7 @@ env:
   global:
    - PHPTESTSUITE=''
    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
-   - MAKETARGETS='all test'
+   - MAKETARGETS='preparetest all test'
 
 script:
  - set -e
@@ -89,49 +89,14 @@ matrix:
       after_script:
 
 ################################################################################
-## C/C++ and phpunit agent tests
-#### with PHP 5.6
-    - env: CC=gcc CXX=g++
+## C/C++ agent tests
+    - env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
       after_script:
-    - env: CC=clang-3.6 CXX=clang++-3.6
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       after_script:
-    - env: CC=gcc-4.6 CXX=g++-4.6
-      after_script:
-    - env: CC=gcc-4.8 CXX=g++-4.8
-      after_script:
-    - env: CC=gcc-4.9 CXX=g++-4.9
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+    - env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
       after_script:
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
-      after_script:
-#### with PHP 7.0
-    - php: 7.0
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.0
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
-#### with PHP 7.1
-    - php: 7.1 # allowed failure
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
       after_script:
 
 ################################################################################
