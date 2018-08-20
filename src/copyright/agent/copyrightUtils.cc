@@ -298,7 +298,7 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
 
 #pragma omp parallel
   {
-    CopyrightDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
+    CopyrightDatabaseHandler threadLocalDatabaseHandler(std::move(databaseHandler.spawn()));
 
     size_t pFileCount = fileIds.size();
 #pragma omp for
