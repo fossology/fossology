@@ -6,9 +6,20 @@
 language: php
 dist: trusty
 php:
-  - '5.6'
+  - '7.0'
 addons:
  - postgresql: "9.3"
+ - apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+    - gcc-5
+    - g++-5
+    - gcc-6
+    - g++-6
+
 cache:
  - apt
 
@@ -33,22 +44,14 @@ install:
                               libpq-dev libcunit1-dev libcppunit-dev
                               libboost-regex-dev libboost-program-options-dev
                               liblocal-lib-perl libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
- - sudo apt-get install -q -y $CXX $CC || sudo apt-get install -q -y $CC
+ - sudo apt-get install -q -y ${CXX} ${CC} || sudo apt-get install -q -y ${CC}
  - sudo apt-get install -q -y cppcheck
  - ( cd src && composer install --dev )
  - install/scripts/install-spdx-tools.sh
  - install/scripts/install-ninka.sh
 
 before_script:
- - sudo mkdir -p /var/local/cache/fossology
- - sudo chown $(whoami) /var/local/cache/fossology
- - sudo mkdir -p /srv/fossologyTestRepo
- - sudo chown $(whoami) /srv/fossologyTestRepo
- - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
- - psql -c "create database fossology;" -U postgres
- - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
- - echo "localhost:*:*:fossy:fossy" >> ~/.pgpass && echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
- - chmod 0600 ~/.pgpass
+ - utils/prepare-test -afty
 
 env:
   global:
@@ -59,12 +62,12 @@ env:
 script:
  - set -e
  - src/testing/syntax/syntaxtest.sh
- - if [[ ! -z "$CHECKBEFORE" ]]; then $CHECKBEFORE; fi
- - if [[ ! -z "$MAKETARGETS" ]]; then make $MAKETARGETS; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
- - if [[ ! -z "$PHPTESTSUITE" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
+ - if [[ ! -z "${CHECKBEFORE}" ]]; then ${CHECKBEFORE}; fi
+ - if [[ ! -z "${MAKETARGETS}" ]]; then make ${MAKETARGETS}; fi
+ - if [[ ! -z "${PHPTESTSUITE}" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="${PHPTESTSUITE}"; fi
  - set +e
 
 after_script:
@@ -89,49 +92,14 @@ matrix:
       after_script:
 
 ################################################################################
-## C/C++ and phpunit agent tests
-#### with PHP 5.6
-    - env: CC=gcc CXX=g++
+## C/C++ agent tests
+    - env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
       after_script:
-    - env: CC=clang-3.6 CXX=clang++-3.6
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       after_script:
-    - env: CC=gcc-4.6 CXX=g++-4.6
-      after_script:
-    - env: CC=gcc-4.8 CXX=g++-4.8
-      after_script:
-    - env: CC=gcc-4.9 CXX=g++-4.9
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
+    - env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
       after_script:
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
-      after_script:
-#### with PHP 7.0
-    - php: 7.0
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.0
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
-#### with PHP 7.1
-    - php: 7.1 # allowed failure
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
       after_script:
 
 ################################################################################
@@ -159,18 +127,6 @@ matrix:
 
 ################################################################################
   allow_failures:
-    - php: 7.1
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.1
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.1
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.1
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
     - script:
         - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
       after_script:
