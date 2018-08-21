@@ -16,17 +16,36 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+/**
+ * @file
+ * @brief Run one-shot license analysis on JSON license
+ */
 require_once ('CommonCliTest.php');
 
-class OneShot_JSON extends CommonCliTest
+/**
+ * @class OneShotJSON
+ * @brief Run one-shot license analysis on JSON license
+ */
+class OneShotJSON extends CommonCliTest
 {
+  /**
+   * @var string $testd_file
+   * Path to the file
+   */
   public $tested_file;
 
+  /**
+   * @brief Run NOMOS on JSON file
+   * @test
+   * -# Check if required file exists
+   * -# Run nomos on the file and record the output
+   * -# Check if the output says \b JSON
+   */
   function testOneShot_JSON()
   {
     $this->tested_file = dirname(dirname(dirname(__DIR__))).'/testing/dataFiles/TestData/licenses/jslint.js';
     $license_report = "JSON";
-    
+
     list($output,) = $this->runNomos("",array($this->tested_file));
     list(,,,,$license) = explode(' ', $output);
     $this->assertEquals(trim($license), $license_report);

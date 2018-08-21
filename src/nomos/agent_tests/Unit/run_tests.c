@@ -14,6 +14,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test cases for Nomos
+ * \dir
+ * \brief Unit test cases for Nomos
+ */
 
 /* local includes */
 #include <libfocunit.h>
@@ -34,7 +40,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "nomos_regex.h"
 #include "_autodefs.h"
 //nomos globals
-extern licText_t licText[]; /* Defined in _autodata.c */
+extern licText_t licText[]; /**< Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
 

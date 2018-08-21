@@ -24,12 +24,17 @@
 #include "util.h"
 #include "nomos_regex.h"
 
+/**
+ * \file
+ * \brief Doctor buffer utilities for debugging
+ */
+/**
+ * \brief garbage collect: eliminate all INVISIBLE characters in the buffer
+ * \param[in,out] textBuffer Buffer to compress
+ * \return Size difference between orifinal and compressed buffer
+ */
 int compressDoctoredBuffer( char* textBuffer)
 {
-  /*
-   * garbage collect: eliminate all INVISIBLE characters in the buffer
-   */
-
   int previous=strlen(textBuffer);
 
   if(cur.docBufferPositionsAndOffsets)
@@ -42,6 +47,10 @@ int compressDoctoredBuffer( char* textBuffer)
   return previous - after;
 }
 
+/**
+ * \brief Remove HTML comments from buffer without removing comment text
+ * \param[in,out] buf
+ */
 void removeHtmlComments(char* buf)
 {
   int f;
@@ -113,12 +122,14 @@ void removeHtmlComments(char* buf)
   }
 }
 
+/**
+ * \brief Remove comments that start at the beginning of a line
+ *
+ * Comments like *, ^dnl, ^xcomm, ^comment, and // preserving the comment text
+ * \param[in,out] buf
+ */
 void removeLineComments(char* buf)
 {
-  /*
-   * step 2: remove comments that start at the beginning of a line, * like
-   * ^dnl, ^xcomm, ^comment, and //
-   */
   char* cp;
   char* MODULE_LICENSE = "MODULE_LICENSE";
   cp = buf;
@@ -213,6 +224,10 @@ void removeLineComments(char* buf)
   }
 }
 
+/**
+ * \brief Remove newlines from buffer
+ * \param[in,out] buf
+ */
 void cleanUpPostscript(char* buf)
 {
   char* cp;
@@ -232,13 +247,15 @@ void cleanUpPostscript(char* buf)
   }
 }
 
+/**
+ * \brief Remove groff/troff font-size indicators, the literal
+ *        string backslash-n and all backslahes, ala
+ *
+ * `perl -pe 's,\\s[+-][0-9]*,,g;s,\\s[0-9]*,,g;s/\\n//g;' | f`
+ * \param[in,out] buf
+ */
 void removeBackslashesAndGTroffIndicators(char* buf)
 {
-  /*
-   *      - step 4: remove groff/troff font-size indicators, the literal
-   *              string backslash-n and all backslahes, ala:
-   *==>   perl -pe 's,\\s[+-][0-9]*,,g;s,\\s[0-9]*,,g;s/\\n//g;' |
-   f*/
   char* cp;
   char* x;
   for (cp = buf; *cp; cp++)
@@ -267,16 +284,17 @@ void removeBackslashesAndGTroffIndicators(char* buf)
   }
 }
 
+/**
+ * \brief Convert white-space to real spaces, and remove
+ *        unnecessary punctuation
+ *
+ * `tr -d '*=+#$|%.,:;!?()\\][\140\047\042' | tr '\011\012\015' '   '`
+ * \param[in,out] buf
+ * \note We purposely do NOT process backspace-characters here.  Perhaps
+ * there's an improvement in the wings for this?
+ */
 void convertWhitespaceToSpaceAndRemoveSpecialChars(char* buf, int isCR )
 {
-  /*
-   *      - step 5: convert white-space to real spaces, and remove
-   *              unnecessary punctuation, ala:
-   *==>   tr -d '*=+#$|%.,:;!?()\\][\140\047\042' | tr '\011\012\015' '   '
-   *****
-   * NOTE: we purposely do NOT process backspace-characters here.  Perhaps
-   * there's an improvement in the wings for this?
-   */
   char* cp;
   for (cp = buf; /*cp < end &&*/*cp; cp++)
   {
@@ -409,16 +427,15 @@ void convertWhitespaceToSpaceAndRemoveSpecialChars(char* buf, int isCR )
   }
 }
 
-
+/**
+ * Look for hyphenations of words, to compress both halves into a
+ * single (sic) word.  Regex == "[a-z]- [a-z]".
+ * \param[in,out] buf
+ * \note Not sure this will work based on the way we strip punctuation
+ * out of the buffer above -- work on this later.
+ */
 void dehyphen(char* buf)
 {
-  /*
-   * Look for hyphenations of words, to compress both halves into a sin-
-   * gle (sic) word.  Regex == "[a-z]- [a-z]".
-   *****
-   * NOTE: not sure this will work based on the way we strip punctuation
-   * out of the buffer above -- work on this later.
-   */
   char* cp;
 
   for (cp = buf; idxGrep(_UTIL_HYPHEN, cp, REG_ICASE); /*nada*/)
@@ -452,12 +469,14 @@ void dehyphen(char* buf)
 
 }
 
+/**
+ * \brief Clean up miscellaneous punctuation
+ *
+ * `perl -pe 's,[-_/]+ , ,g;s/print[_a-zA-Z]* //g;s/  / /g;'`
+ * \param[in,out] buf
+ */
 void removePunctuation(char* buf)
 {
-  /*
-   *      - step 6: clean up miscellaneous punctuation, ala:
-   *==>           perl -pe 's,[-_/]+ , ,g;s/print[_a-zA-Z]* //g;s/  / /g;'
-   */
   char* cp;
   char* x;
   for (cp = buf; idxGrep(_UTIL_MISCPUNCT, cp, REG_EXTENDED); /*nada*/)
@@ -482,16 +501,20 @@ void removePunctuation(char* buf)
   }
 }
 
+/**
+ * \brief Ignore function calls to print routines
+ *
+ * Only concentrate on what's being printed (sometimes programs do print
+ * licensing information) -- but don't ignore real words that END in 'print',
+ * like footprint and fingerprint.
+ *
+ * Here, we take a risk and just look for a 't' (in "footprint"), or for an
+ * 'r' (in "fingerprint").  If someone has ever coded a print routine that
+ * is named 'rprint' or tprint', we're spoofed.
+ * \param[in,out] buf
+ */
 void ignoreFunctionCalls(char* buf)
 {
-  /*
-   * Ignore function calls to print routines: only concentrate on what's being
-   * printed (sometimes programs do print licensing information) -- but don't
-   * ignore real words that END in 'print', like footprint and fingerprint.
-   * Here, we take a risk and just look for a 't' (in "footprint"), or for an
-   * 'r' (in "fingerprint").  If someone has ever coded a print routine that
-   * is named 'rprint' or tprint', we're spoofed.
-   */
   char* cp;
   char* x;
   for (cp = buf; idxGrep(_UTIL_PRINT, cp, REG_ICASE); /*nada*/)
@@ -510,12 +533,13 @@ void ignoreFunctionCalls(char* buf)
   }
 }
 
+/**
+ * Convert the regex ' [X ]+' (where X is really the character #defined as
+ * INVISIBLE) to a single space (and a string of INVISIBLE characters).
+ * \param[in,out] buf
+ */
 void convertSpaceToInvisible(char* buf)
 {
-  /*
-   * Convert the regex ' [X ]+' (where X is really the character #defined as
-   * INVISIBLE) to a single space (and a string of INVISIBLE characters).
-   */
   char* cp;
   for (cp = buf; *cp; /*nada*/)
   {
@@ -540,6 +564,25 @@ void convertSpaceToInvisible(char* buf)
   }
 }
 
+/**
+ * \brief Convert a buffer of multiple *stuff* to text-only, separated by spaces
+ *
+ * The steps followed in this function are:
+ * -# Filter HTML/XML comments using removeHtmlComments()
+ * -# Filter code comments using removeLineComments()
+ * -# Filter post scripts using cleanUpPostscript()
+ * -# Filter groff/troff using removeBackslashesAndGTroffIndicators()
+ * -# Filter spaces and special characters using convertWhitespaceToSpaceAndRemoveSpecialChars()
+ * -# Filter hyphen strings using dehyphen()
+ * -# Filter punctuation using removePunctuation()
+ * -# Ignore print routines using ignoreFunctionCalls()
+ * -# Filter spaces using convertSpaceToInvisible()
+ * -# Compress the buffer using compressDoctoredBuffer()
+ * \param[in,out] buf   Buffer to filter
+ * \param[in]     isML  Buffer contains HTML/XML data
+ * \param[in]     isPS  Buffer contains post script data
+ * \param[in]     isCR
+ */
 void doctorBuffer(char *buf, int isML, int isPS, int isCR)
 {
 
@@ -604,7 +647,7 @@ void doctorBuffer(char *buf, int isML, int isPS, int isCR)
    * NOTE: we purposely do NOT process backspace-characters here.  Perhaps
    * there's an improvement in the wings for this?
    */
- convertWhitespaceToSpaceAndRemoveSpecialChars(buf, isCR);
+  convertWhitespaceToSpaceAndRemoveSpecialChars(buf, isCR);
   /*
    * Look for hyphenations of words, to compress both halves into a sin-
    * gle (sic) word.  Regex == "[a-z]- [a-z]".

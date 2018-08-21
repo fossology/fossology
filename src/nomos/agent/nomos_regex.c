@@ -27,17 +27,25 @@
 #include "nomos_gap.h"
 #include "nomos_utils.h"
 /**
- * \file nomos_regex.c
+ * \file
  * \brief search using regex functions
  *
  * Functions for dealing with the regex clib functions.  Performs the
  * regex searchs on the data.
- *
  */
+/** Buffer to hold regex error */
 static char regexErrbuf[myBUFSIZ];
 
 regex_t idx_regc[NFOOTPRINTS];
 
+/**
+ * \brief Log an error caused by regex
+ *
+ * Calls regerror()
+ * \param ret   Error code
+ * \param regc  Compiled regex
+ * \param regex Regex string
+ */
 void regexError(int ret, regex_t *regc, char *regex)
 {
 #ifdef	PROC_TRACE
@@ -50,6 +58,12 @@ void regexError(int ret, regex_t *regc, char *regex)
   Bail(-__LINE__);
 }
 
+/**
+ * \brief Check if a string ends with given suffix
+ * \param s       String to check
+ * \param suffix  Suffix to find
+ * \return 1 if suffix found, 0 otherwise
+ */
 int endsIn(char *s, char *suffix)
 {
   int slen = (int) strlen(s);
@@ -69,6 +83,12 @@ int endsIn(char *s, char *suffix)
   return (0);
 }
 
+/**
+ * \brief Check if a line exists in a file
+ * \param pathname  File location
+ * \param regex     Regex to check
+ * \return True if regex satisfied, false otherwise
+ */
 int lineInFile(char *pathname, char *regex)
 {
   char buf[myBUFSIZ];
@@ -81,6 +101,13 @@ int lineInFile(char *pathname, char *regex)
   return (textInFile(pathname, buf, REG_NEWLINE));
 }
 
+/**
+ * \brief Check if a regex passes in a file
+ * \param pathname  File location
+ * \param regex     Regex to check
+ * \param flags     Additional regex flags
+ * \return True if regex satisfied, false otherwise
+ */
 int textInFile(char *pathname, char *regex, int flags)
 {
   char *textp;
@@ -114,7 +141,6 @@ int textInFile(char *pathname, char *regex, int flags)
 }
 
 /**
- * strGrep
  * \brief General-purpose grep function, used for one-time-only searches.
  *
  * @return -1 on regex-compile failure, 1 if regex search fails, and 0 if
@@ -177,12 +203,12 @@ int strGrep(char *regex, char *data, int flags)
   return (1);
 }
 
-/* idxGrep
+/**
  * \brief compile a regex, and perform the search (on data?)
  *
- * @param int index : number of licence/regex we are looking for (given in STRINGS.in)
- * @param char* data, the data to search
- * @param int flags regcomp cflags
+ * @param index number of licence/regex we are looking for (given in STRINGS.in)
+ * @param data  the data to search
+ * @param flags regcomp cflags
  *
  * @return -1 on regex-compile failure, 1 if regex search fails, and 0 if
  * regex search is successful.
@@ -192,6 +218,16 @@ int idxGrep(int index, char *data, int flags)
   return idxGrep_base(index, data, flags, 0);
 }
 
+/**
+ * \brief compile a regex, perform the search and record findings
+ *
+ * If OPTS_NO_HIGHLIGHTINFO is set, do not record. If not set, record the findings
+ * \param index number of licence/regex we are looking for (given in STRINGS.in)
+ * \param data  the data to search
+ * \param flags regcomp cflags
+ * \return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+ * regex search is successful.
+ */
 int idxGrep_recordPosition(int index, char *data, int flags)
 {
   if( optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
@@ -202,6 +238,17 @@ int idxGrep_recordPosition(int index, char *data, int flags)
   }
 }
 
+/**
+ * \brief compile a regex, perform the search and record findings
+ *
+ * If OPTS_NO_HIGHLIGHTINFO is set, do not record. If not set, record the
+ * doctored findings
+ * \param index number of licence/regex we are looking for (given in STRINGS.in)
+ * \param data  the data to search
+ * \param flags regcomp cflags
+ * \return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+ * regex search is successful.
+ */
 int idxGrep_recordPositionDoctored(int index, char *data, int flags)
 {
 
@@ -213,6 +260,17 @@ int idxGrep_recordPositionDoctored(int index, char *data, int flags)
   }
 }
 
+/**
+ * \brief compile a regex, perform the search and record index
+ *
+ * If OPTS_NO_HIGHLIGHTINFO is set, do not record. If not set, record the
+ * finding index
+ * \param index number of licence/regex we are looking for (given in STRINGS.in)
+ * \param data  the data to search
+ * \param flags regcomp cflags
+ * \return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+ * regex search is successful.
+ */
 int idxGrep_recordIndex(int index, char *data, int flags)
 {
   if( optionIsSet(OPTS_NO_HIGHLIGHTINFO) ) {
@@ -223,8 +281,18 @@ int idxGrep_recordIndex(int index, char *data, int flags)
   }
 }
 
-
-int matchOnce(int isPlain,char *data, char* regex, regex_t *rp, regmatch_t* regmatch ) {
+/**
+ * \brief Perform a regex match on a given data and return only first match
+ * \param isPlain   Do a plain match?
+ * \param data      The string to perform search on
+ * \param regex     The regex string
+ * \param rp        Regex buffer
+ * \param[out] regmatch  Regex matches
+ * \return
+ */
+int matchOnce(int isPlain, char *data, char* regex, regex_t *rp,
+    regmatch_t* regmatch)
+{
   if(isPlain) {
     return !strNbuf_noGlobals(data, regex, regmatch , 0 , cur.matchBase );
   }
@@ -232,7 +300,18 @@ int matchOnce(int isPlain,char *data, char* regex, regex_t *rp, regmatch_t* regm
   return regexec(rp, data, 1, regmatch, 0);
 }
 
-int storeOneMatch(regmatch_t currentRegMatch, int lastmatch, GArray* allmatches, char** tmpData, char* data){
+/**
+ * \brief Store a single regex match to array
+ * \param[in] currentRegMatch Match to store
+ * \param[in] lastmatch       Index of last match
+ * \param[in,out] allmatches  Array of all matches
+ * \param[in,out] tmpData
+ * \param[in] data
+ * \return New lastmatch index
+ */
+int storeOneMatch(regmatch_t currentRegMatch, int lastmatch, GArray* allmatches,
+    char** tmpData, char* data)
+{
   regmatch_t storeRegMatch;
   storeRegMatch.rm_so = currentRegMatch.rm_so + lastmatch;
   storeRegMatch.rm_eo = currentRegMatch.rm_eo + lastmatch;
@@ -242,13 +321,13 @@ int storeOneMatch(regmatch_t currentRegMatch, int lastmatch, GArray* allmatches,
   return lastmatch;
 }
 
-/* idxGrep_base
+/**
  * \brief compile a regex, and perform the search (on data?)
  *
- * @param int index : number of licence/regex we are looking for (given in STRINGS.in)
- * @param char* data, the data to search
- * @param int flags regcomp cflags
- * @param int mode Flag to control recording of findings (0:No, 1: Yes, 2:Yes doctored buffer)
+ * @param index number of licence/regex we are looking for (given in STRINGS.in)
+ * @param data the data to search
+ * @param flags regcomp cflags
+ * @param mode Flag to control recording of findings (0:No, 1: Yes, 2:Yes doctored buffer)
  *
  * @return -1 on regex-compile failure, 1 if regex search fails, and 0 if
  * regex search is successful.
@@ -260,7 +339,11 @@ int idxGrep_base(int index, char *data, int flags, int mode)
 
   int show = flags & FL_SHOWMATCH;
   licText_t *ltp = licText + index;
-  regex_t *rp = idx_regc + index; //TODO is idx_regc needed? Here we set the pointer to our array and later we fill it, but we never reuse the regex_t
+  /**
+   * \todo is idx_regc needed? Here we set the pointer to our array and later
+   * we fill it, but we never reuse the regex_t
+   */
+  regex_t *rp = idx_regc + index;
 
   CALL_IF_DEBUG_MODE(printf(" %i %i \"", index, ltp->plain);)
 
@@ -357,7 +440,7 @@ int idxGrep_base(int index, char *data, int flags, int mode)
       lastmatch = storeOneMatch(currentRegMatch, lastmatch, allmatches, &tmpData, data);
     }
 
-  
+
     if(index >= _KW_first  && index <= _KW_last ) {
       rememberWhatWeFound(cur.keywordPositions, allmatches, index, mode);
     }
@@ -370,24 +453,48 @@ int idxGrep_base(int index, char *data, int flags, int mode)
 
   if (!ltp->plain ) regfree(rp);
 return (1);
-
 }
 
-
+/**
+ * \brief Add a given index to index list
+ * \param[in,out] indexList List to add index to
+ * \param[in] index         Index to be appended
+ */
 void recordIndex(GArray* indexList, int index){
   g_array_append_val(indexList, index);
 }
 
+/**
+ * \brief Get offset from doctored buffer
+ * \param posInDoctoredBuffer
+ * \return new offset
+ * \sa uncollapsePosition()
+ */
 static int getOffset(int posInDoctoredBuffer)
 {
   return uncollapsePosition(posInDoctoredBuffer, cur.docBufferPositionsAndOffsets);
 }
 
-regmatch_t* getRegmatch_t(GArray* in,int  index){
+/**
+ * \brief From a given array, get regex match from a given index
+ * \param in    Array to get regex match from
+ * \param index The index in array required
+ * \return  Regex match @index
+ */
+regmatch_t* getRegmatch_t(GArray* in, int index)
+{
  return & g_array_index(in, regmatch_t, index);
 }
 
-void rememberWhatWeFound(GArray* highlight, GArray* regmatch_tArray,  int index, int mode)
+/**
+ * \brief Store regex matches in highlight array
+ * \param[in,out] highlight   The array holding the regex matches
+ * \param[in] regmatch_tArray Array of regex matches to store
+ * \param[in] index           Index of license (from STRINGS.in)
+ * \param[in] mode            Mode to store (1=>get the byte position|2=>get the offset)
+ */
+void rememberWhatWeFound(GArray* highlight, GArray* regmatch_tArray, int index,
+  int mode)
 {
 
   if (mode != 1 && mode != 2)
@@ -422,18 +529,25 @@ void rememberWhatWeFound(GArray* highlight, GArray* regmatch_tArray,  int index,
 
 #define	_XC(q)	((char) xascii[q])
 
-
+/**
+ * \brief Check if a string exists in buffer (case insensitive)
+ * \param data  Haystack
+ * \param str   Needle
+ * \return 1 on success, 0 otherwise
+ * \sa strNbuf_noGlobals()
+ */
 int strNbuf(char *data, char *str){
 
   return strNbuf_noGlobals(data, str, &(cur.regm), gl.flags & FL_SAVEBASE , cur.matchBase );
 }
 
-
 /**
- * \brief This is our own internal, case-insensitive version of strstr().  No
- * open-source code was consulted/used in the construction of this function.
+ * \brief This is our own internal, case-insensitive version of strstr().
+ *
+ * No open-source code was consulted/used in the construction of this function.
  */
-int strNbuf_noGlobals(char *data, char *str , regmatch_t* matchPos, int doSave , char* saveData)
+int strNbuf_noGlobals(char *data, char *str, regmatch_t* matchPos, int doSave,
+char* saveData)
 {
   static int firstFlag = 1;
   static char xascii[128];
