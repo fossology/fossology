@@ -77,6 +77,8 @@ src/monk/agent/squareBuilder
 src/monk/agent_tests/Unit/results/
 src/monk/agent_tests/Unit/test_monk
 src/monk/agent_tests/Unit/run_tests
+src/monk/agent_tests/Functional/monk
+src/monk/agent_tests/Functional/monkbulk
 src/monk/agent_tests/Functional/monk-Xunit1.xml
 src/monk/agent_tests/Functional/monk-Xunit2.xml
 src/monk/agent_tests/Functional/monk-Xunit3.xml
@@ -126,6 +128,7 @@ variable.list
 /src/decider/agent/version.php
 /testReport/
 /src/readmeoss/agent/version.php
+/src/reuser/agent/reuser
 /src/reuser/agent/version.php
 /src/copyright/agent/ecc
 /src/copyright/VERSION-ecc
