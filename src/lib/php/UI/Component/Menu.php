@@ -20,10 +20,9 @@
 namespace Fossology\Lib\UI\Component;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Lib\Util\Object;
 use Twig_Environment;
 
-class Menu extends Object
+class Menu
 {
   const FULL_MENU_DEBUG = 'fullmenudebug';
   var $MenuTarget = "treenav";

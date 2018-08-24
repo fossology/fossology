@@ -50,7 +50,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->uploadDao = M::mock(UploadDao::classname());
+    $this->uploadDao = M::mock(UploadDao::class);
 
     $logger = new Logger('default');
     $logger->pushHandler(new ErrorLogHandler());
@@ -225,7 +225,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $this->buildDecisions(array(
         array(301,1,$groupId,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO,array($firstEventId,$firstEventId+1,$firstEventId+2))
     ));
-    $itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $itemTreeBounds = M::mock(ItemTreeBounds::class);
     $itemTreeBounds->shouldReceive('getItemId')->andReturn(301);
     $itemTreeBounds->shouldReceive('getUploadTreeTableName')->andReturn('uploadtree');
     $itemTreeBounds->shouldReceive('containsFiles')->andReturn(false);
@@ -238,7 +238,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     assertThat($events1, arrayWithSize(2));
     assertThat($events1, hasKeyInArray(401));
     assertThat($events1, hasKeyInArray(402));
-    assertThat($events1[401], is(anInstanceOf(ClearingEvent::classname())));
+    assertThat($events1[401], is(anInstanceOf(ClearingEvent::class)));
     assertThat($events1[402]->getEventId(), is($firstEventId+1));
     assertThat($events1[401]->getEventId(), is($firstEventId+2));
   }
@@ -284,7 +284,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testBulkHistoryWithoutMatches()
   {
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
     $treeBounds->shouldReceive('getItemId')->andReturn(301);
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
@@ -301,7 +301,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
 
   public function testBulkHistoryWithoutMatchesFromDifferentFolder()
   {
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
     $treeBounds->shouldReceive('getItemId')->andReturn(305);
     $treeBounds->shouldReceive('getLeft')->andReturn(4);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
@@ -316,7 +316,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->insertBulkEvents();
 
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
     $treeBounds->shouldReceive('getItemId')->andReturn(301);
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
@@ -339,7 +339,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
   {
     $this->insertBulkEvents();
 
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
     $treeBounds->shouldReceive('getItemId')->andReturn(301);
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getUploadTreeTableName')->andReturn("uploadtree");
@@ -371,7 +371,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $scope = DecisionScopes::ITEM;
     $this->buildDecisions(array(array(303,$user,$groupId,$type,$t,$scope,array($eventId)),
         array(305,$user,$groupId,$type,$t,$scope,array($eventId+1))));
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
 
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getRight')->andReturn(8);
@@ -395,7 +395,7 @@ class ClearingDaoTest extends \PHPUnit_Framework_TestCase
     $type = DecisionTypes::IDENTIFIED;
     $scope = DecisionScopes::ITEM;
     $this->buildDecisions(array(  array( $item,$user,$groupId,$type,$t,$scope,array($eventId,$eventId+1) )  ));
-    $treeBounds = M::mock(ItemTreeBounds::classname());
+    $treeBounds = M::mock(ItemTreeBounds::class);
 
     $treeBounds->shouldReceive('getLeft')->andReturn(1);
     $treeBounds->shouldReceive('getRight')->andReturn(8);

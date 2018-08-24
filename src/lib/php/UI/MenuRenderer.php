@@ -18,9 +18,7 @@
 
 namespace Fossology\Lib\UI;
 
-use Fossology\Lib\Util\Object;
-
-class MenuRenderer extends Object
+class MenuRenderer
 {
    /**
    * @param $menu     menu list need to show as list

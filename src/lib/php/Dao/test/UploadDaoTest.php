@@ -164,7 +164,7 @@ class UploadDaoTest extends \PHPUnit_Framework_TestCase
     $this->prepareModularTable($subentries);
 
     $nextItem = $this->uploadDao->getPreviousItem(1, 6);
-    assertThat($nextItem, anInstanceOf(Item::classname()));
+    assertThat($nextItem, anInstanceOf(Item::class));
     assertThat($nextItem->getId(), is(8));
   }
 

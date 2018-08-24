@@ -20,9 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Html\HtmlElement;
-use Fossology\Lib\Util\Object;
 
-class Highlight extends Object
+class Highlight
 {
   const MATCH = "M";
   const CHANGED = "MC";

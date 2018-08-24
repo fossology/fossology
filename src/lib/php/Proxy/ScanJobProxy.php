@@ -19,14 +19,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Proxy;
 
 use Fossology\Lib\Data\AgentRef;
-use Fossology\Lib\Util\Object;
 use Fossology\Lib\Dao\AgentDao;
 
 /**
  * Class AgentDao
  * @package Fossology\Lib\Dao
  */
-class ScanJobProxy extends Object
+class ScanJobProxy
 {
   const ARS_TABLE_SUFFIX = "_ars";
 

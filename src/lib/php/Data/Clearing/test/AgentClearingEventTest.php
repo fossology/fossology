@@ -39,8 +39,8 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
   private $agentClearingEvent;
 
   protected function setUp() {
-    $this->licenseRef = M::mock(LicenseRef::classname());
-    $this->agentRef = M::mock(AgentRef::classname());
+    $this->licenseRef = M::mock(LicenseRef::class);
+    $this->agentRef = M::mock(AgentRef::class);
 
     $this->agentClearingEvent = new AgentClearingEvent($this->licenseRef, $this->agentRef, $this->matchId, $this->percentage);
   }
@@ -120,4 +120,3 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->agentClearingEvent->getPercentage(), is($this->percentage));
   }
 }
- 

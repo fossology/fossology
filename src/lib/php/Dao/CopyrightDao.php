@@ -22,10 +22,9 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class CopyrightDao extends Object
+class CopyrightDao
 {
   /** @var DbManager */
   private $dbManager;
@@ -38,7 +37,7 @@ class CopyrightDao extends Object
   {
     $this->dbManager = $dbManager;
     $this->uploadDao = $uploadDao;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
   
   /**

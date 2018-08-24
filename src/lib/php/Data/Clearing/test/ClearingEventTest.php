@@ -42,7 +42,7 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
   protected function setUp()
   {
     $this->timestamp = time();
-    $this->clearingLicense = M::mock(ClearingLicense::classname());
+    $this->clearingLicense = M::mock(ClearingLicense::class);
 
     $this->licenseDecisionEvent = new ClearingEvent($this->eventId, $this->uploadTreeId, $this->timestamp, $this->userId, $this->groupId, $this->eventType, $this->clearingLicense);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -102,4 +102,3 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionEvent->getGroupId(), is($this->groupId));
   }
 }
- 

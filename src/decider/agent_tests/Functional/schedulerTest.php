@@ -78,7 +78,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = M::mock('Monolog\Logger');
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);

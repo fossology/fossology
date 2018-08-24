@@ -56,16 +56,16 @@ class HighlightRendererTest extends \PHPUnit_Framework_TestCase
 
   public function prepareMocks()
   {
-    $this->htmlElement = M::mock(SimpleHtmlElement::classname());
+    $this->htmlElement = M::mock(SimpleHtmlElement::class);
     $this->htmlElement->shouldReceive('getOpeningText')->andReturn('<element>');
     $this->htmlElement->shouldReceive('getClosingText')->andReturn('</element>');
 
-    $this->highlight = M::mock(Highlight::classname());
+    $this->highlight = M::mock(Highlight::class);
     $this->highlight->shouldReceive('getType')->andReturn(Highlight::MATCH)->byDefault();
     $this->highlight->shouldReceive('getInfoText')->andReturn("<infoText>")->byDefault();
     $this->highlight->shouldReceive('getHtmlElement')->andReturn(null)->byDefault();
 
-    $this->splitPosition = M::mock(SplitPosition::className());
+    $this->splitPosition = M::mock(SplitPosition::class);
     $this->splitPosition->shouldReceive('getLevel')->andReturn($this->level)->byDefault();
     $this->splitPosition->shouldReceive('getHighlight')->andReturn($this->highlight)->byDefault();
   }

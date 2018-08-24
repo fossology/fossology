@@ -21,11 +21,10 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-class UserDao extends Object
+class UserDao
 {
   const USER = 0;
   const ADMIN = 1;

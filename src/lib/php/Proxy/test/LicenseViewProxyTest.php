@@ -30,7 +30,7 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
   {
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
     $this->almostAllColumns = 'rf_pk,rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,rf_fullname,rf_notes,marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type,rf_source';
   }
@@ -44,7 +44,7 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
   {
     $licenseViewProxy = new LicenseViewProxy(0);
 
-    $reflection = new \ReflectionClass($licenseViewProxy->classname() );
+    $reflection = new \ReflectionClass(get_class($licenseViewProxy));
     $method = $reflection->getMethod('queryOnlyLicenseRef');
     $method->setAccessible(true);
     
@@ -62,7 +62,7 @@ class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
     $groupId = 123;
     $licenseViewProxy = new LicenseViewProxy($groupId);
 
-    $reflection = new \ReflectionClass($licenseViewProxy->classname() );
+    $reflection = new \ReflectionClass(get_class($licenseViewProxy));
     $method = $reflection->getMethod('queryLicenseCandidate');
     $method->setAccessible(true);
     

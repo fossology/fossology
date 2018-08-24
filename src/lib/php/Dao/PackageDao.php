@@ -22,10 +22,9 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Package\Package;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class PackageDao extends Object
+class PackageDao
 {
 
   /** @var DbManager */

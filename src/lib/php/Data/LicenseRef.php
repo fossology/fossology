@@ -19,10 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-use Fossology\Lib\Util\Object;
-
-class LicenseRef extends Object
+class LicenseRef
 {
   /** @var int */
   private $id;

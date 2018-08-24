@@ -37,7 +37,7 @@ class ItemTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
 
     $this->item = new Item($this->itemTreeBounds, $this->parentId, $this->fileId, $this->fileMode, $this->fileName);
   }
@@ -111,4 +111,3 @@ class ItemTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

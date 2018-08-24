@@ -20,9 +20,8 @@ namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class AgentClearingEvent extends Object implements LicenseClearing {
+class AgentClearingEvent implements LicenseClearing {
   /** @var LicenseRef */
   private $licenseRef;
   /** @var AgentRef */

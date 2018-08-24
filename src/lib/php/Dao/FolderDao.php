@@ -23,10 +23,9 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Folder\Folder;
 use Fossology\Lib\Data\Upload\UploadProgress;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class FolderDao extends Object
+class FolderDao
 {
   const FOLDER_KEY = "folder" ;
   const DEPTH_KEY = "depth" ;
@@ -49,7 +48,7 @@ class FolderDao extends Object
   public function __construct(DbManager $dbManager, UserDao $userDao, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
     $this->uploadDao = $uploadDao;
     $this->userDao = $userDao;
   }

@@ -34,7 +34,7 @@ class ScanJobProxyTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->agentDaoMock = M::mock(AgentDao::classname());
+    $this->agentDaoMock = M::mock(AgentDao::class);
     $this->scanJobProxy = new ScanJobProxy($this->agentDaoMock,$this->uploadId);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -47,7 +47,7 @@ class ScanJobProxyTest extends \PHPUnit_Framework_TestCase
 
   private function prepareScanAgentStatus()
   {
-    $reflection = new \ReflectionClass($this->scanJobProxy->classname() );
+    $reflection = new \ReflectionClass(get_class($this->scanJobProxy));
     $method = $reflection->getMethod('scanAgentStatus');
     $method->setAccessible(true);
     
