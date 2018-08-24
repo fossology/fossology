@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o xtrace
 
-docker-compose build --force-rm
+docker-compose build
 docker-compose up -d
 
 #### fossology needs up to 15 seconds to startup
