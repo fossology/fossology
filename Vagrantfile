@@ -3,6 +3,16 @@
 
 # Copyright Siemens AG, 2014
 # SPDX-License-Identifier:  GPL-2.0 LGPL-2.1
+$post_up_message = <<WELCOME
+Use your FOSSology at http://localhost:8081/repo/
+  user: fossy , password: fossy
+
+Or do a 'vagrant ssh' and look at '/fossology' for your source tree.
+
+To update the sources within the vagrant box you have to either
+- call 'vagrant rsync' maually or
+- call 'vagrant rsync-auto' to tell vagrant, to automatically sync the changes
+WELCOME
 
 $add_proxy_settings = <<PROXYSCRIPT
 # get gateway of running VM and set proxy info within global profile
@@ -29,7 +39,7 @@ sudo apt-get update -qq -y
 date > /etc/vagrant.provisioned
 
 echo "lets go!"
-cd /vagrant
+cd /fossology
 
 ./utils/fo-installdeps -e -y
 
@@ -38,20 +48,19 @@ sudo make install
 
 sudo /usr/local/lib/fossology/fo-postinstall
 
-sudo cp /vagrant/install/src-install-apache-example.conf /etc/apache2/conf-enabled/fossology.conf
+sudo cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-enabled/fossology.conf
 
 # increase upload size
-sudo /vagrant/install/scripts/php-conf-fix.sh --overwrite
+sudo /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 sudo /etc/init.d/apache2 restart
-
-echo "use your FOSSology at http://localhost:8081/repo/"
-echo " user: fossy , password: fossy"
-echo "or do a vagrant ssh and look at /vagrant for your source tree"
 SCRIPT
 
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/jessie64"
+  config.vm.post_up_message = $post_up_message
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder ".", "/fossology", type: "rsync"
 
   config.vm.provider "virtualbox" do |vbox|
     vbox.customize ["modifyvm", :id, "--memory", "4096"]
