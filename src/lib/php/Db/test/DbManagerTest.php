@@ -39,8 +39,6 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
 
     $this->logger = M::mock('Monolog\\Logger');
     $this->logger->shouldReceive('addDebug');
-
-    // $this->dbManager->setDriver($this->driver);
   }
 
   function tearDown()
@@ -85,7 +83,7 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     $this->driver->shouldReceive('prepare');
     $sqlStmt = 'foo';
     $this->dbManager->prepare($sqlStmt,'SELECT elephant FROM africa');
-    $this->logger->shouldReceive('addDebug')->with(matchesPattern("/executing '$sqlStmt' took /"));
+    $this->logger->shouldReceive('addDebug')->with(M::pattern("/executing '$sqlStmt' took /"));
     $this->dbManager->flushStats();
   }
 
@@ -93,14 +91,14 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
 
   function testExistsDb_no()
   {
-    $this->driver->shouldReceive('existsTable')->with(matchesPattern('/dTable/'))->andReturn(FALSE);
+    $this->driver->shouldReceive('existsTable')->with(M::pattern('/dTable/'))->andReturn(FALSE);
     $existsTable = $this->dbManager->existsTable('badTable');
     assertThat($existsTable, is(FALSE));
   }
 
   function testExistsDb_yes()
   {
-    $this->driver->shouldReceive('existsTable')->with(matchesPattern('/dTable/'))->andReturn(TRUE);
+    $this->driver->shouldReceive('existsTable')->with(M::pattern('/dTable/'))->andReturn(TRUE);
     $existsTable = $this->dbManager->existsTable('goodTable');
     assertThat($existsTable, is(TRUE));
   }
