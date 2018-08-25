@@ -27,7 +27,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-class LicenseDaoTest extends \PHPUnit_Framework_TestCase
+class LicenseDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestLiteDb */
   private $testDb;

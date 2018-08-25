@@ -28,7 +28,7 @@ require_once(dirname(dirname(dirname(__FILE__)))."/ui/showjobs.php");
 /**
  * \class test_showjobs
  */
-class test_showjobs extends PHPUnit_Framework_TestCase {
+class test_showjobs extends \PHPUnit\Framework\TestCase {
   /**
    * \brief initialization
    */

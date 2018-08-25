@@ -26,7 +26,7 @@
 
 require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 
-class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
+class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
 
   public $agentDir;
   public $pkgagent;

@@ -25,7 +25,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
-class UploadDaoTest extends \PHPUnit_Framework_TestCase
+class UploadDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

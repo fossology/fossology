@@ -31,7 +31,7 @@ $TEST_RESULT_PATH = "./test_result";
 /**
  * \class cliParamsTest4Wget - test wget agent from cli
  */
-class cliParamsTest4Wget extends PHPUnit_Framework_TestCase {
+class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
 
   public $WGET_PATH = "";
   public $DB_COMMAND = "";

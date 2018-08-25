@@ -23,7 +23,7 @@ use Fossology\Lib\Data\AgentRef;
 use Mockery as M;
 
 
-class ScanJobProxyTest extends \PHPUnit_Framework_TestCase
+class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $agentDaoMock;
   private $uploadId = 23;

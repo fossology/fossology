@@ -75,7 +75,7 @@ class TestPlugin extends DefaultPlugin
   }
 }
 
-class DefaultPluginTest extends \PHPUnit_Framework_TestCase
+class DefaultPluginTest extends \PHPUnit\Framework\TestCase
 {
   private $name = "<name>";
 

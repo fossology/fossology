@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 
-class LicenseTest extends \PHPUnit_Framework_TestCase {
+class LicenseTest extends \PHPUnit\Framework\TestCase {
   /** @var string */
   private $text;
   /** @var string */
@@ -46,4 +46,3 @@ class LicenseTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->license->getUrl(), is($this->url));
   }
 }
- 

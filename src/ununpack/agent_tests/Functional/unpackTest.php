@@ -35,7 +35,7 @@ require_once '/usr/share/php/PHPUnit/Framework.php';
 global $GlobalReady;
 $GlobalReady = TRUE;
 
-class cliParamsTest extends PHPUnit_Framework_TestCase {
+class cliParamsTest extends \PHPUnit\Framework\TestCase {
 
 	public $agentDir;
 	public $copyright;

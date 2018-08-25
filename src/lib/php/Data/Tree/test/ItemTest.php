@@ -23,7 +23,7 @@ use Mockery as M;
 
 require_once(__DIR__ . '/../../../common-dir.php');
 
-class ItemTest extends \PHPUnit_Framework_TestCase
+class ItemTest extends \PHPUnit\Framework\TestCase
 {
   private $id = 234;
   private $parentId = 432;
@@ -111,4 +111,3 @@ class ItemTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

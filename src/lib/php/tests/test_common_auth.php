@@ -26,7 +26,7 @@ require_once(dirname(__FILE__) . '/../common-auth.php');
 /**
  * \class test_common_auth
  */
-class test_common_auth extends PHPUnit_Framework_TestCase
+class test_common_auth extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
   protected function setUp()

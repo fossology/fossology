@@ -26,7 +26,7 @@ function Traceback_uri()
   return "http://localhost/repo";
 }
 
-class UrlBuilderTest extends \PHPUnit_Framework_TestCase
+class UrlBuilderTest extends \PHPUnit\Framework\TestCase
 {
   /** @var UrlBuilder */
   private $urlBuilder;
@@ -54,4 +54,3 @@ class UrlBuilderTest extends \PHPUnit_Framework_TestCase
         "'License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$shortName</a>"));
   }
 }
- 

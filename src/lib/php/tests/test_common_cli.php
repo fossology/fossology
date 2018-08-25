@@ -26,7 +26,7 @@ require_once(dirname(__FILE__) . '/../common-cli.php');
 /**
  * \class test_common_cli
  */
-class test_common_cli extends PHPUnit_Framework_TestCase
+class test_common_cli extends \PHPUnit\Framework\TestCase
 {
   /**
    * \brief initialization

@@ -25,7 +25,7 @@ use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Mockery as M;
 
-class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
+class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
 {
   /** @var bool */
   private $sameUpload = true;
@@ -181,4 +181,3 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

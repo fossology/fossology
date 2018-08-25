@@ -25,7 +25,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
 
 
-class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
+class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
 {
   private $itemId = 12;
   private $userId = 5;
@@ -184,4 +184,3 @@ class ClearingEventProcessorTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

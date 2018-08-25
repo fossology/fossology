@@ -29,7 +29,7 @@ function Traceback_uri()
   return 'uri';
 }
 
-class FolderNavTest extends \PHPUnit_Framework_TestCase
+class FolderNavTest extends \PHPUnit\Framework\TestCase
 {
   /** @var M */
   private $dbManager;

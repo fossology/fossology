@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Test;
 
-class TestPgDbTest extends \PHPUnit_Framework_TestCase
+class TestPgDbTest extends \PHPUnit\Framework\TestCase
 {
   
   public function testIfTestDbIsCreated()
