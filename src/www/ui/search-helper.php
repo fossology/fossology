@@ -32,14 +32,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * @param $uploadDao \Fossology\Lib\Dao\UploadDao
  * @param $groupID int
  * @param $PG_CONN resource
- * @return array of uploadtree recs.  Each record contains uploadtree_pk, parent,
- *         upload_fk, pfile_fk, ufile_mode, and ufile_name
+ * @return array of uploadtree recs and total uploadtree recs count. Each record
+ *         contains uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, and
+ *         ufile_name
  */
 function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype,
                     $License, $Copyright, $uploadDao, $groupID, $PG_CONN)
 {
   $MaxPerPage  = 100;  /* maximum number of result items per page */
   $UploadtreeRecs = array();  // uploadtree record array to return
+  $totalUploadtreeRecs = array();  // total uploadtree record array
+  $totalUploadtreeRecsCount = 0; // total uploadtree records count to return
   $NeedTagfileTable = true;
   $NeedTaguploadtreeTable = true;
 
@@ -58,7 +61,7 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
 
     /* Check upload permission */
     if (!$uploadDao->isAccessible($upload_pk, $groupID)) {
-      return $UploadtreeRecs;
+      return array($UploadtreeRecs, $totalUploadtreeRecsCount);
     }
   }
 
@@ -87,7 +90,7 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
     {
       /* tag doesn't match anything, so no results are possible */
       pg_free_result($result);
-      return $UploadtreeRecs;
+      return array($UploadtreeRecs, $totalUploadtreeRecsCount);
     }
 
     /* Make a list of the tag_pk's that satisfy the criteria */
@@ -223,19 +226,20 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
 
   $Offset = $Page * $MaxPerPage;
   $SQL .= " ORDER BY ufile_name, uploadtree.pfile_fk";
-  $SQL .= " LIMIT $MaxPerPage OFFSET $Offset;";
   $result = pg_query($PG_CONN, $SQL);
   DBCheckResult($result, $SQL, __FILE__, __LINE__);
   if (pg_num_rows($result))
   {
     while ($row = pg_fetch_assoc($result))
     {
-      if (!$uploadDao->isAccessible($row['upload_fk'], $groupID)) {
+      if (!$uploadDao->isAccessible($row['upload_fk'], $groupId)) {
         continue;
       }
-      $UploadtreeRecs[] = $row;
+      $totalUploadtreeRecs[] = $row;
     }
   }
   pg_free_result($result);
-  return($UploadtreeRecs);
+  $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $this->MaxPerPage);
+  $totalUploadtreeRecsCount = sizeof($totalUploadtreeRecs);
+  return array($UploadtreeRecs, $totalUploadtreeRecsCount);
 } // GetResults()
