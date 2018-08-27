@@ -16,22 +16,57 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-class RepositoryApiTest extends \PHPUnit\Framework\TestCase {
-  /** @var RepositoryApi */
-  private $repositoryApi;
+function time()
+{
+  return 1535371200;
+}
 
-  protected function setUp() {
-    $this->repositoryApi = new RepositoryApi();
+class RepositoryApiTest extends \PHPUnit\Framework\TestCase
+{
+  /** @var CurlRequest */
+  private $mockCurlRequest;
+
+  protected function setUp()
+  {
+    $this->mockCurlRequest = \Mockery::mock('CurlRequest');
+
+    $this->mockCurlRequest->shouldReceive('setOptions')->once()->with(array(
+      CURLOPT_HEADER         => true,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_HTTPHEADER     => array('User-Agent: fossology'),
+      CURLOPT_TIMEOUT        => 2,
+    ));
+    $this->mockCurlRequest->shouldReceive('execute')->once()
+      ->andReturn('HEADER{"key": "value"}');
+    $this->mockCurlRequest->shouldReceive('getInfo')->once()
+      ->with(CURLINFO_HEADER_SIZE)->andReturn(6);
+    $this->mockCurlRequest->shouldReceive('close')->once();
   }
 
-  public function testCurlGet() {
-    $result = $this->repositoryApi->getLatestRelease();
-    assertThat($result, hasKey('tag_name'));
+  public function tearDown()
+  {
+    \Mockery::close();
   }
-  
-  public function testGetCommitsOfLastDays() {
-    $result = $this->repositoryApi->getCommitsOfLastDays(60);
-    assertThat($result, is(not(emptyArray())));
-    assertThat($result[0], hasKey('sha'));
+
+  public function testGetLatestRelease()
+  {
+    $mockCurlRequestServer = \Mockery::mock('CurlRequestServer');
+    $mockCurlRequestServer->shouldReceive('create')->once()
+      ->with('https://api.github.com/repos/fossology/fossology/releases/latest')
+      ->andReturn($this->mockCurlRequest);
+    $repositoryApi = new RepositoryApi($mockCurlRequestServer);
+
+    $this->assertEquals(array('key' => 'value'), $repositoryApi->getLatestRelease());
+  }
+
+  public function testGetCommitsOfLastDays()
+  {
+    $mockCurlRequestServer = \Mockery::mock('CurlRequestServer');
+    $mockCurlRequestServer->shouldReceive('create')->once()
+      ->with('https://api.github.com/repos/fossology/fossology/commits?since=2018-06-28T12:00:00Z')
+      ->andReturn($this->mockCurlRequest);
+    $repositoryApi = new RepositoryApi($mockCurlRequestServer);
+
+    $this->assertEquals(array('key' => 'value'), $repositoryApi->getCommitsOfLastDays(60));
   }
 }
