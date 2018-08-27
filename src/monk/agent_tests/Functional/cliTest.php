@@ -29,6 +29,14 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
   /** @var string */
   private $testDataDir;
 
+  public static function providerWhetherToUseStandalone()
+  {
+    return array(
+      array(FALSE), // not standalone
+      array(TRUE)   // standalone
+    );
+  }
+
   protected function setUp()
   {
     $this->testDataDir = dirname(__DIR__)."/testlicenses";
@@ -43,8 +51,16 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     $this->dbManager = null;
   }
 
-  private function runMonk($args="", $files=array())
+  private function runMonk($args="", $files=array(), $standalone=FALSE)
   {
+    if($standalone) {
+      $temporaryKB = tempnam("/tmp", "monk.knowledgebase");
+      list($output,$retCode) = $this->runMonk("-s $temporaryKB");
+      $this->assertEquals(0, $retCode, "monk failed to save the knowledgebase to $temporaryKB: ".$output);
+      $result = $this->runMonk("-k $temporaryKB $args", $files);
+      unlink($temporaryKB);
+      return $result;
+    }
     $sysConf = $this->testDb->getFossSysConf();
 
     $confFile = $sysConf."/fossology.conf";
@@ -62,7 +78,9 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
       $args .= " ".escapeshellarg($file);
     }
 
-    $pipeFd = popen("$execDir/$agentName -c $sysConf $args", "r");
+    $cmd = "$execDir/$agentName -c $sysConf $args";
+    echo "run: $cmd\n";
+    $pipeFd = popen($cmd, "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
     $output = "";
@@ -88,11 +106,14 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     $this->testDb->insertData_license_ref(1<<10);
   }
 
-  public function testRunMonkScan()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMonkScan($standalone)
   {
     $this->setUpTables();
 
-    list($output,$retCode) = $this->runMonk("", array($this->testDataDir."/expectedFull/Apache-2.0"));
+    list($output,$retCode) = $this->runMonk("", array($this->testDataDir."/expectedFull/Apache-2.0"), $standalone);
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
@@ -130,13 +151,16 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     }
   }
 
-  public function testRunMultipleMonkScansFulls()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMultipleMonkScansFulls($standalone)
   {
     $this->setUpTables();
 
     $testFiles = glob($this->testDataDir."/expectedFull/*");
 
-    list($output,$retCode) = $this->runMonk("", $testFiles);
+    list($output,$retCode) = $this->runMonk("", $testFiles, $standalone);
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
@@ -151,13 +175,16 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     $lines, $testFiles);
   }
 
-  public function testRunMultipleMonkScansDiff()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMultipleMonkScansDiff($standalone)
   {
     $this->setUpTables();
 
     $testFiles = glob($this->testDataDir."/expectedDiff/*");
 
-    list($output,$retCode) = $this->runMonk("", $testFiles);
+    list($output,$retCode) = $this->runMonk("", $testFiles, $standalone);
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
@@ -171,33 +198,32 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     $lines, $testFiles);
   }
 
-  public function testRunMonkHelpMode()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMonkHelpMode($standalone)
   {
     $this->setUpTables();
 
-    list($output,$retCode) = $this->runMonk("-h", array());
+    list($output,$retCode) = $this->runMonk("-h", array(), $standalone);
 
-    $this->assertEquals(3, $retCode, 'monk failed: '.$output);
+    $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
-    $expectedOutputRgx = "/Usage: .*\/monk \[options\] -- \[file \[file \[\.\.\.\]\]
-  -h   :: help \(print this message\), then exit\.
-  -c   :: specify the directory for the system configuration\.
-  -v   :: verbose output\.
-  -J   :: JSON output.
-  file :: scan file and print licenses detected within it\.
-  no file :: process data from the scheduler\.
-  -V   :: print the version info, then exit\./";
+    $expectedOutputRgx = '/Usage:.*/';
 
     $this->assertRegExp($expectedOutputRgx,$output);
   }
 
-  public function testRunMonkScansWithNegativeMatch()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMonkScansWithNegativeMatch($standalone)
   {
     $this->setUpTables();
 
     $fileName = tempnam(".", "monkCli");
 
-    list($output,$retCode) = $this->runMonk("", array($fileName));
+    list($output,$retCode) = $this->runMonk("", array($fileName), $standalone);
 
     unlink($fileName);
 
@@ -206,14 +232,17 @@ class MonkCliTest extends \PHPUnit_Framework_TestCase
     $this->assertEquals("",$output);
   }
 
-  public function testRunMonkScansWithNegativeMatchVerbose()
+  /**
+   * @dataProvider providerWhetherToUseStandalone
+   */
+  public function testRunMonkScansWithNegativeMatchVerbose($standalone)
   {
     $this->setUpTables();
 
     $fileName = tempnam(".", "monkCli");
     $testFiles = array($fileName);
 
-    list($output,$retCode) = $this->runMonk("-v", $testFiles);
+    list($output,$retCode) = $this->runMonk("-v", $testFiles, $standalone);
 
     unlink($fileName);
 
