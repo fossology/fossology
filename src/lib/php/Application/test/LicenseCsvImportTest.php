@@ -25,7 +25,7 @@ use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
-class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
+class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 {
   protected function setUp()
   {

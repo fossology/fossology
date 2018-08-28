@@ -59,7 +59,7 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
   }
 }
 
-class ClearedComonReportTest extends \PHPUnit_Framework_TestCase
+class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
 {
   /** @var UploadDao|MockInterface */
   private $uploadDao;

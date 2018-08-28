@@ -25,7 +25,7 @@ use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\SplitPosition;
 use Mockery as M;
 
-class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
+class HighlightProcessorTest extends \PHPUnit\Framework\TestCase
 {
   /** @var License */
   private $license1;

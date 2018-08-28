@@ -24,7 +24,7 @@ use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 use Monolog\Logger;
 
-class AgentDaoTest extends \PHPUnit_Framework_TestCase {
+class AgentDaoTest extends \PHPUnit\Framework\TestCase {
 
   private $uploadId = 25;
   private $olderAgentId = 3;
@@ -192,4 +192,3 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
   }
 
 }
- 

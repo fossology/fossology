@@ -38,7 +38,7 @@ function ReportCachePurgeAll()
 
 }
 
-class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
+class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 {
   const MATCH_ID = 231;
   const PERCENTAGE = 315;

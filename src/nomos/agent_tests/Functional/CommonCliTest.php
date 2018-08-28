@@ -19,7 +19,7 @@
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 
-class CommonCliTest extends PHPUnit_Framework_TestCase
+class CommonCliTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   protected $testDb;

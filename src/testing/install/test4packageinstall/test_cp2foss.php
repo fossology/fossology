@@ -25,7 +25,7 @@ require_once("./test_common.php");
 /**
  * @outputBuffering enabled
  */
-class test_cp2foss extends PHPUnit_Framework_TestCase {
+class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
   public $DB_NAME;
   public $PG_CONN;

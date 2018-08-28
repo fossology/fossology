@@ -22,7 +22,7 @@ use Mockery as M;
 use Fossology\Lib\Db\DbManager;
 
 
-class LicenseViewProxyTest extends \PHPUnit_Framework_TestCase
+class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $dbManagerMock;
 

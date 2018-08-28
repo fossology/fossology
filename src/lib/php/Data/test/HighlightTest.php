@@ -22,7 +22,7 @@ namespace Fossology\Lib\Data;
 use Fossology\Lib\Html\HtmlElement;
 use Mockery as M;
 
-class HighlightTest extends \PHPUnit_Framework_TestCase
+class HighlightTest extends \PHPUnit\Framework\TestCase
 {
   private $start = 10;
   private $end = 12;
@@ -100,4 +100,3 @@ class HighlightTest extends \PHPUnit_Framework_TestCase
     assertThat($this->highlight->getHtmlElement(), is($this->htmlElement));
   }
 }
- 

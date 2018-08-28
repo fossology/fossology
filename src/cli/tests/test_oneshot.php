@@ -20,7 +20,7 @@
    * \brief test for one-shot nomos/copyright
    */
 
-  class test_oneshot extends PHPUnit_Framework_TestCase {
+  class test_oneshot extends \PHPUnit\Framework\TestCase {
 
 
     /**

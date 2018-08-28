@@ -32,7 +32,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
+class NinkaScheduledTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

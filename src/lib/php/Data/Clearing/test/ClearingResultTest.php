@@ -22,7 +22,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Exception;
 use Mockery as M;
 
-class ClearingResultTest extends \PHPUnit_Framework_TestCase
+class ClearingResultTest extends \PHPUnit\Framework\TestCase
 {
 
   /** @var LicenseRef|M\MockInterface */
@@ -239,4 +239,3 @@ class ClearingResultTest extends \PHPUnit_Framework_TestCase
     new ClearingResult(null);
   }
 }
- 

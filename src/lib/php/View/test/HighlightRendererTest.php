@@ -26,7 +26,7 @@ use Fossology\Lib\Html\SimpleHtmlElement;
 use Mockery\MockInterface;
 use Mockery as M;
 
-class HighlightRendererTest extends \PHPUnit_Framework_TestCase
+class HighlightRendererTest extends \PHPUnit\Framework\TestCase
 {
   /** @var int */
   private $level = 5;

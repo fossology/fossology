@@ -22,7 +22,7 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Test\TestPgDb;
 
-class UploadTreeProxyTest extends \PHPUnit_Framework_TestCase
+class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $testDb;
 

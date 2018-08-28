@@ -21,7 +21,7 @@ namespace Fossology\SpdxTwo;
 
 require_once(__DIR__ . '/../../agent/spdx2utils.php');
 
-class spdx2Test extends \PHPUnit_Framework_TestCase
+class spdx2Test extends \PHPUnit\Framework\TestCase
 {
   private $assertCountBefore;
 

@@ -23,7 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
-class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
+class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 {
   protected function setUp()
   {
@@ -145,4 +145,3 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

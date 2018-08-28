@@ -28,7 +28,7 @@ require_once './utility.php';
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\Test\TestInstaller;
 
-class cliParamsTest4Ununpack extends PHPUnit_Framework_TestCase
+class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
 {
   private $agentDir;
   private $ununpack;

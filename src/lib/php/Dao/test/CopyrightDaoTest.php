@@ -33,7 +33,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
+class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

@@ -23,7 +23,7 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
-class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
+class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
 
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
@@ -91,4 +91,3 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     assertThat($filteredClearingDecisions, containsInAnyOrder($expecedArray));
   }
 }
- 

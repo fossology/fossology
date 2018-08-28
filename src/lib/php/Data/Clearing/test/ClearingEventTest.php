@@ -20,7 +20,7 @@ namespace Fossology\Lib\Data\Clearing;
 
 use Mockery as M;
 
-class ClearingEventTest extends \PHPUnit_Framework_TestCase
+class ClearingEventTest extends \PHPUnit\Framework\TestCase
 {
   /** @var int */
   private $eventId = 12;
@@ -102,4 +102,3 @@ class ClearingEventTest extends \PHPUnit_Framework_TestCase
     assertThat($this->licenseDecisionEvent->getGroupId(), is($this->groupId));
   }
 }
- 

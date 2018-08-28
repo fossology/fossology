@@ -26,7 +26,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
 
-class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
+class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 {
   /** @var LicenseDao|M\MockInterface */
   private $licenseDao;
@@ -240,4 +240,3 @@ class AgentLicenseEventProcessorTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

@@ -37,7 +37,7 @@ require_once '/usr/share/php/PHPUnit/Framework.php';
 global $GlobalReady;
 $GlobalReady=TRUE;
 
-class cli1Test extends PHPUnit_Framework_TestCase
+class cli1Test extends \PHPUnit\Framework\TestCase
 {
 	public function testHelp()
 	{

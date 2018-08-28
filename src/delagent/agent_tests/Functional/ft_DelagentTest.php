@@ -23,7 +23,7 @@ require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
  * \brief test delagent cli
  */
 
-class ft_DelagentTest extends PHPUnit_Framework_TestCase {
+class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
 
   public $SYSCONF_DIR;
   public $DB_NAME;

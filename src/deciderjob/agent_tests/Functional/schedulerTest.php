@@ -40,7 +40,7 @@ include_once(__DIR__.'/../../../lib/php/Plugin/FO_Plugin.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
-class SchedulerTest extends \PHPUnit_Framework_TestCase
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

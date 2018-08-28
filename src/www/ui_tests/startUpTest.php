@@ -14,7 +14,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-class StartUpTest extends \PHPUnit_Framework_TestCase
+class StartUpTest extends \PHPUnit\Framework\TestCase
 {
   /** @var string */
   private $pageContent;

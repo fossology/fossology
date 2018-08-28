@@ -20,7 +20,7 @@ namespace Fossology\Lib\Dao\Data;
 
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
-class ItemTreeBoundsTest extends \PHPUnit_Framework_TestCase
+class ItemTreeBoundsTest extends \PHPUnit\Framework\TestCase
 {
 
   /**
@@ -81,4 +81,3 @@ class ItemTreeBoundsTest extends \PHPUnit_Framework_TestCase
     assertThat($this->itemTreeBounds->containsFiles(), is(false));
   }
 }
- 

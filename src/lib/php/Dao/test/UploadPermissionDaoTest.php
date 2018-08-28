@@ -25,7 +25,7 @@ use Mockery as M;
 
 require_once __DIR__.'/../../Plugin/FO_Plugin.php';
 
-class UploadPermissionDaoTest extends \PHPUnit_Framework_TestCase
+class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

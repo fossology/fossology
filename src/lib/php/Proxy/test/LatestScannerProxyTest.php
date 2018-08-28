@@ -22,7 +22,7 @@ use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
 
-class LatestScannerProxyTest extends \PHPUnit_Framework_TestCase
+class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestLiteDb */
   private $testDb;

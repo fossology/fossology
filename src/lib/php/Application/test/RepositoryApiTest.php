@@ -16,7 +16,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-class RepositoryApiTest extends \PHPUnit_Framework_TestCase {
+class RepositoryApiTest extends \PHPUnit\Framework\TestCase {
   /** @var RepositoryApi */
   private $repositoryApi;
 

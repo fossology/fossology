@@ -23,7 +23,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Test\TestPgDb;
 
-class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
+class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $testDb;
   private $groupId = 401;
@@ -247,4 +247,3 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     $uploadBrowseProxy->getStatus(-1);
   }
 }
- 
