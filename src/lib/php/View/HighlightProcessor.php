@@ -23,9 +23,8 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\SplitPosition;
-use Fossology\Lib\Util\Object;
 
-class HighlightProcessor extends Object
+class HighlightProcessor
 {
   const LEVEL = 'level';
   const ACTION = 'action';
@@ -146,7 +145,7 @@ class HighlightProcessor extends Object
   {
     if (isset($highlights))
     {
-      usort($highlights, array($this->classname(), 'startAndLengthFirstSorter'));
+      usort($highlights, array(get_class($this), 'startAndLengthFirstSorter'));
     }
   }
 
@@ -312,7 +311,7 @@ class HighlightProcessor extends Object
   {
     foreach ($splitPositions as &$splitPositionEntries)
     {
-      usort($splitPositionEntries, array($this->classname(), 'splitPositionEntrySorter'));
+      usort($splitPositionEntries, array(get_class($this), 'splitPositionEntrySorter'));
     }
     unset($splitPositionEntries);
   }

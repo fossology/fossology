@@ -22,12 +22,11 @@ use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\AgentPlugin;
-use Fossology\Lib\Util\Object;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 include_once(__DIR__ . "/../../lib/php/common-job.php");
 
-class BulkReuser extends Object
+class BulkReuser
 {
   /** @var DbManager */
   private $dbManager;

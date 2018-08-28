@@ -34,7 +34,7 @@ class PagedHexResultTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp()
   {
-    $highlightState = M::mock(HighlightState::className());
+    $highlightState = M::mock(HighlightState::class);
     $highlightState->shouldReceive("openExistingElements")->withAnyArgs()->andReturn("");
     $highlightState->shouldReceive("closeOpenElements")->withAnyArgs()->andReturn("");
     $this->result = new PagedHexResult(self::START_OFFSET, $highlightState);

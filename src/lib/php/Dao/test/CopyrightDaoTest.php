@@ -69,7 +69,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     assertThat($highlights,arrayWithSize(1));
     $highlight0 = $highlights[0];
-    assertThat($highlight0,anInstanceOf(Highlight::classname()));
+    assertThat($highlight0,anInstanceOf(Highlight::class));
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     assertThat($highlight0->getEnd(),equalTo(201));
     

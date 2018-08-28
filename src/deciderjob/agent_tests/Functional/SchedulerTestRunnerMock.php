@@ -92,7 +92,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
     $GLOBALS['container'] = $container;
 
-    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
+    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
 

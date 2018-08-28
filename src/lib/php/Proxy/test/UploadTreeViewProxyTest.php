@@ -30,7 +30,7 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp()
   {
-    $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
   }
 
   public function testDefaultViewName()

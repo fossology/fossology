@@ -116,7 +116,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
   
   public function testSetDelimiter()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvExport); 
     $delimiter = $reflection->getProperty('delimiter');
@@ -131,7 +131,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
   
   public function testSetEnclosure()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvExport); 
     $enclosure = $reflection->getProperty('enclosure');

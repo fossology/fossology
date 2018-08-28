@@ -42,15 +42,15 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp()
   {
-    $this->licenseDao = M::mock(LicenseDao::classname());
-    $this->agentsDao = M::mock(AgentDao::classname());
+    $this->licenseDao = M::mock(LicenseDao::class);
+    $this->agentsDao = M::mock(AgentDao::class);
 
-    $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
 
     $this->agentLicenseEventProcessor = new AgentLicenseEventProcessor($this->licenseDao, $this->agentsDao);
     
     global $container;
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $this->dbManagerMock->shouldReceive('prepare');
     $this->dbManagerMock->shouldReceive('execute');
     $this->dbManagerMock->shouldReceive('fetchArray')
@@ -199,16 +199,16 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
    */
   protected function createLicenseMatch($licenseId, $licenseShortName, $agentId, $agentName, $matchId, $percentage)
   {
-    $licenseRef = M::mock(LicenseRef::classname());
+    $licenseRef = M::mock(LicenseRef::class);
     $licenseRef->shouldReceive("getId")->withNoArgs()->andReturn($licenseId);
     $licenseRef->shouldReceive("getShortName")->withNoArgs()->andReturn($licenseShortName);
 
-    $agentRef = M::mock(LicenseRef::classname());
+    $agentRef = M::mock(LicenseRef::class);
     $agentRef->shouldReceive("getAgentId")->withNoArgs()->andReturn($agentId);
     $agentRef->shouldReceive("getAgentName")->withNoArgs()->andReturn($agentName);
     $agentRef->shouldReceive("getAgentName")->withNoArgs()->andReturn($agentName);
 
-    $licenseMatch = M::mock(LicenseMatch::classname());
+    $licenseMatch = M::mock(LicenseMatch::class);
     $licenseMatch->shouldReceive("getLicenseRef")->withNoArgs()->andReturn($licenseRef);
     $licenseMatch->shouldReceive("getAgentRef")->withNoArgs()->andReturn($agentRef);
     $licenseMatch->shouldReceive("getLicenseFileId")->withNoArgs()->andReturn($matchId);

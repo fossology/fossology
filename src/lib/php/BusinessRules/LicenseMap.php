@@ -21,9 +21,8 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
-use Fossology\Lib\Util\Object;
 
-class LicenseMap extends Object
+class LicenseMap
 {
   const CONCLUSION = 1;
   const TRIVIAL = 2;

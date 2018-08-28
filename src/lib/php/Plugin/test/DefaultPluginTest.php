@@ -107,7 +107,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     global $container;
     $container = M::mock('Container');
 
-    $this->menu = M::mock(Menu::classname());
+    $this->menu = M::mock(Menu::class);
     $this->twigEnvironment = M::mock('\Twig_Environment');
     $this->logger = M::mock('Monolog\Logger');
 

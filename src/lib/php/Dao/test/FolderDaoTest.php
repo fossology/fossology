@@ -204,7 +204,7 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
   {
     $this->folderDao->ensureTopLevelFolder();
     $goodFolder = $this->folderDao->getFolder(FolderDao::TOP_LEVEL);
-    assertThat($goodFolder, is(anInstanceOf(\Fossology\Lib\Data\Folder\Folder::classname())));
+    assertThat($goodFolder, is(anInstanceOf(\Fossology\Lib\Data\Folder\Folder::class)));
     assertThat($goodFolder->getId(), equalTo(FolderDao::TOP_LEVEL));
     $badFolder = $this->folderDao->getFolder(987);
     assertThat($badFolder, is(nullValue()));

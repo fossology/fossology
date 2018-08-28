@@ -79,12 +79,12 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("ReuserSchedulerTest");
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
-    $this->treeDao = \Mockery::mock(TreeDao::classname());
+    $this->treeDao = \Mockery::mock(TreeDao::class);
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 

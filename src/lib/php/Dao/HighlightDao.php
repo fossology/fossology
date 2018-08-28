@@ -22,10 +22,9 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class HighlightDao extends Object
+class HighlightDao
 {
   /**
    * @var DbManager
@@ -42,7 +41,7 @@ class HighlightDao extends Object
   function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
 
     $this->typeMap = array(
         'M' => Highlight::MATCH,

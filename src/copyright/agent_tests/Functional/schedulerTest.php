@@ -54,7 +54,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
     $logger = new Logger("CopyrightSchedulerTest");
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
   }

@@ -58,15 +58,15 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
   {
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManager = M::mock(DbManager::classname());
-    $this->agentDao = M::mock(AgentDao::classname());
+    $this->dbManager = M::mock(DbManager::class);
+    $this->agentDao = M::mock(AgentDao::class);
     $this->agentDao->shouldReceive('getCurrentAgentId')->andReturn(1234);
-    $this->highlightDao = M::mock(HighlightDao::classname());
-    $this->uploadDao = M::mock(UploadDao::classname());
+    $this->highlightDao = M::mock(HighlightDao::class);
+    $this->uploadDao = M::mock(UploadDao::class);
     $this->showJobsDao = new ShowJobsDao($this->dbManager, $this->uploadDao);
-    $this->clearingDao = M::mock(ClearingDao::classname());
-    $this->clearingDecisionProcessor = M::mock(ClearingDecisionProcessor::classname());
-    $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
+    $this->clearingDao = M::mock(ClearingDao::class);
+    $this->clearingDecisionProcessor = M::mock(ClearingDecisionProcessor::class);
+    $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::class);
 
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManager);
     $container->shouldReceive('get')->withArgs(array('dao.agent'))->andReturn($this->agentDao);
@@ -74,7 +74,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
     $container->shouldReceive('get')->withArgs(array('dao.upload'))->andReturn($this->uploadDao);
     $container->shouldReceive('get')->withArgs(array('dao.clearing'))->andReturn($this->clearingDao);
-    $container->shouldReceive('get')->withArgs(array('decision.types'))->andReturn(M::mock(DecisionTypes::classname()));
+    $container->shouldReceive('get')->withArgs(array('decision.types'))->andReturn(M::mock(DecisionTypes::class));
     $container->shouldReceive('get')->withArgs(array('businessrules.clearing_decision_processor'))->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->withArgs(array('businessrules.agent_license_event_processor'))->andReturn($this->agentLicenseEventProcessor);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -166,7 +166,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
    */
   protected function createLicenseMatch($agentName, $matchId)
   {
-    $licenseMatch = M::mock(LicenseMatch::classname());
+    $licenseMatch = M::mock(LicenseMatch::class);
     $licenseMatch->shouldReceive("getLicenseFileId")->withNoArgs()->andReturn($matchId);
     return $licenseMatch;
   }
@@ -210,7 +210,7 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
    */
   protected function createLicenseMatchWithLicId($licId)
   {
-    $licenseMatch = M::mock(LicenseMatch::classname());
+    $licenseMatch = M::mock(LicenseMatch::class);
     $licenseMatch->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     return $licenseMatch;
   }

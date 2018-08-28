@@ -49,21 +49,21 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
     $this->timestamp = time();
     $this->clearingEventProcessor = new ClearingEventProcessor();
 
-    $this->addedLicense = M::mock(ClearingLicense::classname());
+    $this->addedLicense = M::mock(ClearingLicense::class);
     $this->addedLicense->shouldReceive("getShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedLicense->shouldReceive("getId")->withNoArgs()->andReturn($this->addedId);
     
-    $this->addedEvent = M::mock(ClearingEvent::classname());
+    $this->addedEvent = M::mock(ClearingEvent::class);
     $this->addedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->addedName);
     $this->addedEvent->shouldReceive("getLicenseId")->withNoArgs()->andReturn($this->addedId);
     $this->addedEvent->shouldReceive("getClearingLicense")->withNoArgs()->andReturn($this->addedLicense);
     $this->addedEvent->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp);
     $this->addedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(false);
 
-    $this->removedLicense = M::mock(ClearingLicense::classname());
+    $this->removedLicense = M::mock(ClearingLicense::class);
     $this->removedLicense->shouldReceive("getShortName")->withNoArgs()->andReturn($this->removedName);
     $this->removedLicense->shouldReceive("getId")->withNoArgs()->andReturn($this->removedId);
-    $this->removedEvent = M::mock(ClearingEvent::classname());
+    $this->removedEvent = M::mock(ClearingEvent::class);
     $this->removedEvent->shouldReceive("getLicenseShortName")->withNoArgs()->andReturn($this->removedName);
     $this->removedEvent->shouldReceive("getLicenseId")->withNoArgs()->andReturn($this->removedId);
     $this->removedEvent->shouldReceive("getClearingLicense")->withNoArgs()->andReturn($this->removedLicense);
@@ -81,7 +81,7 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
    */
   protected function createEvents()
   {
-    $license = M::mock(ClearingLicense::classname());
+    $license = M::mock(ClearingLicense::class);
 
     $events = array();
     $events[] = $this->createEvent($this->timestamp, $license);
@@ -108,11 +108,11 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
     $licAId = 42;
     $licBId = 23;
 
-    $license1 = M::mock(ClearingLicense::classname());
+    $license1 = M::mock(ClearingLicense::class);
     $license1->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licAId);
     $events[] = $this->createEvent($this->timestamp, $license1, false);
 
-    $license2 = M::mock(ClearingLicense::classname());
+    $license2 = M::mock(ClearingLicense::class);
     $license2->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licBId);
     $events[] = $this->createEvent($this->timestamp+60, $license2, false);
 
@@ -127,11 +127,11 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
   {
     $events = array();
     $licId = 42;
-    $licenseRef1 = M::mock(ClearingLicense::classname());
+    $licenseRef1 = M::mock(ClearingLicense::class);
     $licenseRef1->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     $events[] = $this->createEvent($this->timestamp, $licenseRef1, false);
 
-    $licenseRef2 = M::mock(ClearingLicense::classname());
+    $licenseRef2 = M::mock(ClearingLicense::class);
     $licenseRef2->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     $events[] = $this->createEvent($this->timestamp+60, $licenseRef2, false);
 
@@ -146,11 +146,11 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
     $events = array();
     $licId = 42;
 
-    $licenseRef1 = M::mock(ClearingLicense::classname());
+    $licenseRef1 = M::mock(ClearingLicense::class);
     $licenseRef1->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     $events[] = $this->createEvent($this->timestamp, $licenseRef1);
 
-    $licenseRef2 = M::mock(ClearingLicense::classname());
+    $licenseRef2 = M::mock(ClearingLicense::class);
     $licenseRef2->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     $events[] = $this->createEvent($this->timestamp+60, $licenseRef2);
 
@@ -164,11 +164,11 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
   {
     $events = array();
 
-    $licenseRef1 = M::mock(ClearingLicense::classname());
+    $licenseRef1 = M::mock(ClearingLicense::class);
     $licenseRef1->shouldReceive("getLicenseId")->withNoArgs()->andReturn("fortyTwo");
     $events[] = $this->createEvent($this->timestamp, $licenseRef1);
 
-    $licenseRef2 = M::mock(ClearingLicense::classname());
+    $licenseRef2 = M::mock(ClearingLicense::class);
     $licenseRef2->shouldReceive("getLicenseId")->withNoArgs()->andReturn("fortyTwo");
     $events[] = $this->createEvent($this->timestamp+60, $licenseRef2);
 

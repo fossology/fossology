@@ -20,7 +20,7 @@ namespace Fossology\Lib\Util;
 
 use Closure;
 
-class ArrayOperation extends Object
+class ArrayOperation
 {
   /**
    * @param array

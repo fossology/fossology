@@ -30,10 +30,9 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\UploadTreeProxy;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class ClearingDao extends Object
+class ClearingDao
 {
   /** @var DbManager */
   private $dbManager;
@@ -51,7 +50,7 @@ class ClearingDao extends Object
   function __construct(DbManager $dbManager, UploadDao $uploadDao)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
     $this->uploadDao = $uploadDao;
     $this->licenseRefCache = array();
   }

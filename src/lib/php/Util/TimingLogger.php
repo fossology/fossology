@@ -20,7 +20,7 @@ namespace Fossology\Lib\Util;
 
 use Monolog\Logger;
 
-class TimingLogger extends Object
+class TimingLogger
 {
   const DEFAULT_WATCH = 'default';
 

@@ -42,7 +42,7 @@ class UrlBuilderTest extends \PHPUnit\Framework\TestCase
     $shortName = "<shortName>";
     $fullName = "<fullName>";
 
-    $licenseRef = M::mock(LicenseRef::classname());
+    $licenseRef = M::mock(LicenseRef::class);
     $licenseRef->shouldReceive("getId")->once()->withNoArgs()->andReturn($id);
     $licenseRef->shouldReceive("getShortName")->once()->withNoArgs()->andReturn($shortName);
     $licenseRef->shouldReceive("getFullName")->once()->withNoArgs()->andReturn($fullName);

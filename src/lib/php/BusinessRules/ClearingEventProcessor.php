@@ -20,9 +20,8 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class ClearingEventProcessor extends Object
+class ClearingEventProcessor
 {
 
   /**

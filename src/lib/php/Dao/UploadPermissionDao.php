@@ -20,11 +20,9 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-
-class UploadPermissionDao extends Object
+class UploadPermissionDao
 {
   /** @var DbManager */
   private $dbManager;

@@ -18,9 +18,7 @@
 
 namespace Fossology\Lib\Plugin;
 
-use Fossology\Lib\Util\Object;
-
-abstract class AgentPlugin extends Object implements Plugin
+abstract class AgentPlugin implements Plugin
 {
   const PRE_JOB_QUEUE = 'preJq';
   

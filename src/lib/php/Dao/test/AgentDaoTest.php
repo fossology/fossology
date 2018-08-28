@@ -67,7 +67,7 @@ class AgentDaoTest extends \PHPUnit\Framework\TestCase {
   private $incompleteAgent;
 
   protected function setUp() {
-    $this->dbManager = M::mock(DbManager::classname());
+    $this->dbManager = M::mock(DbManager::class);
     $this->logger = M::mock('Monolog\Logger');
 
     $this->testDb = new TestPgDb();
@@ -144,7 +144,7 @@ class AgentDaoTest extends \PHPUnit\Framework\TestCase {
   {
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
     
     $this->dbManagerMock->shouldReceive('prepare')->once();

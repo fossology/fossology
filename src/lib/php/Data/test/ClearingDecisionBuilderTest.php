@@ -63,7 +63,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
-    $this->clearingEvent = M::mock(ClearingEvent::classname());
+    $this->clearingEvent = M::mock(ClearingEvent::class);
     $this->clearingId = 8;
     $this->uploadTreeId = 9;
     $this->pfileId = 10;
@@ -104,16 +104,16 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
 
   public function testPositiveLicenses()
   {
-    $addedLic = M::mock(LicenseRef::classname());
+    $addedLic = M::mock(LicenseRef::class);
     
-    $addedClearingLic = M::mock(ClearingLicense::classname());
+    $addedClearingLic = M::mock(ClearingLicense::class);
     $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
     $addedClearingLic->shouldReceive('getLicenseRef')->withNoArgs()->andReturn($addedLic);
     
-    $removedClearingLic = M::mock(ClearingLicense::classname());
+    $removedClearingLic = M::mock(ClearingLicense::class);
     $removedClearingLic->shouldReceive('isRemoved')->andReturn(true);
 
-    $removedClearingEvent = M::mock(ClearingEvent::classname());
+    $removedClearingEvent = M::mock(ClearingEvent::class);
     
     $this->clearingEvent->shouldReceive('getClearingLicense')->andReturn($addedClearingLic);
     $removedClearingEvent->shouldReceive('getClearingLicense')->andReturn($removedClearingLic);

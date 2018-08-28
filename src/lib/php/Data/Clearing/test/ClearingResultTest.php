@@ -39,11 +39,11 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
 
   protected function setUp()
   {
-    $this->licenseRef = M::mock(LicenseRef::classname());
-    $this->clearingEvent = M::mock(ClearingEvent::classname());
+    $this->licenseRef = M::mock(LicenseRef::class);
+    $this->clearingEvent = M::mock(ClearingEvent::class);
 
-    $this->agentClearingEvent1 = M::mock(AgentClearingEvent::classname());
-    $this->agentClearingEvent2 = M::mock(AgentClearingEvent::classname());
+    $this->agentClearingEvent1 = M::mock(AgentClearingEvent::class);
+    $this->agentClearingEvent2 = M::mock(AgentClearingEvent::class);
     
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }

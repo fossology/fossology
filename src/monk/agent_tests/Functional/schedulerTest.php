@@ -58,7 +58,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("SchedulerTest");
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);

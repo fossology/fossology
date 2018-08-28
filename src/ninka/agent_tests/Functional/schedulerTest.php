@@ -52,7 +52,7 @@ class NinkaScheduledTest extends \PHPUnit\Framework\TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("NinkaSchedulerTest");
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
   }
   

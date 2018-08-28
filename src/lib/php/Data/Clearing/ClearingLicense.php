@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class ClearingLicense extends Object
+class ClearingLicense
 {
 
   private $licenseRef;

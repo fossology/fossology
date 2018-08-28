@@ -21,9 +21,8 @@ namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
-use Fossology\Lib\Util\Object;
 
-class ClearingDecision extends Object
+class ClearingDecision
 {
   /** @var bool */
   private $sameFolder;

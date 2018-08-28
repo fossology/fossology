@@ -48,7 +48,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
   public function testConstructAndSanity()
   {
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), true);
-    assertThat($uploadBrowseProxy,is(anInstanceOf(UploadBrowseProxy::classname())));
+    assertThat($uploadBrowseProxy,is(anInstanceOf(UploadBrowseProxy::class)));
   }
   
   public function testUpdateTableStatus()
