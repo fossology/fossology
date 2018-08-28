@@ -38,8 +38,8 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [[ $OPTS == ' --' ]]; then
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
   EVERYTHING=true
 fi
 
@@ -75,11 +75,11 @@ if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get "$YesOpt" install \
+      apt-get $YesOpt install \
         libglib2.0-dev
       ;;
     RedHatEnterprise*|CentOS|Fedora)
-      yum "$YesOpt" install \
+      yum $YesOpt install \
         glib2-devel
       ;;
     *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
@@ -90,11 +90,11 @@ if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get "$YesOpt" install \
+      apt-get $YesOpt install \
         libglib2.0-0
       ;;
     RedHatEnterprise*|CentOS|Fedora)
-      yum "$YesOpt" install \
+      yum $YesOpt install \
         glib2
       ;;
   esac
