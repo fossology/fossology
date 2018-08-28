@@ -171,7 +171,7 @@ Follow the steps to get your work included in the project.
 
 3. Create a new branch from the main master branch to contain your changes.
    Best way is to call is to follow the type described in **Git Commit Conventions**
-   stated above: `<type>/<scope>-<topic>`
+   stated above: `<githubId>/#<issueNr>/<description/scope/topic>`
 
    ```bash
    git checkout -b <topic-branch-name>
@@ -180,14 +180,15 @@ Follow the steps to get your work included in the project.
    Example:
 
    ```bash
-   git checkout -b fix/buckets-undefined-index
+   git checkout -b john/138/buckets-undefined-index
    ```
    
    Or
    
    ```bash
-   git checkout -b fix/issue-###
+   git checkout -b john/fix/138
    ```
+
 
 4. It's coding time!
    Please respect the coding convention: [Coding guidelines](https://github.com/fossology/fossology/wiki/Coding-Style)
@@ -198,10 +199,10 @@ Follow the steps to get your work included in the project.
    Use Git's [interactive rebase](https://help.github.com/articles/interactive-rebase)
    feature to tidy up your commits before making them public.
 
-5. Locally merge (or rebase) the upstream master branch into your topic branch:
+5. Locally rebase the upstream master branch into your topic branch:
 
    ```bash
-   git pull [--rebase] upstream master
+   git pull --rebase upstream master
    ```
 
 6. Push your topic branch up to your fork:
@@ -213,6 +214,14 @@ Follow the steps to get your work included in the project.
 7. [Open a Pull Request](https://help.github.com/articles/using-pull-requests/)
     with a clear title and description against the `master` branch.
 
-**IMPORTANT**: By submitting a patch, you agree to allow the project owners to
-license your work under the terms of the [GPLv2](LICENSE) (if it
-includes code changes).
+## IMPORTANT
+The FOSSology project does not require you to assign the copyright of your
+contributions, you retain the copyright. The FOSSology project **does** require
+that you make your contributions available under the
+[GNU General Public License as published by the Free Software Foundation, version 2](LICENSE),
+in order to be accepted as contribution in the main repo.
+
+If appropriate, include the [GPLv2 license header](https://github.com/fossology/fossology/wiki/Coding-Style#default-license-and-file-headers)
+at the top of each file along with the copyright info. If you are adding a new
+file that you wrote, include your name in the copyright notice in the license
+summary.
