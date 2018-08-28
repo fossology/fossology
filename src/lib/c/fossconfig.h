@@ -1,49 +1,53 @@
 /* **************************************************************
-Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License
+ version 2 as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-************************************************************** */
-
+ ************************************************************** */
+/**
+ * \file
+ * \brief FOSSology library to read config file
+ */
 #ifndef FOSSCONFIG_H_INCLUDE
 #define FOSSCONFIG_H_INCLUDE
 
 #include <glib.h>
 
-/** the parser error domain */
+/** The parser error domain */
 #define PARSE_ERROR    1
 #define RETRIEVE_ERROR 2
 
-/** parser error codes */
+/** Parser error codes */
 typedef enum
 {
-  fo_missing_file,
-  fo_missing_group,
-  fo_missing_key,
-  fo_invalid_key,
-  fo_invalid_group,
-  fo_invalid_file,
-  fo_invalid_join,
-  fo_load_config
+  fo_missing_file,  ///< File is missing
+  fo_missing_group, ///< Required group is missing
+  fo_missing_key,   ///< Required key is missing
+  fo_invalid_key,   ///< Requested key is invalid
+  fo_invalid_group, ///< Requested group is invalid
+  fo_invalid_file,  ///< File is invalid
+  fo_invalid_join,  ///< Join is invalid
+  fo_load_config    ///< Unable to load config
 } fo_error_codes;
 
+/** FOSSology config file object */
 typedef struct
 {
-  GTree* group_map;
-  GTree* key_sets;
-  char** group_set;
-  int n_groups;
+  GTree* group_map; ///< Tree of groups in conf file
+  GTree* key_sets;  ///< Tree of sets of keys
+  char** group_set; ///< Array of groups
+  int n_groups;     ///< Number of groups
 } fo_conf;
 
 fo_conf* fo_config_load(char* fname, GError** error);

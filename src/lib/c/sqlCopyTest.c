@@ -15,14 +15,15 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 **************************************************************/
 
-/**************************************************************
+/** ***********************************************************
 * \file  sqlCopyTest.c
 * \brief This is a test program for sqlCopy functions.
 **************************************************************/
 
 #include "libfossology.h"
 
-/* Return the string to use for the text column data
+/**
+ * Return the string to use for the text column data
  */
 char* GetTextCol(int NumTextBytes)
 {

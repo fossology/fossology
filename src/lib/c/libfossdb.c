@@ -16,7 +16,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 **************************************************************/
 
 /*!
- \file libfossdb.c
+ \file
  \brief Common libpq database functions.
  */
 
@@ -27,9 +27,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 #include <string.h>
 
 /*!
- fo_dbconnect()
-
- \brief Connect to a database.  The default is Db.conf.
+ \brief Connect to a database. The default is Db.conf.
 
  \param DBConfFile File path of the Db.conf file to use.  If NULL, use the default Db.conf
  \param ErrorBuf   Address of pointer to error buffer.  fo_dbconnect will allocate this
@@ -165,18 +163,18 @@ PGconn* fo_dbconnect(char* DBConfFile, char** ErrorBuf)
 
 
 /*!
- fo_checkPQresult
- \brief Check the result status of a postgres SELECT
+ \brief Check the result status of a postgres SELECT.
+
  If an error occured, write the error to stdout
 
- \param PGconn *pgConn
- \param PGresult *result
- \param char *sql     the sql query
- \param char * FileID is a file identifier string to write into 
+ \param pgConn  Database connection object
+ \param result  Postgres result object
+ \param sql     the sql query
+ \param FileID is a file identifier string to write into
                       the error message.  Typically the caller
                       will use __FILE__, but any identifier string
                       is ok.
- \param int LineNumb  the line number of the caller (__LINE__)
+ \param LineNumb  the line number of the caller (__LINE__)
 
  \return 0 on OK, -1 on failure.  On failure, result will be freed.
 ****************************************************/
@@ -200,18 +198,17 @@ int fo_checkPQresult(PGconn* pgConn, PGresult* result, char* sql, char* FileID, 
 
 
 /*!
- fo_checkPQcommand
  @brief Check the result status of a postgres commands (not select)
         If an error occured, write the error to stdout
 
- @param PGconn *pgConn
- @param PGresult *result
- @param char *sql the sql query
- @param char * FileID is a file identifier string to write into 
+ @param pgConn  Database connection object
+ @param result  Postgres result object
+ @param sql the sql query
+ @param FileID is a file identifier string to write into
                       the error message.  Typically the caller
                       will use __FILE__, but any identifier string
                       is ok.
- @param int LineNumb  the line number of the caller (__LINE__)
+ @param LineNumb  the line number of the caller (__LINE__)
 
  @return 0 on OK, -1 on failure.  On failure, result will be freed.
 ****************************************************/
@@ -239,9 +236,8 @@ int fo_checkPQcommand(PGconn* pgConn, PGresult* result, char* sql, char* FileID,
 Note, this assumes the database name is 'fossology'.
 
 @param pgConn database connection
-@param tableName
+@param tableName  The table in question
 
-@todo REMOVE hardcoded catalog name "fossology"
 @return 1 if table exists, 0 on error (which is logged) or if table does not exist.
 ****************************************************/
 int fo_tableExists(PGconn* pgConn, const char* tableName)

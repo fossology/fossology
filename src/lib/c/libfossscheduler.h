@@ -69,75 +69,102 @@ extern char* sysconfigdir;
 
 /*
  * The following macro definitions are meant to act as their own statement in
- * the c language. To acomplish this, they needed to not only be able to be used
+ * the c language. To accomplish this, they needed to not only be able to be used
  * in the situation of an "if" statement with no body, but also require that
  * they are followed by a ";".
  *
  * To do this the "do {} while(0)" loop is used, the loop will not appear in
  * result flow control since it does not modify the flow of control, but it is
- * a single statement that requires a ";" at the end to be syntatically correct
+ * a single statement that requires a ";" at the end to be syntactically correct
  */
 
-/** @brief Logging functions
-*/
+/**
+ * Log fatal error
+ * @param ... standard printf-style function call
+ */
 #define LOG_FATAL(...) { \
             fprintf(stdout, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "\n"); \
             fflush(stdout); }
-
+/**
+ * Log Postgres fatal error
+ * @param pg_r Postgres error code
+ * @param ... standard printf-style function call
+ */
 #define LOG_PQ_FATAL(pg_r, ...) { \
             fprintf(stdout, "FATAL %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "FATAL postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
             fflush(stdout); }
 
+/**
+ * Log general error
+ * @param ... standard printf-style function call
+ */
 #define LOG_ERROR(...) { \
             fprintf(stdout, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "\n"); \
             fflush(stdout); }
 
+/**
+ * Log Postgres general error
+ * @param pg_r Postgres error code
+ * @param ... standard printf-style function call
+ */
 #define LOG_PQ_ERROR(pg_r, ...) { \
             fprintf(stdout, "ERROR %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); \
             fflush(stdout); }
 
+/**
+ * Log warnings
+ * @param ... standard printf-style function call
+ */
 #define LOG_WARNING(...) { \
             fprintf(stdout, "WARNING %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "\n"); \
             fflush(stdout); }
 
+/**
+ * Log debugging messages
+ * @param ... standard printf-style function call
+ */
 #define LOG_DEBUG(...) { \
             fprintf(stdout, "DEBUG %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "\n"); \
             fflush(stdout); }
 
+/**
+ * Log notice messages
+ * @param ... standard printf-style function call
+ */
 #define LOG_NOTICE(...) { \
             fprintf(stdout, "NOTICE %s.%d: ", __FILE__, __LINE__); \
             fprintf(stdout, __VA_ARGS__); \
             fprintf(stdout, "\n"); \
             fflush(stdout); }
 
-#define TVERBOSE   agent_verbose
-#define TVERBOSE0 (agent_verbose & (1 << 0))
-#define TVERBOSE1 (agent_verbose & (1 << 1))
-#define TVERBOSE2 (agent_verbose & (1 << 2))
-#define TVERBOSE3 (agent_verbose & (1 << 3))
-#define TVERBOSE4 (agent_verbose & (1 << 4))
-#define TVERBOSE5 (agent_verbose & (1 << 5))
-#define TVERBOSE6 (agent_verbose & (1 << 6))
-#define TVERBOSE7 (agent_verbose & (1 << 7))
+#define TVERBOSE   agent_verbose              ///< Agent verbose set
+#define TVERBOSE0 (agent_verbose & (1 << 0))  ///< Verbose level 0
+#define TVERBOSE1 (agent_verbose & (1 << 1))  ///< Verbose level 1
+#define TVERBOSE2 (agent_verbose & (1 << 2))  ///< Verbose level 2
+#define TVERBOSE3 (agent_verbose & (1 << 3))  ///< Verbose level 3
+#define TVERBOSE4 (agent_verbose & (1 << 4))  ///< Verbose level 4
+#define TVERBOSE5 (agent_verbose & (1 << 5))  ///< Verbose level 5
+#define TVERBOSE6 (agent_verbose & (1 << 6))  ///< Verbose level 6
+#define TVERBOSE7 (agent_verbose & (1 << 7))  ///< Verbose level 7
 
 /** @brief By using these macros the verbosity level of an agent can be changed
 *         dynamically through the scheduler.
 *
 * For example, to print "this is a verbose test at line <line>" at verbose
 * level 2 simply call:
-*    LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);
+*    `LOG_VERBOSE2("this is a verbose test at line %d", __LINE__);`
 * Though you never have to put the caller's filename or line number
 * in a message since they are added by LOG_NOTICE.
 */

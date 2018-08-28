@@ -16,7 +16,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 **************************************************************/
 
 /*!
- * \file sqlCopy.c
+ * \file
  * \brief sqlCopy buffers sql inserts and performs batch copy's
  *        to the database.  Why do this?  Because this method is
  *        roughtly 15x faster than individual sql inserts for a
@@ -26,7 +26,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
  * not an external file.  So the caller should give some consideration
  * to the number of records buffered.
  *
- *\code
+ * \code
  * How to use:
  * 1. Get an sqlCopy_struct pointer from fo_sqlCopyCreate().
  * 2. Add records you want inserted into a single table in the
@@ -40,7 +40,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
  * 1. fo_sqlCopyExecute() will execute the copy to database immediately.
  * 2. fo_sqlCopyPrint() will print the sqlCopy structure.
  *    It is good for debugging.
-\endcode
+ * \endcode
  */
 
 #include "sqlCopy.h"
@@ -48,8 +48,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 /*!
  \brief Constructor for sqlCopy_struct.
 
- \param PGconn  Database connection
- \param TableName
+ \param pGconn  Database connection
+ \param TableName Table to be used
  \param BufSize  Size of the copy buffer in bytes.
                 If BufSize is smaller than needed to hold any
                 single row, then BufSize is automatically increased.
@@ -133,6 +133,8 @@ int tmp_printhex(char * str)
 }
 #endif
 
+#define growby  128  ///< Grow DataBuf by this number of bytes.
+
 /*!
  \brief Add a data row to an sqlCopy
  Use '\N' to pass in a null
@@ -152,8 +154,6 @@ int tmp_printhex(char * str)
 \endverbatim
  \return 0 if failure
 */
-#define growby  128  //Grow DataBuf by this number of bytes.
-
 int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow)
 {
   int NewRowLen;
@@ -241,7 +241,8 @@ int fo_sqlCopyAdd(psqlCopy_t pCopy, char* DataRow)
 
 /*!
  \brief Execute the copy (ie insert the buffered records into the
- database.
+ database).
+
  Then reset pCopy (effectively empty it).
 
  \param pCopy  Pointer to sqlCopy struct
@@ -288,13 +289,15 @@ int fo_sqlCopyExecute(psqlCopy_t pCopy)
 
 
 /*!
- \brief Destructor for sqlCopy_struct.  This will execute CopyExecute
+ \brief Destructor for sqlCopy_struct.
+
+ This will execute fo_sqlCopyExecute()
  if the ExecuteFlag is true and there are records that need
  to be written.
 
  \param pCopy Pointer to sqlCopy struct
  \param ExecuteFlag  0 if DataRows should not be written,
-                           1 if DataRows should be written
+                     1 if DataRows should be written
 
  \return void
 */
@@ -310,6 +313,7 @@ void fo_sqlCopyDestroy(psqlCopy_t pCopy, int ExecuteFlag)
 
 /*!
  \brief Print the sqlCopy_struct.
+
  This is used for debugging.
 
  \param pCopy Pointer to sqlCopy struct

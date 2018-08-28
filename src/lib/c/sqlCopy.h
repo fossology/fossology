@@ -32,20 +32,20 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
         printf("ERROR: %s:%d, %s\n   %s\n", __FILE__, __LINE__, Msg, strerror(errno)); \
         return(0);}
 
-/* fo_sqlCopy for batch copy (mass inserts) */
+/** fo_sqlCopy for batch copy (mass inserts) */
 struct sqlCopy_struct
 {
+  /** Database connection */
   PGconn* pGconn;
-  /* Database connection */
+  /** Database table to copy (insert) into */
   char* TableName;
-  /* Database table to copy (insert) into */
+  /** Comma separated list of column names */
   char ColumnNames[1024];
-  /* Comma separated list of column names */
+  /** Number of bytes allocated to DataBuf */
   int BufSize;
-  /* Number of bytes allocated to DataBuf */
+  /** Index into DataBuf where the next data is added */
   int DataIdx;
-  /* Index into DataBuf where the next data is added */
-  char* DataBuf;           /* Data to insert */
+  char* DataBuf;           /** Data to insert */
 };
 typedef struct sqlCopy_struct sqlCopy_t, * psqlCopy_t;
 

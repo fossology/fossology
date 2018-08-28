@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 ***************************************************************/
 
 /*!
- * \file libfossagent.c
+ * \file
  * \brief libfossagent.c contains general use functions for agents.
  */
 
@@ -28,6 +28,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define FUNCTION
 
+/**
+ * \brief Get the upload tree table name for a given upload
+ * \param dbManager The DB manager in use
+ * \param uploadId  ID of the upload
+ * \return Upload tree table name of the upload.
+ */
 char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
 {
   char* result;
@@ -57,7 +63,12 @@ char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
   return result;
 }
 
-
+/**
+ * \brief Get all file IDs (pfile_fk) for a given upload
+ * \param dbManager fo_dbManager in use
+ * \param uploadId  ID of the upload
+ * \return File IDs for the given upload
+ */
 PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId)
 {
 
@@ -98,6 +109,12 @@ PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId)
   return result;
 }
 
+/**
+ * \brief Get the pfile name for a given file ID
+ * \param dbManager fo_dbManager in use
+ * \param fileId    File ID (pfile_pk)
+ * \return The file name (`SHA1.MD5.SIZE`)
+ */
 char* queryPFileForFileId(fo_dbManager* dbManager, long fileId)
 {
   PGresult* fileNameResult = fo_dbManager_ExecPrepared(
@@ -126,12 +143,12 @@ char* queryPFileForFileId(fo_dbManager* dbManager, long fileId)
  \param pgConn Database connection object pointer.
  \param agent_name Name of agent to look up.
  \param Upload_pk is no longer used.
- \param rev agent revision, if given this is the exact revision of the agent being requested.
+ \param rev Agent revision, if given this is the exact revision of the agent being requested.
  \param agent_desc Description of the agent.  Used to write a new agent record in the
                    case where no enabled agent records exist for this agent_name.
- \return On success return agent_pk.  On sql failure, return 0, and the error will be
+ \return On success return agent_pk. On sql failure, return 0, and the error will be
          written to stdout.
- \todo This function is not checking if the agent is enabled.  And it is not setting
+ \todo This function is not checking if the agent is enabled. And it is not setting
        agent version when an agent record is inserted.
  */
 FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_pk, const char* rev, const char* agent_desc)
@@ -174,17 +191,18 @@ FUNCTION int fo_GetAgentKey(PGconn* pgConn, const char* agent_name, long Upload_
 
 /**
 \brief Write ars record
+
 If the ars table does not exist, one is created by inheriting the ars_master table.
 The new table is called {tableName}.  For example, "unpack_ars".
 If ars_pk is zero a new ars record will be created. Otherwise, it is updated.
 
 \param pgConn Database connection object pointer.
 \param ars_pk  If zero, a new record will be created.
-\param upload_pk
-\parm  agent_pk   Agents should get this from fo_GetAgentKey()
+\param upload_pk  ID of the upload
+\param agent_pk   Agents should get this from fo_GetAgentKey()
 \param tableName  ars table name
-\parm  ars_status   Status to update ars_status.  May be null.
-\parm  ars_success  Automatically set to false if ars_pk is zero.
+\param ars_status   Status to update ars_status.  May be null.
+\param ars_success  Automatically set to false if ars_pk is zero.
 
 \return On success write the ars record and return the ars_pk.
 On sql failure, return 0, and the error will be written to stdout.
@@ -264,11 +282,23 @@ FUNCTION int fo_CreateARSTable(PGconn* pgConn, const char* tableName)
   return 1;  /* success */
 }  /* fo_CreateARSTable() */
 
+/**
+ * \brief Get the maximum group privilege
+ * \param permGroup   Permission level of the group
+ * \param permPublic  Public permission on the upload
+ * \return The maximum privilege allowed
+ */
 FUNCTION int max(int permGroup, int permPublic)
 {
   return ( permGroup > permPublic ) ? permGroup : permPublic;
 }
 
+/**
+ * \brief Get the minimum permission level required
+ * \param user_perm     User level permission on the upload
+ * \param permExternal  External permission level on the upload
+ * \return The minimum permission required
+ */
 FUNCTION int min(int user_perm, int permExternal)
 {
   return ( user_perm < permExternal ) ? user_perm: permExternal;
@@ -278,9 +308,9 @@ FUNCTION int min(int user_perm, int permExternal)
 * \brief Get users permission to this upload
 *
 * \param pgConn Database connection object pointer.
-* \param long upload_pk
-* \param user_pk
-* \param user_perm
+* \param upload_pk  Upload ID
+* \param user_pk    User ID
+* \param user_perm  Privilege of user
 *
 * \return permission (PERM_) this user has for UploadPk
 */
@@ -329,8 +359,8 @@ FUNCTION int getEffectivePermissionOnUpload(PGconn* pgConn, long UploadPk, int u
 * \brief Get users permission to this upload
 *
 * \param pgConn Database connection object pointer.
-* \param long upload_pk
-* \param user_pk
+* \param upload_pk  Upload ID
+* \param user_pk    User ID
 *
 * \return permission (PERM_) this user has for UploadPk
 */
@@ -365,10 +395,10 @@ FUNCTION int GetUploadPerm(PGconn* pgConn, long UploadPk, int user_pk)
 *        If upload_pk does not exist, return "uploadtree".
 *
 * \param pgConn Database connection object pointer.
-* \param upload_pk
+* \param upload_pk  Upload ID
 *
 * \return uploadtree table name, or null if upload_pk does not exist.
-* Caller must free the (non-null) returned value.
+* \note Caller must free the (non-null) returned value.
 */
 FUNCTION char* GetUploadtreeTableName(PGconn* pgConn, int upload_pk)
 {

@@ -96,16 +96,13 @@ FILE* fo_RepFwrite(char* Type, char* Filename);
 int fo_RepFclose(FILE* F);
 int fo_RepImport(char* Source, char* Type, char* Filename, int HardLink);
 
-/* Replacements for mmap */
+/** Replacements for mmap */
 struct RepMmapStruct
 {
-  int FileHandle;
-  /* handle from open() */
-  unsigned char* Mmap;
-  /* memory pointer from mmap */
-  uint32_t MmapSize;
-  /* size of file mmap */
-  uint32_t _MmapSize; /* real size of mmap (set to page boundary) */
+    int FileHandle;       ///< Handle from open()
+    unsigned char* Mmap;  ///< Memory pointer from mmap
+    uint32_t MmapSize;    ///< Size of file mmap
+    uint32_t _MmapSize;   ///< Real size of mmap (set to page boundary)
 };
 typedef struct RepMmapStruct RepMmapStruct;
 void fo_RepMunmap(RepMmapStruct* M);

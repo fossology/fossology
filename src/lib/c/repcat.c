@@ -19,7 +19,10 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 ***********************
 stdout = data from file.
 ****************************************************************/
-
+/**
+ * \file
+ * \brief Cat a file from fo_repo to stdout
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include "libfossrepo.h"
@@ -28,6 +31,10 @@ stdout = data from file.
 char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
+/**
+ * @brief Read a file and print to stdout
+ * @param argv Requires two arguments (file type and filename)
+ */
 int main(int argc, char* argv[])
 {
   int LenIn, LenOut;

@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 /**
-* @file test_fossconfig.c
-* @brief unit tests for the fossconfig library section of libfossology.
+* @file
+* @brief Unit tests for the fossconfig library section of libfossology.
 */
 
 /* includes for files that will be tested */
@@ -101,12 +101,15 @@ fo_conf* test_data;
 /* ************************************************************************** */
 
 /**
-* @brief test the fo_config_load function. This should check all of the error
-*        conditions using different configuration files as will as a successful
-*        load. It is important to note that if the fo_config_load of the valid
-*        configuration file fails, all following test cases will fail as a
-*        result. Because of this, a failure here will cause a fatal abort of
-*        testing.
+* @brief test the fo_config_load function.
+*
+* @test
+* This should check all of the error
+* conditions using different configuration files as will as a successful
+* load. It is important to note that if the fo_config_load of the valid
+* configuration file fails, all following test cases will fail as a
+* result. Because of this, a failure here will cause a fatal abort of
+* testing.
 *
 * @return void
 */
@@ -164,9 +167,16 @@ void test_fo_config_load()
 }
 
 /**
-* @brief Test the group set function. Note that the order the groups are in the
-*        names array is different from the order they are declared in the file.
-*        This is because the names are stored internally in alphabetical order
+* @brief Test the group set function.
+*
+* @note
+* Note that the order the groups are in the
+* names array is different from the order they are declared in the file.
+* This is because the names are stored internally in alphabetical order.
+*
+* @test
+* -# Get the group set for the test data using fo_config_group_set()
+* -# Check if the group names returned match the actual names
 *
 * @return void
 */
@@ -186,6 +196,10 @@ void test_fo_config_group_set()
 * @brief Test the key set function. Again, keys are stored in alphabetical
 *        order, so the comparison order may be wonky.
 *
+* @test
+* -# From the test data, get the key list using fo_config_key_set() for each
+* group
+* -# Check if the key values match
 * @return void
 */
 void test_fo_config_key_set()
@@ -220,6 +234,8 @@ void test_fo_config_key_set()
 
 /**
 * @brief Tests the has group function
+* @test
+* -# Check fo_config_has_group() on test data for TRUE and FALSE conditions
 * @return void
 */
 void test_fo_config_has_group()
@@ -229,9 +245,12 @@ void test_fo_config_has_group()
 }
 
 /**
-* @brief Test the has key function. There are three cases here because there
-*        are two ways that a config can not have a key. If the key isn't in the
-*        group or the group doesn't exist
+* @brief Test the has key function.
+*
+* @test
+* There are three cases here because there
+* are two ways that a config can not have a key. If the key isn't in the
+* group or the group doesn't exist
 *
 * @return void
 */
@@ -246,6 +265,9 @@ void test_fo_config_has_key()
 * @brief Test the get function. This will also test the error cases of invalid
 *        key and invalid group names.
 *
+* @test
+* -# Test fo_config_get() for known group and keys
+* -# Call fo_config_get() on missing group/keys and check the error returned
 * @return
 */
 void test_fo_config_get()
@@ -293,8 +315,11 @@ void test_fo_config_get()
 }
 
 /**
-* @brief Tests the is list function. Tests groups that has both and a group
-*        that doesn't have a list. Error cases are tested elsewhere.
+* @brief Tests the is list function.
+*
+* @test
+* Tests groups that has both and a group
+* that doesn't have a list. Error cases are tested elsewhere.
 *
 * @return void
 */
@@ -309,8 +334,10 @@ void test_fo_config_is_list()
 }
 
 /**
-* @brief Tests the list length function. Checks both lists in the test file and
-*        tests a none-list key error
+* @brief Tests the list length function.
+*
+* @test
+* Checks both lists in the test file and tests a none-list key error
 *
 * @return void
 */
@@ -341,8 +368,10 @@ void test_fo_config_list_length()
 }
 
 /**
-* @brief Tests the get list function. Tests a none list key, and the index
-*        being out of the valid range.
+* @brief Tests the get list function.
+*
+* @test
+* Tests a none list key, and the index being out of the valid range.
 *
 * @return void
 */
@@ -400,7 +429,9 @@ void test_fo_config_get_list()
 /**
 * @brief Tests the config free function. This makes sure that everything is
 *        correctly set to NULL after a free.
-*
+* @test
+* -# Call fo_config_free() on test data
+* -# Check if everything is freed/NULLed
 * @return void
 */
 void test_fo_config_free()
