@@ -38,8 +38,8 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [[ $OPTS == ' --' ]]; then
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
   EVERYTHING=true
 fi
 
@@ -79,11 +79,11 @@ if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get "$YesOpt" install \
+      apt-get $YesOpt install \
         subversion git wget
       ;;
     RedHatEnterprise*|CentOS|Fedora)
-      yum "$YesOpt" install \
+      yum $YesOpt install \
         subversion git wget
       ;;
   esac

@@ -58,8 +58,8 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [[ $OPTS == ' --' ]]; then
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
   EVERYTHING=true
 fi
 
@@ -100,33 +100,33 @@ if [[ $BUILDTIME ]]; then
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
          echo "DB: Installing build essential....."
-         apt-get "$YesOpt" install \
+         apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
               trusty)
-                apt-get "$YesOpt" install postgresql-server-dev-9.3;;
+                apt-get $YesOpt install postgresql-server-dev-9.3;;
               jessie)
-                apt-get "$YesOpt" install postgresql-server-dev-9.4;;
+                apt-get $YesOpt install postgresql-server-dev-9.4;;
               xenial)
-                apt-get "$YesOpt" install postgresql-server-dev-9.5;;
+                apt-get $YesOpt install postgresql-server-dev-9.5;;
               stretch|buster|sid)
-                apt-get "$YesOpt" install postgresql-server-dev-9.6;;
+                apt-get $YesOpt install postgresql-server-dev-9.6;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
          ;;
       Fedora)
-         yum "$YesOpt" groupinstall "Development Tools"
-         yum "$YesOpt" install \
+         yum $YesOpt groupinstall "Development Tools"
+         yum $YesOpt install \
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
             boost-devel
          ;;
       RedHatEnterprise*|CentOS)
-         yum "$YesOpt" install \
+         yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
@@ -146,8 +146,8 @@ if [[ $RUNTIME ]]; then
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
         echo "doing runtime"
-         apt-get "$YesOpt" install apache2
-         apt-get "$YesOpt" install php-pear \
+         apt-get $YesOpt install apache2
+         apt-get $YesOpt install php-pear \
             libxml2 \
             binutils php-gettext \
             cabextract cpio sleuthkit genisoimage \
@@ -157,19 +157,19 @@ if [[ $RUNTIME ]]; then
             dpkg-dev heirloom-mailx
          case "$CODENAME" in
             trusty)
-               apt-get "$YesOpt" install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
             jessie)
-               apt-get "$YesOpt" install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+               apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
             xenial)
-               apt-get "$YesOpt" install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-zip;;
+               apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-zip;;
             stretch|buster|sid)
-               apt-get "$YesOpt" install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
+               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
       Fedora)
-         yum "$YesOpt" install postgresql-server httpd
-         yum "$YesOpt" install \
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
@@ -188,8 +188,8 @@ if [[ $RUNTIME ]]; then
          echo "   please install from upstream sources."
          ;;
       RedHatEnterprise*|CentOS)
-         yum "$YesOpt" install postgresql-server httpd
-         yum "$YesOpt" install \
+         yum $YesOpt install postgresql-server httpd
+         yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql php-process \
             smtpdaemon \

@@ -110,8 +110,8 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   fi
   case "${DISTRO}" in
     Debian|Ubuntu|LinuxMint)
-      sudo apt-get install -q "${YesOpt}" cppcheck ;;
+      sudo apt-get install -q $YesOpt cppcheck ;;
     Fedora|RedHatEnterprise*|CentOS)
-      yum "${YesOpt}" install cppcheck ;;
+      yum $YesOpt install cppcheck ;;
   esac
 fi

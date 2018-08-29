@@ -38,8 +38,8 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [[ $OPTS == ' --' ]]; then
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
   EVERYTHING=true
 fi
 
@@ -79,15 +79,15 @@ if [ $RUNTIME ]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
-      apt-get "$YesOpt" install \
+      apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full unrar-free
       ;;
     RedHatEnterprise*|CentOS)
-      yum "$YesOpt" install \
+      yum $YesOpt install \
         bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins sleuthkit unrar
       ;;
     Fedora)
-      yum "$YesOpt" install \
+      yum $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm tar upx unzip gzip sleuthkit unrar
       ;;
   esac
