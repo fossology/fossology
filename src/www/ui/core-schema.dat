@@ -505,9 +505,9 @@
   $Schema["TABLE"]["ecc"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["DESC"] = "";
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"copyright_decision_pk\" int8 DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"copyright_decision_pk\" SET NOT NULL, ALTER COLUMN \"copyright_decision_pk\" SET DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"ecc_decision_pk\" int8 DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"ecc_decision_pk\" SET NOT NULL, ALTER COLUMN \"ecc_decision_pk\" SET DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
 
   $Schema["TABLE"]["ecc_decision"]["user_fk"]["DESC"] = "";
   $Schema["TABLE"]["ecc_decision"]["user_fk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"user_fk\" int8";
@@ -1908,7 +1908,7 @@
   $Schema["SEQUENCE"]["keyword_ct_pk_seq"]["UPDATE"] = "SELECT setval('keyword_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM keyword))";
 
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_decision_pk_seq\"";
-  $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM ecc_decision))";
+  $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(ecc_decision_pk)) val FROM ecc_decision))";
 
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_decision_pk_seq\"";
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["UPDATE"] = "SELECT setval('keyword_decision_pk_seq',(SELECT greatest(1,max(keyword_decision_pk)) val FROM keyword_decision))";
@@ -1929,7 +1929,7 @@
   $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["author_pfile_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_agent_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
+  $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"ecc_decision_pk\");";
   $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ct_pk\");";
   $Schema["CONSTRAINT"]["keyword_decision_pkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pkey\" PRIMARY KEY (\"keyword_decision_pk\");";
   $Schema["CONSTRAINT"]["keyword_pkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pkey\" PRIMARY KEY (\"ct_pk\");";
