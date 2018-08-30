@@ -28,6 +28,30 @@ security:
 produces:
   - application/json
 paths:
+  /auth:
+    get:
+      summary: Get a login session registered
+      description:
+        Get a login session registered using the username and password
+      parameters:
+        - name: username
+          required: true
+          description: Username of the login user
+          in: query
+          type: string
+        - name: password
+          required: true
+          description: Password of the user trying to login
+          in: query
+          type: string
+      responses:
+        200:
+          description: Login successfull
+          schema:
+            type: string
+        404:
+          description: UserName or password incorrect
+
   /uploads/{id}:
     get:
       tags:

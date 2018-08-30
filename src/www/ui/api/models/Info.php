@@ -46,6 +46,15 @@ class Info
     ));
   }
 
+  public function getArray()
+  {
+    return [
+      'code' => $this->code,
+      'message' => $this->message,
+      'type' => $this->type
+    ];
+  }
+
   /**
    * @return mixed
    */

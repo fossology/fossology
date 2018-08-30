@@ -17,7 +17,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  ***************************************************************/
 
 require_once "StringHelper.php";
-require_once '/usr/local/share/fossology/www/ui/api/models/File.php';
+require_once __DIR__ . "/../models/File.php";
 
 use \Fossology\Lib\Dao\UploadPermissionDao;
 use \Fossology\Lib\Dao\UploadDao;
@@ -27,6 +27,7 @@ use \www\ui\api\models\File;
 use \www\ui\api\helper\StringHelper;
 use \Fossology\Lib\Dao\FolderDao;
 use \Fossology\Lib\Dao\UserDao;
+use \Fossology\Lib\Auth\Auth;
 
 class RestHelper
 {
@@ -74,12 +75,27 @@ class RestHelper
     return new File($filename, $contentTypeCut, $content);
   }
 
+  public function hasUserAccess($authMethod)
+  {
+    return true;
+  }
+
   /**
    * @return \Monolog\Logger
    */
   public function getLogger()
   {
     return $this->logger;
+  }
+
+  /**
+   * @return User ID
+   */
+  public function getUserId()
+  {
+    //return 3;
+    $session = $this->authHelper->getSession();
+    return $session->get(Auth::USER_ID);
   }
 
   /**

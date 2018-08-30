@@ -17,7 +17,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  ***************************************************************/
 
 
-require_once '/usr/local/share/fossology/vendor/autoload.php';
 use Fossology\Lib\Auth\Auth;
 require_once "helper/RestHelper.php";
 require_once "models/InfoType.php";
@@ -27,17 +26,13 @@ require_once "models/Info.php";
 require_once "models/SearchResult.php";
 require_once "models/Decider.php";
 require_once "helper/DbHelper.php";
-require_once "/usr/local/share/fossology/www/ui/search-helper.php";
-require_once "/usr/local/share/fossology/lib/php/common.php";
-require_once "/usr/local/share/fossology/www/ui/agent-add.php";
-require_once "/usr/local/share/fossology/www/ui/auth-helper.php";
-
-//TODO: REMOVE ERROR_DISPLAY
-ini_set('display_errors', 1);
-error_reporting(-1);
+require_once dirname(dirname(__FILE__)) . "/search-helper.php";
+require_once dirname(dirname(dirname(dirname(__FILE__)))) . "/lib/php/common.php";
+require_once dirname(dirname(__FILE__)) . "/agent-add.php";
+require_once dirname(__FILE__) . "/helper/AuthHelper.php";
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Silex\Application;
 use api\models\Info;
 use \www\ui\api\models\InfoType;
@@ -59,35 +54,34 @@ $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
 {
   $restHelper = new RestHelper();
   $dbHelper = new DbHelper();
-  $username = $request->headers->get("Php-Auth-User");
-  $password = $request->headers->get("Php-Auth-Pw");
-  //checks if user has access to this functionality
+  $username = $request->headers->get("php-auth-user");
+  $password = $request->headers->get("php-auth-pw");
+  // Checks if user has access to this functionality
   if($restHelper->getAuthHelper()->checkUsernameAndPassword($username, $password))
   {
-    //get the id from the fossology user
+    // Get the id from the fossology user
     if (is_numeric($id))
     {
       if($dbHelper->doesIdExist("upload","upload_pk", $id))
       {
-        return new Response(json_encode($dbHelper->getUploads($_SESSION["_sf2_attributes"][Auth::USER_ID], $id),
-                            JSON_PRETTY_PRINT));
+        return new JsonResponse($dbHelper->getUploads($_SESSION["_sf2_attributes"][Auth::USER_ID], $id));
       }
       else
       {
         $error = new Info(404, "File does not exist", InfoType::ERROR);
-        return new Response($error->getJSON(), $error->getCode());
+        return new JsonResponse($error->getArray(), $error->getCode());
       }
     }
     else
     {
       $error = new Info(400, "Bad Request. $id is not a number!", InfoType::ERROR);
-      return new Response($error->getJSON());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     $error = new Info(403, "No authorized to GET upload with id " . $id, InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 
 });
@@ -100,19 +94,19 @@ $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $reque
   {
     if (is_integer($id))
     {
-      return new Response("TODO");
+      return new JsonResponse("TODO");
       //TODO implement patch method
     }
     else
     {
       $error = new Info(400, "Bad Request. $id is not a number!", InfoType::ERROR);
-      return new Response($error->getJSON());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     $error = new Info(403, "No authorized to PATCH upload with id " . $id, InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 
 });
@@ -128,18 +122,18 @@ $app->PUT(BASE_PATH.'uploads/', function (Application $app, Request $request)
     {
       $put = array();
       parse_str(file_get_contents('php://input'), $put);
-      return new Response("fdsfds");
+      return new JsonResponse("fdsfds");
     }
     catch (Exception $e)
     {
       $error = new Info(400, "Bad Request. Invalid Input", InfoType::ERROR);
-      return new Response($error->getJSON(),$error->getCode());
+      return new JsonResponse($error->getArray(),$error->getCode());
     }
   }
   else
   {
     $error = new Info(403, "No authorized to PUT upload", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 });
 
@@ -151,13 +145,13 @@ $app->GET(BASE_PATH.'uploads/', function (Application $app, Request $request)
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
     //get the id from the fossology user
-    $response = json_encode($dbHelper->getUploads($restHelper->getUserId()), JSON_PRETTY_PRINT);
-    return new Response($response, 200);
+    $response = $dbHelper->getUploads($restHelper->getUserId());
+    return new JsonResponse($dbHelper->getUploads($restHelper->getUserId()));
   }
   else
   {
     $error = new Info(403, "No authorized to GET upload", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 
 });
@@ -176,24 +170,24 @@ $app->DELETE(BASE_PATH.'uploads/{id}', function (Application $app, Request $requ
       {
         TryToDelete($id, $restHelper->getUserId(), $restHelper->getGroupId(), $restHelper->getUploadDao());
         $info = new Info(202, "Delete Job for file with id " . $id, InfoType::INFO);
-        return new Response($info->getJSON(), $info->getCode());
+        return new JsonResponse($info->getJSON(), $info->getCode());
       }
       else
       {
         $error = new Info(404, "Id " . $id . " doesn't exist", InfoType::ERROR);
-        return new Response($error->getJSON(), $error->getCode());
+        return new JsonResponse($error->getArray(), $error->getCode());
       }
     }
     else
     {
       $error = new Info(400, "Bad Request. $id is not a number!", InfoType::ERROR);
-      return new Response($error->getJSON());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     $error = new Info(403, "Not authorized to PUT upload", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 });
 
@@ -228,7 +222,7 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
     {
       $error = new Info(400, "Bad Request. At least one parameter, containing a value is required",
         InfoType::ERROR);
-      return new Response($error->getJSON(), $error->getCode());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
 
     /**
@@ -238,7 +232,7 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
     {
       $error = new Info(400, "Bad Request. filesizemin and filesizemax need to be numeric",
         InfoType::ERROR);
-      return new Response($error->getJSON(), $error->getCode());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
 
     $restHelper = new RestHelper();
@@ -258,13 +252,13 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);
       $searchResults[] = $currentResult->getJSON();
     }
-    return new Response(json_encode($searchResults, JSON_PRETTY_PRINT));
+    return new JsonResponse($searchResults);
   }
   else
   {
     //401 because every user can search. Only not logged in user can't
     $error = new Info(401, "Not authorized to search", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 });
 
@@ -278,13 +272,13 @@ $app->GET(BASE_PATH.'users/', function(Application $app, Request $request)
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
     $users = $dbHelper->getUsers();
-    return new Response($users, 200);
+    return new JsonResponse($users, 200);
   }
   else
   {
     //401 because every user can search. Only not logged in user can't
     $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 
 
@@ -302,26 +296,26 @@ $app->GET(BASE_PATH.'users/{id}', function(Application $app, Request $request, $
       if($dbHelper->doesIdExist("users","user_pk", $id))
       {
         $users = $dbHelper->getUsers($id);
-        return new Response($users, 200);
+        return new JsonResponse($users, 200);
       }
       else
       {
         $error = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-        return new Response($error->getJSON(), $error->getCode());
+        return new JsonResponse($error->getArray(), $error->getCode());
       }
 
     }
     else
     {
       $error = new Info(400, "Bad request. $id is not a number!", InfoType::ERROR);
-      return new Response($error->getJSON(), $error->getCode());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     //401 because every user can search. Only not logged in user can't
     $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 
 
@@ -340,27 +334,51 @@ $app->DELETE(BASE_PATH.'users/{id}', function(Application $app, Request $request
       {
         $dbHelper->deleteUser($id);
         $info = new Info(202, "User will be deleted", InfoType::INFO);
-        return new Response($info->getJSON(), $info->getCode());
+        return new JsonResponse($info->getJSON(), $info->getCode());
       }
       else
       {
         $error = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-        return new Response($error->getJSON(), $error->getCode());
+        return new JsonResponse($error->getArray(), $error->getCode());
       }
 
     }
     else
     {
       $error = new Info(400, "Bad request. $id is not a number!", InfoType::ERROR);
-      return new Response($error->getJSON(), $error->getCode());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     //401 because every user can search. Only not logged in user can't
     $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
+});
+
+$app->GET(BASE_PATH.'auth/', function (Application $app, Request $request)
+{
+  $restHelper = new RestHelper();
+  $dbHelper = new DbHelper();
+  $username = $request->query->get("username");
+  $password = $request->query->get("password");
+  // Checks if user is valid
+  if($restHelper->getAuthHelper()->checkUsernameAndPassword($username, $password))
+  {
+    $base64String = base64_encode("$username:$password");
+    $newHeader = "authorization: Basic $base64String";
+    // Create the response header
+    return new JsonResponse([
+      "header" => $newHeader
+    ]);
+  }
+  else
+  {
+    $error = new Info(404, "Username or password is incorrect", InfoType::ERROR);
+    return new JsonResponse($error->getArray(), $error->getCode());
+  }
+
 });
 
 $app->GET(BASE_PATH.'jobs/', function(Application $app, Request $request)
@@ -370,9 +388,9 @@ $app->GET(BASE_PATH.'jobs/', function(Application $app, Request $request)
   if(isset($limit) && (!is_numeric($limit) || $limit < 0))
   {
     $error = new Info(400, "Limit cannot be smaller than 1 and has to be numeric!", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
-  return new Response($dbHelper->getJobs($limit), 200);
+  return new JsonResponse($dbHelper->getJobs($limit), 200);
 });
 
 $app->POST(BASE_PATH.'jobs/', function(Application $app, Request $request)
@@ -396,18 +414,18 @@ $app->GET(BASE_PATH.'jobs/{id}', function(Application $app, Request $request, $i
   {
     if($dbHelper->doesIdExist("job", "job_pk", $id))
     {
-      return new Response($dbHelper->getJobs(0, $id), 200);
+      return new JsonResponse($dbHelper->getJobs(0, $id), 200);
     }
     else
     {
       $error = new Info(404, "Job id ".$id." doesn't exist", InfoType::ERROR);
-      return new Response($error->getJSON(), $error->getCode());
+      return new JsonResponse($error->getArray(), $error->getCode());
     }
   }
   else
   {
     $error = new Info(400, "Id has to be numeric!", InfoType::ERROR);
-    return new Response($error->getJSON(), $error->getCode());
+    return new JsonResponse($error->getArray(), $error->getCode());
   }
 });
 

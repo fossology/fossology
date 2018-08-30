@@ -122,8 +122,6 @@ class UploadFilePage extends UploadPageBase
     $groupId = Auth::getGroupId();
 
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
-    file_put_contents("/home/uawet3g4/test/filename.txt",json_encode($originalFileName));
-    file_put_contents("/home/uawet3g4/test/request.txt",json_encode($request));
     if (empty($uploadId))
     {
       return array(false, _("Failed to insert upload record"), $description);
