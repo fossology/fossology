@@ -231,7 +231,8 @@ if [[ $AGENT ]]; then
    must_run_as_root
    # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
    chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h {$MAN1DIR}/cp2foss.1 {$MAN1DIR}/fossjobs.1
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1{,.gz} {$MAN1DIR}/fossjobs.1{,.gz} || echo
 fi
 
 if [[ $AGENT && $RUNNINGDATABASE ]]; then
