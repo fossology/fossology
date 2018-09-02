@@ -39,5 +39,16 @@ class ScanOptions
     $this->decider = $decider;
   }
 
-
+  /**
+   * Get ScanOptions elements as array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      "analysis"  => $this->analysis,
+      "reuse"     => $this->reuse,
+      "decide"    => $this->decider
+    ];
+  }
 }

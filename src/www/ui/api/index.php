@@ -33,6 +33,7 @@ require_once dirname(__FILE__) . "/helper/AuthHelper.php";
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Session\Session;
 use Silex\Application;
 use api\models\Info;
 use \www\ui\api\models\InfoType;
@@ -41,6 +42,9 @@ use \www\ui\api\helper\DbHelper;
 use \www\ui\api\models\ScanOptions;
 use \www\ui\api\models\Analysis;
 use api\models\SearchResult;
+
+// setup autoloading
+require_once(dirname(dirname(dirname(__DIR__))) . "/vendor/autoload.php");
 
 $app = new Silex\Application();
 $app['debug'] = true;
@@ -52,19 +56,20 @@ const BASE_PATH = "/repo/api/v1/";
 
 $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   $username = $request->headers->get("php-auth-user");
   $password = $request->headers->get("php-auth-pw");
   // Checks if user has access to this functionality
   if($restHelper->getAuthHelper()->checkUsernameAndPassword($username, $password))
   {
+    $thisSession = sessionGetter();
     // Get the id from the fossology user
     if (is_numeric($id))
     {
       if($dbHelper->doesIdExist("upload","upload_pk", $id))
       {
-        return new JsonResponse($dbHelper->getUploads($_SESSION["_sf2_attributes"][Auth::USER_ID], $id));
+        return new JsonResponse($dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id));
       }
       else
       {
@@ -88,7 +93,7 @@ $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
 
 $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
 
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
@@ -114,7 +119,7 @@ $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $reque
 $app->PUT(BASE_PATH.'uploads/', function (Application $app, Request $request)
 {
 
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
 
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
@@ -139,12 +144,12 @@ $app->PUT(BASE_PATH.'uploads/', function (Application $app, Request $request)
 
 $app->GET(BASE_PATH.'uploads/', function (Application $app, Request $request)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
 
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
-    //get the id from the fossology user
+    // Get the id from the fossology user
     $response = $dbHelper->getUploads($restHelper->getUserId());
     return new JsonResponse($dbHelper->getUploads($restHelper->getUserId()));
   }
@@ -159,7 +164,7 @@ $app->GET(BASE_PATH.'uploads/', function (Application $app, Request $request)
 $app->DELETE(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
   require_once "../../../delagent/ui/delete-helper.php";
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   $id = intval($id);
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
@@ -195,7 +200,7 @@ $app->DELETE(BASE_PATH.'uploads/{id}', function (Application $app, Request $requ
 
 $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
 
   //check user access to search
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
@@ -235,7 +240,7 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
       return new JsonResponse($error->getArray(), $error->getCode());
     }
 
-    $restHelper = new RestHelper();
+    $restHelper = new RestHelper($request);
     $dbHelper = new DbHelper();
 
     $item = GetParm("item", PARM_INTEGER);
@@ -266,7 +271,7 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
 
 $app->GET(BASE_PATH.'users/', function(Application $app, Request $request)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   //check user access to search
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
@@ -286,7 +291,7 @@ $app->GET(BASE_PATH.'users/', function(Application $app, Request $request)
 
 $app->GET(BASE_PATH.'users/{id}', function(Application $app, Request $request, $id)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   //check user access to search
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
@@ -323,7 +328,7 @@ $app->GET(BASE_PATH.'users/{id}', function(Application $app, Request $request, $
 
 $app->DELETE(BASE_PATH.'users/{id}', function(Application $app, Request $request, $id)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   //check user access to search
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
@@ -359,7 +364,7 @@ $app->DELETE(BASE_PATH.'users/{id}', function(Application $app, Request $request
 
 $app->GET(BASE_PATH.'auth/', function (Application $app, Request $request)
 {
-  $restHelper = new RestHelper();
+  $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
   $username = $request->query->get("username");
   $password = $request->query->get("password");
@@ -428,5 +433,18 @@ $app->GET(BASE_PATH.'jobs/{id}', function(Application $app, Request $request, $i
     return new JsonResponse($error->getArray(), $error->getCode());
   }
 });
+
+/**
+ * Get current session maintained by Symfony
+ * @return \Symfony\Component\HttpFoundation\Session\Session
+ */
+function sessionGetter()
+{
+  $thisSession = new Session();
+  if($thisSession->isStarted()){
+    $thisSession->start();
+  }
+  return $thisSession;
+}
 
 $app->run();

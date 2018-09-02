@@ -38,5 +38,16 @@ class Decider
     $this->newScanner = $newScanner;
   }
 
-
+  /**
+   * Get decider as an array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      "nomosMonk"  => $this->nomosMonk,
+      "bulkReused" => $this->bulkReused,
+      "newScanner" => $this->newScanner
+    ];
+  }
 }

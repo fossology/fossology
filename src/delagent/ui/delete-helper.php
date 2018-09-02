@@ -1,10 +1,10 @@
 <?php
 
-include_once "/usr/local/share/fossology/lib/php/common.php";
-include_once "/usr/local/share/fossology/delagent/ui/DeleteResponse.php";
-include_once "/usr/local/share/fossology/delagent/ui/DeleteMessages.php";
-use delagent\ui\DeleteMessages;
-use delagent\ui\DeleteResponse;
+include_once dirname(dirname(__DIR__)) . "/lib/php/common.php";
+include_once "DeleteResponse.php";
+include_once "DeleteMessages.php";
+use Fossology\DelAgent\UI\DeleteMessages;
+use Fossology\DelAgent\UI\DeleteResponse;
 
 /**
  * \brief Given a folder_pk, try to add a job after checking permissions.

@@ -34,6 +34,7 @@ class user_del extends FO_Plugin
     $this->Title      = TITLE_user_del;
     $this->MenuList   = "Admin::Users::Delete";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->dbManager  = $GLOBALS['container']->get('db.manager');
 
     parent::__construct();
   }
@@ -110,7 +111,7 @@ class user_del extends FO_Plugin
     if (!empty($User))
     {
       if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = DeleteUser($User, $PG_CONN); }
+      else { $rc = DeleteUser($User, $this->dbManager); }
       if (empty($rc))
       {
         /* Need to refresh the screen */

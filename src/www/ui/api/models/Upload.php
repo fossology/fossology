@@ -45,11 +45,11 @@ class Upload
   }
 
   /**
-   * @return array associative array
+   * @return Json string
    */
   public function getJSON()
   {
-    return array(
+    return json_encode(array(
       'folderId' => $this->folderId,
       'folderName' => $this->folderName,
       'uploadId' => $this->uploadId,
@@ -57,6 +57,23 @@ class Upload
       "uploadName" => $this->uploadName,
       "uploadDate" => $this->uploadDate,
       "fileSize" => $this->fileSize
-    );
+    ));
+  }
+
+  /**
+   * Get the upload element as an associative array
+   * @return Associative array
+   */
+  public function getArray()
+  {
+    return [
+      "folderId"    => $this->folderId,
+      "folderName"  => $this->folderName,
+      "uploadId"    => $this->uploadId,
+      "description" => $this->description,
+      "uploadName"  => $this->uploadName,
+      "uploadDate"  => $this->uploadDate,
+      "fileSize"    => $this->fileSize
+    ];
   }
 }

@@ -53,14 +53,29 @@ class Job
    */
   public function getJSON()
   {
-    return array(
+    return json_encode(array(
       'id' => $this->id,
       'name' => $this->name,
       'queueDate' => $this->queueDate,
       'uploadId' => $this->uploadId,
       'userId' => $this->userId,
       'groupId' => $this->groupId
-    );
+    ));
   }
 
+  /**
+   * Get Job element as array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      'id'        => $this->id,
+      'name'      => $this->name,
+      'queueDate' => $this->queueDate,
+      'uploadId'  => $this->uploadId,
+      'userId'    => $this->userId,
+      'groupId'   => $this->groupId
+    ];
+  }
 }

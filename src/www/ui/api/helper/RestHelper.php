@@ -28,6 +28,7 @@ use \www\ui\api\helper\StringHelper;
 use \Fossology\Lib\Dao\FolderDao;
 use \Fossology\Lib\Dao\UserDao;
 use \Fossology\Lib\Auth\Auth;
+use Symfony\Component\HttpFoundation\Request;
 
 class RestHelper
 {
@@ -39,11 +40,12 @@ class RestHelper
   private $folderDao;
   private $userDao;
   private $authHelper;
+  private $request;
 
   /**
    * RestHelper constructor.
    */
-  public function __construct()
+  public function __construct($request)
   {
     $this->dbHelper = new DbHelper();
     $this->stringHelper = new StringHelper();
@@ -53,6 +55,7 @@ class RestHelper
     $this->userDao = new UserDao($this->dbHelper->getDbManager(), $this->logger);
     $this->folderDao = new FolderDao($this->dbHelper->getDbManager(), $this->userDao, $this->uploadDao);
     $this->authHelper = new AuthHelper($this->userDao);
+    $this->request = $request;
   }
 
   /**
@@ -77,7 +80,13 @@ class RestHelper
 
   public function hasUserAccess($authMethod)
   {
-    return true;
+    if($authMethod === "SIMPLE_KEY") {
+      $username = $this->request->headers->get("php-auth-user");
+      $password = $this->request->headers->get("php-auth-pw");
+      return $this->authHelper->checkUsernameAndPassword($username, $password);
+    } else {
+      return false;
+    }
   }
 
   /**
@@ -93,7 +102,6 @@ class RestHelper
    */
   public function getUserId()
   {
-    //return 3;
     $session = $this->authHelper->getSession();
     return $session->get(Auth::USER_ID);
   }

@@ -122,7 +122,7 @@ class User
    */
   public function getJSON()
   {
-    return array(
+    return json_encode(array(
       'userId' => $this->id,
       'description' => $this->description,
       'email' => $this->email,
@@ -130,10 +130,23 @@ class User
       "rootFolderId" => $this->rootFolderId,
       "emailNotification" => $this->emailNotification,
       "agents" => $this->agents
-    );
+    ));
   }
 
-
-
-
+  /**
+   * Get user element as associative array
+   * @return array Associative array
+   */
+  public function getArray()
+  {
+    return [
+      "userId"       => $this->id,
+      "description"  => $this->description,
+      "email"        => $this->email,
+      "accessLevel"  => $this->accessLevel,
+      "rootFolderId" => $this->rootFolderId,
+      "emailNotification" => $this->emailNotification,
+      "agents"       => $this->agents
+    ];
+  }
 }

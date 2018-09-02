@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
 Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2017 Siemens AG
+Copyright (C) 2017-2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -17,21 +17,42 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-require_once "/usr/local/share/fossology/lib/php/common-db.php";
-require_once "/usr/local/share/fossology/lib/php/common-perms.php";
+require_once __DIR__ . "/../../lib/php/common-db.php";
+require_once __DIR__ . "/../../lib/php/common-perms.php";
+
 /**
  * \brief Delete a user.
- *
+ * \param $UserId User to be deleted.
+ * \param $dbManager DB Manager used.
  * \return NULL on success, string on failure.
  */
-function DeleteUser($UserId, $PG_CONN)
+function DeleteUser($UserId, $dbManager)
 {
+  // Prepare all statements
+  $userSelectStatement = __METHOD__ . ".getUser";
+  $dbManager->prepare($userSelectStatement,
+    "SELECT * FROM users WHERE user_pk = '$1' LIMIT 1;");
+
+  $selectGroupStatement = __METHOD__ . ".getGroup";
+  $dbManager->prepare($selectGroupStatement,
+    "SELECT group_pk FROM groups WHERE group_name = '$1' LIMIT 1;");
+
+  $deleteGroupUserStatement = __METHOD__ . ".deleteGroupUser";
+  $dbManager->prepare($deleteGroupUserStatement,
+    "DELETE FROM group_user_member WHERE user_fk = '$1';");
+
+  $deleteUserStatement = __METHOD__ . ".deleteUser";
+  $dbManager->prepare($deleteUserStatement,
+    "DELETE FROM users WHERE user_pk = '$1';");
+
+  $userCheckStatement = __METHOD__ . ".getUserbyName";
+  $dbManager->prepare($userCheckStatement,
+    "SELECT * FROM users WHERE user_name = '$1' LIMIT 1;");
+
   /* See if the user already exists */
-  $sql = "SELECT * FROM users WHERE user_pk = '$UserId' LIMIT 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $row = pg_fetch_assoc($result);
-  pg_free_result($result);
+  $result = $dbManager->execute($userSelectStatement, ["user_pk", $UserId]);
+  $row = $dbManager->fetchArray($result);
+  $dbManager->freeResult($result);
   if (empty($row['user_name']))
   {
     $text = _("User does not exist.");
@@ -41,33 +62,23 @@ function DeleteUser($UserId, $PG_CONN)
   /* Delete the users group
    * First look up the users group_pk
    */
-  $sql = "SELECT group_pk FROM groups WHERE group_name = '$row[user_name]' LIMIT 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $GroupRow = pg_fetch_assoc($result);
-  pg_free_result($result);
+  $result = $dbManager->execute($selectGroupStatement, [$row[user_name]]);
+  $GroupRow = $dbManager->fetchArray($result);
+  $dbManager->freeResult($result);
 
   /* Delete all the group user members for this user_pk */
-  $sql = "DELETE FROM group_user_member WHERE user_fk = '$UserId'";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $dbManager->freeResult($dbManager->execute($deleteGroupUserStatement, [$UserId]));
 
   /* Delete the user */
-  $sql = "DELETE FROM users WHERE user_pk = '$UserId';";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  $dbManager->freeResult($dbManager->execute($deleteUserStatement, [$UserId]));
 
   /* Now delete their group */
   DeleteGroup($GroupRow['group_pk'], $PG_CONN);
 
   /* Make sure it was deleted */
-  $sql = "SELECT * FROM users WHERE user_name = '$UserId' LIMIT 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $rowCount = pg_num_rows($result);
-  pg_free_result($result);
+  $result = $dbManager->execute($userCheckStatement, [$UserId]);
+  $rowCount = count($dbManager->fetchArray($result));
+  $dbManager->freeResult($result);
   if ($rowCount != 0)
   {
     $text = _("Failed to delete user.");

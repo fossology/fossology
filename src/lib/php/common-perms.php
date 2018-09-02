@@ -24,7 +24,7 @@ use Fossology\Lib\Auth\Auth;
   /***********************************************************
    Function: GetUploadsFromFolder()
 
-   @param int $folder_pk 
+   @param int $folder_pk
    @Return array of upload_pks for all the uploads in this
            folder (and subfolders).
    ***********************************************************/
@@ -39,7 +39,7 @@ use Fossology\Lib\Auth\Auth;
   /***********************************************************
    Function: GetUploadsFromFolder_recurse()
 
-   @param int $folder_pk 
+   @param int $folder_pk
    @param array $uploads  array of upload_pk's.  Caller must
    @Return array of upload_pks for all the uploads in this
            folder (and subfolders).
@@ -51,7 +51,7 @@ use Fossology\Lib\Auth\Auth;
      $sql = "select * from foldercontents where parent_fk=$folder_pk";
      $result = pg_query($PG_CONN, $sql);
      DBCheckResult($result, $sql, __FILE__, __LINE__);
-     while ($row = pg_fetch_assoc($result)) 
+     while ($row = pg_fetch_assoc($result))
      {
        switch ($row["foldercontents_mode"])
        {
@@ -73,7 +73,7 @@ use Fossology\Lib\Auth\Auth;
    *  @brief Check if User is already in the $GroupArray.
    *  If not, add them.  If they are, update their record with the
    *  highest permission granted to them.
-   *  
+   *
    *  @param $GroupRow
    *  @param $GroupArray
    *  @return $GroupArray is updated.
@@ -133,7 +133,7 @@ use Fossology\Lib\Auth\Auth;
     $sql = "select group_pk, group_name, group_perm, user_fk from group_user_member, groups where group_pk=$group_pk and group_pk=group_fk $UserCondition";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result)) 
+    while ($row = pg_fetch_assoc($result))
     {
       /* Add the user(s) to $GroupArray */
       AddUserToGroupArray($row, $GroupArray);
@@ -143,7 +143,7 @@ use Fossology\Lib\Auth\Auth;
   /**
    *  @brief Find all the groups a user belongs to.
    *  @param $user_pk optional, defaults to current user
-   *  @return array of groups 
+   *  @return array of groups
    *  each group is itself an array with the following elements
    *  -  [user_pk]
    *  -  [group_pk]
@@ -163,7 +163,7 @@ use Fossology\Lib\Auth\Auth;
     $sql = "select group_fk as group_pk from group_user_member where user_fk=$user_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result)) 
+    while ($row = pg_fetch_assoc($result))
     {
       /* Now find all the groups that contain this group */
       GetGroupUsers($user_pk, $row['group_pk'], $GroupArray);
@@ -191,7 +191,7 @@ use Fossology\Lib\Auth\Auth;
     }
     else
     {
-      $sql = "select group_pk, group_name from groups, group_user_member 
+      $sql = "select group_pk, group_name from groups, group_user_member
                   where group_pk=group_fk and user_fk='$user_pk' and group_perm=1";
     }
     $result = pg_query($PG_CONN, $sql);
@@ -215,12 +215,14 @@ use Fossology\Lib\Auth\Auth;
    * \param $group_pk
    * Returns NULL on success, string on failure.
    */
-  function DeleteGroup($group_pk, $PG_CONN)
+  function DeleteGroup($group_pk)
   {
+    global $PG_CONN;
+
     $user_pk = Auth::getUserId();
 
     /* Make sure groupname looks valid */
-    if (empty($group_pk)) 
+    if (empty($group_pk))
     {
       $text = _("Error: Group name must be specified.");
       return ($text);
@@ -238,7 +240,7 @@ use Fossology\Lib\Auth\Auth;
     }
     pg_free_result($result);
 
-    /* Make sure the user has permission to delete this group 
+    /* Make sure the user has permission to delete this group
      * Look through all the group users (table group_user_member)
      * and make sure the user has admin access.
      */

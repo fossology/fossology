@@ -60,23 +60,23 @@ class AuthHelper
     /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
-    $_SESSION['time_check'] = time() + (480 * 60);
+    $this->session->set('time_check', time() + (480 * 60));
     /* No specified permission means ALL permission */
     if ("X" . $row['user_perm'] == "X")
     {
-      $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_ADMIN;
+      $this->session->set(Auth::USER_LEVEL, PLUGIN_DB_ADMIN);
     } else
     {
-      $_SESSION[Auth::USER_LEVEL] = $row['user_perm'];
+      $this->session->set(Auth::USER_LEVEL, $row['user_perm']);
     }
-    $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
+    $this->session->set('checkip', GetParm("checkip", PARM_STRING));
     /* Check for the no-popup flag */
     if (GetParm("nopopup", PARM_INTEGER) == 1)
     {
-      $_SESSION['NoPopup'] = 1;
+      $this->session->set('NoPopup', 1);
     } else
     {
-      $_SESSION['NoPopup'] = 0;
+      $this->session->set('NoPopup', 0);
     }
     return true;
   }
@@ -95,24 +95,20 @@ class AuthHelper
       $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
     }
 
-    $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
     $SysConf['auth'][Auth::USER_ID] = $userRow['user_pk'];
     $this->session->set(Auth::USER_ID, $userRow['user_pk']);
-    $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
     $this->session->set(Auth::USER_NAME, $userRow['user_name']);
-    $_SESSION['Folder'] = $userRow['root_folder_fk'];
-    $_SESSION[Auth::USER_LEVEL] = $userRow['user_perm'];
+    $this->session->set('Folder', $userRow['root_folder_fk']);
     $this->session->set(Auth::USER_LEVEL, $userRow['user_perm']);
-    $_SESSION['UserEmail'] = $userRow['user_email'];
-    $_SESSION['UserEnote'] = $userRow['email_notify'];
-    $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
+    $this->session->set('UserEmail', $userRow['user_email']);
+    $this->session->set('UserEnote', $userRow['email_notify']);
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
-    $_SESSION['GroupName'] = $userRow['group_name'];
+    $this->session->set('GroupName', $userRow['group_name']);
   }
 
   /**
-   * @return mixed
+   * @return Session
    */
   public function getSession()
   {

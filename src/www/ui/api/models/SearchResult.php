@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 
 namespace api\models;
+
 use api\models\Upload;
 
 class SearchResult
@@ -41,11 +42,23 @@ class SearchResult
 
   public function getJSON()
   {
-    return array(
+    return json_encode(array(
       'upload' => $this->upload,
       'uploadTreeId' => $this->uploadTreeId,
       'filename' => $this->filename
-    );
+    ));
   }
 
+  /**
+   * Get Search result element as array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      'upload'        => $this->upload,
+      'uploadTreeId'  => $this->uploadTreeId,
+      'filename'      => $this->filename
+    ];
+  }
 }

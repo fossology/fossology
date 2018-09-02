@@ -74,6 +74,16 @@ class File
     ));
   }
 
-
-
+  /**
+   * Get the file element as array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      'filename'    => $this->filename,
+      'contentType' => $this->contentType,
+      'fileContent' => $this->fileContent
+    ];
+  }
 }

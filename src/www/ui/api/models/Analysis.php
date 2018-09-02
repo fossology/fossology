@@ -54,5 +54,23 @@ class Analysis
     $this->package = $package;
   }
 
+  /**
+   * Get the object as an array
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      "bucket"    => $this->bucket,
+      "copyright" => $this->copyright,
+      "ecc"       => $this->ecc,
+      "keyword"   => $this->keyword,
+      "mime"      => $this->mime,
+      "monk"      => $this->monk,
+      "nomos"     => $this->nomos,
+      "package"   => $this->package
+    ];
+  }
+
 
 }
