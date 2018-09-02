@@ -30,7 +30,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class TestCLib extends \PHPUnit_Framework_TestCase
+class TestCLib extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

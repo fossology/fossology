@@ -38,7 +38,7 @@ function ReportCachePurgeAll()
 
 }
 
-class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
+class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 {
   const MATCH_ID = 231;
   const PERCENTAGE = 315;
@@ -74,15 +74,15 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->timestamp = time();
     $this->includeSubFolders = false;
 
-    $this->clearingDao = M::mock(ClearingDao::classname());
-    $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
+    $this->clearingDao = M::mock(ClearingDao::class);
+    $this->agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::class);
     $this->clearingEventProcessor = new ClearingEventProcessor();
 
-    $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
     $this->itemTreeBounds->shouldReceive("getItemId")->withNoArgs()->andReturn($this->uploadTreeId);
     $this->itemTreeBounds->shouldReceive("getPfileId")->withNoArgs()->andReturn($this->pfileId);
 
-    $this->dbManager = M::mock(DbManager::classname());
+    $this->dbManager = M::mock(DbManager::class);
     $this->dbManager->shouldReceive('begin')->withNoArgs();
     $this->dbManager->shouldReceive('commit')->withNoArgs();
 
@@ -110,7 +110,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
             ->with($this->itemTreeBounds)
             ->andReturn(array());
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
@@ -136,7 +136,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
             ->with($this->itemTreeBounds)->andReturn(array());
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn(DecisionScopes::ITEM);
@@ -165,7 +165,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
             ->with($this->itemTreeBounds)->andReturn(array());
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $clearingDecision->shouldReceive("getScope")->withNoArgs()->andReturn($isGlobal);
@@ -194,7 +194,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId, $this->includeSubFolders)
         ->andReturn(array());
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IRRELEVANT);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
@@ -224,7 +224,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId, $this->includeSubFolders)
         ->andReturn(array($licenseRef->getId() => $addedEvent));
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IRRELEVANT);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
@@ -256,7 +256,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
         ->with($this->itemTreeBounds, $this->groupId, $this->includeSubFolders)
         ->andReturn(array($licenseRef->getId() => $removedEvent));
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IRRELEVANT);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
@@ -288,7 +288,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
             ->with($this->itemTreeBounds)->andReturn($scannerResults);
 
-    $clearingDecision = M::mock(ClearingDecision::classname());
+    $clearingDecision = M::mock(ClearingDecision::class);
     $clearingDecision->shouldReceive("getTimeStamp")->withNoArgs()->andReturn($this->timestamp-3600);
     $clearingDecision->shouldReceive("getType")->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $clearingDecision->shouldReceive("getClearingEvents")->withNoArgs()->andReturn(array());
@@ -505,7 +505,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
     $this->agentLicenseEventProcessor->shouldReceive("getScannerEvents")
         ->with($this->itemTreeBounds,LicenseMap::CONCLUSION)->andReturn($scannerResults);
 
-    $licenseMap = M::mock(LicenseMap::classname());
+    $licenseMap = M::mock(LicenseMap::class);
     $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {return $id;});
     $licenseMap->shouldReceive('getUsage')->andReturn(LicenseMap::CONCLUSION);
     
@@ -540,7 +540,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $licenseRef = new LicenseRef($licenseId, $licenseShortname, $licenseFullName);
 
-    $agentRef = M::mock(AgentRef::classname());
+    $agentRef = M::mock(AgentRef::class);
     
     $scannerEvents = array(
       $licenseId => array(new AgentClearingEvent($licenseRef, $agentRef, self::MATCH_ID, self::PERCENTAGE))

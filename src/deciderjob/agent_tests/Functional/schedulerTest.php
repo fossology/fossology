@@ -40,7 +40,7 @@ include_once(__DIR__.'/../../../lib/php/Plugin/FO_Plugin.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
-class SchedulerTest extends \PHPUnit_Framework_TestCase
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -76,7 +76,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $logger = M::mock('Monolog\Logger');
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
@@ -244,13 +244,13 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $dbManager = M::mock(DbManager::classname());
-    $agentDao = M::mock(AgentDao::classname());
-    $clearingDao = M::mock(ClearingDao::classname());
-    $uploadDao = M::mock(UploadDao::classname());
-    $highlightDao = M::mock(HighlightDao::classname());
-    $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
-    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
+    $dbManager = M::mock(DbManager::class);
+    $agentDao = M::mock(AgentDao::class);
+    $clearingDao = M::mock(ClearingDao::class);
+    $uploadDao = M::mock(UploadDao::class);
+    $highlightDao = M::mock(HighlightDao::class);
+    $decisionProcessor = M::mock(ClearingDecisionProcessor::class);
+    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::class);
 
     $uploadId = 13243;
 
@@ -266,10 +266,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $itemIds = array(4343, 43);
 
-    $bounds0 = M::mock(ItemTreeBounds::classname());
+    $bounds0 = M::mock(ItemTreeBounds::class);
     $bounds0->shouldReceive('getItemId')->andReturn($itemIds[0]);
     $bounds0->shouldReceive('containsFiles')->andReturn(false);
-    $bounds1 = M::mock(ItemTreeBounds::classname());
+    $bounds1 = M::mock(ItemTreeBounds::class);
     $bounds1->shouldReceive('getItemId')->andReturn($itemIds[1]);
     $bounds1->shouldReceive('containsFiles')->andReturn(false);
     $bounds = array($bounds0, $bounds1);
@@ -285,7 +285,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     /* dummy expectations needed for unmockable LicenseMap constructor */
     $dbManager->shouldReceive('prepare');
-    $res = M::Mock(DbManager::classname());
+    $res = M::Mock(DbManager::class);
     $dbManager->shouldReceive('execute')->andReturn($res);
     $row1 = array('rf_fk' => 2334, 'parent_fk' => 1);
     $row2 = array('rf_fk' => 2333, 'parent_fk' => 1);

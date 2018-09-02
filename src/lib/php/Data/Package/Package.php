@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Package;
 
 use Fossology\Lib\Data\Upload\Upload;
-use Fossology\Lib\Util\Object;
 
-class Package extends Object {
+class Package {
 
   /** @var int */
   private $id;

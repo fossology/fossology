@@ -27,7 +27,7 @@ require_once(dirname(__FILE__) . '/../common-db.php');
 /**
  * \class test_common_cache
  */
-class test_common_cached extends PHPUnit_Framework_TestCase
+class test_common_cached extends \PHPUnit\Framework\TestCase
 {
   public $PG_CONN;
   public $upload_pk = 0;

@@ -25,7 +25,7 @@ use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
-class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
+class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 {
   protected function setUp()
   {
@@ -54,7 +54,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleCsvLicense()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $nkMap = array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licG'=>false,'licH'=>false,'licZ'=>100);
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', $nkMap);
@@ -111,7 +111,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleHeadCsv()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
   
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text','fullname','notes','bar'))),
@@ -126,14 +126,14 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
    */
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text')));
   }
   
   public function testSetDelimiter()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     
     $licenseCsvImport->setDelimiter('|');
@@ -145,7 +145,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testSetEnclosure()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     
     $licenseCsvImport->setEnclosure('|');
@@ -157,7 +157,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleCsv()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('shortname','foo','text','fullname','notes')));
@@ -176,7 +176,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleFileIfFileNotExists()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists');
     assertThat($msg, is(equalTo(_('Internal error'))));
@@ -184,7 +184,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
   
   public function testHandleFileIfFileIsNotParsable()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $msg = $licenseCsvImport->handleFile(__FILE__);
     assertThat($msg, startsWith( _('Error while parsing file')));
@@ -192,7 +192,7 @@ class LicenseCsvImportTest extends \PHPUnit_Framework_TestCase
 
   public function testHandleFile()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $filename = tempnam("/tmp", "FOO");
     $handle = fopen($filename, 'w');

@@ -23,7 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Monolog\Logger;
 
-class UserDaoTest extends \PHPUnit_Framework_TestCase
+class UserDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestLiteDb */
   private $testDb;

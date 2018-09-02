@@ -26,7 +26,7 @@ require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 /**
  * \class ft_cliDelagentTest - functioin test delagent agent from cli
  */
-class ft_cliDelagentTest extends PHPUnit_Framework_TestCase {
+class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
 
   public $EXE_PATH = "";
   public $PG_CONN;

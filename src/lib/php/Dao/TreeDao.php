@@ -21,10 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class TreeDao extends Object
+class TreeDao
 {
   /** @var DbManager */
   private $dbManager;
@@ -34,7 +33,7 @@ class TreeDao extends Object
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
 
   public function getFullPath($itemId, $tableName, $parentId=0, $dropArtifactPrefix=false)

@@ -22,9 +22,8 @@ namespace Fossology\Lib\View;
 
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\SplitPosition;
-use Fossology\Lib\Util\Object;
 
-class HighlightState extends Object
+class HighlightState
 {
   const PLACEHOLDER = " # ";
 

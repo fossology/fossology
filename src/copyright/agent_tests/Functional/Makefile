@@ -37,6 +37,7 @@ test-sched: all
 
 clean:
 	@echo "nothing to do"
+	rm -rf testconf copyright
 
 .PHONY: all test coverage clean
 

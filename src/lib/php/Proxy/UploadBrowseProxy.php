@@ -21,10 +21,8 @@ namespace Fossology\Lib\Proxy;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 
-
-class UploadBrowseProxy extends Object
+class UploadBrowseProxy
 {
   const PRIO_COLUMN = 'priority';
   

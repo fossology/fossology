@@ -6,175 +6,122 @@
 language: php
 dist: trusty
 php:
-  - '5.6'
+  - 7.0
+  - 5.6
+  - 7.1
 addons:
- - postgresql: "9.3"
-cache:
- - apt
+  apt:
+    packages: &default_packages
+      - bzip2
+      - cabextract
+      - cpio
+      - genisoimage
+      - libboost-program-options-dev
+      - libboost-regex-dev
+      - libcppunit-dev
+      - libcunit1-dev
+      - libdbd-sqlite3-perl
+      - libglib2.0-dev
+      - liblocal-lib-perl
+      - libmagic-dev
+      - librpm-dev
+      - libspreadsheet-writeexcel-perl
+      - libtext-template-perl
+      - php5-cli
+      - php5-pgsql
+      - poppler-utils
+      - p7zip
+      - p7zip-full
+      - rpm
+      - sleuthkit
+      - unrar-free
+      - unzip
+      - upx-ucl
+
+services: postgresql
 
 sudo: required
 
-services:
-  - docker
-
 install:
- - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
- - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.5 main'
- - sudo add-apt-repository 'deb http://llvm.org/apt/precise/ llvm-toolchain-precise-3.6 main'
- - sudo apt-get update -qq
- - apt-cache --names-only search '^(gcc|clang)-[0-9.]+$'
- - sudo apt-get install -q -y debhelper libglib2.0-dev libmagic-dev libxml2-dev
-                              libtext-template-perl librpm-dev  rpm libpcre3-dev libssl-dev
-                              apache2 libapache2-mod-php5 php5-pgsql php-pear php5-cli
-                              binutils bzip2 cabextract cpio sleuthkit genisoimage poppler-utils
-                              rpm upx-ucl unrar-free unzip p7zip-full p7zip wget git-core subversion
-                              libpq-dev libcunit1-dev libcppunit-dev
-                              libboost-regex-dev libboost-program-options-dev
-                              liblocal-lib-perl libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
- - sudo apt-get install -q -y --allow-unauthenticated $CXX $CC || sudo apt-get install -q -y --allow-unauthenticated $CC
- - sudo apt-get install -q -y cppcheck
- - ( cd src && composer install --dev )
- - install/scripts/install-spdx-tools.sh
- - install/scripts/install-ninka.sh
+  - composer install --working-dir=src
+  - ./install/scripts/install-spdx-tools.sh
+  - ./install/scripts/install-ninka.sh
 
 before_script:
- - sudo mkdir -p /var/local/cache/fossology
- - sudo chown $(whoami) /var/local/cache/fossology
- - sudo mkdir -p /srv/fossologyTestRepo
- - sudo chown $(whoami) /srv/fossologyTestRepo
- - psql -c "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" -U postgres
- - psql -c "create database fossology;" -U postgres
- - psql -c "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD 'fossologytest';" -U postgres
- - echo "localhost:*:*:fossy:fossy" >> ~/.pgpass && echo "localhost:*:*:fossologytest:fossologytest" >> ~/.pgpass
- - chmod 0600 ~/.pgpass
+  - ./utils/prepare-test -afty
 
 env:
   global:
-   - PHPTESTSUITE=''
-   - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
-   - MAKETARGETS='all test-adj2nest test-buckets test-cli test-copyright test-debug test-decider test-deciderjob test-delagent test-lib test-maintagent test-mimetype test-monk test-nomos test-pkgagent test-readmeoss test-reportImport test-reuser test-spdx2 test-unifiedreport test-wget_agent test-www'
+    - PHPTESTSUITE=''
+    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
+    - MAKETARGETS='all test'
+  matrix:
+    - PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
 
 script:
- - set -e
- - src/testing/syntax/syntaxtest.sh
- - if [[ ! -z "$CHECKBEFORE" ]]; then $CHECKBEFORE; fi
- - if [[ ! -z "$MAKETARGETS" ]]; then make $MAKETARGETS; fi
- - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
- - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
- - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
- - if [[ ! -z "$PHPTESTSUITE" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="$PHPTESTSUITE"; fi
- - set +e
+  - set -e
+  - src/testing/syntax/syntaxtest.sh
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
+  - if [[ ! -z "${CHECKBEFORE}" ]]; then ${CHECKBEFORE}; fi
+  - if [[ ! -z "${MAKETARGETS}" ]]; then make ${MAKETARGETS}; fi
+  - if [[ ! -z "${PHPTESTSUITE}" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="${PHPTESTSUITE}"; fi
+  - set +e
 
 after_script:
- - mkdir -p build/logs
- - php src/vendor/bin/coveralls -vv -x clover.xml
+  - mkdir -p build/logs
+  - if [[ ! -z "${PHPTESTSUITE}" ]]; then php src/vendor/bin/coveralls -vv -x clover.xml; fi
 
 matrix:
   include:
-
-################################################################################
-## general tests
-    - env: TEST=default-docker-test
-      before_script:
-      install:
-      script:
-        - src/testing/docker/default-docker-test.sh
-      after_script:
-    - env: TEST=docker-compose-test
-      before_script:
-      install:
+  ## docker tests ##
+    - name: default-docker-test
+      services: docker
+      install: true
+      before_script: true
+      script: src/testing/docker/default-docker-test.sh
+    - name: docker-compose-test
+      services: docker
+      install: true
+      before_script: true
       script: src/testing/docker/docker-compose-test.sh
-      after_script:
-
-################################################################################
-## C/C++ and phpunit agent tests
-#### with PHP 5.6
-    - env: CC=gcc CXX=g++
-      after_script:
-    - env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - env: CC=gcc-4.6 CXX=g++-4.6
-      after_script:
-    - env: CC=gcc-4.8 CXX=g++-4.8
-      after_script:
-    - env: CC=gcc-4.9 CXX=g++-4.9
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
+  ## C/C++ agent tests ##
+    - env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
+      addons:
+        apt:
+          packages:
+            - *default_packages
+            - gcc-4.8
+            - g++-4.8
+    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-5
+            - g++-5
+    - env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-6
+            - g++-6
     - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
-      after_script:
-#### with PHP 7.0
-    - php: 7.0
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.0
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.0
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
-#### with PHP 7.1
-    - php: 7.1 # allowed failure
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.1 # allowed failure
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
-
-################################################################################
-## PHP tests
-#### PHP: PhpUnit Tests
-    - php: 5.6
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.0
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
-    - php: 7.1
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
-#### PHP: phpcpd
-    - script: # allowed failure
-        - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
-      after_script:
-
-################################################################################
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty
+          packages:
+            - *default_packages
+            - clang-3.6
+  ## PHP: phpcpd ##
+    - script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
   allow_failures:
+    - script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
     - php: 7.1
-      env: CC=gcc CXX=g++
-      after_script:
-    - php: 7.1
-      env: CC=clang-3.6 CXX=clang++-3.6
-      after_script:
-    - php: 7.1
-      env: CC=gcc-5 CXX=g++-5
-      after_script:
-    - php: 7.1
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall -Werror'
-      after_script:
-    - script:
-        - src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
-      after_script:
-    - php: 7.1
-      env:
-        PHPTESTSUITE='Fossology PhpUnit Test Suite'
-        CHECKBEFORE=''
-        MAKETARGETS='build-lib VERSIONFILE build-cli'
-

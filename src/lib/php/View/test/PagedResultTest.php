@@ -31,7 +31,7 @@ class TestPagedResult extends PagedResult {
   }
 }
 
-class PagedResultTest extends \PHPUnit_Framework_TestCase {
+class PagedResultTest extends \PHPUnit\Framework\TestCase {
 
   const START_OFFSET = 12;
   const META_TEXT = "<meta>";
@@ -98,4 +98,3 @@ class PagedResultTest extends \PHPUnit_Framework_TestCase {
   }
 
 }
- 

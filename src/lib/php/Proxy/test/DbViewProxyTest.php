@@ -21,7 +21,7 @@ namespace Fossology\Lib\Proxy;
 use Mockery as M;
 use Fossology\Lib\Db\DbManager;
 
-class DbViewProxyTest extends \PHPUnit_Framework_TestCase
+class DbViewProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $dbViewName = "foo";
   private $dbViewQuery = "select 3.14";
@@ -34,7 +34,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
     $this->dbViewDao = new DbViewProxy($this->dbViewQuery, $this->dbViewName);
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
   }
 

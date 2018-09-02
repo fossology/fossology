@@ -67,7 +67,7 @@ class SolidDbManagerTest extends DbManagerTest
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2 AND $3';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
     
-    $reflection = new \ReflectionClass($this->dbManager->classname() );
+    $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
 
@@ -85,7 +85,7 @@ class SolidDbManagerTest extends DbManagerTest
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
     
-    $reflection = new \ReflectionClass($this->dbManager->classname() );
+    $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
     

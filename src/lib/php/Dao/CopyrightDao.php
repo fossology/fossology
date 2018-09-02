@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -22,10 +22,9 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class CopyrightDao extends Object
+class CopyrightDao
 {
   /** @var DbManager */
   private $dbManager;
@@ -38,9 +37,9 @@ class CopyrightDao extends Object
   {
     $this->dbManager = $dbManager;
     $this->uploadDao = $uploadDao;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
-  
+
   /**
    * @param int $uploadTreeId
    * @param string $tableName
@@ -77,11 +76,12 @@ class CopyrightDao extends Object
       $addAgentValue = ' AND agent_fk=$2';
       $params[] = $agentId;
     }
-    $getHighlightForTableName = "SELECT * FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
+    $columnsToSelect = "type, content, copy_startbyte, copy_endbyte";
+    $getHighlightForTableName = "SELECT $columnsToSelect FROM $tableName WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
     if($tableName != "copyright"){
       $sql = $getHighlightForTableName;
     }else{
-      $sql = "$getHighlightForTableName UNION SELECT * FROM author WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
+      $sql = "$getHighlightForTableName UNION SELECT $columnsToSelect FROM author WHERE copy_startbyte IS NOT NULL AND pfile_fk=$1 $addAgentValue";
     }
     $this->dbManager->prepare($statementName,$sql);
     $result = $this->dbManager->execute($statementName, $params);
@@ -118,7 +118,8 @@ class CopyrightDao extends Object
         'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
     if ($decision_pk <= 0)
     {
-      return $this->dbManager->insertTableRow($tableName, $assocParams, __METHOD__.'Insert.'.$tableName, 'copyright_decision_pk');
+      $primaryColumn = $tableName . '_pk';
+      return $this->dbManager->insertTableRow($tableName, $assocParams, __METHOD__.'Insert.'.$tableName, $primaryColumn);
     }
     else
     {
@@ -338,7 +339,8 @@ class CopyrightDao extends Object
   public function getDecisions($tableName,$pfileId)
   {
     $statementName = __METHOD__.$tableName;
-    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by copyright_decision_pk desc";
+    $orderTablePk = $tableName.'_pk';
+    $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by $orderTablePk desc";
     $params = array($pfileId);
 
     return $this->dbManager->getRows($sql, $params, $statementName);
@@ -380,7 +382,7 @@ class CopyrightDao extends Object
       $sql .= " AND ut.upload_fk=$".count($params);
       $stmt .= '.upload';
     }
-    
+
     $this->dbManager->prepare($stmt, "$sql");
     $resource = $this->dbManager->execute($stmt, $params);
     $this->dbManager->freeResult($resource);

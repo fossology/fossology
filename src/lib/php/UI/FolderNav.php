@@ -20,9 +20,8 @@ namespace Fossology\Lib\UI;
 
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 
-class FolderNav extends Object
+class FolderNav
 {
   /** @var DbManager */
   private $dbManager;

@@ -24,7 +24,7 @@ use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 use Monolog\Logger;
 
-class AgentDaoTest extends \PHPUnit_Framework_TestCase {
+class AgentDaoTest extends \PHPUnit\Framework\TestCase {
 
   private $uploadId = 25;
   private $olderAgentId = 3;
@@ -67,7 +67,7 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
   private $incompleteAgent;
 
   protected function setUp() {
-    $this->dbManager = M::mock(DbManager::classname());
+    $this->dbManager = M::mock(DbManager::class);
     $this->logger = M::mock('Monolog\Logger');
 
     $this->testDb = new TestPgDb();
@@ -144,7 +144,7 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
   {
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
     
     $this->dbManagerMock->shouldReceive('prepare')->once();
@@ -192,4 +192,3 @@ class AgentDaoTest extends \PHPUnit_Framework_TestCase {
   }
 
 }
- 

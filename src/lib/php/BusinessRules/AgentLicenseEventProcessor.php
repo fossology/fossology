@@ -25,9 +25,8 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\LatestScannerProxy;
-use Fossology\Lib\Util\Object;
 
-class AgentLicenseEventProcessor extends Object
+class AgentLicenseEventProcessor
 {
   private $latestAgentMapCache = array();
   /** @var LicenseDao */

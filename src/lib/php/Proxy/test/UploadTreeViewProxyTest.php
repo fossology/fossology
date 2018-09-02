@@ -21,7 +21,7 @@ namespace Fossology\Lib\Proxy;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Mockery as M;
 
-class UploadTreeViewProxyTest extends \PHPUnit_Framework_TestCase
+class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $viewSuffix = "<suffix>";
 
@@ -30,7 +30,7 @@ class UploadTreeViewProxyTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->itemTreeBounds = M::mock(ItemTreeBounds::classname());
+    $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
   }
 
   public function testDefaultViewName()
@@ -143,4 +143,3 @@ class UploadTreeViewProxyTest extends \PHPUnit_Framework_TestCase
     new UploadTreeViewProxy($this->itemTreeBounds, array('bar'));
   }
 }
- 

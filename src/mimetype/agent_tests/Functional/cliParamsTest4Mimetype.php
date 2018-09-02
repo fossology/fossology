@@ -29,7 +29,7 @@ require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 /**
  * \class cliParamsTest4Mimetype - test mimetype agent from cli
  */
-class cliParamsTest4Mimetype extends PHPUnit_Framework_TestCase {
+class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
 
   public $EXE_PATH = "";
   public $PG_CONN;

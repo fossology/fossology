@@ -23,7 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
-class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
+class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 {
   protected function setUp()
   {
@@ -116,7 +116,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
   
   public function testSetDelimiter()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvExport); 
     $delimiter = $reflection->getProperty('delimiter');
@@ -131,7 +131,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
   
   public function testSetEnclosure()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
     $reflection = new \ReflectionClass($licenseCsvExport); 
     $enclosure = $reflection->getProperty('enclosure');
@@ -145,4 +145,3 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

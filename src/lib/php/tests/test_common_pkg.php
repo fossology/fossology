@@ -27,7 +27,7 @@ require_once(dirname(__FILE__) . '/../common-db.php');
 /**
  * \class test_common_pkg
  */
-class test_common_pkg extends PHPUnit_Framework_TestCase
+class test_common_pkg extends \PHPUnit\Framework\TestCase
 {
   public $PG_CONN;
   public $DB_COMMAND =  "";

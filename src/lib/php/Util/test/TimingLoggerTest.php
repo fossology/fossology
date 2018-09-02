@@ -29,7 +29,7 @@ class HackedTimingLogger extends TimingLogger
   }
 }
 
-class TimingLoggerTest extends \PHPUnit_Framework_TestCase
+class TimingLoggerTest extends \PHPUnit\Framework\TestCase
 {
   private $logger;
   
@@ -77,4 +77,3 @@ class TimingLoggerTest extends \PHPUnit_Framework_TestCase
   }
   
 }
- 

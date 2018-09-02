@@ -2,8 +2,6 @@
 
 namespace Fossology\Lib\Agent;
 
-use Fossology\Lib\Util\Object;
-
 function cli_Init()
 {
 }
@@ -32,7 +30,7 @@ function fgets($in)
   return $fgetsMock->fgets($in);
 }
 
-class FgetsMock extends Object
+class FgetsMock
 {
   function fgets($in) {}
 }

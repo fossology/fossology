@@ -33,7 +33,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
+class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -69,7 +69,7 @@ class CopyrightDaoTest extends \PHPUnit_Framework_TestCase
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     assertThat($highlights,arrayWithSize(1));
     $highlight0 = $highlights[0];
-    assertThat($highlight0,anInstanceOf(Highlight::classname()));
+    assertThat($highlight0,anInstanceOf(Highlight::class));
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     assertThat($highlight0->getEnd(),equalTo(201));
     

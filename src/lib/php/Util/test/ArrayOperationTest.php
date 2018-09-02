@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Util;
 
 
-class ArrayOperationTest extends \PHPUnit_Framework_TestCase
+class ArrayOperationTest extends \PHPUnit\Framework\TestCase
 {
   
   protected function setUp()
@@ -93,4 +93,3 @@ class ArrayOperationTest extends \PHPUnit_Framework_TestCase
   }
   
 }
- 

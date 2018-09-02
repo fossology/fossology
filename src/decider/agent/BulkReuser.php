@@ -22,12 +22,11 @@ use Fossology\DeciderJob\UI\DeciderJobAgentPlugin;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\AgentPlugin;
-use Fossology\Lib\Util\Object;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 include_once(__DIR__ . "/../../lib/php/common-job.php");
 
-class BulkReuser extends Object
+class BulkReuser
 {
   /** @var DbManager */
   private $dbManager;
@@ -60,8 +59,6 @@ class BulkReuser extends Object
     $upload = $uploadDao->getUpload($uploadId);
     $uploadName = $upload->getFilename();
     $job_pk = \JobAddJob($userId, $groupId, $uploadName, $uploadId);
-    /** @var DeciderJobAgentPlugin $deciderPlugin */
-    $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array(array('name' => 'agent_monk_bulk', 'args' => $row['lrb_pk']));
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies);

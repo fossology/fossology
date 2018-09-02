@@ -23,7 +23,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Test\TestPgDb;
 
-class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
+class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $testDb;
   private $groupId = 401;
@@ -48,7 +48,7 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
   public function testConstructAndSanity()
   {
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), true);
-    assertThat($uploadBrowseProxy,is(anInstanceOf(UploadBrowseProxy::classname())));
+    assertThat($uploadBrowseProxy,is(anInstanceOf(UploadBrowseProxy::class)));
   }
   
   public function testUpdateTableStatus()
@@ -247,4 +247,3 @@ class UploadBrowseProxyTest extends \PHPUnit_Framework_TestCase
     $uploadBrowseProxy->getStatus(-1);
   }
 }
- 

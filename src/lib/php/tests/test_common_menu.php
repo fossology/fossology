@@ -27,7 +27,7 @@ require_once(dirname(__FILE__) . '/../common-parm.php');
 /**
  * \class test_common_menu
  */
-class test_common_menu extends PHPUnit_Framework_TestCase
+class test_common_menu extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
   protected function setUp()

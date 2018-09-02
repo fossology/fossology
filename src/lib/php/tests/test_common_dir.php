@@ -26,7 +26,7 @@ require_once(dirname(__FILE__) . '/../common-dir.php');
 /**
  * \class test_common_dir
  */
-class test_common_dir extends PHPUnit_Framework_TestCase
+class test_common_dir extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
   protected function setUp()

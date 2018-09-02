@@ -22,7 +22,7 @@ use Fossology\Lib\Data\Upload\Upload;
 use Mockery as M;
 
 
-class PackageTest extends \PHPUnit_Framework_TestCase {
+class PackageTest extends \PHPUnit\Framework\TestCase {
 
   private $id = 123;
 
@@ -34,7 +34,7 @@ class PackageTest extends \PHPUnit_Framework_TestCase {
   private $package;
 
   protected function setUp() {
-    $this->uploads = array(M::mock(Upload::classname()));
+    $this->uploads = array(M::mock(Upload::class));
 
     $this->package = new Package($this->id, $this->name, $this->uploads);
   }
@@ -54,4 +54,3 @@ class PackageTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->package->getUploads(), is($this->uploads));
   }
 }
- 

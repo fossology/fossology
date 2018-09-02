@@ -19,7 +19,7 @@
 
 namespace Fossology\Lib\Data;
 
-class LicenseMatchTest extends \PHPUnit_Framework_TestCase
+class LicenseMatchTest extends \PHPUnit\Framework\TestCase
 {
   /** @var LicenseRef */
   private $licenseRef;

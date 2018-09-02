@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # FOSSology mod_deps script
 # This script helps you install dependencies on a system. for a module
 #
@@ -16,67 +16,62 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbehy --long runtime,buildtime,everything,,help -n 'mod_deps' -- "$@"`
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
 
-if [ $? != 0 ]; then
-  echo "ERROR: Bad option specified."
-  OPTS="--help"
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
 fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [ "$OPTS" = " --" ]; then
-  EVERYTHING=1
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
 fi
 
 while true; do
   case "$1" in
-    -r|--runtime) RUNTIME=1; shift;;
-    -b|--buildtime) BUILDTIME=1; shift;;
-    -e|--everything) EVERYTHING=1; shift;;
-    -y) YesOpt=" -y "; shift;;
-    -h|--help)
-      echo "Usage: mod_deps [options]";
-      echo "  -r or --runtime    : install runtime dependencies"
-      echo "  -b or --buildtime  : install buildtime dependencies"
-      echo "  -e or --everything : install all dependencies (default)"
-      echo "  -h or --help       : this help text"
-      exit;;
-    --) shift; break;;
-    *) echo "ERROR: option $1 not recognised"; exit 1;;
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
   esac
 done
 
-# This must run as root.
-if [ `id -u` != "0" ] ; then
-  echo "ERROR: fo-installdeps must run as root."
-  echo "Aborting."
-  exit 1
-fi
+set -o errexit -o nounset -o pipefail
 
-if [ $EVERYTHING ]; then
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
   echo "*** Installing both runtime and buildtime dependencies ***"
-  RUNTIME=1
-  BUILDTIME=1
+  RUNTIME=true
+  BUILDTIME=true
 fi
 
 # figure out what distro we're on
-DISTRO=`lsb_release -is`
-CODENAME=`lsb_release -cs`
-
-if [ "$?" != "0" ]; then
-  echo "ERROR: this program requires the lsb_release command. On Debian based"
-  echo "  systems this is probably in the lsb-release package, on"
-  echo "  Fedora/RedHat systems it is probably the redhat-lsb package."
-  exit 1
-fi
+DISTRO=$(lsb_release --id --short)
 
 ########################################################################
 
-if [ $BUILDTIME ]; then
+if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
@@ -84,16 +79,13 @@ if [ $BUILDTIME ]; then
         libmagic-dev
       ;;
     RedHatEnterprise*|CentOS|Fedora)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
       yum $YesOpt install \
         file-devel
       ;;
   esac
 fi
 
-if [ $RUNTIME ]; then
+if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu|LinuxMint)
@@ -101,9 +93,6 @@ if [ $RUNTIME ]; then
         libmagic1
       ;;
     RedHatEnterprise*|CentOS|Fedora)
-      if [ $YesOpt ]; then
-        YesOpt='-y'
-      fi
       yum $YesOpt install \
         file-libs
       ;;

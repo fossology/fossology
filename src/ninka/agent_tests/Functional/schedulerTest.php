@@ -32,7 +32,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
+class NinkaScheduledTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -52,7 +52,7 @@ class NinkaScheduledTest extends \PHPUnit_Framework_TestCase
 
     $this->licenseDao = new LicenseDao($this->dbManager);
     $logger = new Logger("NinkaSchedulerTest");
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
   }
   

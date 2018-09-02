@@ -32,7 +32,7 @@ require_once(dirname(__FILE__) . '/../common-ui.php');
 /**
  * \class test_common_license_file
  */
-class test_common_license_file extends PHPUnit_Framework_TestCase
+class test_common_license_file extends \PHPUnit\Framework\TestCase
 {
   public $upload_pk = 0;
   public $uploadtree_pk_parent = 0;

@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 
-class ObligationMap extends Object
+class ObligationMap
 {
 
   /** @var DbManager */

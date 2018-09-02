@@ -72,9 +72,9 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     /* these appear not to be used by the reuser: mock them to something wrong
      */
-    $this->clearingEventProcessor = M::mock(LicenseRef::classname());
-    $this->decisionTypes = M::mock(LicenseRef::classname());
-    $this->agentLicenseEventProcessor = M::mock(LicenseRef::classname());
+    $this->clearingEventProcessor = M::mock(LicenseRef::class);
+    $this->decisionTypes = M::mock(LicenseRef::class);
+    $this->agentLicenseEventProcessor = M::mock(LicenseRef::class);
 
     $container = M::mock('Container');
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
@@ -89,7 +89,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.tree')->andReturn($this->treeDao);
     $GLOBALS['container'] = $container;
 
-    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
+    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
 

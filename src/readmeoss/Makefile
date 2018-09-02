@@ -12,7 +12,6 @@ include $(VARS)
 MOD_NAME = readmeoss
 
 DIRS = agent ui
-TESTDIR =
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 

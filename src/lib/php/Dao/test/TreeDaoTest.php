@@ -23,7 +23,7 @@ namespace Fossology\Lib\Dao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-class TreeDaoTest extends \PHPUnit_Framework_TestCase
+class TreeDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

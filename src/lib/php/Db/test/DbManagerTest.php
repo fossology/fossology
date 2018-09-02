@@ -21,7 +21,7 @@ namespace Fossology\Lib\Db;
 use Mockery as M;
 use Mockery\MockInterface;
 
-abstract class DbManagerTest extends \PHPUnit_Framework_TestCase
+abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var Driver|MockInterface */
   protected $driver;

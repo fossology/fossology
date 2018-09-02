@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2014, Siemens AG
- * Author: Daniele Fognini
+ * Copyright (C) 2014, 2018, Siemens AG
+ * Author: Daniele Fognini, anupam.ghosh@siemens.com
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2
@@ -18,30 +18,45 @@
 
 
 #ifndef IDENTITY_HPP
-  #define IDENTITY_HPP
+#define IDENTITY_HPP
 
-  #ifndef IDENTITY_ECC
-      #ifndef IDENTITY_COPYRIGHT
-        #define IDENTITY_COPYRIGHT
-      #endif
-  #endif
+#ifndef IDENTITY_KW
+#ifndef IDENTITY_ECC
+#ifndef IDENTITY_COPYRIGHT
+#define IDENTITY_COPYRIGHT
+#endif
+#endif
+#endif
 
+#ifndef IDENTITY_KW
   #ifndef IDENTITY_ECC
-    #ifdef IDENTITY_COPYRIGHT
-     #define IDENTITY "copyright"
-     #define MAX_TYPES 4
-    #else
-     #error
-    #endif
+     #ifdef IDENTITY_COPYRIGHT
+       #define IDENTITY "copyright"
+       #define MAX_TYPES 4
+     #else
+       #error
+     #endif
   #else
     #ifndef IDENTITY_COPYRIGHT
-     #define IDENTITY "ecc"
-     #define MAX_TYPES 1
+      #define IDENTITY "ecc"
+      #define MAX_TYPES 1
     #else
-     #error
+      #error
     #endif
   #endif
+#else
+ #ifndef IDENTITY_ECC
+    #ifndef IDENTITY_COPYRIGHT
+      #define IDENTITY "keyword"
+      #define MAX_TYPES 1
+    #else
+      #error
+    #endif
+  #else
+    #error
+  #endif
+#endif
 
-  #define ALL_TYPES ((1<<MAX_TYPES) -1)
+#define ALL_TYPES ((1<<MAX_TYPES) -1)
 
 #endif // IDENTITY_HPP

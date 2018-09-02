@@ -31,7 +31,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
+class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;
@@ -54,7 +54,7 @@ class CopyrightScheduledTest extends \PHPUnit_Framework_TestCase
     $logger = new Logger("CopyrightSchedulerTest");
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
   }

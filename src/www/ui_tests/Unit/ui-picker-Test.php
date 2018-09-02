@@ -28,7 +28,7 @@ if(!function_exists('register_plugin')){ function register_plugin(){}}
 require_once ($wwwPath.'/ui/ui-picker.php');
 
 
-class ui_picker_Test extends \PHPUnit_Framework_TestCase
+class ui_picker_Test extends \PHPUnit\Framework\TestCase
 {
   /**
    * \brief test for Uploadtree2PathStr

@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Util;
 
 
-class StringOperationTest extends \PHPUnit_Framework_TestCase
+class StringOperationTest extends \PHPUnit\Framework\TestCase
 {
   
   protected function setUp()
@@ -44,4 +44,3 @@ class StringOperationTest extends \PHPUnit_Framework_TestCase
    }
   
 }
- 

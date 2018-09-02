@@ -21,11 +21,10 @@
 namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Util\Object;
 use Fossology\Lib\Auth\Auth;
 use Monolog\Logger;
 
-class ShowJobsDao extends Object
+class ShowJobsDao
 {
   /** @var DbManager */
   private $dbManager;
@@ -42,7 +41,7 @@ class ShowJobsDao extends Object
   {
     $this->dbManager = $dbManager;
     $this->uploadDao = $uploadDao;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
 
   /**

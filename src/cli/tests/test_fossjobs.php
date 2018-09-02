@@ -25,7 +25,7 @@ require_once("./test_common.php");
 /**
  * @outputBuffering enabled
  */
-class test_fossjobs extends PHPUnit_Framework_TestCase {
+class test_fossjobs extends \PHPUnit\Framework\TestCase {
 
   // fossology_testconfig is the temporary system configuration directory
   // created by the src/testing/db/create_test_database.php script.

@@ -29,7 +29,7 @@ function Traceback_uri()
   return 'uri';
 }
 
-class FolderNavTest extends \PHPUnit_Framework_TestCase
+class FolderNavTest extends \PHPUnit\Framework\TestCase
 {
   /** @var M */
   private $dbManager;
@@ -42,8 +42,8 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->folderDao = M::mock(FolderDao::classname());
-    $this->dbManager = M::mock(DbManager::classname());
+    $this->folderDao = M::mock(FolderDao::class);
+    $this->dbManager = M::mock(DbManager::class);
     $this->folderNav = new FolderNav($this->dbManager,$this->folderDao);
     $this->uri = Traceback_uri();
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();

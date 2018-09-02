@@ -21,9 +21,8 @@ namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Exception;
-use Fossology\Lib\Util\Object;
 
-class ClearingDecisionBuilder extends Object
+class ClearingDecisionBuilder
 {
   /** @var bool */
   private $sameFolder;

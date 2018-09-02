@@ -28,7 +28,7 @@ require_once(dirname(dirname(__FILE__)) . '/common-sysconfig.php');
 /**
  * \class test_common_sysconfig
  */
-class test_common_sysconfig extends PHPUnit_Framework_TestCase
+class test_common_sysconfig extends \PHPUnit\Framework\TestCase
 {
   public $PG_CONN;
   public $DB_COMMAND =  "";

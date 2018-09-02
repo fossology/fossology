@@ -22,81 +22,80 @@
 # canonical location for such info, then fix it there first and also
 # update this file and the INSTALL document.
 
+show_help() {
+  cat <<EOF
+Usage: fo-installdeps [options]
+  -r or --runtime    : install runtime dependencies
+  -b or --buildtime  : install buildtime dependencies
+  -e or --everything : install all dependencies (default)
+  -o or --offline : do not run composer installation
+  -y                 : Automatic yes to prompts
+  -h or --help       : this help text
+EOF
+}
+
+source "$(dirname ${BASH_SOURCE[0]})/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+#Default should be installation with internet connection
+OFFLINE=''
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o rbeohy --long runtime,buildtime,everything,offline,help -n 'fo-installdeps' -- "$@"`
+OPTS=$(getopt -o rbeohy --long runtime,buildtime,everything,offline,help -n 'fo-installdeps' -- "$@")
 
-if [ $? != 0 ]; then
-   echo "ERROR: Bad option specified."
+if [[ $? -ne 0 ]]; then
    OPTS="--help"
 fi
 
 eval set -- "$OPTS"
 
-# if no options then do everything
-if [ "$OPTS" = " --" ]; then
-   EVERYTHING=1
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
 fi
-#
-# Don't show the -y option.  Should only be used for install testing, as using
-# it without being careful can destroy your system.
-#
-YesOpt=
-
-#Default should be installation with internet connection
-OFFLINE=0
 
 while true; do
    case "$1" in
-      -r|--runtime) RUNTIME=1; shift;;
-      -b|--buildtime) BUILDTIME=1; shift;;
-      -e|--everything) EVERYTHING=1; shift;;
-      -o|--offline) OFFLINE=1; shift;;
-      -y)
-         YesOpt=" -y "; shift;;
-      -h|--help)
-         echo "Usage: fo-installdeps [options]";
-	 echo "  -r or --runtime    : install runtime dependencies"
-	 echo "  -b or --buildtime  : install buildtime dependencies"
-	 echo "  -e or --everything : install all dependencies (default)"
-	 echo "  -o or --offline : do not run composer installation"
-	 echo "  -y                 : Automatic yes to prompts"
-	 echo "  -h or --help       : this help text"
-	 exit;;
-      --) shift; break;;
-      *) echo "ERROR: option $1 not recognised"; exit 1;;
+      -r|--runtime)     RUNTIME=true; shift;;
+      -b|--buildtime)   BUILDTIME=true; shift;;
+      -e|--everything)  EVERYTHING=true; shift;;
+      -o|--offline)     OFFLINE=true; shift;;
+      -y)               YesOpt='-y'; shift;;
+      -h|--help)        show_help; exit;;
+      --)               shift; break;;
+      *)                echo "ERROR: option $1 not recognised"; exit 1;;
    esac
 done
 
-# This must run as root.
-if [ `id -u` != "0" ] ; then
-   echo "ERROR: fo-installdeps must run as root."
-   echo "Aborting."
-   exit 1
-fi
+set -o errexit -o nounset -o pipefail
 
-if [ $EVERYTHING ]; then
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
    echo "*** Installing both runtime and buildtime dependencies ***"
-   RUNTIME=1
-   BUILDTIME=1
+   RUNTIME=true
+   BUILDTIME=true
 fi
 
 # figure out what distro we're on
-DISTRO=`lsb_release -is`
-CODENAME=`lsb_release -cs`
-
-if [ "$?" != "0" ]; then
-   echo "ERROR: this program requires the lsb_release command. On Debian based"
-   echo "  systems this is probably in the lsb-release package, on"
-   echo "  Fedora/RedHat systems it is probably the redhat-lsb package."
-   exit 1
-fi
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
 
 ########################################################################
 
 echo "install core dependencies"
 
-if [ $BUILDTIME ]; then
+if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
       Debian|Ubuntu|LinuxMint)
@@ -104,28 +103,21 @@ if [ $BUILDTIME ]; then
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
-         POSTGRE=`dpkg --get-selections|grep postgresql-server-dev`
-         if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
+         if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              lenny|hardy) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.3;;
-              squeeze) apt-get $YesOpt install $YesOpt postgresql-server-dev-8.4;;
-              wheezy) apt-get $YesOpt install $YesOpt postgresql-server-dev-9.1;;
-              lucid|natty) apt-get $YesOpt install postgresql-server-dev-8.4;;
-              isadora) apt-get $YesOpt install postgresql-server-dev-8.4;;
-              precise|oneiric|quantal|raring|saucy) apt-get $YesOpt install postgresql-server-dev-9.1;;
-              trusty) apt-get $YesOpt install postgresql-server-dev-9.3;;
-              jessie) apt-get $YesOpt install postgresql-server-dev-9.4;;
-              xenial|yakkety) apt-get $YesOpt install postgresql-server-dev-9.5;;
-              stretch|buster|sid|zesty|artful) apt-get $YesOpt install postgresql-server-dev-9.6;;
-              *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
+              trusty)
+                apt-get $YesOpt install postgresql-server-dev-9.3;;
+              jessie)
+                apt-get $YesOpt install postgresql-server-dev-9.4;;
+              xenial)
+                apt-get $YesOpt install postgresql-server-dev-9.5;;
+              stretch|buster|sid)
+                apt-get $YesOpt install postgresql-server-dev-9.6;;
+              *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
          ;;
       Fedora)
-         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
-         if [ $YesOpt ]; then
-           YesOpt='-y'
-         fi
          yum $YesOpt groupinstall "Development Tools"
          yum $YesOpt install \
             perl-Text-Template subversion \
@@ -133,18 +125,7 @@ if [ $BUILDTIME ]; then
             libxml2 \
             boost-devel
          ;;
-      Mandriva)
-         # 2008.1 tested
-         urpmi \
-            postgresql-devel \
-            libxml2 \
-            perl-Text-Template subversion gcc make perl
-         ;;
       RedHatEnterprise*|CentOS)
-         # 4=Nahant* 5=Tikanga*
-         if [ $YesOpt ]; then
-           YesOpt='-y'
-         fi
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
@@ -157,7 +138,7 @@ fi
 
 ########################################################################
 
-if [ $RUNTIME ]; then
+if [[ $RUNTIME ]]; then
    echo "*** Installing $DISTRO runtime dependencies ***";
    echo "*** For optional email notifications a Mail Transport Agent Must be ***";
    echo "*** installed. Consult with your system administrator. Or try ***";
@@ -174,51 +155,27 @@ if [ $RUNTIME ]; then
             unrar-free unzip p7zip-full p7zip wget \
             subversion git \
             dpkg-dev heirloom-mailx
-         POSTGRE=`dpkg --get-selections|grep postgresql-8.4`
-         if [ -z "$POSTGRE" ]; then  ## if postgresql-server-dev is installed
-           case "$CODENAME" in
-              squeeze)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              wheezy)
-                 apt-get $YesOpt install postgresql-9.1 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              lucid|natty)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              isadora)
-                 apt-get $YesOpt install postgresql-8.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              precise|oneiric|quantal|raring|saucy)
-                 apt-get $YesOpt install postgresql-9.1 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              trusty)
-                 apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              jessie)
-                 apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
-              xenial|yakkety)
-                 apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-zip;;
-              stretch|buster|sid|zesty|artful)
-                 apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
-              *) echo "ERROR: Unknown or Unsupported $DISTRO release, please report to the mailing list"; exit 1;;
-           esac
-         fi
-         ;;
-      Mandriva)
-         [ $AGENT ] || urpmi postgresql-server httpd
-            urpmi php php-pear php-pgsql postgresql \
-               libxml2 \
-               cabextract genisoimage upx sleuthkit binutils bzip2 cpio \
-               mkisofs p7zip poppler-utils rpm tar unzip gzip
-         echo "NOTE: unrar is available in PLF, please install it via urpmi if"
-         echo "   the repository is configured or from http://plf.zarb.org/packages.php"
+         case "$CODENAME" in
+            trusty)
+               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+            jessie)
+               apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+            xenial)
+               apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip;;
+            stretch|buster|sid)
+               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
+            *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+         esac
          ;;
       Fedora)
-         if [ $YesOpt ]; then
-           YesOpt='-y'
-         fi
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
             libxml2 \
-            binutils mailx
+            binutils mailx \
+            sleuthkit
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -227,28 +184,10 @@ if [ $RUNTIME ]; then
          fi
          /sbin/service postgresql start
 
-         # F8=Werwolf F9=Sulphur F10=Cambridge F11=Leonidas F12=Constantine dev=Rawhide
-         case "$CODENAME" in
-            Werwolf|Sulphur)
-               echo "NOTE: sleuthkit and unrar is not available in Fedora release $CODENAME,";
-               echo "   please install from upstream sources.";;
-            Cambridge|Rawhide|Leonidas|Constantine)
-               yum $YesOpt install sleuthkit
-               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
-               echo "   please install from upstream sources."
-	       ;;
-            *) echo "ERROR: Unknown Fedora release, please report a bug. Attempting to install anyway";
-               yum install sleuthkit
-               echo "NOTE: unrar is not available in Fedora release $CODENAME,"
-               echo "   please install from upstream sources."
-               ;;
-         esac
+         echo "NOTE: unrar is not available in Fedora release $CODENAME,"
+         echo "   please install from upstream sources."
          ;;
       RedHatEnterprise*|CentOS)
-         # 4=Nahant* 5=Tikanga*
-         if [ $YesOpt ]; then
-           YesOpt='-y'
-         fi                           
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
@@ -257,47 +196,34 @@ if [ $RUNTIME ]; then
             file libxml2 \
             binutils mailx
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
-         echo "    available in RHEL please install from upstream sources.";;
+         echo "    available in RHEL please install from upstream sources."
+         ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
    
-   if [ $OFFLINE -eq 0 ]; then
-       "$( dirname "$0" )/install_composer.sh"
-   else
+   if [[ $OFFLINE ]]; then
        echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
        echo "Please run the equivalent of 'sudo ./utils/install_composer.sh'"
+   else
+       "$( dirname "$0" )/install_composer.sh"
    fi
 fi
 
 ########################################################################
-# install dependencies of modules via running $mods_enabled_dir/$mod_name/mod_deps
-install_mod_deps()
-{
-  mods_dir=$1
-  for mod_deps in `find -L $mods_dir -name mod_deps`;
-  do
-    if [ -f $mod_deps ]; then
-      echo "run $mod_deps to install dependencies"
-      /bin/sh $mod_deps $options
-    fi
-  done
-}
-
-
-options=""
-if [ $BUILDTIME ]; then
-  options='-b '
+options=''
+if [[ $BUILDTIME ]]; then
+  options="$options -b"
 fi
 
-if [ $RUNTIME ]; then
+if [[ $RUNTIME ]]; then
   options="$options -r"
 fi
 
-if [ ! -z "$YesOpt" ]; then
+if [[ $YesOpt ]]; then
   options="$options -y"
 fi
-BASEDIR=$(dirname $0) 
-mods_dir=$BASEDIR"/../src/" ## get the directory where fo-installdeps resides
-install_mod_deps $mods_dir 
- 
+mods_dir="$(dirname "$0")/../src/" ## get the directory where fo-installdeps resides
+
+find "$mods_dir" -type f -name mod_deps -print0 | xargs -0 -I{} bash -cv "{} $options"
+
 ########################################################################

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-set -ex
-cd install
+set -o errexit -o nounset -o xtrace
 
 docker-compose build --force-rm
 docker-compose up -d
@@ -8,8 +7,12 @@ docker-compose up -d
 #### fossology needs up to 15 seconds to startup
 sleep 15
 
+readonly HOST="$(docker-compose port web 80)"
+
 #### is fossology reachable? --> check title
-curl -L -s http://127.0.0.1:8081/repo/ | grep -q "<title>Getting Started with FOSSology</title>"
+curl --silent --location "http://${HOST}/repo/" | grep -q "<title>Getting Started with FOSSology</title>"
 
 #### test whether the scheduler is running
-docker exec -it install_fossology-scheduler_1 /usr/local/share/fossology/scheduler/agent/fo_cli -S
+docker-compose exec scheduler /usr/local/share/fossology/scheduler/agent/fo_cli -S
+
+docker-compose down

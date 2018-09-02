@@ -25,7 +25,7 @@ use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\SplitPosition;
 use Mockery as M;
 
-class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
+class HighlightProcessorTest extends \PHPUnit\Framework\TestCase
 {
   /** @var License */
   private $license1;
@@ -38,7 +38,7 @@ class HighlightProcessorTest extends \PHPUnit_Framework_TestCase
   {
     $this->license1 = new License(10, "shortName", "fullName", "licenseFullText", 4, "URL", 2);
 
-    $this->licenseDao = M::mock(LicenseDao::classname())
+    $this->licenseDao = M::mock(LicenseDao::class)
         ->shouldReceive('getLicenseById')->with($this->license1->getId())
         ->andReturn($this->license1)->getMock();
 

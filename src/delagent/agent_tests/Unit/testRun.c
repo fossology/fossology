@@ -67,6 +67,8 @@ int DelagentDBInit()
 
   char cwd[2048];
   char* confDir = NULL;
+  char* user = NULL;
+  char* db_name = NULL;
 
   if(getcwd(cwd, sizeof(cwd)) != NULL)
   {
@@ -81,10 +83,13 @@ int DelagentDBInit()
     return -1;
   }
   DBConfFile = get_dbconf();
+  user = getUser();
+  db_name = get_db_name();
 
   memset(CMD, '\0', sizeof(CMD));
-  sprintf(CMD, "gunzip -c ../testdata/testdb_all.gz | psql -U %s -d %s >/dev/null", getUser(), get_db_name());
+  sprintf(CMD, "gunzip -c ../testdata/testdb_all.gz | psql -U %s -d %s >/dev/null", user, db_name);
   rc = system(CMD);
+  free(user);
   if (WEXITSTATUS(rc) != 0)
   {
     printf("Database initialize ERROR!\n");

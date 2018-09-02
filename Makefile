@@ -13,6 +13,7 @@ DIRS = install src
 # '$(subdir)' is equivalent to 'build-$(subdir)'
 BUILDDIRS = $(DIRS:%=build-%)
 INSTALLDIRS = $(DIRS:%=install-%)
+INSTALLDIRSOFFLINE = $(DIRS:%=install_offline-%)
 UNINSTALLDIRS = $(DIRS:%=uninstall-%)
 CLEANDIRS = $(DIRS:%=clean-%)
 TESTDIRS = $(DIRS:%=test-%)
@@ -37,13 +38,20 @@ utils: build-utils
 # generate the VERSION file
 TOP = .
 VERSIONFILE:
-	$(call WriteVERSIONFile,"BUILD")
+	@$(call WriteVERSIONFile,"BUILD")
 
 # install depends on everything being built first
 install: all $(INSTALLDIRS)
 $(INSTALLDIRS):
 	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
 	$(MAKE) -C $(@:install-%=%) install
+
+# offline install (without composer)
+install_offline: all $(INSTALLDIRSOFFLINE)
+	$(INSTALL) -m 666 VERSION $(DESTDIR)$(CONFPATH)/VERSION
+
+$(INSTALLDIRSOFFLINE):
+	$(MAKE) -C $(@:install_offline-%=%) install_offline
 
 uninstall: $(UNINSTALLDIRS)
 $(UNINSTALLDIRS):
@@ -83,5 +91,5 @@ empty-cache:
 
 .PHONY: $(BUILDDIRS) $(DIRS) $(INSTALLDIRS) $(UNINSTALLDIRS)
 .PHONY: $(TESTDIRS) $(CLEANDIRS)
-.PHONY: all install uninstall clean test utils
+.PHONY: all install install_offline uninstall clean test utils preparetest
 .PHONY: dist dist-testing tar tar-release

@@ -21,7 +21,7 @@ namespace Fossology\Lib\BusinessRules;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Test\TestPgDb;
 
-class LicenseMapTest extends \PHPUnit_Framework_TestCase
+class LicenseMapTest extends \PHPUnit\Framework\TestCase
 {
   /** @var DbManager */
   private $dbManager;
