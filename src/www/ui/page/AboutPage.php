@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\CurlRequestService;
 use Fossology\Lib\Application\RepositoryApi;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
@@ -60,7 +61,7 @@ class AboutPage extends DefaultPlugin
     );
     
     if (Auth::isAdmin()) {
-      $repositoryApi = new RepositoryApi();
+      $repositoryApi = new RepositoryApi(new CurlRequestService());
       $latestRelease = $repositoryApi->getLatestRelease();
       $commits = $repositoryApi->getCommitsOfLastDays(30);
       $commit = empty($commits) ? '' : substr($commits[0]['sha'],0,6);
