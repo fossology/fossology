@@ -53,6 +53,13 @@ paths:
           description: UserName or password incorrect
 
   /uploads/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        type: number
+        format: int
     get:
       tags:
         - Upload
@@ -60,13 +67,6 @@ paths:
       summary: Get single upload by id
       description:
         Returns an array with single upload
-      parameters:
-        - name: id
-          required: true
-          description: Id of the upload
-          in: path
-          type: number
-          format: int
       responses:
         200:
           description: Get upload
@@ -95,12 +95,6 @@ paths:
         - Upload
         - Organize
       summary: Delete upload by id
-      parameters:
-        - name: id
-          required: true
-          in: path
-          type: number
-          format: int
       responses:
         202:
           description: Upload will be deleted
@@ -127,16 +121,11 @@ paths:
         - Upload
         - Organize
       parameters:
-        - name: id
-          description: uploadid
-          in: path
+        - name: folder_id
+          description: Folder Id, where upload should be moved to
+          in: header
           required: true
           type: number
-        - name: folder_id
-          description: folder, where upload is located (change this to move upload)
-          in: header
-          required: false
-          type: string
       responses:
         202:
           description: Upload will be moved
@@ -164,11 +153,6 @@ paths:
         - Organize
       description: Can be used to copy uploads
       parameters:
-        - name: id
-          description: uploadid
-          in: path
-          required: true
-          type: number
         - name: folder_id
           description: Folder Id, where upload should be copied to
           in: header
@@ -293,7 +277,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/definitions/Info'
+                $ref: '#/definitions/User'
           401:
             description: Unauthorized, no authentification provided
             schema:
@@ -406,9 +390,7 @@ definitions:
       decider:
         $ref: '#/definitions/LicenseDecider'
       reuse:
-        description: UploadId to reuse
-        type: number
-        format: int
+        $ref: '#/definitions/Reuser'
   Upload:
     type: object
     properties:
@@ -500,9 +482,6 @@ definitions:
       ecc:
         type: boolean
         description: Should ECC Analysis be run on this upload.
-      ip:
-        type: boolean
-        description: Should IP Analysis be run on this upload.
       keyword:
         type: boolean
         description: Should keyword Analysis be run on this upload.
@@ -518,3 +497,23 @@ definitions:
       package:
         type: boolean
         description: Should Package Analysis be run on this upload.
+  Reuser:
+    type: object
+    properties:
+      reuse_upload:
+        type: number
+        format: integer
+        description: The UploadID to reuse.
+      reuse_group:
+        type: number
+        format: integer
+        description: The group of the reused upload
+      reuse_main:
+        type: boolean
+        description: Scanners matches if all Nomos findings are within the Monk findings.
+      reuse_enhanced:
+        type: boolean
+        description: Bulk phrases from reused packages.
+    required:
+      - reuse_uplod
+      - reuse_group

@@ -25,13 +25,14 @@ require_once "models/Analysis.php";
 require_once "models/Info.php";
 require_once "models/SearchResult.php";
 require_once "models/Decider.php";
+require_once "models/Reuser.php";
 require_once "helper/DbHelper.php";
 require_once dirname(dirname(__FILE__)) . "/search-helper.php";
 require_once dirname(dirname(dirname(dirname(__FILE__)))) . "/lib/php/common.php";
-require_once dirname(dirname(__FILE__)) . "/agent-add.php";
 require_once dirname(__FILE__) . "/helper/AuthHelper.php";
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Silex\Application;
@@ -52,16 +53,22 @@ $app['debug'] = true;
 const BASE_PATH = "/repo/api/v1/";
 
 
+/* decode JSON data for API requests */
+$app->before(function (Request $request) {
+  if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
+    $data = json_decode($request->getContent(), true);
+    $request->request->replace(is_array($data) ? $data : array());
+  }
+});
+
 ////////////////////////////UPLOADS/////////////////////
 
 $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
   $restHelper = new RestHelper($request);
   $dbHelper = new DbHelper();
-  $username = $request->headers->get("php-auth-user");
-  $password = $request->headers->get("php-auth-pw");
   // Checks if user has access to this functionality
-  if($restHelper->getAuthHelper()->checkUsernameAndPassword($username, $password))
+  if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
     $thisSession = sessionGetter();
     // Get the id from the fossology user
@@ -97,16 +104,9 @@ $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $reque
 
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
-    if (is_integer($id))
-    {
-      return new JsonResponse("TODO");
-      //TODO implement patch method
-    }
-    else
-    {
-      $error = new Info(400, "Bad Request. $id is not a number!", InfoType::ERROR);
-      return new JsonResponse($error->getArray(), $error->getCode());
-    }
+    $newFolderID = $request->headers->get('folder_id');
+    $info = $restHelper->copyUpload($id, $newFolderID, false);
+    return new JsonResponse($info->getArray(), $info->getCode());
   }
   else
   {
@@ -116,24 +116,15 @@ $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $reque
 
 });
 
-$app->PUT(BASE_PATH.'uploads/', function (Application $app, Request $request)
+$app->PUT(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
-
   $restHelper = new RestHelper($request);
 
   if($restHelper->hasUserAccess("SIMPLE_KEY"))
   {
-    try
-    {
-      $put = array();
-      parse_str(file_get_contents('php://input'), $put);
-      return new JsonResponse("fdsfds");
-    }
-    catch (Exception $e)
-    {
-      $error = new Info(400, "Bad Request. Invalid Input", InfoType::ERROR);
-      return new JsonResponse($error->getArray(),$error->getCode());
-    }
+    $newFolderID = $request->headers->get('folder_id');
+    $info = $restHelper->copyUpload($id, $newFolderID, true);
+    return new JsonResponse($info->getArray(), $info->getCode());
   }
   else
   {
@@ -400,15 +391,47 @@ $app->GET(BASE_PATH.'jobs/', function(Application $app, Request $request)
 
 $app->POST(BASE_PATH.'jobs/', function(Application $app, Request $request)
 {
-  $folder = $request->headers->get("folderId");
-  $upload = $request->headers->get("uploadId");
-  $scanOptionsJSON = json_decode($request->headers->get("scanOptions"));
-  $analysis = new Analysis();
-  $decider = new Decider();
-  $reuse = $scanOptionsJSON["reuse"] ?: -1;
-  $scanOptions = new ScanOptions($analysis, $reuse, $decider);
+  $restHelper = new RestHelper($request);
+  $dbHelper = new DbHelper();  // To initialize PG_CONN
 
-  //TODO query new job for upload with id with options
+  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  {
+    $folder = $request->headers->get("folderId");
+    $upload = $request->headers->get("uploadId");
+    if(is_numeric($folder) && is_numeric($upload)) {
+      $scanOptionsJSON = $request->request->all();
+
+      $analysis = new Analysis();
+      if(array_key_exists("analysis", $scanOptionsJSON)) {
+        $analysis->setUsingArray($scanOptionsJSON["analysis"]);
+      }
+      $decider = new Decider();
+      if(array_key_exists("decider", $scanOptionsJSON)) {
+        $decider->setUsingArray($scanOptionsJSON["decider"]);
+      }
+      $reuser = new Reuser(0, 0, false, false);
+      try {
+        if(array_key_exists("reuse", $scanOptionsJSON)) {
+          $reuser->setUsingArray($scanOptionsJSON["reuse"]);
+        }
+      } catch (UnexpectedValueException $e) {
+        $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
+        return new JsonResponse($error->getArray(), $error->getCode());
+      }
+
+      $scanOptions = new ScanOptions($analysis, $reuser, $decider);
+      $info = $scanOptions->scheduleAgents($folder, $upload);
+      return new JsonResponse($info->getArray(), $info->getCode());
+    } else {
+      $error = new Info(400, "Folder id and upload id should be integers!", InfoType::ERROR);
+      return new JsonResponse($error->getArray(), $error->getCode());
+    }
+  }
+  else
+  {
+    $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
+    return new JsonResponse($error->getArray(), $error->getCode());
+  }
 });
 
 $app->GET(BASE_PATH.'jobs/{id}', function(Application $app, Request $request, $id)

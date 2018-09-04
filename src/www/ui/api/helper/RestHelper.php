@@ -18,12 +18,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 require_once "StringHelper.php";
 require_once __DIR__ . "/../models/File.php";
+require_once dirname(dirname(__FILE__)) . "/page/AdminContentMove.php";
 
 use \Fossology\Lib\Dao\UploadPermissionDao;
 use \Fossology\Lib\Dao\UploadDao;
 use Monolog\Logger;
 use www\ui\api\helper\DbHelper;
 use \www\ui\api\models\File;
+use \www\ui\api\models\Info;
+use \www\ui\api\models\InfoType;
 use \www\ui\api\helper\StringHelper;
 use \Fossology\Lib\Dao\FolderDao;
 use \Fossology\Lib\Dao\UserDao;
@@ -107,6 +110,15 @@ class RestHelper
   }
 
   /**
+   * @return Group ID
+   */
+  public function getGroupId()
+  {
+    $session = $this->authHelper->getSession();
+    return $session->get(Auth::GROUP_ID);
+  }
+
+  /**
    * @return UploadDao
    */
   public function getUploadDao()
@@ -122,11 +134,18 @@ class RestHelper
     return $this->userDao;
   }
 
+  /**
+   * @return FolderDao
+   */
+  public function getFolderDao()
+  {
+    return $this->folderDao;
+  }
+
 
   /**
    * @return UploadPermissionDao
    */
-
   public function getUploadPermissionDao()
   {
     return $this->uploadPermissionDao;
@@ -140,5 +159,38 @@ class RestHelper
     return $this->authHelper;
   }
 
-
+  public function copyUpload($uploadId, $newFolderId, $isCopy)
+  {
+    if(is_numeric($newFolderId) && $newFolderId > 0)
+    {
+      if(!$this->folderDao->isFolderAccessible($newFolderId, $this->getUserId()))
+      {
+        return new Info(403, "Folder is not accessible.",
+          InfoType::ERROR);
+      }
+      if(!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId()))
+      {
+        return new Info(403, "Upload is not accessible.",
+          InfoType::ERROR);
+      }
+      $errors = (new AdminContentMove())->copyContent([$uploadId], $newFolderId, $isCopy);
+      if(empty($errors))
+      {
+        $action = $isCopy ? "copied" : "moved";
+        $info = new Info(202, "Upload $uploadId will be $action to $newFolderId",
+          InfoType::INFO);
+      }
+      else
+      {
+        $info = new Info(202, "Exceptions occurred: $errors",
+          InfoType::ERROR);
+      }
+      return $info;
+    }
+    else
+    {
+      return new Info(400, "Bad Request. Folder id should be a positive integer",
+        InfoType::ERROR);
+    }
+  }
 }

@@ -67,11 +67,11 @@ class DbHelper
     }
 
     $this->sysconfdir = trim($this->sysconfdir);
-    $this->$PG_CONN = DBconnect($this->sysconfdir);
-    $GLOBALS["PG_CONN"] = $this->$PG_CONN;
+    $this->PG_CONN = DBconnect($this->sysconfdir);
+    $GLOBALS["PG_CONN"] = $this->PG_CONN;
     $this->dbManager = new ModernDbManager($logger);
 
-    $pgDriver = new Postgres($this->$PG_CONN);
+    $pgDriver = new Postgres($this->PG_CONN);
     $this->dbManager->setDriver($pgDriver);
   }
 

@@ -1,0 +1,176 @@
+<?php
+/**
+ * *************************************************************
+ * Copyright (C) 2018 Siemens AG
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ * *************************************************************
+ */
+namespace www\ui\api\models;
+
+class Reuser
+{
+
+  private $reuseUpload;
+  private $reuseGroup;
+  private $reuseMain;
+  private $reuseEnhanced;
+
+  /**
+   * Reuser constructor.
+   *
+   * @param $reuseUpload boolean
+   * @param $reuseGroup boolean
+   * @param $reuseMain boolean
+   * @param $reuseEnhanced boolean
+   * @throws \UnexpectedValueException If reuse upload of reuse group are non
+   * integers
+   */
+  public function __construct($reuseUpload, $reuseGroup, $reuseMain = false,
+    $reuseEnhanced = false)
+  {
+    if(is_numeric($reuseUpload) && is_numeric($reuseGroup)) {
+      $this->reuseUpload = $reuseUpload;
+      $this->reuseGroup = $reuseGroup;
+      $this->reuseMain = $reuseMain;
+      $this->reuseEnhanced = $reuseEnhanced;
+    } else {
+      throw new \UnexpectedValueException("reuse_upload and reuse_group should be integers", 400);
+    }
+  }
+
+  /**
+   * Set the values of Reuser based on associative array
+   *
+   * @param array $reuserArray Associative boolean array
+   * @return www\ui\api\models\Reuser Current object
+   * @throws \UnexpectedValueException If reuse upload of reuse group are non
+   * integers
+   */
+  public function setUsingArray($reuserArray)
+  {
+    if (array_key_exists("reuse_upload", $reuserArray)) {
+      $this->reuseUpload = filter_var($reuserArray["reuse_upload"],
+        FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+    }
+    if (array_key_exists("reuse_group", $reuserArray)) {
+      $this->reuseGroup = filter_var($reuserArray["reuse_group"],
+        FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+    }
+    if (array_key_exists("reuse_main", $reuserArray)) {
+      $this->reuseMain = filter_var($reuserArray["reuse_main"],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("reuse_enhanced", $reuserArray)) {
+      $this->reuseEnhanced = filter_var($reuserArray["reuse_enhanced"],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+    if($this->reuseUpload === null || $this->reuseGroup === null)
+    {
+      throw new \UnexpectedValueException("reuse_upload and reuse_group should be integers", 400);
+    }
+    return $this;
+  }
+
+  /**
+   * @return integer
+   */
+  public function getReuseUpload()
+  {
+    return $this->reuseUpload;
+  }
+
+  /**
+   * @return integer
+   */
+  public function getReuseGroup()
+  {
+    return $this->reuseGroup;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReuseMain()
+  {
+    return $this->reuseMain;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReuseEnhanced()
+  {
+    return $this->reuseEnhanced;
+  }
+
+  /**
+   * @param integer $reuseUpload
+   */
+  public function setReuseUpload($reuseUpload)
+  {
+    $this->reuseUpload = filter_var($reuseUpload,
+      FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+    if($this->reuseUpload === null)
+    {
+      throw new \UnexpectedValueException("Reuse upload should be an integer!", 400);
+    }
+  }
+
+  /**
+   * @param integer $reuseGroup
+   */
+  public function setReuseGroup($reuseGroup)
+  {
+    $this->reuseGroup = filter_var($reuseGroup,
+      FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+    if($this->reuseGroup === null)
+    {
+      throw new \UnexpectedValueException("Reuse group should be an integer!", 400);
+    }
+  }
+
+  /**
+   * @param boolean $reuseMain
+   */
+  public function setReuseMain($reuseMain)
+  {
+    $this->reuseMain = filter_var($reuseMain,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param boolean $reuseEnhanced
+   */
+  public function setReuseEnhanced($reuseEnhanced)
+  {
+    $this->reuseEnhanced = filter_var($reuseEnhanced,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * Get decider as an array
+   *
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      "reuseUpload"   => $this->reuseUpload,
+      "reuseGroup"    => $this->reuseGroup,
+      "reuseMain"     => $this->reuseMain,
+      "reuseEnhanced" => $this->reuseEnhanced
+    ];
+  }
+}
