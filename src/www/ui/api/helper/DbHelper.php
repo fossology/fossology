@@ -16,35 +16,46 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
-namespace www\ui\api\helper;
+/**
+ * @file
+ * @brief DB helper for REST api
+ */
+namespace Fossology\UI\Api\Helper;
 
-require_once dirname(dirname(dirname(__FILE__))) . "/api/models/Upload.php";
-require_once dirname(dirname(dirname(__FILE__))) . "/api/models/User.php";
-require_once dirname(dirname(dirname(__FILE__))) . "/api/models/Job.php";
-require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-db.php";
+require_once dirname(dirname(dirname(dirname(__DIR__)))) .
+"/lib/php/common-db.php";
 
-use api\models\Info;
+use Fossology\Lib\Db\Driver\Postgres;
 use Fossology\Lib\Db\ModernDbManager;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\User;
+use Fossology\UI\Api\Models\Job;
+use Fossology\UI\Api\Models\Upload;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
-use Fossology\Lib\Db\Driver\Postgres;
-use api\models\Upload;
-use www\ui\api\models\InfoType;
-use www\ui\api\models\User;
-use www\ui\api\models\Job;
 
+/**
+ * @class DbHelper
+ * @brief Provides helper methods to access database for REST api.
+ */
 class DbHelper
 {
   /**
    * @var ModernDbManager $dbManager
+   * DB manager in use
    */
   private $dbManager;
+  /**
+   * @var resource $PG_CONN
+   * Postgres connection resource
+   */
   private $PG_CONN;
   /**
-   * @var string SysConfDir location
+   * @var string $sysconfdir
+   * SysConfDir location
    */
   private $sysconfdir;
-
 
   /**
    * DbHelper constructor.
@@ -76,6 +87,7 @@ class DbHelper
   }
 
   /**
+   * Get the DB manager
    * @return ModernDbManager
    */
   public function getDbManager()
@@ -84,6 +96,7 @@ class DbHelper
   }
 
   /**
+   * Get the Postgres connection resource
    * @return resource
    */
   public function getPGCONN()
@@ -91,6 +104,14 @@ class DbHelper
     return $this->PG_CONN;
   }
 
+  /**
+   * Get the uploads under the given user id if not upload id is provided.
+   *
+   * Get a single upload information under the given user and upload id.
+   * @param integer $userId   User to check
+   * @param integer $uploadId Pass the upload id to check for single upload.
+   * @return Upload[][] Uploads as an associative array
+   */
   public function getUploads($userId, $uploadId = NULL)
   {
     if($uploadId == NULL)
@@ -128,7 +149,8 @@ FROM upload, folderlist, folder, pfile
   }
 
   /**
-   * @param $uploadTreePk integer
+   * Get first upload name under a given upload tree id
+   * @param integer $uploadTreePk Upload tree id to check.
    * @return string
    */
   public function getFilenameFromUploadTree($uploadTreePk)
@@ -138,18 +160,35 @@ FROM upload, folderlist, folder, pfile
 WHERE uploadtree_pk='. pg_escape_string($uploadTreePk))["ufile_name"];
   }
 
+  /**
+   * Check if a given id exists under given table.
+   * @param string $tableName Table name
+   * @param string $idRowName ID column name
+   * @param string $id        ID to check
+   * @return boolean True if id exists, false otherwise
+   */
   public function doesIdExist($tableName, $idRowName, $id)
   {
     return (0 < (intval($this->getDbManager()->getSingleRow("SELECT COUNT(*)
 FROM $tableName WHERE $idRowName= ".pg_escape_string($id))["count"])));
   }
 
+  /**
+   * Delete the given user id
+   * @param integer $id User id to be deleted
+   */
   public function deleteUser($id)
   {
     require_once dirname(dirname(__DIR__)) . "/user-del-helper.php";
     DeleteUser($id, $this->getDbManager());
   }
 
+  /**
+   * Get the user under the given user id or every user from the database.
+   * @param integer $id User id of the required user, or NULL to fetch all
+   * users.
+   * @return User[][] Users as an associative array
+   */
   public function getUsers($id = NULL)
   {
     if($id == NULL)
@@ -176,6 +215,15 @@ FROM $tableName WHERE $idRowName= ".pg_escape_string($id))["count"])));
     return $users;
   }
 
+  /**
+   * @brief Get the recent jobs.
+   *
+   * If a limit is passed, the results are trimmed. If an ID is passed, the
+   * information for the given id is only retrieved.
+   * @param integer $limit Set to limit the result length
+   * @param integer $id    Set to get information of only given job id
+   * @return Job[][] Jobs as an associative array
+   */
   public function getJobs($limit = 0, $id = NULL)
   {
     if($id == NULL)

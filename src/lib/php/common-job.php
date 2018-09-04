@@ -1,11 +1,10 @@
 <?php
 
-require_once dirname(dirname(dirname(__FILE__))) . "/www/ui/api/helper/DbHelper.php";
 require_once 'common-db.php';
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
-use www\ui\api\helper\DbHelper;
+use Fossology\UI\Api\Helper\DbHelper;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015,2018 Siemens AG

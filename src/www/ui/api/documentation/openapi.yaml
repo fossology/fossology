@@ -286,6 +286,60 @@ paths:
             description: Forbidden, no access to all users
             schema:
               $ref: '#/definitions/Info'
+  /users/{id}:
+    parameters:
+        - name: id
+          required: true
+          in: path
+          type: number
+    get:
+      tags:
+        - User
+        - Admin
+      summary: Get user by id
+      responses:
+        200:
+          description: User with the given id
+          schema:
+            $ref: '#/definitions/User'
+        400:
+          description: Bad request, id NaN etc.
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to all users
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Info'
+    delete:
+      tags:
+        - User
+        - Admin
+      summary: Delete user by id
+      responses:
+        202:
+          description: User will be deleted
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad request, id NaN etc.
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Not found
+          schema:
+            $ref: '#/definitions/Info'
   /jobs:
       get:
         tags:
@@ -358,6 +412,36 @@ paths:
             description: Not found
             schema:
               $ref: '#/definitions/Info'
+  /jobs/{id}:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the job
+        in: path
+        type: number
+        format: int
+    get:
+      tags:
+      - Job
+      summary: Gets single job by id
+      description: Returns job with the status
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Job'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to jobs
+          schema:
+            $ref: '#/definitions/Info'
 definitions:
   SearchResults:
     type: object

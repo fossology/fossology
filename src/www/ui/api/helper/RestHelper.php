@@ -16,37 +16,84 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
-require_once "StringHelper.php";
-require_once __DIR__ . "/../models/File.php";
-require_once dirname(dirname(__FILE__)) . "/page/AdminContentMove.php";
+/**
+ * @file
+ * @brief DAO helper functions for REST api.
+ */
+namespace Fossology\UI\Api\Helper;
 
-use \Fossology\Lib\Dao\UploadPermissionDao;
-use \Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Dao\UploadPermissionDao;
+use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UserDao;
+use Fossology\UI\Api\Helper\StringHelper;
+use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Models\File;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Monolog\Logger;
-use www\ui\api\helper\DbHelper;
-use \www\ui\api\models\File;
-use \www\ui\api\models\Info;
-use \www\ui\api\models\InfoType;
-use \www\ui\api\helper\StringHelper;
-use \Fossology\Lib\Dao\FolderDao;
-use \Fossology\Lib\Dao\UserDao;
-use \Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Request;
 
+require_once dirname(dirname(__FILE__)) . "/page/AdminContentMove.php";
+
+/**
+ * @class RestHelper
+ * @brief Provides various DAO helper functions for REST api
+ */
 class RestHelper
 {
+  /**
+   * @var StringHelper $stringHelper
+   * String helper object
+   */
   private $stringHelper;
+  /**
+   * @var Logger $logger
+   * Logger to use
+   */
   private $logger;
+  /**
+   * @var UploadDao $uploadDao
+   * Upload DAO object
+   */
   private $uploadDao;
+  /**
+   * @var DbHelper $dbHelper
+   * DB helper object
+   */
   private $dbHelper;
+  /**
+   * @var UploadPermissionDao $uploadPermissionDao
+   * Upload permission DAO object
+   */
   private $uploadPermissionDao;
+  /**
+   * @var FolderDao $folderDao
+   * Folder DAO object
+   */
   private $folderDao;
+  /**
+   * @var UserDao $userDao
+   * User DAO object
+   */
   private $userDao;
+  /**
+   * @var AuthHelper $authHelper
+   * Auth helper to provide authentication
+   */
   private $authHelper;
+  /**
+   * @var Request $request
+   * Current Synfony request object
+   */
   private $request;
 
   /**
-   * RestHelper constructor.
+   * @brief RestHelper constructor.
+   *
+   * This constructor initialize all the members
+   * @param Request $request Current Synfony request object
    */
   public function __construct($request)
   {
@@ -65,7 +112,7 @@ class RestHelper
    * This method filters content that starts with ------WebKitFormBoundaryXXXXXXXXX
    * and ends with ------WebKitFormBoundaryXXXXXXXXX---
    * This is required, because the silex framework can't do that natively on put request
-   * @param $rawOutput
+   * @param string $rawOutput
    * @return string
    */
   public function getFilteredFile($rawOutput)
@@ -81,6 +128,14 @@ class RestHelper
     return new File($filename, $contentTypeCut, $content);
   }
 
+  /**
+   * @brief Check if the user is logged in.
+   *
+   * This method currently supports SIMPLE HTTP Auth.
+   * @param string $authMethod Authentication method to use
+   * @return boolean True if the user has access, false otherwise.
+   * @sa Fossology::UI::Api::Helper::checkUsernameAndPassword()
+   */
   public function hasUserAccess($authMethod)
   {
     if($authMethod === "SIMPLE_KEY") {
@@ -93,7 +148,7 @@ class RestHelper
   }
 
   /**
-   * @return \Monolog\Logger
+   * @return Logger
    */
   public function getLogger()
   {
@@ -101,7 +156,7 @@ class RestHelper
   }
 
   /**
-   * @return User ID
+   * @return integer Current user id
    */
   public function getUserId()
   {
@@ -110,7 +165,7 @@ class RestHelper
   }
 
   /**
-   * @return Group ID
+   * @return integer Current group id
    */
   public function getGroupId()
   {
@@ -159,6 +214,21 @@ class RestHelper
     return $this->authHelper;
   }
 
+  /**
+   * @return DbHelper
+   */
+  public function getDbHelper()
+  {
+    return $this->dbHelper;
+  }
+
+  /**
+   * Copy/move a given upload id to a new folder id.
+   * @param integer $uploadId    Upload to copy/move
+   * @param integer $newFolderId New folder id
+   * @param boolean $isCopy      Set true to perform copy, false to move
+   * @return Fossology::UI::Api::Models::Info
+   */
   public function copyUpload($uploadId, $newFolderId, $isCopy)
   {
     if(is_numeric($newFolderId) && $newFolderId > 0)

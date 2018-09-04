@@ -15,21 +15,36 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @file
+ * @brief File model
+ */
 
-namespace www\ui\api\models;
-
+namespace Fossology\UI\Api\Models;
 
 class File
 {
+  /**
+   * @var string $filename
+   * Current file name
+   */
   private $filename;
+  /**
+   * @var string $contentType
+   * HTTP Content-Type header string for current file
+   */
   private $contentType;
+  /**
+   * @var string $fileContent
+   * File content
+   */
   private $fileContent;
 
   /**
    * File constructor.
-   * @param $filename
-   * @param $contentType
-   * @param $fileContent
+   * @param string $filename
+   * @param string $contentType
+   * @param string $fileContent
    */
   public function __construct($filename, $contentType, $fileContent)
   {
@@ -37,6 +52,8 @@ class File
     $this->contentType = $contentType;
     $this->fileContent = $fileContent;
   }
+
+  ////// Getters //////
 
   /**
    * @return string
@@ -67,15 +84,11 @@ class File
    */
   public function getJSON()
   {
-    return json_encode(array(
-      'filename' => $this->filename,
-      'contentType' => $this->contentType,
-      'fileContent' => $this->fileContent
-    ));
+    return json_encode($this->getArray());
   }
 
   /**
-   * Get the file element as array
+   * Get the file element as associative array
    * @return array
    */
   public function getArray()

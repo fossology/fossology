@@ -15,31 +15,69 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @file
+ * @brief User model
+ */
+namespace Fossology\UI\Api\Models;
 
-namespace www\ui\api\models;
-
-
+/**
+ * @class User
+ * @brief Model to hold user information
+ */
 class User
 {
+  /**
+   * @var integer $id
+   * Current user id
+   */
   private $id;
+  /**
+   * @var string $name
+   * Current user's name
+   */
   private $name;
+  /**
+   * @var string $description
+   * Current user description
+   */
   private $description;
+  /**
+   * @var string $email
+   * Current user email
+   */
   private $email;
+  /**
+   * @var integer $accessLevel
+   * Current user access level
+   */
   private $accessLevel;
+  /**
+   * @var integer $rootFolderId
+   * Current user's root folder id
+   */
   private $rootFolderId;
+  /**
+   * @var boolean $emailNotification
+   * Current user's email preference
+   */
   private $emailNotification;
+  /**
+   * @var array $agents
+   * Current user's agent preference
+   */
   private $agents;
 
   /**
    * User constructor.
-   * @param $id integer
-   * @param $name string
-   * @param $description string
-   * @param $email string
-   * @param $accessLevel integer
-   * @param $root_folder_id integer
-   * @param $emailNotification boolean
-   * @param $agents object
+   * @param integer $id
+   * @param string $name
+   * @param string $description
+   * @param string $email
+   * @param integer $accessLevel
+   * @param integer $root_folder_id
+   * @param boolean $emailNotification
+   * @param object $agents
    */
   public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents)
   {
@@ -53,6 +91,7 @@ class User
     $this->agents = $agents;
   }
 
+  ////// Getters //////
   /**
    * @return integer
    */
@@ -86,7 +125,7 @@ class User
   }
 
   /**
-   * @return AccessLevel
+   * @return integer
    */
   public function getAccessLevel()
   {
@@ -118,24 +157,17 @@ class User
   }
 
   /**
-   * @return array
+   * Get current user in JSON representation
+   * @return string
    */
   public function getJSON()
   {
-    return json_encode(array(
-      'userId' => $this->id,
-      'description' => $this->description,
-      'email' => $this->email,
-      "accessLevel" => $this->accessLevel,
-      "rootFolderId" => $this->rootFolderId,
-      "emailNotification" => $this->emailNotification,
-      "agents" => $this->agents
-    ));
+    return json_encode($this->getArray());
   }
 
   /**
-   * Get user element as associative array
-   * @return array Associative array
+   * Get user element as an associative array
+   * @return array
    */
   public function getArray()
   {

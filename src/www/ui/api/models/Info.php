@@ -15,20 +15,39 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @file
+ * @brief Info model
+ */
 
-namespace api\models;
+namespace Fossology\UI\Api\Models;
 
-
+/**
+ * @class Info
+ * @brief Info model to contain general error and return values
+ */
 class Info
 {
+  /**
+   * @var integer $code
+   * HTTP response code
+   */
   private $code;
+  /**
+   * @var string $message
+   * Reponse message
+   */
   private $message;
+  /**
+   * @var InfoType $type
+   * Response type
+   */
   private $type;
   /**
    * Error constructor.
-   * @param $code
-   * @param $message
-   * @param $type
+   * @param integer $code
+   * @param string $message
+   * @param InfoType $type
    */
   public function __construct($code, $message, $type)
   {
@@ -37,15 +56,21 @@ class Info
     $this->type = $type;
   }
 
+  ////// Getters //////
+
+  /**
+   * Get the info as JSON representation
+   * @return string
+   */
   public function getJSON()
   {
-    return json_encode(array(
-      'code' => $this->code,
-      'message' => $this->message,
-      'type' => $this->type
-    ));
+    return json_encode($this->getArray());
   }
 
+  /**
+   * Get info as associative array
+   * @return array
+   */
   public function getArray()
   {
     return [
@@ -56,7 +81,7 @@ class Info
   }
 
   /**
-   * @return mixed
+   * @return integer
    */
   public function getCode()
   {
@@ -64,7 +89,7 @@ class Info
   }
 
   /**
-   * @return mixed
+   * @return string
    */
   public function getMessage()
   {
@@ -72,7 +97,7 @@ class Info
   }
 
   /**
-   * @return mixed
+   * @return InfoType
    */
   public function getType()
   {

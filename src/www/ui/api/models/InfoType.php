@@ -16,9 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
-namespace www\ui\api\models;
+namespace Fossology\UI\Api\Models;
 
-
+/**
+ * @class InfoType
+ * @abstract
+ * @brief Different type of infos provided by REST
+ */
 abstract class InfoType
 {
   const ERROR = "ERROR";

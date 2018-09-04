@@ -15,34 +15,31 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
-
+/**
+ * @dir
+ * @brief REST api for FOSSology
+ * @file
+ * @brief Provides router for REST api requests
+ */
+namespace Fossology\UI\Api;
 
 use Fossology\Lib\Auth\Auth;
-require_once "helper/RestHelper.php";
-require_once "models/InfoType.php";
-require_once "models/ScanOptions.php";
-require_once "models/Analysis.php";
-require_once "models/Info.php";
-require_once "models/SearchResult.php";
-require_once "models/Decider.php";
-require_once "models/Reuser.php";
-require_once "helper/DbHelper.php";
-require_once dirname(dirname(__FILE__)) . "/search-helper.php";
-require_once dirname(dirname(dirname(dirname(__FILE__)))) . "/lib/php/common.php";
-require_once dirname(__FILE__) . "/helper/AuthHelper.php";
-
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Models\Decider;
+use Fossology\UI\Api\Helper\DbHelper;
+use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Models\ScanOptions;
+use Fossology\UI\Api\Models\Analysis;
+use Fossology\UI\Api\Models\SearchResult;
+use Fossology\UI\Api\Models\Reuser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Silex\Application;
-use api\models\Info;
-use \www\ui\api\models\InfoType;
-use \www\ui\api\models\Decider;
-use \www\ui\api\helper\DbHelper;
-use \www\ui\api\models\ScanOptions;
-use \www\ui\api\models\Analysis;
-use api\models\SearchResult;
+
+require_once dirname(dirname(dirname(dirname(__FILE__)))) . "/lib/php/common.php";
 
 // setup autoloading
 require_once(dirname(dirname(dirname(__DIR__))) . "/vendor/autoload.php");
@@ -51,6 +48,7 @@ $app = new Silex\Application();
 $app['debug'] = true;
 
 const BASE_PATH = "/repo/api/v1/";
+const AUTH_METHOD = "SIMPLE_KEY";
 
 
 /* decode JSON data for API requests */
@@ -66,9 +64,9 @@ $app->before(function (Request $request) {
 $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request, $id)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   // Checks if user has access to this functionality
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $thisSession = sessionGetter();
     // Get the id from the fossology user
@@ -76,7 +74,7 @@ $app->GET(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
     {
       if($dbHelper->doesIdExist("upload","upload_pk", $id))
       {
-        return new JsonResponse($dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id));
+        return new JsonResponse($dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id), 200);
       }
       else
       {
@@ -102,7 +100,7 @@ $app->PATCH(BASE_PATH.'uploads/{id}', function (Application $app, Request $reque
 {
   $restHelper = new RestHelper($request);
 
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $newFolderID = $request->headers->get('folder_id');
     $info = $restHelper->copyUpload($id, $newFolderID, false);
@@ -120,7 +118,7 @@ $app->PUT(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
 {
   $restHelper = new RestHelper($request);
 
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $newFolderID = $request->headers->get('folder_id');
     $info = $restHelper->copyUpload($id, $newFolderID, true);
@@ -136,13 +134,13 @@ $app->PUT(BASE_PATH.'uploads/{id}', function (Application $app, Request $request
 $app->GET(BASE_PATH.'uploads/', function (Application $app, Request $request)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
 
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     // Get the id from the fossology user
     $response = $dbHelper->getUploads($restHelper->getUserId());
-    return new JsonResponse($dbHelper->getUploads($restHelper->getUserId()));
+    return new JsonResponse($response, 200);
   }
   else
   {
@@ -156,9 +154,9 @@ $app->DELETE(BASE_PATH.'uploads/{id}', function (Application $app, Request $requ
 {
   require_once "../../../delagent/ui/delete-helper.php";
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   $id = intval($id);
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     if (is_integer($id))
     {
@@ -194,7 +192,7 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
   $restHelper = new RestHelper($request);
 
   //check user access to search
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $searchType = $request->headers->get("searchType");
     $filename = $request->headers->get("filename");
@@ -263,9 +261,9 @@ $app->GET(BASE_PATH.'search/', function(Application $app, Request $request)
 $app->GET(BASE_PATH.'users/', function(Application $app, Request $request)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   //check user access to search
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $users = $dbHelper->getUsers();
     return new JsonResponse($users, 200);
@@ -283,9 +281,9 @@ $app->GET(BASE_PATH.'users/', function(Application $app, Request $request)
 $app->GET(BASE_PATH.'users/{id}', function(Application $app, Request $request, $id)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   //check user access to search
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     if(is_numeric($id))
     {
@@ -320,9 +318,9 @@ $app->GET(BASE_PATH.'users/{id}', function(Application $app, Request $request, $
 $app->DELETE(BASE_PATH.'users/{id}', function(Application $app, Request $request, $id)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   //check user access to search
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     if(is_numeric($id))
     {
@@ -356,7 +354,7 @@ $app->DELETE(BASE_PATH.'users/{id}', function(Application $app, Request $request
 $app->GET(BASE_PATH.'auth/', function (Application $app, Request $request)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();
+  $dbHelper = $restHelper->getDbHelper();
   $username = $request->query->get("username");
   $password = $request->query->get("password");
   // Checks if user is valid
@@ -392,9 +390,8 @@ $app->GET(BASE_PATH.'jobs/', function(Application $app, Request $request)
 $app->POST(BASE_PATH.'jobs/', function(Application $app, Request $request)
 {
   $restHelper = new RestHelper($request);
-  $dbHelper = new DbHelper();  // To initialize PG_CONN
 
-  if($restHelper->hasUserAccess("SIMPLE_KEY"))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
     $folder = $request->headers->get("folderId");
     $upload = $request->headers->get("uploadId");
@@ -414,7 +411,7 @@ $app->POST(BASE_PATH.'jobs/', function(Application $app, Request $request)
         if(array_key_exists("reuse", $scanOptionsJSON)) {
           $reuser->setUsingArray($scanOptionsJSON["reuse"]);
         }
-      } catch (UnexpectedValueException $e) {
+      } catch (\UnexpectedValueException $e) {
         $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
         return new JsonResponse($error->getArray(), $error->getCode());
       }

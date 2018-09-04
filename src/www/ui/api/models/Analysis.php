@@ -15,31 +15,71 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @dir
+ * @brief Data models/resources supported by REST api
+ * @file
+ * @brief Analysis model
+ */
+namespace Fossology\UI\Api\Models;
 
-namespace www\ui\api\models;
-
-
+/**
+ * @class Analysis
+ * @brief Model to hold analysis settings
+ */
 class Analysis
 {
+  /**
+   * @var boolean $bucket
+   * Whether to schedule bucket agent or not
+   */
   private $bucket;
+  /**
+   * @var boolean $copyright
+   * Whether to schedule copyright agent or not
+   */
   private $copyright;
+  /**
+   * @var boolean $ecc
+   * Whether to schedule ecc agent or not
+   */
   private $ecc;
+  /**
+   * @var boolean $keyword
+   * Whether to schedule keyword agent or not
+   */
   private $keyword;
+  /**
+   * @var boolean $mimetype
+   * Whether to schedule mime type agent or not
+   */
   private $mimetype;
+  /**
+   * @var boolean $monk
+   * Whether to schedule monk agent or not
+   */
   private $monk;
+  /**
+   * @var boolean $nomos
+   * Whether to schedule nomos agent or not
+   */
   private $nomos;
+  /**
+   * @var boolean $pkgagent
+   * Whether to schedule package agent or not
+   */
   private $pkgagent;
 
   /**
    * Analysis constructor.
-   * @param $bucket boolean
-   * @param $copyright boolean
-   * @param $ecc boolean
-   * @param $keyword boolean
-   * @param $mime boolean
-   * @param $monk boolean
-   * @param $nomos boolean
-   * @param $package boolean
+   * @param boolean $bucket
+   * @param boolean $copyright
+   * @param boolean $ecc
+   * @param boolean $keyword
+   * @param boolean $mime
+   * @param boolean $monk
+   * @param boolean $nomos
+   * @param boolean $package
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
     $mimetype = false, $monk = false, $nomos = false, $pkgagent = false)
@@ -57,7 +97,7 @@ class Analysis
   /**
    * Set the values of Analysis based on associative array
    * @param array $analysisArray Associative boolean array
-   * @return www\ui\api\models\Analysis Current object
+   * @return Analysis Current object
    */
   public function setUsingArray($analysisArray)
   {
@@ -88,7 +128,7 @@ class Analysis
     return $this;
   }
 
-
+  ////// Getters //////
   /**
    * @return boolean
    */
@@ -153,6 +193,7 @@ class Analysis
     return $this->pkgagent;
   }
 
+  ////// Setters //////
   /**
    * @param boolean $bucket
    */
@@ -218,7 +259,7 @@ class Analysis
   }
 
   /**
-   * Get the object as an array
+   * Get the object as an associative array
    * @return array
    */
   public function getArray()

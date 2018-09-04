@@ -16,16 +16,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
-namespace www\ui\api\helper;
+/**
+ * @file
+ * @brief Provide helper functions for string manipulation
+ */
 
+namespace Fossology\UI\Api\Helper;
 
+/**
+ * @class StringHelper
+ * @brief Provide helper functions for string manipulation
+ */
 class StringHelper
 {
   /**
    * Removes lines from string
-   * @param $lineNumbersToRemove
-   * @param $wholeString
-   * @return string
+   * @param integer[] $lineNumbersToRemove Lines to be removed
+   * @param string $wholeString Raw string
+   * @return string String with lines removed
    */
   function removeLines($lineNumbersToRemove, $wholeString)
   {
@@ -41,16 +49,17 @@ class StringHelper
   }
 
   /**
-   * @param $wholeString - the string that needs to be cut
-   * @param $numbersToRemove - numbers to remove from string
-   * @param $outerLowerString - the string on the bottom of the file
-   * @return string - content
+   * Get content with some lines removed and content after a specific string
+   * removed.
+   * @param string $wholeString The string that needs to be cut
+   * @param integer[] $numbersToRemove Numbers to remove from string
+   * @param string $outerLowerString The string on the bottom of the file
+   * @return string String with required content removed.
    */
   function getContentBetweenString($wholeString, $numbersToRemove, $outerLowerString)
   {
     //remove numbers in array from string
     $cutString = $this->removeLines($numbersToRemove, $wholeString);
-    $contentString = substr($cutString, 0, strpos($cutString, $outerLowerString));
-    return $contentString;
+    return substr($cutString, 0, strpos($cutString, $outerLowerString));
   }
 }

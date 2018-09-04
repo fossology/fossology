@@ -15,30 +15,49 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @file
+ * @brief Scan options model
+ */
 
+namespace Fossology\UI\Api\Models;
 
-namespace www\ui\api\models;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Reuser\ReuserAgentPlugin;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
-use www\ui\api\models\Info;
-use www\ui\api\models\InfoType;
 
-require_once dirname(dirname(__FILE__)) . "/agent-add.php";
+require_once dirname(__DIR__) . "/agent-add.php";
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
 
-
+/**
+ * @class ScanOptions
+ * @brief Model to hold add settings for new scan
+ */
 class ScanOptions
 {
+  /**
+   * @var Analysis $analysis
+   * Analysis settings
+   */
   private $analysis;
+  /**
+   * @var Reuser $reuse
+   * Reuser settings
+   */
   private $reuse;
+  /**
+   * @var Decider $decider
+   * Decider settings
+   */
   private $decider;
 
   /**
    * ScanOptions constructor.
-   * @param $analysis Analysis
-   * @param $reuse integer
-   * @param $decider Decider
+   * @param Analysis $analysis
+   * @param Reuser $reuse
+   * @param Decider $decider
    */
   public function __construct($analysis, $reuse, $decider)
   {
@@ -48,7 +67,7 @@ class ScanOptions
   }
 
   /**
-   * Get ScanOptions elements as array
+   * Get ScanOptions elements as associative array
    * @return array
    */
   public function getArray()
@@ -60,6 +79,13 @@ class ScanOptions
     ];
   }
 
+  /**
+   * Schedule the agents for the given upload in the given folder based on
+   * current settings.
+   * @param integer $folderId Folder with the upload
+   * @param integer $uploadId Upload to be scanned
+   * @return Fossology::UI::Api::Models::Info
+   */
   public function scheduleAgents($folderId, $uploadId)
   {
     $uploadsAccessible = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
@@ -88,6 +114,10 @@ class ScanOptions
     }
   }
 
+  /**
+   * Prepare agentsToAdd string based on Analysis settings.
+   * @return string[]
+   */
   private function prepareAgents() {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
@@ -98,6 +128,10 @@ class ScanOptions
     return $agentsToAdd;
   }
 
+  /**
+   * Prepare Request object based on Reuser settings.
+   * @param Request $request
+   */
   private function prepareReuser(Request &$request) {
 
     $reuserRules = [];
@@ -114,6 +148,10 @@ class ScanOptions
     $request->request->set('reuseMode', $reuserRules);
   }
 
+  /**
+   * Prepare Request object based on Decider settings.
+   * @param Request $request
+   */
   private function prepareDecider(Request &$request) {
     $deciderRules = [];
     if($this->decider->getNomosMonk() === true) {

@@ -17,20 +17,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * *************************************************************
  */
-namespace www\ui\api\models;
 
+/**
+ * @file
+ * @brief Decider model
+ */
+namespace Fossology\UI\Api\Models;
+
+/**
+ * @class Decider
+ * @brief Decider model
+ */
 class Decider
 {
+  /**
+   * @var boolean $nomosMonk
+   * Scanners matches if all Nomos findings are within the Monk findings
+   */
   private $nomosMonk;
+  /**
+   * @var boolean $bulkReused
+   * Decide bulk phrases from reused packages
+   */
   private $bulkReused;
+  /**
+   * @var boolean $newScanner
+   * New scanner results, i.e., decisions were marked as work in progress if
+   * new scanner finds additional licenses
+   */
   private $newScanner;
 
   /**
    * Decider constructor.
    *
-   * @param $nomosMonk boolean
-   * @param $bulkReused boolean
-   * @param $newScanner boolean
+   * @param boolean $nomosMonk
+   * @param boolean $bulkReused
+   * @param boolean $newScanner
    */
   public function __construct($nomosMonk = false, $bulkReused = false, $newScanner = false)
   {
@@ -42,7 +64,7 @@ class Decider
   /**
    * Set the values of Analysis based on associative array
    * @param array $deciderArray Associative boolean array
-   * @return www\ui\api\models\Decider Current object
+   * @return Decider Current object
    */
   public function setUsingArray($deciderArray)
   {
@@ -58,6 +80,7 @@ class Decider
     return $this;
   }
 
+  ////// Getters //////
   /**
    * @return boolean
    */
@@ -82,6 +105,7 @@ class Decider
     return $this->newScanner;
   }
 
+  ////// Setters //////
   /**
    * @param boolean $nomosMonk
    */

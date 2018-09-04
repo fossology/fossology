@@ -15,23 +15,63 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
+/**
+ * @file
+ * @brief Upload model
+ */
+namespace Fossology\UI\Api\Models;
 
-namespace api\models;
-
-
+/**
+ * @class Upload
+ * @brief Model class to hold Upload info
+ */
 class Upload
 {
-
+  /**
+   * @var integer $folderId
+   * Folder id holding the upload
+   */
+  private $folderId;
+  /**
+   * @var string $folderName
+   * Folder name holding the upload
+   */
+  private $folderName;
+  /**
+   * @var integer $uploadId
+   * Current upload id
+   */
+  private $uploadId;
+  /**
+   * @var string $description
+   * Upload description
+   */
+  private $description;
+  /**
+   * @var string $uploadName
+   * Upload name
+   */
+  private $uploadName;
+  /**
+   * @var string $uploadDate
+   * Creation date of upload
+   */
+  private $uploadDate;
+  /**
+   * @var integer $fileSize
+   * Upload size
+   */
+  private $fileSize;
   /**
    * Upload constructor.
-   * @param $folderId integer
-   * @param $folderName string
-   * @param $uploadId integer
-   * @param $description string
-   * @param $uploadName string
-   * @param $uploadDate string
-   * @param $fileSize integer
-   * @param $tag string
+   * @param integer $folderId
+   * @param string $folderName
+   * @param integer $uploadId
+   * @param string $description
+   * @param string $uploadName
+   * @param string $uploadDate
+   * @param integer $fileSize
+   * @param string $tag
    */
   public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $tag = NULL)
   {
@@ -45,24 +85,17 @@ class Upload
   }
 
   /**
-   * @return Json string
+   * Get current upload in JSON representation
+   * @return string
    */
   public function getJSON()
   {
-    return json_encode(array(
-      'folderId' => $this->folderId,
-      'folderName' => $this->folderName,
-      'uploadId' => $this->uploadId,
-      "description" => $this->description,
-      "uploadName" => $this->uploadName,
-      "uploadDate" => $this->uploadDate,
-      "fileSize" => $this->fileSize
-    ));
+    return json_encode($this->getArray());
   }
 
   /**
    * Get the upload element as an associative array
-   * @return Associative array
+   * @return array
    */
   public function getArray()
   {

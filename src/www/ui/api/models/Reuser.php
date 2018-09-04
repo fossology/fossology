@@ -1,6 +1,5 @@
 <?php
-/**
- * *************************************************************
+/***************************************************************
  * Copyright (C) 2018 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
@@ -15,25 +14,47 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
- * *************************************************************
+ ***************************************************************/
+/**
+ * @file
+ * @brief Reuser model
  */
-namespace www\ui\api\models;
+namespace Fossology\UI\Api\Models;
 
+/**
+ * @class Reuser
+ * @brief Model to hold info required by Reuser agent
+ */
 class Reuser
 {
-
+  /**
+   * @var integer $reuseUpload
+   * Upload id to reuse
+   */
   private $reuseUpload;
+  /**
+   * @var integer $reuseGroup
+   * Group id to reuse from
+   */
   private $reuseGroup;
+  /**
+   * @var boolean $reuseMain
+   * Reuse main license
+   */
   private $reuseMain;
+  /**
+   * @var boolean $reuseEnhanced
+   * Use enhanced reuse
+   */
   private $reuseEnhanced;
 
   /**
    * Reuser constructor.
    *
-   * @param $reuseUpload boolean
-   * @param $reuseGroup boolean
-   * @param $reuseMain boolean
-   * @param $reuseEnhanced boolean
+   * @param integer $reuseUpload
+   * @param integer $reuseGroup
+   * @param boolean $reuseMain
+   * @param boolean $reuseEnhanced
    * @throws \UnexpectedValueException If reuse upload of reuse group are non
    * integers
    */
@@ -54,7 +75,7 @@ class Reuser
    * Set the values of Reuser based on associative array
    *
    * @param array $reuserArray Associative boolean array
-   * @return www\ui\api\models\Reuser Current object
+   * @return Reuser Current object
    * @throws \UnexpectedValueException If reuse upload of reuse group are non
    * integers
    */
@@ -83,6 +104,7 @@ class Reuser
     return $this;
   }
 
+  ////// Getters //////
   /**
    * @return integer
    */
@@ -115,6 +137,7 @@ class Reuser
     return $this->reuseEnhanced;
   }
 
+  ////// Setters //////
   /**
    * @param integer $reuseUpload
    */
@@ -160,8 +183,7 @@ class Reuser
   }
 
   /**
-   * Get decider as an array
-   *
+   * Get reuser info as an associative array
    * @return array
    */
   public function getArray()
