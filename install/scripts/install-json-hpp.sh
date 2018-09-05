@@ -24,7 +24,7 @@ proxy_file=/etc/fossology/fossology-proxy.conf
 [ -r $proxy_file ] && . $proxy_file
 
 TMP=$(mktemp)
-curl -s $CURL_OPION -o "$TMP" -L $FILe_URL
+curl -s $CURL_OPION -o "$TMP" -L $FILE_URL
 SUCCESS=$?
 
 if [[ $SUCCESS -ne 0 ]]
