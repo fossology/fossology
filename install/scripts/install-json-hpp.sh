@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# Source fossology config file, for Proxy settings
-conf_file=/etc/fossology.conf
-[ -r $conf_file ] && . $conf_file
-
 cd "$(dirname "$0")/../.."
 FINAL_FILE=./src/copyright/agent/json.hpp
 FILE_SHASUM="fbdfec4b4cf63b3b565d09f87e6c3c183bdd45c5be1864d3fcb338f6f02c1733"
