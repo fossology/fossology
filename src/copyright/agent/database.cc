@@ -188,7 +188,7 @@ bool CopyrightDatabaseHandler::createTableAgentFindings() const
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
 #define SEQUENCE_NAMEClearing IDENTITY"_decision_pk_seq"
-  {"copyright_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
+  {IDENTITY"_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
   {"user_fk", "bigint", "NOT NULL"},
   {"pfile_fk", "bigint", "NOT NULL"},
   {"clearing_decision_type_fk", "bigint", "NOT NULL"},

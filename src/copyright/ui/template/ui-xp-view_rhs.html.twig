@@ -67,13 +67,13 @@
             <br/><b>Comment:</b> {{ row.comment|e }}
           {% endif %}
         </td>
-        <td id="actionsOf{{ row.copyright_decision_pk }}">
+        <td id='actionsOf{{ row["#{decisionsTable}_pk"] }}'>
           <span class="basicActions">
-            <img src="images/button_edit.png" onclick="editDecision({{ row.copyright_decision_pk }}, '{{ row.textfinding|e('js') }}', '{{ row.description|e('js') }}', '{{ row.comment|e('js') }}', {{ row.clearing_decision_type_fk }});">
-            <img class="delete" src="images/space_16.png" onclick="deleteDecision({{ row.copyright_decision_pk }});">
+            <img src="images/button_edit.png" onclick="editDecision({{ row["#{decisionsTable}_pk"] }}, '{{ row.textfinding|e('js') }}', '{{ row.description|e('js') }}', '{{ row.comment|e('js') }}', {{ row.clearing_decision_type_fk }});">
+            <img class="delete" src="images/space_16.png" onclick="deleteDecision({{ row["#{decisionsTable}_pk"] }});">
           </span>
           <span class="undoActions" hidden>
-            deleted [<a href="#" onclick="event.preventDefault();undoDecision({{ row.copyright_decision_pk }});">undo</a>]
+            deleted [<a href="#" onclick="event.preventDefault();undoDecision({{ row["#{decisionsTable}_pk"] }});">undo</a>]
           </span>
         </td>
       </tr>
