@@ -100,13 +100,13 @@ class Upload
   public function getArray()
   {
     return [
-      "folderId"    => $this->folderId,
-      "folderName"  => $this->folderName,
-      "uploadId"    => $this->uploadId,
+      "folderid"    => $this->folderId,
+      "foldername"  => $this->folderName,
+      "id"          => $this->uploadId,
       "description" => $this->description,
-      "uploadName"  => $this->uploadName,
-      "uploadDate"  => $this->uploadDate,
-      "fileSize"    => $this->fileSize
+      "uploadname"  => $this->uploadName,
+      "uploaddate"  => $this->uploadDate,
+      "filesize"    => $this->fileSize
     ];
   }
 }

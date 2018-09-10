@@ -1,6 +1,6 @@
 <?php
 
-require_once 'common-db.php';
+require_once dirname(dirname(__DIR__)) . "/www/ui/api/Helper/DbHelper.php";
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
@@ -68,12 +68,13 @@ use Fossology\UI\Api\Helper\DbHelper;
 function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
 {
   global $container;
+  global $PG_CONN;
 
 
   $dbManager = $container->get('db.manager');
   if(empty($dbManager))
   {
-    $dbHelper = new DbHelper();
+    $dbHelper = new DbHelper($PG_CONN);
     $dbManager = $dbHelper->getDbManager();
   }
   /* check all required inputs */
@@ -116,10 +117,11 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
 function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 {
   global $container;
+  global $PG_CONN;
 
   if(empty($dbManager))
   {
-    $dbHelper = new DbHelper();
+    $dbHelper = new DbHelper($PG_CONN);
     $dbManager = $dbHelper->getDbManager();
   }
 
@@ -167,12 +169,6 @@ function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL, $jq_cmd_args=NULL)
 {
   global $PG_CONN;
-
-  if(empty($PG_CONN))
-  {
-    $dbHelper = new DbHelper();
-    $PG_CONN = $dbHelper->getPGCONN();
-  }
 
   $jq_args = pg_escape_string($jq_args);
   $jq_cmd_args = pg_escape_string($jq_cmd_args);

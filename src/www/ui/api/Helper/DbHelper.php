@@ -51,37 +51,18 @@ class DbHelper
    * Postgres connection resource
    */
   private $PG_CONN;
-  /**
-   * @var string $sysconfdir
-   * SysConfDir location
-   */
-  private $sysconfdir;
 
   /**
    * DbHelper constructor.
    */
-  public function __construct()
+  public function __construct($PG_CONN)
   {
-    $logLevel = Logger::DEBUG;
+    $logLevel = Logger::NOTICE;
     $logger = new Logger(__FILE__);
     $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
-    $rcfile = "fossology.rc";
 
-    $this->sysconfdir = getenv('SYSCONFDIR');
-    if ($this->sysconfdir === false)
-    {
-      if (file_exists($rcfile)) $this->sysconfdir = file_get_contents($rcfile);
-      if ($this->sysconfdir === false)
-      {
-        $this->sysconfdir = "/usr/local/etc/fossology";
-      }
-    }
-
-    $this->sysconfdir = trim($this->sysconfdir);
-    $this->PG_CONN = DBconnect($this->sysconfdir);
-    $GLOBALS["PG_CONN"] = $this->PG_CONN;
     $this->dbManager = new ModernDbManager($logger);
-
+    $this->PG_CONN = $PG_CONN;
     $pgDriver = new Postgres($this->PG_CONN);
     $this->dbManager->setDriver($pgDriver);
   }
@@ -116,24 +97,28 @@ class DbHelper
   {
     if($uploadId == NULL)
     {
-      $sql = "SELECT DISTINCT upload.upload_pk, upload.upload_ts, upload.upload_filename,
-upload.upload_desc, folder.folder_pk, folder.folder_name, pfile.pfile_size
-FROM upload, folderlist, folder, pfile
-  WHERE upload.user_fk=".pg_escape_string($userId)."
-  AND folderlist.upload_pk=upload.upload_pk
-  AND pfile.pfile_pk=folderlist.pfile_fk
-";
+      $sql = "SELECT
+upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
+folder.folder_pk, folder.folder_name, pfile.pfile_size
+FROM upload
+INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
+INNER JOIN folder ON folder.folder_pk = folderlist.parent
+INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
+WHERE upload.user_fk = ".pg_escape_string($userId)."
+ORDER BY upload.upload_pk;";
     }
     else
     {
-      $sql = "SELECT DISTINCT upload.upload_pk, upload.upload_ts, upload.upload_filename,
-upload.upload_desc, folder.folder_pk, folder.folder_name, pfile.pfile_size
-FROM upload, folderlist, folder, pfile
-  WHERE upload.user_fk=".pg_escape_string($userId)."
-  AND folderlist.upload_pk=upload.upload_pk
-  AND folderlist.upload_pk=".pg_escape_string($uploadId)."
-  AND pfile.pfile_pk=folderlist.pfile_fk
-";
+      $sql = "SELECT
+upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
+folder.folder_pk, folder.folder_name, pfile.pfile_size
+FROM upload
+INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
+INNER JOIN folder ON folder.folder_pk = folderlist.parent
+INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
+WHERE upload.user_fk = ".pg_escape_string($userId)."
+AND upload.upload_pk = ".pg_escape_string($uploadId)."
+ORDER BY upload.upload_pk;";
     }
 
     $result = $this->dbManager->getRows($sql);
@@ -242,7 +227,7 @@ FROM $tableName WHERE $idRowName= ".pg_escape_string($id))["count"])));
     }
 
     $jobs = [];
-    $result = $result = $this->dbManager->getRows($jobSQL);
+    $result = $this->dbManager->getRows($jobSQL);
     foreach ($result as $row)
     {
       $job = new Job($row["job_pk"], $row["job_name"], $row["job_queued"],

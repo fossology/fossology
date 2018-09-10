@@ -232,14 +232,14 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
   {
     while ($row = pg_fetch_assoc($result))
     {
-      if (!$uploadDao->isAccessible($row['upload_fk'], $groupId)) {
+      if (!$uploadDao->isAccessible($row['upload_fk'], $groupID)) {
         continue;
       }
       $totalUploadtreeRecs[] = $row;
     }
   }
   pg_free_result($result);
-  $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $this->MaxPerPage);
+  $UploadtreeRecs = array_slice($totalUploadtreeRecs, $Offset, $MaxPerPage);
   $totalUploadtreeRecsCount = sizeof($totalUploadtreeRecs);
   return array($UploadtreeRecs, $totalUploadtreeRecsCount);
 } // GetResults()

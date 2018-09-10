@@ -43,7 +43,8 @@
             "Fossology\\DeciderJob\\UI\\" : "deciderjob/ui",
             "Fossology\\Decider\\UI\\" : "decider/ui",
             "Fossology\\DelAgent\\UI\\" : "delagent/ui",
-            "Fossology\\UI\\Page\\" : "www/ui/page"
+            "Fossology\\UI\\Page\\" : "www/ui/page",
+            "Fossology\\UI\\Api\\" : "www/ui/api"
         }
     },
     "config" : {

@@ -134,15 +134,19 @@ class AuthHelper
     }
 
     $SysConf['auth'][Auth::USER_ID] = $userRow['user_pk'];
+    $_SESSION[Auth::USER_ID] = $userRow['user_pk'];
     $this->session->set(Auth::USER_ID, $userRow['user_pk']);
+    $_SESSION[Auth::USER_NAME] = $userRow['user_name'];
     $this->session->set(Auth::USER_NAME, $userRow['user_name']);
-    $this->session->set('Folder', $userRow['root_folder_fk']);
+    $_SESSION['Folder'] = $userRow['root_folder_fk'];
+    $_SESSION[Auth::USER_LEVEL] = $userRow['user_perm'];
     $this->session->set(Auth::USER_LEVEL, $userRow['user_perm']);
-    $this->session->set('UserEmail', $userRow['user_email']);
-    $this->session->set('UserEnote', $userRow['email_notify']);
+    $_SESSION['UserEmail'] = $userRow['user_email'];
+    $_SESSION['UserEnote'] = $userRow['email_notify'];
+    $_SESSION[Auth::GROUP_ID] = $userRow['group_fk'];
     $SysConf['auth'][Auth::GROUP_ID] = $userRow['group_fk'];
     $this->session->set(Auth::GROUP_ID, $userRow['group_fk']);
-    $this->session->set('GroupName', $userRow['group_name']);
+    $_SESSION['GroupName'] = $userRow['group_name'];
   }
 
   /**

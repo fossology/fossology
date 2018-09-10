@@ -459,4 +459,21 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     }
     return false;
   }
+
+  /**
+   * Get the folder contents id for a given child id
+   * @param integer $childId Id of the child
+   * @return NULL|integer Folder content id if success, NULL otherwise
+   */
+  public function getFolderContentsId($childId)
+  {
+    $folderContentsRow = $this->dbManager->getSingleRow(
+      'SELECT foldercontents_pk FROM foldercontents '.
+      'WHERE child_id = $1', [$childId]);
+    if (!$folderContentsRow)
+    {
+      return null;
+    }
+    return intval($folderContentsRow['foldercontents_pk']);
+  }
 }

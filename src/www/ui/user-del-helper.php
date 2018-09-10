@@ -28,29 +28,31 @@ require_once __DIR__ . "/../../lib/php/common-perms.php";
  */
 function DeleteUser($UserId, $dbManager)
 {
+  global $PG_CONN;
+
   // Prepare all statements
   $userSelectStatement = __METHOD__ . ".getUser";
   $dbManager->prepare($userSelectStatement,
-    "SELECT * FROM users WHERE user_pk = '$1' LIMIT 1;");
+    "SELECT * FROM users WHERE user_pk = $1 LIMIT 1;");
 
   $selectGroupStatement = __METHOD__ . ".getGroup";
   $dbManager->prepare($selectGroupStatement,
-    "SELECT group_pk FROM groups WHERE group_name = '$1' LIMIT 1;");
+    "SELECT group_pk FROM groups WHERE group_name = $1 LIMIT 1;");
 
   $deleteGroupUserStatement = __METHOD__ . ".deleteGroupUser";
   $dbManager->prepare($deleteGroupUserStatement,
-    "DELETE FROM group_user_member WHERE user_fk = '$1';");
+    "DELETE FROM group_user_member WHERE user_fk = $1;");
 
   $deleteUserStatement = __METHOD__ . ".deleteUser";
   $dbManager->prepare($deleteUserStatement,
-    "DELETE FROM users WHERE user_pk = '$1';");
+    "DELETE FROM users WHERE user_pk = $1;");
 
   $userCheckStatement = __METHOD__ . ".getUserbyName";
   $dbManager->prepare($userCheckStatement,
-    "SELECT * FROM users WHERE user_name = '$1' LIMIT 1;");
+    "SELECT * FROM users WHERE user_name = $1 LIMIT 1;");
 
   /* See if the user already exists */
-  $result = $dbManager->execute($userSelectStatement, ["user_pk", $UserId]);
+  $result = $dbManager->execute($userSelectStatement, [$UserId]);
   $row = $dbManager->fetchArray($result);
   $dbManager->freeResult($result);
   if (empty($row['user_name']))
@@ -62,7 +64,7 @@ function DeleteUser($UserId, $dbManager)
   /* Delete the users group
    * First look up the users group_pk
    */
-  $result = $dbManager->execute($selectGroupStatement, [$row[user_name]]);
+  $result = $dbManager->execute($selectGroupStatement, [$row['user_name']]);
   $GroupRow = $dbManager->fetchArray($result);
   $dbManager->freeResult($result);
 

@@ -121,7 +121,7 @@ paths:
         - Upload
         - Organize
       parameters:
-        - name: folder_id
+        - name: folderId
           description: Folder Id, where upload should be moved to
           in: header
           required: true
@@ -153,7 +153,7 @@ paths:
         - Organize
       description: Can be used to copy uploads
       parameters:
-        - name: folder_id
+        - name: folderId
           description: Folder Id, where upload should be copied to
           in: header
           required: true
@@ -378,12 +378,12 @@ paths:
         description:  Schedule an Analysis of an existing upload
         parameters:
           # This could also be omitted, because there are no real folders
-          - name: folder_id
+          - name: folderId
             in: header
             required: true
             type: number
             format: int
-          - name: upload_id
+          - name: uploadId
             in: header
             required: true
             type: number
@@ -394,8 +394,10 @@ paths:
             schema:
               $ref: '#/definitions/ScanOptions'
         responses:
-          204:
-            description: Job Scheduled
+          202:
+            description: Job Scheduled with job id in message
+            schema:
+              $ref: '#/definitions/Info'
           400:
             description: Bad request
             schema:
@@ -482,6 +484,9 @@ definitions:
         type: number
         format: int
         description: The folder id, where the upload is located
+      foldername:
+        type: string
+        description: The name of the folder where the upload is located
       id:
         type: number
         format: int

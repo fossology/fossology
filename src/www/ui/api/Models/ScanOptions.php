@@ -28,7 +28,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
 
-require_once dirname(__DIR__) . "/agent-add.php";
+require_once dirname(dirname(__DIR__)) . "/agent-add.php";
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
 
 /**
@@ -106,9 +106,9 @@ class ScanOptions
     $agentsToAdd = $this->prepareAgents();
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
-    $returnStatus = (new AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
+    $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
     if(is_numeric($returnStatus)) {
-      return new Info(200, $returnStatus, InfoType::INFO);
+      return new Info(202, $returnStatus, InfoType::INFO);
     } else {
       return new Info(403, $returnStatus, InfoType::ERROR);
     }
@@ -133,7 +133,10 @@ class ScanOptions
    * @param Request $request
    */
   private function prepareReuser(Request &$request) {
-
+    if($this->reuse->getReuseUpload() == 0) {
+      // No upload to reuse
+      return;
+    }
     $reuserRules = [];
     if($this->reuse->getReuseMain() === true) {
       $reuserRules[] = 'reuseMain';
