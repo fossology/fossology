@@ -106,7 +106,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->insertData(array('copyright','uploadtree_a'));
 
-    $this->testDb->createSequences(array('copyright_ct_pk_seq','copyright_decision_pk_seq'));
+    $this->testDb->createSequences(array('copyright_pk_seq','copyright_decision_pk_seq'));
     $this->testDb->alterTables(array('copyright','copyright_decision'));
   }
 
@@ -300,7 +300,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
 
-    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE ct_pk=$1',array($ctPk),__METHOD__.'.cp');
+    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE copyright_pk=$1',array($ctPk),__METHOD__.'.cp');
     assertThat($updatedCp['content'],is(equalTo($content)));
   }
   

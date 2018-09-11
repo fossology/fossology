@@ -32,7 +32,7 @@
                            SELECT agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled 
                            FROM copyright WHERE type <> 'statement' AND content IS NOT NULL;");
     $countInsertedAuthorColumns = $dbManager->getSingleRow("SELECT count(*) FROM author au INNER JOIN copyright co 
-                           ON au.pfile_fk = co.pfile_fk WHERE au.ct_pk = co.ct_pk AND au.content = co.content;",array(),'getCountInsertedAuthorColumns');      
+                           ON au.pfile_fk = co.pfile_fk WHERE au.author_pk = co.copyright_pk AND au.content = co.content;",array(),'getCountInsertedAuthorColumns');      
     if($countAuthorColumns['count'] == $countInsertedAuthorColumns['count']){
       echo "Deleting the email/url/author data from copyright table...\n";
       $dbManager->queryOnce("DELETE FROM copyright WHERE type <> 'statement' AND content IS NOT NULL;");

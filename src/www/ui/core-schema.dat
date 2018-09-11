@@ -361,9 +361,9 @@
   $Schema["TABLE"]["clearing_event"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
 
 
-  $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"copyright_pk\" int8 DEFAULT nextval('copyright_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"copyright_pk\" SET NOT NULL, ALTER COLUMN \"copyright_pk\" SET DEFAULT nextval('copyright_pk_seq'::regclass)";
 
   $Schema["TABLE"]["copyright"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["agent_fk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"agent_fk\" int8";
@@ -431,9 +431,9 @@
   $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["author"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('author_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["author"]["ct_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('author_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["author_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"author_pk\" int8 DEFAULT nextval('author_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["author_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"author_pk\" SET NOT NULL, ALTER COLUMN \"author_pk\" SET DEFAULT nextval('author_pk_seq'::regclass)";
 
   $Schema["TABLE"]["author"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["agent_fk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"agent_fk\" int8";
@@ -468,9 +468,9 @@
   $Schema["TABLE"]["author"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["ecc"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["ecc"]["ct_pk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["ecc"]["ct_pk"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"ecc_pk\" int8 DEFAULT nextval('ecc_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"ecc_pk\" SET NOT NULL, ALTER COLUMN \"ecc_pk\" SET DEFAULT nextval('ecc_pk_seq'::regclass)";
 
   $Schema["TABLE"]["ecc"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["ecc"]["agent_fk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"agent_fk\" int8";
@@ -538,9 +538,9 @@
   $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["keyword"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["keyword"]["ct_pk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('keyword_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["keyword"]["ct_pk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('keyword_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"keyword_pk\" int8 DEFAULT nextval('keyword_pk_seq'::regclass)";
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"keyword_pk\" SET NOT NULL, ALTER COLUMN \"keyword_pk\" SET DEFAULT nextval('keyword_pk_seq'::regclass)";
 
   $Schema["TABLE"]["keyword"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["keyword"]["agent_fk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"agent_fk\" int8";
@@ -1800,8 +1800,8 @@
   $Schema["SEQUENCE"]["perm_upload_perm_upload_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"perm_upload_perm_upload_pk_seq\"";
   $Schema["SEQUENCE"]["perm_upload_perm_upload_pk_seq"]["UPDATE"] = "SELECT setval('perm_upload_perm_upload_pk_seq',(SELECT greatest(1,max(perm_upload_pk)) val FROM perm_upload))";
 
-  $Schema["SEQUENCE"]["copyright_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["copyright_ct_pk_seq"]["UPDATE"] = "SELECT setval('copyright_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM copyright))";
+  $Schema["SEQUENCE"]["copyright_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_pk_seq"]["UPDATE"] = "SELECT setval('copyright_pk_seq',(SELECT greatest(1,max(copyright_pk)) val FROM copyright))";
 
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\"";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["UPDATE"] = "SELECT setval('license_file_fl_pk_seq',(SELECT greatest(1,max(fl_pk)) val FROM license_file))";
@@ -1898,14 +1898,14 @@
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 
-  $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["UPDATE"] = "SELECT setval('ecc_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM ecc))";
+  $Schema["SEQUENCE"]["ecc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_pk_seq\"";
+  $Schema["SEQUENCE"]["ecc_pk_seq"]["UPDATE"] = "SELECT setval('ecc_pk_seq',(SELECT greatest(1,max(ecc_pk)) val FROM ecc))";
 
-  $Schema["SEQUENCE"]["author_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["author_ct_pk_seq"]["UPDATE"] = "SELECT setval('author_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM author))";
+  $Schema["SEQUENCE"]["author_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_pk_seq\"";
+  $Schema["SEQUENCE"]["author_pk_seq"]["UPDATE"] = "SELECT setval('author_pk_seq',(SELECT greatest(1,max(author_pk)) val FROM author))";
 
-  $Schema["SEQUENCE"]["keyword_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["keyword_ct_pk_seq"]["UPDATE"] = "SELECT setval('keyword_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM keyword))";
+  $Schema["SEQUENCE"]["keyword_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_pk_seq\"";
+  $Schema["SEQUENCE"]["keyword_pk_seq"]["UPDATE"] = "SELECT setval('keyword_pk_seq',(SELECT greatest(1,max(keyword_pk)) val FROM keyword))";
 
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_decision_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(ecc_decision_pk)) val FROM ecc_decision))";
@@ -1925,14 +1925,14 @@
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
-  $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
-  $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"copyright_pk\");";
+  $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"author_pk\");";
   $Schema["CONSTRAINT"]["author_pfile_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["author_agent_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"ecc_decision_pk\");";
-  $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ecc_pk\");";
   $Schema["CONSTRAINT"]["keyword_decision_pkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pkey\" PRIMARY KEY (\"keyword_decision_pk\");";
-  $Schema["CONSTRAINT"]["keyword_pkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["keyword_pkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pkey\" PRIMARY KEY (\"keyword_pk\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
