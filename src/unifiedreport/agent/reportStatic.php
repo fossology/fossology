@@ -214,11 +214,13 @@ class ReportStatic
 
     $table->addRow($rowWidth, "pStyle");
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellLen)->addText(htmlspecialchars($otherStatement['ri_ga_additional']), $rightColStyleBlue, "pStyle");
+    $additionalNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_ga_additional"], ENT_DISALLOWED));
+    $cell = $table->addCell($cellLen)->addText($additionalNotes, $rightColStyleBlue, "pStyle");
 
     $table->addRow($rowWidth);
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, "pStyle");
-    $cell = $table->addCell($cellLen)->addText(htmlspecialchars($otherStatement['ri_ga_risk']), $rightColStyleBlue, "pStyle");
+    $generalRisks = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_ga_risk"], ENT_DISALLOWED));
+    $cell = $table->addCell($cellLen)->addText($generalRisks, $rightColStyleBlue, "pStyle");
 
     $section->addTextBreak();
   }
