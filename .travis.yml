@@ -5,24 +5,18 @@
 
 language: php
 dist: trusty
-php:
-  - 7.0
-  - 5.6
-  - 7.1
-  - 7.2
+php: 7.0
+
 addons:
   apt:
     packages: &default_packages
-      - bzip2
       - cabextract
-      - cpio
       - genisoimage
       - libboost-program-options-dev
       - libboost-regex-dev
       - libcppunit-dev
       - libcunit1-dev
       - libdbd-sqlite3-perl
-      - libglib2.0-dev
       - liblocal-lib-perl
       - libmagic-dev
       - librpm-dev
@@ -36,67 +30,49 @@ addons:
       - rpm
       - sleuthkit
       - unrar-free
-      - unzip
       - upx-ucl
 
 services: postgresql
 
 sudo: required
 
-install:
-  - composer install --working-dir=src
-  - ./install/scripts/install-spdx-tools.sh
-  - ./install/scripts/install-ninka.sh
-
-before_script:
-  - ./utils/prepare-test -afty
-
-env:
-  global:
-    - PHPTESTSUITE=''
-    - CHECKBEFORE='cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/'
-    - MAKETARGETS='all test'
-  matrix:
-    - PHPTESTSUITE='Fossology PhpUnit Test Suite' CHECKBEFORE='' MAKETARGETS='build-lib VERSIONFILE build-cli'
-
-script:
-  - set -e
-  - src/testing/syntax/syntaxtest.sh
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "5.6" ]]; then composer require --no-update phpunit/phpunit ^5; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.0" ]]; then composer require --dev --no-update phpunit/phpunit ^6; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.1" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
-  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.2" ]]; then composer require --dev --no-update phpunit/phpunit ^7; fi
-  - if [[ ! -z "${CHECKBEFORE}" ]]; then ${CHECKBEFORE}; fi
-  - if [[ ! -z "${MAKETARGETS}" ]]; then make ${MAKETARGETS}; fi
-  - if [[ ! -z "${PHPTESTSUITE}" ]]; then src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="${PHPTESTSUITE}"; fi
-  - set +e
-
-after_script:
-  - mkdir -p build/logs
-  - if [[ ! -z "${PHPTESTSUITE}" ]]; then php src/vendor/bin/coveralls -vv -x clover.xml; fi
+before_script: ./utils/prepare-test -afty
 
 matrix:
   include:
-  ## docker tests ##
-    - name: default-docker-test
+    - name: Syntax Check
+      script: src/testing/syntax/syntaxtest.sh
+    - name: Static Code Analysis
+      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/
+    - name: Copy/Paste Detector
+      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+#### Docker tests ###########################
+    - name: Docker Tests
+      addons: {}
       services: docker
-      install: true
-      before_script: true
-      script: src/testing/docker/default-docker-test.sh
-    - name: docker-compose-test
-      services: docker
-      install: true
-      before_script: true
-      script: src/testing/docker/docker-compose-test.sh
-  ## C/C++ agent tests ##
-    - env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
+      before_script: docker-compose build
+      script:
+        - src/testing/docker/test-cluster.sh
+        - src/testing/docker/test-standalone.sh
+#### C/C++ agent tests ###########################
+    - &compiler-tests
+      env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
       addons:
         apt:
+          sources:
+            - ubuntu-toolchain-r-test
           packages:
             - *default_packages
             - gcc-4.8
             - g++-4.8
-    - env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
+      install:
+        - composer install --prefer-dist --working-dir=src
+        - ./install/scripts/install-spdx-tools.sh
+      script:
+        - make
+        - make test
+    - <<: *compiler-tests
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       addons:
         apt:
           sources:
@@ -105,7 +81,8 @@ matrix:
             - *default_packages
             - gcc-5
             - g++-5
-    - env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
+    - <<: *compiler-tests
+      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
       addons:
         apt:
           sources:
@@ -114,7 +91,8 @@ matrix:
             - *default_packages
             - gcc-6
             - g++-6
-    - env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+    - <<: *compiler-tests
+      env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
       addons:
         apt:
           sources:
@@ -122,10 +100,22 @@ matrix:
           packages:
             - *default_packages
             - clang-3.6
-  ## PHP: phpcpd ##
-    - name: PHP-CPD
-      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+#### PHPUnit tests ###########################
+    - &phpunit-tests
+      php: 5.6
+      install: composer install --prefer-dist --working-dir=src
+      script:
+        - make build-lib VERSIONFILE build-cli
+        - src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite"
+      after_success: php src/vendor/bin/coveralls -vv -x clover.xml
+    - <<: *phpunit-tests
+      php: 7.0
+    - <<: *phpunit-tests
+      php: 7.1
+    - <<: *phpunit-tests
+      php: 7.2
   allow_failures:
-    - script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+    - name: Copy/Paste Detector
+      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
     - php: 7.1
     - php: 7.2
