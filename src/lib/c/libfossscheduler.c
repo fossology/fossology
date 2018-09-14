@@ -45,7 +45,7 @@ int sscheduler;      ///< whether the agent was started by the scheduler
 int userID;          ///< the id of the user that created the job
 int groupID;         ///< the id of the group of the user that created the job
 int jobId;           ///< the id of the job
-char* module_name;     ///< the name of the agent
+char* module_name = NULL;     ///< the name of the agent
 
 const static char* sql_check = "\
   SELECT * FROM agent \
@@ -339,23 +339,25 @@ void fo_scheduler_connect_dbMan(int* argc, char** argv, fo_dbManager** dbManager
 */
 void fo_scheduler_disconnect(int retcode)
 {
-  /* send "CLOSED" to the scheduler */
-  if (sscheduler)
-  {
-    fo_heartbeat();
-    fprintf(stdout, "\nBYE %d\n", retcode);
-    fflush(stdout);
+  if (module_name != NULL) {
+    /* send "CLOSED" to the scheduler */
+    if (sscheduler)
+    {
+      fo_heartbeat();
+      fprintf(stdout, "\nBYE %d\n", retcode);
+      fflush(stdout);
 
-    valid = 0;
-    sscheduler = 0;
+      valid = 0;
+      sscheduler = 0;
 
-    g_free(module_name);
+      g_free(module_name);
+    }
+
+    if (strcmp(sysconfigdir, DEFAULT_SETUP))
+      g_free(sysconfigdir);
+
+    fo_config_free(sysconfig);
   }
-
-  if (strcmp(sysconfigdir, DEFAULT_SETUP))
-    g_free(sysconfigdir);
-
-  fo_config_free(sysconfig);
   g_regex_unref(fo_conf_parse);
   g_regex_unref(fo_conf_replace);
 
@@ -363,6 +365,7 @@ void fo_scheduler_disconnect(int retcode)
   sysconfig = NULL;
   fo_conf_parse = NULL;
   fo_conf_replace = NULL;
+  module_name = NULL;
 
   fflush(stdout);
   fflush(stderr);
