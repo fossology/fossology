@@ -378,12 +378,20 @@ $app->GET(BASE_PATH.'jobs/', function(Application $app, Request $request)
   $restHelper = new RestHelper($request);
   $dbHelper = $restHelper->getDbHelper();
   $limit = $request->headers->get("limit");
-  if(isset($limit) && (!is_numeric($limit) || $limit < 0))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
-    $error = new Info(400, "Limit cannot be smaller than 1 and has to be numeric!", InfoType::ERROR);
+    if(isset($limit) && (!is_numeric($limit) || $limit < 0))
+    {
+      $error = new Info(400, "Limit cannot be smaller than 1 and has to be numeric!", InfoType::ERROR);
+      return $app->json($error->getArray(), $error->getCode());
+    }
+    return $app->json($dbHelper->getJobs($limit), 200);
+  }
+  else
+  {
+    $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
     return $app->json($error->getArray(), $error->getCode());
   }
-  return $app->json($dbHelper->getJobs($limit), 200);
 });
 
 $app->POST(BASE_PATH.'jobs/', function(Application $app, Request $request)
@@ -443,21 +451,29 @@ $app->GET(BASE_PATH.'jobs/{id}', function(Application $app, Request $request, $i
   $restHelper = new RestHelper($request);
   $dbHelper = $restHelper->getDbHelper();
 
-  if(isset($id) && is_numeric($id))
+  if($restHelper->hasUserAccess(AUTH_METHOD))
   {
-    if($dbHelper->doesIdExist("job", "job_pk", $id))
+    if(isset($id) && is_numeric($id))
     {
-      return $app->json($dbHelper->getJobs(0, $id), 200);
+      if($dbHelper->doesIdExist("job", "job_pk", $id))
+      {
+        return $app->json($dbHelper->getJobs(0, $id), 200);
+      }
+      else
+      {
+        $error = new Info(404, "Job id ".$id." doesn't exist", InfoType::ERROR);
+        return $app->json($error->getArray(), $error->getCode());
+      }
     }
     else
     {
-      $error = new Info(404, "Job id ".$id." doesn't exist", InfoType::ERROR);
+      $error = new Info(400, "Id has to be numeric!", InfoType::ERROR);
       return $app->json($error->getArray(), $error->getCode());
     }
   }
   else
   {
-    $error = new Info(400, "Id has to be numeric!", InfoType::ERROR);
+    $error = new Info(403, "Not authorized to access users", InfoType::ERROR);
     return $app->json($error->getArray(), $error->getCode());
   }
 });
