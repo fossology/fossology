@@ -322,7 +322,7 @@ int ProcessUpload (long upload_pk)
     return -1;
   }
   uploadtree_tablename = GetUploadtreeTableName(db_conn, upload_pk);
-  if (NULL == uploadtree_tablename) strcpy(uploadtree_tablename, "uploadtree_a");
+  if (NULL == uploadtree_tablename) uploadtree_tablename = strdup("uploadtree_a");
   /*  retrieve the records to process */
   snprintf(sqlbuf, sizeof(sqlbuf),
       "SELECT pfile_pk as pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename, mimetype_name as mimetype from pfile, mimetype, (SELECT distinct(pfile_fk) as PF from %s where upload_fk='%ld') as SS where PF=pfile_pk and (pfile_mimetypefk='%d' or pfile_mimetypefk='%d' OR pfile_mimetypefk='%d') and mimetype_pk=pfile_mimetypefk and (not exists (SELECT 1 from pkg_rpm where pkg_rpm.pfile_fk = pfile_pk)) and (not exists (SELECT 1 from pkg_deb where pkg_deb.pfile_fk = pfile_pk))", uploadtree_tablename, upload_pk, mimetypepk, debmimetypepk, debsrcmimetypepk);
@@ -712,7 +712,7 @@ int GetMetadataDebBinary (long upload_pk, struct debpkginfo *pi)
 
   if (!upload_pk) return -1; // when upload_pk is empty
   uploadtree_tablename = GetUploadtreeTableName(db_conn, upload_pk);
-  if (NULL == uploadtree_tablename) strcpy(uploadtree_tablename, "uploadtree_a");
+  if (NULL == uploadtree_tablename) uploadtree_tablename = strdup("uploadtree_a");
   /* Get the debian control file's repository path */
   /* First get the uploadtree bounds (lft,rgt) for the package */
   snprintf(SQL,sizeof(SQL),"SELECT lft,rgt FROM %s WHERE upload_fk = %ld AND pfile_fk = %ld limit 1",

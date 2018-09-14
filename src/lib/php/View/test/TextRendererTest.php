@@ -180,7 +180,7 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
 
     assertThat($renderedText, is("fo<a id=\"highlight\"></a><span class=\"hi-url\" title=\"0\">o <span class=\"hi-match\" title=\"0\">bar </span>ba</span>z quux"));
   }
-  
+
   function testRenderHighlightThatIsIgnorableByBulk()
   {
     $highlight1 = new Highlight(14, 14, Highlight::DELETED, 0, 0, 'ref1');
@@ -194,5 +194,5 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
 
     assertThat($cleanText, is("foo bar baz quux"));
   }
-  
+
 }

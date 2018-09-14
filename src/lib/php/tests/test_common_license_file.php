@@ -42,7 +42,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
 
   public $DB_COMMAND =  "";
   public $DB_NAME =  "";
- 
+
   /** @var TestLiteDb */
   private $testDb;
   /** @var ModernDbManager */
@@ -53,7 +53,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp() 
+  protected function setUp()
   {
     global $PG_CONN;
     global $upload_pk;
@@ -93,7 +93,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
       'AF1DF2C4B32E4115DB5F272D9EFD0E674CF2A0BC', '2239AA7DAC291B6F8D0A56396B1B8530', '4560')));
     $this->dbManager->freeResult($this->dbManager->execute($stmt,array(
       'B1938B14B9A573D59ABCBD3BF0F9200CE6E79FB6', '55EFE7F9B9D106047718F1CE9173B869', '1892')));
-      
+
     /** add nomos agent record **/
     $this->dbManager->queryOnce($sql="INSERT INTO agent (agent_name) VALUES('nomos')");
 
@@ -104,7 +104,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
             . " VALUES ($1,$2,$3,$4,$5,$6,$7)");
     $this->dbManager->freeResult($this->dbManager->execute($stmt,
             array(1, 'test_ref', 'test_ref', 'false', 'true', 'false', 1)));
- 
+
     /** get pfile id */
     $this->dbManager->prepare($stmt='license_ref.select',
           $sql = "SELECT pfile_pk from pfile where pfile_sha1"
@@ -123,7 +123,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
                        $sql = "INSERT INTO license_file(rf_fk, agent_fk, pfile_fk) VALUES ($1,$2,$3)");
     $this->dbManager->freeResult($this->dbManager->execute($stmt, array(1, $agent_pk, $pfile_pk_parent)));
     $this->dbManager->freeResult($this->dbManager->execute($stmt, array(2, $agent_pk, $pfile_pk_child)));
-    
+
     $this->dbManager->queryOnce("INSERT INTO upload (upload_filename,upload_mode,upload_ts, pfile_fk, uploadtree_tablename)"
             . " VALUES ('$upload_filename',40,now(), '$pfile_pk_parent', '$this->uploadtree_tablename')");
     $row = $this->dbManager->getSingleRow("SELECT upload_pk from upload where upload_filename = '$upload_filename'",array(),__METHOD__.'.upload.select');
@@ -131,9 +131,9 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
 
     $this->dbManager->prepare($stmtIn=__METHOD__.'.uploadtree.insert',
             "INSERT INTO uploadtree (parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES ($1,$2,$3,$4,$5,$6,$7)");
-    $this->dbManager->freeResult(    
+    $this->dbManager->freeResult(
        $this->dbManager->execute($stmtIn,array(NULL, $upload_pk, $pfile_pk_parent, 33188, 1, 2, 'license_test.file.parent')));
- 
+
     $this->dbManager->prepare($stmtOut=__METHOD__.'uploadtree.select',
             "SELECT uploadtree_pk from uploadtree where pfile_fk=$1");
     $res = $this->dbManager->execute($stmtOut,array($pfile_pk_parent));
@@ -142,7 +142,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $this->uploadtree_pk_parent = $row['uploadtree_pk'];
 
     /** add child uploadtree record */
-    $this->dbManager->freeResult(    
+    $this->dbManager->freeResult(
        $this->dbManager->execute($stmtIn,array($this->uploadtree_pk_parent, $upload_pk, $pfile_pk_child, 33188, 1, 2, 'license_test.file.child')));
 
     $res = $this->dbManager->execute($stmtOut,array($pfile_pk_child));
@@ -151,12 +151,12 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $this->uploadtree_pk_child = $row['uploadtree_pk'];
 
     $this->uploadtree_tablename = GetUploadtreeTableName($upload_pk);
-    print('.'); 
+    print('.');
   }
 
   /**
    * \brief testing from GetFileLicenses
-   * in this test case, this pfile have only one license 
+   * in this test case, this pfile have only one license
    */
   function testGetFileLicenses()
   {
@@ -179,7 +179,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
 
   /**
    * \brief testing from GetFileLicenses
-   * in this test case, this pfile have 2 same license 
+   * in this test case, this pfile have 2 same license
    */
   function testGetFileLicensesDul()
   {
@@ -309,14 +309,14 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-   
+
     /** delete the agent record */
     $sql = "DELETE FROM agent where agent_name = 'nomos';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
- 
+
     pg_close($PG_CONN);
     exec("$DB_COMMAND -d $DB_NAME");
   }

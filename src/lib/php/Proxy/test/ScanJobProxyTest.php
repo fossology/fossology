@@ -22,7 +22,6 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\AgentRef;
 use Mockery as M;
 
-
 class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $agentDaoMock;
@@ -50,10 +49,10 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
     $reflection = new \ReflectionClass(get_class($this->scanJobProxy));
     $method = $reflection->getMethod('scanAgentStatus');
     $method->setAccessible(true);
-    
+
     return $method;
   }
-  
+
   public function testScanAgentStatus()
   {
     $method = $this->prepareScanAgentStatus();
@@ -63,7 +62,7 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
     $this->agentDaoMock->shouldReceive('getRunningAgentIds')->never();
     $this->agentDaoMock->shouldReceive('getCurrentAgentRef')->with($this->agentName)
             ->andReturn(new AgentRef($this->agentId, $this->agentName, 'a0815'));
-    
+
     $vars = $method->invoke($this->scanJobProxy,$this->agentName);
     assertThat($vars, is(array(
       'successfulAgents'=>$successfulAgents,
@@ -73,8 +72,8 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
       'currentAgentRev'=>'a0815'
     )));
   }
-    
-    
+
+
   public function testScanAgentStatusLatestStillRuns()
   {
     $method = $this->prepareScanAgentStatus();
@@ -86,7 +85,7 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             ->andReturn(array($runningAgentId))->once();
     $this->agentDaoMock->shouldReceive('getCurrentAgentRef')->with($this->agentName)
             ->andReturn(new AgentRef($runningAgentId, $this->agentName, 'b1234'));
-    
+
     $vars = $method->invoke($this->scanJobProxy,$this->agentName);
     assertThat($vars, is(array(
       'successfulAgents'=>$successfulAgents,
@@ -97,8 +96,8 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
       'currentAgentRev'=>'b1234'
     )));
   }
-  
-  
+
+
   public function testScanAgentStatusLatestNotRuns()
   {
     $method = $this->prepareScanAgentStatus();
@@ -110,7 +109,7 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             ->andReturn(array())->once();
     $this->agentDaoMock->shouldReceive('getCurrentAgentRef')->with($this->agentName)
             ->andReturn(new AgentRef($runningAgentId, $this->agentName, 'b1234'));
-    
+
     $vars = $method->invoke($this->scanJobProxy,$this->agentName);
     assertThat($vars, is(array(
       'successfulAgents'=>$successfulAgents,
@@ -121,8 +120,8 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
       'currentAgentRev'=>'b1234'
     )));
   }
-  
-  
+
+
   public function testScanAgentStatusWithoutSuccess()
   {
     $method = $this->prepareScanAgentStatus();
@@ -134,7 +133,7 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             ->andReturn(array($runningAgentId))->once();
     $this->agentDaoMock->shouldReceive('getCurrentAgentRef')->with($this->agentName)
             ->andReturn(new AgentRef($runningAgentId, $this->agentName, 'b1234'));
-    
+
     $vars = $method->invoke($this->scanJobProxy,$this->agentName);
     assertThat($vars, is(array(
       'successfulAgents'=>$successfulAgents,
@@ -143,8 +142,8 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
       'isAgentRunning'=>true
     )));
   }
-  
-  
+
+
   public function testCreateAgentStatus()
   {
     $successfulAgents = array(array('agent_id'=>$this->agentId,'agent_rev'=>'a0815','agent_name'=>$this->agentName));
@@ -155,7 +154,7 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             ->andReturn(new AgentRef($this->agentId, $this->agentName, 'a0815'));
     $fakedAgentName = 'ghost';
     $this->agentDaoMock->shouldReceive('arsTableExists')->with(M::anyOf($this->agentName,$fakedAgentName))->andReturn(true,false)->twice();
-    
+
     $vars = $this->scanJobProxy->createAgentStatus(array($this->agentName,$fakedAgentName));
     assertThat($vars, is(array(array(
       'successfulAgents'=>$successfulAgents,
@@ -165,8 +164,8 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
       'currentAgentRev'=>'a0815'
     ))));
   }
-  
-  
+
+
   private function pretendScanAgentStatus($successfulAgents)
   {
     $reflection = new \ReflectionObject($this->scanJobProxy);
@@ -174,18 +173,18 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
     $prop->setAccessible(true);
     $prop->setValue($this->scanJobProxy, $successfulAgents);
   }
-  
+
   public function testGetAgentMap()
   {
     $successfulAgents = array($this->agentName=>array(new AgentRef($this->agentId, $this->agentName, 'a0815')));
     $this->pretendScanAgentStatus($successfulAgents);
-    
+
     $expected = array($this->agentId=>"$this->agentName a0815");
     $map = $this->scanJobProxy->getAgentMap();
     assertThat($map,is(equalTo($expected)));
   }
-  
-  
+
+
   public function testGetLatestSuccessfulAgentIds()
   {
     $otherAgentName = 'drinkMe';
@@ -194,12 +193,12 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             new AgentRef($this->agentId-1, $this->agentName, 'beforeA0815')),
         $otherAgentName=>array(new AgentRef($otherAgentId, $otherAgentName, 'coffee')));
     $this->pretendScanAgentStatus($successfulAgents);
-    
+
     $expected = array($this->agentName=>$this->agentId,$otherAgentName=>$otherAgentId);
     $ids = $this->scanJobProxy->getLatestSuccessfulAgentIds();
     assertThat($ids,is(equalTo($expected)));
   }
-  
+
   public function testGetSuccessfulAgents()
   {
     $otherAgentName = 'drinkMe';
@@ -208,10 +207,10 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
             new AgentRef($this->agentId-1, $this->agentName, 'beforeA0815')),
         $otherAgentName=>array(new AgentRef($otherAgentId, $otherAgentName, 'coffee')));
     $this->pretendScanAgentStatus($successfulAgents);
-    
+
     $expected = array_merge($successfulAgents[$this->agentName],$successfulAgents[$otherAgentName]);
     $ids = $this->scanJobProxy->getSuccessfulAgents();
     assertThat($ids,is(equalTo($expected)));
   }
-  
+
 }

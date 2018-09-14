@@ -42,14 +42,14 @@ class ReflectoryTest extends \PHPUnit\Framework\TestCase
   protected function tearDown() {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
-  
+
   public function testInvokeObjectsMethodnameWith()
   {
     $instanceWithPrivateMethod = new ClassWithPrivateMethod();
     assertThat(Reflectory::invokeObjectsMethodnameWith($instanceWithPrivateMethod, 'add', array(2)),is(1+2));
     assertThat(Reflectory::invokeObjectsMethodnameWith($instanceWithPrivateMethod, 'add', array(4)),is(1+2+4));
   }
-  
+
   public function testGetObjectsProperty()
   {
     $instanceWithPrivateMethod = new ClassWithPrivateMethod();
@@ -62,6 +62,6 @@ class ReflectoryTest extends \PHPUnit\Framework\TestCase
     Reflectory::setObjectsProperty($instanceWithPrivateMethod, 'internal', 3);
     assertThat($instanceWithPrivateMethod->getInternal(),is(3));
   }
-  
-  
+
+
 }

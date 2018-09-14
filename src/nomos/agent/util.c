@@ -908,7 +908,8 @@ void printRegexMatch(int n, int cached)
 #endif /* PROC_TRACE */
 
   if (*debugStr == NULL_CHAR) {
-    (void) sprintf(debugStr, "%s/Nomos.strings.txt", gl.initwd);
+    strncpy(debugStr, gl.initwd, sizeof(debugStr)-1);
+    strncat(debugStr, "/Nomos.strings.txt", sizeof(debugStr)-1);
 #ifdef DEBUG
     printf("File: %s\n", debugStr);
 #endif /* DEBUG */

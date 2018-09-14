@@ -63,7 +63,7 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
     $this->licenseFileId = 12;
 
     $this->licenseMatch = new LicenseMatch($this->fileId, $this->licenseRef, $this->agentRef, $this->licenseFileId, $this->percent);
-    
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -71,7 +71,7 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
-  
+
   public function testGetFileId()
   {
     assertThat($this->licenseMatch->getFileId(), is($this->fileId));

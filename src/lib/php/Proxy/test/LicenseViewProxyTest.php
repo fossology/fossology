@@ -18,9 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
-use Mockery as M;
 use Fossology\Lib\Db\DbManager;
-
+use Mockery as M;
 
 class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
 {
@@ -47,16 +46,16 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $reflection = new \ReflectionClass(get_class($licenseViewProxy));
     $method = $reflection->getMethod('queryOnlyLicenseRef');
     $method->setAccessible(true);
-    
+
     $options1 = array('columns'=>array('rf_pk','rf_shortname'));
     $query1 = $method->invoke($licenseViewProxy,$options1);
     assertThat($query1, is("SELECT rf_pk,rf_shortname FROM ONLY license_ref"));
-    
+
     $options2 = array('extraCondition'=>'rf_pk<100');
     $query2 = $method->invoke($licenseViewProxy,$options2);
     assertThat($query2, is("SELECT $this->almostAllColumns,0 AS group_fk FROM ONLY license_ref WHERE rf_pk<100"));
   }
-  
+
   public function testQueryLicenseCandidate()
   {
     $groupId = 123;
@@ -65,28 +64,28 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $reflection = new \ReflectionClass(get_class($licenseViewProxy));
     $method = $reflection->getMethod('queryLicenseCandidate');
     $method->setAccessible(true);
-    
+
     $options1 = array('columns'=>array('rf_pk','rf_shortname'));
     $query1 = $method->invoke($licenseViewProxy,$options1);
     assertThat($query1, is("SELECT rf_pk,rf_shortname FROM license_candidate WHERE group_fk=$groupId"));
-    
+
     $options2 = array('extraCondition'=>'rf_pk<100');
     $query2 = $method->invoke($licenseViewProxy,$options2);
     assertThat($query2, is("SELECT $this->almostAllColumns,group_fk FROM license_candidate WHERE group_fk=$groupId AND rf_pk<100"));
-    
+
     $prefix = '#';
     $options3 = array(LicenseViewProxy::CANDIDATE_PREFIX=>$prefix,'columns'=>array('rf_shortname'));
     $query3 = $method->invoke($licenseViewProxy,$options3);
     assertThat($query3, is("SELECT '". pg_escape_string($prefix). "'||rf_shortname AS rf_shortname FROM license_candidate WHERE group_fk=$groupId"));
   }
-  
+
   public function testConstruct()
   {
     $licenseViewProxy0 = new LicenseViewProxy(0);
     $query0 = $licenseViewProxy0->getDbViewQuery();
     $expected0 = "SELECT $this->almostAllColumns,0 AS group_fk FROM ONLY license_ref";
     assertThat($query0,is($expected0));
-    
+
     $licenseViewProxy123 = new LicenseViewProxy(123,array('diff'=>true));
     $query123 = $licenseViewProxy123->getDbViewQuery();
     $expected123 = "SELECT $this->almostAllColumns,group_fk FROM license_candidate WHERE group_fk=123";
@@ -97,5 +96,4 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $expected0123 = "$expected123 UNION $expected0";
     assertThat($query0123,is($expected0123));
   }
-  
 }

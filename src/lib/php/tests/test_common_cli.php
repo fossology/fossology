@@ -31,12 +31,12 @@ class test_common_cli extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp() 
+  protected function setUp()
   {
   }
 
   /**
-   * \brief test for cli_logger 
+   * \brief test for cli_logger
    */
   function testcli_logger()
   {
@@ -54,7 +54,7 @@ class test_common_cli extends \PHPUnit\Framework\TestCase
     $this->assertEquals("$data\n", $file_contents);
     print "unit test for common-cli.php end\n";
   }
-  
+
   /**
    * \brief clean the env
    */

@@ -568,13 +568,15 @@ char* createRelativePath(item_t *p, scanres_t *scp)
   char* cp;
   if (*(p->str) == '/')
   {
-    (void) strcpy(scp->fullpath, p->str);
+    strcpy(scp->fullpath, p->str);
     scp->nameOffset = (size_t) (cur.targetLen + 1);
     cp = scp->fullpath; /* full pathname */
   }
   else
   {
-    (void) sprintf(scp->fullpath, "%s/%s", cur.cwd, p->str);
+    strncpy(scp->fullpath, cur.cwd, sizeof(scp->fullpath)-1);
+    strncat(scp->fullpath, "/", sizeof(scp->fullpath)-1);
+    strncat(scp->fullpath, p->str, sizeof(scp->fullpath)-1);
     scp->nameOffset = (size_t) (cur.cwdLen + 1);
     cp = p->str; /* relative path == faster open() */
   }

@@ -52,7 +52,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $logger->shouldReceive('debug');
     $uploadPermissionDao = M::mock('Fossology\Lib\Dao\UploadPermissionDao');
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $uploadPermissionDao);
-    
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -410,22 +410,22 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $previousItem = $this->uploadDao->getPreviousItem(32, $previousId);
     assertThat($previousItem, is(nullValue()));
   }
-  
-  
+
+
   public function testCountNonArtifactDescendants()
   {
     $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
     $this->testDb->insertData(array('uploadtree_a'));
-    
+
     $artifact = new ItemTreeBounds(2,'uploadtree_a', 1, 2, 3);
     $artifactDescendants = $this->uploadDao->countNonArtifactDescendants($artifact);
     assertThat($artifactDescendants, is(0));
-   
+
     $zip = new ItemTreeBounds(1,'uploadtree_a', 1, 1, 24);
     $zipDescendants = $this->uploadDao->countNonArtifactDescendants($zip);
     assertThat($zipDescendants, is(count(array(6,7,8,10,11,12)) ) );
   }
-  
+
 
   public function testGetUploadParent()
   {
@@ -433,7 +433,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $topId = $this->uploadDao->getUploadParent(32);
     assertThat($topId,equalTo(3650));
   }
-  
+
   /** @expectedException \Exception
    * @expectedExceptionMessage Missing upload tree parent for upload
    */
@@ -442,7 +442,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $this->prepareUploadTree(array(array(4651, 3650, 33, 0, 805323776, 2, 75, 'artifact.dir')));
     $this->uploadDao->getUploadParent(33);
   }
-  
+
   /** @expectedException \Exception
    * @expectedExceptionMessage Missing upload tree parent for upload
    */
@@ -450,7 +450,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
   {
     $this->uploadDao->getUploadParent(34);
   }
-  
+
   public function testGetUploadHashes()
   {
     $this->testDb->createPlainTables(array('pfile'));
@@ -460,7 +460,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $hashes = $this->uploadDao->getUploadHashes(2);
     assertThat($hashes,equalTo(array('md5'=>'F703E0197FB6C5BD0C8DFDCC115A0231','sha1'=>'5DAFC9C82988A81413B995210B668CF5CF5975FF')));
   }
-   
+
   public function testGetFatItem()
   {
     $this->prepareUploadTree($this->getTestFileStructure());
@@ -468,18 +468,18 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $itemM1a = 13655;
     $this->prepareUploadTree(array(array($itemM1a, 3655, 32, 0, $isContainer, 39+0, 40-0, 'M1a')));
     $this->dbManager->queryOnce('UPDATE uploadtree SET realparent=parent WHERE ufile_mode&(1<<28)=0',__METHOD__.'.fixRealparent');
-    
+
     $fatA = $this->uploadDao->getFatItemId($itemA=3653, 32, 'uploadtree');
     assertThat($fatA,equalTo($itemA));
     $fatB = $this->uploadDao->getFatItemId($itemBEmpty=3663, 32, 'uploadtree');
     assertThat($fatB, equalTo($itemBEmpty));
     $fatD = $this->uploadDao->getFatItemId($itemDFolder=3682, 32, 'uploadtree');
-    assertThat($fatD, equalTo($itemDFolder));          
+    assertThat($fatD, equalTo($itemDFolder));
     $fatL1 = $this->uploadDao->getFatItemId($itemL1ToFolder=3666, 32, 'uploadtree');
-    assertThat($fatL1, equalTo(3667));        
+    assertThat($fatL1, equalTo(3667));
     $fatL2 = $this->uploadDao->getFatItemId($itemL2ToItem=3664, 32, 'uploadtree');
     assertThat($fatL2, equalTo(3665));
-    
+
     $fatM = $this->uploadDao->getFatItemId(3654, 32, 'uploadtree');
     assertThat($fatM, equalTo($itemM1a));
   }

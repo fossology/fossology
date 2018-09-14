@@ -36,7 +36,6 @@ global $container;
 require_once(__DIR__ . '/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 require_once(__DIR__ . '/../../agent/DeciderAgent.php');
 
-
 class DeciderAgentTest extends \PHPUnit\Framework\TestCase
 {
   /** @var DbManager */

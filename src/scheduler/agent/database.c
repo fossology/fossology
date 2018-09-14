@@ -542,8 +542,8 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
 void email_init(scheduler_t* scheduler)
 {
   int email_notify, fd;
-  struct stat header_sb;
-  struct stat footer_sb;
+  struct stat header_sb = {};
+  struct stat footer_sb = {};
 	gchar* fname;
 	GError* error = NULL;
 

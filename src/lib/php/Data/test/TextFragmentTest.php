@@ -18,7 +18,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 class TextFragmentTest extends \PHPUnit\Framework\TestCase
 {
   const START_OFFSET = 10;

@@ -24,7 +24,6 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
 class LicenseDaoTest extends \PHPUnit\Framework\TestCase

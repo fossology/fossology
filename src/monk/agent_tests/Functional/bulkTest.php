@@ -28,7 +28,6 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
-
 class MonkBulkTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
