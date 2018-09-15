@@ -34,22 +34,26 @@ addons:
 
 services: postgresql
 
-sudo: required
+sudo: false
 
-before_script: ./utils/prepare-test -afty
-
-matrix:
+jobs:
   include:
     - name: Syntax Check
       script: src/testing/syntax/syntaxtest.sh
     - name: Static Code Analysis
+      addons:
+        apt:
+          packages:
+            - cppcheck
       script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/
     - name: Copy/Paste Detector
+      install: composer install --prefer-dist --working-dir=src
       script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
 #### Docker tests ###########################
     - name: Docker Tests
       addons: {}
       services: docker
+      sudo: required
       before_script: docker-compose build
       script:
         - src/testing/docker/test-cluster.sh
@@ -57,6 +61,7 @@ matrix:
 #### C/C++ agent tests ###########################
     - &compiler-tests
       env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
+      sudo: required
       addons:
         apt:
           sources:
@@ -68,6 +73,7 @@ matrix:
       install:
         - composer install --prefer-dist --working-dir=src
         - ./install/scripts/install-spdx-tools.sh
+      before_script: ./utils/prepare-test -afty
       script:
         - make
         - make test
@@ -103,7 +109,9 @@ matrix:
 #### PHPUnit tests ###########################
     - &phpunit-tests
       php: 5.6
+      sudo: required
       install: composer install --prefer-dist --working-dir=src
+      before_script: ./utils/prepare-test -afty
       script:
         - make build-lib VERSIONFILE build-cli
         - src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite"
@@ -116,6 +124,5 @@ matrix:
       php: 7.2
   allow_failures:
     - name: Copy/Paste Detector
-      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
     - php: 7.1
     - php: 7.2
