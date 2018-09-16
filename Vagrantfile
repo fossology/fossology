@@ -3,6 +3,16 @@
 
 # Copyright Siemens AG, 2014
 # SPDX-License-Identifier:  GPL-2.0 LGPL-2.1
+$post_up_message = <<WELCOME
+Use your FOSSology at http://localhost:8081/repo/
+  user: fossy , password: fossy
+
+Or do a 'vagrant ssh' and look at '/fossology' for your source tree.
+
+To update the sources within the vagrant box you have to either
+- call 'vagrant rsync' maually or
+- call 'vagrant rsync-auto' to tell vagrant, to automatically sync the changes
+WELCOME
 
 $add_proxy_settings = <<PROXYSCRIPT
 # get gateway of running VM and set proxy info within global profile
@@ -20,53 +30,37 @@ fi
 PROXYSCRIPT
 
 $build_and_test = <<SCRIPT
+# fix "dpkg-reconfigure: unable to re-open stdin: No file or directory" issue
 export DEBIAN_FRONTEND=noninteractive
 
 echo "Provisioning system to compile, test and develop."
-# fix "dpkg-reconfigure: unable to re-open stdin: No file or directory" issue
-sudo dpkg-reconfigure locales
-
 sudo apt-get update -qq -y
-
-sudo apt-get install -qq curl php5 git libspreadsheet-writeexcel-perl libdbd-sqlite3-perl
-
-# sudo /vagrant/install/install_composer.sh
-
-# install spdx-tools
-/vagrant/install/scripts/install-spdx-tools.sh
-
-# install ninka
-/vagrant/install/scripts/install-ninka.sh
 
 date > /etc/vagrant.provisioned
 
 echo "lets go!"
-cd /vagrant
+cd /fossology
 
 ./utils/fo-installdeps -e -y
 
-make CFLAGS=-I/usr/include/glib-2.0
+make
 sudo make install
-sudo /usr/local/lib/fossology/fo-postinstall
-sudo /etc/init.d/fossology start
 
-sudo cp /vagrant/install/src-install-apache-example.conf  /etc/apache2/conf-enabled/fossology.conf
+sudo /usr/local/lib/fossology/fo-postinstall
+
+sudo cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-enabled/fossology.conf
 
 # increase upload size
-sudo /vagrant/install/scripts/php-conf-fix.sh --overwrite
+sudo /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 sudo /etc/init.d/apache2 restart
-
-echo "use your FOSSology at http://localhost:8081/repo/"
-echo " user: fossy , password: fossy"
-echo "or do a vagrant ssh and look at /vagrant for your source tree"
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  # Hmm... no Debian image available yet, let's use a derivate
-  # Ubuntu Server 14.04 LTS (Trusty Tahr)
-  config.vm.box = "trusty64"
-  config.vm.box_url = "https://cloud-images.ubuntu.com/vagrant/trusty/current/trusty-server-cloudimg-amd64-vagrant-disk1.box"
+  config.vm.box = "debian/jessie64"
+  config.vm.post_up_message = $post_up_message
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder ".", "/fossology", type: "rsync"
 
   config.vm.provider "virtualbox" do |vbox|
     vbox.customize ["modifyvm", :id, "--memory", "4096"]
@@ -79,21 +73,18 @@ Vagrant.configure("2") do |config|
   # use proxy from host if environment variable PROXY=true
   if ENV['PROXY']
     if ENV['PROXY'] == 'true'
-      config.vm.provision "shell" do |s|
-        s.inline = $add_proxy_settings
+      config.vm.provision "shell" do |shell|
+        shell.inline = $add_proxy_settings
       end
     end
   end
 
   # call the script
-  config.vm.provision "shell" do |s|
-    s.inline = $build_and_test
-  end
-  
-  config.vm.provision "shell", run: "always" do |s|
-    s.inline = "service fossology start"
+  config.vm.provision "shell" do |shell|
+    shell.inline = $build_and_test
   end
 
-  # fix "stdin: is not a tty" issue
-#  config.ssh.shell = "bash -c 'BASH_ENV=/etc/profile exec bash'"
+  config.vm.provision "shell", run: "always" do |shell|
+    shell.inline = "/etc/init.d/fossology start"
+  end
 end
