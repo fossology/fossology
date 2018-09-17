@@ -27,7 +27,9 @@ void scheduler_disconnect(MonkState* state, int exitval) {
 }
 
 void bail(MonkState* state, int exitval) {
-  scheduler_disconnect(state, exitval);
+  if(state->dbManager != NULL) {
+    scheduler_disconnect(state, exitval);
+  }
   exit(exitval);
 }
 
