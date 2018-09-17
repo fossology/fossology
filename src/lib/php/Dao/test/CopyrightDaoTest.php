@@ -45,7 +45,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
   }
-  
+
   protected function tearDown()
   {
     $this->testDb = null;
@@ -64,7 +64,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $noHighlights = $copyrightDao->getHighlights($uploadTreeId=1);
     assertThat($noHighlights,emptyArray());
-    
+
     $this->testDb->insertData(array('copyright'));
     $highlights = $copyrightDao->getHighlights($uploadTreeId = 1);
     assertThat($highlights,arrayWithSize(1));
@@ -72,7 +72,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($highlight0,anInstanceOf(Highlight::class));
     $this->assertInstanceOf('Fossology\Lib\Data\Highlight', $highlight0);
     assertThat($highlight0->getEnd(),equalTo(201));
-    
+
     $hilights = $copyrightDao->getHighlights($uploadTreeId=2);
     assertThat($hilights,arrayWithSize(1));
     $hilight0 = $hilights[0];
@@ -291,11 +291,11 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
   public function testUpdateTable()
   {
     $this->setUpClearingTables();
-    
+
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
     $ctPk = 2;
-    
+
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
@@ -303,20 +303,20 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE ct_pk=$1',array($ctPk),__METHOD__.'.cp');
     assertThat($updatedCp['content'],is(equalTo($content)));
   }
-  
+
   public function testDeleteCopyright()
   {
     $this->setUpClearingTables();
-    
+
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
-    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);    
+    $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
     $initialEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $initialCount = count($initialEntries);
-    
+
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
     $copyrightDao->updateTable($item, $hash2, $content='', 55, 'copyright', 'delete');
-    
+
     $remainingEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
     $remainingCount = count($remainingEntries);
     assertThat($remainingCount,is(equalTo($initialCount-1)));

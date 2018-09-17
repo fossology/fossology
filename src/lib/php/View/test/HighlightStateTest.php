@@ -19,7 +19,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\View;
 
-
 class HighlightStateTest extends \PHPUnit\Framework\TestCase {
 
   public function testBla() {

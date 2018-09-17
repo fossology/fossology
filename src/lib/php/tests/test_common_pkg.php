@@ -43,7 +43,7 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
     global $DB_COMMAND;
     global $DB_NAME;
     print "Starting unit test for common-pkg.php\n";
-    
+
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     exec($DB_COMMAND, $dbout, $rc);
     preg_match("/(\d+)/", $dbout[0], $matches);
@@ -61,7 +61,7 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
   {
     print "test function GetPkgMimetypes()\n";
     global $PG_CONN;
-    
+
     #prepare database testdata
     $mimeType = "application/x-rpm";
     /** delete test data pre testing */
@@ -72,7 +72,7 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
     $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
     $result = pg_query($PG_CONN, $sql);
     pg_free_result($result);
- 
+
     #begin test GetPkgMimetypes()
     $sql = "select * from mimetype where
              mimetype_name='application/x-rpm'";

@@ -31,7 +31,7 @@ class test_common_active extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp() 
+  protected function setUp()
   {
   }
 

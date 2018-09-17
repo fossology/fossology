@@ -4,22 +4,15 @@
 #
 # uses phpIni to store file path - change if required
 #
-PHP5_PATH=/etc/php5/apache2/php.ini
-PHP7_PATH=/etc/php/7.0/apache2/php.ini
-phpIni=""
+PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}')
+phpIni="${PHP_PATH}/../apache2/php.ini"
 
 echo 'Automated php.ini configuration adjustments'
 echo
 if [ -f /etc/redhat-release ]; then
     phpIni=/etc/php.ini
     TIMEZONE=`readlink -f /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
-elif [ -f ${PHP5_PATH} ]; then
-    phpIni=${PHP5_PATH}
-    TIMEZONE=`cat /etc/timezone`
-elif [ -f ${PHP7_PATH} ]; then
-    phpIni=${PHP7_PATH}
 else
-    phpIni=/etc/php5/apache2/php.ini
     TIMEZONE=`cat /etc/timezone`
 fi
 

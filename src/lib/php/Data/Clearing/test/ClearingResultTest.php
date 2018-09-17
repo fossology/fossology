@@ -35,7 +35,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
   private $agentClearingEvent2;
   /** @var ClearingResult */
   private $licenseDecisionResult;
-  
+
 
   protected function setUp()
   {
@@ -44,7 +44,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
 
     $this->agentClearingEvent1 = M::mock(AgentClearingEvent::class);
     $this->agentClearingEvent2 = M::mock(AgentClearingEvent::class);
-    
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -83,7 +83,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseRef(), is($this->licenseRef));
   }
-  
+
   public function testGetLicenseRefFromAgentEvents()
   {
     $this->agentClearingEvent1->shouldReceive("getLicenseRef")->once()->andReturn($this->licenseRef);
@@ -99,7 +99,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
 
-  
+
   public function testGetLicenseIdFromAgentEvent()
   {
     $licenseId = 123;
@@ -107,7 +107,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->licenseDecisionResult = new ClearingResult(null, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
-  
+
   public function testGetLicenseShortName()
   {
     $licenseShortName = "<shortName>";
@@ -131,7 +131,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getComment(), is($comment));
   }
-  
+
   public function testGetCommentWithoutClearingEvent()
   {
     $comment = "";
@@ -155,7 +155,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getAcknowledgement(), is($acknowledgement));
   }
-  
+
   public function testGetReportInfoWithoutClearingEvent()
   {
     $reportInfo = "";
@@ -208,7 +208,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->licenseDecisionResult = new ClearingResult($this->clearingEvent, array($this->agentClearingEvent1));
     assertThat($this->licenseDecisionResult->getLicenseId(), is($licenseId));
   }
-  
+
   public function testGetLicenseIdWithoutClearingEvent()
   {
     $licenseId = 123;

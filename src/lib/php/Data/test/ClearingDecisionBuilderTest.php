@@ -88,7 +88,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
 
   public function testSameFolder()
   {
-    $clearingDec =$this->clearingDecisionBuilder 
+    $clearingDec =$this->clearingDecisionBuilder
         ->setSameFolder($this->sameFolder)
         ->build();
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
@@ -105,16 +105,16 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
   public function testPositiveLicenses()
   {
     $addedLic = M::mock(LicenseRef::class);
-    
+
     $addedClearingLic = M::mock(ClearingLicense::class);
     $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
     $addedClearingLic->shouldReceive('getLicenseRef')->withNoArgs()->andReturn($addedLic);
-    
+
     $removedClearingLic = M::mock(ClearingLicense::class);
     $removedClearingLic->shouldReceive('isRemoved')->andReturn(true);
 
     $removedClearingEvent = M::mock(ClearingEvent::class);
-    
+
     $this->clearingEvent->shouldReceive('getClearingLicense')->andReturn($addedClearingLic);
     $removedClearingEvent->shouldReceive('getClearingLicense')->andReturn($removedClearingLic);
 

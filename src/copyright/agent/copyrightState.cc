@@ -19,17 +19,11 @@
 #include "copyrightState.hpp"
 #include "identity.hpp"
 
-CopyrightState::CopyrightState(int agentId, CliOptions&& cliOptions) :
-  agentId(agentId),
+CopyrightState::CopyrightState(CliOptions&& cliOptions) :
   cliOptions(cliOptions),
   scanners(cliOptions.extractScanners())
 {
 }
-
-int CopyrightState::getAgentId() const
-{
-  return agentId;
-};
 
 void CopyrightState::addScanner(scanner* sc)
 {

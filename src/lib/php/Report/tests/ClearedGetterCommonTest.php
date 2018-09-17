@@ -18,8 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Report;
 
-use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\TreeDao;
+use Fossology\Lib\Dao\UploadDao;
 use Mockery as M;
 use Mockery\MockInterface;
 

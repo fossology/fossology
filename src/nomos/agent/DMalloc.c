@@ -309,7 +309,7 @@ DMnotfreed()
  */
 DMtrigger()
 {
-  int i;
+  int i = 0;
   i++;
 }
 

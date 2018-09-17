@@ -113,6 +113,8 @@ if [[ $BUILDTIME ]]; then
                 apt-get $YesOpt install postgresql-server-dev-9.5;;
               stretch|buster|sid)
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
+              bionic)
+                apt-get "$YesOpt" install postgresql-server-dev-10;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -154,16 +156,18 @@ if [[ $RUNTIME ]]; then
             poppler-utils upx-ucl \
             unrar-free unzip p7zip-full p7zip wget \
             subversion git \
-            dpkg-dev heirloom-mailx
+            dpkg-dev
          case "$CODENAME" in
             trusty)
-               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.54.0 libboost-regex1.54.0;;
             jessie)
-               apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl;;
+               apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0;;
             xenial)
-               apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip;;
+               apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 libboost-regex1.58.0;;
             stretch|buster|sid)
-               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip;;
+               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
+            bionic)
+               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
@@ -175,7 +179,7 @@ if [[ $RUNTIME ]]; then
             smtpdaemon \
             libxml2 \
             binutils mailx \
-            sleuthkit
+            sleuthkit boost
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -194,7 +198,7 @@ if [[ $RUNTIME ]]; then
             php php-pear php-pgsql php-process \
             smtpdaemon \
             file libxml2 \
-            binutils mailx
+            binutils mailx boost
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources."
          ;;

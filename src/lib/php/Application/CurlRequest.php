@@ -1,7 +1,5 @@
+<?php
 /*
-Author: Daniele Fognini
-Copyright (C) 2013-2014, Siemens AG
-
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -16,17 +14,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#ifndef MONK_AGENT_SCHEDULER_H
-#define MONK_AGENT_SCHEDULER_H
+namespace Fossology\Lib\Application;
 
-#include "match.h"
+class CurlRequest
+{
+  private $handle = null;
 
-int handleSchedulerMode(MonkState* state, const Licenses* licenses);
+  public function __construct($url)
+  {
+    $this->handle = curl_init($url);
+  }
 
-int sched_onNoMatch(MonkState* state, const File* file);
-int sched_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo);
-int sched_onDiffMatch(MonkState* state, const File* file, const License* license, const DiffResult* diffResult);
-int sched_ignore(MonkState* state, const File* file);
-int sched_noop(MonkState* state);
+  public function setOptions($options)
+  {
+    curl_setopt_array($this->handle, $options);
+  }
 
-#endif // MONK_AGENT_SCHEDULER_H
+  public function execute()
+  {
+    return curl_exec($this->handle);
+  }
+
+  public function getInfo($resource)
+  {
+    return curl_getinfo($this->handle, $resource);
+  }
+
+  public function close()
+  {
+    curl_close($this->handle);
+  }
+}

@@ -44,13 +44,13 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
   }
-  
+
   public function testConstructAndSanity()
   {
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), true);
     assertThat($uploadBrowseProxy,is(anInstanceOf(UploadBrowseProxy::class)));
   }
-  
+
   public function testUpdateTableStatus()
   {
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, 'status_fk'=> UploadStatus::OPEN));
@@ -59,7 +59,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($uploadId,$this->groupId));
     assertThat($updatedRow['status_fk'],equalTo($newStatus));
   }
-  
+
   public function testUpdateTableStatusFromRejectByUser()
   {
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, 'status_fk'=> UploadStatus::REJECTED));
@@ -68,7 +68,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($uploadId,$this->groupId));
     assertThat($updatedRow['status_fk'],equalTo(UploadStatus::REJECTED));
   }
-  
+
   public function testUpdateTableStatusByAdvisor()
   {
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, 'status_fk'=> UploadStatus::OPEN));
@@ -77,7 +77,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($uploadId,$this->groupId));
     assertThat($updatedRow['status_fk'],equalTo($newStatus));
   }
-  
+
   /**
    * @expectedException \Exception
    */
@@ -87,7 +87,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->updateTable('status_fk', $uploadId=1, $newStatus=UploadStatus::REJECTED);
   }
-  
+
   public function testUpdateTableStatusToRejectByAdvisor()
   {
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, 'status_fk'=> UploadStatus::OPEN));
@@ -96,7 +96,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT status_fk FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($uploadId,$this->groupId));
     assertThat($updatedRow['status_fk'],equalTo($newStatus));
   }
-  
+
   /**
    * @expectedException \Exception
    */
@@ -113,7 +113,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT assignee FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($uploadId,$this->groupId));
     assertThat($updatedRow['assignee'],equalTo($newAssignee));
   }
-  
+
   /**
    * @expectedException \Exception
    */
@@ -122,53 +122,53 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->updateTable('assignee', 1, 123);
   }
-  
-  
+
+
   private function wrapperTestMoveUploadToInfinity($uploadId, $order='DESC')
   {
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>1));
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>2,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>2));
-    
+
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->moveUploadToInfinity($uploadId, 'DESC'==$order);
-    
+
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT upload_fk FROM upload_clearing WHERE group_fk=$1 ORDER BY '.UploadBrowseProxy::PRIO_COLUMN." $order LIMIT 1",array($this->groupId));
     assertThat($updatedRow['upload_fk'],equalTo($uploadId));
-  }  
-  
+  }
+
   public function testMoveUploadToInfinityTop()
   {
     $this->wrapperTestMoveUploadToInfinity(1, 'DESC');
-  }  
+  }
 
   public function testMoveUploadToInfinityDown()
   {
     $this->wrapperTestMoveUploadToInfinity(2, 'ASC');
   }
-  
-  
+
+
   private function wrapperTestMoveUploadBeyond($moveUpload=4, $beyondUpload=2, $expectedPrio = 1.5)
   {
     $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>4,'upload_filename'=>'for.all4','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ));
     $this->testDb->getDbManager()->insertTableRow('upload', array('upload_pk'=>5,'upload_filename'=>'for.all5','user_fk'=>1,'upload_mode'=>1,'public_perm'=>Auth::PERM_READ));
-    
+
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>1));
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>2,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>2));
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>4,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>4));
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>5,'group_fk'=>$this->groupId, UploadBrowseProxy::PRIO_COLUMN=>5));
-    
+
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->moveUploadBeyond($moveUpload, $beyondUpload);
     $updatedRow = $this->testDb->getDbManager()->getSingleRow('SELECT '.UploadBrowseProxy::PRIO_COLUMN.' FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2',array($moveUpload,$this->groupId));
     assertThat($updatedRow[UploadBrowseProxy::PRIO_COLUMN],equalTo($expectedPrio));
-    
+
   }
 
   public function testMoveUploadBeyondDown()
   {
     $this->wrapperTestMoveUploadBeyond(4,2,1.5);
   }
-  
+
   public function testMoveUploadBeyondUp()
   {
     $this->wrapperTestMoveUploadBeyond(2,4,4.5);
@@ -178,13 +178,13 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
   {
     $this->wrapperTestMoveUploadBeyond(4,1,0.5);
   }
-  
+
   public function testMoveUploadBeyondFarUp()
   {
     $this->wrapperTestMoveUploadBeyond(4,5,5.5);
   }
 
-  
+
   public function testGetFolderPartialQuery()
   {
     $this->testDb->createPlainTables(array('foldercontents','uploadtree'));
@@ -199,7 +199,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $row = $this->testDb->getDbManager()->getSingleRow("SELECT count(*) FROM $view", $params);
     assertThat($row['count'],equalTo(1));
   }
-  
+
   public function testGetFolderPartialQueryWithUserInTwoGoodGroups()
   {
     $this->testDb->createPlainTables(array('foldercontents','uploadtree'));
@@ -216,8 +216,8 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $row = $this->testDb->getDbManager()->getSingleRow("SELECT count(*) FROM $view", $params);
     assertThat($row['count'],equalTo(1));
   }
-  
-  
+
+
   /**
    * @expectedException \Exception
    */
@@ -227,7 +227,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $params = array();
     $uploadBrowseProxy->getFolderPartialQuery($params);
   }
-  
+
   public function testGetStatus()
   {
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
@@ -236,7 +236,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $uploadBrowseProxy->updateTable('status_fk', $uploadId, $newStatus=UploadStatus::IN_PROGRESS);
     assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo($newStatus));
   }
-    
+
   /**
    * @expectedException \Exception
    */

@@ -30,7 +30,6 @@ use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 use Monolog\Logger;
 
-
 class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */

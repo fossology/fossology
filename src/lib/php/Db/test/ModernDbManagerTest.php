@@ -33,7 +33,7 @@ class ModernDbManagerTest extends DbManagerTest
   {
     parent::tearDown();
   }
-  
+
   function testInsertTableRow()
   {
     $tableName = 'foo';
@@ -45,7 +45,7 @@ class ModernDbManagerTest extends DbManagerTest
     $this->driver->shouldReceive('freeResult');
     $this->dbManager->insertTableRow($tableName,$assocParams,$sqlLog);
   }
-  
+
   function testCreateMap()
   {
     $keyColumn = 'yek';
@@ -53,7 +53,7 @@ class ModernDbManagerTest extends DbManagerTest
     $tableName = 'foo';
     $sqlLog = 'bar';
     $preSql = "/ $keyColumn, *$valueColumn /";
-    $this->driver->shouldReceive('prepare')->with($sqlLog,$preSql)->once();
+    $this->driver->shouldReceive('prepare')->with($sqlLog,\Mockery::pattern($preSql))->once();
     $this->driver->shouldReceive('execute')->andReturn('fakeRes');
     $this->driver->shouldReceive('fetchArray')->andReturn(
             array($keyColumn=>'k0',$valueColumn=>'v0'),
@@ -65,5 +65,4 @@ class ModernDbManagerTest extends DbManagerTest
     assertThat($map,hasKey('k0'));
     assertThat($map,EqualTo(array('k0'=>'v0','k1'=>'v1')));
   }
-  
-} 
+}

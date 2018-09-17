@@ -39,7 +39,8 @@ OBJECTS = test_string_operations.o \
           test_match.o \
           test_diff.o \
           test_database.o \
-          test_encoding.o
+          test_encoding.o \
+          test_serialize.o
 
 all: $(EXE)
 

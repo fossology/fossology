@@ -22,7 +22,7 @@ endif
 EXE = monk monkbulk
 OBJECTS = string_operations.o file_operations.o database.o encoding.o \
           license.o highlight.o match.o hash.o diff.o common.o \
-          cli.o scheduler.o \
+          cli.o scheduler.o serialize.o \
           _squareVisitor.o
 COVERAGE = string_operations_cov.o file_operations_cov.o encoding_cov.o \
            database_cov.o license_cov.o highlight_cov.o match_cov.o \

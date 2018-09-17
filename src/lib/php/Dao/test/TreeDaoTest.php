@@ -53,22 +53,22 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
   protected function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
-        
+
     $this->testDb = null;
     $this->dbManager = null;
   }
-  
+
   public function testGetMinimalCoveringItem()
   {
     $this->prepareModularTable(array());
     $coverContainer = $this->treeDao->getMinimalCoveringItem(1, "uploadtree");
     assertThat($coverContainer,equalTo(5));
-    
+
     $this->prepareUploadTree(array(array($item=99,null,$upload=32,88,0x0,1,2,'plainFile',null)));
     $coverSelf = $this->treeDao->getMinimalCoveringItem($upload, "uploadtree");
     assertThat($coverSelf,equalTo($item));
   }
-  
+
   public function testGetFullPathFromSingleFolderUpload()
   {
     $this->prepareModularTable(array(array(6,5,1,0,0,5,6,$fName="file",5)));
@@ -257,7 +257,7 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->treeDao->getFullPath(3665, "uploadtree"),        equalTo("uploadDaoTest.tar/uploadDaoTest/L/L2/L2a"));
     assertThat($this->treeDao->getFullPath(3665, "uploadtree",0,true), equalTo(                  "uploadDaoTest/L/L2/L2a"));
   }
-  
+
   public function testGetUploadHashes()
   {
     $this->testDb->createPlainTables(array('pfile'));

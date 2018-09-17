@@ -161,10 +161,11 @@ class Xpview extends DefaultPlugin
     $theView = $view->getView(null, null, $showHeader=0, "", $highlights, false, true);
     list($pageMenu, $textView)  = $theView;
 
-    $decisions = $this->copyrightDao->getDecisions($this->decisionTableName ,$uploadEntry['pfile_fk']);
+    $decisions = $this->copyrightDao->getDecisions($this->decisionTableName, $uploadEntry['pfile_fk']);
 
     $vars['agentName'] = $this->agentName;
     $vars['decisions'] = $decisions;
+    $vars['decisionsTable'] = $this->decisionTableName;
     $vars['itemId'] = $uploadTreeId;
     $vars['uploadId'] = $uploadId;
     $vars['pfile'] = $uploadEntry['pfile_fk'];

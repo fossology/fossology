@@ -1,7 +1,7 @@
 {
-    "name": "fossology/fossology",
-    "description": "FOSSology is a open source license compliance software system and toolkit.",
-    "_readme": [
+    "name" : "fossology/fossology",
+    "description" : "FOSSology is a open source license compliance software system and toolkit.",
+    "_readme" : [
         "Copyright Siemens AG 2014-2016",
         "",
         "Copying and distribution of this file, with or without modification,",
@@ -9,40 +9,54 @@
         "notice and this notice are preserved.  This file is offered as-is,",
         "without any warranty."
     ],
-    "require": {
-        "monolog/monolog": "1.10.*",
-        "symfony/config": "2.6.*",
-        "symfony/http-foundation": "2.6.*",
-        "symfony/dependency-injection": "2.6.*",
-        "twig/twig": "1.*",
-        "twig/extensions": "1.*",
-        "easyrdf/easyrdf": "0.9.*",
-        "phpoffice/phpword": "v0.13.*"
+    "require" : {
+        "monolog/monolog" : "1.10.*",
+        "symfony/config" : "2.6.*",
+        "symfony/http-foundation" : "2.6.*",
+        "symfony/dependency-injection" : "2.6.*",
+        "twig/twig" : "1.*",
+        "twig/extensions" : "1.*",
+        "easyrdf/easyrdf" : "0.9.*",
+        "phpoffice/phpword" : "v0.13.*"
     },
-
-    "require-dev": {
-        "mockery/mockery": ">=0.9.1",
-        "hamcrest/hamcrest-php": "1.1.*",
-        "squizlabs/php_codesniffer": "1.*",
-        "sebastian/phpcpd": "2.*",
-        "satooshi/php-coveralls": "1.0.*",
-        "phpunit/phpunit": "~5"
+    "require-dev" : {
+        "hamcrest/hamcrest-php" : "^2",
+        "mockery/mockery" : "^1",
+        "php-coveralls/php-coveralls" : "^2",
+        "phpunit/phpunit" : "^5.7",
+        "sebastian/phpcpd" : "^3",
+        "squizlabs/php_codesniffer" : "^3"
     },
-
-    "autoload": {
-        "psr-4": {
-            "Fossology\\Lib\\": "lib/php",
-            "Fossology\\Agent\\Copyright\\UI\\": "copyright/ui",
-            "Fossology\\DeciderJob\\UI\\": "deciderjob/ui",
-            "Fossology\\Decider\\UI\\": "decider/ui",
-            "Fossology\\DelAgent\\UI\\": "delagent/ui",
-            "Fossology\\UI\\Page\\": "www/ui/page"
+    "autoload" : {
+        "psr-4" : {
+            "Fossology\\Lib\\" : "lib/php",
+            "Fossology\\Agent\\Copyright\\UI\\" : "copyright/ui",
+            "Fossology\\DeciderJob\\UI\\" : "deciderjob/ui",
+            "Fossology\\Decider\\UI\\" : "decider/ui",
+            "Fossology\\DelAgent\\UI\\" : "delagent/ui",
+            "Fossology\\UI\\Page\\" : "www/ui/page"
         }
     },
-    
-    "config": {
-        "platform": {
-            "php": "5.6"
+    "config" : {
+        "platform" : {
+            "php" : "5.6"
         }
-    }
+    },
+    "homepage" : "https://www.fossology.org/",
+    "license" : [
+        "GPL-2.0-only",
+        "LGPL-2.1-only"
+    ],
+    "support" : {
+        "email" : "fossology@fossology.org",
+        "issues" : "https://github.com/fossology/fossology/issues",
+        "wiki" : "https://github.com/fossology/fossology/wiki",
+        "source" : "https://github.com/fossology/fossology/"
+    },
+    "keywords" : [
+        "fossology",
+        "spdx",
+        "license-management",
+        "license"
+    ]
 }

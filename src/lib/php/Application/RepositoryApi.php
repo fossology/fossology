@@ -16,34 +16,44 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-class RepositoryApi {
+class RepositoryApi
+{
+  // @var CurlRequestService
+  private $curlRequestService = null;
+
+  public function __construct($curlRequestService)
+  {
+    $this->curlRequestService = $curlRequestService;
+  }
+
   /**
    * @param string $apiRequest
    * @return array
    */
   private function curlGet($apiRequest)
   {
-    $url = 'https://api.github.com/repos/fossology/fossology/'. $apiRequest;
-    $handle = curl_init();
+    $url = 'https://api.github.com/repos/fossology/fossology/'.$apiRequest;
+
+    $request = $this->curlRequestService->create($url);
     $curlopt = array(
-        CURLOPT_URL => $url,
-        CURLOPT_HEADER => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER => array('User-Agent: fossology')
-        );
-    curl_setopt_array($handle, $curlopt);
-    curl_setopt($handle, CURLOPT_TIMEOUT, 2);
-    $response = curl_exec($handle);
+      CURLOPT_HEADER         => true,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_HTTPHEADER     => array('User-Agent: fossology'),
+      CURLOPT_TIMEOUT        => 2,
+    );
+    $request->setOptions($curlopt);
+    $response = $request->execute();
     if ($response !== false) {
-      $headerSize = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
+      $headerSize = $request->getInfo(CURLINFO_HEADER_SIZE);
       $resultBody = json_decode(substr($response, $headerSize), true);
     } else {
       $resultBody = array();
     }
-    curl_close($handle);
+    $request->close();
+
     return $resultBody;
   }
-  
+
   /**
    * @return array
    */
@@ -51,7 +61,7 @@ class RepositoryApi {
   {
     return $this->curlGet('releases/latest');
   }
-  
+
   /**
    * @param int $days
    * @return array

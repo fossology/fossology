@@ -26,7 +26,7 @@ class TimingLogger
 
   /** @var Logger */
   private $logger;
-  
+
   /** @var float[] */
   private $watchTimes;
 
@@ -42,14 +42,14 @@ class TimingLogger
 
   /**
    * @brief start stopwatch timer
-   * 
+   *
    * @param string $watch
    */
   public function tic($watch = self::DEFAULT_WATCH)
   {
     $this->watchTimes[$watch] = $this->getTimestamp();
   }
- 
+
   /**
    * @param string $text
    * @param string $watch
