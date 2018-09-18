@@ -120,6 +120,7 @@ paths:
       tags:
         - Upload
         - Organize
+      description: Move upload from one folder to other
       parameters:
         - name: folderId
           description: Folder Id, where upload should be moved to
@@ -210,6 +211,7 @@ paths:
       get:
         tags:
           - Search
+        description: Search the FOSSology for a specific file
         parameters:
           - name: searchType
             # use 'allfiles', if not given
@@ -271,6 +273,7 @@ paths:
         tags:
           - User
           - Admin
+        description: Get the registered users
         responses:
           200:
             description: OK
