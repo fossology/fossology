@@ -375,10 +375,11 @@ class CopyrightDao
       $params[] = $content;
     }
 
+    $cpTablePk = $cpTable."_pk";
     $sql = "UPDATE $cpTable AS cpr SET $setSql
             FROM $cpTable as cp
             INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
-            WHERE cpr.ct_pk = cp.ct_pk
+            WHERE cpr.$cpTablePk = cp.$cpTablePk
               AND cp.hash = $1
               AND ( ut.lft BETWEEN $2 AND $3 )";
     if ('uploadtree_a' == $item->getUploadTreeTableName())

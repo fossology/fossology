@@ -113,8 +113,9 @@ bool CopyrightDatabaseHandler::createTables() const
 
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
   {
-#define SEQUENCE_NAME IDENTITY"_ct_pk_seq"
-    {"ct_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
+#define SEQUENCE_NAME IDENTITY"_pk_seq"
+#define COLUMN_NAME_PK IDENTITY"_pk"
+    { COLUMN_NAME_PK, "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAME "'::regclass)"},
     {"agent_fk", "bigint", "NOT NULL"},
     {"pfile_fk", "bigint", "NOT NULL"},
     {"content", "text", ""},
@@ -277,18 +278,20 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
 #endif
             "INNER JOIN pfile on (PF = pfile_pk) "
 #ifdef IDENTITY_COPYRIGHT
-            "WHERE copyright.ct_pk IS NULL AND au.ct_pk IS NULL",
+            "WHERE copyright.copyright_pk IS NULL AND au.author_pk IS NULL",
 #else
-            "WHERE ct_pk IS NULL OR agent_fk <> %d",
+            "WHERE %s_pk IS NULL OR agent_fk <> %d",
 #endif
     uploadTreeTableName.c_str(),
     uploadId,
     IDENTITY,
     agentId
 #ifdef IDENTITY_COPYRIGHT
-    , agentId, agentId
-#endif
     , agentId
+#else
+    , IDENTITY
+    , agentId
+#endif
   );
 
   return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
