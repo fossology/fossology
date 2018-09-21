@@ -17,7 +17,7 @@
 
  ********************************************************/
 /**
- * \file util.c
+ * \file
  * \brief local function of delagent
  *
  * delagent: Remove an upload from the DB and repository
@@ -29,6 +29,12 @@ int Verbose = 0;
 int Test = 0;
 PGconn* db_conn = NULL;        // the connection to Database
 
+/**
+ * \brief If verbose is on, print to stdout
+ * \param format printf format to use for printing
+ * \param ... Data to be printed
+ * \return Number of characters printed
+ */
 int printfInCaseOfVerbosity (const char *format, ...)
 {
   va_list arg;
@@ -44,10 +50,13 @@ int printfInCaseOfVerbosity (const char *format, ...)
 }
 
 /**
- * \brief PQexecCheck()
- *
- * simple wrapper which includes PQexec and fo_checkPQcommand
- *
+ * \brief simple wrapper which includes PQexec and fo_checkPQcommand
+ * \param desc description for the SQL command, else NULL
+ * \param SQL  SQL command executed
+ * \param file source file name
+ * \param line source line number
+ * \return PQexec query result
+ * \see PQexec()
  */
 PGresult * PQexecCheck(const char *desc, char *SQL, char *file, const int line)
 {
@@ -70,6 +79,10 @@ PGresult * PQexecCheck(const char *desc, char *SQL, char *file, const int line)
   return result;
 }
 
+/**
+ * \brief Execute SQL query and create the result
+ * \see PQexecCheck()
+ */
 void PQexecCheckClear(const char *desc, char *SQL, char *file, const int line)
 {
   PGresult *result;
@@ -80,10 +93,10 @@ void PQexecCheckClear(const char *desc, char *SQL, char *file, const int line)
 /**
  * \brief if this account is valid
  *
- * \param char *user - user name
- * \param char *password - password
- * \param int *user_id - will be set to the id of the user
- * \param int *user_perm - will be set to the permission level of the user
+ * \param[in]  user user name
+ * \param[in]  password password
+ * \param[out] user_id will be set to the id of the user
+ * \param[out] user_perm will be set to the permission level of the user
  *
  * \return 1: invalid;
  *         0: yes, valid;
@@ -144,8 +157,8 @@ int authentication(char *user, char *password, int *user_id, int *user_perm)
  * \brief check if the upload can be deleted, that is the user have
  * the permission to delete this upload
  *
- * \param long upload_id - upload id
- * \param char *user_name - user name
+ * \param upload_id upload id
+ * \param user_name user name
  *
  * \return 0: yes, you have the needed permissions;
  *         1: no;
@@ -173,11 +186,31 @@ int check_permission_upload(int wanted_permissions, long upload_id, int user_id,
   return perms;
 }
 
+/**
+ * \brief check if the user has read permission on the given upload
+ * \param upload_id
+ * \param user_id
+ * \param user_perm Permission requested by user
+ * \return 0: yes, you have the needed permissions;
+ *         1: no;
+ *        -1: failure;
+ *        -2: does not exist
+ */
 int check_read_permission_upload(long upload_id, int user_id, int user_perm)
 {
   return check_permission_upload(PERM_READ, upload_id, user_id, user_perm);
 }
 
+/**
+ * \brief check if the user has read permission on the given upload
+ * \param upload_id
+ * \param user_id
+ * \param user_perm Permission requested by user
+ * \return 0: yes, you have the needed permissions;
+ *         1: no;
+ *        -1: failure;
+ *        -2: does not exist
+ */
 int check_write_permission_upload(long upload_id, int user_id, int user_perm)
 {
   return check_permission_upload(PERM_WRITE, upload_id, user_id, user_perm);
@@ -187,8 +220,9 @@ int check_write_permission_upload(long upload_id, int user_id, int user_perm)
  * \brief check if the upload can be deleted, that is the user have
  * the permission to delete this upload
  *
- * \param long upload_id - upload id
- * \param char *user_name - user name
+ * \param upload_id upload id
+ * \param user_name user name
+ * \param user_perm Permission requested by user
  *
  * \return 0: yes, can be deleted;
  *         1: can not be deleted;
@@ -220,11 +254,11 @@ int check_write_permission_folder(long folder_id, int user_id, int user_perm)
 }
 
 /**
- * \brief check if the upload can be deleted, that is the user have
- * the permissoin to delete this upload
+ * \brief check if the license can be deleted, that is the user have
+ * the permission to delete this license
  *
- * \param long upload_id - upload id
- * \param char *user_name - user name
+ * \param license_id license id
+ * \param user_perm Permission requested by user
  *
  * \return 0: yes, can be deleted;
  *         1: can not be deleted;
@@ -241,13 +275,14 @@ int check_write_permission_license(long license_id, int user_perm)
 
 
 /**
- * \brief deleteLicense()
+ * \brief Delete the licenses associated to the upload
  *
  *   Given an upload ID, delete all licenses associated with it.
  *   The DoBegin flag determines whether BEGIN/COMMIT should be called.
  *   Do this if you want to reschedule license analysis.
  *
- * \param long UploadId the upload id
+ * \param UploadId the upload id
+ * \param user_perm permission level the user has
  *
  * \return 0: yes, success;
  *         1: can not be deleted;
@@ -279,7 +314,7 @@ int deleteLicense (long UploadId, int user_perm)
   }
   items = PQntuples(result);
   PQclear(result);
-  /***********************************************/
+
   /* delete pfile licenses */
   printfInCaseOfVerbosity("# Deleting licenses\n");
   snprintf(SQL,MAXSQL,"DELETE FROM licterm_name WHERE pfile_fk IN (SELECT pfile_fk FROM uploadtree WHERE upload_fk = '%ld');",UploadId);
@@ -293,7 +328,6 @@ int deleteLicense (long UploadId, int user_perm)
 
   fo_scheduler_heart(items);
 
-  /***********************************************/
   /* Commit the change! */
   printfInCaseOfVerbosity("# Delete completed\n");
   if (Test)
@@ -312,11 +346,11 @@ int deleteLicense (long UploadId, int user_perm)
 } /* deleteLicense() */
 
 /**
- * \brief deleteUpload()
+ * \brief Given an upload ID, delete it.
  *
-*  Given an upload ID, delete it.
- *
- *  param long UploadId the upload id
+ * \param UploadId the upload id
+ * \param user_id
+ * \param user_perm permission level the user has
  *
  * \return 0: yes, can is deleted;
  *         1: can not be deleted;
@@ -345,9 +379,7 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
   PQexecCheckClear(desc, "SET statement_timeout = 0;", __FILE__, __LINE__);
   PQexecCheckClear(NULL, "BEGIN;", __FILE__, __LINE__);
 
-  /***********************************************/
-  /*** Delete everything that impacts the UI ***/
-  /***********************************************/
+  /* Delete everything that impacts the UI */
 
   if (!Test)
   {
@@ -356,12 +388,10 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
     PQexecCheckClear(NULL, "COMMIT;", __FILE__, __LINE__);
   }
 
-  /***********************************************/
-  /*** Begin complicated stuff ***/
-  /***********************************************/
+  /* Begin complicated stuff */
 
   /* Get the list of pfiles to delete */
-  /** These are all pfiles in the upload_fk that only appear once. **/
+  /* These are all pfiles in the upload_fk that only appear once. */
   snprintf(SQL,MAXSQL,"SELECT DISTINCT pfile_pk,pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile INTO %s FROM uploadtree INNER JOIN pfile ON upload_fk = %ld AND pfile_fk = pfile_pk;",TempTable,UploadId);
   PQexecCheckClear("Getting list of pfiles to delete", SQL, __FILE__, __LINE__);
 
@@ -381,7 +411,6 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
     PQclear(result);
   }
 
-  /***********************************************/
   /* Now to delete the actual pfiles from the repository before remove the DB. */
 
   /* Get the file listing -- needed for deleting pfiles from the repository. */
@@ -418,11 +447,11 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
   } /* if Test <= 1 */
   PQclear(pfile_result);
 
-  /***********************************************
+  /*
    This begins the slow part that locks the DB.
    The problem is, we don't want to lock a critical row,
    otherwise the scheduler will lock and/or fail.
-   ***********************************************/
+  */
   if (!Test)
   {
     PQexecCheckClear(NULL, "BEGIN;", __FILE__, __LINE__);
@@ -431,7 +460,6 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
   snprintf(SQL,MAXSQL,"DELETE FROM foldercontents WHERE (foldercontents_mode & 2) != 0 AND child_id = %ld;",UploadId);
   PQexecCheckClear("Deleting foldercontents", SQL, __FILE__, __LINE__);
 
-  /***********************************************/
   /* Delete the actual upload */
 
   /* Delete the bucket_container record as it can't be cascade delete with upload table */
@@ -468,7 +496,6 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
   snprintf(SQL, MAXSQL, "DELETE FROM uploadtree WHERE upload_fk = %ld;", UploadId);
   PQexecCheckClear("Deleting from uploadtree", SQL, __FILE__, __LINE__);
 
-  /***********************************************/
   /* delete from pfile is SLOW due to constraint checking.
      Do it separately. */
   snprintf(SQL,MAXSQL,"DELETE FROM pfile USING %s WHERE pfile.pfile_pk = %s.pfile_pk;",TempTable,TempTable);
@@ -498,10 +525,15 @@ int deleteUpload (long UploadId, int user_id, int user_perm)
 /**
  * \brief remove link between parent and (child,mode) if there are other parents
  *
+ * \param child  id of the child to be unlinked
+ * \param parent id of the parent to unlink from
+ * \param mode   1<<0 child is folder_fk, 1<<1 child is upload_fk, 1<<2 child is an uploadtree_fk
+ * \param user_perm permission level the user has
+ *
  * \return 0: successfully deleted link (other link existed);
  *         1: was not able to delete the link (no other link to this upload existed);
  *        -1: failure
- *
+ * \todo add permission checks
  */
 int unlinkContent (long child, long parent, int mode, int user_id, int user_perm)
 {
@@ -509,7 +541,6 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
   char SQL[MAXSQL];
   PGresult *result;
 
-  // TODO: add permission checks
   if(mode == 1){
     snprintf(SQL,MAXSQL,"SELECT COUNT(DISTINCT parent_fk) FROM foldercontents WHERE foldercontents_mode=%d AND child_id=%ld",mode,child);
   }
@@ -549,15 +580,17 @@ int unlinkContent (long child, long parent, int mode, int user_id, int user_perm
 }
 
 /**
- * \brief listFoldersRecurse(): Draw folder tree.
+ * \brief Draw folder tree.
  *
  *   if DelFlag is set, then all child uploads are
  *   deleted and the folders are deleted.
  *
- * \param long Parent the parent folder id
- * \param int Depth
- * \param long Row grandparent (used to unlink if multiple grandparents)
- * \param int DelFlag 0=no del, 1=del if unique parent, 2=del unconditional
+ * \param Parent the parent folder id
+ * \param Depth
+ * \param row grandparent (used to unlink if multiple grandparents)
+ * \param DelFlag 0=no del, 1=del if unique parent, 2=del unconditional
+ * \param user_id
+ * \param user_perm permission level the user has
  *
  * \return 0: success;
  *         1: fail;
@@ -743,6 +776,15 @@ int listFoldersRecurse (long Parent, int Depth, long Row, int DelFlag, int user_
   return 0; /* success */
 } /* listFoldersRecurse() */
 
+/**
+ * \brief Given a PGresult, find detached folders
+ * \param result PGresult from a query
+ * \param user_id
+ * \param user_perm permission level the user has
+ * \return 0: success;
+ *         1: fail;
+ *        -1: failure
+ */
 int listFoldersFindDetatchedFolders(PGresult *result, int user_id, int user_perm)
 {
   int DetachFlag=0;
@@ -790,6 +832,13 @@ int listFoldersFindDetatchedFolders(PGresult *result, int user_id, int user_perm
   return 0;
 }
 
+/**
+ * \brief Given a PGresult, find detached uploads
+ * \param result PGresult from a query
+ * \param user_id
+ * \param user_perm permission level the user has
+ * \return 0: success
+ */
 int listFoldersFindDetatchedUploads(PGresult *result, int user_id, int user_perm)
 {
   int DetachFlag=0;
@@ -831,6 +880,14 @@ int listFoldersFindDetatchedUploads(PGresult *result, int user_id, int user_perm
   return 0;
 }
 
+/**
+ * \brief Given a user id, find detached folders and uploads
+ * \param user_id
+ * \param user_perm permission level the user has
+ * \return 0: success;
+ *         1: fail;
+ *        -1: failure
+ */
 int listFoldersFindDetatched(int user_id, int user_perm)
 {
   char SQL[MAXSQL];
@@ -859,7 +916,9 @@ int listFoldersFindDetatched(int user_id, int user_perm)
 }
 
 /**
- * \brief listFolders(): List every folder.
+ * \brief List every folder.
+ * \param user_id
+ * \param user_perm permission level the user has
  */
 int listFolders (int user_id, int user_perm)
 {
@@ -898,9 +957,11 @@ int listFolders (int user_id, int user_perm)
 } /* listFolders() */
 
 /**
- * \brief listUploads(): List every upload ID.
+ * \brief List every upload ID.
  *
- * \char *user_name - user name
+ * \param user_id user id
+ * \param user_perm permission level the user has
+ * \return 0 on success; -1 on failure
  */
 int listUploads (int user_id, int user_perm)
 {
@@ -941,12 +1002,15 @@ int listUploads (int user_id, int user_perm)
 } /* listUploads() */
 
 /**
- * \brief deleteFolder()
+ * \brief recursively delete a folder
  *
  *  Given a folder ID, delete it AND recursively delete everything below it!
  *  This includes upload deletion!
  *
- * \param long FolderId the fold id to delete
+ * \param cFolder the folder id to delete
+ * \param pFolder parent of the current folder
+ * \param user_id
+ * \param user_perm permission level the user has
  *
  * \return 0: success;
  *         1: fail
@@ -962,12 +1026,14 @@ int deleteFolder(long cFolder, long pFolder,  int user_id, int user_perm)
 /**********************************************************************/
 
 /**
- * \brief readAndProcessParameter()
+ * \brief Parse parameters
  *
  *  Read Parameter from scheduler.
  *  Process line elements.
  *
- * \param char *Parm the parameter string
+ * \param Parm the parameter string
+ * \param user_id
+ * \param user_perm permission level the user has
  *
  * \return 0: yes, can is deleted;
  *         1: can not be deleted;
@@ -1066,6 +1132,15 @@ int readAndProcessParameter (char *Parm, int user_id, int user_perm)
   return rc;
 } /* readAndProcessParameter() */
 
+/**
+ * \brief process the jobs from scheduler
+ *
+ * -# Read the jobs from the scheduler using fo_scheduler_next().
+ * -# Get the permission level of the current user.
+ * -# Parse the parameters and process
+ * \see fo_scheduler_next()
+ * \see readAndProcessParameter()
+ */
 void doSchedulerTasks()
 {
   char *Parm = NULL;

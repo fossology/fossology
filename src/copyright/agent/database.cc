@@ -31,6 +31,9 @@ using namespace fo;
     }\
   } while(0)
 
+/**
+ * \brief Default constructor for DatabaseEntry
+ */
 DatabaseEntry::DatabaseEntry() :
         agent_fk(0),
         pfile_fk(0),
@@ -42,14 +45,23 @@ DatabaseEntry::DatabaseEntry() :
 {
 };
 
-
+/**
+ * \brief Spawn/fork a new database handler and return it
+ * \return CopyrightDatabaseHandler object with spawned DbManager
+ */
 CopyrightDatabaseHandler CopyrightDatabaseHandler::spawn() const
 {
   DbManager spawnedDbMan(dbManager.spawn());
   return CopyrightDatabaseHandler(spawnedDbMan);
 }
 
-
+/**
+ * \brief Given a list of ColumnDef, return a comma separated list of column names
+ * \param in   List to parse
+ * \param size Number of elements in the list
+ * \return Comma separated list of column names
+ * \see CopyrightDatabaseHandler::ColumnDef
+ */
 std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) const
 {
   std::string result;
@@ -62,6 +74,14 @@ std::string CopyrightDatabaseHandler::getColumnListString(const CopyrightDatabas
   return result;
 }
 
+/**
+ * \brief Return a comma delimited string with column elements separated by space.
+ * The string is used for database creation
+ * \param in   List of column to be parsed
+ * \param size Number of elements in the list
+ * \return Comma delimited string
+ * \see CopyrightDatabaseHandler::createTableAgentFindings()
+ */
 std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDatabaseHandler::ColumnDef in[], size_t size) const
 {
   std::string result;
@@ -78,6 +98,16 @@ std::string CopyrightDatabaseHandler::getColumnCreationString(const CopyrightDat
   return result;
 }
 
+/**
+ * \brief Create tables required by agent
+ *
+ * Calls createTableAgentFindings() and createTableClearing()
+ * to create the tables required by the agent to work.
+ *
+ * The function tries to create table in maximum of MAX_TABLE_CREATION_RETRIES
+ * attempts.
+ * \return True if success, false otherwise
+ */
 bool CopyrightDatabaseHandler::createTables() const
 {
   int failedCounter = 0;
@@ -111,6 +141,10 @@ bool CopyrightDatabaseHandler::createTables() const
   return tablesChecked;
 }
 
+/**
+ * \brief Columns required by agent in database
+ * \todo Removed constrain: "CHECK (type in ('statement', 'email', 'url'))"}
+ */
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
   {
 #define SEQUENCE_NAME IDENTITY"_pk_seq"
@@ -126,6 +160,11 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columns[] =
     {"is_enabled", "boolean", "NOT NULL DEFAULT TRUE"},
   };
 
+/**
+ * \brief Create table to store agent find data
+ * \return True on success, false otherwise
+ * \see CopyrightDatabaseHandler::columns
+ */
 bool CopyrightDatabaseHandler::createTableAgentFindings() const
 {
   if (!dbManager.sequenceExists(SEQUENCE_NAME))
@@ -186,7 +225,9 @@ bool CopyrightDatabaseHandler::createTableAgentFindings() const
   return true;
 }
 
-
+/**
+ * \brief Columns required to store user decisions in database.
+ */
 const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecision[] = {
 #define SEQUENCE_NAMEClearing IDENTITY"_decision_pk_seq"
   {IDENTITY"_decision_pk", "bigint", "PRIMARY KEY DEFAULT nextval('" SEQUENCE_NAMEClearing "'::regclass)"},
@@ -199,6 +240,11 @@ const CopyrightDatabaseHandler::ColumnDef CopyrightDatabaseHandler::columnsDecis
   {"is_enabled", "boolean", "NOT NULL DEFAULT TRUE"}
 };
 
+/**
+ * \brief Create table to store user decisions
+ * \return True on success, false otherwise
+ * \see CopyrightDatabaseHandler::columnsDecision
+ */
 bool CopyrightDatabaseHandler::createTableClearing() const
 {
   #define CLEARING_TABLE IDENTITY "_decision"
@@ -261,6 +307,12 @@ bool CopyrightDatabaseHandler::createTableClearing() const
   return true;
 }
 
+/**
+ * \brief Get the list of pfile ids on which the given agent has no findings for a given upload
+ * \param agentId  Agent id to be removed from result
+ * \param uploadId Upload id to scan for files
+ * \return List of pfiles on which the given agent has no findings
+ */
 std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId)
 {
   std::string uploadTreeTableName = queryUploadTreeTableName(uploadId);
@@ -291,6 +343,12 @@ std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int a
   return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
 }
 
+/**
+ * \brief Insert empty findings in database to prevent scan on next upload
+ * \param agentId Id of agent which did not find any statement
+ * \param pFileId Id of the file on which no statements were found
+ * \return True on success, false otherwise
+ */
 bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long int pFileId) const
 {
   return dbManager.execPrepared(
@@ -306,6 +364,12 @@ bool CopyrightDatabaseHandler::insertNoResultInDatabase(long int agentId, long i
   );
 }
 
+/**
+ * \brief Insert a finding in database
+ * \param entry Entry to be inserted in the database
+ * \return True on success, false otherwise
+ * \see DatabaseEntry
+ */
 bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
 {
   std::string tableName = IDENTITY;
@@ -332,6 +396,9 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
   );
 }
 
+/**
+ * \brief Constructor to initialize database handler
+ */
 CopyrightDatabaseHandler::CopyrightDatabaseHandler(DbManager manager) :
   AgentDatabaseHandler(manager)
 {

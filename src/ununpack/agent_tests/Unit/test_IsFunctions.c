@@ -17,9 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 
 static int Result = 0;
-
 /**
- * @brief function IsDebianSourceFile(char *Filename)
+ * \file
+ * \brief Unit test cases for Isxxx functions
+ */
+/**
+ * \brief function IsDebianSourceFile(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on dsc file
+ * -# Check if function returns YES
  */
 void testIsDebianSourceFile()
 {
@@ -27,8 +33,12 @@ void testIsDebianSourceFile()
   Result = IsDebianSourceFile(Filename);
   FO_ASSERT_EQUAL(Result, 1);
 }
+
 /**
- * @brief function IsDebianSourceFile(char *Filename)
+ * \brief function IsDebianSourceFile(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on non dsc file
+ * -# Check if function returns NO
  */
 void testIsNotDebianSourceFile()
 {
@@ -37,9 +47,11 @@ void testIsNotDebianSourceFile()
   FO_ASSERT_EQUAL(Result, 0);
 }
 
-
 /**
- * @brief function IsExeFile(char *Filename)
+ * \brief function IsExe(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on exe file
+ * -# Check if function returns YES
  */
 void testIsExeFile()
 {
@@ -49,7 +61,10 @@ void testIsExeFile()
 }
 
 /**
- * @brief function IsNotExeFile(char *Filename)
+ * \brief function IsExe(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on non exe file
+ * -# Check if function returns NO
  */
 void testIsNotExeFile()
 {

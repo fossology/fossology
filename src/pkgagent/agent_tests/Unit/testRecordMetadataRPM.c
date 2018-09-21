@@ -22,12 +22,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAXSQL  4096
 extern char *DBConfFile;
 /**
- * \file testRecordMetadataRPM.c
+ * \file
  * \brief unit test for RecordMetadataRPM function
  */
 
 /**
- * \brief Test pkgagent.c function RecordMetadata()
+ * \brief Test pkgagent.c function RecordMetadataRPM()
+ * \test
+ * \test
+ * -# Create a test upload in pfile table
+ * -# Create rpmpkginfo object and populate it
+ * -# Call RecordMetadataRPM()
+ * -# Check if meta data got inserted in DB
  */
 void test_RecordMetadataRPM()
 {

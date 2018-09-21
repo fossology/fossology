@@ -17,12 +17,16 @@
 ***********************************************************/
 
 /**
- * \file admin-bucket-pool.php
- * \brief The purpose of this is to facilitate editing an existing bucketpool
+ * @file admin-bucket-pool.php
+ * @brief The purpose of this is to facilitate editing an existing bucketpool
  */
 
 define("TITLE_admin_bucket_pool", _("Duplicate Bucketpool"));
 
+/**
+ * @class admin_bucket_pool
+ * UI plugin for bucket pool
+ */
 class admin_bucket_pool extends FO_Plugin
 {
   function __construct()
@@ -38,10 +42,10 @@ class admin_bucket_pool extends FO_Plugin
    * @brief Clone a bucketpool and its bucketdef records.
    *        Increment the bucketpool version.
    *
-   * @param $bucketpool_pk - pk to clone.
-   * @param $UpdateDefault - 'on' if true,  or empty if false
+   * @param int    $bucketpool_pk pk to clone.
+   * @param string $UpdateDefault 'on' if true,  or empty if false
    *
-   * @return the new bucketpool_pk
+   * @return int The new bucketpool_pk
    *         A message suitable to display to the user is returned in $msg.
    *         This may be a success message or a non-fatal error message.
    */
@@ -56,7 +60,7 @@ class admin_bucket_pool extends FO_Plugin
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
 
-    /**
+    /*
      * Get the last version for this bucketpool name.
      * There could be a race condition between getting the last version and
      * inserting the new version, but this is an admin only function and it
@@ -71,7 +75,7 @@ class admin_bucket_pool extends FO_Plugin
     pg_free_result($result);
     $newversion = $vrow['version'] + 1;
 
-    /** Insert the new bucketpool record  */
+    /* Insert the new bucketpool record  */
     $sql = "insert into bucketpool (bucketpool_name, version, active, description) select bucketpool_name, '$newversion', active, description from bucketpool where bucketpool_pk=$bucketpool_pk";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -105,7 +109,8 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
   }
 
   /**
-   * \brief User chooses a bucketpool to duplicate from a select list.
+   * @brief User chooses a bucketpool to duplicate from a select list.
+   *
    * The new bucketpool and bucket_def records will be identical
    * to the originals except for the primary keys and bucketpool version
    * (which will be bumped). \n
@@ -114,6 +119,8 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
    *
    * The user must then manually modify the bucketpool and/or bucketdef
    * records to create their new (modified) bucketpool.
+   * @return string
+   * @see FO_Plugin::Output()
    */
   public function Output()
   {

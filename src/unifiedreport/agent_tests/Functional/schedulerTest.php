@@ -15,7 +15,16 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
+/**
+ * @dir
+ * @brief Functional tests for unified report
+ * @file
+ * @brief Functional tests for unified report
+ */
+/**
+ * @namespace Fossology::Report::Test
+ * @brief Namespace for report related tests
+ */
 namespace Fossology\Report\Test;
 
 use Fossology\Lib\Db\DbManager;
@@ -25,22 +34,41 @@ use Fossology\Lib\Test\TestPgDb;
 include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 
+/**
+ * @class SchedulerTest
+ * @brief Test for unified report
+ */
 class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var int */
+  /** @var int $userId
+   * User id to be used
+   */
   private $userId = 2;
-  /** @var int */
+  /** @var int $groupId
+   * Group id to be used
+   */
   private $groupId = 2;
 
-  /** @var TestPgDb */
+  /** @var TestPgDb $testDb
+   * Test db
+   */
   private $testDb;
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * Db Manager object
+   */
   private $dbManager;
-  /** @var TestInstaller */
+  /** @var TestInstaller $testInstaller
+   * Test installer object
+   */
   private $testInstaller;
-  /** @var SchedulerTestRunnerCli */
+  /** @var SchedulerTestRunnerCli $runnerCli
+   * The CLI interface for scheduler
+   */
   private $runnerCli;
 
+  /**
+   * @brief Setup test env
+   */
   public function setUp()
   {
     $this->testDb = new TestPgDb("report".time());
@@ -50,6 +78,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
+  /**
+   * @brief Tear down test env
+   */
   public function tearDown()
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
@@ -58,6 +89,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager = null;
   }
 
+  /**
+   * @brief Setup test repo
+   */
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -66,26 +100,37 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testInstaller->cpRepo();
   }
 
+  /**
+   * @brief Tear down test repo
+   */
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
     $this->testInstaller->clear();
   }
 
+  /**
+   * @brief Setup tables required by the agent
+   */
   private function setUpTables()
   {
     $this->testDb->createSequences(array(),true);
     $this->testDb->createPlainTables(array(),true);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('copyright','monk','nomos'));
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx',
+      'FileLicense_pkey','clearing_event_pkey'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master',
+      'license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
 
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     // $this->testDb->insertData_license_ref();
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
 
+  /**
+   * @brief Get the heart count from agent
+   */
   private function getHeartCount($output)
   {
     $matches = array();
@@ -98,7 +143,15 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     }
   }
 
-  /** @group Functional */
+  /**
+   * @brief Test report agent
+   * @test
+   * -# Generate report an upload
+   * -# Check if the DB is updated with new value
+   * -# Check if report file is created
+   * -# Check if report file size is close to test report
+   * @todo Generate the test file and fix the test case
+   */
   public function testReport()
   {
     $this->setUpTables();
@@ -114,7 +167,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
     assertThat($row, hasKeyValuePair('job_fk', $jobId));
     $filepath = $row['filepath'];
-    // TODO replace file
     // $comparisionFile = __DIR__.'/ReportTestfiles.tar_clearing_report_Mon_May_04_05_2015_11_53_18.docx';
     // assertThat(is_file($comparisionFile),equalTo(true));
     // assertThat(filesize($filepath), closeTo(filesize($comparisionFile),5));

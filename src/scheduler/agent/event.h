@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Event handling operations
+ */
 
 #ifndef EVENT_H_INCLUDE
 #define EVENT_H_INCLUDE
@@ -29,18 +33,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /** interanl structure for an event */
 typedef struct {
-    void(*func)(scheduler_t*, void*); ///< the function that will be executed for this event
-    void* argument;                   ///< the arguments for the function
-    char* name;                       ///< name of the event, used for debugging
-    char*    source_name;
-    uint16_t source_line;
+  void(*func)(scheduler_t*, void*); ///< The function that will be executed for this event
+  void* argument;                   ///< The arguments for the function
+  char* name;                       ///< Name of the event, used for debugging
+  char*    source_name;             ///< Name of the source file creating the event
+  uint16_t source_line;             ///< Line in the source file creating the event
 } event_t;
 
 /** internal structure for the event loop */
 typedef struct event_loop {
-    GAsyncQueue* queue; ///< the queue that is the core of the event loop
-    int terminated;     ///< flag that signals the end of the event loop
-    int occupied;       ///< does this loop already have a worker thread
+  GAsyncQueue* queue; ///< The queue that is the core of the event loop
+  int terminated;     ///< Flag that signals the end of the event loop
+  int occupied;       ///< Does this loop already have a worker thread
 } event_loop_t;
 
 
@@ -51,8 +55,8 @@ typedef void(*event_function)(scheduler_t*, void*);
  */
 typedef struct
 {
-    void* first;
-    int second;
+  void* first;
+  int second;
 } arg_int;
 
 /* ************************************************************************** */

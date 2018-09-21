@@ -26,22 +26,46 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 include_once(__DIR__ . "/../../lib/php/common-job.php");
 
+/**
+ * @class BulkReuser
+ * @brief Prepares bulk licenses for an upload and run DeciderJob on it
+ */
 class BulkReuser
 {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DbManager object
+   */
   private $dbManager;
 
+  /**
+   * @brief Get Database Manager from containers
+   */
   function __construct()
   {
     $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
+  /**
+   * @fn rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency)
+   * @brief Rerun Monk bulk and decider on a given upload
+   * @param int   $uploadId   Upload on which the agents have to run
+   * @param int   $groupId    Group which is running the agents
+   * @param int   $userId     User who is running the agents
+   * @param int   $bulkId     Previous bulk for reuse
+   * @param array $dependency Dependency on agent (Not in use)
+   * @throws Exception If agent cannot be added, throw exception with message as HTML
+   * @return int Id of the new job
+   */
   public function rerunBulkAndDeciderOnUpload($uploadId, $groupId, $userId, $bulkId, $dependency)
   {
-    /* @var $uploadDao UploadDao */
+    /** @var UploadDao $uploadDao
+     * UploadDao from container
+     */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
     $topItem = $uploadDao->getUploadParent($uploadId);
-    /* @var $deciderPlugin DeciderJobAgentPlugin */
+    /** @var DeciderJobAgentPlugin $deciderPlugin
+     * DeciderJobAgentPlugin object to add deciderjob
+     */
     $deciderPlugin = plugin_find("agent_deciderjob");
     $dependecies = array();
     $sql = "INSERT INTO license_ref_bulk (user_fk,group_fk,rf_text,upload_fk,uploadtree_fk) "

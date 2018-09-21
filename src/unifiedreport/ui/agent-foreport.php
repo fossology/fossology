@@ -15,14 +15,24 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/**
+ * @dir
+ * @brief Contains UI plugin for unified report agent
+ * @file
+ * @brief Contains UI plugin for unified report agent
+ */
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @class FoUnifiedReportGenerator
+ * @brief Unified report generator UI plugin
+ */
 class FoUnifiedReportGenerator extends DefaultPlugin
 {
-  const NAME = 'agent_founifiedreport';
-  
+  const NAME = 'agent_founifiedreport';       ///< Plugin mod name
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -32,6 +42,10 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     ));
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
+   */
   protected function handle(Request $request)
   {
     $groupId = Auth::getGroupId();
@@ -44,7 +58,7 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     {
       return $this->flushContent($e->getMessage());
     }
-    
+
     $reportGenAgent = plugin_find('agent_unifiedreport');
     $userId = Auth::getUserId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
@@ -68,20 +82,27 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     $showJobsPlugin->OutputOpen();
     return $showJobsPlugin->getResponse();
   }
-  
+
+  /**
+   * @brief Get Upload object for an upload id
+   * @param int $uploadId
+   * @param int $groupId
+   * @throws Exception
+   * @return Upload Upload object for $uploadId
+   */
   protected function getUpload($uploadId, $groupId)
-  {  
+  {
     if ($uploadId <=0)
     {
       throw new Exception(_("parameter error"));
     }
-    /** @var UploadDao */
+    /** @var UploadDao $uploadDao*/
     $uploadDao = $this->getObject('dao.upload');
     if (!$uploadDao->isAccessible($uploadId, $groupId))
     {
       throw new Exception(_("permission denied"));
     }
-    /** @var Upload */
+    /** @var Upload $upload*/
     $upload = $uploadDao->getUpload($uploadId);
     if ($upload === null)
     {
@@ -90,6 +111,10 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     return $upload;
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   */
   function preInstall()
   {
     $text = _("Generate Report");

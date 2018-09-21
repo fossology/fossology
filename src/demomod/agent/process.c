@@ -16,7 +16,7 @@
 
  ***************************************************************/
 /**
- * \file process.c
+ * \file
  * \brief Functions to process a single file and process an upload
  */
 
@@ -27,13 +27,13 @@ extern psqlCopy_t psqlcpy;       // fo_sqlCopy struct used for fast data inserti
 extern PGconn    *pgConn;        // database connection
 
 /**
- * @brief Process a single file - read the first 32 bytes 
+ * @brief Process a single file - read the first 32 bytes
  * @param FilePath Path of the file to read.
  * @param FileResult Structure to save the file result (32 bytes)
  *
  * @returns 0 if success, may also write fatal error to stderr.
  */
-FUNCTION int ProcessFile(char *FilePath, pFileResult_t FileResult) 
+FUNCTION int ProcessFile(char *FilePath, pFileResult_t FileResult)
 {
   int   rv;             // generic renurn value
   FILE *fin;
@@ -146,7 +146,7 @@ FUNCTION int ProcessUpload(int upload_pk, int agent_fk)
     }
 
     rv = ProcessFile(FilePath, &FileResult);
-    if (rv == 0) 
+    if (rv == 0)
     {
       fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
 

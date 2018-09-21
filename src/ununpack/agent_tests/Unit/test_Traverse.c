@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for Traverse()
+ */
 static char *Label = "called by main";
 static char *Basename ="";
 static ParentInfo *PI = NULL;
@@ -48,6 +51,9 @@ int TraverseClean()
 
 /**
  * @brief normal test for one package
+ * \test
+ * -# Call Traverse() on a single package
+ * -# Check if the files are unpacked
  */
 void testTraverseNormal4Package()
 {
@@ -64,6 +70,9 @@ void testTraverseNormal4Package()
 
 /**
  * @brief normal test for one package another case
+ * \test
+ * -# Call Traverse() on a single package
+ * -# Check if the files are unpacked
  */
 void testTraverseNormal4Package2()
 {
@@ -80,6 +89,9 @@ void testTraverseNormal4Package2()
 
 /**
  * @brief normal test for one directory
+ * \test
+ * -# Call Traverse() on a directory containing packages
+ * -# Check if the files are unpacked properly
  */
 void testTraverseNormal4Dir()
 {
@@ -104,6 +116,9 @@ void testTraverseNormal4Dir()
 
 /**
  * @brief normal test for rpm
+ * \test
+ * -# Call Traverse() on a single RPM package
+ * -# Check if the files are unpacked
  */
 void testTraverseNormal4Rpm()
 {
@@ -120,6 +135,10 @@ void testTraverseNormal4Rpm()
 
 /**
  * @brief abnormal test for null parameters
+ * \test
+ * -# Call Traverse() on empty strings
+ * -# Check if function returns 0
+ * -# Check if nothing is done by function
  */
 void testTraverseNullParams()
 {

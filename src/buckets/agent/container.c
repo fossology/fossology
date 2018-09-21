@@ -15,13 +15,18 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
+/**
+ * \file container.c
+ * Process bucket containers
+ */
 #include "buckets.h"
 
 extern int debug;
 
 
 /**
- * \brief given a container uploadtree_pk and bucketdef, determine what buckets
+ * \brief Given a container uploadtree_pk and bucketdef, determine what buckets
  * the container is in.
  *
  * A container is in all the buckets of its children (recursive).
@@ -29,16 +34,16 @@ extern int debug;
  * This function is also called for no-pfile artifacts to simplify the
  * recursion in walkTree().
  *
- * \param PGconn $pgConn  postgresql connection
- * \param pbucketdef_t $bucketDefArray
- * \param int $uploadtree_pk
+ * \param pgConn         postgresql connection
+ * \param bucketDefArray bucket
+ * \param uploadtree_pk  Upload tree id to be check
  *
  * \return zero terminated array of bucket_pk's for this uploadtree_pk (may contain
  *        no elements).  This must be free'd by the caller.
  *
- * Note: It's tempting to just have walkTree() remember all the child buckets.
- *      but, due to pfile reuse, some of the tree might have been
- *     processed before walkTree() was called.
+ * \note It's tempting to just have walkTree() remember all the child buckets.
+ *       but, due to pfile reuse, some of the tree might have been
+ *       processed before walkTree() was called.
  */
 FUNCTION int *getContainerBuckets(PGconn *pgConn, pbucketdef_t bucketDefArray,
                                   int uploadtree_pk)

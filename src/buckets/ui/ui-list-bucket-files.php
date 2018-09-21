@@ -22,7 +22,7 @@ use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file ui-list-bucket-files.php
- * \brief This plugin is used to: \n
+ * This plugin is used to: \n
  * List files for a given bucket in a given uploadtree. \n
  * The following are passed in: \n
  *  bapk   bucketagent_pk \n
@@ -32,6 +32,17 @@ use Fossology\Lib\Dao\UploadDao;
  *  bp     bucketpool_pk \n
  */
 
+/**
+ * @class list_bucket_files
+ * This plugin is used to: \n
+ * List files for a given bucket in a given uploadtree. \n
+ * The following are passed in: \n
+ *  bapk   bucketagent_pk \n
+ *  napk   nomosagent_pk \n
+ *  item   uploadtree_pk \n
+ *  bpk    bucket_pk \n
+ *  bp     bucketpool_pk \n
+ */
 class list_bucket_files extends FO_Plugin
 {
   function __construct()
@@ -45,7 +56,8 @@ class list_bucket_files extends FO_Plugin
   }
 
   /**
-   * \brief Customize submenus.
+   * @brief Customize submenus.
+   * @see FO_Plugin::RegisterMenus()
    */
   function RegisterMenus()
   {
@@ -62,14 +74,16 @@ class list_bucket_files extends FO_Plugin
   } // RegisterMenus()
 
   /**
-   * \brief This is called before the plugin is used.
+   * @brief This is called before the plugin is used.
+   *
    * It should assume that Install() was already run one time
    * (possibly years ago and not during this object's creation).
    *
-   * returntrue on success, false on failure.
+   * @return boolean true on success, false on failure.
    *  A failed initialize is not used by the system.
    *
-   * \note tis function must NOT assume that other plugins are installed.
+   * @note This function must NOT assume that other plugins are installed.
+   * @see FO_Plugin::Initialize()
    */
   function Initialize()
   {
@@ -81,7 +95,8 @@ class list_bucket_files extends FO_Plugin
 
 
   /**
-   * \brief Display all the files for a bucket in this subtree.
+   * @brief Display all the files for a bucket in this subtree.
+   * @see FO_Plugin::Output()
    */
   function Output()
   {
@@ -195,7 +210,7 @@ class list_bucket_files extends FO_Plugin
                  and agent_fk=$bucketagent_pk
                  and bucket_fk=$bucket_pk
                  and bucketpool_fk=$bucketpool_pk
-                 and bucket_pk=bucket_fk 
+                 and bucket_pk=bucket_fk
                  and nomosagent_fk=$nomosagent_pk
                  order by uploadtree.ufile_name
                  limit $limit offset $Offset";

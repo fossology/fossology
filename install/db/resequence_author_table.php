@@ -16,9 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * \file resequence_author_table.php
+ * Resequence the author and copyright table, remove duplicates in author table,
+ * remove dependency of author table on copyright sequence.
+ */
 
 /**
  * \brief Drop all sequence and constrains and resequence the author table and build them again
+ * \param DbManager $dbManager DB Manager to be used 
  */
 
 function ResequenceAuthorTablePKey($dbManager)
@@ -71,6 +77,7 @@ COMMIT;
 
 /**
  * \brief Drop primary key constrains and resequence the copyright table and build them again
+ * \param DbManager $dbManager DB Manager to be used
  */
 
 function ResequenceCopyrightTablePKey($dbManager)
@@ -106,6 +113,7 @@ COMMIT;
 
 /**
  * \brief Remove reduntant entries from author table
+ * \param DbManager $dbManager DB Manager to be used
  */
 
 function CleanAuthorTable($dbManager)
@@ -139,6 +147,7 @@ COMMIT;
 
 /**
  * \brief Remove invalid entries from copyright table
+ * \param DbManager $dbManager DB Manager to be used
  */
 
 function CleanCopyrightTable($dbManager)

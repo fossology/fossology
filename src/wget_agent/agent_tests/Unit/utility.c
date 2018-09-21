@@ -16,14 +16,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 #include <stdio.h>
-#include <sys/stat.h> 
+#include <sys/stat.h>
 #include "utility.h"
 
 /**
- * \brief juge if the file or directory is existed not
- *
- * \param char *path_name - the file or directory name including path
- *
+ * \file
+ * \brief Judge if the file or directory is existed not
+ * \param path_name The file or directory name including path
  * \return existed or not, 0: not existed, 1: existed
  */
 int file_dir_existed(char *path_name)
@@ -40,9 +39,7 @@ int file_dir_existed(char *path_name)
 
 /**
  * \brief Remove all files under dirpath
- *
- * \param char *path_name - the file or directory name including path
- *
+ * \param path_name The file or directory name including path
  * \return existed or not, 0: not existed, 1: existed
  */
 int RemoveDir(char *dirpath)
@@ -60,6 +57,6 @@ int main()
 {
   int result = file_dir_existed("./test-data");
   printf("result is:%d\n", result);
-  return 0; 
+  return 0;
 }
 #endif

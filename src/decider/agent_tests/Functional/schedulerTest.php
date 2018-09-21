@@ -15,7 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
+/**
+ * @namespace Fossology::Decider::Test
+ * Namespace for Decider test cases
+ */
 namespace Fossology\Decider\Test;
 
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
@@ -41,6 +44,10 @@ include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
+/**
+ * @class SchedulerTest
+ * @brief Test cases for interaction between decider and scheduler
+ */
 class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
@@ -71,6 +78,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /** @var SchedulerTestRunnerMock */
   private $runnerMock;
 
+  /**
+   * @brief Setup the objects, database and repository
+   */
   protected function setUp()
   {
     $this->testDb = new TestPgDb("deciderSched");
@@ -96,6 +106,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
+  /**
+   * @brief Destroy objects, database and repository
+   */
   protected function tearDown()
   {
     $this->testDb->fullDestruct();
@@ -108,6 +121,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     M::close();
   }
 
+  /**
+   * @brief Setup test repository
+   */
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -116,28 +132,46 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testInstaller->cpRepo();
   }
 
+  /**
+   * @brief Destroy test repository
+   */
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
     $this->testInstaller->clear();
   }
 
+  /**
+   * @brief Create test tables required by agent
+   */
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey','jobqueue_jq_pk_seq','job_job_pk_seq'),false);
+    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk',
+      'license_set_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight',
+      'highlight_keyword','agent','pfile','ars_master','users','group_user_member','license_map','jobqueue','job'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq',
+      'license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
+      'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','FileLicense_pkey',
+      'jobqueue_jq_pk_seq','job_job_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','clearing_decision','license_file','highlight','jobqueue','job'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event',
+      'clearing_decision','license_file','highlight','jobqueue','job'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','nomos_ars','monk_ars','copyright_ars'), false);
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file',
+      'nomos_ars','monk_ars','copyright_ars'), false);
     $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
 
+  /**
+   * @brief Get the heart count value from the agent output
+   * @param string $output Output from agent
+   * @return int Heart count value, -1 on failure
+   */
   private function getHeartCount($output)
   {
     $matches = array();

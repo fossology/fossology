@@ -16,6 +16,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * @file
+ * @brief UI plugin for ReadMeOSS agent
+ */
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -23,10 +28,14 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @class ReadMeOssPlugin
+ * @brief Agent plugin for Readme_OSS agent
+ */
 class ReadMeOssPlugin extends DefaultPlugin
 {
-  const NAME = 'ui_readmeoss';
-  
+  const NAME = 'ui_readmeoss';        ///< Mod name for the plugin
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -36,14 +45,22 @@ class ReadMeOssPlugin extends DefaultPlugin
     ));
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   */
   function preInstall()
   {
     $text = _("Generate ReadMe_OSS");
     menu_insert("Browse-Pfile::Export&nbsp;ReadMe_OSS", 0, self::NAME, $text);
-    
+
     menu_insert("UploadMulti::Generate&nbsp;ReadMe_OSS", 0, self::NAME, $text);
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
+   */
   protected function handle(Request $request)
   {
     $groupId = Auth::getGroupId();
@@ -99,7 +116,15 @@ class ReadMeOssPlugin extends DefaultPlugin
     $showJobsPlugin->OutputOpen();
     return $showJobsPlugin->getResponse();
   }
-  
+
+  /**
+   * @brief Get parameters from job queue and schedule them
+   * @param int $groupId
+   * @param int $upload
+   * @param int $addUploads
+   * @throws Exception
+   * @return int Array of job id and job queue id
+   */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
     $uploadId = $upload->getId();
@@ -137,9 +162,17 @@ class ReadMeOssPlugin extends DefaultPlugin
     }
     return array($jobId,$jobQueueId);
   }
-  
+
+  /**
+   * @brief Get upload object for a given id
+   * @param int $uploadId
+   * @param int $groupId
+   * @throws Exception
+   * @return Fossology::Lib::Data::Upload::Upload Upload object or null
+   * on failure
+   */
   protected function getUpload($uploadId, $groupId)
-  {  
+  {
     if ($uploadId <=0)
     {
       throw new Exception(_("parameter error: $uploadId"));

@@ -20,10 +20,14 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 
+/**
+ * @class ui_diff_buckets
+ * UI plugin for buckets diff
+ */
 class ui_diff_buckets extends FO_Plugin
 {
   var  $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
-  var  $threshold  = 150;  /* cut point for removing by eval order, hardcode for v1  */
+  var  $threshold  = 150;  /**< cut point for removing by eval order, hardcode for v1  */
 
   function __construct()
   {
@@ -36,7 +40,8 @@ class ui_diff_buckets extends FO_Plugin
   }
 
   /**
-   * \brief Create and configure database tables
+   * @brief Create and configure database tables
+   * @see FO_Plugin::Install()
    */
   function Install()
   {
@@ -49,11 +54,13 @@ class ui_diff_buckets extends FO_Plugin
 
   /**
    * @brief This is called before the plugin is used.
+   *
    * It should assume that Install() was already run one time
    * (possibly years ago and not during this object's creation).
-   * @return true on success, false on failure.
+   * @return boolean true on success, false on failure.
    * A failed initialize is not used by the system.
-   * \note This function must NOT assume that other plugins are installed.
+   * @note This function must NOT assume that other plugins are installed.
+   * @see FO_Plugin::Initialize()
    */
   function Initialize()
   {
@@ -72,7 +79,7 @@ class ui_diff_buckets extends FO_Plugin
 
   /**
    * @brief Get uploadtree info for a given uploadtree_pk.
-   * @param $Uploadtree_pk
+   * @param int $Uploadtree_pk
    * @return array with uploadtree record and:\n
    *   agent_pk\n
    *   bucketagent_pk\n
@@ -107,12 +114,15 @@ class ui_diff_buckets extends FO_Plugin
     unset($row);
 
     return $TreeInfo;
-  } 
+  }
 
 
   /**
    * @brief Given an $Uploadtree_pk, return a string with the histogram for the directory BY bucket.
-   * @return a string with the histogram for the directory BY bucket.
+   * @param int $Uploadtree_pk
+   * @param array $TreeInfo
+   * @param array $BucketDefArray
+   * @return string a string with the histogram for the directory BY bucket.
    */
   function UploadHist($Uploadtree_pk, $TreeInfo, $BucketDefArray)
   {
@@ -128,14 +138,14 @@ class ui_diff_buckets extends FO_Plugin
     $bucketpool_pk = $TreeInfo['bucketpool_pk'];
 
     /*select all the buckets for entire tree for this bucketpool */
-    $sql = "SELECT distinct(bucket_fk) as bucket_pk, 
+    $sql = "SELECT distinct(bucket_fk) as bucket_pk,
                    count(bucket_fk) as bucketcount, bucket_reportorder
               from bucket_file, bucket_def,
-                  (SELECT distinct(pfile_fk) as PF from uploadtree 
-                     where upload_fk=$upload_pk 
+                  (SELECT distinct(pfile_fk) as PF from uploadtree
+                     where upload_fk=$upload_pk
                        and ((ufile_mode & (1<<28))=0)
                        and uploadtree.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$bucketagent_pk 
+              where PF=pfile_fk and agent_fk=$bucketagent_pk
                     and bucket_file.nomosagent_fk=$nomosagent_pk
                     and bucket_pk=bucket_fk
                     and bucketpool_fk=$bucketpool_pk
@@ -154,7 +164,7 @@ if (false)
       $action = Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk";
 
       $HistStr .= "<script type='text/javascript'>
-function addArsGo(formid, selectid ) 
+function addArsGo(formid, selectid )
 {
 var selectobj = document.getElementById(selectid);
 var ars_pk = selectobj.options[selectobj.selectedIndex].value;
@@ -234,14 +244,14 @@ return;
 
 
   /**
-   * @brief Return the entire <td> ... </td> for $Child file listing table
+   * @brief Return the entire \<td> ... \</td> for $Child file listing table
    *        differences are highlighted.
-   * @param $Child
-   * @param $agent_pk
-   * @param $OtherChild
-   * @param $BucketDefArray
+   * @param array $Child
+   * @param int $agent_pk
+   * @param array $OtherChild
+   * @param array $BucketDefArray
    *
-   * @return the entire html <td> ... </td> for $Child file listing table
+   * @return string the entire html \<td> ... \</td> for $Child file listing table
    * differences are highlighted.
    */
   function ChildElt($Child, $agent_pk, $OtherChild, $BucketDefArray)
@@ -250,7 +260,7 @@ return;
     $bucketstr = $Child['bucketstr'];
 
     /* If both $Child and $OtherChild are specified,
-     * reassemble bucketstr and highlight the differences 
+     * reassemble bucketstr and highlight the differences
      */
     if ($OtherChild and $OtherChild)
     {
@@ -258,8 +268,8 @@ return;
       foreach ($Child['bucketarray'] as $bucket_pk)
       {
         $bucket_color = $BucketDefArray[$bucket_pk]['bucket_color'];
-        $BucketStyle = "style='color:#606060;background-color:$bucket_color'";  
-        $DiffStyle = "style='background-color:$bucket_color;text-decoration:underline;text-transform:uppercase;border-style:outset'";  
+        $BucketStyle = "style='color:#606060;background-color:$bucket_color'";
+        $DiffStyle = "style='background-color:$bucket_color;text-decoration:underline;text-transform:uppercase;border-style:outset'";
         $bucket_name = $BucketDefArray[$bucket_pk]['bucket_name'];
 
         if (!empty($bucketstr)) $bucketstr .= ", ";
@@ -297,16 +307,17 @@ return;
 
   /**
    * @brief Get a string with the html table rows comparing the two file lists.
+   *
    *  Each row contains 5 table fields.
    *  The third field is just for a column separator.
    *  If files match their fuzzyname then put on the same row.
    *  Highlight license differences.
    *  Unmatched fuzzynames go on a row of their own.
-   * @param $Master
-   * @param $agent_pk1
-   * @param $agent_pk2
-   * @param $bucketDefArray
-   * @returns html table
+   * @param array $Master
+   * @param int $agent_pk1
+   * @param int $agent_pk2
+   * @param array $BucketDefArray
+   * @returns string html table
    */
   function ItemComparisonRows($Master, $agent_pk1, $agent_pk2, $BucketDefArray)
   {
@@ -350,10 +361,10 @@ return;
 
   /**
    * @brief Add bucket_pk array and string to Children array.
-   * @param $TreeInfo
-   * @param &$Children
-   * @param $BucketDefArray
-   * @return updated $Children
+   * @param array $TreeInfo
+   * @param array $Children
+   * @param array $BucketDefArray
+   * @return array updated $Children
    */
   function AddBucketStr($TreeInfo, &$Children, $BucketDefArray)
   {
@@ -370,16 +381,15 @@ return;
 
   /**
    * @brief Check all the buckets in $MyArray
-   * @param $MyArray is array of bucket_pk's
-   * @param $Threshold
-   * @param $BucketDefArray
-   *   Check all the buckets in $MyArray.
-   * @return True if all the bucket_evalorder's are at or below $Threshold
+   * @param array $MyArray Array of bucket_pk's
+   * @param int $Threshold
+   * @param array $BucketDefArray
+   * @return boolean True if all the bucket_evalorder's are at or below $Threshold
    *   else return False if any are above $Threshold
    */
   function EvalThreshold($MyArray, $Threshold, $BucketDefArray)
   {
-    foreach($MyArray as $bucket_pk) 
+    foreach($MyArray as $bucket_pk)
     {
       $bucket_evalorder = $BucketDefArray[$bucket_pk]['bucket_evalorder'];
       if ($bucket_evalorder > $Threshold) return False;
@@ -387,10 +397,10 @@ return;
     return True;
   }
 
-  /** @brief remove files where all the buckets in both pairs
+  /* @brief remove files where all the buckets in both pairs
    * are below a bucket_evalorder threshold.
   function filter_evalordermin(&$Master, $BucketDefArray, $threshold)
-  { 
+  {
     foreach($Master as $Key =>&$Pair)
     {
       $Pair1 = GetArrayVal("1", $Pair);
@@ -410,7 +420,7 @@ return;
         else
           continue;
       }
-      else 
+      else
       if (($this->EvalThreshold($Pair1['bucketarray'], $threshold, $BucketDefArray) == True)
           and ($this->EvalThreshold($Pair2['bucketarray'], $threshold, $BucketDefArray) == True))
         unset($Master[$Key]);
@@ -421,11 +431,10 @@ return;
 
   /**
    * @brief remove files that contain identical bucket lists
-   * @param &$Master
-   * @return updated $Master
+   * @param array &$Master
    */
   function filter_samebucketlist(&$Master)
-  { 
+  {
     foreach($Master as $Key =>&$Pair)
     {
       $Pair1 = GetArrayVal("1", $Pair);
@@ -440,13 +449,13 @@ return;
 
   /**
    * @brief Filter children
-   * @param $filter:  none, samebucketlist
-   * An empty or unknown filter is the same as "none"
-   * @param &$Master
-   * @param $BucketDefArray
+   * @param string $filter none, samebucketlist
+   * (An empty or unknown filter is the same as "none")
+   * @param array &$Master
+   * @param array $BucketDefArray
    */
   function FilterChildren($filter, &$Master, $BucketDefArray)
-  { 
+  {
 //debugprint($Master, "Master");
     switch($filter)
     {
@@ -461,16 +470,16 @@ return;
 
   /**
    * @brief HTML output
-   * @param $Master
-   * @param $uploadtree_pk1
-   * @param $uploadtree_pk2
-   * @param $in_uploadtree_pk1
-   * @param $in_uploadtree_pk2
-   * @param $filter
-   * @param $TreeInfo1
-   * @param $TreeInfo2
-   * @param $BucketDefArray
-   * @return HTML as string.
+   * @param array $Master
+   * @param int $uploadtree_pk1
+   * @param int $uploadtree_pk2
+   * @param int $in_uploadtree_pk1
+   * @param int $in_uploadtree_pk2
+   * @param string $filter
+   * @param array $TreeInfo1
+   * @param array $TreeInfo2
+   * @param array $BucketDefArray
+   * @return string HTML as string.
    */
   function HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2, $BucketDefArray)
   {
@@ -571,7 +580,7 @@ return;
 
     $StyleRt = "style='float:right'";
     $OutBuf .= "<a name='flist' href='#histo' $StyleRt > Jump to histogram </a><br>";
-    
+
     /* Switch to license diff view */
     $text = _("Switch to license view");
     $switchURL = Traceback_uri();
@@ -624,12 +633,14 @@ return;
 
 
   /**
-   * @brief Output(): 
+   * @brief @copybrief FO_Plugin::Output()
+   *
    * Requires:\n
           filter: optional filter to apply\n
           item1:  uploadtree_pk of the column 1 tree\n
           item2:  uploadtree_pk of the column 2 tree\n
           freeze: column number (1 or 2) to freeze
+   * @see FO_Plugin::Output()
    */
   function Output()
   {
@@ -668,7 +679,7 @@ return;
     $text = _("Elapsed time: %.2f seconds");
     printf( "<small>$text</small>", $Time);
 
-    if ($Cached) 
+    if ($Cached)
     {
       $text = _("cached");
       $text1 = _("Update");
@@ -681,13 +692,16 @@ return;
     return;
   }
 
-  
+  /**
+   * Create HTML output
+   * @return string HTML output
+   */
   public function htmlContent()
   {
     $filter = GetParm("filter",PARM_STRING);
     if (empty($filter)) $filter = "none";
     $FreezeCol = GetParm("freeze",PARM_INTEGER);  // which column to freeze?  1 or 2 or null
-    $ClickedCol = GetParm("col",PARM_INTEGER);  // which column was clicked on?  1 or 2 or null
+    $ClickedCol = GetParm("col",PARM_INTEGER);    // which column was clicked on?  1 or 2 or null
     $ItemFrozen = GetParm("itemf",PARM_INTEGER);  // frozen item or null
     $in_uploadtree_pk1 = GetParm("item1",PARM_INTEGER);
     $in_uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
@@ -696,7 +710,7 @@ return;
       Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
 
     /* If you click on a item in a frozen column, then you are a dope so ignore $ItemFrozen */
-    if ($FreezeCol == $ClickedCol) 
+    if ($FreezeCol == $ClickedCol)
     {
       $ItemFrozen= 0;
       $FreezeCol = 0;
@@ -780,7 +794,7 @@ JSOUT;
 
       /* Master array of children, aligned.   */
       $Master = MakeMaster($Children1, $Children2);
-      
+
       /* add linkurl to children */
       FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this, $uploadtree_pk1, $uploadtree_pk2);
 
@@ -796,8 +810,8 @@ JSOUT;
           $V .= $this->HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2, $BucketDefArray);
       }
       return $V;
-  }    
-  
+  }
+
 }
 
 $NewPlugin = new ui_diff_buckets;

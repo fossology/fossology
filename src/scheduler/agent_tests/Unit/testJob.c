@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test for job operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -24,14 +28,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include <utils.h>
 
-
+/**
+ * Local function for testing data prepare
+ */
 int Prepare_Testing_Data_Job(scheduler_t* scheduler) {
   return Prepare_Testing_Data(scheduler);
 }
 
 /* ************************************************************************** */
-/* **** job function tests ******************************************** */
+/* ********** job function tests ******************************************** */
 /* ************************************************************************** */
+
+/**
+ * \brief Test for job events
+ * \test
+ * -# Initialize scheduler and database
+ * -# Create new database_update_event() to load data
+ * -# Get the job from scheduler and call
+ *     -# job_verbose_event() and check if job is updated
+ *     -# job_pause_event() and check if job is paused
+ *     -# job_restart_event() and check if job is restarted
+ *     -# job_priority_event() and check if job is restarted
+ *     -# job_fail_event() and check if job is failed
+ */
 void test_job_event()
 {
   scheduler_t* scheduler;
@@ -65,7 +84,7 @@ void test_job_event()
   params->second = jq_pk;
   job_restart_event(scheduler, params);
   FO_ASSERT_EQUAL(job->status, JB_RESTART);
-  
+
   params = g_new0(arg_int, 1);
   params->first = job;
   params->second = 1;
@@ -74,12 +93,23 @@ void test_job_event()
 
   job_fail_event(scheduler, job);
   FO_ASSERT_EQUAL(job->status, JB_FAILED);
-  
+
   scheduler_update(scheduler);
 
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for job functions
+ * \test
+ * -# Initialize scheduler and database
+ * -# Create new database_update_event() to load data
+ * -# Get the job from scheduler and call
+ *     -# job_next() and check the job queue id
+ *     -# next_job() and check the job is NOT NULL and its id is 1
+ *     -# peek_job() and check the job is NOT NULL and its id is 1
+ *     -# active_jobs() and check the result is 0
+ */
 void test_job_fun()
 {
   scheduler_t* scheduler;
@@ -96,7 +126,7 @@ void test_job_fun()
   jq_pk = Prepare_Testing_Data_Job(scheduler);
 
   database_update_event(scheduler, NULL);
-  
+
   job = g_tree_lookup(scheduler->job_list, &jq_pk);
   FO_ASSERT_PTR_NOT_NULL_FATAL(job);
 
@@ -120,7 +150,7 @@ void test_job_fun()
 
 CU_TestInfo tests_job[] =
 {
-    {"Test job_event",          test_job_event          },
-    {"Test job_fun",          test_job_fun          },
+    {"Test job_event", test_job_event },
+    {"Test job_fun",   test_job_fun   },
     CU_TEST_INFO_NULL
 };

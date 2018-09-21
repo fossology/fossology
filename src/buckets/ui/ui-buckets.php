@@ -21,9 +21,13 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\UI\Component\MicroMenu;
 
+/**
+ * @class ui_buckets
+ * Install buckets plugin to UI menu
+ */
 class ui_buckets extends FO_Plugin
 {
-  var $uploadtree_tablename = "";
+  var $uploadtree_tablename = "";   /**< Upload tree on which the upload is listed */
 
   function __construct()
   {
@@ -36,7 +40,8 @@ class ui_buckets extends FO_Plugin
   }
 
   /**
-   * \brief Create and configure database tables
+   * @brief Create and configure database tables
+   * @see FO_Plugin::Install()
    */
   function Install()
   {
@@ -118,13 +123,14 @@ class ui_buckets extends FO_Plugin
 
 
   /**
-   * \brief This is called before the plugin is used.
+   * @brief This is called before the plugin is used.
    * It should assume that Install() was already run one time
    * (possibly years ago and not during this object's creation).
    *
-   * \return true on success, false on failure.
+   * @return boolean true on success, false on failure.
    * A failed initialize is not used by the system.
-   * \note This function must NOT assume that other plugins are installed.
+   * @note This function must NOT assume that other plugins are installed.
+   * @see FO_Plugin::Initialize()
    */
   function Initialize()
   {
@@ -145,9 +151,12 @@ class ui_buckets extends FO_Plugin
 
 
   /**
-   * \brief Given an $Uploadtree_pk, display: \n
+   * Given an $Uploadtree_pk, display: \n
    * (1) The histogram for the directory BY bucket. \n
    * (2) The file listing for the directory.
+   * @param int $Uploadtree_pk
+   * @param string $Uri
+   * @return string
    */
   function ShowUploadHist($Uploadtree_pk,$Uri)
   {
@@ -208,17 +217,17 @@ class ui_buckets extends FO_Plugin
     $sql = "SELECT distinct(bucket_fk) as bucket_pk,
                    count(bucket_fk) as bucketcount, bucket_reportorder
               from bucket_file, bucket_def,
-                  (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename 
-                     where upload_fk=$upload_pk 
+                  (SELECT distinct(pfile_fk) as PF from $this->uploadtree_tablename
+                     where upload_fk=$upload_pk
                        and ((ufile_mode & (1<<28))=0)
                        and ((ufile_mode & (1<<29))=0)
                        and $this->uploadtree_tablename.lft BETWEEN $lft and $rgt) as SS
-              where PF=pfile_fk and agent_fk=$bucketagent_pk 
+              where PF=pfile_fk and agent_fk=$bucketagent_pk
                     and bucket_file.nomosagent_fk=$nomosagent_pk
                     and bucket_pk=bucket_fk
                     and bucketpool_fk=$bucketpool_pk
               group by bucket_fk,bucket_reportorder
-              order by bucket_reportorder asc"; 
+              order by bucket_reportorder asc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $historows = pg_fetch_all($result);
@@ -230,7 +239,7 @@ class ui_buckets extends FO_Plugin
       $action = Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk";
 
       $VLic .= "<script type='text/javascript'>
-function addArsGo(formid, selectid ) 
+function addArsGo(formid, selectid )
 {
 var selectobj = document.getElementById(selectid);
 var ars_pk = selectobj.options[selectobj.selectedIndex].value;
@@ -293,7 +302,7 @@ return;
         $VLic .= ">$bucket_name </a>";
 
         /* Allow users to tag an entire bucket */
-/* Future, maybe v 2.1 
+/* Future, maybe v 2.1
         $TagHref = "<a href=" . Traceback_uri() . "?mod=bucketbrowser&upload=$upload_pk&item=$Uploadtree_pk&bapk=$bucketagent_pk&bpk=$bucket_pk&bp=$bucketpool_pk&napk=$nomosagent_pk&tagbucket=1>Tag</a>";
         $VLic .= " [$TagHref]";
 */
@@ -483,21 +492,22 @@ return;
 
 
   /**
-   * @brief tag a bucket
-   * @param $upload_pk
-   * @param $uploadtree_pk
-   * @param $bucketagent_pk
-   * @param $bucket_pk
-   * @param $bucketpool_pk
-   * @param $nomosagent_pk
+   * @brief Tag a bucket
+   * @param int $upload_pk
+   * @param int $uploadtree_pk
+   * @param int $bucketagent_pk
+   * @param int $bucket_pk
+   * @param int $bucketpool_pk
+   * @param int $nomosagent_pk
    **/
   function TagBucket($upload_pk, $uploadtree_pk, $bucketagent_pk, $bucket_pk, $bucketpool_pk, $nomosagent_pk)
   {
-  }  // TagBucket() 
+  }  // TagBucket()
 
 
   /**
-   * \brief This function returns the scheduler status.
+   * @brief This function returns the scheduler status.
+   * @see FO_Plugin::Output()
    */
   public function Output()
   {
@@ -515,7 +525,7 @@ return;
     $Item = GetParm("item",PARM_INTEGER);
     if ( !$Item)
     {
-     return _('No item selected'); 
+     return _('No item selected');
     }
     $updcache = GetParm("updcache",PARM_INTEGER);
     $tagbucket = GetParm("tagbucket",PARM_INTEGER);
@@ -525,7 +535,7 @@ return;
     /* Remove "updcache" from the GET args and set $this->UpdCache
      * This way all the url's based on the input args won't be
      * polluted with updcache
-     * Use Traceback_parm_keep to ensure that all parameters are in order 
+     * Use Traceback_parm_keep to ensure that all parameters are in order
      */
     $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("upload","item","folder","ars")) ;
     if ($updcache)
@@ -539,7 +549,7 @@ return;
       $V = ReportCacheGet($CacheKey);
     }
 
-    if (!empty($tagbucket)) 
+    if (!empty($tagbucket))
     {
       $bucketagent_pk = GetParm("bapk",PARM_INTEGER);
       $bucket_pk = GetParm("bpk",PARM_INTEGER);
@@ -547,7 +557,7 @@ return;
       $nomosagent_pk = GetParm("napk",PARM_INTEGER);
       $this->TagBucket($Upload, $Item, $bucketagent_pk, $bucket_pk, $bucketpool_pk, $nomosagent_pk);
     }
-    
+
     $Cached = !empty($V);
     if(!$Cached)
     {

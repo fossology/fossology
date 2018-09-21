@@ -19,6 +19,10 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @class CopyrightAgentPlugin
+ * @brief Create UI plugin for copyright agent
+ */
 class CopyrightAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -29,6 +33,10 @@ class CopyrightAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "copyright scanner", "copyright_ars");

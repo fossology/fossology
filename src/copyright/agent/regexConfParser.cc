@@ -15,13 +15,22 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-
+/**
+ * \file regexConfParser.cc
+ * \brief Handles RegexMap related requests
+ */
 #include "regexConfParser.hpp"
 #include <string>
 #include <iostream>
 
 using namespace std;
 
+/**
+ * \brief Read a string stream and crate a RegexMap
+ * \param stream           String stream to read from
+ * \param isVerbosityDebug Print debug messages if true
+ * \return RegexMap created using stream
+ */
 RegexMap readConfStreamToMap(std::istringstream& stream,
                              const bool isVerbosityDebug)
 {
@@ -32,6 +41,9 @@ RegexMap readConfStreamToMap(std::istringstream& stream,
   return regexMap;
 }
 
+/**
+ * \overload
+ */
 RegexMap readConfStreamToMap(std::ifstream& stream,
                              const bool isVerbosityDebug)
 {
@@ -42,6 +54,13 @@ RegexMap readConfStreamToMap(std::ifstream& stream,
   return regexMap;
 }
 
+/**
+ * \brief Given a single line as 'key=value' pair,
+ * create a RegexMap
+ * \param[out] regexMap         Map to add pairs
+ * \param[in]  regexDesc        String containing the pair to be added
+ * \param[in]  isVerbosityDebug Print debug messages if true
+ */
 void addRegexToMap(/*in and out*/ RegexMap& regexMap,
                    const std::string& regexDesc,
                    const bool isVerbosityDebug)
@@ -71,6 +90,13 @@ void addRegexToMap(/*in and out*/ RegexMap& regexMap,
   }
 }
 
+/**
+ * \brief Removes tokens separated by RGX_SEPARATOR_LEFT
+ * in constInput using regexMap
+ * \param[in] regexMap   Map to be used for removal
+ * \param[in] constInput Input which has to be removed
+ * \return String with tokens removed
+ */
 string replaceTokens(/*in*/ RegexMap& regexMap,
                      const string& constInput)
 {

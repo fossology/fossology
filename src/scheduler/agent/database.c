@@ -15,7 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ************************************************************** */
-
+/**
+ * \file
+ * \brief Database related operations
+ */
 /* local includes */
 #include <agent.h>
 #include <database.h>
@@ -47,43 +50,47 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   email_notify = 0;        \
   error = NULL; }
 
-#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"
-#define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\""
-#define DEFAULT_FOOTER  "\""
-#define DEFAULT_SUBJECT "FOSSology scan complete\n"
-#define DEFAULT_COMMAND "/usr/bin/mailx"
+#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"    ///< Email command format
+#define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
+#define DEFAULT_FOOTER  "\""                  ///< Default email footer
+#define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
+#define DEFAULT_COMMAND "/usr/bin/mailx"      ///< Default email command to use
 
-#define min(x, y) (x < y ? x : y)
+#define min(x, y) (x < y ? x : y)     ///< Return the minimum of x, y
 
 /**
  * We need to pass both a job_t* and the fossology url string to the
  * email_replace() function. This structure allows both of these to be passed.
  */
 typedef struct {
-    scheduler_t* scheduler;
-    gchar* foss_url;
-    job_t* job;
+    scheduler_t* scheduler; ///< Current scheduler reference
+    gchar* foss_url;        ///< Fossology URL string
+    job_t* job;             ///< Current job structure
 } email_replace_args;
 
 /**
- * Replaces the variables that are in the header and footer files. This is a
+ * @brief Replaces the variables that are in the header and footer files.
+ *
+ * This is a
  * callback function that is passed to the glib function g_regex_replace_eval().
  * This reads what was matched by the regex and then appends the correct
  * information onto the GString that is passed to the function.
  *
- * Variables:
- *   $UPLOADNAME
- *   $BROWSELINK
- *   $SCHEDULERLOG
- *   $UPLOADFOLDERNAME
- *   $JOBRESULT
- *   $JOBQUEUELINK
+ * Variables:\n
+ *   $UPLOADNAME\n
+ *   $BROWSELINK\n
+ *   $SCHEDULERLOG\n
+ *   $UPLOADFOLDERNAME\n
+ *   $JOBRESULT\n
+ *   $JOBQUEUELINK\n
+ *   $AGENTSTATUS\n
  *   $DB.table.column [not implemented]
  *
  * @param match  the regex match that glib found
  * @param ret    the GString* that results should be appended to.
- * @param j      the job that this email relates to
+ * @param args   The email replace arguments with foss url and job reference
  * @return       always FALSE so that g_regex_replace_eval() will continue
+ * @todo needs implementation of $DB.table.column
  */
 static gboolean email_replace(const GMatchInfo* match, GString* ret,
     email_replace_args* args)
@@ -93,7 +100,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   gchar* fossy_url = args->foss_url;
   job_t* job       = args->job;
   GPtrArray* rows  = NULL;
-  // TODO belongs to $DB if statement gchar* table, * column;
+  /* TODO belongs to $DB if statement => gchar* table, * column; */
   PGresult* db_result;
   guint i;
 
@@ -132,7 +139,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
 
   /* $BROWSELINK
    *
-   * Appends the url that will link to the upload in the browse menue of the user
+   * Appends the URL that will link to the upload in the browse menu of the user
    * interface.
    */
   else if(strcmp(m_str, "BROWSELINK") == 0)
@@ -167,7 +174,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
 
   /* $JOBQUEUELINK
    *
-   * Appends the url that will link to the job queue
+   * Appends the URL that will link to the job queue
    */
   else if(strcmp(m_str, "JOBQUEUELINK") == 0)
   {
@@ -191,7 +198,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
 
   /* $SCHEDULERLOG
    *
-   * Appends the url that will link to the log file produced by the agent.
+   * Appends the URL that will link to the log file produced by the agent.
    */
   else if(strcmp(m_str, "SCHEDULERLOG") == 0)
   {
@@ -223,6 +230,13 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
       g_free(sql);
       sql = g_strdup_printf(parent_folder_name, folder_pk);
       db_result = database_exec(args->scheduler, sql);
+      /*
+       * Get the current folder name and traverse back till the root folder.
+       * Add the folder names found in an array.
+       * array[0] => Curr_Folder
+       * array[1] => Par_Folder
+       * array[2] => Root_Folder
+       */
       while(PQresultStatus(db_result) == PGRES_TUPLES_OK && PQntuples(db_result) == 1)
       {
         GString *foldername = g_string_new(PQgetvalue(db_result, 0, 0));
@@ -233,6 +247,11 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
         sql = g_strdup_printf(parent_folder_name, folder_pk);
         db_result = database_exec(args->scheduler, sql);
       }
+      /*
+       * Traverse the folder name array from behind and append the names with a
+       * `/` as a separator between the names.
+       * Result => Root_Folder / Par_Folder / Curr_folder
+       */
       for(i = rows->len - 1; i > 0; i--)
       {
         GString *folder = g_ptr_array_index(rows, i);
@@ -268,7 +287,6 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
   /* $AGENTSTATUS
    *
    * Appends the list of agents run with their status.
-   *
    */
   else if(strcmp(m_str, "AGENTSTATUS") == 0)
   {
@@ -282,7 +300,10 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     else
     {
       rows = g_ptr_array_sized_new(PQntuples(db_result));
-      /* check for any failed jobs */
+      /*
+       * Find all the agents for the current job and attach their jq_pk,
+       * their name and their status (true=>pass, false=>fail)
+       */
       for(i = 0; i < PQntuples(db_result) && ret; i++)
       {
         agent_info *data = (agent_info *)calloc(1, sizeof(agent_info));
@@ -298,6 +319,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
         }
         g_ptr_array_add(rows, data);
       }
+      /* Pass the agent data to email_formating function to convert in desired format */
       g_string_append(ret, email_format_text(rows, fossy_url));
       g_ptr_array_free(rows, TRUE);
     }
@@ -345,11 +367,10 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
 }
 
 /**
- * @brief checks the database for the status of the job
+ * @brief Checks the database for the status of the job
  *
- * @param db_conn   database connection for getting list of related jobs
- * @param job_list  the list of all currently running jobs
- * @param job       the job to check for the job status on
+ * @param scheduler Current scheduler reference
+ * @param job       The job to check for the job status on
  * @return 0: job is not finished, 1: job has finished, 2: job has failed
  */
 static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
@@ -412,7 +433,8 @@ static gint email_checkjobstatus(scheduler_t* scheduler, job_t* job)
  * This compiles the email based upon the header file, footer file, and the job
  * that just completed.
  *
- * @param job  the job that just finished
+ * @param scheduler Current scheduler reference
+ * @param job       The job that just finished
  * @return void, no return
  */
 static void email_notification(scheduler_t* scheduler, job_t* job)
@@ -462,7 +484,9 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
     return;
   }
 
-  /* special for delagent, upload records have been deleted, so can't get the user info from upload table, so get the user info from job table */
+  /* special for delagent, upload records have been deleted.
+   * So can't get the user info from upload table.
+   * So get the user info from job table */
   if(PQntuples(db_result) == 0)
   {
     SafePQclear(db_result);
@@ -532,11 +556,13 @@ static void email_notification(scheduler_t* scheduler, job_t* job)
 }
 
 /**
- * Loads information about the email that will be sent for job notifications.
+ * @brief Loads information about the email that will be sent for job notifications.
+ *
  * This loads the header and footer configuration files, loads the subject and
  * client info, and compiles the regex that is used to replace variables in the
  * header and footer files.
  *
+ * @param[in,out] scheduler Current scheduler to init
  * @return void, no return
  */
 void email_init(scheduler_t* scheduler)
@@ -634,6 +660,8 @@ typedef struct
  * This has a static list of all tables and the associated columns used by the
  * scheduler. If any changes that affect the tables and columns used by the
  * scheduler are made, this static list should be updated.
+ *
+ * @param scheduler the scheduler_t* that holds the connection
  */
 static void check_tables(scheduler_t* scheduler)
 {
@@ -667,7 +695,7 @@ static void check_tables(scheduler_t* scheduler)
       { NULL }
   };
 
-  /* iterate accros every require table and column */
+  /* 1st iterate across every require table and column */
   sprintf(sqltmp, check_scheduler_tables, PQdb(scheduler->db_conn));
   for(curr = cols; curr->table; curr++)
   {
@@ -691,7 +719,7 @@ static void check_tables(scheduler_t* scheduler)
       break;
     }
 
-    /* check that the correct number of columns was returned */
+    /* check that the correct number of columns was returned yr */
     if(PQntuples(db_result) != curr->ncols)
     {
       /* we have failed the database check */
@@ -802,7 +830,7 @@ PGresult* database_exec(scheduler_t* scheduler, const char* sql)
 }
 
 /**
- * TODO
+ * @todo
  *
  * @param scheduler
  * @param sql
@@ -816,8 +844,9 @@ void database_exec_event(scheduler_t* scheduler, char* sql)
 }
 
 /**
- * Checks the job queue for any new entries.
+ * @brief Checks the job queue for any new entries.
  *
+ * @param scheduler The scheduler_t* that holds the connection
  * @param unused
  */
 void database_update_event(scheduler_t* scheduler, void* unused)
@@ -905,9 +934,10 @@ void database_update_event(scheduler_t* scheduler, void* unused)
 }
 
 /**
- * Resets the any jobs in the job queue that are not completed. This is to make
- * sure that any jobs that were running with the scheduler shutdown are run correctly
- * when it starts up again.
+ * @brief Resets any jobs in the job queue that are not completed.
+ *
+ * This is to make sure that any jobs that were running with the scheduler
+ * shutdown are run correctly when it starts up again.
  */
 void database_reset_queue(scheduler_t* scheduler)
 {
@@ -917,9 +947,10 @@ void database_reset_queue(scheduler_t* scheduler)
 }
 
 /**
- * Change the status of a job in the database.
+ * @brief Change the status of a job in the database.
  *
- * @param j_id id number of the relevant job
+ * @param scheduler The scheduler_t* that holds the connection
+ * @param job    job_t* object for the job
  * @param status the new status of the job
  */
 void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
@@ -964,7 +995,7 @@ void database_update_job(scheduler_t* scheduler, job_t* job, job_status status)
 }
 
 /**
- * Updates the number of items that a job queue entry has processed.
+ * @brief Updates the number of items that a job queue entry has processed.
  *
  * @param j_id the id number of the job queue entry
  * @param num the number of items processed in total
@@ -978,7 +1009,7 @@ void database_job_processed(int j_id, int num)
 }
 
 /**
- * enters the name of the log file for a job into the database
+ * @brief Enters the name of the log file for a job into the database
  *
  * @param j_id the id number for the relevant job
  * @param log_name the name of the log file
@@ -992,9 +1023,9 @@ void database_job_log(int j_id, char* log_name)
 }
 
 /**
- * Changes the priority of a job queue entry in the database.
+ * @brief Changes the priority of a job queue entry in the database.
  *
- * @param db_conn   the connection to the database
+ * @param scheduler The scheduler_t* that holds the connection
  * @param job       the job to change the priority for
  * @param priority  the new priority of the job
  */

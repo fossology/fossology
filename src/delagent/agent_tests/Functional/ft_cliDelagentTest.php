@@ -18,13 +18,14 @@
  */
 
 /**
- * \brief test the delagent agent thu command line.
+ * \brief test the delagent agent thru command line.
  */
 //require_once '/usr/share/php/PHPUnit/Framework.php';
 require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 
 /**
- * \class ft_cliDelagentTest - functioin test delagent agent from cli
+ * \class ft_cliDelagentTest
+ * \brief Functional test delagent agent from cli
  */
 class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
 
@@ -66,7 +67,12 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
     $this->assertEquals($usageL, $out[6]); // check if the option -L removed
   }
   /**
-   * \brief test delagent -u
+   * @brief test delagent -u
+   * @test
+   * -# Prepare testdb.
+   * -# Get the Upload id and filename for a upload.
+   * -# Call delagent cli with `-u` flag
+   * -# Check if the upload id and filename matches.
    */
   function testDelagentu(){
     global $EXE_PATH;
@@ -97,7 +103,12 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
 
 
   /**
-   * \brief test delagent -f
+   * @brief test delagent -f
+   * @test
+   * -# Load test db
+   * -# Get a folder name
+   * -# Call delagent cli with `-f` flag
+   * -# Check if folder name matches
    */
   function testDelagentf(){
     global $EXE_PATH;
@@ -127,7 +138,11 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   }
 
   /**
-   * \brief test delagent -U 2
+   * @brief test delagent -U 2
+   * @test
+   * -# Setup test db
+   * -# Call delagent cli with `-U` flag to delete an upload
+   * -# Check if the upload got deleted
    */
   function testDelagentUpload(){
     global $EXE_PATH;

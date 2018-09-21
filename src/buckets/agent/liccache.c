@@ -26,13 +26,13 @@
 #include "buckets.h"
 
 /**
- * \brief calculate the hash of an rf_shortname
+ * \brief Calculate the hash of an rf_shortname
  * rf_shortname is the key
- * 
- * \param cacheroot_t $pcroot 
- * \param $rf_shortname
  *
- * \return hash value
+ * \param pcroot       Hash table root
+ * \param rf_shortname License short name
+ *
+ * \return Hash value
  */
 FUNCTION long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname)
 {
@@ -45,12 +45,12 @@ FUNCTION long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname)
   hashval = hashval % pcroot->maxnodes;
   return hashval;
 }
- 
+
 /**
  *
  * \brief Print the contents of the hash table
  *
- * \param cacheroot_t $pcroot
+ * \param pcroot Hash table to be printed
  *
  * \return none
  */
@@ -63,21 +63,21 @@ FUNCTION void lrcache_print(cacheroot_t *pcroot)
   pcnode = pcroot->nodes;
   for (i=0; i<pcroot->maxnodes; i++)
   {
-    if (pcnode->rf_pk != 0L) 
+    if (pcnode->rf_pk != 0L)
     {
       hashval = lrcache_hash(pcroot, pcnode->rf_shortname);
       printf("%ld, %ld, %s\n", hashval, pcnode->rf_pk, pcnode->rf_shortname);
     }
     pcnode++;
   }
-} 
+}
 
 /**
  *
- * \brief free the hash table
- * 
- * \param cacheroot_t $pcroot
- * 
+ * \brief Free the hash table
+ *
+ * \param pcroot Hash table to be destroyed
+ *
  * \return none
  */
 FUNCTION void lrcache_free(cacheroot_t *pcroot)
@@ -88,7 +88,7 @@ FUNCTION void lrcache_free(cacheroot_t *pcroot)
   pcnode = pcroot->nodes;
   for (i=0; i<pcroot->maxnodes; i++)
   {
-    if (pcnode->rf_pk != 0L) 
+    if (pcnode->rf_pk != 0L)
     {
       free(pcnode->rf_shortname);
     }
@@ -98,12 +98,12 @@ FUNCTION void lrcache_free(cacheroot_t *pcroot)
 }
 
 /**
- * \brief add a rf_shortname, rf_pk to the license_ref cache 
+ * \brief Add a rf_shortname, rf_pk to the license_ref cache
  * rf_shortname is the key
  *
- * \param cacheroot_t $pcroot 
- * \param $rf_pk
- * \param $rf_shortname
+ * \param pcroot       Hash table to be modified
+ * \param rf_pk        License id to be added
+ * \param rf_shortname License short name to be added
  *
  * \return -1 for failure, 0 for success
  */
@@ -135,11 +135,11 @@ FUNCTION int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname)
 }
 
 /**
- * \brief lookup rf_pk in the license_ref cache 
+ * \brief Lookup rf_pk in the license_ref cache
  * rf_shortname is the key
  *
- * \param cacheroot_t $pcroot
- * \param $rf_shortname
+ * \param pcroot       Hash table (haystack)
+ * \param rf_shortname Short name to be searched (needle)
  *
  * \return rf_pk, 0 if the shortname is not in the cache
  */
@@ -159,7 +159,7 @@ FUNCTION long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname)
 
     pcnode = pcroot->nodes + noden;
     if (!pcnode->rf_pk) return 0;
-    if (strcmp(pcnode->rf_shortname, rf_shortname) == 0) 
+    if (strcmp(pcnode->rf_shortname, rf_shortname) == 0)
     {
       return pcnode->rf_pk;
     }
@@ -170,19 +170,19 @@ FUNCTION long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname)
 
 /**
  *
- * \brief build a cache the license ref db table.
+ * \brief Build a cache the license ref db table.
  *
- * \param PGconn $pgConn database connection
- * \param cacheroot_t $pcroot
+ * \param[in]  pgConn Database connection
+ * \param[out] pcroot Hash table
  *
  * lrcache_init builds a cache using the rf_shortname as the key
- * and the rf_pk as the value.  This is an optimization. The cache is used for 
+ * and the rf_pk as the value.  This is an optimization. The cache is used for
  * reference license lookups instead of querying the db.
  *
  * \return 0 for failure, 1 for success
  */
 
-FUNCTION int lrcache_init(PGconn *pgConn, cacheroot_t *pcroot) 
+FUNCTION int lrcache_init(PGconn *pgConn, cacheroot_t *pcroot)
 {
     PGresult *result;
     char query[128];
@@ -198,7 +198,7 @@ FUNCTION int lrcache_init(PGconn *pgConn, cacheroot_t *pcroot)
 
     numLics = PQntuples(result);
     /* populate the cache  */
-    for (row = 0; row < numLics; row++) 
+    for (row = 0; row < numLics; row++)
     {
       lrcache_add(pcroot, atol(PQgetvalue(result, row, 0)), PQgetvalue(result, row, 1));
     }
@@ -212,21 +212,21 @@ FUNCTION int lrcache_init(PGconn *pgConn, cacheroot_t *pcroot)
  * \brief Get the rf_pk for rf_shortname
  *
  * Checks the cache to get the rf_pk for this shortname.
- * If it doesn't exist, add it to both license_ref and the 
+ * If it doesn't exist, add it to both license_ref and the
  * license_ref cache (the hash table).
  *
- * \param PGConn $pgConn database connection
- * \param cacheroot_t $pcroot
- * \param char $rf_shortname
+ * \param pgConn       Database connection
+ * \param pcroot       Hash table to be looked
+ * \param rf_shortname Short name to search
  *
  * \return rf_pk of the matched license or 0
  */
-FUNCTION long get_rfpk(PGconn *pgConn, cacheroot_t *pcroot, char *rf_shortname) 
+FUNCTION long get_rfpk(PGconn *pgConn, cacheroot_t *pcroot, char *rf_shortname)
 {
   long  rf_pk;
   size_t len;
 
-  if ((len = strlen(rf_shortname)) == 0) 
+  if ((len = strlen(rf_shortname)) == 0)
   {
     printf("ERROR! %s.%d get_rfpk() passed empty name", __FILE__, __LINE__);
     return (0);
@@ -247,15 +247,14 @@ FUNCTION long get_rfpk(PGconn *pgConn, cacheroot_t *pcroot, char *rf_shortname)
 } /* get_rfpk */
 
 /**
- * \brief Add a new license to license_ref table
+ * Adds a new license to license_ref table
  *
- * Adds a license to license_ref table.
- *
- * \param  char $licenseName
+ * \param pgConn      Database connection
+ * \param licenseName Name of license to be added
  *
  * \return rf_pk for success, 0 for failure
  */
-FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName) 
+FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName)
 {
     PGresult *result;
     char  query[256];

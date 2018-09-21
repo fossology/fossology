@@ -16,6 +16,10 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
+/**
+ * @namespace Fossology::DelAgent::UI::Page
+ * @brief UI namespace for delagent
+ */
 namespace Fossology\DelAgent\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
@@ -27,6 +31,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\DelAgent\UI\DeleteResponse;
 
+/**
+ * @class AdminUploadDelete
+ * @brief UI plugin to delete uploaded files
+ */
 class AdminUploadDelete extends DefaultPlugin
 {
   const NAME = "admin_upload_delete";
@@ -45,18 +53,19 @@ class AdminUploadDelete extends DefaultPlugin
         self::PERMISSION => Auth::PERM_ADMIN,
         self::REQUIRES_LOGIN => TRUE
     ));
-    
+
     global $container;
     $this->uploadDao = $container->get('dao.upload');
     $this->folderDao = $container->get('dao.folder');
   }
 
-  
+
   /**
-   * @param int $uploadpk - the upload(upload_id) you want to delete
-   * \return NULL on success, string on failure.
+   * @brief Delete a given upload
+   * @param int $uploadpk The upload(upload_id) you want to delete
+   * @return NULL on success, string on failure.
    */
-  private function delete($uploadpk) 
+  private function delete($uploadpk)
   {
     /* Prepare the job: job "Delete" */
     $user_pk = Auth::getUserId();
@@ -82,15 +91,15 @@ class AdminUploadDelete extends DefaultPlugin
     }
     return NULL;
   }
-  
-    /**
-   * @param Request $request
-   * @return Response
+
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
    */
   protected function handle(Request $request)
   {
     $vars = array();
-    
+
     $uploadpks = $request->get('uploads');
     $folderId = $request->get('folder');
 
@@ -103,7 +112,7 @@ class AdminUploadDelete extends DefaultPlugin
     $vars['tracbackUri'] = Traceback_uri();
     $root_folder_pk = GetUserRootFolder();
     $vars['rootFolderListOptions'] = FolderListOption($root_folder_pk, 0);
-    
+
     $uploadList = array();
     $folderList = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
     foreach($folderList as $L) {
@@ -117,15 +126,16 @@ class AdminUploadDelete extends DefaultPlugin
       $uploadList[$L['upload_pk']] = $desc;
     }
     $vars['uploadList'] = $uploadList;
-    
-    return $this->render('admin_upload_delete.html.twig', $this->mergeWithDefault($vars));    
+
+    return $this->render('admin_upload_delete.html.twig', $this->mergeWithDefault($vars));
   }
-  
-  
+
+
   /**
-   * @param int[] $uploadpks
    * @brief starts deletion and handles error messages
-   * @return string
+   * @param array $uploadpks Upload ids to be deleted
+   * @param int   $folderId  Id of folder containing uploads
+   * @return string Error or success message
    */
   private function initDeletion($uploadpks, $folderId)
   {
@@ -167,12 +177,12 @@ class AdminUploadDelete extends DefaultPlugin
             (sizeof($uploadpks) - sizeof($errorMessages)) . " projects queued";
     return DisplayMessage($displayMessage);
   }
-  
+
   /**
-   * \brief Given a folder_pk, try to add a job after checking permissions.
-   * \param $uploadpk - the upload(upload_id) you want to delete
-   *
-   * \return string with the message.
+   * @brief Given a folder_pk, try to add a job after checking permissions.
+   * @param $uploadpk The upload(upload_id) you want to delete
+   * @param $folderId The folder(folder_id) containing the uploads
+   * @return string with the message.
    */
   private function TryToDelete($uploadpk, $folderId)
   {

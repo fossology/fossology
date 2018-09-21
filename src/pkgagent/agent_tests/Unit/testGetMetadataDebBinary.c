@@ -22,16 +22,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAXSQL  4096
 extern char *DBConfFile;
 /**
- * \file testGetMetadataDebBinary.c
+ * \file
  * \brief unit test for GetMetadataDebBinary function
  */
 
 /**
  * \brief Prepare database
- *
  * \param db_conn the database connection
  * \param pi the pointer of debpkginfo
- *
  * \return upload_pk on OK, -1 on failure
  */
 long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
@@ -203,7 +201,6 @@ long prepare_Database(PGconn *db_conn, struct debpkginfo *pi)
 
 /**
  * \brief Prepare repository
- *
  * \return 0 on OK, -1 on failure
  */
 int prepare_Repository()
@@ -223,11 +220,9 @@ int prepare_Repository()
 
 /**
  * \brief remove database
- *
  * \param db_conn the database connection
  * \param pi the pointer of debpkginfo
  * \param upload_pk
- *
  * \return 0 on OK, -1 on failure
  */
 int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
@@ -317,7 +312,6 @@ int remove_Database(PGconn *db_conn, struct debpkginfo *pi, long upload_pk)
 
 /**
  * \brief remove repository
- *
  * \return 0 on OK, -1 on failure
  */
 int remove_Repository()
@@ -336,7 +330,11 @@ int remove_Repository()
 
 /**
  * \brief Test pkgagent.c GetMetadataDebBinary function
- * get debian binary package info
+ * get Debian binary package info
+ * \test
+ * -# Load a test file in database
+ * -# Pass test file id to GetMetadataDebBinary()
+ * -# Check if meta data is parsed properly
  */
 void test_GetMetadataDebBinary()
 {
@@ -396,6 +394,9 @@ void test_GetMetadataDebBinary()
 /**
  * \brief Test pkgagent.c GetMetadataDebBinary function
  * with no upload_pk in database
+ * \test
+ * -# Pass 0 to GetMetadataDebBinary() as upload_pk
+ * -# Check if function return -1
  */
 void test_GetMetadataDebBinary_no_uploadpk()
 {
@@ -425,8 +426,13 @@ void test_GetMetadataDebBinary_no_uploadpk()
 
 /**
  * \brief Test pkgagent.c ProcessUpload function
- * give the upload_pk of debian binary package,
+ *
+ * Give the upload_pk of debian binary package,
  * get the package information about this upload id
+ * \test
+ * -# Create a test entry in database for an upload
+ * -# Call ProcessUpload() on the upload
+ * -# Check if run was success
  */
 void test_ProcessUpload()
 {

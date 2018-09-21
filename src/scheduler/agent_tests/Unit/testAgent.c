@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit tests for agent operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -44,6 +48,14 @@ int agent_clean_suite(void)
   return clean_suite();
 }
 */
+
+/**
+ * \brief Creates 2 pipes and initialize parameters
+ * \param[out] int_dst  Initial destination pipe
+ * \param[out] int_src  Initial source pipe
+ * \param[out] file_dst File descriptor for int_dst with read only
+ * \param[out] file_src File descriptor for int_src with write
+ */
 void create_pipe(int* int_dst, int* int_src, FILE** file_dst, FILE** file_src)
 {
   int a_to_b[2];
@@ -62,6 +74,16 @@ void create_pipe(int* int_dst, int* int_src, FILE** file_dst, FILE** file_src)
 /* **** meta agent function tests ******************************************* */
 /* ************************************************************************** */
 
+/**
+ * \brief Test for meta_agent_init()
+ * \test
+ * -# Call meta_agent_init() with appropriate parameters
+ * -# Check if the meta_agent_t returned is not null
+ * -# Check if agent have appropriate name, max_run, special values, version
+ *    raw_cmd and is assigned valid
+ * -# Call meta_agent_init() with NULL name, should return null
+ * -# Call meta_agent_init() with NULL command, should return null
+ */
 void test_meta_agent_init()
 {
   char* name = "copyright";
@@ -83,6 +105,13 @@ void test_meta_agent_init()
   FO_ASSERT_PTR_NULL(meta_agent_init(name, NULL, max, spc));
 }
 
+/**
+ * \brief Test for add_meta_agent()
+ * \test
+ * -# Call add_meta_agent() with appropriate parameters, should return true
+ * -# Call add_meta_agent() with false parameters, should return false
+ * -# check if the meta agent is added to the list and contains proper values
+ */
 void test_add_meta_agent()
 {
   scheduler_t* scheduler;
@@ -138,8 +167,14 @@ void test_agent_list_clear()
 /* **** agent function tests ************************************************ */
 /* ************************************************************************** */
 
-// TODO add to suite
-
+/**
+ * \brief Test for agent_death_event()
+ * \test
+ * -# Create an agent
+ * -# Add to the scheduler
+ * -# Call agent_death_event()
+ * -# Check if the agent is removed from the scheduler
+ */
 void test_agent_death_event()
 {
   scheduler_t* scheduler;
@@ -180,7 +215,18 @@ void test_agent_death_event()
   scheduler_destroy(scheduler);
 }
 
-// TODO add to suite
+/**
+ * \brief Test for agent_create_event()
+ * \test
+ * -# Create a meta agent and add to the scheduler calling agent_create_event()
+ * -# Check if the agent for added to the scheduler and is running
+ * -# Call agent_pause() and agent_unpause() and check if the agent status changes
+ * -# Call agent_ready_event() and check if the agent status updated
+ * -# Call agent_fail_event() and check if the agent status updated
+ * -# Call agent_update_event() and check if the agent status is not updated
+ * -# Call agent_death_event() and check if the agent status is failed and agent
+ *    is removed from scheduler
+ */
 void test_agent_create_event()
 {
   scheduler_t* scheduler;
@@ -240,13 +286,13 @@ void test_agent_create_event()
 
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
-  
+
   /* test agent update event */
   agent_update_event(scheduler, NULL);
   ag = g_tree_lookup(scheduler->agents, &fagent->pid);
   FO_ASSERT_PTR_NOT_NULL(ag);
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
- 
+
   pid_set = g_new0(int, 2);
   pid_set[0] = fagent->pid;
   pid_set[1] = 0;
@@ -259,11 +305,14 @@ void test_agent_create_event()
   FO_ASSERT_EQUAL(fagent->status, AG_FAILED);
   FO_ASSERT_PTR_NULL(ag);
 
-  scheduler_close_event(scheduler, (void*)1); 
+  scheduler_close_event(scheduler, (void*)1);
   scheduler_destroy(scheduler);
 }
 
-// TODO add to suite
+/**
+ * \brief Test for agent_init()
+ * \todo finish
+ */
 void test_agent_init()
 {
   scheduler_t* scheduler;
@@ -297,7 +346,7 @@ void test_agent_init()
   FO_ASSERT_TRUE(ma->valid);
   */
 
-  scheduler_destroy(scheduler);  
+  scheduler_destroy(scheduler);
   // TODO finish
 }
 /* ************************************************************************** */

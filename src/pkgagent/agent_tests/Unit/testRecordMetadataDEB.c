@@ -22,12 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAXSQL  4096
 extern char *DBConfFile;
 /**
- * \file testRecordMetadataDEB.c
+ * \file
  * \brief unit test for RecordMetadataDEB function
  */
 
 /**
  * \brief Test pkgagent.c function RecordMetadataDEB()
+ * \test
+ * -# Create a test upload in pfile table
+ * -# Create debpkginfo object and populate it
+ * -# Call RecordMetadataDEB()
+ * -# Check if meta data got inserted in DB
  */
 void test_RecordMetadataDEB()
 {

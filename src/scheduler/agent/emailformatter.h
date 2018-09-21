@@ -21,11 +21,14 @@
 
 #include <agent.h>
 
+/**
+ * Structure to hold information about a single agent required by email formatter
+ */
 typedef struct
 {
-  guint id;
-  GString* agent;
-  gboolean status;
+  guint id;         ///< Job queue id for the agent
+  GString* agent;   ///< Agent name
+  gboolean status;  ///< Agent status (Pass => true, fail => false)
 } agent_info;
 
 /* Format rows as plain text */

@@ -46,13 +46,10 @@ class CopyrightView extends Xpview
         self::TITLE => _("View Copyright/Email/Url Analysis")
     ));
   }
-  
+
   /**
-   * @overwrite
-   * @param int $uploadId
-   * @param int $uploadTreeId
-   * @param int $agentId
-   * @return array
+   * @copydoc Fossology::Agent::Copyright::UI::Xpview::additionalVars()
+   * @see Fossology::Agent::Copyright::UI::Xpview::additionalVars()
    */
   protected function additionalVars($uploadId, $uploadTreeId, $agentId)
   {
@@ -61,7 +58,7 @@ class CopyrightView extends Xpview
       $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
     }
-    
+
     $modCopyrightHist = plugin_find('copyright-hist');
     $filter = '';
     list($output, $tableVars) = $modCopyrightHist->getTableForSingleType('statement', _("Copyright"), $uploadId, $uploadTreeId, $filter, $agentId);
@@ -71,7 +68,7 @@ class CopyrightView extends Xpview
         'script' => '<script>$(document).ready(function() { createTablestatement(); } );</script>');
     return $vars;
   }
-  
+
 }
 
 register_plugin(new CopyrightView());

@@ -15,17 +15,18 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- -------------------------------------------
-
- regexscan - A Fossology agent creation "Tutorial" in multiple stages.
-   This is stage 1 and demonstrates the fundamental agent requirements:
-
-    1. Connect to database
-    2. Connect to Scheduler
-    3. Terminate
-
  ***************************************************************/
+
+/**
+ * \file
+ * \brief Stage 1 demonstration
+ *
+ * This is stage 1 and demonstrates the fundamental agent requirements:
+ * -# Connect to database
+ * -# Connect to Scheduler
+ * -# Terminate
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -49,9 +50,9 @@ char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 
 PGconn *pgConn = NULL;  // Database connection
 
-/*********************************************************
+/**
  Usage():
- *********************************************************/
+ */
 void    Usage   (char *Name)
 {
   printf("Usage: %s [options] [id [id ...]]\n",Name);

@@ -18,12 +18,19 @@
  ***************************************************************/
 
 /**
- * \file 
- * \brief the word count agent, count the word count for one file
- *  This should be used directly from the scheduler, do not support running from command line.
- *  wc_agent get upload_id from the scheduler, then get all pfiles (the pfiles are belonging to this upload) 
- *  which are not in the table agent_wc. if one pfile already in the table, it means that we arleady counted the word count
- *  for this pfile, ignore it
+ * \file
+ * \brief The word count agent, count the word count for one file
+ *
+ * \page wcagent Word count agent
+ * \tableofcontents
+ * \section wcagentabout About Word count agent
+ * This should be used directly from the scheduler, do not support running from command line.
+ *
+ * wc_agent get upload_id from the scheduler, then get all pfiles (the pfiles are belonging to this upload)
+ * which are not in the table agent_wc. If one pfile already in the table, it means that we already counted the word count
+ * for this pfile, ignore it.
+ * \section wcagentsource Agent source
+ *   - \link src/example_wc_agent/agent \endlink
  */
 
 #include <stdlib.h>
@@ -46,20 +53,20 @@ char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 void *pgConn = NULL;
 
 /* input for this system */
-long GlobalPfileFk=-1; /* the pfile_fk to process */
-char GlobalPfile[MAXCMD]; /* the pfile (sha1.md5.len) to process */
+long GlobalPfileFk=-1;    /** The pfile_fk to process */
+char GlobalPfile[MAXCMD]; /** The pfile (sha1.md5.len) to process */
 
 /**
- * \brief check if the pfile_id is a file
- * 
- * \param long mode - mode of the pfile, if is from ufile_mode in table upload_tree
- * container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, package=1<<25,directory=1<<18 
+ * \brief Check if the pfile_id is a file
+ *
+ * \param mode mode of the pfile, if is from ufile_mode in table upload_tree\n
+ * container=1<<29, artifact=1<<28, project=1<<27, replica(same pfile)=1<<26, package=1<<25,directory=1<<18
  *
  * \return 1 on yes, is a file; 0 on no,  not a file
  */
 int IsFile(long mode)
 {
- /** 
+ /**
   * if ((mode & 1<<18) + (mode & 0040000) != 0), is dir
   * if ((mode & 1<<28) != 0), is artifact
   * if ((mode & 1<<29) != 0), is container
@@ -69,14 +76,15 @@ int IsFile(long mode)
  else return 0;
 }
 
-/** 
+/**
  * \brief This function does the work.
+ *
  * In this example, we'll just run wc and store the
  * results in the database.
- * Requires: DB open and ready.
- * 
- * \param long PfileFk - pfile id 
- * \param char * Pfile - the file path in repo
+ * \note Requires: DB open and ready.
+ *
+ * \param PfileFk pfile id
+ * \param Pfile   the file path in repo
  *
  * \return 0 on success, != 0 on failure.
  */
@@ -150,6 +158,7 @@ int ProcessData(long PfileFk, char *Pfile)
 
 /**
  * \brief Say how to run this program.
+ *
  *  Many agents permit running from the command-line
  *  for testing.
  *  At minimum, you need "-i" to initialize the DB and exit.
@@ -170,7 +179,7 @@ int main(int argc, char *argv[])
 {
   int c;
   int InitFlag=0; /* is the system just going to initialize? */
-  int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
+  int CmdlineFlag = 0; /* run from command line flag, 1 yes, 0 not */
   char *Parm = NULL;
   char *agent_desc = "File character, line, word count.";
   int pfile_count = 0;
@@ -189,7 +198,7 @@ int main(int argc, char *argv[])
   char *ErrorBuf;
 
 
-  /** initialize the scheduler connection */
+  /* initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv);
 
   /* Process command-line */
@@ -239,7 +248,7 @@ int main(int argc, char *argv[])
       Parm = fo_scheduler_current();
       if (Parm[0] != '\0')
       {
-        
+
         fo_scheduler_heart(1);
         /* 1 parameter: upload_pk */
         upload_pk = atoi(Parm);
@@ -261,7 +270,7 @@ int main(int argc, char *argv[])
             and upload_fk='%d' and agent_fk='%d'",
             upload_pk, Agent_pk);
         result = PQexec(pgConn, sqlbuf);
-        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) 
+        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__))
         {
           PQfinish(pgConn);
           exit(-1);
@@ -276,11 +285,16 @@ int main(int argc, char *argv[])
         /* Record analysis start in wc_agent_ars, the wc_agent audit trail. */
         ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
 
-        /** get all pfile ids on a upload record */
+        /* get all pfile ids on a upload record */
         memset(sqlbuf, 0, sizeof(sqlbuf));
-        snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as pfile_id, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile_path, ufile_mode FROM uploadtree, pfile  WHERE uploadtree.pfile_fk = pfile.pfile_pk AND pfile.pfile_pk not in(SELECT pfile_fk from agent_wc) AND upload_fk = '%d' LIMIT 5000;", upload_pk);
+        snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as pfile_id,"
+            " pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfile_path,"
+            " ufile_mode FROM uploadtree, pfile"
+            " WHERE uploadtree.pfile_fk = pfile.pfile_pk"
+            "   AND pfile.pfile_pk not in(SELECT pfile_fk from agent_wc)"
+            "   AND upload_fk = '%d' LIMIT 5000;", upload_pk);
         result = PQexec(pgConn, sqlbuf);
-        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__)) 
+        if (fo_checkPQresult(pgConn, result, sqlbuf, __FILE__, __LINE__))
         {
           PQfinish(pgConn);
           exit(-1);

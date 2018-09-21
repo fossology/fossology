@@ -14,6 +14,12 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************************/
+
+/**
+ * \file
+ * \brief Traverse directories
+ */
+
 #include "ununpack.h"
 #include "externs.h"
 
@@ -91,8 +97,9 @@ void	TraverseStart	(char *Filename, char *Label, char *NewDir,
 
 /**
  * \brief Called by exec'd child to process.
- *        The child never leaves here!  It calls EXIT!
- *         Exit is 0 on success, non-zero on failure.
+ *
+ * The child never leaves here! It calls EXIT!
+ * Exit is 0 on success, non-zero on failure.
  * \param Index Child index into the queue table
  * \param CI The ContainerInfo
  * \param NewDir Optional, specifies an alternate directory to extract to.
@@ -107,17 +114,22 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   switch(Type)
   {
     case CMD_PACK:
-      /* If the file processed is one original uploaded file and it is an archive,
+      /**
+       * If the file processed is one original uploaded file and it is an archive,
        * also using repository, need to reset the file name in the archive,
        * if do not reset, for the gz Z bz2 archives, the file name in the archive is
        * sha1.md5.size file name, that is:
+       *
        * For example:
+       * \code
        * argmatch.c.gz    ---> CI->Source  --->
        * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.292
        * CI->PartnameNew --->
        * 657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6
+       * \endcode
        * so in order to get the original file name(CI->PartnameNew): we need get the
        * upload archive name first, then get rid of the postfix.
+       *
        * For example:
        * for test.gz, get rid of .gz, get the original file name 'test',
        * replace sha1.md5.size file name with 'test'.
@@ -128,7 +140,8 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
         strncpy(CI->PartnameNew, UploadFileName, sizeof(CI->PartnameNew) - 1);
       }
       else
-        /* If the file processed is a sub-archive, in the other words, it is part of other archive,
+        /**
+         * If the file processed is a sub-archive, in the other words, it is part of other archive,
          * or not using repository, need get rid of the postfix
          * two time, for example:
          * 1. for test.tar.gz, it is in test.rpm, when test.tar.gz is unpacked,
@@ -204,7 +217,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
   if (rc)
   {
     /* if command failed but we want to continue anyway */
-    /** Note: CMD_DEFAULT will never get here because rc==0 **/
+    /* Note: CMD_DEFAULT will never get here because rc==0 */
     if (strstr(CMD[CI->PI.Cmd].Cmd, "unzip") && (rc == 82))
     {
       LOG_ERROR("pfile %s Command %s failed on: %s, Password required.",
@@ -230,7 +243,7 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
  **/
 int CountFilename(char *Pathname, char *Dirname)
 {
-  char *FullDirname;  /* full Dirname (includes forward and trailing slashes and null terminator) */
+  char *FullDirname;  /** Full Dirname (includes forward and trailing slashes and null terminator) */
   char *sp;
   int   FoundCount = 0;
   int   NameLen;
@@ -429,7 +442,7 @@ int	Traverse	(char *Filename, char *Basename,
       chmod(Filename,(CI.Stat.st_mode | 0600));
     }
 
-    /** if it made it this far, then it's spawning time! **/
+    /* if it made it this far, then it's spawning time! */
     /* Determine where to put the output */
     Index=0;
     while((Index < MAXCHILD) && (Queue[Index].ChildPid != 0))
@@ -519,7 +532,7 @@ int	Traverse	(char *Filename, char *Basename,
     if (RecurseOk && CMD[CI.PI.Cmd].MetaCmd && CMD[CI.PI.Cmd].MetaCmd[0])
     {
       /* extract meta info */
-      /** This needs to call AddToRepository() or DisplayContainerInfo() **/
+      /* This needs to call AddToRepository() or DisplayContainerInfo() */
       char Cmd[2*FILENAME_MAX];
       char Fname[FILENAME_MAX];
       memcpy(&CImeta,&CI,sizeof(CI));
@@ -535,7 +548,7 @@ int	Traverse	(char *Filename, char *Basename,
       strcat(CImeta.Partname,".meta");
 
       /* remove the destination file if it exists */
-      /** this gets past any permission problems with read-only files **/
+      /* this gets past any permission problems with read-only files */
       unlink(CImeta.Source);
 
       /* build the command and run it */

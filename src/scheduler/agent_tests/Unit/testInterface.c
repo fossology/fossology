@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test for interface operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -37,6 +41,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** local declarations ************************************************** */
 /* ************************************************************************** */
 
+/**
+ * Check the processor architecture (32/64 bit)
+ */
 #if defined(__amd64__)
   #define mint_t int64_t
 #else
@@ -100,6 +107,19 @@ void* interface_listen_thread(void* unused);
 /* **** interface function tests ******************************************** */
 /* ************************************************************************** */
 
+/**
+ * \brief Test for interface_init()
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Initialize interface on the scheduler using interface_init()
+ * -# Check the scheduler for
+ *     -# `i_created` as TRUE
+ *     -# `i_terminate` as FALSE
+ *     -# `server` as not NULL
+ *     -# `workers` as not NULL
+ *     -# `cancel` as not NULL
+ * -# Destroy the scheduler and interface
+ */
 void test_interface_init()
 {
   scheduler_t* scheduler;
@@ -129,6 +149,15 @@ void test_interface_init()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for interface_destroy()
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Destroy interface on the scheduler using interface_destroy() multiple times
+ * -# Check the scheduler for
+ *     -# `i_created` as FALSE
+ *     -# `i_terminate` as FALSE
+ */
 void test_interface_destroy()
 {
   scheduler_t* scheduler;
@@ -153,6 +182,17 @@ void test_interface_destroy()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for interface_listen_thread()
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Set scheduler's `i_terminate` and `i_created` to TRUE and call
+ * interface_listen_thread()
+ * -# Check for the result
+ * -# Set scheduler's `i_terminate` and `i_created` to FALSE and call
+ * interface_listen_thread()
+ * -# Check for the result
+ */
 void test_interface_listen_thread()
 {
   mint_t result;
@@ -173,6 +213,15 @@ void test_interface_listen_thread()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for interface_init() thread pool
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Initialize interface using interface_init()
+ * -# Check the pool's max threads equals the value set in fossology.conf
+ * -# Check the unprocessed workers in pool is 0
+ * -# Connect to the scheduler port and check if result is TRUE
+ */
 void test_interface_pool()
 {
   scheduler_t* scheduler;
@@ -225,6 +274,15 @@ void test_interface_pool()
   FO_ASSERT_EQUAL((int)result, (int)len);            \
   FO_ASSERT_STRING_EQUAL(buffer, res)
 
+/**
+ * \brief Test for close message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send `close` message on the interface
+ * -# Check for the result on socket which should contain\n
+ * `recieved\nCLOSE`
+ */
 void test_sending_close()
 {
   // buffer for the port that the interface is listening on
@@ -258,6 +316,15 @@ void test_sending_close()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for load message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send `load` message on the interface
+ * -# Check for the result on socket which should contain\n
+ * `received\nhost:<host> address:<address> max:<max> running:0\nend`
+ */
 void test_sending_load()
 {
   char buffer[1024];
@@ -282,6 +349,18 @@ void test_sending_load()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for kill message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send invalid \b kill message on the interface
+ * -# Check for the result on socket which should contain\n
+ * `received\nInvalid kill command: <kill message>`
+ * -# Send valid \b kill message on the interface
+ * -# Check for the result on socket which should contain\n
+ * `received` and queue length should decrease
+ */
 void test_sending_kill()
 {
   char buffer[1024];
@@ -343,6 +422,18 @@ void test_sending_kill()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for pause message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send invalid \b pause message on the interface
+ * -# Check for the result on socket which should contain\n
+ * `received\nInvalid pause command: <pause message>`
+ * -# Send valid \b pause message on the interface (`pause <job id>`)
+ * -# Check for the result on socket which should contain\n
+ * `received` and queue length should decrease
+ */
 void test_sending_pause()
 {
   char buffer[1024];
@@ -393,6 +484,15 @@ void test_sending_pause()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for reload message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send valid \b reload message on the interface (`pause <job id>`)
+ * -# Check for the result on socket which should contain\n
+ * `received` and a new event `scheduler_config_event` should be triggered
+ */
 void test_sending_reload()
 {
   char buffer[1024];
@@ -422,6 +522,15 @@ void test_sending_reload()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for agent message on interface
+ * \test
+ * -# Initialize scheduler and interface
+ * -# Create a socket connection to scheduler
+ * -# Send valid \b agent message on the interface (`pause <job id>`)
+ * -# Check for the result on socket which should contain\n
+ * `received` and a new event `list_agents_event` should be triggered
+ */
 void test_sending_agents()
 {
   char buffer[1024];

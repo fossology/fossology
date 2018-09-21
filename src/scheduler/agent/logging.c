@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Log related operations
+ */
 
 /* local includes */
 #include <event.h>
@@ -35,7 +39,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 /**
  * The main log, this is global because every function within the scheduler
- * hould have access to the main log.
+ * should have access to the main log.
  */
 log_t* main_log = NULL;
 
@@ -49,8 +53,8 @@ log_t* main_log = NULL;
  */
 typedef struct
 {
-    log_t* log;
-    gchar* msg;
+    log_t* log;   ///< Log to use
+    gchar* msg;   ///< Message to log
 } log_event_args;
 
 /**
@@ -58,6 +62,7 @@ typedef struct
  * processing them in a side thread. This is used so that prints will happen
  * in the correct order instead of intermixed.
  *
+ * @param scheduler Related scheduler reference
  * @param pass  the arguments for the event
  */
 static void log_event(scheduler_t* scheduler, log_event_args* pass)
@@ -77,12 +82,12 @@ static void log_event(scheduler_t* scheduler, log_event_args* pass)
  * This will open and set the parameters of a log_t type. This checks the name
  * given and checks if it is a directory. If it is a directory, it will try to
  * open a file named fossology.log inside the directory instead. If the file
- * cannot be openned, this will return NULL.
+ * cannot be opened, this will return NULL.
  *
- * @param log_name  the name or directory of the log file
- * @param pro_name  the name of the process printed to the log file, can be NULL
- * @param pro_pid   the pid of the process that this log file belongs to
- * @return          a new log_t stucture
+ * @param log_name  The name or directory of the log file
+ * @param pro_name  The name of the process printed to the log file, can be NULL
+ * @param pro_pid   The pid of the process that this log file belongs to
+ * @return          A new log_t structure
  */
 log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
 {
@@ -123,10 +128,11 @@ log_t* log_new(gchar* log_name, gchar* pro_name, pid_t pro_pid)
 /**
  * @brief Creates a log file structure based on an already created FILE*
  *
- * @param log_file  the already existing FILE*
- * @param pro_name  the name of the process to write to the log file
- * @param pro_pid   the PID of the process to write to the log file
- * @return          a new log_t instance that can be used to write to
+ * @param log_file  The already existing FILE*
+ * @param log_name  The name or directory of the log file
+ * @param pro_name  The name of the process to write to the log file
+ * @param pro_pid   The PID of the process to write to the log file
+ * @return          A new log_t instance that can be used to write to
  */
 log_t* log_new_FILE(FILE* log_file, gchar* log_name, gchar* pro_name, pid_t pro_pid)
 {
@@ -170,13 +176,16 @@ void log_destroy(log_t* log)
 }
 
 /**
- * main logging function. This will print the time stamp for the log and the
+ * @brief Main logging function.
+ *
+ * This will print the time stamp for the log and the
  * scheduler's pid, followed by whatever is to be printed to the log. This
  * function will also make sure that the log is open, and if it isn't open
  * it using whatever the log_name is currently set to. This should be used
  * almost identically to a normal printf
  *
- * @param fmt the format for the printed data
+ * @param log The log to print to
+ * @param fmt The format for the printed data
  * @return 1 on success, 0 otherwise
  */
 int lprintf(log_t* log, const char* fmt, ...)
@@ -201,12 +210,15 @@ int lprintf(log_t* log, const char* fmt, ...)
 }
 
 /**
- * The provides the same functionality for lprintf as vprintf does for printf.
+ * @brief The provides the same functionality for lprintf as vprintf does for
+ * printf.
+ *
  * If somebody wanted to create a custom logging function, they could simply
  * use this function within a va_start va_end pair.
  *
- * @param fmt the formatting string for the print
- * @param args the arguemtn for the print in and form of a va_list
+ * @param log The log to print to
+ * @param fmt The formatting string for the print
+ * @param args The arguemtn for the print in and form of a va_list
  * @return 1 on success, 0 otherwise
  */
 int vlprintf(log_t* log, const char* fmt, va_list args)
@@ -260,8 +272,11 @@ int vlprintf(log_t* log, const char* fmt, va_list args)
  * does have the disadvantage that two call of clprintf right next to each other
  * will not necessarily fall next to each other in the log.
  *
- * @param fmt  the format string like any normal printf function
- * @return  if the printf was successful.
+ * @param log  The log to print to
+ * @param s_name  Name of the source file printing the log
+ * @param s_line  Line number of the source file
+ * @param fmt  The format string like any normal printf function
+ * @return  If the printf was successful.
  */
 int clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...)
 {

@@ -26,8 +26,8 @@ extern int debug;
 /**
  * \brief Get a bucketpool_pk based on the bucketpool_name
  *
- * \param PGconn $pgConn  Database connection object
- * \param char $bucketpool_name
+ * \param pgConn          Database connection object
+ * \param bucketpool_name Bucket pool name
  *
  * \return active bucketpool_pk or 0 if error
 ****************************************************/
@@ -50,12 +50,12 @@ FUNCTION int getBucketpool_pk(PGconn *pgConn, char *bucketpool_name)
 
 
 /**
- * \brief Initialize the bucket definition list
+ * \brief Initialize the bucket definition list.
  * If an error occured, write the error to stdout
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param cacheroot_t $pcroot  license cache root
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param pcroot        License cache root
  *
  * \return an array of bucket definitions (in eval order)
  * or 0 if error.
@@ -185,13 +185,13 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
 /**
  * \brief Read the match only file (bucket type 2)
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename  File name of match_only file
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      File name of match_only file
+ * \param pcroot        Look up cache root
  *
  * \return an array of rf_pk's that match the licenses
- * in filename.
- * or 0 if error.
+ * in filename or 0 if error.
  */
 FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
                              char *filename, cacheroot_t *pcroot)
@@ -269,14 +269,13 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
 /**
  * \brief Read the match every file filename, for bucket type 1
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      File name to match against
+ * \param pcroot        License cache
  *
  * \return an array of arrays of rf_pk's that define a
- * match_every combination.
- * or 0 if error.
+ * match_every combination or 0 if error.
  */
 FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
                              char *filename, cacheroot_t *pcroot)
@@ -349,19 +348,21 @@ FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
 /**
  * \brief Parse filename, for bucket type 5 REGEX-FILE
  * Lines are in format:
- * {ftype1} {regex1} {op} {ftype2} {regex2}
+ * \code {ftype1} {regex1} {op} {ftype2} {regex2} \endcode
  *
  * ftype is either "license" or "filename" \n
  * op is either "and" (1) or "or" (2) or "not" (3) \n
  * The op clause is optional. \n
- * For example: \n
+ * For example:
+ * \code
  *   license bsd.*clause \n
- *   license (GPL_?v3|Affero_v3) and filename .*mypkg \n
+ *   license (GPL_?v3|Affero_v3) and filename .*mypkg
+ * \endcode
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      Filename to be parsed
+ * \param pcroot        License cache
  *
  * \return an array of arrays of regex_file_t's that
  *        represent the rows in filename. \n
@@ -487,7 +488,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
   }
 
   /* bad file data.  Die unceremoniously.
-   * todo: die more gracefully.
+   * \todo: die more gracefully.
    */
   if (errorCount) exit(-1);
 
@@ -505,9 +506,9 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
  * \brief Given a filetype token from REGEX-FILE
  * return the token int representation.
  *
- * \param char $token
- * \param char $filepath  path of REGEX-FILE data file.
- *                       used for error reporting only.
+ * \param token    Token to convert
+ * \param filepath Path of REGEX-FILE data file.
+ *                 used for error reporting only.
  *
  * \return 1=filename, 2=license
  */
@@ -526,13 +527,13 @@ FUNCTION int getRegexFiletype(char *token, char *filepath)
  * \brief Given a string with | separated license names
  * return an integer array of rf_pk's
  *
- * \param PGconn $pgConn  Database connection object
- * \param char $nameStr   string of lic names eg "bsd | gpl"
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn  Database connection object
+ * \param nameStr String of lic names eg "bsd | gpl"
+ * \param pcroot  License cache
  *
  * \return an array of rf_pk's that match the names in nameStr
  *
- * if nameStr contains a license name that is not in
+ * \note If nameStr contains a license name that is not in
  * the license_ref file, then 0 is returned since there
  * is no way to match all the listed licenses.
  */
@@ -601,14 +602,14 @@ FUNCTION int *getLicsInStr(PGconn *pgConn, char *nameStr,
  * \brief Get the latest nomos agent_pk that has data for this
  * this uploadtree.
  *
- * \param PGconn $pgConn  Database connection object
- * \param int    $upload_pk
+ * \param pgConn    Database connection object
+ * \param upload_pk Upload id
  *
  * \return nomos_agent_pk of the latest version of the nomos agent
  *        that has data for this upload. \n
  *        Or 0 if there is no license data available
  *
- * NOTE: This function writes error to stdout
+ * \note This function writes error to stdout
  */
 FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
 {
@@ -638,13 +639,13 @@ FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
  * uploadtree_pk of it's children (i.e. scan down through
  * artifacts to get the children's parent
  *
- * \param PGconn $pgConn  Database connection object
- * \param int    $uploadtree_pk
+ * \param pgConn        Database connection object
+ * \param uploadtree_pk Upload tree id for container
  *
  * \return uploadtree_pk of children's parent. \n
  *         Or 0 if there are no children (empty container or non-container)
  *
- * NOTE: This function writes error to stdout
+ * \note This function writes error to stdout
  */
 FUNCTION int childParent(PGconn *pgConn, int uploadtree_pk)
 {

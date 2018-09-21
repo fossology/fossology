@@ -17,14 +17,14 @@
 
  ***************************************************************/
 /**
- * \file process.c
+ * \file
  * \brief Functions to process a single file and process an upload
  */
 
 #include "maintagent.h"
 
 /**********  Globals  *************/
-extern PGconn    *pgConn;        // database connection
+extern PGconn    *pgConn;        ///< database connection
 
 
 /**
@@ -101,14 +101,18 @@ FUNCTION void ValidateFolders()
 
 /**
  * @brief Verify and optionally fix file permissions
+
+ \code
  /usr/share/fossology drwxr-sr-x 15 fossy fossy
- /srv/repostitory 
- path  /srv/fossology/repository drwxrws--- 3 fossy fossy
+ /srv/repostitory
+ path /srv/fossology/repository drwxrws--- 3 fossy fossy
  /etc/fossology drwxr-sr-x 4 fossy fossy
  /usr/local/lib/fossology/ drwxr-sr-x 2 fossy fossy
+ \endcode
  *
  * @param fix 0 to report bad permissions, 1 to report and fix them
  * @returns void but writes status to stdout
+ * @todo Verify file permissions is not implemented yet
  */
 FUNCTION void VerifyFilePerms(int fix)
 {
@@ -137,6 +141,7 @@ LOG_NOTICE("Verify file permissions is not implemented yet");
  * @brief Remove Uploads with no pfiles
  *
  * @returns void but writes status to stdout
+ * @todo Optimize query
  */
 FUNCTION void RemoveUploads()
 {
@@ -168,8 +173,8 @@ FUNCTION void RemoveUploads()
  */
 FUNCTION void RemoveTemps()
 {
-  PGresult* result; 
-  PGresult* DropResult; 
+  PGresult* result;
+  PGresult* DropResult;
   int row;
   int NumRows;
   int DroppedCount = 0;
@@ -208,6 +213,7 @@ FUNCTION void RemoveTemps()
  * @brief Process expired uploads (slow)
  *
  * @returns void but writes status to stdout
+ * @todo Process expired uploads is not implemented yet
  */
 FUNCTION void ProcessExpired()
 {
@@ -230,10 +236,12 @@ LOG_NOTICE("Process expired uploads is not implemented yet");
 
 /**
  * @brief Remove orphaned files from the repository (slow)
- *        Loop through each file in the repository and make sure there is a pfile table entry.
- *        Then make sure the pfile_pk is used by uploadtree.
+ *
+ * Loop through each file in the repository and make sure there is a pfile table entry.
+ * Then make sure the pfile_pk is used by uploadtree.
  *
  * @returns void but writes status to stdout
+ * @todo Remove orphaned files from the repository is not implemented yet
  */
 FUNCTION void RemoveOrphanedFiles()
 {
@@ -256,9 +264,11 @@ LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
 
 /**
  * @brief Delete orphaned gold files from the repository
- *        Loop through each gold file in the repository and make sure there is a pfile entry in the upload table.
+ *
+ * Loop through each gold file in the repository and make sure there is a pfile entry in the upload table.
  *
  * @returns void but writes status to stdout
+ * @todo Remove orphaned gold files from the repository is not implemented yet
  */
 FUNCTION void DeleteOrphanGold()
 {
@@ -306,7 +316,7 @@ FUNCTION void NormalizeUploadPriorities()
   result = PQexec(pgConn, sql3);
   if (fo_checkPQcommand(pgConn, result, sql3, __FILE__, __LINE__)) ExitNow(-213);
   PQclear(result);
-  
+
   EndTime = (long)time(0);
   printf("Normalized upload priorities (%ld seconds)\n", EndTime-StartTime);
 
@@ -334,7 +344,7 @@ FUNCTION void reIndexAllTables()
   PQclear(result);
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) ExitNow(-215);
-  
+
   EndTime = (long)time(0);
   printf("Time taken for reindexing the database : %ld seconds\n", EndTime-StartTime);
 

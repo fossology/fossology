@@ -22,8 +22,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <unistd.h>
 
 /**
- * \file testRun.c
- * \brief main function for in this testing module
+ * \dir mimetype/agent_tests/Unit
+ * \brief Unit tests for mimetype agent
+ * \dir mimetype/agent_tests/Unit/finder
+ * \brief Actual test cases
+ * \file
+ * \brief Main function for in this testing module
  */
 
 char *DBConfFile = NULL;
@@ -57,7 +61,7 @@ CU_SuiteInfo suites[] = {
 #endif
 
 /*
- * \brief create required tables
+ * \brief Create required tables
  */
 void createTables()
 {
@@ -143,7 +147,7 @@ void createTables()
 }
 
 /*
- * \brief  main test function
+ * \brief Main test function
  */
 int main( int argc, char *argv[] )
 {

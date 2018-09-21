@@ -16,6 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ********************************************************/
+/**
+ * \headerfile ""
+ * Contains all the functions supported by delagent
+ */
 #ifndef _DELAGENT_H
 #define _DELAGENT_H 1
 
@@ -35,14 +39,34 @@
 #include "libfossology.h"
 
 extern int Verbose;
+/**
+ * \var int Test
+ * Set if working in test mode else 0
+ */
 extern int Test;
 
 /* for DB */
 extern PGconn* db_conn;
 
+/**
+ * \def MAXSQL
+ * Maximum length of SQL commands
+ */
 #define MAXSQL  1024
+/**
+ * \def MAXSQLFolder
+ * Maximum length of folder address
+ */
 #define MAXSQLFolder 1024
+/**
+ * \def MAXLINE
+ * Maximum length of a line
+ */
 #define MAXLINE 1024
+/**
+ * \def myBUFSIZ
+ * Maximum buffer size
+ */
 #define myBUFSIZ 2048
 
 /* authentication and permission checking */

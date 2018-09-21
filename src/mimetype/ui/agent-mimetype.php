@@ -19,6 +19,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @file
+ * @brief UI plugin for mimetype agent
+ * @class MimetypeAgentPlugin
+ * @brief UI plugin for mimetype agent
+ */
 class MimetypeAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -29,6 +35,10 @@ class MimetypeAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "mimetype agent", "mimetype_ars");

@@ -31,11 +31,12 @@ use Fossology\Lib\Auth\Auth;
 
 
 /**
- * \brief Create
- *        new groups, group_user_member, perm_upload and perm_folder records
+ * \brief Create new groups, group_user_member, perm_upload and perm_folder records
  *        to support 2.2 permissions.
  *
- * \return 0 on success, 1 on failure
+ * \param boolean $Verbose Print verbose debugging messages
+ *
+ * \return int 0 on success, 1 on failure
  **/
 function Migrate_21_22($Verbose)
 {

@@ -1,11 +1,15 @@
 #!/usr/bin/python -u
+##
+# @dir
+# @brief Functional testing module
+# @file
+# @brief Functional testing module 
+# 
+# Module uses a simple xml file to describe a set of functional tests. This was
+# originally written for the FOSSology scheduler and as such is tailored to
+# testing that piece of software.
+
 """
-  Functional testing module 
-  
-  Module uses a simple xml file to describe a set of functional tests. This was
-  originally written for the FOSSology scheduler and as such is tailored to
-  testing that piece of software.
- 
   ==============================================================================
   Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
  
@@ -46,8 +50,10 @@ defsSplit   = re.compile('([^\s]+):([^\s]+)')
 class DefineError(Exception):
   """ Error class used for missing definitions in the xml file """
   def __init__(self, value):
+    """ Constructor """
     self.value = value
   def __str__(self):
+    """ To string """
     return repr(self.value)
 
 class TimeoutError(Exception):
@@ -55,14 +61,13 @@ class TimeoutError(Exception):
   pass
 
 def timeout(func, maxRuntime):
-  """
-  @brief Allows the caller to set a max runtime for a particular function call.
-  
-  @param func        the function that will have the max runtime
-  @param maxRuntime  the max amount of time alloted to the function in seconds
-  
-  Returns a Boolean, True indicating that the function finished, False otherwise
-  """
+  ##
+  # @brief Allows the caller to set a max runtime for a particular function call.
+  #
+  # @param func        the function that will have the max runtime
+  # @param maxRuntime  the max amount of time alloted to the function in seconds
+  #
+  # Returns a Boolean, True indicating that the function finished, False otherwise
   
   def timeout_handler(signum, frame):
     raise TimeoutError()
@@ -639,6 +644,9 @@ class testsuite:
 ################################################################################
 
 def main():
+  """
+  Main entry point for the Functional tests
+  """
   usage = "usage: %prog [options]"
   parser = OptionParser(usage = usage)
   parser.add_option("-t", "--tests",    dest = "testfile",   help = "The xml file to pull the tests from")

@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief CLI interface for scheduler
+ */
 
 /* std library includes */
 #include <stdio.h>
@@ -40,10 +44,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define vprintf(...) if(verbose) printf(__VA_ARGS__);
 
-int response = 1; ///< is a response expected from the scheduler
-int s;            ///< the socket that the CLI will use to communicate
-int verbose;      ///< the verbose flag for the cli
-fo_conf* conf;    ///< the loaded configuration data
+int response = 1; ///< Is a response expected from the scheduler
+int s;            ///< The socket that the CLI will use to communicate
+int verbose;      ///< The verbose flag for the cli
+fo_conf* conf;    ///< The loaded configuration data
 
 /* ************************************************************************** */
 /* **** utility functions *************************************************** */
@@ -55,7 +59,7 @@ fo_conf* conf;    ///< the loaded configuration data
  * Creates a new socket that connects to the given host and port.
  *
  * @param host  Cstring name of the host to connect to
- * @param port  Cstring representation of the port to connec to
+ * @param port  Cstring representation of the port to connect to
  * @return      The file descriptor of the new socket
  */
 int socket_connect(char* host, char* port)
@@ -98,7 +102,7 @@ int socket_connect(char* host, char* port)
 }
 
 /**
- * @brief performs the actions necessary to receive from the scheduler.
+ * @brief Performs the actions necessary to receive from the scheduler.
  *
  * @param s       the socket that is connected to the scheduler
  * @param buffer  buffer that is used to store messages from the scheduler
@@ -161,6 +165,11 @@ uint8_t receive(int s, char* buffer, size_t max, uint8_t end)
   return closing;
 }
 
+/**
+ * @brief Interface usage print
+ *
+ * Prints the usage message for the interface on stdout.
+ */
 void interface_usage()
 {
   printf("FOSSology scheduler command line interface\n");

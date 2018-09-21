@@ -26,7 +26,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "testRun.h"
 
 /**
- * \file testRun.c
+ * \file
  * \brief main function for in this testing module
  */
 
@@ -34,6 +34,10 @@ char *DBConfFile = NULL;
 
 extern CU_SuiteInfo suites[];
 
+/**
+ * \brief Helper function to get db owner
+ * \return Owner of the database
+ */
 char* getUser()
 {
   char CMD[200], *user;
@@ -59,6 +63,7 @@ char* getUser()
 
 /**
  * \brief initialize db
+ * \return 0 on success, -1 otherwise
  */
 int DelagentDBInit()
 {
@@ -110,6 +115,7 @@ int DelagentClean()
 
 /**
  * \brief init db and repo
+ * \return 0 on success, -1 otherwise
  */
 int DelagentInit()
 {

@@ -15,12 +15,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \brief Unit test cases for TaintString()
+ */
 static int Result = 0;
 static int DestLen = 4096;
 
 /**
- * @brief function TaintString
+ * @brief function TaintString()
+ * \test
+ * -# Check the replace functionality of TaintString()
  */
 void testTaintString1()
 {
@@ -31,7 +35,9 @@ void testTaintString1()
   FO_ASSERT_STRING_EQUAL(Dest, "testReplaceTaintstring");
 }
 /**
- * @brief function TaintString
+ * @brief function TaintString()
+ * \test
+ * -# Check if TaintString() escapes quotes and slashes
  */
 void testTaintString2()
 {
@@ -42,7 +48,9 @@ void testTaintString2()
   FO_ASSERT_STRING_EQUAL(Dest, "test'\\''Taintstring");
 }
 /**
- * @brief function TaintString
+ * @brief function TaintString()
+ * \test
+ * -# Check if TaintString() escapes escaped slashes
  */
 void testTaintString3()
 {
@@ -53,8 +61,11 @@ void testTaintString3()
   FO_ASSERT_STRING_EQUAL(Dest, "test\\\\Taintstring");
 }
 /**
- *  * @brief function TaintString
- *   */
+ * @brief function TaintString()
+ * \test
+ * -# Check if TaintString() preserves quotes and remove slashes
+ * using ProtectQuotes parameter
+ */
 void testTaintString4()
 {
   char Dest[DestLen];

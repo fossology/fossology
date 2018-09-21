@@ -21,22 +21,58 @@
 
  The bucket agent uses user rules (see bucket table) to classify
  files into user categories (buckets).
+ \page buckets Buckets agent
+ \tableofcontents
+
+ The bucket agent uses user rules (see bucket table) to classify
+ files into user categories (buckets).
 
  Containers are in all the buckets of their contents.
 
  Packages, like all other container, are in the buckets of their children.
  In addition, packages can have their own rules that will place them in
  additional buckets.
+
+ \section bucketsactions Supported actions
+ Command line flag|Description|
+ ---:|:---|
+ -i|Initialize the database, then exit|
+ -n|Bucketpool name of bucketpool to use|
+ -p|Bucketpool_pk of bucketpool to use|
+ -r|Rerun buckets|
+ -t|Uploadtree_pk, root of tree to scan|
+ -u|Upload_pk to scan|
+ -v|Verbose (turns on copious debugging output)|
+ -V|Print the version info, then exit|
+ -c SYSCONFDIR|Specify the directory for the system configuration|
+ \note
+ -n and -p are mutually exclusive.  If both are specified
+ -p is used. One of these is required.
+
+ \note
+ -t and -u are mutually exclusive.  If both are specified
+ -u is used. One of these is required.
+ \note
+ If none of -nptu are specified, the bucketpool_pk and upload_pk
+ are read from stdin, one comma delimited pair per line.
+ For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.
+ This is the normal execution from the scheduler.
+ \section bucketssource Agent source
+   - \link src/buckets/agent \endlink
+   - \link src/buckets/ui \endlink
  */
 
 #include "buckets.h"
 
+/** Print debug messages */
 int debug = 0;
 
-/* global mimetype_pk's for Debian source and binary packages */
+/** global mimetype_pk's for Debian source packages */
 int DEB_SOURCE;
+/** global mimetype_pk's for Debian binary packages */
 int DEB_BINARY;
 
+/** Bucket agent build version */
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="buckets build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else

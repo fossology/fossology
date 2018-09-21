@@ -16,6 +16,15 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * @file dbmigrate_bulk_license.php
+ * @brief This file is called by fossinit.php to transform bulk licenses
+ *        into bulk license sets and drop rf_fk column from license_ref_bulk
+ *        It migrates from 2.6.3.3 to 3.0.0
+ *
+ * This should be called after fossinit calls apply_schema.
+ **/
+
 echo "Transform bulk licenses into bulk license sets...";
 $dbManager->queryOnce('
   INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing)

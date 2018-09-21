@@ -16,6 +16,16 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * @file dbmigrate_clearing-event.php
+ * @brief This file is called by fossinit.php to ensure that
+ *        every user had chosen an active group, link decisions with groups,
+ *        fill clearing event table with old decisions and link them with decisions
+ *        It migrates from 2.6 to 2.6.3
+ *
+ * This should be called after fossinit calls apply_schema.
+ **/
+
 echo "Ensure that every user had chosen an active group";
 $dbManager->queryOnce('UPDATE users SET group_fk=gum.group_fk FROM group_user_member gum WHERE users.group_fk is null and user_pk=user_fk');
         

@@ -18,6 +18,10 @@
 
 define("TITLE_core_debug_fileloc", _("Global Variables"));
 
+/**
+ * @class core_debug_fileloc
+ * @brief Plugin to display global variables
+ */
 class core_debug_fileloc extends FO_Plugin
 {
   function __construct()
@@ -30,8 +34,10 @@ class core_debug_fileloc extends FO_Plugin
   }
 
   /**
-   * \brief This is where we check for
+   * @brief This is where we check for
    * changes to the full-debug setting.
+   * @copydoc FO_Plugin::PostInitialize()
+   * @see FO_Plugin::PostInitialize()
    */
   function PostInitialize()
   {
@@ -51,7 +57,8 @@ class core_debug_fileloc extends FO_Plugin
 
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   public function Output()
   {

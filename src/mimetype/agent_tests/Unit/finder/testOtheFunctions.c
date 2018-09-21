@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testOtherFunctions.c
- * \brief testing for the function CheckMimeTypes, GetDefaultMime, GetFieldValue 
+ * \file
+ * \brief Testing for the function CheckMimeTypes, GetDefaultMime, GetFieldValue
  */
 
 extern int CheckMimeTypes  (char *Ext);
@@ -36,7 +36,7 @@ static long upload_pk = -1;
 static long pfile_pk = -1;
 
 /**
- * \brief initialize
+ * \brief initialize DB
  */
 int  DBInit()
 {
@@ -82,7 +82,7 @@ int  DBInit()
   pfile_pk  = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /** insert upload ununpack.c */
+  /* insert upload ununpack.c */
    memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts,pfile_fk) VALUES ('ununpack.c',40,now(),'%ld');", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -92,7 +92,7 @@ int  DBInit()
     exit(-1);
   }
   PQclear(result);
- 
+
   /* select upload_pk */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"SELECT upload_pk FROM upload WHERE pfile_fk = '%ld';",
@@ -106,7 +106,7 @@ int  DBInit()
   upload_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /** insert uploadtree */
+  /* insert uploadtree */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL,MAXCMD,"INSERT INTO uploadtree (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,1,48,'ununpack.c');", upload_pk, pfile_pk);
   result = PQexec(pgConn, SQL);
@@ -127,7 +127,7 @@ int  DBInit()
   }
   PQclear(result);
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
-  /** clear all data in mimetype */
+  /* clear all data in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype;");
   result =  PQexec(pgConn, SQL);
@@ -162,7 +162,7 @@ int DBClean()
   }
   PQclear(result);
 
-  /** delete uploadtree info */
+  /* delete uploadtree info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM uploadtree WHERE upload_fk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -173,7 +173,7 @@ int DBClean()
   }
   PQclear(result);
 
-  /** delete upload info */
+  /* delete upload info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM upload WHERE upload_pk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -184,7 +184,7 @@ int DBClean()
   }
   PQclear(result);
 
-  /** delete pfile info */
+  /* delete pfile info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM pfile WHERE pfile_pk = %ld;", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -214,15 +214,20 @@ int DBClean()
 /* test functions */
 
 /**
- * \brief for function CheckMimeTypes
+ * \brief for function CheckMimeTypes()
+ * \test
+ * -# Clear mimetype for \c bin extension in mimetype table
+ * -# Get mimetype id for \c bin extension from CheckMimeTypes()
+ * -# Check if the return id matched DB id
+ * -# Check for one more extension
  */
 void testCheckMimeTypes()
 {
-  /** for the file, if the extension is bin, the mime type is application/octet-stream */
+  /* for the file, if the extension is bin, the mime type is application/octet-stream */
   char Ext[] = "bin";
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
-  /** extension is bin */
-  /** delete the record the mimetype_name is application/octet-stream in mimetype, before testing */
+  /* extension is bin */
+  /* delete the record the mimetype_name is application/octet-stream in mimetype, before testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'application/octet-stream';");
   result =  PQexec(pgConn, SQL);
@@ -232,9 +237,9 @@ void testCheckMimeTypes()
     exit(-1);
   }
   PQclear(result);
-  /** testing the function CheckMimeTypes */
+  /* testing the function CheckMimeTypes */
   int ret = CheckMimeTypes(Ext);
-  /** justify if the record  mimetype_name is application/octet-stream is in mimetype */ 
+  /* justify if the record  mimetype_name is application/octet-stream is in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "SELECT mimetype_pk from mimetype where mimetype_name = 'application/octet-stream';");
   result =  PQexec(pgConn, SQL);
@@ -246,7 +251,7 @@ void testCheckMimeTypes()
   int mimetype_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   CU_ASSERT_EQUAL(ret, mimetype_pk);
-  /** delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
+  /* delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'application/octet-stream';");
   result =  PQexec(pgConn, SQL);
@@ -258,10 +263,10 @@ void testCheckMimeTypes()
   PQclear(result);
 #if 0
 #endif
-  /** mimetype_name is spec */
-  /** for the file, if the extension is spec, the mime type is application/x-rpm-spec */
+  /* mimetype_name is spec */
+  /* for the file, if the extension is spec, the mime type is application/x-rpm-spec */
   char Ext2[] = "spec";
-  /** delete the record the mimetype_name is application/x-rpm-spec in mimetype, before testing */
+  /* delete the record the mimetype_name is application/x-rpm-spec in mimetype, before testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'application/x-rpm-spec';");
   result =  PQexec(pgConn, SQL);
@@ -271,9 +276,9 @@ void testCheckMimeTypes()
     exit(-1);
   }
   PQclear(result);
-  /** testing the function CheckMimeTypes */
+  /* testing the function CheckMimeTypes */
   ret = CheckMimeTypes(Ext2);
-  /** justify if the record  mimetype_name is application/x-rpm-spec is in mimetype */
+  /* justify if the record  mimetype_name is application/x-rpm-spec is in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "SELECT mimetype_pk from mimetype where mimetype_name = 'application/x-rpm-spec';");
   result =  PQexec(pgConn, SQL);
@@ -285,7 +290,7 @@ void testCheckMimeTypes()
   mimetype_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   CU_ASSERT_EQUAL(ret, mimetype_pk);
-  /** delete the record the mimetype_name is application/x-rpm-spec in mimetype, after testing */
+  /* delete the record the mimetype_name is application/x-rpm-spec in mimetype, after testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'application/x-rpm-spec';");
   result =  PQexec(pgConn, SQL);
@@ -298,11 +303,14 @@ void testCheckMimeTypes()
 }
 
 /**
- * \brief for function DBCheckFileExtention 
+ * \brief for function DBCheckFileExtention()
+ * \test
+ * -# For a given file, check if DBCheckFileExtention() returns
+ * correct mimetype id
  */
 void testDBCheckFileExtention()
 {
-  /** delete the record the mimetype_name is text/x-csrc in mimetype, before testing */
+  /* delete the record the mimetype_name is text/x-csrc in mimetype, before testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'text/x-csrc';");
   result =  PQexec(pgConn, SQL);
@@ -325,7 +333,7 @@ void testDBCheckFileExtention()
   int mimetype_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
   CU_ASSERT_EQUAL(mimetype_id, mimetype_pk);
-  /** delete the record the mimetype_name is text/x-csrc in mimetype, after testing */
+  /* delete the record the mimetype_name is text/x-csrc in mimetype, after testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'text/x-csrc';");
   result =  PQexec(pgConn, SQL);
@@ -338,7 +346,11 @@ void testDBCheckFileExtention()
 }
 
 /**
- * \brief for function GetFieldValue
+ * \brief for function GetFieldValue()
+ * \test
+ * -# Create a string with \c field='value' format
+ * -# Call GetFieldValue()
+ * -# Check if correct filed and value are identified
  */
 void testGetFieldValue()
 {
@@ -363,7 +375,7 @@ CU_TestInfo testcases_CheckMimeTypes[] =
 };
 
 /**
- * \brief testcases for function DBCheckFileExtention 
+ * \brief testcases for function DBCheckFileExtention
  */
 CU_TestInfo testcases_DBCheckFileExtention[] =
 {
