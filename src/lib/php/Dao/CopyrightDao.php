@@ -163,19 +163,26 @@ class CopyrightDao
   public function getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere)
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
-    $params[]= $uploadId;
+    $params = array();
+    $extendWClause = null;
 
-    $whereClause = null;
-    if ($type !== null && $type != "skipcontent")
+    if ($uploadTreeTableName === "uploadtree_a")
+    {
+      $params[]= $uploadId;
+      $extendWClause .= " AND UT.upload_fk = $".count($params);
+      $statementName .= ".withUI";
+    }
+
+    if($type !== null && $type != "skipcontent")
     {
       $params[]= $type;
-      $whereClause .= " AND C.type = $".count($params);
+      $extendWClause .= " AND C.type = $".count($params);
       $statementName .= ".withType";
     }
 
     if ($extrawhere !== null)
     {
-      $whereClause .= "AND ". $extrawhere;
+      $extendWClause .= " AND ". $extrawhere;
       $statementName .= "._".$extrawhere."_";
     }
 
@@ -185,8 +192,7 @@ class CopyrightDao
              WHERE C.content IS NOT NULL
                AND C.content!=''
                AND C.is_enabled='true'
-               AND UT.upload_fk = $1
-               $whereClause
+               $extendWClause
              ORDER BY UT.uploadtree_pk, C.content DESC";
     $this->dbManager->prepare($statementName, $sql);
     $sqlResult = $this->dbManager->execute($statementName, $params);
@@ -206,19 +212,33 @@ class CopyrightDao
   public function getEditedEntries($tableName, $uploadTreeTableName, $uploadId, $decisionType)
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
+    $params = array();
+    $extendWClause = null;
 
+    if ($uploadTreeTableName === "uploadtree_a")
+    {
+      $params[]= $uploadId;
+      $extendWClause .= " AND UT.upload_fk = $".count($params);
+      $statementName .= ".withUI";
+    }
+
+    if(!empty($decisionType))
+    {
+      $params[]= $decisionType;
+      $extendWClause .= " AND clearing_decision_type_fk = $".count($params);
+      $statementName .= ".withDecisionType";
+    }
     $columns = "CD.description as description, CD.textfinding as textfinding, CD.comment as comments, UT.uploadtree_pk as uploadtree_pk";
 
     $primaryColumn = $tableName . '_pk';
     $sql = "SELECT $columns
               FROM $tableName CD
-             INNER JOIN uploadtree_a UT ON CD.pfile_fk = UT.pfile_fk
+             INNER JOIN $uploadTreeTableName UT ON CD.pfile_fk = UT.pfile_fk
              WHERE CD.is_enabled = 'true'
-               AND UT.upload_fk = $1
-               AND clearing_decision_type_fk = $2
+              $extendWClause
              ORDER BY CD.pfile_fk, UT.uploadtree_pk, CD.textfinding, CD.$primaryColumn DESC";
     $this->dbManager->prepare($statementName, $sql);
-    $sqlResult = $this->dbManager->execute($statementName, array($uploadId, $decisionType));
+    $sqlResult = $this->dbManager->execute($statementName, $params);
     $result = $this->dbManager->fetchAll($sqlResult);
     $this->dbManager->freeResult($sqlResult);
 
