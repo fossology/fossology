@@ -64,7 +64,7 @@ void testTraverseStartNormal()
 }
 
 /**
- * @brief test TraverseStart() dirctory
+ * @brief test TraverseStart() for directory
  * \test
  * -# Pass a directory's location to TraverseStart()
  * -# Check if files are unpacked
