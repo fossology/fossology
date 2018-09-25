@@ -26,7 +26,6 @@
  */
 namespace Fossology\UI\Api\Helper;
 
-use Fossology\Lib\Exception;
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Fossology\Lib\Dao\UserDao;
@@ -50,11 +49,10 @@ class AuthHelper
 
   /**
    * AuthHelper constructor.
-   * @param UserDao $userDao
    */
-  public function __construct($userDao)
+  public function __construct()
   {
-    $this->userDao = $userDao;
+    $this->userDao = $GLOBALS["container"]->get('dao.user');
     $this->session = new Session();
     $this->session->save();
   }
@@ -76,7 +74,7 @@ class AuthHelper
     }
     try {
       $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       return false;
     }
 
@@ -90,11 +88,9 @@ class AuthHelper
       if (strcmp($passwordHash, $row['user_pass']) != 0) {
         return false;
       }
-    } else if (! empty($row['user_seed'])) {
+    } else if (! empty($row['user_seed']) || ! empty($password)) {
       /* Seed with no password hash = no login */
-      return false;
-    } else if (! empty($password)) {
-      /* empty password required */
+      /* Empty password  = no login */
       return false;
     }
 

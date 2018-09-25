@@ -22,7 +22,8 @@
         "symfony/dependency-injection" : "3.3.*",
         "twig/twig" : "1.*",
         "twig/extensions" : "1.*",
-        "silex/silex": "2.1.0"
+        "slim/slim": "3.11.0",
+        "flexsounds/slim-symfony-di-container": "1.0.1"
     },
     "require-dev" : {
         "doctrine/instantiator" : "1.0.5",

@@ -66,14 +66,12 @@ paths:
         - Organize
       summary: Get single upload by id
       description:
-        Returns an array with single upload
+        Returns a single upload
       responses:
         200:
           description: Get upload
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/Upload'
+            $ref: '#/definitions/Upload'
         400:
           description: Bad request, id NaN etc.
           schema:
@@ -397,7 +395,7 @@ paths:
             schema:
               $ref: '#/definitions/ScanOptions'
         responses:
-          202:
+          201:
             description: Job Scheduled with job id in message
             schema:
               $ref: '#/definitions/Info'

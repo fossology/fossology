@@ -27,17 +27,11 @@ use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Helper\StringHelper;
-use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Models\File;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Monolog\Logger;
-use Symfony\Component\HttpFoundation\Request;
 
 require_once dirname(dirname(__DIR__)) . "/page/AdminContentMove.php";
-require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-"/lib/php/common-sysconfig.php";
 
 /**
  * @class RestHelper
@@ -50,11 +44,6 @@ class RestHelper
    * String helper object
    */
   private $stringHelper;
-  /**
-   * @var Logger $logger
-   * Logger to use
-   */
-  private $logger;
   /**
    * @var UploadDao $uploadDao
    * Upload DAO object
@@ -85,80 +74,23 @@ class RestHelper
    * Auth helper to provide authentication
    */
   private $authHelper;
-  /**
-   * @var Request $request
-   * Current Synfony request object
-   */
-  private $request;
-  /**
-   * @var string $sysconfdir
-   * SysConfDir location
-   */
-  private $sysconfdir;
 
   /**
    * @brief RestHelper constructor.
    *
    * This constructor initialize all the members
-   * @param Request $request Current Synfony request object
    */
-  public function __construct($request)
+  public function __construct()
   {
-    global $SysConf;
-    global $PG_CONN;
-    global $SYSCONFDIR;
     global $container;
 
-    $rcfile = "fossology.rc";
-
-    $this->sysconfdir = getenv('SYSCONFDIR');
-    if ($this->sysconfdir === false)
-    {
-      if (file_exists($rcfile)) $this->sysconfdir = file_get_contents($rcfile);
-      if ($this->sysconfdir === false)
-      {
-        $this->sysconfdir = "/usr/local/etc/fossology";
-      }
-    }
-
-    $this->sysconfdir = trim($this->sysconfdir);
-    $SYSCONFDIR = $this->sysconfdir;
-
-    // Initialize version and pg_conn
-    ConfigInit($this->sysconfdir, $SysConf);
-
-    // Initialize scheduler settings
-    $confFile = $this->sysconfdir . "/fossology.conf";
-    $fossConf = parse_ini_file($confFile, true);
-    foreach($fossConf['FOSSOLOGY'] as $key => $value) {
-      $SysConf['FOSSOLOGY'][$key] = $value;
-    }
-
-    $this->dbHelper = new DbHelper($PG_CONN);
+    $this->dbHelper = new DbHelper();
     $this->stringHelper = new StringHelper();
-    $this->logger = new Logger(__FILE__);
-    $this->uploadPermissionDao = new UploadPermissionDao($this->dbHelper->getDbManager(), $this->logger);
-    $this->uploadDao = new UploadDao($this->dbHelper->getDbManager(), $this->logger, $this->uploadPermissionDao);
-    $this->userDao = new UserDao($this->dbHelper->getDbManager(), $this->logger);
-    $this->folderDao = new FolderDao($this->dbHelper->getDbManager(), $this->userDao, $this->uploadDao);
-    $this->authHelper = new AuthHelper($this->userDao);
-
-    // Update the containers
-    $container->removeDefinition("session");
-    $container->set("session", $this->authHelper->getSession());
-    $container->removeDefinition("logger");
-    $container->set("logger", $this->logger);
-    $container->removeDefinition("db.manager");
-    $container->set("db.manager", $this->dbHelper->getDbManager());
-    $container->removeDefinition("dao.upload");
-    $container->set("dao.upload", $this->uploadDao);
-    $container->removeDefinition("dao.upload.permission");
-    $container->set("dao.upload.permission", $this->uploadPermissionDao);
-    $container->removeDefinition("dao.folder");
-    $container->set("dao.folder", $this->folderDao);
-    $container->removeDefinition("dao.user");
-    $container->set("dao.user", $this->userDao);
-    $this->request = $request;
+    $this->authHelper = new AuthHelper();
+    $this->uploadPermissionDao = $container->get('dao.upload.permission');
+    $this->uploadDao = $container->get('dao.upload');
+    $this->userDao = $container->get('dao.user');
+    $this->folderDao = $container->get('dao.folder');
   }
 
   /**
@@ -198,14 +130,6 @@ class RestHelper
     } else {
       return false;
     }
-  }
-
-  /**
-   * @return Logger
-   */
-  public function getLogger()
-  {
-    return $this->logger;
   }
 
   /**
@@ -273,15 +197,6 @@ class RestHelper
   public function getDbHelper()
   {
     return $this->dbHelper;
-  }
-
-  /**
-   * Get the FOSSology Sysconf dir
-   * @return string
-   */
-  public function getSysConfDir()
-  {
-    return $this->sysconfdir;
   }
 
   /**

@@ -25,15 +25,10 @@ namespace Fossology\UI\Api\Helper;
 require_once dirname(dirname(dirname(dirname(__DIR__)))) .
 "/lib/php/common-db.php";
 
-use Fossology\Lib\Db\Driver\Postgres;
 use Fossology\Lib\Db\ModernDbManager;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\Job;
 use Fossology\UI\Api\Models\Upload;
-use Monolog\Handler\ErrorLogHandler;
-use Monolog\Logger;
 
 /**
  * @class DbHelper
@@ -46,25 +41,13 @@ class DbHelper
    * DB manager in use
    */
   private $dbManager;
-  /**
-   * @var resource $PG_CONN
-   * Postgres connection resource
-   */
-  private $PG_CONN;
 
   /**
    * DbHelper constructor.
    */
-  public function __construct($PG_CONN)
+  public function __construct()
   {
-    $logLevel = Logger::NOTICE;
-    $logger = new Logger(__FILE__);
-    $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, $logLevel));
-
-    $this->dbManager = new ModernDbManager($logger);
-    $this->PG_CONN = $PG_CONN;
-    $pgDriver = new Postgres($this->PG_CONN);
-    $this->dbManager->setDriver($pgDriver);
+    $this->dbManager = $GLOBALS['container']->get('db.manager');
   }
 
   /**
@@ -77,15 +60,6 @@ class DbHelper
   }
 
   /**
-   * Get the Postgres connection resource
-   * @return resource
-   */
-  public function getPGCONN()
-  {
-    return $this->PG_CONN;
-  }
-
-  /**
    * Get the uploads under the given user id if not upload id is provided.
    *
    * Get a single upload information under the given user and upload id.
@@ -93,9 +67,9 @@ class DbHelper
    * @param integer $uploadId Pass the upload id to check for single upload.
    * @return Upload[][] Uploads as an associative array
    */
-  public function getUploads($userId, $uploadId = NULL)
+  public function getUploads($userId, $uploadId = null)
   {
-    if($uploadId == NULL)
+    if($uploadId == null)
     {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
@@ -174,9 +148,9 @@ FROM $tableName WHERE $idRowName= ".pg_escape_string($id))["count"])));
    * users.
    * @return User[][] Users as an associative array
    */
-  public function getUsers($id = NULL)
+  public function getUsers($id = null)
   {
-    if($id == NULL)
+    if($id == null)
     {
       $usersSQL = "SELECT user_pk, user_name, user_desc, user_email,
                   email_notify, root_folder_fk, user_perm, user_agent_list FROM users";
@@ -209,9 +183,9 @@ FROM $tableName WHERE $idRowName= ".pg_escape_string($id))["count"])));
    * @param integer $id    Set to get information of only given job id
    * @return Job[][] Jobs as an associative array
    */
-  public function getJobs($limit = 0, $id = NULL)
+  public function getJobs($limit = 0, $id = null)
   {
-    if($id == NULL)
+    if($id == null)
     {
       $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk, job_user_fk, job_group_fk FROM job";
     }
