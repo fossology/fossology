@@ -51,7 +51,7 @@ class JobController extends RestController
     $limit = 0;
     if ($request->hasHeader('limit')) {
       $limit = $request->getHeaderLine('limit');
-      if (isset($limit) && (! is_int($limit) || $limit < 0)) {
+      if (isset($limit) && (! is_numeric($limit) || $limit < 0)) {
         $returnVal = new Info(400,
           "Limit cannot be smaller than 1 and has to be numeric!",
           InfoType::ERROR);
@@ -84,13 +84,6 @@ class JobController extends RestController
    */
   public function createJob($request, $response, $args)
   {
-    // Initialize plugins
-    require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-      "/lib/php/common-plugin.php";
-    plugin_load();
-    plugin_preinstall();
-    plugin_postinstall();
-
     $folder = $request->getHeaderLine("folderId");
     $upload = $request->getHeaderLine("uploadId");
     if (is_numeric($folder) && is_numeric($upload) && $folder > 0 && $upload > 0) {

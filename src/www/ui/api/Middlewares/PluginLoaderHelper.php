@@ -18,22 +18,18 @@
  ***************************************************************/
 /**
  * @file
- * @brief Auth middleware for Slim
+ * @brief Middleware to load and unload plugins
  */
 
-namespace Fossology\UI\Api\Helper;
+namespace Fossology\UI\Api\Middlewares;
 
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
+require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) .
+"/lib/php/common-plugin.php";
 
-/**
- * @class RestAuthHelper
- * @brief Authentication middleware for Slim framework
- */
-class RestAuthHelper
+class PluginLoaderHelper
 {
   /**
-   * Check authentication for all calls, except for /auth/
+   * Load all the plugins before the call and unload them after the call
    *
    * @param  \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
    * @param  \Psr\Http\Message\ResponseInterface      $response PSR7 response
@@ -43,19 +39,13 @@ class RestAuthHelper
    */
   public function __invoke($request, $response, $next)
   {
-    if(stristr($request->getUri()->getPath(), "/auth/") !== false) {
-      $response = $next($request, $response);
-    } else {
-      $authHelper = new AuthHelper();
-      $username = $request->getHeaderLine("php-auth-user");
-      $password = $request->getHeaderLine("php-auth-pw");
-      if(!$authHelper->checkUsernameAndPassword($username, $password)) {
-        $error = new Info(403, "Not authorized", InfoType::ERROR);
-        $response = $response->withJson($error->getArray(), $error->getCode());
-      } else {
-        $response = $next($request, $response);
-      }
-    }
+    plugin_load();
+    plugin_preinstall();
+    plugin_postinstall();
+
+    $response = $next($request, $response);
+
+    plugin_unload();
     return $response;
   }
 }

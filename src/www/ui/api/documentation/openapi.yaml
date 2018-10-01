@@ -14,11 +14,11 @@ swagger: '2.0'
 info:
   title: FOSSology API
   description: Automate your fossology instance using this API
-  version: "1.0.0"
+  version: "2.0.0"
 host: localhost
 schemes:
   - https
-basePath: /repo/api/v1
+basePath: /repo/api/v2
 securityDefinitions:
   UserSecurity:
     type: basic
@@ -205,6 +205,61 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Info'
+    post:
+      tags:
+        - Upload
+      summary: Post new upload to FOSSology
+      description: |
+        Endpoint to create a new upload in FOSSology
+      consumes:
+        - multipart/form-data
+      parameters:
+        - name: fileInput
+          required: true
+          in: formData
+          type: file
+        - name: folderId
+          description: Folder Id, where upload should be created
+          in: header
+          required: true
+          type: number
+        - name: uploadDescription
+          description: Visible description of the file
+          in: header
+          required: false
+          type: string
+        - name: public
+          description: The access level to the upload (default protected)
+          in: header
+          required: false
+          type: string
+          enum:
+            - private
+            - protected
+            - public
+        - name: scanOptions
+          required: false
+          in: body
+          schema:
+            $ref: '#/definitions/ScanOptions'
+      responses:
+        201:
+          description: Upload is created
+          schema:
+            $ref: '#/definitions/Info'
+        401:
+          description: Unauthorized, no authentification provided
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to folder
+          schema:
+            $ref: '#/definitions/Info'
+        500:
+          description: Error while processing the upload
+          schema:
+            $ref: '#/definitions/Info'
+
   /search:
       get:
         tags:
@@ -445,6 +500,48 @@ paths:
           description: Forbidden, no access to jobs
           schema:
             $ref: '#/definitions/Info'
+
+  /folders:
+    get:
+      tags:
+      - Organize
+      summary: Get the list of accessible folders
+      responses:
+        200:
+          description: List of folders
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Folder'
+        403:
+          description: Forbidden, no access to folders
+          schema:
+            $ref: '#/definitions/Info'
+  /folders/{id}:
+    get:
+      tags:
+      - Organize
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+          description: ID of the folder
+      summary: Get a single folder details
+      responses:
+        200:
+          description: Details of the required folder
+          schema:
+            $ref: '#/definitions/Folder'
+        403:
+          description: Forbidden, no access to folders
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
+
 definitions:
   SearchResults:
     type: object
@@ -607,3 +704,16 @@ definitions:
     required:
       - reuse_uplod
       - reuse_group
+  Folder:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int32
+        description: Id of the folder.
+      name:
+        type: string
+        description: Name of the folder.
+      description:
+        type: string
+        description: Description of the folder.

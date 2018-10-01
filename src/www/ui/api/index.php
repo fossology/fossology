@@ -32,16 +32,22 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))) .
 
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
+use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Helper\RestAuthHelper;
+use Fossology\UI\Api\Middlewares\RestAuthHelper;
+use Fossology\UI\Api\Middlewares\PluginLoaderHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Slim\App;
 
-const BASE_PATH = "/v1/";
+const REST_VERSION_SLUG = "restVersion";
+
+const VERSION_1_2 = "/v{" . REST_VERSION_SLUG . ":[1-2]}/";
+const VERSION_1   = "/v{" . REST_VERSION_SLUG . ":1}/";
+const VERSION_2   = "/v{" . REST_VERSION_SLUG . ":2}/";
 
 const AUTH_METHOD = "SIMPLE_KEY";
 
@@ -66,20 +72,33 @@ $app = new App($GLOBALS['container']);
 $app->add(new RestAuthHelper());
 
 //////////////////////////AUTH/////////////////////
-$app->get(BASE_PATH . 'auth/', AuthController::class . ':getAuthHeaders');
+$app->get(VERSION_1_2 . 'auth/', AuthController::class . ':getAuthHeaders');
 
 //////////////////////////UPLOADS/////////////////////
-$app->group(BASE_PATH . 'uploads',
+$app->group("",
   function (){
-    $this->get('/[{id:\\d+}]', UploadController::class . ':getUploads');
-    $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
-    $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
-    $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
-    $this->any('/{params:.*}', BadRequestController::class);
+    $this->group(VERSION_1_2 . 'uploads',
+      function (){
+        $this->get('/[{id:\\d+}]', UploadController::class . ':getUploads');
+        $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
+        $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
+        $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
+      });
+    $this->group(VERSION_2 . 'uploads',
+      function (){
+        $this->post('/', UploadController::class . ':postUpload')
+          ->add(new PluginLoaderHelper());
+        $this->any('/{params:.*}', BadRequestController::class);
+      });
+    $this->group(VERSION_1 . 'uploads',
+      function (){
+        $this->any('/{params:.*}', BadRequestController::class);
+      });
   });
 
+
 ////////////////////////////ADMIN-USERS/////////////////////
-$app->group(BASE_PATH . 'users',
+$app->group(VERSION_1_2 . 'users',
   function (){
     $this->get('/[{id:\\d+}]', UserController::class . ':getUsers');
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
@@ -87,23 +106,25 @@ $app->group(BASE_PATH . 'users',
   });
 
 ////////////////////////////JOBS/////////////////////
-$app->group(BASE_PATH . 'jobs',
+$app->group(VERSION_1_2 . 'jobs',
   function (){
     $this->get('/[{id:\\d+}]', JobController::class . ':getJobs');
     $this->post('/', JobController::class . ':createJob')
-      ->add(
-      function ($request, $response, $next){
-        $response = $next($request, $response);
-        plugin_unload();
-        return $response;
-      });
+      ->add(new PluginLoaderHelper());
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////SEARCH/////////////////////
-$app->group(BASE_PATH . 'search',
+$app->group(VERSION_1_2 . 'search',
   function (){
     $this->get('/', SearchController::class . ':performSearch');
+  });
+
+////////////////////////////FOLDER/////////////////////
+$app->group(VERSION_2 . 'folders',
+  function (){
+    $this->get('/[{id:\\d+}]', FolderController::class . ':getFolders');
+    $this->any('/{params:.*}', BadRequestController::class);
   });
 
 //////////////////////////ERROR-HANDLERS/////////////////////

@@ -53,8 +53,12 @@ class AuthHelper
   public function __construct()
   {
     $this->userDao = $GLOBALS["container"]->get('dao.user');
-    $this->session = new Session();
-    $this->session->save();
+    $this->session = $GLOBALS["container"]->get('session');
+    if (!$this->session->isStarted())
+    {
+      $this->session->setName('Login');
+      $this->session->start();
+    }
   }
 
   /**

@@ -74,8 +74,8 @@ class SearchController extends RestController
     /*
      * check if filesizeMin && filesizeMax are numeric, if existing
      */
-    if ((! empty($filesizeMin) && (! is_int($filesizeMin) || $filesizeMin < 0)) ||
-      (! empty($filesizeMax) && (! is_int($filesizeMax) || $filesizeMax < 0))) {
+    if ((! empty($filesizeMin) && (! is_numeric($filesizeMin) || $filesizeMin < 0)) ||
+      (! empty($filesizeMax) && (! is_numeric($filesizeMax) || $filesizeMax < 0))) {
       $returnVal = new Info(400,
         "Bad Request. filesizemin and filesizemax need to be positive integers!",
         InfoType::ERROR);

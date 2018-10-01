@@ -29,6 +29,7 @@ use Fossology\Lib\Auth\Auth;
 use const Fossology\UI\Api\AUTH_METHOD;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Helper\UploadHelper;
 
 /**
  * @class UploadController
@@ -132,7 +133,7 @@ class UploadController extends RestController
   {
     $returnVal = null;
     if ($request->hasHeader('folderId') &&
-      is_int($newFolderID = $request->getHeaderLine('folderId'))) {
+      is_numeric($newFolderID = $request->getHeaderLine('folderId'))) {
       $id = intval($args['id']);
       $returnVal = $this->restHelper->copyUpload($id, $newFolderID, $isCopy);
     } else {
@@ -140,5 +141,49 @@ class UploadController extends RestController
         InfoType::ERROR);
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Get a new upload from the POST method
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function postUpload($request, $response, $args)
+  {
+    $uploadHelper = new UploadHelper();
+    if ($request->hasHeader('folderId') &&
+      is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
+
+      $allFolderIds = $this->container->get('dao.folder')->getAllFolderIds();
+      if(!in_array($folderId, $allFolderIds)) {
+        $error = new Info(404, "folderId $folderId does not exists!", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+      if(!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
+        $error = new Info(403, "folderId $folderId is not accessible!", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+
+      $description = $request->getHeaderLine('uploadDescription');
+      $public = $request->getHeaderLine('public');
+      $public = empty($public) ? 'protected' : $public;
+      list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
+       $request, $folderId, $description, $public);
+      if (! $status) {
+        $info = new Info(500, [
+          $message,
+          $statusDescription
+        ], InfoType::ERROR);
+      } else {
+        $info = new Info(201, intval($uploadId), InfoType::INFO);
+      }
+      return $response->withJson($info->getArray(), $info->getCode());
+    } else {
+      $error = new Info(400, "folderId must be a positive integer!", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
   }
 }
