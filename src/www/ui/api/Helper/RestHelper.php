@@ -27,11 +27,8 @@ use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Models\File;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-
-require_once dirname(dirname(__DIR__)) . "/page/AdminContentMove.php";
 
 /**
  * @class RestHelper
@@ -39,11 +36,6 @@ require_once dirname(dirname(__DIR__)) . "/page/AdminContentMove.php";
  */
 class RestHelper
 {
-  /**
-   * @var StringHelper $stringHelper
-   * String helper object
-   */
-  private $stringHelper;
   /**
    * @var UploadDao $uploadDao
    * Upload DAO object
@@ -85,51 +77,11 @@ class RestHelper
     global $container;
 
     $this->dbHelper = new DbHelper();
-    $this->stringHelper = new StringHelper();
     $this->authHelper = new AuthHelper();
     $this->uploadPermissionDao = $container->get('dao.upload.permission');
     $this->uploadDao = $container->get('dao.upload');
     $this->userDao = $container->get('dao.user');
     $this->folderDao = $container->get('dao.folder');
-  }
-
-  /**
-   * This method filters content that starts with ------WebKitFormBoundaryXXXXXXXXX
-   * and ends with ------WebKitFormBoundaryXXXXXXXXX---
-   * This is required, because the silex framework can't do that natively on put request
-   * @param string $rawOutput
-   * @return string
-   */
-  public function getFilteredFile($rawOutput)
-  {
-    $cutString = explode("\n",$rawOutput);
-    $webKitBoundaryString = trim(str_replace("-", "",$cutString[0]));
-    $contentDispositionString = trim(str_replace("-", "",$cutString[1]));
-    $contentTypeString = trim($cutString[2]);
-
-    $filename = explode("filename=", str_replace("\"", "",$contentDispositionString))[1];
-    $contentTypeCut = explode("Content-Type:", $contentTypeString)[1];
-    $content = $this->stringHelper->getContentBetweenString($rawOutput, array(0,1,2,3), $webKitBoundaryString);
-    return new File($filename, $contentTypeCut, $content);
-  }
-
-  /**
-   * @brief Check if the user is logged in.
-   *
-   * This method currently supports SIMPLE HTTP Auth.
-   * @param string $authMethod Authentication method to use
-   * @return boolean True if the user has access, false otherwise.
-   * @sa Fossology::UI::Api::Helper::checkUsernameAndPassword()
-   */
-  public function hasUserAccess($authMethod)
-  {
-    if($authMethod === "SIMPLE_KEY") {
-      $username = $this->request->headers->get("php-auth-user");
-      $password = $this->request->headers->get("php-auth-pw");
-      return $this->authHelper->checkUsernameAndPassword($username, $password);
-    } else {
-      return false;
-    }
   }
 
   /**
@@ -221,7 +173,9 @@ class RestHelper
           InfoType::ERROR);
       }
       $uploadContentId = $this->folderDao->getFolderContentsId($uploadId);
-      $errors = (new \AdminContentMove())->copyContent([$uploadContentId], $newFolderId, $isCopy);
+      $contentMove = plugin_find('content_move');
+
+      $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
       if(empty($errors))
       {
         $action = $isCopy ? "copied" : "moved";

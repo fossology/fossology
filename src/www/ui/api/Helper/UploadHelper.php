@@ -26,7 +26,6 @@ namespace Fossology\UI\Api\Helper;
 use Fossology\UI\Page\UploadFilePage;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Http\UploadedFile;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * @class UploadHelper
@@ -34,6 +33,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
  */
 class UploadHelper extends UploadFilePage
 {
+
   /**
    * Get a request from Slim and translate to Symfony request to be
    * processed by FOSSology
@@ -47,7 +47,17 @@ class UploadHelper extends UploadFilePage
   public function createNewUpload(ServerRequestInterface $request, $folderName,
     $fileDescription, $isPublic)
   {
-    $uploadedFile = $request->getUploadedFiles()[self::FILE_INPUT_NAME];
+    $uploadedFile = $request->getUploadedFiles();
+    if (! isset($uploadedFile[self::FILE_INPUT_NAME])) {
+      return array(
+        false,
+        "Missing file",
+        "File " . self::FILE_INPUT_NAME . " missing from request",
+        -1
+      );
+    } else {
+      $uploadedFile = $uploadedFile[self::FILE_INPUT_NAME];
+    }
     $path = $uploadedFile->file;
     $originalName = $uploadedFile->getClientFilename();
     $originalMime = $uploadedFile->getClientMediaType();
@@ -55,7 +65,7 @@ class UploadHelper extends UploadFilePage
     $symfonyFile = new \Symfony\Component\HttpFoundation\File\UploadedFile($path,
       $originalName, $originalMime, $originalError);
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
-    $symfonySession = new Session();
+    $symfonySession = $GLOBALS['container']->get('session');
     $symfonySession->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
 
     $symfonyRequest->request->set(self::FOLDER_PARAMETER_NAME, $folderName);

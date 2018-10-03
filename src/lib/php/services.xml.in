@@ -20,7 +20,7 @@ without any warranty.
         </parameter>
         <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
         <parameter key="time.zone" type="string"></parameter>
-        <parameter key="displayErrorDetails" type="constant">true</parameter>
+	<parameter key="displayErrorDetails" type="constant">false</parameter>
         <parameter key="addContentLengthHeader" type="constant">false</parameter>
     </parameters>
 

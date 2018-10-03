@@ -505,6 +505,7 @@ paths:
     get:
       tags:
       - Organize
+      - Folders
       summary: Get the list of accessible folders
       responses:
         200:
@@ -517,10 +518,53 @@ paths:
           description: Forbidden, no access to folders
           schema:
             $ref: '#/definitions/Info'
+    post:
+      tags:
+      - Organize
+      - Folders
+      summary: Create a new folder
+      parameters:
+        - name: parentFolder
+          in: header
+          required: true
+          type: number
+          description: Parent folder for the new folder
+        - name: folderName
+          in: header
+          required: true
+          type: string
+          description: Name of the new folder
+        - name: folderDescription
+          in: header
+          required: false
+          type: string
+          description: Description of the new folder
+      responses:
+        200:
+          description: Folder with the same name already exists under the same parent
+          schema:
+            $ref: '#/definitions/Info'
+        201:
+          description: Folder is created with new folder id in message
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad parameters
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to parent folders
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
   /folders/{id}:
     get:
       tags:
       - Organize
+      - Folders
       parameters:
         - name: id
           in: path
@@ -533,12 +577,199 @@ paths:
           description: Details of the required folder
           schema:
             $ref: '#/definitions/Folder'
+        400:
+          description: Bad parameters
+          schema:
+            $ref: '#/definitions/Info'
         403:
-          description: Forbidden, no access to folders
+          description: Forbidden, no access to folder
           schema:
             $ref: '#/definitions/Info'
         404:
           description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
+    delete:
+      tags:
+      - Organize
+      - Folders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+          description: ID of the folder to be deleted
+      summary: Delete a folder
+      responses:
+        202:
+          description: Folder scheduled to be deleted
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad parameters
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to folder
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
+    patch:
+      tags:
+      - Organize
+      - Folders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+          description: ID of the folder to be edited
+        - name: name
+          in: header
+          required: false
+          type: string
+          description: New name of the folder
+        - name: description
+          in: header
+          required: false
+          type: string
+          description: New description of the folder
+      summary: Edit a folder's description
+      responses:
+        200:
+          description: Folder is updated
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad parameters
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to folder
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
+    put:
+      tags:
+      - Organize
+      - Folders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+          description: ID of the folder to be edited
+        - name: parent
+          in: header
+          required: true
+          type: number
+          description: New parent folder id
+        - name: action
+          in: header
+          required: true
+          type: string
+          enum:
+            - copy
+            - move
+          description: Action to be performed
+      summary: Copy/Move a folder
+      responses:
+        202:
+          description: Folder will be copied/moved
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad parameters
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to folder
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Folder not found
+          schema:
+            $ref: '#/definitions/Info'
+
+  /report:
+    get:
+      tags:
+      - Job
+      - Upload
+      summary: Get the reports for a given upload
+      parameters:
+        - name: uploadId
+          in: header
+          required: true
+          type: number
+          description: Id of the upload to generate the report for
+        - name: reportFormat
+          in: header
+          required: true
+          type: string
+          enum:
+            - dep5
+            - spdx2
+            - spdx2tv
+            - readmeoss
+            - unifiedreport
+      responses:
+        201:
+          description: Report generation is scheduled. Link to download report will be in message
+          schema:
+            $ref: '#/definitions/Info'
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Upload not found
+          schema:
+            $ref: '#/definitions/Info'
+  /report/{id}:
+    get:
+      tags:
+      - Job
+      - Upload
+      summary: Download the report
+      parameters:
+        - name: id
+          in: path
+          required: true
+          type: number
+          description: Id the report to download
+      produces:
+        - text/plain
+        - application/zip
+      responses:
+        200:
+          description: Required report
+          schema:
+            type: file
+        400:
+          description: Bad request
+          schema:
+            $ref: '#/definitions/Info'
+        403:
+          description: Forbidden, no access to upload
+          schema:
+            $ref: '#/definitions/Info'
+        404:
+          description: Upload not found
+          schema:
+            $ref: '#/definitions/Info'
+        503:
+          description: Report is not ready yet. Check 'Retry-After' header.
           schema:
             $ref: '#/definitions/Info'
 

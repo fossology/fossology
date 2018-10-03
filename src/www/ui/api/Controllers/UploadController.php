@@ -48,7 +48,7 @@ class UploadController extends RestController
    */
   public function getUploads($request, $response, $args)
   {
-    $thisSession = $this->container->get('session');
+    $thisSession = $this->restHelper->getAuthHelper()->getSession();
     $id = null;
     if (isset($args['id'])) {
       $id = intval($args['id']);

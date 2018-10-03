@@ -34,11 +34,11 @@ use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\FolderController;
 use Fossology\UI\Api\Controllers\JobController;
+use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Middlewares\RestAuthHelper;
-use Fossology\UI\Api\Middlewares\PluginLoaderHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Slim\App;
@@ -68,6 +68,9 @@ $timingLogger->toc("setup init");
 
 $app = new App($GLOBALS['container']);
 
+plugin_load();
+plugin_preinstall();
+plugin_postinstall();
 // Middleware for authentication
 $app->add(new RestAuthHelper());
 
@@ -86,8 +89,7 @@ $app->group("",
       });
     $this->group(VERSION_2 . 'uploads',
       function (){
-        $this->post('/', UploadController::class . ':postUpload')
-          ->add(new PluginLoaderHelper());
+        $this->post('/', UploadController::class . ':postUpload');
         $this->any('/{params:.*}', BadRequestController::class);
       });
     $this->group(VERSION_1 . 'uploads',
@@ -109,8 +111,7 @@ $app->group(VERSION_1_2 . 'users',
 $app->group(VERSION_1_2 . 'jobs',
   function (){
     $this->get('/[{id:\\d+}]', JobController::class . ':getJobs');
-    $this->post('/', JobController::class . ':createJob')
-      ->add(new PluginLoaderHelper());
+    $this->post('/', JobController::class . ':createJob');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -124,6 +125,18 @@ $app->group(VERSION_1_2 . 'search',
 $app->group(VERSION_2 . 'folders',
   function (){
     $this->get('/[{id:\\d+}]', FolderController::class . ':getFolders');
+    $this->post('/', FolderController::class . ':createFolder');
+    $this->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
+    $this->patch('/{id:\\d+}', FolderController::class . ':editFolder');
+    $this->put('/{id:\\d+}', FolderController::class . ':copyFolder');
+    $this->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////REPORT/////////////////////
+$app->group(VERSION_2 . 'report',
+  function (){
+    $this->get('/', ReportController::class . ':getReport');
+    $this->get('/{id:\\d+}', ReportController::class . ':downloadReport');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -152,4 +165,5 @@ $slimContainer->set('phpErrorHandler',
 );
 
 $app->run();
+plugin_unload();
 
