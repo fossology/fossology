@@ -175,6 +175,10 @@ without any warranty.
         </service>
 
         <service id="helper.restHelper" class="Fossology\UI\Api\Helper\RestHelper">
+            <argument type="service" id="dao.upload.permission"/>
+            <argument type="service" id="dao.upload"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.folder"/>
             <argument type="service" id="logger"/>
         </service>
     </services>

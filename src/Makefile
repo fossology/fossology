@@ -84,7 +84,7 @@ phpvendors:
 composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
-	(cd $(DESTDIR)$(MODDIR); $(COMPOSER_PHAR) install --no-plugins --no-scripts --no-dev)
+	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null; $(COMPOSER_PHAR) install --no-plugins --no-scripts --no-dev)
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

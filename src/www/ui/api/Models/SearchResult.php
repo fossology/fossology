@@ -29,7 +29,7 @@ namespace Fossology\UI\Api\Models;
 class SearchResult
 {
   /**
-   * @var Upload $upload
+   * @var array $upload
    * Upload object from the search
    */
   private $upload;
@@ -73,7 +73,7 @@ class SearchResult
   public function getArray()
   {
     return [
-      'upload'        => $this->upload->getArray(),
+      'upload'        => $this->upload,
       'uploadTreeId'  => $this->uploadTreeId,
       'filename'      => $this->filename
     ];

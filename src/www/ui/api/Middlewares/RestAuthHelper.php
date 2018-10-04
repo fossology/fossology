@@ -46,7 +46,7 @@ class RestAuthHelper
    */
   public function __invoke($request, $response, $next)
   {
-    if(stristr($request->getUri()->getPath(), "/auth/") !== false) {
+    if(stristr($request->getUri()->getPath(), "/auth") !== false) {
       $response = $next($request, $response);
     } else {
       $authHelper = new AuthHelper();

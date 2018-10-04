@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2017 Siemens AG
+ Copyright (C) 2017-2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -45,9 +45,7 @@ use Slim\App;
 
 const REST_VERSION_SLUG = "restVersion";
 
-const VERSION_1_2 = "/v{" . REST_VERSION_SLUG . ":[1-2]}/";
 const VERSION_1   = "/v{" . REST_VERSION_SLUG . ":1}/";
-const VERSION_2   = "/v{" . REST_VERSION_SLUG . ":2}/";
 
 const AUTH_METHOD = "SIMPLE_KEY";
 
@@ -66,66 +64,59 @@ $timingLogger->tic();
 ConfigInit($GLOBALS['SYSCONFDIR'], $SysConf);
 $timingLogger->toc("setup init");
 
-$app = new App($GLOBALS['container']);
-
+$timingLogger->tic();
 plugin_load();
 plugin_preinstall();
 plugin_postinstall();
+$timingLogger->toc("setup plugins");
+
+$app = new App($GLOBALS['container']);
+
 // Middleware for authentication
 $app->add(new RestAuthHelper());
 
 //////////////////////////AUTH/////////////////////
-$app->get(VERSION_1_2 . 'auth/', AuthController::class . ':getAuthHeaders');
+$app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
 
 //////////////////////////UPLOADS/////////////////////
-$app->group("",
+$app->group(VERSION_1 . 'uploads',
   function (){
-    $this->group(VERSION_1_2 . 'uploads',
-      function (){
-        $this->get('/[{id:\\d+}]', UploadController::class . ':getUploads');
-        $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
-        $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
-        $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
-      });
-    $this->group(VERSION_2 . 'uploads',
-      function (){
-        $this->post('/', UploadController::class . ':postUpload');
-        $this->any('/{params:.*}', BadRequestController::class);
-      });
-    $this->group(VERSION_1 . 'uploads',
-      function (){
-        $this->any('/{params:.*}', BadRequestController::class);
-      });
+    $this->get('[/{id:\\d+}]', UploadController::class . ':getUploads');
+    $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
+    $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
+    $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
+    $this->post('', UploadController::class . ':postUpload');
+    $this->any('/{params:.*}', BadRequestController::class);
   });
 
 
 ////////////////////////////ADMIN-USERS/////////////////////
-$app->group(VERSION_1_2 . 'users',
+$app->group(VERSION_1 . 'users',
   function (){
-    $this->get('/[{id:\\d+}]', UserController::class . ':getUsers');
+    $this->get('[/{id:\\d+}]', UserController::class . ':getUsers');
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////JOBS/////////////////////
-$app->group(VERSION_1_2 . 'jobs',
+$app->group(VERSION_1 . 'jobs',
   function (){
-    $this->get('/[{id:\\d+}]', JobController::class . ':getJobs');
-    $this->post('/', JobController::class . ':createJob');
+    $this->get('[/{id:\\d+}]', JobController::class . ':getJobs');
+    $this->post('', JobController::class . ':createJob');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////SEARCH/////////////////////
-$app->group(VERSION_1_2 . 'search',
+$app->group(VERSION_1 . 'search',
   function (){
-    $this->get('/', SearchController::class . ':performSearch');
+    $this->get('', SearchController::class . ':performSearch');
   });
 
 ////////////////////////////FOLDER/////////////////////
-$app->group(VERSION_2 . 'folders',
+$app->group(VERSION_1 . 'folders',
   function (){
-    $this->get('/[{id:\\d+}]', FolderController::class . ':getFolders');
-    $this->post('/', FolderController::class . ':createFolder');
+    $this->get('[/{id:\\d+}]', FolderController::class . ':getFolders');
+    $this->post('', FolderController::class . ':createFolder');
     $this->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
     $this->patch('/{id:\\d+}', FolderController::class . ':editFolder');
     $this->put('/{id:\\d+}', FolderController::class . ':copyFolder');
@@ -133,9 +124,9 @@ $app->group(VERSION_2 . 'folders',
   });
 
 ////////////////////////////REPORT/////////////////////
-$app->group(VERSION_2 . 'report',
+$app->group(VERSION_1 . 'report',
   function (){
-    $this->get('/', ReportController::class . ':getReport');
+    $this->get('', ReportController::class . ':getReport');
     $this->get('/{id:\\d+}', ReportController::class . ':downloadReport');
     $this->any('/{params:.*}', BadRequestController::class);
   });
@@ -157,13 +148,18 @@ $slimContainer->set('notAllowedHandler',
   }
 );
 $slimContainer->set('phpErrorHandler',
-  function ($request, $response){
-    $error = new Info(500, "Something went wrong! Please try again later",
+  function ($request, $response, $error){
+    $GLOBALS['container']->get('logger')->error($error);
+    $error = new Info(500, "Something went wrong! Please try again later.",
       InfoType::ERROR);
     return $response->withJson($error->getArray(), $error->getCode());
   }
 );
+$GLOBALS['container']->setAlias('errorHandler', 'phpErrorHandler');
 
 $app->run();
 plugin_unload();
+
+$GLOBALS['container']->get("db.manager")->flushStats();
+return 0;
 

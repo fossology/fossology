@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2018
+# Copyright (C) Siemens AG 2017-2018
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,9 +14,9 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 2.0.0
+  version: 1.0.0
 servers:
-  - url: /repo/api/v2
+  - url: /repo/api/v1
     description: Localhost instance
 security:
   - BasicAuth: []

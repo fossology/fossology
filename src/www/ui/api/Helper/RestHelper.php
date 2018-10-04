@@ -72,16 +72,17 @@ class RestHelper
    *
    * This constructor initialize all the members
    */
-  public function __construct()
+  public function __construct(UploadPermissionDao $uploadPermissionDao,
+    UploadDao $uploadDao, UserDao $userDao, FolderDao $folderDao)
   {
     global $container;
 
     $this->dbHelper = new DbHelper();
     $this->authHelper = new AuthHelper();
-    $this->uploadPermissionDao = $container->get('dao.upload.permission');
-    $this->uploadDao = $container->get('dao.upload');
-    $this->userDao = $container->get('dao.user');
-    $this->folderDao = $container->get('dao.folder');
+    $this->uploadPermissionDao = $uploadPermissionDao;
+    $this->uploadDao = $uploadDao;
+    $this->userDao = $userDao;
+    $this->folderDao = $folderDao;
   }
 
   /**
