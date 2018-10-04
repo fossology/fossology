@@ -53,7 +53,7 @@ class SearchResult
   public function __construct($upload, $uploadTreeId, $filename)
   {
     $this->upload = $upload;
-    $this->uploadTreeId = $uploadTreeId;
+    $this->uploadTreeId = intval($uploadTreeId);
     $this->filename = $filename;
   }
 
@@ -73,7 +73,7 @@ class SearchResult
   public function getArray()
   {
     return [
-      'upload'        => $this->upload,
+      'upload'        => $this->upload->getArray(),
       'uploadTreeId'  => $this->uploadTreeId,
       'filename'      => $this->filename
     ];

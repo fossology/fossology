@@ -128,6 +128,40 @@ class Analysis
     return $this;
   }
 
+  /**
+   * Set the values of Analysis based on string from DB
+   * @param array $analysisString String from DB settings
+   * @return Analysis Current object
+   */
+  public function setUsingString($analysisString)
+  {
+    if(stristr($analysisString, "bucket")) {
+      $this->bucket = true;
+    }
+    if(stristr($analysisString, "copyright")) {
+      $this->copyright = true;
+    }
+    if(stristr($analysisString, "ecc")) {
+      $this->ecc = true;
+    }
+    if(stristr($analysisString, "keyword")) {
+      $this->keyword = true;
+    }
+    if(stristr($analysisString, "mimetype")) {
+      $this->mimetype = true;
+    }
+    if(stristr($analysisString, "monk")) {
+      $this->monk = true;
+    }
+    if(stristr($analysisString, "nomos")) {
+      $this->nomos = true;
+    }
+    if(stristr($analysisString, "pkgagent")) {
+      $this->pkgagent = true;
+    }
+    return $this;
+  }
+
   ////// Getters //////
   /**
    * @return boolean
@@ -266,13 +300,13 @@ class Analysis
   {
     return [
       "bucket"    => $this->bucket,
-      "copyright" => $this->copyright,
+      "copyright_email_author" => $this->copyright,
       "ecc"       => $this->ecc,
       "keyword"   => $this->keyword,
       "mimetype"  => $this->mimetype,
       "monk"      => $this->monk,
       "nomos"     => $this->nomos,
-      "pkgagent"  => $this->pkgagent
+      "package"   => $this->pkgagent
     ];
   }
 

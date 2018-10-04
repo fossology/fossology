@@ -189,10 +189,10 @@ class Reuser
   public function getArray()
   {
     return [
-      "reuseUpload"   => $this->reuseUpload,
-      "reuseGroup"    => $this->reuseGroup,
-      "reuseMain"     => $this->reuseMain,
-      "reuseEnhanced" => $this->reuseEnhanced
+      "reuse_upload"   => $this->reuseUpload,
+      "reuse_group"    => $this->reuseGroup,
+      "reuse_main"     => $this->reuseMain,
+      "reuse_enhanced" => $this->reuseEnhanced
     ];
   }
 }

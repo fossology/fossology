@@ -137,9 +137,9 @@ class Decider
   public function getArray()
   {
     return [
-      "nomosMonk"  => $this->nomosMonk,
-      "bulkReused" => $this->bulkReused,
-      "newScanner" => $this->newScanner
+      "nomos_monk"  => $this->nomosMonk,
+      "bulk_reused" => $this->bulkReused,
+      "new_scanner" => $this->newScanner
     ];
   }
 }

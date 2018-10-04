@@ -49,7 +49,7 @@ class Folder
    */
   public function __construct($id, $name, $description)
   {
-    $this->id = $id;
+    $this->id = intval($id);
     $this->name = $name;
     $this->description = $description;
   }
@@ -88,20 +88,6 @@ class Folder
     return json_encode($this->getArray());
   }
 
-  /**
-   * Get the file element as associative array
-   *
-   * @return array
-   */
-  public function getArray()
-  {
-    return [
-      'id' => $this->id,
-      'name' => $this->name,
-      'description' => $this->description
-    ];
-  }
-
   ////// Setters //////
 
   /**
@@ -109,7 +95,7 @@ class Folder
    */
   public function setId($id)
   {
-    $this->id = $id;
+    $this->id = intval($id);
   }
 
   /**
@@ -128,4 +114,17 @@ class Folder
     $this->description = $description;
   }
 
+  /**
+   * Get the file element as associative array
+   *
+   * @return array
+   */
+  public function getArray()
+  {
+    return [
+      'id' => intval($this->id),
+      'name' => $this->name,
+      'description' => $this->description
+    ];
+  }
 }

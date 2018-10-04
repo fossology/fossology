@@ -123,7 +123,7 @@ class FolderController extends RestController
       $info = new Info(404, "Parent folder not found!", InfoType::ERROR);
     } else {
       $folderId = $this->restHelper->getFolderDao()->getFolderId($folderName, $parentFolder);
-      $info = new Info(201, $folderId, InfoType::INFO);
+      $info = new Info(201, intval($folderId), InfoType::INFO);
     }
     return $response->withJson($info->getArray(), $info->getCode());
   }
