@@ -64,7 +64,7 @@
   </table>
 
   {{ 'Compare with'| trans }}
-  <select id="cmp">
+  <select id="cmp" class="ui-render-select2">
     <option value="0">--{{ 'existing license'|trans }}--</option>
   {% for lic in licenseArray %}
     <option value="{{ lic.id }}" title="{{ lic.fullname }}">{{ lic.shortname }}</option>

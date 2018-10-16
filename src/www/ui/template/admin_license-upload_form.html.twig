@@ -72,7 +72,7 @@
     </tr>
     <tr>
       <td align="right">{{ 'Risk level'|trans }}</td>
-      <td align="left">{{ macro.select('risk_level',range(0,5),'risk_level',risk_level) }}</td>
+      <td align="left">{{ macro.selectsingle('risk_level',range(0,5),'risk_level',risk_level) }}</td>
     </tr>
   </table>
   {% if rfId %}

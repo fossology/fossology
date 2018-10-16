@@ -77,5 +77,6 @@ var bulkFormTableContent = (function(){
 
 $('#bulkFormAddLicense').click(function(){ bulkFormTableContent[0](); });
 $('#bulkFormRmLicense').click(function(){ bulkFormTableContent[1](); });
+$('#bulkLicense').select2({width:'resolve'});
 
 function getBulkFormTableContent(){ return bulkFormTableContent[3](); }

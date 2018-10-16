@@ -34,7 +34,7 @@
     {% set size = 0 %}
   {% endif %}
   <select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %}{% if size > 0  %} multiple="multiple" size="{{ size }}"{% endif %}{% if action is defined %}
-    {{ action}}{% endif %}>
+    {{ action}}{% endif %} class="ui-render-select2">
     {% for key, value in options %}
       <option value="{{ key }}"{% if selected == key %} selected="selected"{% endif %}>
         {{ value|e }}
