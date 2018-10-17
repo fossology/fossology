@@ -310,7 +310,7 @@ void testFindCmd4NtfsFile()
 /**
  * \brief find partition file
  * \test
- * -# Call FindCmd() on parition file
+ * -# Call FindCmd() on partition file
  * -# Check if function returns correct index
  * \todo Test file does not exists
  */

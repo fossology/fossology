@@ -17,14 +17,30 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Perform a one-shot license analysis on a file (include bsd license)
+ * @file
+ * @brief Perform a one-shot license analysis on a file (include bsd license)
  */
 require_once ('CommonCliTest.php');
 
+/**
+ * @class OneShotbsdTest
+ * @brief Perform a one-shot license analysis on a file (include bsd license)
+ */
 class OneShotbsdTest extends CommonCliTest
 {
+  /**
+   * @var string $bsd
+   * File location of BSD license
+   */
   public $bsd;
 
+  /**
+   * @brief Run NOMOS on BSD style license
+   * @test
+   * -# Check if required license files exists
+   * -# Run nomos on the license files and record the output
+   * -# Check if the correct license is matched on the intended file
+   */
   function testOneShotBsd()
   {
     $this->bsd = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/BSD_style_d.txt';
@@ -36,6 +52,13 @@ class OneShotbsdTest extends CommonCliTest
     $this->assertEquals(trim($license), $bsdlic);
   }
 
+  /**
+   * @brief Run NOMOS on DNS digest
+   * @test
+   * -# Check if required license files exists
+   * -# Run nomos on the license files and record the output
+   * -# Check if the correct license is matched on the intended file
+   */
   function testOneShotDnsdigest()
   {
     $this->bsd = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/DNSDigest.c';

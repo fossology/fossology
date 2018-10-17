@@ -15,6 +15,11 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+/**
+ * \file
+ * \brief Test cases for Doctored buffer
+ */
+
 #include <stdbool.h>
 
 #include "nomos.h"
@@ -34,6 +39,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "nomos_regex.h"
 #include "_autodefs.h"
 
+/**
+ * \brief Test for doctorBuffer()
+ * \test
+ * -# Create a dirty string
+ * -# Initialize scanner and call doctorBuffer() on dirty string
+ * -# Check if the string is sanitized
+ */
 void test_doctorBuffer()
 {
   licenseInit();
@@ -53,6 +65,13 @@ void test_doctorBuffer()
   g_free(fer);
 }
 
+/**
+ * \brief Test for uncollapsePosition()
+ * \test
+ * -# Create a dirty string
+ * -# Initialize scanner and call doctorBuffer() on dirty string
+ * -# Check if uncollapsePosition() refers to original position
+ */
 void test_doctorBuffer_uncollapse()
 {
 
@@ -74,6 +93,9 @@ void test_doctorBuffer_uncollapse()
   g_free(fer);
 }
 
+/**
+ * \brief Helper function to match licenses and highlight info
+ */
 static void report_Match(char* buf)
 {
   printf("I have %i matches \n", cur.theMatches->len);
@@ -81,19 +103,28 @@ static void report_Match(char* buf)
   {
     LicenceAndMatchPositions* licenceAndMatch =  getLicenceAndMatchPositions(cur.theMatches, i);
     for (int k=0; k < licenceAndMatch->matchPositions->len; ++k) {
-    MatchPositionAndType* PaT = getMatchfromHighlightInfo(licenceAndMatch->matchPositions, k);
-    printf("Match from %d to %d: ", PaT->start, PaT->end);
+      MatchPositionAndType* PaT = getMatchfromHighlightInfo(
+          licenceAndMatch->matchPositions, k);
+      printf("Match from %d to %d: ", PaT->start, PaT->end);
 
-    for (int j = PaT->start; j < PaT->end; ++j)
-    {
-      printf("%c", *(buf + j));
+      for (int j = PaT->start; j < PaT->end; ++j)
+      {
+        printf("%c", *(buf + j));
+      }
+
+      printf("\n");
     }
-
-    printf("\n");
-  }
   }
 }
 
+/**
+ * \brief Test for idxGrep_recordPosition()
+ * \test
+ * -# Load a license info from a file
+ * -# Add license to the current matches
+ * -# Call idxGrep_recordPosition() to match license regex
+ * -# Call report_Match() to verify the match
+ */
 void test_doctorBuffer_fromFile()
 {
 
@@ -160,8 +191,10 @@ void test_doctorBuffer_fromFile()
 //! Clear exceptions: Input cannot be MarkUp and PostScript simultaneously..
 //! Please do not change the test order in this source file
 
-/*
- * step 1: take care of embedded HTML/XML and special HTML-chars like
+/**
+ * \brief Test for removeHtmlComments()
+ * \test
+ * Step 1: take care of embedded HTML/XML and special HTML-chars like
  * &quot; and &nbsp; -- but DON'T remove the text in an HTML comment.
  * There might be licensing text/information in the comment!
  *****
@@ -184,8 +217,10 @@ void test_1_removeHtmlComments()
   g_free(te22Buffer);
 }
 
-/*
- * step 2: remove comments that start at the beginning of a line, * like
+/**
+ * \brief Test for removeLineComments()
+ * \test
+ * Step 2: remove comments that start at the beginning of a line, * like
  * ^dnl, ^xcomm, ^comment, and //
  */
 void test_2_removeLineComments()
@@ -207,7 +242,9 @@ void test_2_removeLineComments()
   g_free(te22Buffer);
 }
 
-/*
+/**
+ * \brief Test for cleanUpPostscript()
+ * \test
  * Step 3 - strip out crap at end-of-line on postscript documents
  */
 void test_3_cleanUpPostscript()
@@ -224,10 +261,13 @@ void test_3_cleanUpPostscript()
 }
 
 
-/*
- *      - step 4: remove groff/troff font-size indicators, the literal
- *              string backslash-n and all backslahes, ala:
- *==>   perl -pe 's,\\s[+-][0-9]*,,g;s,\\s[0-9]*,,g;s/\\n//g;' |f */
+/**
+ * \brief Test for removeBackslashesAndGTroffIndicators()
+ * \test
+ * Step 4: remove groff/troff font-size indicators, the literal
+ *         string backslash-n and all backslahes, ala:
+ * ==>  `perl -pe 's,\\s[+-][0-9]*,,g;s,\\s[0-9]*,,g;s/\\n//g;' |f`
+ */
 void test_4_removeBackslashesAndGTroffIndicators()
 {
   initializeCurScan(&cur);
@@ -247,12 +287,14 @@ void test_4_removeBackslashesAndGTroffIndicators()
   g_free(te22Buffer);
 }
 
-/*
- *      - step 5: convert white-space to real spaces, and remove
- *              unnecessary punctuation, ala:
- *==>   tr -d '*=+#$|%.,:;!?()\\][\140\047\042' | tr '\011\012\015' '   '
+/**
+ * \brief Test for convertWhitespaceToSpaceAndRemoveSpecialChars()
+ * \test
+ * Step 5: convert white-space to real spaces, and remove
+ *         unnecessary punctuation, ala:
+ * ==>  `tr -d '*=+#$|%.,:;!?()\\][\140\047\042' | tr '\011\012\015' '   '`
  *****
- * NOTE: we purposely do NOT process backspace-characters here.  Perhaps
+ * \note we purposely do NOT process backspace-characters here.  Perhaps
  * there's an improvement in the wings for this?
  */
 void test_5_convertWhitespaceToSpaceAndRemoveSpecialChars()
@@ -279,11 +321,17 @@ void test_5_convertWhitespaceToSpaceAndRemoveSpecialChars()
 }
 
 
-/*
+/**
+ * \brief Test for dehyphen()
+ *
  * Look for hyphenations of words, to compress both halves into a sin-
  * gle (sic) word.  Regex == "[a-z]- [a-z]".
+ * \test
+ * -# Create dirty string with hyphens
+ * -# Call dehyphen() on the dirty string
+ * -# Check if the string is cleaned
  *****
- * NOTE: not sure this will work based on the way we strip punctuation
+ * \note not sure this will work based on the way we strip punctuation
  * out of the buffer above -- work on this later.
  */
 void test_6_dehyphen()
@@ -298,6 +346,12 @@ void test_6_dehyphen()
   g_free(fer);
 }
 
+/**
+ * \brief Test for dehyphen()
+ * \test
+ * -# Create a string with mix of hyphens and INVISIBLE
+ * -# Call dehyphen() and check the result
+ */
 void test_6a_dehyphen()
 {
   initializeCurScan(&cur);
@@ -317,9 +371,11 @@ void test_6a_dehyphen()
 
 }
 
-/*
- *      - step 6: clean up miscellaneous punctuation, ala:
- *==>           perl -pe 's,[-_/]+ , ,g;s/print[_a-zA-Z]* //g;s/  / /g;'
+/**
+ * \brief Test for removePunctuation()
+ * \test
+ * Step 6: clean up miscellaneous punctuation, ala:
+ * ==>     `perl -pe 's,[-_/]+ , ,g;s/print[_a-zA-Z]* //g;s/  / /g;'`
  */
 void test_7_removePunctuation()
 {
@@ -340,7 +396,9 @@ void test_7_removePunctuation()
   g_free(te22Buffer);
 }
 
-/*
+/**
+ * \brief Test for ignoreFunctionCalls()
+ * \test
  * Ignore function calls to print routines: only concentrate on what's being
  * printed (sometimes programs do print licensing information) -- but don't
  * ignore real words that END in 'print', like footprint and fingerprint.
@@ -366,9 +424,12 @@ void test_8_ignoreFunctionCalls()
   g_free(te22Buffer);
 }
 
-/*
- * Convert the regex ' [X ]+' (where X is really the character #defined as
- * INVISIBLE) to a single space (and a string of INVISIBLE characters).
+/**
+ * \brief Test for convertSpaceToInvisible()
+ * \test
+ * -# Create string with many empty spaces
+ * -# Call convertSpaceToInvisible()
+ * -# Check if all spaces (>2) are replaced with INVISIBLE
  */
 void test_9_convertSpaceToInvisible()
 {
@@ -390,8 +451,10 @@ void test_9_convertSpaceToInvisible()
   g_free(te22Buffer);
 }
 
-/*
- * garbage collect: eliminate all INVISIBLE characters in the buffer
+/**
+ * \brief Test for compressDoctoredBuffer()
+ * \test
+ * -# garbage collect: eliminate all INVISIBLE characters in the buffer
  */
 void test_10_compressDoctoredBuffer()
 {

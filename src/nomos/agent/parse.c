@@ -28,13 +28,13 @@
 #include "nomos_utils.h"
 #include "_autodefs.h"
 
-/* DEBUG  
+/* DEBUG
 #define DOCTOR_DEBUG 1
 #define PROC_TRACE 1
    DEBUG */
 
 /**
- * \file parse.c
+ * \file
  * \brief searches for licenses
  *
  * The main workhorse of nomos. This file contains most of the logic for finding
@@ -107,6 +107,9 @@
 #define _msize          _fIJG+1
 //@}
 
+/**
+ * Regex match related data
+ */
 static struct {
   char *base;
   int sso;
@@ -168,12 +171,12 @@ void copyleftExceptions(char *, int, int, int);
  * File local variables
  */
 //@{
-/*
+/**
  * Detected licenses are stored here in a form ',BSD,MIT' etc
-*/
+ */
 static char licStr[myBUFSIZ];
 
-static char ltsr[NFOOTPRINTS]; /* License Text Search Results,
+static char ltsr[NFOOTPRINTS]; /**< License Text Search Results,
            a bytemask for each possible match string */
 static char name[256];
 static char lmem[_msize];
@@ -182,34 +185,34 @@ static list_t whereList;
 static list_t whCacheList;
 static int refOffset;
 static int maxInterest;
-static int pd;     /* Flag for whether we've checked for a
+static int pd; /**< Flag for whether we've checked for a
           public domain "license" */
 static int crCheck;
 static int checknw;
-static int lDebug = 0;  /* set this to non-zero for more debugging */
-static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
+static int lDebug = 0; /**< set this to non-zero for more debugging */
+static int lDiags = 0; /**< set this to non-zero for printing diagnostics */
 //@}
 
 /**
  * \name micro function definitions
- * These #define's save a LOT of typing and indention... :)
+ * These #define's save a LOT of typing and indentation... :)
  */
 //@{
-#define PARSE_ARGS      filetext, size, isML, isPS
-#define LVAL(x)         (ltsr[x] & LTSR_RMASK)
-#define SEEN(x)         (ltsr[x] & LTSR_SMASK)
-#define INFILE(x)       fileHasPatt(x, PARSE_ARGS, 0)
-#define NOT_INFILE(x)   !( fileHasPatt(x, PARSE_ARGS, 0) && clearLastElementOfLicenceBuffer() )
-#define RM_INFILE(x)    fileHasPatt(x, PARSE_ARGS, 1)
-#define GPL_INFILE(x)   fileHasPatt(x, PARSE_ARGS, 2)
-#define PERL_INFILE(x)  fileHasPatt(x, PARSE_ARGS, 3)
-#define NY_INFILE(x)    fileHasPatt(x, PARSE_ARGS, 4)
-#define X_INFILE(x, y)  fileHasPatt(x, PARSE_ARGS, y)
-#define DEBUG_INFILE(x) printf(" Regex[%d] = \"%s\"\nINFILE(%d) = %d\n", x, _REGEX(x), x, INFILE(x));
-#define HASREGEX(x, cp) idxGrep(x, cp, REG_ICASE|REG_EXTENDED)
-#define HASREGEX_RI(x, cp) idxGrep_recordIndex(x, cp, REG_ICASE|REG_EXTENDED)
-#define HASTEXT(x, fl)  idxGrep_recordIndex(x, filetext, REG_ICASE|fl)
-#define URL_INFILE(x)   (INFILE(x) || fileHasPatt(x, PARSE_ARGS, -1))
+#define PARSE_ARGS      filetext, size, isML, isPS  ///< Arguments to parse
+#define LVAL(x)         (ltsr[x] & LTSR_RMASK)      ///< Check LTSR_RMASK on lstr[x]
+#define SEEN(x)         (ltsr[x] & LTSR_SMASK)      ///< Check LTSR_SMASK on lstr[x]
+#define INFILE(x)       fileHasPatt(x, PARSE_ARGS, 0) ///< Calls fileHasPatt()
+#define NOT_INFILE(x)   !( fileHasPatt(x, PARSE_ARGS, 0) && clearLastElementOfLicenceBuffer() ) ///< Calls fileHasPatt()
+#define RM_INFILE(x)    fileHasPatt(x, PARSE_ARGS, 1) ///< Calls fileHasPatt() with qType 1
+#define GPL_INFILE(x)   fileHasPatt(x, PARSE_ARGS, 2) ///< Calls fileHasPatt() with qType 2
+#define PERL_INFILE(x)  fileHasPatt(x, PARSE_ARGS, 3) ///< Calls fileHasPatt() with qType 3
+#define NY_INFILE(x)    fileHasPatt(x, PARSE_ARGS, 4) ///< Calls fileHasPatt() with qType 4
+#define X_INFILE(x, y)  fileHasPatt(x, PARSE_ARGS, y) ///< Calls fileHasPatt() with qType y
+#define DEBUG_INFILE(x) printf(" Regex[%d] = \"%s\"\nINFILE(%d) = %d\n", x, _REGEX(x), x, INFILE(x)); ///< Debug print
+#define HASREGEX(x, cp) idxGrep(x, cp, REG_ICASE|REG_EXTENDED)  ///< Calls idxGrep()
+#define HASREGEX_RI(x, cp) idxGrep_recordIndex(x, cp, REG_ICASE|REG_EXTENDED) ///< Calls idxGrep_recordIndex()
+#define HASTEXT(x, fl)  idxGrep_recordIndex(x, filetext, REG_ICASE|fl)  ///< Calls idxGrep_recordIndex()
+#define URL_INFILE(x)   (INFILE(x) || fileHasPatt(x, PARSE_ARGS, -1)) ///< Check in file with qType 0|1
 #define CANSKIP(i,x,y,z)        ((i >= y) && (i <= z) && !(kwbm & (1 << (x - _KW_first))))
 #define HASKW(x, y)     (x & (1 << (y - _KW_first)))
 #define TRYGROUP(x)     x(PARSE_ARGS)
@@ -246,6 +249,16 @@ static int lDiags = 0;  /* set this to non-zero for printing diagnostics */
 #define EXCEPTIONS()    copyleftExceptions(PARSE_ARGS)
 //@}
 
+/**
+ * \brief Checks for a phrase in a file
+ * \param licTextIdx  Index of phrase to look
+ * \param filetext    Content of file
+ * \param size        File size
+ * \param isML        File content is HTML/XML
+ * \param isPS        File content is a post script
+ * \param qType       <0, look at raw text. >=0 look in doctored buffers
+ * \return True if pattern found
+ */
 static int fileHasPatt(int licTextIdx, char *filetext, int size,
     int isML, int isPS, int qType)
 {
@@ -304,7 +317,16 @@ static int fileHasPatt(int licTextIdx, char *filetext, int size,
   return(findPhrase(licTextIdx, PARSE_ARGS, qType));
 }
 
-
+/**
+ * \brief Debugging call for idxGrep()
+ *
+ * Function calls idxGrep() and print the regex match using printRegexMatch()
+ * \param licTextIdx  license index
+ * \param buf
+ * \param show
+ * \return -1 on regex-compile failure, 1 if regex search fails, and 0 if
+ * regex search is successful.
+ */
 static int dbgIdxGrep(int licTextIdx, char *buf, int show)
 {
   int ret;
@@ -327,7 +349,27 @@ static int dbgIdxGrep(int licTextIdx, char *buf, int show)
   return ret;
 }
 
-
+/**
+ * \brief Parse a file to check all the possible licenses and add them to
+ * matches
+ *
+ * The function calls fileHasPatt() if the file contains a pattern defined in
+ * STRINGS.in. If a match is found, then it can call idxGrep_recordIndex() to
+ * check if the file has some additional text and finally adds the license
+ * using addRef(). The results found are also stored in licStr as a comma
+ * separated list.
+ *
+ * The function first check if a file contains an interesting string which can
+ * denote a license. If it is found then the heuristics are done in detail to
+ * find the exact license match. For more info please refer to
+ * [nomos wiki](https://github.com/fossology/fossology/wiki/Nomos#step-2-change-the-scanner---parsec)
+ * \param filetext  File content
+ * \param size      File size
+ * \param[out] scp  Scan results
+ * \param isML      Source is HTML/XML
+ * \param isPS      Source is PostScript
+ * \return  Next index in licStr
+ */
 char *parseLicenses(char *filetext, int size, scanres_t *scp,
     int isML, int isPS)
 {
@@ -1275,18 +1317,18 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_fOFL] = 1;
   }
   cleanLicenceBuffer();
-  /** Simple Public License 2.0 */
+  /* Simple Public License 2.0 */
   if (INFILE(_TITLE_SimPL_V2)) {
     INTERESTING("SimPL-2.0");
     lmem[_mGPL] = 1;
   }
   cleanLicenceBuffer();
-  /** Leptonica license */
+  /* Leptonica license */
   if (INFILE(_TITLE_LEPTONICA) && INFILE(_LT_GNU_3)) {
     INTERESTING("Leptonica");
   }
   cleanLicenceBuffer();
-  /** copyleft-next license
+  /*  copyleft-next license
     * It has to be checked before GPL because the license has the reference
     * to GPL license which gives a false positive GPL finding.
     */
@@ -1572,7 +1614,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "GPL(alternate)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if ((GPL_INFILE(_LT_GPL3ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER) 
+      else if ((GPL_INFILE(_LT_GPL3ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER)
             || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref2))
             && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED))
       {
@@ -1843,7 +1885,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       && (NOT_INFILE(_TEXT_NOT_GPL2))
       && (NOT_INFILE(_LT_CNRI_PYTHON_GPL))
       && (NOT_INFILE(_LT_W3Cref4))
-      && (INFILE(_LT_GPL_NAMED) 
+      && (INFILE(_LT_GPL_NAMED)
         || INFILE(_LT_GPL_NAMED2)
         || (INFILE(_LT_GPL_NAMED3) && !HASTEXT(_PHR_GPL_GHOSTSCRIPT, REG_EXTENDED)))
       && (NOT_INFILE(_LT_GPL_NAMED3_EXHIBIT))
@@ -1871,7 +1913,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "GPLV3(named)" : "GPL-3.0");
   }
   cleanLicenceBuffer();
-  if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED) 
+  if (!lmem[_mLGPL] && (INFILE(_LT_LGPL_NAMED)
         || INFILE(_LT_LGPL_NAMED2)) && NOT_INFILE(_LT_GPL_NAMED_EXHIBIT)
       && NOT_INFILE(_LT_PHP_V30_2)) {
     cp = LGPLVERS();
@@ -1882,7 +1924,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * MIT, X11, Open Group, NEC -- text is very long, search in 2 parts
    */
-  if (INFILE(_LT_JSON) && INFILE(_LT_MIT_NO_EVIL)) { // JSON license 
+  if (INFILE(_LT_JSON) && INFILE(_LT_MIT_NO_EVIL)) { // JSON license
     INTERESTING("JSON");
     lmem[_mMIT] = 1;
   }
@@ -1916,7 +1958,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * MIT search order changed. First MIT license explicit phrases and references are checked .
    */
-  else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) && 
+  else if ((INFILE(_LT_MIT_1) || INFILE(_TITLE_MIT)) &&
       NOT_INFILE(_TITLE_MIT_EXHIBIT) && NOT_INFILE(_TITLE_SGI) && !lmem[_mMIT]) {
     if(INFILE(_LT_MIT_NO_EVIL)) {
       INTERESTING(lDebug ? "MIT-style(no evil)" : "JSON");
@@ -1939,27 +1981,27 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "XFree86(2)" : "XFree86");
         lmem[_mMIT] = 1;
       }
-      /** MIT-advertising License */
+      /* MIT-advertising License */
       else if (INFILE(_LT_MIT_ADVERTISING)) {
         INTERESTING("MIT-advertising");
         lmem[_mMIT] = 1;
       }
-      /** MIT-enna License */
+      /* MIT-enna License */
       else if (INFILE(_LT_MIT_ENNA)) {
         INTERESTING("MIT-enna");
         lmem[_mMIT] = 1;
       }
-      /** MIT-feh License */
+      /* MIT-feh License */
       else if (INFILE(_LT_MIT_FEH)) {
         INTERESTING("MIT-feh");
         lmem[_mMIT] = 1;
       }
-      /** MITNFA License */
+      /* MITNFA License */
       else if (HASTEXT(_LT_MITNFA, 0)) {
         INTERESTING("MITNFA");
         lmem[_mMIT] = 1;
       }
-      /** Imlib2 License */
+      /* Imlib2 License */
       else if (INFILE(_LT_Imlib2)) {
         INTERESTING("Imlib2");
         lmem[_mMIT] = 1;
@@ -1968,7 +2010,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "MIT(14)" : "MIT");
         lmem[_mMIT] = 1;
       }
-      /** NCSA */
+      /* NCSA */
       else if (INFILE(_TITLE_NCSA) && NOT_INFILE(_TITLE_NCSA_EXHIBIT)) {
         INTERESTING(lDebug ? "NCSA(1)" : "NCSA");
         lmem[_mMIT] = 1;
@@ -2026,7 +2068,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       lmem[_fUNICODE] = 1;
       lmem[_mMIT] = 1;
     }
-    /**
+    /*
      * Adobe-Glyph
      */
     else if (HASTEXT(_LT_ADOBE_GLYPH_1, REG_EXTENDED) && INFILE(_LT_ADOBE_GLYPH_2)) {
@@ -2289,12 +2331,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /** MirOS License (MirOS) */
-  if (INFILE(_TITLE_MIROS)) { 
-    INTERESTING("MirOS"); 
+  if (INFILE(_TITLE_MIROS)) {
+    INTERESTING("MirOS");
     lmem[_mMIT] = 1;
   }
   cleanLicenceBuffer();
-  /** Libpng license */
+  /* Libpng license */
   if (INFILE(_TITLE_LIBPNG)) {
     INTERESTING("Libpng");
   }
@@ -2627,7 +2669,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * MPL (Mozilla)
    * ... Sun SISSL and one Mozilla licensing derivative share wording
    */
-  if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) && 
+  if ((INFILE(_LT_MPL_OR) || INFILE(_TITLE_MPL_ref)) &&
       !lmem[_fREAL] && NOT_INFILE(_LT_CPALref) && NOT_INFILE(_TITLE_GSOAP)) {
     cp = MPLVERS(); /* NPL, too */
     INTERESTING(lDebug ? "MPL/NPL#2" : cp);
@@ -2769,7 +2811,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     else if (INFILE(_TITLE_RHeCos_V11)) {
       INTERESTING("RHeCos-1.1");
-    } 
+    }
     else if (INFILE(_TITLE_CYGNUS_ECOS_V10)) {
       INTERESTING("Cygnus-eCos-1.0");
     }
@@ -6218,7 +6260,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   else if (INFILE(_LT_USGOVT_2)) {
-    /**
+    /*
      * mpich2
      */
     if (INFILE(_LT_MPICH2)) {
@@ -6269,7 +6311,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   /*
    * Zimbra
-   */ 
+   */
   if (INFILE(_TITLE_ZIMBRA_13)) {
      INTERESTING("Zimbra-1.3");
   }
@@ -6295,7 +6337,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
      INTERESTING("Multics");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * H2
    * Note, H2 title is also checked in MPL section
    */
@@ -6306,14 +6348,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("H2");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * CRYPTOGAMS
    */
   if (INFILE(_LT_CRYPTOGAMS)) {
     INTERESTING("Cryptogams");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Cygnus-eCos-1.0
    * Note, Cygnus-eCos title is also checked in MPL section
    */
@@ -6321,7 +6363,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Cygnus-eCos-1.0");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * RHeCos-1.1
    * Note, RHeCos-1.1 title is also checked in MPL section
    */
@@ -6337,42 +6379,42 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("TMate");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Abstyles
    */
   if (INFILE(_LT_ABSTYLES_1) && INFILE(_LT_ABSTYLES_2)) {
     INTERESTING("Abstyles");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Amazon Digital Services License
    */
   if (INFILE(_LT_ADSL) && INFILE(_CR_AMAZON)) {
     INTERESTING("ADSL");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * CrystalStacker License
    */
   if (HASTEXT(_LT_CRYSTALSTACKER, REG_EXTENDED)) {
     INTERESTING("CrystalStacker");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * 3GPP
    */
   if (INFILE(_LT_3GPP)) {
     INTERESTING("3GPP");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * ITU-T
    */
   if (INFILE(_LT_ITU_T_1) || INFILE(_LT_ITU_T_2) || HASTEXT(_TITLE_ITU_T, 0)) {
     INTERESTING("ITU-T");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Sun Public License
    */
   if (!lmem[_mSUN] && !lmem[_mMPL]) {
@@ -6384,56 +6426,56 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * libtiff, note that license text is detected earlier
    */
   if (INFILE(_PHR_LIBTIFF)) {
      INTERESTING("libtiff");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Imlib2
    */
   if (INFILE(_PHR_Imlib2)) {
     INTERESTING("Imlib2");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Wide Open License (WOL)
    */
   if (INFILE(_TITLE_WOL) || INFILE(_URL_WOL)) {
     INTERESTING("WOL");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * naist-2003
    */
   if (INFILE(_LT_NAIST_2003) && HASTEXT(_TEXT_NAIST, 0)) {
     INTERESTING("naist-2003");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * EDL-1.0
    */
   if (INFILE(_TITLE_EDL_V10)) {
     INTERESTING("EDL-1.0");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * HSQLDB
    */
   if (INFILE(_LT_HSQLDB_1) || INFILE(_LT_HSQLDB_2) || INFILE(_LT_HSQLDB_3)) {
     INTERESTING("HSQLDB");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * Sony Computer Entertainment (SCEA) Shared Source License
   */
   if (INFILE(_TITLE_SCEA)) {
     INTERESTING("SCEA");
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * OpenMap
    */
   if (INFILE(_TITLE_OPENMAP)) {
@@ -6441,7 +6483,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_fPDDL] = 1;
   }
   cleanLicenceBuffer();
-  /**
+  /*
    * ICU 1.8.1
    */
   if (INFILE(_LT_ICU_1) || INFILE(_TITLE_ICU) || INFILE(_SPDX_ICU)) {
@@ -6504,7 +6546,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "IP(3)" : "IP-claim");
   }
   cleanLicenceBuffer();
-  /* 
+  /*
    * Dual licenses
    */
   if (INFILE(_LT_DUAL_LICENSE_0) && NOT_INFILE(_TITLE_NOSL)) {
@@ -6516,7 +6558,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_DUAL_LICENSE_1) && NOT_INFILE(_TITLE_NOSL)) {
     MEDINTEREST(lDebug ? "Dual-license(1)" : "Dual-license");
   }
-  else if (INFILE(_LT_DUAL_LICENSE_2)) { 
+  else if (INFILE(_LT_DUAL_LICENSE_2)) {
     MEDINTEREST(lDebug ? "Dual-license(2)" : "Dual-license");
   }
   else if (INFILE(_LT_DUAL_LICENSE_3) && NOT_INFILE(_LT_DUAL_LICENSE_3_EXHIBIT)) {
@@ -6679,7 +6721,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Beerware");
   }
   cleanLicenceBuffer();
-  /* 
+  /*
    * CMake license
    */
   if (URL_INFILE(_URL_CMAKE)) {
@@ -6719,7 +6761,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /*
-   * European Union Public Licence 
+   * European Union Public Licence
    */
   if (INFILE(_TITLE_EUPL_V10)) {
     INTERESTING("EUPL-1.0");
@@ -6728,10 +6770,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("EUPL-1.1");
   }
   cleanLicenceBuffer();
-  /** University of Illinois/NCSA Open Source License */
+  /* University of Illinois/NCSA Open Source License */
   if (!lmem[_fNCSA] && INFILE(_TITLE_NCSA) && NOT_INFILE(_TITLE_NCSA_EXHIBIT)) {
     INTERESTING(lDebug ? "NCSA(2)" : "NCSA");
-    /** OZPLB-1.1 refers both to NCSA and OZPLB-1.1 licenses */
+    /* OZPLB-1.1 refers both to NCSA and OZPLB-1.1 licenses */
     if (INFILE(_TITLE_OZPLB_11)) {
       INTERESTING("OZPLB-1.1");
     }
@@ -6739,19 +6781,19 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
   cleanLicenceBuffer();
-  /** ODC Public Domain Dedication & License 1.0 */
+  /* ODC Public Domain Dedication & License 1.0 */
   if (INFILE(_TITLE_PDDL)) {
     INTERESTING("PDDL-1.0");
     lmem[_fPDDL] = 1;
   }
   cleanLicenceBuffer();
-  /** PostgreSQL License */
+  /* PostgreSQL License */
   if (INFILE(_TITLE_POSTGRES) || INFILE(_TITLE_POSTGRES_1)) {
     INTERESTING("PostgreSQL");
     lmem[_fBSD] = 1;
   }
   cleanLicenceBuffer();
-  /**   Sax Public Domain Notice */
+  /* Sax Public Domain Notice */
   if (INFILE(_LT_SAX_PD)) {
     INTERESTING("SAX-PD");
     lmem[_fSAX] = 1;
@@ -6773,7 +6815,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "WTFPL(phr)" : "WTFPL");
   }
   cleanLicenceBuffer();
-  /** Independent JPEG Group License */
+  /* Independent JPEG Group License */
   if (!lmem[_fIJG]) {
     if (HASTEXT(_PHR_IJG_1, REG_EXTENDED)) {
       INTERESTING("IJG");
@@ -6790,17 +6832,17 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
     cleanLicenceBuffer();
   }
-  /** Netizen Open Source License  */
+  /* Netizen Open Source License  */
   if (INFILE(_TITLE_NOSL) && !lmem[_mMPL]) {
     INTERESTING(lDebug ? "NOSL(#2)" : "NOSL");
   }
   cleanLicenceBuffer();
-  /** Net Boolean Public License v1 */
+  /* Net Boolean Public License v1 */
   if (INFILE(_TITLE_NBPL_V10)) {
     INTERESTING("NBPL-1.0");
   }
   cleanLicenceBuffer();
-  /** Flora License */
+  /* Flora License */
   if (INFILE(_TITLE_Flora_V10)) {
     INTERESTING("Flora-1.0");
   }
@@ -6811,46 +6853,46 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("Flora");
   }
   cleanLicenceBuffer();
-  /** Standard ML of New Jersey License */
+  /* Standard ML of New Jersey License */
   if (INFILE(_TITLE_SMLNJ)) {
     INTERESTING("SMLNJ");
   }
   cleanLicenceBuffer();
-  /** Mozilla Public License possibility */
+  /* Mozilla Public License possibility */
   if (URL_INFILE(_URL_MPL_LATEST) && !lmem[_mMPL]) {
     INTERESTING(lDebug ? "MPL(latest)" : "MPL");
   }
   cleanLicenceBuffer();
-  /** Citrix License */
+  /* Citrix License */
   if (INFILE(_TITLE_CITRIX)) {
     INTERESTING("Citrix");
     lmem[_fCITRIX] = 1;
   }
   cleanLicenceBuffer();
-  /** CUA office public license */
+  /* CUA office public license */
   if (INFILE(_TITLE_CUA10)) {
     INTERESTING("CUA-OPL-1.0");
   }
   cleanLicenceBuffer();
-  /**  the Erlang Public License */
+  /*  the Erlang Public License */
   if (INFILE(_TITLE_ERLPL_ref)) {
     INTERESTING("ErlPL-1.1");
   }
   cleanLicenceBuffer();
-  /** German Free Software License */
+  /* German Free Software License */
   if (INFILE(_TITLE_D_FSL_10) || INFILE(_TITLE_D_FSL_DE1_10) || INFILE(_TITLE_D_FSL_DE2_10) || INFILE(_TITLE_D_FSL_DE3_10) || INFILE(_TITLE_D_FSL_DE4_10))
   {
     INTERESTING("D-FSL-1.0");
     lmem[_mGPL] = 1;
   }
   cleanLicenceBuffer();
-  /**  CCLRC License */
+  /*  CCLRC License */
   if (INFILE(_TITLE_CCLRC)) {
     INTERESTING("CCLRC");
   }
   cleanLicenceBuffer();
 
-  /** Some GPL cases are still missing */
+  /* Some GPL cases are still missing */
   if (!lmem[_mGPL] && (INFILE(_LT_GPL_V2_ref) || INFILE(_LT_GPL_V2_ref1) || INFILE(_LT_GPL_V2_ref2) || INFILE(_LT_GPL_V2_ref3) || INFILE(_LT_GPL_V2_ref4)))
   {
     INTERESTING(lDebug ? "GPL_V2_ref" : "GPL-2.0");
@@ -6873,7 +6915,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
 
-  /** MX4J License version 1.0 */
+  /* MX4J License version 1.0 */
   if (INFILE(_LT_MX4J_V10))
   {
     INTERESTING("MX4J-1.0");
@@ -6883,13 +6925,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("MX4J");
   }
   cleanLicenceBuffer();
-  /** postfix license */
+  /* postfix license */
   if (INFILE(_TITLE_POSTFIX))
   {
     INTERESTING("Postfix");
   }
   cleanLicenceBuffer();
-  /** not public domain */
+  /* not public domain */
   if (HASTEXT(_LT_PUBDOM_NOTclaim, REG_EXTENDED)) {
     if (INFILE(_LT_PUBDOM_CC)) {
       INTERESTING(lDebug ? "Pubdom(CC)" : LS_PD_CLM);
@@ -6900,43 +6942,43 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     pd = 0;
   }
   cleanLicenceBuffer();
-  /** License: Apache 2.0 */
+  /* License: Apache 2.0 */
   if (INFILE(_LT_APACHE_V2ref1) || INFILE(_LT_APACHE_V2ref2) || INFILE(_LT_APACHE_V2ref3) || INFILE(_LT_APACHE_V2ref4) || INFILE(_LT_APACHE_V2ref5))
   {
     INTERESTING("Apache-2.0");
   }
   cleanLicenceBuffer();
-  /** LIBGCJ license */
+  /* LIBGCJ license */
   if (INFILE(_LT_LIBGCJ))
   {
     INTERESTING("LIBGCJ");
   }
   cleanLicenceBuffer();
-  /** open cascade technology public license */
+  /* open cascade technology public license */
   if (INFILE(_TITLE_OPEN_CASCADE))
   {
     INTERESTING("OpenCASCADE-PL");
   }
   cleanLicenceBuffer();
-  /**  KnowledgeTree Public License */
+  /*  KnowledgeTree Public License */
   if (INFILE(_LT_KnowledgeTree_V11))
   {
     INTERESTING("KnowledgeTree-1.1");
   }
   cleanLicenceBuffer();
-  /** Interbase Public License */
+  /* Interbase Public License */
   if (INFILE(_LT_Interbase_V10))
   {
     INTERESTING("Interbase-1.0");
   }
   cleanLicenceBuffer();
-  /** ClearSilver license */
+  /* ClearSilver license */
   if (INFILE(_LT_ClearSilver))
   {
     INTERESTING("ClearSilver");
   }
   cleanLicenceBuffer();
-  /** ACE, TAO, CIAO */
+  /* ACE, TAO, CIAO */
   if(INFILE(_LT_ACE)) {
     INTERESTING("ACE");
   }
@@ -6944,41 +6986,42 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("FaCE");
   }
   cleanLicenceBuffer();
-  /** JISP */
+  /* JISP */
   if(INFILE(_LT_JISP)) {
     INTERESTING("JISP");
   }
   cleanLicenceBuffer();
-  /** Qmail */
+  /* Qmail */
   if(INFILE(_LT_QMAIL)) {
     INTERESTING("Qmail");
   }
   cleanLicenceBuffer();
-  /** Migemo */
+  /* Migemo */
   if(INFILE(_LT_MIGEMO)) {
     INTERESTING("Migemo");
   }
   cleanLicenceBuffer();
-  /** Sendmail */
+  /* Sendmail */
   if(INFILE(_LT_Sendmail_title) ) {
      INTERESTING("Sendmail");
   }
-  cleanLicenceBuffer(); /** Giftware */
+  cleanLicenceBuffer();
+  /* Giftware */
   if(INFILE(_LT_GIFTWARE)) {
     INTERESTING("Giftware");
-  } 
+  }
   cleanLicenceBuffer();
-  /** Logica opensource */
+  /* Logica opensource */
   if(INFILE(_LT_LOGICA)) {
     INTERESTING("Logica-OSL-1.0");
-  } 
+  }
   cleanLicenceBuffer();
-  /** Unidex */
+  /* Unidex */
   if(INFILE(_LT_UNIDEX)) {
     INTERESTING("Unidex");
-  } 
+  }
   cleanLicenceBuffer();
-  /**  TCL License */
+  /*  TCL License */
   if (!lmem[_fTCL]) {
     if (INFILE(_TITLE_TCL)) {
       INTERESTING("TCL");
@@ -6991,7 +7034,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     }
   }
   cleanLicenceBuffer();
-  /** AndroidSDK-Commercial license */
+  /* AndroidSDK-Commercial license */
   if (INFILE(_LT_GOOGLE_SDK)) {
     INTERESTING("AndroidSDK.Commercial");
   }
@@ -7024,7 +7067,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   cleanLicenceBuffer();
   gl.flags |= ~FL_SAVEBASE; /* turn off, regardless */
   /*
-   * ... and, there are several generic claims that "you are free to use this 
+   * ... and, there are several generic claims that "you are free to use this
    * software".
    * We call these claims "Freeware", because you can use the software free of charge,
    * but some other copyright holder exclusive rights are not granted in some cases.
@@ -7357,7 +7400,14 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   return(licStr+1);       /* don't include the leading comma */
 }
 
-
+/**
+ * \brief Check for SISSL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return SISSL license shortname
+ */
 char *sisslVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7377,6 +7427,14 @@ char *sisslVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
+/**
+ * \brief Check for ASL Apache versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return ASL Apache license shortname
+ */
 char *aslVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7432,6 +7490,14 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
+/**
+ * \brief Check for MPL|NPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *mplNplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7538,7 +7604,14 @@ char *mplNplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for RPSL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
 {
   char *lstr = NULL_STR;
@@ -7581,7 +7654,14 @@ char *realVersion(char *filetext, int size, int isML, int isPS, int ref)
   return lstr;
 }
 
-
+/**
+ * \brief Check for python versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *pythonVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7629,6 +7709,14 @@ char *pythonVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
+/**
+ * \brief Check for AFL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *aflVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7661,7 +7749,14 @@ char *aflVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for OSL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *oslVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7694,7 +7789,14 @@ char *oslVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for CDDL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *cddlVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7721,7 +7823,14 @@ char *cddlVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for LPPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *lpplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7820,7 +7929,14 @@ char *lpplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for AGPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *agplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7879,7 +7995,14 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for GFDL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *gfdlVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7934,7 +8057,14 @@ char *gfdlVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for LGPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *lgplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -7951,7 +8081,7 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
       lstr = "LGPL-2.1+";
     }
   }
-  else if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) || 
+  else if ((INFILE(_PHR_LGPL3_OR_LATER) || INFILE(_PHR_LGPL3_OR_LATER_ref1) ||
         INFILE(_PHR_LGPL3_OR_LATER_ref2) ||
         HASTEXT(_PHR_LGPL3_OR_LATER_ref3, REG_EXTENDED)) && !HASTEXT(_LT_IGNORE_CLAUSE, REG_EXTENDED)) {
     lstr = "LGPL-3.0+";
@@ -8017,7 +8147,14 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for GPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *gplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *cp, *lstr = NULL_STR;
@@ -8165,7 +8302,14 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for CPL versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *cplVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -8189,7 +8333,14 @@ char *cplVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for CC-BY-SA-X versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *ccsaVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -8241,7 +8392,14 @@ char *ccsaVersion(char *filetext, int size, int isML, int isPS)
   return lstr;
 }
 
-
+/**
+ * \brief Check for CC_BY-X versions
+ * \param filetext  File content
+ * \param size      File size
+ * \param isML      File is HTML/XML
+ * \param isPS      File is PostScript
+ * \return Return license shortname
+ */
 char *ccVersion(char *filetext, int size, int isML, int isPS)
 {
   char *lstr = NULL_STR;
@@ -8276,7 +8434,7 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
   }
   else {
     lstr = lDebug ? "CCA(def)" : "CC-BY";
-  } 
+  }
   lmem[_fCCBY] = 1;
   return lstr;
 }
@@ -8288,12 +8446,12 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
  * Cache the search results of, as we are very likely to be looking up the
  * same word/phrase again.
  *
- * @param int index, index of the phrase to be searched for
- * @param char *filetext, the text to search
- * @param int size the size of??
- * @param int isML medium level interest??
- * @param int isPS postscript file??
- * @param int qtype ??
+ * @param index index of the phrase to be searched for
+ * @param filetext the text to search
+ * @param size the size of file
+ * @param isML Is HTML/XML file?
+ * @param isPS Is postscript file?
+ * @param qtype ??
  *
  * @return int ?? 0 means ??
  */
@@ -8773,6 +8931,20 @@ int findPhrase(int index, char *filetext, int size, int isML, int isPS,
   return(ret);
 }
 
+/**
+ * \brief Locate a regex in a given file
+ *
+ * Function first looks in raw text, then goes for doctored buffer if not found
+ * in the file.
+ *
+ * Save location using saveRegexLocation()
+ * \param text  Raw file to check
+ * \param op    List
+ * \param index Index of regex
+ * \param size  Size of file
+ * \param sso   Match start
+ * \param seo   Match end
+ */
 void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
 {
   int i;
@@ -9047,7 +9219,13 @@ void locateRegex(char *text, item_t *op, int index, int size, int sso, int seo)
   return;
 }
 
-
+/**
+ * \brief Save a regex in whereList
+ * \param index     Index of the regex
+ * \param offset    Regex match start
+ * \param length    Regex match length
+ * \param saveCache Set YES to save in whChacheList
+ */
 void saveRegexLocation(int index, int offset, int length, int saveCache)
 {
   item_t *ip;
@@ -9753,6 +9931,7 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
 
 /**
  * \brief If we call this function, we still don't know anything about a license.
+ *
  * In fact, there may be NO license.  Look for copyrights, references to
  * the word "trademark", "patent", etc. (and possibly other trivial (or
  * borderline-insignificant) legal stuff in this file.
@@ -9776,11 +9955,13 @@ void checkCornerCases(char *filetext, int size, int score,
   /*
    * FINAL cases: (close to giving up) -- lowest-importance items
    */
-  /**TODO Remove this code block and respective phrase from STRINGS.in later
+  /**
+   * @todo Remove this code block and respective phrase from STRINGS.in later
    *
    * Trademark detection removed. It gave too many false positives.Code left
    * because more experiences are needed about the consequences.
-   *
+   */
+  /*
   if (!(*licStr)) {
     if (HASTEXT(_TEXT_TRADEMARK, 0)) {
       LOWINTEREST(LS_TDMKONLY);
@@ -10030,7 +10211,7 @@ void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
   return;
 }
 
-/*
+/**
  * SPDX license references
  *
  * Note that many license references have been detected earlier:
@@ -10874,7 +11055,7 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   return;
 }
 
-/*
+/**
  * Find copyleft exceptions
  *
  */
@@ -10967,7 +11148,7 @@ void copyleftExceptions(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_WxWindows_exception_31)) {
     INTERESTING("WxWindows-exception-3.1");
   }
-  /**
+  /*
    * Find exception phrases. There are similar phrases
    * in exception clauses. Therefore 'else if' structure
    * has to be used to get correct detections.
