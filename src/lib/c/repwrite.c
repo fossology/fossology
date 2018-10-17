@@ -16,9 +16,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation, Inc.0
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-*************************
-stdin = data to write.
 ****************************************************************/
+/**
+ * \file
+ * \brief Create a file.
+ *
+ * stdin = data to write.
+ * \sa fo_RepFwrite()
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

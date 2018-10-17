@@ -16,10 +16,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation, Inc.0
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-*********************
-Input can be from stdin or command-line.
-stdin can be pairs of files, or xml.
 ****************************************************************/
+/**
+ * \file
+ * \brief Copy a file into the repository.
+ *
+ * Input can be from stdin or command-line.
+ * stdin can be pairs of files, or xml.
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,15 +36,19 @@ stdin can be pairs of files, or xml.
 char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 
-/*** GLOBALS (for stats ***/
+/*** GLOBALS (for stats) ***/
 long TotalImported = 0;
 long TotalDuplicate = 0;
 long TotalError = 0;
 
 
-/*****************************************
-CopyFile(): Given one file, copy it.
-*****************************************/
+/**
+ * Given one file, copy it.
+ * @param Source  Source file path
+ * @param Type    Type of source
+ * @param Name    Destination file name
+ * @sa fo_RepImport()
+ */
 void CopyFile(char* Source, char* Type, char* Name)
 {
   int rc;
@@ -59,10 +67,13 @@ void CopyFile(char* Source, char* Type, char* Name)
   else TotalError++;
 } /* CopyFile() */
 
-/*****************************************
-ReadLine(): Read a line from stdin.
-Returns number of bytes loaded.
-*****************************************/
+/**
+ * Read a line from stdin.
+ * @param Fin       File to read from (STDIN)
+ * @param[out] Line Line read
+ * @param MaxLine   Max length of line
+ * @return Number of bytes loaded.
+ */
 int ReadLine(FILE* Fin, char* Line, int MaxLine)
 {
   int C = '@';
@@ -81,10 +92,11 @@ int ReadLine(FILE* Fin, char* Line, int MaxLine)
   return (i);
 } /* ReadLine() */
 
-/*****************************************
-Hex2Dec(): Given a hex character, return
-decimal value.
-*****************************************/
+/**
+ * Given a hex character, return decimal value.
+ * @param C Hex character to convert
+ * @return Decimal value of C
+ */
 int Hex2Dec(char C)
 {
   if (!isxdigit(C)) return (0);
@@ -93,10 +105,11 @@ int Hex2Dec(char C)
   return (C - 'a' + 10);
 } /* Hex2Dec() */
 
-/*****************************************
-UnUnicodeHex(): Convert "&#xAA;" to hex.
-Returns hex or -1 on error.
-*****************************************/
+/**
+ * Convert "&#xAA;" to hex.
+ * @param S Unicode character
+ * @return Returns hex or -1 on error.
+ */
 int UnUnicodeHex(char* S)
 {
   int v;
@@ -109,10 +122,11 @@ int UnUnicodeHex(char* S)
   return (-1);
 } /* UnUnicodeHex() */
 
-/*****************************************
-ProcessPairs(): Process pairs of names.
-Format: dest src
-*****************************************/
+/**
+ * Process pairs of names in format: `dest src`
+ * @param Fin   FP to read from
+ * @param Type  Type of file
+ */
 void ProcessPairs(FILE* Fin, char* Type)
 {
   char Buf[10240];
@@ -154,12 +168,16 @@ void ProcessPairs(FILE* Fin, char* Type)
   }
 } /* ProcessPairs() */
 
-/*****************************************
-ProcessXML(): Process Ununpack XML.
-Format comes from Ununpack -L.
-We care about fuid and source fields.
-We want to skip directories and artifacts.
-*****************************************/
+/**
+ * @brief Process Ununpack XML.
+ *
+ * Format comes from Ununpack -L.
+ * We care about fuid and source fields.
+ * We want to skip directories and artifacts.
+ * @param Fin         File pointer
+ * @param TypeSource  Type of source
+ * @param Type        Type of destination
+ */
 void ProcessXML(FILE* Fin, char* TypeSource, char* Type)
 {
   char Buf[10240];

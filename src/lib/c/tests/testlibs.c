@@ -14,7 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * @dir
+ * @brief Unit tests for libfossology
+ */
 #include <libfocunit.h>
 #include <libfodbreposysconf.h>
 
@@ -34,6 +37,7 @@ extern CU_TestInfo libfossdbmanager_testcases[];
 /**
 * array of every test suite. There should be at least one test suite for every
 * library includes in libfossology.
+* \todo Fix `fossscheduler_testcases`
 */
 
 #if CU_VERSION_P == 213
