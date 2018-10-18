@@ -151,7 +151,7 @@ $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','t
         'license_ref_bulk'=>array('rf_fk','removing'));
 if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
 {
-  $dbManager->queryOnce('begin; 
+  $dbManager->queryOnce('begin;
     CREATE TABLE uploadtree_b AS (SELECT * FROM uploadtree_a);
     DROP TABLE uploadtree_a;
     CREATE TABLE uploadtree_a () INHERITS (uploadtree);
@@ -166,6 +166,11 @@ if($dbManager->existsTable("author"))
   require_once("$LIBEXECDIR/resequence_author_table.php"); // If table exists, clean up for Schema
 }
 
+if($isUpdating && substr(str_replace(".", "", $sysconfig['Release']), 0, 3) <= 330)
+{
+  require_once("$LIBEXECDIR/dbmigrate_3.3-3.4.php");
+  Migrate_33_34($dbManager, $Verbose);
+}
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
@@ -347,6 +352,11 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0
   require_once("$LIBEXECDIR/dbmigrate_multiple_copyright_decisions.php");
 
   $sysconfig['Release'] = "3.1.0";
+}
+
+// fix release-version datamodel-version missmatch
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == "3.1.0")) {
+  $sysconfig['Release'] = "3.3.0";
 }
 
 $dbManager->begin();
