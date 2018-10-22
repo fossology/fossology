@@ -1886,7 +1886,6 @@
   $Schema["CONSTRAINT"]["clearing_decision_event_event_fk_fkey"] = "ALTER TABLE \"clearing_decision_event\" ADD CONSTRAINT \"clearing_decision_event_event_fk_fkey\" FOREIGN KEY (\"clearing_event_fk\") REFERENCES \"clearing_event\" (\"clearing_event_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_event_decision_fk_fkey"] = "ALTER TABLE \"clearing_decision_event\" ADD CONSTRAINT \"clearing_decision_event_decision_fk_fkey\" FOREIGN KEY (\"clearing_decision_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
-  $Schema["CONSTRAINT"]["clearing_event_rf_fk_fkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_event_job_fk_fkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_job_fk_fkey\" FOREIGN KEY (\"job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE RESTRICT ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"copyright_pk\");";
   $Schema["CONSTRAINT"]["copyright_agent_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -1925,7 +1924,6 @@
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_file_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["license_file_pfile_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["license_file_rf_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
   $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
