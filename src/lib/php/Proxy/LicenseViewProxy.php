@@ -68,7 +68,7 @@ class LicenseViewProxy extends DbViewProxy
       $dbViewQuery .= " AND $options[extraCondition]";
     }
     return $dbViewQuery;
-}
+  }
   
   private function queryOnlyLicenseRef($options){
     $columns = array_key_exists(self::OPT_COLUMNS, $options) ? $options[self::OPT_COLUMNS] : $this->allColumns;

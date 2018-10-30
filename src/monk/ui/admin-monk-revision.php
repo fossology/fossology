@@ -34,7 +34,7 @@ class AdminMonkRevision extends DefaultPlugin {
         self::TITLE => _("Manage Monk Revision"),
         self::MENU_LIST => "Admin::Agent::Monk",
         self::PERMISSION => Auth::PERM_ADMIN
-    ));
+        ));
   }
   
   /**

@@ -231,7 +231,10 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
-   * with mock agent
+   * @test
+   * -# Setup an upload with no clearing decisions
+   * -# Run reuser on the empty upload with mock agent
+   * -# Check that no clearing decisions added by reuser
    */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndNoClearing()
   {
@@ -240,7 +243,10 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
-   * with scheduler cli
+   * @test
+   * -# Setup an upload with no clearing decisions
+   * -# Run reuser on the empty upload with scheduler cli
+   * -# Check that no clearing decisions added by reuser
    */
   public function testReuserRealScanWithoutAnyUploadToCopyAndNoClearing()
   {
@@ -250,10 +256,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Test on an upload with no clearing decisions
    * @param SchedulerTestRunner $runner
-   * @test
-   * -# Setup an upload with no clearing decisions
-   * -# Run reuser on the empty upload
-   * -# Check that no clearing decisions added by reuser
    */
   private function runnerReuserScanWithoutAnyUploadToCopyAndNoClearing(SchedulerTestRunner $runner)
   {
@@ -307,7 +309,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
-   * with agent mock
+   * @test
+   * -# Run reuser on the empty upload with agent mock
+   * -# Check that no clearing decisions added by reuser
    */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndAClearing()
   {
@@ -316,7 +320,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
-   * with scheduler cli
+   * @test
+   * -# Run reuser on the empty upload with scheduler cli
+   * -# Check that no clearing decisions added by reuser
    */
   public function testReuserRealScanWithoutAnyUploadToCopyAndAClearing()
   {
@@ -326,9 +332,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Run reuser agent with no upload to copy decisions from
    * @param SchedulerTestRunner $runner
-   * @test
-   * -# Run reuser on the empty upload
-   * -# Check that no clearing decisions added by reuser
    */
   private function runnerReuserScanWithoutAnyUploadToCopyAndAClearing($runner)
   {
@@ -352,7 +355,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithALocalClearing()
-   * with mock agent
+   * @test
+   * -# Create an upload with clearing decisions on files
+   * -# Run reuser on the upload new upload with mock agent
+   * -# Check if clearing decisions are added
+   * -# Check if the clearing decisions have new ids
+   * -# Check the clearing type and scope are retained
+   * -# Check the upload tree id of the clearing decision
    */
   public function testReuserMockedScanWithALocalClearing()
   {
@@ -361,7 +370,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithALocalClearing()
-   * with scheduler cli
+   * @test
+   * -# Create an upload with clearing decisions on files
+   * -# Run reuser on the upload new upload with scheduler cli
+   * -# Check if clearing decisions are added
+   * -# Check if the clearing decisions have new ids
+   * -# Check the clearing type and scope are retained
+   * -# Check the upload tree id of the clearing decision
    */
   public function testReuserRealScanWithALocalClearing()
   {
@@ -372,13 +387,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @brief Check reuser with local clearing decisions (file level)
    * @param SchedulerTestRunner $runner
    * @param int $heartBeat
-   * @test
-   * -# Create an upload with clearing decisions on files
-   * -# Run reuser on the upload new upload
-   * -# Check if clearing decisions are added
-   * -# Check if the clearing decisions have new ids
-   * -# Check the clearing type and scope are retained
-   * -# Check the upload tree id of the clearing decision
    */
   private function runnerReuserScanWithALocalClearing($runner, $heartBeat=0)
   {
@@ -426,7 +434,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithARepoClearing()
-   * with mock agent
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Run reuser with mock agent
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
    */
   public function testReuserMockedScanWithARepoClearing()
   {
@@ -435,7 +449,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithARepoClearing()
-   * with scheduler cli
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Run reuser with scheduler cli
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
    */
   public function testReuserRealScanWithARepoClearing()
   {
@@ -445,13 +465,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Run reuser on upload with clearing
    * @param SchedulerTestRunner $runner
-   * @test
-   * -# Create an upload with license clearing done
-   * -# Run reuser
-   * -# Check if new upload has clearings
-   * -# Reuser should have not created a new clearing decision and reuse them
-   * -# Decision types and scopes are same
-   * -# Reuser should have not created a correct local event history
    */
   private function runnerReuserScanWithARepoClearing($runner)
   {
@@ -519,7 +532,14 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @brief Call runnerReuserScanWithARepoClearingEnhanced()
-   * with mock agent
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Create an upload with files with small difference
+   * -# Run reuser with mock agent
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
    */
   public function testReuserRealScanWithARepoClearingEnhanced()
   {
@@ -529,14 +549,6 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Run reuser with enhanced flag on upload with clearing
    * @param SchedulerTestRunner $runner
-   * @test
-   * -# Create an upload with license clearing done
-   * -# Create an upload with files with small difference
-   * -# Run reuser
-   * -# Check if new upload has clearings
-   * -# Reuser should have not created a new clearing decision and reuse them
-   * -# Decision types and scopes are same
-   * -# Reuser should have not created a correct local event history
    */
   private function runnerReuserScanWithARepoClearingEnhanced($runner)
   {
