@@ -6550,6 +6550,16 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     pd = 0;
   }
   cleanLicenceBuffer();
+  /*
+   * Community Data License Agreement
+   */
+  if (INFILE(_TITLE_CDLA_Permissive_10)) {
+    INTERESTING("CDLA-Permissive-1.0");
+  }
+  else if (INFILE(_TITLE_CDLA_Sharing_10)) {
+    INTERESTING("CDLA-Sharing-1.0");
+  }
+  cleanLicenceBuffer();
 
   SPDXREF();
   cleanLicenceBuffer();
@@ -10514,6 +10524,12 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   }
   if (INFILE(_SPDX_CC_BY_NC_SA_40)) {
     INTERESTING("CC-BY-NC-SA-4.0");
+  }
+  if (INFILE(_SPDX_CDLA_Permissive_10)) {
+    INTERESTING("CDLA-Permissive-1.0");
+  }
+  if (INFILE(_SPDX_CDLA_Sharing_10)) {
+    INTERESTING("CDLA-Sharing-1.0");
   }
   if (INFILE(_SPDX_Crossword)) {
     INTERESTING("Crossword");

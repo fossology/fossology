@@ -7953,6 +7953,14 @@ k
 %KEY% "licen[cs]"
 %STR% "common development and distribution licen[cs]e cddl (v|version )1\.?1"
 #
+%ENTRY% _TITLE_CDLA_Permissive_10
+%KEY% "licen[cs]"
+%STR% "Community Data License Agreement Permissive (Version |v[\. ])1\.?0"
+#
+%ENTRY% _TITLE_CDLA_Sharing_10
+%KEY% "licen[cs]"
+%STR% "Community Data License Agreement Sharing (Version |v[\. ])1\.?0"
+#
 %ENTRY% _TITLE_CECILL_V10
 %KEY% "licen[cs]"
 %STR% "license =FEW= (version |v)1\.?0"
@@ -10230,6 +10238,14 @@ k
 %ENTRY% _SPDX_Caldera
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?Caldera"
+
+%ENTRY% _SPDX_CDLA_Permissive_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?CDLA-Permissive-1\.?0"
+
+%ENTRY% _SPDX_CDLA_Sharing_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?CDLA-Sharing-1\.?0"
 
 %ENTRY% _SPDX_CECILL_10
 %KEY% "licen[cs]e"
