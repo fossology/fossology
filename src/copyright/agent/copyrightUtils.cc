@@ -111,11 +111,9 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
           boost::program_options::value< vector<string> >(),
           "files to scan"
         )
-#ifndef DISABLE_JSON
         (
           "json,J", "output JSON"
         )
-#endif
         (
           "config,c", boost::program_options::value<string>(), "path to the sysconfigdir"
         )

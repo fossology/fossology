@@ -53,9 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "copyright.hpp"
 
-#ifndef DISABLE_JSON
 #include <json/json.h>
-#endif
 
 using namespace std;
 using namespace fo;
@@ -78,9 +76,7 @@ int main(int argc, char** argv)
     return_sched(1);
   }
 
-#ifndef DISABLE_JSON
   bool json = cliOptions.doJsonOutput();
-#endif
   CopyrightState state = getState(std::move(cliOptions));
 
   if (!fileNames.empty())
@@ -111,7 +107,6 @@ int main(int argc, char** argv)
             (*sc)->ScanString(s, l);
           }
 
-#ifndef DISABLE_JSON
           if (json) {
             Json::Value results;
             for (auto m = l.begin(); m != l.end(); ++m)
@@ -128,7 +123,6 @@ int main(int argc, char** argv)
             Json::FastWriter builder;
             cout << builder.write(output);
           } else {
-#endif
             stringstream ss;
             ss << fileName << " ::" << endl;
             // Output matches
@@ -140,9 +134,7 @@ int main(int argc, char** argv)
             }
             // Thread-Safety: output all matches (collected in ss) at once to cout
             cout << ss.str();
-#ifndef DISABLE_JSON
           }
-#endif
         }
       }
     }

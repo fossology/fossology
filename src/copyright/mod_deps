@@ -104,7 +104,7 @@ if [[ $RUNTIME ]]; then
       esac;;
     Fedora)
       yum $YesOpt install \
-        jsoncpp-devel
+        jsoncpp
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install epel-release;
