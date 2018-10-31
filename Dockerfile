@@ -25,6 +25,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
 COPY ./utils/utils.sh ./utils/utils.sh
+COPY ./src/copyright/mod_deps ./src/copyright/
 COPY ./src/delagent/mod_deps ./src/delagent/
 COPY ./src/mimetype/mod_deps ./src/mimetype/
 COPY ./src/pkgagent/mod_deps ./src/pkgagent/

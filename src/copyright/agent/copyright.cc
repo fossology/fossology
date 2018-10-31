@@ -53,9 +53,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "copyright.hpp"
 
-#ifndef DISABLE_JSON
-#include "json.hpp"
-#endif
+#include <json/json.h>
 
 using namespace std;
 using namespace fo;
@@ -78,9 +76,7 @@ int main(int argc, char** argv)
     return_sched(1);
   }
 
-#ifndef DISABLE_JSON
   bool json = cliOptions.doJsonOutput();
-#endif
   CopyrightState state = getState(std::move(cliOptions));
 
   if (!fileNames.empty())
@@ -111,23 +107,22 @@ int main(int argc, char** argv)
             (*sc)->ScanString(s, l);
           }
 
-#ifndef DISABLE_JSON
           if (json) {
-            vector<nlohmann::json> results;
-            for (auto m = l.begin();  m != l.end(); ++m)
+            Json::Value results;
+            for (auto m = l.begin(); m != l.end(); ++m)
             {
-              nlohmann::json j;
+              Json::Value j;
               j["start"] = m->start;
               j["end"] = m->end;
               j["type"] = m->type;
               j["content"] = cleanMatch(s, *m);
-              results.push_back(j);
+              results.append(j);
             }
-            nlohmann::json output;
+            Json::Value output;
             output["results"] = results;
-            cout << output.dump();
+            Json::FastWriter builder;
+            cout << builder.write(output);
           } else {
-#endif
             stringstream ss;
             ss << fileName << " ::" << endl;
             // Output matches
@@ -139,9 +134,7 @@ int main(int argc, char** argv)
             }
             // Thread-Safety: output all matches (collected in ss) at once to cout
             cout << ss.str();
-#ifndef DISABLE_JSON
           }
-#endif
         }
       }
     }
