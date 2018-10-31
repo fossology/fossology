@@ -57,13 +57,16 @@ services:
     volumes:
       - repository:/srv/fossology/repository/
   db:
-    image: postgres
+    image: postgres:9.6
     restart: unless-stopped
     environment:
       - POSTGRES_DB=fossology
       - POSTGRES_USER=fossy
       - POSTGRES_PASSWORD=fossy
       - POSTGRES_INITDB_ARGS='-E SQL_ASCII'
+    volumes:
+      - database:/var/lib/postgresql/data
 
 volumes:
+  database:
   repository:
