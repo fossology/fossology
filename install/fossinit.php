@@ -95,6 +95,8 @@ foreach($Options as $optKey => $optVal)
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$SysConf["DBCONF"]["dbname"] = $DatabaseName;
+$GLOBALS["SysConf"] = array_merge($GLOBALS["SysConf"], $SysConf);
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
 $gInfo = posix_getgrnam($projectGroup);
 posix_setgid($gInfo['gid']);

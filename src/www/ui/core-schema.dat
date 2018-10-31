@@ -1883,10 +1883,7 @@
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
   $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_decision_event_event_fk_fkey"] = "ALTER TABLE \"clearing_decision_event\" ADD CONSTRAINT \"clearing_decision_event_event_fk_fkey\" FOREIGN KEY (\"clearing_event_fk\") REFERENCES \"clearing_event\" (\"clearing_event_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_decision_event_decision_fk_fkey"] = "ALTER TABLE \"clearing_decision_event\" ADD CONSTRAINT \"clearing_decision_event_decision_fk_fkey\" FOREIGN KEY (\"clearing_decision_fk\") REFERENCES \"clearing_decision\" (\"clearing_decision_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
-  $Schema["CONSTRAINT"]["clearing_event_job_fk_fkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_job_fk_fkey\" FOREIGN KEY (\"job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE RESTRICT ON DELETE RESTRICT;";
   $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"copyright_pk\");";
   $Schema["CONSTRAINT"]["copyright_agent_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -1959,7 +1956,6 @@
   $Schema["CONSTRAINT"]["report_info_pkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_pkey\" PRIMARY KEY (\"ri_pk\");";
   $Schema["CONSTRAINT"]["report_info_upload_fk_fkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["reportgen_upload_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["reportgen_job_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_job_fk_fkey\" FOREIGN KEY (\"job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
@@ -1974,7 +1970,6 @@
   $Schema["CONSTRAINT"]["upload_pfile_fk_fkey"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["upload_clearing_license_upload_fk_fkey"] = "ALTER TABLE \"upload_clearing_license\" ADD CONSTRAINT \"upload_clearing_license_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["upload_clearing_license_rf_fk_fkey"] = "ALTER TABLE \"upload_clearing_license\" ADD CONSTRAINT \"upload_clearing_license_rf_fk_fkey\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_packages_package_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_package_fk\" FOREIGN KEY (\"package_fk\") REFERENCES \"package\" (\"package_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_packages_upload_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_upload_fk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_reuse_reused_upload_fk"] = "ALTER TABLE \"upload_reuse\" ADD CONSTRAINT \"upload_reuse_reused_upload_fk\" FOREIGN KEY (\"reused_upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";

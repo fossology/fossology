@@ -40,6 +40,11 @@ function cleanTableForeign($dbManager, $tableToClean, $foreignKey, $referenceTab
     echo "No connection object passed!\n";
     return false;
   }
+  if(!(DB_TableExists($tableToClean) == 1 && DB_TableExists($referenceTable) == 1)) {
+    // Table does not exists (migrating from old version)
+    echo "Table $tableToClean or $referenceTable does not exists, not cleaning!\n";
+    return 0;
+  }
 
   $sql = "";
   if($dryRun) {
@@ -81,6 +86,11 @@ function cleanWithUnique($dbManager, $tableName, $primaryKey, $columnNames, $dry
   if($dbManager == NULL){
     echo "No connection object passed!\n";
     return false;
+  }
+  if(DB_TableExists($tableName) != 1) {
+    // Table does not exists (migrating from old version)
+    echo "Table $tableName does not exists, not cleaning!\n";
+    return 0;
   }
 
   $sql = "";
@@ -125,7 +135,7 @@ WITH deleted AS (
  */
 function Migrate_33_34($dbManager, $dryRun)
 {
-  if(DB_ConstraintExists('group_user_member_user_group_ukey')) {
+  if(DB_ConstraintExists('group_user_member_user_group_ukey', $GLOBALS["SysConf"]["DBCONF"]["dbname"])) {
     // The last constraint also cleared, no need for re-run
     return;
   }
@@ -136,9 +146,6 @@ function Migrate_33_34($dbManager, $dryRun)
       ["bucket_container", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "pfile_fk", "pfile", "pfile_pk"],
-      ["clearing_decision_event", "clearing_event_fk", "clearing_event", "clearing_event_pk"],
-      ["clearing_decision_event", "clearing_decision_fk", "clearing_decision", "clearing_decision_pk"],
-      ["clearing_event", "job_fk", "job", "job_pk"],
       ["copyright_decision", "pfile_fk", "pfile", "pfile_pk"],
       ["ecc", "agent_fk", "agent", "agent_pk"],
       ["ecc", "pfile_fk", "pfile", "pfile_pk"],
@@ -148,17 +155,14 @@ function Migrate_33_34($dbManager, $dryRun)
       ["keyword", "agent_fk", "agent", "agent_pk"],
       ["keyword", "pfile_fk", "pfile", "pfile_pk"],
       ["keyword_decision", "pfile_fk", "pfile", "pfile_pk"],
-      ["license_file", "rf_fk", "license_ref", "rf_pk"],
       ["license_ref_bulk", "upload_fk", "upload", "upload_pk"],
       ["pkg_deb_req", "pkg_fk", "pkg_deb", "pkg_pk"],
       ["pkg_rpm_req", "pkg_fk", "pkg_rpm", "pkg_pk"],
       ["report_cache", "report_cache_uploadfk", "upload", "upload_pk"],
       ["report_info", "upload_fk", "upload", "upload_pk"],
       ["reportgen", "upload_fk", "upload", "upload_pk"],
-      ["reportgen", "job_fk", "job", "job_pk"],
       ["upload", "pfile_fk", "pfile", "pfile_pk"],
-      ["upload_clearing_license", "upload_fk", "upload", "upload_pk"],
-      ["upload_clearing_license", "rf_fk", "license_ref", "rf_pk"]
+      ["upload_clearing_license", "upload_fk", "upload", "upload_pk"]
     ];
     $dbManager->queryOnce("BEGIN;");
 
@@ -175,8 +179,8 @@ function Migrate_33_34($dbManager, $dryRun)
     $count += cleanWithUnique($dbManager, "obligation_ref", "ob_pk", ["ob_md5"], $dryRun);
     $count += cleanWithUnique($dbManager, "group_user_member", "group_user_member_pk",
       ["user_fk", "group_fk"], $dryRun);
-    echo "Removed $count rows from tables with new constraints\n";
     $dbManager->queryOnce("COMMIT;");
+    echo "Removed $count rows from tables with new constraints\n";
   } catch (Exception $e) {
     echo "Something went wrong. Try running postinstall again!\n";
     $dbManager->queryOnce("ROLLBACK;");
