@@ -146,9 +146,6 @@ function Migrate_33_34($dbManager, $dryRun)
       ["bucket_container", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "pfile_fk", "pfile", "pfile_pk"],
-      ["clearing_decision_event", "clearing_event_fk", "clearing_event", "clearing_event_pk"],
-      ["clearing_decision_event", "clearing_decision_fk", "clearing_decision", "clearing_decision_pk"],
-      ["clearing_event", "job_fk", "job", "job_pk"],
       ["copyright_decision", "pfile_fk", "pfile", "pfile_pk"],
       ["ecc", "agent_fk", "agent", "agent_pk"],
       ["ecc", "pfile_fk", "pfile", "pfile_pk"],
@@ -164,10 +161,8 @@ function Migrate_33_34($dbManager, $dryRun)
       ["report_cache", "report_cache_uploadfk", "upload", "upload_pk"],
       ["report_info", "upload_fk", "upload", "upload_pk"],
       ["reportgen", "upload_fk", "upload", "upload_pk"],
-      ["reportgen", "job_fk", "job", "job_pk"],
       ["upload", "pfile_fk", "pfile", "pfile_pk"],
-      ["upload_clearing_license", "upload_fk", "upload", "upload_pk"],
-      ["upload_clearing_license", "rf_fk", "license_ref", "rf_pk"]
+      ["upload_clearing_license", "upload_fk", "upload", "upload_pk"]
     ];
     $dbManager->queryOnce("BEGIN;");
 
