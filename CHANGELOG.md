@@ -1,3 +1,207 @@
+# Changelog of FOSSology
+
+### 3.4.0-RC2 (Nov 2nd 2018)
+
+This pre-release adds important corrections to 3.4.0-RC1 and also the commit to update the changelog information and therefore features for the 3.4.0 release are found in the section for the release candidate 1 for 3.4.0 information listed below.
+
+#### Corrections
+
+* `b6cb10d` fix(dashboard): change comparison statements for postgres 
+* `5c463d1` fix(constraints): Remove faulty constraints
+* `6b017b1` fix(resequence): Check the column name from DB
+* `1983b29` fix(tests): fix PHPCS and phpunit testcases for deciderjob
+* `592e48f` fix(core-schema): drop constraint from clearing_event and license_filter
+
+#### Refactorings, Infrastructure
+
+* `99a56a1` fix(postgresql): Fixed postgresql version to 9.6 and use a volume
+* `0ce85bd` chore(copyright): Remove DISABLE_JSON macro 
+* `31be206` feat(copyright): Use package based dependency for json
+
+#### Documentation
+
+* `714d7f4` docs(changelog): updating changelog files
+
+### 3.4.0-RC1 (Oct 18th 2018)
+
+#### Features
+
+* `114750a` feat(addLicense): Retain previous request values
+* `be6e705` feat(adminLicense): Add search to each column
+* `de88249` feat(bulk): inclusion of licensetext, acknowledgement and comment
+* `e67549b` feat(composer): Updated development dependencies. * Switched to Mockery::pattern for pattern matching.
+* `f5c89fa` feat(copyright): allow copyright to run standalone
+* `fd302b1` feat(copyright): Enable recursion test
+* `aef0070` feat(copyright): New JSON hpp version
+* `5dd657a` feat(copyright): refactor copyrightDao check uploadtree table name
+* `923982a` feat(docker-compose): Prepared docker-compose Dockerfile to replace the standalone Dockerfile. Changes: docker-compose.docker-entrypoint.sh: * Refactored bash script.
+* `4ffe259` feat(docker): Implemented multi-staged build. * Added simple test for standalone copyright.
+* `346546d` feat(docker): Replaced standalone Dockerfile with docker-compose. Changes: .dockerignore: * Added some unrelated files for docker.
+* `058a41b` feat(emailConfig): Move config settings to sysconfig table
+* `215b6d8` feat(fo-installdeps): Drop support for End-of-Life distributions.
+* `7b804e1` feat(fo-postinstall): Added flag to omit all database operations. 
+* `063d5df` feat(fo-postinstall): Implemented best practises for bash script.
+* `e9345a2` feat(fossology): Support for Bionic Beaver
+* `d89c334` feat(info): change tag from input to textarea refactor ShowReportInfo add missing </tr>
+* `843d319` feat(jquery): update jquery, datatable and select2 to latest versions 1) fix delete license color issue 2) fix width issue for user decisions
+* `ab30fbf` feat(keyword): new-keyword-agent
+* `192b1bb` feat(license_administration): add sorting, update datatable
+* `7e22a09` feat(license_administration): Improvements of the existing implementation for the admin license table.
+* `320865e` feat(licenses): add license test to licenseref.sql from SPDX
+* `1b5f5ee` feat(licenses): exceptions detection restructured
+* `6da4823` feat(licenses): gnu-javamail-exception bug corrected
+* `baec095` feat(licenses): MPL detection bug corrected
+* `0a6436a` feat(monk): add monk knowledgebase serialization
+* `4c5c00a` feat(php): Improved PHP 7.2 support.Added support for PHPUnit 6.
+* `49ffd73` feat(php): Replaced the class Object by builtin features.
+* `0093d1a` feat(phpunit): Migrated to namespaced phpunit.
+* `d89539e` feat(pkgagent): Drop support for RPM 4.4.x and RHEL/CentOS 5.
+* `d09331f` feat(prepare-test): Print a warning to user for perpare-test
+* `b202f93` feat(readmeoss): add license shortname above the license text
+* `5033861` feat(serverUpload): Check for wildchar during upload
+* `891bb45` feat(test): Bypass API rate limit of github.
+* `fd237b0` feat(wget_agent): Mask password in log
+
+#### Corrections
+
+* `0bcd1b7` fix(ars_seq): Reset ars sequence to ars_master
+* `7276004` fix(author): Fix multiple entries in author table
+* `d764d97` fix(cli): there were minor problems in the variable names
+* `cb9f5c0` fix(cliTest): Ununpack and copyright cli test fixes
+* `24beb0e` fix(copyright): match copyright statements in full
+* `945aad2` fix(copyright): replace ct_pk with table_pk for all copyright sub-agents
+* `13898c2` fix(copyright): unify same column selection for both queries
+* `4e1acb4` fix(cunit-version): Change script with new syntax
+* `33b5ea7` fix(dataTable): Make removed class common
+* `d3a1b31` fix(dataTables): Update datatable objects to 1.10
+* `edb57fc` fix(decisions): Replace copyright_decision_pk with table_pk
+* `8638bd7` fix(delagent): Extra drop statements in test
+* `5a041ab` fix(delagent): Prevent unauthorized delete from CLI
+* `d277eb7` fix(deps): Add Boost runtime dependencies
+* `aac3126` fix(deps): Add boost runtime dependency fix #1175
+* `af0d048` fix(docker-compose): Added missing mod_deps in the docker-compose.Dockerfile.
+* `8f65e44` fix(ecc-view): Update ecc_decision table to match other schema
+* `97647f1` fix(email): Prevent scheduler crashes
+* `7813c66` fix(email): Update existing sysconfig values
+* `87016ec` fix(fo-installdeps): Allow running without the option '-y'.
+* `f88d428` fix(import-csv): syntax error in importing license-csv
+* `42ab00a` fix(install_offline): Fix install_offline recipe to run in install folder
+* `d2a3b85` fix(license-list): fix handling of getLicensesPerFileNameForAgentId result
+* `e79df05` fix(licenseUpdate): update the license parameters with same shortname
+* `dcbbff4` fix(mimetype): Quick fix for mimetype test
+* `d83507a` fix(monkbulk): check the job status when scheduling multiple monkbulks
+* `fa35d2a` fix(ninka): typo for ninka script
+* `f77eeaf` fix(nomos): fix nomos crash
+* `3ff7487` fix(nomos): fix posix incompatible regular expressions
+* `181a9f6` fix(nonzipUpload): change the upload_mode
+* `ce8dab0` fix(perpare-test): Give more options to users
+* `85573fe` fix(pkgagent): Added support for RPM >= 4.14
+* `793eb13` fix(postinstall): Look for compressed man pages also
+* `44e2bd6` fix(scheduler): make init script wait for postgresql on startup
+* `daa0bd0` fix(scheduler): revert make init script wait for postgresql on startup
+* `b4fdf40` fix(schema): Add missing constraints
+* `a87c285` fix(schema): check with the table property for current scheme
+* `8a8097d` fix(sysconfig): Change structure of values
+* `ddab228` fix(test): Remove prepare test from test target
+* `4e670f8` fix(testCases): Fix scheduler and ununpack test cases
+* `08cfa75` fix(travis): Missing phppcd on travis. * Switched the jobs "Syntax Check", "Static Code Analysis" and "Copy/Paste Detector" to sudoless.
+* `051f91e` fix(unitTests): Fixing CUnit and PHPUnit tests
+* `196731f` fix(uploadSrv): Copyright statement fix
+* `94424d9` fix(user): Update user's current group while removing from group
+* `426fdbb` fix(wget_agent): Ignore test_proxy_ftp, because it is flaky on travis.
+* `372a308` fix(xenial): Added the missing runtime dependency php7.0-mbstring.
+
+#### Refactorings, Infrastructure
+
+* `51376ae` chore(deps): Implemented best practices for bash scripts.
+* `adc9117` chore(doxygen): Add license header to doxygen conf file
+* `69ce635` chore(tests): Removed dummy directories for testing.
+* `a824fe1` chore(travis): Removed global environment variables usage. * Moved syntax check and static code analysis in separate steps.
+* `252f663` chore(travis): Simplified travis.yml * Removed unused dependencies. * Removed caching for apt
+* `a11fdfb` chore(unifiedreport): Remove extra space
+* `762e9fc` chore(vagrant): Switched to ubuntu/xenial64. * Removed symlinks. * Added missing test dependency. * Added script to configure vagrant for development.
+* `c13f06d` perf(copyright): Improve query for pfile on upload
+* `ae66e68` perf(copyright): Use prepared statements to fetch pfiles
+* `7473a25` perf(Docker): Use Debian Jessie slim variant
+* `6e5b21c` refactor(monk): refactor and cleanup code
+* `ee154ea` test(monk): add more unit and functional tests for monk
+
+#### Documentation
+
+* `f06006f` doc(screenshots): add wrongly deleted screenshots back into the source code
+* `87d2d9c` docs(adj2nest): Added doxygen comments for adj2nest
+* `3380961` docs(agents): Added supported CLI options to every agent
+* `65764e5` docs(buckets): Added doxygen comments for buckets agent
+* `1c6b01d` docs(contributing): Added steps to create PR
+* `ce496cc` docs(CONTRIBUTING): Made required changes in note
+* `b97f643` docs(copyright): Added doxygen comments for copyright agent
+* `d013713` docs(debug): Added doxygen comments for debug plugin
+* `b835cb6` docs(decider): Added doxygen comments for decider agent
+* `b85cb8c` docs(deciderjob): Added doxygen comments for deciderjob agent
+* `3bb9c64` docs(delagent): Added doxygen comments for delagent
+* `a11054d` docs(demomod): Added doxygen comments for demomod
+* `ddca886` docs(doxygen): Add doxygen conf file
+* `a0387d9` docs(issue): Issue, PR template for new requests
+* `6793719` docs(libc): Doxygen documentation for C library
+* `cf1305c` docs(LICENSE): Create LICENSE to reflect in git
+* `c3925cb` docs(main): remove outdated screenshots
+* `42f7737` docs(mainpage): Include text from README.md
+* `c415a5e` docs(maintagent): Added doxygen comments for maintagent
+* `5fa5579` docs(mimetype): Added doxygen comments for mimetype agent
+* `d652eb1` docs(nomos): Doxygen documentation for NOMOS agent
+* `e0c4ecc` docs(nomos):update call hierarchy notes
+* `a125fc4` docs(pkgagent): Added doxygen comments for pkgagnet
+* `f1ae113` docs(README): fix readme for docker-compose and version numbers
+* `d57c426` docs(README): Show only master build status
+* `9d6f865` docs(readmeoss): Added doxygen comments for ReadmeOss
+* `bd32a77` docs(regexscan): Added doxygen comments for regexscan
+* `fe463a7` docs(reuser): Added doxygen comments for reuser
+* `d1d8a6a` docs(scheduler): Added doxygen comments for scheduler
+* `8f73e10` docs(sections): Created unique section name for every agent
+* `2ca0ea5` docs(spdx2): Added doxygen comments for SPDX2
+* `315f4d4` docs(unifiedreport): Added doxygen comments for unifiedreport
+* `10d0588` docs(ununpack): Added doxygen comments for ununpack
+* `07a8356` docs(ununpack): Fix few spelling mistakes
+* `eb30027` docs(wc_agent): Added doxygen comments for wc_agent
+* `e79fe95` docs(wget_agent): Added doxygen comments for wget_agent
+
+### 3.3.0 (May 2018)
+
+#### Features
+
+* `4f48227` feat(ui): Color mapping for risk level in the ui.
+* `12f5546` feat(nomos): extend unclassified license detection
+* `9904b2c` feat(license): add acknowledgements to license clearing include acknowledgements in unified report include acknowledgements in readmeoss add acknowledgement tests
+* `05dbf91` feat(licenses): add license text to fossology database from SPDX license text added for Abstyles, Adobe-2006, Adobe-Glyph, Afmparse, AMPAS, APAFML, bzip2-1.0.5, bzip2-1.0.6, CrystalStacker, curl, gnuplot, Intel-ACPI, MIT-CMU, SCEA, TCL, TMate rename license Intel-acpi to Intel-ACPI closes #1052
+* `4299a5f` feat(obligation): update csv licesnse changes in the obligation table
+* `be6434e` feat(licenses): missing INFILE added, IBM-reciprocal added
+
+#### Corrections
+
+* `e478bbf` fix(reuser): copy license decision in reuse
+* `3d0c4b8` fix(schema): check for inherits when drop indexes
+* `7bc1c82` fix(copyright): Fix copyright_decision table
+* `d7cd66c` fix(upload-file): get distinct of groupid to insert in perm upload table
+* `d76a643` fix(reuser): remove warnings and errors with testcases for reuse
+* `1d6ff8e` fix(unifiedreport): Global license appears twice in Main license section
+* `9269a36` fix(uploadSrvPage): Added feature so that users can update the name of upload manually
+* `5b32c69` fix(phptestcase): Remove PHP 5.5 test case
+* `8c3a710` fix(search.php): max records per page updated and documentation added
+* `45f0253` fix(search.php): Fix the algorithm for total number of files matching the search criteria
+* `6a1f712` fix(search.php): Fix the number of files matching the search criteria
+* `9b9c214` fix(copyright): read only users should be able to read copyrights
+* `3bf9fff` fix(perm): reading license information and browsing should be allowed with annonymous user
+* `616d635` fix(delagent): change query which deletes all files with same pfile
+* `5bcaa71` fix(browse): ajax browse required login
+* `ca7ac1a` fix(obligations): remove extra else cases and fix warnings
+* `000fdb3` fix(browseView): change style of checkbox button whole folder | Marked upload change job title as well as upload name if the multi readmeOss or SPDX2 scheduled
+* `49d1c37` fix(cp2foss): fix cp2foss -X parameter usage
+
+#### Refactorings, Documentation
+
+* `f5aa2cf` refactor(common-ui): fix spelling mistake
+* `24022a5` docs(vagrant): add vagrant setup documentation
+
 ### 3.2.0 (February 2018)
 
 #### Features
