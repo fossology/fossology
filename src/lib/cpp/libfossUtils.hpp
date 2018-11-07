@@ -17,6 +17,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef LIBFOSS_UTILS_HPP_
 #define LIBFOSS_UTILS_HPP_
 
+/**
+ * \file
+ * \brief General utility functions for CPP
+ */
+
 namespace fo
 {
   unsigned long stringToUnsignedLong(const char* string);
