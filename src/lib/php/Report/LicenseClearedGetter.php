@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2017, Siemens AG
+ Copyright (C) 2014-2018, Siemens AG
  Author: Daniele Fognini
 
  This program is free software; you can redistribute it and/or
@@ -71,7 +71,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
         if ($clearingLicense->isRemoved()){
           continue;
         }
-        
+
         if ($this->onlyComments && !($comment = $clearingLicense->getComment())) {
           continue;
         }
@@ -173,14 +173,15 @@ class LicenseClearedGetter extends ClearedGetterCommon
             ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
 
     $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
-    foreach($totalLicenses as $licenseShortName){
-      if (array_key_exists($licenseShortName, $scannerLicenseHistogram)){
+    foreach($totalLicenses as $licenseShortName) {
+      $count = 0;
+      if (array_key_exists($licenseShortName, $scannerLicenseHistogram)) {
         $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
       }
       $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
-      if(strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0){
+      if(strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0) {
         $LicenseHistArray[] = array("scannerCount" => $count, "editedCount" => $editedCount, "licenseShortname" => $licenseShortName);
-      }else{
+      } else {
         $LicenseHistArray[] = array("scannerCount" => $noScannerLicenseFoundCount, "editedCount" => $editedNoLicenseFoundCount, "licenseShortname" => $licenseShortName);
       }
     }
