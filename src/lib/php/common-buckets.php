@@ -16,28 +16,29 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
 
-/************************************************************
- These are common bucket functions.
+/** *********************************************************
+ * \file
+ * \brief These are common bucket functions.
  ************************************************************/
 
 /**
- * SelectBucketDataset
  * \brief Return a select list showing all the successful bucket
  *        runs on a particular $upload_pk.
- *        This list can be included in UI's to let the user select
- *        which data they wish to view.
- *        The most recent results are the default selection.
+ *
+ *  This list can be included in UI's to let the user select
+ *  which data they wish to view.
+ *  The most recent results are the default selection.
  *
  * \param string $upload_pk
- * \param string &$ars_pk    return ars_pk of the selected element, may be zero
- *                           if there are no data.  This is also used to pass in
+ * \param string &$ars_pk    Return ars_pk of the selected element, may be zero
+ *                           if there are no data. This is also used to pass in
  *                           the selected ars_pk.
  * \param string $id         HTML element id
  * \param string $extra      Extra info for the select element, e.g. "onclick=..."
  *
- * \return select string, select value is $ars_pk
+ * \return Select string, select value is $ars_pk \n
  *         If there are no rows to select, $ars_pk is returned 0
- *         and a simple string $NoData is returned;
+ *         and a simple string $NoData is returned; \n
  *         If there are only 1 row, an empty string is returned, and $ars_pk is
  *         set to that row.
  */
@@ -45,7 +46,7 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
 {
   global $PG_CONN;
 
-  /** schedule bucket */
+  /* schedule bucket */
   $NoData = ActiveHTTPscript("Schedule");
   $NoData .= "<script language='javascript'>\n";
   $NoData .= "function Schedule_Reply()\n";
@@ -125,14 +126,13 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
 }
 
 /**
- * SelectBucketpool
  * \brief Return a select list containing all the active bucketpool's.
  *
- * \param string $selected, selected bucketpool_pk
- * \param string $active, 'Y' (default) or 'all'
+ * \param string $selected Selected bucketpool_pk
+ * \param string $active   'Y' (default) or 'all'
  *
- * \return string select list
- * Note: list uses static element id="default_bucketpool_fk"
+ * \return String select list
+ * \note list uses static element id="default_bucketpool_fk"
  *       the element name is the same as the id.
  */
 function SelectBucketPool($selected, $active='Y')
@@ -166,12 +166,13 @@ function SelectBucketPool($selected, $active='Y')
  * \brief Get all the unique bucket_pk's for a given uploadtree_pk and
  * for a given nomos and bucket agent.
  *
- * \param $nomosagent_pk
- * \param $bucketagent_pk
- * \param $uploadtree_pk
+ * \param int $nomosagent_pk  Nomos agent id
+ * \param int $bucketagent_pk Bucket agent id
+ * \param int $uploadtree_pk  File id in upload tree
+ * \param int $bucketpool_pk  Bucket pool id
  *
- * \return  array of unique bucket_pk's, may be empty if no buckets.
- *   FATAL if any input is missing
+ * \return Array of unique bucket_pk's, may be empty if no buckets.
+ *   \b FATAL if any input is missing
  */
 function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk)
 {
@@ -222,13 +223,13 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
  * \brief Get string of $delimiter delimited bucket names for the given inputs.
  * Args are same as GetFileBuckets().
  *
- * \param $nomosagent_pk
- * \param $bucketagent_pk
- * \param $uploadtree_pk
- * \param $bucketDefArray is array of bucket_def records indexed by bucket_pk
+ * \param int $nomosagent_pk
+ * \param int $bucketagent_pk
+ * \param int $uploadtree_pk
+ * \param array $bucketDefArray Array of bucket_def records indexed by bucket_pk
  *        see initBucketDefArray().
- * \param $delimiter is delimiter string to use to seperate bucket names.
- * \param $color if True, the string is returned as html with bucket names
+ * \param string  $delimiter Delimiter string to use to separate bucket names.
+ * \param boolean $color if True, the string is returned as HTML with bucket names
  *         color coded.
  *
  * \return string of $delimiter delimited bucket names for the given inputs.
@@ -280,11 +281,11 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
  * \brief Check if a bucket_pk is found in a tree
  * for a given nomos and bucket agent.
  *
- * \param  $bucket_pk
- * \param  $uploadtree_pk
+ * \param int $bucket_pk
+ * \param int $uploadtree_pk
  *
- * \return True if bucket_pk is found in the tree
- *   False if not
+ * \return True if bucket_pk is found in the tree,
+ *   false if not
  */
 function BucketInTree($bucket_pk, $uploadtree_pk)
 {
@@ -330,9 +331,9 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
 /**
  * \brief Initializes array of bucket_def records.
  *
- * \param $bucketpool_pk - bucketpool id
+ * \param int $bucketpool_pk Bucketpool id
  *
- * \return list of bucket def records.
+ * \return List of bucket def records.
  */
 function initBucketDefArray($bucketpool_pk)
 {

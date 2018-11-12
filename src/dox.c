@@ -134,7 +134,7 @@
  * \subsection libsectioncpp FOSSology library for CPP
  * \link src/lib/cpp \endlink contains components for \subpage libcpp
  * \subsection libsectionphp FOSSology library for PHP
- * \link src/lib/php \endlink contains components for FOSSology PHP library
+ * \link src/lib/php \endlink contains components for \subpage libphp
  *
  * \section schedsection scheduler
  * You can find all the scheduler code in src/scheduler/.  But we might want to move it
@@ -193,6 +193,7 @@
  * These libraries provides with some common utility functionalities.
  * -# \subpage libc
  * -# \subpage libcpp
+ * -# \subpage libphp
  */
 
 /* General directory definitions */

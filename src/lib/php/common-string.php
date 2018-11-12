@@ -17,6 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * @file
+ * @brief Common function to handle strings
+ */
+
 // For compatibility with older php versions
 if (!defined('ENT_SUBSTITUTE'))
 {
@@ -24,8 +29,10 @@ if (!defined('ENT_SUBSTITUTE'))
 }
 
 /**
- * @param $content
- * @return string
+ * Convert string to UTF-8
+ * @param string $content String to be converted
+ * @param bool   $toHTML  True to return HTML compatible strings
+ * @return string UTF8 converted string
  */
 function convertToUTF8($content, $toHTML=true)
 {
@@ -50,11 +57,21 @@ function convertToUTF8($content, $toHTML=true)
   return (htmlspecialchars($output1, ENT_SUBSTITUTE, "UTF-8")) ?: "<b>Unknown encoding</b>";
 }
 
+/**
+ * Check if the given string is already UTF-8 encoded
+ * @param string $content String to check
+ * @return boolean True if encoded in UTF-8, false otherwise
+ */
 function checkUTF8($content)
 {
   return mb_check_encoding($content, "UTF-8");
 }
 
+/**
+ * Try to convert a string to UTF-8 encoded string
+ * @param string $content String to be converted
+ * @return boolean|string UTF-8 converted string, false if cannot be converted
+ */
 function tryConvertToUTF8($content)
 {
   $inCharset = mb_detect_encoding($content, mb_detect_order(), true);

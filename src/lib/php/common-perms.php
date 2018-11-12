@@ -17,15 +17,16 @@
  ***********************************************************/
 use Fossology\Lib\Auth\Auth;
 
-/*************************************************
- Library of common functions for permissions and groups.
- *************************************************/
+/**
+ * \file
+ * \brief Library of common functions for permissions and groups.
+ */
 
-  /***********************************************************
-   Function: GetUploadsFromFolder()
+  /** ********************************************************
+   Get all the uploads inside a given folder
 
    @param int $folder_pk
-   @Return array of upload_pks for all the uploads in this
+   @return Array of upload_pks for all the uploads in this
            folder (and subfolders).
    ***********************************************************/
    function GetUploadsFromFolder($folder_pk)
@@ -36,13 +37,16 @@ use Fossology\Lib\Auth\Auth;
      return $uploads;
    }  /* GetUploadsFromFolder */
 
-  /***********************************************************
-   Function: GetUploadsFromFolder_recurse()
+  /** ********************************************************
+   Get the upload ids of all uploads inside given folder.
+
+   \note This is recursive!
 
    @param int $folder_pk
-   @param array $uploads  array of upload_pk's.  Caller must
-   @Return array of upload_pks for all the uploads in this
+   @param[in,out] array $uploads  Array of upload_pk's.
+   @return Array of upload_pks for all the uploads in this
            folder (and subfolders).
+   @sa GetUploadsFromFolder()
    ***********************************************************/
    function GetUploadsFromFolder_recurse($folder_pk, &$uploads)
    {
@@ -71,11 +75,12 @@ use Fossology\Lib\Auth\Auth;
 
   /**
    *  @brief Check if User is already in the $GroupArray.
-   *  If not, add them.  If they are, update their record with the
+   *
+   *  If not, add them. If they are, update their record with the
    *  highest permission granted to them.
    *
-   *  @param $GroupRow
-   *  @param $GroupArray
+   *  @param array $GroupRow Group row from DB
+   *  @param[in,out] array &$GroupArray Group array where user is to be added
    *  @return $GroupArray is updated.
    **/
   function AddUserToGroupArray($GroupRow, &$GroupArray)
@@ -98,6 +103,7 @@ use Fossology\Lib\Auth\Auth;
 
     if (!$found)
     {
+      $NewGroup = array();
       $NewGroup['user_pk'] = $GroupRow['user_fk'];
       $NewGroup['group_pk'] = $GroupRow['group_pk'];
       $NewGroup['group_name'] = $GroupRow['group_name'];
@@ -108,9 +114,10 @@ use Fossology\Lib\Auth\Auth;
 
   /**
    *  @brief Get all the users users of this group.
-   *  @param $user_pk optional, if specified limit to single user
-   *  @param $group_pk
-   *  @return array of groups the and the user's permission (group_perm) in each group
+   *  @param int $user_pk  Optional, if specified limit to single user
+   *  @param int $group_pk Group id to look into
+   *  @param[in,out] array &$GroupArray
+   *  @return Array of groups the and the user's permission (group_perm) in each group
    *  -  [user_pk]
    *  -  [group_pk]
    *  -  [group_name]
@@ -142,8 +149,8 @@ use Fossology\Lib\Auth\Auth;
 
   /**
    *  @brief Find all the groups a user belongs to.
-   *  @param $user_pk optional, defaults to current user
-   *  @return array of groups
+   *  @param int $user_pk Optional, defaults to current user
+   *  @return Array of groups
    *  each group is itself an array with the following elements
    *  -  [user_pk]
    *  -  [group_pk]
@@ -172,9 +179,10 @@ use Fossology\Lib\Auth\Auth;
     return $GroupArray;
   }
 
-  /* @brief Get array of groups that this user has admin access to
-   * @depricated use UserDao->getAdminGroupMap
-   * @param $user_pk
+  /**
+   * @brief Get array of groups that this user has admin access to
+   * @depricated use UserDao::getAdminGroupMap()
+   * @param int $user_pk
    *
    * @return Array in the format {group_pk=>group_name, group_pk=>group_name, ...}
    *         Array may be empty.
@@ -212,8 +220,8 @@ use Fossology\Lib\Auth\Auth;
 
   /**
    * \brief Delete a group.
-   * \param $group_pk
-   * Returns NULL on success, string on failure.
+   * \param int $group_pk Group to be deleted
+   * \returns NULL on success, string on failure.
    */
   function DeleteGroup($group_pk)
   {

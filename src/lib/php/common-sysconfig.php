@@ -17,22 +17,25 @@
 ***********************************************************/
 
 /**
- * \file common-sysconfig.php
+ * \file
  * \brief System configuration functions.
  */
 
-/** Data types for sysconfig table */
-//@{
+/** Integer type config  */
 define("CONFIG_TYPE_INT", 1);
+/** Text type config     */
 define("CONFIG_TYPE_TEXT", 2);
+/** Textarea type config */
 define("CONFIG_TYPE_TEXTAREA", 3);
+/** Password type config */
 define("CONFIG_TYPE_PASSWORD", 4);
+/** Dropdown type config */
 define("CONFIG_TYPE_DROP", 5);
-//}@
 
 
 /**
  * \brief Initialize the fossology system after bootstrap().
+ *
  * This function also opens a database connection (global PG_CONN).
  *
  * System configuration variables are in four places:
@@ -41,16 +44,18 @@ define("CONFIG_TYPE_DROP", 5);
  *  - SYSCONFDIR/Db.conf
  *  - Database sysconfig table
  *
- * VERSION and fossology.conf variables are organized by group.  For example,
+ * VERSION and fossology.conf variables are organized by group. For example,
+ * \code{.ini}
  * [DIRECTORIES]
  *   REPODIR=/srv/mydir
+ * \endcode
  *
- * but the sysconfig table and Db.conf are not.  So all the table values will be put in
- * a made up "SYSCONFIG" group.  And all the Db.conf values will be put in a
+ * But the sysconfig table and Db.conf are not. So all the table values will be put in
+ * a made up "SYSCONFIG" group. And all the Db.conf values will be put in a
  * "DBCONF" group.
  *
- * \param $sysconfdir - path to SYSCONFDIR
- * \param $SysConf - configuration variable array (updated by this function)
+ * \param string $sysconfdir   Path to SYSCONFDIR
+ * \param[out] array &$SysConf Configuration variable array (updated by this function)
  *
  * If the sysconfig table doesn't exist then create it.
  * Write records for the core variables into sysconfig table.
@@ -61,7 +66,7 @@ define("CONFIG_TYPE_DROP", 5);
  *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
  *  -  $SysConf[VERSION][COMMIT_HASH] => "4467M"
  *
- * \Note Since so many files expect directory paths that used to be in pathinclude.php
+ * \note Since so many files expect directory paths that used to be in pathinclude.php
  * to be global, this function will define the same globals (everything in the
  * DIRECTORIES section of fossology.conf).
  */
@@ -96,7 +101,7 @@ function ConfigInit($sysconfdir, &$SysConf)
   foreach($dbConf as $var => $val) $SysConf['DBCONF'][$var] = $val;
   unset($dbConf);
 
-  /**
+  /*
    * Connect to the database.  If the connection fails,
    * DBconnect() will print a failure message and exit.
    */
@@ -431,11 +436,12 @@ function Create_option_value()
 }
 
 /**
- * \brief validation function check_boolean().
- * check if the value format is valid,
+ * \brief Validation function check_boolean().
+ *
+ * Check if the value format is valid,
  * only true/false is valid
  *
- * \param $value - the value which will be checked
+ * \param string $value The value which will be checked
  *
  * \return 1, if the value is valid, or 0
  */
@@ -449,10 +455,11 @@ function check_boolean($value)
 }
 
 /**
- * \brief validation function check_fossology_url().
- * check if the url is valid,
+ * \brief Validation function check_fossology_url().
  *
- * \param $url - the url which will be checked
+ * Check if the URL is valid.
+ *
+ * \param string $url The URL which will be checked
  *
  * \return  1: valid, 0: invalid
  */
@@ -478,10 +485,11 @@ function check_fossology_url($url)
 }
 
 /**
- * \brief validation function check_logo_url().
- * check if the url is available,
+ * \brief Validation function check_logo_url().
  *
- * \param $url - the url which will be checked
+ * Check if the URL is available.
+ *
+ * \param string $url The URL which will be checked
  *
  * \return 1: available, 0: unavailable
  */
@@ -498,10 +506,11 @@ function check_logo_url($url)
 }
 
 /**
- * \brief validation function check_logo_image_url().
- * check if the url is available,
+ * \brief Validation function check_logo_image_url().
  *
- * \param $url - the url which will be checked
+ * Check if the URL is available.
+ *
+ * \param string $url The url which will be checked
  *
  * \return 1: the url is available, 0: unavailable
  */
@@ -521,11 +530,12 @@ function check_logo_image_url($url)
 }
 
 /**
- * \brief validation function check_email_address().
- * implement this function if needed in the future
- * check if the email address is valid
+ * \brief Validation function check_email_address().
  *
- * \param $email_address - the email address which will be checked
+ * Check if the email address is valid.
+ * \todo Implement this function if needed in the future.
+ *
+ * \param string $email_address The email address which will be checked
  *
  * \return 1: valid, 0: invalid
  */
@@ -535,11 +545,11 @@ function check_email_address($email_address)
 }
 
 /**
- * \brief check if the url is available
+ * \brief Check if the URL is available
  *
- * \param $url - url
- * \param $timeout - timeout interval, default 2 seconds
- * \param $tries - if unavailable, will try several times, default 2 times
+ * \param string $url  URL
+ * \param int $timeout Timeout interval, default 2 seconds
+ * \param int $tries   If unavailable, will try several times, default 2 times
  *
  * \return 1: available, 0: unavailable
  */
@@ -563,8 +573,8 @@ function is_available($url, $timeout = 2, $tries = 2)
 }
 
 /**
- * \brief check if the url is valid
- * \param $url - the url which will be checked
+ * \brief Check if the url is valid
+ * \param string $url The url which will be checked
  * \return 1: the url is valid, 0: invalid
  */
 function check_url($url)
@@ -576,8 +586,8 @@ function check_url($url)
 }
 
 /**
- * \brief check if the ip address is valid
- * \param $ip - IP address
+ * \brief Check if the ip address is valid
+ * \param string $ip IP address
  * \return 1: yes
  */
 function check_IP($ip)
