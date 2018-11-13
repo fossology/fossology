@@ -165,9 +165,9 @@ if [[ $RUNTIME ]]; then
             xenial)
                apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 libboost-regex1.58.0;;
             stretch|buster|sid)
-               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
+               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip php-mbstring s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
             bionic)
-               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
+               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
