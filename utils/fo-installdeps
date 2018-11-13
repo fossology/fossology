@@ -228,6 +228,6 @@ if [[ $YesOpt ]]; then
 fi
 mods_dir="$(dirname "$0")/../src/" ## get the directory where fo-installdeps resides
 
-find "$mods_dir" -type f -name mod_deps -print0 | xargs -0 -I{} bash -cv "{} $options"
+find "$mods_dir" -type f -name mod_deps -execdir bash -cv "{} $options" \;
 
 ########################################################################
