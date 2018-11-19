@@ -78,7 +78,6 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
     }
 
     $cmd = "$execDir/$agentName -c $sysConf $args";
-    echo "run: $cmd\n";
     $pipeFd = popen($cmd, "r");
     $this->assertTrue($pipeFd !== false, 'running monk failed');
 
