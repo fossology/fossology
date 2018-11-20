@@ -22,17 +22,33 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
 
+/**
+ * @file
+ * @brief Import licenses from CSV
+ */
+
+/**
+ * @class LicenseCsvImport
+ * @brief Import licenses from CSV
+ */
 class LicenseCsvImport {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager to use */
   protected $dbManager;
-  /** @var string */
+  /** @var string $delimiter
+   * Delimiter used in CSV */
   protected $delimiter = ',';
-  /** @var string */
+  /** @var string $enclosure
+   * Enclosure used in CSV */
   protected $enclosure = '"';
-  /** @var null|array */
+  /** @var null|array $headrow
+   * Header of CSV */
   protected $headrow = null;
-  /** @var array */
+  /** @var array $nkMap
+   * Map based on license shortname */
   protected $nkMap = array();
+  /** @var array $alias
+   * Alias for headers */
   protected $alias = array(
       'shortname'=>array('shortname','Short Name'),
       'fullname'=>array('fullname','Long Name'),
@@ -45,24 +61,38 @@ class LicenseCsvImport {
       'risk'=>array('risk','risk_level')
       );
 
+  /**
+   * Constructor
+   * @param DbManager $dbManager DB manager to use
+   */
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
   }
-  
+
+  /**
+   * @brief Update the delimiter
+   * @param string $delimiter New delimiter to use.
+   */
   public function setDelimiter($delimiter=',')
   {
     $this->delimiter = substr($delimiter,0,1);
   }
 
+  /**
+   * @brief Update the enclosure
+   * @param string $enclosure New enclosure to use.
+   */
   public function setEnclosure($enclosure='"')
   {
     $this->enclosure = substr($enclosure,0,1);
   }
-  
+
   /**
-   * @param string $filename
-   * @return string message
+   * @brief Read the CSV line by line and import it.
+   * @param string $filename Location of the CSV file.
+   * @return string message Error message, if any. Otherwise
+   *         `Read csv: <count> licenses` on success.
    */
   public function handleFile($filename)
   {
@@ -93,8 +123,10 @@ class LicenseCsvImport {
   }
 
   /**
-   * @param array $row
-   * @return string $log
+   * Handle a single row read from the CSV. If headrow is not set, then handle
+   * current row as head row.
+   * @param array $row   Single row from CSV
+   * @return string $log Log messages
    */
   private function handleCsv($row)
   {
@@ -116,10 +148,16 @@ class LicenseCsvImport {
         $mRow[$optNeedle] = $row[$this->headrow[$optNeedle]];
       }
     }
-    
+
     return $this->handleCsvLicense($mRow);
   }
-  
+
+  /**
+   * @brief Handle a row as head row.
+   * @param array $row  Head row to be handled.
+   * @throws \Exception
+   * @return boolean[]|mixed[] Parsed head row.
+   */
   private function handleHeadCsv($row)
   {
     $headrow = array();
@@ -137,6 +175,12 @@ class LicenseCsvImport {
     return $headrow;
   }
 
+  /**
+   * @brief Update the license info in the DB.
+   * @param array $row      Row with new values.
+   * @param array $sameText Matched row with old values.
+   * @return string Log messages.
+   */
   private function updateLicense($row,$sameText)
   {
     $log = "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
@@ -163,13 +207,17 @@ class LicenseCsvImport {
       $this->dbManager->prepare($stmt, $sql);
       $res = $this->dbManager->execute($stmt,$param);
       $this->dbManager->freeResult($res);
-    }  
+    }
     return $log;
   }
-  
+
   /**
-   * @param array $row
-   * @return string
+   * @brief Handle a single row from CSV.
+   *
+   * The function checks if the license text hash is already in the DB, then
+   * updates it. Otherwise inserts new row in the DB.
+   * @param array $row CSV row to be inserted.
+   * @return string Log messages.
    */
   private function handleCsvLicense($row)
   {
@@ -196,7 +244,7 @@ class LicenseCsvImport {
     $dbManager->freeResult($resi);
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
     $return = "Inserted '$row[shortname]' in DB";
-    
+
     if ($this->insertMapIfNontrivial($row['parent_shortname'],$row['shortname'],LicenseMap::CONCLUSION))
     {
       $return .= " with conclusion '$row[parent_shortname]'";
@@ -207,7 +255,18 @@ class LicenseCsvImport {
     }
     return $return;
   }
-  
+
+  /**
+   * @brief Insert in `license_map` table if the license conclusion is
+   * non-trivial.
+   *
+   * If the from and to are not same and from exists in database, then the
+   * conclusion is non-trivial.
+   * @param string $fromName  Parent license name
+   * @param string $toName    License name
+   * @param string $usage     Usage of the license
+   * @return boolean True if license is non-trivial, false otherwise.
+   */
   private function insertMapIfNontrivial($fromName,$toName,$usage)
   {
     $isNontrivial = ($fromName!==null && $fromName!=$toName && $this->getKeyFromShortname($fromName)!==false);
@@ -220,7 +279,12 @@ class LicenseCsvImport {
     }
     return $isNontrivial;
   }
-  
+
+  /**
+   * @brief Get the license id using license shortname from DB or nkMap.
+   * @param string $shortname Shortname of the license.
+   * @return int License id
+   */
   private function getKeyFromShortname($shortname)
   {
     if(array_key_exists($shortname, $this->nkMap))

@@ -25,25 +25,46 @@ use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
+/**
+ * @class LicenseCsvImportTest
+ * @brief Test for LicenseCsvImport
+ */
 class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 {
+  /**
+   * @brief One time setup for test
+   * @see PHPUnit::Framework::TestCase::setUp()
+   */
   protected function setUp()
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
+  /**
+   * @brief Close mockery
+   * @see PHPUnit::Framework::TestCase::tearDown()
+   */
   protected function tearDown() {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::getKeyFromShortname()
+   * @test
+   * -# Create test DB and insert a license in `license_ref`.
+   * -# Call LicenseCsvImport::getKeyFromShortname() on a known license.
+   * -# Check if the id matches.
+   * -# Call LicenseCsvImport::getKeyFromShortname() on an unknown license.
+   * -# Check if the return value is false.
+   */
   public function testGetKeyFromShortname()
   {
     $testDb = new TestLiteDb();
     $testDb->createPlainTables(array('license_ref'));
     $shortname = 'licA';
     $knownId = 101;
-    /** @var DbManager */
+    /*** @var DbManager ***/
     $dbManager = &$testDb->getDbManager();
     $dbManager->insertTableRow('license_ref', array('rf_pk'=>$knownId,'rf_shortname'=>$shortname));
     $licenseCsvImport = new LicenseCsvImport($dbManager);
@@ -52,6 +73,13 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'getKeyFromShortname', array("no $shortname")), equalTo(false));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::handleCsvLicense()
+   * @test
+   * -# Mock DB manager object.
+   * -# Create object of LicenseCsvImport and initialize nkMap.
+   * -# Call several handle calls and check the log messages.
+   */
   public function testHandleCsvLicense()
   {
     $dbManager = M::mock(DbManager::class);
@@ -109,6 +137,15 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat($returnH, is("Text of 'licH' already used for 'licD', updated the source, updated the risk level"));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::handleHeadCsv()
+   * @test
+   * -# Initialize LicenseCsvImport.
+   * -# Call LicenseCsvImport::handleHeadCsv() on actual header names.
+   * -# Check if the header returned have required keys.
+   * -# Call LicenseCsvImport::handleHeadCsv() on alias header names.
+   * -# Check if the header returned have required keys.
+   */
   public function testHandleHeadCsv()
   {
     $dbManager = M::mock(DbManager::class);
@@ -123,6 +160,11 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @expectedException Exception
+   * @brief Test for LicenseCsvImport::handleHeadCsv()
+   * @test
+   * -# Initialize LicenseCsvImport.
+   * -# Call LicenseCsvImport::handleHeadCsv() on missing header names.
+   * -# Function must throw an Exception.
    */
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
@@ -131,6 +173,15 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text')));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::setDelimiter()
+   * @test
+   * -# Initialize LicenseCsvImport.
+   * -# Set a new delimiter using LicenseCsvImport::setDelimiter().
+   * -# Check if the delimiter is changed.
+   * -# Set a new delimiter using LicenseCsvImport::setDelimiter().
+   * -# Check if the delimiter is changed with only the first character passed.
+   */
   public function testSetDelimiter()
   {
     $dbManager = M::mock(DbManager::class);
@@ -143,6 +194,15 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('<'));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::setEnclosure()
+   * @test
+   * -# Initialize LicenseCsvImport.
+   * -# Set a new enclosure using LicenseCsvImport::setEnclosure().
+   * -# Check if the enclosure is changed.
+   * -# Set a new enclosure using LicenseCsvImport::setEnclosure().
+   * -# Check if the enclosure is changed with only the first character passed.
+   */
   public function testSetEnclosure()
   {
     $dbManager = M::mock(DbManager::class);
@@ -155,6 +215,13 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure'),is('<'));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::handleCsv()
+   * @test
+   * -# Call LicenseCsvImport::handleCsv() for first time. headrow must be set.
+   * -# Call LicenseCsvImport::handleCsv() with sample data.
+   * -# Check if it is imported in nkMap
+   */
   public function testHandleCsv()
   {
     $dbManager = M::mock(DbManager::class);
@@ -173,7 +240,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'nkMap'),is(array('licA'=>101)));
   }
 
-
+  /**
+   * @brief Test for LicenseCsvImport::handleFile() (non-existing file)
+   * @test
+   * -# Call LicenseCsvImport::handleFile() on non-existing file
+   * -# Function must return `Internal error`
+   */
   public function testHandleFileIfFileNotExists()
   {
     $dbManager = M::mock(DbManager::class);
@@ -182,6 +254,12 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat($msg, is(equalTo(_('Internal error'))));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::handleFile() (non-csv file)
+   * @test
+   * -# Call LicenseCsvImport::handleFile() on non-csv file
+   * -# Function must return `Error while parsing file`
+   */
   public function testHandleFileIfFileIsNotParsable()
   {
     $dbManager = M::mock(DbManager::class);
@@ -190,6 +268,13 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     assertThat($msg, startsWith( _('Error while parsing file')));
   }
 
+  /**
+   * @brief Test for LicenseCsvImport::handleFile() (csv file with header)
+   * @test
+   * -# Create an empty CSV file and write a valid header.
+   * -# Call LicenseCsvImport::handleFile().
+   * -# Function must return message starting with `head okay`.
+   */
   public function testHandleFile()
   {
     $dbManager = M::mock(DbManager::class);

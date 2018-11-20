@@ -23,19 +23,38 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
+/**
+ * @class LicenseCsvExportTest
+ * @brief Test for class LicenseCsvExport
+ */
 class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 {
+  /**
+   * @brief One time setup for test
+   * @see PHPUnit::Framework::TestCase::setUp()
+   */
   protected function setUp()
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
+  /**
+   * @brief Close mockery
+   * @see PHPUnit::Framework::TestCase::tearDown()
+   */
   protected function tearDown() {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
 
-
+  /**
+   * @brief Test for LicenseCsvExport::createCsv()
+   * @test
+   * -# Setup test DB and insert some licenses.
+   * -# Call LicenseCsvExport::createCsv().
+   * -# Check if the file returned is correct.
+   * -# Test with different delimiters.
+   */
   public function testCreateCsv()
   {
     $testDb = new TestLiteDb();
@@ -112,8 +131,15 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     assertThat($csv3,is(equalTo($expected3)));
   }
 
-
-
+  /**
+   * @brief Test for LicenseCsvExport::setDelimiter()
+   * @test
+   * -# Initialize LicenseCsvExport.
+   * -# Set a new delimiter using LicenseCsvExport::setDelimiter().
+   * -# Check if the delimiter is changed.
+   * -# Set a new delimiter using LicenseCsvExport::setDelimiter().
+   * -# Check if the delimiter is changed with only the first character passed.
+   */
   public function testSetDelimiter()
   {
     $dbManager = M::mock(DbManager::class);
@@ -129,6 +155,15 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     assertThat($delimiter->getValue($licenseCsvExport),is('<'));
   }
 
+  /**
+   * @brief Test for LicenseCsvExport::setEnclosure()
+   * @test
+   * -# Initialize LicenseCsvExport.
+   * -# Set a new enclosure using LicenseCsvExport::setEnclosure().
+   * -# Check if the enclosure is changed.
+   * -# Set a new enclosure using LicenseCsvExport::setEnclosure().
+   * -# Check if the enclosure is changed with only the first character passed.
+   */
   public function testSetEnclosure()
   {
     $dbManager = M::mock(DbManager::class);
