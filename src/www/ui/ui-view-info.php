@@ -649,7 +649,7 @@ class ui_view_info extends FO_Plugin
     $VT .= $withTrStart . $attrib7 . $withTdStart ."<input type='Text' name='sw360Link' style='width:98%' value='" . $sw360Link . "'>".$withTdTrEnd;
 
     $attrib8 = "General assessment";
-    $VT .= $withTrStart . $attrib8 . $withTdStart ."<input type='Text' name='generalAssesment' style='width:98%' value='" . $generalAssesment . "'>".$withTdTrEnd;
+    $VT .= $withTrStart . $attrib8 . $withTdStart . "<textarea style='overflow:auto;width:98%;height:80px;' name='generalAssesment'>" . $generalAssesment . "</textarea>".$withTdTrEnd;
 
     $attrib9 = "Source / binary integration notes";
     $nonCritical = "no critical files found, source code and binaries can be used as is";

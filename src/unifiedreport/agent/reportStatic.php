@@ -191,7 +191,9 @@ class ReportStatic
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
-    $table->addCell($cellLen)->addText(htmlspecialchars($otherStatement['ri_general_assesment']), $rightColStyleBlue, "pStyle");
+    $generalAssessment = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_general_assesment"], ENT_DISALLOWED));
+    $table->addCell($cellLen)->addText($generalAssessment, $rightColStyleBlue, "pStyle");
+
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" "), $leftColStyle, "pStyle");
