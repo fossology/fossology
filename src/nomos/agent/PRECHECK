@@ -41,50 +41,51 @@ esac
 TRIES=$#
 rm -f $PASS
 #set -x
-awk -F\	 -v PASS="$PASS" 'BEGIN { f=0; c=1 }
-    /^%ENTRY%	_LT/ { f=1; NAME=$NF }
-    /^%KEY%/ { KEY=$NF }
+awk -v PASS="$PASS" 'BEGIN { f=0; c=1 }
+    /^%ENTRY% _LT/ { f=1; NAME=$NF }
+# Keys can have space in between, so select every field after first field.
+    /^%KEY%/ { KEY=substr($0, index($0,$2)) }
     /^%NOCHECK%/ { c=1 }
     /^%STR%/ {
-        if (f) {
-    	    printf("[%s] %s: ", KEY, NAME);
-	    if ($0 !~ "\\(") {
-	        printf("%s", $0);
-	    }
-	    else {
-     	        N=length($0); x=0;
-	        for (i=1; i<=N; i++) {
-		    X=substr($0, i, 1);
-		    if (X == "(") {
-			    x++;
-		    }
-		    else if (X == ")") {
-			    X = "_";
-			    x--;
-		    }
-		    Y[i] = !x ? X : "_";
-	        }
-	        for (i=1; i<=N; i++) {
-		    printf("%c", Y[i]);
-	        }
-            }
-	    printf("\n");
-            f=0;
-	    if (c) {
-	        cmd = sprintf("echo %s >> %s", NAME, PASS);
-		system(cmd);
-	    }
-	    c=0;
-        }
-    }
+		if (f) {
+			printf("[%s] %s: ", KEY, NAME);
+			if ($0 !~ "\\(") {
+				printf("%s", $0);
+			}
+			else {
+				N=length($0); x=0;
+				for (i=1; i<=N; i++) {
+					X=substr($0, i, 1);
+					if (X == "(") {
+						x++;
+					}
+					else if (X == ")") {
+						X = "_";
+						x--;
+					}
+					Y[i] = !x ? X : "_";
+				}
+				for (i=1; i<=N; i++) {
+					printf("%c", Y[i]);
+				}
+			}
+			printf("\n");
+			f=0;
+			if (c) {
+				cmd = sprintf("echo %s >> %s", NAME, PASS);
+				system(cmd);
+			}
+			c=0;
+		}
+	}
 ' $IN | sed -e 's/%STR%//g' |
     tee $TEMP > $DATA
 # cp $TEMP file_1	# for debugging...
-awk -F\	 '
+awk '
 BEGIN {
 	f=0;
 }
-/^%ENTRY%	_LT/ {
+/^%ENTRY% _LT/ {
 	f=1;
 	NAME=$NF;
 }
@@ -181,7 +182,7 @@ void preloadResults(char *filetext, char *ltsr)
 ##			if [ $? -ne 0 ]; then
 ##				echo "\"$WORD\" is NOT in this line:" 
 ##				echo "$LINE"
-##				sed -e "s/$TAG
+##				sed -e "s/$TAG"
 ##				grep -v $TAG $FNAME > X
 ##				mv -f X $FNAME
 ##				continue
