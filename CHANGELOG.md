@@ -1,5 +1,37 @@
 # Changelog of FOSSology
 
+### 3.4.0 (Nov 29th 2018)
+
+After two release candidates, compatibility isues with updating from 3.2.0 and 3.3.0 have been resolved. The main features of the 3.4.0 release are found under the release candidate one for the 3.4.0 release (cf. https://github.com/fossology/fossology/releases/tag/3.4.0-rc1). Particular updates compared to the release candidate two (cf. https://github.com/fossology/fossology/releases/tag/3.4.0-rc2) are found below.
+
+Mainly, 3.4.0, including the two release candidates, adds more documentation, infrastructure support and testing. It improves the support for Debian 9 stretch and Ubuntu 18.04 LTS. Moreover, new functionality has been added for running FOSSology from the command line including optimized output in JSON directly from the agent. Last but now least, updates have been applied to incorporate updates at the SPDX License List, such as the support for recognizing license exceptions.
+
+#### Credits
+
+Looking into the git commit history, it shows you all the users who have contributed to this release since 3.3:
+
+> Tatsuo,
+> Steve,
+> Shaheem,
+> Robert,
+> rlintu,
+> Michael,
+> Maximilian,
+> Gaurav,
+> Dmitry,
+> Anupam
+
+#### Corrections
+
+* `ee8b69c` fix(constraints): Remove more faulty constraints    
+* `c6743d5` fix(unifiedreport): add default count as 0 in result of scan
+
+#### Refactorings, Infrastructure
+
+* `faaaeed` fix(installdeps): Run child terminals interactively
+* `6a298ea` fix(debian): Add php7.2 dependencies for Ubuntu Bionic
+* `36c8da7` fix(debian): Install composer.phar before running it
+
 ### 3.4.0-RC2 (Nov 2nd 2018)
 
 This pre-release adds important corrections to 3.4.0-RC1 and also the commit to update the changelog information and therefore features for the 3.4.0 release are found in the section for the release candidate 1 for 3.4.0 information listed below.
