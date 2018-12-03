@@ -5,7 +5,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2018 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -388,7 +388,8 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
   /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
   if ($AgentName == "ununpack" || $AgentName == "adj2nest")
   {
-    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
+    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk "
+         . "AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
   }
   else
   {
@@ -483,3 +484,34 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
 
   return ($jq_pk);
 }
+
+/**
+ * @brief Check if an agent is already running in a job.
+ *
+ * This is used to make sure dependencies don't get scheduled multiple times
+ * when the latest scan is not finished.
+ *
+ * @param string $agentName The agent name (from agent.agent_name)
+ * @param int    $upload_pk The upload id
+ *
+ * @return int jq_pk of scheduled jobqueue or 0 = not scheduled
+ */
+function isAlreadyRunning($agentName, $upload_pk)
+{
+  global $PG_CONN;
+
+  $jq_pk = 0;
+
+  $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON job_pk = jq_job_fk "
+       . "WHERE jq_type='$agentName' AND job_upload_fk = $upload_pk "
+       . "AND jq_end_bits = 0";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $jq_pk = $row["jq_pk"];
+  }
+  pg_free_result($result);
+  return intval($jq_pk);
+} // isAlreadyRunning()
