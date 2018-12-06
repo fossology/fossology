@@ -14,7 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * \file test_accuracy.cc
+ * \brief Checks the accuracy of agent results
+ */
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -28,11 +31,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "regTypes.hpp"
 #include "regscan.hpp"
 
-// Number of test cases (numbered from 0 to NUMTESTS-1)
+/** Number of test cases (numbered from 0 to NUMTESTS-1) */
 #define NUMTESTS 142
 
 using namespace std;
 
+/**
+ * \class TestDataCheck
+ * \brief Unit test driver
+ */
 class TestDataCheck : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE(TestDataCheck);
@@ -42,7 +49,11 @@ protected:
   void testDataCheck();
 } ;
 
-
+/**
+ * \brief Escape HTML special characters
+ * \param[out] out Output stream
+ * \param[in]  s   String to escape
+ */
 void HtmlEscapedOutput(ostream& out, const char* s)
 {
   char c = *s;
@@ -62,7 +73,6 @@ void HtmlEscapedOutput(ostream& out, const char* s)
 
 void GetReferenceResults(const string& fileName, list<match>& results)
 {
-  
   ifstream t(fileName);
   stringstream tstream;
   tstream << t.rdbuf();
@@ -84,6 +94,10 @@ void GetReferenceResults(const string& fileName, list<match>& results)
   }
 }
 
+/**
+ * \class overlappingMatch
+ * \brief Helper to check overlapping results
+ */
 class overlappingMatch {
   // Criterion if match m2 is sufficiently similar to a given match m
   const match& m;
@@ -95,6 +109,9 @@ public:
   }
 } ;
 
+/**
+ * \brief Print results to out
+ */
 void Display(ostream& out, ifstream& data, list<match>& l, list<match>& lcmp, const char*prein, const char*postin, const char*prenn, const char*postnn)
 {
   // Print results
@@ -116,17 +133,29 @@ void Display(ostream& out, ifstream& data, list<match>& l, list<match>& lcmp, co
   }
 }
 
+/**
+ * \brief Compare matches
+ * \param a
+ * \param b
+ * \return True if a \< b, false otherwise
+ */
 bool cmpMatches(const match &a, const match &b)
 {
-  // Compare matches, return true if a<b
   if (a.start < b.start)
     return true;
   if (a.start == b.start && a.end < b.end)
     return true;
-  // Otherwise, false
   return false;
 }
 
+/**
+ * \brief Test agent on every file in ../testdata/ folder
+ * \test
+ * -# Load test files from ../testdata/ directory and run copyright
+ * and author scanners on them.
+ * -# Merger the results from both scanners
+ * -# Check the results against \a "_raw" results of each input file
+ */
 void TestDataCheck::testDataCheck()
 {
   // Test all instances
@@ -134,13 +163,13 @@ void TestDataCheck::testDataCheck()
   // Create a copyright scanner and an author scanner
   hCopyrightScanner hsc;
   regexScanner hauth(regAuthor::getRegex(), regAuthor::getType());
-  
+
   ofstream out("results.html");
-  
+
   out << "<html><head><style type=\"text/css\">"
     "body { font-family: sans-serif; } h1 { font-size: 14pt; } h2 { font-size: 10pt; } p { font-size: 10pt; } .falsepos { background-color: #FFC080; } .falseneg { background-color: #FF8080; }"
     "</style></head><body>" << endl;
-  
+
   // Scan files
   for (int i = 0; i < NUMTESTS; i++)
   {
@@ -152,7 +181,7 @@ void TestDataCheck::testDataCheck()
     // Merge lists lng and lauth
     lng.merge(lauth, cmpMatches);
     GetReferenceResults(fileName + "_raw", lrefs);
-    
+
     out << "<h1>testdata" << i << "</h1>" << endl;
     out << "<h2>HScanner</h2>" << endl;
     Display(out, tstream, lng, lrefs, "<code>", "</code>", "<code class=\"falsepos\">", "</code>");

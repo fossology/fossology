@@ -15,25 +15,42 @@
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
- -------------------------------------------
-
- regexscan - A Fossology agent creation "Tutorial" in multiple stages.
-   This is stage 3 and demonstrates the fundamental agent requirements:
-
-    1. Connect to database
-    2. Connect to Scheduler
-    3. Process -r as a regex argument
-    4. Process filename and report regex scan results from command line
-    5. Process upload file collection from upload_pk stdin input
-    6. Terminate
-
-    *!
-    * \file regexscan.c
-    * \brief Regular expression scanning agent. Tutorial sample code
-    * \author Paul Guttmann
-    * \date 2013
  ***************************************************************/
+/*!
+ * \dir
+ * \brief Sample scanner with multiple stages.
+ * \page regexscan Regex Scanner
+ * \tableofcontents
+ * \section regexscanabout About Regex Scanner
+ * A Fossology agent creation "Tutorial" in multiple stages.
+ *
+ * This is stage 3 and demonstrates the fundamental agent requirements:
+ * -# Connect to database
+ * -# Connect to Scheduler
+ * -# Process -r as a regex argument
+ * -# Process filename and report regex scan results from command line
+ * -# Process upload file collection from upload_pk stdin input
+ * -# Terminate
+ * \section regexscanactions Supported actions
+ * Usage: `regexscan [options] [id [id ...]]`
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -i        | Initialize the database, then exit |
+ * | -c SYSCONFDIR | FOSSology configuration directory |
+ * | -h        | Show available command line options |
+ * | -v        | Increase agent logging verbosity |
+ * | -r        | Regex expression to load from command line |
+ * | filename  | Filename to process with regex |
+ * \section regexscansource Agent source
+ *   - \link src/regexscan/agent \endlink
+ */
+
+/*!
+ * \file regexscan.c
+ * \brief Regular expression scanning agent. Tutorial sample code
+ * \author Paul Guttmann
+ * \date 2013
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -58,9 +75,9 @@ char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 #endif
 */
 
-PGconn *pgConn = NULL;  // Database connection
+PGconn *pgConn = NULL;  ///< Database connection
 
-/*********************************************************
+/**
   \brief Scan a file for a regex - regular expression.
   \n the regex is compiled in this function for performance
 
@@ -69,7 +86,7 @@ PGconn *pgConn = NULL;  // Database connection
   \param scanFilePtr    handle for file to scan
   \param fileName string name of file to scan
   \return 0 = OK, otherwise error code
- *********************************************************/
+ */
 int regexScan(regex_t *regex, char *regexStr, FILE *scanFilePtr, char *fileName)
 {
   int retCode;
@@ -90,7 +107,8 @@ int regexScan(regex_t *regex, char *regexStr, FILE *scanFilePtr, char *fileName)
     retCode = regexec(regex, textBuff, 1, rm, 0);  /* nmatch = 1, matchptr = rm */
     if (!retCode)
     {
-      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n", fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
+      sprintf(msgBuff, "%s: regex found at line %d at position %d. -> %.*s \n",
+              fileName, lineCount, rm[0].rm_so+1, rm[0].rm_eo-rm[0].rm_so, textBuff + rm[0].rm_so);
       puts(msgBuff);
       if (!match)
       {
@@ -123,21 +141,22 @@ int regexScan(regex_t *regex, char *regexStr, FILE *scanFilePtr, char *fileName)
   return 0;
 }
 
-/*********************************************************
+/**
   \brief Creates filenames from pfile_pk value
 
-  \param pfileNum string containing pfile_pk value 
+  \param pfileNum string containing pfile_pk value
   \param pfileRepoName string with repo path and filename
   \param pfileRealName string with original filename
   \return 0 = OK, otherwise error code
- *********************************************************/
+ */
 int pfileNumToNames(char *pfileNum, char *pfileRepoName, char *pfileRealName)
 {
   char sqlSelect[256];
   PGresult *result;
 
   /* Attempt to locate the appropriate pFile_pk record */
-  sprintf(sqlSelect, "SELECT pfile_sha1, pfile_md5, pfile_size, ufile_name FROM pfile, uploadtree WHERE pfile_fk = pfile_pk and pfile_pk = '%s'", pfileNum);
+  sprintf(sqlSelect, "SELECT pfile_sha1, pfile_md5, pfile_size, ufile_name FROM"
+      " pfile, uploadtree WHERE pfile_fk = pfile_pk and pfile_pk = '%s'", pfileNum);
   result = PQexec(pgConn, sqlSelect);
 
   if (fo_checkPQresult(pgConn, result, sqlSelect, __FILE__, __LINE__)) return 0;
@@ -171,14 +190,14 @@ int pfileNumToNames(char *pfileNum, char *pfileRepoName, char *pfileRealName)
 }
 
 
-/*********************************************************
+/**
   \brief Scan an Upload for a regex - regular expression.
   \n gets a list of files in an upload and calls regexScan()
 
   \param uploadNum string containing upload_pk value
   \param regexStr string containing the regex
   \return i = number of files scanned, 0 = error
-**********************************************************/
+ */
 int regexScanUpload(char *uploadNum, char *regexStr)
 {
   char sqlSelect[256];
@@ -217,7 +236,8 @@ int regexScanUpload(char *uploadNum, char *regexStr)
   }
 
   /* Now get our list of required pfile entries for this upload */
-  sprintf(sqlSelect, "SELECT uploadtree.pfile_fk, ufile_name from uploadtree, upload where upload_fk = upload_pk and uploadtree.pfile_fk <> 0 and ufile_mode = 32768 and upload_pk = '%s'", uploadNum);
+  sprintf(sqlSelect, "SELECT uploadtree.pfile_fk, ufile_name from uploadtree, upload"
+      " where upload_fk = upload_pk and uploadtree.pfile_fk <> 0 and ufile_mode = 32768 and upload_pk = '%s'", uploadNum);
   result = PQexec(pgConn, sqlSelect);
 
   if (fo_checkPQresult(pgConn, result, sqlSelect, __FILE__, __LINE__)) return 0;
@@ -237,7 +257,8 @@ int regexScanUpload(char *uploadNum, char *regexStr)
   for (i=0; i<fileCount; i++)
   {
     /* Attempt to locate the appropriate pFile_pk record */
-    sprintf(sqlSelect, "SELECT pfile_sha1, pfile_md5, pfile_size, ufile_name FROM pfile, uploadtree WHERE pfile_fk = pfile_pk and pfile_pk = '%s'", PQgetvalue(result, i, 0));
+    sprintf(sqlSelect, "SELECT pfile_sha1, pfile_md5, pfile_size, ufile_name"
+            " FROM pfile, uploadtree WHERE pfile_fk = pfile_pk and pfile_pk = '%s'", PQgetvalue(result, i, 0));
     pfileResult = PQexec(pgConn, sqlSelect);
 
     if (fo_checkPQresult(pgConn, pfileResult, sqlSelect, __FILE__, __LINE__)) return 0;
@@ -267,7 +288,8 @@ int regexScanUpload(char *uploadNum, char *regexStr)
     }
     else
     {
-      fprintf(stderr, "WARNING: File: %s - Located %d instances of pfile_pk %s ! Size = %s bytes!\n", PQgetvalue(result, i, 1), PQntuples(pfileResult), PQgetvalue(result, i, 0), PQgetvalue(pfileResult, i, 2));
+      fprintf(stderr, "WARNING: File: %s - Located %d instances of pfile_pk %s ! Size = %s bytes!\n",
+              PQgetvalue(result, i, 1), PQntuples(pfileResult), PQgetvalue(result, i, 0), PQgetvalue(pfileResult, i, 2));
     }
   }
   /* return the number of scanned files */
@@ -275,10 +297,11 @@ int regexScanUpload(char *uploadNum, char *regexStr)
 }
 
 
-/*********************************************************
+/**
  Usage():
  \brief Usage description for this regexscan agent.
- *********************************************************/
+ \param Name Path of the binary
+ */
 void    Usage   (char *Name)
 {
   printf("Usage: %s [options] [id [id ...]]\n",Name);

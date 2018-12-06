@@ -17,6 +17,7 @@ addons:
       - libcppunit-dev
       - libcunit1-dev
       - libdbd-sqlite3-perl
+      - libjsoncpp-dev
       - liblocal-lib-perl
       - libmagic-dev
       - librpm-dev
@@ -39,13 +40,15 @@ sudo: false
 jobs:
   include:
     - name: Syntax Check
-      script: src/testing/syntax/syntaxtest.sh
+      script:
+        - src/testing/syntax/syntaxtest.sh
+        - composer validate --no-check-all --working-dir=src --strict
     - name: Static Code Analysis
       addons:
         apt:
           packages:
             - cppcheck
-      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ --suppress=*:src/copyright/agent/json.hpp src/
+      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
     - name: Copy/Paste Detector
       install: composer install --prefer-dist --working-dir=src
       script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
@@ -120,9 +123,9 @@ jobs:
       php: 7.0
     - <<: *phpunit-tests
       php: 7.1
+      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
     - <<: *phpunit-tests
       php: 7.2
+      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
   allow_failures:
     - name: Copy/Paste Detector
-    - php: 7.1
-    - php: 7.2

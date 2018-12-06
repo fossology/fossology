@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test for host operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -23,6 +27,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** host function tests ************************************************* */
 /* ************************************************************************** */
 
+/**
+ * \brief Test for host_init()
+ * \test
+ * -# Create a host using host_init()
+ * -# Check if the host returned is not NULL
+ * -# Check if the host gets name, address, agent_dir and max properly
+ * -# Check if the host has no running agents
+ * -# Destroy the host
+ */
 void test_host_init()
 {
   host_t* host;
@@ -38,6 +51,16 @@ void test_host_init()
   host_destroy(host);
 }
 
+/**
+ * \brief Test for host_insert()
+ * \test
+ * -# Initialize scheduler using scheduler_init()
+ * -# Create a host using host_init()
+ * -# Insert the host to the scheduler using host_insert()
+ * -# Check if scheduler's host list and queue size increases
+ * -# Verify if the hosts are added in the given order to the scheduler's host
+ *    queue
+ */
 void test_host_insert()
 {
   scheduler_t* scheduler;
@@ -74,6 +97,14 @@ void test_host_insert()
   g_free(name);
 }
 
+/**
+ * \brief Test for host_increase_load()
+ * \test
+ * -# Initialize host using host_init()
+ * -# Check the running agents on host are 0
+ * -# Call host_increase_load() on the host
+ * -# Check if the running agents on host are increasing
+ */
 void test_host_increase_load()
 {
   host_t* host = host_init("local", "localhost", "directory", 10);
@@ -87,6 +118,14 @@ void test_host_increase_load()
   host_destroy(host);
 }
 
+/**
+ * \brief Test for host_decrease_load()
+ * \test
+ * -# Initialize host using host_init()
+ * -# Set the host load to 2
+ * -# Call host_decrease_load() on the host
+ * -# Check if the running agents on host are decreasing
+ */
 void test_host_decrease_load()
 {
   host_t* host = host_init("local", "localhost", "directory", 10);
@@ -101,6 +140,14 @@ void test_host_decrease_load()
   host_destroy(host);
 }
 
+/**
+ * \brief Test for get_host()
+ * \test
+ * -# Initialize the scheduler using scheduler_init()
+ * -# Add hosts to the scheduler with different capacity using host_insert()
+ * -# Get the hosts from scheduler using get_host.
+ * -# Check the name of the host for a given capacity
+ */
 void test_get_host()
 {
   host_t* host;

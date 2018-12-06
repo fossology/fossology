@@ -34,11 +34,11 @@
 #define myBUFSIZ	2048
 #define DataSize    32
 
-/* A structure to put the results of a single file scan */
+/** A structure to put the results of a single file scan */
 struct FileResult_struct
 {
-  char Buf[DataSize];
-  char HexStr[(DataSize * 2) + 1];
+  char Buf[DataSize];               ///< Buffer
+  char HexStr[(DataSize * 2) + 1];  ///< Hexadecimal string
 };
 typedef struct FileResult_struct FileResult_t, *pFileResult_t;
 

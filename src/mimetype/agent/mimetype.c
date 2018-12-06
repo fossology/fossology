@@ -17,23 +17,48 @@
 /**
  * \file mimetype.c
  * \brief Get the mimetype for a package.
+ * \page mimetype MimeType agent
+ * \tableofcontents
+ * \section mimetypeabout About mimetype agent
  * Lots of different agents generate mimetype information, but they have
- * limitations.  For example:
- *  - Ununpack: it knows mimetypes!  But only for the files it extracts.
+ * limitations.
+ *
+ * For example:
+ *  - \link Ununpack \endlink: it knows mimetypes!  But only for the files it extracts.
  *    Unknown files are not assigned mimetypes.
- *  - Pkgmetagetta: it knows mimetypes!  But only for the files it supports.
- *    And the mimetypes are not the same as ununpack.  For example,
- *    Ununpack uses Magic and says "application/x-rpm" while libextractor
- *    says "application/x-redhat-package-manager".  These are different
+ *  - \link Pkgagent \endlink: it knows mimetypes!  But only for the files it supports.
+ *    And the mimetypes are not the same as \link ununpack \endlink.  For example,
+ *    Ununpack uses Magic and says \c "application/x-rpm" while libextractor
+ *    says \c "application/x-redhat-package-manager". These are different
  *    strings.
+ *
  * This agent is intended as be the official source for mimetypes.
+ *
  * What it does:
- *  (1) If ununpack found a mimetype, us it.  This is because ununpack
- *      actually unpacks the files.  Thus, if the file can ben unpacked
- *      then this must be the right mimetype.
- *      Also ununpack uses /etc/UnMagic.mime which identifies more
- *      special types than regular magic(5).
- *  (2) If ununpack did not find a mimetype, then use magic(5).
+ *  -# If ununpack found a mimetype, use it. This is because ununpack
+ *     actually unpacks the files. Thus, if the file can be unpacked
+ *     then this must be the right mimetype.
+ *     Also ununpack uses /etc/UnMagic.mime which identifies more
+ *     special types than regular magic(5).
+ *  -# If ununpack did not find a mimetype, then use magic(5).
+ *
+ *  \section mimetypeactions Supported actions
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -h | Help (print this message), then exit |
+ * | -i | Initialize the database, then exit |
+ * | -v | Verbose (-vv = more verbose) |
+ * | -c | Specify the directory for the system configuration |
+ * | -C | Run from command line |
+ * | -V | Print the version info, then exit |
+ * | file | If files are listed, display their mimetype |
+ * | no file | Process data from the scheduler |
+ *
+ * \section mimetypesource Agent source
+ *   - \link src/mimetype/agent \endlink
+ *   - \link src/mimetype/ui \endlink
+ *   - Functional test cases \link src/mimetype/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/mimetype/agent_tests/Unit \endlink
  */
 
 #include "finder.h"
@@ -67,12 +92,12 @@ int main(int argc, char *argv[])
   int rv;
   PGresult *result;
   char sqlbuf[1024];
-  int CmdlineFlag = 0; /** run from command line flag, 1 yes, 0 not */
+  int CmdlineFlag = 0;        ///< run from command line flag, 1 yes, 0 not
   char *COMMIT_HASH;
   char *VERSION;
   char agent_rev[MAXCMD];
-                           
-  /** initialize the scheduler connection */
+
+  /* initialize the scheduler connection */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
   /* Process command-line */
@@ -145,7 +170,7 @@ int main(int argc, char *argv[])
 
     while(fo_scheduler_next())
     {
-      /** get piece of information, including upload_pk, others */
+      /* get piece of information, including upload_pk, others */
       Parm = fo_scheduler_current();
       if (Parm && Parm[0])
       {
@@ -188,7 +213,7 @@ int main(int argc, char *argv[])
         /* Record analysis start in mimetype_ars, the mimetype audit trail. */
         ars_pk = fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 0);
 
-        /** get all pfile ids on a upload record */
+        /* get all pfile ids on a upload record */
         memset(sqlbuf, 0, sizeof(sqlbuf));
         snprintf(sqlbuf, sizeof(sqlbuf), "SELECT DISTINCT(pfile_pk) as Akey, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS A FROM uploadtree, pfile WHERE uploadtree.pfile_fk = pfile.pfile_pk AND pfile_mimetypefk is NULL AND upload_fk = '%d';", upload_pk);
         result = PQexec(pgConn, sqlbuf);
@@ -207,17 +232,17 @@ int main(int argc, char *argv[])
           }
 
           /* Process the repository file */
-          /** Find the path **/
+          /* Find the path */
           Path = fo_RepMkPath("files",A);
           if (Path && fo_RepExist("files",A))
           {
             /* Get the mimetype! */
             DBCheckMime(Path);
           }
-          else 
+          else
           {
             printf("ERROR pfile %d Unable to process.\n",Akey);
-            printf("LOG pfile %d File '%s' not found.\n",Akey,A);  
+            printf("LOG pfile %d File '%s' not found.\n",Akey,A);
             PQfinish(pgConn);
             exit(-1);
           }
@@ -230,7 +255,7 @@ int main(int argc, char *argv[])
           fo_scheduler_heart(1);
         }
         PQclear(result);
-        
+
         /* Record analysis success in mimetype_ars. */
         if (ars_pk) fo_WriteARS(pgConn, ars_pk, upload_pk, Agent_pk, AgentARSName, 0, 1);
       }
@@ -242,7 +267,7 @@ int main(int argc, char *argv[])
   magic_close(MagicCookie);
   if (DBMime) PQclear(DBMime);
   if (pgConn) PQfinish(pgConn);
-  /** after cleaning up agent, disconnect from the scheduler, this doesn't return */
+  /* after cleaning up agent, disconnect from the scheduler, this doesn't return */
   fo_scheduler_disconnect(0);
   return(0);
 } /* main() */

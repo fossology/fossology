@@ -22,11 +22,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  * @file no_check.c
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This agent does not
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This agent does not
  *        check for the return of fo_scheduler_next() to be NULL, so will fail
  *        the scheduler startup test since will never finish.
  *
- * This is a failing agent
+ * @note This is a failing agent
  */
 
 int main(int argc, char** argv)

@@ -17,7 +17,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 
 /**
- * @brief find xx.7z
+ * \file
+ * \brief Unit test cases for FindCmd()
+ */
+/**
+ * \brief find xx.7z
+ * \test
+ * -# Call FindCmd() on 7z file
+ * -# Check if function returns correct index
  */
 void testFindCmdNormal()
 {
@@ -36,7 +43,10 @@ void testFindCmdNormal()
 }
 
 /**
- * @brief find .dsc
+ * \brief find xx.dsc
+ * \test
+ * -# Call FindCmd() on dsc file
+ * -# Check if function returns correct index
  */
 void testFindCmd4DscFile()
 {
@@ -47,7 +57,10 @@ void testFindCmd4DscFile()
 }
 
 /**
- * @brief find xx.cab
+ * \brief find xx.cab
+ * \test
+ * -# Call FindCmd() on cab file
+ * -# Check if function returns correct index
  */
 void testFindCmd4CabFile()
 {
@@ -58,7 +71,10 @@ void testFindCmd4CabFile()
 }
 
 /**
- * @brief find xx.msi
+ * \brief find xx.msi
+ * \test
+ * -# Call FindCmd() on msi file
+ * -# Check if function returns correct index
  */
 void testFindCmd4MsiFile()
 {
@@ -69,7 +85,10 @@ void testFindCmd4MsiFile()
 }
 
 /**
- * @brief find xx.rpm
+ * \brief find xx.rpm
+ * \test
+ * -# Call FindCmd() on rpm file
+ * -# Check if function returns correct index
  */
 void testFindCmd4RpmFile()
 {
@@ -83,7 +102,10 @@ void testFindCmd4RpmFile()
 }
 
 /**
- * @brief find xx.iso
+ * \brief find xx.iso
+ * \test
+ * -# Call FindCmd() on iso file
+ * -# Check if function returns correct index
  */
 void testFindCmd4IsoFile()
 {
@@ -94,7 +116,10 @@ void testFindCmd4IsoFile()
 }
 
 /**
- * @brief find xx.zip
+ * \brief find xx.zip
+ * \test
+ * -# Call FindCmd() on zip file
+ * -# Check if function returns correct index
  */
 void testFindCmd4ZipFile()
 {
@@ -105,7 +130,10 @@ void testFindCmd4ZipFile()
 }
 
 /**
- * @brief find xx.rar
+ * \brief find xx.rar
+ * \test
+ * -# Call FindCmd() on rar file
+ * -# Check if function returns correct index
  */
 void testFindCmd4RarFile()
 {
@@ -116,7 +144,10 @@ void testFindCmd4RarFile()
 }
 
 /**
- * @brief find xx.cpio
+ * \brief find xx.cpio
+ * \test
+ * -# Call FindCmd() on cpio file
+ * -# Check if function returns correct index
  */
 void testFindCmd4CpioFile()
 {
@@ -128,7 +159,10 @@ void testFindCmd4CpioFile()
 
 
 /**
- * @brief find xx.udeb
+ * \brief find xx.deb
+ * \test
+ * -# Call FindCmd() on deb file
+ * -# Check if function returns correct index
  */
 void testFindCmd4DebFile()
 {
@@ -139,7 +173,10 @@ void testFindCmd4DebFile()
 }
 
 /**
- * @brief find xx.a
+ * \brief find xx.ar
+ * \test
+ * -# Call FindCmd() on ar file
+ * -# Check if function returns correct index
  */
 void testFindCmd4ArchiveLibFile()
 {
@@ -151,7 +188,10 @@ void testFindCmd4ArchiveLibFile()
 
 
 /**
- * @brief find xx.tar
+ * \brief find xx.tar
+ * \test
+ * -# Call FindCmd() on tar file
+ * -# Check if function returns correct index
  */
 void testFindCmd4TarFile()
 {
@@ -163,7 +203,10 @@ void testFindCmd4TarFile()
 
 
 /**
- * @brief find xx.Z
+ * \brief find xx.z
+ * \test
+ * -# Call FindCmd() on z file
+ * -# Check if function returns correct index
  */
 void testFindCmd4ZFile()
 {
@@ -174,7 +217,10 @@ void testFindCmd4ZFile()
 }
 
 /**
- * @brief find xx.exe
+ * \brief find xx.exe
+ * \test
+ * -# Call FindCmd() on exe file
+ * -# Check if function returns correct index
  */
 void testFindCmd4ExeFile()
 {
@@ -185,7 +231,10 @@ void testFindCmd4ExeFile()
 }
 
 /**
- * @brief find xx.bz2
+ * \brief find xx.bz2
+ * \test
+ * -# Call FindCmd() on bz2 file
+ * -# Check if function returns correct index
  */
 void testFindCmd4Bz2File()
 {
@@ -196,7 +245,10 @@ void testFindCmd4Bz2File()
 }
 
 /**
- * @brief find ext3 fs
+ * \brief find ext3 fs
+ * \test
+ * -# Call FindCmd() on ext3 file
+ * -# Check if function returns correct index
  */
 void testFindCmd4Ext3File()
 {
@@ -207,7 +259,10 @@ void testFindCmd4Ext3File()
 }
 
 /**
- * @brief find ext2 fs
+ * \brief find ext2 fs
+ * \test
+ * -# Call FindCmd() on ext2 file
+ * -# Check if function returns correct index
  */
 void testFindCmd4Ext2File()
 {
@@ -218,7 +273,10 @@ void testFindCmd4Ext2File()
 }
 
 /**
- * @brief find fat fs
+ * \brief find fat fs
+ * \test
+ * -# Call FindCmd() on fat file
+ * -# Check if function returns correct index
  */
 void testFindCmd4FatFile()
 {
@@ -236,7 +294,10 @@ void testFindCmd4FatFile()
 }
 
 /**
- * @brief find ntfs fs
+ * \brief find ntfs fs
+ * \test
+ * -# Call FindCmd() on fs file
+ * -# Check if function returns correct index
  */
 void testFindCmd4NtfsFile()
 {
@@ -247,7 +308,11 @@ void testFindCmd4NtfsFile()
 }
 
 /**
- * @brief find partition
+ * \brief find partition file
+ * \test
+ * -# Call FindCmd() on partition file
+ * -# Check if function returns correct index
+ * \todo Test file does not exists
  */
 void testFindCmd4PartitionFile()
 {

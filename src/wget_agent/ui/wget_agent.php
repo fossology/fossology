@@ -17,12 +17,16 @@
 ***********************************************************/
 
 /**
- * \file wget_agent.php
+ * \file
  * \brief schedule the wget_agent agent
- **/
+ */
 
 define("TITLE_agent_wget_agent", "wget_agent");
 
+/**
+ * @class agent_wget_agent
+ * @brief UI plugin for WGET_AGENT
+ */
 class agent_wget_agent extends FO_Plugin {
 
   public $Name = "wget_agent";
@@ -33,9 +37,10 @@ class agent_wget_agent extends FO_Plugin {
   public $AgentName = "wget_agent";   // agent.agent_name
 
   /**
-   * \brief Register additional menus.
-   **/
-  function RegisterMenus() 
+   * @copydoc FO_Plugin::RegisterMenus()
+   * @see FO_Plugin::RegisterMenus()
+   */
+  function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY) {
       return (0);
@@ -47,38 +52,39 @@ class agent_wget_agent extends FO_Plugin {
 
 
   /**
-   * \brief Check if the upload has results from this agent.
+   * @brief Check if the upload has results from this agent.
    *
-   * \param $upload_pk
+   * @param int $upload_pk Upload to check
    *
-   * \returns:
+   * @returns
    * - 0 = no
    * - 1 = yes, from latest agent version
    * - 2 = yes, from older agent version (does not apply to wget_agent)
-   **/
-  function AgentHasResults($upload_pk) 
+   */
+  function AgentHasResults($upload_pk)
   {
     return (0);
   } // AgentHasResults()
 
 
   /**
-   * \brief Queue the wget agent.
-   *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
+   * @brief Queue the wget agent.
+   *
+   * Before queuing, check if agent needs to be queued. It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
+   * @param int $job_pk
+   * @param int $upload_pk
+   * @param string $ErrorMsg Error message on failure
+   * @param array $Dependencies Array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
    *
-   * \returns
+   * @returns
    * - jq_pk Successfully queued
    * -   0   Not queued, latest version of agent has previously run successfully
    * -  -1   Not queued, error, error string in $ErrorMsg
-   **/
+   */
   function AgentAdd($job_pk, $upload_pk, &$ErrorMsg, $Dependencies)
   {
     $Dependencies[] = "wget_agent";

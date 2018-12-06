@@ -16,36 +16,32 @@
  ***************************************************************/
 
 /**
- * \file finder.c
- * \brief get mime type for specified package
+ * \file
+ * \brief Get mime type for specified package
  */
 
 #include "finder.h"
 
-char SQL[MAXCMD];
+char SQL[MAXCMD];         ///< For DB
 
-/** for the DB */
-PGresult *DBMime = NULL; /* contents of mimetype */
-int  MaxDBMime=0; /* how many rows in DBMime */
+PGresult *DBMime = NULL;  ///< contents of mimetype table
+int  MaxDBMime=0;         ///< how many rows in DBMime
 PGconn *pgConn;
-int Agent_pk=-1; /* agent identifier */
+int Agent_pk=-1;          ///< agent identifier
 
-/** for /etc/mime.types */
-FILE *FMimetype=NULL;
+FILE *FMimetype=NULL;     ///< for /etc/mime.types
 
-/** for Magic */
-magic_t MagicCookie;
+magic_t MagicCookie;      ///< for Magic
 
-/** input for this system */
 int Akey = 0;
-char A[MAXCMD];
+char A[MAXCMD];           ///< input for this system
 
 /**
  * \brief Create a string with taint quoting.
  *
- * \param char *S - the string will be tainted
+ * \param[in] S The string to be tainted
  *
- * \return char* - static string, tainted string.
+ * \return Static tainted string.
  */
 char * TaintString(char *S)
 {
@@ -68,7 +64,7 @@ char * TaintString(char *S)
 } /* TaintString() */
 
 /**
- * \brief populate the DBMime table.
+ * \brief Populate the DBMime table.
  */
 void DBLoadMime()
 {
@@ -76,7 +72,7 @@ void DBLoadMime()
   memset(SQL, 0, MAXCMD);
   snprintf(SQL, MAXCMD-1, "SELECT mimetype_pk,mimetype_name FROM mimetype ORDER BY mimetype_pk ASC;");
   DBMime =  PQexec(pgConn, SQL); /* SELECT */
-  if (fo_checkPQresult(pgConn, DBMime, SQL, __FILE__, __LINE__)) 
+  if (fo_checkPQresult(pgConn, DBMime, SQL, __FILE__, __LINE__))
   {
     PQfinish(pgConn);
     exit(-1);
@@ -85,11 +81,12 @@ void DBLoadMime()
 } /* DBLoadMime() */
 
 /**
- * \brief find a mime type in the DBMime table.
- * if the Mimetype is alrady in table mimetype, return mimetype_pk,
- * if not, insert it into table mimetype, then return the mimetype_pk
+ * \brief Find a mime type in the DBMime table.
  *
- * \param char *Mimetype - mimetype_name
+ * If the Mimetype is already in table mimetype, return mimetype_pk,
+ * if not, insert it into table mimetype, then return the mimetype_pk.
+ *
+ * \param Mimetype Mimetype_name
  * \return int - mimetype ID or -1 if not found.
  */
 int DBFindMime(char *Mimetype)
@@ -129,14 +126,14 @@ int DBFindMime(char *Mimetype)
 } /* DBFindMime() */
 
 /**
- * \brief given an extension, see if extension exists in
- *  the /etc/mime.types. 
+ * \brief Given an extension, see if extension exists in
+ *  the /etc/mime.types.
  *
- * \param har *Ext - the extension
+ * \param Ext The extension
  *
  * \return int -  if the extension exists in
  * the /etc/mime.types, add metatype to DB and return
- * DB index.  Otherwise, return -1.
+ * DB index. Otherwise, return -1.
  */
 int CheckMimeTypes(char *Ext)
 {
@@ -190,10 +187,10 @@ int CheckMimeTypes(char *Ext)
 } /* CheckMimeTypes() */
 
 /**
- * \brief given a pfile, identify any filenames
+ * \brief Given a pfile, identify any filenames
  *  and see if any of them have a known extension based on
  * /etc/mime.types.
- *
+ * \note Reads pfile id from Akey
  * \return int - return the mimetype id, or -1 if not found.
  */
 int DBCheckFileExtention()
@@ -244,14 +241,17 @@ int DBCheckFileExtention()
 } /* DBCheckFileExtention() */
 
 /**
- * \brief get the ID for the default mimetype.
- *  Options are:
- *  application/x-empty      :: zero-length file
- *  text/plain               :: 1st 100 characters are printable
- *  application/octet-stream :: 1st 100 characters contain binary
+ * \brief Get the ID for the default mimetype.
  *
- * \param char *MimeType - mimetype name
- * \param char *Filename - file name
+ *  Options are:
+ *  | Mimetype                 | Description |
+ *  | ---: | :--- |
+ *  | application/x-empty      | Zero-length file |
+ *  | text/plain               | 1st 100 characters are printable |
+ *  | application/octet-stream | 1st 100 characters contain binary |
+ *
+ * \param MimeType Mimetype name
+ * \param Filename File name
  *
  * \return int - return -1 on error, or DB index to metatype.
  */
@@ -268,7 +268,7 @@ int GetDefaultMime(char *MimeType, char *Filename)
   Fin = fopen(Filename,"rb");
   if (!Fin) return(-1);
 
-  i=0; 
+  i=0;
   C=fgetc(Fin);
   while(!feof(Fin) && isprint(C) && (i < 100))
   {
@@ -284,9 +284,10 @@ int GetDefaultMime(char *MimeType, char *Filename)
 
 /**
  * \brief Given a file, check if it has a mime type
- * in the DB.  If it does not, then add it.
+ * in the DB.
  *
- * \param char *Filename - the path of the file
+ * If it does not, then add it.
+ * \param Filename The path of the file
  */
 void DBCheckMime(char *Filename)
 {
@@ -410,10 +411,15 @@ void DBCheckMime(char *Filename)
 } /* DBCheckMime() */
 
 /**
- * \brief given a string that contains
+ * \brief Given a string that contains
  *  field='value' pairs, save the items.
+ * \param[in]  Sin   Input string
+ * \param[out] Field Field string
+ * \param[in]  FieldMax Capacity of Field
+ * \param[out] Value Value string
+ * \param[in]  ValueMax Capacity of Field
  *
- * \return char * - return pointer to start of next field, or
+ * \return Return character pointer to start of next field, or
  *  NULL at \0.
  */
 char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
@@ -472,12 +478,11 @@ char *  GetFieldValue   (char *Sin, char *Field, int FieldMax,
 } /* GetFieldValue() */
 
 /**
- * \brief read a line each time from one file
+ * \brief Read a line each time from one file
+ * \param[in]  Fin The file stream
+ * \param[out] Line Save a line of content
+ * \param[in]  MaxLine Max character count one time to read a line
  *
- * \param FILE *Fin - the file stream
- * \param char *Line - save a line of content
- * \param int MaxLine - max character count one time to read a line
- * 
  * \return int - the character count of the line
  *
  */
@@ -511,7 +516,7 @@ int ReadLine(FILE *Fin, char *Line, int MaxLine)
 /**
  * \brief Here are some suggested options
  *
- * \param char *Name - the name of the executable, ususlly it is mimetype
+ * \param Name - the name of the executable, usually it is mimetype
  */
 void Usage(char *Name)
 {

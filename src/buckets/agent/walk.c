@@ -15,6 +15,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+/**
+ * \file walk.c
+ * Processing a given file
+ */
+
 #include "buckets.h"
 
 extern int debug;
@@ -22,22 +27,22 @@ extern int debug;
 /**
  * \brief This function does a recursive depth first walk through a file tree (uploadtree).
  *
- * \param PGconn $pgConn   The database connection object.
- * \param pbucketdef_t    $bucketDefArray  Bucket Definitions
- * \param int  $agent_pk   The agent_pk
- * \param int  $uploadtree_pk
- * \param int  $skipProcessedCheck true if it is ok to skip the initial 
- *                       processed() call.  The call is unnecessary during 
- *                       recursion and it's an DB query, so best to avoid
- *                       doing an unnecessary call.
- * \param int  $hasPrules  1=bucketDefArray contains at least one rule that only 
- *                       apply to packages.  0=No package rules.
+ * \param pgConn             The database connection object.
+ * \param bucketDefArray     Bucket Definitions
+ * \param agent_pk           The agent_pk
+ * \param uploadtree_pk
+ * \param skipProcessedCheck true if it is ok to skip the initial
+ *                           processed() call.  The call is unnecessary during
+ *                           recursion and it's an DB query, so best to avoid
+ *                           doing an unnecessary call.
+ * \param hasPrules          1=bucketDefArray contains at least one rule that only
+ *                           apply to packages.  0=No package rules.
  *
  * \return 0 on OK, -1 on failure.
  *
- * Errors are written to stdout.
+ * \note Errors are written to stdout.
  */
-FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk, 
+FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
                       int  uploadtree_pk, int skipProcessedCheck,
                       int hasPrules)
 {
@@ -53,11 +58,11 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
   if (debug) printf("---- START walkTree, uploadtree_pk=%d ----\n",uploadtree_pk);
 
   /* get uploadtree rec for uploadtree_pk */
-  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from %s where uploadtree_pk=%d", 
+  sprintf(sqlbuf, "select pfile_fk, lft, rgt, ufile_mode, ufile_name, upload_fk from %s where uploadtree_pk=%d",
           bucketDefArray->uploadtree_tablename, uploadtree_pk);
   origresult = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, origresult, sqlbuf, fcnName, __LINE__)) return -1;
-  if (PQntuples(origresult) == 0) 
+  if (PQntuples(origresult) == 0)
   {
     printf("FATAL: %s.%s missing uploadtree_pk %d\n", __FILE__, fcnName, uploadtree_pk);
     return -1;
@@ -83,18 +88,18 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     return  processFile(pgConn, bucketDefArray, &uploadtree, agent_pk, hasPrules);
   }
 
-  /* Since uploadtree_pk isn't a leaf, find its immediate children and 
+  /* Since uploadtree_pk isn't a leaf, find its immediate children and
      process (if child is leaf) or recurse on container.
      Packages need both processing (check bucket_def rules) and recursion.
    */
-  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from %s where parent=%d", 
+  sprintf(sqlbuf, "select uploadtree_pk,pfile_fk, lft, rgt, ufile_mode, ufile_name from %s where parent=%d",
           bucketDefArray->uploadtree_tablename, uploadtree_pk);
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return -1;
   numChildren = PQntuples(result);
-  if (numChildren == 0) 
+  if (numChildren == 0)
   {
-    printf("FATAL: %s.%s: Inconsistent uploadtree. uploadtree_pk %d should have children based on lft and rgt\n", 
+    printf("FATAL: %s.%s: Inconsistent uploadtree. uploadtree_pk %d should have children based on lft and rgt\n",
            __FILE__, fcnName, uploadtree_pk);
     return -1;
   }
@@ -112,9 +117,9 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     childuploadtree.ufile_name = strdup(PQgetvalue(result, childIdx, 5));
     childuploadtree.upload_fk = uploadtree.upload_fk;
 
-    /* if child is a leaf, just process rather than recurse 
+    /* if child is a leaf, just process rather than recurse
     */
-    if (childuploadtree.rgt == (childuploadtree.lft+1)) 
+    if (childuploadtree.rgt == (childuploadtree.lft+1))
     {
       if (childuploadtree.pfile_fk > 0)
         processFile(pgConn, bucketDefArray, &childuploadtree,
@@ -124,21 +129,21 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
     }
 
     /* not a leaf so recurse */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, childuploadtree.uploadtree_pk, 
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, childuploadtree.uploadtree_pk,
                   1, hasPrules);
-    if (rv) 
+    if (rv)
     {
       free(childuploadtree.ufile_name);
       return rv;
     }
 
     /* done processing children, now processes (find buckets) for the container */
-    processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk, 
+    processFile(pgConn, bucketDefArray, &childuploadtree, agent_pk,
                 hasPrules);
 
     free(childuploadtree.ufile_name);
   } // end of child processing
-  
+
 
   PQclear(result);
   PQclear(origresult);
@@ -147,7 +152,7 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
 
 
 /**
- * \brief Process a file.  
+ * \brief Process a file.
  *
  * The file might be a single file, a container,
  * an artifact, a package, ..., in other words, an uploadtree record. \n
@@ -155,22 +160,22 @@ FUNCTION int walkTree(PGconn *pgConn, pbucketdef_t bucketDefArray, int agent_pk,
  * up without interruption. \n
  * There is one small caveat.  If the container is a package AND
  * the bucketDefArray has rules that apply to packages (applies_to='p')
- * THEN process the package as both a leaf since the bucket pool has its own 
+ * THEN process the package as both a leaf since the bucket pool has its own
  * rules for packages, and as a container (the pkg is in each of its childrens
  * buckets).
  *
- * \param PGconn $pgConn   The database connection object.
- * \param pbucketdef_t    $bucketDefArray  Bucket Definitions
- * \param pupuploadtree_t $puoloadtree Uploadtree record
- * \param int  $agent_pk   The agent_pk
- * \param int  $hasPrules  1=bucketDefArray contains at least one rule that only 
+ * \param pgConn         The database connection object.
+ * \param bucketDefArray Bucket Definitions
+ * \param puoloadtree    Uploadtree record
+ * \param agent_pk       The agent_pk
+ * \param hasPrules      1=bucketDefArray contains at least one rule that only
  *                       apply to packages.  0=No package rules.
  *
  * \return 0 on OK, -1 on failure.
  *
- * Errors are written to stdout.
+ * \note Errors are written to stdout.
  */
-FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
                       puploadtree_t puploadtree, int agent_pk, int hasPrules)
 {
   int  *bucketList;  // null terminated list of bucket_pk's
@@ -184,7 +189,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
   /* Can skip processing for terminal artifacts (e.g. empty artifact container,
      and "artifact.meta" files.
   */
-  if (IsArtifact(puploadtree->ufile_mode) 
+  if (IsArtifact(puploadtree->ufile_mode)
       && (puploadtree->rgt == puploadtree->lft+1)) return 0;
 
   package.pkgname[0] = 0;
@@ -192,7 +197,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
   package.vendor[0] = 0;
   package.srcpkgname[0] = 0;
 
-  /* If is a container and hasPrules and pfile_pk != 0, 
+  /* If is a container and hasPrules and pfile_pk != 0,
      then get the package record (if it is a package).
    */
   if ((puploadtree->pfile_fk && (IsContainer(puploadtree->ufile_mode))) && hasPrules)
@@ -202,7 +207,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
              For debian, srcpkg may also be null if the source and binary packages
              have the same name and version.
     */
-    snprintf(sql, sizeof(sql), 
+    snprintf(sql, sizeof(sql),
            "select pkg_name, version, '' as vendor, source as srcpkg  from pkg_deb where pfile_fk='%d' \
             union all \
             select pkg_name, version, vendor, source_rpm as srcpkg from pkg_rpm where pfile_fk='%d' ",
@@ -211,9 +216,9 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
     if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
     isPkg = PQntuples(result);
 
-    /* is the file a package?  
+    /* is the file a package?
        Then replace any terminal newline with a null in the package name.
-       If not, continue on to the next bucket def. 
+       If not, continue on to the next bucket def.
      */
     if (isPkg)
     {
@@ -247,7 +252,7 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
       || (IsContainer(puploadtree->ufile_mode)))
   {
     bucketList = getContainerBuckets(pgConn, bucketDefArray, puploadtree->uploadtree_pk);
-    rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, bucketList, 
+    rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, bucketList,
                       agent_pk, bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
     if (bucketList) free(bucketList);
 

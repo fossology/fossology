@@ -324,7 +324,7 @@ class LicenseDao
                                                    $includeSubfolders=true,
                                                    $excluding='',
                                                    $ignore=false,
-                                                   $includeUploadTreePk=false)
+                                                   &$clearingDecisionsForLicList = array())
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -387,7 +387,7 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $path = implode($pathStack,'/');
-    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
+    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     while ($row = $this->dbManager->fetchArray($result))
     {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding))
@@ -402,7 +402,7 @@ ORDER BY lft asc
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
       $path = implode($pathStack,'/');
-      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
+      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     }
     $this->dbManager->freeResult($result);
     return array_reverse($licensesPerFileName);
@@ -426,16 +426,15 @@ ORDER BY lft asc
     }
   }
 
-  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk)
+  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, &$clearingDecisionsForLicList = array())
   {
     if (($row['ufile_mode']&(1<<29)) ==0)
     {
       if($row['rf_shortname'])
-      { 
-        if($includeUploadTreePk){
-          $licensesPerFileName[$path][$row['uploadtree_pk']][] = $row['rf_shortname'];
-        }else{
-          $licensesPerFileName[$path][] = $row['rf_shortname'];
+      {
+        $licensesPerFileName[$path]['scanResults'][] = $row['rf_shortname'];
+        if (array_key_exists($row['uploadtree_pk'], $clearingDecisionsForLicList)) {
+          $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
         }
       }
     }
@@ -495,9 +494,9 @@ ORDER BY lft asc
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function ($name)
-                {
-                  return "'" . $name . "'";
-                }, $filterLicenses)) . ")";
+        {
+          return "'" . $name . "'";
+        }, $filterLicenses)) . ")";
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
 
@@ -658,13 +657,24 @@ ORDER BY lft asc
     return $refArray['rf_pk'];
   }
 
-
+  /**
+   * @param array("License by Nomos.")
+   * @return int count of license_ref
+   */
   public function getLicenseCount()
   {
     $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
     return intval($licenseRefTable['cnt']);
   }
 
+  /**
+   * @param int $rf_pk 
+   * @param string $shortname 
+   * @param string $fullname 
+   * @param string $rfText, $rfNotes 
+   * @param string $readyformerge
+   * @param int $riskLvl
+   */
   public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $readyformerge, $riskLvl)
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
@@ -672,12 +682,18 @@ ORDER BY lft asc
         array($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $marydone, $riskLvl), __METHOD__);
   }
 
+  /**
+   * @param int $licenseId
+   * @param int $groupId
+   */
   public function getLicenseParentById($licenseId, $groupId=null)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
             array(LicenseMap::CONCLUSION,$licenseId), $groupId);
   }
+
   /**
+   * @param array $licenseLists
    * @return array
    **/
   public function getLicenseObligations($licenseLists)

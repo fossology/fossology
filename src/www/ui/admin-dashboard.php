@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2017 Siemens AG
+ Copyright (C) 2015-2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -226,9 +226,12 @@ function GetLastAnalyzeTime($TableName)
     $head3 = _("Started");
     $head4 = _("Elapsed");
     $V .= "<tr><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th></tr>\n";
-
-    $current_query = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "state" : "current_query";
-    $procpid = (strcmp($this->pgVersion['server'], "9.2") >= 0) ? "pid" : "procpid";
+    $getCurrentVersion = explode(" ", $this->pgVersion['server']);
+    $currentVersion = str_replace(".", "", $getCurrentVersion[0]);
+    unset($getCurrentVersion);
+    $oldVersion = str_replace(".", "", "9.2");
+    $current_query = ($currentVersion >= $oldVersion) ? "state" : "current_query";
+    $procpid = ($currentVersion >= $oldVersion) ? "pid" : "procpid";
     $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
 
     $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;

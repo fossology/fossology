@@ -1,3 +1,31 @@
+fossology (3.4.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.4.0 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Sun, 29 Nov 2018 12:00:00 +0100
+ 
+fossology (3.4.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.4.0-rc2 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Sun, 2 Nov 2018 12:00:00 +0100
+
+fossology (3.4.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.4.0-rc1 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Thu, 18 Oct 2018 09:07:00 +0200
+
+fossology (3.3.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.3.0 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Mon, 7 May 2018 12:53:00 +0200
+
 fossology (3.2.0-1) unstable; urgency=low
 
   * New upstream release

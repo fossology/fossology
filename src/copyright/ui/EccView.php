@@ -43,7 +43,8 @@ class EccView extends Xpview
   }
 
   /**
-   * \brief Customize submenus.
+   * @copydoc Fossology::Agent::Copyright::UI::Xpview::RegisterMenus()
+   * @see Fossology::Agent::Copyright::UI::Xpview::RegisterMenus()
    */
   function RegisterMenus()
   {

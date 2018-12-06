@@ -19,14 +19,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 
 /**
- * @file simple.c
+ * @file
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This agent passes a
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This agent passes a
  *        database pointer to the fo_scheduler_connect function and checks that
  *        the database was successfully connected to.
  *
- * This is a correct agent.
+ * @note This is a correct agent.
  */
 
 int main(int argc, char** argv)

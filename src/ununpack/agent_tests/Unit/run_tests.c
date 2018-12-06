@@ -14,38 +14,43 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * \dir
+ * \brief Unit test cases for ununpack agent
+ * \file
+ * \brief Unit test runner for ununpack agent
+ */
 #include "run_tests.h"
 #include "../agent/ununpack_globals.h"
 
 #define AGENT_DIR "../../"
 /* globals that mostly shouldn't be globals */
-char *Filename = "";
-char *NewDir = "./test-result";
-int Recurse = -1;
-int exists = 0; // default not exists
-char *DBConfFile = NULL;
+char *Filename = "";              ///< Filename
+char *NewDir = "./test-result";   ///< Test result directory
+int Recurse = -1;                 ///< Level of unpack recursion. Default to infinite
+int exists = 0;                   ///< Default not exists
+char *DBConfFile = NULL;          ///< DB conf file location
 
 /* ************************************************************************** */
 /* **** test suite ********************************************************** */
 /* ************************************************************************** */
-extern CU_TestInfo ExtractAR_testcases[];
-extern CU_TestInfo ununpack_iso_testcases[];
-extern CU_TestInfo ununpack_disk_testcases[];
-extern CU_TestInfo CopyFile_testcases[];
-extern CU_TestInfo FindCmd_testcases[];
-extern CU_TestInfo Prune_testcases[];
-extern CU_TestInfo RunCommand_testcases[];
-extern CU_TestInfo Traverse_testcases[];
-extern CU_TestInfo TraverseChild_testcases[];
-extern CU_TestInfo TraverseStart_testcases[];
-extern CU_TestInfo TaintString_testcases[];
-extern CU_TestInfo IsFunctions_testcases[];
-extern CU_TestInfo ContainerInfo_testcases[];
-extern CU_TestInfo Checksum_testcases[];
-extern CU_TestInfo PathCheck_testcases[];
-extern CU_TestInfo DBInsertPfile_testcases[];
-extern CU_TestInfo DBInsertUploadTree_testcases[];
+extern CU_TestInfo ExtractAR_testcases[];       ///< AR test cases
+extern CU_TestInfo ununpack_iso_testcases[];    ///< ISO test cases
+extern CU_TestInfo ununpack_disk_testcases[];   ///< Disk image test cases
+extern CU_TestInfo CopyFile_testcases[];        ///< Copy test cases
+extern CU_TestInfo FindCmd_testcases[];         ///< FindCmd() test cases
+extern CU_TestInfo Prune_testcases[];           ///< Prune() test cases
+extern CU_TestInfo RunCommand_testcases[];      ///< Run test cases
+extern CU_TestInfo Traverse_testcases[];        ///< Traverse() test cases
+extern CU_TestInfo TraverseChild_testcases[];   ///< TraverseChild() test cases
+extern CU_TestInfo TraverseStart_testcases[];   ///< TraverseStart() test cases
+extern CU_TestInfo TaintString_testcases[];     ///< TaintString() test cases
+extern CU_TestInfo IsFunctions_testcases[];     ///< Isxxx() test cases
+extern CU_TestInfo ContainerInfo_testcases[];   ///< Container info test cases
+extern CU_TestInfo Checksum_testcases[];        ///< Checksum test cases
+extern CU_TestInfo PathCheck_testcases[];       ///< Pacth check test cases
+extern CU_TestInfo DBInsertPfile_testcases[];   ///< DB insertion test cases (pfile)
+extern CU_TestInfo DBInsertUploadTree_testcases[];  ///< DB insertion test cases (uploadtree)
 
 #if CU_VERSION_P == 213
 CU_SuiteInfo suites[] =
@@ -61,7 +66,7 @@ CU_SuiteInfo suites[] =
 
   // utils.c
   {"CopyFile", NULL, NULL, (CU_SetUpFunc)CopyFileInit, (CU_TearDownFunc)CopyFileClean, CopyFile_testcases},
-  // TODO not working {"FindCmd", NULL, NULL, NULL, NULL, FindCmd_testcases},
+  /** \todo not working {"FindCmd", NULL, NULL, NULL, NULL, FindCmd_testcases}, */
   {"Prune", NULL, NULL, (CU_SetUpFunc)PruneInit, (CU_TearDownFunc)PruneClean, Prune_testcases},
   {"RunCommand", NULL, NULL, NULL, NULL, RunCommand_testcases},
   {"TaintString", NULL, NULL, NULL, NULL, TaintString_testcases},
@@ -98,7 +103,7 @@ CU_SuiteInfo suites[] =
 
   // utils.c
   {"CopyFile", CopyFileInit, CopyFileClean, CopyFile_testcases},
-  // TODO not working {"FindCmd", NULL, NULL, FindCmd_testcases},
+  /** \todo not working {"FindCmd", NULL, NULL, FindCmd_testcases}, */
   {"Prune", PruneInit, PruneClean, Prune_testcases},
   {"RunCommand", NULL, NULL, RunCommand_testcases},
   {"TaintString", NULL, NULL, TaintString_testcases},

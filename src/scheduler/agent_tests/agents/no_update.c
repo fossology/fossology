@@ -22,15 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MINUTES_TO_WAIT 1
 
 /**
- * @file simple.c
+ * @file
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This particular agent
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This particular agent
  *        will startup and then do nothing for at least MINUTES_TO_WAIT minutes.
  *        This tests to make sure that the scheduler will not kill an agent that
  *        has NOKILL set to true.
  *
- * This is a working agent
+ * @note This is a working agent
  */
 
 int main(int argc, char** argv)

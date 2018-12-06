@@ -22,6 +22,10 @@ use Fossology\Lib\Db\DbManager;
 
 define("TITLE_admin_folder_delete", _("Delete Folder"));
 
+/**
+ * @class admin_folder_delete
+ * @brief UI plugin to delete folders
+ */
 class admin_folder_delete extends FO_Plugin {
 
   /** @var DbManager */
@@ -39,13 +43,12 @@ class admin_folder_delete extends FO_Plugin {
   }
 
   /**
-   * \brief Delete
-   * Creates a job to detele the folder
-   *
-   * \param $folderpk - the folder_pk to remove
-   * \return NULL on success, string on failure.
+   * @brief Creates a job to detele the folder
+   * @param int $folderpk the folder_pk to remove
+   * @param int $userId   the user deleting the folder
+   * @return NULL on success, string on failure.
    */
-  function Delete($folderpk, $userId) 
+  function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
     /* Can't remove top folder */
@@ -78,7 +81,8 @@ class admin_folder_delete extends FO_Plugin {
   } // Delete()
 
   /**
-   * \brief Generate the text for this plugin.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   public function Output() {
     /* If this is a POST, then process the request. */

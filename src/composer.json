@@ -1,7 +1,7 @@
 {
     "name" : "fossology/fossology",
     "description" : "FOSSology is a open source license compliance software system and toolkit.",
-    "_readme" : [
+    "_comment" : [
         "Copyright Siemens AG 2014-2016",
         "",
         "Copying and distribution of this file, with or without modification,",
@@ -10,20 +10,28 @@
         "without any warranty."
     ],
     "require" : {
-        "monolog/monolog" : "1.10.*",
-        "symfony/config" : "2.6.*",
-        "symfony/http-foundation" : "2.6.*",
-        "symfony/dependency-injection" : "2.6.*",
-        "twig/twig" : "1.*",
-        "twig/extensions" : "1.*",
         "easyrdf/easyrdf" : "0.9.*",
-        "phpoffice/phpword" : "v0.13.*"
+        "ext-gettext": "*",
+        "ext-mbstring": "*",
+        "ext-json" : "*",
+        "ext-xml" : "*",
+        "monolog/monolog" : "1.10.*",
+        "phpoffice/phpword" : "v0.13.*",
+        "symfony/config" : "~2.7.36",
+        "symfony/http-foundation" : "~2.7.36",
+        "symfony/dependency-injection" : "~2.7.36",
+        "twig/twig" : "1.*",
+        "twig/extensions" : "1.*"
     },
     "require-dev" : {
+        "doctrine/instantiator" : "1.0.5",
+        "ext-posix" : "*",
+        "ext-sqlite3" : "*",
         "hamcrest/hamcrest-php" : "^2",
         "mockery/mockery" : "^1",
+        "myclabs/deep-copy" : "1.7.0",
         "php-coveralls/php-coveralls" : "^2",
-        "phpunit/phpunit" : "^5.7",
+        "phpunit/phpunit" : "^5.7 || ^6",
         "sebastian/phpcpd" : "^3",
         "squizlabs/php_codesniffer" : "^3"
     },

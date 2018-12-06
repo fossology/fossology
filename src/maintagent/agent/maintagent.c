@@ -19,12 +19,38 @@
 /**
  \file maintagent.c
  \brief FOSSology maintenance agent
+ \page maintagent Maintenance agent
+ \tableofcontents
 
+ \section maintagentabout About
  This agent performs a variety of maintenance and repair functions.
- run ./maintagent -help to see usage.
- 
- Anyone with execute access can run this agent.  This makes it easy to put in a cron job.
- If run from the FOSSology UI, you must be an admin.
+ \section maintagentactions Supported actions
+ Commandline flag|Description|
+ ---:|:---|
+ -a|Run all non slow maintenance operations|
+ -A|Run all maintenance operations|
+ -D|Vacuum Analyze the database|
+ -F|Validate folder contents|
+ -g|Delete orphan gold files|
+ -h|Print help (usage)|
+ -N|Normalize the (internal) priority numbers|
+ -p|Verify file permissions (report only)
+ -P|Verify and fix file permissions|
+ -R|Remove uploads with no pfiles|
+ -T|Remove orphaned temp tables|
+ -U|Process expired uploads (slow)|
+ -Z|Remove orphaned files from the repository (slow)|
+ -i|Initialize the database, then exit|
+ -I|Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)|
+ -v|verbose (turns on debugging output)|
+ -V|print the version info, then exit|
+ -c SYSCONFDIR|Specify the directory for the system configuration.|
+
+  Anyone with execute access can run this agent. This makes it easy to put in a cron job.
+  If run from the FOSSology UI, you must be an admin.
+  \section maintagentsource Agent source
+   - \link src/maintagent/agent \endlink
+   - \link src/maintagent/ui \endlink
  */
 
 #include "maintagent.h"
@@ -36,11 +62,13 @@ char BuildVersion[]="maintagent build version: NULL.\n";
 #endif
 
 /**********  Globals  *************/
-PGconn    *pgConn = 0;        // database connection
+PGconn    *pgConn = 0;        ///< database connection
 
 
-/****************************************************/
-int main(int argc, char **argv) 
+/**
+ * \brief Main entry point for the agent
+ */
+int main(int argc, char **argv)
 {
   int cmdopt;
   char *COMMIT_HASH;
@@ -51,7 +79,7 @@ int main(int argc, char **argv)
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  /* get agent pk 
+  /* get agent pk
    * Note, if GetAgentKey fails, this process will exit.
    */
   COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
@@ -70,14 +98,14 @@ int main(int argc, char **argv)
   int RemoveOrphanedFilesExe = 0;
   int reIndexAllTablesExe = 0;
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1)
   {
-    switch (cmdopt) 
+    switch (cmdopt)
     {
       case 'a': /* All non slow operations */
           if(ValidateFoldersExe == 0){
             ValidateFolders();
-            ValidateFoldersExe = 1; 
+            ValidateFoldersExe = 1;
           }
           if(VerifyFilePermsExe == 0){
             VerifyFilePerms(1);
@@ -91,7 +119,7 @@ int main(int argc, char **argv)
             NormalizeUploadPriorities();
             NormalizeUploadPrioritiesExe = 1;
           }
-          if(RemoveTempsExe == 0){ 
+          if(RemoveTempsExe == 0){
             RemoveTemps();
             RemoveTempsExe = 1;
           }
@@ -103,7 +131,7 @@ int main(int argc, char **argv)
       case 'A': /* All operations */
           if(ValidateFoldersExe == 0){
             ValidateFolders();
-            ValidateFoldersExe = 1; 
+            ValidateFoldersExe = 1;
           }
           if(VerifyFilePermsExe == 0){
             VerifyFilePerms(1);
@@ -117,7 +145,7 @@ int main(int argc, char **argv)
             NormalizeUploadPriorities();
             NormalizeUploadPrioritiesExe = 1;
           }
-          if(RemoveTempsExe == 0){ 
+          if(RemoveTempsExe == 0){
             RemoveTemps();
             RemoveTempsExe = 1;
           }
@@ -125,14 +153,14 @@ int main(int argc, char **argv)
             VacAnalyze();
             VacAnalyzeExe = 1;
           }
-          if(ProcessExpiredExe == 0){ 
+          if(ProcessExpiredExe == 0){
             ProcessExpired();
             ProcessExpiredExe = 1;
           }
-          if(RemoveOrphanedFilesExe == 0){   
+          if(RemoveOrphanedFilesExe == 0){
             RemoveOrphanedFiles();
             RemoveOrphanedFilesExe = 1;
-          } 
+          }
           break;
       case 'D': /* Vac/Analyze (slow) */
           if(VacAnalyzeExe == 0){
@@ -171,7 +199,7 @@ int main(int argc, char **argv)
           if(RemoveUploadsExe == 0){
             RemoveUploads();
             RemoveUploadsExe = 1;
-          } 
+          }
           break;
       case 'T': /* Remove orphaned temp tables */
           if(RemoveTempsExe == 0){
@@ -189,10 +217,10 @@ int main(int argc, char **argv)
           if(RemoveOrphanedFilesExe == 0){
             RemoveOrphanedFiles();
             RemoveOrphanedFilesExe = 1;
-          } 
+          }
           break;
       case 'I': /* Reindexing of database */
-          if(reIndexAllTablesExe == 0){   
+          if(reIndexAllTablesExe == 0){
             reIndexAllTables();
             reIndexAllTablesExe = 1;
           }
@@ -203,7 +231,7 @@ int main(int argc, char **argv)
           agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
             break;
       case 'V': /* print version info */
-            printf("%s", BuildVersion);           
+            printf("%s", BuildVersion);
             ExitNow(0);
       case 'c': break; /* handled by fo_scheduler_connect() */
       default:

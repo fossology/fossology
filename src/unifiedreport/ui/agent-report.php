@@ -18,16 +18,24 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @class UnifiedReportAgentPlugin
+ * @brief Generate unified report for multiple uploads
+ */
 class UnifiedReportAgentPlugin extends AgentPlugin
 {
   public function __construct() {
     $this->Name = "agent_unifiedreport";
     $this->Title =  _("Unified Report Generator");
     $this->AgentName = "unifiedreport";
-  
+
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   */
   function preInstall()
   {
     // no AgentCheckBox

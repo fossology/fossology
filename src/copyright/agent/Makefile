@@ -10,10 +10,11 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp $(shell pkg-config --cflags jsoncpp)
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS) \
+                $(shell pkg-config --libs jsoncpp)
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
@@ -37,10 +38,7 @@ HEADERS = $(OBJECTS:%.o=%.hpp) $(OBJECTS_COP:%_cop.o=%.hpp)
 COVERAGE = $(OBJECTS:.o=_cov.o)
 COVERAGE_COP = $(OBJECTS_COP:.o=_cov.o)
 
-all: json.hpp $(CXXFOLIB) $(EXE)
-
-json.hpp:
-	$(TOP)/install/scripts/install-json-hpp.sh
+all: $(CXXFOLIB) $(EXE)
 
 $(EXE_COP): $(CXXFOLIB) $(VARS) $(OBJECTS) $(OBJECTS_COP)
 	$(CXX) $(OBJECTS) $(OBJECTS_COP) $(DEF_ID_COP) $(DEF) $(CXXFLAGS_LINK) -o $@
@@ -102,6 +100,6 @@ uninstall:
 	done
 
 clean:
-	rm -f $(EXE) *.o *.a *.gcno *.gcda core json.hpp
+	rm -f $(EXE) *.o *.a *.gcno *.gcda core
 
 .PHONY: all install uninstall clean

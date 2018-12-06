@@ -27,6 +27,10 @@ extern "C" {
 #include "libfossology.h"
 }
 
+/**
+ * \typedef
+ * Key value pair regex name in key and pattern in value
+ */
 typedef std::map<std::string, std::string> RegexMap;
 
 RegexMap readConfStreamToMap(std::istringstream& stream,

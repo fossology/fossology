@@ -32,10 +32,14 @@ define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
 
 class copyright_list extends FO_Plugin
 {
-  /** @var DbManager */
+  /** @var DbManager
+   * DbManager object
+   */
   private $dbManager;
-  
-  /** @var UploadDao */
+
+  /** @var UploadDao
+   * UploadDao opbject
+   */
   private $uploadDao;
 
   function __construct()
@@ -55,7 +59,8 @@ class copyright_list extends FO_Plugin
   }
 
   /**
-   * \brief Customize submenus.
+   * @copydoc FO_Plugin::RegisterMenus()
+   * @see FO_Plugin::RegisterMenus()
    */
   function RegisterMenus()
   {
@@ -79,15 +84,15 @@ class copyright_list extends FO_Plugin
   } // RegisterMenus()
 
   /**
-   * \return return rows to process, and $upload_pk
-   * @param $Uploadtree_pk
-   * @param $Agent_pk
-   * @param $upload_pk
-   * @param $hash
-   * @param $type
-   * @param $tableName
+   * @brief Get statement rows for a specified set
+   * @param int $Uploadtree_pk Uploadtree id
+   * @param int $Agent_pk Agent id
+   * @param int $upload_pk Upload id
+   * @param string $hash Content hash
+   * @param string $type Content type
+   * @param string $tableName Content table name (copyright|ecc|author)
    * @throws Exception
-   * @return array
+   * @return array Rows to process, and $upload_pk
    */
   function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName)
   {
@@ -100,7 +105,7 @@ class copyright_list extends FO_Plugin
     /* get all the copyright records for this uploadtree.  */
     $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
               from $tableName,
-              (SELECT uploadtree_pk, pfile_fk as PF, ufile_name from uploadtree 
+              (SELECT uploadtree_pk, pfile_fk as PF, ufile_name from uploadtree
                  where upload_fk=$1
                    and uploadtree.lft BETWEEN $2 and $3) as SS
               where PF=pfile_fk and agent_fk=$4 and hash=$5 and type=$6 order by uploadtree_pk";
@@ -117,8 +122,11 @@ class copyright_list extends FO_Plugin
   /**
    * \brief Remove unwanted rows by hash and type and
    * exclusions and filter
-   * \param $NumRows - the number of instances.
-   * \return new array and $NumRows
+   * \param array $rows
+   * \param string $excl
+   * \param int $NumRows the number of instances.
+   * \param string $filter
+   * \return array new array and $NumRows
    */
   function GetRequestedRows($rows, $excl, &$NumRows, $filter)
   {
@@ -139,7 +147,7 @@ class copyright_list extends FO_Plugin
       $result = $this->dbManager->execute($statement,array("$NoLicStr", "$VoidLicStr"));
       $rf_rows = $this->dbManager->fetchAll($result);
       if(!empty($rf_rows)){
-        foreach($rf_rows as $row) 
+        foreach($rf_rows as $row)
         {
           if (!empty($rf_clause)) $rf_clause .= " or ";
           $rf_clause .= " rf_fk=$row[rf_pk]";
@@ -175,7 +183,7 @@ class copyright_list extends FO_Plugin
         {
           unset($rows[$RowIdx]);
           continue;
-        }         
+        }
       }
     }
 
@@ -208,6 +216,10 @@ class copyright_list extends FO_Plugin
     return $rows2;
   }
 
+  /**
+   * @copydoc FO_Plugin::OutputOpen()
+   * @see FO_Plugin::OutputOpen()
+   */
   function OutputOpen()
   {
 
@@ -219,7 +231,8 @@ class copyright_list extends FO_Plugin
   }
 
   /**
-   * \brief Display the loaded menu and plugins.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   function Output()
   {
@@ -374,11 +387,20 @@ class copyright_list extends FO_Plugin
     return;
   }
 
+  /**
+   * @copydoc FO_Plugin::getTemplateName()
+   * @see FO_Plugin::getTemplateName()
+   */
   function getTemplateName()
   {
     return 'copyrightlist.html.twig';
   }
 
+  /**
+   * @brief Get the table name, mod, and view based on type
+   * @param string $type Type of content
+   * @return string[] Table name, mod, and view
+   */
   private function getTableName($type)
   {
 

@@ -38,15 +38,16 @@
 /** shortname cache very simple nonresizing hash table */
 struct cachenode
 {
-  char *rf_shortname;
-  long rf_pk;
+    char *rf_shortname;     ///< License shortname
+    long rf_pk;             ///< License id from database
 };
 typedef struct cachenode cachenode_t;
 
+/** Root for chachenode_t nodes */
 struct cacheroot
 {
-  int maxnodes;
-  cachenode_t *nodes;
+    int maxnodes;           ///< No. of nodes in the list
+    cachenode_t *nodes;     ///< Array of nodes
 };
 typedef struct cacheroot cacheroot_t;
 

@@ -15,7 +15,16 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
+/**
+ * @dir
+ * @brief Functional test cases for Reuser agent
+ * @file
+ * @brief Functional test cases for Reuser agent and scheduler interaction
+ */
+/**
+ * @namespace Fossology::Reuser::Test
+ * @brief Namespace to hold test cases for Reuser agent
+ */
 namespace Fossology\Reuser\Test;
 
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
@@ -41,37 +50,74 @@ include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
+/**
+ * @class SchedulerTest
+ * @brief Tests for Reuser agent and scheduler interaction
+ */
 class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
+  /** @var int $groupId
+   * Group id to use
+   */
   private $groupId = 3;
+  /** @var int $userId
+   * User id to use
+   */
   private $userId = 2;
-  /** @var TestPgDb */
+  /** @var TestPgDb $testDb
+   * Test db
+   */
   private $testDb;
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DBManager to use
+   */
   private $dbManager;
-  /** @var TestInstaller */
+  /** @var TestInstaller $testInstaller
+   * TestInstaller object
+   */
   private $testInstaller;
-  /** @var LicenseDao */
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
   private $licenseDao;
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
   private $clearingDao;
-  /** @var ClearingDecisionFilter */
+  /** @var ClearingDecisionFilter $clearingDecisionFilter
+   * ClearingDecisionFilter object
+   */
   private $clearingDecisionFilter;
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * Upload Dao
+   */
   private $uploadDao;
-  /** @var UploadPermissionDao */
+  /** @var UploadPermissionDao $uploadPermDao
+   * Upload permission
+   */
   private $uploadPermDao;
-  /** @var HighlightDao */
+  /** @var HighlightDao $highlightDao
+   * Highlight Dao
+   */
   private $highlightDao;
-  /** @var Mock|TreeDao */
+  /** @var Mock|TreeDao $treeDao
+   * Tree dao
+   */
   private $treeDao;
 
-  /** @var SchedulerTestRunnerCli */
+  /** @var SchedulerTestRunnerCli $runnerCli
+   * Scheduler interface
+   */
   private $runnerCli;
 
-  /** @var SchedulerTestRunnerMock */
+  /** @var SchedulerTestRunnerMock $runnerMock
+   * Test runner
+   */
   private $runnerMock;
 
+  /**
+   * @brief Setup test env
+   */
   protected function setUp()
   {
     $this->testDb = new TestPgDb("reuserSched");
@@ -88,10 +134,14 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 
-    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao, $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter, $this->treeDao);
+    $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
+      $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter, $this->treeDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
+  /**
+   * @brief Tear down test env
+   */
   protected function tearDown()
   {
     $this->testDb->fullDestruct();
@@ -102,6 +152,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = null;
   }
 
+  /**
+   * @brief Setup test repo
+   */
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -110,28 +163,48 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testInstaller->cpRepo();
   }
 
+  /**
+   * @brief Tear down test repo
+   */
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
     $this->testInstaller->clear();
   }
 
+  /**
+   * @brief Setup tables required by the agent
+   */
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member','upload_clearing_license'),false);
-    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'),false);
+    $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree',
+      'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
+      'clearing_decision_event','clearing_event','license_file','highlight',
+      'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
+
+    'upload_clearing_license'),false);
+    $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq',
+      'upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq',
+      'license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
+      'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
-    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+    $this->testDb->createConstraints(array('agent_pkey','pfile_pkey',
+      'upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master',
+      'license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('monk'));
 
-    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users','group_user_member','agent','license_file','monk_ars'), false);
+    $this->testDb->insertData(array('pfile','upload','uploadtree_a','users',
+      'group_user_member','agent','license_file','monk_ars'), false);
     $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
 
+  /**
+   * @brief Get the heart count from agent
+   */
   private function getHeartCount($output)
   {
     $matches = array();
@@ -144,24 +217,46 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     }
   }
 
+  /**
+   * @brief Get clearings for a given upload id
+   * @param int $uploadId
+   * @param int $groupId
+   * @return ClearingDecision[]
+   */
   private function getFilteredClearings($uploadId, $groupId)
   {
     $bounds = $this->uploadDao->getParentItemBounds($uploadId);
     return $this->clearingDao->getFileClearingsFolder($bounds, $groupId);
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
+   * @test
+   * -# Setup an upload with no clearing decisions
+   * -# Run reuser on the empty upload with mock agent
+   * -# Check that no clearing decisions added by reuser
+   */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndNoClearing()
   {
     $this->runnerReuserScanWithoutAnyUploadToCopyAndNoClearing($this->runnerMock);
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndNoClearing()
+   * @test
+   * -# Setup an upload with no clearing decisions
+   * -# Run reuser on the empty upload with scheduler cli
+   * -# Check that no clearing decisions added by reuser
+   */
   public function testReuserRealScanWithoutAnyUploadToCopyAndNoClearing()
   {
     $this->runnerReuserScanWithoutAnyUploadToCopyAndNoClearing($this->runnerCli);
   }
 
+  /**
+   * @brief Test on an upload with no clearing decisions
+   * @param SchedulerTestRunner $runner
+   */
   private function runnerReuserScanWithoutAnyUploadToCopyAndNoClearing(SchedulerTestRunner $runner)
   {
     $this->setUpTables();
@@ -180,7 +275,12 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->rmRepo();
   }
 
-
+  /**
+   * @brief Creates two clearing decisions
+   * @param int $scope
+   * @param int $originallyClearedItemId
+   * @return ClearingLicense[]
+   */
   protected function insertDecisionFromTwoEvents($scope=DecisionScopes::ITEM,$originallyClearedItemId=23)
   {
     $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
@@ -201,25 +301,38 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $addedEventIds = array($eventId1, $eventId2);
 
-    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $scope, $addedEventIds);
+    $this->clearingDao->createDecisionFromEvents($originallyClearedItemId, $this->userId,
+      $this->groupId, DecisionTypes::IDENTIFIED, $scope, $addedEventIds);
 
     return array($clearingLicense1, $clearingLicense2, $addedEventIds);
   }
 
-
-
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
+   * @test
+   * -# Run reuser on the empty upload with agent mock
+   * -# Check that no clearing decisions added by reuser
+   */
   public function testReuserMockedScanWithoutAnyUploadToCopyAndAClearing()
   {
     $this->runnerReuserScanWithoutAnyUploadToCopyAndAClearing($this->runnerMock);
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithoutAnyUploadToCopyAndAClearing()
+   * @test
+   * -# Run reuser on the empty upload with scheduler cli
+   * -# Check that no clearing decisions added by reuser
+   */
   public function testReuserRealScanWithoutAnyUploadToCopyAndAClearing()
   {
     $this->runnerReuserScanWithoutAnyUploadToCopyAndAClearing($this->runnerCli);
   }
 
+  /**
+   * @brief Run reuser agent with no upload to copy decisions from
+   * @param SchedulerTestRunner $runner
+   */
   private function runnerReuserScanWithoutAnyUploadToCopyAndAClearing($runner)
   {
     $this->setUpTables();
@@ -240,18 +353,41 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->rmRepo();
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithALocalClearing()
+   * @test
+   * -# Create an upload with clearing decisions on files
+   * -# Run reuser on the upload new upload with mock agent
+   * -# Check if clearing decisions are added
+   * -# Check if the clearing decisions have new ids
+   * -# Check the clearing type and scope are retained
+   * -# Check the upload tree id of the clearing decision
+   */
   public function testReuserMockedScanWithALocalClearing()
   {
     $this->runnerReuserScanWithALocalClearing($this->runnerMock,1);
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithALocalClearing()
+   * @test
+   * -# Create an upload with clearing decisions on files
+   * -# Run reuser on the upload new upload with scheduler cli
+   * -# Check if clearing decisions are added
+   * -# Check if the clearing decisions have new ids
+   * -# Check the clearing type and scope are retained
+   * -# Check the upload tree id of the clearing decision
+   */
   public function testReuserRealScanWithALocalClearing()
   {
     $this->runnerReuserScanWithALocalClearing($this->runnerCli,1);
   }
 
+  /**
+   * @brief Check reuser with local clearing decisions (file level)
+   * @param SchedulerTestRunner $runner
+   * @param int $heartBeat
+   */
   private function runnerReuserScanWithALocalClearing($runner, $heartBeat=0)
   {
     $this->setUpTables();
@@ -290,23 +426,46 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($newClearing->getType(), equalTo($potentiallyReusableClearing->getType()));
     assertThat($newClearing->getScope(), equalTo($potentiallyReusableClearing->getScope()));
 
-    assertThat($newClearing->getUploadTreeId(), equalTo($potentiallyReusableClearing->getUploadTreeId() + $reusingUploadItemShift));
+    assertThat($newClearing->getUploadTreeId(),
+      equalTo($potentiallyReusableClearing->getUploadTreeId() + $reusingUploadItemShift));
 
     $this->rmRepo();
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithARepoClearing()
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Run reuser with mock agent
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
+   */
   public function testReuserMockedScanWithARepoClearing()
   {
     $this->runnerReuserScanWithARepoClearing($this->runnerMock);
   }
 
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithARepoClearing()
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Run reuser with scheduler cli
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
+   */
   public function testReuserRealScanWithARepoClearing()
   {
     $this->runnerReuserScanWithARepoClearing($this->runnerCli);
   }
 
+  /**
+   * @brief Run reuser on upload with clearing
+   * @param SchedulerTestRunner $runner
+   */
   private function runnerReuserScanWithARepoClearing($runner)
   {
     $this->setUpTables();
@@ -314,7 +473,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId);
 
-    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(DecisionScopes::REPO,$originallyClearedItemId=23);
+    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(
+      DecisionScopes::REPO,$originallyClearedItemId=23);
     $clearingLicenses = array($clearingLicense1, $clearingLicense2);
 
     /* upload 3 in the test db is the same as upload 2
@@ -370,14 +530,26 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->rmRepo();
   }
 
-
-
-  /** @group Functional */
+  /**
+   * @brief Call runnerReuserScanWithARepoClearingEnhanced()
+   * @test
+   * -# Create an upload with license clearing done
+   * -# Create an upload with files with small difference
+   * -# Run reuser with mock agent
+   * -# Check if new upload has clearings
+   * -# Reuser should have not created a new clearing decision and reuse them
+   * -# Decision types and scopes are same
+   * -# Reuser should have not created a correct local event history
+   */
   public function testReuserRealScanWithARepoClearingEnhanced()
   {
     $this->runnerReuserScanWithARepoClearingEnhanced($this->runnerMock);
   }
 
+  /**
+   * @brief Run reuser with enhanced flag on upload with clearing
+   * @param SchedulerTestRunner $runner
+   */
   private function runnerReuserScanWithARepoClearingEnhanced($runner)
   {
     $this->setUpTables();
@@ -390,10 +562,13 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->uploadDao->addReusedUpload($uploadId=3,$reusedUpload=2,$this->groupId,$this->groupId,$reuseMode=2);
 
     $repoPath = $this->testDb->getFossSysConf().'/repo/files/';
-    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(4)->andReturn($repoPath.'04621571bcbabce75c4dd1c6445b87dec0995734.59cacdfce5051cd8a1d8a1f2dcce40a5.12320');
-    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(351)->andReturn($repoPath.'c518ce1658140b65fa0132ad1130cb91512416bf.8e913e594d24ff3aeabe350107d97815.35829');
+    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(4)->andReturn($repoPath
+      .'04621571bcbabce75c4dd1c6445b87dec0995734.59cacdfce5051cd8a1d8a1f2dcce40a5.12320');
+    $this->treeDao->shouldReceive('getRepoPathOfPfile')->with(351)->andReturn($repoPath
+      .'c518ce1658140b65fa0132ad1130cb91512416bf.8e913e594d24ff3aeabe350107d97815.35829');
 
-    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(DecisionScopes::REPO,$originallyClearedItemId);
+    list($clearingLicense1, $clearingLicense2, $addedEventIds) = $this->insertDecisionFromTwoEvents(
+      DecisionScopes::REPO,$originallyClearedItemId);
     $clearingLicenses = array($clearingLicense1, $clearingLicense2);
 
     list($success,$output,$retCode) = $runner->run($uploadId, $this->userId, $this->groupId);

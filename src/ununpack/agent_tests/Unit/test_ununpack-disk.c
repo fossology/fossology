@@ -15,12 +15,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for ExtractDisk()
+ */
 /* locals */
 static int Result = 0;
 
 /**
  * @brief unpack disk image, ext2
+ * \test
+ * -# Try to extract ext2 fs images using ExtractDisk()
+ * -# Check if the files are unpacked
  */
 void testExtractDisk4Ext2()
 {
@@ -37,6 +43,9 @@ void testExtractDisk4Ext2()
 
 /**
  * @brief unpack disk image, ext3
+ * \test
+ * -# Try to extract ext3 fs images using ExtractDisk()
+ * -# Check if the files are unpacked
  */
 void testExtractDisk4Ext3()
 {
@@ -52,7 +61,11 @@ void testExtractDisk4Ext3()
 }
 
 /**
- * @brief unpack disk image, ext2, FStype is unknowned
+ * @brief unpack disk image, ext2, FStype is unknown
+ * \test
+ * -# Try to extract ext2 fs images using ExtractDisk() with empty FStype
+ * -# Check if function returns NOT OK
+ * -# Check if function has not unpacked the files
  */
 void testExtractDisk4Ext2FstypeUnknow()
 {
@@ -69,6 +82,9 @@ void testExtractDisk4Ext2FstypeUnknow()
 
 /**
  * @brief unpack disk image, fat
+ * \test
+ * -# Try to extract fat fs images using ExtractDisk()
+ * -# Check if the files are unpacked
  */
 void testExtractDisk4Fat()
 {
@@ -85,6 +101,9 @@ void testExtractDisk4Fat()
 
 /**
  * @brief unpack disk image, ntfs
+ * \test
+ * -# Try to extract ntfs fs images using ExtractDisk()
+ * -# Check if the files are unpacked
  */
 void testExtractDisk4Ntfs()
 {
@@ -124,6 +143,9 @@ int FatDiskNameClean()
 
 /**
  * @brief Convert to lowercase.
+ * \test
+ * -# Pass a string with upper case letters to FatDiskName()
+ * -# Check if the string is returned in lower case
  */
 void testFatDiskName1()
 {
@@ -132,6 +154,14 @@ void testFatDiskName1()
   FO_ASSERT_EQUAL(strcmp(Name, "fossology"), 0);
 }
 
+/**
+ * @brief Convert to lowercase.
+ * \test
+ * -# Pass a string with upper case letters to FatDiskName()
+ * -# Check if the string is returned in lower case
+ * -# Pass a string with upper case letters and spaces to FatDiskName()
+ * -# Check if the string is returned in lower case with spaces in place
+ */
 void testFatDiskName2()
 {
   strcpy(Name, "Fosso\0");
@@ -143,6 +173,12 @@ void testFatDiskName2()
   FO_ASSERT_EQUAL(strcmp(Name, "fossology hello"), 0);
 }
 
+/**
+ * @brief Convert to lowercase.
+ * \test
+ * -# Pass a string with upper case letters and text in `()` to FatDiskName()
+ * -# Check if the string is returned in lower case without `()`
+ */
 void testFatDiskName3()
 {
   strcpy(Name, "Fosso (hello)");
@@ -150,6 +186,12 @@ void testFatDiskName3()
   FO_ASSERT_EQUAL(strcmp(Name, "fosso"), 0);
 }
 
+/**
+ * @brief Convert to lowercase.
+ * \test
+ * -# Pass an empty string to FatDiskName()
+ * -# Check if empty string is returned
+ */
 void testFatDiskNameNameEmpty()
 {
   strcpy(Name, "");

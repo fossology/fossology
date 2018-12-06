@@ -16,13 +16,17 @@
 
  ***************************************************************/
 /**
- * \file usage.c
+ * \file
  * \brief Maintenance agent validation, and usage functions
  */
 
 #include "maintagent.h"
 
-FUNCTION void Usage(char *Name) 
+/**
+ * \biref Print usage message to user
+ * \param Name absolute path to the binary
+ */
+FUNCTION void Usage(char *Name)
 {
   printf("Usage: %s [options]\n", Name);
   printf("  -a   :: Run all non slow maintenance operations.\n");

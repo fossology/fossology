@@ -16,6 +16,35 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/**
+ * @dir readmeoss
+ * @brief Readme_OSS agent
+ * @dir readmeoss/agent
+ * @brief Readme_OSS agent source
+ * @file
+ * @brief Readme_OSS agent
+ * @page readmeoss Readme_OSS agent
+ * @tableofcontents
+ * @section readmeossabout About ReadmeOSS agent
+ *
+ * Readme_OSS agent generates a list of license short-names, license text,
+ * license's acknowledgement and copyrights found in an upload. The output is
+ * generated as a plain text plain.
+ *
+ * The agent creates the report and store on the server with other reports in
+ * `/srv/fossology/repository/report/` folder with file name in
+ * <b>`ReadMe_OSS_<uploadfilename>_<timestamp>.txt`</b> format.
+ *
+ * @section readmeossactions Supported actions
+ * Currently, ReadMe_OSS does not support CLI commands and read only from
+ * scheduler.
+ *
+ * @section readmeosssource Agent source
+ *   - @link src/readmeoss/agent @endlink
+ *   - @link src/readmeoss/ui @endlink
+ *
+ * @todo Write test cases for the agent
+ */
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
@@ -25,23 +54,38 @@ use Fossology\Lib\Report\LicenseMainGetter;
 
 include_once(__DIR__ . "/version.php");
 
+/**
+ * @class ReadmeOssAgent
+ * @brief Readme_OSS agent generates list of licenses and copyrights found
+ * in an upload
+ */
 class ReadmeOssAgent extends Agent
 {
-  const UPLOAD_ADDS = "uploadsAdd";
+  const UPLOAD_ADDS = "uploadsAdd";   ///< The HTTP GET parameter name
 
-  /** @var LicenseClearedGetter  */
+  /** @var LicenseClearedGetter $licenseClearedGetter
+   * LicenseClearedGetter object
+   */
   private $licenseClearedGetter;
 
-  /** @var XpClearedGetter */
+  /** @var XpClearedGetter $cpClearedGetter
+   * XpClearedGetter object
+   */
   private $cpClearedGetter;
 
-  /** @var LicenseMainGetter  */
+  /** @var LicenseMainGetter $licenseMainGetter
+   * LicenseMainGetter object
+   */
   private $licenseMainGetter;
 
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
 
-  /** @var int[] */
+  /** @var int $additionalUploadIds
+   * Additional Uploads to be included in report
+   */
   protected $additionalUploadIds = array();
 
   function __construct()
@@ -58,7 +102,9 @@ class ReadmeOssAgent extends Agent
   }
 
   /**
-   * @todo without wrapper
+   * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
+   * @todo Without wrapper
    */
   function processUploadId($uploadId)
   {
@@ -102,9 +148,9 @@ class ReadmeOssAgent extends Agent
   }
 
   /**
-   * @brief write data to text file
-   * @param array $contents
-   * @param int $uploadId
+   * @brief Write data to text file
+   * @param array $contents Contents of the report
+   * @param int   $uploadId ID of the upload
    */
   private function writeReport($contents, $uploadId)
   {
@@ -132,10 +178,10 @@ class ReadmeOssAgent extends Agent
   }
 
   /**
-   * @brief update the report path
-   * @param int $uploadId
-   * @param int $jobId
-   * @param char $filename
+   * @brief Update the report path
+   * @param int    $uploadId Upload ID
+   * @param int    $jobId    Job ID
+   * @param string $filename Path of the file
    */
   private function updateReportTable($uploadId, $jobId, $filename)
   {
@@ -144,11 +190,12 @@ class ReadmeOssAgent extends Agent
 
   /**
    * @brief This function lists elements of array
-   * @param addSeparator
-   * @param $dataForReadME
-   * @param $extract
-   * @param $break
-   */ 
+   * @param string $addSeparator  Separator to be used
+   * @param string $dataForReadME Array of content
+   * @param string $extract       Data to be extracted from $dataForReadME
+   * @param string $break         Line break string
+   * @return string Formated report
+   */
   private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract='text', $break)
   {
     $outData = "";
@@ -165,9 +212,11 @@ class ReadmeOssAgent extends Agent
   }
 
   /**
-   * @brief gather all the data
-   * @param array $contents
-   * @param char $packageName
+   * @brief Gather all the data
+   * @param array  $contents    Array of contents with `licenseMain`, `licenses`
+   * and `licenseAcknowledgements` keys.
+   * @param string $packageName Package for which the report is generated
+   * @return string ReadmeOSS report
    */
   private function generateReport($contents, $packageName)
   {

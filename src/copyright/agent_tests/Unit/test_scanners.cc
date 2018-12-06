@@ -27,6 +27,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace std;
 
+/**
+ * \brief Create stream which follows agent output format
+ * \param[out] out Stream to load data into
+ * \param[in]  l   List of matches to create output stream
+ */
 ostream& operator<<(ostream& out, const list<match>& l)
 {
   for (auto m = l.begin(); m != l.end(); ++m)
@@ -34,6 +39,9 @@ ostream& operator<<(ostream& out, const list<match>& l)
   return out;
 }
 
+/**
+ * \brief test data
+ */
 const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "Copyright 2004 my company\n\n"
   "Copyrights by any strange people\n\n"
@@ -51,7 +59,7 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "* Copyright (c) 1989, 1993\n" // Really just one newline here!
   "* The Regents of the University of California. All rights reserved.\n\n"
   "to be licensed as a whole";
-  
+
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
   CPPUNIT_TEST (copyscannerTest);
@@ -64,6 +72,13 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE_END ();
 
 private:
+  /**
+   * \brief Runs scanner on content and check matches against expectedStrings
+   * \param sc              Scanner to use
+   * \param content         Content to scan
+   * \param type            Match type
+   * \param expectedStrings Expected strings from scanner result
+   */
   void scannerTest (const scanner& sc, const char* content, const string& type, list<const char*> expectedStrings)
   {
     list<match> matches;
@@ -84,6 +99,13 @@ private:
   }
 
 protected:
+  /**
+   * \brief Test copyright scanner
+   * \test
+   * -# Create a copyright scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void copyscannerTest()
   {
     // Test copyright matcher
@@ -97,7 +119,14 @@ protected:
       "Copyright (c) 1989, 1993\n* The Regents of the University of California. All rights reserved."
     });
   }
-  
+
+  /**
+   * \brief Test copyright scanner for author
+   * \test
+   * -# Create a author scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regAuthorTest()
   {
     regexScanner sc("author", "copyright");
@@ -108,16 +137,37 @@ protected:
     });
   }
 
+  /**
+   * \brief Test ECC scanner
+   * \test
+   * -# Create a ECC scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regEccTest () {
     regexScanner sc("ecc", "ecc");
     scannerTest(sc, testContent, "ecc", { "space vehicle designed by NASA" });
   }
 
+  /**
+   * \brief Test copyright scanner for URL
+   * \test
+   * -# Create a URL scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regUrlTest () {
     regexScanner sc("url", "copyright");
     scannerTest(sc, testContent, "url", { "http://mysite.org/FAQ" });
   }
 
+  /**
+   * \brief Test copyright scanner for email
+   * \test
+   * -# Create a email scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regEmailTest () {
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });

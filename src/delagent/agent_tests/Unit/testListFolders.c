@@ -28,6 +28,9 @@ extern char *DBConfFile;
 
 /**
  * \brief for function ListFolders
+ * \test
+ * -# List folders using listFolders()
+ * -# Check for the return code
  */
 void testListFolders()
 {
@@ -44,6 +47,9 @@ void testListFolders()
 }
 /**
  * \brief for function ListUploads
+ * \test
+ * -# List uploads using listUploads()
+ * -# Check for the return code
  */
 void testListUploads()
 {

@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testDBFindMime.c
- * \brief testing for the function DBFindMime
+ * \file
+ * \brief testing for the function DBFindMime()
  */
 
 extern char *DBConfFile;
@@ -58,14 +58,20 @@ int DBFindMimeClean()
 /* test functions */
 
 /**
- * \brief for function DBFindMime
+ * \brief for function DBFindMime()
+ * \test
+ * -# Create one new entry from mimetype table
+ * -# Get the mimetype id from DBFindMime() for the inserted type
+ * -# Check if the value returned from function matches the actual id
+ * -# Call DBFindMime() on a type which does not exists in DB
+ * -# Check if -1 is returned
  */
 void testDBFindMime()
 {
   char SQL[MAXCMD] = {0};
   PGresult *result = NULL;
   char mimetype_name[] = "application/octet-stream";
-  /** delete the record mimetype_name is application/octet-stream in mimetype */
+  /* delete the record mimetype_name is application/octet-stream in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -75,7 +81,7 @@ void testDBFindMime()
     exit(-1);
   }
   PQclear(result);
-  /** insert one record */
+  /* insert one record */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "INSERT INTO mimetype (mimetype_name) VALUES ('%s');", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -85,10 +91,10 @@ void testDBFindMime()
     exit(-1);
   }
   PQclear(result);
-  /** exectue the tested function */
-  /** 1. the Mimetype is alrady in table mimetype */
+  /* exectue the tested function */
+  /* 1. the Mimetype is already in table mimetype */
   int ret = DBFindMime(mimetype_name);
-  /** select the record mimetype_name is application/octet-stream */
+  /* select the record mimetype_name is application/octet-stream */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "SELECT mimetype_name from mimetype where mimetype_name = ('%s');", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -102,7 +108,7 @@ void testDBFindMime()
 
   CU_ASSERT_NOT_EQUAL(ret, mimetype_id);
 
-  /** delete the record mimetype_name is application/octet-stream in mimetype */
+  /* delete the record mimetype_name is application/octet-stream in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -114,8 +120,8 @@ void testDBFindMime()
   PQclear(result);
 
   DBMime = NULL;
-  /** 2. the Mimetype is not in table mimetype */
-  /** select the record mimetype_name is application/octet-stream */
+  /* 2. the Mimetype is not in table mimetype */
+  /* select the record mimetype_name is application/octet-stream */
   ret = DBFindMime(mimetype_name);
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "SELECT mimetype_name from mimetype where mimetype_name = ('%s');", mimetype_name);
@@ -130,7 +136,7 @@ void testDBFindMime()
   PQclear(result);
 
   CU_ASSERT_NOT_EQUAL(ret, mimetype_id);
-  /** delete the record mimetype_name is application/octet-stream in mimetype */
+  /* delete the record mimetype_name is application/octet-stream in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);

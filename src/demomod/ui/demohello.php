@@ -15,7 +15,13 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
+/**
+ * \file
+ * \brief UI component for demomod (Visible in menu)
+ */
+/**
+ * @namespace Fossology::DemoHello
+ */
 namespace Fossology\DemoHello;
 
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -23,9 +29,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 
+/**
+ * @class DemoHello
+ * @brief UI component for demomod (Visible in menu)
+ */
 class DemoHello extends DefaultPlugin
 {
-  const NAME = "demo_hello";
+  const NAME = "demo_hello";    ///< mod name
 
   public function __construct()
   {

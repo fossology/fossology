@@ -14,7 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * \file test_regex.cc
+ * \brief Test for regex accuracy
+ */
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -23,6 +26,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 using namespace std;
 
+/**
+ * \class regexTest
+ * \brief Test fixture to test regex accuracy
+ */
 class regexTest : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (regexTest);
   CPPUNIT_TEST (regTest);
@@ -30,6 +37,15 @@ class regexTest : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE_END ();
 
 protected:
+  /**
+   * \brief Test regex on a test string
+   *
+   * \test
+   * -# Create a test string
+   * -# Create a regex pattern
+   * -# Run the regex on the string
+   * -# Check the actual number of matches against expected result
+   */
   void regTest (void) {
 
     std::string content = "This is copy of a copyright statement similar to copyleft found in copying";

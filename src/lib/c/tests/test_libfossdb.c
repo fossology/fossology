@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 /**
-* @file test_libfossagent.c
-* @brief unit tests for the libfossagent.
+* @file
+* @brief Unit tests for the libfossagent.
 */
 
 /* includes for files that will be tested */
@@ -38,10 +38,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 extern char* dbConf;
 
 /**
-* @brief fo_tableExists() tests:
-*   - Check for an existing table
-*   - Check for table that does not exist
-*   - Check for a non table entities (sequence, constraint, ...)
+* @brief fo_tableExists() tests
+* @test
+* -# Check for an existing table
+* -# Check for table that does not exist
+* -# Check for a non table entities (sequence, constraint, ...)
 * @return void
 */
 void test_fo_tableExists()

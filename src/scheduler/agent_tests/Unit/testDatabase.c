@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test cases for db operations
+ */
 
 /* include functions to test */
 #include <testRun.h>
@@ -34,6 +38,13 @@ extern char* jobsql_processed;
 /* **** database function tests ******************************************** */
 /* ************************************************************************** */
 
+/**
+ * \brief Test for database_init()
+ * \todo not complete
+ * \test
+ * -# Call database_init() with a scheduler
+ * -# Check if the required tables with required columns are created
+ */
 void test_database_init()
 {
   scheduler_t* scheduler;
@@ -69,6 +80,11 @@ void test_database_init()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for database_exec_event()
+ * \test
+ * -# Initialize database and call database_exec_event()
+ */
 void test_database_exec_event()
 {
   scheduler_t* scheduler;
@@ -86,6 +102,14 @@ void test_database_exec_event()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for database_update_event()
+ * \test
+ * -# Initialize test database
+ * -# Call database_update_event()
+ * -# Check if new jobs are added to the queue with proper names
+ * -# Reset the queue
+ */
 void test_database_update_event()
 {
   scheduler_t* scheduler;
@@ -116,6 +140,15 @@ void test_database_update_event()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for database_update_job()
+ * \test
+ * -# Initialize test database
+ * -# Create a mock job
+ * -# Check the job status
+ * -# Call database_update_job() to update the job status
+ * -# Check if the job status is not changed for the structure but updated in DB
+ */
 void test_database_update_job()
 {
   scheduler_t* scheduler;
@@ -155,6 +188,16 @@ void test_database_update_job()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for database_job_processed(),database_job_log(),database_job_priority()
+ * \test
+ * -# Initialize test database
+ * -# Create a mock job
+ * -# Call database_job_processed() to update items processed
+ * -# Call database_job_log() to create a test log
+ * -# Call database_job_priority() to update job priority
+ * \todo Add checks for function calls
+ */
 void test_database_job()
 {
   scheduler_t* scheduler;
@@ -195,6 +238,13 @@ void test_database_job()
   scheduler_destroy(scheduler);
 }
 
+/**
+ * \brief Test for email_notification()
+ * \test
+ * -# Initialize scheduler, DB and email
+ * -# Create a job and update status using database_update_job()
+ * -# Check if job checkedout by email
+ */
 void test_email_notify()
 {
   scheduler_t* scheduler;
@@ -223,11 +273,11 @@ void test_email_notify()
 
 CU_TestInfo tests_database[] =
 {
-    {"Test database_init",          test_database_init          },
-    {"Test database_exec_event",       test_database_exec_event       },
-    {"Test database_update_event",       test_database_update_event       },
-    {"Test database_update_job",       test_database_update_job       },
-    {"Test database_job",       test_database_job       },
+    {"Test database_init",          test_database_init        },
+    {"Test database_exec_event",    test_database_exec_event  },
+    {"Test database_update_event",  test_database_update_event},
+    {"Test database_update_job",    test_database_update_job  },
+    {"Test database_job",           test_database_job         },
     CU_TEST_INFO_NULL
 };
 

@@ -16,8 +16,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 *********************************************************************/
 
 /**
-* @file test_fossscheduler.c
-* @brief unit tests for the fossscheduler library section of libfossology.
+* @file
+* @brief Unit tests for the fossscheduler library section of libfossology.
 */
 
 /* includes for files that will be tested */
@@ -112,11 +112,12 @@ void tear_down(void)
 }
 
 /**
-* @brief Since the fo_scheduler_next() function will block until either a
-*        "CLOSE\n" or a non-command message is sent a signal is needed to test
+* @brief Test for fo_scheduler_next() blocking
+* @test Since the fo_scheduler_next() function will block until either a
+*        `"CLOSE\n"` or a non-command message is sent a signal is needed to test
 *        the intermediate state of the connection. This will check that the
-*        "END\n" command left the connection in the correct state and then send
-*        a "CLOSE\n" command so that fo_scheduler_next() will return in the
+*        `"END\n"` command left the connection in the correct state and then send
+*        a `"CLOSE\n"` command so that fo_scheduler_next() will return in the
 *        main thread.
 * @return void
 */
@@ -131,6 +132,10 @@ void signal_connect_end()
 /**
 * @brief Serves the same purpose for the verbose command as the
 *        signal_connect_end() function does for the end command
+*
+* @test
+* -# Check the agent_verbose at begin
+* -# Update the verbose value
 * @return void
 */
 void signal_connect_verbose()
@@ -143,6 +148,12 @@ void signal_connect_verbose()
   write_con("CLOSE\n");
 }
 
+/**
+* @brief Test for version string
+* @test
+* -# Read from the scheduler connection
+* -# Check the version string with COMMIT_HASH
+*/
 void signal_connect_version()
 {
   FO_ASSERT_FALSE(valid);
@@ -158,9 +169,11 @@ void signal_connect_version()
 /* ************************************************************************** */
 
 /**
-* @brief tests calling an fo_scheduler_connect in a situation where it
-*        wouldn't create a connection to the scheduler. This will not pass
-*        --scheduler_start as a command line arg to fo_scheduler_connect
+* @brief Test for fo_scheduler_connect() with no new connection
+* @test
+* Tests calling an fo_scheduler_connect() in a situation where it
+* wouldn't create a connection to the scheduler. This will not pass
+* `--scheduler_start` as a command line arg to fo_scheduler_connect()
 * @return void
 */
 void test_scheduler_no_connect()
@@ -186,10 +199,13 @@ void test_scheduler_no_connect()
 }
 
 /**
-* @brief tests calling an fo_scheduler_connect in a situation where it will
-*        create a connection to the scheduler. This will pass --scheduler_start
-*        as a command line arg to fo_scheduler_connect. The alarm, sleep and
-*        following assert check that the heart beat was correctly created.
+* @brief Test for fo_scheduler_connect() with a new connection
+*
+* @test
+* Tests calling an fo_scheduler_connect() in a situation where it will
+* create a connection to the scheduler. This will pass `--scheduler_start`
+* as a command line arg to fo_scheduler_connect(). The alarm, sleep and
+* following assert check that the heart beat was correctly created.
 * @return void
 */
 void test_scheduler_connect()
@@ -224,7 +240,11 @@ void test_scheduler_connect()
 }
 
 /**
-* @brief Tests sending "CLOSE\n" to stdin for the scheduler next function.
+* @brief Tests sending `"CLOSE\n"` to stdin for the scheduler next function.
+* @test
+* -# Send `CLOSE\n` to the scheduler
+* -# Call fo_scheduler_next().
+* -# Check if NULL is returned.
 * @return void
 */
 void test_scheduler_next_close()
@@ -236,7 +256,12 @@ void test_scheduler_next_close()
 }
 
 /**
-* @brief Tests sending "END\n" to the stdin for the scheduler next function.
+* @brief Tests sending `"END\n"` to the stdin for the scheduler next function.
+* @test
+* -# Send `END\n` to the scheduler
+* -# Send a `SIGALRM`
+* -# Call fo_scheduler_next().
+* -# Check if NULL is returned.
 * @return void
 */
 void test_scheduler_next_end()
@@ -251,8 +276,13 @@ void test_scheduler_next_end()
 }
 
 /**
-* @brief Tests sending "VERBOSE #\n" to the stdin for the scheduler next
-*        function
+* @brief Tests sending `"VERBOSE #\n"` to the stdin for the scheduler next
+*        function.
+* @test
+* -# Send `VERBOSE #\n` to the scheduler
+* -# Send a `SIGALRM`
+* -# Call fo_scheduler_next().
+* -# Check if NULL is returned.
 * @return void
 */
 void test_scheduler_next_verbose()
@@ -267,7 +297,13 @@ void test_scheduler_next_verbose()
 }
 
 /**
-* @brief Tests sending "VERSION\n" to the stdin for the scheduler next function
+* @brief Tests sending `"VERSION\n"` to the stdin for the scheduler next
+* function
+* @test
+* -# Send `VERSION\n` to the scheduler
+* -# Send a `SIGALRM`
+* -# Call fo_scheduler_next().
+* -# Check if NULL is returned.
 * @return void
 */
 void test_scheduler_next_version()
@@ -282,10 +318,12 @@ void test_scheduler_next_version()
 }
 
 /**
-* @brief Tests send a non-command to the stdin for the scheduler next function.
-*        unlike the other scheduler next test functions, this does not need to
-*        setup a signal since fo_scheduler_next() will return without any extra
-*        commands.
+* @brief Tests scheduler for non commands.
+* @test
+* Send a non-command to the stdin for the scheduler next function.
+* Unlike the other scheduler next test functions, this does not need to
+* setup a signal since fo_scheduler_next() will return without any extra
+* commands.
 * @return void
 */
 void test_scheduler_next_oth()
@@ -301,6 +339,9 @@ void test_scheduler_next_oth()
 
 /**
 * @brief Tests the scheduler current function.
+* @test
+* -# Send `CLOSE\n` to the scheduler
+* -# Check if fo_scheduler_next() and fo_scheduler_current() returns NULL
 * @return void
 */
 void test_scheduler_current()
@@ -315,6 +356,9 @@ void test_scheduler_current()
 
 /**
 * @brief Tests the scheduler disconnection function.
+* @test
+* -# Call fo_scheduler_disconnect()
+* -# Check if scheduler returns `BYE #\n`
 * @return void
 */
 void test_scheduler_disconnect()
@@ -331,6 +375,11 @@ void test_scheduler_disconnect()
 * @brief Test the scheduler heart function. This function must set up the
 *        heartbeat again so that it can check that the heartbeat will increase
 *        correctly.
+* @test
+* -# Send heart beat 1 using fo_scheduler_heart() and check if items_processed
+* is updated.
+* -# Send heart beat 10 and check if items_processed is updated with 11.
+* -# Send `SIGALRM` and check if scheduler returns `HEART: 11`.
 * @return void
 */
 void test_scheduler_heart()

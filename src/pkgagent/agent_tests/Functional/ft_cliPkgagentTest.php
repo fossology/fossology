@@ -18,6 +18,8 @@
  ***************************************************************/
 
 /**
+ * \dir
+ * \brief Function test the pkgagent
  * \file ft_cliPkgagentTest.php
  * \brief function test the pkgagent cli
  *
@@ -26,6 +28,10 @@
 
 require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
 
+/**
+ * @class ft_cliPkgagentTest
+ * @brief Test cli parameter i and v and rpm file and no parameters.
+ */
 class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
 
   public $agentDir;
@@ -33,6 +39,10 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
   protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
   private $db_conf;
 
+  /**
+   * @brief Set up test environment
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   function setUp() {
 /*
     $AGENTDIR = NULL;
@@ -65,6 +75,12 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     return;
   } // setUP
 
+  /**
+   * @brief Test help message
+   * @test
+   * -# Call \c -h on pkgagent CLI
+   * -# Check if help message was printed properly
+   */
   function testHelp() {
     // pkgagent -h
     $rtn = NULL;
@@ -79,6 +95,12 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     return;
   }
 
+  /**
+   * @brief Test DB init flag
+   * @test
+   * -# Call \c -i on pkgagent CLI
+   * -# Check if agent ran properly
+   */
   function testI() {
     // pkgagent -i
     $rtn = NULL;
@@ -96,6 +118,12 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     return;
   }
 
+  /**
+   * @brief Test CLI with single RPM
+   * @test
+   * -# Call CLI with single RPM file path
+   * -# Check if agent parse the RPM file properly
+   */
   function testOneRPM()
   {
     // pkgagent rpmfile
@@ -125,6 +153,12 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     return;
   }
 
+  /**
+   * @brief Test CLI in verbose with one RPM
+   * @test
+   * -# Pass one RPM to CLI with \c -vv flag
+   * -# Test if extra information is loaded
+   */
   function testOneRPMV()
   {
     // pkgagent -v rpmfile

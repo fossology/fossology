@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for TraverseStart()
+ */
 static char *Label = "";
 
 /**
@@ -43,6 +46,12 @@ int TraverseStartClean()
   return 0;
 }
 
+/**
+ * \brief Test TraverseStart() for normal file
+ * \test
+ * -# Pass a normal file location to TraverseStart()
+ * -# Check if files are unpacked
+ */
 void testTraverseStartNormal()
 {
   Filename = "../testdata/testthree.zip";
@@ -55,7 +64,10 @@ void testTraverseStartNormal()
 }
 
 /**
- * @brief test traversestart dirctory
+ * @brief test TraverseStart() for directory
+ * \test
+ * -# Pass a directory's location to TraverseStart()
+ * -# Check if files are unpacked
  */
 void testTraverseStartDir()
 {

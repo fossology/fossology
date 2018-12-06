@@ -102,8 +102,8 @@ class TreeDao
       return $row['artifact_path_prefix'].$row['file_path'];
     }else{
       return $row['file_path'];
+    }
   }
-}
 
   public function getMinimalCoveringItem($uploadId, $tableName)
   {

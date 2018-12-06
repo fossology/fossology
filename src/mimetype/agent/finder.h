@@ -29,45 +29,20 @@
 #define MAXCMD 1024
 extern char SQL[MAXCMD];
 
-/** for the DB */
-extern PGresult *DBMime; /* contents of mimetype table */
-extern int  MaxDBMime; /* how many rows in DBMime */
+extern PGresult *DBMime;
+extern int  MaxDBMime;
 extern PGconn *pgConn;
-extern int Agent_pk; /* agent identifier */
+extern int Agent_pk;
 
-/** for /etc/mime.types */
 extern FILE *FMimetype;
 
-/* for Magic */
 extern magic_t MagicCookie;
 
-/** input for this system */
 extern int Akey;
 extern char A[MAXCMD];
 
-/**
- * \brief Convert field=value pairs into variables: A and Akey.
- */
 void    SetEnv  (char *S);
-
-/**
- * \brief Given a file, check if it has a mime type
- * in the DB.  If it does not, then add it.
- */
 void  DBCheckMime (char *Filename);
-
-/**
- * \brief read a line each time from one file
- */
 int ReadLine(FILE *Fin, char *Line, int MaxLine);
-
-/**
- * \brief Here are some suggested options
- */
 void  Usage (char *Name);
-
-/**
- * \brief find a mime type in the DBMime table.
- */
 int DBFindMime (char *Mimetype);
-

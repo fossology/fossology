@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+/**
+ * \file
+ * \brief Unit test cases for Nomos_gap
+ */
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,7 +27,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "nomos_gap.h"
 
-void test_collapseInvisible() {
+/**
+ * \brief Test for collapseInvisible()
+ * \test
+ * -# Create a string with INVISIBLE characters
+ * -# Call collapseInvisible()
+ * -# Check if the string is collapsed with getPairPosOff()
+ */
+void test_collapseInvisible()
+{
   char* buf, *fer;
   GArray* po;
   buf=g_strdup_printf("\377abc\377\377de\377\377fg\377hi");
@@ -39,7 +51,15 @@ void test_collapseInvisible() {
   g_free(fer);
 }
 
-void test_uncollapseInvisible() {
+/**
+ * \brief Test for uncollapsePosition() on collapseInvisible()
+ * \test
+ * -# Create a string with INVISIBLE characters
+ * -# Call collapseInvisible()
+ * -# Check if the string can be uncollapsed by calling uncollapsePosition()
+ */
+void test_uncollapseInvisible()
+{
   char* buf, *fer;
   GArray* po;
   buf=g_strdup_printf("\377abc\377\377de\377\377fg\377hi");
@@ -54,7 +74,15 @@ void test_uncollapseInvisible() {
   g_free(fer);
 }
 
-void test_collapseSpaces() {
+/**
+ * \brief Test for collapseSpaces()
+ * \test
+ * -# Create a string with spaces
+ * -# Call collapseSpaces()
+ * -# Check if the string is collapsed with getPairPosOff()
+ */
+void test_collapseSpaces()
+{
   char* buf, *fer;
   GArray* po;
   buf=g_strdup_printf("  abc  d e      fghi");
@@ -69,7 +97,15 @@ void test_collapseSpaces() {
   g_free(fer);
 }
 
-void test_uncollapseSpaces() {
+/**
+ * \brief Test for uncollapsePosition() on collapseSpaces()
+ * \test
+ * -# Create a string with spaces
+ * -# Call collapseSpaces()
+ * -# Check if the string can be uncollapsed by calling uncollapsePosition()
+ */
+void test_uncollapseSpaces()
+{
   char* buf, *fer;
   GArray* po;
   buf=g_strdup_printf("  abc  d e      fghi");
@@ -82,7 +118,6 @@ void test_uncollapseSpaces() {
   g_free(buf);
   g_free(fer);
 }
-
 
 CU_TestInfo nomos_gap_testcases[] = {
   {"Testing collapse space:", test_collapseSpaces},

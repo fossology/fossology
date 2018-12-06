@@ -18,6 +18,10 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @class EccAgentPlugin
+ * @brief Create UI plugin for ECC agent
+ */
 class EccAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -28,6 +32,10 @@ class EccAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "ecc scanner", "ecc_ars");

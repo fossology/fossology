@@ -21,7 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utility.h"
 
 /**
- * \file testSetEnv.c
+ * \file
  * \brief testing for the function SetEnv()
  */
 
@@ -55,6 +55,10 @@ int  SetEnvClean()
 }
 /**
  * \brief set the global variables
+ * \test
+ * -# Set parameters for wget_agent
+ * -# Call SetEnv()
+ * -# Check if the parameters get set
  */
 void testSetEnvNormal()
 {

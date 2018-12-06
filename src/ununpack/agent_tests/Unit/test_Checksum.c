@@ -17,13 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 
 /**
- * \file test_Checksum.c
+ * \file
  * \brief unit test case for checksum.c
- *
  */
 
 /**
  * \brief test function CountDigits
+ * \test
+ * -# Call CountDigits() with a number
+ * -# Check if function returned actual count
  */
 void testCountDigits()
 {
@@ -36,6 +38,9 @@ void testCountDigits()
 
 /**
  * \brief test function SumComputeFile
+ * \test
+ * -# Compute checksum of a known file using SumComputeFile()
+ * -# Compare if the function result correct checksum
  */
 void testSumComputeFile()
 {
@@ -68,6 +73,10 @@ void testSumComputeFile()
 
 /**
  * \brief test function SumToString
+ * \test
+ * -# Get a result from SumComputeFile()
+ * -# Call SumToString() on the result
+ * -# Check if the function translated the structure to a string
  */
 void testSumToString()
 {

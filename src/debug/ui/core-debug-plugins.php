@@ -20,6 +20,10 @@ use Fossology\Lib\Plugin\Plugin;
 
 define("TITLE_core_debug", _("Debug Plugins"));
 
+/**
+ * @class core_debug
+ * @brief Plugin for core debug
+ */
 class core_debug extends FO_Plugin
 {
   function __construct()
@@ -32,7 +36,8 @@ class core_debug extends FO_Plugin
   }
 
   /**
-   * \brief display the loaded menu and plugins.
+   * @brief display the loaded menu and plugins.
+   * @see FO_Plugin::Output()
    */
   function Output()
   {
@@ -56,14 +61,17 @@ class core_debug extends FO_Plugin
     }
     print $output;
   }
-  
+
   /**
-   * \brief Display the loaded menu and plugins.
+   * @brief Display the loaded menu and plugins.
+   * @return string HTML output
    */
   protected function htmlContent()
   {
     $V = "";
-    /** @var Plugin[] $Plugins */
+    /** @var Plugin[] $Plugins
+     * All available plugins
+     */
     global $Plugins;
 
     $text = _("Plugin Summary");

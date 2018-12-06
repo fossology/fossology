@@ -15,15 +15,20 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+/**
+ * \file match.c
+ * Matching license names with pfile contents using regex
+ */
+
 #include "buckets.h"
 
 
 /**
  * \brief Does this regex match any license name for this pfile?
  *
- * \param PGresult $result    results from select of lic names for this pfile
- * \param int      $numLics   number of lics in result
- * \param regex_t $compRegex ptr to compiled regex to check
+ * \param result    Results from select of lic names for this pfile
+ * \param numLics   Number of lics in result
+ * \param compRegex ptr to compiled regex to check
  *
  * \return 1=true, 0=false
  */

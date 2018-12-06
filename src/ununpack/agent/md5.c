@@ -1,4 +1,4 @@
-/*
+/**
  * This is an OpenSSL-compatible implementation of the RSA Data Security,
  * Inc. MD5 Message-Digest Algorithm.
  *
@@ -14,13 +14,17 @@
  * Some known optimizations are not included to reduce source code size
  * and avoid compile-time configuration.
  */
-
+/**
+ * \file
+ * \brief This is an OpenSSL-compatible implementation of the RSA Data Security,
+ * Inc. MD5 Message-Digest Algorithm.
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include "md5.h"
 
-/*
+/**
  * The basic MD5 functions.
  *
  * F is optimized compared to its RFC 1321 definition just like in Colin
@@ -31,7 +35,7 @@
 #define H(x, y, z)			((x) ^ (y) ^ (z))
 #define I(x, y, z)			((y) ^ ((x) | ~(z)))
 
-/*
+/**
  * The MD5 transformation for all four rounds.
  */
 #define STEP(f, a, b, c, d, x, t, s) \
@@ -39,7 +43,7 @@
 	(a) = (((a) << (s)) | (((a) & 0xffffffff) >> (32 - (s)))); \
 	(a) += (b);
 
-/*
+/**
  * SET reads 4 input bytes in little-endian byte order and stores them
  * in a properly aligned word in host byte order.
  *
@@ -63,9 +67,9 @@
 	(ctx->block[(n)])
 #endif
 
-/*
+/**
  * This processes one or more 64-byte data blocks, but does NOT update
- * the bit counters.  There're no alignment requirements.
+ * the bit counters. There're no alignment requirements.
  */
 static void *body(MyMD5_CTX *ctx, void *data, unsigned long size)
 {

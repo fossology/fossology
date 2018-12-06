@@ -17,26 +17,30 @@
 ***********************************************************/
 
 /**
- * \file agent-demomod.php
+ * \file
  * \brief run the demomod agent
  */
 
 define("TITLE_agent_demomod", _("Demomod scanner"));
 
+/**
+ * @class agent_demomod
+ * @brief UI plugin for demomod (handle user requests)
+ */
 class agent_demomod extends FO_Plugin {
 
-  public $Name = "agent_demomod";
-  public $Title = TITLE_agent_demomod;
-  public $Version = "1.0";
-  public $Dependency = array();
-  public $DBaccess = PLUGIN_DB_WRITE;
-  public $AgentName = "demomod";   // agent.agent_name
+  public $Name = "agent_demomod";       ///< Mod name
+  public $Title = TITLE_agent_demomod;  ///< Page title
+  public $Version = "1.0";              ///< Plugin versin
+  public $Dependency = array();         ///< Dependecy for plugin
+  public $DBaccess = PLUGIN_DB_WRITE;   ///< DB access required
+  public $AgentName = "demomod";        ///< agent.agent_name
 
 
   /**
    * \brief  Register additional menus.
    */
-  function RegisterMenus() 
+  function RegisterMenus()
   {
     if ($this->State != PLUGIN_STATE_READY)  return (0); // don't run
     menu_insert("Agents::" . $this->Title, 0, $this->Name);
@@ -46,12 +50,12 @@ class agent_demomod extends FO_Plugin {
   /**
    * \brief Check if the upload has already been successfully scanned.
    *
-   * \param $upload_pk
+   * \param int $upload_pk
    *
    * \returns:
    * - 0 = no
    * - 1 = yes, from latest agent version
-   * - 2 = yes, from older agent version 
+   * - 2 = yes, from older agent version
    **/
   function AgentHasResults($upload_pk)
   {
@@ -61,14 +65,15 @@ class agent_demomod extends FO_Plugin {
 
   /**
    * \brief Queue the demomod agent.
+   *
    *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
    *  - It is already queued
    *  - It has already been run by the latest agent version
    *
-   * \param $job_pk
-   * \param $upload_pk
-   * \param $ErrorMsg - error message on failure
-   * \param $Dependencies - array of plugin names representing dependencies.
+   * \param int $job_pk
+   * \param int $upload_pk
+   * \param string $ErrorMsg - error message on failure
+   * \param array $Dependencies - array of plugin names representing dependencies.
    *        This is for dependencies that this plugin cannot know about ahead of time.
    *
    * \returns

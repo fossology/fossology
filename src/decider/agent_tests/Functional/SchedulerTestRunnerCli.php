@@ -24,6 +24,7 @@ include_once(__DIR__.'/../../../lib/php/Test/Agent/AgentTestMockHelper.php');
 include_once(__DIR__.'/SchedulerTestRunner.php');
 
 /**
+ * @file SchedulerTestRunnerCli
  * @todo move to lib/test
  */
 class SchedulerTestRunnerCli implements SchedulerTestRunner
@@ -36,6 +37,10 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
     $this->testDb = $testDb;
   }
 
+  /**
+   * @copydoc SchedulerTestRunner::run()
+   * @see SchedulerTestRunner::run()
+   */
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -51,14 +56,14 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $output = "";
     $retCode = -1;
-    if ($success) 
+    if ($success)
     {
       while (($buffer = fgets($pipeFd, 4096)) !== false) {
         $output .= $buffer;
       }
       $retCode = pclose($pipeFd);
     }
-    else 
+    else
     {
       print "failed opening pipe to $cmd";
     }

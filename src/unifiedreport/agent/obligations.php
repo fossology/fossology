@@ -5,12 +5,12 @@
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -20,30 +20,44 @@ use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 
+/**
+ * @class ObligationsToLicenses
+ * @brief Handles license obligations
+ */
 class ObligationsToLicenses
 {
-  /** @var licenseDao */
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
   private $licenseDao;
 
-  /** @var clearingDao */
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
   private $clearingDao;
 
-  /** @var uploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
 
   public function __construct()
   {
-    global $container; 
+    global $container;
     $this->licenseDao = $container->get('dao.license');
     $this->clearingDao = $container->get('dao.clearing');
     $this->uploadDao = $container->get('dao.upload');
-  } 
-  
+  }
+
   /**
-   * @param array
-   * @param array
-   * @return array
-  **/
+   * @brief For given list of license statements,
+   * return obligations and white lists
+   * @param array $licenseStatements
+   * @param array $mainLicenseStatements
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array [obligations, whitelist]
+   */
   function getObligations($licenseStatements, $mainLicenseStatements, $uploadId, $groupId)
   {
     $licenseIds = $this->contentOnly($licenseStatements) ?: array();
@@ -73,6 +87,12 @@ class ObligationsToLicenses
     return array($newobligations, $whiteLists);
   }
 
+  /**
+   * @brief Get list of licenses added by Monk bulk
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array List of license ids
+   */
   function getBulkAddLicenseList($uploadId, $groupId)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -94,6 +114,11 @@ class ObligationsToLicenses
     return $licenseId;
   }
 
+  /**
+   * @brief Group obligations based on $groupBy
+   * @param array $obligations
+   * @return array
+   */
   function groupObligations($obligations)
   {
     foreach($obligations as $obligation ) {
@@ -120,9 +145,10 @@ class ObligationsToLicenses
   }
 
   /**
-   * @param array
-   * @return array
-  **/
+   * @brief From a list of license statements, return only license id
+   * @param array $licenseStatements
+   * @return array List of license ids
+   */
   function contentOnly($licenseStatements)
   {
     foreach($licenseStatements as $licenseStatement){

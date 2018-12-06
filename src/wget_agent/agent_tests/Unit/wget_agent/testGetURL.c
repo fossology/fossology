@@ -22,12 +22,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "libfodbreposysconf.h"
 
 /**
- * \file testGetURL.c
+ * \file
  * \brief testing for the function GetURL()
+ *
  * int GetURL(char *TempFile, char *URL, char *TempFileDir)
  * char *TempFile - used when upload from URL by the scheduler, the downloaded file(directory) will be archived as this file
  *               when running from command, this parameter is null, e.g. /var/local/lib/fossology/agents/wget.32732
+ *
  * char *URL - the url you want to download
+ *
  * char *TempFileDir - where you want to store your downloaded file(directory)
  *
  * return int, 0 on success, non-zero on failure.
@@ -60,9 +63,15 @@ int GetURLClean()
 /* test functions */
 
 /**
- * \brief the URL is one file
- * TempFileDir is ./test_result
+ * \brief The URL is one file
+ *
+ * TempFileDir is ./test_result,
  * TempFile is empty
+ * \test
+ * -# Load a single file URL
+ * -# Set the TempFileDir
+ * -# Call GetURL()
+ * -# Check if the file got downloaded
  */
 void testGetURLNormal_URLIsOneFile()
 {
@@ -75,8 +84,15 @@ void testGetURLNormal_URLIsOneFile()
 
 /**
  * \brief the URL is one dir
+ *
  * TempFileDir is ./test_result
  * TempFile is not empty
+ * \test
+ * -# Set wget parameters to include several files
+ * -# Load a URL for a file
+ * -# Set the TempFileDir and TempFile
+ * -# Call GetURL()
+ * -# Check if the files were downloaded
  */
 void testGetURLAbnormal_URLIsOneDir()
 {

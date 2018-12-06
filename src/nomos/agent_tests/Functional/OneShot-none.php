@@ -17,16 +17,32 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Perform a one-shot license analysis on a file with no license
+ * @file
+ * @brief Perform a one-shot license analysis on a file with no license
  *
  * License returned should be: No_license_found
  */
 require_once ('CommonCliTest.php');
 
+/**
+ * @class OneShotnoneTest
+ * @brief Perform a one-shot license analysis on a file with no license
+ */
 class OneShotnoneTest extends CommonCliTest
 {
+  /**
+   * @var string $none
+   * Path to the file without license
+   */
   public $none;
 
+  /**
+   * @brief Run NOMOS on file without license information
+   * @test
+   * -# Get the location of test file
+   * -# Run NOMOS on the test file and record the output
+   * -# Check if the output says \b No_license_found
+   */
   public function testOneShotnone()
   {
     /* check to see if the file exists */

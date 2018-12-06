@@ -15,9 +15,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
 /**
- * @brief function PathCheck
+ * \file
+ * \brief Unit test cases for PathCheck() and Usage()
+ */
+/**
+ * \brief function PathCheck
+ * \test
+ * -# Create a string with `%H`, `%R` and `%U`
+ * -# Call PathCheck() and check if place holders are replaced
  */
 void testPathCheck()
 {
@@ -36,12 +42,15 @@ void testPathCheck()
 }
 
 /**
- * @brief function Usage
+ * \brief function Usage
+ * \test
+ * -# Call Usage()
+ * -# Check the results
+ * \todo Need added output check of Usage, how to do it?
  */
 void testUsage()
 {
   Usage("ununpack", "2.0");
-  //Need added output check of Usage, how to do it?
 }
 
 /* ************************************************************************** */

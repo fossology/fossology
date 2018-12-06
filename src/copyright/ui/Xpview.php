@@ -17,6 +17,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * @namespace Fossology::Agent::Copyright::UI
+ * @brief Namespace for Copyright agent's UI components
+ */
 namespace Fossology\Agent\Copyright\UI;
 
 use Fossology\Lib\Auth\Auth;
@@ -32,6 +36,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use ui_view;
 
+/**
+ * @class Xpview
+ * @brief Default plugin
+ */
 class Xpview extends DefaultPlugin
 {
   /** @var string */
@@ -64,23 +72,26 @@ class Xpview extends DefaultPlugin
   protected $skipOption;
   /** @var string */
   protected $xptext;
-  
+
   function __construct($name, $params)
   {
     $mergedParams = array_merge($params, array(self::DEPENDENCIES=>array("browse", "view"),
                                        self::PERMISSION=> Auth::PERM_READ));
-    
+
     parent::__construct($name, $mergedParams);
     $this->agentName = $this->tableName;
-    
+
     $this->uploadDao = $this->getObject('dao.upload');
     $this->copyrightDao = $this->getObject('dao.copyright');
     $this->agentDao = $this->getObject('dao.agent');
     $this->highlightRenderer = $this->getObject('view.highlight_renderer');
     $this->decisionTypes = $this->getObject('decision.types');
   }
-  
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
+   */
   protected function handle(Request $request)
   {
     $vars = array();
@@ -92,7 +103,7 @@ class Xpview extends DefaultPlugin
       $vars['message']= "<h2>$text</h2>";
       return $this->responseBad($vars);
     }
-    
+
     if( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
       $text = _("Permission Denied");
       $vars['message']= "<h2>$text</h2>";
@@ -179,19 +190,28 @@ class Xpview extends DefaultPlugin
     $vars['skipOption'] =$this->skipOption;
     $vars['clearingTypes'] = $copyrightDecisionMap;
     $vars['xptext'] = $this->xptext;
-    
+
     $agentId = intval($request->get("agent"));
     $vars = array_merge($vars,$this->additionalVars($uploadId, $uploadTreeId, $agentId));
     return $this->render('ui-cp-view.html.twig',$this->mergeWithDefault($vars));
   }
-  
+
+  /**
+   * @brief Get additional variables for a give item
+   * @param int $uploadId
+   * @param int $uploadTreeId
+   * @param int $agentId
+   * @return array
+   * @todo Not implemented
+   */
   protected function additionalVars($uploadId, $uploadTreeId, $agentId)
   {
     return array();
   }
-  
+
   /**
-   * @overwrite
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::mergeWithDefault()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::mergeWithDefault()
    */
   protected function mergeWithDefault($vars)
   {
@@ -200,15 +220,20 @@ class Xpview extends DefaultPlugin
     return $allVars;
   }
 
-  
+  /**
+   * @brief Call on bad uploads
+   * @param array $vars Extra vars to load by template
+   * @return Response
+   */
   private function responseBad($vars=array())
   {
     $vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
     return $this->render("include/base.html.twig",$vars);
   }
-  
-  
+
+
   /**
+   * @brief Create legend box
    * @return string rendered legend box
    */
   function legendBox()
@@ -222,13 +247,14 @@ class Xpview extends DefaultPlugin
   }
 
   /**
-   * \brief Customize submenus.
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::RegisterMenus()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::RegisterMenus()
    */
   function RegisterMenus()
   {
     $tooltipText = _("Copyright/Email/Url/Author");
     menu_insert("Browse-Pfile::Copyright/Email/Url", 0, 'copyright-view', $tooltipText);
-    
+
     $itemId = GetParm("item", PARM_INTEGER);
     $textFormat = $this->microMenu->getFormatParameter($itemId);
     $pageNumber = GetParm("page", PARM_INTEGER);
@@ -250,4 +276,4 @@ class Xpview extends DefaultPlugin
       $this->NoMenu = 1;
     }
   }
-} 
+}

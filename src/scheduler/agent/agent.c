@@ -16,8 +16,10 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ************************************************************** */
 
-/*
- * TODO change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for
+/**
+ * \file
+ * \brief Contains agent related information
+ * \todo Change the "<date> <time> scheduler ::" to "<date> <time> agent ::" for
  * some log messages
  */
 
@@ -47,17 +49,31 @@
 /* other library includes */
 #include <glib.h>
 
+/**
+ * \brief Test if paramater is NULL
+ *
+ * If parameter is NULL, set the errno, write the error and return void.
+ * \param a Object to check
+ */
 #define TEST_NULV(a) if(!a) { \
   errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return; }
+/**
+ * \brief Test if paramater is NULL
+ *
+ * Like TEST_NULV(), returns ret instead of void.
+ * \param a Object to check
+ * \param ret Value to return if a is NULL
+ * \sa TEST_NULV()
+ */
 #define TEST_NULL(a, ret) if(!a) { \
   errno = EINVAL; ERROR("agent passed is NULL, cannot proceed"); return ret; }
 
-/** prints the credential of the agent */
+/** Prints the credential of the agent */
 #define AGENT_CREDENTIAL                                                 \
   log_printf("JOB[%d].%s[%d.%s]: ", agent->owner->id, agent->type->name, \
       agent->pid, agent->host->name)
 
-/** prints the credential to the agent log */
+/** Prints the credential to the agent log */
 #define AGENT_LOG_CREDENTIAL                                              \
   con_printf(job_log(agent->owner), "JOB[%d].%s[%d.%s]: ",                \
       agent->owner->id, agent->type->name, agent->pid, agent->host->name)
@@ -88,7 +104,7 @@
   AGENT_CREDENTIAL;                          \
   log_printf(__VA_ARGS__); } while(0)
 
-/** send logging specifically to the agent log file */
+/** Send logging specifically to the agent log file */
 #define AGENT_CONCURRENT_PRINT(...) do {                             \
   AGENT_LOG_CREDENTIAL;                                 \
   con_printf(job_log(agent->owner), __VA_ARGS__); } while(0)
@@ -111,8 +127,10 @@ const char* agent_status_strings[] =
 /* ************************************************************************** */
 
 /**
+ * @brief This will close all of the agent's pipes
+ *
  * This function will be called by g_tree_foreach() which is the reason for its
- * formatting. This will close all of the agent's pipes
+ * formatting.
  *
  * @param pid_ptr   the key that was used to store this agent
  * @param agent     the agent that is being closed
@@ -134,8 +152,8 @@ static int agent_close_fd(int* pid_ptr, agent_t* agent, agent_t* excepted)
 
 /**
  * Check the status and check in time of an agent.
- *   - if we haven't gotten a recent communication, close it
- *   - if it hasn't been performing tasks, close it
+ *   - If we haven't gotten a recent communication, close it
+ *   - If it hasn't been performing tasks, close it
  *
  * @param pid_ptr  pointer to key in g_tree, is not used in this function
  * @param agent    the agent that needs to be updated
@@ -182,12 +200,13 @@ static int update(int* pid_ptr, agent_t* agent, gpointer unused)
 }
 
 /**
- * GTraversalFunction that kills all of the agents. This is used for an unclean
- * death since all of the child processes will be sent a kill signal instead of
- * existing cleanly.
+ * @brief GTraversalFunction that kills all of the agents.
+ *
+ * This is used for an unclean death since all of the child processes will
+ * be sent a kill signal instead of existing cleanly.
  *
  * @param pid the process id associated with the agent
- * @param a pointer to the information associated with an agent
+ * @param agent a pointer to the information associated with an agent
  * @param unused
  * @return always returns 0 to indicate that the traversal should continue
  */
@@ -198,8 +217,8 @@ static int agent_kill_traverse(int* pid, agent_t* agent, gpointer unused)
 }
 
 /**
- * GTraverseFunction that will print he name of every agent in alphabetical
- * order separated by spaces.
+ * @brief GTraverseFunction that will print the name of every agent in
+ * alphabetical order separated by spaces.
  *
  * @param name the name of the agent
  * @param ma the meta_agents structure associated with the specific name
@@ -250,7 +269,8 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
  * Main function used for agent communication. This is where the communication
  * thread will spend the majority of its time.
  *
- * @param a the agent that will be listened on
+ * @param scheduler Pointer to scheduler interface
+ * @param agent a the agent that will be listened on
  */
 static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 {
@@ -269,14 +289,15 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 
   TEST_NULV(agent);
 
-  /* Start by getting the version information from the agent. The agent should
+  /**
+   * Start by getting the version information from the agent. The agent should
    * send "VERSION: <string>" where the string is the version information. there
    * are five things that can happen here.
-   *   1. the agent sends correct version information   => continue
-   *   2. this is the first agent to send version info  => save version and continue
-   *   3. the agent sends incorrect version information => invalidate the agent
-   *   4. the agent doesn't send version information    => invalidate the agent
-   *   5. the agent crashed before sending information  => close the thread
+   *   -# the agent sends correct version information   => continue
+   *   -# this is the first agent to send version info  => save version and continue
+   *   -# the agent sends incorrect version information => invalidate the agent
+   *   -# the agent doesn't send version information    => invalidate the agent
+   *   -# the agent crashed before sending information  => close the thread
    */
   if (fgets(buffer, sizeof(buffer), agent->read) == NULL)
   {
@@ -340,12 +361,13 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
   g_static_mutex_unlock(&version_lock);
 #endif
 
-  /* If we reach here the agent has correctly sent VERION information to the
+  /*!
+   * If we reach here the agent has correctly sent VERION information to the
    * scheduler. The agent now enters a listening loop. The communication thread
    * will wait for input from the agent, and act according to the agents current
    * state and what was sent
    *
-   * NOTE: any command prepended by "@@@" is a message from the scheduler to the
+   * \note any command prepended by "@@@" is a message from the scheduler to the
    *       communication thread, not from the agent.
    */
   while (1)
@@ -362,12 +384,12 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     if (TVERB_AGENT && (TVERB_SPECIAL || strncmp(buffer, "SPECIAL", 7) != 0))
       AGENT_CONCURRENT_PRINT("received: \"%s\"\n", buffer);
 
-    /* command: "BYE"
+    /*! - \b command: "BYE"
      *
-     * The agent has finished processing all of the data from the relevant job.
-     * This command is follow by a return code. 0 indicates that it completed
-     * correctly, anything else can be used as an error code. Regardless of
-     * whether the agent completed, the communication thread will shutdown.
+     *    The agent has finished processing all of the data from the relevant job.
+     *    This command is follow by a return code. 0 indicates that it completed
+     *    correctly, anything else can be used as an error code. Regardless of
+     *    whether the agent completed, the communication thread will shutdown.
      */
     if (strncmp(buffer, "BYE", 3) == 0)
     {
@@ -379,20 +401,20 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       break;
     }
 
-    /* command "@@@1"
+    /*! - \b command "@@@1"
      *
-     * The scheduler needs the communication thread to shutdown. This will
-     * normally only happen if the agent crashes and the scheduler receives a
-     * SIGCHLD for it before it sends "BYE #".
+     *    The scheduler needs the communication thread to shutdown. This will
+     *    normally only happen if the agent crashes and the scheduler receives a
+     *    SIGCHLD for it before it sends "BYE #".
      */
     if (strncmp(buffer, "@@@1", 4) == 0)
       break;
 
-    /* command "@@@0"
+    /*! - \b command "@@@0"
      *
-     * The scheduler has updated the data that the agent should be processing.
-     * This is sent after an agent sends the "OK" command, and the scheduler has
-     * processed the resulting agent_ready_event().
+     *    The scheduler has updated the data that the agent should be processing.
+     *    This is sent after an agent sends the "OK" command, and the scheduler has
+     *    processed the resulting agent_ready_event().
      */
     if (strncmp(buffer, "@@@0", 4) == 0 && agent->updated)
     {
@@ -406,13 +428,13 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
     /* agent just checked in */
     agent->check_in = time(NULL);
 
-    /* command: "OK"
+    /*! - \b command: "OK"
      *
-     * The agent is ready for data. This is sent it 2 situations:
-     *   1. the agent has completed startup and is ready for the first part of
-     *      the data that needs to be analyzed for the job
-     *   2. the agent has finished the last piece of the job it was working on
-     *      and is ready for the next piece or to be shutdown
+     *    The agent is ready for data. This is sent it 2 situations:
+     *        -# the agent has completed startup and is ready for the first part of
+     *           the data that needs to be analyzed for the job
+     *        -# the agent has finished the last piece of the job it was working on
+     *           and is ready for the next piece or to be shutdown
      */
     if (strncmp(buffer, "OK", 2) == 0)
     {
@@ -420,12 +442,12 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
         event_signal(agent_ready_event, agent);
     }
 
-    /* command: "HEART"
+    /*! - \b command: "HEART"
      *
-     * Given the size of jobs that can be processed by FOSSology, agents can
-     * take an extremely long period of time to finish. To make sure that an
-     * agent is still working it must periodically update the scheduler with
-     * how much of the job it has processed.
+     *    Given the size of jobs that can be processed by FOSSology, agents can
+     *    take an extremely long period of time to finish. To make sure that an
+     *    agent is still working it must periodically update the scheduler with
+     *    how much of the job it has processed.
      */
     else if (strncmp(buffer, "HEART", 5) == 0)
     {
@@ -445,23 +467,23 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       database_job_processed(agent->owner->id, agent->total_analyzed);
     }
 
-    /* command: "EMAIL"
+    /*! - \b command: "EMAIL"
      *
-     * Agents have the ability to set the message that will be sent with the
-     * notification email. This grabs the message and sets inside the job that
-     * the agent is running under.
+     *    Agents have the ability to set the message that will be sent with the
+     *    notification email. This grabs the message and sets inside the job that
+     *    the agent is running under.
      */
     else if (strncmp(buffer, "EMAIL", 5) == 0)
     {
       agent->owner->message = g_strdup(buffer + 6);
     }
 
-    /* command: "SPECIAL"
+    /*! - \b command: "SPECIAL"
      *
-     * Agents can set special attributes that change how it is treated during
-     * execution. This grabs the command and whether it is being set to true
-     * or false. Agents use this by calling fo_scheduler_set_special() in the
-     * agent api.
+     *    Agents can set special attributes that change how it is treated during
+     *    execution. This grabs the command and whether it is being set to true
+     *    or false. Agents use this by calling fo_scheduler_set_special() in the
+     *    agent api.
      */
     else if (strncmp(buffer, "SPECIAL", 7) == 0)
     {
@@ -491,10 +513,10 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       agent->special ^= relevant;
     }
 
-    /* command: GETSPECIAL
+    /*! - \b command: GETSPECIAL
      *
-     * The agent has requested the value of a special attribute. The scheduler
-     * will respond with the value of the special attribute.
+     *    The agent has requested the value of a special attribute. The scheduler
+     *    will respond with the value of the special attribute.
      */
     else if (strncmp(buffer, "GETSPECIAL", 10) == 0)
     {
@@ -512,10 +534,10 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
       g_match_info_free(match);
     }
 
-    /* command: unknown
+    /*! - \b command: unknown
      *
-     * The agent didn't use a legal command. This will simply put what the agent
-     * printed into the log and move on.
+     *    The agent didn't use a legal command. This will simply put what the agent
+     *    printed into the log and move on.
      */
     else if (!(TVERB_AGENT))
       AGENT_CONCURRENT_PRINT("\"%s\"\n", buffer);
@@ -526,13 +548,16 @@ static void agent_listen(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
- * Parses the shell command that is found in the configuration file.
+ * @brief Parses the shell command that is found in the configuration file.
  *
- * @param confdir  the configuration directory for FOSSology
- * @param userid   the id of the user that created the job
- * @param input    the command line that was in the agent configuration file
- * @param argc     return: returns the number of arguments parsed
- * @param argv     return: the parsed arguments
+ * @param confdir  The configuration directory for FOSSology
+ * @param user_id  The id of the user that created the job
+ * @param group_id The id of the group that created the job
+ * @param input    The command line that was in the agent configuration file
+ * @param jq_cmd_args Extra parameters required by agent (if any)
+ * @param jobId    Job id (from db)
+ * @param[out] argc     Returns the number of arguments parsed
+ * @param[out] argv     The parsed arguments
  */
 static void shell_parse(char* confdir, int user_id, int group_id, char* input, char *jq_cmd_args, int jobId, int* argc, char*** argv)
 {
@@ -589,27 +614,28 @@ static void shell_parse(char* confdir, int user_id, int group_id, char* input, c
  */
 typedef struct
 {
-  scheduler_t* scheduler;
-  agent_t* agent;
+  scheduler_t* scheduler; ///< Reference to current scheduler state
+  agent_t* agent;         ///< Reference to current agent state
 } agent_spawn_args;
 
 /**
- * Spawns a new agent using the command passed in using the meta agent. This
- * function will call the fork and exec necessary to create a new agent. As a
- * result what this function does will change depending on if it is running in
- * the child or the parent.
+ * @brief Spawns a new agent using the command passed in using the meta agent.
  *
- * child:
- *   will duplicate the stdin, stdout, and stderr pipes for printing to the
+ * This function will call the fork and exec necessary to create a new agent.
+ * As a result what this function does will change depending on if it is running
+ * in the child or the parent.
+ *
+ * @b child:
+ *   Will duplicate the stdin, stdout, and stderr pipes for printing to the
  *   scheduler, parse the command line options for the agent and start the
  *   agent. It will then call exec to start the new agent process
  *
- * parent:
- *   this will enter the listen function, and wait for information from the
+ * @b parent:
+ *   This will enter the listen function, and wait for information from the
  *   child, either as a failure or as an update for the information being
  *   analyzed
  *
- * @param passed  a pointer to scheduler_t and the new agent_t
+ * @param pass  a pointer to scheduler_t and the new agent_t
  */
 static void* agent_spawn(agent_spawn_args* pass)
 {
@@ -648,7 +674,8 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* were parsed when the meta_agent was created    */
     if (strcmp(agent->host->address, LOCAL_HOST) == 0)
     {
-      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->owner->group_id, agent->type->raw_cmd, agent->owner->jq_cmd_args,
+      shell_parse(scheduler->sysconfigdir, agent->owner->user_id, agent->owner->group_id,
+                  agent->type->raw_cmd, agent->owner->jq_cmd_args,
                   agent->owner->parent_id, &argc, &args);
 
       tmp = args[0];
@@ -671,12 +698,14 @@ static void* agent_spawn(agent_spawn_args* pass)
     else
     {
       args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d", agent->host->agent_dir,
-      AGENT_CONF, agent->type->name, agent->type->raw_cmd, agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d",
+                     agent->host->agent_dir, AGENT_CONF, agent->type->name, agent->type->raw_cmd,
+                     agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
 
       if (len>=sizeof(buffer)) {
         *(buffer + sizeof(buffer) - 1) = '\0';
-        log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: truncated buffer: \"%s\"", __FILE__, __LINE__, agent->owner->id, agent->owner->agent_type, buffer);
+        log_printf("ERROR %s.%d: JOB[%d.%s]: exec failed: truncated buffer: \"%s\"",
+            __FILE__, __LINE__, agent->owner->id, agent->owner->agent_type, buffer);
 
         exit(5);
       }
@@ -708,7 +737,9 @@ static void* agent_spawn(agent_spawn_args* pass)
 /* ************************************************************************** */
 
 /**
- * Creates a new meta agent. This will take and parse the information necessary
+ * @brief Creates a new meta agent.
+ *
+ * This will take and parse the information necessary
  * for the creation of a new agent instance. The name of the agent, the cmd for
  * starting the agent, the number of these agents that can run simutaniously,
  * and any special conditions for this agent. This function is where the cmd
@@ -719,7 +750,7 @@ static void* agent_spawn(agent_spawn_args* pass)
  *
  * @param max the number of these that can concurrently, -1 for no limit
  * @param spc any special conditions associated with the agent
- * @return
+ * @return meta_agent_t Meta agent
  */
 meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
 {
@@ -768,7 +799,9 @@ void meta_agent_destroy(meta_agent_t* ma)
 }
 
 /**
- * allocate and spawn a new agent. The agent that is spawned will be of the same
+ * @brief Allocate and spawn a new agent.
+ *
+ * The agent that is spawned will be of the same
  * type as the meta_agent that is passed to this function and the agent will run
  * on the host that is passed.
  *
@@ -885,15 +918,15 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
 }
 
 /**
- * frees the memory associated with an agent.
+ * @brief Frees the memory associated with an agent.
  *
  * This include:
- *  1. all of the files that are open in the agent
- *  2. all of the pipes still open for the agent
- *  3. inform the os that the process can die using a waitpid()
- *  4. free the internal data structure of the agent
+ * -# All of the files that are open in the agent
+ * -# All of the pipes still open for the agent
+ * -# Inform the os that the process can die using a waitpid()
+ * -# Free the internal data structure of the agent
  *
- * @param a the agent to destroy
+ * @param agent the agent to destroy
  */
 void agent_destroy(agent_t* agent)
 {
@@ -920,6 +953,7 @@ void agent_destroy(agent_t* agent)
  * received for several process deaths, there will be seperate events for each
  * pid.
  *
+ * @param scheduler the scheduler reference to which process was attached to
  * @param pid the pid of the process that died
  */
 void agent_death_event(scheduler_t* scheduler, pid_t* pid)
@@ -981,12 +1015,15 @@ void agent_death_event(scheduler_t* scheduler, pid_t* pid)
 }
 
 /**
- * Event created when a new agent has been created. This means that the agent
+ * @brief Event created when a new agent has been created.
+ *
+ * This means that the agent
  * has been allocated internally and the fork() call has successfully executed.
  * The agent has not yet communicated with the scheduler when this event is
  * created.
  *
- * @param a the agent that has been created.
+ * @param scheduler the scheduler reference to which agent has to attach
+ * @param agent the agent that has been created.
  */
 void agent_create_event(scheduler_t* scheduler, agent_t* agent)
 {
@@ -999,12 +1036,15 @@ void agent_create_event(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
- * Event created when an agent is ready for more data. This will event will be
+ * @brief Event created when an agent is ready for more data.
+ *
+ * This will event will be
  * created when an agent first communicates with the scheduler, so this will
  * handle changing its status to AG_RUNNING. This will also be created every
  * time an agent finishes a block of data.
  *
- * @param a the agent that is ready.
+ * @param scheduler the scheduler reference to which agent is attached
+ * @param agent the agent that is ready
  */
 void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
 {
@@ -1048,6 +1088,7 @@ void agent_ready_event(scheduler_t* scheduler, agent_t* agent)
  * that are hung without heart beat or any agents that have stopped updating
  * the number of item processed.
  *
+ * @param scheduler the scheduler reference to inform
  * @param unused needed since this an event, but should be NULL
  */
 void agent_update_event(scheduler_t* scheduler, void* unused)
@@ -1056,10 +1097,13 @@ void agent_update_event(scheduler_t* scheduler, void* unused)
 }
 
 /**
- * Fails an agent. This will move the agent status to AG_FAILED and send a
+ * @brief Fails an agent.
+ *
+ * This will move the agent status to AG_FAILED and send a
  * SIGKILL to the relevant agent. It will also update the agents status within
  * the job that owns it and close the associated communication thread.
  *
+ * @param scheduler the scheduler to which agent is attached
  * @param agent  the agent that is failing.
  */
 void agent_fail_event(scheduler_t* scheduler, agent_t* agent)
@@ -1072,9 +1116,11 @@ void agent_fail_event(scheduler_t* scheduler, agent_t* agent)
 }
 
 /**
- * TODO
+ * @brief Receive agent on interface.
  *
- * @param ostr
+ * Calls agent_list() and print evert agent attached to the scheduler.
+ * @param scheduler the scheduler to which agent is attached
+ * @param ostr Stream to write info to
  */
 void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr)
 {
@@ -1091,7 +1137,7 @@ void list_agents_event(scheduler_t* scheduler, GOutputStream* ostr)
  * is used to transition between agent states instead of a raw set of the status
  * so that correct printing of the verbose message is guaranteed
  *
- * @param a the agent to change the status for
+ * @param agent the agent to change the status for
  * @param new_status the new status of the agentchar* sysconfdir = NULL;    // system configuration directory (SYSCONFDIR)
  */
 void agent_transition(agent_t* agent, agent_status new_status)
@@ -1114,7 +1160,7 @@ void agent_transition(agent_t* agent, agent_status new_status)
  * Pauses an agent, this will pause the agent by sending a SIGSTOP to the
  * process and then decrease the load on the host machine.
  *
- * @param a the agent to pause
+ * @param agent the agent to pause
  */
 void agent_pause(agent_t* agent)
 {
@@ -1124,10 +1170,10 @@ void agent_pause(agent_t* agent)
 
 /**
  * Unpause the agent, this will send a SIGCONT to the process regardless of if
- * a SIGTOP was sent. If the process wasn't SIGSTOP'd this will do nothing. Also
+ * a SIGCONT was sent. If the process wasn't SIGSTOP'd this will do nothing. Also
  * increases the load on the host.
  *
- * @param a the agent to unpause
+ * @param agent the agent to unpause
  */
 void agent_unpause(agent_t* agent)
 {
@@ -1136,12 +1182,14 @@ void agent_unpause(agent_t* agent)
 }
 
 /**
- * Prints the status of the agent to the output stream provided. The formating
- * for this is as such:
- *   agent:<pid> host:<host> type:<type> status:<status> time:<time>
+ * @brief Prints the status of the agent to the output stream provided.
  *
- * @param a
- * @param ostr
+ * The formating for this is as such:
+ *
+ *     `agent:<pid> host:<host> type:<type> status:<status> time:<time>`
+ *
+ * @param agent Agent to get info from
+ * @param ostr  Stream to write info to
  */
 void agent_print_status(agent_t* agent, GOutputStream* ostr)
 {
@@ -1166,10 +1214,12 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
 }
 
 /**
- * unclean kill of an agent. This simply sends a SIGKILL to the agent and lets
+ * @brief Unclean kill of an agent.
+ *
+ * This simply sends a SIGKILL to the agent and lets
  * everything else get cleaned up normally.
  *
- * @param a the agent to kill
+ * @param agent the agent to kill
  */
 void agent_kill(agent_t* agent)
 {
@@ -1181,7 +1231,7 @@ void agent_kill(agent_t* agent)
  * Acts as a standard printf, but prints the agents instead of stdout. This is
  * the main function used by the scheduler when communicating with the agents.
  *
- * @param a the agent to send the formated data to
+ * @param agent the agent to send the formated data to
  * @param fmt the formating string for the data
  * @return if the print was successful
  */
@@ -1216,7 +1266,7 @@ int aprintf(agent_t* agent, const char* fmt, ...)
  * agent. When using this function, one should always print "@@@..." where ...
  * is the message that is actually getting sent.
  *
- * @param a the agent to send the information to
+ * @param agent the agent to send the information to
  * @param buf the actual data
  * @param count the number of bytes to write to the agent
  * @return returns if the write was successful
@@ -1231,10 +1281,11 @@ ssize_t agent_write(agent_t* agent, const void* buf, int count)
 /* ************************************************************************** */
 
 /**
- * Calls the agent test function for every type of agent. This is used when
- * either the -t or -T option are used upon scheduler creation.
+ * @brief Calls the agent test function for every type of agent.
  *
- * @param h the host to start the agents on,
+ * This is used when either the -t or -T option are used upon scheduler creation.
+ *
+ * @param scheduler scheduler reference to test attached agents
  */
 void test_agents(scheduler_t* scheduler)
 {
@@ -1242,9 +1293,10 @@ void test_agents(scheduler_t* scheduler)
 }
 
 /**
- * Call the agent_kill function for every agent within the system. This will
- * send a SIGKILL to every child process of the scheduler. Used when shutting
- * down the scheduler.
+ * @brief Call the agent_kill function for every agent within the system.
+ *
+ * This will send a SIGKILL to every child process of the scheduler. Used when
+ * shutting down the scheduler.
  */
 void kill_agents(scheduler_t* scheduler)
 {
@@ -1255,6 +1307,7 @@ void kill_agents(scheduler_t* scheduler)
  * Creates a new meta agent and adds it to the list of meta agents. This will
  * parse the shell command that will start the agent process.
  *
+ * @param meta_agents GTree of meta agents available for the scheduler
  * @param name the name of the meta agent (e.g. "nomos", "copyright", etc...)
  * @param cmd the shell command used to the run the agent
  * @param max the max number of this type of agent that can run concurrently

@@ -61,7 +61,7 @@ abstract class DbManager
       $this->dbDriver->begin();
     }
     $this->transactionDepth++;
-   }
+  }
 
   public function commit() {
     $this->transactionDepth--;

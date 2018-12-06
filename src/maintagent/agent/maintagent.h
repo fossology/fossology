@@ -33,6 +33,9 @@
 #include <libfossology.h>
 #define FUNCTION
 
+/**
+ * Maximum buffer to use
+ */
 #define myBUFSIZ	2048
 
 /* File utils.c */

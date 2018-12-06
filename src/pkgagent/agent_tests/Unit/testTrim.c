@@ -20,12 +20,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pkgagent.h>
 
 /**
- * \file testTrim.c
- * \brief unit test for Trim function
+ * \file
+ * \brief Unit test for Trim function
  */
 
 /**
- * \brief test case for input parameter is normal
+ * \brief Test case for input parameter is normal
+ * \test
+ * -# Create a string with extra spaces both ends
+ * -# Call trim()
+ * -# Check if the extra space were removed
  */
 void test_Trim_normal()
 {
@@ -37,7 +41,11 @@ void test_Trim_normal()
 }
 
 /**
- * \brief test case for input parameter is null
+ * \brief Test case for input parameter is null
+ * \test
+ * -# Create an empty string
+ * -# Call trim()
+ * -# Check if entry string is returned
  */
 void test_Trim_str_is_null()
 {
@@ -48,7 +56,11 @@ void test_Trim_str_is_null()
 }
 
 /**
- * \brief test case for input parameter is all space
+ * \brief Test case for input parameter is all space
+ * \test
+ * -# Create a string with only spaces
+ * -# Call trim()
+ * -# Check if empty string is returned
  */
 void test_Trim_allspace()
 {

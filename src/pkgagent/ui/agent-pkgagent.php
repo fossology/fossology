@@ -19,6 +19,14 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @dir
+ * @brief UI plugin of pkgagent
+ * @file
+ * @brief UI plugin of pkgagent
+ * @class PkgAgentPlugin
+ * @brief UI plugin of pkgagent
+ */
 class PkgAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -29,11 +37,19 @@ class PkgAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "package meta data scanner", "pkgagent_ars");
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   */
   function preInstall()
   {
     $dbManager = $GLOBALS['container']->get('db.manager');

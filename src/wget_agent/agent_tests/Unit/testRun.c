@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "testRun.h"
 
 /**
- * \file testRun.c
+ * \file
  * \brief main function for in this testing module
  */
 

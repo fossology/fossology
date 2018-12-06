@@ -19,7 +19,8 @@
 
 /**
  * cliParams
- * \brief test the ununpack agent cli parameters.
+ * @file
+ * @brief Test the ununpack agent cli parameters. (Normal)
  *
  * @group ununpack
  */
@@ -28,16 +29,34 @@ require_once './utility.php';
 use Fossology\Lib\Test\TestPgDb;
 use Fossology\Lib\Test\TestInstaller;
 
+/**
+ * @class cliParamsTest4Ununpack
+ * @brief Test the ununpack agent cli parameters. (Normal)
+ */
 class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
 {
+  /** @var string $agentDir
+   * Location of agent directory
+   */
   private $agentDir;
+  /** @var string $ununpack
+   * Location of agent binary
+   */
   private $ununpack;
 
-  /** @var TestPgDb */
+  /** @var TestPgDb $testDb
+   * Test db
+   */
   private $testDb;
-  /** @var TestInstaller */
+  /** @var TestInstaller $testInstaller
+   * TestInstaller object
+   */
   private $testInstaller;
 
+  /**
+   * @brief Setup test repo and db
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   function setUp()
   {
     global $TEST_DATA_PATH;
@@ -62,6 +81,10 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->testDb->alterTables(array(), true);
   }
 
+  /**
+   * @brief Teardown test repo and db
+   * @see PHPUnit_Framework_TestCase::tearDown()
+   */
   public function tearDown()
   {
     $this->testInstaller->uninstall($this->agentDir);
@@ -75,7 +98,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
       exec("/bin/rm -rf $TEST_RESULT_PATH");
   }
 
-  /* command is ununpack -i */
+  /**
+   * @brief Call agent with `-i` flag
+   * @test
+   * -# Call agent with `-i` flag to initialize db
+   * -# Check if agent return OK
+   */
   function testNormalParamI(){
 
     $command = $this->ununpack." -i";
@@ -83,8 +111,14 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertEquals($rtn, 0);
   }
 
-  /* command is ununpack -qCR xxxxx -d xxxxx, begin */
-  /* unpack iso file*/
+  /**
+   * @brief Pass an iso to agent
+   *
+   * Command is `ununpack -qCR xxxxx -d xxxxx`
+   * @test
+   * -# Pass an ISO to the agent
+   * -# Check if it get extracted
+   */
   function testNormalIso1(){
 
     global $TEST_DATA_PATH;
@@ -92,28 +126,41 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
 
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/test.iso -d $TEST_RESULT_PATH";
     exec($command);
-    /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
+    /* check if the result is ok? Larry think the file & dir name should be not changed, even just to uppercase */
     $this->assertFileExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip.dir/test.dir/test.zip.dir/ununpack");
     $this->assertFileExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip.dir/test.dir/test.jar.dir/ununpack");
   }
 
-  /* command is ununpack -qCR xxxxx -d xxxxx -L log */
-  /* unpack iso file and check log file*/
+  /**
+   * @brief Pass a log file to the agent
+   *
+   * Command is `ununpack -qCR xxxxx -d xxxxx -L log`
+   * @test
+   * -# Pass a compressed file and a log file with `-L` flag
+   * -# Check if agent extract the compressed file
+   * -# Check if agent write to the log file
+   */
   function testNormalParamL(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
 
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/test.iso -d $TEST_RESULT_PATH -L $TEST_RESULT_PATH/log";
     exec($command);
-    /* check if the result is ok? larry think the file & dir name should be not changed, even just to uupercase */
+    /* check if the result is ok? Larry think the file & dir name should be not changed, even just to uppercase */
     $this->assertFileExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip.dir/test.dir/test.zip.dir/ununpack");
     $this->assertFileExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip.dir/test.dir/test.zip.dir/ununpack");
     /* check if the log file generated? */
     $this->assertFileExists("$TEST_RESULT_PATH/log");
   }
 
-  /* command is ununpack -qCR -x xxxxx -d xxxxx*/
-  /* unpack zip file with -x and check if delete all unpack files.*/
+  /**
+   * @brief Check clean flag
+   *
+   * Command is `ununpack -qCR -x xxxxx -d xxxxx`
+   * @test
+   * -# Pass agent a compressed file and `-x` flag
+   * -# Check if the agent removed the unpacked files
+   */
   function testNormalParamx(){
 
     global $TEST_DATA_PATH;
@@ -125,8 +172,14 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertTrue(!$isDir);
   }
 
-  /* command is ununpack -qC -r 0 -d xxxxx*/
-  /* unpack zip file with -r 0.*/
+  /**
+   * @brief Check recurse flag
+   *
+   * Command is `ununpack -qC -r 0 -d xxxxx`
+   * @test
+   * -# Pass a double compressed file to the agent with `-r` flag
+   * -# Check if the agent unpack only upto depth passed
+   */
   function testNormalParamr(){
 
     global $TEST_DATA_PATH;
@@ -139,7 +192,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertTrue(!$isDir);
   }
 
-  /* unpack iso, another case */
+  /**
+   * @brief Pass an iso to agent
+   * @test
+   * -# Pass an ISO to the agent
+   * -# Check if it get extracted
+   */
   function testNormalIso2(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -150,7 +208,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/test.iso.dir/test1.zip.tar.dir/test1.zip");
   }
 
-  /* unpack rpm file */
+  /**
+   * @brief Check for RPM files
+   * @test
+   * -# Pass an RPM file to the agent
+   * -# Check if the contents of RPM get unpacked
+   */
   function testNormalRpm(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -165,7 +228,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
                             "usr/share/fossology/bsam/ui/ui-license.php");
   }
 
-  /* unpack tar file */
+  /**
+   * @brief Check for TAR files
+   * @test
+   * -# Pass an TAR file to the agent
+   * -# Check if the contents of TAR get unpacked
+   */
   function testNormalTar(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -173,12 +241,18 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
                   "emptydirs.tar -d $TEST_RESULT_PATH";
     exec($command);
-    /* check if the result is ok? select some files to confirm */
+    /* check if the result is ok? Select some files to confirm */
     $this->assertFileExists("$TEST_RESULT_PATH/emptydirs.tar.dir/emptydirs/dir2/zerolenfile");
   }
 
-  /* unpack rar file, compress if on windows operating system */
-  /* TODO: failing on Travis
+  /**
+   * @brief Check for RAR files compressed on Windows systems
+   * @test
+   * -# Pass an RAR file to the agent compressed on windows
+   * -# Check if the contents of RAR get unpacked
+   * @todo: failing on Travis
+   */
+  /*
   function testNormalRarWin(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -186,13 +260,17 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
                   "test.rar -d $TEST_RESULT_PATH";
     exec($command);
-    /* check if the result is ok? select one file to confirm *\
+    /* check if the result is ok? select one file to confirm *\/
     $this->assertFileExists("$TEST_RESULT_PATH/test.rar.dir/dir1/ununpack");
   } */
 
 
   /**
    * unpack archive lib and xx.deb/xx.udeb file
+   * @brief Check for archive lib and deb files
+   * @test
+   * -# Pass the files to the agent
+   * -# Check if the contents of files get unpacked
    * \todo Test not working on Xenail but pass on Trusty
    */
   /*
@@ -220,7 +298,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
             "control.tar.gz.dir/control.tar.dir/md5sums");
   } */
 
-  /* unpack jar file */
+  /**
+   * @brief Check for Jar files
+   * @test
+   * -# Pass a Jar file to the agent
+   * -# Check if the contents of Jar get unpacked
+   */
   function testNormalJar(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -232,7 +315,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/test.jar.dir/ununpack");
   }
 
-  /* unpack zip file */
+  /**
+   * @brief Check for ZIP files
+   * @test
+   * -# Pass a ZIP file to the agent
+   * -# Check if the contents of ZIP get unpacked
+   */
   function testNormalZip(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -246,7 +334,10 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * unpack cab and msi file
+   * @brief Check for CAB and MSI files
+   * @test
+   * -# Pass CAB and MSI files to the agent
+   * -# Check if the contents of files get unpacked
    * \todo Test not working on Xenail but pass on Trusty
    */
   /*
@@ -274,7 +365,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/test.msi.dir/ununpack");
   } */
 
-  /* unpack dsc file */
+  /**
+   * @brief Check for DSC files
+   * @test
+   * -# Pass an DSC file to the agent
+   * -# Check if the contents of DSC get unpacked
+   */
   function testNormalDsc(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -286,7 +382,13 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/test_1-1.dsc.unpacked/debian/README.Debian");
   }
 
-  /* unpack .Z .gz .bz2 file */
+
+  /**
+   * @brief Check for Z, GZ and BZ2 files
+   * @test
+   * -# Pass Z, GZ and BZ2 files to the agent
+   * -# Check if the contents of files get unpacked
+   */
   function testNormalCompressedFile(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -321,7 +423,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/fossI16L335U29.tar.bz2.dir/fossI16L335U29.tar.dir/fossology/README");
   }
 
-  /* unpack .Z .gz .bz2 tarball */
+  /**
+   * @brief Check for Z, GZ and BZ2 tarballs
+   * @test
+   * -# Pass Z, GZ and BZ2 tarballs to the agent
+   * -# Check if the contents of files get unpacked
+   */
   function testNormalTarball(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -345,7 +452,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/fossI16L335U29.tar.bz2.dir/fossI16L335U29.tar.dir/fossology/README");
   }
 
-  /* analyse pdf file, to-do, mybe need to modify this test case */
+  /**
+   * @brief Check for PDF files
+   * @test
+   * -# Pass a PDF file to the agent
+   * -# Check if the contents of file get unpacked
+   */
   function testNormalPdf(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -353,14 +465,17 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
                   "test.pdf -d $TEST_RESULT_PATH";
     exec($command);
-    /* check if the result is ok? select one file to confirm,
-       now the israel.html is not under destination directory,
-       is under source directory
-     */
+    /* check if the result is ok? select one file to confirm. */
     $this->assertFileExists("$TEST_RESULT_PATH/test.pdf.dir/test");
   }
 
-  /* unpack upx file, to-do, uncertain how is the unpacked result like */
+  /**
+   * @brief Check for UPX files
+   * @test
+   * -# Pass a UPX file to the agent
+   * -# Check if the contents of file get unpacked
+   * @todo Uncertain how the unpack results looks like
+   */
   function testNormalUpx(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -371,7 +486,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     //$this->assertFileExists("$TEST_RESULT_PATH/");
   }
 
-  /* unpack disk image(file system) */
+  /**
+   * @brief Check for disk images (file systems)
+   * @test
+   * -# Pass ext2, ext3, fat and ntfs disk images to the agent
+   * -# Check if the contents of images get unpacked
+   */
   function testNormalFsImage(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -419,6 +539,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
 
   /* unpack boot x-x86_boot image, to-do, do not confirm
      how is the boot x-x86 boot image like  */
+
   /*function testNormalBootImage(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -431,11 +552,14 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertFileExists("$TEST_RESULT_PATH/vmlinuz-2.6.26-2-686.dir/Partition_0000");
   }*/
 
-  /* command is ununpack -qCR xxxxx -d xxxxx, end */
-
-  /* command is ununpack -qCR -m 10 xxxxx -d xxxxx, begin */
-
-  /* unpack one comlicated package, using -m option, multy-process */
+  /**
+   * @brief Check for multi process flag
+   *
+   * Command is `ununpack -qCR -m 10 xxxxx -d xxxxx`
+   * @test
+   * -# Pass a complex file to the agent with `-m` flag
+   * -# Check if the contents of file get unpacked
+   */
   function testNormalMultyProcess(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -453,7 +577,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
 
   }
 
-  /* analyse EXE file */
+  /**
+   * @brief Check for EXE files
+   * @test
+   * -# Pass a EXE file to the agent
+   * -# Check if the contents of file get unpacked
+   */
   function testNormalEXE(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -467,7 +596,12 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $this->assertTrue(!$isDir);
   }
 
-  /* test ununpack cpio file */
+  /**
+   * @brief Check for CPIO files
+   * @test
+   * -# Pass a CPIO file to the agent
+   * -# Check if the contents of file get unpacked
+   */
   function testNormalcpio(){
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -475,8 +609,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
     $command = $this->ununpack." -qCR $TEST_DATA_PATH/".
                   "test.cpio -d $TEST_RESULT_PATH";
     exec($command);
-    /* check if the result is ok?
-     */
+    /* check if the result is ok? */
     $this->assertFileExists("$TEST_RESULT_PATH/test.cpio.dir/ununpack");
   }
 }

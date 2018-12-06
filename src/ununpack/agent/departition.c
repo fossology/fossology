@@ -1,6 +1,6 @@
 /******************************************************************
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -16,10 +16,9 @@
  ******************************************************************/
 
 /**
- * \file departition.c
+ * \file
  * \brief Extract a partition table from file systems.
- **/
-
+ */
 
 #define _LARGEFILE64_SOURCE
 
@@ -48,27 +47,28 @@ char BuildVersion[]="Build version: " COMMIT_HASH ".\n";
 char Version[]=COMMIT_HASH;
 #endif
 
-int	Test=0;	/* set to 0 to extract, 1 to just be verbose */
-int	Verbose=0;
+int	Test=0;	      ///< Set to 0 to extract, 1 to just be verbose
+int	Verbose=0;    ///< Verbose level for log
 
 /**
- * \brief Extract a kernel file system and copy it to a new file 
+ * \brief Extract a kernel file system and copy it to a new file
  *        called "Kernel_%04d",Counter
  *
  * \param Fin Open file descriptor
  *
- *        The first linux kernels were files: vmlinux.
- *        The files got big, so they compressed them: vmlinux.gz
- *        Today, they are integrated into boot managers, so they
- *        actually are wrapped in a file system: vmlinux.gz + x86 sector = vmlinuz
- *        The location of the vmlinux.gz in vmlinuz varies based on
- *        boot options and versions.  (Assembly code is actually used to
- *        identify the offset.)
- *        So, we just scan until we find the start of the file.
- *        *.gz files begin with "1F 8B 08 00" or "1F 8B 08 08"
- *        Find the *.gz, then dump the entire file.
- *        (This is similar to the approach used by extract-ikconfig.)
- **/
+ * The first linux kernels were files: vmlinux.
+ * The files got big, so they compressed them: vmlinux.gz
+ * Today, they are integrated into boot managers, so they
+ * actually are wrapped in a file system: vmlinux.gz + x86 sector = vmlinuz
+ * The location of the vmlinux.gz in vmlinuz varies based on
+ * boot options and versions. (Assembly code is actually used to
+ * identify the offset.)
+ *
+ * So, we just scan until we find the start of the file.
+ * *.gz files begin with "1F 8B 08 00" or "1F 8B 08 08"
+ * Find the *.gz, then dump the entire file.
+ * (This is similar to the approach used by extract-ikconfig.)
+ */
 void	ExtractKernel	(int Fin)
 {
   long Hold;
@@ -132,7 +132,7 @@ void	ExtractKernel	(int Fin)
   }
 
   /* Copy file */
-  /** NOTE: ReadSize == bytes ready to save to file **/
+  /** \note ReadSize == bytes ready to save to file */
   while(ReadSize > 0)
   {
     Bp=Buffer;
@@ -156,12 +156,13 @@ void	ExtractKernel	(int Fin)
 
 /**
  * \brief Dump a partition to a file
- *        This function extracts, then returns the pointer back
- *        to the original location.
- * \param Fin  source of data (disk image)
- * \param Start  begin of partition
- * \param Size   end of partition
- **/
+ *
+ * This function extracts, then returns the pointer back
+ * to the original location.
+ * \param Fin    Source of data (disk image)
+ * \param Start  Begin of partition
+ * \param Size   End of partition
+ */
 void	ExtractPartition	(int Fin, uint64_t Start, uint64_t Size)
 {
   off64_t Hold;
@@ -215,7 +216,7 @@ void	ExtractPartition	(int Fin, uint64_t Start, uint64_t Size)
 #ifdef O_LARGEFILE
   Fout = open(Name,O_CREAT | O_LARGEFILE | O_WRONLY | O_TRUNC, 0644);
 #else
-  /** BSD does not use nor need O_LARGEFILE **/
+  /* BSD does not use nor need O_LARGEFILE */
   Fout = open(Name,O_CREAT | O_WRONLY | O_TRUNC, 0644);
 #endif
   if (Fout == -1)
@@ -260,12 +261,13 @@ void	ExtractPartition	(int Fin, uint64_t Start, uint64_t Size)
 
 /**
  * \brief Read a master boot record (first 0x200 bytes).
- *        The MBR contains 446 bytes of assembly, and 4 partition tables.
- *        Extracts kernel and partitions based on MBR.
+ *
+ * The MBR contains 446 bytes of assembly, and 4 partition tables.
+ * Extracts kernel and partitions based on MBR.
  * \param Fin Open file descriptor to read
  * \param MBRStart offset for record
  * \return 0=not MBR, 1=MBR
- **/
+ */
 int	ReadMBR	(int Fin, uint64_t MBRStart)
 {
   unsigned char MBR[0x200]; /* master boot record sector */
@@ -329,7 +331,8 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
       printf("           HSC Start=%d,%d,%d\n",Head[0],Sec[0],Cyl[0]);
       printf("           HSC End  =%d,%d,%d\n",Head[1],Sec[1],Cyl[1]);
       printf("           Sector: Start=%llu (%08llx)  End=%llu (%08llx)\n",
-          (unsigned long long)Start,(unsigned long long)Start,(unsigned long long)Start+Size,(unsigned long long)Start+Size);
+          (unsigned long long)Start,(unsigned long long)Start,
+          (unsigned long long)Start+Size,(unsigned long long)Start+Size);
       printf("           Byte: Logical start= %llu (%08llx)\n",
           (unsigned long long)MBRStart+(Start)*SectorSize,
           (unsigned long long)MBRStart+(Start)*SectorSize);
@@ -368,7 +371,9 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
         long S,E;
         S=MBRStart+(Start)*SectorSize;
         E=MBRStart+(Size)*SectorSize;
-        if (Verbose) fprintf(stderr,"Extracting type %02x: start=%04llx  size=%llu\n",Type,(unsigned long long)S,(unsigned long long)E);
+        if (Verbose)
+          fprintf(stderr,"Extracting type %02x: start=%04llx  size=%llu\n",
+                  Type,(unsigned long long)S,(unsigned long long)E);
         ExtractPartition(Fin,S,E);
       }
     }
@@ -379,7 +384,7 @@ int	ReadMBR	(int Fin, uint64_t MBRStart)
 /**
  * \brief Usage
  * \param Filename (executable argv[0] name)
- **/
+ */
 void	Usage	(char *Filename)
 {
   fprintf(stderr,"Usage: %s [-t] diskimage\n",Filename);
@@ -388,8 +393,8 @@ void	Usage	(char *Filename)
 } /* Usage() */
 
 /**
- * \brief main
-**/
+ * \brief Main for departition
+ */
 int	main	(int argc, char *argv[])
 {
   int Fin;
@@ -422,7 +427,7 @@ int	main	(int argc, char *argv[])
 #ifdef O_LARGEFILE
   Fin = open(argv[optind],O_RDONLY | O_LARGEFILE);
 #else
-  /** BSD does not use nor need O_LARGEFILE **/
+  /* BSD does not use nor need O_LARGEFILE */
   Fin = open(argv[optind],O_RDONLY);
 #endif
   if (Fin == -1)
