@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2018 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -45,7 +46,7 @@
  *
  * \return string containing formatted checkbox list HTML
  */
-function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = "") 
+function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username = "")
 {
 
   global $Plugins;
@@ -61,7 +62,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
     $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);    
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
     $uList = pg_fetch_all($result);
     pg_free_result($result);
     // Ulist should never be empty, if it is, something really wrong,
@@ -85,14 +86,14 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
       $FoundSkip = false;
       foreach($SkipAgents as $SkipAgent)
       {
-        if ($Agent->Name == $SkipAgent)  
+        if ($Agent->Name == $SkipAgent)
         {
           $FoundSkip = true;
           break;
         }
       }
       if ($FoundSkip) continue;
- 
+
       if ($upload_pk != -1) {
         $rc = $Agent->AgentHasResults($upload_pk);
       }
@@ -122,7 +123,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
 
 /**
  * \brief  Assume someone called AgentCheckBoxMake() and submitted the HTML form.
- *         Run AgentAdd() for each of the checked agents. 
+ *         Run AgentAdd() for each of the checked agents.
  *
  * \param $job_pk
  * \param $upload_pk
@@ -164,7 +165,7 @@ function AgentSchedule($jobId, $uploadId, $agents)
  *        associated with the upload
  * \return array of dependencies
  */
-function FindDependent($UploadPk, $list=NULL) 
+function FindDependent($UploadPk, $list=NULL)
 {
   /*
    * Find the jobs that fo_notify should depend on. fo_notify is
@@ -300,12 +301,13 @@ function AgentARSList($TableName, $upload_pk, $limit=1, $agent_fk=0, $ExtraWhere
  *
  * \param $upload_pk - upload id
  * \param $arsTableName - name of ars table to check for the requested agent
+ * \param bool $arsSuccess Need only success results?
  *
  * \returns nomos agent_pk or 0 if none
  */
-function LatestAgentpk($upload_pk, $arsTableName)
+function LatestAgentpk($upload_pk, $arsTableName, $arsSuccess = false)
 {
-  $AgentRec = AgentARSList($arsTableName, $upload_pk, 1);
+  $AgentRec = AgentARSList($arsTableName, $upload_pk, 1, 0, $arsSuccess);
 
   if (empty($AgentRec)) {
     $Agent_pk = 0;
@@ -455,11 +457,15 @@ function CheckARS($upload_pk, $AgentName, $AgentDesc, $AgentARSTableName)
   $Latest_agent_pk = GetAgentKey($AgentName, $AgentDesc);
 
   /* get last agent pk with successful results */
-  $Last_successful_agent_pk = LatestAgentpk($upload_pk, $AgentARSTableName);
+  $Last_successful_agent_pk = LatestAgentpk($upload_pk, $AgentARSTableName, true);
 
-  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) and ($Latest_agent_pk == $Last_successful_agent_pk)) return 1;
-
-  if (!empty($Latest_agent_pk) and !empty($Last_successful_agent_pk) ) return 2;
+  if (! empty($Latest_agent_pk) && ! empty($Last_successful_agent_pk)) {
+    if ($Latest_agent_pk == $Last_successful_agent_pk) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
 
   return 0;
 } // CheckARS()
