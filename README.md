@@ -1,7 +1,7 @@
 # FOSSology
 
 [![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.svg?branch=master)](https://travis-ci.org/fossology/fossology)
-[![Stories in Ready](https://badge.waffle.io/fossology/fossology.svg?label=ready&title=Ready)](http://waffle.io/fossology/fossology)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2395/badge)](https://bestpractices.coreinfrastructure.org/projects/2395)
 [![Coverage Status](https://coveralls.io/repos/github/fossology/fossology/badge.svg?branch=master)](https://coveralls.io/github/fossology/fossology?branch=master)
 
 ## About
