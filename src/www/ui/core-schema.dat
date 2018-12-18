@@ -944,11 +944,14 @@
   $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_compatible\" bool DEFAULT false";
   $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_compatible\" SET NOT NULL, ALTER COLUMN \"rf_spdx_compatible\" SET DEFAULT false";
 
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_flag\" IS 'default will be 1 if it gets updated from UI it will be 2'";
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_flag\" int4 DEFAULT 1";
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_flag\" SET NOT NULL, ALTER COLUMN \"rf_flag\" SET DEFAULT 1";
+
 
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
