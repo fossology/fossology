@@ -76,9 +76,9 @@ jobs:
       install:
         - composer install --prefer-dist --working-dir=src
         - ./install/scripts/install-spdx-tools.sh
-      before_script: ./utils/prepare-test -afty
+      before_script: &default-before-script
+        ./utils/prepare-test -afty
       script:
-        - make
         - make test
     - <<: *compiler-tests
       env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
@@ -109,6 +109,26 @@ jobs:
           packages:
             - *default_packages
             - clang-3.6
+    - <<: *compiler-tests
+      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
+      addons:
+        postgresql: "10"
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-6
+            - g++-6
+            - postgresql-10
+            - postgresql-client-10
+      before_script: &postgres-before-script
+        # Use default port
+        - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
+        # Use 9.6 auth config:
+        - sudo cp /etc/postgresql/{9.6,10}/main/pg_hba.conf
+        - sudo service postgresql restart
+        - *default-before-script
 #### PHPUnit tests ###########################
     - &phpunit-tests
       php: 5.6
@@ -126,6 +146,18 @@ jobs:
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
     - <<: *phpunit-tests
       php: 7.2
+      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
+    - <<: *phpunit-tests
+      php: 7.2
+      env: PGPORT=5432
+      addons:
+        postgresql: "10"
+        apt:
+          packages:
+            - *default_packages
+            - postgresql-10
+            - postgresql-client-10
+      before_script: *postgres-before-script
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
   allow_failures:
     - name: Copy/Paste Detector

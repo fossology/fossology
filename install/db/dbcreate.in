@@ -26,12 +26,12 @@ su postgres -c "psql --tuples-only --command \"select * from pg_database where d
 if [ $? = 0 ]; then
    echo "NOTE: fossology database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
-   su postgres -c 'createlang -l fossology' |grep -q plpgsql
+   su postgres -c 'echo "SELECT * FROM pg_language;" | psql -t fossology' |grep -q plpgsql
    if [ $? = 0 ]; then
       echo "NOTE: plpgsql already exists in fossology database, good"
    else
       echo "NOTE: plpgsql doesn't exist, adding"
-      su postgres -c 'createlang plpgsql fossology'
+      su postgres -c 'echo "CREATE LANGUAGE plpgsql;" | psql fossology'
       if [ $? != 0 ]; then
          echo "ERROR: failed to add plpgsql to fossology database"
       fi
