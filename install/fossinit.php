@@ -168,11 +168,10 @@ if($dbManager->existsTable("author"))
   require_once("$LIBEXECDIR/resequence_author_table.php"); // If table exists, clean up for Schema
 }
 
-if($isUpdating && substr(str_replace(".", "", $sysconfig['Release']), 0, 3) <= 330)
-{
-  require_once("$LIBEXECDIR/dbmigrate_3.3-3.4.php");
-  Migrate_33_34($dbManager, $Verbose);
-}
+// Migration script to clear tables for new constraints
+require_once("$LIBEXECDIR/dbmigrate_3.3-3.4.php");
+Migrate_33_34($dbManager, $Verbose);
+
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
 {
