@@ -1782,11 +1782,11 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_46
 %KEY% =NULL=
-%STR% "as an alternative.{,20}you may use this file under"
+%STR% "as an alternative.{0,20}you may use this file under"
 #
 %ENTRY% _LT_DUAL_LICENSE_47
 %KEY% =NULL=
-%STR% "under the terms of either.{,15}or"
+%STR% "under the terms of either.{0,15}or"
 #
 %ENTRY% _LT_SUBSEQUENT_VERSION
 %KEY% "licen[cs]"
