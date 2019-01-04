@@ -179,5 +179,3 @@ jobs:
         target-branch: master
         on:
           branch: master
-  allow_failures:
-    - name: Copy/Paste Detector

@@ -66,6 +66,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     NOTE: By default, no analysis agents are queued up.
     -T       = TEST. No database or repository updates are performed.
                Test mode enables verbose mode.
+    -i       = ignore scm data scaning
 
   FOSSology source options:
     archive  = file, directory, or URL to the archive.
@@ -225,6 +226,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $vcsuser;
   global $vcspass;
   global $TarExcludeList;
+  global $scm;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {
@@ -266,14 +268,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Create the upload for the file */
   if ($Verbose) {
-    print "JobAddUpload($user_pk, $group_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
+    print "JobAddUpload($user_pk, $group_pk, $UploadName, $UploadArchive, $UploadDescription, $Mode, $FolderPk, $public_flag, $scm);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
+    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag, $scm);
     print "  UploadPk is: '$UploadPk'\n";
   }
 
@@ -378,6 +380,7 @@ $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
 $public_flag = 0;
+$scm = 'f';
 $OptionS = "";
 
 $user = $passwd = "";
@@ -503,6 +506,9 @@ for ($i = 1;$i < $argc;$i++) {
       break;
     case '-G': /* upload from git repo */
       $VCS = 'Git';
+      break;
+    case '-i': /* ignore scm data when scaning */
+      $scm = 't';
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
