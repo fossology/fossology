@@ -175,6 +175,8 @@ class UploadSrvPage extends UploadPageBase
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
+    $scm = intval($request->get('scm') == 1) ? 't' : 'f';
+
     $sourceFiles = trim($request->get(self::SOURCE_FILES_FIELD));
     $sourceFiles = $this->basicShEscaping($sourceFiles);
     $host = $request->get('host') ?: "localhost";
@@ -242,7 +244,7 @@ class UploadSrvPage extends UploadPageBase
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    $uploadId = JobAddUpload($userId, $groupId, $shortName, $sourceFiles, $description, $uploadMode, $folderId, $publicPermission);
+    $uploadId = JobAddUpload($userId, $groupId, $shortName, $sourceFiles, $description, $uploadMode, $folderId, $publicPermission, $scm);
 
     if (empty($uploadId))
     {
