@@ -32,12 +32,12 @@ su postgres -c 'psql -l' |grep -q $dbname
 if [ $? = 0 ]; then
    echo "NOTE: $dbname database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
-   su postgres -c "createlang -l $dbname" |grep -q plpgsql
+   su postgres -c "echo 'SELECT * FROM pg_language;' | psql -t" | grep -q plpgsql
    if [ $? = 0 ]; then
       echo "NOTE: plpgsql already exists in $dbname database, good"
    else
       echo "NOTE: plpgsql doesn't exist, adding"
-      su postgres -c "createlang plpgsql $dbname"
+      su postgres -c "echo 'CREATE LANGUAGE plpgsql;' | psql $dbname"
       if [ $? != 0 ]; then
          echo "ERROR: failed to add plpgsql to $dbname database"
       fi

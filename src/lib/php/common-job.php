@@ -51,19 +51,20 @@ use Fossology\Lib\Db\DbManager;
  *
  * \param $userId
  * \param $groupId
- * \param $job_name   Job name
- * \param $filename   For upload from URL, this is the URL.\n
- *                    For upload from file, this is the filename.\n
- *                    For upload from server, this is the file path.\n
- * \param $desc       Optional user file description.
- * \param $UploadMode 1<<2=URL, 1<<3=upload from server or file
+ * \param $job_name    Job name
+ * \param $filename    For upload from URL, this is the URL.\n
+ *                     For upload from file, this is the filename.\n
+ *                     For upload from server, this is the file path.\n
+ * \param $desc        Optional user file description.
+ * \param $UploadMode  1<<2=URL, 1<<3=upload from server or file
  * \param $folder_pk   The folder to contain this upload
  * \param $public_perm The public permission on this upload
+ * \param $scm         Optional ignore SCM specific data
  *
  * \return upload_pk or null (failure)
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE, $scm='f')
 {
   global $container;
 
@@ -73,8 +74,8 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
       empty($UploadMode) or empty($folder_pk)) return;
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
-      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, scm) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm, $scm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
