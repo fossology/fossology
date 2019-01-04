@@ -1484,6 +1484,10 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4";
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL";
 
+  $Schema["TABLE"]["upload"]["scm"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"scm\" IS 'true: automatically ignore SCM data when scaning, false: don\'t ignore it'";
+  $Schema["TABLE"]["upload"]["scm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"scm\" boolean DEFAULT false";
+  $Schema["TABLE"]["upload"]["scm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"scm\" DROP NOT NULL";
+
 
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4";
