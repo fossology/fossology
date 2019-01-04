@@ -75,8 +75,9 @@ class UploadUrlPage extends UploadPageBase
     $groupId = Auth::getGroupId();
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
+    $scm = intval($request->get('scm') == 1) ? 't' : 'f';
 
-    $uploadId = JobAddUpload($userId, $groupId, $shortName, $getURL, $description, $mode, $folderId, $publicPermission);
+    $uploadId = JobAddUpload($userId, $groupId, $shortName, $getURL, $description, $mode, $folderId, $publicPermission, $scm);
     if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);

@@ -20,6 +20,7 @@
  */
 #include "ununpack.h"
 #include "externs.h"
+#include "regex.h"
 
 /**
  * \brief File mode BITS
@@ -29,6 +30,11 @@ enum BITS {
   BITS_ARTIFACT = 28,
   BITS_CONTAINER = 29
 };
+
+/**
+ * regular expression to detect SCM data
+ */
+const char* SCM_REGEX = "/\\.git|\\.hg|\\.bzr|CVS/ROOT|\\.svn/";
 
 
 /**
@@ -77,7 +83,7 @@ int IsInflatedFile(char *FileName, int InflateSize)
  * @param rc exit code
  * @returns no return, calls exit()
  */
-void	SafeExit	(int rc)
+void  SafeExit  (int rc)
 {
   if (pgConn) PQfinish(pgConn);
   fo_scheduler_disconnect(rc);
@@ -108,7 +114,7 @@ void RemovePostfix(char *Name)
  *  - Every mimetype is loaded
  *  - Every mimetype has an DBindex.
  */
-void	InitCmd	()
+void  InitCmd ()
 {
   int i;
   PGresult *result;
@@ -165,7 +171,7 @@ void	InitCmd	()
  * @param Replace String to replace with
  * @returns 0 on success, 1 on overflow.
  **/
-int	TaintString	(char *Dest, int DestLen,
+int TaintString (char *Dest, int DestLen,
     char *Src, int ProtectQuotes, char *Replace)
 {
   int i,d;
@@ -217,7 +223,7 @@ int	TaintString	(char *Dest, int DestLen,
  * - Remove zero-length files
  * @returns 1=pruned, 0=no change.
  **/
-int	Prune	(char *Fname, struct stat Stat)
+int Prune (char *Fname, struct stat Stat)
 {
   if (!Fname || (Fname[0]=='\0')) return(1);  /* not a good name */
   /* check file type */
@@ -285,7 +291,7 @@ int MkDirs (char *Fname)
       Dir[i]='/';
     }
   }
-  rc = mkdir(Dir,0770);	/* create whatever is left */
+  rc = mkdir(Dir,0770); /* create whatever is left */
   if (rc && (errno == EEXIST)) rc=0;
   if (rc)
   {
@@ -303,7 +309,7 @@ int MkDirs (char *Fname)
  * @param Fname file name
  * @returns 0 on success, 1 on failure.
  **/
-int	MkDir	(char *Fname)
+int MkDir (char *Fname)
 {
   if (mkdir(Fname,0770))
   {
@@ -319,7 +325,7 @@ int	MkDir	(char *Fname)
  * @param Fname file name
  * @returns 1=yes, 0=no.
  **/
-int	IsDir	(char *Fname)
+int IsDir (char *Fname)
 {
   struct stat Stat;
   int rc;
@@ -393,14 +399,14 @@ int     ReadLine (FILE *Fin, char *Line, int MaxLine)
  * @param Quiet If true, do not write warning on file not found
  * @returns 1 if exists, 0 if does not exist.
  **/
-int	IsExe	(char *Exe, int Quiet)
+int IsExe (char *Exe, int Quiet)
 {
   char *Path;
   int i,j;
   char TestCmd[FILENAME_MAX];
 
   Path = getenv("PATH");
-  if (!Path) return(0);	/* nope! */
+  if (!Path) return(0); /* nope! */
 
   memset(TestCmd,'\0',sizeof(TestCmd));
   j=0;
@@ -410,7 +416,7 @@ int	IsExe	(char *Exe, int Quiet)
     {
       if ((j>0) && (TestCmd[j-1] != '/')) strcat(TestCmd,"/");
       strcat(TestCmd,Exe);
-      if (IsFile(TestCmd,1))	return(1); /* found it! */
+      if (IsFile(TestCmd,1))  return(1); /* found it! */
       /* missed */
       memset(TestCmd,'\0',sizeof(TestCmd));
       j=0;
@@ -427,7 +433,7 @@ int	IsExe	(char *Exe, int Quiet)
   {
     if (TestCmd[j-1] != '/') strcat(TestCmd,"/");
     strcat(TestCmd,Exe);
-    if (IsFile(TestCmd,1))	return(1); /* found it! */
+    if (IsFile(TestCmd,1))  return(1); /* found it! */
   }
   if (!Quiet) LOG_WARNING("%s not found in $PATH",Exe);
   return(0); /* not in path */
@@ -440,7 +446,7 @@ int	IsExe	(char *Exe, int Quiet)
  * @param[out] Dst Destination file path
  * @returns 0 if copy worked, 1 if failed.
  **/
-int	CopyFile	(char *Src, char *Dst)
+int CopyFile  (char *Src, char *Dst)
 {
   int Fin, Fout;
   unsigned char * Mmap;
@@ -451,7 +457,7 @@ int	CopyFile	(char *Src, char *Dst)
 
   if (lstat(Src,&Stat) == -1) return(1);
   LenIn = Stat.st_size;
-  if (!S_ISREG(Stat.st_mode))	return(1);
+  if (!S_ISREG(Stat.st_mode)) return(1);
 
   Fin = open(Src,O_RDONLY);
   if (Fin == -1)
@@ -567,7 +573,7 @@ int     ParentWait      ()
  * @param Show Unused
  * @return void but updates global CMD Status
  **/
-void	CheckCommands	(int Show)
+void  CheckCommands (int Show)
 {
   int i;
   int rc;
@@ -575,7 +581,7 @@ void	CheckCommands	(int Show)
   /* Check for CMD_PACK and CMD_ARC tools */
   for(i=0; CMD[i].Cmd != NULL; i++)
   {
-    if (CMD[i].Cmd[0] == '\0')	continue; /* no command to check */
+    if (CMD[i].Cmd[0] == '\0')  continue; /* no command to check */
     switch(CMD[i].Type)
     {
       case CMD_PACK:
@@ -620,7 +626,7 @@ void	CheckCommands	(int Show)
  * @param Where
  * @returns -1 if command could not run.
  *************************************************/
-int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
+int RunCommand  (char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
 {
   char Cmd1[FILENAME_MAX * 3];
@@ -849,7 +855,7 @@ void OctetType(char *Filename, char *TypeBuf)
  *        extraction command.  This uses Magic.
  * @returns index to command-type, or -1 on error.
  **/
-int	FindCmd	(char *Filename)
+int FindCmd (char *Filename)
 {
   char *Type;
   char TypeBuf[256];
@@ -950,7 +956,7 @@ int	FindCmd	(char *Filename)
  * @brief Free a list of files in a directory list.
  * @param DL directory list
  **/
-void	FreeDirList	(dirlist *DL)
+void  FreeDirList (dirlist *DL)
 {
   dirlist *d;
   /* free records */
@@ -969,7 +975,7 @@ void	FreeDirList	(dirlist *DL)
  * @param Fullname Path to top level directory.
  * @returns the directory list
  **/
-dirlist *	MakeDirList	(char *Fullname)
+dirlist * MakeDirList (char *Fullname)
 {
   dirlist *dlist=NULL, *dhead=NULL;
   DIR *Dir;
@@ -978,7 +984,7 @@ dirlist *	MakeDirList	(char *Fullname)
   /* no effort is made to sort since all records need to be processed anyway */
   /* Current order is "reverse inode order" */
   Dir = opendir(Fullname);
-  if (Dir == NULL)	return(NULL);
+  if (Dir == NULL)  return(NULL);
 
   Entry = readdir(Dir);
   while(Entry != NULL)
@@ -1046,7 +1052,7 @@ dirlist *	MakeDirList	(char *Fullname)
  * @param Smain main extraction directory (may be null)
  * @param Sfile filename
  **/
-void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
+void  SetDir  (char *Dest, int DestLen, char *Smain, char *Sfile)
 {
   int i;
 
@@ -1058,7 +1064,7 @@ void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
     if (Sfile && (Sfile[0]=='/')) Sfile++;
     /* skip "../" */
     /** NOTE: Someone that embeds "../" within the path can still
-	    climb out! **/
+      climb out! **/
     i=1;
     while(i && Sfile)
     {
@@ -1084,7 +1090,7 @@ void	SetDir	(char *Dest, int DestLen, char *Smain, char *Sfile)
  * @brief Print a ContainerInfo structure.
  * @param CI ContainerInfo struct to print
  **/
-void	DebugContainerInfo	(ContainerInfo *CI)
+void  DebugContainerInfo  (ContainerInfo *CI)
 {
   LOG_DEBUG("Container:");
   printf("  Source: %s\n",CI->Source);
@@ -1113,7 +1119,7 @@ void	DebugContainerInfo	(ContainerInfo *CI)
  * @param Fuid string of sha1.md5.size
  * @returns 1 if record exists, 0 if record does not exist.
  **/
-int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
+int DBInsertPfile (ContainerInfo *CI, char *Fuid)
 {
   PGresult *result;
   char *Val; /* string result from SQL query */
@@ -1198,6 +1204,70 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 } /* DBInsertPfile() */
 
 /**
+ * @brief Search for SCM data in the filename
+ * 
+ * SCM data is one of these:
+ *   Git (.git)Data(char *FileName)
+ *   Mercurial (.hg)
+ *   Bazaar (.bzr)
+ *   CVS (CVS/Root)
+ *   Subversion (.svn) 
+ * @param sourcefilename
+ * @returns 1 if SCM data is found
+ **/ 
+int TestSCMData(char *sourcefilename)
+{
+  regex_t preg;
+  int err;
+  int found;
+ 
+  err = regcomp (&preg, SCM_REGEX, REG_NOSUB | REG_EXTENDED);
+  if (err == 0)
+  {
+    int match;
+
+    match = regexec (&preg, sourcefilename, 0, NULL, 0);
+    regfree (&preg);
+    if(match == 0) 
+    {
+      found = 1;
+      if (Verbose) LOG_DEBUG("match found %s",sourcefilename);
+    }
+    else if(match == REG_NOMATCH)
+    {
+      found = 0;
+      if (Verbose) LOG_DEBUG("match not found %s",sourcefilename);
+    }
+    else 
+    {
+      char *text;
+      size_t size;
+      size = regerror (err, &preg, NULL, 0);
+      text = malloc (sizeof (*text) * size);
+      if(text)
+      {
+        regerror (err, &preg, text, size);
+        LOG_ERROR("Error regexc '%s' '%s' return %d, error %s",SCM_REGEX,sourcefilename,match,text);
+      }
+      else
+      {
+        LOG_ERROR("Not enough memory (%lu)",sizeof (*text) * size);
+        SafeExit(127);
+      } 
+      found = 0;
+    }
+  }
+  else
+  {
+     LOG_ERROR("Error regcomp(%d)",err);
+     SafeExit(127);
+  }
+   
+  
+  return(found);
+}
+
+/**
  * @brief Insert an UploadTree record.
  *
  * If the tree is a duplicate, then we need to replicate
@@ -1207,21 +1277,29 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
  * @param Mask mask file mode for ufile_mode
  * @returns 1 if tree exists for some other project (duplicate) and 0 if tree does not exist.
  **/
-int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
+int DBInsertUploadTree  (ContainerInfo *CI, int Mask)
 {
   char UfileName[1024];
   char *cp;
   PGresult *result;
   char EscBuf[1024];
+  char scmflag; 
   int  error;
 
   if (!Upload_Pk) return(-1); /* should never happen */
-  // printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
+  //printf("=========== BEFORE ==========\n"); DebugContainerInfo(CI);
 
   /* Find record's mode */
   CI->ufile_mode = CI->Stat.st_mode & Mask;
   if (!CI->TopContainer && CI->Artifact) CI->ufile_mode |= (1 << BITS_ARTIFACT);
   if (CI->HasChild) CI->ufile_mode |= (1 << BITS_CONTAINER);
+
+  /* Find SCMFlag */
+  snprintf(UfileName,sizeof(UfileName),"SELECT scm FROM upload WHERE upload_pk = %s;",Upload_Pk);
+  result = PQexec(pgConn, UfileName);
+  if (fo_checkPQresult(pgConn, result, UfileName, __FILE__, __LINE__)) SafeExit(17);
+  scmflag = *(char *)PQgetvalue(result,0,0);
+  PQclear(result);
 
   /* Find record's name */
   memset(UfileName,'\0',sizeof(UfileName));
@@ -1264,7 +1342,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
   }
 
   // Begin add by vincent
-  if(ReunpackSwitch)
+  if(ReunpackSwitch && ((scmflag == 't' && !TestSCMData(CI->Source)) || (scmflag == 'f')))
   {
     /* postgres 8.3 seems to have a problem escaping binary characters
      * (it works in 8.4).  So manually substitute '~' for any unprintable and slash chars.
@@ -1319,7 +1397,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
  * @param Mask file mode mask
  * @returns 1 if added, 0 if already exists!
  **/
-int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
+int AddToRepository (ContainerInfo *CI, char *Fuid, int Mask)
 {
   int IsUnique = 1;  /* is it a DB replica? */
 
@@ -1366,7 +1444,7 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
  *            CI->Cmd = command to be used ON this file (child)
  * @returns 1 if item is unique, 0 if duplicate.
  **/
-int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
+int DisplayContainerInfo  (ContainerInfo *CI, int Cmd)
 {
   int i;
   int Mask=0177000; /* used for XML modemask */
@@ -1618,7 +1696,7 @@ void deleteTmpFiles(char *dir)
  * @param Name program name
  * @param Version program version
  **/
-void	Usage	(char *Name, char *Version)
+void  Usage (char *Name, char *Version)
 {
   fprintf(stderr,"Universal Unpacker, %s, compiled %s %s\n",
       Version,__DATE__,__TIME__);
