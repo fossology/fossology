@@ -29,7 +29,6 @@ install: all
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	$(INSTALL_DATA) dbmigrate_copyright-author.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	$(INSTALL_DATA) dbmigrate_multiple_copyright_decisions.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
-	$(INSTALL_DATA) dbmigrate_scm.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_scm.php
 	$(INSTALL_DATA) resequence_author_table.php $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
@@ -61,7 +60,6 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
-	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_scm.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
