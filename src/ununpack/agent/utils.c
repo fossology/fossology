@@ -1219,7 +1219,7 @@ int TestSCMData(char *sourcefilename)
 {
   regex_t preg;
   int err;
-  int found;
+  int found=0;
  
   err = regcomp (&preg, SCM_REGEX, REG_NOSUB | REG_EXTENDED);
   if (err == 0)
