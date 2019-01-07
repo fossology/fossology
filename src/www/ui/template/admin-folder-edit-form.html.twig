@@ -6,7 +6,7 @@
 <form method='post'>
     <ol>
         <li> {{ "Select the folder to edit:"|trans }}
-            <select name="oldfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value">
+            <select name="oldfolderid" onChange="window.location.href='{{ onchangeURI }}' + this.value" class="ui-render-select2">
                 {{ folderListOption }} FolderListOption(-1, 0, 1, $FolderSelectId);
             </select>
             <P />

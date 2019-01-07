@@ -16,7 +16,7 @@
     {{ 'You have no permission to change permissions on any upload in this folder.'|trans }}
   {% else %}
     {{ 'Select the upload you wish to edit'|trans }}:
-    <select id="uploadselect" name="uploadselect">
+    <select id="uploadselect" name="uploadselect" class="ui-render-select2">
     {% for upload in uploadList %}
       <option value="{{ upload.upload_pk }}"{% if upload.upload_pk==uploadId %} selected="selected"{% endif %}>{{ upload.name|e }},
         {{ upload.upload_ts|date('Y-m-d h:i:s') }}</option>
@@ -62,7 +62,7 @@
   <h2>{{ "Look up who is a member of group "|trans }}</h2>
   {{ "To edit group memberships "|trans }} <a href="?mod=group_manage_users">{{ "click here"|trans }}</a>
   <br/>
-  {{ 'To list the users in a group, select the group'|trans }}: <select id="groupsForGum">
+  {{ 'To list the users in a group, select the group'|trans }}: <select id="groupsForGum" class="ui-render-select2">
   {% for gId,gName in groupArray %}
     <option value="{{ gId }}">{{ gName|e }}</option>
   {% endfor %}

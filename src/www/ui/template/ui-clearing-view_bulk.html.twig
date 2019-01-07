@@ -25,7 +25,7 @@
     <table>
       <tr>
         <td id="bulkExistingLicense">
-            <select id="bulkLicense" style="width:100%" >
+            <select id="bulkLicense" style="width:100%" class="ui-render-select2">
               {% for license in licenseArray %}
                 <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
               {% endfor %}

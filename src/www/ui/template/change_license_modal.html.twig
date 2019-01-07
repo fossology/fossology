@@ -9,7 +9,7 @@
     <table>
       <tr>
         <td>{{ 'Available licenses'| trans }}:<br/>
-          <select name="licenseLeft" id=licenseLeft" style="min-width:200px" size="20" multiple="multiple">
+          <select name="licenseLeft" id="licenseLeft" style="min-width:200px" size="20" multiple="multiple">
             {%  for opt in licenseArray  %}
             <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
                     ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
@@ -25,7 +25,7 @@
         </td>
         <td>
           {{ 'Selected licenses'|trans }}:<br/>
-          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple" >
+          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple">
           </select>
         </td>
       </tr>

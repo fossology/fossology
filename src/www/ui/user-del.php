@@ -38,7 +38,7 @@ class user_del extends FO_Plugin
 
   /**
    * \brief Delete a user.
-   * 
+   *
    * \return NULL on success, string on failure.
    */
   function Delete($UserId)
@@ -56,7 +56,7 @@ class user_del extends FO_Plugin
       return($text);
     }
 
-    /* Delete the users group 
+    /* Delete the users group
      * First look up the users group_pk
      */
     $sql = "SELECT group_pk FROM groups WHERE group_name = '$row[user_name]' LIMIT 1;";
@@ -138,7 +138,7 @@ class user_del extends FO_Plugin
       $V .= _("To delete a user, enter the following information:<P />\n");
       $V .= "<ol>\n";
       $V .= _("<li>Select the user to delete.<br />");
-      $V .= "<select name='userid'>\n";
+      $V .= "<select name='userid' class='ui-render-select2'>\n";
       while( $row = pg_fetch_assoc($result))
       {
         $V .= "<option value='" . $row['user_pk'] . "'>";

@@ -128,9 +128,9 @@ class admin_folder_delete extends FO_Plugin {
     $V.= "</ul>\n";
     $text = _("Select the folder to delete:  ");
     $V.= "<P>$text\n";
-    $V.= "<select name='folder'>\n";
+    $V.= "<select name='folder' class='ui-render-select2'>\n";
     $text = _("select folder");
-    $V.= "<option value=''>[$text]</option>\n";
+    $V.= "<option value='' disabled selected>[$text]</option>\n";
     $V.= FolderListOption(-1, 0, 1, -1, true);
     $V.= "</select><P />\n";
     $text = _("Delete");

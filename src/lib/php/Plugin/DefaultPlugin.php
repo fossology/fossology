@@ -41,7 +41,7 @@ abstract class DefaultPlugin implements Plugin
   const MENU_ORDER = "menuOrder";
   const MENU_TARGET = "menuTarget";
   const TITLE = "title";
-    
+
   /** @var ContainerBuilder */
   protected $container;
   /** @var Twig_Environment */
@@ -364,6 +364,7 @@ abstract class DefaultPlugin implements Plugin
     }
 
     $styles = "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
+    $styles .= "<link rel='stylesheet' href='css/select2.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/fossology.css'>\n";
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
@@ -398,7 +399,7 @@ abstract class DefaultPlugin implements Plugin
   {
     return $this->render("include/base.html.twig",$this->mergeWithDefault(array("content"=>$content)));
   }
-      
+
   /**
    * @param string $name
    * @throws \Exception

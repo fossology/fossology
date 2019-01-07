@@ -40,11 +40,11 @@ class admin_tag_manage extends FO_Plugin
 
   /**
    * \brief Enable/Disable Tag on one folder(all uploads under this folder) or one upload
-   * 
+   *
    * \param $folder_id - folder id
    * \param $upload_id - upload id
    * \param $manage - enable or disable
-   * 
+   *
    * \return return null when no uploads to manage, return 1 after setting
    */
   function ManageTag($folder_id, $upload_id, $manage)
@@ -74,7 +74,7 @@ class admin_tag_manage extends FO_Plugin
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $count = pg_num_rows($result);
       pg_free_result($result);
-      if (empty($count) && $manage_value == true) // has not been disabled, and want to disable this upload 
+      if (empty($count) && $manage_value == true) // has not been disabled, and want to disable this upload
       {
         $sql = "INSERT INTO tag_manage(upload_fk, is_disabled) VALUES($upload_id, true);";
         $result = pg_query($PG_CONN, $sql);
@@ -161,14 +161,15 @@ class admin_tag_manage extends FO_Plugin
     $V .= "<li>$text<br>\n";
     $V .= "<select name='folder'\n";
     $V .= "onLoad='Uploads_Get((\"" . Traceback_uri() . "?mod=upload_options&folder=$Folder' ";
-    $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)'>\n";
+    $V .= "onChange='Uploads_Get(\"" . Traceback_uri() . "?mod=upload_options&folder=\" + this.value)' ";
+    $V .= "class='ui-render-select2'>\n";
     $V .= FolderListOption(-1,0,1,$Folder);
     $V .= "</select><P />\n";
 
     $text = _("Select the upload to  enable/disable:");
     $V .= "<li>$text<br>";
     $V .= "<div id='tagdiv'>\n";
-    $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n"; 
+    $V .= "<select size='10' name='upload' onChange='Tagging_Get(\"" . Traceback_uri() . "?mod=upload_tagging&upload=\" + this.value)'>\n";
     $List = FolderListUploads_perm($Folder, Auth::PERM_WRITE);
     foreach($List as $L)
     {

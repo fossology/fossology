@@ -12,7 +12,7 @@
     <ol>
       <li>{{"Select the folder containing the upload you wish to analyze"|trans}}:<br/>
         <select name="folder" onLoad="Uploads_Get('{{ baseUri }}?mod=upload_options&folder={{ folderId }}');"
-                onChange="Uploads_Get('{{ baseUri }}?mod=upload_options&folder=' + this.value);">
+                onChange="Uploads_Get('{{ baseUri }}?mod=upload_options&folder=' + this.value);" class="ui-render-select2">
           {{ folderListOptions }}
         </select>
       </li>
