@@ -623,6 +623,7 @@ class fo_libschema
       if ($R['default'] != '')
       {
         $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
+        $R['default'] = str_replace("public.", "", $R['default']);
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
         $this->currSchema['TABLE'][$Table][$Column]['ADD'] .= " DEFAULT " . $R['default'];
 
@@ -884,7 +885,7 @@ class fo_libschema
       /* UNIQUE constraints also include indexes. */
       if (empty($this->currSchema['CONSTRAINT'][$row['index']]))
       {
-        $this->currSchema['INDEX'][$row['table']][$row['index']] = str_replace("public.".$row['table']." ", $row['table']." ", $row['define']) . ";";
+        $this->currSchema['INDEX'][$row['table']][$row['index']] = str_replace("public.", "", $row['define']) . ";";
       }
     }
     $this->dbman->freeResult($result);
