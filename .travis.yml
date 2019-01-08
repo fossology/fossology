@@ -159,5 +159,25 @@ jobs:
             - postgresql-client-10
       before_script: *postgres-before-script
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
+    - stage: GitHub Page Release
+      name: GitHub Page deploy
+      addons:
+        apt:
+          packages:
+            - doxygen
+            - graphviz
+      script:
+        - doxygen -v
+        - bash utils/deploy-pages.sh
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN
+        keep-history: false
+        local-dir: ./code_docs
+        repo: $GH_REPO_REF
+        target-branch: master
+        on:
+          branch: master
   allow_failures:
     - name: Copy/Paste Detector
