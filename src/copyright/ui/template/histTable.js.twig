@@ -86,7 +86,37 @@ function createTable{{ table.type }}() {
     });
   });
 
+  $('#replaceSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      var replaceText = $('#replaceText').val().trim();
+      var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
+      if(replaceIsValid){
+        updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
+      }
+    });
+    location.reload(true);
+  });
+
   return enabledTable;
+}
+
+function updateRows{{ table.type }}(upload, item, hash, kind, replaceText) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'text',
+    url: '?mod=ajax-copyright-hist&action=update&type={{ table.type }}',
+    data: { id : upload + ',' + item + ',' + hash + ',' + kind, value : replaceText },
+      success: function(data) {
+        var updateElement = $("#update{{ table.type }}" + hash);
+        $("#delete{{ table.type }}" + hash).hide();
+        updateElement.html("updating...");
+      },
+      error: function() { 
+        alert('error while updating a record'); 
+      }
+  });
 }
 
 function delete{{ table.type }}(upload, item, hash, kind) {
@@ -99,7 +129,9 @@ function delete{{ table.type }}(upload, item, hash, kind) {
         $("#delete{{ table.type }}" + hash).hide();
         $("#update{{ table.type }}" + hash).show();
       },
-      error: function() { alert('error'); }
+      error: function() { 
+        alert('error while deleting a record'); 
+      }
   });
 }
 
