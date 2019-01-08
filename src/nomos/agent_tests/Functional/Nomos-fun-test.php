@@ -72,6 +72,11 @@ class NomosFunTest extends CommonCliTest
     exec("sort ./scan.out.r >./scan.out.s");
     exec("diff ./LastGoodNomosTestfilesScan.s ./scan.out.s >./report.d", $out, $rtn);
     $count = exec("cat report.d|wc -l", $out, $ret);
-    $this->assertEquals($count,'0', "some lines of licenses are different, please view ./report.d for the details!");
+    if ($count != 0) {
+      print "Some lines of licenses are different, see details below, or view ./report.d\n";
+      exec("cat ./report.d", $report);
+      foreach ($report as $line) print "$line\n";
+    }
+    $this->assertEquals($count,'0');
   }
 }
