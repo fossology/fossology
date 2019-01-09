@@ -2408,7 +2408,7 @@
 %STR% "you may do anything with this at your own risk"
 #
 %ENTRY% _LT_FREE_103
-%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
+%KEY% "(©|\(c\)|copyright|\<c\>[^+:]|copy)"
 %STR% "you make absolutely no changes to your copy =FEW= if you do make changes you name it something other"
 #
 %ENTRY% _LT_FREE_104

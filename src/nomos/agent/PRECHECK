@@ -90,10 +90,10 @@ BEGIN {
 	NAME=$NF;
 }
 /^%STR%/ {
-	BUF=$NF;
+	BUF=substr($0, index($0,$2));
 	if (f) {
 		printf("%s: ", NAME);
-		if ($NF ~ "[(]") {
+		if (BUF ~ "[(]") {
 			max = length(BUF);
 			for (i = 1; i <= max; i++) {
 				ch = substr(BUF, i, 1);
@@ -115,7 +115,7 @@ BEGIN {
 			printf("\n");
 		}
 		else {
-			printf("%s\n", $NF);
+			printf("%s\n", BUF);
 		}
 		f=0;
 	}
@@ -177,7 +177,7 @@ void preloadResults(char *filetext, char *ltsr)
 		FNAME=$(printf "$DIR/split_%02d.%s" $I "$WORD")
 		for i in $(seq 1 $WC) ; do
 			LINE=$(head -n $i $TEMP | tail -1)
-			TAG=$(expr "$LINE" : '\(.*\):')
+			TAG=$(expr "$LINE" : '\(.*\): ')
 ##			echo "$LINE" | sed -e 's/.*: //' | grep -iq "$WORD"
 ##			if [ $? -ne 0 ]; then
 ##				echo "\"$WORD\" is NOT in this line:" 
