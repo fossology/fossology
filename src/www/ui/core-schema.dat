@@ -1520,6 +1520,10 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4";
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL";
 
+  $Schema["TABLE"]["upload"]["spdx_license_comment"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"spdx_license_comment\" IS 'true: SPDX output show license comments, false: dont show it'";
+  $Schema["TABLE"]["upload"]["spdx_license_comment"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"spdx_license_comment\" boolean DEFAULT false";
+  $Schema["TABLE"]["upload"]["spdx_license_comment"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"spdx_license_comment\" DROP NOT NULL";
+
 
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4";
