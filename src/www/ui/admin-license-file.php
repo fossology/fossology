@@ -373,15 +373,16 @@ class admin_license_file extends FO_Plugin
     }
 
     $md5term = (empty($text) || stristr($text, "License by Nomos")) ? 'null' : 'md5($10)';
+
     $sql = "UPDATE license_ref SET
         rf_active=$2, marydone=$3,  rf_shortname=$4, rf_fullname=$5,
         rf_url=$6,  rf_notes=$7,  rf_text_updatable=$8,   rf_detector_type=$9,  rf_text=$10,
-        rf_md5=$md5term, rf_risk=$11, rf_spdx_compatible=$12
+        rf_md5=$md5term, rf_risk=$11, rf_spdx_compatible=$12, rf_flag=$13
           WHERE rf_pk=$1";
     $params = array($rfId,
       $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
       $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
-      $riskLvl,$_POST['rf_spdx_compatible']);
+      $riskLvl,$_POST['rf_spdx_compatible'],2);
     $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
