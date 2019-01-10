@@ -21,6 +21,14 @@ LicenseConcluded: {{ concludedLicense }}
 {% else %}
 LicenseConcluded: NOASSERTION
 {% endif %}
+{% if licenseCommentState %}
+{% if licenseComment is empty %}
+LicenseComment: NOCOMMENT
+{% else %}
+LicenseComments: <text>{{ licenseComment |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                         |replace({'\f':''}) }} </text>
+{% endif %}
+{% endif %}
 {% if scannerLicenses|default is empty %}
 LicenseInfoInFile: NOASSERTION
 {% else %}

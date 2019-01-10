@@ -38,6 +38,13 @@
 {% else %}
     <spdx:licenseConcluded rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% endif %}
+{% if licenseCommentState %}
+{% if licenseComment is empty %}
+    <spdx:licenseComments rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+{% else %}
+    <spdx:licenseComments>{{ licenseComment|e }}</spdx:licenseComments>
+{% endif %}
+{% endif %}
 {% if scannerLicenses|default is empty %}
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}{% for res in scannerLicenses %}

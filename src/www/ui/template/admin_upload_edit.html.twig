@@ -27,7 +27,11 @@
 
       <li>{{ 'Upload description'|trans }}:
         <input type="text" name="newdesc" size="60" value="{{ uploadDesc|e }}" />
-      </li> 
+      </li>
+
+			<li>{{ 'License comment'|trans }}:
+				<input type="checkbox" name="licensecomment" {%if licenseComment %}checked{% endif %} value="1" >
+			</li>
     </ol>
     <input type="submit" value="{{ 'Edit'|trans }}" />
   </form>

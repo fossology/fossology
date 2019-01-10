@@ -324,7 +324,7 @@ class SpdxTwoAgent extends Agent
     $this->heartbeat(0);
 
     $upload = $this->uploadDao->getUpload($uploadId);
-    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
+    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     $mainLicenses = array();
@@ -380,7 +380,10 @@ class SpdxTwoAgent extends Agent
           continue;
         }
 
-        if ($clearingEvent->getReportinfo()) {
+        /* ADD COMMENT */
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['comment'] = $clearingLicense->getComment();
+        if($clearingEvent->getReportinfo())
+        {
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
                                     '-' . md5($customLicenseText);
@@ -634,13 +637,17 @@ class SpdxTwoAgent extends Agent
    * @brief Generate report nodes for files
    * @param string $filesWithLicenses
    * @param string $treeTableName
+   * @param int $uploadID
    * @return string Node content
    */
-  protected function generateFileNodes($filesWithLicenses, $treeTableName)
+  protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
   {
-    if (strcmp($this->outputFormat, "dep5") !== 0) {
-      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName);
-    } else {
+    if (strcmp($this->outputFormat, "dep5")!==0)
+    {
+      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
+    }
+    else
+    {
       return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
     }
   }
@@ -649,9 +656,10 @@ class SpdxTwoAgent extends Agent
    * @brief For each file, generate the nodes by files
    * @param string &$filesWithLicenses
    * @param string $treeTableName
+   * @param int $uploadID
    * @return string Node string
    */
-  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
+  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId)
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
@@ -673,7 +681,7 @@ class SpdxTwoAgent extends Agent
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      $content .= $this->renderString($this->getTemplateFile('file'),array(
+      $array = array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
           'md5'=>$hashes['md5'],
@@ -685,7 +693,13 @@ class SpdxTwoAgent extends Agent
           'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], $this->spdxValidityChecker),
           'concludedLicenses'=> SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
           'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
-          'copyrights'=>$licenses['copyrights']));
+          'copyrights'=>$licenses['copyrights'],
+          'licenseCommentState'=>$this->getSPDXLicenseCommentState($uploadId));
+      if($this->getSPDXLicenseCommentState($uploadId)) {
+        $array['licenseComment'] = $licenses['comment'];
+      }
+
+      $content .= $this->renderString($this->getTemplateFile('file'),$array);
     }
     $this->heartbeat($filesProceeded - $lastValue);
     return $content;
@@ -786,6 +800,21 @@ class SpdxTwoAgent extends Agent
     $filelistPack = $this->dbManager->getSingleRow($sql,$param,$stmt);
 
     return sha1($filelistPack['concat_sha1']);
+  }
+
+  /**
+   * @brief Get spdx license comment state for a given upload
+   *
+   * @param int $uploadId
+   * @return boolval License comment state (TRUE : show license comment, FALSE : don't show it)
+   */
+  protected function getSPDXLicenseCommentState(int $uploadId)
+  {
+    $sql = "SELECT spdx_license_comment from upload where upload_pk=$1";
+    $param[] = $uploadId;
+    $licensecomment = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Spdx_license_comment');
+
+    return ($licensecomment['spdx_license_comment']=="t");
   }
 }
 
