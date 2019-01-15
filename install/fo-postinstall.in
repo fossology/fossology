@@ -195,7 +195,7 @@ if [[ $COMMON ]]; then
    # make sure repo and its parent dir has the right permissions
    if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
      echo "NOTE: Repository group is not correct."
-     echo "Fixing"
+     echo "Fixing..This may take long duration, depending on your repository size."
      chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
    fi
    chmod 2770 $\{REPO%/*\} $REPO
