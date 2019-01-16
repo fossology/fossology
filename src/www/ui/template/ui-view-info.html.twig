@@ -261,6 +261,40 @@
     {% endif %}
   </table><br />
 
+  {% if reusedPackageList is not empty %}
+    <h2>{{ "Reused component"|trans }}</h2>
+    <table border="1">
+      <thead>
+        <tr>
+          <th width="5%">{{ "Item"|trans }}</th>
+          <th width="25%">{{ "Meta"|trans }}</th>
+          <th>{{ "Value"|trans }}</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for reusedPackage in reusedPackageList %}
+        <tr>
+          <td align="center" rowspan="4">{{ loop.index }}</td>
+          <td>{{ "Reused package name"|trans }}</td>
+          <td align="right"><a href="{{ reusedPackage.url|e }}">{{ reusedPackage.name|e }}</a></td>
+        </tr>
+        <tr>
+          <td>{{ "Reused package SHA1"|trans }}</td>
+          <td align="right">{{ reusedPackage.sha1|e }}</td>
+        </tr>
+        <tr>
+          <td>{{ "Reused package group"|trans }}</td>
+          <td align="right">{{ reusedPackage.group|e }}</td>
+        </tr>
+        <tr>
+          <td>{{ "Reused mode"|trans }}</td>
+          <td align="right">{{ reusedPackage.mode|e }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+
   {% if sightingsContent is not empty %}
     <h2>{{ "Sightings"|trans }}</h2>
     {{ sightingsContent }}
