@@ -1,14 +1,15 @@
 ---
 name: Bug report
 about: Create a report to help us improve
+labels: bug
 ---
 
-Before filling this issue, please read the Wiki (https://github.com/fossology/fossology/wiki)
-and search if the bug do not already exists in the issues (https://github.com/fossology/fossology/issues).
+<!-- Before filling this issue, please read the wiki (https://github.com/fossology/fossology/wiki)
+and search if the bug do not already exists in the issues (https://github.com/fossology/fossology/issues). -->
 
 ### Description
 
-Please describle your issue in few words here.
+Please describe your issue in few words here.
 
 #### How to reproduce
 
@@ -25,9 +26,9 @@ If applicable, add screenshots to help explain your problem.
 
 ### Logs
 
-Any logs (if any) genereated in
+Any logs (if any) generated in
 
-#### Fossology logs
+#### FOSSology logs
 
 Logs generated under /var/log/fossology/fossology.log
 
