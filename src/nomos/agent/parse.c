@@ -5017,19 +5017,27 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /* More EPL cases */
   if (!_epl) {
     if (INFILE(_LT_EPLref)) {
-	  if (INFILE(_TITLE_EPL10)) {
-	    INTERESTING(lDebug ? "Eclipse(v.0#2)" : "EPL-1.0");
-	  }
-	  else if (INFILE(_TITLE_EPL20)) {
-	    INTERESTING(lDebug ? "Eclipse(v.2#2)" : "EPL-2.0");
-	  }
-	  else {
-	    INTERESTING(lDebug ? "Eclipse(#2)" : "EPL");
-	  }
-	}
-	else if (INFILE(_LT_EPL10ref_1)) {
-	  INTERESTING(lDebug ? "Eclipse(ref#2)" : "EPL-1.0");
-	}
+      if (INFILE(_TITLE_EPL10)) {
+        INTERESTING(lDebug ? "Eclipse(v.0#2)" : "EPL-1.0");
+      }
+      else if (INFILE(_TITLE_EPL20)) {
+        INTERESTING(lDebug ? "Eclipse(v.2#2)" : "EPL-2.0");
+      }
+      else {
+        INTERESTING(lDebug ? "Eclipse(#2)" : "EPL");
+      }
+    }
+    else if (INFILE(_LT_EPL10ref_1)) {
+      INTERESTING(lDebug ? "Eclipse(ref#2)" : "EPL-1.0");
+    }
+    else if (INFILE(_LT_EPL) && NOT_INFILE(_TITLE_EPL_IGNORE)) {
+      if (INFILE(_TITLE_EPL10ref_1)) {
+        INTERESTING(lDebug ? "Eclipse(v1.0#2)" : "EPL-1.0");
+      }
+      if (INFILE(_TITLE_EPL20ref_1)) {
+        INTERESTING(lDebug ? "Eclipse(v1.0#2)" : "EPL-2.0");
+      }
+    }
   }
   cleanLicenceBuffer();
   /*
