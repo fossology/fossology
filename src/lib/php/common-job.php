@@ -103,7 +103,6 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
  * @param $job_name
  * @param $upload_pk (optional)
  * @param $priority  (optional default 0)
- *
  * @return int $job_pk the job primary key
  */
 function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
