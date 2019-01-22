@@ -19,20 +19,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\LicenseRef;
+use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
 class LicenseMapTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DbManager */
   private $dbManager;
-  /** @var int */
+  /** @var int $groupId
+   * Test group */
   private $groupId = 101;
 
 
   protected function setUp()
   {
     $this->testDb = new TestPgDb();
-    $this->testDb->createPlainTables(array('license_ref','license_map'));
+    $this->testDb->createPlainTables(
+      array(
+        'license_ref',
+        'license_map',
+        'obligation_ref',
+        'obligation_map',
+        'obligation_candidate_map'
+      ));
     $this->dbManager = $this->testDb->getDbManager();
     $this->dbManager->queryOnce("CREATE TABLE license_candidate (group_fk integer) INHERITS (license_ref)");
     $this->dbManager->insertTableRow('license_map',array('license_map_pk'=>0,'rf_fk'=>2,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
@@ -40,6 +50,31 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->insertTableRow('license_ref',array('rf_pk'=>2,'rf_shortname'=>'Two','rf_fullname'=>'Two-2'));
     $this->dbManager->insertTableRow('license_candidate',
             array('rf_pk'=>3,'rf_shortname'=>'Three','rf_fullname'=>'Three-3','group_fk'=>$this->groupId));
+    $this->dbManager->insertTableRow('obligation_ref',
+      array(
+        'ob_pk' => 2,
+        'ob_type' => 'Obligation',
+        'ob_topic' => 'Obligation-1',
+        'ob_text' => 'Obligation text',
+        'ob_classification' => 'white',
+        'ob_modifications' => 'Yes',
+        'ob_comment' => 'Obligation comment',
+        'ob_active' => true,
+        'ob_text_updatable' => false,
+        'ob_md5' => '0ffdddc657a16b95894437b4af736102'
+      ));
+    $this->dbManager->insertTableRow('obligation_map',
+      array(
+        'om_pk' => 2,
+        'ob_fk' => 2,
+        'rf_fk' => 2
+      ));
+    $this->dbManager->insertTableRow('obligation_candidate_map',
+      array(
+        'om_pk' => 2,
+        'ob_fk' => 2,
+        'rf_fk' => 3
+      ));
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -73,6 +108,24 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
   {
     $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
     assertThat($licenseMap->getProjectedShortName(2),is('One'));
+  }
+
+  function testObligationForLicense()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    assertThat($licenseMap->getObligationsForLicenseRef(2), contains(2));
+  }
+
+  function testObligationForUnassignedLicense()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    assertThat($licenseMap->getObligationsForLicenseRef(1), is(emptyArray()));
+  }
+
+  function testObligationForCandidateLicense()
+  {
+    $licenseMap = new LicenseMap($this->dbManager, $this->groupId);
+    assertThat($licenseMap->getObligationsForLicenseRef(3, true), contains(2));
   }
 
   function testProjectedIdOfMappedIdIsIdItselfIfTrivialMap()

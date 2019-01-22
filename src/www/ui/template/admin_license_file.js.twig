@@ -50,7 +50,8 @@ function getDataForTable() {
     "rf_shortname":       "{{ entry['rf_shortname']|escape('js') }}",
     "rf_fullname":        "{{ entry['rf_fullname']|escape('js') }}",
     "rf_text":            [ "{{ entry['rf_pk'] }}", "{{ entry['rf_text'][:120]|escape('js') }}" ],
-    "rf_url":             "{{ entry['rf_url'] }}"
+    "rf_url":             "{{ entry['rf_url'] }}",
+    "ob_topic":           "{{ entry['ob_topic'] }}"
   });
   {% endfor %}
 
@@ -76,7 +77,8 @@ function createLicenseTable() {
       {title: "Shortname", data: "rf_shortname", defaultContent: ""},
       {title: "Fullname", data: "rf_fullname", defaultContent: ""},
       {title: "Text", data: "rf_text", defaultContent: "", render: renderLicenseText},
-      {title: "URL", data: "rf_url", defaultContent: "", render: renderLink}
+      {title: "URL", data: "rf_url", defaultContent: "", render: renderLink},
+      {title: "Obligation topic", data: "ob_topic", defaultContent: "", render: renderObligation}
     ],
     order: [[ 3, "asc" ]]
   });
@@ -116,9 +118,25 @@ function createLicenseTable() {
 
     return "<textarea readonly class=\"licenseTextArea\" id=\"licenseTextArea" + licenseID + "\" " +
            "data-licenseid=\"" + licenseID + "\" data-textloaded=\"false\" " +
-           "rows=\"3\" cols=\"40\">" +
+           "rows=\"3\" cols=\"40\" style=\"width:100%\">" +
            licenseText +
            "</textarea>";
+  }
+
+  function renderObligation(data) {
+    if (! data) {
+      return "";
+    }
+
+    var ob_topics = data.split(";");
+
+    var options = [];
+    for (var i = 0, len = ob_topics.length; i< len; i++) {
+      options.push("<option>" + ob_topics[i] + "</option>");
+    }
+    return "<div style='overflow:auto;max-width:280px'>" +
+      "<select size='4' readonly>" + options.join("") +
+      "</select></div>";
   }
 
   // Add a text input to each footer cell
