@@ -45,17 +45,19 @@ class upload_properties extends FO_Plugin
   }
 
   /**
-   * @brief Update upload properties (name and description)
+   * @brief Update upload properties (name, description and ignore files wo infos state)
    *
    * @param $uploadId upload.upload_pk of record to update
    * @param $newName New upload.upload_filename, and uploadtree.ufle_name
    *        If null, old value is not changed.
    * @param $newDesc New upload description (upload.upload_desc)
    *        If null, old value is not changed.
+   * @param $ignoreFilesWOInfos Must be at true to exclude files without info in SPDX reports
+   *        If null, old value is not changed.
    *
    * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
-  function UpdateUploadProperties($uploadId, $newName, $newDesc)
+  function UpdateUploadProperties($uploadId, $newName, $newDesc, $ignoreFilesWOInfos)
   {
     if (empty($newName) and empty($newDesc)) {
       return 2;
@@ -90,6 +92,13 @@ class upload_properties extends FO_Plugin
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
+
+    if (isset($ignoreFilesWOInfos))
+    {
+      $ignoreFilesWOInfosValue = ( $ignoreFilesWOInfos ? 't' : 'f' );
+      $this->dbManager->getSingleRow("UPDATE upload SET ignore_files_wo_infos=$2 WHERE upload_pk=$1",array($uploadId,$ignoreFilesWOInfosValue),__METHOD__.'.updateUpload.ignoreFilesWOInfos');
+    }
+
     return 1;
   }
 
@@ -108,6 +117,7 @@ class upload_properties extends FO_Plugin
     $NewName = GetArrayVal("newname", $_POST);
     $NewDesc = GetArrayVal("newdesc", $_POST);
     $upload_pk = GetArrayVal("upload_pk", $_POST);
+    $ignoreFilesWOInfos = (GetArrayVal("ignorefileswoinfo", $_POST) == 1);
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
     }
@@ -118,8 +128,9 @@ class upload_properties extends FO_Plugin
       return "<h2>$text</h2>";
     }
 
-    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
-    if ($rc == 0) {
+    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc, $ignoreFilesWOInfos);
+    if($rc == 0)
+    {
       $text = _("Nothing to Change");
       $this->vars['message'] = $text;
     } else if ($rc == 1) {
@@ -161,12 +172,24 @@ class upload_properties extends FO_Plugin
       $upload = null;
     }
 
+    /* Test if it is the first call to display the Uploaded File Properties page */
+    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET' && !empty($upload))
+    {
+      /* if it is, read the ignore_files_wo_infos value in database */
+      $row=$this->dbManager->getSingleRow("SELECT ignore_files_wo_infos FROM upload WHERE upload_pk=$1",array($upload_pk),__METHOD__.'.getIgnoreFilesWOInfos');
+      if (!empty($row))
+      {
+        $ignoreFilesWOInfos = ($row['ignore_files_wo_infos'] == 't');
+      }
+    }
+
     $baseFolderUri = $this->vars['baseUri']."$folder_pk&upload=";
     $this->vars['uploadAction'] = "onchange=\"js_url(this.value, '$baseFolderUri')\"";
 
     $this->vars['uploadFilename'] = $upload ? $upload->getFilename() : '';
     $this->vars['uploadDesc'] = $upload ? $upload->getDescription() : '';
     $this->vars['content'] = $V;
+    $this->vars['ignoreFilesWOInfo'] = $ignoreFilesWOInfos;
 
     return $this->render('admin_upload_edit.html.twig');
   }

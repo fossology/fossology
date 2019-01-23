@@ -324,7 +324,7 @@ class SpdxTwoAgent extends Agent
     $this->heartbeat(0);
 
     $upload = $this->uploadDao->getUpload($uploadId);
-    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName());
+    $fileNodes = $this->generateFileNodes($filesWithLicenses, $upload->getTreeTableName(), $uploadId);
 
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($uploadId, $this->groupId);
     $mainLicenses = array();
@@ -636,11 +636,14 @@ class SpdxTwoAgent extends Agent
    * @param string $treeTableName
    * @return string Node content
    */
-  protected function generateFileNodes($filesWithLicenses, $treeTableName)
+  protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
   {
-    if (strcmp($this->outputFormat, "dep5") !== 0) {
-      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName);
-    } else {
+    if (strcmp($this->outputFormat, "dep5")!==0)
+    {
+      return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
+    }
+    else
+    {
       return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
     }
   }
@@ -649,9 +652,10 @@ class SpdxTwoAgent extends Agent
    * @brief For each file, generate the nodes by files
    * @param string &$filesWithLicenses
    * @param string $treeTableName
+   * @param int $uploadID
    * @return string Node string
    */
-  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
+  protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId)
   {
     /* @var $treeDao TreeDao */
     $treeDao = $this->container->get('dao.tree');
@@ -673,7 +677,10 @@ class SpdxTwoAgent extends Agent
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      $content .= $this->renderString($this->getTemplateFile('file'),array(
+      if(!$this->getIgnoreFilesWOinfo($uploadId) ||
+         ($this->getIgnoreFilesWOinfo($uploadId) && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights']))))
+      {
+        $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
           'md5'=>$hashes['md5'],
@@ -686,6 +693,7 @@ class SpdxTwoAgent extends Agent
           'concludedLicenses'=> SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
           'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights'=>$licenses['copyrights']));
+      }
     }
     $this->heartbeat($filesProceeded - $lastValue);
     return $content;
@@ -786,6 +794,20 @@ class SpdxTwoAgent extends Agent
     $filelistPack = $this->dbManager->getSingleRow($sql,$param,$stmt);
 
     return sha1($filelistPack['concat_sha1']);
+  }
+
+   /**
+   * @brief Get current ignore files without infos in spdx reports state for a given upload
+   *
+   * @param int $uploadId
+   * @return boolval current state (TRUE : SPDX output dont show files wo infos, FALSE : show it)
+   */
+  protected function getIgnoreFilesWOinfo(int $uploadId)
+  {
+    $sql = "SELECT ignore_files_wo_infos from upload where upload_pk=$1";
+    $param[] = $uploadId;
+    $row = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Ignore_files_wo_infos');
+    return ($row['ignore_files_wo_infos']=='t');
   }
 }
 

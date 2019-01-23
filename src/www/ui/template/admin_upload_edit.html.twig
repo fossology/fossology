@@ -27,7 +27,11 @@
 
       <li>{{ 'Upload description'|trans }}:
         <input type="text" name="newdesc" size="60" value="{{ uploadDesc|e }}" />
-      </li> 
+      </li>
+
+      <li>{{ 'Ignore files with no info in SPDX reports'|trans }}:
+        <input type="checkbox" name="ignorefileswoinfo" {%if ignoreFilesWOInfo %}checked{% endif %} value="1" >
+      </li>
     </ol>
     <input type="submit" value="{{ 'Edit'|trans }}" />
   </form>
