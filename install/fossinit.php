@@ -337,7 +337,7 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0
     WHERE rf1.rf_shortname='3DFX'
       AND rf2.rf_shortname='Glide'
     LIMIT 1", array(), 'old.3dfx.rf_pk');
-  if (count($row))
+  if (!empty($row))
   {
     $id_3dfx = intval($row['id_3dfx']);
     $id_glide = intval($row['id_glide']);
@@ -433,6 +433,7 @@ function initLicenseRefTable($Verbose)
     $marydone = $row['marydone'];
     $rf_text_updatable = $row['rf_text_updatable'];
     $rf_detector_type = $row['rf_detector_type'];
+    $rf_flag = $row['rf_flag'];
 
     if ($count) // update when it is existing
     {
@@ -446,9 +447,14 @@ function initLicenseRefTable($Verbose)
       $marydone_check = $row_check['marydone'];
       $rf_text_updatable_check = $row_check['rf_text_updatable'];
       $rf_detector_type_check = $row_check['rf_detector_type'];
+      $rf_flag_check = $row_check['rf_flag'];
 
       $sql = "UPDATE license_ref set ";
-      if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text',";
+      if($rf_flag_check == 1 ||  $rf_flag == 1) {
+        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
+      } else {
+        $sql .= " rf_text='$rf_text_check',";
+      }
       if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
       if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
       if ($rf_notes_check != $rf_notes && !empty($rf_notes))  $sql .= " rf_notes ='$rf_notes',";
@@ -458,14 +464,11 @@ function initLicenseRefTable($Verbose)
       if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type))  $sql .= " rf_detector_type = '$rf_detector_type',";
       $sql = substr_replace($sql ,"",-1);
 
-      if ($sql != "UPDATE license_ref set") // check if have something to update
-      {
+      if ($sql != "UPDATE license_ref set") { // check if have something to update
         $sql .= " where rf_shortname = '$escaped_name'";
         $dbManager->queryOnce($sql);
       }
-    }
-    else  // insert when it is new
-    {
+    } else {  // insert when it is new
       pg_free_result($result_check);
       $sql = "INSERT INTO license_ref (rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, rf_text_updatable, rf_detector_type, marydone)"
               . "VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$rf_active', '$rf_text_updatable', '$rf_detector_type', '$marydone');";

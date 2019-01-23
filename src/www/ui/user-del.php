@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+require_once "user-del-helper.php";
 define("TITLE_user_del", _("Delete A User"));
 
 use \Fossology\Lib\Auth\Auth;
@@ -32,6 +34,7 @@ class user_del extends FO_Plugin
     $this->Title      = TITLE_user_del;
     $this->MenuList   = "Admin::Users::Delete";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->dbManager  = $GLOBALS['container']->get('db.manager');
 
     parent::__construct();
   }
@@ -108,7 +111,7 @@ class user_del extends FO_Plugin
     if (!empty($User))
     {
       if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = $this->Delete($User); }
+      else { $rc = DeleteUser($User, $this->dbManager); }
       if (empty($rc))
       {
         /* Need to refresh the screen */

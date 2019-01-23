@@ -82,7 +82,10 @@ abstract class HistogramBase extends FO_Plugin {
                <div><table border=1 width='100%' id='copyright".$type."'></table></div>
                <br/><br/>
                <div>
-                <a style='cursor: pointer; margin-left:10px;'id='deleteSelected".$type."' class='buttonLink'>Mark selected rows for deletion</a>
+                Replace: <input type='text' id='replaceText' style='width:80%'>
+                <br/><br/>
+                <a style='cursor: pointer; margin-left:10px;' id='replaceSelected".$type."' class='buttonLink'>Mark selected rows for replace</a>
+                <a style='cursor: pointer; margin-left:10px;' id='deleteSelected".$type."' class='buttonLink'>Mark selected rows for deletion</a>
                <br/><br/>
                <h4>Deactivated $typeDescriptor statements:</h4>
                </div>

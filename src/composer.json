@@ -15,13 +15,14 @@
         "ext-mbstring": "*",
         "ext-json" : "*",
         "ext-xml" : "*",
-        "monolog/monolog" : "1.10.*",
+        "monolog/monolog" : "1.22.*",
         "phpoffice/phpword" : "v0.13.*",
-        "symfony/config" : "~2.7.36",
-        "symfony/http-foundation" : "~2.7.36",
-        "symfony/dependency-injection" : "~2.7.36",
+        "symfony/config" : "3.3.*",
+        "symfony/http-foundation" : "3.3.*",
+        "symfony/dependency-injection" : "3.3.*",
         "twig/twig" : "1.*",
-        "twig/extensions" : "1.*"
+        "twig/extensions" : "1.*",
+        "silex/silex": "2.1.0"
     },
     "require-dev" : {
         "doctrine/instantiator" : "1.0.5",
@@ -42,7 +43,8 @@
             "Fossology\\DeciderJob\\UI\\" : "deciderjob/ui",
             "Fossology\\Decider\\UI\\" : "decider/ui",
             "Fossology\\DelAgent\\UI\\" : "delagent/ui",
-            "Fossology\\UI\\Page\\" : "www/ui/page"
+            "Fossology\\UI\\Page\\" : "www/ui/page",
+            "Fossology\\UI\\Api\\" : "www/ui/api"
         }
     },
     "config" : {

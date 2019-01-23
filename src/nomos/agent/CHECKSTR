@@ -1,7 +1,7 @@
 #!/bin/sh
 #**************************************************************
 # Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -25,9 +25,13 @@ ERRS=0
 # echo "$PROG: validating phrase seeds in license strings..."
 for i in $(seq 1 $WC) ; do
 	LINE=$(head -n $i $DATA | tail -n 1)
+	if echo "${LINE}" | egrep -iq "^\[=NULL=\]" ; then
+		continue
+	fi
 	KEY=$(echo "$LINE" | awk -F\" '{print $2}')
-	REST=$(echo "$LINE" | awk -F: '{print $2}')
-	TAG=$(expr "$LINE" : '\[.*\] \(.*\):')
+# License string can contain `:`
+	REST=$(expr "$LINE" : '\[.*\] _.*: \(.*\)$')
+	TAG=$(expr "$LINE" : '\[.*\] \(.*\): ')
 #	echo LINE $i: key $KEY tag $TAG rest $REST
 	if [ -f checkstr.OK ]; then
 #		grep -qx "$TAG" $PASS && echo "$TAG: OK" && continue
@@ -44,7 +48,7 @@ for i in $(seq 1 $WC) ; do
 		KLUDGE="${CH1})${OTH}"
 		if echo "$LINE" | fgrep -iq "$KLUDGE" ; then
 			X=1	# echo "OK (kludge \"$KLUDGE\")"
-		else 
+		else
 			echo "$PROG: Key \"$KEY\" NOT FOUND in entry below:"
 			echo "$LINE"
 			ERRS=$((ERRS+1))

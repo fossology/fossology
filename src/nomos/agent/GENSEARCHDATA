@@ -274,7 +274,7 @@ END {
 # the auto-generated source file with a syntax error so we don't build.
 # The build _should_ fail until the error is repaired.
 #####
-grep "%KEY%" $INFILE | grep -v '^#' | sed -e 's/%KEY%	/ /g' | sort |
+grep "%KEY%" $INFILE | grep -v '^#' | sed -e 's/%KEY% / /g' | sort |
     uniq -c | sort -nr > $STR_HIST
 # [ -f ${NEW_H}_TAIL ] && cat ${NEW_H}_TAIL >> $NEW_H		# no remove!
 #####
