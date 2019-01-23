@@ -1532,6 +1532,10 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4";
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL";
 
+  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"ignore_files_wo_infos\" IS 'true: SPDX output dont show files wo infos, false: show it'";
+  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"ignore_files_wo_infos\" boolean DEFAULT false";
+  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"ignore_files_wo_infos\" DROP NOT NULL";
+
 
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4";

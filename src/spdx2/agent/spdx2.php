@@ -678,7 +678,10 @@ class SpdxTwoAgent extends Agent
         $licenses['scanner'] = array();
       }
       $stateComment = $this->getSPDXLicenseCommentState($uploadId);
-      $dataTemplate = array(
+      $stateWoInfos = $this->getIgnoreFilesWOinfo($uploadId);
+      if (!$stateWoInfos ||
+          ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights'])))) {
+        $dataTemplate = array(
           'fileId' => $fileId,
           'sha1' => $hashes['sha1'],
           'md5' => $hashes['md5'],
@@ -692,12 +695,12 @@ class SpdxTwoAgent extends Agent
           'scannerLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights' => $licenses['copyrights'],
           'licenseCommentState' => $stateComment
-      );
-      if ($stateComment) {
-        $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
+        );
+        if ($stateComment) {
+          $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
+        }
+        $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);
       }
-
-      $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);
     }
     $this->heartbeat($filesProceeded - $lastValue);
     return $content;
@@ -818,8 +821,21 @@ class SpdxTwoAgent extends Agent
     }
     return false;
   }
-}
 
+  /**
+   * @brief Get current ignore files without infos in spdx reports state for a given upload
+   *
+   * @param int $uploadId
+   * @return boolval current state (TRUE : SPDX output dont show files wo infos, FALSE : show it)
+   */
+  protected function getIgnoreFilesWOinfo($uploadId)
+  {
+    $sql = "SELECT ignore_files_wo_infos from upload where upload_pk=$1";
+    $param = array($uploadId);
+    $row = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Ignore_files_wo_infos');
+    return ($row['ignore_files_wo_infos']=='t');
+  }
+}
 $agent = new SpdxTwoAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();
