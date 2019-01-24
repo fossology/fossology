@@ -1,5 +1,5 @@
-Please refer to CONTRIBUTING.md (https://github.com/fossology/fossology/blob/master/CONTRIBUTING.md)
-before creating the pull request to make sure you follow all the standards.
+<!-- Please refer to CONTRIBUTING.md (https://github.com/fossology/fossology/blob/master/CONTRIBUTING.md)
+before creating the pull request to make sure you follow all the standards. -->
 
 ## Description
 
@@ -16,4 +16,3 @@ Describe the steps required to test the changes proposed in the pull request.
 Please consider using the closing keyword if the pull request is proposed to
 fix an issue already created in the repository
 (https://help.github.com/articles/closing-issues-using-keywords/)
-
