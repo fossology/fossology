@@ -36,13 +36,13 @@
 /**
  * Maximum buffer to use
  */
-#define myBUFSIZ	2048
+#define myBUFSIZ 2048
 
 /* File utils.c */
-void ExitNow        (int ExitVal);
+void ExitNow(int ExitVal);
 
 /* File usage.c */
-void Usage          (char *Name);
+void Usage(char *Name);
 
 /* File process.c */
 void VacAnalyze();
@@ -55,5 +55,6 @@ void RemoveOrphanedFiles();
 void DeleteOrphanGold();
 void NormalizeUploadPriorities();
 void reIndexAllTables();
+void removeOrphanedRows();
 
 #endif /* _MAINTAGENT_H */

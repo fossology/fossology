@@ -97,8 +97,10 @@ int main(int argc, char **argv)
   int ProcessExpiredExe = 0;
   int RemoveOrphanedFilesExe = 0;
   int reIndexAllTablesExe = 0;
+  int removeOrphanedRowsExe = 0;
+
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aADEFghIpNPRTUZivVc:")) != -1)
   {
     switch (cmdopt)
     {
@@ -223,6 +225,12 @@ int main(int argc, char **argv)
           if(reIndexAllTablesExe == 0){
             reIndexAllTables();
             reIndexAllTablesExe = 1;
+          }
+          break;
+      case 'E': /* Remove orphaned files from the database */
+          if(removeOrphanedRowsExe == 0){   
+            removeOrphanedRows();
+            removeOrphanedRowsExe = 1;
           }
           break;
       case 'i': /* "Initialize" */

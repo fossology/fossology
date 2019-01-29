@@ -323,9 +323,10 @@ FUNCTION void NormalizeUploadPriorities()
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }
+
 /**
  * @brief reindex of all indexes in fossology database
-  * @returns void but writes status to stdout
+ * @returns void but writes status to stdout
  */
 FUNCTION void reIndexAllTables()
 {
@@ -347,6 +348,98 @@ FUNCTION void reIndexAllTables()
 
   EndTime = (long)time(0);
   printf("Time taken for reindexing the database : %ld seconds\n", EndTime-StartTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
+  return;  // success
+}
+
+/**
+ * @brief remove orphaned rows from fossology database
+ * @returns void but writes status to stdout
+ */
+FUNCTION void removeOrphanedRows()
+{
+  PGresult* result; // the result of the database access
+  char *uploadTreeOrphaned;
+  char *clearingDecisionOrphaned;
+  char *clearingDecisionEventOrphaned;
+  char *clearingEventOrphaned;
+  char *obligationMapOrphaned;
+  char *obligationCandidateMapOrphaned;
+  long startTime, endTime;
+
+  char *sql1 = " DELETE FROM uploadtree "
+                 " WHERE uploadtree_pk IN (SELECT DISTINCT(uploadtree_pk) "
+               " FROM uploadtree UT LEFT OUTER JOIN upload U ON U.upload_pk = UT.upload_fk "
+                 " WHERE U.upload_pk IS NULL); ";
+
+  char *sql2 = " DELETE FROM clearing_decision "
+                 " WHERE uploadtree_fk IN (SELECT DISTINCT(uploadtree_fk) "
+               " FROM clearing_decision CD LEFT OUTER JOIN uploadtree UT ON UT.uploadtree_pk = CD.uploadtree_fk "
+                 " WHERE UT.uploadtree_pk IS NULL); ";
+
+  char *sql3 = " DELETE FROM clearing_decision_event CDE USING clearing_event CE "
+                 " WHERE CDE.clearing_event_fk = CE.clearing_event_pk AND "
+                 "  CE.uploadtree_fk IN (SELECT DISTINCT(uploadtree_fk) "
+               " FROM clearing_event CE LEFT OUTER JOIN uploadtree UT ON UT.uploadtree_pk = CE.uploadtree_fk "
+                 " WHERE UT.uploadtree_pk IS NULL); ";
+
+  char *sql4 = " DELETE FROM clearing_event "
+                 " WHERE uploadtree_fk IN (SELECT DISTINCT(uploadtree_fk) "
+               " FROM clearing_event CE LEFT OUTER JOIN uploadtree UT ON UT.uploadtree_pk = CE.uploadtree_fk "
+                 " WHERE UT.uploadtree_pk IS NULL); ";
+
+  char *sql5 = " DELETE FROM obligation_map "
+                 " WHERE rf_fk IN (SELECT DISTINCT(rf_fk) "
+               " FROM obligation_map OM LEFT OUTER JOIN license_ref LR ON LR.rf_pk = OM.rf_fk "
+                 " WHERE LR.rf_pk IS NULL); ";
+
+  char *sql6 = " DELETE FROM obligation_candidate_map "
+                 " WHERE rf_fk IN (SELECT DISTINCT(rf_fk) "
+               " FROM obligation_candidate_map OCM LEFT OUTER JOIN license_candidate LC ON LC.rf_pk = OCM.rf_fk "
+                 " WHERE LC.rf_pk IS NULL); ";
+
+  startTime = (long)time(0);
+
+  result = PQexec(pgConn, sql1);
+  if (fo_checkPQcommand(pgConn, result, sql1, __FILE__, __LINE__)) ExitNow(-411);
+  uploadTreeOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from uploadtree table\n", uploadTreeOrphaned);
+
+  result = PQexec(pgConn, sql2);
+  if (fo_checkPQcommand(pgConn, result, sql2, __FILE__, __LINE__)) ExitNow(-412);
+  clearingDecisionOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from clearing_decision table\n", clearingDecisionOrphaned);
+
+  result = PQexec(pgConn, sql3);
+  if (fo_checkPQcommand(pgConn, result, sql3, __FILE__, __LINE__)) ExitNow(-413);
+  clearingDecisionEventOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from clearing_decision_event table\n", clearingDecisionEventOrphaned);
+
+  result = PQexec(pgConn, sql4);
+  if (fo_checkPQcommand(pgConn, result, sql4, __FILE__, __LINE__)) ExitNow(-414);
+  clearingEventOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from clearing_event table\n", clearingEventOrphaned);
+
+  result = PQexec(pgConn, sql5);
+  if (fo_checkPQcommand(pgConn, result, sql5, __FILE__, __LINE__)) ExitNow(-415);
+  obligationMapOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from obligation_map table\n", obligationMapOrphaned);
+
+  result = PQexec(pgConn, sql6);
+  if (fo_checkPQcommand(pgConn, result, sql6, __FILE__, __LINE__)) ExitNow(-416);
+  obligationCandidateMapOrphaned = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Orphaned records have been removed from obligation_candidate_map table\n", obligationCandidateMapOrphaned);
+
+  endTime = (long)time(0);
+
+  printf("Time taken for removing orphaned rows from database : %ld seconds\n", endTime-startTime);
 
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success

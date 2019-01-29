@@ -42,6 +42,7 @@ FUNCTION void Usage(char *Name)
   printf("  -T   :: Remove orphaned temp tables.\n");
   printf("  -U   :: Process expired uploads (slow).\n");
   printf("  -Z   :: Remove orphaned files from the repository (slow).\n");
+  printf("  -E   :: Remove orphaned rows from database.\n");
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -I   :: Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use).\n");
   printf("  -v   :: verbose (turns on debugging output)\n");
