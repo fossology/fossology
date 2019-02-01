@@ -143,9 +143,12 @@ function Migrate_33_34($dbManager, $dryRun)
     echo "*** Cleaning tables for new constraints ***\n";
     $count = 0;
     $tableMap = [
+      ["author", "agent_fk", "agent", "agent_pk"],
+      ["author", "pfile_fk", "pfile", "pfile_pk"],
       ["bucket_container", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "bucket_fk", "bucket_def", "bucket_pk"],
       ["bucket_file", "pfile_fk", "pfile", "pfile_pk"],
+      ["copyright", "agent_fk", "agent", "agent_pk"],
       ["copyright_decision", "pfile_fk", "pfile", "pfile_pk"],
       ["ecc", "agent_fk", "agent", "agent_pk"],
       ["ecc", "pfile_fk", "pfile", "pfile_pk"],
