@@ -38,10 +38,10 @@ void testListFolders()
   char *ErrorBuf;
   int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   rc = listFolders(3, 10);
-  PQfinish(db_conn);
+  PQfinish(pgConn);
   CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListFolders PASS!");
 }
@@ -57,11 +57,11 @@ void testListUploads()
   char *ErrorBuf;
   int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
   rc = listUploads(3, 10);
 
-  PQfinish(db_conn);
+  PQfinish(pgConn);
   CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListUploads PASS!");
 }
