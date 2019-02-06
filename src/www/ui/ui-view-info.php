@@ -20,6 +20,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\UserDao;
 
 class ui_view_info extends FO_Plugin
 {
@@ -27,6 +28,9 @@ class ui_view_info extends FO_Plugin
   private $uploadDao;
   /** @var DbManager */
   private $dbManager;
+  /** @var UserDao $userDao
+   * User DAO to use */
+  private $userDao;
 
   function __construct()
   {
@@ -38,6 +42,7 @@ class ui_view_info extends FO_Plugin
     parent::__construct();
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->userDao = $GLOBALS['container']->get('dao.user');
   }
 
   /**
@@ -550,6 +555,50 @@ class ui_view_info extends FO_Plugin
   }
 
   /**
+   * @brief Get the info regarding reused package
+   * @param int $uploadId Get the reused package for this upload
+   * @returns List of twig variables
+   */
+  function showReuseInfo($uploadId)
+  {
+    $vars = [];
+    $reusedInfo = $this->uploadDao->getReusedUpload($uploadId,
+      Auth::getGroupId());
+    foreach ($reusedInfo as $row) {
+      $entry = [];
+      $reuseUploadFk = $row['reused_upload_fk'];
+      $reuseGroupFk = $row['reused_group_fk'];
+      $reusedUpload = $this->uploadDao->getUpload($reuseUploadFk);
+      $reuseMode = "";
+      switch ($row['reuse_mode']) {
+        case UploadDao::REUSE_ENHANCED:
+          $reuseMode = "Enhanced reuse";
+          break;
+        case UploadDao::REUSE_MAIN:
+          $reuseMode = "Main license reuse";
+          break;
+        case UploadDao::REUSE_ENH_MAIN:
+          $reuseMode = "Enhanced with main license reuse";
+          break;
+        default:
+          $reuseMode = "Normal";
+      }
+
+      $entry['name'] = $reusedUpload->getFilename();
+      $entry['url'] = Traceback_uri() .
+        "?mod=license&upload=$reuseUploadFk&item=" .
+        $this->uploadDao->getUploadParent($reuseUploadFk);
+      $entry['group'] = $this->userDao->getGroupNameById($reuseGroupFk) .
+        " ($reuseGroupFk)";
+      $entry['sha1'] = $this->uploadDao->getUploadHashes($reuseUploadFk)['sha1'];
+      $entry['mode'] = $reuseMode;
+
+      $vars['reusedPackageList'][] = $entry;
+    }
+    return $vars;
+  }
+
+  /**
     * @param array $checkBoxListParams
     * @return $cbSelectionList
    */
@@ -624,6 +673,7 @@ class ui_view_info extends FO_Plugin
     $this->vars += $this->ShowMetaView($uploadId, $itemId);
     $this->vars += $this->ShowSightings($uploadId, $itemId);
     $this->vars += $this->ShowView($uploadId, $itemId);
+    $this->vars += $this->showReuseInfo($uploadId);
   }
 
   public function getTemplateName()
