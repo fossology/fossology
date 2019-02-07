@@ -123,7 +123,6 @@ class UploadFilePage extends UploadPageBase
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission, $scm);
-
     if (empty($uploadId))
     {
       return array(false, _("Failed to insert upload record"), $description);
