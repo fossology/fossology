@@ -16,8 +16,18 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 ************************************************************** */
 /**
+ * \dir
+ * \brief Contains FOSSology C library
  * \file
  * \brief The main FOSSology C library
+ * \page libc FOSSology C library
+ * \tableofcontents
+ *
+ * \section libcabout About
+ * This is library contains common utility functions for FOSSology agents
+ * written in C language.
+ * \section libcsource Library source
+ * - \link src/lib/c \endlink
  */
 #ifndef LIBFOSSOLOGY_H
 #define LIBFOSSOLOGY_H

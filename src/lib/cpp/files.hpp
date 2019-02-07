@@ -14,9 +14,18 @@ You should have received a copy of the GNU General Public License along with thi
 #include <string>
 #include <glib.h>
 
+/**
+ * \file
+ * \brief Utility functions for file handling
+ */
+
 namespace fo
 {
 
+  /**
+   * \class File
+   * \brief Class to handle file related operations.
+   */
   class File
   {
   public:
@@ -28,8 +37,8 @@ namespace fo
     const std::string& getFileName() const;
     bool isReadable() const;
   private:
-    unsigned long id;
-    std::string fileName;
+    unsigned long id;         ///< ID of the file
+    std::string fileName;     ///< Path of the file
   };
 
   std::string getStringFromFile(const char* filename, const unsigned long int maximumBytes = 1 << 20);

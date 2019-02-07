@@ -30,17 +30,34 @@ extern "C" {
 
 #include "libfossdbQueryResult.hpp"
 
+/**
+ * \file
+ * \brief DB wrapper for agents
+ */
+
 namespace fo
 {
+  /**
+   * \class DbManagerStructDeleter
+   * \brief DB manager deleter (for shared pointer)
+   */
   class DbManagerStructDeleter
   {
   public:
+    /**
+     * Called by shared pointer destructor
+     * @param d DB manager to be deleted
+     */
     void operator ()(fo_dbManager* d)
     {
       fo_dbManager_finish(d);
     }
   };
 
+  /**
+   * \class DbManager
+   * \brief DB wrapper for agents
+   */
   class DbManager
   {
   public :
@@ -62,7 +79,7 @@ namespace fo
     QueryResult execPrepared(fo_dbManager_PreparedStatement* stmt, ...) const;
 
   private:
-    unptr::shared_ptr <fo_dbManager> dbManager;
+    unptr::shared_ptr <fo_dbManager> dbManager;    ///< Shared DB manager
   };
 }
 
