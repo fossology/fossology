@@ -53,7 +53,7 @@ class UploadSrvPage extends UploadPageBase
     }
 
     return in_array($host,$hostList);
-   }
+  }
 
   /**
    * \brief checks, whether a normalized path starts with an path in the

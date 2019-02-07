@@ -468,7 +468,8 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
       if (!empty($upload_id) && "tag" == $Val->URI)
       {
         $tagstatus = TagStatus($upload_id);
-        if (0 == $tagstatus) break; // tagging on this upload is disabled
+        if (0 == $tagstatus) { break; // tagging on this upload is disabled
+        }
       }
 
       $entry = "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
@@ -556,7 +557,8 @@ function menu_remove($Menu, $RmName)
   $NewArray = array();
   foreach ($Menu as $MenuObj)
   {
-    if ($MenuObj->Name != $RmName) $NewArray[] = $MenuObj;
+    if ($MenuObj->Name != $RmName) { $NewArray[] = $MenuObj;
+    }
   }
   return $NewArray;
 }

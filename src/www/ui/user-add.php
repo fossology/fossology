@@ -18,7 +18,7 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_user_add", _("Add A User"));
+define("TITLE_USER_ADD", _("Add A User"));
 
 class user_add extends FO_Plugin {
 
@@ -28,7 +28,7 @@ class user_add extends FO_Plugin {
   function __construct()
   {
     $this->Name = "user_add";
-    $this->Title = TITLE_user_add;
+    $this->Title = TITLE_USER_ADD;
     $this->MenuList = "Admin::Users::Add";
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();

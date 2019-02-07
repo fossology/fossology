@@ -19,7 +19,7 @@
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Auth\Auth;
 
-define("TITLE_PopupLicense", _("Show Reference License"));
+define("TITLE_POPUPLICENSE", _("Show Reference License"));
 
 class PopupLicense extends FO_Plugin
 {
@@ -30,7 +30,7 @@ class PopupLicense extends FO_Plugin
   function __construct()
   {
     $this->Name = "popup-license";
-    $this->Title = TITLE_PopupLicense;
+    $this->Title = TITLE_POPUPLICENSE;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;

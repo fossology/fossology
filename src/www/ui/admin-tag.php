@@ -21,14 +21,14 @@
  * \brief Create tag without tagging anything
  */
 
-define("TITLE_admin_tag", _("Create Tag"));
+define("TITLE_ADMIN_TAG", _("Create Tag"));
 
 class admin_tag extends FO_Plugin
 {
   function __construct()
   {
     $this->Name     = "admin_tag";
-    $this->Title    = TITLE_admin_tag;
+    $this->Title    = TITLE_ADMIN_TAG;
     $this->MenuList = "Admin::Tag::Create Tag";
     $this->Version  = "1.3";
     $this->DBaccess = PLUGIN_DB_ADMIN;

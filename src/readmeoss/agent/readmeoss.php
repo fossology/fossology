@@ -207,7 +207,7 @@ class ReadmeOssAgent extends Agent
       if(!empty($addSeparator)) {
         $outData .= $addSeparator . $break;
       }
-     }
+    }
     return $outData;
   }
 

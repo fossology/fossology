@@ -165,11 +165,12 @@ if (array_key_exists("a", $options)) {
 
 /* Hide agents  that aren't related to data scans */
 $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
+for($ac=0; !empty($agent_list[$ac]->URI); $ac++) {
   if (array_search($agent_list[$ac]->URI, $Skip) !== false) 
   {
-      unset($agent_list[$ac]);
+    unset($agent_list[$ac]);
   }
+}
 
 /* If the user specified a list, then disable every agent not in the list */
 $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
@@ -181,9 +182,11 @@ if (array_key_exists("A", $options))
     $Found = 0;
     foreach(explode(',', $options["A"]) as $Val) 
     {
-      if (!strcmp($Val, $agent_list[$ac]->URI))  $Found = 1; 
+      if (!strcmp($Val, $agent_list[$ac]->URI)) {  $Found = 1;
+      } 
     }
-    if ($Found == 0) $agent_list[$ac]->URI = NULL;
+    if ($Found == 0) { $agent_list[$ac]->URI = NULL;
+    }
   }
 }
 

@@ -217,7 +217,8 @@ class fo_libschema
     }
     foreach ($this->schema['SEQUENCE'] as $name => $import)
     {
-      if (empty($name)) continue;
+      if (empty($name)) { continue;
+      }
 
       if(!array_key_exists('SEQUENCE', $this->currSchema)
         || !array_key_exists($name, $this->currSchema['SEQUENCE']))
@@ -241,7 +242,8 @@ class fo_libschema
     }
     foreach ($this->schema['CLUSTER'] as $name => $sql)
     {
-      if (empty($name)) continue;
+      if (empty($name)) { continue;
+      }
 
       if(!array_key_exists('CLUSTER', $this->currSchema)
         || !array_key_exists($name, $this->currSchema['CLUSTER']))
@@ -266,7 +268,8 @@ class fo_libschema
     }
     foreach ($this->schema['SEQUENCE'] as $name => $import)
     {
-      if (empty($name)) continue;
+      if (empty($name)) { continue;
+      }
 
       if (is_array($import) && array_key_exists('UPDATE', $import)) {
         $this->applyOrEchoOnce($import['UPDATE'], $stmt = __METHOD__ . "." . $name);
@@ -886,10 +889,12 @@ class fo_libschema
         $sql .= " (" . $Results[$i]['fk_constraint_key'] . ")";
       }
 
-      if (!empty($Results[$i]['on_update']))
+      if (!empty($Results[$i]['on_update'])) {
         $sql .= " ON UPDATE " . $Results[$i]['on_update'];
-      if (!empty($Results[$i]['on_delete']))
+      }
+      if (!empty($Results[$i]['on_delete'])) {
         $sql .= " ON DELETE " . $Results[$i]['on_delete'];
+      }
 
       $sql .= ";";
       $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
@@ -899,7 +904,8 @@ class fo_libschema
     /* CONSTRAINT: ALL OTHERS */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
-      if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) continue;
+      if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) { continue;
+      }
 
       $sql = "ALTER TABLE \"" . $Results[$i]['table_name'] . "\"";
       $sql .= " ADD CONSTRAINT \"" . $Results[$i]['constraint_name'] . '"';
@@ -1133,7 +1139,7 @@ class fo_libschema
     }
   }
 
-// MakeFunctions()
+  // MakeFunctions()
 }
 
 if (empty($dbManager) || !($dbManager instanceof DbManager))

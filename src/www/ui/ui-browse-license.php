@@ -83,8 +83,9 @@ class ui_browse_license extends DefaultPlugin
 
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (empty($Item) || empty($Upload))
+    if (empty($Item) || empty($Upload)) {
       return;
+    }
     $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
     if (GetParm("mod", PARM_STRING) == self::NAME)

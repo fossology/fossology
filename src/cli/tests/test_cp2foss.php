@@ -146,7 +146,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[13]) {
       $upload_id = get_upload_id($out[6]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     fwrite(STDOUT, "DEBUG: $upload_id \n");
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -212,7 +213,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[4]) {
       $upload_id = get_upload_id($out[4]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -251,7 +253,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[12]) {
       $upload_id = get_upload_id($out[12]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     $agent_status = 0;
     sleep(5);
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -281,7 +284,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[24]) {
       $upload_id = get_upload_id($out[24]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -298,7 +302,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[18]) {
       $upload_id = get_upload_id($out[18]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     fwrite(STDOUT, "Debug: upload_id is:$upload_id\n");
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -344,7 +349,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -429,7 +435,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     if ( $return_var != 0 ) {
         print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
-#        exit(1);
+      #        exit(1);
     }
 
     // time to drop the database 
@@ -441,4 +447,4 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
 }
 
-?>
+

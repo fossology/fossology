@@ -53,6 +53,9 @@ jobs:
     - name: Copy/Paste Detector
       install: composer install --prefer-dist --working-dir=src
       script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
+    - name: PHP Codesniffer
+      install: composer install --prefer-dist --working-dir=src
+      script: src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml --extensions=php src/www/ui/ src/lib/php/ src/delagent/ui/ src/decider/ src/deciderjob/ src/cli/ src/readmeoss/ src/spdx2/ src/reuser/ src/nomos/ui/ src/unifiedreport/ src/monk/ui/
 #### Docker tests ###########################
     - name: Docker Tests
       addons: {}

@@ -217,9 +217,10 @@ class ui_view_info extends FO_Plugin
     if ($row) {
 
       /* upload source */
-      if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL");
-      else if ($row['upload_mode'] & 1 << 3) $text = _("Added by file upload");
-      else if ($row['upload_mode'] & 1 << 4) $text = _("Added from filesystem");
+      if ($row['upload_mode'] & 1 << 2) { $text = _("Added by URL");
+      } else if ($row['upload_mode'] & 1 << 3) { $text = _("Added by file upload");
+      } else if ($row['upload_mode'] & 1 << 4) { $text = _("Added from filesystem");
+      }
       $vars['fileUploadOriginInfo'] = $text;
       $vars['fileUploadOrigin'] = $row['upload_origin'];
 
@@ -621,7 +622,8 @@ class ui_view_info extends FO_Plugin
   public function Output()
   {
     $uploadId = GetParm("upload",PARM_INTEGER);
-    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) return;
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) { return;
+    }
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");

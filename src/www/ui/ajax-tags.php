@@ -19,14 +19,14 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_ajax_tags", _("List Tags"));
+define("TITLE_AJAX_TAGS", _("List Tags"));
 
 class ajax_tags extends FO_Plugin
 {
   function __construct()
   {
     $this->Name       = "tag_get";
-    $this->Title      = TITLE_ajax_tags;
+    $this->Title      = TITLE_AJAX_TAGS;
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
 

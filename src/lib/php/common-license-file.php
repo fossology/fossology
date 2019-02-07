@@ -42,7 +42,8 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
 {
   global $PG_CONN;
 
-  if (empty($agent)) Fatal("Missing parameter: agent", __FILE__, __LINE__);
+  if (empty($agent)) { Fatal("Missing parameter: agent", __FILE__, __LINE__);
+  }
 
   if ($uploadtree_pk)
   {
@@ -60,10 +61,11 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
     $agentIdCondition = $agent != "any" ?  "and agent_fk=$agent" : "";
 
     /* Strip out added upload_pk condition if it isn't needed */
-    if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
+    if (($uploadtree_tablename == "uploadtree_a") or ($uploadtree_tablename == "uploadtree")) {
       $UploadClause = "upload_fk=$upload_pk and ";
-    else
+    } else {
       $UploadClause = "";
+    }
 
     /*  Get the licenses under this $uploadtree_pk*/
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk, fl_pk
@@ -75,7 +77,8 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
   }
-  else Fatal("Missing function inputs", __FILE__, __LINE__);
+  else { Fatal("Missing function inputs", __FILE__, __LINE__);
+  }
 
   $LicArray = array();
   if ($duplicate)  // get duplicated licenses
@@ -158,7 +161,8 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   }
   pg_free_result($result);
 
-  if (empty($rf_pk)) return array(); // if when the rf_shortname does not exist
+  if (empty($rf_pk)) { return array(); // if when the rf_shortname does not exist
+  }
 
   $shortname = pg_escape_string($rf_shortname);
 
@@ -185,10 +189,11 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   }
 
   /* Strip out added upload_pk condition if it isn't needed */
-  if (($uploadtree_tablename == "uploadtree_a") OR ($uploadtree_tablename == "uploadtree"))
+  if (($uploadtree_tablename == "uploadtree_a") or ($uploadtree_tablename == "uploadtree")) {
     $UploadClause = "upload_fk=$upload_pk and ";
-  else
+  } else {
     $UploadClause = "";
+  }
   $theLimit = ($limit=='ALL') ? '' : "LIMIT $limit";
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
           from license_file, agent, $TagTable
@@ -246,10 +251,12 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
     //$Time = microtime(true) - $uTime2;
     //printf( "GetFilesWithLicense($row[ufile_name]) time: %.2f seconds<br>", $Time);
 
-    if (pg_num_rows($result) > 0)
-    $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
+    if (pg_num_rows($result) > 0) {
+      $pkarray[$row['uploadtree_pk']] = $row['ufile_name'];
+    }
   }
-  if ($result) pg_free_result($result);
+  if ($result) { pg_free_result($result);
+  }
   return $pkarray;
 }
 
@@ -305,7 +312,8 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
     foreach($TagArray as $TagPair)
     {
       /* Build string of tags for this item */
-      if (!empty($TagStr)) $TagStr .= ",";
+      if (!empty($TagStr)) { $TagStr .= ",";
+      }
       $TagStr .= " " . $TagPair['tag_name'];
 
       /* Update $UniqueTagArray */
@@ -318,7 +326,8 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
           break;
         }
       }
-      if (!$found) $UniqueTagArray[] = $TagPair;
+      if (!$found) { $UniqueTagArray[] = $TagPair;
+      }
     }
 
     $text3 = _("Tag");

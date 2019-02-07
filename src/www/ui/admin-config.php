@@ -18,7 +18,7 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_foconfig", _("Configuration Variables"));
+define("TITLE_FOCONFIG", _("Configuration Variables"));
 
 /**
  * \class foconfig extend from FO_Plugin
@@ -33,7 +33,7 @@ class foconfig extends FO_Plugin
   function __construct()
   {
     $this->Name       = "foconfig";
-    $this->Title      = TITLE_foconfig;
+    $this->Title      = TITLE_FOCONFIG;
     $this->MenuList   = "Admin::Customize";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->PluginLevel = 50;    // run before 'regular' plugins
@@ -61,7 +61,8 @@ class foconfig extends FO_Plugin
     {
       if ($Group != $row['group_name'])
       {
-        if ($Group) $OutBuf .= "</table><br>";
+        if ($Group) { $OutBuf .= "</table><br>";
+        }
         $Group = $row['group_name'];
         $OutBuf .= "<table border=1>";
       }
@@ -154,7 +155,8 @@ class foconfig extends FO_Plugin
           if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
           {
             $this->dbManager->getSingleRow("update sysconfig set conf_value=$1 where variablename=$2",array($VarValue,$VarName),__METHOD__.'.setVarNameData');
-            if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
+            if (!empty($UpdateMsg)) { $UpdateMsg .= ", ";
+            }
             $UpdateMsg .= $VarName;
           }
           /* the validation_function is not empty, but after checking, the value is invalid */
@@ -173,13 +175,15 @@ class foconfig extends FO_Plugin
           }
         }
       }
-      if (!empty($UpdateMsg)) $UpdateMsg .= _(" updated.");
+      if (!empty($UpdateMsg)) { $UpdateMsg .= _(" updated.");
+      }
     }
 
     $OutBuf = '';
     if($this->OutputType=='HTML')
     {
-      if ($UpdateMsg) $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+      if ($UpdateMsg) { $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+      }
       $OutBuf .= $this->HTMLout();
     }
     $this->vars['content'] = $OutBuf;

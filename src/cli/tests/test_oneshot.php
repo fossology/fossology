@@ -49,6 +49,6 @@
       $this->assertEquals($license, $output[0]);
     }
 
-}
+  }
 
-?>
+  

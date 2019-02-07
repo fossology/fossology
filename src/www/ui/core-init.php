@@ -18,12 +18,12 @@
 
 use Fossology\Lib\Auth\Auth;
 
-define("TITLE_core_init", _("Initialize"));
+define("TITLE_CORE_INIT", _("Initialize"));
 
 class core_init extends FO_Plugin
 {
   var $Name       = "init";
-  var $Title      = TITLE_core_init;
+  var $Title      = TITLE_CORE_INIT;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
   var $Dependency = array("auth","refresh","menus","Default");

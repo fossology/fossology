@@ -21,7 +21,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_admin_obligation_file", _("Obligations and Risks Administration"));
+define("TITLE_ADMIN_OBLIGATION_FILE", _("Obligations and Risks Administration"));
 
 class admin_obligation_file extends FO_Plugin
 {
@@ -34,7 +34,7 @@ class admin_obligation_file extends FO_Plugin
   function __construct()
   {
     $this->Name       = "admin_obligation";
-    $this->Title      = TITLE_admin_obligation_file;
+    $this->Title      = TITLE_ADMIN_OBLIGATION_FILE;
     $this->MenuList   = "Admin::Obligation Admin";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();

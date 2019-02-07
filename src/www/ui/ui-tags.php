@@ -281,7 +281,8 @@ class ui_tag extends FO_Plugin
           $this->CreateTag($tag_data);
           return (NULL);
         }
-        else pg_free_result($result);
+        else { pg_free_result($result);
+        }
       }
     }
     pg_exec("BEGIN;");
@@ -294,10 +295,11 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     $Val = str_replace("'", "''", $tag_notes);
-    if (!empty($tag_dir))
-    $sql = "UPDATE tag_uploadtree SET tag_uploadtree_date = now(), tag_uploadtree_text = '$Val', tag_fk = $tag_pk WHERE tag_uploadtree_pk = $tag_file_pk;";
-    else
-    $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$Val', tag_fk = $tag_pk WHERE tag_file_pk = $tag_file_pk;";
+    if (!empty($tag_dir)) {
+      $sql = "UPDATE tag_uploadtree SET tag_uploadtree_date = now(), tag_uploadtree_text = '$Val', tag_fk = $tag_pk WHERE tag_uploadtree_pk = $tag_file_pk;";
+    } else {
+      $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$Val', tag_fk = $tag_pk WHERE tag_file_pk = $tag_file_pk;";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -328,10 +330,11 @@ class ui_tag extends FO_Plugin
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    if (Isdir($ufile_mode))
+    if (Isdir($ufile_mode)) {
       $sql = "DELETE FROM tag_uploadtree WHERE tag_uploadtree_pk = $tag_file_pk";
-    else
+    } else {
       $sql = "DELETE FROM tag_file WHERE tag_file_pk = $tag_file_pk";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -538,19 +541,21 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     /* Get all information about $tag_file_pk (tag_file/tag_uploadtree table)*/
-    if (Isdir($ufile_mode))
-    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
-    else
-    $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
+    if (Isdir($ufile_mode)) {
+      $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
+    } else {
+      $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     $tag_pk = $row['tag_pk'];
     $tag = $row['tag'];
-    if (Isdir($ufile_mode))
-    $tag_notes = $row['tag_uploadtree_text'];
-    else
-    $tag_notes = $row['tag_file_text'];
+    if (Isdir($ufile_mode)) {
+      $tag_notes = $row['tag_uploadtree_text'];
+    } else {
+      $tag_notes = $row['tag_file_text'];
+    }
     $tag_desc = $row['tag_desc'];
     pg_free_result($result);
 

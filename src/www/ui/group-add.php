@@ -19,7 +19,7 @@ use Fossology\Lib\Auth\Auth;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-define("TITLE_add_group", _("Add Group"));
+define("TITLE_ADD_GROUP", _("Add Group"));
 
 /**
  * \class group_add extends FO_Plugin
@@ -29,7 +29,7 @@ class group_add extends FO_Plugin {
   function __construct()
   {
     $this->Name = "group_add";
-    $this->Title = TITLE_add_group;
+    $this->Title = TITLE_ADD_GROUP;
     $this->MenuList = "Admin::Groups::Add Group";
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 1;  /* Don't allow Default User to add a group */

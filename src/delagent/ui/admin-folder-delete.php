@@ -20,7 +20,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_admin_folder_delete", _("Delete Folder"));
+define("TITLE_ADMIN_FOLDER_DELETE", _("Delete Folder"));
 
 /**
  * @class admin_folder_delete
@@ -34,7 +34,7 @@ class admin_folder_delete extends FO_Plugin {
   function __construct()
   {
     $this->Name = "admin_folder_delete";
-    $this->Title = TITLE_admin_folder_delete;
+    $this->Title = TITLE_ADMIN_FOLDER_DELETE;
     $this->MenuList = "Organize::Folders::Delete Folder";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
@@ -80,7 +80,8 @@ class admin_folder_delete extends FO_Plugin {
 
     /* Tell the scheduler to check the queue. */
     $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success) return $error_msg . "\n" . $output;
+    if (!$success) { return $error_msg . "\n" . $output;
+    }
 
     return (NULL);
   } // Delete()

@@ -19,11 +19,11 @@
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Session\Session;
 
-define("TITLE_core_smauth", _("SiteMinder_Login"));
+define("TITLE_CORE_SMAUTH", _("SiteMinder_Login"));
 
 class core_smauth extends FO_Plugin {
   var $Name = "smauth";
-  var $Title = TITLE_core_smauth;
+  var $Title = TITLE_CORE_SMAUTH;
   var $Version = "1.0";
   var $Dependency = array();
   var $PluginLevel = 1000; /* make this run first! */
@@ -62,7 +62,8 @@ class core_smauth extends FO_Plugin {
     $session->setName('Login');
     $session->start();
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) { $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    }
     $Now = time();
     if (!empty($_SESSION['time'])) {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
@@ -82,43 +83,44 @@ class core_smauth extends FO_Plugin {
     if (!$PG_CONN)
     { 
       DBconnect();
-      if (!$PG_CONN) echo "NO DB connection"; 
+      if (!$PG_CONN) { echo "NO DB connection";
+      } 
     }
 
     /* Enable or disable plugins based on login status */
     $Level = PLUGIN_DB_NONE;
     if (@$_SESSION['User']) {  //TODO: also need to check SiteMinder session
-    /* If you are logged in, then the default level is "Download". */
-    if ("X" . $_SESSION[Auth::USER_LEVEL] == "X") {
-      $Level = PLUGIN_DB_WRITE;
-    } else {
-      $Level = $_SESSION[Auth::USER_LEVEL];
-    }
-    /* Recheck the user in case he is suddenly blocked or changed. */
-    if (empty($_SESSION['time_check'])) {
-      $_SESSION['time_check'] = time() + (480 * 60);
-    }
-    if (time() >= @$_SESSION['time_check']) {
-      $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $R = pg_fetch_assoc($result);
-      pg_free_result($result);
-      $_SESSION['User'] = $R['user_name'];
-      $_SESSION['Folder'] = $R['root_folder_fk'];
-      $_SESSION[Auth::USER_LEVEL] = $R['user_perm'];
-      $_SESSION['UserEmail'] = $R['user_email'];
-      $_SESSION['UserEnote'] = $R['email_notify'];
-      if(empty($R['ui_preference']))
-      {
-        $_SESSION['UiPref'] = 'simple';
+      /* If you are logged in, then the default level is "Download". */
+      if ("X" . $_SESSION[Auth::USER_LEVEL] == "X") {
+        $Level = PLUGIN_DB_WRITE;
+      } else {
+        $Level = $_SESSION[Auth::USER_LEVEL];
       }
-      else
-      {
-        $_SESSION['UiPref'] = $R['ui_preference'];
+      /* Recheck the user in case he is suddenly blocked or changed. */
+      if (empty($_SESSION['time_check'])) {
+        $_SESSION['time_check'] = time() + (480 * 60);
       }
-      $Level = $_SESSION[Auth::USER_LEVEL];
-    }
+      if (time() >= @$_SESSION['time_check']) {
+        $sql = "SELECT * FROM users WHERE user_pk='" . @$_SESSION['UserId'] . "';";
+        $result = pg_query($PG_CONN, $sql);
+        DBCheckResult($result, $sql, __FILE__, __LINE__);
+        $R = pg_fetch_assoc($result);
+        pg_free_result($result);
+        $_SESSION['User'] = $R['user_name'];
+        $_SESSION['Folder'] = $R['root_folder_fk'];
+        $_SESSION[Auth::USER_LEVEL] = $R['user_perm'];
+        $_SESSION['UserEmail'] = $R['user_email'];
+        $_SESSION['UserEnote'] = $R['email_notify'];
+        if(empty($R['ui_preference']))
+        {
+          $_SESSION['UiPref'] = 'simple';
+        }
+        else
+        {
+          $_SESSION['UiPref'] = $R['ui_preference'];
+        }
+        $Level = $_SESSION[Auth::USER_LEVEL];
+      }
     } else {
       $this->CheckUser($UID);
       $Level = $_SESSION[Auth::USER_LEVEL];
@@ -163,8 +165,9 @@ class core_smauth extends FO_Plugin {
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $R = pg_fetch_assoc($result);
       pg_free_result($result);
-      if (!empty($R['conf_value']))
-      $UserDesc = "'".$R['conf_value']."'";
+      if (!empty($R['conf_value'])) {
+        $UserDesc = "'".$R['conf_value']."'";
+      }
 
       // Get BucketPool from sysconfig
       $sql = "SELECT conf_value FROM sysconfig WHERE variablename = 'BucketPool';";
@@ -189,15 +192,17 @@ class core_smauth extends FO_Plugin {
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         if (pg_num_rows($result) == 1) {
           $R = pg_fetch_assoc($result);
-          if (!empty($R['bucketpool_pk']))
-          $BucketPool = $R['bucketpool_pk'];
+          if (!empty($R['bucketpool_pk'])) {
+            $BucketPool = $R['bucketpool_pk'];
+          }
         } else {
           $BucketPool = 'null';
         }
         pg_free_result($result);
       }
     }
-    else pg_free_result($result);
+    else { pg_free_result($result);
+    }
 
     /* See if the user exists */
     $sql = "SELECT * FROM users WHERE user_email = '$Email';";
@@ -225,8 +230,9 @@ class core_smauth extends FO_Plugin {
         $row = pg_fetch_assoc($result);
         pg_free_result($result);
         //print_r($row);
-        if (empty($row['folder_pk']))
-        return;
+        if (empty($row['folder_pk'])) {
+          return;
+        }
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
 
@@ -241,8 +247,9 @@ class core_smauth extends FO_Plugin {
         $row = pg_fetch_assoc($result);
         pg_free_result($result);
         //print_r($row);
-        if (empty($row['folder_pk']))
-        return;
+        if (empty($row['folder_pk'])) {
+          return;
+        }
         $FolderPk = $row['folder_pk'];
         //echo $FolderPk;
       }

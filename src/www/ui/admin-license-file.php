@@ -22,7 +22,7 @@ use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Response;
 use Fossology\Lib\BusinessRules\ObligationMap;
 
-define("TITLE_admin_license_file", _("License Administration"));
+define("TITLE_ADMIN_LICENSE_FILE", _("License Administration"));
 
 class admin_license_file extends FO_Plugin
 {
@@ -32,7 +32,7 @@ class admin_license_file extends FO_Plugin
   function __construct()
   {
     $this->Name       = "admin_license";
-    $this->Title      = TITLE_admin_license_file;
+    $this->Title      = TITLE_ADMIN_LICENSE_FILE;
     $this->MenuList   = "Admin::License Admin";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->vars       = array();
@@ -201,21 +201,20 @@ class admin_license_file extends FO_Plugin
     if ($namestr == "All") {
       $where = "";
     } else {
-      $where = "where rf_shortname like '" . pg_escape_string($namestr) . "%' ";
+      $where = "where rf_shortname like '". pg_escape_string($namestr) ."%' ";
     }
 
     // $filter is one of these: "all", "done", "notdone"
-    if ($filter != "all") {
+    if ($filter != "all")
+    {
       if (empty($where)) {
         $where .= "where ";
       } else {
         $where .= " and ";
       }
-      if ($filter == "done") {
-        $where .= " marydone=true";
+      if ($filter == "done") { $where .= " marydone=true";
       }
-      if ($filter == "notdone") {
-        $where .= " marydone=false";
+      if ($filter == "notdone") { $where .= " marydone=false";
       }
     }
 
@@ -229,7 +228,7 @@ class admin_license_file extends FO_Plugin
       $dataSize = sizeof($data);
       $plural = "";
 
-      if ($dataSize > 1) {
+      if($dataSize > 1) {
         $plural = "s";
       }
       $dataMessage = $dataSize . _(" License$plural found");
@@ -261,10 +260,8 @@ class admin_license_file extends FO_Plugin
 
     if (0 < count($_POST)) {
       $rf_pk_update = $_POST['rf_pk'];
-      if (! empty($rf_pk)) {
-        $rf_pk_update = $rf_pk;
-      } else if (empty($rf_pk_update)) {
-        $rf_pk_update = $_GET['rf_pk'];
+      if (!empty($rf_pk)) { $rf_pk_update = $rf_pk;
+      } else if (empty($rf_pk_update)) { $rf_pk_update = $_GET['rf_pk'];
       }
     }
 

@@ -48,9 +48,9 @@ function GetMimeType($Item)
   {
     $row = pg_fetch_assoc($result);
     $Meta = $row['mimetype_name'];
-  }
-  else
+  } else {
     $Meta = 'application/octet-stream';
+  }
 
   pg_free_result($result);
   return($Meta);

@@ -19,13 +19,13 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_emailHistogram", _("Email/URL/Author Browser"));
+define("TITLE_EMAILHISTOGRAM", _("Email/URL/Author Browser"));
 
 class EmailHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "email-hist";
-    $this->Title = TITLE_emailHistogram;
+    $this->Title = TITLE_EMAILHISTOGRAM;
     $this->viewName = "email-view";
     $this->agentName = "copyright";
     parent::__construct();

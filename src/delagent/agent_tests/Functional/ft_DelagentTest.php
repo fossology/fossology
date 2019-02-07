@@ -70,7 +70,8 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[11]) {
       $upload_id = get_upload_id($out[11]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status("ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -171,4 +172,4 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
 
 }
 
-?>
+

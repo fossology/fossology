@@ -41,4 +41,4 @@ $test->addTestFile('dashR.php');
 $test->addTestFile('duplicate-Upfolder.php');
 $test->run(new TextReporter());
 
-?>
+

@@ -18,7 +18,7 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_folder_properties", _("Edit Folder Properties"));
+define("TITLE_FOLDER_PROPERTIES", _("Edit Folder Properties"));
 
 class folder_properties extends FO_Plugin {
 
@@ -28,7 +28,7 @@ class folder_properties extends FO_Plugin {
   function __construct()
   {
     $this->Name = "folder_properties";
-    $this->Title = TITLE_folder_properties;
+    $this->Title = TITLE_FOLDER_PROPERTIES;
     $this->MenuList = "Organize::Folders::Edit Properties";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;

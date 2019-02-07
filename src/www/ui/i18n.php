@@ -28,8 +28,9 @@ if (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER))
   $browser_lang = $_SERVER['HTTP_ACCEPT_LANGUAGE'];
   $lang = substr($browser_lang,  0, 2);
 }
-else
+else {
   $lang = '';
+}
 
 // Set locale depending on language.
 switch ($lang)
@@ -40,10 +41,11 @@ switch ($lang)
   default: // Nothing to do for 'unknown locale'?
 }
 
-if (isSet($_GET["locale"])) $locale = $_GET["locale"];
+if (isset($_GET["locale"])) { $locale = $_GET["locale"];
+}
 putenv("LC_ALL=$locale");
 setlocale(LC_ALL, $locale);
 bindtextdomain("messages", "./locale");
 textdomain("messages");
 //print("Browser says: $browser_lang, Your language is $lang, your locale is $locale");
-?>
+

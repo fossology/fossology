@@ -21,7 +21,7 @@
  * \brief operations on the scheduler from GUI
  **/
 
-define("TITLE_admin_scheduler", _("Scheduler Administration"));
+define("TITLE_ADMIN_SCHEDULER", _("Scheduler Administration"));
 
 /**
  * \class admin_scheduler
@@ -35,7 +35,7 @@ class admin_scheduler extends FO_Plugin
   function __construct()
   {
     $this->Name       = "admin_scheduler";
-    $this->Title      = TITLE_admin_scheduler;
+    $this->Title      = TITLE_ADMIN_SCHEDULER;
     $this->MenuList   = "Admin::Scheduler";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
@@ -63,8 +63,9 @@ class admin_scheduler extends FO_Plugin
   {
     $job_list_option = "<option value='0'>scheduler</option>";
     $operation = GetParm('operation', PARM_TEXT);
-    if ("stop" === $operation)
+    if ("stop" === $operation) {
       return $job_list_option;
+    }
     $job_array = GetRunnableJobList(); /* get all job list */
     for($i = 0; $i < sizeof($job_array); $i++)
     {
@@ -178,9 +179,12 @@ class admin_scheduler extends FO_Plugin
       return $this->error_info;
     }
     $commands = $operation;
-    if (!empty($job_id) && 'scheduler' != $job_id) $commands .= " $job_id";
-    if (isset($priority_id)) $commands .= " $priority_id";
-    if (!empty($level_id)) $commands .= " $level_id";
+    if (!empty($job_id) && 'scheduler' != $job_id) { $commands .= " $job_id";
+    }
+    if (isset($priority_id)) { $commands .= " $priority_id";
+    }
+    if (!empty($level_id)) { $commands .= " $level_id";
+    }
     $commands = trim($commands);
     $commu_status = fo_communicate_with_scheduler($commands, $response_from_scheduler, $this->error_info);
     return $response_from_scheduler . $this->error_info;

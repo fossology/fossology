@@ -41,18 +41,21 @@ function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
 $FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 {
   $str ="\n<select name='$SLName' $Options>\n";
-  if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
-
+  if ($FirstEmpty == true) {
+    $str .= "<option value='' > </option>\n";
+  }
   foreach ($KeyValArray as $key => $val)
   {
-    if ($SelElt == true)
-    $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
-    else
-    $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
-    if ($ReturnKey == true)
-    $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
-    else
-    $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    if ($SelElt == true) {
+      $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
+    } else {
+      $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    }
+    if ($ReturnKey == true) {
+      $str .= "<option value='$key' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    } else {
+      $str .= "<option value='$val' $SELECTED>".htmlentities($val, ENT_QUOTES)."</option>\n";
+    }
   }
   $str .= "</select>";
   return $str;
@@ -140,11 +143,13 @@ function GetFileExt($fname)
  */
 function GetArrayVal($Key, $Arr)
 {
-  if (!is_array($Arr)) return "";
-  if (array_key_exists($Key, $Arr))
-  return ($Arr[$Key]);
-  else
-  return "";
+  if (!is_array($Arr)) { return "";
+  }
+  if (array_key_exists($Key, $Arr)) {
+    return ($Arr[$Key]);
+  } else {
+    return "";
+  }
 }
 
 /**
@@ -162,7 +167,8 @@ function HostListOption()
     $options .= "<option value='$key' SELECTED> $key </option>\n";
     $i++;
   }
-  if (1 == $i) return ""; // if only have one host, does not display
+  if (1 == $i) { return ""; // if only have one host, does not display
+  }
   return $options;
 }
 
@@ -178,7 +184,8 @@ function HostListOption()
 function DownloadString2File($text, $name, $contentType)
 {
   $connstat = connection_status();
-  if ($connstat != 0) return _("Lost connection.");
+  if ($connstat != 0) { return _("Lost connection.");
+  }
 
   $session = new Session();
   $session->save();
@@ -193,7 +200,8 @@ function DownloadString2File($text, $name, $contentType)
   header("Content-Transfer-Encoding: binary\n");
 
   echo $text;
-  if ((connection_status()==0) and !connection_aborted()) return True;
+  if ((connection_status()==0) and !connection_aborted()) { return True;
+  }
   return _("Lost connection.");
 }
 
@@ -228,11 +236,13 @@ function GetUploadtreeTableName($upload_pk)
  */
 function GetUploadName($upload_pk)
 {
-  if (empty($upload_pk)) return "";
+  if (empty($upload_pk)) { return "";
+  }
   $upload_rec = GetSingleRec("upload", "where upload_pk='$upload_pk'");
   $upload_filename = $upload_rec['upload_filename'];
-  if (empty($upload_filename)) return "";
-  else return $upload_filename;
+  if (empty($upload_filename)) { return "";
+  } else { return $upload_filename;
+  }
 }
 
 /**
@@ -244,11 +254,13 @@ function GetUploadName($upload_pk)
  */
 function GetUploadID($uploadtreeid)
 {
-  if (empty($uploadtreeid)) return "";
+  if (empty($uploadtreeid)) { return "";
+  }
   $upload_rec = GetSingleRec("uploadtree", "where uploadtree_pk=$uploadtreeid");
   $uploadid = $upload_rec['upload_fk'];
-  if (empty($uploadid)) return "" ;
-  else return $uploadid;
+  if (empty($uploadid)) { return "" ;
+  } else { return $uploadid;
+  }
 }
 
 /**
@@ -261,7 +273,8 @@ function GetUploadID($uploadtreeid)
 function Get1stUploadtreeID($upload)
 {
   global $PG_CONN;
-  if (empty($upload)) return "";
+  if (empty($upload)) { return "";
+  }
   $sql = "SELECT max(uploadtree_pk) from uploadtree where upload_fk = $upload and parent is null;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);

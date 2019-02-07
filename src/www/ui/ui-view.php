@@ -101,7 +101,8 @@ class ui_view extends FO_Plugin
    */
   function GetFileJumpMenu($Fin, $CurrPage, $PageSize, $Uri)
   {
-    if (!$Fin) return;
+    if (!$Fin) { return;
+    }
     $Stat = fstat($Fin);
     $MaxSize = $Stat['size'];
     $MaxPage = intval($MaxSize / $PageSize);
@@ -225,8 +226,9 @@ class ui_view extends FO_Plugin
 
   private function checkAndPrepare($inputFile, $startOffset, $outputLength)
   {
-    if (!$inputFile)
+    if (!$inputFile) {
       return False;
+    }
 
     $inputFileStat = fstat($inputFile);
     $inputFileSize = $inputFileStat['size'];

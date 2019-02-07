@@ -195,9 +195,9 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (!Isartifact($Row['ufile_mode']))
+    if (!Isartifact($Row['ufile_mode'])) {
       array_unshift($uploadtreeArray, $Row);
-
+    }
     $uploadtree_pk = $Row['parent'];
   }
 
@@ -273,8 +273,9 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
     $UploadtreePk =  $Path[0]['uploadtree_pk'];
     $V .= "<br><b><a href='$Uri2&folder=$Folder&upload=$Upload&item=$UploadtreePk'>$UploadName</a></b>";
   }
-  else
-  $V .= "<br>";
+  else {
+    $V .= "<br>";
+  }
 
   /* Show the path within the upload */
   for($p=0; !empty($Path[$p]['uploadtree_pk']); $p++)
@@ -318,7 +319,8 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
 
   if ($Enumerate >= 0)
   {
-    if ($PostText) $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PostText";
+    if ($PostText) { $V .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$PostText";
+    }
     $V .= "</td></tr></table>";
   }
 
@@ -372,16 +374,17 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
  *
  * \return String containing the listing.
  */
-function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
+function Dir2FileList    (&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
 {
   $LastPfilePk = -1;
   $V = "";
   while (($R = pg_fetch_assoc($Listing)) and !empty($R['uploadtree_pk']))
   {
-    if (array_key_exists("licenses", $R))
+    if (array_key_exists("licenses", $R)) {
       $Licenses = $R["licenses"];
-    else
+    } else {
       $Licenses = '';
+    }
 
     $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
@@ -435,10 +438,11 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
   $V = "";
   foreach($Listing as $R)
   {
-    if (array_key_exists("licenses", $R))
+    if (array_key_exists("licenses", $R)) {
       $Licenses = $R["licenses"];
-    else
+    } else {
       $Licenses = '';
+    }
 
     $Phrase='';
     if ($ShowPhrase && !empty($R['phrase_text']))
@@ -516,14 +520,17 @@ function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtre
       {
         unset($children[$key]);
         $NonAChildren = GetNonArtifactChildren($child['uploadtree_pk'], $uploadtree_tablename);
-        if ($NonAChildren)
+        if ($NonAChildren) {
           $foundChildren = array_merge($foundChildren, $NonAChildren);
+        }
       }
-      else
+      else {
         unset($children[$key]);
+      }
     }
-    else
-    $foundChildren[$key] = $child;
+    else {
+      $foundChildren[$key] = $child;
+    }
   }
   // uasort($foundChildren, '_DirCmp');
   return $foundChildren;

@@ -100,8 +100,8 @@ if (!(is_numeric($item)) &&  !(is_numeric($upload))) {
 
 /** check upload Id and uploadtree ID */
 $upload_from_item = $uploadtree1stid = "";
-if (is_numeric($item)) $upload_from_item = GetUploadID($item);
-else if (empty($item) && is_numeric($upload)) {
+if (is_numeric($item)) { $upload_from_item = GetUploadID($item);
+} else if (empty($item) && is_numeric($upload)) {
   $uploadtree1stid = Get1stUploadtreeID($upload);
   if (empty($uploadtree1stid)) {
     print "Upload $upload does not exist.\n";
@@ -225,7 +225,8 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
       }
       $filepath .= $uploadtreeRow['ufile_name'];
     }
-    if (1 == $excluding_flag) continue; // excluding files whose path contains excluding text
+    if (1 == $excluding_flag) { continue; // excluding files whose path contains excluding text
+    }
     $V = $filepath;
     print "$V";
     print "\n";
@@ -242,7 +243,8 @@ function Usage4Options($UploadID, $item)
   $bucket_arr = pg_fetch_all($result);
   pg_free_result($result);
   $clause4uploadtree = "";
-  if ($item) $clause4uploadtree = " uploadtree $item";
+  if ($item) { $clause4uploadtree = " uploadtree $item";
+  }
   if ($bucket_arr) {
     print "For"."$clause4uploadtree under upload $UploadID, you can specify options below: \n 
       bucket_agent_id : -a
@@ -256,4 +258,4 @@ function Usage4Options($UploadID, $item)
   }
 }
 
-?>
+

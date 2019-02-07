@@ -124,7 +124,8 @@ function Traceback_parm($ShowMod=1)
     $V = preg_replace("/^[^&]*/","",$V);
   }
 
-  if (is_array($V)) return $V[0];
+  if (is_array($V)) { return $V[0];
+  }
   return $V;
 } // Traceback_parm()
 

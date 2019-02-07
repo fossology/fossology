@@ -293,9 +293,12 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $jq_args = "$UploadPk - $Src";
-  if ($TarExcludeList) $jq_args .= " ".$TarExcludeList;
-  if ($VCS)  $jq_args .= " ".$VCS; // add flags when upload from version control system 
-  if ($vcsuser && $vcspass) $jq_args .= " --username $vcsuser --password $vcspass ";
+  if ($TarExcludeList) { $jq_args .= " ".$TarExcludeList;
+  }
+  if ($VCS) {  $jq_args .= " ".$VCS; // add flags when upload from version control system 
+  }
+  if ($vcsuser && $vcspass) { $jq_args .= " --username $vcsuser --password $vcspass ";
+  }
   if ($Verbose) {
     print "JobQueueAdd($jobpk, wget_agent, $jq_args, no, NULL);\n";
   }
@@ -516,8 +519,8 @@ for ($i = 1;$i < $argc;$i++) {
         print $Usage . "\n";
         exit(1);
       }
-    /* No hyphen means it is a file! */
-    $UploadArchive = $argv[$i];
+      /* No hyphen means it is a file! */
+      $UploadArchive = $argv[$i];
   } /* switch */
 } /* for each parameter */
 
@@ -558,20 +561,21 @@ if (!$UploadArchive) {  // upload is empty
 $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
 if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
-    if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+  if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+  }
+  else if (strchr($UploadArchive, '*')) {
+    $file_number_cmd = "ls $UploadArchive > /dev/null";
+    system($file_number_cmd, $return_val);
+    if ($return_val) { exit(1); // not files matched
     }
-    else if (strchr($UploadArchive, '*')) {
-      $file_number_cmd = "ls $UploadArchive > /dev/null";
-      system($file_number_cmd, $return_val);
-      if ($return_val) exit(1); // not files matched
-      if ("/" != $UploadArchive[0]) { // it is a absolute path
-        $UploadArchive = getcwd()."/".$UploadArchive;
-      }
+    if ("/" != $UploadArchive[0]) { // it is a absolute path
+      $UploadArchive = getcwd()."/".$UploadArchive;
     }
-    else {
-      print "Note: it seems that what you want to upload '$UploadArchive' does not exist. \n";
-      exit(1);
-    }
+  }
+  else {
+    print "Note: it seems that what you want to upload '$UploadArchive' does not exist. \n";
+    exit(1);
+  }
 } else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;
 }
@@ -589,5 +593,6 @@ if ($vcsuser && $vcspass) {
 print "Loading '$UploadArchive'\n";
 print "  Calling UploadOne in 'main': '$FolderPath'\n";
 $res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-if ($res) exit(1); // fail to upload
+if ($res) { exit(1); // fail to upload
+}
 exit(0);

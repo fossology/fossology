@@ -17,7 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-define("TITLE_maintagent", _("FOSSology Maintenance"));
+define("TITLE_MAINTAGENT", _("FOSSology Maintenance"));
 
 use Fossology\Lib\Auth\Auth;
 
@@ -30,7 +30,7 @@ class maintagent extends FO_Plugin {
   public function __construct()
   {
     $this->Name = "maintagent";
-    $this->Title = TITLE_maintagent;
+    $this->Title = TITLE_MAINTAGENT;
     $this->MenuList = "Admin::Maintenance";
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();
@@ -49,8 +49,9 @@ class maintagent extends FO_Plugin {
      */
     $options = "-";
     foreach ($_REQUEST as $key => $value) {
-      if ($key == $value)
+      if ($key == $value) {
         $options .= $value;
+      }
     }
 
     /* Create the maintenance job */
@@ -58,14 +59,17 @@ class maintagent extends FO_Plugin {
     $groupId = Auth::getGroupId();
 
     $job_pk = JobAddJob($user_pk, $groupId, "Maintenance");
-    if (empty($job_pk) || ($job_pk < 0)) return _("Failed to insert job record");
+    if (empty($job_pk) || ($job_pk < 0)) { return _("Failed to insert job record");
+    }
 
     $jq_pk = JobQueueAdd($job_pk, "maintagent", NULL, NULL, NULL, NULL, $options);
-    if (empty($jq_pk)) return _("Failed to insert task 'Maintenance' into job queue");
+    if (empty($jq_pk)) { return _("Failed to insert task 'Maintenance' into job queue");
+    }
 
     /* Tell the scheduler to check the queue. */
     $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success) return($error_msg . "\n" . $output);
+    if (!$success) { return($error_msg . "\n" . $output);
+    }
 
     return _("The maintenance job has been queued");
   }

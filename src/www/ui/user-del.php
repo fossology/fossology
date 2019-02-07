@@ -18,7 +18,7 @@
  ***********************************************************/
 
 require_once "user-del-helper.php";
-define("TITLE_user_del", _("Delete A User"));
+define("TITLE_USER_DEL", _("Delete A User"));
 
 use \Fossology\Lib\Auth\Auth;
 
@@ -31,7 +31,7 @@ class user_del extends FO_Plugin
   function __construct()
   {
     $this->Name       = "user_del";
-    $this->Title      = TITLE_user_del;
+    $this->Title      = TITLE_USER_DEL;
     $this->MenuList   = "Admin::Users::Delete";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->dbManager  = $GLOBALS['container']->get('db.manager');

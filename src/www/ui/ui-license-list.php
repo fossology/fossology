@@ -262,7 +262,7 @@ class ui_license_list extends FO_Plugin
       fputcsv($out, $head, $this->delimiter, $this->enclosure);
       foreach($lines as $row){
         $newRow = explode(':', str_replace(array(': ', ', '), ':', $row));
-       fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
+        fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
       }
       $content = ob_get_contents();
       ob_end_clean();

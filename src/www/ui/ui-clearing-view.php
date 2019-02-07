@@ -41,7 +41,7 @@ use Monolog\Logger;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_clearingView", _("Change concluded License "));
+define("TITLE_CLEARINGVIEW", _("Change concluded License "));
 
 class ClearingView extends FO_Plugin
 {
@@ -73,7 +73,7 @@ class ClearingView extends FO_Plugin
   function __construct()
   {
     $this->Name = "view-license";
-    $this->Title = TITLE_clearingView;
+    $this->Title = TITLE_CLEARINGVIEW;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->Dependency = array("view");
     $this->LoginFlag = 0;

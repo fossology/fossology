@@ -28,7 +28,7 @@ use Fossology\Lib\Proxy\ScanJobProxy;
  * uploadtree.
  */
 
-define("TITLE_license_list_files", _("List Files for License"));
+define("TITLE_LICENSE_LIST_FILES", _("List Files for License"));
 
 class LicenseListFiles extends FO_Plugin
 {
@@ -50,7 +50,7 @@ class LicenseListFiles extends FO_Plugin
   function __construct()
   {
     $this->Name = "license_list_files";
-    $this->Title = TITLE_license_list_files;
+    $this->Title = TITLE_LICENSE_LIST_FILES;
     $this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_READ;
     $this->LoginFlag = 0;
@@ -76,7 +76,8 @@ class LicenseListFiles extends FO_Plugin
     $rf_shortname = GetParm("lic", PARM_RAW);
     $Excl = GetParm("excl", PARM_RAW);
     $URL = $this->Name . "&item=$uploadtree_pk&lic=".urlencode($rf_shortname)."&page=-1";
-    if (!empty($Excl)) $URL .= "&excl=$Excl";
+    if (!empty($Excl)) { $URL .= "&excl=$Excl";
+    }
     $text = _("Show All Files");
     menu_insert($this->Name . "::Show All", 0, $URL, $text);
   } // RegisterMenus()
@@ -140,7 +141,8 @@ class LicenseListFiles extends FO_Plugin
       $text2 = _("with license");
       $text3 = _("files are unique with same file hash.");
       $V .= "Total $Count $text $text2 <b>$rf_shortname</b>, $Unique $text3";
-      if ($Count < $Max) $Max = $Count;
+      if ($Count < $Max) { $Max = $Count;
+      }
       $limit = ($Page < 0) ? "ALL" : $Max;
       $order = " order by ufile_name asc";
       /** should delete $filesresult yourself */
@@ -155,7 +157,8 @@ class LicenseListFiles extends FO_Plugin
       for ($i = 0; $i < $max_num; $i++)
       {
         $row = $file_result_temp[$i];
-        if (empty($row)) continue;
+        if (empty($row)) { continue;
+        }
         array_push($sorted_file_result, $row);
         for ($j = $i + 1; $j < $max_num; $j++)
         {
@@ -171,10 +174,12 @@ class LicenseListFiles extends FO_Plugin
       $text = _("Display");
       $text1 = _("excludes");
       $text2 = _("files with these extensions");
-      if (!empty($Excl)) $V .= "<br>$text <b>$text1</b> $text2: $Excl";
+      if (!empty($Excl)) { $V .= "<br>$text <b>$text1</b> $text2: $Excl";
+      }
 
       $text2 = _("files with these licenses");
-      if (!empty($Exclic)) $V .= "<br>$text <b>$text1</b> $text2: $Exclic";
+      if (!empty($Exclic)) { $V .= "<br>$text <b>$text1</b> $text2: $Exclic";
+      }
 
       /* Get the page menu */
       if (($Max > 0) && ($Count >= $Max) && ($Page >= 0))
@@ -211,21 +216,25 @@ class LicenseListFiles extends FO_Plugin
         // Allow user to exclude files with this extension
         $FileExt = GetFileExt($row['ufile_name']);
         $URL = $baseURL;
-        if (!empty($Excl))
+        if (!empty($Excl)) {
           $URL .= "&excl=$Excl:$FileExt";
-        else
+        } else {
           $URL .= "&excl=$FileExt";
-        if (!empty($Exclic)) $URL .= "&exclic=" . urlencode($Exclic);
+        }
+        if (!empty($Exclic)) { $URL .= "&exclic=" . urlencode($Exclic);
+        }
         $text = _("Exclude this file type.");
         $Header = "<a href=$URL>$text</a>";
 
         /* Allow user to exclude files with this exact license list */
         $URL = $baseURL;
-        if (!empty($Exclic))
+        if (!empty($Exclic)) {
           $URL .= "&exclic=" . urlencode($Exclic) . ":" . $URLlicstring;
-        else
+        } else {
           $URL .= "&exclic=$URLlicstring";
-        if (!empty($Excl)) $URL .= "&excl=$Excl";
+        }
+        if (!empty($Excl)) { $URL .= "&excl=$Excl";
+        }
 
         $text = _("Exclude files with license");
         $Header .= "<br><a href=$URL>$text: $licstring.</a>";

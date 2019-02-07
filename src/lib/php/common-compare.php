@@ -81,42 +81,45 @@ function MakeMaster($Children1, $Children2)
       }
 
       /* find fuzzy+extension match */
-      if (!$done) foreach ($Children2 as $key => $Child2)
-      {
-        if ($Child1['fuzzynameext'] == $Child2['fuzzynameext'])
+      if (!$done) { foreach ($Children2 as $key => $Child2)
         {
-          $Master[$row][1] = $Child1;
-          $Master[$row][2] = $Child2;
-          unset($Children2[$key]);
-          $done = true;
-          break;
-        }
+          if ($Child1['fuzzynameext'] == $Child2['fuzzynameext'])
+          {
+            $Master[$row][1] = $Child1;
+            $Master[$row][2] = $Child2;
+            unset($Children2[$key]);
+            $done = true;
+            break;
+          }
+      }
       }
 
       /* find files that only differ by 1 character in fuzzyext */
-      if (!$done) foreach ($Children2 as $key => $Child2)
-      {
-        if (levenshtein($Child1['fuzzynameext'], $Child2['fuzzynameext']) == 1)
+      if (!$done) { foreach ($Children2 as $key => $Child2)
         {
-          $Master[$row][1] = $Child1;
-          $Master[$row][2] = $Child2;
-          unset($Children2[$key]);
-          $done = true;
-          break;
-        }
+          if (levenshtein($Child1['fuzzynameext'], $Child2['fuzzynameext']) == 1)
+          {
+            $Master[$row][1] = $Child1;
+            $Master[$row][2] = $Child2;
+            unset($Children2[$key]);
+            $done = true;
+            break;
+          }
+      }
       }
 
       /* Look for fuzzy match */
-      if (!$done) foreach ($Children2 as $key => $Child2)
-      {
-        if ($Child1['fuzzyname'] == $Child2['fuzzyname'])
+      if (!$done) { foreach ($Children2 as $key => $Child2)
         {
-          $Master[$row][1] = $Child1;
-          $Master[$row][2] = $Child2;
-          unset($Children2[$key]);
-          $done = true;
-          break;
-        }
+          if ($Child1['fuzzyname'] == $Child2['fuzzyname'])
+          {
+            $Master[$row][1] = $Child1;
+            $Master[$row][2] = $Child2;
+            unset($Children2[$key]);
+            $done = true;
+            break;
+          }
+      }
       }
 
       /* no match so add it in by itself */
@@ -166,11 +169,13 @@ function FileList(&$Master, $agent_pk1, $agent_pk2, $filter, $plugin, $uploadtre
   {
     foreach($Master as &$MasterRow)
     {
-      if (!empty($MasterRow[1]))
+      if (!empty($MasterRow[1])) {
         $MasterRow[1]["linkurl"] = GetDiffLink($MasterRow, 1, $agent_pk1, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
+      }
 
-      if (!empty($MasterRow[2]))
+      if (!empty($MasterRow[2])) {
         $MasterRow[2]["linkurl"] = GetDiffLink($MasterRow, 2, $agent_pk2, $filter, $plugin, $ModLicView, $uploadtree_pk1, $uploadtree_pk2);
+      }
     }
   }
 } // FileList()
@@ -208,10 +213,11 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
   $Child = $MasterRow[$side];
 
   /* if the opposite column element is empty, then use the original uploadtree_pk */
-  if (empty($OppositeChild))
+  if (empty($OppositeChild)) {
     $OppositeParm = "&item{$OppositeSide}=$OppositeItem";
-  else
+  } else {
     $OppositeParm = "&item{$OppositeSide}=$OppositeChild[uploadtree_pk]";
+  }
 
   $IsDir = Isdir($Child['ufile_mode']);
   $IsContainer = Iscontainer($Child['ufile_mode']);
@@ -232,7 +238,8 @@ function GetDiffLink($MasterRow, $side, $agent_pk, $filter, $plugin, $ModLicView
   {
     $Container_uploadtree_pk = $Child['uploadtree_pk'];
     $LicUri = "?mod=$plugin->Name&item{$side}=$Child[uploadtree_pk]{$OppositeParm}&col=$side";
-    if (!empty($filter)) $LicUri .= "&filter=$filter";
+    if (!empty($filter)) { $LicUri .= "&filter=$filter";
+    }
   }
   else
   {
@@ -329,8 +336,9 @@ function FuzzyName(&$Children)
       $ExtLen = strlen($Ext);
       $NoExtName = substr($Child['ufile_name'], 0, -1*$ExtLen);
     }
-    else
+    else {
       $NoExtName = $Child['ufile_name'];
+    }
 
     $NoNumbName = preg_replace('/([0-9]|\.|-|_)/', "", $NoExtName);
     $NoNumbNameext = preg_replace('/([0-9]|\.|-|_)/', "", $Child['ufile_name']);

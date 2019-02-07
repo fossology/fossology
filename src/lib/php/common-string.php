@@ -53,7 +53,8 @@ function convertToUTF8($content, $toHTML=true)
     }
   }
 
-  if (!$toHTML) return $output1;
+  if (!$toHTML) { return $output1;
+  }
   return (htmlspecialchars($output1, ENT_SUBSTITUTE, "UTF-8")) ?: "<b>Unknown encoding</b>";
 }
 

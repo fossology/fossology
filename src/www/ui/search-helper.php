@@ -125,8 +125,9 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
     }
     pg_free_result($result);
 
-    if (!$NeedTagfileTable && !$NeedTaguploadtreeTable)
+    if (!$NeedTagfileTable && !$NeedTaguploadtreeTable) {
       $SQL .= ", tag_file, tag_uploadtree";
+    }
   }
 
   /* do we need the pfile table? Yes, if any of these are a search critieria.  */
@@ -144,22 +145,25 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
   /* add the tag conditions */
   if (!empty($tag))
   {
-    if ($NeedAnd) $SQL .= " AND";
+    if ($NeedAnd) { $SQL .= " AND";
+    }
     $SQL .= "(";
     $NeedOr = false;
     foreach ($tag_pk_array as $tagRec)
     {
-      if ($NeedOr) $SQL .= " OR";
+      if ($NeedOr) { $SQL .= " OR";
+      }
       $SQL .= "(";
       $tag_pk = $tagRec['tag_pk'];
-      if ($NeedTagfileTable && $NeedTaguploadtreeTable)
+      if ($NeedTagfileTable && $NeedTaguploadtreeTable) {
         $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
-      else if ($NeedTaguploadtreeTable)
+      } else if ($NeedTaguploadtreeTable) {
         $SQL .= "uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk";
-      else if ($NeedTagfileTable)
+      } else if ($NeedTagfileTable) {
         $SQL .= "uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk";
-      else
+      } else {
         $SQL .= "(uploadtree.pfile_fk=tag_file.pfile_fk and tag_file.tag_fk=$tag_pk) or (uploadtree_pk=tag_uploadtree.uploadtree_fk and tag_uploadtree.tag_fk=$tag_pk) ";
+      }
       $SQL .= ")";
       $NeedOr=1;
     }
@@ -169,28 +173,32 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
 
   if ($Filename)
   {
-    if ($NeedAnd) $SQL .= " AND";
+    if ($NeedAnd) { $SQL .= " AND";
+    }
     $SQL .= " ufile_name ilike '". pg_escape_string($Filename) . "'";
     $NeedAnd=1;
   }
 
   if (!empty($SizeMin) && is_numeric($SizeMin))
   {
-    if ($NeedAnd)  $SQL .= " AND";
+    if ($NeedAnd) {  $SQL .= " AND";
+    }
     $SQL .= " pfile.pfile_size >= ".pg_escape_string($SizeMin);
     $NeedAnd=1;
   }
 
   if (!empty($SizeMax) && is_numeric($SizeMax))
   {
-    if ($NeedAnd)  $SQL .= " AND";
+    if ($NeedAnd) {  $SQL .= " AND";
+    }
     $SQL .= " pfile.pfile_size <= ".pg_escape_string($SizeMax);
     $NeedAnd=1;
   }
 
   if ($Item)
   {
-    if ($NeedAnd) $SQL .= " AND";
+    if ($NeedAnd) { $SQL .= " AND";
+    }
     $SQL .= "  upload_fk = $upload_pk AND lft >= $lft AND rgt <= $rgt";
     $NeedAnd=1;
   }
@@ -198,14 +206,16 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
   /* search only containers */
   if ($searchtype == 'containers')
   {
-    if ($NeedAnd) $SQL .= " AND";
+    if ($NeedAnd) { $SQL .= " AND";
+    }
     $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)";
     $NeedAnd=1;
   }
   $dir_ufile_mode = 536888320;
   if ($searchtype == 'directory')
   {
-    if ($NeedAnd) $SQL .= " AND";
+    if ($NeedAnd) { $SQL .= " AND";
+    }
     $SQL .= " ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0) AND (ufile_mode != $dir_ufile_mode) and pfile_fk != 0";
     $NeedAnd=1;
   }
@@ -213,13 +223,15 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
   /** license and copyright */
   if ($searchtype != "directory") {
     if (!empty($License)) {
-      if ($NeedAnd) $SQL .= " AND";
+      if ($NeedAnd) { $SQL .= " AND";
+      }
 
       $SQL .= " uploadtree.pfile_fk=pfile_ref.pfile_fk and pfile_ref.rf_shortname ilike '" . pg_escape_string($License) . "'";
       $NeedAnd = 1;
     }
     if (!empty($Copyright)) {
-      if ($NeedAnd) $SQL .= " AND";
+      if ($NeedAnd) { $SQL .= " AND";
+      }
       $SQL .= " uploadtree.pfile_fk=copyright.pfile_fk and copyright.content ilike '%" . pg_escape_string($Copyright) . "%'";
     }
   }

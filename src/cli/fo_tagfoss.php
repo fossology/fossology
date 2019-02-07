@@ -59,10 +59,11 @@ else
   exit -1;
 }
 
-if ( array_key_exists('p', $Options))
+if ( array_key_exists('p', $Options)) {
   $PrintOnly = true;
-else
+} else {
   $PrintOnly = false;
+}
 
 $sql = "select distinct(pfile_fk), pfile_sha1, ufile_name from uploadtree,pfile where upload_fk='$upload_pk' and pfile_pk=pfile_fk";
 $result = pg_query($PG_CONN, $sql);
@@ -88,7 +89,8 @@ while ($row = pg_fetch_assoc($result))
   }
 }
 exit;
-  if (count($ToAntelink) ) $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly);
+if (count($ToAntelink) ) { $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly);
+}
 
 echo "$TaggedFileCount files tagged out of $TotalFileCount files.\n";
 
@@ -122,7 +124,8 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly)
 
   /* construct array of just sha1's */
   $sha1array = array();
-  foreach($ToAntelink as $row) $sha1array[] = $row['pfile_sha1'];
+  foreach($ToAntelink as $row) { $sha1array[] = $row['pfile_sha1'];
+  }
   $PostData = json_encode($sha1array);
 
   $curlch = curl_init($AntepediaServer);
@@ -139,7 +142,8 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly)
   {
     curl_setopt($curlch, CURLOPT_HTTPPROXYTUNNEL, TRUE);
     curl_setopt($curlch, CURLOPT_PROXY, $ProxyServer);
-    if (!empty($ProxyPort)) curl_setopt($curlch, CURLOPT_PROXYPORT, $ProxyPort);
+    if (!empty($ProxyPort)) { curl_setopt($curlch, CURLOPT_PROXYPORT, $ProxyPort);
+    }
     curl_setopt($curlch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
   }
 
@@ -165,10 +169,11 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly)
   $response = json_decode($response);
 
   // print any errors
-  if ($response->error) echo $response->error . "\n";
+  if ($response->error) { echo $response->error . "\n";
+  }
 
-//echo "response\n";
-//print_r($response);
+  //echo "response\n";
+  //print_r($response);
   /* Add tag or print */
   foreach($response->results as $result)
   {
@@ -207,7 +212,8 @@ function GetRawRow($sha1, $ToAntelink)
   /* find the sha1 in $ToAntelink and print the ufile_name */
   foreach($ToAntelink as $row) 
   { 
-    if (strcasecmp($row['pfile_sha1'], $sha1) == 0) return $row;
+    if (strcasecmp($row['pfile_sha1'], $sha1) == 0) { return $row;
+    }
   }
 }
-?>
+

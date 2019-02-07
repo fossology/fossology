@@ -16,7 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-define("TITLE_acme_review", _("ACME Review"));
+define("TITLE_ACME_REVIEW", _("ACME Review"));
 
 /**
  * \brief Sort project by count desc
@@ -30,7 +30,8 @@ define("TITLE_acme_review", _("ACME Review"));
 function proj_cmp($rowa, $rowb)
 {
   $key1 = $rowb['count'] - $rowa['count'];
-  if ($key1) return $key1;
+  if ($key1) { return $key1;
+  }
 
   // secondary key - project_name ascending
   return (strnatcasecmp($rowa['project_name'], $rowb['project_name']));
@@ -39,7 +40,7 @@ function proj_cmp($rowa, $rowb)
 class acme_review extends FO_Plugin
 {
   var $Name       = "acme_review";
-  var $Title      = TITLE_acme_review;
+  var $Title      = TITLE_ACME_REVIEW;
   var $Version    = "1.0";
   var $MenuList   = "";
   var $MenuOrder  = 110;
@@ -165,11 +166,12 @@ class acme_review extends FO_Plugin
     $sql = "select distinct(acme_project_fk) as acme_project_fk, count(acme_project_fk) as filecount from acme_pfile
             right join uploadtree on uploadtree.pfile_fk=acme_pfile.pfile_fk where upload_fk=$upload_pk
             group by acme_project_fk order by filecount desc";
-   $result = pg_query($PG_CONN, $sql);
+    $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     while ($row = pg_fetch_assoc($result))
     {
-      if ($row['filecount'] < $MinCount) break;
+      if ($row['filecount'] < $MinCount) { break;
+      }
 
       // retrieve the acme_project record to go with the found acme_project_fk
       $sql = "select * from acme_project where acme_project_pk='$row[acme_project_fk]'";
@@ -227,7 +229,8 @@ class acme_review extends FO_Plugin
     $ColorSpanRows = 1;  // Alternate background color every $ColorSpanRows
     $RowNum = 0;
 
-    if (empty($acme_project_array)) $acme_project_array = array(); 
+    if (empty($acme_project_array)) { $acme_project_array = array();
+    } 
     foreach ($acme_project_array as $project)
     {
       /* Set alternating row background color - repeats every $ColorSpanRows rows */
@@ -303,10 +306,10 @@ class acme_review extends FO_Plugin
     $spdx .= "<created>" . date('c') . "</created>\n";   // date-time in ISO 8601 format
     $spdx .= '</CreationInfo>' . "\n";
 
-$in_encoding = iconv_get_encoding("input_encoding");
+    $in_encoding = iconv_get_encoding("input_encoding");
     foreach($acme_project_array as $project)
     {
-//debugprint($project, "Project");
+      //debugprint($project, "Project");
       $spdx .= "<Package>\n";
       $spdx .= '<name>' . str_replace("&", " and ", strip_tags($project['project_name'])) . '</name>' . "\n";
       $spdx .= "<versionInfo>$project[version]</versionInfo>\n";
@@ -315,19 +318,19 @@ $in_encoding = iconv_get_encoding("input_encoding");
       $spdx .= '<description>' . str_replace("&", " and ", strip_tags($project['description'])) . '</description>' . "\n";
       $spdx .= "</Package>\n";
     }
-/*
-			<packageSupplier>Organization: FSF (info@fsf.com)</packageSupplier>
-			<packageOriginator>Organization: FSF (info@fsf.com)</packageOriginator>
-			<packageDdownloadLocation>http://ftp.gnu.org/gnu/coreutils/</packageDdownloadLocation>
-			<packageFileName>coreutils-8.12.tar.gz</packageFileName>
-			<sourceInfo>
-				mechanism: git
-				repository: git://git.sv.gnu.org/coreutils
-				branch: master
-				tag: v8.12
-			</sourceInfo>
-		</Package>
-*/
+    /*
+    <packageSupplier>Organization: FSF (info@fsf.com)</packageSupplier>
+    <packageOriginator>Organization: FSF (info@fsf.com)</packageOriginator>
+    <packageDdownloadLocation>http://ftp.gnu.org/gnu/coreutils/</packageDdownloadLocation>
+    <packageFileName>coreutils-8.12.tar.gz</packageFileName>
+    <sourceInfo>
+                mechanism: git
+                repository: git://git.sv.gnu.org/coreutils
+                branch: master
+                tag: v8.12
+    </sourceInfo>
+    </Package>
+    */
 
     $spdx .= "  </SpdxDocument> </rdf:RDF>\n";
     return $spdx;
@@ -342,7 +345,7 @@ $in_encoding = iconv_get_encoding("input_encoding");
     global $Plugins;
     global $PG_CONN;
 
-//phpinfo();
+    //phpinfo();
     $CriteriaCount = 0;
     $V="";
     $GETvars="";
@@ -394,7 +397,8 @@ $in_encoding = iconv_get_encoding("input_encoding");
         $includeArray = $_POST['includeproj'];
         foreach ($acme_project_array as &$project)
         { 
-          if (array_key_exists($project['acme_project_fk'], $includeArray)) $project['include'] = "t";
+          if (array_key_exists($project['acme_project_fk'], $includeArray)) { $project['include'] = "t";
+          }
         }
       }
 
@@ -429,27 +433,32 @@ $in_encoding = iconv_get_encoding("input_encoding");
         while ($acme_pfileRow = pg_fetch_assoc($result))
         {
           $LicArray = GetFileLicenses($agent_pk, '', $acme_pfileRow['uploadtree_pk'], $uploadtree_tablename);
-          foreach($LicArray as $key=>$license) $ItemLicArray[$key] = $license;
+          foreach($LicArray as $key=>$license) { $ItemLicArray[$key] = $license;
+          }
         }
         $project['licenses'] = '';
         foreach($ItemLicArray as $license) 
         {
-          if ($license == "No_license_found") continue;
-          if (!empty($project['licenses'])) $project['licenses'] .= ", ";
+          if ($license == "No_license_found") { continue;
+          }
+          if (!empty($project['licenses'])) { $project['licenses'] .= ", ";
+          }
           $project['licenses'] .= $license;
         }
       }
     }
 
     /* sort $acme_project_array by count desc */
-    if (!empty($acme_project_array)) usort($acme_project_array, 'proj_cmp');
+    if (!empty($acme_project_array)) { usort($acme_project_array, 'proj_cmp');
+    }
 
     /* generate and download spdx file */
     if (!empty($spdxbtn))
     {
       $spdxfile = $this->GenerateSPDX($acme_project_array);
       $rv = DownloadString2File($spdxfile, "SPDX.rdf file", "xml");
-      if ($rv !== true) echo $rv;
+      if ($rv !== true) { echo $rv;
+      }
     }
     
     switch($this->OutputType)
@@ -475,4 +484,4 @@ $in_encoding = iconv_get_encoding("input_encoding");
 //return;  // prevent anyone from seeing this plugin
 $NewPlugin = new acme_review;
 $NewPlugin->Initialize();
-?>
+

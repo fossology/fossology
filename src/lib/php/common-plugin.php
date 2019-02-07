@@ -144,7 +144,8 @@ function plugin_sort()
   $DepArray = array();
   foreach ($Plugins as &$P)
   {
-    if (empty($P->Dependency[0])) continue; // ignore no dependencies
+    if (empty($P->Dependency[0])) { continue; // ignore no dependencies
+    }
     $DepArray[$P->Name] = array();
     $D = &$DepArray[$P->Name];
     for ($j = 0; $j < count($P->Dependency); $j++)
@@ -175,7 +176,8 @@ function plugin_sort()
   /* Finally: Put the direct dependencies back into the structures */
   foreach ($Plugins as &$P)
   {
-    if (empty($P->Dependency[0])) continue; // ignore no dependencies
+    if (empty($P->Dependency[0])) { continue; // ignore no dependencies
+    }
     $P->Dependency = array_keys($DepArray[$P->Name]);
     unset($P);
   }

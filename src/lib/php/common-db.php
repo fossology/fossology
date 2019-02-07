@@ -45,7 +45,8 @@ function DBconnect($sysconfdir, $options="", $exitOnFail=true)
 {
   global $PG_CONN;
 
-  if (!empty($PG_CONN)) return $PG_CONN;
+  if (!empty($PG_CONN)) { return $PG_CONN;
+  }
 
   $path="$sysconfdir/Db.conf";
   if (empty($options))
@@ -210,10 +211,11 @@ function DBCheckResult($result, $sql, $filenm, $lineno)
   if (!$result)
   {
     echo "<hr>File: $filenm, Line number: $lineno<br>";
-    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK)
+    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK) {
       echo pg_last_error($PG_CONN);
-    else
+    } else {
       echo "FATAL: DB connection lost.";
+    }
     echo "<br> $sql";
     debugbacktrace();
     echo "<hr>";
@@ -291,7 +293,8 @@ function DB_ConstraintExists($ConstraintName, $DBName='fossology')
   $row = pg_fetch_assoc($result);
   $count = $row['count'];
   pg_free_result($result);
-  if ($count == 1) return True;
+  if ($count == 1) { return True;
+  }
   return False;
 } /* DB_ColExists()  */
 

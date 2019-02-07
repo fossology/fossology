@@ -29,14 +29,14 @@ use Symfony\Component\HttpFoundation\Response;
  * User must have PERM_WRITE to the uploads.
  */
 
-define("TITLE_core_uploads", _("List Uploads as Options"));
+define("TITLE_CORE_UPLOADS", _("List Uploads as Options"));
 
 class core_uploads extends FO_Plugin
 {
   function __construct()
   {
     $this->Name       = "upload_options";
-    $this->Title      = TITLE_core_uploads;
+    $this->Title      = TITLE_CORE_UPLOADS;
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
 

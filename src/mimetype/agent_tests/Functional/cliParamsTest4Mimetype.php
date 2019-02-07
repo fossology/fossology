@@ -174,4 +174,4 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
   }
 }
 
-?>
+

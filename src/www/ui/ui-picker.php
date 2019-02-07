@@ -284,7 +284,8 @@ class ui_picker extends FO_Plugin
    */
   function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   {
-    if (empty($FolderList)) return "__FILE__ __LINE__ No folder list specified";
+    if (empty($FolderList)) { return "__FILE__ __LINE__ No folder list specified";
+    }
 
     $OutBuf = "";
     $Uri2 = Traceback_uri() . "?mod=$this->Name";
@@ -319,8 +320,9 @@ class ui_picker extends FO_Plugin
         $href = "$Uri2&bitem=$uploadtree_rec[uploadtree_pk]&item=$File1uploadtree_pk";
         $OutBuf .= "<a href='$href'>";
 
-        if (!$First && Iscontainer($uploadtree_rec['ufile_mode']))
-        $OutBuf .= "<br>&nbsp;&nbsp;";
+        if (!$First && Iscontainer($uploadtree_rec['ufile_mode'])) {
+          $OutBuf .= "<br>&nbsp;&nbsp;";
+        }
 
         $OutBuf .= "<b>" . $uploadtree_rec['ufile_name'] . "</b>";
         $OutBuf .= "</a>";
@@ -348,7 +350,8 @@ class ui_picker extends FO_Plugin
 
     /* select possible item2's from pick history for this user */
     $user_pk = $_SESSION['UserId'];
-    if (empty($user_pk)) return $PickerRows;
+    if (empty($user_pk)) { return $PickerRows;
+    }
 
     $sql = "select file_picker_pk, uploadtree_fk1, uploadtree_fk2 from file_picker
               where user_fk= '$user_pk' and ($uploadtree_pk=uploadtree_fk1 or $uploadtree_pk=uploadtree_fk2)";
@@ -371,10 +374,11 @@ class ui_picker extends FO_Plugin
     $PickSelectArray = array();
     foreach($PickerRows as $PickRec)
     {
-      if ($PickRec['uploadtree_fk1'] == $uploadtree_pk)
-      $item2 = $PickRec["uploadtree_fk2"];
-      else
-      $item2 = $PickRec["uploadtree_fk1"];
+      if ($PickRec['uploadtree_fk1'] == $uploadtree_pk) {
+        $item2 = $PickRec["uploadtree_fk2"];
+      } else {
+        $item2 = $PickRec["uploadtree_fk1"];
+      }
       $PathArray = Dir2Path($item2, 'uploadtree');
       $Path = $this->Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
@@ -408,7 +412,8 @@ class ui_picker extends FO_Plugin
     $ext = GetFileExt($FileName);
     $tail = ".$ext";
 
-    if (empty($NameRoot)) return "";
+    if (empty($NameRoot)) { return "";
+    }
 
     /* find non artifact containers with names similar to $FileName */
     $sql = "select uploadtree_pk from uploadtree
@@ -426,7 +431,8 @@ class ui_picker extends FO_Plugin
     pg_free_result($result);
 
     $rtncount = count($SuggestionsArray);
-    if ($rtncount == 0) return "";
+    if ($rtncount == 0) { return "";
+    }
 
     /* Order the select list by the  beginning of the path */
     natsort($SuggestionsArray);
@@ -446,25 +452,28 @@ class ui_picker extends FO_Plugin
   function BrowsePick($uploadtree_pk, $inBrowseuploadtree_pk, $infolder_pk, $PathArray)
   {
     $OutBuf = "";
-    if (empty($inBrowseuploadtree_pk))
-    $Browseuploadtree_pk = $uploadtree_pk;
-    else
-    $Browseuploadtree_pk = $inBrowseuploadtree_pk;
+    if (empty($inBrowseuploadtree_pk)) {
+      $Browseuploadtree_pk = $uploadtree_pk;
+    } else {
+      $Browseuploadtree_pk = $inBrowseuploadtree_pk;
+    }
 
-    if (empty($infolder_pk))
-    $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
-    else
-    $folder_pk = $infolder_pk;
+    if (empty($infolder_pk)) {
+      $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
+    } else {
+      $folder_pk = $infolder_pk;
+    }
 
     // Get list of folders that this $Browseuploadtree_pk is in
     $FolderList = Folder2Path($folder_pk);
 
     // If you aren't browsing folders,
     //   Get list of directories that this $Browseuploadtree_pk is in
-    if (empty($infolder_pk))
-    $DirectoryList = Dir2Path($Browseuploadtree_pk, 'uploadtree');
-    else
-    $DirectoryList = '';
+    if (empty($infolder_pk)) {
+      $DirectoryList = Dir2Path($Browseuploadtree_pk, 'uploadtree');
+    } else {
+      $DirectoryList = '';
+    }
 
     // Get HTML for folder/directory list.
     // This is the stuff in the yellow bar.
@@ -715,9 +724,9 @@ class ui_picker extends FO_Plugin
 
     if ($this->OutputType=='HTML')
     {
-      if (empty($uploadtree_pk))
+      if (empty($uploadtree_pk)) {
         $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
-      else
+      } else
       {
         $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
         $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);

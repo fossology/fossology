@@ -19,12 +19,12 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_upload_tagging", _("Manage Upload Tagging"));
+define("TITLE_UPLOAD_TAGGING", _("Manage Upload Tagging"));
 
 class upload_tagging extends FO_Plugin
 {
   var $Name       = "upload_tagging";
-  var $Title      = TITLE_upload_tagging;
+  var $Title      = TITLE_UPLOAD_TAGGING;
   var $Version    = "1.0";
   var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_ADMIN;

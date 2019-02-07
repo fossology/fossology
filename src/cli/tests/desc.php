@@ -41,4 +41,4 @@ class TestDashD extends UnitTestCase {
     $this->assertPattern('/ERROR, -d /', $output[0]);
   }
 }
-?>
+

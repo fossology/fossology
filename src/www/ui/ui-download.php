@@ -86,9 +86,11 @@ class ui_download extends FO_Plugin
        Also, IE will ignore <style>...</style> tags that are NOT
        in a <head>...</head>block.
        **/
-      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      if (!empty($this->Title)) { $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      }
       $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
-      if (!empty($Menu)) print $Menu->OutputCSS();
+      if (!empty($Menu)) { print $Menu->OutputCSS();
+      }
       $V .= "</head>\n";
       $V .= "<body class='text'>\n";
       print $V;

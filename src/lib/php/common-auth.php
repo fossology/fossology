@@ -61,14 +61,18 @@ function account_check(&$user, &$passwd, &$group = "")
     $user_passwd_array = parse_ini_file($user_passwd_file, true, INI_SCANNER_RAW);
 
     /* get username and password from conf file */
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['user']))
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['user'])) {
       $user = $user_passwd_array['user'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['username']))
+    }
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['username'])) {
       $user = $user_passwd_array['username'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname']))
+    }
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['groupname'])) {
       $group = $user_passwd_array['groupname'];
-    if(!empty($user_passwd_array) && !empty($user_passwd_array['password']))
+    }
+    if(!empty($user_passwd_array) && !empty($user_passwd_array['password'])) {
       $passwd = $user_passwd_array['password'];
+    }
   }
   /* check if the user name/passwd is valid */
   if (empty($user)) {

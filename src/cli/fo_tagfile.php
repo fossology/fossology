@@ -46,12 +46,13 @@ function Usage($argc, $argv)
 /**
  * @brief Take raw line with path from diff output and return just the path.
  * The diff output lines (grepped for +++) follow this format:\n
- *+++ 1065/LINUX/android//bootable/bootloader/lk/app/aboot/aboot.c	2011-03-08 17:03:19.432717000 +0800
+ *+++ 1065/LINUX/android//bootable/bootloader/lk/app/aboot/aboot.c    2011-03-08 17:03:19.432717000 +0800
  * @returns File path
  */
 function Strip2Path($RawFilePath)
 {
-  if (empty($RawFilePath)) return "";
+  if (empty($RawFilePath)) { return "";
+  }
 
   /* strip to first slash */
   $FirstSlashPos = strpos($RawFilePath, "/");
@@ -87,14 +88,16 @@ function Path2Uploadtree($upload_pk, $FilePath)
   $FilePathStr = "";
   foreach($FilePathArray as $name)
   {
-    if (empty($name)) continue;
+    if (empty($name)) { continue;
+    }
     $FilePathStr .= $name;
   }
 
   $sql = "SELECT * from uploadtree where upload_fk='$upload_pk' and ufile_name='$FileName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0) return false;
+  if (pg_num_rows($result) == 0) { return false;
+  }
 
   /* Get the uploadtree recs for this file name */
   while ($row = pg_fetch_assoc($result))
@@ -199,7 +202,8 @@ else
   exit -1;
 }
 
-if ($Missing) "Missing: $Missing\n";
+if ($Missing) { "Missing: $Missing\n";
+}
 
 /* read $PathFile a line at a time */
 $fhandle  = @fopen($PathFile, "r");
@@ -211,16 +215,17 @@ if ($fhandle )
   {
      $fpath = Strip2Path($fpathRaw);
      $UploadtreeRow = Path2Uploadtree($upload_pk, $fpath);
-     if ($UploadtreeRow === false)
+    if ($UploadtreeRow === false)
      {
-       echo "Missing $fpath\n";
-       $MissCount++;
-     }
-     else
+      echo "Missing $fpath\n";
+      $MissCount++;
+    }
+    else
      {
-       if ($Missing === false) TagPath($UploadtreeRow, $tag_pk);
-       $FileCount++;
-     }
+      if ($Missing === false) { TagPath($UploadtreeRow, $tag_pk);
+      }
+      $FileCount++;
+    }
   }
   if (!feof($fhandle )) 
   {
@@ -234,4 +239,4 @@ echo "$FileCount files tagged\n";
 echo "$MissCount file paths not found\n";
 
 return (0);
-?>
+

@@ -23,7 +23,7 @@ use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-define("TITLE_changeLicProcPost", _("Private: Change license file post"));
+define("TITLE_CHANGELICPROCPOST", _("Private: Change license file post"));
 
 class changeLicenseProcessPost extends FO_Plugin
 {
@@ -35,7 +35,7 @@ class changeLicenseProcessPost extends FO_Plugin
   function __construct()
   {
     $this->Name = "change-license-processPost";
-    $this->Title = TITLE_changeLicProcPost;
+    $this->Title = TITLE_CHANGELICPROCPOST;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->OutputType = 'JSON';
     $this->OutputToStdout = 1;

@@ -70,4 +70,4 @@ class TestCLInputCP2foss extends UnitTestCase {
     $this->assertPattern('/ERROR, -a /', $output[0]);
   }
 }
-?>
+

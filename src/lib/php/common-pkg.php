@@ -45,9 +45,10 @@ function GetPkgMimetypes()
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   while ($row = pg_fetch_assoc($result))
   {
-    if ($row['mimetype_name'] == 'application/x-rpm') $pkArray[0] = $row['mimetype_pk'];
-    else if ($row['mimetype_name'] == 'application/x-debian-package') $pkArray[1] = $row['mimetype_pk'];
-    else if ($row['mimetype_name'] == 'application/x-debian-source') $pkArray[2] = $row['mimetype_pk'];
+    if ($row['mimetype_name'] == 'application/x-rpm') { $pkArray[0] = $row['mimetype_pk'];
+    } else if ($row['mimetype_name'] == 'application/x-debian-package') { $pkArray[1] = $row['mimetype_pk'];
+    } else if ($row['mimetype_name'] == 'application/x-debian-source') { $pkArray[2] = $row['mimetype_pk'];
+    }
   }
   pg_free_result($result);
   return $pkArray;
@@ -123,7 +124,8 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
   }
 
   /* If $source is empty, then this isn't even a package */
-  if (empty($source)) return;
+  if (empty($source)) { return;
+  }
 
   /* To get here we must be looking at a binary package */
   /* Find the source pkg in this upload */
@@ -133,7 +135,8 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
             and pfile_fk=pfile_pk and pfile_mimetypefk=$srcpkgmt limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0) $NumBinNoSrcPkgs++;
+  if (pg_num_rows($result) == 0) { $NumBinNoSrcPkgs++;
+  }
   pg_free_result($result);
   return;
 }

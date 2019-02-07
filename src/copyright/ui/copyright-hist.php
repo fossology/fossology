@@ -19,7 +19,7 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_copyrightHistogram", _("Copyright Browser"));
+define("TITLE_COPYRIGHTHISTOGRAM", _("Copyright Browser"));
 
 /**
  * @class CopyrightHistogram
@@ -29,7 +29,7 @@ class CopyrightHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "copyright-hist";
-    $this->Title = TITLE_copyrightHistogram;
+    $this->Title = TITLE_COPYRIGHTHISTOGRAM;
     $this->viewName = "copyright-view";
     $this->agentName = "copyright";
     parent::__construct();

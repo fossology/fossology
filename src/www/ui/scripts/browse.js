@@ -38,7 +38,7 @@ $(document).ready(function () {
     $('.cc').dblclick( function (){
         var source=table.cell(this).data();
         openCommentModal(source[0],source[1],source[2]); 
-      } );
+    } );
     $('select.goto-active-option').change(function() {
       var url = $(this).val();
       if(url){ window.location = url;}

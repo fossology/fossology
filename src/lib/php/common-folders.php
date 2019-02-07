@@ -62,7 +62,8 @@ function GetUserRootFolder()
   $user_pk = Auth::getUserId();
 
   /* everyone has a user_pk, even if not logged in.  But verify. */
-  if (empty($user_pk)) return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";
+  if (empty($user_pk)) { return "__FILE__:__LINE__ GetUserRootFolder(Not logged in)<br>";
+  }
 
   /* Get users root folder */
   $sql = "select root_folder_fk from users where user_pk=$user_pk";
@@ -99,7 +100,8 @@ function Folder2Path($folder_pk)
   $FolderList = array();
 
   /* validate inputs */
-  if (empty($folder_pk)) return __FILE__.":".__LINE__." Folder2Browse(empty)<br>";
+  if (empty($folder_pk)) { return __FILE__.":".__LINE__." Folder2Browse(empty)<br>";
+  }
 
   /* Get users root folder */
   $root_folder_fk = GetUserRootFolder();   // will fail if no user session
@@ -115,7 +117,8 @@ function Folder2Path($folder_pk)
 
     // Limit folders to user root.  Limit to an arbitrary 20 folders as a failsafe
     // against this loop going infinite.
-    if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) break;
+    if (($folder_pk == $root_folder_fk) or (count($FolderList)>20)) { break;
+    }
 
     $sql = "select parent_fk from foldercontents where child_id='$folder_pk' and foldercontents_mode=".FolderDao::MODE_FOLDER;
     $result = pg_query($PG_CONN, $sql);
@@ -143,7 +146,8 @@ function GetFolderFromItem($upload_pk="", $uploadtree_pk="")
   global $PG_CONN;
 
   /* validate inputs */
-  if (empty($uploadtree_pk) and empty($upload_pk)) return "__FILE__:__LINE__ GetFolderFromItem(empty)<br>";
+  if (empty($uploadtree_pk) and empty($upload_pk)) { return "__FILE__:__LINE__ GetFolderFromItem(empty)<br>";
+  }
 
   if (empty($upload_pk))
   {
@@ -193,15 +197,21 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $li
     }
     elseif($linkParent)
     {
-      if(empty($OldParent)) $OldParent=0;
+      if(empty($OldParent)) {
+        $OldParent=0;
+      }
       $V .= "<option value='$OldParent $ParentFolder'>";
     }
     else
     {
       $V .= "<option value='$ParentFolder'>";
     }
-    if ($Depth != 0) { $V .= "&nbsp;&nbsp;"; }
-    for($i=1; $i < $Depth; $i++) { $V .= "&nbsp;&nbsp;"; }
+    if ($Depth != 0) {
+      $V .= "&nbsp;&nbsp;";
+    }
+    for($i=1; $i < $Depth; $i++) {
+      $V .= "&nbsp;&nbsp;";
+    }
 
     /* Load this folder's name */
     $sql = "SELECT folder_name FROM folder WHERE folder_pk=$ParentFolder LIMIT 1;";
@@ -209,7 +219,9 @@ function FolderListOption($ParentFolder,$Depth, $IncludeTop=1, $SelectId=-1, $li
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     $Name = trim($row['folder_name']);
-    if ($Name == "") { $Name = "[default]"; }
+    if ($Name == "") {
+      $Name = "[default]";
+    }
 
     /* Load any subfolders */
     /* Now create the HTML */
@@ -350,9 +362,15 @@ function FolderListUploads_perm($ParentFolder, $perm)
 {
   global $PG_CONN;
 
-  if (empty($PG_CONN)) { return; }
-  if (empty($ParentFolder)) { return; }
-  if ($ParentFolder == "-1")  $ParentFolder = GetUserRootFolder();
+  if (empty($PG_CONN)) {
+    return;
+  }
+  if (empty($ParentFolder)) { 
+    return; 
+  }
+  if ($ParentFolder == "-1") {
+    $ParentFolder = GetUserRootFolder();
+  }
   $groupId = Auth::getGroupId();
   /* @var $uploadDao UploadDao */
   $uploadDao = $GLOBALS['container']->get('dao.upload');
@@ -409,8 +427,9 @@ function FolderListUploadsRecurse($ParentFolder=-1, $FolderPath='', $perm=Auth::
   global $PG_CONN;
   if (empty($PG_CONN)) { return array(); }
   if (empty($ParentFolder)) { return array(); }
-  if($perm!=Auth::PERM_READ && $perm=Auth::PERM_WRITE)
+  if($perm!=Auth::PERM_READ && $perm=Auth::PERM_WRITE) {
           return array();
+  }
   if ($ParentFolder == "-1") { $ParentFolder = FolderGetTop(); }
   $groupId = Auth::getGroupId();
   /* @var $uploadDao UploadDao */
@@ -548,8 +567,9 @@ function ContainExcludeString($FilePath, $ExcludingText) {
   if ($excluding_length > 0 && strstr($FilePath, $ExcludingText)) {
     $excluding_flag = 1;
     /* filepath does not contain 'xxxx/' */
-    if ('/' != $ExcludingText[0] && '/' == $ExcludingText[$excluding_length - 1] && !strstr($FilePath, '/'.$ExcludingText))
+    if ('/' != $ExcludingText[0] && '/' == $ExcludingText[$excluding_length - 1] && !strstr($FilePath, '/'.$ExcludingText)) {
       $excluding_flag = 0;
+    }
   }
   return $excluding_flag;
 }

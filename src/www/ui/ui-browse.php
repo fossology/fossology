@@ -26,7 +26,7 @@ use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_ui_browse", _("Browse"));
+define("TITLE_UI_BROWSE", _("Browse"));
 
 class ui_browse extends FO_Plugin
 {
@@ -38,7 +38,7 @@ class ui_browse extends FO_Plugin
   function __construct()
   {
     $this->Name = "browse";
-    $this->Title = TITLE_ui_browse;
+    $this->Title = TITLE_UI_BROWSE;
     $this->MenuList = "Browse";
     $this->MenuOrder = 80; // just to right of Home(100)
     $this->MenuTarget = "";
@@ -117,7 +117,8 @@ class ui_browse extends FO_Plugin
     $dbManager->prepare($stmtGetFirstChild,"SELECT uploadtree_pk FROM $uploadtree_tablename WHERE parent=$1 limit 1");
     foreach ($Results as $Row)
     {
-      if (empty($Row['uploadtree_pk'])) continue;
+      if (empty($Row['uploadtree_pk'])) { continue;
+      }
       $ShowSomething = 1;
       $Name = $Row['ufile_name'];
 
@@ -156,12 +157,13 @@ class ui_browse extends FO_Plugin
       }
       $V .= "<td>$displayItem</td>\n";
 
-      if (!Iscontainer($Row['ufile_mode']))
+      if (!Iscontainer($Row['ufile_mode'])) {
         $V .= menu_to_1list($MenuPfileNoCompare, $Parm, "<td>", "</td>\n", 1, $Upload);
-      else if (!Isdir($Row['ufile_mode']))
+      } else if (!Isdir($Row['ufile_mode'])) {
         $V .= menu_to_1list($MenuPfile, $Parm, "<td>", "</td>\n", 1, $Upload);
-      else
+      } else {
         $V .= menu_to_1list($MenuTag, $Parm, "<td>", "</td>\n", 1, $Upload);
+      }
 
     } /* foreach($Results as $Row) */
     $V .= "</table>\n";

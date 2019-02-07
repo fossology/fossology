@@ -70,7 +70,8 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   $dbManager = $container->get('db.manager');
   /* check all required inputs */
   if (empty($userId) or empty($job_name) or empty($filename) or
-      empty($UploadMode) or empty($folder_pk)) return;
+      empty($UploadMode) or empty($folder_pk)) { return;
+  }
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
       (upload_desc,upload_filename,user_fk,upload_mode,upload_origin,public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
@@ -166,7 +167,8 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   {
     foreach($Depends as $Dependency)
     {
-      if (empty($Dependency)) continue;
+      if (empty($Dependency)) { continue;
+      }
 
       $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$Dependency'";
       $result = pg_query($PG_CONN, $sql);
@@ -174,7 +176,8 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
       $MissingDep =  (pg_num_rows($result) == 0);
       pg_free_result($result);
 
-      if ($MissingDep) return;
+      if ($MissingDep) { return;
+      }
     }
   }
 
@@ -286,7 +289,8 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
   $agent_count = count($agent_list);
   foreach(explode(",", $upload_pk_list) as $upload_pk)
   {
-    if (empty($upload_pk))  continue;
+    if (empty($upload_pk)) {  continue;
+    }
 
     // Create a job for the upload
     $where = "where upload_pk ='$upload_pk'";
@@ -348,7 +352,8 @@ function QueueUploadsOnDelagents($upload_pk_list)
   {
     foreach(explode(",", $upload_pk_list) as $upload_pk)
     {
-      if (empty($upload_pk))  continue;
+      if (empty($upload_pk)) {  continue;
+      }
 
       // Create a job for the upload
       $jobpk = JobAddJob($user_pk, $group_pk, "Delete", $upload_pk);
@@ -365,7 +370,8 @@ function QueueUploadsOnDelagents($upload_pk_list)
   } // if $upload_pk is defined
   /* Tell the scheduler to check the queue. */
   $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-  if (!$success) echo $error_msg . "\n" . $output;
+  if (!$success) { echo $error_msg . "\n" . $output;
+  }
 }
 
 /**
@@ -442,12 +448,14 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
   $DependsEmpty = array();
 
   /* check if the latest agent has already been run */
-  if ($plugin->AgentHasResults($upload_pk) == 1)
+  if ($plugin->AgentHasResults($upload_pk) == 1) {
     return 0;
+  }
 
   /* if it is already scheduled, then return success */
-  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0)
+  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0) {
     return $jq_pk;
+  }
 
   /* queue up dependencies */
   foreach ($Dependencies as $Dependency)
@@ -467,8 +475,9 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
       $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
       return -1;
     }
-    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
+    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1) {
       return -1;
+    }
   }
   /* schedule AgentName */
   if (empty($jqargs))

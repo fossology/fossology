@@ -23,7 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-define("TITLE_core_auth", _("Login"));
+define("TITLE_CORE_AUTH", _("Login"));
 
 class core_auth extends FO_Plugin
 {
@@ -38,7 +38,7 @@ class core_auth extends FO_Plugin
   function __construct()
   {
     $this->Name = "auth";
-    $this->Title = TITLE_core_auth;
+    $this->Title = TITLE_CORE_AUTH;
     $this->PluginLevel = 1000; /* make this run first! */
     $this->LoginFlag = 0;
     parent::__construct();
@@ -98,14 +98,17 @@ class core_auth extends FO_Plugin
       $SysConf['auth'][Auth::GROUP_ID] = $selectedGroupId;
     }
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
-    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) { $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    }
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) { $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    }
 
     $Now = time();
     if (!empty($_SESSION['time']))
     {
       /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+      if (@$_SESSION['time'] + (60 * 480) < $Now) { $this->updateSession("");
+      }
     }
 
     $_SESSION['time'] = $Now;
@@ -136,8 +139,9 @@ class core_auth extends FO_Plugin
         }
         $this->updateSession($row);
       }
-    } else
+    } else {
       $this->updateSession("");
+    }
 
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION[Auth::USER_LEVEL]);

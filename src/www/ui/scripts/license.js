@@ -51,20 +51,23 @@ $(document).ready(function () {
   });
   
   var scanFilter = getCookie('scanFilter');
-  if(scanFilter==="")
+  if(scanFilter==="") {
     scanFilter = 0;
+  }
   $('#scanFilter option[value='+scanFilter+']').parent().val(scanFilter);
   $('#scanFilter').change(function (){ filterScan($(this).val(),'scan'); });
 
   var conFilter = getCookie('conFilter');
-  if(conFilter==="")
+  if(conFilter==="") {
     conFilter = 0;
+  }
   $('#conFilter option[value='+conFilter+']').parent().val(conFilter);
   $('#conFilter').change(function (){ filterScan($(this).val(),'con'); });
   
   var openFilter = getCookie('openFilter');
-  if(openFilter==='true' || openFilter==='checked')
+  if(openFilter==='true' || openFilter==='checked') {
     $('#openCBoxFilter').prop('checked',openFilter);
+  }
   $('#openCBoxFilter').click(function (){
     setCookie('openFilter', $(this).prop('checked'));
     otable.fnFilter('');
@@ -122,9 +125,9 @@ function scheduleScan(upload, agentName, resultEntityKey) {
         $('#' + agentName.replace("agent_", "") + "_span").hide();
         queueUpdateCheck(jqPk, function () {
             resultEntity.html(agentName.replace("agent_", "") + " done.<br/>");
-          }, function () {
-            resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
-          }
+        }, function () {
+          resultEntity.html(agentName.replace("agent_", "") + " failed!<br/>");
+        }
         );
       }
       else {
@@ -141,8 +144,9 @@ function scheduleScan(upload, agentName, resultEntityKey) {
 }
 
 function dressContents(data, type, full) {
-  if (type === 'display')
+  if (type === 'display') {
     return '<a href=\'#\' onclick=\'filterScan(' + data[1] + ',\"scan\")\'>' + data[0] + '</a>';
+  }
   return data;
 }
 

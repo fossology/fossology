@@ -60,7 +60,8 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
   if (!empty($AgentList)) {
     // get user agent preferences
     $userName = $_SESSION['User'];
-    if (!empty($specified_username)) $userName = $specified_username;
+    if (!empty($specified_username)) { $userName = $specified_username;
+    }
     $sql = "SELECT user_name, user_agent_list, default_bucketpool_fk FROM users WHERE
 				    user_name='$userName';";
     $result = pg_query($PG_CONN, $sql);
@@ -76,7 +77,8 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
     }
     $list = explode(',',$uList[0]['user_agent_list']);
     $default_bucketpool_fk = $uList[0]['default_bucketpool_fk'];
-    if (empty($default_bucketpool_fk)) $SkipAgents[] = "agent_bucket";
+    if (empty($default_bucketpool_fk)) { $SkipAgents[] = "agent_bucket";
+    }
 
     foreach($AgentList as $AgentItem) {
       $Agent = &$Plugins[plugin_find_id($AgentItem->URI)];
@@ -94,7 +96,8 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
           break;
         }
       }
-      if ($FoundSkip) continue;
+      if ($FoundSkip) { continue;
+      }
 
       if ($upload_pk != -1) {
         $rc = $Agent->AgentHasResults($upload_pk);
@@ -217,7 +220,7 @@ function FindDependent($UploadPk, $list=NULL)
   foreach($jobList as $job)
   {
     $sql = "SELECT jq_pk, jq_job_fk FROM jobqueue WHERE jq_job_fk = $job " .
-					 " order by jq_pk desc;";
+                     " order by jq_pk desc;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $Q = pg_fetch_all($result);

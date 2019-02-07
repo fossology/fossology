@@ -18,7 +18,7 @@
 ***********************************************************/
 
 
-define("TITLE_showjobs", _("Show Jobs"));
+define("TITLE_SHOWJOBS", _("Show Jobs"));
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
@@ -38,7 +38,7 @@ class showjobs extends FO_Plugin
   function __construct()
   {
     $this->Name       = "showjobs";
-    $this->Title      = TITLE_showjobs;
+    $this->Title      = TITLE_SHOWJOBS;
     $this->MenuOrder  = 5;
     $this->Dependency = array("browse");
     $this->DBaccess   = PLUGIN_DB_WRITE;
@@ -151,29 +151,35 @@ class showjobs extends FO_Plugin
         $thisURL = Traceback_uri() . "?mod=" . $this->Name . "&upload=$uploadPk";
         switch($action)
         {
-        case 'pause':
-          if (empty($jq_pk)) break;
-          $command = "pause $jq_pk";
-          $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
-          if ($rv == false) $this->vars['errorInfo'] =  _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
+          case 'pause':
+            if (empty($jq_pk)) { break;
+            }
+            $command = "pause $jq_pk";
+            $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+            if ($rv == false) { $this->vars['errorInfo'] =  _("Unable to pause job.") . " " . $response_from_scheduler . $error_info;
+            }
+            echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
 
-        case 'restart':
-          if (empty($jq_pk)) break;
-          $command = "restart $jq_pk";
-          $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
-          if ($rv == false) $this->vars['errorInfo'] =  _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
+          case 'restart':
+            if (empty($jq_pk)) { break;
+            }
+            $command = "restart $jq_pk";
+            $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+            if ($rv == false) { $this->vars['errorInfo'] =  _("Unable to restart job.") . " " . $response_from_scheduler . $error_info;
+            }
+            echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
 
-        case 'cancel':
-          if (empty($jq_pk)) break;
-          $Msg = "\"" . _("Killed by") . " " . $_SESSION[Auth::USER_NAME] . "\"";
-          $command = "kill $jq_pk $Msg";
-          $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
-          if ($rv == false) $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info; 
-          echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
+          case 'cancel':
+            if (empty($jq_pk)) { break;
+            }
+            $Msg = "\"" . _("Killed by") . " " . $_SESSION[Auth::USER_NAME] . "\"";
+            $command = "kill $jq_pk $Msg";
+            $rv = fo_communicate_with_scheduler($command, $response_from_scheduler, $error_info);
+            if ($rv == false) { $this->vars['errorInfo'] =  _("Unable to cancel job.") . $response_from_scheduler . $error_info;
+            } 
+            echo "<script type=\"text/javascript\"> window.location.replace(\"$thisURL\"); </script>";
           break;
         }
       }
@@ -184,9 +190,11 @@ class showjobs extends FO_Plugin
       $this->vars['uploadName'] = $this->getUploadNameForGeekyScan($job);
     }else{
       $allusersval=GetParm("allusers",PARM_INTEGER);
-      if(!$allusersval) $allusersval = 0;
+      if(!$allusersval) { $allusersval = 0;
+      }
       $this->vars['allusersval'] = $allusersval;
-      if(!$page) $page=0;
+      if(!$page) { $page=0;
+      }
       $this->vars['page'] = $page;
       $this->vars['clockTime'] = $this->getTimeToRefresh();
       $this->vars['allusersdiv'] = menu_to_1html(menu_find($this->Name, $MenuDepth),0);  

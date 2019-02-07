@@ -32,7 +32,7 @@
  * \return the rf_shortname, and comma delimited string of uploadtree_pks:
  * "FSF,123,456"
  */
-define("TITLE_ajax_filelic", _("ajax find items by license"));
+define("TITLE_AJAX_FILELIC", _("ajax find items by license"));
 
 /**
  * @class ajax_filelic
@@ -49,7 +49,7 @@ class ajax_filelic extends FO_Plugin
    * @var string $Title
    * Title of the HTML
    */
-  var $Title = TITLE_ajax_filelic;
+  var $Title = TITLE_AJAX_FILELIC;
   /**
    * @var string $Version
    * Version

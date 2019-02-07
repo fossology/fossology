@@ -25,8 +25,9 @@ var noLicenseString = "No_license_found";
 function jsArrayFromHtmlOptions(pListBox) {
   var options = new Array(pListBox.options.length);
   for (var i = 0; i < options.length; i++) {
-    if (pListBox.options[i].value === magicNumberNoLicenseFound)
+    if (pListBox.options[i].value === magicNumberNoLicenseFound) {
       continue;
+    }
     options[i] = pListBox.options[i];
   }
   return options;
@@ -34,9 +35,11 @@ function jsArrayFromHtmlOptions(pListBox) {
 
 function htmlOptionsFromJsArray(pListBox, options) {
   pListBox.options.length = 0;
-  if(options===undefined) return;
+  if(options===undefined) { return;
+  }
   for (var i = 0; i < options.length; i++) {
-      if(options[i]===undefined) continue;
+    if(options[i]===undefined) { continue;
+    }
       pListBox.options[i] = options[i];
   }
 }
@@ -44,8 +47,9 @@ function htmlOptionsFromJsArray(pListBox, options) {
 function sortLicenseList(pListBox) {
   var options = jsArrayFromHtmlOptions(pListBox);
   options.sort(compareText);
-  if (options.length == 0)
+  if (options.length == 0) {
     options[0] = (new Option(noLicenseString, magicNumberNoLicenseFound));
+  }
   htmlOptionsFromJsArray(pListBox, options);
 }
 
@@ -111,19 +115,19 @@ function scheduledDeciderError (responseobject, resultEntity) {
 
 function isUserError(bulkActions, refText) {
     var errorText = "";
-    if(bulkActions.length < 1) {
-        errorText += "No licenses to bulk scan selected\n";
-    }
+  if(bulkActions.length < 1) {
+      errorText += "No licenses to bulk scan selected\n";
+  }
 
-    if(refText.trim().split(" ").length < 2) {
-        errorText += "Reference text needs to be at least 2 words long"
-    }
+  if(refText.trim().split(" ").length < 2) {
+      errorText += "Reference text needs to be at least 2 words long"
+  }
 
     //show errors to user
-    if(errorText.length > 0) {
-      alert("Bulk scan not scheduled: \n\n"+errorText);
-      return true;
-    }
+  if(errorText.length > 0) {
+    alert("Bulk scan not scheduled: \n\n"+errorText);
+    return true;
+  }
     return false;
 }
 

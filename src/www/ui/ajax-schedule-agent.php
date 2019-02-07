@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  * data to the UI.
  */
 
-define("TITLE_ajax_schedule_agent", _("Schedule agent"));
+define("TITLE_AJAX_SCHEDULE_AGENT", _("Schedule agent"));
 
 /**
  * \class ajax_upload_agents extends from FO_Plugin
@@ -37,7 +37,7 @@ class ajax_schedule_agent extends FO_Plugin
   function __construct()
   {
     $this->Name       = "schedule_agent";
-    $this->Title      = TITLE_ajax_schedule_agent;
+    $this->Title      = TITLE_AJAX_SCHEDULE_AGENT;
     $this->DBaccess   = PLUGIN_DB_READ;
     parent::__construct();
   }

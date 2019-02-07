@@ -257,7 +257,8 @@ class UserEditPage extends DefaultPlugin
         continue;
       }
 
-      if (!$first) $sql .= ",";
+      if (!$first) { $sql .= ",";
+      }
       $sql .= "$key='" . pg_escape_string($val) . "'";
       $first = FALSE;
     }

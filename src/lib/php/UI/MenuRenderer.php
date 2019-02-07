@@ -64,6 +64,6 @@ class MenuRenderer
     }
 
     return '<select class="goto-active-option"><option disabled selected>-- select action --</option>'.$optionsOut.'</select>';
- }
+  }
 }
 

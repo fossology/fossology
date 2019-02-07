@@ -126,20 +126,21 @@ function ReportCachePut($CacheKey, $CacheValue)
   $ParsedURI = array();
   parse_str($EscKey, $ParsedURI);
   /* use 'upload= ' to define the upload in the cache key */
-  if (array_key_exists("upload", $ParsedURI))
+  if (array_key_exists("upload", $ParsedURI)) {
     $Upload = $ParsedURI['upload'];
-  else
-    if (array_key_exists("item", $ParsedURI))
-    {
-      $sql = "SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]';";
-      $result = pg_query($PG_CONN, $sql);
-      DBCheckResult($result, $sql, __FILE__, __LINE__);
+  }
+  if (array_key_exists("item", $ParsedURI)) {
+    $sql = "SELECT upload_fk FROM uploadtree WHERE uploadtree_pk='$ParsedURI[item]';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-      $row = pg_fetch_assoc($result);
-      $Upload = $row['upload_fk'];
-      pg_free_result($result);
-    }
-  if (empty($Upload)) $Upload = "Null";
+    $row = pg_fetch_assoc($result);
+    $Upload = $row['upload_fk'];
+    pg_free_result($result);
+  }
+  if (empty($Upload)) {
+    $Upload = "Null";
+  }
 
   $sql = "INSERT INTO report_cache (report_cache_key, report_cache_value, report_cache_uploadfk)
                            VALUES ('$EscKey', '$EscValue', $Upload);";

@@ -131,7 +131,8 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
 
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -167,7 +168,8 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else { $this->assertFalse(TRUE);
+    }
 
     sleep(5); //wait for the agents complete
     $agent_status = 0;
@@ -271,7 +273,7 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     if ( $return_var != 0 ) {
         print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
-#        exit(1);
+      #        exit(1);
     }
 
     // time to drop the database 
@@ -282,4 +284,4 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
 
 }
 
-?>
+

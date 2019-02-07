@@ -25,7 +25,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-define("TITLE_ajaxShowJobs", _("ShowJobs"));
+define("TITLE_AJAXSHOWJOBS", _("ShowJobs"));
 
 class AjaxShowJobs extends FO_Plugin
 {
@@ -49,7 +49,7 @@ class AjaxShowJobs extends FO_Plugin
   function __construct()
   {
     $this->Name = "ajaxShowJobs";
-    $this->Title = TITLE_ajaxShowJobs;
+    $this->Title = TITLE_AJAXSHOWJOBS;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -250,8 +250,10 @@ class AjaxShowJobs extends FO_Plugin
           $jobNumber++;
 
           /* Only display the jobs for this page */
-          if ($jobNumber >= $lastJob) break;
-          if ($jobNumber < $firstJob) continue;
+          if ($jobNumber >= $lastJob) { break;
+          }
+          if ($jobNumber < $firstJob) { continue;
+          }
 
           /* blank line separator between pfiles */
           $outBuf .= "<tr><td colspan=8> <hr> </td></tr>";
@@ -283,21 +285,25 @@ class AjaxShowJobs extends FO_Plugin
           }
 
           $outBuf .= htmlentities($uploadName, ENT_QUOTES) . $userName;
-          if (!empty($uploadDesc)) $outBuf .= " (" . $uploadDesc . ")";
+          if (!empty($uploadDesc)) { $outBuf .= " (" . $uploadDesc . ")";
+          }
           $outBuf .= "</a>";
           $outBuf .= "</th>";
           $outBuf .= "<th $uploadStyle><a>".$this->showJobsDao->getEstimatedTime($jobId)."</a></th>";
           $outBuf .= "</tr>";
           $single_browse = 1;
         }else{ 
-          if ($jobNumber < $firstJob) continue; 
+          if ($jobNumber < $firstJob) { continue;
+          } 
         }
       }else{  /* Show Jobs that are not attached to an upload */
 
         $jobNumber++;
         /* Only display the jobs for this page */
-        if ($jobNumber >= $lastJob) break;
-        if ($jobNumber < $firstJob) continue;
+        if ($jobNumber >= $lastJob) { break;
+        }
+        if ($jobNumber < $firstJob) { continue;
+        }
 
         /* blank line separator between pfiles */
         $outBuf .= "<tr><td colspan=8> <hr> </td></tr>";
@@ -461,17 +467,19 @@ class AjaxShowJobs extends FO_Plugin
     $status = "";
     
     /* check the jobqueue status.  If the job is finished, return the status. */
-    if (!empty($jobqueueRec['jq_endtext'])) 
+    if (!empty($jobqueueRec['jq_endtext'])) { 
       $status .= "$jobqueueRec[jq_endtext]";
+    }
 
     if (!strstr($status, "Success") and !strstr($status, "Fail") and $jobqueueRec["jq_end_bits"]){
       $status .= "<br>";
-      if ($jobqueueRec["jq_end_bits"] == 0x1)
+      if ($jobqueueRec["jq_end_bits"] == 0x1) {
         $status .= _("Success");
-      else if ($jobqueueRec["jq_end_bits"] == 0x2)
+      } else if ($jobqueueRec["jq_end_bits"] == 0x2) {
         $status .= _("Failure");
-      else if ($jobqueueRec["jq_end_bits"] == 0x4)
+      } else if ($jobqueueRec["jq_end_bits"] == 0x4) {
         $status .= _("Nonfatal");
+      }
     }
     return $status;
   } /* jobqueueStatus() */
