@@ -49,7 +49,6 @@ use Fossology\Lib\Db\DbManager;
 /**
  * \brief Insert a new upload record, and update the foldercontents table.
  *
-<<<<<<< HEAD
  * \param int $userId        User creating the job
  * \param int $groupId       Group creating the job
  * \param string $job_name   Job name
@@ -60,7 +59,7 @@ use Fossology\Lib\Db\DbManager;
  * \param int $UploadMode    1<<2=URL, 1<<3=upload from server or file
  * \param int $folder_pk     The folder to contain this upload
  * \param int $public_perm   The public permission on this upload
- * \param char $scm          Optional ignore SCM specific data ('t': true, 'f': false)
+ * \param char $scm          Optional ignore SCM specific data ('f': false, 't': true)
  *
  * \return upload_pk or null (failure).
  *         On failure, error is written to stdout
