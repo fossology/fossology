@@ -18,7 +18,7 @@
 use Fossology\Lib\Plugin\Plugin;
 
 /**
- * \file common-plugin.php
+ * \file
  * \brief Core functions for user interface plugins
  **/
 
@@ -29,16 +29,15 @@ global $Plugins;
 $Plugins = array();
 
 /**
- * @brief Sort compare function.  Sorts by dependency
- * relationship.  If a and b are at the same
- * dependency level, then sort by the plugin level.
+ * @brief Sort compare function.
  *
- * returns -1, 0, 1 for plugin a being <, =, or > than b
+ * Sorts by dependency relationship.  If a and b are at the same
+ * dependency level, then sort by the plugin level.
  *
  * @param Plugin a
  * @param Plugin b
  *
- * @return int
+ * @return -1, 0, 1 for plugin a being <, =, or > than b
  */
 function plugin_cmp($a, $b)
 {
@@ -92,7 +91,7 @@ function plugin_cmp($a, $b)
 /**
  * \brief Disable all plugins that have a level greater than the users permission level.
  *
- * \param $Level the users DBaccess level
+ * \param int $Level The user's DBaccess level
  * \return void
  */
 function plugin_disable($Level)
@@ -188,13 +187,14 @@ function plugin_sort()
 /**
  * \brief Given the official name of a plugin, find the index to it in the
  *        global $Plugins array.
- *        Only plugins in PLUGIN_STATE_READY are scanned.
+ *
+ * \note Only plugins in PLUGIN_STATE_READY are scanned.
  * \param $Name Plugin name
  * \return -1 if the plugin $Name is not found.
  **/
 function plugin_find_id($pluginName)
 {
-  /** TODO: has to be removed */
+  /** \todo has to be removed */
   /** @var Plugin[] $Plugins */
   global $Plugins;
 
@@ -208,11 +208,11 @@ function plugin_find_id($pluginName)
 
 /**
  * @brief Given the official name of a plugin, return the $Plugins object.
- *        Only plugins in PLUGIN_STATE_READY are scanned.
- * returns the plugin or NULL if the plugin name isn't found.
  *
- * @param string $pluginName
- * @return Plugin|NULL
+ * Only plugins in PLUGIN_STATE_READY are scanned.
+ *
+ * @param string $pluginName Name of the required plugin
+ * @return Plugin|NULL The plugin or NULL if the plugin name isn't found.
  */
 function plugin_find($pluginName)
 {
@@ -222,9 +222,10 @@ function plugin_find($pluginName)
 
 /**
  * \brief Initialize every plugin in the global $Plugins array.
- *        plugin_sort() is called followed by the plugin
- *        PostInitialize() if PLUGIN_STATE_VALID,
- *        and RegisterMenus() if PLUGIN_STATE_READY.
+ *
+ * plugin_sort() is called followed by the plugin
+ * PostInitialize() if PLUGIN_STATE_VALID,
+ * and RegisterMenus() if PLUGIN_STATE_READY.
  **/
 function plugin_preinstall()
 {
@@ -258,8 +259,6 @@ function plugin_postinstall()
 
 /**
  * \brief Load every module ui found in mods-enabled
- *
- * \param $CallInit 1 = call plugin_init(), else ignored.
  **/
 function plugin_load()
 {
@@ -311,7 +310,11 @@ function plugin_unload()
   }
 } // plugin_unload()
 
-
+/**
+ * Register a new plugin to the global Plugins array.
+ * @param Plugin $plugin Plugin to be added
+ * @throws \Exception If plugin has no name or is already registered
+ */
 function register_plugin(Plugin $plugin) {
   /** @var Plugin[] $Plugins */
   global $Plugins;
@@ -329,6 +332,12 @@ function register_plugin(Plugin $plugin) {
   $Plugins[$name] = $plugin;
 }
 
+/**
+ * Used to convert plugin to string representation by __toString()
+ * @param array  $vars      Associative array of variable name => value
+ * @param string $classname Name of the class of the object being represented
+ * @return string String representation of the object
+ */
 function getStringRepresentation($vars, $classname) {
   $output = $classname . " {\n";
   foreach($vars as $name => $value) {

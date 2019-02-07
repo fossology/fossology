@@ -17,18 +17,18 @@
  ***********************************************************/
 
 /**
- * \file common-pkg.php
+ * \file
  * \brief This file contains common functions for the package agent.
  */
 
 /**
  * \brief Get package mimetype
  *
- * \return:
+ * \return
  *   Array of mimetype_pk's in the following order:
- *     application/x-rpm
- *     application/x-debian-package
- *     application/x-debian-source
+ *   -# application/x-rpm
+ *   -# application/x-debian-package
+ *   -# application/x-debian-source
  */
 function GetPkgMimetypes()
 {
@@ -56,11 +56,12 @@ function GetPkgMimetypes()
 /**
  * \brief Increment counts of source package, binary package, and binary with no source
  *
- * \param $uploadtree_row Uploadtree row + pfile_mimetypefk
- * \param  $MimetypeArray  Assoc array of mimetype names and mimetype_pk (from GetPkgMimetypes)
- * \param  &$NumSrcPkgs  Incremented if this is a source package
- * \param  &$NumBinPkgs  Incremented if this is a binary package
- * \param  &$NumBinNoSrcPkgs  Incremented if this binary pkg has no source package
+ * \param array $uploadtree_row Uploadtree row + pfile_mimetypefk
+ * \param array $MimetypeArray  Assoc array of mimetype names and mimetype_pk
+ * (from GetPkgMimetypes)
+ * \param[out] int &$NumSrcPkgs  Incremented if this is a source package
+ * \param[out] int &$NumBinPkgs  Incremented if this is a binary package
+ * \param[out] int &$NumBinNoSrcPkgs  Incremented if this binary pkg has no source package
  * \return
  *   None.  This function increments values passed in by reference.
  */
@@ -128,7 +129,7 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
   /* Find the source pkg in this upload */
   $source = trim($source);
   $sql = "select uploadtree_pk from uploadtree, pfile where
-            upload_fk=$uploadtree_row[upload_fk] and ufile_name='$source' 
+            upload_fk=$uploadtree_row[upload_fk] and ufile_name='$source'
             and pfile_fk=pfile_pk and pfile_mimetypefk=$srcpkgmt limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -136,5 +137,3 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
   pg_free_result($result);
   return;
 }
-
-?>

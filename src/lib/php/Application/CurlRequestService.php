@@ -16,8 +16,22 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+/**
+ * @file
+ * @brief Service to create new curl request handler.
+ */
+
+/**
+ * @class CurlRequestService
+ * Service to create new curl request handler.
+ */
 class CurlRequestService
 {
+  /**
+   * Create and return a new curl request handler.
+   * @param string $url URL to access.
+   * @return Fossology::Lib::Application::CurlRequest
+   */
   public function create($url)
   {
     return new CurlRequest($url);

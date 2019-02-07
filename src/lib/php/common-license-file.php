@@ -18,7 +18,7 @@
 ***********************************************************/
 
 /**
- * \file common-license-file.php
+ * \file
  * \brief This file contains common functions for the
  * license_file and license_ref tables.
  */
@@ -26,15 +26,16 @@
 
 /**
  * \brief get all the licenses for a single file or uploadtree
- * 
- * \param $agent_pk - agent id
- * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
- * \param $uploadtree_pk - (used only if $pfile_pk is empty)
- * \param $uploadtree_tablename
- * \param $duplicate - get duplicated licenses or not, if NULL: No, or Yes
  *
- * \return Array of file licenses   LicArray[fl_pk] = rf_shortname if $duplicate is Not NULL
- * LicArray[rf_pk] = rf_shortname if $duplicate is NULL
+ * \param int $agent_pk Agent id
+ * \param int $pfile_pk Pfile id, (if empty, $uploadtree_pk must be given)
+ * \param int $uploadtree_pk (used only if $pfile_pk is empty)
+ * \param string $uploadtree_tablename Upload tree table to use
+ * \param bool $duplicate Get duplicated licenses or not, if NULL: No, or Yes
+ *
+ * \return Array of file licenses\n
+ * LicArray[fl_pk] = rf_shortname if $duplicate is Not NULL\n
+ * LicArray[rf_pk] = rf_shortname if $duplicate is NULL\n
  * FATAL if neither pfile_pk or uploadtree_pk were passed in
  */
 function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree', $duplicate="")
@@ -67,7 +68,7 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
     /*  Get the licenses under this $uploadtree_pk*/
     $sql = "SELECT distinct(rf_shortname) as rf_shortname, rf_pk as rf_fk, fl_pk
               from license_file_ref,
-                  (SELECT distinct(pfile_fk) as PF from $uploadtree_tablename 
+                  (SELECT distinct(pfile_fk) as PF from $uploadtree_tablename
                      where $UploadClause lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk $agentIdCondition
               order by rf_shortname asc";
@@ -94,14 +95,14 @@ function GetFileLicenses($agent, $pfile_pk, $uploadtree_pk, $uploadtree_tablenam
 }
 
 /**
- * \brief  Same as GetFileLicenses() but returns license list as a single string
- * \param $agent_pk - agent id
- * \param $pfile_pk - pfile id, (if empty, $uploadtree_pk must be given)
- * \param $uploadtree_pk - (used only if $pfile_pk is empty)
- * \param $uploadtree_tablename
+ * \brief Same as GetFileLicenses() but returns license list as a single string
+ * \param int $agent_pk Agent id
+ * \param int $pfile_pk Pfile id, (if empty, $uploadtree_pk must be given)
+ * \param int $uploadtree_pk (used only if $pfile_pk is empty)
+ * \param string $uploadtree_tablename
  *
  * \return Licenses string for specified file
- * \see GetFileLicenses() 
+ * \see GetFileLicenses()
  */
 function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
@@ -111,20 +112,20 @@ function GetFileLicenses_string($agent_pk, $pfile_pk, $uploadtree_pk, $uploadtre
 }
 
 /**
- * \brief get files with a given license (shortname).
+ * \brief Get files with a given license (shortname).
  *
- * \param $agent_pk - apgent id
- * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
- * \param $uploadtree_pk - sets scope of request
- * \param $PkgsOnly - if true, only list packages, default is false (all files are listed)
- * for now, $PkgsOnly is not yet implemented.
- * \param $offset - select offset, default is 0
- * \param $limit - select limit (num rows returned), default is no limit
- * \param $order - sql order by clause, default is blank
- *                 e.g. "order by ufile_name asc"
- * \param $tag_pk - optional tag_pk.  Restrict results to files that have this tag.
- * \param $uploadtree_tablename
- *                 
+ * \param int $agent_pk Agent id
+ * \param string $rf_shortname Short name of one license, like GPL, APSL, MIT, ...
+ * \param int $uploadtree_pk Sets scope of request
+ * \param bool $PkgsOnly If true, only list packages, default is false (all files are listed).
+ * For now, $PkgsOnly is not yet implemented.
+ * \param int $offset Select offset, default is 0
+ * \param string $limit Select limit (num rows returned), default is no limit
+ * \param string $order SQL order by clause, default is blank
+ *                 e.g. `"order by ufile_name asc"`
+ * \param int $tag_pk Optional tag_pk. Restrict results to files that have this tag.
+ * \param string $uploadtree_tablename
+ *
  * \return pg_query result.  See $sql for fields returned.
  *
  * \note Caller should use pg_free_result to free.
@@ -177,7 +178,7 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   if (is_array($agent_pk))
   {
     $agentCondition = ' AND agent_fk IN (' . implode(',', $agent_pk) . ')';
-  } 
+  }
   else if ($agent_pk != "any")
   {
     $agentCondition = "and agent_fk=$agent_pk";
@@ -191,9 +192,9 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
   $theLimit = ($limit=='ALL') ? '' : "LIMIT $limit";
   $sql = "select uploadtree_pk, license_file.pfile_fk, ufile_name, agent_name, max(agent_pk) agent_pk
           from license_file, agent, $TagTable
-              (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename 
+              (SELECT pfile_fk as PF, uploadtree_pk, ufile_name from $uploadtree_tablename
                  where $UploadClause
-                 lft BETWEEN $lft and $rgt 
+                 lft BETWEEN $lft and $rgt
                  and ufile_mode & (3<<28) = 0 )  as SS
           where PF=license_file.pfile_fk $agentCondition and rf_fk in ($rf_pk)
               AND agent_pk=agent_fk
@@ -208,17 +209,20 @@ function GetFilesWithLicense($agent_pk, $rf_shortname, $uploadtree_pk,
 /**
  * \brief Given an uploadtree_pk, find all the non-artifact, immediate children
  * (uploadtree_pk's) that have license $rf_shortname.
+ *
  * By "immediate" I mean the earliest direct non-artifact.
- * For example:
- *    A > B, C  (A has children B and C)
+ *
+ * For example:\n
+ *    A > B, C  (A has children B and C)\n
  *    If C is an artifact, descend that tree till you find the first non-artifact
  *    and consider that non-artifact an immediate child.
  *
- * \param $agent_pk - agent id
- * \param $rf_shortname - short name of one license, like GPL, APSL, MIT, ...
- * \param $uploadtree_pk   sets scope of request
- * \param $PkgsOnly - if true, only list packages, default is false (all files are listed)
- *                    $PkgsOnly is not yet implemented.
+ * \param int $agent_pk Agent id
+ * \param string $rf_shortname Short name of one license, like GPL, APSL, MIT, ...
+ * \param int $uploadtree_pk   Sets scope of request
+ * \param bool $PkgsOnly If true, only list packages, default is false (all
+ * files are listed). $PkgsOnly is not yet implemented.
+ * \param string $uploadtree_tablename
  *
  * \returns Array of uploadtree_pk ==> ufile_name
  */
@@ -251,29 +255,30 @@ function Level1WithLicense($agent_pk, $rf_shortname, $uploadtree_pk, $PkgsOnly=f
 
 
 /**
- * \brief get list of links: [View][Info][Download]
+ * \brief Get list of links: `[View][Info][Download]`
  *
- * \param $upload_fk - upload id
- * \param $uploadtree_pk - uploadtree id
- * \param $napk - nomos agent pk
- * \param $pfile_pk
- * \param $Recurse true if links should propapagate recursion.  Currently,
+ * \param int $upload_fk Upload id
+ * \param int $uploadtree_pk Uploadtree id
+ * \param int $napk Nomos agent pk
+ * \param int $pfile_pk
+ * \param bool $Recurse true if links should propapagate recursion.  Currently,
  *        this means that the displayed tags will be displayed for directory contents.
- * \param $UniqueTagArray - cumulative array of unique tags
- * \param $uploadtree_tablename
- * \param $wantTags - if true add [Tag] ...
+ * \param array &$UniqueTagArray Cumulative array of unique tags
+ * \param string $uploadtree_tablename
+ * \param bool $wantTags
+ * \parblock If true add [Tag] ...
  *
- *        For example:
+ * For example:
  * \verbatim  Array
- *        (
- *          [0] => Array
- *            (
- *                [tag_pk] => 5
- *                [tag_name] => GPL false positive
- *            )
- *        )
- * \endverbatim
- * \param $uploadtree_tablename for $upload_fk
+   (
+     [0] => Array
+       (
+           [tag_pk] => 5
+           [tag_name] => GPL false positive
+       )
+   )
+ \endverbatim
+ * \endparblock
  *
  * \returns String containing the links [View][Info][Download][Tag {tags}]
  */
@@ -297,7 +302,7 @@ function FileListLinks($upload_fk, $uploadtree_pk, $napk, $pfile_pk, $Recurse=Tr
   {
     $TagArray = GetAllTags($uploadtree_pk, $Recurse, $uploadtree_tablename);
     $TagStr = "";
-    foreach($TagArray as $TagPair) 
+    foreach($TagArray as $TagPair)
     {
       /* Build string of tags for this item */
       if (!empty($TagStr)) $TagStr .= ",";

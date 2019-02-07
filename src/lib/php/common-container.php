@@ -16,6 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/**
+ * @file
+ * @brief Setup the dependency injection container for Symfony from services.xml
+ */
+
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
@@ -70,6 +75,6 @@ if(!empty($timeZone))
   $twig->getExtension('core')->setTimezone($timeZone);
 }
 
-/** @var TimingLogger */
+/** @var TimingLogger $timingLogger */
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime);

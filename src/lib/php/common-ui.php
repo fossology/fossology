@@ -19,29 +19,30 @@
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
- * \file common-ui.php
+ * \file
+ * \brief Common function for UI operations
  */
 
 /**
  * \brief Build a single choice select pulldown
  *
- * \param $KeyValArray - Assoc array.  Use key/val pairs for list
- * \param $SLName - Select list name (default is "unnamed"),
- * \param $SelectedVal - Initially selected value or key, depends on $SelElt
- * \param $FirstEmpty - True if the list starts off with an empty choice (default is false)
- * \param $SelElt - True (default) if $SelectedVal is a value False if $SelectedVal is a key
- * \param $Options - Optional.  Options to add to the select statment.
+ * \param array $KeyValArray Assoc array.  Use key/val pairs for list
+ * \param string $SLName Select list name (default is "unnamed"),
+ * \param string $SelectedVal Initially selected value or key, depends on $SelElt
+ * \param bool $FirstEmpty True if the list starts off with an empty choice (default is false)
+ * \param bool $SelElt True (default) if $SelectedVal is a value False if $SelectedVal is a key
+ * \param string $Options Optional.  Options to add to the select statement.
  * For example, "id=myid onclick= ..."
- * \param $ReturnKey - True (default) return the Key as value, if False return the Value
+ * \param bool $ReturnKey True (default) return the Key as value, if False return the Value
  *
- * \return a string of select html 
+ * \return A string of select HTML
  */
-function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "", 
+function Array2SingleSelect($KeyValArray, $SLName="unnamed", $SelectedVal= "",
 $FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 {
   $str ="\n<select name='$SLName' $Options>\n";
   if ($FirstEmpty == true) $str .= "<option value='' > </option>\n";
-  
+
   foreach ($KeyValArray as $key => $val)
   {
     if ($SelElt == true)
@@ -61,11 +62,12 @@ $FirstEmpty=false, $SelElt=true, $Options="", $ReturnKey=true)
 /**
  * \brief Write message to stdout and die.
  *
- * \param $msg - Message to write
- * \param $filenm - File name (__FILE__)
- * \param $lineno - Line number of the caller (__LINE__)
+ * \param string $msg    Message to write
+ * \param string $filenm File name (__FILE__)
+ * \param int    $lineno Line number of the caller (__LINE__)
  *
  * \return None, prints error, file, and line number, then exits(1)
+ * \sa debugbacktrace()
  */
 function Fatal($msg, $filenm, $lineno)
 {
@@ -76,7 +78,7 @@ function Fatal($msg, $filenm, $lineno)
 }
 
 /**
- * \brief debug back trace
+ * \brief Debug back trace
  */
 function debugbacktrace()
 {
@@ -86,7 +88,9 @@ function debugbacktrace()
 }
 
 /**
- * \brief print debug message
+ * @brief Print debug message
+ * @param mixed  $val   Variable to be printed
+ * @param string $title Title of the variable
  */
 function debugprint($val, $title)
 {
@@ -96,7 +100,8 @@ function debugprint($val, $title)
 }
 
 /**
- * \brief translate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB/PB
+ * \brief Translate a byte number to a proper type, xxx bytes to xxx B/KB/MB/GB/TB/PB
+ * \param int $bytes Bytes to be converted
  */
 function HumanSize( $bytes )
 {
@@ -109,13 +114,13 @@ function HumanSize( $bytes )
   }
   return(round($bytes, 2) . ' PB');
 }
- 
+
 /**
- * \brief get File Extension (text after last period)
+ * \brief Get File Extension (text after last period)
  *
- * \param $fname - file name
- * 
- * \return the file extension of the specified file name
+ * \param string $fname File name
+ *
+ * \return The file extension of the specified file name
  */
 function GetFileExt($fname)
 {
@@ -126,12 +131,12 @@ function GetFileExt($fname)
 
 
 /**
- * \brief get the value from a array(map)
+ * \brief Get the value from a array(map)
  *
- * \param $Key - key 
- * \param $Arr - Whithin the Array, you can get value according to the key
+ * \param mixed $Key Key to look
+ * \param array $Arr Within the Array, you can get value according to the key
  *
- * \return an array value, or "" if the array key does not exist
+ * \return An array value, or "" if the array key does not exist
  */
 function GetArrayVal($Key, $Arr)
 {
@@ -143,9 +148,9 @@ function GetArrayVal($Key, $Arr)
 }
 
 /**
- * \brief get host list
+ * \brief Get host list
  *
- * \return return HTML of the host name tree
+ * \return Return HTML of the host name tree
  */
 function HostListOption()
 {
@@ -162,12 +167,12 @@ function HostListOption()
 }
 
 /**
- * \brief send a string to a user as a download file
+ * \brief Send a string to a user as a download file
  *
- * \param $text - text to download as file
- * \param $name - file name
- * \param $contentType - download file Content-Type
- * 
+ * \param string $text Text to download as file
+ * \param string $name File name
+ * \param string $contentType Download file Content-Type
+ *
  * \return True on success, error message on failure.
  */
 function DownloadString2File($text, $name, $contentType)
@@ -197,9 +202,9 @@ function DownloadString2File($text, $name, $contentType)
  * \brief Get the uploadtree table name for this upload_pk
  *        If upload_pk does not exist, return "uploadtree".
  *
- * \param $upload_pk
- * 
- * \return uploadtree table name
+ * \param int $upload_pk
+ *
+ * \return Uploadtree table name
  */
 function GetUploadtreeTableName($upload_pk)
 {
@@ -215,11 +220,11 @@ function GetUploadtreeTableName($upload_pk)
 }
 
 /**
- * \brief get Upload Name through upload id
- * 
- * \param $upload_id - upload ID
+ * \brief Get Upload Name through upload id
  *
- * \return upload name
+ * \param int $upload_id Upload ID
+ *
+ * \return Upload name, "" if upload does not exists
  */
 function GetUploadName($upload_pk)
 {
@@ -231,11 +236,11 @@ function GetUploadName($upload_pk)
 }
 
 /**
- * \brief get upload id through uploadtreeid
+ * \brief Get upload id through uploadtreeid
  *
- * \param $uploadtreeid - uploadtree id
+ * \param int $uploadtreeid Uploadtree id
  *
- * \return return upload id
+ * \return Upload id
  */
 function GetUploadID($uploadtreeid)
 {
@@ -247,11 +252,11 @@ function GetUploadID($uploadtreeid)
 }
 
 /**
- * \brief get 1st uploadtree id through upload id
+ * \brief Get 1st uploadtree id through upload id
  *
- * \param $upload - upload id
+ * \param int $upload Upload id
  *
- * \return return 1st uploadtree id 
+ * \return 1st uploadtree id
  */
 function Get1stUploadtreeID($upload)
 {

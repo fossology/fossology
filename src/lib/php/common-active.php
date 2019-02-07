@@ -17,12 +17,13 @@
 ***********************************************************/
 
 /**
- * \file common-active.php
+ * \file
  * \brief These are common functions for performing active HTTP requests.
  * (Used in place of AJAX or ActiveX.)
  */
 
 /** \brief Load a new url
+ *
  * The new url is url+val
  * e.g. js_url(this.value, "http:me?val=")
  **/
@@ -42,13 +43,15 @@ function js_url()
 
 
 /**
- * \brief Display a message.  This is used to convey the results of button push like
- * upload, submit, analyze, create, etc.
+ * \brief Display a message.
  *
- * \param $Message the message to display
- * \param $keep a safe text string NOT run through htmlentities
+ * This is used to convey the results of button push like upload, submit,
+ * analyze, create, etc.
  *
- * \return the html to display (with embeded javascript)
+ * \param string $Message The message to display
+ * \param string $keep A safe text string NOT run through htmlentities
+ *
+ * \return The html to display (with embeded javascript)
  */
 function displayMessage($Message,$keep=NULL) {
 
@@ -73,20 +76,25 @@ function displayMessage($Message,$keep=NULL) {
 /**
  * \brief Given a function name, create the
  * JavaScript needed for doing the request.
+ *
  * The JavaScript takes a URL and returns the data.
  * The JavaScript is Asynchronous (no wait while the request goes on).
- * 
- * \param $RequestName - the JavaScript variable name to use.
- * The javascript function is named "${RequestName}_Get"
+ *
+ * \param string $RequestName
+ * \parblock The JavaScript variable name to use.
+ *
+ * The javascript function is named "${RequestName}_Get"\n
  * The javascript function "${RequestName}_Reply" must be defined for
  * handling the reply.  (You will need to make this Javascript function.)
+ *
  * The javascript variable "${RequestName}.status" contains the
  * reply's HTTP return code (200 means "OK") and "${RequestName}.readyState"
  * is the handle's state (4 = "loaded").
- * \param $IncludeScriptTags - if will append the javascript tag.  default value is 1.
+ * \endparblock
+ * \param boolean $IncludeScriptTags If will append the javascript tag. Default value is 1.
  * empty on no, other on yes
  *
- * \return the html (with embeded javascript)
+ * \return The html (with embeded javascript)
  *
  * \see References: http://www.w3schools.com/xml/xml_http.asp
  */
@@ -116,11 +124,11 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
   $HTML .= "if ($RequestName!=null)\n";
   $HTML .= "  {\n";
   $HTML .= "  $RequestName.onreadystatechange=${RequestName}_Reply;\n";
-  /***
+  /*
    'true' means asynchronous request.
   Rather than waiting for the reply, the reply is
   managed by the onreadystatechange event handler.
-  ***/
+  */
   $HTML .= "  $RequestName.open('GET',Url,true);\n";
   $HTML .= "  $RequestName.send(null);\n";
   $HTML .= "  }\n";

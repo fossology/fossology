@@ -16,26 +16,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
 /**
- * \file common-menu.php
- * \brief common menu functions
+ * \file
+ * \brief Common menu functions
  */
-const MENU_PATH_SEPARATOR = "::";
-const MENU_BREAK = "[BREAK]";
+const MENU_PATH_SEPARATOR = "::";   ///< Separator used between menu paths
+const MENU_BREAK = "[BREAK]";       ///< Break menu at this
 
 /**
+ * \class menu
  * \brief
- *  Code for creating a menu list (2D linked list) from a set of plugins.
+ * Code for creating a menu list (2D linked list) from a set of plugins.
  */
 class menu {
-  var $Name = ""; // name of the menu item
-  var $URI = NULL; // URI for the plugin (everything after the "?mod=")
-  var $HTML = NULL; // HTML to include (if provided, used in place of all else)
-  var $Order = 0; // Used for ordering menu items
-  var $Target = NULL; // recommended name of window for showing results
-  var $MaxDepth = 0; // How deep is SubMenu?
-  var $SubMenu = NULL;
-  public $FullName; // list to submenu list
-  
+  var $Name = "";       ///< Name of the menu item
+  var $URI = NULL;      ///< URI for the plugin (everything after the "?mod=")
+  var $HTML = NULL;     ///< HTML to include (if provided, used in place of all else)
+  var $Order = 0;       ///< Used for ordering menu items
+  var $Target = NULL;   ///< Recommended name of window for showing results
+  var $MaxDepth = 0;    ///< How deep is SubMenu?
+  var $SubMenu = NULL;  ///< Sub menu to show
+  public $FullName;     ///< List to submenu list
+
+  /**
+   * Return the name of the menu
+   * @param boolean $showFullName If true, return FullName and order, else
+   * return Name
+   * @return string
+   */
   public function getName($showFullName=false)
   {
     if($showFullName)
@@ -49,16 +56,17 @@ class menu {
 /*********************************
  Global array: don't touch!
  *********************************/
-$MenuList = array();
-$MenuMaxDepth = 0; // how deep is the tree (for UI display)
+$MenuList = array();  ///< Global menu list array
+$MenuMaxDepth = 0;    ///< How deep is the tree (for UI display)
 /**
  * \brief Create a "First Prev 1 2 ... Next Last" page links for paged output.
  *
- * \param $Page       Page number of the current page
- * \param $TotalPage  Last page number
- * \param $Uri        URL of the page being displayed. "&page=" will be appended to the URL
+ * \param int $Page       Page number of the current page
+ * \param int $TotalPage  Last page number
+ * \param string $Uri     URL of the page being displayed. "&page=" will be
+ * appended to the URL
  *
- * \return string containing menu html
+ * \return String containing menu HTML
  */
 function MenuPage($Page, $TotalPage, $Uri = '') {
   $V = "<font class='text'><center>";
@@ -100,14 +108,15 @@ function MenuPage($Page, $TotalPage, $Uri = '') {
   $V.= "</center></font>";
   return ($V);
 } // MenuPage
+
 /**
- * \brief Create a "First Prev 1 2 ... Next" page links for paged output. 
+ * \brief Create a "First Prev 1 2 ... Next" page links for paged output.
  *
- * \param $Page  Page number of the current page
- * \param $Next  true display "Next" and false don't display
- * \param $Uri   URL of the page being displayed. "&page=" will be appended to the URL
+ * \param int $Page   Page number of the current page
+ * \param bool $Next  True display "Next" and false don't display
+ * \param string $Uri URL of the page being displayed. "&page=" will be appended to the URL
  *
- * \return string containing menu html
+ * \return String containing menu HTML
  */
 function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $V = "<font class='text'><center>";
@@ -143,14 +152,15 @@ function MenuEndlessPage($Page, $Next = 1, $Uri = '') {
   $V.= "</center></font>";
   return ($V);
 } // MenuEndlessPage()
+
 /**
  * \brief Compare two menu items for sorting.
  *
- * \param $a menu a
- * \param $b menu b
+ * \param &$a menu a
+ * \param &$b menu b
  *
- * \return -1 a > b
- *         1  a < b
+ * \return -1 a > b\n
+ *         1  a < b\n
  *         0  a->Order = b->Order and a->Name = b->Name
  */
 function menu_cmp(&$a, &$b) {
@@ -163,21 +173,24 @@ function menu_cmp(&$a, &$b) {
   $rc = strcmp($a->Name, $b->Name);
   return (strcmp($a->Name, $b->Name));
 } // menu_cmp()
+
 /**
  * \brief Given a Path, order level for the last
  * item, and a plugin name, insert the menu item.
+ *
  * This is VERY recursive and returns the new menu.
  * If $URI is blank, nothing is added.
  *
- * @param $menuItems
- * @param $path
- * @param $pathRemainder
- * @param $LastOrder
- * @param $Target
- * @param $URI
- * @param $HTML
- * @param $Title
- * @return int the max depth of menu
+ * @param[in,out] array &$menuItems Array of menu items. If null is passed,
+ * new array is created.
+ * @param array $path    Path of the menu item
+ * @param string $pathRemainder
+ * @param int $LastOrder  Order (position) of last menu item
+ * @param string $Target  Name of the Menu target
+ * @param string $URI     URI of the menu
+ * @param string $HTML    HTML of the menu
+ * @param string &$Title  Title of the menu
+ * @return int The max depth of menu
  */
 function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, $URI, $HTML, &$Title)
 {
@@ -254,17 +267,17 @@ function menu_insert_r(&$menuItems, $path, $pathRemainder, $LastOrder, $Target, 
 
 
 /**
- * \brief menu_insert(): Given a Path, order level for the last
+ * \brief Given a Path, order level for the last
  * item, and optional plugin name, insert the menu item.
  *
- * \param $Path      path of the new menu item
- * \param $LastOrder is used for grouping items in order.
- * \param $Target    target of the new menu item
- * \param $URI       URL link of the new menu item
- * \param $HTML      HTML of the new menu item
- * \param $Title     Title of the new menu item
+ * \param string $Path   Path of the new menu item
+ * \param int $LastOrder Is used for grouping items in order.
+ * \param string $URI    URL link of the new menu item
+ * \param string $Title  Title of the new menu item
+ * \param string $Target Target of the new menu item
+ * \param string $HTML   HTML of the new menu item
  */
-function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL) 
+function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target = NULL, $HTML = NULL)
 {
   global $MenuList;
   menu_insert_r($MenuList, array(), $Path, $LastOrder, $Target, $URI, $HTML, $Title);
@@ -274,18 +287,19 @@ function menu_insert($Path, $LastOrder = 0, $URI = NULL, $Title = NULL, $Target 
 /**
  * \brief Given a top-level menu name, find
  * the list of sub-menus below it and max depth of menu.
- * NOTICE this this function returns the sub menus of $Name, NOT the menu specified
+ *
+ * \note this this function returns the sub menus of $Name, NOT the menu specified
  * by $Name.
  *
- * \todo rename this function to menu_find_submenus.
+ * \todo Rename this function to menu_find_submenus.
  *
- * \param $Name      top-level menu name, may be a "::" separated list.
- * \param $MaxDepth  max depth of menu, returned value
- * \param $Menu      menu object array (default is global $MenuList)
+ * \param string $Name        Top-level menu name, may be a "::" separated list.
+ * \param[out] int &$MaxDepth Max depth of menu, returned value
+ * \param menu $Menu          menu object array (default is global $MenuList)
  *
- * \return array of sub-menus.  $MaxDepth is also returned
+ * \return Array of sub-menus.  $MaxDepth is also returned
  */
-function menu_find($Name, &$MaxDepth, $Menu = NULL) 
+function menu_find($Name, &$MaxDepth, $Menu = NULL)
 {
   global $MenuList;
   if (empty($Menu)) {
@@ -310,20 +324,21 @@ function menu_find($Name, &$MaxDepth, $Menu = NULL)
 } // menu_find()
 
 
+$menu_to_1html_counter = 0;  ///< Counter used by menu_to_1html()
 /**
- * \brief Take a menu and render it as
- * one HTML line.  This ignores submenus!
+ * \brief Take a menu and render it as one HTML line.
+ *
+ * This ignores submenus!
  * This is commonly called the "micro-menu".
  *
- * \param $Menu          menu list need to show as HTML
- * \param $ShowRefresh   If $ShowRefresh==1, show Refresh
- * \param $ShowTraceback If $ShowTraceback==1, show Tracback
- * \param $ShowAll       If $ShowAll==0, then items without hyperlinks are hidden.
+ * \param menu $Menu          menu list need to show as HTML
+ * \param bool $ShowRefresh   If true, show Refresh
+ * \param bool $ShowTraceback If true, show Tracback
+ * \param bool $ShowAll       If false, then items without hyperlinks are hidden.
  *
  * \return HTML string
  */
-$menu_to_1html_counter = 0;
-function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1) 
+function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1)
 {
   $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
 
@@ -411,7 +426,8 @@ function menu_to_1html($Menu, $ShowRefresh = 1, $ShowTraceback = 0, $ShowAll = 1
 }
 
 /**
- * @param $menu menu
+ * Get the additional string for menu full name
+ * @param menu $menu menu
  * @return string
  */
 function getFullNameAddition(menu $menu)
@@ -423,18 +439,19 @@ function getFullNameAddition(menu $menu)
 /**
  * \brief Take a menu and render it as
  * one HTML line with items in a "[name]" list.
- * This ignores submenus!
  *
- * \param $Menu     menu list need to show as list
- * \param $Parm     a list of parameters to add to the URL.
- * \param $Pre      string before "[name]"
- * \param $Post     string after "[name]"
- * \param $ShowAll  If $ShowAll==0, then items without hyperlinks are hidden.
- * \param $upload_id upload id
- * 
+ * \note This ignores submenus!
+ *
+ * \param menu $Menu      menu list need to show as list
+ * \param string &$Parm   A list of parameters to add to the URL.
+ * \param string $Pre     String before "[name]"
+ * \param string $Post    String after "[name]"
+ * \param bool $ShowAll   If false, then items without hyperlinks are hidden.
+ * \param int  $upload_id Upload id
+ *
  * \return one HTML line with items in a "[name]" list
  */
-function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "") 
+function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $upload_id  = "")
 {
   if (empty($Menu)) {
     return '';
@@ -442,7 +459,7 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
 
   $showFullName = isset($_SESSION) && array_key_exists('fullmenudebug', $_SESSION) && $_SESSION['fullmenudebug'] == 1;
   $V = "";
-  
+
   foreach($Menu as $Val) {
     if (!empty($Val->HTML)) {
       $entry = $Val->HTML;
@@ -453,7 +470,7 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
         $tagstatus = TagStatus($upload_id);
         if (0 == $tagstatus) break; // tagging on this upload is disabled
       }
-      
+
       $entry = "[<a href='" . Traceback_uri() . "?mod=" . $Val->URI . "&" . $Parm . "'";
       if (!empty($Val->Title)) {
         $entry .= " title='" . htmlentities($Val->Title, ENT_QUOTES) . "'";
@@ -477,12 +494,13 @@ function menu_to_1list($Menu, &$Parm, $Pre = "", $Post = "", $ShowAll = 1, $uplo
 
 /**
  * \brief Debugging code for printing the menu.
- * This is recursive.
  *
- * \param $Menu    menu list to be printed
- * \param $Indent  indent char
+ * \note This is recursive.
+ *
+ * \param menu &$Menu   menu list to be printed
+ * \param int  $Indent  Indentations to add
  */
-function menu_print(&$Menu, $Indent) 
+function menu_print(&$Menu, $Indent)
 {
   if (!isset($Menu)) {
     return;
@@ -523,13 +541,15 @@ function menu_print(&$Menu, $Indent)
  *  from a menu list.
  *
  * For example,
+ * \code
  *   $mymenu = menu_find("Browse-Pfile", $MenuDepth);
  *   $myNewMenu = menu_remove($mymenu, "Compare");
+ * \endcode
  *
- * \param $Menu   menu list the menu item remove from
- * \param $RmName remove name of menu
+ * \param menu $Menu     menu list the menu item remove from
+ * \param string $RmName Remove name of menu
  *
- * \return a new menu list without $RmName
+ * \return A new menu list without $RmName
  */
 function menu_remove($Menu, $RmName)
 {

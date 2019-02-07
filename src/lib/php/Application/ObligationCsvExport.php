@@ -21,33 +21,58 @@ namespace Fossology\Lib\Application;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
 
+/**
+ * @file
+ * @brief Helper class to export obligations as a CSV
+ */
+
+/**
+ * @class ObligationCsvExport
+ * @brief Helper class to export obligations as a CSV
+ */
 class ObligationCsvExport {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager to be used */
   protected $dbManager;
-  /** @var string */
+  /** @var string $delimiter
+   * Delimiter used in the CSV */
   protected $delimiter = ',';
-  /** @var string */
+  /** @var string $enclosure
+   * Ecnlosure used in the CSV */
   protected $enclosure = '"';
 
+  /**
+   * Constructor
+   * @param DbManager $dbManager DbManager to be used.
+   */
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
   }
 
+  /**
+   * @brief Update the delimiter
+   * @param string $delimiter New delimiter to use.
+   */
   public function setDelimiter($delimiter=',')
   {
     $this->delimiter = substr($delimiter,0,1);
   }
 
+  /**
+   * @brief Update the enclosure
+   * @param string $enclosure New enclosure to use.
+   */
   public function setEnclosure($enclosure='"')
   {
     $this->enclosure = substr($enclosure,0,1);
   }
 
   /**
-   * @param int $rf
-   * @return string csv
+   * @brief Create CSV from the obligations
+   * @param int $rf Obligation id to be returned, else set 0 to get all.
+   * @return string CSV
    */
   public function createCsv($ob=0)
   {

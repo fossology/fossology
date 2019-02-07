@@ -17,19 +17,21 @@
 ***********************************************************/
 
 /**
- * \file common-repo.php
+ * \file
  * \brief This file contains common repository functions.
  */
 
 /**
  * \brief Given an uploadtree_pk, return a string that describes
- * the mime type.  Note this only looks in the pfile rec.  For some mimetypes
+ * the mime type.
+ *
+ * \note this only looks in the pfile rec.  For some mimetypes
  * unpack initializes the pfile mimetype.  Others require the mimetype agent.
  * (This is in common-repo since mimetypes apply to repo contents.)
  *
- * \param $Item - uploadtree pk
+ * \param int $Item Uploadtree pk
  *
- * \return string that describes the mime type.
+ * \return String that describes the mime type.
  */
 function GetMimeType($Item)
 {
@@ -48,7 +50,7 @@ function GetMimeType($Item)
     $Meta = $row['mimetype_name'];
   }
   else
-    $Meta = 'application/octet-stream'; 
+    $Meta = 'application/octet-stream';
 
   pg_free_result($result);
   return($Meta);
@@ -56,14 +58,14 @@ function GetMimeType($Item)
 
 /**
  * \brief Given a pfile id, retrieve the pfile path.
- * 
- * NOTE: The filename at the path may not exist.
+ *
+ * \note The filename at the path may not exist.
  * In fact, the entire path may not exist!
  *
- * \param $PfilePk - pfile pk
- * \param $Repo - repository type
+ * \param int $PfilePk Pfile pk
+ * \param string $Repo Repository type
  *
- * \return the path, or NULL if the pfile record does not exist.
+ * \return The path, or NULL if the pfile record does not exist.
  */
 function RepPath($PfilePk, $Repo="files")
 {
@@ -86,13 +88,13 @@ function RepPath($PfilePk, $Repo="files")
 /**
  * \brief Given an uploadtree_pk, retrieve the pfile path.
  *
- * NOTE: The filename at the path may not exist.
+ * \note The filename at the path may not exist.
  * In fact, the entire path may not exist!
  *
- * \param $Item - uploadtree pk
- * \param $Repo - repository type
+ * \param int $Item    Uploadtree pk
+ * \param string $Repo Repository type
  *
- * \return the path, or NULL if the pfile record does not exist.
+ * \return The path, or NULL if the pfile record does not exist.
  */
 function RepPathItem($Item, $Repo="files")
 {
