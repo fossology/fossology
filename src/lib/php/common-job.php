@@ -53,8 +53,8 @@ use Fossology\Lib\Db\DbManager;
  * \param int $groupId       Group creating the job
  * \param string $job_name   Job name
  * \param string $filename   For upload from URL, this is the URL.\n
- *                    For upload from file, this is the filename.\n
- *                    For upload from server, this is the file path.\n
+ *                           For upload from file, this is the filename.\n
+ *                           For upload from server, this is the file path.\n
  * \param string $desc       Optional user file description.
  * \param int $UploadMode    1<<2=URL, 1<<3=upload from server or file
  * \param int $folder_pk     The folder to contain this upload
