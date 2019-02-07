@@ -19,6 +19,14 @@
 #ifndef UNIQUE_PTR_HPP_
 #define UNIQUE_PTR_HPP_
 
+/**
+ * \file
+ * \brief Defined which unique to be used by creating new `unptr` namespace
+ *
+ * If a macro `USEBOOST_UNIQUEPTR` is defined, then use boost::interprocess
+ * unique pointer, else `std` unique pointer under `unptr` namespace.
+ */
+
 //#define USEBOOST_UNIQUEPTR
 #ifdef USEBOOST_UNIQUEPTR
   #include <boost/interprocess/smart_ptr/unique_ptr.hpp>

@@ -1,8 +1,6 @@
 /********************************************************
- delagent: Remove an upload from the DB and repository
-
  Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2017 Siemens AG
+ Copyright (C) 2015-2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,6 +15,7 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ********************************************************/
+
 /**
  * \file delagent.c
  * \brief Delagent to delete uploaded packages
@@ -86,7 +85,6 @@ void usage (char *Name)
   fprintf(stderr,"  -i   :: Initialize the DB, then exit.\n");
   fprintf(stderr,"  -u   :: List uploads IDs.\n");
   fprintf(stderr,"  -U # :: Delete upload ID.\n");
-  //fprintf(stderr,"  -L # :: Delete ALL licenses associated with upload ID.\n");
   fprintf(stderr,"  -f   :: List folder IDs.\n");
   fprintf(stderr,"  -F # :: Delete folder ID and all uploads under this folder.\n");
   fprintf(stderr,"          Folder '1' is the default folder.  '-F 1' will delete\n");
@@ -105,19 +103,19 @@ void usage (char *Name)
  * \brief Write message to user after success/failure
  * \param kind Upload/Folder
  * \param id   Upload/Folder id
- * \param user_name User created the request
+ * \param userName User created the request
  * \param returnedCode Code returned by agent
  */
-void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedCode)
+void writeMessageAfterDelete(char *kind, long id, char *userName, int returnedCode)
 {
   if (0 == returnedCode)
   {
-    fprintf(stdout, "The %s '%ld' is deleted by the user '%s'.\n", kind, id, user_name);
+    fprintf(stdout, "The %s '%ld' is deleted by the user '%s'.\n", kind, id, userName);
   }
   else
   {
-    fprintf(stdout, "Deletion failed: user '%s' does not have the permsssion to delete the %s '%ld', or the %s '%ld' does not exist.\n", user_name, kind, id, kind, id);
-    exit(returnedCode);
+    fprintf(stdout, "Deletion failed: user '%s' does not have the permsssion to delete the %s '%ld', or the %s '%ld' does not exist.\n", userName, kind, id, kind, id);
+    exitNow(returnedCode);
   }
 }
 
@@ -163,23 +161,23 @@ void writeMessageAfterDelete(char *kind, long id, char *user_name, int returnedC
  */
 int main (int argc, char *argv[])
 {
-  int c;
-  int listProj=0, listFolder=0;
-  long delUpload=0, delFolder=0, delLicense=0, delFolderParent=0;
-  int scheduler=0; /* should it run from the scheduler? */
-  int gotArg=0;
-  char *agent_desc = "Deletes upload.  Other list/delete options available from the command line.";
-  char *COMMIT_HASH;
-  char *VERSION;
-  char agent_rev[myBUFSIZ];
-  int option_index = 0;
-  char *user_name = NULL;
+  int  c;
+  int  listProj=0, listFolder=0;
+  long delUpload=0, delFolder=0, delFolderParent=0;
+  int  scheduler=0; /* should it run from the scheduler? */
+  int  gotArg=0;
+  char *agentDesc = "Deletes upload.  Other list/delete options available from the command line.";
+  char *commitHash;
+  char *version;
+  char agentRev[myBUFSIZ];
+  int  optionIndex = 0;
+  char *userName = NULL;
   char *password = NULL;
-  int user_id = -1;
-  int user_perm = -1;
-  int returnedCode = 0;
+  int  userId = -1;
+  int  userPerm = -1;
+  int  returnedCode = 0;
 
-  fo_scheduler_connect(&argc, argv, &db_conn);
+  fo_scheduler_connect(&argc, argv, &pgConn);
 
   static struct option long_options[] =
   {
@@ -189,18 +187,18 @@ int main (int argc, char *argv[])
   };
 
   while ((c = getopt_long (argc, argv, "n:p:ifF:lL:sTuU:P:vVc:h",
-         long_options, &option_index)) != -1)
+         long_options, &optionIndex)) != -1)
   {
     switch (c)
     {
       case 'n':
-        user_name = optarg;
+        userName = optarg;
         break;
       case 'p':
         password = optarg;
         break;
       case 'i':
-        PQfinish(db_conn);
+        PQfinish(pgConn);
         return(0);
       case 'f':
         listFolder=1;
@@ -208,10 +206,6 @@ int main (int argc, char *argv[])
         break;
       case 'F':
         delFolder=atol(optarg);
-        gotArg=1;
-        break;
-      case 'L':
-        delLicense=atol(optarg);
         gotArg=1;
         break;
       case 'P':
@@ -241,37 +235,37 @@ int main (int argc, char *argv[])
         break; /* handled by fo_scheduler_connect() */
       case 'V':
         printf("%s", BuildVersion);
-        PQfinish(db_conn);
+        PQfinish(pgConn);
         return(0);
       default:
         usage(argv[0]);
-        exit(-1);
+        exitNow(-1);
     }
   }
 
   if (!gotArg)
   {
     usage(argv[0]);
-    exit(-1);
+    exitNow(-1);
   }
 
   if (scheduler != 1)
   {
-    if (0 != authentication(user_name, password, &user_id, &user_perm))
+    if (0 != authentication(userName, password, &userId, &userPerm))
     {
       LOG_FATAL("User name or password is invalid.\n");
-      exit(-1);
+      exitNow(-1);
     }
 
-    COMMIT_HASH = fo_sysconfig("delagent", "COMMIT_HASH");
-    VERSION = fo_sysconfig("delagent", "VERSION");
-    sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
+    commitHash = fo_sysconfig("delagent", "COMMIT_HASH");
+    version = fo_sysconfig("delagent", "VERSION");
+    sprintf(agentRev, "%s.%s", version, commitHash);
     /* Get the Agent Key from the DB */
-    fo_GetAgentKey(db_conn, basename(argv[0]), 0, agent_rev, agent_desc);
+    fo_GetAgentKey(pgConn, basename(argv[0]), 0, agentRev, agentDesc);
 
     if (listProj)
     {
-      returnedCode = listUploads(user_id, user_perm);
+      returnedCode = listUploads(userId, userPerm);
     }
     if (returnedCode < 0)
     {
@@ -279,7 +273,7 @@ int main (int argc, char *argv[])
     }
     if (listFolder)
     {
-      returnedCode = listFolders(user_id, user_perm);
+      returnedCode = listFolders(userId, userPerm);
     }
     if (returnedCode < 0)
     {
@@ -289,21 +283,15 @@ int main (int argc, char *argv[])
     alarm(60);  /* from this point on, handle the alarm */
     if (delUpload)
     {
-      returnedCode = deleteUpload(delUpload, user_id, user_perm);
+      returnedCode = deleteUpload(delUpload, userId, userPerm);
 
-      writeMessageAfterDelete("upload", delUpload, user_name, returnedCode);
+      writeMessageAfterDelete("upload", delUpload, userName, returnedCode);
     }
     if (delFolder)
     {
-      returnedCode = deleteFolder(delFolder, delFolderParent, user_id, user_perm);
+      returnedCode = deleteFolder(delFolder, delFolderParent, userId, userPerm);
 
-      writeMessageAfterDelete("folder", delFolder, user_name, returnedCode);
-    }
-    if (delLicense)
-    {
-      returnedCode = deleteLicense(delLicense, user_perm);
-
-      writeMessageAfterDelete("license", delLicense, user_name, returnedCode);
+      writeMessageAfterDelete("folder", delFolder, userName, returnedCode);
     }
   }
   else
@@ -311,8 +299,7 @@ int main (int argc, char *argv[])
     /* process from the scheduler */
     doSchedulerTasks();
   }
-  fo_scheduler_disconnect(0);
 
-  PQfinish(db_conn);
+  exitNow(0);
   return(returnedCode);
 } /* main() */

@@ -16,6 +16,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/**
+ * @namespace Fossology::Lib::BusinessRules
+ * @brief Contains business rules for FOSSology
+ */
 namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Dao\AgentDao;
@@ -26,14 +30,27 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\LatestScannerProxy;
 
+/**
+ * @class AgentLicenseEventProcessor
+ * @brief Handle events related to license findings
+ */
 class AgentLicenseEventProcessor
 {
+  /** @var array $latestAgentMapCache
+   * License map cache */
   private $latestAgentMapCache = array();
-  /** @var LicenseDao */
+  /** @var LicenseDao $licenseDao
+   * License DAO object */
   private $licenseDao;
-  /** @var AgentDao */
+  /** @var AgentDao $agentDao
+   * Agent DAO object */
   private $agentDao;
 
+  /**
+   * Constructor for the event processor
+   * @param LicenseDao $licenseDao License DAO to be used
+   * @param AgentDao $agentDao     Agent DAO to be used
+   */
   public function __construct(LicenseDao $licenseDao, AgentDao $agentDao)
   {
     $this->licenseDao = $licenseDao;
@@ -41,8 +58,9 @@ class AgentLicenseEventProcessor
   }
 
   /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int
+   * @brief Get licenses detected by agents for a given upload tree item.
+   * @param ItemTreeBounds $itemTreeBounds Upload tree item bound
+   * @param int $usageId                   License usage
    * @return LicenseRef[]
    */
   public function getScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
@@ -53,8 +71,24 @@ class AgentLicenseEventProcessor
   }
 
   /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @return array[][]
+   * @brief Get licenses match from agents for given upload tree items
+   * @param ItemTreeBounds $itemTreeBounds Upload tree bounds to get results for
+   * @param int $usageId  License usage
+   * @return array Associative array with
+   * \code
+   * res => array(
+   *     <license-id> => array(
+   *         <agent-name> => array(
+   *             id         => <license-id>,
+   *             licenseRef => <license-ref>,
+   *             agentRef   => <agent-ref>,
+   *             matchId    => <highlight-match-id>,
+   *             percentage => <match-percentage>
+   *         )
+   *     )
+   * )
+   * \endcode
+   * format
    */
   protected function getScannerDetectedLicenseDetails(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
@@ -87,7 +121,8 @@ class AgentLicenseEventProcessor
   }
 
   /**
-   * @param ItemTreeBounds $itemTreeBounds
+   * @brief Get all license id matches by agent for a given upload tree item
+   * @param ItemTreeBounds $itemTreeBounds Upload tree bound
    * @return LicenseMatch[][][] map licenseId->agentName->licenseMatches
    */
   public function getLatestScannerDetectedMatches(ItemTreeBounds $itemTreeBounds)
@@ -113,9 +148,12 @@ class AgentLicenseEventProcessor
 
     return $this->filterLatestScannerDetectedMatches($agentDetectedLicenses, $itemTreeBounds->getUploadId());
   }
-  
+
   /**
    * @brief (A->B->C->X) => C->A->X if B=latestScannerId(A)
+   * @param array $agentDetectedLicenses  Agent license match map
+   * @param int $uploadId Upload to be queried
+   * @return LicenseMatch[][][] map licenseId->agentName->licenseMatches
    */
   protected function filterLatestScannerDetectedMatches($agentDetectedLicenses, $uploadId)
   {
@@ -124,12 +162,20 @@ class AgentLicenseEventProcessor
     {
       return array();
     }
-    
+
     $latestAgentIdPerAgent = $this->getLatestAgentIdPerAgent($uploadId, $agentNames);
     $latestAgentDetectedLicenses = $this->filterDetectedLicenses($agentDetectedLicenses, $latestAgentIdPerAgent);
     return $latestAgentDetectedLicenses;
   }
-  
+
+  /**
+   * @brief Get map for agent name => agent id
+   *
+   * The function also updates the agent map cache.
+   * @param int $uploadId     Upload to query
+   * @param array $agentNames Agents required
+   * @return array Map of agent name => agent id
+   */
   private function getLatestAgentIdPerAgent($uploadId, $agentNames)
   {
     if(!array_key_exists($uploadId,$this->latestAgentMapCache)
@@ -144,10 +190,10 @@ class AgentLicenseEventProcessor
     }
     return $this->latestAgentMapCache[$uploadId];
   }
-  
+
   /**
-   * (A->B->C->X, A->B) => C->A->X
-   * @param mixed[][][]
+   * @brief (A->B->C->X, A->B) => C->A->X
+   * @param mixed[][][] $agentDetectedLicenses
    * @param array $agentLatestMap
    * @return mixed[][]
    */
@@ -176,8 +222,9 @@ class AgentLicenseEventProcessor
   }
 
   /**
-   * @param array $details
-   * @return LicenseRef[]
+   * @brief Get scanned license as a map of license-id => license-ref
+   * @param array $details Result from getScannerDetectedLicenseDetails()
+   * @return LicenseRef[] indexed by license id
    */
   public function getScannedLicenses($details)
   {
@@ -194,16 +241,17 @@ class AgentLicenseEventProcessor
 
     return $licenses;
   }
-  
+
   /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int
+   * @brief Get all scanner events that occurred on a given upload tree bound
+   * @param ItemTreeBounds $itemTreeBounds Upload tree bound
+   * @param int $usageId  License usage
    * @return AgentClearingEvent[][] indexed by LicenseId
    */
   public function getScannerEvents(ItemTreeBounds $itemTreeBounds, $usageId=LicenseMap::TRIVIAL)
   {
     $agentDetails = $this->getScannerDetectedLicenseDetails($itemTreeBounds, $usageId);
-    
+
     $result = array();
     foreach ($agentDetails as $licenseId => $properties)
     {
@@ -215,14 +263,16 @@ class AgentLicenseEventProcessor
           $agentClearingEvents[] = $this->createAgentClearingEvent($licenseProperty);
         }
       }
-      
+
       $result[$licenseId] = $agentClearingEvents;
     }
     return $result;
   }
-  
+
   /**
-   * @param $licenseProperty
+   * @brief Create a new AgentClearingEvent
+   * @param array $licenseProperty License properties required for
+   *        AgentClearingEvent in an associative array
    * @return AgentClearingEvent
    */
   private function createAgentClearingEvent($licenseProperty)

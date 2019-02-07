@@ -17,34 +17,42 @@
  ***********************************************************/
 
 /**
- * \file common-parm.php
- * \brief common function of parmeters
+ * \file
+ * \brief Common function of REQUEST parmeters
  */
 
+/** Integer parameter */
 define("PARM_INTEGER",1);
+/** Number (decimal) parameter */
 define("PARM_NUMBER",2);
+/** String parameter (URI decoded) */
 define("PARM_STRING",3);
+/** String parameter (stripslashed) */
 define("PARM_TEXT",4);
+/** Raw parameter */
 define("PARM_RAW",5);
 
 /**
  * \brief This function will retrieve the variables and check data types.
-*  Plugins should not use globals to access HTTP variables.
+ *
+ * Plugins should not use globals to access HTTP variables.
  * This is because HTTP variables may contain hostile code/values.
- * PARM_INTEGER: Only integers are returned.
- * PARM_NUMBER: Only numbers (decimals are fine) are returned.
- * PARM_STRING: The variable is converted from URI encoding to text.
- * PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
- * PARM_RAW: Return the raw value.
+ * - \b PARM_INTEGER: Only integers are returned.
+ * - \b PARM_NUMBER: Only numbers (decimals are fine) are returned.
+ * - \b PARM_STRING: The variable is converted from URI encoding to text.
+ * - \b PARM_TEXT: Like PARM_STRING, but all safe quoting is removed.
+ * - \b PARM_RAW: Return the raw value.
+ *
  * If the variable does not exist, OR is the wrong type (e.g., a string
  * when it should be a number), then nothing is returned.
- * NOTE: If a plugin wants to access these variable directly, it can.
+ *
+ * \note If a plugin wants to access these variable directly, it can.
  * But it is responsible for all safety checks.
  *
- * \param $Name variable name
- * \param $Type variable type
+ * \param string $parameterName Variable name
+ * \param $parameterType        Variable type (see the defines for allowed values)
  *
- * \return string of variables
+ * \return String of variables
  */
 function GetParm($parameterName, $parameterType)
 {
@@ -93,6 +101,7 @@ function Traceback_uri()
 
 /**
  * \brief Get the URI query to this location.
+ *
  * If ShowMod is set, then the module name is included.
  * Else, this begins with the first parameter.
  */
@@ -121,6 +130,8 @@ function Traceback_parm($ShowMod=1)
 
 /**
  * \brief Create a new URI, keeping only these items.
+ *
+ * \param array $List Array of parameter names
  */
 function Traceback_parm_keep($List)
 {

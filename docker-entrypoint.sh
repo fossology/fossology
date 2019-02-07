@@ -50,7 +50,7 @@ fi
 
 # Setup environment
 if [[ $# -eq 0 || ($# -eq 1 && "$1" == "scheduler") ]]; then
-  /usr/local/lib/fossology/fo-postinstall --database --licenseref
+  /usr/local/lib/fossology/fo-postinstall --common --database --licenseref
 fi
 
 # Start Fossology

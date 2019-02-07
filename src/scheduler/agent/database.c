@@ -215,10 +215,10 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     sql = g_strdup_printf(folder_name, job->id);
     db_result = database_exec(args->scheduler, sql);
 
-    if(PQresultStatus(db_result) != PGRES_TUPLES_OK)
+    if(PQresultStatus(db_result) != PGRES_TUPLES_OK || PQntuples(db_result) == 0)
     {
       g_string_append_printf(ret,
-          "[ERROR: unable to select folder name for upload %d]", job->id);
+          "[NOTICE: unable to select folder name for upload %d]", job->id);
     }
     else
     {
