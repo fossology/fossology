@@ -49,7 +49,6 @@ use Fossology\Lib\Db\DbManager;
 /**
  * \brief Insert a new upload record, and update the foldercontents table.
  *
-<<<<<<< HEAD
  * \param int $userId        User creating the job
  * \param int $groupId       Group creating the job
  * \param string $job_name   Job name
