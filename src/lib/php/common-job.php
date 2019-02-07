@@ -53,17 +53,18 @@ use Fossology\Lib\Db\DbManager;
  * \param int $groupId       Group creating the job
  * \param string $job_name   Job name
  * \param string $filename   For upload from URL, this is the URL.\n
- *                    For upload from file, this is the filename.\n
- *                    For upload from server, this is the file path.\n
+ *                           For upload from file, this is the filename.\n
+ *                           For upload from server, this is the file path.\n
  * \param string $desc       Optional user file description.
  * \param int $UploadMode    1<<2=URL, 1<<3=upload from server or file
  * \param int $folder_pk     The folder to contain this upload
  * \param int $public_perm   The public permission on this upload
+ * \param char $scm          Optional ignore SCM specific data ('t': true, 'f': false)
  *
  * \return upload_pk or null (failure).
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE, $scm='f')
 {
   global $container;
 
@@ -73,8 +74,8 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
       empty($UploadMode) or empty($folder_pk)) return;
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
-      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm, scm) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING upload_pk",
+      array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm, $scm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
