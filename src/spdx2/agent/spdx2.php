@@ -381,7 +381,7 @@ class SpdxTwoAgent extends Agent
         }
 
         /* ADD COMMENT */
-        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['comment'] = $clearingLicense->getComment();
+        $filesWithLicenses[$clearingDecision->getUploadTreeId()]['comment'][] = $clearingLicense->getComment();
         if($clearingEvent->getReportinfo())
         {
           $customLicenseText = $clearingEvent->getReportinfo();
@@ -696,7 +696,7 @@ class SpdxTwoAgent extends Agent
           'copyrights'=>$licenses['copyrights'],
           'licenseCommentState'=>$this->getSPDXLicenseCommentState($uploadId));
       if($this->getSPDXLicenseCommentState($uploadId)) {
-        $array['licenseComment'] = $licenses['comment'];
+        $array['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
       }
 
       $content .= $this->renderString($this->getTemplateFile('file'),$array);
