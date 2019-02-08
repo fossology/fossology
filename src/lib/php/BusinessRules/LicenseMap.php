@@ -143,7 +143,9 @@ class LicenseMap
    */
   public function getTopLevelLicenseRefs()
   {
-    $licenseView = new LicenseViewProxy($this->groupId,array('columns'=>array('rf_pk','rf_shortname','rf_fullname')),'license_visible');
+    $licenseView = new LicenseViewProxy($this->groupId,
+      array('columns'=>array('rf_pk','rf_shortname','rf_fullname')),
+      'license_visible');
     $query = $licenseView->asCTE()
           .' SELECT rf_pk, rf_shortname, rf_fullname FROM '.$licenseView->getDbViewName()
           .' LEFT JOIN license_map ON rf_pk=rf_fk AND rf_fk!=rf_parent AND usage=$1'
@@ -165,10 +167,27 @@ class LicenseMap
    */
   public static function getMappedLicenseRefView($usageExpr='$1')
   {
-    $sql = "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM ONLY license_ref bot "
+    return "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM ONLY license_ref bot "
           ."LEFT JOIN license_map ON bot.rf_pk=rf_fk AND usage=$usageExpr "
           ."INNER JOIN license_ref top ON rf_parent=top.rf_pk OR rf_parent IS NULL AND bot.rf_pk=top.rf_pk";
-    return $sql;
   }
 
+  /**
+   * @brief Get all Obligations attached with given license ref
+   * @param int  $license_ref ID of license / candidate license
+   * @param bool $candidate   Is the license candidate?
+   * @return int[] Array of obligation ids
+   */
+  public function getObligationsForLicenseRef($license_ref, $candidate = false)
+  {
+    $tableName = $candidate ? "obligation_candidate_map" : "obligation_map";
+    $sql = "SELECT distinct(ob_fk) FROM $tableName WHERE rf_fk = $1;";
+    $ob_fks = $this->dbManager->getRows($sql, [$license_ref],
+      __METHOD__ . $tableName);
+    $returnVal = [];
+    foreach ($ob_fks as $row) {
+      $returnVal[] = $row['ob_fk'];
+    }
+    return $returnVal;
+  }
 }

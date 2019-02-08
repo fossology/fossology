@@ -190,20 +190,19 @@ class ObligationMap
    */
   public function associateLicenseWithObligation($obId,$licId,$candidate=false)
   {
-    if ($candidate)
-    {
-      $sql = "INSERT INTO obligation_candidate_map (ob_fk, rf_fk) VALUES ($1, $2)";
-      $stmt = __METHOD__.".om_addcandidate_$obId";
+    if (! $this->isLicenseAssociated($obId, $licId, $candidate)) {
+      if ($candidate) {
+        $sql = "INSERT INTO obligation_candidate_map (ob_fk, rf_fk) VALUES ($1, $2)";
+        $stmt = __METHOD__ . ".om_addcandidate";
+      } else {
+        $sql = "INSERT INTO obligation_map (ob_fk, rf_fk) VALUES ($1, $2)";
+        $stmt = __METHOD__ . ".om_addlicense";
+      }
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($obId,$licId));
+      $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
     }
-    else
-    {
-      $sql = "INSERT INTO obligation_map (ob_fk, rf_fk) VALUES ($1, $2)";
-      $stmt = __METHOD__.".om_addlicense_$obId";
-    }
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($obId,$licId));
-    $this->dbManager->fetchArray($res);
-    $this->dbManager->freeResult($res);
   }
 
   /**
@@ -238,7 +237,7 @@ class ObligationMap
       {
         $sql = "DELETE FROM obligation_map WHERE ob_fk=$1 AND rf_fk=$2";
       }
-      $stmt = __METHOD__.".omdel_$licId";
+      $stmt = __METHOD__.".omdel_lic";
       $this->dbManager->prepare($stmt,$sql);
       $res = $this->dbManager->execute($stmt,array($obId,$licId));
     }
@@ -246,4 +245,25 @@ class ObligationMap
     $this->dbManager->freeResult($res);
   }
 
+  /**
+   * @brief Get all obligations from DB
+   * @return array
+   */
+  public function getObligations()
+  {
+    $sql = "SELECT * FROM obligation_ref;";
+    return $this->dbManager->getRows($sql);
+  }
+
+  /**
+   * @brief Get the obligation topic from the obligation id
+   * @param int     $ob_pk     Obligation id
+   * @return string Obligation topic
+   */
+  public function getTopicNameFromId($ob_pk)
+  {
+    $sql = "SELECT ob_topic FROM obligation_ref WHERE ob_pk = $1;";
+    $result = $this->dbManager->getSingleRow($sql,array($ob_pk));
+    return $result['ob_topic'];
+  }
 }
