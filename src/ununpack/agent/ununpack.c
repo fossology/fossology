@@ -86,6 +86,7 @@
  * | -L out | Generate a log of files extracted (in XML) to out |
  * | -F     | Using files from the repository |
  * | -i     | Initialize the database queue system, then exit |
+ * | -I     | Ignore SCM data |
  * | -Q     | Using scheduler queue system. (Includes -F) |
  * | ^      | If -L is used, unpacked files are placed in 'files' |
  * | -T rep | Set gold repository name to 'rep' (for testing) |
@@ -138,7 +139,7 @@ int	main(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiqRr:T:t:U:VvXx")) != -1)
+  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiIqRr:T:t:U:VvXx")) != -1)
   {
     switch(c)
     {
@@ -164,6 +165,7 @@ int	main(int argc, char *argv[])
           LOG_WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.");
         SafeExit(0);
         break; /* never reached */
+      case 'I': IgnoreSCMData=1; break;
       case 'Q':
         UseRepository=1;
 

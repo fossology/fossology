@@ -60,7 +60,7 @@ class UnpackAgentPlugin extends AgentPlugin
        return $jobQueueId;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, '');
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $arguments);
   }
 }
 

@@ -111,7 +111,7 @@ class UploadUrlPage extends UploadPageBase
       return array(false, "Failed to insert task 'wget_agent' into job queue", $description);
     }
     
-    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, $jobqueueId);
+    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, true);
     return array(true, $message, $description);
   }
   
