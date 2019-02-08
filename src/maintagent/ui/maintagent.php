@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -81,6 +82,7 @@ class maintagent extends FO_Plugin {
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
               //       "g"=>_("Remove orphaned gold files."),
+                     "E"=>_("Remove orphaned rows from database."),
                      "N"=>_("Normalize priority "),
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),

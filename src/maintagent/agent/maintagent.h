@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -33,27 +34,36 @@
 #include <libfossology.h>
 #define FUNCTION
 
+/* for DB */
+extern PGconn* pgConn;
+
 /**
  * Maximum buffer to use
  */
-#define myBUFSIZ	2048
+#define myBUFSIZ 2048
+
+/**
+ * Maximum length of SQL commands
+ */
+#define MAXSQL 1024
 
 /* File utils.c */
-void ExitNow        (int ExitVal);
+void exitNow(int exitVal);
 
 /* File usage.c */
-void Usage          (char *Name);
+void usage(char *name);
 
 /* File process.c */
-void VacAnalyze();
-void ValidateFolders();
-void VerifyFilePerms(int fix);
-void RemoveUploads();
-void RemoveTemps();
-void ProcessExpired();
-void RemoveOrphanedFiles();
-void DeleteOrphanGold();
-void NormalizeUploadPriorities();
+void vacAnalyze();
+void validateFolders();
+void verifyFilePerms(int fix);
+void removeUploads();
+void removeTemps();
+void processExpired();
+void removeOrphanedFiles();
+void deleteOrphanGold();
+void normalizeUploadPriorities();
 void reIndexAllTables();
+void removeOrphanedRows();
 
 #endif /* _MAINTAGENT_H */
