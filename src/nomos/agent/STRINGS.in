@@ -1,6 +1,6 @@
 #####
 # (C) Copyright 2006-2015 Hewlett-Packard Development Company, L.P.
-# (C) Copyright 2017,2018 Bittium Wireless Ltd.
+# (C) Copyright 2017-2019 Bittium Wireless Ltd.
 #####
 
 /* License footprints */
@@ -491,7 +491,7 @@
 #
 %ENTRY% _LT_APACHE_V2ref3
 %KEY% "\<under\>"
-%STR% "(licen[cs]ed|is) under (the )?apache v2"
+%STR% "(licen[cs]ed|is|released) under (the )?apache v2"
 #
 %ENTRY% _LT_APACHE_V2ref4
 %KEY% "licen[cs]"
@@ -1192,52 +1192,28 @@
 %KEY% "licen[cs]"
 %STR% "exercise the freedoms specified here provided that you comply with the express conditions of this licen[cs]e"
 #
-%ENTRY% _LT_CCA_1
-%KEY% "licen[cs]"
-%STR% "you must attribute the work in the manner specified by the author or licen[cs]or"
+%ENTRY% _LT_CC_ref
+%KEY% =NULL=
+%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?) =SOME= \<creative ?commons\>"
 #
-%ENTRY% _LT_CCA_2
-%KEY% "distribut"
-%STR% "for any reuse or distribution you must make clear to others the licen[cs]e terms of this work"
-#
-%ENTRY% _LT_CCA_ref
-%KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons (attribution|public) =FEW= licen[cs]e"
-#
-# _LT_CCA_SA is for v 2.5
-%ENTRY% _LT_CCA_SA
+# _LT_CC_BY_SA is for v 2.5
+%ENTRY% _LT_CC_BY_SA_25
 %KEY% "distribut"
 %STR% "if you alter transform or build upon this work you may distribute the resulting work only under the same or similar licen[cs]e"
 #
-%ENTRY% _LT_CCA_SAref1
-%KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= creative commons attribution[ -]share[ -]?alike =FEW= licen[cs]e"
-#
-%ENTRY% _LT_CCA_SAref2
-%KEY% "licen[cs]"
-%STR% "licen[cs]e =FEW= (creative commons |cc( |-))by-sa"
-#
 # CC v 3.0 share alike wording
-%ENTRY% _LT_CCA_SA_30
+%ENTRY% _LT_CC_BY_SA_30
 %KEY% "Adaptation"
 %STR% "You may not offer or impose any terms on the Adaptation that restrict"
 #
 # CC v 3.0 non commercial wording
-%ENTRY% _LT_CCA_NC_30
+%ENTRY% _LT_CC_BY_NC_30
 %KEY% "commercial"
 %STR% "in any manner that is primarily intended for or directed toward commercial advantage or private monetary"
 # CC v 3.0 no derivatives wording
-%ENTRY% _LT_CCA_ND_30
+%ENTRY% _LT_CC_BY_ND_30
 %KEY% "derogatory"
 %STR% "You must not distort, mutilate, modify or take other derogatory"
-#
-%ENTRY% _LT_CCA_ND_ref
-%KEY% "licen[cs]"
-%STR% "work is licensed under the creative commons attribution-noderivs 3\.?0"
-#
-%ENTRY% _LT_CCA_BY_V30
-%KEY% "licen[cs]"
-%STR% "licen[cs]ed? under the creative commons attribution 3\.?0"
 #####
 # DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
 # for the duration of the applicable copyright licen[cs]e to exercise
@@ -1792,6 +1768,10 @@
 %KEY% =NULL=
 %STR% "under the terms of either.{0,15}or"
 #
+%ENTRY% _LT_DUAL_LICENSE_48
+%KEY% "licen[cs]"
+%STR% "dual licen[cs]ed under =FEW= or"
+#
 %ENTRY% _LT_SUBSEQUENT_VERSION
 %KEY% "licen[cs]"
 %STR% "under the terms of either =SOME= license =FEW= or =FEW= (subsequent|later|new) version =FEW= license"
@@ -1835,6 +1815,18 @@
 %ENTRY% _LT_EPL10ref_1
 %KEY% "licen[cs]"
 %STR% "license(:?|d under) eclipse public licen[cs]e =FEW= 1\.?0"
+#
+%ENTRY% _LT_EPL10ref_2
+ %KEY% "licen[cs]"
+%STR% "licensed? under =FEW= EPL.1\.?0"
+#
+%ENTRY% _LT_EPL10ref_3
+%KEY% =NULL=
+%STR% "available =SOME= under( the)? EPL.1\.?0"
+#
+%ENTRY% _LT_EPL20ref_1
+%KEY% "licen[cs]"
+%STR% "(subject to|license(:?|d under)) (the )?eclipse public licen[cs]e =FEW= 2\.?0"
 #
 %ENTRY% _LT_EPL
 %KEY% "licen[cs]"
@@ -2983,7 +2975,7 @@
 #
 %ENTRY% _LT_GPL_V2_ref1
 %KEY% "licen[cs]"
-%STR% "under the terms of the gnu ((general p|p)ublic|general purpose) licen[cs]e (([v-]?| ?version) ?)2"
+%STR% "under (the terms of )?the gnu ((general )?public|general purpose|general) licen[cs]e (([v-]?| ?version) ?)2"
 #
 %ENTRY% _LT_GPL_V2_ref
 %KEY% "licen[cs]"
@@ -3175,12 +3167,14 @@
 ##%STR% "is hereby granted provided that the above copyright notice appear in all copies and that both that copyright notice and this permission notice appear"
 #####
 # !! UNIQUE: is hereby granted without fee user agrees to display
-# DELETED: ... this =SOME= is hereby granted without fee user agrees
-# to displaythe above copyright notice and this licen[cs]e notice
 #####
 %ENTRY% _LT_HP_3
 %KEY% "permi[st]"
 %STR% "permission to use copy modify distribute and/or sell"
+#
+%ENTRY% _LT_HP_snmp_pp
+%KEY% "licen[cs]"
+%STR% "user agrees to display the above copyright notice and this licen[cs]e notice"
 #####
 # A Unique string for this is "per the terms"
 #####
@@ -3296,6 +3290,10 @@
 %ENTRY% _LT_ICU_1
 %KEY% "licen[cs]"
 %STR% "available under =FEW= ICU license =FEW= ICU 1\.?8\.?1 and later"
+#
+%ENTRY% _LT_ICU_2
+%KEY% "notice"
+%STR% "except as contained in this notice =SOME= shall not be used in advertising or otherwise =SOME= dealings in this Software without prior written authorization of"
 #
 %ENTRY% _LT_ID_EULA
 %KEY% "licen[cs]"
@@ -3537,9 +3535,13 @@
 %KEY% "licen[cs]"
 %STR% "information-technology promotion agency hereinafter called IPA grants? the licen[cs]e of digital font program =FEW= hereinafter called licen[cs]ed program under the following terms and conditions"
 #
-%ENTRY% _LT_IPTC
+%ENTRY% _LT_IPTC_1
 %KEY% "licen[cs]"
 %STR% "licen[cs]ee recognises the licen[cs]or as the sole owner of the intellectual property protected by the trademark"
+#
+%ENTRY% _LT_IPTC_2
+%KEY% "licen[cs]"
+%STR% "subject to =FEW= licensing requirements contained herein you may =FEW= use the specifications and materials =FEW= IPTC"
 #
 %ENTRY% _LT_ITU_T_1
 %KEY% "licen[cs]"
@@ -4106,7 +4108,7 @@
 #
 %ENTRY% _LT_MITref7
 %KEY% "licen[cs]"
-%STR% "licen[cs]e(:?) (type )?\<mit\>"
+%STR% "licen[cs]ed?:? (type )?\<mit\>"
 #
 %ENTRY% _LT_MITref8
 %KEY% "licen[cs]"
@@ -4185,8 +4187,8 @@
 %STR% "licensed under (the )?MPL( |-)1\.?1"
 #
 %ENTRY% _LT_MPL20_ref
-%KEY% "licen[cs]"
-%STR% "licensed under (the )?MPL( |-)2\.?0"
+%KEY% =NULL=
+%STR% "(licensed|available) =FEW= under (the )?MPL( |-)2\.?0"
 #
 %ENTRY% _LT_MPL_OR
 %NOCHECK%
@@ -4912,7 +4914,7 @@
 #
 %ENTRY% _LT_PUBDOM_2
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
-%STR% "(available|released|donated|given|claim) =FEW= (the|to|for) \<public\>"
+%STR% "(available|released|donated|given|claim) =FEW= (the|to|for) \<public\>[ -]\<domain\>"
 #
 %ENTRY% _LT_PUBDOM_3
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
@@ -5119,8 +5121,8 @@
 # DELETED: you hereby grant to original contributor a world-?wide ...
 #####
 %ENTRY% _LT_Qwt_exception_10_1
-%KEY% =NULL=
-%STR% "Qwt License Version 1\.0"
+%KEY% "licen[cs]"
+%STR% "Qwt Licen[cs]e Version 1\.?0"
 #
 %ENTRY% _LT_Qwt_exception_10_2
 %KEY% =NULL=
@@ -5687,8 +5689,15 @@
 %ENTRY% _LT_UCAR_1
 %KEY% "distribut"
 %STR% "alter enhance and/?o?r? distribute this software"
-#
+# _LT_UCAR_2 is used only with and after _LT_UCAR_1 therefore there is no
+# need to check key value.
 %ENTRY% _LT_UCAR_2
+%NOCHECK%
+%KEY% "obligat"
+%STR% "UCAR.Unidata is not obligated to provide the user with any support"
+#
+# UCAR/Unidata license does not have _LT_UCAR_3 and there is no testdata for it.
+%ENTRY% _LT_UCAR_3
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "provided that the copyright notice and these paragraphs are preserved"
 #
@@ -5761,6 +5770,10 @@
 %ENTRY% _LT_UNIDEX
 %KEY% "grants"
 %STR% "unidex,? inc\.? grants you permission to copy,? modify,? distribute"
+#
+%ENTRY% _LT_universal_foss_exception_10
+%KEY% "licen[cs]"
+%STR% "facilitate interoperability with other software =SOME= with complete corresponding source under a license that is OSI-approved"
 #
 %ENTRY% _LT_USGOVT_1
 %KEY% "licen[cs]"
@@ -6408,8 +6421,7 @@ k
 %STR% "see copyright file in =FEW= distribution"
 #
 %ENTRY% _LT_SEE_OTHER_14
-%KEY% "copyright"
-%NOCHECK%
+%KEY% "licen[cs]"
 %STR% "see =FEW= for more details on licensing"
 #
 %ENTRY% _LT_SEE_OTHER_15
@@ -7697,7 +7709,15 @@ k
 #
 %ENTRY% _PHR_COPYLEFT_NEXT_PARA3
 %KEY% "distribut"
-%STR% "conditions for distributing derived works outbound gpl compatibility" 
+%STR% "conditions for distributing derived works outbound gpl compatibility"
+#
+%ENTRY% _PHR_CPL_05
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed? under CPL.0\.?5"
+#
+%ENTRY% _PHR_CPL_10
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed? under CPL.1\.?0"
 #
 %ENTRY% _TITLE_CYGNUS_ECOS_V10
 %KEY% "licen[cs]"
@@ -7719,145 +7739,9 @@ k
 %KEY% "licen[cs]"
 %STR% "attribution assurance licen[cs]e"
 #
-%ENTRY% _TITLE_NC_ND_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-noderiv(ative)?s 1\.?0"
-#
-%ENTRY% _TITLE_NC_ND_V10_1
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderivs-noncommercial 1\.?0"
-#
-%ENTRY% _TITLE_NC_ND_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-noderiv(ative)?s 2\.?0"
-#
-%ENTRY% _TITLE_NC_ND_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-noderiv(ative)?s 2\.?5"
-#
-%ENTRY% _TITLE_NC_ND_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-noderiv(ative)?s 3\.?0"
-#
-%ENTRY% _TITLE_NC_ND_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-noderiv(ative)?s 4\.?0"
-#
-%ENTRY% _TITLE_NC_SA_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 1\.?0"
-#
-%ENTRY% _TITLE_NC_SA_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 2\.?0"
-#
-%ENTRY% _TITLE_NC_SA_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 2\.?5"
-#
-%ENTRY% _TITLE_NC_SA_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 3\.?0"
-#
-%ENTRY% _TITLE_NC_SA_V30_1
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 3\.?0"
-#
-%ENTRY% _TITLE_NC_SA_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noncommercial-sharealike 4\.?0"
-#
 %ENTRY% _TITLE_OPENMAP
 %KEY% "licen[cs]"
 %STR% "OpenMap Software License Agreement"
-#
-%ENTRY% _TITLE_SA_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-sharealike 1\.?0"
-#
-%ENTRY% _TITLE_SA_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-sharealike 2\.?0"
-#
-%ENTRY% _TITLE_SA_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-sharealike 2\.?5"
-#
-%ENTRY% _TITLE_SA_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-sharealike 3\.?0"
-#
-%ENTRY% _TITLE_SA_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-sharealike 4\.?0"
-#
-%ENTRY% _TITLE_NC_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-nonCommercial 1\.?0"
-#
-%ENTRY% _TITLE_NC_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-nonCommercial 2\.?0"
-#
-%ENTRY% _TITLE_NC_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-nonCommercial 2\.?5"
-#
-%ENTRY% _TITLE_NC_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-nonCommercial 3\.?0"
-#
-%ENTRY% _TITLE_NC_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-nonCommercial 4\.?0"
-#
-%ENTRY% _TITLE_ND_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderiv(ative)?s 1\.?0"
-#
-%ENTRY% _TITLE_ND_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderiv(ative)?s 2\.?0"
-#
-%ENTRY% _TITLE_ND_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderiv(ative)?s 2\.?5"
-#
-%ENTRY% _TITLE_ND_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderiv(ative)?s 3\.?0"
-#
-%ENTRY% _TITLE_ND_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution-noderiv(ative)?s 4\.?0"
-#
-%ENTRY% _TITLE_ATTR_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution =FEW= 1\.?0"
-#
-%ENTRY% _TITLE_ATTR_V20
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution =FEW= 2\.?0"
-#
-%ENTRY% _TITLE_ATTR_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution =FEW= 2\.?5"
-#
-%ENTRY% _TITLE_ATTR_V30
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution =FEW= 3\.?0"
-#
-%ENTRY% _TITLE_ATTR_V40
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "attribution =FEW= 4\.?0"
-#
-%ENTRY% _TITLE_CC0_10_1
-%KEY% "universal"
-%STR% "cc0 1\.?0 universal"
-#
-%ENTRY% _TITLE_CC0_10_2
-%KEY% "universal"
-%STR% "creative commons zero v?1\.?0 universal"
 #
 %ENTRY% _TITLE_ATT_SRC_12D
 %KEY% "(condit|vers)ion"
@@ -7880,7 +7764,8 @@ k
 %STR% "boost software licen[cs]e"
 #
 %ENTRY% _TITLE_BOOST10
-%KEY% "(condit|vers)ion"
+%KEY% "licen[cs]"
+%STR% "boost software licen[cs]e (v|version )1\.?0"
 #
 %ENTRY% _TITLE_BRAINSTORM_EULA
 %KEY% "\<(end[ -]user|eula)\>"
@@ -7906,46 +7791,145 @@ k
 %KEY% "licen[cs]"
 %STR% "creative commons gnu (lesser|library) general public licen[cs]e"
 #
-%ENTRY% _TITLE_CCA
+%ENTRY% _TITLE_CC_BY
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-#%STR% "creative commons attribution =FEW= generic"
 %STR% "creative commons attribution"
 #
-%ENTRY% _TITLE_CCA_V10
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution 1\.?0 generic"
+%ENTRY% _TITLE_CC0_10_1
+%KEY% "universal"
+%STR% "cc0 1\.?0 universal"
 #
-%ENTRY% _TITLE_CCA_V25
-%KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution 2\.?5 generic"
+%ENTRY% _TITLE_CC0_10_2
+%KEY% "universal"
+%STR% "creative commons (zero|cc0) v?1\.?0 universal"
 #
-%ENTRY% _TITLE_CCA_V30
+%ENTRY% _TITLE_CC_BY_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution 3\.?0 generic"
+%STR% "creative commons attribution.?1\.?0"
 #
-%ENTRY% _TITLE_CCA_V40
+%ENTRY% _TITLE_CC_BY_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution 4\.?0 generic"
+%STR% "creative commons attribution.?2\.?0"
 #
-%ENTRY% _TITLE_CCA_SA
+%ENTRY% _TITLE_CC_BY_25
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution.?2\.?5"
+#
+%ENTRY% _TITLE_CC_BY_30
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution.?3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution.?4\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_10
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]nonCommercial 1\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_20
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]nonCommercial 2\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_25
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]nonCommercial 2\.?5"
+#
+%ENTRY% _TITLE_CC_BY_NC_30
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]nonCommercial 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]nonCommercial 4\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_10
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 1\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_10_1
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderivs[ -]noncommercial 1\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_20
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_25
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 2\.?5"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_30
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_ND_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]noderiv(ative)?s 4\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_SA_10
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 1\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_SA_20
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 2\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_SA_25
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 2\.?5"
+#
+%ENTRY% _TITLE_CC_BY_NC_SA_30
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_NC_SA_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noncommercial[ -]sharealike 4\.?0"
+#
+%ENTRY% _TITLE_CC_BY_ND_10
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderiv(ative)?s 1\.?0"
+#
+%ENTRY% _TITLE_CC_BY_ND_20
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderiv(ative)?s 2\.?0"
+#
+%ENTRY% _TITLE_CC_BY_ND_25
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderiv(ative)?s 2\.?5"
+#
+%ENTRY% _TITLE_CC_BY_ND_30
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderiv(ative)?s 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_ND_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]noderiv(ative)?s 4\.?0"
+#
+%ENTRY% _TITLE_CC_BY_SA
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "creative commons attribution[ -]share[ -]alike"
 #
-%ENTRY% _TITLE_CCA_SA_V10
+%ENTRY% _TITLE_CC_BY_SA_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]share[ -]alike 1\.?0 licen[cs]e"
+%STR% "creative commons attribution[ -]share.?alike 1\.?0"
 #
-%ENTRY% _TITLE_CCA_SA_V25
+%ENTRY% _TITLE_CC_BY_SA_20
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]share[ -]alike 2\.?5 licen[cs]e"
+%STR% "creative commons attribution[ -]share.?alike 2\.?0"
 #
-%ENTRY% _TITLE_CCA_SA_V30
+%ENTRY% _TITLE_CC_BY_SA_25
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]share[ -]alike 3\.?0( licen[cs]e)?"
+%STR% "creative commons attribution[ -]share.?alike 2\.?5"
 #
-%ENTRY% _TITLE_CCA_SA_V40
+%ENTRY% _TITLE_CC_BY_SA_30
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]share[ -]alike 4\.?0( licen[cs]e)?"
+%STR% "creative commons attribution[ -]share.?alike 3\.?0"
+#
+%ENTRY% _TITLE_CC_BY_SA_40
+%KEY% "a(gree|ttribut|vailabl|uthor)"
+%STR% "creative commons attribution[ -]share.?alike 4\.?0"
 #
 %ENTRY% _TITLE_CCPL
 %KEY% "licen[cs]"
@@ -8027,11 +8011,11 @@ k
 %KEY% "licen[cs]"
 %STR% "common public attribution licen[cs]e (v|version )1\.?0"
 #
-%ENTRY% _TITLE_CPL05
+%ENTRY% _TITLE_CPL_05
 %KEY% "licen[cs]"
 %STR% "common public licen[cs]e =FEW= (0\.?5|(cpl |v|version )0\.?5)"
 #
-%ENTRY% _TITLE_CPL10
+%ENTRY% _TITLE_CPL_10
 %KEY% "licen[cs]"
 %STR% "common public licen[cs]e =FEW= (1\.?0|(cpl |v|version )1\.?0)"
 #
@@ -8298,6 +8282,10 @@ k
 %ENTRY% _TITLE_INTERLINK_EULA
 %KEY% "\<(end[ -]user|eula)\>"
 %STR% "end[ -]user licen[cs]e agreement interlink networks"
+#
+%ENTRY% _TITLE_IPTC
+%KEY% "licen[cs]"
+%STR% "Non-Exclusive License Agreement for International Press Telecommunications Council"
 #
 %ENTRY% _TITLE_ITU_T
 %KEY% "licen[cs]"
@@ -8601,17 +8589,21 @@ k
 %KEY% "licen[cs]"
 %STR% "open group public licen[cs]e"
 #
+%ENTRY% _TITLE_OGL_UK
+%KEY% "licen[cs]"
+%STR% "Open Government Licen[cs]e"
+#
 %ENTRY% _TITLE_OGL_UK_10
 %KEY% "licen[cs]"
-%STR% "Open Government Licence v?1\.?0"
+%STR% "Open Government Licen[cs]e v?1\.?0"
 #
 %ENTRY% _TITLE_OGL_UK_20
 %KEY% "licen[cs]"
-%STR% "Open Government Licence v?2\.?0"
+%STR% "Open Government Licen[cs]e v?2\.?0"
 #
 %ENTRY% _TITLE_OGL_UK_30
 %KEY% "licen[cs]"
-%STR% "Open Government Licence v?3\.?0"
+%STR% "Open Government Licen[cs]e v?3\.?0"
 #
 %ENTRY% _TITLE_OGTSL
 %KEY% "licen[cs]"
@@ -9069,6 +9061,10 @@ k
 %KEY% "\<(end[ -]user|eula)\>"
 %STR% "unitedlinux llc end[ -]user agreement and software licen[cs]e terms"
 #
+%ENTRY% _TITLE_universal_foss_exception_10
+%KEY% =NULL=
+%STR% "Universal FOSS Exception (Version |v\.)1.0"
+#
 %ENTRY% _TITLE_XIMIANLOGO10
 %KEY% "licen[cs]"
 %STR% "ximian logo licen[cs]e (v|version )1\.?0"
@@ -9275,7 +9271,7 @@ k
 #
 %ENTRY% _PHR_BSD_3_CLAUSE_2
 %KEY% "licen[cs]"
-%STR% "3(-| )clause BSD license"
+%STR% "(3|three)(-| )clause BSD license"
 #
 %ENTRY% _PHR_BSD_3_CLAUSE_3
 %KEY% "licen[cs]"
@@ -9513,7 +9509,7 @@ k
 #
 %ENTRY% _PHR_GPL_GHOSTSCRIPT
 %KEY% =NULL=
-%STR% "<meta name=\"Producer\" content=\"GPL Ghostscript [0-9]{1,2}\.?[0-9]{1,2}\".?>"
+%STR% "<meta name=\"Producer\" content=\"GPL Ghostscript [0-9]{1,2}\.?[0-9]{1,2}.*/>"
 #
 %ENTRY% _PHR_HISTORICAL
 %KEY% "permi[st]"
@@ -9751,6 +9747,10 @@ k
 %KEY% "licen[cs]"
 %STR% "licence (agreement )?for this file is the same as (the rest of )?the libtiff library"
 #
+%ENTRY% _PHR_Linux_OpenIB
+%KEY% "licen[cs]"
+%STR% "OpenIB\.?org BSD license"
+#
 ##%ENTRY% _PHR_OBJONLY
 ##%KEY% "so(ftware|urce)"
 ##%STR% "open software licen[cs]e =SOME= (v|version)"
@@ -9758,10 +9758,6 @@ k
 %ENTRY% _PHR_MACROVISION
 %KEY% "licen[cs]"
 %STR% "licen[cs]or means macrovision corp"
-#
-%ENTRY% _PHR_OSL
-%KEY% "so(ftware|urce)"
-%STR% "open software licen[cs]e =SOME= (v|version)"
 #
 %ENTRY% _PHR_NONCOMMERCIAL
 %KEY% "commerc"
@@ -9873,6 +9869,10 @@ k
 %KEY% "(\<gnu|free\>|l?gpl)"
 %STR% "\<not\> =FEW= (distribu|develop|released?|licen[cs]ed|available|subject) =FEW= (under|to) =SOME= (lgpl|lesser GNU general public licen[cs]e|(lesser|library) (general p|p)ublic licen[cs]e)"
 #
+%ENTRY% _PHR_OGL_CC_BY_ref
+%KEY% "licen[cs]"
+%STR% "aligned to be interoperable with any creative commons attribution licen[cs]e"
+#
 %ENTRY% _PHR_OPEN_FONT_V10_1
 %KEY% "licen[cs]"
 %STR% "SIL OFL 1\.?0 =FEW= license"
@@ -9888,6 +9888,14 @@ k
 %ENTRY% _PHR_OPEN_FONT_V11_2
 %KEY% "licen[cs]"
 %STR% "license =FEW= OFL.1\.?1"
+#
+%ENTRY% _PHR_OSL
+%KEY% "so(ftware|urce)"
+%STR% "open software licen[cs]e =SOME= (v|version)"
+#
+%ENTRY% _PHR_OZPLB_10
+%KEY% "licen[cs]"
+%STR% "under the terms of the NICTA public software licen[cs]e"
 #
 %ENTRY% _PHR_PATENT
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
@@ -9981,22 +9989,6 @@ k
 %ENTRY% _PHR_YAST_CR
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "yast =SOME= copyright"
-#
-%ENTRY% _PHR_CC_BY_NC_SA_30_1
-%KEY% "distribut"
-%STR% "redistribute =FEW= modify =FEW= under the terms of the creative commons attribution-noncommercial-sharealike 3\.?0"
-#
-%ENTRY% _PHR_CC_BY_NC_SA_30_2
-%KEY% "licen[cs]"
-%STR% "licensed under the creative commons attribution-noncommercial-sharealike 3\.?0"
-#
-%ENTRY% _PHR_CC_BY_SA_30
-%KEY% "licen[cs]"
-%STR% "licensed under the creative commons attribution-sharealike 3\.?0"
-#
-%ENTRY% _PHR_CC_BY_SA_1
-%KEY% "licen[cs]"
-%STR% "license =FEW= creative commons =FEW= attribution\,? share-?alike"
 #
 %ENTRY% _PHR_X11_1
 %KEY% "licen[cs]"
@@ -10635,15 +10627,15 @@ k
 
 %ENTRY% _SPDX_GPL_10
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?GPL[- ]1\.?0"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]+\"?GPL[- ]1\.?0"
 
 %ENTRY% _SPDX_GPL_20
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?GPL[- ]2\.?0"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]+\"?GPL[- ]2\.?0"
 
 %ENTRY% _SPDX_GPL_30
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?GPL[- ]3\.?0"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]+\"?GPL[- ]3\.?0"
 
 %ENTRY% _SPDX_LGPL_21
 %KEY% "licen[cs]e"
@@ -10816,6 +10808,10 @@ k
 %ENTRY% _SPDX_MIT
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?\<MIT\>"
+
+%ENTRY% _SPDX_MIT_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?MIT-0"
 
 %ENTRY% _SPDX_MIT_advertising
 %KEY% "licen[cs]e"
@@ -11989,77 +11985,141 @@ k
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?debian\.?org/misc/bsd\.?licen[cs]e"
 #
-%ENTRY% _URL_CCA_BY_V40
-%KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by/4\.?0"
+%ENTRY% _URL_CC_BY
+%KEY% =NULL=
+%STR% "creativecommons\.?org"
 #
-%ENTRY% _URL_CCA_BY_V30
+%ENTRY% _URL_CC_BY_10
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by/3\.?0"
+%STR% "creativecommons\.?org/licen[cs]es/by/1\.?0"
 #
-%ENTRY% _URL_CCA_BY_V25
-%KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by/2\.?5"
-#
-%ENTRY% _URL_CCA_BY_V20
+%ENTRY% _URL_CC_BY_20
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by/2\.?0"
 #
-%ENTRY% _URL_CCA_SA
+%ENTRY% _URL_CC_BY_25
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa"
+%STR% "creativecommons\.?org/licen[cs]es/by/2\.?5"
 #
-%ENTRY% _URL_CCA_SA_V10
+%ENTRY% _URL_CC_BY_30
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/1\.?0"
+%STR% "creativecommons\.?org/licen[cs]es/by/3\.?0"
 #
-%ENTRY% _URL_CCA_SA_V20
+%ENTRY% _URL_CC_BY_40
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/2\.?0"
+%STR% "creativecommons\.?org/licen[cs]es/by/4\.?0"
 #
-%ENTRY% _URL_CCA_SA_V25
+%ENTRY% _URL_CC_BY_NC_ND_10
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/2\.?5"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/1\.?0"
 #
-%ENTRY% _URL_CCA_SA_V30
-%KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/3\.?0"
-#
-%ENTRY% _URL_CCA_SA_V40
-%KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/4\.?0"
-#
-%ENTRY% _URL_CCA_BY_ND_V20
+%ENTRY% _URL_CC_BY_NC_ND_20
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/2\.?0"
 #
-%ENTRY% _URL_CCA_BY_ND_V30
+%ENTRY% _URL_CC_BY_NC_ND_25
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-nd/3\.?0"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/2\.?5"
 #
-%ENTRY% _URL_CCA_BY_SA_V25
+%ENTRY% _URL_CC_BY_NC_ND_30
 %KEY% "licen[cs]"
-%STR% "creativecommons\.?org/licen[cs]es/by-sa/2\.?5"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/3\.?0"
 #
-%ENTRY% _URL_CCA_BY_NC_V25
+%ENTRY% _URL_CC_BY_NC_10
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc/1\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_20
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc/2\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_25
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by-nc/2\.?5"
 #
-%ENTRY% _URL_CCA_BY_NC_SA_V20
+%ENTRY% _URL_CC_BY_NC_30
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc/3\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_40
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc/4\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_ND_40
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-nd/4\.?0"
+#
+%ENTRY% _URL_CC_BY_ND_10
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nd/1\.?0"
+#
+%ENTRY% _URL_CC_BY_ND_20
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nd/2\.?0"
+#
+%ENTRY% _URL_CC_BY_ND_25
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nd/2\.?5"
+#
+%ENTRY% _URL_CC_BY_ND_30
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nd/3\.?0"
+#
+%ENTRY% _URL_CC_BY_ND_40
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nd/4\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_SA_10
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-sa/1\.?0"
+#
+%ENTRY% _URL_CC_BY_NC_SA_20
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by-nc-sa/2\.?0"
 #
-%ENTRY% _URL_CCA_BY_NC_SA_V30
+%ENTRY% _URL_CC_BY_NC_SA_25
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-nc-sa/2\.?5"
+#
+%ENTRY% _URL_CC_BY_NC_SA_30
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by-nc-sa/3\.?0"
 #
-%ENTRY% _URL_CCA_BY_NC_SA_V40
+%ENTRY% _URL_CC_BY_NC_SA_40
 %KEY% "licen[cs]"
 %STR% "creativecommons\.?org/licen[cs]es/by-nc-sa/4\.?0"
+#
+%ENTRY% _URL_CC_BY_SA
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa"
+#
+%ENTRY% _URL_CC_BY_SA_10
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa/1\.?0"
+#
+%ENTRY% _URL_CC_BY_SA_20
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa/2\.?0"
+#
+%ENTRY% _URL_CC_BY_SA_25
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa/2\.?5"
+#
+%ENTRY% _URL_CC_BY_SA_30
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa/3\.?0"
+#
+%ENTRY% _URL_CC_BY_SA_40
+%KEY% "licen[cs]"
+%STR% "creativecommons\.?org/licen[cs]es/by-sa/4\.?0"
 #
 %ENTRY% _URL_CC0
 %KEY% "public"
 %STR% "creativecommons\.?org/publicdomain/zero/1\.?0"
+#
+%ENTRY% _URL_CC_PD
+%KEY% "public"
+%STR% "creativecommons\.?org/licenses/publicdomain"
 #
 %ENTRY% _URL_CCGPL
 %KEY% "licen[cs]"
@@ -12109,7 +12169,7 @@ k
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/cpl"
 #
-%ENTRY% _URL_CPL_V10
+%ENTRY% _URL_CPL_10
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/cpl1\.?0"
 #
@@ -12128,10 +12188,6 @@ k
 %ENTRY% _URL_GPL_3
 %KEY% "(\<gnu|free\>|l?gpl)"
 %STR% "w?w?w?\.?gnu\.?org/copyleft/gpl"
-#
-%ENTRY% _URL_H2
-%KEY% "licen[cs]"
-%STR% "http://h2database\.?com/html/license\.?html"
 #
 %ENTRY% _URL_IBM_PL
 %KEY% "licen[cs]"
@@ -12269,6 +12325,10 @@ k
 %KEY% "licen[cs]"
 %STR% "sun\.?com/j2se/1\.?5\.?0/jdk-1_5_0_0\.?1-licen[cs]e"
 #
+%ENTRY% _URL_universal_foss_exception_10
+%KEY% "licen[cs]"
+%STR% "oracle\.?com/licenses/universal-foss-exception"
+#
 %ENTRY% _URL_WEBM
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?webmproject\.?org/licen[cs]e/software"
@@ -12294,9 +12354,13 @@ k
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?zend\.?com/license/2_00\.?txt"
 #
-%ENTRY% _URL_ZLIB
+%ENTRY% _URL_ZLIB_1
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?(zlib|gzip)\.?org/zlib/zlib_licen[cs]e"
+#
+%ENTRY% _URL_ZLIB_2
+%KEY% "licen[cs]"
+%STR% "w?w?w?\.?zlib\.?net/zlib_licen[cs]e"
 #
 %ENTRY% _URL_Flora
 %KEY% "licen[cs]"
