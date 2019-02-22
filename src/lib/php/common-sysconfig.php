@@ -81,8 +81,8 @@ function ConfigInit($sysconfdir, &$SysConf)
   /* Add this file contents to $SysConf, then destroy $VersionConf
    * This file can define its own groups and is eval'd.
    */
-  foreach($versionConf as $groupName => $groupArray) {
-    foreach($groupArray as $var => $assign) {
+  foreach ($versionConf as $groupName => $groupArray) {
+    foreach ($groupArray as $var => $assign) {
       $toeval = "\$$var = \"$assign\";";
       eval($toeval);
       $SysConf[$groupName][$var] = ${$var};
@@ -98,7 +98,8 @@ function ConfigInit($sysconfdir, &$SysConf)
   /* Add this file contents to $SysConf, then destroy $dbConf
    * This file can define its own groups and is eval'd.
    */
-  foreach($dbConf as $var => $val) { $SysConf['DBCONF'][$var] = $val;
+  foreach ($dbConf as $var => $val) {
+    $SysConf['DBCONF'][$var] = $val;
   }
   unset($dbConf);
 
@@ -125,7 +126,7 @@ function ConfigInit($sysconfdir, &$SysConf)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  while($row = pg_fetch_assoc($result)) {
+  while ($row = pg_fetch_assoc($result)) {
     $SysConf['SYSCONFIG'][$row['variablename']] = $row['conf_value'];
   }
   pg_free_result($result);
@@ -150,7 +151,8 @@ function Create_sysconfig()
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $numrows = pg_num_rows($result);
   pg_free_result($result);
-  if ($numrows > 0) { return 0;
+  if ($numrows > 0) {
+    return 0;
   }
 
   /* Create the sysconfig table */
@@ -250,7 +252,8 @@ function Populate_sysconfig()
   $variable = "FOSSologyURL";
   $urlPrompt = _("FOSSology URL");
   $hostname = exec("hostname -f");
-  if (empty($hostname)) { $hostname = "localhost";
+  if (empty($hostname)) {
+    $hostname = "localhost";
   }
   $fossologyURL = $hostname."/repo/";
   $urlDesc = _("URL of this FOSSology server, e.g. $fossologyURL");
@@ -381,14 +384,15 @@ function Populate_sysconfig()
    So insert each one individually so that new variables get added.
   */
   foreach ($valueArray as $variable => $values) {
-    /* Check if the variable already exists.  Insert it if it does not.
+    /*
+     * Check if the variable already exists. Insert it if it does not.
      * This is better than an insert ignoring duplicates, because that
-    * generates a postresql log message.
-    */
+     * generates a postresql log message.
+     */
     $VarRec = GetSingleRec("sysconfig", "WHERE variablename='$variable'");
     if (empty($VarRec)) {
-      $sql = "INSERT INTO sysconfig (" . implode(",", $columns) . ") VALUES ("
-        . implode(",", $values) . ");";
+      $sql = "INSERT INTO sysconfig (" . implode(",", $columns) . ") VALUES (" .
+        implode(",", $values) . ");";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -399,7 +403,8 @@ function Populate_sysconfig()
           $updateString[] = $column . "=" . $values[$index];
         }
       }
-      $sql = "UPDATE sysconfig SET ". implode(",", $updateString) ." WHERE variablename='$variable';";
+      $sql = "UPDATE sysconfig SET " . implode(",", $updateString) .
+        " WHERE variablename='$variable';";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
@@ -425,7 +430,8 @@ function Create_option_value()
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $numrows = pg_num_rows($result);
   pg_free_result($result);
-  if ($numrows > 0) { return 0;
+  if ($numrows > 0) {
+    return 0;
   }
 
   /* Create the option_value column */
@@ -457,7 +463,7 @@ function Create_option_value()
  */
 function check_boolean($value)
 {
-  if (!strcmp($value, 'true') || !strcmp($value, 'false')) {
+  if (! strcmp($value, 'true') || ! strcmp($value, 'false')) {
     return 1;
   } else {
     return 0;
@@ -477,13 +483,15 @@ function check_fossology_url($url)
 {
   $url_array = explode("/", $url, 2);
   $name = $url_array[0];
-  if (!empty($name)) {
+  if (! empty($name)) {
     $hostname = exec("hostname -f");
-    if (empty($hostname)) { $hostname = "localhost";
+    if (empty($hostname)) {
+      $hostname = "localhost";
     }
-    if(check_IP($name)) {
+    if (check_IP($name)) {
       $hostname1 = gethostbyaddr($name);
-      if (strcmp($hostname, $hostname1) == 0) {  return 0;  // host is not reachable
+      if (strcmp($hostname, $hostname1) == 0) {
+        return 0; // host is not reachable
       }
     }
     $server_name = $_SERVER['SERVER_NAME'];
@@ -492,7 +500,8 @@ function check_fossology_url($url)
     if (strcmp($name, $hostname) && strcmp($name, $server_name)) {
       return 0;
     }
-  } else { return 0;
+  } else {
+    return 0;
   }
   return 1;
 }
@@ -508,14 +517,15 @@ function check_fossology_url($url)
  */
 function check_logo_url($url)
 {
-  if (empty($url)) { return 1; /* logo url can be null, with the default */
+  if (empty($url)) {
+    return 1; /* logo url can be null, with the default */
   }
-  //$res = check_url($url);
+  // $res = check_url($url);
   $res = is_available($url);
   if (1 == $res) {
     return 1;
-  }
-  else { return 0;
+  } else {
+    return 0;
   }
 }
 
@@ -532,14 +542,15 @@ function check_logo_image_url($url)
 {
   global $SysConf;
 
-  if (empty($url)) { return 1; /* logo url can be null, with the default */
+  if (empty($url)) {
+    return 1; /* logo url can be null, with the default */
   }
   $logoLink = @$SysConf["LogoLink"];
-  $new_url = $logoLink.$url;
+  $new_url = $logoLink . $url;
   if (is_available($url) || is_available($new_url)) {
     return 1;
-  }
-  else { return 0;
+  } else {
+    return 0;
   }
 
 }
@@ -573,13 +584,16 @@ function is_available($url, $timeout = 2, $tries = 2)
   global $SysConf;
 
   $proxyStmts = "";
-  if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['http_proxy']) {
+  if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['http_proxy']) {
     $proxyStmts .= "export http_proxy={$SysConf['FOSSOLOGY']['http_proxy']};";
   }
-  if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['https_proxy']) {
+  if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['https_proxy']) {
     $proxyStmts .= "export https_proxy={$SysConf['FOSSOLOGY']['https_proxy']};";
   }
-  if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) && $SysConf['FOSSOLOGY']['ftp_proxy']) {
+  if (array_key_exists('ftp_proxy', $SysConf['FOSSOLOGY']) &&
+    $SysConf['FOSSOLOGY']['ftp_proxy']) {
     $proxyStmts .= "export ftp_proxy={$SysConf['FOSSOLOGY']['ftp_proxy']};";
   }
 
@@ -587,7 +601,8 @@ function is_available($url, $timeout = 2, $tries = 2)
   system($commands, $return_var);
   if (0 == $return_var) {
     return 1;
-  } else { return 0;
+  } else {
+    return 0;
   }
 }
 
@@ -598,10 +613,12 @@ function is_available($url, $timeout = 2, $tries = 2)
  */
 function check_url($url)
 {
-  if (empty($url) || preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 || preg_match("@[[:space:]]@", $url) != 0) {
+  if (empty($url) ||
+    preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $url) != 1 ||
+    preg_match("@[[:space:]]@", $url) != 0) {
     return 0;
-  }
-  else { return 1;
+  } else {
+    return 1;
   }
 }
 
@@ -612,6 +629,6 @@ function check_url($url)
  */
 function check_IP($ip)
 {
-  $e="([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
+  $e = "([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
   return preg_match("/^$e\.$e\.$e\.$e$/", $ip);
 }

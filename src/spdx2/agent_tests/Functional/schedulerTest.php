@@ -141,8 +141,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
     }
     return -1;
@@ -183,7 +182,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @param int $uploadId
    * @param int $jobId
    */
-  public function runJobFromJobque($uploadId, $jobId){
+  public function runJobFromJobque($uploadId, $jobId)
+  {
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId);
 
     assertThat('cannot run runner', $success, equalTo(true));
@@ -197,7 +197,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @param int $jobId
    * @return string
    */
-  public function getReportFilepathFromJob($uploadId, $jobId){
+  public function getReportFilepathFromJob($uploadId, $jobId)
+  {
     $row = $this->dbManager->getSingleRow("SELECT upload_fk,job_fk,filepath FROM reportgen WHERE job_fk = $1", array($jobId),
       "reportFileName");
     assertThat($row, hasKeyValuePair('upload_fk', $uploadId));
@@ -268,12 +269,10 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
 
     $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
     $jarFile = __DIR__.'/'.$jarFileBasename;
-    if(!file_exists($jarFile))
-    {
+    if (!file_exists($jarFile)) {
       $zipFileBasename='SPDXTools-'.$tag.'.zip';
       $zipFile=__DIR__.'/'.$zipFileBasename;
-      if(!file_exists($zipFile))
-      {
+      if (!file_exists($zipFile)) {
         file_put_contents($zipFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$zipFileBasename, 'r'));
 
       }
@@ -289,7 +288,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Verify if java is intalled on the system
    */
-  protected function verifyJavaIsInstalled(){
+  protected function verifyJavaIsInstalled()
+  {
     $lines = '';
     $returnVar = 0;
     exec('which java', $lines, $returnVar);

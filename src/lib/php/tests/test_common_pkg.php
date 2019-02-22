@@ -94,7 +94,8 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     if (!is_callable('pg_connect')) {
       return;
     }

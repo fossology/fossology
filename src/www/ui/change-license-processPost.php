@@ -68,8 +68,7 @@ class changeLicenseProcessPost extends FO_Plugin
     pg_free_result($result);
     $buckets_dir = $SysConf['DIRECTORIES']['MODDIR'];
     /** rerun bucket on the file */
-    foreach ($bucketpool_array as $bucketpool)
-    {
+    foreach ($bucketpool_array as $bucketpool) {
       $command = "$buckets_dir/buckets/agent/buckets -r -t $uploadTreeId -p $bucketpool";
       exec($command);
     }
@@ -80,13 +79,11 @@ class changeLicenseProcessPost extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
     $itemId = $_POST['uploadTreeId'];
-    if (empty($itemId))
-    {
+    if (empty($itemId)) {
       return $this->errorJson("bad item id");
     }
 
@@ -94,32 +91,30 @@ class changeLicenseProcessPost extends FO_Plugin
     $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
 
-    if(!empty($decisionMark) && $decisionMark == "irrelevant")
-    {
-      if(!is_array($itemId)){
+    if (! empty($decisionMark) && $decisionMark == "irrelevant") {
+      if (! is_array($itemId)) {
         $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
-      }else{
-        foreach($itemId as $uploadTreeId){
-          $responseMsg = $this->doMarkIrrelevant($uploadTreeId, $groupId, $userId);
-          if(!empty($responseMsg)){
+      } else {
+        foreach ($itemId as $uploadTreeId) {
+          $responseMsg = $this->doMarkIrrelevant($uploadTreeId, $groupId,
+            $userId);
+          if (! empty($responseMsg)) {
             return $responseMsg;
           }
         }
       }
-      if(!empty($responseMsg)){
+      if (!empty($responseMsg)) {
         return $responseMsg;
       }
-      return new JsonResponse(array('result'=>'success'));      
+      return new JsonResponse(array('result'=>'success'));
     }
 
-    if(!empty($decisionMark) && $decisionMark == "deleteIrrelevant")
-    {
+    if (!empty($decisionMark) && $decisionMark == "deleteIrrelevant") {
       $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
       /** @var ItemTreeBounds */
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
       $errMsg = $this->clearingDao->deleteIrrelevantDecisionsFromDirectory($itemTreeBounds,$groupId,$userId);
-      if (empty($errMsg))
-      {
+      if (empty($errMsg)) {
         return new JsonResponse(array('result'=>'success'));
       }
       return $this->errorJson($errMsg,$errMsg);
@@ -149,16 +144,12 @@ class changeLicenseProcessPost extends FO_Plugin
 
     $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
 
-    if (isset($licenses))
-    {
-      if (!is_array($licenses))
-      {
+    if (isset($licenses)) {
+      if (! is_array($licenses)) {
         return $this->errorJson("bad license array");
       }
-      foreach ($licenses as $licenseId)
-      {
-        if (intval($licenseId) <= 0)
-        {
+      foreach ($licenses as $licenseId) {
+        if (intval($licenseId) <= 0) {
           return $this->errorJson("bad license");
         }
 
@@ -177,13 +168,15 @@ class changeLicenseProcessPost extends FO_Plugin
     /** after changing one license, purge all the report cache */
     ReportCachePurgeAll();
 
-    //Todo: Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to take the newest valid license, then uncomment this line
+    /**
+     * @todo Change sql statement of fossology/src/buckets/agent/leaf.c line 124 to
+     * take the newest valid license, then uncomment this line
     // $this->ChangeBuckets(); // change bucket accordingly
+     */
 
     if (empty($errorMsg) && ($jq_pk>0)) {
       return new JsonResponse(array("jqid" => $jq_pk));
-    }
-    else {
+    } else {
       return $this->errorJson($errorMsg, 500);
     }
   }
@@ -192,7 +185,6 @@ class changeLicenseProcessPost extends FO_Plugin
   {
     return new JsonResponse(array("error" => $msg), $code);
   }
-
 }
 
 $NewPlugin = new changeLicenseProcessPost;

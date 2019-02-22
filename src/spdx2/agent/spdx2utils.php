@@ -57,20 +57,17 @@ class SpdxTwoUtils
    */
   static public function addPrefixOnDemand($license, $spdxValidityChecker = null)
   {
-    if(empty($license) || $license === "NOASSERTION")
-    {
+    if (empty($license) || $license === "NOASSERTION") {
       return "NOASSERTION";
     }
 
-    if(strpos($license, " OR ") !== false)
-    {
+    if (strpos($license, " OR ") !== false) {
       return "(" . $license . ")";
     }
 
-    if($spdxValidityChecker === null ||
+    if ($spdxValidityChecker === null ||
         (is_callable($spdxValidityChecker) &&
-            call_user_func($spdxValidityChecker, $license)))
-    {
+            call_user_func($spdxValidityChecker, $license))) {
       return $license;
     }
 
@@ -90,8 +87,7 @@ class SpdxTwoUtils
   static public function addPrefixOnDemandKeys($licenses, $spdxValidityChecker = null)
   {
     $ret = array();
-    foreach($licenses as $license=>$text)
-    {
+    foreach ($licenses as $license=>$text) {
       $ret[self::addPrefixOnDemand($license, $spdxValidityChecker)] = $text;
     }
     return $ret;
@@ -119,26 +115,20 @@ class SpdxTwoUtils
    */
   static public function implodeLicenses($licenses, $spdxValidityChecker = null)
   {
-    if(!$licenses || !is_array($licenses) || sizeof($licenses) == 0)
-    {
+    if (!$licenses || !is_array($licenses) || sizeof($licenses) == 0) {
       return "";
     }
 
     $licenses = self::addPrefixOnDemandList($licenses, $spdxValidityChecker);
     sort($licenses, SORT_NATURAL | SORT_FLAG_CASE);
 
-    if(count($licenses) == 3 &&
-       ($index = array_search("Dual-license",$licenses)) !== false)
-    {
+    if (count($licenses) == 3 &&
+       ($index = array_search("Dual-license",$licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
-    }
-    elseif(count($licenses) == 3 &&
-        ($index = array_search(self::$prefix . "Dual-license",$licenses)) !== false)
-    {
+    } elseif (count($licenses) == 3 &&
+        ($index = array_search(self::$prefix . "Dual-license",$licenses)) !== false) {
       return $licenses[$index===0?1:0] . " OR " . $licenses[$index===2?1:2];
-    }
-    else
-    {
+    } else {
       // Add prefixes where needed, enclose statments containing ' OR ' with parantheses
       return implode(" AND ", $licenses);
     }

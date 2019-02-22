@@ -49,7 +49,8 @@ class ReportStatic
                               "cellSpacing" => 5
                              );
 
-  function __construct($timeStamp) {
+  function __construct($timeStamp)
+  {
     $this->timeStamp = $timeStamp ?: time();
   }
 
@@ -138,10 +139,9 @@ class ReportStatic
   function addCheckBoxText($cell, $value, $text)
   {
     $textrun = $cell->addTextRun();
-    if(!strcmp($value,'checked')){
+    if (!strcmp($value,'checked')) {
       $textrun->addFormField('checkbox')->setValue(true);
-    }
-    else{
+    } else {
       $textrun->addFormField('checkbox');
     }
     $textrun->addText($text);
@@ -193,7 +193,6 @@ class ReportStatic
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General assessment"), $leftColStyle, "pStyle");
     $generalAssessment = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_general_assesment"], ENT_DISALLOWED));
     $table->addCell($cellLen)->addText($generalAssessment, $rightColStyleBlue, "pStyle");
-
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" "), $leftColStyle, "pStyle");
@@ -316,11 +315,10 @@ class ReportStatic
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen);
     $cell = $table->addCell($secondColLen);
-    if(empty($textCommonObligation)){
+    if (empty($textCommonObligation)) {
       $cell->addText(htmlspecialchars($textCommonObligation), $secondRowColorStyle, "pStyle");
-    }
-    else{
-      foreach($textCommonObligation as $text){
+    } else {
+      foreach ($textCommonObligation as $text) {
         $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
       }
     }
@@ -334,11 +332,10 @@ class ReportStatic
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen);
     $cell = $table->addCell($secondColLen);
-    if (empty($textAdditionalObligation)){
+    if (empty($textAdditionalObligation)) {
       $cell->addText(htmlspecialchars($textAdditionalObligation), null, "pStyle");
-    }
-    else{
-      foreach($textAdditionalObligation as $text){
+    } else {
+      foreach ($textAdditionalObligation as $text) {
         $cell->addText(htmlspecialchars($text), null, "pStyle");
       }
     }
@@ -349,11 +346,10 @@ class ReportStatic
     $table->addRow($rowWidth);
     $cell = $table->addCell($firstColLen);
     $cell = $table->addCell($secondColLen);
-    if(empty($textObligationAndRisk)){
+    if (empty($textObligationAndRisk)) {
       $cell->addText(htmlspecialchars($textObligationAndRisk), $secondRowColorStyle, "pStyle");
-    }
-    else{
-      foreach($textObligationAndRisk as $text){
+    } else {
+      foreach ($textObligationAndRisk as $text) {
         $cell->addText(htmlspecialchars($text), $secondRowColorStyle, "pStyle");
       }
     }
@@ -400,16 +396,15 @@ class ReportStatic
     $cell = $table->addCell($thirdColLen,
       $firstRowStyle)->addText(htmlspecialchars("License section reference and short Description"), $firstRowTextStyle);
 
-    if(!empty($obligations)){
-      foreach($obligations as $obligation){
+    if (!empty($obligations)) {
+      foreach ($obligations as $obligation) {
         $table->addRow($rowWidth);
         $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]), $firstRowTextStyle);
           $table->addCell($secondColLen,$secondColStyle)->addText(htmlspecialchars(implode(",",$obligation["license"])));
           $obligationText = str_replace("\n", "<w:br/>", htmlspecialchars($obligation["text"], ENT_DISALLOWED));
           $table->addCell($thirdColLen)->addText($obligationText);
       }
-    }
-    else{
+    } else {
       $table->addRow($rowWidth);
       $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($key), $firstRowTextStyle);
       $table->addCell($secondColLen,$secondColStyle);
@@ -438,15 +433,15 @@ class ReportStatic
 
     $table = $section->addTable($this->tablestyle);
 
-    if(!empty($obligations)){
-      foreach($obligations as $obligation){
+    if (!empty($obligations)) {
+      foreach ($obligations as $obligation) {
         $table->addRow($rowWidth);
         $table->addCell($secondColLen,$firstColStyle)->addText(htmlspecialchars(implode(",",$obligation["license"])));
         $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($obligation["topic"]));
       }
     }
-    if(!empty($whiteLists)){
-      foreach($whiteLists as $whiteList){
+    if (!empty($whiteLists)) {
+      foreach ($whiteLists as $whiteList) {
         $table->addRow($rowWidth);
         $table->addCell($firstColLen,$firstColStyle)->addText(htmlspecialchars($whiteList));
         $table->addCell($secondColLen,$firstColStyle)->addText("");
@@ -542,7 +537,6 @@ class ReportStatic
     $styleFont = array('bold'=>true, 'size'=>10, 'name'=>'Arial','underline' => 'single');
     $styleFont1 = array('bold'=>false, 'size'=>10, 'name'=>'Arial','underline' => 'single');
     $styleFont2 = array('bold'=>false, 'size'=>10, 'name'=>'Arial');
-
 
     $section->addTitle(htmlspecialchars("$heading"), 2);
     $section->addText("Only such source code of this component may be used-");

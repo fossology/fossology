@@ -39,7 +39,7 @@ class test_common_auth extends \PHPUnit\Framework\TestCase
    */
   function test_siteminder_check()
   {
-    $_SERVER['HTTP_SMUNIVERSALID'] = NULL;
+    $_SERVER['HTTP_SMUNIVERSALID'] = null;
     $result = siteminder_check();
     $this->assertEquals("-1", $result );
     $_SERVER['HTTP_SMUNIVERSALID'] = "Test Siteminder";
@@ -51,7 +51,8 @@ class test_common_auth extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     print "Ending unit test for common-auth.php\n";
   }
 }

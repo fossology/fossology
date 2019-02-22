@@ -38,7 +38,7 @@ $cacheFile = "$cacheDir/container.php";
 $startTime = microtime(true);
 $cached = $cacheDir && file_exists($cacheFile);
 
-if(isset($GLOBALS['apiCall']) && $GLOBALS['apiCall']) {
+if (isset($GLOBALS['apiCall']) && $GLOBALS['apiCall']) {
   // Call from REST api
   $container = new \Flexsounds\Component\SymfonyContainerSlimBridge\ContainerBuilder();
 
@@ -48,13 +48,11 @@ if(isset($GLOBALS['apiCall']) && $GLOBALS['apiCall']) {
   $loader->load('services.xml');
 
   $container->compile();
-}
-else {
+} else {
   if ($cached) {
     require_once($cacheFile);
     $container = new $containerClassName();
-  }
-  else {
+  } else {
     $container = new ContainerBuilder();
 
     $container->setParameter('application_root', dirname(dirname(__DIR__)));
@@ -64,8 +62,7 @@ else {
 
     $container->compile();
 
-    if ($cacheDir && is_dir($cacheDir))
-    {
+    if ($cacheDir && is_dir($cacheDir)) {
       $dumper = new PhpDumper($container);
       umask(0027);
       file_put_contents(
@@ -82,8 +79,7 @@ $logger->pushHandler(new ErrorLogHandler(ErrorLogHandler::OPERATING_SYSTEM, Logg
 $logger->pushHandler(new BrowserConsoleHandler(Logger::DEBUG));
 
 $timeZone = $container->getParameter('time.zone');
-if(!empty($timeZone))
-{
+if (!empty($timeZone)) {
   $twig = $container->get('twig.environment');
   $twig->getExtension('core')->setTimezone($timeZone);
 }

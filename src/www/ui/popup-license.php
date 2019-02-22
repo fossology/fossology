@@ -40,50 +40,42 @@ class PopupLicense extends FO_Plugin
     $this->licenseDao = $container->get('dao.license');
   }
 
-
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
     $licenseShortname = GetParm("lic", PARM_TEXT);
     $licenseId = GetParm("rf", PARM_NUMBER);
     $groupId = $_SESSION[Auth::GROUP_ID];
-    if (empty($licenseShortname) && empty($licenseId))
-    {
+    if (empty($licenseShortname) && empty($licenseId)) {
       return;
     }
-    if ($licenseId)
-    {
+    if ($licenseId) {
       $license = $this->licenseDao->getLicenseById($licenseId, $groupId);
+    } else {
+      $license = $this->licenseDao->getLicenseByShortName($licenseShortname,
+        $groupId);
     }
-    else
-    {
-      $license = $this->licenseDao->getLicenseByShortName($licenseShortname, $groupId);
-    }
-    if ($license === null)
-    {
+    if ($license === null) {
       return;
     }
     $this->vars['shortName'] = $license->getShortName();
     $this->vars['fullName'] = $license->getFullName();
     $parent = $this->licenseDao->getLicenseParentById($license->getId());
-    if($parent!==null)
-    {
+    if ($parent !== null) {
       $this->vars['parentId'] = $parent->getId();
       $this->vars['parentShortName'] = $parent->getShortName();
     }
     $licenseUrl = $license->getUrl();
-    if (strtolower($licenseUrl) == 'none')
-    {
+    if (strtolower($licenseUrl) == 'none') {
       $licenseUrl = NULL;
     }
     $this->vars['url'] = $licenseUrl;
     $this->vars['text'] = $license->getText();
     $this->vars['risk'] = $license->getRisk() ?: 0;
     return $this->render('popup_license.html.twig');
-  }  
+  }
 }
 
 $NewPlugin = new PopupLicense();

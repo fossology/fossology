@@ -40,7 +40,7 @@
           track of other data associated with a connection.
  **/
 function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
-{ 
+{
   if (empty($IPaddr)) {
     $IPaddr = '127.0.0.1';
   }
@@ -53,8 +53,7 @@ function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
   }
 
   $result = @socket_connect($sock, $IPaddr, $Port);
-  if ($result === false)
-  {
+  if ($result === false) {
     $ErrorMsg = "Connection to the scheduler failed.  Is the scheduler running?<br>";
     $ErrorMsg .= "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($sock)) . "<br>\n";
     return false;
@@ -136,21 +135,17 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
   $address = $SysConf['FOSSOLOGY']['address'];
   $port =  $SysConf['FOSSOLOGY']['port'];
   $sock = fo_scheduler_connect($address, $port, $error_msg);
-  if ($sock)
-  {
+  if ($sock) {
     $msg = trim($input);
     $write_result = fo_scheduler_write($sock, $msg);
-    if ($write_result)
-    {
-      while ($buf = fo_scheduler_read($sock))
-      {
+    if ($write_result) {
+      while ($buf = fo_scheduler_read($sock)) {
         /* when get all response from the scheduler for the command 'status' or 'status <job_id>', or 'agents'
            will get a string 'end' */
         if (substr($buf, 0, 3) == "end") {
           break;
         }
-        if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
-        {
+        if (substr($buf, 0, 8) == "received") { /* get a string 'received'*/
           /* 1. if the command is not 'status' or 'status <job_id>' or 'agents', when receiving
                 a string 'received', that mean this communication is over.
              2. if the command is 'status' or 'status <job_id>' or 'agents', first receiving
@@ -160,15 +155,11 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
           if (substr($input, 0, 6) != "status" && substr($input, 0, 6) != "agents") {
             break;
           }
-        }
-        else /* do not save the symbol string 'received' as the output, they are just symbols */
-        {
+        } else { /* do not save the symbol string 'received' as the output, they are just symbols */
           $output .= "$buf<br>";
         }
       }
-    }
-    else
-    {
+    } else {
       $error_msg = socket_strerror(socket_last_error($sock));
     }
     fo_scheduler_close($sock);

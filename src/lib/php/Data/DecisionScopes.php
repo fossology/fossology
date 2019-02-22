@@ -34,5 +34,4 @@ class DecisionScopes extends Types
         self::PACKAGE => "package",
         self::REPO => "global");
   }
-
 }

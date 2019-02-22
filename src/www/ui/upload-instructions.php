@@ -32,22 +32,24 @@ class UploadInstructions extends DefaultPlugin
         self::TITLE => _("Upload Instructions"),
         self::MENU_LIST => "Upload::Instructions",
         self::PERMISSION => Auth::PERM_WRITE
-    ));
+      ));
   }
 
   /**
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request) {
+  protected function handle(Request $request)
+  {
     $vars['URI'] = Traceback_uri();
     $this->renderer->clearTemplateCache();
     $this->renderer->clearCacheFiles();
-    
+
     return $this->render('upload_instructions.html.twig', $this->mergeWithDefault($vars));
   }
 
-  private function asciiUnrock(){
+  private function asciiUnrock()
+  {
     $V= '';
     $V .= "<P />\n";
     $V .= _("Select the type of upload based on where the data is located:\n");

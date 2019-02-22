@@ -60,13 +60,13 @@ class SolidDbManagerTest extends DbManagerTest
     assertThat($map,hasKey('k0'));
     assertThat($map,EqualTo(array('k0'=>'v0','k1'=>'v1')));
   }
-  
+
   function testEvaluateStatement()
   {
     $this->driver->shouldReceive('query');
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2 AND $3';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
-    
+
     $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
@@ -74,21 +74,21 @@ class SolidDbManagerTest extends DbManagerTest
     $params = array(7,'Mammalia',true);
     $sql = $method->invoke($this->dbManager,$stmt,$params);
     assertThat($sql, is('SELECT pet FROM africa WHERE cervical=7 AND class=\'Mammalia\' AND t') );
-    
+
     $params = array(7,'Mammalia\'; SELECT * FROM passwords WHERE user like \'%',true);
     $sql = $method->invoke($this->dbManager,$stmt,$params);
     assertThat($sql, is('SELECT pet FROM africa WHERE cervical=7 AND class=\'Mammalia\'\'; SELECT * FROM passwords WHERE user like \'\'%\' AND t') );
-  }  
-    
+  }
+
   function testEvaluateStatement_exception()
   {
     $sqlStmt = 'SELECT pet FROM africa WHERE cervical=$1 AND class=$2';
     $this->dbManager->prepare($stmt='statement',$sqlStmt);
-    
+
     $reflection = new \ReflectionClass(get_class($this->dbManager));
     $method = $reflection->getMethod('evaluateStatement');
     $method->setAccessible(true);
-    
+
     $exceptionMsg = false;
     $params = array(7,'Mammalia','non-used parameter');
     try {
@@ -99,5 +99,4 @@ class SolidDbManagerTest extends DbManagerTest
     }
     assertThat($exceptionMsg, is('$3 not found in prepared statement'));
   }
-  
-} 
+}

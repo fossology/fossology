@@ -50,8 +50,7 @@ class DbViewProxy
    */
   public function materialize()
   {
-    if ($this->materialized)
-    {
+    if ($this->materialized) {
       return;
     }
     global $container;
@@ -65,8 +64,7 @@ class DbViewProxy
    */
   public function unmaterialize()
   {
-    if (!$this->materialized)
-    {
+    if (!$this->materialized) {
       return;
     }
     global $container;
@@ -88,5 +86,4 @@ class DbViewProxy
   {
     return $this->dbViewQuery;
   }
-
 }

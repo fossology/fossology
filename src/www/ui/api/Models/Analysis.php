@@ -101,29 +101,34 @@ class Analysis
    */
   public function setUsingArray($analysisArray)
   {
-    if(array_key_exists("bucket", $analysisArray)) {
-      $this->bucket = filter_var($analysisArray["bucket"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("bucket", $analysisArray)) {
+      $this->bucket = filter_var($analysisArray["bucket"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("copyright_email_author", $analysisArray)) {
-      $this->copyright = filter_var($analysisArray["copyright_email_author"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("copyright_email_author", $analysisArray)) {
+      $this->copyright = filter_var($analysisArray["copyright_email_author"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("ecc", $analysisArray)) {
+    if (array_key_exists("ecc", $analysisArray)) {
       $this->ecc = filter_var($analysisArray["ecc"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("keyword", $analysisArray)) {
-      $this->keyword = filter_var($analysisArray["keyword"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("keyword", $analysisArray)) {
+      $this->keyword = filter_var($analysisArray["keyword"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("mime", $analysisArray)) {
-      $this->mimetype = filter_var($analysisArray["mime"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("mime", $analysisArray)) {
+      $this->mimetype = filter_var($analysisArray["mime"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("monk", $analysisArray)) {
+    if (array_key_exists("monk", $analysisArray)) {
       $this->monk = filter_var($analysisArray["monk"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("nomos", $analysisArray)) {
+    if (array_key_exists("nomos", $analysisArray)) {
       $this->nomos = filter_var($analysisArray["nomos"], FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("package", $analysisArray)) {
-      $this->pkgagent = filter_var($analysisArray["package"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("package", $analysisArray)) {
+      $this->pkgagent = filter_var($analysisArray["package"],
+        FILTER_VALIDATE_BOOLEAN);
     }
     return $this;
   }
@@ -135,28 +140,28 @@ class Analysis
    */
   public function setUsingString($analysisString)
   {
-    if(stristr($analysisString, "bucket")) {
+    if (stristr($analysisString, "bucket")) {
       $this->bucket = true;
     }
-    if(stristr($analysisString, "copyright")) {
+    if (stristr($analysisString, "copyright")) {
       $this->copyright = true;
     }
-    if(stristr($analysisString, "ecc")) {
+    if (stristr($analysisString, "ecc")) {
       $this->ecc = true;
     }
-    if(stristr($analysisString, "keyword")) {
+    if (stristr($analysisString, "keyword")) {
       $this->keyword = true;
     }
-    if(stristr($analysisString, "mimetype")) {
+    if (stristr($analysisString, "mimetype")) {
       $this->mimetype = true;
     }
-    if(stristr($analysisString, "monk")) {
+    if (stristr($analysisString, "monk")) {
       $this->monk = true;
     }
-    if(stristr($analysisString, "nomos")) {
+    if (stristr($analysisString, "nomos")) {
       $this->nomos = true;
     }
-    if(stristr($analysisString, "pkgagent")) {
+    if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
     }
     return $this;
@@ -309,6 +314,4 @@ class Analysis
       "package"   => $this->pkgagent
     ];
   }
-
-
 }

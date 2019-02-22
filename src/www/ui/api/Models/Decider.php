@@ -68,14 +68,17 @@ class Decider
    */
   public function setUsingArray($deciderArray)
   {
-    if(array_key_exists("nomos_monk", $deciderArray)) {
-      $this->nomosMonk = filter_var($deciderArray["nomos_monk"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("nomos_monk", $deciderArray)) {
+      $this->nomosMonk = filter_var($deciderArray["nomos_monk"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("bulk_reused", $deciderArray)) {
-      $this->bulkReused = filter_var($deciderArray["bulk_reused"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("bulk_reused", $deciderArray)) {
+      $this->bulkReused = filter_var($deciderArray["bulk_reused"],
+        FILTER_VALIDATE_BOOLEAN);
     }
-    if(array_key_exists("new_scanner", $deciderArray)) {
-      $this->newScanner = filter_var($deciderArray["new_scanner"], FILTER_VALIDATE_BOOLEAN);
+    if (array_key_exists("new_scanner", $deciderArray)) {
+      $this->newScanner = filter_var($deciderArray["new_scanner"],
+        FILTER_VALIDATE_BOOLEAN);
     }
     return $this;
   }

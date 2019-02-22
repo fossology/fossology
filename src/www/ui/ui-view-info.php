@@ -96,21 +96,26 @@ class ui_view_info extends FO_Plugin
     }
     $vars['repoLocPage'] = $Page;
 
-    /**********************************
-     List File Info
-     **********************************/
-    if ($Page == 0)
-    {
+    /**
+     * ********************************
+     * List File Info
+     * ********************************
+     */
+    if ($Page == 0) {
       $sql = "SELECT * FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         LIMIT 1;";
-      $row = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
+      $row = $this->dbManager->getSingleRow($sql, array($Item),
+        __METHOD__ . "GetFileDescribingRow");
       $bytes = $row['pfile_size'];
       $bytesH = HumanSize($bytes);
-      $bytes = number_format($bytes, 0, "", ",").' B';
-      if ($bytesH == $bytes) { $bytesH = ""; }
-      else { $bytesH = '(' . $bytesH . ')'; }
+      $bytes = number_format($bytes, 0, "", ",") . ' B';
+      if ($bytesH == $bytes) {
+        $bytesH = "";
+      } else {
+        $bytesH = '(' . $bytesH . ')';
+      }
       $vars['sizeInBytes'] = $bytes;
       $vars['sizeInMB'] = $bytesH;
       $vars['fileSha1'] = $row['pfile_sha1'];
@@ -169,7 +174,7 @@ class ui_view_info extends FO_Plugin
     $vars = [];
     $vars['sightingsContent'] = $v;
     return $vars;
-  }//ShowSightings()
+  } //ShowSightings()
 
   /**
    * \brief Display the meta data associated with the file.
@@ -202,8 +207,9 @@ class ui_view_info extends FO_Plugin
     /* get mimetype */
     if (! empty($row['pfile_fk'])) {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
-      $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
-      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row['pfile_fk']));
+      $this->dbManager->prepare(__METHOD__ . "GetMimetype", $sql);
+      $result = $this->dbManager->execute(__METHOD__ . "GetMimetype",
+        array($row['pfile_fk']));
       if (pg_num_rows($result)) {
         $pmRow = pg_fetch_assoc($result);
         $vars['getMimeTypeName'] = $pmRow['mimetype_name'];
@@ -213,13 +219,17 @@ class ui_view_info extends FO_Plugin
 
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
-    $row = $this->dbManager->getSingleRow($sql,array($row['upload_fk']),__METHOD__."getUploadOrigin");
+    $row = $this->dbManager->getSingleRow($sql, array($row['upload_fk']),
+      __METHOD__ . "getUploadOrigin");
     if ($row) {
 
       /* upload source */
-      if ($row['upload_mode'] & 1 << 2) { $text = _("Added by URL");
-      } else if ($row['upload_mode'] & 1 << 3) { $text = _("Added by file upload");
-      } else if ($row['upload_mode'] & 1 << 4) { $text = _("Added from filesystem");
+      if ($row['upload_mode'] & 1 << 2) {
+        $text = _("Added by URL");
+      } else if ($row['upload_mode'] & 1 << 3) {
+        $text = _("Added by file upload");
+      } else if ($row['upload_mode'] & 1 << 4) {
+        $text = _("Added from filesystem");
       }
       $vars['fileUploadOriginInfo'] = $text;
       $vars['fileUploadOrigin'] = $row['upload_origin'];
@@ -600,10 +610,9 @@ class ui_view_info extends FO_Plugin
   }
 
   /**
-    * @param array $checkBoxListParams
-    * @return $cbSelectionList
+   * @param array $checkBoxListParams
+   * @return $cbSelectionList
    */
-
   protected function getCheckBoxSelectionList($checkBoxListParams)
   {
     foreach ($checkBoxListParams as $checkBoxListParam) {
@@ -621,8 +630,9 @@ class ui_view_info extends FO_Plugin
 
   public function Output()
   {
-    $uploadId = GetParm("upload",PARM_INTEGER);
-    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) { return;
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
+      return;
     }
 
     $itemId = GetParm("item",PARM_INTEGER);
@@ -682,7 +692,7 @@ class ui_view_info extends FO_Plugin
   {
     return "ui-view-info.html.twig";
   }
-
 }
-$NewPlugin = new ui_view_info;
+
+$NewPlugin = new ui_view_info();
 $NewPlugin->Initialize();

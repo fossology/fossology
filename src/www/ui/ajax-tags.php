@@ -46,19 +46,18 @@ class ajax_tags extends FO_Plugin
     $uploadRec = GetSingleRec("upload", "where upload_pk='$uploadtreeRec[upload_fk]'");
     if (empty($uploadRec['uploadtree_tablename'])) {
       $uploadtree_tablename = "uploadtree";
-    }
-    else {
+    } else {
       $uploadtree_tablename = $uploadRec['uploadtree_tablename'];
     }
 
     $List = GetAllTags($item, true, $uploadtree_tablename);
-    foreach($List as $L)
-    {
+    foreach ($List as $L) {
       $V .= $L['tag_name'] . ",";
     }
 
     return new Response($V, Response::HTTP_OK,array('content-type'=>'text/plain'));
   }
 }
-$NewPlugin = new ajax_tags;
+
+$NewPlugin = new ajax_tags();
 $NewPlugin->Initialize();

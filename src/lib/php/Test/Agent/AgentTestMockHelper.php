@@ -12,14 +12,19 @@ function getopt($arg1, $arg2)
   global $jobId;
   global $groupId;
   global $extraOpts;
-  
-  if (!is_array($extraOpts))
-  {
+
+  if (! is_array($extraOpts)) {
     $extraOpts = array();
   }
 
-  $opts = array_merge(array("scheduler_start" => "", "userID" => $userId, "jobId" => $jobId, "groupID" => $groupId), $extraOpts);
-  
+  $opts = array_merge(
+    array(
+      "scheduler_start" => "",
+      "userID" => $userId,
+      "jobId" => $jobId,
+      "groupID" => $groupId
+    ), $extraOpts);
+
   return $opts;
 }
 
@@ -32,6 +37,8 @@ function fgets($in)
 
 class FgetsMock
 {
-  function fgets($in) {}
+  function fgets($in)
+  {
+  }
 }
 

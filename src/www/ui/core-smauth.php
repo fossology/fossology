@@ -21,7 +21,8 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 define("TITLE_CORE_SMAUTH", _("SiteMinder_Login"));
 
-class core_smauth extends FO_Plugin {
+class core_smauth extends FO_Plugin
+{
   var $Name = "smauth";
   var $Title = TITLE_CORE_SMAUTH;
   var $Version = "1.0";
@@ -33,10 +34,11 @@ class core_smauth extends FO_Plugin {
    * \brief Only used during installation.
    * This may be called multiple times.
    * Used to ensure the DB has the right default columns.
-   * 
+   *
    * \return 0 on success, non-zero on failure.
    */
-  function Install() {
+  function Install()
+  {
     global $PG_CONN;
     if (empty($PG_CONN)) {
       return (1);
@@ -48,11 +50,14 @@ class core_smauth extends FO_Plugin {
    * \brief This is where the magic for
    * Authentication happens.
    */
-  function PostInitialize() {
+  function PostInitialize()
+  {
     global $PG_CONN;
     global $SysConf;
 
-    if (siteminder_check() == -1) {return;}
+    if (siteminder_check() == -1) {
+      return;
+    }
 
     $UID = siteminder_check();
 
@@ -62,29 +67,28 @@ class core_smauth extends FO_Plugin {
     $session->setName('Login');
     $session->start();
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) { $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) {
+      $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
     }
     $Now = time();
-    if (!empty($_SESSION['time'])) {
-      /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) {
-        $_SESSION['User'] = NULL;
-        $_SESSION[Auth::USER_ID] = NULL;
-        $_SESSION[Auth::USER_LEVEL] = NULL;
-        $SysConf['auth'][Auth::USER_ID] = NULL;
-        $_SESSION['UserEmail'] = NULL;
-        $_SESSION['Folder'] = NULL;
-        $_SESSION['UiPref'] = NULL;
-        /* TODO: need to clear SiteMinder session */
-      }
+    /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
+    if (! empty($_SESSION['time']) && @$_SESSION['time'] + (60 * 480) < $Now) {
+      $_SESSION['User'] = NULL;
+      $_SESSION[Auth::USER_ID] = NULL;
+      $_SESSION[Auth::USER_LEVEL] = NULL;
+      $SysConf['auth'][Auth::USER_ID] = NULL;
+      $_SESSION['UserEmail'] = NULL;
+      $_SESSION['Folder'] = NULL;
+      $_SESSION['UiPref'] = NULL;
+      /* TODO: need to clear SiteMinder session */
     }
 
     /* check db connection */
-    if (!$PG_CONN)
-    { 
+    if (! $PG_CONN) {
       DBconnect();
-      if (!$PG_CONN) { echo "NO DB connection";
-      } 
+      if (!$PG_CONN) {
+        echo "NO DB connection";
+      }
     }
 
     /* Enable or disable plugins based on login status */
@@ -111,12 +115,9 @@ class core_smauth extends FO_Plugin {
         $_SESSION[Auth::USER_LEVEL] = $R['user_perm'];
         $_SESSION['UserEmail'] = $R['user_email'];
         $_SESSION['UserEnote'] = $R['email_notify'];
-        if(empty($R['ui_preference']))
-        {
+        if (empty($R['ui_preference'])) {
           $_SESSION['UiPref'] = 'simple';
-        }
-        else
-        {
+        } else {
           $_SESSION['UiPref'] = $R['ui_preference'];
         }
         $Level = $_SESSION[Auth::USER_LEVEL];
@@ -136,7 +137,8 @@ class core_smauth extends FO_Plugin {
    * \brief See if a username is valid.
    * \return string on match, or null on no-match.
    */
-  function CheckUser($Email) {
+  function CheckUser($Email)
+  {
     global $PG_CONN;
     global $SysConf;
 
@@ -200,8 +202,8 @@ class core_smauth extends FO_Plugin {
         }
         pg_free_result($result);
       }
-    }
-    else { pg_free_result($result);
+    } else {
+      pg_free_result($result);
     }
 
     /* See if the user exists */
@@ -218,7 +220,7 @@ class core_smauth extends FO_Plugin {
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_assoc($result);
       pg_free_result($result);
-      if (empty($row['name'])){
+      if (empty($row['name'])) {
         //create folder for the user
         $sql = "INSERT INTO folder (folder_name, folder_desc) VALUES ('$FolderName', '$FolderDes');";
         $result = pg_query($PG_CONN, $sql);
@@ -276,12 +278,9 @@ class core_smauth extends FO_Plugin {
     $SysConf['auth'][Auth::USER_ID] = $R['user_pk'];
     $_SESSION['UserEmail'] = $R['user_email'];
     $_SESSION['UserEnote'] = $R['email_notify'];
-    if(empty($R['ui_preference']))
-    {
+    if (empty($R['ui_preference'])) {
       $_SESSION['UiPref'] = 'simple';
-    }
-    else
-    {
+    } else {
       $_SESSION['UiPref'] = $R['ui_preference'];
     }
     $_SESSION['Folder'] = $R['root_folder_fk'];
@@ -303,18 +302,20 @@ class core_smauth extends FO_Plugin {
   /**
    * \brief generate the output for this plug-in
    */
-  function Output() {
+  function Output()
+  {
     global $SysConf;
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
     $V = "";
-    if (siteminder_check() == -1) {return;}
+    if (siteminder_check() == -1) {
+      return;
+    }
 
     $UID = siteminder_check();
 
-    if ($this->OutputType=="HTML")
-    {
+    if ($this->OutputType=="HTML") {
       /* TODO:logout need to clear SiteMinder session */
       $_SESSION['User'] = NULL;
       $_SESSION[Auth::USER_ID] = NULL;
@@ -337,5 +338,5 @@ class core_smauth extends FO_Plugin {
   } // Output()
 }
 
-$NewPlugin = new core_smauth;
+$NewPlugin = new core_smauth();
 $NewPlugin->Initialize();

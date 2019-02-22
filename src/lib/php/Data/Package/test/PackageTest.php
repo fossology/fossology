@@ -21,7 +21,8 @@ namespace Fossology\Lib\Data\Package;
 use Fossology\Lib\Data\Upload\Upload;
 use Mockery as M;
 
-class PackageTest extends \PHPUnit\Framework\TestCase {
+class PackageTest extends \PHPUnit\Framework\TestCase
+{
 
   private $id = 123;
 
@@ -32,7 +33,8 @@ class PackageTest extends \PHPUnit\Framework\TestCase {
   /** @var Package */
   private $package;
 
-  protected function setUp() {
+  protected function setUp()
+  {
     $this->uploads = array(M::mock(Upload::class));
 
     $this->package = new Package($this->id, $this->name, $this->uploads);

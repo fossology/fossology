@@ -71,11 +71,9 @@ class ReuserPlugin extends DefaultPlugin
   {
     $allFolder = $this->folderDao->getAllFolderIds();
     $result = array();
-    for($i=0; $i < sizeof($allFolder); $i++)
-    {
+    for ($i=0; $i < sizeof($allFolder); $i++) {
       $listObject = $this->prepareFolderUploads($allFolder[$i]);
-      foreach ($listObject as $key => $value)
-      {
+      foreach ($listObject as $key => $value) {
         $result[explode(",",$key)[0]] = $value;
       }
     }
@@ -92,15 +90,11 @@ class ReuserPlugin extends DefaultPlugin
     list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($request->get(self::FOLDER_PARAMETER_NAME));
     $ajaxMethodName = $request->get('do');
 
-    if ($ajaxMethodName == "getUploads")
-    {
+    if ($ajaxMethodName == "getUploads") {
       $uploadsById = "";
-      if(empty($folderId) || empty($trustGroupId))
-      {
+      if (empty($folderId) || empty($trustGroupId)) {
         $uploadsById = $this->getAllUploads();
-      }
-      else
-      {
+      } else {
         $uploadsById = $this->prepareFolderUploads($folderId, $trustGroupId);
       }
       return new JsonResponse($uploadsById, JsonResponse::HTTP_OK);
@@ -121,9 +115,7 @@ class ReuserPlugin extends DefaultPlugin
       list($folder, $trustGroup) = $folderGroupPair;
       $folderId = intval($folder);
       $trustGroupId = intval($trustGroup);
-    }
-    else
-    {
+    } else {
       $trustGroupId = Auth::getGroupId();
       $folderId = 0;
     }
@@ -137,20 +129,17 @@ class ReuserPlugin extends DefaultPlugin
    */
   public function renderContent(&$vars)
   {
-    if (!array_key_exists('folderStructure', $vars))
-    {
+    if (!array_key_exists('folderStructure', $vars)) {
       $rootFolderId = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
       $vars['folderStructure'] = $this->folderDao->getFolderStructure($rootFolderId);
     }
-    if ($this->folderDao->isWithoutReusableFolders($vars['folderStructure']))
-    {
+    if ($this->folderDao->isWithoutReusableFolders($vars['folderStructure'])) {
       return '';
     }
     $pair = array_key_exists(self::FOLDER_PARAMETER_NAME, $vars) ? $vars[self::FOLDER_PARAMETER_NAME] : '';
 
     list($folderId, $trustGroupId) = $this->getFolderIdAndTrustGroup($pair);
-    if (empty($folderId) && !empty($vars['folderStructure']))
-    {
+    if (empty($folderId) && !empty($vars['folderStructure'])) {
       $folderId = $vars['folderStructure'][0][FolderDao::FOLDER_KEY]->getId();
     }
 
@@ -194,8 +183,7 @@ class ReuserPlugin extends DefaultPlugin
     $folderUploads = $this->folderDao->getFolderUploads($folderId, $trustGroupId);
 
     $uploadsById = array();
-    foreach ($folderUploads as $uploadProgress)
-    {
+    foreach ($folderUploads as $uploadProgress) {
       $key = $uploadProgress->getId().','.$uploadProgress->getGroupId();
       $display = $uploadProgress->getFilename() . _(" from ")
                . date("Y-m-d H:i",$uploadProgress->getTimestamp())

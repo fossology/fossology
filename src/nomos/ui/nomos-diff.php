@@ -126,8 +126,7 @@ class ui_nomos_diff extends FO_Plugin
     if ($this->State != PLUGIN_STATE_INVALID) {
       return (1);
     } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-    {
+    if ($this->Name !== "") { // Name must be defined
       global $Plugins;
       $this->State = PLUGIN_STATE_VALID;
       array_push($Plugins, $this);
@@ -693,8 +692,7 @@ class ui_nomos_diff extends FO_Plugin
       $V = ReportCacheGet($CacheKey);
     }
 
-    if (empty($V)) // no cache exists
-    {
+    if (empty($V)) { // no cache exists
       $filter = GetParm("filter", PARM_STRING);
       if (empty($filter)) {
         $filter = "samehash";

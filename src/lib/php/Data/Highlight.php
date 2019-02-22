@@ -216,5 +216,4 @@ class Highlight
       ($this->hasRef() ? ":". $this->refStart . "-" . $this->refEnd : "")
       .")";
   }
-
 }

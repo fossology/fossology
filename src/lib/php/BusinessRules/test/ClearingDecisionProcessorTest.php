@@ -506,7 +506,9 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
         ->with($this->itemTreeBounds,LicenseMap::CONCLUSION)->andReturn($scannerResults);
 
     $licenseMap = M::mock(LicenseMap::class);
-    $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {return $id;});
+    $licenseMap->shouldReceive('getProjectedId')->andReturnUsing(function($id) {
+      return $id;
+    });
     $licenseMap->shouldReceive('getUsage')->andReturn(LicenseMap::CONCLUSION);
 
     $hasUnhandledScannerDetectedLicenses = $this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($this->itemTreeBounds, $this->groupId, array(), $licenseMap);
@@ -548,5 +550,4 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 
     return array($scannerEvents, $licenseRef, $agentRef);
   }
-
 }

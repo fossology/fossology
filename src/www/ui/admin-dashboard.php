@@ -24,10 +24,10 @@ use Fossology\Lib\Db\DbManager;
 class dashboard extends FO_Plugin
 {
   protected $pgVersion;
-  
+
   /** @var DbManager */
   private $dbManager;
-  
+
   function __construct()
   {
     $this->Name       = "dashboard";
@@ -152,25 +152,24 @@ class dashboard extends FO_Plugin
       Loaded Extensions
       </td>
       <td><div class='infoTable'>";
-    foreach ($loadedModules as $currentExtensionName)
-     {
-
+    foreach ($loadedModules as $currentExtensionName) {
       $currentVersion = phpversion($currentExtensionName);
-      $table.=$currentExtensionName.": ".$currentVersion."<br />";
+      $table .= $currentExtensionName . ": " . $currentVersion . "<br />";
     }
 
     $table .="</div></td>
     </tr>
   </tbody>
 </table>
-  
+
   ";
     return $table;
   }
 
   function GetLastAnalyzeTime($TableName)
   {
-    return $this->GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",$TableName);
+    return $this->GetLastAnalyzeTimeOrVacTime("last_analyze, last_autoanalyze",
+      $TableName);
   }
 
 
@@ -234,28 +233,27 @@ class dashboard extends FO_Plugin
     $oldVersion = str_replace(".", "", "9.2");
     $current_query = ($currentVersion >= $oldVersion) ? "state" : "current_query";
     $procpid = ($currentVersion >= $oldVersion) ? "pid" : "procpid";
-    $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid"; 
+    $sql = "SELECT $procpid processid, $current_query, query_start, now()-query_start AS elapsed FROM pg_stat_activity WHERE $current_query != '<IDLE>' AND datname = 'fossology' ORDER BY $procpid";
 
     $statementName = __METHOD__."queryFor_".$current_query."_orderBy_".$procpid;
     $this->dbManager->prepare($statementName,$sql);
     $result = $this->dbManager->execute($statementName, array());
-    
-    if (pg_num_rows($result) > 1)
-    {
-      while ($row = pg_fetch_assoc($result))
-      {
-        if ($row[$current_query] == $sql) { continue;  // Don't display this query
+
+    if (pg_num_rows($result) > 1) {
+      while ($row = pg_fetch_assoc($result)) {
+        if ($row[$current_query] == $sql) {
+          continue; // Don't display this query
         }
         $V .= "<tr>";
         $V .= "<td class='dashboard'>$row[processid]</td>";
-        $V .= "<td class='dashboard'>" . htmlspecialchars($row[$current_query]) . "</td>";
+        $V .= "<td class='dashboard'>" . htmlspecialchars($row[$current_query]) .
+          "</td>";
         $StartTime = substr($row['query_start'], 0, 19);
         $V .= "<td class='dashboard'>$StartTime</td>";
         $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
       }
-    }
-    else {
+    } else {
       $V .= "<tr><td class='dashboard' colspan=4>There are no active FOSSology queries</td></tr>";
     }
 
@@ -291,28 +289,32 @@ class dashboard extends FO_Plugin
     $head5 = _("Mount Point");
     $V .= "<tr><th>$head0</th><th>$head1</th><th>$head2</th><th>$head3</th><th>$head4</th><th>$head5</th></tr>\n";
     $headerline = true;
-    foreach($Lines as $L)
-    {
+    foreach ($Lines as $L) {
       // Skip top header line
-      if ($headerline)
-      {
+      if ($headerline) {
         $headerline = false;
         continue;
       }
 
-      if (empty($L)) { continue; }
+      if (empty($L)) {
+        continue;
+      }
       $L = trim($L);
-      $L = preg_replace("/[[:space:]][[:space:]]*/"," ",$L);
-      $List = explode(" ",$L);
+      $L = preg_replace("/[[:space:]][[:space:]]*/", " ", $L);
+      $List = explode(" ", $L);
 
       // Skip some filesystems we are not interested in
-      if ($List[0] == 'tmpfs') { continue;
+      if ($List[0] == 'tmpfs') {
+        continue;
       }
-      if ($List[0] == 'udev') { continue;
+      if ($List[0] == 'udev') {
+        continue;
       }
-      if ($List[0] == 'none') { continue;
+      if ($List[0] == 'none') {
+        continue;
       }
-      if ($List[5] == '/boot') { continue;
+      if ($List[5] == '/boot') {
+        continue;
       }
 
       $V .= "<tr><td>" . htmlentities($List[0]) . "</td>";
@@ -321,8 +323,8 @@ class dashboard extends FO_Plugin
       $V .= "<td align='right' style='border-right:none'>$List[3]</td>";
 
       // Warn if running out of disk space
-      $PctFull = (int)$List[4];
-      $WarnAtPct = 90;  // warn the user if they exceed this % full
+      $PctFull = (int) $List[4];
+      $WarnAtPct = 90; // warn the user if they exceed this % full
       if ($PctFull > $WarnAtPct) {
         $mystyle = "style=border-right:none;background-color:red";
       } else {
@@ -358,11 +360,12 @@ class dashboard extends FO_Plugin
 
     return($V);
   }
-  
-  public function Output() {
+
+  public function Output()
+  {
     global $PG_CONN;
     $this->pgVersion = pg_version($PG_CONN);
-    
+
     $V="";
     $V .= "<table style='width: 100%;' border=0>\n";
     $V .= "<tr>";
@@ -403,7 +406,7 @@ class dashboard extends FO_Plugin
     $V .= "</table>\n";
     return $V;
   }
-  
+
   /**
    * \brief execute a shell command
    * \param $cmd - command to execute
@@ -411,9 +414,9 @@ class dashboard extends FO_Plugin
    */
   protected function DoCmd($cmd)
   {
-    $fin = popen($cmd,"r");
+    $fin = popen($cmd, "r");
     $buffer = "";
-    while (!feof($fin)) {
+    while (! feof($fin)) {
       $buffer .= fread($fin, 8192);
     }
     pclose($fin);

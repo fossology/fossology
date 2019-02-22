@@ -39,21 +39,17 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
 ";
 $opts = getopt("h", array('username:', 'password:', 'uname:', 'gname:', 'upasswd:', 'permlvl:', 'accesslvl:', 'folder:'));
 
-if(array_key_exists('h',$opts))
-{
+if (array_key_exists('h',$opts)) {
   print "$usage\n";
   return 0;
 }
 
 $adminName = array_key_exists("username", $opts) ? $opts["username"] : null;
 $passwd = array_key_exists("password", $opts) ? $opts["password"] : null;
-if(!account_check($adminName, $passwd, $group))
-{
+if (!account_check($adminName, $passwd, $group)) {
   print "Fossology login failure\n";
   return 2;
-}
-else
-{
+} else {
   print "Logged in as user $adminName\n";
 }
 
@@ -63,8 +59,7 @@ $userDao = $GLOBALS['container']->get("dao.user");
 $folderDao = $GLOBALS['container']->get("dao.folder");
 
 $adminRow = $userDao->getUserByName($adminName);
-if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
-{
+if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN) {
   print "You have no permission to admin the user group thingy\n";
   return 1;
 }
@@ -75,8 +70,7 @@ if ($user !== false) {
     print "The user already exists, and updates in permissions not done from the commandline, we will only add group rights\n";
 }
 
-if($uName && !$user)
-{
+if ($uName && !$user) {
   $pass = array_key_exists('upasswd', $opts) ? $opts['upasswd'] : '';
   $seed = rand() . rand();
   $hash = sha1($seed . $pass);
@@ -101,44 +95,33 @@ if($uName && !$user)
 }
 
 $gName = array_key_exists("gname", $opts) ? $opts["gname"] : '';
-if ($gName)
-{
+if ($gName) {
   $sql = "SELECT group_pk FROM groups WHERE group_name=$1";
   $groupRow = $dbManager->getSingleRow($sql, array($gName), __FILE__ . __LINE__);
   $groupId = $groupRow ? $groupRow['group_pk'] : $userDao->addGroup($gName);
-}
-else
-{
+} else {
   $groupId = false;
 }
 
 $permLvl = array_key_exists("permlvl", $opts) ? intval($opts["permlvl"]) : 0;
-if($user && $groupId)
-{
+if ($user && $groupId) {
   $sql = "SELECT group_user_member_pk id FROM group_user_member WHERE user_fk=$1 AND group_fk=$2";
   $gumRow = $dbManager->getSingleRow($sql,array($user['user_pk'],$groupId),__FILE__.__LINE__);
 }
 
-if($user && $groupId && $permLvl<0 && $gumRow)
-{
+if ($user && $groupId && $permLvl<0 && $gumRow) {
   $dbManager->prepare($stmt = __FILE__.__LINE__,
       "delete from group_user_member where group_user_member_pk=$1");
   $dbManager->freeResult($dbManager->execute($stmt, array($gumRow['id'])));
   print "deleted membership of $uName in $gName\n";
-}
-else if($user && $groupId && $permLvl>=0 && $gumRow)
-{
+} else if ($user && $groupId && $permLvl>=0 && $gumRow) {
   $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
       array($permLvl, $gumRow['id']), __FILE__.__LINE__);
   print "update membership of $uName in $gName\n";
-}
-else if($user && $groupId && $permLvl>=0)
-{
+} else if ($user && $groupId && $permLvl>=0) {
   $dbManager->insertTableRow('group_user_member',
           array('group_perm'=>$permLvl,'user_fk'=>$user['user_pk'],'group_fk'=>$groupId));
   print "inserted membership of $uName in $gName\n";
-}
-else
-{
+} else {
   print ".\n";
 }

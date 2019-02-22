@@ -57,5 +57,4 @@ class test_common_ui extends \PHPUnit\Framework\TestCase
     $result = HumanSize(1024 * (1024 * 99 + 511));
     $this->assertEquals("99.5 MB", $result);
   }
-
 }

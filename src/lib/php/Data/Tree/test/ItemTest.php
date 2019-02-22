@@ -93,21 +93,25 @@ class ItemTest extends \PHPUnit\Framework\TestCase
     $this->assertFalse($this->item->containsFileTreeItems());
   }
 
-  public function testHasParent() {
+  public function testHasParent()
+  {
     $this->assertTrue($this->item->hasParent());
   }
 
-  public function testHasNoParent() {
-    $this->item = new Item($this->itemTreeBounds, null, $this->fileId, $this->fileMode, $this->fileName);
+  public function testHasNoParent()
+  {
+    $this->item = new Item($this->itemTreeBounds, null, $this->fileId,
+      $this->fileMode, $this->fileName);
     $this->assertFalse($this->item->hasParent());
   }
 
-  public function testIsContainer() {
+  public function testIsContainer()
+  {
     $this->assertFalse($this->item->isContainer());
   }
 
-  public function testIsFile() {
+  public function testIsFile()
+  {
     $this->assertTrue($this->item->isFile());
   }
-
 }

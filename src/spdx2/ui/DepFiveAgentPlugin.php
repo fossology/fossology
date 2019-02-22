@@ -26,7 +26,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class DepFiveAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_dep5";
     $this->Title =  _("DEP5 copyright file generation");
     $this->AgentName = "dep5";

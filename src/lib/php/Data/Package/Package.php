@@ -20,7 +20,8 @@ namespace Fossology\Lib\Data\Package;
 
 use Fossology\Lib\Data\Upload\Upload;
 
-class Package {
+class Package
+{
 
   /** @var int */
   private $id;
@@ -36,7 +37,8 @@ class Package {
    * @param string $name
    * @param Upload[] $uploads
    */
-  public function __construct($id, $name, $uploads) {
+  public function __construct($id, $name, $uploads)
+  {
     $this->id = $id;
     $this->uploads = $uploads;
     $this->name = $name;
@@ -65,5 +67,4 @@ class Package {
   {
     return $this->uploads;
   }
-
-} 
+}

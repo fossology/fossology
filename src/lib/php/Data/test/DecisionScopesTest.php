@@ -21,9 +21,11 @@ namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Test\EnumMapTestBase;
 
-class DecisionScopesTest extends EnumMapTestBase {
+class DecisionScopesTest extends EnumMapTestBase
+{
 
-  protected function setUp() {
+  protected function setUp()
+  {
     $this->setTypes(new DecisionScopes());
   }
 
@@ -42,4 +44,3 @@ class DecisionScopesTest extends EnumMapTestBase {
     $this->checkMapping(DecisionScopes::REPO, "global");
   }
 }
- 

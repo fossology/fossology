@@ -18,12 +18,13 @@
 
   /**
    * \file test library
-   */ 
+   */
 
   /**
-   * \brief create DB 
+   * \brief create DB
    */
-function create_db() {
+function create_db()
+{
   global $SYSCONF_DIR;
   global $DB_NAME;
   global $REPO_NAME;
@@ -45,7 +46,8 @@ function create_db() {
   /**
    * \brief drop db
    */
-function drop_db() {
+function drop_db()
+{
   global $PG_CONN;
   global $DB_COMMAND;
   global $DB_NAME;
@@ -60,37 +62,41 @@ function drop_db() {
    *
    * \return upload Id, false on failure.
    */
-function get_upload_id($upload_info) {
+function get_upload_id($upload_info)
+{
   $upload_id = 0;
   preg_match("/UploadPk is: '(\d+)'/", $upload_info, $matches);
   $upload_id = $matches[1];
-  if (!$upload_id) { return false;
-  } else { return $upload_id;
+  if (!$upload_id) {
+    return false;
+  } else {
+    return $upload_id;
   }
 }
 
 
- 
+
   /**
    * connect to a database
    * \param $fossology_testconfig the testing SYSCONFDIR provided by create_test_database.pl
    *
    * \return A valid postgres database handle, or false if connection cannot be made
    */
-function connect_to_DB($fossology_testconfig) {
-   $test_pg_conn = FALSE;
+function connect_to_DB($fossology_testconfig)
+{
+  $test_pg_conn = FALSE;
 
-   $db_conf_file = $fossology_testconfig . "/Db.conf";
-    
-   $test_pg_conn = pg_connect(str_replace(";", " ", file_get_contents($db_conf_file)));
+  $db_conf_file = $fossology_testconfig . "/Db.conf";
+
+  $test_pg_conn = pg_connect(
+    str_replace(";", " ", file_get_contents($db_conf_file)));
 
   if (empty($test_pg_conn)) {
-       print "Error - could not connect to test db via $db_conf_file\n";
+    print "Error - could not connect to test db via $db_conf_file\n";
+  } else {
+    print "Successfully connected to test db\n";
   }
-  else {
-        print "Successfully connected to test db\n";
-  }
-      return($test_pg_conn);
+  return ($test_pg_conn);
 }
 
   /**
@@ -101,7 +107,8 @@ function connect_to_DB($fossology_testconfig) {
    *
    * \return 1 as complete sucessfully, other as failed or not scheduled
    */
-function check_agent_status($test_dbh, $agent_name, $upload_id) {
+function check_agent_status($test_dbh, $agent_name, $upload_id)
+{
   #global $PG_CONN;
   $ars_table_name = $agent_name."_ars";
   $count = 0;
@@ -111,8 +118,10 @@ function check_agent_status($test_dbh, $agent_name, $upload_id) {
   $result = pg_query($test_dbh, $sql);
   $count = pg_num_rows($result);
   pg_free_result($result);
-  if(1 == $count) {  return 1;
-  } else { return 0;
+  if (1 == $count) {
+    return 1;
+  } else {
+    return 0;
   }
 }
 
@@ -124,7 +133,8 @@ function check_agent_status($test_dbh, $agent_name, $upload_id) {
    *
    * \return 1: exist; 0: not exist
    */
-function check_file_uploadtree($test_dbh, $file_name, $upload_id) {
+function check_file_uploadtree($test_dbh, $file_name, $upload_id)
+{
   $count = 0;
   $sql = "SELECT uploadtree_pk FROM uploadtree where upload_fk = $upload_id and ufile_name = '$file_name';";
   // print "sql is:$sql\n";
@@ -141,7 +151,8 @@ function check_file_uploadtree($test_dbh, $file_name, $upload_id) {
   /**
    * \brief add a admin user, default fossy/fosssy
    */
-function add_user($user='fossy', $password='fossy') {
+function add_user($user='fossy', $password='fossy')
+{
   global $PG_CONN;
   /* User does not exist.  Create it. */
   $Seed = rand() . rand();
@@ -164,7 +175,8 @@ function add_user($user='fossy', $password='fossy') {
   /**
    * \brief replace default repo with new repo
    */
-function preparations() {
+function preparations()
+{
   global $SYSCONF_DIR;
   global $REPO_NAME;
   add_proxy(); // add proxy
@@ -180,9 +192,10 @@ function preparations() {
 }
 
   /**
-   * \brief at the end of this testing, stop the testing scheduler 
+   * \brief at the end of this testing, stop the testing scheduler
    */
-function stop_scheduler() {
+function stop_scheduler()
+{
   global $SYSCONF_DIR;
   /** stop the scheduler in this test */
   $scheduler_path = "$SYSCONF_DIR/mods-enabled/scheduler/agent/fo_scheduler";
@@ -190,9 +203,10 @@ function stop_scheduler() {
 }
 
   /**
-   * \brief stop the running scheduler and start new schduler with new sysconfdir 
+   * \brief stop the running scheduler and start new schduler with new sysconfdir
    */
-function scheduler_operation() {
+function scheduler_operation()
+{
   global $SYSCONF_DIR;
   $scheduler_path = "/usr/local/share/fossology/scheduler/agent/fo_scheduler";
   exec("sudo $scheduler_path -k");  // kill the default scheduler if running
@@ -204,7 +218,8 @@ function scheduler_operation() {
 /**
  * \brief add proxy for testing
  */
-function add_proxy($proxy_type='http_proxy', $porxy='web-proxy.cce.hp.com:8088') {
+function add_proxy($proxy_type='http_proxy', $porxy='web-proxy.cce.hp.com:8088')
+{
   global $SYSCONF_DIR;
 
   $foss_conf = $SYSCONF_DIR."/fossology.conf";
@@ -213,14 +228,15 @@ function add_proxy($proxy_type='http_proxy', $porxy='web-proxy.cce.hp.com:8088')
 }
 
 /**
- * \brief get primary uploadtree_pk 
+ * \brief get primary uploadtree_pk
  *
  * \param $upload_id - upload_id
  * \param $test_dbh - db connection
- * 
+ *
  * \return the first uploadtree id of this upload
  */
-function get_uploadtree_id($test_dbh, $upload_id) {
+function get_uploadtree_id($test_dbh, $upload_id)
+{
   $sql = "SELECT uploadtree_pk from uploadtree where upload_fk =$upload_id order by uploadtree_pk limit 1;";
   $result = pg_query($test_dbh, $sql);
   $row = pg_fetch_assoc($result);

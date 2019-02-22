@@ -27,13 +27,15 @@ namespace Fossology\Lib\Application;
  * @class UserInfo
  * @brief Get user info from session
  */
-class UserInfo {
+class UserInfo
+{
 
   /**
    * @brief Get the user id from the session.
    * @return int Id of the current user
    */
-  public function getUserId() {
+  public function getUserId()
+  {
     return $_SESSION['UserId'];
   }
 
@@ -41,8 +43,8 @@ class UserInfo {
    * @brief Get the group id from the session.
    * @return int Id of the current group
    */
-  public function getGroupId() {
+  public function getGroupId()
+  {
     return $_SESSION['GroupId'];
   }
-
 }

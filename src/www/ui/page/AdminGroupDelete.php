@@ -55,24 +55,21 @@ class AdminGroupDelete extends DefaultPlugin
 
     /** @var UserDao $userDao */
     $userDao = $this->getObject('dao.user');
-    $groupMap = $userDao->getDeletableAdminGroupMap($userId,$_SESSION[Auth::USER_LEVEL]);
+    $groupMap = $userDao->getDeletableAdminGroupMap($userId,
+      $_SESSION[Auth::USER_LEVEL]);
 
     $groupId = $request->get('grouppk');
-    if (!empty($groupId))
-    {
-      try
-      {
+    if (! empty($groupId)) {
+      try {
         $userDao->deleteGroup($groupId);
         $vars['message'] = _("Group") . ' ' . $groupMap[$groupId] . ' ' . _("deleted") . '.';
         unset($groupMap[$groupId]);
-      } catch (\Exception $e)
-      {
+      } catch (\Exception $e) {
         $vars['message'] = $e->getMessage();
       }
     }
 
-    if (empty($groupMap))
-    {
+    if (empty($groupMap)) {
       $vars['content'] = _("You have no groups you can delete.");
       return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
     }

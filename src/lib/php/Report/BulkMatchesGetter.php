@@ -26,7 +26,8 @@ class BulkMatchesGetter extends ClearedGetterCommon
   /** @var ClearingDao */
   private $clearingDao;
 
-  public function __construct() {
+  public function __construct()
+  {
     global $container;
     $this->clearingDao = $container->get('dao.clearing');
     parent::__construct($groupBy = "bulkId");
@@ -39,20 +40,19 @@ class BulkMatchesGetter extends ClearedGetterCommon
     $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
 
-    foreach($bulkHistory as $bulk) {
+    foreach ($bulkHistory as $bulk) {
       $allLicenses = "";
       $bulkId = $bulk['bulkId'];
-      foreach($bulk['removedLicenses'] as $removedLics){
+      foreach ($bulk['removedLicenses'] as $removedLics) {
         $allLicenses .= ($removedLics ? "[remove] " : "") . $removedLics.', ';
       }
-      foreach($bulk['addedLicenses'] as $addedLics){
+      foreach ($bulk['addedLicenses'] as $addedLics) {
         $allLicenses .= ($addedLics ? "[add] " : "") . $addedLics.', ';
       }
       $allLicenses = trim($allLicenses, ', ');
       $content = $bulk['text'];
 
-      foreach ($this->clearingDao->getBulkMatches($bulkId,$groupId) as $bulkMatch)
-      {
+      foreach ($this->clearingDao->getBulkMatches($bulkId, $groupId) as $bulkMatch) {
         $uploadTreeId = $bulkMatch['itemid'];
 
         $result[] = array(

@@ -83,8 +83,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $matches = array();
 
     $opts = array();
-    if (preg_match("/-r([0-9]*)/", $args, $matches))
-    {
+    if (preg_match("/-r([0-9]*)/", $args, $matches)) {
       $opts['r'] = $matches[1];
     }
 
@@ -116,5 +115,4 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     return array(true, $output, $exitval);
   }
-
 }

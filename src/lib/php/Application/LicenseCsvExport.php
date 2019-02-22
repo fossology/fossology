@@ -30,7 +30,8 @@ use Fossology\Lib\Db\DbManager;
  * @class LicenseCsvExport
  * @brief Helper class to export license list as a CSV from the DB
  */
-class LicenseCsvExport {
+class LicenseCsvExport
+{
   /** @var DbManager $dbManager
    * DB manager in use */
   protected $dbManager;
@@ -83,16 +84,13 @@ class LicenseCsvExport {
               LEFT JOIN license_ref rr ON mr.rf_parent=rr.rf_pk
             WHERE rf.rf_detector_type=$1";
     $param = array($userDetected=1,LicenseMap::CONCLUSION,LicenseMap::REPORT);
-    if ($rf>0)
-    {
+    if ($rf>0) {
       $stmt = __METHOD__.'.rf';
       $param[] = $rf;
       $sql .= ' AND rf.rf_pk=$'.count($param);
       $row = $this->dbManager->getSingleRow($sql,$param,$stmt);
       $vars = $row ? array( $row ) : array();
-    }
-    else
-    {
+    } else {
       $stmt = __METHOD__;
       $this->dbManager->prepare($stmt,$sql);
       $res = $this->dbManager->execute($stmt,$param);
@@ -104,13 +102,11 @@ class LicenseCsvExport {
     ob_start();
     $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk');
     fputcsv($out, $head, $this->delimiter, $this->enclosure);
-    foreach($vars as $row)
-    {
+    foreach ($vars as $row) {
       fputcsv($out, $row, $this->delimiter, $this->enclosure);
     }
     $content = ob_get_contents();
     ob_end_clean();
     return $content;
   }
-
 }

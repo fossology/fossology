@@ -57,10 +57,8 @@ function GetUploadsFromFolder_recurse($folder_pk, &$uploads)
   $sql = "select * from foldercontents where parent_fk=$folder_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($row = pg_fetch_assoc($result))
-  {
-    switch ($row["foldercontents_mode"])
-    {
+  while ($row = pg_fetch_assoc($result)) {
+    switch ($row["foldercontents_mode"]) {
       case 1:  // Child is folder
         GetUploadsFromFolder_recurse($row["child_id"], $uploads);
         break;
@@ -89,10 +87,8 @@ function AddUserToGroupArray($GroupRow, &$GroupArray)
 {
   /* loop throught $GroupArray to see if the user is already present */
   $found = false;
-  foreach($GroupArray as &$Grec)
-  {
-    if ($Grec['user_pk'] == $GroupRow['user_fk'])
-    {
+  foreach ($GroupArray as &$Grec) {
+    if ($Grec['user_pk'] == $GroupRow['user_fk']) {
       /* user already exists in $GroupArray, so make sure they have the highest
        * permission granted to them.
        */
@@ -104,8 +100,7 @@ function AddUserToGroupArray($GroupRow, &$GroupArray)
     }
   }
 
-  if (!$found)
-  {
+  if (! $found) {
     $NewGroup = array();
     $NewGroup['user_pk'] = $GroupRow['user_fk'];
     $NewGroup['group_pk'] = $GroupRow['group_pk'];
@@ -132,7 +127,8 @@ function GetGroupUsers($user_pk, $group_pk, &$GroupArray)
   $GroupArray = array();
 
   $user_pk = GetArrayVal("UserId", $_SESSION);
-  if (empty($user_pk)) { return $GroupArray;
+  if (empty($user_pk)) {
+    return $GroupArray;
   }
 
   /****** For this group, get its users ******/
@@ -145,8 +141,7 @@ function GetGroupUsers($user_pk, $group_pk, &$GroupArray)
   $sql = "select group_pk, group_name, group_perm, user_fk from group_user_member, groups where group_pk=$group_pk and group_pk=group_fk $UserCondition";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($row = pg_fetch_assoc($result))
-  {
+  while ($row = pg_fetch_assoc($result)) {
     /* Add the user(s) to $GroupArray */
     AddUserToGroupArray($row, $GroupArray);
   }
@@ -168,16 +163,17 @@ function GetUsersGroups($user_pk='')
 
   $GroupArray = array();
 
-  if (empty($user_pk)) { $user_pk = GetArrayVal("UserId", $_SESSION);
+  if (empty($user_pk)) {
+    $user_pk = GetArrayVal("UserId", $_SESSION);
   }
-  if (empty($user_pk)) { return $GroupArray;  /* user has no groups */
+  if (empty($user_pk)) {
+    return $GroupArray; /* user has no groups */
   }
   /* find all groups with this user */
   $sql = "select group_fk as group_pk from group_user_member where user_fk=$user_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($row = pg_fetch_assoc($result))
-  {
+  while ($row = pg_fetch_assoc($result)) {
     /* Now find all the groups that contain this group */
     GetGroupUsers($user_pk, $row['group_pk'], $GroupArray);
   }
@@ -199,21 +195,16 @@ function GetGroupArray($user_pk)
 
   $GroupArray = array();
 
-  if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN)
-  {
+  if ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) {
     $sql = "select group_pk, group_name from groups";
-  }
-  else
-  {
+  } else {
     $sql = "select group_pk, group_name from groups, group_user_member
                   where group_pk=group_fk and user_fk='$user_pk' and group_perm=1";
   }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
-    while($row = pg_fetch_assoc($result))
-    {
+  if (pg_num_rows($result) > 0) {
+    while ($row = pg_fetch_assoc($result)) {
       $GroupArray[$row['group_pk']] = $row['group_name'];
     }
   }
@@ -236,8 +227,7 @@ function DeleteGroup($group_pk)
   $user_pk = Auth::getUserId();
 
   /* Make sure groupname looks valid */
-  if (empty($group_pk))
-  {
+  if (empty($group_pk)) {
     $text = _("Error: Group name must be specified.");
     return ($text);
   }
@@ -246,8 +236,7 @@ function DeleteGroup($group_pk)
   $sql = "SELECT group_pk FROM groups WHERE group_pk = '$group_pk'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) < 1)
-  {
+  if (pg_num_rows($result) < 1) {
     pg_free_result($result);
     $text = _("Group does not exist.  Not deleted.");
     return ($text);
@@ -258,13 +247,11 @@ function DeleteGroup($group_pk)
    * Look through all the group users (table group_user_member)
    * and make sure the user has admin access.
    */
-  if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN)
-  {
+  if ($_SESSION[Auth::USER_LEVEL] != PLUGIN_DB_ADMIN) {
     $sql = "SELECT *  FROM group_user_member WHERE group_fk = '$group_pk' and user_fk='$user_pk' and group_perm=1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
+    if (pg_num_rows($result) < 1) {
       pg_free_result($result);
       $text = _("Permission Denied.");
       return ($text);
@@ -308,5 +295,5 @@ function DeleteGroup($group_pk)
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  return (NULL);
+  return (null);
 }

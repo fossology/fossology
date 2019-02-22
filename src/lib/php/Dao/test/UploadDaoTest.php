@@ -44,8 +44,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
     $uploadArray = array(array(1, 'uploadtree'), array(2, 'uploadtree_a'));
-    foreach ($uploadArray as $uploadEntry)
-    {
+    foreach ($uploadArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");
@@ -176,8 +175,7 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
   {
     $this->dbManager->prepare($stmt = 'insert.uploadtree',
         "INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)");
-    foreach ($uploadTreeArray as $uploadTreeEntry)
-    {
+    foreach ($uploadTreeArray as $uploadTreeEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadTreeEntry));
     }
   }

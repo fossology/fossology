@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Folder;
 
-class FolderTest extends \PHPUnit\Framework\TestCase {
+class FolderTest extends \PHPUnit\Framework\TestCase
+{
 
   /** @var int */
   private $folderId = 32;
@@ -35,23 +36,29 @@ class FolderTest extends \PHPUnit\Framework\TestCase {
   /** @var Folder */
   private $folder;
 
-  protected function setUp() {
-    $this->folder = new Folder($this->folderId, $this->folderName, $this->folderDescription, $this->folderPermissions);
+  protected function setUp()
+  {
+    $this->folder = new Folder($this->folderId, $this->folderName,
+      $this->folderDescription, $this->folderPermissions);
   }
 
-  public function testGetId() {
+  public function testGetId()
+  {
     assertThat($this->folder->getId(), is($this->folderId));
   }
 
-  public function testGetName() {
+  public function testGetName()
+  {
     assertThat($this->folder->getName(), is($this->folderName));
   }
 
-  public function testGetDescription() {
+  public function testGetDescription()
+  {
     assertThat($this->folder->getDescription(), is($this->folderDescription));
   }
 
-  public function testGetPermissions() {
+  public function testGetPermissions()
+  {
     assertThat($this->folder->getPermissions(), is($this->folderPermissions));
   }
 }

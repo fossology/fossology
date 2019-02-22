@@ -54,13 +54,11 @@ class LicenseMap
     $this->usageId = $usageId?:self::CONCLUSION;
     $this->groupId = $groupId;
     $this->dbManager = $dbManager;
-    if ($this->usageId == self::TRIVIAL && !$full)
-    {
+    if ($this->usageId == self::TRIVIAL && !$full) {
       return;
     }
     $licenseView = new LicenseViewProxy($groupId);
-    if($full)
-    {
+    if ($full) {
       $query = $licenseView->asCTE()
             .' SELECT distinct on(rf_pk) rf_pk rf_fk, rf_shortname parent_shortname, rf_parent FROM (
                 SELECT r1.rf_pk, r2.rf_shortname, usage, rf_parent FROM '.$licenseView->getDbViewName()
@@ -71,9 +69,7 @@ class LicenseMap
             .') full_map ORDER BY rf_pk,usage DESC';
 
       $stmt = __METHOD__.".$this->usageId,$groupId,full";
-    }
-    else
-    {
+    } else {
       $query = $licenseView->asCTE()
             .' SELECT rf_fk, rf_shortname parent_shortname, rf_parent FROM license_map, '.$licenseView->getDbViewName()
             .' WHERE rf_pk=rf_parent AND rf_fk!=rf_parent AND usage=$1';
@@ -81,8 +77,7 @@ class LicenseMap
     }
     $dbManager->prepare($stmt,$query);
     $res = $dbManager->execute($stmt,array($this->usageId));
-    while($row = $dbManager->fetchArray($res))
-    {
+    while ($row = $dbManager->fetchArray($res)) {
       $this->map[$row['rf_fk']] = $row;
     }
     $dbManager->freeResult($res);
@@ -95,8 +90,7 @@ class LicenseMap
    */
   public function getProjectedId($licenseId)
   {
-    if(array_key_exists($licenseId, $this->map))
-    {
+    if (array_key_exists($licenseId, $this->map)) {
       return $this->map[$licenseId]['rf_parent'];
     }
     return $licenseId;
@@ -112,8 +106,7 @@ class LicenseMap
    */
   public function getProjectedShortname($licenseId, $defaultName=null)
   {
-    if(array_key_exists($licenseId, $this->map))
-    {
+    if (array_key_exists($licenseId, $this->map)) {
       return $this->map[$licenseId]['parent_shortname'];
     }
     return $defaultName;
@@ -154,8 +147,7 @@ class LicenseMap
     $this->dbManager->prepare($stmt,$query);
     $res = $this->dbManager->execute($stmt,array($this->usageId));
     $topLevel = array();
-    while($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $topLevel[$row['rf_pk']] = new LicenseRef($row['rf_pk'],$row['rf_shortname'],$row['rf_fullname']);
     }
     return $topLevel;

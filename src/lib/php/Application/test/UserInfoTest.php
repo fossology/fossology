@@ -22,7 +22,8 @@ namespace Fossology\Lib\Application;
  * @class UserInfoTest
  * @brief Unit tests for UserInfo class
  */
-class UserInfoTest extends \PHPUnit\Framework\TestCase {
+class UserInfoTest extends \PHPUnit\Framework\TestCase
+{
 
   /** @var UserInfo $userInfo
    * UserInfo class object for testing */
@@ -32,7 +33,8 @@ class UserInfoTest extends \PHPUnit\Framework\TestCase {
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp() {
+  protected function setUp()
+  {
     $this->userInfo = new UserInfo();
   }
 
@@ -42,7 +44,8 @@ class UserInfoTest extends \PHPUnit\Framework\TestCase {
    * -# Set user id in session.
    * -# Call UserInfo::getUserId() and check if the id matches.
    */
-  public function testGetUserId() {
+  public function testGetUserId()
+  {
     $userId = 424;
 
     $_SESSION['UserId'] = $userId;
@@ -56,7 +59,8 @@ class UserInfoTest extends \PHPUnit\Framework\TestCase {
    * -# Set group id in session.
    * -# Call UserInfo::getGroupId() and check if the id matches.
    */
-  public function testGetGroupId() {
+  public function testGetGroupId()
+  {
     $groupId = 321;
 
     $_SESSION['GroupId'] = $groupId;

@@ -176,15 +176,12 @@ class RestHelper
    */
   public function copyUpload($uploadId, $newFolderId, $isCopy)
   {
-    if(is_numeric($newFolderId) && $newFolderId > 0)
-    {
-      if(!$this->folderDao->isFolderAccessible($newFolderId, $this->getUserId()))
-      {
+    if (is_numeric($newFolderId) && $newFolderId > 0) {
+      if (!$this->folderDao->isFolderAccessible($newFolderId, $this->getUserId())) {
         return new Info(403, "Folder is not accessible.",
           InfoType::ERROR);
       }
-      if(!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId()))
-      {
+      if (!$this->uploadPermissionDao->isAccessible($uploadId, $this->getGroupId())) {
         return new Info(403, "Upload is not accessible.",
           InfoType::ERROR);
       }
@@ -192,21 +189,16 @@ class RestHelper
       $contentMove = $this->getPlugin('content_move');
 
       $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
-      if(empty($errors))
-      {
+      if (empty($errors)) {
         $action = $isCopy ? "copied" : "moved";
         $info = new Info(202, "Upload $uploadId will be $action to folder $newFolderId",
           InfoType::INFO);
-      }
-      else
-      {
+      } else {
         $info = new Info(202, "Exceptions occurred: $errors",
           InfoType::ERROR);
       }
       return $info;
-    }
-    else
-    {
+    } else {
       return new Info(400, "Bad Request. Folder id should be a positive integer",
         InfoType::ERROR);
     }

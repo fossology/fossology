@@ -46,14 +46,12 @@ class TextFragment
   public function getSlice($startOffset, $endOffset = null)
   {
     $adjustedStartOffset = max($startOffset - $this->startOffset, 0);
-    if (isset($endOffset))
-    {
+    if (isset($endOffset)) {
       $adjustedEndOffset = max($endOffset - $this->startOffset, 0);
-      return substr($this->text, $adjustedStartOffset, max($adjustedEndOffset - $adjustedStartOffset, 0));
-    } else
-    {
+      return substr($this->text, $adjustedStartOffset,
+        max($adjustedEndOffset - $adjustedStartOffset, 0));
+    } else {
       return substr($this->text, $adjustedStartOffset);
     }
   }
-
-} 
+}

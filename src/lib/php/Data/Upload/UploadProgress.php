@@ -35,10 +35,13 @@ class UploadProgress extends Upload
    * @param $row
    * @return Upload
    */
-  public static function createFromTable($row) {
-    return new UploadProgress(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'],
-            $row['uploadtree_tablename'], strtotime($row['upload_ts']),
-            intval($row['group_fk']),intval($row['assignee']),intval($row['status_fk']),$row['status_comment']);
+  public static function createFromTable($row)
+  {
+    return new UploadProgress(intval($row['upload_pk']), $row['upload_filename'],
+      $row['upload_desc'], $row['uploadtree_tablename'],
+      strtotime($row['upload_ts']), intval($row['group_fk']),
+      intval($row['assignee']), intval($row['status_fk']),
+      $row['status_comment']);
   }
 
   /**
@@ -54,7 +57,7 @@ class UploadProgress extends Upload
     $this->assignee = $assignee;
     $this->status = $status;
     $this->commen = $comment;
-    
+
     parent::__construct($id, $filename, $description, $treeTableName, $timestamp);
   }
 
@@ -81,7 +84,7 @@ class UploadProgress extends Upload
   {
     return $this->status;
   }
-  
+
   /**
    * @return string
    */
@@ -98,5 +101,4 @@ class UploadProgress extends Upload
   {
     return $this->comment;
   }
-
 }

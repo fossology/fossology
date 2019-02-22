@@ -34,7 +34,8 @@ class JobDao
     $this->logger = $logger;
   }
 
-  public function getAllJobStatus($uploadId, $userId, $groupId) {
+  public function getAllJobStatus($uploadId, $userId, $groupId)
+  {
     $result = array();
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,
@@ -50,8 +51,7 @@ class JobDao
               OR gm.group_fk = $3)");
 
     $res = $this->dbManager->execute($stmt, array($uploadId, $userId, $groupId));
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $result[$row['jq_pk']] = $row['end_bits'];
     }
     $this->dbManager->freeResult($res);
@@ -73,8 +73,7 @@ class JobDao
               OR gm.group_fk = $3)");
 
     $res = $this->dbManager->execute($stmt, array($jobId, $userId, $groupId));
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $result[$row['jq_pk']] = $row['end_bits'];
     }
     $this->dbManager->freeResult($res);

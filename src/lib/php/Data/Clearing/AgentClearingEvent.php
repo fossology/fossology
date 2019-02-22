@@ -21,7 +21,8 @@ namespace Fossology\Lib\Data\Clearing;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 
-class AgentClearingEvent implements LicenseClearing {
+class AgentClearingEvent implements LicenseClearing
+{
   /** @var LicenseRef */
   private $licenseRef;
   /** @var AgentRef */
@@ -37,7 +38,9 @@ class AgentClearingEvent implements LicenseClearing {
    * @param int $matchId
    * @param null|int $percentage
    */
-  public function __construct(LicenseRef $licenseRef, AgentRef $agentRef, $matchId, $percentage) {
+  public function __construct(LicenseRef $licenseRef, AgentRef $agentRef,
+    $matchId, $percentage)
+  {
     $this->licenseRef = $licenseRef;
     $this->agentRef = $agentRef;
     $this->matchId = $matchId;
@@ -119,7 +122,8 @@ class AgentClearingEvent implements LicenseClearing {
   /**
    * @return int $timeStamp
    */
-  public function getTimeStamp(){
+  public function getTimeStamp()
+  {
     return time();
   }
 

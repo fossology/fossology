@@ -28,7 +28,8 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
   /** @var irreleavntFilesOnly */
   private $irreleavntFilesOnly;
 
-  public function __construct($irreleavntFilesOnly=true) {
+  public function __construct($irreleavntFilesOnly=true)
+  {
     $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
     $this->irreleavntFilesOnly = $irreleavntFilesOnly;
     parent::__construct($groupBy = 'text');
@@ -45,7 +46,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
     return $this->clearingDao->getIrrelevantFilesFolder($itemTreeBounds, $groupId);
   }
-  
+
   /**
    * @overwrite
    * @param type $ungrupedStatements
@@ -54,30 +55,27 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
   protected function groupStatements($ungrupedStatements, $extended, $agentcall)
   {
     $statements = array();
-    foreach($ungrupedStatements as $statement){
+    foreach ($ungrupedStatements as $statement) {
       $fileName = $statement['fileName'];
       $dirName = dirname($statement['fileName']);
       $baseName = basename($statement['fileName']);
       $comment = $statement['comment'];
       $licenseName = $statement['shortname'];
-      if($this->irreleavntFilesOnly){
-        if (array_key_exists($fileName, $statements))
-        {
+      if ($this->irreleavntFilesOnly) {
+        if (array_key_exists($fileName, $statements)) {
           $currentLics = &$statements[$fileName]["licenses"];
-          if (!in_array($licenseName, $currentLics)){
+          if (! in_array($licenseName, $currentLics)) {
             $currentLics[] = $licenseName;
           }
-        }
-        else{
+        } else {
           $statements[$fileName] = array(
             "content" => convertToUTF8($dirName, false),
             "fileName" => $baseName,
             "licenses" => array($licenseName)
             );
         }
-      }
-      else{
-        if($comment){
+      } else {
+        if ($comment) {
           $statements[] = array(
             "content" => $licenseName,
             "text" => $comment,

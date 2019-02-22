@@ -49,5 +49,4 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->licenseRef->getFullName(), is($this->fullName));
   }
-
 }

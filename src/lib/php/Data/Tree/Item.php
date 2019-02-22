@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Tree;
 
-class Item {
+class Item
+{
 
   /** @var int */
   private $parentId;
@@ -35,7 +36,9 @@ class Item {
   /** @var ItemTreeBounds */
   private $itemTreeBounds;
 
-  public function __construct(ItemTreeBounds $itemTreeBounds, $parentId, $fileId, $fileMode, $fileName) {
+  public function __construct(ItemTreeBounds $itemTreeBounds, $parentId, $fileId,
+    $fileMode, $fileName)
+  {
     $this->parentId = $parentId;
     $this->fileId = $fileId;
     $this->fileMode = $fileMode;
@@ -127,6 +130,4 @@ class Item {
   {
     return "Item(#" . $this->getId() . ", '" . $this->fileName . "')";
   }
-
-
 }

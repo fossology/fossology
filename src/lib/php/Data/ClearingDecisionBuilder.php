@@ -94,7 +94,7 @@ class ClearingDecisionBuilder
     $this->clearingEvents = $events;
     return $this;
   }
- 
+
   /**
    * @param int $pfileId
    * @return ClearingDecisionBuilder
@@ -199,8 +199,7 @@ class ClearingDecisionBuilder
    */
   public function build()
   {
-    if ($this->type === null)
-    {
+    if ($this->type === null) {
       throw new Exception("decision type should be set");
     }
 
@@ -208,6 +207,5 @@ class ClearingDecisionBuilder
         $this->uploadTreeId, $this->pfileId, $this->userName, $this->userId, $this->type, $this->scope,
         $this->timeStamp, $this->clearingEvents, $this->reportinfo, $this->comment, $this->acknowledgement);
   }
-
 }
 

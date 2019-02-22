@@ -55,10 +55,9 @@ function deleteUser($UserId, $dbManager)
   $result = $dbManager->execute($userSelectStatement, [$UserId]);
   $row = $dbManager->fetchArray($result);
   $dbManager->freeResult($result);
-  if (empty($row['user_name']))
-  {
+  if (empty($row['user_name'])) {
     $text = _("User does not exist.");
-    return($text);
+    return ($text);
   }
 
   /* Delete the users group
@@ -83,7 +82,7 @@ function deleteUser($UserId, $dbManager)
   $dbManager->freeResult($result);
   if ($rowCount != 0) {
     $text = _("Failed to delete user.");
-    return($text);
+    return ($text);
   }
 
   return(null);

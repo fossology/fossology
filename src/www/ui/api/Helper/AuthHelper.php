@@ -67,8 +67,7 @@ class AuthHelper
     $this->userDao = $userDao;
     $this->session = $session;
     $this->dbHelper = $dbhelper;
-    if (!$this->session->isStarted())
-    {
+    if (!$this->session->isStarted()) {
       $this->session->setName('Login');
       $this->session->start();
     }

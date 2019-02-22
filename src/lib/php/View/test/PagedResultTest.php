@@ -19,7 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\View;
 
-class TestPagedResult extends PagedResult {
+class TestPagedResult extends PagedResult
+{
 
   /**
    * @param string $text
@@ -31,7 +32,8 @@ class TestPagedResult extends PagedResult {
   }
 }
 
-class PagedResultTest extends \PHPUnit\Framework\TestCase {
+class PagedResultTest extends \PHPUnit\Framework\TestCase
+{
 
   const START_OFFSET = 12;
   const META_TEXT = "<meta>";
@@ -96,5 +98,4 @@ class PagedResultTest extends \PHPUnit\Framework\TestCase {
     assertThat($this->pagedResult->getCurrentOffset(), is(self::START_OFFSET + strlen(self::CONTENT_TEXT)));
     assertThat($this->pagedResult->getText(), is(self::META_TEXT . self::CONTENT_TEXT));
   }
-
 }

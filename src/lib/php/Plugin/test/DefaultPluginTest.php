@@ -120,7 +120,8 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->plugin = new TestPlugin($this->name);
   }
 
-  protected function tearDown() {
+  protected function tearDown()
+  {
     M::close();
   }
 
@@ -194,7 +195,8 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->plugin->getResponse();
   }
 
-  public function testSessionIsWrappedInRequest() {
+  public function testSessionIsWrappedInRequest()
+  {
     $this->logger->shouldReceive("debug")->once()->with(startsWith("handle request in"));
 
     $this->plugin = new TestPlugin($this->name, array(TestPlugin::REQUIRES_LOGIN => false));

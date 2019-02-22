@@ -21,7 +21,8 @@ namespace Fossology\Lib\Test;
 class TestLiteDbTest extends \PHPUnit\Framework\TestCase
 {
 
-  public function testGetDbManager(){
+  public function testGetDbManager()
+  {
     $testDb = new TestLiteDb();
     $this->assertInstanceOf('Fossology\Lib\Db\DbManager', $testDb->getDbManager());
   }
@@ -47,6 +48,4 @@ class TestLiteDbTest extends \PHPUnit\Framework\TestCase
     assertThat($tag1,hasKey('perm'));
     assertThat($tag1['perm'],is(10));
   }
-
-
 }
