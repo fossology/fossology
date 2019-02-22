@@ -21,6 +21,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 namespace Fossology\UI\Api\Models;
 
+require_once dirname(dirname(dirname(dirname(__DIR__)))) .
+  '/lib/php/Plugin/FO_Plugin.php';
+
 /**
  * @class User
  * @brief Model to hold user information
@@ -48,7 +51,7 @@ class User
    */
   private $email;
   /**
-   * @var integer $accessLevel
+   * @var string $accessLevel
    * Current user access level
    */
   private $accessLevel;
@@ -67,6 +70,11 @@ class User
    * Current user's agent preference
    */
   private $agents;
+  /**
+   * @var Analysis $analysis
+   * Current user's analysis from $agents
+   */
+  private $analysis;
 
   /**
    * User constructor.
@@ -81,14 +89,28 @@ class User
    */
   public function __construct($id, $name, $description, $email, $accessLevel, $root_folder_id, $emailNotification, $agents)
   {
-    $this->id = $id;
+    $this->id = intval($id);
     $this->name = $name;
     $this->description = $description;
     $this->email = $email;
-    $this->accessLevel = $accessLevel;
-    $this->rootFolderId = $root_folder_id;
+    switch ($accessLevel) {
+      case PLUGIN_DB_READ:
+        $this->accessLevel = "read_only";
+        break;
+      case PLUGIN_DB_WRITE:
+        $this->accessLevel = "read_write";
+        break;
+      case PLUGIN_DB_ADMIN:
+        $this->accessLevel = "admin";
+        break;
+      default:
+        $this->accessLevel = "none";
+    }
+    $this->rootFolderId = intval($root_folder_id);
     $this->emailNotification = $emailNotification;
     $this->agents = $agents;
+    $this->analysis = new Analysis();
+    $this->analysis->setUsingString($this->agents);
   }
 
   ////// Getters //////
@@ -125,7 +147,7 @@ class User
   }
 
   /**
-   * @return integer
+   * @return string
    */
   public function getAccessLevel()
   {
@@ -172,13 +194,14 @@ class User
   public function getArray()
   {
     return [
-      "userId"       => $this->id,
+      "id"       => $this->id,
+      "name"         => $this->name,
       "description"  => $this->description,
       "email"        => $this->email,
       "accessLevel"  => $this->accessLevel,
       "rootFolderId" => $this->rootFolderId,
       "emailNotification" => $this->emailNotification,
-      "agents"       => $this->agents
+      "agents"       => $this->analysis->getArray()
     ];
   }
 }

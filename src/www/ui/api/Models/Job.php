@@ -71,12 +71,12 @@ class Job
    */
   public function __construct($id, $name, $queueDate, $uploadId, $userId, $groupId)
   {
-    $this->id = $id;
+    $this->id = intval($id);
     $this->name = $name;
     $this->queueDate = $queueDate;
-    $this->uploadId = $uploadId;
-    $this->userId = $userId;
-    $this->groupId = $groupId;
+    $this->uploadId = intval($uploadId);
+    $this->userId = intval($userId);
+    $this->groupId = intval($groupId);
   }
 
   /**

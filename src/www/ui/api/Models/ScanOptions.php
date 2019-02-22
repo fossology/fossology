@@ -108,7 +108,7 @@ class ScanOptions
     $this->prepareDecider($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
     if(is_numeric($returnStatus)) {
-      return new Info(202, $returnStatus, InfoType::INFO);
+      return new Info(201, $returnStatus, InfoType::INFO);
     } else {
       return new Info(403, $returnStatus, InfoType::ERROR);
     }

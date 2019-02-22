@@ -27,17 +27,8 @@ use Fossology\Lib\Dao\UploadPermissionDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
-use Fossology\UI\Api\Helper\StringHelper;
-use Fossology\UI\Api\Helper\DbHelper;
-use Fossology\UI\Api\Models\File;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Monolog\Logger;
-use Symfony\Component\HttpFoundation\Request;
-
-require_once dirname(dirname(__DIR__)) . "/page/AdminContentMove.php";
-require_once dirname(dirname(dirname(dirname(__DIR__)))) .
-"/lib/php/common-sysconfig.php";
 
 /**
  * @class RestHelper
@@ -45,16 +36,6 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) .
  */
 class RestHelper
 {
-  /**
-   * @var StringHelper $stringHelper
-   * String helper object
-   */
-  private $stringHelper;
-  /**
-   * @var Logger $logger
-   * Logger to use
-   */
-  private $logger;
   /**
    * @var UploadDao $uploadDao
    * Upload DAO object
@@ -85,127 +66,23 @@ class RestHelper
    * Auth helper to provide authentication
    */
   private $authHelper;
-  /**
-   * @var Request $request
-   * Current Synfony request object
-   */
-  private $request;
-  /**
-   * @var string $sysconfdir
-   * SysConfDir location
-   */
-  private $sysconfdir;
 
   /**
    * @brief RestHelper constructor.
    *
    * This constructor initialize all the members
-   * @param Request $request Current Synfony request object
    */
-  public function __construct($request)
+  public function __construct(UploadPermissionDao $uploadPermissionDao,
+    UploadDao $uploadDao, UserDao $userDao, FolderDao $folderDao)
   {
-    global $SysConf;
-    global $PG_CONN;
-    global $SYSCONFDIR;
     global $container;
 
-    $rcfile = "fossology.rc";
-
-    $this->sysconfdir = getenv('SYSCONFDIR');
-    if ($this->sysconfdir === false)
-    {
-      if (file_exists($rcfile)) $this->sysconfdir = file_get_contents($rcfile);
-      if ($this->sysconfdir === false)
-      {
-        $this->sysconfdir = "/usr/local/etc/fossology";
-      }
-    }
-
-    $this->sysconfdir = trim($this->sysconfdir);
-    $SYSCONFDIR = $this->sysconfdir;
-
-    // Initialize version and pg_conn
-    ConfigInit($this->sysconfdir, $SysConf);
-
-    // Initialize scheduler settings
-    $confFile = $this->sysconfdir . "/fossology.conf";
-    $fossConf = parse_ini_file($confFile, true);
-    foreach($fossConf['FOSSOLOGY'] as $key => $value) {
-      $SysConf['FOSSOLOGY'][$key] = $value;
-    }
-
-    $this->dbHelper = new DbHelper($PG_CONN);
-    $this->stringHelper = new StringHelper();
-    $this->logger = new Logger(__FILE__);
-    $this->uploadPermissionDao = new UploadPermissionDao($this->dbHelper->getDbManager(), $this->logger);
-    $this->uploadDao = new UploadDao($this->dbHelper->getDbManager(), $this->logger, $this->uploadPermissionDao);
-    $this->userDao = new UserDao($this->dbHelper->getDbManager(), $this->logger);
-    $this->folderDao = new FolderDao($this->dbHelper->getDbManager(), $this->userDao, $this->uploadDao);
-    $this->authHelper = new AuthHelper($this->userDao);
-
-    // Update the containers
-    $container->removeDefinition("session");
-    $container->set("session", $this->authHelper->getSession());
-    $container->removeDefinition("logger");
-    $container->set("logger", $this->logger);
-    $container->removeDefinition("db.manager");
-    $container->set("db.manager", $this->dbHelper->getDbManager());
-    $container->removeDefinition("dao.upload");
-    $container->set("dao.upload", $this->uploadDao);
-    $container->removeDefinition("dao.upload.permission");
-    $container->set("dao.upload.permission", $this->uploadPermissionDao);
-    $container->removeDefinition("dao.folder");
-    $container->set("dao.folder", $this->folderDao);
-    $container->removeDefinition("dao.user");
-    $container->set("dao.user", $this->userDao);
-    $this->request = $request;
-  }
-
-  /**
-   * This method filters content that starts with ------WebKitFormBoundaryXXXXXXXXX
-   * and ends with ------WebKitFormBoundaryXXXXXXXXX---
-   * This is required, because the silex framework can't do that natively on put request
-   * @param string $rawOutput
-   * @return string
-   */
-  public function getFilteredFile($rawOutput)
-  {
-    $cutString = explode("\n",$rawOutput);
-    $webKitBoundaryString = trim(str_replace("-", "",$cutString[0]));
-    $contentDispositionString = trim(str_replace("-", "",$cutString[1]));
-    $contentTypeString = trim($cutString[2]);
-
-    $filename = explode("filename=", str_replace("\"", "",$contentDispositionString))[1];
-    $contentTypeCut = explode("Content-Type:", $contentTypeString)[1];
-    $content = $this->stringHelper->getContentBetweenString($rawOutput, array(0,1,2,3), $webKitBoundaryString);
-    return new File($filename, $contentTypeCut, $content);
-  }
-
-  /**
-   * @brief Check if the user is logged in.
-   *
-   * This method currently supports SIMPLE HTTP Auth.
-   * @param string $authMethod Authentication method to use
-   * @return boolean True if the user has access, false otherwise.
-   * @sa Fossology::UI::Api::Helper::checkUsernameAndPassword()
-   */
-  public function hasUserAccess($authMethod)
-  {
-    if($authMethod === "SIMPLE_KEY") {
-      $username = $this->request->headers->get("php-auth-user");
-      $password = $this->request->headers->get("php-auth-pw");
-      return $this->authHelper->checkUsernameAndPassword($username, $password);
-    } else {
-      return false;
-    }
-  }
-
-  /**
-   * @return Logger
-   */
-  public function getLogger()
-  {
-    return $this->logger;
+    $this->dbHelper = new DbHelper();
+    $this->authHelper = new AuthHelper();
+    $this->uploadPermissionDao = $uploadPermissionDao;
+    $this->uploadDao = $uploadDao;
+    $this->userDao = $userDao;
+    $this->folderDao = $folderDao;
   }
 
   /**
@@ -276,15 +153,6 @@ class RestHelper
   }
 
   /**
-   * Get the FOSSology Sysconf dir
-   * @return string
-   */
-  public function getSysConfDir()
-  {
-    return $this->sysconfdir;
-  }
-
-  /**
    * Copy/move a given upload id to a new folder id.
    * @param integer $uploadId    Upload to copy/move
    * @param integer $newFolderId New folder id
@@ -306,7 +174,9 @@ class RestHelper
           InfoType::ERROR);
       }
       $uploadContentId = $this->folderDao->getFolderContentsId($uploadId);
-      $errors = (new \AdminContentMove())->copyContent([$uploadContentId], $newFolderId, $isCopy);
+      $contentMove = plugin_find('content_move');
+
+      $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
       if(empty($errors))
       {
         $action = $isCopy ? "copied" : "moved";

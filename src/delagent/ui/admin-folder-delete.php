@@ -40,18 +40,22 @@ class admin_folder_delete extends FO_Plugin {
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
 
   /**
    * @brief Creates a job to detele the folder
    * @param int $folderpk the folder_pk to remove
    * @param int $userId   the user deleting the folder
-   * @param DbManager $dbManager The DB manager object to use
    * @return NULL on success, string on failure.
    */
-  function Delete($folderpk, $userId, $dbManager)
+  function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
+    if(! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
+      $text = _("No access to delete this folder");
+      return ($text);
+    }
     /* Can't remove top folder */
     if ($splitFolder[1] == FolderGetTop()) {
       $text = _("Can Not Delete Root Folder");
@@ -94,7 +98,7 @@ class admin_folder_delete extends FO_Plugin {
       $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
       $Folder = $this->dbManager->getSingleRow($sql,array($splitFolder[1],$userId),__METHOD__."GetRowWithFolderName");
       if(!empty($Folder['folder_name'])){
-        $rc = $this->Delete($folder, $userId, $this->dbManager);
+        $rc = $this->Delete($folder, $userId);
         if (empty($rc)) {
           /* Need to refresh the screen */
           $text = _("Deletion of folder ");

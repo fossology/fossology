@@ -75,13 +75,13 @@ class Upload
    */
   public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $tag = NULL)
   {
-    $this->folderId = $folderId;
+    $this->folderId = intval($folderId);
     $this->folderName = $folderName;
-    $this->uploadId = $uploadId;
+    $this->uploadId = intval($uploadId);
     $this->description = $description;
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
-    $this->fileSize = $fileSize;
+    $this->fileSize = intval($fileSize);
   }
 
   /**

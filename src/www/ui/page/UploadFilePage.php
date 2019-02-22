@@ -79,7 +79,7 @@ class UploadFilePage extends UploadPageBase
         UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder."),
         UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
-    
+
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $description = $this->basicShEscaping($description);
@@ -89,7 +89,7 @@ class UploadFilePage extends UploadPageBase
     {
       return array(false,$uploadErrors[UPLOAD_ERR_NO_FILE],$description);
     }
-    
+
     if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
         != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
     {
@@ -153,7 +153,7 @@ class UploadFilePage extends UploadPageBase
 
     $message = $this->postUploadAddJobs($request, $originalFileName, $uploadId);
 
-    return array(true, $message, $description);
+    return array(true, $message, $description, $uploadId);
   }
 
 }

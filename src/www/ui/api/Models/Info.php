@@ -103,6 +103,4 @@ class Info
   {
     return $this->type;
   }
-
-
 }

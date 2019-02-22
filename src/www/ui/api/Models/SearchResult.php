@@ -29,7 +29,7 @@ namespace Fossology\UI\Api\Models;
 class SearchResult
 {
   /**
-   * @var Upload $upload
+   * @var array $upload
    * Upload object from the search
    */
   private $upload;
@@ -53,7 +53,7 @@ class SearchResult
   public function __construct($upload, $uploadTreeId, $filename)
   {
     $this->upload = $upload;
-    $this->uploadTreeId = $uploadTreeId;
+    $this->uploadTreeId = intval($uploadTreeId);
     $this->filename = $filename;
   }
 

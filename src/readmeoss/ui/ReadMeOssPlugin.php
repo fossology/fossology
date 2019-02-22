@@ -160,7 +160,7 @@ class ReadMeOssPlugin extends DefaultPlugin
     {
       throw new Exception(_("Cannot schedule").": ".$error);
     }
-    return array($jobId,$jobQueueId);
+    return array($jobId, $jobQueueId, $error);
   }
 
   /**
@@ -190,6 +190,20 @@ class ReadMeOssPlugin extends DefaultPlugin
       throw new Exception(_('cannot find uploadId'));
     }
     return $upload;
+  }
+
+  /**
+   * Schedules readme OSS agent to generate report
+   *
+   * @param int $groupId
+   * @param Upload $upload
+   * @param array $addUploads
+   * @return array|number[] Job id and job queue id
+   * @throws Exception
+   */
+  public function scheduleAgent($groupId, $upload, $addUploads = array())
+  {
+    return $this->getJobAndJobqueue($groupId, $upload, $addUploads);
   }
 }
 
