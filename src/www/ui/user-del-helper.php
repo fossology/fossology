@@ -26,7 +26,7 @@ require_once __DIR__ . "/../../lib/php/common-perms.php";
  * \param $dbManager DB Manager used.
  * \return NULL on success, string on failure.
  */
-function DeleteUser($UserId, $dbManager)
+function deleteUser($UserId, $dbManager)
 {
   global $PG_CONN;
 
@@ -49,7 +49,7 @@ function DeleteUser($UserId, $dbManager)
 
   $userCheckStatement = __METHOD__ . ".getUserbyName";
   $dbManager->prepare($userCheckStatement,
-    "SELECT * FROM users WHERE user_name = $1 LIMIT 1;");
+    "SELECT count(*) AS cnt FROM users WHERE user_name = $1 LIMIT 1;");
 
   /* See if the user already exists */
   $result = $dbManager->execute($userSelectStatement, [$UserId]);
@@ -79,13 +79,12 @@ function DeleteUser($UserId, $dbManager)
 
   /* Make sure it was deleted */
   $result = $dbManager->execute($userCheckStatement, [$UserId]);
-  $rowCount = count($dbManager->fetchArray($result));
+  $rowCount = count($dbManager->fetchArray($result)['cnt']);
   $dbManager->freeResult($result);
-  if ($rowCount != 0)
-  {
+  if ($rowCount != 0) {
     $text = _("Failed to delete user.");
     return($text);
   }
 
-  return(NULL);
+  return(null);
 } // Delete()

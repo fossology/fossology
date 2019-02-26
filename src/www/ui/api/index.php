@@ -48,7 +48,7 @@ const REST_VERSION_SLUG = "restVersion";
 
 const VERSION_1   = "/v{" . REST_VERSION_SLUG . ":1}/";
 
-const AUTH_METHOD = "SIMPLE_KEY";
+const AUTH_METHOD = "JWT_TOKEN";
 
 $startTime = microtime(true);
 
@@ -90,6 +90,7 @@ $app->add(new RestAuthMiddleware());
 
 //////////////////////////AUTH/////////////////////
 $app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
+$app->post(VERSION_1 . 'tokens', AuthController::class . ':createNewJwtToken');
 
 //////////////////////////UPLOADS/////////////////////
 $app->group(VERSION_1 . 'uploads',

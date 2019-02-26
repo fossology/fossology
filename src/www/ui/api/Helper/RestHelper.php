@@ -29,6 +29,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\Lib\Plugin\Plugin;
 
 /**
  * @class RestHelper
@@ -36,6 +37,21 @@ use Fossology\UI\Api\Models\InfoType;
  */
 class RestHelper
 {
+  /**
+   * @var array VALID_SCOPES
+   * Valid scopes for REST authentication tokens.
+   */
+  const VALID_SCOPES = ["read", "write"];
+  /**
+   * @var array SCOPE_DB_MAP
+   * Maps a user readable scope to DB value.
+   */
+  const SCOPE_DB_MAP = ["read" => "r", "write" => "w"];
+  /**
+   * @var int TOKEN_KEY_LENGTH
+   * Length of the token secret key.
+   */
+  const TOKEN_KEY_LENGTH = 40;
   /**
    * @var UploadDao $uploadDao
    * Upload DAO object
@@ -73,16 +89,15 @@ class RestHelper
    * This constructor initialize all the members
    */
   public function __construct(UploadPermissionDao $uploadPermissionDao,
-    UploadDao $uploadDao, UserDao $userDao, FolderDao $folderDao)
+    UploadDao $uploadDao, UserDao $userDao, FolderDao $folderDao,
+    DbHelper $dbHelper, AuthHelper $authHelper)
   {
-    global $container;
-
-    $this->dbHelper = new DbHelper();
-    $this->authHelper = new AuthHelper();
     $this->uploadPermissionDao = $uploadPermissionDao;
     $this->uploadDao = $uploadDao;
     $this->userDao = $userDao;
     $this->folderDao = $folderDao;
+    $this->dbHelper = $dbHelper;
+    $this->authHelper = $authHelper;
   }
 
   /**
@@ -174,7 +189,7 @@ class RestHelper
           InfoType::ERROR);
       }
       $uploadContentId = $this->folderDao->getFolderContentsId($uploadId);
-      $contentMove = plugin_find('content_move');
+      $contentMove = $this->getPlugin('content_move');
 
       $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);
       if(empty($errors))
@@ -195,5 +210,62 @@ class RestHelper
       return new Info(400, "Bad Request. Folder id should be a positive integer",
         InfoType::ERROR);
     }
+  }
+
+  /**
+   * @brief A safe wrapper around plugin_find
+   *
+   * Get the FOSSology plugin from the plugin array.
+   *
+   * @param string $pluginName The required plugin
+   * @return Plugin The required plugin if found, else throws an exception.
+   * @throws \UnexpectedValueException Throws exception when plugin is not
+   *         found.
+   * @uses plugin_find()
+   */
+  public function getPlugin($pluginName)
+  {
+    $plugin = plugin_find($pluginName);
+    if (! $plugin) {
+      throw new \UnexpectedValueException(
+        "Unable to find plugin " . $pluginName);
+    }
+    return $plugin;
+  }
+
+  /**
+   * @brief Check if the token request contains valid parameters.
+   *
+   * The function checks for following properties:
+   * - The format of expiry parameter should be YYYY-MM-DD and should be +1
+   *   from now().
+   * - The length of token name should be between 0 and 40.
+   * - The scope of token should be valid.
+   *
+   * @param string $tokenExpire The expiry of token requested.
+   * @param string $tokenName   The name of the token requested.
+   * @param string $tokenScope  The scope of the token requested.
+   * @return boolean|Fossology::UI::Api::Models::Info True if all parameters
+   *         are ok, else an info.
+   */
+  public function validateTokenRequest($tokenExpire, $tokenName, $tokenScope)
+  {
+    $requestValid = true;
+    if (strtotime($tokenExpire) < strtotime("tomorrow") ||
+      ! preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",
+        $tokenExpire) || strtotime($tokenExpire) > strtotime("+30 days")) {
+      $requestValid = new Info(400,
+        "The token should have at least 1 day and max 30 days " .
+        "of validity and should follow YYYY-MM-DD format.", InfoType::ERROR);
+    } elseif (! in_array($tokenScope, RestHelper::VALID_SCOPES)) {
+      $requestValid = new Info(400,
+        "Invalid token scope, allowed only " .
+        join(",", RestHelper::VALID_SCOPES), InfoType::ERROR);
+    } elseif (empty($tokenName) || strlen($tokenName) > 40) {
+      $requestValid = new Info(400,
+        "The token name must be a valid string of max 40 character length",
+        InfoType::ERROR);
+    }
+    return $requestValid;
   }
 }

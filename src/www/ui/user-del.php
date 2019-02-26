@@ -111,7 +111,7 @@ class user_del extends FO_Plugin
     if (!empty($User))
     {
       if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = DeleteUser($User, $this->dbManager); }
+      else { $rc = deleteUser($User, $this->dbManager); }
       if (empty($rc))
       {
         /* Need to refresh the screen */
