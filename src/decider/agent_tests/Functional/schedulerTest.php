@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2018, Siemens AG
+Copyright (C) 2014-2019, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -199,7 +199,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -245,7 +245,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -292,7 +292,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -340,7 +340,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
 
     $licId1 = $licenseRef1->getId();
 
@@ -392,9 +392,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -451,9 +451,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -510,9 +510,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
-    $licenseRef2 = $this->licenseDao->getLicenseByShortName("GPL-1.0")->getRef();
-    $licenseRef3 = $this->licenseDao->getLicenseByShortName("APL-1.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
+    $licenseRef2 = $this->licenseDao->getLicenseByShortName("BSL-1.0")->getRef();
+    $licenseRef3 = $this->licenseDao->getLicenseByShortName("ZPL-1.1")->getRef();
 
     $licId1 = $licenseRef1->getId();
     $licId2 = $licenseRef2->getId();
@@ -565,7 +565,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpTables();
     $this->setUpRepo();
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $agentBulk = 6;
@@ -612,7 +612,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpRepo();
     $monkAgentId = 5;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $pfile = 4;
@@ -656,7 +656,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->setUpRepo();
     $monkAgentId = 5;
 
-    $licenseRef1 = $this->licenseDao->getLicenseByShortName("GPL-3.0")->getRef();
+    $licenseRef1 = $this->licenseDao->getLicenseByShortName("SPL-1.0")->getRef();
     $licId1 = $licenseRef1->getId();
 
     $pfile = 4;

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+Copyright (C) 2015,2019 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -82,16 +82,25 @@ abstract class TestAbstractDb
 
   public function insertData_license_ref($limit=140)
   {
+    $keysToBeChanged = array(
+      'rf_OSIapproved' => '"rf_OSIapproved"',
+      'rf_FSFfree'=> '"rf_FSFfree"',
+      'rf_GPLv2compatible' => '"rf_GPLv2compatible"',
+      'rf_GPLv3compatible'=> '"rf_GPLv3compatible"',
+      'rf_Fedora' => '"rf_Fedora"'
+      );
+
+    /** import licenseRef.json */
     $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i ++) {
-      $sql = $this->queryConverter($splitted[$i]);
-      $this->dbManager->queryOnce($delimiter . $sql);
-      if ($i > $limit) {
+    $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
+    $statementName = __METHOD__.'.insertInToLicenseRef';
+    foreach ($jsonData as $licenseArrayKey => $licenseArray) {
+      $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
+      $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
+      $SQL = "INSERT INTO license_ref ( $keys ) VALUES ($valuePlaceHolders);";
+      $this->dbManager->prepare($statementName, $SQL);
+      $this->dbManager->execute($statementName, array_values($licenseArray));
+      if ($licenseArrayKey >= $limit) {
         break;
       }
     }
