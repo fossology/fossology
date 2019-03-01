@@ -59,10 +59,13 @@ class ScheduleAgent extends DefaultPlugin
     {
       $upload = $this->uploadDao->getUpload($uploadId);
       $uploadName = $upload->getFilename();
-      $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
-
       $ourPlugin = plugin_find($agentName);
-      $jobqueueId = $ourPlugin->AgentAdd($jobId, $uploadId, $errorMessage, array());
+
+      $jobqueueId = isAlreadyRunning($ourPlugin->AgentName, $uploadId);
+      if($jobqueueId == 0) {
+        $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+        $jobqueueId = $ourPlugin->AgentAdd($jobId, $uploadId, $errorMessage, array());
+      }
     } else
     {
       $errorMessage = "bad request";
@@ -82,5 +85,3 @@ class ScheduleAgent extends DefaultPlugin
 }
 
 register_plugin(new ScheduleAgent());
-
-

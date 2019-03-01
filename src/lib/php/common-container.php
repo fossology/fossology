@@ -16,6 +16,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+/**
+ * @file
+ * @brief Setup the dependency injection container for Symfony from services.xml
+ */
+
 use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
@@ -33,12 +38,9 @@ $cacheFile = "$cacheDir/container.php";
 $startTime = microtime(true);
 $cached = $cacheDir && file_exists($cacheFile);
 
-if ($cached) {
-  require_once($cacheFile);
-  $container = new $containerClassName();
-}
-else {
-  $container = new ContainerBuilder();
+if(isset($GLOBALS['apiCall']) && $GLOBALS['apiCall']) {
+  // Call from REST api
+  $container = new \Flexsounds\Component\SymfonyContainerSlimBridge\ContainerBuilder();
 
   $container->setParameter('application_root', dirname(dirname(__DIR__)));
 
@@ -46,15 +48,31 @@ else {
   $loader->load('services.xml');
 
   $container->compile();
+}
+else {
+  if ($cached) {
+    require_once($cacheFile);
+    $container = new $containerClassName();
+  }
+  else {
+    $container = new ContainerBuilder();
 
-  if ($cacheDir && is_dir($cacheDir))
-  {
-    $dumper = new PhpDumper($container);
-    umask(0027);
-    file_put_contents(
-        $cacheFile,
-        $dumper->dump(array('class' => $containerClassName))
-    );
+    $container->setParameter('application_root', dirname(dirname(__DIR__)));
+
+    $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
+    $loader->load('services.xml');
+
+    $container->compile();
+
+    if ($cacheDir && is_dir($cacheDir))
+    {
+      $dumper = new PhpDumper($container);
+      umask(0027);
+      file_put_contents(
+          $cacheFile,
+          $dumper->dump(array('class' => $containerClassName))
+      );
+    }
   }
 }
 
@@ -70,6 +88,6 @@ if(!empty($timeZone))
   $twig->getExtension('core')->setTimezone($timeZone);
 }
 
-/** @var TimingLogger */
+/** @var TimingLogger $timingLogger */
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime(sprintf("DI container setup (cached: %s)", $cached ? 'yes' : 'no'), $startTime);

@@ -20,6 +20,8 @@ without any warranty.
         </parameter>
         <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
         <parameter key="time.zone" type="string"></parameter>
+	<parameter key="displayErrorDetails" type="constant">false</parameter>
+        <parameter key="addContentLengthHeader" type="constant">false</parameter>
     </parameters>
 
     <services>
@@ -83,10 +85,6 @@ without any warranty.
             <argument type="service" id="logger"/>
         </service>
         <service id="dao.copyright" class="Fossology\Lib\Dao\CopyrightDao">
-            <argument type="service" id="db.manager"/>
-            <argument type="service" id="dao.upload"/>
-        </service>
-        <service id="dao.ip" class="Fossology\Lib\Dao\IPDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
         </service>
@@ -176,5 +174,12 @@ without any warranty.
             <tag name="twig.extension"/>
         </service>
 
+        <service id="helper.restHelper" class="Fossology\UI\Api\Helper\RestHelper">
+            <argument type="service" id="dao.upload.permission"/>
+            <argument type="service" id="dao.upload"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.folder"/>
+            <argument type="service" id="logger"/>
+        </service>
     </services>
 </container>

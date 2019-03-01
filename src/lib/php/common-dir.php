@@ -17,22 +17,37 @@
  ***********************************************************/
 
 /**
- * \file common-dir.php
- * \brief Common Direcotory Functions
+ * \file
+ * \brief Common Directory Functions
  */
 
 use Fossology\Lib\Db\DbManager;
 
+/**
+ * Check if the mode denotes directory
+ * @param int $mode File mode (as octal integer)
+ * @return boolean True if is a directory, false otherwise.
+ */
 function Isdir($mode) { return(($mode & 1<<18) + ($mode & 0040000) != 0); }
+/**
+ * Check if the mode denotes artifact (a file)
+ * @param int $mode File mode (as octal integer)
+ * @return boolean True if is an artifact, false otherwise.
+ */
 function Isartifact($mode) { return(($mode & 1<<28) != 0); }
+/**
+ * Check if the mode denotes container (fossology folder)
+ * @param int $mode File mode (as octal integer)
+ * @return boolean True if is a container, false otherwise.
+ */
 function Iscontainer($mode) { return(($mode & 1<<29) != 0); }
 
 /**
  * \brief Convert a file mode to string values.
  *
- * \param $Mode file mode (as octal integer)
+ * \param int $Mode File mode (as octal integer)
  *
- * \return string of dir mode
+ * \return String of dir mode
  */
 function DirMode2String($Mode)
 {
@@ -83,19 +98,20 @@ function DirMode2String($Mode)
   return($V);
 } // DirMode2String()
 
+$DirGetNonArtifact_Prepared=0;
 /**
  * \brief Given an artifact directory (uploadtree_pk),
  *  return the first non-artifact directory (uploadtree_pk).
- *  TBD: "username" will be added in the future and it may change
+ *
+ *  \todo TBD: "username" will be added in the future and it may change
  *  how this function works.
- *  NOTE: This is recursive!
+ *  \note This is recursive!
  *
- * \param $UploadtreePk uploadtree_pk
- * \param $uploadtree_tablename defaults to 'uploadtree' to not break bsam/ui
+ * \param int    $UploadtreePk Uploadtree_pk
+ * \param string $uploadtree_tablename Defaults to 'uploadtree' to not break bsam/ui
  *
- * \return the first non-artifact directory uploadtree_pk
+ * \return The first non-artifact directory uploadtree_pk
  */
-$DirGetNonArtifact_Prepared=0;
 function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
 {
   $Children = array();
@@ -143,8 +159,8 @@ function DirGetNonArtifact($UploadtreePk, $uploadtree_tablename='uploadtree')
  *
  * \param $a $b to compare
  *
- * \return 0 if they are equal
- *         <0 less than
+ * \return 0 if they are equal \n
+ *         <0 less than \n
  *         >0 greater than
  */
 function _DirCmp($a,$b)
@@ -156,11 +172,11 @@ function _DirCmp($a,$b)
 /**
  * \brief Return the path (without artifacts) of an uploadtree_pk.
  *
- * \param $uploadtree_pk
- * \param $uploadtree_tablename
+ * \param int    $uploadtree_pk
+ * \param string $uploadtree_tablename
  *
- * \return an array containing the path (with no artifacts).  Each element 
- *         in the path is an array containing the uploadtree record for 
+ * \return An array containing the path (with no artifacts). Each element
+ *         in the path is an array containing the uploadtree record for
  *         $uploadtree_pk and its parents.
  *         The path begins with the uploadtree_pk record.
  */
@@ -181,26 +197,26 @@ function Dir2Path($uploadtree_pk, $uploadtree_tablename='uploadtree')
     pg_free_result($result);
     if (!Isartifact($Row['ufile_mode']))
       array_unshift($uploadtreeArray, $Row);
-    
+
     $uploadtree_pk = $Row['parent'];
   }
-  
+
   return($uploadtreeArray);
 } // Dir2Path()
 
 /**
  * \brief Get an html linked string of a file browse path.
  *
- * \param $Mod - Module name (e.g. "browse")
- * \param $UploadtreePk
- * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
- * \param $ShowBox - true to draw a box around the string
- * \param $ShowMicro - true to show micro menu
- * \param $Enumerate - if >= zero number the folder/file path (the stuff in the yellow bar)
+ * \param string $Mod Module name (e.g. "browse")
+ * \param int $UploadtreePk
+ * \param string $LinkLast Create link (a href) for last item and use LinkLast as the module name
+ * \param bool $ShowBox True to draw a box around the string
+ * \param bool $ShowMicro True to show micro menu
+ * \param int $Enumerate If >= zero number the folder/file path (the stuff in the yellow bar)
  *   starting with the value $Enumerate
- * \param $PreText - optional additional text to preceed the folder path
- * \param $PostText - optional text to follow the folder path
- * \param $uploadtree_tablename
+ * \param string $PreText Optional additional text to precede the folder path
+ * \param string $PostText Optional text to follow the folder path
+ * \param string $uploadtree_tablename
  *
  * \return string of browse paths
  */
@@ -314,15 +330,16 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
 } // Dir2Browse()
 
 /**
- * \brief Get an html linkes string of a file browse path.
- *  This calls Dir2Browse().
+ * \brief Get an html links string of a file browse path.
  *
- * \param $Mod - Module name (e.g. "browse")
- * \param $UploadPk
- * \param $LinkLast - create link (a href) for last item and use LinkLast as the module name
- * \param $ShowBox - draw a box around the string (default true)
- * \param $ShowMicro - show micro menu (default false)
- * \param $uploadtree_tablename
+ * This calls Dir2Browse().
+ *
+ * \param string $Mod Module name (e.g. "browse")
+ * \param int $UploadPk Upload to browse
+ * \param string $LinkLast Create link (a href) for last item and use LinkLast as the module name
+ * \param bool $ShowBox Draw a box around the string (default true)
+ * \param bool $ShowMicro Show micro menu (default false)
+ * \param string $uploadtree_tablename
  *
  * \return string of browse paths
  */
@@ -344,16 +361,16 @@ function Dir2BrowseUpload ($Mod, $UploadPk, $LinkLast=NULL, $ShowBox=1, $ShowMic
  *  pfile, list all of the breadcrumbs for each file.
  *  If the pfile is a duplicate, then indent it.
  *
- * DEPRECATED - convert your code to UploadtreeFileList()
+ * \deprecated Convert your code to UploadtreeFileList()
  *
- * \param $Listing = array from a database selection.  The SQL query should
+ * \param array &$Listing Array from a database selection.  The SQL query should
  *	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
- * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
- * \param $IfFilePlugin = string containing plugin name to use if this is a file
- * \param $Count = first number for indexing the entries (may be -1 for no count)
- * \param $ShowPhrase Obsolete from bsam
+ * \param string $IfDirPlugin Plugin name to use if this is a directory or any other container
+ * \param string $IfFilePlugin Plugin name to use if this is a file
+ * \param int $Count First number for indexing the entries (may be -1 for no count)
+ * \param int $ShowPhrase Obsolete from bsam
  *
- * \return string containing the listing.
+ * \return String containing the listing.
  */
 function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowPhrase=0)
 {
@@ -403,12 +420,12 @@ function Dir2FileList	(&$Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $ShowP
  *  pfile, list all of the breadcrumbs for each file.
  *  If the pfile is a duplicate, then indent it.
  *
- * \param $Listing = array from a database selection.  The SQL query should
+ * \param array $Listing Array from a database selection.  The SQL query should
  *	use "ORDER BY pfile_fk" so that the listing can indent duplicate pfiles
- * \param $IfDirPlugin = string containing plugin name to use if this is a directory or any other container
- * \param $IfFilePlugin = string containing plugin name to use if this is a file
- * \param $Count = first number for indexing the entries (may be -1 for no count)
- * \param $ShowPhrase Obsolete from bsam
+ * \param string $IfDirPlugin Plugin name to use if this is a directory or any other container
+ * \param string $IfFilePlugin Plugin name to use if this is a file
+ * \param int $Count First number for indexing the entries (may be -1 for no count)
+ * \param int $ShowPhrase Obsolete from bsam
  *
  * \return string containing the listing.
  */
@@ -457,20 +474,21 @@ function UploadtreeFileList($Listing, $IfDirPlugin, $IfFilePlugin, $Count=-1, $S
 
 /**
  * \brief Find the non artifact children of an uploadtree pk.
+ *
  * If any children are artifacts, resolve them until you get
  * to a non-artifact.
  *
- * \param $uploadtree_pk
- * \param $uploadtree_tablename
+ * \param int $uploadtree_pk  Upload tree id
+ * \param string $uploadtree_tablename Upload tree table name
  *
- * \return list of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
- *         list may be empty if there are no children.
+ * \return List of child uploadtree recs + pfile_size + pfile_mimetypefk on success.
+ *         List may be empty if there are no children.
  * Child list is sorted by ufile_name.
  */
 function GetNonArtifactChildren($uploadtree_pk, $uploadtree_tablename='uploadtree')
 {
   global $container;
-  /** @var DbManager */
+  /** @var DbManager $dbManager */
   $dbManager = $container->get('db.manager');
 
   /* Find all the children */

@@ -18,15 +18,31 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+/**
+ * @file
+ * @brief Get user info from session
+ */
 
+/**
+ * @class UserInfo
+ * @brief Get user info from session
+ */
 class UserInfo {
 
+  /**
+   * @brief Get the user id from the session.
+   * @return int Id of the current user
+   */
   public function getUserId() {
     return $_SESSION['UserId'];
   }
 
+  /**
+   * @brief Get the group id from the session.
+   * @return int Id of the current group
+   */
   public function getGroupId() {
     return $_SESSION['GroupId'];
   }
 
-} 
+}

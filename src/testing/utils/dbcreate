@@ -21,12 +21,12 @@ su postgres -c 'psql -l' |grep -q fosstest
 if [ $? = 0 ]; then
    echo "NOTE: fosstest database already exists, not creating"
    echo "*** Checking for plpgsql support ***"
-   su postgres -c 'createlang -l fosstest' |grep -q plpgsql
+   su postgres -c 'echo "SELECT * FROM pg_language;" | psql -t fosstest' |grep -q plpgsql
    if [ $? = 0 ]; then
       echo "NOTE: plpgsql already exists in fosstest database, good"
    else
       echo "NOTE: plpgsql doesn't exist, adding"
-      su postgres -c 'createlang plpgsql fosstest'
+      su postgres -c 'echo "CREATE LANGUAGE plpgsql;" | psql fosstest'
       if [ $? != 0 ]; then
          echo "ERROR: failed to add plpgsql to fosstest database"
       fi

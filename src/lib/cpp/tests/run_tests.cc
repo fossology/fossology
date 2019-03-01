@@ -25,8 +25,18 @@
 #include <fstream>
 #include <stdexcept>
 
+/**
+ * \dir
+ * \brief Unit test cases for CPP library
+ * \file
+ * \brief CPP unit test cases runner
+ */
+
 using namespace std;
 
+/**
+ * Main function to run the test cases
+ */
 int main(int argc, char* argv[])
 {
   // Retrieve test path from command line first argument.

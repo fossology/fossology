@@ -21,16 +21,30 @@ namespace Fossology\Lib\Application;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\ArrayOperation;
 
+/**
+ * @file
+ * @brief Helper class for Obligation CSV Import
+ */
+
+/**
+ * @class ObligationCsvImport
+ * @brief Helper class for Obligation CSV Import
+ */
 class ObligationCsvImport {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager to be used */
   protected $dbManager;
-  /** @var string */
+  /** @var string $delimiter
+   * Delimiter used in the CSV */
   protected $delimiter = ',';
-  /** @var string */
+  /** @var string $enclosure
+   * Ecnlosure used in the CSV */
   protected $enclosure = '"';
-  /** @var null|array */
+  /** @var null|array $headrow
+   * Header of CSV */
   protected $headrow = null;
-  /** @var array */
+  /** @var array $alias
+   * Alias for headers */
   protected $alias = array(
       'type'=>array('type','Type'),
       'topic'=>array('topic','Obligation or Risk topic'),
@@ -42,25 +56,39 @@ class ObligationCsvImport {
       'candidatenames'=>array('candidatenames','Associated candidate Licenses')
     );
 
+  /**
+   * Constructor
+   * @param DbManager $dbManager DB manager to use
+   */
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
     $this->obligationMap = $GLOBALS['container']->get('businessrules.obligationmap');
   }
 
+  /**
+   * @brief Update the delimiter
+   * @param string $delimiter New delimiter to use.
+   */
   public function setDelimiter($delimiter=',')
   {
     $this->delimiter = substr($delimiter,0,1);
   }
 
+  /**
+   * @brief Update the enclosure
+   * @param string $enclosure New enclosure to use.
+   */
   public function setEnclosure($enclosure='"')
   {
     $this->enclosure = substr($enclosure,0,1);
   }
 
   /**
-   * @param string $filename
-   * @return string message
+   * @brief Read the CSV line by line and import it.
+   * @param string $filename Location of the CSV file.
+   * @return string message Error message, if any. Otherwise
+   *         `Read csv: <count> licenses` on success.
    */
   public function handleFile($filename)
   {
@@ -91,8 +119,10 @@ class ObligationCsvImport {
   }
 
   /**
-   * @param array $row
-   * @return string $log
+   * Handle a single row read from the CSV. If headrow is not set, then handle
+   * current row as head row.
+   * @param array $row   Single row from CSV
+   * @return string $log Log messages
    */
   private function handleCsv($row)
   {
@@ -110,6 +140,12 @@ class ObligationCsvImport {
     return $this->handleCsvObligation($mRow);
   }
 
+  /**
+   * @brief Handle a row as head row.
+   * @param array $row  Head row to be handled.
+   * @throws \Exception
+   * @return boolean[]|mixed[] Parsed head row.
+   */
   private function handleHeadCsv($row)
   {
     $headrow = array();
@@ -124,6 +160,11 @@ class ObligationCsvImport {
     return $headrow;
   }
 
+  /**
+   * @brief Get the Obligation key from obligation topic and obligation text
+   * @param array $row CSV array with `topic` and `text` keys
+   * @return boolean|int False if not found, key otherwise.
+   */
   private function getKeyFromTopicAndText($row)
   {
     $req = array($row['topic'], $row['text']);
@@ -131,6 +172,14 @@ class ObligationCsvImport {
     return ($row === false) ? false : $row['ob_pk'];
   }
 
+  /**
+   * @brief Compare licenses from Database and CSV
+   * @param bool $exists       Existing license id
+   * @param array $listFromCsv List of obligations from CSV
+   * @param bool $candidate    Is a candidate obligation?
+   * @param array $row         Unused
+   * @return number strcmp() diff
+   */
   private function compareLicList($exists, $listFromCsv, $candidate, $row)
   {
     $getList = $this->obligationMap->getLicenseList($exists, $candidate);
@@ -140,6 +189,12 @@ class ObligationCsvImport {
     return $diff;
   }
 
+  /**
+   * The function takes a string delimited by `;`, explodes it, sort the result
+   * and joins them back using `,` as new delimiter.
+   * @param string $string String to be rearranged.
+   * @return string Rearranged string.
+   */
   private function reArrangeString($string)
   {
     $string = explode(";", $string);
@@ -148,6 +203,12 @@ class ObligationCsvImport {
     return $string;
   }
 
+  /**
+   * @brief Clear all license maps for given obligation
+   * @param int $exists     Existing obligation key
+   * @param bool $candidate Is a candidate obligation?
+   * @return boolean Always true
+   */
   private function clearListFromDb($exists, $candidate)
   {
     $licId = 0;
@@ -156,8 +217,12 @@ class ObligationCsvImport {
   }
 
   /**
-   * @param array $row
-   * @return string
+   * @brief Handle a single row from CSV.
+   *
+   * The function checks if the obligation text hash is already in the DB, then
+   * update the license associations. Otherwise make a new entry in the DB.
+   * @param array $row CSV row to be inserted.
+   * @return string Log messages.
    */
   private function handleCsvObligation($row)
   {
@@ -204,7 +269,7 @@ class ObligationCsvImport {
 
     if (!empty($row['licnames'])) {
       $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
-    } 
+    }
     if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], True);
     }
@@ -217,12 +282,12 @@ class ObligationCsvImport {
   }
 
   /**
-   * \brief Associate selected licenses to the obligation
+   * @brief Associate selected licenses to the obligation
    *
-   * @param array   $licList - list of licenses to be associated
-   *        int     $obPk - the id of the newly created obligation
-   *        boolean $candidate - do we handle candidate licenses?
-   * @return string the list of associated licences
+   * @param array   $licList List of licenses to be associated
+   * @param int     $obPk The id of the newly created obligation
+   * @param boolean $candidate Do we handle candidate licenses?
+   * @return string The list of associated licences
    */
   function AssociateWithLicenses($licList, $obPk, $candidate=False)
   {
@@ -263,6 +328,16 @@ class ObligationCsvImport {
     return $message;
   }
 
+  /**
+   * @brief Update other fields of the obligation.
+   *
+   * Fields updated are:
+   * - classification
+   * - modifications
+   * - comment
+   * @param int $exists Obligation key
+   * @param array $row  Row from CSV.
+   */
   function updateOtherFields($exists, $row)
   {
     $this->dbManager->getSingleRow('UPDATE obligation_ref SET ob_classification=$2, ob_modifications=$3, ob_comment=$4 where ob_pk=$1',

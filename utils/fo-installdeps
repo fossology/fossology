@@ -103,6 +103,10 @@ if [[ $BUILDTIME ]]; then
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
+         case "$CODENAME" in
+           xenial|stretch|buster|sid|bionic)
+             apt-get $YesOpt install php-mbstring;;
+         esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
               trusty)
@@ -125,14 +129,14 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel
+            boost-devel php-mbstring
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel
+            boost-devel php-mbstring
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -195,7 +199,7 @@ if [[ $RUNTIME ]]; then
          yum $YesOpt install postgresql-server httpd
          yum $YesOpt install \
             postgresql \
-            php php-pear php-pgsql php-process \
+            php php-pear php-pgsql php-process php-mbstring\
             smtpdaemon \
             file libxml2 \
             binutils mailx boost

@@ -21,11 +21,22 @@ function time()
   return 1535371200;
 }
 
+/**
+ * @class RepositoryApiTest
+ * @brief Test for RepositoryApi
+ */
 class RepositoryApiTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var CurlRequest */
+  /** @var CurlRequest $mockCurlRequest
+   * CurlRequest object for testing */
   private $mockCurlRequest;
 
+  /**
+   * @brief One time setup for test
+   *
+   * Mock the CurlRequest class and set mockCurlRequest variable
+   * @see PHPUnit::Framework::TestCase::setUp()
+   */
   protected function setUp()
   {
     $this->mockCurlRequest = \Mockery::mock('CurlRequest');
@@ -43,14 +54,25 @@ class RepositoryApiTest extends \PHPUnit\Framework\TestCase
     $this->mockCurlRequest->shouldReceive('close')->once();
   }
 
+  /**
+   * @brief Tear down mock objects
+   * @see PHPUnit::Framework::TestCase::tearDown()
+   */
   public function tearDown()
   {
     \Mockery::close();
   }
 
+  /**
+   * @brief Test for RepositoryApi::getLatestRelease()
+   * @test
+   * -# Mock CurlRequestService object and pass to RepositoryApi
+   * -# Get the result of RepositoryApi::getLatestRelease()
+   * -# Check if you receive array `(key => value)`
+   */
   public function testGetLatestRelease()
   {
-    $mockCurlRequestServer = \Mockery::mock('CurlRequestServer');
+    $mockCurlRequestServer = \Mockery::mock('CurlRequestService');
     $mockCurlRequestServer->shouldReceive('create')->once()
       ->with('https://api.github.com/repos/fossology/fossology/releases/latest')
       ->andReturn($this->mockCurlRequest);
@@ -59,6 +81,13 @@ class RepositoryApiTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals(array('key' => 'value'), $repositoryApi->getLatestRelease());
   }
 
+  /**
+   * @brief Test for RepositoryApi::getCommitsOfLastDays()
+   * @test
+   * -# Mock CurlRequestService object and pass to RepositoryApi
+   * -# Get the result of RepositoryApi::getCommitsOfLastDays()
+   * -# Check if you receive array `(key => value)`
+   */
   public function testGetCommitsOfLastDays()
   {
     $mockCurlRequestServer = \Mockery::mock('CurlRequestServer');

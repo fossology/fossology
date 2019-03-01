@@ -193,7 +193,11 @@ if [[ $COMMON ]]; then
    chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
 
    # make sure repo and its parent dir has the right permissions
-   chown {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
+   if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
+     echo "NOTE: Repository group is not correct."
+     echo "Fixing..This may take long duration, depending on your repository size."
+     chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
+   fi
    chmod 2770 $\{REPO%/*\} $REPO
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because

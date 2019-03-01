@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2017 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+require_once "user-del-helper.php";
 define("TITLE_user_del", _("Delete A User"));
 
 use \Fossology\Lib\Auth\Auth;
@@ -32,13 +34,14 @@ class user_del extends FO_Plugin
     $this->Title      = TITLE_user_del;
     $this->MenuList   = "Admin::Users::Delete";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
+    $this->dbManager  = $GLOBALS['container']->get('db.manager');
 
     parent::__construct();
   }
 
   /**
    * \brief Delete a user.
-   * 
+   *
    * \return NULL on success, string on failure.
    */
   function Delete($UserId)
@@ -56,7 +59,7 @@ class user_del extends FO_Plugin
       return($text);
     }
 
-    /* Delete the users group 
+    /* Delete the users group
      * First look up the users group_pk
      */
     $sql = "SELECT group_pk FROM groups WHERE group_name = '$row[user_name]' LIMIT 1;";
@@ -108,7 +111,7 @@ class user_del extends FO_Plugin
     if (!empty($User))
     {
       if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = $this->Delete($User); }
+      else { $rc = DeleteUser($User, $this->dbManager); }
       if (empty($rc))
       {
         /* Need to refresh the screen */
@@ -138,7 +141,7 @@ class user_del extends FO_Plugin
       $V .= _("To delete a user, enter the following information:<P />\n");
       $V .= "<ol>\n";
       $V .= _("<li>Select the user to delete.<br />");
-      $V .= "<select name='userid'>\n";
+      $V .= "<select name='userid' class='ui-render-select2'>\n";
       while( $row = pg_fetch_assoc($result))
       {
         $V .= "<option value='" . $row['user_pk'] . "'>";

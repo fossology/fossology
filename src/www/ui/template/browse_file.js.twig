@@ -50,6 +50,9 @@ function createDirlistTable() {
     "bFilter": true,
     "bAutoWidth": true,
     "iDisplayLength":50,
+    "fnDrawCallback": function() {
+      renderSelect2();
+    },
     "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
       "sSearch":'_INPUT_<button onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
       "sLengthMenu":'Display <select><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#

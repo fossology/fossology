@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -79,7 +79,7 @@ class UploadFilePage extends UploadPageBase
         UPLOAD_ERR_INVALID_FOLDER_PK => _("Invalid Folder."),
         UPLOAD_ERR_RESEND => _("This seems to be a resent file.")
     );
-    
+
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $description = $this->basicShEscaping($description);
@@ -89,7 +89,7 @@ class UploadFilePage extends UploadPageBase
     {
       return array(false,$uploadErrors[UPLOAD_ERR_NO_FILE],$description);
     }
-    
+
     if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
         != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
     {
@@ -120,8 +120,8 @@ class UploadFilePage extends UploadPageBase
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
 
+    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
     if (empty($uploadId))
     {
       return array(false, _("Failed to insert upload record"), $description);
@@ -150,10 +150,10 @@ class UploadFilePage extends UploadPageBase
       }
       return array(false, $message, $description);
     }
-    
+
     $message = $this->postUploadAddJobs($request, $originalFileName, $uploadId);
-        
-    return array(true, $message, $description);
+
+    return array(true, $message, $description, $uploadId);
   }
 
 }

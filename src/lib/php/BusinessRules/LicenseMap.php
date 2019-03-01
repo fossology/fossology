@@ -22,13 +22,17 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
 
+/**
+ * @class LicenseMap
+ * @brief Wrapper class for license map
+ */
 class LicenseMap
 {
   const CONCLUSION = 1;
   const TRIVIAL = 2;
   const FAMILY = 3;
   const REPORT = 4;
-  
+
   /** @var DbManager */
   private $dbManager;
   /** @var int */
@@ -37,11 +41,13 @@ class LicenseMap
   private $groupId;
   /** @var array */
   private $map = array();
-  
+
   /**
+   * Constructor
    * @param DbManager $dbManager
    * @param int $groupId
    * @param int $usageId
+   * @param bool $full
    */
   public function __construct(DbManager $dbManager, $groupId, $usageId=null, $full=false)
   {
@@ -63,7 +69,7 @@ class LicenseMap
             UNION
             SELECT rf_pk, rf_shortname, -1 usage, rf_pk rf_parent from '.$licenseView->getDbViewName()
             .') full_map ORDER BY rf_pk,usage DESC';
-      
+
       $stmt = __METHOD__.".$this->usageId,$groupId,full";
     }
     else
@@ -81,7 +87,12 @@ class LicenseMap
     }
     $dbManager->freeResult($res);
   }
-  
+
+  /**
+   * @brief For a given license id, get the projected id
+   * @param int $licenseId  License id to be queried
+   * @return int Projected license id
+   */
   public function getProjectedId($licenseId)
   {
     if(array_key_exists($licenseId, $this->map))
@@ -90,8 +101,15 @@ class LicenseMap
     }
     return $licenseId;
   }
-  
-  
+
+  /**
+   * @brief For a given license id, get the projected shortname.
+   *
+   * If the license id is not found in the map, then default name is returned.
+   * @param int $licenseId  License id to be queried
+   * @param string $defaultName Default name to return if license not found in map
+   * @return string|null Projected shortname or default name
+   */
   public function getProjectedShortname($licenseId, $defaultName=null)
   {
     if(array_key_exists($licenseId, $this->map))
@@ -100,20 +118,34 @@ class LicenseMap
     }
     return $defaultName;
   }
-  
+
+  /**
+   * Get the Usage of the map.
+   * @return number
+   */
   public function getUsage()
   {
     return $this->usageId;
   }
-  
+
+  /**
+   * Get the group id of the map.
+   * @return number
+   */
   public function getGroupId()
   {
     return $this->groupId;
   }
-  
+
+  /**
+   * Get the top level license refs from the license map.
+   * @return Fossology::Lib::Data::LicenseRef[]
+   */
   public function getTopLevelLicenseRefs()
   {
-    $licenseView = new LicenseViewProxy($this->groupId,array('columns'=>array('rf_pk','rf_shortname','rf_fullname')),'license_visible');
+    $licenseView = new LicenseViewProxy($this->groupId,
+      array('columns'=>array('rf_pk','rf_shortname','rf_fullname')),
+      'license_visible');
     $query = $licenseView->asCTE()
           .' SELECT rf_pk, rf_shortname, rf_fullname FROM '.$licenseView->getDbViewName()
           .' LEFT JOIN license_map ON rf_pk=rf_fk AND rf_fk!=rf_parent AND usage=$1'
@@ -128,16 +160,34 @@ class LicenseMap
     }
     return $topLevel;
   }
-  
+
   /**
-   * @param string $usageExpr
+   * @brief Query to get license map view along with license ref
+   * @param string $usageExpr Position of usage id in parameter array
    */
   public static function getMappedLicenseRefView($usageExpr='$1')
   {
-    $sql = "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM ONLY license_ref bot "
+    return "SELECT bot.rf_pk rf_origin, top.rf_pk, top.rf_shortname, top.rf_fullname FROM ONLY license_ref bot "
           ."LEFT JOIN license_map ON bot.rf_pk=rf_fk AND usage=$usageExpr "
           ."INNER JOIN license_ref top ON rf_parent=top.rf_pk OR rf_parent IS NULL AND bot.rf_pk=top.rf_pk";
-    return $sql;
   }
 
+  /**
+   * @brief Get all Obligations attached with given license ref
+   * @param int  $license_ref ID of license / candidate license
+   * @param bool $candidate   Is the license candidate?
+   * @return int[] Array of obligation ids
+   */
+  public function getObligationsForLicenseRef($license_ref, $candidate = false)
+  {
+    $tableName = $candidate ? "obligation_candidate_map" : "obligation_map";
+    $sql = "SELECT distinct(ob_fk) FROM $tableName WHERE rf_fk = $1;";
+    $ob_fks = $this->dbManager->getRows($sql, [$license_ref],
+      __METHOD__ . $tableName);
+    $returnVal = [];
+    foreach ($ob_fks as $row) {
+      $returnVal[] = $row['ob_fk'];
+    }
+    return $returnVal;
+  }
 }

@@ -15,7 +15,8 @@
       <li>{{ "Select the folder containing the file to delete"|trans }}:
         <select name='folder' 
         onLoad='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=-1")'
-        onChange='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=" + this.value)'>
+        onChange='Uploads_Get("{{ tracebackUri }}?mod=upload_options&folder=" + this.value)'
+        class="ui-render-select2">
        {{ rootFolderListOptions }}
         </select>
       </li>
@@ -39,7 +40,7 @@
   
     <script>
       window.onload = function() {
-          $('#folder_select').select2();
+        $("select[name=folder]").trigger('change');
       };
 
       function Uploads_Reply()

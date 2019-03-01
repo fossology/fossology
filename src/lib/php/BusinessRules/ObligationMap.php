@@ -20,18 +20,31 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Db\DbManager;
 
+/**
+ * @class ObligationMap
+ * @brief Wrapper class for obligation map
+ */
 class ObligationMap
 {
 
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager object */
   private $dbManager;
 
+  /**
+   * Constructor
+   * @param DbManager $dbManager DB manager to use
+   */
   public function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
   }
 
-  /** @brief get the license id from the shortname */
+  /**
+   * @brief Get the license id from the shortname
+   * @param bool $candidate Is a candidate license
+   * @return string[] Array of license shortnames
+   */
   public function getAvailableShortnames($candidate=false)
   {
     if ($candidate)
@@ -59,7 +72,12 @@ class ObligationMap
     return $licshortnames;
   }
 
-  /** @brief get the license id from the shortname */
+  /**
+   * @brief Get the license id from the shortname
+   * @param string $shortname Short name of the license
+   * @param bool   $candidate Is a candidate license?
+   * @return int License id
+   */
   public function getIdFromShortname($shortname,$candidate=false)
   {
     if ($candidate)
@@ -74,7 +92,12 @@ class ObligationMap
     return $result['rf_pk'];
   }
 
-  /** @brief get the shortname of the license by Id */
+  /**
+   * @brief Get the shortname of the license by Id
+   * @param int $rfId ID of the license
+   * @param bool $candidate Is a candidate license?
+   * @return string License shortname
+   */
   public function getShortnameFromId($rfId,$candidate=false)
   {
     if ($candidate)
@@ -89,7 +112,12 @@ class ObligationMap
     return $result['rf_shortname'];
   }
 
-  /** @brief get the list of licenses associated with the obligation */
+  /**
+   * @brief Get the list of licenses associated with the obligation
+   * @param int $obId Obligation id
+   * @param bool $candidate Is a candidate obligation?
+   * @return string List of license shortname delimited by `';'`
+   */
   public function getLicenseList($obId,$candidate=false)
   {
     $liclist = "";
@@ -123,7 +151,13 @@ class ObligationMap
     return $liclist;
   }
 
-  /** @brief check if the obligation is already associated with the license */
+  /**
+   * @brief Check if the obligation is already associated with the license
+   * @param int $obId   Obligation id
+   * @param int $licId  License id
+   * @param bool $candidate Is a candidate obligation?
+   * @return bool True if license is already mapped, false otherwise
+   */
   public function isLicenseAssociated($obId,$licId,$candidate=false)
   {
     if ($candidate)
@@ -148,26 +182,35 @@ class ObligationMap
     return false;
   }
 
-  /** @brief check if the text of this obligation is existing */
+  /**
+   * @brief Associate a license with an obligation
+   * @param int $obId  Obligation id
+   * @param int $licId License id
+   * @param bool $candidate Is a candidate obligation?
+   */
   public function associateLicenseWithObligation($obId,$licId,$candidate=false)
   {
-    if ($candidate)
-    {
-      $sql = "INSERT INTO obligation_candidate_map (ob_fk, rf_fk) VALUES ($1, $2)";
-      $stmt = __METHOD__.".om_addcandidate_$obId";
+    if (! $this->isLicenseAssociated($obId, $licId, $candidate)) {
+      if ($candidate) {
+        $sql = "INSERT INTO obligation_candidate_map (ob_fk, rf_fk) VALUES ($1, $2)";
+        $stmt = __METHOD__ . ".om_addcandidate";
+      } else {
+        $sql = "INSERT INTO obligation_map (ob_fk, rf_fk) VALUES ($1, $2)";
+        $stmt = __METHOD__ . ".om_addlicense";
+      }
+      $this->dbManager->prepare($stmt, $sql);
+      $res = $this->dbManager->execute($stmt, array($obId,$licId));
+      $this->dbManager->fetchArray($res);
+      $this->dbManager->freeResult($res);
     }
-    else
-    {
-      $sql = "INSERT INTO obligation_map (ob_fk, rf_fk) VALUES ($1, $2)";
-      $stmt = __METHOD__.".om_addlicense_$obId";
-    }
-    $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($obId,$licId));
-    $this->dbManager->fetchArray($res);
-    $this->dbManager->freeResult($res);
   }
 
-  /** @brief check if the text of this obligation is existing */
+  /**
+   * @brief Unassociate a license from an obligation
+   * @param int $obId Obligation id
+   * @param int $licId License id
+   * @param bool $candidate Is a candidate obligation?
+   */
   public function unassociateLicenseFromObligation($obId,$licId=0,$candidate=false)
   {
     if ($licId == 0)
@@ -194,7 +237,7 @@ class ObligationMap
       {
         $sql = "DELETE FROM obligation_map WHERE ob_fk=$1 AND rf_fk=$2";
       }
-      $stmt = __METHOD__.".omdel_$licId";
+      $stmt = __METHOD__.".omdel_lic";
       $this->dbManager->prepare($stmt,$sql);
       $res = $this->dbManager->execute($stmt,array($obId,$licId));
     }
@@ -202,4 +245,25 @@ class ObligationMap
     $this->dbManager->freeResult($res);
   }
 
+  /**
+   * @brief Get all obligations from DB
+   * @return array
+   */
+  public function getObligations()
+  {
+    $sql = "SELECT * FROM obligation_ref;";
+    return $this->dbManager->getRows($sql);
+  }
+
+  /**
+   * @brief Get the obligation topic from the obligation id
+   * @param int     $ob_pk     Obligation id
+   * @return string Obligation topic
+   */
+  public function getTopicNameFromId($ob_pk)
+  {
+    $sql = "SELECT ob_topic FROM obligation_ref WHERE ob_pk = $1;";
+    $result = $this->dbManager->getSingleRow($sql,array($ob_pk));
+    return $result['ob_topic'];
+  }
 }

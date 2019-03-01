@@ -16,19 +16,36 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+/**
+ * @file
+ * @brief Helper class to get the latest release and commits from GitHub API
+ */
+
+/**
+ * @class RepositoryApi
+ * @brief Helper class to get the latest release and commits from GitHub API
+ */
 class RepositoryApi
 {
-  // @var CurlRequestService
+  /**
+   * @var Fossology::Lib::Application::CurlRequestService $curlRequestService
+   * Curl request service object for interation with GitHub API
+   */
   private $curlRequestService = null;
 
+  /**
+   * Constructor
+   * @param Fossology::Lib::Application::CurlRequestService $curlRequestService
+   */
   public function __construct($curlRequestService)
   {
     $this->curlRequestService = $curlRequestService;
   }
 
   /**
-   * @param string $apiRequest
-   * @return array
+   * @brief Send a curl request to apiRequest for resource
+   * @param string $apiRequest Required resource
+   * @return array Response from GitHub API
    */
   private function curlGet($apiRequest)
   {
@@ -55,6 +72,7 @@ class RepositoryApi
   }
 
   /**
+   * @brief Get the latest release info from GitHub
    * @return array
    */
   public function getLatestRelease()
@@ -63,7 +81,8 @@ class RepositoryApi
   }
 
   /**
-   * @param int $days
+   * @brief Get the commits from past n days.
+   * @param int $days Number of days commits are required.
    * @return array
    */
   public function getCommitsOfLastDays($days = 30)

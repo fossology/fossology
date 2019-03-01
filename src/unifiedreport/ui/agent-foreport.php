@@ -24,6 +24,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Data\Upload\Upload;
 
 /**
  * @class FoUnifiedReportGenerator
@@ -59,11 +60,7 @@ class FoUnifiedReportGenerator extends DefaultPlugin
       return $this->flushContent($e->getMessage());
     }
 
-    $reportGenAgent = plugin_find('agent_unifiedreport');
-    $userId = Auth::getUserId();
-    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
-    $error = "";
-    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), tracebackTotalUri());
+    list($jobId, $jobQueueId, $error) = $this->scheduleAgent($groupId, $upload);
 
     if ($jobQueueId<0)
     {
@@ -119,6 +116,24 @@ class FoUnifiedReportGenerator extends DefaultPlugin
   {
     $text = _("Generate Report");
     menu_insert("Browse-Pfile::Export&nbsp;Unified&nbsp;Report", 0, self::NAME, $text);
+  }
+
+  /**
+   * Schedules unified report agent to generate report
+   *
+   * @param int $groupId
+   * @param Upload $upload
+   * @return array Job id, Job queue id and error
+   */
+  public function scheduleAgent($groupId, $upload)
+  {
+    $reportGenAgent = plugin_find('agent_unifiedreport');
+    $userId = Auth::getUserId();
+    $uploadId = $upload->getId();
+    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
+    $error = "";
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), tracebackTotalUri());
+    return array($jobId, $jobQueueId, $error);
   }
 }
 

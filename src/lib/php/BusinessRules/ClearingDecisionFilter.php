@@ -22,17 +22,27 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 
+/**
+ * @class ClearingDecisionFilter
+ * @brief Various utility functions to filter ClearingDecision
+ */
 class ClearingDecisionFilter
 {
+  /** @var string KEYREPO
+   * Key for repo level decisions */
   const KEYREPO = "all";
 
   /**
-   * @param ClearingDecision[] $clearingDecisions
+   * @brief Get the clearing decisions as a map of
+   * `[<pfile-id>] => [<uploadtree-id>] => decision`
+   *
+   * Irrelevant decisions are removed from the map.
+   * @param ClearingDecision[] $clearingDecisions Clearing decisions to be filtered.
    * @return ClearingDecision[][]
    */
   public function filterCurrentClearingDecisions($clearingDecisions)
   {
-    /* @var $clearingDecisionsByItemId ClearingDecision[][] */
+    /* @var ClearingDecision[][] $clearingDecisionsByItemId */
     $clearingDecisionsMapped = array();
 
     foreach ($clearingDecisions as $clearingDecision)
@@ -65,7 +75,10 @@ class ClearingDecisionFilter
 
 
   /**
-   * @param ClearingDecision[] $clearingDecisions
+   * @brief Get clearing decision as map of `<item-id> => <license-shortnames>`
+   *
+   * Irrelevant decisions and removed licenses are removed from the map.
+   * @param ClearingDecision[] $clearingDecisions Clearing decisions to be filtered.
    * @return ClearingDecision[]
    */
   public function filterCurrentClearingDecisionsForLicenseList($clearingDecisions)
@@ -91,7 +104,8 @@ class ClearingDecisionFilter
 
 
   /**
-   * @param ClearingDecision[] $clearingDecisions
+   * @brief Map clearing decisions by upload tree item id
+   * @param ClearingDecision[] $clearingDecisions Clearing decisions to be filtered.
    * @return ClearingDecision[]
    */
   public function filterCurrentReusableClearingDecisions($clearingDecisions)
@@ -107,7 +121,9 @@ class ClearingDecisionFilter
   }
 
   /**
-   * @return ClearingDecision|false
+   * @brief For a given decision map, get the decision of the given item or
+   * pfile id
+   * @return ClearingDecision|false ClearingDecision if found, false otherwise.
    */
   public function getDecisionOf($decisionMap, $itemId, $pfileId)
   {

@@ -40,6 +40,7 @@ class admin_folder_delete extends FO_Plugin {
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
 
   /**
@@ -51,6 +52,10 @@ class admin_folder_delete extends FO_Plugin {
   function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
+    if(! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
+      $text = _("No access to delete this folder");
+      return ($text);
+    }
     /* Can't remove top folder */
     if ($splitFolder[1] == FolderGetTop()) {
       $text = _("Can Not Delete Root Folder");
@@ -128,9 +133,9 @@ class admin_folder_delete extends FO_Plugin {
     $V.= "</ul>\n";
     $text = _("Select the folder to delete:  ");
     $V.= "<P>$text\n";
-    $V.= "<select name='folder'>\n";
+    $V.= "<select name='folder' class='ui-render-select2'>\n";
     $text = _("select folder");
-    $V.= "<option value=''>[$text]</option>\n";
+    $V.= "<option value='' disabled selected>[$text]</option>\n";
     $V.= FolderListOption(-1, 0, 1, -1, true);
     $V.= "</select><P />\n";
     $text = _("Delete");

@@ -47,11 +47,12 @@ class AgentAdder extends DefaultPlugin
     }
     $uploadId = intval($request->get('upload'));
     $agents = $request->get('agents') ?: '';
+    $vars = [];
 
     if (!empty($uploadId) && !empty($agents) && is_array($agents))
     {
       $rc = $this->agentsAdd($uploadId,$agents,$request);
-      if (empty($rc))
+      if (is_numeric($rc))
       {
         $status = GetRunnableJobList();
         $scheduler_msg = empty($status) ? _("Is the scheduler running? ") : '';
@@ -75,7 +76,7 @@ class AgentAdder extends DefaultPlugin
     $vars['folderListUploads'] = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
     $vars['baseUri'] = Traceback_uri();
     $vars['uploadId'] = $uploadId;
-    
+
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $out =  '<ol>';
     $parmAgentFoots = '';
@@ -89,15 +90,15 @@ class AgentAdder extends DefaultPlugin
     $out .= '</ol>';
     $vars['out'] = $out;
     $vars['outFoot'] = '<script language="javascript"> '.$parmAgentFoots.'</script>';
-    
+
     return $this->render('agent_adder.html.twig', $this->mergeWithDefault($vars));
   }
-  
+
   /**
    * @brief Add an upload to multiple agents.
    * @param int $uploadId
    * @param string[] $agentsToStart - list of agents
-   * @return NULL on success, error message string on failure
+   * @return integer Job ID on success, error message string on failure
    */
   private function agentsAdd($uploadId, $agentsToStart, Request $request)
   {
@@ -107,7 +108,7 @@ class AgentAdder extends DefaultPlugin
     if (!$uploadId) {
       return "agent-add.php AgentsAdd(): No upload_pk specified";
     }
-    
+
     /* @var $upload Upload */
     $upload = $GLOBALS['container']->get('dao.upload')->getUpload($uploadId);
     if ($upload===null)
@@ -144,7 +145,19 @@ class AgentAdder extends DefaultPlugin
         return $errorMsg;
       }
     }
-    return null;
+    return $jobId;
+  }
+
+  /**
+   * @brief Add an upload to multiple agents (wrapper for agentsAdd()).
+   * @param int $uploadId
+   * @param string[] $agentsToStart - list of agents
+   * @return integer Job ID on success, error message string on failure
+   * @sa agentsAdd()
+   */
+  public function scheduleAgents($uploadId, $agentsToStart, Request $request)
+  {
+    return $this->agentsAdd($uploadId, $agentsToStart, $request);
   }
 }
 

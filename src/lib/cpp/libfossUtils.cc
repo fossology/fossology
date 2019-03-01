@@ -18,6 +18,16 @@
 
 #include "libfossUtils.hpp"
 
+/**
+ * \file
+ * \brief General utility functions for CPP
+ */
+
+/**
+ * Translates a string to unsigned long type.
+ * \param string String to be translated
+ * \return Translated unsigned long value
+ */
 unsigned long fo::stringToUnsignedLong(const char* string)
 {
   unsigned long uLongVariable;

@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,11 +25,11 @@
 
 /**
  * \biref Print usage message to user
- * \param Name absolute path to the binary
+ * \param name absolute path to the binary
  */
-FUNCTION void Usage(char *Name)
+FUNCTION void usage(char *name)
 {
-  printf("Usage: %s [options]\n", Name);
+  printf("Usage: %s [options]\n", name);
   printf("  -a   :: Run all non slow maintenance operations.\n");
   printf("  -A   :: Run all maintenance operations.\n");
   printf("  -D   :: Vacuum Analyze the database.\n");
@@ -42,11 +43,10 @@ FUNCTION void Usage(char *Name)
   printf("  -T   :: Remove orphaned temp tables.\n");
   printf("  -U   :: Process expired uploads (slow).\n");
   printf("  -Z   :: Remove orphaned files from the repository (slow).\n");
+  printf("  -E   :: Remove orphaned rows from database (slow).\n");
   printf("  -i   :: Initialize the database, then exit.\n");
   printf("  -I   :: Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use).\n");
   printf("  -v   :: verbose (turns on debugging output)\n");
   printf("  -V   :: print the version info, then exit.\n");
   printf("  -c SYSCONFDIR :: Specify the directory for the system configuration. \n");
 } /* Usage() */
-
-

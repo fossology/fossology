@@ -27,4 +27,19 @@ extern "C" {
 #include "libfossAgentDatabaseHandler.hpp"
 #include "libfossUtils.hpp"
 
+/**
+ * \dir
+ * \brief Contains FOSSology CPP library
+ * \file
+ * \brief The main FOSSology CPP library
+ * \page libcpp FOSSology CPP library
+ * \tableofcontents
+ *
+ * \section libcppabout About
+ * This is library contains common utility functions for FOSSology agents
+ * written in CPP language.
+ * \section libcppsource Library source
+ * - \link src/lib/cpp \endlink
+ */
+
 #endif /* LIBFOSSOLOGYCPP_HPP_ */

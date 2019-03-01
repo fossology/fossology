@@ -22,13 +22,32 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 using namespace fo;
 
+/**
+ * \file
+ * \brief Wrapper for DB result
+ */
+
+/**
+ * Constructor for QueryResult
+ * @param pgResult Postgres query result object
+ */
 QueryResult::QueryResult(PGresult* pgResult) : ptr(unptr::unique_ptr<PGresult, PGresultDeleter>(pgResult)) {
 };
 
+/**
+ * \brief Check if the query failed
+ *
+ * Check if the query is failed by checking the Postgres object for NULL
+ * \return True if failed, false on success.
+ */
 bool QueryResult::isFailed() const {
   return ptr.get() == NULL;
 }
 
+/**
+ * Check the row count in the query result
+ * \return Row count if result exists, -1 otherwise
+ */
 int QueryResult::getRowCount() const {
   if (ptr) {
     return PQntuples(ptr.get());
@@ -37,6 +56,11 @@ int QueryResult::getRowCount() const {
   return -1;
 }
 
+/**
+ * Get all columns from required row as a string vector
+ * \param i The row to be fetched
+ * \return String vector with each column as new element
+ */
 std::vector<std::string> QueryResult::getRow(int i) const {
   std::vector<std::string> result;
 

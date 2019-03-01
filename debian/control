@@ -2,7 +2,7 @@ Source: fossology
 Section: utils
 Priority: extra
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjsoncpp-dev, php5-cli|php7.0-cli|php7.2-cli
+Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjsoncpp-dev, php5-cli|php7.0-cli|php7.2-cli, php-mbstring|php5, php-zip|php5, php-xml|php5
 Standards-Version: 3.9.1
 Homepage: http://fossology.org
 
@@ -37,7 +37,7 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql, php-pear, php5-cli|php7.0-cli|php7.2-cli, php5-json|php7.0-json|php7.2-json, ${shlibs:Depends}, ${misc:Depends}
+Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql, php-pear, php5-cli|php7.0-cli|php7.2-cli, php5-json|php7.0-json|php7.2-json, php-mbstring|php5, php-zip|php5, php-xml|php5, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -274,7 +274,7 @@ Description: architecture for analyzing software, OSS readme generator
 
 Package: fossology-unifiedreport
 Architecture: any
-Depends: fossology-common, ${misc:Depends}
+Depends: fossology-common, php-zip|php5, php-xml|php5, ${misc:Depends}
 Description: architecture for analyzing software, Microsoft Word report generator
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -310,7 +310,7 @@ Description: architecture for analyzing software, SPDX v2.0 generator
 
 Package: fossology-reportimport
 Architecture: any
-Depends: fossology-common, ${misc:Depends}
+Depends: fossology-common, php-mbstring|php5, ${misc:Depends}
 Description: architecture for analyzing software, report importer
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents

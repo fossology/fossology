@@ -129,12 +129,12 @@
  * Please see the file LICENSE included with this software for the full text of these licenses.
  * \section libsection FOSSology C library
  * \link src/lib/ \endlink contains fossology.a and all the component files that go into this common core C library.
- * \subsection libc FOSSology library for C
- * \link src/lib/c \endlink contains components for FOSSology core C library.
- * \subsection libcpp FOSSology library for CPP
- * \link src/lib/cpp \endlink contains components for FOSSology core CPP library
- * \subsection libphp FOSSology library for PHP
- * \link src/lib/php \endlink contains components for FOSSology PHP library
+ * \subsection libsectionc FOSSology library for C
+ * \link src/lib/c \endlink contains components for \subpage libc
+ * \subsection libsectioncpp FOSSology library for CPP
+ * \link src/lib/cpp \endlink contains components for \subpage libcpp
+ * \subsection libsectionphp FOSSology library for PHP
+ * \link src/lib/php \endlink contains components for \subpage libphp
  *
  * \section schedsection scheduler
  * You can find all the scheduler code in src/scheduler/.  But we might want to move it
@@ -184,6 +184,16 @@
  * -# \subpage demomod
  * -# \subpage wcagent
  * -# \subpage regexscan
+ *
+ * \page libraries Libraries provided by FOSSology
+ * \tableofcontents
+ * FOSSology also provides you with libraries which can be used in developing a
+ * new agent for FOSSology.
+ *
+ * These libraries provides with some common utility functionalities.
+ * -# \subpage libc
+ * -# \subpage libcpp
+ * -# \subpage libphp
  */
 
 /* General directory definitions */

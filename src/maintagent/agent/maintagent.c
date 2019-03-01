@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014,2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -61,10 +61,6 @@ char BuildVersion[]="maintagent build version: " VERSION_S " r(" COMMIT_HASH_S "
 char BuildVersion[]="maintagent build version: NULL.\n";
 #endif
 
-/**********  Globals  *************/
-PGconn    *pgConn = 0;        ///< database connection
-
-
 /**
  * \brief Main entry point for the agent
  */
@@ -73,8 +69,8 @@ int main(int argc, char **argv)
   int cmdopt;
   char *COMMIT_HASH;
   char *VERSION;
-  char agent_rev[myBUFSIZ];
-  char *agent_desc = "Maintenance Agent";
+  char agentRev[myBUFSIZ];
+  char *agentDesc = "Maintenance Agent";
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
@@ -84,163 +80,178 @@ int main(int argc, char **argv)
    */
   COMMIT_HASH = fo_sysconfig("maintagent", "COMMIT_HASH");
   VERSION = fo_sysconfig("maintagent", "VERSION");
-  snprintf(agent_rev, sizeof(agent_rev), "%s.%s", VERSION, COMMIT_HASH);
+  snprintf(agentRev, sizeof(agentRev), "%s.%s", VERSION, COMMIT_HASH);
   /* insert/update agent data if necessary */
-  fo_GetAgentKey(pgConn, basename(argv[0]), 0, agent_rev, agent_desc);
+  fo_GetAgentKey(pgConn, basename(argv[0]), 0, agentRev, agentDesc);
 
-  int ValidateFoldersExe = 0;
-  int VerifyFilePermsExe = 0;
-  int RemoveUploadsExe = 0;
-  int NormalizeUploadPrioritiesExe = 0;
-  int RemoveTempsExe = 0;
-  int VacAnalyzeExe = 0;
-  int ProcessExpiredExe = 0;
-  int RemoveOrphanedFilesExe = 0;
+  int validateFoldersExe = 0;
+  int verifyFilePermsExe = 0;
+  int removeUploadsExe = 0;
+  int normalizeUploadPrioritiesExe = 0;
+  int removeTempsExe = 0;
+  int vacAnalyzeExe = 0;
+  int processExpiredExe = 0;
+  int removeOrphanedFilesExe = 0;
   int reIndexAllTablesExe = 0;
+  int removeOrphanedRowsExe = 0;
+
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADFghIpNPRTUZivVc:")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aADEFghIpNPRTUZivVc:")) != -1)
   {
     switch (cmdopt)
     {
       case 'a': /* All non slow operations */
-          if(ValidateFoldersExe == 0){
-            ValidateFolders();
-            ValidateFoldersExe = 1;
+          if (validateFoldersExe == 0) {
+            validateFolders();
+            validateFoldersExe = 1;
           }
-          if(VerifyFilePermsExe == 0){
-            VerifyFilePerms(1);
-            VerifyFilePermsExe = 1;
+          if (verifyFilePermsExe == 0) {
+            verifyFilePerms(1);
+            verifyFilePermsExe = 1;
           }
-          if(RemoveUploadsExe == 0){
-            RemoveUploads();
-            RemoveUploadsExe = 1;
+          if (removeUploadsExe == 0) {
+            removeUploads();
+            removeUploadsExe = 1;
           }
-          if(NormalizeUploadPrioritiesExe == 0){
-            NormalizeUploadPriorities();
-            NormalizeUploadPrioritiesExe = 1;
+          if (normalizeUploadPrioritiesExe == 0) {
+            normalizeUploadPriorities();
+            normalizeUploadPrioritiesExe = 1;
           }
-          if(RemoveTempsExe == 0){
-            RemoveTemps();
-            RemoveTempsExe = 1;
+          if (removeTempsExe == 0) {
+            removeTemps();
+            removeTempsExe = 1;
           }
-          if(VacAnalyzeExe == 0){
-            VacAnalyze();
-            VacAnalyzeExe = 1;
+          if (vacAnalyzeExe == 0) {
+            vacAnalyze();
+            vacAnalyzeExe = 1;
           }
           break;
       case 'A': /* All operations */
-          if(ValidateFoldersExe == 0){
-            ValidateFolders();
-            ValidateFoldersExe = 1;
+          if (validateFoldersExe == 0) {
+            validateFolders();
+            validateFoldersExe = 1;
           }
-          if(VerifyFilePermsExe == 0){
-            VerifyFilePerms(1);
-            VerifyFilePermsExe = 1;
+          if (verifyFilePermsExe == 0) {
+            verifyFilePerms(1);
+            verifyFilePermsExe = 1;
           }
-          if(RemoveUploadsExe == 0){
-            RemoveUploads();
-            RemoveUploadsExe = 1;
+          if (removeUploadsExe == 0) {
+            removeUploads();
+            removeUploadsExe = 1;
           }
-          if(NormalizeUploadPrioritiesExe == 0){
-            NormalizeUploadPriorities();
-            NormalizeUploadPrioritiesExe = 1;
+          if (normalizeUploadPrioritiesExe == 0) {
+            normalizeUploadPriorities();
+            normalizeUploadPrioritiesExe = 1;
           }
-          if(RemoveTempsExe == 0){
-            RemoveTemps();
-            RemoveTempsExe = 1;
+          if (removeTempsExe == 0) {
+            removeTemps();
+            removeTempsExe = 1;
           }
-          if(VacAnalyzeExe == 0){
-            VacAnalyze();
-            VacAnalyzeExe = 1;
+          if (vacAnalyzeExe == 0) {
+            vacAnalyze();
+            vacAnalyzeExe = 1;
           }
-          if(ProcessExpiredExe == 0){
-            ProcessExpired();
-            ProcessExpiredExe = 1;
+          if (processExpiredExe == 0) {
+            processExpired();
+            processExpiredExe = 1;
           }
-          if(RemoveOrphanedFilesExe == 0){
-            RemoveOrphanedFiles();
-            RemoveOrphanedFilesExe = 1;
+          if (removeOrphanedFilesExe == 0) {
+            removeOrphanedFiles();
+            removeOrphanedFilesExe = 1;
+          }
+          if (reIndexAllTablesExe == 0) {
+            reIndexAllTables();
+            reIndexAllTablesExe = 1;
+          }
+          if (removeOrphanedRowsExe == 0) {
+            removeOrphanedRows();
+            removeOrphanedRowsExe = 1;
           }
           break;
       case 'D': /* Vac/Analyze (slow) */
-          if(VacAnalyzeExe == 0){
-            VacAnalyze();
-            VacAnalyzeExe = 1;
+          if (vacAnalyzeExe == 0) {
+            vacAnalyze();
+            vacAnalyzeExe = 1;
           }
           break;
       case 'F': /* Validate folder contents */
-          if(ValidateFoldersExe == 0){
-            ValidateFolders();
-            ValidateFoldersExe = 1;
+          if (validateFoldersExe == 0) {
+            validateFolders();
+            validateFoldersExe = 1;
           }
           break;
       case 'g': /* Delete orphan gold files */
-          DeleteOrphanGold();
+          deleteOrphanGold();
           break;
       case 'h':
-            Usage(argv[0]);
-            ExitNow(0);
+            usage(argv[0]);
+            exitNow(0);
       case 'N': /* Remove uploads with no pfiles */
-          if(NormalizeUploadPrioritiesExe == 0){
-            NormalizeUploadPriorities();
-            NormalizeUploadPrioritiesExe = 1;
+          if (normalizeUploadPrioritiesExe == 0) {
+            normalizeUploadPriorities();
+            normalizeUploadPrioritiesExe = 1;
           }
           break;
       case 'p': /* Verify file permissions */
-          VerifyFilePerms(0);
+          verifyFilePerms(0);
           break;
       case 'P': /* Verify and fix file permissions */
-          if(VerifyFilePermsExe == 0){
-            VerifyFilePerms(1);
-            VerifyFilePermsExe = 1;
+          if (verifyFilePermsExe == 0) {
+            verifyFilePerms(1);
+            verifyFilePermsExe = 1;
           }
           break;
       case 'R': /* Remove uploads with no pfiles */
-          if(RemoveUploadsExe == 0){
-            RemoveUploads();
-            RemoveUploadsExe = 1;
+          if (removeUploadsExe == 0) {
+            removeUploads();
+            removeUploadsExe = 1;
           }
           break;
       case 'T': /* Remove orphaned temp tables */
-          if(RemoveTempsExe == 0){
-            RemoveTemps();
-            RemoveTempsExe = 1;
+          if (removeTempsExe == 0) {
+            removeTemps();
+            removeTempsExe = 1;
           }
           break;
       case 'U': /* Process expired uploads (slow) */
-          if(ProcessExpiredExe == 0){
-            ProcessExpired();
-            ProcessExpiredExe = 1;
+          if (processExpiredExe == 0) {
+            processExpired();
+            processExpiredExe = 1;
           }
           break;
       case 'Z': /* Remove orphaned files from the repository (slow) */
-          if(RemoveOrphanedFilesExe == 0){
-            RemoveOrphanedFiles();
-            RemoveOrphanedFilesExe = 1;
+          if (removeOrphanedFilesExe == 0) {
+            removeOrphanedFiles();
+            removeOrphanedFilesExe = 1;
           }
           break;
       case 'I': /* Reindexing of database */
-          if(reIndexAllTablesExe == 0){
+          if (reIndexAllTablesExe == 0) {
             reIndexAllTables();
             reIndexAllTablesExe = 1;
           }
           break;
+      case 'E': /* Remove orphaned files from the database */
+          if (removeOrphanedRowsExe == 0) {
+            removeOrphanedRows();
+            removeOrphanedRowsExe = 1;
+          }
+          break;
       case 'i': /* "Initialize" */
-            ExitNow(0);
+            exitNow(0);
       case 'v': /* verbose output for debugging  */
           agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
             break;
       case 'V': /* print version info */
             printf("%s", BuildVersion);
-            ExitNow(0);
+            exitNow(0);
       case 'c': break; /* handled by fo_scheduler_connect() */
       default:
-            Usage(argv[0]);
-            ExitNow(-1);
+            usage(argv[0]);
+            exitNow(-1);
     }
   }
 
-
-  ExitNow(0);  /* success */
+  exitNow(0);  /* success */
   return(0);   /* Never executed but prevents compiler warning */
 } /* main() */

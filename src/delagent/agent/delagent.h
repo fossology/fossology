@@ -1,6 +1,6 @@
 /********************************************************
  Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015-2017 Siemens AG
+ Copyright (C) 2015-2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -46,7 +46,7 @@ extern int Verbose;
 extern int Test;
 
 /* for DB */
-extern PGconn* db_conn;
+extern PGconn* pgConn;
 
 /**
  * \def MAXSQL
@@ -70,27 +70,28 @@ extern PGconn* db_conn;
 #define myBUFSIZ 2048
 
 /* authentication and permission checking */
-int authentication(char *user, char * password, int *user_id, int *user_perm);
+int authentication(char *user, char * password, int *userId, int *userPerm);
 
-int check_permission_upload(int wantedPermissions, long upload_id, int user_id, int user_perm);
-int check_read_permission_upload(long upload_id, int user_id, int user_perm);
-int check_write_permission_upload(long upload_id, int user_id, int user_perm);
-int check_permission_folder(long folder_id, int user_id, int user_perm);
-int check_permission_license(long license_id, int user_perm);
+int check_permission_upload(int wantedPermissions, long uploadId, int userId, int userPerm);
+int check_read_permission_upload(long upload_id, int userId, int userPerm);
+int check_write_permission_upload(long upload_id, int userId, int userPerm);
+int check_permission_folder(long folder_id, int userId, int userPerm);
+int check_permission_license(long license_id, int userPerm);
 
 /* functions that list things */
-int listFolders(int user_id, int user_perm);
-int listUploads(int user_id, int user_perm);
+int listFolders(int userId, int userPerm);
+int listUploads(int userId, int userPerm);
+int listFoldersRecurse(long Parent, int Depth, long Row, int DelFlag, int userId, int userPerm);
 
 /* function that delete actual things */
-int deleteLicense(long UploadId, int user_perm);
-int deleteUpload(long UploadId, int user_id, int user_perm);
-int deleteFolder(long cFolder, long pFolder, int user_id, int user_perm);
+int deleteUpload(long uploadId, int userId, int userPerm);
+int deleteFolder(long cFolder, long pFolder, int userId, int userPerm);
+int unlinkContent(long child, long parent, int mode, int userId, int userPerm);
 
 /* for usage from scheduler */
 void doSchedulerTasks();
 
 /* misc */
 void usage(char *Name);
-
+void exitNow(int exitVal);
 #endif /* _DELAGENT_H */
