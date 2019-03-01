@@ -97,7 +97,7 @@ int  DBLoadGoldInit()
   GlobalUploadKey = atoi(PQgetvalue(result,0,0));
   PQclear(result);
 
-  GError* error;
+  GError* error = NULL;
   char* foConf = get_confFile();
 
   char cmd[MAXCMD+1];

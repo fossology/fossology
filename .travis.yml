@@ -1,10 +1,10 @@
-# Copyright Siemens AG, 2014-2018
-# SPDX-License-Identifier:	GPL-2.0 LGPL-2.1
+# Copyright Siemens AG, 2014-2019
+# SPDX-License-Identifier: GPL-2.0 LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
 
 language: php
-dist: trusty
+dist: xenial
 php: 7.0
 cache:
   ccache: true
@@ -22,6 +22,7 @@ addons:
       - genisoimage
       - libboost-program-options-dev
       - libboost-regex-dev
+      - libglib2.0-dev
       - libcppunit-dev
       - libcunit1-dev
       - libdbd-sqlite3-perl
@@ -32,8 +33,11 @@ addons:
       - librpm-dev
       - libspreadsheet-writeexcel-perl
       - libtext-template-perl
-      - php5-cli
-      - php5-pgsql
+      - php-cli
+      - php-pgsql
+      - php-zip
+      - php-xml
+      - php-mbstring
       - poppler-utils
       - p7zip
       - p7zip-full
@@ -73,15 +77,15 @@ jobs:
         - src/testing/docker/test-standalone.sh
 #### C/C++ agent tests ###########################
     - &compiler-tests
-      env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
+      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       addons:
         apt:
           sources:
             - ubuntu-toolchain-r-test
           packages:
             - *default_packages
-            - gcc-4.8
-            - g++-4.8
+            - gcc-5
+            - g++-5
       install:
         - composer install --prefer-dist --working-dir=src
         - ./install/scripts/install-spdx-tools.sh
@@ -94,16 +98,6 @@ jobs:
       after_success:
         - ccache -s
     - <<: *compiler-tests
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-5
-            - g++-5
-    - <<: *compiler-tests
       env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
       addons:
         apt:
@@ -114,14 +108,25 @@ jobs:
             - gcc-6
             - g++-6
     - <<: *compiler-tests
-      env: CC=clang-3.6 CXX=clang++-3.6 CFLAGS='-Wall -Werror -Wno-error=deprecated-register'
+      env: CC=gcc-7 CXX=g++-7 CFLAGS='-Wall'
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty
+            - ubuntu-toolchain-r-test
           packages:
             - *default_packages
-            - clang-3.6
+            - gcc-7
+            - g++-7
+    - <<: *compiler-tests
+      env: CC=gcc-8 CXX=g++-8 CFLAGS='-Wall'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-8
+            - g++-8
     - <<: *compiler-tests
       env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
       addons:
@@ -139,7 +144,7 @@ jobs:
         # Use default port
         - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
         # Use 9.6 auth config:
-        - sudo cp /etc/postgresql/{9.6,10}/main/pg_hba.conf
+        - sudo cp /etc/postgresql/{9.5,10}/main/pg_hba.conf
         - sudo service postgresql restart
         - *default-before-script
 #### PHPUnit tests ###########################
@@ -155,25 +160,25 @@ jobs:
     - &php7-phpunit-tests
       <<: *phpunit-tests
       php: 7.0
+      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
       script:
         - make build-lib VERSIONFILE build-cli
         - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
     - &php71-phpunit-tests
       <<: *php7-phpunit-tests
       php: 7.1
-      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
-    - <<: *php71-phpunit-tests
+    - <<: *php7-phpunit-tests
       php: 7.2
-    - <<: *php71-phpunit-tests
+    - <<: *php7-phpunit-tests
       php: 7.2
       env: PGPORT=5432
       addons:
         postgresql: "10"
         apt:
           packages:
-            - *default_packages
             - postgresql-10
             - postgresql-client-10
+            - *default_packages
       before_script: *postgres-before-script
     - stage: GitHub Page Release
       name: GitHub Page deploy
