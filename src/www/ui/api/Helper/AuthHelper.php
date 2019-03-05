@@ -160,7 +160,7 @@ class AuthHelper
    * @return boolean|Fossology::UI::Api::Models::Info True if values are ok
    *         Info otherwise.
    */
-  private function isTokenActive($valuesFromDb, $tokenId)
+  public function isTokenActive($valuesFromDb, $tokenId)
   {
     $isPayloadValid = true;
     if ($valuesFromDb['active'] == "f") {
@@ -220,5 +220,16 @@ class AuthHelper
       "scope" => $scope
     ];
     return JWT::encode($newJwtToken, $key, 'HS256');
+  }
+
+  /**
+   * Get the value for maximum API token validity from sysconfig table.
+   *
+   * @return integer The value stored in DB.
+   * @see Fossology::UI::Api::Helper::getMaxTokenValidity()
+   */
+  public function getMaxTokenValidity()
+  {
+    return $this->dbHelper->getMaxTokenValidity();
   }
 }

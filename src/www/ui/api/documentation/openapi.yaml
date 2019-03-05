@@ -880,7 +880,7 @@ components:
         token_expire:
           type: string
           format: date
-          description: Date when the token must expire (max 30 days).
+          description: Date when the token must expire (default max 30 days).
       required:
         - username
         - password

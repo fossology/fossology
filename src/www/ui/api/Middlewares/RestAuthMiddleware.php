@@ -30,7 +30,6 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\AuthHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Firebase\JWT\JWT;
 
 /**
  * @class RestAuthMiddleware

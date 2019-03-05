@@ -16,17 +16,17 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
-.active-token-table {
+.active-token-table, .expired-token-table {
 	border: 1px solid black;
 	width: 100%;
 	border-collapse: collapse;
 }
 
-.active-token-table tr {
+.active-token-table tr, .expired-token-table tr {
 	border-bottom: 1px inset #aaa;
 }
 
-.active-token-table td {
+.active-token-table td, .expired-token-table td {
 	padding: 5px;
 }
 

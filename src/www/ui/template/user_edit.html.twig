@@ -211,6 +211,55 @@
       </tbody>
     </table>
   {% endif %}
+  {% if expiredTokenList is not empty %}
+    <hr>
+    <h3>{{ 'Expired access tokens '|trans }}({{ expiredTokenList|length }})</h3>
+    <table class="expired-token-table">
+      <thead>
+        <tr>
+          <th>
+            {{ 'Token name'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Created on'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Expired'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Scope'|trans }}
+          </th>
+          <th style="width:15%"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for singleToken in expiredTokenList %}
+        <tr>
+          <td>
+            {{ singleToken.name }}
+          </td>
+          <td>
+            {{ singleToken.created }}
+          </td>
+          <td>
+            {{ singleToken.expire }}
+          </td>
+          <td>
+            {%if singleToken.scope == 'r' %}
+              {{ 'read only'|trans }}
+            {% else %}
+              {{ 'read/write'|trans }}
+            {% endif %}
+          </td>
+          <td>
+            <input type="button" class="pat-action pat-reveal" value="Reveal"
+              id="reveal-{{ singleToken.id }}" />
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
   <br /><br /><br />
 {% endblock %}
 
@@ -230,6 +279,17 @@
       });
     });
     {% endif %}
+
+    $(function() {
+      $("#pat_expiry").datepicker({
+        minDate : 0,
+        maxDate : "+{{ maxTokenDate }}D",
+        dateFormat : "yy-mm-dd",
+        showOtherMonths : true,
+        selectOtherMonths : true,
+        showButtonPanel : true
+      });
+    });
   </script>
   <script src="scripts/user-edit.js" type="text/javascript"></script>
 {% endblock %}

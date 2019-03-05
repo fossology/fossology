@@ -23,8 +23,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -41,10 +41,10 @@ class AuthController extends RestController
   /**
    * Get the authentication headers for the user.
    *
-   * @param Request $request
-   * @param Response $response
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
    * @param array $args
-   * @return Request
+   * @return ResponseInterface
    * @deprecated Use createNewJwtToken()
    */
   public function getAuthHeaders($request, $response, $args)
@@ -59,10 +59,10 @@ class AuthController extends RestController
   /**
    * Get the JWT authentication headers for the user
    *
-   * @param Request $request
-   * @param Request $response
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
    * @param array $args
-   * @return Request
+   * @return ResponseInterface
    */
   public function createNewJwtToken($request, $response, $args)
   {

@@ -26,15 +26,6 @@ function delayedFadeOut(time, element) {
 }
 
 $(function() {
-  $("#pat_expiry").datepicker({
-    minDate : 0,
-    maxDate : "+30D",
-    dateFormat : "yy-mm-dd",
-    showOtherMonths : true,
-    selectOtherMonths : true,
-    showButtonPanel : true
-  });
-
   $(".pat-revoke").on('click', function(e) {
     var button = this;
     var tokenId = button.id.split('-')[1];

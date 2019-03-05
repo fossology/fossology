@@ -251,11 +251,14 @@ class RestHelper
   public function validateTokenRequest($tokenExpire, $tokenName, $tokenScope)
   {
     $requestValid = true;
+    $tokenValidity = $this->authHelper->getMaxTokenValidity();
+
     if (strtotime($tokenExpire) < strtotime("tomorrow") ||
       ! preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",
-        $tokenExpire) || strtotime($tokenExpire) > strtotime("+30 days")) {
+        $tokenExpire) ||
+      strtotime($tokenExpire) > strtotime("+$tokenValidity days")) {
       $requestValid = new Info(400,
-        "The token should have at least 1 day and max 30 days " .
+        "The token should have at least 1 day and max $tokenValidity days " .
         "of validity and should follow YYYY-MM-DD format.", InfoType::ERROR);
     } elseif (! in_array($tokenScope, RestHelper::VALID_SCOPES)) {
       $requestValid = new Info(400,

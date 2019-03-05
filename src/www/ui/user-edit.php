@@ -21,6 +21,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Helper\AuthHelper;
 use Fossology\UI\Api\Models\Info;
 use Firebase\JWT\JWT;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
@@ -33,6 +34,11 @@ class UserEditPage extends DefaultPlugin
   /** @var DbManager */
   private $dbManager;
 
+  /**
+   * @var AuthHelper
+   * Auth helper object */
+  private $authHelper;
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -43,6 +49,7 @@ class UserEditPage extends DefaultPlugin
     ));
 
     $this->dbManager = $this->getObject('db.manager');
+    $this->authHelper = $this->getObject('helper.authHelper');
   }
 
   /**
@@ -112,6 +119,8 @@ class UserEditPage extends DefaultPlugin
     $vars['userId'] = $UserRec['user_pk'];
     $vars['newToken'] = $newToken;
     $vars['tokenList'] = $this->getListOfActiveTokens();
+    $vars['expiredTokenList'] = $this->getListOfExpiredTokens();
+    $vars['maxTokenDate'] = $this->authHelper->getMaxTokenValidity();
 
     return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
@@ -398,18 +407,57 @@ class UserEditPage extends DefaultPlugin
       } catch (DuplicateTokenNameException $e) {
         throw new \UnexpectedValueException($e->getMessage());
       }
-      $authHelper = $container->get('helper.authHelper');
-      return $authHelper->generateJwtToken($request->getHost(), $tokenExpiry,
+      return $this->authHelper->generateJwtToken($request->getHost(), $tokenExpiry,
           $jti['created_on'], $jti['jti'], $tokenScope, $key);
     }
   }
 
+  /**
+   * @brief Get a list of active tokens for current user.
+   *
+   * Fetches the tokens for current user from DB and format it for twig
+   * template. Also check if the token is expired.
+   * @return array
+   */
   private function getListOfActiveTokens()
   {
+    global $container;
+
     $user_pk = Auth::getUserId();
-    $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on " .
+    $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on, active " .
            "FROM personal_access_tokens " .
            "WHERE user_fk = $1 AND active = true;";
+    $rows = $this->dbManager->getRows($sql, [$user_pk],
+      __METHOD__ . ".getActiveTokens");
+    $response = [];
+    foreach ($rows as $row) {
+      if ($this->authHelper->isTokenActive($row, $row["pat_pk"]) === true) {
+        $entry = [
+          "id" => $row["pat_pk"] . "." . $user_pk,
+          "name" => $row["token_name"],
+          "created" => $row["created_on"],
+          "expire" => $row["expire_on"],
+          "scope" => $row["token_scope"]
+        ];
+        $response[] = $entry;
+      }
+    }
+    array_multisort(array_column($response, "created"), SORT_ASC, $response);
+    return $response;
+  }
+
+  /**
+   * Get a list of expired tokens for current user.
+   * @return array
+   */
+  private function getListOfExpiredTokens()
+  {
+    global $container;
+
+    $user_pk = Auth::getUserId();
+    $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on " .
+      "FROM personal_access_tokens " .
+      "WHERE user_fk = $1 AND active = false;";
     $rows = $this->dbManager->getRows($sql, [$user_pk],
       __METHOD__ . ".getActiveTokens");
     $response = [];

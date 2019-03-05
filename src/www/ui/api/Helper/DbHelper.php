@@ -311,4 +311,21 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
     }
     return $tokenIsUnique;
   }
+
+  /**
+   * Get the value for maximum API token validity from sysconfig table.
+   *
+   * @return integer The value stored in DB or 30 (default).
+   */
+  public function getMaxTokenValidity()
+  {
+    $sql = "SELECT conf_value FROM sysconfig WHERE variablename = $1;";
+    $result = $this->dbManager->getSingleRow($sql, ["PATMaxExipre"],
+      __METHOD__ . ".tokenMaxValidFromSysconfig");
+    $validity = 30;
+    if (! empty($result['conf_value'])) {
+      $validity = intval($result['conf_value']);
+    }
+    return $validity;
+  }
 }
