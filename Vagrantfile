@@ -52,6 +52,7 @@ sudo /usr/local/lib/fossology/fo-postinstall
 
 sudo cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
 sudo a2enconf fossology.conf
+sudo a2enmod rewrite
 
 # increase upload size
 sudo /fossology/install/scripts/php-conf-fix.sh --overwrite
