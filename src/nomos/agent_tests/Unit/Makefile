@@ -17,7 +17,7 @@ LOCALAGENTDIR = ../../agent
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTLIB = -L$(TESTDIR) -lfocunit -lcunit 
 CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I$(TESTDIR) -std=c99 -DCU_VERSION_P=$(CUNIT_VERSION)
-LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(TESTLIB)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(TESTLIB) $(shell pkg-config --libs json-c) -lpthread -lrt
 DEF = -DDATADIR='"$(DATADIR)"'
 EXE = test_nomos
 
