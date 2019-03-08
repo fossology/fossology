@@ -38,7 +38,8 @@ use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Middlewares\RestAuthHelper;
+use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
+use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Slim\App;
@@ -66,14 +67,26 @@ $timingLogger->toc("setup init");
 
 $timingLogger->tic();
 plugin_load();
-plugin_preinstall();
-plugin_postinstall();
-$timingLogger->toc("setup plugins");
 
 $app = new App($GLOBALS['container']);
 
+/*
+ * To check the order of middlewares, refer
+ * https://www.slimframework.com/docs/v3/concepts/middleware.html
+ *
+ * FOSSology Init is the first middleware and Rest Auth is second.
+ *
+ * 1. The call enters from Rest Auth and initialize session variables.
+ * 2. It then goes to FOSSology Init and initialize all plugins
+ * 3. The normal flow continues.
+ * 4. The call now enteres FOSSology Init again and plugins are unloaded.
+ * 5. Then call then enters Rest Auth and leaves as is.
+ */
+
+// Middleware for plugin initialization
+$app->add(new FossologyInitMiddleware());
 // Middleware for authentication
-$app->add(new RestAuthHelper());
+$app->add(new RestAuthMiddleware());
 
 //////////////////////////AUTH/////////////////////
 $app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
@@ -158,7 +171,6 @@ $slimContainer->set('phpErrorHandler',
 $GLOBALS['container']->setAlias('errorHandler', 'phpErrorHandler');
 
 $app->run();
-plugin_unload();
 
 $GLOBALS['container']->get("db.manager")->flushStats();
 return 0;
