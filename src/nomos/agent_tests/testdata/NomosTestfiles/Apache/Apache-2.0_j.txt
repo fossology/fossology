@@ -1,0 +1,3 @@
+## License
+
+This project is released under the Apache v2. licence. See [LICENCE](LICENCE) for more details.
