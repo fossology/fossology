@@ -226,7 +226,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $vcsuser;
   global $vcspass;
   global $TarExcludeList;
-  global $scm;
+  global $scmarg;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {

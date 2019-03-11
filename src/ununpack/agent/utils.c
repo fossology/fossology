@@ -1334,7 +1334,12 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     strncpy(UfileName, EscBuf, sizeof(UfileName));
   }
 
-  // Begin add by vincent
+  /*
+   * Tests for SCM Data: IgnoreSCMData is global and defined in ununpack_globals.h with false value
+   * and pass to true if ununpack is called with -I option to ignore SCM data. 
+   * So if IgnoreSCMData is false the right test is true.
+   * Otherwise if IgnoreSCMData is true and CI->Source is not a SCM data then add it in database.
+  */
   if(ReunpackSwitch && ((IgnoreSCMData && !TestSCMData(CI->Source)) || !IgnoreSCMData))
   {
     /* postgres 8.3 seems to have a problem escaping binary characters
@@ -1374,7 +1379,6 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
     PQclear(result);
   }
-  //End add by Vincent
   TotalItems++;
   fo_scheduler_heart(1);
   return(0);
