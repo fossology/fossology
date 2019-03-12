@@ -48,6 +48,7 @@ src/cli/testupdate2.php
 src/cli/fo_import_licenses
 src/cli/fo_usergroup
 src/cli/fossupload_status
+src/cli/exportLicenseRefUsingSPDX
 src/copyright/agent/copyright
 src/copyright/agent/keyword
 src/copyright/agent_tests/Functional/copyright
