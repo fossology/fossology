@@ -66,6 +66,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     NOTE: By default, no analysis agents are queued up.
     -T       = TEST. No database or repository updates are performed.
                Test mode enables verbose mode.
+    -I       = ignore scm data scanning
 
   FOSSology source options:
     archive  = file, directory, or URL to the archive.
@@ -225,6 +226,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $vcsuser;
   global $vcspass;
   global $TarExcludeList;
+  global $scmarg;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {
@@ -312,7 +314,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   if (!$Test) {
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
-    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"), $scmarg);
     if ($ununpack_jq_pk < 0) {
       echo  $ErrorMsg;
       return 1;
@@ -378,6 +380,7 @@ $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
 $public_flag = 0;
+$scmarg = NULL;
 $OptionS = "";
 
 $user = $passwd = "";
@@ -503,6 +506,9 @@ for ($i = 1;$i < $argc;$i++) {
       break;
     case '-G': /* upload from git repo */
       $VCS = 'Git';
+      break;
+    case '-I': /* ignore scm data when scanning */
+      $scmarg = '-I';
       break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {

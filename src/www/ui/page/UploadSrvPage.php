@@ -270,7 +270,8 @@ class UploadSrvPage extends UploadPageBase
 
     /* schedule agents */
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack")];
-    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"));
+    $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"), $unpackargs);
     if ($ununpack_jq_pk < 0)
     {
       return array(false, $text, _($ErrorMsg));

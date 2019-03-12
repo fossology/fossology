@@ -20,6 +20,7 @@
  */
 #include "ununpack.h"
 #include "externs.h"
+#include "regex.h"
 
 /**
  * \brief File mode BITS
@@ -29,6 +30,12 @@ enum BITS {
   BITS_ARTIFACT = 28,
   BITS_CONTAINER = 29
 };
+
+/**
+ * regular expression to detect SCM data
+ */
+const char* SCM_REGEX = "/\\.git|\\.hg|\\.bzr|CVS/ROOT|\\.svn/";
+
 
 
 /**
@@ -1198,6 +1205,70 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
 } /* DBInsertPfile() */
 
 /**
+ * @brief Search for SCM data in the filename
+ *
+ * SCM data is one of these:
+ *   Git (.git)Data(char *FileName)
+ *   Mercurial (.hg)
+ *   Bazaar (.bzr)
+ *   CVS (CVS/Root)
+ *   Subversion (.svn)
+ * @param sourcefilename
+ * @returns 1 if SCM data is found
+ **/
+int TestSCMData(char *sourcefilename)
+{
+  regex_t preg;
+  int err;
+  int found=0;
+
+  err = regcomp (&preg, SCM_REGEX, REG_NOSUB | REG_EXTENDED);
+  if (err == 0)
+  {
+    int match;
+
+    match = regexec (&preg, sourcefilename, 0, NULL, 0);
+    regfree (&preg);
+    if(match == 0)
+    {
+      found = 1;
+      if (Verbose) LOG_DEBUG("match found %s",sourcefilename);
+    }
+    else if(match == REG_NOMATCH)
+    {
+      found = 0;
+      if (Verbose) LOG_DEBUG("match not found %s",sourcefilename);
+    }
+    else
+    {
+      char *text;
+      size_t size;
+      size = regerror (err, &preg, NULL, 0);
+      text = malloc (sizeof (*text) * size);
+      if(text)
+      {
+        regerror (err, &preg, text, size);
+        LOG_ERROR("Error regexc '%s' '%s' return %d, error %s",SCM_REGEX,sourcefilename,match,text);
+      }
+      else
+      {
+        LOG_ERROR("Not enough memory (%lu)",sizeof (*text) * size);
+        SafeExit(127);
+      }
+      found = 0;
+    }
+  }
+  else
+  {
+     LOG_ERROR("Error regcomp(%d)",err);
+     SafeExit(127);
+  }
+
+
+  return(found);
+} /* TestSCMData() */
+
+/**
  * @brief Insert an UploadTree record.
  *
  * If the tree is a duplicate, then we need to replicate
@@ -1263,8 +1334,13 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     strncpy(UfileName, EscBuf, sizeof(UfileName));
   }
 
-  // Begin add by vincent
-  if(ReunpackSwitch)
+  /*
+   * Tests for SCM Data: IgnoreSCMData is global and defined in ununpack_globals.h with false value
+   * and pass to true if ununpack is called with -I option to ignore SCM data. 
+   * So if IgnoreSCMData is false the right test is true.
+   * Otherwise if IgnoreSCMData is true and CI->Source is not a SCM data then add it in database.
+  */
+  if(ReunpackSwitch && ((IgnoreSCMData && !TestSCMData(CI->Source)) || !IgnoreSCMData))
   {
     /* postgres 8.3 seems to have a problem escaping binary characters
      * (it works in 8.4).  So manually substitute '~' for any unprintable and slash chars.
@@ -1303,7 +1379,6 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
     CI->uploadtree_pk = atol(PQgetvalue(result,0,0));
     PQclear(result);
   }
-  //End add by Vincent
   TotalItems++;
   fo_scheduler_heart(1);
   return(0);
@@ -1640,6 +1715,7 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  -L out :: Generate a log of files extracted (in XML) to out.\n");
   fprintf(stderr,"  -F     :: Using files from the repository.\n");
   fprintf(stderr,"  -i     :: Initialize the database queue system, then exit.\n");
+  fprintf(stderr,"  -I     :: Ignore SCM Data.\n");
   fprintf(stderr,"  -Q     :: Using scheduler queue system. (Includes -F)\n");
   fprintf(stderr,"            If -L is used, unpacked files are placed in 'files'.\n");
   fprintf(stderr,"      -T rep :: Set gold repository name to 'rep' (for testing)\n");

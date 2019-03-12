@@ -79,7 +79,7 @@ class Adj2nestAgentPlugin extends AgentPlugin
    * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
    */
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null, $unpackArgs=null)
   {
     if ($this->AgentHasResults($uploadId) == 1)
     {
@@ -93,7 +93,7 @@ class Adj2nestAgentPlugin extends AgentPlugin
     }
 
     if (!$this->isAgentIncluded($dependencies, 'agent_unpack')) {
-      $dependencies[] = "agent_unpack";
+      $dependencies[] = array('name' => "agent_unpack", 'args' => $unpackArgs);
     }
     $args = is_array($arguments) ? '' : $arguments;
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
