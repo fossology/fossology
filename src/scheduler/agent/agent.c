@@ -778,6 +778,7 @@ meta_agent_t* meta_agent_init(char* name, char* cmd, int max, int spc)
   strcpy(ma->raw_cmd, cmd);
   strcat(ma->raw_cmd, " --scheduler_start");
   ma->max_run = max;
+  ma->run_count = 0;
   ma->special = spc;
   ma->version = NULL;
   ma->valid = TRUE;
@@ -899,9 +900,12 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
     return NULL;
   }
 
-  /* increase the load on the host */
+  /* increase the load on the host and count of running agents */
   if (agent->owner->id > 0)
+  {
     host_increase_load(agent->host);
+    meta_agent_increase_count(agent->type);
+  }
 
   /* spawn the listen thread */
   pass = g_new0(agent_spawn_args, 1);
@@ -1148,9 +1152,15 @@ void agent_transition(agent_t* agent, agent_status new_status)
   if (agent->owner->id > 0)
   {
     if (agent->status == AG_PAUSED)
+    {
       host_increase_load(agent->host);
+      meta_agent_increase_count(agent->type);
+    }
     if (new_status == AG_PAUSED)
+    {
       host_decrease_load(agent->host);
+      meta_agent_decrease_count(agent->type);
+    }
   }
 
   agent->status = new_status;
@@ -1224,6 +1234,7 @@ void agent_print_status(agent_t* agent, GOutputStream* ostr)
 void agent_kill(agent_t* agent)
 {
   AGENT_SEQUENTIAL_PRINT("KILL: sending SIGKILL to pid %d\n", agent->pid);
+  meta_agent_decrease_count(agent->type);
   kill(agent->pid, SIGKILL);
 }
 
@@ -1355,3 +1366,22 @@ int is_agent_special(agent_t* agent, int special_type)
   return (agent != NULL) && ((agent->special & special_type) != 0);
 }
 
+/**
+ * Increase the running agent count.
+ * @param ma Agent's meta
+ */
+void meta_agent_increase_count(meta_agent_t* ma)
+{
+  ma->run_count++;
+  V_AGENT("AGENT[%s] run increased to %d\n", ma->name, ma->run_count);
+}
+
+/**
+ * Decrease the running agent count.
+ * @param ma Agent's meta
+ */
+void meta_agent_decrease_count(meta_agent_t* ma)
+{
+  ma->run_count--;
+  V_AGENT("AGENT[%s] run decreased to %d\n", ma->name, ma->run_count);
+}
