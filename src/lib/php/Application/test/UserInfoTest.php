@@ -18,16 +18,30 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+/**
+ * @class UserInfoTest
+ * @brief Unit tests for UserInfo class
+ */
+class UserInfoTest extends \PHPUnit\Framework\TestCase {
 
-class UserInfoTest extends \PHPUnit_Framework_TestCase {
-
-  /** @var UserInfo */
+  /** @var UserInfo $userInfo
+   * UserInfo class object for testing */
   private $userInfo;
 
+  /**
+   * @brief One time setup for test
+   * @see PHPUnit::Framework::TestCase::setUp()
+   */
   protected function setUp() {
     $this->userInfo = new UserInfo();
   }
 
+  /**
+   * @brief Test for UserInfo::getUserId()
+   * @test
+   * -# Set user id in session.
+   * -# Call UserInfo::getUserId() and check if the id matches.
+   */
   public function testGetUserId() {
     $userId = 424;
 
@@ -36,6 +50,12 @@ class UserInfoTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->userInfo->getUserId(), is($userId));
   }
 
+  /**
+   * @brief Test for UserInfo::getGroupId()
+   * @test
+   * -# Set group id in session.
+   * -# Call UserInfo::getGroupId() and check if the id matches.
+   */
   public function testGetGroupId() {
     $groupId = 321;
 
@@ -44,4 +64,3 @@ class UserInfoTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->userInfo->getGroupId(), is($groupId));
   }
 }
- 

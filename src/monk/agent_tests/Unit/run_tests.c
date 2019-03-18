@@ -39,6 +39,7 @@ extern CU_TestInfo diff_testcases[];
 extern CU_TestInfo match_testcases[];
 extern CU_TestInfo database_testcases[];
 extern CU_TestInfo encoding_testcases[];
+extern CU_TestInfo serialize_testcases[];
 
 extern int license_setUpFunc();
 extern int license_tearDownFunc();
@@ -50,6 +51,21 @@ extern int database_tearDownFunc();
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
 
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] = {
+    {"Testing process:", NULL, NULL, NULL, NULL, string_operations_testcases},
+    {"Testing monk:", NULL, NULL, NULL, NULL, file_operations_testcases},
+    {"Testing license:", NULL, NULL, (CU_SetUpFunc)license_setUpFunc, (CU_TearDownFunc)license_tearDownFunc, license_testcases},
+    {"Testing highlighting:", NULL, NULL, NULL, NULL, highlight_testcases},
+    {"Testing hash:", NULL, NULL, NULL, NULL, hash_testcases},
+    {"Testing diff:", NULL, NULL, NULL, NULL, diff_testcases},
+    {"Testing match:", NULL, NULL, NULL, NULL, match_testcases},
+    {"Testing database:", NULL, NULL, (CU_SetUpFunc)database_setUpFunc, (CU_TearDownFunc)database_tearDownFunc, database_testcases},
+    {"Testing encoding:", NULL, NULL, NULL, NULL, encoding_testcases},
+    {"Testing serialize:", NULL, NULL, NULL, NULL, serialize_testcases},
+    CU_SUITE_INFO_NULL
+};
+#else
 CU_SuiteInfo suites[] = {
     {"Testing process:", NULL, NULL, string_operations_testcases},
     {"Testing monk:", NULL, NULL, file_operations_testcases},
@@ -60,8 +76,10 @@ CU_SuiteInfo suites[] = {
     {"Testing match:", NULL, NULL, match_testcases},
     {"Testing database:", database_setUpFunc, database_tearDownFunc, database_testcases},
     {"Testing encoding:", NULL, NULL, encoding_testcases},
+    {"Testing serialize:", NULL, NULL, serialize_testcases},
     CU_SUITE_INFO_NULL
 };
+#endif
 
 /* ************************************************************************** */
 /* **** main test functions ************************************************* */

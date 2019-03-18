@@ -32,19 +32,28 @@ class BucketAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * Get the current user's default bucket pool id
+   * @return int Bucket pool id
+   */
   protected function getDefaultBucketPool()
-  {  
+  {
     $user_pk = Auth::getUserId();
     if (empty($user_pk)) {
       return 0;
     }
 
-    /* @var $dbManager DbManager */
+    /** @var $dbManager DbManager */
     $dbManager = $GLOBALS['container']->get('db.manager');
     $usersRec = $dbManager->getSingleRow('SELECT default_bucketpool_fk FROM users WHERE user_pk=$1', array($user_pk));
     return $usersRec['default_bucketpool_fk'];
   }
 
+  /**
+   * Register the plugin to UI
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   */
   function preInstall()
   {
     $bucketPool = $this->getDefaultBucketPool();
@@ -55,10 +64,10 @@ class BucketAgentPlugin extends AgentPlugin
   }
 
   /**
-   * @override
-   * @param int $uploadId
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    */
-  public function AgentHasResults($uploadId=0) 
+  public function AgentHasResults($uploadId=0)
   {
     $default_bucketpool_fk = $this->getDefaultBucketPool();
     if (empty($default_bucketpool_fk)) {
@@ -90,7 +99,10 @@ class BucketAgentPlugin extends AgentPlugin
     return 0;
   }
 
-  
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   */
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
     $default_bucketpool_fk = $this->getDefaultBucketPool();

@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for RunCommand()
+ */
 static char *Cmd = "";
 static char *CmdPre = "";
 static char *File = "";
@@ -32,7 +35,7 @@ void testRunCommand4ZcatTesting()
   deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "-q -l";
-  File = "../test-data/testdata4unpack/FileName.tar.Z";
+  File = "../testdata/test.tar.Z";
   CmdPost = ">/dev/null 2>&1";
   Out = 0x0;
   Where = 0x0;
@@ -43,19 +46,19 @@ void testRunCommand4ZcatTesting()
 }
 
 /**
- * @brief test the command zcat, unpack via zcat 
+ * @brief test the command zcat, unpack via zcat
  */
 void testRunCommand4Zcat()
 {
   deleteTmpFiles("./test-result/");
   Cmd = "zcat";
   CmdPre = "";
-  File = "../test-data/testdata4unpack/FileName.tar.Z";
+  File = "../testdata/test.tar.Z";
   CmdPost = "> '%s' 2>/dev/null";
-  Out = "FileName.tar.Z.unpacked";
+  Out = "test.tar.Z.unpacked";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  exists = file_dir_exists("./test-result/FileName.tar.Z.unpacked");
+  exists = file_dir_exists("./test-result/test.tar.Z.unpacked");
   FO_ASSERT_EQUAL(exists, 1); // the file is existing
   FO_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -68,12 +71,12 @@ void testRunCommand4Pdf()
   deleteTmpFiles("./test-result/");
   Cmd = "pdftotext";
   CmdPre = "-htmlmeta";
-  File = "../test-data/testdata4unpack/israel.pdf";
+  File = "../testdata/test.pdf";
   CmdPost = "> '%s' 2>/dev/null";
-  Out = "israel.pdf.text";
+  Out = "test.pdf.text";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  exists = file_dir_exists("./test-result/israel.pdf.text");
+  exists = file_dir_exists("./test-result/test.pdf.text");
   FO_ASSERT_EQUAL(exists, 1); // the file is existing
   FO_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -86,12 +89,12 @@ void testRunCommand4Rpm1()
   deleteTmpFiles("./test-result/");
   Cmd = "rpm2cpio";
   CmdPre = "";
-  File = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
+  File = "../testdata/test.rpm";
   CmdPost = "> '%s' 2> /dev/null";
-  Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked";
+  Out = "test.rpm.unpacked";
   Where = "./test-result";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  exists = file_dir_exists("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked");
+  exists = file_dir_exists("./test-result/test.rpm.unpacked");
   FO_ASSERT_EQUAL(exists, 1); //  existing
   FO_ASSERT_EQUAL(Result, 0); // command could run
 }
@@ -105,12 +108,12 @@ void testRunCommand4Rpm2()
   testRunCommand4Rpm1();
   Cmd = "cpio";
   CmdPre = "--no-absolute-filenames -i -d <";
-  File = "./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked";
+  File = "./test-result/test.rpm.unpacked";
   CmdPost = ">/dev/null 2>&1";
-  Out = "fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
-  Where = "./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir";
+  Out = "test.rpm.unpacked.dir";
+  Where = "./test-result/test.rpm.unpacked.dir";
   Result = RunCommand(Cmd, CmdPre, File, CmdPost, Out, Where);
-  exists = file_dir_exists("./test-result/fossology-1.2.0-1.el5.i386.rpm.unpacked.dir/etc/fossology/RepPath.conf");
+  exists = file_dir_exists("./test-result/test.rpm.unpacked.dir/usr/share/fossology/bsam/VERSION");
   FO_ASSERT_EQUAL(exists, 1); //  existing
   FO_ASSERT_EQUAL(Result, 0); // command could run
 }

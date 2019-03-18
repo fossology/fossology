@@ -111,7 +111,7 @@ if (empty($return_value))
 
 
 /**
- * @brief get monk license list of one specified uploadtree_id
+ * @brief get ninka license list of one specified uploadtree_id
  *
  * @param int $uploadtree_pk - uploadtree id
  * @param int $upload_pk - upload id
@@ -135,8 +135,8 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
       $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
   }
 
-  /* get last monk agent_pk that has data for this upload */
-  $AgentRec = AgentARSList("monk_ars", $upload_pk, 1);
+  /* get last ninka agent_pk that has data for this upload */
+  $AgentRec = AgentARSList("ninka_ars", $upload_pk, 1);
   if ($AgentRec === false)
   {
     echo _("No data available \n");
@@ -148,24 +148,29 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
   /** @var ItemTreeBounds */
   $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   $licensesPerFileName = $licenseDao->getLicensesPerFileNameForAgentId(
-    $itemTreeBounds, array($agent_pk), true, array(), $excluding, $ignore);
+  $itemTreeBounds, array($agent_pk), true, $excluding, $ignore);
 
-  foreach($licensesPerFileName as $fileName => $licenseNames)
+  foreach($licensesPerFileName as $fileName => $licenseData)
   {
-    if ((!$ignore || $licenseNames !== false && $licenseNames !== array()))
-    {
-      if ($licenseNames !== false)
+    if ($licenseData == false) {
+      if ($showContainer)
       {
-        print($fileName .': '.implode($licenseNames,', ')."\n");
+        print($fileName."\n");
       }
-      else
-      {
-        if ($showContainer)
-        {
-          print($filename."\n");
-        }
-      }
+      continue;
     }
+
+    if (! array_key_exists('scanResults', $licenseData) || empty($licenseData['scanResults']))
+    {
+      continue;
+    }
+
+    $licenseNames = $licenseData['scanResults'];
+    if (($ignore && $licenseNames !== array())) {
+      continue;
+    }
+
+    print($fileName .': '.implode($licenseNames,', ')."\n");
   }
 }
 

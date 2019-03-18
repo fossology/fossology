@@ -1,6 +1,22 @@
-install/docker-compose*
-!install/docker-compose.docker-entrypoint.sh
 fossology310-source.spdx
+
+################################################################################
+# omit rebuilding after changing some unrelated files.
+.editorconfig
+.github
+.gitignore
+.travis.yml
+
+*.md
+LICENSE
+NOTICES*
+Dockerfile
+docker-compose.yml
+
+Vagrantfile
+
+# omit rebuilding after changing the docker tests.
+src/testing/docker
 
 ################################################################################
 # from gitignore:
@@ -23,6 +39,8 @@ VERSION
 *~
 /src/vendor
 .vagrant/
+*.orig
+.#*
 
 # compiled or derived files
 install/db/dbcreate
@@ -52,6 +70,7 @@ src/cli/fo_import_licenses
 src/cli/fo_usergroup
 src/cli/fossupload_status
 src/copyright/agent/copyright
+src/copyright/agent/keyword
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
 src/delagent/agent/delagent
@@ -80,6 +99,8 @@ src/monk/agent/squareBuilder
 src/monk/agent_tests/Unit/results/
 src/monk/agent_tests/Unit/test_monk
 src/monk/agent_tests/Unit/run_tests
+src/monk/agent_tests/Functional/monk
+src/monk/agent_tests/Functional/monkbulk
 src/monk/agent_tests/Functional/monk-Xunit1.xml
 src/monk/agent_tests/Functional/monk-Xunit2.xml
 src/monk/agent_tests/Functional/monk-Xunit3.xml
@@ -129,13 +150,20 @@ variable.list
 /src/decider/agent/version.php
 /testReport/
 /src/readmeoss/agent/version.php
+/src/reuser/agent/reuser
 /src/reuser/agent/version.php
+/src/reuser/agent/reuser
 /src/copyright/agent/ecc
 /src/copyright/VERSION-ecc
+/src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
-/src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar
+/src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar*
 /src/spdx2/agent/version.php
+/src/unifiedreport/agent/version.php
 /src/spdx2/agent/spdx2
+src/reportImport/agent/spdx2Import
+src/reportImport/agent/version.php
+src/reportImport/agent/reportImport
 /src/ninka/agent_tests/Functional/ninka
 /src/ninka/agent_tests/Unit/test_ninka
 /src/ninka/agent/ninka

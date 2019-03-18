@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Dao\UserDao;
 
 class ui_view_info extends FO_Plugin
 {
@@ -27,6 +28,9 @@ class ui_view_info extends FO_Plugin
   private $uploadDao;
   /** @var DbManager */
   private $dbManager;
+  /** @var UserDao $userDao
+   * User DAO to use */
+  private $userDao;
 
   function __construct()
   {
@@ -38,6 +42,7 @@ class ui_view_info extends FO_Plugin
     parent::__construct();
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->userDao = $GLOBALS['container']->get('dao.user');
   }
 
   /**
@@ -53,8 +58,7 @@ class ui_view_info extends FO_Plugin
 
     $menuPosition = 60;
     $menuText = "Info";
-    if (GetParm("mod",PARM_STRING) == $this->Name)
-    {
+    if (GetParm("mod", PARM_STRING) == $this->Name) {
       menu_insert("View::[BREAK]", 61);
       menu_insert("View::[BREAK]", 50);
       menu_insert("View::{$menuText}", $menuPosition);
@@ -63,9 +67,7 @@ class ui_view_info extends FO_Plugin
       menu_insert("View-Meta::{$menuText}", $menuPosition);
 
       menu_insert("Browse::Info",-3);
-    }
-    else
-    {
+    } else {
       $tooltipText = _("View information about this file");
       menu_insert("View::[BREAK]", 61);
       menu_insert("View::[BREAK]", 50);
@@ -83,46 +85,40 @@ class ui_view_info extends FO_Plugin
    */
   function ShowView($Upload, $Item, $ShowMenu=0)
   {
-    $V = "";
-    if (empty($Upload) || empty($Item)) { return; }
+    $vars = [];
+    if (empty($Upload) || empty($Item)) {
+      return;
+    }
 
     $Page = GetParm("page",PARM_INTEGER);
-    if (empty($Page)) { $Page=0; }
+    if (empty($Page)) {
+      $Page = 0;
+    }
+    $vars['repoLocPage'] = $Page;
 
     /**********************************
      List File Info
      **********************************/
     if ($Page == 0)
     {
-      $text = _("Repository Locator");
-      $V .= "<H2>$text</H2>\n";
       $sql = "SELECT * FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         LIMIT 1;";
-      $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
-      $V .= "<table border=1>\n";
-      $text = _("Attribute");
-      $text1 = _("Value");
-      $V .= "<tr><th>$text</th><th>$text1</th></tr>\n";
-      $Bytes = $R['pfile_size'];
-      $BytesH = HumanSize($Bytes);
-      $Bytes = number_format($Bytes, 0, "", ",").' B';
-      if ($BytesH == $Bytes) { $BytesH = ""; }
-      else { $BytesH = '(' . $BytesH . ')'; }
-      $text = _("File Size");
-      $V .= "<tr><td align='center'>$text</td><td align='right'>$Bytes $BytesH</td></tr>\n";
-      $text = _("SHA1 Checksum");
-      $V .= "<tr><td align='center'>$text</td><td align='right'>" . $R['pfile_sha1'] . "</td></tr>\n";
-      $text = _("MD5 Checksum");
-      $V .= "<tr><td align='center'>$text</td><td align='right'>" . $R['pfile_md5'] . "</td></tr>\n";
-      $text = _("Repository ID");
-      $V .= "<tr><td align='center'>$text</td><td align='right'>" . $R['pfile_sha1'] . "." . $R['pfile_md5'] . "." . $R['pfile_size'] . "</td></tr>\n";
-      $text = _("Pfile ID");
-      $V .= "<tr><td align='center'>$text</td><td align='right'>" . $R['pfile_fk'] . "</td></tr>\n";
-      $V .= "</table>\n";
+      $row = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
+      $bytes = $row['pfile_size'];
+      $bytesH = HumanSize($bytes);
+      $bytes = number_format($bytes, 0, "", ",").' B';
+      if ($bytesH == $bytes) { $bytesH = ""; }
+      else { $bytesH = '(' . $bytesH . ')'; }
+      $vars['sizeInBytes'] = $bytes;
+      $vars['sizeInMB'] = $bytesH;
+      $vars['fileSha1'] = $row['pfile_sha1'];
+      $vars['fileMd5'] = $row['pfile_md5'];
+      $vars['fileSize'] = $row['pfile_size'];
+      $vars['filePfileId'] = $row['pfile_fk'];
     }
-    return($V);
+    return $vars;
   } // ShowView()
 
   /**
@@ -130,50 +126,49 @@ class ui_view_info extends FO_Plugin
    */
   function ShowSightings($Upload, $Item)
   {
-    $V = "";
-    if (empty($Upload) || empty($Item)) { return; }
+    $v = "";
+    if (empty($Upload) || empty($Item)) {
+      return $vars;
+    }
 
-    $Page = GetParm("page",PARM_INTEGER);
-    if (empty($Page)) { $Page=0; }
-    $Max = 50;
-    $Offset = $Page * $Max;
-
+    $page = GetParm("page",PARM_INTEGER);
+    if (empty($page)) {
+      $page = 0;
+    }
+    $MAX = 50;
+    $offset = $page * $MAX;
     /**********************************
      List the directory locations where this pfile is found
      **********************************/
-    $text = _("Sightings");
-    $V .= "<H2>$text</H2>\n";
     $sql = "SELECT * FROM pfile,uploadtree
         WHERE pfile_pk=pfile_fk
         AND pfile_pk IN
         (SELECT pfile_fk FROM uploadtree WHERE uploadtree_pk = $1)
         LIMIT $2 OFFSET $3";
     $this->dbManager->prepare(__METHOD__."getListOfFiles",$sql);
-    $result = $this->dbManager->execute(__METHOD__."getListOfFiles",array($Item,$Max,$Offset));
-    $Count = pg_num_rows($result);
-    if (($Page > 0) || ($Count >= $Max))
-    {
-      $VM = "<P />\n" . MenuEndlessPage($Page, ($Count >= $Max)) . "<P />\n";
+    $result = $this->dbManager->execute(__METHOD__."getListOfFiles",array($Item,$MAX,$offset));
+    $count = pg_num_rows($result);
+    if (($page > 0) || ($count >= $MAX)) {
+      $vMenu = "<p>\n" . MenuEndlessPage($page, ($count >= $MAX)) . "</p>\n";
+    } else {
+      $vMenu = "";
     }
-    else { $VM = ""; }
-    if ($Count > 0)
-    {
-      $V .= _("This exact file appears in the following locations:\n");
-      $V .= $VM;
-      $Offset++;
-      $V .= Dir2FileList($result,"browse","view",$Offset);
-      $V .= $VM;
-    }
-    else if ($Page > 0)
-    {
-      $V .= _("End of listing.\n");
-    }
-    else
-    {
-      $V .= _("This file does not appear in any other known location.\n");
+    if ($count > 0) {
+      $v .= _("This exact file appears in the following locations:\n");
+      $v .= $vMenu;
+      $offset++;
+      $v .= Dir2FileList($result,"browse","view",$offset);
+      $v .= $vMenu;
+    } else if ($page > 0) {
+      $v .= _("End of listing.\n");
+    } else {
+      $v .= _("This file does not appear in any other known location.\n");
     }
     pg_free_result($result);
-    return($V);
+
+    $vars = [];
+    $vars['sightingsContent'] = $v;
+    return $vars;
   }//ShowSightings()
 
   /**
@@ -181,57 +176,37 @@ class ui_view_info extends FO_Plugin
    */
   function ShowMetaView($Upload, $Item)
   {
-    $V = "";
-    $Count = 1;
-    if (empty($Item) || empty($Upload))
-    { return; }
-
-    /**********************************
-     Display meta data
-     **********************************/
-
-    $text = _("File Info");
-    $V .= "<H2>$text</H2>\n";
-    $V .= "<table border='1'>\n";
-    $text = _("Item");
-    $text1 = _("Meta Data");
-    $text2 = _("Value");
-    $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
+    $vars = [];
+    if (empty($Item) || empty($Upload)) {
+      return $vars;
+    }
 
     /* display mimetype */
     $sql = "SELECT * FROM uploadtree where uploadtree_pk = $1";
     $this->dbManager->prepare(__METHOD__."DisplayMimetype",$sql);
     $result = $this->dbManager->execute(__METHOD__."DisplayMimetype",array($Item));
-    if (pg_num_rows($result))
-    {
+    if (pg_num_rows($result)) {
+      $vars['fileInfo'] = 1;
       $row = pg_fetch_assoc($result);
 
-      if (!empty($row['mimetype_pk']))
-      {
-        $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
-        $V .= "</td><td>" . htmlentities($row['mimetype_name']) . "</td></tr>\n";
+      if (! empty($row['mimetype_pk'])) {
+        $vars['displayMimeTypeName'] = $row['mimetype_name'];
       }
-    }
-    else
-    {
+    } else {
       // bad uploadtree_pk
-      pg_free_result($result);
-      $text = _("File does not exist in database");
-      return $text;
+      $vars['fileInfo'] = 0;
+      return $vars;
     }
     $this->dbManager->freeResult($result);
 
     /* get mimetype */
-    if (!empty($row['pfile_fk']))
-    {
+    if (! empty($row['pfile_fk'])) {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
       $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
       $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row['pfile_fk']));
-      if (pg_num_rows($result))
-      {
+      if (pg_num_rows($result)) {
         $pmRow = pg_fetch_assoc($result);
-        $V .= "<tr><td align='right'>" . $Count++ . "</td><td>Unpacked file type";
-        $V .= "</td><td>" . htmlentities($pmRow['mimetype_name']) . "</td></tr>\n";
+        $vars['getMimeTypeName'] = $pmRow['mimetype_name'];
       }
       $this->dbManager->freeResult($result);
     }
@@ -239,21 +214,18 @@ class ui_view_info extends FO_Plugin
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
     $row = $this->dbManager->getSingleRow($sql,array($row['upload_fk']),__METHOD__."getUploadOrigin");
-    if ($row)
-    {
+    if ($row) {
 
       /* upload source */
-      if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL: ");
-      else if ($row['upload_mode'] & 1 << 3) $text = _("Added by file upload: ");
-      else if ($row['upload_mode'] & 1 << 4) $text = _("Added from filesystem: ");
-      $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
-      $V .= "<td>" . htmlentities($row['upload_origin']) . "</td></tr>\n";
+      if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL");
+      else if ($row['upload_mode'] & 1 << 3) $text = _("Added by file upload");
+      else if ($row['upload_mode'] & 1 << 4) $text = _("Added from filesystem");
+      $vars['fileUploadOriginInfo'] = $text;
+      $vars['fileUploadOrigin'] = $row['upload_origin'];
 
       /* upload time */
-      $text = _("Added to repo");
-      $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
       $ts = $row['upload_ts'];
-      $V .= "<td>" . substr($ts, 0, strrpos($ts, '.')) . "</td></tr>\n";
+      $vars['fileUploadDate'] = substr($ts, 0, strrpos($ts, '.'));
     }
       /* display where it was uploaded from */
 
@@ -261,12 +233,9 @@ class ui_view_info extends FO_Plugin
     $sql = "SELECT user_name from users, upload  where user_pk = user_fk and upload_pk = $1";
     $row = $this->dbManager->getSingleRow($sql,array($Upload),__METHOD__."getUploadOwner");
 
-    $text = _("Added by");
-    $V .= "<tr><td align='right'>" . $Count++ . "</td><td>$text</td>";
-    $V .= "<td>" . $row['user_name'] . "</td></tr>\n";
+    $vars['fileUploadUser'] = $row['user_name'];
 
-    $V .= "</table><br>\n";
-    return($V);
+    return $vars;
   } // ShowMetaView()
 
   /**
@@ -275,7 +244,7 @@ class ui_view_info extends FO_Plugin
    */
   function ShowPackageInfo($Upload, $Item, $ShowMenu=0)
   {
-    $V = "";
+    $vars = [];
     $Require = "";
     $MIMETYPE = "";
     $Count = 0;
@@ -293,7 +262,7 @@ class ui_view_info extends FO_Plugin
                       "URL"=>"url",
                       "Summary"=>"summary",
                       "Description"=>"description",
-                      "Source"=>"source_rpm");    
+                      "Source"=>"source_rpm");
 
     $deb_binary_info = array("Package"=>"pkg_name",
                              "Architecture"=>"pkg_arch",
@@ -316,20 +285,18 @@ class ui_view_info extends FO_Plugin
                              "Uploaders"=>"uploaders",
                              "Standards-Version"=>"standards_version");
 
-    if (empty($Item) || empty($Upload)) { return; }
+    if (empty($Item) || empty($Upload)) {
+      return $vars;
+    }
 
     /**********************************
      Check if pkgagent disabled
      ***********************************/
     $sql = "SELECT agent_enabled FROM agent WHERE agent_name ='pkgagent' order by agent_ts LIMIT 1;";
     $row = $this->dbManager->getSingleRow($sql,array(),__METHOD__."checkPkgagentDisabled");
-    if (isset($row) && ($row['agent_enabled']== 'f')){return;}
-
-    /**********************************
-     Display package info
-     **********************************/
-    $text = _("Package Info");
-    $V .= "<H2>$text</H2>\n";
+    if (isset($row) && ($row['agent_enabled'] == 'f')) {
+      return $vars;
+    }
 
     /* If pkgagent_ars table didn't exists, don't show the result. */
     $sql = "SELECT typlen  FROM pg_type where typname='pkgagent_ars' limit 1;";
@@ -337,37 +304,18 @@ class ui_view_info extends FO_Plugin
     $result = $this->dbManager->execute(__METHOD__."displayPackageInfo",array());
     $numrows = pg_num_rows($result);
     $this->dbManager->freeResult($result);
-    if ($numrows <= 0)
-    {
-      $V .= _("No data available. Use Jobs > Agents to schedule a pkgagent scan.");
-      return($V);
+    if ($numrows <= 0) {
+      $vars['packageAgentNA'] = 1;
+      return $vars;
     }
 
     /* If pkgagent_ars table didn't have record for this upload, don't show the result. */
     $agent_status = AgentARSList('pkgagent_ars', $Upload);
-    if (empty($agent_status))
-    {
-
-      /** schedule pkgagent */
-      $V .= ActiveHTTPscript("Schedule");
-      $V .= "<script language='javascript'>\n";
-      $V .= "function Schedule_Reply()\n";
-      $V .= "  {\n";
-      $V .= "  if ((Schedule.readyState==4) && (Schedule.status==200))\n";
-      $V .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
-      $V .= "  }\n";
-      $V .= "</script>\n";
-
-      $V .= "<form name='formy' method='post'>\n";
-      $V .= "<div id='msgdiv'>\n";
-      $V .= _("No data available.");
-      $V .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
-      $V .= "onClick='Schedule_Get(\"" . Traceback_uri() . "?mod=schedule_agent&upload=$Upload&agent=agent_pkgagent \")'>\n";
-      $V .= "</input>";
-      $V .= "</div> \n";
-      $V .= "</form>\n";
-
-      return($V);
+    if (empty($agent_status)) {
+      $vars['packageAgentStatus'] = 1;
+      $vars['trackback_uri'] = Traceback_uri() .
+        "?mod=schedule_agent&upload=$Upload&agent=agent_pkgagent";
+      return ($vars);
     }
     $sql = "SELECT mimetype_name
         FROM uploadtree
@@ -376,70 +324,54 @@ class ui_view_info extends FO_Plugin
         INNER JOIN mimetype ON pfile_mimetypefk = mimetype_pk;";
     $this->dbManager->prepare(__METHOD__."getMimetypeName",$sql);
     $result = $this->dbManager->execute(__METHOD__."getMimetypeName",array($Item));
-    while ($row = pg_fetch_assoc($result))
-    {
-      if (!empty($row['mimetype_name']))
-      {
+    while ($row = pg_fetch_assoc($result)) {
+      if (! empty($row['mimetype_name'])) {
         $MIMETYPE = $row['mimetype_name'];
       }
     }
     $this->dbManager->freeResult($result);
 
     /** RPM Package Info **/
-    if ($MIMETYPE == "application/x-rpm")
-    {
+    if ($MIMETYPE == "application/x-rpm") {
       $sql = "SELECT *
                 FROM pkg_rpm
                 INNER JOIN uploadtree ON uploadtree_pk = $1
                 AND uploadtree.pfile_fk = pkg_rpm.pfile_fk;";
       $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."getRPMPackageInfo");
-      if((!empty($R['source_rpm']))and(trim($R['source_rpm']) != "(none)"))
-      {
-        $V .= _("RPM Binary Package");
-      }
-      else
-      {
-        $V .= _("RPM Source Package");
+      if ((! empty($R['source_rpm'])) and (trim($R['source_rpm']) != "(none)")) {
+        $vars['packageType'] = _("RPM Binary Package");
+      } else {
+        $vars['packageType'] = _("RPM Source Package");
       }
       $Count=1;
 
-      $V .= "<table border='1' name='pkginfo'>\n";
-      $text = _("Item");
-      $text1 = _("Type");
-      $text2 = _("Value");
-      $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-
-      if (!empty($R['pkg_pk']))
-      {
+      if (! empty($R['pkg_pk'])) {
         $Require = $R['pkg_pk'];
-        foreach ($rpm_info as $key=>$value)
-        {
-          $text = _($key);
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
-          $Count++;
-        } 
+        foreach ($rpm_info as $key => $value) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _($key);
+          $entry['value'] = htmlentities($R["$value"]);
+          $Count ++;
+          $vars['packageEntries'][] = $entry;
+        }
 
         $sql = "SELECT * FROM pkg_rpm_req WHERE pkg_fk = $1;";
         $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
         $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
-        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
-        {
-          $text = _("Requires");
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $Val = htmlentities($R['req_value']);
-          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-          $V .= "</td><td>$Val</td></tr>\n";
-          $Count++;
+        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _("Requires");
+          $entry['value'] = htmlentities($R['req_value']);
+          $Count ++;
+          $vars['packageRequires'][] = $entry;
         }
         $this->dbManager->freeResult($result);
       }
-      $V .= "</table>\n";
-    }
-    else if ($MIMETYPE == "application/x-debian-package")
-    {
-      $V .= _("Debian Binary Package\n");
+    } else if ($MIMETYPE == "application/x-debian-package") {
+      $vars['packageType'] = _("Debian Binary Package\n");
 
       $sql = "SELECT *
                 FROM pkg_deb
@@ -448,21 +380,15 @@ class ui_view_info extends FO_Plugin
       $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianBinaryPackageInfo");
       $Count=1;
 
-      $V .= "<table border='1'>\n";
-      $text = _("Item");
-      $text1 = _("Type");
-      $text2 = _("Value");
-      $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-
-      if ($R)
-      {
+      if ($R) {
         $Require = $R['pkg_pk'];
-        foreach ($deb_binary_info as $key=>$value)
-        {
-          $text = _($key);
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
-          $Count++;
+        foreach ($deb_binary_info as $key => $value) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _($key);
+          $entry['value'] = htmlentities($R["$value"]);
+          $Count ++;
+          $vars['packageEntries'][] = $entry;
         }
         pg_free_result($result);
 
@@ -470,22 +396,19 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
         $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
-        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
-        {
-          $text = _("Depends");
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $Val = htmlentities($R['req_value']);
-          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-          $V .= "</td><td>$Val</td></tr>\n";
-          $Count++;
+        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _("Depends");
+          $entry['value'] = htmlentities($R['req_value']);
+          $Count ++;
+          $vars['packageRequires'][] = $entry;
         }
         $this->dbManager->freeResult($result);
       }
       $V .= "</table>\n";
-    }
-    else if ($MIMETYPE == "application/x-debian-source")
-    {
-      $V .= _("Debian Source Package\n");
+    } else if ($MIMETYPE == "application/x-debian-source") {
+      $vars['packageType'] = _("Debian Source Package\n");
 
       $sql = "SELECT *
                 FROM pkg_deb
@@ -494,21 +417,15 @@ class ui_view_info extends FO_Plugin
       $R = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."debianSourcePakcageInfo");
       $Count=1;
 
-      $V .= "<table border='1'>\n";
-      $text = _("Item");
-      $text1 = _("Type");
-      $text2 = _("Value");
-      $V .= "<tr><th width='5%'>$text</th><th width='20%'>$text1</th><th>$text2</th></tr>\n";
-
-      if ($R)
-      {
+      if ($R) {
         $Require = $R['pkg_pk'];
-        foreach ($deb_source_info as $key=>$value)
-        {
-          $text = _($key);
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $V .= "</td><td>" . htmlentities($R["$value"]) . "</td></tr>\n";
-          $Count++;
+        foreach ($deb_source_info as $key => $value) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _($key);
+          $entry['value'] = htmlentities($R["$value"]);
+          $Count ++;
+          $vars['packageEntries'][] = $entry;
         }
         pg_free_result($result);
 
@@ -516,25 +433,21 @@ class ui_view_info extends FO_Plugin
         $this->dbManager->prepare(__METHOD__."getPkg_rpm_req",$sql);
         $result = $this->dbManager->execute(__METHOD__."getPkg_rpm_req",array($Require));
 
-        while ($R = pg_fetch_assoc($result) and !empty($R['req_pk']))
-        {
-          $text = _("Build-Depends");
-          $V .= "<tr><td align='right'>$Count</td><td>$text";
-          $Val = htmlentities($R['req_value']);
-          $Val = preg_replace("@((http|https|ftp)://[^{}<>&[:space:]]*)@i","<a href='\$1'>\$1</a>",$Val);
-          $V .= "</td><td>$Val</td></tr>\n";
-          $Count++;
+        while ($R = pg_fetch_assoc($result) and ! empty($R['req_pk'])) {
+          $entry = [];
+          $entry['count'] = $Count;
+          $entry['type'] = _("Build-Depends");
+          $entry['value'] = htmlentities($R['req_value']);
+          $Count ++;
+          $vars['packageRequires'][] = $entry;
         }
         $this->dbManager->freeResult($result);
       }
-      $V .= "</table>\n";
+    } else {
+      /* Not a package */
+      $vars['packageType'] = "";
     }
-    else
-    {
-       /* Not a package */
-       return "";
-    }
-    return($V);
+    return $vars;
   } // ShowPackageInfo()
 
 
@@ -543,24 +456,20 @@ class ui_view_info extends FO_Plugin
    */
   function ShowTagInfo($Upload, $Item)
   {
-    $VT = "";
-    $text = _("Tag Info");
-    $VT .= "<H2>$text</H2>\n";
+    $vars = [];
     $groupId = Auth::getGroupId();
     $row = $this->uploadDao->getUploadEntry($Item);
-    if (empty($row))
-    {
-      $text = _("Invalid URL, nonexistant item");
-      return "<h2>$text $Item</h2>";
+    if (empty($row)) {
+      $vars['tagInvalid'] = 1;
+      return $vars;
     }
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
 
-    if (empty($lft))
-    {
-      $text = _("Upload data is unavailable.  It needs to be unpacked.");
-      return "<h2>$text uploadtree_pk: $Item</h2>";
+    if (empty($lft)) {
+      $vars['tagInvalid'] = 2;
+      return $vars;
     }
     $sql = "SELECT * FROM uploadtree INNER JOIN (SELECT * FROM tag_file,tag WHERE tag_pk = tag_fk) T
         ON uploadtree.pfile_fk = T.pfile_fk WHERE uploadtree.upload_fk = $1
@@ -569,27 +478,144 @@ class ui_view_info extends FO_Plugin
         WHERE uploadtree.upload_fk = $1 AND uploadtree.lft >= $2 AND uploadtree.rgt <= $3 ORDER BY ufile_name";
     $this->dbManager->prepare(__METHOD__,$sql);
     $result = $this->dbManager->execute(__METHOD__,array($upload_pk, $lft,$rgt));
-    if (pg_num_rows($result) > 0)
-    {
-      $VT .= "<table border=1>\n";
-      $text = _("FileName");
-      $text2 = _("Tag");
-      $VT .= "<tr><th>$text</th><th>$text2</th><th></th></tr>\n";
-      while ($row = pg_fetch_assoc($result))
-      {
-        $VT .= "<tr><td align='center'>" . $row['ufile_name'] . "</td><td align='center'>" . $row['tag'] . "</td>";
-        if ($this->uploadDao->isAccessible($upload_pk, $groupId))
-        {
-          $VT .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=" . $row['uploadtree_pk'] . "&tag_file_pk=" . $row['tag_file_pk'] . "'>View</a></td></tr>\n";
-        }else{
-          $VT .= "<td align='center'></td></tr>\n";
+    if (pg_num_rows($result) > 0) {
+      while ($row = pg_fetch_assoc($result)) {
+        $entry = [];
+        $entry['ufile_name'] = $row['ufile_name'];
+        $entry['tag'] = $row['tag'];
+        if ($this->uploadDao->isAccessible($upload_pk, $groupId)) {
+          $entry['url'] = Traceback_uri() .
+            "?mod=tag&action=edit&upload=$Upload&item=" . $row['uploadtree_pk'] .
+            "&tag_file_pk=" . $row['tag_file_pk'];
+        } else {
+          $entry['url'] = "";
         }
+        $vars['tagsEntries'][] = $entry;
       }
-      $VT .= "</table><p>\n";
     }
     $this->dbManager->freeResult($result);
 
-    return $VT;
+    return $vars;
+  }
+
+  function ShowReportInfo($Upload)
+  {
+    $vars = [];
+    $row = $this->uploadDao->getReportInfo($Upload);
+    $checkBoxDefault = "unchecked";
+    $vars['nonCritical']        = $checkBoxDefault;
+    $vars['critical']           = $checkBoxDefault;
+    $vars['noDependency']       = $checkBoxDefault;
+    $vars['dependencySource']   = $checkBoxDefault;
+    $vars['dependencyBinary']   = $checkBoxDefault;
+    $vars['noExportRestriction'] = $checkBoxDefault;
+    $vars['exportRestriction']  = $checkBoxDefault;
+    $vars['noRestriction']      = $checkBoxDefault;
+    $vars['restrictionForUse']  = $checkBoxDefault;
+
+    if (! empty($row)) {
+      $reviewedBy = $row['ri_reviewed'];
+      $reportRel = $row['ri_report_rel'];
+      $community = $row['ri_community'];
+      $component = $row['ri_component'];
+      $version = $row['ri_version'];
+      $relDate = $row['ri_release_date'];
+      $sw360Link = $row['ri_sw360_link'];
+      $footerNote = $row['ri_footer'];
+      $generalAssesment = $row['ri_general_assesment'];
+      $gaAdditional = $row['ri_ga_additional'];
+      $gaRisk = $row['ri_ga_risk'];
+      $gaSelectionList = explode(',', $row['ri_ga_checkbox_selection']);
+    }
+
+    $vars['footerNote']           = $footerNote;
+    $vars['reviewedBy']           = $reviewedBy;
+    $vars['reportRel']            = $reportRel;
+    $vars['community']            = $community;
+    $vars['component']            = $component;
+    $vars['version']              = $version;
+    $vars['relDate']              = $relDate;
+    $vars['sw360Link']            = $sw360Link;
+    $vars['generalAssesment']     = $generalAssesment;
+    if (array_key_exists(8, $gaSelectionList)) {
+      $vars['nonCritical']        = $gaSelectionList[0];
+      $vars['critical']           = $gaSelectionList[1];
+      $vars['noDependency']       = $gaSelectionList[2];
+      $vars['dependencySource']   = $gaSelectionList[3];
+      $vars['dependencyBinary']   = $gaSelectionList[4];
+      $vars['noExportRestriction'] = $gaSelectionList[5];
+      $vars['exportRestriction']  = $gaSelectionList[6];
+      $vars['noRestriction']      = $gaSelectionList[7];
+      $vars['restrictionForUse']  = $gaSelectionList[8];
+    }
+    $vars['gaAdditional']         = $gaAdditional;
+    $vars['gaRisk']               = $gaRisk;
+
+    return $vars;
+  }
+
+  /**
+   * @brief Get the info regarding reused package
+   * @param int $uploadId Get the reused package for this upload
+   * @returns List of twig variables
+   */
+  function showReuseInfo($uploadId)
+  {
+    $vars = [];
+    $reusedInfo = $this->uploadDao->getReusedUpload($uploadId,
+      Auth::getGroupId());
+    foreach ($reusedInfo as $row) {
+      $entry = [];
+      $reuseUploadFk = $row['reused_upload_fk'];
+      $reuseGroupFk = $row['reused_group_fk'];
+      $reusedUpload = $this->uploadDao->getUpload($reuseUploadFk);
+      $reuseMode = "";
+      switch ($row['reuse_mode']) {
+        case UploadDao::REUSE_ENHANCED:
+          $reuseMode = "Enhanced reuse";
+          break;
+        case UploadDao::REUSE_MAIN:
+          $reuseMode = "Main license reuse";
+          break;
+        case UploadDao::REUSE_ENH_MAIN:
+          $reuseMode = "Enhanced with main license reuse";
+          break;
+        default:
+          $reuseMode = "Normal";
+      }
+
+      $entry['name'] = $reusedUpload->getFilename();
+      $entry['url'] = Traceback_uri() .
+        "?mod=license&upload=$reuseUploadFk&item=" .
+        $this->uploadDao->getUploadParent($reuseUploadFk);
+      $entry['group'] = $this->userDao->getGroupNameById($reuseGroupFk) .
+        " ($reuseGroupFk)";
+      $entry['sha1'] = $this->uploadDao->getUploadHashes($reuseUploadFk)['sha1'];
+      $entry['mode'] = $reuseMode;
+
+      $vars['reusedPackageList'][] = $entry;
+    }
+    return $vars;
+  }
+
+  /**
+    * @param array $checkBoxListParams
+    * @return $cbSelectionList
+   */
+
+  protected function getCheckBoxSelectionList($checkBoxListParams)
+  {
+    foreach ($checkBoxListParams as $checkBoxListParam) {
+      $ret = GetParm($checkBoxListParam, PARM_STRING);
+      if (empty($ret)) {
+        $cbList[] = "unchecked";
+      } else {
+        $cbList[] = "checked";
+      }
+    }
+    $cbSelectionList = implode(",", $cbList);
+
+    return $cbSelectionList;
   }
 
   public function Output()
@@ -599,15 +625,60 @@ class ui_view_info extends FO_Plugin
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
-    
-    $V="";
-    $V .= $this->ShowTagInfo($uploadId, $itemId);
-    $V .= $this->ShowPackageinfo($uploadId, $itemId, 1);
-    $V .= $this->ShowMetaView($uploadId, $itemId);
-    $V .= $this->ShowSightings($uploadId, $itemId);
-    $V .= $this->ShowView($uploadId, $itemId);
 
-    return $V;
+    $submitReportInfo = GetParm("submitReportInfo", PARM_STRING);
+
+    if (isset($submitReportInfo)) {
+      $reviewedBy = GetParm('reviewedBy', PARM_TEXT);
+      $footerNote = GetParm('footerNote', PARM_TEXT);
+      $reportRel = GetParm('reportRel', PARM_TEXT);
+      $community = GetParm('community', PARM_TEXT);
+      $component = GetParm('component', PARM_TEXT);
+      $version = GetParm('version', PARM_TEXT);
+      $relDate = GetParm('relDate', PARM_TEXT);
+      $sw360Link = GetParm('sw360Link', PARM_TEXT);
+      $generalAssesment = GetParm('generalAssesment', PARM_TEXT);
+      $checkBoxListParams = array(
+        "nonCritical",
+        "critical",
+        "noDependency",
+        "dependencySource",
+        "dependencyBinary",
+        "noExportRestriction","exportRestriction","noRestriction","restrictionForUse");
+      $cbSelectionList = $this->getCheckBoxSelectionList($checkBoxListParams);
+      $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
+      $gaRisk = GetParm('gaRisk', PARM_TEXT);
+      $sql = "UPDATE report_info SET ri_reviewed=$2, ri_footer=$3, ri_report_rel=$4, ri_community=$5, " .
+        "ri_component=$6,ri_version=$7, ri_release_date=$8, ri_sw360_link=$9, " .
+        "ri_general_assesment=$10, ri_ga_additional=$11, ri_ga_risk=$12, ri_ga_checkbox_selection=$13 " .
+        "WHERE upload_fk=$1;";
+      $this->dbManager->prepare(__METHOD__ . "updateReportInfoData", $sql);
+      $result = $this->dbManager->execute(__METHOD__ . "updateReportInfoData",
+        array(
+          $uploadId,
+          $reviewedBy,
+          $footerNote,
+          $reportRel,
+          $community,
+          $component,
+          $version,
+          $relDate,
+          $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $cbSelectionList));
+      $this->dbManager->freeResult($result);
+    }
+
+    $this->vars += $this->ShowReportInfo($uploadId);
+    $this->vars += $this->ShowTagInfo($uploadId, $itemId);
+    $this->vars += $this->ShowPackageinfo($uploadId, $itemId, 1);
+    $this->vars += $this->ShowMetaView($uploadId, $itemId);
+    $this->vars += $this->ShowSightings($uploadId, $itemId);
+    $this->vars += $this->ShowView($uploadId, $itemId);
+    $this->vars += $this->showReuseInfo($uploadId);
+  }
+
+  public function getTemplateName()
+  {
+    return "ui-view-info.html.twig";
   }
 
 }

@@ -25,17 +25,6 @@
 #define AGENT_DESC IDENTITY " agent" ///< what program this is
 #define AGENT_ARS  IDENTITY "_ars"
 
-// exclude unsupported compilers from json output
-#if defined(__clang__)
-  #if (__clang_major__ * 10000 + __clang_minor__ * 100 + __clang_patchlevel__) < 30400
-    #define DISABLE_JSON
-  #endif
-#elif defined(__GNUC__)
-  #if (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) < 40900
-    #define DISABLE_JSON
-  #endif
-#endif
-
 #include <string>
 #include <vector>
 #include <list>
@@ -44,9 +33,7 @@
 #include "regscan.hpp"
 #include "copyscan.hpp"
 
-//#include "regexMatcher.hpp"
 #include "copyrightState.hpp"
-//#include "files.hpp"
 #include "database.hpp"
 #include "cleanEntries.hpp"
 
@@ -54,15 +41,15 @@ extern "C" {
 #include "libfossology.h"
 }
 
-void queryAgentId(int& agent, PGconn* dbConn);
+int queryAgentId(PGconn* dbConn);
 
 void bail(int exitval);
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager);
+int writeARS(int agentId, int arsId, int uploadId, int success, const fo::DbManager& dbManager);
 
 bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames);
 
-CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions);
+CopyrightState getState(CliOptions&& cliOptions);
 
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType);
 /*
@@ -70,7 +57,7 @@ std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std
 */
 void normalizeContent(std::string& content);
 
-bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& handler);
+bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& handler);
 
 
 #endif /* COPYRIGHTUTILS_HPP_ */

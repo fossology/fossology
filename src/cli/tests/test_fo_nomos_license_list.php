@@ -25,7 +25,7 @@ require_once("./test_common.php");
 /**
  * @outputBuffering enabled
  */
-class test_fo_nomos_license_list extends PHPUnit_Framework_TestCase {
+class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
 
   public $SYSCONF_DIR = "/usr/local/etc/fossology/";
   public $DB_NAME;

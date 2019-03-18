@@ -2,7 +2,7 @@
 /***********************************************************
  Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
-  
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -19,6 +19,15 @@
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @file agent_adj2nest.php
+ * adj2nest UI plugin
+ */
+
+/**
+ * @class Adj2nestAgentPlugin
+ * The adj2nest UI agent plugin class
+ */
 class Adj2nestAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -29,6 +38,10 @@ class Adj2nestAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentHasResults()
+   * @see \Fossology\Lib\Plugin\AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
@@ -61,25 +74,18 @@ class Adj2nestAgentPlugin extends AgentPlugin
     $dbManager->freeResult($res);
     return $wrongOrder ? 2 : 1;
   }
-  
+
   /**
-   * @param int $jobId
-   * @param int $uploadId
-   * @param &string $errorMsg - error message on failure
-   * @param array $dependencies - array of plugin names representing dependencies.
-   * @param mixed $arguments (ignored if not a string)
-   * @returns int
-   * * jqId  Successfully queued
-   * *   0   Not queued, latest version of agent has previously run successfully
-   * *  -1   Not queued, error, error string in $ErrorMsg
-   **/
-  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+   * @copydoc Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
+   * @see \Fossology\Lib\Plugin\AgentPlugin::AgentAdd()
+   */
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null, $unpackArgs=null)
   {
     if ($this->AgentHasResults($uploadId) == 1)
     {
       return 0;
     }
-    
+
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
     if ($jobQueueId != 0)
     {
@@ -87,13 +93,18 @@ class Adj2nestAgentPlugin extends AgentPlugin
     }
 
     if (!$this->isAgentIncluded($dependencies, 'agent_unpack')) {
-      $dependencies[] = "agent_unpack";
+      $dependencies[] = array('name' => "agent_unpack", 'args' => $unpackArgs);
     }
     $args = is_array($arguments) ? '' : $arguments;
     return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
   }
-  
-  
+
+  /**
+   * Check if agent already included in the dependency list
+   * @param mixed  $dependencies Array of job dependencies
+   * @param string $agentName    Name of the agent to be checked for
+   * @return boolean true if agent already in dependency list else false
+   */
   protected function isAgentIncluded($dependencies, $agentName)
   {
     foreach($dependencies as $dependency)

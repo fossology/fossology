@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2017 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -9,7 +9,7 @@
     <table>
       <tr>
         <td>{{ 'Available licenses'| trans }}:<br/>
-          <select name="licenseLeft" id=licenseLeft" style="min-width:200px" size="20" multiple="multiple">
+          <select name="licenseLeft" id="licenseLeft" style="min-width:200px" size="20" multiple="multiple">
             {%  for opt in licenseArray  %}
             <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
                     ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
@@ -25,7 +25,7 @@
         </td>
         <td>
           {{ 'Selected licenses'|trans }}:<br/>
-          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple" >
+          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple">
           </select>
         </td>
       </tr>
@@ -39,6 +39,8 @@
     </div>
     <div style="text-align: center;">
       <button type="button" autofocus onclick="markDecisions();">{{ 'Mark decisions as irrelevant'|trans }}</button>
+      &nbsp;
+      <button type="button" autofocus onclick="deleteMarkedDecisions();">{{ 'Remove marked irrelevant decisions'|trans }}</button>
     </div>
     <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />

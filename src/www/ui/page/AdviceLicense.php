@@ -176,7 +176,7 @@ class AdviceLicense extends DefaultPlugin
     }
     if ($oldRow['rf_pk'] == -1)
     {
-      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText);
+      $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId());
     }
 
     $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, $note, !empty($marydone), $riskLvl);

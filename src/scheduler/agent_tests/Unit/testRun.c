@@ -14,7 +14,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * \dir
+ * \brief Unit tests for scheduler
+ * \file
+ * \brief Unit tests for scheduler
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -41,8 +46,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 char* testdb = NULL;
 
 /**
- * We don't want to actually generate any error messages. To do this, the log
- * file will be set to /dev/null.
+ * Check if main log is not NULL, destroy it else create a new log on
+ * ./founit.log
  *
  * @return -1 on failure, 0 of success
  */
@@ -72,9 +77,7 @@ int clean_suite(void)
 {
   if(main_log)
     log_destroy(main_log);
-  
-  
-  
+
   main_log = NULL;
   return 0;
 }
@@ -84,6 +87,23 @@ int clean_suite(void)
 /* ************************************************************************** */
 
 /* create test suite */
+#if CU_VERSION_P == 213
+/** \todo tests_job is not running */
+CU_SuiteInfo suites[] =
+{
+    {"Host",            NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_host             },
+    {"Interface",       NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_interface        },
+    {"InterfaceThread", NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_interface_thread },
+    {"Database",        NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_database },
+    {"Email",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_email },
+  //  {"Job"  NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_job },
+    {"Scheduler",       NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_scheduler },
+    {"MetaAgent",       NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_meta_agent },
+    {"Agent",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_agent },
+    {"Event",           NULL, NULL, (CU_SetUpFunc)init_suite, (CU_TearDownFunc)clean_suite, tests_event },
+    CU_SUITE_INFO_NULL
+};
+#else
 CU_SuiteInfo suites[] =
 {
     {"Host",            init_suite, clean_suite, tests_host             },
@@ -98,6 +118,7 @@ CU_SuiteInfo suites[] =
     {"Event",init_suite,clean_suite, tests_event },
     CU_SUITE_INFO_NULL
 };
+#endif
 
 int main( int argc, char *argv[] )
 {

@@ -4,15 +4,18 @@
 #
 # uses phpIni to store file path - change if required
 #
+PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}')
+phpIni="${PHP_PATH}/../apache2/php.ini"
+
 echo 'Automated php.ini configuration adjustments'
 echo
 if [ -f /etc/redhat-release ]; then
     phpIni=/etc/php.ini
-    TIMEZONE=`readlink /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
+    TIMEZONE=`readlink -f /etc/localtime | sed 's%/usr/share/zoneinfo/%%'`
 else
-    phpIni=/etc/php5/apache2/php.ini
     TIMEZONE=`cat /etc/timezone`
 fi
+
 if [ -z $TIMEZONE ]; then
     TIMEZONE="America/Denver"
 fi
@@ -48,4 +51,3 @@ then
 else
     echo 'php.ini was not located as expected. Please adjust phpIni to suit.'
 fi
-

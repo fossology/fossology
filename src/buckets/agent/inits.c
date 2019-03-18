@@ -26,8 +26,8 @@ extern int debug;
 /**
  * \brief Get a bucketpool_pk based on the bucketpool_name
  *
- * \param PGconn $pgConn  Database connection object
- * \param char $bucketpool_name
+ * \param pgConn          Database connection object
+ * \param bucketpool_name Bucket pool name
  *
  * \return active bucketpool_pk or 0 if error
 ****************************************************/
@@ -39,7 +39,7 @@ FUNCTION int getBucketpool_pk(PGconn *pgConn, char *bucketpool_name)
   PGresult *result;
 
   /* Skip file if it has already been processed for buckets. */
-  sprintf(sqlbuf, "select bucketpool_pk from bucketpool where (bucketpool_name='%s') and (active='Y') order by version desc", 
+  sprintf(sqlbuf, "select bucketpool_pk from bucketpool where (bucketpool_name='%s') and (active='Y') order by version desc",
           bucketpool_name);
   result = PQexec(pgConn, sqlbuf);
   if (fo_checkPQresult(pgConn, result, sqlbuf, fcnName, __LINE__)) return 0;
@@ -50,12 +50,12 @@ FUNCTION int getBucketpool_pk(PGconn *pgConn, char *bucketpool_name)
 
 
 /**
- * \brief Initialize the bucket definition list
+ * \brief Initialize the bucket definition list.
  * If an error occured, write the error to stdout
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param cacheroot_t $pcroot  license cache root
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param pcroot        License cache root
  *
  * \return an array of bucket definitions (in eval order)
  * or 0 if error.
@@ -73,7 +73,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
   struct stat statbuf;
 
   /* reasonable input validation  */
-  if ((!pgConn) || (!bucketpool_pk)) 
+  if ((!pgConn) || (!bucketpool_pk))
   {
     printf("ERROR: %s.%s.%d Invalid input pgConn: %lx, bucketpool_pk: %d.\n",
             __FILE__, fcnName, __LINE__, (unsigned long)pgConn, bucketpool_pk);
@@ -111,7 +111,7 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
     /* compile regex if type 3 (REGEX) */
     if (bucketDefList[rowNum].bucket_type == 3)
     {
-      rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2), 
+      rv = regcomp(&bucketDefList[rowNum].compRegex, PQgetvalue(result, rowNum, 2),
                    REG_NOSUB | REG_ICASE | REG_EXTENDED);
       if (rv != 0)
       {
@@ -185,21 +185,21 @@ FUNCTION pbucketdef_t initBuckets(PGconn *pgConn, int bucketpool_pk, cacheroot_t
 /**
  * \brief Read the match only file (bucket type 2)
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename  File name of match_only file
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      File name of match_only file
+ * \param pcroot        Look up cache root
  *
  * \return an array of rf_pk's that match the licenses
- * in filename.
- * or 0 if error.
+ * in filename or 0 if error.
  */
-FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk, 
+FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
                              char *filename, cacheroot_t *pcroot)
 {
   char *fcnName = "getMatchOnly";
   char *delims = ",\t\n\r";
   char *sp;
-  char filepath[256];  
+  char filepath[256];
   char inbuf[256];
   int *match_only = 0;
   int  line_count = 0;
@@ -208,7 +208,7 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
   FILE *fin;
 
   /* put together complete file path to match_only file */
-  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
            PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
@@ -222,23 +222,24 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
 
   /* count lines in file */
   while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
-  
-  /* calloc match_only array as lines+1.  This set the array to 
+
+  /* calloc match_only array as lines+1.  This set the array to
      the max possible size +1 for null termination */
   match_only = calloc(line_count+1, sizeof(int));
   if (!match_only)
   {
     printf("FATAL: %s.%s.%d Unable to allocate %d int array.\n",
            __FILE__, fcnName, __LINE__, line_count+1);
+    fclose(fin);
     return 0;
   }
 
-  /* read each line fgets 
+  /* read each line fgets
      A match_only file has one license per line, no leading whitespace.
      Comments start with leading #
    */
   rewind(fin);
-  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  while (fgets(inbuf, sizeof(inbuf), fin))
   {
     /* input string should only contain 1 token (license name) */
     sp = strtok(inbuf, delims);
@@ -259,28 +260,28 @@ FUNCTION int *getMatchOnly(PGconn *pgConn, int bucketpool_pk,
 //printf("MATCH_ONLY license: %s, NOT FOUND in DB - ignored\n", sp);
     }
   }
+  fclose(fin);
 
-return match_only;
+  return match_only;
 }
 
 
 /**
  * \brief Read the match every file filename, for bucket type 1
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      File name to match against
+ * \param pcroot        License cache
  *
- * \return an array of arrays of rf_pk's that define a 
- * match_every combination.
- * or 0 if error.
+ * \return an array of arrays of rf_pk's that define a
+ * match_every combination or 0 if error.
  */
-FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk, 
+FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
                              char *filename, cacheroot_t *pcroot)
 {
   char *fcnName = "getMatchEvery";
-  char filepath[256];  
+  char filepath[256];
   char inbuf[256];
   int **match_every = 0;
   int **match_every_head = 0;
@@ -290,7 +291,7 @@ FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
   FILE *fin;
 
   /* put together complete file path to match_every file */
-  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
            PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
@@ -304,24 +305,25 @@ FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
 
   /* count lines in file */
   while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
-  
-  /* calloc match_every array as lines+1.  This sets the array to 
+
+  /* calloc match_every array as lines+1.  This sets the array to
      the max possible size +1 for null termination */
   match_every = calloc(line_count+1, sizeof(int *));
   if (!match_every)
   {
     printf("FATAL: %s.%s.%d Unable to allocate %d int array.\n",
            __FILE__, fcnName, __LINE__, line_count+1);
+    fclose(fin);
     return 0;
   }
   match_every_head = match_every;
 
-  /* read each line fgets 
+  /* read each line fgets
      A match_every file has 1-n licenses per line
      Comments start with leading #
    */
   rewind(fin);
-  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  while (fgets(inbuf, sizeof(inbuf), fin))
   {
     /* comment? */
     if (inbuf[0] == '#') continue;
@@ -338,36 +340,39 @@ FUNCTION int **getMatchEvery(PGconn *pgConn, int bucketpool_pk,
     free(match_every_head);
     match_every_head = 0;
   }
-return match_every_head;
+  fclose(fin);
+  return match_every_head;
 }
 
 
 /**
  * \brief Parse filename, for bucket type 5 REGEX-FILE
  * Lines are in format:
- * {ftype1} {regex1} {op} {ftype2} {regex2}
+ * \code {ftype1} {regex1} {op} {ftype2} {regex2} \endcode
  *
  * ftype is either "license" or "filename" \n
  * op is either "and" (1) or "or" (2) or "not" (3) \n
  * The op clause is optional. \n
- * For example: \n
+ * For example:
+ * \code
  *   license bsd.*clause \n
- *   license (GPL_?v3|Affero_v3) and filename .*mypkg \n
+ *   license (GPL_?v3|Affero_v3) and filename .*mypkg
+ * \endcode
  *
- * \param PGconn $pgConn  Database connection object
- * \param int $bucketpool_pk
- * \param char $filename
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn        Database connection object
+ * \param bucketpool_pk Bucket pool id
+ * \param filename      Filename to be parsed
+ * \param pcroot        License cache
  *
- * \return an array of arrays of regex_file_t's that 
+ * \return an array of arrays of regex_file_t's that
  *        represent the rows in filename. \n
  * or 0 if error.
  */
-FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk, 
+FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
                              char *filename, cacheroot_t *pcroot)
 {
   char *fcnName = "getRegexFile";
-  char filepath[256];  
+  char filepath[256];
   char inbuf[256];
   regex_file_t *regex_row_head = 0;
   int  line_count = 0;
@@ -380,7 +385,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
   FILE *fin;
 
   /* put together complete file path to match_every file */
-  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+  snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
            PROJECTSTATEDIR, bucketpool_pk, filename);
 
   /* open filepath */
@@ -396,23 +401,24 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
 
   /* count lines in file */
   while (fgets(inbuf, sizeof(inbuf), fin)) line_count++;
-  
-  /* calloc array as lines+1.  This sets the array to 
+
+  /* calloc array as lines+1.  This sets the array to
      the max possible size +1 for null termination */
   regex_row_head = calloc(line_count+1, sizeof(regex_file_t));
   if (!regex_row_head)
   {
     printf("FATAL: %s.%s.%d Unable to allocate %d regex_file_t array.\n",
            __FILE__, fcnName, __LINE__, line_count+1);
+    fclose(fin);
     return 0;
   }
 
-  /* read each line fgets 
+  /* read each line fgets
      File has 1-n expressions per line
      Comments start with leading #
    */
   rewind(fin);
-  while (fgets(inbuf, sizeof(inbuf), fin)) 
+  while (fgets(inbuf, sizeof(inbuf), fin))
   {
     /* comment? */
     if (inbuf[0] == '#') continue;
@@ -482,7 +488,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
   }
 
   /* bad file data.  Die unceremoniously.
-   * todo: die more gracefully.
+   * \todo: die more gracefully.
    */
   if (errorCount) exit(-1);
 
@@ -491,6 +497,7 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
     free(regex_row_head);
     regex_row_head = 0;
   }
+  fclose(fin);
   return regex_row_head;
 }
 
@@ -499,9 +506,9 @@ FUNCTION regex_file_t *getRegexFile(PGconn *pgConn, int bucketpool_pk,
  * \brief Given a filetype token from REGEX-FILE
  * return the token int representation.
  *
- * \param char $token  
- * \param char $filepath  path of REGEX-FILE data file.
- *                       used for error reporting only.
+ * \param token    Token to convert
+ * \param filepath Path of REGEX-FILE data file.
+ *                 used for error reporting only.
  *
  * \return 1=filename, 2=license
  */
@@ -520,13 +527,13 @@ FUNCTION int getRegexFiletype(char *token, char *filepath)
  * \brief Given a string with | separated license names
  * return an integer array of rf_pk's
  *
- * \param PGconn $pgConn  Database connection object
- * \param char $nameStr   string of lic names eg "bsd | gpl"
- * \param cacheroot_t $pcroot  License cache
+ * \param pgConn  Database connection object
+ * \param nameStr String of lic names eg "bsd | gpl"
+ * \param pcroot  License cache
  *
  * \return an array of rf_pk's that match the names in nameStr
  *
- * if nameStr contains a license name that is not in
+ * \note If nameStr contains a license name that is not in
  * the license_ref file, then 0 is returned since there
  * is no way to match all the listed licenses.
  */
@@ -549,7 +556,7 @@ FUNCTION int *getLicsInStr(PGconn *pgConn, char *nameStr,
   sp = nameStr;
   while (*sp) if (*sp++ == *delims) lic_count++;
 
-  /* we need lic_count+1 int array.  This sets the array to 
+  /* we need lic_count+1 int array.  This sets the array to
      the max possible size +1 for null termination */
   pkArray = calloc(lic_count+1, sizeof(int));
   if (!pkArray)
@@ -595,14 +602,14 @@ FUNCTION int *getLicsInStr(PGconn *pgConn, char *nameStr,
  * \brief Get the latest nomos agent_pk that has data for this
  * this uploadtree.
  *
- * \param PGconn $pgConn  Database connection object
- * \param int    $upload_pk  
+ * \param pgConn    Database connection object
+ * \param upload_pk Upload id
  *
  * \return nomos_agent_pk of the latest version of the nomos agent
  *        that has data for this upload. \n
  *        Or 0 if there is no license data available
- * 
- * NOTE: This function writes error to stdout
+ *
+ * \note This function writes error to stdout
  */
 FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
 {
@@ -612,7 +619,7 @@ FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
   int  nomos_agent_pk = 0;
 
   /*** Find the latest enabled nomos agent_pk ***/
-                         
+
   snprintf(sql, sizeof(sql),
           "select agent_fk from nomos_ars, agent \
               WHERE agent_pk=agent_fk and ars_success=true and upload_fk='%d' \
@@ -632,13 +639,13 @@ FUNCTION int LatestNomosAgent(PGconn *pgConn, int upload_pk)
  * uploadtree_pk of it's children (i.e. scan down through
  * artifacts to get the children's parent
  *
- * \param PGconn $pgConn  Database connection object
- * \param int    $uploadtree_pk  
+ * \param pgConn        Database connection object
+ * \param uploadtree_pk Upload tree id for container
  *
  * \return uploadtree_pk of children's parent. \n
  *         Or 0 if there are no children (empty container or non-container)
- *        
- * NOTE: This function writes error to stdout
+ *
+ * \note This function writes error to stdout
  */
 FUNCTION int childParent(PGconn *pgConn, int uploadtree_pk)
 {
@@ -650,7 +657,7 @@ FUNCTION int childParent(PGconn *pgConn, int uploadtree_pk)
   do
   {
     snprintf(sql, sizeof(sql),
-           "select uploadtree_pk,ufile_mode from uploadtree where parent=%d limit 1", 
+           "select uploadtree_pk,ufile_mode from uploadtree where parent=%d limit 1",
            uploadtree_pk);
     result = PQexec(pgConn, sql);
     if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) break;

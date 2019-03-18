@@ -18,18 +18,31 @@
  ***************************************************************/
 
 /**
+ * \dir
+ * \brief Function test the pkgagent
  * \file ft_cliPkgagentTest.php
  * \brief function test the pkgagent cli
  *
  * Test cli parameter i and v and rpm file and no parameters.
  */
 
-class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
+require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
+
+/**
+ * @class ft_cliPkgagentTest
+ * @brief Test cli parameter i and v and rpm file and no parameters.
+ */
+class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
 
   public $agentDir;
   public $pkgagent;
   protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
+  private $db_conf;
 
+  /**
+   * @brief Set up test environment
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   function setUp() {
 /*
     $AGENTDIR = NULL;
@@ -53,27 +66,45 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
     }
 */
     //print "agent:$this->agentDir\npkgagent:$this->pkgagent\n";
+
+    $cwd = getcwd();
+    list($test_name, $this->db_conf, $DB_NAME, $PG_CONN) = setupTestEnv($cwd, "pkgagent");
+
     $this->agentDir = '../../agent';
-    $this->pkgagent = $this->agentDir .'/pkgagent';
+    $this->pkgagent = $this->agentDir .'/pkgagent -c ' . $this->db_conf;
     return;
   } // setUP
 
+  /**
+   * @brief Test help message
+   * @test
+   * -# Call \c -h on pkgagent CLI
+   * -# Check if help message was printed properly
+   */
   function testHelp() {
     // pkgagent -h
-    $last = exec("$this->pkgagent -h 2>&1", $usageOut, $rtn=NULL);
+    $rtn = NULL;
+    $last = exec("$this->pkgagent -h 2>&1", $usageOut, $rtn);
     //print "testHelp: last is:$last\nusageout is:\n";
     //print_r($usageOut) . "\n";
     // Check a couple of options for sanity
-    $usage = "Usage: $this->pkgagent [options] [file [file [...]]";
+    $usage = "Usage: $this->agentDir/pkgagent [options] [file [file [...]]";
     $dashI = '-i   :: initialize the database, then exit.';
     $this->assertEquals($usage, $usageOut[0]);
     $this->assertEquals($dashI, trim($usageOut[1]));
     return;
   }
 
+  /**
+   * @brief Test DB init flag
+   * @test
+   * -# Call \c -i on pkgagent CLI
+   * -# Check if agent ran properly
+   */
   function testI() {
     // pkgagent -i
-    $last = exec("$this->pkgagent -i 2>&1", $got, $rtn=NULL);
+    $rtn = NULL;
+    $last = exec("$this->pkgagent -i 2>&1", $got, $rtn);
 
     if($rtn != 0){
       $this->fail("pkgagent FAILED!, return value is:$rtn\n");
@@ -87,6 +118,12 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
     return;
   }
 
+  /**
+   * @brief Test CLI with single RPM
+   * @test
+   * -# Call CLI with single RPM file path
+   * -# Check if agent parse the RPM file properly
+   */
   function testOneRPM()
   {
     // pkgagent rpmfile
@@ -97,7 +134,8 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
                       'Summary:FOSSology is a licenses exploration tool',
                       'OK'
                      );
-    $last = exec("$this->pkgagent -C $this->testfile 2>&1", $got, $rtn=NULL);
+    $rtn = NULL;
+    $last = exec("$this->pkgagent -C $this->testfile 2>&1", $got, $rtn);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     //$this->assertEquals($expected[0],$got[0]);
@@ -114,12 +152,18 @@ class ft_cliPkgagentTest extends PHPUnit_Framework_TestCase {
     $this->assertEquals('OK',$got[$size-1]);
     return;
   }
-  
+
+  /**
+   * @brief Test CLI in verbose with one RPM
+   * @test
+   * -# Pass one RPM to CLI with \c -vv flag
+   * -# Test if extra information is loaded
+   */
   function testOneRPMV()
   {
     // pkgagent -v rpmfile
-
-    $last = exec("$this->pkgagent -C -vv $this->testfile 2>&1", $got, $rtn=NULL);
+    $rtn = NULL;
+    $last = exec("$this->pkgagent -C -vv $this->testfile 2>&1", $got, $rtn);
     //print "testOneRpm: last is:$last\ngot is:\n";
     //print_r($got) . "\n";
     // check the output

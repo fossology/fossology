@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class ClearingEvent extends Object implements LicenseClearing
+class ClearingEvent implements LicenseClearing
 {
   /** @var int */
   private $eventId;
@@ -46,9 +45,6 @@ class ClearingEvent extends Object implements LicenseClearing
    * @param int $groupId
    * @param int $eventType
    * @param ClearingLicense $clearingLicense
-   * @param boolean $removed
-   * @param string $reportinfo
-   * @param string $comment
    */
   public function __construct($eventId, $uploadTreeId, $timestamp, $userId, $groupId, $eventType, ClearingLicense $clearingLicense)
   {
@@ -125,6 +121,15 @@ class ClearingEvent extends Object implements LicenseClearing
   public function getReportinfo()
   {
     return $this->clearingLicense->getReportinfo();
+  }
+
+  /**
+   * @return string
+   * @deprecated
+   */
+  public function getAcknowledgement()
+  {
+    return $this->clearingLicense->getAcknowledgement();
   }
 
   /**

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,7 +22,7 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseRef;
 use Mockery as M;
 
-class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
+class AgentClearingEventTest extends \PHPUnit\Framework\TestCase {
   /** @var LicenseRef|M\MockInterface */
   private $licenseRef;
 
@@ -39,8 +39,8 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
   private $agentClearingEvent;
 
   protected function setUp() {
-    $this->licenseRef = M::mock(LicenseRef::classname());
-    $this->agentRef = M::mock(AgentRef::classname());
+    $this->licenseRef = M::mock(LicenseRef::class);
+    $this->agentRef = M::mock(AgentRef::class);
 
     $this->agentClearingEvent = new AgentClearingEvent($this->licenseRef, $this->agentRef, $this->matchId, $this->percentage);
   }
@@ -90,6 +90,10 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->agentClearingEvent->getReportinfo(), is(""));
   }
 
+  public function testGetAcknowledgement() {
+    assertThat($this->agentClearingEvent->getAcknowledgement(), is(""));
+  }
+
   public function testIsRemoved() {
     assertThat($this->agentClearingEvent->isRemoved(), is(false));
   }
@@ -116,4 +120,3 @@ class AgentClearingEventTest extends \PHPUnit_Framework_TestCase {
     assertThat($this->agentClearingEvent->getPercentage(), is($this->percentage));
   }
 }
- 

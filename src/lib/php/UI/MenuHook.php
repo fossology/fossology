@@ -18,9 +18,7 @@
 
 namespace Fossology\Lib\UI;
 
-use Fossology\Lib\Util\Object;
-
-class MenuHook extends Object
+class MenuHook
 {
   /**
    * @param string $hook 'ParmAgents'|'Agents'|'UploadMulti'

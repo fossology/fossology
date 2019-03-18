@@ -13,21 +13,29 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 
+namespace Fossology\DelAgent\UI;
 
-namespace delagent\ui;
-
+/**
+ * @class DeleteResponse
+ * @brief Handle response from delagent
+ */
 class DeleteResponse
 {
   /**
-   * @var $deleteMessageCode DeleteMessages
+   * @var DeleteMessages $deleteMessageCode
+   * Messages from delagent
    */
   private $deleteMessageCode;
+  /**
+   * @var string $additionalMessage
+   * Additional messages for user
+   */
   private $additionalMessage;
 
   /**
    * DeleteResponse constructor.
-   * @param $deleteMessage int
-   * @param $additionalMessage
+   * @param DeleteMessages|int $deleteMessage
+   * @param string $additionalMessage
    */
   public function __construct($deleteMessage, $additionalMessage = "")
   {
@@ -44,6 +52,7 @@ class DeleteResponse
   }
 
   /**
+   * @brief Translates message code to strings
    * @return string
    */
   public function getDeleteMessageString()

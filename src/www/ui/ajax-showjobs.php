@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015, Siemens AG
+ Copyright (C) 2015-2018, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>, 
          Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -21,6 +21,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -39,6 +40,9 @@ class AjaxShowJobs extends FO_Plugin
   /** @var UserDao */
   private $userDao;
 
+  /** @var ClearingDao */
+  private $clearingDao;
+
   /** @var int $maxUploadsPerPage max number of uploads to display on a page */
   private $maxUploadsPerPage = 10;
 
@@ -55,6 +59,7 @@ class AjaxShowJobs extends FO_Plugin
     global $container;
     $this->showJobsDao = $container->get('dao.show_jobs');
     $this->userDao = $container->get('dao.user');
+    $this->clearingDao = $container->get('dao.clearing');
     $this->dbManager = $container->get('db.manager');
 
     parent::__construct();
@@ -232,6 +237,10 @@ class AjaxShowJobs extends FO_Plugin
       /* Upload  */
       if (!empty($job["upload"])){
         $uploadName = GetArrayVal("upload_filename", $job["upload"]);
+        $jobName = $job["job"]["job_name"];
+        if($uploadName !== $jobName){
+          $uploadName = $jobName;
+        }
         $uploadDesc = GetArrayVal("upload_desc", $job["upload"]);
         $upload_pk = GetArrayVal("upload_pk", $job["upload"]);
         $jobId = GetArrayVal("job_pk", $job["job"]);
@@ -355,9 +364,18 @@ class AjaxShowJobs extends FO_Plugin
         }
         if (empty($jobqueueRec['jq_endtime'])) {
           $varJobQueueRow['eta'] = $this->showJobsDao->getEstimatedTime($jobqueueRec['jq_job_fk'], $jobqueueRec['jq_type'], $itemsPerSec, $job['job']['job_upload_fk']);
+          if($jobqueueRec['jq_type'] === 'monkbulk' || $jobqueueRec['jq_type'] === 'deciderjob'){
+            $noOfMonkBulk = $this->showJobsDao->getItemsProcessedForDecider('decider', $jobqueueRec['jq_job_fk']);
+            if(!empty($noOfMonkBulk)){
+              $totalCountOfMb = $this->clearingDao->getPreviousBulkIds($noOfMonkBulk[1], Auth::getGroupId(), Auth::getUserId(), $onlyCount=1);
+            }
+            if(!empty($totalCountOfMb)){
+              $varJobQueueRow['isNoOfMonkBulk'] = $noOfMonkBulk[0]."/".$totalCountOfMb;
+            }
+          }
         }
-        $varJobQueueRow['canDoActions'] = 
-                ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
+
+        $varJobQueueRow['canDoActions'] = ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
         $varJobQueueRow['isInProgress'] = ($jobqueueRec['jq_end_bits'] == 0);
         $varJobQueueRow['isReady'] = ($jobqueueRec['jq_end_bits'] == 1);
         
@@ -374,6 +392,11 @@ class AjaxShowJobs extends FO_Plugin
             break;
           case 'dep5':
             $varJobQueueRow['download'] = "DEP5 copyright file";
+            break;
+          case 'reportImport':
+            $varJobQueueRow['download'] = "uploaded SPDX2 report";
+          case 'unifiedreport':
+            $varJobQueueRow['download'] = "Unified Report";
             break;
           default:
             $varJobQueueRow['download'] = "";

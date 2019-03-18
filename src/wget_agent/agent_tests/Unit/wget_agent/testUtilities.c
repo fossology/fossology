@@ -21,19 +21,24 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "utility.h"
 
 /**
- * \file testUtilities.c
+ * \file
  * \brief testing for functions GetPosition, IsFile, TaintURL
  */
 
 /* test functions */
 
 /**
- * \brief for function IsFile 
- * a file
+ * \brief Test for function IsFile()
+ * \test
+ * -# Create a file
+ * -# Call IsFile()
+ * -# Check if result is 1
  */
 void testIsFileNormal_RegulerFile()
 {
-  system("echo 'hello world' > ./test.file");
+  int pid = system("echo 'hello world' > ./test.file");
+  if (WIFEXITED(pid)) pid = WEXITSTATUS(pid);
+  else pid = -1;
   char Fname[] = "./test.file";
   int isFile = IsFile(Fname, 1);
   CU_ASSERT_EQUAL(isFile, 1);
@@ -41,17 +46,23 @@ void testIsFileNormal_RegulerFile()
 }
 
 /**
- * \brief for function IsFile
- * a file
+ * \brief Test for function IsFile()
+ * a symlink
+ * \test
+ * -# Create a file and a symlink to the file
+ * -# Call IsFile() to follow symlink
+ * -# Check if result is 1
  */
 void testIsFileNormal_SymLink()
 {
-  system("echo 'hello world' > ./test.file");
+  int pid = system("echo 'hello world' > ./test.file");
+  if (WIFEXITED(pid)) pid = WEXITSTATUS(pid);
+  else pid = -1;
   char Fname[] = "./test.file";
   int isFile = IsFile(Fname, 0);
   CU_ASSERT_EQUAL(isFile, 1);
   char NewFname[] = "./link.file";
-  symlink(Fname, NewFname);
+  pid = symlink(Fname, NewFname);
   isFile = IsFile(NewFname, 1);
   CU_ASSERT_EQUAL(isFile, 1);
 #if 0
@@ -61,7 +72,11 @@ void testIsFileNormal_SymLink()
 }
 
 /**
- * \brief for function GetPosition
+ * \brief Test for function GetPosition()
+ * \test
+ * -# Create 3 URLs (http, https and ftp)
+ * -# Call GetPosition() on 3 URLs
+ * -# Check if correct position was returned
  */
 void testGetPositionNormal()
 {
@@ -80,7 +95,11 @@ void testGetPositionNormal()
 }
 
 /**
- * \brief for function TaintURL 
+ * \brief Test for function TaintURL()
+ * \test
+ * -# Create URLs with unwanted characters
+ * -# Call TaintURL()
+ * -# Check if result is 1
  */
 void testTaintURL()
 {
@@ -100,8 +119,11 @@ void testTaintURL()
 }
 
 /**
- * \brief for function PathCheck()
- * 
+ * \brief Test for function PathCheck()
+ * \test
+ * -# Create a path string with "%H"
+ * -# Call PathCheck
+ * -# Check if "%H" was replaced with HostName
  * \note free the pointer from PathCheck()
  */
 void test_PathCheck()
@@ -117,7 +139,11 @@ void test_PathCheck()
 }
 
 /**
- * \brief for function Archivefs(), dir
+ * \brief Test for function Archivefs(), dir
+ * \test
+ * -# Create a directory with a file
+ * -# Call Archivefs()
+ * -# Check if the result is a tar archive
  */
 void test_Archivefs_dir()
 {
@@ -140,7 +166,11 @@ void test_Archivefs_dir()
 }
 
 /**
- * \brief for function Archivefs(), reguler file
+ * \brief Test for function Archivefs(), reguler file
+ * \test
+ * -# Create a test file
+ * -# Call Archivefs()
+ * -# Check if the result is normal file
  */
 void test_Archivefs_file()
 {

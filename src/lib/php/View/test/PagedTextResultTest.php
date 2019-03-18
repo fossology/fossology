@@ -24,7 +24,7 @@ if(!function_exists('') )
   require_once(__DIR__."/../../common-string.php");
 }
 
-class PagedTextResultTest extends \PHPUnit_Framework_TestCase {
+class PagedTextResultTest extends \PHPUnit\Framework\TestCase {
 
   const START_OFFSET = 15;
 
@@ -53,4 +53,3 @@ class PagedTextResultTest extends \PHPUnit_Framework_TestCase {
   }
 
 }
- 

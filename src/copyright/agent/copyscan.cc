@@ -5,12 +5,12 @@
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -21,9 +21,13 @@
 #include <algorithm>
 #include "regexConfProvider.hpp"
 
-const string copyrightType("statement");
+const string copyrightType("statement");  /**< A constant for default copyrightType as "statement" */
 
-
+/**
+ * \brief Constructor for default hCopyrightScanner
+ *
+ * Initialize all regex values
+ */
 hCopyrightScanner::hCopyrightScanner()
 {
   RegexConfProvider rcp;
@@ -31,18 +35,26 @@ hCopyrightScanner::hCopyrightScanner()
 
   regCopyright = rx::regex(rcp.getRegexValue("copyright","REG_COPYRIGHT"),
                         rx::regex_constants::icase);
-  
+
   regException = rx::regex(rcp.getRegexValue("copyright","REG_EXCEPTION"),
                rx::regex_constants::icase);
   regNonBlank = rx::regex(rcp.getRegexValue("copyright","REG_NON_BLANK"));
-  
+
   regSimpleCopyright = rx::regex(rcp.getRegexValue("copyright","REG_SIMPLE_COPYRIGHT"),
                      rx::regex_constants::icase);
 }
 
+/**
+ * \brief Scan a given string for copyright statements
+ *
+ * Given a string s, scans for copyright statements using regCopyrights.
+ * Then checks for an regException match.
+ * \param[in]  s   String to work on
+ * \param[out] out List of matchs
+ */
 void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
 {
-  
+
   string::const_iterator begin = s.begin();
   string::const_iterator pos = begin;
   string::const_iterator end = s.end();
@@ -54,18 +66,19 @@ void hCopyrightScanner::ScanString(const string& s, list<match>& out) const
       // No further copyright statement found
       break;
     string::const_iterator foundPos = results[0].first;
-    
+
     if (!rx::regex_match(foundPos, end, regException))
     {
-      // Not an exception, this means that at foundPos there is a copyright statement
-      // Try to find the proper beginning and end before adding it to the out list
-      
-      // Copyright statements should extend over the following lines until
-      // a blank line or a line with a new copyright statement is found
-      // A blank line may consist of
-      // - spaces and punctuation
-      // - no word of two letters, no two consecutive digits
-                  
+      /**
+       * Not an exception, this means that at foundPos there is a copyright statement.
+       * Try to find the proper beginning and end before adding it to the out list.
+       *
+       * Copyright statements should extend over the following lines until
+       * a blank line or a line with a new copyright statement is found.
+       * A blank line may consist of
+       *   - spaces and punctuation
+       *   - no word of two letters, no two consecutive digits
+      */
       string::const_iterator j = find(foundPos, end, '\n');
       while (j != end)
       {

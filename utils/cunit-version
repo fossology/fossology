@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Copyright 2018 Siemens AG
+# Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+
+DISTRO=$(lsb_release -is)
+
+CUNIT=""
+
+case "$DISTRO" in
+  Debian|Ubuntu|LinuxMint)
+    CUNIT=$(dpkg-query -W -f='${Version}' libcunit1-dev)
+  ;;
+  RedHatEnterprise*|CentOS|Fedora|Mandriva)
+    CUNIT=$(rpm -qi CUnit | grep -i "Version")
+  ;;
+  *)
+    CUNIT="2.1.2"
+  ;;
+esac
+
+if echo $CUNIT | grep -q "2.1-3"; then
+  echo "213"
+elif echo $CUNIT | grep -q "2.1.3"; then
+  echo "213"
+else
+  echo "212"
+fi

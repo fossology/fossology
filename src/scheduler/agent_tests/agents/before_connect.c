@@ -19,14 +19,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 
 /**
- * @file simple.c
+ * @dir
+ * @brief Contains sample agents which have specific behaviors
+ * @file
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This agent is
- *        identical to the simple agent, but it writes to stdout before calling
- *        fo_scheduler_connect().
+ *        tests to confirm a correctly working scheduler.
  *
- * This is a failing agent
+ * This agent is identical to the simple agent, but it writes to stdout before
+ * calling fo_scheduler_connect().
+ *
+ * @note This is a failing agent
  */
 
 int main(int argc, char** argv)

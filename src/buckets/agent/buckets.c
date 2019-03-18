@@ -21,22 +21,58 @@
 
  The bucket agent uses user rules (see bucket table) to classify
  files into user categories (buckets).
+ \page buckets Buckets agent
+ \tableofcontents
+
+ The bucket agent uses user rules (see bucket table) to classify
+ files into user categories (buckets).
 
  Containers are in all the buckets of their contents.
 
  Packages, like all other container, are in the buckets of their children.
  In addition, packages can have their own rules that will place them in
  additional buckets.
+
+ \section bucketsactions Supported actions
+ Command line flag|Description|
+ ---:|:---|
+ -i|Initialize the database, then exit|
+ -n|Bucketpool name of bucketpool to use|
+ -p|Bucketpool_pk of bucketpool to use|
+ -r|Rerun buckets|
+ -t|Uploadtree_pk, root of tree to scan|
+ -u|Upload_pk to scan|
+ -v|Verbose (turns on copious debugging output)|
+ -V|Print the version info, then exit|
+ -c SYSCONFDIR|Specify the directory for the system configuration|
+ \note
+ -n and -p are mutually exclusive.  If both are specified
+ -p is used. One of these is required.
+
+ \note
+ -t and -u are mutually exclusive.  If both are specified
+ -u is used. One of these is required.
+ \note
+ If none of -nptu are specified, the bucketpool_pk and upload_pk
+ are read from stdin, one comma delimited pair per line.
+ For example, 'bppk=123, upk=987' where 123 is the bucketpool_pk and 987 is the upload_pk.
+ This is the normal execution from the scheduler.
+ \section bucketssource Agent source
+   - \link src/buckets/agent \endlink
+   - \link src/buckets/ui \endlink
  */
 
 #include "buckets.h"
 
+/** Print debug messages */
 int debug = 0;
 
-/* global mimetype_pk's for Debian source and binary packages */
+/** global mimetype_pk's for Debian source packages */
 int DEB_SOURCE;
+/** global mimetype_pk's for Debian binary packages */
 int DEB_BINARY;
 
+/** Bucket agent build version */
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="buckets build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
 #else
@@ -44,7 +80,7 @@ char BuildVersion[]="buckets build version: NULL.\n";
 #endif
 
 /****************************************************/
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
   char *agentDesc = "Bucket agent";
   int cmdopt;
@@ -85,9 +121,9 @@ int main(int argc, char **argv)
   user_pk = fo_scheduler_userID(); /* get user_pk for user who queued the agent */
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:hV")) != -1) 
+  while ((cmdopt = getopt(argc, argv, "rin:p:t:u:vc:hV")) != -1)
   {
-    switch (cmdopt) 
+    switch (cmdopt)
     {
       case 'i': /* "Initialize" */
             PQfinish(pgConn);
@@ -143,11 +179,11 @@ int main(int argc, char **argv)
             verbose++;
             break;
       case 'c': break; /* handled by fo_scheduler_connect() */
-      case 'r': 
+      case 'r':
             rerun = 1; /** rerun bucket */
             break;
       case 'V': /* print version info */
-            printf("%s", BuildVersion);           
+            printf("%s", BuildVersion);
             PQfinish(pgConn);
             exit(0);
       default:
@@ -172,7 +208,7 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
-  /* get agent pk 
+  /* get agent pk
    * Note, if GetAgentKey fails, this process will exit.
    */
   COMMIT_HASH = fo_sysconfig("buckets", "COMMIT_HASH");
@@ -197,7 +233,7 @@ int main(int argc, char **argv)
   while(++readnum)
   {
     uploadtree.upload_fk = 0;
-    if (ReadFromStdin) 
+    if (ReadFromStdin)
     {
       bucketpool_pk = 0;
 
@@ -233,9 +269,9 @@ int main(int argc, char **argv)
              where upload_fk='%d' and parent is null limit 1", uploadtree.upload_fk);
       topresult = PQexec(pgConn, sqlbuf);
       if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
-      if (PQntuples(topresult) == 0) 
+      if (PQntuples(topresult) == 0)
       {
-        printf("ERROR: %s.%s missing upload_pk %d.\nsql: %s", 
+        printf("ERROR: %s.%s missing upload_pk %d.\nsql: %s",
                __FILE__, agentDesc, uploadtree.upload_fk, sqlbuf);
         PQclear(topresult);
         continue;
@@ -255,15 +291,19 @@ int main(int argc, char **argv)
       /* Only one input to process if from command line, so terminate if it's been done */
       if (readnum > 1) break;
 
-      /* not reading from stdin 
+      /* not reading from stdin
        * Get the pfile, and ufile_name for head_uploadtree_pk
        */
       sprintf(sqlbuf, "select pfile_fk, ufile_name, ufile_mode,lft,rgt, upload_fk from uploadtree where uploadtree_pk=%d", head_uploadtree_pk);
       topresult = PQexec(pgConn, sqlbuf);
-      if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__)) return -1;
-      if (PQntuples(topresult) == 0) 
+      if (fo_checkPQresult(pgConn, topresult, sqlbuf, agentDesc, __LINE__))
       {
-        printf("FATAL: %s.%s missing root uploadtree_pk %d\n", 
+        free(uploadtree.ufile_name);
+        return -1;
+      }
+      if (PQntuples(topresult) == 0)
+      {
+        printf("FATAL: %s.%s missing root uploadtree_pk %d\n",
                __FILE__, agentDesc, head_uploadtree_pk);
         PQclear(topresult);
         continue;
@@ -290,22 +330,22 @@ int main(int argc, char **argv)
     }
 
     /* at this point we know:
-     * bucketpool_pk, bucket agent_pk, nomos agent_pk, upload_pk, 
+     * bucketpool_pk, bucket agent_pk, nomos agent_pk, upload_pk,
      * pfile_pk, and head_uploadtree_pk (the uploadtree_pk of the head tree to scan)
      */
 
     /* Has the upload already been processed?  If so, we are done.
        Don't even bother to create a bucket_ars entry.
-     */ 
-    switch (UploadProcessed(pgConn, agent_pk, nomos_agent_pk, uploadtree.pfile_fk, head_uploadtree_pk, uploadtree.upload_fk, bucketpool_pk)) 
+     */
+    switch (UploadProcessed(pgConn, agent_pk, nomos_agent_pk, uploadtree.pfile_fk, head_uploadtree_pk, uploadtree.upload_fk, bucketpool_pk))
     {
       case 1:  /* upload has already been processed */
         if (1 == rerun) break;
         printf("LOG: Duplicate request for bucket agent to process upload_pk: %d, uploadtree_pk: %d, bucketpool_pk: %d, bucket agent_pk: %d, nomos agent_pk: %d, pfile_pk: %d ignored.\n",
              uploadtree.upload_fk, head_uploadtree_pk, bucketpool_pk, agent_pk, nomos_agent_pk, uploadtree.pfile_fk);
-        continue; 
+        continue;
       case -1: /* SQL error, UploadProcessed() wrote error message */
-        continue; 
+        continue;
       case 0:  /* upload has not been processed */
         break;
     }
@@ -372,7 +412,7 @@ int main(int argc, char **argv)
 
     /*** Record analysis start in bucket_ars, the bucket audit trail. ***/
     if (0 == rerun) { // do not have any bucket scan on this upload
-      snprintf(sqlbuf, sizeof(sqlbuf), 
+      snprintf(sqlbuf, sizeof(sqlbuf),
           "insert into bucket_ars (agent_fk, upload_fk, ars_success, nomosagent_fk, bucketpool_fk) values(%d,%d,'%s',%d,%d)",
           agent_pk, uploadtree.upload_fk, "false", nomos_agent_pk, bucketpool_pk);
       if (debug)
@@ -400,14 +440,14 @@ int main(int argc, char **argv)
     /*** END bucket_ars insert  ***/
 
     if (debug) printf("%s sql: %s\n",__FILE__, sqlbuf);
-  
-    /* process the tree for buckets 
-       Do this as a single transaction, therefore this agent must be 
+
+    /* process the tree for buckets
+       Do this as a single transaction, therefore this agent must be
        run as a single thread.  This will prevent the scheduler from
        consuming excess time (this is a fast agent), and allow this
        process to update bucket_ars.
      */
-    rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, 0, 
+    rv = walkTree(pgConn, bucketDefArray, agent_pk, head_uploadtree_pk, 0,
              hasPrules);
     /* if no errors and top level is a container, process the container */
     if ((!rv) && (IsContainer(uploadtree.ufile_mode)))
@@ -419,17 +459,17 @@ int main(int argc, char **argv)
     if (0 == rerun && ars_pk)
     {
       if (rv)
-        snprintf(sqlbuf, sizeof(sqlbuf), 
+        snprintf(sqlbuf, sizeof(sqlbuf),
                 "update bucket_ars set ars_endtime=now(), ars_success=false where ars_pk='%d'",
                 ars_pk);
       else
-        snprintf(sqlbuf, sizeof(sqlbuf), 
+        snprintf(sqlbuf, sizeof(sqlbuf),
                 "update bucket_ars set ars_endtime=now(), ars_success=true where ars_pk='%d'",
                 ars_pk);
 
-      if (debug)  
+      if (debug)
         printf("%s(%d): %s\n", __FILE__, __LINE__, sqlbuf);
-      
+
       result = PQexec(pgConn, sqlbuf);
       if (fo_checkPQcommand(pgConn, result, sqlbuf, __FILE__ ,__LINE__)) return -1;
       PQclear(result);

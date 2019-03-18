@@ -15,60 +15,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for ExtractISO()
+ */
 /* locals */
 static int Result = 0;
 
 /**
  * @brief unpack iso file
+ * \test
+ * -# Pass an ISO to ExtractISO()
+ * -# Check if function returns 0 and files are unpacked
  */
-void testExtractISO1()
+void testExtractISO()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/imagefile.iso";
-  MkDirs("./test-result/imagefile.iso.dir");
-  Result = ExtractISO(Filename, "./test-result/imagefile.iso.dir");
-  FO_ASSERT_EQUAL(Result, 0); 
-
-  int rc = 0;
-  char commands[250];
-  sprintf(commands, "isoinfo -f -R -i '%s' | grep ';1' > /dev/null ", Filename);
-  rc = system(commands);
-  if (0 != rc)
-  {
-    exists = file_dir_exists("./test-result/imagefile.iso.dir/test.cpi");
-    FO_ASSERT_EQUAL(exists, 1); 
-  }
-  else
-  {
-    exists = file_dir_exists("./test-result/imagefile.iso.dir/TEST.CPI;1");
-    FO_ASSERT_EQUAL(exists, 1); // existing
-  }
-}
-
-/**
- * @brief unpack iso file
- */
-void testExtractISO2()
-{
-  deleteTmpFiles("./test-result/");
-  exists = file_dir_exists("./test-result/");
-  FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/523.iso";
-  MkDirs("./test-result/523.iso.dir");
-  Result = ExtractISO(Filename, "./test-result/523.iso.dir"); // 
-  exists = file_dir_exists("./test-result/523.iso.dir/523sfp/DOS4GW.EXE");
+  Filename = "../testdata/test.iso";
+  MkDirs("./test-result/test.iso.dir");
+  Result = ExtractISO(Filename, "./test-result/test.iso.dir");
   FO_ASSERT_EQUAL(Result, 0);
-  FO_ASSERT_EQUAL(exists, 1); 
-  exists = file_dir_exists("./test-result/523.iso.dir/523sfp/p3p10131.bin");
-  FO_ASSERT_EQUAL(exists, 1); 
 
+  exists = file_dir_exists("./test-result/test.iso.dir/test1.zip.tar.dir/test1.zip");
+  FO_ASSERT_EQUAL(exists, 1);
 }
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Pass an empty strings to ExtractISO()
+ * -# Check if function returns 1
  */
 void testExtractISO4EmptyParameters()
 {
@@ -76,20 +54,23 @@ void testExtractISO4EmptyParameters()
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
   Result = ExtractISO("", ""); // empty parameters
-  FO_ASSERT_EQUAL(Result, 1); // fail to Extract  
+  FO_ASSERT_EQUAL(Result, 1); // fail to Extract
 }
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Pass a non ISO to ExtractISO()
+ * -# Check if function returns 1 and files are not unpacked
  */
 void testExtractISO4ErrorParameters()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  Filename = "../test-data/testdata4unpack/fcitx_3.6.2.orig.tar.gz";
-  MkDirs("./test-result/fcitx_3.6.2.orig.tar.gz.dir");
-  Result = ExtractISO(Filename, "./test-result/fcitx_3.6.2.orig.tar.gz.dir");
+  Filename = "../testdata/test_1.orig.tar.gz";
+  MkDirs("./test-result/test_1.orig.tar.gz.dir");
+  Result = ExtractISO(Filename, "./test-result/test_1.orig.tar.gz.dir");
   FO_ASSERT_EQUAL(Result, 0); // fail to Extract
 }
 
@@ -99,8 +80,7 @@ void testExtractISO4ErrorParameters()
 
 CU_TestInfo ununpack_iso_testcases[] =
 {
-  {"testExtractISO: iso file 1:", testExtractISO1},
-  {"testExtractISO: iso file 2:", testExtractISO2},
+  {"testExtractISO: iso file:", testExtractISO},
   {"testExtractISO: abnormal parameters:", testExtractISO4EmptyParameters},
   {"testExtractISO: error parameters:", testExtractISO4ErrorParameters},
   CU_TEST_INFO_NULL

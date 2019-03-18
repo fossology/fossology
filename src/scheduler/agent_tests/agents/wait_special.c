@@ -18,18 +18,21 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* fossology includes */
 #include <libfossology.h>
 
+/// the number of minutes to wait before closing
 #define MINUTES_TO_WAIT 1
 
 /**
- * @file simple.c
+ * @file
  * @date June 1, 2012
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This agent will set
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This agent will set
  *        itself to NOKILL, wait long enough that the scheduler would have
  *        killed it. Then set itself back to be able to be killed, and wait
  *        till the scheduler would kill it. Then finish.
  *
- * This is a failing agent
+ * @note This is a failing agent
  */
 
 int main(int argc, char** argv)

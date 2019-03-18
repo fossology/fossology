@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015, 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\Request;
 class UploadSrvPage extends UploadPageBase
 {
   const NAME = 'upload_srv_files';
+  const NAME_PARAM = 'name';
   const SOURCE_FILES_FIELD = 'sourceFiles';
 
   public function __construct()
@@ -138,6 +139,7 @@ class UploadSrvPage extends UploadPageBase
   protected function handleView(Request $request, $vars)
   {
     $vars['sourceFilesField'] = self::SOURCE_FILES_FIELD;
+    $vars['nameField'] = self::NAME_PARAM;
     $vars['hostlist'] = HostListOption();
     return $this->render("upload_srv.html.twig", $this->mergeWithDefault($vars));
   }
@@ -187,10 +189,22 @@ class UploadSrvPage extends UploadPageBase
       return array(false, $text, $description);
     }
 
-    $shortName = basename($sourceFiles);
+    $name = $request->get(self::NAME_PARAM);
+
+    if((preg_match('/[*?%$]+/', $sourceFiles)) && empty($name))
+    {
+      $text = _("The file path contains a wildchar, you must provide a name for the upload.");
+      return array(false, $text, $description);
+    }
+
+    if (empty($name))
+    {
+      $name = basename($sourceFiles);
+    }
+    $shortName = $this->basicShEscaping(basename($name));
     if (empty($shortName))
     {
-      $shortName = $sourceFiles;
+      $shortName = $name;
     }
     if(strcmp($host,"localhost"))
     {
@@ -256,7 +270,8 @@ class UploadSrvPage extends UploadPageBase
 
     /* schedule agents */
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack")];
-    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"));
+    $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"), $unpackargs);
     if ($ununpack_jq_pk < 0)
     {
       return array(false, $text, _($ErrorMsg));
@@ -285,4 +300,3 @@ class UploadSrvPage extends UploadPageBase
   }
 }
 register_plugin(new UploadSrvPage());
-

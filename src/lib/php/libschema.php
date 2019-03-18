@@ -1,7 +1,7 @@
 <?php
 /*
  Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014-2015, Siemens AG
+ Copyright (C) 2014-2015, 2018 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,7 +18,7 @@
  */
 
 /**
- * @file libschema.php
+ * @file
  * @brief Functions to bring database schema to a known state.
  *
  **/
@@ -32,25 +32,49 @@ use Fossology\Lib\Db\ModernDbManager;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 
+/**
+ * @class fo_libschema
+ * @brief Class to handle database schema
+ */
 class fo_libschema
 {
+  /**
+   * @var bool $debug
+   * Set true to enable debugging
+   */
   public $debug = false;
 
-  /** @var DbManager */
+  /**
+   * @var DbManager $dbman
+   * DB manager to use
+   */
   private $dbman;
 
+  /**
+   * @var array $schema
+   * Schema to be applied
+   */
   private $schema = array();
 
+  /**
+   * @var array $currSchema
+   * Current schema of the DB
+   */
   private $currSchema = array();
 
   /**
+   * Constructor for fo_libschema
    * @param DbManager $dbManager
    */
   function __construct(DbManager &$dbManager)
   {
     $this->dbman = $dbManager;
   }
-  
+
+  /**
+   * Set the Driver for the DbManager
+   * @param Driver $dbDriver
+   */
   function setDriver(Driver &$dbDriver)
   {
     $this->dbman->setDriver($dbDriver);
@@ -58,7 +82,10 @@ class fo_libschema
 
 
   /**
-   * apply or echo
+   * Apply or echo the SQL statement based on the debugging status.
+   * @param string $sql  Statement to be applied
+   * @param string $stmt Name of the statement (for caching)
+   * @return DB result
    */
   function applyOrEchoOnce($sql, $stmt = '')
   {
@@ -73,7 +100,7 @@ class fo_libschema
 
 
   /**
-   * @brief Make schema match $Filename.  This is a single transaction.
+   * @brief Make schema match $Filename. This is a single transaction.
    * @param string $filename Schema file written by schema-export.php
    * @param bool $debug Turn on debugging (echo sql as it is being executed)
    * @param string $catalog Optional database name
@@ -176,9 +203,12 @@ class fo_libschema
     return false;
   }
 
-  /************************************/
-  /* Add sequences */
-  /************************************/
+  /**
+   * @brief Add sequences to the database
+   *
+   * The function first checks if the sequence already exists or not.
+   * The sequence is only created only if it does not exists.
+   */
   function applySequences()
   {
     if (empty($this->schema['SEQUENCE']))
@@ -197,9 +227,12 @@ class fo_libschema
       }
     }
   }
-  /************************************/
-  /* Add clusters */
-  /************************************/
+  /**
+   * @brief Add clusters
+   *
+   * The function first checks if the cluster already exists or not.
+   * The cluster is only created only if it does not exists.
+   */
   function applyClusters()
   {
     if (empty($this->schema['CLUSTER']))
@@ -217,9 +250,14 @@ class fo_libschema
       }
     }
   }
-  /************************************/
-  /* Add sequences */
-  /************************************/
+
+  /**
+   * @brief Add sequences
+   *
+   * The function executes the UPDATE statement of the sequence.
+   *
+   * @see applySequences()
+   */
   function updateSequences()
   {
     if (empty($this->schema['SEQUENCE']))
@@ -236,9 +274,12 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Add tables/columns (dependent on sequences for default values) */
-  /************************************/
+  /**
+   * @brief Add tables/columns (dependent on sequences for default values)
+   *
+   * The function creates new tables in the database. The function also drops
+   * columns which are missing from schema and add new columns as well.
+   */
   function applyTables($inherits=false)
   {
     if (empty($this->schema['TABLE']))
@@ -253,7 +294,7 @@ class fo_libschema
       }
       if (!DB_TableExists($table))
       {
-        $sql = "CREATE TABLE \"$table\" ()";
+        $sql = "CREATE TABLE IF NOT EXISTS \"$table\" ()";
         $this->applyOrEchoOnce($sql, $stmt = __METHOD__ . $table);
       }
       foreach ($columns as $column => $modification)
@@ -306,9 +347,9 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Add views (dependent on columns) */
-  /************************************/
+  /**
+   * Add views (dependent on columns)
+   */
   function applyViews()
   {
     if (empty($this->schema['VIEW']))
@@ -330,10 +371,11 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Delete constraints */
-  /* Delete now, so they won't interfere with migrations. */
-  /************************************/
+  /**
+   * @brief Delete constraints
+   *
+   * Delete now, so they won't interfere with migrations.
+   */
   function dropConstraints()
   {
     if (empty($this->currSchema['CONSTRAINT']))
@@ -366,9 +408,9 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Delete indexes */
-  /************************************/
+  /**
+   * Delete indexes
+   */
   function dropIndexes()
   {
     if (empty($this->currSchema['INDEX']))
@@ -377,7 +419,7 @@ class fo_libschema
     }
     foreach ($this->currSchema['INDEX'] as $table => $IndexInfo)
     {
-      if (empty($table) || empty($this->schema['TABLE'][$table]))
+      if (empty($table) || (empty($this->schema['TABLE'][$table]) && empty($this->schema['INHERITS'][$table])))
       {
         continue;
       }
@@ -393,9 +435,9 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Add indexes (dependent on columns) */
-  /************************************/
+  /**
+   * Add indexes (dependent on columns)
+   */
   function applyIndexes()
   {
     if (empty($this->schema['INDEX']))
@@ -426,9 +468,9 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Add constraints (dependent on columns, views, and indexes) */
-  /************************************/
+  /**
+   * Add constraints (dependent on columns, views, and indexes)
+   */
   function applyConstraints()
   {
     $this->currSchema = $this->getCurrSchema(); /* constraints and indexes are linked, recheck */
@@ -467,12 +509,15 @@ class fo_libschema
     }
   }
 
-  /************************************/
-  /* Delete views */
-  /************************************/
-  /* Get current tables and columns used by all views */
-  /* Delete if: uses table I know and column I do not know. */
-  /* Without this delete, we won't be able to drop columns. */
+  /**
+   * @brief Delete views
+   *
+   * Get current tables and columns used by all views.
+   * Delete if: uses table I know and column I do not know.
+   * Without this delete, we won't be able to drop columns.
+   *
+   * @param string $catalog Name of the catalog
+   */
   function dropViews($catalog)
   {
     $sql = "SELECT view_name,table_name,column_name
@@ -500,9 +545,11 @@ class fo_libschema
     $result = $this->dbman->freeResult($result);
   }
 
-  /************************************/
-  /* Delete columns/tables */
-  /************************************/
+  /**
+   * Delete columns from tables
+   * @param array  $columns Name of columns to be dropped
+   * @param string $table   Name of the table
+   */
   function dropColumnsFromTable($columns, $table)
   {
     if (empty($table) || empty($this->schema['TABLE'][$table]))
@@ -540,7 +587,10 @@ class fo_libschema
     unset($this->currSchema['TABLEID']);
     return $this->currSchema;
   }
-  
+
+  /**
+   * Add inherited relations to the current schema.
+   */
   function addInheritedRelations()
   {
     $sql = "SELECT class.relname AS table, daddy.relname AS inherits_from
@@ -558,9 +608,9 @@ class fo_libschema
     $this->currSchema['INHERITS'] = $relations;
   }
 
-  /***************************/
-  /* Get the tables */
-  /***************************/
+  /**
+   * Add tables to the current schema
+   */
   function addTables()
   {
     $referencedSequencesInTableColumns = array();
@@ -623,6 +673,7 @@ class fo_libschema
       if ($R['default'] != '')
       {
         $R['default'] = preg_replace("/::bpchar/", "::char", $R['default']);
+        $R['default'] = str_replace("public.", "", $R['default']);
         $this->currSchema['TABLE'][$Table][$Column]['ALTER'] .= ", $Alter SET DEFAULT " . $R['default'];
         $this->currSchema['TABLE'][$Table][$Column]['ADD'] .= " DEFAULT " . $R['default'];
 
@@ -639,9 +690,10 @@ class fo_libschema
     return $referencedSequencesInTableColumns;
   }
 
-  /***************************/
-  /* Get Views */
-  /***************************/
+  /**
+   * Add views to the current schema
+   * @param string $viewowner Owner of the view
+   */
   function addViews($viewowner)
   {
     $sql = "SELECT viewname,definition FROM pg_views WHERE viewowner = $1";
@@ -656,9 +708,10 @@ class fo_libschema
     $this->dbman->freeResult($result);
   }
 
-  /***************************/
-  /* Get Sequence */
-  /***************************/
+  /**
+   * Add sequences to the current schema
+   * @param array $referencedSequencesInTableColumns Array from addTables()
+   */
   function addSequences($referencedSequencesInTableColumns)
   {
     $sql = "SELECT relname
@@ -693,9 +746,9 @@ class fo_libschema
     $this->dbman->freeResult($result);
   }
 
-  /***************************/
-  /* Get Constraints */
-  /***************************/
+  /**
+   * Add constraints to the current schema
+   */
   function addConstraints()
   {
     $sql = "SELECT c.conname AS constraint_name,
@@ -774,8 +827,8 @@ class fo_libschema
       $Results[$i]['fk_constraint_key'] = $Key;
     }
     /* Save the constraint */
-    /** There are different types of constraints that must be stored in order **/
-    /** CONSTRAINT: PRIMARY KEY **/
+    /* There are different types of constraints that must be stored in order */
+    /* CONSTRAINT: PRIMARY KEY */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
       if ($Results[$i]['type'] != 'PRIMARY KEY')
@@ -795,7 +848,7 @@ class fo_libschema
       $this->currSchema['CONSTRAINT'][$Results[$i]['constraint_name']] = $sql;
       $Results[$i]['processed'] = 1;
     }
-    /** CONSTRAINT: UNIQUE **/
+    /* CONSTRAINT: UNIQUE */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
       if ($Results[$i]['type'] != 'UNIQUE')
@@ -816,7 +869,7 @@ class fo_libschema
       $Results[$i]['processed'] = 1;
     }
 
-    /** CONSTRAINT: FOREIGN KEY **/
+    /* CONSTRAINT: FOREIGN KEY */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
       if ($Results[$i]['type'] != 'FOREIGN KEY')
@@ -843,7 +896,7 @@ class fo_libschema
       $Results[$i]['processed'] = 1;
     }
 
-    /** CONSTRAINT: ALL OTHERS **/
+    /* CONSTRAINT: ALL OTHERS */
     for ($i = 0; !empty($Results[$i]['constraint_name']); $i++)
     {
       if (!empty($Results[$i]['processed']) && $Results[$i]['processed'] == 1) continue;
@@ -863,9 +916,9 @@ class fo_libschema
     }
   }
 
-  /***************************/
-  /* Get Index */
-  /***************************/
+  /**
+   * Add indexes to the current schema
+   */
   function addIndexes()
   {
     $sql = "SELECT tablename AS table, indexname AS index, indexdef AS define
@@ -884,13 +937,17 @@ class fo_libschema
       /* UNIQUE constraints also include indexes. */
       if (empty($this->currSchema['CONSTRAINT'][$row['index']]))
       {
-        $this->currSchema['INDEX'][$row['table']][$row['index']] = $row['define'] . ";";
+        $this->currSchema['INDEX'][$row['table']][$row['index']] = str_replace("public.", "", $row['define']) . ";";
       }
     }
     $this->dbman->freeResult($result);
   }
 
-
+  /**
+   * Add functions to the given schema
+   * @param array $schema Schema in which the functions are to be added
+   * @return array Schema with functions under `FUNCTION` key
+   */
   function addFunctions($schema)
   {
     // prosrc
@@ -920,7 +977,13 @@ class fo_libschema
     return $schema;
   }
 
-
+  /**
+   * Write array entries to $fout as string representation
+   * @param resource $fout
+   * @param string   $key
+   * @param array    $value
+   * @param string   $varname
+   */
   function writeArrayEntries($fout, $key, $value, $varname)
   {
     $varname .= '["' . str_replace('"', '\"', $key) . '"]';
@@ -941,7 +1004,7 @@ class fo_libschema
    * \brief Export the schema of the connected ($PG_CONN) database to a
    *        file in the format readable by GetSchema().
    *
-   * @param string $filename path to the file to store the schema in.
+   * @param string $filename Path to the file to store the schema in.
    *
    * @return false=success, on error return string with error message.
    **/
@@ -980,14 +1043,13 @@ class fo_libschema
 
 
   /**
-   * MakeFunctions
    * \brief Create any required DB functions.
    */
   function makeFunctions()
   {
     print "  Applying database functions\n";
     flush();
-    /********************************************
+    /* *******************************************
      * uploadtree2path is a DB function that returns the non-artifact parents of an uploadtree_pk.
      * drop and recreate to change the return type.
      */
@@ -1049,6 +1111,9 @@ class fo_libschema
     return;
   }
 
+  /**
+   * Apply inherits relations from schema on DB
+   */
   function applyInheritedRelations() {
     if (empty($this->schema['INHERITS']))
     {
@@ -1084,9 +1149,9 @@ if (empty($dbManager) || !($dbManager instanceof DbManager))
 $libschema = new fo_libschema($dbManager);
 /**
  * @brief Make schema match $Filename.  This is a single transaction.
- * @param $Filename Schema file written by schema-export.php
- * @param $Debug Turn on debugging (echo sql as it is being executed)
- * @param $Catalog Optional database name
+ * @param string $Filename Schema file written by schema-export.php
+ * @param bool   $Debug Turn on debugging (echo sql as it is being executed)
+ * @param string $Catalog Optional database name
  * @return false=success, on error return string with error message.
  **/
 function ApplySchema($Filename = NULL, $Debug = false, $Catalog = 'fossology')
@@ -1117,7 +1182,6 @@ function ExportSchema($filename = NULL)
 }
 
 /**
- * MakeFunctions
  * \brief Create any required DB functions.
  */
 function MakeFunctions($Debug)

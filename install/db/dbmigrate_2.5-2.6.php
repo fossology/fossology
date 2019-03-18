@@ -17,6 +17,22 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+/**
+ * @file dbmigrate_2.5-2.6.php
+ * @brief This file is called by fossinit.php to migrate from
+ *        a 2.5 database to 2.6.
+ *        Specifically, this is to set active group for current users,
+ *        insert clearing decisions from license_file_audit table
+ *        to support 2.6 decisions.
+ *
+ * This should be called after fossinit calls apply_schema and
+ * table license_file_audit and clearing_decision exists.
+ **/
+
+/**
+ * @brief Set active group for existing users from group_user_member table
+ * @return void
+ */
 function setActiveGroup($verbose)
 {
   global $dbManager;
@@ -47,6 +63,12 @@ function setActiveGroup($verbose)
   }
 }
 
+/**
+ * @brief Copy decisions from license_file_audit table to clearing_decision
+ * @global type $dbManager
+ * @param boolean $verbose tell about decisions
+ * @return int number of inserted decisions
+ */
 function blowAudit($verbose)
 {
   global $dbManager;
@@ -57,7 +79,7 @@ function blowAudit($verbose)
           FROM license_file_audit lfa INNER JOIN license_file lf ON lfa.fl_fk=lf.fl_pk
                INNER JOIN uploadtree ut ON lf.pfile_fk=ut.pfile_fk
           GROUP BY lfa.user_fk, lfa.date, lfa.reason, lfa.rf_fk, ut.pfile_fk";
-  // ensure that these results where not inserted before
+  // ensure that these results were not inserted before
   $sql = "SELECT pureInserts.* FROM ($sql) pureInserts
             LEFT JOIN clearing_decision cd
               ON pureInserts.uploadtree_id=cd.uploadtree_fk and pureInserts.user_id=cd.user_fk
@@ -107,7 +129,7 @@ function blowAudit($verbose)
 
 /**
  * @global type $dbManager
- * @param type $verbose tell about decisions
+ * @param boolean $verbose tell about decisions
  * @return int number of inserted decisions
  */
 function migrate_25_26($verbose)

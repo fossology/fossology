@@ -32,11 +32,12 @@ class EmailHistogram extends HistogramBase {
   }
 
   /**
-   * @param $upload_pk
-   * @param $uploadtreeId
-   * @param $filter
-   * @param $agentId
-   * @return array
+   * @brief Get contents for author table
+   * @param int    $upload_pk    Upload id for fetch request
+   * @param int    $uploadtreeId Upload tree id of the item
+   * @param string $filter       Filter to apply for query
+   * @param int    $agentId      Agent id which populate the result
+   * @return array Email contents, upload tree items in result
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
@@ -60,23 +61,23 @@ class EmailHistogram extends HistogramBase {
 
 
   /**
-   * @param $upload_pk
-   * @param $Uploadtree_pk
-   * @param $filter
-   * @param $agentId
-   * @param $VF
-   * @return string
+   * @copydoc HistogramBase::fillTables()
+   * @see HistogramBase::fillTables()
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
     list($VEmail, $VUrl, $VAuthor, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
-    $out = $this->renderString('emailhist_tables.html.twig', 
+    $out = $this->renderString('emailhist_tables.html.twig',
             array('contEmail'=>$VEmail, 'contUrl'=>$VUrl, 'contAuthor'=>$VAuthor,
                 'fileList'=>$VF));
     return array($out, $tableVars);
   }
 
+  /**
+   * @copydoc FO_Plugin::RegisterMenus()
+   * @see FO_Plugin::RegisterMenus()
+   */
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
@@ -98,6 +99,10 @@ class EmailHistogram extends HistogramBase {
     }
   }
 
+  /**
+   * @copydoc HistogramBase::createScriptBlock()
+   * @see HistogramBase::createScriptBlock()
+   */
   protected function createScriptBlock()
   {
     return "
@@ -106,7 +111,8 @@ class EmailHistogram extends HistogramBase {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
-    } );
+      $(\"#EmailUrlAuthorTabs\").tabs();
+    });
     ";
   }
 

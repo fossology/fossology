@@ -1,0 +1,4 @@
+<?php
+define("AGENT_REPORTIMPORT_NAME", "reportImport");
+define("AGENT_REPORTIMPORT_VERSION", "{$VERSION}");
+define("AGENT_REPORTIMPORT_REV", "{$COMMIT_HASH}");

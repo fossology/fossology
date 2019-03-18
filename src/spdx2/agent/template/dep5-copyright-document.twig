@@ -19,11 +19,11 @@ Comment: {% if licenseComments %}
 {# File Paragraphes: #}
 {{ packageNodes }}
 {# Stand-alone License Paragraphes: #}
-{% for licenseId,extractedText in licenseTexts %}
+{% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
 
 License: {{ licenseId }}
- {{ extractedText|replace({'\f':''})|replace({'\r\n':'\n'})
-                                    |replace({'\n\n':'\n.\n'})
-                                    |replace({'\n\n':'\n.\n'})
-                                    |replace({'\n':'\n '}) }}
-{% endfor %}
+ {{ licenseData['text']|replace({'\f':''})|replace({'\r\n':'\n'})
+                                          |replace({'\n\n':'\n.\n'})
+                                          |replace({'\n\n':'\n.\n'})
+                                          |replace({'\n':'\n '}) }}
+{% endif %}{% endfor %}

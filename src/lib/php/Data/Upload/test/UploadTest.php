@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Upload;
 
-
-class UploadTest extends \PHPUnit_Framework_TestCase
+class UploadTest extends \PHPUnit\Framework\TestCase
 {
   /** @var int */
   private $id = 132;
@@ -38,7 +37,7 @@ class UploadTest extends \PHPUnit_Framework_TestCase
   {
     $this->timestamp = time();
     $this->upload = new Upload($this->id, $this->fileName, $this->description, $this->treeTableName, $this->timestamp);
-    
+
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -90,4 +89,3 @@ class UploadTest extends \PHPUnit_Framework_TestCase
     assertThat($upload->getTimestamp(), is($this->timestamp));
   }
 }
- 

@@ -14,7 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *********************************************************************/
-
+/**
+ * \dir
+ * \brief Unit test for pkgagent
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -61,6 +64,18 @@ int PkgagentDBClean()
 }
 
 /* create test suite */
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] = {
+    {"Testing the function GetFieldValue:", NULL, NULL, NULL, NULL, testcases_GetFieldValue},
+    //{"Testing the function ProcessUpload:", NULL, NULL, NULL, NULL, testcases_ProcessUpload},
+    {"Testing the function RecordMetadataDEB:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_RecordMetadataDEB},
+    {"Testing the function GetMetadataDebSource:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadataDebSource},
+    {"Testing the function RecordMetadataRPM:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_RecordMetadataRPM},
+    {"Testing the function GetMetadataDebBinary:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadataDebBinary},
+    {"Testing the function GetMetadata:", NULL, NULL, (CU_SetUpFunc)PkgagentDBInit, (CU_TearDownFunc)PkgagentDBClean, testcases_GetMetadata},
+    CU_SUITE_INFO_NULL
+};
+#else
 CU_SuiteInfo suites[] = {
     {"Testing the function GetFieldValue:", NULL, NULL, testcases_GetFieldValue},
     //{"Testing the function ProcessUpload:", NULL, NULL, testcases_ProcessUpload},
@@ -71,6 +86,7 @@ CU_SuiteInfo suites[] = {
     {"Testing the function GetMetadata:", PkgagentDBInit, PkgagentDBClean, testcases_GetMetadata},
     CU_SUITE_INFO_NULL
 };
+#endif
 
 int main( int argc, char *argv[] )
 {

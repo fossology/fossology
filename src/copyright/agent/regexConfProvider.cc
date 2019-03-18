@@ -15,12 +15,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+/**
+ * \file regexConfProvider.cc
+ */
 #include "regexConfProvider.hpp"
 
 using namespace std;
 
+/**
+ * \brief Map to store RegexMap with a string key
+ *
+ * Where key is the identity file name from which the RegexMap is loaded
+ * and value is the RegexMap from the identity file
+ */
 map<string,RegexMap> RegexConfProvider::_regexMapMap = {};
 
+/**
+ * \brief Check if a given file exists
+ * \param filename The file path to check
+ * \return True if exists and readable, false otherwise.
+ */
 bool testIfFileExists(const string& filename)
 {
   ifstream f(filename);
@@ -29,6 +43,18 @@ bool testIfFileExists(const string& filename)
   return exists;
 }
 
+/**
+ * \brief Get the regex conf file
+ *
+ * Checks for regex file in
+ *   -# Current directory
+ *   -# Relative to test directory
+ *   -# In installed directory
+ *
+ * Return the first match found
+ * \param identity Name of file to be found (without \b ".conf" extension)
+ * \return Path of conf file as a string
+ */
 string getRegexConfFile(const string& identity)
 {
   string confInSameDir(identity + ".conf");
@@ -52,9 +78,18 @@ string getRegexConfFile(const string& identity)
   }
 }
 
+/**
+ * \brief Constructor to set verbosity level
+ */
 RegexConfProvider::RegexConfProvider(const bool isVerbosityDebug)
   : _isVerbosityDebug(isVerbosityDebug) {}
 
+/**
+ * \brief Get file stream for regex conf file
+ * \param[in]  identity Name of file to be found (without \b ".conf" extension)
+ * \param[out] stream   Input file stream created from identity
+ * \return True on success, false otherwise
+ */
 bool RegexConfProvider::getRegexConfStream(const string& identity,
                                            /*out*/ ifstream& stream)
 {
@@ -67,6 +102,11 @@ bool RegexConfProvider::getRegexConfStream(const string& identity,
   return stream.is_open();
 }
 
+/**
+ * \brief Check if identity already loaded in RegexMap, if not
+ * load them
+ * \param identity Identity to be matched
+ */
 void RegexConfProvider::maybeLoad(const std::string& identity)
 {
   map<string,RegexMap>& rmm = RegexConfProvider::_regexMapMap;
@@ -95,6 +135,10 @@ void RegexConfProvider::maybeLoad(const std::string& identity)
   }
 }
 
+/**
+ * \overload
+ * \param stream   Stream to read from
+ */
 void RegexConfProvider::maybeLoad(const string& identity,
                                   istringstream& stream)
 {
@@ -115,6 +159,12 @@ void RegexConfProvider::maybeLoad(const string& identity,
   }
 }
 
+/**
+ * \brief Get the regex as string from the RegexMap
+ * \param identity Identity from which the map was loaded
+ * \param key      Key of the regex value required
+ * \return Regex value as a null terminated string
+ */
 const char* RegexConfProvider::getRegexValue(const string& identity,
                                              const string& key)
 {

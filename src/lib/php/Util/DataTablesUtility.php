@@ -21,7 +21,7 @@ namespace Fossology\Lib\Util;
 
 use Monolog\Logger;
 
-class DataTablesUtility extends Object
+class DataTablesUtility
 {
   /**
    * @var Logger
@@ -30,7 +30,7 @@ class DataTablesUtility extends Object
 
   function __construct()
   {
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
 
   /**

@@ -23,7 +23,7 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
-class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
+class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
 
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
@@ -39,17 +39,17 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
   public function testFilterCurrentClearingDecisions() {
     $itemId = 543;
     $pfileId = 432;
-    $decision1 = M::mock(ClearingDecision::classname());
+    $decision1 = M::mock(ClearingDecision::class);
     $decision1->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision1->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::REPO);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
     $decision1->shouldReceive("getPfileId")->andReturn($pfileId);
-    $decision2 = M::mock(ClearingDecision::classname());
+    $decision2 = M::mock(ClearingDecision::class);
     $decision2->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision2->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(DecisionScopes::ITEM);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId+1);
     $decision2->shouldReceive("getPfileId")->andReturn($pfileId);
-    $decisionIrrel = M::mock(ClearingDecision::classname());
+    $decisionIrrel = M::mock(ClearingDecision::class);
     $decisionIrrel->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IRRELEVANT);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision1, $decisionIrrel, $decision2));
@@ -68,7 +68,7 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
   {
     $itemId = 543;
     $pfileId = 432;
-    $decision = M::mock(ClearingDecision::classname());
+    $decision = M::mock(ClearingDecision::class);
     $decision->shouldReceive("getType")->atLeast()->once()->withNoArgs()->andReturn(DecisionTypes::IDENTIFIED);
     $decision->shouldReceive("getScope")->atLeast()->once()->withNoArgs()->andReturn(12345);
     $decision->shouldReceive("getUploadTreeId")->andReturn($itemId);
@@ -80,9 +80,9 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
   public function testFilterCurrentReusableClearingDecisions() {
     $itemId = 543;
     $itemId2 = 432;
-    $decision1 = M::mock(ClearingDecision::classname());
+    $decision1 = M::mock(ClearingDecision::class);
     $decision1->shouldReceive("getUploadTreeId")->andReturn($itemId);
-    $decision2 = M::mock(ClearingDecision::classname());
+    $decision2 = M::mock(ClearingDecision::class);
     $decision2->shouldReceive("getUploadTreeId")->andReturn($itemId2);
 
     $filteredClearingDecisions = $this->clearingDecisionFilter->filterCurrentReusableClearingDecisions(array($decision1, $decision2));
@@ -91,4 +91,3 @@ class ClearingDecisionFilterTest extends \PHPUnit_Framework_TestCase {
     assertThat($filteredClearingDecisions, containsInAnyOrder($expecedArray));
   }
 }
- 

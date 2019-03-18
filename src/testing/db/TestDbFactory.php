@@ -57,10 +57,10 @@ class TestDbFactory
     exec($cmd = "psql -Ufossy -h localhost -lqtA | cut -f 1 -d '|' | grep -q '^$dbName\$'", $cmdOut, $cmdRtn);
     if ($cmdRtn == 0)
     {
-      exec($cmd = "createlang -Ufossy -h localhost -l $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
+      exec($cmd = "echo 'SELECT * FROM pg_language;' | psql -Ufossy -h localhost -t $dbName | grep -q plpgsql", $cmdOut, $cmdRtn);
       if ($cmdRtn != 0)
       {
-        exec($cmd = "createlang -Ufossy -h localhost plpgsql $dbName", $cmdOut, $cmdRtn);
+        exec($cmd = "echo 'CREATE LANGUAGE plpgsql;' | psql -Ufossy -h localhost $dbName", $cmdOut, $cmdRtn);
         if ($cmdRtn != 0)
           throw new \Exception("ERROR: failed to add plpgsql to $dbName database");
       }
@@ -148,6 +148,6 @@ class TestDbFactory
     {
       unlink($filename);
     }
-    rmdir($sys_conf);
+    exec("rm -rf $sys_conf");
   }
 }

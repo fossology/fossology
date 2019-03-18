@@ -43,5 +43,6 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,$@)
+	$(call TESTDIR_LOOP,$@)
 
 .PHONY: all test coverage install uninstall clean

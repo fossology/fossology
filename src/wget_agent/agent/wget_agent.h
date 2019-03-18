@@ -66,51 +66,15 @@ extern gid_t ForceGroup;
 /* for debugging */
 extern int Debug;
 
-/**
- * \brief Given a filename, is it a file?
- */
 int IsFile(char *Fname, int Link);
-
-/**
- * \brief Closes the connection to the server. Also frees memory used by the PGconn object;then exit.
- */
 void SafeExit  (int rc);
-
-/**
- * \brief Get the position (ending + 1) of http|https|ftp:// of one url
- */
 int GetPosition(char *URL);
-
-/**
- * \brief Insert a file into the database and repository.
- *        This mimicks the old webgoldimport.
- */
 void DBLoadGold  ();
-
-/**
- * \brief Given a URL string, taint-protect it.
- */
 int     TaintURL(char *Sin, char *Sout, int SoutSize);
-
-/**
- * \brief Do the wget.
- */
 int GetURL(char *TempFile, char *URL, char *TempFileDir);
-
-/**
- * \brief Convert input pairs into globals.
- *        This functions taints the parameters as needed.
- */
 void SetEnv(char *S, char *TempFileDir);
-
-/**
- * \brief Substitute Hostname for %H in path
- */
 char *PathCheck (char *DirPath);
 
-/**
- * \brief Here are some suggested options
- */
 void  Usage (char *Name);
 
 int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status);
@@ -120,6 +84,10 @@ int GetVersionControl();
 void GetProxy();
 
 void replace_url_with_auth();
+
+void MaskPassword();
+
+char* GetVersionControlCommand(int withPassword);
 
 #endif /* _WGET_AGENT_H */
 

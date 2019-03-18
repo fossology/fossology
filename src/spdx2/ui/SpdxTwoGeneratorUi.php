@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015-2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -24,11 +24,17 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @class SpdxTwoGeneratorUi
+ * @brief Call SPDX2 agent to generate report from UI
+ */
 class SpdxTwoGeneratorUi extends DefaultPlugin
 {
-  const NAME = 'ui_spdx2';
-  const DEFAULT_OUTPUT_FORMAT = "spdx2";
-  /** @var string */
+  const NAME = 'ui_spdx2';                ///< Mod name of the plugin
+  const DEFAULT_OUTPUT_FORMAT = "spdx2";  ///< Default report format
+  /** @var string $outputFormat
+   * Report format in use
+   */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
   function __construct()
@@ -47,6 +53,10 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     ));
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   */
   function preInstall()
   {
     $text = _("Generate SPDX report");
@@ -60,6 +70,10 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     menu_insert("Browse-Pfile::Export&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
+   */
   protected function handle(Request $request)
   {
 
@@ -100,7 +114,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     {
       list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
     }
-    catch (Exception $ex) {
+    catch (\Exception $ex) {
       return $this->flushContent($ex->getMessage());
     }
 
@@ -117,6 +131,11 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     return $showJobsPlugin->getResponse();
   }
 
+  /**
+   * @brief Add multiple uploads to the report
+   * @param array $uploads List of upload IDs
+   * @return string
+   */
   protected function uploadsAdd($uploads)
   {
     if (count($uploads) == 0) {
@@ -125,6 +144,14 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     return '--uploadsAdd='. implode(',', array_keys($uploads));
   }
 
+  /**
+   * @brief Get the Job ID and Job queue ID
+   * @param int $groupId
+   * @param Upload $upload
+   * @param array $addUploads
+   * @throws Exception
+   * @return array JobID, JobQuqueID
+   */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
     $uploadId = $upload->getId();
@@ -149,35 +176,64 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }
-    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
+    if(empty($jqCmdArgs)) {
+      $jobName = $upload->getFilename();
+    } else {
+      $jobName = "Multi File SPDX2";
+    }
+    $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";
     $jobQueueId = $spdxTwoAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
     if ($jobQueueId<0)
     {
-      throw new Exception(_("Cannot schedule").": ".$error);
+      throw new \Exception(_("Cannot schedule").": ".$error);
     }
-    return array($jobId,$jobQueueId);
+    return array($jobId,$jobQueueId, $error);
   }
 
+  /**
+   * @brief Get Upload object for a given upload id
+   * @param int $uploadId
+   * @param int $groupId
+   * @throws Exception
+   * @return Fossology::Lib::Data::Upload::Upload
+   */
   protected function getUpload($uploadId, $groupId)
   {
     if ($uploadId <=0)
     {
-      throw new Exception(_("parameter error: $uploadId"));
+      throw new \Exception(_("parameter error: $uploadId"));
     }
     /* @var $uploadDao UploadDao */
     $uploadDao = $this->getObject('dao.upload');
     if (!$uploadDao->isAccessible($uploadId, $groupId))
     {
-      throw new Exception(_("permission denied"));
+      throw new \Exception(_("permission denied"));
     }
     /** @var Upload */
     $upload = $uploadDao->getUpload($uploadId);
     if ($upload === null)
     {
-      throw new Exception(_('cannot find uploadId'));
+      throw new \Exception(_('cannot find uploadId'));
     }
     return $upload;
+  }
+
+  /**
+   * Schedules spdx agent to generate report based of outputFormat
+   *
+   * @param int $groupId
+   * @param Upload $upload
+   * @param string $outputFormat
+   * @param array $addUploads
+   * @return array|number[] Job id and job queue id
+   * @throws Exception
+   */
+  public function scheduleAgent($groupId, $upload,
+    $outputFormat = self::DEFAULT_OUTPUT_FORMAT, $addUploads = array())
+  {
+    $this->outputFormat = $outputFormat;
+    return $this->getJobAndJobqueue($groupId, $upload, $addUploads);
   }
 }
 

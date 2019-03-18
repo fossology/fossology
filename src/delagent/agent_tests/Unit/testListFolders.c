@@ -28,31 +28,41 @@ extern char *DBConfFile;
 
 /**
  * \brief for function ListFolders
+ * \test
+ * -# List folders using listFolders()
+ * -# Check for the return code
  */
 void testListFolders()
 {
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  ListFolders();
-  PQfinish(db_conn);
+  rc = listFolders(3, 10);
+  PQfinish(pgConn);
+  CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListFolders PASS!");
 }
 /**
  * \brief for function ListUploads
+ * \test
+ * -# List uploads using listUploads()
+ * -# Check for the return code
  */
 void testListUploads()
 {
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  ListUploads(2, 10);
+  rc = listUploads(3, 10);
 
-  PQfinish(db_conn);
+  PQfinish(pgConn);
+  CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("ListUploads PASS!");
 }
 

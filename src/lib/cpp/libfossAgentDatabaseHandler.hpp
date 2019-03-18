@@ -22,18 +22,33 @@
 
 #include "libfossdbmanagerclass.hpp"
 
+/**
+ * \file
+ * \brief DB utility functions for agents
+ */
+
 namespace fo
 {
+  /**
+   * \class AgentDatabaseHandler
+   * \brief Database handler for agents
+   */
   class AgentDatabaseHandler
   {
 
   protected:
-    DbManager dbManager;
+    DbManager dbManager;        ///< DbManager to use
   public:
     AgentDatabaseHandler(DbManager dbManager);
     AgentDatabaseHandler(AgentDatabaseHandler&& other);
+    /**
+     * Explicitly disallow copy constructor
+     */
     AgentDatabaseHandler(const AgentDatabaseHandler&) = delete;
     virtual ~AgentDatabaseHandler();
+    /**
+     * Explicitly disallow copy constructor
+     */
     AgentDatabaseHandler operator =(const AgentDatabaseHandler&) = delete;
 
     bool begin() const;

@@ -1,5 +1,6 @@
 /***************************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,29 +17,25 @@
 
  ***************************************************************/
 /**
- * \file utils.c
+ * \file
  * \brief Miscellaneous utility functions for maintagent
  */
 
 #include "maintagent.h"
 
-/**********  Globals  *************/
-extern PGconn    *pgConn;        // database connection
-
-
 /**
  * @brief Exit function.  This does all cleanup and should be used
  *        instead of calling exit() or main() return.
  *
- * @param ExitVal Exit value
+ * @param exitVal Exit value
  * @returns void Calls exit()
  */
-FUNCTION void ExitNow(int ExitVal) 
+FUNCTION void exitNow(int exitVal)
 {
   if (pgConn) PQfinish(pgConn);
 
-  if (ExitVal) LOG_ERROR("Exiting with status %d", ExitVal);
+  if (exitVal) LOG_ERROR("Exiting with status %d", exitVal);
 
-  fo_scheduler_disconnect(ExitVal);
-  exit(ExitVal);
+  fo_scheduler_disconnect(exitVal);
+  exit(exitVal);
 } /* ExitNow() */

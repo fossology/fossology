@@ -16,6 +16,41 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/**
+ * @dir
+ * @brief Source code of SPDX2 report agent
+ * @file
+ * @brief SPDX2 report generation
+ *
+ * Generates reports according to SPDX2 standards.
+ * @page spdx2 SPDX2 report
+ * @tableofcontents
+ * @section spdx2about About SPDX2 agent
+ * The agent generates report for an upload according to the spdx2 standard
+ * format. It contains
+ * -# File path
+ * -# Copyright
+ * -# License ID (short name)
+ * -# License name
+ * -# Actual license text in file
+ * -# File checksum
+ *
+ * for every file.
+ *
+ * @section spdx2actions Supported actions
+ * Currently, SPDX2 agent does not support CLI commands and read only from scheduler.
+ *
+ * @section spdx2source Agent source
+ *   - @link src/spdx2/agent @endlink
+ *   - @link src/spdx2/ui @endlink
+ *   - Functional test cases @link src/spdx2/agent_tests/Functional @endlink
+ *   - Unit test cases @link src/spdx2/agent_tests/Unit @endlink
+ */
+
+/**
+ * @namespace Fossology::SpdxTwo
+ * @brief Namespace used by SPDX2 agent
+ */
 namespace Fossology\SpdxTwo;
 
 use Fossology\Lib\Agent\Agent;
@@ -40,40 +75,70 @@ include_once(__DIR__ . "/spdx2utils.php");
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
 
+/**
+ * @class SpdxTwoAgent
+ * @brief SPDX2 agent
+ */
 class SpdxTwoAgent extends Agent
 {
 
-  const OUTPUT_FORMAT_KEY = "outputFormat";
-  const DEFAULT_OUTPUT_FORMAT = "spdx2";
-  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5";
-  const UPLOAD_ADDS = "uploadsAdd";
+  const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
+  const DEFAULT_OUTPUT_FORMAT = "spdx2";                  ///< Default output format
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5";  ///< Output formats available
+  const UPLOAD_ADDS = "uploadsAdd";                       ///< Argument for additional uploads
 
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
   private $clearingDao;
-  /** @var LicenseDao */
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
   private $licenseDao;
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DbManager object
+   */
   protected $dbManager;
-  /** @var Twig_Environment */
+  /** @var Twig_Environment $renderer
+   * Twig_Environment object
+   */
   protected $renderer;
-  /** @var LicenseMap */
+  /** @var LicenseMap $licenseMap
+   * LicenseMap object
+   */
   private $licenseMap;
-  /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M');
-  /** @var array */
+  /** @var array $agentNames
+   * Agent names mapping
+   */
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
+  /** @var array $includedLicenseIds
+   * License ids included
+   */
   protected $includedLicenseIds = array();
-  /** @var string */
+  /** @var string $filebasename
+   * Basename of SPDX2 report
+   */
   protected $filebasename = null;
-  /** @var string */
+  /** @var string $uri
+   * URI of the file
+   */
   protected $uri;
-  /** @var string */
+  /** @var string $filename
+   * File name
+   */
   protected $filename;
-  /** @var string */
+  /** @var string $outputFormat
+   * Output format of the report
+   */
   protected $outputFormat = self::DEFAULT_OUTPUT_FORMAT;
 
-  /** @var callable */
+  /** @var callable $spdxValidityChecker
+   * SPDX validator to be used
+   */
   protected $spdxValidityChecker = null;
 
   function __construct()
@@ -112,9 +177,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[] $args
-   *
-   * @return string[] $args
+   * @brief Parse arguments
+   * @param string $args Array of arguments to be parsed
+   * @return array $args Parsed arguments
    */
   protected function preWorkOnArgs($args)
   {
@@ -135,8 +200,8 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param int $uploadId
-   * @return bool
+   * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
    */
   function processUploadId($uploadId)
   {
@@ -167,8 +232,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string $partname
-   * @return string
+   * @brief Get TWIG template file based on output format
+   * @param string $partname copyright|document|file|package
+   * @return string Template file path
    */
   protected function getTemplateFile($partname)
   {
@@ -188,6 +254,13 @@ class SpdxTwoAgent extends Agent
     return $prefix . $partname . $postfix;
   }
 
+  /**
+   * @brief Generate report basename based on upload name
+   *
+   * The base name is in format <b>`<OutputFormat>_<packagename>_<timestamp><-spdx.rdf|.spdx|.txt>`</b>
+   * @param string $packageName Name of the upload
+   * @return string Report file's base name
+   */
   protected function getFileBasename($packageName)
   {
     if($this->filebasename == null) {
@@ -209,6 +282,11 @@ class SpdxTwoAgent extends Agent
     return $this->filebasename;
   }
 
+  /**
+   * @brief Get absolute path for report
+   * @param string $packageName Name of the upload
+   * @return string Absolute file path for report
+   */
   protected function getFileName($packageName)
   {
     global $SysConf;
@@ -217,8 +295,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string $packageName
-   * @return string
+   * @brief Get the URI for the given package
+   * @param string $packageName Name of the upload
+   * @return string URI for the upload
    */
   protected function getUri($packageName)
   {
@@ -233,8 +312,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
+   * @brief Given an upload id, render the report string
    * @param int $uploadId
-   * @return string
+   * @return string Rendered report string
    */
   protected function renderPackage($uploadId)
   {
@@ -287,8 +367,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
+   * @brief Given an ItemTreeBounds, get the files with clearings
    * @param ItemTreeBounds $itemTreeBounds
-   * @return string[][][] $filesWithLicenses mapping item->'concluded'->(array of shortnames)
+   * @return string[][][] Mapping item->'concluded'->(array of shortnames)
    */
   protected function getFilesWithLicensesFromClearings(ItemTreeBounds $itemTreeBounds)
   {
@@ -336,9 +417,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] $filesWithLicenses
-   * @param string[] $licenses
-   * @param string[] $copyrights
+   * @brief Map licenses, copyrights, files and full path to filesWithLicenses array
+   * @param[in,out] string $filesWithLicenses
+   * @param string $licenses
+   * @param string $copyrights
    * @param string $file
    * @param string $fullPath
    */
@@ -351,7 +433,9 @@ class SpdxTwoAgent extends Agent
       $filesWithLicenses[$key]['files']=array();
       $filesWithLicenses[$key]['copyrights']=array();
     }
-
+    if(empty($copyrights)){
+      $copyrights = array();
+    }
     $filesWithLicenses[$key]['files'][$file] = $fullPath;
     foreach ($copyrights as $copyright) {
       if (!in_array($copyright, $filesWithLicenses[$key]['copyrights'])) {
@@ -361,8 +445,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] $filesWithLicenses
+   * @brief Map findings to the files
+   * @param[in,out] string &$filesWithLicenses
    * @param string $treeTableName
+   * @return String array of files with associated findings
    */
   protected function toLicensesWithFiles(&$filesWithLicenses, $treeTableName)
   {
@@ -413,8 +499,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] &$filesWithLicenses
+   * @brief Attach finding agents to the files and return names of scanners
+   * @param[in,out] string &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
+   * @return Name(s) of scanners used
    */
   protected function addScannerResults(&$filesWithLicenses, ItemTreeBounds $itemTreeBounds)
   {
@@ -464,9 +552,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] &$filesWithLicenses
+   * @brief Add copyright results to the files
+   * @param[in,out] string &$filesWithLicenses
    * @param int $uploadId
-   * @return string
    */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
@@ -480,7 +568,8 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] &$filesWithLicenses
+   * @brief Add clearing status to the files
+   * @param[in,out] string &$filesWithLicenses
    * @param ItemTreeBounds $itemTreeBounds
    */
   protected function addClearingStatus(&$filesWithLicenses,ItemTreeBounds $itemTreeBounds)
@@ -504,6 +593,7 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
+   * @brief For a given upload, compute the URI and filename for the report
    * @param int $uploadId
    */
   protected function computeUri($uploadId)
@@ -516,8 +606,9 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
+   * @brief Write the report the file and update report table
    * @param string $packageNodes
-   * @param int[] $packageIds
+   * @param int $packageIds
    * @param int $uploadId
    */
   protected function writeReport(&$packageNodes, $packageIds, $uploadId)
@@ -553,9 +644,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param int $uploadId
-   * @param int $jobId
-   * @param string $fileName
+   * @brief Update the reportgen table with new report path
+   * @param int $uploadId    Upload id
+   * @param int $jobId       Job id
+   * @param string $fileName File name of the report
    */
   protected function updateReportTable($uploadId, $jobId, $fileName){
     $this->dbManager->insertTableRow('reportgen',
@@ -564,15 +656,22 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string $templateName
-   * @param array $vars
-   * @return string
+   * @brief Render a twig template
+   * @param string $templateName Name of the template to be rendered
+   * @param array $vars Variables for the template
+   * @return string The rendered output
    */
   protected function renderString($templateName, $vars)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
   }
 
+  /**
+   * @brief Generate report nodes for files
+   * @param string $filesWithLicenses
+   * @param string $treeTableName
+   * @return string Node content
+   */
   protected function generateFileNodes($filesWithLicenses, $treeTableName)
   {
     if (strcmp($this->outputFormat, "dep5")!==0)
@@ -586,9 +685,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] &$filesWithLicenses
+   * @brief For each file, generate the nodes by files
+   * @param string &$filesWithLicenses
    * @param string $treeTableName
-   * @return string
+   * @return string Node string
    */
   protected function generateFileNodesByFiles($filesWithLicenses, $treeTableName)
   {
@@ -635,9 +735,10 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param string[][][] &$filesWithLicenses
+   * @brief For each file, generate the nodes by licenses
+   * @param string &$filesWithLicenses
    * @param string $treeTableName
-   * @return string
+   * @return string Node string
    */
   protected function generateFileNodesByLicenses($filesWithLicenses, $treeTableName)
   {
@@ -680,11 +781,12 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
+   * @brief Get the license texts from fossology
    * @return string[] with keys being shortname
    */
   protected function getLicenseTexts() {
     $licenseTexts = array();
-    $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_text')));
+    $licenseViewProxy = new LicenseViewProxy($this->groupId,array(LicenseViewProxy::OPT_COLUMNS=>array('rf_pk','rf_shortname','rf_fullname','rf_text')));
     $this->dbManager->prepare($stmt=__METHOD__, $licenseViewProxy->getDbViewQuery());
     $res = $this->dbManager->execute($stmt);
 
@@ -692,14 +794,18 @@ class SpdxTwoAgent extends Agent
     {
       if (array_key_exists($row['rf_pk'], $this->includedLicenseIds))
       {
-        $licenseTexts[$row['rf_shortname']] = $row['rf_text'];
+        $licenseTexts[$row['rf_shortname']] = array(
+          'text' => $row['rf_text'],
+          'name' => $row['rf_fullname'] ?: $row['rf_shortname']);
       }
     }
     foreach($this->includedLicenseIds as $license => $customText)
     {
       if (true !== $customText)
       {
-        $licenseTexts[$license] = $customText;
+        $licenseTexts[$license] = array(
+          'text' => $customText,
+          'name' => $license);
       }
     }
     $this->dbManager->freeResult($res);
@@ -707,8 +813,12 @@ class SpdxTwoAgent extends Agent
   }
 
   /**
-   * @param UploadTree $upload
-   * @return string
+   * @brief Get a unique identifier for a given upload
+   *
+   * This is done using concatinating SHA1 of every pfile in upload and
+   * calculating the SHA1 of the resulted string.
+   * @param Upload $upload
+   * @return string The unique identifier
    */
   protected function getVerificationCode(Upload $upload)
   {

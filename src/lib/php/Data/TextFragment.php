@@ -20,10 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-use Fossology\Lib\Util\Object;
-
-class TextFragment extends Object
+class TextFragment
 {
 
   private $startOffset;

@@ -20,13 +20,13 @@ namespace Fossology\Lib\Util;
 
 use Monolog\Logger;
 
-class TimingLogger extends Object
+class TimingLogger
 {
   const DEFAULT_WATCH = 'default';
 
   /** @var Logger */
   private $logger;
-  
+
   /** @var float[] */
   private $watchTimes;
 
@@ -42,14 +42,14 @@ class TimingLogger extends Object
 
   /**
    * @brief start stopwatch timer
-   * 
+   *
    * @param string $watch
    */
   public function tic($watch = self::DEFAULT_WATCH)
   {
     $this->watchTimes[$watch] = $this->getTimestamp();
   }
- 
+
   /**
    * @param string $text
    * @param string $watch

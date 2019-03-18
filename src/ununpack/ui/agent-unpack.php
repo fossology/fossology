@@ -16,9 +16,18 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
-
+/**
+ * @dir
+ * @brief UI components for ununpack agent
+ * @file
+ * @brief UI plugin for ununpack agent
+ */
 use Fossology\Lib\Plugin\AgentPlugin;
 
+/**
+ * @class UnpackAgentPlugin
+ * @brief UI for ununpack agent to schedule a job
+ */
 class UnpackAgentPlugin extends AgentPlugin
 {
   public function __construct() {
@@ -29,11 +38,19 @@ class UnpackAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, "ununpack", "Archive unpacker", "ununpack_ars");
   }
-  
+
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   */
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
 
@@ -43,7 +60,7 @@ class UnpackAgentPlugin extends AgentPlugin
        return $jobQueueId;
     }
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, '');
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $arguments);
   }
 }
 

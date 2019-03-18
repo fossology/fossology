@@ -17,17 +17,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 
 /**
- * \file test_Checksum.c
+ * \file
  * \brief unit test case for checksum.c
- *
  */
 
 /**
  * \brief test function CountDigits
+ * \test
+ * -# Call CountDigits() with a number
+ * -# Check if function returned actual count
  */
 void testCountDigits()
 {
-  uint64_t Num = 15; 
+  uint64_t Num = 15;
   int Digits = 0;
   Digits = CountDigits(Num);
   //printf("%d has %d digits\n",Num,Digits);
@@ -36,12 +38,15 @@ void testCountDigits()
 
 /**
  * \brief test function SumComputeFile
+ * \test
+ * -# Compute checksum of a known file using SumComputeFile()
+ * -# Compare if the function result correct checksum
  */
 void testSumComputeFile()
 {
   Cksum *SumTest;
   FILE *Fin;
-  Filename = "../test-data/testdata4unpack/threezip.zip";
+  Filename = "../testdata/test.zip";
   char Fuid[1024];
   int i;
 
@@ -58,22 +63,26 @@ void testSumComputeFile()
       Fuid[73]='.';
       snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)SumTest->DataLen);
       //printf("%s +++++++++\n",Fuid);
-      FO_ASSERT_STRING_EQUAL(Fuid, "E1ABCC8332A1A477D06EF9BA46A62ECCED2C357E.7613AE78F7E175DCB132472F20028F50.557949");
-      FO_ASSERT_EQUAL((int)SumTest->DataLen, 557949);
+      FO_ASSERT_STRING_EQUAL(Fuid, "5CBBD4E0487601E9160A5C887E5C0C1E6541B3DE.5234FC4D5F9786A51B2206B9DEEACA68.825");
+      FO_ASSERT_EQUAL((int)SumTest->DataLen, 825);
       free(SumTest);
     }
     fclose(Fin);
-  } 
+  }
 }
 
 /**
  * \brief test function SumToString
+ * \test
+ * -# Get a result from SumComputeFile()
+ * -# Call SumToString() on the result
+ * -# Check if the function translated the structure to a string
  */
 void testSumToString()
 {
   Cksum *SumTest;
   FILE *Fin;
-  Filename = "../test-data/testdata4unpack/threezip.zip";
+  Filename = "../testdata/test.zip";
   char *Fuid = NULL;
 
   Fin = fopen(Filename,"rb");
@@ -83,11 +92,11 @@ void testSumToString()
     if (SumTest)
     {
       Fuid = SumToString(SumTest);
-      FO_ASSERT_STRING_EQUAL(Fuid, "E1ABCC8332A1A477D06EF9BA46A62ECCED2C357E.7613AE78F7E175DCB132472F20028F50.557949");
+      FO_ASSERT_STRING_EQUAL(Fuid, "5CBBD4E0487601E9160A5C887E5C0C1E6541B3DE.5234FC4D5F9786A51B2206B9DEEACA68.825");
       free(SumTest);
     }
     fclose(Fin);
-  }  
+  }
 }
 /* ************************************************************************** */
 /* **** cunit test cases **************************************************** */

@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAMES = copyright ecc
+MOD_NAMES = copyright ecc keyword
 
 DIRS = agent ui
 TESTDIR = agent_tests
@@ -53,6 +53,7 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,clean)
+	$(MAKE) -s -C $(TESTDIR) $@
 	rm -f VERSION*
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean

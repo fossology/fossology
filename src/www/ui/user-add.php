@@ -37,11 +37,11 @@ class user_add extends FO_Plugin {
 
   /**
    * \brief Add a user.
-   * 
+   *
    * \return NULL on success, string on failure.
    */
   function Add() {
-     
+
     global $PG_CONN;
 
     if (!$PG_CONN) {
@@ -85,7 +85,7 @@ class user_add extends FO_Plugin {
       $text = _("Passwords did not match. Not added.");
       return ($text);
     }
-    
+
     if(empty($Email))
     {
       $text = _("Email must be specified. Not added.");
@@ -98,7 +98,7 @@ class user_add extends FO_Plugin {
       $text = _("Invalid email address.  Not added.");
       return ($text);
     }
-    
+
     /* Make sure email is unique */
     $email_count = $this->dbManager->getSingleRow("SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;", array($Email))["count"];
     if ($email_count > 0) {
@@ -181,7 +181,7 @@ class user_add extends FO_Plugin {
     $text = _("User root folder");
     $V.= "$Style<th>$text";
     $V.= "</th>";
-    $V.= "<td><select name='folder'>";
+    $V.= "<td><select name='folder' class='ui-render-select2'>";
     $V.= FolderListOption(-1, 0);
     $V.= "</select></td>\n";
     $V.= "</tr>\n";

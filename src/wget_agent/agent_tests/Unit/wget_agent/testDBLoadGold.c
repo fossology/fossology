@@ -25,8 +25,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define AGENT_DIR "../../"
 /**
- * \file testDBLoadGold.c
+ * \file
  * \brief testing for the function DBLoadGold
+ * \dir wget_agent/agent_tests/Unit/wget_agent/
+ * \brief Contains actual test cases
  */
 
 static PGresult *result = NULL;
@@ -35,7 +37,8 @@ extern fo_conf* sysconfig;
 static fo_dbManager* dbManager;
 /**
  * \brief initialize
- * at first download one file(dir), save as one tar file
+ *
+ * At first download one file(dir), save as one tar file
  */
 int  DBLoadGoldInit()
 {
@@ -43,27 +46,27 @@ int  DBLoadGoldInit()
   char TempFileDir[MAXCMD];
   char TempFile[MAXCMD];
 
-  /** create db */
+  /** -# Create db */
   dbManager = createTestEnvironment(AGENT_DIR, "wget_agent", 1);
   if (!dbManager) {
     LOG_FATAL("Unable to connect to database");
     return 1;
   }
 
-
   pgConn = fo_dbManager_getWrappedConnection(dbManager);
 
-  strcpy(GlobalParam, "-l 1 -A gz -R fosso*,index.html*");
-  strcpy(URL, "http://www.fossology.org/testdata/wgetagent/debian/");
+  /** -# Set  */
+  strcpy(GlobalParam, "-l 1 -A *.list -R *.deb");
+  strcpy(URL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
   strcpy(TempFileDir, "./test_result/");
-  strcpy(TempFile, "./test_result/wget.tar");
+  strcpy(TempFile, "./test_result/fossology.sources.list");
   GetURL(TempFile, URL, TempFileDir);
-  strcpy(GlobalTempFile,"./test_result/wget.tar");
-  strcpy(GlobalURL, "http://www.fossology.org/testdata/wgetagent/debian/");
+  strcpy(GlobalTempFile,"./test_result/fossology.sources.list");
+  strcpy(GlobalURL, "https://mirrors.kernel.org/fossology/releases/3.0.0/ubuntu/14.04/");
 
-  /** delete the record that upload_filename is wget.tar, pre testing */
+  /** -# Delete the record that upload_filename is wget.tar, pre testing */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'wget.tar';");
+  snprintf(SQL,MAXCMD, "DELETE FROM upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -72,9 +75,9 @@ int  DBLoadGoldInit()
   }
   PQclear(result);
 
-  /** insert upload wget.tar */
+  /** -# Insert upload wget.tar */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('wget.tar',40,now());");
+  snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts) VALUES ('fossology.sources.list',40,now());");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -82,9 +85,9 @@ int  DBLoadGoldInit()
     return 1;
   }
   PQclear(result);
-  /** get upload id */
+  /** -# Get upload id */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD,"SELECT upload_pk from upload where upload_filename = 'wget.tar';");
+  snprintf(SQL,MAXCMD,"SELECT upload_pk from upload where upload_filename = 'fossology.sources.list';");
   result = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
@@ -114,7 +117,7 @@ int  DBLoadGoldInit()
   return 0;
 }
 /**
- * \brief clean the env
+ * \brief Clean the env
  */
 int DBLoadGoldClean()
 {
@@ -145,24 +148,27 @@ int DBLoadGoldClean()
 }
 
 /**
- * \brief convert a string to lowcase
- *
- * \param char *string - the string will be converted to lowcase
+ * \brief Convert a string to lower case
+ * \param[in,out] string The string will be converted to lower case
  */
 void string_tolower(char *string)
 {
-  int length = strlen(string);  
+  int length = strlen(string);
   int i = 0;
-  for (i = 0; i < length; i++)  
-  {  
-    string[i] = tolower(string[i]);  
-  }   
+  for (i = 0; i < length; i++)
+  {
+    string[i] = tolower(string[i]);
+  }
 }
 
 /* test functions */
 
 /**
- * \brief for function DBLoadGold
+ * \brief Function to test DBLoadGold
+ * \test
+ * -# Call DBLoadGold()
+ * -# Get the data from pfile table
+ * -# Check if the file exists in file system
  */
 void testDBLoadGold()
 {
@@ -174,7 +180,8 @@ void testDBLoadGold()
   char *pfile_md5;
   memset(SQL, 0, MAXCMD);
   PGresult *result;
-  snprintf(SQL, MAXCMD-1, "select pfile_sha1, pfile_md5 from pfile where pfile_pk in (select pfile_fk from upload where upload_pk = %ld);", GlobalUploadKey);
+  snprintf(SQL, MAXCMD-1, "select pfile_sha1, pfile_md5 from pfile where pfile_pk in (select pfile_fk from "
+      "upload where upload_pk = %ld);", GlobalUploadKey);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
   {

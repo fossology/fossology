@@ -1,7 +1,7 @@
 <?php
 /*
- * Author: Daniele Fognini
- * Copyright (C) 2014-2015, Siemens AG
+ * Author: Daniele Fognini, Shaheem Azmal M MD
+ * Copyright (C) 2016-2018, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +16,35 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+/**
+ * @dir readmeoss
+ * @brief Readme_OSS agent
+ * @dir readmeoss/agent
+ * @brief Readme_OSS agent source
+ * @file
+ * @brief Readme_OSS agent
+ * @page readmeoss Readme_OSS agent
+ * @tableofcontents
+ * @section readmeossabout About ReadmeOSS agent
+ *
+ * Readme_OSS agent generates a list of license short-names, license text,
+ * license's acknowledgement and copyrights found in an upload. The output is
+ * generated as a plain text plain.
+ *
+ * The agent creates the report and store on the server with other reports in
+ * `/srv/fossology/repository/report/` folder with file name in
+ * <b>`ReadMe_OSS_<uploadfilename>_<timestamp>.txt`</b> format.
+ *
+ * @section readmeossactions Supported actions
+ * Currently, ReadMe_OSS does not support CLI commands and read only from
+ * scheduler.
+ *
+ * @section readmeosssource Agent source
+ *   - @link src/readmeoss/agent @endlink
+ *   - @link src/readmeoss/ui @endlink
+ *
+ * @todo Write test cases for the agent
+ */
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
@@ -25,28 +54,43 @@ use Fossology\Lib\Report\LicenseMainGetter;
 
 include_once(__DIR__ . "/version.php");
 
+/**
+ * @class ReadmeOssAgent
+ * @brief Readme_OSS agent generates list of licenses and copyrights found
+ * in an upload
+ */
 class ReadmeOssAgent extends Agent
 {
-  const UPLOAD_ADDS = "uploadsAdd";
+  const UPLOAD_ADDS = "uploadsAdd";   ///< The HTTP GET parameter name
 
-  /** @var LicenseClearedGetter  */
+  /** @var LicenseClearedGetter $licenseClearedGetter
+   * LicenseClearedGetter object
+   */
   private $licenseClearedGetter;
 
-  /** @var XpClearedGetter */
+  /** @var XpClearedGetter $cpClearedGetter
+   * XpClearedGetter object
+   */
   private $cpClearedGetter;
 
-  /** @var LicenseMainGetter  */
+  /** @var LicenseMainGetter $licenseMainGetter
+   * LicenseMainGetter object
+   */
   private $licenseMainGetter;
 
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
   private $uploadDao;
 
-  /** @var int[] */
+  /** @var int $additionalUploadIds
+   * Additional Uploads to be included in report
+   */
   protected $additionalUploadIds = array();
 
   function __construct()
   {
-    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement", false);
+    $this->cpClearedGetter = new XpClearedGetter("copyright", "statement");
     $this->licenseClearedGetter = new LicenseClearedGetter();
     $this->licenseMainGetter = new LicenseMainGetter();
 
@@ -58,7 +102,9 @@ class ReadmeOssAgent extends Agent
   }
 
   /**
-   * @todo without wrapper
+   * @copydoc Fossology::Lib::Agent::Agent::processUploadId()
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
+   * @todo Without wrapper
    */
   function processUploadId($uploadId)
   {
@@ -72,6 +118,8 @@ class ReadmeOssAgent extends Agent
     $this->heartbeat(0);
     $licenseStmts = array();
     $copyrightStmts = array();
+    $licenseStmtsMain = array();
+    $licenseAcknowledgements = array();
 
     foreach($uploadIds as $addUploadId)
     {
@@ -81,20 +129,29 @@ class ReadmeOssAgent extends Agent
       $moreLicenses = $this->licenseClearedGetter->getCleared($addUploadId, $groupId);
       $licenseStmts = array_merge($licenseStmts, $moreLicenses['statements']);
       $this->heartbeat(count($moreLicenses['statements']));
-      $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId);
+      $this->licenseClearedGetter->setOnlyAcknowledgements(true);
+      $moreAcknowledgements = $this->licenseClearedGetter->getCleared($addUploadId, $groupId);
+      $licenseAcknowledgements = array_merge($licenseAcknowledgements, $moreAcknowledgements['statements']);
+      $this->heartbeat(count($moreAcknowledgements['statements']));
+      $moreCopyrights = $this->cpClearedGetter->getCleared($addUploadId, $groupId, true, "copyright");
       $copyrightStmts = array_merge($copyrightStmts, $moreCopyrights['statements']);
       $this->heartbeat(count($moreCopyrights['statements']));
       $moreMainLicenses = $this->licenseMainGetter->getCleared($addUploadId, $groupId);
-      $licenseStmts = array_merge($licenseStmts, $moreMainLicenses['statements']);
+      $licenseStmtsMain = array_merge($licenseStmtsMain, $moreMainLicenses['statements']);
       $this->heartbeat(count($moreMainLicenses['statements']));
     }
 
-    $contents = array('licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts );
+    $contents = array('licensesMain'=>$licenseStmtsMain, 'licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts, 'licenseAcknowledgements' => $licenseAcknowledgements);
     $this->writeReport($contents, $uploadId);
 
     return true;
   }
 
+  /**
+   * @brief Write data to text file
+   * @param array $contents Contents of the report
+   * @param int   $uploadId ID of the upload
+   */
   private function writeReport($contents, $uploadId)
   {
     global $SysConf;
@@ -120,12 +177,47 @@ class ReadmeOssAgent extends Agent
     $this->updateReportTable($uploadId, $this->jobId, $fileName);
   }
 
-  private function updateReportTable($uploadId, $jobId, $filename){
-    $this->dbManager->insertTableRow('reportgen',
-            array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$filename),
-            __METHOD__);
+  /**
+   * @brief Update the report path
+   * @param int    $uploadId Upload ID
+   * @param int    $jobId    Job ID
+   * @param string $filename Path of the file
+   */
+  private function updateReportTable($uploadId, $jobId, $filename)
+  {
+    $this->dbManager->insertTableRow('reportgen', array('upload_fk'=>$uploadId, 'job_fk'=>$jobId, 'filepath'=>$filename), __METHOD__);
   }
 
+  /**
+   * @brief This function lists elements of array
+   * @param string $addSeparator  Separator to be used
+   * @param string $dataForReadME Array of content
+   * @param string $extract       Data to be extracted from $dataForReadME
+   * @param string $break         Line break string
+   * @return string Formated report
+   */
+  private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract='text', $break)
+  {
+    $outData = "";
+    foreach($dataForReadME as $statements) {
+      if($extract == 'text') {
+        $outData .= $statements["content"] . $break;
+      }
+      $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
+      if(!empty($addSeparator)) {
+        $outData .= $addSeparator . $break;
+      }
+     }
+    return $outData;
+  }
+
+  /**
+   * @brief Gather all the data
+   * @param array  $contents    Array of contents with `licenseMain`, `licenses`
+   * and `licenseAcknowledgements` keys.
+   * @param string $packageName Package for which the report is generated
+   * @return string ReadmeOSS report
+   */
   private function generateReport($contents, $packageName)
   {
     $separator1 = str_repeat("=", 120);
@@ -133,26 +225,30 @@ class ReadmeOssAgent extends Agent
     $break = str_repeat("\r\n", 2);
 
     $output = $separator1 . $break . $packageName . $break . $separator2 . $break;
-    foreach($contents['licenses'] as $licenseStatement){
-      $output .= $licenseStatement['text'] . $break;
-      $output .= $separator2 . $break;
+    if(!empty($contents['licensesMain'])) {
+      $output .= $separator1 . $break . " MAIN LICENSES " . $break . $separator2 . $break;
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licensesMain'], 'text', $break);
     }
-    $copyrights = "";
-    foreach($contents['copyrights'] as $copyrightStatement){
-      $copyrights .= $copyrightStatement['content']."\r\n";
+    if(!empty($contents['licenses'])) {
+      $output .= $separator1 . $break . " OTHER LICENSES " . $break . $separator2 . $break;
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenses'], 'text', $break);
     }
-    if(empty($copyrights)){
+    if(!empty($contents['licenseAcknowledgements'])) {
+      $output .= $separator1 . $break . " ACKNOWLEDGEMENTS " . $break . $separator2 . $break;
+      $output .= $this->createReadMeOSSFormat($separator2, $contents['licenseAcknowledgements'], 'text', $break);
+    }
+    $copyrights = $this->createReadMeOSSFormat("", $contents['copyrights'], 'content', "\r\n");
+    if(empty($copyrights)) {
       $output .= "<Copyright notices>";
       $output .= $break;
       $output .= "<notices>";
-    }else{
+    } else {
       $output .= "Copyright notices";
       $output .= $break;
       $output .= $copyrights;
     }
     return $output;
   }
-
 }
 
 $agent = new ReadmeOssAgent();

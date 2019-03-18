@@ -30,6 +30,15 @@ extern "C" {
 
 #include "libfossdbmanagerclass.hpp"
 
+/**
+ * \file
+ * \brief Test case for DB Manager
+ */
+
+/**
+ * \class FoLibCPPTest
+ * \brief Test cases for CPP DB Manager
+ */
 class FoLibCPPTest : public CPPUNIT_NS::TestFixture {
 CPPUNIT_TEST_SUITE(FoLibCPPTest);
     CPPUNIT_TEST(test_runSimpleQuery);
@@ -41,19 +50,32 @@ CPPUNIT_TEST_SUITE(FoLibCPPTest);
     CPPUNIT_TEST(test_runSchedulerConnectConstructor);
   CPPUNIT_TEST_SUITE_END();
 private:
-  fo::DbManager* dbManager;
+  fo::DbManager* dbManager;       ///< Object for DbManager
 
 public:
+  /**
+   * One time setup to create test environment and get new DbManager
+   */
   void setUp() {
     dbManager = new fo::DbManager(createTestEnvironment("", NULL, 0));
   }
 
+  /**
+   * Tear down to destroy DbManager object and test environment
+   */
   void tearDown() {
     delete dbManager;
     // dbManager connection is already closed by destructor
     dropTestEnvironment(NULL, "", NULL);
   }
 
+  /**
+   * Test to check if simple query executes successfully
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Call fo::DbManager::queryPrintf() with simple statement.
+   * -# Check for the result.
+   */
   void test_runCommandQueryCheckIfSuccess() {
     fo::DbManager manager = dbManager->spawn();
     fo::QueryResult result = manager.queryPrintf("CREATE TABLE tbl(%s integer)", "col");
@@ -61,6 +83,16 @@ public:
     CPPUNIT_ASSERT(result);
   }
 
+  /**
+   * Test to check fo::DbManager::tableExists() function
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Create a new table.
+   * -# Call fo::DbManager::tableExists() with newly created table.
+   * -# Check for the result to be true.
+   * -# Call fo::DbManager::tableExists() with non existing table name.
+   * -# Check for the result to be false.
+   */
   void test_tableExists() {
     fo::DbManager manager = dbManager->spawn();
 
@@ -70,6 +102,15 @@ public:
     CPPUNIT_ASSERT(!manager.tableExists("tb"));
   }
 
+  /**
+   * Test to check fo::QueryResult::getSimpleResults() function
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Create a new table and insert some values in it.
+   * -# Call fo::DbManager::queryPrintf() to select new result.
+   * -# Check the fo::QueryResult object for row count.
+   * -# Check the value of fo::QueryResult::getSimpleResults().
+   */
   void test_runSimpleQuery() {
     fo::DbManager manager = dbManager->spawn();
 
@@ -96,7 +137,14 @@ public:
     CPPUNIT_ASSERT_EQUAL(expected, results);
   };
 
-
+  /**
+   * Test to check fo::DbManager::execPrepared() function
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Create a prepared statement.
+   * -# Call fo::DbManager::execPrepared() with the newly created statement.
+   * -# Check for the result.
+   */
   void test_runPreparedStatement() {
     fo::DbManager manager = dbManager->spawn();
 
@@ -128,6 +176,18 @@ public:
     CPPUNIT_ASSERT_EQUAL(expected, results);
   }
 
+  /**
+   * Test to check transaction functions
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Create a test table.
+   * -# Spawn two new DbManager s.
+   * -# Call fo::DbManager::begin() on new managers.
+   * -# Insert some data using new managers.
+   * -# Call fo::DbManager::commit() on one manager.
+   * -# Call fo::DbManager::rollback() on another manager.
+   * -# Inserts from other manager should not be there in the table.
+   */
   void test_transactions() {
     fo::DbManager manager1 = dbManager->spawn();
 
@@ -170,6 +230,14 @@ public:
     CPPUNIT_ASSERT_EQUAL(expected, results);
   }
 
+  /**
+   * Test to check bad query
+   * \test
+   * -# Spawn a new DbManager.
+   * -# Call fo::DbManager::queryPrintf() with a corrupted statement.
+   * -# Check if result is a failure.
+   * \todo implement fo::DbManager::setLogFile() and check that errors pass through
+   */
   void test_runBadCommandQueryCheckIfError() {
     fo::DbManager manager = dbManager->spawn();
 
@@ -183,6 +251,15 @@ public:
     CPPUNIT_ASSERT(!result);
   }
 
+  /**
+   * Test to check if DbManager can create connection with scheduler connect
+   * \test
+   * -# Create a test sysconf dir with a VERSION file.
+   * -# Set the `argv`
+   * -# Call fo::DbManager::DbManager() with the `argv`.
+   * -# Execute a statement and check the result.
+   * \todo make this correctly
+   */
   void test_runSchedulerConnectConstructor() {
     const char* sysConf = get_sysconfdir(); // [sic]
 

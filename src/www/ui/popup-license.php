@@ -81,7 +81,7 @@ class PopupLicense extends FO_Plugin
     }
     $this->vars['url'] = $licenseUrl;
     $this->vars['text'] = $license->getText();
-    $this->vars['risk'] = $license->getRisk();
+    $this->vars['risk'] = $license->getRisk() ?: 0;
     return $this->render('popup_license.html.twig');
   }  
 }

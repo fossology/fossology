@@ -36,13 +36,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define JOB_STATUS_TYPES(apply)                        \
   apply(NOT_AVAILABLE)                                 \
-  /** Checkout out from the db, but not started yet */ \
+  /** Checkout out from the DB, but not started yet */ \
   apply(CHECKEDOUT)                                    \
   /** Agents have started analysis on the job */       \
   apply(STARTED)                                       \
   /** All the data for this job has been analyzed */   \
   apply(COMPLETE)                                      \
-  /** FIXME NOT USED */                                \
+  /** @FIXME NOT USED */                               \
   apply(RESTART)                                       \
   /** The job has failed, likely an agent failure */   \
   apply(FAILED)                                        \
@@ -61,29 +61,29 @@ extern const char* job_status_strings[];
 typedef struct
 {
     /* associated agent information */
-    char*  agent_type;      ///< the type of agent used to analyze the data
+    char*  agent_type;      ///< The type of agent used to analyze the data
     char*  required_host;   ///< If not NULL, this job must run on a specific host machine
-    GList* running_agents;  ///< the list of agents assigned to this job that are still working
-    GList* finished_agents; ///< the list of agents that have completed their tasks
-    GList* failed_agents;   ///< the list of agents that failed while working
-    log_t*  log;             ///< the log to print any agent logging messages to
+    GList* running_agents;  ///< The list of agents assigned to this job that are still working
+    GList* finished_agents; ///< The list of agents that have completed their tasks
+    GList* failed_agents;   ///< The list of agents that failed while working
+    log_t*  log;            ///< The log to print any agent logging messages to
 
-    /* information for data manipluation */
-    job_status status;    ///< the current status for the job
-    gchar*     data;      ///< the data associated with this job (jq_args)
-    gchar     *jq_cmd_args; ///< command line arguments for this job
-    PGresult*  db_result; ///< results from the sql query (if any)
-    GMutex*    lock;      ///< lock to maintain data integrity
-    uint32_t   idx;       ///< the current index into the sql results
+    /* information for data manipulation */
+    job_status status;    ///< The current status for the job
+    gchar*     data;      ///< The data associated with this job (jq_args)
+    gchar     *jq_cmd_args; ///< Command line arguments for this job
+    PGresult*  db_result; ///< Results from the sql query (if any)
+    GMutex*    lock;      ///< Lock to maintain data integrity
+    uint32_t   idx;       ///< The current index into the sql results
 
     /* information about job status */
-    gchar*   message;   ///< message that will be sent with job notification email
-    int32_t  priority;  ///< importance of the job, maps directory to unix priority
-    int32_t  verbose;   ///< the verbose level for all of the agents in this job
-    int32_t  parent_id; ///< the identifier for the parent of this job (its queue id)
-    int32_t  id;        ///< the identifier for this job
-    int32_t  user_id;   ///< the id of the user that created the job
-    int32_t  group_id;  ///< the id of the group that created the job
+    gchar*   message;   ///< Message that will be sent with job notification email
+    int32_t  priority;  ///< Importance of the job, maps directory to unix priority
+    int32_t  verbose;   ///< The verbose level for all of the agents in this job
+    int32_t  parent_id; ///< The identifier for the parent of this job (its queue id)
+    int32_t  id;        ///< The identifier for this job
+    int32_t  user_id;   ///< The id of the user that created the job
+    int32_t  group_id;  ///< The id of the group that created the job
 } job_t;
 
 /* ************************************************************************** */

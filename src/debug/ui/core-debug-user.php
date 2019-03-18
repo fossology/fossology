@@ -18,6 +18,10 @@
 
 define("TITLE_debug_user", _("Debug User"));
 
+/**
+ * @class debug_user
+ * @brief Plugin to print debug information about current user
+ */
 class debug_user extends FO_Plugin
 {
   function __construct()
@@ -28,12 +32,16 @@ class debug_user extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
   }
-  
+
+  /**
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
+   */
   public function Output()
   {
     $V = "";
     global $PG_CONN;
-      $sql = "SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';";
+    $sql = "SELECT * FROM users WHERE user_pk = '" . @$_SESSION['UserId'] . "';";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $R = pg_fetch_assoc($result);

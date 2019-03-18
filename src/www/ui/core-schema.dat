@@ -33,35 +33,6 @@
   $Schema["TABLE"]["agent"]["agent_ts"]["ALTER"] = "ALTER TABLE \"agent\" ALTER COLUMN \"agent_ts\" DROP NOT NULL, ALTER COLUMN \"agent_ts\" SET DEFAULT now()";
 
 
-  $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_pk\" int4 DEFAULT nextval('agent_runstatus_ars_pk_seq'::regclass)";
-  $Schema["TABLE"]["agent_runstatus"]["ars_pk"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_pk\" SET NOT NULL, ALTER COLUMN \"ars_pk\" SET DEFAULT nextval('agent_runstatus_ars_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["agent_runstatus"]["agent_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_runstatus"]["agent_fk"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"agent_fk\" int4";
-  $Schema["TABLE"]["agent_runstatus"]["agent_fk"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"agent_fk\" SET NOT NULL";
-
-  $Schema["TABLE"]["agent_runstatus"]["upload_fk"]["DESC"] = "";
-  $Schema["TABLE"]["agent_runstatus"]["upload_fk"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"upload_fk\" int4";
-  $Schema["TABLE"]["agent_runstatus"]["upload_fk"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
-
-  $Schema["TABLE"]["agent_runstatus"]["ars_complete"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_complete\" IS 'true if the agent has completed with success (i.e. results are available), false if the agent has not completed running on this upload or the results are not usable (due to errors)'";
-  $Schema["TABLE"]["agent_runstatus"]["ars_complete"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_complete\" bool DEFAULT false";
-  $Schema["TABLE"]["agent_runstatus"]["ars_complete"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_complete\" SET NOT NULL, ALTER COLUMN \"ars_complete\" SET DEFAULT false";
-
-  $Schema["TABLE"]["agent_runstatus"]["ars_status"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_status\" IS 'status of run - on error exit, record error msg if possible'";
-  $Schema["TABLE"]["agent_runstatus"]["ars_status"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_status\" text";
-  $Schema["TABLE"]["agent_runstatus"]["ars_status"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_status\" DROP NOT NULL";
-
-  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_starttime\" IS 'time record was added.'";
-  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_starttime\" timestamptz DEFAULT now()";
-  $Schema["TABLE"]["agent_runstatus"]["ars_starttime"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_starttime\" SET NOT NULL, ALTER COLUMN \"ars_starttime\" SET DEFAULT now()";
-
-  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["DESC"] = "COMMENT ON COLUMN \"agent_runstatus\".\"ars_endtime\" IS 'time when agent completed'";
-  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["ADD"] = "ALTER TABLE \"agent_runstatus\" ADD COLUMN \"ars_endtime\" timestamptz";
-  $Schema["TABLE"]["agent_runstatus"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"agent_runstatus\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL";
-
-
   $Schema["TABLE"]["agent_wc"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"agent_wc\".\"pfile_fk\" IS 'pfile key'";
   $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ADD"] = "ALTER TABLE \"agent_wc\" ADD COLUMN \"pfile_fk\" int4";
   $Schema["TABLE"]["agent_wc"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"agent_wc\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL";
@@ -102,27 +73,6 @@
   $Schema["TABLE"]["ars_master"]["ars_endtime"]["DESC"] = "COMMENT ON COLUMN \"ars_master\".\"ars_endtime\" IS 'time scan completed'";
   $Schema["TABLE"]["ars_master"]["ars_endtime"]["ADD"] = "ALTER TABLE \"ars_master\" ADD COLUMN \"ars_endtime\" timestamptz";
   $Schema["TABLE"]["ars_master"]["ars_endtime"]["ALTER"] = "ALTER TABLE \"ars_master\" ALTER COLUMN \"ars_endtime\" DROP NOT NULL";
-
-
-  $Schema["TABLE"]["attachments"]["attachment_pk"]["DESC"] = "";
-  $Schema["TABLE"]["attachments"]["attachment_pk"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"attachment_pk\" int4 DEFAULT nextval('attachments_attachment_pk_seq'::regclass)";
-  $Schema["TABLE"]["attachments"]["attachment_pk"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"attachment_pk\" SET NOT NULL, ALTER COLUMN \"attachment_pk\" SET DEFAULT nextval('attachments_attachment_pk_seq'::regclass)";
-
-  $Schema["TABLE"]["attachments"]["type"]["DESC"] = "COMMENT ON COLUMN \"attachments\".\"type\" IS '''c''=comment, ''f''=file'";
-  $Schema["TABLE"]["attachments"]["type"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"type\" char(1)";
-  $Schema["TABLE"]["attachments"]["type"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"type\" SET NOT NULL";
-
-  $Schema["TABLE"]["attachments"]["text"]["DESC"] = "COMMENT ON COLUMN \"attachments\".\"text\" IS 'comment, or file name of uploaded file'";
-  $Schema["TABLE"]["attachments"]["text"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"text\" text";
-  $Schema["TABLE"]["attachments"]["text"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"text\" SET NOT NULL";
-
-  $Schema["TABLE"]["attachments"]["pfile_fk"]["DESC"] = "COMMENT ON COLUMN \"attachments\".\"pfile_fk\" IS 'pfile_fk if type file'";
-  $Schema["TABLE"]["attachments"]["pfile_fk"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"pfile_fk\" int4";
-  $Schema["TABLE"]["attachments"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"pfile_fk\" DROP NOT NULL";
-
-  $Schema["TABLE"]["attachments"]["server_fk"]["DESC"] = "";
-  $Schema["TABLE"]["attachments"]["server_fk"]["ADD"] = "ALTER TABLE \"attachments\" ADD COLUMN \"server_fk\" int4";
-  $Schema["TABLE"]["attachments"]["server_fk"]["ALTER"] = "ALTER TABLE \"attachments\" ALTER COLUMN \"server_fk\" DROP NOT NULL";
 
 
   $Schema["TABLE"]["bucket_ars"]["ars_pk"]["DESC"] = "";
@@ -352,14 +302,18 @@
   $Schema["TABLE"]["clearing_event"]["reportinfo"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"reportinfo\" text";
   $Schema["TABLE"]["clearing_event"]["reportinfo"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"reportinfo\" DROP NOT NULL";
 
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"clearing_event\".\"acknowledgement\" IS 'public comment'";
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["clearing_event"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
   $Schema["TABLE"]["clearing_event"]["date_added"]["DESC"] = "";
   $Schema["TABLE"]["clearing_event"]["date_added"]["ADD"] = "ALTER TABLE \"clearing_event\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
   $Schema["TABLE"]["clearing_event"]["date_added"]["ALTER"] = "ALTER TABLE \"clearing_event\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
 
 
-  $Schema["TABLE"]["copyright"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["copyright"]["ct_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"copyright_pk\" int8 DEFAULT nextval('copyright_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright"]["copyright_pk"]["ALTER"] = "ALTER TABLE \"copyright\" ALTER COLUMN \"copyright_pk\" SET NOT NULL, ALTER COLUMN \"copyright_pk\" SET DEFAULT nextval('copyright_pk_seq'::regclass)";
 
   $Schema["TABLE"]["copyright"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["copyright"]["agent_fk"]["ADD"] = "ALTER TABLE \"copyright\" ADD COLUMN \"agent_fk\" int8";
@@ -422,10 +376,14 @@
   $Schema["TABLE"]["copyright_decision"]["comment"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["copyright_decision"]["comment"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
 
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"copyright_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
-  $Schema["TABLE"]["author"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["author"]["ct_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["author"]["ct_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('copyright_ct_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
+  $Schema["TABLE"]["author"]["author_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"author_pk\" int8 DEFAULT nextval('author_pk_seq'::regclass)";
+  $Schema["TABLE"]["author"]["author_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"author_pk\" SET NOT NULL, ALTER COLUMN \"author_pk\" SET DEFAULT nextval('author_pk_seq'::regclass)";
 
   $Schema["TABLE"]["author"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["agent_fk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"agent_fk\" int8";
@@ -460,9 +418,9 @@
   $Schema["TABLE"]["author"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["ecc"]["ct_pk"]["DESC"] = "";
-  $Schema["TABLE"]["ecc"]["ct_pk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"ct_pk\" int8 DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
-  $Schema["TABLE"]["ecc"]["ct_pk"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"ct_pk\" SET NOT NULL, ALTER COLUMN \"ct_pk\" SET DEFAULT nextval('ecc_ct_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"ecc_pk\" int8 DEFAULT nextval('ecc_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc"]["ecc_pk"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"ecc_pk\" SET NOT NULL, ALTER COLUMN \"ecc_pk\" SET DEFAULT nextval('ecc_pk_seq'::regclass)";
 
   $Schema["TABLE"]["ecc"]["agent_fk"]["DESC"] = "";
   $Schema["TABLE"]["ecc"]["agent_fk"]["ADD"] = "ALTER TABLE \"ecc\" ADD COLUMN \"agent_fk\" int8";
@@ -497,9 +455,9 @@
   $Schema["TABLE"]["ecc"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["DESC"] = "";
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"copyright_decision_pk\" int8 DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
-  $Schema["TABLE"]["ecc_decision"]["copyright_decision_pk"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"copyright_decision_pk\" SET NOT NULL, ALTER COLUMN \"copyright_decision_pk\" SET DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"ecc_decision_pk\" int8 DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc_decision"]["ecc_decision_pk"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"ecc_decision_pk\" SET NOT NULL, ALTER COLUMN \"ecc_decision_pk\" SET DEFAULT nextval('ecc_decision_pk_seq'::regclass)";
 
   $Schema["TABLE"]["ecc_decision"]["user_fk"]["DESC"] = "";
   $Schema["TABLE"]["ecc_decision"]["user_fk"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"user_fk\" int8";
@@ -525,7 +483,78 @@
   $Schema["TABLE"]["ecc_decision"]["comment"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["ecc_decision"]["comment"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
 
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ecc_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
+
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"keyword_pk\" int8 DEFAULT nextval('keyword_pk_seq'::regclass)";
+  $Schema["TABLE"]["keyword"]["keyword_pk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"keyword_pk\" SET NOT NULL, ALTER COLUMN \"keyword_pk\" SET DEFAULT nextval('keyword_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["keyword"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["agent_fk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"agent_fk\" int8";
+  $Schema["TABLE"]["keyword"]["agent_fk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"agent_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["pfile_fk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["keyword"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["content"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["keyword"]["content"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["hash"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["keyword"]["hash"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["type"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["type"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"type\" text";
+  $Schema["TABLE"]["keyword"]["type"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"type\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["copy_startbyte"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["copy_startbyte"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"copy_startbyte\" int4";
+  $Schema["TABLE"]["keyword"]["copy_startbyte"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"copy_startbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["copy_endbyte"]["DESC"] = "";
+  $Schema["TABLE"]["keyword"]["copy_endbyte"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"copy_endbyte\" int4";
+  $Schema["TABLE"]["keyword"]["copy_endbyte"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"copy_endbyte\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"keyword\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["keyword"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["keyword"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+  $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"keyword_decision_pk\" int8 DEFAULT nextval('keyword_decision_pk_seq'::regclass)";
+  $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"keyword_decision_pk\" SET NOT NULL, ALTER COLUMN \"keyword_decision_pk\" SET DEFAULT nextval('keyword_decision_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["keyword_decision"]["user_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["user_fk"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"user_fk\" int8";
+  $Schema["TABLE"]["keyword_decision"]["user_fk"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"user_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["pfile_fk"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["keyword_decision"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["clearing_decision_type_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["clearing_decision_type_fk"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"clearing_decision_type_fk\" int8";
+  $Schema["TABLE"]["keyword_decision"]["clearing_decision_type_fk"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"clearing_decision_type_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["description"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["description"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"description\" text";
+  $Schema["TABLE"]["keyword_decision"]["description"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"description\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["textfinding"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["textfinding"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"textfinding\" text";
+  $Schema["TABLE"]["keyword_decision"]["textfinding"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_decision"]["comment"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["keyword_decision"]["comment"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"keyword_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"file_picker_pk\" int4 DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass)";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"file_picker_pk\" SET NOT NULL, ALTER COLUMN \"file_picker_pk\" SET DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass)";
@@ -915,11 +944,14 @@
   $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_spdx_compatible\" bool DEFAULT false";
   $Schema["TABLE"]["license_ref"]["rf_spdx_compatible"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_spdx_compatible\" SET NOT NULL, ALTER COLUMN \"rf_spdx_compatible\" SET DEFAULT false";
 
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_flag\" IS 'default will be 1 if it gets updated from UI it will be 2'";
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_flag\" int4 DEFAULT 1";
+  $Schema["TABLE"]["license_ref"]["rf_flag"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_flag\" SET NOT NULL, ALTER COLUMN \"rf_flag\" SET DEFAULT 1";
+
 
   $Schema["TABLE"]["license_candidate"]["group_fk"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"group_fk\" IS 'group seeing this candidate'";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
@@ -958,6 +990,18 @@
   $Schema["TABLE"]["license_set_bulk"]["lrb_fk"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"lrb_fk\" int8";
   $Schema["TABLE"]["license_set_bulk"]["lrb_fk"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"lrb_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["license_set_bulk"]["comment"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"comment\" IS 'User comment'";
+  $Schema["TABLE"]["license_set_bulk"]["comment"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["license_set_bulk"]["comment"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"reportinfo\" IS 'public comment'";
+  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"reportinfo\" text";
+  $Schema["TABLE"]["license_set_bulk"]["reportinfo"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"reportinfo\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"acknowledgement\" IS 'public comment'";
+  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"acknowledgement\" text";
+  $Schema["TABLE"]["license_set_bulk"]["acknowledgement"]["ALTER"] = "ALTER TABLE \"license_set_bulk\" ALTER COLUMN \"acknowledgement\" DROP NOT NULL";
+
 
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["DESC"] = "";
   $Schema["TABLE"]["mimetype"]["mimetype_pk"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_pk\" int4 DEFAULT nextval('mimetype_mimetype_pk_seq'::regclass)";
@@ -979,23 +1023,51 @@
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"rf_fk\" int8";
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_candidate_map\".\"om_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_candidate_map_om_pk_seq'::regclass)";
+  $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["ALTER"] = "ALTER TABLE \"obligation_candidate_map\" ALTER COLUMN \"om_pk\" SET NOT NULL, ALTER COLUMN \"om_pk\" SET DEFAULT nextval('obligation_candidate_map_om_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["obligation_candidate_map"]["ob_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_candidate_map\".\"ob_fk\" IS 'Obligation topic key as in obligation_ref'";
+  $Schema["TABLE"]["obligation_candidate_map"]["ob_fk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"ob_fk\" int8";
+  $Schema["TABLE"]["obligation_candidate_map"]["ob_fk"]["ALTER"] = "ALTER TABLE \"obligation_candidate_map\" ALTER COLUMN \"ob_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["obligation_candidate_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_candidate_map\".\"rf_fk\" IS 'Reference license key as in license_candidate'";
+  $Schema["TABLE"]["obligation_candidate_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"rf_fk\" int8";
+  $Schema["TABLE"]["obligation_candidate_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_candidate_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
+
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_pk\" int8 DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_pk\" SET NOT NULL, ALTER COLUMN \"ob_pk\" SET DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["obligation_ref"]["ob_topic"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_topic\" IS 'Include notices, Copyleft effect, ...'";
+  $Schema["TABLE"]["obligation_ref"]["ob_type"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_type\" IS 'Type of legal statement: obligation, restriction, risk or right'";
+  $Schema["TABLE"]["obligation_ref"]["ob_type"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_type\" text DEFAULT 'Obligation'::text";
+  $Schema["TABLE"]["obligation_ref"]["ob_type"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_type\" SET NOT NULL";
+
+    $Schema["TABLE"]["obligation_ref"]["ob_topic"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_topic\" IS 'An arbitrary name for the obligation: include notices, copyleft effect, ...'";
   $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_topic\" text";
   $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_topic\" SET NOT NULL";
 
-  $Schema["TABLE"]["obligation_ref"]["ob_text"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text\" IS 'Obligation text'";
+  $Schema["TABLE"]["obligation_ref"]["ob_text"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text\" IS 'The full text of the obligation'";
   $Schema["TABLE"]["obligation_ref"]["ob_text"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_text\" text";
   $Schema["TABLE"]["obligation_ref"]["ob_text"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_text\" SET NOT NULL";
 
-  $Schema["TABLE"]["obligation_ref"]["ob_active"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_active\" IS 'change this to false if you don''t want this obligation to be used in new reports'";
+  $Schema["TABLE"]["obligation_ref"]["ob_classification"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_classification\" IS 'Level of attention this obligation should raise in the clearing process: green, white, yellow or red'";
+  $Schema["TABLE"]["obligation_ref"]["ob_classification"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_classification\" text";
+  $Schema["TABLE"]["obligation_ref"]["ob_classification"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_classification\" DROP NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_modifications"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_modifications\" IS 'True if the obligation applies on modified source code (mainly applies on copyleft licenses)'";
+  $Schema["TABLE"]["obligation_ref"]["ob_modifications"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_modifications\" text";
+  $Schema["TABLE"]["obligation_ref"]["ob_modifications"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_modifications\" DROP NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_comment"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_comment\" IS 'Optional comment'";
+  $Schema["TABLE"]["obligation_ref"]["ob_comment"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_comment\" text";
+  $Schema["TABLE"]["obligation_ref"]["ob_comment"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["obligation_ref"]["ob_active"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_active\" IS 'Change this to false if you don''t want this obligation to be used in new reports'";
   $Schema["TABLE"]["obligation_ref"]["ob_active"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_active\" bool DEFAULT true";
   $Schema["TABLE"]["obligation_ref"]["ob_active"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_active\" SET NOT NULL, ALTER COLUMN \"ob_active\" SET DEFAULT true";
 
-  $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text_updatable\" IS 'true if the obligation text can be updated'";
+  $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_text_updatable\" IS 'True if the obligation text can be updated'";
   $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_text_updatable\" bool DEFAULT false";
   $Schema["TABLE"]["obligation_ref"]["ob_text_updatable"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_text_updatable\" SET NOT NULL, ALTER COLUMN \"ob_text_updatable\" SET DEFAULT false";
 
@@ -1274,7 +1346,7 @@
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"ui_label\" varchar(60)";
   $Schema["TABLE"]["sysconfig"]["ui_label"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"ui_label\" SET NOT NULL";
 
-  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea'";
+  $Schema["TABLE"]["sysconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown'";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"vartype\" int4";
   $Schema["TABLE"]["sysconfig"]["vartype"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"vartype\" SET NOT NULL";
 
@@ -1293,6 +1365,10 @@
   $Schema["TABLE"]["sysconfig"]["validation_function"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"validation_function\" IS 'Name of function to validate input. Not currently implemented.'";
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"validation_function\" varchar(40) DEFAULT NULL::character varying";
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"validation_function\" DROP NOT NULL, ALTER COLUMN \"validation_function\" SET DEFAULT NULL::character varying";
+  
+  $Schema["TABLE"]["sysconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" character varying(40) DEFAULT NULL";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL";
 
 
   $Schema["TABLE"]["tag"]["tag_pk"]["DESC"] = "";
@@ -1577,12 +1653,65 @@
   $Schema["TABLE"]["users"]["group_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"group_fk\" int4";
   $Schema["TABLE"]["users"]["group_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
+  $Schema["TABLE"]["report_info"]["ri_pk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_pk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_pk\" int4 DEFAULT nextval('report_info_pk_seq'::regclass)";
+  $Schema["TABLE"]["report_info"]["ri_pk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_pk\" SET NOT NULL, ALTER COLUMN \"ri_pk\" SET DEFAULT nextval('report_info_pk_seq'::regclass)";
 
+  $Schema["TABLE"]["report_info"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["upload_fk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["report_info"]["upload_fk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_reviewed\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_reviewed"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_reviewed\" SET NOT NULL, ALTER COLUMN \"ri_reviewed\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_footer"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_footer"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_footer\" text DEFAULT 'Your Organization'";
+  $Schema["TABLE"]["report_info"]["ri_footer"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_footer\" SET NOT NULL, ALTER COLUMN \"ri_footer\" SET DEFAULT 'Your Organization'";
+
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_report_rel\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_report_rel"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_report_rel\" SET NOT NULL, ALTER COLUMN \"ri_report_rel\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_community"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_community"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_community\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_community"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_community\" SET NOT NULL, ALTER COLUMN \"ri_community\" SET DEFAULT 'NA'";  
+
+  $Schema["TABLE"]["report_info"]["ri_component"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_component"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_component"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component\" SET NOT NULL, ALTER COLUMN \"ri_component\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_version"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_version"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_version\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_version"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_version\" SET NOT NULL, ALTER COLUMN \"ri_version\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_release_date\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_release_date"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_release_date\" SET NOT NULL, ALTER COLUMN \"ri_release_date\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_sw360_link\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_sw360_link\" SET NOT NULL, ALTER COLUMN \"ri_sw360_link\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_general_assesment\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_general_assesment\" SET NOT NULL, ALTER COLUMN \"ri_general_assesment\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_additional\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_ga_additional"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_additional\" SET NOT NULL, ALTER COLUMN \"ri_ga_additional\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_risk\" text DEFAULT 'NA'";
+  $Schema["TABLE"]["report_info"]["ri_ga_risk"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_risk\" SET NOT NULL, ALTER COLUMN \"ri_ga_risk\" SET DEFAULT 'NA'";
+
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_checkbox_selection\" text";
+  $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_checkbox_selection\" DROP NOT NULL";
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::integer AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
-  $Schema["VIEW"]["runstat_up_agent"] = "CREATE VIEW \"runstat_up_agent\" AS SELECT agent_runstatus.ars_status, agent_runstatus.ars_complete, agent_runstatus.ars_pk, agent_runstatus.ars_starttime AS ars_ts, agent_runstatus.agent_fk, agent.agent_desc, agent.agent_name, agent.agent_parms, agent.agent_enabled AS agent_enable, agent.agent_pk, agent.agent_ts, agent.agent_rev, upload.upload_desc, upload.upload_filename, upload.pfile_fk, upload.upload_pk FROM ((agent_runstatus JOIN agent ON ((agent_runstatus.agent_fk = agent.agent_pk))) JOIN upload ON ((agent_runstatus.upload_fk = upload.upload_pk)));";
 
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\"";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["UPDATE"] = "SELECT setval('sysconfig_sysconfig_pk_seq',(SELECT greatest(1,max(sysconfig_pk)) val FROM sysconfig))";
@@ -1596,14 +1725,8 @@
   $Schema["SEQUENCE"]["agent_agent_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"agent_agent_pk_seq\"";
   $Schema["SEQUENCE"]["agent_agent_pk_seq"]["UPDATE"] = "SELECT setval('agent_agent_pk_seq',(SELECT greatest(1,max(agent_pk)) val FROM agent))";
 
-  $Schema["SEQUENCE"]["agent_runstatus_ars_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"agent_runstatus_ars_pk_seq\"";
-  $Schema["SEQUENCE"]["agent_runstatus_ars_pk_seq"]["UPDATE"] = "SELECT setval('agent_runstatus_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM agent_runstatus))";
-
   $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"nomos_ars_ars_pk_seq\"";
-  $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["UPDATE"] = "SELECT setval('nomos_ars_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM bucket_ars))";
-
-  $Schema["SEQUENCE"]["attachments_attachment_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"attachments_attachment_pk_seq\"";
-  $Schema["SEQUENCE"]["attachments_attachment_pk_seq"]["UPDATE"] = "SELECT setval('attachments_attachment_pk_seq',(SELECT greatest(1,max(attachment_pk)) val FROM attachments))";
+  $Schema["SEQUENCE"]["nomos_ars_ars_pk_seq"]["UPDATE"] = "SELECT setval('nomos_ars_ars_pk_seq',(SELECT greatest(1,max(ars_pk)) val FROM ars_master))";
 
   $Schema["SEQUENCE"]["tag_manage_tag_manage_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"tag_manage_tag_manage_pk_seq\"";
   $Schema["SEQUENCE"]["tag_manage_tag_manage_pk_seq"]["UPDATE"] = "SELECT setval('tag_manage_tag_manage_pk_seq',(SELECT greatest(1,max(tag_manage_pk)) val FROM tag_manage))";
@@ -1623,8 +1746,8 @@
   $Schema["SEQUENCE"]["perm_upload_perm_upload_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"perm_upload_perm_upload_pk_seq\"";
   $Schema["SEQUENCE"]["perm_upload_perm_upload_pk_seq"]["UPDATE"] = "SELECT setval('perm_upload_perm_upload_pk_seq',(SELECT greatest(1,max(perm_upload_pk)) val FROM perm_upload))";
 
-  $Schema["SEQUENCE"]["copyright_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["copyright_ct_pk_seq"]["UPDATE"] = "SELECT setval('copyright_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM copyright))";
+  $Schema["SEQUENCE"]["copyright_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_pk_seq"]["UPDATE"] = "SELECT setval('copyright_pk_seq',(SELECT greatest(1,max(copyright_pk)) val FROM copyright))";
 
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\"";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["UPDATE"] = "SELECT setval('license_file_fl_pk_seq',(SELECT greatest(1,max(fl_pk)) val FROM license_file))";
@@ -1662,6 +1785,9 @@
   $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_map_om_pk_seq\"";
   $Schema["SEQUENCE"]["obligation_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_map))";
 
+  $Schema["SEQUENCE"]["obligation_candidate_map_om_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_candidate_map_om_pk_seq\"";
+  $Schema["SEQUENCE"]["obligation_candidate_map_om_pk_seq"]["UPDATE"] = "SELECT setval('obligation_candidate_map_om_pk_seq',(SELECT greatest(1,max(om_pk)) val FROM obligation_candidate_map))";
+
   $Schema["SEQUENCE"]["obligation_ref_ob_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"obligation_ref_ob_pk_seq\"";
   $Schema["SEQUENCE"]["obligation_ref_ob_pk_seq"]["UPDATE"] = "SELECT setval('obligation_ref_ob_pk_seq',(SELECT greatest(1,max(ob_pk)) val FROM obligation_ref))";
 
@@ -1698,6 +1824,9 @@
   $Schema["SEQUENCE"]["users_user_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"users_user_pk_seq\"";
   $Schema["SEQUENCE"]["users_user_pk_seq"]["UPDATE"] = "SELECT setval('users_user_pk_seq',(SELECT greatest(1,max(user_pk)) val FROM users))";
 
+  $Schema["SEQUENCE"]["report_info_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"report_info_pk_seq\"";
+  $Schema["SEQUENCE"]["report_info_pk_seq"]["UPDATE"] = "SELECT setval('report_info_pk_seq',(SELECT greatest(1,max(ri_pk)) val FROM report_info))";
+
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"file_picker_file_picker_pk_seq\"";
   $Schema["SEQUENCE"]["file_picker_file_picker_pk_seq"]["UPDATE"] = "SELECT setval('file_picker_file_picker_pk_seq',(SELECT greatest(1,max(file_picker_pk)) val FROM file_picker))";
 
@@ -1715,110 +1844,138 @@
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 
-  $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_ct_pk_seq\"";
-  $Schema["SEQUENCE"]["ecc_ct_pk_seq"]["UPDATE"] = "SELECT setval('ecc_ct_pk_seq',(SELECT greatest(1,max(ct_pk)) val FROM ecc))";
+  $Schema["SEQUENCE"]["ecc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_pk_seq\"";
+  $Schema["SEQUENCE"]["ecc_pk_seq"]["UPDATE"] = "SELECT setval('ecc_pk_seq',(SELECT greatest(1,max(ecc_pk)) val FROM ecc))";
+
+  $Schema["SEQUENCE"]["author_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_pk_seq\"";
+  $Schema["SEQUENCE"]["author_pk_seq"]["UPDATE"] = "SELECT setval('author_pk_seq',(SELECT greatest(1,max(author_pk)) val FROM author))";
+
+  $Schema["SEQUENCE"]["keyword_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_pk_seq\"";
+  $Schema["SEQUENCE"]["keyword_pk_seq"]["UPDATE"] = "SELECT setval('keyword_pk_seq',(SELECT greatest(1,max(keyword_pk)) val FROM keyword))";
 
   $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_decision_pk_seq\"";
-  $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM ecc_decision))";
+  $Schema["SEQUENCE"]["ecc_decision_pk_seq"]["UPDATE"] = "SELECT setval('ecc_decision_pk_seq',(SELECT greatest(1,max(ecc_decision_pk)) val FROM ecc_decision))";
 
+  $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_decision_pk_seq\"";
+  $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["UPDATE"] = "SELECT setval('keyword_decision_pk_seq',(SELECT greatest(1,max(keyword_decision_pk)) val FROM keyword_decision))";
 
-  $Schema["CONSTRAINT"]["FileLicense_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"FileLicense_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (\"agent_pk\");";
-  $Schema["CONSTRAINT"]["agent_runstatus_pkey"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"agent_runstatus_pkey\" PRIMARY KEY (\"ars_pk\");";
-  $Schema["CONSTRAINT"]["attachments_pkey"] = "ALTER TABLE \"attachments\" ADD CONSTRAINT \"attachments_pkey\" PRIMARY KEY (\"attachment_pk\");";
+  $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
+  $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
+  $Schema["CONSTRAINT"]["ars_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"ars_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
+  $Schema["CONSTRAINT"]["ars_agent_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["ars_ars_upload_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"ars_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"author_pk\");";
+  $Schema["CONSTRAINT"]["author_agent_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["author_pfile_fk_fkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["bucket_ars_pkey"] = "ALTER TABLE \"bucket_ars\" ADD CONSTRAINT \"bucket_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
   $Schema["CONSTRAINT"]["bucket_container_pkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_pkey\" PRIMARY KEY (\"bf_pk\");";
-  $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
+  $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["bucket_container_bucket_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_bucket_fk_fkey\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["bucket_pkey"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucket_pkey\" PRIMARY KEY (\"bucket_pk\");";
+  $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["bf_bucket_agent_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bf_bucket_agent_fk\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["bucket_file_pkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pkey\" PRIMARY KEY (\"bf_pk\");";
+  $Schema["CONSTRAINT"]["bucket_file_bucket_fk_key"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_key\" UNIQUE (\"bucket_fk\",\"pfile_fk\",\"agent_fk\",\"nomosagent_fk\");";
+  $Schema["CONSTRAINT"]["bucket_file_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["bucket_file_bucket_fk_fkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_fkey\" FOREIGN KEY (\"bucket_fk\") REFERENCES \"bucket_def\" (\"bucket_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["bucket_file_pfile_fk_fkey"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["bucketpool_pkey"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_pkey\" PRIMARY KEY (\"bucketpool_pk\");";
+  $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key1"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key1\" UNIQUE (\"bucketpool_name\",\"version\");";
   $Schema["CONSTRAINT"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pkey\" PRIMARY KEY (\"clearing_decision_pk\");";
+  $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["clearing_event_pkey"] = "ALTER TABLE \"clearing_event\" ADD CONSTRAINT \"clearing_event_pkey\" PRIMARY KEY (\"clearing_event_pk\");";
+  $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"copyright_pk\");";
+  $Schema["CONSTRAINT"]["copyright_agent_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
-  $Schema["CONSTRAINT"]["copyright_pkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pkey\" PRIMARY KEY (\"ct_pk\");";
-  $Schema["CONSTRAINT"]["author_pkey"] = "ALTER TABLE \"author\" ADD CONSTRAINT \"author_pkey\" PRIMARY KEY (\"ct_pk\");";
-  $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
-  $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ct_pk\");";
+  $Schema["CONSTRAINT"]["copyright_decision_pfile_fk_fkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ecc_pk\");";
+  $Schema["CONSTRAINT"]["ecc_agent_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ecc_pfile_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"ecc_decision_pk\");";
+  $Schema["CONSTRAINT"]["ecc_decision_pfile_fk_fkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
+  $Schema["CONSTRAINT"]["file_picker_user_fk_ukey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_ukey\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
-  $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";
+  $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["group_user_member_user_group_ukey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_group_ukey\" UNIQUE (\"user_fk\",\"group_fk\");";
+  $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
+  $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
+  $Schema["CONSTRAINT"]["highlight_keyword_pfile_fk_fkey"] = "ALTER TABLE \"highlight_keyword\" ADD CONSTRAINT \"highlight_keyword_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["job_pkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_pkey\" PRIMARY KEY (\"job_pk\");";
+  $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (\"job_folder_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["jobqueue_pkey"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_pkey\" PRIMARY KEY (\"jq_pk\");";
+  $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (\"jq_job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_pkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pkey\" PRIMARY KEY (\"keyword_pk\");";
+  $Schema["CONSTRAINT"]["keyword_agent_fk_fkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_pfile_fk_fkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_decision_pkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pkey\" PRIMARY KEY (\"keyword_decision_pk\");";
+  $Schema["CONSTRAINT"]["keyword_decision_pfile_fk_fkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["license_file_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pkey\" PRIMARY KEY (\"fl_pk\");";
+  $Schema["CONSTRAINT"]["license_file_pfile_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
+  $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
+  $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
   $Schema["CONSTRAINT"]["license_ref_bulk_pkey"] = "ALTER TABLE \"license_ref_bulk\" ADD CONSTRAINT \"license_ref_bulk_pkey\" PRIMARY KEY (\"lrb_pk\");";
   $Schema["CONSTRAINT"]["license_set_bulk_fkey"] = "ALTER TABLE \"license_set_bulk\" ADD CONSTRAINT \"license_set_bulk_fkey\" FOREIGN KEY (\"lrb_fk\") REFERENCES \"license_ref_bulk\" (\"lrb_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["mimetype_pk"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"mimetype_pk\" PRIMARY KEY (\"mimetype_pk\");";
-  $Schema["CONSTRAINT"]["nomos_ars_pkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_pkey\" PRIMARY KEY (\"ars_pk\");";
+  $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
+  $Schema["CONSTRAINT"]["obligation_ref_pkey"] = "ALTER TABLE \"obligation_ref\" ADD CONSTRAINT \"obligation_ref_pkey\" PRIMARY KEY (\"ob_pk\");";
+  $Schema["CONSTRAINT"]["obligation_ref_md5_ukey"] = "ALTER TABLE \"obligation_ref\" ADD CONSTRAINT \"obligation_ref_md5_ukey\" UNIQUE (\"ob_md5\");";
   $Schema["CONSTRAINT"]["package_pkey"] = "ALTER TABLE \"package\" ADD CONSTRAINT \"package_pkey\" PRIMARY KEY (\"package_pk\");";
   $Schema["CONSTRAINT"]["perm_upload_pkey"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_pkey\" PRIMARY KEY (\"perm_upload_pk\");";
-  $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
-  $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
-  $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
-  $Schema["CONSTRAINT"]["pkg_rpm_pkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pkey\" PRIMARY KEY (\"pkg_pk\");";
-  $Schema["CONSTRAINT"]["pkg_rpm_req_pkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkey\" PRIMARY KEY (\"req_pk\");";
-  $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (\"report_cache_pk\");";
-  $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
-  $Schema["CONSTRAINT"]["rf_pkpk"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_pkpk\" PRIMARY KEY (\"rf_pk\");";
-  $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
-  $Schema["CONSTRAINT"]["tag_manage_pkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_pkey\" PRIMARY KEY (\"tag_manage_pk\");";
-  $Schema["CONSTRAINT"]["tags_file_pkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pkey\" PRIMARY KEY (\"tag_file_pk\");";
-  $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
-  $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
-  $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
-  $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
-  $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
-  $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
-  $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
-  $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
-  $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
-  $Schema["CONSTRAINT"]["ars_unique"] = "ALTER TABLE \"agent_runstatus\" ADD CONSTRAINT \"ars_unique\" UNIQUE (\"agent_fk\",\"upload_fk\");";
-  $Schema["CONSTRAINT"]["bucket_file_bucket_fk_key"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bucket_file_bucket_fk_key\" UNIQUE (\"bucket_fk\",\"pfile_fk\",\"agent_fk\",\"nomosagent_fk\");";
-  $Schema["CONSTRAINT"]["bucketpool_bucketpool_name_key1"] = "ALTER TABLE \"bucketpool\" ADD CONSTRAINT \"bucketpool_bucketpool_name_key1\" UNIQUE (\"bucketpool_name\",\"version\");";
-  $Schema["CONSTRAINT"]["dirmodemask"] = "ALTER TABLE \"mimetype\" ADD CONSTRAINT \"dirmodemask\" UNIQUE (\"mimetype_name\");";
-  $Schema["CONSTRAINT"]["file_picker_user_fk_key"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_key\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
-  $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
-  $Schema["CONSTRAINT"]["md5_sha1_size"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"md5_sha1_size\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\");";
-  $Schema["CONSTRAINT"]["perm_upload_upload_fk_group_fk_key"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_upload_fk_group_fk_key\" UNIQUE (\"upload_fk\",\"group_fk\");";
-  $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
-  $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
-  $Schema["CONSTRAINT"]["rf_md5unique"] = "ALTER TABLE \"license_ref\" ADD CONSTRAINT \"rf_md5unique\" UNIQUE (\"rf_md5\");";
-  $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
-  $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
-  $Schema["CONSTRAINT"]["bf_bucket_agent_fk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"bf_bucket_agent_fk\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["bucket_container_agent_fk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["bucket_container_nomosagent_pk_fkey"] = "ALTER TABLE \"bucket_container\" ADD CONSTRAINT \"bucket_container_nomosagent_pk_fkey\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["bucketpool_fk"] = "ALTER TABLE \"bucket_def\" ADD CONSTRAINT \"bucketpool_fk\" FOREIGN KEY (\"bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["clearing_decision_pfile_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["clearing_decision_user_fk_fkey"] = "ALTER TABLE \"clearing_decision\" ADD CONSTRAINT \"clearing_decision_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["ecc_decision_user_fk"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_user_fk\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["jdep_depends_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_depends_jq_fk\" FOREIGN KEY (\"jdep_jq_depends_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["jdep_jq_fk"] = "ALTER TABLE \"jobdepends\" ADD CONSTRAINT \"jdep_jq_fk\" FOREIGN KEY (\"jdep_jq_fk\") REFERENCES \"jobqueue\" (\"jq_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["job_job_folder_fk_fkey"] = "ALTER TABLE \"job\" ADD CONSTRAINT \"job_job_folder_fk_fkey\" FOREIGN KEY (\"job_folder_fk\") REFERENCES \"folder\" (\"folder_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["jobqueue_job_fk"] = "ALTER TABLE \"jobqueue\" ADD CONSTRAINT \"jobqueue_job_fk\" FOREIGN KEY (\"jq_job_fk\") REFERENCES \"job\" (\"job_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["license_map_rf_fkfk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_rf_fkfk\" FOREIGN KEY (\"rf_fk\") REFERENCES \"license_ref\" (\"rf_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["mimetype_fk"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"mimetype_fk\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["nomos_ars_agent_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["nomos_ars_upload_fk_fkey"] = "ALTER TABLE \"ars_master\" ADD CONSTRAINT \"nomos_ars_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
-  $Schema["CONSTRAINT"]["nomosagentpk"] = "ALTER TABLE \"bucket_file\" ADD CONSTRAINT \"nomosagentpk\" FOREIGN KEY (\"nomosagent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["perm_upload_fkidx"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_fkidx\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["perm_upload_group_fkidx"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_group_fkidx\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["pfile_fk"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"pfile_fk\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["perm_upload_upload_fk_group_fk_key"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_upload_fk_group_fk_key\" UNIQUE (\"upload_fk\",\"group_fk\");";
+  $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
+  $Schema["CONSTRAINT"]["pfile_md5_sha1_size_ukey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_md5_sha1_size_ukey\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\");";
+  $Schema["CONSTRAINT"]["pfile_mimetype_fk_fkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_mimetype_fk_fkey\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
+  $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_key"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
+  $Schema["CONSTRAINT"]["pkg_deb_req_pkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkey\" PRIMARY KEY (\"req_pk\");";
+  $Schema["CONSTRAINT"]["pkg_deb_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_deb_req\" ADD CONSTRAINT \"pkg_deb_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_deb\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_rpm_pkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pkey\" PRIMARY KEY (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_rpm_pfile_fk_fkey"] = "ALTER TABLE \"pkg_rpm\" ADD CONSTRAINT \"pkg_rpm_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["tag_manage_upload_fk_fkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["pkg_rpm_req_pkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkey\" PRIMARY KEY (\"req_pk\");";
+  $Schema["CONSTRAINT"]["pkg_rpm_req_pkg_fk_fkey"] = "ALTER TABLE \"pkg_rpm_req\" ADD CONSTRAINT \"pkg_rpm_req_pkg_fk_fkey\" FOREIGN KEY (\"pkg_fk\") REFERENCES \"pkg_rpm\" (\"pkg_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["report_cache_pkey"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_pkey\" PRIMARY KEY (\"report_cache_pk\");";
+  $Schema["CONSTRAINT"]["report_cache_report_cache_key_key"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_key_key\" UNIQUE (\"report_cache_key\");";
+  $Schema["CONSTRAINT"]["report_cache_report_cache_uploadfk_fkey"] = "ALTER TABLE \"report_cache\" ADD CONSTRAINT \"report_cache_report_cache_uploadfk_fkey\" FOREIGN KEY (\"report_cache_uploadfk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["report_cache_user_pkey"] = "ALTER TABLE \"report_cache_user\" ADD CONSTRAINT \"report_cache_user_pkey\" PRIMARY KEY (\"report_cache_user_pk\");";
+  $Schema["CONSTRAINT"]["report_info_pkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_pkey\" PRIMARY KEY (\"ri_pk\");";
+  $Schema["CONSTRAINT"]["report_info_upload_fk_fkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["reportgen_upload_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
+  $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
+  $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
+  $Schema["CONSTRAINT"]["tags_file_pkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pkey\" PRIMARY KEY (\"tag_file_pk\");";
   $Schema["CONSTRAINT"]["tags_file_pfile_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["tags_file_tag_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["tag_manage_pkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_pkey\" PRIMARY KEY (\"tag_manage_pk\");";
+  $Schema["CONSTRAINT"]["tag_manage_upload_fk_fkey"] = "ALTER TABLE \"tag_manage\" ADD CONSTRAINT \"tag_manage_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
+  $Schema["CONSTRAINT"]["upload_pfile_fk_fkey"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
+  $Schema["CONSTRAINT"]["upload_clearing_license_upload_fk_fkey"] = "ALTER TABLE \"upload_clearing_license\" ADD CONSTRAINT \"upload_clearing_license_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_packages_package_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_package_fk\" FOREIGN KEY (\"package_fk\") REFERENCES \"package\" (\"package_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_packages_upload_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_upload_fk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["upload_reuse_reused_upload_fk"] = "ALTER TABLE \"upload_reuse\" ADD CONSTRAINT \"upload_reuse_reused_upload_fk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["upload_reuse_upload_fk"] = "ALTER TABLE \"upload_reuse\" ADD CONSTRAINT \"upload_reuse_upload_fk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"ufile_rel_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
   $Schema["CONSTRAINT"]["uploadtree_uploadfk"] = "ALTER TABLE \"uploadtree\" ADD CONSTRAINT \"uploadtree_uploadfk\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["uploadtree_a_pkey"] = "ALTER TABLE \"uploadtree_a\" ADD CONSTRAINT \"uploadtree_a_pkey\" PRIMARY KEY (\"uploadtree_pk\");";
+  $Schema["CONSTRAINT"]["user_pkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_pkey\" PRIMARY KEY (\"user_pk\");";
+  $Schema["CONSTRAINT"]["user_user_name_key"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"user_user_name_key\" UNIQUE (\"user_name\");";
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
@@ -1830,6 +1987,7 @@
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_pfile_fk_scope_idx"] = "CREATE INDEX clearing_decision_pfile_fk_scope_idx ON clearing_decision USING btree (pfile_fk, scope);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_fk_idx"] = "CREATE INDEX clearing_decision_uploadtree_fk_idx ON clearing_decision USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_decision"]["clearing_decision_group_fk_idx"] = "CREATE INDEX clearing_decision_group_fk_idx ON clearing_decision USING btree (group_fk);";
+  $Schema["INDEX"]["clearing_decision"]["clearing_decision_uploadtree_group_pfile_idx"] = "CREATE INDEX clearing_decision_uploadtree_group_pfile_idx ON clearing_decision USING btree (uploadtree_fk, group_fk, pfile_fk);";
 
   $Schema["INDEX"]["clearing_decision_event"]["clearing_decision_event_clearing_fk_idx"] = "CREATE INDEX clearing_decision_event_clearing_fk_idx ON clearing_decision_event USING btree (clearing_decision_fk);";
 
@@ -1837,8 +1995,9 @@
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_fk_idx ON clearing_event USING btree (uploadtree_fk);";
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_group_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_group_fk_idx ON clearing_event USING btree (uploadtree_fk, group_fk, date_added);";
 
-  $Schema["INDEX"]["copyright"]["agent_fk_idx"] = "CREATE INDEX agent_fk_idx ON copyright USING btree (agent_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_agent_fk_idx"] = "CREATE INDEX copyright_agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
+  $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_clearing_decision_type_fk_index"] = "CREATE INDEX copyright_decision_clearing_decision_type_fk_index ON copyright_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
@@ -1846,15 +2005,24 @@
 
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
+  $Schema["INDEX"]["author"]["author_pfile_hash_idx"] = "CREATE INDEX author_pfile_hash_idx ON author USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["ecc"]["ecc_agent_fk_index"] = "CREATE INDEX ecc_agent_fk_index ON ecc USING btree (agent_fk);";
   $Schema["INDEX"]["ecc"]["ecc_hash_index"] = "CREATE INDEX ecc_hash_index ON ecc USING btree (hash);";
   $Schema["INDEX"]["ecc"]["ecc_pfile_fk_index"] = "CREATE INDEX ecc_pfile_fk_index ON ecc USING btree (pfile_fk);";
+  $Schema["INDEX"]["ecc"]["ecc_pfile_hash_idx"] = "CREATE INDEX ecc_pfile_hash_idx ON ecc USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_clearing_decision_type_fk_index"] = "CREATE INDEX ecc_decision_clearing_decision_type_fk_index ON ecc_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_fk_index"] = "CREATE INDEX ecc_decision_pfile_fk_index ON ecc_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
 
+  $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
+  $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
+  $Schema["INDEX"]["keyword"]["keyword_pfile_fk_index"] = "CREATE INDEX keyword_pfile_fk_index ON keyword USING btree (pfile_fk);";
+  $Schema["INDEX"]["keyword"]["keyword_pfile_hash_idx"] = "CREATE INDEX keyword_pfile_hash_idx ON keyword using btree (hash, pfile_fk);";
+  $Schema["INDEX"]["keyword_decision"]["keyword_decision_clearing_decision_type_fk_index"] = "CREATE INDEX keyword_decision_clearing_decision_type_fk_index ON keyword_decision USING btree (clearing_decision_type_fk);";
+  $Schema["INDEX"]["keyword_decision"]["keyword_decision_pfile_fk_index"] = "CREATE INDEX keyword_decision_pfile_fk_index ON keyword_decision USING btree (pfile_fk);";
+  $Schema["INDEX"]["keyword_decision"]["keyword_decision_user_fk_index"] = "CREATE INDEX keyword_decision_user_fk_index ON keyword_decision USING btree (user_fk);";
   $Schema["INDEX"]["highlight"]["highlight_fl_fk_idx"] = "CREATE INDEX highlight_fl_fk_idx ON highlight USING btree (fl_fk);";
 
   $Schema["INDEX"]["highlight_keyword"]["highlight_keyword_pfile_fk_idx"] = "CREATE INDEX highlight_keyword_pfile_fk_idx ON highlight_keyword USING btree (pfile_fk);";
@@ -1865,6 +2033,7 @@
   $Schema["INDEX"]["license_file"]["fl_rf_fk"] = "CREATE INDEX fl_rf_fk ON license_file USING btree (rf_fk);";
   $Schema["INDEX"]["license_file"]["lf_pfile_fk"] = "CREATE INDEX lf_pfile_fk ON license_file USING btree (pfile_fk);";
   $Schema["INDEX"]["license_file"]["lf_agent_fk"] = "CREATE INDEX lf_agent_fk ON license_file USING btree (agent_fk);";
+  $Schema["INDEX"]["license_file"]["lf_pfile_agent_rf_lf_idx"] = "CREATE INDEX lf_pfile_agent_rf_lf_idx ON license_file USING btree (pfile_fk, agent_fk, rf_fk, fl_pk);";
 
   $Schema["INDEX"]["license_ref"]["rf_shortname_idx"] = "CREATE INDEX rf_shortname_idx ON license_ref USING btree (rf_shortname);";
 
@@ -1890,11 +2059,13 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_pfile_fk_idx"] = "CREATE INDEX uploadtree_a_pfile_fk_idx ON uploadtree_a USING btree (pfile_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_idx"] = "CREATE INDEX uploadtree_a_upload_fk_idx ON uploadtree_a USING btree (upload_fk);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
+  $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_lft_ufilemode_pfile_idx"] = "CREATE INDEX uploadtree_a_upload_lft_ufilemode_pfile_idx ON uploadtree_a USING btree (upload_fk, lft, ufile_mode, pfile_fk);";
+  $Schema["INDEX"]["upload_clearing_license"]["upload_clearing_license_upload_group_idx"] = "CREATE INDEX upload_clearing_license_upload_group_idx ON upload_clearing_license USING btree (upload_fk, group_fk);";
 
   $Schema["CLUSTER"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" CLUSTER ON \"upload_pkey_idx\";";
   $Schema["CLUSTER"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" CLUSTER ON \"ufile_rel_pkey\";";
-  $Schema["CLUSTER"]["highlight_keyword_pfile_fk_idx"] = "ALTER TABLE \"highlight_keyword\" CLUSTER ON \"highlight_keyword_pfile_fk_idx\";";
   $Schema["CLUSTER"]["clearing_decision_pkey"] = "ALTER TABLE \"clearing_decision\" CLUSTER ON \"clearing_decision_pkey\";";
+  $Schema["CLUSTER"]["highlight_keyword_pfile_fk_idx"] = "ALTER TABLE \"highlight_keyword\" CLUSTER ON \"highlight_keyword_pfile_fk_idx\";";
 
   $Schema["INHERITS"]["uploadtree_a"] = "uploadtree";
   $Schema["INHERITS"]["readmeoss_ars"] = "ars_master";

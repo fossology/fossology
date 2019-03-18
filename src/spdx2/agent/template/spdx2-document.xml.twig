@@ -8,11 +8,11 @@
     xmlns:spdx="http://spdx.org/rdf/terms#"
     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
 <spdx:SpdxDocument rdf:about="{{ uri }}#SPDXRef-DOCUMENT">
-  <spdx:specVersion>SPDX-2.0</spdx:specVersion>
+  <spdx:specVersion>SPDX-2.1</spdx:specVersion>
   <spdx:dataLicense rdf:resource="http://spdx.org/licenses/CC0-1.0" />
   <spdx:creationInfo>
     <spdx:CreationInfo>
-      <spdx:licenseListVersion>2.6</spdx:licenseListVersion> 
+      <spdx:licenseListVersion>2.6</spdx:licenseListVersion>
       <spdx:creator>Person: {{ userName|e }}</spdx:creator>
       <spdx:creator>Organization: {{ organisation|e }}</spdx:creator>
       <spdx:creator>Tool: spdx2</spdx:creator>
@@ -20,10 +20,10 @@
     </spdx:CreationInfo>
   </spdx:creationInfo>
   <spdx:name>{{ documentName|e }}</spdx:name>
-  <rdfs:comment> 
+  <rdfs:comment>
     This document was created using license information and a generator from Fossology.
   </rdfs:comment>
-{% for licenseId,extractedText in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
+  {% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
   <spdx:hasExtractedLicensingInfo>
 {% if licenseId starts with 'LicenseRef-' %}
     <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#{{ licenseId|replace(' ','-')|url_encode }}">
@@ -31,9 +31,10 @@
     <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseId|replace(' ','-')|url_encode }}">
 {% endif %}
       <spdx:licenseId>{{ licenseId|replace(' ','-')|e }}</spdx:licenseId>
+      <spdx:name>{{ licenseData['name']|e }}</spdx:name>
       <spdx:extractedText><![CDATA[
-{{ extractedText|replace({'\f':''})
-                |replace({']]>':']]]]><![CDATA[>'}) }}
+{{ licenseData['text']|replace({'\f':''})
+                      |replace({']]>':']]]]><![CDATA[>'}) }}
       ]]></spdx:extractedText>
     </spdx:ExtractedLicensingInfo>
   </spdx:hasExtractedLicensingInfo>

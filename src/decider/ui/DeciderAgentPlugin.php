@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015, Siemens AG
+ * Copyright (C) 2014-2018, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,6 +21,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 include_once(__DIR__ . "/../agent/version.php");
 
+/**
+ * @class DeciderAgentPlugin
+ * @brief UI plugin for DeciderAgent
+ */
 class DeciderAgentPlugin extends AgentPlugin
 {
   const RULES_FLAG = "-r";
@@ -33,10 +37,11 @@ class DeciderAgentPlugin extends AgentPlugin
     parent::__construct();
   }
 
-  
+
   /**
-   * @param array $vars
-   * @return string
+   * @brief Render HTML from template
+   * @param array $vars Variables using in template
+   * @return string HTML rendered from agent_decider.html.twig template
    */
   public function renderContent(&$vars)
   {
@@ -48,30 +53,32 @@ class DeciderAgentPlugin extends AgentPlugin
     }
     return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
   }
-  
+
   /**
-   * @param array $vars
-   * @return string
+   * @brief Render footer HTML
+   * @param array $vars Variables using in template
+   * @return string Footer HTML
    */
   public function renderFoot(&$vars)
   {
     return "";
   }
 
-    /**
-     * @param int $jobId
-     * @param int $uploadId
-     * @param string $errorMsg
-     * @param Request $request
-     * @return string
-     */
+  /**
+   * @brief Schedule decider agent
+   * @param int $jobId
+   * @param int $uploadId
+   * @param string $errorMsg
+   * @param Request $request Session request
+   * @return string
+   */
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
     $dependencies = array();
-   
+
     $rules = $request->get('deciderRules') ?: array();
     $rulebits = 0;
-    
+
     foreach($rules as $rule)
     {
       switch ($rule) {
@@ -87,7 +94,8 @@ class DeciderAgentPlugin extends AgentPlugin
           $rulebits |= 0x2;
           break;
         case 'reuseBulk':
-          $dependencies[] = 'agent_reuser';
+          $dependencies[] = 'agent_nomos';
+          $dependencies[] = 'agent_monk';
           $rulebits |= 0x4;
           break;
         case 'wipScannerUpdates':
@@ -95,7 +103,7 @@ class DeciderAgentPlugin extends AgentPlugin
           $rulebits |= 0x8;
       }
     }
-    
+
     if (empty($rulebits))
     {
       return 0;
@@ -104,7 +112,12 @@ class DeciderAgentPlugin extends AgentPlugin
     $args = self::RULES_FLAG.$rulebits;
     return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies), $args);
   }
-  
+
+  /**
+   * @brief Add dependencies on DeciderAgent
+   * @param array $dependencies
+   * @param Request $request
+   */
   protected function addScannerDependencies(&$dependencies, Request $request)
   {
     $agentList = $request->get('agents') ?: array();
@@ -121,9 +134,10 @@ class DeciderAgentPlugin extends AgentPlugin
       }
     }
   }
-  
+
   /**
-   * @override
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
    */
   public function preInstall()
   {

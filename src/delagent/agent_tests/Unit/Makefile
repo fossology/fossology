@@ -27,49 +27,29 @@ TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
 LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(CUNIT_LIB) $(TEST_LIB) -lcrypto -lssl
-CFLAGS_LOCAL = $(FO_CFLAG) -I$(LOCALAGENTDIR)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -DCU_VERSION_P=$(CUNIT_VERSION)
+
 EXE = test_delagent
 TEST_OBJ_RUN = testRun.o
-TEST_OBJ = testListFolders.o testDeleteFolders.o testReadParameter.o
+TEST_OBJ = testListFolders.o testDeleteFolders.o
 
 # these are the external test data files needed by the tests
 # at the moment they will be found in the delagent/ directory, but this
 # may change as we organize the test data in a more consistent way
-TEST_FILES = testdb_all.tar testrepo_files.tar testrepo_gold.tar
+TEST_FILES = testdb_all.gz testrepo_files.tar.gz testrepo_gold.tar.gz
 
 all: $(EXE)
-
-# target to retrieve remote test data if it doesn't already exist
-# make sure your /etc/wgetrc file is configured correctly!
-testdata:
-	@echo "Retrieve test files"
-	@# for each test file specified, look for it in ../testdata
-	@# if it exists, do nothing.
-	@# if it does not exist, look in /var/www/testfiles
-	@# if not in /var/www/testfiles, wget it from fossology.org
-	mkdir -p ../testdata
-	@$(foreach test_file, $(TEST_FILES), \
-		if [ -e ../testdata/$(test_file) ]; then \
-			echo "../testdata/$(test_file) exists"; \
-		elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
-			echo "$(test_file) found in /var/www/testfiles/delagent"; \
-			cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
-		else \
-			echo "$(test_file) does not exist. need to wget from fossology.org"; \
-			wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
-		fi; \
-	)
 
 $(EXE): delagent.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS) cunit_lib test_lib $(FOLIB)
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent.o $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
-	$(CC) -c $(CFLAGS_LOCAL) $<
+	$(CC) -c $(CFLAGS_LOCAL) -I $(CUNIT_LIB_DIR) -I $(TEST_LIB_DIR) $<
 
 $(TEST_OBJ): %.o: %.c
 	$(CC) -c $(CFLAGS_LOCAL) $< -o $@
 
-test: all testdata
+test: all $(TEST_FILES:%=../testdata/%)
 	./$(EXE)
 
 cunit_lib:
@@ -78,7 +58,7 @@ cunit_lib:
 test_lib:
 	$(MAKE) -C $(TEST_LIB_DIR)
 
-coverage: all testdata delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
+coverage: all $(TEST_FILES:%=../testdata/%) delagent_cov.o $(TEST_OBJ_RUN) $(TEST_OBJ) $(VARS)
 	$(CC) -o $(EXE) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/delagent_cov.o $(FLAG_COV) $(LDFLAGS_LOCAL) $(CFLAGS_LOCAL); \
 	./$(EXE); \
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
@@ -91,7 +71,7 @@ delagent.o:
 	$(MAKE) -C $(LOCALAGENTDIR) $@
 
 clean:
-	rm -rf $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result ../testdata
+	rm -rf $(EXE) $(TEST_OBJ) $(TEST_OBJ_RUN) core *.xml *.txt *.gc* results test_result
 
 .PHONY: all test coverage clean
 

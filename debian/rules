@@ -18,6 +18,8 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
+COMPOSER_PHAR := $(shell which composer)
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
@@ -73,6 +75,12 @@ install-arch:
 	dh_clean -k -s 
 	dh_installdirs -s
 
+ifeq ($(COMPOSER_PHAR),)
+	mkdir -p ~/composer/
+	utils/install_composer.sh ~/composer/
+	$(eval COMPOSER_PHAR=~/composer/composer)
+endif
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install-install
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
@@ -86,6 +94,7 @@ install-arch:
            -C src/maintagent install
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           COMPOSER_PHAR=$(COMPOSER_PHAR) \
            -C src composer_install
 	mkdir -p $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
 	cp $(CURDIR)/install/scripts/* $(CURDIR)/debian/fossology-common/usr/share/fossology/setup
@@ -157,7 +166,10 @@ install-arch:
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-readmeoss \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/readmeoss install
-	
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-unifiedreport \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/unifiedreport install
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install
@@ -166,8 +178,12 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/spdx2 install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reportimport \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/reportImport install
+
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
-	cp $(shell which composer) $(CURDIR)/debian/fossology-dev/usr/bin
+	cp $(COMPOSER_PHAR) $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
 	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 

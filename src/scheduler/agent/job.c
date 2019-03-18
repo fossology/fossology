@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Job handling operations
+ */
 
 /* local includes */
 #include <libfossrepo.h>
@@ -53,13 +57,15 @@ const char* job_status_strings[] = { JOB_STATUS_TYPES(SELECT_STRING) };
 #undef SELECT_STRING
 
 /**
- * Tests if a job is active, if it is, the integer pointed to by counter will be
+ * @brief Tests if a job is active
+ *
+ * If the job is active, the integer pointed to by counter will be
  * incremented by 1. This is used when determining if the scheduler can shutdown
  * and will be called from within a g_tree_foreach().
  *
- * @param job_id the id number used as the key in the Gtree
- * @param j the job that is being tested for activity
- * @param counter the count of the number of active jobs
+ * @param job_id  The id number used as the key in the Gtree
+ * @param job     The job that is being tested for activity
+ * @param counter The count of the number of active jobs
  * @return always returns 0
  */
 static int is_active(int* job_id, job_t* job, int* counter)
@@ -70,14 +76,15 @@ static int is_active(int* job_id, job_t* job, int* counter)
 }
 
 /**
- * Prints the jobs status to the output stream. The output will be in this
- * format:
+ * @brief Prints the jobs status to the output stream.
+ *
+ * The output will be in this format:
  *   job:<id> status:<status> type:<agent type> priority:<priority> running:<# running> finished:<#finished> failed:<# failed>
  *
  * @param job_id the id number that the job was created with
  *   @note if the int pointed to by the job_id is value 0, that means
  *         print all agent status as well
- * @param j the job itself
+ * @param job  the job itself
  * @param ostr the output stream to write everything to
  * @return always returns 0
  */
@@ -126,13 +133,14 @@ static void job_transition(scheduler_t* scheduler, job_t* job, job_status new_st
 }
 
 /**
- * Used to compare two different jobs in the priority queue. This simply compares
- * their priorities so that jobs with a high priority are scheduler before low
- * priority jobs.
+ * @brief Used to compare two different jobs in the priority queue.
+ *
+ * This simply compares their priorities so that jobs with a high priority are
+ * scheduler before low priority jobs.
  *
  * @param a       The first job
  * @param b       The second job
- * @param unused  unused
+ * @param user_data  unused
  * @return        The comparison of the two jobs
  */
 static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
@@ -145,19 +153,23 @@ static gint job_compare(gconstpointer a, gconstpointer b, gpointer user_data)
 /* ************************************************************************** */
 
 /**
- * Create a new job. Every different task will create a new job and as a result
+ * @brief Create a new job.
+ *
+ * Every different task will create a new job and as a result
  * the job will only deal with one type of agent. This is important because if an
  * agent fails when processing data from a job, that job might need to create a
  * new agent to deal with the data.
  *
- * @param job_list   the list of all jobs, the job will be added to this list
- * @param job_queue  the job queue, the job must be added to this for scheduling
- * @param type       the type of agent that will be created for this job
- * @param host       the name of the host that this job will execute on
- * @param id         the id number for the job in the database
- * @param user_id    the id of the user that created the job
- * @param priority   the priority of the job, this is just a linux process priority
- * @param jq_cmd_args command line arguments
+ * @param job_list   The list of all jobs, the job will be added to this list
+ * @param job_queue  The job queue, the job must be added to this for scheduling
+ * @param type       The type of agent that will be created for this job
+ * @param host       The name of the host that this job will execute on
+ * @param id         The id number for the job in the database
+ * @param parent_id  The parent id for the job in the database (queue)
+ * @param user_id    The id of the user that created the job
+ * @param group_id   The id of the group that created the job
+ * @param priority   The priority of the job, this is just a Linux process priority
+ * @param jq_cmd_args Command line arguments
  * @return the new job
  */
 job_t* job_init(GTree* job_list, GSequence* job_queue,
@@ -195,7 +207,7 @@ job_t* job_init(GTree* job_list, GSequence* job_queue,
  * freed, the job owns the data associated with it so this must also free that
  * information.
  *
- * @param j the job to free
+ * @param job the job to free
  */
 void job_destroy(job_t* job)
 {
@@ -203,7 +215,7 @@ void job_destroy(job_t* job)
 
   if(job->db_result != NULL)
   {
-    PQclear(job->db_result);
+    SafePQclear(job->db_result);
 
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
     g_mutex_clear(job->lock);
@@ -234,8 +246,8 @@ void job_destroy(job_t* job)
  * Causes the job to send its verbose level to all of the agents that belong to
  * it.
  *
- * @param scheduler  the scheduler to job belongs to
- * @param j          update all verbose levels on the agents of this job
+ * @param scheduler  The scheduler to job belongs to
+ * @param job        Update all verbose levels on the agents of this job
  */
 void job_verbose_event(scheduler_t* scheduler, job_t* job)
 {
@@ -247,13 +259,14 @@ void job_verbose_event(scheduler_t* scheduler, job_t* job)
 }
 
 /**
- * Event to get the status of the scheduler or a specific job. This is only
- * generated by the interface receiving a status command. The parameter for this
- * function is a little odd since the function needs 2 parameters, but is an
- * event, so can only be passed 1. Because of this, the parameter is a pair, the
- * first is always the g_output_stream to write the status to. The second is
- * either 0 (scheduler status) or the jq_pk of the job that the status was
- * requested for (job status).
+ * @brief Event to get the status of the scheduler or a specific job.
+ *
+ * This is only generated by the interface receiving a status command. The
+ * parameter for this function is a little odd since the function needs 2
+ * parameters, but is an event, so can only be passed 1. Because of this, the
+ * parameter is a pair, the first is always the g_output_stream to write the
+ * status to. The second is either 0 (scheduler status) or the jq_pk of the job
+ * that the status was requested for (job status).
  *
  * @param scheduler  the scheduler this event is called on
  * @param params     the g_output_stream and possibly the jq_pk of the job
@@ -296,11 +309,13 @@ void job_status_event(scheduler_t* scheduler, arg_int* params)
 }
 
 /**
- * Event to pause a job. This event is created by the interface and like the
+ * @brief Event to pause a job.
+ *
+ * This event is created by the interface and like the
  * job status event uses the pair to pass multiple things to a event function.
  *
  * @param scheduler  the scheduler this event was called on
- * @param params     the job_t* and a boolean cli or ui
+ * @param params     the job_t* and a boolean CLI or UI
  */
 void job_pause_event(scheduler_t* scheduler, arg_int* params)
 {
@@ -329,8 +344,8 @@ void job_pause_event(scheduler_t* scheduler, arg_int* params)
 /**
  * Event to restart a paused job. This is called by the interface.
  *
- * @param scheduler  the scheduler this event was called on
- * @param j          the job that will be restarted
+ * @param scheduler  The scheduler this event was called on
+ * @param params     The job that will be restarted
  */
 void job_restart_event(scheduler_t* scheduler, arg_int* params)
 {
@@ -387,11 +402,14 @@ void job_priority_event(scheduler_t* scheduler, arg_int* params)
 }
 
 /**
- * Events that causes a job to be marked a failed. This really only needs to
+ * @brief Events that causes a job to be marked a failed.
+ *
+ * This really only needs to
  * call the job_transition function with JB_FAILED as that will change the job's
  * status in the database.
  *
- * @param j  the job that has failed
+ * @param scheduler Related scheduler structure
+ * @param job       The job that has failed
  */
 void job_fail_event(scheduler_t* scheduler, job_t* job)
 {
@@ -412,7 +430,9 @@ void job_fail_event(scheduler_t* scheduler, job_t* job)
 /* ************************************************************************** */
 
 /**
- * Adds a new agent to the jobs list of agents. When a job is created it doesn't
+ * @brief Adds a new agent to the jobs list of agents.
+ *
+ * When a job is created it doesn't
  * contain any agents that can process its data. When an agent is ready, it will
  * add itself to the job using this function and begin processing the jobs data.
  *
@@ -460,8 +480,8 @@ void job_remove_agent(job_t* job, GTree* job_list, void* agent)
 /**
  * Moves an agent from the running agent list to the finished agent list.
  *
- * @param job    the job to change
- * @param agent  the agent to move
+ * @param job    The job to change
+ * @param agent  The agent to move
  */
 void job_finish_agent(job_t* job, void* agent)
 {
@@ -475,8 +495,8 @@ void job_finish_agent(job_t* job, void* agent)
 /**
  * Moves a job from the running agent list to the failed agent list.
  *
- * @param job    the job that the agent belong to
- * @param agent  the agent to move the failed list
+ * @param job    The job that the agent belong to
+ * @param agent  The agent to move the failed list
  */
 void job_fail_agent(job_t* job, void* agent)
 {
@@ -490,10 +510,11 @@ void job_fail_agent(job_t* job, void* agent)
  * Sets the data that a job should be working on. Currently runonpfile is not
  * implemented, so sql will always be true.
  *
- * @param db_conn  database connection used for runonpfile
+ * @param scheduler Scheduler containing database connection, used for runonpfile
  * @param job      the job to set the data for
  * @param data     the data that the job should be processing
  * @param sql      currently, always false
+ * @todo runonpfile is not implemented
  */
 void job_set_data(scheduler_t* scheduler, job_t* job, char* data, int sql)
 {
@@ -509,10 +530,11 @@ void job_set_data(scheduler_t* scheduler, job_t* job, char* data, int sql)
 }
 
 /**
- * updates the status of the job. This will check the status of all agents that belong
+ * Updates the status of the job. This will check the status of all agents that belong
  * to this job and if the job has finished or all of the agents have fail
  *
- * @param j
+ * @param scheduler
+ * @param job
  */
 void job_update(scheduler_t* scheduler, job_t* job)
 {
@@ -547,9 +569,10 @@ void job_update(scheduler_t* scheduler, job_t* job)
 }
 
 /**
- * Tests to see if there is still data available for this job
+ * @brief Tests to see if there is still data available for this job
  *
- * @param j the job to test
+ * @param scheduler
+ * @param job the job to test
  * @return if the job still has data available
  */
 int job_is_open(scheduler_t* scheduler, job_t* job)
@@ -574,7 +597,7 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
   }
   else
   {
-    PQclear(job->db_result);
+    SafePQclear(job->db_result);
     job->db_result = database_exec(scheduler, job->data);
     job->idx = 0;
 
@@ -589,7 +612,7 @@ int job_is_open(scheduler_t* scheduler, job_t* job)
  * Gets the next piece of data that should be analyzed, if there is no more data
  * to analyze, this will return NULL;
  *
- * @param j the job to get the data for
+ * @param job the job to get the data for
  * @return a pointer to the next block of data or NULL
  */
 char* job_next(job_t* job)
@@ -616,8 +639,8 @@ char* job_next(job_t* job)
  * Gets the log file for the particular job. If the job hasn't had anything to
  * log yet, this will create the file from the repository and then return it.
  *
- * @param j the job to get the file for
- * @return the FILE* to print the job's log infot o
+ * @param job the job to get the file for
+ * @return the FILE* to print the job's log info
  */
 log_t* job_log(job_t* job)
 {
@@ -656,9 +679,11 @@ log_t* job_log(job_t* job)
 /* ************************************************************************** */
 
 /**
- * Gets the next job from the job queue. If there isn't a waiting in the job
- * queue this will return NULL.
+ * @brief Gets the next job from the job queue.
  *
+ * If there isn't a waiting in the job queue this will return NULL.
+ *
+ * @param job_queue The queue to get job from
  * @return the job or NULL
  */
 job_t* next_job(GSequence* job_queue)
@@ -676,8 +701,9 @@ job_t* next_job(GSequence* job_queue)
 }
 
 /**
- * Gets the job that is at the top of the queue if there is one
+ * @brief Gets the job that is at the top of the queue if there is one.
  *
+ * @param job_queue The queue to get job from
  * @return the job at the top of the job queue, NULL if queue is empty
  */
 job_t* peek_job(GSequence* job_queue)
@@ -694,8 +720,9 @@ job_t* peek_job(GSequence* job_queue)
 }
 
 /**
- * gets the number of jobs that are not paused
+ * @brief Gets the number of jobs that are not paused
  *
+ * @param job_list The list to check
  * @return number of non-paused jobs
  */
 uint32_t active_jobs(GTree* job_list)

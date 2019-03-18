@@ -17,7 +17,92 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *******************************************************************/
-
+/**
+ * \dir
+ * \brief Source code for ununpack agent
+ * \file
+ * \brief Main file for ununpack agent
+ * \page ununpack Ununpack agent
+ * \tableofcontents
+ * \section ununpackabout About
+ * Ununpack agent helps in extracting uploaded files. The agent uses depth-first
+ * search for traversing and unpacks every file it can.
+ *
+ * Ununpack agent uses mimetypes to identify the file type. The list of
+ * supported mimetypes and related tools are below and for programmatic use:
+ * \link ununpack_globals.h \endlink
+ *
+ * | Mimetype | Tool |
+ * | ---: | :--- |
+ * | application/gzip | zcat |
+ * | application/x-gzip | zcat |
+ * | application/x-compress | zcat |
+ * | application/x-bzip | bzcat |
+ * | application/x-bzip2 | bzcat |
+ * | application/x-upx | upx |
+ * | application/pdf | pdftotext |
+ * | application/x-pdf | pdftotext |
+ * | application/x-zip | unzip |
+ * | application/zip | unzip |
+ * | application/x-tar | tar |
+ * | application/x-gtar | tar |
+ * | application/x-cpio | cpio |
+ * | application/x-rar | unrar |
+ * | application/x-cab | cabextract |
+ * | application/x-7z-compressed | 7z |
+ * | application/x-7z-w-compressed | 7z |
+ * | application/x-rpm | rpm2cpio |
+ * | application/x-archive | ar |
+ * | application/x-debian-package | ar |
+ * | application/x-iso | isoinfo |
+ * | application/x-iso9660-image | isoinfo |
+ * | application/x-fat | fat |
+ * | application/x-ntfs | ntfs |
+ * | application/x-ext2 | linux-ext |
+ * | application/x-ext3 | linux-ext |
+ * | application/x-x86_boot | departition |
+ * | application/x-debian-source | dpkg-source |
+ * | application/x-xz | tar |
+ * | application/jar | unzip |
+ * | application/java-archive | unzip |
+ * | application/x-dosexec | 7z |
+ *
+ * \section ununpackactions Supported actions
+ * Usage: \code ununpack [options] file [file [file...]] \endcode
+ * Extracts each file. If filename specifies a directory, then extracts
+ * everything in it.
+ * | Command line flag | Description |
+ * | -----: | :--- |
+ * | -h     | Help, then exit |
+ * | -C     | Force continue when unpack tool fails |
+ * | -d dir | Specify alternate extraction directory. %%U substitutes a unique ID |
+ * | ^ | Default is the same directory as file (usually not a good idea) |
+ * | -m #   | Number of CPUs to use (default: 1) |
+ * | -P     | Prune files: remove links, >1 hard links, zero files, etc |
+ * | -R     | Recursively unpack (same as '-r -1') |
+ * | -r #   | Recurse to a specified depth (0=none/default, -1=infinite) |
+ * | -X     | Remove recursive sources after unpacking |
+ * | -x     | Remove ALL unpacked files when done (clean up) |
+ * | -L out | Generate a log of files extracted (in XML) to out |
+ * | -F     | Using files from the repository |
+ * | -i     | Initialize the database queue system, then exit |
+ * | -I     | Ignore SCM data |
+ * | -Q     | Using scheduler queue system. (Includes -F) |
+ * | ^      | If -L is used, unpacked files are placed in 'files' |
+ * | -T rep | Set gold repository name to 'rep' (for testing) |
+ * | -t rep | Set files repository name to 'rep' (for testing) |
+ * | -A     | Do not set the initial DB container as an artifact |
+ * | -f     | Force processing files that already exist in the DB |
+ * | -q     | Quiet (generate no output) |
+ * | -U upload_pk | Upload to unpack (implies -RQ). Writes to db |
+ * | -v     | Verbose (-vv = more verbose) |
+ * | -V     | Print the version info, then exit |
+ * \section ununpacksource Agent source
+ *   - \link src/ununpack/agent \endlink
+ *   - \link src/ununpack/ui \endlink
+ *   - Functional test cases \link src/ununpack/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/ununpack/agent_tests/Unit \endlink
+ */
 #define _GNU_SOURCE
 #include "ununpack.h"
 #include "ununpack_globals.h"
@@ -54,14 +139,14 @@ int	main(int argc, char *argv[])
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
 
-  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiqRr:T:t:U:VvXx")) != -1)
+  while((c = getopt(argc,argv,"ACc:d:FfHhL:m:PQiIqRr:T:t:U:VvXx")) != -1)
   {
     switch(c)
     {
       case 'A':	SetContainerArtifact=0; break;
       case 'C':	ForceContinue=1; break;
       case 'c':	break;  /* handled by fo_scheduler_connect() */
-      case 'd':	
+      case 'd':
         /* if there is a %U in the path, substitute a unique ID */
         NewDir=PathCheck(optarg);
         break;
@@ -80,6 +165,7 @@ int	main(int argc, char *argv[])
           LOG_WARNING("dpkg-source is not available on this system.  This means that debian source packages will NOT be unpacked.");
         SafeExit(0);
         break; /* never reached */
+      case 'I': IgnoreSCMData=1; break;
       case 'Q':
         UseRepository=1;
 
@@ -97,10 +183,10 @@ int	main(int argc, char *argv[])
         memset(REP_FILES,0,sizeof(REP_FILES));
         strncpy(REP_FILES,optarg,sizeof(REP_FILES)-1);
         break;
-      case 'U':	
+      case 'U':
         UseRepository = 1;
         Recurse = -1;
-        Upload_Pk = optarg; 
+        Upload_Pk = optarg;
         break;
       case 'V': printf("%s", BuildVersion);SafeExit(0);
       case 'v':	Verbose++; break;
@@ -113,7 +199,7 @@ int	main(int argc, char *argv[])
   }
 
   /* Open DB and Initialize CMD table */
-  if (UseRepository) 
+  if (UseRepository)
   {
     /* Check Permissions */
     if (GetUploadPerm(pgConn, atoi(Upload_Pk), user_pk) < PERM_WRITE)
@@ -121,7 +207,7 @@ int	main(int argc, char *argv[])
       LOG_ERROR("You have no update permissions on upload %s", Upload_Pk);
       SafeExit(100);
     }
-        
+
     COMMIT_HASH = fo_sysconfig(AgentName, "COMMIT_HASH");
     VERSION = fo_sysconfig(AgentName, "VERSION");
     sprintf(agent_rev, "%s.%s", VERSION, COMMIT_HASH);
@@ -145,9 +231,9 @@ int	main(int argc, char *argv[])
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(101);
 
     if (PQntuples(result) > 0) /* if there is a value */
-    {  
+    {
       PQclear(result);
-      LOG_WARNING("Upload_pk %s, has already been unpacked.  No further action required", 
+      LOG_WARNING("Upload_pk %s, has already been unpacked.  No further action required",
               Upload_Pk)
       SafeExit(0);
     }
@@ -158,20 +244,20 @@ int	main(int argc, char *argv[])
 
     /* Get Pfile path and Pfile_Pk, from Upload_Pk */
   snprintf(SQL,MAXSQL,
-        "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk, pfile_size FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'", 
+        "SELECT pfile.pfile_sha1 || '.' || pfile.pfile_md5 || '.' || pfile.pfile_size AS pfile, pfile_fk, pfile_size FROM upload INNER JOIN pfile ON upload.pfile_fk = pfile.pfile_pk WHERE upload.upload_pk = '%s'",
            Upload_Pk);
     result =  PQexec(pgConn, SQL);
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(102);
 
     if (PQntuples(result) > 0) /* if there is a value */
-    {  
+    {
       Pfile = strdup(PQgetvalue(result,0,0));
       Pfile_Pk = strdup(PQgetvalue(result,0,1));
       Pfile_size = atol(PQgetvalue(result, 0, 2));
       if (Pfile_size == 0)
-      {  
+      {
         PQclear(result);
-        LOG_WARNING("Uploaded file (Upload_pk %s), is zero length.  There is nothing to unpack.", 
+        LOG_WARNING("Uploaded file (Upload_pk %s), is zero length.  There is nothing to unpack.",
                       Upload_Pk)
         SafeExit(0);
       }
@@ -188,7 +274,7 @@ int	main(int argc, char *argv[])
       sprintf(uploadtree_tablename, "uploadtree_%s", Upload_Pk);
       if (!fo_tableExists(pgConn, uploadtree_tablename))
       {
-        snprintf(SQL,MAXSQL,"CREATE TABLE %s (LIKE uploadtree INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES); ALTER TABLE %s ADD CONSTRAINT %s CHECK (upload_fk=%s); ALTER TABLE %s INHERIT uploadtree", 
+        snprintf(SQL,MAXSQL,"CREATE TABLE %s (LIKE uploadtree INCLUDING DEFAULTS INCLUDING CONSTRAINTS INCLUDING INDEXES); ALTER TABLE %s ADD CONSTRAINT %s CHECK (upload_fk=%s); ALTER TABLE %s INHERIT uploadtree",
                uploadtree_tablename, uploadtree_tablename, uploadtree_tablename, Upload_Pk, uploadtree_tablename);
         PQsetNoticeProcessor(pgConn, SQLNoticeProcessor, SQL);  // ignore notice about implicit primary key index creation
         result =  PQexec(pgConn, SQL);
@@ -294,14 +380,14 @@ int	main(int argc, char *argv[])
       }
       /* else: Fname is NULL and CF is NULL */
     }
-    else 
+    else
     {
       FnameCheck = argv[optind];
       CF = SumOpenFile(argv[optind]);
     }
 
     /* Check file to unpack.  Does it exist?  Is it zero length? */
-    if (stat(FnameCheck,&Stat)) 
+    if (stat(FnameCheck,&Stat))
     {
       LOG_ERROR("File to unpack is unavailable: %s, error: %s", Fname, strerror(errno));
       SafeExit(109);
@@ -459,7 +545,7 @@ int	main(int argc, char *argv[])
     /* Delete temporary files */
     if (strcmp(NewDir, ".")) RemoveDir(NewDir);
   }
- 
+
   SafeExit(0);
   return(0);  // never executed but makes the compiler happy
-} 
+}

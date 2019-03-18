@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- *               2014-2015 Siemens AG
+ *               2014-2017 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,13 +64,14 @@ class AjaxExplorer extends DefaultPlugin
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: License Browser"),
         self::DEPENDENCIES => array("license"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
@@ -439,7 +440,7 @@ class AjaxExplorer extends DefaultPlugin
       $getTextEditBulk = _("Bulk");
       $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
-
+    $fileListLinks .= "<input type='checkbox' id='selectedForIrrelevant' value='".$childUploadTreeId."'>";
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
 

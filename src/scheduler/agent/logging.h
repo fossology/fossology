@@ -14,6 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
+/**
+ * \file
+ * \brief Log related operations
+ */
 
 #ifndef LOGGING_H_INCLUDE
 #define LOGGING_H_INCLUDE
@@ -35,11 +39,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 /* **** Log file structures ************************************************* */
 /* ************************************************************************** */
 
+/**
+ * Log structure. Holds data required for logging.
+ */
 typedef struct
 {
     gchar* log_name;  ///< The name of the log file that will be printed to
-    gchar* pro_name;  ///< what should be printed as the process name
-    pid_t  pro_pid;   ///< the pid of the process
+    gchar* pro_name;  ///< What should be printed as the process name
+    pid_t  pro_pid;   ///< The pid of the process
     FILE*  log_file;  ///< The log file itself
 } log_t;
 
@@ -54,13 +61,13 @@ extern log_t* main_log;
 
 /*
  * The following macro definitions are meant to act as their own statement in
- * the c language. To acomplish this, they needed to not only be able to be used
+ * the C language. To accomplish this, they needed to not only be able to be used
  * in the situation of an "if" statement with no body, but also require that
  * they are followed by a ";".
  *
  * To do this the "do {} while(0)" loop is used, the loop will not appear in
  * result flow control since it does not modify the flow of control, but it is
- * a single statement that requires a ";" at the end to be syntatically correct
+ * a single statement that requires a ";" at the end to be syntactically correct
  */
 
 /** Macro that is called when the scheduler hits a fatal error */
@@ -91,7 +98,7 @@ extern log_t* main_log;
             lprintf(main_log, __VA_ARGS__); \
             lprintf(main_log, "\n"); \
             lprintf(main_log, "ERROR postgresql error: %s\n", PQresultErrorMessage(pg_r)); } \
-            PQclear(pg_r)
+            SafePQclear(pg_r)
 
 /** Macros that is called when a notification is generated */
 #define TEST_NOTIFY verbose > 0
@@ -109,7 +116,7 @@ extern log_t* main_log;
 
 /* verbose macros, if changing from greater than scheme to bit mask, just */
 /* change these the the TVERBOSE# macro when a test of verbose is needed, */
-/* this happpens when printing from another thread. The other verbose     */
+/* this happens when printing from another thread. The other verbose      */
 /* macro makes the syntax better everywhere else                          */
 #define TVERB_JOB     (verbose & 0x8)
 #define TVERB_AGENT   (verbose & 0x10)

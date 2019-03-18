@@ -25,15 +25,17 @@
 
 #define FUNCTION
 
-
+/**
+ * \file
+ * \brief Utilities used by nomos
+ */
 
 /**
- add2license_ref
  \brief Add a new license to license_ref table
 
  Adds a license to license_ref table.
 
- @param  char *licenseName
+ @param  licenseName Name of license
 
  @return rf_pk for success, 0 for failure
  */
@@ -108,12 +110,10 @@ FUNCTION long add2license_ref(char *licenseName)
 }
 
 /**
- lrcache_hash
-
  \brief calculate the hash of an rf_shortname
  rf_shortname is the key
 
- @param cacheroot_t *
+ @param pcroot Root pointer
  @param rf_shortname
 
  @return hash value
@@ -132,11 +132,9 @@ FUNCTION long lrcache_hash(cacheroot_t *pcroot, char *rf_shortname)
 }
 
 /**
- lrcache_print
-
  \brief Print the contents of the hash table
 
- @param cacheroot_t *
+ @param pcroot Table root
 
  @return none
  */
@@ -159,11 +157,9 @@ FUNCTION void lrcache_print(cacheroot_t *pcroot)
 }
 
 /**
- lrcache_free
-
  \brief free the hash table
 
- @param cacheroot_t *
+ @param pcroot Table root
 
  @return none
  */
@@ -185,14 +181,12 @@ FUNCTION void lrcache_free(cacheroot_t *pcroot)
 }
 
 /**
- lrcache_add
-
  \brief add a rf_shortname, rf_pk to the license_ref cache
  rf_shortname is the key
 
- @param cacheroot_t *
- @param rf_pk
- @param rf_shortname
+ @param pcroot        Table root
+ @param rf_pk         License ID in DB
+ @param rf_shortname  License shortname (key)
 
  @return -1 for failure, 0 for success
  */
@@ -225,12 +219,10 @@ FUNCTION int lrcache_add(cacheroot_t *pcroot, long rf_pk, char *rf_shortname)
 }
 
 /**
- lrcache_lookup
-
  \brief lookup rf_pk in the license_ref cache
  rf_shortname is the key
 
- @param cacheroot_t *
+ @param pcroot
  @param rf_shortname
 
  @return rf_pk, 0 if the shortname is not in the cache
@@ -262,15 +254,13 @@ FUNCTION long lrcache_lookup(cacheroot_t *pcroot, char *rf_shortname)
 }
 
 /**
- initLicRefCache
-
  \brief build a cache the license ref db table.
-
- @param cacheroot_t *
 
  initLicRefCache builds a cache using the rf_shortname as the key
  and the rf_pk as the value.  This is an optimization. The cache is used for
  reference license lookups instead of querying the db.
+
+ @param pcroot
 
  @return 0 for failure, 1 for success
  */
@@ -304,15 +294,14 @@ FUNCTION int initLicRefCache(cacheroot_t *pcroot)
 } /* initLicRefCache */
 
 /**
- get_rfpk
  \brief Get the rf_pk for rf_shortname
 
  Checks the cache to get the rf_pk for this shortname.
  If it doesn't exist, add it to both license_ref and the
  license_ref cache (the hash table).
 
- @param cacheroot_t *
- @param char *rf_shortname
+ @param pcroot
+ @param rf_shortname
 
  @return rf_pk of the matched license or 0
  */
@@ -343,14 +332,14 @@ FUNCTION long get_rfpk(cacheroot_t *pcroot, char *rf_shortname)
 } /* get_rfpk */
 
 /**
- getFieldValue
  \brief Given a string that contains field='value' pairs, save the items.
 
  @return pointer to start of next field, or NULL at \0.
 
  \callgraph
  */
-FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax, char *value, int valueMax, char separator)
+FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax,
+    char *value, int valueMax, char separator)
 {
   int s;
   int f;
@@ -461,11 +450,9 @@ FUNCTION char *getFieldValue(char *inStr, char *field, int fieldMax, char *value
 } /* getFieldValue */
 
 /**
- parseLicenseList
  \brief parse the comma separated list of license names found
- Uses cur.compLic and sets cur.licenseList
 
- void?
+ Uses cur.compLic and sets cur.licenseList
  */
 
 FUNCTION void parseLicenseList()
@@ -483,7 +470,7 @@ FUNCTION void parseLicenseList()
   }
 
   /* check for a single name  FIX THIS!*/
-  if (strstr(cur.compLic, ",") == NULL_CHAR)
+  if (strstr(cur.compLic, ",") == NULL)
   {
     cur.licenseList[0] = cur.compLic;
     cur.licenseList[1] = NULL;
@@ -523,6 +510,10 @@ FUNCTION void parseLicenseList()
   return;
 } /* parseLicenseList */
 
+/**
+ * \brief Print nomos usage help
+ * \param Name Path to nomos binary
+ */
 FUNCTION void Usage(char *Name)
 {
   printf("Usage: %s [options] [file [file [...]]\n", Name);
@@ -540,6 +531,13 @@ FUNCTION void Usage(char *Name)
   printf("  -n   :: spaw n - 1 child processes to run, there will be n running processes(the parent and n - 1 children). \n the default n is 2(when n is less than 2 or not setting, will be changed to 2) when -d is specified.\n");
 } /* Usage() */
 
+/**
+ * \brief Close connections and exit
+ *
+ * The function closes DB and scheduler connections and calls exit() with the
+ * return code passed
+ * \param exitval Return code to pass to exit()
+ */
 FUNCTION void Bail(int exitval)
 {
 #ifdef PROC_TRACE
@@ -562,6 +560,11 @@ FUNCTION void Bail(int exitval)
   exit(exitval);
 }
 
+/**
+ * \brief Check if an CLI option is set
+ * \param val Binary position to check
+ * \return > 0 if it is set, 0 otherwise
+ */
 FUNCTION int optionIsSet(int val)
 {
 #ifdef PROC_TRACE
@@ -572,7 +575,6 @@ FUNCTION int optionIsSet(int val)
 } /* optionIsSet */
 
 /**
- getFileLists
  \brief Initialize the lists: regular-files list cur.regfList and buffer-offset
  list cur.offList.
 
@@ -601,12 +603,11 @@ FUNCTION  void getFileLists(char *dirpath)
 } /* getFileLists */
 
 /**
- * updateLicenseFile
- * \brief, insert rf_fk, agent_fk and pfile_fk into license_file table
+ * \brief insert rf_fk, agent_fk and pfile_fk into license_file table
  *
- * @param long rfPK the reference file foreign key
+ * @param rfPK the reference file foreign key
  *
- * returns long the primary key for the inserted entry (or Negative value on error)
+ * \returns The primary key for the inserted entry (or Negative value on error)
  *
  * \callgraph
  */
@@ -649,6 +650,13 @@ FUNCTION long updateLicenseFile(long rfPk)
   }
 } /* updateLicenseFile */
 
+/**
+ * \brief Return the highlight type (K|L|0) for a given index
+ * @param index Index to convert
+ * @return K if index is between keyword length,\n
+ * L if index is larger than keyword length,\n
+ * 0 otherwise
+ */
 FUNCTION char convertIndexToHighlightType(int index)
 {
 
@@ -665,12 +673,11 @@ FUNCTION char convertIndexToHighlightType(int index)
 }
 
 /**
- * updateLicenseHighlighting
- * \brief, insert rf_fk, agent_fk , offset, len and type into highlight table
+ * \brief insert rf_fk, agent_fk, offset, len and type into highlight table
  *
- * @param long rfPK the reference file foreign key
+ * @param pcroot The root of hash table
  *
- * returns boolean (True or False)
+ * \returns boolean (True or False)
  *
  * \callgraph
  */
@@ -768,9 +775,8 @@ FUNCTION int updateLicenseHighlighting(cacheroot_t *pcroot){
 
 
 /**
- * processFile
  * \brief process a single file
- *
+ * \param fileToScan File path
  * \callgraph
  */
 FUNCTION void processFile(char *fileToScan)
@@ -808,6 +814,11 @@ FUNCTION void processFile(char *fileToScan)
   /* freeAndClearScan(&cur); */
 } /* Process File */
 
+/**
+ * \brief Set the license file id to the highlights
+ * \param licenseFileId License id
+ * \param licenseName   License name
+ */
 void setLicenseFileIdInHiglightArray(long licenseFileId, char* licenseName){
   int i;
   for (i = 0; i < cur.theMatches->len; ++i) {
@@ -817,6 +828,12 @@ void setLicenseFileIdInHiglightArray(long licenseFileId, char* licenseName){
   }
 } /* setLicenseFileIdInHiglightArray */
 
+/**
+ * \brief Add a license to hash table, license table and highlight array
+ * \param licenseName License name
+ * \param pcroot      Hash table root
+ * \return True if license is inserted in DB, False otherwise
+ */
 int updateLicenseFileAndHighlightArray(char* licenseName, cacheroot_t* pcroot) {
   long rf_pk = get_rfpk(pcroot, licenseName);
   long licenseFileId = updateLicenseFile(rf_pk);
@@ -829,14 +846,12 @@ int updateLicenseFileAndHighlightArray(char* licenseName, cacheroot_t* pcroot) {
 }
 
 /**
- recordScanToDb
-
- Write out the information about the scan to the FOSSology database.
+ \brief Write out the information about the scan to the FOSSology database.
 
  curScan is passed as an arg even though it's available as a global,
  in order to facilitate future modularization of the code.
 
- Returns: 0 if successful, -1 if not.
+ \returns 0 if successful, -1 if not.
 
  \callgraph
  */
@@ -885,16 +900,37 @@ FUNCTION int recordScanToDB(cacheroot_t *pcroot, struct curScan *scanRecord)
   return (0);
 } /* recordScanToDb */
 
-FUNCTION inline MatchPositionAndType* getMatchfromHighlightInfo(GArray* in, int index)
+/**
+ * \brief Get the MatchPositionAndType for a given index in highlight array
+ * \param in    Highlight array
+ * \param index Index to fetch
+ * \return Match position and type
+ */
+FUNCTION inline MatchPositionAndType* getMatchfromHighlightInfo(GArray* in,
+    int index)
 {
   return &g_array_index(in, MatchPositionAndType, index);
 }
 
-FUNCTION inline LicenceAndMatchPositions* getLicenceAndMatchPositions(GArray* in, int index){
+/**
+ * \brief Get the LicenceAndMatchPositions for a given index in match array
+ * \param in    Match array
+ * \param index Index to fetch
+ * \return License and match position
+ */
+FUNCTION inline LicenceAndMatchPositions* getLicenceAndMatchPositions(
+    GArray* in, int index)
+{
   return &g_array_index(in, LicenceAndMatchPositions, index);
-};
+}
 
-
+/**
+ * \brief Initialize the scanner
+ *
+ * Creates a new index list, match list, keyword position list, doctored buffer
+ * and license index
+ * \param cur Current scanner
+ */
 FUNCTION void initializeCurScan(struct curScan* cur)
 {
   cur->indexList =  g_array_new(FALSE, FALSE, sizeof(int));
@@ -906,9 +942,8 @@ FUNCTION void initializeCurScan(struct curScan* cur)
 
 
 /**
- * freeAndClearScan
  * \brief Clean-up all the per scan data structures, freeing any old data.
- *
+ * \param thisScan Scanner to clear
  * \callgraph
  */
 FUNCTION void freeAndClearScan(struct curScan *thisScan)
@@ -931,6 +966,11 @@ FUNCTION void freeAndClearScan(struct curScan *thisScan)
   hdestroy();
 
 }
+
+/**
+ * \brief Cleans the match array and free the memory
+ * \param theMatches The matches list
+ */
 FUNCTION inline void cleanTheMatches(GArray* theMatches){
 
   int i;
@@ -940,7 +980,10 @@ FUNCTION inline void cleanTheMatches(GArray* theMatches){
   g_array_free( theMatches, TRUE);
 }
 
-
+/**
+ * \brief Cleans the license and match positions object and free the memory
+ * \param in The matches object
+ */
 FUNCTION inline void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in )
 {
   if(in->licenceName) g_free(in->licenceName);
@@ -948,6 +991,11 @@ FUNCTION inline void cleanLicenceAndMatchPositions( LicenceAndMatchPositions* in
   g_array_free(in->indexList,TRUE);
 }
 
+/**
+ * \brief Add a license to the matches array
+ * \param[in,out] theMatches  The matches array
+ * \param[in]     licenceName License to be added
+ */
 FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
   LicenceAndMatchPositions newMatch;
   newMatch.indexList = cur.indexList;
@@ -960,10 +1008,17 @@ FUNCTION inline void addLicence(GArray* theMatches, char* licenceName ) {
   g_array_append_val(theMatches , newMatch);
 }
 
+/**
+ * \brief Clean the license buffer
+ */
 inline void cleanLicenceBuffer(){
   g_array_set_size(cur.indexList, 0);
 }
 
+/**
+ * \brief Remove the last element from license buffer
+ * \return True always
+ */
 inline bool clearLastElementOfLicenceBuffer(){
   if(cur.indexList->len>0)
     g_array_remove_index(cur.indexList, cur.indexList->len -1);

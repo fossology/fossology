@@ -23,12 +23,16 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <pkgagent.h>
 
 /**
- * \file testGetFieldValue.c
+ * \file
  * \brief unit test for GetFieldValue function
  */
 
 /**
  * \brief test case for input parameter is normal
+ * \test
+ * -# Create a string with \c field=value format
+ * -# Call GetFieldValue() with a separator
+ * -# Check if the value string is parsed properly
  */
 void test_GetFieldValue_normal()
 {
@@ -46,6 +50,10 @@ void test_GetFieldValue_normal()
 
 /**
  * \brief test case for input parameter is NULL
+ * \test
+ * -# Create an empty string
+ * -# Pass to GetFieldValue()
+ * -# Check if value string returned is NULL
  */
 void test_GetFieldValue_sin_is_null()
 {
@@ -62,8 +70,12 @@ void test_GetFieldValue_sin_is_null()
 }
 
 /**
- *  * \brief test case for don't set input separator
- *   */
+ * \brief test case for don't set input separator
+ * \test
+ * -# Create a string with \c field=value format
+ * -# Call GetFieldValue() with separator as NULL
+ * -# Check if field and value are not separated
+ */
 void test_GetFieldValue_noseparator()
 {
   char *Sin = "name=larry, very good";
@@ -73,7 +85,7 @@ void test_GetFieldValue_noseparator()
   int ValueMax = 1024;
   char *predictField = "name";
   char *predictValue = "=larry, very good";
-  char Separator = NULL;
+  char Separator = '\0';
   char *Result = GetFieldValue(Sin, Field, FieldMax, Value, ValueMax, Separator);
   //printf("test_GetFieldValue_noseparator Result is:%s, field is: %s, value is:%s\n", Result, Field, Value);
   CU_ASSERT_TRUE(!strcmp(Result, predictValue));

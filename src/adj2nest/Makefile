@@ -22,7 +22,6 @@ include $(VARS)
 MOD_NAME = adj2nest
 
 DIRS = agent ui
-TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
@@ -30,10 +29,10 @@ all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	$(MAKE) -C $(TESTDIR) test
+	@echo "nothing to do"
 
 coverage: all
-	$(MAKE) -C $(TESTDIR) coverage
+	@echo "nothing to do"
 
 VERSIONFILE:
 	$(call WriteVERSIONFile,$(MOD_NAME))

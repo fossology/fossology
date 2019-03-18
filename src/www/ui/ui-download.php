@@ -94,13 +94,13 @@ class ui_download extends FO_Plugin
       print $V;
       if (!empty($Menu)) { $Menu->Output($this->Title); }
     }
-     
+
     $P = &$Plugins[plugin_find_id("view")];
     $P->ShowView(NULL,"browse");
     exit;
   } // CheckRestore()
 
-  
+
   function getResponse()
   {
     try
@@ -233,8 +233,21 @@ class ui_download extends FO_Plugin
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));
     BrowserConsoleHandler::reset();
-    
+
     return $response;
+  }
+
+  /**
+   * Get the file response for a given report job id
+   * @param int $jobId
+   * @return BinaryFileResponse
+   * @throws Exception
+   */
+  public function getReport($jobId)
+  {
+    $_GET['report'] = $jobId;
+    list($Filename, $Name) = $this->getPathAndName();
+    return $this->downloadFile($Filename, $Name);
   }
 }
 

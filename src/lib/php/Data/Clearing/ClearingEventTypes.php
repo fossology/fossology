@@ -24,6 +24,7 @@ class ClearingEventTypes extends Types {
   const USER = 1;
   const BULK = 2;
   const AGENT = 3;
+  const IMPORT = 4;
 
   public function __construct()
   {
@@ -32,7 +33,8 @@ class ClearingEventTypes extends Types {
     $this->map = array(
         self::USER => "User decision",
         self::BULK => "Bulk",
-        self::AGENT => "User confirmed agent finding"
+        self::AGENT => "User confirmed agent finding",
+        self::IMPORT => "Imported decision"
     );
   }
 } 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -27,10 +27,9 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
-use Fossology\Lib\Util\Object;
 use Monolog\Logger;
 
-class LicenseDao extends Object
+class LicenseDao
 {
   const NO_LICENSE_FOUND = 'No_license_found';
 
@@ -44,7 +43,7 @@ class LicenseDao extends Object
   function __construct(DbManager $dbManager)
   {
     $this->dbManager = $dbManager;
-    $this->logger = new Logger(self::className());
+    $this->logger = new Logger(self::class);
   }
 
   /**
@@ -325,7 +324,7 @@ class LicenseDao extends Object
                                                    $includeSubfolders=true,
                                                    $excluding='',
                                                    $ignore=false,
-                                                   $includeUploadTreePk=false)
+                                                   &$clearingDecisionsForLicList = array())
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
@@ -388,7 +387,7 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $path = implode($pathStack,'/');
-    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
+    $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     while ($row = $this->dbManager->fetchArray($result))
     {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding))
@@ -403,7 +402,7 @@ ORDER BY lft asc
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
       $path = implode($pathStack,'/');
-      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk);
+      $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     }
     $this->dbManager->freeResult($result);
     return array_reverse($licensesPerFileName);
@@ -427,16 +426,15 @@ ORDER BY lft asc
     }
   }
 
-  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, $includeUploadTreePk)
+  private function addToLicensesPerFileName(&$licensesPerFileName, $path, $row, $ignore, &$clearingDecisionsForLicList = array())
   {
     if (($row['ufile_mode']&(1<<29)) ==0)
     {
       if($row['rf_shortname'])
-      { 
-        if($includeUploadTreePk){
-          $licensesPerFileName[$path][$row['uploadtree_pk']][] = $row['rf_shortname'];
-        }else{
-          $licensesPerFileName[$path][] = $row['rf_shortname'];
+      {
+        $licensesPerFileName[$path]['scanResults'][] = $row['rf_shortname'];
+        if (array_key_exists($row['uploadtree_pk'], $clearingDecisionsForLicList)) {
+          $licensesPerFileName[$path]['concludedResults'][] = $clearingDecisionsForLicList[$row['uploadtree_pk']];
         }
       }
     }
@@ -496,9 +494,9 @@ ORDER BY lft asc
 
     $noLicenseFoundStmt = empty($filterLicenses) ? "" : " AND rf_shortname NOT IN ("
         . implode(", ", array_map(function ($name)
-                {
-                  return "'" . $name . "'";
-                }, $filterLicenses)) . ")";
+        {
+          return "'" . $name . "'";
+        }, $filterLicenses)) . ")";
 
     $statementName = __METHOD__ . '.' . $uploadTreeTableName;
 
@@ -610,10 +608,10 @@ ORDER BY lft asc
     $bulkId = $licenseRefBulkIdResult['lrb_pk'];
 
     $stmt = __METHOD__ . '.insertAction';
-    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing) VALUES ($1,$2,$3)");
+    $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) VALUES ($1,$2,$3,$4,$5,$6)");
     foreach($licenseRemovals as $licenseId=>$removing)
     {
-      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing)));
+      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing[0]), $removing[1], $removing[2], $removing[3]));
     }
 
     return $bulkId ;
@@ -633,24 +631,50 @@ ORDER BY lft asc
   }
 
   /**
+   * @param $shortname
+   * @param $refText
+   * @param bool $spdxCompatible
+   * @return mixed
+   */
+  public function insertLicense($shortname, $refText, $spdxCompatible = false)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
+      array($shortname, $refText, $spdxCompatible ? 1 : 0),
+      __METHOD__.".addLicense" );
+    return $row["rf_pk"];
+  }
+
+  /**
    * @param string $newShortname
    * @param string $refText
    * @return int Id of license candidate
    */
-  public function insertUploadLicense($newShortname, $refText)
+  public function insertUploadLicense($newShortname, $refText, $groupId)
   {
     $sql = 'INSERT INTO license_candidate (group_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
-    $refArray = $this->dbManager->getSingleRow($sql, array($_SESSION['GroupId'], $newShortname, $refText), __METHOD__);
+    $refArray = $this->dbManager->getSingleRow($sql, array($groupId, $newShortname, $refText), __METHOD__);
     return $refArray['rf_pk'];
   }
 
-
+  /**
+   * @param array("License by Nomos.")
+   * @return int count of license_ref
+   */
   public function getLicenseCount()
   {
     $licenseRefTable = $this->dbManager->getSingleRow("SELECT COUNT(*) cnt FROM license_ref WHERE rf_text!=$1", array("License by Nomos."));
     return intval($licenseRefTable['cnt']);
   }
 
+  /**
+   * @param int $rf_pk 
+   * @param string $shortname 
+   * @param string $fullname 
+   * @param string $rfText, $rfNotes 
+   * @param string $readyformerge
+   * @param int $riskLvl
+   */
   public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $readyformerge, $riskLvl)
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
@@ -658,9 +682,33 @@ ORDER BY lft asc
         array($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $marydone, $riskLvl), __METHOD__);
   }
 
+  /**
+   * @param int $licenseId
+   * @param int $groupId
+   */
   public function getLicenseParentById($licenseId, $groupId=null)
   {
     return $this->getLicenseByCondition(" rf_pk=(SELECT rf_parent FROM license_map WHERE usage=$1 AND rf_fk=$2 AND rf_fk!=rf_parent)",
             array(LicenseMap::CONCLUSION,$licenseId), $groupId);
+  }
+
+  /**
+   * @param array $licenseLists
+   * @return array
+   **/
+  public function getLicenseObligations($licenseLists)
+  {
+    if(!empty($licenseLists)){
+      $licenseList = implode (",",$licenseLists);
+      $statementName = __METHOD__;
+      $this->dbManager->prepare($statementName,
+            "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, rf_shortname FROM obligation_ref
+             JOIN obligation_map ON obligation_map.ob_fk=obligation_ref.ob_pk
+             JOIN license_ref ON obligation_map.rf_fk=license_ref.rf_pk WHERE ob_active='t' and rf_fk in ($licenseList)");
+      $result = $this->dbManager->execute($statementName, array());
+      $ObligationRef = $this->dbManager->fetchAll($result);
+      $this->dbManager->freeResult($result);
+      return $ObligationRef;
+    }
   }
 }

@@ -17,43 +17,58 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 
 static int Result = 0;
-
 /**
- * @brief function IsDebianSourceFile(char *Filename)
+ * \file
+ * \brief Unit test cases for Isxxx functions
+ */
+/**
+ * \brief function IsDebianSourceFile(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on dsc file
+ * -# Check if function returns YES
  */
 void testIsDebianSourceFile()
 {
-  char *Filename = "../test-data/testdata4unpack/fcitx_3.6.2-1.dsc";
+  char *Filename = "../testdata/test_1-1.dsc";
   Result = IsDebianSourceFile(Filename);
   FO_ASSERT_EQUAL(Result, 1);
 }
+
 /**
- * @brief function IsDebianSourceFile(char *Filename)
+ * \brief function IsDebianSourceFile(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on non dsc file
+ * -# Check if function returns NO
  */
 void testIsNotDebianSourceFile()
 {
-  char *Filename = "../test-data/testdata4unpack/tx_3.6.2.orig.tar.gz";
+  char *Filename = "../testdata/test_1.orig.tar.gz";
   Result = IsDebianSourceFile(Filename);
   FO_ASSERT_EQUAL(Result, 0);
 }
 
-
 /**
- * @brief function IsExeFile(char *Filename)
+ * \brief function IsExe(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on exe file
+ * -# Check if function returns YES
  */
 void testIsExeFile()
 {
-  char *Filename = "../testdata/testdata4unpack/fcitx_3.6.2-1.dsc";
+  char *Filename = "../testdata/test.exe";
   Result = IsExe(Filename, 1);
   FO_ASSERT_EQUAL(Result, 1);
 }
 
 /**
- * @brief function IsNotExeFile(char *Filename)
+ * \brief function IsExe(char *Filename)
+ * \test
+ * -# Call IsDebianSourceFile() on non exe file
+ * -# Check if function returns NO
  */
 void testIsNotExeFile()
 {
-  char *Filename = "../testdata/testdata4unpack/tx_3.6.2.orig.tar.gz";
+  char *Filename = "../testdata/test_1.orig.tar.gz";
   Result = IsExe(Filename, 1);
   FO_ASSERT_EQUAL(Result, 0);
 }
@@ -66,7 +81,7 @@ CU_TestInfo IsFunctions_testcases[] =
 {
   {"IsDebianSourceFile:", testIsDebianSourceFile},
   {"IsNotDebianSourceFile:", testIsNotDebianSourceFile},
-/**  {"IsExeFile:", testIsExefile}, */
+/**  {"IsExeFile:", testIsExeFile}, */
   {"IsNotExeFile:", testIsNotExeFile},
   CU_TEST_INFO_NULL
 };

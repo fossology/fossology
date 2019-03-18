@@ -52,13 +52,14 @@ class AjaxFileBrowser extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: File Browser"),
         self::DEPENDENCIES => array("fileBrowse"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');

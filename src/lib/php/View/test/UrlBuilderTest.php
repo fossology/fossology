@@ -26,7 +26,7 @@ function Traceback_uri()
   return "http://localhost/repo";
 }
 
-class UrlBuilderTest extends \PHPUnit_Framework_TestCase
+class UrlBuilderTest extends \PHPUnit\Framework\TestCase
 {
   /** @var UrlBuilder */
   private $urlBuilder;
@@ -42,7 +42,7 @@ class UrlBuilderTest extends \PHPUnit_Framework_TestCase
     $shortName = "<shortName>";
     $fullName = "<fullName>";
 
-    $licenseRef = M::mock(LicenseRef::classname());
+    $licenseRef = M::mock(LicenseRef::class);
     $licenseRef->shouldReceive("getId")->once()->withNoArgs()->andReturn($id);
     $licenseRef->shouldReceive("getShortName")->once()->withNoArgs()->andReturn($shortName);
     $licenseRef->shouldReceive("getFullName")->once()->withNoArgs()->andReturn($fullName);
@@ -54,4 +54,3 @@ class UrlBuilderTest extends \PHPUnit_Framework_TestCase
         "'License text','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');\">$shortName</a>"));
   }
 }
- 

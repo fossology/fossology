@@ -21,6 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "match.h"
 
+int handleSchedulerMode(MonkState* state, const Licenses* licenses);
+
 int sched_onNoMatch(MonkState* state, const File* file);
 int sched_onFullMatch(MonkState* state, const File* file, const License* license, const DiffMatchInfo* matchInfo);
 int sched_onDiffMatch(MonkState* state, const File* file, const License* license, const DiffResult* diffResult);

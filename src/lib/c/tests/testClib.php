@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
-/** 
+/**
  * @todo remove this file and change Makefile
  */
 
@@ -30,7 +30,7 @@ if (!function_exists('Traceback_uri'))
   }
 }
 
-class TestCLib extends \PHPUnit_Framework_TestCase
+class TestCLib extends \PHPUnit\Framework\TestCase
 {
   /** @var TestPgDb */
   private $testDb;

@@ -30,40 +30,51 @@ static PGresult *result = NULL;
 
 /**
  * \brief for function DeleteFolders
+ * \test
+ * -# Give a folder id to deleteFolder()
+ * -# Check for return code
  */
 void testDeleteFolders()
 {
-  long FolderId = 5;
+  long FolderId = 3;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
+  int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  DeleteFolder(FolderId);
+  rc = deleteFolder(3, FolderId, 3, 10);
 
-  PQfinish(db_conn);
+  PQfinish(pgConn);
+  CU_ASSERT_EQUAL(rc, 0);
   CU_PASS("DeleteFolders PASS!");
 }
 
 /**
  * \brief for function DeleteUploads
+ * \test
+ * -# Delete an upload using deleteUpload() and check for the return
+ * -# Check if the upload is delete from database
+ * -# Check if the copyrights for the given upload is also deleted
  */
 void testDeleteUploads()
 {
-  long UploadId = 85;
+  long UploadId = 2;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
   char sql[1024];
+  int rc;
 
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
+  pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
   /** exectue the tested function */
-  DeleteUpload(UploadId);
+  rc = deleteUpload(UploadId, 3, 10);
+  CU_ASSERT_EQUAL(rc, 0);
 
   /* check if uploadtree records deleted */
   memset(sql, '\0', 1024);
   snprintf(sql, 1024, "SELECT * FROM uploadtree WHERE upload_fk = %ld;", UploadId);
-  result = PQexec(db_conn, sql);
-  if (fo_checkPQresult(db_conn, result, sql, __FILE__, __LINE__)) 
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
   {
     CU_FAIL("DeleteUploads FAIL!");
   }
@@ -76,8 +87,8 @@ void testDeleteUploads()
   /* check if copyright records deleted */
   memset(sql, '\0', 1024);
   snprintf(sql, 1024, "SELECT * FROM copyright C INNER JOIN uploadtree U ON C.pfile_fk = U.pfile_fk AND U.upload_fk = %ld;", UploadId);
-  result = PQexec(db_conn, sql);
-  if (fo_checkPQresult(db_conn, result, sql, __FILE__, __LINE__))
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
   {
     CU_FAIL("DeleteUploads FAIL!");
   }
@@ -86,25 +97,14 @@ void testDeleteUploads()
     CU_ASSERT_EQUAL(PQntuples(result),0);
   }
   PQclear(result);
-  
-  PQfinish(db_conn);
-  CU_PASS("DeleteUploads PASS!");
-}
 
-/**
- * \brief for function DeleteLicenses
- */
-void testDeleteLicenses()
-{
-  long UploadId = 85;
-  char *ErrorBuf;
-  
-  db_conn = fo_dbconnect(DBConfFile, &ErrorBuf);
-  /** exectue the tested function */
-  DeleteLicense(UploadId);
-  
-  PQfinish(db_conn);
-  CU_PASS("DeleteLicenses PASS!");
+  /** Check false input */
+  UploadId = 4;
+  rc = deleteUpload(UploadId, 2, 10);
+  CU_ASSERT_NOT_EQUAL(rc, 0);
+
+  PQfinish(pgConn);
+  CU_PASS("DeleteUploads PASS!");
 }
 
 /**
@@ -116,7 +116,6 @@ CU_TestInfo testcases_DeleteFolders[] =
 #endif
 {"Testing the function DeleteFolders:", testDeleteFolders},
 {"Testing the function DeleteUploads:", testDeleteUploads},
-{"Testing the function DeleteLicenses:", testDeleteLicenses}, 
   CU_TEST_INFO_NULL
 };
 

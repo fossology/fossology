@@ -18,16 +18,14 @@
 
 namespace Fossology\Lib\UI;
 
-use Fossology\Lib\Util\Object;
-
-class MenuRenderer extends Object
+class MenuRenderer
 {
    /**
    * @param $menu     menu list need to show as list
    * @param $parm     a list of parameters to add to the URL.
    * @param $uploadId upload id
    */
-  public static function menuToActiveSelect($menu, &$parm, $uploadId = "") 
+  public static function menuToActiveSelect($menu, &$parm, $uploadId = "")
   {
     if (empty($menu)) {
       return '';
@@ -59,13 +57,13 @@ class MenuRenderer extends Object
       }
       $optionsOut .= $entry;
     }
-    
+
     if (plugin_find_id('showjobs') >= 0)
     {
       $optionsOut .= '<option value="' . Traceback_uri() . '?mod=showjobs&upload='.$uploadId.'" title="' . _("Scan History") . '" >'._("History").'</option>';
     }
-    
-    return '<select class="goto-active-option"><option>-- select action --</option>'.$optionsOut.'</select>';
+
+    return '<select class="goto-active-option"><option disabled selected>-- select action --</option>'.$optionsOut.'</select>';
  }
 }
 

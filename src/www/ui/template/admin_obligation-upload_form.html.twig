@@ -18,7 +18,15 @@
         {% if isReadOnly %}
           ({{ 'read only'|trans }}){% endif %}
       </td>
-      <td><input type="text" name="ob_topic" value="{{ ob_topic|e }}" size="30"></td>
+      <td><input type="text" name="ob_topic" value="{{ ob_topic|e }}" size="57"></td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Type of obligation'|trans }}
+        {% if isReadOnly %}
+          ({{ 'read only'|trans }}){% endif %}
+      </td>
+      <td align="left">{{ macro.selectsingle('ob_type', obligationTypes, 'ob_type', 'Obligation', 'style="min-width:120px;"', 4) }}
+      </td>
     </tr>
     <tr>
       <td align="right">{{ 'Obligation Text'|trans }}
@@ -30,8 +38,30 @@
       </td>
     </tr>
     <tr>
+      <td align="right">{{ 'Optional: level of attention this obligation </br> should raise in the clearing process'|trans }}
+        {% if isReadOnly %}
+          ({{ 'read only'|trans }}){% endif %}
+      </td>
+      <td align="left">{{ macro.selectsingle('ob_classification', obligationClassification, 'ob_classification', 'green', 'style="min-width:120px;"', 4) }}
+      </td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Optional: does this obligation apply</br> on modified source code?'|trans }}</td>
+      <td align="left">{{ macro.select('ob_modifications',YesNoMap,'ob_modifications',ob_modifications) }}</td>
+    </tr>
+    <tr>
       <td align="right">{{ "Associated Licenses"|trans }}</td>
-      <td align="left">{{ macro.selectwitharray(licenseSelectorName, licenseShortnames, licenseSelectorId, licnames, 'style="min-width:420px;"', 5) }}</td>
+      <td align="left">{{ macro.selectwitharray(licenseSelectorName, licenseShortnames, licenseSelectorId, licnames, 'style="min-width:575px;"', 8) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ "Optional: Associated Candidate Licenses"|trans }}</td>
+      <td align="left">{{ macro.selectwitharray(candidateSelectorName, candidateShortnames, candidateSelectorId, candidatenames, 'style="min-width:575px;"', 8) }}</td>
+    </tr>
+    <tr>
+      <td align="right">{{ 'Optional: comment'|trans }}</td>
+      <td>
+        <textarea name="ob_comment" rows="5" cols="80" {% if isReadOnly %} readonly="readonly" {% endif %}>{{ ob_comment  |e }}</textarea>
+      </td>
     </tr>
     <tr>
       <td align="right">{{ 'Text Updatable'|trans }}</td>
@@ -42,4 +72,7 @@
     <a href="?mod=admin_obligation_to_csv&amp;ob={{ obId }}" class="buttonLink">{{ 'Export as CSV'|trans }}</a>
   {% endif %}
   <input type="submit" value="{% if obId %}{{ 'Update'|trans }}{% else %}{{ 'Add obligation'|trans }}{% endif %}"/>
+  {% if obId %}
+  <input type="submit" onclick="confirmDeletion()" value="{{ 'Delete obligation (use with caution)'|trans }}"/>
+  {% endif %}
 </form>

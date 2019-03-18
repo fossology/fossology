@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# Copyright 2018 Siemens AG
+# Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# This script helps you install build and runtime dependencies on a system.
+# It is NOT indented to replace package dependencies, it's just a tool to
+# make testing the "upstream" build and install process. If you determine
+# this script isn't installing something you think it should, consult
+# the packaging metadata for the system in question as that is the
+# canonical location for such info, then fix it there first and also
+# update this file and the INSTALL document.
+
+show_help() {
+  cat <<EOF
+Usage: prepare-test [options]
+  -a              : Accept the warning prompt
+  -f              : Create fossy user in Database
+  -t              : Create fossologytest user in Database
+  -y              : Automatic yes to prompts
+  -h              : This help text
+EOF
+}
+
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+# Setting default options
+CreateFossy="N"
+CreateFossyTest="N"
+
+cat <<EOF
+****************************************************************************
+* Please note, the script changes the owner of /var/local/cache/fossology! *
+* Also creates a test repo under /srv/fossologyTestRepo.                   *
+* Creates a PostgreSQL user fossy and fossologytest and stores password    *
+* under ~/.pgpass                                                          *
+****************************************************************************
+* NOTE: Above changes may break your current installation!!                *
+* NOTE: Please do not run on a productive instance!!                       *
+****************************************************************************
+
+EOF
+
+while getopts ":aftyh" o; do
+  case "${o}" in
+    a)
+      WarnAccept="Y"
+      ;;
+    f)
+      CreateFossy="Y"
+      ;;
+    t)
+      CreateFossyTest="Y"
+      ;;
+    y)
+      YesOpt='-y'
+      ;;
+    h)
+      show_help; exit;;
+    *)
+      show_help; exit 1;;
+   esac
+done
+
+if [[ -z ${WarnAccept} ]]; then
+  read -r -n 1 -p "Are you sure run this script?(y/N) " WarnAccept
+  if [[ -z ${WarnAccept} ]]; then
+    WarnAccept="N"
+  fi
+fi
+
+echo
+
+if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
+  sudo mkdir -p /var/local/cache/fossology
+  sudo chown "$(whoami)" /var/local/cache/fossology
+  sudo mkdir -p /srv/fossologyTestRepo
+  sudo chown "$(whoami)" /srv/fossologyTestRepo
+  if [[ "${CreateFossy}" == "Y" ]]; then
+    sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
+    echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
+    sudo su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+  fi
+  if [[ "${CreateFossyTest}" == "Y" ]]; then
+    testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
+    sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
+    echo "localhost:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
+    chmod 0600 ~/.pgpass
+  fi
+  case "${DISTRO}" in
+    Debian|Ubuntu|LinuxMint)
+      sudo apt-get install -q $YesOpt cppcheck ;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum $YesOpt install cppcheck ;;
+  esac
+fi

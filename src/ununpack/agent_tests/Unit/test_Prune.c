@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for Prune()
+ */
 /* local variables */
 static char *Fname = "";
 struct stat Stat;
@@ -44,11 +47,14 @@ int PruneClean()
 /* test functions */
 
 /**
- * @brief regular  file, size is 0
+ * @brief regular file, size is 0
+ * \test
+ * -# Copy a null file (size 0) and call Prune()
+ * -# Check if directory is removed
  */
 void testPruneFileFileSzieIs0()
 {
-  Fname = "../test-data/testdata4unpack/null_file";
+  Fname = "../testdata/null_file";
   deleteTmpFiles(NewDir);
   strcpy(Dst, "./test-result/nullfile");
   stat(Fname, &Stat);
@@ -60,13 +66,16 @@ void testPruneFileFileSzieIs0()
 }
 
 /**
- * @brief regular  file, size is great than 0
+ * @brief regular file, size is great than 0
+ * \test
+ * -# Copy a regular file and call Prune()
+ * -# Check if directory is not removed
  */
 void testPruneRegFile()
 {
-  Fname = "../test-data/testdata4unpack/libfossagent.a";
+  Fname = "../testdata/test.ar";
   deleteTmpFiles(NewDir);
-  strcpy(Dst, "./test-result/libfossagent.a");
+  strcpy(Dst, "./test-result/test.ar");
   stat(Fname, &Stat);
   CopyFile(Fname, Dst);
   Result = Prune(Dst, Stat);
@@ -78,10 +87,13 @@ void testPruneRegFile()
 #if 0
 /**
  * @brief character file
+ * \test
+ * -# Copy a character file and call Prune()
+ * -# Check if directory is removed
  */
 void testPruneCharFile()
 {
-  Fname = "../test-data/testdata4unpack/cfile";
+  Fname = "../testdata/ext2file.fs";
   stat(Fname, &Stat);
   Result = Prune(Fname, Stat);
   exists = file_dir_exists(Fname);

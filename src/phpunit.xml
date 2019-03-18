@@ -1,16 +1,22 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<phpunit bootstrap="./phpunit-bootstrap.php" colors="true">
+<phpunit
+  bootstrap="./phpunit-bootstrap.php" colors="true"
+  backupGlobals="true"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  convertErrorsToExceptions="true"
+  convertNoticesToExceptions="false"
+  stopOnFailure="false">
   <php>
     <env name="SYSCONFDIR" value="src/lib/php/tests/sysconfigDirTest"/>
   </php>
   <logging>
-    <log type="coverage-clover" target="../clover.xml" charset="UTF-8" highlight="false"/>
+    <log type="coverage-clover" target="../clover.xml"/>
   </logging>
 
   <testsuites>
     <testsuite name="Fossology PhpUnit Test Suite">
-      <file>www/ui_tests/startUpTest.php</file>
       <directory suffix="Test.php">lib/php</directory>
+      <file>www/ui_tests/startUpTest.php</file>
       <file>cli/tests/test_fo_copyright_list.php</file>
     </testsuite>
 
@@ -20,9 +26,9 @@
       <directory suffix="Test.php">deciderjob/agent_tests/Functional</directory>
       <directory suffix="Test.php">monk/agent_tests/Functional</directory>
       <directory suffix="Test.php">ninka/agent_tests/Functional</directory>
+      <directory suffix="Test.php">reuser/agent_tests/Functional</directory>    
       <directory suffix="Test.php">spdx2/agent_tests</directory>
     </testsuite>
-
   </testsuites>
 
   <filter>
@@ -30,13 +36,13 @@
       <directory suffix=".php">.</directory>
       <exclude>
         <directory suffix="Test.php">.</directory>
-        <file>./phpunit-bootstrap.php</file>
         <directory>lib/php/tests</directory>
         <directory>lib/c</directory>
         <directory>*/*tests</directory>
         <directory>testing</directory>
         <directory>tutorials</directory>
         <directory>vendor</directory>
+        <file>./phpunit-bootstrap.php</file>
       </exclude>
     </whitelist>
   </filter>

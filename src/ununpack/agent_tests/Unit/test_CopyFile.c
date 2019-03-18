@@ -14,14 +14,18 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
+/**
+ * \file
+ * \brief Unit test cases related to file handling
+ */
 #include "run_tests.h"
 
 /* local variables */
-static char *Src = "";
-static char *Dst = NULL;
-static struct stat statSrc;
-static struct stat statDst;
-static int Result = 0;
+static char *Src = "";      ///< Souce location
+static char *Dst = NULL;    ///< Destination location
+static struct stat statSrc; ///< Stat of source
+static struct stat statDst; ///< Stat of destination
+static int Result = 0;      ///< Result of calls
 
 
 /**
@@ -46,11 +50,15 @@ int CopyFileClean()
 /* test functions */
 
 /**
- * @brief copy directory 
+ * \brief copy directory
+ * \test
+ * -# Add a new directory to Dst
+ * -# Call CopyFile() to copy a file from Src to Dst
+ * -# Check if file was copied to new directory
  */
 void testCopyFileNormalFile()
 {
-  Src = "../test-data/testdata4unpack/imagefile.iso";
+  Src = "../testdata/test.iso";
   deleteTmpFiles("./test-result/");
   strcpy(Dst, "./test-result/hello");
   stat(Src, &statSrc);
@@ -61,11 +69,15 @@ void testCopyFileNormalFile()
 }
 
 /**
- * @brief copy directory 
+ * \brief copy directory
+ * \test
+ * -# Call CopyFile() to copy directory
+ * -# Check if the function returns 1
+ * -# Check if a file under Src is not copied to Dst
  */
 void testCopyFileNormalDir()
 {
-  Src = "../test-data/testdata4unpack/testdir";
+  Src = "../testdata";
   strcpy(Dst, "./test-result/hello");
   deleteTmpFiles("./test-result/");
   Result = CopyFile(Src, Dst);
@@ -75,7 +87,11 @@ void testCopyFileNormalDir()
 }
 
 /**
- * @brief parameters are null
+ * \brief parameters are null
+ * \test
+ * -# Call CopyFile() on an empty Src
+ * -# Check if function returns 1
+ * -# Check if function did not do anything
  */
 void testCopyFileAbnormal()
 {

@@ -15,44 +15,57 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for ExtractAR()
+ */
 /* locals */
 static int Result = 0;
 
 
- /** @brief unpack archive library file
- **/
+ /**
+  * @brief unpack archive library file
+  * \test
+  * -# Try to extract `.ar` library file using ExtractAR()
+  * -# Check if the files are unpacked
+  */
 void testExtractAR4ArchiveLibraryFile()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  MkDirs("./test-result/libfossagent.a.dir/");
-  Filename = "../test-data/testdata4unpack/libfossagent.a";
-  Result = ExtractAR(Filename, "./test-result/libfossagent.a.dir");
-  exists = file_dir_exists("./test-result/libfossagent.a.dir/libfossagent.o");
+  MkDirs("./test-result/test.ar.dir/");
+  Filename = "../testdata/test.ar";
+  Result = ExtractAR(Filename, "./test-result/test.ar.dir");
+  exists = file_dir_exists("./test-result/test.ar.dir/test.tar");
   FO_ASSERT_EQUAL(exists, 1); // existing
   FO_ASSERT_EQUAL(Result, 0); // Extract archieve library successfully
 }
 
 /**
  * @brief unpack deb file
+ * \test
+ * -# Try to extract `.deb` archives using ExtractAR()
+ * -# Check if the files are unpacked
  */
 void testExtractAR4DebFile()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  MkDirs("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/");
-  Filename = "../test-data/testdata4unpack/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb";
-  Result = ExtractAR(Filename, "./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir");
-  exists = file_dir_exists("./test-result/bind9-host_1%3a9.7.0.dfsg.P1-1_i386.deb.dir/data.tar.gz");
+  MkDirs("./test-result/test.deb.dir/");
+  Filename = "../testdata/test.deb";
+  Result = ExtractAR(Filename, "./test-result/test.deb.dir");
+  exists = file_dir_exists("./test-result/test.deb.dir/data.tar.xz");
   FO_ASSERT_EQUAL(exists, 1); // existing
   FO_ASSERT_EQUAL(Result, 0); // Extract archieve library successfully
 }
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Call ExtractAR() with empty parameters
+ * -# Check if the function return NOT OK
  */
 void testExtractAR4EmptyParameters()
 {
@@ -60,20 +73,23 @@ void testExtractAR4EmptyParameters()
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
   Result = ExtractAR("", ""); // empty parameters
-  FO_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library 
+  FO_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library
 }
 
 /**
  * @brief abnormal parameters
+ * \test
+ * -# Try to extract `.rpm` archives using ExtractAR()
+ * -# Check if the function return NOT OK
  */
 void testExtractAR4ErrorParameters()
 {
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/");
   FO_ASSERT_EQUAL(exists, 0); // not existing
-  MkDirs("./test-result/fossology-1.2.0-1.el5.i386.rpm.dir/");
-  Filename = "../test-data/testdata4unpack/fossology-1.2.0-1.el5.i386.rpm";
-  Result = ExtractAR(Filename, "./test-result/fossology-1.2.0-1.el5.i386.rpm.dir");
+  MkDirs("./test-result/test.rpm.dir/");
+  Filename = "../testdata/test.rpm";
+  Result = ExtractAR(Filename, "./test-result/test.dir");
   FO_ASSERT_EQUAL(Result, 1); // fail to Extract archieve library
 }
 

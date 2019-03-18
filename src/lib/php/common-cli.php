@@ -18,8 +18,8 @@
 ***********************************************************/
 
 /**
- * \file common-cli.php
- * \brief general purpose classes used by fossology cli programs.
+ * \file
+ * \brief General purpose classes used by fossology CLI programs.
  *
  * \package common-cli
  *
@@ -27,8 +27,8 @@
  */
 
 /**
- * \brief Initalize the fossology environment for cli use.  This routine loads
- * the plugins so they can be use by cli programs.  In the process of doing
+ * \brief Initialize the fossology environment for CLI use. This routine loads
+ * the plugins so they can be use by cli programs. In the process of doing
  * that it disables the core-auth plugin.
  *
  * \return true
@@ -42,7 +42,7 @@ function cli_Init()
   plugin_load(0); /* load but do not initialize */
 
   /* Turn off authentication */
-  /** The auth module hijacks and disables plugins, so turn it off. **/
+  /* The auth module hijacks and disables plugins, so turn it off. */
   if (array_key_exists("auth", $Plugins)) {
     $P = &$Plugins["auth"];
     if (!empty($P)) {
@@ -52,24 +52,24 @@ function cli_Init()
   $_SESSION['User'] = 'fossy';
 
   /* Initialize plugins */
-  /** This registers plugins with the menu structure and start the DB
-   connection. **/
+  /* This registers plugins with the menu structure and start the DB
+   connection. */
   plugin_preinstall();
 
   return(true);
 } // cli_Init()
 
 /**
- * \brief write/append a message to the log handle passed in.
+ * \brief Write/append a message to the log handle passed in.
  *
- * \param $handle - the path to the file
- * \param $message - the message to put in the log file, the string
+ * \param string $handle  The path to the file
+ * \param string $message The message to put in the log file, the string
  * should not have a new line at the end, this function will add it.
- * \param $mode - the open mode, either 'a' or 'w'
+ * \param string $mode    The open mode, either 'a' or 'w'
  *
- * \note it is up to the caller to manage the mode
+ * \note It is up to the caller to manage the mode
  *
- * \return null on sucess, string for failure
+ * \return null on success, string for failure
  */
 function cli_logger($handle, $message, $mode='a')
 {
@@ -85,5 +85,5 @@ function cli_logger($handle, $message, $mode='a')
     return("$text $handle\n");
   }
   fclose($FR);
-  return(Null);
+  return(null);
 }

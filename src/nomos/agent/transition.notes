@@ -158,6 +158,7 @@ It really helps to know the call hierarchy used by the nomos agent to actually
 detect licenses. As it is now, it looks like this:
 
 main() calls
+processFile() calls
 processRawSource() calls
 processNonPackagedFiles() calls
 processRegularFiles() calls

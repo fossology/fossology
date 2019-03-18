@@ -23,6 +23,14 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Db\DbManager;
 
+/**
+ * @file sanity_check.php
+ * Check the sanity of the database tables
+ */
+
+/**
+ * @class SanityChecker Check sanity of the database
+ */
 class SanityChecker
 {
   /** @var DbManager */
@@ -38,6 +46,12 @@ class SanityChecker
     $this->verbose = $verbose;
   }
 
+  /**
+   * @brief Check the sanity of decision, upload status, License Event types
+   *        license_candidate table and ensures Top level folder for each user.
+   *
+   * @return int error code; 0 on success
+   */
   public function check()
   {
     $this->checkDecisionScopes();
@@ -50,6 +64,9 @@ class SanityChecker
     return $this->errors;
   }
 
+  /**
+   * @brief Check if clearing_decision have proper values in scope and decision_type columns
+   */
   private function checkDecisionScopes()
   {
     $decScopes = new DecisionScopes();
@@ -60,6 +77,9 @@ class SanityChecker
     $this->errors += $this->checkDatabaseEnum($tablename = 'clearing_decision', 'decision_type', $typeMap);
   }
 
+  /**
+   * @brief Check if upload_clearing have proper values in status_fk column
+   */
   private function checkUploadStatus()
   {
     $uploadStatus = new UploadStatus();
@@ -67,6 +87,9 @@ class SanityChecker
     $this->errors += $this->checkDatabaseEnum($tablename = 'upload_clearing', 'status_fk', $statusMap);
   }
 
+  /**
+   * @brief Check if clearing_event have proper values in type_fk column
+   */
   private function checkLicenseEventTypes()
   {
     $licenseEventTypes = new ClearingEventTypes();
@@ -75,9 +98,9 @@ class SanityChecker
   }
   
   /**
-   * 
-   * @param string $tablename
-   * @param string $columnname
+   * @brief Check if every values in given column are values from the given map
+   * @param string $tablename Table in which the values have to be looked upon
+   * @param string $columnname Name of column to check values
    * @param array $map using keys
    * @return int
    */
@@ -104,9 +127,14 @@ class SanityChecker
     return $errors;
   }
   
+  /**
+   * @biref Check if table exists in database
+   * @param string $tableName Name of table to be checked
+   * @return int
+   */
   private function checkExistsTable($tableName)
   {
-    $error = intval(!$this->dbManager->existsTable('license_candidate'));
+    $error = intval(!$this->dbManager->existsTable($tableName));
     if($error){
       echo "(-) table $tableName does not exists";
     }

@@ -1,49 +1,86 @@
 <?php
 /*
- Copyright (C) 2015 Siemens AG
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2015 Siemens AG
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/**
+ *
+ * @file
+ * @brief Functional test cases for Nomos
+ * @dir
+ * @brief Functional test cases for Nomos
+ */
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 
-class CommonCliTest extends PHPUnit_Framework_TestCase
+/**
+ *
+ * @class CommonCliTest
+ * @brief Tests for common CLI operations
+ */
+class CommonCliTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var TestPgDb */
+
+  /**
+   *
+   * @var TestPgDb $testDb Test Database
+   */
   protected $testDb;
-  /** @var TestInstaller */
+
+  /**
+   *
+   * @var TestInstaller $testInstaller Test installer to setup test env
+   */
   protected $testInstaller;
-  /** @var string */
+
+  /**
+   *
+   * @var string $agentDir Path to agent
+   */
   protected $agentDir;
-  
+
+  /**
+   * @brief Setup the test cases and initialize the objects
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   protected function setUp()
   {
-    $this->testDb = new TestPgDb("nomosfun".time());
+    $this->testDb = new TestPgDb("nomosfun" . time());
     $this->agentDir = dirname(dirname(__DIR__));
-    $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
+    $this->testdir = dirname(dirname(__DIR__)) .
+      "/agent_tests/testdata/NomosTestfiles/";
 
     $sysConf = $this->testDb->getFossSysConf();
     $this->testInstaller = new TestInstaller($sysConf);
     $this->testInstaller->init();
     $this->testInstaller->install($this->agentDir);
 
-    $this->testDb->createSequences(array('license_ref_rf_pk_seq'), false);
-    $this->testDb->createPlainTables(array('agent','license_ref'), false);
-    $this->testDb->alterTables(array('license_ref'), false);
+    $this->testDb->createSequences(array(
+      'license_ref_rf_pk_seq'
+    ), false);
+    $this->testDb->createPlainTables(array(
+      'agent',
+      'license_ref'
+    ), false);
+    $this->testDb->alterTables(array(
+      'license_ref'
+    ), false);
   }
 
+  /**
+   * @brief Destruct the objects initialized during setUp()
+   * @see PHPUnit_Framework_TestCase::tearDown()
+   */
   protected function tearDown()
   {
     $this->testInstaller->uninstall($this->agentDir);
@@ -51,21 +88,31 @@ class CommonCliTest extends PHPUnit_Framework_TestCase
     $this->testInstaller->rmRepo();
     $this->testDb = null;
   }
-  
-  protected function runNomos($args="", $files=array())
+
+  /**
+   * @brief Run nomos using the arguments passed
+   *
+   * -# The function setups the test environment required for the agent to run.
+   * -# Run the agent with the arguments passed and pass the files to the agent
+   * @param string $args CLI arguments for the nomos agent
+   * @param array $files File paths to scan by nomos
+   * @return string[] Output and return code
+   */
+  protected function runNomos($args = "", $files = array())
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $confFile = $sysConf."/fossology.conf";
-    system("touch ".$confFile);
+    $confFile = $sysConf . "/fossology.conf";
+    system("touch " . $confFile);
     $config = "[FOSSOLOGY]\ndepth = 0\npath = $sysConf/repo\n";
     file_put_contents($confFile, $config);
 
-    $execDir = $this->agentDir.'/agent';
-    system("install -D $this->agentDir/VERSION $sysConf/mods-enabled/nomos/VERSION");
+    $execDir = $this->agentDir . '/agent';
+    system(
+      "install -D $this->agentDir/VERSION $sysConf/mods-enabled/nomos/VERSION");
 
     foreach ($files as $file) {
-      $args .= " ".escapeshellarg($file);
+      $args .= " " . escapeshellarg($file);
     }
 
     $pipeFd = popen("$execDir/nomos -c $sysConf $args", "r");
@@ -78,17 +125,27 @@ class CommonCliTest extends PHPUnit_Framework_TestCase
     $retCode = pclose($pipeFd);
 
     unlink("$sysConf/mods-enabled/nomos/VERSION");
-    //unlink("$sysConf/mods-enabled/nomos");
-    //rmdir("$sysConf/mods-enabled");
+    // unlink("$sysConf/mods-enabled/nomos");
+    // rmdir("$sysConf/mods-enabled");
     unlink($confFile);
 
-    return array($output,$retCode);
+    return array(
+      $output,
+      $retCode
+    );
   }
-  
+
+  /**
+   * @brief Test for nomos help message
+   * @test
+   * -# Call runNomos() with `-h` to get help message
+   * -# Check the output for help message
+   */
   public function testHelp()
   {
     $nomos = dirname(dirname(__DIR__)) . '/agent/nomos';
-    list($output,) = $this->runNomos($args="-h"); // exec("$nomos -h 2>&1", $out, $rtn);
+    list ($output,) = $this->runNomos($args = "-h"); // exec("$nomos -h 2>&1",
+                                                     // $out, $rtn);
     $out = explode("\n", $output);
     $usage = "Usage: $nomos [options] [file [file [...]]";
     $this->assertEquals($usage, $out[0]);

@@ -20,13 +20,17 @@ namespace Fossology\Lib\BusinessRules;
 
 use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class ClearingEventProcessor extends Object
+/**
+ * @class ClearingEventProcessor
+ * @brief Functions to process clearing events
+ */
+class ClearingEventProcessor
 {
 
   /**
-   * @param ClearingEvent[] $events
+   * @brief Get license refs from clearing events
+   * @param ClearingEvent[] $events Clearing events to extract license ref from
    * @return LicenseRef[]
    */
   public function getClearingLicenseRefs($events)
@@ -45,8 +49,9 @@ class ClearingEventProcessor extends Object
   }
 
   /**
-   * @param ClearingEvent[] $events
-   * @return ClearingEvent[]
+   * @brief Filter events based on license id
+   * @param ClearingEvent[] $events Clearing events to be filtered
+   * @return ClearingEvent[] Clearing events keyed on license id
    */
   public function filterEffectiveEvents($events)
   {

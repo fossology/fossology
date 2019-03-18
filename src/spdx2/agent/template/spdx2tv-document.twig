@@ -4,7 +4,7 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-SPDXVersion: SPDX-2.0
+SPDXVersion: SPDX-2.1
 DataLicense: CC0-1.0
 
 ##-------------------------
@@ -42,10 +42,10 @@ LicenseListVersion: 2.6
 ## License Information
 ##-------------------------
 
-{% for licenseId,extractedText in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
+{% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
 LicenseID: {{ licenseId|replace(' ','-') }}
-LicenseName: {{ licenseId|replace(' ','-') }}
-ExtractedText: <text> {{ extractedText|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
-                                      |replace({'\f':''}) }} </text>
+LicenseName: {{ licenseData['name'] }}
+ExtractedText: <text> {{ licenseData['text']|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                                            |replace({'\f':''}) }} </text>
 
 {% endif %}{% endfor %}

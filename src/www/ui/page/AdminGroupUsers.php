@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
- Copyright (C) 2014-2015, Siemens AG
- Author: Steffen Weber 
+ Copyright (C) 2014-2015, 2018 Siemens AG
+ Author: Steffen Weber
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -149,14 +149,23 @@ class AdminGroupUsers extends DefaultPlugin
   private function updateGUMPermission($gum_pk, $perm)
   {
     $dbManager = $this->getObject('db.manager');
-    if ($perm === -1)
-    {
+    if ($perm === -1) {
       $dbManager->prepare($stmt = __METHOD__ . ".delByGUM",
-          "delete from group_user_member where group_user_member_pk=$1");
-      $dbManager->freeResult($dbManager->execute($stmt, array($gum_pk)));
-    } else if (array_key_exists($perm, $this->groupPermissions))
-    {
-      $dbManager->getSingleRow("update group_user_member set group_perm=$1 where group_user_member_pk=$2",
+          "DELETE FROM group_user_member WHERE group_user_member_pk=$1 RETURNING user_fk, group_fk");
+      $deletedEntry = $dbManager->execute($stmt, array($gum_pk));
+      $effectedUser = $dbManager->fetchArray($deletedEntry);
+      $isEffected = $dbManager->getSingleRow("SELECT count(*) cnt FROM users WHERE user_pk=$1 AND group_fk = $2",
+        array($effectedUser['user_fk'], $effectedUser['group_fk']), $stmt = __METHOD__ . ".isUserEffectedFromRemoval");
+      if($isEffected['cnt'] == 1) {
+        $dbManager->getSingleRow("UPDATE users SET group_fk = (
+          SELECT group_fk FROM group_user_member WHERE user_fk = $1 AND group_perm >= 0 LIMIT 1)
+          WHERE user_pk = $1",
+          array($effectedUser['user_fk']), $stmt = __METHOD__ . ".setNewGroupId");
+      }
+      $dbManager->freeResult($deletedEntry);
+    }
+    else if (array_key_exists($perm, $this->groupPermissions)) {
+      $dbManager->getSingleRow("UPDATE group_user_member SET group_perm=$1 WHERE group_user_member_pk=$2",
           array($perm, $gum_pk), $stmt = __METHOD__ . ".updatePermInGUM");
     }
   }

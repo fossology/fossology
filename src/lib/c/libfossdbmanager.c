@@ -25,30 +25,34 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossdbmanager.h>
 #include <libfossdb.h>
 
+/** Parameter for queries */
 typedef struct
 {
-  int type;
-  char* name;
-  char* fmt;
+  int type;   ///< Type of parameter, check buildStringArray() for more
+  char* name; ///< Name of the parameter
+  char* fmt;  ///< Printf format string for the parameter
 } param;
 
+/** Prepared statements */
 struct fo_dbmanager_preparedstatement
 {
-  fo_dbManager* dbManager;
-  param* params;
-  char* name;
-  int paramc;
+  fo_dbManager* dbManager;  ///< DB manager
+  param* params;  ///< Query parameters
+  char* name;     ///< Name of the prepared statement
+  int paramc;     ///< Number of paramenters
 };
 
+/** Database manager object */
 struct fo_dbmanager
 {
-  PGconn* dbConnection;
-  GHashTable* cachedPrepared;
-  char* dbConf;
-  FILE* logFile;
-  int ignoreWarns;
+  PGconn* dbConnection; ///< Postgres database connection object
+  GHashTable* cachedPrepared; ///< Hash table of prepared statements
+  char* dbConf;         ///< DB conf file location
+  FILE* logFile;        ///< FOSSology log file pointer
+  int ignoreWarns;      ///< Set to ignore warnings from logging
 };
 
+/** Print the log in logfile or stdout */
 #define LOG(level, str, ...) \
   do {\
     FILE* logFile = dbManager->logFile; \
@@ -58,10 +62,13 @@ struct fo_dbmanager
       printf(level ": " str, __VA_ARGS__); \
   } while(0)
 
+/** Macro to log error */
 #define LOG_ERROR(str, ...) LOG("ERROR", str, __VA_ARGS__)
+/** Macro to log fatal error */
 #define LOG_FATAL(str, ...) LOG("FATAL", str, __VA_ARGS__)
 
 #ifdef DEBUG
+/** Macro to log debug message */
 #define LOG_DEBUG(str, ...) LOG("DEBUG", str, __VA_ARGS__)
 #else
 #define LOG_DEBUG(str, ...) \
@@ -69,6 +76,12 @@ struct fo_dbmanager
   } while(0)
 #endif
 
+/**
+ * \brief Free prepared statement
+ *
+ * The function is used in initializing hash table.
+ * \param ptr Pointer for fo_dbManager_PreparedStatement object
+ */
 static void cachedPrepared_free(gpointer ptr)
 {
   fo_dbManager_PreparedStatement* stmt = ptr;
@@ -77,6 +90,11 @@ static void cachedPrepared_free(gpointer ptr)
   free(stmt);
 }
 
+/**
+ * \brief Receive notice/warning from Postgres and print in log
+ * \param arg DB manager
+ * \param res Result from Postgres
+ */
 static void noticeReceiver(void* arg, const PGresult* res) {
   fo_dbManager* dbManager = arg;
   char* message = PQresultErrorMessage(res);
@@ -85,6 +103,13 @@ static void noticeReceiver(void* arg, const PGresult* res) {
     LOG("NOTICE", "%s", message);
 };
 
+/**
+ * \brief Create new fo_dbManager object with conf file location
+ * \param dbConnection  DB connection object
+ * \param dbConf        Conf file location
+ * \return The new DB manager object with conf file location
+ * \sa fo_dbManager_new()
+ */
 fo_dbManager* fo_dbManager_new_withConf(PGconn* dbConnection, const char* dbConf)
 {
   fo_dbManager* dbManager = fo_dbManager_new(dbConnection);
@@ -92,6 +117,11 @@ fo_dbManager* fo_dbManager_new_withConf(PGconn* dbConnection, const char* dbConf
   return dbManager;
 }
 
+/**
+ * \brief Create and initialize new fo_dbManager object
+ * \param dbConnection  DB connection object
+ * \return New DB manager object
+ */
 fo_dbManager* fo_dbManager_new(PGconn* dbConnection)
 {
   fo_dbManager* result = malloc(sizeof(fo_dbManager));
@@ -113,6 +143,30 @@ fo_dbManager* fo_dbManager_new(PGconn* dbConnection)
   return result;
 }
 
+/**
+ * \brief Creates a copy of the given dbManager with a new dedicated database
+ * connection.
+ *
+ * Any statement prepared with the originating instance can be normally
+ * executed with the previous connection, statements prepared with the new
+ * instance will be completely independent (they are connection-local). The new
+ * instance has the default logging attached and not share the log of the
+ * originating instance, if needed set it with fo_dbManager_setLogFile().
+ *
+ * \b Example
+ * \code
+ * dbManager0 = fo_dbManager_new_withConf(dbConnection, "DB.conf");
+ * statement1 = fo_dbManager_PrepareStamement(dbManager0, "a", "SELECT * FROM a");
+ *
+ * dbManager1 = fo_dbManager_fork(dbManager0);
+ * statement2 = fo_dbManager_PrepareStamement(dbManager1, "a", "SELECT * FROM a");
+ *
+ * dbManager2 = fo_dbManager_fork(dbManager1);
+ * \endcode
+ * \param dbManager Existing DB manager
+ * \return New DB manager forked from existing manager, else log a fatal error.
+ * \sa fo_dbManager_new_withConf()
+ */
 fo_dbManager* fo_dbManager_fork(fo_dbManager* dbManager)
 {
   fo_dbManager* result = NULL;
@@ -130,6 +184,12 @@ fo_dbManager* fo_dbManager_fork(fo_dbManager* dbManager)
   return result;
 }
 
+/**
+ * \brief Set the log file pointer for a given DB manager
+ * \param dbManager   DB manager to be updated
+ * \param logFileName Log file location
+ * \return 0 on success, 1 on failure
+ */
 int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName)
 {
   if (dbManager->logFile)
@@ -146,16 +206,35 @@ int fo_dbManager_setLogFile(fo_dbManager* dbManager, const char* logFileName)
   }
 }
 
+/**
+ * \brief Set the ignoreWarns for a fo_dbManager
+ * \param dbManager DB manager to be updated
+ * \param ignoreWarns New value
+ */
 void fo_dbManager_ignoreWarnings(fo_dbManager* dbManager, int ignoreWarns)
 {
   dbManager->ignoreWarns = ignoreWarns;
 }
 
+/**
+ * \brief Get the wrapped Postgres connection object from fo_dbManager
+ * \param dbManager DB manager with the connection object
+ * \return The connection object wrapped inside the manager
+ */
 PGconn* fo_dbManager_getWrappedConnection(fo_dbManager* dbManager)
 {
   return dbManager->dbConnection;
 }
 
+/**
+ * \brief Un-allocate the memory from a DB manager
+ *
+ * The function applies following actions on the manager before calling free
+ * -# Unref the cached table
+ * -# Free the DB conf file location
+ * -# Close the log file FP
+ * \param dbManager The DB manager to be free-ed
+ */
 void fo_dbManager_free(fo_dbManager* dbManager)
 {
   g_hash_table_unref(dbManager->cachedPrepared);
@@ -166,12 +245,27 @@ void fo_dbManager_free(fo_dbManager* dbManager)
   free(dbManager);
 }
 
+/**
+ * \brief Finish a connection on fo_dbManager
+ *
+ * -# Call PQfinish()
+ * -# Free the DB manager using fo_dbManager_free()
+ * \param dbManager DB manager
+ */
 void fo_dbManager_finish(fo_dbManager* dbManager)
 {
   PQfinish(dbManager->dbConnection);
   fo_dbManager_free(dbManager);
 }
 
+/**
+ * \brief Print an array as a JSON string
+ *
+ * The function prints the array in `{[index]='value', ...}` format
+ * \param parameters Array of strings
+ * \param count      Length of the array
+ * \return JSON styled C string in the mentioned format
+ */
 static char* array_print(char** parameters, int count)
 {
   GString* resultCreator = g_string_new("{");
@@ -186,6 +280,11 @@ static char* array_print(char** parameters, int count)
   return g_string_free(resultCreator, FALSE);
 }
 
+/**
+ * \brief Free an array of strings
+ * \param parameters Array of strings
+ * \param count      Length of the array
+ */
 static void array_free(char** parameters, int count)
 {
   int i;
@@ -194,6 +293,10 @@ static void array_free(char** parameters, int count)
   free(parameters);
 }
 
+/**
+ * NULL terminated array of param supported in query parameters
+ * \note Remember to keep these synchronized in buildStringArray()
+ */
 param supported[] = {
 #define ADDSUPPORTED(n, type, fmt) \
   {n, #type, fmt},
@@ -204,11 +307,17 @@ param supported[] = {
   ADDSUPPORTED(4, unsigned, "%u")
   ADDSUPPORTED(5, unsigned int, "%u")
   ADDSUPPORTED(6, unsigned long, "%lu")
-/* remember to keep these synchronized in buildStringArray() */
 #undef ADDSUPPORTED
   {0, NULL, NULL},
 };
 
+/**
+ * \brief Create an array of strings from an array of param
+ * \param paramCount  Length of params array
+ * \param params      Array of param objects
+ * \param vars        Corresponding value to objects in params array
+ * \return Array of string with param value
+ */
 static inline char** buildStringArray(int paramCount, param* params, va_list vars)
 {
   char** result = malloc(sizeof(char*) * paramCount);
@@ -245,6 +354,19 @@ static inline char** buildStringArray(int paramCount, param* params, va_list var
   return result;
 }
 
+/**
+ * \brief Print a prepared statement as a JSON string
+ *
+ * Prints the string in
+ * \code
+ * { name: '<statement_name>', parameterTypes: [
+ *   [<index>]={<param_name>,<format>}],
+ *   ...
+ * ]}
+ * \endcode
+ * \param preparedStatement The prepared statement to be printed
+ * \return JSON styled C string in the mentioned format
+ */
 char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatement)
 {
   GString* resultCreator = g_string_new("");
@@ -264,6 +386,12 @@ char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatem
   return g_string_free(resultCreator, FALSE);
 }
 
+/**
+ * \brief BEGIN a transaction block in Postgres
+ * \param dbManager DB manager in use
+ * \return 1 on success;\n
+ * 0 on failure;
+ */
 int fo_dbManager_begin(fo_dbManager* dbManager)
 {
   int result = 0;
@@ -276,6 +404,12 @@ int fo_dbManager_begin(fo_dbManager* dbManager)
   return result;
 }
 
+/**
+ * \brief COMMIT a transaction block in Postgres
+ * \param dbManager DB manager in use
+ * \return 1 on success;\n
+ * 0 on failure;
+ */
 int fo_dbManager_commit(fo_dbManager* dbManager)
 {
   int result = 0;
@@ -288,6 +422,12 @@ int fo_dbManager_commit(fo_dbManager* dbManager)
   return result;
 }
 
+/**
+ * \brief ROLLBACK a transaction block in Postgres
+ * \param dbManager DB manager in use
+ * \return 1 on success;\n
+ * 0 on failure;
+ */
 int fo_dbManager_rollback(fo_dbManager* dbManager)
 {
   int result = 0;
@@ -300,11 +440,28 @@ int fo_dbManager_rollback(fo_dbManager* dbManager)
   return result;
 }
 
+/**
+ * \brief Check if a table exists in Database
+ * \param dbManager DB manager to use
+ * \param tableName Table in question
+ * \return 1 on success;
+ * 0 on failure;
+ * \sa fo_dbManager_exists()
+ */
 int fo_dbManager_tableExists(fo_dbManager* dbManager, const char* tableName)
 {
   return fo_dbManager_exists(dbManager, "table", tableName);
 }
 
+/**
+ * \brief Check if a given type with the given name exists in Database
+ * \param dbManager DB manager to use
+ * \param type      Type to be checked (table|column|view|etc...)
+ * \param tableName Table in question
+ * \return 1 on success;
+ * 0 on failure;
+ * \sa fo_dbManager_exists()
+ */
 int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* name)
 {
   int result = 0;
@@ -339,6 +496,25 @@ int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* n
   return result;
 }
 
+/**
+ * \brief Execute a SQL query in a printf format
+ *
+ * \b Example
+ * \code
+ * char* aString = fo_dbManager_StringEscape(dbManager, "a it's=");
+ *
+ * if (aString)
+ *     PGresult* result = fo_dbManager_Exec_printf(
+ *                            dbManager,
+ *                            "SELECT * FROM %s WHERE a='%s%d'",
+ *                            "table_one", aString, 3
+ *                        );
+ * \endcode
+ * \param dbManager             DB manager to use
+ * \param sqlQueryStringFormat  Query format like printf
+ * \return PGreult object on success;\n
+ * NULL on error (also writes to log);
+ */
 PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQueryStringFormat, ...)
 {
   char* sqlQueryString;
@@ -374,6 +550,14 @@ PGresult* fo_dbManager_Exec_printf(fo_dbManager* dbManager, const char* sqlQuery
   return result;
 }
 
+/**
+ * \brief Escape strings to prevent injections
+ *
+ * Escapes using PQescapeStringConn()
+ * \param dbManager DB manager to use
+ * \param string    String to be escaped
+ * \return Escaped string on success; NULL otherwise
+ */
 char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string)
 {
   size_t length = strlen(string);
@@ -391,6 +575,12 @@ char* fo_dbManager_StringEscape(fo_dbManager* dbManager, const char* string)
   }
 }
 
+/**
+ * \brief Execute a prepared statement
+ * \param preparedStatement Prepared statement
+ * \return Result on success; NULL otherwise
+ * \sa fo_dbManager_ExecPreparedv()
+ */
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...)
 {
   if (!preparedStatement)
@@ -405,6 +595,13 @@ PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStat
   return result;
 }
 
+/**
+ * \brief Execute a prepared statement
+ * \param preparedStatement Prepared statement
+ * \param args              Values for the parameter placeholders
+ * \return Result on success; NULL otherwise
+ * \sa fo_dbManager_ExecPrepared()
+ */
 PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedStatement, va_list args)
 {
   if (!preparedStatement)
@@ -464,6 +661,13 @@ PGresult* fo_dbManager_ExecPreparedv(fo_dbManager_PreparedStatement* preparedSta
   return result;
 }
 
+/**
+ * \brief Compare two strings ignoring consecutive spaces in b
+ * \param a       First string
+ * \param b       Second string
+ * \param bLength Length of second string
+ * \return 0 if strings don't match
+ */
 static inline int parseParamStr_equals(const char* a, const char* b, size_t bLength)
 {
   const char* ptrA = a;
@@ -493,6 +697,14 @@ static inline int parseParamStr_equals(const char* a, const char* b, size_t bLen
   return (!(*ptrA) && (lenB == bLength));
 }
 
+/**
+ * \brief Get the required param object in dest based on type
+ * \param [in]type    Type of parameter
+ * \param [in]length  Length of type string
+ * \param [out]dest   The required param object
+ * \return 1 on success;\n
+ * 0 otherwise
+ */
 static inline int parseParamStr_set(const char* type, size_t length, param* dest)
 {
   param* ptr = supported;
@@ -508,6 +720,13 @@ static inline int parseParamStr_set(const char* type, size_t length, param* dest
   return 0;
 }
 
+/**
+ * \brief Get a list of params from a required CSV
+ * \param paramtypes  CSV of required params
+ * \param [out]params Array of required params
+ * \return 0 on error, 1 on success
+ * \sa parseParamStr_set()
+ */
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params)
 {
   *params = g_array_new(TRUE, FALSE, sizeof(param));
@@ -573,6 +792,13 @@ int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params)
   return success;
 }
 
+/**
+ * \brief Initialize prepared statement from a CSV of parameters type required
+ * \param statement   Statement to the initialized
+ * \param paramtypes  CSV of parameters type required
+ * \return 0 on error, 1 on success
+ * \sa fo_dbManager_parseParamStr()
+ */
 static inline int parseParamStr(fo_dbManager_PreparedStatement* statement, const char* paramtypes)
 {
   GArray* paramsG;
@@ -583,6 +809,16 @@ static inline int parseParamStr(fo_dbManager_PreparedStatement* statement, const
   return success;
 }
 
+/**
+ * \brief Create a prepared statement
+ * \param dbManager  DB manager to use
+ * \param name       Name of the prepared statement
+ * \param query      Query to be perpared
+ * \param paramtypes CSV list of parameter types
+ * \return Prepared statement on success;\n
+ * NULL otherwise;
+ * \sa parseParamStr()
+ */
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(
   fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes
 )

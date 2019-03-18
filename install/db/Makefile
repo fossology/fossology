@@ -21,12 +21,15 @@ install: all
 	$(INSTALL_DATA) dbmigrate_2.1-2.2.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
 	$(INSTALL_DATA) dbmigrate_2.0-2.5-pre.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
+	$(INSTALL_DATA) dbmigrate_3.3-3.4.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.3-3.4.php
 	$(INSTALL_DATA) dbmigrate_clearing-event.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	$(INSTALL_DATA) dbmigrate_real-parent.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	$(INSTALL_DATA) dbmigrate_bulk_license.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php
 	$(INSTALL_DATA) sanity_check.php $(DESTDIR)$(LIBEXECDIR)/sanity_check.php
 	$(INSTALL_DATA) fo_mapping_license.php $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	$(INSTALL_DATA) dbmigrate_copyright-author.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
+	$(INSTALL_DATA) dbmigrate_multiple_copyright_decisions.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
+	$(INSTALL_DATA) resequence_author_table.php $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
@@ -49,12 +52,15 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.1-2.2.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.0-2.5-pre.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.3-3.4.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_mapping_license.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \

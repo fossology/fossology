@@ -15,17 +15,25 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+
 namespace Fossology\SpdxTwo;
 
+/**
+ * @class SpdxTwoUtils
+ * @brief Utilities for SPDX2
+ */
 class SpdxTwoUtils
 {
-  static public $prefix = "LicenseRef-";
+  static public $prefix = "LicenseRef-";      ///< Prefix to be used
 
   /**
-   * @param string[] $args
-   * @param string $key1
-   * @param string $key2
+   * @brief For a given set of arguments assign $args[$key1] and $args[$key2]
    *
+   * Get the array of arguments and find $key1 and $key2 values and assign
+   * to $args[$key1] and $args[$key2].
+   * @param string $args String array
+   * @param string $key1 Key1
+   * @param string $key2 Key2
    * @return string[] $args
    */
   static public function preWorkOnArgsFlp($args,$key1,$key2)
@@ -42,9 +50,9 @@ class SpdxTwoUtils
   }
 
   /**
+   * @brief Add prefix to the license based on SPDX2 standards
    * @param string $license
    * @param callable $spdxValidityChecker
-   *
    * @return string
    */
   static public function addPrefixOnDemand($license, $spdxValidityChecker = null)
@@ -53,25 +61,32 @@ class SpdxTwoUtils
     {
       return "NOASSERTION";
     }
+
     if(strpos($license, " OR ") !== false)
     {
       return "(" . $license . ")";
     }
-    else
+
+    if($spdxValidityChecker === null ||
+        (is_callable($spdxValidityChecker) &&
+            call_user_func($spdxValidityChecker, $license)))
     {
-      if($spdxValidityChecker === null ||
-          (is_callable($spdxValidityChecker) &&
-              call_user_func($spdxValidityChecker, $license)))
-      {
-        return $license;
-      }
-      else
-      {
-        return self::$prefix . $license;
-      }
+      return $license;
     }
+
+    // if we get here, we're using a non-standard SPDX license
+    // make sure our license text conforms to the SPDX specifications
+    $license = preg_replace('/[^a-zA-Z0-9\-\_\.\+]/','-',$license);
+    $license = preg_replace('/\+(?!$)/','-',$license);
+    return self::$prefix . $license;
   }
 
+  /**
+   * @brief Add prefix to license keys
+   * @param array $licenses
+   * @param callable $spdxValidityChecker
+   * @return string[]
+   */
   static public function addPrefixOnDemandKeys($licenses, $spdxValidityChecker = null)
   {
     $ret = array();
@@ -82,6 +97,12 @@ class SpdxTwoUtils
     return $ret;
   }
 
+  /**
+   * @brief Add prefix to license list
+   * @param array $licenses
+   * @param callable $spdxValidityChecker
+   * @return array
+   */
   static public function addPrefixOnDemandList($licenses, $spdxValidityChecker = null)
   {
     return array_map(function ($license) use ($spdxValidityChecker)
@@ -91,9 +112,9 @@ class SpdxTwoUtils
   }
 
   /**
-   * @param string[] $licenses
+   * @brief Implode licenses with "AND" or "OR"
+   * @param string $licenses
    * @param callable $spdxValidityChecker
-   *
    * @return string
    */
   static public function implodeLicenses($licenses, $spdxValidityChecker = null)

@@ -1,6 +1,5 @@
 /*********************************************************************
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2015 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -15,7 +14,10 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
-
+/**
+ * @dir
+ * @brief Unit tests for libfossology
+ */
 #include <libfocunit.h>
 #include <libfodbreposysconf.h>
 
@@ -35,7 +37,19 @@ extern CU_TestInfo libfossdbmanager_testcases[];
 /**
 * array of every test suite. There should be at least one test suite for every
 * library includes in libfossology.
+* \todo Fix `fossscheduler_testcases`
 */
+
+#if CU_VERSION_P == 213
+CU_SuiteInfo suites[] =
+  {
+    {"Testing libfossdb", NULL, NULL, NULL, NULL, libfossdb_testcases},
+    {"Testing fossconfig", NULL, NULL, NULL, NULL, fossconfig_testcases},
+    {"Testing libfossdbmanger", NULL, NULL, NULL, NULL, libfossdbmanager_testcases},
+    // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
+    CU_SUITE_INFO_NULL
+  };
+#else
 CU_SuiteInfo suites[] =
   {
     {"Testing libfossdb", NULL, NULL, libfossdb_testcases},
@@ -44,6 +58,7 @@ CU_SuiteInfo suites[] =
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
   };
+#endif
 
 /* ************************************************************************** */
 /* **** main function ******************************************************* */

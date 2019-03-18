@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@ use Fossology\Lib\Data\Clearing\ClearingEvent;
 use Fossology\Lib\Data\Clearing\ClearingLicense;
 use Mockery as M;
 
-class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
+class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
 {
   /** @var bool */
   private $sameUpload = true;
@@ -50,6 +50,8 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   /** @var string */
   private $reportinfo;
   /** @var string */
+  private $acknowledgement;
+  /** @var string */
   private $scope;
   /** @var int */
   private $timeStamp;
@@ -61,7 +63,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
-    $this->clearingEvent = M::mock(ClearingEvent::classname());
+    $this->clearingEvent = M::mock(ClearingEvent::class);
     $this->clearingId = 8;
     $this->uploadTreeId = 9;
     $this->pfileId = 10;
@@ -70,6 +72,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
     $this->type = DecisionTypes::TO_BE_DISCUSSED;
     $this->comment = "Test comment";
     $this->reportinfo = "Test reportinfo";
+    $this->acknowledgement = "Test acknowledgement";
     $this->scope = DecisionScopes::ITEM;
     $this->timeStamp = mktime(11, 14, 15, 7, 28, 2012);
 
@@ -85,7 +88,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 
   public function testSameFolder()
   {
-    $clearingDec =$this->clearingDecisionBuilder 
+    $clearingDec =$this->clearingDecisionBuilder
         ->setSameFolder($this->sameFolder)
         ->build();
     assertThat($clearingDec->getSameFolder(), is($this->sameFolder));
@@ -101,17 +104,17 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
 
   public function testPositiveLicenses()
   {
-    $addedLic = M::mock(LicenseRef::classname());
-    
-    $addedClearingLic = M::mock(ClearingLicense::classname());
+    $addedLic = M::mock(LicenseRef::class);
+
+    $addedClearingLic = M::mock(ClearingLicense::class);
     $addedClearingLic->shouldReceive('isRemoved')->withNoArgs()->andReturn(false);
     $addedClearingLic->shouldReceive('getLicenseRef')->withNoArgs()->andReturn($addedLic);
-    
-    $removedClearingLic = M::mock(ClearingLicense::classname());
+
+    $removedClearingLic = M::mock(ClearingLicense::class);
     $removedClearingLic->shouldReceive('isRemoved')->andReturn(true);
 
-    $removedClearingEvent = M::mock(ClearingEvent::classname());
-    
+    $removedClearingEvent = M::mock(ClearingEvent::class);
+
     $this->clearingEvent->shouldReceive('getClearingLicense')->andReturn($addedClearingLic);
     $removedClearingEvent->shouldReceive('getClearingLicense')->andReturn($removedClearingLic);
 
@@ -178,4 +181,3 @@ class ClearingDecisionBuilderTest extends \PHPUnit_Framework_TestCase
   }
 
 }
- 

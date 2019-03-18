@@ -24,10 +24,9 @@ use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
-use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 
-class LicenseDaoTest extends \PHPUnit_Framework_TestCase
+class LicenseDaoTest extends \PHPUnit\Framework\TestCase
 {
   /** @var TestLiteDb */
   private $testDb;
@@ -83,7 +82,7 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
     $expected = array( new LicenseMatch($pfileId, $licenseRef, $agentRef, $licenseFileId, $matchPercent) );
 
     assertThat($matches, equalTo($expected));
-    assertThat($matches[0], is(anInstanceOf(LicenseMatch::classname())) );
+    assertThat($matches[0], is(anInstanceOf(LicenseMatch::class)) );
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
@@ -300,16 +299,16 @@ class LicenseDaoTest extends \PHPUnit_Framework_TestCase
 
     $key = "project.tar.gz/project.tar/project/folderB/subBfolderB/subBBsubBfolderA/BBBfileA";
     $this->assertArrayHasKey($key, $result);
-    $expected = array($licAll[$rf_pk_all[0]]);
-    assertThat($result[$key], is(equalTo($expected)));
+    $expected = $licAll[$rf_pk_all[0]];
+    assertThat($result[$key]['scanResults'][0], is(equalTo($expected)));
 
     $key = "project.tar.gz/project.tar/project/folderB/subBfolderB/subBBsubBfolderA/BBBfileB";
     $this->assertArrayHasKey($key, $result);
 
     $key = "project.tar.gz/project.tar/project/folderB/subBfolderB/subBBsubBfolderA/BBBfileC";
     $this->assertArrayHasKey($key, $result);
-    $this->assertContains($licAll[$rf_pk_all[0]],$result[$key]);
-    $this->assertContains($licAll[$rf_pk_all[1]],$result[$key]);
+    $this->assertContains($licAll[$rf_pk_all[0]],$result[$key]['scanResults']);
+    $this->assertContains($licAll[$rf_pk_all[1]],$result[$key]['scanResults']);
 
     $key = "project.tar.gz";
     $this->assertArrayHasKey($key, $result);

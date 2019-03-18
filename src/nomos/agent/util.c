@@ -18,7 +18,7 @@
 /* Equivalent to core nomos v1.29 */
 
 /**
- * \file utilc
+ * \file
  * \brief misc utilites
  *
  * @version "$Id: util.c 4032 2011-04-05 22:16:20Z bobgo $"
@@ -31,8 +31,8 @@
 #include "nomos_regex.h"
 #include  "nomos_utils.h"
 
-#define MM_CACHESIZE 20
-#define MAXLENGTH     100 
+#define MM_CACHESIZE 20     ///< MM Cache size
+#define MAXLENGTH     100   ///< Buffer length
 
 #ifdef REUSE_STATIC_MEMORY
 static char grepzone[10485760]; /* 10M for now, adjust if needed */
@@ -54,7 +54,11 @@ static struct mm_cache memcache[MEMCACHESIZ];
 void memCacheDump();
 #endif /* MEMORY_TRACING */
 
-
+/**
+ * \brief Check if given path is a directory
+ * \param dpath Path to check
+ * \return  True if path is a directory, false otherwise
+ */
 int isDIR(char *dpath)
 {
 #ifdef PROC_TRACE
@@ -64,7 +68,12 @@ int isDIR(char *dpath)
   return(isINODE(dpath, S_IFDIR));
 }
 
-
+/**
+ * \brief Check if given file is empty
+ * \param fpath Path of file to check
+ * \return  True if file is empty, false otherwise
+ * \sa isFILE()
+ */
 int isEMPTYFILE(char *fpath)
 {
 #ifdef PROC_TRACE
@@ -77,7 +86,12 @@ int isEMPTYFILE(char *fpath)
   return(cur.stbuf.st_size == 0);
 }
 
-
+/**
+ * \brief Check if given path is a Block device
+ * \param bpath Path to check
+ * \return  True if path is a block device, false otherwise
+ * \sa isINODE()
+ */
 int isBLOCK(char *bpath)
 {
 #ifdef PROC_TRACE
@@ -87,7 +101,12 @@ int isBLOCK(char *bpath)
   return(isINODE(bpath, S_IFBLK));
 }
 
-
+/**
+ * \brief Check if given path is a character device
+ * \param cpath Path to check
+ * \return  True if path is a character device, false otherwise
+ * \sa isINODE()
+ */
 int isCHAR(char *cpath)
 {
 #ifdef PROC_TRACE
@@ -97,7 +116,12 @@ int isCHAR(char *cpath)
   return(isINODE(cpath, S_IFCHR));
 }
 
-
+/**
+ * \brief Check if given path is a pipe
+ * \param ppath Path to check
+ * \return  True if path is a pipe, false otherwise
+ * \sa isINODE()
+ */
 int isPIPE(char *ppath)
 {
 #ifdef PROC_TRACE
@@ -107,7 +131,12 @@ int isPIPE(char *ppath)
   return(isINODE(ppath, S_IFIFO));
 }
 
-
+/**
+ * \brief Check if given path is a symbolic link
+ * \param spath Path to check
+ * \return  True if path is a symbolic link, false otherwise
+ * \sa isINODE()
+ */
 int isSYMLINK(char *spath)
 {
 #ifdef PROC_TRACE
@@ -117,7 +146,12 @@ int isSYMLINK(char *spath)
   return(isINODE(spath, S_IFLNK));
 }
 
-
+/**
+ * \brief Check for a inode against a flag
+ * \param ipath Path of inode
+ * \param typ   Flag to check against to
+ * \return  Return true if inode matches with the flag, false otherwise
+ */
 int isINODE(char *ipath, int typ)
 {
   int ret;
@@ -129,7 +163,7 @@ int isINODE(char *ipath, int typ)
 
   if ((ret = stat(ipath, &cur.stbuf)) < 0) {
     /*
-   IF we're trying to stat() a file that doesn't exist, 
+   IF we're trying to stat() a file that doesn't exist,
    that's no biggie.
    Any other error, however, is fatal.
      */
@@ -145,7 +179,11 @@ int isINODE(char *ipath, int typ)
   return((int)(cur.stbuf.st_mode & S_IFMT & typ));
 }
 
-
+/**
+ * \brief Check if a relocation target is accessible
+ * \param basename Base name of the original target
+ * \return  Path of the new target, NULL on failure
+ */
 char *newReloTarget(char *basename)
 {
   static char newpath[myBUFSIZ];
@@ -300,7 +338,17 @@ void memCacheDump(char *s)
 }
 #endif /* MEMORY_TRACING */
 
-
+/**
+ * \brief Find Begin of Line in a string
+ *
+ * The function starts from the starting position and tracks backward till a
+ * EOL is hit.
+ * \param s           Starting position in string to scan
+ * \param upperLimit  Upper limit of the string
+ * \return - Location of BOL if found
+ * - If we hit upperLimit, return upper limit
+ * - NULL otherwise
+ */
 char *findBol(char *s, char *upperLimit)
 {
   char *cp;
@@ -332,7 +380,13 @@ char *findBol(char *s, char *upperLimit)
   return(NULL_STR);
 }
 
-
+/**
+ * \brief Find first ROL in a string
+ * \param s Starting position in a string
+ * \return - Position of first EOL hit
+ * - Last element of the string if EOL not found
+ * - NULL otherwise
+ */
 char *findEol(char *s)
 {
   char *cp;
@@ -355,7 +409,15 @@ char *findEol(char *s)
   return(NULL_STR);
 }
 
-
+/**
+ * \brief Rename an inode at oldpath to newpath
+ *
+ * The functions calls rename() first. If it fails, another try is done using
+ * `mv` command.
+ * \note If everything fails, function prints an error and call Bail()
+ * \param oldpath Original path to be renamed
+ * \param newpath New path of the inode
+ */
 void renameInode(char *oldpath, char *newpath)
 {
   int err = 0;
@@ -390,7 +452,13 @@ void renameInode(char *oldpath, char *newpath)
   return;
 }
 
-
+/**
+ * \brief Change inode mode bits
+ *
+ * \note The function prints error and call Bail() if chmod() fails
+ * \param pathname Path of the inode
+ * \param mode     New mode bits (e.g. 0660)
+ */
 void chmodInode(char *pathname, int mode)
 {
   char sErrorBuf[1024];
@@ -410,7 +478,13 @@ void chmodInode(char *pathname, int mode)
   return;
 }
 
-
+/**
+ * \brief Open a file and return the file pointer
+ * \note The function prints error and call Bail() on failure
+ * \param pathname Path of the file to open
+ * \param mode     Mode in which the file should be opened
+ * \return File pointer
+ */
 FILE *fopenFile(char *pathname, char *mode)
 {
   FILE *fp;
@@ -449,6 +523,13 @@ static void printListToFile(list_t *l, char *filename, char *mode) {
 }
  */
 
+/**
+ * \brief Open a process pipe using popen()
+ * \note The function prints error and call Bail() on failure
+ * \param command Command to open a pipe to
+ * \param mode    Mode of the pipe
+ * \return File pointer to the opened pipe
+ */
 FILE *popenProc(char *command, char *mode)
 {
   FILE *pp;
@@ -476,6 +557,8 @@ FILE *popenProc(char *command, char *mode)
 
 /**
  * \brief VERY simple line count, does NOT have to be perfect!
+ * \param textp Pointer to string
+ * \return Number of lines found
  */
 char *wordCount(char *textp)
 {
@@ -512,7 +595,13 @@ char *wordCount(char *textp)
   return(wcbuf);
 }
 
-
+/**
+ * \brief Create a copy of a string
+ * \param s     String to be copied
+ * \param label Label on the new memory
+ * \return New string
+ * \sa memAlloc()
+ */
 char *copyString(char *s, char *label)
 {
   char *cp;
@@ -530,7 +619,11 @@ char *copyString(char *s, char *label)
   return(cp);
 }
 
-
+/**
+ * \brief Get the basename from a file path
+ * \param path Path to the file
+ * \return  Basename start pointer on the path
+ */
 char *pathBasename(char *path)
 {
   char *cp;
@@ -543,7 +636,9 @@ char *pathBasename(char *path)
   return(cp == NULL_STR ? path : (char *)(cp+1));
 }
 
-
+/**
+ * \brief Get occurrence of a regex in a given string pointer
+ */
 char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
     int recordOffsets)
 {
@@ -822,7 +917,11 @@ char *getInstances(char *textp, int size, int nBefore, int nAfter, char *regex,
   return(ibuf);
 }
 
-
+/**
+ * \brief Get the current date
+ * \note The function prints a fatal log and call Bail() if ctime_r() fails
+ * \return Current date
+ */
 char *curDate()
 {
   static char datebuf[32];
@@ -866,6 +965,10 @@ void memStats(char *s)
 #endif /* MEMSTATS */
 
 
+/**
+ * \brief Create symbolic links for a given path in current directory
+ * \param path Path to the inode
+ */
 void makeSymlink(char *path)
 {
 #if defined(PROC_TRACE) || defined(UNPACK_DEBUG)
@@ -884,7 +987,7 @@ void makeSymlink(char *path)
 
 /**
  * \brief CDB -- Need to review this code, particularly for the use of an
- * external file (Nomos.strings.txt). Despite the fact that variable 
+ * external file (Nomos.strings.txt). Despite the fact that variable
  * is named debugStr, the file appears to be used for more than just
  * debugging.
  *
@@ -908,7 +1011,8 @@ void printRegexMatch(int n, int cached)
 #endif /* PROC_TRACE */
 
   if (*debugStr == NULL_CHAR) {
-    (void) sprintf(debugStr, "%s/Nomos.strings.txt", gl.initwd);
+    strncpy(debugStr, gl.initwd, sizeof(debugStr)-1);
+    strncat(debugStr, "/Nomos.strings.txt", sizeof(debugStr)-1);
 #ifdef DEBUG
     printf("File: %s\n", debugStr);
 #endif /* DEBUG */
@@ -970,8 +1074,8 @@ void printRegexMatch(int n, int cached)
 
 /**
  * \brief Replace all nulls in Buffer with blanks.
- * \param Buffer: The data having its nulls replaced.
- * \param BufferSize: Buffer size
+ * \param Buffer      The data having its nulls replaced.
+ * \param BufferSize  Buffer size
  */
 void ReplaceNulls(char *Buffer, int BufferSize)
 {
@@ -1038,7 +1142,7 @@ char *mmapFile(char *pathname) /* read-only for now */
   }
 
   (void) strcpy(mmp->label, pathname);
-  if (cur.stbuf.st_size) 
+  if (cur.stbuf.st_size)
   {
     mmp->size = cur.stbuf.st_size + 1;
     mmp->mmPtr = memAlloc(mmp->size, MTAG_MMAPFILE);
@@ -1068,7 +1172,7 @@ char *mmapFile(char *pathname) /* read-only for now */
     }
     mmp->inUse = 1;
     /* Replace nulls with blanks so binary files can be scanned */
-    ReplaceNulls(mmp->mmPtr,  mmp->size-1); 
+    ReplaceNulls(mmp->mmPtr,  mmp->size-1);
     return((char *) mmp->mmPtr);
   }
   /*
@@ -1149,7 +1253,15 @@ void munmapFile(void *ptr)
   return;
 }
 
-
+/**
+ * \brief Finds the length of first line in a buffer
+ *
+ * Function traverse the buffer and breaks at the first occurance of EOL or
+ * NULL_CHAR
+ * \param p   Buffer to look into
+ * \param len Upper limit in p
+ * \return  Length of the line
+ */
 int bufferLineCount(char *p, int len)
 {
   char *cp;
@@ -1175,7 +1287,11 @@ int bufferLineCount(char *p, int len)
   return(i ? i : 1);
 }
 
-
+/**
+ * \brief Append a string at the end of the file
+ * \param pathname  Path to the file
+ * \param str       String to be appended
+ */
 void appendFile(char *pathname, char *str)
 {
   FILE *fp;
@@ -1190,7 +1306,12 @@ void appendFile(char *pathname, char *str)
   return;
 }
 
-
+/**
+ * \brief Run a system command
+ * \param fmt The command to run along with parameters
+ * \note The function will log errors if and error occurs
+ * \return The return code from the command.
+ */
 int mySystem(const char *fmt, ...)
 {
   int ret;
@@ -1223,6 +1344,11 @@ int mySystem(const char *fmt, ...)
 }
 
 
+/**
+ * \brief Check if an inode is a file
+ * \param pathname  Path to check
+ * \return True if it is a file, false otherwise
+ */
 int isFILE(char *pathname)
 {
 
@@ -1235,7 +1361,9 @@ int isFILE(char *pathname)
 
 
 /**
- * \brief adds a line to the specified pathname if either:
+ * \brief adds a line to the specified pathname
+ *
+ * Adds a line to the specified pathname if either:
  * - the line does NOT already exist in the line, or
  * - the variable 'forceFlag' is set to non-zero
  */
@@ -1271,7 +1399,11 @@ void Msg(const char *fmt, ...)
   return;
 }
 
-
+/**
+ * \brief Raise an assert
+ * \param fatalFlag Set to TRUE if assert is fatal. Function will BAIL
+ * \param fmt       Assert format
+ */
 void Assert(int fatalFlag, const char *fmt, ...)
 {
   va_start(ap, fmt);

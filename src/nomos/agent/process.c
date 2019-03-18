@@ -16,7 +16,7 @@
 
  ***************************************************************/
 /**
- * \file process.c
+ * \file
  * \brief some common functions that process the files for scanning
  */
 
@@ -48,7 +48,7 @@ static void processNonPackagedFiles()
 
   /*
    * If there are unused/unreferenced source archives, they need to be
-   * processed indivudually.  Create the global 'unused archives' list
+   * processed individually.  Create the global 'unused archives' list
    * and hand it off to be processed.
    */
 #ifdef	UNPACK_DEBUG
@@ -140,9 +140,9 @@ void processRawSource()
  * processRegularFiles
  * \brief Process a list of regular files.
  *
- *  \callgraph
-  CDB - This really isn't a list, there should only be a single file in
-  regfList. 
+ * \callgraph
+ * CDB - This really isn't a list, there should only be a single file in
+ * regfList.
  */
 void processRegularFiles()
 {

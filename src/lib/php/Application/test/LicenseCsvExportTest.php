@@ -23,19 +23,38 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
-class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
+/**
+ * @class LicenseCsvExportTest
+ * @brief Test for class LicenseCsvExport
+ */
+class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
 {
+  /**
+   * @brief One time setup for test
+   * @see PHPUnit::Framework::TestCase::setUp()
+   */
   protected function setUp()
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
+  /**
+   * @brief Close mockery
+   * @see PHPUnit::Framework::TestCase::tearDown()
+   */
   protected function tearDown() {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
-  
- 
+
+  /**
+   * @brief Test for LicenseCsvExport::createCsv()
+   * @test
+   * -# Setup test DB and insert some licenses.
+   * -# Call LicenseCsvExport::createCsv().
+   * -# Check if the file returned is correct.
+   * -# Test with different delimiters.
+   */
   public function testCreateCsv()
   {
     $testDb = new TestLiteDb();
@@ -51,7 +70,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
 
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>2,'usage'=>LicenseMap::REPORT));
-    
+
     $licenseCsvExport = new LicenseCsvExport($dbManager);
     $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk');
     $out = fopen('php://output', 'w');
@@ -68,7 +87,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         $licenses[1]['rf_notes'],
         $licenses[1]['rf_source'],
         $licenses[1]['rf_risk']));
-        
+
     fputcsv($out, array($licenses[2]['rf_shortname'],
         $licenses[2]['rf_fullname'],
         $licenses[2]['rf_text'],
@@ -78,7 +97,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         $licenses[2]['rf_notes'],
         $licenses[2]['rf_source'],
         $licenses[2]['rf_risk']));
-    
+
     fputcsv($out, array($licenses[3]['rf_shortname'],
         $licenses[3]['rf_fullname'],
         $licenses[3]['rf_text'],
@@ -91,7 +110,7 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
     $expected = ob_get_contents();
     ob_end_clean();
     assertThat($csv,is(equalTo($expected)));
-    
+
     $delimiter = '|';
     $licenseCsvExport->setDelimiter($delimiter);
     $csv3 = $licenseCsvExport->createCsv(3);
@@ -109,40 +128,55 @@ class LicenseCsvExportTest extends \PHPUnit_Framework_TestCase
         $delimiter);
     $expected3 = ob_get_contents();
     ob_end_clean();
-    assertThat($csv3,is(equalTo($expected3)));    
+    assertThat($csv3,is(equalTo($expected3)));
   }
-  
 
-  
+  /**
+   * @brief Test for LicenseCsvExport::setDelimiter()
+   * @test
+   * -# Initialize LicenseCsvExport.
+   * -# Set a new delimiter using LicenseCsvExport::setDelimiter().
+   * -# Check if the delimiter is changed.
+   * -# Set a new delimiter using LicenseCsvExport::setDelimiter().
+   * -# Check if the delimiter is changed with only the first character passed.
+   */
   public function testSetDelimiter()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $reflection = new \ReflectionClass($licenseCsvExport); 
+    $reflection = new \ReflectionClass($licenseCsvExport);
     $delimiter = $reflection->getProperty('delimiter');
     $delimiter->setAccessible(true);
-    
+
     $licenseCsvExport->setDelimiter('|');
     assertThat($delimiter->getValue($licenseCsvExport),is('|'));
-    
+
     $licenseCsvExport->setDelimiter('<>');
     assertThat($delimiter->getValue($licenseCsvExport),is('<'));
   }
-  
+
+  /**
+   * @brief Test for LicenseCsvExport::setEnclosure()
+   * @test
+   * -# Initialize LicenseCsvExport.
+   * -# Set a new enclosure using LicenseCsvExport::setEnclosure().
+   * -# Check if the enclosure is changed.
+   * -# Set a new enclosure using LicenseCsvExport::setEnclosure().
+   * -# Check if the enclosure is changed with only the first character passed.
+   */
   public function testSetEnclosure()
   {
-    $dbManager = M::mock(DbManager::classname());
+    $dbManager = M::mock(DbManager::class);
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $reflection = new \ReflectionClass($licenseCsvExport); 
+    $reflection = new \ReflectionClass($licenseCsvExport);
     $enclosure = $reflection->getProperty('enclosure');
     $enclosure->setAccessible(true);
-    
+
     $licenseCsvExport->setEnclosure('|');
     assertThat($enclosure->getValue($licenseCsvExport),is('|'));
-    
+
     $licenseCsvExport->setEnclosure('<>');
     assertThat($enclosure->getValue($licenseCsvExport),is('<'));
   }
 
 }
- 

@@ -18,9 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data\Upload;
 
-use Fossology\Lib\Util\Object;
-
-class Upload extends Object
+class Upload
 {
   /** @var int */
   protected $id;

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\HighlightDao;
+use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Db\DbManager;
 use Mockery as M;
@@ -53,20 +54,26 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
   private $decisionTypes;
   /** @var HighlightDao */
   private $highlightDao;
+  /** @var ShowJobsDao */
+  private $showJobsDao;
 
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao,
-    ClearingDecisionProcessor $clearingDecisionProcessor, AgentLicenseEventProcessor $agentLicenseEventProcessor)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, HighlightDao $highlightDao, ShowJobsDao $showJobsDao, ClearingDecisionProcessor $clearingDecisionProcessor, AgentLicenseEventProcessor $agentLicenseEventProcessor)
   {
     $this->clearingDao = $clearingDao;
     $this->agentDao = $agentDao;
     $this->uploadDao = $uploadDao;
     $this->highlightDao = $highlightDao;
+    $this->showJobsDao = $showJobsDao;
     $this->dbManager = $dbManager;
     $this->decisionTypes = new DecisionTypes();
     $this->clearingDecisionProcessor = $clearingDecisionProcessor;
     $this->agentLicenseEventProcessor = $agentLicenseEventProcessor;
   }
 
+  /**
+   * @copydoc SchedulerTestRunner::run()
+   * @see SchedulerTestRunner::run()
+   */
   public function run($uploadId, $userId=2, $groupId=2, $jobId=1, $args="")
   {
     $GLOBALS['userId'] = $userId;
@@ -89,15 +96,16 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('dao.highlight')->andReturn($this->highlightDao);
+    $container->shouldReceive('get')->with('dao.show_jobs')->andReturn($this->showJobsDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_decision_processor')->andReturn($this->clearingDecisionProcessor);
     $container->shouldReceive('get')->with('businessrules.agent_license_event_processor')->andReturn($this->agentLicenseEventProcessor);
     $GLOBALS['container'] = $container;
 
-    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
+    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
-    
+
     $exitval = 0;
 
     ob_start();
@@ -108,5 +116,5 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     return array(true, $output, $exitval);
   }
-  
+
 }

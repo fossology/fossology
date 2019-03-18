@@ -2,14 +2,26 @@ Source: fossology
 Section: utils
 Priority: extra
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, libboost-regex-dev, libboost-program-options-dev, php5, curl, PBBUILDDEP
+Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, PBPHPCLI, curl, PBBUILDDEP
 Standards-Version: PBDEBSTD
 Homepage: http://fossology.org
+
+Package: fossology-dev
+Architecture: any
+Depends: PBPHPCLI
+Description: architecture for analyzing software, development utils
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains software to ease development behind a firewall.
 
 Package: fossology
 Architecture: any
 Depends: fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
-Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
+Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -25,7 +37,7 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: php5-pgsql, php-pear, php5-cli, php5-json, ${shlibs:Depends}, ${misc:Depends}
+Depends: php-pgsql, php-pear, PBPHPCLI, php-json, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -38,7 +50,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5, ${misc:Depends}
+Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php, ${misc:Depends}
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -247,6 +259,30 @@ Description: architecture for analyzing software, deciderjob
  type identification.
  .
  This package contains the deciderjob agent programs and their resources.
+
+Package: fossology-unifiedreport
+Architecture: any
+Depends: fossology-common, ${misc:Depends}
+Description: architecture for analyzing software, Microsoft Word report generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the unifiedreport agent programs and their resources.
+
+Package: fossology-readmeoss
+Architecture: any
+Depends: fossology-common, fossology-copyright ${misc:Depends}
+Description: architecture for analyzing software, OSS readme generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the readmeoss agent programs and their resources.
 
 Package: fossology-reuser
 Architecture: any

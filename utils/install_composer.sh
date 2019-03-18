@@ -17,10 +17,9 @@ version="1.4.2"
 ################################################################################
 # prepare
 
-set -e
-cd "$( dirname "${BASH_SOURCE[0]}" )/.."
+pushd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
-if [[ "$1" == "-h" ]]; then
+if [[ $1 == '-h' ]]; then
     cat <<EOF
 This script is used to install composer in version=${version}.
 The composer artifact is downloaded from https://github.com/composer/getcomposer.org with commit_hash=${current_github_hash}.
@@ -39,14 +38,16 @@ EOF
     exit 0
 fi
 
+set -o errexit -o nounset -o pipefail
+
 # if run as root, install by default to /usr/bin, otherwise install to ./utils
-if [ "$EUID" -ne 0 ]; then
+if [[ $EUID -ne 0 ]]; then
     install_dir="${1:-utils}"
 else
     install_dir="${1:-/usr/local/bin}"
 fi
 
-if [ ! -d "$install_dir" ]; then
+if [[ ! -d "$install_dir" ]]; then
     echo "install_dir=\"${install_dir}\" is not present (currently at \"$(pwd)\")"
     exit 1
 fi
@@ -58,7 +59,9 @@ target="$install_dir/$filename"
 # do the install
 
 echo "composer $version will be installed to: $target (this will override any old executable)"
-wget -q \
-     -O "$target" \
+curl --silent \
+     --output "$target" --location \
      "https://github.com/composer/getcomposer.org/raw/$current_github_hash/web/download/$version/composer.phar"
 chmod +x "$target"
+
+popd

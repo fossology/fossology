@@ -16,12 +16,27 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+/**
+ * @file
+ * @brief Regression test for NOMOS
+ */
 
+/**
+ * @class NomosFunTest
+ * @brief Runs regression test on NOMOS
+ */
 class NomosFunTest extends CommonCliTest
 {
-  /** @var string */
+  /**
+   * @var string $testdir
+   * Location of test dir holding the test licenses
+   */
   protected $testdir;
 
+  /**
+   * @brief Setup the test cases and initialize the objects
+   * @see PHPUnit_Framework_TestCase::setUp()
+   */
   protected function setUp()
   {
     parent::setUp();
@@ -29,6 +44,15 @@ class NomosFunTest extends CommonCliTest
     $this->testdir = dirname(dirname(__DIR__))."/agent_tests/testdata/NomosTestfiles/";
   }
 
+  /**
+   * @brief Runs regression test on NOMOS based on LastGoodNomosTestfilesScan
+   * @test
+   * -# Run nomos on every test file inside testdir and save result in a file
+   * -# Read the `testdata/LastGoodNomosTestfilesScan` file to load previous
+   * results
+   * -# Check the difference in last results and new results
+   * -# If there is a difference, fail the test.
+   */
   public function testDiffNomos()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -48,6 +72,11 @@ class NomosFunTest extends CommonCliTest
     exec("sort ./scan.out.r >./scan.out.s");
     exec("diff ./LastGoodNomosTestfilesScan.s ./scan.out.s >./report.d", $out, $rtn);
     $count = exec("cat report.d|wc -l", $out, $ret);
-    $this->assertEquals($count,'0', "some lines of licenses are different, please view ./report.d for the details!");
+    if ($count != 0) {
+      print "Some lines of licenses are different, see details below, or view ./report.d\n";
+      exec("cat ./report.d", $report);
+      foreach ($report as $line) print "$line\n";
+    }
+    $this->assertEquals($count,'0');
   }
 }

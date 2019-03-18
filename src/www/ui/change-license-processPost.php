@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2015 Siemens AG
+ * Copyright (C) 2014-2018 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -93,12 +93,31 @@ class changeLicenseProcessPost extends FO_Plugin
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
-    if(!empty($decisionMark))
+
+    if(!empty($decisionMark) && $decisionMark == "irrelevant")
+    {
+      if(!is_array($itemId)){
+        $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
+      }else{
+        foreach($itemId as $uploadTreeId){
+          $responseMsg = $this->doMarkIrrelevant($uploadTreeId, $groupId, $userId);
+          if(!empty($responseMsg)){
+            return $responseMsg;
+          }
+        }
+      }
+      if(!empty($responseMsg)){
+        return $responseMsg;
+      }
+      return new JsonResponse(array('result'=>'success'));      
+    }
+
+    if(!empty($decisionMark) && $decisionMark == "deleteIrrelevant")
     {
       $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
       /** @var ItemTreeBounds */
       $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
-      $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+      $errMsg = $this->clearingDao->deleteIrrelevantDecisionsFromDirectory($itemTreeBounds,$groupId,$userId);
       if (empty($errMsg))
       {
         return new JsonResponse(array('result'=>'success'));
@@ -107,6 +126,15 @@ class changeLicenseProcessPost extends FO_Plugin
     }
 
     return $this->doEdit($userId,$groupId,$itemId);
+  }
+
+  function doMarkIrrelevant($itemId, $groupId, $userId)
+  {
+    $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
+    /** @var ItemTreeBounds */
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
+    $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+    return $errMsg;
   }
 
   function doEdit($userId,$groupId,$itemId)
@@ -135,7 +163,7 @@ class changeLicenseProcessPost extends FO_Plugin
         }
 
         $this->clearingDao->insertClearingEvent($itemId, $userId, $groupId, $licenseId, $removed,
-            ClearingEventTypes::USER, $reportInfo = '', $comment = '', $jobId);
+            ClearingEventTypes::USER, $reportInfo = '', $comment = '', $acknowledgement = '', $jobId);
       }
     }
 
@@ -169,5 +197,3 @@ class changeLicenseProcessPost extends FO_Plugin
 
 $NewPlugin = new changeLicenseProcessPost;
 $NewPlugin->Initialize();
-
-

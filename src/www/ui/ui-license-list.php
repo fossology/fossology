@@ -108,7 +108,7 @@ class ui_license_list extends FO_Plugin
 
   function getAgentPksFromRequest($upload_pk)
   {
-    $agents = array("monk","nomos","ninka");
+    $agents = array("monk","nomos","ninka","reportImport");
     $agent_pks = array();
 
     foreach($agents as $agent)
@@ -135,17 +135,9 @@ class ui_license_list extends FO_Plugin
      $licensesPerFileName = array();
     /** @var ItemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
-    $licensesPerFileNameOld = $this->licenseDao->getLicensesPerFileNameForAgentId($itemTreeBounds, $agent_pks, $includeSubfolder, array(), $exclude, $ignore, true);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, Auth::getGroupId());
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisionsForLicenseList($allDecisions);
-    foreach($licensesPerFileNameOld as $path => $uploadTreePk){
-      foreach($uploadTreePk as $uploadTreeId => $licenseArray){
-        if($editedMappedLicenses[$uploadTreeId]){
-          $licensesPerFileName[$path]['concludedResults'] = $editedMappedLicenses[$uploadTreeId];
-        }
-        $licensesPerFileName[$path]['scanResults'] = $licenseArray;
-      } 
-    }
+    $licensesPerFileName = $this->licenseDao->getLicensesPerFileNameForAgentId($itemTreeBounds, $agent_pks, $includeSubfolder, $exclude, $ignore, $editedMappedLicenses);
     /* how many lines of data do you want to display */
     $currentNum = 0;
     $lines = [];
@@ -157,10 +149,15 @@ class ui_license_list extends FO_Plugin
           break;
         }
 
-        if(!empty($licenseNames['concludedResults'])){
-          $lines[] = rtrim($fileName .': '.implode($licenseNames['scanResults'],' ') . ', '.implode($licenseNames['concludedResults'],' ') . '', ', ');
+        if(array_key_exists('concludedResults', $licenseNames) && !empty($licenseNames['concludedResults'])) {
+          $conclusions = array();
+          foreach ($licenseNames['concludedResults'] as $value) {
+              $conclusions = array_merge($conclusions, $value);
+          }
+          $conclusions = array_unique ($conclusions);
+          $lines[] = $fileName . ': ' . implode(' ', $licenseNames['scanResults']) . ', ' . implode(' ', $conclusions);
         }else{
-          $lines[] = rtrim($fileName .': '.implode($licenseNames['scanResults'],' ') . '');
+          $lines[] = $fileName .': '.implode(' ', $licenseNames['scanResults']);
         }
       }
       if (!$ignore && $licenseNames === false)

@@ -3,7 +3,7 @@
 
  Copyright (C) 2007-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -17,15 +17,23 @@
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
- -------------------------------------------
- adj2nest
+ ***************************************************************/
+
+/**
+ \file adj2nest.c
+ \page adj2nest adj2nest
+ \tableofcontents
+ \section adj2nestbrief Working of adj2nest
  Convert an adjacency list to a nested set and update user permissions to the upload.
  Ununpack creates an adjacency list: every child knows it's parent.
+
  For performance: convert this to nested set.
+
+ <PRE>
    P1
    /\
  C1  C2
-
+ </PRE>
  C1 is placed in set 1.
  C2 is placed in set 2.
  P1 is placed in set 3 -- P1 tree spans sets 1-3.
@@ -33,7 +41,7 @@
  All sets are ordered, so every parent knows the range
  of sets that form every child.
 
- Method:
+ \section adj2nestmethod Method:
  - Select all keys and parents from uploadtree where they are in the upload_fk.
  - Build a tree that changes "child knows parent" to "parent knows child".
  - Walk the tree. (depth-first)
@@ -42,13 +50,31 @@
      - Track the right by counting each visited node.
    - Update the DB.
 
- NOTE:
+ \section adj2nestactions Supported actions
+ Command line flag|Description|
+ ---:|:---|
+  -h|Help (print this message), then exit|
+  -i|Initialize the database, then exit|
+  -a|Run on ALL uploads that have no nested set records|
+  -c SYSCONFDIR|Specify the directory for the system configuration|
+  -v|Verbose (-vv = more verbose)|
+  -u|list all upload ids, then exit|
+  no file|Process upload ids from the scheduler|
+  id|Process upload ids from the command-line|
+  -V|Print the version info, then exit|
+
+ \section adj2nestnote NOTE:
  The first id is "1", not "0".
  Every node is assumed to have a NULL child!
    - If there are n nodes, then the top-most range is [1,2*n]
    - Every left and every right value is unique.
    - The left part of the range is the same as the node's ID number.
- ***************************************************************/
+
+ \section sadj2nestource Agent source
+   - \link src/adj2nest/agent \endlink
+   - \link src/adj2nest/ui \endlink
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -69,28 +95,34 @@ char BuildVersion[]="adj2nest build version: " VERSION_S " r(" COMMIT_HASH_S ").
 char BuildVersion[]="adj2nest build version: NULL.\n";
 #endif
 
-PGconn *pgConn = NULL;  // Database connection
+PGconn *pgConn = NULL;  ///< Database connection
 
+/**
+ * \struct uploadtree
+ * \brief Contains information required by uploadtree elements
+ */
 struct uploadtree
-  {
-  long UploadtreePk;
-  long Child;
-  long Sibling;
-  };
+{
+  long UploadtreePk;  /**< uploadtree element's ID */
+  long Child;         /**< uploadtree element's child ID */
+  long Sibling;       /**< uploadtree element's sibling ID */
+};
 typedef struct uploadtree uploadtree;
 uploadtree *Tree=NULL;
-char *uploadtree_tablename;
+char *uploadtree_tablename; /**< Name of DB table (uploadtree, uploadtree_a,...) */
 long TreeSize=0;
-long TreeSet=0; /* index for inserting the next child */
-long SetNum=0; /* index for tracking set numbers */
+long TreeSet=0; /**< index for inserting the next child */
+long SetNum=0;  /**< index for tracking set numbers */
 int isBigUpload=0;
 /************************************************************/
 /************************************************************/
 /************************************************************/
 
-/**************************************************
- WalkTree(): Given a tree, recursively walk it.
- **************************************************/
+/**
+ * Given a tree, recursively walk it.
+ * \param Index ID of the uploadtree element
+ * \param Depth Maximum depth for the recursion
+ */
 void	WalkTree	(long Index, long Depth)
 {
   long LeftSet;
@@ -127,11 +159,12 @@ void	WalkTree	(long Index, long Depth)
 
 } /* WalkTree() */
 
-/**************************************************
- SetParent(): Given a parent and a child, add the child
- to the parent's chain.
- NOTE: This is iterative!
- **************************************************/
+/**
+ * Given a parent and a child, add the child
+ * to the parent's chain. NOTE: This is iterative!
+ * \param Parent ID of the parent to add child.
+ * \param Child  ID of the child to be added.
+ */
 void	SetParent	(long Parent, long Child)
 {
   long P;
@@ -189,11 +222,12 @@ void	SetParent	(long Parent, long Child)
     }
 } /* SetParent() */
 
-/**************************************************
- LoadAdj(): Given an upload_pk, load the adjacency table.
- This is in the format "every child knows its parent".
- Returns the adjacency tree.
- **************************************************/
+/**
+ * Given an upload_pk, load the adjacency table.
+ * This is in the format "every child knows its parent".
+ * Returns the adjacency tree.
+ * \param UploadPk Upload ID to be aj2nested
+ */
 void	LoadAdj	(long UploadPk)
 {
   long i;
@@ -205,7 +239,7 @@ void	LoadAdj	(long UploadPk)
   char LastChar;
 
   uploadtree_tablename = GetUploadtreeTableName(pgConn, UploadPk);
-  
+
   /* If the last character of the uploadtree_tablename is a digit, run analyze */
   LastChar = uploadtree_tablename[strlen(uploadtree_tablename)-1];
   if (LastChar >= '0' && LastChar <= '9')
@@ -214,7 +248,7 @@ void	LoadAdj	(long UploadPk)
     snprintf(SQL,sizeof(SQL),"ANALYZE %s",uploadtree_tablename);
     pgResult =  PQexec(pgConn, SQL);
     fo_checkPQcommand(pgConn, pgResult, SQL, __FILE__ ,__LINE__);
-    PQclear(pgResult);  
+    PQclear(pgResult);
   }
 
   snprintf(SQL,sizeof(SQL),"SELECT uploadtree_pk,parent FROM %s WHERE upload_fk = %ld AND parent IS NOT NULL ORDER BY parent, ufile_mode&(1<<29) DESC, ufile_name",uploadtree_tablename,UploadPk);
@@ -252,7 +286,7 @@ void	LoadAdj	(long UploadPk)
     Child = atol(PQgetvalue(pgRootResult, i, 0));
     Tree[TreeSet].UploadtreePk = Child;
     TreeSet++;
-    
+
     /* dummy heart to make sure the scheduler knows we are still alive */
     if ((i % 100000) == 0) fo_scheduler_heart(0);
   }
@@ -263,7 +297,7 @@ void	LoadAdj	(long UploadPk)
     Child = atol(PQgetvalue(pgNonRootResult,i,0));
     Parent = atol(PQgetvalue(pgNonRootResult,i,1));
     SetParent(Parent,Child);
-    
+
     /* dummy heart to make sure the scheduler knows we are still alive */
     if ((i % 100000) == 0) fo_scheduler_heart(0);
   }
@@ -275,7 +309,7 @@ void	LoadAdj	(long UploadPk)
 } /* LoadAdj() */
 
 /*********************************************
- RunAllNew(): Run on all uploads WHERE the upload
+ Run on all uploads WHERE the upload
  has no nested set numbers.
  This displays each upload as it runs!
  *********************************************/
@@ -347,10 +381,12 @@ void    ListUploads     ()
 /************************************************************/
 
 /**********************************************
- MatchField(): Given a string that contains
+ Given a string that contains
  field='value' pairs, check if the field name
  matches.
- Returns: 1 on match, 0 on miss, -1 on no data.
+ \param Field Haystack
+ \param S     Needle
+ \return 1 on match, 0 on miss, -1 on no data.
  **********************************************/
 int	MatchField	(char *Field, char *S)
 {
@@ -368,10 +404,12 @@ int	MatchField	(char *Field, char *S)
 } /* MatchField() */
 
 /**********************************************
- SkipFieldValue(): Given a string that contains
+ Given a string that contains
  field='value' pairs, skip the first pair and
  return the pointer to the next pair (or NULL if
  end of string).
+ \param S field='value' pairs
+ \return Pointer to next pair
  **********************************************/
 char *	SkipFieldValue	(char *S)
 {
@@ -410,11 +448,13 @@ char *	SkipFieldValue	(char *S)
 } /* SkipFieldValue() */
 
 /**********************************************
- UntaintValue(): The scheduler taints field=value
+ The scheduler taints field=value
  pairs.  Given a pair, return the untainted value.
  NOTE: In string and out string CAN be the same string!
  NOTE: strlen(Sout) is ALWAYS < strlen(Sin).
- Returns Sout, or NULL if there is an error.
+ \param[in]  Sin  Tainted string
+ \param[out] Sout Untainted string
+ \return Untainted string or NULL if there is an error.
  **********************************************/
 char *	UntaintValue	(char *Sin, char *Sout)
 {
@@ -470,10 +510,12 @@ char *	UntaintValue	(char *Sin, char *Sout)
 } /* UntaintValue() */
 
 /**********************************************
- SetParm(): Convert field=value pairs into parameter.
+ Convert field=value pairs into parameter.
  This overwrites the parameter string!
  The parameter is untainted from the scheduler.
- Returns 1 if Parm is set, 0 if not.
+ \param ParmName field='value' pairs.
+ \param Parm     Parameter to be set.
+ \returns 1 if Parm is set, 0 if not.
  **********************************************/
 int	SetParm	(char *ParmName, char *Parm)
 {
@@ -499,7 +541,7 @@ int	SetParm	(char *ParmName, char *Parm)
 /**
  * \brief Finish updating the upload record and permissions data
  *
- * \param long UploadPk
+ * \param UploadPk Upload ID to be updated
  *
  * \return int -1 failure, 0 success
  */
@@ -525,7 +567,8 @@ int UpdateUpload(long UploadPk)
 }
 
 /*********************************************************
- Usage():
+ Usage of the agent
+ \param Name absolute path of the agent
  *********************************************************/
 void    Usage   (char *Name)
 {
@@ -587,7 +630,7 @@ int	main	(int argc, char *argv[])
       return(0);
     case 'V':
       printf("%s", BuildVersion);
-      PQfinish(pgConn); 
+      PQfinish(pgConn);
       return(0);
     default:
       Usage(argv[0]);
@@ -619,7 +662,7 @@ int	main	(int argc, char *argv[])
       }
 
       LoadAdj(UploadPk);
-      if (Tree) WalkTree(0,0); 
+      if (Tree) WalkTree(0,0);
       if (Tree) free(Tree);
       Tree=NULL;
       TreeSize=0;
@@ -630,11 +673,11 @@ int	main	(int argc, char *argv[])
   }
   else
   {
-    for (i = 0; i < upload_count; i++) 
+    for (i = 0; i < upload_count; i++)
     {
       UploadPk = uploads_to_scan[i];
       LoadAdj(UploadPk);
-      if (Tree) WalkTree(0,0); 
+      if (Tree) WalkTree(0,0);
       if (Tree) free(Tree);
       Tree=NULL;
       TreeSize=0;

@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2014-2015 Siemens AG
+ Copyright (C) 2014-2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +16,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * @file
+ * @brief UI plugin for ReadMeOSS agent
+ */
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -23,10 +28,14 @@ use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
 
+/**
+ * @class ReadMeOssPlugin
+ * @brief Agent plugin for Readme_OSS agent
+ */
 class ReadMeOssPlugin extends DefaultPlugin
 {
-  const NAME = 'ui_readmeoss';
-  
+  const NAME = 'ui_readmeoss';        ///< Mod name for the plugin
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -36,14 +45,22 @@ class ReadMeOssPlugin extends DefaultPlugin
     ));
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::preInstall()
+   */
   function preInstall()
   {
     $text = _("Generate ReadMe_OSS");
     menu_insert("Browse-Pfile::Export&nbsp;ReadMe_OSS", 0, self::NAME, $text);
-    
+
     menu_insert("UploadMulti::Generate&nbsp;ReadMe_OSS", 0, self::NAME, $text);
   }
 
+  /**
+   * @copydoc Fossology::Lib::Plugin::DefaultPlugin::handle()
+   * @see Fossology::Lib::Plugin::DefaultPlugin::handle()
+   */
   protected function handle(Request $request)
   {
     $groupId = Auth::getGroupId();
@@ -99,7 +116,15 @@ class ReadMeOssPlugin extends DefaultPlugin
     $showJobsPlugin->OutputOpen();
     return $showJobsPlugin->getResponse();
   }
-  
+
+  /**
+   * @brief Get parameters from job queue and schedule them
+   * @param int $groupId
+   * @param int $upload
+   * @param int $addUploads
+   * @throws Exception
+   * @return int Array of job id and job queue id
+   */
   protected function getJobAndJobqueue($groupId, $upload, $addUploads)
   {
     $uploadId = $upload->getId();
@@ -123,18 +148,31 @@ class ReadMeOssPlugin extends DefaultPlugin
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }
-    $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
+    if(empty($jqCmdArgs)) {
+      $jobName = $upload->getFilename();
+    } else {
+      $jobName = "Multi File ReadmeOSS";
+    }
+    $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";
     $jobQueueId = $readMeOssAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
     if ($jobQueueId<0)
     {
       throw new Exception(_("Cannot schedule").": ".$error);
     }
-    return array($jobId,$jobQueueId);
+    return array($jobId, $jobQueueId, $error);
   }
-  
+
+  /**
+   * @brief Get upload object for a given id
+   * @param int $uploadId
+   * @param int $groupId
+   * @throws Exception
+   * @return Fossology::Lib::Data::Upload::Upload Upload object or null
+   * on failure
+   */
   protected function getUpload($uploadId, $groupId)
-  {  
+  {
     if ($uploadId <=0)
     {
       throw new Exception(_("parameter error: $uploadId"));
@@ -152,6 +190,20 @@ class ReadMeOssPlugin extends DefaultPlugin
       throw new Exception(_('cannot find uploadId'));
     }
     return $upload;
+  }
+
+  /**
+   * Schedules readme OSS agent to generate report
+   *
+   * @param int $groupId
+   * @param Upload $upload
+   * @param array $addUploads
+   * @return array|number[] Job id and job queue id
+   * @throws Exception
+   */
+  public function scheduleAgent($groupId, $upload, $addUploads = array())
+  {
+    return $this->getJobAndJobqueue($groupId, $upload, $addUploads);
   }
 }
 

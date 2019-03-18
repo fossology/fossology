@@ -21,11 +21,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define AGENT_NAME "monk" ///< the name of the agent, used to get agent key
 #define AGENT_DESC "monk agent" ///< what program this is
-#define AGENT_ARS  "monk_ars" 
+#define AGENT_ARS  "monk_ars"
 
 #define MODE_SCHEDULER 1
 #define MODE_CLI 2
 #define MODE_BULK 3
+#define MODE_EXPORT_KOWLEDGEBASE 4
+#define MODE_CLI_OFFLINE 5
 
 #define FULL_MATCH "M"
 #define DIFF_TYPE_MATCH "M0"
@@ -54,6 +56,7 @@ typedef struct {
   int agentId;
   int scanMode;
   int verbosity;
+  char* knowledgebaseFile;
   int json;
   void* ptr;
 } MonkState;

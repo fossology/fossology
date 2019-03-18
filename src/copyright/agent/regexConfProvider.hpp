@@ -30,6 +30,10 @@
 
 std::string getRegexConfFile(const std::string& identity);
 
+/**
+ * \class RegexConfProvider
+ * \brief Provide regex using conf file
+ */
 class RegexConfProvider
 {
 public:
@@ -45,7 +49,7 @@ public:
 private:
   static std::map<std::string,RegexMap> _regexMapMap;
 
-  bool _isVerbosityDebug;
+  bool _isVerbosityDebug;      /**< True to print debug messages */
 
   bool getRegexConfStream(const std::string& identity,
                           /*out*/ std::ifstream& stream);

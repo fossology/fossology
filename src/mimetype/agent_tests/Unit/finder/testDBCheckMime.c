@@ -21,8 +21,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 
 /**
- * \file testDBCheckMime.c
- * \brief testing for the function DBCheckMime
+ * \file
+ * \brief Testing for the function DBCheckMime
  */
 
 static PGresult *result = NULL;
@@ -31,7 +31,7 @@ static long pfile_pk = -1;
 extern char *DBConfFile;
 
 /**
- * \brief initialize
+ * \brief Initialize DB
  */
 int  DBCheckMimeInit()
 {
@@ -79,7 +79,7 @@ int  DBCheckMimeInit()
   pfile_pk  = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /** insert upload a executable file */
+  /* insert upload a executable file */
    memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"INSERT INTO upload (upload_filename,upload_mode,upload_ts,pfile_fk) VALUES ('mimetype',40,now(),'%ld');", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -89,7 +89,7 @@ int  DBCheckMimeInit()
     exit(-1);
   }
   PQclear(result);
- 
+
   /* select upload_pk */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"SELECT upload_pk FROM upload WHERE pfile_fk = '%ld';",
@@ -103,7 +103,7 @@ int  DBCheckMimeInit()
   upload_pk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
 
-  /** insert uploadtree */
+  /* insert uploadtree */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL,MAXCMD,"INSERT INTO uploadtree (upload_fk,pfile_fk,lft,rgt,ufile_name) VALUES (%ld,%ld,1,48,'mimetype');", upload_pk, pfile_pk);
   result = PQexec(pgConn, SQL);
@@ -124,7 +124,7 @@ int  DBCheckMimeInit()
   }
   PQclear(result);
   MagicCookie = magic_open(MAGIC_PRESERVE_ATIME|MAGIC_MIME);
-  /** clear all data in mimetype */
+  /* clear all data in mimetype */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype;");
   result =  PQexec(pgConn, SQL);
@@ -145,7 +145,7 @@ int  DBCheckMimeInit()
   return 0;
 }
 /**
- * \brief clean the env
+ * \brief Clean the env
  */
 int DBCheckMimeClean()
 {
@@ -159,7 +159,7 @@ int DBCheckMimeClean()
   }
   PQclear(result);
 
-  /** delete uploadtree info */
+  /* delete uploadtree info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM uploadtree WHERE upload_fk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -170,7 +170,7 @@ int DBCheckMimeClean()
   }
   PQclear(result);
 
-  /** delete upload info */
+  /* delete upload info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM upload WHERE upload_pk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -181,7 +181,7 @@ int DBCheckMimeClean()
   }
   PQclear(result);
 
-  /** delete pfile info */
+  /* delete pfile info */
   memset(SQL,'\0',MAXCMD);
   snprintf(SQL,MAXCMD,"DELETE FROM pfile WHERE pfile_pk = %ld;", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -203,7 +203,7 @@ int DBCheckMimeClean()
   }
   PQclear(result);
 
-  /** delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
+  /* delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'application/octet-stream';");
   result =  PQexec(pgConn, SQL);
@@ -222,8 +222,11 @@ int DBCheckMimeClean()
 /* test functions */
 
 /**
- * \brief for function DBCheckMime 
- * the file is a c source file  
+ * \brief For function DBCheckMime()
+ * \test
+ * -# Load a C file in database
+ * -# Pass a C file to DBCheckMime()
+ * -# Check if the mimetype from DB matches
  */
 void testDBCheckMime()
 {
@@ -233,9 +236,9 @@ void testDBCheckMime()
   char mimetype_name[] = "application/octet-stream";
   int pfile_mimetypefk = 0;
   int mimetype_id = -1;
-  
+
   DBCheckMime(file_path);
-  /** get　mimetype_pk from table mimetype */
+  /* get　mimetype_pk from table mimetype */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL)-1,"SELECT mimetype_pk FROM mimetype WHERE mimetype_name= '%s';", mimetype_name);
   result =  PQexec(pgConn, SQL);
@@ -246,8 +249,8 @@ void testDBCheckMime()
   }
   mimetype_id = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
-  
-  /** get mimetype id from pfile */
+
+  /* get mimetype id from pfile */
   memset(SQL,'\0',sizeof(SQL));
   snprintf(SQL,sizeof(SQL)-1,"SELECT pfile_mimetypefk FROM pfile WHERE pfile_pk= %ld;", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -260,7 +263,7 @@ void testDBCheckMime()
   PQclear(result);
 
   CU_ASSERT_EQUAL(pfile_mimetypefk, mimetype_id);
-  /** delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
+  /* delete the record the mimetype_name is application/octet-stream in mimetype, after testing */
   memset(SQL, '\0', MAXCMD);
   snprintf(SQL, MAXCMD, "DELETE FROM mimetype where mimetype_name = 'text/x-csrc';");
   result =  PQexec(pgConn, SQL);
@@ -273,7 +276,7 @@ void testDBCheckMime()
 }
 
 /**
- * \brief testcases for function DBCheckMime 
+ * \brief testcases for function DBCheckMime
  */
 CU_TestInfo testcases_DBCheckMime[] =
 {

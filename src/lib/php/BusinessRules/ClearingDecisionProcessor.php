@@ -27,25 +27,38 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
-use Fossology\Lib\Util\Object;
 
-class ClearingDecisionProcessor extends Object
+/**
+ * @class ClearingDecisionProcessor
+ * @brief Utility functions to process ClearingDecision
+ */
+class ClearingDecisionProcessor
 {
+  /**
+   * @var integer NO_LICENSE_KNOWN_DECISION_TYPE
+   * Decision type when no known license found
+   */
   const NO_LICENSE_KNOWN_DECISION_TYPE = 2;
 
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao
+   * Clearing DAO object */
   private $clearingDao;
-  /** @var AgentLicenseEventProcessor */
+  /** @var AgentLicenseEventProcessor $agentLicenseEventProcessor
+   * License event processor object */
   private $agentLicenseEventProcessor;
-  /** @var ClearingEventProcessor */
+  /** @var ClearingEventProcessor $clearingEventProcessor
+   * Clearing event processor object */
   private $clearingEventProcessor;
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager */
   private $dbManager;
 
   /**
+   * Constructor
    * @param ClearingDao $clearingDao
    * @param AgentLicenseEventProcessor $agentLicenseEventProcessor
    * @param ClearingEventProcessor $clearingEventProcessor
+   * @param DbManager $dbManager
    */
   public function __construct(ClearingDao $clearingDao, AgentLicenseEventProcessor $agentLicenseEventProcessor, ClearingEventProcessor $clearingEventProcessor, DbManager $dbManager)
   {
@@ -56,11 +69,14 @@ class ClearingDecisionProcessor extends Object
   }
 
   /**
-   * @param ItemTreeBounds $itemTreeBounds
-   * @param int $groupId
-   * @param int[] $additionalEventIds additional event ids to include, indexed by licenseId
-   * @param null|LicenseMap $licenseMap if given then license are considered as equal iff mapped to same
-   * @return bool
+   * Check if the given upload tree bound have unhandled license detections
+   * @param ItemTreeBounds $itemTreeBounds Upload tree bound to check
+   * @param int $groupId Current group id
+   * @param array $additionalEventIds Additional event ids to include, indexed
+   *        by licenseId
+   * @param null|LicenseMap $licenseMap If given then license are considered as
+   *        equal iff mapped to same
+   * @return bool True if unhandled licenses found, false otherwise.
    */
   public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $additionalEventIds = array(), $licenseMap=null)
   {
@@ -90,6 +106,16 @@ class ClearingDecisionProcessor extends Object
     return false;
   }
 
+  /**
+   * @brief Insert clearing events in DB for agent findings
+   * @param ItemTreeBounds $itemBounds  Upload tree bound of the item
+   * @param int $userId   Current user id
+   * @param int $groupId  Current group id
+   * @param boolean $remove Is the license finding removed?
+   * @param int $type     Finding type
+   * @param array $removedIds Licenses to be skipped
+   * @return number[]
+   */
   private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds = array())
   {
     $eventIds = array();
@@ -106,10 +132,12 @@ class ClearingDecisionProcessor extends Object
   }
 
   /**
-   * @param ClearingDecision $decision
-   * @param int $type
-   * @param int[] $clearingEventIds
-   * @return boolean
+   * @brief Check if clearing decisions are different from clearing event ids
+   * @param ClearingDecision $decision  Clearing decisions to check
+   * @param int $type   Clearing decision type required
+   * @param int $scope  Clearing decision scope required
+   * @param array $clearingEventIds     Clearing events to compare with
+   * @return boolean True if they are same, false otherwise
    */
   private function clearingDecisionIsDifferentFrom(ClearingDecision $decision, $type, $scope, $clearingEventIds)
   {
@@ -127,12 +155,13 @@ class ClearingDecisionProcessor extends Object
   }
 
   /**
+   * @brief Create clearing decisions from clearing events
    * @param ItemTreeBounds $itemBounds
    * @param int $userId
    * @param int $groupId
    * @param int $type
    * @param boolean $global
-   * @param int[] $additionalEventIds additional event ids to include, indexed by licenseId
+   * @param array Additional event ids to include, indexed by licenseId
    */
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global, $additionalEventIds = array())
   {
@@ -144,7 +173,7 @@ class ClearingDecisionProcessor extends Object
 
     $itemId = $itemBounds->getItemId();
 
-    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId);
+    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, $includeSubFolders=false);
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
     {
       $type = DecisionTypes::IDENTIFIED;
@@ -185,9 +214,11 @@ class ClearingDecisionProcessor extends Object
   }
 
   /**
+   * @brief For a given item, get the clearing decisions
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
-   * @return array
+   * @param int $usageId
+   * @return array Array of added and removed license findings
    * @throws Exception
    */
   public function getCurrentClearings(ItemTreeBounds $itemTreeBounds, $groupId, $usageId=LicenseMap::TRIVIAL)

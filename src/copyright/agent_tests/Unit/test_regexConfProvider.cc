@@ -29,28 +29,44 @@ class regexConfProviderTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (simpleTest);
   CPPUNIT_TEST (simpleReplacementTest);
   CPPUNIT_TEST (multipleReplacementTest);
+  CPPUNIT_TEST (testForInfiniteRecursion);
 
   CPPUNIT_TEST_SUITE_END ();
 
 private:
+  /**
+   * \brief Test RegexConfProvider
+   * \test
+   * -# Create new RegexConfProvider
+   * -# Load test data from testStream
+   * -# Get data using testKey and compare against testString
+   * \param testStream Stream to load data from
+   * \param testString String to check result against
+   * \param testKey    Key to check result against
+   */
   void regexConfProviderTest (istringstream& testStream,
                     const string& testString,
                     const string& testKey)
   {
     string testIdentity("testIdentity");
-    
+
     RegexConfProvider rcp;
 
     // load parse test-stream
     rcp.maybeLoad(testIdentity,testStream);
-    
+
     // test RegexConfProvider
-    CPPUNIT_ASSERT_MESSAGE("The generated string schould match the expected string",
+    CPPUNIT_ASSERT_MESSAGE("The generated string should match the expected string",
                            0 == strcmp(testString.c_str(),
                                        rcp.getRegexValue(testIdentity,testKey)));
   }
 
 protected:
+  /**
+   * \test
+   * -# Create simple test stream with 'key=value'
+   * -# Check with regexConfProviderTest()
+   */
   void simpleTest()
   {
     string testString = "Lorem Ipsum";
@@ -61,6 +77,11 @@ protected:
     regexConfProviderTest(testStream,testString,testKey);
   }
 
+  /**
+   * \test
+   * -# Create test stream with key inside value
+   * -# Check with regexConfProviderTest()
+   */
   void simpleReplacementTest()
   {
     string testString = "Lorem Ipsum";
@@ -73,6 +94,11 @@ protected:
     regexConfProviderTest(testStream,testString,testKey);
   }
 
+  /**
+   * \test
+   * -# Create test stream with multiple pairs
+   * -# Check with regexConfProviderTest()
+   */
   void multipleReplacementTest()
   {
     string testString = "Lorem Ipsum";
@@ -87,6 +113,12 @@ protected:
     regexConfProviderTest(testStream,testString,testKey);
   }
 
+  /**
+   * \test
+   * -# Create ambiguous test stream
+   * -# Load in RegexConfProvider
+   * -# Try to retrieve value
+   */
   void testForInfiniteRecursion()
   {
     string testString = "Lorem Ipsum";
@@ -97,7 +129,7 @@ protected:
     istringstream testStream(testLine);
 
     string testIdentity("testIdentity");
-    
+
     RegexConfProvider rcp;
 
     // load parse test-stream

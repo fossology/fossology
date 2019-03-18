@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -98,6 +98,14 @@ class ClearingResult implements LicenseClearing {
   public function getReportinfo()
   {
     return isset($this->clearingEvent) ? $this->clearingEvent->getReportinfo() : '';
+  }
+
+  /**
+   * @return string
+   */
+  public function getAcknowledgement()
+  {
+    return isset($this->clearingEvent) ? $this->clearingEvent->getAcknowledgement() : '';
   }
 
   /**

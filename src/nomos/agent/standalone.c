@@ -1,3 +1,7 @@
+/**
+ * \file
+ * \brief Dummy implementations of library functions for stand-alone operations
+ */
 #include "standalone.h"
 
 int result = 0;

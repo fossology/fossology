@@ -19,10 +19,11 @@
  ***********************************************************/
 
 /**
- * \file export license_ref into licenseref.sql
- * 
+ * \file export_license_ref.php
+ * \brief export license_ref into licenseref.sql
+ *        Added in 2.2.0
  * \exit 0: sucess; 1: failed
- */
+ **/
 
 $Usage = "Usage: " . basename($argv[0]) . "
   -h     help, this message

@@ -16,6 +16,65 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
+/**
+ * \dir
+ * \brief Nomos agent source
+ * \file
+ * \brief Nomos header file
+ * \page nomos Nomos agent
+ * \tableofcontents
+ * \section nomosabout About
+ * Nomos does license identification using short phrases (regular expressions)
+ * and heuristics (e.g. phrase must be found in (or out of) proximity to
+ * another phrase or phrases).
+ *
+ * Nomos may also identify a "style" type of license if it has similarities
+ * with a known license type.
+ *
+ * The signatures which uniquely identify a license are stored in `STRINGS.in`
+ * file.
+ *
+ * If you wish to contribute to Nomos, please read [How to add a new license
+ * signature](https://github.com/fossology/fossology/wiki/Nomos).
+ *
+ * \subsection nomosdebug Debugging
+ * Activating the defines of PROC_TRACE and/or DOCTOR_DEBUG (see line 31 of
+ * file parse.c). Nomos generates lot of tracing information that is really
+ * helpful to debug it.
+ *
+ * `PROC_TRACE` will show you, for example, which regex's were tried and which
+ * are successful. To see the successful matches, grep the output file for
+ * "addRef".
+ *
+ * `DOCTOR_DEBUG` will show you the before and after versions of the buffer to
+ * be processed. Look in the output file or `----- [Dr-BEFORE:] -----` and
+ * `+++++ [Dr-AFTER] +++:`
+ *
+ * \section nomosactions Supported actions
+ *
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -i   | Initialize the database, then exit. |
+ * | -c   | Specify the directory for the system configuration. |
+ * | -l   | Print full file path (command line only). |
+ * | -v   | Verbose (-vv = more verbose). |
+ * | -J   | Output in JSON. |
+ * | -S   | Print Highlightinfo to stdout . |
+ * | file | If files are listed, print the licenses detected within them. |
+ * | no file | Process data from the scheduler. |
+ * | -V   | Print the version info, then exit. |
+ * | -d   | Specify a directory to scan. |
+ * | -n   | Spaw n - 1 child processes to run, there will be n running
+ * processes(the parent and n - 1 children). \n The default n is 2(when n is
+ * less than 2 or not setting, will be changed to 2) when -d is specified. |
+ * \section nomossource Agent source
+ *   - \link src/nomos/agent \endlink
+ *   - \link src/nomos/ui \endlink
+ *   - Functional test cases \link src/nomos/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/nomos/agent_tests/Unit \endlink
+ */
+
 #ifndef _NOMOS_H
 #define _NOMOS_H 1
 #ifndef	_GNU_SOURCE
@@ -45,7 +104,7 @@
 #include "nomos_gap.h"
 #include <stdbool.h>
 
-
+/** Use nomos in standalone mode (no FOSSology DB) */
 #ifdef STANDALONE
 #include "standalone.h"
 #else
@@ -55,8 +114,8 @@
 
 #include <glib.h>
 
-/*
- * TO use our local version of debug-malloc(), compile -DMEMORY_TRACING
+/**
+ * To use our local version of debug-malloc(), compile -DMEMORY_TRACING
  */
 #ifdef	MEMORY_TRACING
 #include "DMalloc.h"
@@ -71,17 +130,17 @@
 #define	PROC_TRACE
 #endif	/* PROC_TRACE_SWITCH */
 
-#define	myBUFSIZ	2048
-#define	MAX_RENAME	1000
-#define TEMP_FILE_LEN 100
+#define	myBUFSIZ	2048      ///< Buffer max length
+#define	MAX_RENAME	1000    ///< Max rename length
+#define TEMP_FILE_LEN 100   ///< Max temp file length
 
-/* MAX_SCANBYTES is the maximum number of bytes that will be scanned
+/** MAX_SCANBYTES is the maximum number of bytes that will be scanned
  * in a file.  Historically, we have never found a license more than
- * 64k into a file.  
+ * 64k into a file.
  */
 #define MAX_SCANBYTES 1024*1024
 
-/*
+/**
  * Program options and flags
  *
  * MD: I think these are used when making nomos
@@ -93,13 +152,13 @@
 #define OPTS_NO_HIGHLIGHTINFO 0x10
 #define OPTS_JSON_OUTPUT 0x20
 
-char debugStr[myBUFSIZ];
-char dbErrString[myBUFSIZ];
-char saveLics[myBUFSIZ];
+char debugStr[myBUFSIZ];        ///< Debug string
+char dbErrString[myBUFSIZ];     ///< DB error string
+char saveLics[myBUFSIZ];        ///< License string
 
-size_t hashEntries;
+size_t hashEntries;             ///< Hash entries
 
-/*
+/**
   Flags for program control
  */
 #define	FL_SAVEBASE	0x20
@@ -116,9 +175,12 @@ size_t hashEntries;
 
 
 /**
- *  Symbolic Boolean values
+ *  Symbolic Boolean value for NO
  */
 #define	NO	0
+/**
+ *  Symbolic Boolean value for YES
+ */
 #define	YES	1
 
 /* List-sorting flags */
@@ -137,15 +199,15 @@ size_t hashEntries;
 #define	IL_NONE		0
 #define	IL_INIT		-1
 
-/*
+/**
  * license-text search results (ltsr) stuff
  */
-#define	LTSR_RMASK	((char) 1)	/* True if it's been matched */
-#define	LTSR_SMASK	((char) 2)	/* True if it's been searched for */
-#define	LTSR_YES	((char) 3)	/* both searched, and matched */
-#define	LTSR_NO		LTSR_SMASK	/* searched but not matched */
+#define	LTSR_RMASK	((char) 1)	/**< True if it's been matched */
+#define	LTSR_SMASK	((char) 2)	/**< True if it's been searched for */
+#define	LTSR_YES	((char) 3)	  /**< Both searched, and matched */
+#define	LTSR_NO		LTSR_SMASK	  /**< Searched but not matched */
 
-/*
+/**
  * Miscellaneous strings used in various modules
  */
 #define STR_NOTPKG      "None (not an rpm-format package)"
@@ -153,10 +215,10 @@ size_t hashEntries;
 /*
  * License-scanning limits
  */
-#define	_scCOMFORT	9	/* >= 9 --> certain it's a license */
-#define	_scINVALID	4	/* < 4 --> probably NOT a license */
+#define	_scCOMFORT	9	/**< >= 9 --> certain it's a license */
+#define	_scINVALID	4	/**< < 4 --> probably NOT a license */
 
-/*
+/**
  * LS_ = License Summaries/Strings
  */
 #define	LS_NONE		"None"
@@ -175,33 +237,33 @@ size_t hashEntries;
 /*
  * NULL values
  */
-#define	NULL_ITEM	(item_t *) NULL
-#define	NULL_LIST	(list_t *) NULL
-#define	NULL_FH		(fh_t *) NULL
-#define	NULL_CHAR	'\0'
-#define	NULL_STR	(char *) NULL
+#define	NULL_ITEM	(item_t *) NULL ///< NULL item
+#define	NULL_LIST	(list_t *) NULL ///< NULL list
+#define	NULL_FH		(fh_t *) NULL   ///< NULL fh
+#define	NULL_CHAR	'\0'            ///< NULL character
+#define	NULL_STR	(char *) NULL   ///< NULL string
 
-/*
+/**
  * Macros needed across >1 source module
  */
-#define	isEOL(x)	(((x == '\n') || (x == '\r') || (x == '\v')))
+#define	isEOL(x)	(((x == '\n') || (x == '\r') || (x == '\v'))) ///< Check if x points to a EOL character
 #define	IS_HUGE(x)	(x >= gl.blkUpperLimit)
 
 
 
 #define	NOMOS_TEMP	"/tmp/nomos.tempdir"
-#define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp," /* CDB, This goes away. */
+#define	NOMOS_TLOCK	"/tmp/nomos.tempdir/.lock.tmp," /**< CDB, This goes away. */
 
 
-/*
-  Caches memory-mapped files
+/**
+ * Caches memory-mapped files
  */
 struct mm_cache {
-  int inUse;
-  int fd;
-  unsigned long size;
-  void *mmPtr;
-  char label[myBUFSIZ];
+    int inUse;            ///< Cache in use
+    int fd;               ///< File descriptor
+    unsigned long size;   ///< Size
+    void *mmPtr;          ///< Memory pointer
+    char label[myBUFSIZ]; ///< Label
 };
 
 
@@ -253,29 +315,33 @@ typedef	struct listitem item_t;
 
  */
 struct list {
-  char name[64];  /**< name of the list */
-  int used;       /**< number of items found, 0 is empty list */
-  int size;       /**< what size is this? (MD) */
-  int ix;         /**< the index for the items below */
-  int sorted;     /**< flag to indicate how ?? (the list or the items in the
+    char name[64]; /**< Name of the list */
+    int used; /**< Number of items found, 0 is empty list */
+    int size; /**< What size is this? (MD) */
+    int ix; /**< The index for the items below */
+    int sorted; /**< Flag to indicate how ?? (the list or the items in the
                          list?) things are sorted: SORT_BY_NAME or
                          SORT_BY_NAME_ICASE */
-  int desc;
-  item_t *items;
+    int desc; /**< Description */
+    item_t *items; /**< List items */
 };
 typedef	struct list list_t;
 
-
+/**
+ * Search string
+ */
 struct searchString {
-  int csLen;
-  char *csData;
+    int csLen;      ///< String length
+    char *csData;   ///< String data
 };
 typedef struct searchString searchString_t;
 
-
+/**
+ * License specification
+ */
 struct licenseSpec {
-  searchString_t seed;
-  searchString_t text;
+    searchString_t seed;  ///< License seed
+    searchString_t text;  ///< License text
 };
 typedef struct licenseSpec licSpec_t;
 
@@ -285,11 +351,11 @@ typedef struct licenseSpec licSpec_t;
   for each file scanned.
  */
 struct globals {
-  char initwd[myBUFSIZ]; /* CDB, would like to workaround/eliminate. */
-  char progName[64];
-  int progOpts;
-  int flags;
-  int uPsize;
+    char initwd[myBUFSIZ];  ///< CDB, would like to workaround/eliminate.
+    char progName[64];      ///< Program name
+    int progOpts;           ///< CLI options
+    int flags;              ///< Flags
+    int uPsize;             ///< Size
 #ifdef	GLOBAL_DEBUG
   int DEEBUG;
   int MEM_DEEBUG;
@@ -297,26 +363,32 @@ struct globals {
 #ifdef	PROC_TRACE_SWITCH
   int ptswitch;
 #endif	/* PROC_TRACE_SWITCH */
-  list_t sHash;
-  /** Agent-specific Things */
-  int agentPk;
-  long uploadFk;
-  int arsPk;
-  PGconn *pgConn;
-  fo_dbManager *dbManager;
+    list_t sHash;           ///< Hashes
+    /* Agent-specific Things */
+    int agentPk;            ///< Agent id
+    long uploadFk;          ///< Upload id
+    int arsPk;              ///< Agent ars id
+    PGconn *pgConn;         ///< DB Connection
+    fo_dbManager *dbManager;  ///< FOSSology DB manager
 };
 
+/**
+ * License match positions and license type
+ */
 typedef struct  {
-  int start;
-  int end;
-  int index; //Enums from index (Entrynumber) in STRINGS.in
+    int start;    ///< Start position of match
+    int end;      ///< End position of match
+    int index;    ///< Enums from index (Entrynumber) in STRINGS.in
 } MatchPositionAndType;
 
+/**
+ * License matches
+ */
 typedef struct  {
-  GArray* matchPositions;
-  GArray* indexList;
-  char* licenceName;
-  int licenseFileId;
+    GArray* matchPositions;   ///< Match positions
+    GArray* indexList;        ///< License indexes
+    char* licenceName;        ///< License names
+    int licenseFileId;        ///< PFile id
 } LicenceAndMatchPositions;
 
 
@@ -326,11 +398,11 @@ typedef struct  {
   \brief Struct that tracks state related to current file being scanned.
  */
 struct curScan {
-  char cwd[myBUFSIZ]; 		/**< CDB, Would like to workaround and eliminate. */
+    char cwd[myBUFSIZ]; /**< CDB, Would like to workaround and eliminate. */
   char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
   char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
   char filePath[myBUFSIZ];    /**< the original file path passed in */
-  long pFileFk;				/**< [in] pfile_fk from scheduler */
+    long pFileFk; /**< [in] pfile_fk from scheduler */
   char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
   char *licPara;
   char *matchBase;
@@ -351,22 +423,27 @@ struct curScan {
   char *tmpLics;              /**< pointer to storage for parsed names */
   char *licenseList[512];     /**< list of license names found, can be a single name */
 
-  GArray* indexList;
-  GArray* theMatches;
-  GArray* keywordPositions;
+    GArray* indexList; /**< List of license indexes */
+    GArray* theMatches; /**< List of matches */
+    GArray* keywordPositions; /**< List of matche positions */
   GArray* docBufferPositionsAndOffsets;
   int currentLicenceIndex;
 };
 
-
+/**
+ * License pattern
+ */
 struct license {
-  int len;
-  char *patt;
+    int len;      ///< Length of pattern
+    char *patt;   ///< License pattern to use
 };
 
+/**
+ * License text to information
+ */
 struct licensetext {
-  char *regex;
-  char *tseed;	/**< unencrypted license text */
+    char *regex;  ///< License regex
+    char *tseed;	///< unencrypted license text
   int nAbove;
   int nBelow;
   int compiled;
@@ -374,14 +451,23 @@ struct licensetext {
 };
 typedef struct licensetext licText_t;
 
+/**
+ * Get regex of a license text
+ */
 #define	_REGEX(x)	licText[x].regex
+/**
+ * Get seed of a license text
+ */
 #define	_SEED(x)	licText[x].tseed
 
+/**
+ * License scan result
+ */
 struct scanResults {
-  int score;
+    int score;        ///< License match score
   int kwbm;
   int size;
-  int flag;
+    int flag;         ///< Flags
   int dataOffset;
   char fullpath[myBUFSIZ];
   char linkname[16];
@@ -428,13 +514,13 @@ typedef	struct scanResults scanres_t;
 #define	MTAG_SCANRES	"scan-results list"
 
 
-/**
+/*
    Functions defined in nomos.c, used in other files
  */
 void Bail(int exitval);
 int optionIsSet(int val);
 
-/**
+/*
   Global Declarations
  */
 extern struct globals gl;

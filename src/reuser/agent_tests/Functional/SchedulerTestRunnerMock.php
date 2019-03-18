@@ -34,24 +34,41 @@ include_once(__DIR__.'/SchedulerTestRunner.php');
 
 include(dirname(dirname(__DIR__)).'/agent/ReuserAgent.php');
 
+/**
+ * @class SchedulerTestRunnerMock
+ * @brief Create mock objects for reuser
+ */
 class SchedulerTestRunnerMock implements SchedulerTestRunner
 {
-  /** @var DbManager */
+  /** @var DbManager $dbManager
+   * DB manager object
+   */
   private $dbManager;
 
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
   private $clearingDao;
-  /** @var ClearingDecisionFilter */
+  /** @var ClearingDecisionFilter $clearingDecisionFilter
+   * ClearingDecisionFilter object
+   */
   private $clearingDecisionFilter;
-  /** @var ClearingDecisionProcessor */
+  /** @var ClearingDecisionProcessor $clearingDecisionProcessor
+   * ClearingDecisionProcessor object
+   */
   private $clearingDecisionProcessor;
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao
+   * Upload Dao object
+   */
   private $uploadDao;
-  /** @var AgentDao */
+  /** @var AgentDao $agentDao
+   * AgentDao object
+   */
   private $agentDao;
-  /** @var TreeDao */
+  /** @var TreeDao $treeDao
+   * TreeDao object
+   */
   private $treeDao;
-
 
   public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter, TreeDao $treeDao)
   {
@@ -72,9 +89,9 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     /* these appear not to be used by the reuser: mock them to something wrong
      */
-    $this->clearingEventProcessor = M::mock(LicenseRef::classname());
-    $this->decisionTypes = M::mock(LicenseRef::classname());
-    $this->agentLicenseEventProcessor = M::mock(LicenseRef::classname());
+    $this->clearingEventProcessor = M::mock(LicenseRef::class);
+    $this->decisionTypes = M::mock(LicenseRef::class);
+    $this->agentLicenseEventProcessor = M::mock(LicenseRef::class);
 
     $container = M::mock('Container');
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
@@ -89,7 +106,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('dao.tree')->andReturn($this->treeDao);
     $GLOBALS['container'] = $container;
 
-    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::classname());
+    $fgetsMock = M::mock(\Fossology\Lib\Agent\FgetsMock::class);
     $fgetsMock->shouldReceive("fgets")->with(STDIN)->andReturn($uploadId, false);
     $GLOBALS['fgetsMock'] = $fgetsMock;
 
@@ -98,10 +115,10 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     ob_start();
 
     include(dirname(dirname(__DIR__)).'/agent/reuser.php');
-    
+
     $output = ob_get_clean();
 
     return array(true, $output, $exitval);
   }
-  
+
 }

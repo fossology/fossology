@@ -1,0 +1,18 @@
+#!/bin/bash
+# Copyright Siemens AG 2017
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+#
+# Description: cleans installs requirements for the backup and restore
+
+set -e
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#### install dependencies
+apt-get install -y python3-pip python3.4-venv libyaml-dev
+python3 -m venv venv
+${DIR}/venv/bin/pip3 install awscli

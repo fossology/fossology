@@ -29,7 +29,7 @@ function Traceback_uri()
   return 'uri';
 }
 
-class FolderNavTest extends \PHPUnit_Framework_TestCase
+class FolderNavTest extends \PHPUnit\Framework\TestCase
 {
   /** @var M */
   private $dbManager;
@@ -42,8 +42,8 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
 
   protected function setUp()
   {
-    $this->folderDao = M::mock(FolderDao::classname());
-    $this->dbManager = M::mock(DbManager::classname());
+    $this->folderDao = M::mock(FolderDao::class);
+    $this->dbManager = M::mock(DbManager::class);
     $this->folderNav = new FolderNav($this->dbManager,$this->folderDao);
     $this->uri = Traceback_uri();
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
@@ -54,7 +54,7 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
-  
+
   protected function getFormattedItem($row)
   {
     return Reflectory::invokeObjectsMethodnameWith($this->folderNav, 'getFormattedItem', array($row,$this->uri));
@@ -70,7 +70,7 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
     $this->dbManager->shouldReceive('freeResult')->with($res);
     return $res;
   }
-  
+
   public function testShowFolderTreeWithoutContent()
   {
     $res = $this->prepareShowFolderTree($parentFolderId='foo');
@@ -79,7 +79,7 @@ class FolderNavTest extends \PHPUnit_Framework_TestCase
     $out = $this->folderNav->showFolderTree($parentFolderId);
     assertThat($out, equalTo('<ul id="tree"><li>'.$this->getFormattedItem($rowA).'</li></ul>'));
   }
-  
+
   public function testShowFolderTreeWithContent()
   {
     $res = $this->prepareShowFolderTree($parentFolderId='foo');

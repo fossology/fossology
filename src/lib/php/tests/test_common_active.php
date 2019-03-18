@@ -26,12 +26,12 @@ require_once(dirname(__FILE__) .'/../common-active.php');
 /**
  * \class test_common_active
  */
-class test_common_active extends PHPUnit_Framework_TestCase
+class test_common_active extends \PHPUnit\Framework\TestCase
 {
   /**
    * \brief initialization
    */
-  protected function setUp() 
+  protected function setUp()
   {
   }
 

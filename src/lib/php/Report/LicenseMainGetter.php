@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2016, Siemens AG
+ Copyright (C) 2016-2017, Siemens AG
  Author: Daniele Fognini, Shaheem Azmal M MD
 
  This program is free software; you can redistribute it and/or
@@ -50,6 +50,8 @@ class LicenseMainGetter extends ClearedGetterCommon
     foreach ($mainLicIds as $originLicenseId) {
       $allLicenseCols = $this->licenseDao->getLicenseById($originLicenseId, $groupId); 
       $allStatements[] = array(
+        'licenseId' => $originLicenseId,
+        'risk' => $allLicenseCols->getRisk(),
         'content' => $licenseMap->getProjectedShortname($originLicenseId),
         'text' => $allLicenseCols->getText()
       );
@@ -58,10 +60,15 @@ class LicenseMainGetter extends ClearedGetterCommon
     return $allStatements;
   }
   
-  public function getCleared($uploadId, $groupId=null)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
+    if(!$extended){
+      for($i=0; $i<=count($statements); $i++){
+        unset($statements[$i]['risk']);
+      }
+    }
     return array("statements" => array_values($statements));
   }
 }

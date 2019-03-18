@@ -18,7 +18,7 @@
 /* Equivalent to core nomos v1.48 */
 
 /**
- * \file licenses.c
+ * \file
  * \brief utilities to scan, score and save license found data
  *
  * @version "$Id: licenses.c 4032 2011-04-05 22:16:20Z bobgo $"
@@ -72,8 +72,8 @@ char timerName[64];
 #endif	/* STOPWATCH */
 
 #ifndef MAX
-#define	MAX(a, b)	((a) > (b) ? a : b)
-#define	MIN(a, b)	((a) < (b) ? a : b)
+#define	MAX(a, b)	((a) > (b) ? a : b) ///< Max of two
+#define	MIN(a, b)	((a) < (b) ? a : b) ///< Min of two
 #endif
 
 /**
@@ -103,9 +103,9 @@ void licenseInit() {
   /**
    * Examine the search strings in licSpec looking for 3 corner-cases
    * to optimize all the regex-searches we'll be making:
-   * (a) the seed string is the same as the text-search string
-   * (b) the text-search string has length 1 and contents == "."
-   * (c) the seed string is the 'null-string' indicator
+   * -# The seed string is the same as the text-search string
+   * -# The text-search string has length 1 and contents == "."
+   * -# The seed string is the 'null-string' indicator
    */
   for (i = 0; i < NFOOTPRINTS; i++) {
     same = 0;
@@ -254,30 +254,33 @@ void licenseInit() {
   return;
 }
 
-#define	LINE_BYTES	50	/* fudge for punctuation, etc. */
-#define	LINE_WORDS	8	/* assume this many words per line */
-#define	WC_BYTES	30	/* wild-card counts this many bytes */
-#define	WC_WORDS	3	/* wild-card counts this many words */
-#define	PUNT_LINES	3	/* if "dunno", guess this line-count */
-#define	MIN_LINES	1	/* normal minimum-extra-lines */
+#define	LINE_BYTES	50	/**< fudge for punctuation, etc. */
+#define	LINE_WORDS	8	  /**< assume this many words per line */
+#define	WC_BYTES	30	  /**< wild-card counts this many bytes */
+#define	WC_WORDS	3	    /**< wild-card counts this many words */
+#define	PUNT_LINES	3	  /**< if "dunno", guess this line-count */
+#define	MIN_LINES	1	    /**< normal minimum-extra-lines */
 
 
 /**
- * \brief This function should be called BEFORE the wild-card specifier =ANY=
+ * \note This function should be called BEFORE the wild-card specifier =ANY=
  * is converted to a REAL regex ".*" (e.g., before fixSearchString())!
  *
  * ASSUME a "standard line-length" of 50 characters/bytes.  That's
- * likely too small, but err on the side of being too conservative. \n
+ * likely too small, but err on the side of being too conservative.
  *
- * determining for the number of text-lines ABOVE involves finding out
+ * Determining for the number of text-lines ABOVE involves finding out
  * how far into the 'license footprint' the seed-word resides.  ASSUME
  * a standard line-length of 50 (probably too small, but we'll err on
  * the side of being too conservative.  If the seed isn't IN the regex,
- * assume a generally-bad worst-case and search 2-3 lines above. \n
+ * assume a generally-bad worst-case and search 2-3 lines above.
  *
- * determining for the number of text-lines BELOW involves finding out
+ * Determining for the number of text-lines BELOW involves finding out
  * how long the 'license footprint' actually is, plus adding some fudge
  * based on the number of wild-cards in the footprint.
+ * \param index License index from Strings.in
+ * \param regex regex to match for
+ * \param aboveCalc Set to look above
  */
 static int searchStrategy(int index, char *regex, int aboveCalc) {
   char *start;
@@ -568,13 +571,15 @@ char* createRelativePath(item_t *p, scanres_t *scp)
   char* cp;
   if (*(p->str) == '/')
   {
-    (void) strcpy(scp->fullpath, p->str);
+    strcpy(scp->fullpath, p->str);
     scp->nameOffset = (size_t) (cur.targetLen + 1);
     cp = scp->fullpath; /* full pathname */
   }
   else
   {
-    (void) sprintf(scp->fullpath, "%s/%s", cur.cwd, p->str);
+    strncpy(scp->fullpath, cur.cwd, sizeof(scp->fullpath)-1);
+    strncat(scp->fullpath, "/", sizeof(scp->fullpath)-1);
+    strncat(scp->fullpath, p->str, sizeof(scp->fullpath)-1);
     scp->nameOffset = (size_t) (cur.cwdLen + 1);
     cp = p->str; /* relative path == faster open() */
   }
@@ -582,22 +587,28 @@ char* createRelativePath(item_t *p, scanres_t *scp)
   return cp;
 }
 
+/**
+ * For EACH file, determine if we want to scan it, and if so, scan
+ * the candidate files for keywords (to obtain a "score" -- the higher
+ * the score, the more likely it has a real open source license in it).
+ *
+ * There are lots of things that will 'disinterest' us in a file (below).
+ * \param scores
+ * \param licenseList
+ * \note This loop is called 400,000 to 500,000 times when parsing a
+ * distribution. Little slow-downs ADD UP quickly!
+ * \note Some other part of FOSSology has already decided we
+ * want to scan this file, so we need to look into removing this
+ * file scoring stuff.
+ * \FIXME We don't currently use _UTIL_FILTER, which is set up to
+ * exclude some files by filename.
+ */
 void scanForKeywordsAndSetScore(scanres_t* scores, list_t* licenseList)
 {
   /*
      CDB -- Some other part of FOSSology has already decided we
      want to scan this file, so we need to look into removing this
      file scoring stuff.
-   */
-  /*
-   * For EACH file, determine if we want to scan it, and if so, scan
-   * the candidate files for keywords (to obtain a "score" -- the higher
-   * the score, the more likely it has a real open source license in it).
-   *****
-   * There are lots of things that will 'disinterest' us in a file (below).
-   *****
-   * PERFORMANCE NOTE: this loop is called 400,000 to 500,000 times
-   * when parsing a distribution.  Little slow-downs ADD UP quickly!
    */
   scanres_t* scp;
   int c;
@@ -667,16 +678,20 @@ void scanForKeywordsAndSetScore(scanres_t* scores, list_t* licenseList)
   return;
 }
 
+/**
+ * \brief Reset scores to 1 if it is 0
+ *
+ * If we were invoked with a single-file-only option, just over-ride the
+ * score calculation -- give the file any greater-than-zero score so it
+ * appears as a valid candidate.  This is important when the file to be
+ * evaluated has no keywords, yet might contain authorship inferences.
+ * \param scores
+ * \note It is always the case that we are doing one file at a time.
+ */
 void relaxScoreCriterionForSingleFile(scanres_t* scores)
 {
   /*
    * CDB - It is always the case that we are doing one file at a time.
-   */
-  /*
-   * If we were invoked with a single-file-only option, just over-ride the
-   * score calculation -- give the file any greater-than-zero score so it
-   * appears as a valid candidate.  This is important when the file to be
-   * evaluated has no keywords, yet might contain authorship inferences.
    */
   if (scores->score == 0)
   {
@@ -684,14 +699,19 @@ void relaxScoreCriterionForSingleFile(scanres_t* scores)
   }
 }
 
+/**
+ * \brief Run through the list once more
+ *
+ * This time we record and count the license candidates to process. License
+ * candidates are determined by either (score >= low) *OR* matching a set of
+ * filename patterns.
+ * @param lowWater  Lowest score to filter
+ * @param scores    Scores to filter
+ * @param nFiles    Number of files
+ * @return
+ */
 int fiterResultsOfKeywordScan(int lowWater, scanres_t* scores, int nFiles)
 {
-  /*
-   * Run through the list once more; this time we record and count the
-   * license candidates to process.  License candidates are determined
-   * by either (score >= low) *OR* matching a set of filename patterns.
-   */
-
   int nCand;
 
   scanres_t* scp;
@@ -727,19 +747,17 @@ int fiterResultsOfKeywordScan(int lowWater, scanres_t* scores, int nFiles)
 
 /**
  * \brief scan the list for a license(s)
- * This routine takes a list, but in fossology we always pass in a single file
+ *
+ * This routine takes a list, but in fossology we always pass in a single file.
+ *
+ * Set up defaults for the minimum-scores for which we'll save files.
+ * Try to ensure a minimum # of license files will be recorded for this
+ * source/package (try, don't force it too hard); see if lower scores
+ * yield a better fit, but recognize the of a non-license file increases
+ * as we lower the bar.
  */
 void licenseScan(list_t *licenseList)
 {
-
-  /*
-   * Set up defaults for the minimum-scores for which we'll save files.
-   * Try to ensure a minimum # of license files will be recorded for this
-   * source/package (try, don't force it too hard); see if lower scores
-   * yield a better fit, but recognize the of a non-license file increases
-   * as we lower the bar.
-   */
-
   int lowWater = 1; // constant
 
   int nCand; //relevant output
@@ -791,7 +809,12 @@ void licenseScan(list_t *licenseList)
 } /* licenseScan */
 
 /**
- * \brief score comparison
+ * \brief Compare two scores
+ * \return -1 ; If score1 > score2 \n
+ *  1 ; If score1 < score2 \n
+ * -1 ; If fullpath1 != NULL and follpath2 = NULL \n
+ *  1 ; If fullpath1 = NULL and follpath2 != NULL \n
+ *    ; String comparison of fullpath if conditions above fails
  * \note this procedure is a qsort callback that provides a REVERSE
  * integer sort (highest to lowest)
  */
@@ -816,6 +839,9 @@ static int scoreCompare(const void *arg1, const void *arg2) {
   }
 }
 
+/**
+ * \brief Mark curent scan as LS_NOSUM (No_license_found)
+ */
 static void noLicenseFound() {
 
 #ifdef	PROC_TRACE
@@ -826,6 +852,17 @@ static void noLicenseFound() {
   return;
 }
 
+/**
+ * \brief Print highlight info about matches
+ *
+ * This functions prtints to STDOUT only if OPTS_HIGHLIGHT_STDOUT is set.
+ *
+ * Format:
+ * `    Keyword at <start>, length <length>, index = 0,
+ *      License #<name># at <start>, length <length>, index = <license_index>,`
+ * \param keyWords    Keywords matches
+ * \param theMatches  License matches
+ */
 static void printHighlightInfo(GArray* keyWords,  GArray* theMatches){
   if ( optionIsSet(OPTS_HIGHLIGHT_STDOUT) )
   {
@@ -853,6 +890,9 @@ static void printHighlightInfo(GArray* keyWords,  GArray* theMatches){
   return;
 }
 
+/**
+ * \brief Prints keywords match to STDOUT
+ */
 static void printKeyWordMatches(scanres_t *scores, int idx)
 {
   int c;
@@ -881,10 +921,10 @@ static void printKeyWordMatches(scanres_t *scores, int idx)
 
 }
 
-/*Returns :
- negative value if a < b; zero if a = b; positive value if a > b.
+/**
+ * \brief Compare two integers
+ * \returns negative value if a < b; zero if a = b; positive value if a > b.
  */
-
 static gint compare_integer(gconstpointer a, gconstpointer b)
 {
   gint out;
@@ -899,7 +939,12 @@ static gint compare_integer(gconstpointer a, gconstpointer b)
 
 }
 
-
+/**
+ * \brief Rescan original content for the licenses already found
+ * \param textp   Original text string
+ * \param isFileMarkupLanguage  Is original text a markup text
+ * \param isPS    Is original text a PostScript text
+ */
 static void rescanOriginalTextForFoundLicences(char* textp, int isFileMarkupLanguage, int isPS){
  if (cur.theMatches->len > 0 )
   {
@@ -933,9 +978,17 @@ static void rescanOriginalTextForFoundLicences(char* textp, int isFileMarkupLang
  * \brief Save/creates all the license-data in a specific directory temp
  * directory?
  *
- * OF SPECIAL INTEREST: this function changes directory!
+ * \note OF SPECIAL INTEREST: this function changes directory!
  *
- * CDB - Some initializations happen here for no particular reason
+ * \todo CDB - Some initializations happen here for no particular reason
+ * \FIXME we should filter some names out like the shellscript does.
+ * For instance, word-spell-dictionary files will score high but will
+ * likely NOT contain a license.  But the shellscript filters these
+ * names AFTER they're already scanned.  Think about it.
+ * \FIXME BUG: When _FTYP_POSTSCR is "(postscript|utf-8 unicode)", the resulting
+ * license-parse yields 'NoLicenseFound' but when both "postscript" and
+ * "utf-8 unicode" are searched independently, parsing definitely finds
+ * quantifiable licenses. WHY?
  * \callgraph
  */
 static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
@@ -1171,7 +1224,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
    */
   /* print results if running from the command line */
   /* DBug: printf("saveLicenseData on return gl.initwd is:%s\n",gl.initwd); */
-  if(cur.cliMode) 
+  if(cur.cliMode)
   {
     if (gl.progOpts & OPTS_JSON_OUTPUT) {
       printf("[");
@@ -1204,29 +1257,29 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
 /**
  * \brief Construct a 'computed license'.  Wherever possible, leave off the
  * entries for None and LikelyNot; those are individual-file results
- * and we're making an 'aggregate summary' here. \n
- *****
+ * and we're making an 'aggregate summary' here.
+ *
  * parseLicenses() added license components found, as long as they were
  * considered "interesting" to some extent.  Components of significant
  * interest had their iFlag set to 1; those of lower-interest were set to
  * 0.  In this way we can tier license components into 4 distinct levels:
  * 'interesting', 'medium interest', 'nothing significant', and 'Zero'. \n
  * ==> If the list is EMPTY, there's nothing, period. \n
- * ==> If listCount() returns non-zero, "interesting" stuff is in it and 
+ * ==> If listCount() returns non-zero, "interesting" stuff is in it and
  *     we can safely ignore things of 'significantly less interest'. \n
  * ==> If neither of these is the case, only the licenses of the above \n
  *     'significantly less interest' category exist (don't ignore them).
- ******
+ *
  * We need to be VERY careful in this routine about the length of the
  * license-summary created; they COULD be indefinitely long!  For now,
- * just check to see if we're going to overrun the buffer... \n
+ * just check to see if we're going to overrun the buffer...
  *
- * Construct a 'computed license'. \n
+ * Construct a 'computed license'.
  *
  * Wherever possible, leave off the entries for None and LikelyNot; those are
- * individual-file results and we're making an 'aggregate summary' here. \n
+ * individual-file results and we're making an 'aggregate summary' here.
  *
- * This function adds licenses to cur.compLic
+ * \note This function adds licenses to cur.compLic
  *
  */
 static void makeLicenseSummary(list_t *l, int highScore, char *target, int size) {

@@ -24,7 +24,7 @@ case "$1" in
     if [ -f "/etc/apache2/sites-enabled/fossology.conf" ]; then
     rm -rf  /etc/apache2/sites-enabled/fossology.conf
     fi
-    sed -r -i.bak 's/;? ?upload_max_filesize ?= ?[0-9]+[kmgKMG]*/upload_max_filesize = 750M/' /etc/php5/apache2/php.ini
+    sed -r -i.bak 's/;? ?upload_max_filesize ?= ?[0-9]+[kmgKMG]*/upload_max_filesize = 750M/' /etc/php*/apache2/php.ini
     ln -s /etc/fossology/conf/fo-apache.conf /etc/apache2/sites-enabled/fossology.conf
     # need to run fo-postinstall web and agent stuff
     /usr/lib/fossology/fo-postinstall --web-only

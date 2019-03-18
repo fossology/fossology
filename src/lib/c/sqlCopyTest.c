@@ -15,14 +15,15 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 **************************************************************/
 
-/**************************************************************
+/** ***********************************************************
 * \file  sqlCopyTest.c
 * \brief This is a test program for sqlCopy functions.
 **************************************************************/
 
 #include "libfossology.h"
 
-/* Return the string to use for the text column data
+/**
+ * Return the string to use for the text column data
  */
 char* GetTextCol(int NumTextBytes)
 {
@@ -66,7 +67,7 @@ int main(int argc, char** argv)
     exit(-1);
   }
 
-  /* first argument is the number of rows to test, 
+  /* first argument is the number of rows to test,
    * the second is the number of bytes to use for col_text
    * third is the Copy data buffer size
    */
@@ -80,6 +81,7 @@ int main(int argc, char** argv)
   DataBuf = calloc(datasize, sizeof(char));
   if (!DataBuf)
   {
+    free(col_text);
     ERROR_RETURN("Allocating test data buffer failed.")
     exit(-2);
   }

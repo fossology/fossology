@@ -148,24 +148,29 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
   /** @var ItemTreeBounds */
   $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   $licensesPerFileName = $licenseDao->getLicensesPerFileNameForAgentId(
-    $itemTreeBounds, array($agent_pk), true, array(), $excluding, $ignore);
+    $itemTreeBounds, array($agent_pk), true, $excluding, $ignore);
 
-  foreach($licensesPerFileName as $fileName => $licenseNames)
+  foreach($licensesPerFileName as $fileName => $licenseData)
   {
-    if ((!$ignore || $licenseNames !== false && $licenseNames !== array()))
-    {
-      if ($licenseNames !== false)
+    if ($licenseData == false) {
+      if ($showContainer)
       {
-        print($fileName .': '.implode($licenseNames,', ')."\n");
+        print($fileName."\n");
       }
-      else
-      {
-        if ($showContainer)
-        {
-          print($filename."\n");
-        }
-      }
+      continue;
     }
+
+    if (! array_key_exists('scanResults', $licenseData) || empty($licenseData['scanResults']))
+    {
+      continue;
+    }
+
+    $licenseNames = $licenseData['scanResults'];
+    if (($ignore && $licenseNames !== array())) {
+      continue;
+    }
+
+    print($fileName .': '.implode($licenseNames,', ')."\n");
   }
 }
 

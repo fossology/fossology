@@ -5,7 +5,7 @@ use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2018 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -21,46 +21,46 @@ use Fossology\Lib\Db\DbManager;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************/
 /**
- * \file common-job.php
- * \brief library of functions used by the ui to manage jobs.
- *        Jobs information is stored in the jobs, jobdepends,
- *        and jobqueue tables.
- * 
- * Terminology:
- * Scheduled jobs are divided into a specific heirarchy.
- * 
- * "Job"
- * This is the Job container and is saved in a database
- * job record.  
+ * \file
+ * \brief Library of functions used by the UI to manage jobs.
  *
- * "JobQueue"
- * There may be several tasks to perform for a job.  
+ * Jobs information is stored in the jobs, jobdepends and jobqueue tables.
+ *
+ * \par Terminology:
+ * Scheduled jobs are divided into a specific heirarchy.
+ *
+ * \par "Job"
+ * This is the Job container and is saved in a database
+ * job record.
+ *
+ * \par "JobQueue"
+ * There may be several tasks to perform for a job.
  * For example, a job may be composed of
  * an unpack task, an adj2nest task, and a nomos task.
  * Each job task is specified in a database jobqueue record.
- * 
+ *
  * JobQueue tasks may have dependencies upon the completion of
- * other JobQueue tasks.  The jobdepends tables keep those
+ * other JobQueue tasks. The jobdepends tables keep those
  * parent child relationships.
- * 
+ *
  **/
 
 
 /**
  * \brief Insert a new upload record, and update the foldercontents table.
  *
- * \param $userId
- * \param $groupId
- * \param $job_name   Job name
- * \param $filename   For upload from URL, this is the URL.\n
- *                    For upload from file, this is the filename.\n
- *                    For upload from server, this is the file path.\n
- * \param $desc       Optional user file description.
- * \param $UploadMode 1<<2=URL, 1<<3=upload from server or file
- * \param $folder_pk   The folder to contain this upload
- * \param $public_perm The public permission on this upload
+ * \param int $userId        User creating the job
+ * \param int $groupId       Group creating the job
+ * \param string $job_name   Job name
+ * \param string $filename   For upload from URL, this is the URL.\n
+ *                           For upload from file, this is the filename.\n
+ *                           For upload from server, this is the file path.\n
+ * \param string $desc       Optional user file description.
+ * \param int $UploadMode    1<<2=URL, 1<<3=upload from server or file
+ * \param int $folder_pk     The folder to contain this upload
+ * \param int $public_perm   The public permission on this upload
  *
- * \return upload_pk or null (failure)
+ * \return upload_pk or null (failure).
  *         On failure, error is written to stdout
  */
 function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
@@ -73,7 +73,7 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
       empty($UploadMode) or empty($folder_pk)) return;
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin,public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
       array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
@@ -98,11 +98,11 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
 /**
  * @brief Insert a new job record.
  *
- * @param $userId
- * @param $groupId
- * @param $job_name
- * @param $upload_pk (optional)
- * @param $priority  (optional default 0)
+ * @param int    $userId    User creating the job
+ * @param int    $groupId   Group creating the job
+ * @param string $job_name  Job name
+ * @param int    $upload_pk (optional)
+ * @param int    $priority  (optional default 0)
  *
  * @return int $job_pk the job primary key
  */
@@ -136,22 +136,23 @@ function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
     $stmtName
   );
 
-  return ($row['job_pk']);
+  return intval($row['job_pk']);
 } // JobAddJob()
 
 
 /**
  * @brief Insert a jobqueue + jobdepends records.
  *
- * @param int    $job_pk the job primary key (returned by JobAddJob)
- * @param string $jq_type name of agent (should match the name in agent.conf
- * @param string $jq_args arguments to pass to the agent in the form of
- * $jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";
- * @param string $jq_runonpfile column name
- * @param array  $Depends array of jq_pk's this jobqueue is dependent on.
- * @param string $jq_cmd_args  command line arguments
+ * @param int    $job_pk The job primary key (returned by JobAddJob)
+ * @param string $jq_type Name of agent (should match the name in agent.conf
+ * @param string $jq_args Arguments to pass to the agent in the form of
+ * <tt>$jq_args="folder_pk='$Folder' name='$Name' description='$Desc' ...";</tt>
+ * @param string $jq_runonpfile Column name
+ * @param array  $Depends Array of jq_pk's this jobqueue is dependent on.
+ * @param string $host    Host required for the job
+ * @param string $jq_cmd_args  Command line arguments
  *
- * @return new jobqueue key (jobqueue.jq_pk), or null on failure
+ * @return New jobqueue key (jobqueue.jq_pk), or null on failure.
  *
  */
 function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $host = NULL, $jq_cmd_args=NULL)
@@ -161,9 +162,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
-  if (is_array($Depends)) 
+  if (is_array($Depends))
   {
-    foreach($Depends as $Dependency) 
+    foreach($Depends as $Dependency)
     {
       if (empty($Dependency)) continue;
 
@@ -194,7 +195,7 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
-   
+
   /* Find the jobqueue that was just added */
   $jq_pk = GetLastSeq("jobqueue_jq_pk_seq", "jobqueue");
   if (empty($jq_pk))
@@ -207,9 +208,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   }
 
   /* Add dependencies */
-  if (is_array($Depends)) 
+  if (is_array($Depends))
   {
-    foreach($Depends as $Dependency) 
+    foreach($Depends as $Dependency)
     {
       if (empty($Dependency))
       {
@@ -233,14 +234,14 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
 
 
 /**
- * \brief Gets the list of jobqueue records with the requested $status 
+ * \brief Gets the list of jobqueue records with the requested $status
  *
- * \param string $status - the status might be:
- *        Started, Completed, Restart, Failed, Paused, etc
- *        the status 'Started' and 'Restart', you can call them as running status
+ * \param string $status The status might be:\n
+ *        Started, Completed, Restart, Failed, Paused, etc.\n
+ *        The status 'Started' and 'Restart', you can call them as running status
  *        to get all the running job list, you can set the $status as 'tart'
  *
- * \return job list related to the jobstatus,
+ * \return Job list related to the jobstatus,
  *         the result is like: Array(1, 2, 3, .., i), sorted
  **/
 function GetJobList($status)
@@ -262,10 +263,11 @@ function GetJobList($status)
 /**
  * \brief Schedule agent tasks on upload ids
  *
- * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
- * Or, use 'ALL' to specify all upload ids.
- * \param $agent_list - array of agent plugin objects to schedule.
- * \param $Verbose - verbose output, not empty: output, empty: does not output
+ * \param string $upload_pk_list Upload ids, The string can be a
+ * comma-separated list of upload ids. Or, use 'ALL' to specify all upload ids.
+ * \param array  $agent_list Array of agent plugin objects to schedule.
+ * \param bool   $Verbose Verbose output, not empty: output, empty: does not
+ * output
  */
 function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 {
@@ -276,13 +278,13 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
   $user_pk = Auth::getUserId();
   $group_pk = Auth::getGroupId();
 
-  if (empty($upload_pk_list)) 
+  if (empty($upload_pk_list))
   {
     return;
   }
   // Schedule them
   $agent_count = count($agent_list);
-  foreach(explode(",", $upload_pk_list) as $upload_pk) 
+  foreach(explode(",", $upload_pk_list) as $upload_pk)
   {
     if (empty($upload_pk))  continue;
 
@@ -302,21 +304,21 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 
     // don't exit on AgentAdd failure, or all the agents requested will
     // not get scheduled.
-    for ($ac = 0;$ac < $agent_count;$ac++) 
+    for ($ac = 0;$ac < $agent_count;$ac++)
     {
       $agentname = $agent_list[$ac]->URI;
-      if (!empty($agentname)) 
+      if (!empty($agentname))
       {
         $Agent = & $Plugins[plugin_find_id($agentname) ];
         $Dependencies = "";
         $ErrorMsg = "already queued!";
         $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-        if ($agent_jq_pk <= 0) 
+        if ($agent_jq_pk <= 0)
         {
           echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
           echo "WARNING message: $ErrorMsg\n";
-        } 
-        else if ($Verbose) 
+        }
+        else if ($Verbose)
         {
           $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk";
           $result = pg_query($PG_CONN, $SQL);
@@ -333,8 +335,8 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
 /**
  * \brief Schedule delagent on upload ids
  *
- * \param $upload_pk_list -  upload ids, The string can be a comma-separated list of upload ids.
- * Or, use 'ALL' to specify all upload ids.
+ * \param string $upload_pk_list Upload ids, The string can be a
+ * comma-separated list of upload ids. Or, use 'ALL' to specify all upload ids.
  */
 function QueueUploadsOnDelagents($upload_pk_list)
 {
@@ -368,13 +370,14 @@ function QueueUploadsOnDelagents($upload_pk_list)
 
 /**
  * \brief Check if an agent is already scheduled in a job.
+ *
  * This is used to make sure dependencies, like unpack
  * don't get scheduled multiple times within a single job.
  *
- * \param $job_pk    - the job to be checked
- * \param $AgentName - the agent name (from agent.agent_name)
+ * \param int    $job_pk    The job to be checked
+ * \param string $AgentName The agent name (from agent.agent_name)
  *
- * \return 
+ * \return
  * jq_pk of scheduled jobqueue
  * or 0 = not scheduled
  */
@@ -388,7 +391,8 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
   /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
   if ($AgentName == "ununpack" || $AgentName == "adj2nest")
   {
-    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
+    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk "
+         . "AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
   }
   else
   {
@@ -408,20 +412,23 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 
 
 /**
- * \brief Queue an agent.  This is a simple version of AgentAdd() that can be
+ * \brief Queue an agent. This is a simple version of AgentAdd() that can be
  *  used by multiple plugins that only use upload_pk as jqargs.
- *  Before queuing, check if agent needs to be queued.  It doesn't need to be queued if:
+ *
+ *  Before queuing, check if agent needs to be queued. It doesn't need to be
+ *  queued if:
  *  - It is already queued
  *  - It has already been run by the latest agent version
  *
- * \param $plugin caller plugin object
- * \param $job_pk
- * \param $upload_pk
- * \param $ErrorMsg - error message on failure
- * \param $Dependencies - array of named dependencies. Each array element is the plugin name.
- *         For example,  array(agent_adj2nest, agent_pkgagent).  
+ * \param Plugin $plugin Caller plugin object
+ * \param int $job_pk
+ * \param int $upload_pk
+ * \param[out] string &$ErrorMsg Error message on failure
+ * \param array $Dependencies Array of named dependencies. Each array element
+ * is the plugin name.
+ *         For example, array(agent_adj2nest, agent_pkgagent).
  *         Typically, this will just be array(agent_adj2nest).
- * \param $jqargs (optional) jobqueue.jq_args
+ * \param string $jqargs (optional) jobqueue.jq_args
  *
  * \returns
  * - jq_pk Successfully queued
@@ -483,3 +490,34 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
 
   return ($jq_pk);
 }
+
+/**
+ * @brief Check if an agent is already running in a job.
+ *
+ * This is used to make sure dependencies don't get scheduled multiple times
+ * when the latest scan is not finished.
+ *
+ * @param string $agentName The agent name (from agent.agent_name)
+ * @param int    $upload_pk The upload id
+ *
+ * @return int jq_pk of scheduled jobqueue or 0 = not scheduled
+ */
+function isAlreadyRunning($agentName, $upload_pk)
+{
+  global $PG_CONN;
+
+  $jq_pk = 0;
+
+  $sql = "SELECT jq_pk FROM jobqueue INNER JOIN job ON job_pk = jq_job_fk "
+       . "WHERE jq_type='$agentName' AND job_upload_fk = $upload_pk "
+       . "AND jq_end_bits = 0";
+  $result = pg_query($PG_CONN, $sql);
+  DBCheckResult($result, $sql, __FILE__, __LINE__);
+  if (pg_num_rows($result) > 0)
+  {
+    $row = pg_fetch_assoc($result);
+    $jq_pk = $row["jq_pk"];
+  }
+  pg_free_result($result);
+  return intval($jq_pk);
+} // isAlreadyRunning()

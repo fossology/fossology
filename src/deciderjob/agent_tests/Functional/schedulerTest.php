@@ -15,7 +15,12 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
-
+/**
+ * @file schedulerTest.php
+ * @brief Functional tests for DeciderJobAgent
+ * @namespace Fossology::DeciderJob::Test
+ * @brief Namespace for decider job test cases
+ */
 namespace Fossology\DeciderJob\Test;
 
 use Fossology\Lib\BusinessRules\AgentLicenseEventProcessor;
@@ -40,35 +45,42 @@ include_once(__DIR__.'/../../../lib/php/Plugin/FO_Plugin.php');
 include_once(__DIR__.'/SchedulerTestRunnerCli.php');
 include_once(__DIR__.'/SchedulerTestRunnerMock.php');
 
-class SchedulerTest extends \PHPUnit_Framework_TestCase
+/**
+ * @class SchedulerTest
+ * @brief Test interactions between scheduler and agent
+ */
+class SchedulerTest extends \PHPUnit\Framework\TestCase
 {
-  /** @var TestPgDb */
+  /** @var TestPgDb $testDb */
   private $testDb;
-  /** @var DbManager */
+  /** @var DbManager $dbManager */
   private $dbManager;
-  /** @var TestInstaller */
+  /** @var TestInstaller $testInstaller */
   private $testInstaller;
-  
-  /** @var LicenseDao */
+
+  /** @var LicenseDao $licenseDao */
   private $licenseDao;
-  /** @var ClearingDao */
+  /** @var ClearingDao $clearingDao */
   private $clearingDao;
-  /** @var ClearingDecisionProcessor */
+  /** @var ClearingDecisionProcessor $clearingDecisionProcessor */
   private $clearingDecisionProcessor;
-  /** @var AgentLicenseEventProcessor */
+  /** @var AgentLicenseEventProcessor $agentLicenseEventProcessor */
   private $agentLicenseEventProcessor;
-  /** @var UploadDao */
+  /** @var UploadDao $uploadDao */
   private $uploadDao;
-  /** @var UploadPermissionDao */
+  /** @var UploadPermissionDao $uploadPermDao */
   private $uploadPermDao;
-  /** @var HighlightDao */
+  /** @var HighlightDao $highlightDao */
   private $highlightDao;
 
-  /** @var SchedulerTestRunnerCli */
+  /** @var SchedulerTestRunnerCli $runnerCli */
   private $runnerCli;
-  /** @var SchedulerTestRunnerMock */
+  /** @var SchedulerTestRunnerMock $runnerMock */
   private $runnerMock;
 
+  /**
+   * @brief Setup the objects, database and repository
+   */
   protected function setUp()
   {
     $this->testDb = new TestPgDb("deciderJobSched".time());
@@ -76,7 +88,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $logger = M::mock('Monolog\Logger');
 
     $this->licenseDao = new LicenseDao($this->dbManager);
-    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::classname());
+    $this->uploadPermDao = \Mockery::mock(UploadPermissionDao::class);
     $this->uploadDao = new UploadDao($this->dbManager, $logger, $this->uploadPermDao);
     $this->highlightDao = new HighlightDao($this->dbManager);
     $agentDao = new AgentDao($this->dbManager, $logger);
@@ -89,6 +101,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
+  /**
+   * @brief Destroy objects, database and repository
+   */
   protected function tearDown()
   {
     $this->testDb->fullDestruct();
@@ -99,6 +114,9 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->clearingDao = null;
   }
 
+  /**
+   * @brief Setup test repository
+   */
   private function setUpRepo()
   {
     $sysConf = $this->testDb->getFossSysConf();
@@ -107,12 +125,18 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testInstaller->cpRepo();
   }
 
+  /**
+   * @brief Destroy test repository
+   */
   private function rmRepo()
   {
     $this->testInstaller->rmRepo();
     $this->testInstaller->clear();
   }
 
+  /**
+   * @brief Create test tables required by agent
+   */
   private function setUpTables()
   {
     $this->testDb->createPlainTables(array('upload','upload_reuse','uploadtree','uploadtree_a','license_ref','license_ref_bulk','clearing_decision','clearing_decision_event','clearing_event','license_file','highlight','highlight_bulk','agent','pfile','ars_master','users','group_user_member','license_map'),false);
@@ -129,6 +153,11 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');
   }
 
+  /**
+   * @brief Get the heart count value from the agent output
+   * @param string $output Output from agent
+   * @return int Heart count value, -1 on failure
+   */
   private function getHeartCount($output)
   {
     $matches = array();
@@ -142,18 +171,35 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
   }
 
 
-  /** @group Functional */
+  /** 
+   * @group Functional 
+   * @test
+   * -# Insert few clearing events
+   * -# Run DeciderJobAgent Mock
+   * -# Check for decisions (should exist)
+   * -# Check if events still exists
+   */
   public function testDeciderMockedScanWithTwoEventAndNoAgentShouldMakeADecision()
   {
     $this->runnerDeciderScanWithTwoEventAndNoAgentShouldMakeADecision($this->runnerMock);
   }
 
-  /** @group Functional */
+  /** 
+   * @group Functional 
+   * @test
+   * -# Insert few clearing events
+   * -# Run DeciderJobAgent Cli
+   * -# Check for decisions (should exist)
+   * -# Check if events still exists
+   */
   public function testDeciderRealScanWithTwoEventAndNoAgentShouldMakeADecision()
   {
     $this->runnerDeciderScanWithTwoEventAndNoAgentShouldMakeADecision($this->runnerCli);
   }
 
+  /**
+   * @brief run decider with two events
+   */
   private function runnerDeciderScanWithTwoEventAndNoAgentShouldMakeADecision($runner)
   {
     $this->setUpTables();
@@ -196,18 +242,33 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
-  /** @group Functional */
+  /** 
+   * @group Functional
+   * @test
+   * -# Create findings with nomos
+   * -# Run DeciderJobAgent Mock
+   * -# Check for decisions (should not be empty)
+   */
   public function testDeciderMockScanWithNoEventsAndOnlyNomosShouldNotMakeADecision()
   {
     $this->runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($this->runnerMock);
   }
 
-  /** @group Functional */
+  /** 
+   * @group Functional
+   * @test
+   * -# Create findings with nomos
+   * -# Run DeciderJobAgent Cli
+   * -# Check for decisions (should not be empty)
+   */
   public function testDeciderRealScanWithNoEventsAndOnlyNomosShouldNotMakeADecision()
   {
     $this->runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($this->runnerCli);
   }
 
+  /**
+   * @brief run decider with no events
+   */
   private function runnerDeciderScanWithNoEventsAndOnlyNomosShouldNotMakeADecision($runner)
   {
     $this->setUpTables();
@@ -239,18 +300,23 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
+  /**
+   * @test
+   * -# Insert two clearing events
+   * -# Run DeciderJobAgent
+   */
   public function testDeciderScanWithTwoEventAndNoAgentShouldMakeADecision()
   {
     $this->setUpTables();
     $this->setUpRepo();
 
-    $dbManager = M::mock(DbManager::classname());
-    $agentDao = M::mock(AgentDao::classname());
-    $clearingDao = M::mock(ClearingDao::classname());
-    $uploadDao = M::mock(UploadDao::classname());
-    $highlightDao = M::mock(HighlightDao::classname());
-    $decisionProcessor = M::mock(ClearingDecisionProcessor::classname());
-    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::classname());
+    $dbManager = M::mock(DbManager::class);
+    $agentDao = M::mock(AgentDao::class);
+    $clearingDao = M::mock(ClearingDao::class);
+    $uploadDao = M::mock(UploadDao::class);
+    $highlightDao = M::mock(HighlightDao::class);
+    $decisionProcessor = M::mock(ClearingDecisionProcessor::class);
+    $agentLicenseEventProcessor = M::mock(AgentLicenseEventProcessor::class);
 
     $uploadId = 13243;
 
@@ -266,10 +332,10 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     $itemIds = array(4343, 43);
 
-    $bounds0 = M::mock(ItemTreeBounds::classname());
+    $bounds0 = M::mock(ItemTreeBounds::class);
     $bounds0->shouldReceive('getItemId')->andReturn($itemIds[0]);
     $bounds0->shouldReceive('containsFiles')->andReturn(false);
-    $bounds1 = M::mock(ItemTreeBounds::classname());
+    $bounds1 = M::mock(ItemTreeBounds::class);
     $bounds1->shouldReceive('getItemId')->andReturn($itemIds[1]);
     $bounds1->shouldReceive('containsFiles')->andReturn(false);
     $bounds = array($bounds0, $bounds1);
@@ -285,7 +351,7 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
 
     /* dummy expectations needed for unmockable LicenseMap constructor */
     $dbManager->shouldReceive('prepare');
-    $res = M::Mock(DbManager::classname());
+    $res = M::Mock(DbManager::class);
     $dbManager->shouldReceive('execute')->andReturn($res);
     $row1 = array('rf_fk' => 2334, 'parent_fk' => 1);
     $row2 = array('rf_fk' => 2333, 'parent_fk' => 1);
@@ -314,18 +380,37 @@ class SchedulerTest extends \PHPUnit_Framework_TestCase
     $this->rmRepo();
   }
 
-  /** @group Functional */
+  /**
+   * @group Functional
+   * @test
+   * -# Insert two clearing events
+   * -# Run DeciderJobAgent with force rule Mock
+   * -# Check for decisions (should exist)
+   * -# Check if events still exists
+   * -# Check if new event is created
+   */
   public function testDeciderMockedScanWithForceDecision()
   {
     $this->runnerDeciderScanWithForceDecision($this->runnerMock);
   }
 
-  /** @group Functional */
+  /**
+   * @group Functional
+   * @test
+   * -# Insert two clearing events
+   * -# Run DeciderJobAgent with force rule Cli
+   * -# Check for decisions (should exist)
+   * -# Check if events still exists
+   * -# Check if new event is created
+   */
   public function testDeciderRealScanWithForceDecision()
   {
     $this->runnerDeciderScanWithForceDecision($this->runnerCli);
   }
 
+  /**
+   * @brief run decider with force decision
+   */
   private function runnerDeciderScanWithForceDecision($runner)
   {
     $this->setUpTables();

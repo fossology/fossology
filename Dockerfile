@@ -1,5 +1,6 @@
 # FOSSology Dockerfile
 # Copyright Siemens AG 2016, fabio.huser@siemens.com
+# Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -8,33 +9,84 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:8.8
+FROM debian:jessie-slim as builder
 
-MAINTAINER Fossology <fossology@fossology.org>
+LABEL maintainer="Fossology <fossology@fossology.org>"
 
 WORKDIR /fossology
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      git \
+      lsb-release \
+      php5-cli \
+      sudo \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY ./utils/fo-installdeps ./utils/fo-installdeps
+COPY ./utils/utils.sh ./utils/utils.sh
+COPY ./src/copyright/mod_deps ./src/copyright/
+COPY ./src/delagent/mod_deps ./src/delagent/
+COPY ./src/mimetype/mod_deps ./src/mimetype/
+COPY ./src/pkgagent/mod_deps ./src/pkgagent/
+COPY ./src/scheduler/mod_deps ./src/scheduler/
+COPY ./src/ununpack/mod_deps ./src/ununpack/
+COPY ./src/wget_agent/mod_deps ./src/wget_agent/
+
+RUN mkdir -p /fossology/dependencies-for-runtime \
+ && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
+ && rm -rf /var/lib/apt/lists/*
+
 COPY . .
 
-RUN apt-get update && \
-    apt-get install -y lsb-release sudo postgresql php5-curl libpq-dev libdbd-sqlite3-perl libspreadsheet-writeexcel-perl && \
-    /fossology/utils/fo-installdeps -e -y && \
-    rm -rf /var/lib/apt/lists/*
+RUN /fossology/utils/install_composer.sh
 
-RUN curl -sS https://getcomposer.org/installer | php && \
-    mv composer.phar /usr/local/bin/composer
+RUN make install clean
 
-RUN /fossology/install/scripts/install-spdx-tools.sh
 
-RUN /fossology/install/scripts/install-ninka.sh
+FROM debian:jessie-slim
 
-RUN make install
+LABEL maintainer="Fossology <fossology@fossology.org>"
 
-RUN cp /fossology/install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf && \
-    ln -s /etc/apache2/conf-available/fossology.conf /etc/apache2/conf-enabled/fossology.conf
+### install dependencies
+COPY --from=builder /fossology/dependencies-for-runtime /fossology
 
+WORKDIR /fossology
+
+# Fix for Postgres and other packages in slim variant
+RUN mkdir /usr/share/man/man1 /usr/share/man/man7 \
+ && DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      curl \
+      lsb-release \
+      sudo \
+ && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
+ && DEBIAN_FRONTEND=noninteractive apt-get purge -y lsb-release \
+ && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
+ && rm -rf /var/lib/apt/lists/*
+
+# configure php
+COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
 RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 
-EXPOSE 8081
+# configure apache
+COPY ./install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
+RUN a2enconf fossology.conf \
+ && a2enmod rewrite \
+ && mkdir -p /var/log/apache2/ \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
 
+COPY ./docker-entrypoint.sh /fossology/docker-entrypoint.sh
 RUN chmod +x /fossology/docker-entrypoint.sh
 ENTRYPOINT ["/fossology/docker-entrypoint.sh"]
+
+COPY --from=builder /etc/cron.d/fossology /etc/cron.d/fossology
+COPY --from=builder /etc/init.d/fossology /etc/init.d/fossology
+COPY --from=builder /usr/local/ /usr/local/
+
+# the database is filled in the entrypoint
+RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database

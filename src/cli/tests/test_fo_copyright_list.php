@@ -20,7 +20,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 use Fossology\Lib\Test\TestInstaller;
 use Fossology\Lib\Test\TestPgDb;
 
-class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
+class test_fo_copyright_list extends \PHPUnit\Framework\TestCase {
   /** @var string scheduler_path is the absolute path to the scheduler binary */
   public $fo_copyright_list_path;
   /** @var TestPgDb */
@@ -56,51 +56,53 @@ class test_fo_copyright_list extends PHPUnit_Framework_TestCase {
   {
     $upload_id = 2;
     $auth = "--user fossy --password fossy";
-    $out = "";
     $uploadtree_id = 13;
     $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --container 1";
-    exec("$command 2>&1", $out, $rtn);
-    $this->assertEquals(27, count($out));
-    $this->assertEquals("B.zip/B/1b/AAL_B: copyright (c) 2002 by author", $out[22]);
+    exec("$command 2>&1", $output, $return_value);
+
+    $this->assertEquals(0, $return_value, "Non-zero exit status code with\n" . join('\n', $output));
+    $this->assertEquals(27, count($output));
+    $this->assertEquals("B.zip/B/1b/AAL_B: copyright (c) 2002 by author", $output[22]);
   }
 
   function test_get_copryright_list_email()
   {
     $upload_id = 2;
     $auth = "--user fossy --password fossy";
-    $out = "";
     $uploadtree_id = 13;
     $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 1";
-    exec("$command 2>&1", $out, $rtn);
-    /** check one line of the report */
-    $this->assertEquals("B.zip/B/1b/3DFX_B: info@3dfx.com", $out[7]);
+    exec("$command 2>&1", $output, $return_value);
+
+    $this->assertEquals(0, $return_value, "Non-zero exit status code with\n" . join('\n', $output));
+    $this->assertEquals("B.zip/B/1b/3DFX_B: info@3dfx.com", $output[7]);
   }
   
   function test_get_copryright_list_withoutContainer()
   {
     $upload_id = 2;
     $auth = "--user fossy --password fossy";
-    $out = "";
-    $uploadtree_id = 13;    $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 0";
-     exec("$command 2>&1", $out, $rtn);
-    /** check one line of the report */
-    $this->assertEquals("B.zip/B/1b/3DFX_B: info@3dfx.com", $out[4]);
+    $uploadtree_id = 13;
+    $command = "$this->fo_copyright_list_path $auth -u $upload_id -t $uploadtree_id --type email --container 0";
+    exec("$command 2>&1", $output, $return_value);
+
+    $this->assertEquals(0, $return_value, "Non-zero exit status code with\n" . join('\n', $output));
+    $this->assertEquals("B.zip/B/1b/3DFX_B: info@3dfx.com", $output[4]);
   }
 
   public function test_help() {
     $auth = "--user fossy --password fossy";
-
     $command = "$this->fo_copyright_list_path $auth -h";
-    exec("$command 2>&1", $out, $rtn);
-    $output_msg_count = count($out);
-    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    exec("$command 2>&1", $output, $return_value);
+
+    $this->assertEquals(0, $return_value, "Non-zero exit status code with\n" . join('\n', $output));
+    $this->assertEquals(11, count($output));
   }
   
   public function test_help_noAuthentication() {
-    $out = "";
     $command = "$this->fo_copyright_list_path -h";
-    exec("$command 2>&1", $out, $rtn);
-    $output_msg_count = count($out);
-    $this->assertEquals(11, $output_msg_count, "Test that the number of output lines from '$command' is $output_msg_count");
+    exec("$command 2>&1", $output, $return_value);
+
+    $this->assertEquals(0, $return_value, "Non-zero exit status code with\n" . join('\n', $output));
+    $this->assertEquals(11, count($output));
   }
 }

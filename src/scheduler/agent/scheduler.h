@@ -14,7 +14,99 @@ You should have received a copy of the GNU General Public License along
 with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ************************************************************** */
-
+/**
+ * \dir
+ * \brief Source for scheduler
+ * \file
+ * \brief Header file for the scheduler
+ * \page scheduler FOSSology Scheduler
+ * \tableofcontents
+ * \section schedulerabout About scheduler
+ * The FOSSology job scheduler is a daemon that periodically checks the job
+ * queue and spawns agents to run scans. Multiple jobs can be run simultaneously
+ * as defined in fossology.conf.
+ * \section schedulerterminology Terminology
+ * \subsection jobstreamterm Job stream
+ *     A list of all the job steps queued at the same time for an upload.
+ *     For example, all the job steps (programs) necessary to get a particular
+ *     upload from unpack through all of its scans.
+ * \subsection jobterm Job
+ *     A specific step in the process of working on an upload. Each job would
+ *     be associated with a different type of agent. For example if a person
+ *     uploaded a .tar file and wanted license and copyright analysis run on the
+ *     file, there would be a job for the unpack step, a job for the license step
+ *     and a job for the copyright step.
+ * \subsection agentterm Agent
+ *     The actual process that the scheduler will spawn and be communicating
+ *     with. An instance of the copyright scanner would be an example of an
+ *     agent. A job is a scheduler construct used to run an agent process.
+ * \section schedulerarchitecture Scheduler Architecture
+ * Scheduler use a classic client server communication style for both the agent
+ * communication and the UI communication. Every time a new communication
+ * channel is needed, the scheduler will create a new thread to manage the
+ * communications with that channel. This makes the communication logic much simpler.
+ *
+ * If the communication thread receives anything that would involve changing a
+ * data structure internal to the scheduler, it passes the information off to
+ * the main thread instead of changing it personally. The communication threads send
+ * information to the main thread using events. The communication thread will package
+ * the function and arguments and pass it to a concurrent queue that the main thread
+ * is waiting on.
+ *
+ * When a new job stream is found in the job queue, the scheduler will create only
+ * the jobs for that job stream that have all the preconditions fulfilled. Once
+ * created the jobs will have agents allocated to them. Allocated agents belong
+ * to the job and will remain in the scheduler's data structures until the job
+ * is removed from the system. Jobs are responsible for cleaning up any agents
+ * allocated to them.
+ *
+ * Within a job, when an agent is ready for data, it will inform the main thread
+ * that it is waiting. The main thread will then take a chunk of data from the
+ * job that the agent belongs to and allocate it to the agent. The communication
+ * thread will then be responsible for sending the data to the corresponding
+ * process. It is important to note that the communication threads are using
+ * blocking IO on the pipe from the corresponding process. As a result, any
+ * string that starts with "@" is reserved as a communication from the scheduler
+ * instead of the corresponding process. Writing anything that starts with "@"
+ * to stdout within an agent will result in undefined behavior.
+ *
+ * Here are some other properties of the scheduler:
+ * - Scheduler can take advantage of multiple processors on whatever machine it is running on.
+ * - Simplified code for communicating with agents since all IO would be blocking instead of non-blocking.
+ * - Master thread can not get swamped with communications between the agents and can concentrate on managing new jobs.
+ * - Uses GLib
+ * - Job queue is implemented in db tables:
+ *     - **job** - the job stream
+ *     - **jobqueue** - individual jobs
+ *     - **jobdepends** - job dependencies (for example, you can't run buckets until the license scan is done)
+ *
+ * [More info on scheduler](https://github.com/fossology/fossology/wiki/Job-Scheduler)
+ * \section scheduleractions Communicating with scheduler
+ * You can send commands to a running scheduler. The scheduler listens on the
+ * port specified in fossology.conf. After a command is sent, the scheduler will
+ * respond with "received". You can send the following commands:
+ *
+ * | Command | Definition |
+ * | ---: | :--- |
+ * | close   | Close the connection to the scheduler. |
+ * | stop    | Scheduler will gracefully shutdown after the currently running jobs have finished. |
+ * | pause <job_id> | The job id (job_pk) will pause. All agents associated with the job will be put to sleep. |
+ * | agents  | Respond with a space separated list of agents configured to run. |
+ * | reload  | Reload the configuration information for the agents and hosts. |
+ * | status  | Respond on the same socket with all of the status information. |
+ * | status <job_id> | Respond with a detailed status for the specific job. |
+ * | restart <job_id> | Restart the job specified. |
+ * | verbose | The verbosity level for the scheduler will be changed to match level. |
+ * | verbose <job_id> | The verbosity level for all of the agents owned by the specified job will be changed to level. |
+ * | priority | Changes the priority of a particular job within the scheduler. |
+ * | database | Check the database job queue for new jobs. |
+ *
+ * \section schedulersource Agent source
+ *   - \link src/scheduler/agent \endlink
+ *   - Test agents \link src/scheduler/agent_tests/agents \endlink
+ *   - Functional test cases \link src/scheduler/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/scheduler/agent_tests/Unit \endlink
+ */
 #ifndef SCHEDULER_H_INCLUDE
 #define SCHEDULER_H_INCLUDE
 
@@ -38,28 +130,38 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 #define CHECKOUT_SIZE 100
 
-#define AGENT_BINARY "%s/%s/%s/agent/%s"
-#define AGENT_CONF "mods-enabled"
+#define AGENT_BINARY "%s/%s/%s/agent/%s"  ///< Format to get agent binary
+#define AGENT_CONF "mods-enabled"         ///< Agent conf location
+
+/**
+ * Check if PGresult is not NULL. Then call PQclear and set result as NULL
+ * to prevent multiple calls.
+ */
+#define SafePQclear(pgres)  if (pgres) {PQclear(pgres); pgres = NULL;}
 
 /* ************************************************************************** */
 /* *** Scheduler structure ************************************************** */
 /* ************************************************************************** */
 
+/**
+ * The main scheduler structure. It holds all the information about the current
+ * scheduler process and is used by several different operations.
+ */
 typedef struct
 {
     /* information about the scheduler process */
-    gchar*   process_name;  ///< the name of the scheduler process
-    gboolean s_pid;         ///< the pid of the scheduler process
-    gboolean s_daemon;      ///< is the scheduler being run as a daemon
-    gboolean s_startup;     ///< has the scheduler finished startup tests
-    gboolean s_pause;       ///< has the scheduler been paused
+    gchar*   process_name;  ///< The name of the scheduler process
+    gboolean s_pid;         ///< The pid of the scheduler process
+    gboolean s_daemon;      ///< Is the scheduler being run as a daemon
+    gboolean s_startup;     ///< Has the scheduler finished startup tests
+    gboolean s_pause;       ///< Has the scheduler been paused
 
     /* loaded configuration information */
-    fo_conf* sysconfig;     ///< configuration information loaded from the configuration file
-    gchar*   sysconfigdir;  ///< the system directory that contain fossology.conf
-    gchar*   logdir;        ///< the directory to put the log file in
-    gboolean logcmdline;    ///< was the log file set by the command line
-    log_t*   main_log;      ///< the main log file for the scheduler
+    fo_conf* sysconfig;     ///< Configuration information loaded from the configuration file
+    gchar*   sysconfigdir;  ///< The system directory that contain fossology.conf
+    gchar*   logdir;        ///< The directory to put the log file in
+    gboolean logcmdline;    ///< Was the log file set by the command line
+    log_t*   main_log;      ///< The main log file for the scheduler
 
     /* used exclusively in agent.c */
     GTree*  meta_agents;    ///< List of all meta agents available to the scheduler
@@ -67,15 +169,15 @@ typedef struct
 
     /* used exclusively in host.c */
     GTree* host_list;       ///< List of all hosts available to the scheduler
-    GList* host_queue;      ///< round-robin queue for choosing which host use next
+    GList* host_queue;      ///< Round-robin queue for choosing which host use next
 
     /* used exclusively in interface.c */
-    gboolean      i_created;    ///< has the interface been created
-    gboolean      i_terminate;  ///< has the interface been terminated
-    uint16_t      i_port;       ///< the port that the scheduler is listening on
-    GThread*      server;       ///< thread that is listening to the server socket
-    GThreadPool*  workers;      ///< threads to handle incoming network communication
-    GCancellable* cancel;       ///< used to stop the listening thread when it is running
+    gboolean      i_created;    ///< Has the interface been created
+    gboolean      i_terminate;  ///< Has the interface been terminated
+    uint16_t      i_port;       ///< The port that the scheduler is listening on
+    GThread*      server;       ///< Thread that is listening to the server socket
+    GThreadPool*  workers;      ///< Threads to handle incoming network communication
+    GCancellable* cancel;       ///< Used to stop the listening thread when it is running
 
     /* used exclusively in job.c */
     GTree*     job_list;    ///< List of jobs that have been created
@@ -87,7 +189,7 @@ typedef struct
     gchar*   email_subject;   ///< The subject to be used for emails
     gchar*   email_header;    ///< The beginning of the email message
     gchar*   email_footer;    ///< The end of the email message
-    gchar*   email_command;   ///< The command that will sends emails, usually xmail
+    gchar*   email_command;   ///< The command that will sends emails, usually mailx
     gboolean default_header;  ///< Is the header the default header
     gboolean default_footer;  ///< Is the footer the default footer
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2016, Siemens AG
+Copyright (C) 2014-2017, Siemens AG
 Author: Andreas Würl
 
 This program is free software; you can redistribute it and/or
@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\UI\Page;
 
+use Fossology\Lib\Application\CurlRequestService;
 use Fossology\Lib\Application\RepositoryApi;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
@@ -56,11 +57,11 @@ class AboutPage extends DefaultPlugin
     $vars = array(
         'licenseCount' => $this->licenseDao->getLicenseCount(),
         'project' => _("FOSSology"),
-        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014-2016 Siemens AG."),
+        'copyright' => _("Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.<br>\nCopyright (C) 2014-2017 Siemens AG."),
     );
     
     if (Auth::isAdmin()) {
-      $repositoryApi = new RepositoryApi();
+      $repositoryApi = new RepositoryApi(new CurlRequestService());
       $latestRelease = $repositoryApi->getLatestRelease();
       $commits = $repositoryApi->getCommitsOfLastDays(30);
       $commit = empty($commits) ? '' : substr($commits[0]['sha'],0,6);

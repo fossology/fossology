@@ -18,7 +18,7 @@
 ***********************************************************/
 
 /**
- *  \file common-db.php
+ *  \file
  *  \brief This file contains common database functions.
  **/
 
@@ -27,17 +27,18 @@
  * \brief Connect to database engine.
  *        This is a no-op if $PG_CONN already has a value.
  *
- * \param $sysconfdir fossology configuration directory (location of Db.conf)
- * \param $Options an optional list of attributes for
+ * \param string $sysconfdir fossology configuration directory (location of
+ *             Db.conf)
+ * \param string $options an optional list of attributes for
  *             connecting to the database. E.g.:
- *   "dbname=text host=text user=text password=text"
- * \param $exitOnFail true (default) to print error and call exit on failure
- *                  false to return $PG_CONN === false on failure
+ *   `"dbname=text host=text user=text password=text"`
+ * \param bool   $exitOnFail true (default) to print error and call exit on
+ *                  failure false to return $PG_CONN === false on failure
  *
- * If $Options is empty, then connection parameters will be read from Db.conf.
+ * If $options is empty, then connection parameters will be read from Db.conf.
  *
- * \return 
- *   Success: $PG_CONN, the postgres connection object
+ * \return
+ *   Success: $PG_CONN, the postgres connection object \n
  *   Failure: Error message is printed
  **/
 function DBconnect($sysconfdir, $options="", $exitOnFail=true)
@@ -87,16 +88,18 @@ function DBconnect($sysconfdir, $options="", $exitOnFail=true)
 /**
    \brief Retrieve a single database record.
 
-          This function does a:
-            "SELECT * from $Table $Where limit 1"
-          and returns the result as an associative array.
+   This function does a:
+   \code
+   "SELECT * from $Table $Where limit 1"
+   \endcode
+   and returns the result as an associative array.
 
-   \param $Table   Table name
-   \param $Where   SQL where clause e.g. "where uploadtree_pk=2".
+   \param string $Table   Table name
+   \param string $Where   SQL where clause e.g. `"where uploadtree_pk=2"`.
                    Though a WHERE clause is the typical use, $Where
                    can really be any options following the sql tablename.
-   \return 
-       Associative array for this record.  
+   \return
+       Associative array for this record.
        May be empty if no record found.
  **/
 function GetSingleRec($Table, $Where="")
@@ -117,15 +120,15 @@ function GetSingleRec($Table, $Where="")
  * \brief Create an associative array by using table
  *        rows to source the key/value pairs.
  *
- * \param $Table   tablename
- * \param $KeyCol  Key column name in $Table
- * \param $ValCol  Value column name in $Table
- * \param $Where   SQL where clause (optional)
+ * \param string $Table   tablename
+ * \param string $KeyCol  Key column name in $Table
+ * \param string $ValCol  Value column name in $Table
+ * \param string $Where   SQL where clause (optional)
  *                 This can really be any clause following the
  *                 table name in the sql
  *
  * \return
- *  Array[Key] = Val for each row in the table
+ *  Array[Key] = Val for each row in the table.
  *  May be empty if no table rows or Where results
  *  in no rows.
  **/
@@ -150,15 +153,15 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
  * \brief Create an array by using table
  *        rows to source the values.
  *
- * \param $Table   tablename
- * \param $ValCol  Value column name in $Table
- * \param $Uniq    Sort out duplicates
- * \param $Where   SQL where clause (optional)
+ * \param string $Table   tablename
+ * \param string $ValCol  Value column name in $Table
+ * \param string $Uniq    Sort out duplicates
+ * \param string $Where   SQL where clause (optional)
  *                 This can really be any clause following the
  *                 table name in the sql
  *
  * \return
- *  Array[Key] = Val for each row in the table
+ *  Array[Key] = Val for each row in the table.
  *  May be empty if no table rows or Where results
  *  in no rows.
  **/
@@ -194,9 +197,9 @@ function DB2ValArray($Table, $ValCol, $Uniq=false, $Where="")
  *  If found, treat them as fatal.
  *
  * \param $result  command result object
- * \param $sql     SQL command (optional)
- * \param $filenm  File name (__FILE__)
- * \param $lineno  Line number of the caller (__LINE__)
+ * \param string $sql     SQL command (optional)
+ * \param string $filenm  File name (__FILE__)
+ * \param int    $lineno  Line number of the caller (__LINE__)
  *
  * \return None, prints error, sql and line number, then exits(1)
  **/
@@ -221,8 +224,9 @@ function DBCheckResult($result, $sql, $filenm, $lineno)
 
 /**
  * \brief Check if table exists.
+ * \note This is postgresql specific.
  *
- * \param $decisionTableName
+ * \param string $tableName Table to check
  *
  * \return 1 if table exists, 0 if not.
 **/
@@ -231,7 +235,8 @@ function DB_TableExists($tableName)
   global $PG_CONN;
   global $SysConf;
 
-  $sql = "select count(*) as count from information_schema.tables where table_catalog='{$SysConf['DBCONF']['dbname']}' and table_name='$tableName'";
+  $sql = "select count(*) as count from information_schema.tables where "
+       . "table_catalog='{$SysConf['DBCONF']['dbname']}' and table_name='$tableName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -243,11 +248,11 @@ function DB_TableExists($tableName)
 
 /**
  * \brief Check if a column exists.
- *        This is postgresql specific.
+ * \note This is postgresql specific.
  *
- * \param $decisionTableName
- * \param $colName
- * \param $DBName, default "fossology"
+ * \param string $tableName Table to check in
+ * \param string $colName   Column to check
+ * \param string $DBName    Database name, default "fossology"
  *
  * \return 1 if column exists, 0 if not.
 **/
@@ -255,7 +260,8 @@ function DB_ColExists($tableName, $colName, $DBName='fossology')
 {
   global $PG_CONN;
 
-  $sql = "select count(*) as count from information_schema.columns where table_catalog='$DBName' and table_name='$tableName' and column_name='$colName'";
+  $sql = "select count(*) as count from information_schema.columns where "
+       . "table_catalog='$DBName' and table_name='$tableName' and column_name='$colName'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -267,10 +273,10 @@ function DB_ColExists($tableName, $colName, $DBName='fossology')
 
 /**
  * \brief Check if a constraint exists.
- *        This is postgresql specific.
+ * \note This is postgresql specific.
  *
- * \param $ConstraintName
- * \param $DBName, default "fossology"
+ * \param string $ConstraintName Constraint to check
+ * \param string $DBName         Database name, default "fossology"
  *
  * \return True if constraint exists, False if not.
 **/
@@ -278,7 +284,8 @@ function DB_ConstraintExists($ConstraintName, $DBName='fossology')
 {
   global $PG_CONN;
 
-  $sql = "select count(*) as count from information_schema.table_constraints where table_catalog='$DBName' and constraint_name='$ConstraintName' limit 1";
+  $sql = "select count(*) as count from information_schema.table_constraints "
+       . "where table_catalog='$DBName' and constraint_name='$ConstraintName' limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
@@ -291,13 +298,14 @@ function DB_ConstraintExists($ConstraintName, $DBName='fossology')
 
 /**
  * \brief Get last sequence number.
- *        This is typically used to get the primary key of a newly inserted record.
- *        This must be called immediately after the insert.
  *
- * \param $seqname Sequence Name of key just added
- * \param $tablename table containing $seqname
+ * This is typically used to get the primary key of a newly inserted record.
+ * This must be called immediately after the insert.
  *
- * \return current sequence number (i.e. the primary key of the rec just added)
+ * \param string $seqname   Sequence Name of key just added
+ * \param string $tablename Table containing $seqname
+ *
+ * \return Current sequence number (i.e. the primary key of the rec just added)
 **/
 function GetLastSeq($seqname, $tablename)
 {

@@ -1,6 +1,14 @@
 #
-# $Id$
+# Spec file for fossology for building rpm packages
 #
+# SPDX-License-Identifier: GPL-2.0
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+#
+
 %define srcname PBPKG
 
 Name:           PBPKG
@@ -11,10 +19,14 @@ Group:          PBGRP
 Url:            PBURL
 Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
-Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent
+Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent fossology-decider fossology-spdx2 fossology-reuser
 #Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
-BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,curl,PBBUILDDEP
-Summary:        FOSSology is a licenses exploration tool
+BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,php-mbstring,php-xml,curl,PBBUILDDEP
+Summary:        FOSSology is a license compliance analysis  tool
+
+#
+# package
+#
 
 %package common
 Requires:       php >= 5.1.6,php-pear >= 5.16,php-pgsql >= 5.1.6,php-process,php-mbstring,PBDEP
@@ -118,6 +130,20 @@ Requires:       fossology-common
 Summary:        Architecture for reusing clearing result of other uploads, monkbulk
 Group:          PBGRP
 
+%package unifiedreport
+Requires:       fossology-common
+Summary:        Unified report Agent
+Group:          PBGRP
+
+%package reportimport
+Requires:       fossology-common
+Summary:        Report Import Agent
+Group:          PBGRP
+
+#
+# description
+#
+
 %description
 PBDESC
 
@@ -187,24 +213,49 @@ This package contains the monk agent programs and their resources.
 %description monkbulk
 This package contains the monkbulk agent programs and their resources.
 
+%description unifiedreport
+This package contains the unified report agent programs and their resources.
+
+%description reportimport
+This package contains the report import agent programs and their resources.
+
+#
+# prep
+#
+
 %prep
 %setup -q -n %{name}-%{version}PBEXTDIR
 #PBPATCHCMD
 
-mkdir -p /tmp/composer/
-utils/install_composer.sh /tmp/composer/
-COMPOSER_PHAR=/tmp/composer/composer
+mkdir -p $RPM_BUILD_DIR/composer/
+utils/install_composer.sh $RPM_BUILD_DIR/composer/
+# make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} composer_install
 
-make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} composer_install
+#
+# build
+#
 
 %build
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var}
 #make %{?_smp_mflags} SYSCONFDIR=%{_sysconfdir}
 make SYSCONFDIR=%{_sysconfdir}/fossology PREFIX=%{_usr} LOCALSTATEDIR=%{_var} -C src/nomos/agent/ -f Makefile.sa
 
+#
+# install
+#
+
 %install
+export COMPOSER_PHAR=$RPM_BUILD_DIR/composer/composer
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} install_offline
+make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C install/ -f Makefile install
 make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} -C src/nomos/agent/ -f Makefile.sa install
+make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology LOCALSTATEDIR=%{_var} LIBDIR=%{_libdir} composer_install
+
+# emulating writing composer file, TODO see if that is really needed now
+cp src/composer.json $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+cp src/composer.lock $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+#cp $RPM_BUILD_ROOT%fossology/src/vendor $RPM_BUILD_ROOT%{_usr}/share/PBPROJ
+
 #mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d
 #cat > $RPM_BUILD_ROOT/%{_sysconfdir}/httpd/conf.d/PBPROJ.conf << EOF
 #Alias /repo/ /usr/share/PBPROJ/www/
@@ -219,16 +270,28 @@ make DESTDIR=$RPM_BUILD_ROOT PREFIX=%{_usr} SYSCONFDIR=%{_sysconfdir}/fossology 
 #</Directory>
 #EOF
 cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
+cp install/scripts/php-conf-fix.sh $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
+
+# manually add the version file
+cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 
 #rm -f $RPM_BUILD_ROOT/%{_sysconfdir}/default/PBPROJ
+
+#
+# clean
+#
 
 %clean
 %{__rm} -rf $RPM_BUILD_ROOT
 
+#
+# files
+#
+
 %files
 %defattr(-,root,root)
-%doc ChangeLog
-%doc COPYING COPYING.LGPL HACKING README.md install/INSTALL install/INSTALL.multi LICENSE
+# %doc ChangeLog # mcj todo not existing anymore, right?
+%doc COPYING COPYING.LGPL README.md install/INSTALL install/INSTALL.multi NOTICES CONTRIBUTING.md CHANGELOG.md
 
 %files common
 %defattr(-,root,root)
@@ -255,6 +318,18 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
 
+%files unifiedreport
+%{_sysconfdir}/PBPROJ/mods-enabled/unifiedreport
+%{_datadir}/PBPROJ/unifiedreport/*
+%{_datadir}/PBPROJ/unifiedreport/ui/*
+%{_datadir}/PBPROJ/unifiedreport/agent/*
+
+%files reportimport
+%{_sysconfdir}/PBPROJ/mods-enabled/reportImport
+%{_datadir}/PBPROJ/reportImport/*
+%{_datadir}/PBPROJ/reportImport/agent/*
+%{_datadir}/PBPROJ/reportImport/ui/*
+
 %files db
 %defattr(-,root,root)
 %dir %{_usr}/lib/PBPROJ
@@ -271,30 +346,36 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_datadir}/PBPROJ/readmeoss/*
 
 %files ninka
+%defattr(-,root,root)
 %{_sysconfdir}/PBPROJ/mods-enabled/ninka
 %{_datadir}/PBPROJ/ninka/*
 
 %files decider
+%defattr(-,root,root)
 %dir %{_datadir}/PBPROJ/decider
 %{_sysconfdir}/PBPROJ/mods-enabled/decider
 %{_datadir}/PBPROJ/decider/*
 
 %files deciderjob
+%defattr(-,root,root)
 %dir %{_datadir}/PBPROJ/deciderjob
 %{_sysconfdir}/PBPROJ/mods-enabled/deciderjob
 %{_datadir}/PBPROJ/deciderjob/*
 
 %files reuser
+%defattr(-,root,root)
 %dir %{_datadir}/PBPROJ/reuser
 %{_sysconfdir}/PBPROJ/mods-enabled/reuser
 %{_datadir}/PBPROJ/reuser/*
 
 %files monk
+%defattr(-,root,root)
 %dir %{_datadir}/PBPROJ/monk
 %{_sysconfdir}/PBPROJ/mods-enabled/monk
 %{_datadir}/PBPROJ/monk/*
 
 %files monkbulk
+%defattr(-,root,root)
 %dir %{_datadir}/PBPROJ/monkbulk
 %{_sysconfdir}/PBPROJ/mods-enabled/monkbulk
 %{_datadir}/PBPROJ/monkbulk/*
@@ -374,6 +455,10 @@ cp utils/fo-cleanold $RPM_BUILD_ROOT/%{_usr}/lib/PBPROJ/
 %{_datadir}/PBPROJ/dep5/*
 %{_datadir}/PBPROJ/spdx2tv/*
 
+#
+# post
+#
+
 %post common
 # Run the postinstall script
 /usr/lib/PBPROJ/fo-postinstall --common
@@ -415,6 +500,9 @@ ln -s %{_sysconfdir}/PBPROJ/conf/fo-apache.conf  %{_sysconfdir}/httpd/conf.d/PBP
 # Run the postinstall script
 /usr/lib/PBPROJ/fo-postinstall --web-only
 
+# fix php config for fixing the time zone, TODO does not work reliably with cent
+/usr/lib/PBPROJ/php-conf-fix.sh --overwrite
+
 # httpd is also assumed to run locally
 LANGUAGE=C service httpd status 2>&1 | grep -q PBSTOP
 if [ $? -eq 0 ]; then
@@ -432,8 +520,73 @@ fi
 # Run the postinstall script
 /usr/lib/PBPROJ/fo-postinstall --agent
 
+#
+# post: agent independency ops
+#
+
+%post ununpack
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post copyright
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post buckets
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post mimetype
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post nomos
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post pkgagent
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post delagent
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post wgetagent
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post spdx2
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post decider
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post deciderjob
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post reuser
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post monk
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+%post monkbulk
+# Run the postinstall script
+/usr/lib/PBPROJ/fo-postinstall --agent
+
+
 chkconfig --add PBPROJ
 /etc/init.d/PBPROJ start
+
+#
+# preun
+#
 
 %preun
 if [ $1 -eq 0 ]; then
@@ -445,6 +598,10 @@ if [ $1 -eq 0 ]; then
   /usr/lib/PBPROJ/fo-cleanold
 fi
 
+#
+# postun
+#
+
 %postun scheduler
 if [ $1 -eq 0 ]; then
   # cleanup logs
@@ -452,6 +609,7 @@ if [ $1 -eq 0 ]; then
     rm -rf /var/log/PBPROJ || echo "ERROR: could not remove /var/log/fossology"
   fi
 fi
+
 %postun common
 if [ $1 -eq 0 ]; then
   echo "removing FOSSology user..."
@@ -475,5 +633,13 @@ if [ $1 -eq 0 ]; then
   fi
 fi
 
+#
+# changelog
+#
+
 %changelog
 PBLOG
+
+#
+# end
+#

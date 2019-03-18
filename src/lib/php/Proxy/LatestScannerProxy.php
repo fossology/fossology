@@ -30,7 +30,9 @@ class LatestScannerProxy extends DbViewProxy
    * @param int|string $uploadId
    * @param array $agentNames used to determine the ars tables
    * @param string $dbViewName
-   * @param int value 0 means non-prepared query
+   * @param string $andEnabled
+   * @throws \Exception
+   * @internal param value $int 0 means non-prepared query
    */
   public function __construct($uploadId, $agentNames=array('nomos','monk'), $dbViewName='latest_scanner', $andEnabled = "AND agent_enabled")
   {
@@ -42,6 +44,7 @@ class LatestScannerProxy extends DbViewProxy
     $subqueries = array();
     foreach($agentNames as $name)
     {
+      // NOTE: this query fails if the ars-table is not yet created.
       $subqueries[] = "SELECT * FROM (SELECT $this->columns FROM $name".self::ARS_SUFFIX.", agent
         WHERE agent_fk=agent_pk AND upload_fk=$uploadId $andEnabled ORDER BY agent_fk DESC limit 1) latest_$name";
     }

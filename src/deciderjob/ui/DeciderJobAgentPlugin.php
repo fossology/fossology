@@ -15,16 +15,24 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
+/**
+ * @namespace Fossology::DeciderJob::UI
+ * @brief DeciderJobAgent's UI
+ */
 namespace Fossology\DeciderJob\UI;
 
 use Fossology\Lib\Plugin\AgentPlugin;
 
 include_once(__DIR__ . "/../agent/version.php");
 
+/**
+ * @class DeciderJobAgentPlugin
+ * @brief UI plugin for DeciderJobAgent
+ */
 class DeciderJobAgentPlugin extends AgentPlugin
 {
   const CONFLICT_STRATEGY_FLAG = "-k";
-    
+
   function __construct() {
     $this->Name = "agent_deciderjob";
     $this->Title = _("Automatic User License Decider");
@@ -34,26 +42,22 @@ class DeciderJobAgentPlugin extends AgentPlugin
   }
 
   /**
-   * @overwrite
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
+   * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
    */
   function preInstall()
   {
     // no menue entry
   }
-  
+
   /**
-   * @overwrite
-   * @param int $jobId
-   * @param int $uploadId
-   * @param string $errorMsg
-   * @param array $dependencies
-   * @param type $conflictStrategyId
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
    */
-  
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $conflictStrategyId=null)
   {
     $dependencies[] = "agent_adj2nest";
- 
+
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
     if ($jobQueueId != 0)
     {

@@ -1,6 +1,6 @@
 /*******************************************************************
  Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -29,8 +29,8 @@
  * \param Source  Pathname of source file
  * \param Destination Unpack destination
  * \return 0 on success, non-zero on failure.
- * NOTE: This spawns multiple processes.
- * NOTE: Things that are known to cause failures:
+ * \note This spawns multiple processes.
+ * \note Things that are known to cause failures:
  *   - Absolute paths in ar files
  *   - Same file name listed twice in the archive
  **/
@@ -53,7 +53,7 @@ int	ExtractAR	(char *Source, char *Destination)
     fprintf(stderr,"ERROR: directory name longer than %d characters\n",(int)sizeof(CWD));
     return(-1);
   }
-  if (Verbose > 1) 
+  if (Verbose > 1)
   {
     printf("CWD: %s\n",CWD);
     if (!Quiet) fprintf(stderr,"Extracting ar: %s\n",Source);

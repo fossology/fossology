@@ -16,44 +16,73 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
-class RepositoryApi {
+/**
+ * @file
+ * @brief Helper class to get the latest release and commits from GitHub API
+ */
+
+/**
+ * @class RepositoryApi
+ * @brief Helper class to get the latest release and commits from GitHub API
+ */
+class RepositoryApi
+{
   /**
-   * @param string $apiRequest
-   * @return array
+   * @var Fossology::Lib::Application::CurlRequestService $curlRequestService
+   * Curl request service object for interation with GitHub API
+   */
+  private $curlRequestService = null;
+
+  /**
+   * Constructor
+   * @param Fossology::Lib::Application::CurlRequestService $curlRequestService
+   */
+  public function __construct($curlRequestService)
+  {
+    $this->curlRequestService = $curlRequestService;
+  }
+
+  /**
+   * @brief Send a curl request to apiRequest for resource
+   * @param string $apiRequest Required resource
+   * @return array Response from GitHub API
    */
   private function curlGet($apiRequest)
   {
-    $url = 'https://api.github.com/repos/fossology/fossology/'. $apiRequest;
-    $handle = curl_init();
+    $url = 'https://api.github.com/repos/fossology/fossology/'.$apiRequest;
+
+    $request = $this->curlRequestService->create($url);
     $curlopt = array(
-        CURLOPT_URL => $url,
-        CURLOPT_HEADER => true,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HTTPHEADER => array('User-Agent: fossology')
-        );
-    curl_setopt_array($handle, $curlopt);
-    curl_setopt($handle, CURLOPT_TIMEOUT, 2);
-    $response = curl_exec($handle);
+      CURLOPT_HEADER         => true,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_HTTPHEADER     => array('User-Agent: fossology'),
+      CURLOPT_TIMEOUT        => 2,
+    );
+    $request->setOptions($curlopt);
+    $response = $request->execute();
     if ($response !== false) {
-      $headerSize = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
+      $headerSize = $request->getInfo(CURLINFO_HEADER_SIZE);
       $resultBody = json_decode(substr($response, $headerSize), true);
     } else {
       $resultBody = array();
     }
-    curl_close($handle);
+    $request->close();
+
     return $resultBody;
   }
-  
+
   /**
+   * @brief Get the latest release info from GitHub
    * @return array
    */
   public function getLatestRelease()
   {
     return $this->curlGet('releases/latest');
   }
-  
+
   /**
-   * @param int $days
+   * @brief Get the commits from past n days.
+   * @param int $days Number of days commits are required.
    * @return array
    */
   public function getCommitsOfLastDays($days = 30)

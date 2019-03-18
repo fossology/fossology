@@ -26,8 +26,6 @@ LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq -lrpm -lrpmio
 
 EXE = pkgagent
 HDRS = pkgagent.h
-CFLAGS_LOCAL_RPM_4_4 = $(CFLAGS_LOCAL) -D_RPM_4_4
-CFLAGS_LOCAL_RPM = $(CFLAGS_LOCAL) -D_RPM_4_4_COMPAT
 
 all: $(EXE)
 
@@ -35,26 +33,10 @@ $(EXE): main.c $(FOLIB) pkgagent.o $(VARS) $(HDRS)
 	$(CC) main.c pkgagent.o $(LDFLAGS_LOCAL) $(CFLAGS_LOCAL) $(DEFS) -o $@
 
 pkgagent.o: pkgagent.c pkgagent.h
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
-		$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
-	else \
-		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM); \
-		else \
-			$(CC) -c $< $(CFLAGS_LOCAL_RPM_4_4); \
-		fi \
-	fi
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 pkgagent_cov.o: pkgagent.c pkgagent.h
-	if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.5 >/dev/null; then \
-		$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
-	else \
-		if expr `rpm --version|awk '{print $$3}'|awk -F. '{print $$1"."$$2}'` \>= 4.10 >/dev/null; then \
-			$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM) -o $@; \
-		else \
-			$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL_RPM_4_4) -o $@; \
-		fi \
-	fi
+	$(CC) -c $< $(FLAG_COV) $(CFLAGS_LOCAL) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)

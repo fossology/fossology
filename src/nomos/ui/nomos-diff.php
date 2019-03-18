@@ -1,98 +1,152 @@
 <?php
-
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 /***********************************************************
- Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
-
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 ***********************************************************/
 /**
- * \file nomos-diff.php 
+ * \file
  * \brief Compare License Browser, list license histogram
  */
 
 define("TITLE_ui_nomos_diff", _("Compare License Browser"));
 
+/**
+ * @class ui_nomos_diff
+ * @brief Compare License Browser, list license histogram
+ */
 class ui_nomos_diff extends FO_Plugin
 {
-  var $Name       = "nomosdiff";
-  var $Title      = TITLE_ui_nomos_diff;
-  var $Version    = "1.0";
-  // var $MenuList= "Jobs::License";
-  var $Dependency = array("browse","view");
-  var $DBaccess   = PLUGIN_DB_READ;
-  var $LoginFlag  = 0;
-  var $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
 
+  /**
+   * @var string $Name
+   * Name of the UI mod
+   */
+  var $Name = "nomosdiff";
+
+  /**
+   * @var string $Title
+   * HTML title
+   */
+  var $Title = TITLE_ui_nomos_diff;
+
+  /**
+   * @var string $Version
+   * Version of the plugin
+   */
+  var $Version = "1.0";
+
+  // var $MenuList= "Jobs::License";
+  /**
+   * @var array $Dependency
+   * Plugin dependencies
+   */
+  var $Dependency = array(
+    "browse",
+    "view"
+  );
+
+  /**
+   * @var string $DBaccess
+   * DB access required
+   */
+  var $DBaccess = PLUGIN_DB_READ;
+
+  /**
+   * @var integer $LoginFlag
+   * User need not to be logged-in
+   */
+  var $LoginFlag = 0;
+
+  /**
+   * @var string $ColumnSeparatorStyleL
+   * CSS style for columns
+   */
+  var $ColumnSeparatorStyleL = "style='border:solid 0 #006600; border-left-width:2px;padding-left:1em'";
 
   /**
    * \brief Create and configure database tables
+   * \see FO_Plugin::Install()
    */
   function Install()
   {
     global $PG_CONN;
     if (empty($PG_CONN)) {
-      return(1);
+      return (1);
     } /* No DB */
 
-    return(0);
-  } // Install()
+    return (0);
+  }
+
+  // Install()
 
   /**
    * \brief Customize submenus.
+   * \see FO_Plugin::RegisterMenus()
    */
   function RegisterMenus()
   {
-    /* at this stage you have to call this plugin with a direct URL
-     that displays both trees to compare.
-    */
+    /*
+     * at this stage you have to call this plugin with a direct URL
+     * that displays both trees to compare.
+     */
     return 0;
-  } // RegisterMenus()
+  }
 
+  // RegisterMenus()
 
   /**
    * \brief This is called before the plugin is used.
+   *
    * It should assume that Install() was already run one time
    * (possibly years ago and not during this object's creation).
    *
    * \return true on success, false on failure.
    * A failed initialize is not used by the system.
    * \note This function must NOT assume that other plugins are installed.
+   * \see FO_Plugin::Initialize()
    */
   function Initialize()
   {
     global $_GET;
 
     if ($this->State != PLUGIN_STATE_INVALID) {
-      return(1);
+      return (1);
     } // don't re-run
     if ($this->Name !== "") // Name must be defined
     {
       global $Plugins;
-      $this->State=PLUGIN_STATE_VALID;
-      array_push($Plugins,$this);
+      $this->State = PLUGIN_STATE_VALID;
+      array_push($Plugins, $this);
     }
-    return($this->State == PLUGIN_STATE_VALID);
-  } // Initialize()
+    return ($this->State == PLUGIN_STATE_VALID);
+  }
+
+  // Initialize()
 
   /**
    * \brief get an array with uploadtree record and agent_pk
+   *
+   * @param integer $Uploadtree_pk Upload tree id to be retrieved
+   * @return array Array with uploadtree record and agent_pk
    */
   function GetTreeInfo($Uploadtree_pk)
   {
-    $TreeInfo = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $Uploadtree_pk");
+    $TreeInfo = GetSingleRec("uploadtree",
+      "WHERE uploadtree_pk = $Uploadtree_pk");
     $TreeInfo['agent_pk'] = LatestAgentpk($TreeInfo['upload_fk'], "nomos_ars");
 
     // Get the uploadtree table
@@ -101,11 +155,11 @@ class ui_nomos_diff extends FO_Plugin
     return $TreeInfo;
   }
 
-
   /**
    * \brief get history info for the directory BY LICENSE.
-   * \param $Uploadtree_pk - Uploadtree_pk
-   * \return a string with the histogram for the directory BY LICENSE.
+   * \param $Uploadtree_pk Uploadtree_pk
+   * \param $TreeInfo Tree info generated by GetTreeInfo()
+   * \return string A string with the histogram for the directory BY LICENSE.
    */
   function UploadHist($Uploadtree_pk, $TreeInfo)
   {
@@ -117,20 +171,20 @@ class ui_nomos_diff extends FO_Plugin
     $upload_pk = $TreeInfo['upload_fk'];
     $agent_pk = $TreeInfo['agent_pk'];
 
-    /*  Get the counts for each license under this UploadtreePk*/
+    /* Get the counts for each license under this UploadtreePk */
     $sql = "SELECT rf_shortname as licname,
                    count(rf_shortname) as liccount, rf_shortname
               from ONLY license_ref,license_file,
                   (SELECT distinct(pfile_fk) as PF from $TreeInfo[uploadtree_tablename]
-                     where upload_fk=$upload_pk 
+                     where upload_fk=$upload_pk
                        and {$TreeInfo['uploadtree_tablename']}.lft BETWEEN $lft and $rgt) as SS
               where PF=pfile_fk and agent_fk=$agent_pk and rf_fk=rf_pk
-              group by rf_shortname 
+              group by rf_shortname
               order by liccount desc";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-    /* Write license histogram to $VLic  */
+    /* Write license histogram to $VLic */
     $LicCount = 0;
     $UniqueLicCount = 0;
     $NoLicFound = 0;
@@ -145,65 +199,68 @@ class ui_nomos_diff extends FO_Plugin
     $text = _("License Name");
     $VLic .= "<th align=left>$text</th></tr>\n";
 
-    while ($row = pg_fetch_assoc($result))
-    {
-      $UniqueLicCount++;
+    while ($row = pg_fetch_assoc($result)) {
+      $UniqueLicCount ++;
       $LicCount += $row['liccount'];
 
-      /*  Count  */
+      /* Count */
       $VLic .= "<tr><td align='right'>$row[liccount]</td>";
 
-      /*  Show  */
+      /* Show */
       $ShowTitle = _("Click Show to list files with this license.");
       $VLic .= "<td align='center'><a href='";
       $VLic .= Traceback_uri();
 
       $text = _("Show");
-      $VLic .= "?mod=license_list_files&napk=$agent_pk&item=$Uploadtree_pk&lic=" . urlencode($row['rf_shortname']) . "' title='$ShowTitle'>$text</a></td>";
+      $VLic .= "?mod=license_list_files&napk=$agent_pk&item=$Uploadtree_pk&lic=" .
+        urlencode($row['rf_shortname']) . "' title='$ShowTitle'>$text</a></td>";
 
-      /*  License name  */
+      /* License name */
       $VLic .= "<td align='left'>";
       $rf_shortname = rawurlencode($row['rf_shortname']);
-      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" . Traceback_uri() . "?mod=ajax_filelic&napk=$agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
+      $VLic .= "<a id='$rf_shortname' onclick='FileColor_Get(\"" .
+        Traceback_uri() .
+        "?mod=ajax_filelic&napk=$agent_pk&item=$Uploadtree_pk&lic=$rf_shortname\")'";
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
-      if ($row['licname'] == "No_license_found") $NoLicFound =  $row['liccount'];
+      if ($row['licname'] == "No_license_found")
+        $NoLicFound = $row['liccount'];
     }
     pg_free_result($result);
     $VLic .= "</table>\n";
     $VLic .= "<p>\n";
 
-    return($VLic);
-  } // UploadHist()
+    return ($VLic);
+  }
 
+  // UploadHist()
 
   /**
-   * \brief get the entire <td> ... </td> for $Child file listing table
+   * \brief get the entire `<td> ... </td>` for $Child file listing table
+   *
    * License differences are highlighted.
+   * \return string The entire `<td> ... </td>`
    */
   function ChildElt($Child, $agent_pk, $OtherChild)
   {
     $UniqueTagArray = array();
     $licstr = $Child['licstr'];
 
-    /* If both $Child and $OtherChild are specified,
+    /*
+     * If both $Child and $OtherChild are specified,
      * reassemble licstr and highlight the differences
      */
-    if ($OtherChild and $OtherChild)
-    {
+    if ($OtherChild and $OtherChild) {
       $licstr = "";
-      $DiffLicStyle = "style='background-color:#ffa8a8'";  // mid red pastel
-      foreach ($Child['licarray'] as $rf_pk => $rf_shortname)
-      {
-        if (!empty($licstr)) $licstr .= ", ";
-        if (@$OtherChild['licarray'][$rf_pk])
-        {
+      $DiffLicStyle = "style='background-color:#ffa8a8'"; // mid red pastel
+      foreach ($Child['licarray'] as $rf_pk => $rf_shortname) {
+        if (! empty($licstr))
+          $licstr .= ", ";
+        if (@$OtherChild['licarray'][$rf_pk]) {
           /* license is in both $Child and $OtherChild */
           $licstr .= $rf_shortname;
-        }
-        else
-        {
+        } else {
           /* license is missing from $OtherChild */
           $licstr .= "<span $DiffLicStyle>$rf_shortname</span>";
         }
@@ -222,14 +279,17 @@ class ui_nomos_diff extends FO_Plugin
     /* display item links */
     $ColStr .= "<td valign='top'>";
     $uploadtree_tablename = GetUploadtreeTableName($Child['upload_fk']);
-    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'], $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray, $uploadtree_tablename);
+    $ColStr .= FileListLinks($Child['upload_fk'], $Child['uploadtree_pk'],
+      $agent_pk, $Child['pfile_fk'], True, $UniqueTagArray, $uploadtree_tablename);
     $ColStr .= "</td>";
     return $ColStr;
-  }  /* ChildElt() */
+  }
 
+  /* ChildElt() */
 
   /**
-   * \brief get a string with the html table rows comparing the two file lists. \n 
+   * \brief get a string with the html table rows comparing the two file lists.
+   *
    * Each row contains 5 table fields.
    * The third field is just for a column separator.
    * If files match their fuzzyname then put on the same row.
@@ -239,31 +299,25 @@ class ui_nomos_diff extends FO_Plugin
   function ItemComparisonRows($Master, $agent_pk1, $agent_pk2)
   {
     $TableStr = "";
-    $RowStyle1 = "style='background-color:#ecfaff'";  // pale blue
-    $RowStyle2 = "style='background-color:#ffffe3'";  // pale yellow
+    $RowStyle1 = "style='background-color:#ecfaff'"; // pale blue
+    $RowStyle2 = "style='background-color:#ffffe3'"; // pale yellow
     $RowNum = 0;
 
-    foreach ($Master as $key => $Pair)
-    {
-      $RowStyle = (++$RowNum % 2) ? $RowStyle1 : $RowStyle2;
+    foreach ($Master as $key => $Pair) {
+      $RowStyle = (++ $RowNum % 2) ? $RowStyle1 : $RowStyle2;
       $TableStr .= "<tr $RowStyle>";
 
       $Child1 = GetArrayVal("1", $Pair);
       $Child2 = GetArrayVal("2", $Pair);
-      if (empty($Child1))
-      {
+      if (empty($Child1)) {
         $TableStr .= "<td></td><td></td>";
         $TableStr .= "<td $this->ColumnSeparatorStyleL>&nbsp;</td>";
         $TableStr .= $this->ChildElt($Child2, $agent_pk2, $Child1);
-      }
-      else if (empty($Child2))
-      {
+      } else if (empty($Child2)) {
         $TableStr .= $this->ChildElt($Child1, $agent_pk1, $Child2);
         $TableStr .= "<td $this->ColumnSeparatorStyleL>&nbsp;</td>";
         $TableStr .= "<td></td><td></td>";
-      }
-      else if (!empty($Child1) and !empty($Child2))
-      {
+      } else if (! empty($Child1) and ! empty($Child2)) {
         $TableStr .= $this->ChildElt($Child1, $agent_pk1, $Child2);
         $TableStr .= "<td $this->ColumnSeparatorStyleL>&nbsp;</td>";
         $TableStr .= $this->ChildElt($Child2, $agent_pk2, $Child1);
@@ -272,125 +326,132 @@ class ui_nomos_diff extends FO_Plugin
       $TableStr .= "</tr>";
     }
 
-    return($TableStr);
-  } // ItemComparisonRows()
+    return ($TableStr);
+  }
 
-
+  // ItemComparisonRows()
 
   /**
    * \brief Add license array to Children array.
    */
   function AddLicStr($TreeInfo, &$Children)
   {
-    if (!is_array($Children)) return;
+    if (! is_array($Children))
+      return;
     $agent_pk = $TreeInfo['agent_pk'];
-    foreach($Children as &$Child)
-    {
-      /** do not get duplicated licenses */
+    foreach ($Children as &$Child) {
+      /**
+       * do not get duplicated licenses
+       */
       $Child['licarray'] = GetFileLicenses($agent_pk, 0, $Child['uploadtree_pk']);
       $Child['licstr'] = implode(", ", $Child['licarray']);
     }
   }
 
-
   /**
    * \brief removes identical files
+   *
    * If a child pair are identical remove the master record
    */
   function filter_samehash(&$Master)
   {
-    if (!is_array($Master)) return;
+    if (! is_array($Master))
+      return;
 
-    foreach($Master as $Key =>&$Pair)
-    {
-      if (empty($Pair[1]) or empty($Pair[2])) continue;
-      if (empty($Pair[1]['pfile_fk'])) continue;
-      if (empty($Pair[2]['pfile_fk'])) continue;
+    foreach ($Master as $Key => &$Pair) {
+      if (empty($Pair[1]) or empty($Pair[2]))
+        continue;
+      if (empty($Pair[1]['pfile_fk']))
+        continue;
+      if (empty($Pair[2]['pfile_fk']))
+        continue;
 
       if ($Pair[1]['pfile_fk'] == $Pair[2]['pfile_fk'])
-      unset($Master[$Key]);
+        unset($Master[$Key]);
     }
     return;
-  }  /* End of samehash */
+  }
 
+  /* End of samehash */
 
   /**
    * \brief removes files that have the same name and license list.
    */
   function filter_samelic(&$Master)
   {
-    foreach($Master as $Key =>&$Pair)
-    {
-      if (empty($Pair[1]) or empty($Pair[2])) continue;
-      if (($Pair[1]['ufile_name'] == $Pair[2]['ufile_name'])
-      && ($Pair[1]['licstr'] == $Pair[2]['licstr']))
-      unset($Master[$Key]);
+    foreach ($Master as $Key => &$Pair) {
+      if (empty($Pair[1]) or empty($Pair[2]))
+        continue;
+      if (($Pair[1]['ufile_name'] == $Pair[2]['ufile_name']) &&
+        ($Pair[1]['licstr'] == $Pair[2]['licstr']))
+        unset($Master[$Key]);
     }
     return;
-  }  /* End of samelic */
+  }
 
+  /* End of samelic */
 
   /**
    * \brief removes files that have the same fuzzyname, and same license list.
    */
   function filter_samelicfuzzy(&$Master)
   {
-    foreach($Master as $Key =>&$Pair)
-    {
-      if (empty($Pair[1]) or empty($Pair[2])) continue;
-      if (($Pair[1]['fuzzyname'] == $Pair[2]['fuzzyname'])
-      && ($Pair[1]['licstr'] == $Pair[2]['licstr']))
-      unset($Master[$Key]);
+    foreach ($Master as $Key => &$Pair) {
+      if (empty($Pair[1]) or empty($Pair[2]))
+        continue;
+      if (($Pair[1]['fuzzyname'] == $Pair[2]['fuzzyname']) &&
+        ($Pair[1]['licstr'] == $Pair[2]['licstr']))
+        unset($Master[$Key]);
     }
     return;
-  }  /* End of samelic */
+  }
 
+  /* End of samelic */
 
   /**
    * \brief removes pairs of "No_license_found"
+   *
    * Or pairs that only have one file and "No_license_found"
+   *
    * Uses fuzzyname.
    */
   function filter_nolics(&$Master)
   {
     $NoLicStr = "No_license_found";
 
-    foreach($Master as $Key =>&$Pair)
-    {
+    foreach ($Master as $Key => &$Pair) {
       $Pair1 = GetArrayVal("1", $Pair);
       $Pair2 = GetArrayVal("2", $Pair);
 
-      if (empty($Pair1))
-      {
+      if (empty($Pair1)) {
         if ($Pair2['licstr'] == $NoLicStr)
-        unset($Master[$Key]);
+          unset($Master[$Key]);
         else
-        continue;
-      }
-      else if (empty($Pair2))
-      {
+          continue;
+      } else if (empty($Pair2)) {
         if ($Pair1['licstr'] == $NoLicStr)
-        unset($Master[$Key]);
+          unset($Master[$Key]);
         else
-        continue;
-      }
-      else if (($Pair1['licstr'] == $NoLicStr)
-      and ($Pair2['licstr'] == $NoLicStr))
-      unset($Master[$Key]);
+          continue;
+      } else if (($Pair1['licstr'] == $NoLicStr) and
+        ($Pair2['licstr'] == $NoLicStr))
+        unset($Master[$Key]);
     }
     return;
-  }  /* End of nolics */
+  }
+
+  /* End of nolics */
 
   /**
-   * \brief filter children through same license, same hash, no license, same fuzzy license
+   * \brief filter children through same license, same hash, no license, same
+   * fuzzy license
    *
-   * \param $filter - none, samelic, samehash
+   * \param $filter none, samelic, samehash
    * An empty or unknown filter is the same as "none"
    */
   function FilterChildren($filter, &$Master)
   {
-    switch($filter)
-    {
+    switch ($filter) {
       case 'samehash':
         $this->filter_samehash($Master);
         break;
@@ -412,11 +473,11 @@ class ui_nomos_diff extends FO_Plugin
     }
   }
 
-
   /**
    * \brief HTML output, returns HTML as string.
    */
-  function HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2)
+  function HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1,
+    $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2)
   {
     /* Initialize */
     $FreezeText = _("Freeze Path");
@@ -429,80 +490,82 @@ class ui_nomos_diff extends FO_Plugin
     $OutBuf .= "function ChangeFilter(selectObj, utpk1, utpk2){";
     $OutBuf .= "  var selectidx = selectObj.selectedIndex;";
     $OutBuf .= "  var filter = selectObj.options[selectidx].value;";
-    $OutBuf .= '  window.location.assign("?mod=' . $this->Name .'&item1="+utpk1+"&item2="+utpk2+"&filter=" + filter); ';
+    $OutBuf .= '  window.location.assign("?mod=' . $this->Name .
+      '&item1="+utpk1+"&item2="+utpk2+"&filter=" + filter); ';
     $OutBuf .= "}\n";
 
-    /* Freeze function (path list in banner)
-     FreezeColNo is the ID of the column to freeze: 1 or 2
-    Toggle Freeze button label: Freeze Path <-> Unfreeze Path
-    Toggle Freeze button background color: white to light blue
-    Toggle which paths are frozen: if path1 freezes, then unfreeze path2.
-    Rewrite urls: eg &item1 ->  &Fitem1
-    */
+    /*
+     * Freeze function (path list in banner)
+     * FreezeColNo is the ID of the column to freeze: 1 or 2
+     * Toggle Freeze button label: Freeze Path <-> Unfreeze Path
+     * Toggle Freeze button background color: white to light blue
+     * Toggle which paths are frozen: if path1 freezes, then unfreeze path2.
+     * Rewrite urls: eg &item1 -> &Fitem1
+     */
     $OutBuf .= "function Freeze(FreezeColNo) {";
-    $OutBuf .=  "var FreezeElt1 = document.getElementById('Freeze1');";
-    $OutBuf .=  "var FreezeElt2 = document.getElementById('Freeze2');";
-    $OutBuf .=  "var AddFreezeArg = 1; "; //1 to add &freeze=, 0 to remove &freeze= from url
-    $OutBuf .=  "var old_uploadtree_pk;\n";
+    $OutBuf .= "var FreezeElt1 = document.getElementById('Freeze1');";
+    $OutBuf .= "var FreezeElt2 = document.getElementById('Freeze2');";
+    $OutBuf .= "var AddFreezeArg = 1; "; // 1 to add &freeze=, 0 to remove
+                                         // &freeze= from url
+    $OutBuf .= "var old_uploadtree_pk;\n";
 
     /* change the freeze labels to denote their new status */
-    $OutBuf .=  "if (FreezeColNo == '1')";
-    $OutBuf .=  "{";
-    $OutBuf .=    "if (FreezeElt1.innerHTML == '$FrozenText') ";
-    $OutBuf .=    "{";
-    $OutBuf .=      "FreezeElt1.innerHTML = '$FreezeText';";
-    $OutBuf .=      "FreezeElt1.style.backgroundColor = 'white'; ";
-    $OutBuf .=      "AddFreezeArg = 0;";
-    $OutBuf .=    "}";
-    $OutBuf .=    "else { ";
-    $OutBuf .=      "FreezeElt1.innerHTML = '$FrozenText'; ";
-    $OutBuf .=      "FreezeElt1.style.backgroundColor = '#EAF7FB'; ";
-    $OutBuf .=      "FreezeElt2.innerHTML = '$FreezeText';";
-    $OutBuf .=      "FreezeElt2.style.backgroundColor = 'white';";
-    $OutBuf .=      "old_uploadtree_pk = $in_uploadtree_pk1;";
-    $OutBuf .=    "}";
-    $OutBuf .=  "}";
-    $OutBuf .=  "else {";
-    $OutBuf .=    "if (FreezeElt2.innerHTML == '$FrozenText') ";
-    $OutBuf .=    "{";
-    $OutBuf .=      "FreezeElt2.innerHTML = '$FreezeText';";
-    $OutBuf .=      "FreezeElt2.style.backgroundColor = 'white';";
-    $OutBuf .=      "AddFreezeArg = 0;";
-    $OutBuf .=    "}";
-    $OutBuf .=    "else {";
-    $OutBuf .=      "FreezeElt1.innerHTML = '$FreezeText';";
-    $OutBuf .=      "FreezeElt1.style.backgroundColor = 'white';";
-    $OutBuf .=      "FreezeElt2.innerHTML = '$FrozenText';";
-    $OutBuf .=      "FreezeElt2.style.backgroundColor = '#EAF7FB';";
-    $OutBuf .=      "old_uploadtree_pk = $in_uploadtree_pk2;";
-    $OutBuf .=    "}";
-    $OutBuf .=  "}";
+    $OutBuf .= "if (FreezeColNo == '1')";
+    $OutBuf .= "{";
+    $OutBuf .= "if (FreezeElt1.innerHTML == '$FrozenText') ";
+    $OutBuf .= "{";
+    $OutBuf .= "FreezeElt1.innerHTML = '$FreezeText';";
+    $OutBuf .= "FreezeElt1.style.backgroundColor = 'white'; ";
+    $OutBuf .= "AddFreezeArg = 0;";
+    $OutBuf .= "}";
+    $OutBuf .= "else { ";
+    $OutBuf .= "FreezeElt1.innerHTML = '$FrozenText'; ";
+    $OutBuf .= "FreezeElt1.style.backgroundColor = '#EAF7FB'; ";
+    $OutBuf .= "FreezeElt2.innerHTML = '$FreezeText';";
+    $OutBuf .= "FreezeElt2.style.backgroundColor = 'white';";
+    $OutBuf .= "old_uploadtree_pk = $in_uploadtree_pk1;";
+    $OutBuf .= "}";
+    $OutBuf .= "}";
+    $OutBuf .= "else {";
+    $OutBuf .= "if (FreezeElt2.innerHTML == '$FrozenText') ";
+    $OutBuf .= "{";
+    $OutBuf .= "FreezeElt2.innerHTML = '$FreezeText';";
+    $OutBuf .= "FreezeElt2.style.backgroundColor = 'white';";
+    $OutBuf .= "AddFreezeArg = 0;";
+    $OutBuf .= "}";
+    $OutBuf .= "else {";
+    $OutBuf .= "FreezeElt1.innerHTML = '$FreezeText';";
+    $OutBuf .= "FreezeElt1.style.backgroundColor = 'white';";
+    $OutBuf .= "FreezeElt2.innerHTML = '$FrozenText';";
+    $OutBuf .= "FreezeElt2.style.backgroundColor = '#EAF7FB';";
+    $OutBuf .= "old_uploadtree_pk = $in_uploadtree_pk2;";
+    $OutBuf .= "}";
+    $OutBuf .= "}";
 
-    /* Alter the url to add or remove freeze={column number}  */
-    $OutBuf .=  "var i=0;\n";
-    $OutBuf .=  "var linkid;\n";
-    $OutBuf .=  "var linkelt;\n";
-    $OutBuf .=  "var FreezeIdx;\n";
-    $OutBuf .=  "var BaseURL;\n";
-    $OutBuf .=  "var numlinks = document.links.length;\n";
-    $OutBuf .=  "for (i=0; i < numlinks; i++)\n";
-    $OutBuf .=  "{";
-    $OutBuf .=    "linkelt = document.links[i];\n";
+    /* Alter the url to add or remove freeze={column number} */
+    $OutBuf .= "var i=0;\n";
+    $OutBuf .= "var linkid;\n";
+    $OutBuf .= "var linkelt;\n";
+    $OutBuf .= "var FreezeIdx;\n";
+    $OutBuf .= "var BaseURL;\n";
+    $OutBuf .= "var numlinks = document.links.length;\n";
+    $OutBuf .= "for (i=0; i < numlinks; i++)\n";
+    $OutBuf .= "{";
+    $OutBuf .= "linkelt = document.links[i];\n";
     // freeze is the last url arg, so trim it off if it exists
-    $OutBuf .=      "FreezeIdx = linkelt.href.indexOf('&freeze');\n";
-    $OutBuf .=      "if (FreezeIdx > 0) \n";
-    $OutBuf .=        "BaseURL = linkelt.href.substr(0,FreezeIdx); \n";
-    $OutBuf .=      "else ";
-    $OutBuf .=        "BaseURL = linkelt.href; \n";
-    $OutBuf .=      "if (AddFreezeArg == 1) \n ";
-    $OutBuf .=        "linkelt.href = BaseURL + '&freeze=' + FreezeColNo + '&itemf=' + old_uploadtree_pk;";
-    $OutBuf .=      "else \n";
-    $OutBuf .=        "linkelt.href = BaseURL;";
-    $OutBuf .=  "}\n";
+    $OutBuf .= "FreezeIdx = linkelt.href.indexOf('&freeze');\n";
+    $OutBuf .= "if (FreezeIdx > 0) \n";
+    $OutBuf .= "BaseURL = linkelt.href.substr(0,FreezeIdx); \n";
+    $OutBuf .= "else ";
+    $OutBuf .= "BaseURL = linkelt.href; \n";
+    $OutBuf .= "if (AddFreezeArg == 1) \n ";
+    $OutBuf .= "linkelt.href = BaseURL + '&freeze=' + FreezeColNo + '&itemf=' + old_uploadtree_pk;";
+    $OutBuf .= "else \n";
+    $OutBuf .= "linkelt.href = BaseURL;";
+    $OutBuf .= "}\n";
     $OutBuf .= "}\n";
     $OutBuf .= "</script>\n";
-    /******* END javascript functions  ********/
-
+    /******* END javascript functions ********/
 
     /* Select list for filters */
     $SelectFilter = "<select name='diff_filter' id='diff_filter' onchange='ChangeFilter(this,$uploadtree_pk1, $uploadtree_pk2)'>";
@@ -518,7 +581,6 @@ class ui_nomos_diff extends FO_Plugin
     $SelectFilter .= "<option $Selected value='nolics'>3. Same as 2b. but also remove files with no license";
     $SelectFilter .= "</select>";
 
-
     $StyleRt = "style='float:right'";
     $OutBuf .= "<a name='flist' href='#histo' $StyleRt > Jump to histogram </a><br>";
 
@@ -528,8 +590,7 @@ class ui_nomos_diff extends FO_Plugin
     $BucketURL .= "?mod=bucketsdiff&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
     $OutBuf .= "<a href='$BucketURL' $StyleRt > $text </a> ";
 
-
-    //    $TableStyle = "style='border-style:collapse;border:1px solid black'";
+    // $TableStyle = "style='border-style:collapse;border:1px solid black'";
     $TableStyle = "";
     $OutBuf .= "<table border=0 id='dirlist' $TableStyle>";
 
@@ -548,9 +609,10 @@ class ui_nomos_diff extends FO_Plugin
     $OutBuf .= "</td></tr>";
 
     /* File comparison table */
-    $OutBuf .= $this->ItemComparisonRows($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk']);
+    $OutBuf .= $this->ItemComparisonRows($Master, $TreeInfo1['agent_pk'],
+      $TreeInfo2['agent_pk']);
 
-    /*  Separator row */
+    /* Separator row */
     $ColumnSeparatorStyleTop = "style='border:solid 0 #006600; border-top-width:2px; border-bottom-width:2px;'";
     $OutBuf .= "<tr>";
     $OutBuf .= "<td colspan=5 $ColumnSeparatorStyleTop>";
@@ -572,100 +634,113 @@ class ui_nomos_diff extends FO_Plugin
     return $OutBuf;
   }
 
-
   /**
-   * \brief generate output information \n 
-   * filter: optional filter to apply \n
-   * item1:  uploadtree_pk of the column 1 tree \n
-   * item2:  uploadtree_pk of the column 2 tree \n
-   * freeze: column number (1 or 2) to freeze
+   * \brief generate output information
+   *
+   * - filter: optional filter to apply
+   * - item1: uploadtree_pk of the column 1 tree
+   * - item2: uploadtree_pk of the column 2 tree
+   * - freeze: column number (1 or 2) to freeze
    */
   function Output()
   {
     if ($this->State != PLUGIN_STATE_READY) {
-      return(0);
+      return (0);
     }
-    $V="";
+    $V = "";
 
     $uTime = microtime(true);
     /* */
-    $updcache = GetParm("updcache",PARM_INTEGER);
+    $updcache = GetParm("updcache", PARM_INTEGER);
 
-    /* Remove "updcache" from the GET args.
+    /*
+     * Remove "updcache" from the GET args.
      * This way all the url's based on the input args won't be
      * polluted with updcache
-     * Use Traceback_parm_keep to ensure that all parameters are in order */
-    $CacheKey = "?mod=" . $this->Name . Traceback_parm_keep(array("item1","item2", "filter", "col", "freeze", "itemf"));
-    if ($updcache)
-    {
-      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/","",$_SERVER['REQUEST_URI']);
+     * Use Traceback_parm_keep to ensure that all parameters are in order
+     */
+    $CacheKey = "?mod=" . $this->Name .
+      Traceback_parm_keep(
+        array(
+          "item1",
+          "item2",
+          "filter",
+          "col",
+          "freeze",
+          "itemf"
+        ));
+    if ($updcache) {
+      $_SERVER['REQUEST_URI'] = preg_replace("/&updcache=[0-9]*/", "",
+        $_SERVER['REQUEST_URI']);
       unset($_GET['updcache']);
       $V = ReportCachePurgeByKey($CacheKey);
-    }
-    else
-    {
+    } else {
       $V = ReportCacheGet($CacheKey);
     }
 
-    if (empty($V) )  // no cache exists
+    if (empty($V)) // no cache exists
     {
-      $filter = GetParm("filter",PARM_STRING);
-      if (empty($filter)) $filter = "samehash";
-      $FreezeCol = GetParm("freeze",PARM_INTEGER);  // which column to freeze?  1 or 2 or null
-      $ClickedCol = GetParm("col",PARM_INTEGER);  // which column was clicked on?  1 or 2 or null
-      $ItemFrozen = GetParm("itemf",PARM_INTEGER);  // frozen item or null
-      $in_uploadtree_pk1 = GetParm("item1",PARM_INTEGER);
-      $in_uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
+      $filter = GetParm("filter", PARM_STRING);
+      if (empty($filter))
+        $filter = "samehash";
+      $FreezeCol = GetParm("freeze", PARM_INTEGER); // which column to freeze? 1
+                                                    // or 2 or null
+      $ClickedCol = GetParm("col", PARM_INTEGER);   // which column was clicked
+                                                    // on? 1 or 2 or null
+      $ItemFrozen = GetParm("itemf", PARM_INTEGER); // frozen item or null
+      $in_uploadtree_pk1 = GetParm("item1", PARM_INTEGER);
+      $in_uploadtree_pk2 = GetParm("item2", PARM_INTEGER);
 
       if (empty($in_uploadtree_pk1) or empty($in_uploadtree_pk2))
-        Fatal("Bad input parameters.  Both item1 and item2 must be specified.", __FILE__, __LINE__);
+        Fatal("Bad input parameters.  Both item1 and item2 must be specified.",
+          __FILE__, __LINE__);
 
-      /* If you click on a item in a frozen column, then you are a dope so ignore $ItemFrozen */
-      if ($FreezeCol == $ClickedCol) 
-      {
-        $ItemFrozen= 0;
+      /*
+       * If you click on a item in a frozen column, then you are a dope so
+       * ignore $ItemFrozen
+       */
+      if ($FreezeCol == $ClickedCol) {
+        $ItemFrozen = 0;
         $FreezeCol = 0;
       }
 
-      /* @var $uploadDao UploadDao  */
+      /* @var UploadDao $uploadDao */
       $uploadDao = $GLOBALS['container']->get('dao.upload');
       /* Check item1 upload permissions */
       $Item1Row = $uploadDao->getUploadEntry($in_uploadtree_pk1);
-      if (!$uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()))
-      {
+      if (! $uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId())) {
         $text = _("Permission Denied");
         return "<h2>$text item 1</h2>";
       }
 
       /* Check item2 upload permissions */
       $Item2Row = $uploadDao->getUploadEntry($in_uploadtree_pk2);
-      if(!$uploadDao->isAccessible($Item2Row['upload_fk'],Auth::getGroupId()))
-      {
+      if (! $uploadDao->isAccessible($Item2Row['upload_fk'], Auth::getGroupId())) {
         $text = _("Permission Denied");
         return "<h2>$text item 2</h2>";
       }
 
-      $uploadtree_pk1  = $in_uploadtree_pk1;
+      $uploadtree_pk1 = $in_uploadtree_pk1;
       $uploadtree_pk2 = $in_uploadtree_pk2;
 
-      //  if someone is going to freeze a column, let them manually select in the other column (don't try to do matching)
-      if ($FreezeCol == 1)
-      {
+      // if someone is going to freeze a column, let them manually select in the
+      // other column (don't try to do matching)
+      if ($FreezeCol == 1) {
         $uploadtree_pk1 = $ItemFrozen;
-      }
-      else if ($FreezeCol == 2)
-      {
+      } else if ($FreezeCol == 2) {
         $uploadtree_pk2 = $ItemFrozen;
       }
 
-      $newURL = Traceback_dir() . "?mod=" . $this->Name . "&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
-      if (!empty($filter)) $newURL .= "&filter=$filter";
+      $newURL = Traceback_dir() . "?mod=" . $this->Name .
+        "&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
+      if (! empty($filter))
+        $newURL .= "&filter=$filter";
 
       // rewrite page with new uploadtree_pks */
-      if (($uploadtree_pk1 != $in_uploadtree_pk1)
-      || ($uploadtree_pk2 != $in_uploadtree_pk2))
-      {
-        print <<< JSOUT
+      if (($uploadtree_pk1 != $in_uploadtree_pk1) ||
+        ($uploadtree_pk2 != $in_uploadtree_pk2)) {
+        print
+          <<< JSOUT
 <script type="text/javascript">
   window.location.assign('$newURL');
 </script>
@@ -676,84 +751,75 @@ JSOUT;
       $TreeInfo2 = $this->GetTreeInfo($uploadtree_pk2);
       $ErrText = _("No license data for");
       $ErrText2 = _("Use Jobs > Agents to schedule a license scan.");
-      $ErrMsg= '';
-      if ($TreeInfo1['agent_pk'] == 0)
-      {
+      $ErrMsg = '';
+      if ($TreeInfo1['agent_pk'] == 0) {
         $ErrMsg = "$ErrText $TreeInfo1[ufile_name].<br>$ErrText2<p>";
-      }
-      else
-      if ($TreeInfo2['agent_pk'] == 0)
-      {
+      } else if ($TreeInfo2['agent_pk'] == 0) {
         $ErrMsg = "$ErrText $TreeInfo2[ufile_name].<br>$ErrText2<p>";
-      }
-      else
-      {
+      } else {
         /* Get list of children */
         $Children1 = GetNonArtifactChildren($uploadtree_pk1);
         $Children2 = GetNonArtifactChildren($uploadtree_pk2);
 
         /* Add fuzzyname to children */
-        FuzzyName($Children1);  // add fuzzyname to children
-        FuzzyName($Children2);  // add fuzzyname to children
+        FuzzyName($Children1); // add fuzzyname to children
+        FuzzyName($Children2); // add fuzzyname to children
 
         /* add element licstr to children */
         $this->AddLicStr($TreeInfo1, $Children1);
         $this->AddLicStr($TreeInfo2, $Children2);
 
-        /* Master array of children, aligned.   */
+        /* Master array of children, aligned. */
         $Master = MakeMaster($Children1, $Children2);
 
         /* add linkurl to children */
-        FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'], $filter, $this,
-        $uploadtree_pk1, $uploadtree_pk2);
+        FileList($Master, $TreeInfo1['agent_pk'], $TreeInfo2['agent_pk'],
+          $filter, $this, $uploadtree_pk1, $uploadtree_pk2);
 
         /* Apply filter */
         $this->FilterChildren($filter, $Master);
       }
 
-      switch($this->OutputType)
-      {
+      switch ($this->OutputType) {
         case "XML":
           break;
         case "HTML":
           if ($ErrMsg)
-          $V .= $ErrMsg;
+            $V .= $ErrMsg;
           else
-          $V .= $this->HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2, $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1, $TreeInfo2);
+            $V .= $this->HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2,
+              $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1,
+              $TreeInfo2);
           break;
         case "Text":
           break;
         default:
       }
       $Cached = false;
-    }
-    else
-    $Cached = true;
+    } else
+      $Cached = true;
 
-    if (!$this->OutputToStdout) {
-      return($V);
+    if (! $this->OutputToStdout) {
+      return ($V);
     }
     print "$V";
-    $Time = microtime(true) - $uTime;  // convert usecs to secs
+    $Time = microtime(true) - $uTime; // convert usecs to secs
     $text = _("Elapsed time: %.2f seconds");
-    printf( "<small>$text</small>", $Time);
+    printf("<small>$text</small>", $Time);
 
-    if ($Cached)
-    {
+    if ($Cached) {
       $text = _("cached");
       $text1 = _("Update");
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
+    } else {
+      // Cache Report if this took longer than 1/2 second
+      if ($Time > 0.5)
+        ReportCachePut($CacheKey, $V);
     }
-    else
-    {
-      //  Cache Report if this took longer than 1/2 second
-      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
-    }
-    /**/
+    /* */
     return;
-  }  /* End Output() */
-
+  } /* End Output() */
 }
 
-$NewPlugin = new ui_nomos_diff;
+$NewPlugin = new ui_nomos_diff();
 $NewPlugin->Initialize();

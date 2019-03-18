@@ -28,9 +28,9 @@
 /**
  * \brief Migrate to the uploadtree_a table
  *
- * \param $DryRun Do not create the table, just print the sql.
+ * \param boolean $DryRun Do not create the table, just print the sql.
  *
- * \return 0 on success, 1 on failure
+ * \return int 0 on success, 1 on failure
  **/
 function Migrate_20_21($DryRun)
 {
@@ -92,6 +92,14 @@ function Migrate_20_21($DryRun)
   return 0;  // success
 } // Migrate_20_21
 
+/**
+ * @brief Run a SQL query and return the result array
+ *
+ * @param string $sql The SQL query to be executed
+ * @param boolean $DryRun Do not create the table, just print the sql.
+ *
+ * @return mixed Result of $sql query
+ **/
 function RunSQL($sql, $DryRun)
 {
   global $PG_CONN;

@@ -22,6 +22,10 @@ use Fossology\Lib\Db\DbManager;
 
 define("TITLE_admin_folder_delete", _("Delete Folder"));
 
+/**
+ * @class admin_folder_delete
+ * @brief UI plugin to delete folders
+ */
 class admin_folder_delete extends FO_Plugin {
 
   /** @var DbManager */
@@ -36,18 +40,22 @@ class admin_folder_delete extends FO_Plugin {
     $this->DBaccess = PLUGIN_DB_WRITE;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
+    $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
 
   /**
-   * \brief Delete
-   * Creates a job to detele the folder
-   *
-   * \param $folderpk - the folder_pk to remove
-   * \return NULL on success, string on failure.
+   * @brief Creates a job to detele the folder
+   * @param int $folderpk the folder_pk to remove
+   * @param int $userId   the user deleting the folder
+   * @return NULL on success, string on failure.
    */
-  function Delete($folderpk, $userId) 
+  function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
+    if(! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
+      $text = _("No access to delete this folder");
+      return ($text);
+    }
     /* Can't remove top folder */
     if ($splitFolder[1] == FolderGetTop()) {
       $text = _("Can Not Delete Root Folder");
@@ -78,7 +86,8 @@ class admin_folder_delete extends FO_Plugin {
   } // Delete()
 
   /**
-   * \brief Generate the text for this plugin.
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
    */
   public function Output() {
     /* If this is a POST, then process the request. */
@@ -124,9 +133,9 @@ class admin_folder_delete extends FO_Plugin {
     $V.= "</ul>\n";
     $text = _("Select the folder to delete:  ");
     $V.= "<P>$text\n";
-    $V.= "<select name='folder'>\n";
+    $V.= "<select name='folder' class='ui-render-select2'>\n";
     $text = _("select folder");
-    $V.= "<option value=''>[$text]</option>\n";
+    $V.= "<option value='' disabled selected>[$text]</option>\n";
     $V.= FolderListOption(-1, 0, 1, -1, true);
     $V.= "</select><P />\n";
     $text = _("Delete");

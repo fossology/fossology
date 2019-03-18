@@ -16,9 +16,14 @@ You should have received a copy of the GNU Lesser General Public License
 along with this library; if not, write to the Free Software Foundation, Inc.0
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-***********************
-Returns: 0=exist, 1=not exist
 ****************************************************************/
+/**
+ * \file
+ * \brief Check if a file exists
+ *
+ * Returns: 0=exist, 1=not exist
+ * \sa fo_RepExist()
+ */
 
 #include <stdlib.h>
 #include <stdio.h>

@@ -15,6 +15,11 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  ***************************************************************/
+
+/**
+ * \file leaf.c
+ * Handle leaf buckets
+ */
 #include "buckets.h"
 
 extern int debug;
@@ -23,18 +28,18 @@ extern int DEB_BINARY;
 
 
 /**
- * \brief determine which bucket(s) a leaf node is in and write results
- * 
- * \param PGconn      $pgConn          postgresql connection
- * \param pbucketdef_t $bucketDefArray  Bucket Definitions
- * \param puploadtree_t $puploadtree    uploadtree record
- * \param ppackage_t    $ppackage       package record
- * \param int          $agent_pk
- * \param int          $hasPrules       
+ * \brief Determine which bucket(s) a leaf node is in and write results
+ *
+ * \param pgConn         postgresql connection
+ * \param bucketDefArray Bucket Definitions
+ * \param puploadtree    uploadtree record
+ * \param ppackage       package record
+ * \param agent_pk       Id of agent handling the job
+ * \param hasPrules      Not used
  *
  * \return 0=success, else error
  */
-FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray, 
+FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
                          puploadtree_t puploadtree, ppackage_t ppackage,
                          int agent_pk, int hasPrules)
 {
@@ -42,7 +47,7 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
   int *bucketList;
 
   bucketList = getLeafBuckets(pgConn, bucketDefArray, puploadtree, ppackage, hasPrules);
-  if (bucketList) 
+  if (bucketList)
   {
     if (debug)
     {
@@ -50,8 +55,8 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
       for (rv=0;bucketList[rv];rv++) printf("%d ",bucketList[rv]);
       printf("\n");
     }
-    rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk, 
-                      bucketList, agent_pk, 
+    rv = writeBuckets(pgConn, puploadtree->pfile_fk, puploadtree->uploadtree_pk,
+                      bucketList, agent_pk,
                       bucketDefArray->nomos_agent_pk, bucketDefArray->bucketpool_pk);
   }
   else
@@ -65,14 +70,14 @@ FUNCTION int processLeaf(PGconn *pgConn, pbucketdef_t bucketDefArray,
 /**
  * \brief Determine what buckets the pfile is in
  *
- * \param PGconn $pgConn  postgresql connection
- * \param pbucketdef_t $bucketDefArray
- * \param puploadtree_t $puploadtree
- * \param int $hasPrules  
+ * \param pgConn         postgresql connection
+ * \param bucketDefArray Bucket definition to work on
+ * \param puploadtree    Upload tree to work on
+ * \param hasPrules      Not used
  *
  * \return array of bucket_pk's, or 0 if error
  */
-FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray, 
+FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
                              puploadtree_t puploadtree, ppackage_t ppackage,
                              int hasPrules)
 {
@@ -87,7 +92,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
   int   numLics, licNumb;
   int   numBucketDefs = 0;
   int   match = 0;   // bucket match
-  int   foundmatch, foundmatch2; 
+  int   foundmatch, foundmatch2;
   int   *pmatch_array;
   int  **ppmatch_array;
   int  *pfile_rfpks;
@@ -115,13 +120,13 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
     return 0;
   }
   bucket_pk_list = bucket_pk_list_start;
-  
+
   /*** select all the licenses for uploadtree_pk and children and agent_pk ***/
   bucketDefArray = in_bucketDefArray;
-//  snprintf(sql, sizeof(sql), 
+//  snprintf(sql, sizeof(sql),
 //           "select rf_shortname, rf_pk from license_file, license_ref where agent_fk=%d and pfile_fk=%d and rf_fk=rf_pk",
 //           bucketDefArray->nomos_agent_pk, puploadtree->pfile_fk);
-  snprintf(sql, sizeof(sql), 
+  snprintf(sql, sizeof(sql),
       "SELECT distinct(rf_shortname) as rf_shortname, rf_pk \
         from license_ref,license_file,\
              (SELECT distinct(pfile_fk) as PF from uploadtree \
@@ -134,7 +139,7 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
   result = PQexec(pgConn, sql);
   if (fo_checkPQresult(pgConn, result, sql, fcnName, __LINE__)) return 0;
   numLics = PQntuples(result);
-  
+
   /* make int array of rf_pk's for this pfile */
   pfile_rfpks = calloc(numLics+1, sizeof(int));
   if (pfile_rfpks == 0)
@@ -142,9 +147,9 @@ FUNCTION int *getLeafBuckets(PGconn *pgConn, pbucketdef_t in_bucketDefArray,
     printf("FATAL: out of memory allocating int array of %d rf_pk elements\n", numLics+1);
     return 0;
   }
-  for (licNumb=0; licNumb < numLics; licNumb++) 
+  for (licNumb=0; licNumb < numLics; licNumb++)
     pfile_rfpks[licNumb] = atoi(PQgetvalue(result, licNumb, 1));
-  
+
 
 #ifdef BOBG
 printf("bobg: fileName: %s\n", puploadtree->ufile_name);
@@ -153,7 +158,7 @@ printf("bobg: fileName: %s\n", puploadtree->ufile_name);
   /* loop through all the bucket defs in this pool */
   for (bucketDefArray = in_bucketDefArray; bucketDefArray->bucket_pk; bucketDefArray++)
   {
-    /* if this def is restricted to package (applies_to='p'), 
+    /* if this def is restricted to package (applies_to='p'),
        then skip if this is not a package.
        NOTE DEPENDENCY ON PKG ANALYSIS!
     */
@@ -188,7 +193,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
       /***  1  MATCH_EVERY  ***/
       case 1:
         ppmatch_array = bucketDefArray->match_every;
-        if (!ppmatch_array) break;  
+        if (!ppmatch_array) break;
         while (*ppmatch_array)
         {
           /* is match_array contained in pfile_rfpks?  */
@@ -202,15 +207,15 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
           ++ppmatch_array;
         }
         break;
-        
+
       /***  2  MATCH_ONLY  ***/
-      case 2: 
+      case 2:
         if (numLics == 0) break;
-        foundmatch = 1;  
+        foundmatch = 1;
         /* loop through pfile licenses to see if they are all found in the match_only list  */
-        for (licNumb=0; licNumb < numLics; licNumb++) 
+        for (licNumb=0; licNumb < numLics; licNumb++)
         {
-          /* if rf_pk doesn't match any value in match_only, 
+          /* if rf_pk doesn't match any value in match_only,
              then pfile is not in this bucket              */
           pmatch_array = bucketDefArray->match_only;
           while (*pmatch_array)
@@ -218,7 +223,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
             if (pfile_rfpks[licNumb] == *pmatch_array) break;
             pmatch_array++;
           }
-          if (!*pmatch_array) 
+          if (!*pmatch_array)
           {
             /* no match, so pfile is not in this bucket */
             foundmatch = 0;
@@ -245,7 +250,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
         break;
 
       /***  4  EXEC  ***/
-      case 4:  
+      case 4:
         /* file to exec bucketDefArray->dataFilename
          * Exec'd file returns 0 on true (file is in bucket).
          * When a file is exec'd it can expect the following
@@ -254,21 +259,21 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
          * LICENSES: pipe seperated list of licenses for this file.
          * PKGVERS: Package version from pkg header
          * VENDOR: Vendor from pkg header
-         * PKGNAME:  simple package name (e.g. "cup", "mozilla-mail", ...) 
+         * PKGNAME:  simple package name (e.g. "cup", "mozilla-mail", ...)
                      of file being checked.  Only applies to packages.
-         * SRCPKGNAME:  Source package name 
+         * SRCPKGNAME:  Source package name
          * UPLOADTREE_PK: uploadtree_pk
          * PFILE_PK: pfile_pk
          * PKGTYPE: 's' if source, 'b' if binary package, '' if not a package
          */
         /* put together complete file path to file */
-        snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s", 
+        snprintf(filepath, sizeof(filepath), "%s/bucketpools/%d/%s",
                  PROJECTSTATEDIR, bucketDefArray->bucketpool_pk, bucketDefArray->dataFilename);
 			if ((pid = fork()) < 0)
       {
         printf("FATAL: fork failure, %s\n", strerror(errno));
 			}
-			else 
+			else
       if (pid == 0)  /* in child */
       {
         /* use TMPDIR for working directory
@@ -287,31 +292,31 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
         envp[envnum++] = strdup(envbuf);
         /* create pipe seperated list of licenses */
         strcpy(envbuf, "LICENSES=");
-        for (licNumb=0; licNumb < numLics; licNumb++) 
+        for (licNumb=0; licNumb < numLics; licNumb++)
         {
           if (envbuf[9]) strcat(envbuf, "|");
           strcat(envbuf, PQgetvalue(result, licNumb, 0));
         }
         envp[envnum++] = strdup(envbuf);
         sprintf(envbuf, "PKGVERS=%s", ppackage->pkgvers);
-        envp[envnum++] = strdup(envbuf); 
+        envp[envnum++] = strdup(envbuf);
         sprintf(envbuf, "VENDOR=%s", ppackage->vendor);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
         sprintf(envbuf, "PKGNAME=%s", ppackage->pkgname);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
         sprintf(envbuf, "SRCPKGNAME=%s", ppackage->srcpkgname);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
         sprintf(envbuf, "UPLOADTREE_PK=%d", puploadtree->uploadtree_pk);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
         sprintf(envbuf, "PFILE_PK=%d", puploadtree->pfile_fk);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
 
         /* Only figure out PKGTYPE if this is a pkg
            For Debian packages, check mimetype:
              application/x-debian-package --  binary
              application/x-debian-source  --  source
-           For RPM's, 
-             if srcpkgname is not null, 
+           For RPM's,
+             if srcpkgname is not null,
              then this is a binary package
              else this is a source package
          */
@@ -322,7 +327,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
               || (ppackage->srcpkgname[0]==0)) pkgtype='b';
           else
           {
-            snprintf(sql, sizeof(sql), 
+            snprintf(sql, sizeof(sql),
                      "select pfile_mimetypefk from pfile where pfile_pk=%d",
                      puploadtree->pfile_fk);
             resultmime = PQexec(pgConn, sql);
@@ -335,7 +340,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
           }
         }
         sprintf(envbuf, "PKGTYPE=%c", pkgtype);
-        envp[envnum++] =strdup(envbuf); 
+        envp[envnum++] =strdup(envbuf);
 
         envp[envnum++] = 0;
         execve(filepath, argv, envp);
@@ -344,26 +349,26 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
 			}
 
       /* wait for exit */
-			if (waitpid(pid, &rv, 0) < 0) 
+			if (waitpid(pid, &rv, 0) < 0)
       {
         printf("FATAL: waitpid, %s\n", strerror(errno));
         return 0;
 			}
-			if (WIFSIGNALED(rv)) 
+			if (WIFSIGNALED(rv))
       {
         printf("FATAL: child %d died from signal %d", pid, WTERMSIG(rv));
         return 0;
       }
-			else 
-      if (WIFSTOPPED(rv)) 
+			else
+      if (WIFSTOPPED(rv))
       {
         printf("FATAL: child %d stopped, signal %d", pid, WSTOPSIG(rv));
         return 0;
       }
-			else 
-      if (WIFEXITED(rv)) 
+			else
+      if (WIFEXITED(rv))
       {
-				if (WEXITSTATUS(rv) == 0) 
+				if (WEXITSTATUS(rv) == 0)
         {
           *bucket_pk_list = bucketDefArray->bucket_pk;
           bucket_pk_list++;
@@ -380,7 +385,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
          op to end of line is optional.
          e.g. filename COPYRIGHT and license BSD.*clause
       */
-      case 5:  
+      case 5:
         regex_row = bucketDefArray->regex_row;
         foundmatch = 0;
         foundmatch2 = 0;
@@ -442,7 +447,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
 
       /*** 99 DEFAULT bucket. aka not in any other bucket ***/
       case 99:
-        if (!match) 
+        if (!match)
         {
           *bucket_pk_list = bucketDefArray->bucket_pk;
           bucket_pk_list++;
@@ -451,7 +456,7 @@ printf("bobg: check bucket_pk: %d\n", bucketDefArray->bucket_pk);
         break;
 
       /*** UNKNOWN BUCKET TYPE  ***/
-      default:  
+      default:
         printf("FATAL: Unknown bucket type %d, exiting...\n",
                 bucketDefArray->bucket_type);
         exit(-1);

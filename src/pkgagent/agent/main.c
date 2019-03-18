@@ -16,17 +16,60 @@
 
  ***************************************************************/
 /**
- * \file main.c
+ * \dir
+ * \brief Package agent source
+ * \file
  * \brief main for pkgagent
- *
+ * \page pkgagent Package agent
+ * \tableofcontents
+ * \section pkgagentabout About
  * The package metadata agent puts data about each package (rpm and deb) into the database.
- * 
- * Pkgagent get RPM package info from rpm files using rpm library,
+ *
+ * * Pkgagent get RPM package info from rpm files using rpm library,
  * Build pkgagent.c need "rpm" and "librpm-dev", running binary just need "rpm".
+ * * Pkgagent get Debian binary package info from .deb binary control file.
+ * * Pkgagent get Debian source package info from .dsc file.
  *
- * Pkgagent get Debian binary package info from .deb binary control file.
+ * \section pkgagentuse Ways to use pkgagent
+ * There are 2 ways to use the pkgagent agent:
+ *  -# <b>Command Line Analysis</b> - test a rpm file from the command line
+ *  -# <b>Agent Based Analysis</b>  - run from the scheduler
  *
- * Pkgagent get Debian source package info from .dsc file.
+ * \subsection pkgclianalysis Command Line Analysis
+ * To analyze a rpm file from the command line:
+ * | CLI argument | Description |
+ * | ---: | :--- |
+ * | file | If files are rpm package listed, display their meta data |
+ * | -v   | Verbose (-vv = more verbose) |
+ *
+ *   example:
+ *     \code $ ./pkgagent rpmfile \endcode
+ *
+ * \subsection pkgagentanalysis Agent Based Analysis
+ *  To run the pkgagent as an agent simply run with no command line args
+ * | CLI argument | Description |
+ * | ---: | :--- |
+ * | no file | Process data from the scheduler |
+ * | -i      | Initialize the database, then exit |
+ *
+ *   example:
+ *     \code $ upload_pk | ./pkgagent \endcode
+ *
+ * \section pkgagentactions Supported actions
+ * | Command line flag | Description |
+ * | ---: | :--- |
+ * | -i   | Initialize the database, then exit |
+ * | -v   | Verbose (-vv = more verbose) |
+ * | -c   | Specify the directory for the system configuration |
+ * | -C   | Run from command line |
+ * | file | If files are rpm package listed, display their package information |
+ * | no file | Process data from the scheduler |
+ * | -V   | Print the version info, then exit |
+ * \section pkgagentsource Agent source
+ *   - \link src/pkgagent/agent \endlink
+ *   - \link src/pkgagent/ui \endlink
+ *   - Functional test cases \link src/pkgagent/agent_tests/Functional \endlink
+ *   - Unit test cases \link src/pkgagent/agent_tests/Unit \endlink
  */
 #include "pkgagent.h"
 
@@ -38,33 +81,6 @@ char BuildVersion[]="pkgagent build version: NULL.\n";
 
 /**
  * \brief main function for the pkgagent
- *
- * There are 2 ways to use the pkgagent agent:
- *   1. Command Line Analysis :: test a rpm file from the command line
- *   2. Agent Based Analysis  :: run from the scheduler
- *
- * +-----------------------+
- * | Command Line Analysis |
- * +-----------------------+
- *
- * To analyze a rpm file from the command line:
- *   file :: if files are rpm package listed, display their meta data
- *   -v   :: verbose (-vv = more verbose)
- *
- *   example:
- *     $ ./pkgagent rpmfile
- *
- * +----------------------+
- * | Agent Based Analysis |
- * +----------------------+
- *
- * To run the pkgagent as an agent simply run with no command line args
- *   no file :: process data from the scheduler
- *   -i      :: initialize the database, then exit
- *
- *   example:
- *     $ upload_pk | ./pkgagent
- *
  * \param argc the number of command line arguments
  * \param argv the command line arguments
  * \return 0 on a successful program execution
@@ -113,8 +129,8 @@ int	main	(int argc, char *argv[])
       case 'c':
         break; /* handled by fo_scheduler_connect() */
       case 'C':
-        CmdlineFlag = 1; 
-        break;        
+        CmdlineFlag = 1;
+        break;
       case 'V':
         printf("%s", BuildVersion);
         PQfinish(db_conn);
@@ -190,12 +206,10 @@ int	main	(int argc, char *argv[])
         printf("OK\n");
       else
         printf("Fail\n");
-#ifdef _RPM_4_4_COMPAT
       rpmFreeCrypto();
       int i;
       for(i=0; i< rpmpi->req_size;i++)
         free(rpmpi->requires[i]);
-#endif /* After RPM4.4 version*/
       free(rpmpi->requires);
       free(rpmpi);
       rpmFreeMacros(NULL);

@@ -19,13 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 
 /**
- * @file simple.c
+ * @file
  * @date Dec. 15, 2011
  * @brief This is a simple test agent meant to be used by Unit and functional
- *        tests to confirm a correctly working scheduler. This particular agent
+ *        tests to confirm a correctly working scheduler.
+ *
+ *        This particular agent
  *        is meant connect correctly to the scheduler and then instantly die.
  *
- * This is a failing agent
+ * @note This is a failing agent
  */
 
 int main(int argc, char** argv)

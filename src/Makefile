@@ -25,9 +25,11 @@ DIRS = \
 	nomos \
 	pkgagent \
 	readmeoss \
+	unifiedreport \
 	reuser \
 	scheduler \
 	spdx2 \
+	reportImport \
 	ununpack \
 	wget_agent \
 	www

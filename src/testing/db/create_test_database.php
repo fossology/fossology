@@ -30,7 +30,7 @@ $start_time = get_time();
     Create a minimal FOSSology test database and associated configuration,
     if one does not already exist.
 
-    This script is intended to provide a minimal PRE-INSTALLATION test 
+    This script is intended to provide a minimal PRE-INSTALLATION test
     environment in which FOSSology Unit, Functional, and other tests can
     be executed.  It allows tests to be run without having the FOSSology
     system installed on a target test system.
@@ -39,14 +39,14 @@ $start_time = get_time();
     Here is what this script does:
 
     0) Check whether an environment variable FOSSOLOGY_TESTCONFIG is set
-       If so, this environment variable should point to the fossology 
+       If so, this environment variable should point to the fossology
        testing system configuration directory, which will be something like:
- 
-           /tmp/fossologytest_20120611_172315/ 
 
-       If FOSSOLOGY_TESTCONFIG is set, then simply exit.  
-       We do not validate the testing environment further, but any 
-       subsequent tests should be able to use this test database and 
+           /tmp/fossologytest_20120611_172315/
+
+       If FOSSOLOGY_TESTCONFIG is set, then simply exit.
+       We do not validate the testing environment further, but any
+       subsequent tests should be able to use this test database and
        system configuration.
 
     1) Make sure we can connect to postgres as the 'fossologytest' user.
@@ -55,7 +55,7 @@ $start_time = get_time();
 
            * the PGPASSWORD environment variable
            * the pgpass file specified by the PGPASSFILE environment variable
-           * the current user's ~/.pgpass file 
+           * the current user's ~/.pgpass file
 
        If we cannot connect as user 'fossologytest' then a few things
        should be checked:
@@ -68,9 +68,9 @@ $start_time = get_time();
 
        The database should have a unique, easily-identifiable name that we
        can use in subsequent FOSSology unit, function, or other tests.
-     
+
        It will be called: 'fossologytest_YYYYMMDD_hhmmss
- 
+
        where YYYYMMDD_hhmmss is a timestamp indicating when the database
        was created.
 
@@ -84,19 +84,19 @@ $start_time = get_time();
        This is created in the system's temporary directory (e.g. /tmp).
        It is named after the current testing database timestamp.  Example:
 
-           /tmp/fossologytest_20120611_172315/ 
+           /tmp/fossologytest_20120611_172315/
 
     5) Create a Db.conf file in the testing system config directory
- 
+
        This contains the database connection parameters that were just set up
        and which should be used in subsequent tests.  Example:
 
            /tmp/fossologytest_20120611_172315/Db.conf
 
     6) Create a mods-enabled directory in the temporary fossology system
-       configuration directory, and populate it with symlinks to the 
+       configuration directory, and populate it with symlinks to the
        working copy of fossology.  Example:
- 
+
            /tmp/fossologytest_20120611_172315/mods-enabled/adj2nest
            /tmp/fossologytest_20120611_172315/mods-enabled/buckets
            ...
@@ -120,7 +120,7 @@ $test_username = 'fossologytest';
 $test_environment_variable = 'FOSSOLOGY_TESTCONFIG';
 
 /* very first step - check for the FOSSOLOGY_TESTCONFIG environment variable.
-   If this exists, then our job here is done.  
+   If this exists, then our job here is done.
    We simply echo the value to stdout and exit */
 $fossology_testconfig = getenv($test_environment_variable);
 
@@ -154,7 +154,7 @@ if ( $pg_password_environment ) {
 }
 else {
     if ( $pg_passfile_environment ) {
-        // A PGPASSFILE environment variable specifies the location 
+        // A PGPASSFILE environment variable specifies the location
         // of a pgpass file
         debug("Found a PGPASSFILE environment variable of '$pg_passfile_environment' overriding any ~/.pgpass file");
         $pgpass_file = $pg_passfile_environment;
@@ -172,7 +172,7 @@ else {
                     $testuser_found = TRUE;
                 }
             }
-                
+
             if ( $testuser_found == TRUE ) {
                 debug("Found a '$test_username' user in $pgpass_file");
             }
@@ -218,9 +218,9 @@ $initial_postgres_params .= "user=$test_username ";
 $test_pg_conn = @pg_connect($initial_postgres_params);
 
 /* pg_connect returns a database connection handle, or FALSE if it
-   was not able to connect.  
- 
-   If we were not able to connect, try to figure out why and 
+   was not able to connect.
+
+   If we were not able to connect, try to figure out why and
    provide a helpful message to the tester */
 if ( $test_pg_conn == FALSE ) {
 
@@ -261,7 +261,7 @@ pg_close($test_pg_conn) or die ("FAIL: We could not close the posgres connection
    base for the testing instance of the system config directory */
 $system_temp_dir = sys_get_temp_dir();
 
-/* generate a timestamp directory name for this testing database instance 
+/* generate a timestamp directory name for this testing database instance
    This will be, for example:
        /tmp/fossologytest_20120611_172315/  */
 $testing_timestamp = date("Ymd_His");
@@ -280,15 +280,15 @@ $test_db_name = "fossologytest_$testing_timestamp";
 $test_pg_conn = @pg_connect($initial_postgres_params)
     or die("FAIL: Could not connect to Postgres server!");
 
-// note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding 
+// note: normal 'mortal' users cannot choose 'SQL_ASCII' encoding
 // unless the LC_CTYPE environment variable is set correctly
 //$sql_statement="CREATE DATABASE $test_db_name ENCODING='SQL_ASCII'";
 // In the long run, FOSSology should be using a UTF8 encoding for text
 $sql_statement="CREATE DATABASE $test_db_name ENCODING='UTF8' TEMPLATE template0";
-$result = pg_query($test_pg_conn, $sql_statement) 
+$result = pg_query($test_pg_conn, $sql_statement)
     or die("FAIL: Could not create test database!\n");
 
-// close the connection to the template1 database. Now we can 
+// close the connection to the template1 database. Now we can
 // reconnect to the newly-created test database
 pg_close($test_pg_conn);
 
@@ -303,7 +303,7 @@ $test_db_params .= "host=localhost ";
 //$postgres_params       .= "port=5432 ";
 $test_db_params .= "user=$test_username ";
 
-$test_db_conn = pg_connect($test_db_params) 
+$test_db_conn = pg_connect($test_db_params)
     or die ("Could not connect to the new test database '$test_db_name'\n");
 
 
@@ -330,7 +330,7 @@ if ( $plpgsql_already_installed == FALSE ) {
 }
 
 
-/* now create a valid Db.conf file in the testing temp directory 
+/* now create a valid Db.conf file in the testing temp directory
    for accessing our fancy pants new test database */
 $db_conf_fh = fopen("$testing_temp_dir/Db.conf", 'w')
     or die("FAIL! Cannot write $testing_temp_dir/Db.conf\n");
@@ -338,46 +338,43 @@ fwrite($db_conf_fh, "dbname   = $test_db_name;\n");
 fwrite($db_conf_fh, "host     = localhost;\n");
 fwrite($db_conf_fh, "user     = $test_username;\n");
 // Note: because the Db.conf file is itself just the parameters
-//       used in the pg_connect() command, we should be able to 
+//       used in the pg_connect() command, we should be able to
 //       safely omit the password, since whatever mechanism was
 //       already in place to authenticate can still be used.
 //fwrite($db_conf_fh, "password = fossologytest;\n");
 fclose($db_conf_fh);
 
 
-/* now create a mods-enabled directory to contain symlinks to the 
+/* now create a mods-enabled directory to contain symlinks to the
    agents in the current working copy of fossology */
 $mods_enabled_dir = "$testing_temp_dir/mods-enabled";
-/*
+
 mkdir($mods_enabled_dir, 0755, TRUE)
     or die("FAIL! Cannot create test mods-enabled directory at: $mods_enabled_dir\n");
-*/
-
 
 /* here we have to do the work that each of the agents' 'make install'
    targets would normally do, but since we want the tests to be able
    to execute before FOSSology is installed, we need to do a minimal
    amount of work to enable them */
 
-/* for each src/ directory above us, create a symlink for it in the 
-   temporary testing mods-enabled directory we just created;  
+/* for each src/ directory above us, create a symlink for it in the
+   temporary testing mods-enabled directory we just created;
    but always skip the cli and lib directories */
 
 $fo_base_dir = realpath(__DIR__ . '/../..');
 $src_dirs = scandir($fo_base_dir);
 
-/*
 foreach ($src_dirs as $src_dir) {
     $full_src_dir = $fo_base_dir . "/" . $src_dir;
     // skip dotted directories, lib/, cli/, and other irrelevant directories
-    if ( preg_match("/^\./", $src_dir) 
-         || $src_dir == 'lib' 
-         || $src_dir == 'cli' 
+    if ( preg_match("/^\./", $src_dir)
+         || $src_dir == 'lib'
+         || $src_dir == 'cli'
          || $src_dir == 'example_wc_agent'
-         || $src_dir == 'tutorials' 
-         || $src_dir == 'srcdocs' 
-         || $src_dir == 'testing' 
-         || $src_dir == 'demomod' 
+         || $src_dir == 'tutorials'
+         || $src_dir == 'srcdocs'
+         || $src_dir == 'testing'
+         || $src_dir == 'demomod'
         ) {
         continue;
     }
@@ -397,9 +394,9 @@ foreach ($src_dirs as $src_dir) {
             or die("FAIL - could not create symlink for $src_dir in $mods_enabled_dir\n");
     }
 }
-*/
 
-$des_dir = "/usr/local/etc/fossology/mods-enabled/";
+/*
+$des_dir = "/srv/fossologyTestRepo/testConf/mods-enabled/";
 if (is_dir($des_dir)) {
   symlink($des_dir, "$mods_enabled_dir")
     or die("FAIL - could not create symlink for $des_dir\n");
@@ -407,6 +404,7 @@ if (is_dir($des_dir)) {
 else {
   print "please run make install from source before do the test.\n";
 }
+*/
 
 /* Now let's set up a test repository location, which is just an empty
    subdirectory within our temporary testing system config directory */
@@ -415,7 +413,7 @@ mkdir($test_repo_dir, 0755, TRUE)
     or die ("FAIL! Cannot create test repository directory at: $test_repo_dir\n");
 
 
-/* now create a valid fossology.conf file in the testing 
+/* now create a valid fossology.conf file in the testing
    temp directory  */
 
 // be lazy and just use a system call to gather user and group name
@@ -452,7 +450,7 @@ fclose($fo_conf_fh);
 $fo_version_fh = fopen("$testing_temp_dir/VERSION", 'w')
     or die("FAIL: Could not open $testing_temp_dir/VERSION for writing\n");
 fwrite($fo_version_fh, "[BUILD]\n");
-fwrite($fo_version_fh, "VERSION=trunk\n");
+fwrite($fo_version_fh, "VERSION=test\n");
 fwrite($fo_version_fh, "COMMIT_HASH=0000\n");
 $build_date = date("Y/m/d H:i");
 fwrite($fo_version_fh, "BUILD_DATE=$build_date\n");
@@ -493,19 +491,19 @@ require_once(__DIR__ . '/../../lib/php/common-db.php');
 require_once(__DIR__ . '/../../lib/php/common-cache.php');
 
 // apply the core schema
-// We need to buffer the output in order to silence the normal 
-// output generated by ApplySchema, or it will interfere with 
+// We need to buffer the output in order to silence the normal
+// output generated by ApplySchema, or it will interfere with
 // our makefile interface
 debug("Applying the FOSSOlogy schema to test database via ApplySchema()");
 ob_start();
-$apply_result = ApplySchema($core_schema_dat_file);
+$apply_result = ApplySchema($core_schema_dat_file, false, $test_db_name);
 
 // then re-assign the previous PG_CONN, if there was one
 if (isset($previous_PG_CONN)) {
     $PG_CONN = $previous_PG_CONN;
 }
 
-if (!empty($apply_result)) { 
+if (!empty($apply_result)) {
     die("FAIL:  ApplySchema did not succeed.  Output was:\n$apply_result\n");
 }
 debug("Done Applying the FOSSOlogy schema to test database via ApplySchema()");
@@ -531,11 +529,12 @@ $folder_sql = "SELECT setval('folder_folder_pk_seq', (SELECT max(folder_pk) + 1 
 pg_query($test_db_conn, $folder_sql)
     or die("FAIL: could not change folder sequence\n");
 
-$LIBEXECDIR = "/usr/local/lib/fossology/";
-$MODDIR = "/usr/local/share/fossology/";
+$LIBEXECDIR = "$fo_base_dir/lib/";
+$MODDIR = "$fo_base_dir/";
 /* for the 2.0 -> 2.1 migration, create the uploadtree_0 table */
-require_once("/usr/local/lib/fossology/dbmigrate_2.0-2.1.php"); // hardcode for now
-require_once("/usr/local/lib/fossology/dbmigrate_2.1-2.2.php"); // hardcode for now
+require_once(__DIR__ . '/../../lib/php/libschema.php');
+require_once(__DIR__ . "/../../../install/db/dbmigrate_2.0-2.1.php"); // hardcode for now
+require_once(__DIR__ . "/../../../install/db/dbmigrate_2.1-2.2.php"); // hardcode for now
 $Verbose = 0;
 Migrate_20_21($Verbose);
 Migrate_21_22($Verbose);
@@ -545,7 +544,7 @@ ob_end_clean();
 pg_close($test_db_conn);
 
 
-/* When we finish successfully, print out the testing SYSCONFDIR 
+/* When we finish successfully, print out the testing SYSCONFDIR
    to stdout as the ONLY output from the script.  In this way it
    can be "imported" into the GNU Make environment  */
 debug("Successful test database creation");

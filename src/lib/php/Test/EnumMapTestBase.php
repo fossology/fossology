@@ -20,7 +20,7 @@ namespace Fossology\Lib\Test;
 
 use Fossology\Lib\Data\Types;
 
-class EnumMapTestBase extends \PHPUnit_Framework_TestCase {
+class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
 
   /** @var Types */
   private $types;

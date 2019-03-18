@@ -155,6 +155,14 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/deciderjob install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-unifiedreport \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/unifiedreport install
+
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-readmeoss \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/readmeoss install
+	
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reuser \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reuser install
@@ -163,6 +171,7 @@ install-arch:
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/spdx2 install
 
+	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
 	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 

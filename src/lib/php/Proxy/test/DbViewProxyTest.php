@@ -18,10 +18,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
-use Mockery as M;
 use Fossology\Lib\Db\DbManager;
+use Mockery as M;
 
-class DbViewProxyTest extends \PHPUnit_Framework_TestCase
+class DbViewProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $dbViewName = "foo";
   private $dbViewQuery = "select 3.14";
@@ -34,7 +34,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
     $this->dbViewDao = new DbViewProxy($this->dbViewQuery, $this->dbViewName);
     global $container;
     $container = M::mock('ContainerBuilder');
-    $this->dbManagerMock = M::mock(DbManager::classname());
+    $this->dbManagerMock = M::mock(DbManager::class);
     $container->shouldReceive('get')->withArgs(array('db.manager'))->andReturn($this->dbManagerMock);
   }
 
@@ -47,7 +47,7 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
   {
     assertThat($this->dbViewDao->getDbViewName(),is($this->dbViewName));
   }
-  
+
   public function testMaterialize()
   {
     $this->dbManagerMock->shouldReceive('queryOnce')->with("CREATE TEMPORARY TABLE $this->dbViewName AS $this->dbViewQuery", M::any());
@@ -68,16 +68,16 @@ class DbViewProxyTest extends \PHPUnit_Framework_TestCase
     $this->dbManagerMock->shouldReceive('queryOnce')->with("DROP TABLE $this->dbViewName");
     $this->dbViewDao->unmaterialize();
   }
-  
+
   public function testUnmaterializeWithoutMaterialize()
   {
     $this->dbManagerMock->shouldReceive('queryOnce')->never();
     $this->dbViewDao->unmaterialize();
-  } 
-    
+  }
+
   public function testAsCTE()
   {
     assertThat($this->dbViewDao->asCTE(),is("WITH $this->dbViewName AS (".$this->dbViewQuery.")"));
   }
-  
+
 }

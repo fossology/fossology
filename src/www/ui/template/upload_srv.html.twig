@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2015, 2018 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -22,14 +22,27 @@
   NOTE: <strong>Contents under a directory will be recursively included.</strong>
   '*' is supported to select multiple files (e.g. *.txt).
 </li>
+<li>
+  <label for="{{ nameField }}">
+    ({{ 'Optional'|trans }}) {{ 'Enter a viewable name for this file or directory'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ nameField }}" type="text" size="120"/><br/>
+  {{ 'Note: If no name is provided, then the uploaded file (directory) name will be used.' |trans }}
+</li>
 {% if hostlist|length > 0 %}
 <li>
   <label for="host">
     {{ 'Choose a host'| trans }}:
   </label>
-  <select name='host'>
+  <select name='host' class="ui-render-select2">
     {{ hostlist }}
   </select>
 </li>
 {% endif %}
+{% endblock %}
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript"> {% include "upload_srv.js.twig" %} </script>
+  {{ injectedFoot }}
 {% endblock %}

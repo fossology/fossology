@@ -22,12 +22,17 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MAXSQL  4096
 extern char *DBConfFile;
 /**
- * \file testRecordMetadataDEB.c
+ * \file
  * \brief unit test for RecordMetadataDEB function
  */
 
 /**
  * \brief Test pkgagent.c function RecordMetadataDEB()
+ * \test
+ * -# Create a test upload in pfile table
+ * -# Create debpkginfo object and populate it
+ * -# Call RecordMetadataDEB()
+ * -# Check if meta data got inserted in DB
  */
 void test_RecordMetadataDEB()
 {
@@ -46,6 +51,7 @@ void test_RecordMetadataDEB()
   snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)100);
 
   pi = (struct debpkginfo *)malloc(sizeof(struct debpkginfo));
+  memset(pi, 0, sizeof(struct debpkginfo));
   int predictValue = 0;
 
   /* perpare testing data in database */
@@ -56,6 +62,7 @@ void test_RecordMetadataDEB()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Perpare pfile information ERROR!\n");
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -66,7 +73,7 @@ void test_RecordMetadataDEB()
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pfile information ERROR!\n");
-    exit(-1); 
+    exit(-1);
   }
   pi->pFileFk = atoi(PQgetvalue(result, 0, 0));
   PQclear(result);
@@ -104,6 +111,8 @@ void test_RecordMetadataDEB()
   if (fo_checkPQresult(db_conn, result, SQL, __FILE__, __LINE__))
   {
     printf("Get pkg information ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   CU_ASSERT_STRING_EQUAL(PQgetvalue(result, 0, 1), "Test Pkg");
@@ -121,6 +130,8 @@ void test_RecordMetadataDEB()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Clear pkg_deb_req test data ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -130,6 +141,8 @@ void test_RecordMetadataDEB()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Clear pkg_deb test data ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -139,6 +152,8 @@ void test_RecordMetadataDEB()
   if (fo_checkPQcommand(db_conn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Clear pfile test data ERROR!\n");
+    PQclear(result);
+    free(pi);
     exit(-1);
   }
   PQclear(result);
@@ -146,7 +161,7 @@ void test_RecordMetadataDEB()
   PQfinish(db_conn);
   int k;
   for(k=0; k< pi->dep_size;k++)
-  free(pi->depends[k]);
+    free(pi->depends[k]);
   free(pi->depends);
   memset(pi,0,sizeof(struct debpkginfo));
   free(pi);

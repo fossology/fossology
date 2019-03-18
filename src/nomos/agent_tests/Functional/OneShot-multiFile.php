@@ -17,16 +17,29 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Perform a one-shot license analysis on multiple files
+ * @file
+ * @brief Perform a one-shot license analysis on multiple files
  *
  * License returned should be: See the array $Results below.
  */
 
 require_once ('CommonCliTest.php');
 
+/**
+ * @class OneShotMultiFileTest
+ * @brief Perform a one-shot license analysis on multiple files
+ */
 class OneShotMultiFileTest extends CommonCliTest
 {
+  /**
+   * @var string $files
+   * Location of test files
+   */
   public $files;
+  /**
+   * @var array $Results
+   * Mapping of files => expected result
+   */
   public $Results = array(
     'Affero-v1.0' => 'AGPL-1.0',
     'Apache-v1.1' => 'Apache-1.1',
@@ -42,7 +55,7 @@ class OneShotMultiFileTest extends CommonCliTest
     'BSD_style_h.txt' => 'BSD',
   	'BSD_style_i.txt' => 'BSD-3-Clause',
   	'BSD_style_j.txt' => 'BSD-3-Clause',
-  	'BSD_style_k.txt' => 'BSD-2-Clause',
+  	'BSD_style_k.txt' => 'Apache-1.1-style',
   	'BSD_style_l.txt' => 'BSD-style',
     'BSD_style_m.txt' => 'BSD',
   	'BSD_style_n.txt' => 'BSD-3-Clause',
@@ -51,9 +64,9 @@ class OneShotMultiFileTest extends CommonCliTest
   	'BSD_style_q.txt' => 'BSD-style',
   	'BSD_style_r.txt' => 'BSD-style',
   	'BSD_style_s.txt' => 'OpenSSL',
-  	'BSD_style_t.txt' => 'BSD-style',
+  	'BSD_style_t.txt' => 'SSLeay',
     'BSD_style_u.txt' => 'BSD-3-Clause',
-    'BSD_style_v.txt' => 'BSD-style',
+    'BSD_style_v.txt' => 'MIT-CMU-style',
     'BSD_style_w.txt' => 'BSD-style',
     'BSD_style_x.txt' => 'BSD-style,Govt-work',
     'BSD_style_y.txt' => 'PHP-3.0',
@@ -75,6 +88,14 @@ class OneShotMultiFileTest extends CommonCliTest
   	'jslint.js' => 'JSON',
   );
 
+  /**
+   * @brief Run NOMOS on multiple files at once
+   * @test
+   * -# Get the location of test files
+   * -# Run NOMOS on the test files and record the output
+   * -# For every result output, check if the file is in $Results array
+   * -# For every result output, match it using the $Results map
+   */
   public function testOneShotmultiFile()
   {
     $this->files = dirname(dirname(dirname(dirname(__FILE__)))).'/testing/dataFiles/TestData/licenses/*';

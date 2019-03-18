@@ -19,11 +19,11 @@
 /* Equivalent to core nomos v1.10 */
 
 /**
- * \file list.c
+ * \file
  * \brief list manipulation functions and str/val Compare functions
  *
  * list.c supplies all of the functions needed to manipulate the list and
- * listitem strunctures defined in nomos.h.  It also supplies the
+ * listitem structures defined in nomos.h. It also supplies the
  * str*Compare* and valCompare* functions.
  *
  * @version "$Id: list.c 3676 2010-11-15 23:10:52Z bobgo $"
@@ -59,7 +59,8 @@ static void listDebugDetails();
  *    l->used = 0\n
  *    l->ix = -1\n
  *    l->sorted = UNSORTED\n
- *
+ * \param l     List to initialize
+ * \param label Name of the list
  * \note label can't be longer than l->name (64)
  *
  */
@@ -110,6 +111,11 @@ void listInit(list_t *l, int size, char *label) {
   return;
 }
 
+/**
+ * \brief Destroy list_t
+ * \param l List to destroy
+ * \param deallocFlag Set to also free list memory
+ */
 void listClear(list_t *l, int deallocFlag) {
   item_t *p;
   int i;
@@ -206,13 +212,18 @@ void listClear(list_t *l, int deallocFlag) {
   return;
 }
 
+/**
+ * \brief Validate list
+ * \param l List to validate
+ * \param appendFlag If set and list is completely used, double its size
+ */
 void listValidate(list_t *l, int appendFlag) {
   if (l == NULL_LIST) {
     LOG_FATAL("listValidate: null list!")
                 Bail(-__LINE__);
   }
-  /*
-   * Question: do we want to initialize the list here, instead of aborting?
+  /**
+   * \note Question: do we want to initialize the list here, instead of aborting?
    * It would mean we don't have to initialize EVERY list EVERYWHERE -- we
    * could just set the size to zero and start adding/inserting.
    */
@@ -233,11 +244,11 @@ void listValidate(list_t *l, int appendFlag) {
 
 
 /**
- * \brief get an item from the itemlist.  If the item is not in the itemlist,
+ * \brief get an item from the itemlist. If the item is not in the itemlist,
  * then add it to the itemlist.
  *
  * This function searches the str member in the listitem structure, if found,
- * a pointer to that item is returned.  If not found, the item is added to the
+ * a pointer to that item is returned. If not found, the item is added to the
  * list of items 'in the middle' of the list.
  *
  * @param list_t *list the list to search/update
@@ -467,13 +478,12 @@ item_t *listLookupAlias(list_t *l, char *s)
 #endif /* notdef */
 
 /**
- * listIterate
  * \brief return a pointer to listitem, returns a NULL_ITEM when no more items
  * to return.
  *
- * @param list_t *list a point to a list
+ * @param l list a point to a list
  *
- * NOTE: this routine increments the ix member! (bad boy)
+ * \note This routine increments the ix member! (bad boy)
  *
  * \todo remove/fix the fact that this routine increments ix.
  */
@@ -509,6 +519,10 @@ item_t *listIterate(list_t *l) {
   return (p);
 }
 
+/**
+ * \brief Rest list ix to -1
+ * \param l List to reset
+ */
 void listIterationReset(list_t *l) {
 
 #ifdef LIST_DEBUG /* was PROC_TRACE */
@@ -525,6 +539,14 @@ void listIterationReset(list_t *l) {
   return;
 }
 
+/**
+ * \brief Delete an item from list
+ *
+ * The function also rearrange list after deletion.
+ * \param l List to delete from
+ * \param p Item to delete
+ * \return 0 on error, 1 on success
+ */
 int listDelete(list_t *l, item_t *p) {
   int index;
   item_t *base;
@@ -569,6 +591,13 @@ int listDelete(list_t *l, item_t *p) {
   return (1);
 }
 
+/**
+ * \brief Double the size of list
+ *
+ * Creates a new pointer with double the size of current list, copy old list
+ * items, free the old list->items and assign new pointer to list->items
+ * \param l List to be doubled
+ */
 static void listDoubleSize(list_t *l) {
   int sz;
   item_t *newptr;
@@ -598,9 +627,20 @@ static void listDoubleSize(list_t *l) {
     l->items = newptr;
   }
   l->size *= 2;
+
   return;
 }
 
+/**
+ * \brief Sort the list as per the sortType passed
+ * \param[in,out] l List to sort
+ * \param sortType \parblock
+ * Which type of sorting to use.
+ *
+ * It can of `UNSORTED|SORT_BY_NAME_ICASE|SORT_BY_NAME|SORT_BY_COUNT_DSC|
+ * SORT_BY_COUNT_ASC|SORT_BY_ALIAS|SORT_BY_BASENAME`
+ * \endparblock
+ */
 void listSort(list_t *l, int sortType) {
 
   int (*f)() = 0;
@@ -708,7 +748,7 @@ void listSort(list_t *l, int sortType) {
   return;
 }
 
-/*
+/**
  * qsort utility-function to create an alphabetically sorted (ASCENDING)
  * [case-insensitive] list based on the string value in the item_t 'str' field
  */
@@ -719,7 +759,7 @@ static int strIcaseCompare(item_t *p1, item_t *p2) {
   return (ret ? ret : valCompareDsc(p1, p2));
 }
 
-/*
+/**
  * qsort utility-function to create an alphabetically sorted (ASCENDING)
  * list based on the string value in the item_t 'str' field
  */
@@ -730,7 +770,7 @@ static int strCompare(item_t *p1, item_t *p2) {
   return (ret ? ret : valCompareDsc(p1, p2));
 }
 
-/*
+/**
  * qsort utility-function to create an alphabetically sorted (ASCENDING)
  * list based on the path-basename of string value in the item_t 'str' field
  */
@@ -741,7 +781,7 @@ static int strCompareBasename(item_t *p1, item_t *p2) {
   return (ret ? ret : strCompare(p1, p2));
 }
 
-/*
+/**
  * qsort utility-function to create a numerically sorted (ASCENDING)
  * list based on the integer value in the item_t 'val' field
  */
@@ -749,7 +789,7 @@ static int valCompareAsc(item_t *p1, item_t *p2) {
   return (p1->val - p2->val);
 }
 
-/*
+/**
  * qsort utility-function to create a numerically sorted (DESCENDING)
  * list based on the integer value in the item_t 'val' field
  */
@@ -757,7 +797,7 @@ static int valCompareDsc(item_t *p1, item_t *p2) {
   return (p2->val - p1->val);
 }
 
-/*
+/**
  * qsort utility-function to create an alphabetically sorted (ASCENDING)
  * list based on the string value in the item_t 'buf' field
  */
@@ -766,7 +806,7 @@ static int bufCompare(item_t *p1, item_t *p2) {
   return (ret ? ret : valCompareDsc(p1, p2));
 }
 
-/*
+/**
  * Be careful about calling this function; some lists use the 'val'
  * field as a flag, others use it as a count!
  */

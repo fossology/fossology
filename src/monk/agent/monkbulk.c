@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2015, Siemens AG
+Copyright (C) 2013-2015,2018 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -129,7 +129,7 @@ BulkAction** queryBulkActions(MonkState* state, long bulkId) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "queryBulkActions",
-      "SELECT rf_fk, removing FROM license_set_bulk WHERE lrb_fk = $1",
+      "SELECT rf_fk, removing, comment, reportinfo, acknowledgement FROM license_set_bulk WHERE lrb_fk = $1",
   long
   ),
   bulkId
@@ -144,6 +144,9 @@ BulkAction** queryBulkActions(MonkState* state, long bulkId) {
     BulkAction *action = (BulkAction *) malloc(sizeof(BulkAction));
     action->licenseId = atoi(PQgetvalue(bulkActionsResult, row, column++));
     action->removing = (strcmp(PQgetvalue(bulkActionsResult, row, column++), "t") == 0);
+    action->comment = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
+    action->reportinfo = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
+    action->acknowledgement = g_strdup(PQgetvalue(bulkActionsResult, row, column++));
     bulkActions[row] = action;
   }
   bulkActions[row] = NULL;
@@ -301,12 +304,12 @@ int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches)
             fo_dbManager_PrepareStamement(
                     state->dbManager,
                     "saveBulkResult:decision",
-                    "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed)"
-                            " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7"
+                    "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement)"
+                            " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10"
                             " FROM uploadtree"
-                            " WHERE upload_fk = $8 AND pfile_fk = $1 AND lft BETWEEN $9 AND $10"
+                            " WHERE upload_fk = $11 AND pfile_fk = $1 AND lft BETWEEN $12 AND $13"
                             "RETURNING clearing_event_pk",
-    long, int, int, int, int, long, int,
+    long, int, int, int, int, long, int, char*, char*, char*,
     int, long, long
     ),
     file->id,
@@ -317,6 +320,9 @@ int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches)
             BULK_DECISION_TYPE,
             action->licenseId,
             action->removing ? 1 : 0,
+            action->comment,
+            action->reportinfo,
+            action->acknowledgement,
 
             bulkArguments->uploadId,
             bulkArguments->uploadTreeLeft,

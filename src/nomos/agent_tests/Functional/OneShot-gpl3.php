@@ -17,17 +17,33 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 /**
- * \brief Perform a one-shot license analysis on a glpv3 license
+ * @file
+ * @brief Perform a one-shot license analysis on a glpv3 license
  *
  * License returned should be FSF,GPL_v3,Public-domain
  */
 
 require_once ('CommonCliTest.php');
 
+/**
+ * @class OneShotgpl3Test
+ * @brief Perform a one-shot analysis on GPL_v3 license
+ */
 class OneShotgpl3Test extends CommonCliTest
 {
+  /**
+   * @var string $gplv3
+   * Path to GPL license
+   */
   public $gplv3;
 
+  /**
+   * @brief Run NOMOS on GPL license
+   * @test
+   * -# Check if required GPL license file exists
+   * -# Run nomos on the license and record the output
+   * -# Check if the output says \b GPL-3.0
+   */
   public function testOneShotgplv3()
   {
     /* check to see if the file exists */

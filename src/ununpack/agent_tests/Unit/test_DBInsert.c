@@ -17,8 +17,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "run_tests.h"
 #include "../agent/externs.h"
 /**
- * \file test_DBInsert.c
- * \brief tests for ununpack DB access function
+ * \file
+ * \brief Tests for ununpack DB access function
  */
 
 static PGresult *result = NULL;
@@ -32,9 +32,9 @@ extern char *DBConfFile;
 int  DBInsertInit()
 {
   char *ErrorBuf;
-  char *upload_filename = "argmatch.c.gz";
+  char *upload_filename = "test_1.orig.tar.gz";
   int upload_mode = 104;
-  char *upload_origin = "argmatch.c.gz";
+  char *upload_origin = "test_1.orig.tar.gz";
   char *tmp;
 
   pgConn = fo_dbconnect(DBConfFile, &ErrorBuf);
@@ -43,17 +43,18 @@ int  DBInsertInit()
     LOG_FATAL("Unable to connect to database");
     exit(-1);
   }
- 
-  /** insert upload info */
+
+  /* insert upload info */
   memset(SQL,'\0',MAXSQL);
-  snprintf(SQL,MAXSQL,"INSERT INTO upload (upload_filename,upload_mode,upload_origin) VALUES ('%s', %d, '%s');",upload_filename, upload_mode, upload_origin);
+  snprintf(SQL,MAXSQL,"INSERT INTO upload (upload_filename,upload_mode,upload_origin) VALUES ('%s', %d, '%s');",
+      upload_filename, upload_mode, upload_origin);
   result =  PQexec(pgConn, SQL);
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__))
   {
     printf("Insert upload information ERROR!\n");
     return (-1);
   }
-  PQclear(result); 
+  PQclear(result);
 
   /* select the upload pk */
   memset(SQL,'\0',MAXSQL);
@@ -87,7 +88,7 @@ int DBInsertClean()
   }
   PQclear(result);
 
-  /** delete uploadtree info */
+  /* delete uploadtree info */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"DELETE FROM uploadtree WHERE upload_fk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -98,7 +99,7 @@ int DBInsertClean()
   }
   PQclear(result);
 
-  /** delete upload info */
+  /* delete upload info */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"DELETE FROM upload WHERE upload_pk = %ld;", upload_pk);
   result =  PQexec(pgConn, SQL);
@@ -109,7 +110,7 @@ int DBInsertClean()
   }
   PQclear(result);
 
-  /** delete pfile info */
+  /* delete pfile info */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"DELETE FROM pfile WHERE pfile_pk = %ld;", pfile_pk);
   result =  PQexec(pgConn, SQL);
@@ -137,28 +138,36 @@ int DBInsertClean()
 
 /**
  * \brief test DBInsertPfile function
+ * \test
+ * -# Call DBInsertPfile() with a sample ContainerInfo
+ * -# Check if function returns OK
  */
 void testDBInsertPfile()
 {
   ContainerInfo *CI = NULL;
   struct stat Stat = {0};
   ParentInfo PI = {0, 1287725739, 1287725739, 0, 0};
-  ContainerInfo CITest = {"../test-data/testdata4unpack/argmatch.c.gz", "./test-result/", "argmatch.c.gz", "argmatch.c.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
+  ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/",
+      "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
-  char *Fuid = "657db64230b9d647362bfe0ebb82f7bd1d879400.a0f2e4d071ba2e68910132a8da5784a6.2920";
-  int result = DBInsertPfile(CI, Fuid);  
+  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1312";
+  int result = DBInsertPfile(CI, Fuid);
   CU_ASSERT_EQUAL(result, 1);
 }
 
 /**
  * \brief test DBInsertUploadTree function
+ * \test
+ * -# Call DBInsertUploadTree() with sample ContainerInfo
+ * -# Check if function return OK
  */
 void testDBInsertUploadTree()
 {
   ContainerInfo *CI = NULL;
   struct stat Stat = {0};
   ParentInfo PI = {0, 1287725739, 1287725739, 0, 0};
-  ContainerInfo CITest = {"../test-data/testdata4unpack/argmatch.c.gz", "./test-result/", "argmatch.c.gz", "argmatch.c.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
+  ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/",
+      "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
   int result = DBInsertUploadTree(CI, 1);
   CU_ASSERT_EQUAL(result, 0);

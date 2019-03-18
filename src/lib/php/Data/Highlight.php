@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014, 2018 Siemens AG
 Authors: Andreas Würl, Daniele Fognini
 
 This program is free software; you can redistribute it and/or
@@ -20,9 +20,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data;
 
 use Fossology\Lib\Html\HtmlElement;
-use Fossology\Lib\Util\Object;
 
-class Highlight extends Object
+class Highlight
 {
   const MATCH = "M";
   const CHANGED = "MC";
@@ -38,6 +37,7 @@ class Highlight extends Object
   const AUTHOR = "A";
   const IP = "I";
   const ECC = "X";
+  const KEYWORDOTHERS = "KW";
   const UNDEFINED = "any";
 
   /**
@@ -217,4 +217,4 @@ class Highlight extends Object
       .")";
   }
 
-} 
+}

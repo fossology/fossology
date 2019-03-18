@@ -55,13 +55,14 @@ class ui_browse_license extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
   
   public function __construct() {
     parent::__construct(self::NAME, array(
         self::TITLE => _("License Browser"),
         self::DEPENDENCIES => array("browse", "view"),
-        self::PERMISSION => Auth::PERM_READ
+        self::PERMISSION => Auth::PERM_READ,
+        self::REQUIRES_LOGIN => false
     ));
 
     global $container;

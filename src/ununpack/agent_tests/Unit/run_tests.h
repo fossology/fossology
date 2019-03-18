@@ -36,10 +36,6 @@ extern magic_t MagicCookie;
 /* run_tests.c */
 extern int file_dir_exists(char *path_name);
 
-/* FindCmd */
-extern int FindCmdInit();
-extern int FindCmdClean();
-
 /* TraverseStart */
 extern int TraverseStartInit();
 extern int TraverseStartClean();

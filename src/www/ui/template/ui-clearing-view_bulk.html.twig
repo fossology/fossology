@@ -1,9 +1,19 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2015,2018 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
+  <div class="modal" id="textModal" hidden>
+    <form name="addOrRemoveText">
+      <div>{{ 'Please enter the text phrase:'|trans }}</div>
+      <textarea id="referenceText" style="overflow:auto;width:100%;height:80px;" name="referenceText"></textarea>
+      <br/><br/>
+      <a class="buttonLink" style="width:7em;" onclick="submitTextModal();">OK</a>  &nbsp; &nbsp;
+      <a class="buttonLink" style="width:7em;" onclick="closeTextModal();">{{ 'Cancel'|trans }}</a>
+    </form>
+  </div>
+
 <div class="modal" id="bulkModal" hidden>
   <form name="bulkForm">
     <h2>{{ 'Bulk recognition'| trans }}</h2>
@@ -14,18 +24,23 @@
 
     <table>
       <tr>
-        <td style="padding-right:20px">
-          <span id="bulkExistingLicense">
-            <select id="bulkLicense" style="min-width:200px" >
+        <td id="bulkExistingLicense">
+            <select id="bulkLicense" style="width:100%" class="ui-render-select2">
               {% for license in licenseArray %}
                 <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
               {% endfor %}
-            </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
-          </span>
+            </select>
         </td>
-        <td style="padding-right:20px">
+        <td>
+          <img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
+        </td>
+        <td style="padding:0px 3px 0px 3px">
           <a href="#" id="bulkFormAddLicense" style="font-size:20px;"><img src="images/icons/add_16.png" title="append job to add selected license" alt="+"/></a>
+        </td>
+        <td style="padding:0px 3px 0px 3px">
           <a href="#" id="bulkFormRmLicense" style="font-size:20px;"><img src="images/icons/remove_16.png" title="append job to remove selected license" alt="-"/></a>
+        </td>
+        <td>
           <img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'Adding or removing a license is possible. Removing a license will pull the scanner found license off from the potential clearing decisions. This can be used to correct a scanner finding'|trans }}" alt="" class="info-bullet"/>
         </td>
         <td>
@@ -34,11 +49,14 @@
       </tr>
     </table>
 
-    <table id="bulkFormTable" class="dataTable" style="border: 1px solid black;">
+    <table id="bulkFormTable" class="dataTable" border="1">
       <thead>
         <hr id="bulkFormTableHead">
-          <th style="border-right:1px dashed black;">Action</th>
+          <th>Action</th>
           <th>License</th>
+          <th>License Text</th>
+          <th>Acknowledgement</th>
+          <th>Comment</th>
           <th></th>
         </hr>
       </thead>
@@ -48,7 +66,7 @@
 
     <br/>
     {{ 'Reference text'| trans }}:<br/>
-    <textarea name="bulkRefText" id="bulkRefText" type="text" cols="80" rows="12"></textarea><br>
+    <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" style="width:100%"></textarea><br>
     <select name="bulkScope" id="bulkScope">
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
       <option value="f">{{ 'scan only current Folder'| trans }}</option>

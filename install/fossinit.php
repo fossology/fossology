@@ -95,6 +95,8 @@ foreach($Options as $optKey => $optVal)
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
+$SysConf["DBCONF"]["dbname"] = $DatabaseName;
+$GLOBALS["SysConf"] = array_merge($GLOBALS["SysConf"], $SysConf);
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
 $gInfo = posix_getgrnam($projectGroup);
 posix_setgid($gInfo['gid']);
@@ -151,7 +153,7 @@ $migrateColumns = array('clearing_decision'=>array('reportinfo','clearing_pk','t
         'license_ref_bulk'=>array('rf_fk','removing'));
 if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
 {
-  $dbManager->queryOnce('begin; 
+  $dbManager->queryOnce('begin;
     CREATE TABLE uploadtree_b AS (SELECT * FROM uploadtree_a);
     DROP TABLE uploadtree_a;
     CREATE TABLE uploadtree_a () INHERITS (uploadtree);
@@ -160,6 +162,15 @@ if($isUpdating && !empty($sysconfig) && $sysconfig['Release'] == '2.6.3.1')
     DROP TABLE uploadtree_b;
     COMMIT;',__FILE__.'.rebuild.uploadtree_a');
 }
+
+if($dbManager->existsTable("author"))
+{
+  require_once("$LIBEXECDIR/resequence_author_table.php"); // If table exists, clean up for Schema
+}
+
+// Migration script to clear tables for new constraints
+require_once("$LIBEXECDIR/dbmigrate_3.3-3.4.php");
+Migrate_33_34($dbManager, $Verbose);
 
 $FailMsg = $libschema->applySchema($SchemaFilePath, $Verbose, $DatabaseName, $migrateColumns);
 if ($FailMsg)
@@ -191,7 +202,7 @@ else
 }
 
 /* initialize the license_ref table */
-if ($UpdateLiceneseRef) 
+if ($UpdateLiceneseRef)
 {
   $row = $dbManager->getSingleRow("SELECT count(*) FROM license_ref",array(),'license_ref.count');
   if ($row['count'] >  0) {
@@ -325,7 +336,7 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0
     WHERE rf1.rf_shortname='3DFX'
       AND rf2.rf_shortname='Glide'
     LIMIT 1", array(), 'old.3dfx.rf_pk');
-  if (count($row))
+  if (!empty($row))
   {
     $id_3dfx = intval($row['id_3dfx']);
     $id_glide = intval($row['id_glide']);
@@ -335,6 +346,18 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0
   $dbManager->commit();
 
   $sysconfig['Release'] = "3.0.2";
+}
+
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == '3.0.2'))
+{
+  require_once("$LIBEXECDIR/dbmigrate_multiple_copyright_decisions.php");
+
+  $sysconfig['Release'] = "3.1.0";
+}
+
+// fix release-version datamodel-version missmatch
+if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == "3.1.0")) {
+  $sysconfig['Release'] = "3.3.0";
 }
 
 $dbManager->begin();
@@ -378,20 +401,20 @@ function initLicenseRefTable($Verbose)
     print "FATAL: Unable to access '$LIBEXECDIR'.\n";
     return (1);
   }
-  
+
   $dbManager->queryOnce("BEGIN");
   $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
   /* create a new temp table structure only - license_ref_2 */
   $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
 
-  /** import licenseref.sql */  
+  /** import licenseref.sql */
   $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
   $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
   $dbManager->queryOnce($sqlstmts);
-  
+
   $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
-  
+
   $dbManager->prepare(__METHOD__.'.licenseRefByShortname','SELECT * from license_ref where rf_shortname=$1');
   /** traverse all records in user's license_ref table, update or insert */
   while ($row = pg_fetch_assoc($result_new))
@@ -409,6 +432,7 @@ function initLicenseRefTable($Verbose)
     $marydone = $row['marydone'];
     $rf_text_updatable = $row['rf_text_updatable'];
     $rf_detector_type = $row['rf_detector_type'];
+    $rf_flag = $row['rf_flag'];
 
     if ($count) // update when it is existing
     {
@@ -422,9 +446,14 @@ function initLicenseRefTable($Verbose)
       $marydone_check = $row_check['marydone'];
       $rf_text_updatable_check = $row_check['rf_text_updatable'];
       $rf_detector_type_check = $row_check['rf_detector_type'];
+      $rf_flag_check = $row_check['rf_flag'];
 
       $sql = "UPDATE license_ref set ";
-      if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text',";
+      if($rf_flag_check == 1 ||  $rf_flag == 1) {
+        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
+      } else {
+        $sql .= " rf_text='$rf_text_check',";
+      }
       if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
       if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
       if ($rf_notes_check != $rf_notes && !empty($rf_notes))  $sql .= " rf_notes ='$rf_notes',";
@@ -434,14 +463,11 @@ function initLicenseRefTable($Verbose)
       if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type))  $sql .= " rf_detector_type = '$rf_detector_type',";
       $sql = substr_replace($sql ,"",-1);
 
-      if ($sql != "UPDATE license_ref set") // check if have something to update
-      {
+      if ($sql != "UPDATE license_ref set") { // check if have something to update
         $sql .= " where rf_shortname = '$escaped_name'";
         $dbManager->queryOnce($sql);
       }
-    }
-    else  // insert when it is new
-    {
+    } else {  // insert when it is new
       pg_free_result($result_check);
       $sql = "INSERT INTO license_ref (rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, rf_text_updatable, rf_detector_type, marydone)"
               . "VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$rf_active', '$rf_text_updatable', '$rf_detector_type', '$marydone');";

@@ -1,6 +1,6 @@
 /***************************************************************
  Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014, Siemens AG
+ Copyright (C) 2014, 2018 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,10 +17,10 @@
 
  ***************************************************************/
 /**
- * \file nomos.c
+ * \file
  * \brief Main for the nomos agent
  *
- * Nomos detects licenses and copyrights in a file.  Depending on how it is
+ * Nomos detects licenses and copyrights in a file. Depending on how it is
  * invoked, it either stores it's findings in the FOSSology data base or
  * reports them to standard out.
  *
@@ -38,7 +38,7 @@ struct globals gl;
 struct curScan cur;
 
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
-int Verbose = 0;
+int Verbose = 0; /**< Verbosity level */
 
 #define FUNCTION
 
@@ -52,6 +52,17 @@ char BuildVersion[] = "nomos build version: NULL.\n";
 /* nomos agent starting up in scheduler mode... */
 /* \ref http://www.fossology.org/projects/fossology/wiki/Nomos_Test_Cases*/
 
+/**
+ * \brief Make entry in ars table for audit
+ *
+ * At the call, first checks if there are any entries in the ars table for the
+ * given agent and upload. If so, skip it. Otherwise, collect all files under
+ * the upload and processes them. Nomos sends a heart beat at every file scan
+ * completion.
+ *
+ * At the end, make an entry in the ars using fo_WriteARS().
+ * \param cacheroot Root for hash table
+ */
 void arsNomos(cacheroot_t* cacheroot){
   int i;
   int upload_pk = 0;
@@ -141,9 +152,10 @@ void arsNomos(cacheroot_t* cacheroot){
 /**
  * \brief list all files and store file paths from the specified directory
  *
- * \pamram dir_name - directory
- * \param process_count - process count, write file paths into temp files on average process_count
- * \param FILE **pFile - file descriptor array
+ * \param dir_name directory
+ * \param process_count process count, write file paths into temp files on average process_count
+ * \param distribute_count  Track number of files
+ * \param pFile file descriptor array
  */
 void list_dir (const char * dir_name, int process_count, int *distribute_count, FILE **pFile)
 {
@@ -161,23 +173,23 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   int file_number = 0;
   while ((dirent_handler = readdir(dir_handler)) != NULL)
   {
-    /* get the file path, form the file path /dir_name/file_name, 
+    /* get the file path, form the file path /dir_name/file_name,
        e.g. dir_name is '/tmp' file_name is 'test_file_1.txt', form one path '/tmp/test_file_1.txt' */
-    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name); 
+    sprintf( filename_buf , "%s/%s",dir_name, dirent_handler->d_name);
 
-    if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return 
+    if (stat(filename_buf, &stat_buf) == -1) // if can access the current file, return
     {
       LOG_FATAL("Unable to stat file: %s, error message: %s\n", filename_buf, strerror(errno)) ;
       closedir(dir_handler);
       return;
     }
 
-    /** 1) do not travel '..', '.' directory 
-        2) when the file type is directory, travel it 
+    /*  1) do not travel '..', '.' directory
+        2) when the file type is directory, travel it
         3) when the file type is reguler file, write it into temp files on average (value from -n) */
     if (strcmp (dirent_handler->d_name, "..") != 0 && strcmp (dirent_handler->d_name, ".") != 0)
     {
-      /** the file type is a directory (exclude '..' and '.') */
+      /* the file type is a directory (exclude '..' and '.') */
       if ((stat_buf.st_mode & S_IFMT)  == S_IFDIR)
       {
         list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
@@ -197,11 +209,11 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
   closedir(dir_handler);
 }
 
-/** 
+/**
  * \brief read line by line, then call processFile to grab license line by line
- * 
- * \param file_number - while temp path file do you want to read and process
- * \param FILE **pFile - file descriptor array
+ *
+ * \param file_number while temp path file do you want to read and process
+ * \param pFile       file descriptor array
  */
 void read_file_grab_license(int file_number, FILE **pFile)
 {
@@ -230,8 +242,8 @@ void read_file_grab_license(int file_number, FILE **pFile)
 /**
  * \brief the recursive create process and process grabbing licenses
  *
- * \param int proc_num - how many child processes(proc_num - 1) will be created
- * \param FILE **pFile - temp path file pointers
+ * \param proc_num how many child processes(proc_num - 1) will be created
+ * \param pFile temp path file pointers
  */
 void myFork(int proc_num, FILE **pFile) {
   pid_t pid;
@@ -258,7 +270,10 @@ void myFork(int proc_num, FILE **pFile) {
   }
 }
 
-int main(int argc, char **argv) 
+/**
+ * Main entry point for nomos
+ */
+int main(int argc, char **argv)
 {
   int i;
   int c;
@@ -408,7 +423,7 @@ int main(int argc, char **argv)
     pid_t mainPid = 0; // main process id
     cur.cliMode = 1;
 
-    /** when scanning_directory is real direcotry, scan license in parallel */
+    /* when scanning_directory is real direcotry, scan license in parallel */
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
 
@@ -418,11 +433,11 @@ int main(int argc, char **argv)
       int file_descriptor = 0;
       for(i = 0; i < process_count; i++)
       {
-        /** create temp file */
+        /* create temp file */
         char file_template[] = "/tmp/foss-XXXXXX"; // 'XXXXXX' will be replaced after mkstemp
         file_descriptor = mkstemp(file_template);
 
-        /** get the temp path file distriptors */
+        /* get the temp path file distriptors */
         pFile[i] = fdopen(file_descriptor, "w");  // open the files to write later
         if (!pFile[i])
         {
@@ -431,12 +446,12 @@ int main(int argc, char **argv)
         strcpy(pTempFileName[i], file_template); // store temp file names
       }
 
-      /** walk through the specified directory to get all the file(file path) and
+      /* walk through the specified directory to get all the file(file path) and
           store into mutiple files - /tmp/foss-XXXXXX */
       int distribute_count = 0; // record how many files are found in one directory
       list_dir(scanning_directory, process_count, &distribute_count, pFile); // list and store files into /tmp/foss-XXXXXX in one directory
 
-      /** after the walking through and writing job is done, close all the temp path file distriptors.
+      /* after the walking through and writing job is done, close all the temp path file distriptors.
           then open the temp path files to read */
       for(i = 0; i < process_count; i++)
       {
@@ -444,20 +459,20 @@ int main(int argc, char **argv)
         pFile[i] = fopen(pTempFileName[i], "r"); // open the temp files to read
       }
 
-      /** create process_count - 1 child processes(please do not forget we always have the main process) */
+      /* create process_count - 1 child processes(please do not forget we always have the main process) */
       mainPid = getpid(); // get main process id
       myFork(process_count - 1, pFile); // spawn process_count - 1 chile processes and grab licenses through process_count processes
       int status = 0;
       pid_t wpid = 0;
       if (mainPid == getpid())
       {
-        /** wait all processes done. */
+        /* wait all processes done. */
         while(1){
           wpid = wait(&status);
           if (-1 == wpid) break;
         }
 
-        /** close the opening files, then delete the temp path files */
+        /* close the opening files, then delete the temp path files */
         for(i = 0; i < process_count; i++)
         {
           if (pFile[i])
@@ -467,13 +482,13 @@ int main(int argc, char **argv)
           }
         }
 
-        /** free memeory */
+        /* free memeory */
         free(pFile);
         free(pTempFileName);
       }
     }
     else {
-      if (0 != process_count) 
+      if (0 != process_count)
       {
         printf("Warning: -n {nprocs} ONLY works with -d {directory}.\n");
       }

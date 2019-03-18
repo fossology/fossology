@@ -1,7 +1,7 @@
 # FOSSology
 
-[![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.png)](https://travis-ci.org/fossology/fossology/)
-[![Stories in Ready](https://badge.waffle.io/fossology/fossology.svg?label=ready&title=Ready)](http://waffle.io/fossology/fossology)
+[![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.svg?branch=master)](https://travis-ci.org/fossology/fossology)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2395/badge)](https://bestpractices.coreinfrastructure.org/projects/2395)
 [![Coverage Status](https://coveralls.io/repos/github/fossology/fossology/badge.svg?branch=master)](https://coveralls.io/github/fossology/fossology?branch=master)
 
 ## About
@@ -15,7 +15,7 @@ http://fossology.org/
 
 ## Requirements
 
-The PHP versions 5.5.9 to 5.6.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.4 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
+The PHP versions 5.6.x and 7.0.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.6 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
 ## Installation
 
@@ -39,10 +39,8 @@ docker run -p 8081:80 fossology/fossology
 
 The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy passwd fossy.
 
-Execution with external database container can be done using Docker Compose.
-The Docker Compose file is located under the `/install` folder can can be run using following command:
+Execution with external database container can be done using Docker Compose, via the following command:
 ``` sh
-cd install
 docker-compose up
 ```
 
@@ -53,6 +51,27 @@ The Docker image allows configuration of it's database connection over a set of 
 - **FOSSOLOGY_DB_NAME:** Name of the PostgreSQL database. Defaults to `fossology`.
 - **FOSSOLOGY_DB_USER:** User to be used for PostgreSQL connection. Defaults to `fossy`.
 - **FOSSOLOGY_DB_PASSWORD:** Password to be used for PostgreSQL connection. Defaults to `fossy`.
+
+## Vagrant
+
+FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
+
+**Pre-requisites:**  Vagrant >= 2.x and Virtualbox >= 5.2.x
+
+**Steps:**
+
+```    
+git clone https://github.com/fossology/fossology
+cd fossology/
+vagrant up
+```
+
+The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/) and user can login the credentials using 
+
+```
+user: fossy
+pass: fossy
+```
 
 ## Documentation
 
@@ -125,11 +144,3 @@ the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.
 
 Please see the files COPYING and COPYING.LGPL included with this
 software for the full text of these licenses.
-
-## Screenshots
-
-![Browsing](examples/Browseb.jpg)
-
-![LicenseBrowser](examples/LicenseBrowserb.jpg)
-
-![Concluding a license](examples/Concludeb.jpg)

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2018, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -19,9 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\LicenseRef;
-use Fossology\Lib\Util\Object;
 
-class ClearingLicense extends Object
+class ClearingLicense
 {
 
   private $licenseRef;
@@ -29,6 +28,8 @@ class ClearingLicense extends Object
   private $removed;
   /** @var string */
   private $reportInfo;
+  /** @var string */
+  private $acknowledgement;
   /** @var string */
   private $comment;
   /** @var int */
@@ -38,14 +39,16 @@ class ClearingLicense extends Object
    * @param LicenseRef $licenseRef
    * @param boolean $removed
    * @param string $reportinfo
+   * @param string $acknowledgement
    * @param string $comment
    */
-  public function __construct(LicenseRef $licenseRef, $removed, $type, $reportInfo = "", $comment = "")
+  public function __construct(LicenseRef $licenseRef, $removed, $type, $reportInfo = "", $comment = "", $acknowledgement = "")
   {
     $this->licenseRef = $licenseRef;
     $this->removed = $removed;
     $this->type = $type;
     $this->reportInfo = $reportInfo;
+    $this->acknowledgement = $acknowledgement;
     $this->comment = $comment;
   }
 
@@ -54,7 +57,7 @@ class ClearingLicense extends Object
    */
   public function copyNegated()
   {
-    return new ClearingLicense($this->licenseRef, !($this->removed), $this->type, $this->reportInfo, $this->comment);
+    return new ClearingLicense($this->licenseRef, !($this->removed), $this->type, $this->reportInfo, $this->comment, $this->acknowledgement);
   }
 
   /**
@@ -121,6 +124,14 @@ class ClearingLicense extends Object
     return $this->reportInfo;
   }
 
+  /**
+   * @return string
+   */
+  public function getAcknowledgement()
+  {
+    return $this->acknowledgement;
+  }
+
   public function __toString()
   {
     $eventTypes = new ClearingEventTypes();
@@ -130,6 +141,7 @@ class ClearingLicense extends Object
        .",type='".($eventTypes->getTypeName($this->type))."'(".$this->type.")"
        .",comment='".$this->comment."'"
        .",reportinfo='".$this->reportInfo."'"
+       .",acknowledgement='".$this->acknowledgement."'"
       .")";
 
   }

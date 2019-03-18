@@ -18,6 +18,10 @@
 
 define("TITLE_debug_flush_cache", _("Flush Cache"));
 
+/**
+ * @class debug_flush_cache
+ * @brief Plugin to flush all cached pages
+ */
 class debug_flush_cache extends FO_Plugin
 {
   function __construct()
@@ -30,7 +34,10 @@ class debug_flush_cache extends FO_Plugin
   }
 
   /**
-   * \brief Generate output.
+   * @brief Purge all cached pages
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
+   * @see ReportCachePurgeAll()
    */
   public function Output()
   {

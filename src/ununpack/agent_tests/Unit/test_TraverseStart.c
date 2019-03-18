@@ -15,7 +15,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************/
 #include "run_tests.h"
-
+/**
+ * \file
+ * \brief Unit test cases for TraverseStart()
+ */
 static char *Label = "";
 
 /**
@@ -43,23 +46,32 @@ int TraverseStartClean()
   return 0;
 }
 
+/**
+ * \brief Test TraverseStart() for normal file
+ * \test
+ * -# Pass a normal file location to TraverseStart()
+ * -# Check if files are unpacked
+ */
 void testTraverseStartNormal()
 {
-  Filename = "../test-data/testdata4unpack/threezip.zip";
+  Filename = "../testdata/testthree.zip";
   deleteTmpFiles("./test-result/");
-  exists = file_dir_exists("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  exists = file_dir_exists("./test-result/testthree.zip.dir/testtwo.zip.dir/test.zip.dir/ununpack");
   FO_ASSERT_EQUAL(exists, 0); // ./test-result/ is not existing
   TraverseStart(Filename, Label, NewDir, Recurse);
-  exists = file_dir_exists("./test-result/threezip.zip.dir/twozip.zip.dir/Desktop.zip.dir/record.txt");
+  exists = file_dir_exists("./test-result/testthree.zip.dir/testtwo.zip.dir/test.zip.dir/ununpack");
   FO_ASSERT_EQUAL(exists, 1); // ./test-result/ is existing
 }
 
 /**
- * @brief test traversestart dirctory
+ * @brief test TraverseStart() for directory
+ * \test
+ * -# Pass a directory's location to TraverseStart()
+ * -# Check if files are unpacked
  */
 void testTraverseStartDir()
 {
-  Filename = "../test-data/testdata4unpack/testdir/";
+  Filename = "../testdata/";
   deleteTmpFiles("./test-result/");
   exists = file_dir_exists("./test-result/test.jar.dir/ununpack");
   FO_ASSERT_EQUAL(exists, 0); // ./test-result/ is not existing

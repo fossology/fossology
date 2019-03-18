@@ -1,19 +1,23 @@
 /*
- * Copyright (C) 2014, Siemens AG
+ * Copyright (C) 2014-2018, Siemens AG
  * Author: Daniele Fognini, Johannes Najjar
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2
  * as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  * See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+/**
+ * \file copyrightUtils.cc
+ * \brief Utilities used by copyright and ecc agent
  */
 
 #include "copyrightUtils.hpp"
@@ -24,7 +28,12 @@
 
 using namespace std;
 
-void queryAgentId(int& agent, PGconn* dbConn)
+/**
+ * \brief Get agent id, exit if agent id is incorrect
+ * \param[in]  dbConn Database connection object
+ * \return ID of the agent
+ */
+int queryAgentId(PGconn* dbConn)
 {
   char* COMMIT_HASH = fo_sysconfig(AGENT_NAME, "COMMIT_HASH");
   char* VERSION = fo_sysconfig(AGENT_NAME, "VERSION");
@@ -40,7 +49,7 @@ void queryAgentId(int& agent, PGconn* dbConn)
 
   if (agentId > 0)
   {
-    agent = agentId;
+    return agentId;
   }
   else
   {
@@ -48,20 +57,37 @@ void queryAgentId(int& agent, PGconn* dbConn)
   }
 }
 
-int writeARS(CopyrightState& state, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
+/**
+ * \brief Call C function fo_WriteARS() and translate the arguments
+ * \see fo_WriteARS()
+ */
+int writeARS(int agentId, int arsId, int uploadId, int success, const fo::DbManager& dbManager)
 {
-  return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, state.getAgentId(), AGENT_ARS, NULL, success);
+  return fo_WriteARS(dbManager.getConnection(), arsId, uploadId, agentId, AGENT_ARS, NULL, success);
 }
 
+/**
+ * \brief Disconnect with scheduler returning an error code and exit
+ * \param exitval Error code
+ */
 void bail(int exitval)
 {
   fo_scheduler_disconnect(exitval);
   exit(exitval);
 }
 
+/**
+ * \brief Parse the options sent by CLI to CliOptions object
+ * \param[in]  argc
+ * \param[in]  argv
+ * \param[out] dest      The parsed CliOptions object
+ * \param[out] fileNames List of files to be scanned
+ * \return True if success, false otherwise
+ * \todo Change and add help based on IDENTITY
+ */
 bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames)
 {
-  unsigned type;
+  unsigned type = 0;
 
   boost::program_options::options_description desc(IDENTITY ": recognized options");
   desc.add_options()
@@ -85,11 +111,24 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
           boost::program_options::value< vector<string> >(),
           "files to scan"
         )
-#ifndef DISABLE_JSON
         (
           "json,J", "output JSON"
         )
-#endif
+        (
+          "config,c", boost::program_options::value<string>(), "path to the sysconfigdir"
+        )
+        (
+          "scheduler_start", "specifies, that the command was called by the scheduler"
+        )
+        (
+          "userID", boost::program_options::value<int>(), "the id of the user that created the job (only in combination with --scheduler_start)"
+        )
+        (
+          "groupID", boost::program_options::value<int>(), "the id of the group of the user that created the job (only in combination with --scheduler_start)"
+        )
+        (
+          "jobId", boost::program_options::value<int>(), "the id of the job (only in combination with --scheduler_start)"
+        )
     ;
 
   boost::program_options::positional_options_description p;
@@ -107,7 +146,7 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
     if ((vm.count("help") > 0) || (type > ALL_TYPES))
     {
       cout << desc << endl;
-      return false;
+      exit(0);
     }
 
     if (vm.count("files"))
@@ -152,6 +191,10 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
   }
 }
 
+/**
+ * \brief Add default scanners to the agent state
+ * \param state State to which scanners are being added
+ */
 static void addDefaultScanners(CopyrightState& state)
 {
   unsigned types = state.getCliOptions().getOptType();
@@ -174,8 +217,18 @@ static void addDefaultScanners(CopyrightState& state)
   if (types & 1<<0)
     state.addScanner(new regexScanner("ecc", "ecc"));
 #endif
+#ifdef IDENTITY_KW
+  if (types & 1<<0)
+    state.addScanner(new regexScanner("keyword", "keyword"));
+#endif
 }
 
+/**
+ * \brief Make a boost regex scanner object based on regex desc and type
+ * \param regexDesc   Regex format for scanner
+ * \param defaultType Type of scanner
+ * \return scanner object or NULL in case of error
+ */
 scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defaultType) {
   #define RGX_FMT_SEPARATOR "@@"
   auto fmtRegex = rx::regex(
@@ -200,18 +253,30 @@ scanner* makeRegexScanner(const std::string& regexDesc, const std::string& defau
   return 0; // nullptr
 }
 
-CopyrightState getState(fo::DbManager dbManager, CliOptions&& cliOptions)
+/**
+ * \brief Create a new state for the current agent based on CliOptions.
+ *
+ * Called during instantiation of agent.
+ * \param cliOptions CliOptions passed to the agent
+ * \return New CopyrightState object for the agent
+ */
+CopyrightState getState(CliOptions&& cliOptions)
 {
-  int agentID;
-  queryAgentId(agentID, dbManager.getConnection());
-
-  CopyrightState state(agentID, std::move(cliOptions));
-
+  CopyrightState state(std::move(cliOptions));
   addDefaultScanners(state);
 
   return state;
 }
 
+/**
+ * \brief Save findings to the database if agent was called by scheduler
+ * \param s                        Statement found
+ * \param matches                  List of regex matches for highlight
+ * \param pFileId                  Id of pfile on which the statement was found
+ * \param agentId                  Id of agent who discovered the statements
+ * \param copyrightDatabaseHandler Database handler object
+ * \return True of successful insertion, false otherwise
+ */
 bool saveToDatabase(const string& s, const list<match>& matches, unsigned long pFileId, int agentId, const CopyrightDatabaseHandler& copyrightDatabaseHandler)
 {
   if (!copyrightDatabaseHandler.begin())
@@ -242,15 +307,18 @@ bool saveToDatabase(const string& s, const list<match>& matches, unsigned long p
     }
   }
 
-  if (count == 0)
-  {
-    copyrightDatabaseHandler.insertNoResultInDatabase(agentId, pFileId);
-  }
-
   return copyrightDatabaseHandler.commit();
 }
 
-void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, CopyrightDatabaseHandler& databaseHandler)
+/**
+ * \brief Scan a given file with all available scanners and save findings to database
+ * \param sContent        Content of file
+ * \param pFileId         id of the pfile sent for scan
+ * \param state           State of the agent
+ * \param agentId         Agent id
+ * \param databaseHandler Database handler used by agent
+ */
+void matchFileWithLicenses(const string& sContent, unsigned long pFileId, CopyrightState const& state, int agentId, CopyrightDatabaseHandler& databaseHandler)
 {
   list<match> l;
   const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
@@ -258,10 +326,23 @@ void matchFileWithLicenses(const string& sContent, unsigned long pFileId, Copyri
   {
     (*sc)->ScanString(sContent, l);
   }
-  saveToDatabase(sContent, l, pFileId, state.getAgentId(), databaseHandler);
+  saveToDatabase(sContent, l, pFileId, agentId, databaseHandler);
 }
 
-void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
+/**
+ * \brief Get the file contents, scan for statements and save findings to database
+ *
+ * Reads the file contents of the pFileId and send it for scanning to matchFileWithLicenses().
+ *
+ * If the pfile is not found for pFileId, bails with error code 8.
+ *
+ * If the pfile is not found in repository, bails with error code 7.
+ * \param state           State of the agent
+ * \param agentId         Agent id
+ * \param pFileId         pFile to be scanned
+ * \param databaseHandler Database handler used by agent
+ */
+void matchPFileWithLicenses(CopyrightState const& state, int agentId, unsigned long pFileId, CopyrightDatabaseHandler& databaseHandler)
 {
   char* pFile = databaseHandler.getPFileNameForFileId(pFileId);
 
@@ -281,7 +362,7 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
     string s;
     ReadFileToString(fileName, s);
 
-    matchFileWithLicenses(s, pFileId, state, databaseHandler);
+    matchFileWithLicenses(s, pFileId, state, agentId, databaseHandler);
 
     free(fileName);
     free(pFile);
@@ -293,13 +374,24 @@ void matchPFileWithLicenses(CopyrightState const& state, unsigned long pFileId, 
   }
 }
 
-bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabaseHandler& databaseHandler)
+/**
+ * \brief Process a given upload id, scan from statements and add to database
+ *
+ * The agent runs in parallel with the help of omp.
+ * A new thread is created for every pfile.
+ * \param state           State of the agent
+ * \param agentId         Agent id
+ * \param uploadId        Upload id to be processed
+ * \param databaseHandler Database handler object
+ * \return True when upload is processed
+ */
+bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& databaseHandler)
 {
-  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(state.getAgentId(), uploadId);
+  vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(agentId, uploadId);
 
 #pragma omp parallel
   {
-    CopyrightDatabaseHandler threadLocalDatabaseHandler(std::move(databaseHandler.spawn()));
+    CopyrightDatabaseHandler threadLocalDatabaseHandler(databaseHandler.spawn());
 
     size_t pFileCount = fileIds.size();
 #pragma omp for
@@ -312,7 +404,7 @@ bool processUploadId(const CopyrightState& state, int uploadId, CopyrightDatabas
         continue;
       }
 
-      matchPFileWithLicenses(state, pFileId, threadLocalDatabaseHandler);
+      matchPFileWithLicenses(state, agentId, pFileId, threadLocalDatabaseHandler);
 
       fo_scheduler_heart(1);
     }

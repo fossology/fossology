@@ -31,7 +31,7 @@
  * \param $DryRun Do not insert the ars records into the db.  Just print the insert statements.
  *        The ars table will still be created if it doesn't exist.
  *
- * \return 0 on success, 1 on failure
+ * \return int 0 on success, 1 on failure
  **/
 function Migrate_14_20($DryRun)
 {
@@ -93,7 +93,7 @@ function Migrate_14_20($DryRun)
 /**
  * \brief Create ars table
  *
- * \param $ARStablename  ARS table name
+ * \param string $ARStablename  ARS table name
  *
  * \return void
  **/

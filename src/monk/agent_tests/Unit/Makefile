@@ -15,7 +15,7 @@ LOCALAGENTDIR = ../../agent
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTDBDIR = $(TOP)/src/testing/db/c
 TEST_FLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
-TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
+TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR) -DCU_VERSION_P=$(CUNIT_VERSION)
 
 LDFLAGS_LOCAL = $(FO_LDFLAGS) $(TEST_FLAGS) -lcunit -fopenmp -lm -Werror
 CFLAGS_LOCAL = -std=c99 -I$(LOCALAGENTDIR) $(FO_CFLAGS) $(TEST_CFLAGS)
@@ -39,7 +39,8 @@ OBJECTS = test_string_operations.o \
           test_match.o \
           test_diff.o \
           test_database.o \
-          test_encoding.o
+          test_encoding.o \
+          test_serialize.o
 
 all: $(EXE)
 

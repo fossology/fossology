@@ -16,7 +16,7 @@
             <tr>
               <th></th>
               <th>
-                <select id="scanFilter">
+                <select id="scanFilter" class="ui-render-select2">
                   <option value="0">-- {{'filter for scan results'|trans}} --</option>
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # FOSSology postinstall script
 # Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 # Copyright (C) 2015 Siemens AG
@@ -8,119 +8,125 @@
 # idempotent, meaning that running it repeatedly will still do the
 # right thing, regardless of the success of previous runs.
 
+show_help() \{
+  cat <<EOF
+Usage: fo-postinstall [options]
+  -a or --agent           : agent specific actions
+  -d or --database        : Create the FOSSology database
+  -w or --web-only        : web interface specific actions
+  -s or --scheduler-only  : scheduler specific actions
+  -e or --everything      : all actions, default
+  -o or --overwrite       : overwrite config files with new versions
+  -l or --licenseref      : update the license_ref table with fossology supplied licenses
+  -c or --common          : common actions
+  -h or --help            : this help text
+ Special options
+  --no-running-database   : omit all database operations
+EOF
+\}
+
+AGENT=''
+DATABASE=''
+WEBONLY=''
+SCHEDULERONLY=''
+EVERYTHING=''
+OVERWRITE=''
+LICENSEREF=''
+COMMON=''
+RUNNINGDATABASE=true
+
 ## Options parsing and setup
 # parse options
-# set -x
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,help -n 'fo-postinstall' -- "$@")
 
-OPTS=`getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,help -n 'fo-postinstall' -- "$@"`
-
-if [ $? != 0 ]; then
-   echo "ERROR: Bad option specified."
+if [[ $? -ne 0 ]]; then
    OPTS="--help"
 fi
 
 eval set -- "$OPTS"
 
 # if no options or just -o then do everything
-if [ "$OPTS" = " --" -o "$OPTS" = " -o --" ]; then
-   EVERYTHING=1
+if [[ $OPTS == ' --' || $OPTS == ' -o --' ]]; then
+   EVERYTHING=true
 fi
 
 while true; do
    case "$1" in
-      -a|--agent) AGENT=1; shift;;
-      -d|--database) DATABASE=1; shift;;
-      -w|--web-only) WEBONLY=1; shift;;
-      -s|--scheduler-only) SCHEDULERONLY=1; shift;;
-      -e|--everything) EVERYTHING=1; shift;;
-      -o|--overwrite) OVERWRITE=1; shift;;
-      -l|--licenseref) LICENSEREF=1; shift;;
-      -c|--common) COMMON=1; shift;;
-      -h|--help)
-         echo "Usage: fo-postinstall [options]";
-         echo "  -a or --agent      : agent specific actions"
-         echo "  -d or --database   : Create the FOSSology database"
-         echo "  -w or --web-only   : web interface specific actions"
-         echo "  -s or --scheduler-only  : scheduler specific actions"
-         echo "  -e or --everything : all actions, default"
-         echo "  -o or --overwrite  : overwrite config files with new versions"
-         echo "  -l or --licenseref : update the license_ref table with fossology supplied licenses"
-         echo "  -c or --common     : common actions"
-         echo "  -h or --help       : this help text"
-         echo " Special options"
-         echo "  --web-only         : web, but exclude normal agent actions"
-         echo "  --scheduler-only   : scheduler, but exclude normal agent actions"
-
-         exit;;
-      --) shift; break;;
-      *) echo "Error: option $1 not recognised"; exit 1;;
+      -a|--agent)            AGENT=true; shift;;
+      -d|--database)         DATABASE=true; shift;;
+      -w|--web-only)         WEBONLY=true; shift;;
+      -s|--scheduler-only)   SCHEDULERONLY=true; shift;;
+      -e|--everything)       EVERYTHING=true; shift;;
+      -o|--overwrite)        OVERWRITE=true; shift;;
+      -l|--licenseref)       LICENSEREF=true; shift;;
+      -c|--common)           COMMON=true; shift;;
+      --no-running-database) RUNNINGDATABASE=''; shift;;
+      -h|--help)             show_help; exit;;
+      --)                    shift; break;;
+      *)                     echo "Error: option $1 not recognised"; exit 1;;
    esac
 done
 
-# the scheduler and web machines needs the agent stuff done too
-if [ $SCHEDULER ]; then
-   SCHEDULERONLY=1
-fi
+set -o errexit -o nounset -o pipefail
 
-if [ $EVERYTHING ]; then
+if [[ $EVERYTHING ]]; then
    echo "*** Running postinstall for everything ***"
-   COMMON=1
-   SCHEDULERONLY=1
-   AGENT=1
-   DATABASE=1
-   WEBONLY=1
-   LICENSEREF=1
+   COMMON=true
+   SCHEDULERONLY=true
+   AGENT=true
+   DATABASE=true
+   WEBONLY=true
+   LICENSEREF=true
 fi
 
-onlyAllowedAsRoot() \{
-   # This must run as root.
-   if [ `id -u` != "0" ] ; then
-      echo "ERROR: fo-postinstall must run as root."
-      echo "Aborting."
-      exit 1
-   fi
+must_run_as_root() \{
+  # This must run as root.
+  if [[ $(id -u) -ne 0 ]] ; then
+    echo >&2 "ERROR: fo-postinstall must run as root."
+    echo >&2 "Aborting."
+    exit 1
+  fi
 \}
 
-
-readConfigVal() \{
+read_config_value() \{
    local line="$1"
    local key="$2"
    local out="$3"
-   [[ "$out" =~ ^[a-zA-Z]+$ ]] || \{ echo "FATAL: bad parameters to readConfigVal: $@"; exit 1; \}
+   [[ "$out" =~ ^[a-zA-Z]+$ ]] || \{ echo >&2 "FATAL: bad parameters to read_config_value: $@"; exit 1; \}
    if [[ $line =~ ^[[:space:]]*${key}[[:space:]]*\=[[:space:]]*([^[:space:]\']*) ]]; then
       eval "$out='$\{BASH_REMATCH[1]\}'"
    fi
 \}
 
-setValueInSection() \{
+set_value_in_section() \{
    echo "NOTE: writing $2=$3 in section $4 of $1"
    sed -e "s/\[$4\]/[$4]\n$2=$3/" -i.bak "$1"
 \}
 
-confFile="{$SYSCONFDIR}/fossology.conf"
-if [ -e "$confFile" ] ; then
+REPO=''
+PROJECTGROUP=''
+CONFIG="{$SYSCONFDIR}/fossology.conf"
+if [[ -f $CONFIG ]]; then
    while read line; do
-      readConfigVal "$line" path REPO
-      readConfigVal "$line" PROJECTGROUP PROJECTGROUP
-   done < "$confFile"
-   [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || \{ echo "ERROR: bad value for PROJECTGROUP in config"; exit 2; \}
+      read_config_value "$line" path REPO
+      read_config_value "$line" PROJECTGROUP PROJECTGROUP
+   done < "$CONFIG"
+   [[ $PROJECTGROUP =~ ^[a-z0-9]*$ ]] || \{ echo >&2 "ERROR: bad value for PROJECTGROUP in config"; exit 2; \}
 else
-   echo "ERROR: Cannot find $confFile"
+   echo >&2 "ERROR: Cannot find $CONFIG"
    exit 1
 fi
 
-if [ $COMMON ]; then
-   onlyAllowedAsRoot
+if [[ $COMMON ]]; then
+   must_run_as_root
    echo "*** Running postinstall for common actions***"
 
-   ## check path to repo
-   [[ $REPO ]] || \{
-      echo "ERROR: path is not set in $confFile"
-      exit 1
-   \}
-   ## set default PROJECTGROUP if not set
+   # check path to repo
+   [[ $REPO ]] || \{ echo >&2 "ERROR: path is not set in $CONFIG"; exit 1; \}
+
+   # set default when PROJECTGROUP is not set
    [[ $PROJECTGROUP ]] || \{
-      setValueInSection "$confFile" PROJECTGROUP {$PROJECTGROUP} 'DIRECTORIES'
+      set_value_in_section "$CONFIG" PROJECTGROUP {$PROJECTGROUP} 'DIRECTORIES'
       PROJECTGROUP="{$PROJECTGROUP}"
    \}
 
@@ -137,190 +143,152 @@ if [ $COMMON ]; then
    # check for group
    if grep -q "^$PROJECTGROUP:" /etc/group; then
       echo "NOTE: group '$PROJECTGROUP' already exists, good."
+   elif groupadd --system "$PROJECTGROUP"; then
+      echo "NOTE: group '$PROJECTGROUP' created"
    else
-      # use addgroup if it exists since it supports --system
-      if [ -f /usr/sbin/addgroup -a ! -L /usr/sbin/addgroup ]; then
-         addgroup --system $PROJECTGROUP
-      else
-         groupadd $PROJECTGROUP
-      fi
-      if [ "$?" != "0" ] ; then
-         echo "ERROR: Unable to create group '$PROJECTGROUP'"
-         exit 1
-      else
-         echo "NOTE: group '$PROJECTGROUP' created"
-      fi
+      echo >&2 "ERROR: Unable to create group '$PROJECTGROUP'"
+      exit 1
    fi
 
    # check for user
    if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
       echo "NOTE: user '{$PROJECTUSER}' already exists, good."
-      USERSHELL=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 7`
-      if [ "$USERSHELL" = "/bin/false" ]; then
-         echo "ERROR: {$PROJECTUSER} shell must be a real shell"
+      USERSHELL=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 7)
+      if [[ $USERSHELL == "/bin/false" ]]; then
+         echo >&2 "ERROR: {$PROJECTUSER} shell must be a real shell"
          exit 1
       fi
-      USERHOME=`grep "^{$PROJECTUSER}:" /etc/passwd |cut -d: -f 6`
-      if [ "$USERHOME" != "/home/{$PROJECTUSER}" ]; then
+      USERHOME=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 6)
+      if [[ $USERHOME != "/home/{$PROJECTUSER}" ]]; then
          echo "NOTE: change user '{$PROJECTUSER}' homedir from $USERHOME to /home/{$PROJECTUSER}."
-         mkdir -p /home/{$PROJECTUSER}
-         chown {$PROJECTUSER}:{$PROJECTUSER} /home/{$PROJECTUSER}
-         usermod -d /home/{$PROJECTUSER} {$PROJECTUSER}
+         mkdir --parents /home/{$PROJECTUSER}
+         chown {$PROJECTUSER}:$PROJECTGROUP /home/{$PROJECTUSER}
+         usermod --home /home/{$PROJECTUSER} {$PROJECTUSER}
       fi
+   elif useradd --comment "{$PROJECT}" --gid $PROJECTGROUP --create-home --shell /bin/bash --system {$PROJECTUSER}; then
+      echo "NOTE: user '{$PROJECTUSER}' created"
    else
-      # ensure that the full parent path of the HOME exists first
-      mkdir -p $\{REPO%/*/*\}
-      # use adduser if it exists since it supports --system, but
-      # not if it's a symlink (probably to /usr/sbin/useradd)
-      if [ -f /usr/sbin/adduser -a ! -L /usr/sbin/adduser ]; then
-         adduser --gecos "{$PROJECT}" --ingroup $PROJECTGROUP --system \
-           --shell /bin/bash {$PROJECTUSER}
-      else
-         useradd -c "{$PROJECT}" -g $PROJECTGROUP -m \
-           -s /bin/bash {$PROJECTUSER}
-      fi
-      if [ "$?" != "0" ] ; then
-         echo "ERROR: Unable to create user '{$PROJECTUSER}'"
-         exit 1
-      else
-         echo "NOTE: user '{$PROJECTUSER}' created"
-      fi
+      echo >&2 "ERROR: Unable to create user '{$PROJECTUSER}'"
+      exit 1
    fi
 
    ## check for existance/ownership/permissions of needed directories
    echo "*** Making sure needed dirs exist with right ownership/permissions ***"
-   if [ ! -d "{$PROJECTSTATEDIR}" ] ; then
-      mkdir -m 2775 -p "{$PROJECTSTATEDIR}"
-   fi
-   chown root:$PROJECTGROUP {$PROJECTSTATEDIR}
-   chmod 2775 {$PROJECTSTATEDIR}
-   if [ ! -d "{$PROJECTSTATEDIR}/agents" ] ; then
-      mkdir -m 2775 -p "{$PROJECTSTATEDIR}/agents"
-   fi
-   chown root:$PROJECTGROUP {$PROJECTSTATEDIR}/agents
-   chmod 2775 {$PROJECTSTATEDIR}/agents
 
-   if [ ! -d "{$CACHEDIR}" ] ; then
-       mkdir -p "{$CACHEDIR}"
-   else
+   if [[ -d "{$CACHEDIR}" ]]; then
        echo "*** clearing file cache ***"
-       rm -rf {$CACHEDIR}/*
+       rm --force --recursive {$CACHEDIR}/*
    fi
-   chown root:$PROJECTGROUP {$CACHEDIR}
-   chmod 2775 {$CACHEDIR}
-
-   if [ ! -d "$REPO" ] ; then
-      mkdir -p "$REPO"
-   else
-      echo "NOTE: Repository already exists at $REPO"
+   if [[ -d "$REPO" ]]; then
+       echo "NOTE: Repository already exists at $REPO"
    fi
 
-   chown {$PROJECTUSER}:$PROJECTGROUP $REPO
-   chmod 2770 $REPO
-   # make sure the parent dir has the right permissions too
-   chown {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\}
-   chmod 2770 $\{REPO%/*\}
+   mkdir --parents \
+      "{$PROJECTSTATEDIR}" \
+      "{$PROJECTSTATEDIR}/agents" \
+      "{$CACHEDIR}" \
+      "$REPO"
+
+   chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
+   chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
+
+   # make sure repo and its parent dir has the right permissions
+   if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
+     echo "NOTE: Repository group is not correct."
+     echo "Fixing..This may take long duration, depending on your repository size."
+     chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
+   fi
+   chmod 2770 $\{REPO%/*\} $REPO
 
    # make install sets Db.conf's mode to 660, but can't chgrp it because
    # the group doesn't exist until we create it above. So chgrp now
-   chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+   chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo >&2 "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
 
-   echo "NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.  We suggest that you either configure postgres to run its autovacuum and autoanalyze daemons, or maintagent -D in a cron job, or run Admin > Maintenance on a regular basis.  Admin > Dashboard will show you the last time vacuum and analyze have been run."
-
+   cat <<EOF
+NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.
+      We suggest that you either configure postgres to run its autovacuum and autoanalyze daemons, or maintagent -D in a cron job, or run Admin > Maintenance on a regular basis.
+      Admin > Dashboard will show you the last time vacuum and analyze have been run.
+EOF
 fi
 
 [[ $PROJECTGROUP ]] || \{ echo "PROJECTGROUP is not set"; exit 2; \}
 
-if [ $WEBONLY ]; then
+if [[ $WEBONLY ]]; then
    echo "*** Running postinstall for web-only actions***"
-   LICENSEREF=1
+   LICENSEREF=true
 fi
 
 ########################################################################
 
-if [ $DATABASE ]; then
+if [[ $DATABASE && $RUNNINGDATABASE ]]; then
    {$LIBEXECDIR}/dbcreate
 fi # end of DATABASE
 
-if [ $LICENSEREF ]; then
+if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
    echo "*** update the database and license_ref table ***"
    {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
 fi # end of license reference
 
 ########################################################################
 
-if [ $AGENT ]; then
-   onlyAllowedAsRoot
+if [[ $AGENT ]]; then
+   must_run_as_root
    # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
-   chown -R {$PROJECTUSER}:$PROJECTGROUP {$MODDIR}
-   #chmod u+s {$MODDIR}/scheduler/agent/fo_scheduler
-   #chmod g+s {$MODDIR}/scheduler/agent/fo_scheduler
-   chown -R {$PROJECTUSER}:$PROJECTGROUP {$LIBEXECDIR}
-   chown -R {$PROJECTUSER}:$PROJECTGROUP {$SYSCONFDIR}
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP /etc/cron.d/fossology
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP /etc/init.d/fossology
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/departition
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/cp2foss
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/fossjobs
-   #chown -f {$PROJECTUSER}:$PROJECTGROUP {$BINDIR}/schema-export
-   chown -f {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
-   chown -f {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1
-   chown -f {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/fossjobs.1
+   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1{,.gz} {$MAN1DIR}/fossjobs.1{,.gz} || echo
+fi
 
-   {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}
-   if [ $? != 0 ] ; then
+if [[ $AGENT && $RUNNINGDATABASE ]]; then
+   if ! {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}; then
      echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
      exit 1
    fi
    echo "Database connectivity is good."
-
 fi # end of AGENT
 
 ########################################################################
 
-if [ $SCHEDULERONLY ]; then
-   onlyAllowedAsRoot
+if [[ $SCHEDULERONLY ]]; then
+   must_run_as_root
    echo "*** Setting up scheduler ***"
 
    # Create the scheduler log directory.
-   if [ -f {$LOGDIR} ] ; then
+   if [[ -f {$LOGDIR} ]] ; then
      # Must be a directory and not a file
-     rm -f {$LOGDIR}
+     rm --force {$LOGDIR}
    fi
-   if [ ! -d {$LOGDIR} ] ; then
-     mkdir -p {$LOGDIR}
-   fi
-   chown -R {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
+   mkdir --parents {$LOGDIR}
+   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
    chmod 2775 {$LOGDIR}
-   find {$LOGDIR} -type f | while read i ; do chmod 660 "$i" ; done
+   find {$LOGDIR} -type f -print0 | xargs --no-run-if-empty --null chmod 660
 fi # end of SCHEDULERONLY
 
 ########################################################################
-if [ $WEBONLY ]; then
-   onlyAllowedAsRoot
-   if [ $LICENSEREF == 0 ] ; then
-     echo "*** Initializing database tables ***"
-     {$LIBEXECDIR}/fossinit.php -c {$SYSCONFDIR}
-   fi
+if [[ $WEBONLY ]]; then
+   must_run_as_root
 
    echo "*** Setting up the web interface ***"
 
    # See if web server user exists, if so add to the group.
    # check for www-data (Debian, etc)
-   grep -q "^www-data:" /etc/passwd
-   if [ $? == 0 ] ; then
+   if grep -q "^www-data:" /etc/passwd; then
      echo "NOTE: Adding user www-data to group $PROJECTGROUP"
      # this is smart enough to not add multiple times so it's ok to repeat
-     usermod -G $PROJECTGROUP -a www-data
-   fi
-   # check for apache (RHEL/CentOS, etc)
-   grep -q "^apache:" /etc/passwd
-   if [ $? == 0 ] ; then
-     echo "NOTE: Adding user apache to group $PROJECTGROUP"
-     # this is smart enough to not add multiple times so it's ok to repeat
-     usermod -G $PROJECTGROUP -a apache
+     usermod --groups $PROJECTGROUP --append www-data
    fi
 
+   # check for apache (RHEL/CentOS, etc)
+   if grep -q "^apache:" /etc/passwd; then
+     echo "NOTE: Adding user apache to group $PROJECTGROUP"
+     # this is smart enough to not add multiple times so it's ok to repeat
+     usermod --groups $PROJECTGROUP --append apache
+   fi
+
+   # apache2 reload is only necessary when it is running.
+   if /etc/init.d/apache2 status > /dev/null; then
+     /etc/init.d/apache2 reload
+   fi
 fi # end of WEBONLY
 
 ########################################################################

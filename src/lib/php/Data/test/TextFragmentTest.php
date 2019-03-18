@@ -18,8 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
-class TextFragmentTest extends \PHPUnit_Framework_TestCase
+class TextFragmentTest extends \PHPUnit\Framework\TestCase
 {
   const START_OFFSET = 10;
 
@@ -67,4 +66,3 @@ class TextFragmentTest extends \PHPUnit_Framework_TestCase
     assertThat($this->fragment->getSlice(self::START_OFFSET + 9, self::START_OFFSET + 9 + 3), is("az"));
   }
 }
- 

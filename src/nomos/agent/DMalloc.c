@@ -16,9 +16,7 @@
 
  ***************************************************************/
 /**
- * \file DMalloc.c
- *
- * \brief 
+ * \file
  * - Several global variables control actions taken by the memory check
  * routines.  These are provided also as a convenient interface to
  * run-time debuggers.
@@ -43,7 +41,7 @@
 
 
 /* GLOBALS */
-int     DMverbose = 1;
+int DMverbose = 1;          ///< Verbosity level
 char   *DMtriggeraddr = NULL;
 
 #define TRIGGER(p) if( (p) == DMtriggeraddr ) DMtrigger();
@@ -69,7 +67,8 @@ static freed(char *ptr, char *fname, int line);
 /**
  * \brief Add guard word encoding size on start of memory area and a guard byte
  * just past the end of the area.
- *
+ * \param prt Pointer to guard
+ * \param size
  * \return pointer to user's area
  */
 static char   *guardit(char *ptr, int size)
@@ -88,7 +87,12 @@ static char   *guardit(char *ptr, int size)
 
 /**
  * \brief Check the validity of allocated memory areas and report any
- * problems.  Called by DMmemcheck().
+ * problems.
+ *
+ * Called by DMmemcheck().
+ * \param ptr   Pointer to check
+ * \param fname Source file name for logging
+ * \param line  Source line number for logging
  */
 static char   *memorycheck(char *ptr, char *fname, int line)
 {
@@ -118,7 +122,9 @@ static char   *memorycheck(char *ptr, char *fname, int line)
   return(ptr);
 }
 
-
+/**
+ * \copybrief memorycheck()
+ */
 char   *DMmemcheck(char *ptr, char *fname, int line)
 {
   int    i;
@@ -135,6 +141,12 @@ char   *DMmemcheck(char *ptr, char *fname, int line)
   return(ptr);
 }
 
+/**
+ * \brief Free a pointer allocated by DMmalloc()
+ * \param ptr   Pointer to be freed
+ * \param fname Source file name
+ * \param line  Source line number
+ */
 DMfree(char *ptr, char *fname, int line)
 {
   unsigned long size;
@@ -158,7 +170,14 @@ DMfree(char *ptr, char *fname, int line)
   free(ptr);
 }
 
-
+/**
+ * \brief Allocate memory safely using malloc()
+ * \param size    Size to be allocated
+ * \param fname   Source file name
+ * \param line    Source line number
+ * \return Pointer to new memory
+ * \note Allocated pointer must be freed using DMfree()
+ */
 char   *DMmalloc(int size, char *fname, int line)
 {
   char   *ptr;
@@ -183,6 +202,16 @@ char   *DMmalloc(int size, char *fname, int line)
   return(ptr);
 }
 
+/**
+ * \brief Allocate memory safely using calloc()
+ * \param size    Size of single element
+ * \param nitems  Total number of elements
+ * \param fname   Source file name
+ * \param line    Source line number
+ * \return Pointer to new memory
+ * \note Allocated pointer must be freed using DMfree()
+ * \sa DMmalloc()
+ */
 char   *DMcalloc(int size, int nitems, char *fname, int line)
 {
   char   *ptr;
@@ -261,7 +290,16 @@ static freed(char *ptr, char *fname, int line)
   }
 }
 
-
+/**
+ * \brief Reallocate memory safely using realloc()
+ * \param ptr     The pointer to be reallocated
+ * \param size    New size
+ * \param fname   Source file name
+ * \param line    Source line number
+ * \return Pointer to new memory
+ * \sa DMmemcheck()
+ * \sa guardit()
+ */
 char   *DMrealloc(char *ptr, int size, char *fname, int line)
 {
   char   *saveptr;
@@ -309,7 +347,7 @@ DMnotfreed()
  */
 DMtrigger()
 {
-  int i;
+  int i = 0;
   i++;
 }
 

@@ -24,39 +24,18 @@ AGENTDIR = ../../agent
 
 # the list of external test data files required by this test
 # these will be found in ../testdata/
-TEST_FILES = testdb_all.tar
+TEST_FILES = testdb_all.gz
 
 all:
 	$(MAKE) -C $(AGENTDIR) $@
 
-# target to retrieve remote test data if it doesn't already exist
-# make sure your /etc/wgetrc file is configured correctly!
-testdata:
-	@echo "Retrieve test files"
-	@# for each test file specified, look for it in ../testdata
-	@# if it exists, do nothing.
-	@# if it does not exist, look in /var/www/testfiles
-	@# if not in /var/www/testfiles, wget it from fossology.org
-	mkdir -p ../testdata
-	@$(foreach test_file, $(TEST_FILES), \
-		if [ -e ../testdata/$(test_file) ]; then \
-			echo "../testdata/$(test_file) exists"; \
-		elif [ -e /var/www/testfiles/delagent/$(test_file) ]; then \
-			echo "$(test_file) found in /var/www/testfiles/delagent"; \
-			cp /var/www/testfiles/delagent/$(test_file) ../testdata/; \
-		else \
-			echo "$(test_file) does not exist. need to wget from fossology.org"; \
-			wget --directory-prefix=../testdata http://www.fossology.org/testdata/delagent/$(test_file); \
-		fi; \
-	)
-
-test: all testdata
+test: all $(TEST_FILES:%=../testdata/%)
 	phpunit --log-junit delagent-Xunit.xml $(TESTFILE)
 
 coverage:
 	@echo "nothing to do"
 
 clean:
-	rm -rf *.xml ../testdata
+	rm -rf *.xml
 
 .PHONY: all test coverage clean

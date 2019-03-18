@@ -27,7 +27,7 @@ require_once(dirname(__FILE__) . '/../common-parm.php');
 /**
  * \class test_common_menu
  */
-class test_common_menu extends PHPUnit_Framework_TestCase
+class test_common_menu extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
   protected function setUp()
@@ -41,7 +41,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
   {
     print "Starting unit test for common-menu.php\n";
     print "test function MenuPage()\n";
-    
+
     $Page = 10;
     $TotalPage = 15;
     $Uri = "http://fossology.org/repo/";
@@ -102,7 +102,7 @@ class test_common_menu extends PHPUnit_Framework_TestCase
     $countMenuListBefore = count($MenuList);
     $result = menu_insert($Path, $LastOrder, $URI, $Title, $Target, $HTML);
     $this->assertEquals($Path,$MenuList[$countMenuListBefore]->FullName);
-     
+
     print "test function menu_find)\n";
     $depth = 2;
     $result = menu_find("Test1", $depth);

@@ -20,6 +20,7 @@ all: VERSIONFILE ninka-all
 	$(call DIR_LOOP, )
 
 test: all
+	$(TOP)/install/scripts/install-ninka.sh
 	$(MAKE) -C $(TESTDIR) test
 
 coverage: all

@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -21,7 +22,7 @@ define("TITLE_maintagent", _("FOSSology Maintenance"));
 use Fossology\Lib\Auth\Auth;
 
 /**
- * \class maintagent extend from FO_Plugin
+ * \class maintagent
  * \brief Queue the maintenance agent with the requested parameters
  */
 class maintagent extends FO_Plugin {
@@ -34,13 +35,11 @@ class maintagent extends FO_Plugin {
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();
   }
-  
+
   /**
-   * \brief queue the job
-   *
-   * \param
-   * \returns status string
-   **/
+   * \brief Queue the job
+   * \returns string Status string
+   */
   function QueueJob()
   {
     global $SysConf;
@@ -74,9 +73,8 @@ class maintagent extends FO_Plugin {
 
   /**
    * \brief Display the input form
-   * \param
-   * \returns HTML in string
-   **/
+   * \returns string HTML in string
+   */
   function DisplayForm()
   {
     /* Array of maintagent options and description */
@@ -84,6 +82,7 @@ class maintagent extends FO_Plugin {
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
               //       "g"=>_("Remove orphaned gold files."),
+                     "E"=>_("Remove orphaned rows from database."),
                      "N"=>_("Normalize priority "),
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),
@@ -122,6 +121,10 @@ class maintagent extends FO_Plugin {
   }
 
 
+  /**
+   * @copydoc FO_Plugin::Output()
+   * @see FO_Plugin::Output()
+   */
   public function Output()
   {
     $V = "";

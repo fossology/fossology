@@ -28,12 +28,12 @@ require_once(dirname(dirname(__FILE__)) . '/common-sysconfig.php');
 /**
  * \class test_common_sysconfig
  */
-class test_common_sysconfig extends PHPUnit_Framework_TestCase
+class test_common_sysconfig extends \PHPUnit\Framework\TestCase
 {
   public $PG_CONN;
   public $DB_COMMAND =  "";
-  public $DB_NAME =  "";  
-  public $sys_conf = ""; 
+  public $DB_NAME =  "";
+  public $sys_conf = "";
 
   /**
    * \brief initialization with db
@@ -98,5 +98,6 @@ class test_common_sysconfig extends PHPUnit_Framework_TestCase
       $this->assertEquals(check_IP($ip),$correct,$message="result for IP $ip is false");
       print('.');
     }
-  }  
+  }
 }
+

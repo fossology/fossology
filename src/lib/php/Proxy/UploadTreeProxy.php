@@ -286,7 +286,7 @@ class UploadTreeProxy extends DbViewProxy
     else
     {
       $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport'));
       $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
       $agentFilter = $latestAgentIds ? " AND lf.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
     }
@@ -315,9 +315,9 @@ class UploadTreeProxy extends DbViewProxy
         return " $conditionQueryHasLicense
               AND NOT EXISTS (SELECT * FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.") )";
       case "noCopyright":
-        return "EXISTS (SELECT ct_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
+        return "EXISTS (SELECT copyright_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":
-        return "EXISTS (SELECT ct_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
+        return "EXISTS (SELECT ecc_pk FROM ecc cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
     }
   }
 

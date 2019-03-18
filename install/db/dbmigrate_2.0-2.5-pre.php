@@ -17,7 +17,7 @@
  ***********************************************************/
 
 /**
- * @file dbmigrate_2.0-2.5.php
+ * @file dbmigrate_2.0-2.5-pre.php
  * @brief This file is called by fo-postinstall, 
  *        2.0 database to 2.5. 
  *
@@ -26,11 +26,10 @@
 
 
 /**
- * \brief 
- * delete from copyright where pfile_fk not in (select pfile_pk from pfile)
+ * \brief Delete from copyright where pfile_fk not in (select pfile_pk from pfile)
  * add foreign constraint on copyright pfile_fk if not exist
  *
- * \return 0 on success, 1 on failure
+ * \return int 0 on success, 1 on failure
  **/
 function Migrate_20_25($Verbose)
 {

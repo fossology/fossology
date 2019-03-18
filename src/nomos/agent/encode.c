@@ -16,18 +16,19 @@
 
  ***************************************************************/
 /**
- * \file encode.c
- * \brief Simple utility program for escaping C strings for
- * inclusion in code. Reads the first line of a given file
- * and then outputs (to stdout) text suitable for initializing
- * an licSpec_t structure. Used by GENSEARCHDATA script for
- * processing STRINGS.in.
+ * \file
+ * \brief Simple utility program for escaping C strings for inclusion in code.
+ *
+ * Reads the first line of a given file and then outputs (to stdout) text
+ * suitable for initializing an licSpec_t structure. Used by GENSEARCHDATA
+ * script for processing STRINGS.in.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/** Buffer size to use */
 #define myBUFSIZ BUFSIZ
 
 
@@ -72,6 +73,7 @@ int main(int argc, char **argv)
     printf("\\%o", str[i] & 0xff);
   }
   printf("\\0\"}\n");
+
 
   return 0;
 }

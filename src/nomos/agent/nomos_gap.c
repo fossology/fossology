@@ -19,10 +19,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdio.h>      /* printf, scanf, NULL */
 #include <stdlib.h>     /* malloc, free, rand */
 
-// gcc nomos_gap.c  `pkg-config glib-2.0 --cflags --libs` -std=c99
+/**
+ * \file
+ * Compile using `gcc nomos_gap.c $(pkg-config glib-2.0 --cflags --libs) -std=c99`
+ */
 
-/* collapse text by elimination of invisible char, returns position+offset pairs  */
-  GArray*  collapseInvisible(char* text, char invisible)
+/**
+ * collapse text by elimination of invisible char, returns position+offset pairs
+ */
+GArray* collapseInvisible(char* text, char invisible)
 {
   int offset = 0;
   char* readPointer = text;
@@ -50,8 +55,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
   return pairs;
 }
 
-// TODO delete me
-/* collapse spaces in text, returns position+offset pairs  */
+/**
+ * Collapse spaces in text, returns position+offset pairs
+ * \todo delete me
+ */
 GArray* collapseSpaces(char* text)
 {
   int start = 0;
