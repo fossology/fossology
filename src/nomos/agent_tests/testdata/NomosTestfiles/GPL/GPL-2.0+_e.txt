@@ -1,0 +1,8 @@
+/* Authors:
+*
+* Liam P White
+*
+* Copyright (C) 2014 Authors
+*
+* Released under GNU GPL v2+, read the file 'COPYING' for more information
+*/

@@ -325,41 +325,6 @@
 %ENTRY% _LT_NOT_ADVERTISING
 %KEY% "permi[st]"
 %STR% "not be used in advertising =SOME= without =FEW= permission"
-#
-%ENTRY% _LT_AFFERO1
-%KEY% "so(ftware|urce)"
-%STR% "affero (general p|p)ublic licen[cs]e is intended to guarantee your freedom to share and change free software"
-#####
-# DELETED: if the program as you received it is intended to interact with
-# users through a computer network and if in the version you received any
-# user interacting with the program was given the opportunity to request
-# transmission to that user of the programs its users ...
-#####
-%ENTRY% _LT_AFFERO2
-%KEY% "so(ftware|urce)"
-%STR% "complete source code you must not remove that facility from your modified version of the program or work"
-#####
-# DELETED: the gnu affero general public licen[cs]e is ... to the community
-#####
-%ENTRY% _LT_AFFERO3
-%KEY% "so(ftware|urce)"
-%STR% "designed specifically to ensure that in such cases the modified source code becomes available"
-#
-%ENTRY% _LT_AFFERO_V3
-%KEY% "licen[cs]"
-%STR% "affero general public licen[cs]e is a free copyleft licen[cs]e for software"
-#
-%ENTRY% _LT_AFFEROref1
-%KEY% "distribut"
-%STR% "you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms =SOME= affero =SOME= licen[cs]e"
-#
-%ENTRY% _LT_AFFEROref2
-%KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (agpl|affero gpl|(general a|a)ffero (general p|p)ublic licen[cs]e)"
-#
-%ENTRY% _LT_NOTAFFEROref1
-%KEY% "licen[cs]"
-%STR% "Use with the GNU Affero General Public License"
 #####
 # DELETED: ... that are embodied in the original work as furnished by
 # the licen[cs]or to make use sell and offer for sale the original work
@@ -406,6 +371,34 @@
 %KEY% "\<(end[ -]user|eula)\>"
 %STR% "this Agfa monotype corporation end user agreement the agreement becomes a binding contract between you and Agfa"
 #
+%ENTRY% _LT_AGPL1
+%KEY% "so(ftware|urce)"
+%STR% "affero (general p|p)ublic licen[cs]e is intended to guarantee your freedom to share and change free software"
+#
+%ENTRY% _LT_AGPL2
+%KEY% "so(ftware|urce)"
+%STR% "complete source code you must not remove that facility from your modified version of the program or work"
+#
+%ENTRY% _LT_AGPL3
+%KEY% "so(ftware|urce)"
+%STR% "designed specifically to ensure that in such cases the modified source code becomes available"
+#
+%ENTRY% _LT_AGPL_30
+%KEY% "licen[cs]"
+%STR% "affero general public licen[cs]e is a free copyleft licen[cs]e for software"
+#
+%ENTRY% _LT_AGPLref1
+%KEY% "distribut"
+%STR% "you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms =SOME= affero =SOME= licen[cs]e"
+#
+%ENTRY% _LT_AGPLref2
+%KEY% "\<under\>"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (agpl|affero gpl|(general a|a)ffero (general p|p)ublic licen[cs]e)"
+#
+%ENTRY% _LT_NOT_AGPLref1
+%KEY% "licen[cs]"
+%STR% "Use with the GNU Affero General Public License"
+#
 %ENTRY% _LT_ALGORITHMICS
 %KEY% "permi[st]"
 %STR% "Algorithmics gives permission for anyone to use and modify this file without any obligation or licen[cs]e condition except that you retain this copyright message in any source r?e?-?distribution in whole or part"
@@ -436,70 +429,37 @@
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "constitutes your acceptance and agreement with america online inc aol as follows"
 #
-%ENTRY% _LT_APACHE_1
+%ENTRY% _LT_Apache_1
 %KEY% "permi[st]"
 %STR% "permission to copy in any form is granted provided this notice is included in all copies permission to r?e?-?distribute is granted provided this file is r?e?-?distributed untouched in all its parts and included files"
 #
-%ENTRY% _LT_APACHE_2
+%ENTRY% _LT_Apache_2
 %KEY% "permi[st]"
 %STR% "r?e?-?distribution of this document is permitted provided that the following conditions are met 1 r?e?-?distributions must retain the above copyright notice this list of conditions and the following disclaimer"
 #
-%ENTRY% _LT_APACHE_11_CLAUSE_3
+%ENTRY% _LT_Apache_20
+%KEY% "licen[cs]"
+%STR% "licen[cs]e each contributor hereby grants to you a perpetual world-?wide non-?exclusive no-charge royalt(ee|y)-free irrevo[ck]able"
+#
+%ENTRY% _LT_Apache_10_CLAUSE_4
+%KEY% "\<ap(ache|ple)\>"
+%STR% "names apache server and apache group must not be used"
+#
+%ENTRY% _LT_Apache_11_CLAUSE_3
 %KEY% "distribut"
 %STR% "documentation included with the r?e?distribution =FEW= must include the following acknowledge?ment"
 #
-%ENTRY% _LT_APACHE_11_CLAUSE_4
+%ENTRY% _LT_Apache_11_CLAUSE_4
 %KEY% "software"
 %STR% "endorse or promote products derived from this software without prior written permission"
 #
-%ENTRY% _LT_APACHE_11_CLAUSE_5
+%ENTRY% _LT_Apache_11_CLAUSE_5
 %KEY% "software"
 %STR% "products derived from this software may not be called"
-#####
-# DELETED: ... copy modify distribute and licen[cs]e this software and its
-# documentation for any purpose provided that existing copyright notices
-# are retained in all copies and that this notice is included in any
-# distributions no written agreement licen[cs]e or royalty fee is required
-#####
-%ENTRY% _LT_APACHEref1
-%KEY% "distribut"
-%STR% "distributed? =SOME= as apache itself"
-#
-%ENTRY% _LT_APACHEref2
-%KEY% "licen[cs]"
-%STR% "licen[cs]ed? =SOME= as apache itself"
-#
-%ENTRY% _LT_APACHEref3
-%KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= apach(e|e software) licen[cs]e"
-#
-%ENTRY% _LT_APACHEref4
-%KEY% "licen[cs]"
-%STR% "the terms of the apache License"
 #
 %ENTRY% _LT_APACHESTYLEref
 %KEY% "\<under\>"
 %STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (apache[ -]style|apache[ -]type|apache-?ish|apache[ -]like) licen[cs]e"
-#
-%ENTRY% _LT_APACHE_V2ref1
-%KEY% "licen[cs]"
-%STR% "licen[cs]e:? apache( |-)?2\.?0?"
-#
-%ENTRY% _LT_APACHE_V2ref2
-%KEY% "licen[cs]"
-%STR% "licen[cs]ed under (the )?apache( |-)2\.?0"
-#
-%ENTRY% _LT_APACHE_V2ref3
-%KEY% "\<under\>"
-%STR% "(licen[cs]ed|is|released) under (the )?apache v2"
-#
-%ENTRY% _LT_APACHE_V2ref4
-%KEY% "licen[cs]"
-%STR% "(covered by|(is|released) under) (an |the )?apache( |-)2\.?0 licen[cs]e"
-#
-%ENTRY% _LT_APACHE_V2ref5
-%KEY% "licen[cs]"
-%STR% "apache( |-)?2\.?0? licen[cs]e"
 #####
 # DELETED: ... =ANY= in consideration of your agreement to the following
 # terms and your use installation modification or re-?distribution
@@ -626,60 +586,10 @@
 %KEY% "licen[cs]"
 %STR% "ascender grants =FEW= a non-exclusive world-wide licen[cs]e for the term i to use the deliverables to create Font Software ii to duplicate font software and iii to distribute Font Software embedded as part of"
 #
-%ENTRY% _LT_ASL11ref
-%KEY% "\<ap(ache|ple)\>"
-%STR% "based on the apache software licen[cs]e (v|version )1\.?1"
-#
-%ENTRY% _LT_ASLref1
-%KEY% "\<ap(ache|ple)\>"
-%STR% "based on the apache software licen[cs]e"
-#
-%ENTRY% _LT_ASLref2
-%KEY% "\<ap(ache|ple)\>"
-%STR% "names apache server and apache group must not be used"
-#
-%ENTRY% _LT_ASLref3
-%KEY% "\<ap(ache|ple)\>"
-%STR% "copyrighted software available under a free-to-use-licen[cs]e by the apache software foundation"
-#####
-# This text is NOT what's listed on the OSI website for 1.1. -- it's also
-# NOT the same as the text for ASL 2.0
-#####
-# DELETED: subject to the terms and conditions of this licen[cs]e ...
-# to reproduce prepare derivative works of publicly display
-#####
-%ENTRY% _LT_ASL
-%KEY% "licen[cs]"
-%STR% "each contributor hereby grants you a perpetual world-?wide non-?exclusive no-charge royalt(ee|y)-free copyright licen[cs]e"
-#
-%ENTRY% _LT_ASL20ref
-%KEY% "\<ap(ache|ple)\>"
-%STR% "(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =SOME= (v|version )2\.?0?"
-#
-%ENTRY% _LT_ASL20ref_2
-%KEY% "\<ap(ache|ple)\>"
-%STR% "(distributed|modified) =FEW= under =FEW= apache 2\.?0 licen[cs]e"
-#
 %ENTRY% _LT_GOOGLE_SDK
 %KEY% "legal"
 %STR% "you agree that Google or third parties own all legal right =FEW=  title and interest in and to the SDK =FEW= any Intellectual Property Rights that subsist in the SDK =SOME= means any and all rights under patent law =FEW= trade secret law =FEW= and any and all other proprietary rights =FEW= Google reserves all rights not expressly granted to you"
-#####
-# DELETED: subject to the terms and conditions of this ... =ANY= patent
-# licen[cs]e to make have made use offer to sell sell import and otherwise
-# transfer the work
-#####
-%ENTRY% _LT_ASL20
-%KEY% "licen[cs]"
-%STR% "licen[cs]e each contributor hereby grants to you a perpetual world-?wide non-?exclusive no-charge royalt(ee|y)-free irrevo[ck]able"
-#####
-# DELETED: in addition to the ... of the software in source code or binary
-# form designed exclusively for use with the Linux operating system ATI
-# Linux Code you may use display modify copy distribute allow others to
-# re-distribute package and repackage such ATI Linux Code for commercial
-# and non-commercial purposes provided that i all binary components of the
-# ATI Linux Code are not modified in any way ii the ATI Linux Code is only
-# used as part
-#####
+#
 %ENTRY% _LT_ATI_EULA
 %KEY% "licen[cs]"
 %STR% "licen[cs]e terms above with respect to portions"
@@ -1104,6 +1014,10 @@
 %KEY% "permi[st]"
 %STR% "redistribution and use in source and binary forms with or without modification are permitted provid(ed|ing) that the following conditions are met"
 #
+%ENTRY% _LT_BSD_CLEAR_CLAUSE_0
+%KEY% "permi[st]"
+%STR% "redistribution and use in source and binary forms with or without modification are permitted subject to the limitations in the disclaimer below"
+#
 %ENTRY% _LT_BSD_CLAUSE_1
 %KEY% "copyright"
 %STR% "redistributions? of source code must retain the (above )?copyright notice (unmodified )?this list of conditions and the following disclaimer"
@@ -1451,7 +1365,7 @@
 #
 %ENTRY% _LT_CPLref1
 %KEY% "licen[cs]"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= (this|the) common public licen[cs]e"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= common public licen[cs]e"
 #####
 # DELETED: ... to use or re-?distribute this =SOME= in text or binary form
 # as required only in conjunction with devices using a Cypress USB
@@ -1721,7 +1635,7 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_36
 %KEY% "licen[cs]"
-%STR% "licensed (to you )?under (your )?choice of =FEW= license =FEW= or =FEW= license"
+%STR% "licensed (to you )?under (your|a|the) choice of( either)? =SOME= or"
 #
 %ENTRY% _LT_DUAL_LICENSE_37
 %KEY% "licen[cs]"
@@ -1814,10 +1728,10 @@
 #
 %ENTRY% _LT_EPL10ref_1
 %KEY% "licen[cs]"
-%STR% "license(:?|d under) eclipse public licen[cs]e =FEW= 1\.?0"
+%STR% "(subject to|license(:?|d under)) (the )?eclipse public licen[cs]e =FEW= 1\.?0"
 #
 %ENTRY% _LT_EPL10ref_2
- %KEY% "licen[cs]"
+%KEY% "licen[cs]"
 %STR% "licensed? under =FEW= EPL.1\.?0"
 #
 %ENTRY% _LT_EPL10ref_3
@@ -2795,7 +2709,7 @@
 # To catch things like "this is GPL".
 %ENTRY% _LT_GPL_NAMED3
 %KEY% "gpl"
-%STR% "[^-]\<gpl\>"
+%STR% "[^-\.]\<gpl\>"
 #
 # To catch things like "this is GPLV2".
 %ENTRY% _LT_GPL_V2_NAMED
@@ -2808,7 +2722,7 @@
 #
 %ENTRY% _LT_GPL_V2_NAMED_later
 %KEY% "gpl"
-%STR% "[^l]gpl(-|v)2\.?0?\+"
+%STR% "[^l]gpl(-| ?v)2\.?0?\+"
 #
 # To catch things like "this is GPLV3".
 %ENTRY% _LT_GPL_V3_NAMED
@@ -3014,7 +2928,7 @@
 %KEY% "distribut"
 %STR% "may copy and/?o?r? distribute verbatim copies of =SOME= as you receive it in any medium provided that you conspicuously and appropriately publish on each copy =SOME= copyright notice"
 #
-%ENTRY% _LT_GPL3_NOT_AFFERO
+%ENTRY% _LT_GPL3_NOT_AGPL
 %KEY% "licen[cs]"
 %STR% "covered work but the special requirements of the gnu affero general public licen[cs]e"
 #####
@@ -4081,9 +3995,6 @@
 #
 %ENTRY% _LT_MITref1
 %KEY% "\<under\>"
-# THIS STR IS VERY WIDE, REMOVE PERMANENTLY LATER IF NO PROBLEMS OCCUR
-#%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= \<mit\> =FEW= licen[cs]e"
-# DETECTION MADE MUCH STRICTER
 %STR% "(free|distributed|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) under =FEW= \<mit\> =FEW= licen[cs]e"
 #
 %ENTRY% _LT_MITref2
@@ -4100,7 +4011,7 @@
 #
 %ENTRY% _LT_MITref5
 %KEY% "licen[cs]"
-%STR% "governed by =FEW= mit.license"
+%STR% "governed by =FEW= mit.(style )?license"
 #
 %ENTRY% _LT_MITref6
 %KEY% "licen[cs]"
@@ -4113,6 +4024,10 @@
 %ENTRY% _LT_MITref8
 %KEY% "licen[cs]"
 %STR% "MIT-style license =FEW= found in the license file at =FEW= angular\.?io/license"
+#
+%ENTRY% _LT_MITref9
+%KEY% "licen[cs]"
+%STR% "is mit.licen[cs]ed"
 #
 %ENTRY% _LT_MITEM
 %KEY% "distribut"
@@ -4953,6 +4868,10 @@
 %ENTRY% _LT_PUBDOM_9
 %KEY% "copyright"
 %STR% "does not claim any copyright"
+#
+%ENTRY% _LT_PUBDOM_10
+%KEY% "copyright"
+%STR% "disclaims copyright to"
 #
 %ENTRY% _LT_PUBDOMNOTcpyrt
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
@@ -7571,26 +7490,6 @@ k
 %KEY% "licen[cs]"
 %STR% "adobe systems =SOME= source code licen[cs]e agreement"
 #
-%ENTRY% _TITLE_AFFERO_V1_ONLY
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )1"
-#
-%ENTRY% _TITLE_AFFERO_V1_OR_LATER
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )1 =SOME= or =SOME= (newer|later|subsequent|more recent)"
-#
-%ENTRY% _TITLE_AFFERO_V3_ONLY
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3"
-#
-%ENTRY% _TITLE_AFFERO_V3_OR_LATER
-%KEY% "licen[cs]"
-%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
-#
-%ENTRY% _TITLE_AFFERO_V3_OR_LATER_ref1
-%KEY% "agpl"
-%STR% "AGPL (version |v)3 or later"
-#
 %ENTRY% _TITLE_AFL30
 %KEY% "licen[cs]"
 %STR% "academic free licen[cs]e =FEW= (3\.?0|(v|version )3\.?0)"
@@ -7622,6 +7521,26 @@ k
 %ENTRY% _TITLE_AGERE_EULA
 %KEY% "\<(end[ -]user|eula)\>"
 %STR% "agere systems =SOME= end[ -]user software licen[cs]e agreement"
+#
+%ENTRY% _TITLE_AGPL_10_only
+%KEY% "licen[cs]"
+%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )1"
+#
+%ENTRY% _TITLE_AGPL_10_or_later
+%KEY% "licen[cs]"
+%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )1 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+#
+%ENTRY% _TITLE_AGPL_30_only
+%KEY% "licen[cs]"
+%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3"
+#
+%ENTRY% _TITLE_AGPL_30_or_later
+%KEY% "licen[cs]"
+%STR% "affero (general p|p)ublic licen[cs]e =FEW= (v|version )3 =SOME= or =SOME= (newer|later|subsequent|more recent)"
+#
+%ENTRY% _TITLE_AGPL_30_or_later_ref1
+%KEY% "agpl"
+%STR% "AGPL (version |v)3 or later"
 #
 %ENTRY% _TITLE_ALFRESCO
 %KEY% "licen[cs]"
@@ -7683,15 +7602,15 @@ k
 %KEY% "licen[cs]"
 %STR% "licen[cs]e agreement between ascender corporation and"
 #
-%ENTRY% _TITLE_ASL11
+%ENTRY% _TITLE_Apache_11
 %KEY% "\<ap(ache|ple)\>"
 %STR% "apache =FEW= licen[cs]e (1\.?1|(v|version )1\.?1)"
 #
-%ENTRY% _TITLE_ASL20
+%ENTRY% _TITLE_Apache_20
 %KEY% "\<ap(ache|ple)\>"
 %STR% "apache =FEW= licen[cs]e (2\.?0|(v|version )2\.?0)"
 #
-%ENTRY% _TITLE_ASL
+%ENTRY% _TITLE_Apache
 %KEY% "\<ap(ache|ple)\>"
 %STR% "apache =FEW= licen[cs]e"
 #
@@ -9210,32 +9129,84 @@ k
 %KEY% =NULL=
 %STR% "^begin "
 #
-%ENTRY% _PHR_AFFERO
+%ENTRY% _PHR_AFL
+%KEY% "licen[cs]"
+%STR% "academic free licen[cs]e =SOME= (v|version)"
+#
+%ENTRY% _PHR_AGPL
 %KEY% "licen[cs]"
 %STR% "affero (general p|p)ublic licen[cs]e"
 #####
 # THis has to be more specific than the generic FSF_Vx_OR_LATER references
 # due to the wording in the text of the Affero-GPL
 ##### 
-%ENTRY% _PHR_AFFERO_V1_OR_LATER
+%ENTRY% _PHR_AGPL_10_or_later
 %KEY% "so(ftware|urce)"
 %STR% "affero (general p|p)ublic =SOME= by the free software foundation ((either v|v)ersion 1 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
-%ENTRY% _PHR_AFFERO_V3_OR_LATER
+%ENTRY% _PHR_AGPL_30_or_later
 %KEY% "so(ftware|urce)"
 %STR% "affero (general p|p)ublic =SOME= by the free software foundation ((either v|v)ersion 3 =SOME= or =SOME= (later|newer|subsequent|more recent))"
 #
-%ENTRY% _PHR_AFFERO_V3_1
-%KEY% "licen[cs]"
-%STR% "license =FEW= AGPL[-v ]3\.?0"
-#
-%ENTRY% _PHR_AFFERO_V3_2
+%ENTRY% _PHR_AGPL_30_1
 %KEY% =NULL=
-%STR% "available under =FEW= AGPL([-v ]3\.0| version 3)"
+%STR% "(license|available under) =FEW= AGPL( ?v\.?3|[- ]3\.?0| version 3)"
 #
-%ENTRY% _PHR_AFL
+%ENTRY% _PHR_Apache_ref0
+%KEY% =NULL=
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code|copyright|www|under) =FEW= apache"
+#
+%ENTRY% _PHR_Apache_ref1
+%KEY% "\<ap(ache|ple)\>"
+%STR% "(distributed?|licen[cs]ed?) =SOME= as apache itself"
+#
+%ENTRY% _PHR_Apache_ref2
+%KEY% "\<ap(ache|ple)\>"
+%STR% "based on the apache software licen[cs]e"
+#
+%ENTRY% _PHR_Apache_ref3
 %KEY% "licen[cs]"
-%STR% "academic free licen[cs]e =SOME= (v|version)"
+%STR% "the terms of the apache License"
+#
+%ENTRY% _PHR_Apache_ref4
+%KEY% "\<under\>"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= apach(e|e software) licen[cs]e"
+#
+%ENTRY% _PHR_Apache_ref6
+%KEY% "\<ap(ache|ple)\>"
+%STR% "copyrighted software available under a free-to-use-licen[cs]e by the apache software foundation"
+#
+%ENTRY% _PHR_Apache_11_ref1
+%KEY% "licen[cs]"
+%STR% "licensed under (the )?apache software license version 1\.?1"
+#
+%ENTRY% _PHR_Apache_11_ref2
+%KEY% "\<ap(ache|ple)\>"
+%STR% "based on the apache software licen[cs]e (v|version )1\.?1"
+#
+%ENTRY% _PHR_Apache_20_ref1
+%KEY% "licen[cs]"
+%STR% "licen[cs]e:? (name:? |(of ))?apache( |-)?2\.?0?"
+#
+%ENTRY% _PHR_Apache_20_ref2
+%KEY% "\<ap(ache|ple)\>"
+%STR% "(covered by|(licen[cs]ed|is|released) under) =FEW= apache(( |-)2\.?0| ?v2)"
+#
+%ENTRY% _PHR_Apache_20_ref3
+%KEY% "licen[cs]"
+%STR% "apache( |-)?2\.?0? licen[cs]e"
+#
+%ENTRY% _PHR_Apache_20_ref4
+%KEY% "\<ap(ache|ple)\>"
+%STR% "(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =FEW= (v|version )2\.?0?"
+#
+%ENTRY% _PHR_Apache_20_ref5
+%KEY% "licen[cs]"
+%STR% "(distributed|modified) =FEW= under =FEW= apache 2\.?0 licen[cs]e"
+#
+%ENTRY% _PHR_Apache_20_ref6
+%KEY% "licen[cs]"
+%STR% "license =FEW= osi approved =FEW= apache (software )?license"
 #
 %ENTRY% _PHR_ARTISTIC_DESC1
 %KEY% "distribut"
@@ -9248,10 +9219,6 @@ k
 %ENTRY% _PHR_ARTISTIC_PERL
 %KEY% =NULL=
 %STR% "provided that the complete Standard Version of the interpreter is so embedded"
-#
-%ENTRY% _PHR_ASL11
-%KEY% "licen[cs]"
-%STR% "licensed under (the )?apache software license version 1\.?1"
 #
 %ENTRY% _PHR_ATTRIBUTION
 %KEY% "a(gree|ttribut|vailabl|uthor)"
@@ -9277,25 +9244,41 @@ k
 %KEY% "licen[cs]"
 %STR% "license =FEW= BSD.3-Clause"
 #
+%ENTRY% _PHR_BSD_3_CLAUSE_4
+%KEY% "licen[cs]"
+%STR% "license =FEW= new BSD license"
+#
 %ENTRY% _PHR_BSD_2_CLAUSE_1
 %KEY% "licen[cs]"
 %STR% "licen[cs]e =FEW= BSD.2-Clause"
 #
 %ENTRY% _PHR_BSD_2_CLAUSE_2
 %KEY% "licen[cs]"
-%STR% "2(-| )clause BSD license"
+%STR% "2(-| )clause BSD licen[cs]e"
 #
 %ENTRY% _PHR_BSD_2_CLAUSE_3
 %KEY% "licen[cs]"
-%STR% "BSD.2-Clause license"
+%STR% "BSD.2-Clause licen[cs]e"
+#
+%ENTRY% _PHR_BSD_2_CLAUSE_4
+%KEY% "licen[cs]"
+%STR% "two.clause BSD licen[cs]e"
+#
+%ENTRY% _PHR_BSD_2_CLAUSE_5
+%KEY% "licen[cs]"
+%STR% "under =FEW= BSD simplified licen[cs]e"
+#
+%ENTRY% _PHR_BSD_2_CLAUSE_6
+%KEY% "licen[cs]"
+%STR% "under =FEW= simplified BSD licen[cs]e"
 #
 %ENTRY% _PHR_BSD_CLEAR_1
 %KEY% "licen[cs]"
-%STR% "licensed under the Clear BSD"
+%STR% "licen[cs]ed under the Clear BSD"
 #
 %ENTRY% _PHR_BSD_3_CLAUSE_LBNL
 %KEY% "licen[cs]"
-%STR% "you are agreeing to =FEW= BSD-LBNL.license"
+%STR% "you are agreeing to =FEW= BSD-LBNL.licen[cs]e"
 #
 %ENTRY% _PHR_CC0_1
 %KEY% "licen[cs]"
@@ -9303,7 +9286,11 @@ k
 #
 %ENTRY% _PHR_CC0_2
 %KEY% "licen[cs]"
-%STR% "under the terms of a creative commons cc0 1\.?0 license"
+%STR% "under the terms of a creative commons cc0 1\.?0 licen[cs]e"
+#
+%ENTRY% _PHR_CC_BY_SA_30
+%KEY% "licen[cs]"
+%STR% "licen[cs]ed under creative commons by-sa 3\.?0"
 #
 %ENTRY% _PHR_CDDL
 %KEY% "distribut"
@@ -10448,6 +10435,10 @@ k
 %ENTRY% _SPDX_CC0_10
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?CC0-1\.?0"
+
+%ENTRY% _SPDX_copyleft_next_030
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?\"?[: ]\"?copyleft-next-0\.?3\.?0"
 
 %ENTRY% _SPDX_copyleft_next_031
 %KEY% "licen[cs]e"
@@ -11937,23 +11928,31 @@ k
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?(fsf|gnu)\.?org/licen[cs]ing/licen[cs]es/agpl-3"
 #
-%ENTRY% _URL_APACHE_10
+%ENTRY% _URL_Apache_1
+%KEY% "licen[cs]"
+%STR% "w?w?w?\.?apache\.?org/licen[cs]es?/licen[cs]e"
+#
+%ENTRY% _URL_Apache_2
+%KEY% "licen[cs]"
+%STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/apache"
+#
+%ENTRY% _URL_Apache_10
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?apache\.?org/licen[cs]e-1\.?0"
 #
-%ENTRY% _URL_APACHE_11
+%ENTRY% _URL_Apache_11
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?apache\.?org/licen[cs]e-1\.?1"
 #
-%ENTRY% _URL_APACHE_20
+%ENTRY% _URL_Apache_20
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?apache\.?org/licen[cs]e-2\.?0"
 #
-%ENTRY% _URL_APACHE_20_1
+%ENTRY% _URL_Apache_20_1
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?apache\.?org/licen[cs]es?/licen[cs]e-?2\.?0"
 #
-%ENTRY% _URL_APACHE_20_2
+%ENTRY% _URL_Apache_20_2
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/apache-?2\.?0"
 #
@@ -11964,14 +11963,6 @@ k
 %ENTRY% _URL_ART
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/artistic"
-#
-%ENTRY% _URL_ASL_1
-%KEY% "licen[cs]"
-%STR% "w?w?w?\.?apache\.?org/licen[cs]es?/licen[cs]e"
-#
-%ENTRY% _URL_ASL_2
-%KEY% "licen[cs]"
-%STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/apache"
 #
 %ENTRY% _URL_BOOST_10
 %KEY% "licen[cs]"
@@ -12374,12 +12365,12 @@ k
 %KEY% "open"
 %STR% "opencontent\.?org/openpub"
 #
-%ENTRY% _MIN_AFFERO_V3
+%ENTRY% _MIN_AGPL_30
 %KEY% "licen[cs]"
 %STR% "(Affero_v3 lic-instance|affero[ _-]?v3 =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= affero?[ _-]v3)"
 %ALIAS% _MINlicense_first
 #
-%ENTRY% _MIN_AFFERO
+%ENTRY% _MIN_AGPL
 %KEY% "licen[cs]"
 %STR% "(Affero lic-instance|affero =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= affero)"
 #
@@ -12516,12 +12507,12 @@ k
 %STR% "(X11 lic-instance|(\<x11\>|x consortium|xfree86) =FEW= licen[cs]e[^h.]|licen[cs]e[^h.] =FEW= (\<x11\>|x consortium|xfree86))"
 %ALIAS% _MINlicense_last
 #
-%ENTRY% _MIN2_AFFERO_V3
+%ENTRY% _MIN2_AGPL_30
 %KEY% "so(ftware|urce)"
 %STR% "(Affero_v3 src-instance|affero[ _-]?v3 =FEW= \<source\>|\<source\> =FEW= affero?[ _-]v3)"
 %ALIAS% _MINsource_first
 #
-%ENTRY% _MIN2_AFFERO
+%ENTRY% _MIN2_AGPL
 %KEY% "so(ftware|urce)"
 %STR% "(Affero src-instance|affero =FEW= \<source\>|\<source\> =FEW= affero)"
 #
@@ -12531,7 +12522,7 @@ k
 #
 %ENTRY% _MIN2_APACHE
 %KEY% "so(ftware|urce)"
-%STR% "(Apache src-instance|apache =FEW= \<source\>|\<source\> =FEW= apache)"
+%STR% "(Apache src-instance|[^/]\<apache\> =FEW= \<source\>|\<source\> =FEW= [^/]\<apache\>)"
 #
 %ENTRY% _MIN2_ARTISTIC
 %KEY% "so(ftware|urce)"
@@ -12653,12 +12644,12 @@ k
 # For the next set we're only interested in 'copyright license-name' (as
 # opposed to 'copyright organization-name'
 #####
-%ENTRY% _MIN3_AFFERO_V3
+%ENTRY% _MIN3_AGPL_30
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(Affero_v3 cpy-instance|affero[ _-]?v3 =FEW= copyright|copyright =FEW= affero?[ _-]v3)"
 %ALIAS% _MINcpyrt_first
 #
-%ENTRY% _MIN3_AFFERO
+%ENTRY% _MIN3_AGPL
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "(Affero cpy-instance|affero =FEW= copyright|copyright =FEW= affero)"
 #

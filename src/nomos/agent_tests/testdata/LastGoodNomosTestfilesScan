@@ -23,6 +23,7 @@ File NomosTestfiles/MIT/MIT-ref_g.txt contains license(s) MIT
 File NomosTestfiles/MIT/MIT-ref_h.txt contains license(s) MIT
 File NomosTestfiles/MIT/crcalc.copyright contains license(s) Apache-2.0,MIT-style
 File NomosTestfiles/MIT/MIT-style_a.txt contains license(s) MIT-CMU-style
+File NomosTestfiles/MIT/MIT-style_b.txt contains license(s) MIT
 File NomosTestfiles/MIT/MIT_and_BSD-3-Clause.txt contains license(s) BSD-3-Clause,MIT
 File NomosTestfiles/MIT/MIT.json contains license(s) MIT
 File NomosTestfiles/MIT/MIT-advertising.txt contains license(s) MIT-advertising
@@ -33,6 +34,7 @@ File NomosTestfiles/MIT/MIT-0.txt contains license(s) MIT-0
 File NomosTestfiles/MIT/WOL.txt contains license(s) WOL
 File NomosTestfiles/MIT/string.ts contains license(s) MIT
 File NomosTestfiles/MIT/MIT-ref_i.txt contains license(s) MIT
+File NomosTestfiles/MIT/MIT-ref_j.txt contains license(s) MIT
 File NomosTestfiles/Bittorrent/bittorrent.nsi contains license(s) BitTorrent-1.0
 File NomosTestfiles/Bittorrent/bittorrent.py contains license(s) BitTorrent-1.1
 File NomosTestfiles/EPL/EPL-1.0.txt contains license(s) EPL-1.0
@@ -72,6 +74,7 @@ File NomosTestfiles/Public-domain/Public-domain-ref.txt contains license(s) Publ
 File NomosTestfiles/Public-domain/PD-dedication.txt contains license(s) Public-domain
 File NomosTestfiles/Public-domain/ar_AE contains license(s) Public-domain
 File NomosTestfiles/Public-domain/biohazard.svg contains license(s) Public-domain
+File NomosTestfiles/Public-domain/Public-domain-ref_b.txt contains license(s) Public-domain
 File NomosTestfiles/info-zip/unzip.c contains license(s) Info-ZIP
 File NomosTestfiles/LPPL/latex.4ht contains license(s) LPPL-1.3c+
 File NomosTestfiles/LPPL/LPPL-1.3c.txt contains license(s) LPPL-1.3c
@@ -122,6 +125,7 @@ File NomosTestfiles/PHP/PHP-3.0_ref_a.txt contains license(s) PHP-3.0
 File NomosTestfiles/Apache/License-2.0.Apache_v2.0 contains license(s) Apache-2.0
 File NomosTestfiles/Apache/condor_blkng_full_disk_io.h contains license(s) Apache-2.0
 File NomosTestfiles/Apache/Apache-1.0.txt contains license(s) Apache-1.0
+File NomosTestfiles/Apache/Apache-1.0.c contains license(s) Apache-1.0
 File NomosTestfiles/Apache/Subject.java-Apache-2.0 contains license(s) Apache-2.0
 File NomosTestfiles/Apache/Apache-1.1.txt contains license(s) Apache-1.1
 File NomosTestfiles/Apache/Apache-1.1_a.txt contains license(s) Apache-1.1
@@ -144,6 +148,8 @@ File NomosTestfiles/Apache/Apache-2.0_g.txt contains license(s) Apache-2.0
 File NomosTestfiles/Apache/Apache-2.0_h.txt contains license(s) Apache-2.0
 File NomosTestfiles/Apache/Apache-2.0_i.txt contains license(s) Apache-2.0
 File NomosTestfiles/Apache/Apache-2.0_j.txt contains license(s) Apache-2.0
+File NomosTestfiles/Apache/Apache-2.0_k.txt contains license(s) Apache-2.0
+File NomosTestfiles/Apache/Apache-2.0_l.txt contains license(s) Apache-2.0
 File NomosTestfiles/Apache/LGPL-3.0+_or_Apache.txt contains license(s) Apache,LGPL-3.0+
 File NomosTestfiles/Apache/Apache-1.1-style.txt contains license(s) Apache-1.1-style
 File NomosTestfiles/Apache/etcd.txt contains license(s) Apache-2.0
@@ -181,7 +187,7 @@ File NomosTestfiles/LGPL/fsp-parser.h contains license(s) LGPL-3.0
 File NomosTestfiles/LGPL/LGPL-2.1.txt contains license(s) LGPL-2.1
 File NomosTestfiles/LGPL/GPL_false-positive_x_bug2307 contains license(s) LGPL-2.1+,MIT-CMU-style
 File NomosTestfiles/LGPL/LGPL-2.1b.txt contains license(s) LGPL-2.1
-File NomosTestfiles/LGPL/openjdk-7-jre-headless_license.txt contains license(s) Apache-2.0,W3C,AGPL-3.0+,ATT,Apache-1.1-style,Freeware,ICU,IJG,LGPL-2.0,NPL-1.1,NotreDame-style,OpenJDK-assembly-exception-1.0,SAX-PD,Unicode,XFree86
+File NomosTestfiles/LGPL/openjdk-7-jre-headless_license.txt contains license(s) W3C,AGPL-3.0+,ATT,Apache-1.1-style,Apache-2.0,Freeware,ICU,IJG,LGPL-2.0,NPL-1.1,NotreDame-style,OpenJDK-assembly-exception-1.0,SAX-PD,Unicode,XFree86
 File NomosTestfiles/LGPL/defconfig contains license(s) BSD,GPL,LGPL
 File NomosTestfiles/LGPL/main.cpp contains license(s) LGPL-2.1+-KDE-exception
 File NomosTestfiles/LGPL/tracker-class.c contains license(s) LGPL-2.1+
@@ -345,6 +351,7 @@ File NomosTestfiles/CC/matching.py contains license(s) BSD,CC-BY-SA-3.0,Public-d
 File NomosTestfiles/CC/CC-BY-1.0_ref.txt contains license(s) CC-BY-1.0
 File NomosTestfiles/CC/CC-BY-2.0_ref.txt contains license(s) CC-BY-2.0
 File NomosTestfiles/CC/CC-BY-2.5_ref.txt contains license(s) Apache-2.0,CC-BY-2.5
+File NomosTestfiles/CC/CC-BY-SA-3.0c.txt contains license(s) CC-BY-SA-3.0
 File NomosTestfiles/Sun/24AF6529.license contains license(s) Sun
 File NomosTestfiles/Sun/sissl-1.1 contains license(s) SISSL-1.1
 File NomosTestfiles/Sun/SPL-1.0.txt contains license(s) SPL-1.0
@@ -458,7 +465,7 @@ File NomosTestfiles/BSD/BSD-2-Clause_not_BSD-style.txt contains license(s) BSD-2
 File NomosTestfiles/APSL/DNSDigest.c contains license(s) APSL,Apache-2.0,OpenSSL
 File NomosTestfiles/BSD/BSD_style_l.txt contains license(s) BSD-style
 File NomosTestfiles/BSD/endiantest.c.BSD-2 contains license(s) BSD-2-Clause
-File NomosTestfiles/BSD/ibm.php contains license(s) Zend-1.0
+File NomosTestfiles/BSD/ibm.php contains license(s) BSD-3-Clause,Zend-1.0
 File NomosTestfiles/BSD/Zend-2.0 contains license(s) Zend-2.0
 File NomosTestfiles/BSD/BSD_style_z.txt contains license(s) OLDAP-2.3
 File NomosTestfiles/BSD/BSD_style_h.txt contains license(s) BSD
@@ -502,6 +509,9 @@ File NomosTestfiles/BSD/BSD-2-Clause_AND_Imlib2.txt contains license(s) BSD-2-Cl
 File NomosTestfiles/BSD/README.rst contains license(s) BSD
 File NomosTestfiles/BSD/0BSD.txt contains license(s) 0BSD
 File NomosTestfiles/BSD/BSD-2-Clause_ref_a.txt contains license(s) BSD-2-Clause
+File NomosTestfiles/BSD/BSD-2-Clause_ref_b.txt contains license(s) BSD-2-Clause
+File NomosTestfiles/BSD/BSD-2-Clause_ref_c.txt contains license(s) BSD-2-Clause
+File NomosTestfiles/BSD/BSD-2-Clause_ref_d.txt contains license(s) BSD-2-Clause
 File NomosTestfiles/BSD/lz4.license contains license(s) BSD-2-Clause,GPL-2.0
 File NomosTestfiles/BSD/README.pdfium contains license(s) BSD-2-Clause
 File NomosTestfiles/BSD/BSD-1-Clause.txt contains license(s) BSD-1-Clause
@@ -509,6 +519,9 @@ File NomosTestfiles/BSD/BSD-3-Clause-Clear_a.txt contains license(s) BSD-3-Claus
 File NomosTestfiles/BSD/BSD_ref_a.txt contains license(s) BSD
 File NomosTestfiles/BSD/BSD-2-Clause-Patent.txt contains license(s) BSD-2-Clause-Patent
 File NomosTestfiles/BSD/Linux-OpenIB.txt contains license(s) Linux-OpenIB
+File NomosTestfiles/BSD/BSD-3-Clause-Clear.txt contains license(s) BSD-3-Clause-Clear
+File NomosTestfiles/BSD/BSD-3-Clause-Clear.c contains license(s) BSD-3-Clause-Clear
+File NomosTestfiles/BSD/New-BSD_ref_a.txt contains license(s) BSD-3-Clause
 File NomosTestfiles/Freeware/app_exec.c contains license(s) Freeware
 File NomosTestfiles/Freeware/tclLoadAix.c contains license(s) Freeware
 File NomosTestfiles/Freeware/Soundex.xs contains license(s) Freeware
@@ -582,6 +595,9 @@ File NomosTestfiles/No_license_found/Not-LGPL.txt contains license(s) No_license
 File NomosTestfiles/No_license_found/pretest.dat contains license(s) No_license_found
 File NomosTestfiles/No_license_found/about.json contains license(s) No_license_found
 File NomosTestfiles/No_license_found/remote.html contains license(s) No_license_found
+File NomosTestfiles/No_license_found/gimp-file-extension.txt contains license(s) No_license_found
+File NomosTestfiles/No_license_found/java1.class contains license(s) No_license_found
+File NomosTestfiles/No_license_found/java2.class contains license(s) No_license_found
 File NomosTestfiles/None-failure/badge_BuckleUp_L.png contains license(s) GPL
 File NomosTestfiles/NOSL/nosl-1.0 contains license(s) NOSL-1.0
 File NomosTestfiles/Fair/Fair.txt contains license(s) Fair
@@ -616,6 +632,8 @@ File NomosTestfiles/AGPL/apps.js contains license(s) BSD
 File NomosTestfiles/AGPL/AGPL-3.0_ref_a.txt contains license(s) AGPL-3.0
 File NomosTestfiles/AGPL/AGPL-3.0_ref_b.txt contains license(s) AGPL-3.0
 File NomosTestfiles/AGPL/AGPL-3.0_ref_c.txt contains license(s) AGPL-3.0
+File NomosTestfiles/AGPL/AGPL-3.0_ref_d.txt contains license(s) AGPL-3.0
+File NomosTestfiles/AGPL/AGPL-3.0_ref_e.txt contains license(s) AGPL-3.0
 File NomosTestfiles/AGPL/pm2-copyright.txt contains license(s) AGPL-3.0
 File NomosTestfiles/NPL/NPL-1.1 contains license(s) NPL-1.1
 File NomosTestfiles/NPL/NPL-1.0 contains license(s) NPL-1.0
@@ -705,6 +723,8 @@ File NomosTestfiles/Dual-license/MIT_or_GPL-3.0.txt contains license(s) Dual-lic
 File NomosTestfiles/Dual-license/EPL-1.0_or_MPL-2.0_1.txt contains license(s) Dual-license,EPL-1.0,MPL-2.0
 File NomosTestfiles/Dual-license/EPL-1.0_or_MPL-2.0_2.txt contains license(s) Dual-license,EPL-1.0,MPL-2.0
 File NomosTestfiles/Dual-license/EPL-2.0_or_GPL-2.0_or_LGPL-2.1.txt contains license(s) Dual-license,EPL-2.0,GPL-2.0+,LGPL-2.1+
+File NomosTestfiles/Dual-license/Apache-2.0_or_CC-BY-4.0.txt contains license(s) Apache-2.0,CC-BY-4.0,Dual-license
+File NomosTestfiles/Dual-license/Apache-2.0_or_LGPL-3.0+.txt contains license(s) Apache-2.0,Dual-license,LGPL-3.0
 File NomosTestfiles/OFL/OFL-1.0.txt contains license(s) OFL-1.0
 File NomosTestfiles/OFL/OFL-1.1.txt contains license(s) OFL-1.1
 File NomosTestfiles/OFL/font-awesome-ie7.css contains license(s) CC-BY-3.0,MIT,OFL-1.1
@@ -716,6 +736,7 @@ File NomosTestfiles/CPL/CPL_license_test.txt contains license(s) CPL-1.0,GPL-2.0
 File NomosTestfiles/CPL/Not_Eclipse_license.txt contains license(s) CPL-1.0
 File NomosTestfiles/CPL/Serializer.cs contains license(s) CPL-1.0
 File NomosTestfiles/CPL/CPL-1.0_ref_a.txt contains license(s) Apache-2.0,CPL-1.0
+File NomosTestfiles/CPL/CPL-1.0_ref_b.txt contains license(s) CPL-1.0
 File NomosTestfiles/RPSL/RPSL_v1.0_a.txt contains license(s) RPSL-1.0
 File NomosTestfiles/RPSL/RPSL-1.0.txt contains license(s) RPSL-1.0
 File NomosTestfiles/RPSL/RPSL_v1.0_b.txt contains license(s) RPSL-1.0
@@ -860,6 +881,7 @@ File NomosTestfiles/GPL/GPL-2.0_i.txt contains license(s) GPL-2.0
 File NomosTestfiles/GPL/GPL-2.0_j.txt contains license(s) GPL-2.0
 File NomosTestfiles/GPL/gcc.c contains license(s) GPL-2.0+
 File NomosTestfiles/GPL/GPL-2.0+_d.txt contains license(s) GPL-2.0+
+File NomosTestfiles/GPL/GPL-2.0+_e.txt contains license(s) GPL-2.0+
 File NomosTestfiles/GPL/GPL-3.0_c.txt contains license(s) GPL-3.0
 File NomosTestfiles/GPL/GPL-2.0.txt contains license(s) GPL-2.0
 File NomosTestfiles/GPL/GPL-2.0+.txt contains license(s) GPL-2.0
@@ -1205,6 +1227,7 @@ File NomosTestfiles/SPDX/CNRI-Jython contains license(s) CNRI-Jython
 File NomosTestfiles/SPDX/CNRI-Python contains license(s) CNRI-Python
 File NomosTestfiles/SPDX/CNRI-Python-GPL-Compatible contains license(s) CNRI-Python-GPL-Compatible
 File NomosTestfiles/SPDX/Condor-1.1 contains license(s) Condor-1.1
+File NomosTestfiles/SPDX/copyleft-next-0.3.0 contains license(s) copyleft-next-0.3.0
 File NomosTestfiles/SPDX/copyleft-next-0.3.1 contains license(s) copyleft-next-0.3.1
 File NomosTestfiles/SPDX/CPAL-1.0 contains license(s) CPAL-1.0
 File NomosTestfiles/SPDX/CPL-1.0 contains license(s) CPL-1.0
@@ -1501,7 +1524,7 @@ File NomosTestfiles/SPDX/Libtool-exception.txt contains license(s) GPL,Libtool-e
 File NomosTestfiles/SPDX/Linux-syscall-note contains license(s) Linux-syscall-note
 File NomosTestfiles/SPDX/Linux-syscall-note.txt contains license(s) GPL,Linux-syscall-note
 File NomosTestfiles/SPDX/LLVM-exception contains license(s) LLVM-exception
-File NomosTestfiles/SPDX/LLVM-exception.txt contains license(s) Apache-2.0,GPL-2.0,LLVM-exception
+File NomosTestfiles/SPDX/LLVM-exception.txt contains license(s) GPL-2.0,LLVM-exception
 File NomosTestfiles/SPDX/LZMA-exception contains license(s) LZMA-exception
 File NomosTestfiles/SPDX/LZMA-exception.txt contains license(s) CPL-1.0,LZMA-exception
 File NomosTestfiles/SPDX/mif-exception contains license(s) mif-exception

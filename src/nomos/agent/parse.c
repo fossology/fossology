@@ -565,74 +565,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Check Apache licenses before BSD
    */
-  if (INFILE(_LT_ASL)) {
+  if (HASTEXT(_PHR_Apache_ref0, REG_EXTENDED)) {
     cp = ASLVERS();
     INTERESTING(cp);
-  }
-  else if (INFILE(_LT_ASLref3)) {
-    cp = ASLVERS();
-    INTERESTING(cp);
-  }
-  else if (INFILE(_LT_ASL20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora))
-  {
-    INTERESTING(lDebug ? "Apache(2.0#2)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_ASL20ref) || INFILE(_LT_ASL20ref_2)) {
-    INTERESTING(lDebug ? "Apache(2.0#3)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_TITLE_ASL20)) {
-    INTERESTING(lDebug ? "Apache(2.0#4)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (URL_INFILE(_URL_APACHE_20_1)) {
-    INTERESTING(lDebug ? "Apache2(url#1)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (URL_INFILE(_URL_APACHE_20_2)) {
-    INTERESTING(lDebug ? "Apache2(url#2)" : "Apache-2.0");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_PHR_ASL11)) {
-    INTERESTING(lDebug ? "Apache(1.1#phr)" : "Apache-1.1");
-    lmem[_mAPACHE11] = 1;
-  }
-  else if (INFILE(_LT_APACHE_1)) {
-    INTERESTING(lDebug ? "Apache(1)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHE_2)) {
-    INTERESTING(lDebug ? "Apache(2)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHEref1)) {
-    INTERESTING(lDebug ? "Apache(ref#1)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHEref2)) {
-    INTERESTING(lDebug ? "Apache(ref#2)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHEref3)) {
-    INTERESTING(lDebug ? "Apache(ref#3)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHEref4)) {
-    INTERESTING(lDebug ? "Apache(ref#4)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (INFILE(_LT_APACHESTYLEref)) {
-    INTERESTING("Apache-style");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (URL_INFILE(_URL_ASL_1)) {
-    INTERESTING(lDebug ? "Apache(url#1)" : "Apache");
-    lmem[_mAPACHE] = 1;
-  }
-  else if (URL_INFILE(_URL_ASL_2)) {
-    INTERESTING(lDebug ? "Apache(url#2)" : "Apache");
-    lmem[_mAPACHE] = 1;
   }
   cleanLicenceBuffer();
   /*
@@ -642,36 +577,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
    * certain, but LOTS of licenses are based on ~10 originally-BSD-phrases.
    */
   if (INFILE(_LT_BSD_1)) {
-    if (!lmem[_mAPACHE] && (INFILE(_CR_APACHE) || INFILE(_TITLE_ASL))) {
-      if (INFILE(_LT_ASL20ref)) {
-        INTERESTING("Apache-2.0");
-        lmem[_mAPACHE] = 1;
-      }
-      else if (INFILE(_LT_ASL11ref)) {
-        INTERESTING(lDebug ? "Apache(1.1#2)" : "Apache-1.1");
-        lmem[_mAPACHE11] = 1;
-      }
-      else if ((INFILE(_LT_ASLref1) || INFILE(_LT_ASLref2))) {
-        INTERESTING(lDebug ? "Apache(1.0#2)" : "Apache-1.0");
-        lmem[_mAPACHE10] = 1;
-      }
-      else {
-        cp = ASLVERS();
-        INTERESTING(cp);
-      }
-    }
-    /*
-     * Originally no BSD style licenses were checked if Apache license
-     * was found. It excludes the case where the file has Apache license
-     * reference and f.ex. BSD-3-Clause license. That is too restrictive
-     * assumption. However, some extra checks needs to be done later to
-     * to prevent following duplicate detections:
-     * - Apache-1.0, BSD-2-Clause
-     * - Apache-1.1, Apache-1.1-style
-     *
-     * If experiences show that the change causes too many false positives,
-     * if should be changed back to else if statement.
-     */
     if (INFILE(_TITLE_PHP301)) {
       INTERESTING(lDebug ? "PHP(v3.01#1)" : "PHP-3.01");
       lmem[_mPHP] = 1;
@@ -737,7 +642,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         else if (INFILE(_LT_BSD_CLAUSE_4) && INFILE(_LT_ANT_BSD_RESTRICTION)) {
           INTERESTING("ANT+SharedSource");
         }
-        else if (!lmem[_mAPACHE11] && INFILE(_LT_APACHE_11_CLAUSE_3) && INFILE(_LT_APACHE_11_CLAUSE_4) && INFILE(_LT_APACHE_11_CLAUSE_5)) {
+        else if (!lmem[_mAPACHE11] && INFILE(_LT_Apache_11_CLAUSE_3) && INFILE(_LT_Apache_11_CLAUSE_4) && INFILE(_LT_Apache_11_CLAUSE_5)) {
           INTERESTING(lDebug ? "BSD(Apache-1.1)" : "Apache-1.1-style");
         }
         else if(HASTEXT(_LT_Sendmail_823_title, 0)) {
@@ -772,7 +677,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
           INTERESTING("BSD-2-Clause");
         }
       }
-
       else if (INFILE(_CR_CRYPTOGAMS)) {
         INTERESTING("Cryptogams");
       }
@@ -804,6 +708,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       }
     }
     lmem[_fBSD] = 1;
+  }
+  else if (INFILE(_LT_BSD_CLEAR_CLAUSE_0) && INFILE(_LT_BSD_CLAUSE_1) && INFILE(_LT_BSD_CLAUSE_2)) {
+    INTERESTING("BSD-3-Clause-Clear");
   }
   else if (INFILE(_PHR_Linux_OpenIB)) {
     INTERESTING("Linux-OpenIB");
@@ -864,11 +771,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_fBSD] = 1;
   }
   else if (INFILE(_LT_BSD_3) && NOT_INFILE(_TITLE_OPENLDAP)) {
-    if (INFILE(_CR_APACHE)) {
-      cp = ASLVERS();
-      INTERESTING(lDebug ? "Apache(g)" : cp);
-    }
-    else if (INFILE(_LT_AMPAS)) {
+    if (INFILE(_LT_AMPAS)) {
       INTERESTING("AMPAS");
     }
     else if (INFILE(_CR_BSDCAL)) {
@@ -1016,7 +919,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_SPDX_BSD_3_Clause)) {
     INTERESTING("BSD-3-Clause");
   }
-  else if (INFILE(_PHR_BSD_3_CLAUSE_1) || INFILE(_PHR_BSD_3_CLAUSE_2) || INFILE(_PHR_BSD_3_CLAUSE_3)) {
+  else if (INFILE(_PHR_BSD_3_CLAUSE_1) || INFILE(_PHR_BSD_3_CLAUSE_2) || INFILE(_PHR_BSD_3_CLAUSE_3) || INFILE(_PHR_BSD_3_CLAUSE_4)) {
     INTERESTING(lDebug ? "BSD(phr1/2)" : "BSD-3-Clause");
   }
   else if (INFILE(_SPDX_BSD_2_Clause_FreeBSD)) {
@@ -1034,8 +937,13 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_SPDX_BSD_2_Clause_2)) {
     INTERESTING("BSD-2-Clause");
   }
-  else if (INFILE(_PHR_BSD_2_CLAUSE_1) || INFILE(_PHR_BSD_2_CLAUSE_2) || INFILE(_PHR_BSD_2_CLAUSE_3)) {
-    INTERESTING(lDebug ? "BSD(phr1/2/3)" : "BSD-2-Clause");
+  else if (INFILE(_PHR_BSD_2_CLAUSE_1)
+        || INFILE(_PHR_BSD_2_CLAUSE_2)
+        || INFILE(_PHR_BSD_2_CLAUSE_3)
+        || INFILE(_PHR_BSD_2_CLAUSE_4)
+        || INFILE(_PHR_BSD_2_CLAUSE_5)
+        || INFILE(_PHR_BSD_2_CLAUSE_6)) {
+    INTERESTING(lDebug ? "BSD(phr1/2/3/4/5/6)" : "BSD-2-Clause");
   }
   else if (INFILE(_SPDX_BSD_4_Clause_UC)) {
     INTERESTING("BSD-4-Clause-UC");
@@ -1355,7 +1263,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING("copyleft-next-0.3.1");
     lmem[_mGPL] = 1;
   }
-  else if (INFILE(_PHR_COPYLEFT_NEXT_030)) {
+  else if (INFILE(_PHR_COPYLEFT_NEXT_030) || INFILE(_SPDX_copyleft_next_030)) {
     INTERESTING("copyleft-next-0.3.0");
   }
   else if (INFILE(_PHR_COPYLEFT_NEXT_031) || INFILE(_SPDX_copyleft_next_031)) {
@@ -1372,24 +1280,24 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     /*
      * Affero
      */
-    if (INFILE(_PHR_AFFERO) && NOT_INFILE(_LT_GPL3ref4)) {
-      if (INFILE(_LT_AFFERO1) || INFILE(_LT_AFFERO2) ||
-          INFILE(_LT_AFFERO3)) {
+    if (INFILE(_PHR_AGPL) && NOT_INFILE(_LT_GPL3ref4)) {
+      if (INFILE(_LT_AGPL1) || INFILE(_LT_AGPL2) ||
+          INFILE(_LT_AGPL3)) {
         cp = AGPLVERS();
         INTERESTING(lDebug ? "Affero(#1)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_AFFEROref1)) {
+      else if (INFILE(_LT_AGPLref1)) {
         cp = AGPLVERS();
         INTERESTING(lDebug ? "Affero(#2)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if (INFILE(_LT_AFFEROref2) && NOT_INFILE(_LT_NOTAFFEROref1)) {
+      else if (INFILE(_LT_AGPLref2) && NOT_INFILE(_LT_NOT_AGPLref1)) {
         cp = AGPLVERS();
         INTERESTING(lDebug ? "Affero(#3)" : cp);
         lmem[_mGPL] = 1;
       }
-      else if (mCR_FSF() && NOT_INFILE(_LT_GPL3_NOT_AFFERO)) {
+      else if (mCR_FSF() && NOT_INFILE(_LT_GPL3_NOT_AGPL)) {
         cp = AGPLVERS();
         INTERESTING(lDebug ? "Affero(CR)" : cp);
         lmem[_mGPL] = 1;
@@ -2234,7 +2142,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     INTERESTING(lDebug ? "MIT(ref4)" : "MIT");
     lmem[_mMIT] = 1;
   }
-  else if (!lmem[_mMIT] && INFILE(_LT_MITref5)) {
+  else if (!lmem[_mMIT] && (INFILE(_LT_MITref5) || INFILE(_LT_MITref9))) {
     INTERESTING(lDebug ? "MIT(ref5)" : "MIT");
     lmem[_mMIT] = 1;
   }
@@ -2243,7 +2151,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     lmem[_mMIT] = 1;
   }
   else if (!lmem[_mMIT] && INFILE(_LT_MITref8)) {
-    INTERESTING(lDebug ? "MIT(ref8)" : "MIT");
+    INTERESTING(lDebug ? "MIT(ref8/9)" : "MIT");
     lmem[_mMIT] = 1;
   }
   else if (INFILE(_SPDX_MIT_0)) {
@@ -5018,7 +4926,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   else if (INFILE(_LT_LPL_102)) {
     INTERESTING("LPL-1.02");
   }
-  else if (INFILE(_LT_CPLref1) && NOT_INFILE(_TITLE_EPL10)) {
+  else if (!lmem[_fREAL] && INFILE(_LT_CPLref1) && NOT_INFILE(_TITLE_EPL10)) {
     cp = CPLVERS();
     INTERESTING(lDebug ? "CPL(ref)" : cp);
   }
@@ -5382,12 +5290,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
         INTERESTING(lDebug ? "RPL#1" : "RPL");
       }
     }
-    else if (INFILE(_LT_RECIP15)) {
-      INTERESTING("RPL-1.5");
-    }
-    else if (INFILE(_TITLE_MINDTERM)) {
-      INTERESTING("MindTerm");
-    }
+  }
+  else if (INFILE(_LT_RECIP15)) {
+    INTERESTING("RPL-1.5");
+  }
+  else if (INFILE(_TITLE_MINDTERM)) {
+    INTERESTING("MindTerm");
   }
   else if (INFILE(_LT_RECIP_1) || INFILE(_LT_RECIP_2)) {
     if (INFILE(_TITLE_RPL15)) {
@@ -5412,6 +5320,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   else if (INFILE(_LT_CC_BY_SA_25)) {
     INTERESTING("CC-BY-SA-2.5");
+  }
+  else if (INFILE(_LT_CC_BY_NC_30)) {
+    INTERESTING("CC-BY-NC-3.0");
   }
   else if (INFILE(_LT_CC_BY_ND_30)) {
     INTERESTING("CC-BY-ND-3.0");
@@ -6858,12 +6769,6 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     pd = 0;
   }
   cleanLicenceBuffer();
-  /* License: Apache 2.0 */
-  if (INFILE(_LT_APACHE_V2ref1) || INFILE(_LT_APACHE_V2ref2) || INFILE(_LT_APACHE_V2ref3) || INFILE(_LT_APACHE_V2ref4) || INFILE(_LT_APACHE_V2ref5))
-  {
-    INTERESTING("Apache-2.0");
-  }
-  cleanLicenceBuffer();
   /* LIBGCJ license */
   if (INFILE(_LT_LIBGCJ))
   {
@@ -7364,6 +7269,9 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
   traceFunc("== aslVersion()\n");
 #endif  /* PROC_TRACE */
 
+  /*
+   * Exclude first non-Apache licenses
+   */
   if (INFILE(_TITLE_PHORUM) || INFILE(_CR_PHORUM)) {
     lstr = "Phorum";
     lmem[_mAPACHE] = 1;
@@ -7372,41 +7280,159 @@ char *aslVersion(char *filetext, int size, int isML, int isPS)
     lstr = "ImageMagick(Apache)";
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_TITLE_ASL20)) {
+  /*
+   * Apache-2.0 cases
+   */
+  else if (INFILE(_SPDX_Apache_20)) {
+    lstr = (lDebug ? "Apache-2.0(SPDX)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_TITLE_Apache_20)) {
     lstr = (lDebug ? "Apache-2(f)" : "Apache-2.0");
     lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_TITLE_ASL11)) {
-    lstr = (lDebug ? "Apache-1.1(f)" : "Apache-1.1");
-    lmem[_mAPACHE11] = 1;
+  else if (INFILE(_PHR_Apache_20_ref1) || INFILE(_PHR_Apache_20_ref2) || INFILE(_PHR_Apache_20_ref3))
+  {
+    lstr = (lDebug ? "PHR_Apache_20_ref(1-5)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
   }
-  else if (INFILE(_LT_ASLref1)) {
-    lstr = (lDebug ? "Apache-1.0(f)" : "Apache-1.0");
-    lmem[_mAPACHE10] = 1;
-  }
-  else if (INFILE(_LT_ASLref2)) {
-    lstr = (lDebug ? "Apache-1.0(g)" : "Apache-1.0");
-    lmem[_mAPACHE10] = 1;
-  }
-  else if (URL_INFILE(_URL_APACHE_20)) {
+  else if (URL_INFILE(_URL_Apache_20)) {
     lstr = (lDebug ? "Apache-2.0(u)" : "Apache-2.0");
     lmem[_mAPACHE] = 1;
   }
-  else if (URL_INFILE(_URL_APACHE_11)) {
+  else if (INFILE(_LT_Apache_20) && NOT_INFILE(_TITLE_Flora_V10) && NOT_INFILE(_TITLE_Flora_V11) && !URL_INFILE(_URL_Flora))
+  {
+    lstr = (lDebug ? "Apache(2.0#2)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_PHR_Apache_20_ref4) || INFILE(_PHR_Apache_20_ref5) || INFILE(_PHR_Apache_20_ref6)) {
+    lstr = (lDebug ? "Apache(2.0#3)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_TITLE_Apache_20)) {
+    lstr = (lDebug ? "Apache(2.0#4)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_20_1)) {
+    lstr = (lDebug ? "Apache2(url#1)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_20_2)) {
+    lstr = (lDebug ? "Apache2(url#2)" : "Apache-2.0");
+    lmem[_mAPACHE] = 1;
+  }
+  /*
+   * Apache-1.1 cases
+   */
+  else if (INFILE(_SPDX_Apache_11)) {
+    lstr = (lDebug ? "Apache-1.1(SPDX)" : "Apache-1.1");
+    lmem[_mAPACHE11] = 1;
+  }
+  else if (INFILE(_TITLE_Apache_11)) {
+    lstr = (lDebug ? "Apache-1.1(f)" : "Apache-1.1");
+    lmem[_mAPACHE11] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_11)) {
     lstr = (lDebug ? "Apache-1.1(u)" : "Apache-1.1");
     lmem[_mAPACHE11] = 1;
   }
-  else if (URL_INFILE(_URL_APACHE_10)) {
+  else if (INFILE(_LT_Apache_11_CLAUSE_3) && INFILE(_LT_Apache_11_CLAUSE_4) && INFILE(_LT_Apache_11_CLAUSE_5)) {
+    lstr = (lDebug ? "Apache-1.1(clauses)" : "Apache-1.1");
+    lmem[_mAPACHE11] = 1;
+  }
+  else if (INFILE(_PHR_Apache_11_ref1)) {
+    lstr = (lDebug ? "Apache(1.1#phr)" : "Apache-1.1");
+    lmem[_mAPACHE11] = 1;
+  }
+  /*
+   * Apache-1.0 cases
+   */
+  else if (INFILE(_SPDX_Apache_10)) {
+    lstr = (lDebug ? "Apache-1.0(SPDX)" : "Apache-1.0");
+    lmem[_mAPACHE10] = 1;
+  }
+  else if (INFILE(_PHR_Apache_ref2)) {
+    lstr = (lDebug ? "Apache-1.0(f)" : "Apache-1.0");
+    lmem[_mAPACHE10] = 1;
+  }
+  else if (INFILE(_LT_Apache_10_CLAUSE_4)) {
+    lstr = (lDebug ? "Apache-1.0(g)" : "Apache-1.0");
+    lmem[_mAPACHE10] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_10)) {
     lstr = (lDebug ? "Apache-1.0(u)" : "Apache-v1.0");
     lmem[_mAPACHE10] = 1;
   }
-  else if (INFILE(_LT_APACHE_11_CLAUSE_3) && INFILE(_LT_APACHE_11_CLAUSE_4) && INFILE(_LT_APACHE_11_CLAUSE_5)) {
-    INTERESTING(lDebug ? "Apache-1.1(clauses)" : "Apache-1.1");
-    lmem[_mAPACHE11] = 1;
+  /*
+   * BSD-style cases
+   */
+  else if (INFILE(_LT_BSD_1)) {
+    if (INFILE(_CR_APACHE) || INFILE(_TITLE_Apache)) {
+      if (INFILE(_PHR_Apache_20_ref6)) {
+        lstr = (lDebug ? "Apache-20_ref6" : "Apache-2.0");
+        lmem[_mAPACHE] = 1;
+      }
+      else if (INFILE(_PHR_Apache_11_ref2)) {
+        lstr = (lDebug ? "Apache(1.1#2)" : "Apache-1.1");
+        lmem[_mAPACHE11] = 1;
+      }
+      else if ((INFILE(_PHR_Apache_ref2) || INFILE(_LT_Apache_10_CLAUSE_4))) {
+        lstr = (lDebug ? "Apache(1.0#2)" : "Apache-1.0");
+        lmem[_mAPACHE10] = 1;
+      }
+      else {
+        lstr = (lDebug ? "Apache(title)" : "Apache");
+        lmem[_mAPACHE] = 1;
+      }
+    }
   }
-  else {
-    lstr = (lDebug ? "Apache(def)" : "Apache");
-    lmem[_mAPACHE11] = 1;
+  /*
+   * Apache without versions
+   */
+  else if (!lmem[_fREAL] && INFILE(_SPDX_Apache)) {
+    lstr = (lDebug ? "Apache(SPDX)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_PHR_Apache_ref1)) {
+    INTERESTING(lDebug ? "Apache(ref#1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_PHR_Apache_ref4)) {
+    lstr = (lDebug ? "Apache(ref#3)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_PHR_Apache_ref3)) {
+    lstr = (lDebug ? "Apache(ref#4)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_1)) {
+    lstr = (lDebug ? "Apache(url#1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (URL_INFILE(_URL_Apache_2)) {
+    lstr = (lDebug ? "Apache(url#2)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_PHR_Apache_ref6)) {
+    lstr = (lDebug ? "Apache(ref#6)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  /*
+   * _LT_Apache_1 and _2 cannot be identified in any Apache license
+   * versions. They have been defined in very early nomos versions. They
+   * are kept here, although, there are no special test cases for them.
+   */
+  else if (INFILE(_LT_Apache_1)) {
+    lstr = (lDebug ? "Apache(1)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_Apache_2)) {
+    lstr = (lDebug ? "Apache(2)" : "Apache");
+    lmem[_mAPACHE] = 1;
+  }
+  else if (INFILE(_LT_APACHESTYLEref)) {
+    lstr = ("Apache-style");
+    lmem[_mAPACHE] = 1;
   }
   return lstr;
 }
@@ -7874,23 +7900,23 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
    * you can also license it under GPL version 3... same reasoning goes with
    * the actual v3 license (vs the reference).
    */
-  if (INFILE(_PHR_AFFERO_V1_OR_LATER) ||
-      INFILE(_TITLE_AFFERO_V1_OR_LATER) || INFILE(_SPDX_AGPL_10_or_later)) {
+  if (INFILE(_PHR_AGPL_10_or_later) ||
+      INFILE(_TITLE_AGPL_10_or_later) || INFILE(_SPDX_AGPL_10_or_later)) {
     lstr = "AGPL-1.0+";
   }
-  else if (INFILE(_PHR_FSF_V1_ONLY) || INFILE(_TITLE_AFFERO_V1_ONLY) || INFILE(_SPDX_AGPL_10)) {
+  else if (INFILE(_PHR_FSF_V1_ONLY) || INFILE(_TITLE_AGPL_10_only) || INFILE(_SPDX_AGPL_10)) {
     lstr = "AGPL-1.0";
   }
-  else if (INFILE(_PHR_AFFERO_V3_OR_LATER) || INFILE(_TITLE_AFFERO_V3_OR_LATER_ref1) ||
-      INFILE(_TITLE_AFFERO_V3_OR_LATER) || INFILE(_SPDX_AGPL_30_or_later)) {
-    if (INFILE(_LT_AFFERO_V3)) {
+  else if (INFILE(_PHR_AGPL_30_or_later) || INFILE(_TITLE_AGPL_30_or_later_ref1) ||
+      INFILE(_TITLE_AGPL_30_or_later) || INFILE(_SPDX_AGPL_30_or_later)) {
+    if (INFILE(_LT_AGPL_30)) {
       lstr = lDebug ? "Affero-v3(#1)" : "AGPL-3.0";
     }
     else {
       lstr = "AGPL-3.0+";
     }
   }
-  else if (INFILE(_PHR_AFFERO_V3_1) || HASTEXT(_PHR_AFFERO_V3_2, REG_EXTENDED) || INFILE(_SPDX_AGPL_30)) {
+  else if (HASTEXT(_PHR_AGPL_30_1, REG_EXTENDED) || INFILE(_SPDX_AGPL_30)) {
     lstr = "AGPL-3.0";
   }
   else if (GPL_INFILE(_PHR_FSF_V3_ONLY)) {
@@ -7904,7 +7930,7 @@ char *agplVersion(char *filetext, int size, int isML, int isPS)
       lstr = lDebug ? "Affero-v3(#2)" : "AGPL-3.0";
     }
   }
-  else if (INFILE(_TITLE_AFFERO_V3_ONLY)) {
+  else if (INFILE(_TITLE_AGPL_30_only)) {
     lstr = lDebug ? "Affero-v3(#3)" : "AGPL-3.0";
   }
   else if (INFILE(_TITLE_GPL3)) {
@@ -8015,7 +8041,7 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
     lstr = "LGPL-3.0+";
   }
   else if (INFILE(_LT_LGPL3ref) && NOT_INFILE(_PHR_NOT_UNDER_LGPL)) {
-    INTERESTING("LGPL-3.0");
+    lstr = "LGPL-3.0";
     lmem[_mLGPL] = 1;
   }
   else if (GPL_INFILE(_PHR_LGPL3_ONLY) ||
@@ -8057,13 +8083,13 @@ char *lgplVersion(char *filetext, int size, int isML, int isPS)
     lstr = lDebug ? "LGPL-v2(#2)" : "LGPL-2.0";
   }
   else if (INFILE(_SPDX_LGPL_20)) {
-    INTERESTING("LGPL-2.0");
+    lstr = "LGPL-2.0";
   }
   else if (INFILE(_SPDX_LGPL_21)) {
-    INTERESTING("LGPL-2.1");
+    lstr = "LGPL-2.1";
   }
   else if (INFILE(_SPDX_LGPL_30)) {
-    INTERESTING("LGPL-3.0");
+    lstr = "LGPL-3.0";
   }
   else {
     lstr = "LGPL";
@@ -8124,7 +8150,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     lstr = "GPL-2.0";
   }
   else if (GPL_INFILE(_PHR_GPL2_OR_GPL3)) {
-    lstr = "GPL-2.0,3.0";
+    lstr = "GPL-2.0,GPL-3.0";
   }
   else if (GPL_INFILE(_PHR_GPL3_OR_LATER_ref2) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref3)
       || GPL_INFILE(_PHR_GPL3_OR_LATER) || GPL_INFILE(_PHR_GPL3_OR_LATER_ref1)) {
@@ -8285,6 +8311,9 @@ char *ccVersion(char *filetext, int size, int isML, int isPS)
     lstr = "CC-BY-SA-2.5";
   }
   else if (INFILE(_TITLE_CC_BY_SA_30) || URL_INFILE(_URL_CC_BY_SA_30)) {
+    lstr = "CC-BY-SA-3.0";
+  }
+  else if (INFILE(_PHR_CC_BY_SA_30)) {
     lstr = "CC-BY-SA-3.0";
   }
   else if (INFILE(_TITLE_CC_BY_SA_40) || URL_INFILE(_URL_CC_BY_SA_40)) {
@@ -9896,6 +9925,9 @@ int checkPublicDomain(char *filetext, int size, int score, int kwbm,
   } else if (INFILE(_LT_PUBDOM_9)) {
     INTERESTING(lDebug ? "Pubdom(9)" : LS_PD_CLM);
     ret = 1;
+  } else if (INFILE(_LT_PUBDOM_10)) {
+    INTERESTING(lDebug ? "Pubdom(10)" : LS_PD_CLM);
+    ret = 1;
   } else if (INFILE(_URL_PUBDOM)) {
     INTERESTING(lDebug ? "Pubdom(URL)" : LS_PD_CLM);
     ret = 1;
@@ -10250,18 +10282,6 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   if (INFILE(_SPDX_ANTLR_PD)) {
     INTERESTING("ANTLR-PD");
   }
-  if (!lmem[_mAPACHE10] && INFILE(_SPDX_Apache_10)) {
-    INTERESTING("Apache-1.0");
-  }
-  else if (!lmem[_mAPACHE11] && INFILE(_SPDX_Apache_11)) {
-    INTERESTING("Apache-1.1");
-  }
-  else if (!lmem[_mAPACHE] && INFILE(_SPDX_Apache_20)) {
-    INTERESTING("Apache-2.0");
-  }
-  else if (!lmem[_fREAL] && !lmem[_mAPACHE10] && !lmem[_mAPACHE11] && !lmem[_mAPACHE] && INFILE(_SPDX_Apache)) {
-    INTERESTING("Apache");
-  }
   if (INFILE(_SPDX_AML)) {
     INTERESTING("AML");
   }
@@ -10436,9 +10456,6 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   else if (INFILE(_SPDX_CC_BY_NC_SA_40)) {
     INTERESTING("CC-BY-NC-SA-4.0");
   }
-  if (INFILE(_SPDX_CDLA_Permissive_10)) {
-    INTERESTING("CDLA-Permissive-1.0");
-  }
   if (INFILE(_SPDX_CC_BY_SA_10)) {
     INTERESTING("CC-BY-SA-1.0");
   }
@@ -10453,6 +10470,9 @@ void spdxReference(char *filetext, int size, int isML, int isPS)
   }
   else if (INFILE(_SPDX_CC_BY_SA_40)) {
     INTERESTING("CC-BY-SA-4.0");
+  }
+  if (INFILE(_SPDX_CDLA_Permissive_10)) {
+    INTERESTING("CDLA-Permissive-1.0");
   }
   if (INFILE(_SPDX_CDLA_Sharing_10)) {
     INTERESTING("CDLA-Sharing-1.0");
