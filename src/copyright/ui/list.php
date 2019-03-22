@@ -101,17 +101,33 @@ class copyright_list extends FO_Plugin
     $lft = $row["lft"];
     $rgt = $row["rgt"];
     $upload_pk = $row["upload_fk"];
+    $params = [];
 
-    /* get all the copyright records for this uploadtree.  */
-    $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
-              from $tableName,
-              (SELECT uploadtree_pk, pfile_fk as PF, ufile_name from uploadtree
-                 where upload_fk=$1
-                   and uploadtree.lft BETWEEN $2 and $3) as SS
-              where PF=pfile_fk and agent_fk=$4 and hash=$5 and type=$6 order by uploadtree_pk";
+    if ($type == "copyFindings") {
+      $sql = "SELECT textfinding AS content, '$type' AS type, uploadtree_pk, ufile_name, PF
+              FROM $tableName,
+              (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
+                 WHERE upload_fk=$1
+                   AND uploadtree.lft BETWEEN $2 AND $3) AS SS
+              WHERE PF=pfile_fk AND hash=$4 ORDER BY uploadtree_pk";
+      $params = [
+        $upload_pk, $lft, $rgt, $hash
+      ];
+    } else {
+      /* get all the copyright records for this uploadtree.  */
+      $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
+                FROM $tableName,
+                (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
+                   WHERE upload_fk=$1
+                     AND uploadtree.lft BETWEEN $2 AND $3) AS SS
+                WHERE PF=pfile_fk AND agent_fk=$4 AND hash=$5 AND type=$6 ORDER BY uploadtree_pk";
+      $params = [
+        $upload_pk, $lft, $rgt, $Agent_pk, $hash, $type
+      ];
+    }
     $statement = __METHOD__.$tableName;
     $this->dbManager->prepare($statement, $sql);
-    $result = $this->dbManager->execute($statement,array($upload_pk, $lft, $rgt, $Agent_pk, $hash, $type));
+    $result = $this->dbManager->execute($statement,$params);
 
     $rows = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
@@ -255,7 +271,7 @@ class copyright_list extends FO_Plugin
     $filter = GetParm("filter",PARM_RAW);
     if (empty($uploadtree_pk) || empty($hash) || empty($type) || empty($agent_pk))
     {
-      $this->vars['pageContent'] = $this->Name . _("is missing required parameters");
+      $this->vars['pageContent'] = $this->Name . _(" is missing required parameters");
       return;
     }
 
@@ -314,6 +330,8 @@ class copyright_list extends FO_Plugin
         case "keyword":
           $TypeStr = _("Keyword Analysis");
           break;
+        case "copyFindings":
+          $TypeStr = _("User Findings");
       }
       $OutBuf .= "$NumInstances $TypeStr instances found in $RowCount  $text";
 
@@ -423,6 +441,11 @@ class copyright_list extends FO_Plugin
         break;
       case "statement" :
         $tableName = "copyright";
+        $modBack = "copyright-hist";
+        $viewName = "copyright-view";
+        break;
+      case "copyFindings" :
+        $tableName = "copyright_decision";
         $modBack = "copyright-hist";
         $viewName = "copyright-view";
         break;

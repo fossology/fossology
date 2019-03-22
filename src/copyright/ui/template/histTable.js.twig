@@ -88,17 +88,82 @@ function createTable{{ table.type }}() {
   });
 
   $('#replaceSelected{{ table.type }}').click(function () {
+    var replaceText = $('#replaceText{{ table.type }}').val().trim();
+    var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
+    if(replaceIsValid){
+      $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+        currentValue = $(this).val();
+        var currUploadData = currentValue.split(',');
+        updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
+      });
+      location.reload(true);
+    }
+  });
+
+  return enabledTable;
+}
+
+function createPlaneTableBase{{ table.type }}(activated) {
+  var aoColumns = [
+      { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
+      { "sTitle": "{{ table.description }}", "sClass": "left"},
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+    ];
+  if (activated)
+  {
+    var id = '#copyright{{ table.type }}';
+    var action = 'getData'
+    aoColumns = aoColumns.concat([
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
+  }
+  else
+  {
+    var id = '#copyright{{ table.type }}deactivated';
+    var action = 'getDeactivatedData'
+  }
+
+  return $(id).dataTable({
+    "bServerSide": true,
+    "sAjaxSource": "?mod=ajax-copyright-hist&action=" + action,
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      aoData.push({ "name":"upload", "value": "{{ table.uploadId }}" });
+      aoData.push({ "name":"item", "value": "{{ table.uploadTreeId }}" });
+      aoData.push({ "name":"type", "value": "{{ table.type }}" });
+      aoData.push({ "name":"filter", "value": "{{ table.filter }}" });
+      $.getJSON(sSource, aoData, fnCallback).fail(function() {
+        if (confirm("You are not logged in. Go to login page?"))
+          window.location.href = "?mod=auth";
+      });
+    },
+    "sPaginationType": "listbox",
+    "aoColumns": aoColumns,
+    "aaSorting": {{ table.sorting }},
+    "iDisplayLength": 50,
+    "bProcessing": true,
+    "bStateSave": true,
+    "bRetrieve": true
+  });
+}
+
+function createPlainTable{{ table.type }}() {
+  var enabledTable = createPlaneTableBase{{ table.type }}(true);
+  createPlaneTableBase{{ table.type }}(false);
+
+  $('#selectDelete{{ table.type }}').change(function () {
+    $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#deleteSelected{{ table.type }}').click(function () {
     $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
       currentValue = $(this).val();
       var currUploadData = currentValue.split(',');
-      var replaceText = $('#replaceText').val().trim();
-      var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
-      if(replaceIsValid){
-        updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
-      }
+      deleteHashDecision(currUploadData[0], currUploadData[1], currUploadData[2]);
     });
-    location.reload(true);
   });
+
+  $('#replaceText{{ table.type }}').parent().remove();
+  $('#replaceSelected{{ table.type }}').remove();
 
   return enabledTable;
 }
