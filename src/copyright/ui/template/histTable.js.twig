@@ -113,8 +113,8 @@ function updateRows{{ table.type }}(upload, item, hash, kind, replaceText) {
         $("#delete{{ table.type }}" + hash).hide();
         updateElement.html("updating...");
       },
-      error: function() { 
-        alert('error while updating a record'); 
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
       }
   });
 }
@@ -129,8 +129,8 @@ function delete{{ table.type }}(upload, item, hash, kind) {
         $("#delete{{ table.type }}" + hash).hide();
         $("#update{{ table.type }}" + hash).show();
       },
-      error: function() { 
-        alert('error while deleting a record'); 
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
       }
   });
 }
@@ -146,6 +146,8 @@ function undo{{ table.type }}(upload, item, hash, kind) {
         $("#update{{ table.type }}" + hash).hide();
         $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);
       },
-      error: function() { alert('error'); }
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
+      }
   });
 }

@@ -100,9 +100,18 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     else if($action=="update" || $action=="delete" || $action=="undo")
     {
       $id = GetParm("id", PARM_STRING);
-      list($upload, $item, $hash, $type) = explode(",", $id);
+      $getEachID = array_filter(explode(",", trim($id, ',')), function($var) {
+          return $var !== "";
+      });
+      if(count($getEachID) == 4) {
+        list($upload, $item, $hash, $type) = $getEachID;
+      } else {
+        return new Response('bad request while '.$action,
+                Response::HTTP_BAD_REQUEST,
+                array('Content-type'=>'text/plain')
+          );
+      }
     }
-
 
     /* check upload permissions */
     if (!(($action == "getData" || $action == "getDeactivatedData") &&

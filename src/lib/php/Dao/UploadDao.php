@@ -659,7 +659,6 @@ ORDER BY lft asc
   {
     $stmt = __METHOD__;
     $sql = "SELECT * FROM report_info where upload_fk=$1";
-    $this->dbManager->prepare(__METHOD__,$sql);
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
     if(empty($row)){
