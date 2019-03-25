@@ -149,3 +149,6 @@ src/reportImport/agent/reportImport
 /src/cli/fo_ninka_license_list
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
+
+# Add all the Ubuntu consol log file
+ubuntu-*
