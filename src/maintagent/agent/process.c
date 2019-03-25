@@ -370,32 +370,35 @@ FUNCTION void removeOrphanedRows()
                "  SELECT 1 "
                "  FROM uploadtree UT  "
                "  WHERE CD.uploadtree_fk = UT.uploadtree_pk "
-               " );";
+               " ) AND CD.scope = '0';";
 
-  char *SQL3 = "DELETE FROM clearing_decision_event CDE"
-               " WHERE NOT EXISTS ( "
-               "  SELECT 1 "
-               "  FROM uploadtree UT  "
-               "  INNER JOIN clearing_event CE "
-               "  ON CE.uploadtree_fk = UT.uploadtree_pk "
-               "  WHERE CDE.clearing_event_fk = CE.clearing_event_pk "
-               " );";
-
-  char *SQL4 = " DELETE FROM clearing_event CE "
+  char *SQL3 = "DELETE FROM clearing_event CE "
                " WHERE NOT EXISTS ( "
                "  SELECT 1 "
                "  FROM uploadtree UT  "
                "  WHERE CE.uploadtree_fk = UT.uploadtree_pk "
+               " ) AND NOT EXISTS ( "
+               "  SELECT 1 "
+               "  FROM clearing_decision CD"
+               "  WHERE CD.uploadtree_fk = CE.uploadtree_fk "
+               "  AND CD.scope = '1'"
                " );";
 
-  char *SQL5 = " DELETE FROM obligation_map OM "
+  char *SQL4 = "DELETE FROM clearing_decision_event CDE"
+               " WHERE NOT EXISTS ( "
+               "  SELECT 1 "
+               "  FROM clearing_event CE  "
+               "  WHERE CE.clearing_event_pk = CDE.clearing_event_fk "
+               " );";
+
+  char *SQL5 = "DELETE FROM obligation_map OM "
                " WHERE NOT EXISTS ( "
                "  SELECT 1 "
                "  FROM license_ref LR  "
                "  WHERE OM.rf_fk = LR.rf_pk "
                " );";
 
-  char *SQL6 = " DELETE FROM obligation_candidate_map OCM "
+  char *SQL6 = "DELETE FROM obligation_candidate_map OCM "
                " WHERE NOT EXISTS ( "
                "  SELECT 1 "
                "  FROM license_ref LR  "
@@ -419,13 +422,13 @@ FUNCTION void removeOrphanedRows()
   result = PQexecCheck(-202, SQL3, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
-  printf("%s Orphaned records have been removed from clearing_decision_event table\n", countTuples);
+  printf("%s Orphaned records have been removed from clearing_event table\n", countTuples);
   fo_scheduler_heart(1);
 
   result = PQexecCheck(-203, SQL4, __FILE__, __LINE__);
   countTuples = PQcmdTuples(result);
   PQclear(result);
-  printf("%s Orphaned records have been removed from clearing_event table\n", countTuples);
+  printf("%s Orphaned records have been removed from clearing_decision_event table\n", countTuples);
   fo_scheduler_heart(1);
 
   result = PQexecCheck(-204, SQL5, __FILE__, __LINE__);
