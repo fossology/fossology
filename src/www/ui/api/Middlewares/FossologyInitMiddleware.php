@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2019 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -17,26 +17,23 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***************************************************************/
 /**
- * @dir
- * @brief Middlewares for the Slim framework
  * @file
- * @brief Auth middleware for Slim
+ * @brief FOSSology initializer for Slim
  */
 
 namespace Fossology\UI\Api\Middlewares;
 
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Helper\AuthHelper;
+require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) .
+  "/lib/php/bootstrap.php";
 
 /**
- * @class RestAuthHelper
- * @brief Authentication middleware for Slim framework
+ * @class FossologyInitMiddleware
+ * @brief Middleware to initialize FOSSology for Slim framework
  */
-class RestAuthHelper
+class FossologyInitMiddleware
 {
   /**
-   * Check authentication for all calls, except for /auth/
+   * Clean all FOSSology plugins and load them again.
    *
    * @param  \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
    * @param  \Psr\Http\Message\ResponseInterface      $response PSR7 response
@@ -46,19 +43,15 @@ class RestAuthHelper
    */
   public function __invoke($request, $response, $next)
   {
-    if(stristr($request->getUri()->getPath(), "/auth") !== false) {
-      $response = $next($request, $response);
-    } else {
-      $authHelper = new AuthHelper();
-      $username = $request->getHeaderLine("php-auth-user");
-      $password = $request->getHeaderLine("php-auth-pw");
-      if(!$authHelper->checkUsernameAndPassword($username, $password)) {
-        $error = new Info(403, "Not authorized", InfoType::ERROR);
-        $response = $response->withJson($error->getArray(), $error->getCode());
-      } else {
-        $response = $next($request, $response);
-      }
-    }
+    global $container;
+    $timingLogger = $container->get("log.timing");
+    plugin_preinstall();
+    plugin_postinstall();
+    $timingLogger->toc("setup plugins");
+
+    $response = $next($request, $response);
+
+    plugin_unload();
     return $response;
   }
 }
