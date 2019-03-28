@@ -80,6 +80,8 @@ class AjaxExplorer extends DefaultPlugin
     $this->clearingDao = $this->getObject('dao.clearing');
     $this->agentDao = $this->getObject('dao.agent');
     $this->clearingFilter = $this->getObject('businessrules.clearing_decision_filter');
+    $this->filesThatShouldStillBeCleared = [];
+    $this->filesToBeCleared = [];
   }
 
   /**
@@ -223,49 +225,12 @@ class AjaxExplorer extends DefaultPlugin
       $nameRange = array();
     }
 
-    /*******    File Listing     ************/
-    $pfileLicenses = array();
-    foreach ($selectedScanners as $agentName=>$agentId) {
-      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange);
-      foreach ($licensePerPfile as $pfile => $licenseRow) {
-        foreach ($licenseRow as $licId => $row) {
-          $lic = $this->licenseProjector->getProjectedShortname($licId);
-          $pfileLicenses[$pfile][$lic][$agentName] = $row;
-        }
-      }
-    }
-
-    $alreadyClearedUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
-
-    $alreadyClearedUploadTreeView->materialize();
-    if (!$isFlat) {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    } else {
-      $this->filesThatShouldStillBeCleared = $alreadyClearedUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
-    $alreadyClearedUploadTreeView->unmaterialize();
-
-    $noLicenseUploadTreeView = new UploadTreeProxy($itemTreeBounds->getUploadId(),
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
-                         UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN ".$itemTreeBounds->getLeft()." AND ".$itemTreeBounds->getRight().")",
-                         UploadTreeProxy::OPT_GROUP_ID => $groupId),
-        $itemTreeBounds->getUploadTreeTableName(),
-        $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
-    $noLicenseUploadTreeView->materialize();
-    if (!$isFlat) {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->countMaskedNonArtifactChildren($itemTreeBounds->getItemId());
-    } else {
-      $this->filesToBeCleared = $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds);
-    }
-    $noLicenseUploadTreeView->unmaterialize();
-
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId, $isFlat);
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisions($allDecisions);
+
+    $pfileLicenses = $this->updateTheFindingsAndDecisions($selectedScanners,
+      $isFlat, $groupId, $editedMappedLicenses, $itemTreeBounds, $nameRange);
+
     $baseUri = Traceback_uri().'?mod=license'.Traceback_parm_keep(array('upload','folder','show'));
 
     $tableData = array();
@@ -316,6 +281,16 @@ class AjaxExplorer extends DefaultPlugin
     if ($isContainer && !$isFlat) {
       $fatChild = $this->uploadDao->getFatItemArray($child['uploadtree_pk'], $uploadId, $this->uploadtree_tablename);
       $uploadtree_pk = $fatChild['item_id'];
+      $childUploadTreeId = $uploadtree_pk;
+      $upload = $this->uploadDao->getUploadEntry($uploadtree_pk, $this->uploadtree_tablename);
+      $fileId = $upload['pfile_fk'];
+      $parent = $upload['realparent'];
+      $parentItemTreeBound = $this->uploadDao->getItemTreeBounds($parent, $this->uploadtree_tablename);
+
+      $pfileLicenses = array_replace($pfileLicenses,
+        $this->updateTheFindingsAndDecisions($latestSuccessfulAgentIds, $isFlat,
+          $groupId, $editedMappedLicenses, $parentItemTreeBound));
+
       $linkUri = "$uri&item=" . $uploadtree_pk;
       if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
@@ -409,6 +384,87 @@ class AjaxExplorer extends DefaultPlugin
     $img = $isDecisionTBD ? 'yellow' : $img;
 
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
+  }
+
+  /**
+   * @brief Fetch the license findings and decisions
+   * @param array $agentIds Map of agents run on the upload (with agent name as
+   *          key and id as value)
+   * @param boolean $isFlat Is the flat view required?
+   * @param integer $groupId The user group
+   * @param[in,out] array $editedMappedLicenses Map of decisions
+   * @param ItemTreeBounds $itemTreeBounds The current item tree bound
+   * @param array $nameRange The name range for current view
+   * @return array Array of license findings mapped as
+   *         `[pfile_id][license_id][agent_name] = license_findings`
+   */
+  private function updateTheFindingsAndDecisions($agentIds, $isFlat, $groupId,
+    &$editedMappedLicenses, $itemTreeBounds, $nameRange = array())
+  {
+    /**
+     * ***** File Listing ***********
+     */
+    $pfileLicenses = [];
+    foreach ($agentIds as $agentName => $agentId) {
+      $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId(
+        $itemTreeBounds, $agentId, $isFlat, $nameRange);
+      foreach ($licensePerPfile as $pfile => $licenseRow) {
+        foreach ($licenseRow as $licId => $row) {
+          $lic = $this->licenseProjector->getProjectedShortname($licId);
+          $pfileLicenses[$pfile][$lic][$agentName] = $row;
+        }
+      }
+    }
+
+    $alreadyClearedUploadTreeView = new UploadTreeProxy(
+      $itemTreeBounds->getUploadId(),
+      $options = array(
+        UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
+        UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
+        $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId
+      ), $itemTreeBounds->getUploadTreeTableName(),
+      $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
+
+    $alreadyClearedUploadTreeView->materialize();
+    if (! $isFlat) {
+      $this->filesThatShouldStillBeCleared = array_replace(
+        $this->filesThatShouldStillBeCleared,
+        $alreadyClearedUploadTreeView->countMaskedNonArtifactChildren(
+          $itemTreeBounds->getItemId()));
+    } else {
+      $this->filesThatShouldStillBeCleared = array_replace(
+        $this->filesThatShouldStillBeCleared,
+        $alreadyClearedUploadTreeView->getNonArtifactDescendants(
+          $itemTreeBounds));
+    }
+    $alreadyClearedUploadTreeView->unmaterialize();
+
+    $noLicenseUploadTreeView = new UploadTreeProxy(
+      $itemTreeBounds->getUploadId(),
+      $options = array(
+        UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+        UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
+        $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId
+      ), $itemTreeBounds->getUploadTreeTableName(),
+      $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
+    $noLicenseUploadTreeView->materialize();
+    if (! $isFlat) {
+      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
+        $noLicenseUploadTreeView->countMaskedNonArtifactChildren(
+          $itemTreeBounds->getItemId()));
+    } else {
+      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
+        $noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds));
+    }
+    $noLicenseUploadTreeView->unmaterialize();
+
+    $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
+      $groupId, $isFlat);
+    $editedMappedLicenses = array_replace($editedMappedLicenses,
+      $this->clearingFilter->filterCurrentClearingDecisions($allDecisions));
+    return $pfileLicenses;
   }
 }
 
