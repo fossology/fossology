@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2018
+# Copyright (C) Siemens AG 2017-2019
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,17 +14,19 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.0
+  version: 1.0.1
 servers:
-  - url: /repo/api/v1
+  - url: http://localhost/repo/api/v1
     description: Localhost instance
 security:
-  - BasicAuth: []
+  - bearerAuth: []
 
 paths:
   /auth:
     get:
-      summary: Get a login session registered
+      deprecated: true
+      security: []
+      summary: Get a login session registered (deprecated, use /tokens)
       description: >
         Get a login session registered using the username and password
       parameters:
@@ -41,8 +43,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: Login successfull
+        '299':
+          description: Resource is deprecated. Use /tokens
           content:
             application/json:
               schema:
@@ -52,6 +54,43 @@ paths:
                       type: string
               example:
                 {"header": "authorization: Basic Zm9zc3k6Zm9zc3k="}
+        '404':
+          description: UserName or password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /tokens:
+    post:
+      security: []
+      summary: Generate a new token
+      description: >
+        Generate a new token to access REST API
+      requestBody:
+        description: Required details for generating new token
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '201':
+          description: Token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                      type: string
+              example:
+                {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTEyOTIyMDAsIm5iZiI6MTU1MTIwNTgwMCwianRpIjoiTmk0eiIsInNjb3BlIjoicmVhZCJ9.71D6xTD2QE45t9AVCwbrQwSSae5lC4yzKCMpZWXoC2Q"}
         '404':
           description: UserName or password incorrect
           content:
@@ -634,9 +673,10 @@ paths:
 
 components:
   securitySchemes:
-    BasicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     SearchResults:
       type: object
@@ -819,6 +859,34 @@ components:
         description:
           type: string
           description: Description of the folder.
+    TokenRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username of the login user.
+        password:
+          type: string
+          format: password
+          description: Password of the user trying to login.
+        token_name:
+          type: string
+          maxLength: 40
+          description: Friendly name of the token
+        token_scope:
+          type: string
+          enum: ["read", "write"]
+          description: The scope of the token.
+        token_expire:
+          type: string
+          format: date
+          description: Date when the token must expire (default max 30 days).
+      required:
+        - username
+        - password
+        - token_name
+        - token_scope
+        - token_expire
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"

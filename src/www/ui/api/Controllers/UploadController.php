@@ -26,7 +26,6 @@ namespace Fossology\UI\Api\Controllers;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\Lib\Auth\Auth;
-use const Fossology\UI\Api\AUTH_METHOD;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;

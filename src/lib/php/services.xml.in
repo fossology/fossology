@@ -174,11 +174,23 @@ without any warranty.
             <tag name="twig.extension"/>
         </service>
 
+        <service id="helper.dbHelper" class="Fossology\UI\Api\Helper\DbHelper">
+            <argument type="service" id="db.manager"/>
+        </service>
+
+        <service id="helper.authHelper" class="Fossology\UI\Api\Helper\AuthHelper">
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="session"/>
+            <argument type="service" id="helper.dbHelper"/>
+        </service>
+
         <service id="helper.restHelper" class="Fossology\UI\Api\Helper\RestHelper">
             <argument type="service" id="dao.upload.permission"/>
             <argument type="service" id="dao.upload"/>
             <argument type="service" id="dao.user"/>
             <argument type="service" id="dao.folder"/>
+            <argument type="service" id="helper.dbHelper"/>
+            <argument type="service" id="helper.authHelper"/>
             <argument type="service" id="logger"/>
         </service>
     </services>

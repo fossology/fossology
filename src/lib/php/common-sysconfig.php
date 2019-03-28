@@ -368,6 +368,11 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'1'", "'$smtpTlsPrompt'",
     strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
 
+  $variable = "PATMaxExipre";
+  $patTokenValidityPrompt = _('Max token validity');
+  $patTokenValidityDesc = _('Maximum validity of tokens (in days)');
+  $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
+    strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
 
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.

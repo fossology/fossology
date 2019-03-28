@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2018-2019 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -28,6 +28,8 @@ namespace Fossology\UI\Api\Middlewares;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\AuthHelper;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * @class RestAuthMiddleware
@@ -36,27 +38,41 @@ use Fossology\UI\Api\Helper\AuthHelper;
 class RestAuthMiddleware
 {
   /**
-   * Check authentication for all calls, except for /auth/
+   * Check authentication for all calls, except for /auth, /tokens
    *
-   * @param  \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-   * @param  \Psr\Http\Message\ResponseInterface      $response PSR7 response
-   * @param  callable                                 $next     Next middleware
+   * @param  ServerRequestInterface $request  PSR7 request
+   * @param  ResponseInterface      $response PSR7 response
+   * @param  callable               $next     Next middleware
    *
-   * @return \Psr\Http\Message\ResponseInterface
+   * @return ResponseInterface
    */
   public function __invoke($request, $response, $next)
   {
-    if(stristr($request->getUri()->getPath(), "/auth") !== false) {
+    $requestUri = $request->getUri();
+    if (stristr($requestUri->getPath(), "/auth") !== false) {
+      $response = $next($request, $response);
+    } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
+      stristr($request->getMethod(), "post") !== false) {
       $response = $next($request, $response);
     } else {
-      $authHelper = new AuthHelper();
-      $username = $request->getHeaderLine("php-auth-user");
-      $password = $request->getHeaderLine("php-auth-pw");
-      if(!$authHelper->checkUsernameAndPassword($username, $password)) {
-        $error = new Info(403, "Not authorized", InfoType::ERROR);
-        $response = $response->withJson($error->getArray(), $error->getCode());
-      } else {
+      $authHelper = $GLOBALS['container']->get('helper.authHelper');
+      $jwtToken = $request->getHeader('Authorization')[0];
+      $tokenValid = $authHelper->verifyAuthToken($jwtToken,
+        $requestUri->getHost(), $userId, $tokenScope);
+      if (stristr($request->getMethod(), "get") === false &&
+        stristr($tokenScope, "write") === false) {
+        /*
+         * If the request method is not GET and token scope is not write,
+         * do not allow the request to pass through.
+         */
+        $tokenValid = new Info(403, "Do not have required scope.", InfoType::ERROR);
+      }
+      if ($tokenValid === true) {
+        $authHelper->updateUserSession($userId, $tokenScope);
         $response = $next($request, $response);
+      } else {
+        $response = $response->withJson($tokenValid->getArray(),
+          $tokenValid->getCode());
       }
     }
     return $response;

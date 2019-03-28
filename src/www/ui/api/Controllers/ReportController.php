@@ -81,17 +81,17 @@ class ReportController extends RestController
         case $this->reportsAllowed[0]:
         case $this->reportsAllowed[1]:
         case $this->reportsAllowed[2]:
-          $spdxGenerator = plugin_find('ui_spdx2');
+          $spdxGenerator = $this->restHelper->getPlugin('ui_spdx2');
           list ($jobId, $jobQueueId, $error) = $spdxGenerator->scheduleAgent(
             Auth::getGroupId(), $upload, $reportFormat);
           break;
         case $this->reportsAllowed[3]:
-          $readmeGenerator = plugin_find('ui_readmeoss');
+          $readmeGenerator = $this->restHelper->getPlugin('ui_readmeoss');
           list ($jobId, $jobQueueId, $error) = $readmeGenerator->scheduleAgent(
             Auth::getGroupId(), $upload);
           break;
         case $this->reportsAllowed[4]:
-          $unifiedGenerator = plugin_find('agent_founifiedreport');
+          $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
           list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
             Auth::getGroupId(), $upload);
           break;
@@ -195,7 +195,7 @@ class ReportController extends RestController
       return $newResponse->withJson($returnVal->getArray(),
         $returnVal->getCode());
     }
-    $ui_download = plugin_find('download');
+    $ui_download = $this->restHelper->getPlugin('download');
     try {
       /**
        * @var BinaryFileResponse $responseFile
