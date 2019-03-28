@@ -18,6 +18,7 @@ addons:
       - libcunit1-dev
       - libdbd-sqlite3-perl
       - libjsoncpp-dev
+      - libjson-c-dev
       - liblocal-lib-perl
       - libmagic-dev
       - librpm-dev

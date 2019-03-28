@@ -1226,18 +1226,16 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   /* DBug: printf("saveLicenseData on return gl.initwd is:%s\n",gl.initwd); */
   if(cur.cliMode)
   {
-    if (gl.progOpts & OPTS_JSON_OUTPUT) {
-      printf("[");
-      parseLicenseList();
-      size_t i = 0;
-      while (cur.licenseList[i] != NULL) {
-        printf("\"%s\"", cur.licenseList[i]);
-        if (cur.licenseList[i+1] != NULL) {
-          printf(",");
-        }
-        ++i;
+    if (optionIsSet(OPTS_JSON_OUTPUT))
+    {
+      if (optionIsSet(OPTS_SCANNING_DIRECTORY))
+      {
+        writeToTemp();
       }
-      printf("]");
+      else
+      {
+        writeToStdOut();
+      }
     } else {
       if (optionIsSet(OPTS_LONG_CMD_OUTPUT) && realpath(cur.targetFile, realPathOfTarget))
         {

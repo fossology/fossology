@@ -13,14 +13,16 @@ PRE = PRECHECK
 PDATA =_split_words
 LICFIX = GENSEARCHDATA
 
-OBJS = licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o # sources.o DMalloc.o
+OBJS = licenses.o list.o parse.o process.o nomos_regex.o util.o nomos_gap.o nomos_utils.o doctorBuffer_utils.o json_writer.o # sources.o DMalloc.o
 GENOBJS = _precheck.o _autodata.o
 HDRS = nomos.h $(OBJS:.o=.h) _autodefs.h
 COVERAGE = $(OBJS:%.o=%_cov.o)
 GENOBJS_COV = $(GENOBJS:%.o=%_cov.o)
 
-CFLAGS_LOCAL = $(FO_CFLAGS) -Werror
+CFLAGS_LOCAL = $(FO_CFLAGS) -Werror $(shell pkg-config --cflags json-c)
 CFLAGS_LOCALO = $(FO_CFLAGS)
+
+FO_LDFLAGS += $(shell pkg-config --libs json-c) -lpthread -lrt
 
 all: encode nomos libnomos.a
 
