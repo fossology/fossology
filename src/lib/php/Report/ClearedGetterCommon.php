@@ -174,7 +174,7 @@ abstract class ClearedGetterCommon
         }
       }
     }
-    if(!empty($findings) && $isUnifiedReport) {
+    if (!empty($findings) && $isUnifiedReport) {
       return array("userFindings" => $findings, "scannerFindings" => $statements);
     } else {
       $statements = array_merge($findings, $statements);
