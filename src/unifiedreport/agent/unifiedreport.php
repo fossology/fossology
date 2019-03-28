@@ -276,8 +276,8 @@ class UnifiedReport extends Agent
     $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(count($licensesIrreComment["statements"]));
 
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
-    $this->heartbeat(count($copyrights["statements"]));
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
+    $this->heartbeat(count($copyrights["scannerFindings"]));
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
     $this->heartbeat(count($ecc["statements"]));
@@ -783,14 +783,18 @@ class UnifiedReport extends Agent
 
     /* Display copyright statements and files */
     $heading = "Copyrights";
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements'], $titleSubHeadingCEI);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['scannerFindings'], $titleSubHeadingCEI);
+
+    /* Display user findings copyright statements and files */
+    $heading = "Copyrights (User Findings)";
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['userFindings'], $titleSubHeadingCEI);
 
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
     $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements'], $titleSubHeadingLicense);
 
-    /* Display NON Functional Licenses license files */
-    $heading = "Non Functional Licenses";
+    /* Display NON-Functional Licenses license files */
+    $heading = "Non-Functional Licenses";
     $reportStaticSection->getNonFunctionalLicenses($section, $heading);
 
     /* Display irrelavant license files */

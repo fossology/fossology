@@ -61,7 +61,7 @@ class LicenseMainGetter extends ClearedGetterCommon
     return $allStatements;
   }
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
