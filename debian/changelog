@@ -1,3 +1,10 @@
+fossology (3.5.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.5.0-rc1 for details
+
+ -- Anupam Ghosh <anupam.ghosh@siemens.com>  Fri, 29 Mar 2019 16:29:23 +0530
+
 fossology (3.4.0-1) unstable; urgency=low
 
   * New upstream release
