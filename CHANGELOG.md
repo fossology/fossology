@@ -1,5 +1,74 @@
 # Changelog of FOSSology
 
+### 3.5.0-RC1 (Mar 29th 2019)
+
+#### Features
+* e63c17534 : feat(tokenExp): Make token max validity configurable
+* 16762d5a8 : feat(rest): Use bearer auth instead of basic
+* 229860e6f : feat(nomos): Fix the JSON output
+* e72db0331 : feat(scm): correct  in cli/cp2foss.php and add comment in agent/utils.c
+* 3b72db061 : feat(scm): ignore scm data when scanning
+* 0f277a1cb : chore(docker): update dockerignore
+* a4f136ab9 : feat(trac): Fix typo `flase` instead of `false`
+* 8e314a12b : feat(licenseref): add new exception text to fossology database
+* 854817d74 : feat(report): Added new endpoint to create reports
+* 62b25d07d : feat(restapi): Post upload and get folders path
+* 0f5991a74 : chore(restapi): Use Slim inplace of Silex
+* 93dbe3df9 : feat(licenses): creative commons detection rewritten. Bug fixes.
+* 94b0f1ee3 : feat(license-admin): Show obligations for license
+* 3b3eb3f5e : refactor(maintagent): refactor maintagent code
+* c46cb3bef : feat(reused-info): Show reused package in info page
+* 47307a87e : docs(lib-php): Doxygen comments for BusinessRules
+* 388bd2245 : refactor(view-page): Use Twig templates for info page
+* e47676311 : feat(maintagent): add feature to delete orphaned files from database
+* 041b5770c : docs(lib-php): Doxygen comments for Auth namespace
+* c9cc5cd01 : docs(lib-php): Added doxygen comments for Application namespace
+* ba2193c3b : docs(lib-php): Added doxygen comment for Agent class
+* 8805b55ca : docs(libphp): Added doxygen comments for PHP common lib
+* 8fda5381b : docs(libcpp): Added doxygen comments for CPP library
+* a9e862baf : test(nomos): Added test case for EPL in pom.xml
+* 9a30827ee : docs(templates): Fix minor typos in templates
+* e1608f9e6 : chore(fo-postinstall.in): Give better notification
+* b6645af42 : feat(licenseRef): check flag before updating the license text
+* 6b6dbb186 : feat(copyright): select and replace copyright in bulk mode
+* 34661939a : docs(restapi): Option to create API documentation
+* af6ba64f9 : chore(common-job): Remove unnecessery changes
+* 87cb1104f : chore(restapi): Change the path for REST classes
+* bea3cf48c : chore(restapi): Allocate namespaces to the files
+* 07ab61055 : replay 6a1f712, 45f02535 and 8c3a710
+* 7aa12b0a7 : add auth
+* 8fb000fef : feat(api): add fossology openapi specification
+* ec5ebeb99 : feat(select2): Use select2 lib for drop-downs
+* ab40ea0f8 : feat(pages): Deploy FOSSology GitHub pages using Travis
+* 8fc071da7 : chore: add best practices badge
+
+#### Corrections
+
+* ec9409ab1 : fix(restApi): Fix for missing plugins
+* 5e9433d29 : fix(maintagent): do not delete decisions with scope 1
+* 4a3c7cb01 : fix(Vagrantfile): Enable mod rewrite in vagrant for REST
+* 14e1a4517 : fix(api): Change back to version 1, remove trailing '/'
+* 7623c4436 : fix(schema): Use open api 3.0.0 to describe API documentation
+* 93dbe3df9 : feat(licenses): creative commons detection rewritten. Bug fixes.
+* 3b01a5333 : fix(fo-installdeps): Add php-mbstring to build deps
+* fa2378625 : fix(delagent): delete existing clearing events using delagent
+* 6e26fdde1 : fix(scheduler): add check for empty results from query
+* d9fd5fe4b : fix(filter): Update the filter in license browser
+* 7e6506355 : fix(nomos): Detect EPL-1.0
+* 78b41aee3 : fix(constraints): Also clean old constraints
+* 36e22784c : fix(licenses): restore regexp POSIX compatibility
+* 2c71518ae : fix(nomos): Fix license string checks
+* 191abff84 : fix(nomos): Use space as separator
+* 47b71300f : fix(restapi): Implement TODOs
+* a115b460a : fix(restapi): Use FOSSology functions
+* 11486eea9 : fix(response): Use JsonResponse instead of plain Response
+* 0ccea49a5 : fix(libschema): Remove schema to match PHP strings
+* b71c25696 : fix(bulk-license): Resize the dropdown for bluk license
+* e8bc89878 : fix(web.postinst): Reflect changes from php-conf-fix
+* 7e3e9b081 : fix(ScheduleAgent): Prevent multiple agent schedules
+* d05d30aa9 : fix(agent): Reschedule failed agents
+
+
 ### 3.4.0 (Nov 29th 2018)
 
 After two release candidates, compatibility isues with updating from 3.2.0 and 3.3.0 have been resolved. The main features of the 3.4.0 release are found under the release candidate one for the 3.4.0 release (cf. https://github.com/fossology/fossology/releases/tag/3.4.0-rc1). Particular updates compared to the release candidate two (cf. https://github.com/fossology/fossology/releases/tag/3.4.0-rc2) are found below.
