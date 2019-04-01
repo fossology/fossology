@@ -144,32 +144,6 @@ $app->group(VERSION_1 . 'report',
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
-//////////////////////////ERROR-HANDLERS/////////////////////
-$slimContainer = $app->getContainer();
-$slimContainer->set('notFoundHandler',
-  function ($request, $response){
-    $error = new Info(404, "Resource not found", InfoType::ERROR);
-    return $response->withJson($error->getArray(), $error->getCode());
-  }
-);
-$slimContainer->set('notAllowedHandler',
-  function ($request, $response, $methods) {
-    $error = new Info(405, 'Method must be one of: ' . implode(', ', $methods),
-      InfoType::ERROR);
-    return $response->withHeader('Allow', implode(', ', $methods))
-      ->withJson($error->getArray(), $error->getCode());
-  }
-);
-$slimContainer->set('phpErrorHandler',
-  function ($request, $response, $error){
-    $GLOBALS['container']->get('logger')->error($error);
-    $error = new Info(500, "Something went wrong! Please try again later.",
-      InfoType::ERROR);
-    return $response->withJson($error->getArray(), $error->getCode());
-  }
-);
-$GLOBALS['container']->setAlias('errorHandler', 'phpErrorHandler');
-
 $app->run();
 
 $GLOBALS['container']->get("db.manager")->flushStats();
