@@ -285,6 +285,21 @@ if [[ $WEBONLY ]]; then
      usermod --groups $PROJECTGROUP --append apache
    fi
 
+   # Enable mod_rewrite for REST API
+   if [[ -f /etc/httpd/conf.modules.d/00-base.conf ]]; then
+     # We are on RHEL
+     if ! egrep -q "^LoadModule rewrite_module modules/mod_rewrite.so" /etc/httpd/conf.modules.d/00-base.conf; then
+       echo "NOTE: Enabling apache module rewrite"
+       echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
+       systemctl restart httpd
+     fi
+   else
+     # We are on Debian
+     echo "NOTE: Enabling apache module rewrite"
+     a2enmod rewrite
+     apachectl restart
+   fi
+
    # apache2 reload is only necessary when it is running.
    if /etc/init.d/apache2 status > /dev/null; then
      /etc/init.d/apache2 reload
