@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:jessie-slim as builder
+FROM debian:stretch-slim as builder
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
@@ -19,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       git \
       lsb-release \
-      php5-cli \
+      php7.0-cli \
       sudo \
  && rm -rf /var/lib/apt/lists/*
 
@@ -48,7 +48,7 @@ RUN /fossology/utils/install_composer.sh
 RUN make install clean
 
 
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 

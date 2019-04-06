@@ -104,8 +104,13 @@ if [[ $BUILDTIME ]]; then
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
          case "$CODENAME" in
-           xenial|stretch|buster|sid|bionic)
+           xenial)
              apt-get $YesOpt install php-mbstring;;
+           stretch|buster|sid)
+             apt-get $YesOpt install php-mbstring php7.0-xml;;
+           bionic)
+             apt-get $YesOpt install php-mbstring php7.2-xml;;
+           *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
