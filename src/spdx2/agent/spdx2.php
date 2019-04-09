@@ -681,7 +681,8 @@ class SpdxTwoAgent extends Agent
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      $array = array(
+      $stateComment = $this->getSPDXLicenseCommentState($uploadId);
+      $dataTemplate = array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
           'md5'=>$hashes['md5'],
@@ -694,12 +695,12 @@ class SpdxTwoAgent extends Agent
           'concludedLicenses'=> SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
           'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights'=>$licenses['copyrights'],
-          'licenseCommentState'=>$this->getSPDXLicenseCommentState($uploadId));
-      if($this->getSPDXLicenseCommentState($uploadId)) {
-        $array['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
+          'licenseCommentState'=>$stateComment);
+      if($stateComment) {
+        $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
       }
 
-      $content .= $this->renderString($this->getTemplateFile('file'),$array);
+      $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);
     }
     $this->heartbeat($filesProceeded - $lastValue);
     return $content;
@@ -811,7 +812,7 @@ class SpdxTwoAgent extends Agent
   protected function getSPDXLicenseCommentState(int $uploadId)
   {
     $sql = "SELECT spdx_license_comment from upload where upload_pk=$1";
-    $param[] = $uploadId;
+    $param = array(1 => $uploadId);
     $licensecomment = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Spdx_license_comment');
 
     return ($licensecomment['spdx_license_comment']=="t");
