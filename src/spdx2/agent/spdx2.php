@@ -677,8 +677,9 @@ class SpdxTwoAgent extends Agent
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      if(!$this->getIgnoreFilesWOinfo($uploadId) ||
-         ($this->getIgnoreFilesWOinfo($uploadId) && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights']))))
+      $stateWoInfos = $this->getIgnoreFilesWOinfo($uploadId);
+      if(!$stateWoInfos ||
+         ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights']))))
       {
         $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
@@ -805,7 +806,7 @@ class SpdxTwoAgent extends Agent
   protected function getIgnoreFilesWOinfo(int $uploadId)
   {
     $sql = "SELECT ignore_files_wo_infos from upload where upload_pk=$1";
-    $param[] = $uploadId;
+    $param = array(1 => $uploadId);
     $row = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Ignore_files_wo_infos');
     return ($row['ignore_files_wo_infos']=='t');
   }
