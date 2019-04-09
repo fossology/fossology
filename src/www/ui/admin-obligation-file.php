@@ -337,6 +337,9 @@ class admin_obligation_file extends FO_Plugin
     $vars['obligationClassification'] = array("green"=>"green", "white"=>"white", "yellow"=>"yellow", "red"=>"red");
     $vars['obligationTypes'] = array("Obligation"=>"Obligation", "Restriction"=>"Restriction", "Risk"=>"Risk", "Right"=>"Right");
 
+    $vars['ob_type'] = $row['ob_type'];
+    $vars['ob_classification'] = $row['ob_classification'];
+
     // build scripts
     $vars['licenseSelectorName'] = 'licenseSelector[]';
     $vars['licenseSelectorId'] = 'licenseSelectorId';
