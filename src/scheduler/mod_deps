@@ -74,7 +74,7 @@ DISTRO=$(lsb_release --id --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu)
       apt-get $YesOpt install \
         libglib2.0-dev
       ;;
@@ -89,7 +89,7 @@ fi
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu)
       apt-get $YesOpt install \
         libglib2.0-0
       ;;
