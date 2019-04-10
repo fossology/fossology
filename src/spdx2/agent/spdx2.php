@@ -809,7 +809,7 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return boolval License comment state (TRUE : show license comment, FALSE : don't show it)
    */
-  protected function getSPDXLicenseCommentState(int $uploadId)
+  protected function getSPDXLicenseCommentState($uploadId)
   {
     $sql = "SELECT spdx_license_comment from upload where upload_pk=$1";
     $param = array($uploadId);
