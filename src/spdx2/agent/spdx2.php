@@ -812,7 +812,7 @@ class SpdxTwoAgent extends Agent
   protected function getSPDXLicenseCommentState(int $uploadId)
   {
     $sql = "SELECT spdx_license_comment from upload where upload_pk=$1";
-    $param = array(1 => $uploadId);
+    $param = array($uploadId);
     $licensecomment = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Spdx_license_comment');
 
     return ($licensecomment['spdx_license_comment']=="t");
