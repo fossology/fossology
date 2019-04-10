@@ -22,9 +22,7 @@ LicenseConcluded: {{ concludedLicense }}
 LicenseConcluded: NOASSERTION
 {% endif %}
 {% if licenseCommentState %}
-{% if licenseComment is empty %}
-LicenseComment: NOCOMMENT
-{% else %}
+{% if licenseComment is not empty %}
 LicenseComments: <text>{{ licenseComment |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                          |replace({'\f':''}) }} </text>
 {% endif %}
