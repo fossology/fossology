@@ -803,10 +803,10 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return boolval current state (TRUE : SPDX output dont show files wo infos, FALSE : show it)
    */
-  protected function getIgnoreFilesWOinfo(int $uploadId)
+  protected function getIgnoreFilesWOinfo($uploadId)
   {
     $sql = "SELECT ignore_files_wo_infos from upload where upload_pk=$1";
-    $param = array(1 => $uploadId);
+    $param = array($uploadId);
     $row = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Ignore_files_wo_infos');
     return ($row['ignore_files_wo_infos']=='t');
   }
