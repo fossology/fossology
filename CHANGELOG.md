@@ -1,5 +1,45 @@
 # Changelog of FOSSology
 
+### 3.5.0 (Apr 11th 2019)
+
+After two release candidates, making fixes for REST API installation and various
+migration tests, FOSSology is stable enough for a new release. The main features
+of the 3.5.0 release can be found under
+[RC1](https://github.com/fossology/fossology/releases/tag/3.5.0-rc1). Particular
+corrections after RC1 can be found under
+[RC2](https://github.com/fossology/fossology/releases/tag/3.5.0-rc2).
+
+Mainly 3.5.0 adds more documentation, infrastructure improvements and support
+for brand new FOSSology REST API.
+
+Moreover, new functionality has improved JSON output for nomos and restructured
+license detection for nomos. Last but not the least, FOSSology now have
+capabilities to ignore files specific to version control systems from the
+scanning improving scan times.
+
+#### Credits
+
+From the git commit history, we have following contributors since 3.4.0:
+
+> @ag4ums,
+> @ChristopheRequillart,
+> @AMDmi3,
+> @GMishx,
+> @mcieno,
+> @max-wittig,
+> @maxhbr,
+> @rlintu,
+> @sandipbhuyan,
+> @shaheemazmalmmd
+
+#### Corrections
+
+* `9c1bf18a9` : chore(docker): bump docker base image to stretch
+
+#### Refactorings, Infrastructure
+
+* `8df86b308` : fixup! chore(docker): bump docker base image to stretch
+
 ### 3.5.0-RC2 (Apr 3rd 2019)
 
 This pre-release adds important corrections to 3.5.0-RC1.
