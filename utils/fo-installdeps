@@ -110,7 +110,6 @@ if [[ $BUILDTIME ]]; then
              apt-get $YesOpt install php-mbstring php7.0-xml php7.0-zip;;
            bionic)
              apt-get $YesOpt install php-mbstring php7.2-xml php7.2-zip;;
-           *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
