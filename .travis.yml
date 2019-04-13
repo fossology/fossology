@@ -137,6 +137,7 @@ jobs:
 #### PHPUnit tests ###########################
     - &phpunit-tests
       php: 5.6
+      addon: {}
       install: composer install --prefer-dist --working-dir=src
       before_script: ./utils/prepare-test -afty
       script:
