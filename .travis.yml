@@ -6,6 +6,11 @@
 language: php
 dist: trusty
 php: 7.0
+cache:
+  ccache: true
+env:
+  global:
+    - PATH="/usr/lib/ccache/:$PATH"
 
 addons:
   apt:
