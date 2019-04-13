@@ -36,8 +36,6 @@ addons:
 
 services: postgresql
 
-sudo: false
-
 jobs:
   include:
     - name: Syntax Check
@@ -57,7 +55,6 @@ jobs:
     - name: Docker Tests
       addons: {}
       services: docker
-      sudo: required
       before_script: docker-compose build
       script:
         - src/testing/docker/test-cluster.sh
@@ -65,7 +62,6 @@ jobs:
 #### C/C++ agent tests ###########################
     - &compiler-tests
       env: CC=gcc-4.8 CXX=g++-4.8 CFLAGS='-Wall'
-      sudo: required
       addons:
         apt:
           sources:
@@ -133,7 +129,6 @@ jobs:
 #### PHPUnit tests ###########################
     - &phpunit-tests
       php: 5.6
-      sudo: required
       install: composer install --prefer-dist --working-dir=src
       before_script: ./utils/prepare-test -afty
       script:
