@@ -8,9 +8,12 @@ dist: trusty
 php: 7.0
 cache:
   ccache: true
+  directories:
+    - $HOME/.composer
 env:
   global:
     - PATH="/usr/lib/ccache/:$PATH"
+    - COMPOSER_HOME="$HOME/.composer/"
 
 addons:
   apt:
