@@ -135,15 +135,16 @@ jobs:
         - make build-lib VERSIONFILE build-cli
         - src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite"
       after_success: php src/vendor/bin/coveralls -vv -x clover.xml
-    - <<: *phpunit-tests
+    - &php7-phpunit-tests
+      <<: *phpunit-tests
       php: 7.0
-    - <<: *phpunit-tests
+    - &php71-phpunit-tests
+      <<: *php7-phpunit-tests
       php: 7.1
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
-    - <<: *phpunit-tests
+    - <<: *php71-phpunit-tests
       php: 7.2
-      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
-    - <<: *phpunit-tests
+    - <<: *php71-phpunit-tests
       php: 7.2
       env: PGPORT=5432
       addons:
@@ -154,7 +155,6 @@ jobs:
             - postgresql-10
             - postgresql-client-10
       before_script: *postgres-before-script
-      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
     - stage: GitHub Page Release
       name: GitHub Page deploy
       addons:
