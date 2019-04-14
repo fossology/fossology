@@ -147,6 +147,9 @@ jobs:
     - &php7-phpunit-tests
       <<: *phpunit-tests
       php: 7.0
+      script:
+        - make build-lib VERSIONFILE build-cli
+        - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
     - &php71-phpunit-tests
       <<: *php7-phpunit-tests
       php: 7.1
