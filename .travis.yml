@@ -82,10 +82,14 @@ jobs:
       install:
         - composer install --prefer-dist --working-dir=src
         - ./install/scripts/install-spdx-tools.sh
+        - sudo /usr/sbin/update-ccache-symlinks
+        - ls /usr/lib/ccache/
       before_script: &default-before-script
         ./utils/prepare-test -afty
       script:
         - make test
+      after_success:
+        - ccache -s
     - <<: *compiler-tests
       env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       addons:
