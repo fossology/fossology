@@ -45,9 +45,9 @@ class AjaxJobStatus extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    $response ='1';
+    $response = '1';
     $jobInfo = $this->dbManager->getSingleRow("SELECT jq_end_bits FROM jobqueue WHERE jq_end_bits ='0' LIMIT 1");
-    if(empty($jobInfo)){
+    if (empty($jobInfo)) {
       $response='0';
     }
     $status = 1;
@@ -55,6 +55,6 @@ class AjaxJobStatus extends DefaultPlugin
     $status = empty($status) ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK;
     return new Response(json_encode(array("status" => $response)), $status, array('content-type'=>'text/json'));
   }
-  
 }
+
 register_plugin(new AjaxJobStatus());

@@ -57,8 +57,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
 
     $uploadArray = array(array('upload_pk'=>1, 'uploadtree_tablename'=>'uploadtree'),
         array('upload_pk'=>2, 'uploadtree_tablename'=>'uploadtree_a'));
-    foreach ($uploadArray as $uploadEntry)
-    {
+    foreach ($uploadArray as $uploadEntry) {
       $this->dbManager->insertTableRow('upload', $uploadEntry);
     }
 
@@ -66,8 +65,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
         "INSERT INTO job (job_pk, job_queued, job_name, job_upload_fk, job_user_fk) VALUES ($1, $2, $3, $4, $5)");
     $jobArray = array(array(1,date('c',time()-5), "FCKeditor_2.6.4.zip", 1,1 ),
                       array(2,date('c'), "zlib_1.2.8.zip", 2,2));
-    foreach ($jobArray as $uploadEntry)
-    {
+    foreach ($jobArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
 
@@ -141,7 +139,10 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = 1;
 
     $this->uploadPermissionDao->shouldReceive('isAccessible')->withArgs(array(anything(),$groupId))
-            ->andReturnUsing(function($upload,$group){ return ($upload==1 || $upload==2 || $upload==4);});
+            ->andReturnUsing(function($upload,$group)
+            {
+              return ($upload==1 || $upload==2 || $upload==4);
+            });
     $testOurJobs = $this->showJobsDao->myJobs(true);
     assertThat($testOurJobs,is(arrayContainingInAnyOrder($this->job_pks)));
     $testMyJobs = $this->showJobsDao->myJobs(false);
@@ -175,8 +176,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $nomosTime = date('Y-m-d H:i:sO',$nowTime-$diffTime);
     $uploadArrayQue = array(array(8, $jobId=1, "nomos", 1,$nomosTime,null ,"Started", 0,"localhost.5963", $itemNomos=147),
                            array(1, $jobId, "ununpack", 1, "2015-04-21 18:29:19.23825+05:30", "2015-04-21 18:29:26.396562+05:30", "Completed",1,null,$itemCount=646 ));
-    foreach ($uploadArrayQue as $uploadEntry)
-    {
+    foreach ($uploadArrayQue as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
 
@@ -188,8 +188,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
                              array(715,651, 2,607 ,33188 ,534 ,535 ,"zconf.h.cmakein"),
                              array(915, 651, 2, 606 ,33188 ,532 ,533 ,"zconf.h"),
                           );
-    foreach ($uploadTreeArray as $uploadEntry)
-    {
+    foreach ($uploadTreeArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
 
@@ -204,8 +203,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
                              array($jqWithTwoDependencies,4),
                              array($jqWithTwoDependencies,4),
                           );
-    foreach ($jobDependsArray as $uploadEntry)
-    {
+    foreach ($jobDependsArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
 
@@ -246,8 +244,7 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $nomosTime = date('Y-m-d H:i:sO',$nowTime-$diffTime);
     $uploadArrayQue = array(array(8, $jobId=1, $jqType="nomos", 1,$nomosTime,null ,"Started", 0,"localhost.5963", $itemNomos=147),
                            array(1, $jobId, "ununpack", 1, "2015-04-21 18:29:19.23825+05:30", "2015-04-21 18:29:26.396562+05:30", "Completed",1,null,$itemCount=646 ));
-    foreach ($uploadArrayQue as $uploadEntry)
-    {
+    foreach ($uploadArrayQue as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
 

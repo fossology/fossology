@@ -19,7 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\Lib\Text;
 
 
-class EncodingConverter implements Converter {
+class EncodingConverter implements Converter
+{
   const UTF8_ENCODING = "UTF-8";
 
   /**
@@ -34,24 +35,22 @@ class EncodingConverter implements Converter {
       $encodings = array("ASCII", "UTF-8", "Windows-1252", "ISO-8859-15", "ISO-8859-1", "GB2312");
       $detectedCharset = mb_detect_encoding($input, $encodings, true);
 
-      if (!$detectedCharset)
-      {
+      if (!$detectedCharset) {
         $charsets = array('iso-8859-1', 'windows-1251', 'GB2312');
-        foreach ($charsets as $charset)
-        {
+        foreach ($charsets as $charset) {
           $output = iconv($charset, self::UTF8_ENCODING . '//TRANSLIT', $input);
           if ($output) {
             return $output;
           }
         }
-      } else
-      {
+      } else {
         return iconv($detectedCharset, self::UTF8_ENCODING, $input);
       }
     }
   }
 
-  public function isUtf8($input) {
+  public function isUtf8($input)
+  {
       return mb_check_encoding($input, self::UTF8_ENCODING);
   }
 }

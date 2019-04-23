@@ -44,28 +44,23 @@ class Menu
    */
   function menu_html(&$menu, $indent)
   {
-    if (empty($menu))
-    {
+    if (empty($menu)) {
       return;
     }
     $output = "";
     $output .= "<!--[if lt IE 7]><table><tr><td><![endif]-->\n";
     $output .= "<ul id='menu-$indent'>\n";
-    
-    foreach ($menu as $menuEntry)
-    {
+
+    foreach ($menu as $menuEntry) {
       $output .= '<li>';
 
-      if (!empty($menuEntry->HTML))
-      {
+      if (!empty($menuEntry->HTML)) {
         $output .= $menuEntry->HTML;
-      } else /* create HTML */
-      {
+      } else { /* create HTML */
         $output .= $this->createHtmlFromMenuEntry($menuEntry, $indent);
       }
 
-      if (!empty($menuEntry->SubMenu))
-      {
+      if (!empty($menuEntry->SubMenu)) {
         $output .= $this->menu_html($menuEntry->SubMenu, $indent + 1);
       }
     }
@@ -73,57 +68,43 @@ class Menu
     $output .= "<!--[if lt IE 7]></td></tr></table></a><![endif]-->\n";
     return preg_replace("|<li><a href=\"#\"><font color(.*)*?$|m", '', $output);
   }
-  
+
   function createHtmlFromMenuEntry(\menu $menuEntry, $indent)
   {
     $isFullMenuDebug = array_key_exists(self::FULL_MENU_DEBUG, $_SESSION) && $_SESSION[self::FULL_MENU_DEBUG] == 1;
     $output = "";
-    if (!empty($menuEntry->URI))
-    {
+    if (!empty($menuEntry->URI)) {
       $output .= '<a  id="'. htmlentities($menuEntry->FullName) .'" href="' . Traceback_uri() . "?mod=" . $menuEntry->URI;
-      if (empty($menuEntry->Target) || ($menuEntry->Target == ""))
-      {
+      if (empty($menuEntry->Target) || ($menuEntry->Target == "")) {
         $output .= '">';
-      } else
-      {
+      } else {
         $output .= '" target="' . $menuEntry->Target . '">';
       }
-      if ($isFullMenuDebug)
-      {
+      if ($isFullMenuDebug) {
         $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-      } else
-      {
+      } else {
         $output .= $menuEntry->Name;
       }
-    } else
-    {
+    } else {
       $output .= '<a id="'. htmlentities($menuEntry->FullName) .'" href="#">';
-      if (empty($menuEntry->SubMenu))
-      {
+      if (empty($menuEntry->SubMenu)) {
         $output .= "<font color='#C0C0C0'>";
-        if ($isFullMenuDebug)
-        {
+        if ($isFullMenuDebug) {
           $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-        }
-        else
-        {
+        } else {
           $output .= '';
         }
         $output .= "</font>";
-      } else
-      {
-        if ($isFullMenuDebug)
-        {
+      } else {
+        if ($isFullMenuDebug) {
           $output .= $menuEntry->FullName . "(" . $menuEntry->Order . ")";
-        } else
-        {
+        } else {
           $output .= $menuEntry->Name;
         }
       }
     }
 
-    if (!empty($menuEntry->SubMenu) && ($indent > 0))
-    {
+    if (!empty($menuEntry->SubMenu) && ($indent > 0)) {
       $output .= " <span>&raquo;</span>";
     }
     $output .= "</a>\n";
@@ -163,8 +144,7 @@ class Menu
     $FOSSfg3h = $FOSScolor1; // highlight colors
     $FOSSbg3h = "beige";
 
-    if ($depth < $MenuDepth)
-    {
+    if ($depth < $MenuDepth) {
       /** The "float:left" is needed to fix IE **/
       $output .= "\n/* CSS for Depth $depth */\n";
       $label = "ul#menu-" . $depth;
@@ -186,8 +166,7 @@ class Menu
     }
 
     /* Depth 1 is special: position is absolute. Left is 0, top is 24 */
-    if ($depth < $MenuDepth)
-    {
+    if ($depth < $MenuDepth) {
       $output .= "\n/* CSS for Depth $depth */\n";
       $output .= $label . " ul#menu-" . $depth . "\n";
       $output .= "  { margin:0; padding:0px 0; list-style:none; display:none; visibility:hidden; left:0px; width:150px; position:absolute; top:24px; font-weight: bold; }\n";
@@ -209,8 +188,7 @@ class Menu
     }
 
     /* Depth 2+ is recursive: position is absolute. Left is 150*(Depth-1), top is 0 */
-    for (; $depth < $MenuDepth; $depth++)
-    {
+    for (; $depth < $MenuDepth; $depth++) {
       $output .= "\n/* CSS for Depth $depth */\n";
       $output .= $label . " ul#menu-" . $depth . "\n";
       $output .= "  { margin:0; padding:1px 0; list-style:none; display:none; visibility:hidden; left:156px; width:150px; position:absolute; top:-1px; font-weight: bold; }\n";
@@ -237,8 +215,7 @@ class Menu
     /** csshover.htc provides ":hover" support for IE **/
     $output .= "body { behavior:url(csshover.htc); }\n";
     /** table definition needed to get rid of extra space under items **/
-    for ($i = 1; $i < $MenuDepth; $i++)
-    {
+    for ($i = 1; $i < $MenuDepth; $i++) {
       $output .= "#menu-$i table {height:0px; border-collapse:collapse; margin:0; padding:0; }\n";
       $output .= "#menu-$i td {height:0px; border:none; margin:0; padding:0; }\n";
     }
@@ -264,15 +241,15 @@ class Menu
     $vars['logoImg'] =  $sysConfig['LogoImage']?: 'images/fossology-logo.gif';
 
     if ( array_key_exists('SupportEmailLabel',$sysConfig) && !empty($sysConfig['SupportEmailLabel'])
-            && array_key_exists('SupportEmailAddr',$sysConfig) && !empty($sysConfig['SupportEmailAddr'])){
+            && array_key_exists('SupportEmailAddr',$sysConfig) && !empty($sysConfig['SupportEmailAddr'])) {
       $menuItem = '<a href="mailto:'.$sysConfig['SupportEmailAddr'].'?subject='.@$sysConfig['SupportEmailSubject'].'">'.$sysConfig['SupportEmailLabel'].'</a>';
       menu_insert("Main::Help::".$sysConfig['SupportEmailLabel'], 0, NULL, NULL, NULL, $menuItem);
-    }    
+    }
 
     $menu = menu_find("Main", $MenuDepth);
     $vars['mainMenu'] = $this->menu_html($menu, 0);
     $vars['uri'] = Traceback_uri();
-    
+
     /* Handle login information */
     $vars['isLoggedOut'] = ((empty($_SESSION[Auth::USER_NAME])) or ($_SESSION[Auth::USER_NAME] == "Default User"));
     $vars['isLoginPage'] = GetParm("mod", PARM_STRING)=='auth';
@@ -288,11 +265,10 @@ class Menu
       );
     }
 
-    if(!$vars['isLoggedOut'])
-    {
+    if (!$vars['isLoggedOut']) {
       $this->mergeUserLoginVars($vars);
     }
-    
+
     $out = $this->renderer->loadTemplate('components/menu.html.twig')->render($vars);
     return $out;
   }
@@ -304,25 +280,21 @@ class Menu
 
     $vars['logOutUrl'] = Traceback_uri() . '?mod=' . ((plugin_find_id('auth')>=0) ? 'auth' : 'smauth');
     $vars['userName'] = $_SESSION[Auth::USER_NAME];
-    
+
     $sql = 'SELECT group_pk, group_name FROM group_user_member LEFT JOIN groups ON group_fk=group_pk WHERE user_fk=$1';
     $stmt = __METHOD__ . '.availableGroups';
     $dbManager->prepare($stmt, $sql);
     $res = $dbManager->execute($stmt, array($_SESSION['UserId']));
     $allAssignedGroups = array();
-    while ($row = $dbManager->fetchArray($res))
-    {
+    while ($row = $dbManager->fetchArray($res)) {
       $allAssignedGroups[$row['group_pk']] = $row['group_name'];
     }
     $dbManager->freeResult($res);
-    if (count($allAssignedGroups) > 1)
-    {
+    if (count($allAssignedGroups) > 1) {
       $vars['backtraceUri'] = Traceback_uri() . "?mod=" . Traceback_parm();
       $vars['groupId'] = $_SESSION[Auth::GROUP_ID];
       $vars['allAssignedGroups'] = $allAssignedGroups;
-    }
-    else
-    {
+    } else {
       $vars['singleGroup'] = @$_SESSION['GroupName'];
     }
   }

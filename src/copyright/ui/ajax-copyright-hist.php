@@ -25,7 +25,7 @@ use Fossology\Lib\Util\DataTablesUtility;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_copyrightHistogramProcessPost", _("Private: Browse post"));
+define("TITLE_COPYRIGHTHISTOGRAMPROCESSPOST", _("Private: Browse post"));
 
 /**
  * @class CopyrightHistogramProcessPost
@@ -62,7 +62,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
   function __construct()
   {
     $this->Name = "ajax-copyright-hist";
-    $this->Title = TITLE_copyrightHistogramProcessPost;
+    $this->Title = TITLE_COPYRIGHTHISTOGRAMPROCESSPOST;
     $this->DBaccess = PLUGIN_DB_READ;
     $this->OutputType = 'JSON';
     $this->LoginFlag = 0;

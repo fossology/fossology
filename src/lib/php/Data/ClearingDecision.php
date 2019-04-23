@@ -114,7 +114,7 @@ class ClearingDecision
   public function getClearingLicenses()
   {
     $clearingLicenses = array();
-    foreach($this->clearingEvents as $clearingEvent) {
+    foreach ($this->clearingEvents as $clearingEvent) {
       $clearingLicenses[] = $clearingEvent->getClearingLicense();
     }
     return $clearingLicenses;
@@ -126,11 +126,9 @@ class ClearingDecision
   public function getPositiveLicenses()
   {
     $result = array();
-    foreach($this->clearingEvents as $clearingEvent)
-    {
+    foreach ($this->clearingEvents as $clearingEvent) {
       $clearingLicense = $clearingEvent->getClearingLicense();
-      if (!$clearingLicense->isRemoved())
-      {
+      if (! $clearingLicense->isRemoved()) {
         $result[] = $clearingLicense->getLicenseRef();
       }
     }
@@ -223,10 +221,11 @@ class ClearingDecision
    */
   public function isInScope()
   {
-    switch ($this->getScope())
-    {
-      case 'global': return true;
-      case 'upload': return $this->sameFolder;
+    switch ($this->getScope()) {
+      case 'global':
+        return true;
+      case 'upload':
+        return $this->sameFolder;
     }
     return false;
   }
@@ -236,10 +235,9 @@ class ClearingDecision
     $output = "ClearingDecision(#" . $this->clearingId . ", ";
 
     foreach ($this->clearingLicenses as $clearingLicense) {
-      $output .= ($clearingLicense->isRemoved() ? "-": "" ). $clearingLicense->getShortName() . ", ";
+      $output .= ($clearingLicense->isRemoved() ? "-" : ""). $clearingLicense->getShortName() . ", ";
     }
 
     return $output . $this->getUserName() . ")";
   }
-
 }

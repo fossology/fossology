@@ -181,5 +181,4 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->clearingEventProcessor->filterEffectiveEvents(array()), is(emptyArray()));
   }
-
 }

@@ -58,7 +58,7 @@ class FolderController extends RestController
         $returnVal = new Info(403, "Folder id $id is not accessible",
           InfoType::ERROR);
       }
-      if($folderDao->getFolder($id) === null) {
+      if ($folderDao->getFolder($id) === null) {
         $returnVal = new Info(404, "Folder id $id does not exists",
           InfoType::ERROR);
       }

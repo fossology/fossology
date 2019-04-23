@@ -54,26 +54,23 @@ class ChangeLicenseBulk extends DefaultPlugin
   protected function handle(Request $request)
   {
     $uploadTreeId = intval($request->get('uploadTreeId'));
-    if ($uploadTreeId <= 0)
-    {
+    if ($uploadTreeId <= 0) {
       return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    try
-    {
+    try {
       $jobQueueId = $this->getJobQueueId($uploadTreeId, $request);
-    } catch (Exception $ex)
-    {
+    } catch (Exception $ex) {
       $errorMsg = $ex->getMessage();
       return new JsonResponse(array("error" => $errorMsg), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
     }
     ReportCachePurgeAll();
-    
+
     return new JsonResponse(array("jqid" => $jobQueueId));
   }
 
   /**
-   * 
+   *
    * @param int $uploadTreeId
    * @param Request $request
    * @return int $jobQueueId
@@ -84,15 +81,13 @@ class ChangeLicenseBulk extends DefaultPlugin
     $uploadId = intval($uploadEntry['upload_fk']);
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    
-    if ($uploadId <= 0 || !$this->uploadDao->isAccessible($uploadId, $groupId))
-    {
+
+    if ($uploadId <= 0 || !$this->uploadDao->isAccessible($uploadId, $groupId)) {
       throw new Exception('permission denied');
     }
 
     $bulkScope = $request->get('bulkScope');
-    switch ($bulkScope)
-    {
+    switch ($bulkScope) {
       case 'u':
         $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
         $topBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTable);
@@ -100,8 +95,9 @@ class ChangeLicenseBulk extends DefaultPlugin
         break;
 
       case 'f':
-        if (!Isdir($uploadEntry['ufile_mode']) && !Iscontainer($uploadEntry['ufile_mode']) && !Isartifact($uploadEntry['ufile_mode']))
-        {
+        if (!Isdir($uploadEntry['ufile_mode']) &&
+            !Iscontainer($uploadEntry['ufile_mode']) &&
+            !Isartifact($uploadEntry['ufile_mode'])) {
           $uploadTreeId = $uploadEntry['parent'] ?: $uploadTreeId;
         }
         break;
@@ -114,14 +110,12 @@ class ChangeLicenseBulk extends DefaultPlugin
     $actions = $request->get('bulkAction');
 
     $licenseRemovals = array();
-    foreach($actions as $licenseAction)
-    {
+    foreach ($actions as $licenseAction) {
       $licenseRemovals[$licenseAction['licenseId']] = array(($licenseAction['action']=='Remove'), $licenseAction['comment'], $licenseAction['reportinfo'], $licenseAction['acknowledgement']);
     }
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText);
 
-    if ($bulkId <= 0)
-    {
+    if ($bulkId <= 0) {
       throw new Exception('cannot insert bulk reference');
     }
     $upload = $this->uploadDao->getUpload($uploadId);
@@ -134,8 +128,7 @@ class ChangeLicenseBulk extends DefaultPlugin
     $errorMsg = '';
     $jqId = $deciderPlugin->AgentAdd($job_pk, $uploadId, $errorMsg, $dependecies, $conflictStrategyId);
 
-    if (!empty($errorMsg))
-    {
+    if (!empty($errorMsg)) {
       throw new Exception(str_replace('<br>', "\n", $errorMsg));
     }
     return $jqId;

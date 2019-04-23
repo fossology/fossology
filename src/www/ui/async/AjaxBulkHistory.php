@@ -53,13 +53,11 @@ class AjaxBulkHistory extends DefaultPlugin
   protected function handle(Request $request)
   {
     $uploadId = intval($request->get('upload'));
-    if (empty($uploadId))
-    {
+    if (empty($uploadId)) {
       return;
     }
     $uploadTreeId = intval($request->get('item'));
-    if (empty($uploadTreeId))
-    {
+    if (empty($uploadTreeId)) {
       return;
     }
     $onlyTried = !$request->get('all');

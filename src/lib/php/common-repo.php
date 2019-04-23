@@ -44,13 +44,12 @@ function GetMimeType($Item)
 	WHERE uploadtree_pk = $Item LIMIT 1;";
   $result = pg_query($PG_CONN, $Sql);
   DBCheckResult($result, $Sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
+  if (pg_num_rows($result) > 0) {
     $row = pg_fetch_assoc($result);
     $Meta = $row['mimetype_name'];
-  }
-  else
+  } else {
     $Meta = 'application/octet-stream';
+  }
 
   pg_free_result($result);
   return($Meta);
@@ -72,14 +71,18 @@ function RepPath($PfilePk, $Repo="files")
   global $Plugins;
   global $LIBEXECDIR;
   global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
+  if (empty($PG_CONN)) {
+    return;
+  }
 
   $sql = "SELECT * FROM pfile WHERE pfile_pk = $PfilePk LIMIT 1;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $Row = pg_fetch_assoc($result);
   pg_free_result($result);
-  if (empty($Row['pfile_sha1'])) { return(NULL); }
+  if (empty($Row['pfile_sha1'])) {
+    return (null);
+  }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
   return($Path[0]);
@@ -100,7 +103,9 @@ function RepPathItem($Item, $Repo="files")
 {
   global $LIBEXECDIR;
   global $PG_CONN;
-  if (empty($PG_CONN)) { return; }
+  if (empty($PG_CONN)) {
+    return;
+  }
 
   $sql = "SELECT * FROM pfile INNER JOIN uploadtree ON pfile_fk = pfile_pk
 	  WHERE uploadtree_pk = $Item LIMIT 1;";
@@ -108,7 +113,9 @@ function RepPathItem($Item, $Repo="files")
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $Row = pg_fetch_assoc($result);
   pg_free_result($result);
-  if (empty($Row['pfile_sha1'])) { return(NULL); }
+  if (empty($Row['pfile_sha1'])) {
+    return (null);
+  }
   $Hash = $Row['pfile_sha1'] . "." . $Row['pfile_md5'] . "." . $Row['pfile_size'];
   exec("$LIBEXECDIR/reppath $Repo $Hash", $Path);
   return($Path[0]);

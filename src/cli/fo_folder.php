@@ -34,9 +34,10 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
   --linkFolder= create a link to this folder (id)
   --linkUpload= create a link to this upload (id)\n";
 
-$opts = getopt("hc:", array("username:", "groupname:", "folderId:", "password:", "linkFolder:", "linkUpload:"));
-if(array_key_exists('h', $opts))
-{
+$opts = getopt("hc:", array("username:", "groupname:",
+    "folderId:",
+    "password:", "linkFolder:", "linkUpload:"));
+if (array_key_exists('h', $opts)) {
   print $Usage;
   exit(0);
 }
@@ -55,27 +56,19 @@ $folderDao = $GLOBALS['container']->get("dao.folder");
 
 if (array_key_exists("folderId", $opts)) {
   $folderId = $opts["folderId"];
-}
-else
-{
+} else {
   $folderId = $folderDao->getRootFolder($userId)->getId();
 }
 
 $linkFolder = array_key_exists("linkFolder", $opts) ? $opts["linkFolder"] : null;
 $linkUpload = array_key_exists("linkUpload", $opts) ? $opts["linkUpload"] : null;
-if(!empty($linkFolder))
-{
+if (!empty($linkFolder)) {
   $folderDao->insertFolderContents($folderId,FolderDao::MODE_FOLDER,$linkFolder);
-}
-elseif(!empty($linkUpload))
-{
+} elseif (!empty($linkUpload)) {
   $folderDao->insertFolderContents($folderId,FolderDao::MODE_UPLOAD,$linkUpload);
-}
-else
-{
+} else {
   $structure = $folderDao->getFolderStructure($folderId);
-  foreach($structure as $folder)
-  {
+  foreach ($structure as $folder) {
     for ($i = 0; $i < $folder[FolderDao::DEPTH_KEY]; $i++) {
       echo '-';
     }
@@ -83,5 +76,5 @@ else
     $theFolder = $folder[FolderDao::FOLDER_KEY];
     echo $theFolder->getName().' (id='.$theFolder->getId().")\n";
   }
-  
+
 }

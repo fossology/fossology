@@ -26,17 +26,19 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 
-class AdminMonkRevision extends DefaultPlugin {
+class AdminMonkRevision extends DefaultPlugin
+{
   const NAME = 'admin_monk_revision';
-  
-  function __construct(){
+
+  function __construct()
+  {
         parent::__construct(self::NAME, array(
         self::TITLE => _("Manage Monk Revision"),
         self::MENU_LIST => "Admin::Agent::Monk",
         self::PERMISSION => Auth::PERM_ADMIN
         ));
   }
-  
+
   /**
    * @param Request $request
    * @return Response
@@ -48,15 +50,13 @@ class AdminMonkRevision extends DefaultPlugin {
     /** @var AgentRef */
     $monk = $agentDao->getCurrentAgentRef('monk');
     $rev = $request->get('rev');
-    if($rev==$monk->getAgentRevision() && $agentDao->renewCurrentAgent('monk'))
-    {
+    if ($rev==$monk->getAgentRevision() && $agentDao->renewCurrentAgent('monk')) {
       $text = _("You have renewed the monk revision.");
       return $this->render('include/base.html.twig', $this->mergeWithDefault(array('message'=>$text)));
     }
     $vars['content'] = '<a href="?mod=admin_monk_revision&rev='.$monk->getAgentRevision().'">'._('Renew monk revision').'</a>';
     return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
   }
-
 }
 
 register_plugin(new AdminMonkRevision());

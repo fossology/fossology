@@ -25,7 +25,7 @@ class ui_tag extends FO_Plugin
 {
   /** @var UploadDao */
   private $uploadDao;
-  
+
   function __construct()
   {
     $this->Name     = "tag";
@@ -52,13 +52,13 @@ class ui_tag extends FO_Plugin
     global $PG_CONN;
 
     $Upload = GetParm("upload",PARM_INTEGER);
-    $Item = GetParm("item",PARM_INTEGER);
+    $Item = GetParm("item", PARM_INTEGER);
 
-    if (empty($Item) || empty($Upload))
-    { return; }
+    if (empty($Item) || empty($Upload)) {
+      return;
+    }
 
-    if (isset($tag_array))
-    {
+    if (isset($tag_array)) {
       $tag_name = $tag_array["tag_name"];
       $tag_notes = $tag_array["tag_notes"];
       $tag_file = $tag_array["tag_file"];
@@ -66,9 +66,7 @@ class ui_tag extends FO_Plugin
       $tag_container = $tag_array["tag_container"];
       $tag_desc = $tag_array["tag_desc"];
       $tag_dir = $tag_array["tag_dir"];
-    }
-    else
-    {
+    } else {
       $tag_name = GetParm('tag_name', PARM_TEXT);
       $tag_notes = GetParm('tag_notes', PARM_TEXT);
       $tag_file = GetParm('tag_file', PARM_TEXT);
@@ -78,15 +76,15 @@ class ui_tag extends FO_Plugin
       $tag_dir = GetParm('tag_dir', PARM_TEXT);
     }
 
-    if (empty($tag_name))
-    {
+    if (empty($tag_name)) {
       $text = _("TagName must be specified. Tag Not created.");
       return ($text);
     }
     /* Need select tag file/package/container */
-    if (empty($tag_dir) && empty($tag_file) && empty($tag_package) && empty($tag_container))
-    {
-      $text = _("Need to select one option (dir/file/package/container) to create tag.");
+    if (empty($tag_dir) && empty($tag_file) && empty($tag_package) &&
+      empty($tag_container)) {
+      $text = _(
+        "Need to select one option (dir/file/package/container) to create tag.");
       return ($text);
     }
 
@@ -96,8 +94,7 @@ class ui_tag extends FO_Plugin
     $sql = "SELECT * FROM tag WHERE tag = '$tag_name'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
+    if (pg_num_rows($result) < 1) {
       pg_free_result($result);
 
       $Val = str_replace("'", "''", $tag_name);
@@ -106,7 +103,7 @@ class ui_tag extends FO_Plugin
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       pg_free_result($result);
-    }else{
+    } else {
       pg_free_result($result);
     }
 
@@ -114,8 +111,7 @@ class ui_tag extends FO_Plugin
     $sql = "SELECT * FROM tag WHERE tag = '$tag_name' LIMIT 1;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
+    if (pg_num_rows($result) < 1) {
       pg_free_result($result);
       $text = _("Failed to create tag.");
       return ($text);
@@ -128,55 +124,47 @@ class ui_tag extends FO_Plugin
     $pfileArray = array();
     $i = 0;
 
-    if (!empty($tag_file))
-    {
+    if (! empty($tag_file)) {
       /* Get pfile_fk from uploadtree_pk */
       $sql = "SELECT pfile_fk FROM uploadtree
               WHERE uploadtree_pk = $Item LIMIT 1";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      while ($row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $pfileArray[$i] = $row['pfile_fk'];
-        $i++;
+        $i ++;
       }
       pg_free_result($result);
     }
 
-    if (!empty($tag_package))
-    {
+    if (! empty($tag_package)) {
       /* GetPkgMimetypes */
       $MimetypeArray = GetPkgMimetypes();
       $sql = "SELECT distinct pfile.pfile_pk FROM uploadtree, pfile WHERE uploadtree.pfile_fk = pfile.pfile_pk AND (pfile.pfile_mimetypefk = $MimetypeArray[0] OR pfile.pfile_mimetypefk = $MimetypeArray[1] OR pfile.pfile_mimetypefk = $MimetypeArray[2]) AND uploadtree.upload_fk = $Upload AND uploadtree.lft >= (SELECT lft FROM uploadtree WHERE uploadtree_pk = $Item) AND uploadtree.rgt <= (SELECT rgt FROM uploadtree WHERE uploadtree_pk = $Item);";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      while ($row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $pfileArray[$i] = $row['pfile_pk'];
-        $i++;
+        $i ++;
       }
       pg_free_result($result);
     }
-    if (!empty($tag_container))
-    {
+    if (! empty($tag_container)) {
       $sql = "SELECT distinct pfile_fk FROM uploadtree WHERE upload_fk = $Upload AND lft >= (SELECT lft FROM uploadtree WHERE uploadtree_pk = $Item) AND rgt <= (SELECT rgt FROM uploadtree WHERE uploadtree_pk = $Item) AND ((ufile_mode & (1<<28))=0) AND pfile_fk!=0;";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      while ($row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $pfileArray[$i] = $row['pfile_fk'];
-        $i++;
+        $i ++;
       }
       pg_free_result($result);
     }
 
-    if (!empty($tag_dir))
-    {
+    if (! empty($tag_dir)) {
       $sql = "SELECT tag_uploadtree_pk FROM tag_uploadtree WHERE tag_fk = $tag_pk AND uploadtree_fk = $Item;";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($result) < 1)
-      {
+      if (pg_num_rows($result) < 1) {
         pg_free_result($result);
         /* Add record to tag_uploadtree table */
         $Val = str_replace("'", "''", $tag_notes);
@@ -184,24 +172,18 @@ class ui_tag extends FO_Plugin
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         pg_free_result($result);
-      }
-      else
-      {
+      } else {
         $text = _("This Tag already associated with this Directory!");
         pg_exec("ROLLBACK;");
         pg_free_result($result);
         return ($text);
       }
-    }
-    else
-    {
-      foreach($pfileArray as $pfile)
-      {
+    } else {
+      foreach ($pfileArray as $pfile) {
         $sql = "SELECT tag_file_pk FROM tag_file WHERE tag_fk = $tag_pk AND pfile_fk = $pfile;";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
-        if (pg_num_rows($result) < 1)
-        {
+        if (pg_num_rows($result) < 1) {
           pg_free_result($result);
           /* Add record to tag_file table */
           $Val = str_replace("'", "''", $tag_notes);
@@ -209,9 +191,7 @@ class ui_tag extends FO_Plugin
           $result = pg_query($PG_CONN, $sql);
           DBCheckResult($result, $sql, __FILE__, __LINE__);
           pg_free_result($result);
-        }
-        else
-        {
+        } else {
           $text = _("This Tag already associated with this File!");
           pg_exec("ROLLBACK;");
           pg_free_result($result);
@@ -220,7 +200,7 @@ class ui_tag extends FO_Plugin
       }
     }
     pg_exec("COMMIT;");
-    return (NULL);
+    return (null);
   }
 
   /**
@@ -233,8 +213,9 @@ class ui_tag extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
 
-    if (empty($Item) || empty($Upload))
-    { return; }
+    if (empty($Item) || empty($Upload)) {
+      return;
+    }
 
     $tag_pk = GetParm('tag_pk', PARM_INTEGER);
     $tag_file_pk = GetParm('tag_file_pk', PARM_INTEGER);
@@ -246,28 +227,23 @@ class ui_tag extends FO_Plugin
     $tag_desc = GetParm('tag_desc', PARM_TEXT);
     $tag_dir = GetParm('tag_dir', PARM_TEXT);
 
-    if (empty($tag_name))
-    {
+    if (empty($tag_name)) {
       $text = _("TagName must be specified. Tag Not Updated.");
       return ($text);
-    }
-    /* Check if tag_name has changed and if the new name is already in use */
-    else
-    {
+    } else {
+      /* Check if tag_name has changed and if the new name is already in use */
       $sql = "SELECT tag FROM tag WHERE tag_pk = '$tag_pk';";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
       $row = pg_fetch_row($result);
       pg_free_result($result);
       /* Is Tag name changed */
-      if ($row[0] <> $tag_name)
-      {
+      if ($row[0] <> $tag_name) {
         $sql = "SELECT * FROM tag WHERE tag = '$tag_name'";
         $result = pg_query($PG_CONN, $sql);
         DBCheckResult($result, $sql, __FILE__, __LINE__);
         /* Is new Tag name defined in name space */
-        if (pg_num_rows($result) >= 1)
-        {
+        if (pg_num_rows($result) >= 1) {
           $row = pg_fetch_row($result);
           pg_free_result($result);
           /* Delete old tag association */
@@ -279,9 +255,10 @@ class ui_tag extends FO_Plugin
                             "tag_notes" => $tag_notes, "tag_file" => $tag_file, "tag_package" => $tag_package,
                             "tag_container" => $tag_container, "tag_dir" => $tag_dir);
           $this->CreateTag($tag_data);
-          return (NULL);
+          return (null);
+        } else {
+          pg_free_result($result);
         }
-        else pg_free_result($result);
       }
     }
     pg_exec("BEGIN;");
@@ -294,16 +271,17 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     $Val = str_replace("'", "''", $tag_notes);
-    if (!empty($tag_dir))
-    $sql = "UPDATE tag_uploadtree SET tag_uploadtree_date = now(), tag_uploadtree_text = '$Val', tag_fk = $tag_pk WHERE tag_uploadtree_pk = $tag_file_pk;";
-    else
-    $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$Val', tag_fk = $tag_pk WHERE tag_file_pk = $tag_file_pk;";
+    if (! empty($tag_dir)) {
+      $sql = "UPDATE tag_uploadtree SET tag_uploadtree_date = now(), tag_uploadtree_text = '$Val', tag_fk = $tag_pk WHERE tag_uploadtree_pk = $tag_file_pk;";
+    } else {
+      $sql = "UPDATE tag_file SET tag_file_date = now(), tag_file_text = '$Val', tag_fk = $tag_pk WHERE tag_file_pk = $tag_file_pk;";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
     pg_exec("COMMIT;");
-    return (NULL);
+    return (null);
   }
 
   /**
@@ -316,8 +294,9 @@ class ui_tag extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
 
-    if (empty($Item) || empty($Upload))
-    { return; }
+    if (empty($Item) || empty($Upload)) {
+      return;
+    }
     $tag_file_pk = GetParm('tag_file_pk', PARM_INTEGER);
 
     $sql = "SELECT ufile_name, ufile_mode FROM uploadtree
@@ -328,10 +307,11 @@ class ui_tag extends FO_Plugin
     $ufile_mode = $row["ufile_mode"];
     pg_free_result($result);
 
-    if (Isdir($ufile_mode))
+    if (Isdir($ufile_mode)) {
       $sql = "DELETE FROM tag_uploadtree WHERE tag_uploadtree_pk = $tag_file_pk";
-    else
+    } else {
       $sql = "DELETE FROM tag_file WHERE tag_file_pk = $tag_file_pk";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -350,22 +330,17 @@ class ui_tag extends FO_Plugin
     $sql = "SELECT tag_pk, tag, tag_desc, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Uploadtree_pk UNION SELECT tag_pk, tag, tag_desc, tag_uploadtree_pk AS tag_file_pk, tag_uploadtree_date AS tag_file_date, tag_uploadtree_text AS tag_file_text FROM tag, tag_uploadtree WHERE tag.tag_pk = tag_uploadtree.tag_fk AND tag_uploadtree.uploadtree_fk = $Uploadtree_pk;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
-    {
+    if (pg_num_rows($result) > 0) {
       $VE .= "<table border=1>\n";
       $text1 = _("Tag");
       $text2 = _("Tag Description");
       $text3 = _("Tag Date");
       $VE .= "<tr><th>$text1</th><th>$text2</th><th>$text3</th><th></th></tr>\n";
-      while ($row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $VE .= "<tr><td align='center'>" . $row['tag'] . "</td><td align='center'>" . $row['tag_desc'] . "</td><td align='center'>" . substr($row['tag_file_date'],0,19) . "</td>";
-        if ($this->uploadDao->isEditable($Upload, Auth::getGroupId()))
-        {
+        if ($this->uploadDao->isEditable($Upload, Auth::getGroupId())) {
           $VE .= "<td align='center'><a href='" . Traceback_uri() . "?mod=tag&action=edit&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>View/Edit</a>|<a href='" . Traceback_uri() . "?mod=tag&action=delete&upload=$Upload&item=$Uploadtree_pk&tag_file_pk=" . $row['tag_file_pk'] . "'>Delete</a></td></tr>\n";
-        }
-        else
-        {
+        } else {
           $nopermtext = _("No permission to edit tag.");
           $VE .= "<td align='center'>$nopermtext</td></tr>\n";
         }
@@ -487,12 +462,9 @@ class ui_tag extends FO_Plugin
     $VC .= _("<p>Notes:</p>");
     $VC .= "<p><textarea rows='10' cols='80' name='tag_notes'></textarea></p>";
 
-    if (Isdir($ufile_mode))
-    {
+    if (Isdir($ufile_mode)) {
       $VC .= "<p><input type='hidden' name='tag_dir' value='1'/></p>";
-    }
-    else if (Iscontainer($ufile_mode))
-    {
+    } else if (Iscontainer($ufile_mode)) {
       /* Recursively tagging UI part comment out */
       /*
        $text = _("Tag this files only.");
@@ -538,19 +510,21 @@ class ui_tag extends FO_Plugin
     pg_free_result($result);
 
     /* Get all information about $tag_file_pk (tag_file/tag_uploadtree table)*/
-    if (Isdir($ufile_mode))
-    $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
-    else
-    $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
+    if (Isdir($ufile_mode)) {
+      $sql = "SELECT tag_pk, tag_uploadtree_text, tag, tag_desc FROM tag_uploadtree, tag WHERE tag_uploadtree_pk=$tag_file_pk AND tag_uploadtree.tag_fk = tag.tag_pk";
+    } else {
+      $sql = "SELECT tag_pk, tag_file_text, tag, tag_desc FROM tag_file, tag WHERE tag_file_pk=$tag_file_pk AND tag_file.tag_fk = tag.tag_pk";
+    }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     $tag_pk = $row['tag_pk'];
     $tag = $row['tag'];
-    if (Isdir($ufile_mode))
-    $tag_notes = $row['tag_uploadtree_text'];
-    else
-    $tag_notes = $row['tag_file_text'];
+    if (Isdir($ufile_mode)) {
+      $tag_notes = $row['tag_uploadtree_text'];
+    } else {
+      $tag_notes = $row['tag_file_text'];
+    }
     $tag_desc = $row['tag_desc'];
     pg_free_result($result);
 
@@ -563,12 +537,9 @@ class ui_tag extends FO_Plugin
     $VEd .= _("<p>Notes:</p>");
     $VEd .= "<p><textarea rows='10' cols='80' name='tag_notes'>$tag_notes</textarea></p>";
 
-    if (Isdir($ufile_mode))
-    {
+    if (Isdir($ufile_mode)) {
       $VEd .= "<p><input type='hidden' name='tag_dir' value='1'/></p>";
-    }
-    else if (Iscontainer($ufile_mode))
-    {
+    } else if (Iscontainer($ufile_mode)) {
       /*
        $text = _("Tag this files only.");
        $VEd .= "<p><input type='checkbox' name='tag_file' value='1' checked/>$text</p>";
@@ -613,17 +584,14 @@ class ui_tag extends FO_Plugin
     $sql = "SELECT tag_pk, tag, tag_file_pk, tag_file_date, tag_file_text FROM tag, tag_file, uploadtree WHERE tag.tag_pk = tag_file.tag_fk AND tag_file.pfile_fk = uploadtree.pfile_fk AND uploadtree.uploadtree_pk = $Item;";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0)
-    {
+    if (pg_num_rows($result) > 0) {
       $VD .= "<form name='form' method='POST' action='" . Traceback_uri() ."?mod=tag&upload=$Upload&item=$Item'>\n";
       $VD .= "<select multiple size='10' name='tag_file_pk[]'>\n";
-      while ($row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $VD .= "<option value='" . $row['tag_file_pk'] . "'>" . "-" . $row['tag'] . "</option>\n";
       }
       $VD .= "</select>\n";
-      if (Iscontainer($ufile_mode))
-      {
+      if (Iscontainer($ufile_mode)) {
         $text = _("Delete Tag only for this file.");
         $VD .= "<p><input type='checkbox' name='tag_file' value='1' checked/>$text</p>";
         $text = _("Delete Tag for all packages (source and binary) in this container tree.");
@@ -654,31 +622,27 @@ class ui_tag extends FO_Plugin
     $Upload = GetParm("upload",PARM_INTEGER);
     $Item = GetParm("item",PARM_INTEGER);
 
-    if (empty($Item) || empty($Upload))
-    { return; }
+    if (empty($Item) || empty($Upload)) {
+      return;
+    }
 
     /**********************************
      Display micro header
      **********************************/
-    if ($ShowHeader)
-    {
+    if ($ShowHeader) {
       $V .= Dir2Browse("browse",$Item,NULL,1,"Browse");
     }
 
     $V .=  $this->ShowExistTags($Upload,$Item);
     $V .= $this->ShowAjaxPage();
 
-    if ($action == 'edit')
-    {
+    if ($action == 'edit') {
       $V .= $this->ShowEditTagPage($Upload,$Item);
     } else {
-      /* Show create tag page */
-      if ($this->uploadDao->isEditable($Upload, Auth::getGroupId()) )
-      {
-        $V .= $this->ShowCreateTagPage($Upload,$Item);
-      }
-      else
-      {
+        /* Show create tag page */
+      if ($this->uploadDao->isEditable($Upload, Auth::getGroupId())) {
+        $V .= $this->ShowCreateTagPage($Upload, $Item);
+      } else {
         $nopermtext = _("You do not have permission to tag this upload.");
         $V .= $nopermtext;
       }
@@ -692,36 +656,30 @@ class ui_tag extends FO_Plugin
     $V="";
     $action = GetParm('action', PARM_TEXT);
 
-    if ($action == 'add')
-    {
-      $rc = $this->CreateTag(NULL);
-      if (!empty($rc))
-      {
+    if ($action == 'add') {
+      $rc = $this->CreateTag(null);
+      if (! empty($rc)) {
         $text = _("Create Tag Failed");
         $this->vars['message'] = "$text: $rc";
       } else {
         $this->vars['message'] = _("Create Tag Successful!");
       }
     }
-    if ($action == 'update')
-    {
+    if ($action == 'update') {
       $rc = $this->EditTag();
-      if (!empty($rc))
-      {
+      if (! empty($rc)) {
         $text = _("Edit Tag Failed");
         $this->vars['message'] = "$text: $rc";
-      }else{
+      } else {
         $this->vars['message'] = _("Edit Tag Successful!");
       }
     }
-    if ($action == 'delete')
-    {
+    if ($action == 'delete') {
       $rc = $this->DeleteTag();
-      if (!empty($rc))
-      {
+      if (! empty($rc)) {
         $text = _("Delete Tag Failed");
         $this->vars['message'] = "$text: $rc";
-      }else{
+      } else {
         $this->vars['message'] = _("Delete Tag Successful!");
       }
     }
@@ -729,7 +687,7 @@ class ui_tag extends FO_Plugin
 
     return $V;
   }
-
 }
-$NewPlugin = new ui_tag;
+
+$NewPlugin = new ui_tag();
 $NewPlugin->Initialize();

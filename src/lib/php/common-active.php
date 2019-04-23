@@ -53,9 +53,10 @@ function js_url()
  *
  * \return The html to display (with embeded javascript)
  */
-function displayMessage($Message,$keep=NULL) {
+function displayMessage($Message, $keep = null)
+{
 
-  $HTML = NULL;
+  $HTML = null;
   $HTML .= "\n<div id='dmessage'>";
   $text = _("Close");
   $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
@@ -102,8 +103,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
 {
   $HTML="";
 
-  if ($IncludeScriptTags)
-  {
+  if ($IncludeScriptTags) {
     $HTML="<script language='javascript'>\n<!--\n";
   }
 
@@ -139,8 +139,7 @@ function ActiveHTTPscript($RequestName,$IncludeScriptTags=1)
   $HTML .= "  }\n";
   $HTML .= "}\n";
 
-  if ($IncludeScriptTags)
-  {
+  if ($IncludeScriptTags) {
     $HTML .= "\n// -->\n</script>\n";
   }
 

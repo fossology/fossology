@@ -35,7 +35,9 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
     $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
     $this->driver->shouldReceive('booleanToDb')->with(false)->andReturn('f');
-    $this->driver->shouldReceive('escapeString')->andReturnUsing(function($v){return pg_escape_string($v);});
+    $this->driver->shouldReceive('escapeString')->andReturnUsing(function ($v){
+      return pg_escape_string($v);
+    });
 
     $this->logger = M::mock('Monolog\\Logger');
     $this->logger->shouldReceive('addDebug');

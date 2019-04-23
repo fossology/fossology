@@ -20,7 +20,9 @@ namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Data\Types;
 
-class ClearingEventTypes extends Types {
+class ClearingEventTypes extends Types
+{
+
   const USER = 1;
   const BULK = 2;
   const AGENT = 3;
@@ -37,4 +39,4 @@ class ClearingEventTypes extends Types {
         self::IMPORT => "Imported decision"
     );
   }
-} 
+}

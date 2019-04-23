@@ -61,7 +61,8 @@ include_once(__DIR__ . "/version.php");
  * @class DeciderJobAgent
  * @brief Get the decision from Monk bulk and apply decisions
  */
-class DeciderJobAgent extends Agent {
+class DeciderJobAgent extends Agent
+{
   const FORCE_DECISION = 1;
 
   /** @var int $conflictStrategyId
@@ -130,11 +131,9 @@ class DeciderJobAgent extends Agent {
     $jobId = $this->jobId;
 
     $eventsOfThisJob = $this->clearingDao->getEventIdsOfJob($jobId);
-    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob)
-    {
+    foreach ($eventsOfThisJob as $uploadTreeId => $additionalEventsFromThisJob) {
       $containerBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
-      foreach($this->loopContainedItems($containerBounds) as $itemTreeBounds)
-      {
+      foreach ($this->loopContainedItems($containerBounds) as $itemTreeBounds) {
         $this->processClearingEventsForItem($itemTreeBounds, $userId, $groupId, $additionalEventsFromThisJob);
       }
     }
@@ -147,15 +146,13 @@ class DeciderJobAgent extends Agent {
    */
   private function loopContainedItems($itemTreeBounds)
   {
-    if (!$itemTreeBounds->containsFiles())
-    {
+    if (!$itemTreeBounds->containsFiles()) {
       return array($itemTreeBounds);
     }
     $result = array();
     $condition = "(ut.lft BETWEEN $1 AND $2) AND ((ut.ufile_mode & (3<<28)) = 0)";
     $params = array($itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
-    foreach($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item)
-    {
+    foreach ($this->uploadDao->getContainedItems($itemTreeBounds, $condition, $params) as $item) {
       $result[] = $item->getItemTreeBounds();
     }
     return $result;
@@ -168,7 +165,7 @@ class DeciderJobAgent extends Agent {
   function processUploadId($uploadId)
   {
     $args = $this->args;
-    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : NULL;
+    $this->conflictStrategyId = array_key_exists('k', $args) ? $args['k'] : null;
 
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
@@ -190,8 +187,7 @@ class DeciderJobAgent extends Agent {
 
     $itemId = $itemTreeBounds->getItemId();
 
-    switch ($this->conflictStrategyId)
-    {
+    switch ($this->conflictStrategyId) {
       case self::FORCE_DECISION:
         $createDecision = true;
         break;
@@ -200,14 +196,10 @@ class DeciderJobAgent extends Agent {
         $createDecision = !$this->clearingDecisionProcessor->hasUnhandledScannerDetectedLicenses($itemTreeBounds, $groupId, $additionalEventsFromThisJob, $this->licenseMap);
     }
 
-    if ($createDecision)
-    {
+    if ($createDecision) {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $userId, $groupId, DecisionTypes::IDENTIFIED, $this->decisionIsGlobal, $additionalEventsFromThisJob);
-    }
-    else
-    {
-      foreach ($additionalEventsFromThisJob as $eventId)
-      {
+    } else {
+      foreach ($additionalEventsFromThisJob as $eventId) {
         $this->clearingDao->copyEventIdTo($eventId, $itemId, $userId, $groupId);
       }
       $this->clearingDao->markDecisionAsWip($itemId, $userId, $groupId);

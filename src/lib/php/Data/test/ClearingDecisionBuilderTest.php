@@ -179,5 +179,4 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
         ->build();
     assertThat($clearingDec->getTimeStamp(), is($this->timeStamp));
   }
-
 }

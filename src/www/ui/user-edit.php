@@ -54,11 +54,12 @@ class UserEditPage extends DefaultPlugin
 
   /**
    * @brief Allow user to change their account settings (users db table).
-   *        If the user is an Admin, they can change settings for any user.\n
-   *        This is called in the following circumstances:\n
-   *        1) User clicks on Admin > Edit User Account\n
-   *        2) User has chosen a user to edit from the 'userid' select list  \n
-   *        3) User hit submit to update user data\n
+   *
+   * If the user is an Admin, they can change settings for any user.\n
+   * This is called in the following circumstances:\n
+   * 1) User clicks on Admin > Edit User Account\n
+   * 2) User has chosen a user to edit from the 'userid' select list  \n
+   * 3) User hit submit to update user data\n
    */
   protected function handle(Request $request)
   {
@@ -77,39 +78,34 @@ class UserEditPage extends DefaultPlugin
     }
 
     $user_pk_to_modify = intval($request->get('user_pk'));
-    if (!($SessionIsAdmin ||
-          empty($user_pk_to_modify) ||
-          $user_pk == $user_pk_to_modify))
-    {
+    if (! ($SessionIsAdmin || empty($user_pk_to_modify) ||
+      $user_pk == $user_pk_to_modify)) {
       $vars['content'] = _("Your request is not valid.");
       return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
     }
 
     $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
 
-    /* If this is a POST (the submit button was clicked), then process the request. */
+      /*
+     * If this is a POST (the submit button was clicked), then process the
+     * request.
+     */
     $BtnText = $request->get('UpdateBtn');
-    if (!empty($BtnText))
-    {
+    if (! empty($BtnText)) {
       /* Get the form data to in an associated array */
       $UserRec = $this->CreateUserRec($request, "");
 
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
-      if (empty($rv))
-      {
+      if (empty($rv)) {
         // Successful db update
         $vars['message'] = "User $UserRec[user_name] updated.";
 
         /* Reread the user record as update verification */
         $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
-      }
-      else
-      {
+      } else {
         $vars['message'] = $rv;
       }
-    }
-    else
-    {
+    } else {
       $NewUserpk = intval($request->get('newuser'));
       $UserRec = empty($NewUserpk) ? $this->CreateUserRec($request, $user_pk) : $this->CreateUserRec($request, $NewUserpk);
     }
@@ -140,15 +136,13 @@ class UserEditPage extends DefaultPlugin
     /* For Admins, get the list of all users
      * For non-admins, only show themself
      */
-    if ($SessionIsAdmin)
-    {
+    if ($SessionIsAdmin) {
       $stmt = __METHOD__ . '.asSessionAdmin';
       $sql = "SELECT * FROM users ORDER BY user_name";
       $this->dbManager->prepare($stmt, $sql);
       $res = $this->dbManager->execute($stmt);
       $allUsers = array();
-      while ($row = $this->dbManager->fetchArray($res))
-      {
+      while ($row = $this->dbManager->fetchArray($res)) {
         $allUsers[$row['user_pk']] = htmlentities($row['user_name']);
       }
       $this->dbManager->freeResult($res);
@@ -160,8 +154,7 @@ class UserEditPage extends DefaultPlugin
     $vars['userEMail'] = $UserRec["user_email"];
     $vars['eMailNotification'] = ($UserRec['email_notify'] == 'y');
 
-    if ($SessionIsAdmin)
-    {
+    if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
           PLUGIN_DB_NONE => _("None (very basic, no database access)"),
           PLUGIN_DB_READ => _("Read-only (read, but no writes or downloads)"),
@@ -175,7 +168,8 @@ class UserEditPage extends DefaultPlugin
     }
 
     $vars['isBlankPassword'] = ($UserRec['_blank_pass'] == 'on');
-    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
+    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack",
+      "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
     $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
 
     return $vars;
@@ -231,25 +225,20 @@ class UserEditPage extends DefaultPlugin
       return _("Errors") . ":<ol>$Errors </ol>";
     }
 
-
     /**** Update the users database record ****/
     /* First remove user_pass and user_seed if the password wasn't changed. */
-    if (!empty($UserRec['_blank_pass']) )
-    {
+    if (!empty($UserRec['_blank_pass']) ) {
       $UserRec['user_seed'] = rand() . rand();
       $UserRec['user_pass'] = sha1($UserRec['user_seed'] . "");
-    }
-    else if (empty($UserRec['_pass1']))   // password wasn't changed
-    {
+    } else if (empty($UserRec['_pass1'])) { // password wasn't changed
       unset( $UserRec['user_pass']);
       unset( $UserRec['user_seed']);
     }
 
     /* Build the sql update */
     $sql = "UPDATE users SET ";
-    $first = TRUE;
-    foreach($UserRec as $key=>$val)
-    {
+    $first = true;
+    foreach ($UserRec as $key=>$val) {
       if ($key[0] == '_' || $key == "user_pk") {
         continue;
       }
@@ -257,16 +246,18 @@ class UserEditPage extends DefaultPlugin
         continue;
       }
 
-      if (!$first) $sql .= ",";
+      if (!$first) {
+        $sql .= ",";
+      }
       $sql .= "$key='" . pg_escape_string($val) . "'";
-      $first = FALSE;
+      $first = false;
     }
     $sql .= " where user_pk=$UserRec[user_pk]";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
-    return (NULL);
+    return (null);
   } // UpdateUser()
 
   /**
@@ -277,14 +268,12 @@ class UserEditPage extends DefaultPlugin
    */
   function GetUserRec($user_pk)
   {
-    if (empty($user_pk))
-    {
+    if (empty($user_pk)) {
       throw new Exception("Invalid access.  Your session has expired.",1);
     }
 
     $UserRec = GetSingleRec("users", "WHERE user_pk=$user_pk");
-    if (empty($UserRec))
-    {
+    if (empty($UserRec)) {
       throw new Exception("Invalid user. ",1);
     }
     return $UserRec;
@@ -314,15 +303,12 @@ class UserEditPage extends DefaultPlugin
     /* If a $user_pk was given, use it to read the user db record.
      * Otherwise, use the form data.
      */
-    if (!empty($user_pk))
-    {
+    if (!empty($user_pk)) {
       $UserRec = $this->GetUserRec($user_pk);
       $UserRec['_pass1'] = "";
       $UserRec['_pass2'] = "";
       $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($UserRec['user_seed'] . "")) ? "on" : "";
-    }
-    else
-    {
+    } else {
       $UserRec = array();
       $UserRec['user_pk'] = intval($request->get('user_pk'));
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
@@ -331,18 +317,14 @@ class UserEditPage extends DefaultPlugin
 
       $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
       $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
-      if (!empty($UserRec['_pass1']))
-      {
+      if (!empty($UserRec['_pass1'])) {
         $UserRec['user_seed'] = rand() . rand();
         $UserRec['user_pass'] = sha1($UserRec['user_seed'] . $UserRec['_pass1']);
         $UserRec['_blank_pass'] = "";
-      }
-      else
-      {
+      } else {
         $UserRec['user_pass'] = "";
         $UserRec['_blank_pass'] = stripslashes($request->get("_blank_pass"));
-        if (empty($UserRec['_blank_pass']))  // check for blank password
-        {
+        if (empty($UserRec['_blank_pass'])) { // check for blank password
           // get the stored seed
           $StoredUserRec = $this->GetUserRec($UserRec['user_pk']);
           $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($StoredUserRec['user_seed'] . "")) ? "on" : "";

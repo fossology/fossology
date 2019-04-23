@@ -41,17 +41,19 @@
  **/
 function fo_scheduler_connect($IPaddr='', $Port='', &$ErrorMsg="")
 {
-  if (empty($IPaddr)) $IPaddr = '127.0.0.1';
-  if (empty($Port)) $Port = 5555;
-  if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false)
-  {
+  if (empty($IPaddr)) {
+    $IPaddr = '127.0.0.1';
+  }
+  if (empty($Port)) {
+    $Port = 5555;
+  }
+  if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
     $ErrorMsg = "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "<br>\n";
     return false;
   }
 
   $result = @socket_connect($sock, $IPaddr, $Port);
-  if ($result === false)
-  {
+  if ($result === false) {
     $ErrorMsg = "Connection to the scheduler failed.  Is the scheduler running?<br>";
     $ErrorMsg .= "socket_connect() failed.\nReason: ($result) " . socket_strerror(socket_last_error($sock)) . "<br>\n";
     return false;
@@ -133,36 +135,31 @@ function fo_communicate_with_scheduler($input, &$output, &$error_msg)
   $address = $SysConf['FOSSOLOGY']['address'];
   $port =  $SysConf['FOSSOLOGY']['port'];
   $sock = fo_scheduler_connect($address, $port, $error_msg);
-  if ($sock)
-  {
+  if ($sock) {
     $msg = trim($input);
     $write_result = fo_scheduler_write($sock, $msg);
-    if ($write_result)
-    {
-      while ($buf = fo_scheduler_read($sock))
-      {
+    if ($write_result) {
+      while ($buf = fo_scheduler_read($sock)) {
         /* when get all response from the scheduler for the command 'status' or 'status <job_id>', or 'agents'
            will get a string 'end' */
-        if (substr($buf, 0, 3) == "end") break;
-        if (substr($buf, 0, 8) == "received") /* get a string 'received'*/
-        {
+        if (substr($buf, 0, 3) == "end") {
+          break;
+        }
+        if (substr($buf, 0, 8) == "received") { /* get a string 'received'*/
           /* 1. if the command is not 'status' or 'status <job_id>' or 'agents', when receiving
                 a string 'received', that mean this communication is over.
              2. if the command is 'status' or 'status <job_id>' or 'agents', first receiving
                 a string 'received', then will receive related response.
                 then a string 'end' as ending.
            */
-          if (substr($input, 0, 6) != "status" && substr($input, 0, 6) != "agents")
+          if (substr($input, 0, 6) != "status" && substr($input, 0, 6) != "agents") {
             break;
-        }
-        else /* do not save the symbol string 'received' as the output, they are just symbols */
-        {
+          }
+        } else { /* do not save the symbol string 'received' as the output, they are just symbols */
           $output .= "$buf<br>";
         }
       }
-    }
-    else
-    {
+    } else {
       $error_msg = socket_strerror(socket_last_error($sock));
     }
     fo_scheduler_close($sock);
@@ -194,7 +191,9 @@ function GetRunnableJobList()
   $command = "status";
   $command_status = fo_communicate_with_scheduler($command, $status_info, $error_msg);
   /* can not get status info from the scheduler, so can not get runnable jobs, probably the scheduler is not running */
-  if (false === $command_status) return ;
+  if (false === $command_status) {
+    return ;
+  }
   $pattern = '/job:(\d+) /';
   preg_match_all($pattern, $status_info, $matches);
   /* the $matches[1] is like: Array(1, 2, 3, .., i)  */

@@ -208,11 +208,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   private function getHeartCount($output)
   {
     $matches = array();
-    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches))
-    {
+    if (preg_match("/.*HEART: ([0-9]*).*/", $output, $matches)) {
       return intval($matches[1]);
-    } else
-    {
+    } else {
       return -1;
     }
   }
@@ -521,8 +519,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
     /** @var ClearingEvent $newEvent */
-    foreach($newEvents as $newEvent)
-    {
+    foreach ($newEvents as $newEvent) {
       assertThat($newEvent->getEventId(), anyOf($addedEventIds));
       assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
     }
@@ -606,8 +603,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     assertThat($newEvents, is(arrayWithSize(count($clearingLicenses))));
 
     /** @var ClearingEvent $newEvent */
-    foreach($newEvents as $newEvent)
-    {
+    foreach ($newEvents as $newEvent) {
       assertThat($newEvent->getEventId(), anyOf($addedEventIds));
       assertThat($newEvent->getClearingLicense(), anyOf($clearingLicenses));
     }
@@ -621,5 +617,4 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($mainLicenseIdForReuseSingle, $mainLicenseSingle);
     $this->rmRepo();
   }
-
 }

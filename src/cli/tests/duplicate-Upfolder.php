@@ -53,4 +53,4 @@ class TestDupFolders extends UnitTestCase
     $this->assertPattern('/Warning: /', $output[5]);
   }
 }
-?>
+

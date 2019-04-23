@@ -24,11 +24,13 @@
  * @version "$Id: desc.php 626 2008-05-24 03:04:12Z rrando $"
  *
  */
-class TestDashD extends UnitTestCase {
+class TestDashD extends UnitTestCase
+{
 
   public $command = '/usr/local/bin/test.cp2foss';
 
-  function TestDesc(){
+  function TestDesc()
+  {
 
     $output = array();
     $error = exec("$this->command -p CP2fossTest -n foo -a /tmp/zlib.tar.bz2 -d \"a comment\"", $output, $retval);
@@ -41,4 +43,4 @@ class TestDashD extends UnitTestCase {
     $this->assertPattern('/ERROR, -d /', $output[0]);
   }
 }
-?>
+

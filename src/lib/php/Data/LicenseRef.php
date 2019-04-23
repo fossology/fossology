@@ -74,5 +74,4 @@ class LicenseRef
       .", ".$this->fullName
     .')';
   }
-
 }

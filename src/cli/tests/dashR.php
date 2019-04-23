@@ -26,7 +26,8 @@
 
 $archive_path = '/tmp/fossology';
 
-class TestCP2fossRecursion extends UnitTestCase {
+class TestCP2fossRecursion extends UnitTestCase
+{
   /*
    * This function will use illegal archives, that is we have a file for
    * input, but it is zero length.
@@ -34,7 +35,8 @@ class TestCP2fossRecursion extends UnitTestCase {
 
   public $command = '/usr/local/bin/test.cp2foss';
 
-  function TestDashRNoArchive(){
+  function TestDashRNoArchive()
+  {
 
     $error = exec("$this->command -p devnull -n fail -a /dev/null -d \"test should fail\" ",
     $output, $retval);
@@ -59,7 +61,8 @@ class TestCP2fossRecursion extends UnitTestCase {
    *
    */
 
-  function TestNoDashR(){
+  function TestNoDashR()
+  {
     /*
      * Method: run a real cp2foss run, then examine the tar file created
      * by it and compare to what was tar'ed up.  If no differences,
@@ -86,21 +89,21 @@ class TestCP2fossRecursion extends UnitTestCase {
     $last = exec("tar -tf $output[1]", $tarout, $retval);
     // get leaf names from find output
     $basenames = array();
-    foreach($findoutput as $path) {
+    foreach ($findoutput as $path) {
       $basenames[] = basename($path);
     }
     sort($tarout);
     sort($basenames);
     $diffs = array_diff($tarout, $basenames);
-    if (empty($diffs)){
+    if (empty($diffs)) {
       $this->pass();
-    }
-    else {
+    } else {
       $this->fail();
     }
   }
 
-  function TestDashR(){
+  function TestDashR()
+  {
     /*
      * Method: run a real cp2foss run, then examine the tar file created
      * by it and compare to what was tar'ed up.  If no differences,
@@ -130,24 +133,23 @@ class TestCP2fossRecursion extends UnitTestCase {
     $last = exec($tcmd, $Rtoutput, $retval);
     $last = exec("tar -tf $output[1]", $tarout, $retval);
     $last = exec("tar -tf $temp_tar", $Rtout, $retval);
-    foreach($tarout as $p) {
+    foreach ($tarout as $p) {
       //echo "tar path is:$p\n";
       $tpaths[] = rtrim($p);
     }
-    foreach($Rtout as $path) {
+    foreach ($Rtout as $path) {
       $Rtpaths[] = rtrim($path);
     }
     sort($tpaths);
     sort($Rtpaths);
     $diffs = array_diff($tpaths, $Rtpaths);
-    if (empty($diffs)){
+    if (empty($diffs)) {
       $this->pass();
-    }
-    else {
+    } else {
       echo "diffs are:\n";
       $this->dump($diffs);
       $this->fail();
     }
   }
 }
-?>
+

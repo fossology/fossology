@@ -66,7 +66,6 @@ require_once("common-users.php");
 require_once("common-string.php");
 /* Only include the command-line interface functions if it is required. */
 global $UI_CLI;
-if (!empty($UI_CLI) && ($UI_CLI == 1))
-{
-  require_once("common-cli.php");
+if (! empty($UI_CLI) && ($UI_CLI == 1)) {
+  require_once ("common-cli.php");
 }

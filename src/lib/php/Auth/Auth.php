@@ -31,7 +31,8 @@ namespace Fossology\Lib\Auth;
  * Permissions
  * See https://github.com/fossology/fossology/wiki/Permissions-and-Groups
  */
-class Auth {
+class Auth
+{
   /** @var string USER_NAME
    * Session variable name containing user name */
   const USER_NAME = 'User';

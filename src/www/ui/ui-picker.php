@@ -21,8 +21,8 @@ use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file ui-picker.php
- * \brief permit people to positively pick a pair of paths, 
- * Path pairs are used by reports that do file comparisons and differences between 
+ * \brief permit people to positively pick a pair of paths,
+ * Path pairs are used by reports that do file comparisons and differences between
  * files (like isos, packages, directories, etc.).
  */
 
@@ -101,12 +101,12 @@ class ui_picker extends FO_Plugin
   function Initialize()
   {
     if ($this->State != PLUGIN_STATE_INVALID) {
-      return(1);
+      return (1);
     } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-    {
+    if ($this->Name !== "") {
+      // Name must be defined
       global $Plugins;
-      $this->State=PLUGIN_STATE_VALID;
+      $this->State = PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
     }
     return($this->State == PLUGIN_STATE_VALID);
@@ -124,8 +124,7 @@ class ui_picker extends FO_Plugin
     $sql = "SELECT typlen  FROM pg_type where typname='file_picker' limit 1";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) > 0) 
-    {
+    if (pg_num_rows($result) > 0) {
       pg_free_result($result);
       return 0;
     }
@@ -165,15 +164,12 @@ class ui_picker extends FO_Plugin
 
     $OutBuf .= "<table style='text-align:left;' >";
 
-    if (!empty($FolderContents))
-    {
+    if (!empty($FolderContents)) {
       usort($FolderContents, 'picker_name_cmp');
 
       /* write subfolders */
-      foreach ($FolderContents as $Folder)
-      {
-        if ($Folder && array_key_exists('folder_pk', $Folder))
-        {
+      foreach ($FolderContents as $Folder) {
+        if ($Folder && array_key_exists('folder_pk', $Folder)) {
           $folder_pk = $Folder['folder_pk'];
           $folder_name = htmlentities($Folder['name']);
           $OutBuf .= "<tr>";
@@ -183,9 +179,7 @@ class ui_picker extends FO_Plugin
           $OutBuf .= "<td>";
           $OutBuf .= "<a href='$Uri&folder=$folder_pk&item=$File1uploadtree_pk'><b>$folder_name</b></a>/";
           $OutBuf .= "</td></tr>";
-        }
-        else if ($Folder && array_key_exists('uploadtree_pk', $Folder))
-        {
+        } else if ($Folder && array_key_exists('uploadtree_pk', $Folder)) {
           $bitem = $Folder['uploadtree_pk'];
           $upload_filename = htmlentities($Folder['name']);
           $OutBuf .= "<tr>";
@@ -200,19 +194,13 @@ class ui_picker extends FO_Plugin
           $OutBuf .= "</td></tr>";
         }
       }
-    }
-    else
-    {
-      if (empty($Children))
-      {
+    } else {
+      if (empty($Children)) {
         $text = _("No children to compare");
         $OutBuf .= "<tr><td colspan=2>$text</td></tr>";
-      }
-      else
-      {
+      } else {
         usort($Children, 'picker_ufile_name_cmp');
-        foreach($Children as $Child)
-        {
+        foreach ($Children as $Child) {
           if (empty($Child)) {
             continue;
           }
@@ -228,19 +216,15 @@ class ui_picker extends FO_Plugin
           $Options = "id=filepick onclick='AppJump($Child[uploadtree_pk])')";
           $OutBuf .= "<button type='button' $Options> $text </button>\n";
           $OutBuf .= "</td>";
-
           $OutBuf .= "<td>";
-          if ($IsContainer)
-          {
+          if ($IsContainer) {
             $OutBuf .= "<a href='$LinkUri'> $Child[ufile_name]</a>";
-          }
-          else
-          {
+          } else {
             $OutBuf .= $Child['ufile_name'];
           }
           if ($IsDir) {
             $OutBuf .= "/";
-          };
+          }
           $OutBuf .= "</td>";
           $OutBuf .= "</tr>";
         }
@@ -284,7 +268,9 @@ class ui_picker extends FO_Plugin
    */
   function HTMLPath($File1uploadtree_pk, $FolderList, $DirectoryList)
   {
-    if (empty($FolderList)) return "__FILE__ __LINE__ No folder list specified";
+    if (empty($FolderList)) {
+      return "__FILE__ __LINE__ No folder list specified";
+    }
 
     $OutBuf = "";
     $Uri2 = Traceback_uri() . "?mod=$this->Name";
@@ -296,31 +282,29 @@ class ui_picker extends FO_Plugin
     $text = _("Folder");
     $OutBuf .= "<b>$text</b>: ";
 
-    foreach ($FolderList as $Folder)
-    {
+    foreach ($FolderList as $Folder) {
       $folder_pk = $Folder['folder_pk'];
       $folder_name = htmlentities($Folder['folder_name']);
       $OutBuf .= "<a href='$Uri2&folder=$folder_pk&item=$File1uploadtree_pk'><b>$folder_name</b></a>/";
     }
 
-    /* write the DirectoryList */
-    if (!empty($DirectoryList))
-    {
+      /* write the DirectoryList */
+    if (! empty($DirectoryList)) {
       $OutBuf .= "<br>";
       $First = true; /* If $First is true, directory path starts a new line */
 
       /* Show the path within the upload */
-      foreach($DirectoryList as $uploadtree_rec)
-      {
-        if (!$First) {
+      foreach ($DirectoryList as $uploadtree_rec) {
+        if (! $First) {
           $OutBuf .= "/ ";
         }
 
         $href = "$Uri2&bitem=$uploadtree_rec[uploadtree_pk]&item=$File1uploadtree_pk";
         $OutBuf .= "<a href='$href'>";
 
-        if (!$First && Iscontainer($uploadtree_rec['ufile_mode']))
-        $OutBuf .= "<br>&nbsp;&nbsp;";
+        if (!$First && Iscontainer($uploadtree_rec['ufile_mode'])) {
+          $OutBuf .= "<br>&nbsp;&nbsp;";
+        }
 
         $OutBuf .= "<b>" . $uploadtree_rec['ufile_name'] . "</b>";
         $OutBuf .= "</a>";
@@ -333,9 +317,9 @@ class ui_picker extends FO_Plugin
   } // HTMLPath()
 
 
-  /** 
+  /**
    * \brief pick history
-   * 
+   *
    * \param $uploadtree_pk - for File 1 (aka item1)
    *
    * return html for the history pick, may be empty array if no history.
@@ -348,20 +332,19 @@ class ui_picker extends FO_Plugin
 
     /* select possible item2's from pick history for this user */
     $user_pk = $_SESSION['UserId'];
-    if (empty($user_pk)) return $PickerRows;
+    if (empty($user_pk)) {
+      return $PickerRows;
+    }
 
     $sql = "select file_picker_pk, uploadtree_fk1, uploadtree_fk2 from file_picker
               where user_fk= '$user_pk' and ($uploadtree_pk=uploadtree_fk1 or $uploadtree_pk=uploadtree_fk2)";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rtncount = pg_num_rows($result);
-    if ($rtncount > 0)
-    {
+    if ($rtncount > 0) {
       $PickerRows = pg_fetch_all($result);
       pg_free_result($result);
-    }
-    else
-    {
+    } else {
       /* No rows in history for this item and user */
       pg_free_result($result);
       return "";
@@ -369,19 +352,19 @@ class ui_picker extends FO_Plugin
 
     /* reformat $PickHistRecs for select list */
     $PickSelectArray = array();
-    foreach($PickerRows as $PickRec)
-    {
-      if ($PickRec['uploadtree_fk1'] == $uploadtree_pk)
-      $item2 = $PickRec["uploadtree_fk2"];
-      else
-      $item2 = $PickRec["uploadtree_fk1"];
+    foreach ($PickerRows as $PickRec) {
+      if ($PickRec['uploadtree_fk1'] == $uploadtree_pk) {
+        $item2 = $PickRec["uploadtree_fk2"];
+      } else {
+        $item2 = $PickRec["uploadtree_fk1"];
+      }
       $PathArray = Dir2Path($item2, 'uploadtree');
       $Path = $this->Uploadtree2PathStr($PathArray);
       $PickSelectArray[$item2] = $Path;
     }
     $Options = "id=HistoryPick onchange='AppJump(this.value)')";
-    $SelectList  = Array2SingleSelect($PickSelectArray, "HistoryPick", "",
-    true, true, $Options);
+    $SelectList = Array2SingleSelect($PickSelectArray, "HistoryPick", "", true,
+      true, $Options);
     return $SelectList;
   } /* End HistoryPick() */
 
@@ -408,32 +391,35 @@ class ui_picker extends FO_Plugin
     $ext = GetFileExt($FileName);
     $tail = ".$ext";
 
-    if (empty($NameRoot)) return "";
+    if (empty($NameRoot)) {
+      return "";
+    }
 
     /* find non artifact containers with names similar to $FileName */
     $sql = "select uploadtree_pk from uploadtree
               where ((ufile_mode & (1<<29))!=0) AND ((ufile_mode & (1<<28))=0)
-                and (ufile_name like '$NameRoot%$tail') 
+                and (ufile_name like '$NameRoot%$tail')
                 and (uploadtree_pk != '$uploadtree_pk') limit 100";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $SuggestionsArray = array();
-    while ($row = pg_fetch_assoc($result))
-    {
+    while ($row = pg_fetch_assoc($result)) {
       $PathArray = Dir2Path($row['uploadtree_pk'], 'uploadtree');
       $SuggestionsArray[$row['uploadtree_pk']] = $this->Uploadtree2PathStr($PathArray);
     }
     pg_free_result($result);
 
     $rtncount = count($SuggestionsArray);
-    if ($rtncount == 0) return "";
+    if ($rtncount == 0) {
+      return "";
+    }
 
     /* Order the select list by the  beginning of the path */
     natsort($SuggestionsArray);
 
     $Options = "id=SuggestPick onchange='AppJump(this.value)')";
-    $SelectList  = Array2SingleSelect($SuggestionsArray, "SuggestionsPick", "",
-    true, true, $Options);
+    $SelectList = Array2SingleSelect($SuggestionsArray, "SuggestionsPick", "",
+      true, true, $Options);
     return $SelectList;
   } /* End SuggestionsPick */
 
@@ -446,40 +432,41 @@ class ui_picker extends FO_Plugin
   function BrowsePick($uploadtree_pk, $inBrowseuploadtree_pk, $infolder_pk, $PathArray)
   {
     $OutBuf = "";
-    if (empty($inBrowseuploadtree_pk))
-    $Browseuploadtree_pk = $uploadtree_pk;
-    else
-    $Browseuploadtree_pk = $inBrowseuploadtree_pk;
+    if (empty($inBrowseuploadtree_pk)) {
+      $Browseuploadtree_pk = $uploadtree_pk;
+    } else {
+      $Browseuploadtree_pk = $inBrowseuploadtree_pk;
+    }
 
-    if (empty($infolder_pk))
-    $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
-    else
-    $folder_pk = $infolder_pk;
+    if (empty($infolder_pk)) {
+      $folder_pk = GetFolderFromItem("", $Browseuploadtree_pk);
+    } else {
+      $folder_pk = $infolder_pk;
+    }
 
     // Get list of folders that this $Browseuploadtree_pk is in
     $FolderList = Folder2Path($folder_pk);
 
     // If you aren't browsing folders,
     //   Get list of directories that this $Browseuploadtree_pk is in
-    if (empty($infolder_pk))
-    $DirectoryList = Dir2Path($Browseuploadtree_pk, 'uploadtree');
-    else
-    $DirectoryList = '';
+    if (empty($infolder_pk)) {
+      $DirectoryList = Dir2Path($Browseuploadtree_pk, 'uploadtree');
+    } else {
+      $DirectoryList = '';
+    }
 
     // Get HTML for folder/directory list.
     // This is the stuff in the yellow bar.
     $OutBuf .= $this->HTMLPath($uploadtree_pk, $FolderList, $DirectoryList);
 
-    /* Get list of folders in this folder
+    /*
+     * Get list of folders in this folder
      * That is, $DirectoryList is empty
-    */
-    if (empty($infolder_pk))
-    {
+     */
+    if (empty($infolder_pk)) {
       $FolderContents = array();
       $Children = GetNonArtifactChildren($Browseuploadtree_pk);
-    }
-    else
-    {
+    } else {
       $Children = array();
       $FolderContents = $this->GetFolderContents($folder_pk);
     }
@@ -490,7 +477,7 @@ class ui_picker extends FO_Plugin
 
 
   /**
-   * \brief get the contents for the folder, 
+   * \brief get the contents for the folder,
    *  This includes subfolders and uploads.
    *
    *  \example $FolderContents array example: \n
@@ -519,11 +506,9 @@ class ui_picker extends FO_Plugin
     $FCresult = pg_query($PG_CONN, $sql);
     DBCheckResult($FCresult, $sql, __FILE__, __LINE__);
 
-    /* Display folder contents  */
-    while ($FCrow = pg_fetch_assoc($FCresult))
-    {
-      switch($FCrow['foldercontents_mode'])
-      {
+      /* Display folder contents */
+    while ($FCrow = pg_fetch_assoc($FCresult)) {
+      switch ($FCrow['foldercontents_mode']) {
         case 1:  /*******   child is folder   *******/
           $sql = "select folder_pk, folder_name as name from folder where folder_pk=$FCrow[child_id]";
           $FolderResult = pg_query($PG_CONN, $sql);
@@ -534,17 +519,15 @@ class ui_picker extends FO_Plugin
           $FolderContents[] = $FolderRow;
           break;
         case 2:  /*******   child is upload   *******/
-          $sql = "select upload_pk, upload_filename as name from upload where upload_pk=$FCrow[child_id] and ((upload_mode & (1<<5))!=0)";
+          $sql = "select upload_pk, upload_filename as name from upload"
+               . " where upload_pk=$FCrow[child_id] and ((upload_mode & (1<<5))!=0)";
           $UpResult = pg_query($PG_CONN, $sql);
           DBCheckResult($UpResult, $sql, __FILE__, __LINE__);
           $NumRows = pg_num_rows($UpResult);
-          if ($NumRows)
-          {
+          if ($NumRows) {
             $UpRow = pg_fetch_assoc($UpResult);
             pg_free_result($UpResult);
-          }
-          else
-          {
+          } else {
             pg_free_result($UpResult);
             break;
           }
@@ -580,7 +563,7 @@ class ui_picker extends FO_Plugin
   {
     $OutBuf = '';
     $uri = Traceback_uri() . "?mod=$this->Name";
-     
+
     /**
      * Script to run when item2 is selected
      * Compare app is id=apick
@@ -599,7 +582,8 @@ class ui_picker extends FO_Plugin
 
     /* Explain what the picker is for */
     $OutBuf .= "The purpose of the picker is to permit people to positively pick a pair of paths.";
-    $OutBuf .= "<br>Path pairs are used by reports that do file comparisons and differences between files (like isos, packages, directories, etc.).";
+    $OutBuf .= "<br>Path pairs are used by reports that do file comparisons and "
+             . "differences between files (like isos, packages, directories, etc.).";
 
     $OutBuf .= "<hr>";
 
@@ -620,8 +604,7 @@ class ui_picker extends FO_Plugin
 
     /* Display the history pick, if there is a history for this user. */
     $HistPick = $this->HistoryPick($uploadtree_pk, $rtncount);
-    if (!empty($HistPick))
-    {
+    if (! empty($HistPick)) {
       $text = _("Select from your pick history");
       $OutBuf .= "<h3>$text ($rtncount):</h3>";
       $OutBuf .= "$HistPick";
@@ -663,9 +646,8 @@ class ui_picker extends FO_Plugin
     $this->Create_file_picker();
 
     $RtnMod = GetParm("rtnmod",PARM_TEXT);
-    $uploadtree_pk = GetParm("item",PARM_INTEGER);
-    if (!$uploadtree_pk)
-    {
+    $uploadtree_pk = GetParm("item", PARM_INTEGER);
+    if (! $uploadtree_pk) {
       return "<h2>Unidentified item 1</h2>";
     }
     $uploadtree_pk2 = GetParm("item2",PARM_INTEGER);
@@ -677,17 +659,15 @@ class ui_picker extends FO_Plugin
 
     /* Check item1 and item2 upload permissions */
     $Item1Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk");
-    if (!$this->uploadDao->isAccessible($Item1Row['upload_fk'], Auth::getGroupId()))
-    {
+    if (! $this->uploadDao->isAccessible($Item1Row['upload_fk'],
+      Auth::getGroupId())) {
       $text = _("Permission Denied");
       return "<h2>$text item 1</h2>";
     }
 
-    if (!empty($uploadtree_pk2))
-    {
+    if (! empty($uploadtree_pk2)) {
       $Item2Row = GetSingleRec("uploadtree", "WHERE uploadtree_pk = $uploadtree_pk2");
-      if (!$this->uploadDao->isAccessible($Item2Row['upload_fk'], Auth::getGroupId()))
-      {
+      if (! $this->uploadDao->isAccessible($Item2Row['upload_fk'], Auth::getGroupId())) {
         $text = _("Permission Denied");
         return "<h2>$text item 2</h2>";
       }
@@ -698,8 +678,7 @@ class ui_picker extends FO_Plugin
      * the picker history, and then redirect both item1 and item2 to the
      * comparison app.
      */
-    if (!empty($user_pk) && !empty($RtnMod) && !empty($uploadtree_pk) && !empty($uploadtree_pk2))
-    {
+    if (!empty($user_pk) && !empty($RtnMod) && !empty($uploadtree_pk) && !empty($uploadtree_pk2)) {
       $sql = "insert into file_picker (user_fk, uploadtree_fk1, uploadtree_fk2, last_access_date)
              values($user_pk, $uploadtree_pk, $uploadtree_pk2, now())";
       // ignore errors (most probably a duplicate key)
@@ -713,12 +692,10 @@ class ui_picker extends FO_Plugin
 
     $OutBuf = "";
 
-    if ($this->OutputType=='HTML')
-    {
-      if (empty($uploadtree_pk))
+    if ($this->OutputType == 'HTML') {
+      if (empty($uploadtree_pk)) {
         $OutBuf = "<h2>Picker URL is missing the first comparison file.</h2>";
-      else
-      {
+      } else {
         $PathArray = Dir2Path($uploadtree_pk, 'uploadtree');
         $OutBuf .= $this->HTMLout($RtnMod, $uploadtree_pk, $Browseuploadtree_pk, $folder_pk, $PathArray);
       }
@@ -726,7 +703,7 @@ class ui_picker extends FO_Plugin
 
     return $OutBuf;
   }
-  
+
   /**
    * \brief Get string representation of uploadtree path.
    *  Use Dir2Path to get $PathArray.
@@ -738,16 +715,14 @@ class ui_picker extends FO_Plugin
   private function Uploadtree2PathStr ($PathArray)
   {
     $Path = "";
-    if (count($PathArray))
-    {
-      foreach ($PathArray as $PathRow)
-      {
+    if (count($PathArray)) {
+      foreach ($PathArray as $PathRow) {
         $Path .= "/" . $PathRow['ufile_name'];
       }
     }
     return $Path;
   }
-  
+
   /**
    * \brief Generate html to pick the application that will be called after
    * the items are identified.

@@ -43,8 +43,7 @@ class AdminContentMove extends DefaultPlugin
   protected function RegisterMenus()
   {
     parent::RegisterMenus();
-    if (!$this->isRequiresLogin() || $this->isLoggedIn())
-    {
+    if (!$this->isRequiresLogin() || $this->isLoggedIn()) {
       menu_insert("Main::Organize::Uploads::Move or Copy", 0, $this->name, $this->name);
     }
   }
@@ -82,28 +81,18 @@ class AdminContentMove extends DefaultPlugin
   private function performAction($folderContentIds, $parentFolderId, $isCopyRequest)
   {
     $message = "";
-    for ($i = 0; $i < sizeof($folderContentIds); $i++)
-    {
+    for ($i = 0; $i < sizeof($folderContentIds); $i++) {
       $folderContentId = intval($folderContentIds[$i]);
-      if ($folderContentId && $parentFolderId && $isCopyRequest)
-      {
-        try
-        {
+      if ($folderContentId && $parentFolderId && $isCopyRequest) {
+        try {
           $this->folderDao->copyContent($folderContentId, $parentFolderId);
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
           $message .= $ex->getMessage();
         }
-      }
-      elseif ($folderContentId && $parentFolderId)
-      {
-        try
-        {
+      } elseif ($folderContentId && $parentFolderId) {
+        try {
           $this->folderDao->moveContent($folderContentId, $parentFolderId);
-        }
-        catch (Exception $ex)
-        {
+        } catch (Exception $ex) {
           $message .= $ex->getMessage();
         }
       }

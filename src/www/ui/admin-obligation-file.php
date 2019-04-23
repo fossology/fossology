@@ -21,7 +21,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_admin_obligation_file", _("Obligations and Risks Administration"));
+define("TITLE_ADMIN_OBLIGATION_FILE", _("Obligations and Risks Administration"));
 
 class admin_obligation_file extends FO_Plugin
 {
@@ -34,7 +34,7 @@ class admin_obligation_file extends FO_Plugin
   function __construct()
   {
     $this->Name       = "admin_obligation";
-    $this->Title      = TITLE_admin_obligation_file;
+    $this->Title      = TITLE_ADMIN_OBLIGATION_FILE;
     $this->MenuList   = "Admin::Obligation Admin";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
@@ -63,7 +63,9 @@ class admin_obligation_file extends FO_Plugin
    */
   function RegisterMenus()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return(0); }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return(0);
+    }
 
     $URL = $this->Name."&add=y";
     $text = _("Add new obligation");
@@ -79,14 +81,10 @@ class admin_obligation_file extends FO_Plugin
     $errorstr = "Obligation or risk not added";
 
     // Delete db record
-    if (@$_POST["del"])
-    {
-      if (@$_POST["del"] == 'y')
-      {
+    if (@$_POST["del"]) {
+      if (@$_POST["del"] == 'y') {
         $V .= $this->Deldb();
-      }
-      else
-      {
+      } else {
         $V .= "<p>Obligation has not been deleted.</p>";
       }
       $V .= $this->Inputfm();
@@ -94,34 +92,29 @@ class admin_obligation_file extends FO_Plugin
     }
 
     // update the db
-    if (@$_POST["updateit"])
-    {
+    if (@$_POST["updateit"]) {
       $resultstr = $this->Updatedb($_POST);
       $V .= $resultstr;
       if (strstr($resultstr, $errorstr)) {
         $V .= $this->Updatefm(0);
-      }
-      else {
+      } else {
         $V .= $this->Inputfm();
       }
       return $V;
     }
 
-    if (@$_REQUEST['add'] == 'y')
-    {
+    if (@$_REQUEST['add'] == 'y') {
       $V .= $this->Updatefm(0);
       return $V;
     }
 
     // Add new rec to db
-    if (@$_POST["addit"])
-    {
+    if (@$_POST["addit"]) {
       $resultstr = $this->Adddb($_POST);
       $V .= $resultstr;
       if (strstr($resultstr, $errorstr)) {
         $V .= $this->Updatefm(0);
-      }
-      else {
+      } else {
         $V .= $this->Inputfm();
       }
       return $V;
@@ -129,8 +122,7 @@ class admin_obligation_file extends FO_Plugin
 
     // bring up the update form
     $ob_pk = @$_REQUEST['ob_pk'];
-    if ($ob_pk)
-    {
+    if ($ob_pk) {
       $V .= $this->Updatefm($ob_pk);
       return $V;
     }
@@ -196,8 +188,7 @@ class admin_obligation_file extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     // print simple message if we have no results
-    if (pg_num_rows($result) == 0)
-    {
+    if (pg_num_rows($result) == 0) {
       $topic = addslashes($topic);
       $text1 = _("No obligation matching the topic");
       $text2 = _("were found");
@@ -232,9 +223,8 @@ class admin_obligation_file extends FO_Plugin
     $ob .= "<th>$text</th>";
     $ob .= "</tr>";
     $lineno = 0;
-    while ($row = pg_fetch_assoc($result))
-    {
-      if ($lineno++ % 2) {
+    while ($row = pg_fetch_assoc($result)) {
+      if ($lineno ++ % 2) {
         $style = "style='background-color:lavender'";
       } else {
         $style = "";
@@ -281,37 +271,38 @@ class admin_obligation_file extends FO_Plugin
 
     if (0 < count($_POST)) {
       $ob_pk_update = $_POST['ob_pk'];
-      if (!empty($ob_pk)) { $ob_pk_update = $ob_pk;
-      } else if (empty($ob_pk_update)) { $ob_pk_update = $_GET['ob_pk'];
+      if (! empty($ob_pk)) {
+        $ob_pk_update = $ob_pk;
+      } else if (empty($ob_pk_update)) {
+        $ob_pk_update = $_GET['ob_pk'];
       }
     }
+    $vars['actionUri'] = "?mod=" . $this->Name . "&ob_pk=$ob_pk_update";
 
-    $vars['actionUri'] = "?mod=" . $this->Name."&ob_pk=$ob_pk_update";
-
-    if ($ob_pk)  // true if this is an update
-    {
-      $row = $this->dbManager->getSingleRow("SELECT * FROM ONLY obligation_ref WHERE ob_pk=$1", array($ob_pk),__METHOD__.'.forUpdate');
-      if ($row === false)
-      {
+    if ($ob_pk) { // true if this is an update
+      $row = $this->dbManager->getSingleRow(
+        "SELECT * FROM ONLY obligation_ref WHERE ob_pk=$1", array(
+          $ob_pk
+        ), __METHOD__ . '.forUpdate');
+      if ($row === false) {
         $text = _("No obligation matching this key");
         $text1 = _("was found");
         return "$text ($ob_pk) $text1.";
       }
 
       $associatedLicenses = $this->obligationMap->getLicenseList($ob_pk);
-      $vars['licnames'] = explode(";",$associatedLicenses);
+      $vars['licnames'] = explode(";", $associatedLicenses);
       $candidateLicenses = $this->obligationMap->getLicenseList($ob_pk, True);
-      $vars['candidatenames'] = explode(";",$candidateLicenses);
-    }
-    else
-    {
-      $row = array('ob_active' =>'t', 'ob_modifications' =>'No', 'ob_text_updatable'=>'t');
+      $vars['candidatenames'] = explode(";", $candidateLicenses);
+    } else {
+      $row = array('ob_active' => 't',
+        'ob_modifications' => 'No',
+        'ob_text_updatable' => 't'
+      );
     }
 
-    foreach(array_keys($row) as $key)
-    {
-      if (array_key_exists($key, $_POST))
-      {
+    foreach (array_keys($row) as $key) {
+      if (array_key_exists($key, $_POST)) {
         $row[$key] = $_POST[$key];
       }
     }
@@ -333,9 +324,12 @@ class admin_obligation_file extends FO_Plugin
     natcasesort($vars['candidateShortnames']);
 
     // build obligation type and classification arrays
-    //TODO Add colors $dbManager->risksFromDB
+    /**
+     * @todo Add colors $dbManager->risksFromDB
+     */
     $vars['obligationClassification'] = array("green"=>"green", "white"=>"white", "yellow"=>"yellow", "red"=>"red");
-    $vars['obligationTypes'] = array("Obligation"=>"Obligation", "Restriction"=>"Restriction", "Risk"=>"Risk", "Right"=>"Right");
+    $vars['obligationTypes'] = array("Obligation"=>"Obligation",
+      "Restriction"=>"Restriction", "Risk"=>"Risk", "Right"=>"Right");
 
     // build scripts
     $vars['licenseSelectorName'] = 'licenseSelector[]';
@@ -391,15 +385,24 @@ class admin_obligation_file extends FO_Plugin
       return "<b>$text</b><p>";
     }
 
-    if ($this->isObligationTopicAndTextBlocked($obId,$topic,$text))
-    {
-      $text = _("ERROR: The obligation topic and text already exist in the obligation list. Obligation not updated.");
+    if ($this->isObligationTopicAndTextBlocked($obId, $topic, $text)) {
+      $text = _(
+        "ERROR: The obligation topic and text already exist in the obligation list. Obligation not updated.");
       return "<b>$text</b><p>";
     }
 
     $md5term = empty($text) ? 'null' : 'md5($6)';
     $sql = "UPDATE obligation_ref SET ob_active=$2, ob_type=$3, ob_modifications=$4, ob_topic=$5, ob_md5=$md5term, ob_text=$6, ob_classification=$7, ob_text_updatable=$8, ob_comment=$9 WHERE ob_pk=$1";
-    $params = array($obId,       $_POST['ob_active'],$_POST['ob_type'],$_POST['ob_modifications'],$topic,$text,$_POST['ob_classification'],$_POST['ob_text_updatable'],$comment);
+    $params = array(
+      $obId,
+      $_POST['ob_active'],
+      $_POST['ob_type'],
+      $_POST['ob_modifications'],
+      $topic,
+      $text,
+      $_POST['ob_classification'],
+      $_POST['ob_text_updatable'],
+      $comment);
     $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
@@ -445,9 +448,9 @@ class admin_obligation_file extends FO_Plugin
       return "<b>$message</b><p>";
     }
 
-    if ($this->isObligationTopicAndTextBlocked(0,$topic,$text))
-    {
-      $message = _("ERROR: The obligation topic and text already exist in the obligation list. Obligation not added.");
+    if ($this->isObligationTopicAndTextBlocked(0, $topic, $text)) {
+      $message = _(
+        "ERROR: The obligation topic and text already exist in the obligation list. Obligation not added.");
       return "<b>$message</b><p>";
     }
 
@@ -499,11 +502,9 @@ class admin_obligation_file extends FO_Plugin
    */
   function addNewLicenses($shortnames,$obId,$candidate=false)
   {
-    if (!empty($shortnames))
-    {
+    if (!empty($shortnames)) {
       $licList = "";
-      foreach ($shortnames as $license)
-      {
+      foreach ($shortnames as $license) {
         $licId = $this->obligationMap->getIdFromShortname($license,$candidate);
         $res = $this->obligationMap->isLicenseAssociated($obId,$licId,$candidate);
         if ($res) {
@@ -535,20 +536,20 @@ class admin_obligation_file extends FO_Plugin
   function removeLicenses($shortnames,$obId,$candidate=false)
   {
     $unassociatedLicenses = "";
-    $licenses = $this->obligationMap->getLicenseList($obId,$candidate);
-    $current = explode(";",$licenses);
-    if (!empty($shortnames)) {
-      $obsoleteLicenses = array_diff($current,$shortnames);
+    $licenses = $this->obligationMap->getLicenseList($obId, $candidate);
+    $current = explode(";", $licenses);
+    if (! empty($shortnames)) {
+      $obsoleteLicenses = array_diff($current, $shortnames);
     } else {
       $obsoleteLicenses = $current;
     }
 
-    if ($obsoleteLicenses)
-    {
-      foreach ($obsoleteLicenses as $toBeRemoved)
-      {
-        $licId = $this->obligationMap->getIdFromShortname($toBeRemoved,$candidate);
-        $this->obligationMap->unassociateLicenseFromObligation($obId,$licId,$candidate);
+    if ($obsoleteLicenses) {
+      foreach ($obsoleteLicenses as $toBeRemoved) {
+        $licId = $this->obligationMap->getIdFromShortname($toBeRemoved,
+          $candidate);
+        $this->obligationMap->unassociateLicenseFromObligation($obId, $licId,
+          $candidate);
         if ($unassociatedLicenses == "") {
           $unassociatedLicenses = "$toBeRemoved";
         } else {
@@ -559,8 +560,6 @@ class admin_obligation_file extends FO_Plugin
 
     return $unassociatedLicenses;
   }
-
-
 }
 
-$NewPlugin = new admin_obligation_file;
+$NewPlugin = new admin_obligation_file();

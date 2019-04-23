@@ -23,20 +23,24 @@ use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Mockery as M;
 
-class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
+class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase
+{
 
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
 
-  protected function setUp() {
+  protected function setUp()
+  {
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
   }
 
-  protected function tearDown() {
+  protected function tearDown()
+  {
     M::close();
   }
 
-  public function testFilterCurrentClearingDecisions() {
+  public function testFilterCurrentClearingDecisions()
+  {
     $itemId = 543;
     $pfileId = 432;
     $decision1 = M::mock(ClearingDecision::class);
@@ -77,7 +81,8 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase {
     $this->clearingDecisionFilter->filterCurrentClearingDecisions(array($decision));
   }
 
-  public function testFilterCurrentReusableClearingDecisions() {
+  public function testFilterCurrentReusableClearingDecisions()
+  {
     $itemId = 543;
     $itemId2 = 432;
     $decision1 = M::mock(ClearingDecision::class);

@@ -285,5 +285,4 @@ class DeciderAgentTest extends \PHPUnit\Framework\TestCase
     $licenseMatch->shouldReceive("getLicenseId")->withNoArgs()->andReturn($licId);
     return $licenseMatch;
   }
-
 }

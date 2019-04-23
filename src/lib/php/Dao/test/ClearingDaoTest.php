@@ -81,8 +81,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         array('myself', 1),
         array('in_same_group', 2),
         array('in_trusted_group', 3));
-    foreach ($userArray as $ur)
-    {
+    foreach ($userArray as $ur) {
       $this->dbManager->insertInto('users', 'user_name, root_folder_fk', $ur);
     }
 
@@ -92,8 +91,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         array(403, 'BAZ', 'baz full', 'baz text'),
         array(404, 'QUX', 'qux full', 'qux text')
     );
-    foreach ($refArray as $params)
-    {
+    foreach ($refArray as $params) {
       $this->dbManager->insertInto('license_ref', 'rf_pk, rf_shortname, rf_fullname, rf_text', $params, $logStmt = 'insert.ref');
     }
 
@@ -120,8 +118,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         305=>array(102, 305, 201, $modf, 4, 5, "Afile"),
         306=>array(102, 306, 202, $modf, 7, 8, "Bfile"),
     );
-    foreach ($this->items as $ur)
-    {
+    foreach ($this->items as $ur) {
       $this->dbManager->insertInto('uploadtree', 'upload_fk,uploadtree_pk,pfile_fk,ufile_mode,lft,rgt,ufile_name', $ur);
     }
     $this->now = time();
@@ -136,14 +133,12 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         array(7, 403, 'TextBAZ', false, 102, 300, $this->groupId),
         array(8, 403, 'TextBAZ', true,  102, 306, $this->groupId)
     );
-    foreach ($bulkLicArray as $params)
-    {
+    foreach ($bulkLicArray as $params) {
       $paramsRef = array($params[0], $params[2], $params[4], $params[5], $params[6]);
       $paramsSet = array($params[0], $params[1], $params[3]);
       $this->dbManager->insertInto('license_ref_bulk', 'lrb_pk, rf_text, upload_fk, uploadtree_fk, group_fk', $paramsRef, 'insert.bulkref');
       $this->dbManager->insertInto('license_set_bulk', 'lrb_fk, rf_fk, removing', $paramsSet, 'insert.bulkset');
     }
-
 
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -158,8 +153,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         array(4, 5004),
         array(7, 5005)
     );
-    foreach ($bulkFindingsArray as $params)
-    {
+    foreach ($bulkFindingsArray as $params) {
       $this->dbManager->insertInto('highlight_bulk', 'lrb_fk, clearing_event_fk', $params, $logStmt = 'insert.bulkfinds');
     }
 
@@ -170,15 +164,14 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
         array(5004, 301),
         array(5005, 305)
     );
-    foreach ($bulkClearingEvents as $params)
-    {
+    foreach ($bulkClearingEvents as $params) {
       $this->dbManager->insertInto('clearing_event', 'clearing_event_pk, uploadtree_fk', $params, $logStmt = 'insert.bulkevents');
     }
   }
 
   private function buildProposals($licProp,$i=0)
   {
-    foreach($licProp as $lp){
+    foreach ($licProp as $lp) {
       list($item,$user,$group,$rf,$isRm,$t) = $lp;
       $this->dbManager->insertInto('clearing_event',
           'clearing_event_pk, uploadtree_fk, user_fk, group_fk, rf_fk, removed, type_fk, date_added',
@@ -189,13 +182,12 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
 
   private function buildDecisions($cDec,$j=0)
   {
-    foreach($cDec as $cd){
+    foreach ($cDec as $cd) {
       list($item,$user,$group,$type,$t,$scope,$eventIds) = $cd;
       $this->dbManager->insertInto('clearing_decision',
           'clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, date_added, scope',
           array($j,$item,$this->items[$item][2],$user,$group,$type, $this->getMyDate($this->now+$t),$scope));
-      foreach ($eventIds as $eId)
-      {
+      foreach ($eventIds as $eId) {
         $this->dbManager->insertTableRow('clearing_decision_event', array('clearing_decision_fk' => $j, 'clearing_event_fk' => $eId));
       }
       $j++;
@@ -271,7 +263,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
   private function collectBulkLicenses($bulks)
   {
     $bulkLics = array();
-    foreach($bulks as $bulk) {
+    foreach ($bulks as $bulk) {
       if (array_key_exists('removedLicenses', $bulk)) {
         $bulkLics = array_merge($bulkLics, $bulk['removedLicenses']);
       }
@@ -291,8 +283,12 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
     $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
-    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
-    $bulkText = array_map(function($bulk){ return $bulk['text']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){
+      return $bulk['matched'];
+    }, $bulks);
+    $bulkText = array_map(function($bulk){
+      return $bulk['text'];
+    }, $bulks);
 
     assertThat($bulkMatched, arrayContaining(false, false, false, false, false));
     assertThat($this->collectBulkLicenses($bulks), arrayContaining('FOO', 'BAR', 'BAZ', 'BAZ', 'QUX'));
@@ -308,7 +304,9 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getUploadId')->andReturn(102);
     $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
-    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
+    $bulkMatched = array_map(function($bulk){
+      return $bulk['matched'];
+    }, $bulks);
     assertThat($bulkMatched, arrayContaining(false));
   }
 
@@ -323,10 +321,18 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
     $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId);
 
-    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
-    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
-    $bulkLicDirs = array_map(function($bulk){ return count($bulk['removedLicenses'])>0; }, $bulks);
-    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
+    $clearingEventIds = array_map(function($bulk){
+      return $bulk['id'];
+    }, $bulks);
+    $bulkMatched = array_map(function($bulk){
+      return $bulk['matched'];
+    }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){
+      return count($bulk['removedLicenses'])>0;
+    }, $bulks);
+    $bulkTried = array_map(function($bulk){
+      return $bulk['tried'];
+    }, $bulks);
 
     assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null));
     assertThat($bulkMatched, arrayContaining(true, false, false, true, false));
@@ -346,10 +352,18 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $treeBounds->shouldReceive('getUploadId')->andReturn(101);
     $bulks = $this->clearingDao->getBulkHistory($treeBounds, $this->groupId, false);
 
-    $clearingEventIds = array_map(function($bulk){ return $bulk['id']; }, $bulks);
-    $bulkMatched = array_map(function($bulk){ return $bulk['matched']; }, $bulks);
-    $bulkLicDirs = array_map(function($bulk){ return count($bulk['removedLicenses'])>0; }, $bulks);
-    $bulkTried = array_map(function($bulk){ return $bulk['tried']; }, $bulks);
+    $clearingEventIds = array_map(function($bulk){
+      return $bulk['id'];
+    }, $bulks);
+    $bulkMatched = array_map(function($bulk){
+      return $bulk['matched'];
+    }, $bulks);
+    $bulkLicDirs = array_map(function($bulk){
+      return count($bulk['removedLicenses'])>0;
+    }, $bulks);
+    $bulkTried = array_map(function($bulk){
+      return $bulk['tried'];
+    }, $bulks);
 
     assertThat($clearingEventIds, arrayContaining(5001, null, null, 5004, null, null));
     assertThat($bulkMatched, arrayContaining(true, false, false, true, false, false));

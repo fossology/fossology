@@ -74,11 +74,11 @@ class test_common_sysconfig extends \PHPUnit\Framework\TestCase
     $this->tearDownDb();
   }
 
-
   /**
    * \brief clean the env db
    */
-  protected function tearDownDb() {
+  protected function tearDownDb()
+  {
     if (!is_callable('pg_connect')) {
       return;
     }
@@ -93,8 +93,9 @@ class test_common_sysconfig extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  public function test_check_IP() {
-    foreach(array(''=>false,'1.2.3.4'=>true,'1.7.49.343'=>false,'255.249.199.0'=>true) as $ip=>$correct){
+  public function test_check_IP()
+  {
+    foreach (array(''=>false,'1.2.3.4'=>true,'1.7.49.343'=>false,'255.249.199.0'=>true) as $ip=>$correct) {
       $this->assertEquals(check_IP($ip),$correct,$message="result for IP $ip is false");
       print('.');
     }

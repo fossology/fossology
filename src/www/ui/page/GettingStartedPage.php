@@ -28,7 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 class GettingStartedPage extends DefaultPlugin
 {
   const NAME = 'Getting Started';
-  
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -48,7 +48,7 @@ class GettingStartedPage extends DefaultPlugin
     menu_insert($topMenuList.'::Overview', $menuOrder-10, $this->getName()."&show=welcome");
     menu_insert($topMenuList.'::License Browser', $menuOrder, $this->getName()."&show=licensebrowser");
   }
-  
+
   /**
    * @param Request $request
    * @return Response
@@ -56,12 +56,11 @@ class GettingStartedPage extends DefaultPlugin
   protected function handle(Request $request)
   {
     $show = $request->get('show');
-    if ($show=='licensebrowser'){
+    if ($show == 'licensebrowser') {
       return $this->render("getting_started_licensebrowser.html.twig");
     }
     $login = _("Login");
-    if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0))
-    {
+    if (empty($_SESSION['User']) && (plugin_find_id("auth") >= 0)) {
       $login = "<a href='".Traceback_uri()."?mod=auth'>$login</a>";
     }
     $vars = array('login'=>$login, 'SiteURI'=> Traceback_uri());

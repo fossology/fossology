@@ -20,7 +20,8 @@ namespace Fossology\Lib\Test;
 
 use Fossology\Lib\Data\Types;
 
-class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
+class EnumMapTestBase extends \PHPUnit\Framework\TestCase
+{
 
   /** @var Types */
   private $types;
@@ -28,7 +29,8 @@ class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
   /**
    * @param Types $types
    */
-  protected function setTypes($types) {
+  protected function setTypes($types)
+  {
     $this->types = $types;
   }
 
@@ -37,7 +39,8 @@ class EnumMapTestBase extends \PHPUnit\Framework\TestCase {
    * @param string $expectedTypeName
    * @throws \Exception
    */
-  protected function checkMapping($type, $expectedTypeName) {
+  protected function checkMapping($type, $expectedTypeName)
+  {
     $typeName = $this->types->getTypeName($type);
 
     assertThat($typeName, is($expectedTypeName));

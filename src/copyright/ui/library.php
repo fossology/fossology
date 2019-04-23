@@ -239,11 +239,13 @@ function MassageContent(&$row, $hash)
 
   /* remove leading "dnl " */
   if ((strlen($content) > 4) &&
-  (substr_compare($content, "dnl ", 0, 4, true) == 0))
-  $content = substr($content, 4);
+  (substr_compare($content, "dnl ", 0, 4, true) == 0)) {
+    $content = substr($content, 4);
+  }
 
   /* skip empty content */
-  if (empty($content)) return true;
+  if (empty($content)) { return true;
+  }
 
   /* Step 1B: rearrange copyright statments to try and put the holder first,
    * followed by the rest of the statement, less copyright years.
@@ -256,7 +258,8 @@ function MassageContent(&$row, $hash)
   $row['content'] = $content;
   $row['copyright_count'] = 1;
   $row['hash'] = md5($row['content']);
-  if ($hash && ($row['hash'] != $hash)) return true;
+  if ($hash && ($row['hash'] != $hash)) { return true;
+  }
 
   return false;
 }  /* End of MassageContent() */

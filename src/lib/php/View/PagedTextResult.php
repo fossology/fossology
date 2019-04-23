@@ -21,8 +21,7 @@ namespace Fossology\Lib\View;
 
 
 // For compatibility with older php versions
-if (!defined('ENT_SUBSTITUTE'))
-{
+if (!defined('ENT_SUBSTITUTE')) {
   define('ENT_SUBSTITUTE', 0); //This might give an empty string, but with the conversion to UTF-8 we might not run into this
 }
 
@@ -38,7 +37,7 @@ class PagedTextResult extends PagedResult
   protected function renderContentText($text)
   {
 
-    if(self::TARGET_CHARSET == "UTF-8"){
+    if (self::TARGET_CHARSET == "UTF-8") {
       return convertToUTF8($text, true);
     }
 

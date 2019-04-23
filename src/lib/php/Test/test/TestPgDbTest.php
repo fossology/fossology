@@ -27,8 +27,7 @@ class TestPgDbTest extends \PHPUnit\Framework\TestCase
     $this->markTestSkipped();
     $dbName = 'fosstestone';
     exec($cmd="dropdb -Ufossy -hlocalhost $dbName", $cmdOut, $cmdRtn);
-    if($cmdRtn != 0)
-    {
+    if ($cmdRtn != 0) {
       echo $cmdOut;
     }
     $testDb = new TestPgDb();
@@ -63,5 +62,4 @@ class TestPgDbTest extends \PHPUnit\Framework\TestCase
     assertThat($tag1,hasKey('perm'));
     assertThat($tag1['perm'],is(10));
   }
-
 }

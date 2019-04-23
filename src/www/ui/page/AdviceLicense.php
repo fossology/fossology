@@ -51,30 +51,25 @@ class AdviceLicense extends DefaultPlugin
     $groupId = Auth::getGroupId();
     /** @var UserDao */
     $userDao = $this->getObject('dao.user');
-    $canEdit = $userDao->isAdvisorOrAdmin($userId,$groupId);
-    if (empty($rf) || !$canEdit)
-    {
+    $canEdit = $userDao->isAdvisorOrAdmin($userId, $groupId);
+    if (empty($rf) || ! $canEdit) {
       $vars = array(
-          'aaData' => json_encode($this->getArrayArrayData($groupId,$canEdit)),
+          'aaData' => json_encode($this->getArrayArrayData($groupId, $canEdit)),
           'canEdit' => $canEdit
       );
       return $this->render('advice_license.html.twig', $this->mergeWithDefault($vars));
     }
 
     $vars = $this->getDataRow($groupId, $rf);
-    if ($vars === false)
-    {
+    if ($vars === false) {
       return $this->flushContent( _('invalid license candidate'));
     }
 
-    if ($request->get('save'))
-    {
-      try
-      {
+    if ($request->get('save')) {
+      try {
         $vars = $this->saveInput($request, $vars);
         $vars['message'] = 'Successfully updated.';
-      } catch (\Exception $e)
-      {
+      } catch (\Exception $e) {
         $vars = array('rf_shortname' => $request->get('shortname'),
                       'rf_fullname' => $request->get('fullname'),
                       'rf_text' => $request->get('rf_text'),
@@ -98,19 +93,17 @@ class AdviceLicense extends DefaultPlugin
     $dbManager->prepare($stmt = __METHOD__, $sql);
     $res = $dbManager->execute($stmt, array($groupId));
     $aaData = array();
-    while ($row = $dbManager->fetchArray($res))
-    {
+    while ($row = $dbManager->fetchArray($res)) {
       $aData = array(htmlentities($row['rf_shortname']),
           htmlentities($row['rf_fullname']),
           '<div style="overflow-y:scroll;max-height:150px;margin:0;">' . nl2br(htmlentities($row['rf_text'])) . '</div>',
           htmlentities($row['rf_url']),
           $this->bool2checkbox($dbManager->booleanFromDb($row['marydone'])));
-      if($canEdit)
-      {
+      if ($canEdit) {
         $link = Traceback_uri() . '?mod=' . Traceback_parm() . '&rf=' . $row['rf_pk'];
         $edit = '<a href="' . $link . '"><img border="0" src="images/button_edit.png"></a>';
         array_unshift($aData,$edit);
-      } 
+      }
       $aaData[] = $aData;
     }
     $dbManager->freeResult($res);
@@ -120,16 +113,14 @@ class AdviceLicense extends DefaultPlugin
 
   private function getDataRow($groupId, $licId)
   {
-    if ($licId == -1)
-    {
+    if ($licId == -1) {
       return array('rf_pk' => -1, 'rf_shortname' => '');
     }
     $sql = "SELECT rf_pk,rf_shortname,rf_fullname,rf_text,rf_url,rf_notes,marydone,rf_risk FROM license_candidate WHERE group_fk=$1 AND rf_pk=$2";
     /* @var $dbManager DbManager */
     $dbManager = $this->getObject('db.manager');
     $row = $dbManager->getSingleRow($sql, array($groupId, $licId), __METHOD__);
-    if (false !== $row)
-    {
+    if (false !== $row) {
       $row['marydone'] = $dbManager->booleanFromDb($row['marydone']);
     }
     return $row;
@@ -158,28 +149,25 @@ class AdviceLicense extends DefaultPlugin
     $note = $request->get('note');
     $riskLvl = intval($request->get('risk'));
 
-    if (empty($shortname) || empty($fullname) || empty($rfText))
-    {
+    if (empty($shortname) || empty($fullname) || empty($rfText)) {
       throw new \Exception('missing shortname (or) fullname (or) reference text');
     }
 
     /* @var $licenseDao LicenseDao */
     $licenseDao = $this->getObject('dao.license');
     $ok = ($oldRow['rf_shortname'] == $shortname);
-    if (!$ok)
-    {
+    if (!$ok) {
       $ok = $licenseDao->isNewLicense($shortname, Auth::getGroupId());
     }
-    if (!$ok)
-    {
+    if (!$ok) {
       throw new \Exception('shortname already in use');
     }
-    if ($oldRow['rf_pk'] == -1)
-    {
+    if ($oldRow['rf_pk'] == -1) {
       $oldRow['rf_pk'] = $licenseDao->insertUploadLicense($shortname, $rfText, Auth::getGroupId());
     }
 
-    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname, $rfText, $url, $note, !empty($marydone), $riskLvl);
+    $licenseDao->updateCandidate($oldRow['rf_pk'], $shortname, $fullname,
+      $rfText, $url, $note, !empty($marydone), $riskLvl);
     return array('rf_pk' => $oldRow['rf_pk'],
         'rf_shortname' => $shortname,
         'rf_fullname' => $fullname,
@@ -189,7 +177,6 @@ class AdviceLicense extends DefaultPlugin
         'rf_risk' => $riskLvl,
         'marydone' => $marydone);
   }
-
 }
 
 register_plugin(new AdviceLicense());

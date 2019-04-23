@@ -20,7 +20,7 @@
  * @file fo_copyright_list.php
  *
  * @brief get a list of filepaths and copyright information for those
- * files. 
+ * files.
  *
  */
 
@@ -42,8 +42,7 @@ $typeCopyright = array("statement","email","url");
 
 $longopts = array("user:", "password:", "type:", "container:");
 $options = getopt("c:u:t:hx:X:", $longopts);
-if (($options === false) || empty($options) || !is_array($options))
-{
+if (($options === false) || empty($options) || ! is_array($options)) {
   $text = _("Invalid option or missing argument.");
   print "$text\n";
   print $Usage;
@@ -56,10 +55,8 @@ use Fossology\Lib\Util\CopyrightLister;
 
 $cpLister = new CopyrightLister();
 
-foreach($options as $option => $value)
-{
-  switch($option)
-  {
+foreach ($options as $option => $value) {
+  switch ($option) {
     case 'c': // handled in fo_wrapper
       break;
     case 'u':
@@ -78,9 +75,9 @@ foreach($options as $option => $value)
       $passwd = $value;
       break;
     case 'type':
-      if(empty($value) || in_array($value, $typeCopyright)){
+      if (empty($value) || in_array($value, $typeCopyright)) {
         $cpLister->setType($value);
-      }else{
+      } else {
         print "Invalid argument '$value' for type.\n";
         print $Usage;
         return 1;
@@ -102,7 +99,7 @@ foreach($options as $option => $value)
 }
 
 /** get upload id through uploadtree id */
-if (is_numeric($item) && !is_numeric($upload)){
+if (is_numeric($item) && !is_numeric($upload)) {
   $upload = GetUploadID($item);
 }
 
@@ -112,7 +109,7 @@ if (!is_numeric($upload)) {
   print $Usage;
   return 1;
 }
-if(!empty($item) && !is_numeric($item)) {
+if (!empty($item) && !is_numeric($item)) {
   print "Uploadtree ID is empty or invalid.\n";
   print $Usage;
   return 1;
@@ -123,8 +120,7 @@ cli_Init();
 account_check($user, $passwd); // check username/password
 
 $return_value = read_permission($upload, $user); // check if the user has the permission to read this upload
-if (empty($return_value))
-{
+if (empty($return_value)) {
   $text = _("The user '$user' has no permission to read the information of upload $upload\n");
   echo $text;
   return 1;

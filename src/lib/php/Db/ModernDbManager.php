@@ -35,10 +35,8 @@ class ModernDbManager extends DbManager
    */
   public function prepare($statementName, $sqlStatement)
   {
-    if (array_key_exists($statementName, $this->preparedStatements))
-    {
-      if ($this->preparedStatements[$statementName] !== $sqlStatement)
-      {
+    if (array_key_exists($statementName, $this->preparedStatements)) {
+      if ($this->preparedStatements[$statementName] !== $sqlStatement) {
         throw new \Exception("Existing Statement mismatch: $statementName");
       }
       return;
@@ -60,8 +58,7 @@ class ModernDbManager extends DbManager
    */
   public function execute($statementName, $params = array())
   {
-    if (!array_key_exists($statementName, $this->preparedStatements))
-    {
+    if (! array_key_exists($statementName, $this->preparedStatements)) {
       throw new \Exception("Unknown Statement");
     }
     $startTime = microtime($get_as_float = true);

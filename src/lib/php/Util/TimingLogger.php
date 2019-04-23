@@ -56,12 +56,10 @@ class TimingLogger
    */
   public function toc($text, $watch = self::DEFAULT_WATCH)
   {
-    if (!array_key_exists($watch, $this->watchTimes))
-    {
+    if (! array_key_exists($watch, $this->watchTimes)) {
       $watch = self::DEFAULT_WATCH;
       $text .= " using watch '$watch'";
-    } else if (empty($text))
-    {
+    } else if (empty($text)) {
       $text = "Using watch '$watch'";
     }
     $this->logWithStartAndEndTime($text, $this->watchTimes[$watch], $this->getTimestamp());

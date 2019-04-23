@@ -24,7 +24,7 @@ use Fossology\Lib\Data\Highlight;
  * \brief Run an analysis for a single file, do not store results in the DB.
  */
 
-define("TITLE_agent_nomos_once", _("One-Shot License Analysis"));
+define("TITLE_AGENT_NOMOS_ONCE", _("One-Shot License Analysis"));
 
 /**
  * @class agent_nomos_once
@@ -39,7 +39,7 @@ class agent_nomos_once extends FO_Plugin
   function __construct()
   {
     $this->Name = "agent_nomos_once";
-    $this->Title = TITLE_agent_nomos_once;
+    $this->Title = TITLE_AGENT_NOMOS_ONCE;
     $this->Dependency = array();
     $this->NoHTML = 0; // always print text output for now
     /* For anyone to access, without login, use: */
@@ -84,8 +84,9 @@ class agent_nomos_once extends FO_Plugin
     global $PG_CONN;
     if (empty($PG_CONN)) {
       return (1);
-    } else
+    } else {
       return (0);
+    }
   }
 
   /**

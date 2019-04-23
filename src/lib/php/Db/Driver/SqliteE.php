@@ -49,8 +49,7 @@ class SqliteE implements Driver
   {
     $paramCnt = 0;
     $pgStyleVar = '$' . ($paramCnt + 1);
-    while (false !== strpos($sqlStatement, $pgStyleVar))
-    {
+    while (false !== strpos($sqlStatement, $pgStyleVar)) {
       $paramCnt++;
       $sqlStatement = str_replace($pgStyleVar, $this->varPrefix . chr(64 + $paramCnt), $sqlStatement);
       $pgStyleVar = '$' . ($paramCnt + 1);
@@ -71,15 +70,13 @@ class SqliteE implements Driver
    */
   public function execute($statementName, $parameters)
   {
-    if (!array_key_exists($statementName, $this->preparedStmt))
-    {
+    if (! array_key_exists($statementName, $this->preparedStmt)) {
       return false;
     }
     $params = array_values($parameters);
     /* @var $stmt SQLite3Stmt */
     $stmt = $this->preparedStmt[$statementName];
-    for ($idx = 0; $idx < $stmt->paramCount(); $idx++)
-    {
+    for ($idx = 0; $idx < $stmt->paramCount(); $idx++) {
       $variableName = $this->varPrefix . chr(65 + $idx);
       $stmt->bindValue($variableName, $params[$idx]);
     }
@@ -136,8 +133,7 @@ class SqliteE implements Driver
   public function fetchAll($res)
   {
     $result = array();
-    while ($row = $res->fetchArray(SQLITE3_ASSOC)) // do not SQLITE3_NUM !
-    {
+    while ($row = $res->fetchArray(SQLITE3_ASSOC)) { // do not SQLITE3_NUM !
       $result[] = $row;
     }
     return $result;
@@ -146,7 +142,8 @@ class SqliteE implements Driver
   /**
    * @return void
    */
-  public function begin(){
+  public function begin()
+  {
     $this->dbConnection->query("BEGIN");
     return;
   }
@@ -154,7 +151,8 @@ class SqliteE implements Driver
   /**
    * @return void
    */
-  public function commit(){
+  public function commit()
+  {
     $this->dbConnection->query("COMMIT");
     return;
   }
@@ -162,7 +160,8 @@ class SqliteE implements Driver
   /**
    * @return void
    */
-  public function rollback(){
+  public function rollback()
+  {
     $this->dbConnection->query("ROLLBACK");
     return;
   }
@@ -193,7 +192,7 @@ class SqliteE implements Driver
   {
     return SQLite3::escapeString($string);
   }
-  
+
   /**
    * @param string $tableName
    * @return bool
@@ -202,12 +201,9 @@ class SqliteE implements Driver
   {
     $sql = "SELECT count(*) cnt FROM sqlite_master WHERE type='table' AND name='$tableName'";
     $row = SQLite3::querySingle($sql);
-    if (!$row && $this->isConnected())
-    {
+    if (! $row && $this->isConnected()) {
       throw new \Exception($this->getLastError());
-    }
-    else if(!$row)
-    {
+    } else if (!$row) {
       throw new \Exception('DB connection lost');
     }
     return($row['cnt']>0);

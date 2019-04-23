@@ -52,8 +52,7 @@ class AdminObligationFromCSV extends DefaultPlugin
   {
     $vars = array();
 
-    if ($request->isMethod('POST'))
-    {
+    if ($request->isMethod('POST')) {
       $uploadFile = $request->files->get('file_input');
       $delimiter = $request->get('delimiter')?:',';
       $enclosure = $request->get('enclosure')?:'"';
@@ -73,20 +72,16 @@ class AdminObligationFromCSV extends DefaultPlugin
   protected function handleFileUpload($uploadedFile,$delimiter=',',$enclosure='"')
   {
     $errMsg = '';
-    if ( !($uploadedFile instanceof UploadedFile) )
-    {
+    if (! ($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
-    }
-    elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0)
-    {
+    } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") . ini_get(self::KEY_UPLOAD_MAX_FILESIZE);
+    } elseif ($uploadedFile->getClientOriginalExtension()!='csv') {
+      $errMsg = _('Invalid extension ') .
+          $uploadedFile->getClientOriginalExtension() . ' of file ' .
+          $uploadedFile->getClientOriginalName();
     }
-    elseif($uploadedFile->getClientOriginalExtension()!='csv')
-    {
-      $errMsg = _('Invalid extension ').$uploadedFile->getClientOriginalExtension().' of file '.$uploadedFile->getClientOriginalName();
-    }
-    if (!empty($errMsg))
-    {
+    if (! empty($errMsg)) {
       return $errMsg;
     }
     /** @var LicenseCsvImport */
@@ -95,7 +90,6 @@ class AdminObligationFromCSV extends DefaultPlugin
     $obligationCsvImport->setEnclosure($enclosure);
     return $obligationCsvImport->handleFile($uploadedFile->getRealPath());
   }
-
 }
 
 register_plugin(new AdminObligationFromCSV());

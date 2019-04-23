@@ -18,12 +18,12 @@
 
 use Fossology\Lib\Auth\Auth;
 
-define("TITLE_core_init", _("Initialize"));
+define("TITLE_CORE_INIT", _("Initialize"));
 
 class core_init extends FO_Plugin
 {
   var $Name       = "init";
-  var $Title      = TITLE_core_init;
+  var $Title      = TITLE_CORE_INIT;
   var $Version    = "1.0";
   var $MenuList   = "Admin::Initialize";
   var $Dependency = array("auth","refresh","menus","Default");
@@ -39,40 +39,44 @@ class core_init extends FO_Plugin
    */
   function PostInitialize()
   {
-    if ($this->State != PLUGIN_STATE_VALID) { return(1); } // don't re-run
+    if ($this->State != PLUGIN_STATE_VALID) {
+      return (1); // don't re-run
+    }
     /** Disable everything but me, DB, menu **/
     /* Enable or disable plugins based on login status */
     global $Plugins;
     $Filename = getcwd() . "/init.ui";
-    if (!file_exists($Filename))
-    {
+    if (! file_exists($Filename)) {
       $this->State = PLUGIN_STATE_INVALID;
       return;
     }
     $Max = count($Plugins);
-    for($i=0; $i < $Max; $i++)
-    {
+    for ($i = 0; $i < $Max; $i ++) {
       $P = &$Plugins[$i];
-      if ($P->State == PLUGIN_STATE_INVALID) { continue; }
+      if ($P->State == PLUGIN_STATE_INVALID) {
+        continue;
+      }
       /* Don't turn off plugins that are already up and running. */
-      if ($P->State == PLUGIN_STATE_READY) { continue; }
-      if ($P->DBaccess == PLUGIN_DB_ADMIN) { continue; }
-      $Key = array_search($P->Name,$this->Dependency);
-      if (($Key === FALSE) && strcmp($P->Name,$this->Name))
-      {
+      if ($P->State == PLUGIN_STATE_READY) {
+        continue;
+      }
+      if ($P->DBaccess == PLUGIN_DB_ADMIN) {
+        continue;
+      }
+      $Key = array_search($P->Name, $this->Dependency);
+      if (($Key === FALSE) && strcmp($P->Name, $this->Name)) {
         // print "Disable " . $P->Name . " as $Key <br>\n";
         $P->Destroy();
         $P->State = PLUGIN_STATE_INVALID;
-      }
-      else
-      {
+      } else {
         // print "Keeping " . $P->Name . " as $Key <br>\n";
       }
     }
     $this->State = PLUGIN_STATE_READY;
-    if (($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) && ($this->MenuList !== ""))
-    {
-      menu_insert("Main::" . $this->MenuList,$this->MenuOrder,$this->Name,$this->MenuTarget);
+    if (($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) &&
+      ($this->MenuList !== "")) {
+      menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->Name,
+        $this->MenuTarget);
     }
     return($this->State == PLUGIN_STATE_READY);
   } // PostInitialize()
@@ -82,45 +86,42 @@ class core_init extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     $V="";
     global $Plugins;
-    switch($this->OutputType)
-    {
+    switch ($this->OutputType) {
       case "XML":
         break;
       case "HTML":
         /* If you are not logged in, then force a login. */
-        if (empty($_SESSION['User']))
-        {
+        if (empty($_SESSION['User'])) {
           $P = &$Plugins["auth"];
-          $P->OutputSet($this->OutputType,0);
+          $P->OutputSet($this->OutputType, 0);
           $V .= $P->Output();
           $P->OutputUnSet();
-        }
-        else /* It's an init */
-        {
+        } else { /* It's an init */
           $FailFlag=0;
           $Filename = getcwd() . "/init.ui";
           $Schema = &$Plugins["schema"];
-          if (empty($Schema))
-          {
+          if (empty($Schema)) {
             $V .= _("Failed to find schema plugin.\n");
             $FailFlag = 1;
-          }
-          else
-          {
+          } else {
             print "<pre>";
-            $FailFlag = $Schema->ApplySchema($Schema->Filename,0,0);
+            $FailFlag = $Schema->ApplySchema($Schema->Filename, 0, 0);
             print "</pre>";
           }
-          if (!$FailFlag)
-          {
-            $V .= _("Initialization complete.  Click 'Home' in the top menu to proceed.<br />");
-            if (is_writable(getcwd())) { $State = unlink($Filename); }
-            else { $State = 0; }
-            if (!$State)
-            {
+          if (! $FailFlag) {
+            $V .= _(
+              "Initialization complete.  Click 'Home' in the top menu to proceed.<br />");
+            if (is_writable(getcwd())) {
+              $State = unlink($Filename);
+            } else {
+              $State = 0;
+            }
+            if (! $State) {
               $V .= "<font color='red'>";
               $V .= _("Failed to remove $Filename\n");
               $text = _("Remove this file to complete the initialization.\n");
@@ -128,9 +129,7 @@ class core_init extends FO_Plugin
               $V .= "</font>\n";
               $FailedFlag = 1;
             }
-          }
-          else
-          {
+          } else {
             $V .= "<font color='red'>";
             $V .= _("Initialization complete with errors.");
             $V .= "</font>\n";
@@ -142,11 +141,13 @@ class core_init extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) { return($V); }
+    if (! $this->OutputToStdout) {
+      return ($V);
+    }
     print($V);
     return;
   } // Output()
-  
+
   /**
    * @see http://www.fossology.org/projects/fossology/wiki/UI_Architecture_Overview
    */
@@ -163,26 +164,24 @@ class core_init extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $R = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R))
-    {
+    if (array_key_exists("user_seed", $R) && array_key_exists("user_pass", $R)) {
       $sql = "SELECT user_name FROM users WHERE user_seed IS NULL AND user_pass IS NULL";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT user_name FROM users";
     }
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $R = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (!empty($R['user_name']))
-    {
-      $V .= _("If you need an account, use '" . $R['user_name'] . "' with no password.\n");
+    if (! empty($R['user_name'])) {
+      $V .= _(
+        "If you need an account, use '" . $R['user_name'] .
+        "' with no password.\n");
       $V .= "<P />\n";
     }
     return $V;
   }
-
 }
+
 $NewPlugin = new core_init;
 $NewPlugin->Initialize();

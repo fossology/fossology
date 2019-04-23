@@ -55,30 +55,26 @@ class ScheduleAgent extends DefaultPlugin
     $uploadId = intval($_POST['uploadId']);
     $agentName = $_POST['agentName'];
 
-    if ($uploadId > 0)
-    {
+    if ($uploadId > 0) {
       $upload = $this->uploadDao->getUpload($uploadId);
       $uploadName = $upload->getFilename();
       $ourPlugin = plugin_find($agentName);
 
       $jobqueueId = isAlreadyRunning($ourPlugin->AgentName, $uploadId);
-      if($jobqueueId == 0) {
+      if ($jobqueueId == 0) {
         $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
         $jobqueueId = $ourPlugin->AgentAdd($jobId, $uploadId, $errorMessage, array());
       }
-    } else
-    {
+    } else {
       $errorMessage = "bad request";
     }
 
     ReportCachePurgeAll();
 
     $headers = array('Content-type' => 'text/json');
-    if (empty($errorMessage) && ($jobqueueId > 0))
-    {
+    if (empty($errorMessage) && ($jobqueueId > 0)) {
       return new Response(json_encode(array("jqid" => $jobqueueId)), Response::HTTP_OK, $headers);
-    } else
-    {
+    } else {
       return new Response(json_encode(array("error" => $errorMessage)), Response::HTTP_INTERNAL_SERVER_ERROR, $headers);
     }
   }

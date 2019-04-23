@@ -29,10 +29,12 @@ function getCookie(cookieName) {
   var allCookies = document.cookie.split(';');
   for (var i = 0; i < allCookies.length; i++) {
     var theCookie = allCookies[i];
-    while (theCookie.charAt(0) == ' ')
+    while (theCookie.charAt(0) == ' ') {
       theCookie = theCookie.substring(1);
-    if (theCookie.indexOf(name) != -1)
+    }
+    if (theCookie.indexOf(name) != -1) {
       return theCookie.substring(name.length, theCookie.length);
+    }
   }
   return "";
 }
@@ -69,8 +71,9 @@ function failed(jqXHR, textStatus, error) {
 }
 
 function rmDefaultText(caller, dflt) {
-  if ($(caller).val() == dflt)
+  if ($(caller).val() == dflt) {
     $(caller).val('');
+  }
 }
 
 function sortList(selector)

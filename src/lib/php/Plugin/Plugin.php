@@ -18,7 +18,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Plugin;
 
-interface Plugin {
+interface Plugin
+{
   function execute();
 
   function preInstall();

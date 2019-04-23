@@ -23,20 +23,20 @@ use Symfony\Component\HttpFoundation\Response;
  * \file ajax-uploads.php
  * \brief This plugin is used to list all uploads associated
  * with a folder.  This is NOT intended to be a user-UI
- * plugin. 
+ * plugin.
  * This is intended as an active plugin to provide support
  * data to the UI.
  * User must have PERM_WRITE to the uploads.
  */
 
-define("TITLE_core_uploads", _("List Uploads as Options"));
+define("TITLE_CORE_UPLOADS", _("List Uploads as Options"));
 
 class core_uploads extends FO_Plugin
 {
   function __construct()
   {
     $this->Name       = "upload_options";
-    $this->Title      = TITLE_core_uploads;
+    $this->Title      = TITLE_CORE_UPLOADS;
     $this->DBaccess   = PLUGIN_DB_READ;
     $this->OutputType = 'Text'; /* This plugin needs no HTML content help */
 
@@ -54,23 +54,20 @@ class core_uploads extends FO_Plugin
     }
     $V = '';
     $uploadList = FolderListUploads_perm($FolderId, Auth::PERM_WRITE);
-    foreach($uploadList as $upload)
-    {
+    foreach ($uploadList as $upload) {
       $V .= "<option value='" . $upload['upload_pk'] . "'>";
       $V .= htmlentities($upload['name']);
-      if (!empty($upload['upload_desc']))
-      {
+      if (! empty($upload['upload_desc'])) {
         $V .= " (" . htmlentities($upload['upload_desc']) . ")";
       }
-      if (!empty($upload['upload_ts']))
-      {
+      if (! empty($upload['upload_ts'])) {
         $V .= " :: " . htmlentities($upload['upload_ts']);
       }
       $V .= "</option>\n";
     }
     return new Response($V, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
-
 }
-$NewPlugin = new core_uploads;
+
+$NewPlugin = new core_uploads();
 $NewPlugin->Initialize();

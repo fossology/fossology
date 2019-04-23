@@ -63,8 +63,7 @@ $groupId = $SysConf['auth']['GroupId'];
 $jobDao = $GLOBALS['container']->get("dao.job");
 $jobStatuses = $jobDao->getAllJobStatus($uploadId, $userId, $groupId);
 $runningJobs = false;
-foreach($jobStatuses as $jobStatus)
-{
+foreach ($jobStatuses as $jobStatus) {
   switch ($jobStatus) {
     case JobStatus::FAILED:
       print "status=ERROR\n";
@@ -112,9 +111,7 @@ if ($uploadDao->getUpload($uploadId) == null) {
       default:
         $status = "ERROR: invalid status";
     }
-  }
-  catch(Exception $e)
-  {
+  } catch(Exception $e) {
     $status = "ERROR: ".$e->getMessage();
   }
 }

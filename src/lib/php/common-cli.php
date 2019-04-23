@@ -78,8 +78,7 @@ function cli_logger($handle, $message, $mode='a')
   die("Can't open $handle, $php_errormsg\n");
   $wrote = fwrite ($FR, $message);
   fflush($FR);
-  if ($wrote == -1)
-  {
+  if ($wrote == -1) {
     fclose($FR);
     $text = _("ERROR: could not write message to");
     return("$text $handle\n");

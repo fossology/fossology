@@ -65,7 +65,7 @@ class UploadVcsPage extends UploadPageBase
     global $MODDIR;
     global $SYSCONFDIR;
     global $Plugins;
-    
+
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $description = $this->basicShEscaping($description);
@@ -73,19 +73,16 @@ class UploadVcsPage extends UploadPageBase
     $getUrlThatMightIncludeSpaces = trim($request->get(self::GETURL_PARAM));
     $getUrl = str_replace(" ", "%20", $getUrlThatMightIncludeSpaces);
 
-    if (empty($getUrl)) 
-    {
+    if (empty($getUrl)) {
       return array(false, _("Empty URL") . $getUrl, $description);
     }
-    if (preg_match("@^((http)|(https))://([[:alnum:]]+)@i", $getUrl) != 1) 
-    {
+    if (preg_match("@^((http)|(https))://([[:alnum:]]+)@i", $getUrl) != 1) {
       return array(false, _("Invalid URL") . $getUrl, $description);
     }
     $getUrl = $this->basicShEscaping($getUrl);
 
     if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
-        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
-    {
+        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)) {
       $text = _("This seems to be a resent file.");
       return array(false, $text, $description);
     }
@@ -99,13 +96,11 @@ class UploadVcsPage extends UploadPageBase
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
     $Name = trim($request->get('name'));
-    if (empty($Name))
-    {
+    if (empty($Name)) {
       $Name = basename($getUrl);
     }
     $ShortName = basename($Name);
-    if (empty($ShortName))
-    {
+    if (empty($ShortName)) {
       $ShortName = $Name;
     }
 
@@ -113,17 +108,16 @@ class UploadVcsPage extends UploadPageBase
     $uploadMode = (1 << 2); // code for "it came from wget"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl, $description, $uploadMode, $folderId, $publicPermission);
-    if (empty($uploadId))
-    {
+    $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl,
+      $description, $uploadMode, $folderId, $publicPermission);
+    if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);
     }
 
     /* Create the job: job "wget" */
     $jobpk = JobAddJob($userId, $groupId, "wget", $uploadId);
-    if (empty($jobpk) || ($jobpk < 0))
-    {
+    if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert job record");
       return array(false, $text, $description);
     }
@@ -134,21 +128,18 @@ class UploadVcsPage extends UploadPageBase
 
     $Username = trim($request->get('username'));
     $Username = $this->basicShEscaping($Username);
-    if (!empty($Username))
-    {
+    if (!empty($Username)) {
       $jq_args .= "--username $Username ";
     }
 
     $Passwd = trim($request->get('passwd'));
     $Passwd = $this->basicShEscaping($Passwd);
-    if (!empty($Passwd)) 
-    {
+    if (!empty($Passwd)) {
       $jq_args .= "--password $Passwd";
-    } 
+    }
 
     $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, NULL, NULL);
-    if (empty($jobqueuepk))
-    {
+    if (empty($jobqueuepk)) {
       $text = _("Failed to insert task 'wget_agent' into job queue");
       return array(false, $text, $description);
     }
@@ -156,15 +147,13 @@ class UploadVcsPage extends UploadPageBase
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
     $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
     $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"), $unpackArgs);
-    if ($ununpack_jq_pk < 0)
-    {
+    if ($ununpack_jq_pk < 0) {
       return array(false, _($ErrorMsg), $description);
     }
 
     $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest") ];
     $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array());
-    if ($adj2nest_jq_pk < 0)
-    {
+    if ($adj2nest_jq_pk < 0) {
       return array(false, _($ErrorMsg), $description);
     }
 
@@ -173,8 +162,7 @@ class UploadVcsPage extends UploadPageBase
     $msg = "";
     /** check if the scheudler is running */
     $status = GetRunnableJobList();
-    if (empty($status))
-    {
+    if (empty($status)) {
       $msg .= _("Is the scheduler running? ");
     }
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
@@ -185,4 +173,5 @@ class UploadVcsPage extends UploadPageBase
     return array(true, $msg.$keep, $description);
   }
 }
+
 register_plugin(new UploadVcsPage());

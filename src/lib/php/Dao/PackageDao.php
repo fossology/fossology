@@ -59,8 +59,7 @@ ORDER BY up2.upload_fk ASC");
     $packageId = 0;
     $packageName = "";
     $uploads = array();
-    while ($row = $this->dbManager->fetchArray($res))
-    {
+    while ($row = $this->dbManager->fetchArray($res)) {
       $packageId = intval($row['package_pk']);
       $packageName = $row['package_name'];
       $uploads[] = Upload::createFromTable($row);
@@ -95,5 +94,4 @@ ORDER BY up2.upload_fk ASC");
     $res = $this->dbManager->execute($statementName, array($package->getId(), $uploadId));
     $this->dbManager->freeResult($res);
   }
-
-} 
+}

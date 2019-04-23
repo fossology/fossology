@@ -26,4 +26,4 @@ class LinkElement extends SimpleHtmlElement
   {
     parent::__construct("a", array("href" => $url));
   }
-} 
+}

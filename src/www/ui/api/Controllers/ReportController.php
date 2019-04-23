@@ -142,34 +142,35 @@ class ReportController extends RestController
    * @param integer $jobId The new job id created by agent
    * @return string The path to download the report
    */
-  private function buildDownloadPath($request, $jobId) {
+  private function buildDownloadPath($request, $jobId)
+  {
     $path = $request->getUri()->getHost();
     $path .= $request->getRequestTarget();
     $url_parts = parse_url($path);
     $download_path = "";
-    if(array_key_exists("scheme", $url_parts)) {
+    if (array_key_exists("scheme", $url_parts)) {
       $download_path .= $url_parts["scheme"] . "://";
     }
-    if(array_key_exists("user", $url_parts)) {
+    if (array_key_exists("user", $url_parts)) {
       $download_path .= $url_parts["user"];
     }
-    if(array_key_exists("pass", $url_parts)) {
+    if (array_key_exists("pass", $url_parts)) {
       $download_path .= ':' . $url_parts["pass"];
     }
-    if(array_key_exists("host", $url_parts)) {
+    if (array_key_exists("host", $url_parts)) {
       $download_path .= $url_parts["host"];
     }
-    if(array_key_exists("port", $url_parts)) {
+    if (array_key_exists("port", $url_parts)) {
       $download_path .= ':' . $url_parts["port"];
     }
-    if($url_parts["path"][-1] !== '/') {
+    if ($url_parts["path"][-1] !== '/') {
       $url_parts["path"] .= '/';
     }
     $download_path .= $url_parts["path"] . $jobId;
-    if(array_key_exists("query", $url_parts)) {
+    if (array_key_exists("query", $url_parts)) {
       $download_path .= '?' . $url_parts["query"];
     }
-    if(array_key_exists("fragment", $url_parts)) {
+    if (array_key_exists("fragment", $url_parts)) {
       $download_path .= '#' . $url_parts["fragment"];
     }
     return $download_path;

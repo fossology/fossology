@@ -36,7 +36,9 @@ use Fossology\Lib\Dao\UploadDao;
  */
 function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
 {
-  if (empty($Item)) { return array(); }
+  if (empty($Item)) {
+    return array();
+  }
 
   global $container;
 
@@ -45,8 +47,7 @@ function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
   $stmt = __METHOD__.".$uploadtree_tablename";
   $sql = "select true from tag_manage, $uploadtree_tablename u where is_disabled = true and tag_manage.upload_fk = u.upload_fk and u.uploadtree_pk = $1";
   $tagDisabled = $dbManager->getSingleRow($sql, array($Item), $stmt);
-  if ($tagDisabled !== false)
-  {
+  if ($tagDisabled !== false) {
     return array();
   }
 
@@ -55,15 +56,12 @@ function GetAllTags($Item, $Recurse=true, $uploadtree_tablename="uploadtree")
   $uploadtree_row = $dbManager->getSingleRow($sql,array($Item), $stmt2);
 
   $params = array($Item, $uploadtree_row['upload_fk']);
-  if ($Recurse)
-  {
+  if ($Recurse) {
     $Condition = " lft between $3 and $4 ";
     $stmt .= ".recurse";
     $params[] = $uploadtree_row['lft'];
     $params[] = $uploadtree_row['rgt'];
-  }
-  else
-  {
+  } else {
     $Condition = " uploadtree.uploadtree_pk=$1 ";
   }
 
@@ -99,18 +97,20 @@ function Array2SingleSelectTag($KeyValArray, $SLName="unnamed", $SelectedVal= ""
 $FirstEmpty=false, $SelElt=true, $Options="")
 {
   $str ="\n<select name='$SLName' $Options>\n";
-  if ($FirstEmpty) $str .= "<option value='' > \n";
-  foreach ($KeyValArray as $key => $val)
-  {
-    if ($SelElt == true)
+  if ($FirstEmpty) {
+    $str .= "<option value='' > \n";
+  }
+  foreach ($KeyValArray as $key => $val) {
+    if ($SelElt == true) {
       $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
-    else
+    } else {
       $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
-/** @todo GetTaggingPerms is commented out due to bug in it **/
-//    $perm = GetTaggingPerms($_SESSION['UserId'],$key);
-//    if ($perm > 1) {
+    }
+    /** @todo GetTaggingPerms is commented out due to bug in it **/
+    //    $perm = GetTaggingPerms($_SESSION['UserId'],$key);
+    //    if ($perm > 1) {
       $str .= "<option value='$key' $SELECTED>$val\n";
-//    }
+    //    }
   }
   $str .= "</select>";
   return $str;
@@ -131,23 +131,25 @@ function TagSelect($SLName="unnamed", $SelectedVal= "",
                    $FirstEmpty=false, $SelElt=true)
 {
   /* Find all the tag namespaces for this user */
-/*  UNUSED
+  /*  UNUSED
   $sql = "select lft,rgt from uploadtree where uploadtree_pk=$Item";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $uploadtree_row = pg_fetch_assoc($result);
-*/
+  */
 
   /* Find all the tags for this namespace */
 
   $str ="\n<select name='$SLName'>\n";
-  if ($FirstEmpty) $str .= "<option value='' > \n";
-  foreach ($KeyValArray as $key => $val)
-  {
-    if ($SelElt == true)
+  if ($FirstEmpty) {
+    $str .= "<option value='' > \n";
+  }
+  foreach ($KeyValArray as $key => $val) {
+    if ($SelElt == true) {
       $SELECTED = ($val == $SelectedVal) ? "SELECTED" : "";
-    else
+    } else {
       $SELECTED = ($key == $SelectedVal) ? "SELECTED" : "";
+    }
     $perm = GetTaggingPerms($_SESSION['UserId'],$key);
     if ($perm > 1) {
       $str .= "<option value='$key' $SELECTED>$val\n";
@@ -166,20 +168,21 @@ function TagSelect($SLName="unnamed", $SelectedVal= "",
  */
 function TagFilter(&$UploadtreeRows, $tag_pk, $uploadtree_tablename)
 {
-  foreach ($UploadtreeRows as $key=>$UploadtreeRow)
-  {
+  foreach ($UploadtreeRows as $key=>$UploadtreeRow) {
     $found = false;
     $tags = GetAllTags($UploadtreeRow["uploadtree_pk"], true, $uploadtree_tablename);
-    foreach($tags as $tagArray)
-    {
-      if ($tagArray['tag_pk'] == $tag_pk)
-      {
+    foreach ($tags as $tagArray) {
+      if ($tagArray['tag_pk'] == $tag_pk) {
         $found = true;
         break;
       }
-      if ($found) break;
+      if ($found) {
+        break;
+      }
     }
-    if ($found == false) unset($UploadtreeRows[$key]);
+    if ($found == false) {
+      unset($UploadtreeRows[$key]);
+    }
   }
 }
 

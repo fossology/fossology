@@ -45,18 +45,15 @@ class ClearingDecisionFilter
     /* @var ClearingDecision[][] $clearingDecisionsByItemId */
     $clearingDecisionsMapped = array();
 
-    foreach ($clearingDecisions as $clearingDecision)
-    {
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
       $itemId = $clearingDecision->getUploadTreeId();
       $fileId = $clearingDecision->getPfileId();
       $scope = $clearingDecision->getScope();
 
-      switch ($scope)
-      {
+      switch ($scope) {
         case DecisionScopes::ITEM:
           $clearingDecisionsMapped[$fileId][$itemId] = $clearingDecision;
           break;
@@ -85,14 +82,14 @@ class ClearingDecisionFilter
   {
     $clearingDecisionsForLicList = array();
 
-    foreach ($clearingDecisions as $clearingDecision){
+    foreach ($clearingDecisions as $clearingDecision) {
 
-      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT){
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
 
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved()){
+        if ($clearingLicense->isRemoved()) {
           continue;
         }
         $itemId = $clearingDecision->getUploadTreeId();
@@ -112,8 +109,7 @@ class ClearingDecisionFilter
   {
     /** @var ClearingDecision[] $clearingDecisionsByItemId */
     $clearingDecisionsByItemId = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
+    foreach ($clearingDecisions as $clearingDecision) {
       $itemId = $clearingDecision->getUploadTreeId();
       $clearingDecisionsByItemId[$itemId] = $clearingDecision;
     }
@@ -127,11 +123,9 @@ class ClearingDecisionFilter
    */
   public function getDecisionOf($decisionMap, $itemId, $pfileId)
   {
-    if (array_key_exists($pfileId, $decisionMap))
-    {
+    if (array_key_exists($pfileId, $decisionMap)) {
       $pfileMap = $decisionMap[$pfileId];
-      if (array_key_exists($itemId, $pfileMap))
-      {
+      if (array_key_exists($itemId, $pfileMap)) {
         return $pfileMap[$itemId];
       }
       if (array_key_exists(self::KEYREPO, $pfileMap)) {

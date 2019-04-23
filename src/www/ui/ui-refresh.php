@@ -43,7 +43,9 @@ class ui_refresh extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
     global $Plugins;
     $P = &$Plugins[plugin_find_id("Default")];
     $GoMod = GetParm("remod",PARM_STRING);
@@ -52,5 +54,6 @@ class ui_refresh extends FO_Plugin
     return($P->Output($GoMod,$GoOpt));
   }
 }
-$NewPlugin = new ui_refresh;
+
+$NewPlugin = new ui_refresh();
 $NewPlugin->Initialize();

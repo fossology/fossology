@@ -119,8 +119,6 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
                 array('id' => $licId, 'licenseRef' => $licenseRef2, 'agentRef' => $agentRef2, 'matchId' => 665, 'percentage' => 95)
             )
     ) );
-
-
   }
 
   public function testGetScannerDetectedLicenseDetailsWithUnknownAgent()
@@ -134,7 +132,6 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
             ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
             ->andReturn($licenseMatches);
-
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
     $reflection = new \ReflectionClass($this->agentLicenseEventProcessor);
@@ -163,7 +160,6 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
             ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
             ->andReturn($licenseMatches);
 
-
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
     $reflection = new \ReflectionClass($this->agentLicenseEventProcessor);
     $method = $reflection->getMethod('getScannerDetectedLicenseDetails');
@@ -183,7 +179,6 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
     $this->licenseDao->shouldReceive('getAgentFileLicenseMatches')->once()
             ->withArgs(array($this->itemTreeBounds,LicenseMap::TRIVIAL))
             ->andReturn($licenseMatches);
-
 
     // $latestAgentDetectedLicenses = $this->agentLicenseEventProcessor->getScannerDetectedLicenseDetails($this->itemTreeBounds);
     $reflection = new \ReflectionClass($this->agentLicenseEventProcessor);
@@ -238,5 +233,4 @@ class AgentLicenseEventProcessorTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->agentLicenseEventProcessor->getScannedLicenses(array()), is(emptyArray()));
   }
-
 }

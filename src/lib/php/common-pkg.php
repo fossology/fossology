@@ -43,11 +43,14 @@ function GetPkgMimetypes()
              or mimetype_name='application/x-debian-source'";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($row = pg_fetch_assoc($result))
-  {
-    if ($row['mimetype_name'] == 'application/x-rpm') $pkArray[0] = $row['mimetype_pk'];
-    else if ($row['mimetype_name'] == 'application/x-debian-package') $pkArray[1] = $row['mimetype_pk'];
-    else if ($row['mimetype_name'] == 'application/x-debian-source') $pkArray[2] = $row['mimetype_pk'];
+  while ($row = pg_fetch_assoc($result)) {
+    if ($row['mimetype_name'] == 'application/x-rpm') {
+      $pkArray[0] = $row['mimetype_pk'];
+    } else if ($row['mimetype_name'] == 'application/x-debian-package') {
+      $pkArray[1] = $row['mimetype_pk'];
+    } else if ($row['mimetype_name'] == 'application/x-debian-source') {
+      $pkArray[2] = $row['mimetype_pk'];
+    }
   }
   pg_free_result($result);
   return $pkArray;
@@ -73,16 +76,14 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
   list($rpm_mtpk, $deb_mtsrcpk, $deb_mtbinpk) = $MimetypeArray;
 
   /* Debian source pkg? */
-  if ($uploadtree_row['pfile_mimetypefk'] == $deb_mtsrcpk)
-  {
-    $NumSrcPkgs++;
+  if ($uploadtree_row['pfile_mimetypefk'] == $deb_mtsrcpk) {
+    $NumSrcPkgs ++;
     return;
   }
 
   /* Debian binary pkg? */
-  if ($uploadtree_row['pfile_mimetypefk'] == $deb_mtbinpk)
-  {
-    $NumBinPkgs++;
+  if ($uploadtree_row['pfile_mimetypefk'] == $deb_mtbinpk) {
+    $NumBinPkgs ++;
     $srcpkgmt = $deb_mtsrcpk;
 
     /* Is the source package present in this upload? */
@@ -101,8 +102,7 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
    * then we are looking at a binary rpm.  If source_rpm is empty, then
    * we are looking at a source rpm.
    */
-  if ($uploadtree_row['pfile_mimetypefk'] == $rpm_mtpk)
-  {
+  if ($uploadtree_row['pfile_mimetypefk'] == $rpm_mtpk) {
     $srcpkgmt = $rpm_mtpk;
     /* Is this a source or binary rpm? */
     $sql = "select source_rpm from pkg_rpm where pfile_fk=$uploadtree_row[pfile_fk] limit 1";
@@ -111,19 +111,18 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
     $row = pg_fetch_assoc($result);
     $source = $row['source_rpm'];
     pg_free_result($result);
-    if ((substr($source,0,6) == "(none)") || empty($source))
-    {
-      $NumSrcPkgs++;
+    if ((substr($source, 0, 6) == "(none)") || empty($source)) {
+      $NumSrcPkgs ++;
       return;
-    }
-    else
-    {
-      $NumBinPkgs++;
+    } else {
+      $NumBinPkgs ++;
     }
   }
 
   /* If $source is empty, then this isn't even a package */
-  if (empty($source)) return;
+  if (empty($source)) {
+    return;
+  }
 
   /* To get here we must be looking at a binary package */
   /* Find the source pkg in this upload */
@@ -133,7 +132,9 @@ function IncrSrcBinCounts($uploadtree_row, $MimetypeArray,
             and pfile_fk=pfile_pk and pfile_mimetypefk=$srcpkgmt limit 1";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0) $NumBinNoSrcPkgs++;
+  if (pg_num_rows($result) == 0) {
+    $NumBinNoSrcPkgs ++;
+  }
   pg_free_result($result);
   return;
 }

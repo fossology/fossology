@@ -49,7 +49,9 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
     parent::__construct($groupBy);
   }
 
-  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null){}
+  protected function getStatements($uploadId, $uploadTreeTableName, $userId = null, $groupId=null)
+  {
+  }
 
   public function getCleared($uploadId, $groupId=null, $extended = true, $agentcall = NULL)
   {

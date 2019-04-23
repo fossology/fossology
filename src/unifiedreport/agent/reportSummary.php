@@ -60,9 +60,9 @@ class ReportSummary
    */
   private function accumulateLicenses($licenses)
   {
-    if(!empty($licenses)){
+    if (!empty($licenses)) {
       $licenses = array_unique(array_column($licenses, 'content'));
-      foreach($licenses as $otherLicenses){
+      foreach ($licenses as $otherLicenses) {
         $allOtherLicenses .= $otherLicenses.", ";
       }
       $allOtherLicenses = rtrim($allOtherLicenses, ", ");
@@ -101,8 +101,8 @@ class ReportSummary
     $allMainLicenses = $this->accumulateLicenses($mainLicenses);
     $allOtherLicenses = $this->accumulateLicenses($licenses);
 
-    if(!empty($histLicenses)){
-      foreach($histLicenses as $histLicense){
+    if (!empty($histLicenses)) {
+      foreach ($histLicenses as $histLicense) {
         $allHistLicenses .= $histLicense["licenseShortname"].", ";
       }
       $allHistLicenses = rtrim($allHistLicenses, ", ");
@@ -138,30 +138,27 @@ class ReportSummary
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Component Information"), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Community"), $firstRowStyle1, "pStyle");
-    if(!empty($newSw360Component["Community"])){
+    if (!empty($newSw360Component["Community"])) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Community"]), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_community']), null, "pStyle");
     }
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component"), $firstRowStyle1, "pStyle");
 
-    if(!empty($newSw360Component["Component"])){
+    if (!empty($newSw360Component["Component"])) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Component"]), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_component']), null, "pStyle");
     }
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Version"), $firstRowStyle1, "pStyle");
 
-    if(!empty($newSw360Component["Version"])){
+    if (!empty($newSw360Component["Version"])) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Version"]), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_version']), null, "pStyle");
     }
     $table->addRow($rowWidth);
@@ -176,30 +173,27 @@ class ReportSummary
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Release date"), $firstRowStyle1, "pStyle");
 
-    if(!empty($newSw360Component["Release date"])){
+    if (!empty($newSw360Component["Release date"])) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Release date"]), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_release_date']), null, "pStyle");
     }
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Main license(s)"), $firstRowStyle1, "pStyle");
-    if(!empty($allMainLicenses)){
+    if (!empty($allMainLicenses)) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allMainLicenses."), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("Main License(s) Not selected."), null, "pStyle");
     }
 
     $table->addRow($rowWidth2);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars("Other license(s)"), $firstRowStyle1, "pStyle");
-    if(!empty($allOtherLicenses)){
+    if (!empty($allOtherLicenses)) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allOtherLicenses."), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("License(s) Not Identified."), null, "pStyle");
     }
 
@@ -216,16 +210,13 @@ class ReportSummary
     $table->addRow($rowWidth2);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" "), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars("Result of License Scan"), $firstRowStyle1, "pStyle");
-    if(!empty($allHistLicenses))
-    {
+    if (!empty($allHistLicenses)) {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("$allHistLicenses."), null, "pStyle");
-    }
-    else{
+    } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars("No License found by the Scanner"), null, "pStyle");
     }
 
     $section->addTextBreak();
     $section->addTextBreak();
   }
-
 }

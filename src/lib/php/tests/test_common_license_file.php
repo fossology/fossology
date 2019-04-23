@@ -67,8 +67,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
     print "*** path to test db creation command: " . $DB_COMMAND;
     exec($DB_COMMAND, $dbout, $rc);
-    if (!empty($rc))
-    {
+    if (!empty($rc)) {
       throw new Exception(implode("\n", $dbout));
     }
     preg_match("/(\d+)/", $dbout[0], $matches);
@@ -275,7 +274,8 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     if (!is_callable('pg_connect')) {
       return;
     }
@@ -315,7 +315,6 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
-
 
     pg_close($PG_CONN);
     exec("$DB_COMMAND -d $DB_NAME");

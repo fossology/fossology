@@ -194,5 +194,4 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
 
     assertThat($cleanText, is("foo bar baz quux"));
   }
-
 }

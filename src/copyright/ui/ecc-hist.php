@@ -19,7 +19,7 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_eccHistogram", _("Export restriction Browser"));
+define("TITLE_ECCHISTOGRAM", _("Export restriction Browser"));
 
 /**
  * @class EccHistogram
@@ -29,7 +29,7 @@ class EccHistogram  extends HistogramBase {
   function __construct()
   {
     $this->Name = "ecc-hist";
-    $this->Title = TITLE_eccHistogram;
+    $this->Title = TITLE_ECCHISTOGRAM;
     $this->viewName = "ecc-view";
     $this->agentName = "ecc";
     parent::__construct();

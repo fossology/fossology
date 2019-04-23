@@ -47,9 +47,8 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   global $container;
   $dbManager = $container->get('db.manager');
 
-  if (empty($default_bucketpool_fk))
-  {
-    $default_bucketpool_fk = NULL;
+  if (empty($default_bucketpool_fk)) {
+    $default_bucketpool_fk = null;
   }
 
   $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
@@ -59,8 +58,7 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
 
   /* Make sure it was added */
   $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');
-  if (empty($row['user_name']))
-  {
+  if (empty($row['user_name'])) {
     $text = _("Failed to insert user.");
     return ($text);
   }
@@ -72,9 +70,11 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   $dbManager->prepare($stmt='group.get', $sql = "select group_pk from groups where group_name=$1");
   $verg = $dbManager->execute('group.get',array($user_name));
   $GroupRow = $dbManager->fetchArray($verg);
-  if(false===$GroupRow){
-    $dbManager->getSingleRow('insert into groups(group_name) values ($1)',array($user_name));
-    $GroupRow = $dbManager->fetchArray($dbManager->execute('group.get',array($user_name)));
+  if (false === $GroupRow) {
+    $dbManager->getSingleRow('insert into groups(group_name) values ($1)',
+      array($user_name));
+    $GroupRow = $dbManager->fetchArray(
+      $dbManager->execute('group.get', array($user_name)));
   }
   $group_pk = $GroupRow['group_pk'];
   // make user a member of their own group

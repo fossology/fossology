@@ -90,5 +90,4 @@ class RepositoryApi
     $since = '?since=' . date('Y-m-d\\TH:i:s\\Z', time() - 3600 * 24 * $days);
     return $this->curlGet('commits' . $since);
   }
-
 }

@@ -23,7 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
-define("TITLE_core_auth", _("Login"));
+define("TITLE_CORE_AUTH", _("Login"));
 
 class core_auth extends FO_Plugin
 {
@@ -38,7 +38,7 @@ class core_auth extends FO_Plugin
   function __construct()
   {
     $this->Name = "auth";
-    $this->Title = TITLE_core_auth;
+    $this->Title = TITLE_CORE_AUTH;
     $this->PluginLevel = 1000; /* make this run first! */
     $this->LoginFlag = 0;
     parent::__construct();
@@ -78,19 +78,16 @@ class core_auth extends FO_Plugin
     global $SysConf;
 
     /* if Site Minder enabled core-auth will be disabled*/
-    if (siteminder_check() != -1)
-    {
+    if (siteminder_check() != -1) {
       return (0);
     }
 
-    if (!$this->session->isStarted())
-    {
+    if (!$this->session->isStarted()) {
       $this->session->setName('Login');
       $this->session->start();
     }
 
-    if (array_key_exists('selectMemberGroup', $_POST))
-    {
+    if (array_key_exists('selectMemberGroup', $_POST)) {
       $selectedGroupId = intval($_POST['selectMemberGroup']);
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
@@ -98,46 +95,44 @@ class core_auth extends FO_Plugin
       $SysConf['auth'][Auth::GROUP_ID] = $selectedGroupId;
     }
 
-    if (array_key_exists(Auth::USER_ID, $_SESSION)) $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
-    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    if (array_key_exists(Auth::USER_ID, $_SESSION)) {
+      $SysConf['auth'][Auth::USER_ID] = $_SESSION[Auth::USER_ID];
+    }
+    if (array_key_exists(Auth::GROUP_ID, $_SESSION)) {
+      $SysConf['auth'][Auth::GROUP_ID] = $_SESSION[Auth::GROUP_ID];
+    }
 
     $Now = time();
-    if (!empty($_SESSION['time']))
-    {
-      /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
-      if (@$_SESSION['time'] + (60 * 480) < $Now) $this->updateSession("");
+    /* Logins older than 60 secs/min * 480 min = 8 hr are auto-logout */
+    if (!empty($_SESSION['time']) && @$_SESSION['time'] + (60 * 480) < $Now) {
+      $this->updateSession("");
     }
 
     $_SESSION['time'] = $Now;
-    if (empty($_SESSION['ip']))
-    {
+    if (empty($_SESSION['ip'])) {
       $_SESSION['ip'] = $this->getIP();
-    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP()))
-    {
+    } else if ((@$_SESSION['checkip'] == 1) && (@$_SESSION['ip'] != $this->getIP())) {
       /* Sessions are not transferable. */
       $this->updateSession("");
       $_SESSION['ip'] = $this->getIP();
     }
 
-    if (@$_SESSION[Auth::USER_NAME])
-    {
+    if (@$_SESSION[Auth::USER_NAME]) {
       /* Recheck the user in case he is suddenly blocked or changed. */
-      if (empty($_SESSION['time_check']))
-      {
+      if (empty($_SESSION['time_check'])) {
         $_SESSION['time_check'] = time() + (480 * 60);
       }
-      if (time() >= @$_SESSION['time_check'])
-      {
+      if (time() >= @$_SESSION['time_check']) {
         $row = $this->userDao->getUserAndDefaultGroupByUserName(@$_SESSION[Auth::USER_NAME]);
         /* Check for instant logouts */
-        if (empty($row['user_pass']))
-        {
+        if (empty($row['user_pass'])) {
           $row = "";
         }
         $this->updateSession($row);
       }
-    } else
+    } else {
       $this->updateSession("");
+    }
 
     /* Disable all plugins with >= level access */
     plugin_disable($_SESSION[Auth::USER_LEVEL]);
@@ -153,8 +148,7 @@ class core_auth extends FO_Plugin
   {
     global $SysConf;
 
-    if (empty($userRow))
-    {
+    if (empty($userRow)) {
       $userRow = $this->userDao->getUserAndDefaultGroupByUserName('Default User');
     }
 
@@ -184,10 +178,8 @@ class core_auth extends FO_Plugin
   {
     /* NOTE: This can be easily defeated wtih fake HTTP headers. */
     $Vars = array('HTTP_CLIENT_IP', 'HTTP_X_COMING_FROM', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED');
-    foreach ($Vars as $V)
-    {
-      if (!empty($_SERVER[$V]))
-      {
+    foreach ($Vars as $V) {
+      if (!empty($_SERVER[$V])) {
         return ($_SERVER[$V]);
       }
     }
@@ -202,12 +194,11 @@ class core_auth extends FO_Plugin
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
-    if (empty($referrer))
-    {
+    if (empty($referrer)) {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
     }
     $referrerQuery = parse_url($referrer,PHP_URL_QUERY);
-    if($referrerQuery) {
+    if ($referrerQuery) {
       $params = array();
       parse_str($referrerQuery,$params);
       if (array_key_exists('mod', $params) && $params['mod'] == $this->Name) {
@@ -216,24 +207,19 @@ class core_auth extends FO_Plugin
     }
 
     $validLogin = $this->checkUsernameAndPassword($userName, $password);
-    if ($validLogin)
-    {
+    if ($validLogin) {
       return new RedirectResponse($referrer);
     }
 
     $initPluginId = plugin_find_id("init");
-    if ($initPluginId >= 0)
-    {
+    if ($initPluginId >= 0) {
       global $Plugins;
       $this->vars['info'] = $Plugins[$initPluginId]->infoFirstTimeUsage();
     }
 
-    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off")
-    {
+    if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") {
       $this->vars['protocol'] = "HTTPS";
-    }
-    else
-    {
+    } else {
       $this->vars['protocol'] = preg_replace("@/.*@", "", @$_SERVER['SERVER_PROTOCOL']);
     }
 
@@ -250,8 +236,7 @@ class core_auth extends FO_Plugin
    */
   function OutputOpen()
   {
-    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User")
-    {
+    if (array_key_exists('User', $_SESSION) && $_SESSION['User'] != "Default User") {
       $this->updateSession("");
       $Uri = Traceback_uri();
       header("Location: $Uri");
@@ -260,7 +245,6 @@ class core_auth extends FO_Plugin
     parent::OutputOpen();
   }
 
-
   /**
    * \brief See if a username/password is valid.
    *
@@ -268,66 +252,52 @@ class core_auth extends FO_Plugin
    */
   function checkUsernameAndPassword($userName, $password)
   {
-    if (empty($userName) || $userName == 'Default User')
-    {
+    if (empty($userName) || $userName == 'Default User') {
       return false;
     }
-    try
-    {
+    try {
       $row = $this->userDao->getUserAndDefaultGroupByUserName($userName);
-    }
-    catch(Exception $e)
-    {
+    } catch (Exception $e) {
       return false;
     }
 
-    if (empty($row['user_name']))
-    {
+    if (empty($row['user_name'])) {
       return false;
     }
 
     /* Check the password -- only if a password exists */
-    if (!empty($row['user_seed']) && !empty($row['user_pass']))
-    {
+    if (! empty($row['user_seed']) && ! empty($row['user_pass'])) {
       $passwordHash = sha1($row['user_seed'] . $password);
-      if (strcmp($passwordHash, $row['user_pass']) != 0)
-      {
+      if (strcmp($passwordHash, $row['user_pass']) != 0) {
         return false;
       }
-    } else if (!empty($row['user_seed']))
-    {
+    } else if (! empty($row['user_seed'])) {
       /* Seed with no password hash = no login */
       return false;
-    } else if (!empty($password))
-    {
+    } else if (!empty($password)) {
       /* empty password required */
       return false;
     }
 
-    /* If you make it here, then username and password were good! */
+      /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
     $_SESSION['time_check'] = time() + (480 * 60);
     /* No specified permission means ALL permission */
-    if ("X" . $row['user_perm'] == "X")
-    {
+    if ("X" . $row['user_perm'] == "X") {
       $_SESSION[Auth::USER_LEVEL] = PLUGIN_DB_ADMIN;
-    } else
-    {
+    } else {
       $_SESSION[Auth::USER_LEVEL] = $row['user_perm'];
     }
     $_SESSION['checkip'] = GetParm("checkip", PARM_STRING);
     /* Check for the no-popup flag */
-    if (GetParm("nopopup", PARM_INTEGER) == 1)
-    {
+    if (GetParm("nopopup", PARM_INTEGER) == 1) {
       $_SESSION['NoPopup'] = 1;
-    } else
-    {
+    } else {
       $_SESSION['NoPopup'] = 0;
     }
     return true;
   }
-
 }
 
-$NewPlugin = new core_auth;
+$NewPlugin = new core_auth();

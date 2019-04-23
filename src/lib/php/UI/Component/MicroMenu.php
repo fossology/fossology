@@ -45,7 +45,7 @@ class MicroMenu
    * @param $itemId
    * @return string
    */
-  public function getFormatParameter($itemId = NULL)
+  public function getFormatParameter($itemId = null)
   {
     $selectedFormat = GetParm("format", PARM_STRING);
 
@@ -54,8 +54,7 @@ class MicroMenu
     }
     if (empty($itemId)) {
       return self::FORMAT_FLOW;
-    }
-    else {
+    } else {
       $mimeType = GetMimeType($itemId);
       list($type, $dummy) = explode("/", $mimeType, 2);
       return $type == 'text' ? self::FORMAT_TEXT : self::FORMAT_FLOW;
@@ -72,8 +71,8 @@ class MicroMenu
     $uri = preg_replace("/&format=[a-zA-Z0-9]*/", "", $uri);
     $uri = preg_replace("/&page=[0-9]*/", "", $uri);
 
-    $pageNumberHex = NULL;
-    $pageNumberText = NULL;
+    $pageNumberHex = null;
+    $pageNumberText = null;
 
     $tooltipTexts = array(
       self::FORMAT_HEX => _("View as a hex dump"),

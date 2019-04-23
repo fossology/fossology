@@ -47,10 +47,10 @@ class AjaxJobInfo extends DefaultPlugin
   protected function handle(Request $request)
   {
     $userId = $_SESSION['UserId'];
-    $jqIds = (array)$request->get('jqIds');
+    $jqIds = (array) $request->get('jqIds');
 
     $result = array();
-    foreach($jqIds as $jq_pk) {
+    foreach ($jqIds as $jq_pk) {
       $jobInfo = $this->dbManager->getSingleRow(
         "SELECT jobqueue.jq_end_bits as end_bits FROM jobqueue INNER JOIN job ON jobqueue.jq_job_fk = job.job_pk
           WHERE jobqueue.jq_pk = $1 AND job_user_fk = $2",
@@ -69,8 +69,6 @@ class AjaxJobInfo extends DefaultPlugin
     $response = new Response(json_encode($result),$status,array('content-type'=>'text/json'));
     return $response;
   }
-  
 }
 
 register_plugin(new AjaxJobInfo());
-

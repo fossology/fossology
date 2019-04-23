@@ -24,7 +24,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class UnifiedReportAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_unifiedreport";
     $this->Title =  _("Unified Report Generator");
     $this->AgentName = "unifiedreport";

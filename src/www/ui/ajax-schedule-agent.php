@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
  * data to the UI.
  */
 
-define("TITLE_ajax_schedule_agent", _("Schedule agent"));
+define("TITLE_AJAX_SCHEDULE_AGENT", _("Schedule agent"));
 
 /**
  * \class ajax_upload_agents extends from FO_Plugin
@@ -37,7 +37,7 @@ class ajax_schedule_agent extends FO_Plugin
   function __construct()
   {
     $this->Name       = "schedule_agent";
-    $this->Title      = TITLE_ajax_schedule_agent;
+    $this->Title      = TITLE_AJAX_SCHEDULE_AGENT;
     $this->DBaccess   = PLUGIN_DB_READ;
     parent::__construct();
   }
@@ -53,15 +53,17 @@ class ajax_schedule_agent extends FO_Plugin
     $UploadPk = GetParm("upload",PARM_INTEGER);
     $Agent = GetParm("agent",PARM_STRING);
     if (empty($UploadPk) || empty($Agent)) {
-      return new Response('missing parameter', Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+      return new Response('missing parameter', Response::HTTP_BAD_REQUEST,
+        array('Content-type' => 'text/plain'));
     }
     $sql = "SELECT upload_pk, upload_filename FROM upload WHERE upload_pk = '$UploadPk'";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) < 1)
-    {
-      $errMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $UploadPk. " " .  _("not found");
-      return new Response($errMsg, Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+    if (pg_num_rows($result) < 1) {
+      $errMsg = __FILE__ . ":" . __LINE__ . " " . _("Upload") . " " . $UploadPk .
+        " " . _("not found");
+      return new Response($errMsg, Response::HTTP_BAD_REQUEST,
+        array('Content-type' => 'text/plain'));
     }
     $UploadRow = pg_fetch_assoc($result);
     $ShortName = $UploadRow['upload_filename'];
@@ -74,17 +76,16 @@ class ajax_schedule_agent extends FO_Plugin
     $Dependencies = array();
     $P = &$Plugins[plugin_find_id($Agent)];
     $rv = $P->AgentAdd($job_pk, $UploadPk, $ErrorMsg, $Dependencies);
-    if ($rv <= 0)
-    {
+    if ($rv <= 0) {
       $text = _("Scheduling of Agent(s) failed: ");
-      return new Response($text.$rv.$ErrorMsg, Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+      return new Response($text . $rv . $ErrorMsg, Response::HTTP_BAD_REQUEST,
+        array('Content-type' => 'text/plain'));
     }
-    
+
     /** check if the scheudler is running */
     $status = GetRunnableJobList();
     $scheduler_msg = "";
-    if (empty($status))
-    {
+    if (empty($status)) {
       $scheduler_msg .= _("Is the scheduler running? ");
     }
 
@@ -96,7 +97,7 @@ class ajax_schedule_agent extends FO_Plugin
     $this->vars['message'] = $msg;
     return new Response($msg, Response::HTTP_OK, array('Content-type'=>'text/plain'));
   }
-
 }
+
 $NewPlugin = new ajax_schedule_agent;
 $NewPlugin->Initialize();

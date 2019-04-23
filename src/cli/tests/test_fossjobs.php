@@ -25,11 +25,12 @@ require_once("./test_common.php");
 /**
  * @outputBuffering enabled
  */
-class test_fossjobs extends \PHPUnit\Framework\TestCase {
+class test_fossjobs extends \PHPUnit\Framework\TestCase
+{
 
   // fossology_testconfig is the temporary system configuration directory
   // created by the src/testing/db/create_test_database.php script.
-  // It is initialized via the Makefile and passed in via the 
+  // It is initialized via the Makefile and passed in via the
   // FOSSOLOGY_TESTCONFIG environment variable.
   public $fossology_testconfig;
 
@@ -42,9 +43,10 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
   // fossjobs_path is the absolute path to the fossjobs binary
   public $fossjobs_path;
 
-  // this method is run once for the entire test class, before any of the 
+  // this method is run once for the entire test class, before any of the
   // test methods are executed.
-  public static function setUpBeforeClass() {
+  public static function setUpBeforeClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -55,7 +57,7 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
 
     /**
        get the value of the FOSSOLOGY_TESTCONFIG environment variable,
-       which will be initialized by the Makefile by running the 
+       which will be initialized by the Makefile by running the
        create_test_database.pl script
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
@@ -100,16 +102,18 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
   }
 
   /* initialization */
-  protected function setUp() {
+  protected function setUp()
+  {
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
   }
 
-  /** 
+  /**
    * \brief schedule agents
    */
-  function test_reschedule_agents(){
+  function test_reschedule_agents()
+  {
     global $fossology_testconfig;
     global $scheduler_path;
     global $cp2foss_path;
@@ -131,7 +135,9 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
 
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -167,7 +173,9 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
 
     sleep(5); //wait for the agents complete
     $agent_status = 0;
@@ -195,7 +203,8 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
   /**
    * \brief list agents, list uploads, help msg
    */
-  function test_list_agent_and_others(){
+  function test_list_agent_and_others()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -232,8 +241,8 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     fwrite(STDOUT, "DEBUG: output was:\n");
     //print_r($out);
     $output_msg_count = count($out);
-    // TODO: / Note:  This is *Highly* dependent on the execution of 
-    // test_reschedule_agents() - i.e. these two test cases are 
+    // TODO: / Note:  This is *Highly* dependent on the execution of
+    // test_reschedule_agents() - i.e. these two test cases are
     // tightly coupled, and they should _not_ be so.
     // at the end of test_reschedule and this method, the number of
     $this->assertEquals(3, $output_msg_count, $command); // have 2 = (3 -1_ uploads
@@ -244,20 +253,22 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     // TODO:  Drop the test database
 
-    //stop_scheduler(); 
+    //stop_scheduler();
     //drop_db();
   }
 
-  // this method is run once for the entire test class, after all of the 
+  // this method is run once for the entire test class, after all of the
   // test methods are executed.
-  public static function tearDownAfterClass() {
+  public static function tearDownAfterClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -271,15 +282,14 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase {
     if ( $return_var != 0 ) {
         print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
-#        exit(1);
+      #        exit(1);
     }
 
-    // time to drop the database 
+    // time to drop the database
     sleep(10);
 
     print "End of functional tests for cp2foss \n";
   }
-
 }
 
-?>
+

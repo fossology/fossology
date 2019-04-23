@@ -58,7 +58,7 @@ class UploadController extends RestController
     }
     $uploads = $this->dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id);
     if ($id !== null) {
-      if($uploads === null) {
+      if ($uploads === null) {
         $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
@@ -157,11 +157,11 @@ class UploadController extends RestController
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
 
       $allFolderIds = $this->container->get('dao.folder')->getAllFolderIds();
-      if(!in_array($folderId, $allFolderIds)) {
+      if (!in_array($folderId, $allFolderIds)) {
         $error = new Info(404, "folderId $folderId does not exists!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }
-      if(!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
+      if (!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
         $error = new Info(403, "folderId $folderId is not accessible!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }

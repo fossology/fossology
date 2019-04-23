@@ -47,13 +47,10 @@ class ObligationMap
    */
   public function getAvailableShortnames($candidate=false)
   {
-    if ($candidate)
-    {
+    if ($candidate) {
       $sql = "SELECT rf_shortname from license_candidate;";
       $stmt = __METHOD__.".rf_candidate_shortnames";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT rf_shortname from license_ref;";
       $stmt = __METHOD__.".rf_shortnames";
     }
@@ -63,8 +60,7 @@ class ObligationMap
     $this->dbManager->freeResult($res);
 
     $licshortnames = array();
-    foreach ($vars as $rf_entry)
-    {
+    foreach ($vars as $rf_entry) {
       $shortname = $rf_entry['rf_shortname'];
       $licshortnames[$shortname] = $shortname;
     }
@@ -80,12 +76,9 @@ class ObligationMap
    */
   public function getIdFromShortname($shortname,$candidate=false)
   {
-    if ($candidate)
-    {
+    if ($candidate) {
       $sql = "SELECT * from license_candidate where rf_shortname = $1;";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT * from license_ref where rf_shortname = $1;";
     }
     $result = $this->dbManager->getSingleRow($sql,array($shortname));
@@ -100,12 +93,9 @@ class ObligationMap
    */
   public function getShortnameFromId($rfId,$candidate=false)
   {
-    if ($candidate)
-    {
+    if ($candidate) {
       $sql = "SELECT * FROM license_candidate WHERE rf_pk = $1;";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT * FROM license_ref WHERE rf_pk = $1;";
     }
     $result = $this->dbManager->getSingleRow($sql,array($rfId));
@@ -121,13 +111,10 @@ class ObligationMap
   public function getLicenseList($obId,$candidate=false)
   {
     $liclist = "";
-    if ($candidate)
-    {
+    if ($candidate) {
       $sql = "SELECT rf_fk FROM obligation_candidate_map WHERE ob_fk=$obId;";
       $stmt = __METHOD__.".om_candidate_$obId";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT rf_fk FROM obligation_map WHERE ob_fk=$obId;";
       $stmt = __METHOD__.".om_license_$obId";
     }
@@ -135,15 +122,11 @@ class ObligationMap
     $res = $this->dbManager->execute($stmt);
     $vars = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    foreach ($vars as $map_entry)
-    {
+    foreach ($vars as $map_entry) {
       $licname = $this->getShortnameFromId($map_entry['rf_fk'], $candidate);
-      if ($liclist == "")
-      {
+      if ($liclist == "") {
         $liclist = "$licname";
-      }
-      else
-      {
+      } else {
         $liclist .= ";$licname";
       }
     }
@@ -160,13 +143,10 @@ class ObligationMap
    */
   public function isLicenseAssociated($obId,$licId,$candidate=false)
   {
-    if ($candidate)
-    {
+    if ($candidate) {
       $sql = "SELECT * from obligation_candidate_map where ob_fk = $1 and rf_fk = $2;";
       $stmt = __METHOD__.".om_testcandidate_$obId";
-    }
-    else
-    {
+    } else {
       $sql = "SELECT * from obligation_map where ob_fk = $1 and rf_fk = $2;";
       $stmt = __METHOD__.".om_testlicense_$obId";
     }
@@ -213,28 +193,19 @@ class ObligationMap
    */
   public function unassociateLicenseFromObligation($obId,$licId=0,$candidate=false)
   {
-    if ($licId == 0)
-    {
-      if ($candidate)
-      {
+    if ($licId == 0) {
+      if ($candidate) {
         $sql = "DELETE FROM obligation_candidate_map WHERE ob_fk=$1";
-      }
-      else
-      {
+      } else {
         $sql = "DELETE FROM obligation_map WHERE ob_fk=$1";
       }
       $stmt = __METHOD__.".omdel_all";
       $this->dbManager->prepare($stmt,$sql);
       $res = $this->dbManager->execute($stmt,array($obId));
-    }
-    else
-    {
-      if ($candidate)
-      {
+    } else {
+      if ($candidate) {
         $sql = "DELETE FROM obligation_candidate_map WHERE ob_fk=$1 AND rf_fk=$2";
-      }
-      else
-      {
+      } else {
         $sql = "DELETE FROM obligation_map WHERE ob_fk=$1 AND rf_fk=$2";
       }
       $stmt = __METHOD__.".omdel_lic";

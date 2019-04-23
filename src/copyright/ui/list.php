@@ -28,7 +28,7 @@ use Fossology\Lib\Db\DbManager;
  * uploadtree.
  */
 
-define("TITLE_copyright_list", _("List Files for Copyright/Email/URL"));
+define("TITLE_COPYRIGHT_LIST", _("List Files for Copyright/Email/URL"));
 
 class copyright_list extends FO_Plugin
 {
@@ -45,7 +45,7 @@ class copyright_list extends FO_Plugin
   function __construct()
   {
     $this->Name = "copyright-list";
-    $this->Title = TITLE_copyright_list;
+    $this->Title = TITLE_COPYRIGHT_LIST;
     $this->Version = "1.0";
     $this->Dependency = array("copyright-hist", "ecc-hist");
     $this->DBaccess = PLUGIN_DB_READ;
@@ -149,7 +149,8 @@ class copyright_list extends FO_Plugin
       if(!empty($rf_rows)){
         foreach($rf_rows as $row)
         {
-          if (!empty($rf_clause)) $rf_clause .= " or ";
+          if (!empty($rf_clause)) { $rf_clause .= " or ";
+          }
           $rf_clause .= " rf_fk=$row[rf_pk]";
         }
       }
@@ -205,8 +206,9 @@ class copyright_list extends FO_Plugin
          * remove duplicate uploadtree_pk's.  This can happen if there
          * are multiple same copyrights in one file.
          */
-        if ($rows2[$RowIdx-1]['uploadtree_pk'] == $rows2[$RowIdx]['uploadtree_pk'])
-        unset($rows2[$RowIdx-1]);
+        if ($rows2[$RowIdx-1]['uploadtree_pk'] == $rows2[$RowIdx]['uploadtree_pk']) {
+          unset($rows2[$RowIdx-1]);
+        }
       }
     }
 
@@ -318,7 +320,8 @@ class copyright_list extends FO_Plugin
       $OutBuf .= ": <b>$Content</b>";
 
       $text = _("Display excludes files with these extensions");
-      if (!empty($excl)) $OutBuf .= "<br>$text: $excl";
+      if (!empty($excl)) { $OutBuf .= "<br>$text: $excl";
+      }
 
       /* Get the page menu */
       if (($RowCount >= $Max) && ($Page >= 0))
@@ -343,15 +346,17 @@ class copyright_list extends FO_Plugin
       foreach($rows as $row)
       {
         ++$RowNum;
-        if ($RowNum < $Offset)
+        if ($RowNum < $Offset) {
           continue;
+        }
 
         // Allow user to exclude files with this extension
         $FileExt = GetFileExt($row['ufile_name']);
-        if (empty($excl))
+        if (empty($excl)) {
           $URL = $baseURL . "&excl=$FileExt";
-        else
+        } else {
           $URL = $baseURL . "&excl=$excl:$FileExt";
+        }
 
         $text = _("Exclude this file type");
         $Header = "<a href=$URL>$text.</a>";
@@ -360,7 +365,8 @@ class copyright_list extends FO_Plugin
         if ($excl)
         {
           $ExclArray = explode(":", $excl);
-          if (in_array($FileExt, $ExclArray)) $ok = false;
+          if (in_array($FileExt, $ExclArray)) { $ok = false;
+          }
         }
 
         if ($ok)

@@ -25,7 +25,7 @@ use Fossology\Lib\Db\DbManager;
 class UploadBrowseProxy
 {
   const PRIO_COLUMN = 'priority';
-  
+
   protected $groupId;
   protected $userPerm;
   /** @var DbManager */
@@ -36,8 +36,7 @@ class UploadBrowseProxy
     $this->groupId = $groupId;
     $this->userPerm = $userPerm;
     $this->dbManager = $dbManager;
-    if ($doSanity)
-    {
+    if ($doSanity) {
       $this->sanity();
     }
   }
@@ -52,54 +51,42 @@ class UploadBrowseProxy
          . ' AND (public_perm>=$3 OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$1))';
     $this->dbManager->getSingleRow($sql, $params);
   }
-  
-  
+
+
   public function updateTable($columnName, $uploadId, $value)
   {
-    if ($columnName == 'status_fk')
-    {
+    if ($columnName == 'status_fk') {
       $this->changeStatus($uploadId, $value);
-    }
-    else if ($columnName == 'assignee' && $this->userPerm)
-    {
+    } else if ($columnName == 'assignee' && $this->userPerm) {
       $sql = "UPDATE upload_clearing SET assignee=$1 WHERE group_fk=$2 AND upload_fk=$3";
       $this->dbManager->getSingleRow($sql, array($value, $this->groupId, $uploadId), $sqlLog = __METHOD__);
-    }
-    else
-    {
+    } else {
       throw new \Exception('invalid column');
     }
-  }  
-  
+  }
+
   protected function changeStatus($uploadId, $newStatus)
   {
-    if ($newStatus == UploadStatus::REJECTED && $this->userPerm)
-    {
+    if ($newStatus == UploadStatus::REJECTED && $this->userPerm) {
       $this->setStatusAndComment($uploadId, $newStatus, $commentText = '');
-    }
-    else if ($newStatus == UploadStatus::REJECTED)
-    {
+    } else if ($newStatus == UploadStatus::REJECTED) {
       throw new \Exception('missing permission');
-    }
-    else if ($this->userPerm)
-    {
+    } else if ($this->userPerm) {
       $sql = "UPDATE upload_clearing SET status_fk=$1 WHERE group_fk=$2 AND upload_fk=$3";
       $this->dbManager->getSingleRow($sql, array($newStatus, $this->groupId, $uploadId), __METHOD__ . '.advisor');
-    }
-    else
-    {
+    } else {
       $sql = "UPDATE upload_clearing SET status_fk=$1 WHERE group_fk=$2 AND upload_fk=$3 AND status_fk<$4";
       $params = array($newStatus, $this->groupId, $uploadId, UploadStatus::REJECTED);
       $this->dbManager->getSingleRow($sql, $params,  __METHOD__ . '.user');
     }
   }
-  
+
   public function setStatusAndComment($uploadId, $statusId, $commentText)
   {
     $sql = "UPDATE upload_clearing SET status_fk=$1, status_comment=$2 WHERE group_fk=$3 AND upload_fk=$4";
     $this->dbManager->getSingleRow($sql, array($statusId, $commentText, $this->groupId, $uploadId), __METHOD__);
   }
-  
+
   public function moveUploadToInfinity($uploadId, $top)
   {
     $fun = $top ? 'MAX('.self::PRIO_COLUMN.')+1' : 'MIN('.self::PRIO_COLUMN.')-1';
@@ -109,7 +96,7 @@ class UploadBrowseProxy
             array($this->groupId,$uploadId),
             __METHOD__.($top?'+':'-'));
   }
-  
+
   public function moveUploadBeyond($moveUpload, $beyondUpload)
   {
     $this->dbManager->begin();
@@ -117,34 +104,31 @@ class UploadBrowseProxy
         $sql='SELECT upload_fk,'.self::PRIO_COLUMN.' FROM upload_clearing WHERE group_fk=$1 AND upload_fk=$2');
     $movePoint = $this->dbManager->getSingleRow($sql, array($this->groupId,$moveUpload), $stmt);
     $beyondPoint = $this->dbManager->getSingleRow($sql, array($this->groupId,$beyondUpload), $stmt);
-    
-    if ($movePoint[self::PRIO_COLUMN] > $beyondPoint[self::PRIO_COLUMN])
-    {
+
+    if ($movePoint[self::PRIO_COLUMN] > $beyondPoint[self::PRIO_COLUMN]) {
       $farPoint = $this->dbManager->getSingleRow("SELECT MAX(".self::PRIO_COLUMN.") m FROM upload_clearing WHERE group_fk=$1 AND ".self::PRIO_COLUMN."<$2",
               array($this->groupId,$beyondPoint[self::PRIO_COLUMN]), 'get.upload.with.lower.priority');
       $farPrio = $farPoint['m']!==null ? $farPoint['m'] : $beyondPoint[self::PRIO_COLUMN]-1;
-    } else
-    {
+    } else {
       $farPoint = $this->dbManager->getSingleRow("SELECT MIN(".self::PRIO_COLUMN.") m FROM upload_clearing WHERE group_fk=$1 AND ".self::PRIO_COLUMN.">$2",
               array($this->groupId,$beyondPoint[self::PRIO_COLUMN]), 'get.upload.with.higher.priority');
       $farPrio = $farPoint['m']!==null ? $farPoint['m'] : $beyondPoint[self::PRIO_COLUMN]+1;
     }
-    
+
     $newPriority = ($farPrio + $beyondPoint[self::PRIO_COLUMN]) / 2;
     $this->dbManager->getSingleRow('UPDATE upload_clearing SET '.self::PRIO_COLUMN.'=$1 WHERE group_fk=$2 AND upload_fk=$3',
             array($newPriority, $this->groupId, $moveUpload),
             __METHOD__.'.update.priority');
     $this->dbManager->commit();
   }
-  
+
   /**
    * @param array $params
    * @return string $partQuery where "select * from $partquery" is query to select all uploads in forderId = $params[0]
    */
   public function getFolderPartialQuery(& $params)
   {
-    if(count($params)!=1)
-    {
+    if (count($params)!=1) {
       throw new \Exception('expected argument to be array with exactly one element for folderId');
     }
     $params[] = $this->groupId;
@@ -152,14 +136,14 @@ class UploadBrowseProxy
     $partQuery = 'upload
         INNER JOIN upload_clearing ON upload_pk = upload_clearing.upload_fk AND group_fk=$2
         INNER JOIN uploadtree ON upload_pk = uploadtree.upload_fk AND upload.pfile_fk = uploadtree.pfile_fk
-        WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode&2 != 0 AND parent_fk = $1 ) 
+        WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode&2 != 0 AND parent_fk = $1 )
          AND (public_perm>=$3
               OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$2))
          AND parent IS NULL
          AND lft IS NOT NULL';
     return $partQuery;
   }
-  
+
   /**
    * @param int $uploadId
    * @return int
@@ -174,4 +158,4 @@ class UploadBrowseProxy
     }
     return $row['status_fk'];
   }
-} 
+}

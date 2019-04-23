@@ -79,5 +79,4 @@ class DbViewProxyTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->dbViewDao->asCTE(),is("WITH $this->dbViewName AS (".$this->dbViewQuery.")"));
   }
-
 }

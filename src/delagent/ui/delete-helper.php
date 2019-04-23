@@ -16,7 +16,7 @@ use Fossology\DelAgent\UI\DeleteResponse;
  */
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {
-  if(!$uploadDao->isEditable($uploadpk, $group_pk)){
+  if (! $uploadDao->isEditable($uploadpk, $group_pk)) {
     $returnMessage = DeleteMessages::NO_PERMISSION;
     return new DeleteResponse($returnMessage);
   }
@@ -62,15 +62,14 @@ function DeleteUpload($uploadpk, $user_pk, $group_pk, $Depends = NULL)
 
   /* Tell the scheduler to check the queue. */
   $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-  if (!$success)
-  {
+  if (!$success) {
     $error_msg = _("Is the scheduler running? Your jobs have been added to job queue.");
     $URL = Traceback_uri() . "?mod=showjobs&upload=$uploadpk ";
     $LinkText = _("View Jobs");
     $msg = "$error_msg <a href=$URL>$LinkText</a>";
     return $msg;
   }
-  return (NULL);
+  return (null);
 } // Delete()
 
 /**
@@ -80,40 +79,32 @@ function DeleteUpload($uploadpk, $user_pk, $group_pk, $Depends = NULL)
  */
 function initDeletion($uploadpks)
 {
-  if(sizeof($uploadpks) <= 0)
-  {
+  if (sizeof($uploadpks) <= 0) {
     return DisplayMessage("No uploads selected");
   }
 
   $V = "";
   $errorMessages = [];
-  $deleteResponse = NULL;
-  for($i=0; $i < sizeof($uploadpks); $i++)
-  {
+  $deleteResponse = null;
+  for ($i=0; $i < sizeof($uploadpks); $i++) {
     $deleteResponse = $this->TryToDelete(intval($uploadpks[$i]));
 
-    if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
-    {
+    if ($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS) {
       $errorMessages[] = $deleteResponse;
     }
   }
 
-  if(sizeof($uploadpks) == 1)
-  {
+  if (sizeof($uploadpks) == 1) {
     $V .= DisplayMessage($deleteResponse->getDeleteMessageString().$deleteResponse->getAdditionalMessage());
-  }
-  else
-  {
+  } else {
     $displayMessage = "";
 
-    if(in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages))
-    {
+    if (in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages)) {
       $displayMessage .= "<br/>Scheduling failed for " .
         array_count_values($errorMessages)[DeleteMessages::SCHEDULING_FAILED] . " uploads<br/>";
     }
 
-    if(in_array(DeleteMessages::NO_PERMISSION, $errorMessages))
-    {
+    if (in_array(DeleteMessages::NO_PERMISSION, $errorMessages)) {
       $displayMessage .= "No permission to delete " .
         array_count_values($errorMessages)[DeleteMessages::NO_PERMISSION]. " uploads<br/>";
     }

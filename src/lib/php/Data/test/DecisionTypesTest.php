@@ -18,11 +18,13 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-
 use Fossology\Lib\Test\EnumMapTestBase;
 
-class DecisionTypesTest extends EnumMapTestBase {
-  protected function setUp() {
+class DecisionTypesTest extends EnumMapTestBase
+{
+
+  protected function setUp()
+  {
     $this->setTypes(new DecisionTypes());
   }
 
@@ -41,4 +43,3 @@ class DecisionTypesTest extends EnumMapTestBase {
     $this->checkMapping(DecisionTypes::IDENTIFIED, "Identified");
   }
 }
- 

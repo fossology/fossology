@@ -46,14 +46,11 @@ class HighlightProcessor
   public function addReferenceTexts(&$highlights, $groupId=null)
   {
     $licenses = array();
-    foreach ($highlights as &$highlight)
-    {
-      if ($highlight->hasLicenseId())
-      {
+    foreach ($highlights as &$highlight) {
+      if ($highlight->hasLicenseId()) {
         $licenseId = $highlight->getLicenseId();
 
-        if (!array_key_exists($licenseId, $licenses))
-        {
+        if (!array_key_exists($licenseId, $licenses)) {
           $licenses[$licenseId] = $this->licenseDao->getLicenseById($licenseId, $groupId);
         }
         /**
@@ -86,8 +83,7 @@ class HighlightProcessor
    */
   public function calculateSplitPositions($highlights)
   {
-    if (empty($highlights))
-    {
+    if (empty($highlights)) {
       return array();
     }
     $this->sortHighlights($highlights);
@@ -108,8 +104,7 @@ class HighlightProcessor
   public function flattenHighlights(&$highlights, $excludedTypes=array())
   {
     $excludedTypesSet = array();
-    foreach ($excludedTypes as $type)
-    {
+    foreach ($excludedTypes as $type) {
       $excludedTypesSet[$type] = $type;
     }
 
@@ -118,21 +113,16 @@ class HighlightProcessor
 
     $currentPosition = 0;
     /** Highlight[] $highlights */
-    foreach ($highlights as $key => $highlight)
-    {
+    foreach ($highlights as $key => $highlight) {
       $isExcludedType = array_key_exists($highlight->getType(), $excludedTypesSet);
-      if ($isExcludedType)
-      {
+      if ($isExcludedType) {
         continue;
       }
-      if ($highlight->getEnd() > $currentPosition)
-      {
+      if ($highlight->getEnd() > $currentPosition) {
         $startPosition = max($highlight->getStart(), $currentPosition);
         $highlights[$key] = new Highlight($startPosition, $highlight->getEnd(), "any", $highlight->getRefStart(), $highlight->getRefEnd(), $highlight->getInfoText());
         $currentPosition = $highlight->getEnd();
-      }
-      else
-      {
+      } else {
         unset($highlights[$key]);
       }
     }
@@ -143,8 +133,7 @@ class HighlightProcessor
    */
   public function sortHighlights(&$highlights)
   {
-    if (isset($highlights))
-    {
+    if (isset($highlights)) {
       usort($highlights, array(get_class($this), 'startAndLengthFirstSorter'));
     }
   }
@@ -157,8 +146,7 @@ class HighlightProcessor
   {
     $splitPositions = array();
     $level = 0;
-    do
-    {
+    do {
       $this->addHighlightingLayer($highlightInfos, $splitPositions, $level++);
     } while (!empty($highlightInfos));
 
@@ -174,13 +162,11 @@ class HighlightProcessor
   private function addHighlightingLayer(&$highlightEntries, &$splitPositions, $level)
   {
     $currentPosition = 0;
-    foreach ($highlightEntries as $key => &$highlightEntry)
-    {
+    foreach ($highlightEntries as $key => &$highlightEntry) {
       $start = $highlightEntry->getStart();
       $end = $highlightEntry->getEnd();
 
-      if ($start >= $currentPosition)
-      {
+      if ($start >= $currentPosition) {
         $this->addAllSplitPositions($splitPositions, $level, $highlightEntry);
 
         ksort($splitPositions);
@@ -204,10 +190,8 @@ class HighlightProcessor
     $end = $highlightEntry->getEnd();
 
     $splitStart = $start;
-    foreach ($splitPositions as $splitPosition => $dummy)
-    {
-      if ($start < $splitPosition && $splitPosition < $end)
-      {
+    foreach ($splitPositions as $splitPosition => $dummy) {
+      if ($start < $splitPosition && $splitPosition < $end) {
         $this->addSingleSectionSplitPositions($splitPositions, $splitStart, $splitPosition, $level, $highlightEntry);
         $splitStart = $splitPosition;
       }
@@ -222,13 +206,12 @@ class HighlightProcessor
    * @param $level
    * @param $highlightEntry
    */
-  private function addSingleSectionSplitPositions(&$splitPositions, $start, $end, $level, $highlightEntry)
+  private function addSingleSectionSplitPositions(&$splitPositions, $start, $end,
+    $level, $highlightEntry)
   {
-    if ($start == $end)
-    {
+    if ($start == $end) {
       $splitPositions[$start][] = new SplitPosition($level, SplitPosition::ATOM, $highlightEntry);
-    } else
-    {
+    } else {
       $splitPositions[$start][] = new SplitPosition($level, SplitPosition::START, $highlightEntry);
       $splitPositions[$end][] = new SplitPosition($level, SplitPosition::END, $highlightEntry);
     }
@@ -240,7 +223,7 @@ class HighlightProcessor
   private function startAndLengthFirstSorter(Highlight $a, Highlight $b)
   {
     if ($a->getStart() < $b->getStart()) {
-      return -1;
+      return - 1;
     } else if ($a->getStart() > $b->getStart()) {
       return 1;
     } else if ($a->getEnd() > $b->getEnd()) {
@@ -256,19 +239,16 @@ class HighlightProcessor
     $leftAction = $leftAction == SplitPosition::ATOM ? SplitPosition::START : $leftAction;
     $rightAction = $rightAction == SplitPosition::ATOM ? SplitPosition::START : $rightAction;
 
-    if ($leftAction != $rightAction)
-    {
+    if ($leftAction != $rightAction) {
       return strcasecmp($leftAction, $rightAction);
-    } else
-    {
+    } else {
       return ($leftAction == SplitPosition::START ? 1 : -1) * $this->compare($a->getLevel(), $b->getLevel());
     }
   }
 
   private function compare($a, $b)
   {
-    if ($a == $b)
-    {
+    if ($a == $b) {
       return 0;
     }
     return ($a < $b) ? -1 : 1;
@@ -279,22 +259,17 @@ class HighlightProcessor
    */
   private function filterMultipleAtomEntries(&$splitPositions)
   {
-    foreach ($splitPositions as &$splitPositionEntries)
-    {
+    foreach ($splitPositions as &$splitPositionEntries) {
       $atomFound = false;
 
-      foreach ($splitPositionEntries as $key => $entry)
-      {
+      foreach ($splitPositionEntries as $key => $entry) {
         /**
          * @var SplitPosition $entry
          */
-        if ($entry->getAction() == SplitPosition::ATOM)
-        {
-          if ($atomFound)
-          {
+        if ($entry->getAction() == SplitPosition::ATOM) {
+          if ($atomFound) {
             unset($splitPositionEntries[$key]);
-          } else
-          {
+          } else {
             $atomFound = true;
           }
         }
@@ -309,12 +284,9 @@ class HighlightProcessor
    */
   private function sortSplitPositionEntries(&$splitPositions)
   {
-    foreach ($splitPositions as &$splitPositionEntries)
-    {
+    foreach ($splitPositions as &$splitPositionEntries) {
       usort($splitPositionEntries, array(get_class($this), 'splitPositionEntrySorter'));
     }
     unset($splitPositionEntries);
   }
-
 }
-

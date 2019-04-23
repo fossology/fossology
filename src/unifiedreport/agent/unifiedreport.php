@@ -371,12 +371,12 @@ class UnifiedReport extends Agent
     $lenTotalLics = count($contents["licenses"]["statements"]);
     // both of this variables have same value but used for different operations
     $lenMainLics = $lenLicsMain = count($contents["licensesMain"]["statements"]);
-    if($lenLicsMain > 0 ) {
-      for($j=0; $j<$lenLicsMain; $j++) {
-        if($lenTotalLics > 0) {
+    if ($lenLicsMain > 0) {
+      for ($j=0; $j<$lenLicsMain; $j++) {
+        if ($lenTotalLics > 0) {
           $found = 0;
-          for($i=0; $i<$lenTotalLics; $i++) {
-            if(!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"])) {
+          for ($i=0; $i<$lenTotalLics; $i++) {
+            if (!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"])) {
               $found += 1;
               $lenMainLics += 1;
               $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licenses"]["statements"][$i];
@@ -387,8 +387,7 @@ class UnifiedReport extends Agent
             $lenMainLics += 1;
             $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licensesMain"]["statements"][$j];
             unset($contents["licensesMain"]["statements"][$j]);
-          }
-          else {
+          } else {
             unset($contents["licensesMain"]["statements"][$j]);
           }
         }
@@ -414,11 +413,11 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($mainLicenses)){
-      foreach($mainLicenses as $licenseMain){
-        if($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5"){
+    if (!empty($mainLicenses)) {
+      foreach ($mainLicenses as $licenseMain) {
+        if ($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5") {
           $styleColumn = array("bgColor" => "F9A7B0");
-        } elseif($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3"){
+        } elseif ($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3") {
           $styleColumn = array("bgColor" => "FEFF99");
         } else {
           $styleColumn = array("bgColor" => "FFFFFF");
@@ -430,18 +429,17 @@ class UnifiedReport extends Agent
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-        if(!empty($licenseMain["files"])){
+        if (!empty($licenseMain["files"])) {
           $cell3 = $table->addCell($thirdColLen, $styleColumn);
           asort($licenseMain["files"]);
-          foreach($licenseMain["files"] as $fileName){
+          foreach ($licenseMain["files"] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
-        }else{
+        } else {
           $cell3 = $table->addCell($thirdColLen, $styleColumn)->addText("");
         }
       }
-    }
-    else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -463,14 +461,14 @@ class UnifiedReport extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
-    if(!empty($title)){
+    if (!empty($title)) {
       $section->addTitle(htmlspecialchars($title), 2);
     }
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
+    if (!empty($licenses)) {
+      foreach ($licenses as $licenseStatement) {
         $table->addRow($this->rowHeight);
         $cell1 = $table->addCell($firstColLen, null, "pStyle");
         $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
@@ -480,11 +478,11 @@ class UnifiedReport extends Agent
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen, null, "pStyle");
         asort($licenseStatement["files"]);
-        foreach($licenseStatement["files"] as $fileName){
+        foreach ($licenseStatement["files"] as $fileName) {
           $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -512,9 +510,9 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
-        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){
+    if (!empty($licenses)) {
+      foreach ($licenses as $licenseStatement) {
+        if (in_array($licenseStatement['risk'], $riskarray['riskLevel'])) {
           $emptyFlag = true;
           $table->addRow($this->rowHeight);
           $cell1 = $table->addCell($firstColLen, $riskarray['color']);
@@ -525,14 +523,16 @@ class UnifiedReport extends Agent
           $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, $riskarray['color']);
           asort($licenseStatement["files"]);
-          foreach($licenseStatement["files"] as $fileName){
+          foreach ($licenseStatement["files"] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
-        }else{ continue; }
+        } else {
+          continue;
+        }
       }
     }
 
-    if(empty($emptyFlag)){
+    if (empty($emptyFlag)) {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -558,15 +558,15 @@ class UnifiedReport extends Agent
     $textStyle = array("size" => 10, "bold" => true);
 
     $section->addTitle(htmlspecialchars($title), 2);
-    if(!empty($text)){
+    if (!empty($text)) {
       $section->addText($text, $textStyle);
     }
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($statementsCEI)){
-      foreach($statementsCEI as $statements){
-        if(!empty($statements['content'])){
+    if (!empty($statementsCEI)) {
+      foreach ($statementsCEI as $statements) {
+        if (!empty($statements['content'])) {
           $table->addRow($smallRowHeight);
           $cell1 = $table->addCell($firstColLen);
           $text = html_entity_decode($statements['content']);
@@ -575,12 +575,12 @@ class UnifiedReport extends Agent
           $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen);
           asort($statements["files"]);
-          foreach($statements['files'] as $fileName){
+          foreach ($statements['files'] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -606,18 +606,18 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licensesIrre)){
-      foreach($licensesIrre as $statements){
+    if (!empty($licensesIrre)) {
+      foreach ($licensesIrre as $statements) {
         $table->addRow($rowWidth, "pStyle");
         $cell1 = $table->addCell($firstColLen)->addText(htmlspecialchars($statements['content']),null, "pStyle");
         $cell2 = $table->addCell($secondColLen)->addText(htmlspecialchars($statements['fileName']),null, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
         asort($statements["licenses"]);
-        foreach($statements['licenses'] as $licenseName){
+        foreach ($statements['licenses'] as $licenseName) {
           $cell3->addText(htmlspecialchars($licenseName), $this->filePathColumn, "pStyle");
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen, "pStyle")->addText("");
       $table->addCell($secondColLen, "pStyle")->addText("");
@@ -643,7 +643,7 @@ class UnifiedReport extends Agent
 
     $table = $section->addTable($this->tablestyle);
 
-    foreach($dataHistogram as $licenseData){
+    foreach ($dataHistogram as $licenseData) {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText($licenseData['scannerCount'], "pStyle");
       $table->addCell($secondColLen)->addText($licenseData['editedCount'], "pStyle");
@@ -692,7 +692,7 @@ class UnifiedReport extends Agent
               ." AS ts, jq_cmd_args FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
     $packageUri = "";
-    if(!empty($jobInfo['jq_cmd_args'])){
+    if (!empty($jobInfo['jq_cmd_args'])) {
       $packageUri = trim($jobInfo['jq_cmd_args'])."?mod=showjobs&upload=".$uploadId;
     }
 
@@ -785,7 +785,6 @@ class UnifiedReport extends Agent
     $heading = "Copyrights";
     $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements'], $titleSubHeadingCEI);
 
-
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
     $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements'], $titleSubHeadingLicense);
@@ -793,7 +792,6 @@ class UnifiedReport extends Agent
     /* Display NON Functional Licenses license files */
     $heading = "Non Functional Licenses";
     $reportStaticSection->getNonFunctionalLicenses($section, $heading);
-
 
     /* Display irrelavant license files */
     $heading = "Irrelevant Files";
@@ -813,7 +811,7 @@ class UnifiedReport extends Agent
     $reportStaticSection->reportFooter($phpWord, $section, $contents['otherStatement']);
 
     $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
-    if(!is_dir($fileBase)) {
+    if (!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
     umask(0022);
@@ -836,8 +834,8 @@ class UnifiedReport extends Agent
     $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
       array($uploadId, $jobId, $filename), __METHOD__);
   }
-
 }
+
 $agent = new UnifiedReport();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();

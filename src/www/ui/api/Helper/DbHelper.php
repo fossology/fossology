@@ -86,8 +86,8 @@ FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
 INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
-WHERE upload.user_fk = " . pg_escape_string($userId) .
-" ORDER BY upload.upload_pk;";
+WHERE upload.user_fk = " . pg_escape_string($userId) . "
+ORDER BY upload.upload_pk;";
     } else {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
@@ -97,8 +97,8 @@ INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
 INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
 WHERE upload.user_fk = " . pg_escape_string($userId) . "
-AND upload.upload_pk = " . pg_escape_string($uploadId) .
-" ORDER BY upload.upload_pk;";
+AND upload.upload_pk = " . pg_escape_string($uploadId) . "
+ORDER BY upload.upload_pk;";
     }
 
     $result = $this->dbManager->getRows($sql);
@@ -185,7 +185,7 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
    * If a limit is passed, the results are trimmed. If an ID is passed, the
    * information for the given id is only retrieved.
    * @param integer $limit Set to limit the result length
-   * @param integer $id    Set to get information of only given job id
+   * @param integer $id Set to get information of only given job id
    * @return Job[][] Jobs as an associative array
    */
   public function getJobs($limit = 0, $id = null)

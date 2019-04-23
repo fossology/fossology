@@ -18,9 +18,10 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_folder_properties", _("Edit Folder Properties"));
+define("TITLE_FOLDER_PROPERTIES", _("Edit Folder Properties"));
 
-class folder_properties extends FO_Plugin {
+class folder_properties extends FO_Plugin
+{
 
   /** @var DbManager */
   private $dbManager;
@@ -28,7 +29,7 @@ class folder_properties extends FO_Plugin {
   function __construct()
   {
     $this->Name = "folder_properties";
-    $this->Title = TITLE_folder_properties;
+    $this->Title = TITLE_FOLDER_PROPERTIES;
     $this->MenuList = "Organize::Folders::Edit Properties";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
@@ -42,7 +43,8 @@ class folder_properties extends FO_Plugin {
    * Includes idiot checking since the input comes from stdin.
    * \return 1 if changed, 0 if failed.
    */
-  function Edit($FolderId, $NewName, $NewDesc) {
+  function Edit($FolderId, $NewName, $NewDesc)
+  {
     $sql = 'SELECT * FROM folder where folder_pk = $1;';
     $Row = $this->dbManager->getSingleRow($sql,array($FolderId),__METHOD__."Get");
     /* If the folder does not exist. */
@@ -50,7 +52,7 @@ class folder_properties extends FO_Plugin {
       return (0);
     }
     $NewName = trim($NewName);
-    if (!empty($FolderId)) {
+    if (! empty($FolderId)) {
       // Reuse the old name if no new name was given
       if (empty($NewName)) {
         $NewName = $Row['folder_name'];
@@ -59,8 +61,7 @@ class folder_properties extends FO_Plugin {
       if (empty($NewDesc)) {
         $NewDesc = $Row['folder_desc'];
       }
-    }
-    else {
+    } else {
       return (0); // $FolderId is empty
     }
     /* Change the properties */
@@ -72,7 +73,8 @@ class folder_properties extends FO_Plugin {
   /**
    * \brief Generate the text for this plugin.
    */
-  public function Output() {
+  public function Output()
+  {
     /* If this is a POST, then process the request. */
     $FolderSelectId = GetParm('selectfolderid', PARM_INTEGER);
     if (empty($FolderSelectId)) {
@@ -81,12 +83,12 @@ class folder_properties extends FO_Plugin {
     $FolderId = GetParm('oldfolderid', PARM_INTEGER);
     $NewName = GetParm('newname', PARM_TEXT);
     $NewDesc = GetParm('newdesc', PARM_TEXT);
-    if (!empty($FolderId)) {
+    if (! empty($FolderId)) {
       $FolderSelectId = $FolderId;
       $rc = $this->Edit($FolderId, $NewName, $NewDesc);
       if ($rc == 1) {
         /* Need to refresh the screen */
-        $text=_("Folder Properties changed");
+        $text = _("Folder Properties changed");
         $this->vars["message"] = $text;
       }
     }

@@ -103,7 +103,6 @@ $app->group(VERSION_1 . 'uploads',
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
-
 ////////////////////////////ADMIN-USERS/////////////////////
 $app->group(VERSION_1 . 'users',
   function (){

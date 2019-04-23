@@ -42,7 +42,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
    * @brief Close mockery
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }
@@ -61,7 +62,7 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $testDb->createPlainTables(array('license_ref','license_map'));
     $dbManager = $testDb->getDbManager();
     $licenses = array();
-    for($i=1;$i<4;$i++){
+    for ($i=1; $i<4; $i++) {
       $licenses[$i] = array('rf_pk'=>$i,'rf_shortname'=>'lic'.$i,'rf_fullname'=>'lice'.$i,
           'rf_text'=>'text'.$i,'rf_url'=>$i.$i,'rf_notes'=>'note'.$i,'rf_source'=>'s'.$i,
           'rf_detector_type'=>1,'rf_risk'=>($i-1));
@@ -178,5 +179,4 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
     $licenseCsvExport->setEnclosure('<>');
     assertThat($enclosure->getValue($licenseCsvExport),is('<'));
   }
-
 }

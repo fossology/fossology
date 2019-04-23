@@ -61,13 +61,14 @@ class Reuser
   public function __construct($reuseUpload, $reuseGroup, $reuseMain = false,
     $reuseEnhanced = false)
   {
-    if(is_numeric($reuseUpload) && is_numeric($reuseGroup)) {
+    if (is_numeric($reuseUpload) && is_numeric($reuseGroup)) {
       $this->reuseUpload = $reuseUpload;
       $this->reuseGroup = $reuseGroup;
       $this->reuseMain = $reuseMain;
       $this->reuseEnhanced = $reuseEnhanced;
     } else {
-      throw new \UnexpectedValueException("reuse_upload and reuse_group should be integers", 400);
+      throw new \UnexpectedValueException(
+        "reuse_upload and reuse_group should be integers", 400);
     }
   }
 
@@ -97,9 +98,9 @@ class Reuser
       $this->reuseEnhanced = filter_var($reuserArray["reuse_enhanced"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if($this->reuseUpload === null || $this->reuseGroup === null)
-    {
-      throw new \UnexpectedValueException("reuse_upload and reuse_group should be integers", 400);
+    if ($this->reuseUpload === null || $this->reuseGroup === null) {
+      throw new \UnexpectedValueException(
+        "reuse_upload and reuse_group should be integers", 400);
     }
     return $this;
   }
@@ -145,8 +146,7 @@ class Reuser
   {
     $this->reuseUpload = filter_var($reuseUpload,
       FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-    if($this->reuseUpload === null)
-    {
+    if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException("Reuse upload should be an integer!", 400);
     }
   }
@@ -158,8 +158,7 @@ class Reuser
   {
     $this->reuseGroup = filter_var($reuseGroup,
       FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
-    if($this->reuseGroup === null)
-    {
+    if ($this->reuseGroup === null) {
       throw new \UnexpectedValueException("Reuse group should be an integer!", 400);
     }
   }

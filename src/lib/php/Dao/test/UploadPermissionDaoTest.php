@@ -44,8 +44,7 @@ class UploadPermissionDaoTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
     $uploadArray = array(array(1, 'uploadtree'), array(2, 'uploadtree_a'));
-    foreach ($uploadArray as $uploadEntry)
-    {
+    foreach ($uploadArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
     $logger = M::mock('Monolog\Logger'); // new Logger("UploadDaoTest");

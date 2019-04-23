@@ -22,7 +22,7 @@ use Fossology\Lib\Auth\Auth;
  * \brief One-Shot Copyright/Email/URL Analysis
  */
 
-define("TITLE_agent_copyright_once", _("One-Shot Copyright/Email/URL Analysis"));
+define("TITLE_AGENT_COPYRIGHT_ONCE", _("One-Shot Copyright/Email/URL Analysis"));
 
 /**
  * @class agent_copyright_once
@@ -33,7 +33,7 @@ class agent_copyright_once extends FO_Plugin {
   function __construct()
   {
     $this->Name = "agent_copyright_once";
-    $this->Title = TITLE_agent_copyright_once;
+    $this->Title = TITLE_AGENT_COPYRIGHT_ONCE;
     $this->Version = "1.0";
     //$this->Dependency = array("browse", "view");
     $this->DBaccess = PLUGIN_DB_NONE;
@@ -90,7 +90,8 @@ class agent_copyright_once extends FO_Plugin {
         'url' => Highlight::URL);
     while (!feof($inputFile)) {
       $Line = fgets($inputFile);
-      if ($Line[0] == '/') continue;
+      if ($Line[0] == '/') { continue;
+      }
       $count = strlen($Line);
       if ($count > 0) {
         /** $Line is not "'", also $Line is not end with ''', please notice that: usually $Line is end with NL(new line) */
@@ -107,10 +108,11 @@ class agent_copyright_once extends FO_Plugin {
         //print_r($match);
         if (!empty($match['start'])) {
           $stuff[$match['type'][0]][] = $match['content'][0];
-          if ($this->NoHTML) // For REST API
+          if ($this->NoHTML) { // For REST API
             array_push($copyright_array, $match['content'][0]);
-          else
+          } else {
             $highlights[] = new Highlight($match['start'][0], $match['end'][0], $typeToHighlightTypeMap[$match['type'][0]], -1, -1, $match['content'][0]);
+          }
         }
       }
       $realline = "";

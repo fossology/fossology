@@ -24,7 +24,8 @@ class SimpleHtmlElement implements HtmlElement
   private $name;
   private $attributes;
 
-  function __construct($name, $attributes=array()) {
+  function __construct($name, $attributes = array())
+  {
     $this->name = $name;
     $this->attributes = $attributes;
   }
@@ -41,7 +42,7 @@ class SimpleHtmlElement implements HtmlElement
   function getOpeningText()
   {
     $openingText = "<" . $this->name;
-    foreach($this->attributes as $name => $value) {
+    foreach ($this->attributes as $name => $value) {
       $openingText .= " $name=\"$value\"";
     }
     return $openingText . ">";

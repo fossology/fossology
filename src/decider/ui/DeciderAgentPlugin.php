@@ -29,7 +29,8 @@ class DeciderAgentPlugin extends AgentPlugin
 {
   const RULES_FLAG = "-r";
 
-  function __construct() {
+  function __construct()
+  {
     $this->Name = "agent_decider";
     $this->Title = _("Automatic Concluded License Decider, based on scanners Matches");
     $this->AgentName = AGENT_DECIDER_NAME;
@@ -47,8 +48,7 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     $renderer = $GLOBALS['container']->get('twig.environment');
     $vars['isNinkaInstalled'] = false;
-    if($ninkaUi=plugin_find('agent_ninka'))
-    {
+    if ($ninkaUi=plugin_find('agent_ninka')) {
       $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
     }
     return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
@@ -79,8 +79,7 @@ class DeciderAgentPlugin extends AgentPlugin
     $rules = $request->get('deciderRules') ?: array();
     $rulebits = 0;
 
-    foreach($rules as $rule)
-    {
+    foreach ($rules as $rule) {
       switch ($rule) {
         case 'nomosInMonk':
           $dependencies[] = 'agent_nomos';
@@ -104,8 +103,7 @@ class DeciderAgentPlugin extends AgentPlugin
       }
     }
 
-    if (empty($rulebits))
-    {
+    if (empty($rulebits)) {
       return 0;
     }
 
@@ -143,7 +141,6 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
   }
-
 }
 
 register_plugin(new DeciderAgentPlugin());

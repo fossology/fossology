@@ -25,9 +25,10 @@ class ui_treenav extends FO_Plugin
   function Output()
   {
     $V="";
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    switch($this->OutputType)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
+    switch ($this->OutputType) {
       case "XML":
         break;
       case "HTML":
@@ -37,7 +38,9 @@ class ui_treenav extends FO_Plugin
       default:
         break;
     }
-    if (!$this->OutputToStdout) { return($V); }
+    if (! $this->OutputToStdout) {
+      return ($V);
+    }
     print("$V");
     return;
   }

@@ -46,8 +46,7 @@ class UploadTreeViewProxy extends DbViewProxy
   {
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $isDefaultTable = $uploadTreeTableName == 'uploadtree_a' || $uploadTreeTableName == 'uploadtree';
-    if ($isDefaultTable)
-    {
+    if ($isDefaultTable) {
       $constraints[] = self::CONDITION_UPLOAD;
     }
     $baseQuery = "SELECT * FROM $uploadTreeTableName";
@@ -58,7 +57,7 @@ class UploadTreeViewProxy extends DbViewProxy
   private static function getConstraintsCondition(ItemTreeBounds $itemTreeBounds, $constraints)
   {
     $conditions = array();
-    foreach(array_unique($constraints) as $constraint) {
+    foreach (array_unique($constraints) as $constraint) {
       $conditions[] = self::getConstraintCondition($itemTreeBounds, $constraint);
     }
     $condition = implode(' AND ', $conditions);
@@ -67,8 +66,7 @@ class UploadTreeViewProxy extends DbViewProxy
 
   private static function getConstraintCondition(ItemTreeBounds $itemTreeBounds, $constraint)
   {
-    switch ($constraint)
-    {
+    switch ($constraint) {
       case self::CONDITION_UPLOAD:
         $uploadId = $itemTreeBounds->getUploadId();
         return "upload_fk = $uploadId";
@@ -82,4 +80,4 @@ class UploadTreeViewProxy extends DbViewProxy
         throw new \InvalidArgumentException("constraint $constraint is not defined");
     }
   }
-} 
+}

@@ -92,8 +92,7 @@ class ReuserAgent extends Agent
   function processUploadId($uploadId)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    foreach($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reuseTriple)
-    {
+    foreach ($this->uploadDao->getReusedUpload($uploadId, $this->groupId) as $reuseTriple) {
       // Get the reuse upload id
       $reusedUploadId = $reuseTriple['reused_upload_fk'];
       // Get the group id
@@ -102,22 +101,18 @@ class ReuserAgent extends Agent
       $reuseMode = $reuseTriple['reuse_mode'];
       // Get the ItemTreeBounds for the upload
       $itemTreeBoundsReused = $this->uploadDao->getParentItemBounds($reusedUploadId);
-      if (false === $itemTreeBoundsReused)
-      {
+      if (false === $itemTreeBoundsReused) {
         continue;
       }
-      if($reuseMode & UploadDao::REUSE_ENHANCED){
+      if ($reuseMode & UploadDao::REUSE_ENHANCED) {
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      }
-      elseif($reuseMode & UploadDao::REUSE_MAIN){
+      } elseif ($reuseMode & UploadDao::REUSE_MAIN) {
         $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
         $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      }
-      elseif($reuseMode & UploadDao::REUSE_ENH_MAIN){
+      } elseif ($reuseMode & UploadDao::REUSE_ENH_MAIN) {
         $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      }
-      else{
+      } else {
         $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
     }
@@ -137,14 +132,11 @@ class ReuserAgent extends Agent
   protected function reuseMainLicense($uploadId, $groupId, $reusedUploadId, $reusedGroupId)
   {
     $mainLicenseIds = $this->clearingDao->getMainLicenseIds($reusedUploadId, $reusedGroupId);
-    if(!empty($mainLicenseIds))
-    {
-      foreach($mainLicenseIds as $mainLicenseId)
-      {
-        if(in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))){
+    if (!empty($mainLicenseIds)) {
+      foreach ($mainLicenseIds as $mainLicenseId) {
+        if (in_array($mainLicenseId, $this->clearingDao->getMainLicenseIds($uploadId, $groupId))) {
           continue;
-        }
-        else{
+        } else {
           $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
         }
       }
@@ -187,15 +179,12 @@ class ReuserAgent extends Agent
           );
         }, array_keys($clearingDecisionToImportByFileId), 100);
 
-    foreach ($containedItems as $item)
-    {
+    foreach ($containedItems as $item) {
       $fileId = $item->getFileId();
-      if (array_key_exists($fileId, $clearingDecisionToImportByFileId))
-      {
-        $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId, $clearingDecisionToImportByFileId[$fileId]);
-      }
-      else
-      {
+      if (array_key_exists($fileId, $clearingDecisionToImportByFileId)) {
+        $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId,
+          $clearingDecisionToImportByFileId[$fileId]);
+      } else {
         throw new \Exception("bad internal state");
       }
 
@@ -228,14 +217,12 @@ class ReuserAgent extends Agent
     $this->dbManager->prepare($stmt, $sql);
     $treeDao = $this->container->get('dao.tree');
 
-    foreach($clearingDecisionsToImport as $clearingDecision)
-    {
+    foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
-      while($row = $this->dbManager->fetchArray($res))
-      {
+      while ($row = $this->dbManager->fetchArray($res)) {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
       }
@@ -257,12 +244,10 @@ class ReuserAgent extends Agent
   protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
   {
     $diffLevel = system("diff $reusedPath $newPath | wc -l");
-    if($diffLevel===false)
-    {
+    if ($diffLevel === false) {
       throw new \Exception('cannot use diff tool');
     }
-    if($diffLevel<5)
-    {
+    if ($diffLevel < 5) {
       $this->createCopyOfClearingDecision($itemId, $this->userId, $this->groupId, $clearingDecision);
       $this->heartbeat(1);
     }
@@ -278,8 +263,7 @@ class ReuserAgent extends Agent
   protected function mapByFileId($clearingDecisions)
   {
     $clearingDecisionByFileId = array();
-    foreach ($clearingDecisions as $clearingDecision)
-    {
+    foreach ($clearingDecisions as $clearingDecision) {
       $fileId = $clearingDecision->getPfileId();
       if (!array_key_exists($fileId, $clearingDecisionByFileId)) {
         $clearingDecisionByFileId[$fileId] = $clearingDecision;
@@ -299,8 +283,7 @@ class ReuserAgent extends Agent
   {
     $clearingEventIdsToCopy = array();
     /** @var ClearingEvent $clearingEvent */
-    foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent)
-    {
+    foreach ($clearingDecisionToCopy->getClearingEvents() as $clearingEvent) {
       $licenseId = $clearingEvent->getLicenseId();
       $uploadTreeId = $itemId;
       $isRemoved = $clearingEvent->isRemoved();
@@ -342,5 +325,4 @@ class ReuserAgent extends Agent
 
     return $mapped;
   }
-
 }

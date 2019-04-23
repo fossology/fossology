@@ -21,7 +21,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class MonkBulkAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_monk_bulk";
     $this->Title =  _("Monk Bulk License Clearing");
     $this->AgentName = "monkbulk";
