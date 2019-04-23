@@ -278,6 +278,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     }
     $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
     print "  UploadPk is: '$UploadPk'\n";
+    print "  FolderPk is: '$FolderPk'\n";
   }
 
   /* Prepare the job: job "wget" */
