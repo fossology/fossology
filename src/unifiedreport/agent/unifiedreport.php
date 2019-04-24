@@ -251,39 +251,39 @@ class UnifiedReport extends Agent
     $this->heartbeat(0);
 
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenses["statements"]));
+    $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesMain["statements"]));
+    $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
     $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
-    $this->heartbeat(count($licensesHist["statements"]));
+    $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
 
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($bulkLicenses["statements"]));
+    $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
     $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenseAcknowledgements["statements"]));
+    $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
     $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenseComments["statements"]));
+    $this->heartbeat(empty($licenseComments) ? 0 : count($licenseComments["statements"]));
 
     $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesIrre["statements"]));
+    $this->heartbeat(empty($licensesIrre) ? 0 : count($licensesIrre["statements"]));
 
     $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesIrreComment["statements"]));
+    $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
-    $this->heartbeat(count($copyrights["statements"]));
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
+    $this->heartbeat(empty($copyrights["scannerFindings"]) ? 0 : count($copyrights["scannerFindings"]));
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
-    $this->heartbeat(count($ecc["statements"]));
+    $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
-    $this->heartbeat(count($otherStatement["statements"]));
+    $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
 
     $contents = array("licenses" => $licenses,
                       "bulkLicenses" => $bulkLicenses,
@@ -783,14 +783,18 @@ class UnifiedReport extends Agent
 
     /* Display copyright statements and files */
     $heading = "Copyrights";
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements'], $titleSubHeadingCEI);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['scannerFindings'], $titleSubHeadingCEI);
+
+    /* Display user findings copyright statements and files */
+    $heading = "Copyrights (User Findings)";
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['userFindings'], $titleSubHeadingCEI);
 
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
     $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements'], $titleSubHeadingLicense);
 
-    /* Display NON Functional Licenses license files */
-    $heading = "Non Functional Licenses";
+    /* Display NON-Functional Licenses license files */
+    $heading = "Non-Functional Licenses";
     $reportStaticSection->getNonFunctionalLicenses($section, $heading);
 
     /* Display irrelavant license files */

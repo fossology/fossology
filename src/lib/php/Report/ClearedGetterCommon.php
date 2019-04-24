@@ -111,7 +111,7 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
-  protected function groupStatements($ungrupedStatements, $extended, $agentcall)
+  protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport)
   {
     $statements = array();
     $findings = array();
@@ -174,11 +174,13 @@ abstract class ClearedGetterCommon
         }
       }
     }
-    if (!empty($findings)) {
+    if (!empty($findings) && $isUnifiedReport) {
+      return array("userFindings" => $findings, "scannerFindings" => $statements);
+    } else {
       $statements = array_merge($findings, $statements);
+      arsort($statements);
+      return array("statements" => array_values($statements));
     }
-    arsort($statements);
-    return $statements;
   }
 
   /**
@@ -189,13 +191,13 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall);
-    return array("statements" => array_values($statements));
+    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport);
+    return $statements;
   }
 
   public function getLicenseHistogramForReport($uploadId, $groupId)
