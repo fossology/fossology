@@ -53,7 +53,7 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
   {
   }
 
-  public function getCleared($uploadId, $groupId=null, $extended = true, $agentcall = NULL)
+  public function getCleared($uploadId, $groupId=null, $extended = true, $agentcall = NULL, $isUnifiedReport = false)
   {
     return array(
       array("good" => "漢", "esc" => "escape", "uml" => ' ü ')

@@ -107,16 +107,20 @@ class ShowJobsDao
   {
     $jobArray = array();
 
-    $allusers_str = ($allusers == 0) ? "job_user_fk='".Auth::getUserId()."' and " : $allusers_str = "";
+    $allusers_str = ($allusers == 0) ? "job_user_fk='" . Auth::getUserId() .
+      "' and " : "";
 
-    $statementName = __METHOD__."$allusers_str";
+    $statementName = __METHOD__ . "$allusers_str";
     $this->dbManager->prepare($statementName,
-    "SELECT job_pk, job_upload_fk FROM job WHERE $allusers_str job_queued >= (now() - interval '".$this->nhours." hours') ORDER BY job_queued DESC");
+      "SELECT job_pk, job_upload_fk FROM job " . "WHERE $allusers_str " .
+      "job_queued >= (now() - interval '" . $this->nhours . " hours') " .
+      "ORDER BY job_queued DESC");
     $result = $this->dbManager->execute($statementName);
     while ($row = $this->dbManager->fetchArray($result)) {
-      if (!empty($row['job_upload_fk'])) {
-        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], Auth::getGroupId());
-        if (!$uploadIsAccessible) {
+      if (! empty($row['job_upload_fk'])) {
+        $uploadIsAccessible = $this->uploadDao->isAccessible(
+          $row['job_upload_fk'], Auth::getGroupId());
+        if (! $uploadIsAccessible) {
           continue;
         }
       }
@@ -159,57 +163,57 @@ class ShowJobsDao
     $jobData = array();
     foreach ($job_pks as $job_pk) {
       /* Get job table data */
-      $statementName = __METHOD__."JobRec";
+      $statementName = __METHOD__ . "JobRec";
       $jobRec = $this->dbManager->getSingleRow(
-        "SELECT * FROM job WHERE job_pk= $1",
-        array($job_pk),
-        $statementName
-      );
+        "SELECT * FROM job WHERE job_pk= $1", array($job_pk),
+        $statementName);
       $jobData[$job_pk]["job"] = $jobRec;
-      if (!empty($jobRec["job_upload_fk"])) {
+      if (! empty($jobRec["job_upload_fk"])) {
         $upload_pk = $jobRec["job_upload_fk"];
         /* Get Upload record for job */
-        $statementName = __METHOD__."UploadRec";
+        $statementName = __METHOD__ . "UploadRec";
         $uploadRec = $this->dbManager->getSingleRow(
-          "SELECT * FROM upload WHERE upload_pk= $1",
-          array($upload_pk),
-          $statementName
-        );
-        if (!empty($uploadRec)) {
+          "SELECT * FROM upload WHERE upload_pk= $1", array($upload_pk),
+          $statementName);
+        if (! empty($uploadRec)) {
           $jobData[$job_pk]["upload"] = $uploadRec;
           /* Get Upload record for uploadtree */
           $uploadtree_tablename = $uploadRec["uploadtree_tablename"];
-          $statementName = __METHOD__."uploadtreeRec";
+          $statementName = __METHOD__ . "uploadtreeRec";
           $uploadtreeRec = $this->dbManager->getSingleRow(
             "SELECT * FROM $uploadtree_tablename where upload_fk = $1 and parent is null",
-            array($upload_pk),
-            $statementName
-          );
+            array($upload_pk), $statementName);
           $jobData[$job_pk]["uploadtree"] = $uploadtreeRec;
         } else {
-          $statementName = __METHOD__."uploadRecord";
+          $statementName = __METHOD__ . "uploadRecord";
           $uploadRec = $this->dbManager->getSingleRow(
             "SELECT * FROM upload right join job on upload_pk = job_upload_fk where job_upload_fk = $1",
-            array($upload_pk),
-            $statementName
-          );
-          /* upload has been deleted so try to get the job name from the original upload job record */
+            array($upload_pk), $statementName);
+          /*
+           * upload has been deleted so try to get the job name from the
+           * original upload job record
+           */
           $jobName = $this->getJobName($uploadRec["job_upload_fk"]);
-          $uploadRec["upload_filename"] = "Deleted Upload: " . $uploadRec["job_upload_fk"] . "(" . $jobName . ")";
+          $uploadRec["upload_filename"] = "Deleted Upload: " .
+            $uploadRec["job_upload_fk"] . "(" . $jobName . ")";
           $uploadRec["upload_pk"] = $uploadRec["job_upload_fk"];
           $jobData[$job_pk]["upload"] = $uploadRec;
         }
       }
       /* Get jobqueue table data */
-      $statementName = __METHOD__."job_pkforjob";
+      $statementName = __METHOD__ . "job_pkforjob";
       $this->dbManager->prepare($statementName,
-      "SELECT jq.*,jd.jdep_jq_depends_fk FROM jobqueue jq LEFT OUTER JOIN jobdepends jd ON jq.jq_pk=jd.jdep_jq_fk WHERE jq.jq_job_fk=$1 ORDER BY jq_pk ASC");
-      $result = $this->dbManager->execute($statementName, array($job_pk));
+        "SELECT jq.*,jd.jdep_jq_depends_fk FROM jobqueue jq LEFT OUTER JOIN jobdepends jd ON jq.jq_pk=jd.jdep_jq_fk WHERE jq.jq_job_fk=$1 ORDER BY jq_pk ASC");
+      $result = $this->dbManager->execute($statementName, array(
+        $job_pk
+      ));
       $rows = $this->dbManager->fetchAll($result);
-      if (!empty($rows)) {
+      if (! empty($rows)) {
         foreach ($rows as $jobQueueRec) {
           $jq_pk = $jobQueueRec["jq_pk"];
-          if (array_key_exists($job_pk,$jobData) && array_key_exists('jobqueue',$jobData[$job_pk]) && array_key_exists($jq_pk,$jobData[$job_pk]['jobqueue'])) {
+          if (array_key_exists($job_pk, $jobData) &&
+            array_key_exists('jobqueue', $jobData[$job_pk]) &&
+            array_key_exists($jq_pk, $jobData[$job_pk]['jobqueue'])) {
             $jobData[$job_pk]['jobqueue'][$jq_pk]["depends"][] = $jobQueueRec["jdep_jq_depends_fk"];
           } else {
             $jobQueueRec["depends"] = array($jobQueueRec["jdep_jq_depends_fk"]);

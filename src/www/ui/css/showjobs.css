@@ -1,5 +1,5 @@
 /***********************************************************
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -48,4 +48,49 @@
   font: normal 8pt verdana, arial, helvetica;
   background: lavender;
   color: black;
+}
+
+.jobTable {
+  width: 100%;
+}
+
+.jobTable thead th {
+  font: bold 10pt verdana, arial, helvetica;
+  background: gold;
+  color: white;
+}
+
+.jobTableNewJob td {
+  text-align: center;
+  font: bold 8pt verdana, arial, helvetica;
+  background: lavender;
+  color: black;
+}
+
+.jobTable tbody tr {
+  width: 100%;
+}
+
+.jobTable tbody td {
+  width: 10%;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(2) {
+  text-align: center;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(4) {
+  text-align: right;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(5) {
+  width: 30%;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(6) {
+  text-align: right;
+}
+
+.jobTable tbody tr:not(.jobTableNewJob) :nth-child(7) {
+  text-align: center;
 }

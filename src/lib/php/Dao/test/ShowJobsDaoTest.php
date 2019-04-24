@@ -98,11 +98,11 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $jobsWithoutUpload = $showJobDao->uploads2Jobs(array());
     assertThat($jobsWithoutUpload, is(emptyArray()));
     $jobsWithUploadIdOne = $showJobDao->uploads2Jobs(array(1));
-    assertThat($jobsWithUploadIdOne, equalTo(array(1,7)));
+    assertThat($jobsWithUploadIdOne, equalTo(array(array(1,7),0)));
     $jobsAtAll = $showJobDao->uploads2Jobs(array(1,2,3,4,5));
-    assertThat($jobsAtAll, equalTo(array(1,7, 2,3,6, 4,8, 5)));
+    assertThat($jobsAtAll, equalTo(array(array(1,7, 2,3,6, 4,8, 5),0)));
     $jobsWithUploadFour = $showJobDao->uploads2Jobs(array(4));
-    assertThat($jobsWithUploadFour, is(emptyArray()));
+    assertThat($jobsWithUploadFour[0], is(emptyArray()));
   }
 
   public function testUploads2JobsPaged()
@@ -115,9 +115,11 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
     $showJobDao = new ShowJobsDao($this->dbManager,$uploadDao);
 
     $jobsPage1 = $showJobDao->uploads2Jobs(range(1,17),0);
-    assertThat($jobsPage1, arrayWithSize(10));
+    assertThat($jobsPage1[0], arrayWithSize(10));
+    assertThat($jobsPage1[1], is(1));
     $jobsPage2 = $showJobDao->uploads2Jobs(array_combine(range(10,16),range(11,17)),1);
-    assertThat($jobsPage2, arrayWithSize(3));
+    assertThat($jobsPage2[0], arrayWithSize(3));
+    assertThat($jobsPage2[1], is(0));
     $jobsPage3 = $showJobDao->uploads2Jobs(array(),2);
     assertThat($jobsPage3, arrayWithSize(0));
   }
@@ -144,15 +146,15 @@ class ShowJobsDaoTest extends \PHPUnit\Framework\TestCase
               return ($upload==1 || $upload==2 || $upload==4);
             });
     $testOurJobs = $this->showJobsDao->myJobs(true);
-    assertThat($testOurJobs,is(arrayContainingInAnyOrder($this->job_pks)));
+    assertThat($testOurJobs[0], is(arrayContainingInAnyOrder($this->job_pks)));
     $testMyJobs = $this->showJobsDao->myJobs(false);
-    assertThat($testMyJobs,equalTo(array(1)));
+    assertThat($testMyJobs, equalTo(array(array(1), 0)));
 
     $this->dbManager->queryOnce("UPDATE job SET job_queued=job_queued-INTERVAL '30 days' WHERE job_pk=1");
     $this->dbManager->prepare(__METHOD__.'insert.perm_upload',
       "INSERT INTO perm_upload (perm_upload_pk, perm, upload_fk, group_fk) VALUES ($1, $2, $3, $4)");
     $testOutdatedJobs = $this->showJobsDao->myJobs(true);
-    assertThat($testOutdatedJobs,equalTo(array(2)));
+    assertThat($testOutdatedJobs, equalTo(array(array(2), 0)));
   }
 
   public function testgetNumItemsPerSec()
