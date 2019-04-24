@@ -75,7 +75,7 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu)
       apt-get $YesOpt install \
         libjsoncpp-dev
       ;;
@@ -97,7 +97,7 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       case "$CODENAME" in
-        jessie|trusty)
+        jessie)
           apt-get $YesOpt install libjsoncpp0;;
         stretch|buster|sid|artful|bionic|xenial|cosmic)
           apt-get $YesOpt install libjsoncpp1;;

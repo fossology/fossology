@@ -98,7 +98,7 @@ echo "install core dependencies"
 if [[ $BUILDTIME ]]; then
    echo "*** Installing $DISTRO buildtime dependencies ***";
    case "$DISTRO" in
-      Debian|Ubuntu|LinuxMint)
+      Debian|Ubuntu)
          echo "DB: Installing build essential....."
          apt-get $YesOpt install \
             libmxml-dev curl libxml2-dev libcunit1-dev \
@@ -113,8 +113,6 @@ if [[ $BUILDTIME ]]; then
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              trusty)
-                apt-get $YesOpt install postgresql-server-dev-9.3;;
               jessie)
                 apt-get $YesOpt install postgresql-server-dev-9.4;;
               xenial)
@@ -154,7 +152,7 @@ if [[ $RUNTIME ]]; then
    echo "*** installed. Consult with your system administrator. Or try ***";
    echo "*** apt-get install mail-transport-agent, pick one and install it***";
    case "$DISTRO" in
-      Debian|Ubuntu|LinuxMint)
+      Debian|Ubuntu)
         echo "doing runtime"
          apt-get $YesOpt install apache2
          apt-get $YesOpt install php-pear \
@@ -166,8 +164,6 @@ if [[ $RUNTIME ]]; then
             subversion git \
             dpkg-dev
          case "$CODENAME" in
-            trusty)
-               apt-get $YesOpt install postgresql-9.3 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.54.0 libboost-regex1.54.0;;
             jessie)
                apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0;;
             xenial)

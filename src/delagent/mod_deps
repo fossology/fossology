@@ -74,7 +74,7 @@ DISTRO=$(lsb_release --id --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu)
       apt-get $YesOpt install \
         libssl-dev
       ;;
