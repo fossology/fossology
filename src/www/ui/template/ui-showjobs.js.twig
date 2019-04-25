@@ -65,26 +65,29 @@ if(clockTime != "0"){
 function createShowJobsTable(data)
 {
   var mainTBody = $("#showjobstable tbody");
+  var joblist = data.showJobsData;
+
+  $("#paginationup").empty();
   mainTBody.empty();
+  $("#paginationdown").empty();
+
   var i = 0;
-  while (i < data.length) {
-    var tableTemplate = createTableForJob(data[i]);
-    fillTableWithJobInfo(tableTemplate, data[i].job);
-    while ((i < (data.length - 1)) &&
-      (data[i].upload !== null && data[i+1].upload !== null) &&
-      (data[i].upload.uploadId === data[i+1].upload.uploadId)) {
+  while (i < joblist.length) {
+    var tableTemplate = createTableForJob(joblist[i]);
+    fillTableWithJobInfo(tableTemplate, joblist[i].job);
+    while ((i < (joblist.length - 1)) &&
+      (joblist[i].upload !== null && joblist[i+1].upload !== null) &&
+      (joblist[i].upload.uploadId === joblist[i+1].upload.uploadId)) {
       i = i + 1;
-      fillTableWithJobInfo(tableTemplate, data[i].job);
+      fillTableWithJobInfo(tableTemplate, joblist[i].job);
     }
     var tr = jQuery("<tr/>").html(tableTemplate);
     mainTBody.append(tr);
     mainTBody.append($("<tr><td colspan='8'><hr /></td></tr>"));
     i = i + 1;
   }
-{#   $("#paginationup").empty();#}
-{#   $("#paginationdown").empty();#}
-{#   $("#paginationup").append(data.pagination);#}
-{#   $("#paginationdown").append(data.pagination);#}
+  $("#paginationup").append(data.pagination);
+  $("#paginationdown").append(data.pagination);
 }
 
 function createTableForJob(job) {
@@ -199,7 +202,7 @@ function getTableBody() {
     url: "?mod=ajaxShowJobs&do=showjb",
     data: post_data,
     success: function (data) {
-      createShowJobsTable(data.showJobsData);
+      createShowJobsTable(data);
     },
     error: function(responseobject) { }
   });

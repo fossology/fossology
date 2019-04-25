@@ -55,9 +55,6 @@ class AjaxShowJobs extends \FO_Plugin
   /** @var ClearingDao */
   private $clearingDao;
 
-  /** @var int $maxUploadsPerPage max number of uploads to display on a page */
-  private $maxUploadsPerPage = 10;
-
   function __construct()
   {
     $this->Name = "ajaxShowJobs";
@@ -306,7 +303,7 @@ class AjaxShowJobs extends \FO_Plugin
         'upload' => $uploadArr,
       );
     }
-    return array('showJobsData' => $returnData);
+    return $returnData;
   } /* getShowJobsForEachJob() */
 
   /**
@@ -386,20 +383,34 @@ class AjaxShowJobs extends \FO_Plugin
   protected function getJobs($uploadPk)
   {
     $page = GetParm('page', PARM_INTEGER);
+    $allusers = GetParm("allusers", PARM_INTEGER);
+    $uri = "?mod=showjobs";
+    if (!empty($allusers) && $allusers > 0) {
+      $uri .= "&allusers=$allusers";
+    }
+    if ($uploadPk > 0) {
+      $uri .= "&upload=$uploadPk";
+    }
 
     $allusers = 0;
+    $totalPages = 0;
     if ($uploadPk > 0) {
       $upload_pks = array($uploadPk);
-      $jobs = $this->showJobsDao->uploads2Jobs($upload_pks, $page);
+      list($jobs, $totalPages) = $this->showJobsDao->uploads2Jobs($upload_pks, $page);
     } else {
-      $allusers = GetParm("allusers", PARM_INTEGER);
-      $jobs = $this->showJobsDao->myJobs($allusers);
+      list($jobs, $totalPages) = $this->showJobsDao->myJobs($allusers, $page);
     }
-    $jobsInfo = $this->showJobsDao->getJobInfo($jobs, $page);
+    $jobsInfo = $this->showJobsDao->getJobInfo($jobs);
     usort($jobsInfo, array($this,"compareJobsInfo"));
 
+    $pagination = ($totalPages > 1 ? MenuPage($page, $totalPages, $uri) : "");
+
     $showJobData = $this->getShowJobsForEachJob($jobsInfo);
-    return new JsonResponse($showJobData);
+    return new JsonResponse(
+      array(
+        'showJobsData' => $showJobData,
+        'pagination' => $pagination
+      ));
   } /* getJobs()*/
 
   public function Output()

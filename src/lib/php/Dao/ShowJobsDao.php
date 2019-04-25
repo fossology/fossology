@@ -33,7 +33,7 @@ class ShowJobsDao
   /** @var Logger */
   private $logger;
   /** @var maxUploadsPerPage */
-  private $maxUploadsPerPage = 10; /* max number of uploads to display on a page */
+  private $maxJobsPerPage = 10; /* max number of jobs to display on a page */
   /** @var nhours */
   private $nhours = 672;  /* 672=24*28 (4 weeks) What is considered a recent number of hours for "My Recent Jobs" */
 
@@ -47,12 +47,12 @@ class ShowJobsDao
   /**
    * @brief Find all the jobs for a given set of uploads.
    *
-   * @param $upload_pks Array of upload_pk's
-   * @param $page Get data for this display page.  Starts with zero.
+   * @param array $upload_pks Array of upload_pk's
+   * @param int $page Get data for this display page. Starts with zero.
    *
    * @return array of job_pk's for the uploads
    **/
-  function uploads2Jobs($upload_pks, $page=0)
+  function uploads2Jobs($upload_pks, $page = 0)
   {
     $jobArray = array();
     $jobCount = count($upload_pks);
@@ -61,10 +61,11 @@ class ShowJobsDao
     }
 
     /* calculate index of starting upload_pk */
-    $offset = empty($page) ? 0 : $page * $this->maxUploadsPerPage;
+    $offset = empty($page) ? 0 : $page * $this->maxJobsPerPage;
+    $totalPages = floor($jobCount / $this->maxJobsPerPage);
 
     /* Get the job_pk's for each for each upload_pk */
-    $lastOffset = ($jobCount < $this->maxUploadsPerPage) ? $offset+$jobCount : $this->maxUploadsPerPage;
+    $lastOffset = ($jobCount < $this->maxJobsPerPage) ? $offset+$jobCount : $this->maxJobsPerPage;
     $statementName = __METHOD__."upload_pkforjob";
     $this->dbManager->prepare($statementName, "SELECT job_pk FROM job WHERE job_upload_fk=$1 ORDER BY job_pk ASC");
     for (; $offset < $lastOffset; $offset++) {
@@ -76,7 +77,7 @@ class ShowJobsDao
       }
       $this->dbManager->freeResult($result);
     }
-    return $jobArray;
+    return array($jobArray, $totalPages);
   }  /* uploads2Jobs() */
 
   /**
@@ -99,23 +100,32 @@ class ShowJobsDao
   /**
    * @brief Find all of my jobs submitted within the last n hours.
    *
-   * @param $allusers
+   * @param int $allusers Get data of all users if set to 1.
+   * @param int $page Get data for this display page. Starts with zero.
    *
-   * @return array of job_pk's
+   * @return array of job_pk's and total number of pages created
    **/
-  public function myJobs($allusers)
+  public function myJobs($allusers, $page = 0)
   {
     $jobArray = array();
+    $offset = empty($page) ? 0 : ($page * $this->maxJobsPerPage) - 1;
 
     $allusers_str = ($allusers == 0) ? "job_user_fk='" . Auth::getUserId() .
       "' and " : "";
 
-    $statementName = __METHOD__ . "$allusers_str";
+    $statementName = __METHOD__ . ".countJobs." . $allusers_str;
+    $sql = "SELECT count(*) AS cnt FROM job WHERE $allusers_str " .
+    "job_queued >= (now() - interval '" . $this->nhours . " hours');";
+
+    $countJobs = $this->dbManager->getSingleRow($sql, [], $statementName)['cnt'];
+    $totalPages = floor($countJobs / $this->maxJobsPerPage);
+
+    $statementName = __METHOD__ . "." . $allusers_str;
     $this->dbManager->prepare($statementName,
       "SELECT job_pk, job_upload_fk FROM job " . "WHERE $allusers_str " .
       "job_queued >= (now() - interval '" . $this->nhours . " hours') " .
-      "ORDER BY job_queued DESC");
-    $result = $this->dbManager->execute($statementName);
+      "ORDER BY job_queued DESC OFFSET $1 LIMIT " . $this->maxJobsPerPage);
+    $result = $this->dbManager->execute($statementName, [$offset]);
     while ($row = $this->dbManager->fetchArray($result)) {
       if (! empty($row['job_upload_fk'])) {
         $uploadIsAccessible = $this->uploadDao->isAccessible(
@@ -128,14 +138,13 @@ class ShowJobsDao
     }
     $this->dbManager->freeResult($result);
 
-    return $jobArray;
+    return array($jobArray, $totalPages);
   }  /* myJobs() */
 
   /**
    * @brief Get job queue data from db.
    *
-   * @param $job_pks Array of $job_pk's to display.
-   * @param $page Get data for this display page. Starts with zero.
+   * @param array $job_pks Array of $job_pk's to display.
    *
    * @return array of job data
    * \code
@@ -157,7 +166,7 @@ class ShowJobsDao
    * JobQueue ['jq_end_bits'] = jq_end_bits
    * \endcode
   **/
-  public function getJobInfo($job_pks, $page=0)
+  public function getJobInfo($job_pks)
   {
     /* Output data array */
     $jobData = array();
