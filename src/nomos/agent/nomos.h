@@ -132,7 +132,7 @@
 #define	PROC_TRACE
 #endif	/* PROC_TRACE_SWITCH */
 
-#define	myBUFSIZ	2048      ///< Buffer max length
+#define	myBUFSIZ	4096      ///< Buffer max length
 #define	MAX_RENAME	1000    ///< Max rename length
 #define TEMP_FILE_LEN 100   ///< Max temp file length
 
