@@ -94,7 +94,10 @@ int DelagentDBInit()
   memset(CMD, '\0', sizeof(CMD));
   sprintf(CMD, "gunzip -c ../testdata/testdb_all.gz | psql -U %s -d %s >/dev/null", user, db_name);
   rc = system(CMD);
-  free(user);
+  if (user != NULL)
+  {
+    free(user);
+  }
   if (WEXITSTATUS(rc) != 0)
   {
     printf("Database initialize ERROR!\n");

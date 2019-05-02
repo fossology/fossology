@@ -217,6 +217,9 @@ void job_destroy(job_t* job)
   {
     SafePQclear(job->db_result);
 
+    // Lock the mutex to prevent clearing locked mutex
+    g_mutex_lock(job->lock);
+    g_mutex_unlock(job->lock);
 #if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
     g_mutex_clear(job->lock);
 #else
