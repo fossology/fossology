@@ -93,8 +93,7 @@ class upload_properties extends FO_Plugin
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
 
-    if (isset($ignoreFilesWOInfos))
-    {
+    if (isset($ignoreFilesWOInfos)) {
       $ignoreFilesWOInfosValue = ( $ignoreFilesWOInfos ? 't' : 'f' );
       $this->dbManager->getSingleRow("UPDATE upload SET ignore_files_wo_infos=$2 WHERE upload_pk=$1",array($uploadId,$ignoreFilesWOInfosValue),__METHOD__.'.updateUpload.ignoreFilesWOInfos');
     }
@@ -129,8 +128,7 @@ class upload_properties extends FO_Plugin
     }
 
     $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc, $ignoreFilesWOInfos);
-    if($rc == 0)
-    {
+    if ($rc == 0) {
       $text = _("Nothing to Change");
       $this->vars['message'] = $text;
     } else if ($rc == 1) {
@@ -173,12 +171,10 @@ class upload_properties extends FO_Plugin
     }
 
     /* Test if it is the first call to display the Uploaded File Properties page */
-    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET' && !empty($upload))
-    {
+    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET' && !empty($upload)) {
       /* if it is, read the ignore_files_wo_infos value in database */
       $row=$this->dbManager->getSingleRow("SELECT ignore_files_wo_infos FROM upload WHERE upload_pk=$1",array($upload_pk),__METHOD__.'.getIgnoreFilesWOInfos');
-      if (!empty($row))
-      {
+      if (!empty($row)) {
         $ignoreFilesWOInfos = ($row['ignore_files_wo_infos'] == 't');
       }
     }

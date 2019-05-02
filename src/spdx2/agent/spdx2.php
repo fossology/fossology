@@ -638,12 +638,9 @@ class SpdxTwoAgent extends Agent
    */
   protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
   {
-    if (strcmp($this->outputFormat, "dep5")!==0)
-    {
+    if (strcmp($this->outputFormat, "dep5")!==0) {
       return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
-    }
-    else
-    {
+    } else {
       return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
     }
   }
@@ -678,9 +675,8 @@ class SpdxTwoAgent extends Agent
         $licenses['scanner'] = array();
       }
       $stateWoInfos = $this->getIgnoreFilesWOinfo($uploadId);
-      if(!$stateWoInfos ||
-         ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights']))))
-      {
+      if (!$stateWoInfos ||
+          ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights'])))) {
         $content .= $this->renderString($this->getTemplateFile('file'),array(
           'fileId'=>$fileId,
           'sha1'=>$hashes['sha1'],
