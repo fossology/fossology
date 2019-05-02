@@ -447,7 +447,7 @@ int idxGrep_base(int index, char *data, int flags, int mode)
     else if (cur.currentLicenceIndex > -1 ) {
        rememberWhatWeFound( getLicenceAndMatchPositions(cur.theMatches, cur.currentLicenceIndex )->matchPositions , allmatches, index, mode);
     }
-
+    g_array_free(allmatches, 1);
     CALL_IF_DEBUG_MODE(printf("Bye!\n");)
  }
 
