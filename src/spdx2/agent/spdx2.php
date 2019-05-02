@@ -382,8 +382,7 @@ class SpdxTwoAgent extends Agent
 
         /* ADD COMMENT */
         $filesWithLicenses[$clearingDecision->getUploadTreeId()]['comment'][] = $clearingLicense->getComment();
-        if($clearingEvent->getReportinfo())
-        {
+        if ($clearingEvent->getReportinfo()) {
           $customLicenseText = $clearingEvent->getReportinfo();
           $reportedLicenseShortname = $this->licenseMap->getProjectedShortname($this->licenseMap->getProjectedId($clearingLicense->getLicenseId())) .
                                     '-' . md5($customLicenseText);
@@ -642,12 +641,9 @@ class SpdxTwoAgent extends Agent
    */
   protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
   {
-    if (strcmp($this->outputFormat, "dep5")!==0)
-    {
+    if (strcmp($this->outputFormat, "dep5")!==0) {
       return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
-    }
-    else
-    {
+    } else {
       return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
     }
   }
@@ -696,7 +692,7 @@ class SpdxTwoAgent extends Agent
           'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights'=>$licenses['copyrights'],
           'licenseCommentState'=>$stateComment);
-      if($stateComment) {
+      if ($stateComment) {
         $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
       }
 

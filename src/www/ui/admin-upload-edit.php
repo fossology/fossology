@@ -57,7 +57,7 @@ class upload_properties extends FO_Plugin
    *
    * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
-  function UpdateUploadProperties($uploadId, $newName, $newDesc, $licenseComment) 
+  function UpdateUploadProperties($uploadId, $newName, $newDesc, $licenseComment)
   {
     if (empty($newName) and empty($newDesc)) {
       return 2;
@@ -93,8 +93,7 @@ class upload_properties extends FO_Plugin
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
 
-    if (isset($licenseComment))
-    {
+    if (isset($licenseComment)) {
       $licenseCommentValue = ( $licenseComment ? 't' : 'f' );
       $this->dbManager->getSingleRow("UPDATE upload SET spdx_license_comment=$2 WHERE upload_pk=$1",array($uploadId,$licenseCommentValue),__METHOD__.'.updateUpload.spdxlicenseComment');
     }
@@ -129,8 +128,7 @@ class upload_properties extends FO_Plugin
     }
 
     $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc, $licenseComment);
-    if($rc == 0)
-    {
+    if ($rc == 0) {
       $text = _("Nothing to Change");
       $this->vars['message'] = $text;
     } else if ($rc == 1) {
@@ -173,12 +171,10 @@ class upload_properties extends FO_Plugin
     }
 
     /* Test if it is the first call to display the Uploaded File Properties page */
-    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET')
-    {
+    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET') {
       /* if it is, read the spdx_license_comment value in database */
       $row=$this->dbManager->getSingleRow("SELECT spdx_license_comment FROM upload WHERE upload_pk=$1",array($upload_pk),__METHOD__.'.getSpdxLicenseComment');
-      if (!empty($row))
-      {
+      if (!empty($row)) {
         $licenseComment = ($row['spdx_license_comment'] == 't');
       }
     }
@@ -190,7 +186,7 @@ class upload_properties extends FO_Plugin
     $this->vars['uploadDesc'] = $upload ? $upload->getDescription() : '';
     $this->vars['content'] = $V;
     $this->vars['licenseComment']= $licenseComment;
-    
+
     return $this->render('admin_upload_edit.html.twig');
   }
 }
