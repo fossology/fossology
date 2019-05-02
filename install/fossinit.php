@@ -277,11 +277,13 @@ if($isUpdating && empty($sysconfig['Release'])) {
   }
   $sysconfig['Release'] = '2.6';
 }
-if(!$isUpdating)
-{
-  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+if (! $isUpdating) {
+  require_once ("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
   print "Creating default user\n";
   Migrate_21_22($Verbose);
+} else {
+  require_once ("$LIBEXECDIR/dbmigrate_3.5-3.6.php");
+  migrate_35_36($dbManager);
 }
 
 if(!$isUpdating || $sysconfig['Release'] == '2.6')

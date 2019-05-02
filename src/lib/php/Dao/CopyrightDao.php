@@ -111,13 +111,15 @@ class CopyrightDao
   public function saveDecision($tableName, $pfileId, $userId , $clearingType,
                                $description, $textFinding, $comment, $decision_pk=-1)
   {
-    $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
-        'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
+    $assocParams = array('user_fk' => $userId, 'pfile_fk' => $pfileId,
+      'clearing_decision_type_fk' => $clearingType, 'description' => $description,
+      'textfinding' => $textFinding, 'hash' => hash('sha256', $textFinding),
+      'comment'=>$comment);
     if ($decision_pk <= 0) {
       $primaryColumn = $tableName . '_pk';
       return $this->dbManager->insertTableRow($tableName, $assocParams, __METHOD__.'Insert.'.$tableName, $primaryColumn);
     } else {
-      $assocParams['is_enabled'] = True;
+      $assocParams['is_enabled'] = true;
       $primaryColumn = $tableName . '_pk';
       $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn, $decision_pk, __METHOD__.'Update.'.$tableName);
       return $decision_pk;
