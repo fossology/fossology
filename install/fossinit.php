@@ -2,7 +2,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014-2015 Siemens AG
+ Copyright (C) 2014-2015,2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -210,16 +210,14 @@ if ($UpdateLiceneseRef)
     initLicenseRefTable(false);
   }
   else if ($row['count'] ==  0) {
-    /** import licenseref.sql */
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-    $dbManager->queryOnce($sqlstmts,$stmt=__METHOD__."$LIBEXECDIR/licenseref.sql");
+    insertInToLicenseRefTableUsingJson('license_ref');
 
     $row_max = $dbManager->getSingleRow("SELECT max(rf_pk) from license_ref",array(),'license_ref.max.rf_pk');
     $current_license_ref_rf_pk_seq = $row_max['max'];
     $dbManager->getSingleRow("SELECT setval('license_ref_rf_pk_seq', $current_license_ref_rf_pk_seq)",array(),
             'set next license_ref_rf_pk_seq value');
 
-    print "fresh install, import licenseref.sql \n";
+    print "fresh install, import licenseRef.json \n";
   }
 }
 
@@ -378,6 +376,52 @@ if($errors>0)
 }
 exit($errors);
 
+/**
+ * \brief insert into license_ref table using json file.
+ *
+ * \param $tableName
+ **/
+function insertInToLicenseRefTableUsingJson($tableName)
+{
+  global $LIBEXECDIR;
+  global $dbManager;
+
+  if (!is_dir($LIBEXECDIR)) {
+    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
+    return (1);
+  }
+
+  $dir = opendir($LIBEXECDIR);
+  if (!$dir) {
+    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
+    return (1);
+  }
+  $dbManager->begin();
+  if ($tableName === 'license_ref_2') {
+    $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2", $statment = __METHOD__.'.dropAncientBackUp');
+    $dbManager->queryOnce("CREATE TABLE license_ref_2 AS SELECT * FROM license_ref WHERE 1=2", $statment = __METHOD__.'.backUpData');
+  }
+  /** import licenseRef.json */
+  $keysToBeChanged = array(
+    'rf_OSIapproved' => '"rf_OSIapproved"',
+    'rf_FSFfree'=> '"rf_FSFfree"',
+    'rf_GPLv2compatible' => '"rf_GPLv2compatible"',
+    'rf_GPLv3compatible'=> '"rf_GPLv3compatible"',
+    'rf_Fedora' => '"rf_Fedora"'
+    );
+
+  $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
+  $statementName = __METHOD__.'.insertInTo'.$tableName;
+  foreach($jsonData as $licenseArrayKey => $licenseArray) {
+    $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
+    $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
+    $SQL = "INSERT INTO $tableName ( $keys ) VALUES ($valuePlaceHolders);";
+    $dbManager->prepare($statementName, $SQL);
+    $dbManager->execute($statementName, array_values($licenseArray));
+  }
+  $dbManager->commit();
+  return;
+}
 
 /**
  * \brief Load the license_ref table with licenses.
@@ -389,29 +433,10 @@ exit($errors);
  **/
 function initLicenseRefTable($Verbose)
 {
-  global $LIBEXECDIR;
   global $dbManager;
 
-  if (!is_dir($LIBEXECDIR)) {
-    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
-    return (1);
-  }
-  $dir = opendir($LIBEXECDIR);
-  if (!$dir) {
-    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
-    return (1);
-  }
-
   $dbManager->queryOnce("BEGIN");
-  $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
-  /* create a new temp table structure only - license_ref_2 */
-  $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
-
-  /** import licenseref.sql */
-  $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-  $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
-  $dbManager->queryOnce($sqlstmts);
-
+  insertInToLicenseRefTableUsingJson('license_ref_2');
   $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
 
@@ -449,10 +474,10 @@ function initLicenseRefTable($Verbose)
       $rf_flag_check = $row_check['rf_flag'];
 
       $sql = "UPDATE license_ref set ";
-      if($rf_flag_check == 1 ||  $rf_flag == 1) {
-        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
-      } else {
+      if ($rf_flag_check == 2 &&  $rf_flag == 1) {
         $sql .= " rf_text='$rf_text_check',";
+      } else {
+        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
       }
       if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
       if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
