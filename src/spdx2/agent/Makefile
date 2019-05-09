@@ -35,6 +35,7 @@ install: all
 	for file in $(EXE); do \
 		echo "installing $$file"; \
 		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file; \
+		$(call make_exec_file,php,$(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_SUBDIR)/$$file); \
 	done
 	echo "Making wrapper for $(MOD_NAME)"
 	ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$(MOD_NAME)

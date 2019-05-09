@@ -37,4 +37,8 @@ $(VARIABLES):
 		echo "$@=\"$($@)\"" >>$(TOP)/variable.list; \
 	fi
 
+define make_exec_file =
+	$(SED) -i '1s/^/\#\!\/usr\/bin\/env $(1)/' $(2)
+endef
+
 .PHONY: $(VARIABLES)
