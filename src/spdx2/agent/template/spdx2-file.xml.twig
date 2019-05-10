@@ -4,6 +4,7 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
+
 <spdx:hasFile>
   <spdx:File rdf:about="{{ uri }}#SPDXRef-item{{ fileId|url_encode }}">
     <spdx:fileName>{{ fileName|e }}</spdx:fileName>
@@ -42,7 +43,7 @@
 {% if licenseComment is empty %}
     <spdx:licenseComments rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}
-    <spdx:licenseComments>{{ licenseComment|e }}</spdx:licenseComments>
+    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]</spdx:licenseComments>
 {% endif %}
 {% endif %}
 {% if scannerLicenses|default is empty %}

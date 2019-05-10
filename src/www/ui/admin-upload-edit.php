@@ -45,19 +45,17 @@ class upload_properties extends FO_Plugin
   }
 
   /**
-   * @brief Update upload properties (name, description and license comment)
+   * @brief Update upload properties (name, description)
    *
    * @param $uploadId upload.upload_pk of record to update
    * @param $newName New upload.upload_filename, and uploadtree.ufle_name
    *        If null, old value is not changed.
    * @param $newDesc New upload description (upload.upload_desc)
    *        If null, old value is not changed.
-   * @param $licenseComment Must be at true to include license comments to SPDX reports
-   *        If null, old value is not changed.
    *
    * @return 1 if the upload record is updated, 0 if not, 2 if no inputs
    **/
-  function UpdateUploadProperties($uploadId, $newName, $newDesc, $licenseComment)
+  function UpdateUploadProperties($uploadId, $newName, $newDesc)
   {
     if (empty($newName) and empty($newDesc)) {
       return 2;
@@ -93,11 +91,6 @@ class upload_properties extends FO_Plugin
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
 
-    if (isset($licenseComment)) {
-      $licenseCommentValue = ( $licenseComment ? 't' : 'f' );
-      $this->dbManager->getSingleRow("UPDATE upload SET spdx_license_comment=$2 WHERE upload_pk=$1",array($uploadId,$licenseCommentValue),__METHOD__.'.updateUpload.spdxlicenseComment');
-    }
-
     return 1;
   }
 
@@ -116,8 +109,6 @@ class upload_properties extends FO_Plugin
     $NewName = GetArrayVal("newname", $_POST);
     $NewDesc = GetArrayVal("newdesc", $_POST);
     $upload_pk = GetArrayVal("upload_pk", $_POST);
-    $licenseComment = (GetArrayVal("licensecomment", $_POST) == 1);
-
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
     }
@@ -127,7 +118,7 @@ class upload_properties extends FO_Plugin
       return "<h2>$text</h2>";
     }
 
-    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc, $licenseComment);
+    $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
     if ($rc == 0) {
       $text = _("Nothing to Change");
       $this->vars['message'] = $text;
@@ -170,22 +161,12 @@ class upload_properties extends FO_Plugin
       $upload = null;
     }
 
-    /* Test if it is the first call to display the Uploaded File Properties page */
-    if (GetParm('REQUEST_METHOD', PARM_STRING) == 'GET') {
-      /* if it is, read the spdx_license_comment value in database */
-      $row=$this->dbManager->getSingleRow("SELECT spdx_license_comment FROM upload WHERE upload_pk=$1",array($upload_pk),__METHOD__.'.getSpdxLicenseComment');
-      if (!empty($row)) {
-        $licenseComment = ($row['spdx_license_comment'] == 't');
-      }
-    }
-
     $baseFolderUri = $this->vars['baseUri']."$folder_pk&upload=";
     $this->vars['uploadAction'] = "onchange=\"js_url(this.value, '$baseFolderUri')\"";
 
     $this->vars['uploadFilename'] = $upload ? $upload->getFilename() : '';
     $this->vars['uploadDesc'] = $upload ? $upload->getDescription() : '';
     $this->vars['content'] = $V;
-    $this->vars['licenseComment']= $licenseComment;
 
     return $this->render('admin_upload_edit.html.twig');
   }

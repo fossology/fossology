@@ -340,18 +340,18 @@ class SpdxTwoAgent extends Agent
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
     return $this->renderString($this->getTemplateFile('package'),array(
-        'packageId'=>$uploadId,
-        'uri'=>$this->uri,
-        'packageName'=>$upload->getFilename(),
-        'uploadName'=>$upload->getFilename(),
-        'sha1'=>$hashes['sha1'],
-        'md5'=>$hashes['md5'],
-        'verificationCode'=>$this->getVerificationCode($upload),
-        'mainLicenses'=>$mainLicenses,
-        'mainLicense'=>SpdxTwoUtils::implodeLicenses($mainLicenses, $this->spdxValidityChecker),
-        'licenseComments'=>$licenseComment,
-        'fileNodes'=>$fileNodes)
-            );
+        'packageId' => $uploadId,
+        'uri' => $this->uri,
+        'packageName' => $upload->getFilename(),
+        'uploadName' => $upload->getFilename(),
+        'sha1' => $hashes['sha1'],
+        'md5' => $hashes['md5'],
+        'verificationCode' => $this->getVerificationCode($upload),
+        'mainLicenses' => $mainLicenses,
+        'mainLicense' => SpdxTwoUtils::implodeLicenses($mainLicenses, $this->spdxValidityChecker),
+        'licenseComments' => $licenseComment,
+        'fileNodes' => $fileNodes)
+    );
   }
 
   /**
@@ -591,14 +591,14 @@ class SpdxTwoAgent extends Agent
     }
 
     $message = $this->renderString($this->getTemplateFile('document'),array(
-        'documentName'=>$fileBase,
-        'uri'=>$this->uri,
-        'userName'=>$this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
-        'organisation'=>'',
-        'packageNodes'=>$packageNodes,
-        'packageIds'=>$packageIds,
-        'licenseTexts'=>$licenseTexts)
-            );
+        'documentName' => $fileBase,
+        'uri' => $this->uri,
+        'userName' => $this->container->get('dao.user')->getUserName($this->userId) . " (" . $this->container->get('dao.user')->getUserEmail($this->userId) . ")",
+        'organisation' => '',
+        'packageNodes' => $packageNodes,
+        'packageIds' => $packageIds,
+        'licenseTexts' => $licenseTexts)
+    );
 
     // To ensure the file is valid, replace any non-printable characters with a question mark.
     // 'Non-printable' is ASCII < 0x20 (excluding \r, \n and tab) and 0x7F (delete).
@@ -641,7 +641,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function generateFileNodes($filesWithLicenses, $treeTableName, $uploadId)
   {
-    if (strcmp($this->outputFormat, "dep5")!==0) {
+    if (strcmp($this->outputFormat, "dep5") !== 0) {
       return $this->generateFileNodesByFiles($filesWithLicenses, $treeTableName, $uploadId);
     } else {
       return $this->generateFileNodesByLicenses($filesWithLicenses, $treeTableName);
@@ -679,19 +679,20 @@ class SpdxTwoAgent extends Agent
       }
       $stateComment = $this->getSPDXLicenseCommentState($uploadId);
       $dataTemplate = array(
-          'fileId'=>$fileId,
-          'sha1'=>$hashes['sha1'],
-          'md5'=>$hashes['md5'],
-          'uri'=>$this->uri,
-          'fileName'=>$fileName,
-          'fileDirName'=>dirname($fileName),
-          'fileBaseName'=>basename($fileName),
-          'isCleared'=>$licenses['isCleared'],
-          'concludedLicense'=>SpdxTwoUtils::implodeLicenses($licenses['concluded'], $this->spdxValidityChecker),
-          'concludedLicenses'=> SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
-          'scannerLicenses'=>SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
-          'copyrights'=>$licenses['copyrights'],
-          'licenseCommentState'=>$stateComment);
+          'fileId' => $fileId,
+          'sha1' => $hashes['sha1'],
+          'md5' => $hashes['md5'],
+          'uri' => $this->uri,
+          'fileName' => $fileName,
+          'fileDirName' => dirname($fileName),
+          'fileBaseName' => basename($fileName),
+          'isCleared' => $licenses['isCleared'],
+          'concludedLicense' => SpdxTwoUtils::implodeLicenses($licenses['concluded'], $this->spdxValidityChecker),
+          'concludedLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['concluded'], $this->spdxValidityChecker),
+          'scannerLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
+          'copyrights' => $licenses['copyrights'],
+          'licenseCommentState' => $stateComment
+      );
       if ($stateComment) {
         $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
       }
@@ -807,11 +808,15 @@ class SpdxTwoAgent extends Agent
    */
   protected function getSPDXLicenseCommentState($uploadId)
   {
-    $sql = "SELECT spdx_license_comment from upload where upload_pk=$1";
-    $param = array($uploadId);
-    $licensecomment = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Spdx_license_comment');
-
-    return ($licensecomment['spdx_license_comment']=="t");
+    $sql = "SELECT ri_ga_checkbox_selection FROM report_info WHERE upload_fk=$1";
+    $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
+    if (!empty($getCommentState['ri_ga_checkbox_selection'])) {
+      $getCommentStateSingle = explode(',', $getCommentState['ri_ga_checkbox_selection']);
+      if ($getCommentStateSingle[9] === "checked") {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

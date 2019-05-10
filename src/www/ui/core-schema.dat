@@ -1520,10 +1520,6 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4";
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL";
 
-  $Schema["TABLE"]["upload"]["spdx_license_comment"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"spdx_license_comment\" IS 'true: SPDX output show license comments, false: dont show it'";
-  $Schema["TABLE"]["upload"]["spdx_license_comment"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"spdx_license_comment\" boolean DEFAULT false";
-  $Schema["TABLE"]["upload"]["spdx_license_comment"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"spdx_license_comment\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4";
@@ -1746,9 +1742,13 @@
   $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_checkbox_selection\" text";
   $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_checkbox_selection\" DROP NOT NULL";
 
+
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
+
   $Schema["VIEW"]["uploadtree_tag_file_inner"] = "CREATE VIEW \"uploadtree_tag_file_inner\" AS SELECT uploadtree.pfile_fk, uploadtree.uploadtree_pk, uploadtree.parent, uploadtree.upload_fk, uploadtree.ufile_mode, uploadtree.lft, uploadtree.rgt, uploadtree.ufile_name, tag_file.tag_file_pk, tag_file.tag_fk, tag_file.tag_file_date, tag_file.tag_file_text FROM (uploadtree JOIN tag_file USING (pfile_fk));";
+
   $Schema["VIEW"]["folderlist"] = "CREATE VIEW \"folderlist\" AS SELECT folder.folder_pk, folder.folder_name AS name, folder.folder_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, NULL::timestamp with time zone AS ts, NULL::integer AS upload_pk, NULL::integer AS pfile_fk, NULL::integer AS ufile_mode FROM folder, foldercontents WHERE ((foldercontents.foldercontents_mode = 1) AND (foldercontents.child_id = folder.folder_pk)) UNION ALL SELECT NULL::integer AS folder_pk, uploadtree.ufile_name AS name, upload.upload_desc AS description, foldercontents.parent_fk AS parent, foldercontents.foldercontents_mode, upload.upload_ts AS ts, upload.upload_pk, uploadtree.pfile_fk, uploadtree.ufile_mode FROM ((upload JOIN uploadtree ON (((upload.upload_pk = uploadtree.upload_fk) AND (uploadtree.parent IS NULL)))) JOIN foldercontents ON (((foldercontents.foldercontents_mode = 2) AND (foldercontents.child_id = upload.upload_pk))));";
+
 
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\"";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["UPDATE"] = "SELECT setval('sysconfig_sysconfig_pk_seq',(SELECT greatest(1,max(sysconfig_pk)) val FROM sysconfig))";
