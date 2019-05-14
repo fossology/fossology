@@ -65,6 +65,9 @@ without any warranty.
         <service id="dao.license" class="Fossology\Lib\Dao\LicenseDao">
             <argument type="service" id="db.manager"/>
         </service>
+        <service id="dao.license.stdc" class="Fossology\Lib\Dao\LicenseStdCommentDao">
+            <argument type="service" id="db.manager"/>
+        </service>
         <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.upload"/>
