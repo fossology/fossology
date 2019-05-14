@@ -162,6 +162,7 @@ jobs:
       php: 7.0
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
       script:
+        - set -o pipefail
         - make build-lib VERSIONFILE build-cli
         - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
     - &php71-phpunit-tests
