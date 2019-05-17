@@ -84,6 +84,6 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
         }
       }
     }
-    return $statements;
+    return array("statements" => array_values($statements));
   }
 }
