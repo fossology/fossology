@@ -514,17 +514,18 @@ class ui_view_info extends FO_Plugin
     $vars = [];
     $row = $this->uploadDao->getReportInfo($Upload);
     $checkBoxDefault = "unchecked";
-    $vars['nonCritical']        = $checkBoxDefault;
-    $vars['critical']           = $checkBoxDefault;
-    $vars['noDependency']       = $checkBoxDefault;
-    $vars['dependencySource']   = $checkBoxDefault;
-    $vars['dependencyBinary']   = $checkBoxDefault;
+    $vars['nonCritical'] = $checkBoxDefault;
+    $vars['critical'] = $checkBoxDefault;
+    $vars['noDependency'] = $checkBoxDefault;
+    $vars['dependencySource'] = $checkBoxDefault;
+    $vars['dependencyBinary'] = $checkBoxDefault;
     $vars['noExportRestriction'] = $checkBoxDefault;
-    $vars['exportRestriction']  = $checkBoxDefault;
-    $vars['noRestriction']      = $checkBoxDefault;
-    $vars['restrictionForUse']  = $checkBoxDefault;
+    $vars['exportRestriction'] = $checkBoxDefault;
+    $vars['noRestriction'] = $checkBoxDefault;
+    $vars['restrictionForUse'] = $checkBoxDefault;
+    $vars['spdxLicenseComment'] = $checkBoxDefault;
 
-    if (! empty($row)) {
+    if (!empty($row)) {
       $reviewedBy = $row['ri_reviewed'];
       $reportRel = $row['ri_report_rel'];
       $community = $row['ri_community'];
@@ -539,28 +540,29 @@ class ui_view_info extends FO_Plugin
       $gaSelectionList = explode(',', $row['ri_ga_checkbox_selection']);
     }
 
-    $vars['footerNote']           = $footerNote;
-    $vars['reviewedBy']           = $reviewedBy;
-    $vars['reportRel']            = $reportRel;
-    $vars['community']            = $community;
-    $vars['component']            = $component;
-    $vars['version']              = $version;
-    $vars['relDate']              = $relDate;
-    $vars['sw360Link']            = $sw360Link;
-    $vars['generalAssesment']     = $generalAssesment;
-    if (array_key_exists(8, $gaSelectionList)) {
-      $vars['nonCritical']        = $gaSelectionList[0];
-      $vars['critical']           = $gaSelectionList[1];
-      $vars['noDependency']       = $gaSelectionList[2];
-      $vars['dependencySource']   = $gaSelectionList[3];
-      $vars['dependencyBinary']   = $gaSelectionList[4];
+    $vars['footerNote'] = $footerNote;
+    $vars['reviewedBy'] = $reviewedBy;
+    $vars['reportRel'] = $reportRel;
+    $vars['community'] = $community;
+    $vars['component'] = $component;
+    $vars['version'] = $version;
+    $vars['relDate'] = $relDate;
+    $vars['sw360Link'] = $sw360Link;
+    $vars['generalAssesment'] = $generalAssesment;
+    if (array_key_exists(9, $gaSelectionList)) {
+      $vars['nonCritical'] = $gaSelectionList[0];
+      $vars['critical'] = $gaSelectionList[1];
+      $vars['noDependency'] = $gaSelectionList[2];
+      $vars['dependencySource'] = $gaSelectionList[3];
+      $vars['dependencyBinary'] = $gaSelectionList[4];
       $vars['noExportRestriction'] = $gaSelectionList[5];
-      $vars['exportRestriction']  = $gaSelectionList[6];
-      $vars['noRestriction']      = $gaSelectionList[7];
-      $vars['restrictionForUse']  = $gaSelectionList[8];
+      $vars['exportRestriction'] = $gaSelectionList[6];
+      $vars['noRestriction'] = $gaSelectionList[7];
+      $vars['restrictionForUse'] = $gaSelectionList[8];
+      $vars['spdxLicenseComment'] = $gaSelectionList[9];
     }
-    $vars['gaAdditional']         = $gaAdditional;
-    $vars['gaRisk']               = $gaRisk;
+    $vars['gaAdditional'] = $gaAdditional;
+    $vars['gaRisk'] = $gaRisk;
 
     return $vars;
   }
@@ -656,7 +658,12 @@ class ui_view_info extends FO_Plugin
         "noDependency",
         "dependencySource",
         "dependencyBinary",
-        "noExportRestriction","exportRestriction","noRestriction","restrictionForUse");
+        "noExportRestriction",
+        "exportRestriction",
+        "noRestriction",
+        "restrictionForUse",
+        "spdxLicenseComment"
+      );
       $cbSelectionList = $this->getCheckBoxSelectionList($checkBoxListParams);
       $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
       $gaRisk = GetParm('gaRisk', PARM_TEXT);

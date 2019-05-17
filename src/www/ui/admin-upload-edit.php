@@ -45,7 +45,7 @@ class upload_properties extends FO_Plugin
   }
 
   /**
-   * @brief Update upload properties (name and description)
+   * @brief Update upload properties (name, description)
    *
    * @param $uploadId upload.upload_pk of record to update
    * @param $newName New upload.upload_filename, and uploadtree.ufle_name
@@ -90,6 +90,7 @@ class upload_properties extends FO_Plugin
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
+
     return 1;
   }
 
@@ -111,7 +112,6 @@ class upload_properties extends FO_Plugin
     if (empty($upload_pk)) {
       $upload_pk = GetParm('upload', PARM_INTEGER);
     }
-
     /* Check Upload permission */
     if (! empty($upload_pk) && !$this->uploadDao->isEditable($upload_pk, $groupId)) {
       $text = _("Permission Denied");
