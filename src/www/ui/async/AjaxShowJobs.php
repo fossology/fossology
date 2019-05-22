@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015-2018, Siemens AG
+ Copyright (C) 2015-2019, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -18,6 +18,12 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+/**
+ * @namespace Fossology::UI::Ajax
+ * Holds the pages which are called in asynchronous method.
+ */
+namespace Fossology\UI\Ajax;
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ShowJobsDao;
 use Fossology\Lib\Dao\UserDao;
@@ -27,7 +33,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 define("TITLE_AJAXSHOWJOBS", _("ShowJobs"));
 
-class AjaxShowJobs extends FO_Plugin
+/**
+ * @file
+ * @brief Provide data for jobs table.
+ * @class AjaxShowJobs
+ * @brief Provide data for jobs table.
+ */
+class AjaxShowJobs extends \FO_Plugin
 {
   const MAX_LOG_OUTPUT = 32768;
 
@@ -42,9 +54,6 @@ class AjaxShowJobs extends FO_Plugin
 
   /** @var ClearingDao */
   private $clearingDao;
-
-  /** @var int $maxUploadsPerPage max number of uploads to display on a page */
-  private $maxUploadsPerPage = 10;
 
   function __construct()
   {
@@ -148,7 +157,7 @@ class AjaxShowJobs extends FO_Plugin
           if (empty($row[$field]) || !file_exists($row[$field])) {
             break;
           }
-          if (filesize($row[$field])>self::MAX_LOG_OUTPUT) {
+          if (filesize($row[$field]) > self::MAX_LOG_OUTPUT) {
             $value = "<pre>" .file_get_contents($row[$field],false,null,-1,self::MAX_LOG_OUTPUT)."</pre>"
                     .'<a href="'.Traceback_uri() . '?mod=download&log=' . $row['jq_pk'] . '">...</a>';
           } else {
@@ -198,239 +207,103 @@ class AjaxShowJobs extends FO_Plugin
   } /* getGeekyScanDetailsForJob() */
 
   /**
-   * @brief Returns an upload job status in html
-   * @param $jobData, $page, $allusers
-   * @return Returns an upload job status in html
+   * @brief Returns an upload job status in array
+   * @param array $jobData
+   * @return Returns an upload job status in array
    **/
-  protected function getShowJobsForEachJob($jobData, $page, $allusers)
+  protected function getShowJobsForEachJob($jobData)
   {
-    $outBuf = '';
-    $pagination = '';
-    $uploadtree_pk = 0;
-    $numJobs = count($jobData);
-    if ($numJobs == 0) {
+    if (count($jobData) == 0) {
       return array('showJobsData' => "There are no jobs to display");
     }
-    $uri = Traceback_uri() . "?mod=showjobs";
-    $uriFull = $uri . Traceback_parm_keep(array("upload"));
-    $uriFullMenu = $uri . Traceback_parm_keep(array("allusers"));
-    /* Next/Prev menu */
-    $next = $numJobs > $this->maxUploadsPerPage;
-    if ($numJobs > $this->maxUploadsPerPage) {
-      $pagination .= MenuEndlessPage($page, $next, $uriFullMenu);
-    }
-
-    /*****************************************************************/
-    /* Now display the summary */
-    /*****************************************************************/
-
-    $uploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:white;'";
-    $noUploadStyle = "style='font:bold 10pt verdana, arial, helvetica; background:gold; color:black;'";
-    $jobStyle = "style='font:bold 8pt verdana, arial, helvetica; background:lavender; color:black;'";
-    $prevupload_pk = "";
-
-    $firstJob = $page * $this->maxUploadsPerPage;
-    $lastJob = ($page * $this->maxUploadsPerPage) + $this->maxUploadsPerPage;
-    $jobNumber = -1;
-    /** if $single_browse is 1, represent alread has an upload browse link, if single_browse is 0, no upload browse link */
-    $single_browse = 0;
-    foreach ($jobData as $job) {
-      /* Upload  */
-      if (!empty($job["upload"])) {
-        $uploadName = GetArrayVal("upload_filename", $job["upload"]);
-        $jobName = $job["job"]["job_name"];
-        if ($uploadName !== $jobName) {
-          $uploadName = $jobName;
-        }
-        $uploadDesc = GetArrayVal("upload_desc", $job["upload"]);
-        $upload_pk = GetArrayVal("upload_pk", $job["upload"]);
-        $jobId = GetArrayVal("job_pk", $job["job"]);
-        /** the column pfile_fk of the record in the table(upload) is NULL when this record is inserted */
-        if ((!empty($upload_pk) && $prevupload_pk != $upload_pk) ||
-          (empty($upload_pk) && 0 == $single_browse)) {
-          $prevupload_pk = $upload_pk;
-          $jobNumber++;
-
-          /* Only display the jobs for this page */
-          if ($jobNumber >= $lastJob) {
-            break;
-          }
-          if ($jobNumber < $firstJob) {
-            continue;
-          }
-
-          /* blank line separator between pfiles */
-          $outBuf .= "<tr><td colspan=8> <hr> </td></tr>";
-          $outBuf .= "<tr>";
-          $outBuf .= "<th $uploadStyle></th>";
-          $outBuf .= "<th colspan=6 $uploadStyle>";
-
-          if (! empty($job['uploadtree'])) {
-            $uploadtree_pk = $job['uploadtree']['uploadtree_pk'];
-            $outBuf .= "<a title='Click to browse' href='" . Traceback_uri() . "?mod=browse&upload=" . $job['job']['job_upload_fk'] . "&item=" . $uploadtree_pk . "'>";
-          } else {
-            $outBuf .= "<a $noUploadStyle>";
-          }
-
-          /* get $userName if all jobs are shown */
-          $userName = "";
-          if ($allusers > 0) {
-            $statementName = __METHOD__ . "UploadRec";
-            $uploadRec = $this->dbManager->getSingleRow(
-              "select user_fk from upload where upload_pk=$1",
-              array($job['job']['job_upload_fk']), $statementName);
-
-            if (! empty($uploadRec['user_fk'])) {
-              $userName = $this->userDao->getUserName($uploadRec['user_fk']);
-            } else {
-              $userName = $this->userDao->getUserName(
-                $job['job']['job_user_fk']);
-            }
-            $userName = "&nbsp;&nbsp;&nbsp;(" .
-              htmlentities($userName, ENT_QUOTES) . ")";
-          }
-
-          $outBuf .= htmlentities($uploadName, ENT_QUOTES) . $userName;
-          if (!empty($uploadDesc)) {
-            $outBuf .= " (" . $uploadDesc . ")";
-          }
-          $outBuf .= "</a>";
-          $outBuf .= "</th>";
-          $outBuf .= "<th $uploadStyle><a>" .
-            $this->showJobsDao->getEstimatedTime($jobId)."</a></th>";
-          $outBuf .= "</tr>";
-          $single_browse = 1;
+    $returnData = [];
+    foreach ($jobData as $jobId => $jobs) {
+      $jobArr = array(
+        'jobId' => $jobs['job']['job_pk'],
+        'jobName' => $jobs['job']['job_name'],
+        'jobQueue' => $jobs['jobqueue']
+      );
+      foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
+        if (! empty($singleJobQueue["jq_endtime"])) {
+          $numSecs = strtotime($singleJobQueue['jq_endtime']) -
+            strtotime($singleJobQueue['jq_starttime']);
         } else {
-          if ($jobNumber < $firstJob) {
-            continue;
-          }
-        }
-      } else {  /* Show Jobs that are not attached to an upload */
-
-        $jobNumber++;
-        /* Only display the jobs for this page */
-        if ($jobNumber >= $lastJob) {
-          break;
-        }
-        if ($jobNumber < $firstJob) {
-          continue;
+          $numSecs = time() - strtotime($singleJobQueue['jq_starttime']);
         }
 
-        /* blank line separator between pfiles */
-        $outBuf .= "<tr><td colspan=8> <hr> </td></tr>";
-        $outBuf .= "<tr>";
-        $outBuf .= "<th $noUploadStyle></th>";
-        $outBuf .= "<th colspan=6 $noUploadStyle>";
-        $outBuf .= htmlentities($job["job"]["job_name"], ENT_QUOTES);
-        $outBuf .= "</th>";
-        $outBuf .= "<th $noUploadStyle></th>";
-        $outBuf .= "</tr>";
-      }
-
-      /* Job data */
-      $outBuf .= "<tr>";
-      $outBuf .= "<th $jobStyle>";
-      $outBuf .= _("Job/Dependency");
-      $outBuf .= "</th>";
-
-      $outBuf .= "<th $jobStyle>";
-      $outBuf .= _("Status");
-      $outBuf .= "</th>";
-
-      $outBuf .= "<th colspan=3 $jobStyle>";
-      $outBuf .= htmlentities($job["job"]["job_name"], ENT_QUOTES);
-      $outBuf .= "</th>";
-
-      $outBuf .= "<th $jobStyle>";
-      $outBuf .= _("Average items/sec");
-      $outBuf .= "</th>";
-
-      $outBuf .= "<th $jobStyle>";
-      $outBuf .= _("ETA");
-      $outBuf .= "</th>";
-
-      $outBuf .= "<th $jobStyle>";
-      $outBuf .= "</th></tr>";
-
-      /* Job queue */
-      foreach ($job['jobqueue'] as $jq_pk => $jobqueueRec) {
-        $varJobQueueRow = array('jqId'=>$jq_pk,
-                                'jobId'=>$jobqueueRec['jq_job_fk'],
-                                'class'=>$this->getClass($jobqueueRec),
-                                'uriFull'=>$uriFull,
-                                'depends'=>$jobqueueRec['jdep_jq_depends_fk'] ? $jobqueueRec['depends'] : array(),
-                                'status'=>$jobqueueRec['jq_endtext'],
-                                'agentName'=>$jobqueueRec['jq_type'],
-                                'itemsProcessed'=>$jobqueueRec['jq_itemsprocessed'],
-                                'startTime'=>substr($jobqueueRec['jq_starttime'], 0, 16),
-                                'endTime'=>empty($jobqueueRec["jq_endtime"]) ? '' : substr($jobqueueRec['jq_endtime'], 0, 16),
-                                'endText'=>$jobqueueRec['jq_endtext'],
-                                'page'=>$page,
-                                'allusers'=>$allusers);
-
-        if (!empty($jobqueueRec["jq_endtime"])) {
-          $numSecs = strtotime($jobqueueRec['jq_endtime']) - strtotime($jobqueueRec['jq_starttime']);
-        } else {
-          $numSecs = time()  - strtotime($jobqueueRec['jq_starttime']);
+        $jobArr['jobQueue'][$key]['itemsPerSec'] = $itemsPerSec = 0;
+        if ($singleJobQueue['jq_starttime']) {
+          $itemsPerSec = $this->showJobsDao->getNumItemsPerSec(
+            $singleJobQueue['jq_itemsprocessed'], $numSecs);
+          $jobArr['jobQueue'][$key]['itemsPerSec'] = $itemsPerSec;
         }
-
-        $itemsPerSec = null;
-        if ($jobqueueRec['jq_starttime']) {
-          $itemsPerSec = $this->showJobsDao->getNumItemsPerSec($jobqueueRec['jq_itemsprocessed'], $numSecs);
-          $varJobQueueRow['itemsPerSec'] = $itemsPerSec;
-        }
-        if (empty($jobqueueRec['jq_endtime'])) {
-          $varJobQueueRow['eta'] = $this->showJobsDao->getEstimatedTime(
-            $jobqueueRec['jq_job_fk'], $jobqueueRec['jq_type'], $itemsPerSec,
-            $job['job']['job_upload_fk']);
-          if ($jobqueueRec['jq_type'] === 'monkbulk' ||
-            $jobqueueRec['jq_type'] === 'deciderjob') {
+        if (empty($singleJobQueue['jq_endtime'])) {
+          $jobArr['jobQueue'][$key]['eta'] = $this->showJobsDao->getEstimatedTime(
+            $singleJobQueue['jq_job_fk'], $singleJobQueue['jq_type'],
+            $itemsPerSec, $jobs['job']['job_upload_fk']);
+          if ($singleJobQueue['jq_type'] === 'monkbulk' ||
+            $singleJobQueue['jq_type'] === 'deciderjob') {
             $noOfMonkBulk = $this->showJobsDao->getItemsProcessedForDecider(
-              'decider', $jobqueueRec['jq_job_fk']);
+              'decider', $singleJobQueue['jq_job_fk']);
             if (! empty($noOfMonkBulk)) {
               $totalCountOfMb = $this->clearingDao->getPreviousBulkIds(
-                $noOfMonkBulk[1], Auth::getGroupId(), Auth::getUserId(), $onlyCount=1);
+                $noOfMonkBulk[1], Auth::getGroupId(), Auth::getUserId(),
+                $onlyCount = 1);
             }
-            if (!empty($totalCountOfMb)) {
-              $varJobQueueRow['isNoOfMonkBulk'] = $noOfMonkBulk[0]."/".$totalCountOfMb;
+            if (! empty($totalCountOfMb)) {
+              $jobArr['jobQueue'][$key]['isNoOfMonkBulk'] = $noOfMonkBulk[0] .
+                "/" . $totalCountOfMb;
             }
           }
         }
 
-        $varJobQueueRow['canDoActions'] = ($_SESSION[Auth::USER_LEVEL] == PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
-        $varJobQueueRow['isInProgress'] = ($jobqueueRec['jq_end_bits'] == 0);
-        $varJobQueueRow['isReady'] = ($jobqueueRec['jq_end_bits'] == 1);
+        $jobArr['jobQueue'][$key]['canDoActions'] = ($_SESSION[Auth::USER_LEVEL] ==
+          PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
+        $jobArr['jobQueue'][$key]['isInProgress'] = ($singleJobQueue['jq_end_bits'] ==
+          0);
+        $jobArr['jobQueue'][$key]['isReady'] = ($singleJobQueue['jq_end_bits'] ==
+          1);
 
-        switch ($jobqueueRec['jq_type']) {
+        switch ($singleJobQueue['jq_type']) {
           case 'readmeoss':
-            $varJobQueueRow['download'] = "ReadMeOss";
+            $jobArr['jobQueue'][$key]['download'] = "ReadMeOss";
             break;
           case 'spdx2':
-            $varJobQueueRow['download'] = "SPDX2 report";
+            $jobArr['jobQueue'][$key]['download'] = "SPDX2 report";
             break;
           case 'spdx2tv':
-            $varJobQueueRow['download'] = "SPDX2 tag/value report";
+            $jobArr['jobQueue'][$key]['download'] = "SPDX2 tag/value report";
             break;
           case 'dep5':
-            $varJobQueueRow['download'] = "DEP5 copyright file";
+            $jobArr['jobQueue'][$key]['download'] = "DEP5 copyright file";
             break;
           case 'reportImport':
-            $varJobQueueRow['download'] = "uploaded SPDX2 report";
+            $jobArr['jobQueue'][$key]['download'] = "uploaded SPDX2 report";
+            break;
           case 'unifiedreport':
-            $varJobQueueRow['download'] = "Unified Report";
+            $jobArr['jobQueue'][$key]['download'] = "Unified Report";
             break;
           default:
-            $varJobQueueRow['download'] = "";
+            $jobArr['jobQueue'][$key]['download'] = "";
         }
-
-        $outBuf .= $this->renderString('ui-showjobs-jobqueue-row.html.twig', $varJobQueueRow);
       }
+      if (! empty($jobs['upload'])) {
+        $uploadArr = array(
+          'uploadName' => $jobs['upload']['upload_filename'],
+          'uploadId' => $jobs['upload']['upload_pk'],
+          'uploadDesc' => $jobs['upload']['upload_desc'],
+          'uploadItem' => $jobs['uploadtree']['uploadtree_pk'],
+          'uploadEta' => $this->showJobsDao->getEstimatedTime($jobId)
+        );
+      } else {
+        $uploadArr = null;
+      }
+      $returnData[] = array(
+        'job' => $jobArr,
+        'upload' => $uploadArr,
+      );
     }
-    if ($numJobs > $this->maxUploadsPerPage) {
-      $pagination = "<p>" . MenuEndlessPage($page, $next, $uriFullMenu);
-    }
-
-    return array('showJobsData' => $outBuf, 'pagination' => $pagination);
+    return $returnData;
   } /* getShowJobsForEachJob() */
 
   /**
@@ -510,20 +383,34 @@ class AjaxShowJobs extends FO_Plugin
   protected function getJobs($uploadPk)
   {
     $page = GetParm('page', PARM_INTEGER);
+    $allusers = GetParm("allusers", PARM_INTEGER);
+    $uri = "?mod=showjobs";
+    if (!empty($allusers) && $allusers > 0) {
+      $uri .= "&allusers=$allusers";
+    }
+    if ($uploadPk > 0) {
+      $uri .= "&upload=$uploadPk";
+    }
 
     $allusers = 0;
+    $totalPages = 0;
     if ($uploadPk > 0) {
       $upload_pks = array($uploadPk);
-      $jobs = $this->showJobsDao->uploads2Jobs($upload_pks, $page);
+      list($jobs, $totalPages) = $this->showJobsDao->uploads2Jobs($upload_pks, $page);
     } else {
-      $allusers = GetParm("allusers", PARM_INTEGER);
-      $jobs = $this->showJobsDao->myJobs($allusers);
+      list($jobs, $totalPages) = $this->showJobsDao->myJobs($allusers, $page);
     }
-    $jobsInfo = $this->showJobsDao->getJobInfo($jobs, $page);
+    $jobsInfo = $this->showJobsDao->getJobInfo($jobs);
     usort($jobsInfo, array($this,"compareJobsInfo"));
 
-    $showJobData = $this->getShowJobsForEachJob($jobsInfo, $page, $allusers);
-    return new JsonResponse($showJobData);
+    $pagination = ($totalPages > 1 ? MenuPage($page, $totalPages, $uri) : "");
+
+    $showJobData = $this->getShowJobsForEachJob($jobsInfo);
+    return new JsonResponse(
+      array(
+        'showJobsData' => $showJobData,
+        'pagination' => $pagination
+      ));
   } /* getJobs()*/
 
   public function Output()
@@ -535,7 +422,6 @@ class AjaxShowJobs extends FO_Plugin
     if (!$this->OutputToStdout) {
       return;
     }
-    header('Content-type: text/json');
     return $output;
   }
 
@@ -550,7 +436,7 @@ class AjaxShowJobs extends FO_Plugin
         }
         break;
       case "showSingleJob":
-        $job_pk1 = GetParm('jobId',PARM_INTEGER);
+        $job_pk1 = GetParm('jobId', PARM_INTEGER);
         return $this->getGeekyScanDetailsForJob($job_pk1);
     }
   }

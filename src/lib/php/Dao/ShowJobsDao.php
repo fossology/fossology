@@ -33,7 +33,7 @@ class ShowJobsDao
   /** @var Logger */
   private $logger;
   /** @var maxUploadsPerPage */
-  private $maxUploadsPerPage = 10; /* max number of uploads to display on a page */
+  private $maxJobsPerPage = 10; /* max number of jobs to display on a page */
   /** @var nhours */
   private $nhours = 672;  /* 672=24*28 (4 weeks) What is considered a recent number of hours for "My Recent Jobs" */
 
@@ -47,12 +47,12 @@ class ShowJobsDao
   /**
    * @brief Find all the jobs for a given set of uploads.
    *
-   * @param $upload_pks Array of upload_pk's
-   * @param $page Get data for this display page.  Starts with zero.
+   * @param array $upload_pks Array of upload_pk's
+   * @param int $page Get data for this display page. Starts with zero.
    *
    * @return array of job_pk's for the uploads
    **/
-  function uploads2Jobs($upload_pks, $page=0)
+  function uploads2Jobs($upload_pks, $page = 0)
   {
     $jobArray = array();
     $jobCount = count($upload_pks);
@@ -61,10 +61,11 @@ class ShowJobsDao
     }
 
     /* calculate index of starting upload_pk */
-    $offset = empty($page) ? 0 : $page * $this->maxUploadsPerPage;
+    $offset = empty($page) ? 0 : $page * $this->maxJobsPerPage;
+    $totalPages = floor($jobCount / $this->maxJobsPerPage);
 
     /* Get the job_pk's for each for each upload_pk */
-    $lastOffset = ($jobCount < $this->maxUploadsPerPage) ? $offset+$jobCount : $this->maxUploadsPerPage;
+    $lastOffset = ($jobCount < $this->maxJobsPerPage) ? $offset+$jobCount : $this->maxJobsPerPage;
     $statementName = __METHOD__."upload_pkforjob";
     $this->dbManager->prepare($statementName, "SELECT job_pk FROM job WHERE job_upload_fk=$1 ORDER BY job_pk ASC");
     for (; $offset < $lastOffset; $offset++) {
@@ -76,7 +77,7 @@ class ShowJobsDao
       }
       $this->dbManager->freeResult($result);
     }
-    return $jobArray;
+    return array($jobArray, $totalPages);
   }  /* uploads2Jobs() */
 
   /**
@@ -99,24 +100,37 @@ class ShowJobsDao
   /**
    * @brief Find all of my jobs submitted within the last n hours.
    *
-   * @param $allusers
+   * @param int $allusers Get data of all users if set to 1.
+   * @param int $page Get data for this display page. Starts with zero.
    *
-   * @return array of job_pk's
+   * @return array of job_pk's and total number of pages created
    **/
-  public function myJobs($allusers)
+  public function myJobs($allusers, $page = 0)
   {
     $jobArray = array();
+    $offset = empty($page) ? 0 : ($page * $this->maxJobsPerPage) - 1;
 
-    $allusers_str = ($allusers == 0) ? "job_user_fk='".Auth::getUserId()."' and " : $allusers_str = "";
+    $allusers_str = ($allusers == 0) ? "job_user_fk='" . Auth::getUserId() .
+      "' and " : "";
 
-    $statementName = __METHOD__."$allusers_str";
+    $statementName = __METHOD__ . ".countJobs." . $allusers_str;
+    $sql = "SELECT count(*) AS cnt FROM job WHERE $allusers_str " .
+    "job_queued >= (now() - interval '" . $this->nhours . " hours');";
+
+    $countJobs = $this->dbManager->getSingleRow($sql, [], $statementName)['cnt'];
+    $totalPages = floor($countJobs / $this->maxJobsPerPage);
+
+    $statementName = __METHOD__ . "." . $allusers_str;
     $this->dbManager->prepare($statementName,
-    "SELECT job_pk, job_upload_fk FROM job WHERE $allusers_str job_queued >= (now() - interval '".$this->nhours." hours') ORDER BY job_queued DESC");
-    $result = $this->dbManager->execute($statementName);
+      "SELECT job_pk, job_upload_fk FROM job " . "WHERE $allusers_str " .
+      "job_queued >= (now() - interval '" . $this->nhours . " hours') " .
+      "ORDER BY job_queued DESC OFFSET $1 LIMIT " . $this->maxJobsPerPage);
+    $result = $this->dbManager->execute($statementName, [$offset]);
     while ($row = $this->dbManager->fetchArray($result)) {
-      if (!empty($row['job_upload_fk'])) {
-        $uploadIsAccessible = $this->uploadDao->isAccessible($row['job_upload_fk'], Auth::getGroupId());
-        if (!$uploadIsAccessible) {
+      if (! empty($row['job_upload_fk'])) {
+        $uploadIsAccessible = $this->uploadDao->isAccessible(
+          $row['job_upload_fk'], Auth::getGroupId());
+        if (! $uploadIsAccessible) {
           continue;
         }
       }
@@ -124,14 +138,13 @@ class ShowJobsDao
     }
     $this->dbManager->freeResult($result);
 
-    return $jobArray;
+    return array($jobArray, $totalPages);
   }  /* myJobs() */
 
   /**
    * @brief Get job queue data from db.
    *
-   * @param $job_pks Array of $job_pk's to display.
-   * @param $page Get data for this display page. Starts with zero.
+   * @param array $job_pks Array of $job_pk's to display.
    *
    * @return array of job data
    * \code
@@ -153,63 +166,63 @@ class ShowJobsDao
    * JobQueue ['jq_end_bits'] = jq_end_bits
    * \endcode
   **/
-  public function getJobInfo($job_pks, $page=0)
+  public function getJobInfo($job_pks)
   {
     /* Output data array */
     $jobData = array();
     foreach ($job_pks as $job_pk) {
       /* Get job table data */
-      $statementName = __METHOD__."JobRec";
+      $statementName = __METHOD__ . "JobRec";
       $jobRec = $this->dbManager->getSingleRow(
-        "SELECT * FROM job WHERE job_pk= $1",
-        array($job_pk),
-        $statementName
-      );
+        "SELECT * FROM job WHERE job_pk= $1", array($job_pk),
+        $statementName);
       $jobData[$job_pk]["job"] = $jobRec;
-      if (!empty($jobRec["job_upload_fk"])) {
+      if (! empty($jobRec["job_upload_fk"])) {
         $upload_pk = $jobRec["job_upload_fk"];
         /* Get Upload record for job */
-        $statementName = __METHOD__."UploadRec";
+        $statementName = __METHOD__ . "UploadRec";
         $uploadRec = $this->dbManager->getSingleRow(
-          "SELECT * FROM upload WHERE upload_pk= $1",
-          array($upload_pk),
-          $statementName
-        );
-        if (!empty($uploadRec)) {
+          "SELECT * FROM upload WHERE upload_pk= $1", array($upload_pk),
+          $statementName);
+        if (! empty($uploadRec)) {
           $jobData[$job_pk]["upload"] = $uploadRec;
           /* Get Upload record for uploadtree */
           $uploadtree_tablename = $uploadRec["uploadtree_tablename"];
-          $statementName = __METHOD__."uploadtreeRec";
+          $statementName = __METHOD__ . "uploadtreeRec";
           $uploadtreeRec = $this->dbManager->getSingleRow(
             "SELECT * FROM $uploadtree_tablename where upload_fk = $1 and parent is null",
-            array($upload_pk),
-            $statementName
-          );
+            array($upload_pk), $statementName);
           $jobData[$job_pk]["uploadtree"] = $uploadtreeRec;
         } else {
-          $statementName = __METHOD__."uploadRecord";
+          $statementName = __METHOD__ . "uploadRecord";
           $uploadRec = $this->dbManager->getSingleRow(
             "SELECT * FROM upload right join job on upload_pk = job_upload_fk where job_upload_fk = $1",
-            array($upload_pk),
-            $statementName
-          );
-          /* upload has been deleted so try to get the job name from the original upload job record */
+            array($upload_pk), $statementName);
+          /*
+           * upload has been deleted so try to get the job name from the
+           * original upload job record
+           */
           $jobName = $this->getJobName($uploadRec["job_upload_fk"]);
-          $uploadRec["upload_filename"] = "Deleted Upload: " . $uploadRec["job_upload_fk"] . "(" . $jobName . ")";
+          $uploadRec["upload_filename"] = "Deleted Upload: " .
+            $uploadRec["job_upload_fk"] . "(" . $jobName . ")";
           $uploadRec["upload_pk"] = $uploadRec["job_upload_fk"];
           $jobData[$job_pk]["upload"] = $uploadRec;
         }
       }
       /* Get jobqueue table data */
-      $statementName = __METHOD__."job_pkforjob";
+      $statementName = __METHOD__ . "job_pkforjob";
       $this->dbManager->prepare($statementName,
-      "SELECT jq.*,jd.jdep_jq_depends_fk FROM jobqueue jq LEFT OUTER JOIN jobdepends jd ON jq.jq_pk=jd.jdep_jq_fk WHERE jq.jq_job_fk=$1 ORDER BY jq_pk ASC");
-      $result = $this->dbManager->execute($statementName, array($job_pk));
+        "SELECT jq.*,jd.jdep_jq_depends_fk FROM jobqueue jq LEFT OUTER JOIN jobdepends jd ON jq.jq_pk=jd.jdep_jq_fk WHERE jq.jq_job_fk=$1 ORDER BY jq_pk ASC");
+      $result = $this->dbManager->execute($statementName, array(
+        $job_pk
+      ));
       $rows = $this->dbManager->fetchAll($result);
-      if (!empty($rows)) {
+      if (! empty($rows)) {
         foreach ($rows as $jobQueueRec) {
           $jq_pk = $jobQueueRec["jq_pk"];
-          if (array_key_exists($job_pk,$jobData) && array_key_exists('jobqueue',$jobData[$job_pk]) && array_key_exists($jq_pk,$jobData[$job_pk]['jobqueue'])) {
+          if (array_key_exists($job_pk, $jobData) &&
+            array_key_exists('jobqueue', $jobData[$job_pk]) &&
+            array_key_exists($jq_pk, $jobData[$job_pk]['jobqueue'])) {
             $jobData[$job_pk]['jobqueue'][$jq_pk]["depends"][] = $jobQueueRec["jdep_jq_depends_fk"];
           } else {
             $jobQueueRec["depends"] = array($jobQueueRec["jdep_jq_depends_fk"]);
