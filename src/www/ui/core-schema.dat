@@ -1520,10 +1520,6 @@
   $Schema["TABLE"]["upload"]["public_perm"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"public_perm\" int4";
   $Schema["TABLE"]["upload"]["public_perm"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"public_perm\" DROP NOT NULL";
 
-  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["DESC"] = "COMMENT ON COLUMN \"upload\".\"ignore_files_wo_infos\" IS 'true: SPDX output dont show files wo infos, false: show it'";
-  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["ADD"] = "ALTER TABLE \"upload\" ADD COLUMN \"ignore_files_wo_infos\" boolean DEFAULT false";
-  $Schema["TABLE"]["upload"]["ignore_files_wo_infos"]["ALTER"] = "ALTER TABLE \"upload\" ALTER COLUMN \"ignore_files_wo_infos\" DROP NOT NULL";
-
 
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["DESC"] = "";
   $Schema["TABLE"]["upload_clearing"]["upload_fk"]["ADD"] = "ALTER TABLE \"upload_clearing\" ADD COLUMN \"upload_fk\" int4";
@@ -1745,6 +1741,10 @@
   $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_ga_checkbox_selection\" text";
   $Schema["TABLE"]["report_info"]["ri_ga_checkbox_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_ga_checkbox_selection\" DROP NOT NULL";
+
+  $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_spdx_selection\" text";
+  $Schema["TABLE"]["report_info"]["ri_spdx_selection"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_spdx_selection\" DROP NOT NULL";
 
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";

@@ -670,15 +670,15 @@ class SpdxTwoAgent extends Agent
         $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $fileName = $treeDao->getFullPath($fileId,$treeTableName,0,true);
+      $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0, true);
       if (!is_array($licenses['concluded'])) {
         $licenses['concluded'] = array();
       }
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      $stateComment = $this->getSPDXLicenseCommentState($uploadId);
-      $stateWoInfos = $this->getIgnoreFilesWOinfo($uploadId);
+      $stateComment = $this->getSPDXReportInfo($uploadId, 0);
+      $stateWoInfos = $this->getSPDXReportInfo($uploadId, 1);
       if (!$stateWoInfos ||
           ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights'])))) {
         $dataTemplate = array(
@@ -809,31 +809,17 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return boolval License comment state (TRUE : show license comment, FALSE : don't show it)
    */
-  protected function getSPDXLicenseCommentState($uploadId)
+  protected function getSPDXReportInfo($uploadId, $key)
   {
-    $sql = "SELECT ri_ga_checkbox_selection FROM report_info WHERE upload_fk=$1";
+    $sql = "SELECT ri_spdx_selection FROM report_info WHERE upload_fk = $1";
     $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
     if (!empty($getCommentState['ri_ga_checkbox_selection'])) {
       $getCommentStateSingle = explode(',', $getCommentState['ri_ga_checkbox_selection']);
-      if ($getCommentStateSingle[9] === "checked") {
+      if ($getCommentStateSingle[$key] === "checked") {
         return true;
       }
     }
     return false;
-  }
-
-  /**
-   * @brief Get current ignore files without infos in spdx reports state for a given upload
-   *
-   * @param int $uploadId
-   * @return boolval current state (TRUE : SPDX output dont show files wo infos, FALSE : show it)
-   */
-  protected function getIgnoreFilesWOinfo($uploadId)
-  {
-    $sql = "SELECT ignore_files_wo_infos from upload where upload_pk=$1";
-    $param = array($uploadId);
-    $row = $this->dbManager->getSingleRow($sql,$param,__METHOD__.'.Ignore_files_wo_infos');
-    return ($row['ignore_files_wo_infos']=='t');
   }
 }
 $agent = new SpdxTwoAgent();
