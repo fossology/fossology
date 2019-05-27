@@ -44,7 +44,7 @@ TEST_FILES += fossI16L335U29.tar.bz2 test.tar.Z testtwo.zip test.zip emptydirs.t
 TEST_FILES += test_1-1.dsc test.msi test.rar test.rpm test_1.orig.tar.gz testthree.zip test.z fossI16L518.7z
 TEST_FILES += libununpack.a test.exe test_1-1.debian.tar.xz ext2file.fs ext3file.fs fatfile.fs ntfsfile.fs
 
-../testdata/libununpack.a:
+../testdata/libununpack.a: libununpack.a
 	cp $(AGENTDIR)/libununpack.a ../testdata/libununpack.a
 
 ../testdata/fossI16L335U29.tar.bz2:
