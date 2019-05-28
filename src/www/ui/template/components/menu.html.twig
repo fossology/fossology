@@ -40,7 +40,7 @@
               {%else%}       
                 <form action="{{ backtraceUri }}" method="post">
                   {% import "include/macros.html.twig" as macro %}
-                  {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' onchange="this.form.submit()"') }}
+                  {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' class="ui-render-select2" onchange="this.form.submit()"') }}
               </form>
               {% endif %}
             </td>

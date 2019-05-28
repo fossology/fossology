@@ -15,7 +15,7 @@ This file is offered as-is, without any warranty.
       <li>{{ "Select the upload you wish to edit"|trans }}:
         {% if uploadList is not empty %}
           {% import "include/macros.html.twig" as macro %}
-          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction) }}
+          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,'class="ui-render-select2"') }}
         {% else %}
           {{ 'No upload available in this folder'|trans }}
         {% endif %}
