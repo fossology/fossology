@@ -106,7 +106,7 @@ class AdminGroupUsers extends DefaultPlugin
         'groupMapAction' => $onchange);
 
     $stmt = __METHOD__ . "getUsersWithGroup";
-    $dbManager->prepare($stmt, "select  user_pk, user_name, group_user_member_pk, group_perm
+    $dbManager->prepare($stmt, "select  user_pk, user_name, user_desc, group_user_member_pk, group_perm
          FROM users LEFT JOIN group_user_member gum ON gum.user_fk=users.user_pk AND gum.group_fk=$1
          ORDER BY user_name");
     $result = $dbManager->execute($stmt, array($group_pk));
@@ -118,7 +118,7 @@ class AdminGroupUsers extends DefaultPlugin
       if ($row['group_user_member_pk']) {
         continue;
       }
-      $otherUsers[$row['user_pk']] = $row['user_name'];
+      $otherUsers[$row['user_pk']] = !empty($row['user_desc']) ? $row['user_desc']. ' ('. $row['user_name'] .')' : $row['user_name'];
     }
 
     $vars['existsOtherUsers'] = count($otherUsers) - 1;
