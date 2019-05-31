@@ -25,7 +25,7 @@
         {% if isReadOnly %}
           ({{ 'read only'|trans }}){% endif %}
       </td>
-      <td align="left">{{ macro.selectsingle('ob_type', obligationTypes, 'ob_type', 'Obligation', 'style="min-width:120px;"', 4) }}
+      <td align="left">{{ macro.selectsingle('ob_type', obligationTypes, 'ob_type', ob_type, 'style="min-width:120px;"', 4) }}
       </td>
     </tr>
     <tr>
@@ -42,7 +42,7 @@
         {% if isReadOnly %}
           ({{ 'read only'|trans }}){% endif %}
       </td>
-      <td align="left">{{ macro.selectsingle('ob_classification', obligationClassification, 'ob_classification', 'green', 'style="min-width:120px;"', 4) }}
+      <td align="left">{{ macro.selectsingle('ob_classification', obligationClassification, 'ob_classification', ob_classification, 'style="min-width:120px;"', 4) }}
       </td>
     </tr>
     <tr>
