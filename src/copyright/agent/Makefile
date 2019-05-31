@@ -13,8 +13,9 @@ include $(VARS)
 CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp $(shell pkg-config --cflags jsoncpp)
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
-CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(ALL_CXXFLAGS) -lm -fopenmp $(FO_CXXLDFLAGS) \
-                $(shell pkg-config --libs jsoncpp)
+CXXFLAGS_LINK = -lboost_regex -lboost_program_options -lboost_system \
+                -lboost_filesystem $(ALL_CXXFLAGS) -lm -fopenmp \
+                $(FO_CXXLDFLAGS) $(shell pkg-config --libs jsoncpp)
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
@@ -28,7 +29,7 @@ EXE_COV = $(EXE_COP)_cov
 
 
 
-OBJECTS = copyright.o regscan.o scanners.o cleanEntries.o regexConfProvider.o regexConfParser.o
+OBJECTS = copyright.o regscan.o scanners.o cleanEntries.o regexConfProvider.o regexConfParser.o directoryScan.o
 OBJECTS_COP = copyscan_cop.o copyrightUtils_cop.o copyrightState_cop.o database_cop.o
 OBJECTS_ECC = copyrightUtils_ecc.o copyrightState_ecc.o database_ecc.o
 OBJECTS_KW = copyrightUtils_kw.o copyrightState_kw.o database_kw.o

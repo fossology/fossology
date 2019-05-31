@@ -41,6 +41,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * || e.g. 'linux@@1@@(linus) torvalds' |
  * | --files arg | Files to scan |
  * | -J [--json] | Output JSON |
+ * | -d [--directory] | Directory to scan (recursive) |
  * \section copyrightsource Agent source
  *   - \link src/copyright/agent \endlink
  *   - \link src/copyright/ui \endlink
@@ -52,8 +53,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sstream>
 
 #include "copyright.hpp"
-
-#include <json/json.h>
 
 using namespace std;
 using namespace fo;
@@ -71,7 +70,8 @@ int main(int argc, char** argv)
 
   CliOptions cliOptions;
   vector<string> fileNames;
-  if (!parseCliOptions(argc, argv, cliOptions, fileNames))
+  string directoryToScan;
+  if (!parseCliOptions(argc, argv, cliOptions, fileNames, directoryToScan))
   {
     return_sched(1);
   }
@@ -81,10 +81,14 @@ int main(int argc, char** argv)
 
   if (!fileNames.empty())
   {
-    const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
-
     const unsigned long fileNamesCount = fileNames.size();
     bool fileError = false;
+    bool printComma = false;
+
+    if (json)
+    {
+      cout << "[" << endl;
+    }
 
 #pragma omp parallel
     {
@@ -92,53 +96,30 @@ int main(int argc, char** argv)
       for (unsigned int argn = 0; argn < fileNamesCount; ++argn)
       {
         const string fileName = fileNames[argn];
-        // Read file into one string
-        string s;
-        if (!ReadFileToString(fileName, s))
+        pair<string, list<match>> scanResult = processSingleFile(state, fileName);
+        if (json)
         {
-          // File error
-          fileError = true;
+          appendToJson(fileName, scanResult, printComma);
         }
         else
         {
-          list<match> l;
-          for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
-          {
-            (*sc)->ScanString(s, l);
-          }
-
-          if (json) {
-            Json::Value results;
-            for (auto m = l.begin(); m != l.end(); ++m)
-            {
-              Json::Value j;
-              j["start"] = m->start;
-              j["end"] = m->end;
-              j["type"] = m->type;
-              j["content"] = cleanMatch(s, *m);
-              results.append(j);
-            }
-            Json::Value output;
-            output["results"] = results;
-            Json::FastWriter builder;
-            cout << builder.write(output);
-          } else {
-            stringstream ss;
-            ss << fileName << " ::" << endl;
-            // Output matches
-            for (auto m = l.begin();  m != l.end(); ++m)
-            {
-              ss << "\t[" << m->start << ':' << m->end << ':' << m->type << "] '"
-                 << cleanMatch(s, *m)
-                 << "'" << endl;
-            }
-            // Thread-Safety: output all matches (collected in ss) at once to cout
-            cout << ss.str();
-          }
+          printResultToStdout(fileName, scanResult);
+        }
+        if (scanResult.first.empty())
+        {
+          fileError = true;
         }
       }
     }
+    if (json)
+    {
+      cout << endl << "]" << endl;
+    }
     return fileError ? 1 : 0;
+  }
+  else if (directoryToScan.length() > 0)
+  {
+    scanDirectory(state, json, directoryToScan);
   }
   else
   {
