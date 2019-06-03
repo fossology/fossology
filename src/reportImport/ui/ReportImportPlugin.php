@@ -109,9 +109,6 @@ class ReportImportPlugin extends DefaultPlugin
     $vars['folderStructure'] = $folderStructure;
     $vars['baseUri'] = $Uri = Traceback_uri() . "?mod=" . self::NAME . "&folder=";
 
-    $baseFolderUri = $vars['baseUri']."$folder_pk&upload=";
-    $vars['uploadAction'] = "onchange=\"js_url(this.value, '$baseFolderUri')\"";
-
     return $this->render('ReportImportPlugin.html.twig', $this->mergeWithDefault($vars));
   }
 

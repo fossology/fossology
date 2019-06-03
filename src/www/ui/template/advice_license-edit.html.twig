@@ -33,8 +33,8 @@
       <td><textarea name="note" cols="120" rows="10">{{ rf_notes|e }}</textarea></td>
     </tr>
     <tr>
-      <td align="right">{{ 'Risk level'|trans }}</td>
-      <td align="left">
+      <td valign="top">{{ 'Risk level'|trans }}:</td>
+      <td>
         {% import 'include/macros.html.twig' as macro %}
         {{ macro.select('risk',range(0,5),'risk',rf_risk) }}
       </td>

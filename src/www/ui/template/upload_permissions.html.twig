@@ -40,7 +40,7 @@
       {% if additableGroups is not empty %}
       <tr>
         <td>
-          {{ macro.select('groupselectnew',additableGroups,'groupselectnew',newGroup) }}
+          {{ macro.select('groupselectnew', additableGroups, 'groupselectnew', newGroup, 'class="ui-render-select2"') }}
         </td>
         <td>
           {% if permNamesWithReuse is defined %}

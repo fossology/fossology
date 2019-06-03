@@ -15,7 +15,7 @@
   {%  if isSessionAdmin %}
     {{ "Select the user to edit"|trans }}:
     {% import "include/macros.html.twig" as macro %}
-    {{ macro.select('userid', allUsers, 'userid', userId, ' onchange="RefreshPage(this.value);"') }}
+    {{ macro.select('userid', allUsers, 'userid', userId, ' class="ui-render-select2" onchange="RefreshPage(this.value);"') }}
   {% endif %}
     
   <table style="border:1px solid black; border-collapse: collapse;" width="100%">
