@@ -18,7 +18,7 @@ without any warranty.
             {$TWIG_CACHE}
             <parameter key="autoescape" type="constant">false</parameter>
         </parameter>
-        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
+        <parameter key="twig.loader.source_path" type="string">%application_root%/lib/php/UI/template</parameter>
         <parameter key="time.zone" type="string"></parameter>
 	<parameter key="displayErrorDetails" type="constant">false</parameter>
         <parameter key="addContentLengthHeader" type="constant">false</parameter>
