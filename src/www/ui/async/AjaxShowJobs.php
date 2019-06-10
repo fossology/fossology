@@ -258,7 +258,7 @@ class AjaxShowJobs extends \FO_Plugin
         }
 
         $jobArr['jobQueue'][$key]['canDoActions'] = ($_SESSION[Auth::USER_LEVEL] ==
-          PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
+          PLUGIN_DB_ADMIN) || (Auth::getUserId() == $jobs['job']['job_user_fk']);
         $jobArr['jobQueue'][$key]['isInProgress'] = ($singleJobQueue['jq_end_bits'] ==
           0);
         $jobArr['jobQueue'][$key]['isReady'] = ($singleJobQueue['jq_end_bits'] ==

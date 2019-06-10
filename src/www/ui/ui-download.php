@@ -218,7 +218,7 @@ class ui_download extends FO_Plugin
 
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));
-    BrowserConsoleHandler::reset();
+    BrowserConsoleHandler::resetStatic();
 
     return $response;
   }
