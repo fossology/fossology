@@ -372,6 +372,10 @@
   $Schema["TABLE"]["copyright_decision"]["textfinding"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"textfinding\" text";
   $Schema["TABLE"]["copyright_decision"]["textfinding"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
 
+  $Schema["TABLE"]["copyright_decision"]["hash"]["DESC"] = "COMMENT ON COLUMN \"copyright_decision\".\"hash\" IS 'SHA256 hash of textfinding for grouping statements.'";
+  $Schema["TABLE"]["copyright_decision"]["hash"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"hash\" char(64)";
+  $Schema["TABLE"]["copyright_decision"]["hash"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
   $Schema["TABLE"]["copyright_decision"]["comment"]["DESC"] = "";
   $Schema["TABLE"]["copyright_decision"]["comment"]["ADD"] = "ALTER TABLE \"copyright_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["copyright_decision"]["comment"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
@@ -479,6 +483,10 @@
   $Schema["TABLE"]["ecc_decision"]["textfinding"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"textfinding\" text";
   $Schema["TABLE"]["ecc_decision"]["textfinding"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
 
+  $Schema["TABLE"]["ecc_decision"]["hash"]["DESC"] = "COMMENT ON COLUMN \"ecc_decision\".\"hash\" IS 'SHA256 hash of textfinding for grouping statements.'";
+  $Schema["TABLE"]["ecc_decision"]["hash"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"hash\" char(64)";
+  $Schema["TABLE"]["ecc_decision"]["hash"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
   $Schema["TABLE"]["ecc_decision"]["comment"]["DESC"] = "";
   $Schema["TABLE"]["ecc_decision"]["comment"]["ADD"] = "ALTER TABLE \"ecc_decision\" ADD COLUMN \"comment\" text";
   $Schema["TABLE"]["ecc_decision"]["comment"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"comment\" DROP NOT NULL";
@@ -547,6 +555,10 @@
   $Schema["TABLE"]["keyword_decision"]["textfinding"]["DESC"] = "";
   $Schema["TABLE"]["keyword_decision"]["textfinding"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"textfinding\" text";
   $Schema["TABLE"]["keyword_decision"]["textfinding"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_decision"]["hash"]["DESC"] = "COMMENT ON COLUMN \"keyword_decision\".\"hash\" IS 'SHA256 hash of textfinding for grouping statements.'";
+  $Schema["TABLE"]["keyword_decision"]["hash"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"hash\" char(64)";
+  $Schema["TABLE"]["keyword_decision"]["hash"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"hash\" DROP NOT NULL";
 
   $Schema["TABLE"]["keyword_decision"]["comment"]["DESC"] = "";
   $Schema["TABLE"]["keyword_decision"]["comment"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"comment\" text";
@@ -1931,11 +1943,13 @@
   $Schema["CONSTRAINT"]["copyright_pfile_fk_fkey"] = "ALTER TABLE \"copyright\" ADD CONSTRAINT \"copyright_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_fk_fkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["copyright_decision_pfile_hash_ukey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\", \"hash\");";
   $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ecc_pk\");";
   $Schema["CONSTRAINT"]["ecc_agent_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_pfile_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_decision_pkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pkey\" PRIMARY KEY (\"ecc_decision_pk\");";
   $Schema["CONSTRAINT"]["ecc_decision_pfile_fk_fkey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ecc_decision_pfile_hash_ukey"] = "ALTER TABLE \"ecc_decision\" ADD CONSTRAINT \"ecc_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\", \"hash\");";
   $Schema["CONSTRAINT"]["file_picker_pkey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_pkey\" PRIMARY KEY (\"file_picker_pk\");";
   $Schema["CONSTRAINT"]["file_picker_user_fk_ukey"] = "ALTER TABLE \"file_picker\" ADD CONSTRAINT \"file_picker_user_fk_ukey\" UNIQUE (\"user_fk\",\"uploadtree_fk1\",\"uploadtree_fk2\");";
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
@@ -1958,6 +1972,7 @@
   $Schema["CONSTRAINT"]["keyword_pfile_fk_fkey"] = "ALTER TABLE \"keyword\" ADD CONSTRAINT \"keyword_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_decision_pkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pkey\" PRIMARY KEY (\"keyword_decision_pk\");";
   $Schema["CONSTRAINT"]["keyword_decision_pfile_fk_fkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_decision_pfile_hash_ukey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\", \"hash\");";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_file_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["license_file_pfile_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2046,6 +2061,7 @@
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_clearing_decision_type_fk_index"] = "CREATE INDEX copyright_decision_clearing_decision_type_fk_index ON copyright_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_user_fk_index"] = "CREATE INDEX copyright_decision_user_fk_index ON copyright_decision USING btree (user_fk);";
+  $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_hash_index"] = "CREATE INDEX copyright_decision_pfile_hash_index ON copyright_decision USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
@@ -2059,14 +2075,18 @@
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_clearing_decision_type_fk_index"] = "CREATE INDEX ecc_decision_clearing_decision_type_fk_index ON ecc_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_fk_index"] = "CREATE INDEX ecc_decision_pfile_fk_index ON ecc_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
+  $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_hash_index"] = "CREATE INDEX ecc_decision_pfile_hash_index ON ecc_decision USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
   $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_index"] = "CREATE INDEX keyword_pfile_fk_index ON keyword USING btree (pfile_fk);";
   $Schema["INDEX"]["keyword"]["keyword_pfile_hash_idx"] = "CREATE INDEX keyword_pfile_hash_idx ON keyword using btree (hash, pfile_fk);";
+
   $Schema["INDEX"]["keyword_decision"]["keyword_decision_clearing_decision_type_fk_index"] = "CREATE INDEX keyword_decision_clearing_decision_type_fk_index ON keyword_decision USING btree (clearing_decision_type_fk);";
   $Schema["INDEX"]["keyword_decision"]["keyword_decision_pfile_fk_index"] = "CREATE INDEX keyword_decision_pfile_fk_index ON keyword_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["keyword_decision"]["keyword_decision_user_fk_index"] = "CREATE INDEX keyword_decision_user_fk_index ON keyword_decision USING btree (user_fk);";
+  $Schema["INDEX"]["keyword_decision"]["keyword_decision_pfile_hash_index"] = "CREATE INDEX keyword_decision_pfile_hash_index ON keyword_decision USING btree (hash, pfile_fk);";
+
   $Schema["INDEX"]["highlight"]["highlight_fl_fk_idx"] = "CREATE INDEX highlight_fl_fk_idx ON highlight USING btree (fl_fk);";
 
   $Schema["INDEX"]["highlight_keyword"]["highlight_keyword_pfile_fk_idx"] = "CREATE INDEX highlight_keyword_pfile_fk_idx ON highlight_keyword USING btree (pfile_fk);";

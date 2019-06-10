@@ -73,6 +73,16 @@ abstract class DbManager
     }
   }
 
+  public function rollback()
+  {
+    if ($this->transactionDepth > 0) {
+      $this->transactionDepth--;
+      $this->dbDriver->rollback();
+    } else if ($this->transactionDepth == 0) {
+      throw new \Exception('too much transaction rollbacks');
+    }
+  }
+
   /**
    * @param $statementName
    * @param $sqlStatement
