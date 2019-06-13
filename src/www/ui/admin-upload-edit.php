@@ -90,7 +90,6 @@ class upload_properties extends FO_Plugin
       $this->dbManager->getSingleRow("UPDATE upload SET upload_desc=$2 WHERE upload_pk=$1",
         array($uploadId, $trimNewDesc), __METHOD__ . '.updateUpload.desc');
     }
-
     return 1;
   }
 
@@ -117,7 +116,6 @@ class upload_properties extends FO_Plugin
       $text = _("Permission Denied");
       return "<h2>$text</h2>";
     }
-
     $rc = $this->UpdateUploadProperties($upload_pk, $NewName, $NewDesc);
     if ($rc == 0) {
       $text = _("Nothing to Change");

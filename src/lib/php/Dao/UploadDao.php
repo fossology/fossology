@@ -632,7 +632,7 @@ ORDER BY lft asc
   public function getReportInfo($uploadId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT * FROM report_info where upload_fk=$1";
+    $sql = "SELECT * FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
     if (empty($row)) {

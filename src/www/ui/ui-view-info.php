@@ -509,64 +509,6 @@ class ui_view_info extends FO_Plugin
     return $vars;
   }
 
-  function ShowReportInfo($Upload)
-  {
-    $vars = [];
-    $row = $this->uploadDao->getReportInfo($Upload);
-    $checkBoxDefault = "unchecked";
-    $vars['nonCritical'] = $checkBoxDefault;
-    $vars['critical'] = $checkBoxDefault;
-    $vars['noDependency'] = $checkBoxDefault;
-    $vars['dependencySource'] = $checkBoxDefault;
-    $vars['dependencyBinary'] = $checkBoxDefault;
-    $vars['noExportRestriction'] = $checkBoxDefault;
-    $vars['exportRestriction'] = $checkBoxDefault;
-    $vars['noRestriction'] = $checkBoxDefault;
-    $vars['restrictionForUse'] = $checkBoxDefault;
-    $vars['spdxLicenseComment'] = $checkBoxDefault;
-
-    if (!empty($row)) {
-      $reviewedBy = $row['ri_reviewed'];
-      $reportRel = $row['ri_report_rel'];
-      $community = $row['ri_community'];
-      $component = $row['ri_component'];
-      $version = $row['ri_version'];
-      $relDate = $row['ri_release_date'];
-      $sw360Link = $row['ri_sw360_link'];
-      $footerNote = $row['ri_footer'];
-      $generalAssesment = $row['ri_general_assesment'];
-      $gaAdditional = $row['ri_ga_additional'];
-      $gaRisk = $row['ri_ga_risk'];
-      $gaSelectionList = explode(',', $row['ri_ga_checkbox_selection']);
-    }
-
-    $vars['footerNote'] = $footerNote;
-    $vars['reviewedBy'] = $reviewedBy;
-    $vars['reportRel'] = $reportRel;
-    $vars['community'] = $community;
-    $vars['component'] = $component;
-    $vars['version'] = $version;
-    $vars['relDate'] = $relDate;
-    $vars['sw360Link'] = $sw360Link;
-    $vars['generalAssesment'] = $generalAssesment;
-    if (array_key_exists(9, $gaSelectionList)) {
-      $vars['nonCritical'] = $gaSelectionList[0];
-      $vars['critical'] = $gaSelectionList[1];
-      $vars['noDependency'] = $gaSelectionList[2];
-      $vars['dependencySource'] = $gaSelectionList[3];
-      $vars['dependencyBinary'] = $gaSelectionList[4];
-      $vars['noExportRestriction'] = $gaSelectionList[5];
-      $vars['exportRestriction'] = $gaSelectionList[6];
-      $vars['noRestriction'] = $gaSelectionList[7];
-      $vars['restrictionForUse'] = $gaSelectionList[8];
-      $vars['spdxLicenseComment'] = $gaSelectionList[9];
-    }
-    $vars['gaAdditional'] = $gaAdditional;
-    $vars['gaRisk'] = $gaRisk;
-
-    return $vars;
-  }
-
   /**
    * @brief Get the info regarding reused package
    * @param int $uploadId Get the reused package for this upload
@@ -611,25 +553,6 @@ class ui_view_info extends FO_Plugin
     return $vars;
   }
 
-  /**
-   * @param array $checkBoxListParams
-   * @return $cbSelectionList
-   */
-  protected function getCheckBoxSelectionList($checkBoxListParams)
-  {
-    foreach ($checkBoxListParams as $checkBoxListParam) {
-      $ret = GetParm($checkBoxListParam, PARM_STRING);
-      if (empty($ret)) {
-        $cbList[] = "unchecked";
-      } else {
-        $cbList[] = "checked";
-      }
-    }
-    $cbSelectionList = implode(",", $cbList);
-
-    return $cbSelectionList;
-  }
-
   public function Output()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
@@ -640,53 +563,6 @@ class ui_view_info extends FO_Plugin
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
 
-    $submitReportInfo = GetParm("submitReportInfo", PARM_STRING);
-
-    if (isset($submitReportInfo)) {
-      $reviewedBy = GetParm('reviewedBy', PARM_TEXT);
-      $footerNote = GetParm('footerNote', PARM_TEXT);
-      $reportRel = GetParm('reportRel', PARM_TEXT);
-      $community = GetParm('community', PARM_TEXT);
-      $component = GetParm('component', PARM_TEXT);
-      $version = GetParm('version', PARM_TEXT);
-      $relDate = GetParm('relDate', PARM_TEXT);
-      $sw360Link = GetParm('sw360Link', PARM_TEXT);
-      $generalAssesment = GetParm('generalAssesment', PARM_TEXT);
-      $checkBoxListParams = array(
-        "nonCritical",
-        "critical",
-        "noDependency",
-        "dependencySource",
-        "dependencyBinary",
-        "noExportRestriction",
-        "exportRestriction",
-        "noRestriction",
-        "restrictionForUse",
-        "spdxLicenseComment"
-      );
-      $cbSelectionList = $this->getCheckBoxSelectionList($checkBoxListParams);
-      $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
-      $gaRisk = GetParm('gaRisk', PARM_TEXT);
-      $sql = "UPDATE report_info SET ri_reviewed=$2, ri_footer=$3, ri_report_rel=$4, ri_community=$5, " .
-        "ri_component=$6,ri_version=$7, ri_release_date=$8, ri_sw360_link=$9, " .
-        "ri_general_assesment=$10, ri_ga_additional=$11, ri_ga_risk=$12, ri_ga_checkbox_selection=$13 " .
-        "WHERE upload_fk=$1;";
-      $this->dbManager->prepare(__METHOD__ . "updateReportInfoData", $sql);
-      $result = $this->dbManager->execute(__METHOD__ . "updateReportInfoData",
-        array(
-          $uploadId,
-          $reviewedBy,
-          $footerNote,
-          $reportRel,
-          $community,
-          $component,
-          $version,
-          $relDate,
-          $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $cbSelectionList));
-      $this->dbManager->freeResult($result);
-    }
-
-    $this->vars += $this->ShowReportInfo($uploadId);
     $this->vars += $this->ShowTagInfo($uploadId, $itemId);
     $this->vars += $this->ShowPackageinfo($uploadId, $itemId, 1);
     $this->vars += $this->ShowMetaView($uploadId, $itemId);
