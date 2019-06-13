@@ -1,0 +1,1 @@
+spdx-license-identifier: MPL-2.0-no-copyleft-exception and BSD-2-Clause and (MIT OR Apache-2.0)
