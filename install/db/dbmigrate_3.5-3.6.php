@@ -133,7 +133,7 @@ function updateSHA256($dbManager, $tableName)
     foreach ($rows as $row) {
         $dbManager->execute($statement, [
             $row["id"],
-            hash('sha256',  file_get_contents(RepPath($row['id'],"files")))
+            hash_file('sha256',  RepPath($row['id'],"files"))
         ]);
     }
     return count($rows);
@@ -193,19 +193,19 @@ function migrate_35_36($dbManager, $force = false)
     // Updating the pfile findings
     if ($totalPfile != 0)
     {
-        echo "*** Updating the sha256 values of manual pfile findings ***\n";
+        echo "*** Updating the sha256 values of pfiles ***\n";
         $countPfile = updateSHA256($dbManager, "pfile");
     }
     $dbManager->commit();
 
     if($total != 0)
     {
-        echo "*** Updated hash of $count/$total manual copyright/ecc/keyword/pfile findings ***\n";
+        echo "*** Updated hash of $count/$total manual copyright/ecc/keyword findings ***\n";
     }
 
     if ($totalPfile != 0)
     {
-        echo "*** Updated sha256 of $countPfile/$totalPfile records of pfile findings ***\n";
+        echo "*** Updated sha256 of $countPfile/$totalPfile records of pfile ***\n";
     }
   } catch (Exception $e) {
     echo "*** Something went wrong. Try running postinstall again! ***\n";
