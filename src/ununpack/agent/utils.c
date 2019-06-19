@@ -18,10 +18,6 @@
  * \file
  * \brief Contains all utility functions used by FOSSology
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "ununpack.h"
 #include "externs.h"
 #include "regex.h"
@@ -1569,18 +1565,22 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
   {
     CksumFile *CF;
     Cksum *Sum;
-    char SHA256[64], command[1000] = "sha256sum ";
-    strcat(command,CI->Source);
+    char SHA256[65];
+    char command[PATH_MAX + 13];
     int retcode = -1;
+    int read = 0;
+
+    memset(SHA256, '\0', sizeof(SHA256));
 
     CF = SumOpenFile(CI->Source);
+    snprintf(command, PATH_MAX + 13, "sha256sum '%s'", CI->Source);
     FILE* file = popen(command, "r");
     if (file != (FILE*) NULL)
     {
-      fscanf(file, "%64s", SHA256);
+      read = fscanf(file, "%64s", SHA256);
       retcode = WEXITSTATUS(pclose(file));
     }
-    if (file == (FILE*) NULL || retcode != 0)
+    if (file == (FILE*) NULL || retcode != 0 || read != 1)
     {
       LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
       SafeExit(56);
@@ -1766,7 +1766,6 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  Boot partitions: x86, vmlinuz\n");
   CheckCommands(Quiet);
 } /* Usage() */
-
 
 /**
  * @brief Dummy postgresql notice processor.
