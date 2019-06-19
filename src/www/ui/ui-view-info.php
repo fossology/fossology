@@ -120,6 +120,7 @@ class ui_view_info extends FO_Plugin
       $vars['sizeInMB'] = $bytesH;
       $vars['fileSha1'] = $row['pfile_sha1'];
       $vars['fileMd5'] = $row['pfile_md5'];
+      $vars['fileSha256'] = $row['pfile_sha256'];
       $vars['fileSize'] = $row['pfile_size'];
       $vars['filePfileId'] = $row['pfile_fk'];
     }

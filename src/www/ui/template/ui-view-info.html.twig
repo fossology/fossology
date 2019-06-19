@@ -182,6 +182,10 @@
         <td align="right">{{ fileMd5|e }}</td>
       </tr>
       <tr>
+        <td align="center">{{ "SHA256 Checksum"|trans }}</td>
+        <td align="right">{{ fileSha256|e }}</td>
+      </tr>
+      <tr>
         <td align="center">{{ "Repository ID"|trans }}</td>
         <td align="right">{{ fileSha1|e }}.{{ fileMd5|e }}.{{ fileSize|e }}</td>
       </tr>
