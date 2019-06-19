@@ -227,6 +227,7 @@ class AjaxShowJobs extends \FO_Plugin
         if (! empty($singleJobQueue["jq_endtime"])) {
           $numSecs = strtotime($singleJobQueue['jq_endtime']) -
             strtotime($singleJobQueue['jq_starttime']);
+          $numSecs = ($numSecs == 0) ? 1 : $numSecs; // If difference is in milliseconds
         } else {
           $numSecs = time() - strtotime($singleJobQueue['jq_starttime']);
         }
@@ -293,7 +294,7 @@ class AjaxShowJobs extends \FO_Plugin
           'uploadId' => $jobs['upload']['upload_pk'],
           'uploadDesc' => $jobs['upload']['upload_desc'],
           'uploadItem' => $jobs['uploadtree']['uploadtree_pk'],
-          'uploadEta' => $this->showJobsDao->getEstimatedTime($jobId)
+          'uploadEta' => $this->showJobsDao->getEstimatedTime($jobs['job']['job_pk'], '', 0, $jobs['upload']['upload_pk'])
         );
       } else {
         $uploadArr = null;
