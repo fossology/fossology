@@ -94,16 +94,19 @@ void DBLoadGold()
   char SQL[MAXCMD];
   long PfileKey;
   char *Path;
-  char SHA256[64], command[1000] = "sha256sum ";
+  char SHA256[65], command[PATH_MAX + 13];
   FILE *Fin;
-  int rc;
+  int rc = -1;
   PGresult *result;
-  int retcode = -1;
+  int read = 0;
+
+  memset(SHA256, '\0', sizeof(SHA256));
 
   LOG_VERBOSE0("Processing %s",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
+
   // Calculate sha256 value
-  strcat(command,GlobalTempFile);
+  snprintf(command, PATH_MAX + 13, "sha256sum '%s'", GlobalTempFile);
   FILE* file = popen(command, "r");
 
   if (!Fin)
@@ -114,13 +117,13 @@ void DBLoadGold()
   }
   if (file != (FILE*) NULL)
   {
-    fscanf(file, "%64s", SHA256);
-    retcode = WEXITSTATUS(pclose(file));
+    read = fscanf(file, "%64s", SHA256);
+    rc = WEXITSTATUS(pclose(file));
   }
-  if (file == (FILE*) NULL || retcode != 0)
+  if (file == (FILE*) NULL || rc != 0 || read != 1)
   {
     LOG_FATAL("Unable to calculate SHA256 of %s\n", GlobalTempFile);
-    SafeExit(2);
+    SafeExit(56);
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
