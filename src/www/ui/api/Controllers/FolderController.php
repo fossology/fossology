@@ -77,7 +77,9 @@ class FolderController extends RestController
     $foldersList = array();
     foreach ($allUserFolders as $folderId) {
       $folder = $folderDao->getFolder($folderId);
-      $folderModel = new Folder($folder->getId(), $folder->getName(), $folder->getDescription());
+      $parentId = $folderDao->getFolderParentId($folderId);
+      $folderModel = new Folder($folder->getId(), $folder->getName(),
+        $folder->getDescription(), $parentId);
       $foldersList[] = $folderModel->getArray();
     }
     if ($id !== null) {
