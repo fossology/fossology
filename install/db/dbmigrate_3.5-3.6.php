@@ -25,6 +25,27 @@ use Fossology\Lib\Db\DbManager;
  * tables.
  */
 
+
+/**
+ * @brief calculate number of records and return offset
+ *
+ * The function gets count of the values from database and
+ * calculates percentage and returns inteager
+ * @param DbManager $dbManager
+ * @param string $tableName
+ */
+function calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $columnName)
+{
+  $percentage = 10;
+  $SQL = "SELECT count(*) AS cnt FROM $tableName WHERE $tableName.$columnName is NULL";
+  $totalPfile = $dbManager->getSingleRow($SQL, [],__METHOD__ . ".calculateNumberOfRecordsToBeProcesses".$tableName);
+  if ($totalPfile['cnt'] > 100) {
+    return intval(($percentage / 100) * $totalPfile['cnt']);
+  } else {
+    return $totalPfile['cnt'];
+  }
+}
+
 /**
  * @brief Removes duplicate decisions based on same textfinding for same pfile
  *
@@ -43,23 +64,23 @@ function cleanDecisionTable($dbManager, $tableName)
   echo "*** Removing any duplicate manual findings from $tableName ***\n";
   // First remove only duplicate deactivated statements
   $sql = "
-DELETE FROM $tableName
-WHERE " . $tableName . "_pk IN (SELECT " . $tableName . "_pk
-  FROM (SELECT " . $tableName . "_pk, is_enabled,
+ DELETE FROM $tableName
+  WHERE " . $tableName . "_pk IN (SELECT " . $tableName . "_pk
+   FROM (SELECT " . $tableName . "_pk, is_enabled,
     ROW_NUMBER() OVER (PARTITION BY textfinding, pfile_fk
                        ORDER BY " . $tableName . "_pk) AS rnum
-    FROM $tableName) AS a
+   FROM $tableName) AS a
   WHERE a.is_enabled = FALSE AND a.rnum > 1);";
   $dbManager->queryOnce($sql);
 
-  // Then remove any active duplicate statements
+    // Then remove any active duplicate statements
   $sql = "
-DELETE FROM $tableName
-WHERE " . $tableName . "_pk IN (SELECT " . $tableName . "_pk
-  FROM (SELECT " . $tableName . "_pk,
+ DELETE FROM $tableName
+  WHERE " . $tableName . "_pk IN (SELECT " . $tableName . "_pk
+   FROM (SELECT " . $tableName . "_pk,
     ROW_NUMBER() OVER (PARTITION BY textfinding, pfile_fk
                        ORDER BY " . $tableName . "_pk) AS rnum
-    FROM $tableName) AS a
+   FROM $tableName) AS a
   WHERE a.rnum > 1);";
   $dbManager->queryOnce($sql);
 }
@@ -72,6 +93,7 @@ WHERE " . $tableName . "_pk IN (SELECT " . $tableName . "_pk
  */
 function updateHash($dbManager, $tableName)
 {
+  $totalCount = 0;
   if($dbManager == null){
     echo "No connection object passed!\n";
     return false;
@@ -81,26 +103,30 @@ function updateHash($dbManager, $tableName)
     echo "Table $tableName does not exists, not updating!\n";
     return 0;
   }
+  $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash");
+  while (!empty($numberOfRecords)) {
+    $sql = "SELECT " . $tableName . "_pk AS id, textfinding " .
+      "FROM $tableName WHERE hash IS NULL LIMIT $numberOfRecords;";
+    $statement = __METHOD__ . ".getNullHash.$tableName";
+    $rows = $dbManager->getRows($sql, [], $statement);
 
-  $sql = "SELECT " . $tableName . "_pk AS id, textfinding " .
-    "FROM $tableName WHERE hash IS NULL;";
-  $statement = __METHOD__ . ".getNullHash.$tableName";
-  $rows = $dbManager->getRows($sql, [], $statement);
-
-  $sql = "
-UPDATE $tableName
-  SET hash = $2
-  WHERE " . $tableName . "_pk = $1;
-";
-  $statement = __METHOD__ . ".updateHashOf.$tableName";
-  $dbManager->prepare($statement, $sql);
-  foreach ($rows as $row) {
-    $dbManager->execute($statement, [
-      $row["id"],
-      hash('sha256', $row['textfinding'])
-    ]);
+    $sql = "
+  UPDATE $tableName
+    SET hash = $2
+    WHERE " . $tableName . "_pk = $1;
+  ";
+    $statement = __METHOD__ . ".updateHashOf.$tableName";
+    $dbManager->prepare($statement, $sql);
+    foreach ($rows as $row) {
+      $dbManager->execute($statement, [
+        $row["id"],
+        hash('sha256', $row['textfinding'])
+      ]);
+    }
+    $totalCount = $totalCount + $numberOfRecords;
+    $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash");
   }
-  return count($rows);
+  return $totalCount;
 }
 
 /**
@@ -111,17 +137,21 @@ UPDATE $tableName
  */
 function updateSHA256($dbManager, $tableName)
 {
-    if($dbManager == null){
-        echo "No connection object passed!\n";
-        return false;
-    }
-    if(DB_TableExists($tableName) != 1) {
-        // Table does not exists (migrating from old version)
-        echo "Table $tableName does not exists, not updating!\n";
-        return 0;
-    }
+  $totalCount = 0;
+  if ($dbManager == null) {
+    echo "No connection object passed!\n";
+    return false;
+  }
+
+  if (DB_TableExists($tableName) != 1) {
+    // Table does not exists (migrating from old version)
+    echo "Table $tableName does not exists, not updating!\n";
+    return 0;
+  }
+  $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
+  while (!empty($numberOfRecords)) {
     $sql = "SELECT ".$tableName.".".$tableName . "_pk AS id ".
-        "FROM $tableName WHERE $tableName.".$tableName."_sha256 is NULL";
+        "FROM $tableName WHERE $tableName.".$tableName."_sha256 is NULL  LIMIT $numberOfRecords";
     $statement = __METHOD__ . ".getNullSHA256.$tableName";
     $rows = $dbManager->getRows($sql, [], $statement);
     $sql = "UPDATE $tableName
@@ -136,7 +166,10 @@ function updateSHA256($dbManager, $tableName)
             hash_file('sha256',  RepPath($row['id'],"files"))
         ]);
     }
-    return count($rows);
+    $totalCount = $totalCount + $numberOfRecords;
+    $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
+  }
+    return $totalCount;
 }
 
 /**
@@ -164,9 +197,7 @@ function migrate_35_36($dbManager, $force = false)
     $total = intval($dbManager->getSingleRow($sql, [],
       __METHOD__ . ".checkIfMigrationDone")['total']);
 
-    $sql = "SELECT count(*) as cnt FROM pfile WHERE pfile_sha256 IS NULL";
-    $totalPfile = intval($dbManager->getSingleRow($sql, [],
-          __METHOD__ . ".checkIfSHAMigrationDone")['cnt']);
+    $totalPfile = calculateNumberOfRecordsToBeProcessed($dbManager, "pfile", "pfile_sha256");
 
     if ($total == 0 && $totalPfile == 0) {
           // Migration not required
