@@ -140,7 +140,7 @@ class ui_report_conf extends FO_Plugin
     if (!empty($row['ri_spdx_selection'])) {
       $listSPDXCheckbox = explode(',', $row['ri_spdx_selection']);
       foreach ($this->checkBoxListSPDX as $key => $value) {
-        $vars[$value] = $listURCheckbox[$key];
+        $vars[$value] = $listSPDXCheckbox[$key];
       }
     }
 
