@@ -268,7 +268,7 @@ class copyright_list extends FO_Plugin
     }
 
     $Page = GetParm("page",PARM_INTEGER);
-    if (empty($Page)) {
+    if (empty($Page) || $Page == -1) {
       $Page=0;
     }
 
@@ -326,7 +326,7 @@ class copyright_list extends FO_Plugin
       /* Get the page menu */
       if (($RowCount >= $Max) && ($Page >= 0))
       {
-        $PagingMenu = "<P />\n" . MenuPage($Page,intval((($RowCount+$Offset)/$Max))) . "<P />\n";
+        $PagingMenu = "<P />\n" . MenuPage($Page, intval($RowCount / $Max)) . "<P />\n";
         $OutBuf .= $PagingMenu;
       }
       else
@@ -349,6 +349,9 @@ class copyright_list extends FO_Plugin
         if ($RowNum < $Offset) {
           continue;
         }
+        if ($RowNum > $Offset + $Max) {
+          break;
+        }
 
         // Allow user to exclude files with this extension
         $FileExt = GetFileExt($row['ufile_name']);
@@ -365,13 +368,15 @@ class copyright_list extends FO_Plugin
         if ($excl)
         {
           $ExclArray = explode(":", $excl);
-          if (in_array($FileExt, $ExclArray)) { $ok = false;
+          if (in_array($FileExt, $ExclArray)) {
+            $ok = false;
           }
         }
 
         if ($ok)
         {
-          $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast, $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
+          $OutBuf .= Dir2Browse($modBack, $row['uploadtree_pk'], $LinkLast,
+            $ShowBox, $ShowMicro, $RowNum, $Header, '', $uploadtree_tablename);
         }
       }
     }
