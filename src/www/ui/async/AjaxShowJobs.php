@@ -393,7 +393,9 @@ class AjaxShowJobs extends \FO_Plugin
       $uri .= "&upload=$uploadPk";
     }
 
-    $allusers = 0;
+    if (empty($allusers)) {
+      $allusers = 0;
+    }
     $totalPages = 0;
     if ($uploadPk > 0) {
       $upload_pks = array($uploadPk);
