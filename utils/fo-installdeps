@@ -104,12 +104,14 @@ if [[ $BUILDTIME ]]; then
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
          case "$CODENAME" in
-           xenial)
-             apt-get $YesOpt install php-mbstring php7.0-zip;;
-           stretch|buster|sid)
+           xenial|stretch)
              apt-get $YesOpt install php-mbstring php7.0-xml php7.0-zip;;
+           buster)
+             apt-get $YesOpt install php-mbstring php7.3-xml php7.3-zip;;
            bionic)
              apt-get $YesOpt install php-mbstring php7.2-xml php7.2-zip;;
+           sid)
+             apt-get $YesOpt install php-mbstring php-xml php-zip;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
@@ -117,10 +119,14 @@ if [[ $BUILDTIME ]]; then
                 apt-get $YesOpt install postgresql-server-dev-9.4;;
               xenial)
                 apt-get $YesOpt install postgresql-server-dev-9.5;;
-              stretch|buster|sid)
+              stretch)
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
+              buster)
+                apt-get $YesOpt install postgresql-server-dev-11;;
               bionic)
                 apt-get $YesOpt install postgresql-server-dev-10;;
+              sid)
+                apt-get $YesOpt install postgresql-server-dev-11;;
               *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
            esac
          fi
@@ -168,10 +174,14 @@ if [[ $RUNTIME ]]; then
                apt-get $YesOpt install postgresql-9.4 libapache2-mod-php5 php5 php5-pgsql php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0;;
             xenial)
                apt-get $YesOpt install postgresql-9.5 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 libboost-regex1.58.0;;
-            stretch|buster|sid)
-               apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip php-mbstring s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
+            stretch)
+               apt-get $YesOpt install postgresql-9.6 php7.0 libapache2-mod-php7.0 php7.0-pgsql php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring s-nail libboost-program-options1.62.0 libboost-regex1.62.0;;
+            buster)
+               apt-get $YesOpt install postgresql-11 php7.3 libapache2-mod-php7.3 php7.3-pgsql php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring s-nail libboost-program-options1.67.0 libboost-regex1.67.0;;
             bionic)
-               apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
+               apt-get $YesOpt install postgresql-10 php7.2 libapache2-mod-php7.2 php7.2-pgsql php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring s-nail libboost-program-options1.65.1 libboost-regex1.65.1;;
+            sid)
+               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring s-nail libboost-program-options1.67.0 libboost-regex1.67.0;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
