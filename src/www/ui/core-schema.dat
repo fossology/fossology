@@ -2004,7 +2004,7 @@
   $Schema["CONSTRAINT"]["personal_access_tokens_token_key_ukey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_token_key_ukey\" UNIQUE (\"user_fk\", \"token_key\");";
   $Schema["CONSTRAINT"]["personal_access_tokens_token_name_ukey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_token_name_ukey\" UNIQUE (\"user_fk\", \"token_name\");";
   $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
-  $Schema["CONSTRAINT"]["pfile_md5_sha1_sha256_size_ukey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_md5_sha1_sha256_size_ukey\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\",\"pfile_sha256\");";
+  $Schema["CONSTRAINT"]["pfile_md5_sha1_size_ukey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_md5_sha1_size_ukey\" UNIQUE (\"pfile_md5\",\"pfile_sha1\",\"pfile_size\");";
   $Schema["CONSTRAINT"]["pfile_mimetype_fk_fkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_mimetype_fk_fkey\" FOREIGN KEY (\"pfile_mimetypefk\") REFERENCES \"mimetype\" (\"mimetype_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["pkg_deb_pkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pkey\" PRIMARY KEY (\"pkg_pk\");";
   $Schema["CONSTRAINT"]["pkg_deb_pfile_fk_fkey"] = "ALTER TABLE \"pkg_deb\" ADD CONSTRAINT \"pkg_deb_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
