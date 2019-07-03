@@ -5,13 +5,17 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-all: dbcreate
+all: dbcreate dbmigrate_pfile_calculate_sha256.php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 # generate the dbcreate script
 dbcreate: dbcreate-process
 	chmod +x dbcreate
+
+# generate the pfile hash script
+dbmigrate_pfile_calculate_sha256.php:	dbmigrate_pfile_calculate_sha256-process_php
+	chmod +x dbmigrate_pfile_calculate_sha256.php
 
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
@@ -31,6 +35,9 @@ install: all
 	$(INSTALL_DATA) dbmigrate_copyright-author.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	$(INSTALL_DATA) dbmigrate_multiple_copyright_decisions.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
 	$(INSTALL_DATA) resequence_author_table.php $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
+	$(INSTALL_DATA) dbmigrate_pfile_calculate_sha256.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
+
+	chmod +x $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
@@ -63,6 +70,7 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
