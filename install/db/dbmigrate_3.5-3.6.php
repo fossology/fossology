@@ -124,8 +124,8 @@ function updateHash($dbManager, $tableName)
       "SET hash = c.sha256 FROM (VALUES ";
     $fileShaList = [];
     foreach ($rows as $row) {
-      $fileShaList[] = "(" . $row["id"] . "," .
-      hash('sha256', $row['textfinding']) . ")";
+      $fileShaList[] = "(" . $row["id"] . ",'" .
+      hash('sha256', $row['textfinding']) . "')";
     }
     $sql .= join(",", $fileShaList);
     $sql .= ") AS c(id, sha256) WHERE c.id = m.$tableName" . "_pk;";
@@ -212,10 +212,11 @@ function updatePfileSha256($dbManager, $force = false)
     // Ask the user for confirmation
     $timePerJob = 0.00905919;
     $totalTime = floatval($totalPfile) * $timePerJob;
-    $hours = intval($totalTime / 3600.0);
     $minutes = intval($totalTime / 60.0);
+    $hours = floor($minutes / 60);
+    $actualMinutes = $minutes - ($hours * 60);
     echo "*** Calculation of SHA256 for pfiles will require approx $hours hrs " .
-      "$minutes mins. ***\n";
+      "$actualMinutes mins. ***\n";
     if ($hours > 0 || $minutes > 45) {
       $REDCOLOR = "\033[0;31m";
       $NOCOLOR = "\033[0m";
