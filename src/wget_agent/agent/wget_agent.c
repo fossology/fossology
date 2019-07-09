@@ -96,7 +96,7 @@ void DBLoadGold()
   char *Path;
   char SHA256[65], command[PATH_MAX + 13];
   FILE *Fin;
-  int rc = -1;
+  int rc = -1, i;
   PGresult *result;
   int read = 0;
 
@@ -124,6 +124,11 @@ void DBLoadGold()
   {
     LOG_FATAL("Unable to calculate SHA256 of %s\n", GlobalTempFile);
     SafeExit(56);
+  }
+  // Change SHA256 to upper case like other checksums
+  for (i = 0; i < 65; i++)
+  {
+    SHA256[i] = toupper(SHA256[i]);
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
@@ -206,8 +211,8 @@ void DBLoadGold()
   Len = Unique+41+33; /* 32 for md5 + 1 for '.' */
   /* Set the pfile */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = %s;",
-      SHA1,MD5,SHA256,Len);
+  snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
+      SHA1,MD5,Len);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(7);
 
