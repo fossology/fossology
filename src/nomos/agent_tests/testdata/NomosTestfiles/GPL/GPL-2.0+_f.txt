@@ -1,0 +1,9 @@
+// Copyright (C) 2007, Fredrik Kuivinen <frekui@gmail.com>
+// 2007, Petr Baudis <pasky@suse.cz>
+// 2008-2011, Jakub Narebski <jnareb@gmail.com>
+
+/**
+* @fileOverview Detect if JavaScript is enabled, and pass it to server-side
+* @license GPLv2 or later
+*/
+
