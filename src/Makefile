@@ -28,6 +28,7 @@ DIRS = \
 	unifiedreport \
 	reuser \
 	scheduler \
+	softwareHeritage \
 	spdx2 \
 	reportImport \
 	ununpack \

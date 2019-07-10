@@ -155,6 +155,11 @@ src/reportImport/agent/reportImport
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
 /install/db/dbmigrate_pfile_calculate_sha256.php
+/src/softwareHeritage/agent/version.php
+/src/softwareHeritage/agent/softwareHeritage
+/src/softwareHeritage/VERSION
+src/delagent/agent_tests/Unit/test_delagent
+src/delagent/agent_tests/Unit/testconf/
 
 # Add all the Ubuntu consol log file
 ubuntu-*
