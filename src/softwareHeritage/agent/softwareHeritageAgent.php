@@ -99,7 +99,7 @@ class softwareHeritageAgent extends Agent
     {
         foreach($licenses as $license)
         {
-            return $this->uploadDao->setshDetails($pfileId, $license);
+            $this->uploadDao->setshDetails($pfileId, $license);
         }
 
         return true;

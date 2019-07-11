@@ -482,7 +482,7 @@ class UploadDao
   {
     $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
         array($uploadId), __METHOD__);
-    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256' => $pfile['pfile_sha256']);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
 
   /**
@@ -663,19 +663,21 @@ ORDER BY lft asc
     return $row;
   }
 
+
+
   /*
    * @brief Store a record of Software Heritga license info in table
    * @param $pfileId        Integer
    * @param $licenseDetails String
    *
-   * @return boolean
+   * @return bool
    */
   public function setshDetails($pfileId, $licenseDetails)
   {
-      if($this->dbManager->insertTableRow('software_heritage',['pfile_fk'=> $pfileId, 'license' => $licenseDetails]))
-      {
-          return true;
-      }
-      return false;
+    if(!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk'=> $pfileId, 'license' => $licenseDetails]))) {
+      return true;
+    }
+    return false;
   }
 }
+
