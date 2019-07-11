@@ -106,6 +106,8 @@ src/nomos/agent_tests/Functional/nomos-regression-test.html
 src/nomos/agent_tests/Functional/report.d
 src/nomos/agent_tests/Unit/test_nomos
 src/ojo/agent/ojo
+src/ojo/agent_tests/Functional/ojo
+src/ojo/agent_tests/Unit/test_ojo
 src/pkgagent/agent/pkgagent
 src/scheduler/agent/defconf/init.d/fossology
 src/scheduler/agent/fo_cli
