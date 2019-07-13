@@ -29,8 +29,8 @@
  *   - @link src/softwareHeritage/ui @endlink
  */
 /**
- * @namespace Fossology\Reuser
- * @brief Namespace used by reuser agent
+ * @namespace Fossology\SoftwareHeritage
+ * @brief Namespace used by softwareHeritage agent
  */
 namespace Fossology\SoftwareHeritage;
 

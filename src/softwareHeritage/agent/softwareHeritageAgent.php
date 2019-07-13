@@ -20,7 +20,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\SoftwareHeritage;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Db\DbManager;
 use \GuzzleHttp\Client;
 
 include_once(__DIR__ . "/version.php");
@@ -38,11 +41,41 @@ class softwareHeritageAgent extends Agent
      */
     private $uploadDao;
 
+    /** @var LicenseDao $licenseDao
+     * LicenseDao object
+     */
+    private $licenseDao;
 
+    /**
+     * configuraiton for software heritage api
+     * @var array $configuration
+     */
+    private $configuration;
+
+    /**
+     * @var $dbManeger DbManager
+     * DbManeger object
+     */
+    private $dbManeger;
+
+    /**
+     * @var $agentDao AgentDao
+     * AgentDao object
+     */
+    protected $agentDao;
+
+    /**
+     * softwareHeritageAgent constructor.
+     * @throws \Exception
+     */
     function __construct()
     {
         parent::__construct(SOFTWARE_HERITAGE_AGENT_NAME, AGENT_VERSION, AGENT_REV);
         $this->uploadDao = $this->container->get('dao.upload');
+        $this->licenseDao = $this->container->get('dao.license');
+        $this->dbManeger = $this->container->get('db.manager');
+        $this->agentDao = $this->container->get('dao.agent');
+        $this->configuration = parse_ini_file(__DIR__.'/conf.ini');
     }
 
     /*
@@ -54,13 +87,17 @@ class softwareHeritageAgent extends Agent
     {
         $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
         $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
+        $pfileFks = $this->uploadDao->getSoftwareHeritagePfileFk($uploadId);
+        $agentId = $this->agentDao->getCurrentAgentId("softwareHeritage");
         foreach($pfileFileDetails as $pfileDetail)
         {
-            $licenseDetails = $this->getSoftwareHeritageLicense($pfileDetail['sha256']);
-            $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'],$licenseDetails);
+            if(!in_array($pfileDetail['pfile_pk'],$pfileFks))
+            {
+                $licenseDetails = $this->getSoftwareHeritageLicense($pfileDetail['sha256']);
+                $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'],$licenseDetails,$agentId);
+            }
             $this->heartbeat(1);
         }
-
         return true;
     }
 
@@ -73,7 +110,7 @@ class softwareHeritageAgent extends Agent
     protected function getSoftwareHeritageLicense($sha256)
     {
         $client = new Client(['http_errors' => false]);
-        $response = $client->get('https://archive.softwareheritage.org/api/1/content/sha256:'.$sha256.'/license/');
+        $response = $client->get($this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256.$this->configuration['api']['content']);
         $statusCode = $response->getStatusCode();
         if(200 === $statusCode)
         {
@@ -84,7 +121,7 @@ class softwareHeritageAgent extends Agent
         }
         else
         {
-            return ["No License Found"];
+            return ["No_license_found"];
         }
     }
 
@@ -95,13 +132,17 @@ class softwareHeritageAgent extends Agent
      *
      * @return boolean True if finished
      */
-    protected function insertSoftwareHeritageRecord($pfileId,$licenses)
+    protected function insertSoftwareHeritageRecord($pfileId,$licenses,$agentId)
     {
         foreach($licenses as $license)
         {
             $this->uploadDao->setshDetails($pfileId, $license);
+            $l = $this->licenseDao->getLicenseByShortName($license);
+            if(!empty($l->getId()))
+            {
+                $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $pfileId,'rf_fk'=> $l->getId(),'rf_match_pct'=> 60]);
+            }
         }
-
         return true;
     }
 }

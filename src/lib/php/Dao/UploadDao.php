@@ -664,9 +664,30 @@ ORDER BY lft asc
   }
 
 
-
   /*
-   * @brief Store a record of Software Heritga license info in table
+  * @brief Get all the pfile_fk stored in software heritage table
+  * @param $uploadId Integer
+  *
+  * @return array
+  */
+  public function getSoftwareHeritagePfileFk($uploadId)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
+    $stmt = __METHOD__.$uploadTreeTableName;
+    $sql = "SELECT software_heritage.pfile_fk AS pfile_fk  
+            FROM  $uploadTreeTableName 
+            JOIN software_heritage 
+            ON $uploadTreeTableName.upload_fk = $1 
+            AND software_heritage.pfile_fk = $uploadTreeTableName.pfile_fk";
+    $rows = $this->dbManager->getRows($sql,array($uploadId),$stmt);
+    $results = [];
+    foreach ($rows as $row) {
+      $results[] = $row['pfile_fk'];
+    }
+    return $results;
+  }
+  /*
+   * @brief Store a record of Software Heritage license info in table
    * @param $pfileId        Integer
    * @param $licenseDetails String
    *
@@ -674,7 +695,7 @@ ORDER BY lft asc
    */
   public function setshDetails($pfileId, $licenseDetails)
   {
-    if(!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk'=> $pfileId, 'license' => $licenseDetails]))) {
+    if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk'=> $pfileId, 'license' => $licenseDetails]))) {
       return true;
     }
     return false;

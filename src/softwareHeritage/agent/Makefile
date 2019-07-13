@@ -10,7 +10,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-COPY = softwareHeritage.php version.php softwareHeritageAgent.php
+COPY = softwareHeritage.php version.php conf.ini softwareHeritageAgent.php
 WRAP = softwareHeritage
 
 all: version.php softwareHeritage
