@@ -26,6 +26,7 @@ install/defconf/Db.conf
 install/defconf/fossology.conf
 install/fo-postinstall
 src/adj2nest/agent/adj2nest
+src/atarashi/agent/atarashiWrapper
 src/buckets/agent/buckets
 src/cli/cp2foss
 src/cli/cp2foss.1
@@ -150,8 +151,6 @@ src/reportImport/agent/reportImport
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
 /install/db/dbmigrate_pfile_calculate_sha256.php
-/src/ninka/agent/atarashiWrapper
-/src/ninka/agent/atarashi
 
 # Add all the Ubuntu consol log file
 ubuntu-*

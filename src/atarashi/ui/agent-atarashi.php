@@ -26,7 +26,6 @@ class AtarashiAgentPlugin extends AgentPlugin
     $this->Name = "agent_atarashi";
     $this->Title =  _("atarashi License Analysis");
     $this->AgentName = "atarashiWrapper";
-    
 
     parent::__construct();
   }
@@ -35,14 +34,14 @@ class AtarashiAgentPlugin extends AgentPlugin
   {
     return CheckARS($uploadId, $this->AgentName, "atarashi agent", "atarashi_ars");
   }
-  
+
   function preInstall()
   {
     if ($this->isAtarashiInstalled()) {
       menu_insert("Agents::" . $this->Title, 0, $this->Name);
     }
   }
-  
+
   public function isAtarashiInstalled()
   {
     exec('which atarashi', $lines, $returnVar);

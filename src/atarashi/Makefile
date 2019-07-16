@@ -16,11 +16,10 @@ TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
-all: VERSIONFILE atarashi-all
+all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	# $(TOP)/install/scripts/install-atarashi.sh
 	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
@@ -48,4 +47,3 @@ clean:
 	rm -f VERSION
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean
-.PHONY: atarashi-all atarashi-install atarashi-uninstall atarashi-clean atarashi-Makefile

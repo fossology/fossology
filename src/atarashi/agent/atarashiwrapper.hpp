@@ -18,12 +18,10 @@
 #ifndef ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
 #define ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
 
-#define AGENT_NAME "atarashi"
-#define AGENT_DESC "atarashi agent"
-#define AGENT_ARS  "atarashi_ars"
-
 #include <string>
 #include <vector>
+#include <jsoncpp/json/json.h>
+
 #include "files.hpp"
 #include "licensematch.hpp"
 #include "state.hpp"
@@ -31,5 +29,5 @@
 using namespace std;
 
 string scanFileWithAtarashi(const State& state, const fo::File& file);
-
+vector<LicenseMatch> extractLicensesFromAtarashiResult(string atarashiResult);
 #endif // ATARASHI_AGENT_ATARASHI_WRAPPER_HPP
