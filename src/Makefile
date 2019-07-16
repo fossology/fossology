@@ -11,6 +11,7 @@ include $(VARS)
 DIRS = \
 	adj2nest \
 	buckets \
+	atarashi \
 	cli \
 	copyright \
 	debug \

@@ -18,7 +18,6 @@
 #include <iostream>
 #include "atarashiwrapper.hpp"
 #include "utils.hpp"
-#include <jsoncpp/json/json.h>
 
 using namespace fo;
 
@@ -142,15 +141,7 @@ vector<LicenseMatch> createMatches(std::string liscenceName, unsigned percentage
 bool matchFileWithLicenses(const State& state, const fo::File& file, AtarashiDatabaseHandler& databaseHandler)
 {
   string atarashiResult = scanFileWithAtarashi(state, file);
-  Json::Reader reader;
-  Json::Value obj;
-  reader.parse(atarashiResult, obj);
-
-  Json::StreamWriterBuilder builder;
-  builder.settings_["indentation"] = "";
-  std::string liscenceName = Json::writeString(builder, obj['results'][0]['shortname']);
-  unsigned percentage = obj['results'][0]['sim_score'].asInt();
-  vector<LicenseMatch> matches = createMatches(liscenceName, percentage);
+  vector<LicenseMatch> matches = extractLicensesFromAtarashiResult(atarashiResult);
   return saveLicenseMatchesToDatabase(state, matches, file.getId(), databaseHandler);
 }
 

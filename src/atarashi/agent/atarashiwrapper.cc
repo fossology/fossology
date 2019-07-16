@@ -44,5 +44,30 @@ string scanFileWithAtarashi(const State& state, const fo::File& file)
     bail(1);
   }
 
-  return result;
+  int jsonStart = result.find("{");
+  return result.substr(jsonStart, string::npos);
+}
+
+vector<LicenseMatch> extractLicensesFromAtarashiResult(string atarashiResult)
+{
+  Json::Reader reader;
+  Json::Value atarashiResultobj;
+  bool parseSuccess = reader.parse(atarashiResult, atarashiResultobj);
+
+  if (!parseSuccess)
+  {
+    cout << "Failed to parse" << reader.getFormattedErrorMessages();
+    bail(-30);
+  }
+
+  vector<LicenseMatch> matches;
+  Json::Value resultArray = atarashiResultobj["results"];
+  for (unsigned int index = 0; index < resultArray.size(); ++index)
+  {
+    Json::Value resultObject = resultArray[index];
+    LicenseMatch m(resultObject["shortname"].asString(),
+        (unsigned)(resultObject["sim_score"].asDouble() * 100.0));
+    matches.push_back(m);
+  }
+  return matches;
 }
