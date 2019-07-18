@@ -126,7 +126,7 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
   $licenseDao = $GLOBALS['container']->get("dao.license");
 
   if (empty($uploadtree_pk)) {
-      $uploadtreeRec = $dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$1',
+      $uploadtreeRec = $dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$2',
               array($upload_pk),
               __METHOD__.'.find.uploadtree.to.use.in.browse.link' );
       $uploadtree_pk = $uploadtreeRec['uploadtree_pk'];
