@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# FOSSology mod_deps script
+# This script helps you install dependencies on a system. for a module
+#
+# Copyright (C) 2018 Siemens AG
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
+
+########################################################################
+
+if [[ $BUILDTIME ]]; then
+  echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        python3 python3-pip
+      ;;
+    Fedora)
+      yum $YesOpt install \
+        python3 python3-pip
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        rh-python3 python3-pip
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac ;;
+  pip3 install --upgrade pip \
+  pip3 install -i https://test.pypi.org/simple/ atarashi
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        python3 python3-pip
+        ;;
+    Fedora)
+      yum $YesOpt install \
+        python3 python3-pip
+      ;;
+    RedHatEnterprise*|CentOS)
+      yum $YesOpt install epel-release;
+      yum $YesOpt install \
+        rh-python3 python3-pip
+      ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
+  esac ;;
+  pip3 install --upgrade pip \
+  pip3 install atarashi
+fi
+
+#######################################################################

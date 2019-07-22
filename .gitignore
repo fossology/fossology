@@ -160,6 +160,8 @@ src/reportImport/agent/reportImport
 /src/softwareHeritage/VERSION
 src/delagent/agent_tests/Unit/test_delagent
 src/delagent/agent_tests/Unit/testconf/
+/src/atarashi/agent/atarashiWrapper
+/src/atarashi/agent_tests/Functional/atarashiWrapper
 
 # Add all the Ubuntu consol log file
 ubuntu-*
