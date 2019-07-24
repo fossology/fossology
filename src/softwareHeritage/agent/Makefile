@@ -10,7 +10,9 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-COPY = softwareHeritage.php version.php conf.ini softwareHeritageAgent.php
+MOD_NAME = softwareHeritage
+
+COPY = softwareHeritage.php version.php softwareHeritage.conf softwareHeritageAgent.php
 WRAP = softwareHeritage
 
 all: version.php softwareHeritage
@@ -26,19 +28,19 @@ softwareHeritage:
 	ln -sf $(FOCLIDIR)/fo_wrapper.php softwareHeritage
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/softwareHeritage/agent/
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
 	for file in $(COPY); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/softwareHeritage/agent/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/softwareHeritage/agent/$$file; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 
 uninstall:
 	for file in $(WRAP); do \
-		rm -rf $(DESTDIR)$(MODDIR)/softwareHeritage/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 
 clean:

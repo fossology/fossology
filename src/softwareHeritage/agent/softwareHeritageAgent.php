@@ -22,6 +22,7 @@ namespace Fossology\SoftwareHeritage;
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Dao\SoftwareHeritageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use \GuzzleHttp\Client;
@@ -53,16 +54,22 @@ class softwareHeritageAgent extends Agent
     private $configuration;
 
     /**
-     * @var $dbManeger DbManager
+     * @var DbManager $dbManeger
      * DbManeger object
      */
     private $dbManeger;
 
     /**
-     * @var $agentDao AgentDao
+     * @var AgentDao $agentDao
      * AgentDao object
      */
     protected $agentDao;
+
+    /**
+     * @var SoftwareHeritageDao $shDao
+     * SoftwareHeritageDao object
+     */
+    private $shDao;
 
     /**
      * softwareHeritageAgent constructor.
@@ -75,35 +82,41 @@ class softwareHeritageAgent extends Agent
         $this->licenseDao = $this->container->get('dao.license');
         $this->dbManeger = $this->container->get('db.manager');
         $this->agentDao = $this->container->get('dao.agent');
-        $this->configuration = parse_ini_file(__DIR__.'/conf.ini');
+        $this->shDao = $this->container->get('dao.softwareHeritage');
+        $this->configuration = parse_ini_file(__DIR__ . '/softwareHeritage.conf');
     }
 
-    /*
+    /**
      * @brief Run software heritage for a package
-     * @param $uploadId Integer
+     * @param int $uploadId
+     * @return bool
+     * @throws \Fossology\Lib\Exception
      * @see Fossology::Lib::Agent::Agent::processUploadId()
      */
     function processUploadId($uploadId)
     {
         $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
         $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
-        $pfileFks = $this->uploadDao->getSoftwareHeritagePfileFk($uploadId);
+        $pfileFks = $this->shDao->getSoftwareHeritagePfileFk($uploadId);
         $agentId = $this->agentDao->getCurrentAgentId("softwareHeritage");
         foreach($pfileFileDetails as $pfileDetail)
         {
             if(!in_array($pfileDetail['pfile_pk'],$pfileFks))
             {
                 $licenseDetails = $this->getSoftwareHeritageLicense($pfileDetail['sha256']);
-                $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'],$licenseDetails,$agentId);
+                if(!empty($licenseDetails))
+                {
+                    $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'],$licenseDetails,$agentId);
+                }
             }
             $this->heartbeat(1);
         }
         return true;
     }
 
-    /*
+    /**
      * @brief Get the license details from software heritage
-     * @param $sha256 String
+     * @param String $sha256
      *
      * @return array
      */
@@ -121,24 +134,24 @@ class softwareHeritageAgent extends Agent
         }
         else
         {
-            return ["No_license_found"];
+            return [];
         }
     }
 
-    /*
+    /**
      * @brief Insert the License Details in softwareHeritage table
-     * @param $pfileId  Integer
-     * @param $license  Array
-     *
+     * @param int $pfileId
+     * @param array $licenses
+     * @param int $agentId
      * @return boolean True if finished
      */
     protected function insertSoftwareHeritageRecord($pfileId,$licenses,$agentId)
     {
         foreach($licenses as $license)
         {
-            $this->uploadDao->setshDetails($pfileId, $license);
+            $this->shDao->setshDetails($pfileId, $license);
             $l = $this->licenseDao->getLicenseByShortName($license);
-            if(!empty($l->getId()))
+            if($l != NULL)
             {
                 $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $pfileId,'rf_fk'=> $l->getId(),'rf_match_pct'=> 60]);
             }
