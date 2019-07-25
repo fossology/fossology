@@ -456,4 +456,19 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     }
     return intval($folderContentsRow['foldercontents_pk']);
   }
+
+  /**
+   * For a given folder id, get the parent folder id.
+   * @param integer $folderPk ID of the folder
+   * @return number Parent id if parent exists, null otherwise.
+   */
+  public function getFolderParentId($folderPk)
+  {
+    $sql = "SELECT parent_fk FROM foldercontents " .
+      "WHERE foldercontents_mode = " . self::MODE_FOLDER .
+      " AND child_id = $1;";
+    $statement = __METHOD__ . ".getParentId";
+    $row = $this->dbManager->getSingleRow($sql, [$folderPk], $statement);
+    return (empty($row)) ? null : $row['parent_fk'];
+  }
 }

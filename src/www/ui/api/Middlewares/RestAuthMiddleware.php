@@ -59,8 +59,8 @@ class RestAuthMiddleware
       $jwtToken = $request->getHeader('Authorization')[0];
       $tokenValid = $authHelper->verifyAuthToken($jwtToken,
         $requestUri->getHost(), $userId, $tokenScope);
-      if (stristr($request->getMethod(), "get") === false &&
-        stristr($tokenScope, "write") === false) {
+      if ($tokenValid === true && (stristr($request->getMethod(), "get") === false &&
+          stristr($tokenScope, "write") === false)) {
         /*
          * If the request method is not GET and token scope is not write,
          * do not allow the request to pass through.
