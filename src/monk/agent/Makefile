@@ -62,7 +62,7 @@ libmonk_cov.a: $(COVERAGE)
 _squareVisitor.c _squareVisitor.h: squareBuilder
 	sh genSquareVisitor
 
-squareBuilder: buildSquareVisitor.c
+squareBuilder: buildSquareVisitor.c $(FOLIB)
 	$(CC) buildSquareVisitor.c $(LOCAL_CFLAGS) $(LOCAL_LDFLAGS) -lm -o $@
 
 $(OBJECTS): %.o: %.c _squareVisitor.c
