@@ -116,6 +116,9 @@ class ui_view_info extends FO_Plugin
       } else {
         $bytesH = '(' . $bytesH . ')';
       }
+      $sql_sh = "select * from software_heritage where pfile_fk = $1";
+      $row_sh = $this->dbManager->getSingleRow($sql_sh,array($row['pfile_fk']),
+            __METHOD__."GetSoftwareHeritageRow");
       $vars['sizeInBytes'] = $bytes;
       $vars['sizeInMB'] = $bytesH;
       $vars['fileSha1'] = $row['pfile_sha1'];
@@ -123,6 +126,7 @@ class ui_view_info extends FO_Plugin
       $vars['fileSha256'] = $row['pfile_sha256'];
       $vars['fileSize'] = $row['pfile_size'];
       $vars['filePfileId'] = $row['pfile_fk'];
+      $vars['fileSHOrigin'] = $row_sh['origin'];
     }
     return $vars;
   } // ShowView()

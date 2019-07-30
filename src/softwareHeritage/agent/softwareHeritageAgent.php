@@ -153,7 +153,7 @@ class softwareHeritageAgent extends Agent
             $l = $this->licenseDao->getLicenseByShortName($license);
             if($l != NULL)
             {
-                $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $pfileId,'rf_fk'=> $l->getId(),'rf_match_pct'=> 60]);
+                $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $pfileId,'rf_fk'=> $l->getId()]);
             }
         }
         return true;

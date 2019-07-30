@@ -185,6 +185,12 @@
         <td align="center">{{ "SHA256 Checksum"|trans }}</td>
         <td align="right">{{ fileSha256|e }}</td>
       </tr>
+      {% if fileSHOrigin %}
+      <tr>
+        <td align="center">{{ "Origin(SoftwareHeritage)"|trans }}</td>
+        <td align="right"><a href="{{ fileSHOrigin|e }}">{{ fileSHOrigin|e }}</a></td>
+      </tr>
+      {% endif %}
       <tr>
         <td align="center">{{ "Repository ID"|trans }}</td>
         <td align="right">{{ fileSha1|e }}.{{ fileMd5|e }}.{{ fileSize|e }}</td>
