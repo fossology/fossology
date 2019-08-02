@@ -107,11 +107,21 @@ class EmailHistogram extends HistogramBase {
   {
     return "
 
+    var emailTabCookie = 'stickyEmailTab';
+
     $(document).ready(function() {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
-      $(\"#EmailUrlAuthorTabs\").tabs();
+      $(\"#EmailUrlAuthorTabs\").tabs({
+        active: ($.cookie(emailTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(emailTabCookie, idString);
+        }
+      });
     });
     ";
   }

@@ -5,5 +5,39 @@
     window.location.assign("?mod={{ name }}&upload=" + upload + "&item=" + item + "&filter=" + filter);
   }
 
+  function deleteHashDecision(hash, upload, type) {
+    $.ajax({
+      type: 'POST',
+      dataType: 'json',
+      url: '?mod=ajax-copyright-hist&action=deleteHashDecision&type=' + type,
+      data: {
+        'hash': hash,
+        'upload': upload
+      },
+      success: function(data) {
+        $("#deleteHashDecision" + type + hash).hide();
+        $("#undoDeleteHashDecision" + type + hash).show();
+      },
+      error: function() { alert('error'); }
+    });
+  }
+
+  function undoHashDecision(hash, upload, type) {
+    $.ajax({
+      type: 'POST',
+      dataType: 'json',
+      url: '?mod=ajax-copyright-hist&action=undoHashDecision&type=' + type,
+      data: {
+        'hash': hash,
+        'upload': upload
+      },
+      success: function(data) {
+        $("#undoDeleteHashDecision" + type + hash).hide();
+        $("#deleteHashDecision" + type + hash).show();
+      },
+      error: function() { alert('error'); }
+    });
+  }
+
   {{ scriptBlock }}
 </script>
