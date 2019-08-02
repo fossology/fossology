@@ -133,8 +133,10 @@ class HighlightDao
     $uploadTreeTableName = $itemTreeBounds->getUploadTreeTableName();
     $stmt = __METHOD__.$uploadTreeTableName;
     $sql = "SELECT start,len
-             FROM highlight_keyword
-             WHERE pfile_fk = (SELECT pfile_fk FROM $uploadTreeTableName WHERE uploadtree_pk = $1)";
+            FROM highlight_keyword AS hk
+            INNER JOIN $uploadTreeTableName AS ut
+            ON hk.pfile_fk = ut.pfile_fk
+            WHERE ut.uploadtree_pk = $1";
     $this->dbManager->prepare($stmt, $sql);
     $result = $this->dbManager->execute($stmt, array($itemTreeBounds->getItemId()));
     $highlightEntries = array();
