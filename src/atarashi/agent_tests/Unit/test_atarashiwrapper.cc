@@ -19,7 +19,7 @@
 #include <boost/assign/list_of.hpp>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "ninkawrapper.hpp"
+#include "atarashiwrapper.hpp"
 
 using namespace std;
 using namespace boost;

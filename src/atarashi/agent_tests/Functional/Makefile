@@ -16,7 +16,7 @@ test: test-sched
 
 all: version
 	$(MAKE) -C $(LOCALAGENTDIR) atarashiWrapper
-	ln -fs $(LOCALAGENTDIR)/atarashi ./atarashi
+	ln -fs $(LOCALAGENTDIR)/atarashiWrapper ./atarashiWrapper
 
 all-cov: version
 	$(MAKE) -C $(LOCALAGENTDIR) atarashi_cov
