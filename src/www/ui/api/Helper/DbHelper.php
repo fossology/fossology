@@ -161,14 +161,20 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
   {
     if ($id == null) {
       $usersSQL = "SELECT user_pk, user_name, user_desc, user_email,
-                  email_notify, root_folder_fk, user_perm, user_agent_list FROM users";
+                  email_notify, root_folder_fk, user_perm, user_agent_list FROM users;";
+      $statement = __METHOD__ . ".getAllUsers";
     } else {
       $usersSQL = "SELECT user_pk, user_name, user_desc, user_email,
                 email_notify, root_folder_fk, user_perm, user_agent_list FROM users
-                WHERE user_pk=" . pg_escape_string($id);
+                WHERE user_pk = $1;";
+      $statement = __METHOD__ . ".getSpecificUser";
     }
     $users = [];
-    $result = $result = $this->dbManager->getRows($usersSQL);
+    if ($id === null) {
+      $result = $result = $this->dbManager->getRows($usersSQL, [], $statement);
+    } else {
+      $result = $result = $this->dbManager->getRows($usersSQL, [$id], $statement);
+    }
     foreach ($result as $row) {
       $user = new User($row["user_pk"], $row["user_name"], $row["user_desc"],
         $row["user_email"], $row["user_perm"], $row["root_folder_fk"],

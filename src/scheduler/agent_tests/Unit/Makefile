@@ -58,7 +58,7 @@ coverage: testRun.c $(OBJECTS) $(COV) $(VARS) $(FOLIB) fossology_testconfig $(EX
 	./$(EXE)
 	$(call coverage-report-html,$(LOCALAGENTDIR))
 
-$(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT)
+$(EXE): testRun.c $(OBJECTS) $(LIB) $(FOCUNIT) $(FOLIB)
 	$(CC) $< -o $(EXE) $(OBJECTS) $(LOCALAGENTDIR)/$(LIB) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL)
 
 $(LIB):

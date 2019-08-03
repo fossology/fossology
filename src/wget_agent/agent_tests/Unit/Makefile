@@ -26,7 +26,7 @@ CHKSRC = $(CHKHDR:%.h=%.c)
 
 all: $(EXE)
 
-$(EXE): libwget_agent.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) cunit_lib test_lib
+$(EXE): libwget_agent.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(CHKHDR) $(CHKSRC) $(VARS) $(DB) $(REPO) $(AGENTLIB) $(FOLIB) cunit_lib test_lib
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c

@@ -14,7 +14,7 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.1
+  version: 1.0.2
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
@@ -859,6 +859,9 @@ components:
         description:
           type: string
           description: Description of the folder.
+        parent:
+          type: integer
+          description: Id of the parent folder (if any, null otherwise).
     TokenRequest:
       type: object
       properties:

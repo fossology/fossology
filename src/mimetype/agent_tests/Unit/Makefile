@@ -23,7 +23,7 @@ TEST_OBJ = ./finder/testDBCheckMime.o \
 
 all: $(EXE)
 
-$(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) cunit_lib test_lib
+$(EXE): libmimetype.a $(TEST_OBJ_RUN) $(TEST_OBJ) $(DB) $(REPO) $(VARS) $(FOLIB) cunit_lib test_lib
 	$(CC) $(TEST_OBJ_RUN) $(TEST_OBJ) $(LOCALAGENTDIR)/libmimetype.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) -o $@
 
 $(TEST_OBJ_RUN): %.o: %.c
