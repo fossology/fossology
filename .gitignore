@@ -28,6 +28,7 @@ install/defconf/fossology.conf
 install/fo-postinstall
 src/adj2nest/agent/adj2nest
 src/atarashi/agent/atarashiWrapper
+src/atarashi/agent_tests/Functional/atarashiWrapper
 src/buckets/agent/buckets
 src/cli/cp2foss
 src/cli/cp2foss.1
