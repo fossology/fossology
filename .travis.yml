@@ -22,6 +22,8 @@ addons:
       - genisoimage
       - libboost-program-options-dev
       - libboost-regex-dev
+      - libboost-system-dev
+      - libboost-filesystem-dev
       - libglib2.0-dev
       - libcppunit-dev
       - libcunit1-dev

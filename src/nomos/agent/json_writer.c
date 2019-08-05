@@ -20,7 +20,7 @@
 #include "json_writer.h"
 #include "nomos.h"
 #include "nomos_utils.h"
-#include "json-c/json.h"
+#include <json-c/json.h>
 
 void writeToTemp()
 {
