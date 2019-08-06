@@ -1573,7 +1573,31 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
     memset(SHA256, '\0', sizeof(SHA256));
 
     CF = SumOpenFile(CI->Source);
-    snprintf(command, PATH_MAX + 13, "sha256sum '%s'", CI->Source);
+	{
+		char* copy_dst_p = command;
+		char* copy_src_p = CI->Source;
+		/* End of array, minus terminal \0, final quote and possible escape character */
+		char* copy_dst_max_p = command + sizeof(command) - 3;
+
+		copy_dst_p += sprintf(copy_dst_p, "sha256sum \"");
+		while (*copy_src_p != '\0') {
+			if (copy_dst_p >= copy_dst_max_p) {
+				LOG_FATAL("Filename too long: %s\n", CI->Source);
+				SafeExit(56); /* Which exit code ? */
+			}
+			if (*copy_src_p == '"' || \
+				*copy_src_p == '\\' || \
+				*copy_src_p == '$') {
+				*copy_dst_p = '\\';
+				copy_dst_p++;
+			}
+			*copy_dst_p = *copy_src_p;
+			copy_dst_p++;
+			copy_src_p++;
+		}
+		sprintf(copy_dst_p, "\"");
+	}
+
     FILE* file = popen(command, "r");
     if (file != (FILE*) NULL)
     {
