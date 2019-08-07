@@ -380,6 +380,12 @@ paths:
               type: integer
               minimum: 0
             in: header
+          - name: upload
+            required: false
+            schema:
+              type: integer
+            in: query
+            description: Return jobs for the given upload id only
         responses:
           '200':
             description: OK
@@ -755,6 +761,17 @@ components:
         groupId:
           type: integer
           description: Group under which the job was scheduled
+        eta:
+          type: integer
+          description: ETA of job to finish in seconds
+        status:
+          type: string
+          enum:
+            - Completed
+            - Failed
+            - Queued
+            - Processing
+          description: Denotes the current status of the job in the queue
     Info:
       type: object
       properties:

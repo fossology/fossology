@@ -192,15 +192,19 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
    * information for the given id is only retrieved.
    * @param integer $limit Set to limit the result length
    * @param integer $id Set to get information of only given job id
-   * @return Job[][] Jobs as an associative array
+   * @return Job[] List of jobs
    */
-  public function getJobs($limit = 0, $id = null)
+  public function getJobs($limit = 0, $id = null, $uploadId = null)
   {
+    $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk," .
+      " job_user_fk, job_group_fk FROM job";
+
     if ($id == null) {
-      $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk, job_user_fk, job_group_fk FROM job";
+      if ($uploadId !== null) {
+        $jobSQL .= " WHERE job_upload_fk = " . pg_escape_string($uploadId);
+      }
     } else {
-      $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk, job_user_fk, job_group_fk
-                FROM job WHERE job_pk=" . pg_escape_string($id);
+      $jobSQL .= " WHERE job_pk = " . pg_escape_string($id);
     }
 
     if ($limit > 0) {
@@ -208,11 +212,16 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
     }
 
     $jobs = [];
-    $result = $this->dbManager->getRows($jobSQL);
+    $statement = __METHOD__ . ".$limit.$id.$uploadId";
+    $result = $this->dbManager->getRows($jobSQL, [], $statement);
     foreach ($result as $row) {
-      $job = new Job($row["job_pk"], $row["job_name"], $row["job_queued"],
-        $row["job_upload_fk"], $row["job_user_fk"], $row["job_group_fk"]);
-      $jobs[] = $job->getArray();
+      $job = new Job($row["job_pk"]);
+      $job->setName($row["job_name"]);
+      $job->setQueueDate($row["job_queued"]);
+      $job->setUploadId($row["job_upload_fk"]);
+      $job->setUserId($row["job_user_fk"]);
+      $job->setGroupId($row["job_group_fk"]);
+      $jobs[] = $job;
     }
     return $jobs;
   }
