@@ -65,6 +65,11 @@ class Analysis
    */
   private $nomos;
   /**
+   * @var boolean $ojo
+   * Whether to schedule ojo agent or not
+   */
+  private $ojo;
+  /**
    * @var boolean $pkgagent
    * Whether to schedule package agent or not
    */
@@ -79,10 +84,11 @@ class Analysis
    * @param boolean $mime
    * @param boolean $monk
    * @param boolean $nomos
+   * @param boolean $ojo
    * @param boolean $package
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $pkgagent = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $pkgagent = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -91,6 +97,7 @@ class Analysis
     $this->mimetype = $mimetype;
     $this->monk = $monk;
     $this->nomos = $nomos;
+    $this->ojo = $ojo;
     $this->pkgagent = $pkgagent;
   }
 
@@ -126,6 +133,9 @@ class Analysis
     if (array_key_exists("nomos", $analysisArray)) {
       $this->nomos = filter_var($analysisArray["nomos"], FILTER_VALIDATE_BOOLEAN);
     }
+    if (array_key_exists("ojo", $analysisArray)) {
+      $this->ojo = filter_var($analysisArray["ojo"], FILTER_VALIDATE_BOOLEAN);
+    }
     if (array_key_exists("package", $analysisArray)) {
       $this->pkgagent = filter_var($analysisArray["package"],
         FILTER_VALIDATE_BOOLEAN);
@@ -160,6 +170,9 @@ class Analysis
     }
     if (stristr($analysisString, "nomos")) {
       $this->nomos = true;
+    }
+    if (stristr($analysisString, "ojo")) {
+      $this->ojo = true;
     }
     if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
@@ -222,6 +235,14 @@ class Analysis
   public function getNomos()
   {
     return $this->nomos;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getOjo()
+  {
+    return $this->ojo;
   }
 
   /**
@@ -290,6 +311,14 @@ class Analysis
   }
 
   /**
+   * @param boolean $ojo
+   */
+  public function setOjo($ojo)
+  {
+    $this->ojo = filter_var($ojo, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * @param boolean $package
    */
   public function setPackage($package)
@@ -311,6 +340,7 @@ class Analysis
       "mimetype"  => $this->mimetype,
       "monk"      => $this->monk,
       "nomos"     => $this->nomos,
+      "ojo"       => $this->ojo,
       "package"   => $this->pkgagent
     ];
   }

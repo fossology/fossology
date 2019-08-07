@@ -843,6 +843,9 @@ components:
         nomos:
           type: boolean
           description: Should Nomos Analysis be run on this upload.
+        ojo:
+          type: boolean
+          description: Should OJO Analysis be run on this upload.
         package:
           type: boolean
           description: Should Package Analysis be run on this upload.
