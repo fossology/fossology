@@ -190,30 +190,60 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
    *
    * If a limit is passed, the results are trimmed. If an ID is passed, the
    * information for the given id is only retrieved.
-   * @param integer $limit Set to limit the result length
-   * @param integer $id Set to get information of only given job id
-   * @return Job[] List of jobs
+   *
+   * @param integer $id       Set to get information of only given job id
+   * @param integer $limit    Set to limit the result length
+   * @param integer $page     Page number required
+   * @param integer $uploadId Upload ID to be filtered
+   * @return array[] List of jobs at first index and total number of pages at
+   *         second.
    */
-  public function getJobs($limit = 0, $id = null, $uploadId = null)
+  public function getJobs($id = null, $limit = 0, $page = 1, $uploadId = null)
   {
     $jobSQL = "SELECT job_pk, job_queued, job_name, job_upload_fk," .
       " job_user_fk, job_group_fk FROM job";
+    $totalJobSql = "SELECT count(*) AS cnt FROM job";
 
+    $filter = "";
+    $pagination = "";
+
+    $params = [];
+    $statement = __METHOD__ . ".getJobs";
+    $countStatement = __METHOD__ . ".getJobCount";
     if ($id == null) {
       if ($uploadId !== null) {
-        $jobSQL .= " WHERE job_upload_fk = " . pg_escape_string($uploadId);
+        $params[] = $uploadId;
+        $filter = "WHERE job_upload_fk = $" . count($params);
+        $statement .= ".withUploadFilter";
+        $countStatement .= ".withUploadFilter";
       }
     } else {
-      $jobSQL .= " WHERE job_pk = " . pg_escape_string($id);
+      $params[] = $id;
+      $filter = "WHERE job_pk = $" . count($params);
+      $statement .= ".withJobFilter";
+      $countStatement .= ".withJobFilter";
     }
 
+    $result = $this->dbManager->getSingleRow("$totalJobSql $filter;", $params,
+      $countStatement);
+
+    $totalResult = $result['cnt'];
+
+    $offset = ($page - 1) * $limit;
     if ($limit > 0) {
-      $jobSQL .= " LIMIT " . pg_escape_string($limit);
+      $params[] = $limit;
+      $pagination = "LIMIT $" . count($params);
+      $params[] = $offset;
+      $pagination .= " OFFSET $" . count($params);
+      $statement .= ".withLimit";
+      $totalResult = floor($totalResult / $limit) + 1;
+    } else {
+      $totalResult = 1;
     }
 
     $jobs = [];
-    $statement = __METHOD__ . ".$limit.$id.$uploadId";
-    $result = $this->dbManager->getRows($jobSQL, [], $statement);
+    $result = $this->dbManager->getRows("$jobSQL $filter $pagination;", $params,
+      $statement);
     foreach ($result as $row) {
       $job = new Job($row["job_pk"]);
       $job->setName($row["job_name"]);
@@ -223,7 +253,7 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $job->setGroupId($row["job_group_fk"]);
       $jobs[] = $job;
     }
-    return $jobs;
+    return [$jobs, $totalResult];
   }
 
   /**

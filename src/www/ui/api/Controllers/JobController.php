@@ -42,23 +42,23 @@ class JobController extends RestController
   /**
    * Get query parameter name for upload filtering
    */
-  private const UPLOAD_PARAM = "upload";
+  const UPLOAD_PARAM = "upload";
   /**
    * Job completed successfully
    */
-  private const JOB_COMPLETED = 0x1 << 1;
+  const JOB_COMPLETED = 0x1 << 1;
   /**
    * Job started by scheduler
    */
-  private const JOB_STARTED = 0x1 << 2;
+  const JOB_STARTED = 0x1 << 2;
   /**
    * Job waiting to be queued
    */
-  private const JOB_QUEUED = 0x1 << 3;
+  const JOB_QUEUED = 0x1 << 3;
   /**
    * Job failed
    */
-  private const JOB_FAILED = 0x1 << 4;
+  const JOB_FAILED = 0x1 << 4;
   /**
    * Get all jobs by a user
    *
@@ -72,11 +72,17 @@ class JobController extends RestController
     $query = $request->getQueryParams();
 
     $limit = 0;
+    $page = 1;
     if ($request->hasHeader('limit')) {
       $limit = $request->getHeaderLine('limit');
-      if (isset($limit) && (! is_numeric($limit) || $limit < 0)) {
+      $page = $request->getHeaderLine('page');
+      if (empty($page)) {
+        $page = 1;
+      }
+      if ((isset($limit) && (! is_numeric($limit) || $limit < 0)) ||
+        (! is_numeric($page) || $page < 1)) {
         $returnVal = new Info(400,
-          "Limit cannot be smaller than 1 and has to be numeric!",
+          "Limit and page cannot be smaller than 1 and has to be numeric!",
           InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
@@ -94,15 +100,15 @@ class JobController extends RestController
 
     if ($id !== null) {
       /* If the ID is passed, don't check for upload */
-      return $this->getAllResults($id, $response, $limit);
+      return $this->getAllResults($id, $response, $limit, $page);
     }
 
     if (array_key_exists(self::UPLOAD_PARAM, $query)) {
       /* If the upload is passed, filter accordingly */
       return $this->getFilteredResults(intval($query[self::UPLOAD_PARAM]),
-        $response, $limit);
+        $response, $limit, $page);
     } else {
-      return $this->getAllResults($id, $response, $limit);
+      return $this->getAllResults($id, $response, $limit, $page);
     }
   }
 
@@ -150,14 +156,16 @@ class JobController extends RestController
 
   /**
    * Get all jobs for the current user.
-   * @param integer $id
-   * @param ResponseInterface $response
-   * @param integer $limit
+   *
+   * @param integer|null $id Specific job id or null for all jobs
+   * @param ResponseInterface $response Response object
+   * @param integer $limit   Limit of jobs per page
+   * @param integer $page    Page number required
    * @return ResponseInterface
    */
-  private function getAllResults($id, $response, $limit)
+  private function getAllResults($id, $response, $limit, $page)
   {
-    $jobs = $this->dbHelper->getJobs($limit, $id);
+    list($jobs, $count) = $this->dbHelper->getJobs($id, $limit, $page);
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEtaAndStatus($job);
@@ -166,30 +174,32 @@ class JobController extends RestController
     if ($id !== null) {
       $finalJobs = $finalJobs[0];
     }
-    return $response->withJson($finalJobs, 200);
+    return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
 
   /**
    * Get all jobs for the given upload.
-   * @param integer $uploadId
-   * @param ResponseInterface $response
-   * @param integer $limit
+   *
+   * @param integer $uploadId Upload id to be filtered
+   * @param ResponseInterface $response Response object
+   * @param integer $limit    Limit of jobs per page
+   * @param integer $page     Page number required
    * @return ResponseInterface
    */
-  private function getFilteredResults($uploadId, $response, $limit)
+  private function getFilteredResults($uploadId, $response, $limit, $page)
   {
     if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $uploadId)) {
       $returnVal = new Info(404, "Upload id " . $uploadId . " doesn't exist",
         InfoType::ERROR);
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
-    $jobs = $this->dbHelper->getJobs($limit, null, $uploadId);
+    list($jobs, $count) = $this->dbHelper->getJobs(null, $limit, $page, $uploadId);
     $finalJobs = [];
     foreach ($jobs as $job) {
       $this->updateEtaAndStatus($job);
       $finalJobs[] = $job->getArray();
     }
-    return $response->withJson($finalJobs, 200);
+    return $response->withHeader("X-Total-Pages", $count)->withJson($finalJobs, 200);
   }
 
   /**

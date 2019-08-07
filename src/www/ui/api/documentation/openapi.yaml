@@ -14,7 +14,7 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.2
+  version: 1.0.3
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
@@ -378,7 +378,13 @@ paths:
             required: false
             schema:
               type: integer
-              minimum: 0
+              minimum: 1
+            in: header
+          - name: page
+            required: false
+            schema:
+              type: integer
+              minimum: 1
             in: header
           - name: upload
             required: false
@@ -389,6 +395,11 @@ paths:
         responses:
           '200':
             description: OK
+            headers:
+              X-Total-Pages:
+                description: Total number of pages which can be generated based on limit
+                schema:
+                  type: integer
             content:
               application/json:
                 schema:
