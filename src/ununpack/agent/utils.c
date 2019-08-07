@@ -22,6 +22,11 @@
 #include "externs.h"
 #include "regex.h"
 
+#define NEW_SHA256
+#ifdef NEW_SHA256
+#include "sha2.h"
+#endif
+
 /**
  * \brief File mode BITS
  */
@@ -1390,7 +1395,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
  *
  * This modifies the CI record's pfile and ufile indexes!
  * @param CI
- * @param Fuid sha1.md5.size
+ * @param Fuid sha1.md5.sha256.size
  * @param Mask file mode mask
  * @returns 1 if added, 0 if already exists!
  **/
@@ -1441,6 +1446,35 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   if (ForceDuplicate) IsUnique=1;
   return(IsUnique);
 } /* AddToRepository() */
+
+#ifdef NEW_SHA256
+int calc_sha256sum(char*filename, char* dst) {
+    sha256_ctx ctx;
+    unsigned char buf[32];
+    unsigned char digest[32];
+    memset(digest, '\0', sizeof(digest));
+    FILE *f;
+    if(!(f=fopen(filename, "rb")))
+    {
+        LOG_FATAL("Failed to open file '%s'\n", filename);
+        return(1);
+    }
+    sha256_init(&ctx);
+
+    int i=0;
+    while((i=fread(buf, 1, sizeof(buf), f)) > 0) {
+        sha256_update(&ctx, buf, i);
+    }
+    sha256_final(&ctx, digest);
+    fclose(f);
+
+    for (i=0; i<32; i++) {
+        snprintf(dst+i*2, 3, "%02x", digest[i]);
+    }
+
+    return 0;
+}
+#endif
 
 /**
  * @brief Print what can be printed in XML.
@@ -1566,38 +1600,17 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
     CksumFile *CF;
     Cksum *Sum;
     char SHA256[65];
+#ifndef NEW_SHA256
     char command[PATH_MAX + 13];
     int retcode = -1;
     int read = 0;
+#endif
 
     memset(SHA256, '\0', sizeof(SHA256));
 
     CF = SumOpenFile(CI->Source);
-	{
-		char* copy_dst_p = command;
-		char* copy_src_p = CI->Source;
-		/* End of array, minus terminal \0, final quote and possible escape character */
-		char* copy_dst_max_p = command + sizeof(command) - 3;
-
-		copy_dst_p += sprintf(copy_dst_p, "sha256sum \"");
-		while (*copy_src_p != '\0') {
-			if (copy_dst_p >= copy_dst_max_p) {
-				LOG_FATAL("Filename too long: %s\n", CI->Source);
-				SafeExit(56); /* Which exit code ? */
-			}
-			if (*copy_src_p == '"' || \
-				*copy_src_p == '\\' || \
-				*copy_src_p == '$') {
-				*copy_dst_p = '\\';
-				copy_dst_p++;
-			}
-			*copy_dst_p = *copy_src_p;
-			copy_dst_p++;
-			copy_src_p++;
-		}
-		sprintf(copy_dst_p, "\"");
-	}
-
+#ifndef NEW_SHA256
+    snprintf(command, PATH_MAX + 13, "sha256sum '%s'", CI->Source);
     FILE* file = popen(command, "r");
     if (file != (FILE*) NULL)
     {
@@ -1609,6 +1622,13 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
       LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
       SafeExit(56);
     }
+#else
+    if(calc_sha256sum(CI->Source, SHA256))
+    {
+        LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
+        SafeExit(56);
+    }
+#endif
     if (CF)
     {
       Sum = SumComputeBuff(CF);
