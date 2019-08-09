@@ -1131,8 +1131,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   /* Check if the pfile exists */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
-      "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = '%s';",
-      Fuid,Fuid+41,Fuid+74,Fuid+140);
+      "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
+      Fuid,Fuid+41,Fuid+140);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(12);
 
@@ -1169,8 +1169,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
        on currval(). */
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
-        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = '%s';",
-        Fuid,Fuid+41,Fuid+74,Fuid+140);
+        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
+        Fuid,Fuid+41,Fuid+140);
     result =  PQexec(pgConn, SQL);  /* SELECT */
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
   }
@@ -1187,8 +1187,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     {
       PQclear(result);
       memset(SQL,'\0',MAXSQL);
-      snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld' WHERE pfile_pk = '%ld';",
-          CMD[CI->PI.Cmd].DBindex, CI->pfile_pk);
+      snprintf(SQL,MAXSQL,"UPDATE pfile SET pfile_mimetypefk = '%ld', pfile_sha256 = '%.64s' WHERE pfile_pk = '%ld';",
+          CMD[CI->PI.Cmd].DBindex, Fuid+74, CI->pfile_pk);
       result =  PQexec(pgConn, SQL); /* UPDATE pfile */
       if (fo_checkPQcommand(pgConn, result, SQL, __FILE__ ,__LINE__)) SafeExit(16);
     }
@@ -1336,7 +1336,7 @@ int	DBInsertUploadTree	(ContainerInfo *CI, int Mask)
 
   /*
    * Tests for SCM Data: IgnoreSCMData is global and defined in ununpack_globals.h with false value
-   * and pass to true if ununpack is called with -I option to ignore SCM data. 
+   * and pass to true if ununpack is called with -I option to ignore SCM data.
    * So if IgnoreSCMData is false the right test is true.
    * Otherwise if IgnoreSCMData is true and CI->Source is not a SCM data then add it in database.
   */
@@ -1568,7 +1568,7 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
     char SHA256[65];
     char command[PATH_MAX + 13];
     int retcode = -1;
-    int read = 0;
+    int read = 0, i;
 
     memset(SHA256, '\0', sizeof(SHA256));
 
@@ -1584,6 +1584,11 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
     {
       LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
       SafeExit(56);
+    }
+    // Change SHA256 to upper case like other checksums
+    for (i = 0; i < 65; i++)
+    {
+      SHA256[i] = toupper(SHA256[i]);
     }
     if (CF)
     {
