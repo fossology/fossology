@@ -30,8 +30,7 @@ install: all
 	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/reuser/agent/
 	for file in $(COPY); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file; \
-		$(call make_exec_file,php,$(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file); \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
