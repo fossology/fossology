@@ -1,5 +1,112 @@
 # Changelog of FOSSology
 
+### 3.6.0-RC1 (Aug 12th 2019)
+
+This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds nw features to FOSSology, including:
+
+* A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
+* Improved handling of manually added copyright statements to files
+* Improvements to the SPDX reporting, for example output also of comments
+* Calculating the SHA256 values for files from now on, because that is going to be used for integration of, for example, Software Heritage or Clearly defined
+
+## Contributors
+
+There are many ways to commit to the source code, but if you count the commits to master, then the credits go to the following persons for this release:
+
+```
+ag4ums
+shaheemazmalmmd
+NicolasToussaint
+rlintu
+sandipbhuyan (GSOC 2019!)
+ChristopheRequillart
+GMishx
+hastagAB (GSOC 2019!)
+vivekaindia (GSOC 2019!)
+maxhbr
+mcjaeger
+PeterDaveHello
+tiegz
+chienphamvu
+```
+
+## Features
+
+* `21bd38428` feat(api): Cache Slim DI container
+* `840ba9b8d` feat(ci): Run travis jobs on Xenial
+* `62c86b865` feat(codesniffer): check php codesniffer through travis
+* `64878b7d7` feat(copyright): Show text findings in copyright
+* `1bbc203cc` feat(cp2foss): cp2foss prints out FolderPk as well
+* `cc16066ef` feat(datatable): add select plugin of datatable to change paging
+* `d3641939e` feat(db): Calculate the sha256 value of the uploading file and store it in database
+* `6b705539f` feat(db): Store SHA256 of the uploaded file
+* `7bc49eaec` feat(dbmigrate_3.5-3.6): add limit to process number of records
+* `4790c6353` feat(licenseRef): add new functionality to add new licenses and update existing licenses from SPDX
+* `d8076a088` feat(licenseref): convert licenseref file from sql to json format
+* `5ab3fe831` feat(licenses): nomos merge error fixed
+* `020595190` feat(licenses): SPDX identifier detection modified to include AND and OR options
+* `84cbbbbea` feat(ojo): New license scanner for SPDX
+* `fbfdc79fc` feat(spdx2): ignore files with no info in SPDX reports
+* `92cbbc2a0` feat(spdx2): SPDX output does not yet show license comments
+* `e514dc6d9` feat(ui): Add user description of available user in group management page
+* `dcc74a9be` feat(ui): Show both user description and user name in 'Assigned to' list
+* `57493d0f1` feat(unifiedReport): separate user and scanner findings of copyrights
+* `f3c9e3df7` feat(unifiedReport): update phpword version from v0.13.* to v0.16.*
+
+## Corrections
+
+* `d528e4fb4` fix(obligations): fix UI and connected db to dropdown menu
+* `f65397495` fix(admin-license-file): Fix update conclusion to self
+* `de2f76fd0` fix(advicelicense): fix double select of risk in advice license remove select2 initialisation in macro
+* `db9f8c8fa` fix(api): Adhere to specification
+* `5ef99c95b` fix(build): Fix clean build from all dirs
+* `61f06e348` fix(codesniffer): Fix errors reported by phpcs
+* `1d1b94fbb` fix(copyright): Fix pagination of copyright
+* `d6d2fabe3` fix(copyright): fix php notices in copyright hist view
+* `53849883c` fix(dbmigrate_3.5-3.6): add single quotes to string and calculate actual minutes
+* `0943d97ad` fix(download): Fix a call to non-static function
+* `4fb3dd1f0` fix(init.d): Implement missing function
+* `1a961298f` fix(migration): Make pfile sha calculation separate script
+* `0c6d64741` fix(nomos): nomos crash (#1337)
+* `9705b2d64` fix(pfile): Fix warnings in ununpack and wget
+* `75fc1252f` fix(pfile): SHA256 is still optional
+* `fd1dc495a` fix(reportConf): include correct array from  to fix report conf closes #1377
+* `d6f62de15` fix(showjob): General fix after refactor
+* `9659ac1b2` fix(showjobs): Check empty for allusers before updating
+* `c2585dcb9` fix(showjobs): Fix the pagination
+* `3f2117c46` fix(spdx2): remove dependency from upload table
+* `de64361f7` fix(strings): correct typo
+* `ad9c6d7bc` fix(UI): increased the size of upload to reuse window in upload files
+* `40defdb6b` fix(ui): Show license findings for folder with single child
+* `65896cd3e` fix(unifiedreport): fixed issue with irrelevant file display
+* `5361fefd2` fix(unifiedReport): remove php warnings from job log
+* `453da1f13` fix(upload): remove dependency from upload table for SPDX shift the report info to new conf page
+* `e304e4e39` fix(vscode): Add vscode editor file to gitignore
+* `b6fdf1121` fix(process): Fix the PHP agent installation
+
+## Infrastructure and Testing
+
+* `3bccc4078` test(ojo): Test cases
+* `dcc429edc` chore(debian): Fix lintian erros and warnings
+* `82653993d` chore(decisions): Store SHA256 of text findings
+* `c2a22fb4a` chore(fo-installdeps): drop unsupported distros
+* `3b6a06e28` chore(travis): Disable unnecessary addon to speed up tests
+* `13e2cfd39` chore(travis): Enable ccache to speed up tests
+* `df793036e` chore(travis): Enable composer cache to speed up tests
+* `34b8784e0` chore(travis): Enable Fast-Finish to retrieve build result faster
+* `0fc133583` chore(travis): Fix Coveralls execution path
+* `a45fc6965` chore(travis): Fix Coveralls output json file not writable issue
+* `f1676582d` chore(travis): Leverage yaml anchor for phpunit
+* `b576acbdc` chore(travis): Remove deprecated Travis CI `sudo` config
+* `fcff243fd` chore(travis): Run PHPUnit via phpdbg to speed up tests
+* `90e7bdfe4` chore(travis): Set pipefail in Travis CI PHPUnit on PHP 7.0
+* `e5f9651c6` chore(travis): Show ccache bins & statistics summary
+* `2d24945f2` chore(version): Force the VERSION variable
+
+## Refactorings
+
+* `a7db0edd6` refac(showjobs): Refactor code to send JSON
+
 ### 3.5.0 (Apr 11th 2019)
 
 After two release candidates, making fixes for REST API installation and various
@@ -156,7 +263,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 
 #### Corrections
 
-* `b6cb10d` fix(dashboard): change comparison statements for postgres 
+* `b6cb10d` fix(dashboard): change comparison statements for postgres
 * `5c463d1` fix(constraints): Remove faulty constraints
 * `6b017b1` fix(resequence): Check the column name from DB
 * `1983b29` fix(tests): fix PHPCS and phpunit testcases for deciderjob
@@ -165,7 +272,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 #### Refactorings, Infrastructure
 
 * `99a56a1` fix(postgresql): Fixed postgresql version to 9.6 and use a volume
-* `0ce85bd` chore(copyright): Remove DISABLE_JSON macro 
+* `0ce85bd` chore(copyright): Remove DISABLE_JSON macro
 * `31be206` feat(copyright): Use package based dependency for json
 
 #### Documentation
@@ -189,7 +296,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 * `346546d` feat(docker): Replaced standalone Dockerfile with docker-compose. Changes: .dockerignore: * Added some unrelated files for docker.
 * `058a41b` feat(emailConfig): Move config settings to sysconfig table
 * `215b6d8` feat(fo-installdeps): Drop support for End-of-Life distributions.
-* `7b804e1` feat(fo-postinstall): Added flag to omit all database operations. 
+* `7b804e1` feat(fo-postinstall): Added flag to omit all database operations.
 * `063d5df` feat(fo-postinstall): Implemented best practises for bash script.
 * `e9345a2` feat(fossology): Support for Bionic Beaver
 * `d89c334` feat(info): change tag from input to textarea refactor ShowReportInfo add missing </tr>
@@ -513,7 +620,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 #### Corrections
 
 * fix(ninka): ninka needs a new dependency
-* fix(docker): use a simpler Dockerfile for standalone build 
+* fix(docker): use a simpler Dockerfile for standalone build
 * fix(browsefolder): added a check to see, if the folder is accessible
 * fix(copyright): invalid pointer to regex
 * fix(copyrightandeccview): added tooltip next to description
@@ -533,7 +640,7 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 * fix(user-creation): email needs to be unique and required
 * fix(www): correct ETA in all job view
 * fix(www): PHP warnings
-* fix(cleanup): remove HACKING, install_locations.xls, build.xml 
+* fix(cleanup): remove HACKING, install_locations.xls, build.xml
 * fix(spdx): typo in template and bump LicenseListVersion
 * fix(spdx): add files with no license found to generated output format
 
@@ -572,87 +679,87 @@ This pre-release adds important corrections to 3.4.0-RC1 and also the commit to 
 
 #### Refactoring
 
-* refactor(ui) rewrite upload pages 
-* refactor(ui) rewrite/refactor delagent and fix #273 
-* refactor(ui) escape strings which become HTML or SQL 
+* refactor(ui) rewrite upload pages
+* refactor(ui) rewrite/refactor delagent and fix #273
+* refactor(ui) escape strings which become HTML or SQL
 
 #### New Larger Features
 
 * New Dockerfile also used for Docker Hub, including composed containers with separate DB server
 * DEP5 / debian-copyright file generation
-* Adding tag-value format for the SPDX2 generation 
+* Adding tag-value format for the SPDX2 generation
 * More efficient UI for bulk scan with multiple licenses at the same time
 
 #### New Smaller Features
 
 * feature(CONTRIBUTING.md) create initial CONTRIBUTING.md to support github feature
 * feature(database) add reindexing option to maintenance agent, as turned out necessary
-* feature(database) add some indexes and clusters to database 
+* feature(database) add some indexes and clusters to database
 * feature(infrastructure) add coverage coverage, adding badge to README.md
-* feature(license-list) improve UI for allowing more agents 
-* feature(spdx-tools) install spdx-tools script for vagrant and travis 
-* feature(ui) add security check to `user-edit.php` 
-* feature(ui) allow users to move and copy their uploads 
+* feature(license-list) improve UI for allowing more agents
+* feature(spdx-tools) install spdx-tools script for vagrant and travis
+* feature(ui) add security check to `user-edit.php`
+* feature(ui) allow users to move and copy their uploads
 * feature(vagrant) increase upload size setting
-* feature(vagrant) support proxy from host_ip:3128 
+* feature(vagrant) support proxy from host_ip:3128
 
 #### Corrections on the (PHP) UI
 
-* fix(ui) fix ui-view error reporting [#615] 
-* fix(ui) fo_copyright_list - bad error checking, - bad error message #277 and #276 
-* fix(ui) handled exception in common-auth.php for incorrect username 
-* fix(ui) mark decisions as irrelevant from file tree [edit] option for uploads 
+* fix(ui) fix ui-view error reporting [#615]
+* fix(ui) fo_copyright_list - bad error checking, - bad error message #277 and #276
+* fix(ui) handled exception in common-auth.php for incorrect username
+* fix(ui) mark decisions as irrelevant from file tree [edit] option for uploads
 * fix(ui) password handling for adding users improved
-* fix(ui) #635: add parameter to URLs for showjobs 
-* fix(ui) only admin should be able to create groups 
-* fix(ui) repair error, which emerges in PHP <= 5.4 
-* fix(ui) repair issue mentioned in #660 
-* fix(ui) repair prepared statement in `admin-license-file.php` 
-* fix(ui-download) add $filenameFallback solve #589 
+* fix(ui) #635: add parameter to URLs for showjobs
+* fix(ui) only admin should be able to create groups
+* fix(ui) repair error, which emerges in PHP <= 5.4
+* fix(ui) repair issue mentioned in #660
+* fix(ui) repair prepared statement in `admin-license-file.php`
+* fix(ui-download) add $filenameFallback solve #589
 * fix(ui) added branch name and separated version into string
 * fix(license-browser) menu order with ECC and other corrected
 * fix(upload-browser) visibility issues with selection of "entire folder"
 
 #### Corrections on the Application Functionality
 
-* fix(agents) fossupload_status print usage on error or --help 
+* fix(agents) fossupload_status print usage on error or --help
 * fix(agents) repair the calls of `heartbeat` #560
-* fix(composer) replace hash with correct one 
-* fix(copyright) fixing listing of copyrights at Readme export 
-* fix(copyright) increase maximum length of TLD's 
+* fix(composer) replace hash with correct one
+* fix(copyright) fixing listing of copyrights at Readme export
+* fix(copyright) increase maximum length of TLD's
 * fix(copyrights) removed extra where condition which leads to miss copyright statements
-* fix(dashboard) missing $this-> in method call 
-* fix(delagent) any user who is not the owner can delete any folder via /delagent -F 
-* fix(delagent) delagent error message wording 
+* fix(dashboard) missing $this-> in method call
+* fix(delagent) any user who is not the owner can delete any folder via /delagent -F
+* fix(delagent) delagent error message wording
 * fix(monk) fix one shot functionality
 * fix(nomos) #340 correct path output on command line use
-* fix(nomos) Remove extra spaces from the end of usage messages 
-* fix(reuse) Corrected lrb_ori to lrb_origin in bulkreuser 
-* fix(security) SQL injection vulnerability in read_permission 
+* fix(nomos) Remove extra spaces from the end of usage messages
+* fix(reuse) Corrected lrb_ori to lrb_origin in bulkreuser
+* fix(security) SQL injection vulnerability in read_permission
 * fix(showjobs) correct view  for `&upload=-1` in the URL
 * fix(spdx2) Remove control characters from SPDX output #591
-* fix(spdx2) fix several bugs in DEP5 and SPDX2 reports 
-* fix(ununpack) remove extraneous parentheses 
-* fix(wget_agent) fix issue #298 
-* fix(wget_agent) fix issue #298 
+* fix(spdx2) fix several bugs in DEP5 and SPDX2 reports
+* fix(ununpack) remove extraneous parentheses
+* fix(wget_agent) fix issue #298
+* fix(wget_agent) fix issue #298
 
 #### Corrections to the Database, Deployment, Tests and Framework
 
-* fix(infrastructure) agent_desc not being initialized in install 
-* fix(infrastrcuture) add to vagrant support for ninka 
-* fix(infrastructure) Added DTD to index file to prevent phpunit test case failure 
-* fix(infrastructure) add fo_chmod and fo_folder to .gitignore 
-* fix(infrastructure) emoved SVN_REV from files and replaced Commit with commit_hash #331 
-* fix(infrastructure) error which emerges in PHP <= 5.4 
+* fix(infrastructure) agent_desc not being initialized in install
+* fix(infrastrcuture) add to vagrant support for ninka
+* fix(infrastructure) Added DTD to index file to prevent phpunit test case failure
+* fix(infrastructure) add fo_chmod and fo_folder to .gitignore
+* fix(infrastructure) emoved SVN_REV from files and replaced Commit with commit_hash #331
+* fix(infrastructure) error which emerges in PHP <= 5.4
 * fix(infrastructure) improved protocol inference #580
-* fix(infrastructure) Missing newline in fossupload_status utility 
-* fix(infrastructure) Missing newlines in fo_chmod error messages 
-* fix(infrastructure) reading of .fossology.rc for not parsing values 
-* fix(infrastructure) remove duplicate test and fix #579 
-* fix(infrastructure) SVN_REV and added branch name in version file #331 
-* fix(infrastructure) Write correct version of DB-scheme to DB 
-* fix(travis) `apt-get install -qq ...` times out 
-* fix(travis) use debian perl instead of cpan 
+* fix(infrastructure) Missing newline in fossupload_status utility
+* fix(infrastructure) Missing newlines in fo_chmod error messages
+* fix(infrastructure) reading of .fossology.rc for not parsing values
+* fix(infrastructure) remove duplicate test and fix #579
+* fix(infrastructure) SVN_REV and added branch name in version file #331
+* fix(infrastructure) Write correct version of DB-scheme to DB
+* fix(travis) `apt-get install -qq ...` times out
+* fix(travis) use debian perl instead of cpan
 
 #### Closed Issues for this Release
 
@@ -827,7 +934,7 @@ See the RC1 notes below for what changed.
 * Fix special case where Freetype license was missed
 * Fix MIT that should have been MIT-style
 * Fix special case of missed CPL-1.0
-* Fix cases of missed file references 
+* Fix cases of missed file references
 * Add LIBGCJ license
 * Add WordNet (was being detected as MIT/Princeton license
 * Add Interbase-1.0 license
