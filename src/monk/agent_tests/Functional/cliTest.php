@@ -115,7 +115,7 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
 
     $this->assertEquals(0, $retCode, 'monk failed: '.$output);
 
-    $this->assertRegExp("/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10272\n/", $output);
+    $this->assertRegExp("/found full match between \".*expectedFull\\/Apache-2.0\" and \"Apache-2\\.0\" \\(rf_pk=[0-9]*\\); matched: 0\\+10456\n/", $output);
   }
 
   private function extractSortedLines($output) {
