@@ -386,7 +386,7 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   PQexecCheckClear("Deleting tag_uploadtree", SQL, __FILE__, __LINE__);
 
   /* Delete uploadtree_nnn table */
-  char uploadtree_tablename[1024];
+  char uploadtree_tablename[1000];
   snprintf(SQL,MAXSQL,"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",uploadId);
   result = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) {
