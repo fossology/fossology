@@ -78,7 +78,7 @@ mode_t	GetISOMode	(char *Line)
  **/
 int	ExtractISO	(char *Source, char *Destination)
 {
-  char Cmd[FILENAME_MAX*4]; /* command to run */
+  char Cmd[FILENAME_MAX*5]; /* command to run */
   char Line[FILENAME_MAX];
   int Len;
   char *s; /* generic string pointer */

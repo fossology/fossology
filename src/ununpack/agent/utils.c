@@ -630,7 +630,7 @@ void	CheckCommands	(int Show)
 int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
 {
-  char Cmd1[FILENAME_MAX * 3];
+  char Cmd1[FILENAME_MAX * 5];
   char CWD[FILENAME_MAX];
   int rc;
   char TempPre[FILENAME_MAX];
