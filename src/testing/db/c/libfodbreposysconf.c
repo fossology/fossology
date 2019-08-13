@@ -174,19 +174,50 @@ int create_db_repo_sysconf(int type, char* agent_name, char* sysconfdir) {
   }
 #endif
 
-  char CMD[ARRAY_LENGTH] = "../../../testing/db/createTestDB.php";
-  if(sysconfdir != NULL)
+  const char INIT_CMD[] = "../../../testing/db/createTestDB.php";
+  char *CMD, *tmp;
+
+  CMD = (char *)malloc(strlen(INIT_CMD) + 1);
+  if (!CMD)
   {
-    sprintf(CMD, "%s -c %s", CMD, sysconfdir);
+    return -1;
+  }
+  sprintf(CMD, "%s", INIT_CMD);
+
+  if (sysconfdir)
+  {
+    tmp = (char *)malloc(strlen(CMD) + 4 + strlen(sysconfdir) + 1);
+    if (!tmp)
+    {
+      free(CMD);
+      return -1;
+    }
+    sprintf(tmp, "%s -c %s", CMD, sysconfdir);
+    free(CMD);
+    CMD = tmp;
   }
 
-  if (1 == type) {
-    command_output(CMD);
+  switch(type)
+  {
+    case 0:
+      tmp = (char *)malloc(strlen(CMD) + 4);
+      if (!tmp)
+      {
+        free(CMD);
+        return -1;
+      }
+      sprintf(tmp, "%s -e", CMD);
+      free(CMD);
+      CMD = tmp;
+    case 1:
+      command_output(CMD);
+      break;
+    default:
+      break;
   }
-  else if (0 == type) {
-    sprintf(CMD, "%s -e", CMD);
-    command_output(CMD);
-  }
+
+  free(CMD);
+
   int argc = 3;
   char* argv[] = {agent_name, "-c", Sysconf};
 
@@ -282,11 +313,25 @@ char* get_confFile() {
  * \return repo path
  */
 char* get_repodir() {
-  memset(RepoDir, '\0', sizeof(RepoDir));
-  strcpy(RepoDir, Sysconf);
+  strncpy(RepoDir, Sysconf, ARRAY_LENGTH);
+  RepoDir[ARRAY_LENGTH-1] = '\0';
+
   char* test_name_tmp = strstr(RepoDir, "testDbConf");
-  *test_name_tmp = 0;
-  sprintf(RepoDir, "%stestDbRepo%s", RepoDir, get_test_name());
+  if (test_name_tmp)
+  {
+    *test_name_tmp = '\0';
+  }
+
+  char *tmp = malloc(strlen(RepoDir) + 1);
+  if (!tmp) {
+    return NULL;
+  }
+
+  sprintf(tmp, "%s", RepoDir);
+  sprintf(RepoDir, "%stestDbRepo%s", tmp, get_test_name());
+
+  free(tmp);
+
 #ifdef TEST
   printf("RepoDir is:%s\n", RepoDir);
 #endif
