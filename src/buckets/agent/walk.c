@@ -222,19 +222,23 @@ FUNCTION int processFile(PGconn *pgConn, pbucketdef_t bucketDefArray,
      */
     if (isPkg)
     {
-      strncpy(package.pkgname, PQgetvalue(result, 0, 0), sizeof(package.pkgname));
+      strncpy(package.pkgname, PQgetvalue(result, 0, 0), sizeof(package.pkgname)-1);
+      package.pkgname[sizeof(package.pkgname)-1] = 0;
       if (package.pkgname[strlen(package.pkgname)-1] == '\n')
         package.pkgname[strlen(package.pkgname)-1] = 0;
 
-      strncpy(package.pkgvers, PQgetvalue(result, 0, 1), sizeof(package.pkgvers));
+      strncpy(package.pkgvers, PQgetvalue(result, 0, 1), sizeof(package.pkgvers)-1);
+      package.pkgvers[sizeof(package.pkgvers)-1] = 0;
       if (package.pkgvers[strlen(package.pkgvers)-1] == '\n')
         package.pkgvers[strlen(package.pkgvers)-1] = 0;
 
-      strncpy(package.vendor, PQgetvalue(result, 0, 2), sizeof(package.vendor));
+      strncpy(package.vendor, PQgetvalue(result, 0, 2), sizeof(package.vendor)-1);
+      package.vendor[sizeof(package.vendor)-1] = 0;
       if (package.vendor[strlen(package.vendor)-1] == '\n')
         package.vendor[strlen(package.vendor)-1] = 0;
 
-      strncpy(package.srcpkgname, PQgetvalue(result, 0, 3), sizeof(package.srcpkgname));
+      strncpy(package.srcpkgname, PQgetvalue(result, 0, 3), sizeof(package.srcpkgname)-1);
+      package.srcpkgname[sizeof(package.srcpkgname)-1] = 0;
       if (package.srcpkgname[strlen(package.srcpkgname)-1] == '\n')
         package.srcpkgname[strlen(package.srcpkgname)-1] = 0;
     }
