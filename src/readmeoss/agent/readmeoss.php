@@ -141,9 +141,38 @@ class ReadmeOssAgent extends Agent
     }
 
     $contents = array('licensesMain'=>$licenseStmtsMain, 'licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts, 'licenseAcknowledgements' => $licenseAcknowledgements);
+    $contents = $this->updateIdentifiedGlobalLicenses($contents);
     $this->writeReport($contents, $uploadId);
 
     return true;
+  }
+
+  /**
+    * @brief callback to compare licenses
+    * @param array $licenses1
+    * @param array $licenses2
+    * @return interger difference of license ids
+    */
+  function checkLicenseId($licenses1, $licenses2)
+  {
+    return strcmp($licenses1['licenseId'], $licenses2['licenseId']);
+  }
+
+  /**
+    * @brief Copy identified global licenses
+    * @param[int,out] array $contents
+    * @return array $contents with identified global license path
+    */
+  function updateIdentifiedGlobalLicenses($contents)
+  {
+    $licensesMain = $contents["licensesMain"];
+    $licenses = $contents["licenses"];
+    $onlyMainLic = array_udiff($licensesMain, $licenses, array($this, "checkLicenseId"));
+    $mainLicensesInIdetifiedFiles = array_uintersect($licenses, $licensesMain, array($this, "checkLicenseId"));
+    $onlyLicense = array_udiff($licenses, $licensesMain, array($this, "checkLicenseId"));
+    $contents["licensesMain"] = array_values(array_merge($onlyMainLic, $mainLicensesInIdetifiedFiles));
+    $contents["licenses"] = array_values($onlyLicense);
+    return $contents;
   }
 
   /**
@@ -221,7 +250,6 @@ class ReadmeOssAgent extends Agent
     $separator1 = str_repeat("=", 120);
     $separator2 = str_repeat("-", 120);
     $break = str_repeat("\r\n", 2);
-
     $output = $separator1 . $break . $packageName . $break . $separator2 . $break;
     if (!empty($contents['licensesMain'])) {
       $output .= $separator1 . $break . " MAIN LICENSES " . $break . $separator2 . $break;
