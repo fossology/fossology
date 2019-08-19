@@ -1,5 +1,4 @@
 <?php
-
 ######################################################################
 # Copyright (C)
 # Author: Vivek Kumar<vvksindia@gmail.com>
@@ -21,6 +20,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\UI\Component\MicroMenu;
+use GuzzleHttp\Client;
 
 /**
  * @class ui_spashts
@@ -33,8 +33,9 @@ class ui_spasht extends FO_Plugin
     $this->Name       = "spashtbrowser";
     $this->Title      = _("Spasht Browser");
     $this->Dependency = array("browse","view");
-    $this->DBaccess   = PLUGIN_DB_READ;
+    $this->DBaccess   = PLUGIN_DB_WRITE;
     $this->LoginFlag  = 0;
+    $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     parent::__construct();
   }
 
@@ -97,20 +98,64 @@ class ui_spasht extends FO_Plugin
    */
   public function output()
   {
+    $patternName = GetParm("patternName",PARM_STRING);
+
+    $vars = array();
+
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
-    $uploadDao = $GLOBALS['container']->get('dao.upload');
-    if ( !$uploadDao->isAccessible($uploadId, Auth::getGroupId()) )
+
+    if($patternName != null && !empty($patternName))
     {
-      $text = _("Permission Denied");
-      return "<h2>$text</h2>";
+
+      $client = new Client([
+        // Base URI is used with relative requests
+        'base_uri' => 'https://api.clearlydefined.io/',
+        ]);
+
+      $res = $client->request('GET','definitions',[
+          'query' => ['pattern' => $patternName]
+        ]);
+      
+        $vars['body'] = "error";
+
+      if($res->getStatusCode()==200)
+      {
+         $body = json_decode($res->getBody()->getContents());
+
+         if(sizeof($body) == 0)
+         {
+          $body[0] = "No Match Found";
+         }
+
+         $vars['body'] = $body;
+      }
+
+      $upload_name = $patternName;
     }
 
-    $upload_name = GetUploadName($uploadId);
-    return($upload_name);
+    else{
+      if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) )
+        {
+          $text = _("Permission Denied");
+          return "<h2>$text</h2>";
+        }
+
+      $upload_name = GetUploadName($uploadId);
+    }
+    
+
+    $vars['uploadName'] = $upload_name;
+
+    $out = $this->renderString('agent_spasht.html.twig',$vars);
+    
+
+    return($out);
   }
 
 }
 
 $NewPlugin = new ui_spasht;
 $NewPlugin->Initialize();
+
+?>
