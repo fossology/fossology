@@ -1,0 +1,94 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<script>
+$("#advanceSearchForm").ready(function() {
+  $("#advanceSearchForm").hide();
+  $(".ui-icon-caret-1-n").hide();
+})
+
+function advanceSearchFormEnabled() {
+  if (document.getElementById("advanceSearchFormStatus").value === "hidden") {
+    $(".ui-icon-caret-1-s").hide();
+    $(".ui-icon-caret-1-n").show();
+    document.getElementById("advanceSearchFormStatus").value = "shown";
+  } else {
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    document.getElementById("advanceSearchFormStatus").value = "hidden";
+  }
+  $("#advanceSearchForm").toggle("blind");
+}
+
+function StoreIntoDb() {
+  var key = $("#selectedDetailKey").val();
+  if (key) {
+    var namespace = $.trim($("#definitionsRow_namespace" + key).text());
+    var name = $.trim($("#definitionsRow_name" + key).text());
+    var revision = $.trim($("#definitionsRow_revision" + key).text());
+    var type = $.trim($("#definitionsRow_type" + key).text());
+    var provider = $.trim($("#definitionsRow_provider" + key).text());
+
+    var params = type + "/" + provider + "/" + namespace + "/" + name +
+      "/" + revision;
+
+    $("#optionSelectedToOpen").val(params);
+    $("#storeForm").submit();
+  } else {
+    return true;
+  }
+}
+
+$("#detailsTable").ready(function() {
+  // Hide showdetails Table
+  $("#detailsTable").hide();
+  $(".detailsRow").hide();
+  $("#defentionSelector").on("click", StoreIntoDb);
+});
+
+function showDetails(key) {
+
+  var detailsRow = ".detailsId"+key;
+  var definitionsRow = "#definitionsRow"+key;
+
+  // Hide all the Table row
+  $(".detailsRow").hide();
+
+  // Remove Highlight from all
+  $(".definitionsRow").addClass("even").removeClass("odd");
+
+  // Show hidden Table row
+  $("#detailsTable").show();
+  $(detailsRow).show(400);
+
+  // Highlight selected definition
+  $(definitionsRow).removeClass("even").addClass("odd");
+
+  $("#selectedDetailKey").val(key);
+}
+
+$( function() {
+  $(".spasht-loading").hide();
+
+  $("#searchForm").submit(function(event) {
+    $(".spasht-loading").show();
+    return;
+  });
+
+  var spashtTabCookie = 'stickySpashtTab';
+  $('#spashtTabs').tabs({
+    active: ($.cookie(spashtTabCookie) || 0),
+    activate: function(e, ui){
+      // Get active tab index and update cookie
+      var idString = $(e.currentTarget).attr('id');
+      idString = parseInt(idString.slice(-1)) - 1;
+      $.cookie(spashtTabCookie, idString);
+    }
+  });
+});
+</script>

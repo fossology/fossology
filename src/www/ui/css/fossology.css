@@ -92,6 +92,12 @@ table
   background: -o-linear-gradient(top, #ffffff 0%,#efefef 100%); /* Opera11.10+ */
   background: -ms-linear-gradient(top, #ffffff 0%,#efefef 100%); /* IE10+ */
   background: linear-gradient(to top, #ffffff, #efefef); /* W3C */
+  position: relative;
+}
+
+.buttonLink:active {
+  top: 1px;
+  left: 1px;
 }
 /* Fun bug: When using the DTD, you need to define html and body
    to be 100% AND div must be used.  Otherwise, iframe becomes

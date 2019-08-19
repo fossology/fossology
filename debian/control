@@ -343,7 +343,8 @@ Description: architecture for analyzing software, report importer
 
 Package: fossology-softwareheritage
 Architecture: any
-Depends: fossology-ununpack, fossology-wgetagent, ${misc:Depends}
+Depends: fossology-common, fossology-ununpack, fossology-wgetagent,
+ ${misc:Depends}
 Description: architecture for fetching the origin of a file software heritage archive.
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -352,3 +353,15 @@ Description: architecture for fetching the origin of a file software heritage ar
  type identification.
  .
  This package contains the softwareHeritage agent programs and their resources.
+
+Package: fossology-spasht
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture to connect clearlyDefined, spasht
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the spasht agent programs and their resources.

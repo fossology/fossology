@@ -1,0 +1,47 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<form id="searchForm" method="post" action="">
+  <span class="searchBoxText">Name: </span>
+    <input type="text" name="patternName" value={{ uploadName }} size="30"/>
+  <span class="ui-icon ui-icon-caret-1-s" onclick="advanceSearchFormEnabled()"></span>
+  <span class="ui-icon ui-icon-caret-1-n" onclick="advanceSearchFormEnabled()"></span>
+  <input type="submit" value="Search" class="buttonLink" style="cursor:pointer;float:none"/>
+
+  <table id="advanceSearchForm" class="advanceSearchForm searchBoxText left-align-cells">
+    <tr>
+      <td>Namespace:</td>
+      <td>
+        <input type="text" name="namespaceName" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Revision:</td>
+      <td>
+        <input type="text" name="revisionName" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Type:</td>
+      <td>
+        <input type="text" name="typeName" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Provider:</td>
+      <td>
+        <input type="text" name="providerName" size="30"/>
+      </td>
+    </tr>
+  </table>
+  <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
+  <input id="advanceSearchFormStatus" type="hidden" name="advanceSearchFormStatus" value="hidden" />
+
+</form>
+
+<div class="spasht-loading" style="display:none">Loading...</div>
