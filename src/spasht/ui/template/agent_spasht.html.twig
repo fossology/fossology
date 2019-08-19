@@ -1,10 +1,26 @@
 {% extends "include/base.html.twig" %}
 
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/spasht.css"/>
+{% endblock %}
+
 {% block content %}
-  <li>
-    ({{ 'Spasht'|trans }}) <br>
-    <input type="text" id="searchBox"/>
-  </li>
+  <div class="row" id="spashtStart">
+    <div class="col" ></div>
+    <div class="col-md-4" id="searchBoxCover">
+      {% include 'agent_spasht_search.html.twig' %}
+    </div>
+    <div class="col"></div>
+  </div>
+  <div class="row">
+      <div class="col-md-4">
+        {% include 'show_definitions.html.twig' %}
+      </div>
+      <div class="col">
+      </div>
+  </div>
 {% endblock %}
 
 
