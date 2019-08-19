@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2019, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -78,6 +78,7 @@ class DeciderAgent extends Agent
   const RULES_NOMOS_MONK_NINKA = 0x2;
   const RULES_BULK_REUSE = 0x4;
   const RULES_WIP_SCANNER_UPDATES = 0x8;
+  const RULES_OJO_NO_CONTRADICTION = 0x10;
   const RULES_ALL = 0xf; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int $activeRules
@@ -175,7 +176,6 @@ class DeciderAgent extends Agent
         }
       }
     }
-
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
     foreach ($this->uploadDao->getContainedItems($parentBounds) as $item) {
       $process = $this->processItem($item);
@@ -230,7 +230,11 @@ class DeciderAgent extends Agent
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK) {
+    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+      $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
+    }
+
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_IN_MONK) == self::RULES_NOMOS_IN_MONK) {
       $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $projectedScannerMatches);
     }
 
@@ -259,6 +263,27 @@ class DeciderAgent extends Agent
       }
     }
     return false;
+  }
+
+  /**
+   * @brief Auto decide matches which are in nomos, monk and OJO findings
+   *
+   * Get the matches which really agree and apply the decisions.
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param LicenseMatch[] $matches        New license matches found
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideIfOjoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  {
+    $licenseMatchExists = count($matches) > 0;
+    foreach ($matches as $licenseMatches) {
+      $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndOJOAgreed($licenseMatches);
+    }
+
+    if ($licenseMatchExists) {
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+    }
+    return $licenseMatchExists;
   }
 
   /**
@@ -402,6 +427,50 @@ class DeciderAgent extends Agent
 
     foreach ($vote as $licId=>$voters) {
       if (count($voters) != 3) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief extracts the matches corresponding to a scanner from a $licenseMatches structure
+   * @param $scanner
+   * @param LicenseMatch[][] $licenseMatches
+   * @return int[] list of license ids
+   */
+  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches)
+  {
+    if (array_key_exists($scanner, $licenseMatches) === true) {
+      return array_map(
+        function ($match) {
+          return $match->getLicenseId();
+        }, $licenseMatches[$scanner]);
+    }
+    return [];
+  }
+
+  /**
+   * @brief Check if the finding by only contains one single license and that no other scanner (nomos) has produced a contradicting statement
+   * @param LicenseMatch[][] $licenseMatches
+   * @return boolean True if they match, false otherwise
+   */
+  protected function areOtherScannerFindingsAndOJOAgreed($licenseMatches)
+  {
+    $findingsByOjo = $this->getLicenseIdsOfMatchesForScanner('ojo', $licenseMatches);
+    if (count($findingsByOjo) == 0) {
+      // nothing to do
+      return false;
+    }
+
+    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches);
+    if (count($findingsByOtherScanner) == 0) {
+      // nothing found by other scanner, so no contradiction
+      return true;
+    }
+    foreach ($findingsByOtherScanner as $findingsByScanner) {
+      if (in_array($findingsByScanner, $findingsByOjo) === false) {
+        // contradiction found
         return false;
       }
     }

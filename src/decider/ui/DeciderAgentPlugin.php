@@ -97,6 +97,12 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_monk';
           $rulebits |= 0x4;
           break;
+        case 'ojoNoContradiction':
+          $dependencies[] = 'agent_nomos';
+          $dependencies[] = 'agent_monk';
+          $dependencies[] = 'agent_ojo';
+          $rulebits |= 0x10;
+          break;
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
           $rulebits |= 0x8;
