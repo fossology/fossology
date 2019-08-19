@@ -113,7 +113,8 @@ function updateHash($dbManager, $tableName)
     return 0;
   }
 
-  $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash")[0];
+  $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash");
+  $numberOfRecords = $numberOfRecords[0];
   while (!empty($numberOfRecords)) {
     $sql = "SELECT " . $tableName . "_pk AS id, textfinding " .
       "FROM $tableName WHERE hash IS NULL LIMIT $numberOfRecords;";
@@ -134,7 +135,8 @@ function updateHash($dbManager, $tableName)
     $dbManager->commit();
 
     $totalCount = $totalCount + $numberOfRecords;
-    $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash")[0];
+    $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, "hash");
+    $numberOfRecords = $numberOfRecords[0];
   }
   return $totalCount;
 }
@@ -221,8 +223,9 @@ function isColumnUpperCase($dbManager, $tableName, $colName, $where)
   }
   $sql = "SELECT count(*) AS cnt FROM $tableName " .
     "WHERE $colName != UPPER($colName) $where;";
-  return ($dbManager->getSingleRow($sql, [], __METHOD__ .
-    ".checkLowerCaseIn.$tableName".strlen($where)))["cnt"] == 0;
+  $row = $dbManager->getSingleRow($sql, [], __METHOD__ .
+    ".checkLowerCaseIn.$tableName".strlen($where));
+  return ($row["cnt"] == 0);
 }
 
 function updatePfileSha256($dbManager, $force = false)
@@ -236,7 +239,12 @@ function updatePfileSha256($dbManager, $force = false)
     $dbManager->commit();
   }
   $totalPfile = 0;
-  $totalPfile = calculateNumberOfRecordsToBeProcessed($dbManager, "pfile", "pfile_sha256")[1];
+  $totalPfile = calculateNumberOfRecordsToBeProcessed($dbManager, "pfile", "pfile_sha256");
+  if (!empty($totalPfile)) {
+    $totalPfile = $totalPfile[1];
+  } else {
+    $totalPfile = 0;
+  }
 
   if ($totalPfile == 0) {
     // Migration not required
@@ -306,8 +314,9 @@ function migrate_35_36($dbManager, $force = false)
     "  UNION" .
     "  SELECT count(*) AS cnt FROM $tables[2] WHERE hash IS NULL" .
     ") SELECT SUM(cnt) AS total FROM decision_tables;";
-    $total = intval($dbManager->getSingleRow($sql, [],
-      __METHOD__ . ".checkIfMigrationDone")['total']);
+    $total = $dbManager->getSingleRow($sql, [], __METHOD__ .
+      ".checkIfMigrationDone");
+    $total = intval($total["total"]);
 
     if ($total == 0) {
       // Migration not required
