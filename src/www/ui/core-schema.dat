@@ -385,6 +385,43 @@
   $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"copyright_spasht_pk\" int8 DEFAULT nextval('copyright_spasht_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"copyright_spasht_pk\" SET NOT NULL, ALTER COLUMN \"copyright_spasht_pk\" SET DEFAULT nextval('copyright_spasht_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["copyright_spasht"]["agent_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["agent_fk"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"agent_fk\" int8";
+  $Schema["TABLE"]["copyright_spasht"]["agent_fk"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"agent_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["pfile_fk"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"pfile_fk\" int8";
+  $Schema["TABLE"]["copyright_spasht"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["clearing_decision_type_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["clearing_decision_type_fk"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"clearing_decision_type_fk\" int8";
+  $Schema["TABLE"]["copyright_spasht"]["clearing_decision_type_fk"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"clearing_decision_type_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["description"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["description"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"description\" text";
+  $Schema["TABLE"]["copyright_spasht"]["description"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"description\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["textfinding"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["textfinding"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"textfinding\" text";
+  $Schema["TABLE"]["copyright_spasht"]["textfinding"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"textfinding\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["hash"]["DESC"] = "COMMENT ON COLUMN \"copyright_spasht\".\"hash\" IS 'SHA256 hash of textfinding for grouping statements.'";
+  $Schema["TABLE"]["copyright_spasht"]["hash"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"hash\" char(64)";
+  $Schema["TABLE"]["copyright_spasht"]["hash"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["comment"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_spasht"]["comment"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"comment\" text";
+  $Schema["TABLE"]["copyright_spasht"]["comment"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"comment\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_spasht"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"copyright_spasht\".\"is_enabled\" IS 'true to enable, false to disable'";
+  $Schema["TABLE"]["copyright_spasht"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
+  $Schema["TABLE"]["copyright_spasht"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
   $Schema["TABLE"]["author"]["author_pk"]["DESC"] = "";
   $Schema["TABLE"]["author"]["author_pk"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"author_pk\" int8 DEFAULT nextval('author_pk_seq'::regclass)";
   $Schema["TABLE"]["author"]["author_pk"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"author_pk\" SET NOT NULL, ALTER COLUMN \"author_pk\" SET DEFAULT nextval('author_pk_seq'::regclass)";
@@ -1427,6 +1464,35 @@
   $Schema["TABLE"]["software_heritage"]["swh_status"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"swh_status\" DROP NOT NULL, ALTER COLUMN \"swh_status\" SET DEFAULT 1";
 
 
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_pk\" int4 DEFAULT nextval('spasht_pk_seq'::regclass)";
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_pk\" SET NOT NULL, ALTER COLUMN \"spasht_pk\" SET DEFAULT nextval('spasht_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["spasht"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["upload_fk"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["spasht"]["upload_fk"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_name"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_name"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_name\" text";
+  $Schema["TABLE"]["spasht"]["spasht_name"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_namespace\" text";
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_namespace\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_revision\" text";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_revision\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_type"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_type"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_type\" text";
+  $Schema["TABLE"]["spasht"]["spasht_type"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_type\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_provider\" text";
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_provider\" DROP NOT NULL";
+
+
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"sysconfig_pk\" int4 DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"sysconfig_pk\" SET NOT NULL, ALTER COLUMN \"sysconfig_pk\" SET DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
@@ -1874,6 +1940,9 @@
   $Schema["SEQUENCE"]["package_package_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"package_package_pk_seq\"";
   $Schema["SEQUENCE"]["package_package_pk_seq"]["UPDATE"] = "SELECT setval('package_package_pk_seq',(SELECT greatest(1,max(package_pk)) val FROM package))";
 
+  $Schema["SEQUENCE"]["spasht_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"spasht_pk_seq\"";
+  $Schema["SEQUENCE"]["spasht_pk_seq"]["UPDATE"] = "SELECT setval('spasht_pk_seq',(SELECT greatest(1,max(spasht_pk)) val FROM spasht))";
+
   $Schema["SEQUENCE"]["upload_upload_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"upload_upload_pk_seq\"";
   $Schema["SEQUENCE"]["upload_upload_pk_seq"]["UPDATE"] = "SELECT setval('upload_upload_pk_seq',(SELECT greatest(1,max(upload_pk)) val FROM upload))";
 
@@ -1888,6 +1957,9 @@
 
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,max(rf_pk)) val FROM license_ref))";
+  
+  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 
   $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_bulk_lrb_pk_seq',(SELECT greatest(1,max(lrb_pk)) val FROM license_ref_bulk))";
@@ -1960,8 +2032,8 @@
   $Schema["SEQUENCE"]["license_map_license_map_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_map_license_map_pk_seq\"";
   $Schema["SEQUENCE"]["license_map_license_map_pk_seq"]["UPDATE"] = "SELECT setval('license_map_license_map_pk_seq',(SELECT greatest(1,max(license_map_pk)) val FROM license_map))";
 
-  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
-  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
+  $Schema["SEQUENCE"]["copyright_spasht_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_spasht_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_spasht_pk_seq"]["UPDATE"] = "SELECT setval('copyright_spasht_pk_seq',(SELECT greatest(1,max(copyright_spasht_pk)) val FROM copyright_spasht))";
 
   $Schema["SEQUENCE"]["ecc_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_pk_seq\"";
   $Schema["SEQUENCE"]["ecc_pk_seq"]["UPDATE"] = "SELECT setval('ecc_pk_seq',(SELECT greatest(1,max(ecc_pk)) val FROM ecc))";
@@ -2014,6 +2086,9 @@
   $Schema["CONSTRAINT"]["copyright_decision_pkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pkey\" PRIMARY KEY (\"copyright_decision_pk\");";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_fk_fkey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["copyright_decision_pfile_hash_ukey"] = "ALTER TABLE \"copyright_decision\" ADD CONSTRAINT \"copyright_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
+  $Schema["CONSTRAINT"]["copyright_spasht_pkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pkey\" PRIMARY KEY (\"copyright_spasht_pk\");";
+  $Schema["CONSTRAINT"]["copyright_spasht_pfile_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["copyright_spasht_agent_fk_fkey"] = "ALTER TABLE \"copyright_spasht\" ADD CONSTRAINT \"copyright_spasht_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_pkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pkey\" PRIMARY KEY (\"ecc_pk\");";
   $Schema["CONSTRAINT"]["ecc_agent_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_agent_fk_fkey\" FOREIGN KEY (\"agent_fk\") REFERENCES \"agent\" (\"agent_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["ecc_pfile_fk_fkey"] = "ALTER TABLE \"ecc\" ADD CONSTRAINT \"ecc_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
@@ -2085,6 +2160,8 @@
   $Schema["CONSTRAINT"]["report_info_upload_fk_fkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["reportgen_upload_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["software_heritage_pfile_fk_fkey"] = "ALTER TABLE \"software_heritage\" ADD CONSTRAINT \"software_heritage_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["spasht_upload_fk_fkey"] = "ALTER TABLE \"spasht\" ADD CONSTRAINT \"spasht_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["spasht_upload_fk_ukey"] = "ALTER TABLE \"spasht\" ADD CONSTRAINT \"spasht_upload_fk_ukey\" UNIQUE (\"upload_fk\");";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
@@ -2132,6 +2209,10 @@
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_fk_index"] = "CREATE INDEX copyright_decision_pfile_fk_index ON copyright_decision USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_user_fk_index"] = "CREATE INDEX copyright_decision_user_fk_index ON copyright_decision USING btree (user_fk);";
   $Schema["INDEX"]["copyright_decision"]["copyright_decision_pfile_hash_index"] = "CREATE INDEX copyright_decision_pfile_hash_index ON copyright_decision USING btree (hash, pfile_fk);";
+
+  $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_agent_fk_idx"] = "CREATE INDEX copyright_spasht_agent_fk_idx ON copyright_spasht USING btree (agent_fk);";
+  $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_fk_index"] = "CREATE INDEX copyright_spasht_pfile_fk_index ON copyright_spasht USING btree (pfile_fk);";
+  $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
 
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
@@ -2186,6 +2267,8 @@
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
 
+  $Schema["INDEX"]["spasht"]["spasht_upload_fk_idx"] = "CREATE INDEX spasht_upload_fk_idx ON spasht USING btree (upload_fk);";
+
   $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
   $Schema["INDEX"]["uploadtree"]["parent"] = "CREATE INDEX parent ON uploadtree USING btree (parent);";
   $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
@@ -2212,4 +2295,5 @@
   $Schema["INHERITS"]["ununpack_ars"] = "ars_master";
   $Schema["INHERITS"]["nomos_ars"] = "ars_master";
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
+  $Schema["INHERITS"]["spasht_ars"] = "ars_master";
   $Schema["INHERITS"]["license_candidate"] = "license_ref";
