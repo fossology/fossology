@@ -12,17 +12,21 @@
     <div class="col-md-4" id="searchBoxCover">
       {% include 'agent_spasht_search.html.twig' %}
     </div>
-    <div class="col"></div>
+    <div class="col">
+    </div>
   </div>
-  <div class="row">
-      <div class="col-md-4">
+  <div class="row" id="spashtStart">
+    <div class="col-md-4">
+      {% if advanceSearch == "checked" %}
+          {% include 'agent_spasht_advanceSearch_form.html.twig' %}
+      {% else %}
         {% include 'show_definitions.html.twig' %}
-      </div>
-      <div class="col">
-      </div>
+      {% endif %}
+    </div>
+    <div class="col">
+    </div>
   </div>
 {% endblock %}
-
 
 {% block foot %}
   {{ parent() }}

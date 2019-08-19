@@ -1,21 +1,4 @@
 <?php
-######################################################################
-# Copyright (C)
-# Author: Vivek Kumar<vvksindia@gmail.com>
-#
-# This program is free software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# version 2 as published by the Free Software Foundation.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-######################################################################
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
@@ -45,22 +28,27 @@ class ui_spasht extends FO_Plugin
    */
   function RegisterMenus()
   {
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    $tooltipText = _("View in ClearlyDefined");
+
+    $URI = $this->getName() . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+    menu_insert("Browse::Spasht", 10, $URI, $tooltipText);
+
+    $itemId = GetParm("item", PARM_INTEGER);
+    $textFormat = $this->microMenu->getFormatParameter($itemId);
+    $pageNumber = GetParm("page", PARM_INTEGER);
+    $this->microMenu->addFormatMenuEntries($textFormat, $pageNumber);
+
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
-    $Item = GetParm("item",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
+    
+    if (!empty($itemId) && !empty($uploadId))
     {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
-        menu_insert("Browse::Spasht",10);
-        menu_insert("Browse::[BREAK]",100);
-      }
-      else
-      {
-        $text = _("View in ClearlyDefined");
-        menu_insert("Browse::Spasht",10,$URI,$text);
-      }
+      $menuText = "Spasht";
+      $menuPosition = 55;
+      menu_insert("Browse::[BREAK]",100);
+      $tooltipText = _("View licenses from Clearly Defined");
+      $URI = $this->getName() . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+      $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
     }
   } // RegisterMenus()
 
@@ -98,38 +86,62 @@ class ui_spasht extends FO_Plugin
    */
   public function output()
   {
-    $patternName = GetParm("patternName",PARM_STRING);
+    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
+    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
 
     $vars = array();
+    
+    $vars['advanceSearch'] = ""; //Set advance search to empty
 
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
 
-    if($patternName != null && !empty($patternName))
+    if($patternName != null && !empty($patternName)) //Check if search is not empty
     {
-
+      /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
       $client = new Client([
         // Base URI is used with relative requests
         'base_uri' => 'https://api.clearlydefined.io/',
         ]);
 
+        // Point to definitions secton in the api
       $res = $client->request('GET','definitions',[
-          'query' => ['pattern' => $patternName]
+          'query' => ['pattern' => $patternName] //Perform query operation into the api
         ]);
-      
-        $vars['body'] = "error";
 
-      if($res->getStatusCode()==200)
+      if($res->getStatusCode()==200) //Get the status of http request
       {
-         $body = json_decode($res->getBody()->getContents());
+         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decode
 
-         if(sizeof($body) == 0)
+         if(sizeof($body) == 0) //Check if no element is found
          {
           $body[0] = "No Match Found";
          }
-
-         $vars['body'] = $body;
       }
+          /** Check for advance Search enabled
+            * If enabled the revisions are retrieved from the body to display them in the form.
+            * As options to users.
+            */
+            if($advanceSearch == "advanceSearch"){
+              $vars['advanceSearch'] = "checked";
+  
+              for ($x = 0; $x < sizeof($body) ; $x++)
+              {
+                $str = explode ("/", $body[$x]);
+  
+                $body_revision[$x] = $str[4];
+                $body_type[$x] = $str[0];
+                $body_provider[$x] = $str[1];
+                $body_namespace[$x] = $str[2];
+              }
+              $vars['body_revision'] = $body_revision;
+              $vars['body_type'] = $body_type;
+              $vars['body_provider'] = $body_provider;
+              $vars['body_namespace'] = $body_namespace;
+
+            }
+            $vars['body'] = $body;
+              
 
       $upload_name = $patternName;
     }
@@ -137,19 +149,17 @@ class ui_spasht extends FO_Plugin
     else{
       if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) )
         {
-          $text = _("Permission Denied");
+          $text = _("Upload Id Not found");
           return "<h2>$text</h2>";
         }
 
       $upload_name = GetUploadName($uploadId);
     }
-    
 
     $vars['uploadName'] = $upload_name;
 
     $out = $this->renderString('agent_spasht.html.twig',$vars);
     
-
     return($out);
   }
 
