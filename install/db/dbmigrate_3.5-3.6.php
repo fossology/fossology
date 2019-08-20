@@ -160,7 +160,9 @@ function updateSHA256($dbManager, $tableName)
     return 0;
   }
 
-  $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256")[0];
+  $records = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
+  $lastCount = $records[1];
+  $numberOfRecords = $records[0];
   while (!empty($numberOfRecords)) {
     $sql = "SELECT ".$tableName.".".$tableName . "_pk AS id " .
       "FROM $tableName WHERE $tableName." . $tableName . "_sha256 is NULL " .
@@ -176,7 +178,7 @@ function updateSHA256($dbManager, $tableName)
       $oneRow = "(" . $row["id"];
       $filePath = RepPath($row['id'], "files");
       if (file_exists($filePath)) {
-        $hash = hash_file('sha256', $filePath);
+        $hash = strtoupper(hash_file('sha256', $filePath));
         $oneRow .= ",'$hash')";
       } else {
         $oneRow .= ",null)";
@@ -190,13 +192,49 @@ function updateSHA256($dbManager, $tableName)
     $dbManager->commit();
 
     $totalCount = $totalCount + $numberOfRecords;
-    $numberOfRecords = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256")[0];
+    echo "* $totalCount pfile records updated *";
+
+    $records = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
+    if ($lastCount == $records[1]) {
+      // NULL files in last loop and this loop are same.
+      // All remaining records does not exist in FS
+      // Prevent from infinite loop
+      break;
+    }
+    $lastCount = $records[1];
+    $numberOfRecords = $records[0];
   }
   return $totalCount;
 }
 
+/**
+ * @brief Check if the given column contains only upper case entries
+ * @param $dbManager DbManager
+ * @param $tableName Table to check
+ * @param $colName   Column of the table to check
+ * @param $where     Additional where clause conditions
+ */
+function isColumnUpperCase($dbManager, $tableName, $colName, $where)
+{
+  if (!empty($where)) {
+    $where = "AND $where";
+  }
+  $sql = "SELECT count(*) AS cnt FROM $tableName " .
+    "WHERE $colName != UPPER($colName) $where;";
+  return ($dbManager->getSingleRow($sql, [], __METHOD__ .
+    ".checkLowerCaseIn.$tableName".strlen($where)))["cnt"] == 0;
+}
+
 function updatePfileSha256($dbManager, $force = false)
 {
+  if (! isColumnUpperCase($dbManager, "pfile", "pfile_sha256", "pfile_sha256 IS NOT NULL")) {
+    // Uppercase already existing hashes
+    $sql = "UPDATE pfile SET pfile_sha256 = UPPER(pfile_sha256);";
+    $statement = __METHOD__ . ".updatePfileSHA256ToUpper";
+    $dbManager->begin();
+    $dbManager->queryOnce($sql, $statement);
+    $dbManager->commit();
+  }
   $totalPfile = 0;
   $totalPfile = calculateNumberOfRecordsToBeProcessed($dbManager, "pfile", "pfile_sha256")[1];
 
@@ -208,32 +246,32 @@ function updatePfileSha256($dbManager, $force = false)
   if (!$force) {
     $force = !empty($envYes);
   }
-  if (!$force) {
-    // Ask the user for confirmation
-    $timePerJob = 0.00905919;
-    $totalTime = floatval($totalPfile) * $timePerJob;
-    $minutes = intval($totalTime / 60.0);
-    $hours = floor($minutes / 60);
-    $actualMinutes = $minutes - ($hours * 60);
-    echo "*** Calculation of SHA256 for pfiles will require approx $hours hrs " .
-      "$actualMinutes mins. ***\n";
-    if ($hours > 0 || $minutes > 45) {
-      $REDCOLOR = "\033[0;31m";
-      $NOCOLOR = "\033[0m";
-      echo "\n*********************************************************" .
-        "***********************\n";
-      echo "*** " . $REDCOLOR . "Error, script will take too much time. Not " .
-        "calculating SHA256 for pfile." . $NOCOLOR . " ***\n";
-      echo "*** Either rerun the fo-postinstall with \"--force-pfile\" flag " .
-        "or set         ***\n" .
-        "*** \"FOSSPFILE=1\" in environment or run script at                " .
-        "            ***\n";
-      echo "*** \"" . dirname(__FILE__) .
-        "/dbmigrate_pfile_calculate_sha256.php\" to continue as a separate process ***\n";
-      echo "*********************************************************" .
-        "***********************\n";
-      return 0;
-    }
+
+  $timePerJob = 0.00905919;
+  $totalTime = floatval($totalPfile) * $timePerJob;
+  $minutes = intval($totalTime / 60.0);
+  $hours = floor($minutes / 60);
+  $actualMinutes = $minutes - ($hours * 60);
+
+  echo "*** Calculation of SHA256 for pfiles will require approx $hours hrs " .
+    "$actualMinutes mins. ***\n";
+
+  if (!$force && $minutes > 45) {
+    $REDCOLOR = "\033[0;31m";
+    $NOCOLOR = "\033[0m";
+    echo "\n*********************************************************" .
+      "***********************\n";
+    echo "*** " . $REDCOLOR . "Error, script will take too much time. Not " .
+      "calculating SHA256 for pfile." . $NOCOLOR . " ***\n";
+    echo "*** Either rerun the fo-postinstall with \"--force-pfile\" flag " .
+      "or set         ***\n" .
+      "*** \"FOSSPFILE=1\" in environment or run script at                " .
+      "            ***\n";
+    echo "*** \"" . dirname(__FILE__) .
+      "/dbmigrate_pfile_calculate_sha256.php\" to continue as a separate process ***\n";
+    echo "*********************************************************" .
+      "***********************\n";
+    return 0;
   }
 
   try {

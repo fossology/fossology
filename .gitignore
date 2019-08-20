@@ -50,6 +50,7 @@ src/cli/testupdate2.php
 src/cli/fo_import_licenses
 src/cli/fo_usergroup
 src/cli/fossupload_status
+src/cli/exportLicenseRefUsingSPDX
 src/copyright/agent/copyright
 src/copyright/agent/keyword
 src/copyright/agent_tests/Functional/copyright
@@ -107,6 +108,9 @@ src/nomos/agent_tests/Functional/nomos-Xunit.xml
 src/nomos/agent_tests/Functional/nomos-regression-test.html
 src/nomos/agent_tests/Functional/report.d
 src/nomos/agent_tests/Unit/test_nomos
+src/ojo/agent/ojo
+src/ojo/agent_tests/Functional/ojo
+src/ojo/agent_tests/Unit/test_ojo
 src/pkgagent/agent/pkgagent
 src/scheduler/agent/defconf/init.d/fossology
 src/scheduler/agent/fo_cli

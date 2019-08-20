@@ -34,6 +34,7 @@ use Fossology\Lib\UI\Component\MicroMenu;
 use Fossology\Lib\View\HighlightRenderer;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use ui_view;
 
 /**
@@ -143,13 +144,25 @@ class Xpview extends DefaultPlugin
     if (!empty($lastItem) && $changed =="true")
     {
       $lastUploadEntry = $this->uploadDao->getUploadEntry($lastItem, $uploadTreeTableName);
-      $clearingType = $_POST['clearingTypes'];
-      $description = $_POST['description'];
-      $textFinding = $_POST['textFinding'];
-      $comment = $_POST['comment'];
-      $decision_pk = $_POST['decision_pk'];
-      $this->copyrightDao->saveDecision($this->decisionTableName ,$lastUploadEntry['pfile_fk'], $userId , $clearingType,
-        $description, $textFinding, $comment, $decision_pk);
+      $clearingType = GetParm('clearingTypes', PARM_INTEGER);
+      $description = trim(GetParm('description', PARM_STRING));
+      $textFinding = trim(GetParm('textFinding', PARM_STRING));
+      $comment = trim(GetParm('comment', PARM_STRING));
+      $decision_pk = GetParm('decision_pk', PARM_INTEGER);
+      if (empty($clearingType) || empty($textFinding)) {
+        if (empty($clearingType)) {
+          $text = _("The clearing type cannot be empty. " .
+            "Please choose a value and submit again.");
+        } else {
+          $text = _("The text finding cannot be empty. " .
+            "Please enter a text and submit again.");
+        }
+        $vars['message']= "<strong>$text</strong>";
+      } else {
+        $this->copyrightDao->saveDecision($this->decisionTableName,
+          $lastUploadEntry['pfile_fk'], $userId , $clearingType, $description,
+          $textFinding, $comment, $decision_pk);
+      }
     }
 
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
@@ -230,7 +243,6 @@ class Xpview extends DefaultPlugin
     $vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
     return $this->render("include/base.html.twig",$vars);
   }
-
 
   /**
    * @brief Create legend box

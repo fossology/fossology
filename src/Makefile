@@ -24,6 +24,7 @@ DIRS = \
 	monk \
 	ninka \
 	nomos \
+	ojo \
 	pkgagent \
 	readmeoss \
 	unifiedreport \

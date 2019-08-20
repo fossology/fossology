@@ -45,7 +45,7 @@ class LicenseListFiles extends FO_Plugin
   private $agentDao;
 
   /** @var Array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'atarashiWrapper' => 'A');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O', 'atarashiWrapper' => 'A');
 
   function __construct()
   {
