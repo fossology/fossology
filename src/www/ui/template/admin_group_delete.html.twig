@@ -12,7 +12,7 @@
  <form name="formy" method="post" action="{{ uri }}">
     {{ "Select the group to delete"|trans }}:
     {% import "include/macros.html.twig" as macro %}
-    {{ macro.select('grouppk',groupMap,'grouppk') }}
+    {{ macro.select('grouppk',groupMap,'grouppk','','class="ui-render-select2"') }}
     <input type="submit" value="{{ 'Delete'|trans }}"/>
   </form>
 {% endblock %}

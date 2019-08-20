@@ -1131,8 +1131,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
   /* Check if the pfile exists */
   memset(SQL,'\0',MAXSQL);
   snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
-      "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
-      Fuid,Fuid+41,Fuid+74);
+      "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = '%s';",
+      Fuid,Fuid+41,Fuid+74,Fuid+140);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(12);
 
@@ -1146,14 +1146,14 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
     memset(SQL,'\0',MAXSQL);
     if (CMD[CI->PI.Cmd].DBindex > 0)
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size,pfile_mimetypefk) "
-               "VALUES ('%.40s','%.32s','%s','%ld');",
-          Fuid,Fuid+41,Fuid+74,CMD[CI->PI.Cmd].DBindex);
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_sha256,pfile_size,pfile_mimetypefk) "
+               "VALUES ('%.40s','%.32s','%.64s','%s','%ld');",
+          Fuid,Fuid+41,Fuid+74,Fuid+140,CMD[CI->PI.Cmd].DBindex);
     }
     else
     {
-      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_size) VALUES ('%.40s','%.32s','%s');",
-          Fuid,Fuid+41,Fuid+74);
+      snprintf(SQL,MAXSQL,"INSERT INTO pfile (pfile_sha1,pfile_md5,pfile_sha256,pfile_size) VALUES ('%.40s','%.32s','%.64s','%s');",
+          Fuid,Fuid+41,Fuid+74,Fuid+140);
     }
     result =  PQexec(pgConn, SQL); /* INSERT INTO pfile */
     // ignore duplicate constraint failure (23505), report others
@@ -1169,8 +1169,8 @@ int	DBInsertPfile	(ContainerInfo *CI, char *Fuid)
        on currval(). */
     memset(SQL,'\0',MAXSQL);
     snprintf(SQL,MAXSQL,"SELECT pfile_pk,pfile_mimetypefk FROM pfile "
-        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = '%s';",
-        Fuid,Fuid+41,Fuid+74);
+        "WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = '%s';",
+        Fuid,Fuid+41,Fuid+74,Fuid+140);
     result =  PQexec(pgConn, SQL);  /* SELECT */
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(14);
   }
@@ -1403,17 +1403,25 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   /* If we ever want to skip artifacts, use && !CI->Artifact */
   if ((Fuid[0]!='\0') && UseRepository)
   {
+    /* Translate the new Fuid into old Fuid */
+    char FuidNew[1024];
+    memset(FuidNew, '\0', sizeof(FuidNew));
+    // Copy the value till md5
+    strncpy(FuidNew, Fuid, 74);
+    // Copy the size of the file
+    strcat(FuidNew,Fuid+140);
+
     /* put file in repository */
     if (!fo_RepExist(REP_FILES,Fuid))
     {
-      if (fo_RepImport(CI->Source,REP_FILES,Fuid,1) != 0)
+      if (fo_RepImport(CI->Source,REP_FILES,FuidNew,1) != 0)
       {
-        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,Fuid);
+        LOG_ERROR("Failed to import '%s' as '%s' into the repository",CI->Source,FuidNew);
         SafeExit(21);
       }
     }
     if (Verbose) LOG_DEBUG("Repository[%s]: insert '%s' as '%s'",
-        REP_FILES,CI->Source,Fuid);
+        REP_FILES,CI->Source,FuidNew);
   }
 
   /* PERFORMANCE NOTE:
@@ -1557,19 +1565,40 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
   {
     CksumFile *CF;
     Cksum *Sum;
+    char SHA256[65];
+    char command[PATH_MAX + 13];
+    int retcode = -1;
+    int read = 0;
+
+    memset(SHA256, '\0', sizeof(SHA256));
 
     CF = SumOpenFile(CI->Source);
+    snprintf(command, PATH_MAX + 13, "sha256sum '%s'", CI->Source);
+    FILE* file = popen(command, "r");
+    if (file != (FILE*) NULL)
+    {
+      read = fscanf(file, "%64s", SHA256);
+      retcode = WEXITSTATUS(pclose(file));
+    }
+    if (file == (FILE*) NULL || retcode != 0 || read != 1)
+    {
+      LOG_FATAL("Unable to calculate SHA256 of %s\n", CI->Source);
+      SafeExit(56);
+    }
     if (CF)
     {
       Sum = SumComputeBuff(CF);
       SumCloseFile(CF);
+
       if (Sum)
       {
         for(i=0; i<20; i++) { sprintf(Fuid+0+i*2,"%02X",Sum->SHA1digest[i]); }
         Fuid[40]='.';
         for(i=0; i<16; i++) { sprintf(Fuid+41+i*2,"%02X",Sum->MD5digest[i]); }
         Fuid[73]='.';
-        snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)Sum->DataLen);
+        for(i=0; i<64; i++) { sprintf(Fuid+74+i,"%c",SHA256[i]); }
+        Fuid[139]='.';
+        snprintf(Fuid+140,sizeof(Fuid)-140,"%Lu",(long long unsigned int)Sum->DataLen);
         if (ListOutFile) fprintf(ListOutFile,"fuid=\"%s\" ",Fuid);
         free(Sum);
       } /* if Sum */
@@ -1587,7 +1616,9 @@ int	DisplayContainerInfo	(ContainerInfo *CI, int Cmd)
           Fuid[40]='.';
           for(i=0; i<16; i++) { sprintf(Fuid+41+i*2,"%02X",Sum->MD5digest[i]); }
           Fuid[73]='.';
-          snprintf(Fuid+74,sizeof(Fuid)-74,"%Lu",(long long unsigned int)Sum->DataLen);
+          for(i=0; i<64; i++) { sprintf(Fuid+74+i,"%c",SHA256[i]); }
+          Fuid[139]='.';
+          snprintf(Fuid+140,sizeof(Fuid)-140,"%Lu",(long long unsigned int)Sum->DataLen);
           if (ListOutFile) fprintf(ListOutFile,"fuid=\"%s\" ",Fuid);
           free(Sum);
         }
@@ -1735,7 +1766,6 @@ void	Usage	(char *Name, char *Version)
   fprintf(stderr,"  Boot partitions: x86, vmlinuz\n");
   CheckCommands(Quiet);
 } /* Usage() */
-
 
 /**
  * @brief Dummy postgresql notice processor.

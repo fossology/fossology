@@ -150,7 +150,7 @@ void testDBInsertPfile()
   ContainerInfo CITest = {"../testdata/test_1.orig.tar.gz", "./test-result/",
       "test_1.orig.tar.gz", "test_1.orig.tar.gz.dir", 1, 1, 0, 0, Stat, PI, 0, 0, 0, 0, 0, 0};
   CI = &CITest;
-  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1312";
+  char *Fuid = "383A1791BA72A77F80698A90F22C1B7B04C59BEF.720B5CECCC4700FC90D628FCB45490E3.1aa248f65785e15aa9da4fa3701741d85653584544ab4003ef45e232a761a2f1.1312";
   int result = DBInsertPfile(CI, Fuid);
   CU_ASSERT_EQUAL(result, 1);
 }

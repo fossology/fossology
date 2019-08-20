@@ -111,15 +111,32 @@ class CopyrightDao
   public function saveDecision($tableName, $pfileId, $userId , $clearingType,
                                $description, $textFinding, $comment, $decision_pk=-1)
   {
-    $assocParams = array('user_fk'=>$userId,'pfile_fk'=>$pfileId,'clearing_decision_type_fk'=>$clearingType,
-        'description'=>$description, 'textfinding'=>$textFinding, 'comment'=>$comment );
+    $primaryColumn = $tableName . '_pk';
+    $assocParams = array(
+      'user_fk' => $userId,
+      'pfile_fk' => $pfileId,
+      'clearing_decision_type_fk' => $clearingType,
+      'description' => $description,
+      'textfinding' => $textFinding,
+      'hash' => hash('sha256', $textFinding),
+      'comment'=> $comment
+    );
+
     if ($decision_pk <= 0) {
-      $primaryColumn = $tableName . '_pk';
-      return $this->dbManager->insertTableRow($tableName, $assocParams, __METHOD__.'Insert.'.$tableName, $primaryColumn);
+      $rows = $this->getDecisionsFromHash($tableName, $assocParams['hash']);
+      foreach ($rows as $row) {
+        if ($row['pfile_fk'] == $pfileId) {
+          $decision_pk = $row[$primaryColumn];
+        }
+      }
+    }
+    if ($decision_pk <= 0) {
+      return $this->dbManager->insertTableRow($tableName, $assocParams,
+        __METHOD__.'Insert.'.$tableName, $primaryColumn);
     } else {
-      $assocParams['is_enabled'] = True;
-      $primaryColumn = $tableName . '_pk';
-      $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn, $decision_pk, __METHOD__.'Update.'.$tableName);
+      $assocParams['is_enabled'] = true;
+      $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn,
+        $decision_pk, __METHOD__.'Update.'.$tableName);
       return $decision_pk;
     }
   }
@@ -343,6 +360,43 @@ class CopyrightDao
     $orderTablePk = $tableName.'_pk';
     $sql = "SELECT * FROM $tableName where pfile_fk = $1 and is_enabled order by $orderTablePk desc";
     $params = array($pfileId);
+
+    return $this->dbManager->getRows($sql, $params, $statementName);
+  }
+
+  /**
+   * @brief Get all the decisions based on hash
+   *
+   * Get all the decisions which matches the given hash. If the upload is null,
+   * get decision from all uploads, otherwise get decisions only for the given
+   * upload.
+   *
+   * @param string $tableName Decision table name
+   * @param string $hash      Hash of the decision
+   * @param int    $upload    Upload id
+   * @param string $uploadtreetable Name of the upload tree table
+   * @return array
+   */
+  public function getDecisionsFromHash($tableName, $hash, $upload = null, $uploadtreetable = null)
+  {
+    $statementName = __METHOD__ . ".$tableName";
+    $orderTablePk = $tableName.'_pk';
+    $join = "";
+    $joinWhere = "";
+    $params = [$hash];
+
+    if ($upload != null) {
+      if (empty($uploadtreetable)) {
+        return -1;
+      }
+      $statementName.= ".filterUpload";
+      $params[] = $upload;
+      $join = "INNER JOIN $uploadtreetable AS ut ON cp.pfile_fk = ut.pfile_fk";
+      $joinWhere = "AND ut.upload_fk = $" . count($params);
+    }
+
+    $sql = "SELECT * FROM $tableName AS cp $join " .
+      "WHERE cp.hash = $1 $joinWhere ORDER BY $orderTablePk;";
 
     return $this->dbManager->getRows($sql, $params, $statementName);
   }

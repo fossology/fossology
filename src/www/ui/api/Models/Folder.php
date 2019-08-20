@@ -41,17 +41,27 @@ class Folder
   private $description;
 
   /**
+   * @var int $parent Id of the parent folder
+   */
+  private $parent;
+
+  /**
    * Folder constructor.
    *
    * @param int $id
    * @param string $name
    * @param string $description
    */
-  public function __construct($id, $name, $description)
+  public function __construct($id, $name, $description, $parent)
   {
     $this->id = intval($id);
     $this->name = $name;
     $this->description = $description;
+    if ($parent !== null) {
+      $this->parent = intval($parent);
+    } else {
+      $this->parent = $parent;
+    }
   }
 
   ////// Getters //////
@@ -78,6 +88,14 @@ class Folder
   public function getDescription()
   {
     return $this->description;
+  }
+
+  /**
+   * @return number
+   */
+  public function getParent()
+  {
+    return $this->parent;
   }
 
   /**
@@ -115,6 +133,18 @@ class Folder
   }
 
   /**
+   * @param string $parent
+   */
+  public function setParent($parent)
+  {
+    if ($parent !== null) {
+      $this->parent = intval($parent);
+    } else {
+      $this->parent = $parent;
+    }
+  }
+
+  /**
    * Get the file element as associative array
    *
    * @return array
@@ -124,7 +154,8 @@ class Folder
     return [
       'id' => intval($this->id),
       'name' => $this->name,
-      'description' => $this->description
+      'description' => $this->description,
+      'parent' => $this->parent
     ];
   }
 }

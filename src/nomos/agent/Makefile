@@ -3,6 +3,7 @@
 
 TOP = ../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 EXE = nomos
@@ -30,7 +31,7 @@ coverage: encode nomos_cov libnomos_cov.a
 
 debug: nomos-gl
 
-nomos: nomos.o $(OBJS) $(GENOBJS)
+nomos: nomos.o $(OBJS) $(GENOBJS) $(FOLIB)
 	$(CC) nomos.o $(OBJS) $(GENOBJS) $(CFLAGS_LOCAL) $(FO_LDFLAGS) -o $@
 
 nomos_cov: nomos_cov.o $(COVERAGE) $(GENOBJS_COV)

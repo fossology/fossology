@@ -227,6 +227,7 @@ class AjaxShowJobs extends \FO_Plugin
         if (! empty($singleJobQueue["jq_endtime"])) {
           $numSecs = strtotime($singleJobQueue['jq_endtime']) -
             strtotime($singleJobQueue['jq_starttime']);
+          $numSecs = ($numSecs == 0) ? 1 : $numSecs; // If difference is in milliseconds
         } else {
           $numSecs = time() - strtotime($singleJobQueue['jq_starttime']);
         }
@@ -258,7 +259,7 @@ class AjaxShowJobs extends \FO_Plugin
         }
 
         $jobArr['jobQueue'][$key]['canDoActions'] = ($_SESSION[Auth::USER_LEVEL] ==
-          PLUGIN_DB_ADMIN) || (Auth::getUserId() == $job['job']['job_user_fk']);
+          PLUGIN_DB_ADMIN) || (Auth::getUserId() == $jobs['job']['job_user_fk']);
         $jobArr['jobQueue'][$key]['isInProgress'] = ($singleJobQueue['jq_end_bits'] ==
           0);
         $jobArr['jobQueue'][$key]['isReady'] = ($singleJobQueue['jq_end_bits'] ==
@@ -293,7 +294,7 @@ class AjaxShowJobs extends \FO_Plugin
           'uploadId' => $jobs['upload']['upload_pk'],
           'uploadDesc' => $jobs['upload']['upload_desc'],
           'uploadItem' => $jobs['uploadtree']['uploadtree_pk'],
-          'uploadEta' => $this->showJobsDao->getEstimatedTime($jobId)
+          'uploadEta' => $this->showJobsDao->getEstimatedTime($jobs['job']['job_pk'], '', 0, $jobs['upload']['upload_pk'])
         );
       } else {
         $uploadArr = null;
@@ -392,7 +393,9 @@ class AjaxShowJobs extends \FO_Plugin
       $uri .= "&upload=$uploadPk";
     }
 
-    $allusers = 0;
+    if (empty($allusers)) {
+      $allusers = 0;
+    }
     $totalPages = 0;
     if ($uploadPk > 0) {
       $upload_pks = array($uploadPk);

@@ -122,7 +122,11 @@ class ScanOptions
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
       if ($set === true) {
-        $agentsToAdd[] = "agent_$agent";
+        if ($agent == "copyright_email_author") {
+          $agentsToAdd[] = "agent_copyright";
+        } else {
+          $agentsToAdd[] = "agent_$agent";
+        }
       }
     }
     return $agentsToAdd;

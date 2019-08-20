@@ -400,7 +400,8 @@ class admin_license_file extends FO_Plugin
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
-    $selectedObligations = $_POST[$this->obligationSelectorName];
+    $selectedObligations = array_key_exists($this->obligationSelectorName,
+      $_POST) ? $_POST[$this->obligationSelectorName] : [];
 
     if (empty($shortname)) {
       $text = _("ERROR: The license shortname is empty. License not added.");
@@ -423,29 +424,47 @@ class admin_license_file extends FO_Plugin
       $_POST['rf_active'],$_POST['marydone'],$shortname,$fullname,
       $url,$notes,$_POST['rf_text_updatable'],$_POST['rf_detector_type'],$text,
       $riskLvl,$_POST['rf_spdx_compatible'],2);
-    $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
-    $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
+    $statement = __METHOD__ . ".updateLicense";
+    if ($md5term == "null") {
+      $statement .= ".nullMD5";
+    }
+    $this->dbManager->prepare($statement, $sql);
+    $this->dbManager->freeResult($this->dbManager->execute($statement, $params));
+
+    $licenseMapDelStatement = __METHOD__ . '.deleteFromMap';
+    $licenseMapDelSql = 'DELETE FROM license_map WHERE rf_fk=$1 AND usage=$2';
+    $this->dbManager->prepare($licenseMapDelStatement, $licenseMapDelSql);
 
     $parentMap = new LicenseMap($this->dbManager, 0, LicenseMap::CONCLUSION);
-    $parentLicenses = $parentMap->getTopLevelLicenseRefs();
-    if (array_key_exists($parent, $parentLicenses) &&
-      $parent != $parentMap->getProjectedId($rfId)) {
-      $stmtDel = __METHOD__ . '.deleteFromMap';
-      $this->dbManager->prepare($stmtDel, 'DELETE FROM license_map WHERE rf_fk=$1 AND usage=$2');
-      $this->dbManager->execute($stmtDel, array($rfId, LicenseMap::CONCLUSION));
-      $this->dbManager->insertTableRow('license_map',
-        array('rf_fk'=>$rfId, 'rf_parent'=>$parent, 'usage'=>LicenseMap::CONCLUSION));
+    if ($parent == 0) {
+      // Update conclusion to self
+      $this->dbManager->execute($licenseMapDelStatement,
+        array($rfId, LicenseMap::CONCLUSION));
+    } else {
+      $parentLicenses = $parentMap->getTopLevelLicenseRefs();
+      if (array_key_exists($parent, $parentLicenses) &&
+        $parent != $parentMap->getProjectedId($rfId)) {
+        $this->dbManager->execute($licenseMapDelStatement,
+          array($rfId, LicenseMap::CONCLUSION));
+        $this->dbManager->insertTableRow('license_map',
+          array('rf_fk'=>$rfId, 'rf_parent'=>$parent, 'usage'=>LicenseMap::CONCLUSION));
+      }
     }
 
-    $reportMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
-    $reportLicenses = $parentMap->getTopLevelLicenseRefs();
-    if (array_key_exists($report, $reportLicenses) &&
-      $report != $reportMap->getProjectedId($rfId)) {
-      $stmtDel = __METHOD__ . '.deleteFromMap';
-      $this->dbManager->prepare($stmtDel, 'DELETE FROM license_map WHERE rf_fk=$1 AND usage=$2');
-      $this->dbManager->execute($stmtDel, array($rfId, LicenseMap::REPORT));
-      $this->dbManager->insertTableRow('license_map',
-        array('rf_fk'=>$rfId, 'rf_parent'=>$report, 'usage'=>LicenseMap::REPORT));
+    if ($report == 0) {
+      // Update report to self
+      $this->dbManager->execute($licenseMapDelStatement,
+        array($rfId, LicenseMap::REPORT));
+    } else {
+      $reportMap = new LicenseMap($this->dbManager, 0, LicenseMap::REPORT);
+      $reportLicenses = $parentMap->getTopLevelLicenseRefs();
+      if (array_key_exists($report, $reportLicenses) &&
+        $report != $reportMap->getProjectedId($rfId)) {
+        $this->dbManager->execute($licenseMapDelStatement,
+          array($rfId, LicenseMap::REPORT));
+        $this->dbManager->insertTableRow('license_map',
+          array('rf_fk'=>$rfId, 'rf_parent'=>$report, 'usage'=>LicenseMap::REPORT));
+      }
     }
 
     $obligationMap = new ObligationMap($this->dbManager);

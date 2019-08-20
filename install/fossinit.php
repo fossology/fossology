@@ -33,6 +33,8 @@ function explainUsage()
   -l  update the license_ref table with fossology supplied licenses
   -r  {prefix} drop database with name starts with prefix
   -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
+  --force-decision force recalculation of SHA256 for decision tables
+  --force-pfile    force recalculation of SHA256 for pfile entries
   -h  this help usage";
   print "$usage\n";
   exit(0);
@@ -53,6 +55,10 @@ use Fossology\Lib\Db\Driver\Postgres;
  * dummy options in order to catch invalid options.
  */
 $AllPossibleOpts = "abc:d:ef:ghijklmnopqr:stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+$longOpts = [
+  "force-decision",
+  "force-pfile"
+];
 
 /* defaults */
 $Verbose = false;
@@ -60,9 +66,11 @@ $DatabaseName = "fossology";
 $UpdateLiceneseRef = false;
 $sysconfdir = '';
 $delDbPattern = 'the option -rfosstest will drop data bases with datname like "fosstest%"';
+$forceDecision = false;
+$forcePfile = false;
 
 /* command-line options */
-$Options = getopt($AllPossibleOpts);
+$Options = getopt($AllPossibleOpts, $longOpts);
 foreach($Options as $optKey => $optVal)
 {
   switch($optKey)
@@ -87,11 +95,19 @@ foreach($Options as $optKey => $optVal)
     case 'r':
       $delDbPattern = $optVal ? "$optVal%" : "fosstest%";
       break;
+    case "force-decision":
+      $forceDecision = true;
+      break;
+    case "force-pfile":
+      $forcePfile = true;
+      break;
     default:
       echo "Invalid Option \"$optKey\".\n";
       explainUsage();
   }
 }
+
+require_once 'fossinit-common.php';
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
@@ -138,7 +154,7 @@ $pgDriver = new Postgres($PG_CONN);
 $libschema->setDriver($pgDriver);
 $previousSchema = $libschema->getCurrSchema();
 $isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
-/* @var $dbManager DbManager */
+/** @var DbManager $dbManager */
 if ($dbManager->existsTable('sysconfig'))
 {
   $sysconfig = $dbManager->createMap('sysconfig', 'variablename', 'conf_value');
@@ -275,11 +291,14 @@ if($isUpdating && empty($sysconfig['Release'])) {
   }
   $sysconfig['Release'] = '2.6';
 }
-if(!$isUpdating)
-{
-  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+if (! $isUpdating) {
+  require_once ("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
   print "Creating default user\n";
   Migrate_21_22($Verbose);
+} else {
+  require_once ("$LIBEXECDIR/dbmigrate_3.5-3.6.php");
+  migrate_35_36($dbManager, $forceDecision);
+  updatePfileSha256($dbManager, $forcePfile);
 }
 
 if(!$isUpdating || $sysconfig['Release'] == '2.6')
@@ -507,100 +526,3 @@ function initLicenseRefTable($Verbose)
   return (0);
 } // initLicenseRefTable()
 
-
-function guessSysconfdir()
-{
-  $rcfile = "fossology.rc";
-  $varfile = dirname(__DIR__).'/variable.list';
-  $sysconfdir = getenv('SYSCONFDIR');
-  if ((false===$sysconfdir) && file_exists($rcfile))
-  {
-    $sysconfdir = file_get_contents($rcfile);
-  }
-  if ((false===$sysconfdir) && file_exists($varfile))
-  {
-    $ini_array = parse_ini_file($varfile);
-    if($ini_array!==false && array_key_exists('SYSCONFDIR', $ini_array))
-    {
-      $sysconfdir = $ini_array['SYSCONFDIR'];
-    }
-  }
-  if (false===$sysconfdir)
-  {
-    $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
-    echo "$text\n";
-    exit(1);
-  }
-  return $sysconfdir;
-}
-
-
-/**
- * \brief Determine SYSCONFDIR, parse fossology.conf
- *
- * \param $sysconfdir Typically from the caller's -c command line parameter
- *
- * \return the $SysConf array of values.  The first array dimension
- * is the group, the second is the variable name.
- * For example:
- *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
- *
- * The global $SYSCONFDIR is also set for backward compatibility.
- *
- * \Note Since so many files expect directory paths that used to be in pathinclude.php
- * to be global, this function will define the same globals (everything in the
- * DIRECTORIES section of fossology.conf).
- */
-function bootstrap($sysconfdir="")
-{
-  if (empty($sysconfdir))
-  {
-    $sysconfdir = guessSysconfdir();
-    echo "assuming SYSCONFDIR=$sysconfdir\n";
-  }
-
-  $sysconfdir = trim($sysconfdir);
-  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
-
-  /*************  Parse fossology.conf *******************/
-  $ConfFile = "{$sysconfdir}/fossology.conf";
-  if (!file_exists($ConfFile))
-  {
-    $text = _("FATAL! Missing configuration file: $ConfFile");
-    echo "$text\n";
-    exit(1);
-  }
-  $SysConf = parse_ini_file($ConfFile, true);
-  if ($SysConf === false)
-  {
-    $text = _("FATAL! Invalid configuration file: $ConfFile");
-    echo "$text\n";
-    exit(1);
-  }
-
-  /* evaluate all the DIRECTORIES group for variable substitutions.
-   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
-   * want BINDIR=/usr/local/bin
-   */
-  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
-  {
-    $toeval = "\$$var = \"$assign\";";
-    eval($toeval);
-
-    /* now reassign the array value with the evaluated result */
-    $SysConf['DIRECTORIES'][$var] = ${$var};
-    $GLOBALS[$var] = ${$var};
-  }
-
-  if (empty($MODDIR))
-  {
-    $text = _("FATAL! System initialization failure: MODDIR not defined in $SysConf");
-    echo "$text\n";
-    exit(1);
-  }
-
-  //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/lib/php/common.php");
-  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
-  return $SysConf;
-}

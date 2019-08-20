@@ -94,17 +94,36 @@ void DBLoadGold()
   char SQL[MAXCMD];
   long PfileKey;
   char *Path;
+  char SHA256[65], command[PATH_MAX + 13];
   FILE *Fin;
-  int rc;
+  int rc = -1;
   PGresult *result;
+  int read = 0;
+
+  memset(SHA256, '\0', sizeof(SHA256));
 
   LOG_VERBOSE0("Processing %s",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
+
+  // Calculate sha256 value
+  snprintf(command, PATH_MAX + 13, "sha256sum '%s'", GlobalTempFile);
+  FILE* file = popen(command, "r");
+
   if (!Fin)
   {
     LOG_FATAL("upload %ld Unable to open temp file %s from %s",
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(1);
+  }
+  if (file != (FILE*) NULL)
+  {
+    read = fscanf(file, "%64s", SHA256);
+    rc = WEXITSTATUS(pclose(file));
+  }
+  if (file == (FILE*) NULL || rc != 0 || read != 1)
+  {
+    LOG_FATAL("Unable to calculate SHA256 of %s\n", GlobalTempFile);
+    SafeExit(56);
   }
   Sum = SumComputeFile(Fin);
   fclose(Fin);
@@ -187,8 +206,8 @@ void DBLoadGold()
   Len = Unique+41+33; /* 32 for md5 + 1 for '.' */
   /* Set the pfile */
   memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
-      SHA1,MD5,Len);
+  snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_sha256 = '%.64s' AND pfile_size = %s;",
+      SHA1,MD5,SHA256,Len);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(7);
 
@@ -197,8 +216,8 @@ void DBLoadGold()
   {
     /* Insert it */
     memset(SQL,'\0',MAXCMD);
-    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_size) VALUES ('%.40s','%.32s',%s)",
-        SHA1,MD5,Len);
+    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_sha256, pfile_size) VALUES ('%.40s','%.32s','%.64s',%s)",
+        SHA1,MD5,SHA256,Len);
     PQclear(result);
     result = PQexec(pgConn, SQL);
     if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(8);

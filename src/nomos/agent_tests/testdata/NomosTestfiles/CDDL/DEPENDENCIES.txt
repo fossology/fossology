@@ -1,0 +1,27 @@
+/ ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// maven pom organized by organization.
+// ------------------------------------------------------------------
+
+Apache XML Security for Java
+
+
+From: 'an unknown organization'
+- Streaming API for XML javax.xml.stream:stax-api:jar:1.0-2
+License: GNU General Public Library (http://www.gnu.org/licenses/gpl.txt) License: COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.0 (http://www.sun.com/cddl/cddl.html)
+
+From: 'Codehaus' (http://www.codehaus.org/)
+- Woodstox (http://woodstox.codehaus.org) org.codehaus.woodstox:woodstox-core-asl:jar:4.4.1
+License: The Apache Software License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+From: 'fasterxml.com' (http://fasterxml.com)
+- Stax2 API (http://wiki.fasterxml.com/WoodstoxStax2) org.codehaus.woodstox:stax2-api:bundle:3.1.4
+License: The BSD License (http://www.opensource.org/licenses/bsd-license.php)
+
+From: 'QOS.ch' (http://www.qos.ch)
+- SLF4J API Module (http://www.slf4j.org) org.slf4j:slf4j-api:jar:1.7.21
+License: MIT License (http://www.opensource.org/licenses/mit-license.php)
+
+From: 'The Apache Software Foundation' (http://www.apache.org/)
+- Apache Commons Codec (http://commons.apache.org/proper/commons-codec/) commons-codec:commons-codec:jar:1.10
+License: Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt)

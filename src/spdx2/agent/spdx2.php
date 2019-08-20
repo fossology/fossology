@@ -670,15 +670,18 @@ class SpdxTwoAgent extends Agent
         $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $fileName = $treeDao->getFullPath($fileId,$treeTableName,0,true);
+      $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0, true);
       if (!is_array($licenses['concluded'])) {
         $licenses['concluded'] = array();
       }
       if (!is_array($licenses['scanner'])) {
         $licenses['scanner'] = array();
       }
-      $stateComment = $this->getSPDXLicenseCommentState($uploadId);
-      $dataTemplate = array(
+      $stateComment = $this->getSPDXReportConf($uploadId, 0);
+      $stateWoInfos = $this->getSPDXReportConf($uploadId, 1);
+      if (!$stateWoInfos ||
+          ($stateWoInfos && (!empty($licenses['concluded']) || (!empty($licenses['scanner']) && !empty($licenses['scanner'][0])) || !empty($licenses['copyrights'])))) {
+        $dataTemplate = array(
           'fileId' => $fileId,
           'sha1' => $hashes['sha1'],
           'md5' => $hashes['md5'],
@@ -692,12 +695,12 @@ class SpdxTwoAgent extends Agent
           'scannerLicenses' => SpdxTwoUtils::addPrefixOnDemandList($licenses['scanner'], $this->spdxValidityChecker),
           'copyrights' => $licenses['copyrights'],
           'licenseCommentState' => $stateComment
-      );
-      if ($stateComment) {
-        $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
+        );
+        if ($stateComment) {
+          $dataTemplate['licenseComment'] = SpdxTwoUtils::implodeLicenses($licenses['comment']);
+        }
+        $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);
       }
-
-      $content .= $this->renderString($this->getTemplateFile('file'),$dataTemplate);
     }
     $this->heartbeat($filesProceeded - $lastValue);
     return $content;
@@ -806,20 +809,19 @@ class SpdxTwoAgent extends Agent
    * @param int $uploadId
    * @return boolval License comment state (TRUE : show license comment, FALSE : don't show it)
    */
-  protected function getSPDXLicenseCommentState($uploadId)
+  protected function getSPDXReportConf($uploadId, $key)
   {
-    $sql = "SELECT ri_ga_checkbox_selection FROM report_info WHERE upload_fk=$1";
+    $sql = "SELECT ri_spdx_selection FROM report_info WHERE upload_fk = $1";
     $getCommentState = $this->dbManager->getSingleRow($sql, array($uploadId), __METHOD__.'.SPDX_license_comment');
-    if (!empty($getCommentState['ri_ga_checkbox_selection'])) {
-      $getCommentStateSingle = explode(',', $getCommentState['ri_ga_checkbox_selection']);
-      if ($getCommentStateSingle[9] === "checked") {
+    if (!empty($getCommentState['ri_spdx_selection'])) {
+      $getCommentStateSingle = explode(',', $getCommentState['ri_spdx_selection']);
+      if ($getCommentStateSingle[$key] === "checked") {
         return true;
       }
     }
     return false;
   }
 }
-
 $agent = new SpdxTwoAgent();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();

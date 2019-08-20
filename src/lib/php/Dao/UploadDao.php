@@ -71,6 +71,23 @@ class UploadDao
   }
 
   /**
+   * Get the first entry for uploadtree_pk for a given pfile in a given upload.
+   * @param integer $uploadFk Upload id
+   * @param integer $pfileFk  Pfile id
+   * @return integer Uploadtree_pk
+   */
+  public function getUploadtreeIdFromPfile($uploadFk, $pfileFk)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadFk);
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT uploadtree_pk " .
+      "FROM $uploadTreeTableName " .
+      "WHERE upload_fk = $1 AND pfile_fk = $2",
+      array($uploadFk, $pfileFk), $stmt);
+    return intval($uploadEntry['uploadtree_pk']);
+  }
+
+  /**
    * @param int $uploadId
    * @return Upload|null
    */
@@ -632,7 +649,7 @@ ORDER BY lft asc
   public function getReportInfo($uploadId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT * FROM report_info where upload_fk=$1";
+    $sql = "SELECT * FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
     if (empty($row)) {
