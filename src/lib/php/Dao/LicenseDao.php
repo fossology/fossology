@@ -652,15 +652,15 @@ ORDER BY lft asc
    * @param array $licenseLists
    * @return array
    **/
-  public function getLicenseObligations($licenseLists)
+  public function getLicenseObligations($licenseLists, $tableName='obligation_map')
   {
     if (!empty($licenseLists)) {
       $licenseList = implode (",",$licenseLists);
-      $statementName = __METHOD__;
+      $statementName = __METHOD__.$tableName;
       $this->dbManager->prepare($statementName,
             "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, rf_shortname FROM obligation_ref
-             JOIN obligation_map ON obligation_map.ob_fk=obligation_ref.ob_pk
-             JOIN license_ref ON obligation_map.rf_fk=license_ref.rf_pk WHERE ob_active='t' and rf_fk in ($licenseList)");
+             JOIN $tableName ON $tableName.ob_fk=obligation_ref.ob_pk
+             JOIN license_ref ON $tableName.rf_fk=license_ref.rf_pk WHERE ob_active='t' and rf_fk in ($licenseList)");
       $result = $this->dbManager->execute($statementName, array());
       $ObligationRef = $this->dbManager->fetchAll($result);
       $this->dbManager->freeResult($result);
