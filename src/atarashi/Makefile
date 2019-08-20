@@ -20,7 +20,6 @@ all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 test: all
-	$(TOP)/install/scripts/install-atarashi.sh
 	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
