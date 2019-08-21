@@ -42,8 +42,13 @@ class SpashtAgent extends Agent
      */
     private $uploadDao;
 
+<<<<<<< HEAD
     /** @var SpashtDao $spashtDao
      * SpashtDao object
+=======
+    /** @var SpashtDao $uploadDao
+     * UploadDao object
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
      */
     private $spashtDao;
 
@@ -52,6 +57,7 @@ class SpashtAgent extends Agent
      */
     private $licenseDao;
 
+<<<<<<< HEAD
     // /**
     //  * @var DbManager $dbManager
     //  * DbManager object
@@ -63,6 +69,19 @@ class SpashtAgent extends Agent
     //  * AgentDao object
     //  */
     // protected $agentDao;
+=======
+    /**
+     * @var DbManeger $dbManager
+     * DbManeger object
+     */
+    private $dbManeger;
+
+    /**
+     * @var AgentDao $agentDao
+     * AgentDao object
+     */
+    protected $agentDao;
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
 
     function __construct()
     {
@@ -70,8 +89,13 @@ class SpashtAgent extends Agent
         $this->uploadDao = $this->container->get('dao.upload');
         $this->spashtDao = $this->container->get('dao.spasht');
         $this->licenseDao = $this->container->get('dao.license');
+<<<<<<< HEAD
         // $this->dbManager = $this->container->get('db.manager');
         // $this->agentDao = $this->container->get('dao.agent');
+=======
+        $this->dbManeger = $this->container->get('db.manager');
+        $this->agentDao = $this->container->get('dao.agent');
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
     }
 
     /*
@@ -87,6 +111,7 @@ class SpashtAgent extends Agent
 
       $agentId = $this->agentDao->getCurrentAgentId("spasht");
 
+<<<<<<< HEAD
       // $pfileSha1DetailsFromUpload = array();
       // $pfileIdDetailsFromUpload = array();
 
@@ -98,10 +123,20 @@ class SpashtAgent extends Agent
 
         // $pfileSha1DetailsFromUpload[] = strtolower($pfileDetail['sha1']);
         // $pfileIdDetailsFromUpload[] = $pfileDetail['pfile_pk'];
+=======
+      $pfileSha1DetailsFromUpload = array();
+      $pfileIdDetailsFromUpload = array();
+
+      foreach($pfileFileDetails as $pfileDetail)
+      {
+        $pfileSha1DetailsFromUpload[] = strtolower($pfileDetail['sha1']);
+        $pfileIdDetailsFromUpload[] = $pfileDetail['pfile_pk'];
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
       }
 
       $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
 
+<<<<<<< HEAD
       $scancodeVersion = $this->getScanCodeVersion($uploadAvailable);
 
       $getNewResult = $this->getInformation($scancodeVersion, $uploadAvailable, $pfileSha1AndpfileId);
@@ -145,6 +180,58 @@ class SpashtAgent extends Agent
     //   }
     //   fclose($file);
     // }
+=======
+      if($uploadAvailable == false)
+      {
+        $file = fopen('/home/fossy/abc.json','w');
+        fwrite($file,"no data available");
+        fclose($file);
+
+        return false;
+      }
+
+      $scancodeVersion = $this->getScanCodeVersion($uploadAvailable);
+
+      $getNewResult = $this->getInformation($scancodeVersion, $uploadAvailable, $pfileSha1DetailsFromUpload, $pfileIdDetailsFromUpload);
+
+      $resultUploadIntoLicenseTable = $this->insertSpashtAgentRecord($getNewResult, $agentId);
+
+      if($resultUploadIntoLicenseTable == true)
+      {
+      $file = fopen('/home/fossy/abc.json','w');
+
+      if($getNewResult == "BodyNotFound")
+      {
+        fwrite($file, "No data available.");
+      }
+      elseif($getNewResult == "UploadNotFound")
+      {
+        fwrite($file, "Upload doesnot match with the selected file.");
+      }
+      else
+      {
+
+        fwrite($file, $agentId);
+        foreach($getNewResult as $key)
+        {
+          fwrite($file, $key['pfileId']."->");
+          foreach($key['license'] as $license)
+          {
+            if(!empty($license))
+            {
+              fwrite($file, $license);
+            }
+            else
+            {
+              fwrite($file, "No_License_Found!");
+            }
+            fwrite($file,"\n");
+          }
+        }
+      }
+      fclose($file);
+    }
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
       return true;
     }
 
@@ -236,7 +323,12 @@ class SpashtAgent extends Agent
      * Search pfile for uploads into clearlydefined
      * tool used is scancode
      */
+<<<<<<< HEAD
      protected function getInformation($scancodeVersion, $details, $pfileSha1AndpfileId)
+=======
+
+     protected function getInformation($scancodeVersion, $details, $pfileSha1DetailsFromUpload, $pfileIdDetailsFromUpload)
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
      {
        $namespace = $details['spasht_namespace'];
        $name = $details['spasht_name'];
@@ -262,7 +354,11 @@ class SpashtAgent extends Agent
       {
         $body = json_decode($res->getBody()->getContents());
 
+<<<<<<< HEAD
         if(empty($body))
+=======
+        if(sizeof($body) == 0)
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
         {
           return "BodyNotFound";
         }
@@ -271,18 +367,30 @@ class SpashtAgent extends Agent
 
         foreach($body->$tool->$scancodeVersion->$dir as $key)
         {
+<<<<<<< HEAD
           $searchInUpload = array_search($key->hashes->sha1, $pfileSha1AndpfileId);
+=======
+          $searchInUpload = array_search($key->hashes->sha1, $pfileSha1DetailsFromUpload);
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
 
           if(!empty($searchInUpload))
           {
             $temp = array();
 
+<<<<<<< HEAD
             $temp['pfileId'] = $searchInUpload;
 
             $temp['sha1'] = $key->hashes->sha1;
 
             if(!empty($key->license))
             {
+=======
+            $temp['pfileId'] = $pfileIdDetailsFromUpload[$searchInUpload];
+
+            if(!empty($key->license))
+            {
+
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
               $temp['license'] = $this->sperateLicenses($key->license);
             }
             else
@@ -294,10 +402,13 @@ class SpashtAgent extends Agent
             {
               $temp['attributions'] = $key->attributions;
             }
+<<<<<<< HEAD
             else
             {
               $temp['attributions'] = ["No_Copyright_Found"];
             }
+=======
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
             $newResultBody[] = $temp;
           }
 
@@ -321,7 +432,11 @@ class SpashtAgent extends Agent
       {
         if($license === "AND" || $license === "OR")
         {
+<<<<<<< HEAD
           continue;
+=======
+          var_dump($license);
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
         }
         else
         {
@@ -341,29 +456,54 @@ class SpashtAgent extends Agent
       return $strLicense;
      }
 
+<<<<<<< HEAD
     /*
      * @brief Insert the License Details in Spasht Agent table
      * @param $agentId  Integer
+=======
+      /*
+     * @brief Insert the License Details in Spasht Agent table
+     * @param $pfileId  Integer
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
      * @param $license  Array
      *
      * @return boolean True if finished
      */
+<<<<<<< HEAD
     protected function insertLicensesSpashtAgentRecord($body, $agentId)
     {
+=======
+    protected function insertSpashtAgentRecord($body, $agentId)
+    {
+      $file = fopen('/home/fossy/abc.json','w');
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
       foreach($body as $key)
       {
         foreach($key['license'] as $license)
         {
           $l = $this->licenseDao->getLicenseByShortName($license);
+<<<<<<< HEAD
           if($l != null)
           {
             if(!empty($l->getId()))
             {
               $this->dbManager->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'rf_fk'=> $l->getId()]);
+=======
+          if($l == null)
+          {
+            fwrite($file, $license."->null"); 
+          }
+          else
+          {
+            if(!empty($l->getId()))
+            {
+              $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'rf_fk'=> $l->getId()]);
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
             }
           }
         }
       }
+<<<<<<< HEAD
       return true;
     }
 
@@ -397,6 +537,8 @@ class SpashtAgent extends Agent
           $this->dbManager->insertTableRow('copyright_spasht',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'textfinding' => $keyCopyright,'hash' => $hashForCopyright,'clearing_decision_type_fk' => 0]);
         }
       }
+=======
+>>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
       fclose($file);
       return true;
     }
