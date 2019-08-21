@@ -12,15 +12,15 @@ include $(VARS)
 MOD_NAMES = spasht
 
 DIRS = ui
-TESTDIR = agent_tests
+# TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
 
 all: VERSIONFILE
 	$(call DIR_LOOP, )
 
-test: all
-	$(MAKE) -C $(TESTDIR) test
+# test: all
+#	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
@@ -50,7 +50,6 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,clean)
-	$(MAKE) -s -C $(TESTDIR) $@
 	rm -f VERSION*
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean
