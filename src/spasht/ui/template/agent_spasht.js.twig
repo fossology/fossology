@@ -1,6 +1,5 @@
 <script>
 function StoreIntoDb(key){
-    //val set[] = { "{{ body.body_revision[key] }}", "{{ body.body_name[key] }}", "{{ body.body_namespace[key] }}", "{{ body.body_type[key] }}" };
 
     var namespace = "definitionsRow_namespace"+key;
     var name = "definitionsRow_name"+key;
@@ -10,7 +9,7 @@ function StoreIntoDb(key){
 
     var params = document.getElementById(type).innerHTML +"/"+ document.getElementById(provider).innerHTML +"/"+ document.getElementById(namespace).innerHTML +"/"+ document.getElementById(name).innerHTML +"/"+ document.getElementById(revision).innerHTML;
 
-    document.getElementById("par").value = params;
+    document.getElementById("optionSelectedToOpen").value = params;
     document.getElementById("storeForm").submit();
     }
 function showDetails(key){
@@ -19,7 +18,7 @@ function showDetails(key){
     var detailsRow = "detailsRow"+key;
 
     var currentElement = document.getElementById("displayElementIndex").value;
-    
+
     if(currentElement != "-1"){
         currentElement = "detailsRow"+currentElement;
         document.getElementById(currentElement).style.display = "none";
@@ -32,6 +31,21 @@ function showDetails(key){
         document.getElementById(detailsRow).style.display = "";
         document.getElementById("displayElementIndex").value = key;
     }
-        
 }
+
+
+$( function() {
+
+    var spashtTabCookie = 'stickySpashtTab';
+
+      $('#spashtTabs').tabs({
+        active: ($.cookie(spashtTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(spashtTabCookie, idString);
+        }
+      });
+    });
 </script>

@@ -7,35 +7,24 @@
 {% endblock %}
 
 {% block content %}
-  <div class="row" id="spashtStart">
-    <div class="col" ></div>
-    <div class="col-md-4" id="searchBoxCover">
-      {% include 'agent_spasht_search.html.twig' %}
-    </div>
-    <div class="col">
-    </div>
-  </div>
-  <div class="row" id="spashtStart">
-    <div class="col">
-      {% if advanceSearch == "checked" %}
-        {% include 'agent_spasht_advanceSearch_form.html.twig' %}
-      {% elseif pageNo == 2 %}
-        {% include 'show_definitions.html.twig' %}
-      {% elseif pageNo == 3 %}
-        Data Stored Successfully {{ pageNo }} -> {{ result }}
-      {% elseif pageNo == 4 %}
-        {% include 'show_uploads_table.html.twig' %}
-      {% else %}
-        Empty
-      {% endif %}
-    </div>
-    <div class="col">
-    {% include 'show_details_table.html.twig' %}
-    </div>
-  </div>
+  {% include 'agent_spasht_ui_tabs.html.twig' %}
 {% endblock %}
 
 {% block foot %}
   {{ parent() }}
-{% include 'agent_spasht.js.twig' %}
+  <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script src="scripts/jquery.dataTables.editable.js" type="text/javascript"></script>
+  <script src="scripts/jquery.dataTables.select.js" type="text/javascript"></script>
+  <script src="scripts/jquery.jeditable.js" type="text/javascript"></script>
+  <script src="scripts/jquery.validate.js" type="text/javascript"></script>
+  <script src="scripts/jquery.cookie.js" type="text/javascript"></script>
+
+  <script language="javascript">
+  {% for table in tables %}
+    {% include "spasht_histTable.js.twig" with table %}
+    createTable{{ table.type }}();
+  {% endfor %}
+  </script>
+  
+  {% include 'agent_spasht.js.twig' %}
 {% endblock %}
