@@ -23,7 +23,6 @@ function StoreIntoDb(key) {
 
 function showDetails(key){
 
-    var detailsTable = "detailsTable";
     var detailsRow = "detailsRow"+key;
 
     var currentElement = document.getElementById("displayElementIndex").value;
@@ -32,9 +31,9 @@ function showDetails(key){
         currentElement = "detailsRow"+currentElement;
         document.getElementById(currentElement).style.display = "none";
     }
-
-    if (document.getElementById(detailsTable).style.display === "none") {
-        document.getElementById(detailsTable).style.display = "";
+    
+    if (document.getElementById("detailsTable").style.display === "none") {
+        document.getElementById("detailsTable").style.display = "";
     }
 
     if (document.getElementById(detailsRow).style.display === "none") {
