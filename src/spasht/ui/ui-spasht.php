@@ -4,6 +4,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\UI\Component\MicroMenu;
 use GuzzleHttp\Client;
+use Fossology\Lib\Dao\SpashtDao;
 
 /**
  * @class ui_spashts
@@ -11,6 +12,10 @@ use GuzzleHttp\Client;
  */
 class ui_spasht extends FO_Plugin
 {
+
+  /** @var SpashtDao  $spashtDao*/
+  private $spashtDao;
+
   function __construct()
   {
     $this->Name       = "spashtbrowser";
@@ -19,10 +24,11 @@ class ui_spasht extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_WRITE;
     $this->LoginFlag  = 0;
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->spashtDao = $GLOBALS['container']->get('dao.spasht');
     parent::__construct();
   }
 
-
+  public $uploadAvailable = "no";
   /**
    * \brief Customize submenus.
    */
@@ -86,15 +92,51 @@ class ui_spasht extends FO_Plugin
    */
   public function output()
   {
-    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
+    $optionSelect = GetParm("par",PARM_STRING);
+    $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
 
     $vars = array();
+    $statusbody = "true";
+
+    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
+    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
     
     $vars['advanceSearch'] = ""; //Set advance search to empty
+    $vars['storeStatus'] = "false";
+    $vars['pageNo'] = 0;
 
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
+
+    if(!empty($optionSelect))
+    {
+      $str = explode ("/", $optionSelect);
+      
+      $body = array();
+
+      $body['body_type'] = $str[0];
+      $body['body_provider'] = $str[1];
+      $body['body_namespace'] = $str[2];
+      $body['body_name'] = $str[3];
+      $body['body_revision'] = $str[4];
+
+      if($uploadAvailable == "yes"){
+        $result = $this->spashtDao->alterComponentRevision($body, $uploadId);
+      }
+      else{
+        $result = $this->spashtDao->addComponentRevision($body, $uploadId);
+      }
+
+      if($result >= 0)
+      {
+        $patternName = null;
+      }
+
+      else
+      {
+        $patternName = $body['body_name'];
+      }
+    }
 
     if($patternName != null && !empty($patternName)) //Check if search is not empty
     {
@@ -104,18 +146,63 @@ class ui_spasht extends FO_Plugin
         'base_uri' => 'https://api.clearlydefined.io/',
         ]);
 
-        // Point to definitions secton in the api
+        // Point to definitions section in the api
       $res = $client->request('GET','definitions',[
           'query' => ['pattern' => $patternName] //Perform query operation into the api
         ]);
 
       if($res->getStatusCode()==200) //Get the status of http request
       {
-         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decode
+         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
 
          if(sizeof($body) == 0) //Check if no element is found
          {
-          $body[0] = "No Match Found";
+          $statusbody = "false";
+         }
+         else
+         {
+           $temp = array();
+           $details = array();
+          for ($x = 0; $x < sizeof($body) ; $x++)
+          {
+            $str = explode ("/", $body[$x]);
+
+            $temp2 = array();
+
+            $temp2['revision'] = $str[4];
+            $temp2['type'] = $str[0];
+            $temp2['name'] = $str[3];
+            $temp2['provider'] = $str[1];
+            $temp2['namespace'] = $str[2];
+
+            $temp[] = $temp2;
+            $uri = "definitions/".$body[$x];
+
+            $detail_body = array();
+
+            //details section
+            $res_details = $client->request('GET',$uri,[
+              'query' => [
+                'expand' => "-files"
+              ] //Perform query operation into the api
+            ]);
+
+            $detail_body = json_decode($res_details->getBody()->getContents(),true);
+
+            $details_temp = array();
+
+            $details_temp['declared'] = $detail_body["licensed"]["declared"];
+            $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
+            $details_temp['release'] = $detail_body["described"]["releaseDate"];
+            $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
+            $details_temp['attribution'] = $detail_body['licensed']["facets"]["core"]['attribution']['parties'];
+            $details_temp['discovered'] = $detail_body['licensed']["facets"]["core"]['discovered']['expressions'];
+
+            $details[] = $details_temp;
+          }
+
+          $vars['details'] = $details;
+          $vars['body'] = $temp;
          }
       }
           /** Check for advance Search enabled
@@ -124,25 +211,17 @@ class ui_spasht extends FO_Plugin
             */
             if($advanceSearch == "advanceSearch"){
               $vars['advanceSearch'] = "checked";
-  
-              for ($x = 0; $x < sizeof($body) ; $x++)
-              {
-                $str = explode ("/", $body[$x]);
-  
-                $body_revision[$x] = $str[4];
-                $body_type[$x] = $str[0];
-                $body_provider[$x] = $str[1];
-                $body_namespace[$x] = $str[2];
-              }
-              $vars['body_revision'] = $body_revision;
-              $vars['body_type'] = $body_type;
-              $vars['body_provider'] = $body_provider;
-              $vars['body_namespace'] = $body_namespace;
-
             }
-            $vars['body'] = $body;
-              
+            if($vars['storeStatus'] == "true")
+            {
+              $vars['pageNo'] = 3;
+            }
+            else
+            {
+              $vars['pageNo'] = 2;
+            }
 
+      $vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;
     }
 
@@ -154,10 +233,23 @@ class ui_spasht extends FO_Plugin
         }
 
       $upload_name = GetUploadName($uploadId);
+      $vars['pageNo'] = 1;
+
+      $searchUploadId = $this->spashtDao->getComponent($uploadId);
+
+      if(!empty($searchUploadId)){
+        $vars['uploadAvailable'] = "yes";
+        $vars['pageNo'] = 4;
+        $vars['body'] = $searchUploadId;
+      }
+      else{
+        $uploadAvailable = "no";
+      }
     }
 
     $vars['uploadName'] = $upload_name;
 
+    $vars['statusbody'] = $statusbody;
     $out = $this->renderString('agent_spasht.html.twig',$vars);
     
     return($out);

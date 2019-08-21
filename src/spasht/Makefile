@@ -1,4 +1,5 @@
 # Copyright 2019
+# Author: Vivek Kumar<vvksindia@gmail.com>
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -20,7 +21,7 @@ all: VERSIONFILE
 	$(call DIR_LOOP, )
 
 # test: all
-#	$(MAKE) -C $(TESTDIR) test
+# 	$(MAKE) -C $(TESTDIR) test
 
 coverage: all
 	$(MAKE) -C $(TESTDIR) coverage
@@ -50,6 +51,7 @@ uninstall:
 
 clean:
 	$(call DIR_LOOP,clean)
+	# $(MAKE) -s -C $(TESTDIR) $@
 	rm -f VERSION*
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean
