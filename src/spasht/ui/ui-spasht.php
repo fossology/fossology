@@ -90,9 +90,9 @@ class ui_spasht extends FO_Plugin
    * @brief This function returns the scheduler status.
    * @see FO_Plugin::Output()
    */
-  public function output()
+  public function Output()
   {
-    $optionSelect = GetParm("par",PARM_STRING);
+    $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
     $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
 
     $vars = array();
@@ -122,7 +122,7 @@ class ui_spasht extends FO_Plugin
 
       if($uploadAvailable == "yes"){
         $result = $this->spashtDao->alterComponentRevision($body, $uploadId);
-      }
+        }
       else{
         $result = $this->spashtDao->addComponentRevision($body, $uploadId);
       }
@@ -205,21 +205,21 @@ class ui_spasht extends FO_Plugin
           $vars['body'] = $temp;
          }
       }
-          /** Check for advance Search enabled
-            * If enabled the revisions are retrieved from the body to display them in the form.
-            * As options to users.
-            */
-            if($advanceSearch == "advanceSearch"){
-              $vars['advanceSearch'] = "checked";
-            }
-            if($vars['storeStatus'] == "true")
-            {
-              $vars['pageNo'] = 3;
-            }
-            else
-            {
-              $vars['pageNo'] = 2;
-            }
+      /** Check for advance Search enabled
+        * If enabled the revisions are retrieved from the body to display them in the form.
+        * As options to users.
+        */
+        if($advanceSearch == "advanceSearch"){
+          $vars['advanceSearch'] = "checked";
+        }
+        if($vars['storeStatus'] == "true")
+        {
+          $vars['pageNo'] = 3;
+        }
+        else
+        {
+          $vars['pageNo'] = 2;
+        }
 
       $vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;

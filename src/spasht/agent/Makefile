@@ -1,5 +1,4 @@
-# Copyright 2019
-# Author: Vivek Kumar<vvksindia@gmail.com>
+# Copyright Siemens AG 2014
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -11,6 +10,7 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
+MOD_NAME = spasht
 COPY = spasht.php version.php SpashtAgent.php
 WRAP = spasht
 
@@ -24,22 +24,22 @@ include $(TOP)/Makefile.process
 spasht:
 	@echo "making locally runnable spast (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
-	ln -sf $(FOCLIDIR)/fo_wrapper.php spasht
+	ln -sf $(FOCLIDIR)/fo_wrapper.php $(WRAP)
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/spasht/agent/
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
 	for file in $(COPY); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/spasht/agent/$$file; \
+		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/spasht/agent/$$file; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 
 uninstall:
 	for file in $(WRAP); do \
-		rm -rf $(DESTDIR)$(MODDIR)/spasht/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 
 clean:

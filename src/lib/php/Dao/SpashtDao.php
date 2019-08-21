@@ -1,12 +1,20 @@
 <?php
 /*
-Copyright 2019
+Copyright (C) 2019
 Author: Vivek Kumar<vvksindia@gmail.com>
 
-Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without any warranty.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 namespace Fossology\Lib\Dao;
@@ -70,26 +78,15 @@ class SpashtDao
    * Where uploadId is found.
    */
 
-  public function getComponent($uploadID)
-  {
+  public function getComponent($uploadID){
     $statement = __METHOD__.".CheckUpload";
 
-    $params = [$uploadID];
+    $params = [ $uploadID ];
 
     $sql = "SELECT * FROM spasht ".
     "WHERE upload_fk = $1";
 
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
-
-    /**
-     * $row["spasht_revision"] = "spasht_revision";
-     * $row["spasht_namespace"] = "spasht_namespace";
-     * $row["spasht_name"] = "spasht_name";
-     * $row["spasht_type"] = "spasht_type";
-     * $row["spasht_provider"] = "spasht_provider";
-     * $row["upload_fk"] = "upload_fk";
-     */
-
     return ($row);
   }
 }
