@@ -52,8 +52,8 @@ class SpashtDao
     return ($this->dbManager->insertPreparedAndReturn($statement, $sql, $params, $returningValue));
   }
 
-  public function alterComponentRevision($revisionBody, $uploadID){
-    
+  public function alterComponentRevision($revisionBody, $uploadID)
+  {
     $assocParams = array('spasht_namespace' => $revisionBody['body_namespace'], 'spasht_name' => $revisionBody['body_name'],
     'spasht_type' => $revisionBody['body_type'], 'spasht_provider' => $revisionBody['body_provider'],
     'spasht_revision' => $revisionBody['body_revision']);
