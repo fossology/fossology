@@ -1,21 +1,12 @@
 <?php
 /*
-Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
-Copyright (C) 2014, Siemens AG
-Author: Johannes Najjar
+Copyright 2019
+Author: Vivek Kumar<vvksindia@gmail.com>
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-version 2 as published by the Free Software Foundation.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.  This file is offered as-is,
+without any warranty.
 */
 
 namespace Fossology\Lib\Dao;
@@ -46,18 +37,11 @@ class SpashtDao
    * Add new entry into spasht Agent
    */
 
-  public function addComponentRevision($revisionBody, $uploadID){
-
+  public function addComponentRevision($revisionBody, $uploadID)
+  {
     $statement = __METHOD__.".AddingNewRevision";
 
-    $params = [
-      $revisionBody['body_revision'],
-      $revisionBody['body_namespace'],
-      $revisionBody['body_name'],
-      $revisionBody['body_type'],
-      $revisionBody['body_provider'],
-      $uploadID
-    ];
+    $params = [ $revisionBody['body_revision'], $revisionBody['body_namespace'], $revisionBody['body_name'], $revisionBody['body_type'], $revisionBody['body_provider'], $uploadID ];
 
     $sql = "INSERT INTO spasht ".
     "(spasht_revision, spasht_namespace, spasht_name, spasht_type, spasht_provider, upload_fk)".
@@ -68,14 +52,14 @@ class SpashtDao
     return ($this->dbManager->insertPreparedAndReturn($statement, $sql, $params, $returningValue));
   }
 
-  public function alterComponentRevision($revisionBody, $uploadID){
-    
+  public function alterComponentRevision($revisionBody, $uploadID)
+  {
     $assocParams = array('spasht_namespace' => $revisionBody['body_namespace'], 'spasht_name' => $revisionBody['body_name'],
     'spasht_type' => $revisionBody['body_type'], 'spasht_provider' => $revisionBody['body_provider'],
     'spasht_revision' => $revisionBody['body_revision']);
 
     $tableName = "spasht";
-    $primaryColumn =  'upload_fk';
+    $primaryColumn = 'upload_fk';
 
     $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn, $uploadID);
     return $uploadID;
@@ -86,12 +70,11 @@ class SpashtDao
    * Where uploadId is found.
    */
 
-  public function getComponent($uploadID){
+  public function getComponent($uploadID)
+  {
     $statement = __METHOD__.".CheckUpload";
 
-    $params = [
-      $uploadID
-    ];
+    $params = [$uploadID];
 
     $sql = "SELECT * FROM spasht ".
     "WHERE upload_fk = $1";
@@ -109,6 +92,4 @@ class SpashtDao
 
     return ($row);
   }
-
-  
 }
