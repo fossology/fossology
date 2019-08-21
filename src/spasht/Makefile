@@ -10,9 +10,9 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAMES = spasht
+MOD_NAME = spasht
 
-DIRS = ui
+DIRS = agent ui
 # TESTDIR = agent_tests
 
 DIR_LOOP = @set -e; for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1); done
@@ -31,27 +31,20 @@ VERSIONFILE:
 
 install: all
 	$(call DIR_LOOP,install)
-	@for MOD_NAME in $(MOD_NAMES); do \
-		echo "make $$MOD_NAME install"; \
-		$(INSTALL_DATA) VERSION-$$MOD_NAME $(DESTDIR)$(MODDIR)/$$MOD_NAME/VERSION; \
-		$(INSTALL_DATA) $$MOD_NAME.conf $(DESTDIR)$(MODDIR)/$$MOD_NAME/$$MOD_NAME.conf; \
-		mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
-		if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD_NAME; then \
-			ln -s $(MODDIR)/$$MOD_NAME $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
-		fi; \
-	done
+	$(INSTALL_DATA) VERSION $(DESTDIR)$(MODDIR)/$(MOD_NAME)/VERSION;
+	$(INSTALL_DATA) $(MOD_NAME).conf $(DESTDIR)$(MODDIR)/$(MOD_NAME)/$(MOD_NAME).conf;
+	mkdir -p $(DESTDIR)$(SYSCONFDIR)/mods-enabled;
+	if test ! -e $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME); then \
+		ln -s $(MODDIR)/$(MOD_NAME) $(DESTDIR)$(SYSCONFDIR)/mods-enabled; \
+	fi;
 
 uninstall:
 	$(call DIR_LOOP,uninstall)
-	@for MOD_NAME in $(MOD_NAMES); do \
-		echo "make $$MOD_NAME uninstall"; \
-		rm -rf $(DESTDIR)$(MODDIR)/$$MOD_NAME; \
-		rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$$MOD_NAME; \
-	done
+	rm -rf $(DESTDIR)$(MODDIR)/$(MOD_NAME);
+	rm -f $(DESTDIR)$(SYSCONFDIR)/mods-enabled/$(MOD_NAME);
 
 clean:
 	$(call DIR_LOOP,clean)
-	# $(MAKE) -s -C $(TESTDIR) $@
-	rm -f VERSION*
+	rm -f VERSION
 
 .PHONY: all test coverage VERSIONFILE install uninstall clean
