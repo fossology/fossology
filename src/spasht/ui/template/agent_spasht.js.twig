@@ -1,6 +1,6 @@
 <script>
 function StoreIntoDb(key){
-    
+
     var namespace = "definitionsRow_namespace"+key;
     var name = "definitionsRow_name"+key;
     var revision = "definitionsRow_revision"+key;
@@ -18,7 +18,7 @@ function showDetails(key){
     var detailsRow = "detailsRow"+key;
 
     var currentElement = document.getElementById("displayElementIndex").value;
-    
+
     if(currentElement != "-1"){
         currentElement = "detailsRow"+currentElement;
         document.getElementById(currentElement).style.display = "none";
@@ -30,6 +30,22 @@ function showDetails(key){
     if( document.getElementById(detailsRow).style.display === "none"){
         document.getElementById(detailsRow).style.display = "";
         document.getElementById("displayElementIndex").value = key;
-    }      
+    }
 }
+
+
+$( function() {
+
+    var spashtTabCookie = 'stickySpashtTab';
+
+      $('#spashtTabs').tabs({
+        active: ($.cookie(spashtTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(spashtTabCookie, idString);
+        }
+      });
+    });
 </script>
