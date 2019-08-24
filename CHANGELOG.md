@@ -1,5 +1,18 @@
 # Changelog of FOSSology
 
+
+### 3.6.0-RC2 (Aug 24th 2019)
+
+This pre-release adds important corrections to 3.6.0-RC2.
+
+#### Corrections
+
+* `f4c2de9df` fix(dbMigrate): Fix PHP syntax error
+* `69b03a368` fix(copyright): Check if empty decision sent
+* `83897a185` fix(obligation): add default value if the obligation type and classification is empty
+* `90b7f551f` feat(unifiedreport): add candidate licenses to the list of obligations
+* `49d901c02` fix(ojo): Remove call to omitEndingLineFeed on<0.6
+
 ### 3.6.0-RC1 (Aug 12th 2019)
 
 This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds nw features to FOSSology, including:
