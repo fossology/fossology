@@ -1143,7 +1143,7 @@
   $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_key\" SET NOT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["active"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"active\" IS 'True if token is active, false otherwise'";
-  $Schema["TABLE"]["personal_access_tokens"]["active"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"active\" boolean";
+  $Schema["TABLE"]["personal_access_tokens"]["active"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"active\" bool";
   $Schema["TABLE"]["personal_access_tokens"]["active"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"active\" SET NOT NULL";
 
 

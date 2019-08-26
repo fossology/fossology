@@ -181,7 +181,11 @@ class AgentLicenseEventProcessor
         $this->latestAgentMapCache[$uploadId][$agentName] = $agentMap;
       }
     }
-    return $this->latestAgentMapCache[$uploadId];
+    if (array_key_exists($uploadId, $this->latestAgentMapCache)) {
+      return $this->latestAgentMapCache[$uploadId];
+    } else {
+      return array();
+    }
   }
 
   /**
