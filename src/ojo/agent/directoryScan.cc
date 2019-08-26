@@ -40,7 +40,7 @@ void scanDirectory(const bool json, const string &directoryPath)
 
   vector<string> filePaths;
 
-  for (fs::path const &p : dirIterator)
+  for (fs::path const &p : boost::make_iterator_range(dirIterator, {}))
   {
     if (fs::is_directory(p))
     {

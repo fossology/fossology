@@ -19,6 +19,7 @@
 #define SRC_OJO_AGENT_DIRECTORYSCAN_HPP_
 
 #include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 #include <iostream>
 
 #include "OjoUtils.hpp"

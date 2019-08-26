@@ -57,6 +57,8 @@ sudo a2enconf fossology.conf
 sudo /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 sudo /etc/init.d/apache2 restart
+
+sudo systemctl daemon-reload
 SCRIPT
 
 Vagrant.configure("2") do |config|

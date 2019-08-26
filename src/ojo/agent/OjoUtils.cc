@@ -351,8 +351,16 @@ void appendToJson(const std::string fileName,
     bool &printComma)
 {
   Json::Value result;
-  Json::FastWriter jsonBuilder;
-  jsonBuilder.omitEndingLineFeed();
+#if JSONCPP_VERSION_HEXA < ((1 << 24) | (4 << 16))
+  // Use FastWriter for versions below 1.4.0
+  Json::FastWriter jsonWriter;
+#else
+  // Since version 1.4.0, FastWriter is deprecated and replaced with
+  // StreamWriterBuilder
+  Json::StreamWriterBuilder jsonWriter;
+  jsonWriter["commentStyle"] = "None";
+  jsonWriter["indentation"] = "";
+#endif
   if (resultPair.first.empty())
   {
     result["file"] = fileName;
@@ -385,7 +393,17 @@ void appendToJson(const std::string fileName,
     {
       printComma = true;
     }
-    cout << "  " << jsonBuilder.write(result) << flush;
+    string jsonString;
+#if JSONCPP_VERSION_HEXA < ((1 << 24) | (4 << 16))
+    // For version below 1.4.0, every writer append `\n` at end.
+    // Find and replace it.
+    jsonString = jsonWriter.write(result);
+    jsonString.replace(jsonString.find("\n"), string("\n").length(), "");
+#else
+    // For version >= 1.4.0, \n is not appended.
+    jsonString = Json::writeString(jsonWriter, result);
+#endif
+    cout << "  " << jsonString << flush;
   }
 }
 

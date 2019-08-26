@@ -12,6 +12,7 @@ include $(VARS)
 
 EXE=unifiedreport.php reportStatic.php reportSummary.php version.php obligations.php
 WRAP=unifiedreport
+MODNAME=unifiedreport
 
 all: version.php
 
@@ -26,19 +27,19 @@ unifiedreport: all
 	ln -sf $(FOCLIDIR)/fo_wrapper.php unifiedreport
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/unifiedreport/agent/
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/
 	for file in $(EXE); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/unifiedreport/agent/$$file; \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
-		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/unifiedreport/agent/$$file; \
+		ln -sf $(LIBEXECDIR)/fo_wrapper  $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file; \
 	done
 
 uninstall:
 	for file in $(WRAP); do \
-		rm -rf $(DESTDIR)$(MODDIR)/unifiedreport/agent/$$file; \
+		rm -rf $(DESTDIR)$(MODDIR)/$(MODNAME)/agent/$$file; \
 	done
 
 clean:

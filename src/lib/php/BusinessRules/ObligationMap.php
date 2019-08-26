@@ -48,10 +48,10 @@ class ObligationMap
   public function getAvailableShortnames($candidate=false)
   {
     if ($candidate) {
-      $sql = "SELECT rf_shortname from license_candidate;";
+      $sql = "SELECT rf_shortname FROM license_candidate;";
       $stmt = __METHOD__.".rf_candidate_shortnames";
     } else {
-      $sql = "SELECT rf_shortname from license_ref;";
+      $sql = "SELECT rf_shortname FROM ONLY license_ref;";
       $stmt = __METHOD__.".rf_shortnames";
     }
     $this->dbManager->prepare($stmt,$sql);
@@ -98,7 +98,8 @@ class ObligationMap
     } else {
       $sql = "SELECT * FROM license_ref WHERE rf_pk = $1;";
     }
-    $result = $this->dbManager->getSingleRow($sql,array($rfId));
+    $statement = __METHOD__ . "." . ($candidate ? "candidate" : "license");
+    $result = $this->dbManager->getSingleRow($sql,array($rfId), $statement);
     return $result['rf_shortname'];
   }
 
