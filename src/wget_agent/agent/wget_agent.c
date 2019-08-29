@@ -97,11 +97,13 @@ void DBLoadGold()
   char SQL[MAXCMD];
   long PfileKey;
   char *Path;
-  char SHA256[65], command[PATH_MAX + 13];
+  char SHA256[65];
+  char *cmd;
   FILE *Fin;
   int rc = -1, i;
   PGresult *result;
   int read = 0;
+  int res;
 
   memset(SHA256, '\0', sizeof(SHA256));
 
@@ -109,8 +111,13 @@ void DBLoadGold()
   Fin = fopen(GlobalTempFile,"rb");
 
   // Calculate sha256 value
-  snprintf(command, PATH_MAX + 13, "sha256sum '%s'", GlobalTempFile);
-  FILE* file = popen(command, "r");
+  res = asprintf(&cmd, "sha256sum '%s'", GlobalTempFile);
+  if (res == -1)
+  {
+    SafeExit(ASPRINTF_MEM_ERROR);
+  }
+
+  FILE* file = popen(cmd, "r");
 
   if (!Fin)
   {
@@ -118,23 +125,34 @@ void DBLoadGold()
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(1);
   }
-  if (file != (FILE*) NULL)
+
+  if (!file)
   {
-    read = fscanf(file, "%64s", SHA256);
-    rc = WEXITSTATUS(pclose(file));
+    LOG_FATAL("Unable to get SHA256 from command %s\n", cmd);
+    free(cmd);
+    SafeExit(56);
   }
-  if (file == (FILE*) NULL || rc != 0 || read != 1)
+
+  free(cmd);
+
+  read = fscanf(file, "%64s", SHA256);
+  rc = WEXITSTATUS(pclose(file));
+
+  if (rc || read != 1)
   {
     LOG_FATAL("Unable to calculate SHA256 of %s\n", GlobalTempFile);
     SafeExit(56);
   }
+
   // Change SHA256 to upper case like other checksums
   for (i = 0; i < 65; i++)
   {
     SHA256[i] = toupper(SHA256[i]);
   }
+
   Sum = SumComputeFile(Fin);
   fclose(Fin);
+
   if ((int)ForceGroup > 0)
   {
     rc = chown(GlobalTempFile,-1,ForceGroup);
@@ -147,12 +165,14 @@ void DBLoadGold()
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(2);
   }
+
   if (Sum->DataLen <= 0)
   {
     LOG_FATAL("upload %ld No bytes downloaded from %s to %s.",
         GlobalUploadKey,GlobalURL,GlobalTempFile);
     SafeExit(3);
   }
+
   Unique = SumToString(Sum);
   LOG_VERBOSE0("Unique %s",Unique);
 
@@ -178,6 +198,7 @@ void DBLoadGold()
   {
     Path = GlobalTempFile;
   } /* else if !GlobalImportGold */
+
   LOG_VERBOSE0("Path is %s",Path);
 
   if (!Path)
@@ -186,18 +207,22 @@ void DBLoadGold()
         GlobalUploadKey,Unique);
     SafeExit(5);
   }
+
   LOG_VERBOSE0("Import files %s",Path);
+
   if (fo_RepImport(Path,"files",Unique,1) != 0)
   {
     LOG_FATAL("upload %ld Failed to import %s from %s into files",
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
+
   if ((int)ForceGroup >= 0)
   {
     rc = chown(Path,-1,ForceGroup);
     if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
   }
+
   if (Path != GlobalTempFile)
   {
     if(Path)
@@ -233,6 +258,7 @@ void DBLoadGold()
     result = PQexec(pgConn, "SELECT currval('pfile_pfile_pk_seq')");
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(182);
   }
+
   PfileKey = atol(PQgetvalue(result,0,0));
   LOG_VERBOSE0("pfile_pk = %ld",PfileKey);
 
@@ -265,6 +291,7 @@ void DBLoadGold()
     free(Sum);
     Sum = NULL;
   }
+
   if (Unique)
   {
     free(Unique);
