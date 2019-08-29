@@ -22,6 +22,9 @@
  * \file wget_agent.c
  * \brief wget_agent: Retrieve a file and put it in the database.
  */
+#define _GNU_SOURCE           // for asprintf
+
+#define ASPRINTF_MEM_ERROR  88
 
 #include "wget_agent.h"
 
@@ -518,13 +521,15 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 int GetVersionControl()
 {
   char *command = NULL;
-  char TempFileDirectory[MAXCMD];
-  char DeleteTempDirCmd[MAXCMD];
-  char TempHome[MAXCMD];
+  char *tmp_file_directory;
+  char *delete_tmpdir_cmd;
+  char *tmp_home;
+
   int rc = 0;
   int resethome = 0; // 0: default; 1: home is null before setting, should rollback
   int rc_system =0;
   char *homeenv = NULL;
+  int res;
 
   homeenv = getenv("HOME");
   if(NULL == homeenv) resethome = 1;
@@ -532,12 +537,28 @@ int GetVersionControl()
   /* We need HOME to point to where .gitconfig is installed
    * path is the repository path and .gitconfig is installed in its parent directory
    */
-  snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
-  setenv("HOME", TempHome, 1);
+  res = asprintf(&tmp_home, "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
+  if (res == -1)
+  {
+    return ASPRINTF_MEM_ERROR;
+  }
+
+  setenv("HOME", tmp_home, 1);
+  free(tmp_home);
 
   /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
-  sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
-  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
+  res = asprintf(&tmp_file_directory, "%s.dir", GlobalTempFile);
+  if (res == -1)
+  {
+    return ASPRINTF_MEM_ERROR;
+  }
+
+  res = asprintf(&delete_tmpdir_cmd, "rm -rf %s", tmp_file_directory);
+  if (res == -1)
+  {
+    free(tmp_file_directory);
+    return ASPRINTF_MEM_ERROR;
+  }
 
   command = GetVersionControlCommand(1);
 
@@ -558,26 +579,31 @@ int GetVersionControl()
     */
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    free(tmp_file_directory);
+    free(delete_tmpdir_cmd);
     return 1;
   }
 
-  snprintf(command,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, TempFileDirectory);
+  snprintf(command,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, tmp_file_directory);
+  free(tmp_file_directory);
   rc = system(command);
   if (rc != 0)
   {
-    systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    systemError(__LINE__, rc, command)
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
-    LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    LOG_FATAL("DeleteTempDirCmd is:%s\n", delete_tmpdir_cmd);
+    free(delete_tmpdir_cmd);
     return 1;
   }
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  rc_system = system(DeleteTempDirCmd);
-  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+  rc_system = system(delete_tmpdir_cmd);
+  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+  free(delete_tmpdir_cmd);
 
   return 0; // succeed to retrieve source
 }
