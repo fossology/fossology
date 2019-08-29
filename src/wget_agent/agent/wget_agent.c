@@ -297,6 +297,34 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
   return(Sin[i]=='\0');
 } /* TaintURL() */
 
+
+/**
+ * \brief Prepare directory for wget.
+ * \param TempFile
+ * \param TempFileDir
+ * \param TempFileDirectory
+ * \parblock
+ * Internal helper function for function GetURL 
+ * \endparblock
+ * \return destination for wget download or NULL
+ */
+char *PrepareWgetDest(char *TempFile, char *TempFileDir, char *TempFileDirectory)
+{
+  if (TempFile && TempFile[0])
+  {
+    /* Delete the temp file if it exists */
+    unlink(TempFile);
+    return TempFileDirectory;
+  }
+  else if(TempFileDir && TempFileDir[0])
+  {
+    return TempFileDir;
+  }
+    
+  return NULL;
+}
+
+
 /**
  * \brief Do the wget.
  * \param TempFile
@@ -376,23 +404,21 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     snprintf(no_proxy, MAXCMD-1, "-e no_proxy='%s'", GlobalProxy[3]);
   }
 
-  if (TempFile && TempFile[0])
-  {
-    /* Delete the temp file if it exists */
-    unlink(TempFile);
+  char *dest;
+
+  dest = PrepareWgetDest(TempFile, TempFileDir, TempFileDirectory);
+
+  if (dest) {
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
-        proxy, WgetArgs,TempFileDirectory,TaintedURL,GlobalParam, no_proxy);
-  }
-  else if(TempFileDir && TempFileDir[0])
-  {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
-        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam, no_proxy);
+        proxy, WgetArgs, dest, TaintedURL, GlobalParam, no_proxy);
   }
   else
   {
     snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
-        proxy, WgetArgs,TaintedURL, GlobalParam, no_proxy);
+        proxy, WgetArgs, TaintedURL, GlobalParam, no_proxy);
   }
+
+
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf;
      /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -P
