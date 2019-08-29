@@ -527,7 +527,6 @@ int GetVersionControl()
 
   int rc = 0;
   int resethome = 0; // 0: default; 1: home is null before setting, should rollback
-  int rc_system =0;
   char *homeenv = NULL;
   int res;
 
@@ -579,8 +578,8 @@ int GetVersionControl()
     */
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(delete_tmpdir_cmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    rc = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
     free(tmp_file_directory);
     free(delete_tmpdir_cmd);
     return 1;
@@ -593,16 +592,16 @@ int GetVersionControl()
   {
     systemError(__LINE__, rc, command)
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(delete_tmpdir_cmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    rc = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
     LOG_FATAL("DeleteTempDirCmd is:%s\n", delete_tmpdir_cmd);
     free(delete_tmpdir_cmd);
     return 1;
   }
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  rc_system = system(delete_tmpdir_cmd);
-  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+  rc = system(delete_tmpdir_cmd);
+  if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
   free(delete_tmpdir_cmd);
 
   return 0; // succeed to retrieve source
