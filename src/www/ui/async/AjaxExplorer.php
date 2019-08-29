@@ -64,7 +64,6 @@ class AjaxExplorer extends DefaultPlugin
   /** @var array [uploadtree_id]=>cnt */
   private $filesToBeCleared;
   /** @var array */
-  
   protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O', 'atarashiWrapper' => 'A');
 
   public function __construct()

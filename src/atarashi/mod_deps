@@ -113,7 +113,7 @@ if [[ $RUNTIME ]]; then
     *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
   esac ;;
   pip3 install --upgrade pip \
-  pip3 install -i https://test.pypi.org/simple/ atarashi
+  pip3 install atarashi
 fi
 
 #######################################################################
