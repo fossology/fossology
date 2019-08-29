@@ -648,5 +648,3 @@ class ui_spasht extends FO_Plugin
 
 $NewPlugin = new ui_spasht;
 $NewPlugin->Initialize();
-
-?>
