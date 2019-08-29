@@ -23,11 +23,6 @@
 #include "regex.h"
 #include "sha2.h"
 
-#define NEW_SHA256
-#ifdef NEW_SHA256
-#include "sha2.h"
-#endif
-
 /**
  * \brief File mode BITS
  */
