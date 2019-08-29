@@ -117,14 +117,14 @@ void DBLoadGold()
     SafeExit(ASPRINTF_MEM_ERROR);
   }
 
-  FILE* file = popen(cmd, "r");
-
   if (!Fin)
   {
     LOG_FATAL("upload %ld Unable to open temp file %s from %s",
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(1);
   }
+  
+  FILE* file = popen(cmd, "r");
 
   if (!file)
   {
