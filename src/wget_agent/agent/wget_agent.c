@@ -25,6 +25,7 @@
 #define _GNU_SOURCE           // for asprintf
 
 #define ASPRINTF_MEM_ERROR  88
+#define ASPRINTF_MEM_ERROR_LOG LOG_FATAL("Not enough memory for asprintf before line %d", __LINE__)
 
 #include "wget_agent.h"
 
@@ -368,7 +369,7 @@ char *PrepareWgetDest(char *TempFile, char *TempFileDir, char *TempFileDirectory
  */
 int GetURL(char *TempFile, char *URL, char *TempFileDir)
 {
-  char CMD[MAXCMD];
+  char *cmd;
   char TaintedURL[MAXCMD];
   char TempFileDirectory[MAXCMD];
   char DeleteTempDirCmd[MAXCMD];
@@ -393,7 +394,6 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     SafeExit(10);
   }
 
-  memset(CMD,'\0',MAXCMD);
   /*
    Wget options:
    --progress=dot :: display a new line as it progresses.
@@ -435,19 +435,25 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
 
   char *dest;
+  int res;
 
   dest = PrepareWgetDest(TempFile, TempFileDir, TempFileDirectory);
 
   if (dest) {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
+    res = asprintf(&cmd," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
         proxy, WgetArgs, dest, TaintedURL, GlobalParam, no_proxy);
   }
   else
   {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
+    res = asprintf(&cmd," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
         proxy, WgetArgs, TaintedURL, GlobalParam, no_proxy);
   }
 
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    SafeExit(ASPRINTF_MEM_ERROR);
+  }
 
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf;
@@ -455,12 +461,12 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
      '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
-  LOG_VERBOSE0("CMD: %s", CMD);
-  rc = system(CMD);
+  LOG_VERBOSE0("CMD: %s", cmd);
+  rc = system(cmd);
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
-    LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
+    LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),cmd);
     unlink(GlobalTempFile);
     rc_system = system(DeleteTempDirCmd);
     if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
@@ -486,53 +492,80 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
     if (!stat(TempFilePath, &sb))
     {
-      memset(CMD,'\0',MAXCMD);
       if (S_ISDIR(sb.st_mode))
       {
-        snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
-        rc_system = system(CMD); // delete all empty directories downloaded
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
-        memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
+        res = asprintf(&cmd, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
+        rc_system = system(cmd); // delete all empty directories downloaded
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, cmd)
+        free(cmd);
+
+        res = asprintf(&cmd, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
       }
       else
       {
-        snprintf(CMD,MAXCMD-1, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
+        res = asprintf(&cmd, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
       }
-      rc_system = system(CMD);
+      
+      rc_system = system(cmd);
       if (rc_system != 0)
       {
-        systemError(__LINE__, rc_system, CMD)
+        systemError(__LINE__, rc_system, cmd)
+        free(cmd);
         unlink(GlobalTempFile);
         rc_system = system(DeleteTempDirCmd);
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
+
     }
     else
     {
-      memset(CMD,'\0',MAXCMD);
-      snprintf(CMD,MAXCMD-1, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile);
-      rc_system = system(CMD);
+      res = asprintf(&cmd, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile);
+      if (res == -1)
+      {
+        ASPRINTF_MEM_ERROR_LOG;
+        SafeExit(ASPRINTF_MEM_ERROR);
+      }
+      rc_system = system(cmd);
       if (rc_system != 0)
       {
-        systemError(__LINE__, rc_system, CMD)
+        systemError(__LINE__, rc_system, cmd)
+        free(cmd);
         unlink(GlobalTempFile);
         rc_system = system(DeleteTempDirCmd);
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
+
     }
   }
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
   {
-    LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
+    LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, cmd);
+    free(cmd);
     unlink(GlobalTempFile);
     rc_system = system(DeleteTempDirCmd);
     if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
     SafeExit(15);
   }
+  
+  free(cmd);
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
   rc_system = system(DeleteTempDirCmd);
