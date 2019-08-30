@@ -47,19 +47,20 @@ typedef struct stat stat_t;
 
 #include "../../ununpack/agent/checksum.h"
 
-#define MAXCMD  2048
+#define URLMAX   3072
+#define STRMAX   2048
 #define FILEPATH 2048
 
-extern char SQL[MAXCMD];
+extern char SQL[STRMAX];
 
 /* for the DB */
 extern PGconn *pgConn;
 /* input for this system */
 extern long GlobalUploadKey;
-extern char GlobalTempFile[MAXCMD];
-extern char GlobalURL[MAXCMD];
-extern char GlobalParam[MAXCMD];
-extern char GlobalType[MAXCMD];
+extern char GlobalTempFile[STRMAX];
+extern char GlobalURL[URLMAX];
+extern char GlobalParam[STRMAX];
+extern char GlobalType[STRMAX];
 extern int GlobalImportGold; /* set to 0 to not store file in gold repository */
 extern gid_t ForceGroup;
 

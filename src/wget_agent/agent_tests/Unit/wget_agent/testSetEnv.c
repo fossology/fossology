@@ -36,9 +36,9 @@ static char TempFileDir[MAX_LENGTH];
 int  SetEnvInit()
 {
   GlobalUploadKey = -1;
-  memset(GlobalTempFile, 0, MAXCMD);
-  memset(GlobalURL, 0, MAXCMD);
-  memset(GlobalParam, 0, MAXCMD);
+  memset(GlobalTempFile, 0, STRMAX);
+  memset(GlobalURL, 0, URLMAX);
+  memset(GlobalParam, 0, STRMAX);
   return 0;
 }
 
@@ -48,9 +48,9 @@ int  SetEnvInit()
 int  SetEnvClean()
 {
   GlobalUploadKey = -1;
-  memset(GlobalTempFile, 0, MAXCMD);
-  memset(GlobalURL, 0, MAXCMD);
-  memset(GlobalParam, 0, MAXCMD);
+  memset(GlobalTempFile, 0, STRMAX);
+  memset(GlobalURL, 0, URLMAX);
+  memset(GlobalParam, 0, STRMAX);
   return 0;
 }
 /**
