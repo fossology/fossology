@@ -482,8 +482,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   /* Run from scheduler! store /srv/fossology/repository/localhost/wget/wget.xxx.dir/<files|directories> to one temp file */
   if (TempFile && TempFile[0])
   {
-    char TempFilePath[MAXCMD];
-    memset(TempFilePath,'\0',MAXCMD);
+    char* tmpfile_path;
     /* for one url http://a.org/test.deb, TempFilePath should be /srv/fossology/repository/localhost/wget/wget.xxx.dir/a.org/test.deb */
     int Position = GetPosition(TaintedURL);
     if (0 == Position)
@@ -495,16 +494,23 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       free(delete_tmpdir_cmd);
       SafeExit(26);
     }
-    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
+    res = asprintf(&tmpfile_path, "%s/%s", TempFileDirectory, TaintedURL + Position);
+    if (res == -1)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      free(delete_tmpdir_cmd);
+      SafeExit(ASPRINTF_MEM_ERROR);
+    }
 
-    if (!stat(TempFilePath, &sb))
+    if (!stat(tmpfile_path, &sb))
     {
       if (S_ISDIR(sb.st_mode))
       {
-        res = asprintf(&cmd, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
+        res = asprintf(&cmd, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", tmpfile_path);
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
           free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
@@ -512,25 +518,29 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, cmd)
         free(cmd);
 
-        res = asprintf(&cmd, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
+        res = asprintf(&cmd, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, tmpfile_path);
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
           free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
       }
       else
       {
-        res = asprintf(&cmd, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
+        res = asprintf(&cmd, "mv '%s' '%s' 2>&1", tmpfile_path, TempFile);
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
           free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
       }
       
+      free(tmpfile_path);
+
       rc_system = system(cmd);
       if (rc_system != 0)
       {
