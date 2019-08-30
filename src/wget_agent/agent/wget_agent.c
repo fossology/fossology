@@ -372,15 +372,20 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   char *cmd;
   char TaintedURL[MAXCMD];
   char TempFileDirectory[MAXCMD];
-  char DeleteTempDirCmd[MAXCMD];
+  char *delete_tmpdir_cmd;
   int rc;
+  int res;
 
   memset(TempFileDirectory,'\0',MAXCMD);
-  memset(DeleteTempDirCmd,'\0',MAXCMD);
 
   /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", TempFile);
-  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
+  res = asprintf(&delete_tmpdir_cmd, "rm -rf %s", TempFileDirectory);
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    SafeExit(ASPRINTF_MEM_ERROR);
+  }
 #if 1
   char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
@@ -435,7 +440,6 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   }
 
   char *dest;
-  int res;
 
   dest = PrepareWgetDest(TempFile, TempFileDir, TempFileDirectory);
 
@@ -452,6 +456,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   if (res == -1)
   {
     ASPRINTF_MEM_ERROR_LOG;
+    free(delete_tmpdir_cmd);
     SafeExit(ASPRINTF_MEM_ERROR);
   }
 
@@ -468,8 +473,9 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   {
     LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),cmd);
     unlink(GlobalTempFile);
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    free(delete_tmpdir_cmd);
     SafeExit(12);
   }
 
@@ -484,8 +490,9 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     {
       LOG_FATAL("path %s is not http://, https://, or ftp://", TaintedURL);
       unlink(GlobalTempFile);
-      rc_system = system(DeleteTempDirCmd);
-      if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+      rc_system = system(delete_tmpdir_cmd);
+      if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+      free(delete_tmpdir_cmd);
       SafeExit(26);
     }
     snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
@@ -498,6 +505,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
         rc_system = system(cmd); // delete all empty directories downloaded
@@ -508,6 +516,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
       }
@@ -517,6 +526,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         if (res == -1)
         {
           ASPRINTF_MEM_ERROR_LOG;
+          free(delete_tmpdir_cmd);
           SafeExit(ASPRINTF_MEM_ERROR);
         }
       }
@@ -527,8 +537,9 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         systemError(__LINE__, rc_system, cmd)
         free(cmd);
         unlink(GlobalTempFile);
-        rc_system = system(DeleteTempDirCmd);
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+        rc_system = system(delete_tmpdir_cmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+        free(delete_tmpdir_cmd);
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
 
@@ -539,6 +550,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
       if (res == -1)
       {
         ASPRINTF_MEM_ERROR_LOG;
+        free(delete_tmpdir_cmd);
         SafeExit(ASPRINTF_MEM_ERROR);
       }
       rc_system = system(cmd);
@@ -547,8 +559,9 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
         systemError(__LINE__, rc_system, cmd)
         free(cmd);
         unlink(GlobalTempFile);
-        rc_system = system(DeleteTempDirCmd);
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+        rc_system = system(delete_tmpdir_cmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+        free(delete_tmpdir_cmd);
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
 
@@ -560,17 +573,21 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, cmd);
     free(cmd);
     unlink(GlobalTempFile);
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    free(delete_tmpdir_cmd);
     SafeExit(15);
   }
   
   free(cmd);
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  rc_system = system(DeleteTempDirCmd);
-  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+  rc_system = system(delete_tmpdir_cmd);
+  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
+
+  free(delete_tmpdir_cmd);
+
   return(0);
 } /* GetURL() */
 
