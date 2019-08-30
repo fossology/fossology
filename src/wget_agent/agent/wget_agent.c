@@ -839,60 +839,92 @@ char *PathCheck(char *DirPath)
  */
 int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 {
-  char CMD[MAXCMD] = {0};
+  char *cmd;
   int rc_system = 0;
+  int res;
 
-  snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
-  rc_system = system(CMD);
-  if (!WIFEXITED(rc_system))
+  res = asprintf(&cmd , "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
+  if (res == -1)
   {
-    LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
-    systemError(__LINE__, rc_system, CMD)
+    ASPRINTF_MEM_ERROR_LOG;
     return 0;
   }
 
+  rc_system = system(cmd);
+  if (!WIFEXITED(rc_system))
+  {
+    LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
+    systemError(__LINE__, rc_system, cmd)
+    free(cmd);
+    return 0;
+  }
+  free(cmd);
+
   if (S_ISDIR(Status.st_mode)) /* directory? */
   {
-    memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
-    rc_system = system(CMD);
+    res = asprintf(&cmd, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
+    if (res == -1)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      return 0;
+    }
+    rc_system = system(cmd);
     if (!WIFEXITED(rc_system))
     {
-      systemError(__LINE__, rc_system, CMD)
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
       return 0;
     }
+    free(cmd);
   } else if (strstr(Path, "*"))  // wildcards
   {
-    memset(CMD, '\0', MAXCMD);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r %s '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
-    rc_system = system(CMD);
-    if (rc_system != 0)
+    res = asprintf(&cmd, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r %s '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    if (res == -1)
     {
-      systemError(__LINE__, rc_system, CMD)
+      ASPRINTF_MEM_ERROR_LOG;
       return 0;
     }
-    memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
-    rc_system = system(CMD);
+    rc_system = system(cmd);
     if (rc_system != 0)
     {
-      systemError(__LINE__, rc_system, CMD)
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
       return 0;
     }
+    free(cmd);
+    res = asprintf(&cmd, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
+    if (res == -1)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      return 0;
+    }
+    rc_system = system(cmd);
+    if (rc_system != 0)
+    {
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
+      return 0;
+    }
+    free(cmd);
   } else if(S_ISREG(Status.st_mode)) /* regular file? */
   {
-    memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
-    rc_system = system(CMD);
-    if (rc_system != 0)
+    res = asprintf(&cmd, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
+    if (res == -1)
     {
-      systemError(__LINE__, rc_system, CMD)
+      ASPRINTF_MEM_ERROR_LOG;
       return 0;
     }
-  }
-  else return 0; /* neither a directory nor a regular file */
+    rc_system = system(cmd);
+    if (rc_system != 0)
+    {
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
+      return 0;
+    }
+    free(cmd);
+  } else return 0; /* neither a directory nor a regular file */
 
   return 1;
 }
