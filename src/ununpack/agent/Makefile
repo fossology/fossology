@@ -23,12 +23,12 @@ include $(VARS)
 LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic
 EXE = departition ununpack
 
-CHKHDR = checksum.h md5.h sha1.h
+CHKHDR = checksum.h md5.h sha1.h sha2.h
 CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
 UUHDR = ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
 UUSRC = $(UUHDR:%.h=%.c)
 
-OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o ununpack-ar.o ununpack-disk.o utils.o
+OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o sha2.o ununpack-ar.o ununpack-disk.o utils.o
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE)
