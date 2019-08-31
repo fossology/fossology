@@ -68,7 +68,7 @@ class AtarashiScheduledTest extends \PHPUnit\Framework\TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $agentName = "atarashi";
+    $agentName = "atarashiWrapper";
 
     $agentDir = dirname(dirname(__DIR__));
     $execDir = "$agentDir/agent";
@@ -148,13 +148,13 @@ class AtarashiScheduledTest extends \PHPUnit\Framework\TestCase
       switch ($licenseMatch->getFileId()) {
         case 7:
         case 4:
-          $expectedLicense = "GPL-3.0+";
+          $expectedLicense = "GPL-3.0-only";
           break;
         case 3:
-          $expectedLicense = "UnclassifiedLicense";
+          $expectedLicense = "BSD-style";
           break;
         default:
-          $expectedLicense = "No_license_found";
+          $expectedLicense = "BSD-style";
             break;
       }
 
@@ -162,7 +162,7 @@ class AtarashiScheduledTest extends \PHPUnit\Framework\TestCase
 
       /** @var AgentRef */
       $agentRef = $licenseMatch->getAgentRef();
-      $this->assertEquals($agentRef->getAgentName(), "atarashi");
+      $this->assertEquals($agentRef->getAgentName(), "atarashiWrapper");
     }
   }
 
