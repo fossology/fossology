@@ -1,5 +1,61 @@
 # Changelog of FOSSology
 
+### 3.6.0 (Sep 10th 2019)
+
+After two release candidates, making fixes for migration tests, unified report and
+load issues with tree-view, FOSSology is stable enough for a new release. The main features
+of the 3.6.0 release can be found under
+[RC1](https://github.com/fossology/fossology/releases/tag/3.6.0-rc1). Particular
+corrections after RC1 can be found under
+[RC2](https://github.com/fossology/fossology/releases/tag/3.6.0-rc2).
+
+Few intresting features in this release are: 
+
+* A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
+* Improved handling of manually added copyright statements to files
+* Improvements to the SPDX reporting, for example output also of comments
+* Calculating the SHA256 values for files from now on, because that is going to be used for integration of, for example, Software Heritage or Clearly defined
+
+#### Credits to 3.6.0
+
+From the git commit history, we have following contributors since 3.5.0:
+
+> @andi8086 <andreas.reichel@tngtech.com>,
+>
+> @ag4ums <anupam.ghosh@siemens.com>,
+>
+> @hastagAB <classicayush@gmail.com>,
+>
+> @chienphamvu <chienphamvu@gmail.com>,
+>
+> @ChristopheRequillart <christophe.requillart@atos.net>,
+>
+> @GMishx <mishra.gaurav@siemens.com>,
+>
+> @maxhbr <maximilian.huber@tngtech.com>,
+>
+> @mcjaeger <michael.c.jaeger@siemens.com>,
+>
+> @NicolasToussaint <nicolas1.toussaint@orange.com>,
+>
+> @PeterDaveHello <hsu@peterdavehello.org>,
+>
+> @rlintu <raino.lintulampi@bittium.com>,
+>
+> @sandipbhuyan <sandipbhuyan@gmail.com>,
+>
+> @shaheemazmalmmd <shaheem.azmal@siemens.com>,
+>
+> @tiegz <tieg@tidelift.com>,
+>
+> @vivekaindia <vvksindia@gmail.com>
+
+#### Corrections
+
+* `7a17bc7b6` fix(src/ununpack/agent/utils.c) update SHA256 of existing entries, patch proposed by @fogninid.
+* `bdd004e43` fix(src/ununpack/agent/utils.c) remove unused #define
+* `ef4820fcd` fix(ajaxExplorer): Reduce view creation
+* `f16c0eecb` fix(importReport): update easyRDF to a stable version
 
 ### 3.6.0-RC2 (Aug 24th 2019)
 
