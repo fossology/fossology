@@ -10,7 +10,7 @@
         "without any warranty."
     ],
     "require" : {
-        "easyrdf/easyrdf" : "0.9.1",
+        "easyrdf/easyrdf" : "0.9.0",
         "ext-gettext": "*",
         "ext-mbstring": "*",
         "ext-json" : "*",
