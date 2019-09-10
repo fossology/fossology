@@ -1,7 +1,8 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
- Author: Daniele Fognini, Johannes Najjar, Steffen Weber
-
+ Copyright (C) 2014-2019, Siemens AG
+ Authors: Daniele Fognini, Johannes Najjar, Steffen Weber,
+          Andreas J. Reichel
+ 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -234,24 +235,35 @@ function removeMainLicense(uploadId,licenseId) {
       .fail(failed);
   }
 }
+
 function openTextModel(uploadTreeId, licenseId, what, type) {
+  var dialogObj = textModal;
+  var refTextId = "#referenceText"
+
   if(type === undefined) {
     type = 0;
   }
+
+  if (what == 3) {
+    // clicked to add inside the Acknowledgement column
+    dialogObj = textAckInputModal;
+    refTextId += "Ack";
+  }
+
   if(type == 0) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
-    $("#referenceText").val(clearingsForSingleFile);
+    $(refTextId).val(clearingsForSingleFile);
     if (what == 4 || what == "comment") {
       createDropDown($("#textModal > form > div"), $("#referenceText"));
     } else {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    dialogObj.plainModal('open');
   } else {
-    $("#referenceText").val($("#"+licenseId+what+type).attr('title'));
+    $(refTextId).val($("#"+licenseId+what+type).attr('title'));
     whatCol = what;
     whatLicId = licenseId;
     if (what == 4 || what == "comment") {
@@ -260,7 +272,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    dialogObj.plainModal('open');
   }
   whatType = type;
 }
@@ -269,23 +281,77 @@ function closeTextModal() {
   textModal.plainModal('close');
 }
 
-function submitTextModal(){
+function ApplyNoticeText(idx)
+{
+  var NoticeText = noticeSelectTable.rows(idx).data()[0][2];
+  var textArea = $("#referenceTextAck");
+
+  var cursorPos = textArea.prop('selectionStart');
+  var v = textArea.val();
+  var textBefore = v.substring(0,  cursorPos);
+  var textAfter  = v.substring(cursorPos, v.length);
+
+  textArea.val(textBefore + NoticeText + textAfter);
+}
+
+function UseThisNoticeButton(idx)
+{
+  return "<input type=button onClick='ApplyNoticeText("+idx+")' value='Use this' />";
+}
+
+function doHandleNoticeFiles(response) {
+   noticeSelectTable.clear();
+
+  $.each(response, function(idx, el) {
+    if (el.ufile_name !== undefined && el.contents !== undefined) {;
+      noticeSelectTable.row.add([ idx, el.ufile_name, el.contents, UseThisNoticeButton(idx) ]);
+      noticeSelectTable.draw();
+    }
+  });
+}
+
+function selectNoticeFile() {
+  var GetNoticeFilesUrl = "?mod=ajax-notice-files&do=search";
+
+  noticeSelectTableDiv.show();
+  $("#noticeFilesButton").hide();
+
+  $.ajax({
+    type: "POST",
+    url: GetNoticeFilesUrl,
+    data: {
+      "upload": uploadId
+    },
+    success: (response) => doHandleNoticeFiles(response),
+    failure: () => alert('Ajax: Could not get notice files.')
+  });
+}
+
+function submitTextModal(fromAckColumn){
+  var dialogObj = textModal;
+  var refTextId = "#referenceText"
+  var ConcludeLicenseUrl = "?mod=conclude-license&do=updateClearings";
+  if (fromAckColumn){
+    // called from Acknowledgment Text Dialog
+    dialogObj = textAckInputModal;
+    refTextId += "Ack";
+  }
   if(whatType == 0) {
     var post_data = {
       "id": idLicUploadTree,
       "columnId": whatCol,
-      "value": $("#referenceText").val()
+      "value": $(refTextId).val()
     };
     $.ajax({
       type: "POST",
-      url: "?mod=conclude-license&do=updateClearings",
+      url: ConcludeLicenseUrl,
       data: post_data,
-      success: doOnSuccess
+      success: () => doOnSuccess(dialogObj)
     });
   } else {
-    textModal.plainModal('close');
-    $("#"+ whatLicId + whatCol +"Bulk").attr('title', $("#referenceText").val());
-    referenceText = $("#referenceText").val().trim();
+    dialogObj.plainModal('close');
+    $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
+    referenceText = $(refTextId).val().trim();
     if(referenceText !== null && referenceText !== '') {
       $("#"+ whatLicId + whatCol + whatType).html($("#"+ whatLicId + whatCol + whatType).attr('title').slice(0, 10) + "...");
     } else {
@@ -314,8 +380,16 @@ function checkIfEligibleForGlobalDecision()
   }
 }
 
-function doOnSuccess() {
-  textModal.plainModal('close');
+function submitAckInputModal(){
+  submitTextModal(true)
+}
+
+function closeAckInputModal(){
+  textAckInputModal.plainModal('close');
+}
+
+function doOnSuccess(dialogObj) {
+  dialogObj.plainModal('close');
   $('#decTypeSet').addClass('decTypeWip');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
@@ -328,6 +402,20 @@ $(document).ready(function () {
       $(this).css({'width':'','height':''});
     }
   });
+  textAckInputModal = $('#textAckInputModal').plainModal();
+  $('#textAckInputModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
+    }
+  });
+
+  noticeSelectTable = $('#noticeSelectTable').DataTable({
+    scrollY: "128px",
+    paging: false,
+    data: []
+  });
+  noticeSelectTableDiv = $('#noticeSelectTableDiv');
+  noticeSelectTableDiv.hide();
 });
 
 function createDropDown(element, textBox) {
