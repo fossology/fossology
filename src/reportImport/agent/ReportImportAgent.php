@@ -101,7 +101,7 @@ class ReportImportAgent extends Agent
       array_key_exists($longArgsKey, $args)){
       echo "DEBUG: unrefined \$longArgs are: ".$args[$longArgsKey]."\n";
       $chunks = explode(" --", $args[$longArgsKey]);
-      if(sizeof($chunks > 1))
+      if(sizeof($chunks) > 1)
       {
         $args[$longArgsKey] = $chunks[0];
         foreach(array_slice($chunks, 1) as $chunk)
