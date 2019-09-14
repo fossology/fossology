@@ -14,7 +14,7 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.2
+  version: 1.0.3
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
@@ -378,11 +378,28 @@ paths:
             required: false
             schema:
               type: integer
-              minimum: 0
+              minimum: 1
             in: header
+          - name: page
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+            in: header
+          - name: upload
+            required: false
+            schema:
+              type: integer
+            in: query
+            description: Return jobs for the given upload id only
         responses:
           '200':
             description: OK
+            headers:
+              X-Total-Pages:
+                description: Total number of pages which can be generated based on limit
+                schema:
+                  type: integer
             content:
               application/json:
                 schema:
@@ -755,6 +772,17 @@ components:
         groupId:
           type: integer
           description: Group under which the job was scheduled
+        eta:
+          type: integer
+          description: ETA of job to finish in seconds
+        status:
+          type: string
+          enum:
+            - Completed
+            - Failed
+            - Queued
+            - Processing
+          description: Denotes the current status of the job in the queue
     Info:
       type: object
       properties:
@@ -826,6 +854,9 @@ components:
         nomos:
           type: boolean
           description: Should Nomos Analysis be run on this upload.
+        ojo:
+          type: boolean
+          description: Should OJO Analysis be run on this upload.
         package:
           type: boolean
           description: Should Package Analysis be run on this upload.

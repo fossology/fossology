@@ -191,7 +191,8 @@ without any warranty.
             <argument type="service" id="dao.folder"/>
             <argument type="service" id="helper.dbHelper"/>
             <argument type="service" id="helper.authHelper"/>
-            <argument type="service" id="logger"/>
+            <argument type="service" id="dao.job"/>
+            <argument type="service" id="dao.show_jobs"/>
         </service>
     </services>
 </container>

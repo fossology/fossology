@@ -30,6 +30,8 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\Lib\Plugin\Plugin;
+use Fossology\Lib\Dao\JobDao;
+use Fossology\Lib\Dao\ShowJobsDao;
 
 /**
  * @class RestHelper
@@ -78,6 +80,16 @@ class RestHelper
    */
   private $userDao;
   /**
+   * @var JobDao $jobDao
+   * Job DAO object
+   */
+  private $jobDao;
+  /**
+   * @var ShowJobsDao $showJobDao
+   * Show job DAO object
+   */
+  private $showJobDao;
+  /**
    * @var AuthHelper $authHelper
    * Auth helper to provide authentication
    */
@@ -90,7 +102,8 @@ class RestHelper
    */
   public function __construct(UploadPermissionDao $uploadPermissionDao,
     UploadDao $uploadDao, UserDao $userDao, FolderDao $folderDao,
-    DbHelper $dbHelper, AuthHelper $authHelper)
+    DbHelper $dbHelper, AuthHelper $authHelper, JobDao $jobDao,
+    ShowJobsDao $showJobDao)
   {
     $this->uploadPermissionDao = $uploadPermissionDao;
     $this->uploadDao = $uploadDao;
@@ -98,6 +111,8 @@ class RestHelper
     $this->folderDao = $folderDao;
     $this->dbHelper = $dbHelper;
     $this->authHelper = $authHelper;
+    $this->jobDao = $jobDao;
+    $this->showJobDao = $showJobDao;
   }
 
   /**
@@ -142,7 +157,6 @@ class RestHelper
     return $this->folderDao;
   }
 
-
   /**
    * @return UploadPermissionDao
    */
@@ -165,6 +179,22 @@ class RestHelper
   public function getDbHelper()
   {
     return $this->dbHelper;
+  }
+
+  /**
+   * @return JobDao
+   */
+  public function getJobDao()
+  {
+    return $this->jobDao;
+  }
+
+  /**
+   * @return ShowJobsDao
+   */
+  public function getShowJobDao()
+  {
+    return $this->showJobDao;
   }
 
   /**
