@@ -27,10 +27,10 @@ spasht:
 	ln -sf $(FOCLIDIR)/fo_wrapper.php $(WRAP)
 
 install: all
-	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
+	$(INSTALL_DATA) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
 	for file in $(COPY); do \
 		echo "installing $$file"; \
-		$(INSTALL_PROGRAM) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
+		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
 	done
 	for file in $(WRAP); do \
 		echo "Making wrapper for $$file"; \
