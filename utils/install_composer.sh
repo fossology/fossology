@@ -7,9 +7,9 @@
 ## Configuration:
 # commit hash of https://github.com/composer/getcomposer.org
 
-current_github_hash="a488222dad0b6eaaa211ed9a21f016bb706b2980"
+current_github_hash="ba13e3fc70f1c66250d1ea7ea4911d593aa1dba5"
 # version of composer (must be present in https://github.com/composer/getcomposer.org/tree/${current_github_hash}/web/download)
-version="1.4.2"
+version="1.9.0"
 
 ##
 ################################################################################
