@@ -1,0 +1,34 @@
+{% extends "include/base.html.twig" %}
+
+{% block styles %}
+  {{ parent() }}
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/spasht.css"/>
+{% endblock %}
+
+{% block content %}
+  <div class="row" id="spashtStart">
+    <div class="col" ></div>
+    <div class="col-md-4" id="searchBoxCover">
+      {% include 'agent_spasht_search.html.twig' %}
+    </div>
+    <div class="col">
+    </div>
+  </div>
+  <div class="row" id="spashtStart">
+    <div class="col-md-4">
+      {% if advanceSearch == "checked" %}
+          {% include 'agent_spasht_advanceSearch_form.html.twig' %}
+      {% else %}
+        {% include 'show_definitions.html.twig' %}
+      {% endif %}
+    </div>
+    <div class="col">
+    </div>
+  </div>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+
+{% endblock %}

@@ -24,7 +24,8 @@
         "symfony/http-foundation" : "v3.3.18",
         "symfony/dependency-injection" : "v3.3.18",
         "twig/twig" : "v1.38.4",
-        "twig/extensions" : "v1.5.4"
+        "twig/extensions" : "v1.5.4",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "require-dev" : {
         "doctrine/instantiator" : "1.0.5",

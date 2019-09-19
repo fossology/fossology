@@ -29,6 +29,7 @@ DIRS = \
 	unifiedreport \
 	reuser \
 	scheduler \
+	spasht \
 	spdx2 \
 	reportImport \
 	ununpack \
