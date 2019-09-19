@@ -43,6 +43,10 @@ global $container;
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 
+/* Load UI templates */
+$loader = $container->get('twig.loader');
+$loader->addPath(dirname(__FILE__).'/template');
+
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
 ConfigInit($SYSCONFDIR, $SysConf);

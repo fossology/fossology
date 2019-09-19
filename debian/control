@@ -62,7 +62,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-decider, apache2,
+Depends: fossology-common, apache2,
  libapache2-mod-php5|libapache2-mod-php7.0|libapache2-mod-php7.2|libapache2-mod-php7.3,
  ${misc:Depends}
 Recommends: fossology-db
@@ -234,7 +234,7 @@ Description: architecture for analyzing software, monk
 
 Package: fossology-monkbulk
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, monk bulk scanning
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -270,7 +270,7 @@ Description: architecture for analyzing software, ojo
 
 Package: fossology-decider
 Architecture: any
-Depends: fossology-common, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${misc:Depends}
 Description: architecture for analyzing software, decider
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
