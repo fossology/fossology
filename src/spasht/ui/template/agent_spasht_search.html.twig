@@ -1,0 +1,5 @@
+<form id="searchForm" method="post" action="">
+  Search: <input type="text" name="patternName" id="searchBox" value={{ uploadName }} size="30"/>
+  <input type="submit" value="submit"/> <br><br>
+  Advance Search: <input type="checkbox" name="advanceSearch" value="advanceSearch" onchange="document.getElementById('searchForm').submit()" {{ advanceSearch }}>
+</form>

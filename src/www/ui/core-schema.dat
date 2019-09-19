@@ -1379,6 +1379,27 @@
   $Schema["TABLE"]["reportgen"]["filepath"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"filepath\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_pk\" int4 DEFAULT nextval('spasht_pk_seq'::regclass)";
+  $Schema["TABLE"]["spasht"]["spasht_pk"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_pk\" SET NOT NULL, ALTER COLUMN \"spasht_pk\" SET DEFAULT nextval('spasht_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_revision\" text";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_revision\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_name"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_name"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_name\" text";
+  $Schema["TABLE"]["spasht"]["spasht_name"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_type"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_type"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_type\" text";
+  $Schema["TABLE"]["spasht"]["spasht_type"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_type\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_provider\" text";
+  $Schema["TABLE"]["spasht"]["spasht_provider"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_provider\" DROP NOT NULL";
+
+
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"sysconfig_pk\" int4 DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"sysconfig_pk\" SET NOT NULL, ALTER COLUMN \"sysconfig_pk\" SET DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
@@ -1817,6 +1838,9 @@
 
   $Schema["SEQUENCE"]["package_package_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"package_package_pk_seq\"";
   $Schema["SEQUENCE"]["package_package_pk_seq"]["UPDATE"] = "SELECT setval('package_package_pk_seq',(SELECT greatest(1,max(package_pk)) val FROM package))";
+
+  $Schema["SEQUENCE"]["spasht_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"spasht_pk_seq\"";
+  $Schema["SEQUENCE"]["spasht_pk_seq"]["UPDATE"] = "SELECT setval('spasht_pk_seq',(SELECT greatest(1,max(spasht_pk)) val FROM spasht))";
 
   $Schema["SEQUENCE"]["upload_upload_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"upload_upload_pk_seq\"";
   $Schema["SEQUENCE"]["upload_upload_pk_seq"]["UPDATE"] = "SELECT setval('upload_upload_pk_seq',(SELECT greatest(1,max(upload_pk)) val FROM upload))";
