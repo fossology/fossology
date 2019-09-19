@@ -257,8 +257,8 @@ FUNCTION long get_rfpk(PGconn *pgConn, cacheroot_t *pcroot, char *rf_shortname)
 FUNCTION long add2license_ref(PGconn *pgConn, char *licenseName)
 {
     PGresult *result;
-    char  query[256];
-    char  insert[256];
+    char  query[MAXSQL];
+    char  insert[MAXSQL];
     char  escLicName[256];
     char *specialLicenseText;
     long rf_pk;
