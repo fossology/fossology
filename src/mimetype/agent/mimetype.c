@@ -158,8 +158,8 @@ int main(int argc, char *argv[])
   for(arg=optind; arg < argc; arg++)
   {
     Akey = -1;
-    memset(A,'\0',sizeof(A));
-    strncpy(A,argv[arg],sizeof(A));
+    strncpy(A,argv[arg],sizeof(A)-1);
+    A[sizeof(A)-1] = '\0';
     DBCheckMime(A);
   }
 
@@ -223,7 +223,8 @@ int main(int argc, char *argv[])
         for(i=0; i < pfile_count; i++)
         {
           Akey = atoi(PQgetvalue(result, i, 0));
-          strncpy(A, PQgetvalue(result, i, 1), sizeof(A));
+          strncpy(A, PQgetvalue(result, i, 1), sizeof(A)-1);
+          A[sizeof(A)-1] = '\0';
           if (Akey <= 0 || A[0]=='\0')
           {
             printf("ERROR: Data is in an unknown format.\n");
