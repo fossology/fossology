@@ -1,0 +1,60 @@
+<form method="post" action="">
+<TABLE>
+  <TR>
+    <TD>Name:</TD>
+    <TD>
+      <input type="text" name="name" value={{ uploadName }} />
+    </TD>
+  </TR>
+  <TR>
+    <TD>namespace:</TD>
+    <TD>
+      <input type="text" list="namespace" name="namespace" /></label>
+                <datalist id="namespace">
+                    {% for key in body_namespace %}
+                        <option value={{ key }}>
+                    {% endfor %}
+                </datalist>
+    </TD>
+  </TR>
+  <TR>
+    <TD>revision:</TD>
+    <TD>
+      <input type="text" list="revision" name="revision" /></label>
+                <datalist id="revision">
+                    {% for key in body_revision %}
+                        <option value={{ key }}>
+                    {% endfor %}
+                </datalist>
+    </TD>
+  </TR>
+  <TR>
+    <TD>type:</TD>
+    <TD>
+    <input type="text" list="type" name="type" /></label>
+                <datalist id="type">
+                    {% for key in body_type %}
+                        <option value={{ key }}>
+                    {% endfor %}
+                </datalist>
+    </TD>
+  </TR>
+  <TR>
+    <TD>provider:</TD>
+    <TD>
+    <input type="text" list="provider" name="provider" /></label>
+                <datalist id="provider">
+                    {% for key in body_provider %}
+                        <option value={{ key }}>
+                    {% endfor %}
+                </datalist>
+    </TD>
+  </TR>
+  <TR>
+    <TD>
+    <input type="submit" value="submit"/>
+    </TD>
+  </TR>
+</TABLE>
+
+</form>
