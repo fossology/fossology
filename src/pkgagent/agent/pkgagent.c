@@ -345,7 +345,8 @@ int ProcessUpload (long upload_pk)
      * */
     if (!strcasecmp(mimetype,"application/x-rpm")) {
       pi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile));
+      strncpy(pi->pFile, PQgetvalue(result, i, 1), sizeof(pi->pFile)-1);
+      pi->pFile[sizeof(pi->pFile)-1] = '\0';
       repFile = fo_RepMkPath("files", pi->pFile);
       if (!repFile) {
         LOG_FATAL("pfile %ld PkgAgent unable to open file %s",
@@ -363,7 +364,8 @@ int ProcessUpload (long upload_pk)
     }
     else if (!strcasecmp(mimetype, "application/x-debian-package")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile)-1);
+      dpi->pFile[sizeof(dpi->pFile)-1] = '\0';
       if (GetMetadataDebBinary(upload_pk, dpi) != -1){
         if (RecordMetadataDEB(dpi) != 0) continue;
       }
@@ -375,7 +377,8 @@ int ProcessUpload (long upload_pk)
     }
     else if (!strcasecmp(mimetype, "application/x-debian-source")){
       dpi->pFileFk = atoi(PQgetvalue(result, i, 0));
-      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile));
+      strncpy(dpi->pFile, PQgetvalue(result, i, 1), sizeof(dpi->pFile)-1);
+      dpi->pFile[sizeof(dpi->pFile)-1] = '\0';
       repFile = fo_RepMkPath("files", dpi->pFile);
       if (!repFile) {
         LOG_FATAL("pfile %ld PkgAgent unable to open file %s\n",
@@ -458,7 +461,8 @@ void ReadHeaderInfo(Header header, struct rpmpkginfo *pi)
         case RPMTAG_BUILDTIME:
           t = atol(msgstr);
           tp = &t;
-          strncpy(pi->buildDate,trim(asctime(gmtime((time_t*)tp))),sizeof(pi->buildDate));
+          strncpy(pi->buildDate,trim(asctime(gmtime((time_t*)tp))),sizeof(pi->buildDate)-1);
+          pi->buildDate[sizeof(pi->buildDate)-1] = '\0';
           break;
         case RPMTAG_VENDOR:
           EscapeString(msgstr, pi->vendor, sizeof(pi->vendor));
