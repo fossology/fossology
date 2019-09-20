@@ -67,9 +67,16 @@ class AdminGroupUsers extends DefaultPlugin
     }
 
     $gum_pk = intval($request->get('gum_pk'));
+    $text = "";
     if ($gum_pk) {
       $perm = intval($request->get('perm'));
-      $this->updateGUMPermission($gum_pk, $perm);
+      $atleastOneUserShouldBePart = $dbManager->getSingleRow("SELECT count(*) cnt FROM group_user_member WHERE group_fk = (SELECT group_fk FROM group_user_member WHERE group_user_member_pk = $1)",
+      array($gum_pk), $stmt = __METHOD__ . ".atleastOneUserShouldBePart");
+      if ($atleastOneUserShouldBePart['cnt'] <= 1) {
+         $text = _("Error: atleast one user should be part of a group.");
+      } else {
+        $this->updateGUMPermission($gum_pk, $perm);
+      }
       $groupMap = $userDao->getAdminGroupMap($userId,
         $_SESSION[Auth::USER_LEVEL]);
     }
@@ -137,6 +144,9 @@ class AdminGroupUsers extends DefaultPlugin
     }
 
     $vars['scripts'] = $scripts;
+    if (!empty($text)) {
+      $vars['message'] .= $text;
+    }
     return $this->render('admin_group_users.html.twig', $this->mergeWithDefault($vars));
   }
 
