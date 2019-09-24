@@ -21,7 +21,7 @@ Source:         PBSRC
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(id -u -n)
 Requires:       fossology-web fossology-scheduler fossology-ununpack fossology-copyright fossology-buckets fossology-mimetype fossology-delagent fossology-wgetagent fossology-decider fossology-spdx2 fossology-reuser
 #Recommends:		fossology-decider, fossology-spdx2, fossology-reuser, fossology-ninka
-BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,php-mbstring,php-xml,curl,PBBUILDDEP
+BuildRequires:  postgresql-devel >= 8.1.11,glib2-devel,libxml2,gcc,make,perl,rpm-devel,pcre-devel,openssl-devel,gcc-c++,php,boost-devel,php-phar,php-mbstring,php-xml,curl,jsoncpp-devel,libgomp-devel,json-c-devel,PBBUILDDEP
 Summary:        FOSSology is a license compliance analysis  tool
 
 #
@@ -291,19 +291,15 @@ cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 %files
 %defattr(-,root,root)
 # %doc ChangeLog # mcj todo not existing anymore, right?
-%doc COPYING COPYING.LGPL README.md install/INSTALL install/INSTALL.multi NOTICES CONTRIBUTING.md CHANGELOG.md
+%doc install/INSTALL install/INSTALL.multi NOTICES* *.md
 
 %files common
 %defattr(-,root,root)
 %config(noreplace) %{_sysconfdir}/cron.d/*
-%config(noreplace) %{_sysconfdir}/PBPROJ/Db.conf
-%config(noreplace) %{_sysconfdir}/PBPROJ/fossology.conf
-%config(noreplace) %{_sysconfdir}/PBPROJ/VERSION
-%config(noreplace) %{_sysconfdir}/PBPROJ/sampleheader.txt
-%config(noreplace) %{_sysconfdir}/PBPROJ/samplefooter.txt
-%dir %{_sysconfdir}/PBPROJ/mods-enabled
+%config(noreplace) %{_sysconfdir}/PBPROJ/*
 %dir %{_sysconfdir}/PBPROJ/conf
 %config(noreplace) %{_sysconfdir}/PBPROJ/conf/*
+%dir %{_sysconfdir}/PBPROJ/mods-enabled
 %dir %{_usr}/lib/PBPROJ
 %dir %{_datadir}/PBPROJ
 %{_usr}/lib/PBPROJ/*
@@ -317,6 +313,8 @@ cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 %{_datadir}/PBPROJ/composer.json
 %{_datadir}/PBPROJ/composer.lock
 %{_datadir}/PBPROJ/vendor/*
+%{_datadir}/PBPROJ/keyword/*
+%{_datadir}/PBPROJ/ojo/*
 
 %files unifiedreport
 %{_sysconfdir}/PBPROJ/mods-enabled/unifiedreport
@@ -327,8 +325,6 @@ cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 %files reportimport
 %{_sysconfdir}/PBPROJ/mods-enabled/reportImport
 %{_datadir}/PBPROJ/reportImport/*
-%{_datadir}/PBPROJ/reportImport/agent/*
-%{_datadir}/PBPROJ/reportImport/ui/*
 
 %files db
 %defattr(-,root,root)

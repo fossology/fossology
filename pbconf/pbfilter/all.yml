@@ -1,0 +1,64 @@
+---
+#
+# $Id$
+#
+# Filter for all files
+#
+#
+# PBREPO is replaced by the root URL to access the repository
+filter:
+  PBREALPKG: $pb->{'realpkg'}
+  PBTAG: $pb->{'tag'}
+  PBPGHBB: !!str ""
+  PBDESC: An open and modular architecture for analyzing software. Currently specializing on license detection.
+  PBPROJ: $pb->{'proj'}
+  PBPKG: $pb->{'pkg'}
+  PBVER: $pb->{'ver'}
+  PBREPO: $pb->{'repo'}
+  PBLOG: yes
+  PBURL: http://www.fossology.org
+  PBSTOP: stop 
+  PBREV: $pb->{'rev'}
+  PBDATE: $pb->{'date'}
+  PBEXTDIR: $pb->{'extdir'}
+  PBBUILDDEP: !!str ""
+  PBFEDORAD: !!str ""
+  PBSRC: src/%{srcname}-%{version}$pb->{'extdir'}.tar.gz
+  PBPACKAGER: $pb->{'packager'}
+#
+# PBSRC is replaced by the source package format
+#
+# PBVER is replaced by the version ($pb->{'ver'} in code)
+#
+# PBDATE is replaced by the date ($pb->{'date'} in code)
+#
+# PBEXTDIR is replaced by the date ($pb->{'extdir'} in code)
+#
+# PBPATCHSRC is replaced by the patches names if value is yes. Patches are located under the pbpatch dir of the pkg.
+#filter PBPATCHSRC = yes
+#
+# PBPATCHCMD is replaced by the patches commands if value is yes
+#filter PBPATCHCMD = yes
+#
+# PBTAG is replaced by the tag ($pb->{'tag'} in code)
+#
+# PBREV is replaced by the revision ($pb->{'rev'} in code)
+#
+# PBREALPKG is replaced by the package name ($pb->{'realpkg'} in code)
+#
+# PBPKG is replaced by the package name ($pb->{'pkg'} in code)
+#
+# PBPROJ is replaced by the project name ($pb->{'proj'} in code)
+#
+# PBPACKAGER is replaced by the packager name ($pb->{'packager'} in code)
+#
+# PBDESC contains the description of the package
+#
+# PBURL contains the URL of the Web site of the project
+#
+# PBLOG is replaced by the changelog if value is yes
+# and should be last as when used we need the %pb hash filled
+#
+# By default no build dependencies
+#
+# For fedora system

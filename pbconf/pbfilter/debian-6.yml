@@ -1,0 +1,15 @@
+---
+#
+# $Id$
+#
+# Filter for debian build
+#
+# PBDEBSTD is replaced by the Debian standard version
+filter:
+  PBDEBCOMP: 7
+  PBDEBSTD: 3.8.0
+  PBDEP: postgresql (>= 8.1) | postgresql-8.4 | postgresql-9.1
+  PBBUILDDEP: postgresql-server-dev-8.4
+#
+# PBDEBCOMP is replaced by the Debian Compatibility value
+#

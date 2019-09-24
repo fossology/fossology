@@ -1,0 +1,37 @@
+---
+#
+# $Id$
+#
+# Filter for rpm build
+#
+#
+# PBGRP is replaced by the RPM group of apps
+filter:
+  PBSUF: $pb->{'suf'}
+  PBGRP: Applications/Engineering
+  PBBUILDDEP: file-devel,perl-Text-Template,perl-podlators
+  PBFEDORAD: service postgresql initdb
+  PBPHPINI: /etc/php.ini
+  PBLIC: GPLv2
+  PBSTOP: inactive
+  PBREC: Recommends: upx
+  PBDEP: cabextract,genisoimage,sleuthkit,file
+  PBPGHBA: perl -pi -e 's|(host\s+all\s+all\s+127.0.0.1/32\s+ident)|#$1|' /var/lib/pgsql/data/pg_hba.conf
+  PBPGHBB: perl -pi -e 's|(host\s+all\s+all\s+::1/128\s+ident)|#$1|' /var/lib/pgsql/data/pg_hba.conf
+#
+# PBLIC is replaced by the license of the application
+#
+# PBDEP is replaced by the list of dependencies
+#
+# PBBUILDDEP is replaced by the list of build dependencies
+#
+# PBSUF is replaced by the package suffix ($pbsuf'} in code)
+#filter PBSUF = %{dist}
+#
+# PBOBS is replaced by the Obsolete line
+#filter PBOBS =
+#
+#
+#PBFEDORAD is on fedora system need initial DB
+#
+#PBPGHBA is change pg_hba files
