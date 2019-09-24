@@ -662,5 +662,19 @@ ORDER BY lft asc
     }
     return $row;
   }
+
+  /**
+   * @brief Get Pfile hashes from the pfile id
+   * @param $pfilePk
+   * @return array
+   */
+  public function getUploadHashesFromPfileId($pfilePk)
+  {
+    $stmt = __METHOD__."getUploadHashesFromPfileId";
+    $sql = "SELECT * FROM pfile WHERE pfile_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($pfilePk), $stmt);
+
+    return ["sha1" => $row["pfile_sha1"], "md5" => $row["pfile_md5"], "sha256" => $row["pfile_sha256"]];
+  }
 }
 

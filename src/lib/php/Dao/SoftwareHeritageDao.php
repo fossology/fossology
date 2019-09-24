@@ -79,4 +79,22 @@ class SoftwareHeritageDao
     }
     return false;
   }
+
+  /**
+   * @brief Get a record from Software Heritage schema from the PfileId
+   * @param int $pfileId
+   * @return array
+   */
+  public function getSoftwareHetiageRecord($pfileId)
+  {
+    $stmt = __METHOD__."getSoftwareHeritageRecord";
+    $sql = "SELECT * FROM software_heritage WHERE pfile_fk = $1";
+    $rows = $this->dbManager->getRows($sql,[$pfileId],$stmt);
+    $licensText = '';
+    foreach ($rows as $row ) {
+        $licensText .= $row["license"].', ';
+    }
+    return ["license" => $licensText];
+
+  }
 }
