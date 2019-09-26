@@ -271,7 +271,8 @@ function closeTextModal() {
 
 function ApplyNoticeText(idx)
 {
-  var NoticeText = noticeSelectTable.rows(idx).data()[0][2];
+  var hiddenNotice = $("#hiddennotice"+idx);
+  var NoticeText = hiddenNotice.val();
   var textArea = $("#referenceTextAck");
 
   var cursorPos = textArea.prop('selectionStart');
@@ -282,17 +283,21 @@ function ApplyNoticeText(idx)
   textArea.val(textBefore + NoticeText + textAfter);
 }
 
-function UseThisNoticeButton(idx)
+function UseThisNoticeButton(idx, text)
 {
-  return "<input type=button onClick='ApplyNoticeText("+idx+")' value='Use this' />";
+  return "<div>" +
+         "<textarea id='hiddennotice"+idx+"' hidden='hidden'>" + text + "</textarea>" +
+         "<input type=button onClick='ApplyNoticeText("+idx+")' value='Use this' />" +
+         "</div>";
 }
 
 function doHandleNoticeFiles(response) {
    noticeSelectTable.clear();
 
   $.each(response, function(idx, el) {
-    if (el.ufile_name !== undefined && el.contents !== undefined) {;
-      noticeSelectTable.row.add([ idx, el.ufile_name, el.contents, UseThisNoticeButton(idx) ]);
+    if (el.ufile_name !== undefined && el.contents_short !== undefined
+        && el.contents !== undefined) {
+      noticeSelectTable.row.add([ idx, el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
       noticeSelectTable.draw();
     }
   });
@@ -379,7 +384,7 @@ $(document).ready(function () {
   });
 
   noticeSelectTable = $('#noticeSelectTable').DataTable({
-    scrollY: "128px",
+    scrollY: "192px",
     paging: false,
     data: []
   });

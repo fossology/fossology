@@ -91,8 +91,15 @@ class AjaxNoticeFiles extends FO_Plugin
           continue;
         }
 
+        $maxlength = 64;
+
         $contents = fread($f, filesize($repofile));
+        $contents_short = $contents;
+        if (strlen($contents) > $maxlength) {
+          $contents_short = substr($contents, 0, $maxlength) . "...";
+        }
         $UploadtreeRecsResult[0][$k]['contents'] = $contents;
+        $UploadtreeRecsResult[0][$k]['contents_short'] = $contents_short;
         fclose($f);
       }
     }
