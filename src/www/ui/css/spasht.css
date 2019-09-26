@@ -5,3 +5,7 @@
 #spashtStart{
     padding-top: 15px;
 }
+#definitionsTable, #definitionsRow{
+    border: 1px solid black;
+    border-collapse: collapse;
+}

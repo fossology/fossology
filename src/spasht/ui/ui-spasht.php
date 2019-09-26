@@ -90,6 +90,7 @@ class ui_spasht extends FO_Plugin
     $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
 
     $vars = array();
+    $statusbody = "true";
     
     $vars['advanceSearch'] = ""; //Set advance search to empty
 
@@ -115,7 +116,26 @@ class ui_spasht extends FO_Plugin
 
          if(sizeof($body) == 0) //Check if no element is found
          {
-          $body[0] = "No Match Found";
+          $statusbody = "false";
+         }
+         else
+         {
+          for ($x = 0; $x < sizeof($body) ; $x++)
+          {
+            $str = explode ("/", $body[$x]);
+
+            $body['index'] = $x;
+            $body_revision[$x] = $str[4];
+            $body_type[$x] = $str[0];
+            $body_name[$x] = $str[3];
+            $body_provider[$x] = $str[1];
+            $body_namespace[$x] = $str[2];
+          }
+          $body['body_revision'] = $body_revision;
+          $body['body_type'] = $body_type;
+          $body['body_name'] = $body_name;
+          $body['body_provider'] = $body_provider;
+          $body['body_namespace'] = $body_namespace;
          }
       }
           /** Check for advance Search enabled
@@ -124,25 +144,10 @@ class ui_spasht extends FO_Plugin
             */
             if($advanceSearch == "advanceSearch"){
               $vars['advanceSearch'] = "checked";
-  
-              for ($x = 0; $x < sizeof($body) ; $x++)
-              {
-                $str = explode ("/", $body[$x]);
-  
-                $body_revision[$x] = $str[4];
-                $body_type[$x] = $str[0];
-                $body_provider[$x] = $str[1];
-                $body_namespace[$x] = $str[2];
-              }
-              $vars['body_revision'] = $body_revision;
-              $vars['body_type'] = $body_type;
-              $vars['body_provider'] = $body_provider;
-              $vars['body_namespace'] = $body_namespace;
-
             }
             $vars['body'] = $body;
+            $vars['statusbody'] = $statusbody;
               
-
       $upload_name = $patternName;
     }
 

@@ -1,5 +1,31 @@
-<ul>
-    {% for key in body %}
-        <li>{{ key|e }}</li>
+{% if statusbody == "false" %}
+    <TR><TD>No Match Found</TD></TR>
+{% else %}
+<TABLE id="definitionsTable">
+    <TR>
+        <TH>Namespace</TH>
+        <TH>/</TH>
+        <TH>Name</TH>
+        <TH></TH>
+        <TH>Revision</TH>
+        <TH></TH>
+        <TH>Type</TH>
+        <TH></TH>
+        <TH>provide</TH>
+    </TR>
+{% set len = body.index - 1 %}
+    {% for key in 0..len %}
+        <TR id="definitionsRow">
+        <TD>{{ body.body_namespace[key] }}</TD>
+        <TD>/</TD>
+        <TD>{{ body.body_name[key] }}</TD>
+        <TD></TD>
+        <TD>{{ body.body_revision[key] }}</TD>
+        <TD></TD>
+        <TD>{{ body.body_type[key] }}</TD>
+        <TD></TD>
+        <TD>{{ body.body_provider[key] }}</TD>
+        </TR>
     {% endfor %}
-</ul>
+</TABLE>
+{% endif %}
