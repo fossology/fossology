@@ -16,11 +16,15 @@
     </div>
   </div>
   <div class="row" id="spashtStart">
-    <div class="col-md-4">
+    <div class="col-md-8">
       {% if advanceSearch == "checked" %}
-          {% include 'agent_spasht_advanceSearch_form.html.twig' %}
-      {% else %}
+        {% include 'agent_spasht_advanceSearch_form.html.twig' %}
+      {% elseif pageNo == 2 %}
         {% include 'show_definitions.html.twig' %}
+      {% elseif pageNo == 3 %}
+        Data Stored Successfully {{ pageNo }} -> {{ storeStatus }}
+      {% else %}
+        {% include 'show_uploads_table.html.twig' %}
       {% endif %}
     </div>
     <div class="col">
@@ -30,5 +34,5 @@
 
 {% block foot %}
   {{ parent() }}
-
+{% include 'agent_spasht.js.twig' %}
 {% endblock %}

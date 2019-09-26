@@ -1,0 +1,16 @@
+<script>
+function StoreIntoDb(key){
+    //val set[] = { "{{ body.body_revision[key] }}", "{{ body.body_name[key] }}", "{{ body.body_namespace[key] }}", "{{ body.body_type[key] }}" };
+
+    var namespace = "definitionsRow_namespace"+key;
+    var name = "definitionsRow_name"+key;
+    var revision = "definitionsRow_revision"+key;
+    var type = "definitionsRow_type"+key;
+    var provider = "definitionsRow_provider"+key;
+
+    var params = document.getElementById(type).innerHTML +"/"+ document.getElementById(provider).innerHTML +"/"+ document.getElementById(namespace).innerHTML +"/"+ document.getElementById(name).innerHTML +"/"+ document.getElementById(revision).innerHTML;
+
+    document.getElementById("par").value = params;
+    document.getElementById("storeForm").submit();
+    }
+</script>

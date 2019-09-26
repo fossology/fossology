@@ -1,6 +1,7 @@
 {% if statusbody == "false" %}
     <TR><TD>No Match Found</TD></TR>
 {% else %}
+<FORM name="storeForm" method="post" action="">
 <TABLE id="definitionsTable">
     <TR>
         <TH>Namespace</TH>
@@ -12,20 +13,28 @@
         <TH>Type</TH>
         <TH></TH>
         <TH>provide</TH>
+        <TH>|</TH>
+        <TH>Menu</TH>
     </TR>
 {% set len = body.index - 1 %}
     {% for key in 0..len %}
-        <TR id="definitionsRow">
-        <TD>{{ body.body_namespace[key] }}</TD>
+    <TR id="definitionsRow">
+        <TD id="definitionsRow_namespace{{ key }}">{{ body.body_namespace[key] }}</TD>
         <TD>/</TD>
-        <TD>{{ body.body_name[key] }}</TD>
+        <TD id="definitionsRow_name{{ key }}">{{ body.body_name[key] }}</TD>
         <TD></TD>
-        <TD>{{ body.body_revision[key] }}</TD>
+        <TD id="definitionsRow_revision{{ key }}">{{ body.body_revision[key] }}</TD>
         <TD></TD>
-        <TD>{{ body.body_type[key] }}</TD>
+        <TD id="definitionsRow_type{{ key }}">{{ body.body_type[key] }}</TD>
         <TD></TD>
-        <TD>{{ body.body_provider[key] }}</TD>
-        </TR>
+        <TD id="definitionsRow_provider{{ key }}">{{ body.body_provider[key] }}</TD>
+        <TD>|</TD>
+        <TD><button onclick="StoreIntoDb({{ key }})">OPEN</button></TD>
+    </TR>
     {% endfor %}
+    <TR>
+    <TD><input id="par" type="hidden" name="par" value="" /></TD>
+    </TR>
 </TABLE>
+</FORM>
 {% endif %}

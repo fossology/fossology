@@ -4,6 +4,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\UI\Component\MicroMenu;
 use GuzzleHttp\Client;
+use Fossology\Lib\Dao\SpashtDao;
 
 /**
  * @class ui_spashts
@@ -11,6 +12,10 @@ use GuzzleHttp\Client;
  */
 class ui_spasht extends FO_Plugin
 {
+
+  /** @var SpashtDao  $spashtDao*/
+  private $spashtDao;
+
   function __construct()
   {
     $this->Name       = "spashtbrowser";
@@ -19,6 +24,7 @@ class ui_spasht extends FO_Plugin
     $this->DBaccess   = PLUGIN_DB_WRITE;
     $this->LoginFlag  = 0;
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
+    $this->spashtDao = $GLOBALS['container']->get('dao.spasht');
     parent::__construct();
   }
 
@@ -86,16 +92,45 @@ class ui_spasht extends FO_Plugin
    */
   public function output()
   {
-    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
+    $optionSelect = GetParm("par",PARM_STRING);
 
     $vars = array();
     $statusbody = "true";
+
+    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
+    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
     
     $vars['advanceSearch'] = ""; //Set advance search to empty
+    $vars['storeStatus'] = "false";
+    $vars['pageNo'] = 0;
 
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
+
+    if(!empty($optionSelect))
+    {
+      $str = explode ("/", $optionSelect);
+      
+      $body = array();
+
+      $body['body_type'] = $str[0];
+      $body['body_provider'] = $str[1];
+      $body['body_namespace'] = $str[2];
+      $body['body_name'] = $str[3];
+      $body['body_revision'] = $str[4];
+     
+      $result = $this->spashtDao->addComponentRevision($body, $uploadId);
+
+      if($result >= 0)
+      {
+        $vars['storeStatus'] = "true";
+      }
+
+      $vars['pageNo'] = 3;
+
+      $out = $this->renderString('show_definitions.html.twig',$vars);
+      return($out);
+    }
 
     if($patternName != null && !empty($patternName)) //Check if search is not empty
     {
@@ -146,8 +181,15 @@ class ui_spasht extends FO_Plugin
               $vars['advanceSearch'] = "checked";
             }
             $vars['body'] = $body;
-            $vars['statusbody'] = $statusbody;
-              
+            if($vars['storeStatus'] == "true")
+            {
+              $vars['pageNo'] = 3;
+            }
+            else
+            {
+              $vars['pageNo'] = 2;
+            }
+
       $upload_name = $patternName;
     }
 
@@ -159,10 +201,19 @@ class ui_spasht extends FO_Plugin
         }
 
       $upload_name = GetUploadName($uploadId);
+      $vars['pageNo'] = 1;
+
+      $searchUploadId = $this->spashtDao->getComponent($uploadId);
+
+      if(!empty($searchUploadId)){
+        $vars['pageNo'] = 4;
+        $vars['body'] = $searchUploadId;
+      }
     }
 
     $vars['uploadName'] = $upload_name;
 
+    $vars['statusbody'] = $statusbody;
     $out = $this->renderString('agent_spasht.html.twig',$vars);
     
     return($out);
