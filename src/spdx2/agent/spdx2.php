@@ -527,9 +527,13 @@ class SpdxTwoAgent extends Agent
     /* @var $copyrightDao CopyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allEntries = $copyrightDao->getAllEntries('copyright', $uploadId, $uploadtreeTable, $type='statement');
-    foreach ($allEntries as $finding) {
+    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere=null);
+    $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
+    foreach ($allScannerEntries as $finding) {
       $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
+    }
+    foreach ($allEditedEntries as $finding) {
+      $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['textfinding'],false);
     }
   }
 
