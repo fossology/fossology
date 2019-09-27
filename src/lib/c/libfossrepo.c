@@ -971,7 +971,8 @@ int fo_RepOpenFull(fo_conf* config)
     fprintf(stderr, "ERROR %s.%d: %s\n", __FILE__, __LINE__, error->message);
     return 0;
   }
-  strncpy(RepPath, path, sizeof(RepPath));
+  strncpy(RepPath, path, sizeof(RepPath)-1);
+  RepPath[sizeof(RepPath)-1] = 0;
 
   return 1;
 } /* fo_RepOpen() */
