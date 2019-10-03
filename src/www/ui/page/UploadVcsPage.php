@@ -145,7 +145,7 @@ class UploadVcsPage extends UploadPageBase
     }
     /* schedule agents */
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
-    $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
+    $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
     $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"), $unpackArgs);
     if ($ununpack_jq_pk < 0) {
       return array(false, _($ErrorMsg), $description);
@@ -170,7 +170,7 @@ class UploadVcsPage extends UploadPageBase
     $text1 = _("has been queued. It is");
     $msg .= "$text $Name $text1 ";
     $keep =  "<a href='$Url'>upload #" . $uploadId . "</a>.\n";
-    return array(true, $msg.$keep, $description);
+    return array(true, $msg.$keep, $description, $uploadId);
   }
 }
 

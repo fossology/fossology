@@ -14,7 +14,7 @@ openapi: 3.0.0
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.3
+  version: 1.0.4
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
@@ -122,6 +122,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Upload'
+        '503':
+          description: >
+            The ununpack agent has not started yet. Please check the 'Look-at'
+            header for more information
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
     delete:
@@ -207,6 +220,9 @@ paths:
         Endpoint to create a new upload in FOSSology
       requestBody:
         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VcsUpload'
           multipart/form-data:
             schema:
               type: object
@@ -238,6 +254,13 @@ paths:
               - protected
               - public
             default: protected
+        - name: ignoreScm
+          description: Ignore SCM files (Git, SVN, TFS)
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
       responses:
         '201':
           description: Upload is created
@@ -909,7 +932,9 @@ components:
           description: Friendly name of the token
         token_scope:
           type: string
-          enum: ["read", "write"]
+          enum:
+            - read
+            - write
           description: The scope of the token.
         token_expire:
           type: string
@@ -921,6 +946,31 @@ components:
         - token_name
         - token_scope
         - token_expire
+    VcsUpload:
+      description: To create an upload from a version control system
+      type: object
+      properties:
+        vcsType:
+          description: VCS type
+          type: string
+          enum:
+            - svn
+            - git
+        vcsUrl:
+          description: URL of the repository
+          type: string
+        vcsName:
+          description: Display name of the upload
+          type: string
+        vcsUsername:
+          description: Username for the VCS
+          type: string
+        vcsPassword:
+          description: Password for the VCS
+          type: string
+      required:
+        - vcsType
+        - vcsUrl
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"
