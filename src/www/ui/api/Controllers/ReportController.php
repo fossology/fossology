@@ -129,6 +129,9 @@ class ReportController extends RestController
     if (! $uploadDao->isAccessible($uploadId, $this->restHelper->getGroupId())) {
       $upload = new Info(403, "Upload is not accessible!", InfoType::ERROR);
     }
+    if ($upload !== null) {
+      return $upload;
+    }
     $upload = $uploadDao->getUpload($uploadId);
     if ($upload === null) {
       $upload = new Info(404, "Upload does not exists!", InfoType::ERROR);

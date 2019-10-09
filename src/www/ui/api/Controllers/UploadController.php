@@ -62,7 +62,17 @@ class UploadController extends RestController
         $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
-      $uploads = $uploads[0];
+      if (! empty($uploads)) {
+        $uploads = $uploads[0];
+      } else {
+        $returnVal = new Info(503,
+          "Ununpack job not started. Please check job status at " .
+          "/api/v1/jobs?upload=" . $id,
+          InfoType::INFO);
+        return $response->withHeader('Retry-After',
+          '60')->withHeader('Look-at', "/api/v1/jobs?upload=" .
+          $id)->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
     }
     return $response->withJson($uploads, 200);
   }
@@ -169,13 +179,13 @@ class UploadController extends RestController
       $description = $request->getHeaderLine('uploadDescription');
       $public = $request->getHeaderLine('public');
       $public = empty($public) ? 'protected' : $public;
+      $ignoreScm = $request->getHeaderLine('ignoreScm');
       list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
-       $request, $folderId, $description, $public);
+        $request, $folderId, $description, $public, $ignoreScm);
       if (! $status) {
-        $info = new Info(500, [
-          $message,
-          $statusDescription
-        ], InfoType::ERROR);
+        $info = new Info($uploadId != -1 ? $uploadId : 500,
+          $message . "\n" . $statusDescription,
+          InfoType::ERROR);
       } else {
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }

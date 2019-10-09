@@ -111,7 +111,7 @@ abstract class UploadPageBase extends DefaultPlugin
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
     $dummy = "";
-    $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
+    $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
     $adj2nestDependencies = array();
     if ($wgetDependency) {
       $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
