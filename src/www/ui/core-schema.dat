@@ -1963,8 +1963,6 @@
   $Schema["CONSTRAINT"]["folder_pkey"] = "ALTER TABLE \"folder\" ADD CONSTRAINT \"folder_pkey\" PRIMARY KEY (\"folder_pk\");";
   $Schema["CONSTRAINT"]["foldercontents_pkey"] = "ALTER TABLE \"foldercontents\" ADD CONSTRAINT \"foldercontents_pkey\" PRIMARY KEY (\"foldercontents_pk\");";
   $Schema["CONSTRAINT"]["group_user_member_pkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_pkey\" PRIMARY KEY (\"group_user_member_pk\");";
-  $Schema["CONSTRAINT"]["group_user_member_group_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_group_fk_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
-  $Schema["CONSTRAINT"]["group_user_member_user_fk_fkey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_fk_fkey\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["group_user_member_user_group_ukey"] = "ALTER TABLE \"group_user_member\" ADD CONSTRAINT \"group_user_member_user_group_ukey\" UNIQUE (\"user_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["group_group_name_key"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_group_name_key\" UNIQUE (\"group_name\");";
   $Schema["CONSTRAINT"]["group_pkey"] = "ALTER TABLE \"groups\" ADD CONSTRAINT \"group_pkey\" PRIMARY KEY (\"group_pk\");";
