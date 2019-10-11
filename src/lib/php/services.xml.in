@@ -79,6 +79,10 @@ without any warranty.
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.spasht" class="Fossology\Lib\Dao\SpashtDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
         <service id="dao.job" class="Fossology\Lib\Dao\JobDao">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>

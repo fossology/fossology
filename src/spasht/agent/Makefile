@@ -1,4 +1,5 @@
 # Copyright 2019
+# Author: Vivek Kumar<vvksindia@gmail.com>
 #
 # Copying and distribution of this file, with or without modification,
 # are permitted in any medium without royalty provided the copyright
@@ -10,7 +11,8 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-COPY = spasht.php version.php
+COPY = spasht.php version.php SpashtAgent.php
+WRAP = spasht
 
 all: version.php spasht
 
