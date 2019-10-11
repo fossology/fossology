@@ -51,6 +51,8 @@ class RestAuthMiddleware
     $requestUri = $request->getUri();
     if (stristr($requestUri->getPath(), "/auth") !== false) {
       $response = $next($request, $response);
+    } elseif (stristr($requestUri->getPath(), "/version") !== false) {
+      $response = $next($request, $response);
     } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
       stristr($request->getMethod(), "post") !== false) {
       $response = $next($request, $response);

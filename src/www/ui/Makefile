@@ -29,7 +29,7 @@ OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php ad
                 upload_permissions.php upload-srv-files.php upload-vcs.php template/components \
                 template/include
 
-OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm)$$"`
+OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm|openapi.yaml)$$"`
 
 RMFILES = FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
