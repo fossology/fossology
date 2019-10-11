@@ -1383,13 +1383,21 @@
   $Schema["TABLE"]["spasht"]["spasht_pk"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_pk\" int4 DEFAULT nextval('spasht_pk_seq'::regclass)";
   $Schema["TABLE"]["spasht"]["spasht_pk"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_pk\" SET NOT NULL, ALTER COLUMN \"spasht_pk\" SET DEFAULT nextval('spasht_pk_seq'::regclass)";
 
-  $Schema["TABLE"]["spasht"]["spasht_revision"]["DESC"] = "";
-  $Schema["TABLE"]["spasht"]["spasht_revision"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_revision\" text";
-  $Schema["TABLE"]["spasht"]["spasht_revision"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_revision\" DROP NOT NULL";
+  $Schema["TABLE"]["spasht"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["upload_fk"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"upload_fk\" int4";
+  $Schema["TABLE"]["spasht"]["upload_fk"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
 
   $Schema["TABLE"]["spasht"]["spasht_name"]["DESC"] = "";
   $Schema["TABLE"]["spasht"]["spasht_name"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_name\" text";
   $Schema["TABLE"]["spasht"]["spasht_name"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_name\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_namespace\" text";
+  $Schema["TABLE"]["spasht"]["spasht_namespace"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_namespace\" DROP NOT NULL";
+
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["DESC"] = "";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_revision\" text";
+  $Schema["TABLE"]["spasht"]["spasht_revision"]["ALTER"] = "ALTER TABLE \"spasht\" ALTER COLUMN \"spasht_revision\" DROP NOT NULL";
 
   $Schema["TABLE"]["spasht"]["spasht_type"]["DESC"] = "";
   $Schema["TABLE"]["spasht"]["spasht_type"]["ADD"] = "ALTER TABLE \"spasht\" ADD COLUMN \"spasht_type\" text";
@@ -2044,6 +2052,8 @@
   $Schema["CONSTRAINT"]["report_info_pkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_pkey\" PRIMARY KEY (\"ri_pk\");";
   $Schema["CONSTRAINT"]["report_info_upload_fk_fkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["reportgen_upload_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["spasht_upload_fk_fkey"] = "ALTER TABLE \"spasht\" ADD CONSTRAINT \"spasht_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["spasht_upload_fk_ukey"] = "ALTER TABLE \"spasht\" ADD CONSTRAINT \"spasht_upload_fk_ukey\" UNIQUE (\"upload_fk\");";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
@@ -2146,6 +2156,8 @@
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
 
+  $Schema["INDEX"]["spasht"]["spasht_upload_fk_idx"] = "CREATE INDEX spasht_upload_fk_idx ON spasht USING btree (upload_fk);";
+
   $Schema["INDEX"]["uploadtree"]["lft_idx"] = "CREATE INDEX lft_idx ON uploadtree USING btree (lft);";
   $Schema["INDEX"]["uploadtree"]["parent"] = "CREATE INDEX parent ON uploadtree USING btree (parent);";
   $Schema["INDEX"]["uploadtree"]["projtree_projid_idx"] = "CREATE INDEX projtree_projid_idx ON uploadtree USING btree (upload_fk);";
@@ -2172,4 +2184,5 @@
   $Schema["INHERITS"]["ununpack_ars"] = "ars_master";
   $Schema["INHERITS"]["nomos_ars"] = "ars_master";
   $Schema["INHERITS"]["monk_ars"] = "ars_master";
+  $Schema["INHERITS"]["spasht_ars"] = "ars_master";
   $Schema["INHERITS"]["license_candidate"] = "license_ref";

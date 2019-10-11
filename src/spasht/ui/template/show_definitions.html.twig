@@ -1,5 +1,44 @@
-<ul>
-    {% for key in body %}
-        <li>{{ key|e }}</li>
+{% if statusbody == "false" %}
+    <TR><TD>No Match Found</TD></TR>
+{% else %}
+
+<TABLE id="definitionsTable">
+    <TR>
+        <TH>Namespace/Name</TH>
+        <TH></TH>
+        <TH>Revision</TH>
+        <TH></TH>
+        <TH>Type</TH>
+        <TH></TH>
+        <TH>provide</TH>
+        <TH>| Menu</TH>
+    </TR>
+    {% for result in body %}
+    <TR id="definitionsRow">
+        <TD  style="display: inline-block; width: 150px; word-wrap: break-word;">
+          <a id="definitionsRow_namespace{{ loop.index0 }}">{{ result.namespace }}</a>/<a id="definitionsRow_name{{ loop.index0 }}">{{ result.name }}</a>
+        </TD>
+        <TD></TD>
+        <TD>
+          <span id="definitionsRow_revision{{ loop.index0 }}" style="display: inline-block; width: 230px; word-wrap: break-word;">{{ result.revision }}</span>
+        </TD>
+        <TD></TD>
+        <TD id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</TD>
+        <TD></TD>
+        <TD id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</TD>
+        <TD>
+          <li>
+            <a href="#" onclick="StoreIntoDb({{ loop.index0 }})">OPEN</a>
+          </li>
+          <li>
+            <a href="#" onclick="showDetails({{ loop.index0 }})">Show Details</a>
+          </li>
+        </TD>
+    </TR>
     {% endfor %}
-</ul>
+
+    </TABLE>
+    <FORM name="storeForm" id="storeForm" method="post" action="">
+    <input id="par" type="hidden" name="par" value="" />
+    <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
+{% endif %}
