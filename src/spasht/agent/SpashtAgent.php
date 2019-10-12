@@ -102,15 +102,6 @@ class SpashtAgent extends Agent
 
       $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
 
-      if($uploadAvailable == false)
-      {
-        $file = fopen('/home/fossy/abc.json','w');
-        fwrite($file,"no data available");
-        fclose($file);
-
-        return false;
-      }
-
       $scancodeVersion = $this->getScanCodeVersion($uploadAvailable);
 
       $getNewResult = $this->getInformation($scancodeVersion, $uploadAvailable, $pfileSha1AndpfileId);
@@ -359,17 +350,12 @@ class SpashtAgent extends Agent
      */
     protected function insertLicensesSpashtAgentRecord($body, $agentId)
     {
-      $file = fopen('/home/fossy/abc.json','w');
       foreach($body as $key)
       {
         foreach($key['license'] as $license)
         {
           $l = $this->licenseDao->getLicenseByShortName($license);
-          if($l == null)
-          {
-            fwrite($file, $license."->null");
-          }
-          else
+          if($l != null)
           {
             if(!empty($l->getId()))
             {
@@ -378,7 +364,6 @@ class SpashtAgent extends Agent
           }
         }
       }
-      fclose($file);
       return true;
     }
 
