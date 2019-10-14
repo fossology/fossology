@@ -1,9 +1,5 @@
 ######################################################################
-<<<<<<< HEAD
 # Copyright (C) 2019.
-=======
-# Copyright (C)
->>>>>>> b5f4506d6... feat(spasht): Integrated License file successuly
 # Author: Vivek Kumar<vvksindia@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
