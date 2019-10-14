@@ -55,7 +55,7 @@ class ui_browse_license extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O', 'spasht' => 'Sp');
 
   public function __construct()
   {
