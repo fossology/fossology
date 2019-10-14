@@ -1,3 +1,11 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+   
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
 <script>
 function StoreIntoDb(key){
     
@@ -32,4 +40,20 @@ function showDetails(key){
         document.getElementById("displayElementIndex").value = key;
     }      
 }
+
+
+$( function() {
+
+    var spashtTabCookie = 'stickySpashtTab';
+
+      $('#spashtTabs').tabs({
+        active: ($.cookie(spashtTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(spashtTabCookie, idString);
+        }
+      });
+    });
 </script>

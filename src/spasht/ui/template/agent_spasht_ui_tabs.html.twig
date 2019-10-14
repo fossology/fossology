@@ -1,0 +1,42 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+   
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<table border="0" width="100%">
+<tr>
+<td valign="top">
+    <div id="spashtTabs">
+    <ul>
+        <li><a href="#ConfigureTab">Configure</a></li>
+        <li><a href="#LicenseTab">Licenses</a></li>
+        <li><a href="#CopyrightTab">Copyrights</a></li>
+    </ul>
+    <div id="ConfigureTab">
+        {% include 'agent_spasht_ui_content.html.twig' %}
+    </div>
+    <div id="LicenseTab">
+        {{ 'License Table' }}
+    </div>
+    <div id="CopyrightTab">
+        <Table id="copyright_spasht_table">
+        <THEAD>
+            <TR>
+            <TH>COUNT</TH>
+            <TH>COPYRIGHT CONTENT</TH>
+            <TH></TH>
+            <TH></TH>
+            </TR>
+        </THEAD>
+        <TBODY></TBODY>
+        </Table>
+    </div>
+    </div>
+</td>
+<td valign="top">{{ fileList }}</td>
+</tr>
+</table>
+   
