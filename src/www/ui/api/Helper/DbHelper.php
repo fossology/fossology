@@ -86,8 +86,10 @@ FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
 INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
-WHERE upload.user_fk = " . pg_escape_string($userId) . "
+WHERE upload.user_fk = $1
 ORDER BY upload.upload_pk;";
+      $statementName = __METHOD__ . ".getAllUploads";
+      $params = [$userId];
     } else {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
@@ -96,12 +98,13 @@ FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
 INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
-WHERE upload.user_fk = " . pg_escape_string($userId) . "
-AND upload.upload_pk = " . pg_escape_string($uploadId) . "
+WHERE upload.user_fk = $1
+AND upload.upload_pk = $2
 ORDER BY upload.upload_pk;";
+      $statementName = __METHOD__ . ".getSpecificUpload";
+      $params = [$userId,$uploadId];
     }
-
-    $result = $this->dbManager->getRows($sql);
+    $result = $this->dbManager->getRows($sql, $params, $statementName);
     $uploads = [];
     foreach ($result as $row) {
       $upload = new Upload($row["folder_pk"], $row["folder_name"],
