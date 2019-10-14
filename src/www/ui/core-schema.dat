@@ -1901,6 +1901,9 @@
 
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,max(rf_pk)) val FROM license_ref))";
+  
+  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 
   $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_bulk_lrb_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_bulk_lrb_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_bulk_lrb_pk_seq',(SELECT greatest(1,max(lrb_pk)) val FROM license_ref_bulk))";
