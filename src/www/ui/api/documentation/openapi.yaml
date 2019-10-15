@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.6
+  version: 1.0.7
   contact:
     email: fossology@fossology.org
   license:
@@ -890,6 +890,10 @@ components:
           description: enable email notification when upload scan completes
         agents:
           $ref: '#/components/schemas/Analysis'
+      required:
+        - id
+        - name
+        - description
     Analysis:
       type: object
       properties:
