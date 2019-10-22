@@ -52,9 +52,9 @@ int IsInflatedFile(char *FileName, int InflateSize)
 {
   int result = 0;
   char FileNameParent[PATH_MAX];
-  memset(FileNameParent, 0, PATH_MAX);
   struct stat st, stParent;
-  strncpy(FileNameParent, FileName, sizeof(FileNameParent));
+  memcpy(FileNameParent, FileName, sizeof(FileNameParent));
+  FileNameParent[PATH_MAX-1] = 0;
   char  *lastSlashPos = strrchr(FileNameParent, '/');
   if (NULL != lastSlashPos)
   {
@@ -631,7 +631,7 @@ void	CheckCommands	(int Show)
 int	RunCommand	(char *Cmd, char *CmdPre, char *File, char *CmdPost,
     char *Out, char *Where)
 {
-  char Cmd1[FILENAME_MAX * 3];
+  char Cmd1[FILENAME_MAX * 5];
   char CWD[FILENAME_MAX];
   int rc;
   char TempPre[FILENAME_MAX];

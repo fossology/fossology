@@ -137,7 +137,8 @@ void	TraverseChild	(int Index, ContainerInfo *CI, char *NewDir)
       if (CI->TopContainer && UseRepository)
       {
         RemovePostfix(UploadFileName);
-        strncpy(CI->PartnameNew, UploadFileName, sizeof(CI->PartnameNew) - 1);
+        memcpy(CI->PartnameNew, UploadFileName, sizeof(CI->PartnameNew));
+        CI->PartnameNew[sizeof(CI->PartnameNew)-1] = 0;
       }
       else
         /**
