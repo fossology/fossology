@@ -10,11 +10,16 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-openapi: 3.0.0
+openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.4
+  version: 1.0.5
+  contact:
+    email: fossology@fossology.org
+  license:
+    name: GPL-2.0-only
+    url: https://github.com/fossology/fossology/blob/master/LICENSE
 servers:
   - url: http://localhost/repo/api/v1
     description: Localhost instance
@@ -97,6 +102,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /version:
+    get:
+      security: []
+      summary: Get the current API information
+      description: >
+        Get the current API version and supported authentication methods
+      responses:
+        '200':
+          description: The version and security information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                      type: string
+                      description: Current API version as per documentation
+                  security:
+                      type: array
+                      items: {
+                        type: string
+                      }
         default:
           $ref: '#/components/responses/defaultResponse'
 

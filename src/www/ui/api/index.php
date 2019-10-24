@@ -38,6 +38,7 @@ use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
+use Fossology\UI\Api\Controllers\VersionController;
 use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
@@ -146,6 +147,12 @@ $app->group(VERSION_1 . 'report',
     $this->get('', ReportController::class . ':getReport');
     $this->get('/{id:\\d+}', ReportController::class . ':downloadReport');
     $this->any('/{params:.*}', BadRequestController::class);
+  });
+
+////////////////////////////VERSION/////////////////////
+$app->group(VERSION_1 . 'version',
+  function (){
+    $this->get('', VersionController::class . ':getVersion');
   });
 
 $app->run();
