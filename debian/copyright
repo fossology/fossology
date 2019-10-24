@@ -1,79 +1,2457 @@
-This package was debianized by Matt Taggart <taggart@debian.org> on
-Fri, 17 Oct 2008 01:24:09 -0700.
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: FOSSology
+Upstream-Contact: Michael C. Jaeger <michael.c.jaeger@siemens.com>
+Disclaimer: <text> This file is offered as-is, without any warranty. </text>
+License: GPL-2.0 AND LGPL-2.1
+Comment: created on 2019-10-23T12:17:25Z with FOSSology
 
-Home Page:
 
-    https://www.fossology.org
+Files: fossology/pbconf/fossology/deb/copyright
+       fossology/debian/copyright
+       fossology/src/composer.json
+       fossology/src/dox.c
+       fossology/LICENSE
+       fossology/README.md
+       fossology/.travis.yml
+       fossology/Vagrantfile
+Copyright: (C) 2008-2012 HP Development Company
+           (C) 2008, Matt Taggart <taggart@debian.org>
+           (C) 2017 Michael C. Jaeger, mcj@mcj.de
+           Copyright (C) 2007-2012 HP Development Company, L.P.
+           Copyright (C) 2007-2012 HP Development Company, L.P. and others.
+           Copyright Siemens AG 2014-2016
+           Copyright (C) 1989, 1991 Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 1991, 1999 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright Siemens AG, 2014-2019
+           Copyright Siemens AG, 2014
+License: GPL-2.0 AND LGPL-2.1
 
-Project Page:
+Files: fossology/src/nomos/agent_tests/Unit/Makefile
+Copyright: Copyright Siemens AG 2014
+License: Freeware-cc79f51f0b86e915ba8f560b9ae83f4d
 
-    https://github.com/fossology/fossology
+Files: fossology/src/ununpack/agent/md5.h
+License: Public-domain-12aee48783b26374ac8ccc9e0f2a4636
 
-Upstream Authors:
+Files: fossology/src/ununpack/agent/md5.c
+License: Public-domain-c935d34ac677e018db8224919b1cfdea
 
-    The FOSSology Development Team <fossology@fossology.org>
+Files: fossology/src/testing/dataFiles/licenseText.php
+       fossology/src/buckets/agent/leaf.c
+       fossology/src/www/locale/nl_NL/LC_MESSAGES/messages.po
+       fossology/src/www/locale/de_DE/LC_MESSAGES/messages.po
+       fossology/src/ninka/agent/ninkawrapper.cc
+       fossology/src/nomos/agent/nomos.h
+       fossology/src/ojo/agent/OjosDatabaseHandler.cc
+       fossology/src/nomos/agent_tests/Functional/OneShot-affero.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-gpl3.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-Oracle-Berkeley-DB.php
+       fossology/src/www/ui/images/icons/README
+       fossology/src/nomos/agent_tests/Functional/OneShot_test.sh
+       fossology/src/nomos/agent_tests/Functional/OneShot-bsd.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-multiFile.php
+       fossology/src/testing/lib/testClasses/parseBrowseMenu.php
+       fossology/src/nomos/agent/parse.c
+       fossology/src/decider/agent_tests/Functional/schedulerTest.php
+       fossology/src/ojo/agent_tests/Functional/schedulerTest.php
+       fossology/src/ninka/agent_tests/Unit/test_ninkawrapper.cc
+       fossology/src/ojo/agent_tests/Unit/test_regex.cc
+       fossology/src/ojo/agent_tests/Unit/test_scanners.cc
+       fossology/src/testing/utils/upload1File.php
+       fossology/src/testing/utils/uploadTestData.php
+       fossology/src/testing/utils/uploadUnpack.php
+       fossology/src/www/ui_tests/EmailNotification/uploadWEmail.php
+       fossology/src/www/ui_tests/EmailNotification/uploadWoutEmail.php
+       fossology/src/testing/utils/uplTestData.php
+       fossology/src/buckets/agent/inits.c
+       fossology/src/testing/utils/createTestFiles.php
+       fossology/src/ojo/agent_tests/Functional/cli_test.sh
+       fossology/pbconf/fossology/rpm/fossology.spec
+       fossology/pbconf/pbfilter/rhel.yml
+       fossology/pbconf/pbfilter/md.yml
+       fossology/pbconf/pbfilter/fedora.yml
+       fossology/pbconf/pbfilter/fedora-18.yml
+       fossology/pbconf/pbfilter/fedora-17.yml
+       fossology/pbconf/pbfilter/fedora-15.yml
+       fossology/pbconf/pbfilter/centos-6.yml
+       fossology/pbconf/pbfilter/centos-7.yml
+       fossology/pbconf/fossology.pb
+       fossology/pbconf/Vagrantfile
+       fossology/install/db/fo_mapping_license.php
+       fossology/debian/rules
+       fossology/CONTRIBUTING.md
+       fossology/src/testing/dataFiles/funcTests.ini
+       fossology/src/testing/dataFiles/pkginstall/debian.ini
+       fossology/src/testing/dataFiles/pkginstall/ubuntu.ini
+       fossology/src/testing/dataFiles/pkginstall/fedora.ini
+       fossology/src/testing/dataFiles/unitTests.ini
+       fossology/src/testing/dataFiles/pkginstall/redhat.ini
+       fossology/src/testing/dataFiles/miginstall/redhat.ini
+       fossology/src/testing/dataFiles/miginstall/fedora.ini
+       fossology/src/testing/dataFiles/miginstall/debian.ini
+       fossology/src/testing/dataFiles/miginstall/ubuntu.ini
+       fossology/pbconf/pbfilter/fedora.pbf
+       fossology/pbconf/pbfilter/md.pbf
+       fossology/pbconf/pbfilter/fedora-17.pbf
+       fossology/pbconf/pbfilter/fedora-18.pbf
+       fossology/pbconf/pbfilter/centos-6.pbf
+       fossology/pbconf/pbfilter/centos-7.pbf
+       fossology/pbconf/pbfilter/fedora-15.pbf
+       fossology/pbconf/pbfilter/rhel.pbf
+       fossology/src/www/ui/api/Models/Reuser.php
+       fossology/src/lib/php/Dao/PackageDao.php
+       fossology/src/monk/agent_tests/Unit/test_file_operations.c
+       fossology/src/www/ui/page/UploadFilePage.php
+       fossology/src/www/ui_tests/VerifyTests/OneShot-lgpl2.1-T.php
+       fossology/src/testing/db/purgeTestEnvironment.php
+       fossology/src/reportImport/ui/ReportImportPlugin.php
+       fossology/src/scheduler/agent_tests/Unit/testEvent.c
+       fossology/src/testing/install/pkgConfig.php
+       fossology/utils/freshmeat/diffm.php
+       fossology/src/pkgagent/agent/main.c
+       fossology/src/www/ui/api/Controllers/FolderController.php
+       fossology/src/lib/php/BusinessRules/test/AgentLicenseEventProcessorTest.php
+       fossology/src/nomos/agent/DMalloc.h
+       fossology/src/testing/lib/createRC.php
+       fossology/src/www/ui/page/UploadSrvPage.php
+       fossology/src/reportImport/agent/ReportImportAgent.php
+       fossology/src/scheduler/agent_tests/agents/quick_death.c
+       fossology/src/buckets/agent/liccache.h
+       fossology/src/testing/utils/Install.php
+       fossology/src/testing/utils/makeDbUser
+       fossology/utils/list_license.php
+       fossology/src/www/ui/api/Models/ScanOptions.php
+       fossology/src/lib/php/View/HighlightProcessor.php
+       fossology/src/wget_agent/agent/main.c
+       fossology/src/www/ui_tests/SiteTests/OrgUploadsMenuTest-Move.php
+       fossology/src/lib/php/Dao/test/AgentDaoTest.php
+       fossology/src/copyright/agent_tests/Functional/cli_test.sh
+       fossology/src/cli/acme_review.php
+       fossology/src/lib/php/common-string.php
+       fossology/src/copyright/agent/database.hpp
+       fossology/src/testing/utils/cleanRF.php
+       fossology/src/nomos/ui/ajax-filelic.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-none.php
+       fossology/src/testing/install/whatos
+       fossology/src/testing/utils/createUIUsers.php
+       fossology/src/monk/agent/database.h
+       fossology/src/lib/php/Db/DbManager.php
+       fossology/src/ojo/agent/OjosDatabaseHandler.hpp
+       fossology/src/unifiedreport/agent/obligations.php
+       fossology/src/scheduler/agent/agent.c
+       fossology/src/lib/c/tests/testClib.php
+       fossology/src/spdx2/ui/SpdxTwoTagValueAgentPlugin.php
+       fossology/src/www/ui_tests/SiteTests/login.php
+       fossology/src/buckets/ui/agent-bucket.php
+       fossology/src/cli/tests/test_cp2foss.php
+       fossology/src/unifiedreport/agent/reportStatic.php
+       fossology/src/cli/tests/ReadMe
+       fossology/src/www/ui/scripts/change-license-view.js
+       fossology/src/www/ui_tests/runDummy.php
+       fossology/src/monk/agent/highlight.c
+       fossology/src/ninka/agent/licensematch.cc
+       fossology/src/www/ui/api/Helper/UploadHelper/HelperToUploadFilePage.php
+       fossology/src/testing/db/TestDbFactory.php
+       fossology/src/www/ui/scripts/license.js
+       fossology/src/cli/fossupload_status.php
+       fossology/src/testing/functional/runFunctionalTests.php
+       fossology/src/pkgagent/ui/Makefile
+       fossology/src/buckets/ui/admin-bucket-pool.php
+       fossology/src/scheduler/agent_tests/agents/wait_special.c
+       fossology/src/lib/php/Proxy/UploadTreeProxy.php
+       fossology/src/reuser/ui/reuser-plugin.php
+       fossology/src/www/ui/admin-upload-edit.php
+       fossology/src/lib/cpp/libfossUtils.cc
+       fossology/src/copyright/agent/cleanEntries.hpp
+       fossology/src/buckets/agent/container.c
+       fossology/src/testing/install/vmrevert.php
+       fossology/src/mimetype/agent_tests/Functional/cliParamsTest4Mimetype.php
+       fossology/src/www/ui/page/AdminObligationFromCSV.php
+       fossology/src/testing/lib/testClasses/dom-parseLicenseTable.php
+       fossology/src/monk/agent/file_operations.c
+       fossology/src/regexscan/agent/regexscan-Stage2.c
+       fossology/src/ununpack/agent/externs.h
+       fossology/src/lib/php/Data/Tree/ItemTreeBounds.php
+       fossology/src/lib/php/tests/test_common_ui.php
+       fossology/src/lib/php/BusinessRules/ClearingDecisionProcessor.php
+       fossology/src/lib/php/Data/test/HighlightTest.php
+       fossology/src/unifiedreport/ui/agent-foreport.php
+       fossology/src/lib/cpp/tests/run_tests.cc
+       fossology/src/lib/php/Data/ClearingDecision.php
+       fossology/src/monk/agent/hash.h
+       fossology/src/copyright/ui/EccView.php
+       fossology/utils/freshmeat/mktop1k.php
+       fossology/utils/freshmeat/Classes/GetFreshmeatRdf.php
+       fossology/src/pkgagent/mod_deps
+       fossology/src/reuser/agent_tests/Functional/schedulerTest.php
+       fossology/src/maintagent/agent/maintagent.h
+       fossology/src/reuser/ui/agent-reuser.php
+       fossology/src/lib/php/Plugin/Plugin.php
+       fossology/src/demomod/ui/demohello.php
+       fossology/src/scheduler/agent_tests/agents/before_connect.c
+       fossology/src/www/ui/api/Helper/AuthHelper.php
+       fossology/src/lib/php/Data/Folder/test/FolderTest.php
+       fossology/src/lib/php/Proxy/LicenseViewProxy.php
+       fossology/src/lib/php/Exceptions/DuplicateTokenNameException.php
+       fossology/src/ojo/agent/OjoAgent.cc
+       fossology/src/ununpack/agent/ununpack-ar.c
+       fossology/src/www/ui/api/Models/File.php
+       fossology/src/www/ui/ui-file-browse.php
+       fossology/src/cli/tests/test_common.php
+       fossology/src/www/ui_tests/BasicTests/UploadUrlTest.php
+       fossology/src/www/ui/ui-browse-license.php
+       fossology/src/lib/php/Dao/ShowJobsDao.php
+       fossology/src/scheduler/agent_tests/agents/no_disconnect.c
+       fossology/src/lib/php/tests/test_common_sysconfig.php
+       fossology/src/nomos/agent/json_writer.h
+       fossology/src/www/ui/popup-license.php
+       fossology/src/lib/php/Application/UserInfo.php
+       fossology/src/decider/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/testing/db/c/libfodbreposysconf.h
+       fossology/src/www/ui/api/Models/InfoType.php
+       fossology/src/www/ui_tests/Unit/ui-picker-Test.php
+       fossology/src/lib/php/UI/Component/Menu.php
+       fossology/src/monk/agent/database.c
+       fossology/utils/prepare-vagrant-dev.sh
+       fossology/src/lib/php/Data/Clearing/ClearingResult.php
+       fossology/src/wget_agent/agent_tests/Functional/cliParamsTest4WgetAgent.php
+       fossology/src/www/ui_tests/BasicTests/moveUploadTest.php
+       fossology/src/scheduler/agent/Makefile
+       fossology/utils/freshmeat/GetFM
+       fossology/src/www/ui/page/AdminLicenseToCSV.php
+       fossology/src/delagent/agent_tests/Unit/testRun.h
+       fossology/src/lib/php/Application/ObligationCsvExport.php
+       fossology/src/testing/db/c/libfodbreposysconf.c
+       fossology/src/debug/agent/Makefile
+       fossology/src/www/ui/admin-tag.php
+       fossology/src/nomos/agent/CHECKSTR
+       fossology/src/scheduler/agent_tests/agents/no_update.c
+       fossology/src/lib/php/Application/CurlRequestService.php
+       fossology/src/nomos/agent/licenses.c
+       fossology/src/pkgagent/agent_tests/Unit/testRecordMetadataDEB.c
+       fossology/src/delagent/ui/DeleteMessages.php
+       fossology/src/lib/php/Data/DecisionScopes.php
+       fossology/src/testing/lib/fossologyTest.php
+       fossology/src/scheduler/Makefile
+       fossology/src/lib/php/Application/ObligationCsvImport.php
+       fossology/utils/fo_merge
+       fossology/src/www/ui/page/AdminObligationToCSV.php
+       fossology/src/lib/php/Data/UploadStatus.php
+       fossology/src/ununpack/agent_tests/Unit/run_tests.h
+       fossology/src/lib/php/Proxy/test/LatestScannerProxyTest.php
+       fossology/src/wget_agent/agent_tests/Unit/utility.h
+       fossology/src/nomos/agent/nomos_regex.h
+       fossology/src/wget_agent/agent_tests/Unit/wget_agent/testUtilities.c
+       fossology/install/db/dbmigrate_2.5-2.6.php
+       fossology/src/www/ui_tests/BasicTests/uploadSrvDirTest.php
+       fossology/src/monk/agent_tests/Functional/schedulerTest.php
+       fossology/src/www/ui/page/UploadPermissionPage.php
+       fossology/src/testing/reports/xml2html.php
+       fossology/src/lib/php/Data/test/LicenseMatchTest.php
+       fossology/src/mimetype/agent_tests/Unit/testRun.c
+       fossology/src/spdx2/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/ojo/agent/ojos.cc
+       fossology/src/buckets/agent/write.c
+       fossology/src/www/ui/api/Middlewares/RestAuthMiddleware.php
+       fossology/src/nomos/agent/nomos_gap.h
+       fossology/src/ninka/agent/databasehandler.cc
+       fossology/src/ninka/agent/databasehandler.hpp
+       fossology/src/ununpack/agent_tests/Unit/test_ununpack-ar.c
+       fossology/src/ninka/ui/agent-ninka.php
+       fossology/src/copyright/agent_tests/Unit/test_regexConfProvider.cc
+       fossology/src/nomos/agent_tests/Functional/Nomos-fun-test.php
+       fossology/src/demomod/ui/demomod.php
+       fossology/src/decider/ui/DeciderAgentPlugin.php
+       fossology/src/testing/lib/testClasses/ReadInputFile.php
+       fossology/src/decider/agent/BulkReuser.php
+       fossology/src/reuser/agent/reuser.php
+       fossology/src/nomos/agent/nomos_gap.c
+       fossology/utils/freshmeat/tests/tgetfm.php
+       fossology/src/deciderjob/agent/DeciderJobAgent.php
+       fossology/src/nomos/agent/process.h
+       fossology/src/spdx2/agent_tests/Unit/spdx2utilTest.php
+       fossology/src/lib/php/Dao/ClearingDao.php
+       fossology/src/www/ui/page/AdviceLicense.php
+       fossology/src/lib/php/Report/LicenseIrrelevantGetter.php
+       fossology/src/reuser/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/testing/install/test4migrationinstall/test_cp2foss.php
+       fossology/src/ojo/ui/agent-ojos.php
+       fossology/src/lib/php/Test/Reflectory.php
+       fossology/src/ojo/agent_tests/Unit/run_tests.cc
+       fossology/src/lib/php/Dao/TreeDao.php
+       fossology/src/monk/agent_tests/Unit/test_highlight.c
+       fossology/src/ununpack/agent_tests/Functional/Makefile
+       fossology/src/ojo/agent/ojoregex.hpp
+       fossology/src/lib/c/fossconfig.c
+       fossology/src/demomod/agent/usage.c
+       fossology/src/lib/c/fossconfigTest.c
+       fossology/src/nomos/ui_tests/Functional/ckZendTest.php
+       fossology/src/mimetype/Makefile
+       fossology/src/lib/php/View/test/PagedTextResultTest.php
+       fossology/src/www/ui/async/AjaxFolderContents.php
+       fossology/src/www/ui/page/HomePage.php
+       fossology/src/testing/install/migrateConfig.php
+       fossology/src/testing/install/test4packageinstall/test_cp2foss.php
+       fossology/src/www/ui/css/access-token.css
+       fossology/src/lib/php/BusinessRules/test/LicenseMapTest.php
+       fossology/src/deciderjob/ui/DeciderJobAgentPlugin.php
+       fossology/utils/preprocess_php
+       fossology/install/fo_dbcheck.php
+       fossology/src/www/ui/core-auth.php
+       fossology/src/mimetype/agent/mimetype.c
+       fossology/src/testing/db/cleanup_test_databases.php
+       fossology/src/www/ui/async/AjaxFileBrowser.php
+       fossology/src/scheduler/agent_tests/agents/Makefile
+       fossology/src/lib/php/Report/LicenseMainGetter.php
+       fossology/src/copyright/agent/copyscan.hpp
+       fossology/src/lib/php/Data/Clearing/ClearingLicense.php
+       fossology/src/monk/agent/file_operations.h
+       fossology/src/unifiedreport/ui/agent-report.php
+       fossology/src/testing/performance/drawline
+       fossology/src/monk/agent/license.h
+       fossology/src/www/ui_tests/SiteTests/UploadInstructMenuTest.php
+       fossology/src/lib/php/common-container.php
+       fossology/src/lib/cpp/tests/testUtils.hpp
+       fossology/src/lib/php/Data/AgentRef.php
+       fossology/src/monk/agent/buildSquareVisitor.c
+       fossology/src/ninka/agent/ninka.cc
+       fossology/src/demomod/agent_tests/Unit/Makefile
+       fossology/src/cli/fo_nomos_license_list.php
+       fossology/src/lib/php/Dao/UploadPermissionDao.php
+       fossology/src/ojo/agent/OjoState.cc
+       fossology/src/www/ui/page/AdminContentDelete.php
+       fossology/src/scheduler/agent/scheduler.c
+       fossology/src/copyright/ui/agent-copyright.php
+       fossology/install/fossinit.php
+       fossology/src/delagent/agent/delagent.c
+       fossology/src/monk/agent/diff.c
+       fossology/src/copyright/ui/Makefile
+       fossology/src/www/ui/ajax-upload-agents.php
+       fossology/src/demomod/agent_tests/Makefile
+       fossology/utils/freshmeat/tests/GpTestSuite.php
+       fossology/src/pkgagent/agent_tests/Functional/Makefile
+       fossology/src/www/ui_tests/SiteTests/UploadUrlMenuTest.php
+       fossology/src/adj2nest/agent/Makefile
+       fossology/install/db/dbmigrate_2.0-2.5-pre.php
+       fossology/src/copyright/agent/scanners.cc
+       fossology/src/lib/php/tests/test_common_cli.php
+       fossology/src/lib/php/Dao/test/LicenseDaoTest.php
+       fossology/src/ununpack/agent/ununpack-ar.h
+       fossology/src/nomos/agent/licenses.h
+       fossology/src/monk/agent_tests/Unit/test_diff.c
+       fossology/src/www/ui/ui-view-info.php
+       fossology/src/www/ui/api/Models/Job.php
+       fossology/src/unifiedreport/agent_tests/Functional/schedulerTest.php
+       fossology/src/www/ui_tests/VerifyTests/bsam/bsam-verifyFossDirsOnly.php
+       fossology/src/www/ui_tests/VerifyTests/bsam-verifyFossDirsOnly.php
+       fossology/src/testing/lib/bootstrap.php
+       fossology/src/mimetype/agent_tests/Unit/finder/testDBFindMime.c
+       fossology/src/www/ui/api/Helper/DbHelper.php
+       fossology/src/wget_agent/mod_deps
+       fossology/src/reuser/agent_tests/Functional/SchedulerTestRunnerMock.php
+       fossology/src/lib/php/View/test/HighlightProcessorTest.php
+       fossology/src/www/ui/admin-tag-manage.php
+       fossology/src/copyright/ui/HistogramBase.php
+       fossology/src/www/ui/acme_review.php
+       fossology/utils/unique.php
+       fossology/src/testing/utils/printLicTbl.php
+       fossology/src/www/ui/Makefile
+       fossology/src/scheduler/agent_tests/agents/no_check.c
+       fossology/src/demomod/ui/Makefile
+       fossology/src/lib/php/View/test/PagedHexResultTest.php
+       fossology/utils/fedora/get-fsrc.php
+       fossology/src/testing/functional/runAgentFunc.php
+       fossology/src/www/ui_tests/Users/emailUserTest.php
+       fossology/src/monk/agent/serialize.c
+       fossology/src/lib/php/Plugin/DefaultPlugin.php
+       fossology/utils/backup/fo-restore.php
+       fossology/src/monk/agent/encoding.c
+       fossology/src/lib/php/Data/Clearing/test/ClearingResultTest.php
+       fossology/src/pkgagent/ui/agent-pkgagent.php
+       fossology/src/www/ui_tests/BasicTests/editFolderDescriptionOnlyTest.php
+       fossology/src/www/ui/scripts/supervised.js
+       fossology/src/lib/php/tests/Makefile
+       fossology/src/spdx2/ui/DepFiveAgentPlugin.php
+       fossology/src/lib/php/Proxy/LatestScannerProxy.php
+       fossology/src/lib/c/tests/test_fossconfig.c
+       fossology/src/delagent/agent_tests/Unit/testRun.c
+       fossology/src/testing/install/test4migrationinstall/test_common.php
+       fossology/src/lib/php/Html/test/SimpleElementTest.php
+       fossology/src/wget_agent/agent_tests/Functional/Makefile
+       fossology/src/demomod/ui_tests/Makefile
+       fossology/src/lib/php/BusinessRules/test/ClearingDecisionProcessorTest.php
+       fossology/src/ununpack/agent/checksum.c
+       fossology/src/lib/php/Util/test/TimingLoggerTest.php
+       fossology/src/copyright/ui/ajax-copyright-hist.php
+       fossology/src/cli/fo_bucket_list.php
+       fossology/src/lib/php/View/UrlBuilder.php
+       fossology/src/cli/cp2foss.php
+       fossology/src/lib/php/Data/Package/Package.php
+       fossology/src/ununpack/agent/ununpack-disk.c
+       fossology/src/ununpack/agent_tests/Unit/test_DBInsert.c
+       fossology/src/www/ui/page/AboutPage.php
+       fossology/src/reportImport/agent/ReportImportSink.php
+       fossology/src/lib/php/Plugin/AgentPlugin.php
+       fossology/src/www/ui/api/Models/Upload.php
+       fossology/src/cli/tests/test_fo_copyright_list.php
+       fossology/src/example_wc_agent/agent/wc_agent.c
+       fossology/src/testing/lib/common-vm.php
+       fossology/src/monk/agent/highlight.h
+       fossology/src/lib/php/Report/BulkMatchesGetter.php
+       fossology/src/unifiedreport/agent/unifiedreport.php
+       fossology/src/scheduler/agent/interface.c
+       fossology/src/www/ui_tests/Users/addUserTest.php
+       fossology/src/lib/php/tests/test_common_dir.php
+       fossology/src/www/ui/scripts/job-queue-poll.js
+       fossology/src/lib/php/Data/Tree/test/ItemTest.php
+       fossology/src/www/ui/scripts/ui-clearing-view_bulk.js
+       fossology/src/www/ui/ui-view.php
+       fossology/src/lib/php/Html/SimpleHtmlElement.php
+       fossology/src/monk/agent_tests/Unit/test_hash.c
+       fossology/src/testing/templates/PHPUnit/templatePHPUnit.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-empty.php
+       fossology/src/demomod/agent/Makefile
+       fossology/src/www/ui/api/Helper/UploadHelper/HelperToUploadVcsPage.php
+       fossology/src/testing/performance/getresult
+       fossology/src/www/ui/scripts/browse.js
+       fossology/src/www/ui_tests/SiteTests/runSiteTests.php
+       fossology/src/www/ui/ui-treenav.php
+       fossology/src/www/ui_tests/SiteTests/UploadFileMenuTest.php
+       fossology/src/www/ui_tests/SiteTests/OrgUploadsMenuTest-Delete.php
+       fossology/src/lib/php/Data/test/LicenseRefTest.php
+       fossology/src/copyright/ui/TextFindingsAjax.php
+       fossology/src/copyright/ui/keyword-hist.php
+       fossology/src/mimetype/agent_tests/Unit/finder/testOtheFunctions.c
+       fossology/src/ununpack/agent/ununpack.c
+       fossology/src/scheduler/agent/fo_cli.c
+       fossology/src/regexscan/agent/regexscan.c
+       fossology/src/www/ui/api/Models/Analysis.php
+       fossology/src/monk/ui/oneshot.php
+       fossology/src/testing/lib/testClasses/parseLicenseTbl.php
+       fossology/src/www/ui/async/AjaxShowJobs.php
+       fossology/src/copyright/agent/copyright.cc
+       fossology/src/lib/php/Data/test/ClearingDecisionBuilderTest.php
+       fossology/src/testing/install/test4migrationinstall/testdata.php
+       fossology/src/testing/install/test4packageinstall/testdata.php
+       fossology/src/testing/functional/testFOSSology.php
+       fossology/src/scheduler/agent/interface.h
+       fossology/utils/repo-range
+       fossology/src/lib/php/Data/DecisionTypes.php
+       fossology/src/www/ui/admin-scheduler.php
+       fossology/src/lib/php/Data/test/TextFragmentTest.php
+       fossology/src/www/ui/ajax-manage-tag.php
+       fossology/src/lib/php/Report/tests/ClearedGetterCommonTest.php
+       fossology/src/copyright/agent_tests/Unit/test_regex.cc
+       fossology/utils/utils.sh
+       fossology/src/cli/fo_ninka_license_list.php
+       fossology/src/www/ui_tests/VerifyTests/bsam/bsam-verifyFoss23D1F1L.php
+       fossology/src/www/ui_tests/VerifyTests/bsam-verifyFoss23D1F1L.php
+       fossology/src/nomos/agent/nomos.c
+       fossology/src/lib/php/Dao/HighlightDao.php
+       fossology/src/www/ui/ui-report-conf.php
+       fossology/src/lib/php/Data/ClearingDecisionBuilder.php
+       fossology/src/decider/agent_tests/Unit/DeciderAgentTest.php
+       fossology/src/debug/Makefile
+       fossology/src/cli/fo_import_licenses.php
+       fossology/src/www/ui_tests/BasicTests/editFolderNameOnlyTest.php
+       fossology/src/lib/php/View/PagedTextResult.php
+       fossology/src/reportImport/agent/reportImport.php
+       fossology/src/lib/php/Test/TestInstaller.php
+       fossology/src/reuser/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/lib/php/tests/test_common_auth.php
+       fossology/src/testing/lib/testClasses/check4jobs.php
+       fossology/src/ununpack/agent/departition.c
+       fossology/src/buckets/agent/buckets.h
+       fossology/src/www/ui/css/fossology.css
+       fossology/src/lib/php/Test/TestLiteDb.php
+       fossology/src/lib/php/Data/License.php
+       fossology/src/demomod/agent/utils.c
+       fossology/src/www/ui_tests/BasicTests/editFolderTest.php
+       fossology/src/lib/php/Report/LicenseClearedGetter.php
+       fossology/src/lib/c/libfossdbmanager.h
+       fossology/src/testing/utils/checkConfig.php
+       fossology/src/lib/php/Data/Clearing/ClearingEventBuilder.php
+       fossology/src/www/ui/scripts/change-license-browse.js
+       fossology/src/copyright/ui/KeywordView.php
+       fossology/install/db/resequence_author_table.php
+       fossology/src/lib/php/Util/TimingLogger.php
+       fossology/src/lib/php/BusinessRules/ObligationMap.php
+       fossology/src/lib/cpp/libfossdbmanagerclass.cc
+       fossology/src/ojo/mod_deps
+       fossology/src/testing/utils/createRC.php
+       fossology/src/wget_agent/agent_tests/Unit/wget_agent/testSetEnv.c
+       fossology/src/demomod/agent/demomod.h
+       fossology/src/copyright/agent/regexConfParser.cc
+       fossology/src/testing/utils/upl1File.php
+       fossology/src/scheduler/agent_tests/Makefile
+       fossology/src/www/ui_tests/Makefile
+       fossology/src/lib/php/Dao/test/UserDaoTest.php
+       fossology/src/testing/lib/common-Ui.php
+       fossology/src/lib/php/Html/test/LinkElementTest.php
+       fossology/src/lib/php/Auth/Auth.php
+       fossology/src/unifiedreport/agent/reportSummary.php
+       fossology/src/ninka/agent_tests/Unit/run_tests.cc
+       fossology/src/www/ui_tests/SiteTests/OrgFoldersMenuTest-Move.php
+       fossology/src/demomod/ui/agent-demomod.php
+       fossology/src/www/ui/async/AjaxJobStatus.php
+       fossology/src/www/ui/api/documentation/openapi.yaml
+       fossology/src/lib/php/Proxy/test/UploadBrowseProxyTest.php
+       fossology/src/spdx2/agent/spdx2utils.php
+       fossology/src/www/ui/ui-download.php
+       fossology/src/copyright/ui/agent-ecc.php
+       fossology/install/db/dbmigrate_2.0-2.1.php
+       fossology/src/maintagent/agent/Makefile
+       fossology/src/lib/php/Dao/test/FolderDaoTest.php
+       fossology/src/lib/php/tests/test_common_license_file.php
+       fossology/src/www/ui_tests/VerifyTests/verifyFossI16L335U29.php
+       fossology/src/adj2nest/ui/agent_adj2nest.php
+       fossology/src/scheduler/agent/sqlstatements.h
+       fossology/src/scheduler/agent_tests/Unit/testScheduler.c
+       fossology/src/www/ui_tests/BasicTests/DeleteFolderTest.php
+       fossology/src/www/ui/api/Models/SearchResult.php
+       fossology/src/lib/php/Test/EnumMapTestBase.php
+       fossology/src/ninka/agent_tests/Functional/schedulerTest.php
+       fossology/src/lib/php/Data/Upload/test/UploadTest.php
+       fossology/src/copyright/ui/ecc-hist.php
+       fossology/src/ununpack/agent_tests/Unit/test_TraverseChild.c
+       fossology/src/ununpack/agent_tests/Unit/test_IsFunctions.c
+       fossology/src/nomos/agent/nomos_utils.c
+       fossology/src/lib/php/Application/test/UserInfoTest.php
+       fossology/src/www/ui_tests/SiteTests/OrgFoldersMenuTest-Delete.php
+       fossology/src/lib/php/View/test/HighlightStateTest.php
+       fossology/src/www/ui/ajax-tags.php
+       fossology/src/www/ui/api/Middlewares/FossologyInitMiddleware.php
+       fossology/src/nomos/agent/doctorBuffer_utils.h
+       fossology/utils/freshmeat/trac.php
+       fossology/src/lib/php/Proxy/test/UploadTreeProxyTest.php
+       fossology/src/lib/php/Data/Clearing/test/ClearingEventTypesTest.php
+       fossology/src/spdx2/ui/SpdxTwoGeneratorUi.php
+       fossology/src/maintagent/ui/Makefile
+       fossology/src/wget_agent/Makefile
+       fossology/src/lib/c/libfossagent.c
+       fossology/src/testing/lib/libTestDB.php
+       fossology/src/testing/utils/RemoveTestUser.sh
+       fossology/src/example_wc_agent/ui_tests/Unit/Makefile
+       fossology/src/monk/agent_tests/Unit/run_tests.c
+       fossology/src/mimetype/agent_tests/Unit/testRun.h
+       fossology/src/scheduler/agent/host.h
+       fossology/src/testing/install/test4packageinstall/test_common.php
+       fossology/src/testing/db/createTestDB.php
+       fossology/src/testing/lib/testClasses/parsePgLinks.php
+       fossology/src/www/ui_tests/BasicTests/UploadFileTest.php
+       fossology/src/maintagent/Makefile
+       fossology/src/lib/php/View/test/TextRendererTest.php
+       fossology/src/cli/tests/dashR.php
+       fossology/src/nomos/agent/nomos_regex.c
+       fossology/src/scheduler/agent/fo_scheduler.c
+       fossology/src/monk/agent/encoding.h
+       fossology/src/scheduler/agent_tests/Unit/testDatabase.c
+       fossology/src/www/ui/agent-add.php
+       fossology/src/maintagent/ui/maintagent.php
+       fossology/src/www/ui/change-license-bulk.php
+       fossology/src/ojo/agent/ojos.hpp
+       fossology/src/ununpack/agent_tests/Unit/run_tests.c
+       fossology/src/ununpack/agent/traverse.c
+       fossology/src/decider/agent_tests/Functional/SchedulerTestRunnerMock.php
+       fossology/src/scheduler/agent/emailformatter.c
+       fossology/src/ninka/agent/ninka.hpp
+       fossology/src/buckets/ui/ui-buckets.php
+       fossology/src/ojo/agent/ojomatch.hpp
+       fossology/src/ojo/agent/directoryScan.cc
+       fossology/src/cli/tests/duplicate-Upfolder.php
+       fossology/install/db/dbmigrate_3.5-3.6.php
+       fossology/src/delagent/agent_tests/Functional/ft_cliDelagentTest.php
+       fossology/src/delagent/ui/Makefile
+       fossology/src/copyright/agent/identity.hpp
+       fossology/src/www/ui/showjobs.php
+       fossology/src/nomos/ui/agent-nomos.php
+       fossology/src/monk/agent_tests/Unit/test_serialize.c
+       fossology/src/cli/fo_monk_license_list.php
+       fossology/src/scheduler/agent_tests/Unit/testRun.c
+       fossology/src/lib/php/View/TextRenderer.php
+       fossology/utils/deploy-pages.sh
+       fossology/src/www/ui/admin-folder-edit.php
+       fossology/src/lib/php/View/PagedHexResult.php
+       fossology/src/lib/php/Data/test/DecisionTypesTest.php
+       fossology/src/testing/lib/testClasses/parseLicenseTblDirs.php
+       fossology/src/www/ui_tests/VerifyTests/OneShot-lgpl2.1.php
+       fossology/src/copyright/mod_deps
+       fossology/src/delagent/agent_tests/Unit/testInitDB.sh
+       fossology/utils/freshmeat/diffm.pod
+       fossology/src/monk/agent_tests/Unit/test_encoding.c
+       fossology/src/reportImport/ui/ReportImportAgentPlugin.php
+       fossology/src/testing/utils/checkOutSrcs.php
+       fossology/src/copyright/agent_tests/Unit/test_scanners.cc
+       fossology/src/wget_agent/ui/Makefile
+       fossology/src/lib/php/Text/tests/EncodingConverterTest.php
+       fossology/src/readmeoss/ui/ReadMeOssPlugin.php
+       fossology/src/scheduler/agent/emailformatter.h
+       fossology/src/lib/php/Text/Converter.php
+       fossology/src/www/ui_tests/BasicTests/DupFolderTest.php
+       fossology/src/copyright/ui/list.php
+       fossology/src/maintagent/agent/process.c
+       fossology/src/ojo/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/demomod/agent/process.c
+       fossology/utils/freshmeat/get-projects.php
+       fossology/utils/parse_license.php
+       fossology/src/lib/php/UI/test/FolderNavTest.php
+       fossology/src/copyright/ui/oneshot.php
+       fossology/src/cli/tests/install
+       fossology/src/adj2nest/agent/adj2nest.c
+       fossology/src/maintagent/agent/maintagent.c
+       fossology/src/debug/ui/core-debug-fileloc.php
+       fossology/src/www/ui/page/AdminLicenseFromCSV.php
+       fossology/src/ojo/agent/directoryScan.hpp
+       fossology/src/copyright/agent/copyrightState.cc
+       fossology/src/monk/agent/monk.c
+       fossology/src/pkgagent/agent/pkgagent.c
+       fossology/src/monk/ui/admin-monk-revision.php
+       fossology/src/delagent/agent/delagent.h
+       fossology/src/www/ui_tests/Users/userEditAnyTest.php
+       fossology/src/cli/fo_chmod.php
+       fossology/src/www/ui/user-add.php
+       fossology/src/scheduler/agent_tests/Unit/testInterface.c
+       fossology/src/lib/php/View/PagedResult.php
+       fossology/src/testing/unit/runAgentUnit.php
+       fossology/src/lib/php/Dao/UploadDao.php
+       fossology/src/lib/php/Test/TestAbstractDb.php
+       fossology/src/cli/fo_folder.php
+       fossology/src/cli/fossjobs.php
+       fossology/src/lib/php/Test/test/TestPgDbTest.php
+       fossology/src/www/ui_tests/Users/dupUserTest.php
+       fossology/src/ununpack/agent_tests/Functional/cliParamsTest4UnunpackException.php
+       fossology/src/buckets/agent/buckets.c
+       fossology/src/reuser/agent/ReuserAgent.php
+       fossology/src/www/ui/api/Controllers/ReportController.php
+       fossology/src/lib/php/Agent/Agent.php
+       fossology/src/testing/utils/CreateTestUser.sh
+       fossology/src/cli/fo_tagfoss.php
+       fossology/src/deciderjob/agent_tests/Functional/schedulerTest.php
+       fossology/src/nomos/agent_tests/Functional/Makefile
+       fossology/src/lib/php/Dao/FolderDao.php
+       fossology/src/example_wc_agent/ui/Makefile
+       fossology/src/testing/db/create_test_database.php
+       fossology/src/ununpack/agent_tests/Unit/test_Prune.c
+       fossology/src/lib/cpp/libfossAgentDatabaseHandler.hpp
+       fossology/src/copyright/agent/copyscan.cc
+       fossology/src/reportImport/agent/ReportImportConfiguration.php
+       fossology/src/ununpack/agent/ununpack_globals.h
+       fossology/src/copyright/agent/regscan.hpp
+       fossology/src/regexscan/agent/Makefile
+       fossology/src/testing/utils/wait4jobs.php
+       fossology/src/cli/tests/all_tests.php
+       fossology/src/spdx2/ui/SpdxTwoAgentPlugin.php
+       fossology/src/lib/php/Data/Clearing/AgentClearingEvent.php
+       fossology/src/reportImport/agent/ReportImportDataItem.php
+       fossology/src/nomos/ui_tests/Functional/verifyRedHatTest.php
+       fossology/src/www/ui_tests/EmailNotification/changeENV.php
+       fossology/src/lib/php/Data/TextFragment.php
+       fossology/src/scheduler/agent_tests/Unit/testAgent.c
+       fossology/src/ununpack/agent_tests/testdata/testit.sh
+       fossology/src/nomos/ui/agent-nomos-once.php
+       fossology/src/mimetype/agent/finder.h
+       fossology/src/testing/lib/TestRun.php
+       fossology/src/testing/functional/genFuncTestsResult
+       fossology/src/nomos/agent_tests/Unit/test_DoctoredBuffer.c
+       fossology/src/wget_agent/agent_tests/Unit/testRun.c
+       fossology/src/example_wc_agent/agent_tests/Functional/Makefile
+       fossology/src/www/ui_tests/Unit/test-showjobs.php
+       fossology/src/www/ui/template/next-options.js.twig
+       fossology/src/www/ui/admin-config.php
+       fossology/src/www/ui/api/index.php
+       fossology/src/lib/php/tests/test_common_menu.php
+       fossology/src/delagent/ui/Page/AdminUploadDelete.php
+       fossology/src/lib/php/View/test/HighlightRendererTest.php
+       fossology/src/lib/c/tests/test_fossscheduler.c
+       fossology/src/testing/lib/testClasses/parseFolderPath.php
+       fossology/src/testing/reports/textReport.php
+       fossology/src/www/Makefile
+       fossology/src/lib/c/tests/test_libfossdb.c
+       fossology/src/testing/lib/c/libfocunit.h
+       fossology/src/lib/php/Report/obligations.php
+       fossology/src/delagent/agent_tests/Unit/testDeleteFolders.c
+       fossology/src/scheduler/agent_tests/Unit/utils.c
+       fossology/src/spdx2/agent/spdx2.php
+       fossology/src/www/ui/css/highlights.css
+       fossology/src/nomos/agent/list.h
+       fossology/utils/runBuild_v2.0.php
+       fossology/src/lib/php/Application/LicenseCsvExport.php
+       fossology/src/delagent/mod_deps
+       fossology/src/monk/agent_tests/Functional/bulkTest.php
+       fossology/src/testing/utils/printUrlTbl.php
+       fossology/src/www/ui/page/AdminContentMove.php
+       fossology/src/copyright/ui/agent-keyword.php
+       fossology/src/www/ui/ui-browse.php
+       fossology/src/pkgagent/agent_tests/Unit/testRecordMetadataRPM.c
+       fossology/src/ununpack/agent_tests/Unit/test_PathCheck.c
+       fossology/src/lib/php/Data/Package/test/PackageTest.php
+       fossology/src/lib/php/Util/DataTablesUtility.php
+       fossology/src/lib/php/Data/Clearing/ClearingEventTypes.php
+       fossology/src/ununpack/agent_tests/testdata/setupDb.sh
+       fossology/src/maintagent/agent/usage.c
+       fossology/src/lib/c/tests/testlibs.c
+       fossology/src/lib/php/Application/test/LicenseCsvImportTest.php
+       fossology/src/unifiedreport/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/www/ui/page/UploadVcsPage.php
+       fossology/src/ununpack/mod_deps
+       fossology/src/www/ui_tests/Tweb.php
+       fossology/src/cli/fo_wrapper.php.in
+       fossology/install/db/dbmigrate_copyright-author.php
+       fossology/src/www/ui/user-del.php
+       fossology/src/pkgagent/agent_tests/Unit/testGetMetadata.c
+       fossology/src/www/ui/async/AjaxBulkHistory.php
+       fossology/src/testing/lib/testClasses/db.php
+       fossology/src/wget_agent/agent/wget_agent.h
+       fossology/src/mimetype/agent_tests/Functional/Makefile
+       fossology/src/lib/php/Data/Clearing/test/AgentClearingEventTest.php
+       fossology/src/scheduler/agent_tests/Unit/testHost.c
+       fossology/install/db/export_license_ref.php
+       fossology/src/reportImport/agent/SpdxTwoImportSource.php
+       fossology/src/lib/php/Plugin/FO_Plugin.php
+       fossology/src/monk/agent_tests/Unit/test_string_operations.c
+       fossology/src/buckets/Makefile
+       fossology/src/lib/php/Util/StringOperation.php
+       fossology/src/www/ui/page/UploadPageBase.php
+       fossology/utils/fedora/clean-tars.php
+       fossology/src/lib/php/Data/Upload/Upload.php
+       fossology/src/ununpack/agent_tests/Unit/test_Traverse.c
+       fossology/src/lib/php/tests/test_common_pkg.php
+       fossology/src/www/ui/page/UploadUrlPage.php
+       fossology/install/db/dbmigrate_1.4-2.0.php
+       fossology/src/lib/php/Db/test/SolidDbManagerTest.php
+       fossology/src/lib/php/Data/Tree/test/ItemTreeBoundsTest.php
+       fossology/src/www/ui/scripts/legend.js
+       fossology/src/www/ui/async/AjaxBrowse.php
+       fossology/install/db/migratetest.php
+       fossology/src/copyright/agent/directoryScan.hpp
+       fossology/src/www/ui_tests/BasicTests/uploadSrvFileTest.php
+       fossology/src/maintagent/agent/utils.c
+       fossology/src/cli/tests/TestPlan.txt
+       fossology/src/buckets/ui/Makefile
+       fossology/src/testing/utils/configTestEnv.php
+       fossology/src/cli/tests/parameters.php
+       fossology/src/copyright/ui/email-hist.php
+       fossology/src/www/ui/group-add.php
+       fossology/src/www/ui/api/Models/Info.php
+       fossology/install/db/dbmigrate_real-parent.php
+       fossology/src/buckets/agent/walk.c
+       fossology/src/copyright/agent/regexConfParser.hpp
+       fossology/src/www/ui/search.php
+       fossology/src/scheduler/agent_tests/agents/simple.c
+       fossology/src/scheduler/agent/database.h
+       fossology/src/testing/install/vmcheck.php
+       fossology/src/lib/php/Dao/test/UploadDaoTest.php
+       fossology/src/lib/php/BusinessRules/LicenseMap.php
+       fossology/src/testing/unit/runPkgUnitTests
+       fossology/src/lib/php/Db/Driver/Postgres.php
+       fossology/src/copyright/ui/CopyrightView.php
+       fossology/src/ununpack/agent_tests/testdata/dropDb.sh
+       fossology/src/delagent/agent_tests/Unit/Makefile
+       fossology/src/copyright/agent/directoryScan.cc
+       fossology/utils/freshmeat/lib_projxml.h.php
+       fossology/src/lib/cpp/tests/test_fossdbmanagerclass.cc
+       fossology/src/monk/agent/license.c
+       fossology/src/scheduler/agent_tests/agents/multi_connect.c
+       fossology/src/www/ui_tests/VerifyTests/verifyFossDirsOnly.php
+       fossology/src/scheduler/agent/event.h
+       fossology/src/www/ui/admin-dashboard.php
+       fossology/src/copyright/ui/library.php
+       fossology/src/monk/ui/agent-monk-bulk.php
+       fossology/src/lib/php/Html/HtmlElement.php
+       fossology/src/lib/php/Application/test/LicenseCsvExportTest.php
+       fossology/src/lib/php/Application/LicenseCsvImport.php
+       fossology/src/adj2nest/Makefile
+       fossology/src/www/ui/api/Controllers/UserController.php
+       fossology/src/lib/php/BusinessRules/ClearingDecisionFilter.php
+       fossology/utils/freshmeat/mk_fmdirs.php
+       fossology/src/www/ui/ui-license-list-files.php
+       fossology/src/lib/php/Proxy/UploadTreeViewProxy.php
+       fossology/src/lib/php/Db/ModernDbManager.php
+       fossology/src/monk/agent_tests/Functional/cliTest.php
+       fossology/src/readmeoss/agent/readmeoss.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-JSON.php
+       fossology/src/lib/php/Dao/LicenseDao.php
+       fossology/src/pkgagent/agent_tests/Unit/testGetMetadataDebSource.c
+       fossology/src/cli/tests/test_oneshot.php
+       fossology/src/lib/php/Util/test/StringOperationTest.php
+       fossology/src/lib/php/Proxy/UploadBrowseProxy.php
+       fossology/src/testing/utils/installTestData.sh
+       fossology/src/readmeoss/ui/ReadMeOssAgentPlugin.php
+       fossology/src/cli/exportLicenseRefUsingSPDX.php
+       fossology/src/copyright/agent/regexConfProvider.hpp
+       fossology/src/lib/php/BusinessRules/AgentLicenseEventProcessor.php
+       fossology/src/www/ui/user-del-helper.php
+       fossology/src/testing/utils/Nightly.php
+       fossology/src/scheduler/agent/agent.h
+       fossology/src/lib/php/Proxy/test/LicenseViewProxyTest.php
+       fossology/src/www/ui/api/Helper/RestHelper.php
+       fossology/src/scheduler/agent/logging.h
+       fossology/utils/freshmeat/tests/tfmrdf.php
+       fossology/src/testing/templates/simpletest/SampleTestRunner.php
+       fossology/src/ununpack/agent_tests/Unit/test_CopyFile.c
+       fossology/src/ununpack/ui/agent-unpack.php
+       fossology/src/www/ui/async/AjaxManageToken.php
+       fossology/src/lib/php/Text/EncodingConverter.php
+       fossology/src/cli/tests/desc.php
+       fossology/src/ununpack/agent_tests/Functional/cliParamsTest4UnunpackNormal.php
+       fossology/src/buckets/agent/match.c
+       fossology/src/www/ui/i18n.php
+       fossology/src/ununpack/ui/ui-reunpack.php
+       fossology/src/www/ui/api/Models/User.php
+       fossology/src/mimetype/mod_deps
+       fossology/src/nomos/ui_tests/Makefile
+       fossology/src/scheduler/ui_tests/Makefile
+       fossology/src/ununpack/ui_tests/Makefile
+       fossology/src/testing/functional/runVerifyUploadsTests.php
+       fossology/src/mimetype/ui/agent-mimetype.php
+       fossology/utils/backup/S3/fo-restore-s3
+       fossology/src/lib/php/UI/MenuHook.php
+       fossology/src/deciderjob/agent/deciderjob.php
+       fossology/src/srcdocs/Makefile
+       fossology/src/ununpack/agent/ununpack-iso.c
+       fossology/src/www/ui/template/upload_srv.js.twig
+       fossology/src/scheduler/agent_tests/Unit/testRun.h
+       fossology/src/lib/php/Data/LicenseMatch.php
+       fossology/src/lib/php/Plugin/test/DefaultPluginTest.php
+       fossology/src/reportImport/agent/ReportImportData.php
+       fossology/src/scheduler/agent_tests/Functional/Makefile
+       fossology/src/monk/agent/monk.h
+       fossology/src/nomos/agent/GENSEARCHDATA
+       fossology/src/pkgagent/agent/pkgagent.h
+       fossology/src/lib/php/Data/Types.php
+       fossology/src/pkgagent/agent_tests/Functional/ft_cliPkgagentTest.php
+       fossology/src/wget_agent/agent_tests/Unit/testRun.h
+       fossology/src/delagent/agent_tests/Unit/testListFolders.c
+       fossology/src/lib/php/Db/Driver.php
+       fossology/src/scheduler/agent_tests/Unit/Makefile
+       fossology/utils/backup/S3/fo-backup-s3
+       fossology/src/lib/php/tests/test_common_active.php
+       fossology/src/lib/php/Data/Clearing/LicenseClearing.php
+       fossology/src/lib/php/Data/SplitPosition.php
+       fossology/src/buckets/agent/validate.c
+       fossology/src/ninka/agent/state.hpp
+       fossology/src/copyright/agent/cleanEntries.cc
+       fossology/src/cli/schema-export.php
+       fossology/src/testing/fo_integration.php
+       fossology/src/lib/cpp/libfossologyCPP.hpp
+       fossology/src/www/ui/page/AdminGroupDelete.php
+       fossology/src/www/ui/admin-obligation-file.php
+       fossology/src/www/ui/ui-picker.php
+       fossology/src/www/ui_tests/BasicTests/BasicSetup.php
+       fossology/src/copyright/agent/copyrightUtils.cc
+       fossology/src/lib/php/Data/LicenseRef.php
+       fossology/src/lib/php/Util/ArrayOperation.php
+       fossology/src/lib/php/Dao/CopyrightDao.php
+       fossology/src/example_wc_agent/ui_tests/Functional/Makefile
+       fossology/src/lib/php/tests/test_common_parm.php
+       fossology/src/lib/c/libfossscheduler.c
+       fossology/src/decider/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/demomod/agent/demomod.c
+       fossology/src/copyright/agent/scanners.hpp
+       fossology/src/www/ui_tests/BasicTests/moveFolderTest.php
+       fossology/src/lib/php/Html/LinkElement.php
+       fossology/src/nomos/agent_tests/Unit/run_tests.c
+       fossology/src/monk/agent/scheduler.h
+       fossology/utils/freshmeat/tests/runGp.php
+       fossology/src/example_wc_agent/agent_tests/Unit/Makefile
+       fossology/src/example_wc_agent/agent_tests/Makefile
+       fossology/src/example_wc_agent/ui_tests/Makefile
+       fossology/src/nomos/agent/GenCodeCopyright
+       fossology/src/ununpack/agent/ununpack.h
+       fossology/src/cli/fo_tagfile.php
+       fossology/src/ununpack/agent_tests/Unit/test_ununpack-disk.c
+       fossology/src/monk/agent/monkbulk.h
+       fossology/src/copyright/agent/copyrightState.hpp
+       fossology/src/scheduler/agent_tests/agents/db_connect.c
+       fossology/src/scheduler/mod_deps
+       fossology/src/www/ui/api/Controllers/RestController.php
+       fossology/src/buckets/agent/liccache.c
+       fossology/src/lib/cpp/files.hpp
+       fossology/src/lib/php/BusinessRules/test/ClearingDecisionFilterTest.php
+       fossology/src/delagent/agent/util.c
+       fossology/src/lib/php/Dao/AgentDao.php
+       fossology/src/nomos/Makefile
+       fossology/src/www/ui_tests/BasicTests/createFldrDeleteIt.php
+       fossology/src/www/ui/api/Controllers/AuthController.php
+       fossology/src/www/ui/async/AjaxJobInfo.php
+       fossology/src/testing/fointeg.php
+       fossology/src/debug/ui/core-debug-plugins.php
+       fossology/src/nomos/agent/encode.c
+       fossology/src/scheduler/agent_tests/Unit/testJob.c
+       fossology/src/delagent/ui/admin-folder-delete.php
+       fossology/src/www/ui/admin-license-file.php
+       fossology/src/lib/c/fossconfig.h
+       fossology/src/testing/utils/BuildandInstall.php
+       fossology/src/nomos/ui_tests/Unit/Makefile
+       fossology/src/wget_agent/agent_tests/Unit/utility.c
+       fossology/src/lib/php/Test/TestPgDb.php
+       fossology/src/lib/php/Dao/test/ShowJobsDaoTest.php
+       fossology/install/fossinit-common.php
+       fossology/src/monk/agent/serialize.h
+       fossology/src/monk/agent_tests/Unit/test_match.c
+       fossology/src/lib/php/Application/CurlRequest.php
+       fossology/src/ununpack/agent/checksum.h
+       fossology/src/mimetype/agent_tests/Unit/finder/testDBLoadMime.c
+       fossology/src/ninka/agent/licensematch.hpp
+       fossology/src/testing/unit/genUnitTestsResult
+       fossology/fossology_doxygen.conf
+       fossology/src/ojo/agent/OjoAgent.hpp
+       fossology/src/lib/php/View/test/PagedResultTest.php
+       fossology/src/nomos/agent_tests/Functional/CommonCliTest.php
+       fossology/src/delagent/Makefile
+       fossology/src/nomos/ui/Makefile
+       fossology/src/debug/ui/Makefile
+       fossology/src/www/ui/user-edit.php
+       fossology/src/copyright/agent/copyrightUtils.hpp
+       fossology/src/lib/php/Report/ClearedGetterCommon.php
+       fossology/src/testing/checkTestData.php
+       fossology/src/scheduler/agent_tests/Functional/Functional.xml
+       fossology/src/lib/php/Proxy/test/ScanJobProxyTest.php
+       fossology/src/nomos/agent/util.h
+       fossology/src/www/ui_tests/SiteTests/AboutMenuTest.php
+       fossology/src/lib/php/Data/test/DecisionScopesTest.php
+       fossology/src/pkgagent/agent_tests/Unit/testTrim.c
+       fossology/src/ununpack/agent_tests/Functional/utility.php
+       fossology/src/testing/utils/testCleanUp.php
+       fossology/src/ununpack/Makefile
+       fossology/src/www/ui/admin-folder-create.php
+       fossology/install/db/dbmigrate_2.1-2.2.php
+       fossology/src/delagent/agent_tests/Functional/ft_DelagentTest.php
+       fossology/src/scheduler/agent/job.c
+       fossology/src/www/ui_tests/SiteTests/UploadServerMenuTest.php
+       fossology/src/www/ui/api/Controllers/BadRequestController.php
+       fossology/src/regexscan/agent/regexscan-Stage3.c
+       fossology/src/wget_agent/agent/wget_agent.c
+       fossology/src/adj2nest/ui/Makefile
+       fossology/src/ninka/agent/ninkawrapper.hpp
+       fossology/src/cli/fo_usergroup.php
+       fossology/src/lib/php/Dao/JobDao.php
+       fossology/src/wget_agent/agent_tests/Unit/wget_agent/testGetURL.c
+       fossology/src/pkgagent/agent_tests/Unit/testGetFieldValue.c
+       fossology/src/monk/agent/genSquareVisitor
+       fossology/src/cli/fo_copyright_list.php
+       fossology/src/www/ui/async/ScheduleAgent.php
+       fossology/utils/mkpod
+       fossology/src/www/ui_tests/SiteTests/OrgFoldersMenuTest-Edit.php
+       fossology/src/copyright/ui/Xpview.php
+       fossology/src/decider/agent_tests/Functional/HelperPluginMock.php
+       fossology/src/copyright/agent/copyright.hpp
+       fossology/src/delagent/agent_tests/Functional/Makefile
+       fossology/src/lib/php/View/HighlightState.php
+       fossology/src/decider/agent/decider.php
+       fossology/src/www/ui/core-smauth.php
+       fossology/src/ojo/agent/OjoUtils.hpp
+       fossology/utils/freshmeat/wrapGFM
+       fossology/src/www/ui_tests/BasicTests/runBasicTests.php
+       fossology/src/www/ui/ui-tags.php
+       fossology/src/monk/agent/diff.h
+       fossology/src/copyright/agent/regscan.cc
+       fossology/src/lib/cpp/libfossdbQueryResult.hpp
+       fossology/src/pkgagent/agent_tests/Unit/testGetMetadataDebBinary.c
+       fossology/src/ojo/agent_tests/Functional/SchedulerTestRunnerScheduler.php
+       fossology/src/cli/tests/test_fo_nomos_license_list.php
+       fossology/src/ununpack/agent/Makefile
+       fossology/src/testing/dataFiles/mailTo.php
+       fossology/src/testing/lib/fossologyTestCase.php
+       fossology/src/testing/utils/lnfo-runTests.php
+       fossology/src/testing/lib/c/libfocunit.c
+       fossology/src/scheduler/agent/event.c
+       fossology/src/www/ui_tests/SiteTests/SearchMenuTest.php
+       fossology/src/www/ui/page/GettingStartedPage.php
+       fossology/src/wget_agent/ui/wget_agent.php
+       fossology/src/lib/php/Exception.php
+       fossology/src/ununpack/agent_tests/Unit/test_TraverseStart.c
+       fossology/src/www/ui/ui-refresh.php
+       fossology/src/www/ui/ui-topnav.php
+       fossology/src/debug/ui/core-debug-menus.php
+       fossology/src/www/ui/async/AjaxExplorer.php
+       fossology/src/www/ui_tests/VerifyTests/verifyFoss23D1F1L.php
+       fossology/src/testing/db/createEmptyTestEnvironment.php
+       fossology/src/www/ui/api/Models/Decider.php
+       fossology/utils/freshmeat/tests/TestPlan.txt
+       fossology/src/copyright/agent/regex.hpp
+       fossology/src/testing/templates/simpletest/templateTest.php
+       fossology/src/lib/c/tests/Makefile
+       fossology/src/nomos/mod_deps
+       fossology/src/ununpack/agent_tests/Unit/test_TaintString.c
+       fossology/src/buckets/ui/ui-list-bucket-files.php
+       fossology/src/testing/utils/fo-runTests.php
+       fossology/src/reportImport/agent/XmlImportSource.php
+       fossology/src/lib/php/Dao/UserDao.php
+       fossology/src/www/ui/css/showjobs.css
+       fossology/src/www/ui_tests/VerifyTests/bsam/bsam-verifyFossI16L518.php
+       fossology/src/www/ui_tests/VerifyTests/bsam-verifyFossI16L518.php
+       fossology/src/cli/tests/test_fossjobs.php
+       fossology/src/nomos/agent/json_writer.c
+       fossology/src/buckets/agent/child.c
+       fossology/src/monk/agent/common.c
+       fossology/src/lib/php/Report/OtherGetter.php
+       fossology/src/lib/php/Proxy/ScanJobProxy.php
+       fossology/src/lib/php/UI/FolderNav.php
+       fossology/install/db/dbmigrate_3.3-3.4.php
+       fossology/src/www/ui/api/Helper/UploadHelper.php
+       fossology/src/lib/php/View/HighlightRenderer.php
+       fossology/src/delagent/agent_tests/Unit/testInitRepo.sh
+       fossology/utils/fo-mktar
+       fossology/src/lib/cpp/files.cc
+       fossology/src/lib/php/Report/XpClearedGetter.php
+       fossology/src/lib/c/tests/test_libfossdbmanager.c
+       fossology/src/monk/agent/string_operations.c
+       fossology/src/lib/php/UI/MenuRenderer.php
+       fossology/src/debug/ui/core-debug-user.php
+       fossology/src/www/ui_tests/Users/noEmailUserTest.php
+       fossology/src/monk/agent/string_operations.h
+       fossology/src/www/ui/core-init.php
+       fossology/src/ojo/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/testing/install/srcConfig.php
+       fossology/src/www/ui/search-helper.php
+       fossology/src/www/ui/page/AdminLicenseCandidate.php
+       fossology/src/buckets/agent/Makefile
+       fossology/src/scheduler/agent/host.c
+       fossology/utils/fedora/tarup-fedora.pl
+       fossology/src/www/ui/ajax-schedule-agent.php
+       fossology/src/delagent/agent_tests/Makefile
+       fossology/src/mimetype/agent_tests/Makefile
+       fossology/src/nomos/agent_tests/Makefile
+       fossology/src/pkgagent/agent_tests/Makefile
+       fossology/src/ununpack/agent_tests/Makefile
+       fossology/src/wget_agent/agent_tests/Makefile
+       fossology/src/lib/php/Db/SolidDbManager.php
+       fossology/utils/freshmeat/tests/tReadInFile.php
+       fossology/src/wget_agent/agent_tests/Unit/wget_agent/testDBLoadGold.c
+       fossology/src/lib/php/Proxy/DbViewProxy.php
+       fossology/src/www/ui/scripts/tools.js
+       fossology/src/monk/agent/cli.h
+       fossology/src/ojo/agent/OjoState.hpp
+       fossology/src/testing/functional/runUploadsTest.php
+       fossology/src/www/ui/api/Controllers/UploadController.php
+       fossology/src/lib/php/Dao/test/TreeDaoTest.php
+       fossology/src/mimetype/agent_tests/Unit/finder/testDBCheckMime.c
+       fossology/src/demomod/Makefile
+       fossology/src/lib/php/Data/JobStatus.php
+       fossology/src/monk/agent/common.h
+       fossology/src/mimetype/agent/finder.c
+       fossology/src/monk/agent/hash.c
+       fossology/src/nomos/ui/nomos-diff.php
+       fossology/src/deciderjob/agent_tests/Functional/SchedulerTestRunnerMock.php
+       fossology/utils/prepare-test
+       fossology/src/lib/php/Application/test/RepositoryApiTest.php
+       fossology/src/reportImport/agent/ImportSource.php
+       fossology/src/nomos/agent/doctorBuffer_utils.c
+       fossology/src/ninka/agent/utils.cc
+       fossology/utils/freshmeat/ReadMe
+       fossology/src/lib/cpp/libfossdbQueryResult.cc
+       fossology/src/testing/utils/libCopyRight.php
+       fossology/src/testing/functional/FossologyFunctionalTests.php
+       fossology/src/www/ui/api/Controllers/SearchController.php
+       fossology/src/www/ui/scripts/copyrightHist.js
+       fossology/src/scheduler/agent/logging.c
+       fossology/src/lib/php/Data/Folder/Folder.php
+       fossology/src/decider/agent/DeciderAgent.php
+       fossology/src/testing/regression/regressiontest.php
+       fossology/src/www/ui_tests/BasicTests/CreateFolderTest.php
+       fossology/src/delagent/agent/Makefile
+       fossology/src/scheduler/agent_tests/Functional/Functional.py
+       fossology/src/www/ui_tests/BasicTests/UploadSrvArchiveTest.php
+       fossology/src/lib/c/libfossdbmanager.c
+       fossology/src/www/ui/change-license-processPost.php
+       fossology/src/www/ui/scripts/change-license-common.js
+       fossology/src/www/ui_tests/BasicTests/DupUploadTest.php
+       fossology/utils/freshmeat/mktop1k.pod
+       fossology/src/copyright/agent/database.cc
+       fossology/src/lib/php/Data/Tree/Item.php
+       fossology/src/ninka/agent/utils.hpp
+       fossology/src/lib/php/Test/test/ReflectoryTest.php
+       fossology/src/lib/php/Test/test/TestLiteDbTest.php
+       fossology/src/ununpack/agent/utils.c
+       fossology/src/www/ui/ui-clearing-view.php
+       fossology/src/lib/php/Data/Highlight.php
+       fossology/src/testing/lib/testClasses/parseMiniMenu.php
+       fossology/src/lib/php/Proxy/test/UploadTreeViewProxyTest.php
+       fossology/src/nomos/agent/DMalloc.c
+       fossology/src/www/ui/page/AdminGroupUsers.php
+       fossology/src/pkgagent/agent_tests/Unit/testRun.c
+       fossology/src/nomos/agent/parse.h
+       fossology/src/lib/php/Data/Clearing/ClearingEvent.php
+       fossology/src/testing/db/createTestEnvironment.php
+       fossology/src/www/ui_tests/foss_ui.php
+       fossology/src/lib/php/Db/test/DbManagerTest.php
+       fossology/src/www/ui/async/AjaxAdminScheduler.php
+       fossology/src/monk/agent/match.h
+       fossology/utils/fo-installdeps
+       fossology/src/testing/lib/testClasses/timer.php
+       fossology/src/www/ui/upload-instructions.php
+       fossology/src/testing/templates/simpletest/runtemplate.php
+       fossology/src/lib/php/Dao/test/ClearingDaoTest.php
+       fossology/src/testing/templates/simpletest/myrun.php
+       fossology/src/lib/cpp/libfossAgentDatabaseHandler.cc
+       fossology/src/ununpack/agent/ununpack-disk.h
+       fossology/src/www/ui/ajax-clearing-view.php
+       fossology/install/db/dbmigrate_multiple_copyright_decisions.php
+       fossology/src/www/ui/ui-license-list.php
+       fossology/src/ununpack/ui/Makefile
+       fossology/src/lib/php/Dao/test/CopyrightDaoTest.php
+       fossology/install/db/dbmigrate_pfile_calculate_sha256.php.in
+       fossology/src/lib/cpp/libfossdbmanagerclass.hpp
+       fossology/src/testing/templates/simpletest/mytest.php
+       fossology/install/db/sanity_check.php
+       fossology/install/db/dbmigrate_clearing-event.php
+       fossology/src/wget_agent/agent/Makefile
+       fossology/src/deciderjob/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/www/ui/api/Controllers/JobController.php
+       fossology/src/www/ui_tests/startUpTest.php
+       fossology/src/reportImport/agent/ReportImportHelper.php
+       fossology/src/lib/php/BusinessRules/ClearingEventProcessor.php
+       fossology/src/lib/php/Db/test/ModernDbManagerTest.php
+       fossology/src/cli/fo_antelink.php
+       fossology/src/copyright/ui/copyright-hist.php
+       fossology/src/ununpack/agent_tests/Unit/test_Checksum.c
+       fossology/src/nomos/agent_tests/Unit/test_nomos_gap.c
+       fossology/src/www/ui/ajax-uploads.php
+       fossology/src/ninka/agent/state.cc
+       fossology/src/www/ui/api/Models/Folder.php
+       fossology/src/regexscan/Makefile
+       fossology/src/www/ui/index.php
+       fossology/src/lib/Makefile
+       fossology/src/nomos/agent/list.c
+       fossology/src/scheduler/agent/job.h
+       fossology/src/lib/php/Db/Driver/SqliteE.php
+       fossology/src/copyright/agent_tests/Functional/schedulerTest.php
+       fossology/src/deciderjob/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/lib/php/BusinessRules/test/ClearingEventProcessorTest.php
+       fossology/src/monk/agent/scheduler.c
+       fossology/src/nomos/agent/process.c
+       fossology/src/lib/php/tests/test_common_cache.php
+       fossology/src/lib/php/Proxy/test/DbViewProxyTest.php
+       fossology/src/www/ui_tests/VerifyTests/browseUploadedTest.php
+       fossology/src/regexscan/agent/regexscan-Stage1.c
+       fossology/src/delagent/ui/DeleteResponse.php
+       fossology/src/scheduler/agent/scheduler.h
+       fossology/src/testing/lib/reportClass.php
+       fossology/src/www/ui_tests/SiteTests/UploadOne-ShotMenuTest.php
+       fossology/src/testing/lib/testClasses/parseLicGrpFileLinks.php
+       fossology/src/lib/php/Application/RepositoryApi.php
+       fossology/src/nomos/agent/nomos_utils.h
+       fossology/src/monk/agent/match.c
+       fossology/src/lib/php/View/test/UrlBuilderTest.php
+       fossology/src/lib/php/Exceptions/DuplicateTokenKeyException.php
+       fossology/src/lib/php/Dao/test/UploadPermissionDaoTest.php
+       fossology/src/nomos/agent_tests/Functional/OneShot-lgpl2.1.php
+       fossology/src/monk/agent/monkbulk.c
+       fossology/src/pkgagent/Makefile
+       fossology/src/monk/agent/cli.c
+       fossology/src/debug/ui/core-debug-flush-cache.php
+       fossology/src/www/ui/template/ui-showjobs.js.twig
+       fossology/src/scheduler/agent/database.c
+       fossology/src/lib/php/Data/test/AgentRefTest.php
+       fossology/src/ununpack/agent_tests/Unit/test_FindCmd.c
+       fossology/src/copyright/agent_tests/Unit/test_accuracy.cc
+       fossology/src/pkgagent/agent/Makefile
+       fossology/src/ununpack/agent_tests/Unit/test_ununpack-iso.c
+       fossology/src/cli/tests/Makefile
+       fossology/src/nomos/agent/PRECHECK
+       fossology/src/nomos/ui_tests/Functional/Makefile
+       fossology/src/testing/performance/stress
+       fossology/src/lib/php/Util/test/ArrayOperationTest.php
+       fossology/install/db/dbmigrate_bulk_license.php
+       fossology/src/copyright/agent/regexConfProvider.cc
+       fossology/src/lib/c/libfossscheduler.h
+       fossology/src/demomod/agent_tests/Functional/Makefile
+       fossology/src/mimetype/ui/Makefile
+       fossology/src/lib/cpp/uniquePtr.hpp
+       fossology/src/lib/php/Data/test/LicenseTest.php
+       fossology/src/lib/cpp/libfossUtils.hpp
+       fossology/src/testing/utils/simpleUi-users.php
+       fossology/src/www/ui_tests/SiteTests/OrgFoldersMenuTest-Create.php
+       fossology/src/ununpack/agent/ununpack-iso.h
+       fossology/src/monk/ui/agent-monk.php
+       fossology/src/testing/lib/common-Test.php
+       fossology/src/www/ui/scripts/user-edit.js
+       fossology/src/www/ui_tests/VerifyTests/runVerifyTests.php
+       fossology/src/ununpack/agent_tests/Unit/test_ContainerInfo.c
+       fossology/src/nomos/agent/util.c
+       fossology/src/spdx2/agent_tests/Functional/SchedulerTestRunner.php
+       fossology/src/ununpack/agent_tests/Unit/test_RunCommand.c
+       fossology/src/lib/c/libfossology.h
+       fossology/src/monk/agent_tests/Unit/test_license.c
+       fossology/src/monk/agent_tests/Unit/test_database.c
+       fossology/src/testing/functional/runTestCleanup.php
+       fossology/src/unifiedreport/agent_tests/Functional/SchedulerTestRunnerCli.php
+       fossology/src/lib/php/Data/Upload/UploadProgress.php
+       fossology/src/buckets/ui/ajax-filebucket.php
+       fossology/src/spdx2/agent_tests/Functional/schedulerTest.php
+       fossology/src/example_wc_agent/Makefile
+       fossology/src/lib/php/Data/Clearing/test/ClearingEventTest.php
+       fossology/src/buckets/ui/bucket-diff.php
+       fossology/src/ojo/agent/OjoUtils.cc
+       fossology/src/copyright/agent_tests/Unit/run_tests.cc
+Copyright: Copyright 2011 Randy Rando
+           Copyright (C) 1992, 2006, 2007 Free Software Foundation, Inc.
+           Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2010 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2010 Hewlett-Packard Development Company, L.P."
+           Copyright (C) 2014-2015 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG
+           Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014, Siemens AG
+           Copyright (C) 2019, Siemens AG
+           Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015 Siemens AG
+           Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2006-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2017-2019 Bittium Wireless Ltd.
+           Copyright (C) 2014-2019, Siemens AG
+           Copyright (C) 2019 Siemens AG
+           Copyright (C) 2010 Hewlett-Packard Development Company, L.P.
+           Copyright Randy Rando
+           Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2018 Siemens AG
+           Copyright (C) 2013-2014, Siemens AG
+           Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2017 Siemens AG
+           Copyright (C) 2014 Siemens AG
+           Copyright (C) 2014-2016 Siemens AG
+           Copyright (C) 2011~2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2018 Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015, 2018 Siemens AG
+           Copyright (C) 2015-2017, Siemens AG
+           Copyright (C) 2011, 2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2017 Siemens AG
+           Copyright (C) 2014, Siemens AG Authors: Andreas Würl, Steffen Weber
+           Copyright (C) 2013-2015, 2018 Siemens AG
+           Copyright (C) 2014 Siemens AG Author: D.Fognini, S. Weber, J.Najjar
+           Copyright (C) 2014, Siemens AG Author: Daniele Fognini
+           Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014, Siemens AG Authors: Steffen Weber, Andreas Würl
+           Copyright (C) 2017, Siemens AG
+           Copyright (C) 2010, 2011, 2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2012-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2018, Siemens AG Author: Daniele Fognini, Johannes Najjar
+           Copyright (C) 2019 Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 2014-2015, Siemens AG Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+           Copyright (C) 2014-2018, Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Author: Johannes Najjar
+           Copyright (C) 2010-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014, Siemens AG Author: Andreas Würl
+           Copyright (C) 2014, Siemens AG Author: Steffen Weber
+           Copyright (C) 2014-2018, Siemens AG Author: Johannes Najjar, Steffen Weber
+           Copyright (C) 2014-2015,2019 Siemens AG
+           Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P. 2014-2015 Siemens AG
+           Copyright (C) 2015-2018, Siemens AG Author: Shaheem Azmal<shaheem.azmal@siemens.com>, Anupam Ghosh <anupam.ghosh@siemens.com>
+           Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013-2017, Siemens AG
+           Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2006-2009 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2006-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2017, Siemens AG
+           Copyright (C) 2015, Siemens AG
+           Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2018-2019 Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 2015, Siemens AG Author: Maximilian Huber
+           Copyright (C) 2015-2018, Siemens AG
+           Copyright (C) 2014-2018, Siemens AG Author: Daniele Fognini, Andreas Würl
+           Copyright (C) 2016, Siemens AG
+           Copyright (C) 2017 TNG Technology Consulting GmbH
+           Copyright (C) 2014-2018, Siemens AG Author: Johannes Najjar
+           Copyright (C) 2015, Siemens AG Author: Steffen Weber
+           Copyright (C) 2017 TNG Technology Consulting GmbH Authors: Andreas Würl, Steffen Weber, Maximilian Huber
+           Copyright (C) 2016-2017, Siemens AG Author: Daniele Fognini, Shaheem Azmal M MD
+           Copyright (C) 2015, Siemens AG Author: Florian Krügel
+           Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015-2017 Siemens AG
+           Copyright (C) 2015-2019 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Author: Steffen Weber
+           Copyright (C) 2015,2018 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Author: Andreas Würl
+           Copyright (C) 2014-2017 Siemens AG Author: J.Najjar
+           Copyright (C) 2018, TNG Technology Consulting GmbH
+           Copyright (C) 2014-2016, Siemens AG Author: Andreas Würl
+           Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014 Siemens AG Author: J.Najjar
+           Copyright (C) 2018, Siemens AG
+           Copyright (C) 2014-2019 Siemens AG Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+           Copyright (C) 2014-2017, Siemens AG Author: Andreas Würl
+           Copyright (C) 2014-2017, Siemens AG Author: Daniele Fognini
+           Copyright (C) 2017-2018, Siemens AG
+           Copyright (C) 2014, Siemens AG Author: Daniele Fognini, Johannes Najjar
+           Copyright (C) 2015,2018 Siemens AG Author: maximilian.huber@tngtech.com
+           Copyright (C) 2016 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Author: Steffen Weber, Johannes Najjar
+           Copyright (C) 2015-2019, Siemens AG Author: Shaheem Azmal<shaheem.azmal@siemens.com>, Anupam Ghosh <anupam.ghosh@siemens.com>
+           copyright Copyright Agent tableofcontents
+           Copyright (C) 2014, 2018 Siemens AG
+           Copyright (C) 2014, Siemens AG Authors: Daniele Fognini, Steffen Weber, Andreas Würl
+           Copyright (C) 2015-2018 Siemens AG
+           Copyright (C) 2014, Siemens AG Authors: Johannes Najjar, Andreas Würl
+           Copyright (C) 2014-2018, Siemens AG Author: Daniele Fognini
+           Copyright (C) 2014-2018, Siemens AG Author: J.Najjar
+           Copyright (C) 2014-2017, Siemens AG Author: Steffen Weber
+           Copyright (C) 2013-2015, Siemens AG
+           Copyright (C) 2006-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2015,2018 Siemens AG
+           Copyright (C) 2014, 2018, Siemens AG Author: Daniele Fognini, anupam.ghosh@siemens.com
+           Copyright (C) 2015-2016 Siemens AG
+           Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+           © 2007 Hugh Jackman
+           (C) 2007-2011, 2013 my favourite company Google
+           (C) copyright 2007-2011, 2013 my favourite company Google
+           Copyright (c) 1989, 1993 Really just one newline here! The Regents of the University of California. All rights reserved.
+           Copyright (c) 1989, 1993 The Regents of the University of California. All rights reserved.
+           Copyright (C) 2014-2015, 2018 Siemens AG
+           Copyright (C) 2014-2018 Siemens AG
+           Copyright (C) 2013-2016, 2018 Siemens AG
+           Copyright (C) 2007-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014,2019 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Author: Johannes Najjar, Daniele Fognini
+           Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2018, Siemens AG Authors: Andreas Würl, Steffen Weber
+           Copyright (C) 2015,2019 Siemens AG
+           Copyright (C) 2014-2015, Siemens AG Authors: Andreas Würl, Steffen Weber
+           Copyright (C) 2017-2018 Siemens AG
+           Copyright (C) 2015-2016, Siemens AG
+           Copyright (C) 2014, Siemens AG Author: Johannes Najjar
+           Copyright (C) 2014-2015 Siemens AG Author: J.Najjar, S. Weber
+           Copyright (C) 2019, Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 205 Siemens AG
+           copyright (c) aaron seigo <aseigo kde.org>
+           Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2016-2018, Siemens AG
+           Copyright (C) 2014-2018, Siemens AG Author: Andreas Würl
+           copyright (c) 2013-2014 hewlett-packard development company, l.p.
+           Copyright (C) 2015 Siemens
+           Copyright (C) 2010-2011 Stefan Schroeder as a part of the FOSSOLOGY project.
+           Copyright (C) Siemens AG 2017
+           Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2015, Siemens AG Authors: Andreas Würl, Daniele Fognini
+           Copyright (C) 2006,2009,2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014, Siemens AG Author: Andreas Würl, Steffen Weber
+           Copyright (C) 2013-2014,2018 Siemens AG
+           Copyright (C) 2014, Siemens AG Author: Johannes Najjar, Daniele Fognini
+           Copyright (C) 2015, Siemens AG Author: Johannes Najjar, anupam.ghosh@siemens.com, Shaheem Azmal
+           Copyright (C) 2014-2017, Siemens AG Author: Daniele Fognini, Shaheem Azmal M MD
+           Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013-2014, Siemens AG Author: Daniele Fognini, Andreas Wuerl
+           Copyright (C) 2014-2015, Siemens AG Author: Daniele Fognini
+           Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P. 2014-2017 Siemens AG
+           Copyright (C) 2014, Siemens AG Author: Daniele Fognini, Cedric Bodet, Johannes Najjar
+           Copyright (C) 2010-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2017 Siemens AG Author: J. Najjar, S. Weber, A. Wührl
+           Copyright (C) 2017, Siemens AG Author: Anuapm Ghosh
+           Copyright (C) 2014, 2015 Siemens AG
+           Copyright (C) 2017 TNG Technology Consulting GmbH Author: Steffen Weber, Johannes Najjar, Maximilian Huber
+           Copyright 2018 Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 2014-2018, Siemens AG Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+           Copyright (C) 2014-2017, Siemens AG Author: Daniele Fognini, Johannes Najjar
+           Copyright (C) 2014, 2018 Siemens AG Authors: Andreas Würl, Daniele Fognini
+           Copyright (C) 2014-2015, 2018 Siemens AG Author: Steffen Weber
+           Copyright (C) 2014-2015, Siemens AG Author: Andreas Würl, Johannes Najjar
+           copyright 3dfx interactive, inc. 1999, all rights reserved
+           Copyright (C) 2014-2018, Siemens AG Author: Daniele Fognini, Steffen Weber
+           Copyright (C) 2014-2017,2019 Siemens AG
+           Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013-2015,2018 Siemens AG
+           Copyright (C) 2015,2019 Siemens AG Author: Shaheem Azmal<shaheem.azmal@siemens.com>, Anupam Ghosh <anupam.ghosh@siemens.com>
+License: GPL-2.0
 
-Copyright:
+Files: fossology/src/ununpack/agent/LICENSE.md5
+License: Openwall
 
-    Copyright (C) 2007-2012 HP Development Company, L.P. and others.
+Files: fossology/src/www/ui/scripts/jquery.dataTables.editable.js
+Copyright: Copyright 2010-2012 Jovan Popovic, all rights reserved.
+License: BSD-3-Clause OR GPL-2.0
 
-    The original FOSSology source code and all associated documentation
-    including these web pages are Copyright (C) 2007-2012 HP Development
-    Company, L.P.
+Files: fossology/src/www/ui/scripts/jquery.dataTables.min.js
+       fossology/src/www/ui/scripts/jquery.jeditable.js
+       fossology/src/www/ui/css/jquery-ui.css
+       fossology/src/www/ui/scripts/jquery-ui.js
+       fossology/src/www/ui/scripts/jquery.cookie.js
+       fossology/src/www/ui/scripts/jquery-3.3.1.min.js
+       fossology/src/www/ui/scripts/jquery.dataTables.select.js
+Copyright: Copyright (c) 2006-2009 Mika Tuupola, Dylan Verheul
+           Copyright (c) 2015 Siemens AG
+           Copyright jQuery Foundation and other contributors; Licensed MIT
+           Copyright 2013 Klaus Hartl Released under the MIT license
+           Copyright (c) 2010-2015 SpryMedia Limited http://datatables.net
+License: MIT
 
-    Any modifications or additions to source code or documentation
-    contributed to the FOSSology project from outside of Hewlett Packard
-    Company or its affiliates are Copyright (C) the contributor, and should
-    be noted as such in the comments section of the modified file(s).
+Files: fossology/src/www/ui/scripts/jquery.treeview.js
+       fossology/src/www/ui/scripts/jquery.validate.js
+Copyright: Copyright (c) 2007 Jörn Zaefferer
+           Copyright (c) 2006 - 2008 Jörn Zaefferer
+License: GPL-2.0 OR MIT
 
-License:
+Files: fossology/src/nomos/agent_tests/Functional/shunit2
+       fossology/src/copyright/agent_tests/Functional/shunit2
+       fossology/src/ojo/agent_tests/Functional/shunit2
+       fossology/src/lib/php/common-scheduler.php
+       fossology/src/lib/php/common-parm.php
+       fossology/src/lib/php/common-active.php
+       fossology/src/lib/php/common-compare.php
+       fossology/src/lib/php/common-db.php
+       fossology/src/lib/php/common-buckets.php
+       fossology/src/lib/php/common-cli.php
+       fossology/src/lib/php/common-job.php
+       fossology/src/lib/php/libschema.php
+       fossology/src/lib/php/common-dir.php
+       fossology/src/lib/c/libfossrepo.h
+       fossology/src/lib/php/common-pkg.php
+       fossology/src/lib/php/common-auth.php
+       fossology/src/lib/c/sqlCopy.h
+       fossology/src/lib/c/repwrite.c
+       fossology/src/lib/c/repmmapcheck.c
+       fossology/src/lib/php/common-plugin.php
+       fossology/src/lib/php/common-users.php
+       fossology/src/lib/php/common-ui.php
+       fossology/src/lib/php/common-menu.php
+       fossology/src/lib/php/common-sysconfig.php
+       fossology/src/lib/c/libfossdb.c
+       fossology/src/lib/php/Makefile
+       fossology/src/lib/c/sqlCopy.c
+       fossology/src/lib/php/common-cache.php
+       fossology/src/lib/php/common-agents.php
+       fossology/src/lib/php/common-folders.php
+       fossology/src/lib/php/bootstrap.php.in
+       fossology/src/lib/c/sqlCopyTest.c
+       fossology/src/lib/php/common.php
+       fossology/src/lib/c/repcopyin.c
+       fossology/src/lib/c/libfossrepo.c
+       fossology/src/lib/c/repremove.c
+       fossology/src/lib/c/libfossdb.h
+       fossology/src/lib/c/repcat.c
+       fossology/src/lib/php/common-tags.php
+       fossology/src/lib/c/rephost.c
+       fossology/src/lib/c/libfossagent.h
+       fossology/src/lib/php/common-repo.php
+       fossology/src/lib/c/repexist.c
+       fossology/src/lib/php/common-perms.php
+       fossology/src/lib/c/reppath.c
+       fossology/src/lib/php/common-license-file.php
+       fossology/src/lib/php/Util/CopyrightLister.php
+Copyright: Copyright 2008 Kate Ward. All Rights Reserved.
+           Copyright 2008 Kate Ward. All Rights Reserved. Released under the LGPL (GNU Lesser General Public License)
+           Copyright (C) 2011-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2017, Siemens AG
+           Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015 Siemens AG
+           Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015,2018 Siemens AG
+           Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2015, 2018 Siemens AG
+           Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2010-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2018 Siemens AG
+           Copyright (C) 2014-2017 Siemens AG
+           Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2010-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 20011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014 Siemens AG
+           Copyright (C) 2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2014-2015 Siemens AG
+License: LGPL-2.1
 
-    This package is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+Files: fossology/src/www/ui/css/csshover.htc
+Copyright: (c) 2005 - Peter Nederlof Peterned - http://www.xs4all.nl/~peterned/ License - http://creativecommons.org/licenses/LGPL/2.1/
+License: LGPL-2.1+
 
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+Files: fossology/src/www/ui/template/file-browse.js.twig
+       fossology/src/www/ui/template/user_edit.html.twig
+       fossology/src/deciderjob/ui/Makefile
+       fossology/src/readmeoss/ui/Makefile
+       fossology/src/ninka/ui/Makefile
+       fossology/src/lib/php/UI/template/components/select-folder.html.twig
+       fossology/src/www/ui/template/bulk-history.html.twig
+       fossology/src/www/ui/template/report.html.twig
+       fossology/src/lib/php/UI/template/components/menu.html.twig
+       fossology/src/www/ui/template/ui-license-list-form.html.twig
+       fossology/src/copyright/ui/template/copyrighthist_tables.html.twig
+       fossology/src/unifiedreport/agent/Makefile
+       fossology/src/reportImport/ui/Makefile
+       fossology/src/decider/ui/Makefile
+       fossology/src/spdx2/agent/template/dep5-copyright-file.twig
+       fossology/src/reportImport/Makefile
+       fossology/src/readmeoss/Makefile
+       fossology/src/www/ui/template/admin_license-upload_form.html.twig
+       fossology/src/monk/ui/Makefile
+       fossology/src/www/ui/template/ui-view-info.html.twig
+       fossology/src/spdx2/agent_tests/Unit/Makefile
+       fossology/src/decider/agent_tests/Unit/Makefile
+       fossology/src/monk/Makefile
+       fossology/src/www/ui/template/browse.html.twig
+       fossology/src/copyright/Makefile
+       fossology/src/reportImport/ui/template/ReportImportPlugin.html.twig
+       fossology/src/www/ui/template/admin_license_candidate.html.twig
+       fossology/src/monk/agent/Makefile
+       fossology/src/ninka/agent_tests/Unit/Makefile
+       fossology/src/copyright/agent_tests/Makefile
+       fossology/src/www/ui/template/browse_license-agent_selector.html.twig
+       fossology/src/spdx2/ui/Makefile
+       fossology/src/copyright/agent/copyright.conf
+       fossology/Dockerfile
+       fossology/src/www/ui/template/ui-showjobs.html.twig
+       fossology/src/reuser/ui/template/reuse-folder.html.twig
+       fossology/src/reuser/ui/Makefile
+       fossology/src/copyright/agent/ecc.conf
+       fossology/src/www/ui/template/ui-clearing-view.html.twig
+       fossology/src/www/ui/template/ui-clearing-view_bulk.html.twig
+       fossology/src/www/ui/template/ui-job-show.html.twig
+       fossology/src/www/ui/template/admin_content_move.html.twig
+       fossology/utils/backup/S3/after
+       fossology/install/easy-install
+       fossology/src/spdx2/agent/version.php.in
+       fossology/src/lib/cpp/tests/Makefile
+       fossology/src/www/ui/template/ui-browse.html.twig
+       fossology/src/www/ui/template/admin_group_delete.html.twig
+       fossology/src/decider/agent_tests/Makefile
+       fossology/src/spdx2/agent/template/spdx2tv-document.twig
+       fossology/src/www/ui/template/reuser.html.twig
+       fossology/src/www/ui/template/admin_content_delete.html.twig
+       fossology/src/unifiedreport/Makefile
+       fossology/src/www/ui/template/ui-browse-license_file-list.js.twig
+       fossology/src/www/ui/template/admin_license_file.html.twig
+       fossology/src/www/ui/template/upload_file.html.twig
+       fossology/src/ojo/Makefile
+       fossology/src/www/ui/template/admin-folder-create-form.html.twig
+       fossology/src/decider/Makefile
+       fossology/src/www/ui/template/getting_started.html.twig
+       fossology/src/www/ui/template/welcome.html.twig
+       fossology/src/ninka/agent_tests/Functional/Makefile
+       fossology/src/www/ui/template/browse_license-summary.html.twig
+       fossology/src/copyright/agent/keyword.conf
+       fossology/src/www/ui/template/admin_upload_edit.html.twig
+       fossology/src/reuser/Makefile
+       fossology/src/ninka/agent/Makefile
+       fossology/src/readmeoss/agent/Makefile
+       fossology/src/www/ui/template/bulk-history.js.twig
+       fossology/src/www/ui/template/advice_license-edit.html.twig
+       fossology/src/www/ui/template/upload_permissions.html.twig
+       fossology/src/www/ui/template/admin_group_users.html.twig
+       fossology/src/www/ui/template/ui-browse.js.twig
+       fossology/src/reuser/agent_tests/Functional/Makefile
+       fossology/src/spdx2/agent_tests/Makefile
+       fossology/src/reportImport/agent/services.php
+       fossology/src/spdx2/agent/template/spdx2tv-file.twig
+       fossology/src/deciderjob/Makefile
+       fossology/src/lib/cpp/Makefile
+       fossology/src/www/ui/template/ui-clearing-view_rhs.html.twig
+       fossology/src/www/ui/template/change_license_modal.html.twig
+       fossology/src/www/ui/template/browse_license-lic_hist.js.twig
+       fossology/src/spdx2/agent/template/dep5-copyright-document.twig
+       fossology/src/spdx2/agent/template/dep5-copyright-package.twig
+       fossology/utils/backup/S3/before
+       fossology/src/copyright/agent/Makefile
+       fossology/src/www/ui/template/upload_srv.html.twig
+       fossology/src/decider/agent/Makefile
+       fossology/src/spdx2/agent_tests/Functional/Makefile
+       fossology/src/lib/php/UI/template/include/foot.html.twig
+       fossology/src/copyright/ui/template/emailhist_tables.html.twig
+       fossology/src/ojo/agent_tests/Functional/Makefile
+       fossology/src/www/ui/template/ui-clearing-view.js.twig
+       fossology/src/monk/agent_tests/Makefile
+       fossology/src/unifiedreport/agent_tests/Makefile
+       fossology/src/copyright/agent_tests/Functional/Makefile
+       fossology/src/ninka/agent_tests/Makefile
+       fossology/src/www/ui/template/ui-report-conf.html.twig
+       fossology/src/monk/agent/_squareVisitor.h.post
+       fossology/src/www/ui/template/riskLevel_select.js.twig
+       fossology/src/www/ui/template/admin_license_from_csv.html.twig
+       fossology/src/ninka/Makefile
+       fossology/src/www/ui/template/admin_license_file.js.twig
+       fossology/src/deciderjob/agent/Makefile
+       fossology/src/www/ui/template/ui-search.html.twig
+       fossology/src/decider/agent_tests/Functional/Makefile
+       fossology/src/deciderjob/agent_tests/Functional/Makefile
+       fossology/src/www/ui/template/browse_license.html.twig
+       fossology/src/spdx2/agent/services.php
+       fossology/src/phpunit-bootstrap.php
+       fossology/src/www/ui/template/advice_license.html.twig
+       fossology/src/www/ui/template/ui-job-show.js.twig
+       fossology/src/www/ui/css/jquery.dataTables.css
+       fossology/src/www/ui/template/upload_vcs.html.twig
+       fossology/src/spdx2/agent/template/spdx2-file.xml.twig
+       fossology/src/ojo/agent_tests/Makefile
+       fossology/src/www/ui/template/agent_adder.html.twig
+       fossology/utils/backup/S3/install
+       fossology/src/www/ui/template/admin_license_candidate-merge.html.twig
+       fossology/src/unifiedreport/agent_tests/Functional/Makefile
+       fossology/src/spdx2/agent/template/spdx2-package.xml.twig
+       fossology/src/deciderjob/agent_tests/Makefile
+       fossology/src/reuser/agent_tests/Makefile
+       fossology/src/spdx2/Makefile
+       fossology/src/unifiedreport/ui/Makefile
+       fossology/src/monk/agent_tests/Unit/Makefile
+       fossology/src/www/ui/template/browse_file.js.twig
+       fossology/src/copyright/ui/template/histTable.js.twig
+       fossology/src/copyright/agent_tests/Unit/Makefile
+       fossology/src/reportImport/agent/Makefile
+       fossology/src/lib/php/UI/template/include/upload.html.twig
+       fossology/src/spdx2/agent/Makefile
+       fossology/src/www/ui/template/admin_obligation-upload_form.html.twig
+       fossology/src/reuser/agent/Makefile
+       fossology/src/lib/php/UI/template/include/macros.html.twig
+       fossology/src/lib/php/UI/template/components/login-form.html.twig
+       fossology/src/monk/agent_tests/Functional/Makefile
+       fossology/src/www/ui/template/popup_license.html.twig
+       fossology/src/spdx2/agent/template/spdx2-document.xml.twig
+       fossology/src/spdx2/agent/template/spdx2tv-package.twig
+       fossology/src/www/ui/template/home.html.twig
+       fossology/src/www/ui/template/browse_license-agent.html.twig
+       fossology/src/monk/agent/_squareVisitor.h.pre
+       fossology/src/ojo/ui/Makefile
+       fossology/src/www/ui/template/login.html.twig
+       fossology/docker-entrypoint.sh
+       fossology/src/www/ui/template/ajax-admin-scheduler.html.twig
+       fossology/src/ojo/agent/Makefile
+       fossology/src/lib/php/UI/template/include/base.html.twig
+       fossology/src/www/ui/template/file-browse.html.twig
+       fossology/src/www/ui/template/oneshot-upload.html.twig
+       fossology/docker-compose.yml
+       fossology/src/www/ui/template/upload_url.html.twig
+       fossology/src/lib/php/services.xml.in
+       fossology/src/www/ui/template/upload_instructions.html.twig
+       fossology/src/www/ui/template/menu-entry.html.twig
+       fossology/src/ojo/agent_tests/Unit/Makefile
+       fossology/src/www/ui/template/getting_started_licensebrowser.html.twig
+       fossology/src/www/ui/template/licensebrowser.html.twig
+       fossology/src/copyright/ui/template/ui-cp-view.html.twig
+Copyright: Copyright 2015 Siemens AG
+           Copyright (C) 2014 Siemens AG
+           Copyright Siemens AG 2014
+           Copyright 2014-2015 Siemens AG
+           Copyright (C) 2014-2015 Siemens AG
+           Copyright 2016-2017 Siemens AG
+           Copyright 2014-2017,2019 Siemens AG
+           Copyright Siemens AG 2017
+           Copyright (C) 2015 Siemens AG
+           Copyright 2014-2016 Siemens AG
+           Copyright 2019 Siemens AG
+           Copyright 2014-2017 Siemens AG
+           Copyright 2015-2017 Siemens AG
+           Copyright Siemens AG 2014-2015
+           Copyright Siemens AG 2015, maximilian.huber@tngtech.com
+           Copyright Siemens AG 2016, fabio.huser@siemens.com
+           Copyright TNG Technology Consulting GmbH 2016-2017, maximilian.huber@tngtech.com
+           Copyright 2014-2018 Siemens AG
+           Copyright 2014-2015,2018 Siemens AG
+           Copyright Siemens AG 2015
+           Copyright 2017 Siemens AG
+           Copyright Siemens AG 2019
+           Copyright 2016 Siemens AG
+           Copyright Siemens AG 2018
+           Copyright 2014-2015, 2018 Siemens AG
+           Copyright Siemens AG 2014,2018
+           Copyright Siemens AG 2014, 2015
+           Copyright Siemens AG 2014-2016
+           Copyright TNG Technology Consulting GmbH 2016, maximilian.huber@tngtech.com
+License: Freeware-Fossology
 
-    You should have received a copy of the GNU General Public License
-    along with this package; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+Files: fossology/src/copyright/ecc.conf
+       fossology/src/copyright/keyword.conf
+       fossology/src/copyright/copyright.conf
+       fossology/src/unifiedreport/unifiedreport.conf
+       fossology/src/ununpack/ununpack.conf
+       fossology/src/reuser/reuser.conf
+       fossology/src/readmeoss/readmeoss.conf
+       fossology/src/delagent/delagent.conf
+       fossology/src/decider/decider.conf
+       fossology/src/nomos/nomos.conf
+       fossology/src/spdx2/spdx2.conf
+       fossology/src/pkgagent/pkgagent.conf
+       fossology/src/buckets/buckets.conf
+       fossology/src/monk/monkbulk.conf
+       fossology/src/wget_agent/wget_agent.conf
+       fossology/src/regexscan/regexscan.conf
+       fossology/src/deciderjob/deciderjob.conf
+       fossology/src/spdx2/spdx2tv.conf
+       fossology/src/adj2nest/adj2nest.conf
+       fossology/src/ninka/ninka.conf
+       fossology/src/maintagent/maintagent.conf
+       fossology/src/monk/monk.conf
+       fossology/src/demomod/demomod.conf
+       fossology/src/mimetype/mimetype.conf
+       fossology/src/example_wc_agent/example_wc_agent.conf
+       fossology/src/ojo/ojo.conf
+       fossology/src/spdx2/dep5.conf
+Copyright: Copyright Siemens AG 2015
+License: Freeware AND Freeware-Fossology
 
-On Debian systems, the complete text of the GNU General
-Public License can be found in `/usr/share/common-licenses/GPL-2'.
+Files: fossology/src/www/ui/template/about.html.twig
+Copyright: Copyright 2014-2016 Siemens AG
+License: Freeware-Fossology AND GPL-2.0
 
-Exception:
-All of the FOSSology source code is licensed under the terms of the GNU
-General Public License version 2, with the following exceptions:
+Files: fossology/src/ununpack/agent/sha2.h
+       fossology/src/ununpack/agent/sha2.c
+Copyright: Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch> All rights reserved.
+License: BSD-3-Clause
 
-* libfossdb and libfossrepo libraries are licensed under the terms of
-the GNU Lesser General Public License version 2.1
+Files: fossology/Makefile.deps
+       fossology/Makefile.conf
+       fossology/.github/ISSUE_TEMPLATE.md
+       fossology/.github/PULL_REQUEST_TEMPLATE.md
+       fossology/.github/ISSUE_TEMPLATE/bug_report.md
+       fossology/.github/ISSUE_TEMPLATE/feature_request.md
+       fossology/utils/fofind
+       fossology/utils/fofindui
+       fossology/utils/FossschemaSpy
+       fossology/utils/install_composer.sh
+       fossology/utils/fo-cleanold
+       fossology/utils/schemaspy.run
+       fossology/utils/preprocess
+       fossology/utils/template.pod
+       fossology/utils/freshmeat/fm.cron
+       fossology/utils/freshmeat/Makefile
+       fossology/utils/freshmeat/tests/tfile_medium
+       fossology/utils/freshmeat/tests/tfile_comment
+       fossology/utils/freshmeat/tests/tfile_small
+       fossology/utils/freshmeat/Design-Notes
+       fossology/utils/cunit-version
+       fossology/utils/installagents
+       fossology/utils/fofindname
+       fossology/utils/mkfilelists
+       fossology/utils/backup/fo-backup
+       fossology/utils/backup/fo-restore
+       fossology/utils/backup/backup_include_b
+       fossology/utils/backup/backup_include_a
+       fossology/utils/Makefile.utils
+       fossology/Makefile
+       fossology/pbconf/fossology.yml
+       fossology/pbconf/ci-scripts/fo-dockerbuild-pb.sh
+       fossology/pbconf/ci-scripts/fo-installdeps-pb.sh
+       fossology/pbconf/pbcl
+       fossology/pbconf/fossology/deb/fossology-common.postrm
+       fossology/pbconf/fossology/deb/fossology-scheduler.postinst
+       fossology/pbconf/fossology/deb/fossology-db.postinst
+       fossology/pbconf/fossology/deb/control
+       fossology/pbconf/fossology/deb/fossology-web.postinst
+       fossology/pbconf/fossology/deb/fossology-common.postinst
+       fossology/pbconf/fossology/deb/fossology-common.README.Debian
+       fossology/pbconf/fossology/deb/fossology-scheduler.logrotate
+       fossology/pbconf/fossology/deb/README.Debian
+       fossology/pbconf/fossology/deb/compat
+       fossology/pbconf/fossology/deb/fossology.postrm
+       fossology/pbconf/fossology/deb/fossology-common.lintian-overrides
+       fossology/pbconf/fossology/deb/rules
+       fossology/pbconf/fossology/deb/fossology-common.docs
+       fossology/pbconf/fossology/deb/fossology-scheduler.postrm
+       fossology/pbconf/fossology/deb/fossology.postinst
+       fossology/pbconf/fossology/deb/notes
+       fossology/pbconf/fossology/deb/source/format
+       fossology/pbconf/fossology/deb/fossology-db.postrm
+       fossology/pbconf/fossology/pbve.pre
+       fossology/pbconf/pbfilter/ubuntu-15.04.pbf
+       fossology/pbconf/pbfilter/ubuntu-13.10.pbf
+       fossology/pbconf/pbfilter/ubuntu.pbf
+       fossology/pbconf/pbfilter/debian-9.yml
+       fossology/pbconf/pbfilter/ubuntu-15.10.pbf
+       fossology/pbconf/pbfilter/ubuntu.yml
+       fossology/pbconf/pbfilter/all.yml
+       fossology/pbconf/pbfilter/rpm.pbf
+       fossology/pbconf/pbfilter/ubuntu-16.10.pbf
+       fossology/pbconf/pbfilter/debian-8.pbf
+       fossology/pbconf/pbfilter/debian-7.yml
+       fossology/pbconf/pbfilter/ubuntu-13.04.pbf
+       fossology/pbconf/pbfilter/ubuntu-16.04.pbf
+       fossology/pbconf/pbfilter/debian-7.pbf
+       fossology/pbconf/pbfilter/debian-8.yml
+       fossology/pbconf/pbfilter/ubuntu-12.10.pbf
+       fossology/pbconf/pbfilter/debian-9.pbf
+       fossology/pbconf/pbfilter/ubuntu-14.04.pbf
+       fossology/pbconf/pbfilter/all.pbf
+       fossology/pbconf/pbfilter/debian-6.pbf
+       fossology/pbconf/pbfilter/ubuntu-17.04.pbf
+       fossology/pbconf/pbfilter/rpm.yml
+       fossology/pbconf/pbfilter/ubuntu-12.04.pbf
+       fossology/pbconf/pbfilter/debian-6.yml
+       fossology/src/srcdocs/makedox
+       fossology/src/phpunit.xml
+       fossology/src/mimetype/agent/Makefile
+       fossology/src/mimetype/agent_tests/Unit/Makefile
+       fossology/src/adj2nest/agent/readme.txt
+       fossology/src/example_wc_agent/agent/Makefile
+       fossology/src/example_wc_agent/agent/README.txt
+       fossology/src/www/ui/images/space_16.png
+       fossology/src/www/ui/images/right-point-bullet.gif
+       fossology/src/www/ui/images/red.png
+       fossology/src/www/ui/images/fossology-flow4.png
+       fossology/src/www/ui/images/treeview-default-line.gif
+       fossology/src/www/ui/images/white.png
+       fossology/src/www/ui/images/pig.gif
+       fossology/src/www/ui/images/yellow.png
+       fossology/src/www/ui/images/dataTable/sort_both.png
+       fossology/src/www/ui/images/dataTable/sort_asc_disabled.png
+       fossology/src/www/ui/images/dataTable/sort_desc.png
+       fossology/src/www/ui/images/dataTable/sort_asc.png
+       fossology/src/www/ui/images/dataTable/sort_desc_disabled.png
+       fossology/src/www/ui/images/logo2.png
+       fossology/src/www/ui/images/green.png
+       fossology/src/www/ui/images/button_edit.png
+       fossology/src/www/ui/images/fossology-logo.gif
+       fossology/src/www/ui/images/icons/close_32.png
+       fossology/src/www/ui/images/icons/close_16.png
+       fossology/src/www/ui/images/icons/arrow_down_32.png
+       fossology/src/www/ui/images/icons/star_filled_32.png
+       fossology/src/www/ui/images/icons/closed_16.png
+       fossology/src/www/ui/images/icons/blue_arrow_down_32.png
+       fossology/src/www/ui/images/icons/star_filled_16.png
+       fossology/src/www/ui/images/icons/star_16.png
+       fossology/src/www/ui/images/icons/arrow_up_32.png
+       fossology/src/www/ui/images/icons/add_32.png
+       fossology/src/www/ui/images/icons/remove_32.png
+       fossology/src/www/ui/images/icons/added_16.png
+       fossology/src/www/ui/images/icons/add_16.png
+       fossology/src/www/ui/images/icons/blue_arrow_up_32.png
+       fossology/src/www/ui/images/icons/star_32.png
+       fossology/src/www/ui/images/icons/remove_16.png
+       fossology/src/www/ui/images/icons/arrow_updown_32.png
+       fossology/src/www/ui/images/info_16.png
+       fossology/src/www/ui/images/treeview-default.gif
+       fossology/src/www/ui/favicon.ico
+       fossology/src/www/ui/css/select2.custom.css
+       fossology/src/www/ui/css/images/ui-icons_555555_256x240.png
+       fossology/src/www/ui/css/images/ui-icons_444444_256x240.png
+       fossology/src/www/ui/css/images/ui-bg_glass_75_dadada_1x400.png
+       fossology/src/www/ui/css/images/ui-bg_glass_65_ffffff_1x400.png
+       fossology/src/www/ui/css/images/ui-bg_flat_75_ffffff_40x100.png
+       fossology/src/www/ui/css/images/ui-icons_777620_256x240.png
+       fossology/src/www/ui/css/images/ui-bg_glass_75_e6e6e6_1x400.png
+       fossology/src/www/ui/css/images/ui-icons_cc0000_256x240.png
+       fossology/src/www/ui/css/images/ui-icons_ffffff_256x240.png
+       fossology/src/www/ui/css/images/ui-icons_777777_256x240.png
+       fossology/src/www/ui/css/select2.min.css
+       fossology/src/www/ui/css/jquery.treeview.css
+       fossology/src/www/ui/api/documentation/pretty-swag.json
+       fossology/src/www/ui/template/admin-folder-edit-form.html.twig
+       fossology/src/www/ui/template/admin_content_move.js.twig
+       fossology/src/www/ui/scripts/select2.full.min.js
+       fossology/src/www/ui/scripts/jquery.plainmodal.min.js
+       fossology/src/www/ui/README.txt
+       fossology/src/www/ui/xhtml1-frameset.dtd
+       fossology/src/nomos/agent/Makefile.sa
+       fossology/src/nomos/agent/Notes
+       fossology/src/nomos/agent/standalone.c
+       fossology/src/nomos/agent/transition.notes
+       fossology/src/nomos/agent/Makefile
+       fossology/src/nomos/agent/standalone.h
+       fossology/src/nomos/agent/_split_words
+       fossology/src/nomos/agent/DMalloc.3x
+       fossology/src/nomos/agent/README
+       fossology/src/nomos/agent_tests/Functional/shunit2_plugin_example
+       fossology/src/nomos/agent_tests/Functional/tests.xml
+       fossology/src/Makefile
+       fossology/src/reuser/agent/version.php.in
+       fossology/src/reuser/ui/services.php
+       fossology/src/reuser/ui/template/agent_reuser.html.twig
+       fossology/src/reuser/ui/template/agent_reuser.js.twig
+       fossology/src/deciderjob/agent/version.php.in
+       fossology/src/lib/php/Test/Agent/AgentTestMockHelper.php
+       fossology/src/lib/php/Test/fosstestinit.sql
+       fossology/src/lib/php/UI/Component/MicroMenu.php
+       fossology/src/lib/php/UI/template/include/head.html.twig
+       fossology/src/lib/php/tests/sysconfigDirTest/fossology.conf
+       fossology/src/lib/php/tests/sysconfigDirTest/Db.conf
+       fossology/src/lib/php/tests/sysconfigDirTest/VERSION
+       fossology/src/lib/php/tests/README
+       fossology/src/lib/c/Makefile
+       fossology/src/lib/c/tests/confdata/key_name.conf
+       fossology/src/lib/c/tests/confdata/no_group.conf
+       fossology/src/lib/c/tests/confdata/bad_key.conf
+       fossology/src/lib/c/tests/confdata/conftest.conf
+       fossology/src/lib/c/tests/confdata/invalid_group.conf
+       fossology/src/lib/c/tests/confdata/key_value.conf
+       fossology/src/delagent/ui/services.php
+       fossology/src/delagent/ui/template/admin_upload_delete.html.twig
+       fossology/src/delagent/ui/delete-helper.php
+       fossology/src/copyright/ui/services.php
+       fossology/src/copyright/ui/template/copyrighthist_scripts.html.twig
+       fossology/src/copyright/ui/template/copyrighthist.html.twig
+       fossology/src/copyright/ui/template/copyrightlist.html.twig
+       fossology/src/copyright/ui/template/histTable.html.twig
+       fossology/src/copyright/ui/template/ui-xp-view_rhs.html.twig
+       fossology/src/ojo/agent/ojoregex.cc
+       fossology/src/ojo/README.md
+       fossology/src/spdx2/agent/agent.sh
+       fossology/src/testing/utils/testCleanup.sh
+       fossology/src/testing/utils/dbcreate
+       fossology/src/testing/utils/junit_xml_reporter.php
+       fossology/src/testing/utils/createDbUser.sql
+       fossology/src/testing/utils/testDBinit.sql
+       fossology/src/testing/utils/nightly.sh
+       fossology/src/testing/db/ftdbcreate.sh
+       fossology/src/testing/db/c/Makefile
+       fossology/src/testing/db/fosstestinit.sql
+       fossology/src/testing/docker/test-standalone.sh
+       fossology/src/testing/docker/test-cluster.sh
+       fossology/src/testing/lib/c/Makefile
+       fossology/src/testing/install/vm.ini
+       fossology/src/testing/performance/chartresult.html
+       fossology/src/testing/jenkins/Fossology_Performance_Prep.xml
+       fossology/src/testing/jenkins/Fossology_Performance.xml
+       fossology/src/testing/jenkins/Fossology_Source_Install.xml
+       fossology/src/testing/jenkins/Fossology_Package_Install_Prep.xml
+       fossology/src/testing/jenkins/Fossology_Package_Build.xml
+       fossology/src/testing/jenkins/Fossology_Unit_Tests.xml
+       fossology/src/testing/jenkins/Fossology_Functional_Tests.xml
+       fossology/src/testing/jenkins/Fossology_Installation.xml
+       fossology/src/testing/jenkins/Fossology_Package_Install.xml
+       fossology/src/testing/jenkins/Fossology_Build.xml
+       fossology/src/testing/jenkins/Fossology_Unit_Tests_Cleanup.xml
+       fossology/src/testing/jenkins/Generate_Code_Documentation.xml
+       fossology/src/testing/jenkins/Fossology_Migration.xml
+       fossology/src/testing/jenkins/Fossology_Unit_Test_Prep.xml
+       fossology/src/testing/tutorials/FOSSologyTest/FOSSologyTest.pkg
+       fossology/src/testing/dataFiles/pkginstall/fo-apache.conf
+       fossology/src/testing/dataFiles/pkginstall/redfed-fossology.repo
+       fossology/src/testing/dataFiles/pkginstall/debian/6/postgresql.conf
+       fossology/src/testing/dataFiles/pkginstall/redhat/6.x/rhel-fossology.repo
+       fossology/src/testing/dataFiles/pkginstall/redhat/6.x/postgresql.conf
+       fossology/src/testing/dataFiles/pkginstall/redhat/6.x/pg_hba.conf
+       fossology/src/testing/README
+       fossology/src/fossy-ruleset.xml
+       fossology/src/ninka/README.md
+       fossology/src/cli/fossjobs.pod
+       fossology/src/cli/foss-scheduler.pod
+       fossology/src/cli/Makefile
+       fossology/src/cli/cp2foss.pod
+       fossology/src/cli/tests/1stest.php
+       fossology/src/demomod/agent/Notes
+       fossology/src/demomod/README
+       fossology/src/wget_agent/agent_tests/Unit/Makefile
+       fossology/src/decider/agent/version.php.in
+       fossology/src/decider/ui/services.php
+       fossology/src/decider/ui/template/agent_decider.html.twig
+       fossology/src/reportImport/agent/version.php.in
+       fossology/src/reportImport/reportImport.conf
+       fossology/src/reportImport/ui/services.php
+       fossology/src/readmeoss/agent/version.php.in
+       fossology/src/pkgagent/agent_tests/Unit/Makefile
+       fossology/src/unifiedreport/agent/version.php.in
+       fossology/src/scheduler/ui_tests/scheduler_status.php
+       fossology/src/scheduler/agent/defconf/init.d/fossology.in
+       fossology/src/scheduler/agent/defconf/default/fossology
+       fossology/src/scheduler/agent_tests/agents/fossology.conf.in
+       fossology/src/scheduler/agent_tests/Unit/utils.h
+       fossology/src/ununpack/agent/sha1.h
+       fossology/src/ununpack/agent/sha1.c
+       fossology/src/ununpack/agent/README
+       fossology/src/ununpack/agent_tests/Unit/Makefile
+       fossology/src/ununpack/agent_tests/Functional/tests.xml
+       fossology/install/INSTALL.multi
+       fossology/install/fo-apache.conf
+       fossology/install/src-install-apache-example.conf
+       fossology/install/db/db.cron
+       fossology/install/db/dbcreate.in
+       fossology/install/db/fossologyinit.sql
+       fossology/install/Makefile
+       fossology/install/defconf/sampleheader.txt
+       fossology/install/defconf/fossology.conf.in
+       fossology/install/defconf/samplefooter.txt
+       fossology/install/defconf/Db.conf.in
+       fossology/install/fo-postinstall.in
+       fossology/install/scripts/php-conf-fix.sh
+       fossology/install/scripts/pgsql-conf-fix.sh
+       fossology/install/scripts/setshm.sh
+       fossology/install/scripts/install-ninka.sh
+       fossology/install/scripts/readme
+       fossology/install/scripts/install-spdx-tools.sh
+       fossology/install/INSTALL
+       fossology/Makefile.process
+       fossology/debian/fossology-common.postrm
+       fossology/debian/fossology-scheduler.postinst
+       fossology/debian/fossology-db.postinst
+       fossology/debian/control
+       fossology/debian/fossology-web.postinst
+       fossology/debian/fossology-common.postinst
+       fossology/debian/fossology-common.README.Debian
+       fossology/debian/fossology-scheduler.logrotate
+       fossology/debian/README.Debian
+       fossology/debian/compat
+       fossology/debian/fossology-scheduler/usr/share/lintian/overrides/fossology-scheduler
+       fossology/debian/fossology.postrm
+       fossology/debian/watch
+       fossology/debian/fossology-common.lintian-overrides
+       fossology/debian/fossology-scheduler.lintian-overrides
+       fossology/debian/fossology-common.docs
+       fossology/debian/fossology-scheduler.postrm
+       fossology/debian/fossology.postinst
+       fossology/debian/notes
+       fossology/debian/upstream/metadata
+       fossology/debian/source/format
+       fossology/debian/fossology-db.postrm
+       fossology/.editorconfig
+Copyright: Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015, 2018 Siemens AG
+           Copyright (C) 2017 Maximilian Huber
+           Copyright (C) 2017 Siemens AG
+           Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+           Copyright 2018 Siemens AG Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+           Copyright (C) 2009 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (c) 1998-2002 W3C (MIT, INRIA, Keio), All Rights Reserved.
+           Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2006-2014 Hewlett-Packard Development Company, L.P.
+           (C) Copyright 2006 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2015 Siemens AG
+           Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
+           Copyright (C) The Internet Society (2001). All Rights Reserved.
+           Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008, 2012 Hewlett-Packard Development Company, L.P.
+License: NoLicenseConcluded
+Comment: scanners found: NOASSERTION
 
-    This library are free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License.
+Files: fossology/.dockerignore
+       fossology/src/lib/php/tests/tests.xml
+       fossology/src/testing/syntax/syntaxtest.sh
+       fossology/src/cli/tests/tests.xml
+       fossology/.gitignore
+       fossology/install/db/Makefile
+Copyright: Copyright (C) 2008-2014 Hewlett-Packard Development Company, L.P.
+License: NoLicenseConcluded
+Comment: scanners found: PHP-possibility
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+Files: fossology/utils/freshmeat/get-projects.pod
+       fossology/utils/freshmeat/Classes/FreshmeatRdfs.php
+       fossology/src/www/locale/de_DE/LC_MESSAGES/messages.mo
+       fossology/src/www/ui/core-schema.dat
+       fossology/src/cli/mkpod
+Copyright: Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
+           Copyright (C) 2008 Hewlett-Packard Development Company, L.P.
+License: NoLicenseConcluded
+Comment: scanners found: GPL-2.0
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-    02110-1301  USA
+Files: fossology/pbconf/fossology/deb/changelog
+       fossology/debian/changelog
+License: NoLicenseConcluded
+Comment: scanners found: LGPL
 
-On Debian systems, the complete text of the GNU Lesser General
-Public License can be found in `/usr/share/common-licenses/LGPL-2.1'.
+Files: fossology/src/srcdocs/fodox.conf
+       fossology/src/testing/dataFiles/pkginstall/debian/6/apache2-php.ini
+       fossology/src/testing/dataFiles/pkginstall/debian/6/cli-php.ini
+       fossology/src/testing/dataFiles/pkginstall/redhat/6.x/php.ini
+License: NoLicenseConcluded
+Comment: scanners found: See-doc.OTHER
 
-The original Debian packaging is (C) 2008, Matt Taggart <taggart@debian.org> and
-is licensed under the GPL, see above.
+Files: fossology/src/nomos/agent/STRINGS.in
+Copyright: (C) Copyright 2006-2015 Hewlett-Packard Development Company, L.P.
+           (C) Copyright 2017-2019 Bittium Wireless Ltd.
+           copyrighted by Daniel Stenberg
+License: NoLicenseConcluded
+Comment: scanners found: 3GPP AND 389-exception AND Abstyles AND ACE AND Adobe AND AFL AND Alfresco AND AML AND AndroidSDK.Commercial AND ANTLR-PD AND AOL-EULA AND Apache-2.0 AND Artistic-1.0 AND ATT-Source AND AVM AND BSL-1.0 AND CDDL AND CECILL-1.1 AND Cisco-style AND Citrix AND CMU AND CNRI-Python-GPL-Compatible AND Cryptogams AND D-FSL-1.0 AND Dual-license AND Dyade AND ECL-1.0 AND EFL AND Fair-style AND Frameworx AND Free-SW AND Freeware AND FTL AND Giftware AND Google AND Govt-rights AND HP AND HPND AND HSQLDB AND IBM-dhcp AND IETF AND IJG AND ImageMagick-style AND Imlib2 AND Intel-WLAN AND IP-claim AND IronDoc AND ISC AND ITU-T AND Java-WSDL4J AND JISP AND LDPL AND Libpng AND libtiff AND Logica-OSL-1.0 AND LPPL AND Mibble AND Migemo AND MitreCVW-style AND Motorola-Mobile-SLA AND MPL-2.0-no-copyleft-exception AND MS-indemnity AND MS-LPL AND MSNTP AND Multics AND naist-2003 AND NASA AND Not-Internet AND NotreDame-style AND NTP AND Nvidia-EULA-b AND OCLC AND ODbL-1.0 AND ODC-By-1.0 AND Open-PL-style AND OpenMap AND OpenSSL AND OReilly-style AND OSL-2.0 AND PHP-style AND PostgreSQL AND Powder-Proprietary AND Qmail AND Qt.Commercial AND RPL-1.5 AND RSA-DNS AND Ruby AND SAX-PD AND SCEA AND Sendmail AND SGI_GLX AND SSLeay AND Tapjoy AND TCL AND TeX-exception AND TMate AND U-Edinburgh-style AND U-Wash-style AND unboundID-ldap-sdk AND Unicode AND Unidex AND unRAR restriction AND WOL AND X11-style AND Zimbra AND Zlib
 
-Additional Debian packaging changes (C) 2008-2012 HP Development Company
+Files: fossology/src/composer.lock
+License: NoLicenseConcluded
+Comment: scanners found: BSD-3-Clause AND LGPL-3.0 AND MIT
 
-Additional Debian packaging changes (C) 2017 Michael C. Jaeger, mcj@mcj.de
+Files: fossology/src/lib/php/Test/testdata.sql
+Copyright: copyright 3dfx interactive, inc. 1999, all rights reserved
+License: NoLicenseConcluded
+Comment: scanners found: Classpath-exception-2.0 AND GPL-2.0+ AND LGPL-2.1+
 
+Files: fossology/src/ojo/agent_tests/Functional/regexTest.json
+License: NoLicenseConcluded
+Comment: scanners found: 0BSD AND AAL AND Abstyles AND Adobe-2006 AND Adobe-Glyph AND ADSL AND AFL-1.1 AND AFL-1.2 AND AFL-2.0 AND AFL-2.1 AND AFL-3.0 AND Afmparse AND AGPL-1.0+ AND Aladdin AND AMDPLPA AND AML AND AMPAS AND ANTLR-PD AND Apache-2.0 AND APAFML AND APL-1.0 AND APSL-1.0 AND APSL-1.1 AND APSL-1.2 AND APSL-2.0 AND Artistic-1.0-Perl AND Artistic-2.0 AND Bahyph AND Barr AND Beerware AND BitTorrent-1.0 AND Borceux AND BSD-3-Clause-Clear AND BSL-1.0 AND bzip2-1.0.5 AND Caldera AND CATOSL-1.1 AND CC-BY-1.0 AND CC-BY-NC-1.0 AND CC-BY-NC-ND-1.0 AND CC-BY-NC-SA-1.0 AND CC-BY-ND-1.0 AND CC-BY-SA-1.0 AND CC0-1.0 AND CDDL-1.0 AND CDLA-Permissive-1.0 AND CDLA-Sharing-1.0 AND CECILL-1.1 AND ClArtistic AND CNRI-Jython AND CNRI-Python-GPL-Compatible AND Condor-1.1 AND copyleft-next-0.3.0 AND CPAL-1.0 AND CPL-1.0 AND CPOL-1.02 AND Crossword AND CrystalStacker AND CUA-OPL-1.0 AND Cube AND curl AND D-FSL-1.0 AND diffmark AND DOC AND Dotseqn AND DSDP AND dvipdfm AND ECL-1.0 AND ECL-2.0 AND EFL-1.0 AND EFL-2.0 AND eGenix AND Entessa AND EPL-1.0 AND ErlPL-1.1 AND EUDatagrid AND EUPL-1.0 AND Eurosym AND Fair AND Frameworx-1.0 AND FreeImage AND FSFAP AND FSFULLR AND FTL AND GFDL-1.1+ AND Giftware AND GL2PS AND Glide AND Glulxe AND gnuplot AND GPL-2.0+ AND gSOAP-1.3b AND HaskellReport AND HPND AND IBM-pibs AND ICU AND IJG AND ImageMagick AND iMatix AND Imlib2 AND Info-ZIP AND Intel-ACPI AND Interbase-1.0 AND IPA AND IPL-1.0 AND ISC AND JasPer-2.0 AND JSON AND LAL-1.2 AND LAL-1.3 AND Latex2e AND Leptonica AND LGPLLR AND Libpng AND libtiff AND LiLiQ-P-1.1 AND LiLiQ-R-1.1 AND LiLiQ-Rplus-1.1 AND Linux-OpenIB AND LPL-1.02 AND LPPL-1.0 AND LPPL-1.1 AND LPPL-1.2 AND LPPL-1.3a AND LPPL-1.3c AND MakeIndex AND MirOS AND MIT-0 AND MITNFA AND Motosoto AND mpich2 AND MPL-1.0 AND MS-PL AND MS-RL AND MTLL AND Multics AND Mup AND NASA-1.3 AND Naumen AND NBPL-1.0 AND NCSA AND Net-SNMP AND NetCDF AND Newsletr AND NGPL AND NLOD-1.0 AND NLPL AND Nokia AND NOSL AND Noweb AND NPL-1.0 AND NPL-1.1 AND NPOSL-3.0 AND NRL AND NTP AND Nunit AND OCCT-PL AND OCLC-2.0 AND ODbL-1.0 AND ODC-By-1.0 AND OFL-1.0 AND OFL-1.1 AND OGL-UK-1.0 AND OGTSL AND OLDAP-1.1 AND OML AND OpenSSL AND OPL-1.0 AND OSET-PL-2.1 AND OSL-1.0 AND OSL-1.1 AND OSL-2.0 AND OSL-2.1 AND OSL-3.0 AND PDDL-1.0 AND PHP-3.01 AND Plexus AND PostgreSQL AND psfrag AND psutils AND Python-2.0 AND Qhull AND QPL-1.0 AND Rdisc AND RHeCos-1.1 AND RPL-1.1 AND RPL-1.5 AND RPSL-1.0 AND RSA-MD AND RSCPL AND Ruby AND SAX-PD AND Saxpath AND SCEA AND Sendmail-8.23 AND SGI-B-1.0 AND SGI-B-1.1 AND SGI-B-2.0 AND SimPL-2.0 AND SISSL-1.2 AND Sleepycat AND SMLNJ AND SMPPL AND SNIA AND Spencer-86 AND Spencer-94 AND Spencer-99 AND SPL-1.0 AND SugarCRM-1.1.3 AND SWL AND TCL AND TCP-wrappers AND TMate AND TORQUE-1.1 AND TOSL AND TU-Berlin-1.0 AND Unicode-DFS-2015 AND Unicode-DFS-2016 AND Unicode-TOU AND Unlicense AND UPL-1.0 AND Vim AND VOSTROM AND VSL-1.0 AND W3C-20150513 AND Watcom-1.0 AND Wsuipa AND WTFPL AND X11 AND Xerox AND XFree86-1.1 AND xinetd AND Xnet AND xpp AND XSkat AND YPL-1.0 AND YPL-1.1 AND Zed AND Zend-2.0 AND Zimbra-1.3 AND Zimbra-1.4 AND zlib-acknowledgement AND ZPL-1.1
+
+Files: fossology/src/spdx2/agent_tests/Functional/fo_report.sql
+License: NoLicenseConcluded
+Comment: scanners found: Glide AND GPL-3.0
+
+Files: fossology/src/unifiedreport/agent_tests/Functional/fo_report.sql
+Copyright: (C) HEWLETT-PACKARD COMPANY, 2004.
+           Copyright 1972 by Massachusetts Institute of Technology and Honeywell Information Systems Inc.
+           Copyright 1988,1990,1993 by Paul Vixie
+           copyright 1988 Richard M. Stallman
+           Copyright 1989 M. Stephenson
+           Copyright © 1990-2006 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved.
+           Copyright © 1990-2007 Condor Team, Computer Sciences Department, University of Wisconsin-Madison, Madison, WI. All Rights Reserved.
+           Copyright © 1991,1990,1989 Carnegie Mellon University All Rights Reserved.
+           Copyright © 1991-2010 Unicode, Inc. All rights reserved.
+           Copyright 1992-2012 The FreeBSD Project. All rights reserved.
+           Copyright 1994-2007 © RealNetworks, Inc. All rights reserved.
+           Copyright 1994-2010 The FreeBSD Project. All rights reserved.
+           Copyright © 1995-2001 Corporation for National Research Initiatives; All Rights Reserved
+           Copyright © 1995-2002 RealNetworks, Inc. and/or its licensors. All Rights Reserved.
+           Copyright ©1995-2002 RealNetworks, Inc. and/or its suppliers.
+           Copyright © 1995-2010 RealNetworks, Inc. and/or its suppliers.
+           Copyright 1996-2002, 2006 by David Turner, Robert Wilhelm, and Werner Lemberg
+           Copyright 1998-1999, The OpenLDAP Foundation. All Rights Reserved.
+           Copyright 1998, Net Boolean Incorporated, Redwood City, California, USA All Rights Reserved.
+           Copyright 1998, The OpenLDAP Foundation. All Rights Reserved.
+           Copyright 1999-2000 The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999-2000, The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright © 1999-2001 Michael Stutz <stutz@dsl.org>
+           Copyright 1999-2001 The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999 2002-03 LaTeX3 Project
+           Copyright 1999 2002-04 LaTeX3
+           Copyright 1999 2002-2006 LaTeX3 Project
+           Copyright 1999 2002-2008 LaTeX3
+           Copyright 1999-2003 The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999, Ericsson Utvecklings AB. All Rights Reserved.
+           Copyright 1999 LaTeX3 Project
+           Copyright 1999, The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright © 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc. <http://fsf.org/>
+           Copyright 2000-2009 Kitware, Inc., Insight Software Consortium All rights reserved.
+           Copyright 2001-2009 Brandon Long ClearSilver
+           Copyright 2001 Scott Robert Ladd. All rights reserved, except as noted herein.
+           Copyright © 2001 Wintertree Software Inc.
+           COPYRIGHT 2002-2010 M+ FONTS PROJECT
+           Copyright © 2002 Affero Inc. 510 Third Street - Suite 225, San Francisco, CA 94107, USA
+           Copyright © 2002. OCLC Online Computer Library Center, Inc. All Rights Reserved
+           Copyright © 2005 Lawrence Rosen.
+           Copyright 2006 by BULL HN Information Systems Inc.
+           Copyright 2006 by Bull SAS All Rights Reserved
+           Copyright 2006 by Princeton University. All rights reserved.
+           Copyright 2006, Sun Microsystems, Inc. All rights reserved.
+           Copyright © 2007 Free Software Foundation, Inc. <http://fsf.org/>
+           Copyright © 2009 Free Software Foundation, Inc. <http://fsf.org/>
+           Copyright © 2014 Tapjoy, Inc. All Rights Reserved TAPJOY SDK DOWNLOAD LICENSE AGREEMENT
+           COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
+           copyright by the Free Software Foundation
+           Copyright (c) 1983-2002 Sybase, Inc. All Rights Reserved.
+           copyright (C) 1989, 1991 Free Software Foundation, Inc.
+           Copyright (C) 1989, 1991 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+           Copyright (C) 1989, 1991 Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+           Copyright (c) 1989-2001 by Lucent Technologies
+           Copyright (C) 1989 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (c) 1990, 1993, 1994, 1995 The Regents of the University of California. All rights reserved.
+           Copyright (c) 1990-1999 Sleepycat Software. All rights reserved.
+           Copyright (c) 1990-2009 Info-ZIP. All rights reserved.
+           Copyright (c) 1991 - 1995, Stichting Mathematisch Centrum Amsterdam, The Netherlands. All rights reserved.
+           copyright (C) 1991-1998, Thomas G. Lane. All Rights Reserved except as specified below.
+           Copyright (C) 1991, 1999 Free Software Foundation, Inc. 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 1991 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+           Copyright (C) 1993 - 2002, all rights reserved.
+           Copyright (C) 1994, 1995, 1997, 1998, 1999, 2000 Aladdin Enterprises, Menlo Park, California, U.S.A. All rights reserved.
+           Copyright (C) 1994-2006 The XFree86 Project, Inc. All rights reserved.
+           Copyright (c) 1994, The Regents of the University of California
+           Copyright (c) 1995, 1996 Guy Eric Schalnat, Group 42, Inc.
+           Copyright (c) 1995, 1996 The President and Fellows of Harvard University. All rights reserved.
+           Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com) All rights reserved.
+           Copyright (C) 1995-1999. All Rights Reserved.
+           Copyright (c) 1995-1999 The Apache Group. All rights reserved.
+           Copyright (c) 1995-2003 by Internet Software Consortium
+           Copyright (C) 1995-2004 Jean-loup Gailly and Mark Adler
+           Copyright (c) 1996, 1997 Andreas Dilger Distributed
+           Copyright (C) 1996, 1999 International Business Machines Corporation and others. All Rights Reserved.
+           copyright (C) 1996-2000 by David Turner, Robert Wilhelm, and Werner Lemberg. All rights reserved except as specified below.
+           Copyright (c) 1996-2000 Intel Corporation All rights reserved.
+           Copyright (c) 1996-2001 Logica Mobile Networks Limited;
+           Copyright (c) 1996-2001 Logica Mobile Networks Limited, all rights reserved.
+           Copyright (c) 1996-2002 Mike Ferris. All Rights Reserved.
+           Copyright (c) 1996-2010, The PostgreSQL Global Development Group
+           Copyright (c) 1996 NVIDIA, Corp. All rights reserved.
+           Copyright (c) 1996 NVIDIA, Corp. NVIDIA
+           Copyright (C) 1996 X Consortium
+           Copyright (C) 1998, 1999, 2000, 2001, 2002 Red Hat, Inc.
+           Copyright (C) 1998, 1999, 2000 Red Hat, Inc. All Rights Reserved.
+           Copyright (C) 1998, 1999, 2000 Red Hat, Inc. (http://www.redhat.com/). All Rights Reserved.
+           Copyright (c) 1998, 1999 Glenn Randers-Pehrson
+           Copyright (c) 1998-1999 Jeremie Miller.
+           Copyright (C) 1998-1999 Netscape Communications Corporation. All Rights Reserved.
+           Copyright (c) 1998-2008 The OpenSSL Project. All rights reserved.
+           Copyright (c) 1998 Julian Smart, Robert Roebling
+           Copyright (C) 1998 Netscape Communications Corporation. All Rights Reserved.
+           Copyright (c) 1999-2000 Apple Computer, Inc. All Rights Reserved.
+           Copyright (c) 1999-2000 Jabber.com, Inc. All Rights Reserved. Contact information for Jabber.com, Inc. is available at http://www.jabber.com/.
+           Copyright (C) 1999-2000 Trolltech AS, Norway.
+           Copyright (C) 1999-2002 Technical Pursuit Inc., All Rights Reserved.
+           Copyright (c) 1999 - 2002 The PHP Group. All rights reserved.
+           Copyright (c) 1999-2003 Apple Computer, Inc. All Rights Reserved.
+           Copyright (c) 1999 - 2006 The PHP Group. All rights reserved.
+           Copyright (c) 1999-2007 Apple Inc. All Rights Reserved.
+           Copyright (c) 1999 - 2010 The PHP Group. All rights reserved.
+           Copyright (c) 1999 Apple Computer, Inc. All Rights Reserved.
+           Copyright (C) 1999 Arphic Technology Co., Ltd. 11Fl. No.168, Yung Chi Rd., Taipei, 110 Taiwan All rights reserved except as specified below.
+           Copyright (C) 2000,2001,2002 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (c) 2000-2001 X.Net, Inc. Lafayette, California, USA
+           Copyright (c) 2000-2002 Glenn Randers-Pehrson
+           Copyright (c) 2000-2005 INRIA, France Telecom All rights reserved.
+           Copyright (c) 2000-2006, The Perl Foundation.
+           Copyright (C) 2000 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 2000 Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+           Copyright (c) 2000- (insert then current year) OCLC Online Computer Library Center, Inc. and other contributors. All rights reserved
+           copyright (c) 2000 The Apache Software Foundation. All rights reserved.
+           Copyright (c) 2000 The Apache Software Foundation. All rights reserved.
+           Copyright (c) 2000 Vovida Networks, Inc. All rights reserved.
+           Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Python Software Foundation; All Rights Reserved
+           Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Python Software Foundation; All Rights Reserved
+           Copyright (c) 2001, 2002, 2003, 2004 Python Software Foundation; All Rights Reserved
+           Copyright (c) 2001, 2002, 2003 Python Software Foundation; All Rights Reserved
+           Copyright (c) 2001-2002 Python Software Foundation; All Rights Reserved
+           Copyright (C) 2001-2002 Technical Pursuit Inc., All Rights Reserved. PREAMBLE
+           Copyright (c) 2001-2004 by the MX4J contributors. All rights reserved.
+           Copyright (C) 2001-2004 Robert A. van Engelen, Genivia inc. All Rights Reserved.
+           Copyright (C) 2001-2007 Technical Pursuit Inc., All Rights Reserved.
+           Copyright (c) 2001-2011 by The Fellowship of SML/NJ
+           Copyright (c) 2001 EU DataGrid. All rights reserved.
+           Copyright (c) 2001 Python Software Foundation; All Rights Reserved
+           Copyright (c) 2001 The Phorum Development Team. All rights reserved.
+           Copyright (c) 2001 Unidex, Inc. All rights reserved.
+           Copyright (c) 2002-2010 Oracle. All rights reserved.
+           Copyright (c) 2002 JSON.org
+           Copyright (C) 2002 Lawrence E. Rosen. All rights reserved.
+           Copyright (C) 2003-2004 Lawrence E. Rosen. All rights reserved.
+           copyright (c) 2003, 2004 nexB Inc. All rights are reserved.
+           Copyright (C) 2003, 2006-2007 Free Software Foundation, Inc.
+           Copyright (c) 2003 Entessa, LLC. All rights reserved.
+           Copyright (C) 2003 Lawrence E. Rosen. All rights reserved.
+           Copyright (c) 2004, 2006-2010 Glenn Randers-Pehrson
+           Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. ("ISC")
+           Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+           Copyright (C) 2004 SugarCRM, Inc.; All Rights Reserved.
+           Copyright(c) 2006 Adobe Systems Incorporated. All rights reserved.
+           Copyright (c) 2006, CRYPTOGAMS by <appro@openssl.org> All rights reserved.
+           Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
+           Copyright (C) 2007 Olli Salonen &lt;oasalonen@gmail.com&gt; see btnx.c for detailed license information
+           Copyright (c) 2008 The NetBSD Foundation, Inc. All rights reserved.
+           Copyright (C) 2009 Free Software Foundation, Inc. <http://fsf.org/>
+           Copyright (c) 2009, Washington University in St. Louis
+           Copyright (C) 2010 Fedora Project. All rights reserved.
+           Copyright (c) 2010, Google Inc. All rights reserved.
+           Copyright (C) 2012, Georg Kitz, @gekitz
+           Copyright (C) Borland/Inprise. All Rights Reserved.
+           Copyright (C) May, 2000 The Open Group, Metro Link, Incorporated and others. All Rights Reserved
+           Copyright (c) NAUMEN (tm) and Contributors. All rights reserved.
+           Copyright &copy 1994-1999. The MITRE Corporation http://www.mitre.org/. All Rights Reserved.
+           Copyright (c) The Open Group Ltd. and others. All Rights Reserved.
+           Copyright (c) Zope Corporation. All rights reserved.
+           Copyright (c) Zope Corporation (tm) and Contributors. All rights reserved.
+           copyrighted by Douglas C. Schmidt
+           copyrighted by Dr. Douglas C. Schmidt and the Center for Distributed
+           copyrighted by Fedora Project
+           copyrighted by Object Computing, Inc., St. Louis Missouri, Copyright (C) 2002, all rights reserved.
+           copyrighted by Open Market, Inc ("Open Market"). The following terms apply to all files associated with the Software and Documentation unless explicitly disclaimed in individual files.
+           COPYRIGHT I B M CORPORATION 2002
+           copyright is written, it is Taro Muraoka.
+           copyright © Open CASCADE S.A.S., 2001. All rights reserved.
+           Copyright © RealNetworks, Inc., 1995-2002. All rights reserved.
+           Copyright Treaty of 1996, the WIPO Performances and Phonograms Treaty of 1996 and
+           Copyright Treaty of 1996, the WIPO Performances and Phonograms Treaty of 1996 and the Universal Copyright Convention (as revised on July 24, 1971).
+           (c) the European Community 2007
+           (C) THE FRAMEWORX COMPANY 2003 http://opensource.org/licenses/frameworx.php'
+           © Skype – Last revised: August 2009
+License: NoLicenseConcluded
+Comment: scanners found: AAL AND ACE AND Adaptec AND Adobe-2006 AND AdobeAFM AND AFL-1.1 AND AFL-1.2 AND AFL-2.0 AND AFL-2.1 AND AFL-3.0 AND Against-DRM AND Agere AND AGPL-1.0 AND AGPL-3.0 AND Aladdin AND Alfresco AND Alfresco-FLOSS AND ANTLR-PD AND Apache-1.0 AND Apache-1.1 AND Apache-2.0 AND APL-1.0 AND APSL-1.0 AND APSL-1.1 AND APSL-1.2 AND APSL-2.0 AND Aptana-1.0 AND Arphic AND Artistic-1.0 AND Artistic-2.0 AND Ascender-EULA AND ATI-EULA AND Autoconf-exception-3.0 AND Bitstream AND BitTorrent-1.1 AND Broadcom-EULA AND BSD AND BSD-2-Clause AND BSD-2-Clause-FreeBSD AND BSD-3-Clause AND BSD-3-Clause-Clear AND BSD-3-Clause-Severability AND BSD-4-Clause AND BSD-4-Clause-UC AND BSD-Doc AND BSD-style AND BSL-1.0 AND CATOSL AND CATOSL-1.1 AND CC-BY AND CC-BY-1.0 AND CC-BY-2.0 AND CC-BY-2.5 AND CC-BY-3.0 AND CC-BY-4.0 AND CC-BY-NC-1.0 AND CC-BY-NC-2.0 AND CC-BY-NC-2.5 AND CC-BY-NC-3.0 AND CC-BY-NC-4.0 AND CC-BY-NC-ND-1.0 AND CC-BY-NC-ND-2.0 AND CC-BY-NC-ND-2.5 AND CC-BY-NC-ND-3.0 AND CC-BY-NC-ND-4.0 AND CC-BY-NC-SA-1.0 AND CC-BY-NC-SA-2.0 AND CC-BY-NC-SA-2.5 AND CC-BY-NC-SA-3.0 AND CC-BY-NC-SA-4.0 AND CC-BY-ND-1.0 AND CC-BY-ND-2.0 AND CC-BY-ND-2.5 AND CC-BY-ND-3.0 AND CC-BY-ND-4.0 AND CC-BY-SA AND CC-BY-SA-1.0 AND CC-BY-SA-2.0 AND CC-BY-SA-2.5 AND CC-BY-SA-3.0 AND CC-BY-SA-4.0 AND CC0-1.0 AND CCLRC AND CDDL AND CDDL-1.0 AND CDDL-1.1 AND CECILL AND CECILL-1.0 AND CECILL-1.1 AND CECILL-2.0 AND CECILL-B AND CECILL-C AND Cisco AND Citrix AND ClArtistic AND ClearSilver AND CMake AND CMU AND CNRI-Python AND CNRI-Python-GPL-Compatible AND CompuServe AND Comtrol AND Condor-1.0 AND Condor-1.1 AND CPAL-1.0 AND CPL-0.5 AND CPL-1.0 AND CPOL-1.02 AND Cryptogams AND CUA-OPL-1.0 AND Docbook AND DSL AND Dual-license AND ECL-1.0 AND ECL-2.0 AND eCos-2.0 AND EFL AND EFL-1.0 AND EFL-2.0 AND Entessa AND Epinions AND EPL-1.0 AND ErlPL-1.1 AND EUDatagrid AND EUPL-1.0 AND EUPL-1.1 AND EUPL-1.2 AND FaCE AND Fair AND FAL-1.3 AND Fedora AND FedoraCLA AND Ferris-1.2 AND Flora-1.0 AND Flora-1.1 AND Frameworx-1.0 AND Freeware AND FSF AND FTL AND GFDL-1.1 AND GFDL-1.2 AND GFDL-1.3 AND Giftware AND Glide AND GPL AND GPL-1.0 AND GPL-1.0+ AND GPL-2.0 AND GPL-2.0+-with-bison-exception AND GPL-2.0+-with-classpath-exception AND GPL-2.0-with-autoconf-exception AND GPL-2.0-with-bison-exception AND GPL-2.0-with-classpath-exception AND GPL-2.0-with-font-exception AND GPL-2.0-with-GCC-exception AND GPL-3.0 AND GPL-3.0+-with-bison-exception AND GPL-3.0+-with-classpath-exception AND GPL-3.0-with-bison-exception AND GPL-3.0-with-GCC-exception AND gSOAP-1.3b AND H2-1.0 AND Hacktivismo AND Hauppauge AND Helix.RealNetworks-EULA AND HP AND HP-EULA AND IBM-pibs AND IJG AND Imlib2 AND Info-ZIP AND Intel AND Intel-WLAN AND Interbase AND IPA AND IPL-1.0 AND ISC AND Jabber-1.0 AND JISP AND JSON AND LGPL AND LGPL-2.0+ AND LGPL-2.1+ AND LGPL-2.1+-KDE-exception AND LGPL-3.0+ AND LIBGCJ AND Libpng AND Logica-OSL-1.0 AND LPL-1.0 AND LPL-1.02 AND LPPL-1.0 AND LPPL-1.1 AND LPPL-1.2 AND LPPL-1.3 AND LPPL-1.3a AND LPPL-1.3b AND LPPL-1.3c AND M+ AND Majordomo-1.1 AND MetroLink-1.0 AND Mibble AND Migemo AND Mindterm AND MirOS AND MIT AND MitreCVW AND Motorola AND Motosoto AND MPL-1.0 AND MPL-1.1 AND MPL-1.1-style AND MPL-2.0-no-copyleft-exception AND MPL-EULA-1.1 AND MPL-EULA-2.0 AND MPL-EULA-3.0 AND MS-LPL AND MS-PL AND MS-RL AND Multics AND MX4J AND MX4J-1.0 AND NASA-1.3 AND Naumen AND NBPL-1.0 AND NewBSD AND NGPL AND Nokia AND NOSL AND NPL-1.0 AND NPOSL-3.0 AND NRL AND NTP AND Nvidia AND Nvidia-EULA AND OASIS AND OCCT AND OCLC-2.0 AND ODbL-1.0 AND OFL-1.0 AND OGTSL AND OLDAP AND OLDAP-1.1 AND OLDAP-1.2 AND OLDAP-1.3 AND OLDAP-1.4 AND OLDAP-2.0 AND OLDAP-2.0.1 AND OLDAP-2.1 AND OLDAP-2.2 AND OLDAP-2.2.1 AND OLDAP-2.2.2 AND OLDAP-2.3 AND OLDAP-2.4 AND OLDAP-2.5 AND OLDAP-2.6 AND OLDAP-2.7 AND OLDAP-2.8 AND Open-PL-0.4 AND Open-PL-1.0 AND OpenDefinition AND OpenGroup AND OpenMarket AND OpenSSL AND OPL AND OPL-1.0 AND OPL-style AND Oracle-Berkeley-DB AND Oracle-Dev AND OSL-1.0 AND OSL-1.1 AND OSL-2.0 AND OSL-2.1 AND OSL-3.0 AND PDDL-1.0 AND Phorum AND Phorum-2.0 AND PHP AND PHP-2.02 AND PHP-3.0 AND PHP-3.01 AND Piriform AND Pixware-EULA AND Public-domain AND Python-2.0 AND Python-2.0.1 AND Python-2.1.3 AND Python-2.2.3 AND Python-2.3.7 AND Python-2.4.4 AND Python-2.5 AND Python-2.6.5 AND Python-2.7 AND Python-3.1.1 AND Qmail AND QPL-1.0 AND QT.Commercial AND RCSL AND RealNetworks-EULA AND RedHat AND RedHat-EULA AND RHeCos-1.1 AND RPL-1.1 AND RPL-1.5 AND RPSL-1.0 AND RSCPL AND Ruby AND SAX-PD AND See-file AND SGI-B-1.0 AND SGI-B-1.1 AND SGI-B-2.0 AND SimPL-2.0 AND SISSL AND Skype-EULA AND Sleepycat AND SNIA-1.1 AND Spikesource AND SPL-1.0 AND Sun-BCLA AND SunJDK6 AND Tapjoy AND Terracotta AND Trolltech AND trolltech-exception AND UCWare-EULA AND Unicode AND Unidex AND Unlicense AND VIM AND Vixie AND VMWare-EULA AND VSL-1.0 AND W3C AND WashU AND Watcom-1.0 AND WebM AND Wintertree AND WordNet-3.0 AND WTFPL AND WXwindows AND X11 AND XFree86 AND XFree86-1.1 AND Xnet AND Yahoo-EULA AND YPL-1.1 AND Zimbra-1.2 AND Zimbra-1.3 AND Zlib AND ZoneAlarm-EULA AND ZPL-1.1 AND ZPL-2.0 AND ZPL-2.1
+
+Files: fossology/install/db/licenseRef.json
+Copyright: (C) 1988, 1989 by Adobe Systems Incorporated. All rights reserved.
+           (c) 2006 Amazon Digital Services, Inc. or its affiliates.
+           (c) Copyright 1992 by Panagiotis Tsirigotis
+           (c) Jim Davies, January 1995
+           (c) Ministerium fuer Wissenschaft und Forschung Nordrhein-Westfalen 2004 Erstellt von Axel Metzger und Till Jaeger, Institut fuer Rechtsfragen der Freien und Open Source Software - ( http:\/\/www.ifross.de ).
+           Copyright 1972 by Massachusetts Institute of Technology and Honeywell Information Systems Inc. Copyright 2006 by BULL HN Information Systems Inc.\nCopyright 2006 by Bull SAS All Rights Reserved
+           Copyright 1986 - 1993, 1998, 2004 Thomas Williams, Colin Kelley
+           Copyright 1988,1990,1993 by Paul Vixie All rights reserved
+           copyright 1989-2000 by Norman Ramsey. All rights reserved.
+           Copyright 1989--2004 by Hunter Goatley.
+           Copyright 1989 M. Stephenson Based on the BISON general public license, copyright 1988 Richard M. Stallman)
+           Copyright 1992, 1993, 1994 by Jutta Degener and Carsten Bormann,\nTechnische Universitaet Berlin
+           Copyright 1992, 1993, 1994 Henry Spencer. All rights reserved.
+           Copyright 1993-2014 University Corporation for Atmospheric Research\/Unidata
+           Copyright 1993 Francis Borceux
+           Copyright 1994-2009 Sun Microsystems, Inc. All Rights Reserved.
+           Copyright 1994-2010 The FreeBSD Project. All rights reserved.
+           Copyright 1995-2001 Corporation for National Research Initiatives; All Rights Reserved
+           Copyright 1995 by Wietse Venema. All rights reserved.
+           Copyright 1996-2002, 2006 by David Turner, Robert Wilhelm, and Werner Lemberg Introduction
+           Copyright 1996-2006 Free Software Foundation, Inc.
+           Copyright 1998-1999, The OpenLDAP Foundation. All Rights Reserved.
+           Copyright 1998, Net Boolean Incorporated, Redwood City, California, USA All Rights Reserved.
+           Copyright 1998, The OpenLDAP Foundation. All Rights Reserved.
+           Copyright 1999-2000 The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999-2000, The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999-2001 The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 1999 2002-03 LaTeX3 Project
+           Copyright 1999 2002-04 LaTeX3 Project
+           Copyright 1999 2002-2006 LaTeX3 Project
+           Copyright 1999 2002-2008 LaTeX3 Project
+           copyright 1999-2010 by Andrew Plotkin.
+           Copyright 1999-2013 ImageMagick Studio LLC
+           Copyright 1999, Ericsson Utvecklings AB. All Rights Reserved.
+           Copyright 1999 LaTeX3 Project
+           Copyright 1999, The OpenLDAP Foundation, Redwood City, California, USA. All Rights Reserved.
+           Copyright 2000-2009 Kitware, Inc., Insight Software Consortium\r\nAll rights reserved.
+           Copyright 2001-2009 Brandon Long
+           Copyright 2001 Scott Robert Ladd. All rights reserved.
+           Copyright 2002-2004 James W. Newkirk, Michael C. Two, Alexei A. Vorontsov, Charlie Poole\nCopyright \u00a9 2000-2004 Philip A. Crai
+           COPYRIGHT 2002-2010 M+ FONTS PROJECT
+           Copyright 2002 Affero Inc.
+           Copyright 2002 (C) The Codehaus. All Rights Reserved.
+           Copyright 2006 by Princeton University. All rights reserved.
+           Copyright 2007 Free Software Foundation, Inc.
+           Copyright 2007 TAPR - http:\/\/www.tapr.org\/OHL
+           Copyright 2009 Free Software Foundation, Inc.
+           Copyright 2014 Tapjoy, Inc. All Rights Reserved
+           Copyright 2018 MongoDB, Inc.
+           Copyright (c) 1985, 1987, 1989, 1990, 1991, 1992, 1993, 1997 Adobe Systems Incorporated. All Rights Reserved.
+           Copyright (c) 1986 by University of Toronto. Written by Henry Spencer.
+           Copyright (c) 1988-1997 Sam Leffler\nCopyright (c) 1991-1997 Silicon Graphics, Inc.
+           Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+           Copyright (C) 1989 by Chen & Harrison International Systems, Inc.
+           Copyright (C) 1989 Free Software Foundation, Inc.\r\n 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 1989 Free Software Foundation, Inc.\r\n51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (c) 1990-1999 Sleepycat Software. All rights reserved.
+           Copyright (c) 1990-2009 Info-ZIP. All rights reserved.
+           Copyright (C) 1991, 1992 Hans-Hermann Bode
+           copyright (C) 1991-1995 Angus J. C. Duggan.
+           copyright (C) 1991-1998, Thomas G. Lane. All Rights Reserved
+           Copyright (C) 1991, 1999 Free Software Foundation, Inc.\n51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 1991, 1999 Free Software Foundation, Inc.\r\n51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (c) 1991-2000 iMatix Corporation.
+           Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All rights reserved.
+           Copyright (C) 1991 Free Software Foundation, Inc.\n51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+           Copyright (C) 1991 Free Software Foundation, Inc.\r\n51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA
+           Copyright (C) 1992-1996, 1998-2012 Free Software Foundation, Inc.
+           Copyright (c) 1993-2003\nThe National Science and Technology Research Center for Computation and Visualization of Geometric Structures (The Geometry Center) University of Minnesota\nemail: qhull@qhull.org
+           Copyright (C) 1994, 1995, 1997, 1998, 1999 Aladdin Enterprises,\nMenlo Park, California, U.S.A. All rights reserved.
+           Copyright (c) 1994-2002 World Wide Web Consortium, (Massachusetts Institute of Technology, Institut National de Recherche en Informatique et en Automatique, Keio University). All Rights Reserved.
+           Copyright (C) 1994-2006 The XFree86 Project, Inc.
+           Copyright (c) 1995, 1996 Xerox Corporation. All Rights Reserved.
+           Copyright (C) 1995-1999. All Rights Reserved.
+           Copyright (c) 1995-1999 The Apache Group. All rights reserved.
+           Copyright (C) 1995-2009 Gerd Neugebauer
+           Copyright (c) 1995-2012 by Arkkra Enterprises. All rights reserved.
+           Copyright (c) 1995-2014 International Business Machines Corporation and others\nAll rights reserved.
+           Copyright (c) 1995-2018 The PNG Reference Library Authors. Copyright (c) 2018 Cosmin Truta. Copyright (c) 2000-2002, 2004, 2006-2018 Glenn Randers-Pehrson. Copyright (c) 1996-1997 Andreas Dilger. Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc.
+           Copyright (C) 1995 by Donald Arseneau
+           Copyright (c) 1996-2000 Intel Corporation\nAll rights reserved.
+           Copyright (c) 1996-2001 Logica Mobile Networks Limited, all rights reserved.\r\n\r\nLogica Mobile Networks Limited (\"Logica\") is the owner of the rights\r\nin the software programs (\"Software\").
+           copyright (C) 1996-2010 Julian R Seward. All rights reserved.
+           Copyright (c) 1996-2010, The PostgreSQL Global Development Group\nPortions Copyright (c) 1994, The Regents of the University of California
+           Copyright (c) 1996 - 2015, Daniel Stenberg, <daniel@haxx.se>.\nAll rights reserved.
+           Copyright (C) 1996 Craig Barratt, Michael C. Grant, and David Carlisle.
+           Copyright (c) 1996 NVIDIA, Corp. All rights reserved.
+           Copyright (C) 1996 X Consortium
+           Copyright (c) 1997,1998,2002,2007 Adobe Systems Incorporated
+           Copyright (C) 1998, 1999, 2000, 2001, 2002 Red Hat, Inc.
+           Copyright (c) 1998, 1999 Henry Spencer. All rights reserved.
+           Copyright (c) 1998-2008 The OpenSSL Project. All rights reserved.
+           Copyright (c) 1998 Julian Smart, Robert Roebling
+           Copyright (c) 1999-2002 Henrik Theiling
+           Copyright (c) 1999 - 2002 The PHP Group. All rights reserved.
+           Copyright (c) 1999-2002 Zend Technologies Ltd. All rights reserved.
+           Copyright (C) 1999-2005 Trolltech AS, Norway.
+           Copyright (c) 1999 - 2006 The PHP Group. All rights reserved.
+           Copyright (c) 1999 - 2012 The PHP Group. All rights reserved.
+           Copyright (C) 1999 Arphic Technology Co., Ltd.\r\n11Fl. No.168, Yung Chi Rd., Taipei, 110 Taiwan\r\nAll rights reserved except as specified below.
+           Copyright (C) 2000, 2001, 2002, 2007, 2008 Free Software Foundation, Inc. <http:\/\/fsf.org\/>
+           Copyright (C) 2000,2001,2002 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (c) 2000-2001 X.Net, Inc. Lafayette, California, USA
+           Copyright (c) 2000-2002 Japan Network Information Center. All rights reserved.
+           Copyright (C) 2000-2002 werken digital. All rights reserved.
+           Copyright (c) 2000-2006, The Perl Foundation
+           Copyright (C) 2000-2008 Carsten Haitzler, Geoff Harrison and various contributors Copyright (C) 2004-2008 Kim Woelders
+           Copyright (C) 2000 Carsten Haitzler and various contributors (see AUTHORS)
+           Copyright (C) 2000 Free Software Foundation, Inc. 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+           Copyright (C) 2000 Free Software Foundation, Inc. 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+           Copyright (c) 2000 The Apache Software Foundation. All rights reserved.
+           Copyright (c) 2000 Vovida Networks, Inc. All rights reserved.
+           Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Python Software Foundation; All Rights Reserved
+           Copyright (C) 2001-2002 Technical Pursuit Inc., All Rights Reserved.
+           Copyright (C) 2001-2003 Wouter van Oortmerssen.
+           Copyright (c) 2001-2004 by the MX4J contributors. All rights reserved.
+           Copyright (c) 2001-2006 Michael David Adams Copyright (c) 1999-2000 Image Power, Inc. Copyright (c) 1999-2000 The University of British Columbia All rights reserved.
+           Copyright (C) 2001-2007 Technical Pursuit Inc., All Rights Reserved.
+           Copyright (c) 2001-2010, The HSQL Development Group All rights reserved.
+           Copyright (c) 2001-2011 by The Fellowship of SML/NJ Copyright (c) 1989-2001 by Lucent Technologies
+           Copyright (c) 2001 EU DataGrid. All rights reserved.
+           Copyright (C) 2001 Leptonica. All rights reserved.
+           Copyright (c) 2001 The Phorum Development Team. All rights reserved.
+           Copyright (c) 2001 Unidex, Inc. All rights reserved.
+           Copyright (c) 2002-2007 Charlie Poole Copyright (c) 2002-2004 James W. Newkirk, Michael C. Two, Alexei A. Vorontsov Copyright (c) 2000-2002 Philip A. Craig Portions Copyright (c) 2002-2007 Charlie Poole or Copyright (c) 2002-2004 James W. Newkirk, Michael C. Two, Alexei A. Vorontsov or Copyright (c) 2000-2002 Philip A. Craig
+           Copyright (c) 2002-2010 Oracle. All rights reserved.
+           Copyright (c) 2002 JSON.org
+           Copyright (c) 2002 The Trustees of Indiana University. All rights reserved.
+           Copyright (c) 2003-2005 Sun Microsystems, Inc. All Rights Reserved.
+           Copyright (C) 2003, 2006-2007 Free Software Foundation, Inc.
+           Copyright (C) 2003, Christophe Geuzaine
+           Copyright (c) 2003 Entessa, LLC. All rights reserved.
+           Copyright (c) 2003, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy). All rights reserved.
+           Copyright (c) 2004, 2006-2010 Glenn Randers-Pehrson
+           Copyright (c) 2004-2010 by Internet Systems Consortium, Inc. (\"ISC\") Copyright (c) 1995-2003 by Internet Software Consortium
+           Copyright (c) 2004-2012 TMate Software. All rights reserved.
+           Copyright (C) 2004 Sam Hocevar <sam@hocevar.net>
+           Copyright (c) 2006, 2007 Advanced Micro Devices, Inc.
+           Copyright (c) 2006 Academy of Motion Picture Arts and Sciences (\"A.M.P.A.S.\"). Portions contributed by others as indicated. All rights reserved.
+           Copyright(c) 2006 Adobe Systems Incorporated. All rights reserved.
+           Copyright (C) 2006 by Rob Landley <rob@landley.net>
+           Copyright (c) 2006, CRYPTOGAMS by <appro@openssl.org>
+           copyright (c) 2006 Mike Mintz and Robert Ekendahl. All rights reserved.
+           Copyright (C) 2007, 2008, 2009, 2010 Karl Berry. Copyright (C) 1988, 1994, 2007 Stephen Gilmore. Copyright (C) 1994, 1995, 1996 Torsten Martinsen.
+           Copyright (c) 2007, Eclipse Foundation, Inc. and its licensors. All rights reserved.
+           Copyright (C) 2007 Free Software Foundation, Inc. <http:\/\/fsf.org\/>
+           Copyright (C) 2007 Free Software Foundation, Inc. <https:\/\/fsf.org\/>
+           Copyright (c) 2007 The Trustees of Indiana University.\n2008 Dresden University of Technology and the Trustees of Indiana University.\n2010 SimuNova UG (haftungsbeschraenkt), www.simunova.com.\nAll rights reserved.\nAuthors: Peter Gottschling and Andrew Lumsdaine
+           Copyright (c) 2007 VOSTROM Holdings, Inc. This VOSTROM Holdings, Inc. (VOSTROM)
+           Copyright (c) 2008 The NetBSD Foundation, Inc.
+           Copyright (c) 2008 The NetBSD Foundation, Inc. All rights reserved.
+           Copyright (C) 2009 Free Software Foundation, Inc.
+           Copyright (c) 2009, Washington University in St. Louis
+           Copyright (c) 2010-2011 Adaptive Computing Enterprises, Inc. All rights reserved.
+           Copyright (c) 2010, Google Inc. All rights reserved.
+           Copyright (c) 2010 Simon Marlow
+           Copyright (c) 2011, Deusty, LLC All rights reserved.
+           Copyright(C) Caldera International Inc. 2001-2002. All rights reserved.
+           copyright CERN.
+           Copyright (c) NAUMEN (tm) and Contributors. All rights reserved.
+           Copyright Copyright 1992-2012 The FreeBSD Project. All rights reserved.
+           Copyright: Copyright (c) 2006 by Apple Computer, Inc., All Rights Reserved.
+           Copyright (c) Zope Corporation. All rights reserved.
+           Copyright (c) Zope Corporation (tm) and Contributors. All rights reserved.
+           copyrighted by Douglas C. Schmidt and his research group at Washington University, University of California, Irvine, and Vanderbilt University, Copyright (c) 1993-2009, all rights reserved.
+           copyrighted by Dr. Douglas C. Schmidt and the Center for Distributed\r\nObject Computing ('DOC' group) at Washington University, Copyright (C) 1993 - 2002, all rights\r\nreserved.
+           copyrighted by Open Market, Inc (\"Open Market\").
+           copyrighted by, proprietary to and a trade secret of ADAPTEC.
+           copyrighted by the Regents of the University of California, Sun Microsystems, Inc., Scriptics Corporation, ActiveState Corporation and other parties.
+           copyrighted work of Comtrol Corporation and or its suppliers.
+           copyright has been retained by Great Circle Associates.
+           copyright, i.e., \"Copyright (c) 1996-1999 Corporation for National Research Initiatives; All Rights Reserved
+           copyright, i.e., \"Copyright (c) 2001, 2002, 2003, 2004, 2005, 2006 Python Software Foundation; All Rights Reserved
+           copyright, i.e., \"Copyright (c)\r\n2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Python Software\r\nFoundation; All Rights Reserved
+           copyright, i.e., \"Copyright (c)\r\n2001, 2002, 2003, 2004 Python Software Foundation; All Rights Reserved
+           copyright, i.e., \"Copyright (c)\r\n2001, 2002, 2003 Python Software Foundation; All Rights Reserved
+           copyright, i.e., \"Copyright (c)\r\n2001-2002 Python Software Foundation; All Rights Reserved
+           copyright, i.e., \"Copyright (c)\r\n2001 Python Software Foundation; All Rights Reserved
+           copyright is written, it is Taro Muraoka.
+           copyright of CERN.
+           Copyright \u00a9 1991,1990,1989 Carnegie Mellon University
+           Copyright \u00a9 1991-2015 Unicode, Inc.
+           Copyright \u00a9 1991-2016 Unicode, Inc.
+           Copyright \u00a9 1995-2010 RealNetworks, Inc.
+           Copyright \u00a9 1997-2002 National Security Agency
+           Copyright \u00a9 1999-2001 Michael Stutz <stutz@dsl.org>
+           Copyright \u00a9 1999-2005, Intel Corp. All rights reserved.
+License: NoLicenseConcluded
+Comment: scanners found: 0BSD AND 389-exception AND AAL AND Abstyles AND ACE AND Adaptec AND Adobe-2006 AND Adobe-Glyph AND AdobeAFM AND ADSL AND AFL-1.1 AND AFL-1.2 AND AFL-2.0 AND AFL-2.1 AND AFL-3.0 AND Afmparse AND Against-DRM AND AgainstDRM AND Agere AND AGPL-1.0 AND AGPL-3.0 AND Aladdin AND Alfresco AND AMDPLPA AND AML AND AMPAS AND ANTLR-PD AND Apache-1.0 AND Apache-1.1 AND Apache-2.0 AND APAFML AND APL-1.0 AND APSL-1.0 AND APSL-1.1 AND APSL-1.2 AND APSL-2.0 AND Aptana-1.0 AND Arphic AND Artistic-1.0 AND Artistic-1.0-cl8 AND Artistic-1.0-Perl AND Artistic-2.0 AND Ascender-EULA AND ATI-EULA AND Autoconf-exception-2.0 AND Autoconf-exception-3.0 AND Barr AND Beerware AND Bitstream AND BitTorrent-1.0 AND BitTorrent-1.1 AND blessing AND BlueOak-1.0.0 AND Bootloader-exception AND Broadcom-EULA AND BSD AND BSD-1-Clause AND BSD-2-Clause AND BSD-2-Clause-FreeBSD AND BSD-2-Clause-Patent AND BSD-3-Clause AND BSD-3-Clause-Attribution AND BSD-3-Clause-Clear AND BSD-3-Clause-LBNL AND BSD-3-Clause-No-Nuclear-License AND BSD-3-Clause-No-Nuclear-License-2014 AND BSD-3-Clause-No-Nuclear-Warranty AND BSD-3-Clause-Open-MPI AND BSD-3-Clause-Severability AND BSD-4-Clause AND BSD-4-Clause-UC AND BSD-Doc AND BSD-Protection AND BSD-Source-Code AND BSD-style AND BSL-1.0 AND bzip2-1.0.5 AND bzip2-1.0.6 AND Caldera AND CATOSL AND CATOSL-1.1 AND CC-BY AND CC-BY-1.0 AND CC-BY-2.0 AND CC-BY-2.5 AND CC-BY-3.0 AND CC-BY-4.0 AND CC-BY-NC-1.0 AND CC-BY-NC-2.0 AND CC-BY-NC-2.5 AND CC-BY-NC-3.0 AND CC-BY-NC-4.0 AND CC-BY-NC-ND-1.0 AND CC-BY-NC-ND-2.0 AND CC-BY-NC-ND-2.5 AND CC-BY-NC-ND-3.0 AND CC-BY-NC-ND-4.0 AND CC-BY-NC-SA-1.0 AND CC-BY-NC-SA-2.0 AND CC-BY-NC-SA-2.5 AND CC-BY-NC-SA-3.0 AND CC-BY-NC-SA-4.0 AND CC-BY-ND-1.0 AND CC-BY-ND-2.0 AND CC-BY-ND-2.5 AND CC-BY-ND-3.0 AND CC-BY-ND-4.0 AND CC-BY-SA AND CC-BY-SA-1.0 AND CC-BY-SA-2.0 AND CC-BY-SA-2.5 AND CC-BY-SA-3.0 AND CC-BY-SA-4.0 AND CC-PDDC AND CC0-1.0 AND CCLRC AND CDDL AND CDDL-1.0 AND CDDL-1.1 AND CDLA-Permissive-1.0 AND CDLA-Sharing-1.0 AND CECILL AND CECILL-1.1 AND CECILL-2.0 AND CECILL-2.1 AND CECILL-B AND CECILL-C AND CERN-OHL-1.1 AND CERN-OHL-1.2 AND Cisco AND Citrix AND ClArtistic AND ClearSilver AND CLISP-exception-2.0 AND CMake AND CMU AND CMU-style AND CNRI-Jython AND CNRI-Python AND CNRI-Python-GPL-Compatible AND CompuServe AND Comtrol AND Condor-1.0 AND Condor-1.1 AND copyleft-next-0.3.0 AND copyleft-next-0.3.1 AND CPAL-1.0 AND CPL-1.0 AND CPOL-1.02 AND Crossword AND CrystalStacker AND CUA-OPL-1.0 AND Cube AND curl AND diffmark AND Docbook AND Dotseqn AND DSDP AND DSL AND Dual-license AND dvipdfm AND ECL-1.0 AND ECL-2.0 AND eCos-2.0 AND eCos-exception-2.0 AND EDL-1.0 AND EFL AND EFL-1.0 AND EFL-2.0 AND eGenix AND Entessa AND Epinions AND EPL-1.0 AND EPL-2.0 AND ErlPL-1.1 AND EUDatagrid AND EUPL-1.0 AND EUPL-1.1 AND EUPL-1.2 AND Eurosym AND FaCE AND Fair AND FAL-1.3 AND Fawkes-Runtime-exception AND Fedora AND FedoraCLA AND Ferris-1.2 AND Flora AND Flora-1.0 AND Flora-1.1 AND FLTK-exception AND Frameworx-1.0 AND FreeImage AND freertos-exception-2.0 AND Freeware AND FSFAP AND FSFUL AND FSFULLR AND FTL AND GCC-exception-2.0 AND GFDL-1.1 AND GFDL-1.2 AND GFDL-1.3 AND Giftware AND GL2PS AND Glide AND Glulxe AND gnu-javamail-exception AND gnuplot AND GPL AND GPL-1.0 AND GPL-1.0+ AND GPL-2.0 AND GPL-2.0+ AND GPL-2.0+-with-bison-exception AND GPL-2.0+-with-classpath-exception AND GPL-2.0-with-autoconf-exception AND GPL-2.0-with-bison-exception AND GPL-2.0-with-classpath-exception AND GPL-2.0-with-font-exception AND GPL-3.0 AND GPL-3.0+ AND GPL-3.0+-with-bison-exception AND GPL-3.0+-with-classpath-exception AND GPL-3.0-with-bison-exception AND GPL-3.0-with-GCC-exception AND GPL-CC-1.0 AND gSOAP-1.3b AND H2-1.0 AND Hacktivismo AND HaskellReport AND Hauppauge AND Helix.RealNetworks-EULA AND HP AND HP-EULA AND HPND AND HPND-sell-variant AND HSQLDB AND i2p-gpl-java-exception AND IBM-pibs AND ICU AND IJG AND ImageMagick AND iMatix AND Imlib2 AND Info-ZIP AND Intel AND Intel-ACPI AND Intel-WLAN AND Interbase AND IPA AND IPL-1.0 AND ISC AND Jabber AND Jabber-1.0 AND JasPer-2.0 AND JISP AND JPNIC AND JSON AND Latex2e AND Leptonica AND LGPL AND LGPL-2.0+ AND LGPL-2.1 AND LGPL-2.1+ AND LGPL-2.1+-KDE-exception AND LGPL-3.0+ AND LGPLLR AND LIBGCJ AND Libpng AND libpng-2.0 AND libtiff AND Libtool-exception AND Linux-OpenIB AND Linux-syscall-note AND LLVM-exception AND Logica-OSL-1.0 AND LPL-1.0 AND LPL-1.02 AND LPPL-1.0 AND LPPL-1.1 AND LPPL-1.2 AND LPPL-1.3 AND LPPL-1.3a AND LPPL-1.3b AND LPPL-1.3c AND LZMA-exception AND Majordomo AND MakeIndex AND MetroLink-1.0 AND Mindterm AND MirOS AND MIT AND MIT-0 AND MIT-CMU AND MIT-enna AND MIT-feh AND MIT-style AND MITNFA AND Motorola AND Motosoto AND mpich2 AND MPL-1.0 AND MPL-1.1 AND MPL-1.1-style AND MPL-2.0-no-copyleft-exception AND MPL-EULA-1.1 AND MPL-EULA-2.0 AND MPL-EULA-3.0 AND MS-LPL AND MS-PL AND MS-RL AND MTLL AND Multics AND Mup AND MX4J AND MX4J-1.0 AND NASA-1.3 AND Naumen AND NBPL-1.0 AND NCSA AND Net-SNMP AND NetCDF AND NewBSD AND Newsletr AND NGPL AND NLOD-1.0 AND Nokia AND Nokia-Qt-exception-1.1 AND Noweb AND NPL-1.0 AND NPOSL-3.0 AND NRL AND NTP AND Nunit AND Nvidia AND Nvidia-EULA AND OASIS AND OCaml-LGPL-linking-exception AND OCCT AND OCCT-exception-1.0 AND OCCT-PL AND OCLC-2.0 AND ODbL-1.0 AND ODC-By-1.0 AND OFL-1.0 AND OFL-1.1 AND OGL-UK-1.0 AND OGL-UK-2.0 AND OGL-UK-3.0 AND OGTSL AND OLDAP AND OLDAP-1.1 AND OLDAP-1.2 AND OLDAP-1.3 AND OLDAP-1.4 AND OLDAP-2.0 AND OLDAP-2.0.1 AND OLDAP-2.1 AND OLDAP-2.2 AND OLDAP-2.2.1 AND OLDAP-2.2.2 AND OLDAP-2.3 AND OLDAP-2.4 AND OLDAP-2.5 AND OLDAP-2.6 AND OLDAP-2.7 AND OLDAP-2.8 AND Open-PL-0.4 AND Open-PL-1.0 AND OpenDefinition AND OpenGroup AND OpenJDK-assembly-exception-1.0 AND OpenMap AND OpenMarket AND OpenSSL AND openvpn-openssl-exception AND OPL AND OPL-1.0 AND OPL-style AND Oracle-Berkeley-DB AND Oracle-Dev AND OSET-PL-2.1 AND OSL-1.0 AND OSL-1.1 AND OSL-2.0 AND OSL-2.1 AND OSL-3.0 AND Parity-6.0.0 AND PDDL-1.0 AND Phorum AND Phorum-2.0 AND PHP AND PHP-2.02 AND PHP-3.0 AND PHP-3.01 AND Piriform AND Pixware-EULA AND Plexus AND PostgreSQL AND PS-or-PDF-font-exception-20170817 AND psfrag AND Public-domain AND Python-2.0 AND Python-2.0.1 AND Python-2.1.3 AND Python-2.2.3 AND Python-2.3.7 AND Python-2.4.4 AND Python-2.5 AND Python-2.6.5 AND Python-2.7 AND Python-3.1.1 AND Qhull AND Qmail AND QPL-1.0 AND Qt-GPL-exception-1.0 AND Qt-LGPL-exception-1.1 AND QT.Commercial AND Qt.Commercial AND Qwt-exception-1.0 AND RCSL AND Rdisc AND RedHat AND RHeCos-1.1 AND RPL-1.1 AND RPL-1.5 AND RPSL AND RPSL-1.0 AND RSA-Cryptoki AND RSA-MD AND RSCPL AND Ruby AND SAX-PD AND Saxpath AND SCEA AND See-file AND Sendmail AND Sendmail-8.23 AND SGI-B-1.0 AND SGI-B-1.1 AND SGI-B-2.0 AND SHL-0.5 AND SHL-0.51 AND SimPL-2.0 AND SISSL AND SISSL-1.2 AND Skype-EULA AND Sleepycat AND SMLNJ AND SMPPL AND Spencer-94 AND Spencer-99 AND Spikesource AND SPL-1.0 AND SSPL-1.0 AND SugarCRM-1.1.3 AND Sun-BCLA AND SunJDK6 AND Swift-exception AND SWL AND Tapjoy AND TAPR-OHL-1.0 AND TCL AND TCP-wrappers AND Terracotta AND TMate AND TORQUE-1.1 AND TOSL AND TrueCrypt-3.0 AND TU-Berlin-2.0 AND u-boot-exception-2.0 AND UCWare-EULA AND UnclassifiedLicense AND Unicode AND Unicode-DFS-2015 AND Unicode-DFS-2016 AND Unicode-TOU AND Unidex AND Universal-FOSS-exception-1.0 AND Unlicense AND UPL-1.0 AND VIM AND Vixie AND VMware-EULA AND VMWare-EULA AND VOSTROM AND VSL-1.0 AND W3C AND W3C-19980720 AND W3C-20150513 AND WashU AND Watcom-1.0 AND WebM AND Wintertree AND WordNet-3.0 AND Wsuipa AND WXwindows AND WxWindows-exception-3.1 AND X11 AND Xerox AND XFree86 AND XFree86-1.1 AND xinetd AND Xnet AND XSkat AND Yahoo-EULA AND YPL-1.0 AND YPL-1.1 AND Zed AND Zend-2.0 AND Zimbra-1.2 AND Zimbra-1.3 AND Zimbra-1.4 AND Zlib AND zlib-acknowledgement AND ZoneAlarm-EULA AND ZPL AND ZPL-1.1 AND ZPL-2.0 AND ZPL-2.1
+
+Files: fossology/debian/source/lintian-overrides
+License: NoLicenseConcluded
+Comment: scanners found: GFDL-possibility AND PHP-possibility
+
+Files: fossology/CHANGELOG.md
+License: NoLicenseConcluded
+Comment: scanners found: AGPL AND CCPL AND GPL-2.0+ AND Intel-ACPI AND LGPL-2.1+ AND MPL AND NCSA AND OpenCASCADE-PL
