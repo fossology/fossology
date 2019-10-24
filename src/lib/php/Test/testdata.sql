@@ -696,6 +696,13 @@ INSERT INTO license_ref VALUES (2, 'LGPL-2.1-or-later', 'LGPL 2.1 or later', NUL
 INSERT INTO license_ref VALUES (3, 'GPL-2.0-or-later', 'GPL 2.0 or later', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 3, NULL, NULL, false, 1);
 INSERT INTO license_ref VALUES (4, 'MIT', 'MIT', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 3, NULL, NULL, false, 1);
 INSERT INTO license_ref VALUES (6, 'Classpath-exception-2.0', 'Classpath exception 2.0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, false, true, false, NULL, 3, NULL, NULL, false, 1)
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (2, 'Test comment #1', 'This will be your first comment!', '2019-05-14 10:12:46.622755+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (3, 'Test comment #2', 'This will be the second comment!', '2019-05-14 10:12:46.624386+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (4, 'Test comment #3', 'This will be the third comment!', '2019-05-14 10:12:46.626194+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (5, 'Test comment #4', 'This will be the fourth comment!', '2019-05-14 10:12:46.627571+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (6, 'Test comment #5', 'This will be the fifth comment!', '2019-05-14 10:12:46.62906+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (7, 'Test comment #6', 'This will be the sixth comment!', '2019-05-14 10:12:46.630884+05:30', 2, true);
+INSERT INTO license_std_comment (lsc_pk, name, comment, updated, user_fk, is_enabled) VALUES (8, 'not-set', 'This comment is not set!', '2019-05-14 10:12:46.632193+05:30', 2, false);
 INSERT INTO mimetype_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (3, 1, 1, true, NULL, '2014-08-07 09:57:20.475587+00', '2014-08-07 09:57:20.593476+00');
 INSERT INTO mimetype_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (8, 1, 2, true, NULL, '2014-08-07 09:57:27.733091+00', '2014-08-07 09:57:27.77946+00');
 INSERT INTO monk_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (6, 5, 1, true, NULL, '2014-08-07 09:57:20.771017+00', '2014-08-07 09:57:21.017807+00');
