@@ -26,6 +26,7 @@ namespace Fossology\UI\Api\Controllers;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\Lib\Auth\Auth;
+use Fossology\UI\Page\UploadPageBase;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
@@ -172,8 +173,19 @@ class UploadController extends RestController
         return $response->withJson($error->getArray(), $error->getCode());
       }
       if (!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
-        $error = new Info(403, "folderId $folderId is not accessible!", InfoType::ERROR);
+        $error = new Info(403, "folderId $folderId is not accessible!",
+          InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
+      }
+
+      $groupId = intval($request->getHeaderLine(UploadPageBase::UPLOAD_GROUP));
+      if (! empty($groupId)) {
+        $groupMap = $this->container->get('dao.user')->getUserGroupMap(
+          $this->restHelper->getUserId());
+        if (! key_exists($groupId, $groupMap)) {
+          $error = new Info(403, "User is not member of group $groupId!", InfoType::ERROR);
+          return $response->withJson($error->getArray(), $error->getCode());
+        }
       }
 
       $description = $request->getHeaderLine('uploadDescription');
@@ -181,7 +193,7 @@ class UploadController extends RestController
       $public = empty($public) ? 'protected' : $public;
       $ignoreScm = $request->getHeaderLine('ignoreScm');
       list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
-        $request, $folderId, $description, $public, $ignoreScm);
+        $request, $folderId, $description, $public, $ignoreScm, $groupId);
       if (! $status) {
         $info = new Info($uploadId != -1 ? $uploadId : 500,
           $message . "\n" . $statusDescription,

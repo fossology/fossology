@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.5
+  version: 1.0.6
   contact:
     email: fossology@fossology.org
   license:
@@ -291,6 +291,13 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: groupId
+          description: The group id to chose while uploading the package
+          in: header
+          required: false
+          schema:
+            type: integer
+            description: Group id, from last login if not provided
       responses:
         '201':
           description: Upload is created
