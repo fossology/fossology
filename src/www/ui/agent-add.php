@@ -119,9 +119,6 @@ class AgentAdder extends DefaultPlugin
         $agents[$agentName] = plugin_find($agentName);
       }
     }
-    if (count($agents)==0) {
-      return _("no valid agent specified");
-    }
 
     $jobId = JobAddJob(Auth::getUserId(), Auth::getGroupId(), $upload->getFilename(), $uploadId);
     $errorMsg = '';
