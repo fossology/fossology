@@ -46,6 +46,11 @@ class Decider
    * new scanner finds additional licenses
    */
   private $newScanner;
+  /**
+   * @var boolean $ojoDecider
+   * Scanners matches if Ojo findings are no contradiction with other findings
+   */
+  private $ojoDecider;
 
   /**
    * Decider constructor.
@@ -53,12 +58,14 @@ class Decider
    * @param boolean $nomosMonk
    * @param boolean $bulkReused
    * @param boolean $newScanner
+   * @param boolean $ojoDecider
    */
-  public function __construct($nomosMonk = false, $bulkReused = false, $newScanner = false)
+  public function __construct($nomosMonk = false, $bulkReused = false, $newScanner = false, $ojoDecider = false)
   {
     $this->nomosMonk  = $nomosMonk;
     $this->bulkReused = $bulkReused;
     $this->newScanner = $newScanner;
+    $this->ojoDecider = $ojoDecider;
   }
 
   /**
@@ -78,6 +85,10 @@ class Decider
     }
     if (array_key_exists("new_scanner", $deciderArray)) {
       $this->newScanner = filter_var($deciderArray["new_scanner"],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists("ojo_decider", $deciderArray)) {
+      $this->ojoDecider = filter_var($deciderArray["ojo_decider"],
         FILTER_VALIDATE_BOOLEAN);
     }
     return $this;
@@ -108,6 +119,14 @@ class Decider
     return $this->newScanner;
   }
 
+  /**
+   * @return boolean
+   */
+  public function getOjoDecider()
+  {
+    return $this->ojoDecider;
+  }
+
   ////// Setters //////
   /**
    * @param boolean $nomosMonk
@@ -134,6 +153,14 @@ class Decider
   }
 
   /**
+   * @param boolean $ojoDecider
+   */
+  public function setOjoDecider($ojoDecider)
+  {
+    $this->ojoDecider = filter_var($ojoDecider, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get decider as an array
    * @return array
    */
@@ -142,7 +169,8 @@ class Decider
     return [
       "nomos_monk"  => $this->nomosMonk,
       "bulk_reused" => $this->bulkReused,
-      "new_scanner" => $this->newScanner
+      "new_scanner" => $this->newScanner,
+      "ojo_decider" => $this->ojoDecider
     ];
   }
 }

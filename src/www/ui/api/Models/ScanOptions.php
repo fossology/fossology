@@ -172,6 +172,9 @@ class ScanOptions
     if ($this->decider->getNewScanner() === true) {
       $deciderRules[] = 'wipScannerUpdates';
     }
+    if ($this->decider->getOjoDecider() === true) {
+      $deciderRules[] = 'ojoNoContradiction';
+    }
     $request->request->set('deciderRules', $deciderRules);
   }
 }

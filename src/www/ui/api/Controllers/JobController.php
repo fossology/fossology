@@ -126,22 +126,35 @@ class JobController extends RestController
     $upload = $request->getHeaderLine("uploadId");
     if (is_numeric($folder) && is_numeric($upload) && $folder > 0 && $upload > 0) {
       $scanOptionsJSON = $request->getParsedBody();
-
+      if (empty($scanOptionsJSON)) {
+        $error = new Info(403, "No agents selected!", InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+      $parametersSent = false;
       $analysis = new Analysis();
-      if (array_key_exists("analysis", $scanOptionsJSON)) {
+      if (array_key_exists("analysis", $scanOptionsJSON) && ! empty($scanOptionsJSON["analysis"])) {
         $analysis->setUsingArray($scanOptionsJSON["analysis"]);
+        $parametersSent = true;
       }
       $decider = new Decider();
-      if (array_key_exists("decider", $scanOptionsJSON)) {
+      if (array_key_exists("decider", $scanOptionsJSON) && ! empty($scanOptionsJSON["decider"])) {
         $decider->setUsingArray($scanOptionsJSON["decider"]);
+        $parametersSent = true;
       }
       $reuser = new Reuser(0, 0, false, false);
       try {
-        if (array_key_exists("reuse", $scanOptionsJSON)) {
+        if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
           $reuser->setUsingArray($scanOptionsJSON["reuse"]);
+        $parametersSent = true;
         }
       } catch (\UnexpectedValueException $e) {
         $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
+        return $response->withJson($error->getArray(), $error->getCode());
+      }
+
+      if (! $parametersSent) {
+        $error = new Info(403, "No parameters selected for agents!",
+          InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }
 

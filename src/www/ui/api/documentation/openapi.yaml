@@ -778,6 +778,9 @@ components:
         new_scanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
+        ojo_decider:
+          type: boolean
+          description: Scanners matches if Ojo findings are no contradiction with other findings.
     ScanOptions:
       type: object
       properties:
