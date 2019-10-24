@@ -152,10 +152,6 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/monk install-monkbulk
 
-#	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ninka \
-#           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-#           -C src/ninka install
-
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ojo \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/ojo install

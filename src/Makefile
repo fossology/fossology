@@ -33,7 +33,6 @@ DIRS = \
 	ununpack \
 	wget_agent \
 	www
-#	ninka \
 
 # create lists of targets for various operations
 # these are phony targets (declared at bottom) of convenience so we can
