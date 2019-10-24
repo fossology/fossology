@@ -1,5 +1,74 @@
 # Changelog of FOSSology
 
+### 3.7.0-RC1 (Oct 24th 2019)
+
+This release was created in order to bring important changes for the REST endpoints to a release, so integration, for example with sw360, work on a release but not with latest master. Besides improvement is the extension of the decider agent to allow for decisions based on found SPDX-License-Identifier tags found by the ojo agent.
+
+#### Contributors
+
+There are many ways to commit to the source code, but if you count the commits to master, then the credits go to the following persons for this release since `3.6.0`:
+
+```
+> Andreas J. Reichel <andreas.reichel@tngtech.com>,
+> Anupam <anupam.ghosh@siemens.com>,
+> Bruno Cornec <bruno.cornec@hpe.com>,
+> Gaurav Mishra <mishra.gaurav@siemens.com>,
+> Maximilian Huber <maximilian.huber@tngtech.com>,
+> Michael <michael.c.jaeger@siemens.com>,
+> Onyemenam Ndubuisi <onyemenamndu@gmail.com>,
+> Piotr Pszczola <piotr.pszczola@orange.com>,
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>,
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>,
+> vivek kumar <vvksindia@gmail.com>,
+> abirw,
+```
+
+#### Features
+
+* `8bbe52d2b` feat(rest): add auto conclusion for ojo findings if
+* `af3f5738d` feat(license): Provide predefined license comments
+* `651a89088` feat(rest): Provide group ID during POST upload
+* `1a82e74a2` feat(decider): add auto conclusion for ojo findings if no contradiction with other findings
+* `71d1b7871` feat(rest): Provide API version as an endpoint
+* `808fa1db2` feat(rest): Upload packages from VCS
+* `fa2c27d16` feat(upload_vcs.html.twig) Use HTML <option selected>
+* `7887f02ad` feat(spdx): add user found copyrights to SPDX reports
+* `0505ca138` feat(upload_vcs.html.twig) make Git the default VCS rather than SVN
+* `8a5f14fd3` feat(pbconf): adapt to pb 0.15 and new fossology 3.3+
+* `5a9a341be` feat(api): Add pagination to jobs endpoint
+* `7a190c110` feat(api): Add OJO analysis to REST API
+* `12f064abe` feat(api): Get job status and ETA
+* `8989c1e17` feat(copyright): New directory scan and better JSON
+
+#### Corrections
+
+* `49fcfa05a` fix(rest): do not schedule decider if the option is empty
+* `1045cf4f6` fix(readmeoss): added edited global license text in readmeoss
+* `213222d31` fix(notices): updating notice file, debian copyright and spdx lic info
+* `9e524ef52` fix(rest): getUploads - invoke getRows with proper parameters
+* `416da0abc` fix: fix formatting as suggested in comment
+* `9a3f86d64` fix(groups): add validations and remove CONSTRAINTS
+* `e4e811f22` fix(geekyscan): make full job report link more descriptive closes #1346
+* `fcc5ef797` fix(deps): Added missing php-pgsql
+* `41fe2b4cd` fix(deps): Fix dependencies for Debian Buster
+* `f0348b64c` fix(buckets): Prevent possible buffer overflow/-run
+* `5f77fe45d` fix(ununpack): Fix compiler warnings for Debian 10/gcc8
+* `7beb859d1` fix(pkgagent): Avoid possible buffer overrun with strncpy
+* `359ae6101` fix(lib/c): Prevent possible buffer overflow/-run
+* `89e461394` fix(delagent): Fix possible buffer overrun
+* `7ee6b5955` fix(mimetype): Fix usage of strncpy, remove memset
+* `4a2829ef2` fix(testing/db/c): Prevent buffer overflows
+* `c1d165af6` fix(ununpack): Increase buffer sizes to prevent overflow
+* `7b62b6759` Attempting to fix bug in fo_nomos_license_list
+
+#### Infrastructure
+
+* `e559e388a` chore(control): Remove ninka from debian/control
+* `c4df71415` refactor(fossology): Refactor modularity
+* `8c3caef81` chore(composer): Bumping composer to 1.9.0
+* `ff1aa9fe3` chore(ninka): Remove Ninka packaging from master
+* `f0e56b1c5` test(licenseStdCommentDao): Add test cases for DAO
+
 ### 3.6.0 (Sep 10th 2019)
 
 After two release candidates, making fixes for migration tests, unified report and
@@ -9,7 +78,7 @@ of the 3.6.0 release can be found under
 corrections after RC1 can be found under
 [RC2](https://github.com/fossology/fossology/releases/tag/3.6.0-rc2).
 
-Few intresting features in this release are: 
+Few intresting features in this release are:
 
 * A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
 * Improved handling of manually added copyright statements to files

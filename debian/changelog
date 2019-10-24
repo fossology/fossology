@@ -1,3 +1,10 @@
+fossology (3.7.0~rc1-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.7.0-rc1 for details
+
+ -- Michael C. Jaeger <michael.c.jaeger@siemens.com>  Thu, 24 Oct 2019 12:00:00 +0100
+
 fossology (3.6.0-1) unstable; urgency=low
 
   * New upstream release
