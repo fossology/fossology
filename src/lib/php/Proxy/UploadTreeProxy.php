@@ -259,7 +259,7 @@ class UploadTreeProxy extends DbViewProxy
       $agentFilter = " AND lf.agent_fk=ANY($agentIds)";
     } else {
       $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport'));
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport','ojo'));
       $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
       $agentFilter = $latestAgentIds ? " AND lf.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
     }
