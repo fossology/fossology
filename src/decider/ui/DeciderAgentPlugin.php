@@ -77,6 +77,12 @@ class DeciderAgentPlugin extends AgentPlugin
     $dependencies = array();
 
     $rules = $request->get('deciderRules') ?: array();
+    $agents = $request->get('agents') ?: array();
+    if (in_array('agent_nomos', $agents)) {
+      $checkAgentNomos = true;
+    } else {
+      $checkAgentNomos = $request->get('Check_agent_nomos') ?: false;
+    }
     $rulebits = 0;
 
     foreach ($rules as $rule) {
@@ -98,8 +104,9 @@ class DeciderAgentPlugin extends AgentPlugin
           $rulebits |= 0x4;
           break;
         case 'ojoNoContradiction':
-          $dependencies[] = 'agent_nomos';
-          $dependencies[] = 'agent_monk';
+          if ($checkAgentNomos) {
+            $dependencies[] = 'agent_nomos';
+          }
           $dependencies[] = 'agent_ojo';
           $rulebits |= 0x10;
           break;
