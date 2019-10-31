@@ -176,5 +176,8 @@ class ScanOptions
       $deciderRules[] = 'ojoNoContradiction';
     }
     $request->request->set('deciderRules', $deciderRules);
+    if ($this->analysis->getNomos()) {
+      $request->request->set('Check_agent_nomos', 1);
+    }
   }
 }

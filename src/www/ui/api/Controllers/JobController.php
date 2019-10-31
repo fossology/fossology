@@ -145,7 +145,7 @@ class JobController extends RestController
       try {
         if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
           $reuser->setUsingArray($scanOptionsJSON["reuse"]);
-        $parametersSent = true;
+          $parametersSent = true;
         }
       } catch (\UnexpectedValueException $e) {
         $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
