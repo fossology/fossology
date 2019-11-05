@@ -18,7 +18,7 @@
         "flexsounds/slim-symfony-di-container": "1.0.3",
         "firebase/php-jwt": "v5.0.0",
         "monolog/monolog" : "1.24.0",
-        "phpoffice/phpword" : "v0.16.0",
+        "phpoffice/phpword" : "v0.17.0",
         "slim/slim": "3.12.0",
         "symfony/config" : "v3.3.18",
         "symfony/http-foundation" : "v3.3.18",
