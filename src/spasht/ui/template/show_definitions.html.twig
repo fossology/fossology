@@ -7,44 +7,44 @@
 #}
 
 {% if statusbody == "false" %}
-    <TR><TD>No Match Found</TD></TR>
+    <tr><td>No Match Found</td></tr>
 {% else %}
 
-<TABLE id="definitionsTable">
-    <TR>
-        <TH>Namespace/Name</TH>
-        <TH></TH>
-        <TH>Revision</TH>
-        <TH></TH>
-        <TH>Type</TH>
-        <TH></TH>
-        <TH>provide</TH>
-        <TH>| Menu</TH>
-    </TR>
+<table id="definitionsTable">
+    <tr>
+        <th>Namespace/Name</th>
+        <th></th>
+        <th>Revision</th>
+        <th></th>
+        <th>Type</th>
+        <th></th>
+        <th>provide</th>
+        <th>| Menu</th>
+    </tr>
     {% for result in body %}
-    <TR id="definitionsRow">
-        <TD  style="display: inline-block; width: 150px; word-wrap: break-word;">
+    <tr id="definitionsRow">
+        <td  style="display: inline-block; width: 150px; word-wrap: break-word;">
           <a id="definitionsRow_namespace{{ loop.index0 }}">{{ result.namespace }}</a>/<a id="definitionsRow_name{{ loop.index0 }}">{{ result.name }}</a>
-        </TD>
-        <TD></TD>
-        <TD>
+        </td>
+        <td></td>
+        <td>
           <span id="definitionsRow_revision{{ loop.index0 }}" style="display: inline-block; width: 230px; word-wrap: break-word;">{{ result.revision }}</span>
-        </TD>
-        <TD></TD>
-        <TD id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</TD>
-        <TD></TD>
-        <TD id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</TD>
-        <TD>
+        </td>
+        <td></td>
+        <td id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</td>
+        <td></td>
+        <td id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</td>
+        <td>
           <li>
             <a href="#" onclick="showDetails({{ loop.index0 }})">Show Details</a>
           </li>
-        </TD>
-    </TR>
+        </td>
+    </tr>
     {% endfor %}
 
-    </TABLE>
-    <FORM name="storeForm" id="storeForm" method="post" action="">
+    </table>
+    <form name="storeForm" id="storeForm" method="post" action="">
     <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
     <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
-    </Form>
+    </form>
 {% endif %}

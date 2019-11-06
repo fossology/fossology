@@ -23,9 +23,9 @@ class ui_spasht extends FO_Plugin
    */
 
   /**
-   * @var AgentDao $agentDao
-   * AgentDao object
-   */
+    * @var AgentDao $agentDao
+    * AgentDao object
+    */
   protected $agentDao;
 
   public $vars;
@@ -48,23 +48,21 @@ class ui_spasht extends FO_Plugin
 
   public $uploadAvailable = "no";
   /**
-   * \brief Customize submenus.
-   */
+    * \brief Customize submenus.
+    */
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
     $Item = GetParm("item",PARM_INTEGER);
     $Upload = GetParm("upload",PARM_INTEGER);
-    if (!empty($Item) && !empty($Upload))
-    {
-      if (GetParm("mod",PARM_STRING) == $this->Name)
-      {
+
+    if (!empty($Item) && !empty($Upload)) {
+
+      if (GetParm("mod",PARM_STRING) == $this->Name) {
         menu_insert("Browse::Spasht agent/view in clearlydefined",10);
         menu_insert("Browse::[BREAK]",100);
-      }
-      else
-      {
+      } else {
         $text = _("view in clearlydefined");
         menu_insert("Browse::Spasht",10,$URI,$text);
       }
@@ -73,15 +71,15 @@ class ui_spasht extends FO_Plugin
 
 
   /**
-   * @brief This is called before the plugin is used.
-   * It should assume that Install() was already run one time
-   * (possibly years ago and not during this object's creation).
-   *
-   * @return boolean true on success, false on failure.
-   * A failed initialize is not used by the system.
-   * @note This function must NOT assume that other plugins are installed.
-   * @see FO_Plugin::Initialize()
-   */
+    * @brief This is called before the plugin is used.
+    * It should assume that Install() was already run one time
+    * (possibly years ago and not during this object's creation).
+    *
+    * @return boolean true on success, false on failure.
+    * A failed initialize is not used by the system.
+    * @note This function must NOT assume that other plugins are installed.
+    * @see FO_Plugin::Initialize()
+    */
   function Initialize()
   {
     global $_GET;
@@ -89,20 +87,18 @@ class ui_spasht extends FO_Plugin
     if ($this->State != PLUGIN_STATE_INVALID) {
       return(1);
     } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-    {
+    if ($this->Name !== "") {
       global $Plugins;
       $this->State=PLUGIN_STATE_VALID;
       array_push($Plugins,$this);
     }
-
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
 
   /**
-   * @brief This function returns the scheduler status.
-   * @see FO_Plugin::Output()
-   */
+    * @brief This function returns the scheduler status.
+    * @see FO_Plugin::Output()
+    */
   public function Output()
   {
     $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
@@ -112,7 +108,7 @@ class ui_spasht extends FO_Plugin
 
     $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
     $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
-    
+
     $this->vars['advanceSearch'] = ""; //Set advance search to empty
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = 0;
@@ -125,67 +121,52 @@ class ui_spasht extends FO_Plugin
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $uploadtree_tablename = GetUploadtreeTableName($uploadId);
     $agentId = $this->agentDao->getCurrentAgentId("spasht");
-    
 
-    if(!empty($optionSelect))
-    {
+    if (!empty($optionSelect)) {
       $str = explode ("/", $optionSelect);
-      
       $body = array();
-
       $body['body_type'] = $str[0];
       $body['body_provider'] = $str[1];
       $body['body_namespace'] = $str[2];
       $body['body_name'] = $str[3];
       $body['body_revision'] = $str[4];
 
-      if($uploadAvailable == "yes"){
+      if ($uploadAvailable == "yes") {
         $result = $this->spashtDao->alterComponentRevision($body, $uploadId);
-        }
-      else{
+      } else {
         $result = $this->spashtDao->addComponentRevision($body, $uploadId);
       }
 
-      if($result >= 0)
-      {
+      if ($result >= 0) {
         $patternName = null;
-      }
-
-      else
-      {
+      } else {
         $patternName = $body['body_name'];
       }
     }
 
-    if($patternName != null && !empty($patternName)) //Check if search is not empty
-    {
+    if ($patternName != null && !empty($patternName)) {//Check if search is not empty
       /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
       $client = new Client([
-        // Base URI is used with relative requests
-        'base_uri' => 'https://api.clearlydefined.io/',
-        ]);
+      // Base URI is used with relative requests
+      'base_uri' => 'https://api.clearlydefined.io/',
+      ]);
 
-        // Point to definitions section in the api
+      // Point to definitions section in the api
       $res = $client->request('GET','definitions',[
-          'query' => ['pattern' => $patternName] //Perform query operation into the api
+        'query' => ['pattern' => $patternName] //Perform query operation into the api
         ]);
 
-      if($res->getStatusCode()==200) //Get the status of http request
-      {
-         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
+      if ($res->getStatusCode()==200) {//Get the status of http request
+        $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
 
-         if(sizeof($body) == 0) //Check if no element is found
-         {
+        if (sizeof($body) == 0) {//Check if no element is found
           $statusbody = "false";
-         }
-         else
-         {
-           $temp = array();
-           $details = array();
-          for ($x = 0; $x < sizeof($body) ; $x++)
-          {
-            $str = explode ("/", $body[$x]);
+        } else {
+          $temp = array();
+          $details = array();
 
+          for ($x = 0; $x < sizeof($body) ; $x++) {
+            $str = explode ("/", $body[$x]);
             $temp2 = array();
 
             $temp2['revision'] = $str[4];
@@ -201,9 +182,9 @@ class ui_spasht extends FO_Plugin
 
             //details section
             $res_details = $client->request('GET',$uri,[
-              'query' => [
-                'expand' => "-files"
-              ] //Perform query operation into the api
+            'query' => [
+              'expand' => "-files"
+            ] //Perform query operation into the api
             ]);
 
             $detail_body = json_decode($res_details->getBody()->getContents(),true);
@@ -219,53 +200,46 @@ class ui_spasht extends FO_Plugin
 
             $details[] = $details_temp;
           }
-
           $this->vars['details'] = $details;
           $this->vars['body'] = $temp;
-         }
+        }
       }
+
       /** Check for advance Search enabled
-        * If enabled the revisions are retrieved from the body to display them in the form.
-        * As options to users.
-        */
-        if($advanceSearch == "advanceSearch"){
-          $this->vars['advanceSearch'] = "checked";
-        }
-        if($this->vars['storeStatus'] == "true")
-        {
-          $this->vars['pageNo'] = 3;
-        }
-        else
-        {
-          $this->vars['pageNo'] = 2;
-        }
+       * If enabled the revisions are retrieved from the body to display them in the form.
+       * As options to users.
+       */
+      if ($advanceSearch == "advanceSearch") {
+        $this->vars['advanceSearch'] = "checked";
+      }
+      if ($this->vars['storeStatus'] == "true") {
+        $this->vars['pageNo'] = "data_stored_successfully";
+      } else {
+        $this->vars['pageNo'] = "show_definitions";
+      }
 
       $this->vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;
-    }
-
-    else{
-      if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) )
-        {
-          $text = _("Upload Id Not found");
-          return "<h2>$text</h2>";
-        }
+    } else {
+      if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
+         $text = _("Upload Id Not found");
+        return "<h2>$text</h2>";
+      }
 
       $this->vars['pageNo'] = 1;
 
       $searchUploadId = $this->spashtDao->getComponent($uploadId);
 
-      if(!empty($searchUploadId)){
+      if (!empty($searchUploadId)) {
         $this->vars['uploadAvailable'] = "yes";
-        $this->vars['pageNo'] = 4;
+        $this->vars['pageNo'] = "show_upload_table";
         $this->vars['body'] = $searchUploadId;
+
         list($this->vars['countOfFile'], $this->vars['fileList']) = $this->getFileListing($uploadtree_pk, $uri, $uploadtree_tablename, $agentId, $uploadId);
-      }
-      else{
+      } else {
         $uploadAvailable = "no";
       }
     }
-
     // $item = $uploadtree_pk;
     // $filter = "Show all";
 
@@ -307,7 +281,6 @@ class ui_spasht extends FO_Plugin
 
     return($out);
   }
-
 
   // public function Output_tables()
   // {
@@ -452,13 +425,13 @@ class ui_spasht extends FO_Plugin
   // }
 
   /**
-   * @param int    $Uploadtree_pk        Uploadtree id
-   * @param string $Uri                  URI
-   * @param string $uploadtree_tablename Uploadtree table name
-   * @param int    $Agent_pk             Agent id
-   * @param int    $upload_pk            Upload id
-   * @return array
-   */
+    * @param int    $Uploadtree_pk        Uploadtree id
+    * @param string $Uri                  URI
+    * @param string $uploadtree_tablename Uploadtree table name
+    * @param int    $Agent_pk             Agent id
+    * @param int    $upload_pk            Upload id
+    * @return array
+    */
   protected function getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk)
   {
     $VF=""; // return values for file listing
@@ -468,42 +441,36 @@ class ui_spasht extends FO_Plugin
     $ChildCount = 0;
     $ChildLicCount = 0;
     $ChildDirCount = 0; /* total number of directory or containers */
-    foreach ($Children as $c)
-    {
-      if (Iscontainer($c['ufile_mode']))
-      {
+
+    foreach ($Children as $c) {
+      if (Iscontainer($c['ufile_mode'])) {
         $ChildDirCount++;
       }
     }
 
     $VF .= "<table border=0>";
-    foreach ($Children as $child)
-    {
-      if (empty($child))
-      {
+    foreach ($Children as $child) {
+      if (empty($child)) {
         continue;
       }
+
       $ChildCount++;
 
       global $Plugins;
       $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
       /* Determine the hyperlink for non-containers to view-license  */
-      if (!empty($child['pfile_fk']) && !empty($ModLicView))
-      {
+      if (!empty($child['pfile_fk']) && !empty($ModLicView)) {
         $LinkUri = Traceback_uri();
         $LinkUri .= "?mod=".$this->viewName."&agent=$Agent_pk&upload=$upload_pk&item=$child[uploadtree_pk]";
-      } else
-      {
+      } else {
         $LinkUri = NULL;
       }
 
       /* Determine link for containers */
-      if (Iscontainer($child['ufile_mode']))
-      {
+      if (Iscontainer($child['ufile_mode'])) {
         $uploadtree_pk = DirGetNonArtifact($child['uploadtree_pk'], $uploadtree_tablename);
         $LicUri = "$Uri&item=" . $uploadtree_pk;
-      } else
-      {
+      } else {
         $LicUri = NULL;
       }
 
@@ -512,18 +479,15 @@ class ui_spasht extends FO_Plugin
       $LicCount = 0;
 
       $cellContent = Isdir($child['ufile_mode']) ? $child['ufile_name'].'/' : $child['ufile_name'];
-      if (Iscontainer($child['ufile_mode']))
-      {
+
+      if (Iscontainer($child['ufile_mode'])) {
         $cellContent = "<a href='$LicUri'><b>$cellContent</b></a>";
-      }
-      else if (!empty($LinkUri)) //  && ($LicCount > 0))
-      {
+      } else if (!empty($LinkUri)) {//  && ($LicCount > 0))
         $cellContent = "<a href='$LinkUri'>$cellContent</a>";
       }
-      $VF .= "<tr><td id='$child[uploadtree_pk]' align='left'>$cellContent</td><td>";
 
-      if ($LicCount)
-      {
+      $VF .= "<tr><td id='$child[uploadtree_pk]' align='left'>$cellContent</td><td>";
+      if ($LicCount) {
         $VF .= "[" . number_format($LicCount, 0, "", ",") . "&nbsp;";
         $VF .= "license" . ($LicCount == 1 ? "" : "s");
         $VF .= "</a>";
@@ -537,10 +501,10 @@ class ui_spasht extends FO_Plugin
   }
 
   /**
-   * @brief Check if passed element is a directory
-   * @param int $Uploadtree_pk Uploadtree id of the element
-   * @return boolean True if it is a directory, false otherwise
-   */
+    * @brief Check if passed element is a directory
+    * @param int $Uploadtree_pk Uploadtree id of the element
+    * @return boolean True if it is a directory, false otherwise
+    */
   protected function isADirectory($Uploadtree_pk)
   {
     $row =  $this->uploadDao->getUploadEntry($Uploadtree_pk, $this->uploadtree_tablename);
@@ -633,18 +597,18 @@ class ui_spasht extends FO_Plugin
   // }
 
   /**
-   * @brief Get sorting orders
-   * @return string[][]
-   */
-  public function returnSortOrder () {
+  * @brief Get sorting orders
+  * @return string[][]
+  */
+  public function returnSortOrder ()
+  {
     $defaultOrder = array (
-        array(0, "desc"),
-        array(1, "desc"),
+      array(0, "desc"),
+      array(1, "desc"),
     );
     return $defaultOrder;
   }
-
 }
 
-$NewPlugin = new ui_spasht;
-$NewPlugin->Initialize();
+  $NewPlugin = new ui_spasht;
+  $NewPlugin->Initialize();
