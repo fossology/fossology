@@ -6,53 +6,53 @@
    This file is offered as-is, without any warranty.
 #}
 
-<TABLE id="detailsTable" style="border: 1px solid black; border-collapse: collapse; display: none;">
-    <TR>
-        <TH>Declared</TH>
-        <TH>Source</TH>
-        <TH>Release</TH>
-        <TH>Files</TH>
-        <TH>Attribution</TH>
-        <TH>Discovered</TH>
-        <TH>MENU</TH>
-    </TR>
+<table id="detailsTable">
+    <tr>
+        <th>Declared</th>
+        <th>Source</th>
+        <th>Release</th>
+        <th>Files</th>
+        <th>Attribution</th>
+        <th>Discovered</th>
+        <th>MENU</th>
+    </tr>
     {% for result in details %}
-    <TR id="detailsRow{{ loop.index0 }}" style="border: 1px solid black; border-collapse: collapse; display: none;">
-        <TD style="border-right: 1px solid black;">
+    <tr id="detailsRow{{ loop.index0 }}" style="border: 1px solid black; border-collapse: collapse; display: none;">
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 100px;">
                 {{ result.declared }}
             </span>
-        </TD>
-        <TD style="border-right: 1px solid black;">
+        </td>
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 180px; word-wrap: break-word;">
                 {{ result.source }}
             </span>
-        </TD>
-        <TD style="border-right: 1px solid black;">
+        </td>
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 100px; word-wrap: break-word;">
                 {{ result.release }}
             </span>
-        </TD>
-        <TD style="border-right: 1px solid black;">
+        </td>
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 70px;">
                 {{ result.files }}
             </span>
-        </TD>
-        <TD style="border-right: 1px solid black;">
+        </td>
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 180px; word-wrap: break-word;">
                 {{ result.attribution[0] }}, {{ result.attribution[1] }}, {{ result.attribution[2] }}, {{ result.attribution[3] }} ...
             </span>
-        </TD>
-        <TD style="border-right: 1px solid black;">
+        </td>
+        <td style="border-right: 1px solid black;">
             <span style="display: inline-block; width: 180px; word-wrap: break-word;">
                 {{ result.discovered[0] }}, {{ result.discovered[1] }}, {{ result.discovered[2] }}, {{ result.discovered[3] }} ...
             </span>
-        </TD>
-        <TD>
+        </td>
+        <td>
             <a href="#" onclick='StoreIntoDb({{ loop.index0 }})'>OPEN</a>
-        </TD>
-    </TR>
+        </td>
+    </tr>
     {% endfor %}
-</TABLE>
+</table>
 
 <input id="displayElementIndex" type="hidden" value="-1" />

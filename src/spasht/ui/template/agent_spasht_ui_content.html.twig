@@ -18,11 +18,11 @@
   <div class="col">
     {% if advanceSearch == "checked" %}
       {% include 'agent_spasht_advanceSearch_form.html.twig' %}
-    {% elseif pageNo == 2 %}
+    {% elseif pageNo == "show_definitions" %}
       {% include 'show_definitions.html.twig' %}
-    {% elseif pageNo == 3 %}
+    {% elseif pageNo == "data_stored_successfully" %}
       Data Stored Successfully {{ pageNo }} -> {{ result }}
-    {% elseif pageNo == 4 %}
+    {% elseif pageNo == "show_upload_table" %}
       {% include 'show_uploads_table.html.twig' %}
     {% else %}
       Empty

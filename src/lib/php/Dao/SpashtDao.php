@@ -78,7 +78,8 @@ class SpashtDao
    * Where uploadId is found.
    */
 
-  public function getComponent($uploadID){
+  public function getComponent($uploadID)
+  {
     $statement = __METHOD__.".CheckUpload";
 
     $params = [ $uploadID ];

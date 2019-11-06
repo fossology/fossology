@@ -1,7 +1,14 @@
-#searchBoxCover{
+#searchBoxCover {
     font-weight: bold;
     font-size: 16px;
 }
-#spashtStart{
+
+#spashtStart {
     padding-top: 15px;
+}
+
+#detailsTable {
+    border: 1px solid black;
+    border-collapse: collapse;
+    display: none;
 }

@@ -24,7 +24,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class SpashtAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_spasht";
     $this->Title = _("Spasht Analysis");
     $this->AgentName = "spasht";
@@ -43,7 +44,7 @@ class SpashtAgentPlugin extends AgentPlugin
   }
 
 
-   /**
+  /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
    */

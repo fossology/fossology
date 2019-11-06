@@ -1,68 +1,68 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
 <form method="post" action="">
-<TABLE>
-  <TR>
-    <TD>Name:</TD>
-    <TD>
+<table>
+  <tr>
+    <td>Name:</td>
+    <td>
       <input type="text" name="name" value={{ uploadName }} />
-    </TD>
-  </TR>
-  <TR>
-    <TD>namespace:</TD>
-    <TD>
+    </td>
+  </tr>
+  <tr>
+    <td>namespace:</td>
+    <td>
       <input type="text" list="namespace" name="namespace" /></label>
         <datalist id="namespace">
           {% for key in body.body_namespace %}
             <option value={{ key }}>
           {% endfor %}
         </datalist>
-    </TD>
-  </TR>
-  <TR>
-    <TD>revision:</TD>
-    <TD>
+    </td>
+  </tr>
+  <tr>
+    <td>revision:</td>
+    <td>
       <input type="text" list="revision" name="revision" /></label>
         <datalist id="revision">
           {% for key in body.body_revision %}
             <option value={{ key }}>
           {% endfor %}
         </datalist>
-    </TD>
-  </TR>
-  <TR>
-    <TD>type:</TD>
-    <TD>
+    </td>
+  </tr>
+  <tr>
+    <td>type:</td>
+    <td>
     <input type="text" list="type" name="type" /></label>
       <datalist id="type">
         {% for key in body.body_type %}
           <option value={{ key }}>
         {% endfor %}
       </datalist>
-    </TD>
-  </TR>
-  <TR>
-    <TD>provider:</TD>
-    <TD>
+    </td>
+  </tr>
+  <tr>
+    <td>provider:</td>
+    <td>
     <input type="text" list="provider" name="provider" /></label>
     <datalist id="provider">
       {% for key in body.body_provider %}
         <option value={{ key }}>
       {% endfor %}
     </datalist>
-    </TD>
-  </TR>
-  <TR>
-    <TD>
+    </td>
+  </tr>
+  <tr>
+    <td>
     <input type="submit" value="submit"/>
-    </TD>
-  </TR>
-</TABLE>
+    </td>
+  </tr>
+</table>
 
 </form>
