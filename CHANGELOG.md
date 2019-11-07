@@ -78,7 +78,7 @@ of the 3.6.0 release can be found under
 corrections after RC1 can be found under
 [RC2](https://github.com/fossology/fossology/releases/tag/3.6.0-rc2).
 
-Few intresting features in this release are:
+Few interesting features in this release are:
 
 * A new agent named `ojo` (eye in Spanish) which does dedicated searches for the 'SPDX-License-Identifier' statements
 * Improved handling of manually added copyright statements to files
