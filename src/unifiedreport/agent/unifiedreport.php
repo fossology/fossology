@@ -277,7 +277,7 @@ class UnifiedReport extends Agent
     $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
-    $this->heartbeat(empty($copyrights["scannerFindings"]) ? 0 : count($copyrights["scannerFindings"]));
+    $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
@@ -285,18 +285,20 @@ class UnifiedReport extends Agent
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
 
-    $contents = array("licenses" => $licenses,
-                      "bulkLicenses" => $bulkLicenses,
-                      "licenseAcknowledgements" => $licenseAcknowledgements,
-                      "licenseComments" => $licenseComments,
-                      "copyrights" => $copyrights,
-                      "ecc" => $ecc,
-                      "licensesIrre" => $licensesIrre,
-                      "licensesIrreComment" => $licensesIrreComment,
-                      "licensesMain" => $licensesMain,
-                      "licensesHist" => $licensesHist,
-                      "otherStatement" => $otherStatement
+    $contents = array(
+                        "licenses" => $licenses,
+                        "bulkLicenses" => $bulkLicenses,
+                        "licenseAcknowledgements" => $licenseAcknowledgements,
+                        "licenseComments" => $licenseComments,
+                        "copyrights" => $copyrights,
+                        "ecc" => $ecc,
+                        "licensesIrre" => $licensesIrre,
+                        "licensesIrreComment" => $licensesIrreComment,
+                        "licensesMain" => $licensesMain,
+                        "licensesHist" => $licensesHist,
+                        "otherStatement" => $otherStatement
                      );
+
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
   }
@@ -359,43 +361,6 @@ class UnifiedReport extends Agent
     $properties->setDescription("OSS clearing report by Fossology tool");
     $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Your Organisation");
   }
-
-
-  /**
-   * @brief Copy identified global licenses
-   * @param[int,out] array $contents
-   * @return array $contents with identified global license path
-   */
-  function identifiedGlobalLicenses($contents)
-  {
-    $lenTotalLics = count($contents["licenses"]["statements"]);
-    // both of this variables have same value but used for different operations
-    $lenMainLics = $lenLicsMain = count($contents["licensesMain"]["statements"]);
-    if ($lenLicsMain > 0) {
-      for ($j=0; $j<$lenLicsMain; $j++) {
-        if ($lenTotalLics > 0) {
-          $found = 0;
-          for ($i=0; $i<$lenTotalLics; $i++) {
-            if (!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"])) {
-              $found += 1;
-              $lenMainLics += 1;
-              $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licenses"]["statements"][$i];
-              unset($contents["licenses"]["statements"][$i]);
-            }
-          }
-          if ($found == 0 ) {
-            $lenMainLics += 1;
-            $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licensesMain"]["statements"][$j];
-            unset($contents["licensesMain"]["statements"][$j]);
-          } else {
-            unset($contents["licensesMain"]["statements"][$j]);
-          }
-        }
-      }
-    }
-    return $contents;
-  }
-
 
   /**
    * @brief Generate global license table
@@ -713,7 +678,7 @@ class UnifiedReport extends Agent
     /* Header starts */
     $reportStaticSection->reportHeader($section);
 
-    $contents = $this->identifiedGlobalLicenses($contents);
+    list($contents['licensesMain']['statements'], $contents['licenses']['statements']) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($contents['licensesMain']['statements'], $contents['licenses']['statements']);
 
     /* Summery table */
     $reportSummarySection->summaryTable($section, $uploadId, $userName,

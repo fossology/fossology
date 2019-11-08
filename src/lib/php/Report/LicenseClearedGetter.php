@@ -42,7 +42,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
   /** @var string[] */
   private $licenseCache = array();
   /** @var agentNames */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
 
   public function __construct()
   {
@@ -149,6 +149,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     }
     return $this->licenseCache[$licenseId]->getRisk();
   }
+
   /**
    * @param int $uploadId, $groupId
    * @return scannerLicenseHistogram, editedLicensesHist
@@ -182,5 +183,33 @@ class LicenseClearedGetter extends ClearedGetterCommon
       }
     }
     return $LicenseHistArray;
+  }
+
+  /**
+    * @brief callback to compare licenses
+    * @param array $licenses1
+    * @param array $licenses2
+    * @return interger difference of license ids
+    */
+  function checkLicenseId($licenses1, $licenses2)
+  {
+    return strcmp($licenses1['licenseId'], $licenses2['licenseId']);
+  }
+
+  /**
+    * @brief Copy identified global licenses
+    * @param array $licensesMain
+    * @param array $licenses
+    * @return array $licensesMain $licenses with identified global license
+    */
+  function updateIdentifiedGlobalLicenses($licensesMain, $licenses)
+  {
+    $onlyMainLic = array_udiff($licensesMain, $licenses, array($this, "checkLicenseId"));
+    $mainLicensesInIdetifiedFiles = array_uintersect($licenses, $licensesMain, array($this, "checkLicenseId"));
+    $onlyLicense = array_udiff($licenses, $licensesMain, array($this, "checkLicenseId"));
+    return array(
+      array_values(array_merge($onlyMainLic, $mainLicensesInIdetifiedFiles)),
+      array_values($onlyLicense)
+    );
   }
 }
