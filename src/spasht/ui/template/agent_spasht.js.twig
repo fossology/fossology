@@ -1,14 +1,14 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
 <script>
-function StoreIntoDb(key){
-    
+function StoreIntoDb(key) {
+
     var namespace = "definitionsRow_namespace"+key;
     var name = "definitionsRow_name"+key;
     var revision = "definitionsRow_revision"+key;
@@ -19,26 +19,28 @@ function StoreIntoDb(key){
 
     document.getElementById("optionSelectedToOpen").value = params;
     document.getElementById("storeForm").submit();
-    }
+}
+
 function showDetails(key){
 
     var detailsTable = "detailsTable";
     var detailsRow = "detailsRow"+key;
 
     var currentElement = document.getElementById("displayElementIndex").value;
-    
-    if(currentElement != "-1"){
+
+    if (currentElement != "-1") {
         currentElement = "detailsRow"+currentElement;
         document.getElementById(currentElement).style.display = "none";
     }
 
-    if( document.getElementById(detailsTable).style.display === "none")
+    if (document.getElementById(detailsTable).style.display === "none") {
         document.getElementById(detailsTable).style.display = "";
+    }
 
-    if( document.getElementById(detailsRow).style.display === "none"){
+    if (document.getElementById(detailsRow).style.display === "none") {
         document.getElementById(detailsRow).style.display = "";
         document.getElementById("displayElementIndex").value = key;
-    }      
+    }
 }
 
 

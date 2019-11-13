@@ -36,369 +36,279 @@ include_once(__DIR__ . "/version.php");
  */
 class SpashtAgent extends Agent
 {
-
   /** @var UploadDao $uploadDao
-     * UploadDao object
-     */
-    private $uploadDao;
+   * UploadDao object
+   */
+  private $uploadDao;
 
-    /** @var SpashtDao $spashtDao
-     * SpashtDao object
-     */
-    private $spashtDao;
+  /** @var SpashtDao $spashtDao
+   * SpashtDao object
+   */
+  private $spashtDao;
 
-    /** @var LicenseDao $licenseDao
-     * LicenseDao object
-     */
-    private $licenseDao;
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
+  private $licenseDao;
 
-    // /**
-    //  * @var DbManager $dbManager
-    //  * DbManager object
-    //  */
-    // private $dbManager;
+  // /**
+  //  * @var DbManager $dbManager
+  //  * DbManager object
+  //  */
+  // private $dbManager;
 
-    // /**
-    //  * @var AgentDao $agentDao
-    //  * AgentDao object
-    //  */
-    // protected $agentDao;
+  // /**
+  //  * @var AgentDao $agentDao
+  //  * AgentDao object
+  //  */
+  // protected $agentDao;
 
-    function __construct()
-    {
-        parent::__construct(SPASHT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
-        $this->uploadDao = $this->container->get('dao.upload');
-        $this->spashtDao = $this->container->get('dao.spasht');
-        $this->licenseDao = $this->container->get('dao.license');
-        // $this->dbManager = $this->container->get('db.manager');
-        // $this->agentDao = $this->container->get('dao.agent');
+  function __construct()
+  {
+    parent::__construct(SPASHT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    $this->uploadDao = $this->container->get('dao.upload');
+    $this->spashtDao = $this->container->get('dao.spasht');
+    $this->licenseDao = $this->container->get('dao.license');
+    // $this->dbManager = $this->container->get('db.manager');
+    // $this->agentDao = $this->container->get('dao.agent');
+  }
+
+  /*
+   * @brief Run Spasht Agent for a package
+   * @param $uploadId Integer
+   * @see Fossology::Lib::Agent::Agent::processUploadId()
+   */
+  function processUploadId($uploadId)
+  {
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
+
+    $agentId = $this->agentDao->getCurrentAgentId("spasht");
+    $pfileSha1AndpfileId = array();
+
+    foreach ($pfileFileDetails as $pfileDetail) {
+      $pfileSha1AndpfileId[$pfileDetail['pfile_pk']] = strtolower($pfileDetail['sha1']);
     }
 
-    /*
-     * @brief Run Spasht Agent for a package
-     * @param $uploadId Integer
-     * @see Fossology::Lib::Agent::Agent::processUploadId()
-     */
-    function processUploadId($uploadId)
-    {
+    $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
+    $scancodeVersion = $this->getScanCodeVersion($uploadAvailable);
 
-      $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
-      $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
+    $getNewResult = $this->getInformation($scancodeVersion, $uploadAvailable, $pfileSha1AndpfileId);
 
-      $agentId = $this->agentDao->getCurrentAgentId("spasht");
+    $resultUploadIntoLicenseTable = $this->insertLicensesSpashtAgentRecord($getNewResult, $agentId);
 
-      // $pfileSha1DetailsFromUpload = array();
-      // $pfileIdDetailsFromUpload = array();
+    $resultUploadIntoCopyrightTable = $this->insertCopyrightSpashtAgentRecord($getNewResult, $agentId);
+    return true;
+  }
 
-      $pfileSha1AndpfileId = array();
+  /**
+   * This function is responsible for available upload in the spasht db.
+   * If the upload is available then only the spasht agent will run.
+   */
 
-      foreach($pfileFileDetails as $pfileDetail)
-      {
-        $pfileSha1AndpfileId[$pfileDetail['pfile_pk']] = strtolower($pfileDetail['sha1']);
+  protected function searchUploadIdInSpasht($uploadId)
+  {
+    $result = $this->spashtDao->getComponent($uploadId);
 
-        // $pfileSha1DetailsFromUpload[] = strtolower($pfileDetail['sha1']);
-        // $pfileIdDetailsFromUpload[] = $pfileDetail['pfile_pk'];
+    if (!empty($result)) {
+      return $result;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get ScanCode Versions and Uri from harvest end point.
+   * This collection will be used for filtering of harvest data.
+   */
+
+  protected function getScanCodeVersion($details)
+  {
+    $namespace = $details['spasht_namespace'];
+    $name = $details['spasht_name'];
+    $revision = $details['spasht_revision'];
+    $type = $details['spasht_type'];
+    $provider = $details['spasht_provider'];
+
+    $tool = "scancode";
+
+    /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
+    $client = new Client([
+     // Base URI is used with relative requests
+     'base_uri' => 'https://api.clearlydefined.io/',
+     ]);
+
+    // uri to harvest section in the api
+    $uri = 'harvest/'.$type."/".$provider."/".$namespace."/".$name."/".$revision."/".$tool;
+
+    $res = $client->request('GET',$uri,[]);
+
+    if ($res->getStatusCode()==200) {
+      $body = json_decode($res->getBody()->getContents());
+
+      if (sizeof($body) == 0) {
+        return "Scancode not found!";
       }
 
-      $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
+      $latestToolVersion = 0;
 
-      $scancodeVersion = $this->getScanCodeVersion($uploadAvailable);
+      for ($x = 0; $x < sizeof($body) ; $x++) {
+        $str = explode ("/", $body[$x]);
+        $toolVersion = $str[6];
+        $newToolVersion = "";
 
-      $getNewResult = $this->getInformation($scancodeVersion, $uploadAvailable, $pfileSha1AndpfileId);
-
-      $resultUploadIntoLicenseTable = $this->insertLicensesSpashtAgentRecord($getNewResult, $agentId);
-
-      $resultUploadIntoCopyrightTable = $this->insertCopyrightSpashtAgentRecord($getNewResult, $agentId);
-
-    //   if($resultUploadIntoLicenseTable == true)
-    //   {
-    //   $file = fopen('/home/fossy/abc.json','w');
-
-    //   if($getNewResult == "BodyNotFound")
-    //   {
-    //     fwrite($file, "No data available.");
-    //   }
-    //   elseif($getNewResult == "UploadNotFound")
-    //   {
-    //     fwrite($file, "Upload doesnot match with the selected file.");
-    //   }
-    //   else
-    //   {
-
-    //     fwrite($file, $agentId);
-    //     foreach($getNewResult as $key)
-    //     {
-    //       fwrite($file, $key['pfileId']."->");
-    //       foreach($key['license'] as $license)
-    //       {
-    //         if(!empty($license))
-    //         {
-    //           fwrite($file, $license);
-    //         }
-    //         else
-    //         {
-    //           fwrite($file, "No_License_Found!");
-    //         }
-    //         fwrite($file,"\n");
-    //       }
-    //     }
-    //   }
-    //   fclose($file);
-    // }
-      return true;
-    }
-
-    /**
-     * This function is responsible for available upload in the spasht db.
-     * If the upload is available then only the spasht agent will run.
-     */
-
-    protected function searchUploadIdInSpasht($uploadId)
-    {
-      $result = $this->spashtDao->getComponent($uploadId);
-
-      if(!empty($result))
-      {
-        return $result;
-      }
-
-      return false;
-    }
-
-    /**
-     * Get ScanCode Versions and Uri from harvest end point.
-     * This collection will be used for filtering of harvest data.
-     */
-
-    protected function getScanCodeVersion($details)
-    {
-      $namespace = $details['spasht_namespace']; 
-      $name = $details['spasht_name'];
-      $revision = $details['spasht_revision'];
-      $type = $details['spasht_type'];
-      $provider = $details['spasht_provider'];
-
-      $tool = "scancode";
-
-      /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
-      $client = new Client([
-        // Base URI is used with relative requests
-        'base_uri' => 'https://api.clearlydefined.io/',
-        ]);
-
-        // uri to harvest section in the api
-
-      $uri = 'harvest/'.$type."/".$provider."/".$namespace."/".$name."/".$revision."/".$tool;
-
-      $res = $client->request('GET',$uri,[]);
-
-      if($res->getStatusCode()==200)
-      {
-        $body = json_decode($res->getBody()->getContents());
-
-        if(sizeof($body) == 0)
-        {
-          return "Scancode not found!";
-        }
-
-        $latestToolVersion = 0;
-        
-        for ($x = 0; $x < sizeof($body) ; $x++)
-        {
-          $str = explode ("/", $body[$x]);
-
-          $toolVersion = $str[6];
-          $newToolVersion = "";
-
-          for ($y = 0; $y < strlen($toolVersion); $y++)
-          {
-            if($toolVersion[$y] != ".")
-            {
-              $newToolVersion .= $toolVersion[$y];
-            }
-          }
-
-          if($latestToolVersion < $newToolVersion)
-          {
-            $latestToolVersion = $newToolVersion;
-
-            $result = $toolVersion;
+        for ($y = 0; $y < strlen($toolVersion); $y++) {
+          if ($toolVersion[$y] != ".") {
+            $newToolVersion .= $toolVersion[$y];
           }
         }
 
-        return $result;
+        if ($latestToolVersion < $newToolVersion) {
+          $latestToolVersion = $newToolVersion;
+          $result = $toolVersion;
+        }
       }
-
-      return "scancode not found!";
+      return $result;
     }
+    return "scancode not found!";
+  }
 
-    /**
-     * Search pfile for uploads into clearlydefined
-     * tool used is scancode
-     */
-     protected function getInformation($scancodeVersion, $details, $pfileSha1AndpfileId)
-     {
-       $namespace = $details['spasht_namespace'];
-       $name = $details['spasht_name'];
-       $revision = $details['spasht_revision'];
-       $type = $details['spasht_type'];
-       $provider = $details['spasht_provider'];
+  /**
+   * Search pfile for uploads into clearlydefined
+   * tool used is scancode
+   */
+  protected function getInformation($scancodeVersion, $details, $pfileSha1AndpfileId)
+  {
+    $namespace = $details['spasht_namespace'];
+    $name = $details['spasht_name'];
+    $revision = $details['spasht_revision'];
+    $type = $details['spasht_type'];
+    $provider = $details['spasht_provider'];
 
-       $tool = "scancode";
-       $dir = "files";
+    $tool = "scancode";
+    $dir = "files";
 
-      /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
-      $client = new Client([
-        // Base URI is used with relative requests
-        'base_uri' => 'https://api.clearlydefined.io/',
-        ]);
+    /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
+    $client = new Client([
+     // Base URI is used with relative requests
+     'base_uri' => 'https://api.clearlydefined.io/',
+     ]);
 
-      // uri to harvest section in the api to get scancode details
-      $uri = 'harvest/'.$type."/".$provider."/".$namespace."/".$name."/".$revision;
+    // uri to harvest section in the api to get scancode details
+    $uri = 'harvest/'.$type."/".$provider."/".$namespace."/".$name."/".$revision;
 
-      $res = $client->request('GET',$uri,[]);
+    $res = $client->request('GET',$uri,[]);
 
-      if($res->getStatusCode()==200)
-      {
-        $body = json_decode($res->getBody()->getContents());
+    if ($res->getStatusCode()==200) {
+      $body = json_decode($res->getBody()->getContents());
 
-        if(empty($body))
-        {
-          return "BodyNotFound";
-        }
-
-        $newResultBody = array();
-
-        foreach($body->$tool->$scancodeVersion->$dir as $key)
-        {
-          $searchInUpload = array_search($key->hashes->sha1, $pfileSha1AndpfileId);
-
-          if(!empty($searchInUpload))
-          {
-            $temp = array();
-
-            $temp['pfileId'] = $searchInUpload;
-
-            $temp['sha1'] = $key->hashes->sha1;
-
-            if(!empty($key->license))
-            {
-              $temp['license'] = $this->sperateLicenses($key->license);
-            }
-            else
-            {
-              $temp['license'] = ["No_License_Found"];
-            }
-
-            if(!empty($key->attributions))
-            {
-              $temp['attributions'] = $key->attributions;
-            }
-            else
-            {
-              $temp['attributions'] = ["No_Copyright_Found"];
-            }
-            $newResultBody[] = $temp;
-          }
-
-          $this->heartbeat(1);
-        }
-
-        return $newResultBody;
+      if (empty($body)) {
+        return "BodyNotFound";
       }
-      return "UploadNotFound";
-     }
 
-     /**
-      * Convert the license string into fossology format
-      */
-     protected function sperateLicenses($key)
-     {
-      $strLicense = array();
-      $checkString = explode (" ", $key);;
+      $newResultBody = array();
 
-      foreach($checkString as $license)
-      {
-        if($license === "AND" || $license === "OR")
-        {
-          continue;
-        }
-        else
-        {
-          $strSubLicense = explode("-",$license);
+      foreach ($body->$tool->$scancodeVersion->$dir as $key) {
+        $searchInUpload = array_search($key->hashes->sha1, $pfileSha1AndpfileId);
 
-          if($strSubLicense[2] === "or" && $strSubLicense[3] === "later")
-          {
-            $license = $strSubLicense[0]."-".$strSubLicense[1]."+";
+        if (!empty($searchInUpload)) {
+          $temp = array();
+          $temp['pfileId'] = $searchInUpload;
+          $temp['sha1'] = $key->hashes->sha1;
+
+          if (!empty($key->license)) {
+            $temp['license'] = $this->sperateLicenses($key->license);
+          } else {
+            $temp['license'] = ["No_License_Found"];
           }
-          elseif($strSubLicense[2] === "only")
-          {
-            $license = $strSubLicense[0]."-".$strSubLicense[1];
+
+          if (!empty($key->attributions)) {
+            $temp['attributions'] = $key->attributions;
+          } else {
+            $temp['attributions'] = ["No_Copyright_Found"];
           }
-          $strLicense []= $license;
+          $newResultBody[] = $temp;
         }
+        $this->heartbeat(1);
       }
-      return $strLicense;
-     }
 
-    /*
-     * @brief Insert the License Details in Spasht Agent table
-     * @param $agentId  Integer
-     * @param $license  Array
-     *
-     * @return boolean True if finished
-     */
-    protected function insertLicensesSpashtAgentRecord($body, $agentId)
-    {
-      foreach($body as $key)
-      {
-        foreach($key['license'] as $license)
-        {
-          $l = $this->licenseDao->getLicenseByShortName($license);
-          if($l != null)
-          {
-            if(!empty($l->getId()))
-            {
-              $this->dbManager->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'rf_fk'=> $l->getId()]);
-            }
-          }
-        }
-      }
-      return true;
+      return $newResultBody;
     }
+    return "UploadNotFound";
+  }
 
-    /*
-     * @brief Insert the Copyright Details in Spasht Agent table
-     * @param $agentId  Integer
-     * @param $license  Array
-     *
-     * @return boolean True if finished
-     */
-    protected function insertCopyrightSpashtAgentRecord($body, $agentId)
-    {
-      $file = fopen('/home/fossy/abc.json','w');
-      fwrite($file, $agentId."->agentID\n");
-      foreach($body as $key)
-      {
-        foreach($key['attributions'] as $keyCopyright)
-        {
-          // $copyrightList = explode (",", $keyCopyright);
-          // foreach($copyrightList as $copyright)
-          //  {
-          //    fwrite($file, $copyright."\n");
-          //   }
+   /**
+   * Convert the license string into fossology format
+   */
+  protected function sperateLicenses($key)
+  {
+    $strLicense = array();
+    $checkString = explode (" ", $key);
 
-          fwrite($file, $keyCopyright." -> ");
-          fwrite($file, $key['pfileId']."\n");
+    foreach ($checkString as $license) {
+      if ($license === "AND" || $license === "OR") {
+        continue;
+      } else {
+        $strSubLicense = explode("-",$license);
 
-          $hashForCopyright = hash ("sha256" , $keyCopyright);
+        if ($strSubLicense[2] === "or" && $strSubLicense[3] === "later") {
+          $license = $strSubLicense[0]."-".$strSubLicense[1]."+";
+        } elseif ($strSubLicense[2] === "only") {
+          $license = $strSubLicense[0]."-".$strSubLicense[1];
+        }
 
-          fwrite($file, $hashForCopyright);
-          $this->dbManager->insertTableRow('copyright_spasht',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'textfinding' => $keyCopyright,'hash' => $hashForCopyright,'clearing_decision_type_fk' => 0]);
+        $strLicense []= $license;
+      }
+    }
+    return $strLicense;
+  }
+
+  /*
+   * @brief Insert the License Details in Spasht Agent table
+   * @param $agentId  Integer
+   * @param $license  Array
+   *
+   * @return boolean True if finished
+   */
+  protected function insertLicensesSpashtAgentRecord($body, $agentId)
+  {
+    foreach ($body as $key) {
+      foreach ($key['license'] as $license) {
+        $l = $this->licenseDao->getLicenseByShortName($license);
+
+        if ($l != null) {
+          if (!empty($l->getId())) {
+            $this->dbManager->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'rf_fk'=> $l->getId()]);
+          }
         }
       }
-      fclose($file);
-      return true;
     }
+    return true;
+  }
 
+  /*
+   * @brief Insert the Copyright Details in Spasht Agent table
+   * @param $agentId  Integer
+   * @param $license  Array
+   *
+   * @return boolean True if finished
+   */
+  protected function insertCopyrightSpashtAgentRecord($body, $agentId)
+  {
+    $file = fopen('/home/fossy/abc.json','w');
+    fwrite($file, $agentId."->agentID\n");
+    foreach ($body as $key) {
+      foreach ($key['attributions'] as $keyCopyright) {
+        fwrite($file, $keyCopyright." -> ");
+        fwrite($file, $key['pfileId']."\n");
+
+        $hashForCopyright = hash ("sha256" , $keyCopyright);
+
+        fwrite($file, $hashForCopyright);
+        $this->dbManager->insertTableRow('copyright_spasht',['agent_fk' => $agentId,'pfile_fk' => $key['pfileId'],'textfinding' => $keyCopyright,'hash' => $hashForCopyright,'clearing_decision_type_fk' => 0]);
+      }
+    }
+    fclose($file);
+    return true;
+  }
 }
