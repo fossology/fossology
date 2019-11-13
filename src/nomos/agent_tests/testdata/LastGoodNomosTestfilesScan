@@ -413,7 +413,7 @@ File NomosTestfiles/MPL/MPL-2.0-with-copyleft-exception.txt contains license(s) 
 File NomosTestfiles/MPL/mpl contains license(s) MPL-2.0-no-copyleft-exception
 File NomosTestfiles/MPL/MPL-1.1.txt contains license(s) MPL-1.1
 File NomosTestfiles/MPL/README contains license(s) MPL
-File NomosTestfiles/MPL/License.txt contains license(s) Dual-license,LGPL-2.1+,MPL-1.1
+File NomosTestfiles/MPL/License-lowercase.txt contains license(s) Dual-license,LGPL-2.1+,MPL-1.1
 File NomosTestfiles/MPL/opl-1.0.txt contains license(s) MPL-1.1-style
 File NomosTestfiles/MPL/MPL-1.0.txt contains license(s) MPL-1.0
 File NomosTestfiles/MPL/MPL-2.0.txt contains license(s) MPL-2.0-no-copyleft-exception
