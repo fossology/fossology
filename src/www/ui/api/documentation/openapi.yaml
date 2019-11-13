@@ -124,9 +124,9 @@ paths:
                       description: Current API version as per documentation
                   security:
                       type: array
-                      items: {
+                      items:
                         type: string
-                      }
+
         default:
           $ref: '#/components/responses/defaultResponse'
 

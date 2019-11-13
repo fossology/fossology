@@ -25,6 +25,8 @@ namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @class VersionController
@@ -42,8 +44,12 @@ class VersionController extends RestController
    */
   public function getVersion($request, $response, $args)
   {
-    $yamlDocArray = yaml_parse_file(__DIR__ .
-      "/../documentation/openapi.yaml");
+    try {
+      $yaml = new Parser();
+      $yamlDocArray = $yaml->parse(file_get_contents(__DIR__ ."/../documentation/openapi.yaml"));
+    } catch (ParseException $exception) {
+      printf("Unable to parse the YAML string: %s", $exception->getMessage());
+    }
     $apiVersion = $yamlDocArray["info"]["version"];
     $security = array();
     foreach ($yamlDocArray["security"] as $secMethod) {
