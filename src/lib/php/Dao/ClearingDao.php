@@ -30,6 +30,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Proxy\ScanJobProxy;
 use Monolog\Logger;
 
 class ClearingDao
@@ -90,7 +91,7 @@ class ClearingDao
                 CASE cd.scope WHEN $globalScope THEN 1 ELSE 0 END AS scopesort
               FROM clearing_decision cd
                 INNER JOIN $uploadTreeTable ut
-                  ON ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope   OR ut.uploadtree_pk = cd.uploadtree_fk
+                  ON (ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope) OR ut.uploadtree_pk = cd.uploadtree_fk
               WHERE $sql_upload $condition
                 cd.decision_type!=$p1 AND cd.group_fk = $p2),
             decision AS (
@@ -917,5 +918,75 @@ INSERT INTO clearing_decision (
     } else {
       return count(array_unique($bulkIds));
     }
+  }
+
+  /**
+   * Get the count of items cleared for the given upload from
+   * clearing_decision table.
+   * @param integer $uploadId Upload id
+   * @param integer $groupId  Group id for the decisions
+   * @return integer Number of items cleared.
+   */
+  public function getClearingDecisionsCount($uploadId, $groupId)
+  {
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
+    $statementName = "";
+    $params = array();
+
+    $cte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, true,
+      $statementName, $params);
+
+    $statementName = __METHOD__ . $statementName;
+    $sql = "$cte SELECT COUNT(*) AS cnt FROM decision;";
+
+    $clearedCounter = $this->dbManager->getSingleRow($sql, $params,
+      $statementName);
+    return $clearedCounter['cnt'];
+  }
+
+  /**
+   * Get the count of items with either agent license finding or user license
+   * finding.
+   * @param integer $uploadId Upload id
+   * @param integer $groupId  Group id
+   * @return integer Number of items with license findings.
+   */
+  public function getTotalDecisionCount($uploadId, $groupId)
+  {
+    $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
+    $scanJobProxy->createAgentStatus(array('nomos', 'monk', 'ninka', 'reportImport', 'ojo'));
+    $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
+    $agentIds = "ANY(VALUES(" . implode("),(", $latestAgentIds) . "))";
+
+    $globalScope = DecisionScopes::REPO;
+    $params = array($groupId, $uploadId);
+    $statement = __METHOD__ . ".$uploadTreeTable." . implode(".", $latestAgentIds);
+    $sql = "
+WITH allDecs AS (
+  SELECT DISTINCT ON (ut.uploadtree_pk) * FROM $uploadTreeTable AS ut
+    LEFT JOIN license_file AS lf
+      ON lf.pfile_fk = ut.pfile_fk
+      AND lf.agent_fk = $agentIds
+      AND lf.rf_fk NOT IN (SELECT rf_pk FROM license_ref
+        WHERE rf_shortname = ANY(VALUES('No_license_found'),('Void'))
+      )
+      AND lf.rf_fk IS NOT NULL
+    LEFT JOIN clearing_decision AS cd ON
+      (ut.uploadtree_pk = cd.uploadtree_fk)
+      OR (ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope)
+      AND cd.group_fk = $1
+  WHERE ut.upload_fk = $2 AND (
+    CASE
+      WHEN lf.fl_pk IS NULL AND cd.clearing_decision_pk IS NULL
+        THEN FALSE
+        ELSE TRUE
+      END
+  )
+)
+SELECT count(*) AS cnt
+FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
+    $foundCounter = $this->dbManager->getSingleRow($sql, $params, $statement);
+    return $foundCounter['cnt'];
   }
 }
