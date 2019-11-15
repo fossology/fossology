@@ -20,6 +20,7 @@
 #define CLEANENTRIES_HPP_
 
 #include <string>
+#include <unicode/unistr.h>
 #include "regex.hpp"
 #include "scanners.hpp"
 

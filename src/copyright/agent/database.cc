@@ -378,7 +378,7 @@ bool CopyrightDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
      "email" == entry.type ||
      "url" == entry.type){
     tableName = "author";
-   }
+  }
 
   return dbManager.execPrepared(
     fo_dbManager_PrepareStamement(

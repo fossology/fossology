@@ -21,6 +21,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "regex.hpp"
 #include "regscan.hpp"
 #include "copyrightUtils.hpp"
+#include "cleanEntries.hpp"
 #include <list>
 #include <cstring>
 #include <ostream>
@@ -68,6 +69,7 @@ class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST (regUrlTest);
   CPPUNIT_TEST (regEmailTest);
   CPPUNIT_TEST (regKeywordTest);
+  CPPUNIT_TEST (cleanEntries);
 
   CPPUNIT_TEST_SUITE_END ();
 
@@ -172,9 +174,70 @@ protected:
     regexScanner sc("email", "copyright",1);
     scannerTest(sc, testContent, "email", { "info@mysite.org", "benj@debian.org" });
   }
+
+  /**
+   * \brief Test copyright scanner for keywords
+   * \test
+   * -# Create a keyword scanner
+   * -# Load test data and expected data
+   * -# Test using scannerTest()
+   */
   void regKeywordTest () {
     regexScanner sc("keyword", "keyword");
     scannerTest(sc, testContent, "keyword", {"patent", "licensed as"});
+  }
+
+  /**
+   * \brief Test cleanMatch() to remove non-UTF8 text and extra spaces
+   * \test
+   * -# Load test data and expected data
+   * -# Generate matches to clean each line in the file
+   * -# Call cleanMatch() to clean each line
+   * -# Check if cleaned test data matches expected data
+   */
+  void cleanEntries () {
+    // Binary content
+    string actualFileContent;
+    ReadFileToString("../testdata/testdata142", actualFileContent);
+
+    vector<string> binaryStrings;
+    std::stringstream *ss = new std::stringstream(actualFileContent);
+    string temp;
+
+    while (std::getline(*ss, temp)) {
+      binaryStrings.push_back(temp);
+    }
+
+    // Simulate matches. Each line is a match
+    vector<match> matches;
+    int pos = 0;
+    int size = binaryStrings.size();
+    for (int i = 0; i < size; i++)
+    {
+      int length = binaryStrings[i].length();
+      matches.push_back(
+        match(pos, pos + length, "statement"));
+      pos += length + 1;
+    }
+
+    // Expected data
+    string expectedFileContent;
+    ReadFileToString("../testdata/testdata142_exp", expectedFileContent);
+
+    delete(ss);
+    ss = new std::stringstream(expectedFileContent);
+    vector<string> expectedStrings;
+    while (std::getline(*ss, temp)) {
+      expectedStrings.push_back(temp);
+    }
+
+    vector<string> actualStrings;
+    for (size_t i = 0; i < matches.size(); i ++)
+    {
+      actualStrings.push_back(cleanMatch(actualFileContent, matches[i]));
+    }
+
+    CPPUNIT_ASSERT(expectedStrings == actualStrings);
   }
 };
 

@@ -73,6 +73,48 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
 }
 
 /**
+ * \brief Clean non unicode characters (binary data).
+ *
+ * Uses ICU library to check if the characters are unicode or not and append
+ * only unicode characters to the result string.
+ * \param sBegin String begin
+ * \param sEnd   String end
+ * \return string Clean statements
+ */
+string cleanNonPrint(string::const_iterator sBegin, string::const_iterator sEnd)
+{
+  string s(sBegin, sEnd);
+  const unsigned char *in = reinterpret_cast<const unsigned char*>(s.c_str());
+  int len = s.length();
+
+  icu::UnicodeString out;
+  for (int i = 0; i < len;)
+  {
+    UChar32 uniChar;
+    size_t lastPos = i;
+    U8_NEXT(in, i, len, uniChar);   // Get next UTF-8 char
+    if (uniChar > 0)
+    {
+      out.append(uniChar);
+    }
+    else
+    {
+      i = lastPos;  // Rest pointer
+      U16_NEXT(in, i, len, uniChar); // Try to get failed input as UTF-16
+      if (U_IS_UNICODE_CHAR(uniChar) && uniChar > 0)
+      {
+        out.append(uniChar);
+      }
+    }
+  }
+  out.trim();
+
+  string ret;
+  out.toUTF8String(ret);
+  return ret;
+}
+
+/**
  * \brief Clean the text based on type
  *
  * If match type is statement, clean as statement. Else clean as general text.
@@ -83,9 +125,11 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
 string cleanMatch(const string& sText, const match& m)
 {
   string::const_iterator it = sText.begin();
+  string utfCompatibleText = cleanNonPrint(it + m.start, it + m.end);
+
   if (m.type == "statement")
-    return cleanStatement(it + m.start, it + m.end);
+    return cleanStatement(utfCompatibleText.begin(), utfCompatibleText.end());
   else
-    return cleanGeneral(it + m.start, it + m.end);
+    return cleanGeneral(utfCompatibleText.begin(), utfCompatibleText.end());
 }
 
