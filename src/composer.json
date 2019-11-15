@@ -23,6 +23,7 @@
         "symfony/config" : "v3.3.18",
         "symfony/http-foundation" : "v3.3.18",
         "symfony/dependency-injection" : "v3.3.18",
+        "symfony/yaml" : "v3.3.18",
         "twig/twig" : "v1.38.4",
         "twig/extensions" : "v1.5.4"
     },
