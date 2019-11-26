@@ -48,6 +48,9 @@ class LicenseCsvImport
   /** @var array $nkMap
    * Map based on license shortname */
   protected $nkMap = array();
+  /** @var array $mdkMap
+   * Map based on license text MD5 */
+  protected $mdkMap = array();
   /** @var array $alias
    * Alias for headers */
   protected $alias = array(
@@ -170,33 +173,94 @@ class LicenseCsvImport
 
   /**
    * @brief Update the license info in the DB.
-   * @param array $row      Row with new values.
-   * @param array $sameText Matched row with old values.
+   * @param array $row  Row with new values.
+   * @param array $rfPk Matched license ID.
    * @return string Log messages.
    */
-  private function updateLicense($row,$sameText)
+  private function updateLicense($row, $rfPk)
   {
-    $log = "Text of '$row[shortname]' already used for '$sameText[rf_shortname]'";
-    $stmt = __METHOD__;
+    $stmt = __METHOD__ . '.getOldLicense';
+    $oldLicense = $this->dbManager->getSingleRow('SELECT ' .
+      'rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
+      'FROM license_ref WHERE rf_pk = $1', array($rfPk), $stmt);
+
+    $stmt = __METHOD__ . '.getOldMapping';
+    $sql = 'SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;';
+    $oldParent = null;
+    $oldParentRow = $this->dbManager->getSingleRow($sql, array($rfPk,
+      LicenseMap::CONCLUSION), $stmt);
+    if (!empty($oldParentRow)) {
+      $oldParent = $oldParentRow['rf_parent'];
+    }
+    $oldReport = null;
+    $oldReportRow = $this->dbManager->getSingleRow($sql, array($rfPk,
+      LicenseMap::REPORT), $stmt);
+    if (!empty($oldReportRow)) {
+      $oldReport = $oldReportRow['rf_parent'];
+    }
+
+    $newParent = null;
+    $newParent = ($row['parent_shortname'] == null) ? null :
+      $this->getKeyFromShortname($row['parent_shortname']);
+
+    $newReport = null;
+    $newReport = ($row['report_shortname'] == null) ? null :
+      $this->getKeyFromShortname($row['report_shortname']);
+
+    $log = "License '$row[shortname]' already exists in DB (id = $rfPk)";
+    $stmt = __METHOD__ . '.updateLicense';
     $sql = "UPDATE license_ref SET ";
-    $param = array($sameText['rf_pk']);
-    if (!empty($row['source']) && empty($sameText['rf_source'])) {
+    $extraParams = array();
+    $param = array($rfPk);
+    if (!empty($row['fullname']) && $row['fullname'] != $oldLicense['rf_fullname']) {
+      $param[] = $row['fullname'];
+      $stmt .= '.fullN';
+      $extraParams[] = "rf_fullname=$" . count($param);
+      $log .= ", updated fullname";
+    }
+    if (!empty($row['text']) && $row['text'] != $oldLicense['rf_text']) {
+      $param[] = $row['text'];
+      $stmt .= '.text';
+      $extraParams[] = "rf_text=$" . count($param) . ",rf_md5=md5($" .
+        count($param) . ")";
+      $log .= ", updated text";
+    }
+    if (!empty($row['url']) && $row['url'] != $oldLicense['rf_url']) {
+      $param[] = $row['url'];
+      $stmt .= '.url';
+      $extraParams[] = "rf_url=$" . count($param);
+      $log .= ", updated URL";
+    }
+    if (!empty($row['notes']) && $row['notes'] != $oldLicense['rf_notes']) {
+      $param[] = $row['notes'];
+      $stmt .= '.notes';
+      $extraParams[] = "rf_notes=$" . count($param);
+      $log .= ", updated notes";
+    }
+    if (!empty($row['source']) && $row['source'] != $oldLicense['rf_source']) {
       $param[] = $row['source'];
       $stmt .= '.updSource';
-      $sql .= " rf_source=$".count($param);
+      $extraParams[] = "rf_source=$".count($param);
       $log .= ', updated the source';
     }
-    if (!empty($row['risk']) && $row['risk']!==$sameText['rf_risk']) {
+    if (!empty($row['risk']) && $row['risk'] != $oldLicense['rf_risk']) {
       $param[] = $row['risk'];
       $stmt .= '.updRisk';
-      $sql .= count($param)==3 ? ", rf_risk=$".count($param) : "rf_risk=$".count($param);
+      $extraParams[] = "rf_risk=$".count($param);
       $log .= ', updated the risk level';
     }
-    if (count($param)>1) {
-      $sql .=" WHERE rf_pk=$1";
-      $this->dbManager->prepare($stmt, $sql);
-      $res = $this->dbManager->execute($stmt,$param);
-      $this->dbManager->freeResult($res);
+    if (count($param) > 1) {
+      $sql .= join(",", $extraParams);
+      $sql .= " WHERE rf_pk=$1;";
+      $this->dbManager->getSingleRow($sql, $param, $stmt);
+      $this->mdkMap[md5($row['text'])] = $rfPk;
+    }
+
+    if (($oldParent != $newParent) && $this->setMap($newParent, $rfPk, LicenseMap::CONCLUSION)) {
+      $log .= " with conclusion '$row[parent_shortname]'";
+    }
+    if (($oldReport != $newReport) && $this->setMap($newReport, $rfPk, LicenseMap::REPORT)) {
+      $log .= " reporting '$row[report_shortname]'";
     }
     return $log;
   }
@@ -211,26 +275,35 @@ class LicenseCsvImport
    */
   private function handleCsvLicense($row)
   {
-    /* @var $dbManager DbManager */
-    $dbManager = $this->dbManager;
     if (empty($row['risk'])) {
       $row['risk'] = 0;
     }
-    if ($this->getKeyFromShortname($row['shortname']) !== false) {
-      return "Shortname '$row[shortname]' already in DB (id=".$this->getKeyFromShortname($row['shortname']).")";
+    $rfPk = $this->getKeyFromShortname($row['shortname']);
+    $md5Match = $this->getKeyFromMd5($row['text']);
+
+    // If shortname exists and does not collide with other texts
+    if ($rfPk !== false) {
+      if ($md5Match == $rfPk || $md5Match === false) {
+        return $this->updateLicense($row, $rfPk);
+      } else {
+        return "Error: MD5 checksum of '" . $row['shortname'] .
+          "' collides with license id=$md5Match";
+      }
     }
-    $sameText = $dbManager->getSingleRow('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',array($row['text']));
-    if ($sameText !== false) {
-      return $this->updateLicense($row,$sameText);
+    if ($md5Match !== false) {
+      return "Error: MD5 checksum of '" . $row['shortname'] .
+        "' collides with license id=$md5Match";
     }
+
     $stmtInsert = __METHOD__.'.insert';
-    $dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source,rf_risk)'
+    $this->dbManager->prepare($stmtInsert,'INSERT INTO license_ref (rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_url,rf_notes,rf_source,rf_risk)'
             . ' VALUES ($1,$2,$3,md5($3),$4,$5,$6,$7,$8) RETURNING rf_pk');
-    $resi = $dbManager->execute($stmtInsert,
-            array($row['shortname'],$row['fullname'],$row['text'],$userDetected=1,$row['url'],$row['notes'],$row['source'],$row['risk']));
-    $new = $dbManager->fetchArray($resi);
-    $dbManager->freeResult($resi);
+    $resi = $this->dbManager->execute($stmtInsert,
+            array($row['shortname'],$row['fullname'],$row['text'],1,$row['url'],$row['notes'],$row['source'],$row['risk']));
+    $new = $this->dbManager->fetchArray($resi);
+    $this->dbManager->freeResult($resi);
     $this->nkMap[$row['shortname']] = $new['rf_pk'];
+    $this->mdkMap[md5($row['text'])] = $new['rf_pk'];
     $return = "Inserted '$row[shortname]' in DB";
 
     if ($this->insertMapIfNontrivial($row['parent_shortname'],$row['shortname'],LicenseMap::CONCLUSION)) {
@@ -278,5 +351,57 @@ class LicenseCsvImport
     $row = $this->dbManager->getSingleRow('SELECT rf_pk FROM license_ref WHERE rf_shortname=$1',array($shortname));
     $this->nkMap[$shortname] = ($row===false) ? false : $row['rf_pk'];
     return $this->nkMap[$shortname];
+  }
+
+  /**
+   * Get the license id using license text's checksum from DB or mdkMap.
+   * @param string $licenseText License text
+   * @return integer License id
+   */
+  private function getKeyFromMd5($licenseText)
+  {
+    $md5 = md5($licenseText);
+    if (array_key_exists($md5, $this->mdkMap)) {
+      return $this->mdkMap[$md5];
+    }
+    $row = $this->dbManager->getSingleRow('SELECT rf_pk FROM license_ref WHERE rf_md5=md5($1)',
+      array($licenseText));
+    $this->mdkMap[$md5] = (empty($row)) ? false : $row['rf_pk'];
+    return $this->mdkMap[$md5];
+  }
+
+  /**
+   * @brief Update license mappings
+   *
+   * First check if the mapping already exists for the license, then update it.
+   * If the mapping does not exists, then insert it.
+   * @param integer $from  The new mapping license
+   * @param integer $to    The license to be updated
+   * @param integer $usage The usage
+   * @return boolean False if mapping could not be updated or $from is empty.
+   */
+  private function setMap($from, $to, $usage)
+  {
+    $return = false;
+    if (!empty($from)) {
+      $sql = "SELECT license_map_pk, rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;";
+      $statement = __METHOD__ . ".getCurrentMapping";
+      $row = $this->dbManager->getSingleRow($sql, array($to, $usage), $statement);
+      if (!empty($row) && $row['rf_parent'] != $from) {
+        $this->dbManager->updateTableRow("license_map", array(
+          'rf_fk' => $to,
+          'rf_parent' => $from,
+          'usage' => $usage
+        ), 'license_map_pk', $row['license_map_pk']);
+        $return = true;
+      } elseif (empty($row)) {
+        $this->dbManager->insertTableRow('license_map', array(
+          'rf_fk' => $to,
+          'rf_parent' => $from,
+          'usage' => $usage));
+        $return = true;
+      }
+    }
+    return $return;
   }
 }

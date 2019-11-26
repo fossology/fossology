@@ -75,6 +75,37 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
+   * @brief Test for LicenseCsvImport::getKeyFromMd5()
+   * @test
+   * -# Create test DB and insert a license in `license_ref`.
+   * -# Call LicenseCsvImport::getKeyFromMd5() on a known license.
+   * -# Check if the id matches.
+   * -# Call LicenseCsvImport::getKeyFromMd5() on an unknown license.
+   * -# Check if the return value is false.
+   */
+  public function testGetKeyFromMd5()
+  {
+    $licenseText = 'I am a strong license';
+    $knownId = 101;
+    $falseLicenseText = "I am a weak license";
+
+    $dbManager = M::mock(DbManager::class);
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_pk FROM license_ref WHERE rf_md5=md5($1)', array($licenseText))
+      ->once()
+      ->andReturn(array('rf_pk' => $knownId));
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_pk FROM license_ref WHERE rf_md5=md5($1)', array($falseLicenseText))
+      ->andReturnNull();
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'getKeyFromMd5', array($licenseText)), equalTo($knownId));
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'getKeyFromMd5', array($falseLicenseText)), equalTo(false));
+  }
+
+  /**
    * @brief Test for LicenseCsvImport::handleCsvLicense()
    * @test
    * -# Mock DB manager object.
@@ -86,56 +117,82 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $dbManager = M::mock(DbManager::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager);
     $nkMap = array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licG'=>false,'licH'=>false,'licZ'=>100);
+    $mdkMap = array(
+      md5('txA') => 101,
+      md5('txB') => false,
+      md5('txC') => false,
+      md5('txD') => 102,
+      md5('txE') => false,
+      md5('txF') => false,
+      md5('txG') => false,
+      md5('txH') => false,
+      md5('txZ') => 100
+    );
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', $nkMap);
+    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', $mdkMap);
 
-    $singleRowD = array('rf_shortname'=>'licD','rf_source'=>'','rf_pk'=>101+3,'rf_risk'=>4);
+    $singleRowA = array('rf_shortname'=>'licA','rf_fullname'=>'licennnseA',
+      'rf_text'=>'someRandom','rf_url'=>'','rf_notes'=>'','rf_source'=>'','rf_risk'=>4);
     $dbManager->shouldReceive('getSingleRow')
-            ->with('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',anything())
-            ->times(6)
-            ->andReturn(false,false,false,$singleRowD,$singleRowD,$singleRowD);
+            ->with('SELECT rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
+              'FROM license_ref WHERE rf_pk = $1', array(101), anything())
+            ->once()
+            ->andReturn($singleRowA);
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
-    $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>102));
 
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
-        array('rf_fk'=>102,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
+        array('rf_fk'=>103,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
+    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 103));
     $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>0,
+        array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>0,
                 'parent_shortname'=>'licA','report_shortname'=>null)));
     assertThat($returnB, is("Inserted 'licB' in DB with conclusion 'licA'"));
 
+    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 104));
     $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
-        array('rf_fk'=>102,'rf_parent'=>100,'usage'=>LicenseMap::REPORT)))->once();
+        array('rf_fk'=>103,'rf_parent'=>100,'usage'=>LicenseMap::REPORT)))->once();
     $returnF = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'','risk'=>1,
                 'parent_shortname'=>null,'report_shortname'=>'licZ')));
     assertThat($returnF, is("Inserted 'licF' in DB reporting 'licZ'"));
 
+    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 105));
     $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
     assertThat($returnC, is("Inserted 'licC' in DB"));
 
+    $dbManager->shouldReceive('getSingleRow')->with("UPDATE license_ref SET " .
+      "rf_fullname=$2,rf_text=$3,rf_md5=md5($3),rf_risk=$4 WHERE rf_pk=$1;",
+      array(101, 'liceB', 'txA', 2), anything())
+      ->once();
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
+        anyof(array(101, LicenseMap::CONCLUSION), array(101, LicenseMap::REPORT)), anything())
+      ->twice()
+      ->andReturn(array('rf_parent' => null));
     $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licA','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>2,
+            array('shortname'=>'licA','fullname'=>'liceB','text'=>'txA','url'=>'','notes'=>'','source'=>'','risk'=>2,
                 'parent_shortname'=>null,'report_shortname'=>null)));
-    assertThat($returnA, is("Shortname 'licA' already in DB (id=101)"));
+    assertThat($returnA, is("License 'licA' already exists in DB (id = 101)" .
+      ", updated fullname, updated text, updated the risk level"));
 
     $returnE = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'','risk'=>false,
                 'parent_shortname'=>null,'report_shortname'=>null)));
-    assertThat($returnE, is("Text of 'licE' already used for 'licD'"));
+    assertThat($returnE, is("Error: MD5 checksum of 'licE' collides with license id=102"));
 
     $returnG = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licG','fullname'=>'liceG','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
                 'parent_shortname'=>null,'report_shortname'=>null,'risk'=>false)));
-    assertThat($returnG, is("Text of 'licG' already used for 'licD', updated the source"));
+    assertThat($returnG, is("Error: MD5 checksum of 'licG' collides with license id=102"));
 
     $returnH = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
             array('shortname'=>'licH','fullname'=>'liceH','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
                 'parent_shortname'=>null,'report_shortname'=>null,'risk'=>3)));
-    assertThat($returnH, is("Text of 'licH' already used for 'licD', updated the source, updated the risk level"));
+    assertThat($returnH, is("Error: MD5 checksum of 'licH' collides with license id=102"));
   }
 
   /**
@@ -231,14 +288,18 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('shortname','foo','text','fullname','notes')));
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'headrow'),is(notNullValue()));
 
-    $dbManager->shouldReceive('getSingleRow')->with('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',anything())->andReturn(false);
+    $dbManager->shouldReceive('getSingleRow')
+      ->with('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',anything())
+      ->andReturn(false);
     $dbManager->shouldReceive('prepare');
     $dbManager->shouldReceive('execute');
     $dbManager->shouldReceive('freeResult');
     $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>101,'rf_risk'=>1));
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array('licA'=>false));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', array(md5('txA')=>false));
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('licA','bar','txA','liceA','noteA')));
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'nkMap'),is(array('licA'=>101)));
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'mdkMap'),is(array(md5('txA')=>101)));
   }
 
   /**
@@ -287,5 +348,94 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $msg = $licenseCsvImport->handleFile($filename);
     assertThat($msg, startsWith( _('head okay')));
     unlink($filename);
+  }
+
+  /**
+   * @brief Test for LicenseCsvImport::setMap()
+   * @test
+   * -# Create test DB and insert 3 licenses in `license_ref`.
+   * -# Call LicenseCsvImport::setMap() with a reporting and conclusion mapping.
+   * -# Check if return value is true and mapping is done in the DB.
+   */
+  public function testSetMapTrue()
+  {
+    $testDb = new TestLiteDb();
+    $testDb->createPlainTables(array('license_ref', 'license_map'));
+    $licenseId = 101;
+    $parentId = 102;
+    $reportId = 103;
+    /** @var DbManager $dbManager **/
+    $dbManager = &$testDb->getDbManager();
+    $dbManager->insertTableRow('license_ref', array(
+      'rf_pk' => $licenseId,
+      'rf_shortname' => "Main License"
+    ));
+    $dbManager->insertTableRow('license_ref', array(
+      'rf_pk' => $parentId,
+      'rf_shortname' => "Parent License"
+    ));
+    $dbManager->insertTableRow('license_ref', array(
+      'rf_pk' => $reportId,
+      'rf_shortname' => "Reported License"
+    ));
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'setMap', array($parentId, $licenseId, LicenseMap::CONCLUSION)),
+      equalTo(true));
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'setMap', array($reportId, $licenseId, LicenseMap::REPORT)),
+      equalTo(true));
+
+    $sql = "SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;";
+    $statement = __METHOD__ . ".getMap";
+    $row = $dbManager->getSingleRow($sql, array($licenseId,
+      LicenseMap::CONCLUSION), $statement);
+
+    assertThat($row['rf_parent'], equalTo($parentId));
+    $row = $dbManager->getSingleRow($sql, array($licenseId,
+      LicenseMap::REPORT), $statement);
+    assertThat($row['rf_parent'], equalTo($reportId));
+  }
+
+  /**
+   * @brief Test for LicenseCsvImport::setMap() with empty mapping
+   * @test
+   * -# Create test DB and insert 3 licenses in `license_ref`.
+   * -# Call LicenseCsvImport::setMap() with a reporting and conclusion mapping
+   *    but the conclusions should be worng licenses.
+   * -# Check if return value is false and there is no mapping done in the DB.
+   */
+  public function testSetMapFalse()
+  {
+    $testDb = new TestLiteDb();
+    $testDb->createPlainTables(array('license_ref', 'license_map'));
+    $licenseId = 101;
+    $parentId = false;
+    $reportId = false;
+    /** @var DbManager $dbManager **/
+    $dbManager = &$testDb->getDbManager();
+    $dbManager->insertTableRow('license_ref', array(
+      'rf_pk' => $licenseId,
+      'rf_shortname' => "Main License"
+    ));
+    $licenseCsvImport = new LicenseCsvImport($dbManager);
+
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'setMap', array($parentId, $licenseId, LicenseMap::CONCLUSION)),
+      equalTo(false));
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'setMap', array($reportId, $licenseId, LicenseMap::REPORT)),
+      equalTo(false));
+
+    $sql = "SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;";
+    $statement = __METHOD__ . ".getMap";
+    $row = $dbManager->getSingleRow($sql, array($licenseId,
+      LicenseMap::CONCLUSION), $statement);
+
+    assertThat($row, equalTo(false));
+    $row = $dbManager->getSingleRow($sql, array($licenseId,
+      LicenseMap::REPORT), $statement);
+    assertThat($row, equalTo(false));
   }
 }
