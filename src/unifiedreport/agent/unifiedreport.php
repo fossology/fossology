@@ -277,7 +277,14 @@ class UnifiedReport extends Agent
     $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
-    $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
+    if (array_key_exists('scannerFindings', $copyright)) {
+      $this->heartbeat(empty($copyrights["scannerFindings"]) ? 0 : count($copyrights["scannerFindings"]));
+      $this->heartbeat(empty($copyrights["userFindings"]) ? 0 : count($copyrights["userFindings"]));
+    } else {
+      $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
+      $copyrights["scannerFindings"] = $copyrights["statements"];
+      unset($copyrights["statements"]);
+    }
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
