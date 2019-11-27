@@ -23,6 +23,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Exception;
 use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Dao\UserDao;
 use Mockery as M;
 
 /**
@@ -65,13 +66,34 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $testDb->createPlainTables(array('license_ref'));
     $shortname = 'licA';
     $knownId = 101;
+    $knownGroup = 4;
     /*** @var DbManager ***/
     $dbManager = &$testDb->getDbManager();
     $dbManager->insertTableRow('license_ref', array('rf_pk'=>$knownId,'rf_shortname'=>$shortname));
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $this->createCandidateTable($dbManager);
+    $dbManager->insertTableRow('license_candidate', array(
+      'rf_pk' => $knownId + 2,
+      'rf_shortname' => "candidate-$shortname",
+      'group_fk' => $knownGroup
+    ));
+    $userDao = M::mock(UserDao::class);
+    $userDao->shouldReceive('getGroupIdByName')
+      ->with("fossy")
+      ->once()
+      ->andReturn(4);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'getKeyFromShortname', array($shortname)), equalTo($knownId));
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'getKeyFromShortname', array("no $shortname")), equalTo(false));
+    // Candidates
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'getKeyFromShortname',
+      array("candidate-$shortname", "fossy")),
+      equalTo($knownId + 2));
+    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'getKeyFromShortname',
+      array("candidate-$shortname")),
+      equalTo(false));
   }
 
   /**
@@ -91,13 +113,16 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
 
     $dbManager = M::mock(DbManager::class);
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_pk FROM license_ref WHERE rf_md5=md5($1)', array($licenseText))
+      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1)',
+        array($licenseText))
       ->once()
       ->andReturn(array('rf_pk' => $knownId));
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_pk FROM license_ref WHERE rf_md5=md5($1)', array($falseLicenseText))
+      ->with('SELECT rf_pk FROM ONLY license_ref WHERE rf_md5=md5($1)',
+        array($falseLicenseText))
       ->andReturnNull();
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
       'getKeyFromMd5', array($licenseText)), equalTo($knownId));
@@ -115,8 +140,18 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleCsvLicense()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
-    $nkMap = array('licA'=>101,'licB'=>false,'licC'=>false,'licE'=>false,'licF'=>false,'licG'=>false,'licH'=>false,'licZ'=>100);
+    $nkMap = array(
+      'licA' => 101,
+      'licB' => false,
+      'licC' => false,
+      'licE' => false,
+      'licF' => false,
+      'licG' => false,
+      'licH' => false,
+      'licZ' => 100,
+      'canLicAfossy' => 200,
+      'canLicBfossy' => false
+    );
     $mdkMap = array(
       md5('txA') => 101,
       md5('txB') => false,
@@ -126,76 +161,261 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       md5('txF') => false,
       md5('txG') => false,
       md5('txH') => false,
-      md5('txZ') => 100
+      md5('txZ') => 100,
+      md5('txCan') => 200,
+      md5('Text of candidate license') => false
     );
+    $userDao = M::mock(UserDao::class);
+    $userDao->shouldReceive('getGroupIdByName')
+      ->with("fossy")
+      ->times(3)
+      ->andReturn(4);
+
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
     Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', $nkMap);
     Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', $mdkMap);
 
-    $singleRowA = array('rf_shortname'=>'licA','rf_fullname'=>'licennnseA',
-      'rf_text'=>'someRandom','rf_url'=>'','rf_notes'=>'','rf_source'=>'','rf_risk'=>4);
+    $singleRowA = array(
+      'rf_shortname' => 'licA',
+      'rf_fullname' => 'licennnseA',
+      'rf_text' => 'someRandom',
+      'rf_md5' => md5('someRandom'),
+      'rf_detector_type' => 1,
+      'rf_url' => '',
+      'rf_notes' => '',
+      'rf_source' => '',
+      'rf_risk' => 4
+    );
     $dbManager->shouldReceive('getSingleRow')
-            ->with('SELECT rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
-              'FROM license_ref WHERE rf_pk = $1', array(101), anything())
-            ->once()
-            ->andReturn($singleRowA);
-    $dbManager->shouldReceive('prepare');
-    $dbManager->shouldReceive('execute');
-    $dbManager->shouldReceive('freeResult');
+      ->with(
+      'SELECT rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
+      'FROM license_ref WHERE rf_pk = $1', array(101), anything())
+      ->once()
+      ->andReturn($singleRowA);
 
-    $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
-        array('rf_fk'=>103,'rf_parent'=>101,'usage'=>LicenseMap::CONCLUSION)))->once();
-    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 103));
-    $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-        array('shortname'=>'licB','fullname'=>'liceB','text'=>'txB','url'=>'','notes'=>'','source'=>'','risk'=>0,
-                'parent_shortname'=>'licA','report_shortname'=>null)));
+    // Test for licB insert
+    $dbManager->shouldReceive('insertTableRow')
+      ->withArgs(array(
+        'license_map', array(
+          'rf_fk' => 103, 'rf_parent' => 101, 'usage' => LicenseMap::CONCLUSION
+      )))
+      ->once();
+    $singleRowB = $singleRowA;
+    $singleRowB["rf_shortname"] = "licB";
+    $singleRowB["rf_fullname"] = "liceB";
+    $singleRowB["rf_text"] = "txB";
+    $singleRowB["rf_md5"] = md5("txB");
+    $singleRowB["rf_risk"] = 0;
+    $this->addLicenseInsertToDbManager($dbManager, $singleRowB, 103);
+    $returnB = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licB',
+        'fullname' => 'liceB',
+        'text' => 'txB',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => 0,
+        'parent_shortname' => 'licA',
+        'report_shortname' => null,
+        'group' => null
+      )));
     assertThat($returnB, is("Inserted 'licB' in DB with conclusion 'licA'"));
 
-    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 104));
-    $dbManager->shouldReceive('insertTableRow')->withArgs(array('license_map',
-        array('rf_fk'=>103,'rf_parent'=>100,'usage'=>LicenseMap::REPORT)))->once();
-    $returnF = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licF','fullname'=>'liceF','text'=>'txF','url'=>'','notes'=>'','source'=>'','risk'=>1,
-                'parent_shortname'=>null,'report_shortname'=>'licZ')));
+    // Test for licF insert
+    $singleRowF = $singleRowA;
+    $singleRowF["rf_shortname"] = "licF";
+    $singleRowF["rf_fullname"] = "liceF";
+    $singleRowF["rf_text"] = "txF";
+    $singleRowF["rf_md5"] = md5("txF");
+    $singleRowF["rf_risk"] = 1;
+    $this->addLicenseInsertToDbManager($dbManager, $singleRowF, 104);
+    $dbManager->shouldReceive('insertTableRow')
+      ->withArgs(array(
+        'license_map', array(
+          'rf_fk' => 104,
+          'rf_parent' => 100,
+          'usage' => LicenseMap::REPORT
+      )))
+      ->once();
+    $returnF = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licF',
+        'fullname' => 'liceF',
+        'text' => 'txF',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => 1,
+        'parent_shortname' => null,
+        'report_shortname' => 'licZ',
+        'group' => null
+      )));
     assertThat($returnF, is("Inserted 'licF' in DB reporting 'licZ'"));
 
-    $dbManager->shouldReceive('fetchArray')->withAnyArgs()->andReturn(array('rf_pk' => 105));
-    $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licC','fullname'=>'liceC','text'=>'txC','url'=>'','notes'=>'','source'=>'','risk'=>2,
-                'parent_shortname'=>null,'report_shortname'=>null)));
+    // Test licC insert
+    $singleRowC = $singleRowA;
+    $singleRowC["rf_shortname"] = "licC";
+    $singleRowC["rf_fullname"] = "liceC";
+    $singleRowC["rf_text"] = "txC";
+    $singleRowC["rf_md5"] = md5("txC");
+    $singleRowC["rf_risk"] = 2;
+    $this->addLicenseInsertToDbManager($dbManager, $singleRowC, 105);
+    $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licC',
+        'fullname' => 'liceC',
+        'text' => 'txC',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => 2,
+        'parent_shortname' => null,
+        'report_shortname' => null,
+        'group' => null
+      )));
     assertThat($returnC, is("Inserted 'licC' in DB"));
 
-    $dbManager->shouldReceive('getSingleRow')->with("UPDATE license_ref SET " .
+    // Test canlicC update
+    $canLicA = $singleRowA;
+    $canLicA["rf_shortname"] = "canLicA";
+    $canLicA["rf_fullname"] = "canLiceA";
+    $canLicA["rf_text"] = "txcan";
+    $canLicA["rf_risk"] = 0;
+    $canLicA["rf_group"] = 4;
+    $dbManager->shouldReceive('getSingleRow')
+    ->with(
+      'SELECT rf_shortname, rf_fullname, rf_text, rf_url, rf_notes, rf_source, rf_risk ' .
+      'FROM license_ref WHERE rf_pk = $1', array(200), anything())
+      ->once()
+      ->andReturn($canLicA);
+    $dbManager->shouldReceive('getSingleRow')
+      ->with(
+        "UPDATE license_candidate SET " .
+        "rf_fullname=$2,rf_text=$3,rf_md5=md5($3) WHERE rf_pk=$1;",
+        array(200, 'canDidateLicenseA', 'Text of candidate license'),
+        anything())
+      ->once();
+    $dbManager->shouldReceive('getSingleRow')
+      ->with(
+        'SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
+        anyof(array(200, LicenseMap::CONCLUSION), array(200, LicenseMap::REPORT)),
+        anything())
+        ->twice()
+        ->andReturn(array('rf_parent' => null));
+    $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'canLicA',
+        'fullname' => 'canDidateLicenseA',
+        'text' => 'Text of candidate license',
+        'url' => '', 'notes' => '', 'source' => '', 'risk' => 0,
+        'parent_shortname' => null, 'report_shortname' => null,
+        'group' => 'fossy'
+      )));
+    assertThat($returnC, is(
+      "License 'canLicA' already exists in DB (id = 200)" .
+      ", updated fullname, updated text"
+    ));
+
+    // Test licA update
+    $dbManager->shouldReceive('getSingleRow')
+      ->with(
+      "UPDATE license_ref SET " .
       "rf_fullname=$2,rf_text=$3,rf_md5=md5($3),rf_risk=$4 WHERE rf_pk=$1;",
       array(101, 'liceB', 'txA', 2), anything())
       ->once();
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
-        anyof(array(101, LicenseMap::CONCLUSION), array(101, LicenseMap::REPORT)), anything())
+      ->with(
+        'SELECT rf_parent FROM license_map WHERE rf_fk = $1 AND usage = $2;',
+        anyof(array(101, LicenseMap::CONCLUSION), array(101, LicenseMap::REPORT)),
+        anything())
       ->twice()
       ->andReturn(array('rf_parent' => null));
-    $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licA','fullname'=>'liceB','text'=>'txA','url'=>'','notes'=>'','source'=>'','risk'=>2,
-                'parent_shortname'=>null,'report_shortname'=>null)));
-    assertThat($returnA, is("License 'licA' already exists in DB (id = 101)" .
-      ", updated fullname, updated text, updated the risk level"));
+    $returnA = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licA',
+        'fullname' => 'liceB',
+        'text' => 'txA',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => 2,
+        'parent_shortname' => null,
+        'report_shortname' => null,
+        'group' => null
+      )));
+    assertThat($returnA, is(
+        "License 'licA' already exists in DB (id = 101)" .
+        ", updated fullname, updated text, updated the risk level"));
 
-    $returnE = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licE','fullname'=>'liceE','text'=>'txD','url'=>'','notes'=>'','source'=>'','risk'=>false,
-                'parent_shortname'=>null,'report_shortname'=>null)));
-    assertThat($returnE, is("Error: MD5 checksum of 'licE' collides with license id=102"));
+    // Test licE md5 collision
+    $returnE = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licE',
+        'fullname' => 'liceE',
+        'text' => 'txD',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => false,
+        'parent_shortname' => null,
+        'report_shortname' => null,
+        'group' => null
+      )));
+    assertThat($returnE, is(
+      "Error: MD5 checksum of 'licE' collides with license id=102"));
 
-    $returnG = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licG','fullname'=>'liceG','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
-                'parent_shortname'=>null,'report_shortname'=>null,'risk'=>false)));
-    assertThat($returnG, is("Error: MD5 checksum of 'licG' collides with license id=102"));
+    // Test licG md5 collision
+    $returnG = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'licG',
+        'fullname' => 'liceG',
+        'text' => 'txD',
+        'url' => '',
+        'notes' => '',
+        'source' => '_G_go_G_',
+        'parent_shortname' => null,
+        'report_shortname' => null,
+        'risk' => false,
+        'group' => null
+      )));
+    assertThat($returnG, is(
+      "Error: MD5 checksum of 'licG' collides with license id=102"));
 
-    $returnH = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleCsvLicense', array(
-            array('shortname'=>'licH','fullname'=>'liceH','text'=>'txD','url'=>'','notes'=>'','source'=>'_G_go_G_',
-                'parent_shortname'=>null,'report_shortname'=>null,'risk'=>3)));
-    assertThat($returnH, is("Error: MD5 checksum of 'licH' collides with license id=102"));
+    // Test canlicB insert
+    $canlicB = $singleRowA;
+    $canlicB["rf_shortname"] = "canLicB";
+    $canlicB["rf_fullname"] = "canLiceB";
+    $canlicB["rf_text"] = "txCan";
+    $canlicB["rf_md5"] = md5("txCan");
+    $canlicB["rf_risk"] = 2;
+    $canlicB["group_fk"] = 4;
+    $canlicB["marydone"] = 't';
+    $this->addLicenseInsertToDbManager($dbManager, $canlicB, 201,
+      "license_candidate");
+    $dbManager->shouldReceive('booleanToDb')
+      ->with(true)
+      ->once()
+      ->andReturn('t');
+    $returnC = Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
+      'handleCsvLicense', array(array(
+        'shortname' => 'canLicB',
+        'fullname' => 'canLiceB',
+        'text' => 'txCan',
+        'url' => '',
+        'notes' => '',
+        'source' => '',
+        'risk' => 2,
+        'parent_shortname' => null,
+        'report_shortname' => null,
+        'group' => 'fossy'
+      )));
+    assertThat($returnC, is("Inserted 'canLicB' in DB" .
+      " as candidate license under group fossy"));
   }
 
   /**
+   *
    * @brief Test for LicenseCsvImport::handleHeadCsv()
    * @test
    * -# Initialize LicenseCsvImport.
@@ -207,13 +427,32 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleHeadCsv()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
-    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text','fullname','notes','bar'))),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>false,'notes'=>4,'source'=>false,'risk'=>0) ) );
+    assertThat(
+      Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleHeadCsv',
+        array(array(
+          'shortname', 'foo', 'text', 'fullname', 'notes', 'bar'
+        ))),
+      is(array(
+        'shortname' => 0, 'fullname' => 3, 'text' => 2,
+        'parent_shortname' => false, 'report_shortname' => false,
+        'url' => false, 'notes' => 4, 'source' => false, 'risk' => 0,
+        'group' => false
+      )));
 
-    assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('Short Name','URL','text','fullname','notes','Foreign ID'))),
-            is( array('shortname'=>0,'fullname'=>3,'text'=>2,'parent_shortname'=>false,'report_shortname'=>false,'url'=>1,'notes'=>4,'source'=>5,'risk'=>false) ) );
+    assertThat(
+      Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleHeadCsv',
+        array(array(
+          'Short Name', 'URL', 'text', 'fullname', 'notes', 'Foreign ID',
+          'License group'
+        ))),
+      is(array(
+        'shortname' => 0, 'fullname' => 3, 'text' => 2,
+        'parent_shortname' => false, 'report_shortname' => false, 'url' => 1,
+        'notes' => 4, 'source' => 5, 'risk' => false, 'group' => 6
+      )));
   }
 
   /**
@@ -227,7 +466,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
     Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,'handleHeadCsv',array(array('shortname','foo','text')));
   }
 
@@ -243,7 +483,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testSetDelimiter()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     $licenseCsvImport->setDelimiter('|');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'delimiter'),is('|'));
@@ -264,7 +505,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testSetEnclosure()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     $licenseCsvImport->setEnclosure('|');
     assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'enclosure') ,is('|'));
@@ -283,23 +525,43 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleCsv()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
-    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('shortname','foo','text','fullname','notes')));
-    assertThat(Reflectory::getObjectsProperty($licenseCsvImport,'headrow'),is(notNullValue()));
+    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv',
+      array(array('shortname', 'foo', 'text', 'fullname', 'notes')));
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'headrow'),
+      is(notNullValue()));
 
     $dbManager->shouldReceive('getSingleRow')
-      ->with('SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',anything())
+      ->with(
+        'SELECT rf_shortname,rf_source,rf_pk,rf_risk FROM license_ref WHERE rf_md5=md5($1)',
+        anything())
       ->andReturn(false);
-    $dbManager->shouldReceive('prepare');
-    $dbManager->shouldReceive('execute');
-    $dbManager->shouldReceive('freeResult');
-    $dbManager->shouldReceive('fetchArray')->andReturn(array('rf_pk'=>101,'rf_risk'=>1));
-    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array('licA'=>false));
-    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', array(md5('txA')=>false));
-    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv', array(array('licA','bar','txA','liceA','noteA')));
-    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'nkMap'),is(array('licA'=>101)));
-    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'mdkMap'),is(array(md5('txA')=>101)));
+    $licenseRow = array(
+      "rf_shortname" => "licA",
+      "rf_fullname" => "liceA",
+      "rf_text" => "txA",
+      "rf_md5" => md5("txA"),
+      "rf_detector_type" => 1,
+      "rf_url" => '',
+      "rf_notes" => 'noteA',
+      "rf_source" => '',
+      "rf_risk" => 0
+    );
+    $this->addLicenseInsertToDbManager($dbManager, $licenseRow, 101);
+    Reflectory::setObjectsProperty($licenseCsvImport, 'nkMap', array(
+        'licA' => false
+    ));
+    Reflectory::setObjectsProperty($licenseCsvImport, 'mdkMap', array(
+        md5('txA') => false
+    ));
+    Reflectory::invokeObjectsMethodnameWith($licenseCsvImport, 'handleCsv',
+      array(array('licA', 'bar', 'txA', 'liceA', 'noteA')));
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'nkMap'),
+      is(array('licA' => 101)));
+    assertThat(Reflectory::getObjectsProperty($licenseCsvImport, 'mdkMap'),
+      is(array(md5('txA') => 101)));
   }
 
   /**
@@ -311,7 +573,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleFileIfFileNotExists()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
     $msg = $licenseCsvImport->handleFile('/tmp/thisFileNameShouldNotExists');
     assertThat($msg, is(equalTo(_('Internal error'))));
   }
@@ -325,7 +588,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleFileIfFileIsNotParsable()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
     $msg = $licenseCsvImport->handleFile(__FILE__);
     assertThat($msg, startsWith( _('Error while parsing file')));
   }
@@ -340,7 +604,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   public function testHandleFile()
   {
     $dbManager = M::mock(DbManager::class);
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
     $filename = tempnam("/tmp", "FOO");
     $handle = fopen($filename, 'w');
     fwrite($handle, "shortname,fullname,text");
@@ -378,7 +643,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       'rf_pk' => $reportId,
       'rf_shortname' => "Reported License"
     ));
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
       'setMap', array($parentId, $licenseId, LicenseMap::CONCLUSION)),
@@ -419,7 +685,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
       'rf_pk' => $licenseId,
       'rf_shortname' => "Main License"
     ));
-    $licenseCsvImport = new LicenseCsvImport($dbManager);
+    $userDao = M::mock(UserDao::class);
+    $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);
 
     assertThat(Reflectory::invokeObjectsMethodnameWith($licenseCsvImport,
       'setMap', array($parentId, $licenseId, LicenseMap::CONCLUSION)),
@@ -437,5 +704,33 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
     $row = $dbManager->getSingleRow($sql, array($licenseId,
       LicenseMap::REPORT), $statement);
     assertThat($row, equalTo(false));
+  }
+
+  /**
+   * Create candidate license table
+   * @param DbManager $dbManager
+   */
+  private function createCandidateTable($dbManager)
+  {
+    $sql = "CREATE TABLE license_candidate (" .
+      "rf_pk, rf_shortname, rf_fullname, rf_text, rf_md5, rf_url, rf_notes, " .
+      "marydone, rf_source, rf_risk, rf_detector_type, group_fk)";
+    $dbManager->queryOnce($sql);
+  }
+
+  /**
+   * Add a new mockery handler for new license insertion in DB
+   * @param DbManager $dbManager The mock object of DbManager
+   * @param array $row    The associated array
+   * @param mixed $return The value which should be returned
+   * @param string $table The table where new data should go
+   */
+  private function addLicenseInsertToDbManager(&$dbManager, $row, $return,
+    $table = "license_ref")
+  {
+    $dbManager->shouldReceive('insertTableRow')
+      ->with($table, $row, anything(), 'rf_pk')
+      ->once()
+      ->andReturn($return);
   }
 }
