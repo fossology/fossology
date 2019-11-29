@@ -410,7 +410,7 @@ class admin_obligation_file extends FO_Plugin
       $_POST['ob_classification'],
       $_POST['ob_text_updatable'],
       $comment);
-    $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
+    $this->dbManager->prepare($stmt=__METHOD__.".update", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
     // Add new licenses and new candiate licenses
@@ -421,7 +421,7 @@ class admin_obligation_file extends FO_Plugin
     $unassociatedLicenses = $this->removeLicenses($licnames,$obId);
     $unassociatedCandidateLicenses = $this->removeLicenses($candidatenames,$obId,true);
 
-    $ob .= "Obligation '$topic' was updated -  ";
+    $ob = "Obligation '$topic' was updated -  ";
     $ob .= $newAssociatedLicenses ? "New licenses: '$newAssociatedLicenses' - " : "";
     $ob .= $newCandidateLicenses ? "New candidate licenses:  '$newCandidateLicenses' - " : "";
     $ob .= $unassociatedLicenses ? "Removed licenses: '$unassociatedLicenses' - " : "";

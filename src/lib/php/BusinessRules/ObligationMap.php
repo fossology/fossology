@@ -101,9 +101,9 @@ class ObligationMap
   public function getShortnameFromId($rfId,$candidate=false)
   {
     if ($candidate) {
-      $sql = "SELECT * FROM license_candidate WHERE rf_pk = $1;";
+      $sql = "SELECT * FROM ONLY license_candidate WHERE rf_pk = $1;";
     } else {
-      $sql = "SELECT * FROM license_ref WHERE rf_pk = $1;";
+      $sql = "SELECT * FROM ONLY license_ref WHERE rf_pk = $1;";
     }
     $statement = __METHOD__ . "." . ($candidate ? "candidate" : "license");
     $result = $this->dbManager->getSingleRow($sql,array($rfId), $statement);
