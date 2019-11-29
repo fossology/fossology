@@ -174,8 +174,12 @@ abstract class ClearedGetterCommon
         }
       }
     }
-    if (!empty($findings) && $isUnifiedReport) {
-      return array("userFindings" => $findings, "scannerFindings" => $statements);
+    if ($agentcall == "copyright" && $isUnifiedReport == true) {
+      if (!empty($findings)) {
+        return array("userFindings" => $findings, "scannerFindings" => $statements);
+      } else {
+        return array("scannerFindings" => $statements);
+      }
     } else {
       $statements = array_merge($findings, $statements);
       arsort($statements);
