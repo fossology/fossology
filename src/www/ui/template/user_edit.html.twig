@@ -121,7 +121,8 @@
               <tbody>
                 <tr>
                   <td>
-                    <input type="radio" name="pat_scope" value="r" id="pat_scope_r" />
+                    <input type="radio" name="pat_scope" value="r"
+                      id="pat_scope_r" checked="checked" />
                   </td>
                   <td style="width:100%">
                     <label class="font-weight:bold" for="pat_scope_r">
@@ -134,6 +135,7 @@
                     </label>
                   </td>
                 </tr>
+              {% if writeAccess %}
                 <tr>
                   <td>
                     <input type="radio" name="pat_scope" value="w" id="pat_scope_w" />
@@ -149,6 +151,7 @@
                     </label>
                   </td>
                 </tr>
+              {% endif %}
               </tbody>
             </table>
           </td>
