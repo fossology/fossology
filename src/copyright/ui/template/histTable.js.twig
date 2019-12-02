@@ -91,13 +91,18 @@ function createTable{{ table.type }}() {
   $('#replaceSelected{{ table.type }}').click(function () {
     var replaceText = $('#replaceText{{ table.type }}').val().trim();
     var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
+    var ajaxList = new Array();
     if(replaceIsValid){
       $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
         currentValue = $(this).val();
         var currUploadData = currentValue.split(',');
-        updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
+        ajaxList.push(updateRows{{ table.type }}(currUploadData[0],
+          currUploadData[1], currUploadData[2], currUploadData[3], replaceText));
       });
-      location.reload(true);
+      // Wait for all ajax calls to resolve
+      $.when.apply($, ajaxList).done(function(){
+        location.reload(true)
+      });
     }
   });
 
@@ -171,19 +176,19 @@ function createPlainTable{{ table.type }}() {
 }
 
 function updateRows{{ table.type }}(upload, item, hash, kind, replaceText) {
-  $.ajax({
+  return $.ajax({
     type: 'POST',
     dataType: 'text',
     url: '?mod=ajax-copyright-hist&action=update&type={{ table.type }}',
     data: { id : upload + ',' + item + ',' + hash + ',' + kind, value : replaceText },
-      success: function(data) {
-        var updateElement = $("#update{{ table.type }}" + hash);
-        $("#delete{{ table.type }}" + hash).hide();
-        updateElement.html("updating...");
-      },
-      error: function(errorResponse) {
-        alert(errorResponse.responseText);
-      }
+    success: function(data) {
+      var updateElement = $("#update{{ table.type }}" + hash);
+      $("#delete{{ table.type }}" + hash).hide();
+      updateElement.html("updating...");
+    },
+    error: function(errorResponse) {
+      alert(errorResponse.responseText);
+    }
   });
 }
 
