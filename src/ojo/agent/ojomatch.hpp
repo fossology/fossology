@@ -56,10 +56,29 @@ struct ojomatch
   {
     license_fk = -1;
   }
+  /**
+   * Default constructor for ojomatch structure
+   */
+  ojomatch() :
+    start(-1), end(-1), len(-1), license_fk(-1), content("")
+  {
+  }
 
   bool operator==(const std::string& matchcontent) const
   {
     if(this->content.compare(matchcontent) == 0)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  bool operator==(const ojomatch& matchcontent) const
+  {
+    if(this->content.compare(matchcontent.content) == 0)
     {
       return true;
     }

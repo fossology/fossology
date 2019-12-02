@@ -42,5 +42,12 @@
  * https://github.com/spdx/license-list-data/tree/master/html)
  */
 #define SPDX_LICENSE_NAMES "(?: and | or | with )?\\(?([\\w\\d\\.\\+\\-]{1,37})\\)?"
+/**
+ * @def SPDX_DUAL_LICENSE
+ * @brief Regex to check if Dual-license
+ *
+ * -# Check if the license string contains or, with or and.
+ */
+#define SPDX_DUAL_LICENSE "(?: (and|or|with)? )"
 
 #endif /* SRC_OJO_AGENT_OJOREGEX_HPP_ */

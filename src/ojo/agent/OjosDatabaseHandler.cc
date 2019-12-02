@@ -214,11 +214,11 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
     /* Remove last occurrence of + and -or-later (if found) */
     if (plusLast != string::npos)
     {
-      tempShortName.replace(plusLast, plus.length(), "");
+      tempShortName.erase(plusLast, string::npos);
     }
     if (orLaterLast != string::npos)
     {
-      tempShortName.replace(orLaterLast, orLater.length(), "");
+      tempShortName.erase(orLaterLast, string::npos);
     }
 
     QueryResult queryResult = dbManager.execPrepared(searchWithOr,
@@ -243,7 +243,7 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
     /* Remove last occurrence of -only (if found) */
     if (onlyLast != string::npos)
     {
-      tempShortName.replace(onlyLast, only.length(), "");
+      tempShortName.erase(onlyLast, string::npos);
     }
 
     QueryResult queryResult = dbManager.execPrepared(searchWithOr,

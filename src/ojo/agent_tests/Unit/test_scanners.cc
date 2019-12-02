@@ -166,7 +166,8 @@ protected:
    */
   void multiSpdxContentTest()
   {
-    scannerTest(multipleSpdxLicense, {"GPL-2.0", "LGPL-2.1+", "Classpath-exception-2.0"});
+    scannerTest(multipleSpdxLicense, {"GPL-2.0", "LGPL-2.1+",
+      "Classpath-exception-2.0", "Dual-license"});
   }
 };
 
