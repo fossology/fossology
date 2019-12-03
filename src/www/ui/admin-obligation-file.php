@@ -410,7 +410,7 @@ class admin_obligation_file extends FO_Plugin
       $_POST['ob_classification'],
       $_POST['ob_text_updatable'],
       $comment);
-    $this->dbManager->prepare($stmt=__METHOD__.".$md5term", $sql);
+    $this->dbManager->prepare($stmt=__METHOD__.".update", $sql);
     $this->dbManager->freeResult($this->dbManager->execute($stmt,$params));
 
     // Add new licenses and new candiate licenses
@@ -421,7 +421,7 @@ class admin_obligation_file extends FO_Plugin
     $unassociatedLicenses = $this->removeLicenses($licnames,$obId);
     $unassociatedCandidateLicenses = $this->removeLicenses($candidatenames,$obId,true);
 
-    $ob .= "Obligation '$topic' was updated -  ";
+    $ob = "Obligation '$topic' was updated -  ";
     $ob .= $newAssociatedLicenses ? "New licenses: '$newAssociatedLicenses' - " : "";
     $ob .= $newCandidateLicenses ? "New candidate licenses:  '$newCandidateLicenses' - " : "";
     $ob .= $unassociatedLicenses ? "Removed licenses: '$unassociatedLicenses' - " : "";
@@ -439,8 +439,8 @@ class admin_obligation_file extends FO_Plugin
   function Adddb()
   {
     $topic = trim($_POST['ob_topic']);
-    $licnames = empty($_POST['licenseSelector']) ? '' : $_POST['licenseSelector'];
-    $candidatenames = empty($_POST['candidateSelector']) ? '' : $_POST['candidateSelector'];
+    $licnames = empty($_POST['licenseSelector']) ? array() : $_POST['licenseSelector'];
+    $candidatenames = empty($_POST['candidateSelector']) ? array() : $_POST['candidateSelector'];
     $text = trim($_POST['ob_text']);
     $comment = trim($_POST['ob_comment']);
     $message = "";
@@ -498,6 +498,7 @@ class admin_obligation_file extends FO_Plugin
     $res = $this->dbManager->execute($stmt,array($_POST['ob_pk']));
 
     $this->obligationMap->unassociateLicenseFromObligation($_POST['ob_pk']);
+    $this->obligationMap->unassociateLicenseFromObligation($_POST['ob_pk'], 0, true);
 
     return "<p>Obligation has been deleted.</p>";
   }
@@ -505,10 +506,9 @@ class admin_obligation_file extends FO_Plugin
   /**
    * \brief Associate selected licenses to the obligation
    *
-   * @param string  $licList - the list of licences to be returned
-   *        array   $shortnames - new licenses to be associated
-   *        int     $obId - obligation being processed
-   *        boolean $candidate - do we handle candidate licenses?
+   * @param array   $shortnames - new licenses to be associated
+   * @param int     $obId - obligation being processed
+   * @param boolean $candidate - do we handle candidate licenses?
    * @return string the list of associated licences
    */
   function addNewLicenses($shortnames,$obId,$candidate=false)
@@ -516,19 +516,16 @@ class admin_obligation_file extends FO_Plugin
     if (!empty($shortnames)) {
       $licList = "";
       foreach ($shortnames as $license) {
-        $licId = $this->obligationMap->getIdFromShortname($license,$candidate);
-        $res = $this->obligationMap->isLicenseAssociated($obId,$licId,$candidate);
-        if ($res) {
-          continue;
+        $licIds = $this->obligationMap->getIdFromShortname($license,$candidate);
+        $newLic = $this->obligationMap->associateLicenseFromLicenseList($obId,
+          $licIds, $candidate);
+        if ($newLic) {
+          if ($licList == "") {
+            $licList = "$license";
+          } else {
+            $licList .= ";$license";
+          }
         }
-
-        $this->obligationMap->associateLicenseWithObligation($obId,$licId,$candidate);
-        if ($licList == "") {
-          $licList = "$license";
-        } else {
-          $licList .= ";$license";
-        }
-
       }
       return $licList;
     }
@@ -540,8 +537,8 @@ class admin_obligation_file extends FO_Plugin
    * \brief Unassociate selected licenses to the obligation
    *
    * @param array   $shortnames - new licenses to be associated
-   *        int     $obId - obligation being processed
-   *        boolean $candidate - do we handle candidate licenses?
+   * @param int     $obId - obligation being processed
+   * @param boolean $candidate - do we handle candidate licenses?
    * @return string the list of associated licences
    */
   function removeLicenses($shortnames,$obId,$candidate=false)
@@ -557,9 +554,9 @@ class admin_obligation_file extends FO_Plugin
 
     if ($obsoleteLicenses) {
       foreach ($obsoleteLicenses as $toBeRemoved) {
-        $licId = $this->obligationMap->getIdFromShortname($toBeRemoved,
+        $licIds = $this->obligationMap->getIdFromShortname($toBeRemoved,
           $candidate);
-        $this->obligationMap->unassociateLicenseFromObligation($obId, $licId,
+        $this->obligationMap->unassociateLicenseFromLicenseList($obId, $licIds,
           $candidate);
         if ($unassociatedLicenses == "") {
           $unassociatedLicenses = "$toBeRemoved";
