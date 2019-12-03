@@ -1,0 +1,81 @@
+name: Make test
+
+on: [push]
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+  PGPORT: 5432
+  PGHOST: localhost
+
+jobs:
+  build:
+
+    services:
+      postgresql:
+        image: postgres:9.6
+        ports:
+          - 5432:5432
+        env:
+          PGPORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        options: --health-cmd="pg_isready" --health-interval="10s" --health-timeout="5s" --health-start-period="10s"
+
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu18.04]
+        php: [7.3]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set environment
+      run: |
+        echo "::set-env name=COMPOSER_HOME::$(echo $HOME/.composer)"
+        echo "::set-env name=PGPASSFILE::$(echo $HOME/.pgpass)"
+        echo "::add-path::/usr/lib/ccache"
+
+    - name: Setup cache
+      uses: actions/cache@v1
+      with:
+        path: ${{ env.COMPOSER_HOME }}
+        key: ${{ runner.OS }}-build-${{ hashFiles('src/composer.lock') }}
+        restore-keys: |
+          ${{ runner.OS }}-build-
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libcppunit-dev libcunit1-dev libdbd-sqlite3-perl
+        sudo apt-get install php-sqlite3 ccache
+        sudo /usr/sbin/update-ccache-symlinks
+        sudo ./utils/fo-installdeps -ye
+        composer install --prefer-dist --working-dir=src
+        ./install/scripts/install-spdx-tools.sh
+        sudo systemctl stop postgresql
+        php --version
+
+    - name: Prepare tests
+      run: |
+        echo "localhost:*:*:postgres:postgres" >> $PGPASSFILE
+        chmod 0600 $PGPASSFILE
+        ./utils/prepare-test -afty
+        testDbPassword=$(tail -n 1 ${PGPASSFILE} | cut -d: -f5)
+        echo "CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;" | psql -Upostgres || true
+        echo "CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;" | psql -Upostgres || true
+        echo "CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';" | psql -Upostgres || true
+
+    - name: Build and test
+      run: make test
+
+    - name: PHP tests
+      run: |
+        phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
+        php src/vendor/bin/php-coveralls -vv -o coveralls.json -x clover.xml
+      shell: bash
+
+    - name: CCACHE stats
+      run: |
+        ccache -s

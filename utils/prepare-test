@@ -38,6 +38,9 @@ EOF
 # figure out what distro we're on
 DISTRO=$(lsb_release --id --short)
 
+# Path for .pgpass file
+PGPASSFILE=${PGPASSFILE:-"~/.pgpass"}
+
 #
 # Don't show the -y option.  Should only be used for install testing, as using
 # it without being careful can destroy your system.
@@ -97,16 +100,19 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   sudo mkdir -p /srv/fossologyTestRepo
   sudo chown "$(whoami)" /srv/fossologyTestRepo
   if [[ "${CreateFossy}" == "Y" ]]; then
-    sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
-    echo "localhost:*:*:fossy:fossy" >> ~/.pgpass
-    chmod 0600 ~/.pgpass
-    sudo su postgres -c "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
+    sudo --preserve-env su postgres -c \
+      "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true
+    echo "localhost:*:*:fossy:fossy" >> ${PGPASSFILE}
+    chmod 0600 ${PGPASSFILE}
+    sudo --preserve-env su postgres -c \
+      "echo 'CREATE DATABASE fossology; GRANT ALL PRIVILEGES ON DATABASE fossology TO fossy;'|psql" || true
   fi
   if [[ "${CreateFossyTest}" == "Y" ]]; then
     testDbPassword=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13)
-    sudo su postgres -c "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true >/dev/null
-    echo "localhost:*:*:fossologytest:${testDbPassword}" >> ~/.pgpass
-    chmod 0600 ~/.pgpass
+    sudo --preserve-env su postgres -c \
+      "echo \"CREATE USER fossologytest WITH CREATEDB LOGIN PASSWORD '${testDbPassword}';\"|psql" || true
+    echo "localhost:*:*:fossologytest:${testDbPassword}" >> ${PGPASSFILE}
+    chmod 0600 ${PGPASSFILE}
   fi
   case "${DISTRO}" in
     Debian|Ubuntu|LinuxMint)
