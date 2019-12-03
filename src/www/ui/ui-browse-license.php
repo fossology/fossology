@@ -40,7 +40,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ui_browse_license extends DefaultPlugin
 {
   const NAME = "license";
-  
+
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
@@ -55,9 +55,10 @@ class ui_browse_license extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
-  
-  public function __construct() {
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+
+  public function __construct()
+  {
     parent::__construct(self::NAME, array(
         self::TITLE => _("License Browser"),
         self::DEPENDENCIES => array("browse", "view"),
@@ -83,18 +84,16 @@ class ui_browse_license extends DefaultPlugin
 
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (empty($Item) || empty($Upload))
+    if (empty($Item) || empty($Upload)) {
       return;
+    }
     $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
-    if (GetParm("mod", PARM_STRING) == self::NAME)
-    {
+    if (GetParm("mod", PARM_STRING) == self::NAME) {
       menu_insert("Browse::$menuName", 99);
       menu_insert("View::$menuName", 99);
       menu_insert("View-Meta::$menuName", 99);
-    }
-    else
-    {
+    } else {
       $text = _("license histogram");
       menu_insert("Browse::$menuName", 99, $URI, $text);
       menu_insert("View::$menuName", 99, $viewLicenseURI, $text);
@@ -106,7 +105,8 @@ class ui_browse_license extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request) {
+  protected function handle(Request $request)
+  {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
     if (!$this->uploadDao->isAccessible($upload, $groupId)) {
@@ -118,24 +118,22 @@ class ui_browse_license extends DefaultPlugin
     $vars['baseuri'] = Traceback_uri();
     $vars['uploadId'] = $upload;
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
-    if($request->get('show')=='quick')
-    {
+    if ($request->get('show')=='quick') {
       $item = $this->uploadDao->getFatItemId($item,$upload,$this->uploadtree_tablename);
     }
-    $vars['itemId'] = $item;    
-    
-    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
+    $vars['itemId'] = $item;
+
+    $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse",
+      -1, '', '', $this->uploadtree_tablename);
     $vars['licenseArray'] = $this->licenseDao->getLicenseArray();
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
-    if (empty($left))
-    {
+    if (empty($left)) {
       return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
     }
     $histVars = $this->showUploadHist($itemTreeBounds);
-    if(is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse'))
-    {
+    if (is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse')) {
       return $histVars;
     }
     $vars = array_merge($vars, $histVars);
@@ -162,17 +160,17 @@ class ui_browse_license extends DefaultPlugin
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
     $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
     $agentMap = $scanJobProxy->getAgentMap();
-    
+
     $vars = array('agentId' => GetParm('agentId', PARM_INTEGER),
                   'agentShowURI' => Traceback_uri() . '?mod=' . Traceback_parm(),
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
 
     $selectedAgentIds = empty($selectedAgentId) ? $scanJobProxy->getLatestSuccessfulAgentIds() : $selectedAgentId;
-    
-    if(!empty($agentMap))
-    {
-      $licVars = $this->createLicenseHistogram($itemTreeBounds->getItemId(), $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
+
+    if (!empty($agentMap)) {
+      $licVars = $this->createLicenseHistogram($itemTreeBounds->getItemId(),
+        $tag_pk, $itemTreeBounds, $selectedAgentIds, $groupId);
       $vars = array_merge($vars, $licVars);
     }
 
@@ -188,8 +186,7 @@ class ui_browse_license extends DefaultPlugin
      *
      * $ChildCount can also be zero if the directory is empty.
      * **************************************/
-    if ($childCount == 0)
-    {
+    if ($childCount == 0) {
       return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
 
@@ -230,19 +227,17 @@ class ui_browse_license extends DefaultPlugin
 
     $agentId = GetParm('agentId', PARM_INTEGER);
     $licListUri = Traceback_uri()."?mod=license_list_files&item=$uploadTreeId";
-    if ($tagId)
-    {
+    if ($tagId) {
       $licListUri .= "&tag=$tagId";
     }
-    if ($agentId)
-    {
+    if ($agentId) {
       $licListUri .= "&agentId=$agentId";
     }
-    
+
     /* Write license histogram to $VLic  */
     list($tableData, $totalScannerLicenseCount, $editedTotalLicenseCount)
         = $this->createLicenseHistogramJSarray($licenseHistogram, $editedLicensesHist, $licListUri);
-    
+
     $uniqueLicenseCount = count($tableData);
     $scannerUniqueLicenseCount = count( $licenseHistogram );
     $editedUniqueLicenseCount = count($editedLicensesHist);
@@ -286,16 +281,12 @@ class ui_browse_license extends DefaultPlugin
     $editedTotalLicenseCount = 0;
 
     $tableData = array();
-    foreach ($realLicNames as $licenseShortName)
-    {
+    foreach ($realLicNames as $licenseShortName) {
       $count = 0;
-      if (array_key_exists($licenseShortName, $scannerLics))
-      {
+      if (array_key_exists($licenseShortName, $scannerLics)) {
         $count = $scannerLics[$licenseShortName]['unique'];
         $rfId = $scannerLics[$licenseShortName]['rf_pk'];
-      }
-      else
-      {
+      } else {
         $rfId = $editedLics[$licenseShortName]['rf_pk'];
       }
       $editedCount = array_key_exists($licenseShortName, $editedLics) ? $editedLics[$licenseShortName]['count'] : 0;
@@ -303,7 +294,8 @@ class ui_browse_license extends DefaultPlugin
       $totalScannerLicenseCount += $count;
       $editedTotalLicenseCount += $editedCount;
 
-      $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" . urlencode($licenseShortName) . "'>$count</a>": "0";
+      $scannerCountLink = ($count > 0) ? "<a href='$licListUri&lic=" .
+          urlencode($licenseShortName) . "'>$count</a>": "0";
       $editedLink = ($editedCount > 0) ? $editedCount : "0";
 
       $tableData[] = array($scannerCountLink, $editedLink, array($licenseShortName,$rfId));
@@ -320,7 +312,7 @@ class ui_browse_license extends DefaultPlugin
   public function renderString($templateName, $vars)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
-  }  
+  }
 }
 
 register_plugin(new ui_browse_license());

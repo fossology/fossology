@@ -21,7 +21,7 @@
  * \brief operations on the scheduler from GUI
  **/
 
-define("TITLE_admin_scheduler", _("Scheduler Administration"));
+define("TITLE_ADMIN_SCHEDULER", _("Scheduler Administration"));
 
 /**
  * \class admin_scheduler
@@ -31,16 +31,16 @@ class admin_scheduler extends FO_Plugin
 {
   var $error_info = "";
   var $operation_array;
-  
+
   function __construct()
   {
     $this->Name       = "admin_scheduler";
-    $this->Title      = TITLE_admin_scheduler;
+    $this->Title      = TITLE_ADMIN_SCHEDULER;
     $this->MenuList   = "Admin::Scheduler";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
   }
-  
+
   /**
    * \brief get the operation list
    * \return operation list
@@ -48,9 +48,8 @@ class admin_scheduler extends FO_Plugin
   function OperationListOption()
   {
     $V = "";
-    foreach ($this->operation_array as $key => $value)
-    {
-      $V.= "<option value='$key'>$value[0]</option>";
+    foreach ($this->operation_array as $key => $value) {
+      $V .= "<option value='$key'>$value[0]</option>";
     }
     return $V;
   }
@@ -63,11 +62,11 @@ class admin_scheduler extends FO_Plugin
   {
     $job_list_option = "<option value='0'>scheduler</option>";
     $operation = GetParm('operation', PARM_TEXT);
-    if ("stop" === $operation)
+    if ("stop" === $operation) {
       return $job_list_option;
+    }
     $job_array = GetRunnableJobList(); /* get all job list */
-    for($i = 0; $i < sizeof($job_array); $i++)
-    {
+    for ($i = 0; $i < sizeof($job_array); $i ++) {
       $job_id = $job_array[$i];
       $job_list_option .= "<option value='$job_id'>$job_id</option>";
     }
@@ -83,18 +82,14 @@ class admin_scheduler extends FO_Plugin
   {
     $operation_text = '';
     $job_id = GetParm('job_list', PARM_TEXT);
-    if ('0' ==  $job_id)
-    {
+    if ('0' == $job_id) {
       $text = _("scheduler");
       $job_type = $text;
-    }
-    else
-    {
+    } else {
       $text = _("job");
       $job_type = "$text $job_id";
     }
-    switch ($operation)
-    {
+    switch ($operation) {
       case 'status':
         $text = _("Status of the");
         $operation_text = "$text $job_type";
@@ -104,7 +99,7 @@ class admin_scheduler extends FO_Plugin
         $operation_text = $text;
         break;
       case 'reload':
-        $text =_("Configuration information for the agents and hosts reloaded");
+        $text = _("Configuration information for the agents and hosts reloaded");
         $operation_text = $text;
         break;
       case 'agents':
@@ -112,8 +107,8 @@ class admin_scheduler extends FO_Plugin
         $operation_text = $text;
         break;
       case 'verbose':
-        $level_id =  GetParm('level_list', PARM_TEXT);
-        $verbose_level =  log($level_id + 1, 2);
+        $level_id = GetParm('level_list', PARM_TEXT);
+        $verbose_level = log($level_id + 1, 2);
         $text1 = _("Change the verbosity level of the");
         $text2 = _("as");
         $operation_text = "$text1 $job_type $text2 $verbose_level";
@@ -139,7 +134,7 @@ class admin_scheduler extends FO_Plugin
         $operation_text = "$text $job_type";
         break;
       case 'priority':
-        $priority_id =  GetParm('priority_list', PARM_TEXT);
+        $priority_id = GetParm('priority_list', PARM_TEXT);
         $text1 = _("Change the priority of the");
         $text2 = _("as");
         $operation_text = "$text1 $job_type $text2 $priority_id";
@@ -158,31 +153,36 @@ class admin_scheduler extends FO_Plugin
    **/
   function OperationSubmit($operation, $job_id, $priority_id, $level_id)
   {
-    if ("start" === $operation) // start the scheduler 
-    {
-      $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $this->error_info);
-      if ($commu_status) // the scheduler is running
-      {
+    if ("start" === $operation) {
+      // start the scheduler
+      $commu_status = fo_communicate_with_scheduler('status',
+        $response_from_scheduler, $this->error_info);
+      if ($commu_status) {
+        // the scheduler is running
         $response_from_scheduler = "Warning, the scheduler is running";
-      }
-      else // start the stopped scheduler
-      {
+      } else {
+        // start the stopped scheduler
         $this->error_info = null;
         $this->StartScheduler();
         return $this->error_info;
       }
-    }
-    else if ("restarts" === $operation) // restart the scheduler 
-    {
+    } else if ("restarts" === $operation) { // restart the scheduler
       $this->StartScheduler('restarts');
       return $this->error_info;
     }
     $commands = $operation;
-    if (!empty($job_id) && 'scheduler' != $job_id) $commands .= " $job_id";
-    if (isset($priority_id)) $commands .= " $priority_id";
-    if (!empty($level_id)) $commands .= " $level_id";
+    if (! empty($job_id) && 'scheduler' != $job_id) {
+      $commands .= " $job_id";
+    }
+    if (isset($priority_id)) {
+      $commands .= " $priority_id";
+    }
+    if (! empty($level_id)) {
+      $commands .= " $level_id";
+    }
     $commands = trim($commands);
-    $commu_status = fo_communicate_with_scheduler($commands, $response_from_scheduler, $this->error_info);
+    $commu_status = fo_communicate_with_scheduler($commands,
+      $response_from_scheduler, $this->error_info);
     return $response_from_scheduler . $this->error_info;
   } // OperationSubmit()
 
@@ -194,13 +194,11 @@ class admin_scheduler extends FO_Plugin
   {
     if ($operation) {
       $command = "/etc/init.d/fossology restart >/dev/null 2>&1";
-    }
-    else {
+    } else {
       $command = "/etc/init.d/fossology start >/dev/null 2>&1";
     }
     $lastline = system($command, $rc);
-    if ($rc)
-    {
+    if ($rc) {
       $this->error_info = " Failed to start the scheduler, return value is: $rc.";
     }
   }
@@ -212,16 +210,16 @@ class admin_scheduler extends FO_Plugin
 
     $this->operation_array = array
     (
-    "status" => array(_("Status"), _("Display job or scheduler status.")), 
-    "database" => array(_("Check job queue"),_("Check for new jobs.")), 
-    "reload" => array(_("Reload"), _("Reload fossology.conf.")), 
-    "agents" => array(_("Agents"), _("Show a list of enabled agents.")), 
-    "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")), 
-    "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")), 
-    //    "start" => array(_("Start Scheduler"), _("Start Scheduler.")), 
-    //    "restarts" => array(_("Restart Scheduler"), _("Restart Scheduler.")), 
-    "restart" => array(_("Unpause a job"), _("Unpause a job.")), 
-    "pause" => array(_("Pause a running job"), _("Pause a running job.")), 
+    "status" => array(_("Status"), _("Display job or scheduler status.")),
+    "database" => array(_("Check job queue"),_("Check for new jobs.")),
+    "reload" => array(_("Reload"), _("Reload fossology.conf.")),
+    "agents" => array(_("Agents"), _("Show a list of enabled agents.")),
+    "verbose" => array(_("Verbose"), _("Change the verbosity level of the scheduler or a job.")),
+    "stop" => array(_("Shutdown Scheduler"), _("Shutdown the scheduler gracefully and stop all background processing.  This can take a while for all the agents to quit.")),
+    //    "start" => array(_("Start Scheduler"), _("Start Scheduler.")),
+    //    "restarts" => array(_("Restart Scheduler"), _("Restart Scheduler.")),
+    "restart" => array(_("Unpause a job"), _("Unpause a job.")),
+    "pause" => array(_("Pause a running job"), _("Pause a running job.")),
     "priority" => array(_("Priority"), _("Change the priority of a job."))
     );
 
@@ -229,36 +227,31 @@ class admin_scheduler extends FO_Plugin
     $job_id = GetParm('job_list', PARM_TEXT);
     $priority_id =  GetParm('priority_list', PARM_TEXT);
     $level_id =  GetParm('level_list', PARM_TEXT);
-    if (!empty($operation))
-    {
+    if (! empty($operation)) {
       $report = "";
-      $response_from_scheduler = $this->OperationSubmit($operation, $job_id, $priority_id, $level_id);
+      $response_from_scheduler = $this->OperationSubmit($operation, $job_id,
+        $priority_id, $level_id);
       $operation_text = $this->GetOperationText($operation);
-      if (empty($this->error_info))
-      {
+      if (empty($this->error_info)) {
         $text = _("successfully");
         $status_msg .= "$operation_text $text.";
-        if (!empty($response_from_scheduler))
-        {
-          $report .= "<hr style='border-style:dashed'>"; /* add one dashed line */
+        if (! empty($response_from_scheduler)) {
+          $report .= "<hr style='border-style:dashed'>"; // Add one dashed line
           $report .= $response_from_scheduler;
         }
-      }
-      else
-      {
+      } else {
         $text = _("failed");
         $status_msg .= "$operation_text $text.";
         $report .= $this->error_info;
       }
-      $this->vars['message'] = $status_msg.$report;
+      $this->vars['message'] = $status_msg . $report;
     }
 
     $text = _("List of operations:");
     $V.= $text;
     $V.= "<ul>";
-    foreach ($this->operation_array as $value)
-    {
-      $V.= "<li><b>$value[0]</b>: $value[1]</li>";
+    foreach ($this->operation_array as $value) {
+      $V .= "<li><b>$value[0]</b>: $value[1]</li>";
     }
     $V.= "</ul>";
     $V.= "<hr>";
@@ -266,7 +259,8 @@ class admin_scheduler extends FO_Plugin
     $text = _("Select an operation");
     $V.= "<form id='operation_form' method='post'>";
     $V.= "<p><li>$text: ";
-    $V.= "<select name='operation' id='operation' onchange='OperationSwich_Get(\"" .Traceback_uri() . "?mod=ajax_admin_scheduler&operation=\"+this.value)'<br />\n";
+    $V.= "<select name='operation' id='operation' onchange='OperationSwich_Get(\""
+       . Traceback_uri() . "?mod=ajax_admin_scheduler&operation=\"+this.value)'<br />\n";
     $V.= $this->OperationListOption();
     $V.= "</select>\n";
     $V.= "<br><br>";

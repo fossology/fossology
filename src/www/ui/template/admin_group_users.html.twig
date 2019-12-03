@@ -10,7 +10,7 @@
   
 {{ "Select the group to manage"|trans }}:
 {% import "include/macros.html.twig" as macro %}
-{{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction) }}
+{{ macro.select('groupselect',groupMap,'groupselect',groupId,groupMapAction ~ 'class="ui-render-select2"') }}
 
 <table border="1">
   <tr><th>{{ "User"|trans }}</th><th>{{ 'Permission'|trans }}</th></tr>
@@ -26,7 +26,7 @@
   {% if existsOtherUsers %}
     <tr>
       <td>
-      {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' onchange="js_url(this.value, newpermurl)"') }}
+      {{ macro.select("userselectnew", otherUsers, "userselectnew", '', ' class="ui-render-select2" onchange="js_url(this.value, newpermurl)"') }}
     </td>
     <td>
       {{ macro.select("permselectnew",newPermissionMap, "permselectnew",-1,' onchange="setNewPermUrl(this.value)"') }}
@@ -38,8 +38,12 @@
 <br/>
 {{ 'All user permissions take place immediately when a value is changed.  There is no submit button.'|trans }}
 <br/>
-{{ 'Add new users on the last line.'|trans }}  
-
+{{ 'Add new users on the last line.'|trans }}
+<br/>
+<br/>
+<b>{{ 'Note: By removing users, you may loose access to uploads, that are uploaded by them.'|trans }}</b>
+<br/>
+<br/>
 {% endblock %}
 
 {% block foot %}

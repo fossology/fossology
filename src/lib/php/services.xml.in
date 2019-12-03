@@ -18,7 +18,7 @@ without any warranty.
             {$TWIG_CACHE}
             <parameter key="autoescape" type="constant">false</parameter>
         </parameter>
-        <parameter key="twig.loader.source_path" type="string">%application_root%/www/ui/template</parameter>
+        <parameter key="twig.loader.source_path" type="string">%application_root%/lib/php/UI/template</parameter>
         <parameter key="time.zone" type="string"></parameter>
 	<parameter key="displayErrorDetails" type="constant">false</parameter>
         <parameter key="addContentLengthHeader" type="constant">false</parameter>
@@ -63,6 +63,9 @@ without any warranty.
             <argument type="service" id="db.manager"/>
         </service>
         <service id="dao.license" class="Fossology\Lib\Dao\LicenseDao">
+            <argument type="service" id="db.manager"/>
+        </service>
+        <service id="dao.license.stdc" class="Fossology\Lib\Dao\LicenseStdCommentDao">
             <argument type="service" id="db.manager"/>
         </service>
         <service id="dao.clearing" class="Fossology\Lib\Dao\ClearingDao">
@@ -174,12 +177,25 @@ without any warranty.
             <tag name="twig.extension"/>
         </service>
 
+        <service id="helper.dbHelper" class="Fossology\UI\Api\Helper\DbHelper">
+            <argument type="service" id="db.manager"/>
+        </service>
+
+        <service id="helper.authHelper" class="Fossology\UI\Api\Helper\AuthHelper">
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="session"/>
+            <argument type="service" id="helper.dbHelper"/>
+        </service>
+
         <service id="helper.restHelper" class="Fossology\UI\Api\Helper\RestHelper">
             <argument type="service" id="dao.upload.permission"/>
             <argument type="service" id="dao.upload"/>
             <argument type="service" id="dao.user"/>
             <argument type="service" id="dao.folder"/>
-            <argument type="service" id="logger"/>
+            <argument type="service" id="helper.dbHelper"/>
+            <argument type="service" id="helper.authHelper"/>
+            <argument type="service" id="dao.job"/>
+            <argument type="service" id="dao.show_jobs"/>
         </service>
     </services>
 </container>

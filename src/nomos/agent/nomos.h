@@ -103,6 +103,8 @@
 #include <sys/time.h>
 #include "nomos_gap.h"
 #include <stdbool.h>
+#include <semaphore.h>
+#include "json_writer.h"
 
 /** Use nomos in standalone mode (no FOSSology DB) */
 #ifdef STANDALONE
@@ -130,7 +132,7 @@
 #define	PROC_TRACE
 #endif	/* PROC_TRACE_SWITCH */
 
-#define	myBUFSIZ	2048      ///< Buffer max length
+#define	myBUFSIZ	4096      ///< Buffer max length
 #define	MAX_RENAME	1000    ///< Max rename length
 #define TEMP_FILE_LEN 100   ///< Max temp file length
 
@@ -151,6 +153,7 @@
 #define OPTS_HIGHLIGHT_STDOUT 0x8
 #define OPTS_NO_HIGHLIGHTINFO 0x10
 #define OPTS_JSON_OUTPUT 0x20
+#define OPTS_SCANNING_DIRECTORY 0x40
 
 char debugStr[myBUFSIZ];        ///< Debug string
 char dbErrString[myBUFSIZ];     ///< DB error string
@@ -398,11 +401,11 @@ typedef struct  {
   \brief Struct that tracks state related to current file being scanned.
  */
 struct curScan {
-    char cwd[myBUFSIZ]; /**< CDB, Would like to workaround and eliminate. */
+  char cwd[myBUFSIZ];      /**< CDB, Would like to workaround and eliminate. */
   char targetDir[myBUFSIZ]; 	/**< Directory where file is */ /* check */
   char targetFile[myBUFSIZ]; 	/**< File we're scanning (tmp file)*/ /* check */
   char filePath[myBUFSIZ];    /**< the original file path passed in */
-    long pFileFk; /**< [in] pfile_fk from scheduler */
+  long pFileFk;            /**< [in] pfile_fk from scheduler */
   char pFile[myBUFSIZ];       /**< [in] pfilename from scheduler */
   char *licPara;
   char *matchBase;
@@ -416,18 +419,20 @@ struct curScan {
   list_t offList;
   list_t lList;
   char compLic[myBUFSIZ];  	/**< the license(s) found, None or NotLikely.
-    							     comma separated if multiple names are found.
-   */
+                                comma separated if multiple names are found. */
   int nLines;
   int cliMode;                /**< boolean to indicate running from command line */
   char *tmpLics;              /**< pointer to storage for parsed names */
   char *licenseList[512];     /**< list of license names found, can be a single name */
 
-    GArray* indexList; /**< List of license indexes */
-    GArray* theMatches; /**< List of matches */
-    GArray* keywordPositions; /**< List of matche positions */
+  GArray* indexList; /**< List of license indexes */
+  GArray* theMatches; /**< List of matches */
+  GArray* keywordPositions; /**< List of matche positions */
   GArray* docBufferPositionsAndOffsets;
   int currentLicenceIndex;
+  FILE *tempJsonPath; /**< File descriptor for temporary file where
+                           intermediate outputs for json are stored */
+  sem_t mutexTempJson; /**< Mutex to handle writes to tempJsonPath */
 };
 
 /**

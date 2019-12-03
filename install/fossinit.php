@@ -2,7 +2,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2014-2015 Siemens AG
+ Copyright (C) 2014-2015,2019 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -33,6 +33,8 @@ function explainUsage()
   -l  update the license_ref table with fossology supplied licenses
   -r  {prefix} drop database with name starts with prefix
   -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
+  --force-decision force recalculation of SHA256 for decision tables
+  --force-pfile    force recalculation of SHA256 for pfile entries
   -h  this help usage";
   print "$usage\n";
   exit(0);
@@ -53,6 +55,10 @@ use Fossology\Lib\Db\Driver\Postgres;
  * dummy options in order to catch invalid options.
  */
 $AllPossibleOpts = "abc:d:ef:ghijklmnopqr:stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+$longOpts = [
+  "force-decision",
+  "force-pfile"
+];
 
 /* defaults */
 $Verbose = false;
@@ -60,9 +66,11 @@ $DatabaseName = "fossology";
 $UpdateLiceneseRef = false;
 $sysconfdir = '';
 $delDbPattern = 'the option -rfosstest will drop data bases with datname like "fosstest%"';
+$forceDecision = false;
+$forcePfile = false;
 
 /* command-line options */
-$Options = getopt($AllPossibleOpts);
+$Options = getopt($AllPossibleOpts, $longOpts);
 foreach($Options as $optKey => $optVal)
 {
   switch($optKey)
@@ -87,11 +95,19 @@ foreach($Options as $optKey => $optVal)
     case 'r':
       $delDbPattern = $optVal ? "$optVal%" : "fosstest%";
       break;
+    case "force-decision":
+      $forceDecision = true;
+      break;
+    case "force-pfile":
+      $forcePfile = true;
+      break;
     default:
       echo "Invalid Option \"$optKey\".\n";
       explainUsage();
   }
 }
+
+require_once 'fossinit-common.php';
 
 /* Set SYSCONFDIR and set global (for backward compatibility) */
 $SysConf = bootstrap($sysconfdir);
@@ -138,7 +154,7 @@ $pgDriver = new Postgres($PG_CONN);
 $libschema->setDriver($pgDriver);
 $previousSchema = $libschema->getCurrSchema();
 $isUpdating = array_key_exists('TABLE', $previousSchema) && array_key_exists('users', $previousSchema['TABLE']);
-/* @var $dbManager DbManager */
+/** @var DbManager $dbManager */
 if ($dbManager->existsTable('sysconfig'))
 {
   $sysconfig = $dbManager->createMap('sysconfig', 'variablename', 'conf_value');
@@ -210,16 +226,14 @@ if ($UpdateLiceneseRef)
     initLicenseRefTable(false);
   }
   else if ($row['count'] ==  0) {
-    /** import licenseref.sql */
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-    $dbManager->queryOnce($sqlstmts,$stmt=__METHOD__."$LIBEXECDIR/licenseref.sql");
+    insertInToLicenseRefTableUsingJson('license_ref');
 
     $row_max = $dbManager->getSingleRow("SELECT max(rf_pk) from license_ref",array(),'license_ref.max.rf_pk');
     $current_license_ref_rf_pk_seq = $row_max['max'];
     $dbManager->getSingleRow("SELECT setval('license_ref_rf_pk_seq', $current_license_ref_rf_pk_seq)",array(),
             'set next license_ref_rf_pk_seq value');
 
-    print "fresh install, import licenseref.sql \n";
+    print "fresh install, import licenseRef.json \n";
   }
 }
 
@@ -277,11 +291,14 @@ if($isUpdating && empty($sysconfig['Release'])) {
   }
   $sysconfig['Release'] = '2.6';
 }
-if(!$isUpdating)
-{
-  require_once("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
+if (! $isUpdating) {
+  require_once ("$LIBEXECDIR/dbmigrate_2.1-2.2.php");
   print "Creating default user\n";
   Migrate_21_22($Verbose);
+} else {
+  require_once ("$LIBEXECDIR/dbmigrate_3.5-3.6.php");
+  migrate_35_36($dbManager, $forceDecision);
+  updatePfileSha256($dbManager, $forcePfile);
 }
 
 if(!$isUpdating || $sysconfig['Release'] == '2.6')
@@ -378,6 +395,52 @@ if($errors>0)
 }
 exit($errors);
 
+/**
+ * \brief insert into license_ref table using json file.
+ *
+ * \param $tableName
+ **/
+function insertInToLicenseRefTableUsingJson($tableName)
+{
+  global $LIBEXECDIR;
+  global $dbManager;
+
+  if (!is_dir($LIBEXECDIR)) {
+    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
+    return (1);
+  }
+
+  $dir = opendir($LIBEXECDIR);
+  if (!$dir) {
+    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
+    return (1);
+  }
+  $dbManager->begin();
+  if ($tableName === 'license_ref_2') {
+    $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2", $statment = __METHOD__.'.dropAncientBackUp');
+    $dbManager->queryOnce("CREATE TABLE license_ref_2 AS SELECT * FROM license_ref WHERE 1=2", $statment = __METHOD__.'.backUpData');
+  }
+  /** import licenseRef.json */
+  $keysToBeChanged = array(
+    'rf_OSIapproved' => '"rf_OSIapproved"',
+    'rf_FSFfree'=> '"rf_FSFfree"',
+    'rf_GPLv2compatible' => '"rf_GPLv2compatible"',
+    'rf_GPLv3compatible'=> '"rf_GPLv3compatible"',
+    'rf_Fedora' => '"rf_Fedora"'
+    );
+
+  $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
+  $statementName = __METHOD__.'.insertInTo'.$tableName;
+  foreach($jsonData as $licenseArrayKey => $licenseArray) {
+    $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
+    $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
+    $SQL = "INSERT INTO $tableName ( $keys ) VALUES ($valuePlaceHolders);";
+    $dbManager->prepare($statementName, $SQL);
+    $dbManager->execute($statementName, array_values($licenseArray));
+  }
+  $dbManager->commit();
+  return;
+}
 
 /**
  * \brief Load the license_ref table with licenses.
@@ -389,29 +452,10 @@ exit($errors);
  **/
 function initLicenseRefTable($Verbose)
 {
-  global $LIBEXECDIR;
   global $dbManager;
 
-  if (!is_dir($LIBEXECDIR)) {
-    print "FATAL: Directory '$LIBEXECDIR' does not exist.\n";
-    return (1);
-  }
-  $dir = opendir($LIBEXECDIR);
-  if (!$dir) {
-    print "FATAL: Unable to access '$LIBEXECDIR'.\n";
-    return (1);
-  }
-
   $dbManager->queryOnce("BEGIN");
-  $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",$stmt=__METHOD__.'.dropAncientBackUp');
-  /* create a new temp table structure only - license_ref_2 */
-  $dbManager->queryOnce("CREATE TABLE license_ref_2 as select * from license_ref WHERE 1=2",$stmt=__METHOD__.'.backUpData');
-
-  /** import licenseref.sql */
-  $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-  $sqlstmts = str_replace("license_ref","license_ref_2", $sqlstmts);
-  $dbManager->queryOnce($sqlstmts);
-
+  insertInToLicenseRefTableUsingJson('license_ref_2');
   $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
 
@@ -449,10 +493,10 @@ function initLicenseRefTable($Verbose)
       $rf_flag_check = $row_check['rf_flag'];
 
       $sql = "UPDATE license_ref set ";
-      if($rf_flag_check == 1 ||  $rf_flag == 1) {
-        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
-      } else {
+      if ($rf_flag_check == 2 &&  $rf_flag == 1) {
         $sql .= " rf_text='$rf_text_check',";
+      } else {
+        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
       }
       if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
       if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
@@ -482,100 +526,3 @@ function initLicenseRefTable($Verbose)
   return (0);
 } // initLicenseRefTable()
 
-
-function guessSysconfdir()
-{
-  $rcfile = "fossology.rc";
-  $varfile = dirname(__DIR__).'/variable.list';
-  $sysconfdir = getenv('SYSCONFDIR');
-  if ((false===$sysconfdir) && file_exists($rcfile))
-  {
-    $sysconfdir = file_get_contents($rcfile);
-  }
-  if ((false===$sysconfdir) && file_exists($varfile))
-  {
-    $ini_array = parse_ini_file($varfile);
-    if($ini_array!==false && array_key_exists('SYSCONFDIR', $ini_array))
-    {
-      $sysconfdir = $ini_array['SYSCONFDIR'];
-    }
-  }
-  if (false===$sysconfdir)
-  {
-    $text = _("FATAL! System Configuration Error, no SYSCONFDIR.");
-    echo "$text\n";
-    exit(1);
-  }
-  return $sysconfdir;
-}
-
-
-/**
- * \brief Determine SYSCONFDIR, parse fossology.conf
- *
- * \param $sysconfdir Typically from the caller's -c command line parameter
- *
- * \return the $SysConf array of values.  The first array dimension
- * is the group, the second is the variable name.
- * For example:
- *  -  $SysConf[DIRECTORIES][MODDIR] => "/mymoduledir/
- *
- * The global $SYSCONFDIR is also set for backward compatibility.
- *
- * \Note Since so many files expect directory paths that used to be in pathinclude.php
- * to be global, this function will define the same globals (everything in the
- * DIRECTORIES section of fossology.conf).
- */
-function bootstrap($sysconfdir="")
-{
-  if (empty($sysconfdir))
-  {
-    $sysconfdir = guessSysconfdir();
-    echo "assuming SYSCONFDIR=$sysconfdir\n";
-  }
-
-  $sysconfdir = trim($sysconfdir);
-  $GLOBALS['SYSCONFDIR'] = $sysconfdir;
-
-  /*************  Parse fossology.conf *******************/
-  $ConfFile = "{$sysconfdir}/fossology.conf";
-  if (!file_exists($ConfFile))
-  {
-    $text = _("FATAL! Missing configuration file: $ConfFile");
-    echo "$text\n";
-    exit(1);
-  }
-  $SysConf = parse_ini_file($ConfFile, true);
-  if ($SysConf === false)
-  {
-    $text = _("FATAL! Invalid configuration file: $ConfFile");
-    echo "$text\n";
-    exit(1);
-  }
-
-  /* evaluate all the DIRECTORIES group for variable substitutions.
-   * For example, if PREFIX=/usr/local and BINDIR=$PREFIX/bin, we
-   * want BINDIR=/usr/local/bin
-   */
-  foreach($SysConf['DIRECTORIES'] as $var=>$assign)
-  {
-    $toeval = "\$$var = \"$assign\";";
-    eval($toeval);
-
-    /* now reassign the array value with the evaluated result */
-    $SysConf['DIRECTORIES'][$var] = ${$var};
-    $GLOBALS[$var] = ${$var};
-  }
-
-  if (empty($MODDIR))
-  {
-    $text = _("FATAL! System initialization failure: MODDIR not defined in $SysConf");
-    echo "$text\n";
-    exit(1);
-  }
-
-  //require("i18n.php"); DISABLED until i18n infrastructure is set-up.
-  require_once("$MODDIR/lib/php/common.php");
-  require_once("$MODDIR/lib/php/Plugin/FO_Plugin.php");
-  return $SysConf;
-}

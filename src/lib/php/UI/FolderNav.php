@@ -33,7 +33,7 @@ class FolderNav
     $this->dbManager = $dbManager;
     $this->folderDao = $folderDao;
   }
-  
+
   /**
    * @param int $parentFolder  parent folder_pk
    * @return string HTML of the folder tree
@@ -48,32 +48,27 @@ class FolderNav
     $res = $this->dbManager->execute($stmt,array($parentFolder));
     $out = '';
     $lastDepth = -1;
-    while($row=$this->dbManager->fetchArray($res)){
-      for(;$row['depth']<$lastDepth;$lastDepth--)
-      {
+    while ($row = $this->dbManager->fetchArray($res)) {
+      for (; $row['depth']<$lastDepth; $lastDepth--) {
         $out .= '</li></ul>';
       }
-      if($row['depth']==$lastDepth)
-      {
+      if ($row['depth']==$lastDepth) {
         $out .= "</li>\n<li>";
       }
-      if($row['depth']==0)
-      {
+      if ($row['depth']==0) {
         $out .= '<ul id="tree"><li>';
         $lastDepth++;
       }
-      for(;$row['depth']>$lastDepth;$lastDepth++)
-      {
+      for (;$row['depth']>$lastDepth;$lastDepth++) {
         $out .= '<ul><li>';
       }
       $out .= $this->getFormattedItem($row, $uri);
     }
-    for(;-1<$lastDepth;$lastDepth--)
-    {
+    for (; - 1<$lastDepth;$lastDepth--) {
       $out .= '</li></ul>';
     }
     return $out;
-  } 
+  }
 
   protected function getFormattedItem($row,$uri)
   {

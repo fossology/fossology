@@ -38,7 +38,8 @@ abstract class ClearedGetterCommon
   private $uploadId;
   private $groupBy;
 
-  public function __construct($groupBy = "content") {
+  public function __construct($groupBy = "content")
+  {
     global $container;
 
     $this->uploadDao = $container->get('dao.upload');
@@ -51,8 +52,7 @@ abstract class ClearedGetterCommon
   {
     $args = getopt("u:", array("uId:","gId:"));
 
-    if (!array_key_exists('u',$args))
-    {
+    if (!array_key_exists('u',$args)) {
       throw new Exception("missing required parameter -u {uploadId}\n",2);
     }
 
@@ -65,8 +65,7 @@ abstract class ClearedGetterCommon
   {
     $uploadId = $this->uploadId;
 
-    if ($uploadId<=0)
-    {
+    if ($uploadId <= 0) {
       print "invalid uploadId ".$uploadId;
       exit(2);
     }
@@ -77,8 +76,7 @@ abstract class ClearedGetterCommon
   {
     $userId = $this->userId;
 
-    if ($userId<=0)
-    {
+    if ($userId <= 0) {
       print "invalid user ".$userId;
       exit(2);
     }
@@ -89,8 +87,7 @@ abstract class ClearedGetterCommon
   {
     $groupId = $this->groupId;
 
-    if ($groupId<=0)
-    {
+    if ($groupId <= 0) {
       print "invalid group ".$groupId;
       exit(2);
     }
@@ -101,7 +98,7 @@ abstract class ClearedGetterCommon
   {
     $parentId = $this->treeDao->getMinimalCoveringItem($uploadId, $uploadTreeTableName);
 
-    foreach($ungrupedStatements as &$statement) {
+    foreach ($ungrupedStatements as &$statement) {
       $uploadTreeId = $statement['uploadtree_pk'];
       unset($statement['uploadtree_pk']);
 
@@ -114,18 +111,17 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
-  protected function groupStatements($ungrupedStatements, $extended, $agentcall)
+  protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport)
   {
     $statements = array();
     $findings = array();
-    foreach($ungrupedStatements as $statement) {
+    foreach ($ungrupedStatements as $statement) {
       $content = convertToUTF8($statement['content'], false);
       $content = htmlspecialchars($content, ENT_DISALLOWED);
       $comments = convertToUTF8($statement['comments'], false);
       $fileName = $statement['fileName'];
 
-      if (!array_key_exists('text', $statement))
-      {
+      if (!array_key_exists('text', $statement)) {
         $description = $statement['description'];
         $textfinding = $statement['textfinding'];
 
@@ -133,23 +129,20 @@ abstract class ClearedGetterCommon
           $text = "";
         } else {
           //$agentcall only have copyright so making it empty for other agents
-          if(!empty($textfinding) && empty($agentcall)) {
+          if (!empty($textfinding) && empty($agentcall)) {
             $content = $textfinding;
           }
           $text = $description;
         }
-      }
-      else
-      {
+      } else {
         $text = $statement['text'];
       }
 
       $groupBy = $statement[$this->groupBy];
 
-      if(empty($comments) && array_key_exists($groupBy, $statements))
-      {
+      if (empty($comments) && array_key_exists($groupBy, $statements)) {
         $currentFiles = &$statements[$groupBy]['files'];
-        if (!in_array($fileName, $currentFiles)){
+        if (!in_array($fileName, $currentFiles)) {
           $currentFiles[] = $fileName;
         }
       } else {
@@ -166,12 +159,11 @@ abstract class ClearedGetterCommon
 
         if (empty($comments)) {
           $statements[$groupBy] = $singleStatement;
-        }
-        else {
+        } else {
           $statements[] = $singleStatement;
         }
       }
-      if(!empty($statement['textfinding']) && !empty($agentcall)){
+      if (!empty($statement['textfinding']) && !empty($agentcall)) {
         $findings[$fileName] = array(
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
@@ -182,11 +174,17 @@ abstract class ClearedGetterCommon
         }
       }
     }
-    if(!empty($findings)){
+    if ($agentcall == "copyright" && $isUnifiedReport == true) {
+      if (!empty($findings)) {
+        return array("userFindings" => $findings, "scannerFindings" => $statements);
+      } else {
+        return array("scannerFindings" => $statements);
+      }
+    } else {
       $statements = array_merge($findings, $statements);
+      arsort($statements);
+      return array("statements" => array_values($statements));
     }
-    arsort($statements);
-    return $statements;
   }
 
   /**
@@ -197,15 +195,15 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall);
-    return array("statements" => array_values($statements));
+    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport);
+    return $statements;
   }
-  
+
   public function getLicenseHistogramForReport($uploadId, $groupId)
   {
     $histogramStatements = $this->getHistogram($uploadId, $groupId);
@@ -227,4 +225,3 @@ abstract class ClearedGetterCommon
     return str_replace('\u001b','',str_replace('\\f','',$jsonHist));
   }
 }
-

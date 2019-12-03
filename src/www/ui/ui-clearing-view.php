@@ -41,7 +41,7 @@ use Monolog\Logger;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_clearingView", _("Change concluded License "));
+define("TITLE_CLEARINGVIEW", _("Change concluded License "));
 
 class ClearingView extends FO_Plugin
 {
@@ -73,7 +73,7 @@ class ClearingView extends FO_Plugin
   function __construct()
   {
     $this->Name = "view-license";
-    $this->Title = TITLE_clearingView;
+    $this->Title = TITLE_CLEARINGVIEW;
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->Dependency = array("view");
     $this->LoginFlag = 0;
@@ -86,15 +86,16 @@ class ClearingView extends FO_Plugin
     $this->clearingDao = $container->get('dao.clearing');
     $this->agentsDao = $container->get('dao.agent');
     $this->logger = $container->get("logger");
-
     $this->highlightDao = $container->get("dao.highlight");
     $this->highlightRenderer = $container->get("view.highlight_renderer");
     $this->highlightProcessor = $container->get("view.highlight_processor");
 
     $this->decisionTypes = $container->get('decision.types');
 
-    $this->clearingDecisionEventProcessor = $container->get('businessrules.clearing_decision_processor');
-    $this->clearingDecisionFilter = $container->get('businessrules.clearing_decision_filter');
+    $this->clearingDecisionEventProcessor = $container->get(
+      'businessrules.clearing_decision_processor');
+    $this->clearingDecisionFilter = $container->get(
+      'businessrules.clearing_decision_filter');
   }
 
 
@@ -110,20 +111,17 @@ class ClearingView extends FO_Plugin
   private function getSelectedHighlighting(ItemTreeBounds $itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId)
   {
     $unmaskAgents = $selectedAgentId;
-    if(empty($selectedAgentId))
-    {  
+    if (empty($selectedAgentId)) {
       $scanJobProxy = new ScanJobProxy($this->agentsDao,$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka'));
+      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport','ojo'));
       $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
-    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds, $licenseId, $unmaskAgents, $highlightId, $clearingId);
+    $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds,
+      $licenseId, $unmaskAgents, $highlightId, $clearingId);
     $groupId = Auth::getGroupId();
-    if (($selectedAgentId > 0) || ($clearingId > 0))
-    {
+    if (($selectedAgentId > 0) || ($clearingId > 0)) {
       $this->highlightProcessor->addReferenceTexts($highlightEntries, $groupId);
-    }
-    else
-    {
+    } else {
       $this->highlightProcessor->flattenHighlights($highlightEntries, array("K", "K "));
     }
     return $highlightEntries;
@@ -132,12 +130,9 @@ class ClearingView extends FO_Plugin
   public function execute()
   {
     $openOutput = $this->OutputOpen();
-    if($openOutput instanceof RedirectResponse)
-    {
+    if ($openOutput instanceof RedirectResponse) {
       $response = $openOutput;
-    }
-    else
-    {
+    } else {
       $response = $this->getResponse();
     }
     $response->prepare($this->getRequest());
@@ -146,55 +141,49 @@ class ClearingView extends FO_Plugin
 
   function OutputOpen()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     }
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (empty($uploadId))
-    {
+    if (empty($uploadId)) {
       return;
     }
 
     $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
-    {
+    if (empty($uploadTreeId)) {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent))
-      {
+      if (!isset($parent)) {
         $this->invalidParm = true;
         return;
       }
 
       $item = $this->uploadDao->getNextItem($uploadId, $parent);
-      if ($item === UploadDao::NOT_FOUND)
-      {
+      if ($item === UploadDao::NOT_FOUND) {
         $this->invalidParm = true;
         return;
       }
       $uploadTreeId = $item->getId();
-      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name
+        . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $uploadEntry = $this->uploadDao->getUploadEntry($uploadTreeId, $uploadTreeTableName);
-    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode']))
-    {
+    if (Isdir($uploadEntry['ufile_mode']) || Iscontainer($uploadEntry['ufile_mode'])) {
       $parent = $this->uploadDao->getUploadParent($uploadId);
-      if (!isset($parent))
-      {
+      if (!isset($parent)) {
         $this->invalidParm = true;
         return;
       }
 
       $item = $this->uploadDao->getNextItem($uploadId, $parent);
-      if ($item === UploadDao::NOT_FOUND)
-      {
+      if ($item === UploadDao::NOT_FOUND) {
         $this->invalidParm = true;
         return;
       }
       $uploadTreeId = $item->getId();
-      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
+      return new RedirectResponse(Traceback_uri() . '?mod=' . $this->Name
+        . Traceback_parm_keep(array("upload", "show")) . "&item=$uploadTreeId");
     }
 
     return parent::OutputOpen();
@@ -206,20 +195,18 @@ class ClearingView extends FO_Plugin
    */
   function Output()
   {
-    if ($this->invalidParm)
-    {
-      $this->vars['content'] = 'This upload contains no files!<br><a href="' . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
+    if ($this->invalidParm) {
+      $this->vars['content'] = 'This upload contains no files!<br><a href="'
+        . Traceback_uri() . '?mod=browse">Go back to browse view</a>';
       return $this->render("include/base.html.twig");
     }
 
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (empty($uploadId))
-    {
+    if (empty($uploadId)) {
       return new Response("", Response::HTTP_BAD_REQUEST);
     }
     $uploadTreeId = GetParm("item", PARM_INTEGER);
-    if (empty($uploadTreeId))
-    {
+    if (empty($uploadTreeId)) {
       return new Response("", Response::HTTP_BAD_REQUEST);
     }
 
@@ -228,15 +215,15 @@ class ClearingView extends FO_Plugin
 
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
-    if (!empty($lastItem))
-    {
+    if (!empty($lastItem)) {
       $this->updateLastItem($userId, $groupId,$lastItem);
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTableName);
 
-    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL, $showBox = 0, "View", -1, '', '', $uploadTreeTableName);
+    $this->vars['micromenu'] = Dir2Browse('license', $uploadTreeId, NULL,
+      $showBox = 0, "View", -1, '', '', $uploadTreeTableName);
 
     global $Plugins;
     /** @var ui_view $view */
@@ -247,11 +234,9 @@ class ClearingView extends FO_Plugin
     $highlightId = GetParm("highlightId", PARM_INTEGER);
     $clearingId = GetParm("clearingId", PARM_INTEGER);
 
-    if ($clearingId !== null)
-    {
+    if ($clearingId !== null) {
       $highlightId = -1;
-    } else if ($highlightId !== null)
-    {
+    } else if ($highlightId !== null) {
       $clearingId = -1;
     }
 
@@ -262,46 +247,39 @@ class ClearingView extends FO_Plugin
     $this->vars['optionName'] = "skipFile";
     $this->vars['formName'] = "uiClearingForm";
     $this->vars['ajaxAction'] = "setNextPrev";
-    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId, $selectedAgentId, $highlightId, $clearingId, $uploadId);
+    $highlights = $this->getSelectedHighlighting($itemTreeBounds, $licenseId,
+      $selectedAgentId, $highlightId, $clearingId, $uploadId);
 
     $isSingleFile = !$itemTreeBounds->containsFiles();
     $hasWritePermission = $this->uploadDao->isEditable($uploadId, $groupId);
 
     $clearingDecisions = null;
-    if ($isSingleFile || $hasWritePermission)
-    {
+    if ($isSingleFile || $hasWritePermission) {
       $clearingDecisions = $this->clearingDao->getFileClearings($itemTreeBounds, $groupId, false);
     }
 
-    if ($isSingleFile && $hasWritePermission)
-    {
+    if ($isSingleFile && $hasWritePermission) {
       $this->vars['bulkUri'] = Traceback_uri() . "?mod=popup-license";
       $licenseArray = $this->licenseDao->getLicenseArray($groupId);
-      // $clearingDecision = $this->clearingDao->getRelevantClearingDecision($itemTreeBounds, $groupId);
       list($addedResults, $removedResults) = $this->clearingDecisionEventProcessor->getCurrentClearings($itemTreeBounds, $groupId, LicenseMap::CONCLUSION);
-      if(count($addedResults)+count($removedResults)>0)
-      {
+      if (count($addedResults)+count($removedResults)>0) {
         array_unshift($licenseArray, array('id'=>0,'fullname'=>'','shortname'=>'------'));
       }
       /** @var ClearingResult $result */
-      foreach ($removedResults as $result)
-      {
+      foreach ($removedResults as $result) {
         array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
       }
       /** @var ClearingResult $result */
-      foreach ($addedResults as $result)
-      {
+      foreach ($addedResults as $result) {
         array_unshift($licenseArray, array( 'id'=>$result->getLicenseId() ,'fullname'=>$result->getLicenseFullName() ,'shortname'=>$result->getLicenseShortName()));
       }
       $this->vars['licenseArray'] = $licenseArray;
-    }
-    elseif($isSingleFile)
-    {
+    } elseif ($isSingleFile) {
       $this->vars['auditDenied'] = true;
     }
 
     $selectedClearingType = false;
-    if(!empty($clearingDecisions)){
+    if (!empty($clearingDecisions)) {
       $selectedClearingType = $clearingDecisions[0]->getType();
     }
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId);
@@ -319,21 +297,13 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['bulkHistory'] = $bulkHistory;
 
-    $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
-    $options = array(UploadTreeProxy::OPT_SKIP_THESE=>"noLicense", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
-    $uploadTreeTableName,
-    $viewName = 'no_license_uploadtree' . $uploadId);
-    $filesOfInterest = $noLicenseUploadTreeView->count();
-    
-    $nonClearedUploadTreeView = new UploadTreeProxy($uploadId,
-        $options = array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared", UploadTreeProxy::OPT_GROUP_ID=>$groupId),
-        $uploadTreeTableName,
-        $viewName = 'already_cleared_uploadtree' . $uploadId);
-    $filesToBeCleared = $nonClearedUploadTreeView->count();
-    
-    $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
-    $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
-    
+    $filesOfInterest = $this->clearingDao->getTotalDecisionCount($uploadId,
+      $groupId);
+    $filesCleared = $this->clearingDao->getClearingDecisionsCount($uploadId,
+      $groupId);
+
+    $this->vars['message'] = _("Cleared").": $filesCleared/$filesOfInterest";
+
     return $this->render("ui-clearing-view.html.twig");
   }
 

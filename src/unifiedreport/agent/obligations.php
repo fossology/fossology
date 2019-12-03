@@ -63,23 +63,24 @@ class ObligationsToLicenses
     $licenseIds = $this->contentOnly($licenseStatements) ?: array();
     $mainLicenseIds = $this->contentOnly($mainLicenseStatements);
 
-    if(!empty($mainLicenseIds)){
+    if (! empty($mainLicenseIds)) {
       $allLicenseIds = array_unique(array_merge($licenseIds, $mainLicenseIds));
-    }
-    else{
+    } else {
       $allLicenseIds = array_unique($licenseIds);
     }
 
     $bulkAddIds = $this->getBulkAddLicenseList($uploadId, $groupId);
-    $obligations = $this->licenseDao->getLicenseObligations($allLicenseIds) ?: array();
+    $obligationRef = $this->licenseDao->getLicenseObligations($allLicenseIds, 'obligation_map') ?: array();
+    $obligationCandidate = $this->licenseDao->getLicenseObligations($allLicenseIds, 'obligation_candidate_map') ?: array();
+    $obligations = array_merge($obligationRef, $obligationCandidate);
     $onlyLicenseIdsWithObligation = array_column($obligations, 'rf_fk');
-    if(!empty($bulkAddIds)){
+    if (!empty($bulkAddIds)) {
       $onlyLicenseIdsWithObligation = array_unique(array_merge($onlyLicenseIdsWithObligation, $bulkAddIds));
     }
     $licenseWithoutObligations = array_diff($allLicenseIds, $onlyLicenseIdsWithObligation) ?: array();
-    foreach($licenseWithoutObligations as $licenseWithoutObligation){
+    foreach ($licenseWithoutObligations as $licenseWithoutObligation) {
       $license = $this->licenseDao->getLicenseById($licenseWithoutObligation);
-      if(!empty($license)){
+      if (!empty($license)) {
         $whiteLists[] = $license->getShortName();
       }
     }
@@ -98,15 +99,15 @@ class ObligationsToLicenses
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $parentTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
     $bulkHistory = $this->clearingDao->getBulkHistory($parentTreeBounds, $groupId, false);
-    if(!empty($bulkHistory)){
+    if (!empty($bulkHistory)) {
       $licenseLists = array_column($bulkHistory, 'addedLicenses');
       $allLicenses = array();
-      foreach($licenseLists as $licenseList){
+      foreach ($licenseLists as $licenseList) {
         $allLicenses = array_unique(array_merge($allLicenses, $licenseList));
       }
-      foreach($allLicenses as $allLicense){
+      foreach ($allLicenses as $allLicense) {
         $license = $this->licenseDao->getLicenseByShortName($allLicense);
-        if(!empty($license)){
+        if (!empty($license)) {
           $licenseId[] = $license->getId();
         }
       }
@@ -121,18 +122,18 @@ class ObligationsToLicenses
    */
   function groupObligations($obligations)
   {
-    foreach($obligations as $obligation ) {
+    $groupedOb = array();
+    foreach ($obligations as $obligation ) {
       $obTopic = $obligation['ob_topic'];
       $obText = $obligation['ob_text'];
       $licenseName = $obligation['rf_shortname'];
       $groupBy = $obText;
-      if(array_key_exists($groupBy, $groupedOb)) {
+      if (array_key_exists($groupBy, $groupedOb)) {
         $currentLics = &$groupedOb[$groupBy]['license'];
-        if (!in_array($licenseName, $currentLics)){
+        if (!in_array($licenseName, $currentLics)) {
           $currentLics[] = $licenseName;
         }
-      }
-      else{
+      } else {
         $singleOb = array(
          "topic" => $obTopic,
          "text" => $obText,
@@ -151,7 +152,7 @@ class ObligationsToLicenses
    */
   function contentOnly($licenseStatements)
   {
-    foreach($licenseStatements as $licenseStatement){
+    foreach ($licenseStatements as $licenseStatement) {
       $licenseId[] = $licenseStatement["licenseId"];
     }
     return $licenseId;

@@ -67,11 +67,11 @@ class ui_download extends FO_Plugin
     header('Expires: Expires: Thu, 19 Nov 1981 08:52:00 GMT'); /* mark it as expired (value from Apache default) */
 
     $V = "";
-    if (($this->NoMenu == 0) && ($this->Name != "menus"))
-    {
+    if (($this->NoMenu == 0) && ($this->Name != "menus")) {
       $Menu = &$Plugins[plugin_find_id("menus")];
+    } else {
+      $Menu = null;
     }
-    else { $Menu = NULL; }
 
     /* DOCTYPE is required for IE to use styles! (else: css menu breaks) */
     $V .= '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN" "xhtml1-frameset.dtd">' . "\n";
@@ -79,32 +79,35 @@ class ui_download extends FO_Plugin
     $V .= "<html>\n";
     $V .= "<head>\n";
     $V .= "<meta name='description' content='The study of Open Source'>\n";
-    if ($this->NoHeader == 0)
-    {
+    if ($this->NoHeader == 0) {
       /** Known bug: DOCTYPE "should" be in the HEADER
        and the HEAD tags should come first.
        Also, IE will ignore <style>...</style> tags that are NOT
        in a <head>...</head>block.
        **/
-      if (!empty($this->Title)) $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      if (!empty($this->Title)) {
+        $V .= "<title>" . htmlentities($this->Title) . "</title>\n";
+      }
       $V .= "<link rel='stylesheet' href='css/fossology.css'>\n";
-      if (!empty($Menu)) print $Menu->OutputCSS();
+      if (!empty($Menu)) {
+        print $Menu->OutputCSS();
+      }
       $V .= "</head>\n";
       $V .= "<body class='text'>\n";
       print $V;
-      if (!empty($Menu)) { $Menu->Output($this->Title); }
+      if (! empty($Menu)) {
+        $Menu->Output($this->Title);
+      }
     }
 
     $P = &$Plugins[plugin_find_id("view")];
-    $P->ShowView(NULL,"browse");
-    exit;
-  } // CheckRestore()
-
+    $P->ShowView(null, "browse");
+    exit();
+  }
 
   function getResponse()
   {
-    try
-    {
+    try {
       $output = $this->getPathAndName();
       list($Filename, $Name) = $output;
       $response = $this->downloadFile($Filename, $Name);
@@ -130,8 +133,7 @@ class ui_download extends FO_Plugin
     global $container;
     /** @var DbManager $dbManager */
     $dbManager = $container->get('db.manager');
-    if (!$dbManager->getDriver())
-    {
+    if (!$dbManager->getDriver()) {
       throw new Exception("Missing database connection.");
     }
 
@@ -139,51 +141,39 @@ class ui_download extends FO_Plugin
     $item = GetParm("item",PARM_INTEGER);
     $logJq = GetParm('log', PARM_INTEGER);
 
-    if (!empty($reportId))
-    {
+    if (!empty($reportId)) {
       $row = $dbManager->getSingleRow("SELECT * FROM reportgen WHERE job_fk = $1", array($reportId), "reportFileName");
-      if ($row === false)
-      {
+      if ($row === false) {
         throw new Exception("Missing report");
       }
       $path = $row['filepath'];
       $filename = basename($path);
       $uploadId = $row['upload_fk'];
-    }
-    elseif (!empty($logJq))
-    {
+    } elseif (!empty($logJq)) {
       $sql = "SELECT jq_log, job_upload_fk FROM jobqueue LEFT JOIN job ON job.job_pk = jobqueue.jq_job_fk WHERE jobqueue.jq_pk =$1";
       $row = $dbManager->getSingleRow($sql, array($logJq), "jqLogFileName");
-      if ($row === false)
-      {
+      if ($row === false) {
         throw new Exception("Missing report");
       }
       $path = $row['jq_log'];
       $filename = basename($path);
       $uploadId = $row['job_upload_fk'];
-    }
-    elseif (empty($item))
-    {
+    } elseif (empty($item)) {
       throw new Exception("Invalid item parameter");
-    }
-    else
-    {
+    } else {
       $path = RepPathItem($item);
-      if (empty($path))
-      {
+      if (empty($path)) {
         throw new Exception("Invalid item parameter");
       }
 
       $fileHandle = @fopen( RepPathItem($item) ,"rb");
       /* note that CheckRestore() does not return. */
-      if (empty($fileHandle))
-      {
+      if (empty($fileHandle)) {
         $this->CheckRestore($item, $path);
       }
 
       $row = $dbManager->getSingleRow("SELECT ufile_name, upload_fk FROM uploadtree WHERE uploadtree_pk = $1",array($item));
-      if ($row===false)
-      {
+      if ($row===false) {
         throw new Exception("Missing item");
       }
       $filename = $row['ufile_name'];
@@ -192,16 +182,13 @@ class ui_download extends FO_Plugin
 
     /* @var $uploadDao UploadDao */
     $uploadDao = $GLOBALS['container']->get('dao.upload');
-    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId()))
-    {
+    if (!Auth::isAdmin() && !$uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
       throw new Exception("No Permission: $uploadId");
     }
-    if (!file_exists($path))
-    {
+    if (!file_exists($path)) {
       throw new Exception("File does not exist");
     }
-    if (!is_file($path))
-    {
+    if (!is_file($path)) {
       throw new Exception("Not a regular file");
     }
     return array($path, $filename);
@@ -225,14 +212,13 @@ class ui_download extends FO_Plugin
 
     $response = new BinaryFileResponse($path);
     $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, $filenameFallback);
-    if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx')
-    {
+    if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx') {
       $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
     }
 
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));
-    BrowserConsoleHandler::reset();
+    BrowserConsoleHandler::resetStatic();
 
     return $response;
   }
@@ -251,5 +237,5 @@ class ui_download extends FO_Plugin
   }
 }
 
-$NewPlugin = new ui_download;
+$NewPlugin = new ui_download();
 $NewPlugin->Initialize();

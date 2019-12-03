@@ -152,9 +152,9 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/monk install-monkbulk
 
-	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ninka \
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-ojo \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
-           -C src/ninka install
+           -C src/ojo install
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
@@ -187,7 +187,7 @@ endif
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
 	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 
-	dh_install -s
+	dh_install -a
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
 # in another 'make' thread.
@@ -231,7 +231,7 @@ binary-indep: build-indep install-indep
 
 # Build architecture dependant packages using the common target.
 binary-arch: build-arch install-arch
-	$(MAKE) -f debian/rules DH_OPTIONS=-s binary-common
+	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install install-indep install-arch configure

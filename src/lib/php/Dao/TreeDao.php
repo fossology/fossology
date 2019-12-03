@@ -40,11 +40,9 @@ class TreeDao
   {
     $statementName = __METHOD__.".".$tableName;
 
-    if ($parentId==$itemId)
-    {
+    if ($parentId==$itemId) {
       return $this->getFullPath($itemId, $tableName);
-    }    
-    else if ($parentId > 0) {
+    } else if ($parentId > 0) {
       $params = array($itemId, $parentId);
       $parentClause = " = $2";
       $parentLoopCondition = "AND (ut.parent != $2)";
@@ -97,10 +95,9 @@ class TreeDao
       throw new \Exception("could not find path of $itemId:\n$sql--".print_r($params,true));
     }
 
-    if(! $dropArtifactPrefix)
-    {
+    if (! $dropArtifactPrefix) {
       return $row['artifact_path_prefix'].$row['file_path'];
-    }else{
+    } else {
       return $row['file_path'];
     }
   }
@@ -123,7 +120,7 @@ class TreeDao
 
      return $row ? $row['uploadtree_pk'] : 0;
   }
-  
+
   /**
    * @param int $uploadtreeId
    * @return array with keys sha1, md5
@@ -134,7 +131,7 @@ class TreeDao
         array($uploadtreeId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
-  
+
   public function getRepoPathOfPfile($pfileId, $repo="files")
   {
     $pfileRow = $this->dbManager->getSingleRow('SELECT * FROM pfile WHERE pfile_pk=$1',array($pfileId));

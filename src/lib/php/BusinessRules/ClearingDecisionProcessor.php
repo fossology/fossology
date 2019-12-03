@@ -80,26 +80,21 @@ class ClearingDecisionProcessor
    */
   public function hasUnhandledScannerDetectedLicenses(ItemTreeBounds $itemTreeBounds, $groupId, $additionalEventIds = array(), $licenseMap=null)
   {
-    if (!empty($licenseMap) && !($licenseMap instanceof LicenseMap))
-    {
+    if (!empty($licenseMap) && !($licenseMap instanceof LicenseMap)) {
       throw new Exception('invalid license map');
     }
     $userEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $groupId);
     $usageId = empty($licenseMap) ? LicenseMap::TRIVIAL : $licenseMap->getUsage();
     $scannerDetectedEvents = $this->agentLicenseEventProcessor->getScannerEvents($itemTreeBounds,$usageId);
     $eventLicenceIds = array();
-    foreach (array_keys($userEvents) as $licenseId)
-    {
+    foreach (array_keys($userEvents) as $licenseId) {
       $eventLicenceIds[empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId)] = $licenseId;
     }
-    foreach (array_keys($additionalEventIds) as $licenseId)
-    {
+    foreach (array_keys($additionalEventIds) as $licenseId) {
       $eventLicenceIds[empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId)] = $licenseId;
     }
-    foreach (array_keys($scannerDetectedEvents) as $licenseId)
-    {
-      if (!array_key_exists(empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId), $eventLicenceIds))
-      {
+    foreach (array_keys($scannerDetectedEvents) as $licenseId) {
+      if (!array_key_exists(empty($licenseMap)? $licenseId: $licenseMap->getProjectedId($licenseId), $eventLicenceIds)) {
         return true;
       }
     }
@@ -119,10 +114,8 @@ class ClearingDecisionProcessor
   private function insertClearingEventsForAgentFindings(ItemTreeBounds $itemBounds, $userId, $groupId, $remove = false, $type = ClearingEventTypes::AGENT, $removedIds = array())
   {
     $eventIds = array();
-    foreach ($this->agentLicenseEventProcessor->getScannerEvents($itemBounds) as $licenseId => $scannerEvents)
-    {
-      if (array_key_exists($licenseId, $removedIds))
-      {
+    foreach ($this->agentLicenseEventProcessor->getScannerEvents($itemBounds) as $licenseId => $scannerEvents) {
+      if (array_key_exists($licenseId, $removedIds)) {
         continue;
       }
       $scannerLicenseRef = $scannerEvents[0]->getLicenseRef();
@@ -165,8 +158,7 @@ class ClearingDecisionProcessor
    */
   public function makeDecisionFromLastEvents(ItemTreeBounds $itemBounds, $userId, $groupId, $type, $global, $additionalEventIds = array())
   {
-    if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE)
-    {
+    if ($type < self::NO_LICENSE_KNOWN_DECISION_TYPE) {
       return;
     }
     $this->dbManager->begin();
@@ -174,25 +166,19 @@ class ClearingDecisionProcessor
     $itemId = $itemBounds->getItemId();
 
     $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, $includeSubFolders=false);
-    if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE)
-    {
+    if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE) {
       $type = DecisionTypes::IDENTIFIED;
       $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, true, ClearingEventTypes::USER);
-      foreach ($previousEvents as $eventId => $clearingEvent)
-      {
-        if (!in_array($eventId, $clearingEventIds) && !$clearingEvent->isRemoved())
-        {
+      foreach ($previousEvents as $eventId => $clearingEvent) {
+        if (!in_array($eventId, $clearingEventIds) && !$clearingEvent->isRemoved()) {
           $licenseId = $clearingEvent->getLicenseId();
           $newEventId = $this->clearingDao->insertClearingEvent($itemBounds->getItemId(), $userId, $groupId, $licenseId, true);
           $clearingEventIds[$licenseId] = $newEventId;
         }
       }
-    }
-    else
-    {
+    } else {
       $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, false, ClearingEventTypes::AGENT, $previousEvents);
-      foreach ($previousEvents as $clearingEvent)
-      {
+      foreach ($previousEvents as $clearingEvent) {
         $clearingEventIds[$clearingEvent->getLicenseId()] = $clearingEvent->getEventId();
       }
     }
@@ -201,12 +187,10 @@ class ClearingDecisionProcessor
     $clearingEventIds = array_unique(array_merge($clearingEventIds, $additionalEventIds));
 
     $scope = $global ? DecisionScopes::REPO : DecisionScopes::ITEM;
-    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $scope, $clearingEventIds))
-    {
+    if (null === $currentDecision || $this->clearingDecisionIsDifferentFrom($currentDecision, $type, $scope, $clearingEventIds)) {
       $this->clearingDao->createDecisionFromEvents($itemBounds->getItemId(), $userId, $groupId, $type, $scope,
           $clearingEventIds);
-    } else
-    {
+    } else {
       $this->clearingDao->removeWipClearingDecision($itemId, $groupId);
     }
 
@@ -229,27 +213,21 @@ class ClearingDecisionProcessor
     $addedResults = array();
     $removedResults = array();
 
-    foreach (array_unique(array_merge(array_keys($events), array_keys($agentEvents))) as $licenseId)
-    {
+    foreach (array_unique(array_merge(array_keys($events), array_keys($agentEvents))) as $licenseId) {
       $licenseDecisionEvent = array_key_exists($licenseId, $events) ? $events[$licenseId] : null;
       $agentClearingEvents = array_key_exists($licenseId, $agentEvents) ? $agentEvents[$licenseId] : array();
 
-      if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0))
-      {
+      if (($licenseDecisionEvent === null) && (count($agentClearingEvents) == 0)) {
         throw new Exception('not in merge');
       }
       $licenseDecisionResult = new ClearingResult($licenseDecisionEvent, $agentClearingEvents);
-      if ($licenseDecisionResult->isRemoved())
-      {
+      if ($licenseDecisionResult->isRemoved()) {
         $removedResults[$licenseId] = $licenseDecisionResult;
-      }
-      else
-      {
+      } else {
         $addedResults[$licenseId] = $licenseDecisionResult;
       }
     }
 
     return array($addedResults, $removedResults);
   }
-
 }

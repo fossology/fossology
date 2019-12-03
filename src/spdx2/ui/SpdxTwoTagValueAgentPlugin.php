@@ -26,7 +26,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class SpdxTwoTagValueAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_spdx2tv";
     $this->Title =  _("SPDX2 generation in Tag:Value format");
     $this->AgentName = "spdx2tv";

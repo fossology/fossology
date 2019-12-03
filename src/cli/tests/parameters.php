@@ -24,11 +24,13 @@
  * @version "$Id: $"
  */
 
-class TestCLInputCP2foss extends UnitTestCase {
+class TestCLInputCP2foss extends UnitTestCase
+{
 
   public $command = '/usr/local/bin/test.cp2foss';
 
-  function Testhnpa(){
+  function Testhnpa()
+  {
 
     $help = exec("$this->command -h", $output, $retval);
     //print_r($output);
@@ -47,7 +49,8 @@ class TestCLInputCP2foss extends UnitTestCase {
     $this->assertPattern('/ERROR, -a /', $output[0]);
   }
 
-  function TestMissingDashP(){
+  function TestMissingDashP()
+  {
 
     // Note you must have a valid archive
     $error = exec("$this->command -n foo -a /tmp/zlib.tar.bz2 -d 'a comment'", $output, $retval);
@@ -55,7 +58,8 @@ class TestCLInputCP2foss extends UnitTestCase {
     $this->assertPattern('/ERROR, -p /', $output[0]);
   }
 
-  function TestMissingDashN(){
+  function TestMissingDashN()
+  {
 
     // Note you must have a valid archive
     $error = exec("$this->command -p foo -a /tmp/zlib.tar.bz2 -d 'a comment'", $output, $retval);
@@ -63,11 +67,12 @@ class TestCLInputCP2foss extends UnitTestCase {
     $this->assertPattern('/ERROR, -n /', $output[0]);
   }
 
-  function TestMissingDasha(){
+  function TestMissingDasha()
+  {
     // Note you must have a valid archive
     $error = exec("$this->command -p baz -n foo -d 'a comment'", $output, $retval);
     //print_r($output);
     $this->assertPattern('/ERROR, -a /', $output[0]);
   }
 }
-?>
+

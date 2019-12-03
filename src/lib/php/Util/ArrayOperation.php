@@ -31,14 +31,11 @@ class ArrayOperation
     $uniqueValues = array_unique($allValues);
     $valueMultiplicityMap = array();
 
-    foreach ($uniqueValues as $value)
-    {
+    foreach ($uniqueValues as $value) {
       $count = 0;
-      foreach ($allValues as $candidate)
-      {
-        if ($value == $candidate)
-        {
-          $count++;
+      foreach ($allValues as $candidate) {
+        if ($value == $candidate) {
+          $count ++;
         }
       }
       $valueMultiplicityMap[$value] = $count;
@@ -53,21 +50,18 @@ class ArrayOperation
       throw new \InvalidArgumentException('chunk size should be positive');
     }
     $result = array();
-    for ($offset = 0; $offset < count($values); $offset += $chunkSize)
-    {
-      $result = array_merge(
-          $result,
-          $callback(array_slice($values, $offset, $chunkSize))
-      );
+    for ($offset = 0; $offset < count($values); $offset += $chunkSize) {
+      $result = array_merge($result,
+        $callback(array_slice($values, $offset, $chunkSize)));
     }
     return $result;
   }
 
-  public static function multiSearch($needles,$haystack){
-    foreach($needles as $needle){
+  public static function multiSearch($needles,$haystack)
+  {
+    foreach ($needles as $needle) {
       $index = array_search($needle, $haystack);
-      if ($index !== false)
-      {
+      if ($index !== false) {
         return $index;
       }
     }

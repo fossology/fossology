@@ -98,6 +98,7 @@ typedef struct
     char* version_source;       ///< the machine that reported the version information
     char* version;              ///< the version of the agent that is running on all hosts
     int valid;                  ///< flag indicating if the meta_agent is valid
+    int run_count;              ///< the count of agents in running state
 } meta_agent_t;
 
 /**
@@ -179,5 +180,8 @@ void kill_agents(scheduler_t* scheduler);
 
 int  is_meta_special(meta_agent_t* ma, int special_type);
 int  is_agent_special(agent_t* agent, int special_type);
+
+void meta_agent_increase_count(meta_agent_t*);
+void meta_agent_decrease_count(meta_agent_t*);
 
 #endif /* AGENT_H_INCLUDE */

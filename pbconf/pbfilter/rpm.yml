@@ -1,0 +1,4 @@
+---
+# PBREC is replaced by the list of recommended pkgs
+filter:
+  PBREC: !!str ""

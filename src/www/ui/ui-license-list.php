@@ -41,7 +41,7 @@ class ui_license_list extends FO_Plugin
 
   /** @var string */
   protected $delimiter = ',';
-  
+
   /** @var string */
   protected $enclosure = '"';
 
@@ -86,16 +86,12 @@ class ui_license_list extends FO_Plugin
     $MenuDisplayString = _("License List");
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (empty($Item) || empty($Upload))
-    {
+    if (empty($Item) || empty($Upload)) {
       return;
     }
-    if (GetParm("mod", PARM_STRING) == $this->Name)
-    {
+    if (GetParm("mod", PARM_STRING) == $this->Name) {
       menu_insert("Browse::$MenuDisplayString", 1);
-    }
-    else
-    {
+    } else {
       menu_insert("Browse::$MenuDisplayString", 1, $URI, $MenuDisplayString);
       /* bobg - This is to use a select list in the micro menu to replace the above List
         and Download, but put this select list in a form
@@ -111,18 +107,13 @@ class ui_license_list extends FO_Plugin
     $agents = array("monk","nomos","ninka","reportImport");
     $agent_pks = array();
 
-    foreach($agents as $agent)
-    {
-      if(GetParm("agentToInclude_".$agent, PARM_STRING))
-      {
+    foreach ($agents as $agent) {
+      if (GetParm("agentToInclude_".$agent, PARM_STRING)) {
         /* get last nomos agent_pk that has data for this upload */
         $AgentRec = AgentARSList($agent."_ars", $upload_pk, 1);
-        if ($AgentRec !== false)
-        {
+        if ($AgentRec !== false) {
           $agent_pks[$agent] = $AgentRec[0]["agent_fk"];
-        }
-        else
-        {
+        } else {
           $agent_pks[$agent] = false;
         }
       }
@@ -137,31 +128,31 @@ class ui_license_list extends FO_Plugin
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, Auth::getGroupId());
     $editedMappedLicenses = $this->clearingFilter->filterCurrentClearingDecisionsForLicenseList($allDecisions);
-    $licensesPerFileName = $this->licenseDao->getLicensesPerFileNameForAgentId($itemTreeBounds, $agent_pks, $includeSubfolder, $exclude, $ignore, $editedMappedLicenses);
+    $licensesPerFileName = $this->licenseDao->getLicensesPerFileNameForAgentId($itemTreeBounds,
+      $agent_pks, $includeSubfolder, $exclude, $ignore, $editedMappedLicenses);
     /* how many lines of data do you want to display */
     $currentNum = 0;
     $lines = [];
-    foreach($licensesPerFileName as $fileName => $licenseNames){
+    foreach ($licensesPerFileName as $fileName => $licenseNames) {
       if ($licenseNames !== false && count($licenseNames) > 0) {
-        if(++$currentNum > $NomostListNum){
+        if (++$currentNum > $NomostListNum) {
           $lines["warn"] = _("<br><b>Warning: Only the first $NomostListNum lines are displayed.  To see the whole list, run fo_nomos_license_list from the command line.</b><br>");
           // TODO: the following should be done using a "LIMIT" statement in the sql query
           break;
         }
 
-        if(array_key_exists('concludedResults', $licenseNames) && !empty($licenseNames['concludedResults'])) {
+        if (array_key_exists('concludedResults', $licenseNames) && !empty($licenseNames['concludedResults'])) {
           $conclusions = array();
           foreach ($licenseNames['concludedResults'] as $value) {
               $conclusions = array_merge($conclusions, $value);
           }
           $conclusions = array_unique ($conclusions);
           $lines[] = $fileName . ': ' . implode(' ', $licenseNames['scanResults']) . ', ' . implode(' ', $conclusions);
-        }else{
+        } else {
           $lines[] = $fileName .': '.implode(' ', $licenseNames['scanResults']);
         }
       }
-      if (!$ignore && $licenseNames === false)
-      {
+      if (!$ignore && $licenseNames === false) {
         $lines[] = $fileName;
       }
     }
@@ -177,28 +168,23 @@ class ui_license_list extends FO_Plugin
     global $SysConf;
     $V = "";
     $formVars = array();
-    if (!$PG_CONN)
-    {
+    if (!$PG_CONN) {
       echo _("NO DB connection");
     }
 
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     }
     $uploadtree_pk = GetParm("item", PARM_INTEGER);
-    if (empty($uploadtree_pk))
-    {
+    if (empty($uploadtree_pk)) {
       return;
     }
 
     $upload_pk = GetParm("upload", PARM_INTEGER);
-    if (empty($upload_pk))
-    {
+    if (empty($upload_pk)) {
       return;
     }
-    if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId()))
-    {
+    if (!$this->uploadDao->isAccessible($upload_pk, Auth::getGroupId())) {
       $text = _("Permission Denied");
       return "<h2>$text</h2>";
     }
@@ -207,14 +193,10 @@ class ui_license_list extends FO_Plugin
     $warnings = array();
     $agent_pks_dict = $this->getAgentPksFromRequest($upload_pk);
     $agent_pks = array();
-    foreach ($agent_pks_dict as $agent_name => $agent_pk)
-    {
-      if ($agent_pk === false)
-      {
+    foreach ($agent_pks_dict as $agent_name => $agent_pk) {
+      if ($agent_pk === false) {
         $warnings[] = _("No information for agent: $agent_name");
-      }
-      else
-      {
+      } else {
         $agent_pks[] = $agent_pk;
         $formVars["agentToInclude_".$agent_name] = "1";
       }
@@ -239,18 +221,15 @@ class ui_license_list extends FO_Plugin
     $V .= "<hr/>";
     $lines = $this->createListOfLines($uploadtreeTablename, $uploadtree_pk, $agent_pks, $NomostListNum, $includeSubfolder, $exclude, $ignore);
 
-    if (array_key_exists("warn",$lines))
-    {
+    if (array_key_exists("warn",$lines)) {
       $warnings[] = $lines["warn"];
       unset($lines["warn"]);
     }
-    foreach($warnings as $warning)
-    {
+    foreach ($warnings as $warning) {
       $V .= "<br><b>$warning</b><br>";
     }
 
-    if ($dltext)
-    {
+    if ($dltext) {
       $request = $this->getRequest();
       $itemId = intval($request->get('item'));
       $path = Dir2Path($itemId, $uploadtreeTablename);
@@ -260,9 +239,9 @@ class ui_license_list extends FO_Plugin
       ob_start();
       $head = array('file path', 'scan results', 'concluded results');
       fputcsv($out, $head, $this->delimiter, $this->enclosure);
-      foreach($lines as $row){
+      foreach ($lines as $row) {
         $newRow = explode(':', str_replace(array(': ', ', '), ':', $row));
-       fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
+        fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
       }
       $content = ob_get_contents();
       ob_end_clean();
@@ -277,13 +256,11 @@ class ui_license_list extends FO_Plugin
 
       $response = new Response($content, Response::HTTP_OK, $headers);
       return $response;
-    }
-    else
-    {
+    } else {
       return $V . '<pre>' . implode("\n", $lines) . '</pre>';
     }
   }
 }
 
-$NewPlugin = new ui_license_list;
+$NewPlugin = new ui_license_list();
 $NewPlugin->Initialize();

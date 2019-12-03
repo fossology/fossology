@@ -167,7 +167,7 @@ $PF = fopen('ol-projects-in-FM', 'w') or die("Can't open file, $php_errormsg\n")
 foreach($projects as $line)
 {
 //  print "line is:$line\n";
-  if(fputcsv($PF, $line) === flase)
+  if(fputcsv($PF, $line) === false)
   {
     print "ERROR: can't write $line\n";
   }

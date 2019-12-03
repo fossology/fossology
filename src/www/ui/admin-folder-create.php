@@ -44,23 +44,20 @@ class folder_create extends FO_Plugin
   public function create($parentId, $newFolder, $desc)
   {
     $folderName = trim($newFolder);
-    if (empty ($folderName))
-    {
+    if (empty($folderName)) {
       return (0);
     }
-    
+
     /* @var $folderDao FolderDao*/
     $folderDao = $GLOBALS['container']->get('dao.folder');
 
     $parentExists = $folderDao->getFolder($parentId);
-    if (!$parentExists)
-    {
+    if (! $parentExists) {
       return (0);
     }
 
     $folderWithSameNameUnderParent = $folderDao->getFolderId($folderName, $parentId);
-    if (!empty ($folderWithSameNameUnderParent))
-    {
+    if (! empty($folderWithSameNameUnderParent)) {
       return 4;
     }
 
@@ -77,18 +74,14 @@ class folder_create extends FO_Plugin
     $ParentId = GetParm('parentid', PARM_INTEGER);
     $NewFolder = GetParm('newname', PARM_TEXT);
     $Desc = GetParm('description', PARM_TEXT);
-    if (!empty ($ParentId) && !empty ($NewFolder))
-    {
+    if (! empty($ParentId) && ! empty($NewFolder)) {
       $rc = $this->create($ParentId, $NewFolder, $Desc);
-      if ($rc == 1)
-      {
+      if ($rc == 1) {
         /* Need to refresh the screen */
         $text = _("Folder");
         $text1 = _("Created");
         $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
-      }
-      else if ($rc == 4)
-      {
+      } else if ($rc == 4) {
         $text = _("Folder");
         $text1 = _("Exists");
         $this->vars['message'] = "$text " . htmlentities($NewFolder) . " $text1";
@@ -101,5 +94,6 @@ class folder_create extends FO_Plugin
     return $this->renderString("admin-folder-create-form.html.twig",$formVars);
   }
 }
-$NewPlugin = new folder_create;
+
+$NewPlugin = new folder_create();
 $NewPlugin->Initialize();

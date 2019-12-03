@@ -37,8 +37,7 @@ class ClearingEventProcessor
   {
     $result = array();
 
-    foreach ($events as $event)
-    {
+    foreach ($events as $event) {
       $clearingLicense = $event->getClearingLicense();
       $licenseId = $clearingLicense->getLicenseId();
 
@@ -56,12 +55,10 @@ class ClearingEventProcessor
   public function filterEffectiveEvents($events)
   {
     $reducedEvents = array();
-    foreach ($events as $event)
-    {
+    foreach ($events as $event) {
       $licenseId = $event->getLicenseId();
       $reducedEvents[$licenseId] = $event;
     }
     return $reducedEvents;
   }
-
 }

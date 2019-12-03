@@ -116,7 +116,8 @@ abstract class Agent
    * @param string $version   Version of the agent
    * @param string $revision  Revision of the agent
    */
-  function __construct($agentName, $version, $revision) {
+  function __construct($agentName, $version, $revision)
+  {
     $this->agentName = $agentName;
     $this->agentVersion = $version;
     $this->agentDesc = $agentName. " agent";
@@ -168,11 +169,13 @@ abstract class Agent
 
     $this->initArsTable();
 
-    if ($this->schedulerMode)
-    {
+    if ($this->schedulerMode) {
       $this->scheduler_greet();
 
-      pcntl_signal(SIGALRM, function($signo) { Agent::heartbeat_handler($signo); });
+      pcntl_signal(SIGALRM, function($signo)
+      {
+        Agent::heartbeat_handler($signo);
+      });
       pcntl_alarm(ALARM_SECS);
     }
 
@@ -210,8 +213,7 @@ abstract class Agent
    */
   function heartbeat($newProcessed)
   {
-    if ($this->schedulerMode)
-    {
+    if ($this->schedulerMode) {
       global $processed;
       global $alive;
 
@@ -244,8 +246,7 @@ abstract class Agent
    */
   function scheduler_disconnect($exitvalue)
   {
-    if ($this->schedulerMode)
-    {
+    if ($this->schedulerMode) {
       Agent::heartbeat_handler(SIGALRM);
       echo "BYE $exitvalue\n";
     }
@@ -293,12 +294,10 @@ abstract class Agent
   private function scheduler_current()
   {
     ($line = fgets(STDIN));
-    if ("CLOSE\n" === $line)
-    {
+    if ("CLOSE\n" === $line) {
       return false;
     }
-    if ("END\n" === $line)
-    {
+    if ("END\n" === $line) {
       return false;
     }
 
@@ -321,13 +320,11 @@ abstract class Agent
    */
   function run_scheduler_event_loop()
   {
-    while (false !== ($line = $this->scheduler_current()))
-    {
+    while (false !== ($line = $this->scheduler_current())) {
       $this->heartbeat(0);
 
       $uploadId = intval($line);
-      if ($uploadId <= 0)
-      {
+      if ($uploadId <= 0) {
         continue;
       }
 
@@ -339,8 +336,7 @@ abstract class Agent
 
       try {
         $success = $this->processUploadId($uploadId);
-      }
-      catch(\Exception $e) {
+      } catch(\Exception $e) {
         print "Caught exception while processing uploadId=$uploadId: ".$e->getMessage();
         print $e->getTraceAsString();
         $success = false;

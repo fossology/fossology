@@ -186,5 +186,4 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     assertThat($map,hasItemInArray(array('rf_fk'=>2,'parent_shortname'=>'One','rf_parent'=>1)));
     assertThat($map,hasItemInArray(array('rf_fk'=>3,'parent_shortname'=>'Three','rf_parent'=>3)));
   }
-
 }

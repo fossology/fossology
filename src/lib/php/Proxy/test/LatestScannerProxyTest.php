@@ -140,5 +140,4 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $latestScannerProxy = new LatestScannerProxy('$1',$agentNames,'latest_scanner', "AND agent_enabled='true'");
     $latestScannerProxy->getNameToIdMap();
   }
-
 }

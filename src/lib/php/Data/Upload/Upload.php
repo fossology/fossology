@@ -35,8 +35,11 @@ class Upload
    * @param $row
    * @return Upload
    */
-  public static function createFromTable($row) {
-    return new Upload(intval($row['upload_pk']), $row['upload_filename'], $row['upload_desc'], $row['uploadtree_tablename'], strtotime($row['upload_ts']));
+  public static function createFromTable($row)
+  {
+    return new Upload(intval($row['upload_pk']), $row['upload_filename'],
+      $row['upload_desc'], $row['uploadtree_tablename'],
+      strtotime($row['upload_ts']));
   }
 
   /**

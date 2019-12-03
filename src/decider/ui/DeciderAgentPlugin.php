@@ -29,7 +29,8 @@ class DeciderAgentPlugin extends AgentPlugin
 {
   const RULES_FLAG = "-r";
 
-  function __construct() {
+  function __construct()
+  {
     $this->Name = "agent_decider";
     $this->Title = _("Automatic Concluded License Decider, based on scanners Matches");
     $this->AgentName = AGENT_DECIDER_NAME;
@@ -47,8 +48,7 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     $renderer = $GLOBALS['container']->get('twig.environment');
     $vars['isNinkaInstalled'] = false;
-    if($ninkaUi=plugin_find('agent_ninka'))
-    {
+    if ($ninkaUi=plugin_find('agent_ninka')) {
       $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
     }
     return $renderer->loadTemplate('agent_decider.html.twig')->render($vars);
@@ -77,10 +77,15 @@ class DeciderAgentPlugin extends AgentPlugin
     $dependencies = array();
 
     $rules = $request->get('deciderRules') ?: array();
+    $agents = $request->get('agents') ?: array();
+    if (in_array('agent_nomos', $agents)) {
+      $checkAgentNomos = true;
+    } else {
+      $checkAgentNomos = $request->get('Check_agent_nomos') ?: false;
+    }
     $rulebits = 0;
 
-    foreach($rules as $rule)
-    {
+    foreach ($rules as $rule) {
       switch ($rule) {
         case 'nomosInMonk':
           $dependencies[] = 'agent_nomos';
@@ -98,14 +103,20 @@ class DeciderAgentPlugin extends AgentPlugin
           $dependencies[] = 'agent_monk';
           $rulebits |= 0x4;
           break;
+        case 'ojoNoContradiction':
+          if ($checkAgentNomos) {
+            $dependencies[] = 'agent_nomos';
+          }
+          $dependencies[] = 'agent_ojo';
+          $rulebits |= 0x10;
+          break;
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
           $rulebits |= 0x8;
       }
     }
 
-    if (empty($rulebits))
-    {
+    if (empty($rulebits)) {
       return 0;
     }
 
@@ -143,7 +154,6 @@ class DeciderAgentPlugin extends AgentPlugin
   {
     menu_insert("ParmAgents::" . $this->Title, 0, $this->Name);
   }
-
 }
 
 register_plugin(new DeciderAgentPlugin());

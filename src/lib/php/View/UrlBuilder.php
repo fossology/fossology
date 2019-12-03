@@ -20,7 +20,8 @@ namespace Fossology\Lib\View;
 
 use Fossology\Lib\Data\LicenseRef;
 
-class UrlBuilder {
+class UrlBuilder
+{
 
   /**
    * @param LicenseRef $licenseRef

@@ -19,13 +19,13 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_emailHistogram", _("Email/URL/Author Browser"));
+define("TITLE_EMAILHISTOGRAM", _("Email/URL/Author Browser"));
 
 class EmailHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "email-hist";
-    $this->Title = TITLE_emailHistogram;
+    $this->Title = TITLE_EMAILHISTOGRAM;
     $this->viewName = "email-view";
     $this->agentName = "copyright";
     parent::__construct();
@@ -107,11 +107,21 @@ class EmailHistogram extends HistogramBase {
   {
     return "
 
+    var emailTabCookie = 'stickyEmailTab';
+
     $(document).ready(function() {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
-      $(\"#EmailUrlAuthorTabs\").tabs();
+      $(\"#EmailUrlAuthorTabs\").tabs({
+        active: ($.cookie(emailTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(emailTabCookie, idString);
+        }
+      });
     });
     ";
   }

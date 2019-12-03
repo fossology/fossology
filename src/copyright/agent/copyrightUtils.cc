@@ -82,10 +82,12 @@ void bail(int exitval)
  * \param[in]  argv
  * \param[out] dest      The parsed CliOptions object
  * \param[out] fileNames List of files to be scanned
+ * \param[out] directoryToScan Directory to be scanned
  * \return True if success, false otherwise
  * \todo Change and add help based on IDENTITY
  */
-bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::string>& fileNames)
+bool parseCliOptions(int argc, char** argv, CliOptions& dest,
+  std::vector<std::string>& fileNames, std::string& directoryToScan)
 {
   unsigned type = 0;
 
@@ -128,6 +130,9 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
         )
         (
           "jobId", boost::program_options::value<int>(), "the id of the job (only in combination with --scheduler_start)"
+        )
+        (
+          "directory,d", boost::program_options::value<string>(), "directory to scan (recursive)"
         )
     ;
 
@@ -174,6 +179,18 @@ bool parseCliOptions(int argc, char** argv, CliOptions& dest, std::vector<std::s
           dest.addScanner(sc);
         }
       }
+    }
+
+    if (vm.count("directory"))
+    {
+      if (vm.count("files"))
+      {
+        cout << "cannot pass files and directory at the same time" << endl;
+        cout << desc << endl;
+        fileNames.clear();
+        return false;
+      }
+      directoryToScan = vm["directory"].as<std::string>();
     }
 
     return true;
@@ -413,3 +430,126 @@ bool processUploadId(const CopyrightState& state, int agentId, int uploadId, Cop
   return true;
 }
 
+/**
+ * Read a single file and run all scanners on it based of CopyrightState.
+ * @param state    Copyright state
+ * @param fileName Location of the file to be scanned
+ * @return A pair of file scanned and list of matches found.
+ */
+pair<string, list<match>> processSingleFile(const CopyrightState& state,
+  const string fileName)
+{
+  const list<unptr::shared_ptr<scanner>>& scanners = state.getScanners();
+  list<match> matchList;
+
+  // Read file into one string
+  string s;
+  if (!ReadFileToString(fileName, s))
+  {
+    // File error
+    s = "";
+  }
+  else
+  {
+    for (auto sc = scanners.begin(); sc != scanners.end(); ++sc)
+    {
+      (*sc)->ScanString(s, matchList);
+    }
+  }
+  return make_pair(s, matchList);
+}
+
+/**
+ * Append a new result from scanner to main output json object
+ * @param fileName   File which was scanned
+ * @param resultPair The result pair from scanSingleFile()
+ * @param printComma Set true to print comma. Will be set true after first
+ *                   data is printed
+ */
+void appendToJson(const std::string fileName,
+    const std::pair<string, list<match>> resultPair, bool &printComma)
+{
+  Json::Value result;
+#if JSONCPP_VERSION_HEXA < ((1 << 24) | (4 << 16))
+  // Use FastWriter for versions below 1.4.0
+  Json::FastWriter jsonWriter;
+#else
+  // Since version 1.4.0, FastWriter is deprecated and replaced with
+  // StreamWriterBuilder
+  Json::StreamWriterBuilder jsonWriter;
+  jsonWriter["commentStyle"] = "None";
+  jsonWriter["indentation"] = "";
+#endif
+
+  if (resultPair.first.empty())
+  {
+    result["file"] = fileName;
+    result["results"] = "Unable to read file";
+  }
+  else
+  {
+    list<match> resultList = resultPair.second;
+    Json::Value results;
+    for (auto m : resultList)
+    {
+      Json::Value j;
+      j["start"] = m.start;
+      j["end"] = m.end;
+      j["type"] = m.type;
+      j["content"] = cleanMatch(resultPair.first, m);
+      results.append(j);
+    }
+    result["file"] = fileName;
+    result["results"] = results;
+  }
+  // Thread-Safety: output all matches JSON at once to STDOUT
+#pragma omp critical (jsonPrinter)
+  {
+    if (printComma)
+    {
+      cout << "," << endl;
+    }
+    else
+    {
+      printComma = true;
+    }
+    string jsonString;
+#if JSONCPP_VERSION_HEXA < ((1 << 24) | (4 << 16))
+    // For version below 1.4.0, every writer append `\n` at end.
+    // Find and replace it.
+    jsonString = jsonWriter.write(result);
+    jsonString.replace(jsonString.find("\n"), string("\n").length(), "");
+#else
+    // For version >= 1.4.0, \n is not appended.
+    jsonString = Json::writeString(jsonWriter, result);
+#endif
+    cout << "  " << jsonString << flush;
+  }
+}
+
+/**
+ * Print the result of current scan to stdout
+ * @param fileName   File which was scanned
+ * @param resultPair Result pair from scanSingleFile()
+ */
+void printResultToStdout(const std::string fileName,
+    const std::pair<string, list<match>> resultPair)
+{
+  if (resultPair.first.empty())
+  {
+    cout << fileName << " :: Unable to read file" << endl;
+    return;
+  }
+  stringstream ss;
+  ss << fileName << " ::" << endl;
+  // Output matches
+  list<match> resultList = resultPair.second;
+  for (auto m = resultList.begin();  m != resultList.end(); ++m)
+  {
+    ss << "\t[" << m->start << ':' << m->end << ':' << m->type << "] '"
+       << cleanMatch(resultPair.first, *m)
+       << "'" << endl;
+  }
+  // Thread-Safety: output all matches (collected in ss) at once to cout
+  cout << ss.str();
+}

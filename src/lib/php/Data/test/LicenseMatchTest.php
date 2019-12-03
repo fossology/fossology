@@ -102,5 +102,4 @@ class LicenseMatchTest extends \PHPUnit\Framework\TestCase
   {
     assertThat($this->licenseMatch->getLicenseId(), equalTo($this->id));
   }
-
 }

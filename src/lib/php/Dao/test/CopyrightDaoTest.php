@@ -26,9 +26,9 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
-if (!function_exists('Traceback_uri'))
-{
-  function Traceback_uri(){
+if (!function_exists('Traceback_uri')) {
+  function Traceback_uri()
+  {
     return 'Traceback_uri_if_desired';
   }
 }
@@ -112,8 +112,8 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
 
   private function searchContent($array, $content, $key='content')
   {
-    foreach($array as $entry) {
-      if(array_key_exists($key, $entry)) {
+    foreach ($array as $entry) {
+      if (array_key_exists($key, $entry)) {
         if ($entry[$key] === $content) {
           return true;
         }

@@ -1,0 +1,190 @@
+{# Copyright 2019 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <h2>{{ "Report Configuration"|trans }}</h2>
+  <form action="" name="formReportInfo" method="post">
+    <table border="1">
+      <tr>
+        <td align="center" colspan="2">
+          <h2>{{ "Unified Report"|trans }}</h2>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          {{ "Attribute"|trans }}
+        </th>
+        <th>
+        {{ "Information"|trans }}
+        </th>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Copyright Text(report Footer)"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="footerNote" style="width:98%" value="{{ footerNote|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Reviewed by (opt.)"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="reviewedBy" style="width:98%" value="{{ reviewedBy|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Report release date"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="reportRel" style="width:98%" value="{{ reportRel|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Community"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="community" style="width:98%" value="{{ community|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Component"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="component" style="width:98%" value="{{ component|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Version"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="version" style="width:98%" value="{{ version|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Release date"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="relDate" style="width:98%" value="{{ relDate|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Mainline /SW360 Portal Link"|trans }}
+        </td>
+        <td align="left">
+          <input type="text" name="sw360Link" style="width:98%" value="{{ sw360Link|e }}" />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "General assessment"|trans }}
+        </td>
+        <td align="left">
+          <textarea style="overflow:auto;width:98%;height:80px;" name="generalAssesment">{{ generalAssesment|e }}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Source / binary integration notes"|trans }}
+        </td>
+        <td align="left">
+          <input type="checkbox" name="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}<br />
+          <input type="checkbox" name="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Dependency notes"|trans }}
+        </td>
+        <td align="left">
+          <input type="checkbox" name="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}<br />
+          <input type="checkbox" name="dependencySource" {{ dependencySource }} />{{ "dependencies found in source code (see obligations)"|trans }}<br />
+          <input type="checkbox" name="dependencyBinary" {{ dependencyBinary }} />{{ "dependencies found in binaries (see obligations)"|trans }}
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Export restrictions by copyright owner"|trans }}
+        </td>
+        <td align="left">
+          <input type="checkbox" name="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}<br />
+          <input type="checkbox" name="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Restrictions for use by copyright owner \n<br/> (e.g. not for Nuclear Power)"|trans }}
+        </td>
+        <td align="left">
+          <input type="checkbox" name="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}<br />
+          <input type="checkbox" name="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Additional notes"|trans }}
+        </td>
+        <td align="left">
+          <textarea style="overflow:auto;width:98%;height:80px;" name="gaAdditional">{{ gaAdditional|e }}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "General Risks (optional)"|trans }}
+        </td>
+        <td align="left">
+          <textarea style="overflow:auto;width:98%;height:80px;" name="gaRisk">{{ gaRisk|e }}</textarea>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" colspan="2">
+          <h2>{{ "SPDX Report"|trans }}</h2>
+        </td>
+      </tr>
+      <tr>
+        <th>
+          {{ "Attribute"|trans }}
+        </th>
+        <th>
+        {{ "Information"|trans }}
+        </th>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Show SPDX license comments"|trans }}
+        </td>
+        <td align="left">
+	<input type="checkbox" name="spdxLicenseComment" {{ spdxLicenseComment }} />
+        </td>
+      </tr>
+      <tr>
+        <td align="left">
+          {{ "Ignore files with no info in SPDX"|trans }}
+        </td>
+        <td align="left">
+	<input type="checkbox" name="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
+        </td>
+      </tr>
+      <tr>
+        <td align="center" colspan="2">
+          <input type="submit" name="submitReportConf" value="Submit" />
+        </td>
+      </tr>
+    </table>
+  </form>
+
+
+{% endblock %}

@@ -42,8 +42,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $possibleOutputFormat = trim(GetParm("outputFormat",PARM_STRING));
     if (strcmp($possibleOutputFormat,"") !== 0 &&
         strcmp($possibleOutputFormat,self::DEFAULT_OUTPUT_FORMAT) !== 0 &&
-        ctype_alnum($possibleOutputFormat))
-    {
+        ctype_alnum($possibleOutputFormat)) {
       $this->outputFormat = $possibleOutputFormat;
     }
     parent::__construct(self::NAME, array(
@@ -81,28 +80,22 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $uploadIds = $request->get('uploads') ?: array();
     $uploadIds[] = intval($request->get('upload'));
     $addUploads = array();
-    foreach($uploadIds as $uploadId)
-    {
+    foreach ($uploadIds as $uploadId) {
       if (empty($uploadId)) {
         continue;
       }
-      try
-      {
+      try {
         $addUploads[$uploadId] = $this->getUpload($uploadId, $groupId);
-      }
-      catch(Exception $e)
-      {
+      } catch(Exception $e) {
         return $this->flushContent($e->getMessage());
       }
     }
     $folderId = $request->get('folder');
-    if(!empty($folderId))
-    {
+    if (!empty($folderId)) {
       /* @var $folderDao FolderDao */
       $folderDao = $this->getObject('dao.folder');
       $folderUploads = $folderDao->getFolderUploads($folderId, $groupId);
-      foreach($folderUploads as $uploadProgress)
-      {
+      foreach ($folderUploads as $uploadProgress) {
         $addUploads[$uploadProgress->getId()] = $uploadProgress;
       }
     }
@@ -110,11 +103,9 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
       return $this->flushContent(_('No upload selected'));
     }
     $upload = array_pop($addUploads);
-    try
-    {
+    try {
       list($jobId,$jobQueueId) = $this->getJobAndJobqueue($groupId, $upload, $addUploads);
-    }
-    catch (\Exception $ex) {
+    } catch (\Exception $ex) {
       return $this->flushContent($ex->getMessage());
     }
 
@@ -168,15 +159,14 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
       $sql .= ' AND jq_cmd_args=$5';
       $params[] = $jqCmdArgs;
       $log .= '.args';
-    }
-    else {
+    } else {
       $sql .= ' AND jq_cmd_args IS NULL';
     }
     $scheduled = $dbManager->getSingleRow($sql,$params,$log);
     if (!empty($scheduled)) {
       return array($scheduled['job_pk'],$scheduled['jq_pk']);
     }
-    if(empty($jqCmdArgs)) {
+    if (empty($jqCmdArgs)) {
       $jobName = $upload->getFilename();
     } else {
       $jobName = "Multi File SPDX2";
@@ -184,8 +174,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     $jobId = JobAddJob($userId, $groupId, $jobName, $uploadId);
     $error = "";
     $jobQueueId = $spdxTwoAgent->AgentAdd($jobId, $uploadId, $error, array(), $jqCmdArgs);
-    if ($jobQueueId<0)
-    {
+    if ($jobQueueId < 0) {
       throw new \Exception(_("Cannot schedule").": ".$error);
     }
     return array($jobId,$jobQueueId, $error);
@@ -200,20 +189,17 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   protected function getUpload($uploadId, $groupId)
   {
-    if ($uploadId <=0)
-    {
+    if ($uploadId <= 0) {
       throw new \Exception(_("parameter error: $uploadId"));
     }
     /* @var $uploadDao UploadDao */
     $uploadDao = $this->getObject('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, $groupId))
-    {
+    if (!$uploadDao->isAccessible($uploadId, $groupId)) {
       throw new \Exception(_("permission denied"));
     }
     /** @var Upload */
     $upload = $uploadDao->getUpload($uploadId);
-    if ($upload === null)
-    {
+    if ($upload === null) {
       throw new \Exception(_('cannot find uploadId'));
     }
     return $upload;

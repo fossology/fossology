@@ -102,5 +102,4 @@ abstract class PagedResult
    * @return string
    */
   protected abstract function renderContentText($text);
-
 }

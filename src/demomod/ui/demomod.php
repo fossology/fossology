@@ -23,7 +23,7 @@ use Fossology\Lib\Dao\UploadDao;
  * \brief browse an upload and display the demomod data (first bytes of the file)
  */
 
-define("TITLE_ui_demomod", _("Demomod View"));
+define("TITLE_UI_DEMOMOD", _("Demomod View"));
 
 /**
  * @class ui_demomod
@@ -32,7 +32,7 @@ define("TITLE_ui_demomod", _("Demomod View"));
 class ui_demomod extends FO_Plugin
 {
   var $Name       = "demomod";        ///< Mod name
-  var $Title      = TITLE_ui_demomod; ///< Page title
+  var $Title      = TITLE_UI_DEMOMOD; ///< Page title
   var $Dependency = array("browse");  ///< Dependecy for plugin
   var $DBaccess   = PLUGIN_DB_READ;   ///< DB access required
   var $uploadtree_tablename;          ///< Upload tree table to use
@@ -85,7 +85,8 @@ class ui_demomod extends FO_Plugin
    */
   function Initialize()
   {
-    if ($this->State != PLUGIN_STATE_INVALID)  return(1);  // don't re-run
+    if ($this->State != PLUGIN_STATE_INVALID) {  return(1);  // don't re-run
+    }
 
     return($this->State == PLUGIN_STATE_VALID);
   } // Initialize()
@@ -108,7 +109,8 @@ class ui_demomod extends FO_Plugin
     $rows = pg_num_rows($result);
     pg_free_result($result);
 
-    if ($rows == 0) return _("There is no demomod data for this upload.  Use Jobs > Schedule Agent.");
+    if ($rows == 0) { return _("There is no demomod data for this upload.  Use Jobs > Schedule Agent.");
+    }
 
     /* Get the scan result */
     /* First we need the pfile_pk */
@@ -116,7 +118,8 @@ class ui_demomod extends FO_Plugin
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_num_rows($result);
-    if ($rows == 0) return _("Internal consistency error. Failed: $sql");
+    if ($rows == 0) { return _("Internal consistency error. Failed: $sql");
+    }
     $row = pg_fetch_assoc($result);
     $pfile_fk = $row['pfile_fk'];
     pg_free_result($result);
@@ -126,7 +129,8 @@ class ui_demomod extends FO_Plugin
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rows = pg_num_rows($result);
-    if ($rows == 0) return _("Internal consistency error. Failed: $sql");
+    if ($rows == 0) { return _("Internal consistency error. Failed: $sql");
+    }
     $row = pg_fetch_assoc($result);
     $firstbytes = $row['firstbytes'];
     pg_free_result($result);
@@ -207,8 +211,9 @@ class ui_demomod extends FO_Plugin
 
       $Cached = false;
     }
-    else
-    $Cached = true;
+    else {
+      $Cached = true;
+    }
 
     if (!$this->OutputToStdout) {
       return($V);
@@ -227,7 +232,8 @@ class ui_demomod extends FO_Plugin
     else
     {
       /*  Cache Report if this took longer than 1/2 second*/
-      if ($Time > 0.5) ReportCachePut($CacheKey, $V);
+      if ($Time > 0.5) { ReportCachePut($CacheKey, $V);
+      }
     }
     return;
   }

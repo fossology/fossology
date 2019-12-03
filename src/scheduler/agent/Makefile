@@ -133,7 +133,6 @@ $(COVERAGE): %_cov.o: %.c $(HEAD) $(DEPEN)
 install: all install-conf
 	$(INSTALL_PROGRAM) fo_scheduler $(DESTDIR)$(MODDIR)/scheduler/agent/fo_scheduler
 	$(INSTALL_PROGRAM) fo_cli $(DESTDIR)$(MODDIR)/scheduler/agent/fo_cli
-	$(INSTALL_PROGRAM) defconf/$(INITFILE) $(DESTDIR)$(INITDIR)/$(INITFILE)
 	@if test ! -e $(CONFDIR)/mods-enabled/scheduler; then \
 		ln -s $(MODDIR)/scheduler $(CONFDIR)/mods-enabled; \
 	fi

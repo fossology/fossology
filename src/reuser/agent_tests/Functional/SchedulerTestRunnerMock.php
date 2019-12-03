@@ -120,5 +120,4 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
 
     return array(true, $output, $exitval);
   }
-
 }

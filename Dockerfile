@@ -9,7 +9,7 @@
 #
 # Description: Docker container image recipe
 
-FROM debian:jessie-slim as builder
+FROM debian:stretch-slim as builder
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
@@ -19,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
       git \
       lsb-release \
-      php5-cli \
+      php7.0-cli \
       sudo \
  && rm -rf /var/lib/apt/lists/*
 
@@ -28,6 +28,8 @@ COPY ./utils/utils.sh ./utils/utils.sh
 COPY ./src/copyright/mod_deps ./src/copyright/
 COPY ./src/delagent/mod_deps ./src/delagent/
 COPY ./src/mimetype/mod_deps ./src/mimetype/
+COPY ./src/nomos/mod_deps ./src/nomos/
+COPY ./src/ojo/mod_deps ./src/ojo/
 COPY ./src/pkgagent/mod_deps ./src/pkgagent/
 COPY ./src/scheduler/mod_deps ./src/scheduler/
 COPY ./src/ununpack/mod_deps ./src/ununpack/
@@ -47,7 +49,7 @@ RUN /fossology/utils/install_composer.sh
 RUN make install clean
 
 
-FROM debian:jessie-slim
+FROM debian:stretch-slim
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
@@ -75,7 +77,6 @@ RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 # configure apache
 COPY ./install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
 RUN a2enconf fossology.conf \
- && a2enmod rewrite \
  && mkdir -p /var/log/apache2/ \
  && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
  && ln -sf /proc/self/fd/1 /var/log/apache2/error.log

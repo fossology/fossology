@@ -16,7 +16,6 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Highlight;
@@ -41,7 +40,6 @@ class ui_view extends FO_Plugin
   protected $blockSizeHex = 8192;
   /** @var int */
   protected $blockSizeText = 81920;
-  
 
   function __construct()
   {
@@ -54,10 +52,12 @@ class ui_view extends FO_Plugin
     parent::__construct();
 
     if (array_key_exists('BlockSizeHex', $GLOBALS['SysConf']['SYSCONFIG'])) {
-      $this->blockSizeHex = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeHex']);
+      $this->blockSizeHex = max(64,
+        $GLOBALS['SysConf']['SYSCONFIG']['BlockSizeHex']);
     }
     if (array_key_exists('BlockSizeText', $GLOBALS['SysConf']['SYSCONFIG'])) {
-      $this->blockSizeText = max(64,$GLOBALS['SysConf']['SYSCONFIG']['BlockSizeText']);
+      $this->blockSizeText = max(64,
+        $GLOBALS['SysConf']['SYSCONFIG']['BlockSizeText']);
     }
 
     global $container;
@@ -81,16 +81,23 @@ class ui_view extends FO_Plugin
     $pageNumber = GetParm("page", PARM_INTEGER);
     $this->microMenu->addFormatMenuEntries($textFormat, $pageNumber);
 
-    $URI = Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+    $URI = Traceback_parm_keep(
+      array(
+        "show",
+        "format",
+        "page",
+        "upload",
+        "item"
+      ));
     $menuPosition = 59;
     $menuText = "View";
     $tooltipText = _("View file contents");
-    $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition, $this->Name, $this->Name . $URI, $tooltipText);
+    $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText, $menuPosition,
+      $this->Name, $this->Name . $URI, $tooltipText);
 
-    if (GetParm("mod", PARM_STRING) != $this->Name)
-    {
-      menu_insert("Browse::{$menuText}", -2, $this->Name . $URI, $tooltipText);
-      menu_insert("Browse::[BREAK]", -1);
+    if (GetParm("mod", PARM_STRING) != $this->Name) {
+      menu_insert("Browse::{$menuText}", - 2, $this->Name . $URI, $tooltipText);
+      menu_insert("Browse::[BREAK]", - 1);
     }
   } // RegisterMenus()
 
@@ -101,7 +108,9 @@ class ui_view extends FO_Plugin
    */
   function GetFileJumpMenu($Fin, $CurrPage, $PageSize, $Uri)
   {
-    if (!$Fin) return;
+    if (! $Fin) {
+      return;
+    }
     $Stat = fstat($Fin);
     $MaxSize = $Stat['size'];
     $MaxPage = intval($MaxSize / $PageSize);
@@ -110,47 +119,40 @@ class ui_view extends FO_Plugin
 
     $Pages = 0; /* How many pages are there? */
 
-    if ($CurrPage * $PageSize >= $MaxSize)
-    {
+    if ($CurrPage * $PageSize >= $MaxSize) {
       $CurrPage = 0;
       $CurrSize = 0;
     }
-    if ($CurrPage < 0)
-    {
+    if ($CurrPage < 0) {
       $CurrPage = 0;
     }
 
-    if ($CurrPage > 0)
-    {
+    if ($CurrPage > 0) {
       $text = _("First");
       $V .= "<a href='$Uri&page=0'>[$text]</a> ";
       $text = _("Prev");
       $V .= "<a href='$Uri&page=" . ($CurrPage - 1) . "'>[$text]</a> ";
-      $Pages++;
+      $Pages ++;
     }
-    for ($i = $CurrPage - 5; $i <= $CurrPage + 5; $i++)
-    {
-      if ($i == $CurrPage)
-      {
+    for ($i = $CurrPage - 5; $i <= $CurrPage + 5; $i ++) {
+      if ($i == $CurrPage) {
         $V .= "<b>" . ($i + 1) . "</b> ";
-      } else if (($i >= 0) && ($i <= $MaxPage))
-      {
+      } else if (($i >= 0) && ($i <= $MaxPage)) {
         $V .= "<a href='$Uri&page=$i'>" . ($i + 1) . "</a> ";
       }
     }
-    if ($CurrPage < $MaxPage)
-    {
+    if ($CurrPage < $MaxPage) {
       $text = _("Next");
       $V .= "<a href='$Uri&page=" . ($CurrPage + 1) . "'>[$text]</a>";
       $text = _("Last");
-      $V .= "<a href='$Uri&page=" . (intval(($MaxSize - 1) / $PageSize)) . "'>[$text]</a>";
-      $Pages++;
+      $V .= "<a href='$Uri&page=" . (intval(($MaxSize - 1) / $PageSize)) .
+        "'>[$text]</a>";
+      $Pages ++;
     }
     $V .= "</font>";
 
     /* If there is only one page, return nothing */
-    if ($Pages == 0)
-    {
+    if ($Pages == 0) {
       return;
     }
     return ($V);
@@ -160,98 +162,105 @@ class ui_view extends FO_Plugin
    * \brief Given a file handle, display "strings" of the file.
    * Output goes to stdout!
    */
-  function ShowText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
+  function ShowText($inputFile, $startOffset, $Flowed, $outputLength = -1,
+    $splitPositions = null, $insertBacklink = false)
   {
-    print $this->getText($inputFile,$startOffset,$Flowed,$outputLength,$splitPositions,$insertBacklink);
+    print
+      $this->getText($inputFile, $startOffset, $Flowed, $outputLength,
+        $splitPositions, $insertBacklink);
   }
 
   /**
    * \brief Given a file handle, display "strings" of the file.
    */
-  function getText($inputFile, $startOffset, $Flowed, $outputLength = -1, $splitPositions = null, $insertBacklink = false)
+  function getText($inputFile, $startOffset, $Flowed, $outputLength = -1,
+    $splitPositions = null, $insertBacklink = false)
   {
-    if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
-    {
+    if (! ($outputLength = $this->checkAndPrepare($inputFile, $startOffset,
+      $outputLength))) {
       return "";
     }
 
-    $output ="";
+    $output = "";
     $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
 
     fseek($inputFile, $startOffset, SEEK_SET);
-    $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
+    $textFragment = new TextFragment($startOffset,
+      fread($inputFile, $outputLength));
 
-    $renderedText = $this->textRenderer->renderText($textFragment, $splitPositions, $insertBacklink);
+    $renderedText = $this->textRenderer->renderText($textFragment,
+      $splitPositions, $insertBacklink);
 
-    $output .=($Flowed ? nl2br($renderedText) : $renderedText) . (!$Flowed ? "</pre>" : "") . "</div>\n";
+    $output .= ($Flowed ? nl2br($renderedText) : $renderedText) .
+      (! $Flowed ? "</pre>" : "") . "</div>\n";
 
     return $output;
   } // ShowText()
-
 
   /**
    * \brief Given a file handle, display a "hex dump" of the file.
    * Output goes to stdout!
    */
-  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = array())
+  function ShowHex($inputFile, $startOffset = 0, $outputLength = -1,
+    $splitPositions = array())
   {
-    print $this->getHex($inputFile,$startOffset,$outputLength,$splitPositions);
+    print $this->getHex($inputFile, $startOffset, $outputLength, $splitPositions);
   }
 
   /**
    * \brief Given a file handle, display a "hex dump" of the file.
    * Output goes to stdout!
    */
-  function getHex($inputFile, $startOffset = 0, $outputLength = -1, $splitPositions = array())
+  function getHex($inputFile, $startOffset = 0, $outputLength = -1,
+    $splitPositions = array())
   {
-    if (!($outputLength = $this->checkAndPrepare($inputFile, $startOffset, $outputLength)))
-    {
+    if (! ($outputLength = $this->checkAndPrepare($inputFile, $startOffset,
+      $outputLength))) {
       return "";
     }
 
     $output = "";
     fseek($inputFile, $startOffset, SEEK_SET);
-    $textFragment = new TextFragment($startOffset, fread($inputFile, $outputLength));
+    $textFragment = new TextFragment($startOffset,
+      fread($inputFile, $outputLength));
 
     $output .= "<div class='mono'>";
 
-    $renderedText = $this->textRenderer->renderHex($textFragment, $splitPositions);
-    $output .=  $renderedText;
+    $renderedText = $this->textRenderer->renderHex($textFragment,
+      $splitPositions);
+    $output .= $renderedText;
 
-    $output .=  "</div>\n";
+    $output .= "</div>\n";
 
     return $output;
   } // ShowHex()
 
   private function checkAndPrepare($inputFile, $startOffset, $outputLength)
   {
-    if (!$inputFile)
+    if (! $inputFile) {
       return False;
+    }
 
     $inputFileStat = fstat($inputFile);
     $inputFileSize = $inputFileStat['size'];
 
-    if ($outputLength < 0)
-    {
+    if ($outputLength < 0) {
       $outputLength = $inputFileSize;
     }
 
-    if (($startOffset < 0) || ($startOffset >= $inputFileSize))
-    {
+    if (($startOffset < 0) || ($startOffset >= $inputFileSize)) {
       return False;
     }
 
-    if ($outputLength == 0)
-    {
+    if ($outputLength == 0) {
       return false;
     }
     return $outputLength;
   }
 
-
   /**
    * \brief Generate the view contents in HTML and sends it
-   *  to stdout.
+   * to stdout.
    *
    * @param resource $inputFile
    * @param string $BackMod
@@ -265,10 +274,12 @@ class ui_view extends FO_Plugin
    *
    * \note This function is intended to be called from other plugins.
    */
-  function ShowView($inputFile = NULL, $BackMod = "browse",
-                    $ShowMenu = 1, $ShowHeader = 1, $ShowText = NULL, $ViewOnly = False, $DispView = True, $highlightEntries = array(), $insertBacklink = false)
+  function ShowView($inputFile = null, $BackMod = "browse", $ShowMenu = 1, $ShowHeader = 1,
+    $ShowText = null, $ViewOnly = false, $DispView = true, $highlightEntries = array(),
+    $insertBacklink = false)
   {
-    return $this->getView($inputFile, $BackMod, $ShowHeader, $ShowText, $highlightEntries, $insertBacklink);
+    return $this->getView($inputFile, $BackMod, $ShowHeader, $ShowText,
+      $highlightEntries, $insertBacklink);
   }
 
   /**
@@ -286,18 +297,17 @@ class ui_view extends FO_Plugin
    *
    * \note This function is intended to be called from other plugins.
    */
-  function getView($inputFile = NULL, $BackMod = "browse",
-                     $ShowHeader = 1, $ShowText = NULL,  $highlightEntries = array(), $insertBacklink = false, $getPageMenuInline = false)
+  function getView($inputFile = null, $BackMod = "browse", $ShowHeader = 1, $ShowText = null,
+    $highlightEntries = array(), $insertBacklink = false, $getPageMenuInline = false)
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       $output = "Invalid plugin state: " . $this->State;
       return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (!empty($Upload) && !$this->uploadDao->isAccessible($Upload,Auth::getGroupId()))
-    {
+    if (! empty($Upload) &&
+      ! $this->uploadDao->isAccessible($Upload, Auth::getGroupId())) {
       $output = "Access denied";
       return $getPageMenuInline ? array("Error", $output) : $output;
     }
@@ -305,34 +315,32 @@ class ui_view extends FO_Plugin
     $Item = GetParm("item", PARM_INTEGER);
     $Page = GetParm("page", PARM_INTEGER);
     $licenseId = GetParm("licenseId", PARM_INTEGER);
-    if (!$inputFile && empty($Item))
-    {
+    if (! $inputFile && empty($Item)) {
       $output = "invalid input file";
       return $getPageMenuInline ? array("Error", $output) : $output;
     }
 
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($Upload);
 
-    if ($ShowHeader)
-    {
-      $Uri = Traceback_uri() . "?mod=browse" . Traceback_parm_keep(array('item','show','folder','upload')) ;
+    if ($ShowHeader) {
+      $Uri = Traceback_uri() . "?mod=browse" .
+        Traceback_parm_keep(array('item', 'show', 'folder', 'upload'));
       /* No item */
-      $header = Dir2Browse($BackMod, $Item, NULL, $showBox=0, "View", -1, '', '', $uploadtree_tablename);
+      $header = Dir2Browse($BackMod, $Item, null, $showBox = 0, "View", - 1, '',
+        '', $uploadtree_tablename);
       $this->vars['micromenu'] = $header;
     }
 
     /* Display file contents */
-    $output="";
+    $output = "";
     $openedFin = False;
     $Format = $this->microMenu->getFormatParameter($Item);
-    if (empty($inputFile))
-    {
+    if (empty($inputFile)) {
       $inputFile = @fopen(RepPathItem($Item), "rb");
       if ($inputFile) {
         $openedFin = true;
       }
-      if (empty($inputFile))
-      {
+      if (empty($inputFile)) {
         $output = $this->outputWhenFileNotInRepo($Upload, $Item);
         return $getPageMenuInline ? array("Error", $output) : $output;
       }
@@ -341,72 +349,67 @@ class ui_view extends FO_Plugin
     $Uri = preg_replace('/&page=[0-9]*/', '', Traceback());
 
     $blockSize = $Format == 'hex' ? $this->blockSizeHex : $this->blockSizeText;
-    
-    if(!isset($Page) && !empty($licenseId))
-    {
-      $startPos = -1;
-      foreach ($highlightEntries as $highlightEntry)
-      {
-        if ($highlightEntry->getLicenseId()==$licenseId && ($startPos==-1 || $startPos>$highlightEntry->getStart()))
-        {
+
+    if (! isset($Page) && ! empty($licenseId)) {
+      $startPos = - 1;
+      foreach ($highlightEntries as $highlightEntry) {
+        if ($highlightEntry->getLicenseId() == $licenseId &&
+          ($startPos == - 1 || $startPos > $highlightEntry->getStart())) {
           $startPos = $highlightEntry->getStart();
         }
       }
-      if ($startPos != -1)
-      {
+      if ($startPos != - 1) {
         $Page = floor($startPos / $blockSize);
       }
     }
 
-    if (!empty($ShowText))
-    {
+    if (! empty($ShowText)) {
       echo $ShowText, "<hr>";
     }
     $PageMenu = $this->GetFileJumpMenu($inputFile, $Page, $blockSize, $Uri);
     $PageSize = $blockSize * $Page;
-    if (!empty($PageMenu) and !$getPageMenuInline)
-    {
+    if (! empty($PageMenu) and ! $getPageMenuInline) {
       $output .= "<center>$PageMenu</center><br>\n";
     }
-    
+
     $startAt = $PageSize;
-    $endAt = $PageSize+$blockSize;
+    $endAt = $PageSize + $blockSize;
     $relevantHighlightEntries = array();
-    foreach ($highlightEntries as $highlightEntry)
-    {
-      if ($highlightEntry->getStart()<$endAt && $highlightEntry->getEnd()>=$startAt)
-      {
+    foreach ($highlightEntries as $highlightEntry) {
+      if ($highlightEntry->getStart() < $endAt &&
+        $highlightEntry->getEnd() >= $startAt) {
         $relevantHighlightEntries[] = $highlightEntry;
       }
     }
-    
-    $this->highlightProcessor->sortHighlights($relevantHighlightEntries);
-    
-    $splitPositions = $this->highlightProcessor->calculateSplitPositions($relevantHighlightEntries);
 
-    if ($Format == 'hex')
-    {
-       $output .= $this->getHex($inputFile, $PageSize, $this->blockSizeHex, $splitPositions);
-    } else
-    {
-      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1, $this->blockSizeText, $splitPositions, $insertBacklink);
+    $this->highlightProcessor->sortHighlights($relevantHighlightEntries);
+
+    $splitPositions = $this->highlightProcessor->calculateSplitPositions(
+      $relevantHighlightEntries);
+
+    if ($Format == 'hex') {
+      $output .= $this->getHex($inputFile, $PageSize, $this->blockSizeHex,
+        $splitPositions);
+    } else {
+      $output .= $this->getText($inputFile, $PageSize, $Format == 'text' ? 0 : 1,
+        $this->blockSizeText, $splitPositions, $insertBacklink);
     }
-    
-    if (!empty($PageMenu) and !$getPageMenuInline)
-    {
+
+    if (! empty($PageMenu) and ! $getPageMenuInline) {
       $output .= "<P /><center>$PageMenu</center><br>\n";
     }
 
-    if ($openedFin)
-    {
+    if ($openedFin) {
       fclose($inputFile);
     }
-    
+
     return $getPageMenuInline ? array($PageMenu, $output) : $output;
   }
 
-  
-  /* Added by vincent implement when view files which not in repository, ask user if want to reunpack*/
+  /*
+   * Added by vincent implement when view files which not in repository, ask
+   * user if want to reunpack
+   */
   protected function outputWhenFileNotInRepo($uploadpk, $item)
   {
     global $Plugins;
@@ -418,45 +421,39 @@ class ui_view extends FO_Plugin
     $flag = 0;
     $output = '';
 
-    if ($state != 0 && $state != 2)
-    {
+    if ($state != 0 && $state != 2) {
       $flag = 1;
       $text = _("Reunpack job is running: you can see it in");
       $text1 = _("jobqueue");
-      $output .=  "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-    }
-    elseif (!empty($uploadunpack))
-    {
+      $output .= "<p> <font color=red>$text <a href='" . Traceback_uri() .
+        "?mod=showjobs'>$text1</a></font></p>";
+    } elseif (! empty($uploadunpack)) {
       $rc = $reunpackPlugin->AgentAdd($uploadpk);
-      if (empty($rc))
-      {
+      if (empty($rc)) {
         /* Need to refresh the screen */
-        $this->vars['message'] =  _("Unpack added to job queue");
+        $this->vars['message'] = _("Unpack added to job queue");
         $flag = 1;
         $text = _("Reunpack job is running: you can see it in");
         $text1 = _("jobqueue");
-        $output .= "<p> <font color=red>$text <a href='" . Traceback_uri() . "?mod=showjobs'>$text1</a></font></p>";
-      }
-      else
-      {
+        $output .= "<p> <font color=red>$text <a href='" . Traceback_uri() .
+          "?mod=showjobs'>$text1</a></font></p>";
+      } else {
         $text = _("Unpack of Upload failed");
         $this->vars['message'] = "$text: $rc";
       }
     }
 
     $text = _("File contents are not available in the repository.");
-    $output .=  "$text\n";
-    $output .=  $reunpackPlugin->ShowReunpackView($item, $flag);
+    $output .= "$text\n";
+    $output .= $reunpackPlugin->ShowReunpackView($item, $flag);
     return $output;
   }
-  
-  
+
   public function Output()
   {
-    return $this->ShowView(NULL, "browse");
+    return $this->ShowView(null, "browse");
   }
-
 }
 
-$NewPlugin = new ui_view;
+$NewPlugin = new ui_view();
 $NewPlugin->Initialize();

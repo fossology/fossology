@@ -96,25 +96,31 @@ class ui_view_info extends FO_Plugin
     }
     $vars['repoLocPage'] = $Page;
 
-    /**********************************
-     List File Info
-     **********************************/
-    if ($Page == 0)
-    {
+    /**
+     * ********************************
+     * List File Info
+     * ********************************
+     */
+    if ($Page == 0) {
       $sql = "SELECT * FROM uploadtree
         INNER JOIN pfile ON uploadtree_pk = $1
         AND pfile_fk = pfile_pk
         LIMIT 1;";
-      $row = $this->dbManager->getSingleRow($sql,array($Item),__METHOD__."GetFileDescribingRow");
+      $row = $this->dbManager->getSingleRow($sql, array($Item),
+        __METHOD__ . "GetFileDescribingRow");
       $bytes = $row['pfile_size'];
       $bytesH = HumanSize($bytes);
-      $bytes = number_format($bytes, 0, "", ",").' B';
-      if ($bytesH == $bytes) { $bytesH = ""; }
-      else { $bytesH = '(' . $bytesH . ')'; }
+      $bytes = number_format($bytes, 0, "", ",") . ' B';
+      if ($bytesH == $bytes) {
+        $bytesH = "";
+      } else {
+        $bytesH = '(' . $bytesH . ')';
+      }
       $vars['sizeInBytes'] = $bytes;
       $vars['sizeInMB'] = $bytesH;
       $vars['fileSha1'] = $row['pfile_sha1'];
       $vars['fileMd5'] = $row['pfile_md5'];
+      $vars['fileSha256'] = $row['pfile_sha256'];
       $vars['fileSize'] = $row['pfile_size'];
       $vars['filePfileId'] = $row['pfile_fk'];
     }
@@ -169,7 +175,7 @@ class ui_view_info extends FO_Plugin
     $vars = [];
     $vars['sightingsContent'] = $v;
     return $vars;
-  }//ShowSightings()
+  } //ShowSightings()
 
   /**
    * \brief Display the meta data associated with the file.
@@ -202,8 +208,9 @@ class ui_view_info extends FO_Plugin
     /* get mimetype */
     if (! empty($row['pfile_fk'])) {
       $sql = "select mimetype_name from pfile, mimetype where pfile_pk = $1 and pfile_mimetypefk=mimetype_pk";
-      $this->dbManager->prepare(__METHOD__."GetMimetype",$sql);
-      $result = $this->dbManager->execute(__METHOD__."GetMimetype",array($row['pfile_fk']));
+      $this->dbManager->prepare(__METHOD__ . "GetMimetype", $sql);
+      $result = $this->dbManager->execute(__METHOD__ . "GetMimetype",
+        array($row['pfile_fk']));
       if (pg_num_rows($result)) {
         $pmRow = pg_fetch_assoc($result);
         $vars['getMimeTypeName'] = $pmRow['mimetype_name'];
@@ -213,13 +220,18 @@ class ui_view_info extends FO_Plugin
 
     /* display upload origin */
     $sql = "select * from upload where upload_pk=$1";
-    $row = $this->dbManager->getSingleRow($sql,array($row['upload_fk']),__METHOD__."getUploadOrigin");
+    $row = $this->dbManager->getSingleRow($sql, array($row['upload_fk']),
+      __METHOD__ . "getUploadOrigin");
     if ($row) {
 
       /* upload source */
-      if ($row['upload_mode'] & 1 << 2) $text = _("Added by URL");
-      else if ($row['upload_mode'] & 1 << 3) $text = _("Added by file upload");
-      else if ($row['upload_mode'] & 1 << 4) $text = _("Added from filesystem");
+      if ($row['upload_mode'] & 1 << 2) {
+        $text = _("Added by URL");
+      } else if ($row['upload_mode'] & 1 << 3) {
+        $text = _("Added by file upload");
+      } else if ($row['upload_mode'] & 1 << 4) {
+        $text = _("Added from filesystem");
+      }
       $vars['fileUploadOriginInfo'] = $text;
       $vars['fileUploadOrigin'] = $row['upload_origin'];
 
@@ -498,62 +510,6 @@ class ui_view_info extends FO_Plugin
     return $vars;
   }
 
-  function ShowReportInfo($Upload)
-  {
-    $vars = [];
-    $row = $this->uploadDao->getReportInfo($Upload);
-    $checkBoxDefault = "unchecked";
-    $vars['nonCritical']        = $checkBoxDefault;
-    $vars['critical']           = $checkBoxDefault;
-    $vars['noDependency']       = $checkBoxDefault;
-    $vars['dependencySource']   = $checkBoxDefault;
-    $vars['dependencyBinary']   = $checkBoxDefault;
-    $vars['noExportRestriction'] = $checkBoxDefault;
-    $vars['exportRestriction']  = $checkBoxDefault;
-    $vars['noRestriction']      = $checkBoxDefault;
-    $vars['restrictionForUse']  = $checkBoxDefault;
-
-    if (! empty($row)) {
-      $reviewedBy = $row['ri_reviewed'];
-      $reportRel = $row['ri_report_rel'];
-      $community = $row['ri_community'];
-      $component = $row['ri_component'];
-      $version = $row['ri_version'];
-      $relDate = $row['ri_release_date'];
-      $sw360Link = $row['ri_sw360_link'];
-      $footerNote = $row['ri_footer'];
-      $generalAssesment = $row['ri_general_assesment'];
-      $gaAdditional = $row['ri_ga_additional'];
-      $gaRisk = $row['ri_ga_risk'];
-      $gaSelectionList = explode(',', $row['ri_ga_checkbox_selection']);
-    }
-
-    $vars['footerNote']           = $footerNote;
-    $vars['reviewedBy']           = $reviewedBy;
-    $vars['reportRel']            = $reportRel;
-    $vars['community']            = $community;
-    $vars['component']            = $component;
-    $vars['version']              = $version;
-    $vars['relDate']              = $relDate;
-    $vars['sw360Link']            = $sw360Link;
-    $vars['generalAssesment']     = $generalAssesment;
-    if (array_key_exists(8, $gaSelectionList)) {
-      $vars['nonCritical']        = $gaSelectionList[0];
-      $vars['critical']           = $gaSelectionList[1];
-      $vars['noDependency']       = $gaSelectionList[2];
-      $vars['dependencySource']   = $gaSelectionList[3];
-      $vars['dependencyBinary']   = $gaSelectionList[4];
-      $vars['noExportRestriction'] = $gaSelectionList[5];
-      $vars['exportRestriction']  = $gaSelectionList[6];
-      $vars['noRestriction']      = $gaSelectionList[7];
-      $vars['restrictionForUse']  = $gaSelectionList[8];
-    }
-    $vars['gaAdditional']         = $gaAdditional;
-    $vars['gaRisk']               = $gaRisk;
-
-    return $vars;
-  }
-
   /**
    * @brief Get the info regarding reused package
    * @param int $uploadId Get the reused package for this upload
@@ -598,76 +554,16 @@ class ui_view_info extends FO_Plugin
     return $vars;
   }
 
-  /**
-    * @param array $checkBoxListParams
-    * @return $cbSelectionList
-   */
-
-  protected function getCheckBoxSelectionList($checkBoxListParams)
-  {
-    foreach ($checkBoxListParams as $checkBoxListParam) {
-      $ret = GetParm($checkBoxListParam, PARM_STRING);
-      if (empty($ret)) {
-        $cbList[] = "unchecked";
-      } else {
-        $cbList[] = "checked";
-      }
-    }
-    $cbSelectionList = implode(",", $cbList);
-
-    return $cbSelectionList;
-  }
-
   public function Output()
   {
-    $uploadId = GetParm("upload",PARM_INTEGER);
-    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) return;
+    $uploadId = GetParm("upload", PARM_INTEGER);
+    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
+      return;
+    }
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
 
-    $submitReportInfo = GetParm("submitReportInfo", PARM_STRING);
-
-    if (isset($submitReportInfo)) {
-      $reviewedBy = GetParm('reviewedBy', PARM_TEXT);
-      $footerNote = GetParm('footerNote', PARM_TEXT);
-      $reportRel = GetParm('reportRel', PARM_TEXT);
-      $community = GetParm('community', PARM_TEXT);
-      $component = GetParm('component', PARM_TEXT);
-      $version = GetParm('version', PARM_TEXT);
-      $relDate = GetParm('relDate', PARM_TEXT);
-      $sw360Link = GetParm('sw360Link', PARM_TEXT);
-      $generalAssesment = GetParm('generalAssesment', PARM_TEXT);
-      $checkBoxListParams = array(
-        "nonCritical",
-        "critical",
-        "noDependency",
-        "dependencySource",
-        "dependencyBinary",
-        "noExportRestriction","exportRestriction","noRestriction","restrictionForUse");
-      $cbSelectionList = $this->getCheckBoxSelectionList($checkBoxListParams);
-      $gaAdditional = GetParm('gaAdditional', PARM_TEXT);
-      $gaRisk = GetParm('gaRisk', PARM_TEXT);
-      $sql = "UPDATE report_info SET ri_reviewed=$2, ri_footer=$3, ri_report_rel=$4, ri_community=$5, " .
-        "ri_component=$6,ri_version=$7, ri_release_date=$8, ri_sw360_link=$9, " .
-        "ri_general_assesment=$10, ri_ga_additional=$11, ri_ga_risk=$12, ri_ga_checkbox_selection=$13 " .
-        "WHERE upload_fk=$1;";
-      $this->dbManager->prepare(__METHOD__ . "updateReportInfoData", $sql);
-      $result = $this->dbManager->execute(__METHOD__ . "updateReportInfoData",
-        array(
-          $uploadId,
-          $reviewedBy,
-          $footerNote,
-          $reportRel,
-          $community,
-          $component,
-          $version,
-          $relDate,
-          $sw360Link, $generalAssesment, $gaAdditional, $gaRisk, $cbSelectionList));
-      $this->dbManager->freeResult($result);
-    }
-
-    $this->vars += $this->ShowReportInfo($uploadId);
     $this->vars += $this->ShowTagInfo($uploadId, $itemId);
     $this->vars += $this->ShowPackageinfo($uploadId, $itemId, 1);
     $this->vars += $this->ShowMetaView($uploadId, $itemId);
@@ -680,7 +576,7 @@ class ui_view_info extends FO_Plugin
   {
     return "ui-view-info.html.twig";
   }
-
 }
-$NewPlugin = new ui_view_info;
+
+$NewPlugin = new ui_view_info();
 $NewPlugin->Initialize();

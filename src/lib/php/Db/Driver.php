@@ -97,13 +97,13 @@ interface Driver
    * @return mixed
    */
   public function booleanToDb($booleanValue);
-  
+
   /**
    * @param string
    * @return string
    */
   public function escapeString($string);
-  
+
   /**
    * @param string $tableName
    * @return bool

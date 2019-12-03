@@ -31,7 +31,8 @@ class LicenseMainGetter extends ClearedGetterCommon
   /** @var LicenseDao */
   private $licenseDao;
 
-  public function __construct() {
+  public function __construct()
+  {
     global $container;
 
     $this->clearingDao = $container->get('dao.clearing');
@@ -48,24 +49,24 @@ class LicenseMainGetter extends ClearedGetterCommon
 
     $allStatements = array();
     foreach ($mainLicIds as $originLicenseId) {
-      $allLicenseCols = $this->licenseDao->getLicenseById($originLicenseId, $groupId); 
+      $allLicenseCols = $this->licenseDao->getLicenseById($originLicenseId, $groupId);
       $allStatements[] = array(
         'licenseId' => $originLicenseId,
         'risk' => $allLicenseCols->getRisk(),
         'content' => $licenseMap->getProjectedShortname($originLicenseId),
         'text' => $allLicenseCols->getText()
       );
-      
+
     }
     return $allStatements;
   }
-  
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null)
+
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
-    if(!$extended){
-      for($i=0; $i<=count($statements); $i++){
+    if (!$extended) {
+      for ($i=0; $i<=count($statements); $i++) {
         unset($statements[$i]['risk']);
       }
     }

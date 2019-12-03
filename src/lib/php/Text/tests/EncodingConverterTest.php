@@ -61,5 +61,4 @@ class EncodingConverterTest extends \PHPUnit\Framework\TestCase
     assertThat( $outputString, startsWith($this->testString));
     assertThat( strlen($outputString), is(greaterThan(2 * strlen($this->testString))));
   }
-
 }

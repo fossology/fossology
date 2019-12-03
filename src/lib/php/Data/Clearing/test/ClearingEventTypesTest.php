@@ -21,9 +21,11 @@ namespace Fossology\Lib\Data\Clearing;
 
 use Fossology\Lib\Test\EnumMapTestBase;
 
-class ClearingEventTypesTest extends EnumMapTestBase {
+class ClearingEventTypesTest extends EnumMapTestBase
+{
 
-  protected function setUp() {
+  protected function setUp()
+  {
     $this->setTypes(new ClearingEventTypes());
   }
 
@@ -37,4 +39,3 @@ class ClearingEventTypesTest extends EnumMapTestBase {
     $this->checkMapping(ClearingEventTypes::BULK, "Bulk");
   }
 }
- 

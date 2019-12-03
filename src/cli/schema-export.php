@@ -44,10 +44,8 @@ $SchemaFilePath = "$MODDIR/www/ui/core-schema.dat";
 
 /* command-line options */
 $Options = getopt($AllPossibleOpts);
-foreach($Options as $Option => $OptVal)
-{
-  switch($Option)
-  {
+foreach ($Options as $Option => $OptVal) {
+  switch ($Option) {
     case 'c': /* used by fo_wrapper */
       break;
     case 'd': /* optional database name */
@@ -65,30 +63,23 @@ foreach($Options as $Option => $OptVal)
   }
 }
 
-if($showUsage)
-{
+if ($showUsage) {
   global $argv;
 
   $usage = "Usage: " . basename($argv[0]) . " [options]
   Update FOSSology database.  Options are:
   -d  {database name} default is 'fossology'
-  -f  {output file} 
+  -f  {output file}
   -h  this help usage";
   print "$usage\n";
-}
-else
-{ 
-  if (file_exists($SchemaFilePath) && !@unlink($SchemaFilePath))
-  {
+} else {
+  if (file_exists($SchemaFilePath) && !@unlink($SchemaFilePath)) {
     $FailMsg = "Existing schema data file ($SchemaFilePath) could not be removed.";
-  }
-  else
-  {
+  } else {
     $FailMsg = ExportSchema($SchemaFilePath);
   }
-  
-  if ($FailMsg !== false)
-  {
+
+  if ($FailMsg !== false) {
     print "ERROR: $FailMsg \n";
     exit(1);
   }

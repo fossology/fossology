@@ -41,7 +41,7 @@ use Symfony\Component\HttpFoundation\Response;
 class AjaxFileBrowser extends DefaultPlugin
 {
   const NAME = "ajax_file_browser";
-  
+
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
@@ -52,9 +52,10 @@ class AjaxFileBrowser extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
-  
-  public function __construct() {
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+
+  public function __construct()
+  {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Ajax: File Browser"),
         self::DEPENDENCIES => array("fileBrowse"),
@@ -71,7 +72,8 @@ class AjaxFileBrowser extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request) {
+  protected function handle(Request $request)
+  {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
     if (!$this->uploadDao->isAccessible($upload, $groupId)) {
@@ -82,11 +84,10 @@ class AjaxFileBrowser extends DefaultPlugin
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
-    if (empty($left))
-    {
+    if (empty($left)) {
        throw new \Exception("Job unpack/adj2nest hasn't completed.");
     }
-    
+
     $scannerAgents = array_keys($this->agentNames);
     $scanJobProxy = new ScanJobProxy($this->agentDao, $upload);
     $scanJobProxy->createAgentStatus($scannerAgents);
@@ -96,7 +97,7 @@ class AjaxFileBrowser extends DefaultPlugin
     $UniqueTagArray = array();
     $this->licenseProjector = new LicenseMap($this->getObject('db.manager'),$groupId,LicenseMap::CONCLUSION,true);
     $vars = $this->createFileListing($tag_pk, $itemTreeBounds, $UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy);
-    
+
     return new JsonResponse(array(
             'sEcho' => intval($request->get('sEcho')),
             'aaData' => $vars['fileData'],
@@ -117,37 +118,31 @@ class AjaxFileBrowser extends DefaultPlugin
    */
   private function createFileListing($tagId, ItemTreeBounds $itemTreeBounds, &$UniqueTagArray, $selectedAgentId, $groupId, $scanJobProxy)
   {
-    if (!empty($selectedAgentId))
-    {
+    if (!empty($selectedAgentId)) {
       $agentName = $this->agentDao->getAgentName($selectedAgentId);
       $selectedScanners = array($agentName=>$selectedAgentId);
-    }
-    else
-    {
+    } else {
       $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
-    
+
     /** change the license result when selecting one version of nomos */
     $uploadId = $itemTreeBounds->getUploadId();
     $isFlat = isset($_GET['flatten']);
 
-    if ($isFlat)
-    {
+    if ($isFlat) {
       $options = array(UploadTreeProxy::OPT_RANGE => $itemTreeBounds);
-    }
-    else
-    {
+    } else {
       $options = array(UploadTreeProxy::OPT_REALPARENT => $itemTreeBounds->getItemId());
     }
-    
+
     $descendantView = new UploadTreeProxy($uploadId, $options, $itemTreeBounds->getUploadTreeTableName(), 'uberItems');
 
     $vars['iTotalDisplayRecords'] = $descendantView->count();
-    
+
     $columnNamesInDatabase = array($isFlat?'ufile_name':'lft');
     $defaultOrder = array(array(0, "asc"));
     $orderString = $this->getObject('utils.data_tables_utility')->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
-    
+
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
     if ($offset) {
@@ -157,44 +152,38 @@ class AjaxFileBrowser extends DefaultPlugin
       $orderString .= " LIMIT $limit";
     }
 
-    /* Get ALL the items under this Uploadtree_pk */ 
+    /* Get ALL the items under this Uploadtree_pk */
     $sql = $descendantView->getDbViewQuery()." $orderString";
     $dbManager = $this->getObject('db.manager');
-            
+
     $dbManager->prepare($stmt=__METHOD__.$orderString,$sql);
     $res = $dbManager->execute($stmt,$descendantView->getParams());
     $descendants = $dbManager->fetchAll($res);
     $dbManager->freeResult($res);
-    
+
     /* Filter out Children that don't have tag */
-    if (!empty($tagId))
-    {
+    if (!empty($tagId)) {
       TagFilter($descendants, $tagId, $itemTreeBounds->getUploadTreeTableName());
     }
-    if (empty($descendants))
-    {
+    if (empty($descendants)) {
       $vars['fileData'] = array();
       return $vars;
     }
-    
+
     if ($isFlat) {
       $firstChild = reset($descendants);
       $lastChild = end($descendants);
       $nameRange = array($firstChild['ufile_name'],$lastChild['ufile_name']);
-    }
-    else {
+    } else {
       $nameRange = array();
     }
 
     /*******    File Listing     ************/
     $pfileLicenses = array();
-    foreach($selectedScanners as $agentName=>$agentId)
-    {
+    foreach ($selectedScanners as $agentName=>$agentId) {
       $licensePerPfile = $this->licenseDao->getLicenseIdPerPfileForAgentId($itemTreeBounds, $agentId, $isFlat, $nameRange);
-      foreach ($licensePerPfile as $pfile => $licenseRow)
-      {
-        foreach ($licenseRow as $licId => $row)
-        {
+      foreach ($licensePerPfile as $pfile => $licenseRow) {
+        foreach ($licenseRow as $licId => $row) {
           $lic = $this->licenseProjector->getProjectedShortname($licId);
           $pfileLicenses[$pfile][$lic][$agentName] = $row;
         }
@@ -203,17 +192,16 @@ class AjaxFileBrowser extends DefaultPlugin
 
     $baseUri = Traceback_uri().'?mod=fileBrowse'.Traceback_parm_keep(array('upload','folder','show'));
 
-    $tableData = array();    
+    $tableData = array();
     $latestSuccessfulAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
-    foreach ($descendants as $child)
-    {
-      if (empty($child))
-      {
+    foreach ($descendants as $child) {
+      if (empty($child)) {
         continue;
       }
-      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId, $pfileLicenses, $groupId, $baseUri, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
+      $tableData[] = $this->createFileDataRow($child, $uploadId, $selectedAgentId,
+        $pfileLicenses, $groupId, $baseUri, $UniqueTagArray, $isFlat, $latestSuccessfulAgentIds);
     }
-    
+
     $vars['fileData'] = $tableData;
     return $vars;
   }
@@ -236,33 +224,26 @@ class AjaxFileBrowser extends DefaultPlugin
     $fileId = $child['pfile_fk'];
     $childUploadTreeId = $child['uploadtree_pk'];
     $linkUri = '';
-    if (!empty($fileId))
-    {
+    if (!empty($fileId)) {
       $linkUri = Traceback_uri();
       $linkUri .= "?mod=view-license&upload=$uploadId&item=$childUploadTreeId";
-      if ($selectedAgentId)
-      {
+      if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
       }
     }
 
     /* Determine link for containers */
     $isContainer = Iscontainer($child['ufile_mode']);
-    if($isContainer && !$isFlat)
-    {
+    if ($isContainer && !$isFlat) {
       $uploadtree_pk = $child['uploadtree_pk'];
       $linkUri = "$uri&item=" . $uploadtree_pk;
-      if ($selectedAgentId)
-      {
+      if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
       }
-    }
-    else if ($isContainer)
-    {
+    } else if ($isContainer) {
       $uploadtree_pk = Isartifact($child['ufile_mode']) ? DirGetNonArtifact($childUploadTreeId, $this->uploadtree_tablename) : $childUploadTreeId;
       $linkUri = "$uri&item=" . $uploadtree_pk;
-      if ($selectedAgentId)
-      {
+      if ($selectedAgentId) {
         $linkUri .= "&agentId=$selectedAgentId";
       }
     }
@@ -270,35 +251,27 @@ class AjaxFileBrowser extends DefaultPlugin
     /* Populate the output ($VF) - file list */
     /* id of each element is its uploadtree_pk */
     $fileName = htmlspecialchars($child['ufile_name']);
-    if ($isContainer)
-    {
+    if ($isContainer) {
       $fileName = "<a href='$linkUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
-    } else if (!empty($linkUri))
-    {
+    } else if (!empty($linkUri)) {
       $fileName = "<a href='$linkUri'>$fileName</a>";
     }
     /* show licenses under file name */
-    $childItemTreeBounds = 
+    $childItemTreeBounds =
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
     $licenseEntries = array();
-    if ($isContainer)
-    {
+    if ($isContainer) {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
-    } else
-    {
-      if (array_key_exists($fileId, $pfileLicenses))
-      {
-        foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo)
-        {
+    } else {
+      if (array_key_exists($fileId, $pfileLicenses)) {
+        foreach ($pfileLicenses[$fileId] as $shortName => $rfInfo) {
           $agentEntries = array();
-          foreach ($rfInfo as $agent => $match)
-          {
+          foreach ($rfInfo as $agent => $match) {
             $agentName = $this->agentNames[$agent];
             $agentEntry = "<a href='?mod=view-license&upload=$child[upload_fk]&item=$childUploadTreeId&format=text&agentId=$match[agent_id]&licenseId=$match[license_id]#highlight'>" . $agentName . "</a>";
 
-            if ($match['match_percentage'] > 0)
-            {
+            if ($match['match_percentage'] > 0) {
               $agentEntry .= ": $match[match_percentage]%";
             }
             $agentEntries[] = $agentEntry;
@@ -307,13 +280,12 @@ class AjaxFileBrowser extends DefaultPlugin
         }
       }
     }
-    
+
     $licenseList = implode(', ', $licenseEntries);
 
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
-    if (! $isContainer)
-    {
+    if (! $isContainer) {
       $text = _("Copyright/Email/Url");
       $fileListLinks .= "[<a href='" . Traceback_uri() . "?mod=copyright-view&upload=$uploadId&item=$childUploadTreeId' >$text</a>]";
       $text = _("ReadMe_OSS");
@@ -323,7 +295,7 @@ class AjaxFileBrowser extends DefaultPlugin
     }
 
     return array($fileName, $licenseList, $fileListLinks);
-  } 
+  }
 }
 
 register_plugin(new AjaxFileBrowser());

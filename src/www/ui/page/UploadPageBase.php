@@ -15,7 +15,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
-         
+
 namespace Fossology\UI\Page;
 
 use Fossology\Lib\Auth\Auth;
@@ -37,6 +37,7 @@ abstract class UploadPageBase extends DefaultPlugin
   const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
   const PUBLIC_ALL = 'public';
   const PUBLIC_GROUPS = 'protected';
+  const UPLOAD_GROUP = 'groupId';
 
   /** @var FolderDao */
   private $folderDao;
@@ -44,7 +45,7 @@ abstract class UploadPageBase extends DefaultPlugin
   private $uploadDao;
   /** @var Logger */
   private $logger;
-  
+
   public function __construct($name, $parameters = array())
   {
     parent::__construct($name, $parameters);
@@ -55,16 +56,15 @@ abstract class UploadPageBase extends DefaultPlugin
   }
   abstract protected function handleUpload(Request $request);
   abstract protected function handleView(Request $request, $vars);
-  
+
   protected function handle(Request $request)
   {
     // Handle request
     $this->folderDao->ensureTopLevelFolder();
-    
+
     $message = "";
     $description = "";
-    if ($request->isMethod(Request::METHOD_POST))
-    {
+    if ($request->isMethod(Request::METHOD_POST)) {
       list($success, $message, $description) = $this->handleUpload($request);
     }
     $vars['message'] = $message;
@@ -81,29 +81,28 @@ abstract class UploadPageBase extends DefaultPlugin
     $vars['baseUrl'] = $request->getBaseUrl();
     $vars['moduleName'] = $this->getName();
     $vars[self::FOLDER_PARAMETER_NAME] = $request->get(self::FOLDER_PARAMETER_NAME);
-    
+
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $vars['parmAgentContents'] = array();
     $vars['parmAgentFoots'] = array();
-    foreach($parmAgentList as $parmAgent) {
+    foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
       $vars['parmAgentContents'][] = $agent->renderContent($vars);
       $vars['parmAgentFoots'][] = $agent->renderFoot($vars);
     }
-    
+
     $session = $request->getSession();
     $session->set(self::UPLOAD_FORM_BUILD_PARAMETER_NAME, time().':'.$_SERVER['REMOTE_ADDR']);
     $vars['uploadFormBuild'] = $session->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME);
     $vars['uploadFormBuildParameterName'] = self::UPLOAD_FORM_BUILD_PARAMETER_NAME;
 
-    if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE)
-    {
+    if (@$_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
       $skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
       $vars['agentCheckBoxMake'] = AgentCheckBoxMake(-1, $skip);
     }
     return $this->handleView($request, $vars);
   }
-  
+
   protected function postUploadAddJobs(Request $request, $fileName, $uploadId, $jobId = null, $wgetDependency = false)
   {
     $userId = Auth::getUserId();
@@ -113,13 +112,13 @@ abstract class UploadPageBase extends DefaultPlugin
       $jobId = JobAddJob($userId, $groupId, $fileName, $uploadId);
     }
     $dummy = "";
+    $unpackArgs = intval($request->get('scm')) == 1 ? '-I' : '';
     $adj2nestDependencies = array();
-    if ($wgetDependency)
-    {
-      $adj2nestDependencies = array(array('name'=>'agent_unpack',AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
+    if ($wgetDependency) {
+      $adj2nestDependencies = array(array('name'=>'agent_unpack','args'=>$unpackArgs,AgentPlugin::PRE_JOB_QUEUE=>array('wget_agent')));
     }
     $adj2nestplugin = \plugin_find('agent_adj2nest');
-    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependencies);
+    $adj2nestplugin->AgentAdd($jobId, $uploadId, $dummy, $adj2nestDependencies, null, (empty($adj2nestDependencies) ? $unpackArgs : ''));
 
     $checkedAgents = checkedAgents();
     AgentSchedule($jobId, $uploadId, $checkedAgents);
@@ -128,17 +127,17 @@ abstract class UploadPageBase extends DefaultPlugin
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
-    foreach($parmAgentList as $parmAgent) {
+    foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
       $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
     }
-    
+
     $status = GetRunnableJobList();
     $message = empty($status) ? _("Is the scheduler running? ") : "";
     $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-    $message .= _("The file") . " " . $fileName . " " . _("has been uploaded. It is") . ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
-    if ($request->get('public')==self::PUBLIC_GROUPS)
-    {
+    $message .= _("The file") . " " . $fileName . " " . _("has been uploaded. It is") .
+        ' <a href=' . $jobUrl . '>upload #' . $uploadId . "</a>.\n";
+    if ($request->get('public')==self::PUBLIC_GROUPS) {
       $this->getObject('dao.upload.permission')->makeAccessibleToAllGroupsOf($uploadId, $userId);
     }
     return $message;
@@ -150,29 +149,25 @@ abstract class UploadPageBase extends DefaultPlugin
    *
    * \param $str - the string to check
    * \param $char - the character to search for
-   
+
    * \return boolean
    */
   function str_contains_notescaped_char($str, $char)
   {
     $pos = 0;
     while ($pos < strlen($str) &&
-           ($pos = strpos($str,$char,$pos)) !== FALSE)
-    {
-      foreach(range(($pos++) -1, 1, -2) as $tpos)
-      {
-        if ($tpos > 0 && $str[$tpos] !== '\\')
-        {
+           ($pos = strpos($str,$char,$pos)) !== false) {
+      foreach (range(($pos++) -1, 1, -2) as $tpos) {
+        if ($tpos > 0 && $str[$tpos] !== '\\') {
           break;
         }
-        if ($tpos > 1 && $str[$tpos - 1] !== '\\')
-        {
+        if ($tpos > 1 && $str[$tpos - 1] !== '\\') {
           continue 2;
         }
       }
-      return TRUE;
+      return true;
     }
-    return FALSE;
+    return false;
   }
 
   /**
@@ -201,7 +196,7 @@ abstract class UploadPageBase extends DefaultPlugin
   protected function path_can_escape($path)
   {
     return $this->str_contains_notescaped_char($path, '$')
-      || strpos($path,'..')!==FALSE;
+      || strpos($path,'..') !== false;
   }
 
   /**
@@ -216,43 +211,33 @@ abstract class UploadPageBase extends DefaultPlugin
    */
   function normalize_path($path, $host="localhost", $appendix="")
   {
-    if(strpos($path,'/')===FALSE || $path === '/')
-    {
-      return FALSE;
+    if (strpos($path,'/') === false || $path === '/') {
+      return false;
     }
-    if($this->path_is_pattern($path))
-    {
+    if ($this->path_is_pattern($path)) {
       $bpath = basename($path);
-      if ($this->path_can_escape($bpath))
-      {
-        return FALSE;
+      if ($this->path_can_escape($bpath)) {
+        return false;
       }
 
-      if(strcmp($host,"localhost") === 0)
-      {
+      if (strcmp($host,"localhost") === 0) {
         return $this->normalize_path(dirname($path),
                                      $host,
                                      $bpath . ($appendix == '' ?
                                                '' :
                                                '/' . $appendix));
-      }
-      else
-      {
-        if($this->path_can_escape($path))
-        {
-          return FALSE;
+      } else {
+        if ($this->path_can_escape($path)) {
+          return false;
         }
         return $path . ($appendix == '' ?
                         '' :
                         '/' . $appendix);
       }
-    }
-    else
-    {
+    } else {
       $rpath = realpath($path);
-      if ($rpath === FALSE)
-      {
-        return FALSE;
+      if ($rpath === false) {
+        return false;
       }
       return $rpath . ($appendix == '' ?
                        '' :

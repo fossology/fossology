@@ -35,25 +35,24 @@ class Reflectory
     /** @var ReflectionMethod */
     $method = $reflection->getMethod($fun);
     $method->setAccessible(true);
-    return $method->invokeArgs($object,$args);  
+    return $method->invokeArgs($object,$args);
   }
-  
+
   public static function getObjectsProperty($object, $prop)
   {
-    $reflection = new ReflectionClass($object); 
+    $reflection = new ReflectionClass($object);
     /** @var ReflectionProperty */
     $property = $reflection->getProperty($prop);
     $property->setAccessible(true);
     return $property->getValue($object);
   }
-  
+
   public static function setObjectsProperty($object, $prop, $value)
   {
-    $reflection = new ReflectionClass($object); 
+    $reflection = new ReflectionClass($object);
     /** @var ReflectionProperty */
     $property = $reflection->getProperty($prop);
     $property->setAccessible(true);
     $property->setValue($object, $value);
   }
-  
 }

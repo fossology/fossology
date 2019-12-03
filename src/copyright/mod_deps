@@ -75,9 +75,9 @@ CODENAME=$(lsb_release --codename --short)
 if [[ $BUILDTIME ]]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
-    Debian|Ubuntu|LinuxMint)
+    Debian|Ubuntu)
       apt-get $YesOpt install \
-        libjsoncpp-dev
+        libjsoncpp-dev libboost-system-dev libboost-filesystem-dev
       ;;
     Fedora)
       yum $YesOpt install \
@@ -88,6 +88,7 @@ if [[ $BUILDTIME ]]; then
       yum $YesOpt install \
         jsoncpp-devel
       ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
   esac
 fi
 
@@ -96,10 +97,16 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       case "$CODENAME" in
-        jessie|trusty)
-          apt-get $YesOpt install libjsoncpp0;;
-        stretch|buster|sid|artful|bionic|xenial|cosmic)
-          apt-get $YesOpt install libjsoncpp1;;
+        jessie)
+          apt-get $YesOpt install libjsoncpp0 libboost-filesystem1.55.0;;
+        stretch)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0;;
+        buster|sid)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0;;
+        xenial)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.58.0;;
+        bionic)
+          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.65.1;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
       esac;;
     Fedora)
@@ -111,6 +118,7 @@ if [[ $RUNTIME ]]; then
       yum $YesOpt install \
         jsoncpp
       ;;
+    *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
   esac
 fi
 

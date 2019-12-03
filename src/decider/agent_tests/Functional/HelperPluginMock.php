@@ -39,7 +39,8 @@ $GLOBALS['xyyzzzDeciderJob'] = $deciderPlugin;
  * @param string $x
  * @return Mockery::MockInterface Mock plugin object
  */
-function plugin_find($x){
+function plugin_find($x)
+{
   return $GLOBALS['xyyzzzDeciderJob'];
 }
 /**
@@ -49,6 +50,7 @@ function plugin_find($x){
  * @param int $uploadId
  * @return int Mock job id
  */
-function IsAlreadyScheduled($jobId, $agentName, $uploadId){
+function IsAlreadyScheduled($jobId, $agentName, $uploadId)
+{
   return 177;
 }

@@ -54,15 +54,12 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $output = "";
     $retCode = -1;
-    if ($success)
-    {
+    if ($success) {
       while (($buffer = fgets($pipeFd, 4096)) !== false) {
         $output .= $buffer;
       }
       $retCode = pclose($pipeFd);
-    }
-    else
-    {
+    } else {
       print "failed opening pipe to $cmd";
     }
 

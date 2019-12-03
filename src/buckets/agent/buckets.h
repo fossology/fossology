@@ -36,7 +36,8 @@
 #include "liccache.h"
 #define FUNCTION
 
-#define myBUFSIZ	2048
+#define myBUFSIZ       2048
+#define MAXSQL         1024
 
 #define IsContainer(mode)  ((mode & 1<<29) != 0)
 #define IsArtifact(mode)   ((mode & 1<<28) != 0)

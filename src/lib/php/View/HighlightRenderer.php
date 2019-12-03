@@ -29,10 +29,10 @@ use Fossology\Lib\Data\SplitPosition;
 class HighlightRenderer
 {
   const DEFAULT_PADDING = 0;
-  
+
   public $classMapping = array('' => '',
             Highlight::UNDEFINED=>'hi-undefined',
-          
+
             Highlight::MATCH => 'hi-match',
             Highlight::CHANGED => 'hi-changed',
             Highlight::ADDED => 'hi-added',
@@ -48,7 +48,7 @@ class HighlightRenderer
             Highlight::IP => 'hi-ip',
             Highlight::ECC => 'hi-mediumorchid'
           );
-  
+
   /**
    * @param SplitPosition $entry
    * @return string
@@ -61,11 +61,9 @@ class HighlightRenderer
 
     $wrappendElement = "";
 
-    if ($highlight)
-    {
+    if ($highlight) {
       $htmlElement = $highlight->getHtmlElement();
-      if ($htmlElement)
-      {
+      if ($htmlElement) {
         $wrappendElement = $htmlElement->getOpeningText();
       }
     }
@@ -83,11 +81,9 @@ class HighlightRenderer
 
     $wrappendElement = "";
 
-    if ($highlight)
-    {
+    if ($highlight) {
       $htmlElement = $highlight->getHtmlElement();
-      if ($htmlElement)
-      {
+      if ($htmlElement) {
         $wrappendElement = $htmlElement->getClosingText();
       }
     }
@@ -104,12 +100,10 @@ class HighlightRenderer
   public function createStyleWithPadding($type, $title, $depth = 0)
   {
     $style = $this->createStartSpan($type, $title);
-    if ($depth < self::DEFAULT_PADDING)
-    {
+    if ($depth < self::DEFAULT_PADDING) {
       $padd = (2 * (self::DEFAULT_PADDING - $depth - 2)) . 'px';
       return $this->getStyleWithPadding($padd, $style);
-    } else
-    {
+    } else {
       return $style;
     }
   }
@@ -132,12 +126,10 @@ class HighlightRenderer
    */
   public function createStartSpan($type, $title)
   {
-    if ($type == 'K ' || $type == 'K')
-    {
+    if ($type == 'K ' || $type == 'K') {
       return "<span class=\"hi-keyword\">";
     }
-    if (!array_key_exists($type, $this->classMapping))
-    {
+    if (! array_key_exists($type, $this->classMapping)) {
       $type = Highlight::UNDEFINED;
     }
     $class = $this->classMapping[$type];
@@ -164,11 +156,9 @@ class HighlightRenderer
             Highlight::BULK => _('bulk'))
         : array(
             Highlight::UNDEFINED => _("license relevant text"));
-    foreach ($colorDefinition as $colorKey => $txt)
-    {
+    foreach ($colorDefinition as $colorKey => $txt) {
       $data[] = array('class'=>$this->classMapping[$colorKey], 'text' => $txt);
     }
     return $data;
   }
-
-} 
+}

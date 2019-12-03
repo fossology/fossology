@@ -75,5 +75,4 @@ class TimingLoggerTest extends \PHPUnit\Framework\TestCase
     $hackedTimingLogger->timestamp = $endTime;
     $hackedTimingLogger->toc($text,$watch);
   }
-
 }

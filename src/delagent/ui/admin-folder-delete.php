@@ -20,13 +20,14 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_admin_folder_delete", _("Delete Folder"));
+define("TITLE_ADMIN_FOLDER_DELETE", _("Delete Folder"));
 
 /**
  * @class admin_folder_delete
  * @brief UI plugin to delete folders
  */
-class admin_folder_delete extends FO_Plugin {
+class admin_folder_delete extends FO_Plugin
+{
 
   /** @var DbManager */
   private $dbManager;
@@ -34,7 +35,7 @@ class admin_folder_delete extends FO_Plugin {
   function __construct()
   {
     $this->Name = "admin_folder_delete";
-    $this->Title = TITLE_admin_folder_delete;
+    $this->Title = TITLE_ADMIN_FOLDER_DELETE;
     $this->MenuList = "Organize::Folders::Delete Folder";
     $this->Dependency = array();
     $this->DBaccess = PLUGIN_DB_WRITE;
@@ -52,7 +53,7 @@ class admin_folder_delete extends FO_Plugin {
   function Delete($folderpk, $userId)
   {
     $splitFolder = explode(" ",$folderpk);
-    if(! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
+    if (! $this->folderDao->isFolderAccessible($splitFolder[1], $userId)) {
       $text = _("No access to delete this folder");
       return ($text);
     }
@@ -80,16 +81,19 @@ class admin_folder_delete extends FO_Plugin {
 
     /* Tell the scheduler to check the queue. */
     $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-    if (!$success) return $error_msg . "\n" . $output;
+    if (! $success) {
+      return $error_msg . "\n" . $output;
+    }
 
-    return (NULL);
+    return (null);
   } // Delete()
 
   /**
    * @copydoc FO_Plugin::Output()
    * @see FO_Plugin::Output()
    */
-  public function Output() {
+  public function Output()
+  {
     /* If this is a POST, then process the request. */
     $folder = GetParm('folder', PARM_RAW);
     $splitFolder = explode(" ",$folder);
@@ -97,19 +101,19 @@ class admin_folder_delete extends FO_Plugin {
       $userId = Auth::getUserId();
       $sql = "SELECT folder_name FROM folder join users on (users.user_pk = folder.user_fk or users.user_perm = 10) where folder_pk = $1 and users.user_pk = $2;";
       $Folder = $this->dbManager->getSingleRow($sql,array($splitFolder[1],$userId),__METHOD__."GetRowWithFolderName");
-      if(!empty($Folder['folder_name'])){
+      if (!empty($Folder['folder_name'])) {
         $rc = $this->Delete($folder, $userId);
         if (empty($rc)) {
           /* Need to refresh the screen */
           $text = _("Deletion of folder ");
           $text1 = _(" added to job queue");
           $this->vars['message'] = $text . $Folder['folder_name'] . $text1;
-        }else{
+        } else {
           $text = _("Deletion of ");
           $text1 = _(" failed: ");
           $this->vars['message'] =  $text . $Folder['folder_name'] . $text1 . $rc;
         }
-      }else{
+      } else {
         $text = _("Cannot delete this folder :: Permission denied");
         $this->vars['message'] = $text;
       }
@@ -144,4 +148,5 @@ class admin_folder_delete extends FO_Plugin {
     return $V;
   }
 }
-$NewPlugin = new admin_folder_delete;
+
+$NewPlugin = new admin_folder_delete();

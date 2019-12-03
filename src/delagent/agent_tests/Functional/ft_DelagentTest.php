@@ -45,7 +45,6 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
     $command = "cp2foss $auth ../../../pkgagent/agent_tests/testdata/fossology-1.2.0-1.el5.i386.rpm -f $upload_path -d upload_des -q all -v";
     $last = exec("$command 2>&1", $out, $rtn);
     sleep(10);
-    // print_r($out);
     $repo_string = "Uploading to folder: '/$upload_path'";
     $repo_pos = strpos($out[7], $repo_string);
     $output_msg_count = count($out);
@@ -70,7 +69,9 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[11]) {
       $upload_id = get_upload_id($out[11]);
-    } else $this->assertFalse(TRUE);
+    } else { 
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status("ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -171,4 +172,4 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
 
 }
 
-?>
+

@@ -19,13 +19,14 @@
 require_once("./test_common.php");
 
 /**
- * \brief test cli cp2foss 
+ * \brief test cli cp2foss
  */
 
 /**
  * @outputBuffering enabled
  */
-class test_cp2foss extends \PHPUnit\Framework\TestCase {
+class test_cp2foss extends \PHPUnit\Framework\TestCase
+{
 
   public $SYSCONF_DIR = "/usr/local/etc/fossology/";
   public $DB_NAME;
@@ -34,7 +35,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
   // fossology_testconfig is the temporary system configuration directory
   // created by the src/testing/db/create_test_database.php script.
-  // It is initialized via the Makefile and passed in via the 
+  // It is initialized via the Makefile and passed in via the
   // FOSSOLOGY_TESTCONFIG environment variable.
   public $fossology_testconfig;
 
@@ -46,9 +47,10 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
   /* initialization */
 
-  // this method is run once for the entire test class, before any of the 
+  // this method is run once for the entire test class, before any of the
   // test methods are executed.
-  public static function setUpBeforeClass() {
+  public static function setUpBeforeClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -58,7 +60,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
     /**
        get the value of the FOSSOLOGY_TESTCONFIG environment variable,
-       which will be initialized by the Makefile by running the 
+       which will be initialized by the Makefile by running the
        create_test_database.pl script
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
@@ -97,14 +99,15 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
 
 
   // this method is run once before each test method defined for this test class.
-  protected function setUp() {
+  protected function setUp()
+  {
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     //$SYSCONF_DIR = "/usr/local/etc/fossology/";
     //$DB_NAME = "fossology";
     //$DB_COMMAND = "../../testing/db/createTestDB.php";
-    
+
     // these calls are deprecated with the new create_test_database call
     //create_db();
     //add_user();
@@ -112,18 +115,19 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     //scheduler_operation();
   }
 
-  /** 
+  /**
    * \brief upload from server
    * 1. upload a file to Software Repository
    * 2. upload a dir to Software Repository
    * 3. upload a dir to one specified path
    *    schedule all agents, set the description for this upload.
    * 4. Loads every file under the corrent directory, except files in the Subversion directories.  The files are
-   *       placed in the UI under the folder "test/exclude/s-u" 
+   *       placed in the UI under the folder "test/exclude/s-u"
    * 5. upload php file file in cli/tests through globbing
    *
    */
-  function test_upload_from_server() {
+  function test_upload_from_server()
+  {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $cp2foss_path;
@@ -146,7 +150,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[13]) {
       $upload_id = get_upload_id($out[6]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     fwrite(STDOUT, "DEBUG: $upload_id \n");
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -187,10 +193,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     if ($out && $out[4]) {
       $upload_id = get_upload_id($out[4]);
       print "DEBUG: Upload_id is $upload_id\n";
-    } 
-    else {
-        print "DEBUG:  Did not get an upload_id!\n";
-        $this->assertFalse(TRUE);
+    } else {
+      print "DEBUG:  Did not get an upload_id!\n";
+      $this->assertFalse(true);
     }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
@@ -212,7 +217,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[4]) {
       $upload_id = get_upload_id($out[4]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -251,7 +258,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[12]) {
       $upload_id = get_upload_id($out[12]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     sleep(5);
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -269,7 +278,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     $agent_status = check_agent_status($test_dbh, "pkgagent", $upload_id);
     $this->assertEquals(1, $agent_status);
 
-    /** cp2foss --username USER --password PASSWORD -q all -A -f test/exclude -n 'test exclue dir'  \ 
+    /** cp2foss --username USER --password PASSWORD -q all -A -f test/exclude -n 'test exclue dir'  \
       -d 'test des exclude dir' -X .svn -X ./ -v */
     $out = "";
     $pos = 0;
@@ -281,12 +290,14 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[24]) {
       $upload_id = get_upload_id($out[24]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
 
-    /** cp2foss --username USER --password PASSWORD -q all -A -f 'regular expression testing' -n 'test regular expression dir'  \ 
+    /** cp2foss --username USER --password PASSWORD -q all -A -f 'regular expression testing' -n 'test regular expression dir'  \
       -d 'test des regular expression' '*.php' */
     $out = "";
     $pos = 0;
@@ -298,7 +309,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[18]) {
       $upload_id = get_upload_id($out[18]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     fwrite(STDOUT, "Debug: upload_id is:$upload_id\n");
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh, "ununpack", $upload_id);
@@ -321,7 +334,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
   /**
    * \brief upload from url
    */
-  function test_upload_from_url(){
+  function test_upload_from_url()
+  {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $cp2foss_path;
@@ -344,7 +358,9 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -362,7 +378,8 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
   /**
    * \brief list agents and help msg, etc
    */
-  function test_list_agent_and_others() {
+  function test_list_agent_and_others()
+  {
     global $fossology_testconfig;
     global $cp2foss_path;
     //global $SYSCONF_DIR;
@@ -401,21 +418,23 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
    * \brief clean the env
    */
   // this method is run once after each test method defined for this test class.
-  protected function tearDown() {
+  protected function tearDown()
+  {
 
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
-   
+
     // TODO:  Drop the test database
-    
-    //stop_scheduler(); 
+
+    //stop_scheduler();
     //drop_db();
   }
 
-  // this method is run once for the entire test class, after all of the 
+  // this method is run once for the entire test class, after all of the
   // test methods are executed.
-  public static function tearDownAfterClass() {
+  public static function tearDownAfterClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -429,16 +448,15 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase {
     if ( $return_var != 0 ) {
         print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
-#        exit(1);
+      #        exit(1);
     }
 
-    // time to drop the database 
+    // time to drop the database
 
     sleep(10);
     print "End of functional tests for cp2foss \n";
 
   }
-
 }
 
-?>
+

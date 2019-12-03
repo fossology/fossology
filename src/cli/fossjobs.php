@@ -20,7 +20,7 @@ use Fossology\Lib\Dao\UploadDao;
 
 /**
  * \file fossjobs.php
- * 
+ *
  * \brief fossjobs
  * list fossology agents that are configured in the ui or
  * run the default configured in the ui.
@@ -55,7 +55,8 @@ SUPPORT FUNCTIONS
  *
  * @return array $agent_list
  */
-function list_agents() {
+function list_agents()
+{
   $agent_list = menu_find("Agents", $depth);
   return ($agent_list);
 }
@@ -165,38 +166,37 @@ if (array_key_exists("a", $options)) {
 
 /* Hide agents  that aren't related to data scans */
 $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-for($ac=0; !empty($agent_list[$ac]->URI); $ac++)
-  if (array_search($agent_list[$ac]->URI, $Skip) !== false) 
-  {
-      unset($agent_list[$ac]);
+for ($ac=0; !empty($agent_list[$ac]->URI); $ac++) {
+  if (array_search($agent_list[$ac]->URI, $Skip) !== false) {
+    unset($agent_list[$ac]);
   }
+}
 
 /* If the user specified a list, then disable every agent not in the list */
 $Skip = array("agent_unpack", "agent_adj2nest", "wget_agent");
-if (array_key_exists("A", $options)) 
-{
+if (array_key_exists("A", $options)) {
   $agent_count = count($agent_list);
-  for ($ac = 0;$ac < $agent_count;$ac++) 
-  {
+  for ($ac = 0;$ac < $agent_count;$ac++) {
     $Found = 0;
-    foreach(explode(',', $options["A"]) as $Val) 
-    {
-      if (!strcmp($Val, $agent_list[$ac]->URI))  $Found = 1; 
+    foreach (explode(',', $options["A"]) as $Val) {
+      if (!strcmp($Val, $agent_list[$ac]->URI)) {
+        $Found = 1;
+      }
     }
-    if ($Found == 0) $agent_list[$ac]->URI = NULL;
+    if ($Found == 0) {
+      $agent_list[$ac]->URI = null;
+    }
   }
 }
 
 /* List available uploads */
-if (array_key_exists("u", $options)) 
-{
+if (array_key_exists("u", $options)) {
   $root_folder_pk = GetUserRootFolder();
-  $FolderPath = NULL;
+  $FolderPath = null;
   $FolderList = FolderListUploadsRecurse($root_folder_pk, $FolderPath, Auth::PERM_WRITE);
 
   print "# The following uploads are available (upload id: name)\n";
-  foreach($FolderList as $Folder)
-  {
+  foreach ($FolderList as $Folder) {
     $Label = $Folder['name'] . " (" . $Folder['upload_desc'] . ')';
     print $Folder['upload_pk'] . ": $Label\n";
   }
@@ -206,39 +206,30 @@ if (array_key_exists("u", $options))
 /* @var $uploadDao UploadDao */
 $uploadDao = $GLOBALS['container']->get('dao.upload');
 
-if (array_key_exists("U", $options)) 
-{
-  /* $options['U'] can either be 'ALL', a string (the upload_pk), 
-     or an array of upload_pk's if multiple -U's were specified. 
+if (array_key_exists("U", $options)) {
+  /* $options['U'] can either be 'ALL', a string (the upload_pk),
+     or an array of upload_pk's if multiple -U's were specified.
    */
   $upload_options = $options['U'];
   $upload_pk_array = array();
-  if ($upload_options == 'ALL') 
-  {
+  if ($upload_options == 'ALL') {
     $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk'])) 
-    {
+    while ($row = pg_fetch_assoc($result) && !empty($row['upload_pk'])) {
         $upload_pk_array[] = $row['upload_pk'];
     }
     pg_free_result($result);
-  }
-  else if (is_array($upload_options))
-  {
+  } else if (is_array($upload_options)) {
     $upload_pk_array = $upload_options;
-  }
-  else
-  {
+  } else {
     $upload_pk_array[] = $upload_options;
   }
-   
+
   /* check permissions */
   $checked_list = array();
-  foreach($upload_pk_array as $upload_pk)
-  {
-    if (!$uploadDao->isEditable($upload_pk, $groupId))
-    {
+  foreach ($upload_pk_array as $upload_pk) {
+    if (!$uploadDao->isEditable($upload_pk, $groupId)) {
       print "You have no permission to queue agents for upload $upload_pk in group $groupId\n";
       continue;
     }
@@ -250,38 +241,29 @@ if (array_key_exists("U", $options))
   QueueUploadsOnAgents($checked_list_str, $agent_list, $Verbose);
 }
 
-if (array_key_exists("D", $options))
-{
+if (array_key_exists("D", $options)) {
   /* $options['D'] can either be 'ALL', a string (the upload_pk),
      or an array of upload_pk's if multiple -D's were specified.
    */
   $upload_options = $options['D'];
   $upload_pk_array = array();
-  if ($upload_options == 'ALL')
-  {
+  if ($upload_options == 'ALL') {
     $SQL = "SELECT upload_pk,upload_desc,upload_filename FROM upload ORDER BY upload_pk;";
     $result = pg_query($PG_CONN, $SQL);
     DBCheckResult($result, $SQL, __FILE__, __LINE__);
-    while ($row = pg_fetch_assoc($result) and !empty($row['upload_pk']))
-    {
+    while ($row = pg_fetch_assoc($result) && !empty($row['upload_pk'])) {
         $upload_pk_array[] = $row['upload_pk'];
     }
     pg_free_result($result);
-  }
-  else if (is_array($upload_options))
-  {
+  } else if (is_array($upload_options)) {
     $upload_pk_array = $upload_options;
-  }
-  else
-  {
+  } else {
     $upload_pk_array[] = $upload_options;
   }
   /* check permissions */
   $checked_list = array();
-  foreach($upload_pk_array as $upload_pk)
-  {
-    if (!$uploadDao->isEditable($upload_pk, $groupId))
-    {
+  foreach ($upload_pk_array as $upload_pk) {
+    if (!$uploadDao->isEditable($upload_pk, $groupId)) {
       print "You have no permission to delete upload " . $upload_pk . "\n";
       continue;
     }

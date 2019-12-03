@@ -44,7 +44,8 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * @brief Close mockery
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
   }

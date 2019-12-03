@@ -1,0 +1,6 @@
+4BCDEFval$imageContext2Lorg/apache/xmlgraphics/image/loader/ImageContext;val$baseURIL java/lang/String;this$0*Lorg/apache/fop/svg/AbstractFOPTranscoder;<init>q(Lorg/apache/fop/svg/AbstractFOPTranscoder;Lorg/apache/xmlgraphics/image/loader/ImageContext;Ljava/lang/String;)VCode LineNumberTable LocalVariableTable thisInnerClasses,Lorg/apache/fop/svg/AbstractFOPTranscoder$2;getParentContext4()Lorg/apache/xmlgraphics/image/loader/ImageContext; getTargetResolution ()F
+resolveURI0(Ljava/lang/String;)Ljavax/xml/transform/Source;url!Lorg/apache/batik/util/ParsedURL;in Ljava/io/InputStream;source)Ljavax/xml/transform/stream/StreamSource;ioeLjava/io/IOException;uri
+StackMapTableA
+SourceFile AbstractFOPTranscoder.java EnclosingMethod GHI JK#org/apache/batik/util/ParsedURL MN'javax/xml/transform/stream/StreamSource OPQ java/io/IOException RSTUV*org/apache/fop/svg/AbstractFOPTranscoder$2Dorg/apache/xmlgraphics/image/loader/impl/AbstractImageSessionContext(org/apache/fop/svg/AbstractFOPTranscodersetupImageInfrastructure(Ljava/lang/String;)V()V getDeviceResolution'(Ljava/lang/String;Ljava/lang/String;)V
+openStream()Ljava/io/InputStream;toString()Ljava/lang/String;*(Ljava/io/InputStream;Ljava/lang/String;)V
+access$100O(Lorg/apache/fop/svg/AbstractFOPTranscoder;)Lorg/apache/batik/bridge/UserAgent;!org/apache/batik/bridge/UserAgentdisplayError(Ljava/lang/Exception;)

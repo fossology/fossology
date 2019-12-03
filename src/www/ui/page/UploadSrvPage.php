@@ -43,17 +43,15 @@ class UploadSrvPage extends UploadPageBase
   {
     global $SysConf;
     $sysConfig = $SysConf['SYSCONFIG'];
-    if(array_key_exists('UploadFromServerAllowedHosts',$sysConfig)){
+    if (array_key_exists('UploadFromServerAllowedHosts', $sysConfig)) {
       $hostListPre = $sysConfig['UploadFromServerAllowedHosts'];
-      $hostList = explode(':',$hostListPre);
-    }
-    else
-    {
+      $hostList = explode(':', $hostListPre);
+    } else {
       $hostList = array("localhost");
     }
 
     return in_array($host,$hostList);
-   }
+  }
 
   /**
    * \brief checks, whether a normalized path starts with an path in the
@@ -68,23 +66,19 @@ class UploadSrvPage extends UploadPageBase
   {
     global $SysConf;
     $sysConfig = $SysConf['SYSCONFIG'];
-    if(array_key_exists('UploadFromServerWhitelist',$sysConfig)){
+    if (array_key_exists('UploadFromServerWhitelist', $sysConfig)) {
       $whitelistPre = $sysConfig['UploadFromServerWhitelist'];
-      $whitelist = explode(':',$whitelistPre);
-    }
-    else
-    {
+      $whitelist = explode(':', $whitelistPre);
+    } else {
       $whitelist = array("/tmp");
     }
 
-    foreach ($whitelist as $item)
-    {
-      if (substr($path,0,strlen($item)) === trim($item))
-      {
-        return TRUE;
+    foreach ($whitelist as $item) {
+      if (substr($path, 0,strlen($item)) === trim($item)) {
+        return true;
       }
     }
-    return FALSE;
+    return false;
   }
 
   /**
@@ -98,14 +92,13 @@ class UploadSrvPage extends UploadPageBase
    */
   function remote_file_permission($path, $server = 'localhost', $persmission = 'r')
   {
-    /** local file */
-    if ($server === 'localhost' || empty($server))
-    {
+    /**
+     * local file
+     */
+    if ($server === 'localhost' || empty($server)) {
       $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
       return @fopen($temp_path, $persmission);
-    }
-    else
-    {
+    } else {
       return 1;  // don't do the file permission check if the file is not on the web server
     }
   }
@@ -120,14 +113,13 @@ class UploadSrvPage extends UploadPageBase
    */
   function remote_file_exists($path, $server = 'localhost')
   {
-    /** local file */
-    if ($server === 'localhost' || empty($server))
-    {
+    /**
+     * local file
+     */
+    if ($server === 'localhost' || empty($server)) {
       $temp_path = str_replace('\ ', ' ', $path); // replace '\ ' with ' '
       return file_exists($temp_path);
-    }
-    else
-    {
+    } else {
       return 1;  // don't do the file exist check if the file is not on the web server
     }
   }
@@ -162,9 +154,8 @@ class UploadSrvPage extends UploadPageBase
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $description = $this->basicShEscaping($description);
 
-    if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
-        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
-    {
+    if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME) !=
+      $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)) {
       return array(false, $uploadErrors[UPLOAD_ERR_RESEND], $description);
     }
 
@@ -178,36 +169,33 @@ class UploadSrvPage extends UploadPageBase
     $sourceFiles = trim($request->get(self::SOURCE_FILES_FIELD));
     $sourceFiles = $this->basicShEscaping($sourceFiles);
     $host = $request->get('host') ?: "localhost";
-    if(preg_match('/[^a-z.0-9]/i', $host))
-    {
+    if (preg_match('/[^a-z.0-9]/i', $host)) {
       $text = _("The given host is not valid.");
       return array(false, $text, $description);
     }
-    if(! $this->check_if_host_is_allowed($host))
-    {
+    if (! $this->check_if_host_is_allowed($host)) {
       $text = _("You are not allowed to upload from the chosen host.");
-      return array(false, $text, $description);
+      return array(false, $text,
+        $description
+      );
     }
 
     $name = $request->get(self::NAME_PARAM);
 
-    if((preg_match('/[*?%$]+/', $sourceFiles)) && empty($name))
-    {
-      $text = _("The file path contains a wildchar, you must provide a name for the upload.");
+    if ((preg_match('/[*?%$]+/', $sourceFiles)) && empty($name)) {
+      $text = _(
+        "The file path contains a wildchar, you must provide a name for the upload.");
       return array(false, $text, $description);
     }
 
-    if (empty($name))
-    {
+    if (empty($name)) {
       $name = basename($sourceFiles);
     }
     $shortName = $this->basicShEscaping(basename($name));
-    if (empty($shortName))
-    {
+    if (empty($shortName)) {
       $shortName = $name;
     }
-    if(strcmp($host,"localhost"))
-    {
+    if (strcmp($host,"localhost")) {
       $shortName = $host . ':' . $shortName;
     }
 
@@ -215,25 +203,27 @@ class UploadSrvPage extends UploadPageBase
     $sourceFiles = str_replace('|', '\|', $sourceFiles);
     $sourceFiles = str_replace(' ', '\ ', $sourceFiles);
     $sourceFiles = str_replace("\t", "\\t", $sourceFiles);
-    if ($sourceFiles == FALSE)
-    {
+    if ($sourceFiles == FALSE) {
       $text = _("failed to normalize/validate given path");
       return array(false, $text, $description);
     }
-    if ($this->check_by_whitelist($sourceFiles) === FALSE)
-    {
-      $text = _("no suitable prefix found in the whitelist") . ", " . _("you are not allowed to upload this file");
+    if ($this->check_by_whitelist($sourceFiles) === FALSE) {
+      $text = _("no suitable prefix found in the whitelist") . ", " .
+        _("you are not allowed to upload this file");
       return array(false, $text, $description);
     }
-    if (!$this->path_is_pattern($sourceFiles) && !$this->remote_file_exists($sourceFiles, $host)) {
+    if (! $this->path_is_pattern($sourceFiles) &&
+      ! $this->remote_file_exists($sourceFiles, $host)) {
       $text = _("'$sourceFiles' does not exist.\n");
       return array(false, $text, $description);
     }
-    if (!$this->path_is_pattern($sourceFiles) && !$this->remote_file_permission($sourceFiles, $host, "r")) {
+    if (! $this->path_is_pattern($sourceFiles) &&
+      ! $this->remote_file_permission($sourceFiles, $host, "r")) {
       $text = _("Have no READ permission on '$sourceFiles'.\n");
       return array(false, $text, $description);
     }
-    if (!$this->path_is_pattern($sourceFiles) && is_file($sourceFiles) && filesize($sourceFiles) <= 0) {
+    if (! $this->path_is_pattern($sourceFiles) && is_file($sourceFiles) &&
+      filesize($sourceFiles) <= 0) {
       $text = _("You can not upload an empty file.\n");
       return array(false, $text, $description);
     }
@@ -242,18 +232,17 @@ class UploadSrvPage extends UploadPageBase
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
-    $uploadId = JobAddUpload($userId, $groupId, $shortName, $sourceFiles, $description, $uploadMode, $folderId, $publicPermission);
+    $uploadId = JobAddUpload($userId, $groupId, $shortName, $sourceFiles,
+      $description, $uploadMode, $folderId, $publicPermission);
 
-    if (empty($uploadId))
-    {
+    if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);
     }
 
-    /* Prepare the job: job "wget" */
+      /* Prepare the job: job "wget" */
     $jobpk = JobAddJob($userId, $groupId, "wget", $uploadId);
-    if (empty($jobpk) || ($jobpk < 0))
-    {
+    if (empty($jobpk) || ($jobpk < 0)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);
     }
@@ -270,16 +259,15 @@ class UploadSrvPage extends UploadPageBase
 
     /* schedule agents */
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack")];
-    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"));
-    if ($ununpack_jq_pk < 0)
-    {
+    $unpackArgs = intval($request->get('scm') == 1) ? '-I' : '';
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array("wget_agent"), $unpackargs);
+    if ($ununpack_jq_pk < 0) {
       return array(false, $text, _($ErrorMsg));
     }
 
     $adj2nestplugin = &$Plugins[plugin_find_id("agent_adj2nest")];
     $adj2nest_jq_pk = $adj2nestplugin->AgentAdd($jobpk, $uploadId, $ErrorMsg, array());
-    if ($adj2nest_jq_pk < 0)
-    {
+    if ($adj2nest_jq_pk < 0) {
       return array(false, $text, _($ErrorMsg));
     }
 
@@ -288,8 +276,7 @@ class UploadSrvPage extends UploadPageBase
     $message = "";
     /** check if the scheudler is running */
     $status = GetRunnableJobList();
-    if (empty($status))
-    {
+    if (empty($status)) {
       $message .= _("Is the scheduler running? ");
     }
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";

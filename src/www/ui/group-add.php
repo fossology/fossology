@@ -19,17 +19,18 @@ use Fossology\Lib\Auth\Auth;
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-define("TITLE_add_group", _("Add Group"));
+define("TITLE_ADD_GROUP", _("Add Group"));
 
 /**
  * \class group_add extends FO_Plugin
  * \brief add a new group
  */
-class group_add extends FO_Plugin {
+class group_add extends FO_Plugin
+{
   function __construct()
   {
     $this->Name = "group_add";
-    $this->Title = TITLE_add_group;
+    $this->Title = TITLE_ADD_GROUP;
     $this->MenuList = "Admin::Groups::Add Group";
     $this->DBaccess = PLUGIN_DB_WRITE;
     $this->LoginFlag = 1;  /* Don't allow Default User to add a group */
@@ -42,20 +43,16 @@ class group_add extends FO_Plugin {
     $V = "";
     /* If this is a POST, then process the request. */
     $groupname = GetParm('groupname', PARM_TEXT);
-    if (!empty($groupname)) 
-    {
-      try
-      {
+    if (! empty($groupname)) {
+      try {
         /* @var $userDao UserDao */
         $userDao = $GLOBALS['container']->get('dao.user');
         $groupId = $userDao->addGroup($groupname);
-        $userDao->addGroupMembership($groupId,Auth::getUserId());
+        $userDao->addGroupMembership($groupId, Auth::getUserId());
         $text = _("Group");
         $text1 = _("added");
         $this->vars['message'] = "$text $groupname $text1.";
-      }
-      catch(Exception $e)
-      {
+      } catch (Exception $e) {
         $this->vars['message'] = $e->getMessage();
       }
     }

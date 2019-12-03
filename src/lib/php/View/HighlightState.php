@@ -72,10 +72,8 @@ class HighlightState
    */
   public function processSplitEntries($entries)
   {
-    foreach ($entries as $entry)
-    {
-      switch ($entry->getAction())
-      {
+    foreach ($entries as $entry) {
+      switch ($entry->getAction()) {
         case SplitPosition::START:
           $this->push($entry);
           $this->checkForAnchor($entry);
@@ -93,22 +91,22 @@ class HighlightState
    */
   public function insertElements($entries, PagedResult $result)
   {
-    foreach ($entries as $entry)
-    {
-      switch ($entry->getAction())
-      {
+    foreach ($entries as $entry) {
+      switch ($entry->getAction()) {
         case SplitPosition::START:
           $this->push($entry);
           $result->appendMetaText($this->startSpan($entry));
           break;
         case SplitPosition::ATOM:
           $result->appendMetaText($this->startSpan($entry));
-          $result->appendMetaText(self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
+          $result->appendMetaText(
+            self::PLACEHOLDER . $this->highlightRenderer->createSpanEnd($entry));
           break;
 
         case SplitPosition::END:
           $this->pop();
-          $result->appendMetaText($this->highlightRenderer->createSpanEnd($entry));
+          $result->appendMetaText(
+            $this->highlightRenderer->createSpanEnd($entry));
           break;
       }
     }
@@ -119,9 +117,9 @@ class HighlightState
    */
   public function closeOpenElements(PagedResult $result)
   {
-    foreach ($this->elementStack as $splitPosition)
-    {
-      $result->appendMetaText($this->highlightRenderer->createSpanEnd($splitPosition));
+    foreach ($this->elementStack as $splitPosition) {
+      $result->appendMetaText(
+        $this->highlightRenderer->createSpanEnd($splitPosition));
     }
   }
 
@@ -130,8 +128,7 @@ class HighlightState
    */
   public function openExistingElements(PagedResult $result)
   {
-    foreach ($this->elementStack as $entry)
-    {
+    foreach ($this->elementStack as $entry) {
       $result->appendMetaText($this->highlightRenderer->createSpanStart($entry));
     }
   }
@@ -156,8 +153,7 @@ class HighlightState
   protected function checkForAnchor(SplitPosition $entry)
   {
     $shouldShowAnchor = !$this->anchorDrawn && $entry->getHighlight()->getType() != Highlight::KEYWORD;
-    if ($shouldShowAnchor)
-    {
+    if ($shouldShowAnchor) {
       $this->anchorDrawn = true;
     }
     return $shouldShowAnchor;

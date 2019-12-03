@@ -39,7 +39,8 @@ class ReflectoryTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown() {
+  protected function tearDown()
+  {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
@@ -62,6 +63,4 @@ class ReflectoryTest extends \PHPUnit\Framework\TestCase
     Reflectory::setObjectsProperty($instanceWithPrivateMethod, 'internal', 3);
     assertThat($instanceWithPrivateMethod->getInternal(),is(3));
   }
-
-
 }

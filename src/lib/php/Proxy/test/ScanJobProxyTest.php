@@ -212,5 +212,4 @@ class ScanJobProxyTest extends \PHPUnit\Framework\TestCase
     $ids = $this->scanJobProxy->getSuccessfulAgents();
     assertThat($ids,is(equalTo($expected)));
   }
-
 }

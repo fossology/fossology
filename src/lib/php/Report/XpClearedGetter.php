@@ -33,7 +33,8 @@ class XpClearedGetter extends ClearedGetterCommon
   protected $getOnlyCleared;
   protected $extrawhere;
 
-  public function __construct($tableName, $type=null, $getOnlyCleared=false, $extraWhere=null) {
+  public function __construct($tableName, $type=null, $getOnlyCleared=false, $extraWhere=null)
+  {
     global $container;
 
     $this->copyrightDao = $container->get('dao.copyright');

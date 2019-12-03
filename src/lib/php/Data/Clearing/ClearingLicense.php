@@ -57,7 +57,8 @@ class ClearingLicense
    */
   public function copyNegated()
   {
-    return new ClearingLicense($this->licenseRef, !($this->removed), $this->type, $this->reportInfo, $this->comment, $this->acknowledgement);
+    return new ClearingLicense($this->licenseRef, ! ($this->removed),
+      $this->type, $this->reportInfo, $this->comment, $this->acknowledgement);
   }
 
   /**
@@ -145,5 +146,4 @@ class ClearingLicense
       .")";
 
   }
-
 }

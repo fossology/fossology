@@ -37,7 +37,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ui_file_browse extends DefaultPlugin
 {
   const NAME = "fileBrowse";
-  
+
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
@@ -48,9 +48,10 @@ class ui_file_browse extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I');
-  
-  public function __construct() {
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+
+  public function __construct()
+  {
     parent::__construct(self::NAME, array(
         self::TITLE => _("File Browser"),
         self::DEPENDENCIES => array("browse", "view"),
@@ -77,18 +78,16 @@ class ui_file_browse extends DefaultPlugin
 
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
-    if (empty($Item) || empty($Upload))
+    if (empty($Item) || empty($Upload)) {
       return;
+    }
     $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
-    if (GetParm("mod", PARM_STRING) == self::NAME)
-    {
+    if (GetParm("mod", PARM_STRING) == self::NAME) {
       menu_insert("Browse::$menuName", 98);
       menu_insert("View::$menuName", 98);
-      menu_insert("View-Meta::$menuName", 98); 
-    }
-    else
-    {
+      menu_insert("View-Meta::$menuName", 98);
+    } else {
       $text = _("File Browser");
       menu_insert("Browse::$menuName", 98, $URI, $text);
       menu_insert("View::$menuName", 98, $viewLicenseURI, $text);
@@ -100,11 +99,11 @@ class ui_file_browse extends DefaultPlugin
    * @param Request $request
    * @return Response
    */
-  protected function handle(Request $request) {
+  protected function handle(Request $request)
+  {
     $upload = intval($request->get("upload"));
     $groupId = Auth::getGroupId();
-    if (!$this->uploadDao->isAccessible($upload, $groupId))
-    {
+    if (!$this->uploadDao->isAccessible($upload, $groupId)) {
       return $this->flushContent(_("Permission Denied"));
     }
 
@@ -113,31 +112,27 @@ class ui_file_browse extends DefaultPlugin
     $vars['baseuri'] = Traceback_uri();
     $vars['uploadId'] = $upload;
     $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
-    if($request->get('show')=='quick')
-    {
+    if ($request->get('show')=='quick') {
       $item = $this->uploadDao->getFatItemId($item,$upload,$this->uploadtree_tablename);
     }
-    $vars['itemId'] = $item;    
+    $vars['itemId'] = $item;
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $this->uploadtree_tablename);
     $left = $itemTreeBounds->getLeft();
-    if (empty($left))
-    {
+    if (empty($left)) {
       return $this->flushContent(_("Job unpack/adj2nest hasn't completed."));
     }
     $histVars = $this->showUploadHist($itemTreeBounds);
-    if(is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse'))
-    {
+    if (is_a($histVars, 'Symfony\\Component\\HttpFoundation\\RedirectResponse')) {
       return $histVars;
     }
     $vars = array_merge($vars, $histVars);
- 
+
     $vars['micromenu'] = Dir2Browse($this->Name, $item, NULL, $showBox = 0, "Browse", -1, '', '', $this->uploadtree_tablename);
 
     $allLicensesPre = $this->licenseDao->getLicenseArray();
     $allLicenses = array();
-    foreach ($allLicensesPre as $value)
-    {
+    foreach ($allLicensesPre as $value) {
       $allLicenses[$value['shortname']] = array('rf_pk' => $value['id']);
     }
     $vars['scannerLicenses'] = $allLicenses;
@@ -164,7 +159,7 @@ class ui_file_browse extends DefaultPlugin
     $scanJobProxy = new ScanJobProxy($this->agentDao, $uploadId);
     $scannerVars = $scanJobProxy->createAgentStatus($scannerAgents);
     $agentMap = $scanJobProxy->getAgentMap();
-    
+
     $vars = array('agentId' => $selectedAgentId,
                   'agentMap' => $agentMap,
                   'scanners'=>$scannerVars);
@@ -183,8 +178,7 @@ class ui_file_browse extends DefaultPlugin
      *
      * $ChildCount can also be zero if the directory is empty.
      * **************************************/
-    if ($childCount == 0)
-    {
+    if ($childCount == 0) {
       return new RedirectResponse("?mod=view-license" . Traceback_parm_keep(array("upload", "item")));
     }
 
@@ -217,7 +211,7 @@ class ui_file_browse extends DefaultPlugin
   public function renderString($templateName, $vars)
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
-  }  
+  }
 }
 
 register_plugin(new ui_file_browse());

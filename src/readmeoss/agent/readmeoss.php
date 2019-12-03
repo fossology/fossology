@@ -121,8 +121,7 @@ class ReadmeOssAgent extends Agent
     $licenseStmtsMain = array();
     $licenseAcknowledgements = array();
 
-    foreach($uploadIds as $addUploadId)
-    {
+    foreach ($uploadIds as $addUploadId) {
       if (!$this->uploadDao->isAccessible($addUploadId, $groupId)) {
         continue;
       }
@@ -140,7 +139,7 @@ class ReadmeOssAgent extends Agent
       $licenseStmtsMain = array_merge($licenseStmtsMain, $moreMainLicenses['statements']);
       $this->heartbeat(count($moreMainLicenses['statements']));
     }
-
+    list($licenseStmtsMain, $licenseStmts) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($licenseStmtsMain, $licenseStmts);
     $contents = array('licensesMain'=>$licenseStmtsMain, 'licenses'=>$licenseStmts, 'copyrights'=>$copyrightStmts, 'licenseAcknowledgements' => $licenseAcknowledgements);
     $this->writeReport($contents, $uploadId);
 
@@ -161,12 +160,11 @@ class ReadmeOssAgent extends Agent
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
     $fileName = $fileBase. "ReadMe_OSS_".$packageName.'_'.time().".txt" ;
 
-    foreach($this->additionalUploadIds as $addUploadId)
-    {
+    foreach ($this->additionalUploadIds as $addUploadId) {
       $packageName .= ', ' . $this->uploadDao->getUpload($addUploadId)->getFilename();
     }
 
-    if(!is_dir($fileBase)) {
+    if (!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
     umask(0133);
@@ -199,15 +197,15 @@ class ReadmeOssAgent extends Agent
   private function createReadMeOSSFormat($addSeparator, $dataForReadME, $extract='text', $break)
   {
     $outData = "";
-    foreach($dataForReadME as $statements) {
-      if($extract == 'text') {
+    foreach ($dataForReadME as $statements) {
+      if ($extract == 'text') {
         $outData .= $statements["content"] . $break;
       }
       $outData .= str_replace("\n", "\r\n", $statements[$extract]) . $break;
-      if(!empty($addSeparator)) {
+      if (!empty($addSeparator)) {
         $outData .= $addSeparator . $break;
       }
-     }
+    }
     return $outData;
   }
 
@@ -223,22 +221,21 @@ class ReadmeOssAgent extends Agent
     $separator1 = str_repeat("=", 120);
     $separator2 = str_repeat("-", 120);
     $break = str_repeat("\r\n", 2);
-
     $output = $separator1 . $break . $packageName . $break . $separator2 . $break;
-    if(!empty($contents['licensesMain'])) {
+    if (!empty($contents['licensesMain'])) {
       $output .= $separator1 . $break . " MAIN LICENSES " . $break . $separator2 . $break;
       $output .= $this->createReadMeOSSFormat($separator2, $contents['licensesMain'], 'text', $break);
     }
-    if(!empty($contents['licenses'])) {
+    if (!empty($contents['licenses'])) {
       $output .= $separator1 . $break . " OTHER LICENSES " . $break . $separator2 . $break;
       $output .= $this->createReadMeOSSFormat($separator2, $contents['licenses'], 'text', $break);
     }
-    if(!empty($contents['licenseAcknowledgements'])) {
+    if (!empty($contents['licenseAcknowledgements'])) {
       $output .= $separator1 . $break . " ACKNOWLEDGEMENTS " . $break . $separator2 . $break;
       $output .= $this->createReadMeOSSFormat($separator2, $contents['licenseAcknowledgements'], 'text', $break);
     }
     $copyrights = $this->createReadMeOSSFormat("", $contents['copyrights'], 'content', "\r\n");
-    if(empty($copyrights)) {
+    if (empty($copyrights)) {
       $output .= "<Copyright notices>";
       $output .= $break;
       $output .= "<notices>";

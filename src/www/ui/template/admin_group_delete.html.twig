@@ -12,9 +12,13 @@
  <form name="formy" method="post" action="{{ uri }}">
     {{ "Select the group to delete"|trans }}:
     {% import "include/macros.html.twig" as macro %}
-    {{ macro.select('grouppk',groupMap,'grouppk') }}
+    {{ macro.select('grouppk',groupMap,'grouppk','','class="ui-render-select2"') }}
     <input type="submit" value="{{ 'Delete'|trans }}"/>
   </form>
+<br/>
+<br/>
+<b>{{ 'Note: After deleting group, you will loose access to uploads that are associated with deleted group.'|trans }}</b>
+
 {% endblock %}
 
 {% block foot %}

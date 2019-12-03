@@ -18,9 +18,10 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_user_add", _("Add A User"));
+define("TITLE_USER_ADD", _("Add A User"));
 
-class user_add extends FO_Plugin {
+class user_add extends FO_Plugin
+{
 
   /** @var DbManager */
   private $dbManager;
@@ -28,7 +29,7 @@ class user_add extends FO_Plugin {
   function __construct()
   {
     $this->Name = "user_add";
-    $this->Title = TITLE_user_add;
+    $this->Title = TITLE_USER_ADD;
     $this->MenuList = "Admin::Users::Add";
     $this->DBaccess = PLUGIN_DB_ADMIN;
     parent::__construct();
@@ -40,14 +41,14 @@ class user_add extends FO_Plugin {
    *
    * \return NULL on success, string on failure.
    */
-  function Add() {
+  function Add()
+  {
 
     global $PG_CONN;
 
-    if (!$PG_CONN) {
+    if (! $PG_CONN) {
       DBconnect();
-      if (!$PG_CONN)
-      {
+      if (! $PG_CONN) {
         $text = _("NO DB connection!");
         echo "<pre>$text\n</pre>";
       }
@@ -68,15 +69,13 @@ class user_add extends FO_Plugin {
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
 
-
     /* Make sure username looks valid */
     if (empty($User)) {
       $text = _("Username must be specified. Not added.");
       return ($text);
     }
     /* limit the user name size to 64 characters when creating an account */
-    if (strlen($User) > 64)
-    {
+    if (strlen($User) > 64) {
       $text = _("Username exceed 64 characters. Not added.");
       return ($text);
     }
@@ -86,21 +85,21 @@ class user_add extends FO_Plugin {
       return ($text);
     }
 
-    if(empty($Email))
-    {
+    if (empty($Email)) {
       $text = _("Email must be specified. Not added.");
       return ($text);
     }
 
     /* Make sure email looks valid */
-    if (!filter_var($Email, FILTER_VALIDATE_EMAIL))
-    {
+    if (! filter_var($Email, FILTER_VALIDATE_EMAIL)) {
       $text = _("Invalid email address.  Not added.");
       return ($text);
     }
 
     /* Make sure email is unique */
-    $email_count = $this->dbManager->getSingleRow("SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;", array($Email))["count"];
+    $email_count = $this->dbManager->getSingleRow(
+      "SELECT COUNT(*) as count FROM users WHERE user_email = $1 LIMIT 1;",
+      array($Email))["count"];
     if ($email_count > 0) {
       $text = _("Email address already exists.  Not added.");
       return ($text);
@@ -109,7 +108,7 @@ class user_add extends FO_Plugin {
     /* See if the user already exists (better not!) */
     $row = $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1 LIMIT 1;",
         array($User), $stmt = __METHOD__ . ".getUserIfExisting");
-    if (!empty($row['user_name'])) {
+    if (! empty($row['user_name'])) {
       $text = _("User already exists.  Not added.");
       return ($text);
     }
@@ -117,31 +116,28 @@ class user_add extends FO_Plugin {
     /* check email notification, if empty (box not checked), or if no email
      * specified for the user set to 'n'.
      */
-    if(empty($Email_notify)) {
-      $Email_notify = '';
-    }
-    elseif(empty($Email)) {
+    if (empty($Email_notify) || empty($Email)) {
       $Email_notify = '';
     }
 
-    $ErrMsg = add_user($User,$Desc,$Seed,$Hash,$Perm,$Email,
-                       $Email_notify,$agentList,$Folder, $default_bucketpool_fk);
+    $ErrMsg = add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
+      $agentList, $Folder, $default_bucketpool_fk);
 
     return ($ErrMsg);
   } // Add()
 
 
-  public function Output() {
+  public function Output()
+  {
     /* If this is a POST, then process the request. */
     $User = GetParm('username', PARM_TEXT);
-    if (!empty($User)) {
+    if (! empty($User)) {
       $rc = $this->Add();
       if (empty($rc)) {
         $text = _("User");
         $text1 = _("added");
         $this->vars['message'] = "$text $User $text1.";
-      }
-      else {
+      } else {
         $this->vars['message'] = $rc;
       }
     }

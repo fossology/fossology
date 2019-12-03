@@ -23,8 +23,7 @@ namespace Fossology\Lib\View;
 use Fossology\Lib\Data\SplitPosition;
 use Fossology\Lib\Data\TextFragment;
 
-if (!defined('ENT_SUBSTITUTE'))
-{
+if (! defined('ENT_SUBSTITUTE')) {
   define('ENT_SUBSTITUTE', 0);
 }
 
@@ -74,15 +73,12 @@ class TextRenderer
    */
   public function render(TextFragment $fragment, HighlightState $state, PagedResult $result, $splitPositions = array())
   {
-    foreach ($splitPositions as $actionPosition => $entries)
-    {
+    foreach ($splitPositions as $actionPosition => $entries) {
       $isBeforeVisibleRange = $actionPosition < $fragment->getStartOffset();
       $isAfterVisibleRange = $actionPosition >= $fragment->getEndOffset();
-      if ($isBeforeVisibleRange || $isAfterVisibleRange)
-      {
+      if ($isBeforeVisibleRange || $isAfterVisibleRange) {
         $this->processEntriesOutsideVisibleRange($fragment, $state, $result, $entries, $isAfterVisibleRange);
-      } else
-      {
+      } else {
         $this->processEntriesWithinVisibleRange($fragment, $state, $result, $actionPosition, $entries);
       }
     }
@@ -100,8 +96,7 @@ class TextRenderer
    */
   protected function processEntriesOutsideVisibleRange(TextFragment $fragment, HighlightState $state, PagedResult $result, $entries, $isAfterVisibleRange)
   {
-    if ($isAfterVisibleRange)
-    {
+    if ($isAfterVisibleRange) {
       $this->finalizeContentText($fragment, $state, $result);
     }
     $state->processSplitEntries($entries, $result);
@@ -116,8 +111,7 @@ class TextRenderer
    */
   protected function processEntriesWithinVisibleRange(TextFragment $fragment, HighlightState $state, PagedResult $result, $actionPosition, $entries)
   {
-    if ($result->isEmpty())
-    {
+    if ($result->isEmpty()) {
       $state->openExistingElements($result);
     }
     $result->appendContentText($fragment->getSlice($result->getCurrentOffset(), $actionPosition));
@@ -132,15 +126,12 @@ class TextRenderer
    */
   protected function finalizeContentText(TextFragment $fragment, HighlightState $state, PagedResult $result)
   {
-    if ($result->getCurrentOffset() < $fragment->getEndOffset())
-    {
-      if ($result->isEmpty())
-      {
+    if ($result->getCurrentOffset() < $fragment->getEndOffset()) {
+      if ($result->isEmpty()) {
         $state->openExistingElements($result);
       }
       $result->appendContentText($fragment->getSlice($result->getCurrentOffset()));
       $state->closeOpenElements($result);
     }
   }
-
 }

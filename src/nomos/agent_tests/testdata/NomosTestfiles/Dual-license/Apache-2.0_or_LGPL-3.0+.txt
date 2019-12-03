@@ -1,0 +1,3 @@
+The REST API client code is released
+under a dual license of Apache 2.0 or LGPLv3+.
+

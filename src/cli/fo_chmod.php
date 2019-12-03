@@ -35,8 +35,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options]
 // TODO support much more command line options
 
 $opts = getopt("hc:", array("username:", "groupname:", "uploadId:", "password:", "destgroup:"));
-if(array_key_exists('h', $opts))
-{
+if (array_key_exists('h', $opts)) {
   print $Usage;
   exit(0);
 }

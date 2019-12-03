@@ -32,8 +32,10 @@ class ui_topnav extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY) { return; }
-    
+    if ($this->State != PLUGIN_STATE_READY) {
+      return;
+    }
+
     global $SysConf;
     global $Plugins;
 
@@ -41,13 +43,11 @@ class ui_topnav extends FO_Plugin
 
     $Uri = Traceback_dir();
 
-    if (@$SysConf['SYSCONFIG']['LogoImage'] and @$SysConf['SYSCONFIG']['LogoLink'])
-    {
+    if (@$SysConf['SYSCONFIG']['LogoImage'] and
+      @$SysConf['SYSCONFIG']['LogoLink']) {
       $LogoLink = $SysConf['SYSCONFIG']['LogoLink'];
       $LogoImg = $SysConf['SYSCONFIG']['LogoImage'];
-    }
-    else
-    {
+    } else {
       $LogoLink = 'http://fossology.org';
       $LogoImg = Traceback_uri . 'images/fossology-logo.gif';
     }
@@ -66,5 +66,5 @@ class ui_topnav extends FO_Plugin
   }
 }
 
-$NewPlugin = new ui_topnav;
+$NewPlugin = new ui_topnav();
 $NewPlugin->Initialize();

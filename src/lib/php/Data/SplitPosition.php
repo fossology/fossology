@@ -79,5 +79,4 @@ class SplitPosition
   {
     return "SplitPosition(level=" . $this->level . ", " . $this->action . ", " . $this->highlight . ")";
   }
-
 }

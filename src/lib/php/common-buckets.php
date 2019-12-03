@@ -73,13 +73,14 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $NumRows = pg_num_rows($result);
-  if ($NumRows == 0) return $NoData;
+  if ($NumRows == 0) {
+    return $NoData;
+  }
   $rows = pg_fetch_all($result);
   pg_free_result($result);
-  if ($NumRows == 1)
-  {
+  if ($NumRows == 1) {
     $ars_pk = $rows[0]['ars_pk'];
-    return "";  /* only one row */
+    return ""; /* only one row */
   }
 
   /* Find the users default_bucketpool_fk */
@@ -91,12 +92,9 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
   pg_free_result($result);
 
   /* Find the default selected row if ars_pk wasn't passed in */
-  if (empty($ars_pk))
-  {
-    foreach ($rows as $row)
-    {
-      if ($row['bucketpool_pk'] == $DefaultBucketpool_pk)
-      {
+  if (empty($ars_pk)) {
+    foreach ($rows as $row) {
+      if ($row['bucketpool_pk'] == $DefaultBucketpool_pk) {
         $ars_pk = $row['ars_pk'];
         break;
       }
@@ -104,18 +102,14 @@ function SelectBucketDataset($upload_pk, &$ars_pk, $id="selectbucketdataset", $e
     reset($rows);
   }
 
-//  $select .= "<option value=''";
-  foreach ($rows as $row)
-  {
+  //  $select .= "<option value=''";
+  foreach ($rows as $row) {
     $select .= "<option value='$row[ars_pk]'";
 
-    if (empty($ars_pk))
-    {
+    if (empty($ars_pk)) {
       $select .= " SELECTED ";
       $ars_pk = $row["ars_pk"];
-    }
-    else if ($ars_pk == $row['ars_pk'])
-    {
+    } else if ($ars_pk == $row['ars_pk']) {
       $select .= " SELECTED ";
     }
 
@@ -144,18 +138,20 @@ function SelectBucketPool($selected, $active='Y')
   $select = "<select name='$name' id='$id' class='ui-render-select2'>";
 
   /* get the bucketpool recs */
-  if ($active == 'Y')
+  if ($active == 'Y') {
     $Where = "where active='Y'";
-  else
+  } else {
     $Where = "";
+  }
   $sql = "select * from bucketpool $Where order by bucketpool_name asc,version desc";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  while ($row = pg_fetch_assoc($result))
-  {
+  while ($row = pg_fetch_assoc($result)) {
     $select .= "<option value='$row[bucketpool_pk]'";
-    if ($row['bucketpool_pk'] == $selected) $select .= " SELECTED ";
+    if ($row['bucketpool_pk'] == $selected) {
+      $select .= " SELECTED ";
+    }
     $select .= ">$row[bucketpool_name], v $row[version]</option>\n";
   }
   $select .= "</select>";
@@ -179,16 +175,18 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
   global $PG_CONN;
   $BuckArray = array();
 
-  if (empty($nomosagent_pk)|| empty($bucketagent_pk) || empty($uploadtree_pk))
-     Fatal("Missing parameter: nomosagent_pk $nomosagent_pk, bucketagent_pk: $bucketagent_pk, uploadtree_pk: $uploadtree_pk<br>", __FILE__, __LINE__);
+  if (empty($nomosagent_pk) || empty($bucketagent_pk) || empty($uploadtree_pk)) {
+    Fatal(
+      "Missing parameter: nomosagent_pk $nomosagent_pk, bucketagent_pk: $bucketagent_pk, uploadtree_pk: $uploadtree_pk<br>",
+      __FILE__, __LINE__);
+  }
 
   /* Find lft and rgt bounds for this $uploadtree_pk  */
   $sql = "SELECT lft,rgt,upload_fk FROM uploadtree
             WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) < 1)
-  {
+  if (pg_num_rows($result) < 1) {
     pg_free_result($result);
     return $BuckArray;
   }
@@ -212,7 +210,9 @@ function GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucket
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  while ($row = pg_fetch_assoc($result)) $BuckArray[] = $row['bucket_pk'];
+  while ($row = pg_fetch_assoc($result)) {
+    $BuckArray[] = $row['bucket_pk'];
+  }
   pg_free_result($result);
 
   return $BuckArray;
@@ -241,12 +241,13 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
   $defrec = current($bucketDefArray);
   $bucketpool_pk = $defrec['bucketpool_fk'];
   $BuckArray = GetFileBuckets($nomosagent_pk, $bucketagent_pk, $uploadtree_pk, $bucketpool_pk);
-  if (empty($BuckArray)) return "";
+  if (empty($BuckArray)) {
+    return "";
+  }
 
   /* convert array of bucket_pk's to array of bucket names */
   $BuckNames = array();
-  foreach ($BuckArray as $bucket_pk)
-  {
+  foreach ($BuckArray as $bucket_pk) {
     $BuckNames[$bucket_pk] = $bucketDefArray[$bucket_pk]['bucket_name'];
   }
 
@@ -254,23 +255,22 @@ function GetFileBuckets_string($nomosagent_pk, $bucketagent_pk, $uploadtree_pk,
   natcasesort($BuckNames);
 
   $first = true;
-  foreach ($BuckNames as $bucket_name)
-  {
-    if ($first)
+  foreach ($BuckNames as $bucket_name) {
+    if ($first) {
       $first = false;
-    else
+    } else {
       $outstr .= $delimiter . " ";
+    }
 
-    if ($color)
-    {
+    if ($color) {
       $bucket_pk = array_search($bucket_name, $BuckNames);
       $bucket_color = $bucketDefArray[$bucket_pk]['bucket_color'];
       $outstr .= "<span style='background-color:$bucket_color'>";
       $outstr .= $bucket_name;
       $outstr .= "</span>";
-    }
-    else
+    } else {
       $outstr .= $bucket_name;
+    }
   }
 
   return $outstr;
@@ -292,17 +292,19 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
   global $PG_CONN;
   $BuckArray = array();
 
-  if (empty($bucket_pk) || empty($uploadtree_pk))
-     Fatal("Missing parameter: bucket_pk: $bucket_pk, uploadtree_pk: $uploadtree_pk<br>", __FILE__, __LINE__);
+  if (empty($bucket_pk) || empty($uploadtree_pk)) {
+    Fatal(
+      "Missing parameter: bucket_pk: $bucket_pk, uploadtree_pk: $uploadtree_pk<br>",
+      __FILE__, __LINE__);
+  }
 
   /* Find lft and rgt bounds for this $uploadtree_pk  */
   $sql = "SELECT lft,rgt, upload_fk FROM uploadtree WHERE uploadtree_pk = $uploadtree_pk";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) < 1)
-  {
+  if (pg_num_rows($result) < 1) {
     pg_free_result($result);
-    return False;
+    return false;
   }
   $row = pg_fetch_assoc($result);
   $lft = $row["lft"];
@@ -318,10 +320,11 @@ function BucketInTree($bucket_pk, $uploadtree_pk)
 
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) == 0)
-    $rv = False;
-  else
-    $rv = True;
+  if (pg_num_rows($result) == 0) {
+    $rv = false;
+  } else {
+    $rv = true;
+  }
   pg_free_result($result);
 
   return $rv;
@@ -343,9 +346,10 @@ function initBucketDefArray($bucketpool_pk)
   $result_name = pg_query($PG_CONN, $sql);
   DBCheckResult($result_name, $sql, __FILE__, __LINE__);
   $bucketDefArray = array();
-  while ($name_row = pg_fetch_assoc($result_name))
+  while ($name_row = pg_fetch_assoc($result_name)) {
     $bucketDefArray[$name_row['bucket_pk']] = $name_row;
+  }
   pg_free_result($result_name);
   return $bucketDefArray;
 }
-?>
+

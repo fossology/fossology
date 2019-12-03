@@ -35,10 +35,8 @@ class SolidDbManager extends DbManager
    */
   public function prepare($statementName, $sqlStatement)
   {
-    if (array_key_exists($statementName, $this->preparedStatements))
-    {
-      if ($this->preparedStatements[$statementName] !== $sqlStatement)
-      {
+    if (array_key_exists($statementName, $this->preparedStatements)) {
+      if ($this->preparedStatements[$statementName] !== $sqlStatement) {
         throw new \Exception("Existing Statement mismatch: $statementName");
       }
       return;
@@ -56,8 +54,7 @@ class SolidDbManager extends DbManager
    */
   public function execute($statementName, $params = array())
   {
-    if (!array_key_exists($statementName, $this->preparedStatements))
-    {
+    if (! array_key_exists($statementName, $this->preparedStatements)) {
       throw new \Exception("Unknown Statement");
     }
     $startTime = microtime(true);
@@ -80,34 +77,26 @@ class SolidDbManager extends DbManager
   {
     $sql = $this->preparedStatements[$statementName];
     $cnt = 0;
-    foreach($params as $var)
-    {
+    foreach ($params as $var) {
       $cnt++;
-      if ($var === null)
-      {
+      if ($var === null) {
         throw new \Exception('given argument for $' . $cnt . ' is null');
       }
-      if(is_bool($var))
-      {
+      if (is_bool($var)) {
         $masked = $this->dbDriver->booleanToDb($var);
-      }
-      else if(is_numeric($var))
-      {
+      } else if (is_numeric($var)) {
         $masked = $var;
-      }
-      else
-      {
+      } else {
         $masked =  "'". $this->dbDriver->escapeString($var)."'";
       }
       $sqlRep = preg_replace('/(\$'.$cnt.')([^\d]|$)/', "$masked$2", $sql);
-      if ($sqlRep == $sql)
-      {
+      if ($sqlRep == $sql) {
         throw new \Exception('$' . $cnt . ' not found in prepared statement');
       }
       $sql = $sqlRep;
     }
-    if(preg_match('/(\$[\d]+)([^\d]|$)/',$sql, $match)){
-      $this->logger->addDebug($match[1]." in '$statementName not resolved");  
+    if (preg_match('/(\$[\d]+)([^\d]|$)/', $sql, $match)) {
+      $this->logger->addDebug($match[1]." in '$statementName not resolved");
     }
     return $sql;
   }

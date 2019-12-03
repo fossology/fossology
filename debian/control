@@ -1,14 +1,19 @@
 Source: fossology
 Section: utils
-Priority: extra
+Priority: optional
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
-Build-Depends: debhelper, libglib2.0-dev, libmagic-dev, libxml2-dev, libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev, libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libboost-program-options-dev, libjsoncpp-dev, php5-cli|php7.0-cli|php7.2-cli, php-mbstring|php5, php-zip|php5, php-xml|php5
+Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
+ libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev,
+ libssl-dev, postgresql-server-dev-all, libboost-regex-dev,
+ libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev,
+ php5-cli|php7.0-cli|php7.2-cli|php7.3-cli, php-mbstring|php5, php-zip|php5,
+ php-xml|php5, libboost-system-dev, libboost-filesystem-dev
 Standards-Version: 3.9.1
-Homepage: http://fossology.org
+Homepage: https://fossology.org
 
 Package: fossology-dev
 Architecture: any
-Depends: php5-cli|php7.0-cli|php7.2-cli
+Depends: php5-cli|php7.0-cli|php7.2-cli|php7.3-cli, ${misc:Depends}
 Description: architecture for analyzing software, development utils
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -20,8 +25,12 @@ Description: architecture for analyzing software, development utils
 
 Package: fossology
 Architecture: any
-Depends: fossology-web, fossology-scheduler, fossology-ununpack, fossology-copyright, fossology-buckets, fossology-mimetype, fossology-delagent, fossology-wgetagent, ${misc:Depends}
-Recommends: fossology-monk, fossology-monkbulk, fossology-decider, fossology-readmeoss, fossology-spdx2, fossology-reportimport, fossology-reuser, fossology-ninka
+Depends: fossology-web, fossology-scheduler, fossology-ununpack,
+ fossology-copyright, fossology-buckets, fossology-mimetype,
+ fossology-delagent, fossology-wgetagent, ${misc:Depends}
+Recommends: fossology-monk, fossology-monkbulk, fossology-decider,
+ fossology-readmeoss, fossology-spdx2, fossology-reportimport,
+ fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -37,7 +46,10 @@ Description: open and modular architecture for analyzing software
 
 Package: fossology-common
 Architecture: any
-Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql, php-pear, php5-cli|php7.0-cli|php7.2-cli, php5-json|php7.0-json|php7.2-json, php-mbstring|php5, php-zip|php5, php-xml|php5, ${shlibs:Depends}, ${misc:Depends}
+Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql|php7.3-pgsql, php-pear,
+ php5-cli|php7.0-cli|php7.2-cli|php7.3-cli, php-mbstring|php5,
+ php5-json|php7.0-json|php7.2-json|php7.3-json, php-zip|php5, php-xml|php5,
+ ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -46,11 +58,14 @@ Description: architecture for analyzing software, common files
  type identification.
  .
  This package contains the resources needed by all of the other
- fossology components. This includes admin tools for maintainance.
+ fossology components. This includes admin tools for maintenance.
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, fossology-db, fossology-decider, apache2, libapache2-mod-php5|libapache2-mod-php7.0|libapache2-mod-php7.2, ${misc:Depends}
+Depends: fossology-common, apache2,
+ libapache2-mod-php5|libapache2-mod-php7.0|libapache2-mod-php7.2|libapache2-mod-php7.3,
+ ${misc:Depends}
+Recommends: fossology-db
 Description: architecture for analyzing software, web interface
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -62,7 +77,8 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}, heirloom-mailx | s-nail
+Depends: fossology-common, heirloom-mailx | s-nail, ${shlibs:Depends},
+ ${misc:Depends}
 Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler
  The FOSSology project is a web based framework that allows you to
@@ -92,7 +108,9 @@ Description: architecture for analyzing software, database
 
 Package: fossology-ununpack
 Architecture: any
-Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit, genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full, p7zip, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, binutils, bzip2, cabextract, cpio, sleuthkit,
+ genisoimage, poppler-utils, rpm, upx-ucl, unrar-free, unzip, p7zip-full,
+ p7zip, ${shlibs:Depends}, ${misc:Depends}
 Conflicts: fossology-agents-single
 Description: architecture for analyzing software, ununpack and adj2nest
  The FOSSology project is a web based framework that allows you to
@@ -101,7 +119,8 @@ Description: architecture for analyzing software, ununpack and adj2nest
  Existing agents include license analysis, metadata extraction, and MIME
  type identification.
  .
- This package contains the ununpack and adj2nest agent programs and their resources.
+ This package contains the ununpack and adj2nest agent programs and their
+ resources.
 
 Package: fossology-copyright
 Architecture: any
@@ -177,7 +196,8 @@ Description: architecture for analyzing software, delagent
 
 Package: fossology-wgetagent
 Architecture: any
-Depends: fossology-common, wget, subversion, git, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, wget, subversion, git, ${shlibs:Depends},
+ ${misc:Depends}
 Replaces: fossology-wgetagent (<= 2.2.0)
 Description: architecture for analyzing software, wget_agent
  The FOSSology project is a web based framework that allows you to
@@ -214,7 +234,7 @@ Description: architecture for analyzing software, monk
 
 Package: fossology-monkbulk
 Architecture: any
-Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, monk bulk scanning
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
@@ -224,21 +244,21 @@ Description: architecture for analyzing software, monk bulk scanning
  .
  This package contains the monk bulk agent programs and their resources.
 
-Package: fossology-ninka
+Package: fossology-ojo
 Architecture: any
-Depends: fossology-common, ninka (>=1.2), ${shlibs:Depends}, ${misc:Depends}
-Description: architecture for analyzing software, ninka
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture for analyzing software, ojo
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents
  which produce results that are then browsable via the web interface.
  Existing agents include license analysis, metadata extraction, and MIME
  type identification.
  .
- This package contains the ninka wrapper agent programs and their resources.
+ This package contains the ojo agent programs and their resources.
 
 Package: fossology-decider
 Architecture: any
-Depends: fossology-common, ${misc:Depends}
+Depends: fossology-common, fossology-deciderjob, ${misc:Depends}
 Description: architecture for analyzing software, decider
  The FOSSology project is a web based framework that allows you to
  upload software to be picked apart and then analyzed by software agents

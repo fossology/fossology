@@ -58,9 +58,9 @@ class test_common_cli extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
-    if (file_exists("./cli.log"))
-    {
+  protected function tearDown()
+  {
+    if (file_exists("./cli.log")) {
       unlink("./cli.log");
     }
   }

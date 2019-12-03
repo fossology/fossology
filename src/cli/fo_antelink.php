@@ -18,7 +18,7 @@
  ***********************************************************/
 
 /** @file This file is a quick hack to read all the pfiles in an upload and tag those
- *  that the Antelink public server identifies as FOSS files.  
+ *  that the Antelink public server identifies as FOSS files.
  *  As is it isn't ready for prime time but needs to solve an immediate
  *  problem.  I'll improve this at a future date but wanted to check it in
  *  because others my find it useful (with minor modificaitons).
@@ -52,29 +52,25 @@ SetCurlArgs($ch);
 $contents = curl_exec( $ch );
 $response=json_decode($contents);
 curl_close( $ch );
-if (!$response->authorized)
-{
+if (! $response->authorized) {
   echo "Invalid antelink acme key.\n";
   exit;
 }
 
-// Maximum number of sha1's to send to antelink in a single batch 
+// Maximum number of sha1's to send to antelink in a single batch
 $MaxBinarySend = 500;
 $MaxSend = 10;
 
-/*  -p  -u {upload_pk} -t {tag_pk} 
+/*  -p  -u {upload_pk} -t {tag_pk}
  *  -u and -t are manditory
  */
 $Options = getopt("vpt:u:");
 if ( array_key_exists('t', $Options)
-     and array_key_exists('u', $Options)
-   )
-{
+     && array_key_exists('u', $Options)
+   ) {
   $tag_pk = $Options['t'];
   $upload_pk = $Options['u'];
-}
-else
-{
+} else {
   echo "Fatal: Missing parameter\n";
   Usage($argc, $argv);
   exit -1;
@@ -90,8 +86,7 @@ inner join pfile on (PF=pfile_pk)
 left join acme_pfile on (PF=acme_pfile.pfile_fk) where acme_pfile_pk is null;";
 $result = pg_query($PG_CONN, $sql);
 DBCheckResult($result, $sql, __FILE__, __LINE__);
-if (pg_num_rows($result) == 0)
-{
+if (pg_num_rows($result) == 0) {
   echo "Empty upload_pk $upload_pk\n";
   exit;
 }
@@ -99,46 +94,47 @@ if (pg_num_rows($result) == 0)
 
 /* loop through each row identifying each as foss or not
  * Put the FOSS SHA1 into an array to send to the squery server.
- * This two step process is needed because bquery can handle requests of 500 hashes 
+ * This two step process is needed because bquery can handle requests of 500 hashes
  * but squery can only handle requests of 10 hashes.  */
 $MasterFOSSarray = array();
 $ToAntelink = array();
 $FoundFOSSfiles = 0;
 $PrecheckFileCount = 0;
-while ($row = pg_fetch_assoc($result))
-{
+while ($row = pg_fetch_assoc($result)) {
   $PrecheckFileCount++;
   $ToAntelink[] = $row;
-  if (count($ToAntelink) >= $MaxBinarySend) 
-  {
-    if ($Verbose) echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+  if (count($ToAntelink) >= $MaxBinarySend) {
+    if ($Verbose) {
+      echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+    }
     $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
     $ToAntelink = array();
   }
 }
 pg_free_result($result);
-if (count($ToAntelink) ) 
-{
+if (count($ToAntelink)) {
   $FoundFOSSfiles += QueryBinaryServer($ToAntelink, $MasterFOSSarray);
-  if ($Verbose) echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+  if ($Verbose) {
+    echo "Precheck $PrecheckFileCount, found $FoundFOSSfiles\n";
+  }
 }
 
 /* loop through each row accumulating groups of $MaxSend files (sha1's) to send to antelink */
 $ToAntelink = array();
 $TaggedFileCount = 0;
 $TotalFileCount = 0;
-foreach ($MasterFOSSarray as $row)
-{
+foreach ($MasterFOSSarray as $row) {
   $TotalFileCount++;
   $ToAntelink[] = $row;
-  if (count($ToAntelink) >= $MaxSend) 
-  {
+  if (count($ToAntelink) >= $MaxSend) {
     $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose);
     $ToAntelink = array();
   }
 }
 
-if (count($ToAntelink) ) $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose);
+if (count($ToAntelink)) {
+  $TaggedFileCount += QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose);
+}
 
 echo "$TaggedFileCount files tagged out of $TotalFileCount files.\n";
 
@@ -148,7 +144,7 @@ return (0);
 /**
  * @brief Query the Antelink public server and tag the results.
  * @param $ToAntelink array of pfile_fk, pfile_sha1, ufile_name records
- * @param $MasterFOSSarray master array of FOSS records.  This will be used for squery. 
+ * @param $MasterFOSSarray master array of FOSS records.  This will be used for squery.
  * @return number of FOSS files in $ToAntelink.
  **/
 function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
@@ -160,7 +156,9 @@ function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
 
   /* construct array of just sha1's */
   $sha1array = array();
-  foreach($ToAntelink as $row) $sha1array[] = $row['pfile_sha1'];
+  foreach ($ToAntelink as $row) {
+    $sha1array[] = $row['pfile_sha1'];
+  }
   $PostData = json_encode($sha1array);
 
   $curlch = curl_init($acmeBinaryqueryurl);
@@ -173,8 +171,7 @@ function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
   //getting response from server
   $curlresponse = curl_exec($curlch);
 
-  if (curl_errno($curlch))
-  {
+  if (curl_errno($curlch)) {
     // Fatal: display curl errors
     echo "Error " .  curl_errno($curlch) . ": " . curl_error($curlch) . "\n";
     return $NumFound;
@@ -186,27 +183,26 @@ function QueryBinaryServer($ToAntelink, &$MasterFOSSarray)
   $response = json_decode($curlresponse);
 
   // print any errors
-  if ($response->error)
-  {
+  if ($response->error) {
      echo $response->error . "\n";
   }
 
   /* Add tag or print */
-if (is_array($response->results))
-  foreach($response->results as $result)
-  {
-    $row = GetRawRow($result->sha1, $ToAntelink);
-    $MasterFOSSarray[] = $row;
+  if (is_array($response->results)) {
+    foreach ($response->results as $result) {
+      $row = GetRawRow($result->sha1, $ToAntelink);
+      $MasterFOSSarray[] = $row;
+    }
   }
 
-  return $NumFound;  
+  return $NumFound;
 }
 
 
 /**
  * @brief Query the Antelink public server and tag the results.
  * @param $ToAntelink array of pfile_fk, pfile_sha1, ufile_name records
- * @param $tag_pk 
+ * @param $tag_pk
  * @param $PrintOnly print the raw antelink data, do not update the db.  Used for debugging.
  * @parma $Verbose   print project name.
  * @return number of tagged files.
@@ -220,8 +216,7 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose)
 
   /* construct array of arrays of name and sha1's */
   $files=array();
-  foreach($ToAntelink as $row) 
-  {
+  foreach ($ToAntelink as $row) {
     $file['hash']=$row['pfile_sha1'];
     $file['name']=$row['ufile_name'];
     $files[]=$file;
@@ -233,91 +228,86 @@ function QueryTag($ToAntelink, $tag_pk, $PrintOnly, $Verbose)
   $curlch = curl_init($acmequeryurl);
   SetCurlArgs($curlch);
 
-  curl_setopt($curlch, CURLOPT_POST, TRUE);
-  curl_setopt($curlch,CURLOPT_POSTFIELDS, $PostData);
-  curl_setopt($curlch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($curlch, CURLOPT_POST, true);
+  curl_setopt($curlch, CURLOPT_POSTFIELDS, $PostData);
+  curl_setopt($curlch, CURLOPT_RETURNTRANSFER, true);
 
   //getting response from server
   $response = curl_exec($curlch);
 
-  if (curl_errno($curlch))
-  {
+  if (curl_errno($curlch)) {
     // Fatal: display curl errors
     echo "Error " .  curl_errno($curlch) . ": " . curl_error($curlch) . "\n";
     return 0;
-//    exit;
+    //    exit;
   }
 
   //closing the curl
   curl_close($curlch);
 
   $response = json_decode($response);
-//echo "response\n";
-//print_r($response);
+  //echo "response\n";
+  //print_r($response);
 
   // print any errors
-  if ($response->error)
-  {
+  if ($response->error) {
      echo $response->error . "\n";
   }
 
   /* Add tag or print */
-if (is_array($response->results))
-  foreach($response->results as $result)
-  {
-    $row = GetRawRow($result->sha1, $ToAntelink);
+  if (is_array($response->results)) {
+    foreach ($response->results as $result) {
+      $row = GetRawRow($result->sha1, $ToAntelink);
 
-    if ($PrintOnly)
-    {
-     if (!empty($row)) print_r($row);
-     // echo $row['ufile_name'] . "\n";
-      print_r($result);
-      continue;
-    }
-
-    foreach ($result->projects as $project)
-    {
-      /* check if acme_project already exists (check if the url is unique) */
-      $url = pg_escape_string($PG_CONN, $project->url);
-      $name = pg_escape_string($PG_CONN, $project->name);
-      $acme_project_pk = '';
-      $sql = "SELECT acme_project_pk from acme_project where url='$url' and project_name='$name'";
-      $sqlresult = pg_query($PG_CONN, $sql);
-      DBCheckResult($sqlresult, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($sqlresult) > 0)
-      {
-        $projrow = pg_fetch_assoc($sqlresult);
-        $acme_project_pk = $projrow['acme_project_pk'];
-      }
-      pg_free_result($sqlresult);
-
-      if (empty($acme_project_pk))
-      {
-        /* this is a new acme_project, so write the acme_project record */
-        $acme_project_pk = writeacme_project($project, $Verbose);
+      if ($PrintOnly) {
+        if (! empty($row)) {
+          print_r($row);
+        }
+        // echo $row['ufile_name'] . "\n";
+        print_r($result);
+        continue;
       }
 
-      /* write the acme_pfile record */
-      writeacme_pfile($acme_project_pk, $row['pfile_pk']);
+      foreach ($result->projects as $project) {
+        /* check if acme_project already exists (check if the url is unique) */
+        $url = pg_escape_string($PG_CONN, $project->url);
+        $name = pg_escape_string($PG_CONN, $project->name);
+        $acme_project_pk = '';
+        $sql = "SELECT acme_project_pk from acme_project where url='$url' and project_name='$name'";
+        $sqlresult = pg_query($PG_CONN, $sql);
+        DBCheckResult($sqlresult, $sql, __FILE__, __LINE__);
+        if (pg_num_rows($sqlresult) > 0) {
+          $projrow = pg_fetch_assoc($sqlresult);
+          $acme_project_pk = $projrow['acme_project_pk'];
+        }
+        pg_free_result($sqlresult);
 
-      /* Tag the pfile (update tag_file table) */
-      /* There is no constraint preventing duplicate tags so do a precheck */
-      $sql = "SELECT * from tag_file where pfile_fk='$row[pfile_pk]' and tag_fk='$tag_pk'";
-      $sqlresult = pg_query($PG_CONN, $sql);
-      DBCheckResult($sqlresult, $sql, __FILE__, __LINE__);
-      if (pg_num_rows($sqlresult) == 0)
-      {
-        $sql = "insert into tag_file (tag_fk, pfile_fk, tag_file_date, tag_file_text) values ($tag_pk, '$row[pfile_pk]', now(), NULL)";
-        $insresult = pg_query($PG_CONN, $sql);
-        DBCheckResult($insresult, $sql, __FILE__, __LINE__);
-        pg_free_result($insresult);
-        $numTagged++;
+        if (empty($acme_project_pk)) {
+          /* this is a new acme_project, so write the acme_project record */
+          $acme_project_pk = writeacme_project($project, $Verbose);
+        }
+
+        /* write the acme_pfile record */
+        writeacme_pfile($acme_project_pk, $row['pfile_pk']);
+
+        /* Tag the pfile (update tag_file table) */
+        /* There is no constraint preventing duplicate tags so do a precheck */
+        $sql = "SELECT * from tag_file where pfile_fk='$row[pfile_pk]' and tag_fk='$tag_pk'";
+        $sqlresult = pg_query($PG_CONN, $sql);
+        DBCheckResult($sqlresult, $sql, __FILE__, __LINE__);
+        if (pg_num_rows($sqlresult) == 0) {
+          $sql = "insert into tag_file (tag_fk, pfile_fk, tag_file_date, tag_file_text) values ($tag_pk, '$row[pfile_pk]', now(), NULL)";
+          $insresult = pg_query($PG_CONN, $sql);
+          DBCheckResult($insresult, $sql, __FILE__, __LINE__);
+          pg_free_result($insresult);
+          $numTagged++;
+        }
+        pg_free_result($sqlresult);
       }
-      pg_free_result($sqlresult);
     }
   }
 
-  return $numTagged;  
+  return $numTagged;
 }
 
 /**
@@ -328,9 +318,10 @@ if (is_array($response->results))
 function GetRawRow($sha1, $ToAntelink)
 {
   /* find the sha1 in $ToAntelink and print the ufile_name */
-  foreach($ToAntelink as $row) 
-  { 
-    if (strcasecmp($row['pfile_sha1'], $sha1) == 0) return $row;
+  foreach ($ToAntelink as $row) {
+    if (strcasecmp($row['pfile_sha1'], $sha1) == 0) {
+      return $row;
+    }
   }
   return '';
 }
@@ -345,7 +336,7 @@ function SetCurlArgs($ch)
   global $SysConf;
   curl_setopt($ch,CURLOPT_USERAGENT,'Curl-php');
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
   curl_setopt($ch,
               CURLOPT_HTTPHEADER, array("Content-Type:
@@ -356,11 +347,12 @@ function SetCurlArgs($ch)
   $http_proxy = $SysConf['FOSSOLOGY']['http_proxy'];
   $ProxyServer = substr($http_proxy, 0, strrpos($http_proxy, ":"));
   $ProxyPort = substr(strrchr($http_proxy, ":"), 1);
-  if (!empty($ProxyServer))
-  {
-    curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+  if (! empty($ProxyServer)) {
+    curl_setopt($ch, CURLOPT_HTTPPROXYTUNNEL, true);
     curl_setopt($ch, CURLOPT_PROXY, $ProxyServer);
-    if (!empty($ProxyPort)) curl_setopt($ch, CURLOPT_PROXYPORT, $ProxyPort);
+    if (! empty($ProxyPort)) {
+      curl_setopt($ch, CURLOPT_PROXYPORT, $ProxyPort);
+    }
     curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
   }
 }
@@ -393,36 +385,38 @@ function writeacme_project($project, $Verbose)
 
   /* convert licenses array to pipe delimited list */
   $licenses = '';
-  foreach($project->licenses as $license) 
-  {
-    if (!empty($licenses)) $licenses .= '|';
+  foreach ($project->licenses as $license) {
+    if (! empty($licenses)) {
+      $licenses .= '|';
+    }
     $licenses .= pg_escape_string($PG_CONN, $license);
   }
 
   /* figure out if we have artefact or content data and pull release date an version out of their respective structs */
-  if (!empty($project->artefacts))
-  {
+  if (! empty($project->artefacts)) {
     $artefact = $project->artefacts[0];
     $projectDate = $artefact->releaseDate;
     $version = pg_escape_string($PG_CONN, $artefact->version);
-  }
-  else
-  {
+  } else {
     $content = $project->contents[0];
     $projectDate = $content->releaseDate;
     $version = pg_escape_string($PG_CONN, $content->revision);
   }
 
-  /* convert unix time to date m/d/yyyy  
+  /* convert unix time to date m/d/yyyy
    * Watch out for time stamps in milliseconds
    */
-  if ($projectDate > 20000000000) $projectDate = $projectDate / 1000;  // convert to seconds if necessary
+  if ($projectDate > 20000000000) {
+    $projectDate = $projectDate / 1000; // convert to seconds if necessary
+  }
   $releasedate = date("Ymd", $projectDate);
 
-  if ($Verbose) echo "Found project: $project_name\n";
+  if ($Verbose) {
+    echo "Found project: $project_name\n";
+  }
 
   /* insert the data */
-  $sql = "insert into acme_project (project_name, url, description, licenses, releasedate, version) 
+  $sql = "insert into acme_project (project_name, url, description, licenses, releasedate, version)
               values ('$project_name', '$url', '$description', '$licenses', '$releasedate', '$version')";
   $InsResult = pg_query($PG_CONN, $sql);
   DBCheckResult($InsResult, $sql, __FILE__, __LINE__);
@@ -451,4 +445,4 @@ function writeacme_pfile($acme_project_pk, $pfile_pk)
   // ignore errors (this is a prototype).  Errors are almost certainly from a duplicate insertion
   @$InsResult = pg_query($PG_CONN, $sql);
 }
-?>
+

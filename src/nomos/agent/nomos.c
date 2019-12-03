@@ -380,6 +380,7 @@ int main(int argc, char **argv)
         printf("%s", BuildVersion);
         Bail(0);
       case 'd': /* diretory to scan */
+        gl.progOpts |= OPTS_SCANNING_DIRECTORY;
         scanning_directory = optarg;
         struct stat dir_sta;
         int ret = stat(scanning_directory, &dir_sta);
@@ -427,6 +428,18 @@ int main(int argc, char **argv)
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
 
+      if (optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        char json_file_template[] = "/tmp/foss-nomos-json-XXXXXX";
+        int json_file_descriptor = mkstemp(json_file_template);
+        cur.tempJsonPath = fdopen(json_file_descriptor, "w+");
+        if (!cur.tempJsonPath)
+        {
+          LOG_FATAL("failed to open %s, %s\n", json_file_template,
+              strerror(errno));
+        }
+        sem_init(&cur.mutexTempJson, 1, 1);
+      }
       pFile = malloc(process_count*(sizeof(FILE*)));
       pTempFileName = malloc(process_count*sizeof(char[50]));
       int i = 0;
@@ -480,6 +493,14 @@ int main(int argc, char **argv)
             fclose(pFile[i]);
             unlink(pTempFileName[i]);
           }
+        }
+
+        if (optionIsSet(OPTS_JSON_OUTPUT))
+        {
+          /* Print the JSON output and clean related variables */
+          parseTempJson();
+          sem_destroy(&cur.mutexTempJson);
+          fclose(cur.tempJsonPath);
         }
 
         /* free memeory */

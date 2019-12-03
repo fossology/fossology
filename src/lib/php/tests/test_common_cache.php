@@ -192,12 +192,12 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown()
+  {
     global $PG_CONN;
     /** db close */
     if (is_callable('pg_close')) {
       pg_close($PG_CONN);
     }
   }
-
 }

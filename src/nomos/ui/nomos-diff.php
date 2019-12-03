@@ -22,7 +22,7 @@ use Fossology\Lib\Dao\UploadDao;
  * \brief Compare License Browser, list license histogram
  */
 
-define("TITLE_ui_nomos_diff", _("Compare License Browser"));
+define("TITLE_UI_NOMOS_DIFF", _("Compare License Browser"));
 
 /**
  * @class ui_nomos_diff
@@ -41,7 +41,7 @@ class ui_nomos_diff extends FO_Plugin
    * @var string $Title
    * HTML title
    */
-  var $Title = TITLE_ui_nomos_diff;
+  var $Title = TITLE_UI_NOMOS_DIFF;
 
   /**
    * @var string $Version
@@ -126,8 +126,7 @@ class ui_nomos_diff extends FO_Plugin
     if ($this->State != PLUGIN_STATE_INVALID) {
       return (1);
     } // don't re-run
-    if ($this->Name !== "") // Name must be defined
-    {
+    if ($this->Name !== "") { // Name must be defined
       global $Plugins;
       $this->State = PLUGIN_STATE_VALID;
       array_push($Plugins, $this);
@@ -224,8 +223,9 @@ class ui_nomos_diff extends FO_Plugin
       $VLic .= ">$row[licname] </a>";
       $VLic .= "</td>";
       $VLic .= "</tr>\n";
-      if ($row['licname'] == "No_license_found")
+      if ($row['licname'] == "No_license_found") {
         $NoLicFound = $row['liccount'];
+      }
     }
     pg_free_result($result);
     $VLic .= "</table>\n";
@@ -255,8 +255,9 @@ class ui_nomos_diff extends FO_Plugin
       $licstr = "";
       $DiffLicStyle = "style='background-color:#ffa8a8'"; // mid red pastel
       foreach ($Child['licarray'] as $rf_pk => $rf_shortname) {
-        if (! empty($licstr))
+        if (! empty($licstr)) {
           $licstr .= ", ";
+        }
         if (@$OtherChild['licarray'][$rf_pk]) {
           /* license is in both $Child and $OtherChild */
           $licstr .= $rf_shortname;
@@ -336,8 +337,9 @@ class ui_nomos_diff extends FO_Plugin
    */
   function AddLicStr($TreeInfo, &$Children)
   {
-    if (! is_array($Children))
+    if (! is_array($Children)) {
       return;
+    }
     $agent_pk = $TreeInfo['agent_pk'];
     foreach ($Children as &$Child) {
       /**
@@ -355,19 +357,24 @@ class ui_nomos_diff extends FO_Plugin
    */
   function filter_samehash(&$Master)
   {
-    if (! is_array($Master))
+    if (! is_array($Master)) {
       return;
+    }
 
     foreach ($Master as $Key => &$Pair) {
-      if (empty($Pair[1]) or empty($Pair[2]))
+      if (empty($Pair[1]) or empty($Pair[2])) {
         continue;
-      if (empty($Pair[1]['pfile_fk']))
+      }
+      if (empty($Pair[1]['pfile_fk'])) {
         continue;
-      if (empty($Pair[2]['pfile_fk']))
+      }
+      if (empty($Pair[2]['pfile_fk'])) {
         continue;
+      }
 
-      if ($Pair[1]['pfile_fk'] == $Pair[2]['pfile_fk'])
+      if ($Pair[1]['pfile_fk'] == $Pair[2]['pfile_fk']) {
         unset($Master[$Key]);
+      }
     }
     return;
   }
@@ -380,11 +387,13 @@ class ui_nomos_diff extends FO_Plugin
   function filter_samelic(&$Master)
   {
     foreach ($Master as $Key => &$Pair) {
-      if (empty($Pair[1]) or empty($Pair[2]))
+      if (empty($Pair[1]) or empty($Pair[2])) {
         continue;
+      }
       if (($Pair[1]['ufile_name'] == $Pair[2]['ufile_name']) &&
-        ($Pair[1]['licstr'] == $Pair[2]['licstr']))
+        ($Pair[1]['licstr'] == $Pair[2]['licstr'])) {
         unset($Master[$Key]);
+      }
     }
     return;
   }
@@ -397,11 +406,13 @@ class ui_nomos_diff extends FO_Plugin
   function filter_samelicfuzzy(&$Master)
   {
     foreach ($Master as $Key => &$Pair) {
-      if (empty($Pair[1]) or empty($Pair[2]))
+      if (empty($Pair[1]) or empty($Pair[2])) {
         continue;
+      }
       if (($Pair[1]['fuzzyname'] == $Pair[2]['fuzzyname']) &&
-        ($Pair[1]['licstr'] == $Pair[2]['licstr']))
+        ($Pair[1]['licstr'] == $Pair[2]['licstr'])) {
         unset($Master[$Key]);
+      }
     }
     return;
   }
@@ -424,18 +435,21 @@ class ui_nomos_diff extends FO_Plugin
       $Pair2 = GetArrayVal("2", $Pair);
 
       if (empty($Pair1)) {
-        if ($Pair2['licstr'] == $NoLicStr)
+        if ($Pair2['licstr'] == $NoLicStr) {
           unset($Master[$Key]);
-        else
+        } else {
           continue;
+        }
       } else if (empty($Pair2)) {
-        if ($Pair1['licstr'] == $NoLicStr)
+        if ($Pair1['licstr'] == $NoLicStr) {
           unset($Master[$Key]);
-        else
+        } else {
           continue;
+        }
       } else if (($Pair1['licstr'] == $NoLicStr) and
-        ($Pair2['licstr'] == $NoLicStr))
+        ($Pair2['licstr'] == $NoLicStr)) {
         unset($Master[$Key]);
+      }
     }
     return;
   }
@@ -678,11 +692,11 @@ class ui_nomos_diff extends FO_Plugin
       $V = ReportCacheGet($CacheKey);
     }
 
-    if (empty($V)) // no cache exists
-    {
+    if (empty($V)) { // no cache exists
       $filter = GetParm("filter", PARM_STRING);
-      if (empty($filter))
+      if (empty($filter)) {
         $filter = "samehash";
+      }
       $FreezeCol = GetParm("freeze", PARM_INTEGER); // which column to freeze? 1
                                                     // or 2 or null
       $ClickedCol = GetParm("col", PARM_INTEGER);   // which column was clicked
@@ -691,9 +705,10 @@ class ui_nomos_diff extends FO_Plugin
       $in_uploadtree_pk1 = GetParm("item1", PARM_INTEGER);
       $in_uploadtree_pk2 = GetParm("item2", PARM_INTEGER);
 
-      if (empty($in_uploadtree_pk1) or empty($in_uploadtree_pk2))
+      if (empty($in_uploadtree_pk1) or empty($in_uploadtree_pk2)) {
         Fatal("Bad input parameters.  Both item1 and item2 must be specified.",
           __FILE__, __LINE__);
+      }
 
       /*
        * If you click on a item in a frozen column, then you are a dope so
@@ -733,8 +748,9 @@ class ui_nomos_diff extends FO_Plugin
 
       $newURL = Traceback_dir() . "?mod=" . $this->Name .
         "&item1=$uploadtree_pk1&item2=$uploadtree_pk2";
-      if (! empty($filter))
+      if (! empty($filter)) {
         $newURL .= "&filter=$filter";
+      }
 
       // rewrite page with new uploadtree_pks */
       if (($uploadtree_pk1 != $in_uploadtree_pk1) ||
@@ -784,20 +800,22 @@ JSOUT;
         case "XML":
           break;
         case "HTML":
-          if ($ErrMsg)
+          if ($ErrMsg) {
             $V .= $ErrMsg;
-          else
+          } else {
             $V .= $this->HTMLout($Master, $uploadtree_pk1, $uploadtree_pk2,
               $in_uploadtree_pk1, $in_uploadtree_pk2, $filter, $TreeInfo1,
               $TreeInfo2);
+          }
           break;
         case "Text":
           break;
         default:
       }
       $Cached = false;
-    } else
+    } else {
       $Cached = true;
+    }
 
     if (! $this->OutputToStdout) {
       return ($V);
@@ -813,8 +831,9 @@ JSOUT;
       echo " <i>$text</i>   <a href=\"$_SERVER[REQUEST_URI]&updcache=1\"> $text1 </a>";
     } else {
       // Cache Report if this took longer than 1/2 second
-      if ($Time > 0.5)
+      if ($Time > 0.5) {
         ReportCachePut($CacheKey, $V);
+      }
     }
     /* */
     return;

@@ -25,8 +25,11 @@ namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
+use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 
 /**
  * @class AuthController
@@ -36,31 +39,120 @@ class AuthController extends RestController
 {
 
   /**
-   * Get app the uploads for current user
+   * Get the authentication headers for the user.
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   * @deprecated Use createNewJwtToken()
+   */
+  public function getAuthHeaders($request, $response, $args)
+  {
+    $warningMessage = "The resource is deprecated. Use /tokens";
+    $returnVal = new Info(406, $warningMessage, InfoType::ERROR);
+
+    return $response->withHeader('Warning', $warningMessage)->withJson(
+      $returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Get the JWT authentication headers for the user
    *
    * @param ServerRequestInterface $request
    * @param ResponseInterface $response
    * @param array $args
    * @return ResponseInterface
    */
-  public function getAuthHeaders($request, $response, $args)
+  public function createNewJwtToken($request, $response, $args)
   {
-    $username = $request->getQueryParam("username");
-    $password = $request->getQueryParam("password");
+    $tokenRequestBody = $request->getParsedBody();
+    $paramsRequired = [
+      "username",
+      "password",
+      "token_name",
+      "token_scope",
+      "token_expire"
+    ];
+    $returnVal = null;
 
-    // Checks if user is valid
-    if ($this->restHelper->getAuthHelper()->checkUsernameAndPassword($username,
-      $password)) {
-      $base64String = base64_encode("$username:$password");
-      $newHeader = "authorization: Basic $base64String";
-      // Create the response header
-      return $response->withJson([
-        "header" => $newHeader
-      ], 200);
+    if (! $this->arrayKeysExists($tokenRequestBody, $paramsRequired)) {
+      $error = new Info(400,
+        "Following parameters are required in the request body: " .
+        join(",", $paramsRequired), InfoType::ERROR);
+      $returnVal = $response->withJson($error->getArray(), $error->getCode());
     } else {
-      $returnVal = new Info(404, "Username or password is incorrect",
-        InfoType::ERROR);
-      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      $tokenValid = $this->restHelper->validateTokenRequest(
+        $tokenRequestBody["token_expire"], $tokenRequestBody["token_name"],
+        $tokenRequestBody["token_scope"]);
+      if ($tokenValid !== true) {
+        $returnVal = $response->withJson($tokenValid->getArray(),
+          $tokenValid->getCode());
+      } else {
+        // Request is in correct format.
+        $authHelper = $this->restHelper->getAuthHelper();
+        if ($authHelper->checkUsernameAndPassword($tokenRequestBody["username"],
+          $tokenRequestBody["password"])) {
+          $userId = $this->restHelper->getUserId();
+          $expire = $tokenRequestBody["token_expire"];
+          $scope  = $tokenRequestBody["token_scope"];
+          $name   = $tokenRequestBody["token_name"];
+          $key    = bin2hex(
+            openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
+          try {
+            $jti = $this->dbHelper->insertNewTokenKey($userId, $expire,
+              RestHelper::SCOPE_DB_MAP[$scope], $name, $key);
+          } catch (DuplicateTokenKeyException $e) {
+            // Key already exists, try again.
+            $key = bin2hex(
+              openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
+            try {
+              $jti = $this->dbHelper->insertNewTokenKey($userId, $expire,
+                RestHelper::SCOPE_DB_MAP[$scope], $name, $key);
+            } catch (DuplicateTokenKeyException $e) {
+              // New key also failed, give up!
+              $error = new Info(429, "Please try again later.", InfoType::ERROR);
+              $returnVal = $response->withHeader('Retry-After', 2)->withJson(
+                $error->getArray(), $error->getCode());
+            }
+          } catch (DuplicateTokenNameException $e) {
+            $error = new Info($e->getCode(), $e->getMessage(), InfoType::ERROR);
+            $returnVal = $response->withJson($error->getArray(),
+              $error->getCode());
+          }
+          if (isset($jti['jti']) && ! empty($jti['jti'])) {
+            $theJwtToken = $this->restHelper->getAuthHelper()->generateJwtToken(
+              $request->getUri()->getHost(), $expire, $jti['created_on'],
+              $jti['jti'], $scope, $key);
+            $returnVal = $response->withJson([
+              "Authorization" => "Bearer " . $theJwtToken
+            ], 201);
+          }
+        } else {
+          $error = new Info(404, "Username or password incorrect.",
+            InfoType::ERROR);
+          $returnVal = $response->withJson($error->getArray(), $error->getCode());
+        }
+      }
     }
+    return $returnVal;
+  }
+
+  /**
+   * @brief Check if a list of keys exists in associative array.
+   *
+   * This function takes a list of keys which should appear in an associative
+   * array. The function flips the key array to make it as an associative array.
+   * It then uses the array_diff_key() to compare the two arrays.
+   *
+   * @param array $array Associative array to check keys against
+   * @param array $keys  Array of keys to check
+   * @return boolean True if all keys exists, false otherwise.
+   * @uses array_flip()
+   * @uses array_diff_key()
+   */
+  private function arrayKeysExists($array, $keys)
+  {
+    return !array_diff_key(array_flip($keys), $array);
   }
 }

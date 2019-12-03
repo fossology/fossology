@@ -3,6 +3,7 @@
 
 TOP = ../../../..
 VARS = $(TOP)/Makefile.conf
+DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 LOCALAGENTDIR = ../../agent
@@ -27,7 +28,7 @@ coverage: $(TEST_OBJ) testGetMetadata.o pkgagent_cov.o cunit_lib test_lib
 	lcov --directory $(LOCALAGENTDIR)/ --capture --output-file cov.txt; \
 	genhtml -o results cov.txt
 
-$(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) cunit_lib test_lib
+$(EXE): $(TEST_OBJ) testGetMetadata.o pkgagent.o $(VARS) $(FOLIB) cunit_lib test_lib
 	$(CC) -o $@ $(LOCALAGENTDIR)/pkgagent.o $(TEST_OBJ) testGetMetadata.o $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL)
 
 $(TEST_OBJ): %.o: %.c
@@ -52,3 +53,5 @@ clean:
 	rm -rf $(EXE) *.o core *.xml *.txt results
 
 .PHONY: all test coverage clean
+
+include $(DEPS)

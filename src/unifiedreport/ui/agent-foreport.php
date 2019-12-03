@@ -51,19 +51,15 @@ class FoUnifiedReportGenerator extends DefaultPlugin
   {
     $groupId = Auth::getGroupId();
     $uploadId = intval($request->get('upload'));
-    try
-    {
+    try {
       $upload = $this->getUpload($uploadId, $groupId);
-    }
-    catch(Exception $e)
-    {
+    } catch(Exception $e) {
       return $this->flushContent($e->getMessage());
     }
 
     list($jobId, $jobQueueId, $error) = $this->scheduleAgent($groupId, $upload);
 
-    if ($jobQueueId<0)
-    {
+    if ($jobQueueId < 0) {
       return $this->flushContent(_('Cannot schedule').": $error");
     }
 
@@ -89,20 +85,17 @@ class FoUnifiedReportGenerator extends DefaultPlugin
    */
   protected function getUpload($uploadId, $groupId)
   {
-    if ($uploadId <=0)
-    {
+    if ($uploadId <= 0) {
       throw new Exception(_("parameter error"));
     }
     /** @var UploadDao $uploadDao*/
     $uploadDao = $this->getObject('dao.upload');
-    if (!$uploadDao->isAccessible($uploadId, $groupId))
-    {
+    if (!$uploadDao->isAccessible($uploadId, $groupId)) {
       throw new Exception(_("permission denied"));
     }
     /** @var Upload $upload*/
     $upload = $uploadDao->getUpload($uploadId);
-    if ($upload === null)
-    {
+    if ($upload === null) {
       throw new Exception(_('cannot find uploadId'));
     }
     return $upload;

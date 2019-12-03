@@ -1,5 +1,5 @@
 {#
-Copyright (C) 2015 Siemens AG
+Copyright (C) 2015,2019 Siemens AG
 Author: Shaheem Azmal<shaheem.azmal@siemens.com>, 
         Anupam Ghosh <anupam.ghosh@siemens.com>
 
@@ -18,33 +18,43 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #}
 
 var prev = "0";
+
+var uploadId = {{ uploadId }};
+var allUsers = {{ allusersval }};
+var pageIndex = {{ page }};
+var fullUri = '?mod=showjobs&upload=' + uploadId;
+if (allUsers != 0) {
+  fullUri += '&allusers=' + allUsers;
+}
+if (pageIndex != 0) {
+  fullUri += '&page=' + pageIndex;
+}
+
 function checkJobQueue()
 {
-    $.ajax({
+  $.ajax({
     type: "POST",
     data:null,
     url: "?mod=jobstatus",
     success: function (data) {
-      if(data.status=="1" || prev =="1") { 
-        
-        if(prev == "0" )
+      if (data.status == "1" || prev == "1") {
+        if (prev == "0") {
           prev = "1";
-        else
-          prev = "0"; 
-
-          getTableBody(); 
-      }else{
+        } else {
+          prev = "0";
+        }
+        getTableBody();
+      } else {
         prev ="0";    
       }
     },
     error: function(responseobject) { }
-	
   });
 }
 
 function autoRefreshTable()
 {
-    checkJobQueue();
+  checkJobQueue();
 }
 
 clockTime = {{ clockTime }};
@@ -54,12 +64,142 @@ if(clockTime != "0"){
 
 function createShowJobsTable(data)
 {
-    $("#paginationup").empty();
-    $("#showjobstable tbody").empty();
-    $("#paginationdown").empty();
-    $("#paginationup").append(data.pagination);
-    $("#showjobstable tbody").append(data.showJobsData);
-    $("#paginationdown").append(data.pagination);     
+  var mainTBody = $("#showjobstable tbody");
+  var joblist = data.showJobsData;
+
+  $("#paginationup").empty();
+  mainTBody.empty();
+  $("#paginationdown").empty();
+
+  if (joblist.showJobsData == "There are no jobs to display") {
+    var emptyTr = jQuery("<tr/>");
+    var tableTemplate = jQuery('<table/>', {
+      class: "jobTable",
+      border: "1"
+    }).html("<tbody><tr><td style='text-align:center'>" +
+      joblist.showJobsData + "</td></th></tbody>");
+    emptyTr.append(tableTemplate);
+    mainTBody.append(emptyTr);
+  }
+  else {
+    var i = 0;
+    while (i < joblist.length) {
+      var tableTemplate = createTableForJob(joblist[i]);
+      fillTableWithJobInfo(tableTemplate, joblist[i].job);
+      while ((i < (joblist.length - 1)) &&
+        (joblist[i].upload !== null && joblist[i+1].upload !== null) &&
+        (joblist[i].upload.uploadId === joblist[i+1].upload.uploadId)) {
+        i = i + 1;
+        fillTableWithJobInfo(tableTemplate, joblist[i].job);
+      }
+      var tr = jQuery("<tr/>").html(tableTemplate);
+      mainTBody.append(tr);
+      mainTBody.append($("<tr><td colspan='8'><hr /></td></tr>"));
+      i = i + 1;
+    }
+  }
+  $("#paginationup").append(data.pagination);
+  $("#paginationdown").append(data.pagination);
+}
+
+function createTableForJob(job) {
+  var tableTemplate = jQuery('<table/>', {
+    id: "jobTable" + job.job.jobId,
+    class: "jobTable",
+    border: "1"
+  });
+  var uploadLink = "";
+  if (job.upload !== null) {
+    uploadLink = '<a title="{{ "Click to browse"|trans }}" ' +
+    'href="?mod=browse&upload=' + job.upload.uploadId + '&item=' +
+    job.upload.uploadItem + '">' + job.upload.uploadName + '</a>';
+  } else {
+    uploadLink = '<span style="color:black">' + job.job.jobName + '</span>';
+  }
+  var uploadETA = "";
+  if ((job.upload !== null) && (job.upload.uploadEta !== null)) {
+    uploadETA = job.upload.uploadEta;
+  }
+  tableTemplate.html('<thead><tr><th></th>' +
+    '<th colspan="6">' + uploadLink + '</th><th style="color:black">' +
+    uploadETA + '</th></tr>' + '</thead><tbody></tbody>');
+  return tableTemplate;
+}
+
+function fillTableWithJobInfo(tableTemplate, job) {
+  var tbody = tableTemplate.children("tbody");
+  $('<tr class="jobTableNewJob">' +
+    '<td>{{ "Job/Dependency"|trans }}</td><td>{{ "Status"|trans }}</td>' +
+    '<td colspan="3">' + job.jobName + '</td><td>{{ "Average items/sec"|trans }}' +
+    '</td><td>{{ "ETA"|trans }}</td><td></td></tr>').appendTo(tbody);
+  $.each(job.jobQueue, function(jobQueueId, jobQueueData) {
+    var action = "";
+    if (jobQueueData.canDoActions && jobQueueData.isInProgress){
+      if (jobQueueData.jq_endtext == "Paused") {
+        action += '[<a href="' + fullUri + '&action=restart&jobid=' + jobQueueId;
+        action += '" title="{{ 'Un-Pause this job'|trans }}">{{ 'Resume'|trans }}</a>]';
+      } else {
+        action += '[<a href="' + fullUri + '&action=pause&jobid=' + jobQueueId;
+        action += '" title="{{ 'Pause this job'|trans }}">{{ 'Pause'|trans }}</a>]';
+      }
+      action += ' [<a href="' + fullUri + '&action=cancel&jobid=' + jobQueueId;
+      action += '" title="{{ 'Cancel this job'|trans }}">{{ 'Cancel'|trans }}</a>]';
+    } else if (jobQueueData.download.length > 0 && jobQueueData.isReady) {
+      action += '[<a href="?mod=download&report=' + job.jobId + '">Download ' +
+        jobQueueData.download + '</a>]';
+    }
+    if ('isNoOfMonkBulk' in jobQueueData) {
+      action += '[{{ 'Count : '|trans }}<a href="#" title="isNoOfMonkBulk">' +
+        jobQueueData.isNoOfMonkBulk + '</a>]';
+    }
+
+    var jobQD = "<a href='?mod=showjobs&upload=-1&job=" + jobQueueId + "'>" + jobQueueId + "</a>";
+    if(jobQueueData.depends[0] !== null) {
+      var dependsList = [];
+      $.each(jobQueueData.depends, function(i, dependId) {
+        dependsList.push("<a href='?mod=showjobs&upload=-1&job=" + dependId + "'>" + dependId + "</a>");
+      });
+      jobQD += ' / ' + dependsList.join(' / ');
+    }
+    var trClass = "jobQueued";
+    var jqET = "";
+    if (jobQueueData.jq_endtext !== null) {
+      jqET = jobQueueData.jq_endtext;
+    }
+    var jqType = jobQueueData.jq_type;
+    var jqItemsProcessed = jobQueueData.jq_itemsprocessed;
+    var jqTime = "";
+    if (jobQueueData.jq_starttime !== null) {
+      jqTime += jobQueueData.jq_starttime.substring(0,16);
+      trClass = "jobScheduled";
+    }
+    if (jobQueueData.jq_endtime !== null) {
+      jqTime += ' - ' + jobQueueData.jq_endtime.substring(0,16);
+      trClass = "jobFinished";
+    }
+    var jqItemsPerSec = jobQueueData.itemsPerSec.toPrecision(5);
+    var jqETA = "";
+    if ('eta' in jobQueueData) {
+      if (jobQueueData.eta !== null) {
+        jqETA = jobQueueData.eta;
+      }
+    } else {
+      jqETA = "{{ "Scanned"|trans }}";
+    }
+    if (jqET.indexOf("Fail") !== -1 || jqET.indexOf("kill") !== -1) {
+      trClass = "jobFailed";
+    }
+
+    $("<tr class='" + trClass + "'><td>" + jobQD + "</td>" +
+      "<td>" + jqET + "</td>" +
+      "<td>" + jqType + "</td>" +
+      "<td>" + jqItemsProcessed + " {{ "items"|trans }}</td>" +
+      "<td>" + jqTime + "</td>" +
+      "<td>" + jqItemsPerSec + " {{ "items/sec"|trans }}</td>" +
+      "<td>" + jqETA + "</td>" +
+      "<td class='jobAction'>" + action + "</td></tr>"
+    ).appendTo(tbody);
+  });
 }
 
 function getTableBody() {
@@ -70,12 +210,12 @@ function getTableBody() {
   };
   
   $.ajax({
-     type: "POST",
-      url: "?mod=ajaxShowJobs&do=showjb",
-     data: post_data,
-  success: function (data) { 
-  createShowJobsTable(data);
-  },
+    type: "POST",
+    url: "?mod=ajaxShowJobs&do=showjb",
+    data: post_data,
+    success: function (data) {
+      createShowJobsTable(data);
+    },
     error: function(responseobject) { }
   });
 }

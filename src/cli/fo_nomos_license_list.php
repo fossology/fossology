@@ -45,17 +45,14 @@ $excluding = '';
 
 $longopts = array("username:", "password:", "container:");
 $options = getopt("c:u:t:hxX:", $longopts);
-if (empty($options) || !is_array($options))
-{
+if (empty($options) || !is_array($options)) {
   print $Usage;
   return 1;
 }
 
 $user = $passwd = "";
-foreach($options as $option => $value)
-{
-  switch($option)
-  {
+foreach ($options as $option => $value) {
+  switch ($option) {
     case 'c': // handled in fo_wrapper
       break;
     case 'u':
@@ -89,11 +86,12 @@ foreach($options as $option => $value)
 }
 
 /** get upload id through uploadtree id */
-if (is_numeric($item) && !is_numeric($upload)) $upload = GetUploadID($item);
+if (is_numeric($item) && !is_numeric($upload)) {
+  $upload = GetUploadID($item);
+}
 
 /** check if parameters are valid */
-if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
-{
+if (!is_numeric($upload) || (!empty($item) && !is_numeric($item))) {
   print "Upload ID or Uploadtree ID is not digital number\n";
   print $Usage;
   return 1;
@@ -102,8 +100,7 @@ if (!is_numeric($upload) || (!empty($item) && !is_numeric($item)))
 account_check($user, $passwd); // check username/password
 
 $return_value = read_permission($upload, $user); // check if the user has the permission to read this upload
-if (empty($return_value))
-{
+if (empty($return_value)) {
   $text = _("The user '$user' has no permission to read the information of upload $upload\n");
   echo $text;
   return 1;
@@ -115,19 +112,19 @@ if (empty($return_value))
  *
  * @param int $uploadtree_pk - uploadtree id
  * @param int $upload_pk - upload id
- * @param int $showContainer - include container or not, 1: yes, 0: no 
+ * @param int $showContainer - include container or not, 1: yes, 0: no
  * @param string $excluding
  * @param bool $ignore ignore files without license
  */
 function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, $ignore)
 {
-  /* @var $dbManager DbManager */  
+  /* @var $dbManager DbManager */
   $dbManager = $GLOBALS['container']->get('db.manager');
-  /* @var $uploadDao UploadDao */  
+  /* @var $uploadDao UploadDao */
   $uploadDao = $GLOBALS['container']->get("dao.upload");
-  /* @var $licenseDao LicenseDao */  
+  /* @var $licenseDao LicenseDao */
   $licenseDao = $GLOBALS['container']->get("dao.license");
-  
+
   if (empty($uploadtree_pk)) {
       $uploadtreeRec = $dbManager->getSingleRow('SELECT uploadtree_pk FROM uploadtree WHERE parent IS NULL AND upload_fk=$1',
               array($upload_pk),
@@ -137,31 +134,27 @@ function GetLicenseList($uploadtree_pk, $upload_pk, $showContainer, $excluding, 
 
   /* get last nomos agent_pk that has data for this upload */
   $AgentRec = AgentARSList("nomos_ars", $upload_pk, 1);
-  if ($AgentRec === false)
-  {
+  if ($AgentRec === false) {
     echo _("No data available\n");
     return;
   }
   $agent_pk = $AgentRec[0]["agent_fk"];
 
-  $uploadtreeTablename = GetUploadtreeTableName($upload_pk);
+  $uploadtreeTablename = getUploadtreeTableName($upload_pk);
   /** @var ItemTreeBounds */
   $itemTreeBounds = $uploadDao->getItemTreeBounds($uploadtree_pk, $uploadtreeTablename);
   $licensesPerFileName = $licenseDao->getLicensesPerFileNameForAgentId(
     $itemTreeBounds, array($agent_pk), true, $excluding, $ignore);
 
-  foreach($licensesPerFileName as $fileName => $licenseData)
-  {
+  foreach ($licensesPerFileName as $fileName => $licenseData) {
     if ($licenseData == false) {
-      if ($showContainer)
-      {
+      if ($showContainer) {
         print($fileName."\n");
       }
       continue;
     }
 
-    if (! array_key_exists('scanResults', $licenseData) || empty($licenseData['scanResults']))
-    {
+    if (! array_key_exists('scanResults', $licenseData) || empty($licenseData['scanResults'])) {
       continue;
     }
 

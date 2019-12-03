@@ -33,20 +33,16 @@ $usage = "Usage: " . basename($argv[0]) . " [options]
 ";
 $opts = getopt("h", array('username:', 'password:', 'delimiter:', 'enclosure:', "csv:"));
 
-if(array_key_exists('h',$opts))
-{
+if (array_key_exists('h',$opts)) {
   print "$usage\n";
   return 0;
 }
 
-if(!array_key_exists('csv',$opts))
-{
+if (!array_key_exists('csv',$opts)) {
   print "no input file given\n";
   print "$usage\n";
   return 0;
-}
-else
-{
+} else {
   $filename = $opts['csv'];
 }
 
@@ -56,21 +52,17 @@ $passwd = array_key_exists("password", $opts) ? $opts["password"] : null;
 $delimiter = array_key_exists("delimiter", $opts) ? $opts["delimiter"] : ',';
 $enclosure = array_key_exists("enclosure", $opts) ? $opts["enclosure"] : '"';
 
-if(!account_check($username, $passwd, $group))
-{
+if (!account_check($username, $passwd, $group)) {
   print "Fossology login failure\n";
   return 2;
-}
-else
-{
+} else {
   print "Logged in as user $username\n";
 }
 
 /** @var UserDao */
 $userDao = $GLOBALS['container']->get("dao.user");
 $adminRow = $userDao->getUserByName($username);
-if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN)
-{
+if ($adminRow["user_perm"] < PLUGIN_DB_ADMIN) {
   print "You have no permission to admin the licenses\n";
   return 1;
 }

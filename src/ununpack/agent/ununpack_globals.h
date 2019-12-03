@@ -38,6 +38,7 @@ int PruneFiles=0;
 int SetContainerArtifact=1;	/* should initial container be an artifact? */
 FILE *ListOutFile=NULL;
 int ReunpackSwitch=0;
+int IgnoreSCMData=0;
 
 /* for the repository */
 int UseRepository=0;

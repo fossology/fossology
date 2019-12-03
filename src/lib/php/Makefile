@@ -19,7 +19,7 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php)$$"`
+FILES = `find . -type f | grep -Ev "(svn|\/tests?)" | grep -E "(php|twig)$$"`
 
 all: bootstrap services.xml
 

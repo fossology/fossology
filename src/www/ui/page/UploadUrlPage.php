@@ -24,13 +24,13 @@ use Symfony\Component\HttpFoundation\Request;
 class UploadUrlPage extends UploadPageBase
 {
   const NAME = 'upload_url';
-  
+
   const NAME_PARAM = 'name';
   const ACCEPT_PARAM = 'accept';
   const REJECT_PARAM = 'reject';
   const GETURL_PARAM = 'geturl';
   const LEVEL_PARAM = 'level';
-  
+
   public function __construct()
   {
     parent::__construct(self::NAME, array(
@@ -40,22 +40,20 @@ class UploadUrlPage extends UploadPageBase
         self::PERMISSION => Auth::PERM_WRITE
     ));
   }
-  
+
   protected function handleUpload(Request $request)
   {
     $folderId = intval($request->get(self::FOLDER_PARAMETER_NAME));
     $description = stripslashes($request->get(self::DESCRIPTION_INPUT_NAME));
     $description = $this->basicShEscaping($description);
-    
+
     $getUrlThatMightIncludeSpaces = trim($request->get(self::GETURL_PARAM));
     $getURL = str_replace(" ", "%20", $getUrlThatMightIncludeSpaces);
 
-    if (empty($getURL)) 
-    {
+    if (empty($getURL)) {
       return array(false, _("Invalid URL"), $description);
     }
-    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $getURL) != 1) 
-    {
+    if (preg_match("@^((http)|(https)|(ftp))://([[:alnum:]]+)@i", $getURL) != 1) {
       return array(false, _("Invalid URL"), $description);
     }
     $getURL = $this->basicShEscaping($getURL);
@@ -83,8 +81,7 @@ class UploadUrlPage extends UploadPageBase
     }
 
     $level = intval($request->get(self::LEVEL_PARAM));
-    if ($level < 0)
-    {
+    if ($level < 0) {
       $level = 1;
     }
 
@@ -93,7 +90,7 @@ class UploadUrlPage extends UploadPageBase
     $accept = $this->basicShEscaping($accept);
     $reject = preg_replace('/\s*,\s*/', ',', trim($request->get(self::REJECT_PARAM)));
     $reject = $this->basicShEscaping($reject);
-    
+
     /* Create the job: job "wget" */
     $jobId = JobAddJob($userId, $groupId, "wget", $uploadId);
     if (empty($jobId) || ($jobId < 0)) {
@@ -101,20 +98,21 @@ class UploadUrlPage extends UploadPageBase
     }
 
     $jqArgs = "$uploadId - $getURL -l $level ";
-    if (!empty($accept)) {
+    if (! empty($accept)) {
       $jqArgs .= "-A $accept ";
     }
     $jqArgs .= empty($reject) ? "-R index.html* " : "-R $reject,index.html* ";
 
     $jobqueueId = JobQueueAdd($jobId, "wget_agent", $jqArgs, NULL, NULL);
     if (empty($jobqueueId)) {
-      return array(false, "Failed to insert task 'wget_agent' into job queue", $description);
+      return array(false,
+        "Failed to insert task 'wget_agent' into job queue", $description);
     }
-    
-    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, $jobqueueId);
+
+    $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, true);
     return array(true, $message, $description);
   }
-  
+
   protected function handleView(Request $request, $vars)
   {
     $vars['geturlField'] = self::GETURL_PARAM;

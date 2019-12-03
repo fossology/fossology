@@ -22,7 +22,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Auth\Auth;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class AjaxJobStatus extends DefaultPlugin
 {
@@ -45,16 +45,17 @@ class AjaxJobStatus extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
-    $response ='1';
-    $jobInfo = $this->dbManager->getSingleRow("SELECT jq_end_bits FROM jobqueue WHERE jq_end_bits ='0' LIMIT 1");
-    if(empty($jobInfo)){
-      $response='0';
+    $response = '1';
+    $jobInfo = $this->dbManager->getSingleRow(
+      "SELECT jq_end_bits FROM jobqueue WHERE jq_end_bits = '0' LIMIT 1;");
+    if (empty($jobInfo)) {
+      $response = '0';
     }
     $status = 1;
     ReportCachePurgeAll();
-    $status = empty($status) ? Response::HTTP_INTERNAL_SERVER_ERROR : Response::HTTP_OK;
-    return new Response(json_encode(array("status" => $response)), $status, array('content-type'=>'text/json'));
+    $status = empty($status) ? JsonResponse::HTTP_INTERNAL_SERVER_ERROR : JsonResponse::HTTP_OK;
+    return new JsonResponse(array("status" => $response), $status);
   }
-  
 }
+
 register_plugin(new AjaxJobStatus());

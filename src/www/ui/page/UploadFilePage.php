@@ -85,28 +85,27 @@ class UploadFilePage extends UploadPageBase
     $description = $this->basicShEscaping($description);
     $uploadedFile = $request->files->get(self::FILE_INPUT_NAME);
 
-    if ($uploadedFile === null)
-    {
-      return array(false,$uploadErrors[UPLOAD_ERR_NO_FILE],$description);
+    if ($uploadedFile === null) {
+      return array(false, $uploadErrors[UPLOAD_ERR_NO_FILE], $description);
     }
 
     if ($request->getSession()->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)
-        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME))
-    {
+        != $request->get(self::UPLOAD_FORM_BUILD_PARAMETER_NAME)) {
       return array(false, $uploadErrors[UPLOAD_ERR_RESEND], $description);
     }
 
     if ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       return array(false, $uploadErrors[UPLOAD_ERR_EMPTY], $description);
     } else if ($uploadedFile->getSize() >= UploadedFile::getMaxFilesize()) {
-      return array(false, $uploadErrors[UPLOAD_ERR_INI_SIZE] . _(" is  really ") . $uploadedFile->getSize() . " bytes.", $description);
+      return array(false, $uploadErrors[UPLOAD_ERR_INI_SIZE] .
+        _(" is  really ") . $uploadedFile->getSize() . " bytes.", $description);
     }
 
     if (empty($folderId)) {
       return array(false, $uploadErrors[UPLOAD_ERR_INVALID_FOLDER_PK], $description);
     }
 
-    if(!$uploadedFile->isValid()) {
+    if (!$uploadedFile->isValid()) {
       return array(false, $uploadedFile->getErrorMessage(), $description);
     }
 
@@ -119,19 +118,17 @@ class UploadFilePage extends UploadPageBase
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
-    $groupId = Auth::getGroupId();
-
-    $uploadId = JobAddUpload($userId, $groupId, $originalFileName, $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
-    if (empty($uploadId))
-    {
+    $groupId = intval($request->get(self::UPLOAD_GROUP, Auth::getGroupId()));
+    $uploadId = JobAddUpload($userId, $groupId, $originalFileName,
+      $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+    if (empty($uploadId)) {
       return array(false, _("Failed to insert upload record"), $description);
     }
 
-    try
-    {
-      $uploadedTempFile = $uploadedFile->move($uploadedFile->getPath(), $uploadedFile->getFilename() . '-uploaded')->getPathname();
-    } catch (FileException $e)
-    {
+    try {
+      $uploadedTempFile = $uploadedFile->move($uploadedFile->getPath(),
+        $uploadedFile->getFilename() . '-uploaded')->getPathname();
+    } catch (FileException $e) {
       return array(false, _("Could not save uploaded file"), $description);
     }
 
@@ -141,11 +138,9 @@ class UploadFilePage extends UploadPageBase
     exec($wgetAgentCall, $wgetOutput, $wgetReturnValue);
     unlink($uploadedTempFile);
 
-    if ($wgetReturnValue != 0)
-    {
+    if ($wgetReturnValue != 0) {
       $message = implode(' ', $wgetOutput);
-      if (empty($message))
-      {
+      if (empty($message)) {
         $message = _("File upload failed.  Error:") . $wgetReturnValue;
       }
       return array(false, $message, $description);
@@ -155,7 +150,6 @@ class UploadFilePage extends UploadPageBase
 
     return array(true, $message, $description, $uploadId);
   }
-
 }
 
 register_plugin(new UploadFilePage());

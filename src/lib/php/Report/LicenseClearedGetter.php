@@ -42,9 +42,10 @@ class LicenseClearedGetter extends ClearedGetterCommon
   /** @var string[] */
   private $licenseCache = array();
   /** @var agentNames */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk');
+  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
 
-  public function __construct() {
+  public function __construct()
+  {
     global $container;
 
     $this->clearingDao = $container->get('dao.clearing');
@@ -62,13 +63,12 @@ class LicenseClearedGetter extends ClearedGetterCommon
     $licenseMap = new LicenseMap($dbManager, $groupId, LicenseMap::REPORT);
     $ungroupedStatements = array();
     foreach ($clearingDecisions as $clearingDecision) {
-      if($clearingDecision->getType() == DecisionTypes::IRRELEVANT)
-      {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
         continue;
       }
       /** @var ClearingDecision $clearingDecision */
       foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
-        if ($clearingLicense->isRemoved()){
+        if ($clearingLicense->isRemoved()) {
           continue;
         }
 
@@ -83,17 +83,13 @@ class LicenseClearedGetter extends ClearedGetterCommon
         $originLicenseId = $clearingLicense->getLicenseId();
         $licenseId = $licenseMap->getProjectedId($originLicenseId);
 
-        if($this->onlyAcknowledgements){
+        if ($this->onlyAcknowledgements) {
           $text = $acknowledgement;
           $risk = "";
-        }
-        else if ($this->onlyComments)
-        {
+        } else if ($this->onlyComments) {
           $text = $comment;
           $risk = "";
-        }
-        else
-        {
+        } else {
           $reportInfo = $clearingLicense->getReportInfo();
           $text = $reportInfo ? : $this->getCachedLicenseText($licenseId, "any");
           $risk = $this->getCachedLicenseRisk($licenseId, $groupId);
@@ -101,7 +97,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
         $ungroupedStatements[] = array(
           'licenseId' => $licenseId,
-          'risk' => $risk, 
+          'risk' => $risk,
           'content' => $licenseMap->getProjectedShortname($originLicenseId, $clearingLicense->getShortName()),
           'uploadtree_pk' => $clearingDecision->getUploadTreeId(),
           'text' => $text
@@ -111,7 +107,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
 
     return $ungroupedStatements;
   }
-  
+
   /**
    * @param boolean $displayOnlyCommentedLicenseClearings
    */
@@ -153,6 +149,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
     }
     return $this->licenseCache[$licenseId]->getRisk();
   }
+
   /**
    * @param int $uploadId, $groupId
    * @return scannerLicenseHistogram, editedLicensesHist
@@ -173,18 +170,46 @@ class LicenseClearedGetter extends ClearedGetterCommon
             ? $editedLicensesHist[LicenseDao::NO_LICENSE_FOUND]['count'] : 0;
 
     $totalLicenses = array_unique(array_merge(array_keys($scannerLicenseHistogram), array_keys($editedLicensesHist)));
-    foreach($totalLicenses as $licenseShortName) {
+    foreach ($totalLicenses as $licenseShortName) {
       $count = 0;
       if (array_key_exists($licenseShortName, $scannerLicenseHistogram)) {
         $count = $scannerLicenseHistogram[$licenseShortName]['unique'];
       }
       $editedCount = array_key_exists($licenseShortName, $editedLicensesHist) ? $editedLicensesHist[$licenseShortName]['count'] : 0;
-      if(strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0) {
+      if (strcmp($licenseShortName, LicenseDao::NO_LICENSE_FOUND) !== 0) {
         $LicenseHistArray[] = array("scannerCount" => $count, "editedCount" => $editedCount, "licenseShortname" => $licenseShortName);
       } else {
         $LicenseHistArray[] = array("scannerCount" => $noScannerLicenseFoundCount, "editedCount" => $editedNoLicenseFoundCount, "licenseShortname" => $licenseShortName);
       }
     }
     return $LicenseHistArray;
+  }
+
+  /**
+    * @brief callback to compare licenses
+    * @param array $licenses1
+    * @param array $licenses2
+    * @return interger difference of license ids
+    */
+  function checkLicenseId($licenses1, $licenses2)
+  {
+    return strcmp($licenses1['licenseId'], $licenses2['licenseId']);
+  }
+
+  /**
+    * @brief Copy identified global licenses
+    * @param array $licensesMain
+    * @param array $licenses
+    * @return array $licensesMain $licenses with identified global license
+    */
+  function updateIdentifiedGlobalLicenses($licensesMain, $licenses)
+  {
+    $onlyMainLic = array_udiff($licensesMain, $licenses, array($this, "checkLicenseId"));
+    $mainLicensesInIdetifiedFiles = array_uintersect($licenses, $licensesMain, array($this, "checkLicenseId"));
+    $onlyLicense = array_udiff($licenses, $licensesMain, array($this, "checkLicenseId"));
+    return array(
+      array_values(array_merge($onlyMainLic, $mainLicensesInIdetifiedFiles)),
+      array_values($onlyLicense)
+    );
   }
 }

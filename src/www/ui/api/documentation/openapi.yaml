@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2018
+# Copyright (C) Siemens AG 2017-2019
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -10,21 +10,28 @@
 # with this program; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-openapi: 3.0.0
+openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.0
+  version: 1.0.6
+  contact:
+    email: fossology@fossology.org
+  license:
+    name: GPL-2.0-only
+    url: https://github.com/fossology/fossology/blob/master/LICENSE
 servers:
-  - url: /repo/api/v1
+  - url: http://localhost/repo/api/v1
     description: Localhost instance
 security:
-  - BasicAuth: []
+  - bearerAuth: []
 
 paths:
   /auth:
     get:
-      summary: Get a login session registered
+      deprecated: true
+      security: []
+      summary: Get a login session registered (deprecated, use /tokens)
       description: >
         Get a login session registered using the username and password
       parameters:
@@ -41,8 +48,8 @@ paths:
           schema:
             type: string
       responses:
-        '200':
-          description: Login successfull
+        '299':
+          description: Resource is deprecated. Use /tokens
           content:
             application/json:
               schema:
@@ -58,6 +65,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /tokens:
+    post:
+      security: []
+      summary: Generate a new token
+      description: >
+        Generate a new token to access REST API
+      requestBody:
+        description: Required details for generating new token
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+      responses:
+        '201':
+          description: Token generated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  header:
+                      type: string
+              example:
+                {"Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJsb2NhbGhvc3QiLCJhdWQiOiJsb2NhbGhvc3QiLCJleHAiOjE1NTEyOTIyMDAsIm5iZiI6MTU1MTIwNTgwMCwianRpIjoiTmk0eiIsInNjb3BlIjoicmVhZCJ9.71D6xTD2QE45t9AVCwbrQwSSae5lC4yzKCMpZWXoC2Q"}
+        '404':
+          description: UserName or password incorrect
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /version:
+    get:
+      security: []
+      summary: Get the current API information
+      description: >
+        Get the current API version and supported authentication methods
+      responses:
+        '200':
+          description: The version and security information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                      type: string
+                      description: Current API version as per documentation
+                  security:
+                      type: array
+                      items:
+                        type: string
+
         default:
           $ref: '#/components/responses/defaultResponse'
 
@@ -83,6 +152,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Upload'
+        '503':
+          description: >
+            The ununpack agent has not started yet. Please check the 'Look-at'
+            header for more information
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
           $ref: '#/components/responses/defaultResponse'
     delete:
@@ -168,6 +250,9 @@ paths:
         Endpoint to create a new upload in FOSSology
       requestBody:
         content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VcsUpload'
           multipart/form-data:
             schema:
               type: object
@@ -199,6 +284,20 @@ paths:
               - protected
               - public
             default: protected
+        - name: ignoreScm
+          description: Ignore SCM files (Git, SVN, TFS)
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: groupId
+          description: The group id to chose while uploading the package
+          in: header
+          required: false
+          schema:
+            type: integer
+            description: Group id, from last login if not provided
       responses:
         '201':
           description: Upload is created
@@ -339,11 +438,28 @@ paths:
             required: false
             schema:
               type: integer
-              minimum: 0
+              minimum: 1
             in: header
+          - name: page
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+            in: header
+          - name: upload
+            required: false
+            schema:
+              type: integer
+            in: query
+            description: Return jobs for the given upload id only
         responses:
           '200':
             description: OK
+            headers:
+              X-Total-Pages:
+                description: Total number of pages which can be generated based on limit
+                schema:
+                  type: integer
             content:
               application/json:
                 schema:
@@ -634,9 +750,10 @@ paths:
 
 components:
   securitySchemes:
-    BasicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     SearchResults:
       type: object
@@ -661,6 +778,9 @@ components:
         new_scanner:
           type: boolean
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
+        ojo_decider:
+          type: boolean
+          description: Scanners matches if Ojo findings are no contradiction with other findings.
     ScanOptions:
       type: object
       properties:
@@ -715,6 +835,17 @@ components:
         groupId:
           type: integer
           description: Group under which the job was scheduled
+        eta:
+          type: integer
+          description: ETA of job to finish in seconds
+        status:
+          type: string
+          enum:
+            - Completed
+            - Failed
+            - Queued
+            - Processing
+          description: Denotes the current status of the job in the queue
     Info:
       type: object
       properties:
@@ -786,6 +917,9 @@ components:
         nomos:
           type: boolean
           description: Should Nomos Analysis be run on this upload.
+        ojo:
+          type: boolean
+          description: Should OJO Analysis be run on this upload.
         package:
           type: boolean
           description: Should Package Analysis be run on this upload.
@@ -819,6 +953,64 @@ components:
         description:
           type: string
           description: Description of the folder.
+        parent:
+          type: integer
+          description: Id of the parent folder (if any, null otherwise).
+    TokenRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          description: Username of the login user.
+        password:
+          type: string
+          format: password
+          description: Password of the user trying to login.
+        token_name:
+          type: string
+          maxLength: 40
+          description: Friendly name of the token
+        token_scope:
+          type: string
+          enum:
+            - read
+            - write
+          description: The scope of the token.
+        token_expire:
+          type: string
+          format: date
+          description: Date when the token must expire (default max 30 days).
+      required:
+        - username
+        - password
+        - token_name
+        - token_scope
+        - token_expire
+    VcsUpload:
+      description: To create an upload from a version control system
+      type: object
+      properties:
+        vcsType:
+          description: VCS type
+          type: string
+          enum:
+            - svn
+            - git
+        vcsUrl:
+          description: URL of the repository
+          type: string
+        vcsName:
+          description: Display name of the upload
+          type: string
+        vcsUsername:
+          description: Username for the VCS
+          type: string
+        vcsPassword:
+          description: Password for the VCS
+          type: string
+      required:
+        - vcsType
+        - vcsUrl
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"

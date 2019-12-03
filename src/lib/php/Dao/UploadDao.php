@@ -64,11 +64,27 @@ class UploadDao
     $stmt = __METHOD__ . ".$uploadTreeTableName";
     $uploadEntry = $this->dbManager->getSingleRow("SELECT * FROM $uploadTreeTableName WHERE uploadtree_pk = $1",
         array($uploadTreeId), $stmt);
-    if ($uploadEntry)
-    {
+    if ($uploadEntry) {
       $uploadEntry['tablename'] = $uploadTreeTableName;
     }
     return $uploadEntry;
+  }
+
+  /**
+   * Get the first entry for uploadtree_pk for a given pfile in a given upload.
+   * @param integer $uploadFk Upload id
+   * @param integer $pfileFk  Pfile id
+   * @return integer Uploadtree_pk
+   */
+  public function getUploadtreeIdFromPfile($uploadFk, $pfileFk)
+  {
+    $uploadTreeTableName = $this->getUploadtreeTableName($uploadFk);
+    $stmt = __METHOD__ . ".$uploadTreeTableName";
+    $uploadEntry = $this->dbManager->getSingleRow("SELECT uploadtree_pk " .
+      "FROM $uploadTreeTableName " .
+      "WHERE upload_fk = $1 AND pfile_fk = $2",
+      array($uploadFk, $pfileFk), $stmt);
+    return intval($uploadEntry['uploadtree_pk']);
   }
 
   /**
@@ -112,10 +128,9 @@ class UploadDao
    * @throws Exception
    * @return ItemTreeBounds
    */
-  public function getParentItemBounds($uploadId, $uploadTreeTableName = NULL)
+  public function getParentItemBounds($uploadId, $uploadTreeTableName = null)
   {
-    if ($uploadTreeTableName === null)
-    {
+    if ($uploadTreeTableName === null) {
       $uploadTreeTableName = $this->getUploadtreeTableName($uploadId);
     }
 
@@ -156,12 +171,10 @@ class UploadDao
 
   private function handleUploadIdForTable($uploadTreeTableName, $uploadId, &$parameters)
   {
-    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a")
-    {
+    if ($uploadTreeTableName === "uploadtree" || $uploadTreeTableName === "uploadtree_a") {
       $parameters[] = $uploadId;
       return " AND upload_fk = $" . count($parameters) . " ";
-    } else
-    {
+    } else {
       return "";
     }
   }
@@ -203,16 +216,14 @@ class UploadDao
    */
   public function getUploadtreeTableName($uploadId)
   {
-    if (!empty($uploadId))
-    {
+    if (!empty($uploadId)) {
       $statementName = __METHOD__;
       $row = $this->dbManager->getSingleRow(
           "SELECT uploadtree_tablename FROM upload WHERE upload_pk=$1",
           array($uploadId),
           $statementName
       );
-      if (!empty($row['uploadtree_tablename']))
-      {
+      if (!empty($row['uploadtree_tablename'])) {
         return $row['uploadtree_tablename'];
       }
     }
@@ -243,7 +254,7 @@ class UploadDao
   const DIR_BCK = -1;
   const NOT_FOUND = null;
 
-  
+
   /**
    * @param $uploadId
    * @param $itemId
@@ -258,35 +269,29 @@ class UploadDao
 
     $options[UploadTreeProxy::OPT_ITEM_FILTER] = " AND ut.ufile_mode & (3<<28) = 0";
     $uploadTreeViewName = 'items2care';
-    
-    if($direction == self::DIR_FWD)
-    {
+
+    if ($direction == self::DIR_FWD) {
       $uploadTreeViewName .= 'fwd';
       $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft>$1";
       $order = 'ASC';
-    }
-    else
-    {
+    } else {
       $uploadTreeViewName .= 'bwd';
       $options[UploadTreeProxy::OPT_ITEM_FILTER] .= " AND lft<$1";
       $order = 'DESC';
     }
-    
+
     $uploadTreeView = new UploadTreeProxy($uploadId, $options, $uploadTreeTableName, $uploadTreeViewName);
     $statementName = __METHOD__ . ".$uploadTreeViewName.";
     $query = $uploadTreeView->getDbViewQuery()." ORDER BY lft $order";
 
     $newItemRow = $this->dbManager->getSingleRow("$query LIMIT 1", array($originLft), $statementName);
-    if ($newItemRow)
-    {
+    if ($newItemRow) {
       return $this->createItem($newItemRow, $uploadTreeTableName);
-    }
-    else
-    {
+    } else {
       return self::NOT_FOUND;
     }
   }
-  
+
 
   /**
    * @param $uploadId
@@ -301,7 +306,7 @@ class UploadDao
         "SELECT uploadtree_pk
             FROM $uploadTreeTableName
             WHERE upload_fk=$1 AND parent IS NULL", array($uploadId), $statementname);
-    if(false === $parent) {
+    if (false === $parent) {
       throw new \Exception("Missing upload tree parent for upload");
     }
     return $parent['uploadtree_pk'];
@@ -417,13 +422,12 @@ class UploadDao
    */
   protected function createItemTreeBounds($uploadEntryData, $uploadTreeTableName)
   {
-    if ($uploadEntryData === FALSE)
-    {
+    if ($uploadEntryData === false) {
       throw new Exception("did not find uploadTreeId in $uploadTreeTableName");
     }
     return new ItemTreeBounds(intval($uploadEntryData['uploadtree_pk']), $uploadTreeTableName, intval($uploadEntryData['upload_fk']), intval($uploadEntryData['lft']), intval($uploadEntryData['rgt']));
   }
-  
+
   /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param bool $isFlat plain files from sub*folders instead of folders
@@ -435,30 +439,27 @@ class UploadDao
     $sql = "SELECT count(*) FROM ".$itemTreeBounds->getUploadTreeTableName()." ut "
          . "WHERE ut.upload_fk=$1";
     $params = array($itemTreeBounds->getUploadId());
-    if (!$isFlat)
-    {
+    if (!$isFlat) {
       $stmt = __METHOD__.'.parent';
       $params[] = $itemTreeBounds->getItemId();
       $sql .= " AND ut.ufile_mode & (1<<28) = 0 AND ut.realparent = $2";
-    }
-    else
-    {
+    } else {
       $params[] = $itemTreeBounds->getLeft();
       $params[] = $itemTreeBounds->getRight();
       $sql .= " AND ut.ufile_mode & (3<<28) = 0 AND (ut.lft BETWEEN $2 AND $3)";
     }
-    
+
     $descendants = $this->dbManager->getSingleRow($sql,$params);
     return $descendants['count'];
   }
-  
-  
-  public function isAccessible($uploadId, $groupId) 
+
+
+  public function isAccessible($uploadId, $groupId)
   {
     return $this->permissionDao->isAccessible($uploadId, $groupId);
   }
-  
-  public function isEditable($uploadId, $groupId) 
+
+  public function isEditable($uploadId, $groupId)
   {
     return $this->permissionDao->isEditable($uploadId, $groupId);
   }
@@ -472,7 +473,7 @@ class UploadDao
   {
     $this->permissionDao->makeAccessibleToAllGroupsOf($uploadId, $userId, $perm);
   }
- 
+
   /**
    * @param int $uploadId
    * @return array with keys sha1, md5
@@ -483,7 +484,7 @@ class UploadDao
         array($uploadId), __METHOD__);
     return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
   }
-  
+
   /**
    * @param int $itemId
    * @param string $uploadId
@@ -492,7 +493,7 @@ class UploadDao
    */
   public function getFatItemArray($itemId,$uploadId,$uploadtreeTablename)
   {
-    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s 
+    $sqlChildrenOf = "SELECT COUNT(*) FROM $uploadtreeTablename s
          WHERE ufile_mode&(1<<28)=0 and s.upload_fk=$2 AND s.realparent=";
     $sql="WITH RECURSIVE item_path (item_id,num_children,depth,ufile_mode,ufile_name) AS (
         SELECT uploadtree_pk item_id, ($sqlChildrenOf $1) num_children, 0 depth, ufile_mode, ufile_name
@@ -506,7 +507,7 @@ class UploadDao
         SELECT * FROM item_path WHERE num_children!=1 OR ufile_mode&(1<<29)=0 ORDER BY depth DESC LIMIT 1";
     return $this->dbManager->getSingleRow($sql,array($itemId, $uploadId),__METHOD__.$uploadtreeTablename);
   }
-    
+
   /**
    * @param int $itemId
    * @param string $uploadId
@@ -534,8 +535,7 @@ class UploadDao
     $condition = " lft BETWEEN $1 AND $2";
     $condition .= " AND (ufile_mode & (1<<28)) = 0";
 
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
+    if ('uploadtree_a' == $uploadTreeTableName) {
       $param[] = $itemTreeBounds->getUploadId();
       $condition .= " AND upload_fk=$".count($param);
     }
@@ -559,10 +559,8 @@ ORDER BY lft asc
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
     $this->addToPFilePerFileName($pfilePerFileName, $pathStack, $row);
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      if ($row['lft'] < $lastLft)
-      {
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if ($row['lft'] < $lastLft) {
         continue;
       }
 
@@ -575,15 +573,12 @@ ORDER BY lft asc
 
   private function updateStackState(&$pathStack, &$rgtStack, &$lastLft, $row)
   {
-    if ($row['lft'] >= $lastLft)
-    {
-      while(count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1])
-      {
+    if ($row['lft'] >= $lastLft) {
+      while (count($rgtStack) > 0 && $row['lft'] > $rgtStack[count($rgtStack)-1]) {
         array_pop($pathStack);
         array_pop($rgtStack);
       }
-      if ($row['lft'] > $lastLft)
-      {
+      if ($row['lft'] > $lastLft) {
         array_push($pathStack, $row['ufile_name']);
         array_push($rgtStack, $row['rgt']);
         $lastLft = $row['lft'];
@@ -593,8 +588,7 @@ ORDER BY lft asc
 
   private function addToPFilePerFileName(&$pfilePerFileName, $pathStack, $row)
   {
-    if (($row['ufile_mode']&(1<<29)) == 0)
-    {
+    if (($row['ufile_mode'] & (1 << 29)) == 0) {
       $path = implode($pathStack,'/');
       $pfilePerFileName[$path]['pfile_pk'] = $row['pfile_pk'];
       $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
@@ -619,8 +613,7 @@ ORDER BY lft asc
     $condition = " lft BETWEEN $1 AND $2";
     $condition .= " AND (ufile_mode & (1<<28)) = 0";
 
-    if ('uploadtree_a' == $uploadTreeTableName)
-    {
+    if ('uploadtree_a' == $uploadTreeTableName) {
       $param[] = $itemTreeBounds->getUploadId();
       $condition .= " AND upload_fk=$".count($param);
     }
@@ -639,10 +632,8 @@ ORDER BY lft asc
     $result = $this->dbManager->execute($statementName, $param);
 
     $pfilePerHashAlgo = array();
-    while ($row = $this->dbManager->fetchArray($result))
-    {
-      if (($row['ufile_mode']&(1<<29)) == 0)
-      {
+    while ($row = $this->dbManager->fetchArray($result)) {
+      if (($row['ufile_mode']&(1<<29)) == 0) {
         $pfilePerHashAlgo[strtolower($row['hash'])][] = array('pfile_pk' => $row['pfile_fk'],
                                                               'uploadtree_pk' => $row['uploadtree_pk']);
       }
@@ -651,18 +642,17 @@ ORDER BY lft asc
     return $pfilePerHashAlgo;
   }
 
- 
+
    /* @param int $uploadId
    * @return array
    */
   public function getReportInfo($uploadId)
   {
     $stmt = __METHOD__;
-    $sql = "SELECT * FROM report_info where upload_fk=$1";
-    $this->dbManager->prepare(__METHOD__,$sql);
+    $sql = "SELECT * FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
 
-    if(empty($row)){
+    if (empty($row)) {
       $this->dbManager->begin();
       $stmt = __METHOD__.'ifempty';
       $sql = "INSERT INTO report_info (upload_fk) VALUES ($1) RETURNING *";

@@ -76,13 +76,11 @@ abstract class DefaultPlugin implements Plugin
 
   public function __construct($name, $parameters = array())
   {
-    if ($name === null || $name === "")
-    {
+    if ($name === null || $name === "") {
       throw new \InvalidArgumentException("plugin requires a name");
     }
     $this->name = $name;
-    foreach ($parameters as $key => $value)
-    {
+    foreach ($parameters as $key => $value) {
       $this->setParameter($key, $value);
     }
 
@@ -97,8 +95,7 @@ abstract class DefaultPlugin implements Plugin
 
   private function setParameter($key, $value)
   {
-    switch ($key)
-    {
+    switch ($key) {
       case self::TITLE:
         $this->title = $value;
         break;
@@ -223,8 +220,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function RegisterMenus()
   {
-    if (isset($this->MenuList) && (!$this->requiresLogin || $this->isLoggedIn()))
-    {
+    if (isset($this->MenuList) && (!$this->requiresLogin || $this->isLoggedIn())) {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->name, $this->name);
     }
   }
@@ -293,8 +289,7 @@ abstract class DefaultPlugin implements Plugin
    */
   protected function render($templateName, $vars = null, $headers = null)
   {
-    if ($this->requiresLogin && !$this->isLoggedIn())
-    {
+    if ($this->requiresLogin && !$this->isLoggedIn()) {
       new Response("permission denied", Response::HTTP_FORBIDDEN, array("contentType" => "text/plain"));
     }
 
@@ -318,16 +313,13 @@ abstract class DefaultPlugin implements Plugin
 
   private function checkPrerequisites()
   {
-    if ($this->requiresLogin && !$this->isLoggedIn())
-    {
+    if ($this->requiresLogin && !$this->isLoggedIn()) {
       throw new \Exception("not allowed without login");
     }
 
-    foreach ($this->dependencies as $dependency)
-    {
+    foreach ($this->dependencies as $dependency) {
       $id = plugin_find_id($dependency);
-      if ($id < 0)
-      {
+      if ($id < 0) {
         $this->unInstall();
         throw new \Exception("unsatisfied dependency '$dependency' in module '" . $this->getName() . "'");
       }
@@ -358,8 +350,7 @@ abstract class DefaultPlugin implements Plugin
 
     $vars['metadata'] = $metadata;
 
-    if (!empty($this->title))
-    {
+    if (!empty($this->title)) {
       $vars[self::TITLE] = htmlentities($this->title);
     }
 
@@ -407,11 +398,9 @@ abstract class DefaultPlugin implements Plugin
    */
   public function __get($name)
   {
-    if (method_exists($this, ($method = 'get' . ucwords($name))))
-    {
+    if (method_exists($this, ($method = 'get' . ucwords($name)))) {
       return $this->$method();
-    } else
-    {
+    } else {
       throw new \Exception("property '$name' not found in module " . $this->name);
     }
   }

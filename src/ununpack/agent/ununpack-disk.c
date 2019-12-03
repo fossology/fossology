@@ -299,7 +299,7 @@ permlist *	SetDiskPerm	(char *inode, permlist *List,
 int	ExtractDisk	(char *Source, char *FStype, char *Destination)
 {
   int rc;
-  char Cmd[FILENAME_MAX*4]; /* command to run */
+  char Cmd[FILENAME_MAX*7]; /* command to run */
   char Line[FILENAME_MAX*2];
   char *s;
   FILE *Fin;

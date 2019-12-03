@@ -42,8 +42,7 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->prepare($stmt = 'insert.upload',
         "INSERT INTO upload (upload_pk, uploadtree_tablename) VALUES ($1, $2)");
     $uploadArray = array(array(1, 'uploadtree'), array(32, 'uploadtree'));
-    foreach ($uploadArray as $uploadEntry)
-    {
+    foreach ($uploadArray as $uploadEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadEntry));
     }
     $this->treeDao = new TreeDao($this->dbManager);
@@ -121,8 +120,7 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
   {
     $this->dbManager->prepare($stmt = 'insert.uploadtree',
         "INSERT INTO uploadtree (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name, realparent) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
-    foreach ($uploadTreeArray as $uploadTreeEntry)
-    {
+    foreach ($uploadTreeArray as $uploadTreeEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $uploadTreeEntry));
     }
   }
@@ -318,5 +316,4 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->treeDao->getFullPath(12, "uploadtree", 7),      equalTo('subExample.tar/subExample/innerFile'));
     assertThat($this->treeDao->getFullPath(12, "uploadtree", 7,true), equalTo(               'subExample/innerFile'));
   }
-
 }

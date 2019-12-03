@@ -40,7 +40,7 @@
       {% if additableGroups is not empty %}
       <tr>
         <td>
-          {{ macro.select('groupselectnew',additableGroups,'groupselectnew',newGroup) }}
+          {{ macro.select('groupselectnew', additableGroups, 'groupselectnew', newGroup, 'class="ui-render-select2"') }}
         </td>
         <td>
           {% if permNamesWithReuse is defined %}
@@ -75,9 +75,11 @@
 {% block foot %}
   {{ parent() }}
   <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script src="scripts/jquery.dataTables.select.js" type="text/javascript"></script>
   <script type="text/javascript">
     dataTableConfig = {
       "aaData":{{ gumJson }},
+      "sPaginationType": "listbox",
       "aoColumns": [
         {"sTitle": "{{ 'User'|trans }}", "sClass": "left", "sWidth": "200px"},
         {"sTitle": "Group", "bVisible": false}

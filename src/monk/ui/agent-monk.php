@@ -21,7 +21,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
 
 class MonkAgentPlugin extends AgentPlugin
 {
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_monk";
     $this->Title = _("Monk License Analysis, scanning for licenses performing a text comparison");
     $this->AgentName = "monk";

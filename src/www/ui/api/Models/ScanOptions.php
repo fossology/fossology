@@ -90,14 +90,13 @@ class ScanOptions
   {
     $uploadsAccessible = FolderListUploads_perm($folderId, Auth::PERM_WRITE);
     $found = false;
-    foreach ($uploadsAccessible as $singleUpload)
-    {
-      if($singleUpload['upload_pk'] == $uploadId) {
+    foreach ($uploadsAccessible as $singleUpload) {
+      if ($singleUpload['upload_pk'] == $uploadId) {
         $found = true;
         break;
       }
     }
-    if($found === false) {
+    if ($found === false) {
       return new Info(404, "Folder id $folderId does not have upload id ".
         "$uploadId or you do not have write access to the folder.", InfoType::ERROR);
     }
@@ -107,7 +106,7 @@ class ScanOptions
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
-    if(is_numeric($returnStatus)) {
+    if (is_numeric($returnStatus)) {
       return new Info(201, $returnStatus, InfoType::INFO);
     } else {
       return new Info(403, $returnStatus, InfoType::ERROR);
@@ -118,11 +117,16 @@ class ScanOptions
    * Prepare agentsToAdd string based on Analysis settings.
    * @return string[]
    */
-  private function prepareAgents() {
+  private function prepareAgents()
+  {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
-      if($set === true) {
-        $agentsToAdd[] = "agent_$agent";
+      if ($set === true) {
+        if ($agent == "copyright_email_author") {
+          $agentsToAdd[] = "agent_copyright";
+        } else {
+          $agentsToAdd[] = "agent_$agent";
+        }
       }
     }
     return $agentsToAdd;
@@ -132,16 +136,17 @@ class ScanOptions
    * Prepare Request object based on Reuser settings.
    * @param Request $request
    */
-  private function prepareReuser(Request &$request) {
-    if($this->reuse->getReuseUpload() == 0) {
+  private function prepareReuser(Request &$request)
+  {
+    if ($this->reuse->getReuseUpload() == 0) {
       // No upload to reuse
       return;
     }
     $reuserRules = [];
-    if($this->reuse->getReuseMain() === true) {
+    if ($this->reuse->getReuseMain() === true) {
       $reuserRules[] = 'reuseMain';
     }
-    if($this->reuse->getReuseEnhanced() === true) {
+    if ($this->reuse->getReuseEnhanced() === true) {
       $reuserRules[] = 'reuseEnhanced';
     }
     $reuserSelector = $this->reuse->getReuseUpload() . "," . $this->reuse->getReuseGroup();
@@ -155,17 +160,24 @@ class ScanOptions
    * Prepare Request object based on Decider settings.
    * @param Request $request
    */
-  private function prepareDecider(Request &$request) {
+  private function prepareDecider(Request &$request)
+  {
     $deciderRules = [];
-    if($this->decider->getNomosMonk() === true) {
+    if ($this->decider->getNomosMonk() === true) {
       $deciderRules[] = 'nomosInMonk';
     }
-    if($this->decider->getBulkReused() === true) {
+    if ($this->decider->getBulkReused() === true) {
       $deciderRules[] = 'reuseBulk';
     }
-    if($this->decider->getNewScanner() === true) {
+    if ($this->decider->getNewScanner() === true) {
       $deciderRules[] = 'wipScannerUpdates';
     }
+    if ($this->decider->getOjoDecider() === true) {
+      $deciderRules[] = 'ojoNoContradiction';
+    }
     $request->request->set('deciderRules', $deciderRules);
+    if ($this->analysis->getNomos()) {
+      $request->request->set('Check_agent_nomos', 1);
+    }
   }
 }

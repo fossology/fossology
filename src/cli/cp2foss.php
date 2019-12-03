@@ -66,6 +66,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     NOTE: By default, no analysis agents are queued up.
     -T       = TEST. No database or repository updates are performed.
                Test mode enables verbose mode.
+    -I       = ignore scm data scanning
 
   FOSSology source options:
     archive  = file, directory, or URL to the archive.
@@ -114,7 +115,8 @@ $fossjobs_command = "";
  * \brief Given an upload name and the number
  * of letters per bucket, return the bucket folder name.
  */
-function GetBucketFolder($UploadName, $BucketGroupSize) {
+function GetBucketFolder($UploadName, $BucketGroupSize)
+{
   $Letters = "abcdefghijklmnopqrstuvwxyz";
   $Numbers = "0123456789";
   if (empty($UploadName)) {
@@ -146,16 +148,17 @@ function GetBucketFolder($UploadName, $BucketGroupSize) {
 
 /**
  * \brief Given a folder path, return the folder_pk.
- * 
+ *
  * \param $FolderPath - path from -f
  * \param $Parent - parent folder of $FolderPath
- * 
- * \return folder_pk, 1: 'Software Repository', others: specified folder 
+ *
+ * \return folder_pk, 1: 'Software Repository', others: specified folder
 
  * \note If any part of the folder path does not exist, thenscp cp2foss will create it.
  * This is recursive!
  */
-function GetFolder($FolderPath, $Parent = NULL) {
+function GetFolder($FolderPath, $Parent = null)
+{
   $dbManager = $GLOBALS['container']->get('db.manager');
   global $Verbose;
   global $Test;
@@ -213,7 +216,8 @@ function GetFolder($FolderPath, $Parent = NULL) {
  *
  * \return 1: error, 0: success
  */
-function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription, $TarSource = NULL) {
+function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription, $TarSource = null)
+{
   $dbManager = $GLOBALS['container']->get('db.manager');
   global $Verbose;
   global $Test;
@@ -225,6 +229,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $vcsuser;
   global $vcspass;
   global $TarExcludeList;
+  global $scmarg;
   $jobqueuepk = 0;
 
   if (empty($UploadName)) {
@@ -237,8 +242,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   $group_pk = $SysConf['auth']['GroupId'];
   /* Get the user record and check the PLUGIN_DB_ level to make sure they have at least write access */
   $UsersRow = GetSingleRec("users", "where user_pk=$user_pk");
-  if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE)
-  {
+  if ($UsersRow["user_perm"] < PLUGIN_DB_WRITE) {
     print "You have no permission to upload files into FOSSology\n";
     return 1;
   }
@@ -253,8 +257,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   $FolderPk = GetFolder($FolderPath, $root_folder_fk);
   if ($FolderPk == 1) {
     print "  Uploading to folder: 'Software Repository'\n";
-  }
-  else {
+  } else {
     print "  Uploading to folder: '$FolderPath'\n";
   }
   print "  Uploading as '$UploadName'\n";
@@ -275,6 +278,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     }
     $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
     print "  UploadPk is: '$UploadPk'\n";
+    print "  FolderPk is: '$FolderPk'\n";
   }
 
   /* Prepare the job: job "wget" */
@@ -291,9 +295,15 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
 
   $jq_args = "$UploadPk - $Src";
-  if ($TarExcludeList) $jq_args .= " ".$TarExcludeList;
-  if ($VCS)  $jq_args .= " ".$VCS; // add flags when upload from version control system 
-  if ($vcsuser && $vcspass) $jq_args .= " --username $vcsuser --password $vcspass ";
+  if ($TarExcludeList) {
+    $jq_args .= " " . $TarExcludeList;
+  }
+  if ($VCS) {
+    $jq_args .= " " . $VCS; // add flags when upload from version control system
+  }
+  if ($vcsuser && $vcspass) {
+    $jq_args .= " --username $vcsuser --password $vcspass ";
+  }
   if ($Verbose) {
     print "JobQueueAdd($jobpk, wget_agent, $jq_args, no, NULL);\n";
   }
@@ -312,7 +322,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   }
   if (!$Test) {
     $unpackplugin = &$Plugins[plugin_find_id("agent_unpack") ];
-    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"));
+    $ununpack_jq_pk = $unpackplugin->AgentAdd($jobpk, $UploadPk, $ErrorMsg, array("wget_agent"), $scmarg);
     if ($ununpack_jq_pk < 0) {
       echo  $ErrorMsg;
       return 1;
@@ -333,7 +343,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
         break;
       default:
         $Cmd = "$fossjobs_command -U '$UploadPk' -A '$QueueList'";
-      break;
+        break;
     }
     if ($Verbose) {
       print "CMD=$Cmd\n";
@@ -341,8 +351,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
     if (!$Test) {
       system($Cmd);
     }
-  }
-  else {
+  } else {
     /* No other agents other than unpack scheduled, attach to unpack*/
   }
   global $OptionS; /* Should it run synchronously? */
@@ -378,13 +387,14 @@ $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
 $public_flag = 0;
+$scmarg = NULL;
 $OptionS = "";
 
 $user = $passwd = "";
 $group = "";
 $vcsuser = $vcspass= "";
 
-for ($i = 1;$i < $argc;$i++) {
+for ($i = 1; $i < $argc; $i ++) {
   switch ($argv[$i]) {
     case '-c':
       $i++;
@@ -493,8 +503,7 @@ for ($i = 1;$i < $argc;$i++) {
       $i++;
       if (1 == $argv[$i]) {
         $public_flag = 1;
-      }
-      else {
+      } else {
         $public_flag = 0;
       }
       break;
@@ -504,14 +513,17 @@ for ($i = 1;$i < $argc;$i++) {
     case '-G': /* upload from git repo */
       $VCS = 'Git';
       break;
+    case '-I': /* ignore scm data when scanning */
+      $scmarg = '-I';
+      break;
     default:
       if (substr($argv[$i], 0, 1) == '-') {
         print "Unknown parameter: '" . $argv[$i] . "'\n";
         print $Usage . "\n";
         exit(1);
       }
-    /* No hyphen means it is a file! */
-    $UploadArchive = $argv[$i];
+      /* No hyphen means it is a file! */
+      $UploadArchive = $argv[$i];
   } /* switch */
 } /* for each parameter */
 
@@ -525,8 +537,7 @@ if (!$Test && $OptionQ) {
 }
 
 /** get archive from stdin */
-if ($stdin_flag)
-{
+if ($stdin_flag) {
   $Fin = fopen("php://stdin", "r");
   if (!feof($Fin)) {
     $UploadArchive = trim(fgets($Fin));
@@ -535,7 +546,7 @@ if ($stdin_flag)
 }
 
 /** compose fossjobs command */
-if($Verbose) {
+if ($Verbose) {
   $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR -v ";
 } else {
   $fossjobs_command = "fossjobs --username $user --groupname $group --password $passwd -c $SYSCONFDIR  ";
@@ -551,29 +562,28 @@ if (!$UploadArchive) {  // upload is empty
 /** get real path, and file name */
 $UploadArchiveTmp = "";
 $UploadArchiveTmp = realpath($UploadArchive);
-if (!$UploadArchiveTmp)  { // neither a file nor folder from server?
-    if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+if (!$UploadArchiveTmp) {
+  // neither a file nor folder from server?
+  if (filter_var($UploadArchive, FILTER_VALIDATE_URL)) {
+  } else if (strchr($UploadArchive, '*')) {
+    $file_number_cmd = "ls $UploadArchive > /dev/null";
+    system($file_number_cmd, $return_val);
+    if ($return_val) {
+      exit(1); // not files matched
     }
-    else if (strchr($UploadArchive, '*')) {
-      $file_number_cmd = "ls $UploadArchive > /dev/null";
-      system($file_number_cmd, $return_val);
-      if ($return_val) exit(1); // not files matched
-      if ("/" != $UploadArchive[0]) { // it is a absolute path
-        $UploadArchive = getcwd()."/".$UploadArchive;
-      }
+    if ("/" != $UploadArchive[0]) { // it is a absolute path
+      $UploadArchive = getcwd()."/".$UploadArchive;
     }
-    else {
-      print "Note: it seems that what you want to upload '$UploadArchive' does not exist. \n";
-      exit(1);
-    }
+  } else {
+    print "Note: it seems that what you want to upload '$UploadArchive' does not exist. \n";
+    exit(1);
+  }
 } else {  // is a file or folder from server
   $UploadArchive = $UploadArchiveTmp;
 }
 
-if (strlen($UploadArchive) > 0) {
-  if (empty($UploadName)) {
-    $UploadName = basename($UploadArchive);
-  }
+if (strlen($UploadArchive) > 0 && empty($UploadName)) {
+  $UploadName = basename($UploadArchive);
 }
 
 if ($vcsuser && $vcspass) {
@@ -583,5 +593,7 @@ if ($vcsuser && $vcspass) {
 print "Loading '$UploadArchive'\n";
 print "  Calling UploadOne in 'main': '$FolderPath'\n";
 $res = UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription);
-if ($res) exit(1); // fail to upload
+if ($res) {
+  exit(1); // fail to upload
+}
 exit(0);

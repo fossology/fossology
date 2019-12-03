@@ -51,7 +51,7 @@ class AdminUploadDelete extends DefaultPlugin
         self::TITLE => _("Delete Uploaded File"),
         self::MENU_LIST => "Organize::Uploads::Delete Uploaded File",
         self::PERMISSION => Auth::PERM_ADMIN,
-        self::REQUIRES_LOGIN => TRUE
+        self::REQUIRES_LOGIN => true
     ));
 
     global $container;
@@ -76,7 +76,7 @@ class AdminUploadDelete extends DefaultPlugin
     }
     /* Add job: job "Delete" has jobqueue item "delagent" */
     $jqargs = "DELETE UPLOAD $uploadpk";
-    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, NULL, NULL);
+    $jobqueuepk = JobQueueAdd($jobpk, "delagent", $jqargs, null, null);
     if (empty($jobqueuepk)) {
       return _("Failed to place delete in job queue");
     }
@@ -89,7 +89,7 @@ class AdminUploadDelete extends DefaultPlugin
       $LinkText = _("View Jobs");
       return "$error_msg <a href=\"$URL\">$LinkText</a>";
     }
-    return NULL;
+    return null;
   }
 
   /**
@@ -103,8 +103,7 @@ class AdminUploadDelete extends DefaultPlugin
     $uploadpks = $request->get('uploads');
     $folderId = $request->get('folder');
 
-    if (!empty($uploadpks))
-    {
+    if (!empty($uploadpks)) {
       $vars['message'] = $this->initDeletion($uploadpks, $folderId);
     }
 
@@ -115,7 +114,7 @@ class AdminUploadDelete extends DefaultPlugin
 
     $uploadList = array();
     $folderList = FolderListUploads_perm($root_folder_pk, Auth::PERM_WRITE);
-    foreach($folderList as $L) {
+    foreach ($folderList as $L) {
       $desc = $L['name'];
       if (!empty($L['upload_desc'])) {
         $desc .= " (" . $L['upload_desc'] . ")";
@@ -139,25 +138,21 @@ class AdminUploadDelete extends DefaultPlugin
    */
   private function initDeletion($uploadpks, $folderId)
   {
-    if(sizeof($uploadpks) <= 0)
-    {
+    if (sizeof($uploadpks) <= 0) {
       return _("No uploads selected");
     }
 
     $errorMessages = [];
-    $deleteResponse = NULL;
-    foreach($uploadpks as $uploadPk)
-    {
+    $deleteResponse = null;
+    foreach ($uploadpks as $uploadPk) {
       $deleteResponse = $this->TryToDelete(intval($uploadPk), $folderId);
 
-      if($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS)
-      {
+      if ($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS) {
         $errorMessages[] = $deleteResponse;
       }
     }
 
-    if(sizeof($uploadpks) == 1)
-    {
+    if (sizeof($uploadpks) == 1) {
       return $deleteResponse->getDeleteMessageString().$deleteResponse->getAdditionalMessage();
     }
 
@@ -186,12 +181,12 @@ class AdminUploadDelete extends DefaultPlugin
    */
   private function TryToDelete($uploadpk, $folderId)
   {
-    if(!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
+    if (!$this->uploadDao->isEditable($uploadpk, Auth::getGroupId())) {
       $returnMessage = DeleteMessages::NO_PERMISSION;
       return new DeleteResponse($returnMessage);
     }
 
-    if(!empty($this->folderDao->isRemovableContent($uploadpk,2))) {
+    if (!empty($this->folderDao->isRemovableContent($uploadpk,2))) {
       $this->folderDao->removeContentById($uploadpk, $folderId);
       $returnMessage = DeleteMessages::SUCCESS;
       return new DeleteResponse($returnMessage);

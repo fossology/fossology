@@ -1,0 +1,16 @@
+---
+#
+# $Id$
+#
+# Filter for debian build
+#
+# PBDEBSTD is replaced by the Debian standard version
+filter:
+  PBPHPCLI: php-cli,php-mbstring,php-xml
+  PBDEBSTD: 3.9.1
+  PBBUILDDEP: postgresql-server-dev-9.6,libjson-c-dev
+  PBDEP: postgresql (>= 8.1) | postgresql-9.6
+  PBDEBCOMP: 7
+#
+# PBDEBCOMP is replaced by the Debian Compatibility value
+#

@@ -18,10 +18,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Text;
 
-interface Converter {
+interface Converter
+{
   /**
    * @param string $input
    * @return string
    */
   function convert($input);
-} 
+}

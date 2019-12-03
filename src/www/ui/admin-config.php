@@ -18,7 +18,7 @@
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_foconfig", _("Configuration Variables"));
+define("TITLE_FOCONFIG", _("Configuration Variables"));
 
 /**
  * \class foconfig extend from FO_Plugin
@@ -33,7 +33,7 @@ class foconfig extends FO_Plugin
   function __construct()
   {
     $this->Name       = "foconfig";
-    $this->Title      = TITLE_foconfig;
+    $this->Title      = TITLE_FOCONFIG;
     $this->MenuList   = "Admin::Customize";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->PluginLevel = 50;    // run before 'regular' plugins
@@ -57,18 +57,17 @@ class foconfig extends FO_Plugin
     $Group = "";
     $InputStyle = "style='background-color:#dbf0f7'";
     $OutBuf .= "<form method='POST'>";
-    while ($row = pg_fetch_assoc($result))
-    {
-      if ($Group != $row['group_name'])
-      {
-        if ($Group) $OutBuf .= "</table><br>";
+    while ($row = pg_fetch_assoc($result)) {
+      if ($Group != $row['group_name']) {
+        if ($Group) {
+          $OutBuf .= "</table><br>";
+        }
         $Group = $row['group_name'];
         $OutBuf .= "<table border=1>";
       }
 
       $OutBuf .= "<tr><td>$row[ui_label]</td><td>";
-      switch ($row['vartype'])
-      {
+      switch ($row['vartype']) {
         case CONFIG_TYPE_INT:
         case CONFIG_TYPE_TEXT:
           $ConfVal = htmlentities($row['conf_value']);
@@ -89,15 +88,13 @@ class foconfig extends FO_Plugin
           $ConfVal = htmlentities($row['conf_value']);
           $Options = explode("|",$row['option_value']);
           $OutBuf .= "<select name='new[$row[variablename]]' title='$row[description]' $InputStyle>";
-          foreach($Options as $Option)
-          {
+          foreach ($Options as $Option) {
             $matches = array();
             preg_match('/(\\w+)[{](.*)[}]/', $Option, $matches);
             $Option_display = $matches[1];
-            $Option_value   = $matches[2];
+            $Option_value = $matches[2];
             $OutBuf .= "<option $InputStyle value='$Option_value' ";
-            if($ConfVal == $Option_value)
-            {
+            if ($ConfVal == $Option_value) {
               $OutBuf .= "selected";
             }
             $OutBuf .= ">$Option_display</option>";
@@ -136,12 +133,9 @@ class foconfig extends FO_Plugin
     /* Compare new and old array
      * and update DB with new values */
     $UpdateMsg = "";
-    if (!empty($newarray))
-    {
-      foreach($newarray as $VarName => $VarValue)
-      {
-        if ($VarValue != $oldarray[$VarName])
-        {
+    if (! empty($newarray)) {
+      foreach ($newarray as $VarName => $VarValue) {
+        if ($VarValue != $oldarray[$VarName]) {
           /* get validation_function row from sysconfig table */
           $sys_array = $this->dbManager->getSingleRow("select validation_function, ui_label from sysconfig where variablename=$1",array($VarName),__METHOD__.'.getVarNameData');
           $validation_function = $sys_array['validation_function'];
@@ -151,40 +145,46 @@ class foconfig extends FO_Plugin
            2. the validation_function is not empty, and after checking, the value is valid
           update sysconfig table
           */
-          if ($is_empty || (!$is_empty && (1 == $validation_function($VarValue))))
-          {
-            $this->dbManager->getSingleRow("update sysconfig set conf_value=$1 where variablename=$2",array($VarValue,$VarName),__METHOD__.'.setVarNameData');
-            if (!empty($UpdateMsg)) $UpdateMsg .= ", ";
-            $UpdateMsg .= $VarName;
-          }
-          /* the validation_function is not empty, but after checking, the value is invalid */
-          else if (!$is_empty && (0 == $validation_function($VarValue)))
-          {
-            if (!strcmp($validation_function, 'check_boolean'))
-            {
-              $warning_msg = _("Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
-              echo "<script>alert('$warning_msg');</script>";
+          if ($is_empty || (! $is_empty && (1 == $validation_function($VarValue)))) {
+            $this->dbManager->getSingleRow(
+              "update sysconfig set conf_value=$1 where variablename=$2",
+              array($VarValue, $VarName), __METHOD__ . '.setVarNameData');
+            if (! empty($UpdateMsg)) {
+              $UpdateMsg .= ", ";
             }
-            else if  (strpos($validation_function, "url"))
-            {
-              $warning_msg = _("Error: $ui_label $VarValue, is not a reachable URL.");
+            $UpdateMsg .= $VarName;
+          } else if (! $is_empty && (0 == $validation_function($VarValue))) {
+            /*
+             * the validation_function is not empty, but after checking, the value
+             * is invalid
+             */
+            if (! strcmp($validation_function, 'check_boolean')) {
+              $warning_msg = _(
+                "Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
+              echo "<script>alert('$warning_msg');</script>";
+            } else if (strpos($validation_function, "url")) {
+              $warning_msg = _(
+                "Error: $ui_label $VarValue, is not a reachable URL.");
               echo "<script>alert('$warning_msg');</script>";
             }
           }
         }
       }
-      if (!empty($UpdateMsg)) $UpdateMsg .= _(" updated.");
+      if (! empty($UpdateMsg)) {
+        $UpdateMsg .= _(" updated.");
+      }
     }
 
     $OutBuf = '';
-    if($this->OutputType=='HTML')
-    {
-      if ($UpdateMsg) $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+    if ($this->OutputType == 'HTML') {
+      if ($UpdateMsg) {
+        $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+      }
       $OutBuf .= $this->HTMLout();
     }
     $this->vars['content'] = $OutBuf;
   }
-
 }
+
 $NewPlugin = new foconfig;
 $NewPlugin->Initialize();

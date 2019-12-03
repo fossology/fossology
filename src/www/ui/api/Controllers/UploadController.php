@@ -26,7 +26,7 @@ namespace Fossology\UI\Api\Controllers;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\Lib\Auth\Auth;
-use const Fossology\UI\Api\AUTH_METHOD;
+use Fossology\UI\Page\UploadPageBase;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
@@ -59,11 +59,21 @@ class UploadController extends RestController
     }
     $uploads = $this->dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id);
     if ($id !== null) {
-      if($uploads === null) {
+      if ($uploads === null) {
         $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
-      $uploads = $uploads[0];
+      if (! empty($uploads)) {
+        $uploads = $uploads[0];
+      } else {
+        $returnVal = new Info(503,
+          "Ununpack job not started. Please check job status at " .
+          "/api/v1/jobs?upload=" . $id,
+          InfoType::INFO);
+        return $response->withHeader('Retry-After',
+          '60')->withHeader('Look-at', "/api/v1/jobs?upload=" .
+          $id)->withJson($returnVal->getArray(), $returnVal->getCode());
+      }
     }
     return $response->withJson($uploads, 200);
   }
@@ -158,25 +168,36 @@ class UploadController extends RestController
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
 
       $allFolderIds = $this->container->get('dao.folder')->getAllFolderIds();
-      if(!in_array($folderId, $allFolderIds)) {
+      if (!in_array($folderId, $allFolderIds)) {
         $error = new Info(404, "folderId $folderId does not exists!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }
-      if(!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
-        $error = new Info(403, "folderId $folderId is not accessible!", InfoType::ERROR);
+      if (!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
+        $error = new Info(403, "folderId $folderId is not accessible!",
+          InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
+      }
+
+      $groupId = intval($request->getHeaderLine(UploadPageBase::UPLOAD_GROUP));
+      if (! empty($groupId)) {
+        $groupMap = $this->container->get('dao.user')->getUserGroupMap(
+          $this->restHelper->getUserId());
+        if (! key_exists($groupId, $groupMap)) {
+          $error = new Info(403, "User is not member of group $groupId!", InfoType::ERROR);
+          return $response->withJson($error->getArray(), $error->getCode());
+        }
       }
 
       $description = $request->getHeaderLine('uploadDescription');
       $public = $request->getHeaderLine('public');
       $public = empty($public) ? 'protected' : $public;
+      $ignoreScm = $request->getHeaderLine('ignoreScm');
       list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
-       $request, $folderId, $description, $public);
+        $request, $folderId, $description, $public, $ignoreScm, $groupId);
       if (! $status) {
-        $info = new Info(500, [
-          $message,
-          $statusDescription
-        ], InfoType::ERROR);
+        $info = new Info($uploadId != -1 ? $uploadId : 500,
+          $message . "\n" . $statusDescription,
+          InfoType::ERROR);
       } else {
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }

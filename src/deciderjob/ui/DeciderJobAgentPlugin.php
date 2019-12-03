@@ -33,7 +33,8 @@ class DeciderJobAgentPlugin extends AgentPlugin
 {
   const CONFLICT_STRATEGY_FLAG = "-k";
 
-  function __construct() {
+  function __construct()
+  {
     $this->Name = "agent_deciderjob";
     $this->Title = _("Automatic User License Decider");
     $this->AgentName = AGENT_DECIDER_JOB_NAME;
@@ -59,8 +60,7 @@ class DeciderJobAgentPlugin extends AgentPlugin
     $dependencies[] = "agent_adj2nest";
 
     $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
-    if ($jobQueueId != 0)
-    {
+    if ($jobQueueId != 0) {
       return $jobQueueId;
     }
 

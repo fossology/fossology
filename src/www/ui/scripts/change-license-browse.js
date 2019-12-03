@@ -107,13 +107,13 @@ function deleteMarkedDecisions() {
   resultEntity = $('bulkIdResult');
     var txt;
     var pleaseConfirm = confirm("You are about to delete all irrelevant decisions. Please confirm!");
-    if (pleaseConfirm == true) {
-      $.ajax({
-        type: "POST",
-        url: "?mod=change-license-processPost",
-        data: data,
-        success: function (data) { location.reload(); },
-        error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
+  if (pleaseConfirm == true) {
+    $.ajax({
+      type: "POST",
+      url: "?mod=change-license-processPost",
+      data: data,
+      success: function (data) { location.reload(); },
+      error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
       });
-    }
+  }
 }

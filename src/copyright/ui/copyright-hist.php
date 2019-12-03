@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2010-2014 Hewlett-Packard Development Company, L.P.
- * Copyright (C) 2014-2017 Siemens AG
+ * Copyright (C) 2014-2017,2019 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_copyrightHistogram", _("Copyright Browser"));
+define("TITLE_COPYRIGHTHISTOGRAM", _("Copyright Browser"));
 
 /**
  * @class CopyrightHistogram
@@ -29,7 +29,7 @@ class CopyrightHistogram extends HistogramBase {
   function __construct()
   {
     $this->Name = "copyright-hist";
-    $this->Title = TITLE_copyrightHistogram;
+    $this->Title = TITLE_COPYRIGHTHISTOGRAM;
     $this->viewName = "copyright-view";
     $this->agentName = "copyright";
     parent::__construct();
@@ -45,14 +45,20 @@ class CopyrightHistogram extends HistogramBase {
    */
   protected function getTableContent($upload_pk, $uploadtreeId, $filter, $agentId)
   {
-    $type = 'statement';
-    $description = _("Copyright");
-
+    $typeDescriptionPairs = array(
+      'statement' => _("Agent Findings"),
+      'copyFindings' => _("User Findings")
+    );
     $tableVars = array();
     $output = array();
-    list($out, $vars) = $this->getTableForSingleType($type, $description, $upload_pk, $uploadtreeId, $filter, $agentId);
-    $tableVars[$type] = $vars;
-    $output[] = $out;
+    foreach($typeDescriptionPairs as $type=>$description)
+    {
+      list ($out, $vars) = $this->getTableForSingleType($type, $description,
+        $upload_pk, $uploadtreeId, $filter, $agentId);
+      $tableVars[$type] = $vars;
+      $output[] = $out;
+    }
+
     $output[] = $tableVars;
     return $output;
   }
@@ -64,10 +70,15 @@ class CopyrightHistogram extends HistogramBase {
    */
   protected function fillTables($upload_pk, $Uploadtree_pk, $filter, $agentId, $VF)
   {
-    list($VCopyright, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
+    list ($vCopyright, $vTextFindings, $tableVars) = $this->getTableContent(
+      $upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $out = $this->renderString('copyrighthist_tables.html.twig',
-            array('contCopyright'=>$VCopyright, 'fileList'=>$VF));
+      array(
+        'contCopyright' => $vCopyright,
+        'contTextFindings' => $vTextFindings,
+        'fileList' => $VF
+      ));
     return array($out, $tableVars);
   }
 
@@ -85,12 +96,12 @@ class CopyrightHistogram extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::Copyright",10);
+        menu_insert("Browse::Copyright agent/user findings",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else
       {
-        $text = _("View copyright histogram");
+        $text = _("View copyright agent/user findings histogram");
         menu_insert("Browse::Copyright",10,$URI,$text);
       }
     }
@@ -104,9 +115,21 @@ class CopyrightHistogram extends HistogramBase {
   {
     return "
 
+    var copyrightTabCookie = 'stickyCopyrightTab';
+
     $(document).ready(function() {
       tableCopyright =  createTablestatement();
-    } );
+      tableFindings = createPlainTablecopyFindings();
+      $('#copyrightFindingsTabs').tabs({
+        active: ($.cookie(copyrightTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(copyrightTabCookie, idString);
+        }
+      });
+    });
     ";
   }
 

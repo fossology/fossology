@@ -19,7 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Data;
 
-class LicenseTest extends \PHPUnit\Framework\TestCase {
+class LicenseTest extends \PHPUnit\Framework\TestCase
+{
   /** @var string */
   private $text;
   /** @var string */
@@ -32,7 +33,7 @@ class LicenseTest extends \PHPUnit\Framework\TestCase {
     $this->text = "The License text";
     $this->url = "http://www.fossology.org";
 
-    $this->license = new License(8,"testSN", "testFN", 4, $this->text, $this->url, 1);
+    $this->license = new License(8, "testSN", "testFN", 4, $this->text, $this->url, 1);
   }
 
   public function testText()

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2015, Siemens AG
+Copyright (C) 2014-2015,2019 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -120,7 +120,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','license_file','highlight','clearing_decision'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
-    $this->testDb->insertData_license_ref();
+    $this->testDb->insertData_license_ref(200);
   }
 
   private function getHeartCount($output)

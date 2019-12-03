@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>pdf-form-with-signature-field</title>
+<meta name="Subject" content=""/>
+<meta name="Keywords" content=""/>
+<meta name="Author" content="Dr. Eric Knauel"/>
+<meta name="Creator" content="PDFCreator Version 1.7.0"/>
+<meta name="Producer" content="GPL Ghostscript 9.07; modified using iTextSharp 5.2.1 (c) 1T3XT BVBA"/>
+<meta name="CreationDate" content=""/>
+</head>
+<body>
+<pre>
+Example PDF file that contains a form with a signature field.
+
+TIKA-1226
+
+comboItemB
+
+listItemB
+listItemC
+
+PDF processed with CutePDF evaluation edition www.CutePDF.com
+
+</pre>
+</body>
+</html>

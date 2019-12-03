@@ -2,7 +2,7 @@
 /***********************************************************
  Copyright (C) 2012-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -19,12 +19,12 @@
 
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_upload_tagging", _("Manage Upload Tagging"));
+define("TITLE_UPLOAD_TAGGING", _("Manage Upload Tagging"));
 
 class upload_tagging extends FO_Plugin
 {
   var $Name       = "upload_tagging";
-  var $Title      = TITLE_upload_tagging;
+  var $Title      = TITLE_UPLOAD_TAGGING;
   var $Version    = "1.0";
   var $Dependency = array();
   var $DBaccess   = PLUGIN_DB_ADMIN;
@@ -44,13 +44,10 @@ class upload_tagging extends FO_Plugin
     $sql = "select count(*) from tag_manage where upload_fk = $1 and is_disabled = true";
     $numTags = $GLOBALS['container']->get('db.manager')->getSingleRow($sql,array($upload_id));
     $count = $numTags['count'];
-    if (empty($count)) // enabled
-    {
+    if (empty($count)) { // enabled
       $text = _("Disable");
       $V = "<input type='submit' name='manage'  value='$text'>\n";
-    }
-    else // disabled
-    {
+    } else { // disabled
       $text = _("Enable");
       $V = "<input type='submit' name='manage' value='$text'>\n";
     }

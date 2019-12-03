@@ -18,13 +18,13 @@
 
 require_once('HistogramBase.php');
 
-define("TITLE_keywordHistogram", _("Keyword Browser"));
+define("TITLE_KEYWORDHISTOGRAM", _("Keyword Browser"));
 
 class KeywordHistogram  extends HistogramBase {
   function __construct()
   {
     $this->Name = "keyword-hist";
-    $this->Title = TITLE_keywordHistogram;
+    $this->Title = TITLE_KEYWORDHISTOGRAM;
     $this->viewName = "keyword-view";
     $this->agentName = "keyword";
     parent::__construct();

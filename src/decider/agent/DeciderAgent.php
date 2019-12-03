@@ -1,7 +1,7 @@
 <?php
 /*
  Author: Daniele Fognini
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2019, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -78,6 +78,7 @@ class DeciderAgent extends Agent
   const RULES_NOMOS_MONK_NINKA = 0x2;
   const RULES_BULK_REUSE = 0x4;
   const RULES_WIP_SCANNER_UPDATES = 0x8;
+  const RULES_OJO_NO_CONTRADICTION = 0x10;
   const RULES_ALL = 0xf; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int $activeRules
@@ -147,8 +148,7 @@ class DeciderAgent extends Agent
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
-    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE))
-    {
+    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)) {
       $bulkReuser = new BulkReuser();
       $bulkIds = $this->clearingDao->getPreviousBulkIds($uploadId, $this->groupId, $this->userId);
       if (count($bulkIds) == 0) {
@@ -157,17 +157,17 @@ class DeciderAgent extends Agent
       $jqId=0;
       $minTime="4";
       $maxTime="60";
-      foreach($bulkIds as $bulkId) {
+      foreach ($bulkIds as $bulkId) {
         $jqId = $bulkReuser->rerunBulkAndDeciderOnUpload($uploadId, $this->groupId, $this->userId, $bulkId, $jqId);
         $this->heartbeat(1);
-        if(!empty($jqId)) {
+        if (!empty($jqId)) {
           $jqIdRow = $this->showJobsDao->getDataForASingleJob($jqId);
-          while($this->showJobsDao->getJobStatus($jqId)) {
+          while ($this->showJobsDao->getJobStatus($jqId)) {
             $this->heartbeat(0);
             $timeInSec = $this->showJobsDao->getEstimatedTime($jqIdRow['jq_job_fk'],'',0,0,1);
-            if($timeInSec > $maxTime) {
+            if ($timeInSec > $maxTime) {
               sleep($maxTime);
-            } else if($timeInSec < $minTime) {
+            } else if ($timeInSec < $minTime) {
               sleep($minTime);
             } else {
               sleep($timeInSec);
@@ -176,10 +176,8 @@ class DeciderAgent extends Agent
         }
       }
     }
-
     $parentBounds = $this->uploadDao->getParentItemBounds($uploadId);
-    foreach ($this->uploadDao->getContainedItems($parentBounds) as $item)
-    {
+    foreach ($this->uploadDao->getContainedItems($parentBounds) as $item) {
       $process = $this->processItem($item);
       $this->heartbeat($process);
     }
@@ -211,42 +209,40 @@ class DeciderAgent extends Agent
     $currentEvents = $this->clearingDao->getRelevantClearingEvents($itemTreeBounds, $this->groupId);
 
     $markAsWip = false;
-    if(null!==$lastDecision && $projectedScannerMatches && ($this->activeRules&self::RULES_WIP_SCANNER_UPDATES)== self::RULES_WIP_SCANNER_UPDATES)
-    {
+    if (null !== $lastDecision && $projectedScannerMatches
+      && ($this->activeRules & self::RULES_WIP_SCANNER_UPDATES) == self::RULES_WIP_SCANNER_UPDATES) {
       $licensesFromDecision = array();
-      foreach($lastDecision->getClearingLicenses() as $clearingLicense)
-      {
+      foreach ($lastDecision->getClearingLicenses() as $clearingLicense) {
         $licenseIdFromEvent = $this->licenseMap->getProjectedId($clearingLicense->getLicenseId());
         $licensesFromDecision[$licenseIdFromEvent] = $licenseIdFromEvent;
       }
       $markAsWip = $this->existsUnhandledMatch($projectedScannerMatches,$licensesFromDecision);
     }
 
-    if(null!==$lastDecision && $markAsWip)
-    {
+    if (null !== $lastDecision && $markAsWip) {
       $this->clearingDao->markDecisionAsWip($item->getId(), $this->userId, $this->groupId);
       return 1;
     }
 
-    if (null!==$lastDecision || 0<count($currentEvents))
-    {
+    if (null!==$lastDecision || 0<count($currentEvents)) {
       return 0;
     }
 
     $haveDecided = false;
 
-    if (($this->activeRules&self::RULES_NOMOS_IN_MONK)== self::RULES_NOMOS_IN_MONK)
-    {
+    if (($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+      $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
+    }
+
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_IN_MONK) == self::RULES_NOMOS_IN_MONK) {
       $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $projectedScannerMatches);
     }
 
-    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA)
-    {
+    if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_MONK_NINKA)== self::RULES_NOMOS_MONK_NINKA) {
       $haveDecided = $this->autodecideNomosMonkNinka($itemTreeBounds, $projectedScannerMatches);
     }
 
-    if (!$haveDecided && $markAsWip)
-    {
+    if (!$haveDecided && $markAsWip) {
       $this->clearingDao->markDecisionAsWip($item->getId(), $this->userId, $this->groupId);
     }
 
@@ -261,14 +257,33 @@ class DeciderAgent extends Agent
    */
   private function existsUnhandledMatch($projectedScannerMatches, $licensesFromDecision)
   {
-    foreach(array_keys($projectedScannerMatches) as $projectedLicenseId)
-    {
-      if(!array_key_exists($projectedLicenseId, $licensesFromDecision))
-      {
+    foreach (array_keys($projectedScannerMatches) as $projectedLicenseId) {
+      if (!array_key_exists($projectedLicenseId, $licensesFromDecision)) {
         return true;
       }
     }
     return false;
+  }
+
+  /**
+   * @brief Auto decide matches which are in nomos, monk and OJO findings
+   *
+   * Get the matches which really agree and apply the decisions.
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param LicenseMatch[] $matches        New license matches found
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideIfOjoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  {
+    $licenseMatchExists = count($matches) > 0;
+    foreach ($matches as $licenseMatches) {
+      $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndOJOAgreed($licenseMatches);
+    }
+
+    if ($licenseMatchExists) {
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+    }
+    return $licenseMatchExists;
   }
 
   /**
@@ -283,17 +298,14 @@ class DeciderAgent extends Agent
   {
     $canDecide = (count($matches)>0);
 
-    foreach($matches as $licenseMatches)
-    {
-      if (!$canDecide) // &= is not lazy
-      {
+    foreach ($matches as $licenseMatches) {
+      if (!$canDecide) { // &= is not lazy
         break;
       }
       $canDecide &= $this->areNomosMonkNinkaAgreed($licenseMatches);
     }
 
-    if ($canDecide)
-    {
+    if ($canDecide) {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
     return $canDecide;
@@ -311,17 +323,14 @@ class DeciderAgent extends Agent
   {
     $canDecide = (count($matches)>0);
 
-    foreach($matches as $licenseMatches)
-    {
-      if (!$canDecide) // &= is not lazy
-      {
+    foreach ($matches as $licenseMatches) {
+      if (!$canDecide) { // &= is not lazy
         break;
       }
       $canDecide &= $this->areNomosMatchesInsideAMonkMatch($licenseMatches);
     }
 
-    if ($canDecide)
-    {
+    if ($canDecide) {
       $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
     }
     return $canDecide;
@@ -336,20 +345,15 @@ class DeciderAgent extends Agent
   protected function remapByProjectedId($matches)
   {
     $remapped = array();
-    foreach($matches as $licenseId => $licenseMatches)
-    {
+    foreach ($matches as $licenseId => $licenseMatches) {
       $projectedId = $this->licenseMap->getProjectedId($licenseId);
 
-      foreach($licenseMatches as $agent => $agentMatches)
-      {
+      foreach ($licenseMatches as $agent => $agentMatches) {
         $haveId = array_key_exists($projectedId, $remapped);
         $haveAgent = $haveId && array_key_exists($agent, $remapped[$projectedId]);
-        if ($haveAgent)
-        {
+        if ($haveAgent) {
           $remapped[$projectedId][$agent] = array_merge($remapped[$projectedId][$agent], $agentMatches);
-        }
-        else
-        {
+        } else {
           $remapped[$projectedId][$agent] = $agentMatches;
         }
       }
@@ -375,32 +379,26 @@ class DeciderAgent extends Agent
    */
   private function areNomosMatchesInsideAMonkMatch($licenseMatches)
   {
-    if (!array_key_exists("nomos", $licenseMatches))
-    {
+    if (!array_key_exists("nomos", $licenseMatches)) {
       return false;
     }
-    if (!array_key_exists("monk", $licenseMatches))
-    {
+    if (!array_key_exists("monk", $licenseMatches)) {
       return false;
     }
 
-    foreach($licenseMatches["nomos"] as $licenseMatch)
-    {
+    foreach ($licenseMatches["nomos"] as $licenseMatch) {
       $matchId = $licenseMatch->getLicenseFileId();
       $nomosRegion = $this->highlightDao->getHighlightRegion($matchId);
 
       $found = false;
-      foreach($licenseMatches["monk"] as $monkLicenseMatch)
-      {
+      foreach ($licenseMatches["monk"] as $monkLicenseMatch) {
         $monkRegion = $this->highlightDao->getHighlightRegion($monkLicenseMatch->getLicenseFileId());
-        if ($this->isRegionIncluded($nomosRegion, $monkRegion))
-        {
+        if ($this->isRegionIncluded($nomosRegion, $monkRegion)) {
           $found = true;
           break;
         }
       }
-      if (!$found)
-      {
+      if (!$found) {
         return false;
       }
     }
@@ -417,27 +415,65 @@ class DeciderAgent extends Agent
   {
     $scanners = array('nomos','monk','ninka');
     $vote = array();
-    foreach ($scanners as $scanner)
-    {
-      if (!array_key_exists($scanner, $licenseMatches))
-      {
+    foreach ($scanners as $scanner) {
+      if (!array_key_exists($scanner, $licenseMatches)) {
         return false;
       }
-      foreach($licenseMatches[$scanner] as $licenseMatch)
-      {
+      foreach ($licenseMatches[$scanner] as $licenseMatch) {
         $licId = $licenseMatch->getLicenseId();
         $vote[$licId][$scanner] = true;
       }
     }
 
-    foreach($vote as $licId=>$voters)
-    {
-      if (count($voters) != 3)
-      {
+    foreach ($vote as $licId=>$voters) {
+      if (count($voters) != 3) {
         return false;
       }
     }
     return true;
   }
 
+  /**
+   * @brief extracts the matches corresponding to a scanner from a $licenseMatches structure
+   * @param $scanner
+   * @param LicenseMatch[][] $licenseMatches
+   * @return int[] list of license ids
+   */
+  protected function getLicenseIdsOfMatchesForScanner($scanner, $licenseMatches)
+  {
+    if (array_key_exists($scanner, $licenseMatches) === true) {
+      return array_map(
+        function ($match) {
+          return $match->getLicenseId();
+        }, $licenseMatches[$scanner]);
+    }
+    return [];
+  }
+
+  /**
+   * @brief Check if the finding by only contains one single license and that no other scanner (nomos) has produced a contradicting statement
+   * @param LicenseMatch[][] $licenseMatches
+   * @return boolean True if they match, false otherwise
+   */
+  protected function areOtherScannerFindingsAndOJOAgreed($licenseMatches)
+  {
+    $findingsByOjo = $this->getLicenseIdsOfMatchesForScanner('ojo', $licenseMatches);
+    if (count($findingsByOjo) == 0) {
+      // nothing to do
+      return false;
+    }
+
+    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches);
+    if (count($findingsByOtherScanner) == 0) {
+      // nothing found by other scanner, so no contradiction
+      return true;
+    }
+    foreach ($findingsByOtherScanner as $findingsByScanner) {
+      if (in_array($findingsByScanner, $findingsByOjo) === false) {
+        // contradiction found
+        return false;
+      }
+    }
+    return true;
+  }
 }

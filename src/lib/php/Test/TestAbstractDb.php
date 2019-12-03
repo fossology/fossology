@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2015, Siemens AG
+Copyright (C) 2015,2019 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -30,22 +30,21 @@ abstract class TestAbstractDb
 
   protected function dirnameRec($path, $depth = 1)
   {
-    for($i = 0; $i < $depth; $i++)
-    {
+    for ($i = 0; $i < $depth; $i ++) {
       $path = dirname($path);
     }
     return $path;
   }
-  
+
   /**
    * @param array $tableList
-   * @param bool $invert 
+   * @param bool $invert
    */
   abstract function createPlainTables($tableList, $invert=false);
-  
+
   /**
    * @param array $tableList
-   * @param bool $invert 
+   * @param bool $invert
    */
   public function insertData($tableList, $invert=FALSE, $dataFile=null)
   {
@@ -53,27 +52,24 @@ abstract class TestAbstractDb
     $testdata = file_get_contents($testdataFile);
     $delimiter = 'INSERT INTO ';
     $offset = strpos($testdata, $delimiter);
-    while( false!==$offset) {
-      $nextOffset = strpos($testdata, $delimiter, $offset+1);
-      if (false===$nextOffset)
-      {
+    while (false !== $offset) {
+      $nextOffset = strpos($testdata, $delimiter, $offset + 1);
+      if (false === $nextOffset) {
         $sql = substr($testdata, $offset);
-      }
-      else
-      {
-        $sql = substr($testdata, $offset, $nextOffset-$offset);
+      } else {
+        $sql = substr($testdata, $offset, $nextOffset - $offset);
       }
       $table = array();
       preg_match('/^INSERT INTO (?P<name>\w+) /', $sql, $table);
-      if( ($invert^!in_array($table['name'], $tableList)) ){
+      if (($invert ^ ! in_array($table['name'], $tableList))) {
         $offset = $nextOffset;
         continue;
-      }    
+      }
       $this->dbManager->queryOnce($this->queryConverter($sql));
       $offset = $nextOffset;
     }
   }
-  
+
   /**
    * @brief convert sql string to something the drive understands
    * @param string $sql
@@ -83,21 +79,28 @@ abstract class TestAbstractDb
   {
     return $sql;
   }
-  
+
   public function insertData_license_ref($limit=140)
   {
+    $keysToBeChanged = array(
+      'rf_OSIapproved' => '"rf_OSIapproved"',
+      'rf_FSFfree'=> '"rf_FSFfree"',
+      'rf_GPLv2compatible' => '"rf_GPLv2compatible"',
+      'rf_GPLv3compatible'=> '"rf_GPLv3compatible"',
+      'rf_Fedora' => '"rf_Fedora"'
+      );
+
+    /** import licenseRef.json */
     $LIBEXECDIR = $this->dirnameRec(__FILE__, 5) . '/install/db';
-    $sqlstmts = file_get_contents("$LIBEXECDIR/licenseref.sql");
-
-    $delimiter = "INSERT INTO license_ref";
-    $splitted = explode($delimiter, $sqlstmts);
-
-    for ($i = 1; $i < count($splitted); $i++)
-    {
-      $sql = $this->queryConverter($splitted[$i]);
-      $this->dbManager->queryOnce($delimiter.$sql);
-      if ($i > $limit)
-      {
+    $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
+    $statementName = __METHOD__.'.insertInToLicenseRef';
+    foreach ($jsonData as $licenseArrayKey => $licenseArray) {
+      $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
+      $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
+      $SQL = "INSERT INTO license_ref ( $keys ) VALUES ($valuePlaceHolders);";
+      $this->dbManager->prepare($statementName, $SQL);
+      $this->dbManager->execute($statementName, array_values($licenseArray));
+      if ($licenseArrayKey >= $limit) {
         break;
       }
     }
@@ -113,8 +116,8 @@ abstract class TestAbstractDb
     $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
     $Schema = array();
     require($coreSchemaFile);
-    foreach($Schema[$type] as $viewName=>$sql){
-      if( $invert^!in_array($viewName, $elementList) ){
+    foreach ($Schema[$type] as $viewName => $sql) {
+      if ($invert ^ ! in_array($viewName, $elementList)) {
         continue;
       }
       $sqlCreate = is_array($sql) ? $sql['CREATE'] : $sql;
@@ -124,13 +127,13 @@ abstract class TestAbstractDb
 
   /**
    * @param array $viewList
-   * @param bool $invert 
+   * @param bool $invert
    */
   public function createViews($viewList, $invert=FALSE)
   {
     $this->applySchema('VIEW', $viewList, $invert);
   }
-  
+
   /**
    * @param array $tableList
    * @param bool $invert
@@ -142,7 +145,7 @@ abstract class TestAbstractDb
     require($coreSchemaFile);
     $attributeKey = "ALTER";
     foreach ($Schema['TABLE'] as $tableName => $tableCols) {
-      if ($invert ^ !in_array($tableName, $tableList)) {
+      if ($invert ^ ! in_array($tableName, $tableList)) {
         continue;
       }
       foreach ($tableCols as $attributes) {
@@ -157,5 +160,4 @@ abstract class TestAbstractDb
   {
     return $this->dbManager;
   }
-
 }

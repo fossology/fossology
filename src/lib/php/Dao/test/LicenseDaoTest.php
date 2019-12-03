@@ -141,8 +141,7 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->prepare($stmt,"SELECT rf_pk,rf_shortname FROM license_ref");
     $licRes = $this->dbManager->execute($stmt);
     $licAll = array();
-    while ($erg=$this->dbManager->fetchArray($licRes))
-    {
+    while ($erg=$this->dbManager->fetchArray($licRes)) {
       $licAll[$erg['rf_pk']] = $erg['rf_shortname'];
     }
     $this->dbManager->freeResult($licRes);
@@ -154,8 +153,7 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $left=2009;
     $right=2014;
     $mydate = "'2014-06-04 14:01:30.551093+02'";
-    foreach ($licAll as $licenseRefNumber=>$shortname)
-    {
+    foreach ($licAll as $licenseRefNumber=>$shortname) {
       $this->dbManager->queryOnce("INSERT INTO license_file (rf_fk, agent_fk, rf_match_pct, rf_timestamp, pfile_fk)
             VALUES ($licenseRefNumber, $agentId, $matchPercent, $mydate, $pfileId)");
     }
@@ -356,7 +354,8 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
 
-  public function testIsNewLicense(){
+  public function testIsNewLicense()
+  {
     $groupId = 401;
     $this->testDb->createPlainTables(array('license_ref'));
     $this->testDb->insertData_license_ref();

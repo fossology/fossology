@@ -19,13 +19,14 @@
 require_once("./test_common.php");
 
 /**
- * \brief test cli fo_nomos_license_list 
+ * \brief test cli fo_nomos_license_list
  */
 
 /**
  * @outputBuffering enabled
  */
-class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
+class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase
+{
 
   public $SYSCONF_DIR = "/usr/local/etc/fossology/";
   public $DB_NAME;
@@ -34,7 +35,7 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
 
   // fossology_testconfig is the temporary system configuration directory
   // created by the src/testing/db/create_test_database.php script.
-  // It is initialized via the Makefile and passed in via the 
+  // It is initialized via the Makefile and passed in via the
   // FOSSOLOGY_TESTCONFIG environment variable.
   public $fossology_testconfig;
 
@@ -43,15 +44,16 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
 
   // cp2foss_path is the absolute path to the cp2foss binary
   public $cp2foss_path;
-  
+
   // fo_nomos_license_list_path is the absolute path to the fo_nomos_license_list_path binary
   public $fo_nomos_license_list_path;
-  
+
   /* initialization */
 
-  // this method is run once for the entire test class, before any of the 
+  // this method is run once for the entire test class, before any of the
   // test methods are executed.
-  public static function setUpBeforeClass() {
+  public static function setUpBeforeClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -62,7 +64,7 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
 
     /**
        get the value of the FOSSOLOGY_TESTCONFIG environment variable,
-       which will be initialized by the Makefile by running the 
+       which will be initialized by the Makefile by running the
        create_test_database.pl script
     */
     $fossology_testconfig = getenv('FOSSOLOGY_TESTCONFIG');
@@ -110,14 +112,15 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
 
 
   // this method is run once before each test method defined for this test class.
-  protected function setUp() {
+  protected function setUp()
+  {
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
 
     //$SYSCONF_DIR = "/usr/local/etc/fossology/";
     //$DB_NAME = "fossology";
     //$DB_COMMAND = "../../testing/db/createTestDB.php";
-    
+
     // these calls are deprecated with the new create_test_database call
     //create_db();
     //add_user();
@@ -128,7 +131,7 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
   /**
    * \brief first populate test data via upload from url, then get nomos license list
    */
-  function test_get_nomos_list() 
+  function test_get_nomos_list()
   {
     global $fossology_testconfig;
     global $fo_nomos_license_list_path;
@@ -172,7 +175,8 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
   /**
    * \brief populate test data via upload from url
    */
-  function upload_from_url(){
+  function upload_from_url()
+  {
     //global $SYSCONF_DIR;
     global $fossology_testconfig;
     global $cp2foss_path;
@@ -191,7 +195,9 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
     /** get upload id that you just upload for testing */
     if ($out && $out[5]) {
       $upload_id = get_upload_id($out[5]);
-    } else $this->assertFalse(TRUE);
+    } else {
+      $this->assertFalse(true);
+    }
     $agent_status = 0;
     $agent_status = check_agent_status($test_dbh,"ununpack", $upload_id);
     $this->assertEquals(1, $agent_status);
@@ -207,7 +213,8 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
   /**
    * \brief help msg, etc
    */
-  function test_others() {
+  function test_others()
+  {
     global $fossology_testconfig;
     global $fo_nomos_license_list_path;
     //global $SYSCONF_DIR;
@@ -238,21 +245,23 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
    * \brief clean the env
    */
   // this method is run once after each test method defined for this test class.
-  protected function tearDown() {
+  protected function tearDown()
+  {
 
     global $fossology_testconfig;
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
-   
+
     // TODO:  Drop the test database
-    
-    //stop_scheduler(); 
+
+    //stop_scheduler();
     //drop_db();
   }
 
-  // this method is run once for the entire test class, after all of the 
+  // this method is run once for the entire test class, after all of the
   // test methods are executed.
-  public static function tearDownAfterClass() {
+  public static function tearDownAfterClass()
+  {
 
     global $fossology_testconfig;
     global $scheduler_path;
@@ -266,15 +275,14 @@ class test_fo_nomos_license_list extends \PHPUnit\Framework\TestCase {
     if ( $return_var != 0 ) {
         print "Error: Could not stop scheduler via '$scheduler_cmd'\n";
         print "$output\n";
-#        exit(1);
+      #        exit(1);
     }
 
-    // time to drop the database 
+    // time to drop the database
     sleep(10);
     print "End of functional tests for fo_nomos_license_list\n";
 
   }
-
 }
 
-?>
+

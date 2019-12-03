@@ -20,6 +20,12 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\UI\Api\Helper\RestHelper;
+use Fossology\UI\Api\Helper\AuthHelper;
+use Fossology\UI\Api\Models\Info;
+use Firebase\JWT\JWT;
+use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
+use Fossology\Lib\Exceptions\DuplicateTokenNameException;
 
 class UserEditPage extends DefaultPlugin
 {
@@ -27,6 +33,11 @@ class UserEditPage extends DefaultPlugin
 
   /** @var DbManager */
   private $dbManager;
+
+  /**
+   * @var AuthHelper
+   * Auth helper object */
+  private $authHelper;
 
   function __construct()
   {
@@ -38,71 +49,81 @@ class UserEditPage extends DefaultPlugin
     ));
 
     $this->dbManager = $this->getObject('db.manager');
+    $this->authHelper = $this->getObject('helper.authHelper');
   }
-  
+
   /**
-   * @brief Allow user to change their account settings (users db table).  
-   *        If the user is an Admin, they can change settings for any user.\n
-   *        This is called in the following circumstances:\n
-   *        1) User clicks on Admin > Edit User Account\n
-   *        2) User has chosen a user to edit from the 'userid' select list  \n
-   *        3) User hit submit to update user data\n
+   * @brief Allow user to change their account settings (users db table).
+   *
+   * If the user is an Admin, they can change settings for any user.\n
+   * This is called in the following circumstances:\n
+   * 1) User clicks on Admin > Edit User Account\n
+   * 2) User has chosen a user to edit from the 'userid' select list  \n
+   * 3) User hit submit to update user data\n
    */
   protected function handle(Request $request)
   {
-    /* Is the session owner an admin?  */
+    /* Is the session owner an admin? */
     $user_pk = Auth::getUserId();
     $SessionUserRec = $this->GetUserRec($user_pk);
     $SessionIsAdmin = $this->IsSessionAdmin($SessionUserRec);
+    $newToken = "";
+
+    if (GetParm('new_pat', PARM_STRING)) {
+      try {
+        $newToken = $this->generateNewToken($request);
+      } catch (\Exception $e) {
+        $vars['message'] = $e->getMessage();
+      }
+    }
 
     $user_pk_to_modify = intval($request->get('user_pk'));
-    if (!($SessionIsAdmin or
-          empty($user_pk_to_modify) or
-          $user_pk == $user_pk_to_modify))
-    {
+    if (! ($SessionIsAdmin || empty($user_pk_to_modify) ||
+      $user_pk == $user_pk_to_modify)) {
       $vars['content'] = _("Your request is not valid.");
       return $this->render('include/base.html.twig', $this->mergeWithDefault($vars));
     }
 
     $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
 
-    /* If this is a POST (the submit button was clicked), then process the request. */
+      /*
+     * If this is a POST (the submit button was clicked), then process the
+     * request.
+     */
     $BtnText = $request->get('UpdateBtn');
-    if (!empty($BtnText)) 
-    {
+    if (! empty($BtnText)) {
       /* Get the form data to in an associated array */
       $UserRec = $this->CreateUserRec($request, "");
 
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
-      if (empty($rv)) 
-      {
+      if (empty($rv)) {
         // Successful db update
         $vars['message'] = "User $UserRec[user_name] updated.";
 
         /* Reread the user record as update verification */
         $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
-      }
-      else 
-      {
+      } else {
         $vars['message'] = $rv;
       }
-    }
-    else  
-    {
+    } else {
       $NewUserpk = intval($request->get('newuser'));
       $UserRec = empty($NewUserpk) ? $this->CreateUserRec($request, $user_pk) : $this->CreateUserRec($request, $NewUserpk);
     }
-    
+
     /* display the edit form with the requested user data */
     $vars = array_merge($vars, $this->DisplayForm($UserRec, $SessionIsAdmin));
     $vars['userId'] = $UserRec['user_pk'];
+    $vars['newToken'] = $newToken;
+    $vars['tokenList'] = $this->getListOfActiveTokens();
+    $vars['expiredTokenList'] = $this->getListOfExpiredTokens();
+    $vars['maxTokenDate'] = $this->authHelper->getMaxTokenValidity();
 
     return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
 
   /**
    * \brief Display the user record edit form
-   * 
+   *
    * \param $UserRec - Database users record for the user to be edited.
    * \param $SessionIsAdmin - Boolean: This session is by an admin
    * \return the text of the display form on success, or error on failure.
@@ -112,31 +133,28 @@ class UserEditPage extends DefaultPlugin
     $vars = array('isSessionAdmin' => $SessionIsAdmin,
                   'userId' => $UserRec['user_pk']);
 
-    /* For Admins, get the list of all users 
+    /* For Admins, get the list of all users
      * For non-admins, only show themself
      */
-    if ($SessionIsAdmin)
-    {
+    if ($SessionIsAdmin) {
       $stmt = __METHOD__ . '.asSessionAdmin';
       $sql = "SELECT * FROM users ORDER BY user_name";
       $this->dbManager->prepare($stmt, $sql);
       $res = $this->dbManager->execute($stmt);
       $allUsers = array();
-      while ($row = $this->dbManager->fetchArray($res))
-      {
+      while ($row = $this->dbManager->fetchArray($res)) {
         $allUsers[$row['user_pk']] = htmlentities($row['user_name']);
       }
       $this->dbManager->freeResult($res);
       $vars['allUsers'] = $allUsers;
     }
-    
+
     $vars['userName'] = $UserRec['user_name'];
     $vars['userDescription'] = $UserRec['user_desc'];
     $vars['userEMail'] = $UserRec["user_email"];
     $vars['eMailNotification'] = ($UserRec['email_notify'] == 'y');
-    
-    if ($SessionIsAdmin)
-    {
+
+    if ($SessionIsAdmin) {
       $vars['allAccessLevels'] = array(
           PLUGIN_DB_NONE => _("None (very basic, no database access)"),
           PLUGIN_DB_READ => _("Read-only (read, but no writes or downloads)"),
@@ -144,25 +162,26 @@ class UserEditPage extends DefaultPlugin
           PLUGIN_DB_ADMIN => _("Full Administrator (all access including adding and deleting users)")
         );
       $vars['accessLevel'] = $UserRec['user_perm'];
-   
+
       $SelectedFolderPk = $UserRec['root_folder_fk'];
       $vars['folderListOption'] = FolderListOption($ParentFolder = -1, $Depth = 0, $IncludeTop = 1, $SelectedFolderPk);
     }
 
     $vars['isBlankPassword'] = ($UserRec['_blank_pass'] == 'on');
-    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack", "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
+    $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack",
+      "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
     $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
-    
+
     return $vars;
   }
 
   /**
    * \brief Validate and update the user data.
    * \param $UserRec - Database record for the user to be edited.
-   * 
+   *
    * \return NULL on success, string (error text) on failure.
    */
-  function UpdateUser($UserRec, $SessionIsAdmin) 
+  function UpdateUser($UserRec, $SessionIsAdmin)
   {
     global $PG_CONN;
 
@@ -206,25 +225,20 @@ class UserEditPage extends DefaultPlugin
       return _("Errors") . ":<ol>$Errors </ol>";
     }
 
-
     /**** Update the users database record ****/
     /* First remove user_pass and user_seed if the password wasn't changed. */
-    if (!empty($UserRec['_blank_pass']) )
-    {
+    if (!empty($UserRec['_blank_pass']) ) {
       $UserRec['user_seed'] = rand() . rand();
       $UserRec['user_pass'] = sha1($UserRec['user_seed'] . "");
-    }
-    else if (empty($UserRec['_pass1']))   // password wasn't changed
-    {
+    } else if (empty($UserRec['_pass1'])) { // password wasn't changed
       unset( $UserRec['user_pass']);
       unset( $UserRec['user_seed']);
     }
-    
+
     /* Build the sql update */
     $sql = "UPDATE users SET ";
-    $first = TRUE;
-    foreach($UserRec as $key=>$val)
-    {
+    $first = true;
+    foreach ($UserRec as $key=>$val) {
       if ($key[0] == '_' || $key == "user_pk") {
         continue;
       }
@@ -232,34 +246,34 @@ class UserEditPage extends DefaultPlugin
         continue;
       }
 
-      if (!$first) $sql .= ",";
+      if (!$first) {
+        $sql .= ",";
+      }
       $sql .= "$key='" . pg_escape_string($val) . "'";
-      $first = FALSE;
+      $first = false;
     }
     $sql .= " where user_pk=$UserRec[user_pk]";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
 
-    return (NULL);
+    return (null);
   } // UpdateUser()
 
   /**
    * \brief Get a user record
    * \param $user_pk  fetch this users db record
-   * 
+   *
    * \return users db record
    */
-  function GetUserRec($user_pk) 
+  function GetUserRec($user_pk)
   {
-    if (empty($user_pk))
-    {
+    if (empty($user_pk)) {
       throw new Exception("Invalid access.  Your session has expired.",1);
     }
 
     $UserRec = GetSingleRec("users", "WHERE user_pk=$user_pk");
-    if (empty($UserRec))
-    {
+    if (empty($UserRec)) {
       throw new Exception("Invalid user. ",1);
     }
     return $UserRec;
@@ -267,10 +281,10 @@ class UserEditPage extends DefaultPlugin
 
   /**
    * \brief Determine if the session user is an admin
-   * 
+   *
    * \return TRUE if the session user is an admin.  Otherwise, return FALSE
    */
-  private function IsSessionAdmin($UserRec) 
+  private function IsSessionAdmin($UserRec)
   {
     return ($UserRec['user_perm'] == PLUGIN_DB_ADMIN);
   }
@@ -278,26 +292,23 @@ class UserEditPage extends DefaultPlugin
   /**
    * \brief Create a user record.
    * \param integer $user_pk: If empty, use form data
-   * 
+   *
    * \return A user record in the same associated array format that you get from a pg_fetch_assoc().
-   *         However, there may be additional fields from the data input form that are not in the 
+   *         However, there may be additional fields from the data input form that are not in the
    *         users table.  These additional fields start with an underscore (_pass1, _pass2, _blank_pass)
    *         that come from the edit form.
    */
-  function CreateUserRec(Request $request, $user_pk="") 
+  function CreateUserRec(Request $request, $user_pk="")
   {
     /* If a $user_pk was given, use it to read the user db record.
      * Otherwise, use the form data.
      */
-    if (!empty($user_pk)) 
-    {
+    if (!empty($user_pk)) {
       $UserRec = $this->GetUserRec($user_pk);
       $UserRec['_pass1'] = "";
       $UserRec['_pass2'] = "";
       $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($UserRec['user_seed'] . "")) ? "on" : "";
-    }
-    else
-    {
+    } else {
       $UserRec = array();
       $UserRec['user_pk'] = intval($request->get('user_pk'));
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
@@ -306,18 +317,14 @@ class UserEditPage extends DefaultPlugin
 
       $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
       $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
-      if (!empty($UserRec['_pass1']))
-      {
+      if (!empty($UserRec['_pass1'])) {
         $UserRec['user_seed'] = rand() . rand();
         $UserRec['user_pass'] = sha1($UserRec['user_seed'] . $UserRec['_pass1']);
         $UserRec['_blank_pass'] = "";
-      }
-      else
-      {
+      } else {
         $UserRec['user_pass'] = "";
         $UserRec['_blank_pass'] = stripslashes($request->get("_blank_pass"));
-        if (empty($UserRec['_blank_pass']))  // check for blank password
-        {
+        if (empty($UserRec['_blank_pass'])) { // check for blank password
           // get the stored seed
           $StoredUserRec = $this->GetUserRec($UserRec['user_pk']);
           $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($StoredUserRec['user_seed'] . "")) ? "on" : "";
@@ -334,6 +341,120 @@ class UserEditPage extends DefaultPlugin
       $UserRec['default_bucketpool_fk'] = intval($request->get("default_bucketpool_fk"));
     }
     return $UserRec;
+  }
+
+  /**
+   * Generate new token based on the request sent by user.
+   *
+   * @param Request $request
+   * @throws \UnexpectedValueException Throws an exception if the request is
+   *         not valid.
+   * @return string The new token if no error occured.
+   * @uses Fossology::UI::Api::Helper::RestHelper::validateTokenRequest()
+   * @uses Fossology::UI::Api::Helper::DbHelper::insertNewTokenKey()
+   */
+  private function generateNewToken(Request $request)
+  {
+    global $container;
+
+    $user_pk = Auth::getUserId();
+    $tokenName = GetParm('pat_name', PARM_STRING);
+    $tokenExpiry = GetParm('pat_expiry', PARM_STRING);
+    $tokenScope = GetParm('pat_scope', PARM_STRING);
+    $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
+    $restHelper = $container->get('helper.restHelper');
+    $isTokenRequestValid = $restHelper->validateTokenRequest($tokenExpiry,
+      $tokenName, $tokenScope);
+
+    if ($isTokenRequestValid !== true) {
+      throw new \UnexpectedValueException($isTokenRequestValid->getMessage());
+    } else {
+      $restDbHelper = $container->get('helper.dbHelper');
+      $key = bin2hex(
+        openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
+      try {
+        $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
+          RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
+      } catch (DuplicateTokenKeyException $e) {
+        // Key already exists, try again.
+        $key = bin2hex(
+          openssl_random_pseudo_bytes(RestHelper::TOKEN_KEY_LENGTH / 2));
+        try {
+          $jti = $restDbHelper->insertNewTokenKey($user_pk, $tokenExpiry,
+            RestHelper::SCOPE_DB_MAP[$tokenScope], $tokenName, $key);
+        } catch (DuplicateTokenKeyException $e) {
+          // New key also failed, give up!
+          throw new DuplicateTokenKeyException("Please try again later.");
+        }
+      } catch (DuplicateTokenNameException $e) {
+        throw new \UnexpectedValueException($e->getMessage());
+      }
+      return $this->authHelper->generateJwtToken($request->getHost(), $tokenExpiry,
+          $jti['created_on'], $jti['jti'], $tokenScope, $key);
+    }
+  }
+
+  /**
+   * @brief Get a list of active tokens for current user.
+   *
+   * Fetches the tokens for current user from DB and format it for twig
+   * template. Also check if the token is expired.
+   * @return array
+   */
+  private function getListOfActiveTokens()
+  {
+    global $container;
+
+    $user_pk = Auth::getUserId();
+    $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on, active " .
+           "FROM personal_access_tokens " .
+           "WHERE user_fk = $1 AND active = true;";
+    $rows = $this->dbManager->getRows($sql, [$user_pk],
+      __METHOD__ . ".getActiveTokens");
+    $response = [];
+    foreach ($rows as $row) {
+      if ($this->authHelper->isTokenActive($row, $row["pat_pk"]) === true) {
+        $entry = [
+          "id" => $row["pat_pk"] . "." . $user_pk,
+          "name" => $row["token_name"],
+          "created" => $row["created_on"],
+          "expire" => $row["expire_on"],
+          "scope" => $row["token_scope"]
+        ];
+        $response[] = $entry;
+      }
+    }
+    array_multisort(array_column($response, "created"), SORT_ASC, $response);
+    return $response;
+  }
+
+  /**
+   * Get a list of expired tokens for current user.
+   * @return array
+   */
+  private function getListOfExpiredTokens()
+  {
+    global $container;
+
+    $user_pk = Auth::getUserId();
+    $sql = "SELECT pat_pk, user_fk, expire_on, token_scope, token_name, created_on " .
+      "FROM personal_access_tokens " .
+      "WHERE user_fk = $1 AND active = false;";
+    $rows = $this->dbManager->getRows($sql, [$user_pk],
+      __METHOD__ . ".getActiveTokens");
+    $response = [];
+    foreach ($rows as $row) {
+      $entry = [
+        "id" => $row["pat_pk"] . "." . $user_pk,
+        "name" => $row["token_name"],
+        "created" => $row["created_on"],
+        "expire" => $row["expire_on"],
+        "scope" => $row["token_scope"]
+      ];
+      $response[] = $entry;
+    }
+    array_multisort(array_column($response, "created"), SORT_ASC, $response);
+    return $response;
   }
 }
 

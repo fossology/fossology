@@ -38,7 +38,9 @@ use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Middlewares\RestAuthHelper;
+use Fossology\UI\Api\Controllers\VersionController;
+use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
+use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Slim\App;
@@ -47,7 +49,7 @@ const REST_VERSION_SLUG = "restVersion";
 
 const VERSION_1   = "/v{" . REST_VERSION_SLUG . ":1}/";
 
-const AUTH_METHOD = "SIMPLE_KEY";
+const AUTH_METHOD = "JWT_TOKEN";
 
 $startTime = microtime(true);
 
@@ -59,6 +61,10 @@ global $container;
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 
+/* Load UI templates */
+$loader = $container->get('twig.loader');
+$loader->addPath(dirname(dirname(__FILE__)).'/template');
+
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
 ConfigInit($GLOBALS['SYSCONFDIR'], $SysConf);
@@ -66,17 +72,30 @@ $timingLogger->toc("setup init");
 
 $timingLogger->tic();
 plugin_load();
-plugin_preinstall();
-plugin_postinstall();
-$timingLogger->toc("setup plugins");
 
 $app = new App($GLOBALS['container']);
 
+/*
+ * To check the order of middlewares, refer
+ * https://www.slimframework.com/docs/v3/concepts/middleware.html
+ *
+ * FOSSology Init is the first middleware and Rest Auth is second.
+ *
+ * 1. The call enters from Rest Auth and initialize session variables.
+ * 2. It then goes to FOSSology Init and initialize all plugins
+ * 3. The normal flow continues.
+ * 4. The call now enteres FOSSology Init again and plugins are unloaded.
+ * 5. Then call then enters Rest Auth and leaves as is.
+ */
+
+// Middleware for plugin initialization
+$app->add(new FossologyInitMiddleware());
 // Middleware for authentication
-$app->add(new RestAuthHelper());
+$app->add(new RestAuthMiddleware());
 
 //////////////////////////AUTH/////////////////////
 $app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
+$app->post(VERSION_1 . 'tokens', AuthController::class . ':createNewJwtToken');
 
 //////////////////////////UPLOADS/////////////////////
 $app->group(VERSION_1 . 'uploads',
@@ -88,7 +107,6 @@ $app->group(VERSION_1 . 'uploads',
     $this->post('', UploadController::class . ':postUpload');
     $this->any('/{params:.*}', BadRequestController::class);
   });
-
 
 ////////////////////////////ADMIN-USERS/////////////////////
 $app->group(VERSION_1 . 'users',
@@ -131,34 +149,13 @@ $app->group(VERSION_1 . 'report',
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
-//////////////////////////ERROR-HANDLERS/////////////////////
-$slimContainer = $app->getContainer();
-$slimContainer->set('notFoundHandler',
-  function ($request, $response){
-    $error = new Info(404, "Resource not found", InfoType::ERROR);
-    return $response->withJson($error->getArray(), $error->getCode());
-  }
-);
-$slimContainer->set('notAllowedHandler',
-  function ($request, $response, $methods) {
-    $error = new Info(405, 'Method must be one of: ' . implode(', ', $methods),
-      InfoType::ERROR);
-    return $response->withHeader('Allow', implode(', ', $methods))
-      ->withJson($error->getArray(), $error->getCode());
-  }
-);
-$slimContainer->set('phpErrorHandler',
-  function ($request, $response, $error){
-    $GLOBALS['container']->get('logger')->error($error);
-    $error = new Info(500, "Something went wrong! Please try again later.",
-      InfoType::ERROR);
-    return $response->withJson($error->getArray(), $error->getCode());
-  }
-);
-$GLOBALS['container']->setAlias('errorHandler', 'phpErrorHandler');
+////////////////////////////VERSION/////////////////////
+$app->group(VERSION_1 . 'version',
+  function (){
+    $this->get('', VersionController::class . ':getVersion');
+  });
 
 $app->run();
-plugin_unload();
 
 $GLOBALS['container']->get("db.manager")->flushStats();
 return 0;

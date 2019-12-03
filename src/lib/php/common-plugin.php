@@ -42,44 +42,36 @@ $Plugins = array();
 function plugin_cmp($a, $b)
 {
   /* Sort by plugin version only when the name is the same */
-  if (0 == strcmp($a->Name, $b->Name))
-  {
+  if (0 == strcmp($a->Name, $b->Name)) {
     /* Sort by plugin version (descending order) */
     $rc = strcmp($a->Version, $b->Version);
-    if ($rc != 0)
-    {
-      return (-$rc);
+    if ($rc != 0) {
+      return (- $rc);
     }
   }
 
   /* Sort by dependencies. */
   /* check if $a is a dependency for $b */
   // print "BEGIN Comparing $a->Name with $b->Name\n";
-  foreach ($a->Dependency as $val)
-  {
+  foreach ($a->Dependency as $val) {
     // print "Comparing $a->Name :: $val with $b->Name\n";
-    if ($val == $b->Name)
-    {
+    if ($val == $b->Name) {
       return (1);
     }
   }
   /* check if $b is a dependency for $a */
-  foreach ($b->Dependency as $val)
-  {
+  foreach ($b->Dependency as $val) {
     // print "Comparing $b->Name :: $val with $a->Name\n";
-    if ($val == $a->Name)
-    {
-      return (-1);
+    if ($val == $a->Name) {
+      return (- 1);
     }
   }
   // print "STILL Comparing $a->Name with $b->Name\n";
 
   /* If same dependencies, then sort by plugin level (highest comes first) */
-  if ($a->PluginLevel > $b->PluginLevel)
-  {
-    return (-1);
-  } elseif ($a->PluginLevel < $b->PluginLevel)
-  {
+  if ($a->PluginLevel > $b->PluginLevel) {
+    return (- 1);
+  } elseif ($a->PluginLevel < $b->PluginLevel) {
     return (1);
   }
 
@@ -102,17 +94,15 @@ function plugin_disable($Level)
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
   $LoginFlag = empty($_SESSION['User']);
-  foreach ($Plugins as $pluginName => &$P)
-  {
-    if ($P->State == PLUGIN_STATE_INVALID)
-    {
-      //echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
+  foreach ($Plugins as $pluginName => &$P) {
+    if ($P->State == PLUGIN_STATE_INVALID) {
+      // echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
       continue;
     }
-    if ($P->DBaccess > $Level)
-    {
-      //echo "<pre>COMP: Going to disable $P->Name\n</pre>";
-      //echo "<pre>COMP: disabling plugins with $P->DBaccess  >= $Level\n</pre>";
+    if ($P->DBaccess > $Level) {
+      // echo "<pre>COMP: Going to disable $P->Name\n</pre>";
+      // echo "<pre>COMP: disabling plugins with $P->DBaccess >=
+      // $Level\n</pre>";
       $P->unInstall();
       unset($Plugins[$pluginName]);
     }
@@ -142,13 +132,13 @@ function plugin_sort()
 
   /* for each plugin, store the dependencies in a matrix */
   $DepArray = array();
-  foreach ($Plugins as &$P)
-  {
-    if (empty($P->Dependency[0])) continue; // ignore no dependencies
+  foreach ($Plugins as &$P) {
+    if (empty($P->Dependency[0])) {
+      continue; // ignore no dependencies
+    }
     $DepArray[$P->Name] = array();
     $D = &$DepArray[$P->Name];
-    for ($j = 0; $j < count($P->Dependency); $j++)
-    {
+    for ($j = 0; $j < count($P->Dependency); $j ++) {
       $D[$P->Dependency[$j]] = $P->PluginLevel;
     }
     unset($P);
@@ -156,16 +146,15 @@ function plugin_sort()
 
   /* Now iterate through the array.
    This converts implied dependencies into direct dependencies. */
-  foreach ($DepArray as $A => $a)
-  {
+  foreach ($DepArray as $A => $a) {
     $Aa = &$DepArray[$A];
-    /* Find every element that depends on this element and merge the
-     dependency lists */
-    foreach ($DepArray as $B => $b)
-    {
+    /*
+     * Find every element that depends on this element and merge the
+     * dependency lists
+     */
+    foreach ($DepArray as $B => $b) {
       $Bb = $DepArray[$B];
-      if (!empty($Bb[$A]))
-      {
+      if (! empty($Bb[$A])) {
         /* merge in the entire list */
         $DepArray[$B] = array_merge($Aa, $Bb);
       }
@@ -173,9 +162,10 @@ function plugin_sort()
   }
 
   /* Finally: Put the direct dependencies back into the structures */
-  foreach ($Plugins as &$P)
-  {
-    if (empty($P->Dependency[0])) continue; // ignore no dependencies
+  foreach ($Plugins as &$P) {
+    if (empty($P->Dependency[0])) {
+      continue; // ignore no dependencies
+    }
     $P->Dependency = array_keys($DepArray[$P->Name]);
     unset($P);
   }
@@ -200,7 +190,7 @@ function plugin_find_id($pluginName)
 
   if (array_key_exists($pluginName, $Plugins)) {
     $plugin = $Plugins[$pluginName];
-    return $plugin->State === PLUGIN_STATE_READY ? $pluginName : -1;
+    return $plugin->State === PLUGIN_STATE_READY ? $pluginName : - 1;
   }
 
   return -1;
@@ -234,10 +224,8 @@ function plugin_preinstall()
 
   plugin_sort();
 
-  foreach (array_keys($Plugins) as $pluginName)
-  {
-    if (array_key_exists($pluginName, $Plugins))
-    {
+  foreach (array_keys($Plugins) as $pluginName) {
+    if (array_key_exists($pluginName, $Plugins)) {
       $Plugins[$pluginName]->preInstall();
     }
   }
@@ -251,8 +239,7 @@ function plugin_postinstall()
   /** @var Plugin[] $Plugins */
   global $Plugins;
 
-  foreach ($Plugins as &$plugin)
-  {
+  foreach ($Plugins as &$plugin) {
     $plugin->postInstall();
   }
 }
@@ -268,16 +255,18 @@ function plugin_load()
 
   /* Open $ModsEnabledDir and include all the php files found in the ui/ subdirectory */
 
-  if (is_dir($ModsEnabledDir))
-  {
+  if (is_dir($ModsEnabledDir)) {
     foreach (glob("$ModsEnabledDir/*") as $ModDirPath) {
-      foreach (array("/ui", "") as $subdir) {
+      foreach (array(
+        "/ui",
+        ""
+      ) as $subdir) {
         $targetPath = $ModDirPath . $subdir;
 
         if (is_dir($targetPath)) {
           foreach (glob("$targetPath/*.php") as $phpFile) {
-            if (!strstr($phpFile, 'ndex.php')) {
-              include_once("$phpFile");
+            if (! strstr($phpFile, 'ndex.php')) {
+              include_once ("$phpFile");
             }
           }
           break;
@@ -295,14 +284,11 @@ function plugin_unload()
   /** @var Plugin[] $Plugins */
   global $Plugins;
 
-  foreach ($Plugins as $key => $plugin)
-  {
-    if ($key == -1)
-    {
+  foreach ($Plugins as $key => $plugin) {
+    if ($key == - 1) {
       break;
     }
-    if (empty($plugin))
-    {
+    if (empty($plugin)) {
       continue;
     }
 
@@ -315,7 +301,8 @@ function plugin_unload()
  * @param Plugin $plugin Plugin to be added
  * @throws \Exception If plugin has no name or is already registered
  */
-function register_plugin(Plugin $plugin) {
+function register_plugin(Plugin $plugin)
+{
   /** @var Plugin[] $Plugins */
   global $Plugins;
 
@@ -338,14 +325,16 @@ function register_plugin(Plugin $plugin) {
  * @param string $classname Name of the class of the object being represented
  * @return string String representation of the object
  */
-function getStringRepresentation($vars, $classname) {
+function getStringRepresentation($vars, $classname)
+{
   $output = $classname . " {\n";
-  foreach($vars as $name => $value) {
-    if (!is_object($value))
-    {
+  foreach ($vars as $name => $value) {
+    if (! is_object($value)) {
       $representation = print_r($value, true);
       $lines = explode("\n", $representation);
-      $lines = array_map(function ($line) {return "      " . $line;}, $lines);
+      $lines = array_map(function ($line){
+        return "      " . $line;
+      }, $lines);
       $representation = trim(implode("\n", $lines));
 
       $output .= "   $name: " . $representation . "\n";

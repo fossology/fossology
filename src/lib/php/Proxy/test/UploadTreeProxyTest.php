@@ -76,7 +76,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->prepare($stmt = 'insert.uploadtree',
         "INSERT INTO uploadtree_a (uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, lft, rgt, ufile_name, realparent)"
             . " VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)");
-    foreach(array(
+    foreach (array(
       array(301, null, $upload, null, 2<<28, 1, 16, 'topDir',null)
      ,array(302,  301, $upload, null, 2<<28, 2,  5,   'dirA', 301)
      ,array(303,  302, $upload,  101,     0, 3,  4, 'fileAB.txt', 302)
@@ -85,8 +85,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
      ,array(306,  305, $upload,  102,     0, 8,  9,'fileCDE.c', 305)
      ,array(307,  304, $upload,  103,     0,11, 12, 'fileCF.cpp', 301)
      ,array(308,  301, $upload,  104,     0,14, 15,  'fileG.h', 301)
-        ) as $itemEntry)
-    {
+        ) as $itemEntry) {
       $this->dbManager->freeResult($this->dbManager->execute($stmt, $itemEntry));
     }
   }
@@ -102,7 +101,11 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendants = array_reduce($descendants, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendants = array_reduce($descendants, function($foo,$bar)
+    {
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendants, equalTo(array(302,305,307,308)) );
   }
 
@@ -117,7 +120,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxyA->getParams());
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsA = array_reduce($descendants, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendantsA = array_reduce($descendants, function($foo,$bar){
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsA, equalTo(array(303)) );
 
     $itemBoundsT = new ItemTreeBounds(301, $uploadTreeTableName='uploadtree_a', $upload, 1, 16);
@@ -127,7 +133,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxyT->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(303,306,307,308)) );
   }
 
@@ -141,7 +150,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendants = array_reduce($descendants, function($foo,$bar){$foo[]=$bar['ufile_name'];return $foo;}, array());
+    $zipDescendants = array_reduce($descendants, function($foo,$bar){
+      $foo[] = $bar['ufile_name'];
+      return $foo;
+    }, array());
     assertThat($zipDescendants, equalTo(array('fileCDE.c')) );
   }
 
@@ -155,7 +167,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendants = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendants = array_reduce($descendants, function($foo,$bar){$foo[]=$bar['ufile_name'];return $foo;}, array());
+    $zipDescendants = array_reduce($descendants, function($foo,$bar){
+      $foo[] = $bar['ufile_name'];
+      return $foo;
+    }, array());
     assertThat($zipDescendants, equalTo(array('fileCDE.c','fileCF.cpp')) );
   }
 
@@ -177,7 +192,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(103)) );
   }
 
@@ -198,7 +216,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(103)) );
   }
 
@@ -242,7 +263,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     $parentOf306 = 305;
     assertThat($zipDescendantsT, equalTo(array($parentOf306,308)) );
   }
@@ -277,7 +301,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(306,308)) );
   }
 
@@ -308,7 +335,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(104)) );
   }
 
@@ -338,7 +368,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(104)) );
   }
 
@@ -368,7 +401,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(104)) );
   }
 
@@ -402,7 +438,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['pfile_fk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['pfile_fk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(104)) );
   }
 
@@ -435,7 +474,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt, $uploadTreeProxy->getParams());
     $descendantsT = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){$foo[]=$bar['uploadtree_pk'];return $foo;}, array());
+    $zipDescendantsT = array_reduce($descendantsT, function($foo,$bar){
+      $foo[] = $bar['uploadtree_pk'];
+      return $foo;
+    }, array());
     assertThat($zipDescendantsT, equalTo(array(302)) );
   }
 }

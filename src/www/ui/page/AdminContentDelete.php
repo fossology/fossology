@@ -26,7 +26,7 @@ use Symfony\Component\HttpFoundation\Response;
 class AdminContentDelete extends DefaultPlugin
 {
   const NAME = 'content_unlink';
-  
+
   /** @var FolderDao */
   private $folderDao;
 
@@ -40,7 +40,7 @@ class AdminContentDelete extends DefaultPlugin
     ));
     $this->folderDao = $GLOBALS['container']->get('dao.folder');
   }
-  
+
   /**
    * @param Request $request
    * @return Response
@@ -49,23 +49,21 @@ class AdminContentDelete extends DefaultPlugin
   {
     $userId = Auth::getUserId();
     $vars = array();
-    
+
     $folderContentId = intval($request->get('foldercontent'));
-    if ($folderContentId)
-    {
+    if ($folderContentId) {
       try {
         $this->folderDao->removeContent($folderContentId);
-      }
-      catch (Exception $ex) {
+      } catch (Exception $ex) {
         $vars['message'] = $ex->getMessage();
       }
     }
-    
+
     $rootFolderId = $this->folderDao->getRootFolder($userId)->getId();
     /* @var $uiFolderNav FolderNav */
     $uiFolderNav = $GLOBALS['container']->get('ui.folder.nav');
     $vars['folderTree'] = $uiFolderNav->showFolderTree($rootFolderId);
-   
+
     return $this->render('admin_content_delete.html.twig', $this->mergeWithDefault($vars));
   }
 }

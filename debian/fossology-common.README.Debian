@@ -34,7 +34,7 @@ INSTALL.multi document and then
     to all of the other agent/scheduler/web machines.
  g) on all the agent machines mount each of the other agents at
     $REPO/<hostname>
- i) install agent pacakges (e.g.fossology-ununpack)
+ i) install agent packages (e.g.fossology-ununpack)
 3) On each of the web machine(s):
  a) install fossology-common
  b) edit /etc/fossology/Db.conf and point it at the database machine
@@ -70,7 +70,7 @@ All of these will be dependent on the goals of your local system and
 can't be reasonably automated, so you'll have to do them by hand.
 
 After you have installed the packages and done the above adjustments,
-you can point your web browser at at the new install
+you can point your web browser at the new install
   http://yourhostname/repo/
 and start using FOSSology!
 

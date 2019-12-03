@@ -22,6 +22,7 @@ namespace Fossology\Lib;
  * @class Exception
  * @brief Fossology exception
  */
-class Exception extends \Exception {
+class Exception extends \Exception
+{
 
 }

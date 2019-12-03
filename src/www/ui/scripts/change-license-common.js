@@ -1,16 +1,16 @@
 /*
  Copyright (C) 2014-2018, Siemens AG
- Author: Daniele Fognini, Johannes Najjar, Steffen Weber 
- 
+ Author: Daniele Fognini, Johannes Najjar, Steffen Weber
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
- 
+
  This program is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License along
  with this program; if not, write to the Free Software Foundation, Inc.,
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -25,8 +25,9 @@ var noLicenseString = "No_license_found";
 function jsArrayFromHtmlOptions(pListBox) {
   var options = new Array(pListBox.options.length);
   for (var i = 0; i < options.length; i++) {
-    if (pListBox.options[i].value === magicNumberNoLicenseFound)
+    if (pListBox.options[i].value === magicNumberNoLicenseFound) {
       continue;
+    }
     options[i] = pListBox.options[i];
   }
   return options;
@@ -34,9 +35,11 @@ function jsArrayFromHtmlOptions(pListBox) {
 
 function htmlOptionsFromJsArray(pListBox, options) {
   pListBox.options.length = 0;
-  if(options===undefined) return;
+  if(options===undefined) { return;
+  }
   for (var i = 0; i < options.length; i++) {
-      if(options[i]===undefined) continue;
+    if(options[i]===undefined) { continue;
+    }
       pListBox.options[i] = options[i];
   }
 }
@@ -44,8 +47,9 @@ function htmlOptionsFromJsArray(pListBox, options) {
 function sortLicenseList(pListBox) {
   var options = jsArrayFromHtmlOptions(pListBox);
   options.sort(compareText);
-  if (options.length == 0)
+  if (options.length == 0) {
     options[0] = (new Option(noLicenseString, magicNumberNoLicenseFound));
+  }
   htmlOptionsFromJsArray(pListBox, options);
 }
 
@@ -111,19 +115,19 @@ function scheduledDeciderError (responseobject, resultEntity) {
 
 function isUserError(bulkActions, refText) {
     var errorText = "";
-    if(bulkActions.length < 1) {
-        errorText += "No licenses to bulk scan selected\n";
-    }
+  if(bulkActions.length < 1) {
+      errorText += "No licenses to bulk scan selected\n";
+  }
 
-    if(refText.trim().split(" ").length < 2) {
-        errorText += "Reference text needs to be at least 2 words long"
-    }
+  if(refText.trim().split(" ").length < 2) {
+      errorText += "Reference text needs to be at least 2 words long"
+  }
 
     //show errors to user
-    if(errorText.length > 0) {
-      alert("Bulk scan not scheduled: \n\n"+errorText);
-      return true;
-    }
+  if(errorText.length > 0) {
+    alert("Bulk scan not scheduled: \n\n"+errorText);
+    return true;
+  }
     return false;
 }
 
@@ -235,15 +239,27 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     type = 0;
   }
   if(type == 0) {
-    clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
+    let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
     $("#referenceText").val(clearingsForSingleFile);
+    if (what == 4 || what == "comment") {
+      createDropDown($("#textModal > form > div"), $("#referenceText"));
+    } else {
+      $("#licenseStdCommentDropDown-text").hide();
+      $("#licenseStdCommentDropDown").next(".select2-container").hide();
+    }
     textModal.plainModal('open');
   } else {
     $("#referenceText").val($("#"+licenseId+what+type).attr('title'));
     whatCol = what;
     whatLicId = licenseId;
+    if (what == 4 || what == "comment") {
+      createDropDown($("#textModal > form > div"), $("#referenceText"));
+    } else {
+      $("#licenseStdCommentDropDown-text").hide();
+      $("#licenseStdCommentDropDown").next(".select2-container").hide();
+    }
     textModal.plainModal('open');
   }
   whatType = type;
@@ -292,3 +308,66 @@ $(document).ready(function () {
     }
   });
 });
+
+function createDropDown(element, textBox) {
+  let dropDown = null;
+  if ($("#licenseStdCommentDropDown").length) {
+    // The dropdown already exists
+    $("#licenseStdCommentDropDown-text").show();
+    dropDown = $("#licenseStdCommentDropDown");
+    dropDown.val(null).trigger('change');
+    dropDown.next(".select2-container").show();
+    return;
+  }
+  dropDown = $("<select />", {
+    "id": "licenseStdCommentDropDown",
+    "class": "ui-render-select2"
+  }).on("select2:select", function(e) {
+    let id = e.params.data.id;
+    getStdLicenseComments(id, function (comment) {
+      if (comment.hasOwnProperty("error")) {
+        console.log("Error while fetching standard comments: " + comment.error);
+      } else {
+        textBox.val(textBox.val() + "\n" + comment.comment);
+      }
+    });
+  });
+  dropDown.insertBefore(element);
+  $("<p />", {
+    "id": "licenseStdCommentDropDown-text"
+  }).html("Select standard license comments:").insertBefore(dropDown);
+  getStdLicenseComments("visible", function (data) {
+    // Add a placeholder for select2
+    data.splice(0, 0, {
+      "lsc_pk": -1,
+      "name": ""});
+    dropDown.select2({
+      selectOnClose: true,
+      dropdownParent: textModal,
+      placeholder: {
+        id: '-1',
+        text: "Select a comment"
+      },
+      data: $.map(data, function(obj) {
+        return {
+          "id": obj.lsc_pk,
+          "text": obj.name
+        };
+      })
+    });
+  });
+}
+
+function getStdLicenseComments(scope, callback) {
+  $.ajax({
+    type: "GET",
+    url: "?mod=ajax_license_std_comments",
+    data: {"scope": scope},
+    success: function(data) {
+      callback(data);
+    },
+    error: function(data) {
+      callback(data.error);
+    }
+  });
+}

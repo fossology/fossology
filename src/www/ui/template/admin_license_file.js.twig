@@ -67,6 +67,7 @@ function createLicenseTable() {
   var adminLicenseTable = $('#adminLicenseTable').DataTable({
     data: getDataForTable(),
     dom: "lBrtip",
+    sPaginationType: "listbox",
     deferRender: true,
     responsive: true,
     scroller: true,

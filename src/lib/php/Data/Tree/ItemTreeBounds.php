@@ -109,6 +109,4 @@ class ItemTreeBounds
     return "ItemTreeBounds([" . $this->left . ", " . $this->right . "] " .
     "upload " . $this->uploadId . "@" . $this->uploadTreeTableName . ")";
   }
-
-
-} 
+}

@@ -251,52 +251,54 @@ class UnifiedReport extends Agent
     $this->heartbeat(0);
 
     $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenses["statements"]));
+    $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesMain["statements"]));
+    $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
     $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
-    $this->heartbeat(count($licensesHist["statements"]));
+    $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
 
     $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($bulkLicenses["statements"]));
+    $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
     $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenseAcknowledgements["statements"]));
+    $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
     $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licenseComments["statements"]));
+    $this->heartbeat(empty($licenseComments) ? 0 : count($licenseComments["statements"]));
 
     $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesIrre["statements"]));
+    $this->heartbeat(empty($licensesIrre) ? 0 : count($licensesIrre["statements"]));
 
     $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId);
-    $this->heartbeat(count($licensesIrreComment["statements"]));
+    $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright");
-    $this->heartbeat(count($copyrights["statements"]));
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
+    $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
-    $this->heartbeat(count($ecc["statements"]));
+    $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
-    $this->heartbeat(count($otherStatement["statements"]));
+    $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
 
-    $contents = array("licenses" => $licenses,
-                      "bulkLicenses" => $bulkLicenses,
-                      "licenseAcknowledgements" => $licenseAcknowledgements,
-                      "licenseComments" => $licenseComments,
-                      "copyrights" => $copyrights,
-                      "ecc" => $ecc,
-                      "licensesIrre" => $licensesIrre,
-                      "licensesIrreComment" => $licensesIrreComment,
-                      "licensesMain" => $licensesMain,
-                      "licensesHist" => $licensesHist,
-                      "otherStatement" => $otherStatement
+    $contents = array(
+                        "licenses" => $licenses,
+                        "bulkLicenses" => $bulkLicenses,
+                        "licenseAcknowledgements" => $licenseAcknowledgements,
+                        "licenseComments" => $licenseComments,
+                        "copyrights" => $copyrights,
+                        "ecc" => $ecc,
+                        "licensesIrre" => $licensesIrre,
+                        "licensesIrreComment" => $licensesIrreComment,
+                        "licensesMain" => $licensesMain,
+                        "licensesHist" => $licensesHist,
+                        "otherStatement" => $otherStatement
                      );
+
     $this->writeReport($contents, $uploadId, $groupId, $userId);
     return true;
   }
@@ -360,44 +362,6 @@ class UnifiedReport extends Agent
     $properties->setSubject("Copyright (C) ".date("Y", $timestamp).", Your Organisation");
   }
 
-
-  /**
-   * @brief Copy identified global licenses
-   * @param[int,out] array $contents
-   * @return array $contents with identified global license path
-   */
-  function identifiedGlobalLicenses($contents)
-  {
-    $lenTotalLics = count($contents["licenses"]["statements"]);
-    // both of this variables have same value but used for different operations
-    $lenMainLics = $lenLicsMain = count($contents["licensesMain"]["statements"]);
-    if($lenLicsMain > 0 ) {
-      for($j=0; $j<$lenLicsMain; $j++) {
-        if($lenTotalLics > 0) {
-          $found = 0;
-          for($i=0; $i<$lenTotalLics; $i++) {
-            if(!strcmp($contents["licenses"]["statements"][$i]["content"], $contents["licensesMain"]["statements"][$j]["content"])) {
-              $found += 1;
-              $lenMainLics += 1;
-              $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licenses"]["statements"][$i];
-              unset($contents["licenses"]["statements"][$i]);
-            }
-          }
-          if ($found == 0 ) {
-            $lenMainLics += 1;
-            $contents["licensesMain"]["statements"][$lenMainLics] = $contents["licensesMain"]["statements"][$j];
-            unset($contents["licensesMain"]["statements"][$j]);
-          }
-          else {
-            unset($contents["licensesMain"]["statements"][$j]);
-          }
-        }
-      }
-    }
-    return $contents;
-  }
-
-
   /**
    * @brief Generate global license table
    * @param Section $section
@@ -414,11 +378,11 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($mainLicenses)){
-      foreach($mainLicenses as $licenseMain){
-        if($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5"){
+    if (!empty($mainLicenses)) {
+      foreach ($mainLicenses as $licenseMain) {
+        if ($licenseMain["risk"] == "4" || $licenseMain["risk"] == "5") {
           $styleColumn = array("bgColor" => "F9A7B0");
-        } elseif($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3"){
+        } elseif ($licenseMain["risk"] == "2" || $licenseMain["risk"] == "3") {
           $styleColumn = array("bgColor" => "FEFF99");
         } else {
           $styleColumn = array("bgColor" => "FFFFFF");
@@ -430,18 +394,17 @@ class UnifiedReport extends Agent
         // replace new line character
         $licenseText = str_replace("\n", "<w:br/>\n", htmlspecialchars($licenseMain["text"], ENT_DISALLOWED));
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
-        if(!empty($licenseMain["files"])){
+        if (!empty($licenseMain["files"])) {
           $cell3 = $table->addCell($thirdColLen, $styleColumn);
           asort($licenseMain["files"]);
-          foreach($licenseMain["files"] as $fileName){
+          foreach ($licenseMain["files"] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
-        }else{
+        } else {
           $cell3 = $table->addCell($thirdColLen, $styleColumn)->addText("");
         }
       }
-    }
-    else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -463,14 +426,14 @@ class UnifiedReport extends Agent
     $firstColLen = 2000;
     $secondColLen = 9500;
     $thirdColLen = 4000;
-    if(!empty($title)){
+    if (!empty($title)) {
       $section->addTitle(htmlspecialchars($title), 2);
     }
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
+    if (!empty($licenses)) {
+      foreach ($licenses as $licenseStatement) {
         $table->addRow($this->rowHeight);
         $cell1 = $table->addCell($firstColLen, null, "pStyle");
         $cell1->addText(htmlspecialchars($licenseStatement["content"], ENT_DISALLOWED), $this->licenseColumn, "pStyle");
@@ -480,11 +443,11 @@ class UnifiedReport extends Agent
         $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
         $cell3 = $table->addCell($thirdColLen, null, "pStyle");
         asort($licenseStatement["files"]);
-        foreach($licenseStatement["files"] as $fileName){
+        foreach ($licenseStatement["files"] as $fileName) {
           $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -512,9 +475,9 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licenses)){
-      foreach($licenses as $licenseStatement){
-        if(in_array($licenseStatement['risk'], $riskarray['riskLevel'])){
+    if (!empty($licenses)) {
+      foreach ($licenses as $licenseStatement) {
+        if (in_array($licenseStatement['risk'], $riskarray['riskLevel'])) {
           $emptyFlag = true;
           $table->addRow($this->rowHeight);
           $cell1 = $table->addCell($firstColLen, $riskarray['color']);
@@ -525,14 +488,16 @@ class UnifiedReport extends Agent
           $cell2->addText($licenseText, $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen, $riskarray['color']);
           asort($licenseStatement["files"]);
-          foreach($licenseStatement["files"] as $fileName){
+          foreach ($licenseStatement["files"] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
-        }else{ continue; }
+        } else {
+          continue;
+        }
       }
     }
 
-    if(empty($emptyFlag)){
+    if (empty($emptyFlag)) {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -558,15 +523,15 @@ class UnifiedReport extends Agent
     $textStyle = array("size" => 10, "bold" => true);
 
     $section->addTitle(htmlspecialchars($title), 2);
-    if(!empty($text)){
+    if (!empty($text)) {
       $section->addText($text, $textStyle);
     }
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($statementsCEI)){
-      foreach($statementsCEI as $statements){
-        if(!empty($statements['content'])){
+    if (!empty($statementsCEI)) {
+      foreach ($statementsCEI as $statements) {
+        if (!empty($statements['content'])) {
           $table->addRow($smallRowHeight);
           $cell1 = $table->addCell($firstColLen);
           $text = html_entity_decode($statements['content']);
@@ -575,12 +540,12 @@ class UnifiedReport extends Agent
           $cell2->addText(htmlspecialchars($statements['comments'], ENT_DISALLOWED), $this->licenseTextColumn, "pStyle");
           $cell3 = $table->addCell($thirdColLen);
           asort($statements["files"]);
-          foreach($statements['files'] as $fileName){
+          foreach ($statements['files'] as $fileName) {
             $cell3->addText(htmlspecialchars($fileName), $this->filePathColumn, "pStyle");
           }
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText("");
       $table->addCell($secondColLen)->addText("");
@@ -606,18 +571,18 @@ class UnifiedReport extends Agent
     $section->addText($titleSubHeading, $this->subHeadingStyle);
 
     $table = $section->addTable($this->tablestyle);
-    if(!empty($licensesIrre)){
-      foreach($licensesIrre as $statements){
+    if (!empty($licensesIrre)) {
+      foreach ($licensesIrre as $statements) {
         $table->addRow($rowWidth, "pStyle");
         $cell1 = $table->addCell($firstColLen)->addText(htmlspecialchars($statements['content']),null, "pStyle");
         $cell2 = $table->addCell($secondColLen)->addText(htmlspecialchars($statements['fileName']),null, "pStyle");
         $cell3 = $table->addCell($thirdColLen);
         asort($statements["licenses"]);
-        foreach($statements['licenses'] as $licenseName){
+        foreach ($statements['licenses'] as $licenseName) {
           $cell3->addText(htmlspecialchars($licenseName), $this->filePathColumn, "pStyle");
         }
       }
-    }else{
+    } else {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen, "pStyle")->addText("");
       $table->addCell($secondColLen, "pStyle")->addText("");
@@ -643,7 +608,7 @@ class UnifiedReport extends Agent
 
     $table = $section->addTable($this->tablestyle);
 
-    foreach($dataHistogram as $licenseData){
+    foreach ($dataHistogram as $licenseData) {
       $table->addRow($this->rowHeight);
       $table->addCell($firstColLen)->addText($licenseData['scannerCount'], "pStyle");
       $table->addCell($secondColLen)->addText($licenseData['editedCount'], "pStyle");
@@ -692,7 +657,7 @@ class UnifiedReport extends Agent
               ." AS ts, jq_cmd_args FROM jobqueue WHERE jq_job_fk=$1", array($this->jobId));
     $timestamp = $jobInfo['ts'];
     $packageUri = "";
-    if(!empty($jobInfo['jq_cmd_args'])){
+    if (!empty($jobInfo['jq_cmd_args'])) {
       $packageUri = trim($jobInfo['jq_cmd_args'])."?mod=showjobs&upload=".$uploadId;
     }
 
@@ -713,7 +678,7 @@ class UnifiedReport extends Agent
     /* Header starts */
     $reportStaticSection->reportHeader($section);
 
-    $contents = $this->identifiedGlobalLicenses($contents);
+    list($contents['licensesMain']['statements'], $contents['licenses']['statements']) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($contents['licensesMain']['statements'], $contents['licenses']['statements']);
 
     /* Summery table */
     $reportSummarySection->summaryTable($section, $uploadId, $userName,
@@ -783,17 +748,19 @@ class UnifiedReport extends Agent
 
     /* Display copyright statements and files */
     $heading = "Copyrights";
-    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['statements'], $titleSubHeadingCEI);
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['scannerFindings'], $titleSubHeadingCEI);
 
+    /* Display user findings copyright statements and files */
+    $heading = "Copyrights (User Findings)";
+    $this->getRowsAndColumnsForCEI($section, $heading, $contents['copyrights']['userFindings'], $titleSubHeadingCEI);
 
     /* Display Bulk findings name,text and files */
     $heading = "Bulk Findings";
     $this->bulkLicenseTable($section, $heading, $contents['bulkLicenses']['statements'], $titleSubHeadingLicense);
 
-    /* Display NON Functional Licenses license files */
-    $heading = "Non Functional Licenses";
+    /* Display NON-Functional Licenses license files */
+    $heading = "Non-Functional Licenses";
     $reportStaticSection->getNonFunctionalLicenses($section, $heading);
-
 
     /* Display irrelavant license files */
     $heading = "Irrelevant Files";
@@ -813,7 +780,7 @@ class UnifiedReport extends Agent
     $reportStaticSection->reportFooter($phpWord, $section, $contents['otherStatement']);
 
     $fileBase = $SysConf["FOSSOLOGY"]["path"]."/report/";
-    if(!is_dir($fileBase)) {
+    if (!is_dir($fileBase)) {
       mkdir($fileBase, 0777, true);
     }
     umask(0022);
@@ -836,8 +803,8 @@ class UnifiedReport extends Agent
     $this->dbManager->getSingleRow("INSERT INTO reportgen(upload_fk, job_fk, filepath) VALUES($1,$2,$3)",
       array($uploadId, $jobId, $filename), __METHOD__);
   }
-
 }
+
 $agent = new UnifiedReport();
 $agent->scheduler_connect();
 $agent->run_scheduler_event_loop();

@@ -45,10 +45,9 @@ class UserController extends RestController
   public function getUsers($request, $response, $args)
   {
     $id = null;
-    if(isset($args['id'])) {
+    if (isset($args['id'])) {
       $id = intval($args['id']);
-      if(! $this->dbHelper->doesIdExist("users", "user_pk", $id))
-      {
+      if (! $this->dbHelper->doesIdExist("users", "user_pk", $id)) {
         $returnVal = new Info(404, "UserId doesn't exist", InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
@@ -72,13 +71,10 @@ class UserController extends RestController
   {
     $id = intval($args['id']);
     $returnVal = null;
-    if($this->dbHelper->doesIdExist("users","user_pk", $id))
-    {
+    if ($this->dbHelper->doesIdExist("users","user_pk", $id)) {
       $this->dbHelper->deleteUser($id);
       $returnVal = new Info(202, "User will be deleted", InfoType::INFO);
-    }
-    else
-    {
+    } else {
       $returnVal = new Info(404, "UserId doesn't exist", InfoType::ERROR);
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());

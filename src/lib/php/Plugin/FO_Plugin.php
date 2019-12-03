@@ -223,7 +223,7 @@ class FO_Plugin implements Plugin
    */
   function Initialize()
   {
-    return (TRUE);
+    return (true);
   } // Initialize()
 
   /**
@@ -238,21 +238,17 @@ class FO_Plugin implements Plugin
    */
   function PostInitialize()
   {
-    if ($this->State != PLUGIN_STATE_VALID)
-    {
+    if ($this->State != PLUGIN_STATE_VALID) {
       return 0;
     } // don't run
 
-    if (empty($_SESSION['User']) && $this->LoginFlag)
-    {
+    if (empty($_SESSION['User']) && $this->LoginFlag) {
       return 0;
     }
     // Make sure dependencies are met
-    foreach ($this->Dependency as $key => $val)
-    {
+    foreach ($this->Dependency as $key => $val) {
       $id = plugin_find_id($val);
-      if ($id < 0)
-      {
+      if ($id < 0) {
         $this->Destroy();
         return (0);
       }
@@ -265,8 +261,7 @@ class FO_Plugin implements Plugin
     // It worked, so mark this plugin as ready.
     $this->State = PLUGIN_STATE_READY;
     // Add this plugin to the menu
-    if ($this->MenuList !== "")
-    {
+    if ($this->MenuList !== "") {
       menu_insert("Main::" . $this->MenuList, $this->MenuOrder, $this->Name, $this->MenuTarget);
     }
     return ($this->State == PLUGIN_STATE_READY);
@@ -283,8 +278,7 @@ class FO_Plugin implements Plugin
    */
   function RegisterMenus()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     } // don't run
     // Add your own menu items here.
@@ -319,8 +313,7 @@ class FO_Plugin implements Plugin
    */
   function OutputOpen()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return (0);
     }
 
@@ -334,8 +327,7 @@ class FO_Plugin implements Plugin
 
     $this->vars['metadata'] = $metadata;
 
-    if (!empty($this->Title))
-    {
+    if (!empty($this->Title)) {
       $this->vars['title'] = htmlentities($this->Title);
     }
 
@@ -346,14 +338,12 @@ class FO_Plugin implements Plugin
     $styles .= "<link rel='icon' type='image/x-icon' href='favicon.ico'>\n";
     $styles .= "<link rel='shortcut icon' type='image/x-icon' href='favicon.ico'>\n";
 
-    if ($this->NoMenu == 0)
-    {
+    if ($this->NoMenu == 0) {
       $styles .= $this->menu->OutputCSS();
     }
     $this->vars['styles'] = $styles;
 
-    if ($this->NoMenu == 0)
-    {
+    if ($this->NoMenu == 0) {
       $this->vars['menu'] = $this->menu->Output($this->Title);
     }
 
@@ -376,8 +366,7 @@ class FO_Plugin implements Plugin
    */
   function OutputUnSet()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
     return "";
@@ -391,17 +380,12 @@ class FO_Plugin implements Plugin
     ob_start();
     $output = $this->Output();
 
-    if($output instanceof Response)
-    {
+    if ($output instanceof Response) {
       $response = $output;
-    }
-    else
-    {
-      if (empty($this->vars['content']) && $output)
-      {
+    } else {
+      if (empty($this->vars['content']) && $output) {
         $this->vars['content'] = $output;
-      } elseif (empty($this->vars['content']))
-      {
+      } elseif (empty($this->vars['content'])) {
         $this->vars['content'] = ob_get_contents();
       }
       $response = $this->render($this->getTemplateName());
@@ -418,7 +402,8 @@ class FO_Plugin implements Plugin
    * (OutputOpen and Output are separated so one plugin
    * can call another plugin's Output.)
    */
-  function Output() {
+  function Output()
+  {
     return new Response("ERROR: Output() method of FO_Plugin not defined in class '" . get_class($this) . "'", Response::HTTP_INTERNAL_SERVER_ERROR);
   }
 
@@ -468,8 +453,7 @@ class FO_Plugin implements Plugin
    */
   public function getRequest()
   {
-    if (!isset($this->request))
-    {
+    if (!isset($this->request)) {
       $this->request = Request::createFromGlobals();
     }
     return $this->request;
@@ -485,12 +469,10 @@ class FO_Plugin implements Plugin
 
   function preInstall()
   {
-    if ($this->State == PLUGIN_STATE_VALID)
-    {
+    if ($this->State == PLUGIN_STATE_VALID) {
       $this->PostInitialize();
     }
-    if ($this->State == PLUGIN_STATE_READY)
-    {
+    if ($this->State == PLUGIN_STATE_READY) {
       $this->RegisterMenus();
     }
   }
@@ -498,8 +480,7 @@ class FO_Plugin implements Plugin
   function postInstall()
   {
     $state = $this->Install();
-    if ($state != 0)
-    {
+    if ($state != 0) {
       throw new Exception("install of plugin " . $this->Name . " failed");
     }
   }

@@ -407,6 +407,26 @@ void scheduler_destroy(scheduler_t* scheduler)
 }
 
 /**
+ * @brief Check if the current agent's max limit is respected.
+ *
+ * Compare the number of running agents and run limit of the agent.
+ * @param agent     Agent which has to be scheduled.
+ * @return True if the agent can be scheduled (no. of running agents < max run
+ *         limit of the agent), false otherwise.
+ */
+static gboolean isMaxLimitReached(meta_agent_t* agent)
+{
+  if (agent->max_run <= agent->run_count)
+  {
+    return TRUE;
+  }
+  else
+  {
+    return FALSE;
+  }
+}
+
+/**
  * @brief Update function called after every event
  *
  * The heart of the scheduler, the actual scheduling algorithm. This will be
@@ -453,6 +473,15 @@ void scheduler_update(scheduler_t* scheduler)
   {
     while((job = peek_job(scheduler->job_queue)) != NULL)
     {
+      // Check the max limit of running agents
+      if (isMaxLimitReached(
+          g_tree_lookup(scheduler->meta_agents, job->agent_type)))
+      {
+        V_SCHED("JOB_INIT: Unable to run agent %s due to max_run limit.\n",
+            job->agent_type);
+        job = NULL;
+        break;
+      }
       // check if the agent is required to run on local host
       if(is_meta_special(
           g_tree_lookup(scheduler->meta_agents, job->agent_type), SAG_LOCAL))

@@ -36,65 +36,59 @@ class TestLiteDb extends TestAbstractDb
 
   function __construct($dbFileName = null)
   {
-    if (!class_exists('Sqlite3'))
-    {
+    if (! class_exists('Sqlite3')) {
       throw new \Exception("Class SQLite3 not found");
     }
 
     date_default_timezone_set("UTC");
-    if (!isset($dbFileName))
-    {
+    if (! isset($dbFileName)) {
       $dbFileName = ":memory:";
-    } else
-    {
-      if (file_exists($dbFileName))
-      {
+    } else {
+      if (file_exists($dbFileName)) {
         unlink($dbFileName);
       }
     }
     $this->dbFileName = $dbFileName;
-    
+
     require (dirname(dirname(__FILE__)).'/common-container.php');
 
     global $container;
     $logger = $container->get('logger');
     $this->logFileName = dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/db.sqlite.log';
-    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));    
-    
+    $logger->pushHandler(new StreamHandler($this->logFileName, Logger::DEBUG));
+
     $sqlite3Connection = new SQLite3($this->dbFileName, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
 
     $liteDb = new SqliteE($sqlite3Connection);
     $container->get('db.manager')->setDriver($liteDb);
     $this->dbManager = $container->get('db.manager');
   }
-  
+
   function __destruct()
   {
-    if (file_exists($this->logFileName))
-    {
+    if (file_exists($this->logFileName)) {
       unlink($this->logFileName);
     }
-    $this->dbManager = null;    
+    $this->dbManager = null;
   }
 
   /**
    * @param array $tableList
-   * @param bool $invert 
+   * @param bool $invert
    */
   public function createPlainTables($tableList, $invert=FALSE)
   {
     $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
     $Schema = array();
     require($coreSchemaFile);
-    foreach($Schema['TABLE'] as $tableName=>$tableCols){
-      if ($invert^!in_array($tableName, $tableList) || array_key_exists($tableName, $Schema['INHERITS'])){
+    foreach ($Schema['TABLE'] as $tableName=>$tableCols) {
+      if ($invert^!in_array($tableName, $tableList) || array_key_exists($tableName, $Schema['INHERITS'])) {
         continue;
       }
       $columns = array();
-      // $pattern = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;"";
-      foreach ($tableCols as $attributes)
-      {
-        $sql = preg_replace('/ DEFAULT .*/','',$attributes["ADD"]);
+        // $pattern = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_pk\" int8;"";
+      foreach ($tableCols as $attributes) {
+        $sql = preg_replace('/ DEFAULT .*/', '', $attributes["ADD"]);
         $alterSql = explode('"', $sql);
         $columns[$alterSql[3]] = "$alterSql[3] " . $alterSql[4];
       }
@@ -102,8 +96,8 @@ class TestLiteDb extends TestAbstractDb
       $this->dbManager->queryOnce($createSql);
     }
   }
-  
-   /**
+
+  /**
    * @brief convert sql string to something the drive understands
    * @param string $sql
    * @return string

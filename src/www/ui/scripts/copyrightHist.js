@@ -21,3 +21,4 @@ $(document).ready(function () {
   tableEmail = createTableemail();
   tableUrl = createTableurl();
 });
+

@@ -53,8 +53,8 @@ use Fossology\Lib\Db\DbManager;
  * \param int $groupId       Group creating the job
  * \param string $job_name   Job name
  * \param string $filename   For upload from URL, this is the URL.\n
- *                    For upload from file, this is the filename.\n
- *                    For upload from server, this is the file path.\n
+ *                           For upload from file, this is the filename.\n
+ *                           For upload from server, this is the file path.\n
  * \param string $desc       Optional user file description.
  * \param int $UploadMode    1<<2=URL, 1<<3=upload from server or file
  * \param int $folder_pk     The folder to contain this upload
@@ -69,21 +69,25 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
 
   $dbManager = $container->get('db.manager');
   /* check all required inputs */
-  if (empty($userId) or empty($job_name) or empty($filename) or
-      empty($UploadMode) or empty($folder_pk)) return;
+  if (empty($userId) || empty($job_name) || empty($filename) ||
+      empty($UploadMode) || empty($folder_pk)) {
+        return;
+  }
 
   $row = $dbManager->getSingleRow("INSERT INTO upload
-      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin, public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
+      (upload_desc,upload_filename,user_fk,upload_mode,upload_origin,public_perm) VALUES ($1,$2,$3,$4,$5,$6) RETURNING upload_pk",
       array($desc,$job_name,$userId,$UploadMode,$filename, $public_perm),__METHOD__.'.insert.upload');
   $uploadId = $row['upload_pk'];
 
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
                array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
 
-  /****  Add user permission to perm_upload *****/
-  if (empty($groupId))
-  {
-    $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',array($userId),__METHOD__.'.select.user');
+  /**
+   * ** Add user permission to perm_upload ****
+   */
+  if (empty($groupId)) {
+    $usersRow = $dbManager->getSingleRow('SELECT * FROM users WHERE user_pk=$1',
+      array($userId), __METHOD__.'.select.user');
     $groupId = $usersRow['group_fk'];
   }
   $perm_admin = Auth::PERM_ADMIN;
@@ -117,13 +121,10 @@ function JobAddJob($userId, $groupId, $job_name, $upload_pk=0, $priority=0)
 
   $params = array($userId, $priority, $job_name, $upload_pk_val);
   $stmtName = __METHOD__;
-  if (empty($groupId))
-  {
+  if (empty($groupId)) {
     $stmtName .= "noGrp";
     $groupPkVal = "(SELECT group_fk FROM users WHERE user_pk = $1)";
-  }
-  else
-  {
+  } else {
     $params[] = $groupId;
     $groupPkVal = "$". count($params);
   }
@@ -162,19 +163,21 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   $jq_cmd_args = pg_escape_string($jq_cmd_args);
 
   /* Make sure all dependencies exist */
-  if (is_array($Depends))
-  {
-    foreach($Depends as $Dependency)
-    {
-      if (empty($Dependency)) continue;
+  if (is_array($Depends)) {
+    foreach ($Depends as $Dependency) {
+      if (empty($Dependency)) {
+        continue;
+      }
 
       $sql = "SELECT jq_pk FROM jobqueue WHERE jq_pk = '$Dependency'";
       $result = pg_query($PG_CONN, $sql);
       DBCheckResult($result, $sql, __FILE__, __LINE__);
-      $MissingDep =  (pg_num_rows($result) == 0);
+      $MissingDep = (pg_num_rows($result) == 0);
       pg_free_result($result);
 
-      if ($MissingDep) return;
+      if ($MissingDep) {
+        return;
+      }
     }
   }
 
@@ -196,10 +199,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   pg_free_result($result);
 
-  /* Find the jobqueue that was just added */
+    /* Find the jobqueue that was just added */
   $jq_pk = GetLastSeq("jobqueue_jq_pk_seq", "jobqueue");
-  if (empty($jq_pk))
-  {
+  if (empty($jq_pk)) {
     $sql = "ROLLBACK";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
@@ -208,12 +210,9 @@ function JobQueueAdd($job_pk, $jq_type, $jq_args, $jq_runonpfile, $Depends, $hos
   }
 
   /* Add dependencies */
-  if (is_array($Depends))
-  {
-    foreach($Depends as $Dependency)
-    {
-      if (empty($Dependency))
-      {
+  if (is_array($Depends)) {
+    foreach ($Depends as $Dependency) {
+      if (empty($Dependency)) {
         continue;
       }
       $sql = "INSERT INTO jobdepends (jdep_jq_fk,jdep_jq_depends_fk) VALUES ('$jq_pk','$Dependency')";
@@ -248,8 +247,7 @@ function GetJobList($status)
 {
   /* Gets the list of jobqueue records with the requested $status */
   global $PG_CONN;
-  if (empty($status))
-  {
+  if (empty($status)) {
     return;
   }
   $sql = "SELECT jq_pk FROM jobqueue WHERE jq_endtext like '%$status%' order by jq_pk;";
@@ -278,21 +276,20 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
   $user_pk = Auth::getUserId();
   $group_pk = Auth::getGroupId();
 
-  if (empty($upload_pk_list))
-  {
+  if (empty($upload_pk_list)) {
     return;
   }
   // Schedule them
   $agent_count = count($agent_list);
-  foreach(explode(",", $upload_pk_list) as $upload_pk)
-  {
-    if (empty($upload_pk))  continue;
+  foreach (explode(",", $upload_pk_list) as $upload_pk) {
+    if (empty($upload_pk)) {
+      continue;
+    }
 
     // Create a job for the upload
     $where = "where upload_pk ='$upload_pk'";
     $UploadRec = GetSingleRec("upload", $where);
-    if (empty($UploadRec))
-    {
+    if (empty($UploadRec)) {
       echo "ERROR: unknown upload_pk: $upload_pk\n";
       continue;
     }
@@ -302,30 +299,27 @@ function QueueUploadsOnAgents($upload_pk_list, $agent_list, $Verbose)
     /* Create Job */
     $job_pk = JobAddJob($user_pk, $group_pk, $ShortName, $upload_pk);
 
-    // don't exit on AgentAdd failure, or all the agents requested will
-    // not get scheduled.
-    for ($ac = 0;$ac < $agent_count;$ac++)
-    {
+      // don't exit on AgentAdd failure, or all the agents requested will
+      // not get scheduled.
+    for ($ac = 0; $ac < $agent_count; $ac ++) {
       $agentname = $agent_list[$ac]->URI;
-      if (!empty($agentname))
-      {
-        $Agent = & $Plugins[plugin_find_id($agentname) ];
+      if (! empty($agentname)) {
+        $Agent = & $Plugins[plugin_find_id($agentname)];
         $Dependencies = "";
         $ErrorMsg = "already queued!";
-        $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $Dependencies);
-        if ($agent_jq_pk <= 0)
-        {
+        $agent_jq_pk = $Agent->AgentAdd($job_pk, $upload_pk, $ErrorMsg,
+          $Dependencies);
+        if ($agent_jq_pk <= 0) {
           echo "WARNING: Scheduling failed for Agent $agentname, upload_pk is: $upload_pk, job_pk is:$job_pk\n";
           echo "WARNING message: $ErrorMsg\n";
-        }
-        else if ($Verbose)
-        {
+        } else if ($Verbose) {
           $SQL = "SELECT upload_filename FROM upload where upload_pk = $upload_pk";
           $result = pg_query($PG_CONN, $SQL);
           DBCheckResult($result, $SQL, __FILE__, __LINE__);
           $row = pg_fetch_assoc($result);
           pg_free_result($result);
-          print "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
+          print
+            "$agentname is queued to run on $upload_pk:$row[upload_filename].\n";
         }
       }
     } /* for $ac */
@@ -344,11 +338,11 @@ function QueueUploadsOnDelagents($upload_pk_list)
   $user_pk = Auth::getUserId();
   $group_pk = Auth::getGroupId();
 
-  if (!empty($upload_pk_list))
-  {
-    foreach(explode(",", $upload_pk_list) as $upload_pk)
-    {
-      if (empty($upload_pk))  continue;
+  if (! empty($upload_pk_list)) {
+    foreach (explode(",", $upload_pk_list) as $upload_pk) {
+      if (empty($upload_pk)) {
+        continue;
+      }
 
       // Create a job for the upload
       $jobpk = JobAddJob($user_pk, $group_pk, "Delete", $upload_pk);
@@ -365,7 +359,9 @@ function QueueUploadsOnDelagents($upload_pk_list)
   } // if $upload_pk is defined
   /* Tell the scheduler to check the queue. */
   $success  = fo_communicate_with_scheduler("database", $output, $error_msg);
-  if (!$success) echo $error_msg . "\n" . $output;
+  if (!$success) {
+    echo $error_msg . "\n" . $output;
+  }
 }
 
 /**
@@ -387,22 +383,23 @@ function IsAlreadyScheduled($job_pk, $AgentName, $upload_pk)
 
   $jq_pk = 0;
 
-  /* check if the upload_pk is currently in the job queue being processed when agent name is ununpack or adj2nest */
-  /* it is unneccessary to reschedule ununpack and adj2nest, one time is enough */
-  if ($AgentName == "ununpack" || $AgentName == "adj2nest")
-  {
-    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk "
-         . "AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
-  }
-  else
-  {
+    /*
+   * check if the upload_pk is currently in the job queue being processed when
+   * agent name is ununpack or adj2nest
+   */
+    /*
+   * it is unneccessary to reschedule ununpack and adj2nest, one time is enough
+   */
+  if ($AgentName == "ununpack" || $AgentName == "adj2nest") {
+    $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk " .
+      "AND jq_type='$AgentName' and job_upload_fk = $upload_pk";
+  } else {
     /* check if the upload_pk is currently in the job queue being processed */
     $sql = "SELECT jq_pk FROM jobqueue, job where job_pk=jq_job_fk AND jq_type='$AgentName' and job_pk=$job_pk";
   }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
+  if (pg_num_rows($result) > 0) {
     $row = pg_fetch_assoc($result);
     $jq_pk = $row["jq_pk"];
   }
@@ -442,49 +439,47 @@ function CommonAgentAdd($plugin, $job_pk, $upload_pk, &$ErrorMsg, $Dependencies,
   $DependsEmpty = array();
 
   /* check if the latest agent has already been run */
-  if ($plugin->AgentHasResults($upload_pk) == 1)
+  if ($plugin->AgentHasResults($upload_pk) == 1) {
     return 0;
+  }
 
   /* if it is already scheduled, then return success */
-  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0)
+  if (($jq_pk = IsAlreadyScheduled($job_pk, $plugin->AgentName, $upload_pk)) != 0) {
     return $jq_pk;
+  }
 
   /* queue up dependencies */
-  foreach ($Dependencies as $Dependency)
-  {
-    if (is_array($Dependency))
-    {
+  foreach ($Dependencies as $Dependency) {
+    if (is_array($Dependency)) {
       $PluginName = $Dependency['name'];
       $DepArgs = $Dependency['args'];
-    } else
-    {
+    } else {
       $PluginName = $Dependency;
       $DepArgs = null;
     }
     $DepPlugin = plugin_find($PluginName);
-    if ($DepPlugin === null)
-    {
+    if ($DepPlugin === null) {
       $ErrorMsg = "Invalid plugin name: $PluginName, (CommonAgentAdd())";
-      return -1;
+      return - 1;
     }
-    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == -1)
-      return -1;
+    if (($Deps[] = $DepPlugin->AgentAdd($job_pk, $upload_pk, $ErrorMsg, $DependsEmpty, $DepArgs)) == - 1) {
+      return - 1;
+    }
   }
   /* schedule AgentName */
-  if (empty($jqargs))
-  {
+  if (empty($jqargs)) {
     $jqargs = $upload_pk;
   }
-  $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL, $jq_cmd_args);
-  if (empty($jq_pk))
-  {
-    $ErrorMsg = _("Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
+  $jq_pk = JobQueueAdd($job_pk, $plugin->AgentName, $jqargs, "", $Deps, NULL,
+    $jq_cmd_args);
+  if (empty($jq_pk)) {
+    $ErrorMsg = _(
+      "Failed to insert agent $plugin->AgentName into job queue. jqargs: $jqargs");
     return (-1);
   }
   /* Tell the scheduler to check the queue. */
   $success = fo_communicate_with_scheduler("database", $output, $error_msg);
-  if (!$success)
-  {
+  if (!$success) {
     $ErrorMsg = $error_msg . "\n" . $output;
   }
 
@@ -513,8 +508,7 @@ function isAlreadyRunning($agentName, $upload_pk)
        . "AND jq_end_bits = 0";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
-  if (pg_num_rows($result) > 0)
-  {
+  if (pg_num_rows($result) > 0) {
     $row = pg_fetch_assoc($result);
     $jq_pk = $row["jq_pk"];
   }

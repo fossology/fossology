@@ -40,6 +40,5 @@ class StringOperationTest extends \PHPUnit\Framework\TestCase
     assertThat(StringOperation::getCommonHead('abcdf','abcef'), equalTo('abc'));
     assertThat(StringOperation::getCommonHead('abc',''), equalTo(''));
     assertThat(StringOperation::getCommonHead('','abc'), equalTo(''));
-   }
-
+  }
 }

@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2018 Siemens AG
+ * Copyright (C) 2014-2019 Siemens AG
  * Author: Daniele Fognini, Johannes Najjar, Steffen Weber
  *
  * This program is free software; you can redistribute it and/or
@@ -22,10 +22,11 @@ use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Util\DataTablesUtility;
+use Fossology\Agent\Copyright\UI\TextFindingsAjax;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
-define("TITLE_copyrightHistogramProcessPost", _("Private: Browse post"));
+define("TITLE_COPYRIGHTHISTOGRAMPROCESSPOST", _("Private: Browse post"));
 
 /**
  * @class CopyrightHistogramProcessPost
@@ -59,10 +60,15 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   private $dataTablesUtility;
 
+  /** @var array $textFindingTypes
+   * List of types used for text findings
+   */
+  private $textFindingTypes = ["copyFindings"];
+
   function __construct()
   {
     $this->Name = "ajax-copyright-hist";
-    $this->Title = TITLE_copyrightHistogramProcessPost;
+    $this->Title = TITLE_COPYRIGHTHISTOGRAMPROCESSPOST;
     $this->DBaccess = PLUGIN_DB_READ;
     $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
@@ -83,53 +89,87 @@ class CopyrightHistogramProcessPost extends FO_Plugin
    */
   function Output()
   {
-    if ($this->State != PLUGIN_STATE_READY)
-    {
+    $returnValue = 0;
+    if ($this->State != PLUGIN_STATE_READY) {
       return 0;
     }
 
     $action = GetParm("action", PARM_STRING);
     $upload = GetParm("upload", PARM_INTEGER);
+    $type = GetParm("type", PARM_STRING);
 
-    if ($action=="deletedecision" || $action=="undodecision")
-    {
+    if ($action=="deletedecision" || $action=="undodecision") {
       $decision = GetParm("decision", PARM_INTEGER);
       $pfile = GetParm("pfile", PARM_INTEGER);
-      $type = GetParm("type", PARM_STRING);
-    }
-    else if($action=="update" || $action=="delete" || $action=="undo")
-    {
+    } else if ($action=="deleteHashDecision" || $action=="undoHashDecision") {
+      $hash = GetParm("hash", PARM_STRING);
+    } else if($action=="update" || $action=="delete" || $action=="undo") {
       $id = GetParm("id", PARM_STRING);
-      list($upload, $item, $hash, $type) = explode(",", $id);
+      $getEachID = array_filter(explode(",", trim($id, ',')), function($var) {
+          return $var !== "";
+      });
+      if(count($getEachID) == 4) {
+        list($upload, $item, $hash, $type) = $getEachID;
+      } else {
+        return new Response('bad request while '.$action,
+                Response::HTTP_BAD_REQUEST,
+                array('Content-type'=>'text/plain')
+          );
+      }
     }
-
 
     /* check upload permissions */
     if (!(($action == "getData" || $action == "getDeactivatedData") &&
         ($this->uploadDao->isAccessible($upload, Auth::getGroupId())) ||
         ($this->uploadDao->isEditable($upload, Auth::getGroupId())))) {
       $permDeniedText = _("Permission Denied");
-      return "<h2>$permDeniedText</h2>";
+      $returnValue = "<h2>$permDeniedText</h2>";
     }
-    $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload);
+    $this->uploadtree_tablename = $this->uploadDao->getUploadtreeTableName(
+      $upload);
 
-    switch($action)
-    {
-      case "getData":
-         return $this->doGetData($upload);
-      case "getDeactivatedData":
-        return $this->doGetData($upload, false);
-      case "update":
-         return $this->doUpdate($item, $hash, $type);
-      case "delete":
-         return $this->doDelete($item, $hash, $type);
-      case "undo":
-         return $this->doUndo($item, $hash, $type);
-      case "deletedecision":
-        return $this->doDeleteDecision($decision, $pfile, $type);
-      case "undodecision":
-        return $this->doUndoDecision($decision, $pfile, $type);
+    if (in_array($type, $this->textFindingTypes) &&
+      ($action == "getData" || $action == "getDeactivatedData")) {
+      $textFindingsHandler = new TextFindingsAjax($this->uploadtree_tablename);
+      if ($action == "getData") {
+        $returnValue = $textFindingsHandler->doGetData($type, $upload);
+      } elseif ($action == "getDeactivatedData") {
+        $returnValue = $textFindingsHandler->doGetData($type, $upload, false);
+      }
+    } else {
+      switch ($action) {
+        case "getData":
+          $returnValue = $this->doGetData($upload);
+          break;
+        case "getDeactivatedData":
+          $returnValue = $this->doGetData($upload, false);
+          break;
+        case "update":
+          $returnValue = $this->doUpdate($item, $hash, $type);
+          break;
+        case "delete":
+          $returnValue = $this->doDelete($item, $hash, $type);
+          break;
+        case "undo":
+          $returnValue = $this->doUndo($item, $hash, $type);
+          break;
+        case "deletedecision":
+          $returnValue = $this->doDeleteDecision($decision, $pfile, $type);
+          break;
+        case "undodecision":
+          $returnValue = $this->doUndoDecision($decision, $pfile, $type);
+          break;
+        case "deleteHashDecision":
+          $returnValue = $this->doDeleteHashDecision($hash, $upload, $type);
+          break;
+        case "undoHashDecision":
+          $returnValue = $this->doUndoHashDecision($hash, $upload, $type);
+          break;
+        default:
+          $returnValue = "<h2>" . _("Unknown action") . "</h2>";
+      }
     }
+    return $returnValue;
   }
 
   /**
@@ -481,7 +521,44 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     return new JsonResponse(array("msg" => $decisionId . " .. " . $pfileId  . " .. " . $type));
   }
 
+  /**
+   * @brief Disable decisions for an upload which matches a hash
+   * @param string $hash   Hash of the decision
+   * @param int    $upload Upload id
+   * @param string $type   'copyright'|'ecc'
+   * @return JsonResponse
+   */
+  protected function doDeleteHashDecision($hash, $upload, $type)
+  {
+    $tableName = $type."_decision";
+    $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $hash,
+      $upload, $this->uploadtree_tablename);
+    foreach ($decisions as $decision) {
+      $this->copyrightDao->removeDecision($tableName, $decision['pfile_fk'],
+        $decision[$tableName . '_pk']);
+    }
+    return new JsonResponse(array("msg" => "$hash .. $upload .. $type"));
+  }
+
+  /**
+   * @brief Rollback decisions for an upload which matches a hash
+   * @param string $hash   Hash of the decision
+   * @param int    $upload Upload id
+   * @param string $type   'copyright'|'ecc'
+   * @return JsonResponse
+   */
+  protected function doUndoHashDecision($hash, $upload, $type)
+  {
+    $tableName = $type."_decision";
+    $decisions = $this->copyrightDao->getDecisionsFromHash($tableName, $hash,
+      $upload, $this->uploadtree_tablename);
+    foreach ($decisions as $decision) {
+      $this->copyrightDao->undoDecision($tableName, $decision['pfile_fk'],
+        $decision[$tableName . '_pk']);
+    }
+    return new JsonResponse(array("msg" => "$hash .. $upload .. $type"));
+  }
 }
 
-$NewPlugin = new CopyrightHistogramProcessPost;
+$NewPlugin = new CopyrightHistogramProcessPost();
 $NewPlugin->Initialize();

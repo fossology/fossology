@@ -29,7 +29,7 @@ class MenuHook
     $maxDepth = 0;
     $agentList = menu_find($hook, $maxDepth) ?: array();
     $agentPluginNames = array();
-    if(is_array($agentList)) {
+    if (is_array($agentList)) {
       foreach ($agentList as $parmAgent) {
         $agent = plugin_find_id($parmAgent->URI);
         if (!empty($agent)) {
@@ -40,4 +40,3 @@ class MenuHook
     return $agentPluginNames;
   }
 }
-

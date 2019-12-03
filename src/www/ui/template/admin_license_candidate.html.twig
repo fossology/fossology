@@ -24,6 +24,7 @@
 {% block foot %}
   {{ parent() }}
   <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
+  <script src="scripts/jquery.dataTables.select.js" type="text/javascript"></script>
   <script src="scripts/jquery-ui.js" type="text/javascript"></script>
   <script type="text/javascript">
     function createBrowseTable() {
@@ -45,6 +46,7 @@
         "aaSorting": tableSorting,
         "iDisplayLength": 20,
         "aaData": {{ aaData }},
+        "sPaginationType": "listbox",
         "bStateSave": true
       };
 

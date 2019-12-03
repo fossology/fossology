@@ -1,0 +1,53 @@
+{# Copyright 2014-2015 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% if bannerMsg %}
+<div style="background-color:#ffbbbb">{{ bannerMsg }}</div>
+{% endif %}
+<table border="0" width="100%">
+  <tr>
+    <td width="150" rowspan="2"><a href="{{ logoLink }}" target="_top" style="background:white;">
+        <img alt="FOSSology" title="FOSSology" src="{{ logoImg }}" border="0"></a>
+    </td>
+    <td colspan="2">
+      {{ mainMenu }}
+    </td>
+  </tr>
+  <tr>
+    <td style="font-size:x-large; font-weight: bold;">{{ title  }}
+      {% if versionInfo %}<br/>
+        {# versionInfo contains all the variables defined at build time in the [BUILD] section of /VERSION #}
+        {% set extractVersion = versionInfo.version|split('-') %}
+        <span id="versionInfo" style="font-size: xx-small; color: gray;">Version: [{{ extractVersion[0] }}], Branch: [{{ versionInfo.branchName }}], Commit: [#{{ versionInfo.commitHash }}] {{ versionInfo.commitDate }} built @ {{ versionInfo.buildDate }}</span>
+      {% endif %}</td>
+    <td align="right" valign="bottom">
+      {% if isLoggedOut %}
+        <small>{% if isLoginPage %}{{ 'Login'|trans }}{% else %}<a href="{{ uri }}?mod=auth"><b>{{ 'Login'|trans }}</b></a>{% endif %}</small>
+      {% else %}
+        <small><a href="{{ logOutUrl }}"><b>logout</b></a></small>
+        <table style="text-align: left;">
+          <tr>
+            <td align="right"><small>{{ 'User'|trans }}:</small></td>
+            <td>{{ userName }}</td>
+          </tr>
+          <tr>
+            <td align='right'><small>{{ 'Group'|trans }}:</small></td>
+            <td>
+              {% if singleGroup %}{{ singleGroup }}
+              {%else%}       
+                <form action="{{ backtraceUri }}" method="post">
+                  {% import "include/macros.html.twig" as macro %}
+                  {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' class="ui-render-select2" onchange="this.form.submit()"') }}
+              </form>
+              {% endif %}
+            </td>
+          </tr>
+        </table>
+      {% endif %}
+    </td>
+  </tr>
+</table>
+<hr />

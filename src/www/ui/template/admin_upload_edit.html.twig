@@ -15,7 +15,7 @@
       <li>{{ "Select the upload you wish to edit"|trans }}:
         {% if uploadId is not empty %}<input type="hidden" name="upload_pk" value="{{ uploadId }}" />
           {% import "include/macros.html.twig" as macro %}
-          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction) }}
+          {{ macro.select('uploadselect',uploadList,'uploadselect',uploadId,uploadAction ~ 'class="ui-render-select2"') }}
         {% else %}
           {{ 'No upload available in this folder'|trans }}
         {% endif %}
@@ -27,7 +27,8 @@
 
       <li>{{ 'Upload description'|trans }}:
         <input type="text" name="newdesc" size="60" value="{{ uploadDesc|e }}" />
-      </li> 
+      </li>
+
     </ol>
     <input type="submit" value="{{ 'Edit'|trans }}" />
   </form>

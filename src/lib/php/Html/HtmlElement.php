@@ -30,4 +30,4 @@ interface HtmlElement
   function getOpeningText();
 
   function getClosingText();
-} 
+}

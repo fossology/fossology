@@ -22,6 +22,8 @@ Usage: fo-postinstall [options]
   -h or --help            : this help text
  Special options
   --no-running-database   : omit all database operations
+  --force-decision        : Force update of SHA256 hash in decision tables
+  --force-pfile           : Force calculation of SHA256 hash of pfile entries
 EOF
 \}
 
@@ -34,10 +36,12 @@ OVERWRITE=''
 LICENSEREF=''
 COMMON=''
 RUNNINGDATABASE=true
+FORCEDECISION=''
+FORCEPFILE=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -45,8 +49,12 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options or just -o then do everything
-if [[ $OPTS == ' --' || $OPTS == ' -o --' ]]; then
+# if no options or just -o or --force-decision/pfile with or without -o then
+# do everything
+if [[ $OPTS == ' --' || $OPTS == ' -o --' || $OPTS == ' --force-decision --' \
+  || $OPTS == ' --force-pfile --' || $OPTS == ' -o --force-decision --' \
+  || $OPTS == ' -o --force-pfile --' || $OPTS == ' --force-decision --force-pfile --' \
+  || $OPTS == ' -o --force-decision --force-pfile --' ]]; then
    EVERYTHING=true
 fi
 
@@ -61,6 +69,8 @@ while true; do
       -l|--licenseref)       LICENSEREF=true; shift;;
       -c|--common)           COMMON=true; shift;;
       --no-running-database) RUNNINGDATABASE=''; shift;;
+      --force-decision)      FORCEDECISION='--force-decision'; shift;;
+      --force-pfile)         FORCEPFILE='--force-pfile'; shift;;
       -h|--help)             show_help; exit;;
       --)                    shift; break;;
       *)                     echo "Error: option $1 not recognised"; exit 1;;
@@ -226,7 +236,7 @@ fi # end of DATABASE
 
 if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
    echo "*** update the database and license_ref table ***"
-   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR}
+   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR} $FORCEDECISION $FORCEPFILE
 fi # end of license reference
 
 ########################################################################
@@ -236,7 +246,7 @@ if [[ $AGENT ]]; then
    # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
    chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
    chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1{,.gz} {$MAN1DIR}/fossjobs.1{,.gz} || echo
+   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1\{,.gz\} {$MAN1DIR}/fossjobs.1\{,.gz\} || echo
 fi
 
 if [[ $AGENT && $RUNNINGDATABASE ]]; then
@@ -283,6 +293,21 @@ if [[ $WEBONLY ]]; then
      echo "NOTE: Adding user apache to group $PROJECTGROUP"
      # this is smart enough to not add multiple times so it's ok to repeat
      usermod --groups $PROJECTGROUP --append apache
+   fi
+
+   # Enable mod_rewrite for REST API
+   if [[ -f /etc/httpd/conf.modules.d/00-base.conf ]]; then
+     # We are on RHEL
+     if ! egrep -q "^LoadModule rewrite_module modules/mod_rewrite.so" /etc/httpd/conf.modules.d/00-base.conf; then
+       echo "NOTE: Enabling apache module rewrite"
+       echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
+       systemctl restart httpd
+     fi
+   else
+     # We are on Debian
+     echo "NOTE: Enabling apache module rewrite"
+     a2enmod rewrite
+     apachectl restart
    fi
 
    # apache2 reload is only necessary when it is running.

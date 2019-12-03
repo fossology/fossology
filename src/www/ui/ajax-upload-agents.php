@@ -43,9 +43,10 @@ class AjaxUploadAgents extends DefaultPlugin
         self::PERMISSION => Auth::PERM_READ
     ));
   }
-  
+
   /**
-   * @brief This function checks if the current job was not already scheduled, or did already fail (You can reschedule failed jobs)
+   * @brief This function checks if the current job was not already scheduled,
+   * or did already fail (You can reschedule failed jobs)
    * @param $agentName   Name of the agent as specified in the agents table
    * @param $uploadId   Upload identifier
    * @return true if the agent is not currently scheduled for this upload, else false
@@ -57,36 +58,34 @@ class AjaxUploadAgents extends DefaultPlugin
     $queued = $GLOBALS['container']->get('db.manager')->getSingleRow($sql,array($uploadId,$agentName));
     return $queued['count']==0;
   }
-  
+
   protected function handle(Request $request)
   {
     $uploadId = intval($request->get("upload"));
     if (empty($uploadId)) {
       throw new Exception('missing upload id');
     }
-   
+
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
     $skipAgents = array("agent_unpack", "wget_agent");
     $out = "";
     $relevantAgents = array();
-    foreach($agentList as $agent)
-    {
-      if (array_search($agent, $skipAgents) !== false)
-      {
+    foreach ($agentList as $agent) {
+      if (array_search($agent, $skipAgents) !== false) {
         continue;
       }
       $plugin = plugin_find($agent);
-      if ( ($plugin->AgentHasResults($uploadId) != 1 ) && $this->jobNotYetScheduled($plugin->AgentName, $uploadId)  )
-      {
+      if (($plugin->AgentHasResults($uploadId) != 1) &&
+        $this->jobNotYetScheduled($plugin->AgentName, $uploadId)) {
         $out .= "<option value='" . $agent . "'>";
         $out .= htmlentities($plugin->Title);
         $out .= "</option>\n";
         $relevantAgents[$agent] = $plugin->Title;
       }
     }
-    
+
     $out = '<select multiple size="10" id="agents" name="agents[]">' .$out. '</select>';
     return new Response($out, Response::HTTP_OK, array('Content-Type'=>'text/plain'));
   }

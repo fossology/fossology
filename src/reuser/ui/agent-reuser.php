@@ -44,7 +44,8 @@ class ReuserAgentPlugin extends AgentPlugin
    */
   private $uploadDao;
 
-  public function __construct() {
+  public function __construct()
+  {
     $this->Name = "agent_reuser";
     $this->Title =  _("Reuse of License Clearing");
     $this->AgentName = "reuser";
@@ -68,7 +69,8 @@ class ReuserAgentPlugin extends AgentPlugin
    * @param array $vars Variables for twig template
    * @return string Rendered HTML
    */
-  public function renderContent(&$vars) {
+  public function renderContent(&$vars)
+  {
     $reuserPlugin = plugin_find('plugin_reuser');
     return $reuserPlugin->renderContent($vars);
   }
@@ -78,7 +80,8 @@ class ReuserAgentPlugin extends AgentPlugin
    * @param array $vars Variables for twig template
    * @return string Rendered HTML
    */
-  public function renderFoot(&$vars) {
+  public function renderFoot(&$vars)
+  {
     $reuserPlugin = plugin_find('plugin_reuser');
     return $reuserPlugin->renderFoot($vars);
   }
@@ -105,11 +108,9 @@ class ReuserAgentPlugin extends AgentPlugin
     $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
     if (count($reuseUploadPair) == 2) {
       list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
-    }
-    else
-    {
+    } else {
       $errorMsg .= 'no reuse upload id given';
-      return -1;
+      return - 1;
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
 
@@ -117,16 +118,14 @@ class ReuserAgentPlugin extends AgentPlugin
 
     $reuseMode = UploadDao::REUSE_NONE;
 
-    if(!empty($getReuseValue)){
-      if(count($getReuseValue)<2){
-        if(in_array('reuseMain', $getReuseValue)){
+    if (! empty($getReuseValue)) {
+      if (count($getReuseValue) < 2) {
+        if (in_array('reuseMain', $getReuseValue)) {
           $reuseMode = UploadDao::REUSE_MAIN;
-        }
-        else{
+        } else {
           $reuseMode = UploadDao::REUSE_ENHANCED;
         }
-      }
-      else{
+      } else {
         $reuseMode = UploadDao::REUSE_ENH_MAIN;
       }
     }
@@ -153,8 +152,7 @@ class ReuserAgentPlugin extends AgentPlugin
 
     $package = $packageDao->findPackageForUpload($reuseUploadId);
 
-    if ($package === null)
-    {
+    if ($package === null) {
       $packageName = StringOperation::getCommonHead($uploadForReuse->getFilename(), $newUpload->getFilename());
       $package = $packageDao->createPackage($packageName ?: $uploadForReuse->getFilename());
       $packageDao->addUploadToPackage($reuseUploadId, $package);

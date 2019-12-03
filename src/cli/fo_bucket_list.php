@@ -20,7 +20,7 @@
  * @file fo_bucket_list.php
  *
  * @brief get a list of filepaths and bucket information for those
- * files. 
+ * files.
  *
  */
 
@@ -34,7 +34,7 @@ $Usage = "Usage: " . basename($argv[0]) . "
   -a bucket agent id  :: bucket agent id
   -n nomos agent id   :: nomos agent id
   -X excluding        :: Exclude files containing [free text] in the path.
-                         'mac/' should exclude all files in the mac directory. 
+                         'mac/' should exclude all files in the mac directory.
                          'mac' and it should exclude all files in any directory containing the substring 'mac'
                          '/mac' and it should exclude all files in any directory that starts with 'mac'
   -h  help, this message
@@ -45,18 +45,15 @@ $upload = $item = $bucket = $bucket_agent = $nomos_agent = "";
 $excluding = '';
 $longopts = array("user:", "password:");
 $options = getopt("c:u:t:b:a:n:hX:", $longopts);
-if (empty($options) || !is_array($options))
-{
+if (empty($options) || ! is_array($options)) {
   print $Usage;
   return 1;
 }
 
 $user = $passwd = "";
 
-foreach($options as $option => $value)
-{
-  switch($option)
-  {
+foreach ($options as $option => $value) {
+  switch ($option) {
     case 'c': // handled in fo_wrapper
       break;
     case 'u':
@@ -100,15 +97,15 @@ if (!(is_numeric($item)) &&  !(is_numeric($upload))) {
 
 /** check upload Id and uploadtree ID */
 $upload_from_item = $uploadtree1stid = "";
-if (is_numeric($item)) $upload_from_item = GetUploadID($item);
-else if (empty($item) && is_numeric($upload)) {
+if (is_numeric($item)) {
+  $upload_from_item = GetUploadID($item);
+} else if (empty($item) && is_numeric($upload)) {
   $uploadtree1stid = Get1stUploadtreeID($upload);
   if (empty($uploadtree1stid)) {
     print "Upload $upload does not exist.\n";
     print $Usage;
     return 1;
-  }
-  else {
+  } else {
     $item = $uploadtree1stid;
     $upload_from_item = $upload;
   }
@@ -129,8 +126,7 @@ if (empty($upload_from_item)) {
 }
 
 /** check if parameters are valid */
-if (!is_numeric($bucket) || !is_numeric($bucket_agent) || !is_numeric($nomos_agent))
-{
+if (!is_numeric($bucket) || !is_numeric($bucket_agent) || !is_numeric($nomos_agent)) {
   print "please enter the correct bucket agent ID and nomos agent ID and bucket ID.\n";
   // print "\$upload, \$item are $upload, $item \n";
   Usage4Options($upload, $item);
@@ -141,8 +137,7 @@ if (!is_numeric($bucket) || !is_numeric($bucket_agent) || !is_numeric($nomos_age
 account_check($user, $passwd); // check username/password
 
 $return_value = read_permission($upload, $user); // check if the user has the permission to read this upload
-if (empty($return_value))
-{
+if (empty($return_value)) {
   $text = _("The user '$user' has no permission to read the information of upload $upload\n");
   echo $text;
   return 1;
@@ -179,11 +174,10 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
 
   /* get the top of tree */
   $sql = "SELECT upload_fk, lft, rgt, uploadtree_pk  from $uploadtree_tablename";
-  
-  if ($uploadtree_pk){ // if uploadtree_pk is null, that means get all data on an upload 
+
+  if ($uploadtree_pk) { // if uploadtree_pk is null, that means get all data on an upload
     $sql .= " where uploadtree_pk='$uploadtree_pk';";
-  }
-  else {
+  } else {
     $sql .= " where upload_fk='$upload_pk' and parent is null;";
   }
   $result = pg_query($PG_CONN, $sql);
@@ -209,13 +203,11 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
 
   /* Select each uploadtree row in this tree, write out text */
   $excluding_flag = 0; // 1: exclude 0: not exclude
-  while ($row = pg_fetch_assoc($outerresult))
-  { 
+  while ($row = pg_fetch_assoc($outerresult)) {
     $filepatharray = Dir2Path($row['uploadtree_pk'], $uploadtree_tablename);
     $filepath = "";
-    foreach($filepatharray as $uploadtreeRow)
-    {
-      if (!empty($filepath)){
+    foreach ($filepatharray as $uploadtreeRow) {
+      if (! empty($filepath)) {
         $filepath .= "/";
         /* filepath contains 'xxxx/', '/xxxx/', 'xxxx', '/xxxx' */
         $excluding_flag = ContainExcludeString($filepath, $excluding);
@@ -225,11 +217,13 @@ function GetBucketList($bucket_pk, $bucket_agent, $nomos_agent, $uploadtree_pk, 
       }
       $filepath .= $uploadtreeRow['ufile_name'];
     }
-    if (1 == $excluding_flag) continue; // excluding files whose path contains excluding text
+    if (1 == $excluding_flag) {
+      continue; // excluding files whose path contains excluding text
+    }
     $V = $filepath;
     print "$V";
     print "\n";
-  } 
+  }
     pg_free_result($outerresult);
 }
 
@@ -242,18 +236,17 @@ function Usage4Options($UploadID, $item)
   $bucket_arr = pg_fetch_all($result);
   pg_free_result($result);
   $clause4uploadtree = "";
-  if ($item) $clause4uploadtree = " uploadtree $item";
+  if ($item) {
+    $clause4uploadtree = " uploadtree $item";
+  }
   if ($bucket_arr) {
-    print "For"."$clause4uploadtree under upload $UploadID, you can specify options below: \n 
+    print "For"."$clause4uploadtree under upload $UploadID, you can specify options below: \n
       bucket_agent_id : -a
       nomos_agent_id  : -n
       bucket_id       : -b
       \n";
     print_r($bucket_arr);
-  }
-  else {
+  } else {
     print "Please confirm uploadtree $item under upload $UploadID has done one bucket scanning.\n";
   }
 }
-
-?>

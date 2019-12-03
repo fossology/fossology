@@ -74,7 +74,8 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
   /** @expectedException \InvalidArgumentException
    * @expectedExceptionMessage chunk size should be positive
    */
-  public function testCallChunkedShouldThrowExceptionWhenChunkSizeIsNotPositive() {
+  public function testCallChunkedShouldThrowExceptionWhenChunkSizeIsNotPositive()
+  {
     ArrayOperation::callChunked(function ($values)
     {
       return array(count($values));
@@ -90,5 +91,4 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
     assertThat(ArrayOperation::multiSearch(array(200),$haystack),is(false));
     assertThat(ArrayOperation::multiSearch(array(200,102),$haystack),is(2));
   }
-
 }

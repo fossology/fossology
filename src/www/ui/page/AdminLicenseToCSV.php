@@ -55,7 +55,6 @@ class AdminLicenseToCSV extends DefaultPlugin
 
     return new Response($content, Response::HTTP_OK, $headers);
   }
-
 }
 
 register_plugin(new AdminLicenseToCSV());

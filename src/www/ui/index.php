@@ -26,8 +26,7 @@ use Fossology\UI\Page\HomePage;
  */
 
 /* initialize session variable to run test in cli mode */
-if (!isset($_SESSION))
-{
+if (! isset($_SESSION)) {
   $_SESSION = array();
 }
 
@@ -44,6 +43,10 @@ global $container;
 $timingLogger = $container->get("log.timing");
 $timingLogger->logWithStartTime("bootstrap", $startTime);
 
+/* Load UI templates */
+$loader = $container->get('twig.loader');
+$loader->addPath(dirname(__FILE__).'/template');
+
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
 ConfigInit($SYSCONFDIR, $SysConf);
@@ -56,13 +59,11 @@ plugin_postinstall();
 $timingLogger->toc("setup plugins");
 
 $plugin = plugin_find(GetParm("mod", PARM_STRING) ?: HomePage::NAME);
-if ($plugin)
-{
+if ($plugin) {
   $timingLogger->tic();
   $plugin->execute();
   $timingLogger->toc("plugin execution");
-} else
-{
+} else {
   $linkUri = Traceback_uri() . "?mod=auth";
   $errorText = _("Module unavailable or your login session timed out.");
   print "$errorText <P />";

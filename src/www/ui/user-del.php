@@ -18,7 +18,7 @@
  ***********************************************************/
 
 require_once "user-del-helper.php";
-define("TITLE_user_del", _("Delete A User"));
+define("TITLE_USER_DEL", _("Delete A User"));
 
 use \Fossology\Lib\Auth\Auth;
 
@@ -31,7 +31,7 @@ class user_del extends FO_Plugin
   function __construct()
   {
     $this->Name       = "user_del";
-    $this->Title      = TITLE_user_del;
+    $this->Title      = TITLE_USER_DEL;
     $this->MenuList   = "Admin::Users::Delete";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->dbManager  = $GLOBALS['container']->get('db.manager');
@@ -53,10 +53,9 @@ class user_del extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $row = pg_fetch_assoc($result);
     pg_free_result($result);
-    if (empty($row['user_name']))
-    {
+    if (empty($row['user_name'])) {
       $text = _("User does not exist.");
-      return($text);
+      return ($text);
     }
 
     /* Delete the users group
@@ -89,10 +88,9 @@ class user_del extends FO_Plugin
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     $rowCount = pg_num_rows($result);
     pg_free_result($result);
-    if ($rowCount != 0)
-    {
+    if ($rowCount != 0) {
       $text = _("Failed to delete user.");
-      return($text);
+      return ($text);
     }
 
     return(NULL);
@@ -108,18 +106,17 @@ class user_del extends FO_Plugin
     /* If this is a POST, then process the request. */
     $User = GetParm('userid',PARM_TEXT);
     $Confirm = GetParm('confirm',PARM_INTEGER);
-    if (!empty($User))
-    {
-      if ($Confirm != 1) { $rc = "Deletion not confirmed. Not deleted."; }
-      else { $rc = DeleteUser($User, $this->dbManager); }
-      if (empty($rc))
-      {
+    if (! empty($User)) {
+      if ($Confirm != 1) {
+        $rc = "Deletion not confirmed. Not deleted.";
+      } else {
+        $rc = deleteUser($User, $this->dbManager);
+      }
+      if (empty($rc)) {
         /* Need to refresh the screen */
         $text = _("User deleted.");
         $this->vars['message'] = $text;
-      }
-      else
-      {
+      } else {
         $this->vars['message'] = $rc;
       }
     }
@@ -129,12 +126,9 @@ class user_del extends FO_Plugin
     $sql = "SELECT user_pk,user_name,user_desc FROM users WHERE user_pk != '$currentUserId' AND user_pk != '1' ORDER BY user_name";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
-    if (pg_num_rows($result) == 0)
-    {
+    if (pg_num_rows($result) == 0) {
       $V .= _("No users to delete.");
-    }
-    else
-    {
+    } else {
       /* Build HTML form */
       $V .= _("Deleting a user removes the user entry from the FOSSology system. The user's name, account information, and password will be <font color='red'>permanently</font> removed. (There is no 'undo' to this delete.)<P />\n");
       $V .= "<form name='formy' method='POST'>\n"; // no url = this url
@@ -142,8 +136,7 @@ class user_del extends FO_Plugin
       $V .= "<ol>\n";
       $V .= _("<li>Select the user to delete.<br />");
       $V .= "<select name='userid' class='ui-render-select2'>\n";
-      while( $row = pg_fetch_assoc($result))
-      {
+      while ($row = pg_fetch_assoc($result)) {
         $V .= "<option value='" . $row['user_pk'] . "'>";
         $V .= $row['user_name'];
         $V .= "</option>\n";
@@ -163,4 +156,5 @@ class user_del extends FO_Plugin
     return $V;
   }
 }
-$NewPlugin = new user_del;
+
+$NewPlugin = new user_del();

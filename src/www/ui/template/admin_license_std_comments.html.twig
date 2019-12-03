@@ -1,0 +1,65 @@
+{# Copyright 2019 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+
+  <p id="messageSpace"></p>
+  <form name="adminLicenseCommentForm" id="adminLicenseCommentForm">
+    <table id="adminLicenseCommentTable" class="simpleTable" cellpadding="3">
+      <thead>
+        <tr>
+          <th>Sl. No.</th>
+          <th>Name</th>
+          <th>Comment</th>
+          <th>Enabled</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for comment in commentArray %}
+        <tr>
+          <td style="text-align:center">{{ loop.index }}</td>
+          <td>
+            <input type="text" name="{{ commentNameParam }}[{{ comment.lsc_pk }}]"
+              value="{{ comment.name }}"
+              placeholder="{{ "Please enter a name for the comment"|trans }}" />
+          </td>
+          <td>
+            <textarea rows="7" cols="80" name="{{ commentParam }}[{{ comment.lsc_pk }}]"
+              placeholder="{{ "Please enter a comment statement"|trans }}">{{ comment.comment }}</textarea>
+          </td>
+          <td>
+            <input type="checkbox" name="{{ enableParam }}[{{ comment.lsc_pk }}]"
+              value="t" class="licStdCommentToggle"
+              {% if comment.is_enabled starts with 't' %}checked{% endif %} />
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4">
+            <button id="addStdLicComment" title="{{ "Add a new comment"|trans }}"
+              style="width:100%" type="button">
+              <img src="images/icons/add_16.png" />{{ "Add a new comment"|trans }}
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="4"><input type="submit" value="Save" style="width:auto" /></td>
+        </tr>
+      </tfoot>
+    </table>
+  </form>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript" src="scripts/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery.dataTables.select.js"></script>
+  <script type="text/javascript" src="scripts/admin-license-std-comments.js"></script>
+{% endblock %}

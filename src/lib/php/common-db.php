@@ -45,41 +45,38 @@ function DBconnect($sysconfdir, $options="", $exitOnFail=true)
 {
   global $PG_CONN;
 
-  if (!empty($PG_CONN)) return $PG_CONN;
+  if (! empty($PG_CONN)) {
+    return $PG_CONN;
+  }
 
   $path="$sysconfdir/Db.conf";
-  if (empty($options))
-  {
+  if (empty($options)) {
     $dbConf = file_get_contents($path);
-    if ($exitOnFail && (false===$dbConf))
-    {
+    if ($exitOnFail && (false === $dbConf)) {
       $text = _("Could not connect to FOSSology database.");
       echo "<h2>$text</h2>";
       echo _('permission denied for configuration file');
-      exit;
+      exit();
     }
-    if(false===$dbConf)
-    {
+    if (false === $dbConf) {
       $PG_CONN = false;
       return;
     }
     $options = $dbConf;
   }
-  if (!empty($options))
-  {
+  if (! empty($options)) {
     $PG_CONN = pg_connect(str_replace(";", " ", $options));
   }
 
-  if (!empty($PG_CONN)) /* success */
-  {
+  if (! empty($PG_CONN)) {
+    /* success */
     return $PG_CONN;
   }
 
-  if ($exitOnFail)
-  {
+  if ($exitOnFail) {
     $text = _("Could not connect to FOSSology database.");
     echo "<h2>$text</h2>";
-    exit;
+    exit();
   }
   $PG_CONN = false;
 }
@@ -142,8 +139,7 @@ function DB2KeyValArray($Table, $KeyCol, $ValCol, $Where="")
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
-  while ($row = pg_fetch_assoc($result))
-  {
+  while ($row = pg_fetch_assoc($result)) {
     $ResArray[$row[$KeyCol]] = $row[$ValCol];
   }
   return $ResArray;
@@ -171,22 +167,18 @@ function DB2ValArray($Table, $ValCol, $Uniq=false, $Where="")
 
   $ResArray = array();
 
-  if ($Uniq)
-  {
+  if ($Uniq) {
     $sql = "SELECT DISTINCT $ValCol from $Table $Where";
-  }
-  else
-  {
+  } else {
     $sql = "SELECT $ValCol from $Table $Where";
   }
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   $i = 0;
-  while ($row = pg_fetch_assoc($result))
-  {
+  while ($row = pg_fetch_assoc($result)) {
     $ResArray[$i] = $row[$ValCol];
-    ++$i;
+    ++ $i;
   }
   return $ResArray;
 }
@@ -207,13 +199,13 @@ function DBCheckResult($result, $sql, $filenm, $lineno)
 {
   global $PG_CONN;
 
-  if (!$result)
-  {
+  if (! $result) {
     echo "<hr>File: $filenm, Line number: $lineno<br>";
-    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK)
+    if (pg_connection_status($PG_CONN) === PGSQL_CONNECTION_OK) {
       echo pg_last_error($PG_CONN);
-    else
+    } else {
       echo "FATAL: DB connection lost.";
+    }
     echo "<br> $sql";
     debugbacktrace();
     echo "<hr>";
@@ -291,7 +283,9 @@ function DB_ConstraintExists($ConstraintName, $DBName='fossology')
   $row = pg_fetch_assoc($result);
   $count = $row['count'];
   pg_free_result($result);
-  if ($count == 1) return True;
+  if ($count == 1) {
+    return true;
+  }
   return False;
 } /* DB_ColExists()  */
 
