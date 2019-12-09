@@ -62,4 +62,5 @@ int	CountDigits	(uint64_t Num);
 Cksum *	SumComputeFile	(FILE *Fin);
 Cksum *	SumComputeBuff	(CksumFile *CF);
 char *	SumToString	(Cksum *Sum);
+int calc_sha256sum(char* filename, char* dst);
 #endif
