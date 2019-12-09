@@ -351,32 +351,6 @@ This General Public License does not permit incorporating your program into prop
 ------------------------------------------------------
 
 
-Public-domain
-
-Written by Solar Designer <solar at openwall.com> in 2001, and placed in the public domain. There's absolutely no warranty.
-
-------------------------------------------------------
-
-Public-domain
-
-Written by Solar Designer <solar at openwall.com> in 2001, and placed in the public domain. See md5.c for more information.
-
-------------------------------------------------------
-
-Openwall
-
-You're allowed to do whatever you like with this software (including
-re-distribution in source and/or binary form, with or without
-modification), provided that credit is given where it is due and any
-modified versions are marked as such. There's absolutely no warranty.
-
-Note that you don't have to re-distribute this software under these
-same relaxed terms. In particular, you're free to place modified
-versions under (L)GPL, thus disallowing further re-distribution in
-binary-only form.
-
-------------------------------------------------------
-
 MIT
 
 MIT License Copyright (c) <year> <copyright holders>
@@ -1226,7 +1200,6 @@ Copyright (c) 1988-1997 Sam Leffler Copyright (c) 1991-1997 Silicon Graphics, In
 Copyright (c) 1986 by University of Toronto. Written by Henry Spencer.
 Copyright (c) 1985, 1987, 1989, 1990, 1991, 1992, 1993, 1997 Adobe Systems Incorporated. All Rights Reserved.
 Copyright (c) 1983-2002 Sybase, Inc. All Rights Reserved.
-Copyright (C) The Internet Society (2001). All Rights Reserved.
 Copyright (C) Siemens AG 2017
 Copyright (C) May, 2000 The Open Group, Metro Link, Incorporated and others. All Rights Reserved
 Copyright (C) Borland/Inprise. All Rights Reserved.

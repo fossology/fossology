@@ -137,7 +137,8 @@ int authentication(char *user, char *password, int *userId, int *userPerm)
   if (user_seed[0] && pass_hash_valid[0])
   {
     strcat(user_seed, password);  // get the hash code on seed+pass
-    SHA1((unsigned char *)user_seed, strlen(user_seed), pass_hash_actual_raw);
+    gcry_md_hash_buffer(GCRY_MD_SHA1, pass_hash_actual_raw, user_seed,
+      strlen(user_seed));
   }
   else
   {

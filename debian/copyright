@@ -30,12 +30,6 @@ Files: fossology/src/nomos/agent_tests/Unit/Makefile
 Copyright: Copyright Siemens AG 2014
 License: Freeware-cc79f51f0b86e915ba8f560b9ae83f4d
 
-Files: fossology/src/ununpack/agent/md5.h
-License: Public-domain-12aee48783b26374ac8ccc9e0f2a4636
-
-Files: fossology/src/ununpack/agent/md5.c
-License: Public-domain-c935d34ac677e018db8224919b1cfdea
-
 Files: fossology/src/testing/dataFiles/licenseText.php
        fossology/src/buckets/agent/leaf.c
        fossology/src/www/locale/nl_NL/LC_MESSAGES/messages.po
@@ -1365,9 +1359,6 @@ Copyright: Copyright 2011 Randy Rando
            Copyright (C) 2015,2019 Siemens AG Author: Shaheem Azmal<shaheem.azmal@siemens.com>, Anupam Ghosh <anupam.ghosh@siemens.com>
 License: GPL-2.0
 
-Files: fossology/src/ununpack/agent/LICENSE.md5
-License: Openwall
-
 Files: fossology/src/www/ui/scripts/jquery.dataTables.editable.js
 Copyright: Copyright 2010-2012 Jovan Popovic, all rights reserved.
 License: BSD-3-Clause OR GPL-2.0
@@ -1697,11 +1688,6 @@ Files: fossology/src/www/ui/template/about.html.twig
 Copyright: Copyright 2014-2016 Siemens AG
 License: Freeware-Fossology AND GPL-2.0
 
-Files: fossology/src/ununpack/agent/sha2.h
-       fossology/src/ununpack/agent/sha2.c
-Copyright: Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch> All rights reserved.
-License: BSD-3-Clause
-
 Files: fossology/Makefile.deps
        fossology/Makefile.conf
        fossology/.github/ISSUE_TEMPLATE.md
@@ -1948,8 +1934,6 @@ Files: fossology/Makefile.deps
        fossology/src/scheduler/agent/defconf/default/fossology
        fossology/src/scheduler/agent_tests/agents/fossology.conf.in
        fossology/src/scheduler/agent_tests/Unit/utils.h
-       fossology/src/ununpack/agent/sha1.h
-       fossology/src/ununpack/agent/sha1.c
        fossology/src/ununpack/agent/README
        fossology/src/ununpack/agent_tests/Unit/Makefile
        fossology/src/ununpack/agent_tests/Functional/tests.xml
@@ -2017,7 +2001,6 @@ Copyright: Copyright (C) 2008-2011 Hewlett-Packard Development Company, L.P.
            Copyright (C) 2007-2013 Hewlett-Packard Development Company, L.P.
            Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P.
            Copyright (C) 2009-2013 Hewlett-Packard Development Company, L.P.
-           Copyright (C) The Internet Society (2001). All Rights Reserved.
            Copyright (C) 2009-2011 Hewlett-Packard Development Company, L.P.
            Copyright (C) 2008-2012 Hewlett-Packard Development Company, L.P.
            Copyright (C) 2008, 2012 Hewlett-Packard Development Company, L.P.

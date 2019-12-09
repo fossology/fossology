@@ -76,17 +76,27 @@ if [[ $BUILDTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       apt-get $YesOpt install \
-        libssl-dev
+        libgcrypt20-dev
       ;;
     RedHatEnterprise*|CentOS|Fedora)
       yum $YesOpt install \
-        openssl-devel
+        libgcrypt-devel
       ;;
   esac
 fi
 
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        libgcrypt20
+      ;;
+    RedHatEnterprise*|CentOS|Fedora)
+      yum $YesOpt install \
+        libgcrypt
+      ;;
+  esac
 fi
 
 #######################################################################

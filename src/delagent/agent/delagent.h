@@ -34,7 +34,7 @@
 #include <signal.h>
 #include <libgen.h>
 #include <getopt.h>
-#include <openssl/sha.h>
+#include <gcrypt.h>
 
 #include "libfossology.h"
 

@@ -93,28 +93,6 @@ FileCopyrightText: <text> Copyright Siemens AG 2014 </text>
 
 ##File
 
-FileName: fossology/src/ununpack/agent/md5.h
-SPDXID: SPDXRef-item26348
-FileChecksum: SHA1: 8638cca622911aa63a251afb1de7874f57ea308f
-FileChecksum: MD5: 5612019bcb2cc8476d9e059c9cba1073
-LicenseConcluded: LicenseRef-Public-domain-12aee48783b26374ac8ccc9e0f2a4636
-LicenseInfoInFile: LicenseRef-Public-domain
-FileCopyrightText: NOASSERTION
-
-
-##File
-
-FileName: fossology/src/ununpack/agent/md5.c
-SPDXID: SPDXRef-item26358
-FileChecksum: SHA1: 594e637e247de95fb95171dbc58066110bcbe1cb
-FileChecksum: MD5: 2322ba9f2cd95371e242c935419dd39e
-LicenseConcluded: LicenseRef-Public-domain-c935d34ac677e018db8224919b1cfdea
-LicenseInfoInFile: LicenseRef-Public-domain
-FileCopyrightText: NOASSERTION
-
-
-##File
-
 FileName: fossology/src/testing/dataFiles/licenseText.php
 SPDXID: SPDXRef-item26020
 FileChecksum: SHA1: e2105ff4b0e6db889443eb77e03b078babd3b370
@@ -126,17 +104,6 @@ LicenseInfoInFile: BSD-3-Clause
 FileCopyrightText: <text> Copyright 2011 Randy Rando
 Copyright (C) 1992, 2006, 2007 Free Software Foundation, Inc.
 Copyright (C) 2011 Hewlett-Packard Development Company, L.P. </text>
-
-
-##File
-
-FileName: fossology/src/ununpack/agent/LICENSE.md5
-SPDXID: SPDXRef-item26343
-FileChecksum: SHA1: 943b14d2292d217f851837012337956a84640c76
-FileChecksum: MD5: ecddf853ad89111f7125e611dfa91356
-LicenseConcluded: LicenseRef-Openwall
-LicenseInfoInFile: LicenseRef-GPL
-FileCopyrightText: NOASSERTION
 
 
 ##File
@@ -16011,28 +15978,6 @@ FileCopyrightText: <text> Copyright (C) 2014, Siemens AG </text>
 
 ##File
 
-FileName: fossology/src/ununpack/agent/sha2.h
-SPDXID: SPDXRef-item26346
-FileChecksum: SHA1: b58ed461edb591c4636b4b445cdf191ad41703de
-FileChecksum: MD5: 763942a7ad59b2d63267cf9dcc781c0e
-LicenseConcluded: BSD-3-Clause
-LicenseInfoInFile: BSD-3-Clause
-FileCopyrightText: <text> Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch> All rights reserved. </text>
-
-
-##File
-
-FileName: fossology/src/ununpack/agent/sha2.c
-SPDXID: SPDXRef-item26361
-FileChecksum: SHA1: 086bee7541626d72efcf0e9ce2275bd90b6b0cc1
-FileChecksum: MD5: ed4b69e7b994ae1a5ce4ebf1db9902c9
-LicenseConcluded: BSD-3-Clause
-LicenseInfoInFile: BSD-3-Clause
-FileCopyrightText: <text> Copyright (C) 2005, 2007 Olivier Gay <olivier.gay@a3.epfl.ch> All rights reserved. </text>
-
-
-##File
-
 FileName: fossology/src/www/ui/scripts/jquery.dataTables.select.js
 SPDXID: SPDXRef-item25065
 FileChecksum: SHA1: 3cf9e2fd82722e7081e0fb7fa137c5f40940782e
@@ -19849,30 +19794,6 @@ FileChecksum: MD5: a0b2c0212ab2f90b4a0900fec3f453e8
 LicenseConcluded: NOASSERTION
 LicenseInfoInFile: NOASSERTION
 FileCopyrightText: NOASSERTION
-
-
-##File
-
-FileName: fossology/src/ununpack/agent/sha1.h
-SPDXID: SPDXRef-item26354
-FileChecksum: SHA1: 58b03e6da4a7f02f539d706b8308a97c35ba25c6
-FileChecksum: MD5: 27d402369e92874fadc42e3908d5b000
-LicenseConcluded: NOASSERTION
-LicenseInfoInFile: NOASSERTION
-FileCopyrightText: <text> Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-Copyright (C) The Internet Society (2001). All Rights Reserved. </text>
-
-
-##File
-
-FileName: fossology/src/ununpack/agent/sha1.c
-SPDXID: SPDXRef-item26364
-FileChecksum: SHA1: 4f6c7e781122a97d7a9ef4d823a7f9d03c3b46ba
-FileChecksum: MD5: 783c17b239bac37a928b42d44b5b88b8
-LicenseConcluded: NOASSERTION
-LicenseInfoInFile: NOASSERTION
-FileCopyrightText: <text> Copyright (C) 2007 Hewlett-Packard Development Company, L.P.
-Copyright (C) The Internet Society (2001). All Rights Reserved. </text>
 
 
 ##File
@@ -28172,19 +28093,6 @@ Should you have any questions concerning this Agreement, or if you desire to con
 
 7. Governing Law
 This agreement is governed by the laws of the United States of America and the Commonwealth of Massachusetts. </text>
-
-LicenseID: LicenseRef-Openwall
-LicenseName: Openwall Notice
-ExtractedText: <text> You're allowed to do whatever you like with this software (including
-re-distribution in source and/or binary form, with or without
-modification), provided that credit is given where it is due and any
-modified versions are marked as such.  There's absolutely no warranty.
-
-Note that you don't have to re-distribute this software under these
-same relaxed terms.  In particular, you're free to place modified
-versions under (L)GPL, thus disallowing further re-distribution in
-binary-only form.
- </text>
 
 LicenseID: LicenseRef-CATOSL
 LicenseName: CATOSL
@@ -39915,11 +39823,3 @@ ExtractedText: <text> Copying and distribution of this file, with or without mod
 are permitted in any medium without royalty provided the copyright
 notice and this notice are preserved.  This file is offered as-is,
 without any warranty. </text>
-
-LicenseID: LicenseRef-Public-domain-12aee48783b26374ac8ccc9e0f2a4636
-LicenseName: Public-domain-12aee48783b26374ac8ccc9e0f2a4636
-ExtractedText: <text> Written by Solar Designer <solar at openwall.com> in 2001, and placed in the public domain.  See md5.c for more information. </text>
-
-LicenseID: LicenseRef-Public-domain-c935d34ac677e018db8224919b1cfdea
-LicenseName: Public-domain-c935d34ac677e018db8224919b1cfdea
-ExtractedText: <text> Written by Solar Designer <solar at openwall.com> in 2001, and placed in the public domain.  There's absolutely no warranty. </text>
