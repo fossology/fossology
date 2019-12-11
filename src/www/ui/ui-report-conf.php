@@ -20,18 +20,35 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\BusinessRules\LicenseMap;
 
 class ui_report_conf extends FO_Plugin
 {
-  /** @var UploadDao */
-  private $uploadDao;
 
   /** @var DbManager */
   private $dbManager;
 
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
+  private $uploadDao;
+
   /** @var UserDao $userDao
-   * User DAO to use */
+   * UserDao object */
   private $userDao;
+
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
+  private $licenseDao;
+
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
+  private $clearingDao;
 
   /**
    * @var mapDBColumns $mapDBColumns
@@ -85,6 +102,8 @@ class ui_report_conf extends FO_Plugin
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->dbManager = $GLOBALS['container']->get('db.manager');
     $this->userDao = $GLOBALS['container']->get('dao.user');
+    $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
+    $this->licenseDao = $GLOBALS['container']->get('dao.license');
   }
 
   /**
@@ -122,7 +141,7 @@ class ui_report_conf extends FO_Plugin
     }
   } // RegisterMenus()
 
-  function allReportConfiguration($uploadId)
+  function allReportConfiguration($uploadId, $groupId)
   {
     $vars = [];
     $row = $this->uploadDao->getReportInfo($uploadId);
@@ -144,7 +163,67 @@ class ui_report_conf extends FO_Plugin
       }
     }
 
+    $tableRows = "";
+    foreach ($this->getAllObligationsForGivenUploadId($uploadId, $groupId) as $obTopic => $obData) {
+      $obLicCount = count($obData['license'])+1;
+      $tableRows .= '<td rowspan = "'.$obLicCount.'">'.$obTopic.'</td>';
+      $tableRows .= '<td rowspan = "'.$obLicCount.'">
+        <textarea readonly="readonly" style="overflow:auto;width:98%;height:80px;">'.$obData['text'].'
+        </textarea></td>';
+      foreach ($obData['license'] as $key => $value) {
+        $tableRows .= '<tr><td>';
+        $tableRows .= '<input type="checkbox" name="obLicenses[]" value="'.$Value.'">'.$value;
+        $tableRows .= '</tr></td>';
+      }
+    }
+    $vars['tableRows'] = $tableRows;
+
     return $vars;
+  }
+
+  function getAllObligationsForGivenUploadId($uploadId, $groupId)
+  {
+    $clearedLicenses = array();
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $clearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
+    foreach ($clearingDecisions as $clearingDecision) {
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        continue;
+      }
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
+          continue;
+        }
+        $originLicenseId = $clearingLicense->getLicenseId();
+        $clearedLicenses[] = $licenseMap->getProjectedId($originLicenseId);
+      }
+    }
+    $obligationsForLicenses = $this->licenseDao->getLicenseObligations($clearedLicenses, 'obligation_map') ?: array();
+    $obligationsForLicenseCandidates = $this->licenseDao->getLicenseObligations($clearedLicenses, 'obligation_candidate_map') ?: array();
+    $allObligations = array_merge($obligationsForLicenses, $obligationsForLicenseCandidates);
+    $groupedOb = array();
+    foreach ($allObligations as $obligations) {
+      $obTopic = $obligations['ob_topic'];
+      $obText = $obligations['ob_text'];
+      $licenseName = $obligations['rf_shortname'];
+      $groupBy = $obTopic;
+      if (array_key_exists($groupBy, $groupedOb)) {
+        $currentLics = &$groupedOb[$groupBy]['license'];
+        if (!in_array($licenseName, $currentLics)) {
+          $currentLics[] = $licenseName;
+        }
+      } else {
+        $singleOb = array(
+         "topic" => $obTopic,
+         "text" => $obText,
+         "license" => array($licenseName)
+        );
+        $groupedOb[$groupBy] = $singleOb;
+      }
+    }
+    return $groupedOb;
   }
 
   /**
@@ -169,7 +248,8 @@ class ui_report_conf extends FO_Plugin
   public function Output()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
+    $groupId = Auth::getGroupId();
+    if (!$this->uploadDao->isAccessible($uploadId, $groupId)) {
       return;
     }
 
@@ -197,8 +277,10 @@ class ui_report_conf extends FO_Plugin
              "WHERE upload_fk = $14;";
       $this->dbManager->getSingleRow($SQL, $parms, __METHOD__ . "updateReportInfoData");
     }
-
-    $this->vars += $this->allReportConfiguration($uploadId);
+echo '<pre>';
+print_r($this->getAllObligationsForGivenUploadId($uploadId, $groupId)); 
+echo '</pre>';
+    $this->vars += $this->allReportConfiguration($uploadId, $groupId);
   }
 
   public function getTemplateName()
