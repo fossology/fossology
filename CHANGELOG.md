@@ -1,5 +1,51 @@
 # Changelog of FOSSology
 
+### 3.7.0-RC2 (Dec 11th 2019)
+
+This pre-release adds important corrections to 3.7.0-RC2
+
+### Contributors
+
+Credits go to the following persons for this release since `3.7.0-RC1`:
+
+```
+> Gaurav Mishra mishra.gaurav@siemens.com
+> Anupam Ghosh anupam.ghosh@siemens.com
+> Shaheem Azmal M MD shaheem.azmal@siemens.com
+> Martin Michlmayr tbm@cyrius.com
+> Michael C. Jaeger michael.c.jaeger@siemens.com
+> Piotr Pszczola piotr.pszczola@orange.com
+```
+
+#### Corrections
+
+* `7cdc6b5` fix(obligation): Move candidate licenses
+* `c74f2f4` fix(obligation): Associate all lic with same name
+* `6809415` fix(copyright): only scanner finding copyrights to unifiedreport
+* `23cb2f6` fix(counter): Optimize clearing counter queries
+* `3885ac1` fix(db): Optimize license browse queries
+* `96a4da4` refactor(report): edited global license code make it available for unified repot fix php codesniffer
+* `08ac476` fix(decider): remove force dependency of nomos and monk for ojo decider add nomos dependency if required
+* `49fcfa0` fix(rest): do not schedule decider if the option is empty credits to @GMishx
+* `f0e56b1` test(licenseStdCommentDao): Add test cases for DAO
+* `213222d` fix(notices): updating notice file, debian copyright and spdx lic info
+* `9e524ef` fix(rest): getUploads - invoke getRows with proper parameters
+* `1045cf4` fix(readmeoss): added edited global license text in readmeoss
+
+#### Features
+
+* `af3f573` feat(license): Provide predefined license comments
+* `8bbe52d` feat(rest): add auto conclusion for ojo findings if no contradiction with other findings
+* `651a890` feat(rest): Provide group ID during POST upload
+* `1a82e74` feat(decider): add auto conclusion for ojo findings if no contradiction with other findings
+
+#### Infrastructure
+
+* `48c0caa` chore(composer.json): updated symfony/dependency-injection version
+* `252bbae` chore(installdeps): remove php-yaml from os level and add it to composer ...
+* `2e15803` docs(changelog): fix typo
+* `d85038a` chore(unifiedReport): change phpword to a latest version update composer.lock with new changes
+
 ### 3.7.0-RC1 (Oct 24th 2019)
 
 This release was created in order to bring important changes for the REST endpoints to a release, so integration, for example with sw360, work on a release but not with latest master. Besides improvement is the extension of the decider agent to allow for decisions based on found SPDX-License-Identifier tags found by the ojo agent.
