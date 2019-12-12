@@ -2,49 +2,40 @@
 
 ### 3.7.0 (Dec 11th 2019)
 
-This release adds important corrections to 3.7.0-RC1
+This release adds important corrections to
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1)
 
 ### Contributors
 
-Credits go to the following persons for this release since `3.7.0-RC1`:
+Credits go to the following persons for this release since
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1):
 
 ```
-> Gaurav Mishra mishra.gaurav@siemens.com
-> Anupam Ghosh anupam.ghosh@siemens.com
-> Shaheem Azmal M MD shaheem.azmal@siemens.com
-> Martin Michlmayr tbm@cyrius.com
-> Michael C. Jaeger michael.c.jaeger@siemens.com
-> Piotr Pszczola piotr.pszczola@orange.com
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Martin Michlmayr <tbm@cyrius.com>
+> Maximilian Huber <maximilian.huber@tngtech.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
 ```
 
 #### Corrections
 
-* `7cdc6b5` fix(obligation): Move candidate licenses
-* `c74f2f4` fix(obligation): Associate all lic with same name
-* `6809415` fix(copyright): only scanner finding copyrights to unifiedreport
-* `23cb2f6` fix(counter): Optimize clearing counter queries
-* `3885ac1` fix(db): Optimize license browse queries
-* `96a4da4` refactor(report): edited global license code make it available for unified repot fix php codesniffer
-* `08ac476` fix(decider): remove force dependency of nomos and monk for ojo decider add nomos dependency if required
-* `49fcfa0` fix(rest): do not schedule decider if the option is empty credits to @GMishx
-* `f0e56b1` test(licenseStdCommentDao): Add test cases for DAO
-* `213222d` fix(notices): updating notice file, debian copyright and spdx lic info
-* `9e524ef` fix(rest): getUploads - invoke getRows with proper parameters
-* `1045cf4` fix(readmeoss): added edited global license text in readmeoss
-
-#### Features
-
-* `af3f573` feat(license): Provide predefined license comments
-* `8bbe52d` feat(rest): add auto conclusion for ojo findings if no contradiction with other findings
-* `651a890` feat(rest): Provide group ID during POST upload
-* `1a82e74` feat(decider): add auto conclusion for ojo findings if no contradiction with other findings
+* `7cdc6b50a` fix(obligation): Move candidate licenses
+* `c74f2f4af` fix(obligation): Associate all lic with same name
+* `68094159b` fix(copyright): only scanner finding copyrights to unifiedreport
+* `23cb2f66a` fix(counter): Optimize clearing counter queries
+* `3885ac14d` fix(db): Optimize license browse queries
+* `96a4da4c3` refactor(report): edited global license code make it available for unified repot fix php codesniffer
+* `08ac47678` fix(decider): remove force dependency of nomos and monk for ojo decider add nomos dependency if required
 
 #### Infrastructure
 
-* `48c0caa` chore(composer.json): updated symfony/dependency-injection version
-* `252bbae` chore(installdeps): remove php-yaml from os level and add it to composer ...
-* `2e15803` docs(changelog): fix typo
-* `d85038a` chore(unifiedReport): change phpword to a latest version update composer.lock with new changes
+* `48c0caa14` chore(composer.json): updated symfony/dependency-injection version
+* `252bbaeb2` chore(installdeps): remove php-yaml from os level and add it to composer update composer.lock..
+* `2e158034e` docs(changelog): fix typo
+* `d85038afc` chore(unifiedReport): change phpword to a latest version update composer.lock with new changes
+* `a674aa9e3` chore(docker-compose): harmonize versions with sw360chores
 
 ### 3.7.0-RC1 (Oct 24th 2019)
 
