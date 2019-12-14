@@ -21,27 +21,23 @@ function StoreIntoDb(key) {
     document.getElementById("storeForm").submit();
 }
 
+$("#detailsTable").ready(function(){
+    // Hide showdetails Table
+    $("#detailsTable").hide();
+    $(".detailsRow").hide();
+});
+
 function showDetails(key){
 
     var detailsRow = "detailsRow"+key;
 
-    var currentElement = document.getElementById("displayElementIndex").value;
+    // Hide all the Table row
+    $(".detailsRow").hide();
 
-    if (currentElement != "-1") {
-        currentElement = "detailsRow"+currentElement;
-        document.getElementById(currentElement).style.display = "none";
-    }
-    
-    if (document.getElementById("detailsTable").style.display === "none") {
-        document.getElementById("detailsTable").style.display = "";
-    }
-
-    if (document.getElementById(detailsRow).style.display === "none") {
-        document.getElementById(detailsRow).style.display = "";
-        document.getElementById("displayElementIndex").value = key;
-    }
+    // Show hidden Table row
+    $("#detailsTable").show();
+    $("#"+detailsRow).show(600);
 }
-
 
 $( function() {
 
