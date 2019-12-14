@@ -33,12 +33,12 @@ version.php: version-process_php
 include $(TOP)/Makefile.process
 
 spasht:
-	@echo "making locally runnable spast (only for testing)"
+	@echo "making locally runnable spasht (only for testing)"
 	$(MAKE) -C $(FOCLIDIR) fo_wrapper
 	ln -sf $(FOCLIDIR)/fo_wrapper.php $(WRAP)
 
 install: all
-	$(INSTALL_DATA) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
+	$(INSTALL_PROGRAM) -d $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/
 	for file in $(COPY); do \
 		echo "installing $$file"; \
 		$(INSTALL_DATA) $$file $(DESTDIR)$(MODDIR)/$(MOD_NAME)/agent/$$file; \
@@ -54,7 +54,7 @@ uninstall:
 	done
 
 clean:
-	rm -f *.o core version.php
+	rm -f $(WRAP) version.php
 
 .PHONY: all install uninstall clean
 

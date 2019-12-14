@@ -78,7 +78,7 @@ class SpashtAgent extends Agent
 
     $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
 
-    $getNewResult = $this->getInformation($uploadAvailable, $pfileSha1AndpfileId);
+     $getNewResult = $this->getInformation($uploadAvailable, $pfileSha1AndpfileId);
 
     $resultUploadIntoLicenseTable = $this->insertLicensesSpashtAgentRecord(
       $getNewResult, $agentId);
@@ -234,16 +234,9 @@ class SpashtAgent extends Agent
    */
   protected function insertCopyrightSpashtAgentRecord($body, $agentId)
   {
-    $file = fopen('/home/fossy/abc.json', 'w');
-    fwrite($file, $agentId . "->agentID\n");
     foreach ($body as $key) {
       foreach ($key['attributions'] as $keyCopyright) {
-        fwrite($file, $keyCopyright . " -> ");
-        fwrite($file, $key['pfileId'] . "\n");
-
         $hashForCopyright = hash("sha256", $keyCopyright);
-
-        fwrite($file, $hashForCopyright);
         $this->dbManager->insertTableRow('copyright_spasht',
           [
             'agent_fk' => $agentId,
@@ -254,7 +247,6 @@ class SpashtAgent extends Agent
           ]);
       }
     }
-    fclose($file);
     return true;
   }
 }

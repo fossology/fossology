@@ -279,10 +279,6 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
     $rows = $this->dbManager->fetchAll($result);
     $this->dbManager->freeResult($result);
 
-    // $file = fopen('/home/fossy/abc.json','w');
-    // fwrite($file, $iTotalDisplayRecords." \n "."h");
-    // fclose($file);
-
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
   }
 
