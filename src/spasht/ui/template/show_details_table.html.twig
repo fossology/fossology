@@ -6,7 +6,7 @@
    This file is offered as-is, without any warranty.
 #}
 
-<table id="detailsTable" style="border: 1px solid black; border-collapse: collapse; display: none;">
+<table id="detailsTable" style="border: 1px solid black;">
     <tr>
         <th>Declared</th>
         <th>Source</th>
@@ -17,8 +17,8 @@
         <th>MENU</th>
     </tr>
     {% for result in details %}
-    <tr id="detailsRow{{ loop.index0 }}" style="border: 1px solid black; border-collapse: collapse; display: none;">
-        <td style="border-right: 1px solid black;">
+    <tr class="detailsRow" id="detailsRow{{ loop.index0 }}" style="border: 1px solid black;">
+        <td style="border-right: 1px solid black;"  >
             <span style="display: inline-block; width: 100px;">
                 {{ result.declared }}
             </span>
@@ -54,5 +54,3 @@
     </tr>
     {% endfor %}
 </table>
-
-<input id="displayElementIndex" type="hidden" value="-1" />
