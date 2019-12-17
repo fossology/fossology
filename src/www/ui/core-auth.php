@@ -193,6 +193,11 @@ class core_auth extends FO_Plugin
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
+    $timezone = GetArrayVal("timezone", $_POST);
+    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
+      $timezone = date_default_timezone_get();
+    }
+    $_SESSION['timezone'] = $timezone;
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
     if (empty($referrer)) {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);

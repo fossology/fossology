@@ -414,7 +414,7 @@ function FolderListUploads_perm($ParentFolder, $perm)
     $New = array();
     $New['upload_pk'] = $R['upload_pk'];
     $New['upload_desc'] = $R['upload_desc'];
-    $New['upload_ts'] = substr($R['upload_ts'], 0, 19);
+    $New['upload_ts'] = Convert2BrowserTime(substr($R['upload_ts'], 0, 19));
     $New['name'] = $R['upload_filename'];
     array_push($List,$New);
   }

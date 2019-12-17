@@ -289,3 +289,17 @@ function Get1stUploadtreeID($upload)
   pg_free_result($result);
   return $uploadtree_id;
 }
+
+/**
+ * \brief Convert the server time to browser time
+ * \param time $server_time to be converted
+ */
+function Convert2BrowserTime($server_time)
+{
+  $tz = $_SESSION["timezone"];
+  $server_timezone = date_default_timezone_get();
+  $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
+  $browser_time->setTimeZone(new \DateTimeZone($tz));
+  $time = $browser_time->format('Y-m-d H:i:s.u P');
+  return $time;
+}
