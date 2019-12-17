@@ -1,4 +1,5 @@
 {# Copyright 2014-2015 Siemens AG
+   Copyright 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -11,6 +12,7 @@
 {{ info }}
 <form method="post" action="{{ authUrl }}">
   <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
+  <input type="hidden" name="timezone" id="timezone" value="" />
   <table border="0">
     <tr>
       <td>{{ 'Username'|trans }}:</td>
@@ -26,4 +28,5 @@
     </tr>
   </table>
   <script type="text/javascript">document.getElementById("unamein").focus();</script>
+  <script type="text/javascript">document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone ;</script>
 </form>

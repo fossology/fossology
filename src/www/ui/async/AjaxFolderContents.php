@@ -51,7 +51,7 @@ class AjaxFolderContents extends DefaultPlugin
       $uploadStatus = new UploadStatus();
       $uploadDate = explode(".",$upload['upload_ts'])[0];
       $uploadStatus = " (" . $uploadStatus->getTypeName($upload['status_fk']) . ")";
-      $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . $uploadDate . $uploadStatus;
+      $results[$upload['foldercontents_pk']] = $upload['upload_filename'] . _(" from ") . Convert2BrowserTime($uploadDate) . $uploadStatus;
     }
 
     if (!$request->get('removable')) {

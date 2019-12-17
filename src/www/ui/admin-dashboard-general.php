@@ -249,7 +249,7 @@ class dashboard extends FO_Plugin
         $V .= "<td class='dashboard'>$row[processid]</td>";
         $V .= "<td class='dashboard'>" . htmlspecialchars($row[$current_query]) .
           "</td>";
-        $StartTime = substr($row['query_start'], 0, 19);
+        $StartTime = Convert2BrowserTime(substr($row['query_start'], 0, 19));
         $V .= "<td class='dashboard'>$StartTime</td>";
         $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
