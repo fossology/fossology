@@ -20,18 +20,35 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Data\DecisionTypes;
+use Fossology\Lib\BusinessRules\LicenseMap;
 
 class ui_report_conf extends FO_Plugin
 {
-  /** @var UploadDao */
-  private $uploadDao;
 
   /** @var DbManager */
   private $dbManager;
 
+  /** @var UploadDao $uploadDao
+   * UploadDao object
+   */
+  private $uploadDao;
+
   /** @var UserDao $userDao
-   * User DAO to use */
+   * UserDao object */
   private $userDao;
+
+  /** @var LicenseDao $licenseDao
+   * LicenseDao object
+   */
+  private $licenseDao;
+
+  /** @var ClearingDao $clearingDao
+   * ClearingDao object
+   */
+  private $clearingDao;
 
   /**
    * @var mapDBColumns $mapDBColumns
@@ -85,6 +102,8 @@ class ui_report_conf extends FO_Plugin
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
     $this->dbManager = $GLOBALS['container']->get('db.manager');
     $this->userDao = $GLOBALS['container']->get('dao.user');
+    $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
+    $this->licenseDao = $GLOBALS['container']->get('dao.license');
   }
 
   /**
@@ -122,7 +141,13 @@ class ui_report_conf extends FO_Plugin
     }
   } // RegisterMenus()
 
-  function allReportConfiguration($uploadId)
+  /**
+   * @brief list all the options for Report Configuration
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array with all obligations grouped by obligation topic
+   */
+  function allReportConfiguration($uploadId, $groupId)
   {
     $vars = [];
     $row = $this->uploadDao->getReportInfo($uploadId);
@@ -144,7 +169,73 @@ class ui_report_conf extends FO_Plugin
       }
     }
 
+    $tableRows = "";
+    $excludedObligations = array();
+    $excludedObligations = (array) json_decode($row['ri_excluded_obligations'], true);
+    foreach ($this->getAllObligationsForGivenUploadId($uploadId, $groupId) as $obTopic => $obData) {
+      $tableRows .= '<tr><td style="width:35%">'.$obTopic.'</td>';
+      $tableRows .= '<td><textarea readonly="readonly" style="overflow:auto;width:98%;height:80px;">'.
+                     $obData['text'].'</textarea></td><td>';
+      foreach ($obData['license'] as $value) {
+        if (!empty($excludedObligations[$obTopic]) && in_array($value, $excludedObligations[$obTopic])) {
+          $tableRows .= '<input type="checkbox" name="obLicenses['.$obTopic.'][]" value="'.$value.'" checked> '.$value.'<br />';
+        } else {
+          $tableRows .= '<input type="checkbox" name="obLicenses['.$obTopic.'][]" value="'.$value.'"> '.$value.'<br />';
+        }
+      }
+      $tableRows .= '</td></tr>';
+    }
+    $vars['tableRows'] = $tableRows;
+    $vars['scriptBlock'] = $this->createScriptBlock();
+
     return $vars;
+  }
+
+  /**
+   * @brief get all the obgligations for cleared licenses
+   * @param int $uploadId
+   * @param int $groupId
+   * @return array with all obligations grouped by obligation topic
+   */
+  function getAllObligationsForGivenUploadId($uploadId, $groupId)
+  {
+    $allClearedLicenses = array();
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+    $allClearingDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds, $groupId);
+    $licenseMap = new LicenseMap($this->dbManager, $groupId, LicenseMap::REPORT);
+    foreach ($allClearingDecisions as $clearingDecisions) {
+      if ($clearingDecisions->getType() == DecisionTypes::IRRELEVANT) {
+        continue;
+      }
+      foreach ($clearingDecisions->getClearingLicenses() as $eachClearingLicense) {
+        if ($eachClearingLicense->isRemoved()) {
+          continue;
+        }
+        $getLicenseId = $eachClearingLicense->getLicenseId();
+        $allClearedLicenses[] = $licenseMap->getProjectedId($getLicenseId);
+      }
+    }
+    $obligationsForLicenses = $this->licenseDao->getLicenseObligations($allClearedLicenses, 'obligation_map') ?: array();
+    $obligationsForLicenseCandidates = $this->licenseDao->getLicenseObligations($allClearedLicenses, 'obligation_candidate_map') ?: array();
+    $allObligations = array_merge($obligationsForLicenses, $obligationsForLicenseCandidates);
+    $groupedObligations = array();
+    foreach ($allObligations as $obligations) {
+      $groupBy = $obligations['ob_topic'];
+      if (array_key_exists($groupBy, $groupedObligations)) {
+        $currentLicenses = &$groupedObligations[$groupBy]['license'];
+        if (!in_array($obligations['rf_shortname'], $currentLicenses)) {
+          $currentLicenses[] = $obligations['rf_shortname'];
+        }
+      } else {
+        $groupedObligations[$groupBy] = array(
+         "topic" => $obligations['ob_topic'],
+         "text" => $obligations['ob_text'],
+         "license" => array($obligations['rf_shortname'])
+        );
+      }
+    }
+    return $groupedObligations;
   }
 
   /**
@@ -169,7 +260,8 @@ class ui_report_conf extends FO_Plugin
   public function Output()
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
-    if (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
+    $groupId = Auth::getGroupId();
+    if (!$this->uploadDao->isAccessible($uploadId, $groupId)) {
       return;
     }
 
@@ -180,7 +272,7 @@ class ui_report_conf extends FO_Plugin
 
     if (isset($submitReportConf)) {
       $parms = array();
-
+      $obLicenses = $_POST["obLicenses"];
       $i = 1;
       $columns = "";
       foreach ($this->mapDBColumns as $key => $value) {
@@ -190,20 +282,44 @@ class ui_report_conf extends FO_Plugin
       }
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListUR);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
+      $parms[] = json_encode($obLicenses);
       $parms[] = $uploadId;
 
       $SQL = "UPDATE report_info SET $columns" .
-               "ri_ga_checkbox_selection = $12, ri_spdx_selection = $13" .
-             "WHERE upload_fk = $14;";
+               "ri_ga_checkbox_selection = $12, ri_spdx_selection = $13, ri_excluded_obligations = $14" .
+             "WHERE upload_fk = $15;";
       $this->dbManager->getSingleRow($SQL, $parms, __METHOD__ . "updateReportInfoData");
     }
-
-    $this->vars += $this->allReportConfiguration($uploadId);
+    $this->vars += $this->allReportConfiguration($uploadId, $groupId);
   }
 
   public function getTemplateName()
   {
     return "ui-report-conf.html.twig";
+  }
+
+  /**
+   * @brief Create Script block for conf
+   * @return string JavaScript block
+   */
+  protected function createScriptBlock()
+  {
+    return "
+
+    var reportTabCookie = 'stickyReportTab';
+
+    $(document).ready(function() {
+      $(\"#confTabs\").tabs({
+        active: ($.cookie(reportTabCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(reportTabCookie, idString);
+        }
+      });
+    });
+    ";
   }
 }
 
