@@ -90,7 +90,6 @@ class changeLicenseProcessPost extends FO_Plugin
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
-
     if (! empty($decisionMark) && $decisionMark == "irrelevant") {
       if (! is_array($itemId)) {
         $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
