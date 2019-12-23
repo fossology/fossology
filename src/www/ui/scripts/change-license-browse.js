@@ -85,7 +85,7 @@ function markDecisions(uploadTreeIdForMultiple) {
   }else{
     var data = {
       "uploadTreeId": $('#uploadTreeId').val(),
-      "decisionMark": 'irrelevant'
+      "decisionMark": uploadTreeIdForMultiple
     };
   }
   resultEntity = $('bulkIdResult');
@@ -99,14 +99,14 @@ function markDecisions(uploadTreeIdForMultiple) {
 
 }
 
-function deleteMarkedDecisions() {
+function deleteMarkedDecisions(decisionToBeRemoved) {
   var data = {
     "uploadTreeId": $('#uploadTreeId').val(),
-    "decisionMark": 'deleteIrrelevant'
+    "decisionMark": decisionToBeRemoved
   };
   resultEntity = $('bulkIdResult');
     var txt;
-    var pleaseConfirm = confirm("You are about to delete all irrelevant decisions. Please confirm!");
+    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
   if (pleaseConfirm == true) {
     $.ajax({
       type: "POST",

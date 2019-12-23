@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2014-2018 Siemens AG
+ * Copyright (C) 2014-2018,2020, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -90,13 +90,13 @@ class changeLicenseProcessPost extends FO_Plugin
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $decisionMark = @$_POST['decisionMark'];
-    if (! empty($decisionMark) && $decisionMark == "irrelevant") {
+    if (! empty($decisionMark) && ($decisionMark == "irrelevant" || $decisionMark == "doNotUse") ) {
       if (! is_array($itemId)) {
-        $responseMsg = $this->doMarkIrrelevant($itemId, $groupId, $userId);
+        $responseMsg = $this->doMarkDecisionTypes($itemId, $groupId, $userId, $decisionMark);
       } else {
         foreach ($itemId as $uploadTreeId) {
-          $responseMsg = $this->doMarkIrrelevant($uploadTreeId, $groupId,
-            $userId);
+          $responseMsg = $this->doMarkDecisionTypes($uploadTreeId, $groupId,
+            $userId, $decisionMark);
           if (! empty($responseMsg)) {
             return $responseMsg;
           }
@@ -108,11 +108,11 @@ class changeLicenseProcessPost extends FO_Plugin
       return new JsonResponse(array('result'=>'success'));
     }
 
-    if (!empty($decisionMark) && $decisionMark == "deleteIrrelevant") {
+    if (!empty($decisionMark) && ($decisionMark == "deleteIrrelevant" || $decisionMark == "deleteDoNotUse")) {
       $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
       /** @var ItemTreeBounds */
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
-      $errMsg = $this->clearingDao->deleteIrrelevantDecisionsFromDirectory($itemTreeBounds,$groupId,$userId);
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId, $itemTableName);
+      $errMsg = $this->clearingDao->deleteDecisionTypeFromDirectory($itemTreeBounds, $groupId, $userId, $decisionMark);
       if (empty($errMsg)) {
         return new JsonResponse(array('result'=>'success'));
       }
@@ -122,12 +122,12 @@ class changeLicenseProcessPost extends FO_Plugin
     return $this->doEdit($userId,$groupId,$itemId);
   }
 
-  function doMarkIrrelevant($itemId, $groupId, $userId)
+  function doMarkDecisionTypes($itemId, $groupId, $userId, $decisionMark)
   {
     $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
     /** @var ItemTreeBounds */
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
-    $errMsg = $this->clearingDao->markDirectoryAsIrrelevant($itemTreeBounds,$groupId,$userId);
+    $errMsg = $this->clearingDao->markDirectoryAsDecisionType($itemTreeBounds, $groupId, $userId, $decisionMark);
     return $errMsg;
   }
 

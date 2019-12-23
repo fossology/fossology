@@ -103,6 +103,7 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
+use Fossology\Lib\Report\LicenseDNUGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
@@ -147,6 +148,11 @@ class UnifiedReport extends Agent
    * LicenseIrrelevantGetter object
    */
   private $licenseIrrelevantGetter;
+
+  /** @var LicenseDNUGetter $licenseDNUGetter
+   * LicenseDNUGetter object
+   */
+  private $licenseDNUGetter;
 
   /** @var BulkMatchesGetter $bulkMatchesGetter
    * BulkMatchesGetter object
@@ -231,6 +237,8 @@ class UnifiedReport extends Agent
     $this->bulkMatchesGetter = new BulkMatchesGetter();
     $this->licenseIrrelevantGetter = new LicenseIrrelevantGetter();
     $this->licenseIrrelevantCommentGetter = new LicenseIrrelevantGetter(false);
+    $this->licenseDNUGetter = new LicenseDNUGetter();
+    $this->licenseDNUCommentGetter = new LicenseDNUGetter(false);
     $this->otherGetter = new OtherGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
@@ -276,6 +284,12 @@ class UnifiedReport extends Agent
     $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId);
     $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
+    $licensesDNU = $this->licenseDNUGetter->getCleared($uploadId, $groupId);
+    $this->heartbeat(empty($licensesDNU) ? 0 : count($licensesDNU["statements"]));
+
+    $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $groupId);
+    $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
+
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
     $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
@@ -294,6 +308,8 @@ class UnifiedReport extends Agent
                         "ecc" => $ecc,
                         "licensesIrre" => $licensesIrre,
                         "licensesIrreComment" => $licensesIrreComment,
+                        "licensesDNU" => $licensesDNU,
+                        "licensesDNUComment" => $licensesDNUComment,
                         "licensesMain" => $licensesMain,
                         "licensesHist" => $licensesHist,
                         "otherStatement" => $otherStatement
@@ -772,6 +788,17 @@ class UnifiedReport extends Agent
     $section->addTitle(htmlspecialchars("$subHeading"), 3);
     $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
     $this->bulkLicenseTable($section, "", $contents['licensesIrreComment']['statements'], $titleSubHeadingNotes);
+
+    /* Display Do not use license files */
+    $heading = "Do not use Files";
+    $titleSubHeadingIrre = "(Path, Files, Licenses)";
+    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesDNU']['statements'], $titleSubHeadingIrre);
+
+    /* Display Do not use file license comment  */
+    $subHeading = "Comment for Do not use files";
+    $section->addTitle(htmlspecialchars("$subHeading"), 3);
+    $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
+    $this->bulkLicenseTable($section, "", $contents['licensesDNUComment']['statements'], $titleSubHeadingNotes);
 
     /* clearing protocol change log table */
     $reportStaticSection->clearingProtocolChangeLogTable($section);

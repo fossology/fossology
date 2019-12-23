@@ -272,7 +272,7 @@ class CopyrightDao
       $scannerEntries = $this->getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere);
       if (!empty($groupId)) {
         $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-        $irrelevantDecisions = $this->clearingDao->getIrrelevantFilesFolder($itemTreeBounds, $groupId);
+        $irrelevantDecisions = $this->clearingDao->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId);
         $uniqueIrrelevantDecisions = array_unique(array_column($irrelevantDecisions, 'uploadtree_pk'));
         foreach ($scannerEntries as $key => $value) {
           if (in_array($value['uploadtree_pk'], $uniqueIrrelevantDecisions)) {
