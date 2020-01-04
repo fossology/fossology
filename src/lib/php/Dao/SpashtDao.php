@@ -90,4 +90,21 @@ class SpashtDao
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
     return ($row);
   }
+
+  /**
+   * Get Spasht ars status for Upload id
+   */
+
+  public function getSpashtArs($uploadID)
+  {
+    $statement = __METHOD__.".CheckUpload";
+
+    $params = [ $uploadID ];
+
+    $sql = "SELECT * FROM spasht_ars ".
+    "WHERE upload_fk = $1";
+
+    $row = $this->dbManager->getSingleRow($sql, $params, $statement);
+    return ($row);
+  }
 }
