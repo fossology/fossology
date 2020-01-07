@@ -2,6 +2,7 @@
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015-2018 Siemens AG
+ Copyright (C) 2019 Orange
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -17,7 +18,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
-define("TITLE_DASHBOARD", _("Dashboard"));
+define("TITLE_DASHBOARD_GENERAL", _("Overview Dashboard"));
 
 use Fossology\Lib\Db\DbManager;
 
@@ -31,8 +32,8 @@ class dashboard extends FO_Plugin
   function __construct()
   {
     $this->Name       = "dashboard";
-    $this->Title      = TITLE_DASHBOARD;
-    $this->MenuList   = "Admin::Dashboard";
+    $this->Title      = TITLE_DASHBOARD_GENERAL;
+    $this->MenuList   = "Admin::Dashboards::Overview";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     parent::__construct();
     $this->dbManager = $GLOBALS['container']->get('db.manager');
@@ -403,7 +404,9 @@ class dashboard extends FO_Plugin
     $V .= $this->DiskFree();
     $V .= "</td>";
     $V .= "</tr>";
+
     $V .= "</table>\n";
+    $V .= "<br><br>";
     return $V;
   }
 
