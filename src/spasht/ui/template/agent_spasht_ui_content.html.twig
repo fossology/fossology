@@ -21,11 +21,11 @@
     {% elseif pageNo == "show_definitions" %}
       {% include 'show_definitions.html.twig' %}
     {% elseif pageNo == "data_stored_successfully" %}
-      Data Stored Successfully {{ pageNo }} -> {{ result }}
+      Data Stored Successfully {{ result }}
     {% elseif pageNo == "show_upload_table" %}
       {% include 'show_uploads_table.html.twig' %}
     {% else %}
-      Empty
+      Please Search and Select Revision
     {% endif %}
   </div>
   <div class="col">
