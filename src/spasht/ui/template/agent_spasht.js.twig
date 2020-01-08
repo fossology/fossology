@@ -7,6 +7,21 @@
 #}
 
 <script>
+$("#advanceSearchForm").ready(function(){
+    // Hide Advance Search Form
+    $("#advanceSearchForm").hide();
+});
+
+function advanceSearchEnabled() {
+  if (document.getElementById('advanceSearch').checked == true) {
+    $("#advanceSearchForm").show(700);
+    $("#definitionsTable").hide(400);
+  } else {
+    $("#advanceSearchForm").hide(400);
+    $("#definitionsTable").show(700);
+  }
+}
+
 function StoreIntoDb(key) {
 
     var namespace = "definitionsRow_namespace"+key;
