@@ -16,9 +16,10 @@
 </div>
 <div class="row" id="spashtStart">
   <div class="col">
-    {% if advanceSearch == "checked" %}
+    <div>
       {% include 'agent_spasht_advanceSearch_form.html.twig' %}
-    {% elseif pageNo == "show_definitions" %}
+    </div>
+    {% if pageNo == "show_definitions" %}
       {% include 'show_definitions.html.twig' %}
     {% elseif pageNo == "data_stored_successfully" %}
       Data Stored Successfully {{ result }}

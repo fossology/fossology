@@ -108,9 +108,9 @@ class ui_spasht extends FO_Plugin
     $statusbody = "true";
 
     $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
+    // $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
 
-    $this->vars['advanceSearch'] = ""; //Set advance search to empty
+    // $this->vars['advanceSearch'] = ""; //Set advance search to empty
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "Spasht_home";
 
@@ -210,9 +210,9 @@ class ui_spasht extends FO_Plugin
        * If enabled the revisions are retrieved from the body to display them in the form.
        * As options to users.
        */
-      if ($advanceSearch == "advanceSearch") {
-        $this->vars['advanceSearch'] = "checked";
-      }
+      // if ($advanceSearch == "advanceSearch") {
+      //   $this->vars['advanceSearch'] = "checked";
+      // }
       if ($this->vars['storeStatus'] == "true") {
         $this->vars['pageNo'] = "data_stored_successfully";
       } else {
