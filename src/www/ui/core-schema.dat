@@ -1060,7 +1060,7 @@
   $Schema["TABLE"]["obligation_map"]["ob_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"ob_fk\" int8";
   $Schema["TABLE"]["obligation_map"]["ob_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"ob_fk\" SET NOT NULL";
 
-  $Schema["TABLE"]["obligation_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"rf_fk\" IS 'Reference license key as in rf_license'";
+  $Schema["TABLE"]["obligation_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"rf_fk\" IS 'Parent license key as in license_ref'";
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"rf_fk\" int8";
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 

@@ -41,21 +41,27 @@ class ObligationMap
   }
 
   /**
-   * @brief Get the license id from the shortname
+   * @brief Get the list of license shortnames
+   *
+   * If candidate license, return list of all licenses.
+   * If not-candidate license, return list of licenses which have conclusion on
+   * self.
    * @param bool $candidate Is a candidate license
    * @return string[] Array of license shortnames
    */
   public function getAvailableShortnames($candidate=false)
   {
+    $params = [];
     if ($candidate) {
       $sql = "SELECT rf_shortname FROM license_candidate;";
       $stmt = __METHOD__.".rf_candidate_shortnames";
     } else {
-      $sql = "SELECT rf_shortname FROM ONLY license_ref;";
+      $sql = LicenseMap::getMappedLicenseRefView();
       $stmt = __METHOD__.".rf_shortnames";
+      $params[] = LicenseMap::CONCLUSION;
     }
     $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt);
+    $res = $this->dbManager->execute($stmt, $params);
     $vars = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
 
@@ -74,7 +80,7 @@ class ObligationMap
    * @param bool   $candidate Is a candidate license?
    * @return int[] License ids
    */
-  public function getIdFromShortname($shortname,$candidate=false)
+  public function getIdFromShortname($shortname, $candidate=false)
   {
     $tableName = "";
     if ($candidate) {

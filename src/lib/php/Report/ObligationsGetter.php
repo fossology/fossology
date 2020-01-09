@@ -72,8 +72,8 @@ class ObligationsGetter
     }
 
     $bulkAddIds = $this->getBulkAddLicenseList($uploadId, $groupId);
-    $obligationRef = $this->licenseDao->getLicenseObligations($allLicenseIds, 'obligation_map') ?: array();
-    $obligationCandidate = $this->licenseDao->getLicenseObligations($allLicenseIds, 'obligation_candidate_map') ?: array();
+    $obligationRef = $this->licenseDao->getLicenseObligations($allLicenseIds) ?: array();
+    $obligationCandidate = $this->licenseDao->getLicenseObligations($allLicenseIds, true) ?: array();
     $obligations = array_merge($obligationRef, $obligationCandidate);
     $onlyLicenseIdsWithObligation = array_column($obligations, 'rf_fk');
     if (!empty($bulkAddIds)) {
