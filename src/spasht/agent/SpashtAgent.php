@@ -108,6 +108,8 @@ class SpashtAgent extends Agent
    */
   protected function getInformation($details, $pfileSha1AndpfileId)
   {
+    global $SysConf;
+
     $namespace = $details['spasht_namespace'];
     $name = $details['spasht_name'];
     $revision = $details['spasht_revision'];
@@ -127,8 +129,22 @@ class SpashtAgent extends Agent
     // uri to definitions section in the api to get scancode details
     $uri = 'definitions/' . $type . "/" . $provider . "/" . $namespace . "/" .
       $name . "/" . $revision;
+    // Prepare proxy
+    $proxy = [];
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+    if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
+      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
+    }
 
-    $res = $client->request('GET', $uri, []);
+    $res = $client->request('GET', $uri, ["proxy" => $proxy]);
 
     if ($res->getStatusCode() == 200) {
       $body = json_decode($res->getBody()->getContents());

@@ -42,6 +42,7 @@ class ui_spasht extends FO_Plugin
     $this->agentDao   = $GLOBALS['container']->get('dao.agent');
     $this->viewName   = "copyright_spasht_list";
     $this->renderer   = $GLOBALS['container']->get('twig.environment');
+    $this->modBack    = $this->Name;
 
     parent::__construct();
   }
@@ -52,20 +53,21 @@ class ui_spasht extends FO_Plugin
     */
   function RegisterMenus()
   {
-    // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("show","format","page","upload","item"));
-    $Item = GetParm("item",PARM_INTEGER);
-    $Upload = GetParm("upload",PARM_INTEGER);
-
-    if (!empty($Item) && !empty($Upload)) {
-
-      if (GetParm("mod",PARM_STRING) == $this->Name) {
-        menu_insert("Browse::Spasht agent/view in clearlydefined",10);
-        menu_insert("Browse::[BREAK]",100);
+    $URI = $this->Name . Traceback_parm_keep(array(
+      "show", "format", "page", "upload", "item"));
+    $Item = GetParm("item", PARM_INTEGER);
+    $Upload = GetParm("upload", PARM_INTEGER);
+    if (! empty($Item) && ! empty($Upload)) {
+      $menuText = "Spasht";
+      $tooltipText = _("View in clearlydefined");
+      $menuPosition = 55;
+      if (GetParm("mod", PARM_STRING) == $this->Name) {
+        menu_insert("Browse::$menuText", $menuPosition);
       } else {
-        $text = _("view in clearlydefined");
-        menu_insert("Browse::Spasht",10,$URI,$text);
+        menu_insert("Browse::$menuText", $menuPosition, $URI, $tooltipText);
       }
+      $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText,
+        $menuPosition, $this->getName(), $URI, $tooltipText);
     }
   } // RegisterMenus()
 
@@ -101,6 +103,8 @@ class ui_spasht extends FO_Plugin
     */
   public function Output()
   {
+    global $SysConf;
+
     $this->agentName = "spasht";
     $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
     $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
@@ -111,6 +115,7 @@ class ui_spasht extends FO_Plugin
     // $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
 
     // $this->vars['advanceSearch'] = ""; //Set advance search to empty
+
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "Spasht_home";
 
@@ -122,6 +127,8 @@ class ui_spasht extends FO_Plugin
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $uploadtree_tablename = GetUploadtreeTableName($uploadId);
     $agentId = $this->agentDao->getCurrentAgentId("spasht");
+
+    $this->vars['micromenu'] = Dir2Browse($this->modBack, $uploadtree_pk, NULL, $showBox = 0, "View", -1, '', '', $uploadtree_tablename);
 
     if (!empty($optionSelect)) {
       $str = explode ("/", $optionSelect);
@@ -148,14 +155,29 @@ class ui_spasht extends FO_Plugin
     if ($patternName != null && !empty($patternName)) {//Check if search is not empty
       /** Guzzle/http Guzzle Client that connect with ClearlyDefined API */
       $client = new Client([
-      // Base URI is used with relative requests
-      'base_uri' => 'https://api.clearlydefined.io/',
+        // Base URI is used with relative requests
+        'base_uri' => $SysConf['SYSCONFIG']["ClearlyDefinedURL"]
       ]);
+      // Prepare proxy
+      $proxy = [];
+      if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+        $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
+      }
+      if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+        $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
+      }
+      if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
+        $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
+      }
 
       // Point to definitions section in the api
-      $res = $client->request('GET','definitions',[
-        'query' => ['pattern' => $patternName] //Perform query operation into the api
-        ]);
+      $res = $client->request('GET', 'definitions', [
+        'query' => ['pattern' => $patternName], //Perform query operation into the api
+        'proxy' => $proxy
+      ]);
 
       if ($res->getStatusCode()==200) {//Get the status of http request
         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
@@ -182,10 +204,11 @@ class ui_spasht extends FO_Plugin
             $detail_body = array();
 
             //details section
-            $res_details = $client->request('GET',$uri,[
-            'query' => [
-              'expand' => "-files"
-            ] //Perform query operation into the api
+            $res_details = $client->request('GET', $uri, [
+              'query' => [
+                'expand' => "-files"
+              ], //Perform query operation into the api
+              'proxy' => $proxy
             ]);
 
             $detail_body = json_decode($res_details->getBody()->getContents(),true);
