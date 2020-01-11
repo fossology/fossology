@@ -955,7 +955,7 @@ INSERT INTO clearing_decision (
   {
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
-    $scanJobProxy->createAgentStatus(array('nomos', 'monk', 'ninka', 'reportImport', 'ojo'));
+    $scanJobProxy->createAgentStatus(array('nomos', 'monk', 'ninka', 'reportImport', 'ojo', 'spasht'));
     $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     $agentIds = "ANY(VALUES(" . implode("),(", $latestAgentIds) . "))";
 
