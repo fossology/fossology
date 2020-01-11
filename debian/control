@@ -339,3 +339,15 @@ Description: architecture for analyzing software, report importer
  type identification.
  .
  This package contains the reportImport agent programs and their resources.
+
+Package: fossology-spasht
+Architecture: any
+Depends: fossology-common, ${shlibs:Depends}, ${misc:Depends}
+Description: architecture to connect clearlyDefined, spasht
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the spasht agent programs and their resources.
