@@ -957,17 +957,17 @@ INSERT INTO clearing_decision (
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
     $scanJobProxy->createAgentStatus(array('nomos', 'monk', 'ninka', 'reportImport', 'ojo'));
     $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
-    $agentIds = "ANY(VALUES(" . implode("),(", $latestAgentIds) . "))";
+    $agentIds = "{" . implode(",", $latestAgentIds) . "}";
 
     $globalScope = DecisionScopes::REPO;
-    $params = array($groupId, $uploadId);
-    $statement = __METHOD__ . ".$uploadTreeTable." . implode(".", $latestAgentIds);
+    $params = array($groupId, $uploadId, $agentIds);
+    $statement = __METHOD__ . "." . $uploadTreeTable;
     $sql = "
 WITH allDecs AS (
   SELECT DISTINCT ON (ut.uploadtree_pk) * FROM $uploadTreeTable AS ut
     LEFT JOIN license_file AS lf
       ON lf.pfile_fk = ut.pfile_fk
-      AND lf.agent_fk = $agentIds
+      AND lf.agent_fk = ANY($3::int[])
       AND lf.rf_fk NOT IN (SELECT rf_pk FROM license_ref
         WHERE rf_shortname = ANY(VALUES('No_license_found'),('Void'))
       )
