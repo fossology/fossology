@@ -31,6 +31,7 @@ use Fossology\Lib\Proxy\ScanJobProxy;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-browse-license.php
@@ -55,7 +56,7 @@ class ui_browse_license extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
   {

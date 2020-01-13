@@ -69,6 +69,7 @@ use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Data\AgentRef;
 
 include_once(__DIR__ . "/spdx2utils.php");
 
@@ -114,7 +115,7 @@ class SpdxTwoAgent extends Agent
   /** @var array $agentNames
    * Agent names mapping
    */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
   /** @var array $includedLicenseIds
    * License ids included
    */

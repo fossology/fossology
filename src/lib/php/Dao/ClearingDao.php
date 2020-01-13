@@ -32,6 +32,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Monolog\Logger;
+use Fossology\Lib\Data\AgentRef;
 
 class ClearingDao
 {
@@ -955,7 +956,7 @@ INSERT INTO clearing_decision (
   {
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
-    $scanJobProxy->createAgentStatus(array('nomos', 'monk', 'ninka', 'reportImport', 'ojo'));
+    $scanJobProxy->createAgentStatus(array_keys(AgentRef::AGENT_LIST));
     $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
     $agentIds = "{" . implode(",", $latestAgentIds) . "}";
 
