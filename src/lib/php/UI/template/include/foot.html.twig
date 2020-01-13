@@ -10,9 +10,16 @@
 <script type="text/javascript">
   function renderSelect2() {
     if(!$('.ui-render-select2').attr("size") > 0) {
-      $('.ui-render-select2').select2({
-        width: 'style',
-        dropdownAutoWidth : true
+      $('.ui-render-select2').each(function() {
+        var dropdownParent = $(document.body);
+        if ($(this).parents('.modal').length !== 0) {
+          dropdownParent = $(this).parents('.modal');
+        }
+        $(this).select2({
+          width: 'style',
+          dropdownAutoWidth : true,
+          dropdownParent: dropdownParent
+        });
       });
     }
   }
