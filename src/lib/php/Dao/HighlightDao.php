@@ -198,4 +198,24 @@ class HighlightDao
     $highlightEntries = array_merge(array_merge($highlightDiffs,$highlightKeywords),$highlightBulk);
     return $highlightEntries;
   }
+
+  /**
+   * @param licenseMatchId
+   * @return page number
+   */
+  public function getPageNumberOfHighlightEntry($licenseMatchId)
+  {
+    $row = $this->dbManager->getSingleRow(
+      "SELECT FLOOR(
+                (
+                  SELECT start FROM highlight WHERE fl_fk=$1 ORDER BY start ASC LIMIT 1
+                ) / (
+                  SELECT conf_value FROM sysconfig WHERE variablename LIKE 'BlockSizeText'
+                )::numeric
+              )
+       AS page;",
+      array($licenseMatchId)
+    );
+    return $row['page'];
+  }
 }
