@@ -24,7 +24,7 @@ namespace Fossology\DelAgent\UI;
  */
 abstract class DeleteMessages
 {
-  const NO_PERMISSION = 0; /**< You don't have permissions to delete the upload */
   const SCHEDULING_FAILED = 1; /**< Deletion Scheduling failed */
   const SUCCESS =  2; /**< Deletion added to job queue */
+  const NO_PERMISSION = 3; /**< You don't have permissions to delete the upload */
 }

@@ -82,7 +82,7 @@ class changeLicenseProcessPost extends FO_Plugin
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
-    $itemId = $_POST['uploadTreeId'];
+    $itemId = @$_POST['uploadTreeId'];
     if (empty($itemId)) {
       return $this->errorJson("bad item id");
     }
