@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.9
+  version: 1.0.10
   contact:
     email: fossology@fossology.org
   license:
@@ -172,6 +172,14 @@ paths:
         - Upload
         - Organize
       summary: Delete upload by id
+      parameters:
+        - name: groupName
+          description: The group name to chose while deleting the package
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided  
       responses:
         '202':
           description: Upload will be deleted
@@ -193,6 +201,13 @@ paths:
           required: true
           schema:
             type: integer
+        - name: groupName
+          description: The group name to chose while changing the package
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided
       responses:
         '202':
           description: Upload will be moved
@@ -298,6 +313,13 @@ paths:
           schema:
             type: integer
             description: Group id, from last login if not provided
+        - name: groupName
+          description: The group name to chose while uploading the package
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided    
       responses:
         '201':
           description: Upload is created
@@ -351,6 +373,13 @@ paths:
           - Search
         description: Search the FOSSology for a specific file
         parameters:
+          - name: groupName
+            description: The group name to chose while performing search
+            in: header
+            required: false
+            schema:
+              type: string
+              description: Group name, from last login if not provided
           - name: searchType
             # use 'allfiles', if not given
             required: false
@@ -522,6 +551,13 @@ paths:
             required: true
             schema:
               type: integer
+          - name: groupName
+            description: The group name to chose while scheduling jobs
+            in: header
+            required: false
+            schema:
+              type: string
+              description: Group name, from last login if not provided    
         requestBody:
           description: Agents to be scheduled with the job
           required: true
@@ -736,6 +772,13 @@ paths:
               - spdx2tv
               - readmeoss
               - unifiedreport
+        - name: groupName
+          description: The group name to chose while generating a report
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided      
       responses:
         '201':
           description: Report generation is scheduled. Link to download report will be in message
@@ -753,6 +796,13 @@ paths:
         description: Id the report to download
         schema:
           type: integer
+      - name: groupName
+        description: The group name to chose while downloading specific report
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided    
     get:
       tags:
       - Job
