@@ -36,6 +36,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-browse-license.php
@@ -70,7 +71,7 @@ class AjaxExplorer extends DefaultPlugin
    * DB proxy view to hold upload tree entries for files with no license */
   private $noLicenseUploadTreeView;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
   {

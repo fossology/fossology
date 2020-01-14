@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
@@ -113,7 +114,7 @@ class ClearingView extends FO_Plugin
     $unmaskAgents = $selectedAgentId;
     if (empty($selectedAgentId)) {
       $scanJobProxy = new ScanJobProxy($this->agentsDao,$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport','ojo'));
+      $scanJobProxy->createAgentStatus(array_keys(AgentRef::AGENT_LIST));
       $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds,
