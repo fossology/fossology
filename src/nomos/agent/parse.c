@@ -10237,8 +10237,10 @@ int match3(int base, char *buf, int score, int save, int isML, int isPS)
 void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
 {
   char *cp;
-  char *start = mtext;
+  char *start;
+  int index=0;
   int len;
+  start =  copyString(mtext, MTAG_TEXTPARA);
   if(!start)
   {
     LOG_FATAL("called saveLicenseParagraph without text")
@@ -10258,13 +10260,15 @@ void saveLicenseParagraph(char *mtext, int isML, int isPS, int entireBuf)
       len = cur.regm.rm_eo + 80;
     } else {
       len = cur.regm.rm_eo + 130 - cur.regm.rm_so;
-      start += cur.regm.rm_so - 50;
+      index = cur.regm.rm_so - 50;
     }
     cur.licPara = memAlloc(len + 9, MTAG_TEXTPARA);
     (void) strcpy(cur.licPara, "... ");
-    (void) strncpy(cur.licPara + 4, start, len);
+    (void) strncpy(cur.licPara + 4, start + index, len);
     (void) strcpy(cur.licPara + len + 4, " ...");
+    memFree(start, MTAG_TEXTPARA);
   }
+
   /*
    * Convert double-line-feed chars ("\r" and "\n" combos) to a single "\n"
    */
