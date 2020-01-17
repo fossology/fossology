@@ -585,7 +585,7 @@ File NomosTestfiles/Frameworx/Frameworx-1.0.txt contains license(s) Frameworx-1.
 File NomosTestfiles/APL/APL-1.0.txt contains license(s) APL-1.0
 File NomosTestfiles/EUPL/EUPL-1.0.txt contains license(s) EUPL-1.0
 File NomosTestfiles/EUPL/EUPL-1.1.txt contains license(s) EUPL-1.1
-File NomosTestfiles/EUPL/EUPL-1.2.txt contains license(s) CC-BY,EUPL-1.2,LGPL,MPL
+File NomosTestfiles/EUPL/EUPL-1.2.txt contains license(s) CC-BY-SA,EUPL-1.2,LGPL,MPL
 File NomosTestfiles/EUPL/simRender.h contains license(s) EUPL-1.1
 File NomosTestfiles/EUPL/async_log.c contains license(s) EUPL
 File NomosTestfiles/No_license_found/ConfigRuleSet.class contains license(s) Apache-possibility
