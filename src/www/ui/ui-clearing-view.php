@@ -301,12 +301,22 @@ class ClearingView extends FO_Plugin
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['bulkHistory'] = $bulkHistory;
 
-    $filesOfInterest = $this->clearingDao->getTotalDecisionCount($uploadId,
-      $groupId);
-    $filesCleared = $this->clearingDao->getClearingDecisionsCount($uploadId,
-      $groupId);
+    $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId),
+      $uploadTreeTableName,
+      'no_license_uploadtree' . $uploadId);
+    $filesOfInterest = $noLicenseUploadTreeView->count();
 
-    $this->vars['message'] = _("Cleared").": $filesCleared/$filesOfInterest";
+    $nonClearedUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId),
+      $uploadTreeTableName,
+      'already_cleared_uploadtree' . $uploadId);
+    $filesToBeCleared = $nonClearedUploadTreeView->count();
+
+    $filesAlreadyCleared = $filesOfInterest - $filesToBeCleared;
+    $this->vars['message'] = _("Cleared").": $filesAlreadyCleared/$filesOfInterest";
 
     return $this->render("ui-clearing-view.html.twig");
   }

@@ -33,6 +33,7 @@ use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
 use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\AgentDao;
 
 /**
@@ -494,16 +495,26 @@ class UploadHelper
     $restHelper = $container->get('helper.restHelper');
     $uploadDao = $restHelper->getUploadDao();
     $dbManager = $restHelper->getDbHelper()->getDbManager();
-    $clearingDao = $container->get('dao.clearing');
     $copyrightDao = $container->get('dao.copyright');
     $agentDao = $container->get('dao.agent');
 
     $agentName = "copyright";
-
-    $totalClearings = $clearingDao->getTotalDecisionCount($uploadId, $groupId);
-    $clearingCount = $clearingDao->getClearingDecisionsCount($uploadId,
-      $groupId);
     $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+
+    $noLicenseUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId),
+      $uploadTreeTableName,
+      'no_license_uploadtree' . $uploadId);
+    $clearingCount = $noLicenseUploadTreeView->count();
+
+    $nonClearedUploadTreeView = new UploadTreeProxy($uploadId,
+      array(UploadTreeProxy::OPT_SKIP_THESE => "alreadyCleared",
+        UploadTreeProxy::OPT_GROUP_ID => $groupId),
+      $uploadTreeTableName,
+      'already_cleared_uploadtree' . $uploadId);
+    $filesToBeCleared = $nonClearedUploadTreeView->count();
+
     $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId,
       $uploadTreeTableName);
     $scanProx = new ScanJobProxy($agentDao, $uploadId);
@@ -532,7 +543,7 @@ class UploadHelper
     $summary->setTotalLicenses($hist['scannerLicenseCount']);
     $summary->setUniqueConcludedLicenses($hist['editedUniqueLicenseCount']);
     $summary->setTotalConcludedLicenses($hist['editedLicenseCount']);
-    $summary->setFilesToBeCleared($totalClearings - $clearingCount);
+    $summary->setFilesToBeCleared($filesToBeCleared);
     $summary->setFilesCleared($clearingCount);
     $summary->setClearingStatus($uploadDao->getStatus($uploadId, $groupId));
     $summary->setCopyrightCount($copyrightCount);

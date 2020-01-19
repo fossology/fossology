@@ -72,6 +72,9 @@ class AjaxExplorer extends DefaultPlugin
   private $noLicenseUploadTreeView;
   /** @var array */
   protected $agentNames = AgentRef::AGENT_LIST;
+  /** @var array $cacheClearedCounter
+   * Array to hold item tree which are already calculated */
+  private $cacheClearedCounter;
 
   public function __construct()
   {
@@ -91,6 +94,7 @@ class AjaxExplorer extends DefaultPlugin
     $this->filesToBeCleared = [];
     $this->alreadyClearedUploadTreeView = NULL;
     $this->noLicenseUploadTreeView = NULL;
+    $this->cacheClearedCounter = [];
   }
 
   public function __destruct()
@@ -457,23 +461,12 @@ class AjaxExplorer extends DefaultPlugin
           UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
           UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
           $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
-          UploadTreeProxy::OPT_GROUP_ID => $groupId
+          UploadTreeProxy::OPT_GROUP_ID => $groupId,
+          UploadTreeProxy::OPT_ONLY_MAIN_LICENSE => true
         ), $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
       $this->alreadyClearedUploadTreeView->materialize();
-    }
-
-    if (! $isFlat) {
-      $this->filesThatShouldStillBeCleared = array_replace(
-        $this->filesThatShouldStillBeCleared,
-        $this->alreadyClearedUploadTreeView->countMaskedNonArtifactChildren(
-          $itemTreeBounds->getItemId()));
-    } else {
-      $this->filesThatShouldStillBeCleared = array_replace(
-        $this->filesThatShouldStillBeCleared,
-        $this->alreadyClearedUploadTreeView->getNonArtifactDescendants(
-          $itemTreeBounds));
     }
 
     if ($this->noLicenseUploadTreeView === NULL) {
@@ -484,25 +477,51 @@ class AjaxExplorer extends DefaultPlugin
           UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
           UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
           $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
-          UploadTreeProxy::OPT_GROUP_ID => $groupId
+          UploadTreeProxy::OPT_GROUP_ID => $groupId,
+          UploadTreeProxy::OPT_ONLY_MAIN_LICENSE => true
         ), $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
       $this->noLicenseUploadTreeView->materialize();
     }
-    if (! $isFlat) {
-      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
-        $this->noLicenseUploadTreeView->countMaskedNonArtifactChildren(
-          $itemTreeBounds->getItemId()));
-    } else {
-      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
-        $this->noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds));
-    }
 
+    $this->updateFilesToBeCleared($isFlat, $itemTreeBounds);
     $allDecisions = $this->clearingDao->getFileClearingsFolder($itemTreeBounds,
       $groupId, $isFlat);
     $editedMappedLicenses = array_replace($editedMappedLicenses,
       $this->clearingFilter->filterCurrentClearingDecisions($allDecisions));
     return $pfileLicenses;
+  }
+
+  /**
+   * Update filesThatShouldStillBeCleared and filesToBeCleared counts if the
+   * passed item has not been cached yet.
+   * @param boolean $isFlat
+   * @param ItemTreeBounds $itemTreeBounds
+   */
+  private function updateFilesToBeCleared($isFlat, $itemTreeBounds)
+  {
+    $itemId = $itemTreeBounds->getItemId();
+    if (in_array($itemId, $this->cacheClearedCounter)) {
+      // Already calculated, no need to recount
+      return;
+    }
+    $this->cacheClearedCounter[] = $itemId;
+    if (! $isFlat) {
+      $this->filesThatShouldStillBeCleared = array_replace(
+        $this->filesThatShouldStillBeCleared,
+        $this->alreadyClearedUploadTreeView->countMaskedNonArtifactChildren(
+          $itemId));
+      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
+        $this->noLicenseUploadTreeView->countMaskedNonArtifactChildren(
+          $itemId));
+    } else {
+      $this->filesThatShouldStillBeCleared = array_replace(
+        $this->filesThatShouldStillBeCleared,
+        $this->alreadyClearedUploadTreeView->getNonArtifactDescendants(
+          $itemTreeBounds));
+      $this->filesToBeCleared = array_replace($this->filesToBeCleared,
+        $this->noLicenseUploadTreeView->getNonArtifactDescendants($itemTreeBounds));
+    }
   }
 }
 
