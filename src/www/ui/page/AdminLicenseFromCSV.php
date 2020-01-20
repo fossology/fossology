@@ -75,6 +75,8 @@ class AdminLicenseFromCSV extends DefaultPlugin
     $errMsg = '';
     if (! ($uploadedFile instanceof UploadedFile)) {
       $errMsg = _("No file selected");
+    } elseif ($uploadedFile->getError() !== UPLOAD_ERR_OK) {
+      $errMsg = $uploadedFile->getErrorMessage();
     } elseif ($uploadedFile->getSize() == 0 && $uploadedFile->getError() == 0) {
       $errMsg = _("Larger than upload_max_filesize ") .
         ini_get(self::KEY_UPLOAD_MAX_FILESIZE);

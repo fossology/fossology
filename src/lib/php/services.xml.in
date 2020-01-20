@@ -145,6 +145,7 @@ without any warranty.
 
         <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport">
             <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
         </service>
 
         <service id="app.obligation_csv_import" class="Fossology\Lib\Application\ObligationCsvImport">

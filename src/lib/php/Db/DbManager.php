@@ -92,7 +92,7 @@ abstract class DbManager
 
   /**
    * Note: this builds a query which is not useable with SQLite
-   * one should use SqLiteE::nsertPreparedAndReturn() instead
+   * one should use SqLiteE::insertPreparedAndReturn() instead
    *
    * @param $statementName
    * @param $sqlStatement
