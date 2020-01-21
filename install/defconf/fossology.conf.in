@@ -77,6 +77,17 @@ PROJECTSTATEDIR=$LOCALSTATEDIR/lib/$PROJECT
 ; cache folder
 CACHEDIR=$LOCALSTATEDIR/cache/$PROJECT
 
+; Use external Authentication
+CONF_EXT_AUTH_ENABLE=false
+; Environment variable where to find the User name
+CONF_EXT_AUTH_ENV_USER=
+; Environment variable where to find the User email
+CONF_EXT_AUTH_ENV_MAIL=
+; Environment variable where to find the User Description
+CONF_EXT_AUTH_ENV_DESC=
+; Set to true to use lowercase usernames
+CONF_EXT_AUTH_ENV_LOWERCASE_USER=
+
 ; project logdir
 LOGDIR=/var/log/$PROJECT
 

@@ -42,7 +42,36 @@ function siteminder_check()
 } // siteminder_check()
 
 /**
- * \brief Check if this account is correct
+ * \brief Check if the external HTTP authentication is enabled.
+ *  The mapping variables should be configured in fossology.conf
+ *  Usernames are forced lowercase.
+ * \return false if not enabled
+ */
+function auth_external_check()
+{
+  $EXT_AUTH_ENABLE = array_key_exists('CONF_EXT_AUTH_ENABLE', $GLOBALS) ? $GLOBALS['CONF_EXT_AUTH_ENABLE'] : false;
+  if ($EXT_AUTH_ENABLE) {
+    $EXT_AUTH_USER = $_SERVER[$GLOBALS['CONF_EXT_AUTH_ENV_USER']];
+    $EXT_AUTH_LOWERCASE = array_key_exists('CONF_EXT_AUTH_ENV_LOWERCASE_USER', $GLOBALS) ? $GLOBALS['CONF_EXT_AUTH_ENV_LOWERCASE_USER'] : false;
+    if ($EXT_AUTH_LOWERCASE) {
+        $EXT_AUTH_USER = strtolower($EXT_AUTH_USER);
+    }
+    $EXT_AUTH_MAIL = $_SERVER[$GLOBALS['CONF_EXT_AUTH_ENV_MAIL']];
+    $EXT_AUTH_DESC = $_SERVER[$GLOBALS['CONF_EXT_AUTH_ENV_DESC']];
+    if (isset($EXT_AUTH_USER) && !empty($EXT_AUTH_USER)) {
+      $out['useAuthExternal']         = true;
+      $out['loginAuthExternal']       = $EXT_AUTH_USER;
+      $out['passwordAuthExternal']    = sha1($EXT_AUTH_USER);
+      $out['emailAuthExternal']       = $EXT_AUTH_MAIL;
+      $out['descriptionAuthExternal'] = $EXT_AUTH_DESC;
+      return $out;
+    }
+  }
+  return $out['useAuthExternal'] = false;
+}
+
+/**
+ * \brief check if this account is correct
  *
  * \param string &$user   User name, reference variable
  * \param string &$passwd Password, reference variable
