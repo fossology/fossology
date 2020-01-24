@@ -95,8 +95,7 @@ class core_auth extends FO_Plugin
       $this->checkUsernameAndPassword($this->authExternal['loginAuthExternal'], $this->authExternal['passwordAuthExternal']);
     }
 
-    if (array_key_exists('selectMemberGroup', $_POST))
-    {
+    if (array_key_exists('selectMemberGroup', $_POST)) {
       $selectedGroupId = intval($_POST['selectMemberGroup']);
       $this->userDao->setDefaultGroupMembership(intval($_SESSION[Auth::USER_ID]), $selectedGroupId);
       $_SESSION[Auth::GROUP_ID] = $selectedGroupId;
@@ -261,34 +260,32 @@ class core_auth extends FO_Plugin
    */
   function checkUsernameAndPassword($userName, $password)
   {
-      //Check the user for external authentication
-      if ($this->authExternal['useAuthExternal']) {
-        $username = $this->authExternal['loginAuthExternal'];
-        //checking if user exist
-        try {
-          $this->userDao->getUserAndDefaultGroupByUserName($username);
-        } catch (Exception $e) {
-            // If user does not exist then we create it
-            $User = trim(str_replace("'", "''", $this->authExternal['loginAuthExternal']));
-            $Pass = $this->authExternal['passwordAuthExternal'] ;
-            $Seed = rand() . rand();
-            $Hash = sha1($Seed . $Pass);
-            $Desc = $this->authExternal['descriptionAuthExternal'];
-            $Perm = 3;
-            $Folder = 1;
-            $Email_notify = "y";
-            $Email = $this->authExternal['emailAuthExternal'];
-            // Set default list of agents when a new user is created
-            $agentList = "agent_bucket,agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo";
-            $default_bucketpool_fk = 2;
-            $this->user-add_user($User,$Desc,$Seed,$Hash,$Perm,$Email,
-                $Email_notify,$agentList,$Folder, $default_bucketpool_fk);
-          }
+    /* Check the user for external authentication */
+    if ($this->authExternal['useAuthExternal']) {
+      $username = $this->authExternal['loginAuthExternal'];
+      /* checking if user exist */
+      try {
+        $this->userDao->getUserAndDefaultGroupByUserName($username);
+      } catch (Exception $e) {
+        /* If user does not exist then we create it */
+        $User = trim(str_replace("'", "''", $this->authExternal['loginAuthExternal']));
+        $Pass = $this->authExternal['passwordAuthExternal'] ;
+        $Seed = rand() . rand();
+        $Hash = sha1($Seed . $Pass);
+        $Desc = $this->authExternal['descriptionAuthExternal'];
+        $Perm = 3;
+        $Folder = 1;
+        $Email_notify = "y";
+        $Email = $this->authExternal['emailAuthExternal'];
+        /* Set default list of agents when a new user is created */
+        $agentList = "agent_bucket,agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo";
+        $default_bucketpool_fk = 2;
+        $this->user-add_user($User,$Desc,$Seed,$Hash,$Perm,$Email,
+          $Email_notify,$agentList,$Folder, $default_bucketpool_fk);
       }
-      //End for external authentication
+    }
 
-    if (empty($userName) || $userName == 'Default User')
-    {
+    if (empty($userName) || $userName == 'Default User') {
       return false;
     }
     try {
