@@ -201,6 +201,7 @@
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-1.0","results":[{"end":32,"len":7,"license":"GPL-1.0","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-1.0+","results":[{"end":33,"len":8,"license":"GPL-1.0+","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-2.0-only","results":[{"end":37,"len":12,"license":"GPL-2.0-only","start":25}]},
+  {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-2.0-with-code.js","results":[{"end":34,"len":7,"license":"GPL-2.0","start":27}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-2.0-or-later","results":[{"end":41,"len":16,"license":"GPL-2.0-or-later","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-2.0","results":[{"end":32,"len":7,"license":"GPL-2.0","start":25}]},
   {"file":"../../../nomos/agent_tests/testdata/NomosTestfiles/SPDX/GPL-2.0+","results":[{"end":33,"len":8,"license":"GPL-2.0+","start":25}]},
