@@ -281,7 +281,7 @@ class DeciderAgent extends Agent
     }
 
     if ($licenseMatchExists) {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=false);
     }
     return $licenseMatchExists;
   }
