@@ -52,17 +52,10 @@ class SoftwareHeritageDao
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $stmt = __METHOD__.$uploadTreeTableName;
-    $sql = "SELECT software_heritage.pfile_fk AS pfile_fk  
-            FROM  $uploadTreeTableName 
-            JOIN software_heritage 
-            ON $uploadTreeTableName.upload_fk = $1 
-            AND software_heritage.pfile_fk = $uploadTreeTableName.pfile_fk";
-    $rows = $this->dbManager->getRows($sql,array($uploadId),$stmt);
-    $results = [];
-    foreach ($rows as $row) {
-        $results[] = $row['pfile_fk'];
-    }
-    return $results;
+    $sql = "SELECT DISTINCT(SH.pfile_fk) FROM $uploadTreeTableName UT
+              INNER JOIN software_heritage SH ON SH.pfile_fk = UT.pfile_fk
+            WHERE UT.upload_fk = $1";
+    return $this->dbManager->getRows($sql,array($uploadId),$stmt);
   }
 
 
@@ -74,7 +67,7 @@ class SoftwareHeritageDao
   */
   public function setshDetails($pfileId, $licenseDetails)
   {
-    if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk'=> $pfileId, 'license' => $licenseDetails]))) {
+    if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk' => $pfileId, 'license' => $licenseDetails]))) {
         return true;
     }
     return false;

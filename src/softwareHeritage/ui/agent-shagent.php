@@ -24,22 +24,23 @@ use Fossology\Lib\Plugin\AgentPlugin;
  */
 class softwareHeritageAgentPlugin extends AgentPlugin
 {
-    public function __construct() {
-        $this->Name = "agent_shagent";
-        $this->Title =  ("Software Heritage Analysis");
-        $this->AgentName = "softwareHeritage";
+  public function __construct()
+  {
+    $this->Name = "agent_shagent";
+    $this->Title =  ("Software Heritage Analysis");
+    $this->AgentName = "softwareHeritage";
 
-        parent::__construct();
-    }
+    parent::__construct();
+  }
 
-    /**
-     * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
-     * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
-     */
-    function AgentHasResults($uploadId=0)
-    {
-        return CheckARS($uploadId, $this->AgentName, "software heritage scanner", "softwareHeritage");
-    }
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
+  function AgentHasResults($uploadId=0)
+  {
+    return CheckARS($uploadId, $this->AgentName, "software heritage scanner", "softwareHeritage");
+  }
 }
 
 register_plugin(new softwareHeritageAgentPlugin());
