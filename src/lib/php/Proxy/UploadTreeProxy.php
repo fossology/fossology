@@ -293,7 +293,7 @@ FROM (
   )
 ) AS filtered_clearing_decision ORDER BY rnum DESC LIMIT 1";
         return " $conditionQueryHasLicense
-            AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.") )";
+            AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.",".DecisionTypes::DO_NOT_USE.") )";
       case "noCopyright":
         return "EXISTS (SELECT copyright_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":
