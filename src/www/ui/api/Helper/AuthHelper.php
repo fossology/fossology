@@ -93,14 +93,14 @@ class AuthHelper
    * Verify the JWT token sent by user.
    *
    * @param string $authHeader The "Authorization" header sent by user.
-   * @param string $hostname   Host name to verify the audience of the token.
    * @param int    $userId     The user id as per the valid token.
    * @param string $tokenScope The scope of the token presented.
    * @return boolean|Fossology::UI::Api::Models::Info True if the token is valid,
    *         false otherwise, Info in case of error.
    */
-  public function verifyAuthToken($authHeader, $hostname, &$userId, &$tokenScope)
+  public function verifyAuthToken($authHeader, &$userId, &$tokenScope)
   {
+    $jwtTokenMatch = null;
     $headerValid = preg_match(
       "/^bearer (([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+))$/i",
       $authHeader, $jwtTokenMatch);
@@ -114,8 +114,7 @@ class AuthHelper
       $jwtTokenPayloadDecoded = JWT::jsonDecode(
         JWT::urlsafeB64Decode($jwtTokenPayload));
 
-      if (($jwtTokenPayloadDecoded->{'jti'} === null) ||
-        ($jwtTokenPayloadDecoded->{'aud'} != $hostname)) {
+      if ($jwtTokenPayloadDecoded->{'jti'} === null) {
         return new Info(403, "Invalid token sent.", InfoType::ERROR);
       }
       $jwtJti = $jwtTokenPayloadDecoded->{'jti'};
@@ -192,8 +191,8 @@ class AuthHelper
   public function updateUserSession($userId, $scope, $groupName = null)
   {
     $authPlugin = $GLOBALS["container"]->get("helper.restHelper")->getPlugin('auth');
-    $user = $this->dbHelper->getUsers($userId)[0];
-    $row = $this->userDao->getUserAndDefaultGroupByUserName($user["name"]);
+    $user = $this->userDao->getUserByPk($userId);
+    $row = $this->userDao->getUserAndDefaultGroupByUserName($user["user_name"]);
     if ($groupName !== null) {
       $row['group_fk'] = $this->userDao->getGroupIdByName($groupName);
       $row['group_name'] = $groupName;
@@ -205,7 +204,6 @@ class AuthHelper
   /**
    * Generates new JWT token.
    *
-   * @param string $hostname Hostname of the issuer
    * @param string $expire   When the token will expire ('YYYY-MM-DD')
    * @param string $created  When the token was created ('YYYY-MM-DD')
    * @param string $jti      Token id (`pat_pk.user_pk`)
@@ -213,11 +211,9 @@ class AuthHelper
    * @param string $key      Token secret key
    * @return string New JWT token
    */
-  public function generateJwtToken($hostname, $expire, $created, $jti, $scope, $key)
+  public function generateJwtToken($expire, $created, $jti, $scope, $key)
   {
     $newJwtToken = [
-      "iss" => $hostname,
-      "aud" => $hostname,
       "exp" => strtotime($expire . " +1 day -1 second"),  // To allow day level granularity
       "nbf" => strtotime($created),
       "jti" => base64_encode($jti),

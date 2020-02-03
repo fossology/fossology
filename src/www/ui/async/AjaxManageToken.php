@@ -103,7 +103,7 @@ class AjaxManageToken extends DefaultPlugin
     $tokenInfo = $restDbHelper->getTokenKey($tokenPk);
     $tokenScope = array_search($tokenInfo['token_scope'], RestHelper::SCOPE_DB_MAP);
 
-    $jwtToken = $authHelper->generateJwtToken($hostname, $tokenInfo['expire_on'],
+    $jwtToken = $authHelper->generateJwtToken($tokenInfo['expire_on'],
       $tokenInfo['created_on'], $jti, $tokenScope, $tokenInfo['token_key']);
     return array(
       "status" => true,
