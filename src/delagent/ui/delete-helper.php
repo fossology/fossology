@@ -87,7 +87,7 @@ function initDeletion($uploadpks)
   $errorMessages = [];
   $deleteResponse = null;
   for ($i=0; $i < sizeof($uploadpks); $i++) {
-    $deleteResponse = $this->TryToDelete(intval($uploadpks[$i]));
+    $deleteResponse = TryToDelete(intval($uploadpks[$i]));
 
     if ($deleteResponse->getDeleteMessageCode() != DeleteMessages::SUCCESS) {
       $errorMessages[] = $deleteResponse;
