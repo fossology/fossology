@@ -410,12 +410,17 @@ void scheduler_destroy(scheduler_t* scheduler)
  * @brief Check if the current agent's max limit is respected.
  *
  * Compare the number of running agents and run limit of the agent.
+ * @note For agents wth no max limit, `max_run = -1`
  * @param agent     Agent which has to be scheduled.
  * @return True if the agent can be scheduled (no. of running agents < max run
  *         limit of the agent), false otherwise.
  */
 static gboolean isMaxLimitReached(meta_agent_t* agent)
 {
+  if (agent->max_run == -1)
+  {
+    return FALSE;
+  }
   if (agent->max_run <= agent->run_count)
   {
     return TRUE;
