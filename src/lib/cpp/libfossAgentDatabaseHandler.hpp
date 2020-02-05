@@ -57,7 +57,7 @@ namespace fo
 
     char* getPFileNameForFileId(unsigned long pfileId) const;
     std::string queryUploadTreeTableName(int uploadId);
-    std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId) const;
+    std::vector<unsigned long> queryFileIdsVectorForUpload(int uploadId, bool ignoreFilesWithMimeType) const;
   };
 }
 

@@ -108,10 +108,10 @@ static char* getFileName(MonkState* state, long pFileId) {
 int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks) {
   File file;
   file.id = pFileId;
+  int result = 0;
 
   file.fileName = getFileName(state, pFileId);
-
-  int result = 0;
+  
   if (file.fileName != NULL) {
     result = readTokensFromFile(file.fileName, &(file.tokens), DELIMITERS);
 

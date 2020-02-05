@@ -257,3 +257,4 @@ int fo_tableExists(PGconn* pgConn, const char* tableName)
   PQclear(result);
   return (TabCount);
 } /* fo_tableExists()  */
+

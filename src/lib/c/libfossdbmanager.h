@@ -80,6 +80,7 @@ fo_dbManager_PrepareStamement_str(dbManager, \
   query, \
   #__VA_ARGS__\
 )
+
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes);
 
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);

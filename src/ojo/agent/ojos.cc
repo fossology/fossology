@@ -75,6 +75,7 @@ int main(int argc, char **argv)
   }
 
   bool json = cliOptions.doJsonOutput();
+  bool ignoreFilesWithMimeType = cliOptions.doignoreFilesWithMimeType();
   OjoState state = getState(std::move(cliOptions));
 
   if (!fileNames.empty())
@@ -147,7 +148,7 @@ int main(int argc, char **argv)
       if (arsId <= 0)
         bail(5);
 
-      if (!processUploadId(state, uploadId, databaseHandler))
+      if (!processUploadId(state, uploadId, databaseHandler, ignoreFilesWithMimeType))
         bail(2);
 
       fo_scheduler_heart(0);

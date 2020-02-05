@@ -44,6 +44,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define MIN_ALLOWED_RANK 66
 
 #include <glib.h>
+#include <stdbool.h>
 #include "libfossdbmanager.h"
 
 #if GLIB_CHECK_VERSION(2,32,0)
@@ -58,6 +59,7 @@ typedef struct {
   int verbosity;
   char* knowledgebaseFile;
   int json;
+  bool ignoreFilesWithMimeType;
   void* ptr;
 } MonkState;
 
