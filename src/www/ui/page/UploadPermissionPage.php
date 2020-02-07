@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2013 Hewlett-Packard Development Company, L.P.
- Copyright (C) 2015 Siemens AG
+ Copyright (C) 2015,2020, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -31,10 +31,15 @@ class UploadPermissionPage extends DefaultPlugin
 {
   const NAME = 'upload_permissions';
   const MOD_REUSE = 16;
+
   /** @var UploadPermissionDao */
   private $uploadPermDao;
+
   /** @var DbManager */
   private $dbManager;
+
+  /** @var FolderDao */
+  private $folderDao;
 
   function __construct()
   {
@@ -45,6 +50,7 @@ class UploadPermissionPage extends DefaultPlugin
         self::REQUIRES_LOGIN => TRUE
     ));
     $this->uploadPermDao = $this->getObject('dao.upload.permission');
+    $this->folderDao = $this->getObject('dao.folder');
     $this->dbManager = $this->getObject('db.manager');
   }
 
@@ -63,46 +69,59 @@ class UploadPermissionPage extends DefaultPlugin
 
     $folder_pk = intval($request->get('folder'));
     $upload_pk = intval($request->get('upload'));
+    $allUploadsPerm = ($request->get('alluploadsperm') == 1) ? 1 : 0;
     $perm_upload_pk = intval($request->get('permupk'));
     $perm = intval($request->get('perm'));
     $newgroup = intval($request->get('newgroup'));
     $newperm = intval($request->get('newperm'));
     $public_perm = $request->get('public', -1);
 
-    /* @var $folderDao FolderDao */
-    $folderDao = $this->getObject('dao.folder');
-    $root_folder_pk = $folderDao->getRootFolder(Auth::getUserId())->getId();
+    $root_folder_pk = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
     if (empty($folder_pk)) {
       $folder_pk = $root_folder_pk;
     }
 
     $UploadList = FolderListUploads_perm($folder_pk, Auth::PERM_WRITE);
-    if (empty($upload_pk) && !empty($UploadList)) {
-      $upload_pk = $UploadList[0]['upload_pk'];
+    if (empty($allUploadsPerm)) {
+      if (empty($upload_pk) && !empty($UploadList)) {
+        $upload_pk = $UploadList[0]['upload_pk'];
+      }
+      if (!empty($perm_upload_pk)) {
+        $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
+      } else if (!empty($newgroup) && !empty($newperm)) {
+        $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
+        $newperm = $newgroup = 0;
+      } else if ($public_perm >= 0) {
+        $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
+      }
+    } else {
+      foreach ($UploadList as $uploadDetails) {
+        $upload_pk = $uploadDetails['upload_pk'];
+        if (!empty($newgroup) && !empty($newperm)) {
+          $this->insertPermission($newgroup, $upload_pk, $newperm, $UploadList);
+        } else if ($public_perm >= 0) {
+          $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
+        }
+      }
     }
-
-    if (!empty($perm_upload_pk)) {
-      $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
-    } else if (!empty($newgroup) && !empty($newperm)) {
-      $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
-      $newperm = $newgroup = 0;
-    } else if ($public_perm >= 0) {
-      $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
-    }
-
-    $vars = array('folderStructure' => $folderDao->getFolderStructure($root_folder_pk),
-        'groupArray'=>$groupsWhereUserIsAdmin,
-        'uploadId'=>$upload_pk,
-        'folderId'=>$folder_pk,
-        'baseUri'=> Traceback_uri() . '?mod=upload_permissions',
-        'newPerm'=>$newperm, 'newGroup'=>$newgroup,
-        'uploadList'=>$UploadList, 'permNames'=>$GLOBALS['PERM_NAMES']);
+    $vars = array(
+            'folderStructure' => $this->folderDao->getFolderStructure($root_folder_pk),
+            'groupArray' => $groupsWhereUserIsAdmin,
+            'uploadId' => $upload_pk,
+            'allUploadsPerm' => $allUploadsPerm,
+            'folderId' => $folder_pk,
+            'baseUri' => Traceback_uri() . '?mod=upload_permissions',
+            'newPerm' => $newperm,
+            'newGroup' => $newgroup,
+            'uploadList' => $UploadList,
+            'permNames' => $GLOBALS['PERM_NAMES']
+            );
 
     if (!empty($UploadList)) {
       $vars['publicPerm'] = $this->uploadPermDao->getPublicPermission($upload_pk);
       $permGroups = $this->uploadPermDao->getPermissionGroups($upload_pk);
       $vars['permGroups'] = $permGroups;
-      $additableGroups = array(0=>'-- select group --');
+      $additableGroups = array(0 => '-- select group --');
       foreach ($groupsWhereUserIsAdmin as $gId=>$gName) {
         if (!array_key_exists($gId, $permGroups)) {
           $additableGroups[$gId] = $gName;
