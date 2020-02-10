@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2019
+# Copyright (C) Siemens AG 2017-2020
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.7
+  version: 1.0.9
   contact:
     email: fossology@fossology.org
   license:
@@ -301,6 +301,43 @@ paths:
       responses:
         '201':
           description: Upload is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/summary:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      tags:
+        - Upload
+      summary: Get single upload summary
+      description:
+        Returns summary for single upload
+      responses:
+        '200':
+          description: Get summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSummary'
+        '503':
+          description: >
+            The ununpack agent has not started yet. Please check the 'Look-at'
+            header for more information
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -814,6 +851,47 @@ components:
         filesize:
           type: integer
           description: Filesize in Bytes.
+    UploadSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Upload id of the upload.
+        uploadName:
+          type: string
+          description: Display name of the upload.
+        mainLicense:
+          type: string
+          description: Main license selected on the upload.
+        uniqueLicenses:
+          type: integer
+          description: No. of unique licenses found.
+        totalLicenses:
+          type: integer
+          description: Total no. of licenses found.
+        uniqueConcludedLicenses:
+          type: integer
+          description: Unique licenses concluded.
+        totalConcludedLicenses:
+          type: integer
+          description: Total concluded licenses.
+        filesToBeCleared:
+          type: integer
+          description: Files without clearing decisions.
+        filesCleared:
+          type: integer
+          description: Files with clearing decisions.
+        clearingStatus:
+          type: string
+          enum:
+            - Open
+            - InProgress
+            - Closed
+            - Rejected
+          description: Upload is clearing status.
+        copyrightCount:
+          type: integer
+          description: No. of copyrights found in the upload.
     Job:
       type: object
       properties:

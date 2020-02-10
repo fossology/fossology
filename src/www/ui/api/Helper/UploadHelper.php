@@ -1,7 +1,7 @@
 <?php
 /**
  * *************************************************************
- * Copyright (C) 2018 Siemens AG
+ * Copyright (C) 2018,2020 Siemens AG
  * Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -28,6 +28,10 @@ namespace Fossology\UI\Api\Helper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
+use Fossology\UI\Api\Models\UploadSummary;
+use Fossology\UI\Page\BrowseLicense;
+use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 /**
  * @class UploadHelper
@@ -92,7 +96,6 @@ class UploadHelper
     } else {
       $ignoreScm = 0;
     }
-
     if (empty($uploadedFile) ||
       ! isset($uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME])) {
       if (empty($vcsData)) {
@@ -258,5 +261,85 @@ class UploadHelper
     } else {
       return true;
     }
+  }
+
+  /**
+   * Generate UploadSummary object for given upload respective to given group id
+   * @param integer $uploadId Upload ID
+   * @param integer $groupId  Group ID
+   * @return Fossology::UI::Api::Models::UploadSummary
+   */
+  public function generateUploadSummary($uploadId, $groupId)
+  {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+    $uploadDao = $restHelper->getUploadDao();
+    $dbManager = $restHelper->getDbHelper()->getDbManager();
+    $clearingDao = $container->get('dao.clearing');
+    $copyrightDao = $container->get('dao.copyright');
+    $agentDao = $container->get('dao.agent');
+
+    $agentName = "copyright";
+
+    $totalClearings = $clearingDao->getTotalDecisionCount($uploadId, $groupId);
+    $clearingCount = $clearingDao->getClearingDecisionsCount($uploadId,
+      $groupId);
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $uploadDao->getParentItemBounds($uploadId,
+      $uploadTreeTableName);
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    $scanProx->createAgentStatus([$agentName]);
+    $agents = $scanProx->getLatestSuccessfulAgentIds();
+    $copyrightCount = 0;
+    if (array_key_exists($agentName, $agents) && ! empty($agents[$agentName])) {
+      $copyrightCount = count(
+        $copyrightDao->getAllEntriesReport($agentName, $uploadId,
+          $uploadTreeTableName, null, false, null, "C.agent_fk = " .
+          $agents[$agentName], $groupId));
+    }
+
+    $mainLicenses = $this->getMainLicenses($dbManager, $uploadId, $groupId);
+
+    $uiLicense = new BrowseLicense();
+    $hist = $uiLicense->getUploadHist($itemTreeBounds);
+
+    $summary = new UploadSummary();
+    $summary->setUploadId($uploadId);
+    $summary->setUploadName($uploadDao->getUpload($uploadId)->getFilename());
+    if ($mainLicenses !== null) {
+      $summary->setMainLicense(implode(",", $mainLicenses));
+    }
+    $summary->setUniqueLicenses($hist['uniqueLicenseCount']);
+    $summary->setTotalLicenses($hist['scannerLicenseCount']);
+    $summary->setUniqueConcludedLicenses($hist['editedUniqueLicenseCount']);
+    $summary->setTotalConcludedLicenses($hist['editedLicenseCount']);
+    $summary->setFilesToBeCleared($totalClearings - $clearingCount);
+    $summary->setFilesCleared($clearingCount);
+    $summary->setClearingStatus($uploadDao->getStatus($uploadId, $groupId));
+    $summary->setCopyrightCount($copyrightCount);
+    return $summary;
+  }
+
+  /**
+   * Get main license selected for the upload
+   * @param DbManager $dbManager DbManager object
+   * @param integer $uploadId    Upload ID
+   * @param integer $groupId     Group ID
+   * @return NULL|array
+   */
+  private function getMainLicenses($dbManager, $uploadId, $groupId)
+  {
+    $sql = "SELECT rf_shortname FROM upload_clearing_license ucl, license_ref"
+         . " WHERE ucl.group_fk=$1 AND upload_fk=$2 AND ucl.rf_fk=rf_pk;";
+    $stmt = __METHOD__.'.collectMainLicenses';
+    $rows = $dbManager->getRows($sql, array($groupId, $uploadId), $stmt);
+    if (empty($rows)) {
+      return null;
+    }
+    $mainLicenses = [];
+    foreach ($rows as $row) {
+      array_push($mainLicenses, $row['rf_shortname']);
+    }
+    return $mainLicenses;
   }
 }
