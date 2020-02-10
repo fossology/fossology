@@ -194,7 +194,7 @@ function updateSHA256($dbManager, $tableName)
     $dbManager->commit();
 
     $totalCount = $totalCount + $numberOfRecords;
-    echo "* $totalCount pfile records updated *";
+    echo "* $totalCount pfile records updated *\n";
 
     $records = calculateNumberOfRecordsToBeProcessed($dbManager, $tableName, $tableName."_sha256");
     if ($lastCount == $records[1]) {
