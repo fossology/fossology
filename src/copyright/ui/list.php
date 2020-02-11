@@ -305,6 +305,7 @@ class copyright_list extends FO_Plugin
     $RowCount = count($rows);
     if ($RowCount)
     {
+      $TypeStr = "";
       $Content = htmlentities($rows[0]['content']);
       $Offset = ($Page < 0) ? 0 : $Page*$Max;
       $PkgsOnly = false;

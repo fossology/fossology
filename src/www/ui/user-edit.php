@@ -45,7 +45,7 @@ class UserEditPage extends DefaultPlugin
         self::TITLE => _("Edit User Account"),
         self::MENU_LIST => 'Admin::Users::Edit User Account',
         self::REQUIRES_LOGIN => true,
-        self::PERMISSION => Auth::PERM_WRITE
+        self::PERMISSION => Auth::PERM_READ
     ));
 
     $this->dbManager = $this->getObject('db.manager');
@@ -117,6 +117,7 @@ class UserEditPage extends DefaultPlugin
     $vars['tokenList'] = $this->getListOfActiveTokens();
     $vars['expiredTokenList'] = $this->getListOfExpiredTokens();
     $vars['maxTokenDate'] = $this->authHelper->getMaxTokenValidity();
+    $vars['writeAccess'] = ($_SESSION[Auth::USER_LEVEL] >= 3);
 
     return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
@@ -360,7 +361,11 @@ class UserEditPage extends DefaultPlugin
     $user_pk = Auth::getUserId();
     $tokenName = GetParm('pat_name', PARM_STRING);
     $tokenExpiry = GetParm('pat_expiry', PARM_STRING);
-    $tokenScope = GetParm('pat_scope', PARM_STRING);
+    if ($_SESSION[Auth::USER_LEVEL] < 3) {
+      $tokenScope = 'r';
+    } else {
+      $tokenScope = GetParm('pat_scope', PARM_STRING);
+    }
     $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
     $restHelper = $container->get('helper.restHelper');
     $isTokenRequestValid = $restHelper->validateTokenRequest($tokenExpiry,

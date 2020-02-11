@@ -115,9 +115,9 @@ class AjaxClearingView extends FO_Plugin
       $row = array(
           '0' => date('Y-m-d', $clearingDecision->getTimeStamp()),
           '1' => $clearingDecision->getUserName(),
-        '2' => $scope->getTypeName($clearingDecision->getScope()),
-        '3' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
-        '4' => implode(", ", $licenseOutputs)
+          '2' => $scope->getTypeName($clearingDecision->getScope()),
+          '3' => $this->decisionTypes->getTypeName($clearingDecision->getType()),
+          '4' => implode(", ", $licenseOutputs)
       );
       $table[] = $row;
     }
@@ -380,8 +380,9 @@ class AjaxClearingView extends FO_Plugin
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
       $percentage = $agentDecisionEvent->getPercentage();
+      $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
       $agentResults[$agentDecisionEvent->getAgentName()][] = array(
-          "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId#highlight",
+          "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight",
           "text" => $percentage ? " (" . $percentage . " %)" : ""
       );
     }

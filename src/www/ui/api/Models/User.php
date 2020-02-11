@@ -193,15 +193,23 @@ class User
    */
   public function getArray()
   {
-    return [
-      "id"       => $this->id,
-      "name"         => $this->name,
-      "description"  => $this->description,
-      "email"        => $this->email,
-      "accessLevel"  => $this->accessLevel,
-      "rootFolderId" => $this->rootFolderId,
-      "emailNotification" => $this->emailNotification,
-      "agents"       => $this->analysis->getArray()
-    ];
+    $returnUser = array();
+    $returnUser["id"] = $this->id;
+    $returnUser["name"] = $this->name;
+    $returnUser["description"] = $this->description;
+    if ($this->email !== null) {
+      $returnUser["email"] = $this->email;
+      $returnUser["accessLevel"] = $this->accessLevel;
+    }
+    if ($this->rootFolderId !== null && $this->rootFolderId != 0) {
+      $returnUser["rootFolderId"] = $this->rootFolderId;
+    }
+    if ($this->emailNotification !== null) {
+      $returnUser["emailNotification"] = $this->emailNotification;
+    }
+    if ($this->agents !== null) {
+      $returnUser["agents"] = $this->analysis->getArray();
+    }
+    return $returnUser;
   }
 }

@@ -30,6 +30,8 @@ class CopyrightDao
   private $dbManager;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var ClearingDao */
+  private $clearingDao;
   /** @var Logger */
   private $logger;
 
@@ -38,6 +40,8 @@ class CopyrightDao
     $this->dbManager = $dbManager;
     $this->uploadDao = $uploadDao;
     $this->logger = new Logger(self::class);
+    global $container;
+    $this->clearingDao = $container->get('dao.clearing');
   }
 
   /**
@@ -261,11 +265,21 @@ class CopyrightDao
    * @param $extrawhere
    * @return array
    */
-  public function getAllEntriesReport($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
+  public function getAllEntriesReport($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null, $groupId=null)
   {
     $tableNameDecision = $tableName."_decision";
     if ($tableName == 'copyright') {
       $scannerEntries = $this->getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere);
+      if (!empty($groupId)) {
+        $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+        $irrelevantDecisions = $this->clearingDao->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId);
+        $uniqueIrrelevantDecisions = array_unique(array_column($irrelevantDecisions, 'uploadtree_pk'));
+        foreach ($scannerEntries as $key => $value) {
+          if (in_array($value['uploadtree_pk'], $uniqueIrrelevantDecisions)) {
+            unset($scannerEntries[$key]);
+          }
+        }
+      }
       $editedEntries = $this->getEditedEntries($tableNameDecision, $uploadTreeTableName, $uploadId, $decisionType);
       return array_merge($scannerEntries, $editedEntries);
     } else {

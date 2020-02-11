@@ -22,6 +22,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
+use Fossology\Lib\Data\AgentRef;
 
 class UploadTreeProxy extends DbViewProxy
 {
@@ -259,7 +260,7 @@ class UploadTreeProxy extends DbViewProxy
       $agentFilter = " AND lf.agent_fk=ANY($agentIds)";
     } else {
       $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport','ojo'));
+      $scanJobProxy->createAgentStatus(array_keys(AgentRef::AGENT_LIST));
       $latestAgentIds = $scanJobProxy->getLatestSuccessfulAgentIds();
       $agentFilter = $latestAgentIds ? " AND lf.agent_fk=ANY(array[".implode(',',$latestAgentIds)."])" : "AND 0=1";
     }
@@ -292,7 +293,7 @@ FROM (
   )
 ) AS filtered_clearing_decision ORDER BY rnum DESC LIMIT 1";
         return " $conditionQueryHasLicense
-            AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.") )";
+            AND NOT EXISTS (SELECT 1 FROM ($decisionQuery) as latest_decision WHERE latest_decision.decision_type IN (".DecisionTypes::IRRELEVANT.",".DecisionTypes::IDENTIFIED.",".DecisionTypes::DO_NOT_USE.") )";
       case "noCopyright":
         return "EXISTS (SELECT copyright_pk FROM copyright cp WHERE cp.pfile_fk=ut.pfile_fk and cp.hash is not null )";
       case "noEcc":

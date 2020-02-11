@@ -21,6 +21,18 @@ namespace Fossology\Lib\Data;
 
 class AgentRef
 {
+
+  /**
+   * @var array $AGENT_LIST
+   * List of agents FOSSology uses to get agent ids
+   */
+  const AGENT_LIST = array(
+    'nomos' => 'N',
+    'monk' => 'M',
+    'ninka' => 'Nk',
+    'reportImport' => 'I',
+    'ojo' => 'O'
+  );
   /**
    * @var int
    */

@@ -1,7 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
- *               2014-2017 Siemens AG
+ *               2014-2017,2020, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-browse-license.php
@@ -70,7 +71,7 @@ class AjaxExplorer extends DefaultPlugin
    * DB proxy view to hold upload tree entries for files with no license */
   private $noLicenseUploadTreeView;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
   {
@@ -401,6 +402,19 @@ class AjaxExplorer extends DefaultPlugin
     // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
     $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
     $img = $isDecisionTBD ? 'yellow' : $img;
+
+    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
+    $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
+    $img = $isDecisionDNU ? 'redGreen' : $img;
+
+    // override green/red flag with grey flag in case of no_license_found scanner finding
+    if (!empty($licenseList) && empty($editedLicenseList)) {
+      $img = (
+              (strpos($licenseList, LicenseDao::NO_LICENSE_FOUND) !== false)
+              &&
+              (count(explode(",", $licenseList)) == 1)
+             ) ? 'grey' : $img;
+    }
 
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   }

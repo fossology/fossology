@@ -7833,7 +7833,7 @@ k
 #
 %ENTRY% _TITLE_CC_BY_SA
 %KEY% "a(gree|ttribut|vailabl|uthor)"
-%STR% "creative commons attribution[ -]share[ -]alike"
+%STR% "creative commons attribution[ -]share.?alike"
 #
 %ENTRY% _TITLE_CC_BY_SA_10
 %KEY% "a(gree|ttribut|vailabl|uthor)"

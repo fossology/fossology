@@ -20,7 +20,7 @@ namespace Fossology\Lib\Application;
 
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Test\TestLiteDb;
+use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
 
 /**
@@ -58,28 +58,60 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
    */
   public function testCreateCsv()
   {
-    $testDb = new TestLiteDb();
-    $testDb->createPlainTables(array('license_ref','license_map'));
+    $testDb = new TestPgDb("licenseCsvExport");
+    $testDb->createPlainTables(array('license_ref','license_map','groups'));
+    $testDb->createInheritedTables(array('license_candidate'));
     $dbManager = $testDb->getDbManager();
     $licenses = array();
-    for ($i=1; $i<4; $i++) {
-      $licenses[$i] = array('rf_pk'=>$i,'rf_shortname'=>'lic'.$i,'rf_fullname'=>'lice'.$i,
-          'rf_text'=>'text'.$i,'rf_url'=>$i.$i,'rf_notes'=>'note'.$i,'rf_source'=>'s'.$i,
-          'rf_detector_type'=>1,'rf_risk'=>($i-1));
+    $candLicenses = array();
+    $dbManager->insertTableRow('groups', array(
+      'group_pk' => 2, 'group_name' => 'test'
+    ));
+    for ($i = 1; $i < 4; $i ++) {
+      $licenses[$i] = array(
+        'rf_pk' => $i,
+        'rf_shortname' => 'lic' . $i,
+        'rf_fullname' => 'lice' . $i,
+        'rf_text' => 'text' . $i,
+        'rf_url' => $i . $i,
+        'rf_notes' => 'note' . $i,
+        'rf_source' => 's' . $i,
+        'rf_detector_type' => 1,
+        'rf_risk' => ($i - 1)
+      );
       $dbManager->insertTableRow('license_ref', $licenses[$i]);
+    }
+    for ($i = 1; $i <= 4; $i ++) {
+      $candLicenses[$i] = array(
+        'rf_pk' => $i + 4,
+        'rf_shortname' => 'candlic' . $i,
+        'rf_fullname' => 'candlice' . $i,
+        'rf_text' => 'text' . $i,
+        'rf_url' => $i . $i,
+        'rf_notes' => 'note' . $i,
+        'rf_source' => 's' . $i,
+        'rf_detector_type' => 1,
+        'rf_risk' => ($i - 1),
+        'marydone' => false,
+        'group_fk' => 2
+      );
+      if ($i % 2 == 0) {
+        $candLicenses[$i]['marydone'] = true;
+      }
+      $dbManager->insertTableRow('license_candidate', $candLicenses[$i]);
     }
 
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>1,'usage'=>LicenseMap::CONCLUSION));
     $dbManager->insertTableRow('license_map', array('rf_fk'=>3,'rf_parent'=>2,'usage'=>LicenseMap::REPORT));
 
     $licenseCsvExport = new LicenseCsvExport($dbManager);
-    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk');
+    $head = array('shortname','fullname','text','parent_shortname','report_shortname','url','notes','source','risk','group');
     $out = fopen('php://output', 'w');
 
     $csv = $licenseCsvExport->createCsv();
     ob_start();
     fputcsv($out, $head);
-        fputcsv($out, array($licenses[1]['rf_shortname'],
+    fputcsv($out, array($licenses[1]['rf_shortname'],
         $licenses[1]['rf_fullname'],
         $licenses[1]['rf_text'],
         null,
@@ -87,7 +119,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[1]['rf_url'],
         $licenses[1]['rf_notes'],
         $licenses[1]['rf_source'],
-        $licenses[1]['rf_risk']));
+        $licenses[1]['rf_risk'],
+        null));
 
     fputcsv($out, array($licenses[2]['rf_shortname'],
         $licenses[2]['rf_fullname'],
@@ -97,7 +130,8 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[2]['rf_url'],
         $licenses[2]['rf_notes'],
         $licenses[2]['rf_source'],
-        $licenses[2]['rf_risk']));
+        $licenses[2]['rf_risk'],
+        null));
 
     fputcsv($out, array($licenses[3]['rf_shortname'],
         $licenses[3]['rf_fullname'],
@@ -107,10 +141,34 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
         $licenses[3]['rf_url'],
         $licenses[3]['rf_notes'],
         $licenses[3]['rf_source'],
-        $licenses[3]['rf_risk']));
+        $licenses[3]['rf_risk'],
+        null));
+
+    fputcsv($out, array($candLicenses[2]['rf_shortname'],
+      $candLicenses[2]['rf_fullname'],
+      $candLicenses[2]['rf_text'],
+      null,
+      null,
+      $candLicenses[2]['rf_url'],
+      $candLicenses[2]['rf_notes'],
+      $candLicenses[2]['rf_source'],
+      $candLicenses[2]['rf_risk'],
+      "test"));
+
+    fputcsv($out, array($candLicenses[4]['rf_shortname'],
+      $candLicenses[4]['rf_fullname'],
+      $candLicenses[4]['rf_text'],
+      null,
+      null,
+      $candLicenses[4]['rf_url'],
+      $candLicenses[4]['rf_notes'],
+      $candLicenses[4]['rf_source'],
+      $candLicenses[4]['rf_risk'],
+      "test"));
     $expected = ob_get_contents();
     ob_end_clean();
-    assertThat($csv,is(equalTo($expected)));
+
+    assertThat($csv, is(equalTo($expected)));
 
     $delimiter = '|';
     $licenseCsvExport->setDelimiter($delimiter);
@@ -125,11 +183,13 @@ class LicenseCsvExportTest extends \PHPUnit\Framework\TestCase
           $licenses[3]['rf_url'],
           $licenses[3]['rf_notes'],
           $licenses[3]['rf_source'],
-          $licenses[3]['rf_risk']),
+          $licenses[3]['rf_risk'],
+          null
+        ),
         $delimiter);
     $expected3 = ob_get_contents();
     ob_end_clean();
-    assertThat($csv3,is(equalTo($expected3)));
+    assertThat($csv3, is(equalTo($expected3)));
   }
 
   /**

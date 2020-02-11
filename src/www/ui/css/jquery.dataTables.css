@@ -195,7 +195,7 @@ table.dataTable tr.even td.sorting_3 { background-color: #F9F9FF; }
  */
 .dataTables_processing {
   position: absolute;
-  top: 50%;
+  top: 10%;
   left: 50%;
   width: 250px;
   height: 30px;
@@ -205,8 +205,9 @@ table.dataTable tr.even td.sorting_3 { background-color: #F9F9FF; }
   border: 1px solid #ddd;
   text-align: center;
   color: #999;
-  font-size: 14px;
+  font-size: 12pt;
   background-color: white;
+  z-index: 999;
 }
 
 

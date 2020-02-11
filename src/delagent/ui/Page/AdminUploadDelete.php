@@ -157,7 +157,7 @@ class AdminUploadDelete extends DefaultPlugin
     }
 
     $displayMessage = "";
-    $countErrorMessages = array_count_values($errorMessages);
+    $countErrorMessages = array_count_values(array_filter($errorMessages));
     if (in_array(DeleteMessages::SCHEDULING_FAILED, $errorMessages)) {
       $displayMessage .= "<br/>Scheduling failed for " .
               $countErrorMessages[DeleteMessages::SCHEDULING_FAILED] . " uploads<br/>";

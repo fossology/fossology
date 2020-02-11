@@ -1,4 +1,4 @@
-{# Copyright 2015 Siemens AG
+{# Copyright 2015,2020, Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -11,18 +11,20 @@
       
   {{ 'Select the folder that contains the upload'|trans }}: 
   {% include 'components/select-folder.html.twig' with {'name':'folderselect','id':'folderselect','selected':folderId} %}
-  <br/>
+  <br/><br/>
+  {{ 'Apply same permissions to all uploads in this folder: '|trans }}<input type="checkbox" style="position:absolute;margin-left:5px;" {% if allUploadsPerm %} checked {% endif %} id="alluploadsperm" name="alluploadsperm" value="1">
+  <br/><br/>
   {% if uploadList is empty %}
     {{ 'You have no permission to change permissions on any upload in this folder.'|trans }}
   {% else %}
     {{ 'Select the upload you wish to edit'|trans }}:
-    <select id="uploadselect" name="uploadselect" class="ui-render-select2">
+    <select id="uploadselect" {% if allUploadsPerm %} disabled {% endif %} name="uploadselect" class="ui-render-select2">
     {% for upload in uploadList %}
       <option value="{{ upload.upload_pk }}"{% if upload.upload_pk==uploadId %} selected="selected"{% endif %}>{{ upload.name|e }},
         {{ upload.upload_ts|date('Y-m-d h:i:s') }}</option>
     {% endfor %}
     </select>
-    <br/>
+    <br/><br/>
     {% import 'include/macros.html.twig' as macro %}
     {{ "Public Permission"|trans }}:
     {{ macro.select('publicpermselect',permNames,'publicpermselect',publicPerm) }}
@@ -53,7 +55,7 @@
       {% endif %}
     </table>    
     
-    {{ "All upload permissions take place immediately when a value is changed.  There is no submit button."|trans }}<br/>
+    {{ "All upload permissions take place immediately when a value is changed. There is no submit button."|trans }}<br/>
     {% if additableGroups is not empty %}
       {{ "Add new groups on the last line."|trans }}
       {{ 'If the clearing for the upload is in progress or ready for your recent group, the reuser can copy these.'|trans }}
@@ -86,6 +88,7 @@
       ],
       "iDisplayLength": 50
     };
+
     var oTable = $('#tblUsers').dataTable(dataTableConfig);
     $('#groupsForGum').change( function() { oTable.fnFilter( $(this).val(), 1 ); } );
     $('#groupsForGum').trigger('change');
@@ -97,17 +100,27 @@
     $('#uploadselect').change(function(){
       window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload='+$(this).val());
     });
+
+    $('#alluploadsperm').change(function(){
+      var allUploads = document.getElementById("alluploadsperm");
+      if (allUploads.checked == true) {
+        window.location.assign('{{ baseUri }}&folder={{ folderId }}&alluploadsperm='+$(this).val());
+      } 
+     if (allUploads.checked == false) {
+        window.location.assign('{{ baseUri }}&folder={{ folderId }}&alluploadsperm=0');
+      }
+    });
     
     $('#publicpermselect').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&public='+$(this).val());
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&public='+$(this).val());
     });
     
     $('#groupselectnew').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&newperm={{ newPerm }}&newgroup='+$(this).val());
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newperm={{ newPerm }}&newgroup='+$(this).val());
     });
 
     $('#permselectnew').change(function(){
-      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&newgroup={{ newGroup }}&newperm='+$(this).val());
+      window.location.assign('{{ baseUri }}&folder={{ folderId }}&upload={{ uploadId }}&alluploadsperm={{ allUploadsPerm }}&newgroup={{ newGroup }}&newperm='+$(this).val());
     });
     
     $('select[name=permselect]').change(function(){

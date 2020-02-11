@@ -84,7 +84,7 @@ class ObligationsToLicenses
         $whiteLists[] = $license->getShortName();
       }
     }
-    $newobligations = $this->groupObligations($obligations);
+    $newobligations = $this->groupObligations($obligations, $uploadId);
     return array($newobligations, $whiteLists);
   }
 
@@ -120,26 +120,30 @@ class ObligationsToLicenses
    * @param array $obligations
    * @return array
    */
-  function groupObligations($obligations)
+  function groupObligations($obligations, $uploadId)
   {
     $groupedOb = array();
+    $row = $this->uploadDao->getReportInfo($uploadId);
+    $excludedObligations = (array) json_decode($row['ri_excluded_obligations'], true);
     foreach ($obligations as $obligation ) {
       $obTopic = $obligation['ob_topic'];
       $obText = $obligation['ob_text'];
       $licenseName = $obligation['rf_shortname'];
       $groupBy = $obText;
-      if (array_key_exists($groupBy, $groupedOb)) {
-        $currentLics = &$groupedOb[$groupBy]['license'];
-        if (!in_array($licenseName, $currentLics)) {
-          $currentLics[] = $licenseName;
+      if (!in_array($licenseName, $excludedObligations[$obTopic])) {
+        if (array_key_exists($groupBy, $groupedOb)) {
+          $currentLics = &$groupedOb[$groupBy]['license'];
+          if (!in_array($licenseName, $currentLics)) {
+            $currentLics[] = $licenseName;
+          }
+        } else {
+          $singleOb = array(
+            "topic" => $obTopic,
+            "text" => $obText,
+            "license" => array($licenseName)
+          );
+          $groupedOb[$groupBy] = $singleOb;
         }
-      } else {
-        $singleOb = array(
-         "topic" => $obTopic,
-         "text" => $obText,
-         "license" => array($licenseName)
-        );
-        $groupedOb[$groupBy] = $singleOb;
       }
     }
     return $groupedOb;

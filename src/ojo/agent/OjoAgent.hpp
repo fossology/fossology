@@ -45,10 +45,12 @@ class OjoAgent
      * Regex to find the list of licenses
      * @var boost::regex regLicenseName
      * Regex to find the license names from the license lists
+     * @var boost::regex regDualLicense
+     * Regex to find dual license strings
      */
-    const boost::regex regLicenseList, regLicenseName;
+    const boost::regex regLicenseList, regLicenseName, regDualLicense;
     void scanString(const std::string &text, boost::regex reg,
-        std::vector<ojomatch> &result, unsigned int offset);
+        std::vector<ojomatch> &result, unsigned int offset, bool isDualTest);
     void filterMatches(std::vector<ojomatch> &matches);
     void findLicenseId(std::vector<ojomatch> &matches,
       OjosDatabaseHandler &databaseHandler);

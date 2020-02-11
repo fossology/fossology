@@ -1,5 +1,42 @@
 # Changelog of FOSSology
 
+### 3.7.0 (Dec 11th 2019)
+
+This release adds important corrections to
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1)
+
+### Contributors
+
+Credits go to the following persons for this release since
+[3.7.0-RC1](https://github.com/fossology/fossology/releases/tag/3.7.0-rc1):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Martin Michlmayr <tbm@cyrius.com>
+> Maximilian Huber <maximilian.huber@tngtech.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+```
+
+#### Corrections
+
+* `7cdc6b50a` fix(obligation): Move candidate licenses
+* `c74f2f4af` fix(obligation): Associate all lic with same name
+* `68094159b` fix(copyright): only scanner finding copyrights to unifiedreport
+* `23cb2f66a` fix(counter): Optimize clearing counter queries
+* `3885ac14d` fix(db): Optimize license browse queries
+* `96a4da4c3` refactor(report): edited global license code make it available for unified repot fix php codesniffer
+* `08ac47678` fix(decider): remove force dependency of nomos and monk for ojo decider add nomos dependency if required
+
+#### Infrastructure
+
+* `48c0caa14` chore(composer.json): updated symfony/dependency-injection version
+* `252bbaeb2` chore(installdeps): remove php-yaml from os level and add it to composer update composer.lock..
+* `2e158034e` docs(changelog): fix typo
+* `d85038afc` chore(unifiedReport): change phpword to a latest version update composer.lock with new changes
+* `a674aa9e3` chore(docker-compose): harmonize versions with sw360chores
+
 ### 3.7.0-RC1 (Oct 24th 2019)
 
 This release was created in order to bring important changes for the REST endpoints to a release, so integration, for example with sw360, work on a release but not with latest master. Besides improvement is the extension of the decider agent to allow for decisions based on found SPDX-License-Identifier tags found by the ojo agent.

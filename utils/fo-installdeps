@@ -104,14 +104,16 @@ if [[ $BUILDTIME ]]; then
             libmxml-dev curl libxml2-dev libcunit1-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
          case "$CODENAME" in
+           jessie)
+             apt-get $YesOpt install php5-cli;;
            xenial|stretch)
-             apt-get $YesOpt install php-mbstring php7.0-xml php7.0-zip;;
+             apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip;;
            buster)
-             apt-get $YesOpt install php-mbstring php7.3-xml php7.3-zip;;
+             apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip;;
            bionic)
-             apt-get $YesOpt install php-mbstring php7.2-xml php7.2-zip;;
+             apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip;;
            sid)
-             apt-get $YesOpt install php-mbstring php-xml php-zip;;
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in

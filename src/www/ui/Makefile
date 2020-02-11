@@ -25,9 +25,9 @@ DIRS = css images locale scripts ajaxPHP
 
 UIFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|js|html|twig)$$"`
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php admin-folder-delete.php \
-                ajax-showjobs.php group-manage-self.php group-manage.php ajax-perms.php \
+                admin-dashboard.php ajax-showjobs.php group-manage-self.php group-manage.php ajax-perms.php \
                 upload_permissions.php upload-srv-files.php upload-vcs.php template/components \
-                template/include
+                template/include ui-browse-license.php
 
 OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm|openapi.yaml)$$"`
 

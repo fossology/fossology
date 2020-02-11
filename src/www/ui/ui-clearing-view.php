@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\Clearing\ClearingResult;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionScopes;
@@ -113,7 +114,7 @@ class ClearingView extends FO_Plugin
     $unmaskAgents = $selectedAgentId;
     if (empty($selectedAgentId)) {
       $scanJobProxy = new ScanJobProxy($this->agentsDao,$uploadId);
-      $scanJobProxy->createAgentStatus(array('nomos','monk','ninka','reportImport','ojo'));
+      $scanJobProxy->createAgentStatus(array_keys(AgentRef::AGENT_LIST));
       $unmaskAgents = $scanJobProxy->getLatestSuccessfulAgentIds();
     }
     $highlightEntries = $this->highlightDao->getHighlightEntries($itemTreeBounds,
@@ -279,8 +280,10 @@ class ClearingView extends FO_Plugin
     }
 
     $selectedClearingType = false;
+    $selectedClearingScope = false;
     if (!empty($clearingDecisions)) {
       $selectedClearingType = $clearingDecisions[0]->getType();
+      $selectedClearingScope = $clearingDecisions[0]->getScope();
     }
     $bulkHistory = $this->clearingDao->getBulkHistory($itemTreeBounds, $groupId);
 
@@ -294,6 +297,7 @@ class ClearingView extends FO_Plugin
     $this->vars['legendData'] = $this->highlightRenderer->getLegendData($selectedAgentId || $clearingId);
     $this->vars['clearingTypes'] = $this->decisionTypes->getMap();
     $this->vars['selectedClearingType'] = $selectedClearingType;
+    $this->vars['selectedClearingScope'] = $selectedClearingScope;
     $this->vars['tmpClearingType'] = $this->clearingDao->isDecisionWip($uploadTreeId, $groupId);
     $this->vars['bulkHistory'] = $bulkHistory;
 
@@ -333,11 +337,9 @@ class ClearingView extends FO_Plugin
   protected function updateLastItem($userId, $groupId, $lastItem)
   {
     $type = GetParm("clearingTypes", PARM_INTEGER);
-    $global = GetParm("globalDecision", PARM_STRING) === "on";
-
+    $global = GetParm("globalDecision", PARM_STRING) === "on" ? 1 : 0;
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
     $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
-
     $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
   }
 }

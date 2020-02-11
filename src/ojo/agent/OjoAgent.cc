@@ -28,7 +28,9 @@ OjoAgent::OjoAgent() :
     regLicenseList(
         boost::regex(SPDX_LICENSE_LIST, boost::regex_constants::icase)),
     regLicenseName(
-        boost::regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase))
+        boost::regex(SPDX_LICENSE_NAMES, boost::regex_constants::icase)),
+    regDualLicense(
+        boost::regex(SPDX_DUAL_LICENSE, boost::regex_constants::icase))
 {
 }
 
@@ -58,10 +60,11 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath,
   vector<ojomatch> licenseList;
   vector<ojomatch> licenseNames;
 
-  scanString(fileContent, regLicenseList, licenseList, 0);
+  scanString(fileContent, regLicenseList, licenseList, 0, false);
   for (auto m : licenseList)
   {
-    scanString(m.content, regLicenseName, licenseNames, m.start);
+    scanString(m.content, regLicenseName, licenseNames, m.start, false);
+    scanString(m.content, regDualLicense, licenseNames, m.start, true);
   }
 
   findLicenseId(licenseNames, databaseHandler);
@@ -91,11 +94,17 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath)
   vector<ojomatch> licenseList;
   vector<ojomatch> licenseNames;
 
-  scanString(fileContent, regLicenseList, licenseList, 0);
+  scanString(fileContent, regLicenseList, licenseList, 0, false);
   for (auto m : licenseList)
   {
-    scanString(m.content, regLicenseName, licenseNames, m.start);
+    scanString(m.content, regLicenseName, licenseNames, m.start, false);
+    scanString(m.content, regDualLicense, licenseNames, m.start, true);
   }
+
+  // Remove duplicate matches for CLI run
+  vector<ojomatch>::iterator uniqueListIt = std::unique(licenseNames.begin(),
+    licenseNames.end());
+  licenseNames.resize(std::distance(licenseNames.begin(), uniqueListIt));
 
   return licenseNames;
 }
@@ -106,9 +115,10 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath)
  * @param reg         Regex to be used
  * @param[out] result The match list.
  * @param offset      The offset to be added for each match
+ * @param isDualTest  True if testing for Dual-license, false otherwise
  */
 void OjoAgent::scanString(const string &text, boost::regex reg,
-    vector<ojomatch> &result, unsigned int offset)
+    vector<ojomatch> &result, unsigned int offset, bool isDualTest)
 {
   string::const_iterator end = text.end();
   string::const_iterator pos = text.begin();
@@ -119,12 +129,17 @@ void OjoAgent::scanString(const string &text, boost::regex reg,
     boost::smatch res;
     if (boost::regex_search(pos, end, res, reg))
     {
+      string content = "Dual-license";
+      if (! isDualTest)
+      {
+        content = res[1].str();
+      }
       // Found match
       result.push_back(
-        ojomatch(offset + res.position(1),
-          offset + res.position(1) + res.length(1),
-          res.length(1),
-          res[1].str()));
+          ojomatch(offset + res.position(1),
+              offset + res.position(1) + res.length(1),
+              res.length(1),
+              content));
       pos = res[0].second;
       offset += res.position() + res.length();
     }

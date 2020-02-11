@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ***********************************************************/
 
+namespace Fossology\UI\Page;
+
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
@@ -31,13 +33,14 @@ use Fossology\Lib\Proxy\ScanJobProxy;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-browse-license.php
  * \brief browse a directory to display all licenses in this directory
  */
 
-class ui_browse_license extends DefaultPlugin
+class BrowseLicense extends DefaultPlugin
 {
   const NAME = "license";
 
@@ -55,7 +58,7 @@ class ui_browse_license extends DefaultPlugin
   /** @var LicenseMap */
   private $licenseProjector;
   /** @var array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
   {
@@ -313,6 +316,16 @@ class ui_browse_license extends DefaultPlugin
   {
     return $this->renderer->loadTemplate($templateName)->render($vars);
   }
+
+  /**
+   * Get the upload histogram generated
+   * @param ItemTreeBounds $itemTreeBounds
+   * @return array
+   */
+  public function getUploadHist($itemTreeBounds)
+  {
+    return $this->showUploadHist($itemTreeBounds);
+  }
 }
 
-register_plugin(new ui_browse_license());
+register_plugin(new BrowseLicense());
