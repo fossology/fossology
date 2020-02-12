@@ -263,8 +263,12 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
       $shLink = $this->configuration['api']['url'].$this->configuration['api']['uri'].$pfileHash["sha256"].$this->configuration['api']['content'];
       $fileListLinks .= "[<a href='".$shLink."' target=\"_blank\">$text</a>]";
     }
+    $img = "";
+    if (! $isContainer) {
+      $img = $shRecord["img"];
+    }
 
-    return [$fileName, $pfileHash["sha256"], $shRecord["license"], $fileListLinks];
+    return [$fileName, $pfileHash["sha256"], $shRecord["license"], $img, $fileListLinks];
   }
 }
 

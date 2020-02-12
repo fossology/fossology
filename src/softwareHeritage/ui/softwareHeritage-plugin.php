@@ -69,7 +69,7 @@ class softwareHeritagePlugin extends DefaultPlugin
       self::PERMISSION => Auth::PERM_READ,
       self::REQUIRES_LOGIN => false
     ));
-    $this->Title      = _("Software heritage");
+    $this->Title = _("Software Heritage");
     $this->dbManeger = $this->container->get('db.manager');
     $this->uploadDao = $this->container->get('dao.upload');
     $this->shDao = $this->container->get('dao.softwareHeritage');
@@ -82,7 +82,7 @@ class softwareHeritagePlugin extends DefaultPlugin
   function RegisterMenus()
   {
     // For all other menus, permit coming back here.
-    $URI = $this->Name . Traceback_parm_keep(array("upload", "item", "show"));
+    $URI = $this->Name . Traceback_parm_keep(array("upload", "item", "show")) . "&flatten=yes";
 
     $Item = GetParm("item", PARM_INTEGER);
     $Upload = GetParm("upload", PARM_INTEGER);
@@ -97,7 +97,7 @@ class softwareHeritagePlugin extends DefaultPlugin
       menu_insert("View::$menuName", 101);
       menu_insert("View-Meta::$menuName", 101);
     } else {
-      $text = _("software Heritage");
+      $text = _("Software Heritage");
       menu_insert("Browse::$menuName", 101, $URI, $text);
       menu_insert("View::$menuName", 101, $viewLicenseURI, $text);
       menu_insert("View-Meta::$menuName", 101, $viewLicenseURI, $text);

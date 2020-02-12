@@ -81,13 +81,15 @@ class SoftwareHeritageDao
   public function getSoftwareHetiageRecord($pfileId)
   {
     $stmt = __METHOD__."getSoftwareHeritageRecord";
-    $sql = "SELECT * FROM software_heritage WHERE pfile_fk = $1";
+    $sql = "SELECT license FROM software_heritage WHERE pfile_fk = $1";
     $rows = $this->dbManager->getRows($sql,[$pfileId],$stmt);
-    $licensText = '';
-    foreach ($rows as $row ) {
-        $licensText .= $row["license"].', ';
+    $licenseShortnames = implode(", ", array_column($rows, 'license'));
+    if ($licenseShortnames) {
+      $img = '<img alt="done" src="images/green.png" class="icon-small"/>';
+    } else {
+      $img = '<img alt="done" src="images/red.png" class="icon-small"/>';
     }
-    return ["license" => $licensText];
+    return ["license" => $licenseShortnames, "img" => $img];
 
   }
 }
