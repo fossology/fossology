@@ -2,6 +2,7 @@
 /***********************************************************
  * Copyright (C) 2014-2015 Siemens AG
  * Author: J.Najjar, S. Weber
+ * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

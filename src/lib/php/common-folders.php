@@ -2,6 +2,7 @@
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2014-2017 Siemens AG
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public

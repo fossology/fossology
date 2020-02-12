@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2014-2018, Siemens AG
+ * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -186,7 +187,7 @@ class ReuserPlugin extends DefaultPlugin
     foreach ($folderUploads as $uploadProgress) {
       $key = $uploadProgress->getId().','.$uploadProgress->getGroupId();
       $display = $uploadProgress->getFilename() . _(" from ")
-               . Convert2BrowserTime(date("Y-m-d H:i",$uploadProgress->getTimestamp()))
+               . Convert2BrowserTime(date("Y-m-d H:i:s",$uploadProgress->getTimestamp()))
                . ' ('. $uploadProgress->getStatusString() . ')';
       $uploadsById[$key] = $display;
     }

@@ -3,6 +3,7 @@
  Copyright (C) 2015-2019, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
