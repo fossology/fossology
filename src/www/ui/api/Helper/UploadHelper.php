@@ -32,6 +32,7 @@ use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\UI\Page\BrowseLicense;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Dao\AgentDao;
 
 /**
  * @class UploadHelper
@@ -329,5 +330,39 @@ class UploadHelper
       array_push($mainLicenses, $row['rf_shortname']);
     }
     return $mainLicenses;
+  }
+
+  /**
+   * Get the license list for given upload scanned by provided agents
+   * @param integer $uploadId        Upload ID
+   * @param array $agents            List of agents to get list from
+   * @param boolean $printContainers If true, print container info also
+   * @return array Array containing `filePath`, `agentFindings` and
+   * `conclusions` for each upload tree item
+   */
+  public function getUploadLicenseList($uploadId, $agents, $printContainers)
+  {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+    $uploadDao = $restHelper->getUploadDao();
+    $agentDao = $container->get('dao.agent');
+
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    $scanProx->createAgentStatus($agents);
+    $agent_ids = $scanProx->getLatestSuccessfulAgentIds();
+
+    /** @var ui_license_list $licenseListObj
+     * ui_license_list object to get licenses
+     */
+    $licenseListObj = $restHelper->getPlugin('license-list');
+    $licenseList = $licenseListObj->createListOfLines($uploadTreeTableName,
+      $parent->getItemId(), $agent_ids, -1, true, '', !$printContainers);
+    if (array_key_exists("warn", $licenseList)) {
+      unset($licenseList["warn"]);
+    }
+    return $licenseList;
   }
 }

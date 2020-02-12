@@ -30,6 +30,9 @@ use Fossology\UI\Page\UploadPageBase;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
+use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 /**
  * @class UploadController
@@ -38,6 +41,15 @@ use Fossology\UI\Api\Helper\UploadHelper;
 class UploadController extends RestController
 {
 
+  /**
+   * Get query parameter name for agent listing
+   */
+  const AGENT_PARAM = "agent";
+
+  /**
+   * Get query parameter name for container listing
+   */
+  const CONTAINER_PARAM = "containers";
   /**
    * Get list of uploads for current user
    *
@@ -219,6 +231,48 @@ class UploadController extends RestController
   }
 
   /**
+   * Get list of licenses for given upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function getUploadLicenses($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $query = $request->getQueryParams();
+
+    if (! array_key_exists(self::AGENT_PARAM, $query)) {
+      $error = new Info(400, "'agent' parameter missing from query.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $agents = explode(",", $query[self::AGENT_PARAM]);
+    $containers = true;
+    if (array_key_exists(self::CONTAINER_PARAM, $query)) {
+      $containers = (strcasecmp($query[self::CONTAINER_PARAM], "true") === 0);
+    }
+
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $adj2nest = $this->isAdj2nestDone($id, $response);
+    $agentScheduled = $this->areAgentsScheduled($id, $agents, $response);
+    if ($adj2nest !== true) {
+      return $adj2nest;
+    } else if ($agentScheduled !== true) {
+      return $agentScheduled;
+    }
+
+    $uploadHelper = new UploadHelper();
+    $licenseList = $uploadHelper->getUploadLicenseList($id, $agents,
+      $containers);
+    return $response->withJson($licenseList, 200);
+  }
+
+  /**
    * Check if upload is accessible
    * @param integer $groupId Group ID
    * @param integer $id      Upload ID
@@ -252,6 +306,65 @@ class UploadController extends RestController
       return $response->withHeader('Retry-After', '60')
         ->withHeader('Look-at', "/api/v1/jobs?upload=" . $id)
         ->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    return true;
+  }
+
+  /**
+   * Check if every agent passed is scheduled for the upload
+   * @param integer $uploadId Upload ID to check agents for
+   * @param array $agents     List of agents to check
+   * @param ResponseInterface $response
+   * @return ResponseInterface|boolean Error response on failure, true on
+   * success
+   */
+  private function areAgentsScheduled($uploadId, $agents, $response)
+  {
+    global $container;
+    $agentDao = $container->get('dao.agent');
+
+    $agentList = array_keys(AgentRef::AGENT_LIST);
+    $intersectArray = array_intersect($agents, $agentList);
+
+    $error = null;
+    if (count($agents) != count($intersectArray)) {
+      $error = new Info(400, "Agent should be any of " .
+        implode(", ", $agentList) . ". " . implode(",", $agents) . " passed.",
+        InfoType::ERROR);
+    } else {
+      // Agent is valid, check if they have ars tables.
+      foreach ($agents as $agent) {
+        if (! $agentDao->arsTableExists($agent)) {
+          $error = new Info(412, "Agent $agent not scheduled for the upload. " .
+            "Please POST to /jobs", InfoType::ERROR);
+          break;
+        }
+      }
+    }
+    if ($error !== null) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    $agentList = $scanProx->createAgentStatus($agents);
+
+    foreach ($agentList as $agent) {
+      if (! array_key_exists('currentAgentId', $agent)) {
+        $error = new Info(412, "Agent " . $agent["agentName"] .
+          " not scheduled for the upload. Please POST to /jobs",
+          InfoType::ERROR);
+        $response = $response->withJson($error->getArray(), $error->getCode());
+      } else if ($agent['isAgentRunning']) {
+        $error = new Info(503, "Agent $agent is running. " .
+          "Please check job status at /api/v1/jobs?upload=" . $uploadId,
+          InfoType::INFO);
+        $response = $response->withHeader('Retry-After', '60')
+        ->withHeader('Look-at', "/api/v1/jobs?upload=" . $uploadId)
+        ->withJson($error->getArray(), $error->getCode());
+      }
+      if ($error !== null) {
+        return $response;
+      }
     }
     return true;
   }

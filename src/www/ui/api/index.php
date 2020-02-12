@@ -106,6 +106,7 @@ $app->group(VERSION_1 . 'uploads',
     $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
     $this->post('', UploadController::class . ':postUpload');
     $this->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
+    $this->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
