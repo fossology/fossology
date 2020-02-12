@@ -118,7 +118,7 @@ class UploadFilePage extends UploadPageBase
     /* Create an upload record. */
     $uploadMode = (1 << 3); // code for "it came from web upload"
     $userId = Auth::getUserId();
-    $groupId = intval($request->get(self::UPLOAD_GROUP, Auth::getGroupId()));
+    $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName,
       $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
     if (empty($uploadId)) {
