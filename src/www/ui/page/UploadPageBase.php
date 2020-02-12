@@ -37,7 +37,6 @@ abstract class UploadPageBase extends DefaultPlugin
   const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
   const PUBLIC_ALL = 'public';
   const PUBLIC_GROUPS = 'protected';
-  const UPLOAD_GROUP = 'groupId';
 
   /** @var FolderDao */
   private $folderDao;
