@@ -542,7 +542,7 @@ class UploadDao
 
     $sql = "
 SELECT ufile_name, uploadtree_pk, lft, rgt, ufile_mode,
-       pfile_pk, pfile_md5, pfile_sha1
+       pfile_pk, pfile_md5, pfile_sha1, pfile_sha256
 FROM $uploadTreeTableName
   LEFT JOIN pfile
     ON pfile_fk = pfile_pk
@@ -594,6 +594,7 @@ ORDER BY lft asc
       $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
       $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
       $pfilePerFileName[$path]['sha1'] = $row['pfile_sha1'];
+      $pfilePerFileName[$path]['sha256'] = $row['pfile_sha256'];
     }
   }
 
@@ -661,4 +662,19 @@ ORDER BY lft asc
     }
     return $row;
   }
+
+  /**
+   * @brief Get Pfile hashes from the pfile id
+   * @param $pfilePk
+   * @return array
+   */
+  public function getUploadHashesFromPfileId($pfilePk)
+  {
+    $stmt = __METHOD__."getUploadHashesFromPfileId";
+    $sql = "SELECT * FROM pfile WHERE pfile_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($pfilePk), $stmt);
+
+    return ["sha1" => $row["pfile_sha1"], "md5" => $row["pfile_md5"], "sha256" => $row["pfile_sha256"]];
+  }
 }
+

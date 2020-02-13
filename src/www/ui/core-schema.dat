@@ -1404,6 +1404,23 @@
   $Schema["TABLE"]["reportgen"]["filepath"]["ALTER"] = "ALTER TABLE \"reportgen\" ALTER COLUMN \"filepath\" DROP NOT NULL";
 
 
+  $Schema["TABLE"]["software_heritage"]["software_heritage_pk"]["DESC"] = "";
+  $Schema["TABLE"]["software_heritage"]["software_heritage_pk"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"software_heritage_pk\" int4 DEFAULT nextval('software_heritage_pk_seq'::regclass)";
+  $Schema["TABLE"]["software_heritage"]["software_heritage_pk"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"software_heritage_pk\" SET NOT NULL, ALTER COLUMN \"software_heritage_pk\" SET DEFAULT nextval('software_heritage_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["software_heritage"]["pfile_fk"]["DESC"] = "";
+  $Schema["TABLE"]["software_heritage"]["pfile_fk"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"pfile_fk\" int4";
+  $Schema["TABLE"]["software_heritage"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["software_heritage"]["license"]["DESC"] = "";
+  $Schema["TABLE"]["software_heritage"]["license"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"license\" text";
+  $Schema["TABLE"]["software_heritage"]["license"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"license\" DROP NOT NULL";
+
+   $Schema["TABLE"]["software_heritage"]["origin"]["DESC"] = "";
+   $Schema["TABLE"]["software_heritage"]["origin"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"origin\" text";
+   $Schema["TABLE"]["software_heritage"]["origin"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"origin\" DROP NOT NULL";
+
+
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"sysconfig_pk\" int4 DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"sysconfig_pk\" SET NOT NULL, ALTER COLUMN \"sysconfig_pk\" SET DEFAULT nextval('sysconfig_sysconfig_pk_seq'::regclass)";
@@ -1749,7 +1766,7 @@
 
   $Schema["TABLE"]["report_info"]["ri_community"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_community"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_community\" text DEFAULT 'NA'";
-  $Schema["TABLE"]["report_info"]["ri_community"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_community\" SET NOT NULL, ALTER COLUMN \"ri_community\" SET DEFAULT 'NA'";  
+  $Schema["TABLE"]["report_info"]["ri_community"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_community\" SET NOT NULL, ALTER COLUMN \"ri_community\" SET DEFAULT 'NA'";
 
   $Schema["TABLE"]["report_info"]["ri_component"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_component"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component\" text DEFAULT 'NA'";
@@ -1951,6 +1968,9 @@
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_decision_pk_seq\"";
   $Schema["SEQUENCE"]["keyword_decision_pk_seq"]["UPDATE"] = "SELECT setval('keyword_decision_pk_seq',(SELECT greatest(1,max(keyword_decision_pk)) val FROM keyword_decision))";
 
+  $Schema["SEQUENCE"]["software_heritage_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"software_heritage_pk_seq\"";
+  $Schema["SEQUENCE"]["software_heritage_pk_seq"]["UPDATE"] = "SELECT setval('software_heritage_pk_seq',(SELECT greatest(1,max(software_heritage_pk)) val FROM software_heritage))";
+
   $Schema["CONSTRAINT"]["agent_pkey"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_pkey\" PRIMARY KEY (\"agent_pk\");";
   $Schema["CONSTRAINT"]["agent_unique_name_rev"] = "ALTER TABLE \"agent\" ADD CONSTRAINT \"agent_unique_name_rev\" UNIQUE (\"agent_name\",\"agent_rev\");";
   $Schema["CONSTRAINT"]["agent_wc_pfile_fk_key"] = "ALTER TABLE \"agent_wc\" ADD CONSTRAINT \"agent_wc_pfile_fk_key\" UNIQUE (\"pfile_fk\");";
@@ -2053,6 +2073,7 @@
   $Schema["CONSTRAINT"]["report_info_pkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_pkey\" PRIMARY KEY (\"ri_pk\");";
   $Schema["CONSTRAINT"]["report_info_upload_fk_fkey"] = "ALTER TABLE \"report_info\" ADD CONSTRAINT \"report_info_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["reportgen_upload_fk_fkey"] = "ALTER TABLE \"reportgen\" ADD CONSTRAINT \"reportgen_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["software_heritage_pfile_fk_fkey"] = "ALTER TABLE \"software_heritage\" ADD CONSTRAINT \"software_heritage_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
