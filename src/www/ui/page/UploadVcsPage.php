@@ -107,7 +107,7 @@ class UploadVcsPage extends UploadPageBase
     /* Create an upload record. */
     $uploadMode = (1 << 2); // code for "it came from wget"
     $userId = Auth::getUserId();
-    $groupId = intval($request->get(self::UPLOAD_GROUP, Auth::getGroupId()));
+    $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl,
       $description, $uploadMode, $folderId, $publicPermission);
     if (empty($uploadId)) {

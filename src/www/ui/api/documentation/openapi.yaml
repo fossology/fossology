@@ -306,13 +306,6 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: groupId
-          description: The group id to chose while uploading the package
-          in: header
-          required: false
-          schema:
-            type: integer
-            description: Group id, from last login if not provided
         - name: groupName
           description: The group name to chose while uploading the package
           in: header
