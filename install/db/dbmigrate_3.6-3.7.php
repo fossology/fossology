@@ -125,12 +125,43 @@ function moveObligation($dbManager, $verbose)
 }
 
 /**
+ * Check if Reuse value needs to be changed.
+ * @param DbManager $dbManager
+ * @return boolean True value 8 exist, false otherwise
+ */
+function migrateReuseValueForEnhanceWithMainLicense($dbManager)
+{
+  if($dbManager == NULL){
+    echo "No connection object passed!\n";
+    return false;
+  }
+  if (DB_TableExists("upload_reuse") != 1) {
+    return false;
+  }
+  $stmt = __METHOD__;
+  $sql = "SELECT exists(SELECT 1 FROM upload_reuse WHERE reuse_mode = $1 LIMIT 1)::int";
+  $row = $dbManager->getSingleRow($sql, array(8), $stmt);
+
+  if ($row['exists']) {
+    echo "*** Changing enhance reuse with main license value to 6 from 8 ***\n";
+    $stmt = __METHOD__."ReplaceValuesFrom8to6";
+    $dbManager->prepare($stmt,
+      "UPDATE upload_reuse
+       SET reuse_mode = $1 WHERE reuse_mode = $2"
+      );
+    $dbManager->freeResult($dbManager->execute($stmt, array(6,8)));
+    return true;
+  }
+  return false;
+}
+/**
  * Migration from FOSSology 3.6.0 to 3.7.0
  * @param DbManager $dbManager
  * @param boolean $dryRun
  */
 function Migrate_36_37($dbManager, $verbose)
 {
+  migrateReuseValueForEnhanceWithMainLicense($dbManager);
   if (! checkMigrate3637Required($dbManager)) {
     // Migration not required
     return;

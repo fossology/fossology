@@ -114,19 +114,19 @@ class ReuserAgentPlugin extends AgentPlugin
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
 
-    $getReuseValue = $request->get('reuseMode');
-
+    $getReuseValue = $request->get('reuseMode') ?: array();
     $reuseMode = UploadDao::REUSE_NONE;
-
-    if (! empty($getReuseValue)) {
-      if (count($getReuseValue) < 2) {
-        if (in_array('reuseMain', $getReuseValue)) {
-          $reuseMode = UploadDao::REUSE_MAIN;
-        } else {
-          $reuseMode = UploadDao::REUSE_ENHANCED;
-        }
-      } else {
-        $reuseMode = UploadDao::REUSE_ENH_MAIN;
+    foreach ($getReuseValue as $currentReuseValue) {
+      switch ($currentReuseValue) {
+        case 'reuseMain':
+          $reuseMode |= UploadDao::REUSE_MAIN;
+          break;
+        case 'reuseEnhanced':
+          $reuseMode |= UploadDao::REUSE_ENHANCED;
+          break;
+        case 'reuseConf':
+          $reuseMode |= UploadDao::REUSE_CONF;
+          break;
       }
     }
 

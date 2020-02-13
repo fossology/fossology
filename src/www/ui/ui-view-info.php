@@ -525,21 +525,18 @@ class ui_view_info extends FO_Plugin
       $reuseUploadFk = $row['reused_upload_fk'];
       $reuseGroupFk = $row['reused_group_fk'];
       $reusedUpload = $this->uploadDao->getUpload($reuseUploadFk);
-      $reuseMode = "";
-      switch ($row['reuse_mode']) {
-        case UploadDao::REUSE_ENHANCED:
-          $reuseMode = "Enhanced reuse";
-          break;
-        case UploadDao::REUSE_MAIN:
-          $reuseMode = "Main license reuse";
-          break;
-        case UploadDao::REUSE_ENH_MAIN:
-          $reuseMode = "Enhanced with main license reuse";
-          break;
-        default:
-          $reuseMode = "Normal";
+      $reuseMode = array();
+      if ($row['reuse_mode'] & UploadDao::REUSE_ENHANCED) {
+        $reuseMode[] = "Enhanced";
+      } else {
+        $reuseMode[] = "Normal";
       }
-
+      if ($row['reuse_mode'] & UploadDao::REUSE_MAIN) {
+        $reuseMode[] = "Main license";
+      }
+      if ($row['reuse_mode'] & UploadDao::REUSE_CONF) {
+        $reuseMode[] = "Report configuration settings";
+      }
       $entry['name'] = $reusedUpload->getFilename();
       $entry['url'] = Traceback_uri() .
         "?mod=license&upload=$reuseUploadFk&item=" .
@@ -547,7 +544,7 @@ class ui_view_info extends FO_Plugin
       $entry['group'] = $this->userDao->getGroupNameById($reuseGroupFk) .
         " ($reuseGroupFk)";
       $entry['sha1'] = $this->uploadDao->getUploadHashes($reuseUploadFk)['sha1'];
-      $entry['mode'] = $reuseMode;
+      $entry['mode'] = implode(", ", $reuseMode)." reuse";
 
       $vars['reusedPackageList'][] = $entry;
     }
