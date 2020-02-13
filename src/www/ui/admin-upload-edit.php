@@ -2,6 +2,7 @@
 /***********************************************************
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015 Siemens AG
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -139,7 +140,7 @@ class upload_properties extends FO_Plugin
       if (! $this->uploadDao->isEditable($uploadProgress->getId(), $groupId)) {
         continue;
       }
-      $display = $uploadProgress->getFilename() . _(" from ") . date("Y-m-d H:i",$uploadProgress->getTimestamp());
+      $display = $uploadProgress->getFilename() . _(" from ") . Convert2BrowserTime(date("Y-m-d H:i:s",$uploadProgress->getTimestamp()));
       $uploadsById[$uploadProgress->getId()] = $display;
     }
     $this->vars['uploadList'] = $uploadsById;

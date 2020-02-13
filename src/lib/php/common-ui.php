@@ -2,6 +2,7 @@
 /***********************************************************
  Copyright (C) 2009-2014 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2017, Siemens AG
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -288,4 +289,18 @@ function Get1stUploadtreeID($upload)
   $uploadtree_id = $row['max'];
   pg_free_result($result);
   return $uploadtree_id;
+}
+
+/**
+ * \brief Convert the server time to browser time
+ * \param time $server_time to be converted
+ */
+function Convert2BrowserTime($server_time)
+{
+  $tz = $_SESSION["timezone"];
+  $server_timezone = date_default_timezone_get();
+  $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
+  $browser_time->setTimeZone(new \DateTimeZone($tz));
+  $time = $browser_time->format('Y-m-d H:i:s');
+  return $time;
 }

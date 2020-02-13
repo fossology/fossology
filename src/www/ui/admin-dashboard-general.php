@@ -3,6 +3,7 @@
  Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  Copyright (C) 2015-2018 Siemens AG
  Copyright (C) 2019 Orange
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -249,7 +250,7 @@ class dashboard extends FO_Plugin
         $V .= "<td class='dashboard'>$row[processid]</td>";
         $V .= "<td class='dashboard'>" . htmlspecialchars($row[$current_query]) .
           "</td>";
-        $StartTime = substr($row['query_start'], 0, 19);
+        $StartTime = Convert2BrowserTime(substr($row['query_start'], 0, 19));
         $V .= "<td class='dashboard'>$StartTime</td>";
         $V .= "<td class='dashboard'>$row[elapsed]</td>";
         $V .= "</tr>\n";
