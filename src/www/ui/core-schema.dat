@@ -1412,13 +1412,13 @@
   $Schema["TABLE"]["software_heritage"]["pfile_fk"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"pfile_fk\" int4";
   $Schema["TABLE"]["software_heritage"]["pfile_fk"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"pfile_fk\" SET NOT NULL";
 
-  $Schema["TABLE"]["software_heritage"]["license"]["DESC"] = "";
-  $Schema["TABLE"]["software_heritage"]["license"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"license\" text";
-  $Schema["TABLE"]["software_heritage"]["license"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"license\" DROP NOT NULL";
+  $Schema["TABLE"]["software_heritage"]["swh_shortnames"]["DESC"] = "";
+  $Schema["TABLE"]["software_heritage"]["swh_shortnames"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"swh_shortnames\" text";
+  $Schema["TABLE"]["software_heritage"]["swh_shortnames"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"swh_shortnames\" DROP NOT NULL";
 
-   $Schema["TABLE"]["software_heritage"]["origin"]["DESC"] = "";
-   $Schema["TABLE"]["software_heritage"]["origin"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"origin\" text";
-   $Schema["TABLE"]["software_heritage"]["origin"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"origin\" DROP NOT NULL";
+  $Schema["TABLE"]["software_heritage"]["swh_status"]["DESC"] = "";
+  $Schema["TABLE"]["software_heritage"]["swh_status"]["ADD"] = "ALTER TABLE \"software_heritage\" ADD COLUMN \"swh_status\" int4 DEFAULT 1";
+  $Schema["TABLE"]["software_heritage"]["swh_status"]["ALTER"] = "ALTER TABLE \"software_heritage\" ALTER COLUMN \"swh_status\" DROP NOT NULL, ALTER COLUMN \"swh_status\" SET DEFAULT 1";
 
 
   $Schema["TABLE"]["sysconfig"]["sysconfig_pk"]["DESC"] = "";

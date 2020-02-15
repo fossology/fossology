@@ -19,7 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
-use  Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
 
 /**
@@ -28,6 +28,11 @@ use Monolog\Logger;
  */
 class SoftwareHeritageDao
 {
+
+  const SWH_STATUS_OK = 200;
+  const SWH_BAD_REQUEST = 400;
+  const SWH_NOT_FOUND = 404;
+  const SWH_RATELIMIT_EXCEED = 429;
 
   /** @var DbManager */
   private $dbManager;
@@ -52,8 +57,8 @@ class SoftwareHeritageDao
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $stmt = __METHOD__.$uploadTreeTableName;
-    $sql = "SELECT DISTINCT(SH.pfile_fk) FROM $uploadTreeTableName UT
-              INNER JOIN software_heritage SH ON SH.pfile_fk = UT.pfile_fk
+    $sql = "SELECT DISTINCT(SWH.pfile_fk) FROM $uploadTreeTableName UT
+              INNER JOIN software_heritage SWH ON SWH.pfile_fk = UT.pfile_fk
             WHERE UT.upload_fk = $1";
     return $this->dbManager->getRows($sql,array($uploadId),$stmt);
   }
@@ -65,9 +70,9 @@ class SoftwareHeritageDao
   * @param String  $licenseDetails
   * @return bool
   */
-  public function setshDetails($pfileId, $licenseDetails)
+  public function setSoftwareHeritageDetails($pfileId, $licenseDetails, $status)
   {
-    if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk' => $pfileId, 'license' => $licenseDetails]))) {
+    if (!empty($this->dbManager->insertTableRow('software_heritage',['pfile_fk' => $pfileId, 'swh_shortnames' => $licenseDetails, 'swh_status' => $status]))) {
         return true;
     }
     return false;
@@ -81,15 +86,13 @@ class SoftwareHeritageDao
   public function getSoftwareHetiageRecord($pfileId)
   {
     $stmt = __METHOD__."getSoftwareHeritageRecord";
-    $sql = "SELECT license FROM software_heritage WHERE pfile_fk = $1";
-    $rows = $this->dbManager->getRows($sql,[$pfileId],$stmt);
-    $licenseShortnames = implode(", ", array_column($rows, 'license'));
-    if ($licenseShortnames) {
+    $row = $this->dbManager->getSingleRow("SELECT swh_shortnames, swh_status FROM software_heritage WHERE pfile_fk = $1",
+        array($pfileId), $stmt);
+    $img = '<img alt="done" src="images/red.png" class="icon-small"/>';
+    if (self::SWH_STATUS_OK == $row['swh_status']) {
       $img = '<img alt="done" src="images/green.png" class="icon-small"/>';
-    } else {
-      $img = '<img alt="done" src="images/red.png" class="icon-small"/>';
     }
-    return ["license" => $licenseShortnames, "img" => $img];
+    return ["license" => $row['swh_shortnames'], "img" => $img];
 
   }
 }
