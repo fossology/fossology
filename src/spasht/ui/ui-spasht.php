@@ -109,15 +109,16 @@ class ui_spasht extends FO_Plugin
     $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
     $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
 
-    $statusbody = "true";
+    $statusbody = "definition_not_found";
 
     $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    // $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
-
-    // $this->vars['advanceSearch'] = ""; //Set advance search to empty
+    $revisionName = GetParm("revisionName",PARM_STRING);
+    $namespaceName = GetParm("namespaceName",PARM_STRING);
+    $typeName = GetParm("typeName",PARM_STRING);
+    $providerName = GetParm("providerName",PARM_STRING);
 
     $this->vars['storeStatus'] = "false";
-    $this->vars['pageNo'] = "Spasht_home";
+    $this->vars['pageNo'] = "definition_not_found";
 
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
@@ -183,10 +184,11 @@ class ui_spasht extends FO_Plugin
         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
 
         if (sizeof($body) == 0) {//Check if no element is found
-          $statusbody = "false";
+          $statusbody = "definition_not_found";
         } else {
           $temp = array();
           $details = array();
+          $acceptResult = false;
 
           for ($x = 0; $x < sizeof($body) ; $x++) {
             $str = explode ("/", $body[$x]);
@@ -198,55 +200,64 @@ class ui_spasht extends FO_Plugin
             $temp2['provider'] = $str[1];
             $temp2['namespace'] = $str[2];
 
-            $temp[] = $temp2;
-            $uri = "definitions/".$body[$x];
+            $accept = $this->checkAdvanceSearch($temp2, $revisionName, $namespaceName, $typeName, $providerName);
 
-            $detail_body = array();
+            if ($accept == true) {
+              $acceptResult = true;
+              $temp[] = $temp2;
+              $uri = "definitions/".$body[$x];
 
-            //details section
-            $res_details = $client->request('GET', $uri, [
-              'query' => [
-                'expand' => "-files"
-              ], //Perform query operation into the api
-              'proxy' => $proxy
-            ]);
+              $detail_body = array();
 
-            $detail_body = json_decode($res_details->getBody()->getContents(),true);
+              //details section
+              $res_details = $client->request('GET', $uri, [
+                'query' => [
+                  'expand' => "-files"
+                ], //Perform query operation into the api
+                'proxy' => $proxy
+              ]);
 
-            $details_temp = array();
+              $detail_body = json_decode($res_details->getBody()->getContents(),true);
 
-            $details_temp['declared'] = $detail_body["licensed"]["declared"];
-            $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
-            $details_temp['release'] = $detail_body["described"]["releaseDate"];
-            $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
-            $details_temp['attribution'] = $detail_body['licensed']["facets"]["core"]['attribution']['parties'];
-            $details_temp['discovered'] = $detail_body['licensed']["facets"]["core"]['discovered']['expressions'];
+              $details_temp = array();
 
-            $details[] = $details_temp;
+              $details_temp['declared'] = $detail_body["licensed"]["declared"];
+              $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
+              $details_temp['release'] = $detail_body["described"]["releaseDate"];
+              $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
+              $details_temp['attribution'] = substr(
+                implode(", ",
+                  $detail_body['licensed']["facets"]["core"]['attribution']['parties']),
+                0, 100);
+              $details_temp['discovered'] = substr(
+                implode(", ",
+                  $detail_body['licensed']["facets"]["core"]['discovered']['expressions']),
+                0, 100);
+
+              $details[] = $details_temp;
+            }
           }
-          $this->vars['details'] = $details;
-          $this->vars['body'] = $temp;
+          if ($acceptResult == true) {
+            $this->vars['details'] = $details;
+            $this->vars['body'] = $temp;
+            $statusbody = "definition_found";
+          } else {
+            $statusbody = "definition_not_found";
+          }
         }
       }
 
-      /** Check for advance Search enabled
-       * If enabled the revisions are retrieved from the body to display them in the form.
-       * As options to users.
-       */
-      // if ($advanceSearch == "advanceSearch") {
-      //   $this->vars['advanceSearch'] = "checked";
-      // }
-      if ($this->vars['storeStatus'] == "true") {
-        $this->vars['pageNo'] = "data_stored_successfully";
-      } else {
+      if ($statusbody == "definition_found") {
         $this->vars['pageNo'] = "show_definitions";
+      } else {
+        $this->vars['pageNo'] = "definition_not_found";
       }
 
       $this->vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;
     } else {
       if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
-         $text = _("Upload Id Not found");
+        $text = _("Upload Id Not found");
         return "<h2>$text</h2>";
       }
 
@@ -315,7 +326,6 @@ class ui_spasht extends FO_Plugin
 
     $this->vars['uploadName'] = $upload_name;
 
-    $this->vars['statusbody'] = $statusbody;
     $out = $this->render('agent_spasht.html.twig',$this->vars);
 
     //$this->Output_tables();
@@ -423,7 +433,32 @@ class ui_spasht extends FO_Plugin
     );
     return $defaultOrder;
   }
+
+  /**
+   * @brief Check for Advance Search
+   * @return boolean
+   */
+  public function checkAdvanceSearch ($body, $revisionName, $namespaceName, $typeName, $providerName)
+  {
+    if (! empty($revisionName != "") && $body['revision'] != $revisionName) {
+      return false;
+    }
+
+    if (! empty($namespaceName != "") && $body['namespace'] != $namespaceName) {
+      return false;
+    }
+
+    if (! empty($typeName != "") && $body['type'] != $typeName) {
+      return false;
+    }
+
+    if (! empty($providerName != "") && $body['provider'] != $providerName) {
+      return false;
+    }
+
+    return true;
+  }
 }
 
-  $NewPlugin = new ui_spasht;
-  $NewPlugin->Initialize();
+$NewPlugin = new ui_spasht;
+$NewPlugin->Initialize();

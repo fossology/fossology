@@ -1,6 +1,6 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
@@ -13,9 +13,17 @@ function createTableBase{{ table.type }}(activated) {
       { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
       { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
     ];
-  var action = 'getData'
 
-  var id = "#copyright_spasht_table";
+  if (activated)
+  {
+    var id = '#copyright_spasht_table';
+    var action = 'getData';
+  }
+  else
+  {
+    var id = '#copyright_spasht_table_deactivated';
+    var action = 'getDeactivatedData';
+  }
 
   return $(id).dataTable({
     "bServerSide": true,
@@ -79,13 +87,19 @@ function createTable{{ table.type }}() {
   $('#replaceSelected{{ table.type }}').click(function () {
     var replaceText = $('#replaceText{{ table.type }}').val().trim();
     var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
+    var ajaxList = new Array();
     if(replaceIsValid){
       $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
         currentValue = $(this).val();
         var currUploadData = currentValue.split(',');
         updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
+        ajaxList.push(updateRows{{ table.type }}(currUploadData[0],
+          currUploadData[1], currUploadData[2], currUploadData[3], replaceText));
       });
-      location.reload(true);
+      // Wait for all ajax calls to resolve
+      $.when.apply($, ajaxList).done(function(){
+        location.reload(true)
+      });
     }
   });
 
@@ -158,7 +172,7 @@ function createPlainTable{{ table.type }}() {
 }
 
 function updateRows{{ table.type }}(upload, item, hash, kind, replaceText) {
-  $.ajax({
+  return $.ajax({
     type: 'POST',
     dataType: 'text',
     url: '?mod=ajax-spasht-copyright-hist&action=update&type={{ table.type }}',
@@ -196,7 +210,7 @@ function undo{{ table.type }}(upload, item, hash, kind) {
     dataType: 'text',
     url: '?mod=ajax-spasht-copyright-hist&action=undo',
     data: { id : upload + ',' + item + ',' + hash + ',' + kind },
-      success: function(data) { 
+      success: function(data) {
         $("#delete{{ table.type }}" + hash).show();
         $("#update{{ table.type }}" + hash).hide();
         $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);

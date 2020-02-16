@@ -34,13 +34,15 @@ class SpashtAgentPlugin extends AgentPlugin
   }
 
   /**
-   * Register the plugin to UI
+   * Do not register the plugin to UI as spasht requires additional parameters
+   * to run
+   *
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
    * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()
    */
   function preInstall()
   {
-      menu_insert("Agents::" . $this->Title, 0, $this->Name);
+    return false;
   }
 
 

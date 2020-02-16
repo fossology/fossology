@@ -107,4 +107,42 @@ class SpashtDao
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
     return ($row);
   }
+
+  /**
+   * Perform updates on copyrights from ClearlyDefined
+   * @param ItemTreeBounds $item Item
+   * @param string $hash         Copyright hash
+   * @param string $content      New copyright content
+   * @param string $action       Actions ('delete'|'rollback'|nothing=>update)
+   */
+  public function updateCopyright($item, $hash, $content, $action='')
+  {
+    $itemTable = $item->getUploadTreeTableName();
+    $stmt = __METHOD__ . "$itemTable";
+    $params = array($hash, $item->getLeft(), $item->getRight());
+
+    if ($action == "delete") {
+      $setSql = "is_enabled='false'";
+      $stmt .= '.delete';
+    } else if ($action == "rollback") {
+      $setSql = "is_enabled='true'";
+      $stmt .= '.rollback';
+    } else {
+      $setSql = "textfinding = $4, hash = md5($4), is_enabled='true'";
+      $params[] = $content;
+    }
+
+    $sql = "UPDATE copyright_spasht AS cpr SET $setSql
+            FROM copyright_spasht as cp
+            INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
+            WHERE cpr.copyright_spasht_pk = cp.copyright_spasht_pk
+              AND cp.hash = $1
+              AND ( ut.lft BETWEEN $2 AND $3 )";
+    if ('uploadtree_a' == $item->getUploadTreeTableName()) {
+      $params[] = $item->getUploadId();
+      $sql .= " AND ut.upload_fk=$".count($params);
+      $stmt .= '.upload';
+    }
+    $this->dbManager->getSingleRow($sql, $params, $stmt);
+  }
 }

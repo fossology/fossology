@@ -1,56 +1,74 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
-<table id="detailsTable" style="border: 1px solid black;">
-    <tr>
-        <th>Declared</th>
-        <th>Source</th>
-        <th>Release</th>
-        <th>Files</th>
-        <th>Attribution</th>
-        <th>Discovered</th>
-        <th>MENU</th>
-    </tr>
+<table id="detailsTable" class="simpleTable detailsTable left-align-cells">
+  <tbody>
     {% for result in details %}
-    <tr class="detailsRow" id="detailsRow{{ loop.index0 }}" style="border: 1px solid black;">
-        <td style="border-right: 1px solid black;"  >
-            <span style="display: inline-block; width: 100px;">
-                {{ result.declared }}
-            </span>
-        </td>
-        <td style="border-right: 1px solid black;">
-            <span style="display: inline-block; width: 180px; word-wrap: break-word;">
-                {{ result.source }}
-            </span>
-        </td>
-        <td style="border-right: 1px solid black;">
-            <span style="display: inline-block; width: 100px; word-wrap: break-word;">
-                {{ result.release }}
-            </span>
-        </td>
-        <td style="border-right: 1px solid black;">
-            <span style="display: inline-block; width: 70px;">
-                {{ result.files }}
-            </span>
-        </td>
-        <td style="border-right: 1px solid black;">
-            <span style="display: inline-block; width: 180px; word-wrap: break-word;">
-                {{ result.attribution[0] }}, {{ result.attribution[1] }}, {{ result.attribution[2] }}, {{ result.attribution[3] }} ...
-            </span>
-        </td>
-        <td style="border-right: 1px solid black;">
-            <span style="display: inline-block; width: 180px; word-wrap: break-word;">
-                {{ result.discovered[0] }}, {{ result.discovered[1] }}, {{ result.discovered[2] }}, {{ result.discovered[3] }} ...
-            </span>
-        </td>
-        <td>
-            <a href="#" onclick='StoreIntoDb({{ loop.index0 }})'>OPEN</a>
-        </td>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Declared
+      </th>
+      <td>
+        <span>{{ result.declared }}</span>
+      </td>
+    </tr>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Source
+      </th>
+      <td>
+        <span>
+          <a href="{{ result.source }}" target="_blank"
+            rel="noopener noreferrer">{{ result.source }}</a>
+        </span>
+      </td>
+    </tr>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Release
+      </th>
+      <td>
+        <span>{{ result.release }}</span>
+      </td>
+    </tr>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Files
+      </th>
+      <td>
+        <span>{{ result.files }}</span>
+      </td>
+    </tr>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Attributions
+      </th>
+      <td>
+        <span>{{ result.attribution }}{% if result.attribution is not empty %}...{% endif %}</span>
+      </td>
+    </tr>
+    <tr class="detailsRow detailsId{{ loop.index0 }}">
+      <th>
+        Discovered
+      </th>
+      <td>
+        <span>{{ result.discovered }}{% if result.discovered is not empty %}...{% endif %}</span>
+      </td>
     </tr>
     {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2">
+        <a style='cursor:pointer;margin:0.4em;' id='defentionSelector'
+          class='buttonLink'>SELECT</a>
+      </td>
+  </tfoot>
 </table>
+
+<input id="selectedDetailKey" type="hidden" name="selectedDetailKey" value="" />

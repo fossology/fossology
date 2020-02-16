@@ -1,13 +1,50 @@
-#searchBoxCover {
-    font-weight: bold;
-    font-size: 16px;
+.searchBoxText {
+  font-weight: bold;
+  font-size: 1.2em;
 }
 
-#spashtStart {
-    padding-top: 15px;
+.spasht-full-row {
+  width: 100%;
+  text-align: center;
+  padding-top: 2em;
+  padding-right: 1em;
+  justify-content: center;
+  display: flex;
 }
 
-#definitionsTable,
-#definitionsRow {
-    border: 1px solid black;
+.left-align-cells td {
+  text-align: left;
+}
+
+.wrapTable td {
+  word-wrap: anywhere;
+}
+
+.detailsTable th {
+  width: 8em;
+  text-align: left;
+}
+
+.detailsTable td span {
+  display: inline-block;
+  width: 50em;
+  text-align: left;
+  word-wrap: anywhere;
+}
+
+.spasht-loading {
+  position: absolute;
+  top: 8em;
+  left: 50%;
+  width: 16em;
+  height: 2em;
+  margin-left: -8em;
+  margin-top: -1em;
+  padding: 1em 0 .5em 0;
+  border: 1px solid #ddd;
+  text-align: center;
+  color: #777;
+  font-size: 12pt;
+  background-color: white;
+  z-index: 999;
 }

@@ -123,7 +123,7 @@ class SpashtAgent extends Agent
      */
     $client = new Client([
       // Base URI is used with relative requests
-      'base_uri' => 'https://api.clearlydefined.io/'
+      'base_uri' => $SysConf['SYSCONFIG']["ClearlyDefinedURL"]
     ]);
 
     // uri to definitions section in the api to get scancode details

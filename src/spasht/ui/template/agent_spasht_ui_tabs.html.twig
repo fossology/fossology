@@ -1,42 +1,62 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
 <table border="0" width="100%">
-<tr>
-<td valign="top">
-    <div id="spashtTabs">
-    <ul>
+  <tr>
+    <td valign="top">
+      <div id="spashtTabs">
+      <ul>
         <li><a href="#ConfigureTab">Configure</a></li>
-        <li><a href="#LicenseTab">Licenses</a></li>
         <li><a href="#CopyrightTab">Copyrights</a></li>
-    </ul>
-    <div id="ConfigureTab">
+      </ul>
+      <div id="ConfigureTab" class="container-fluid">
         {% include 'agent_spasht_ui_content.html.twig' %}
-    </div>
-    <div id="LicenseTab">
-        {{ 'License Table' }}
-    </div>
-    <div id="CopyrightTab">
-        <table id="copyright_spasht_table">
-        <thead>
+      </div>
+      <div id="CopyrightTab" style="padding-bottom:2.5em">
+        <span style="font-weight:bold;display:block;padding:1em 0 1em;font-size:15pt;">Activated statements</span>
+        <table id="copyright_spasht_table" class="dataTable">
+          <thead>
             <tr>
-            <th>COUNT</th>
-            <th>COPYRIGHT CONTENT</th>
-            <th></th>
-            <th></th>
+              <th>COUNT</th>
+              <th>COPYRIGHT CONTENT</th>
+              <th></th>
+              <th></th>
             </tr>
-        </thead>
-        <tbody></tbody>
+          </thead>
+          <tbody></tbody>
         </table>
-    </div>
-    </div>
-</td>
-<td valign="top">{{ fileList }}</td>
-</tr>
+        <br /><br />
+        <div>
+          <span>
+            Replace: <input type='text' id='replaceTextstatement' style='width:80%'>
+          </span>
+          <br/><br/>
+          <a style='cursor:pointer;margin-left:10px;' id='replaceSelectedstatement'
+            class='buttonLink'>Mark selected rows for replace</a>
+          <a style='cursor:pointer;margin-left:10px;' id='deleteSelectedstatement'
+            class='buttonLink'>Mark selected rows for deletion</a>
+          <br />
+        </div>
+        <span style="font-weight:bold;display:block;padding:3em 0 1em;font-size:15pt;">Deactivated statements</span>
+        <table id="copyright_spasht_table_deactivated" class="dataTable">
+          <thead>
+            <tr>
+              <th>COUNT</th>
+              <th>COPYRIGHT CONTENT</th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      </div>
+    </td>
+    <td valign="top">{{ fileList }}</td>
+  </tr>
 </table>
-   

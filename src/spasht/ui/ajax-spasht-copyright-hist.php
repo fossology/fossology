@@ -64,7 +64,7 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
   {
     $this->Name = "ajax-spasht-copyright-hist";
     $this->Title = TITLE_SPASHTCOPYRIGHTHISTOGRAMPROCESSPOST;
-    $this->DBaccess = PLUGIN_DB_READ;
+    $this->DBaccess = PLUGIN_DB_WRITE;
     $this->OutputType = 'JSON';
     $this->LoginFlag = 0;
     $this->NoMenu = 0;
@@ -139,6 +139,15 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
         case "getDeactivatedData":
           $returnValue = $this->doGetData($upload, false);
           break;
+        case "update":
+          $returnValue = $this->doUpdate($item, $hash, $type);
+          break;
+        case "delete":
+          $returnValue = $this->doDelete($item, $hash, $type);
+          break;
+        case "undo":
+          $returnValue = $this->doUndo($item, $hash, $type);
+          break;
         default:
           $returnValue = "<h2>" . _("Unknown action") . "</h2>";
       }
@@ -161,10 +170,11 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
     $agent_pk = GetParm("agent", PARM_STRING);
     $type = GetParm("type", PARM_STRING);
     $filter = GetParm("filter", PARM_STRING);
-    $listPage = "spasht-copyright-list";
+    $this->listPage = "spasht-copyright-list";
 
     header('Content-type: text/json');
-    list($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated);
+    list ($aaData, $iTotalRecords, $iTotalDisplayRecords) = $this->getTableData(
+      $upload, $item, $agent_pk, $type, $this->listPage, $filter, $activated);
     return new JsonResponse(array(
             'sEcho' => intval($_GET['sEcho']),
             'aaData' => $aaData,
@@ -179,25 +189,30 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
    * @param int     $upload    Upload id to get results from
    * @param int     $item      Upload tree id of the item
    * @param int     $agent_pk  Id of the agent who loaded the results
-   * @param string  $type      Type of the statement (statement, url, email, author or ecc)
+   * @param string  $type      Type of the statement (statement, url, email,
+   *        author or ecc)
    * @param string  $listPage  Page slug to use
    * @param string  $filter    Filter data from query
    * @param boolean $activated True to get activated copyrights, else false
-   * @return array[][] Array of table data, total records in database, filtered records
+   * @return array[][] Array of table data, total records in database, filtered
+   *         records
    */
-  private function getTableData($upload, $item, $agent_pk, $type, $listPage, $filter, $activated = true)
+  private function getTableData($upload, $item, $agent_pk, $type, $listPage,
+    $filter, $activated = true)
   {
-    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights($upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter, $activated);
+    list ($rows, $iTotalDisplayRecords, $iTotalRecords) = $this->getCopyrights(
+      $upload, $item, $this->uploadtree_tablename, $agent_pk, $type, $filter,
+      $activated);
     $aaData = array();
     if (!empty($rows)) {
       $rw = $this->uploadDao->isEditable($upload, Auth::getGroupId());
       foreach ($rows as $row) {
-        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type, $listPage, $filter, $activated, $rw);
+        $aaData [] = $this->fillTableRow($row, $item, $upload, $agent_pk, $type,
+          $listPage, $filter, $activated, $rw);
       }
     }
 
     return array($aaData, $iTotalRecords, $iTotalDisplayRecords);
-
   }
 
   /**
@@ -206,12 +221,15 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
    * @param int     $item                Upload tree id of the item
    * @param string  $uploadTreeTableName Upload tree table to use
    * @param int     $agentId             Id of the agent who loaded the results
-   * @param string  $type                Type of the statement (statement, url, email, author or ecc)
+   * @param string  $type                Type of the statement (statement, url,
+   *        email, author or ecc)
    * @param string  $filter              Filter data from query
-   * @param boolean $activated           True to get activated copyrights, else false
+   * @param boolean $activated           True to get activated copyrights, else
+   *        false
    * @return array[][] Array of table records, filtered records, total records
    */
-  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName, $agentId, $type, $filter, $activated = true)
+  protected function getCopyrights($upload_pk, $item, $uploadTreeTableName,
+    $agentId, $type, $filter, $activated = true)
   {
     $offset = GetParm('iDisplayStart', PARM_INTEGER);
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
@@ -219,7 +237,8 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
     $tableName = $this->getTableName($type);
     $orderString = $this->getOrderString();
 
-    list($left, $right) = $this->uploadDao->getLeftAndRight($item, $uploadTreeTableName);
+    list($left, $right) = $this->uploadDao->getLeftAndRight($item,
+      $uploadTreeTableName);
 
     if ($filter == "") {
       $filter = "none";
@@ -258,11 +277,13 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
 
     $countQuery = "SELECT count(*) FROM (SELECT textfinding AS content, count(*) $unorderedQuery $totalFilter $grouping) as K";
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
-        $filterParms, __METHOD__.$tableName . ".count" . ($activated ? '' : '_deactivated'));
+      $filterParms, __METHOD__.$tableName . ".count" .
+      ($activated ? '' : '_deactivated'));
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
     $countAllQuery = "SELECT count(*) FROM (SELECT textfinding AS content, count(*) $unorderedQuery$grouping) as K";
-    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
+    $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params,
+      __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
     $iTotalRecords = $iTotalRecordsRow['count'];
 
     $range = "";
@@ -271,13 +292,12 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
     $filterParms[] = $limit;
     $range .= ' LIMIT $' . count($filterParms);
 
-    $sql = "SELECT textfinding AS content, hash, count(*) as copyright_count  " .
-        $unorderedQuery . $totalFilter . " GROUP BY content, hash " . $orderString . $range;
-    $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName . ($activated ? '' : '_deactivated');
-    $this->dbManager->prepare($statement, $sql);
-    $result = $this->dbManager->execute($statement, $filterParms);
-    $rows = $this->dbManager->fetchAll($result);
-    $this->dbManager->freeResult($result);
+    $sql = "SELECT textfinding AS content, hash, count(*) as copyright_count " .
+      $unorderedQuery . $totalFilter . " GROUP BY content, hash " .
+      $orderString . $range;
+    $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName .
+      ($activated ? '' : '_deactivated');
+    $rows = $this->dbManager->getRows($sql, $filterParms, $statement);
 
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
   }
@@ -293,17 +313,7 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
    */
   private function getTableName($type)
   {
-    switch ($type) {
-      case "license" :
-        $tableName = "license_spasht"; //dummy
-        break;
-      case "statement" :
-        $tableName = "copyright_spasht";
-        break;
-      default:
-        $tableName = "copyright_spasht";
-    }
-    return $tableName;
+    return "copyright_spasht";
   }
 
   /**
@@ -316,9 +326,8 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
 
     $defaultOrder = CopyrightHistogram::returnSortOrder();
 
-    $orderString = $this->dataTablesUtility->getSortingString($_GET, $columnNamesInDatabase, $defaultOrder);
-
-    return $orderString;
+    return $this->dataTablesUtility->getSortingString($_GET,
+      $columnNamesInDatabase, $defaultOrder);
   }
 
   /**
@@ -380,7 +389,8 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
    * @return string[]
    * @internal param boolean $normalizeString
    */
-  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,$listPage, $filter = "", $activated = true, $rw = true)
+  private function fillTableRow($row, $uploadTreeId, $upload, $agentId, $type,
+    $listPage, $filter = "", $activated = true, $rw = true)
   {
     $hash = $row['hash'];
     $output = array('DT_RowId' => "$upload,$uploadTreeId,$hash,$type" );
@@ -392,15 +402,72 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
       $urlArgs .= "&filter=$filter";
     }
     $link .= $urlArgs . "'>" . $row['copyright_count'] . "</a>";
-    $output['0'] = $link;
+    // Copyright filtering needs work. Removing link from output[0]
+    $output['0'] = $row['copyright_count'];
     $output['1'] = convertToUTF8($row['content']);
-    $output['2'] = $this->getTableRowAction($hash, $uploadTreeId, $upload, $type, $activated, $rw);
+    $output['2'] = $this->getTableRowAction($hash, $uploadTreeId, $upload,
+      $type, $activated, $rw);
     if ($rw && $activated) {
       $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     } else {
         $output['3'] = "";
     }
     return $output;
+  }
+
+  /**
+   * @brief Update result
+   * @param int    $itemId Upload tree id of the item to update
+   * @param string $hash   Hash of the content
+   * @param string $type   'statement'|'decision'
+   * @return Response
+   */
+  protected function doUpdate($itemId, $hash, $type)
+  {
+    $content = GetParm("value", PARM_RAW);
+    if (!$content) {
+      return new Response('empty content not allowed',
+        Response::HTTP_BAD_REQUEST, array('Content-type'=>'text/plain'));
+    }
+
+    $item = $this->uploadDao->getItemTreeBounds($itemId,
+      $this->uploadtree_tablename);
+    $this->spashtDao->updateCopyright($item, $hash, $content);
+
+    return new Response('success', Response::HTTP_OK,
+      array('Content-type'=>'text/plain'));
+  }
+
+  /**
+   * @brief Disable a result
+   * @param int    $itemId Upload tree id of the item to update
+   * @param string $hash   Hash of the content
+   * @param string $type   'statement'|'decision'
+   * @return Response
+   */
+  protected function doDelete($itemId, $hash, $type)
+  {
+    $item = $this->uploadDao->getItemTreeBounds($itemId,
+      $this->uploadtree_tablename);
+    $this->spashtDao->updateCopyright($item, $hash, '', 'delete');
+    return new Response('Successfully deleted', Response::HTTP_OK,
+      array('Content-type'=>'text/plain'));
+  }
+
+  /**
+   * @brief Rollback a result
+   * @param int    $itemId Upload tree id of the item to update
+   * @param string $hash   Hash of the content
+   * @param string $type   'statement'|'decision'
+   * @return Response
+   */
+  protected function doUndo($itemId, $hash, $type)
+  {
+    $item = $this->uploadDao->getItemTreeBounds($itemId,
+      $this->uploadtree_tablename);
+    $this->spashtDao->updateCopyright($item, $hash, '', 'rollback');
+    return new Response('Successfully restored', Response::HTTP_OK,
+      array('Content-type'=>'text/plain'));
   }
 }
 

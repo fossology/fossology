@@ -1,36 +1,26 @@
 {# Copyright 2019
-   Author: Vivek Kumar<vvksindia@gmail.com>
+   Author: Vivek Kumar <vvksindia@gmail.com>
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
-<table id="definitionsTable">
-    <tr>
-        <th>Namespace</th>
-        <th>/</th>
-        <th>Name</th>
-        <th></th>
-        <th>Revision</th>
-        <th></th>
-        <th>Type</th>
-        <th></th>
-        <th>provide</th>
-        <th>|</th>
-        <th>Menu</th>
-    </tr>
-    <tr id="definitionsRow">
-        <td>{{ body.spasht_namespace }}</td>
-        <td>/</td>
-        <td>{{ body.spasht_name }}</td>
-        <td></td>
-        <td>{{ body.spasht_revision }}</td>
-        <td></td>
-        <td>{{ body.spasht_type }}</td>
-        <td></td>
-        <td>{{ body.spasht_provider }}</td>
-        <td>|</td>
-        <td>{{ body_menu }}</td>
-    </tr>
+<table id="definitionsTable" class="simpleTable">
+  <tr>
+    <th>Namespace</th>
+    <th>Name</th>
+    <th>Revision</th>
+    <th>Type</th>
+    <th>Provider</th>
+    <th></th>
+  </tr>
+  <tr id="definitionsRow">
+    <td>{{ body.spasht_namespace }}</td>
+    <td>{{ body.spasht_name }}</td>
+    <td>{{ body.spasht_revision }}</td>
+    <td>{{ body.spasht_type }}</td>
+    <td>{{ body.spasht_provider }}</td>
+    <td>{{ body_menu }}</td>
+  </tr>
 </table>

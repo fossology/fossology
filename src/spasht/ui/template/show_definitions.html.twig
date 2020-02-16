@@ -1,50 +1,42 @@
 {# Copyright 2019
    Author: Vivek Kumar<vvksindia@gmail.com>
-   
+
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
 
-{% if statusbody == "false" %}
-    <tr><td>No Match Found</td></tr>
-{% else %}
-
-<table id="definitionsTable">
-    <tr>
-        <th>Namespace/Name</th>
-        <th></th>
-        <th>Revision</th>
-        <th></th>
-        <th>Type</th>
-        <th></th>
-        <th>provide</th>
-        <th>| Menu</th>
+<div id="definitionsTableContent">
+<table id="definitionsTable" class="simpleTable wrapTable" style="width:58em">
+  <tr>
+    <th>Namespace/Name</th>
+    <th>Revision</th>
+    <th>Type</th>
+    <th>Provider</th>
+    <th>Action</th>
+  </tr>
+  {% for result in body %}
+    <tr id="definitionsRow{{ loop.index0 }}" class="definitionsRow" onclick="showDetails({{ loop.index0 }})">
+      <td>
+        <span id="definitionsRow_namespace{{ loop.index0 }}">
+          {{ result.namespace }}
+        </span>/<span id="definitionsRow_name{{ loop.index0 }}">
+          {{ result.name }}
+        </span>
+      </td>
+      <td>
+        <span id="definitionsRow_revision{{ loop.index0 }}">
+          {{ result.revision }}
+        </span>
+      </td>
+      <td id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</td>
+      <td id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</td>
+      <td><a href="#">Show Details</a></td>
     </tr>
-    {% for result in body %}
-    <tr id="definitionsRow">
-        <td  style="display: inline-block; width: 150px; word-wrap: break-word;">
-          <a id="definitionsRow_namespace{{ loop.index0 }}">{{ result.namespace }}</a>/<a id="definitionsRow_name{{ loop.index0 }}">{{ result.name }}</a>
-        </td>
-        <td></td>
-        <td>
-          <span id="definitionsRow_revision{{ loop.index0 }}" style="display: inline-block; width: 230px; word-wrap: break-word;">{{ result.revision }}</span>
-        </td>
-        <td></td>
-        <td id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</td>
-        <td></td>
-        <td id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</td>
-        <td>
-          <li>
-            <a href="#" onclick="showDetails({{ loop.index0 }})">Show Details</a>
-          </li>
-        </td>
-    </tr>
-    {% endfor %}
-
-    </table>
-    <form name="storeForm" id="storeForm" method="post" action="">
-    <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
-    <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
-    </form>
-{% endif %}
+  {% endfor %}
+</table>
+<form name="storeForm" id="storeForm" method="post" action="">
+  <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
+  <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
+</form>
+</div>

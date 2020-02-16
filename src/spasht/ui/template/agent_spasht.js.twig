@@ -7,65 +7,88 @@
 #}
 
 <script>
-$("#advanceSearchForm").ready(function(){
-    // Hide Advance Search Form
-    $("#advanceSearchForm").hide();
-});
+$("#advanceSearchForm").ready(function() {
+  $("#advanceSearchForm").hide();
+  $(".ui-icon-caret-1-n").hide();
+})
 
-function advanceSearchEnabled() {
-  if (document.getElementById('advanceSearch').checked == true) {
-    $("#advanceSearchForm").show(700);
-    $("#definitionsTable").hide(400);
+function advanceSearchFormEnabled() {
+  if (document.getElementById("advanceSearchFormStatus").value === "hidden") {
+    $(".ui-icon-caret-1-s").hide();
+    $(".ui-icon-caret-1-n").show();
+    document.getElementById("advanceSearchFormStatus").value = "shown";
   } else {
-    $("#advanceSearchForm").hide(400);
-    $("#definitionsTable").show(700);
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    document.getElementById("advanceSearchFormStatus").value = "hidden";
+  }
+  $("#advanceSearchForm").toggle("blind");
+}
+
+function StoreIntoDb() {
+  var key = $("#selectedDetailKey").val();
+  if (key) {
+    var namespace = $.trim($("#definitionsRow_namespace" + key).text());
+    var name = $.trim($("#definitionsRow_name" + key).text());
+    var revision = $.trim($("#definitionsRow_revision" + key).text());
+    var type = $.trim($("#definitionsRow_type" + key).text());
+    var provider = $.trim($("#definitionsRow_provider" + key).text());
+
+    var params = type + "/" + provider + "/" + namespace + "/" + name +
+      "/" + revision;
+
+    $("#optionSelectedToOpen").val(params);
+    $("#storeForm").submit();
+  } else {
+    return true;
   }
 }
 
-function StoreIntoDb(key) {
-
-    var namespace = "definitionsRow_namespace"+key;
-    var name = "definitionsRow_name"+key;
-    var revision = "definitionsRow_revision"+key;
-    var type = "definitionsRow_type"+key;
-    var provider = "definitionsRow_provider"+key;
-
-    var params = document.getElementById(type).innerHTML +"/"+ document.getElementById(provider).innerHTML +"/"+ document.getElementById(namespace).innerHTML +"/"+ document.getElementById(name).innerHTML +"/"+ document.getElementById(revision).innerHTML;
-
-    document.getElementById("optionSelectedToOpen").value = params;
-    document.getElementById("storeForm").submit();
-}
-
-$("#detailsTable").ready(function(){
-    // Hide showdetails Table
-    $("#detailsTable").hide();
-    $(".detailsRow").hide();
+$("#detailsTable").ready(function() {
+  // Hide showdetails Table
+  $("#detailsTable").hide();
+  $(".detailsRow").hide();
+  $("#defentionSelector").on("click", StoreIntoDb);
 });
 
-function showDetails(key){
+function showDetails(key) {
 
-    var detailsRow = "detailsRow"+key;
+  var detailsRow = ".detailsId"+key;
+  var definitionsRow = "#definitionsRow"+key;
 
-    // Hide all the Table row
-    $(".detailsRow").hide();
+  // Hide all the Table row
+  $(".detailsRow").hide();
 
-    // Show hidden Table row
-    $("#detailsTable").show();
-    $("#"+detailsRow).show(600);
+  // Remove Highlight from all
+  $(".definitionsRow").addClass("even").removeClass("odd");
+
+  // Show hidden Table row
+  $("#detailsTable").show();
+  $(detailsRow).show(400);
+
+  // Highlight selected definition
+  $(definitionsRow).removeClass("even").addClass("odd");
+
+  $("#selectedDetailKey").val(key);
 }
 
 $( function() {
+  $(".spasht-loading").hide();
 
-    var spashtTabCookie = 'stickySpashtTab';
+  $("#searchForm").submit(function(event) {
+    $(".spasht-loading").show();
+    return;
+  });
 
-      $('#spashtTabs').tabs({
-        active: ($.cookie(spashtTabCookie) || 0),
-        activate: function(e, ui){
-          // Get active tab index and update cookie
-          var idString = $(e.currentTarget).attr('id');
-          idString = parseInt(idString.slice(-1)) - 1;
-          $.cookie(spashtTabCookie, idString);
-        }
-      });
-    });
+  var spashtTabCookie = 'stickySpashtTab';
+  $('#spashtTabs').tabs({
+    active: ($.cookie(spashtTabCookie) || 0),
+    activate: function(e, ui){
+      // Get active tab index and update cookie
+      var idString = $(e.currentTarget).attr('id');
+      idString = parseInt(idString.slice(-1)) - 1;
+      $.cookie(spashtTabCookie, idString);
+    }
+  });
+});
 </script>
