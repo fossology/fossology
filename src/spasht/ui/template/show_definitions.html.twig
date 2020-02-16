@@ -6,10 +6,7 @@
    This file is offered as-is, without any warranty.
 #}
 
-{% if statusbody == "false" %}
-    <tr><td>No Match Found</td></tr>
-{% else %}
-
+<div id="definitionsTableContent">
 <table id="definitionsTable">
     <tr>
         <th>Namespace/Name</th>
@@ -41,10 +38,9 @@
         </td>
     </tr>
     {% endfor %}
-
-    </table>
-    <form name="storeForm" id="storeForm" method="post" action="">
-    <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
-    <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
-    </form>
-{% endif %}
+</table>
+<form name="storeForm" id="storeForm" method="post" action="">
+  <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
+  <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
+</form>
+</div>

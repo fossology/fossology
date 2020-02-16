@@ -109,15 +109,12 @@ class ui_spasht extends FO_Plugin
     $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
     $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
 
-    $statusbody = "true";
+    $statusbody = "definition_not_found";
 
     $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    // $advanceSearch = GetParm("advanceSearch",PARM_STRING); //Get the status of advance search
-
-    // $this->vars['advanceSearch'] = ""; //Set advance search to empty
 
     $this->vars['storeStatus'] = "false";
-    $this->vars['pageNo'] = "Spasht_home";
+    $this->vars['pageNo'] = "definition_not_found";
 
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
@@ -183,7 +180,7 @@ class ui_spasht extends FO_Plugin
         $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
 
         if (sizeof($body) == 0) {//Check if no element is found
-          $statusbody = "false";
+          $statusbody = "definition_not_found";
         } else {
           $temp = array();
           $details = array();
@@ -226,27 +223,21 @@ class ui_spasht extends FO_Plugin
           }
           $this->vars['details'] = $details;
           $this->vars['body'] = $temp;
+          $statusbody = "definition_found";
         }
       }
 
-      /** Check for advance Search enabled
-       * If enabled the revisions are retrieved from the body to display them in the form.
-       * As options to users.
-       */
-      // if ($advanceSearch == "advanceSearch") {
-      //   $this->vars['advanceSearch'] = "checked";
-      // }
-      if ($this->vars['storeStatus'] == "true") {
-        $this->vars['pageNo'] = "data_stored_successfully";
-      } else {
+      if ($statusbody == "definition_found") {
         $this->vars['pageNo'] = "show_definitions";
+      } else {
+        $this->vars['pageNo'] = "definition_not_found";
       }
 
       $this->vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;
     } else {
       if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
-         $text = _("Upload Id Not found");
+        $text = _("Upload Id Not found");
         return "<h2>$text</h2>";
       }
 
@@ -314,8 +305,7 @@ class ui_spasht extends FO_Plugin
     $this->vars['tables'] = $tables;
 
     $this->vars['uploadName'] = $upload_name;
-
-    $this->vars['statusbody'] = $statusbody;
+    
     $out = $this->render('agent_spasht.html.twig',$this->vars);
 
     //$this->Output_tables();

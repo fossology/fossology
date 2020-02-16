@@ -7,9 +7,38 @@
 #}
 
 <form id="searchForm" method="post" action="">
-  <input type="hidden" name="formName" value="SearchForm" />
+  {# <input type="hidden" name="formName" value="SearchForm" /> #}
   Search: <input type="text" name="patternName" id="searchBox" value={{ uploadName }} size="30"/>
-  <input type="submit" value="submit"/> <br><br>
-  Advance Search: <input type="checkbox" name="advanceSearch" value="advanceSearch" id="advanceSearch" onchange="advanceSearchEnabled()" >
+  <span class="ui-icon ui-icon-caret-1-s" onclick="advanceSearchFormEnabled()"></span>
+  <span class="ui-icon ui-icon-caret-1-n" onclick="advanceSearchFormEnabled()"></span>
+  <table id="advanceSearchForm">
+    <tr>
+      <td>Namespace:</td>
+      <td>
+        <input type="text" name="namespace" value="" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Revision:</td>
+      <td>
+        <input type="text" name="revision" value="" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Type:</td>
+      <td>
+        <input type="text" name="type" value="" size="30"/>
+      </td>
+    </tr>
+    <tr>
+      <td>Provider:</td>
+      <td>
+        <input type="text" name="provider" value="" size="30"/>
+      </td>
+    </tr>
+  </table>
+  <input type="submit" value="submit"/>
   <input id="uploadAvailable" type="hidden" name="uploadAvailable" value={{ uploadAvailable }} />
+  <input id="advanceSearchFormStatus" type="hidden" name="advanceSearchFormStatus" value="hidden" />
+  
 </form>

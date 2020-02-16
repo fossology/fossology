@@ -8,17 +8,21 @@
 
 <script>
 $("#advanceSearchForm").ready(function(){
-    // Hide Advance Search Form
-    $("#advanceSearchForm").hide();
-});
+  $("#advanceSearchForm").hide();
+  $(".ui-icon-caret-1-n").hide();
+})
 
-function advanceSearchEnabled() {
-  if (document.getElementById('advanceSearch').checked == true) {
-    $("#advanceSearchForm").show(700);
-    $("#definitionsTable").hide(400);
+function advanceSearchFormEnabled(){
+  if (document.getElementById("advanceSearchFormStatus").value === "hidden") {
+    $(".ui-icon-caret-1-s").hide();
+    $(".ui-icon-caret-1-n").show();
+    $("#advanceSearchForm").show(300);
+    document.getElementById("advanceSearchFormStatus").value = "shown";
   } else {
-    $("#advanceSearchForm").hide(400);
-    $("#definitionsTable").show(700);
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    $("#advanceSearchForm").hide(300);
+    document.getElementById("advanceSearchFormStatus").value = "hidden";
   }
 }
 
@@ -38,6 +42,7 @@ function StoreIntoDb(key) {
 
 $("#detailsTable").ready(function(){
     // Hide showdetails Table
+    document.getElementById("showDetailsTableHead").value = "";
     $("#detailsTable").hide();
     $(".detailsRow").hide();
 });
@@ -50,6 +55,7 @@ function showDetails(key){
     $(".detailsRow").hide();
 
     // Show hidden Table row
+    document.getElementById("showDetailsTableHead").value = "show";
     $("#detailsTable").show();
     $("#"+detailsRow).show(600);
 }

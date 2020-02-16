@@ -8,7 +8,7 @@
 
 <div class="row" id="spashtStart">
   <div class="col" ></div>
-  <div class="col-md-4" id="searchBoxCover">
+  <div class="col-md-5" id="searchBoxCover">
     {% include 'agent_spasht_search.html.twig' %}
   </div>
   <div class="col">
@@ -16,13 +16,10 @@
 </div>
 <div class="row" id="spashtStart">
   <div class="col">
-    <div>
-      {% include 'agent_spasht_advanceSearch_form.html.twig' %}
-    </div>
-    {% if pageNo == "show_definitions" %}
+    {% if pageNo == "definition_not_found" %}
+      <div id="definitionsTableNOTFound">No Match Found</div>
+    {% elseif pageNo == "show_definitions" %}
       {% include 'show_definitions.html.twig' %}
-    {% elseif pageNo == "data_stored_successfully" %}
-      Data Stored Successfully {{ result }}
     {% elseif pageNo == "show_upload_table" %}
       {% include 'show_uploads_table.html.twig' %}
     {% else %}
