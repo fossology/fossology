@@ -8,6 +8,6 @@
 }
 
 #definitionsTable,
-#definitionsRow {
+.definitionsRow {
     border: 1px solid black;
 }

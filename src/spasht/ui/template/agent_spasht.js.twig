@@ -50,14 +50,23 @@ $("#detailsTable").ready(function(){
 function showDetails(key){
 
     var detailsRow = "detailsRow"+key;
+    var definitionsRow = "definitionsRow"+key;
 
     // Hide all the Table row
     $(".detailsRow").hide();
+
+    // Remove Highlight from all
+    $(".definitionsRow").css("background-color", "white");
+    $(".definitionsRow").css("color", "black");
 
     // Show hidden Table row
     document.getElementById("showDetailsTableHead").value = "show";
     $("#detailsTable").show();
     $("#"+detailsRow).show(600);
+
+    // Highlight selected definition
+    $("#"+definitionsRow).css("background-color", "crimson");
+    $("#"+definitionsRow).css("color", "white");
 }
 
 $( function() {
