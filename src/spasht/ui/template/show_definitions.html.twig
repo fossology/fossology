@@ -19,7 +19,7 @@
         <th>| Menu</th>
     </tr>
     {% for result in body %}
-    <tr id="definitionsRow{{ loop.index0 }}" class="definitionsRow">
+    <tr id="definitionsRow{{ loop.index0 }}" class="definitionsRow" onclick="showDetails({{ loop.index0 }})">
         <td  style="display: inline-block; width: 150px; word-wrap: break-word;">
           <a id="definitionsRow_namespace{{ loop.index0 }}">{{ result.namespace }}</a>/<a id="definitionsRow_name{{ loop.index0 }}">{{ result.name }}</a>
         </td>
