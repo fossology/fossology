@@ -305,7 +305,7 @@ class ui_spasht extends FO_Plugin
     $this->vars['tables'] = $tables;
 
     $this->vars['uploadName'] = $upload_name;
-    
+
     $out = $this->render('agent_spasht.html.twig',$this->vars);
 
     //$this->Output_tables();

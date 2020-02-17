@@ -57,7 +57,6 @@ function showDetails(key){
 
     // Remove Highlight from all
     $(".definitionsRow").css("background-color", "white");
-    $(".definitionsRow").css("color", "black");
 
     // Show hidden Table row
     document.getElementById("showDetailsTableHead").value = "show";
@@ -65,8 +64,7 @@ function showDetails(key){
     $("#"+detailsRow).show(400);
 
     // Highlight selected definition
-    $("#"+definitionsRow).css("background-color", "crimson");
-    $("#"+definitionsRow).css("color", "white");
+    $("#"+definitionsRow).css("background-color", "#E2E4FF");
 }
 
 $( function() {
