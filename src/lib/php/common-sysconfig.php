@@ -350,11 +350,17 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'L'", "'$smtpAuthPrompt'",
     strval(CONFIG_TYPE_DROP), "'SMTP'", "3", "'$smtpAuthDesc'", "null", "'Login{L}|None{N}|Plain{P}'");
 
+  $variable = "SMTPFrom";
+  $smtpFrom = _('SMTP Email');
+  $smtpFromDesc = _('e.g.: "user@domain.com"<br>Sender email.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$smtpFrom'",
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpFromDesc'", "'check_email_address'", "null");
+
   $variable = "SMTPAuthUser";
   $smtpAuthUserPrompt = _('SMTP User');
-  $smtpAuthUserDesc = _('e.g.: "user@domain.com"<br>Email to be used for login in SMTP and for from address.');
+  $smtpAuthUserDesc = _('e.g.: "user"<br>Login to be used for login on SMTP Server.');
   $valueArray[$variable] = array("'$variable'", "null", "'$smtpAuthUserPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpAuthUserDesc'", "'check_email_address'", "null");
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "5", "'$smtpAuthUserDesc'", "null", "null");
 
   $variable = "SMTPAuthPasswd";
   $smtpAuthPasswdPrompt = _('SMTP Login Password');
