@@ -24,7 +24,7 @@ COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(CXXFOLIB) $(EXE)
 
-$(EXE): $(CXXFOLIB) $(VARS) $(OBJECTS)
+$(EXE): $(CXXFOLIB) $(VARS) ojoregex.hpp $(OBJECTS)
 	$(CXX) $(OBJECTS) $(DEF) $(CXXFLAGS_LINK) -o $@
 
 $(EXE)_cov: $(CXXFOLIB) $(VARS) $(COVERAGE)
