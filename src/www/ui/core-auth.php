@@ -91,7 +91,7 @@ class core_auth extends FO_Plugin
     }
 
     //--------- Authentification external connection for auto-login-----------
-    if ($this->authExternal['useAuthExternal']) {
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
       $this->checkUsernameAndPassword($this->authExternal['loginAuthExternal'], $this->authExternal['passwordAuthExternal']);
     }
 
@@ -262,7 +262,7 @@ class core_auth extends FO_Plugin
   {
     $user_exists=true;
     /* Check the user for external authentication */
-    if ($this->authExternal['useAuthExternal']) {
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
       $username = $this->authExternal['loginAuthExternal'];
       /* checking if user exists */
       try {
