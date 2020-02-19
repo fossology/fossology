@@ -112,6 +112,10 @@ class ui_spasht extends FO_Plugin
     $statusbody = "definition_not_found";
 
     $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
+    $revisionName = GetParm("revisionName",PARM_STRING);
+    $namespaceName = GetParm("namespaceName",PARM_STRING);
+    $typeName = GetParm("typeName",PARM_STRING);
+    $providerName = GetParm("providerName",PARM_STRING);
 
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "definition_not_found";
@@ -184,6 +188,7 @@ class ui_spasht extends FO_Plugin
         } else {
           $temp = array();
           $details = array();
+          $acceptResult = false;
 
           for ($x = 0; $x < sizeof($body) ; $x++) {
             $str = explode ("/", $body[$x]);
@@ -195,35 +200,44 @@ class ui_spasht extends FO_Plugin
             $temp2['provider'] = $str[1];
             $temp2['namespace'] = $str[2];
 
-            $temp[] = $temp2;
-            $uri = "definitions/".$body[$x];
+            $accept = $this->checkAdvanceSearch($temp2, $revisionName, $namespaceName, $typeName, $providerName);
 
-            $detail_body = array();
+            if ($accept == true) {
+              $acceptResult = true;
+              $temp[] = $temp2;
+              $uri = "definitions/".$body[$x];
 
-            //details section
-            $res_details = $client->request('GET', $uri, [
-              'query' => [
-                'expand' => "-files"
-              ], //Perform query operation into the api
-              'proxy' => $proxy
-            ]);
+              $detail_body = array();
 
-            $detail_body = json_decode($res_details->getBody()->getContents(),true);
+              //details section
+              $res_details = $client->request('GET', $uri, [
+                'query' => [
+                  'expand' => "-files"
+                ], //Perform query operation into the api
+                'proxy' => $proxy
+              ]);
 
-            $details_temp = array();
+              $detail_body = json_decode($res_details->getBody()->getContents(),true);
 
-            $details_temp['declared'] = $detail_body["licensed"]["declared"];
-            $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
-            $details_temp['release'] = $detail_body["described"]["releaseDate"];
-            $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
-            $details_temp['attribution'] = $detail_body['licensed']["facets"]["core"]['attribution']['parties'];
-            $details_temp['discovered'] = $detail_body['licensed']["facets"]["core"]['discovered']['expressions'];
+              $details_temp = array();
 
-            $details[] = $details_temp;
+              $details_temp['declared'] = $detail_body["licensed"]["declared"];
+              $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
+              $details_temp['release'] = $detail_body["described"]["releaseDate"];
+              $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
+              $details_temp['attribution'] = $detail_body['licensed']["facets"]["core"]['attribution']['parties'];
+              $details_temp['discovered'] = $detail_body['licensed']["facets"]["core"]['discovered']['expressions'];
+
+              $details[] = $details_temp;
+            }
           }
-          $this->vars['details'] = $details;
-          $this->vars['body'] = $temp;
-          $statusbody = "definition_found";
+          if ($acceptResult == true) {
+            $this->vars['details'] = $details;
+            $this->vars['body'] = $temp;
+            $statusbody = "definition_found";
+          } else {
+            $statusbody = "definition_not_found";
+          }
         }
       }
 
@@ -412,6 +426,39 @@ class ui_spasht extends FO_Plugin
       array(1, "desc"),
     );
     return $defaultOrder;
+  }
+
+  /**
+   * @brief Check for Advance Search
+   * @return boolean
+   */
+  public function checkAdvanceSearch ($body, $revisionName, $namespaceName, $typeName, $providerName)
+  {
+    if ($revisionName != "") {
+      if ($body['revision'] != $revisionName) {
+        return false;
+      }
+    }
+
+    if ($namespaceName != "") {
+      if ($body['namespace'] != $namespaceName) {
+        return false;
+      }
+    }
+
+    if ($typeName != "") {
+      if ($body['type'] != $typeName) {
+        return false;
+      }
+    }
+
+    if ($providerName != "") {
+      if ($body['provider'] != $providerName) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
 

@@ -16,14 +16,13 @@ function advanceSearchFormEnabled(){
   if (document.getElementById("advanceSearchFormStatus").value === "hidden") {
     $(".ui-icon-caret-1-s").hide();
     $(".ui-icon-caret-1-n").show();
-    $("#advanceSearchForm").show(300);
     document.getElementById("advanceSearchFormStatus").value = "shown";
   } else {
     $(".ui-icon-caret-1-n").hide();
     $(".ui-icon-caret-1-s").show();
-    $("#advanceSearchForm").hide(300);
     document.getElementById("advanceSearchFormStatus").value = "hidden";
   }
+  $( "#advanceSearchForm" ).toggle( "blind" );
 }
 
 function StoreIntoDb(key) {
