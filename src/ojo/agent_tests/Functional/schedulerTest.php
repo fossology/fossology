@@ -330,10 +330,16 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
     $resultArray = $result[0]["results"];
 
     $this->assertEquals($testFile, $result[0]["file"]);
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray, "MPL-2.0-no-copyleft-exception"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray, "BSD-2-Clause"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray, "MIT"));
-    $this->assertTrue($this->resultArrayContainsLicense($resultArray, "Apache-2.0"));
+    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
+      "MPL-2.0-no-copyleft-exception"));
+    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
+      "BSD-2-Clause"));
+    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
+      "MIT"));
+    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
+      "Apache-2.0"));
+    $this->assertTrue($this->resultArrayContainsLicense($resultArray,
+      "Dual-license"));
   }
 
   /**
