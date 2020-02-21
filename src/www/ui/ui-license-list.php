@@ -121,7 +121,7 @@ class ui_license_list extends FO_Plugin
     return $agent_pks;
   }
 
-  function createListOfLines($uploadtreeTablename, $uploadtree_pk, $agent_pks, $NomostListNum, $includeSubfolder, $exclude, $ignore)
+  public function createListOfLines($uploadtreeTablename, $uploadtree_pk, $agent_pks, $NomostListNum, $includeSubfolder, $exclude, $ignore)
   {
      $licensesPerFileName = array();
     /** @var ItemTreeBounds */
@@ -135,25 +135,34 @@ class ui_license_list extends FO_Plugin
     $lines = [];
     foreach ($licensesPerFileName as $fileName => $licenseNames) {
       if ($licenseNames !== false && count($licenseNames) > 0) {
-        if (++$currentNum > $NomostListNum) {
+        if ($NomostListNum > -1 && ++$currentNum > $NomostListNum) {
           $lines["warn"] = _("<br><b>Warning: Only the first $NomostListNum lines are displayed.  To see the whole list, run fo_nomos_license_list from the command line.</b><br>");
           // TODO: the following should be done using a "LIMIT" statement in the sql query
           break;
         }
 
+        $row = array();
+        $row['filePath'] = $fileName;
+        $row['agentFindings'] = $licenseNames['scanResults'];
+        $row['conclusions'] = null;
         if (array_key_exists('concludedResults', $licenseNames) && !empty($licenseNames['concludedResults'])) {
           $conclusions = array();
           foreach ($licenseNames['concludedResults'] as $value) {
               $conclusions = array_merge($conclusions, $value);
           }
           $conclusions = array_unique ($conclusions);
-          $lines[] = $fileName . ': ' . implode(' ', $licenseNames['scanResults']) . ', ' . implode(' ', $conclusions);
+          $row['conclusions'] = $conclusions;
+          $lines[] = $row;
         } else {
-          $lines[] = $fileName .': '.implode(' ', $licenseNames['scanResults']);
+          $lines[] = $row;
         }
       }
       if (!$ignore && $licenseNames === false) {
-        $lines[] = $fileName;
+        $row = array();
+        $row['filePath'] = $fileName;
+        $row['agentFindings'] = null;
+        $row['conclusions'] = null;
+        $lines[] = $row;
       }
     }
     return $lines;
@@ -240,7 +249,18 @@ class ui_license_list extends FO_Plugin
       $head = array('file path', 'scan results', 'concluded results');
       fputcsv($out, $head, $this->delimiter, $this->enclosure);
       foreach ($lines as $row) {
-        $newRow = explode(':', str_replace(array(': ', ', '), ':', $row));
+        $newRow = array();
+        $newRow[] = $row['filePath'];
+        if ($row['agentFindings'] !== null) {
+          $newRow[] = implode(' ', $row['agentFindings']);
+        } else {
+          $newRow[] = "";
+        }
+        if ($row['conclusions'] !== null) {
+          $newRow[] = implode(' ', $row['conclusions']);
+        } else {
+          $newRow[] = "";
+        }
         fputcsv($out, $newRow, $this->delimiter, $this->enclosure);
       }
       $content = ob_get_contents();
@@ -254,10 +274,21 @@ class ui_license_list extends FO_Plugin
         'Expires' => 'Expires: Thu, 19 Nov 1981 08:52:00 GMT'
       );
 
-      $response = new Response($content, Response::HTTP_OK, $headers);
-      return $response;
+      return new Response($content, Response::HTTP_OK, $headers);
     } else {
-      return $V . '<pre>' . implode("\n", $lines) . '</pre>';
+      $V .= '<pre>';
+      foreach ($lines as $row) {
+        $V .= $row['filePath'];
+        if ($row['agentFindings'] !== null) {
+          $V .= ": " . implode(' ', $row['agentFindings']);
+          if ($row['conclusions'] !== null) {
+            $V .= ", " . implode(' ', $row['conclusions']);
+          }
+        }
+        $V .= "\n";
+      }
+      $V .= "</pre>";
+      return $V .= "</pre>";
     }
   }
 }

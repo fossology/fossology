@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.10
+  version: 1.0.12
   contact:
     email: fossology@fossology.org
   license:
@@ -353,6 +353,75 @@ paths:
               description: Contains the URL to get jobs for the given upload
               schema:
                 type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/licenses:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: agent
+        required: true
+        description: Name of the agent
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - nomos
+              - monk
+              - ninka
+              - ojo
+              - reportImport
+          uniqueItems: true
+        style: form
+        explode: false
+      - name: containers
+        required: false
+        description: Show directories and containers
+        in: query
+        schema:
+          type: boolean
+          default: true
+    get:
+      tags:
+        - Upload
+      summary: Get licenses found by agent
+      description:
+        Returns the list of licenses found by requested agent
+      responses:
+        '200':
+          description: Get licenses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadLicenses'
+        '503':
+          description: >
+            The ununpack agent or queried agents have not started yet. Please
+            check the 'Look-at' header for more information.
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '412':
+          description: >
+            The agent has not been scheduled for the upload. Please check the
+            response message.
           content:
             application/json:
               schema:
@@ -1136,6 +1205,33 @@ components:
       required:
         - vcsType
         - vcsUrl
+    UploadLicenses:
+      type: array
+      items:
+        type: object
+        properties:
+          filePath:
+            description: Relative file path
+            type: string
+            example: "path/to/LICENSE"
+          agentFindings:
+            description: Short names of the found licenses
+            type: array
+            items:
+              type: string
+              nullable: true
+            example:
+              - "MIT"
+              - "No_license_found"
+          conclusions:
+            description: License decided by user
+            type: array
+            items:
+              type: string
+              nullable: true
+            example:
+              - "MIT"
+              - "No_license_found"
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"
