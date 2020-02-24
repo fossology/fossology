@@ -278,7 +278,7 @@ class ShowJobsDao
 
       $selectCol = "jq_type, jq_endtime, jq_starttime, jq_itemsprocessed";
       if (empty($jq_Type)) {
-        $removeType = "jq_type NOT LIKE 'ununpack' AND jq_type NOT LIKE 'reportgen' AND jq_type NOT LIKE 'decider' AND";
+        $removeType = "jq_type NOT LIKE 'ununpack' AND jq_type NOT LIKE 'reportgen' AND jq_type NOT LIKE 'decider' AND jq_type NOT LIKE 'softwareHeritage' AND";
         /* get starttime endtime and jobtype form jobqueue for a jobid except $removeType */
         $statementName = __METHOD__."$selectCol.$removeType";
         $this->dbManager->prepare($statementName,

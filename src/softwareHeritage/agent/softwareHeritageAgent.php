@@ -71,7 +71,7 @@ class softwareHeritageAgent extends Agent
    * @var SoftwareHeritageDao $shDao
    * SoftwareHeritageDao object
    */
-  private $shDao;
+  private $softwareHeritageDao;
 
   /**
    * softwareHeritageAgent constructor.
@@ -84,7 +84,7 @@ class softwareHeritageAgent extends Agent
     $this->licenseDao = $this->container->get('dao.license');
     $this->dbManeger = $this->container->get('db.manager');
     $this->agentDao = $this->container->get('dao.agent');
-    $this->shDao = $this->container->get('dao.softwareHeritage');
+    $this->softwareHeritageDao = $this->container->get('dao.softwareHeritage');
     $this->configuration = parse_ini_file(__DIR__ . '/softwareHeritage.conf');
   }
 
@@ -99,12 +99,12 @@ class softwareHeritageAgent extends Agent
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId);
     $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
-    $pfileFks = $this->shDao->getSoftwareHeritagePfileFk($uploadId);
+    $pfileFks = $this->softwareHeritageDao->getSoftwareHeritagePfileFk($uploadId);
     $agentId = $this->agentDao->getCurrentAgentId("softwareHeritage");
     $maxTime = $this->configuration['api']['maxtime'];
     foreach ($pfileFileDetails as $pfileDetail) {
       if (!in_array($pfileDetail['pfile_pk'], array_column($pfileFks, 'pfile_fk'))) {
-        $this->processEachPfileForSH($pfileDetail, $agentId, $maxTime);
+        $this->processEachPfileForSWH($pfileDetail, $agentId, $maxTime);
       }
       $this->heartbeat(1);
     }
@@ -118,21 +118,22 @@ class softwareHeritageAgent extends Agent
    * @param int $maxTime
    * @return bool
    */
-  function processEachPfileForSH($pfileDetail, $agentId, $maxTime)
+  function processEachPfileForSWH($pfileDetail, $agentId, $maxTime)
   {
-    $SHDetails = $this->getSoftwareHeritageLicense($pfileDetail['sha256']);
-    if (is_array($SHDetails) && !empty($SHDetails)) {
-      $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'], $SHDetails, $agentId);
-    } else if (! is_array($SHDetails)) {
+    list ($currentStatus, $currentResult) = $this->getSoftwareHeritageLicense($pfileDetail['sha256']);
+    if (SoftwareHeritageDao::SWH_RATELIMIT_EXCEED == $currentStatus) {
       $this->heartbeat(0); //Fake heartbeat to keep the agent alive.
-      $timeToReset = $SHDetails - time();
+      $timeToReset = $currentResult - time();
       if ($timeToReset > $maxTime) {
         sleep($maxTime);
       } else {
         sleep($timeToReset);
       }
-      $this->processEachPfileForSH($pfileDetail, $agentId, $maxTime);
+      $this->processEachPfileForSWH($pfileDetail, $agentId, $maxTime);
+    } else {
+      $this->insertSoftwareHeritageRecord($pfileDetail['pfile_pk'], $currentResult, $agentId, $currentStatus);
     }
+
     return true;
   }
 
@@ -146,6 +147,9 @@ class softwareHeritageAgent extends Agent
   {
     global $SysConf;
     $proxy = [];
+    $URIToGetLicenses = $this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256.$this->configuration['api']['content'];
+    $URIToGetContent = $this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256;
+
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
         ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
       $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
@@ -158,20 +162,25 @@ class softwareHeritageAgent extends Agent
         ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
       $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
     }
+
     $client = new Client(['http_errors' => false, 'proxy' => $proxy]);
-    $URI = $this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256.$this->configuration['api']['content'];
-    $response = $client->get($URI);
+    $response = $client->get($URIToGetLicenses);
     $statusCode = $response->getStatusCode();
-    if (200 === $statusCode) {
+    $cookedResult = array();
+    if ($statusCode == SoftwareHeritageDao::SWH_STATUS_OK) {
       $responseContent = json_decode($response->getBody()->getContents(),true);
-      $licenseRecord = $responseContent["facts"][0]["licenses"];
-      return $licenseRecord;
-    } else if (429 === $statusCode) {
-      $responseContent = $response->getHeaders();
-      return $responseContent["X-RateLimit-Reset"][0];
-    } else {
-      return [];
+      $cookedResult = $responseContent["facts"][0]["licenses"];
+    } else if ($statusCode == SoftwareHeritageDao::SWH_RATELIMIT_EXCEED) {
+        $responseContent = $response->getHeaders();
+        $cookedResult = $responseContent["X-RateLimit-Reset"][0];
+    } else if ($statusCode == SoftwareHeritageDao::SWH_NOT_FOUND) {
+      $response = $client->get($URIToGetContent);
+      $responseContent = json_decode($response->getBody(),true);
+      if (isset($responseContent["status"])) {
+        $statusCode = SoftwareHeritageDao::SWH_STATUS_OK;
+      }
     }
+    return array($statusCode, $cookedResult);
   }
 
   /**
@@ -181,15 +190,20 @@ class softwareHeritageAgent extends Agent
    * @param int $agentId
    * @return boolean True if finished
    */
-  protected function insertSoftwareHeritageRecord($pfileId,$licenses,$agentId)
+  protected function insertSoftwareHeritageRecord($pfileId, $licenses, $agentId, $status)
   {
-    foreach ($licenses as $license) {
-      $this->shDao->setshDetails($pfileId, $license);
-      $l = $this->licenseDao->getLicenseByShortName($license);
-      if ($l != NULL) {
-        $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,'pfile_fk' => $pfileId,'rf_fk'=> $l->getId()]);
+    $licenseString = !empty($licenses) ? implode(", ", $licenses) : '';
+    $this->softwareHeritageDao->setSoftwareHeritageDetails($pfileId,
+                                  $licenseString, $status);
+    if (!empty($licenses)) {
+      foreach ($licenses as $license) {
+        $l = $this->licenseDao->getLicenseByShortName($license);
+        if ($l != NULL) {
+          $this->dbManeger->insertTableRow('license_file',['agent_fk' => $agentId,
+                                             'pfile_fk' => $pfileId,'rf_fk'=> $l->getId()]);
+        }
       }
+      return true;
     }
-    return true;
   }
 }
