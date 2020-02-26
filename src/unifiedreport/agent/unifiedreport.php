@@ -298,6 +298,7 @@ class UnifiedReport extends Agent
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
+    $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
 
     $contents = array(
                         "licenses" => $licenses,
@@ -702,7 +703,7 @@ class UnifiedReport extends Agent
       $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
 
     /* Assessment summery table */
-    $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
+    $bookMarkCell = $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
 
     /* Todoinfo table */
     $reportStaticSection->todoTable($section);
@@ -791,6 +792,12 @@ class UnifiedReport extends Agent
 
     /* Display Do not use license files */
     $heading = "Do not use Files";
+    if ($contents['otherStatement']['includeDNU']) {
+      // adding an internal bookmark
+      $columnStyleWithUnderline = array("size" => 11, "color" => "0000A0", 'underline' => 'single');
+      $section->addBookmark('DNUBookmark');
+      $bookMarkCell->addLink('DNUBookmark', htmlspecialchars(' NOTE: DO NOT USE files found! Please check Do not use files section', ENT_COMPAT, 'UTF-8'), $columnStyleWithUnderline, "pStyle", true);
+    }
     $titleSubHeadingIrre = "(Path, Files, Licenses)";
     $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesDNU']['statements'], $titleSubHeadingIrre);
 

@@ -173,6 +173,7 @@ class ReportStatic
     $cellRowContinue = array("vMerge" => "continue");
     $cellColSpan = array("gridSpan" => 4);
     $cellColSpan2 = array("gridSpan" => 3);
+    $cellColSpan3 = array("gridSpan" => 2, "valign" => "center");
 
     $rowWidth = 200;
     $rowWidth2 = 300;
@@ -243,8 +244,13 @@ class ReportStatic
     $cell = $table->addCell($cellFirstLen)->addText(htmlspecialchars(" General Risks (optional)"), $leftColStyle, "pStyle");
     $generalRisks = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_ga_risk"], ENT_DISALLOWED));
     $cell = $table->addCell($cellLen)->addText($generalRisks, $rightColStyleBlue, "pStyle");
+    if ($otherStatement["includeDNU"]) {
+      $table->addRow($rowWidth);
+      $cell = $table->addCell($cellFirstLen, $cellColSpan3);
+    }
 
     $section->addTextBreak();
+    return $cell;
   }
 
 
