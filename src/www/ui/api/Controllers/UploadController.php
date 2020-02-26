@@ -33,6 +33,7 @@ use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
 
 /**
  * @class UploadController
@@ -50,6 +51,16 @@ class UploadController extends RestController
    * Get query parameter name for container listing
    */
   const CONTAINER_PARAM = "containers";
+
+  public function __construct($container)
+  {
+    parent::__construct($container);
+    $groupId = $this->restHelper->getGroupId();
+    $dbManager = $this->dbHelper->getDbManager();
+    $uploadBrowseProxy = new UploadBrowseProxy($groupId, 0, $dbManager, false);
+    $uploadBrowseProxy->sanity();
+  }
+
   /**
    * Get list of uploads for current user
    *
