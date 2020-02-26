@@ -183,9 +183,9 @@ class UploadTreeProxy extends DbViewProxy
   {
     return "NOT(SELECT (removed OR cd.decision_type=".DecisionTypes::IRRELEVANT.") excluded"
             . " FROM clearing_decision cd, clearing_decision_event cde, clearing_event ce"
-         . "    WHERE cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
-         . "      AND (cd.uploadtree_fk=$itemTable.uploadtree_pk"
-         . "        OR cd.scope=".DecisionScopes::REPO." AND cd.pfile_fk=$itemTable.pfile_fk)"
+         . "    WHERE ((cd.group_fk=".$this->addParamAndGetExpr('groupId', $options[self::OPT_GROUP_ID])
+         . "      AND cd.uploadtree_fk=$itemTable.uploadtree_pk)"
+         . "        OR (cd.scope=".DecisionScopes::REPO." AND cd.pfile_fk=$itemTable.pfile_fk))"
          . "      AND clearing_decision_pk=clearing_decision_fk"
          . "      AND clearing_event_fk=clearing_event_pk"
          . "      AND rf_fk=".$this->addParamAndGetExpr('conId',$options[self::OPT_CONCLUDE_REF])
@@ -287,9 +287,10 @@ SELECT decision_type, ROW_NUMBER() OVER (
 ) AS rnum
 FROM (
   SELECT * FROM clearing_decision cd
-  WHERE cd.group_fk = $groupId
-  AND (
-    ut.uploadtree_pk = cd.uploadtree_fk OR cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
+  WHERE (
+    ut.uploadtree_pk = cd.uploadtree_fk AND cd.group_fk = $groupId
+  ) OR (
+    cd.pfile_fk = ut.pfile_fk AND cd.scope=".DecisionScopes::REPO."
   )
 ) AS filtered_clearing_decision ORDER BY rnum DESC LIMIT 1";
         return " $conditionQueryHasLicense

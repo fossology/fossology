@@ -79,6 +79,7 @@ class ClearingDao
     $statementName .= "." . $uploadTreeTable . ($onlyCurrent ? ".current": "");
 
     $globalScope = DecisionScopes::REPO;
+    $localScope = DecisionScopes::ITEM;
 
     return "WITH allDecs AS (
               SELECT
@@ -92,9 +93,11 @@ class ClearingDao
                 CASE cd.scope WHEN $globalScope THEN 1 ELSE 0 END AS scopesort
               FROM clearing_decision cd
                 INNER JOIN $uploadTreeTable ut
-                  ON (ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope) OR ut.uploadtree_pk = cd.uploadtree_fk
+                  ON (ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope)
+                    OR (ut.uploadtree_pk = cd.uploadtree_fk
+                      AND cd.scope = $localScope AND cd.group_fk = $p2)
               WHERE $sql_upload $condition
-                cd.decision_type!=$p1 AND cd.group_fk = $p2),
+                cd.decision_type!=$p1),
             decision AS (
               SELECT $filterClause *
               FROM allDecs
