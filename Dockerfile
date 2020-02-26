@@ -46,7 +46,7 @@ COPY . .
 
 RUN /fossology/utils/install_composer.sh
 
-RUN make install clean
+RUN make clean install clean
 
 
 FROM debian:stretch-slim
