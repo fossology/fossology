@@ -91,4 +91,28 @@ footer  = samplefooter.txt
 subject = FOSSology scan complete
 client  = /usr/bin/mailx
 
+[EXT_AUTH]
+; Use external Authentication
+CONF_EXT_AUTH_ENABLE=false
+
+; Environment variable where to find the User name
+CONF_EXT_AUTH_ENV_USER=
+
+; Environment variable where to find the User email
+CONF_EXT_AUTH_ENV_MAIL=
+
+; Environment variable where to find the User Description
+CONF_EXT_AUTH_ENV_DESC=
+
+; Set to true to force usernames to lowercase
+CONF_EXT_AUTH_LOWERCASE_USER=true
+
+; Set to true to automatically create an account for users
+; logging in for the first time
+CONF_EXT_AUTH_NEW_USER_AUTO_CREATE=true
+
+; List of agents attributed to newly created users
+; Example:
+; "agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo,agent_shagent"
+CONF_EXT_AUTH_NEW_USER_AGENT_LIST=
 
