@@ -15,8 +15,8 @@ LOCALAGENTDIR = ../../agent
 test: test-sched
 
 all: version
-	$(MAKE) -C $(LOCALAGENTDIR) atarashiWrapper
-	ln -fs $(LOCALAGENTDIR)/atarashiWrapper ./atarashiWrapper
+	$(MAKE) -C $(LOCALAGENTDIR) atarashi
+	ln -fs $(LOCALAGENTDIR)/atarashi ./atarashi
 
 all-cov: version
 	$(MAKE) -C $(LOCALAGENTDIR) atarashi_cov

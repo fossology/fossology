@@ -9,7 +9,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = atarashiWrapper
+MOD_NAME = atarashi
 
 DIRS = agent ui
 TESTDIR = agent_tests

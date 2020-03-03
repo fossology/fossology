@@ -32,7 +32,7 @@ class AgentRef
     'ninka' => 'Nk',
     'reportImport' => 'I',
     'ojo' => 'O',
-    'atarashiwrapper' => 'A'
+    'atarashi' => 'A'
   );
   /**
    * @var int

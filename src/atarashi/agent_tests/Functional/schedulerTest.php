@@ -68,7 +68,7 @@ class AtarashiScheduledTest extends \PHPUnit\Framework\TestCase
   {
     $sysConf = $this->testDb->getFossSysConf();
 
-    $agentName = "atarashiWrapper";
+    $agentName = "atarashi";
 
     $agentDir = dirname(dirname(__DIR__));
     $execDir = "$agentDir/agent";
@@ -162,7 +162,7 @@ class AtarashiScheduledTest extends \PHPUnit\Framework\TestCase
 
       /** @var AgentRef */
       $agentRef = $licenseMatch->getAgentRef();
-      $this->assertEquals($agentRef->getAgentName(), "atarashiWrapper");
+      $this->assertEquals($agentRef->getAgentName(), "atarashi");
     }
   }
 
