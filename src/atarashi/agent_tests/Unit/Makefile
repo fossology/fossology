@@ -15,9 +15,9 @@ DEF = -DDATADIR='"$(MODDIR)"'
 CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -Wall -I. -I$(LOCALAGENTDIR) -fopenmp
 CXXFLAGS_LINK  = $(FO_CXXLDFLAGS) -lcppunit -fopenmp
 
-EXE = test_atarashiwrapper
+EXE = test_atarashi
 
-OBJECTS = test_atarashiwrapper.o
+OBJECTS = test_atarashi.o
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 $(EXE): run_tests.cc $(OBJECTS) libatarashi.a ${CXXFOLIB}

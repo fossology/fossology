@@ -9,12 +9,12 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-MOD_NAME = atarashiWrapper
+MOD_NAME = atarashi
 DEF = -DDATADIR='"$(MODDIR)"'
 CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -fopenmp $(shell pkg-config --cflags jsoncpp) 
 CXXFLAGS_LINK = $(FO_CXXLDFLAGS) -fopenmp $(shell pkg-config --libs jsoncpp)
 
-EXE = atarashiWrapper
+EXE = atarashi
 
 OBJECTS = databasehandler.o licensematch.o atarashi.o atarashiwrapper.o state.o utils.o
 COVERAGE = $(OBJECTS:%.o=%_cov.o)

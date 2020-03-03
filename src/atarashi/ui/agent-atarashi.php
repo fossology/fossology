@@ -25,7 +25,7 @@ class AtarashiAgentPlugin extends AgentPlugin
   public function __construct() {
     $this->Name = "agent_atarashi";
     $this->Title =  _("atarashi License Analysis");
-    $this->AgentName = "atarashiWrapper";
+    $this->AgentName = "atarashi";
 
     parent::__construct();
   }
