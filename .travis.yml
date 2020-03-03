@@ -47,6 +47,7 @@ addons:
       - sleuthkit
       - unrar-free
       - upx-ucl
+      - libicu-dev
 
 services: postgresql
 

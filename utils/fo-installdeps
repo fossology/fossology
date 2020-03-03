@@ -101,8 +101,10 @@ if [[ $BUILDTIME ]]; then
       Debian|Ubuntu)
          echo "DB: Installing build essential....."
          apt-get $YesOpt install \
-            libmxml-dev curl libxml2-dev libcunit1-dev \
-            build-essential libtext-template-perl subversion rpm librpm-dev libmagic-dev libglib2.0 libboost-regex-dev libboost-program-options-dev
+            libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
+            build-essential libtext-template-perl subversion rpm librpm-dev \
+            libmagic-dev libglib2.0 libboost-regex-dev \
+            libboost-program-options-dev
          case "$CODENAME" in
            jessie)
              apt-get $YesOpt install php5-cli;;
@@ -139,14 +141,14 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel php-mbstring
+            boost-devel php-mbstring libicu-devel
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel php-mbstring
+            boost-devel php-mbstring libicu-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
@@ -174,25 +176,26 @@ if [[ $RUNTIME ]]; then
          case "$CODENAME" in
             jessie)
                apt-get $YesOpt install postgresql-9.4 php5-pgsql libapache2-mod-php5 php5 php5-pgsql \
-                 php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0;;
+                 php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0 libicu52;;
             xenial)
                apt-get $YesOpt install postgresql-9.5 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
-                 php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 libboost-regex1.58.0;;
+                 php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 \
+                 libboost-regex1.58.0 libicu55;;
             stretch)
                apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
                  php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring s-nail libboost-program-options1.62.0 \
-                 libboost-regex1.62.0;;
+                 libboost-regex1.62.0 libicu57;;
             buster)
                apt-get $YesOpt install postgresql-11 php7.3 php7.3-pgsql libapache2-mod-php7.3 php7.3-pgsql \
                  php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring s-nail libboost-program-options1.67.0 \
-                 libboost-regex1.67.0;;
+                 libboost-regex1.67.0 libicu63;;
             bionic)
                apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql libapache2-mod-php7.2 php7.2-pgsql \
                  php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring s-nail libboost-program-options1.65.1 \
-                 libboost-regex1.65.1;;
+                 libboost-regex1.65.1 libicu60;;
             sid)
                apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring s-nail \
-                 libboost-program-options1.67.0 libboost-regex1.67.0;;
+                 libboost-program-options1.67.0 libboost-regex1.67.0 libicu63;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
@@ -204,7 +207,7 @@ if [[ $RUNTIME ]]; then
             smtpdaemon \
             libxml2 \
             binutils mailx \
-            sleuthkit boost
+            sleuthkit boost libicu
 
          # enable, possible init, and start postgresql
          /sbin/chkconfig postgresql on
@@ -223,7 +226,7 @@ if [[ $RUNTIME ]]; then
             php php-pear php-pgsql php-process php-mbstring\
             smtpdaemon \
             file libxml2 \
-            binutils mailx boost
+            binutils mailx boost libicu
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources."
          ;;

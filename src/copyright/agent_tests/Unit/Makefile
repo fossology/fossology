@@ -11,11 +11,13 @@ include $(VARS)
 
 LOCALAGENTDIR = ../../agent
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp $(shell pkg-config --cflags jsoncpp)
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -I$(LOCALAGENTDIR) -fopenmp \
+                $(shell pkg-config --cflags jsoncpp icu-uc)
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK = -lboost_regex -lboost_program_options $(FO_CXXLDFLAGS) -lm \
-                -lstdc++ -lcppunit -ldl -fopenmp
+                -lstdc++ -lcppunit -ldl -fopenmp \
+                $(shell pkg-config --libs icu-uc)
 
 EXE = test_copyright
 
