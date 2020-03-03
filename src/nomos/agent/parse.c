@@ -1063,12 +1063,12 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_PHP30)) {
       INTERESTING(lDebug ? "PHP(v3.0#2)" : "PHP-3.0");
     }
-    else if (INFILE(_TITLE_PHP202)) {
-      INTERESTING(lDebug ? "PHP(v2.0.2#3)" : "PHP-2.0.2");
-    }
     else if (INFILE(_TITLE_PHP20)) {
       INTERESTING(lDebug ? "PHP(v2.02#1)" : "PHP-2.02");
-    }    
+    }      
+    else if (INFILE(_TITLE_PHP202)) {
+      INTERESTING(lDebug ? "PHP(v2.0.2#3)" : "PHP-2.0.2");
+    }  
     else if (INFILE(_CR_PHP)) {
       INTERESTING(lDebug ? "PHP(1)" : "PHP");
     }
