@@ -18,9 +18,9 @@
 #ifndef ATARASHI_AGENT_UTILS_HPP
 #define ATARASHI_AGENT_UTILS_HPP
 
-#define AGENT_NAME "atarashiWrapper"
+#define AGENT_NAME "atarashi"
 #define AGENT_DESC "atarashi agent"
-#define AGENT_ARS  "atarashiwrapper_ars"
+#define AGENT_ARS  "atarashi_ars"
 
 #include <string>
 #include <vector>

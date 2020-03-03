@@ -25,7 +25,7 @@ class AgentRef
     'spasht' => 'Sp',
     'reso' => 'Rs',
     'scanoss' => 'So'
-    'atarashiwrapper' => 'A'
+    'atarashi' => 'A'
   );
   /**
    * @var int
