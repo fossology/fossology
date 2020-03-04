@@ -52,7 +52,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
    * @param type $ungrupedStatements
    * @return type
    */
-  protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport)
+  protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport, $objectAgent)
   {
     $statements = array();
     foreach ($ungrupedStatements as $statement) {
@@ -83,6 +83,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
           );
         }
       }
+      $objectAgent->heartbeat(1);
     }
     return array("statements" => array_values($statements));
   }
