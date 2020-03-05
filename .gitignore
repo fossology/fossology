@@ -53,6 +53,7 @@ src/cli/fossupload_status
 src/cli/exportLicenseRefUsingSPDX
 src/copyright/agent/copyright
 src/copyright/agent/keyword
+src/copyright/agent/fo_unicode_clean
 src/copyright/agent_tests/Functional/copyright
 src/copyright/agent_tests/Unit/test_copyright
 src/delagent/agent/delagent
@@ -157,6 +158,7 @@ src/reportImport/agent/reportImport
 /install/scripts/php.ini
 /install/scripts/php.ini.orig
 /install/db/dbmigrate_pfile_calculate_sha256.php
+/install/db/dbmigrate_change_db_encoding.php
 /src/softwareHeritage/agent/version.php
 /src/softwareHeritage/agent/softwareHeritage
 /src/softwareHeritage/VERSION

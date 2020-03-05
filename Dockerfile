@@ -75,9 +75,7 @@ COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
 RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
 
 # configure apache
-COPY ./install/src-install-apache-example.conf /etc/apache2/conf-available/fossology.conf
-RUN a2enconf fossology.conf \
- && mkdir -p /var/log/apache2/ \
+RUN mkdir -p /var/log/apache2/ \
  && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
  && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
 

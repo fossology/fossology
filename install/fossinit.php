@@ -35,6 +35,7 @@ function explainUsage()
   -v  enable verbose preview (prints sql that would happen, but does not execute it, DB is not updated)
   --force-decision force recalculation of SHA256 for decision tables
   --force-pfile    force recalculation of SHA256 for pfile entries
+  --force-encode   force recode of copyright and sister tables
   -h  this help usage";
   print "$usage\n";
   exit(0);
@@ -57,7 +58,8 @@ use Fossology\Lib\Db\Driver\Postgres;
 $AllPossibleOpts = "abc:d:ef:ghijklmnopqr:stuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 $longOpts = [
   "force-decision",
-  "force-pfile"
+  "force-pfile",
+  "force-encode"
 ];
 
 /* defaults */
@@ -100,6 +102,9 @@ foreach($Options as $optKey => $optVal)
       break;
     case "force-pfile":
       $forcePfile = true;
+      break;
+    case "force-encode":
+      putenv('FOSSENCODING=1');
       break;
     default:
       echo "Invalid Option \"$optKey\".\n";
@@ -388,6 +393,10 @@ require_once("$LIBEXECDIR/dbmigrate_copyright-author.php");
 // Migration script to move candidate licenses in obligations
 require_once("$LIBEXECDIR/dbmigrate_3.6-3.7.php");
 Migrate_36_37($dbManager, $Verbose);
+
+// Migration script for 3.7 => 3.8
+require_once("$LIBEXECDIR/dbmigrate_3.7-3.8.php");
+Migrate_37_38($dbManager, $MODDIR);
 
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
