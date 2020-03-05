@@ -124,6 +124,7 @@ class softwareHeritageAgent extends Agent
     if (SoftwareHeritageDao::SWH_RATELIMIT_EXCEED == $currentStatus) {
       $this->heartbeat(0); //Fake heartbeat to keep the agent alive.
       $timeToReset = $currentResult - time();
+      print "INFO :Software Heritage X-RateLimit-Limit reached. Next slot unlocks in ".gmdate("H:i:s", $timeToReset)."\n";
       if ($timeToReset > $maxTime) {
         sleep($maxTime);
       } else {
