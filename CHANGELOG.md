@@ -1,5 +1,108 @@
 # Changelog of FOSSology
 
+### 3.8.0-RC1 (Mar 05th 2020)
+
+This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds new features to FOSSology, including:
+
+* A new agent added `Software Heritage Analysis` which searches for file existance in softare heritage
+* Reuse of report configuration settings
+* New decision type `do not use`
+* Consider a particular license for its obligation to be listed in report in conf
+* Add external authentification feature
+* New dashboard pages with submenu
+
+#### Credits to contributors for 3.8.0-RC1
+
+From the git commit history, we have following contributors since [3.7.0](https://github.com/fossology/fossology/releases/tag/3.7.0):
+
+```
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> dineshr93 <dineshr93@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> sandipbhuyan <sandipbhuyan@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Woznicki Pawel <pawel.woznicki@orange.com>
+```
+
+#### Corrections
+
+* `31d4c7b39` fix(copyright): Remove non utf8 strings
+* `ddcaa8eb9` fix(conf): Update install/defconf/fossology.conf.in
+* `50e7cf569` Fix(Dockerfile): make clean install clean
+* `2143f6aec` fix(lib): Check group on local decision only
+* `5a7bd82a8` fix(reuser): Run decider after reuser
+* `d97f9cec9` fix(ext-auth): check that external authentication is configured
+* `c20b7fb0f` fix(SHagent): add proxy settings, add SH agent to PHPCS
+* `c60150d59` fix(bulk): Fix dropdown bulk on folder level
+* `251fd8dfd` fix(ojo): Add lower limit to license length
+* `fbc86017c` fix(nomos):test-cases
+* `a1b287e06` fix(nomos) : CC-BY-SA identification
+* `4c04b59bc` fix(nomos) : segfault for large offset value
+* `ffdd07786` fix(highlight): highlight for reference text that exists in different page
+* `a3323dac8` fix(log): fix warnings from apache error log
+* `415b2ae78` fix(view-license): Browse file without scanner ars
+* `efe1301ab` fix(ui): decision and scope for licenses
+* `7c9ca59ef` fix(CHANGELOG): Fix the changelog
+* `87e709233` fix(build-dep): Add PHP-CLI as build dependency
+* `73fe66278` fix(ojo): Handle dual-license and SPDX new naming
+* `b84b6d26b` fix(admin): Allow read user to edit user
+* `c839f02b6` fix(copyright): Wait for ajax calls
+* `ca9a1908c` fix(license-csv): Handle candidate licenses
+* `bdaad200d` fix(license-csv): Update license if exists
+* `50558dcb5` fix(rest): Hide sensitive user info
+* `79d42b791` fix(wget_agent): Fix possible memory corruption and leaks
+* `a84db62f8` fix(wget_agent): Archivefs: Prevent possible buffer overflow
+* `1c5498f0c` fix(wget_agent): GetURL: Part 3 - Prevent possible buffer overflow
+* `afed499a3` fix(wget_agent): GetURL: Part 2 - Prevent possible buffer overflow
+* `1db296e2c` fix(wget_agent): GetURL: Part 1 - Prevent possible buffer overflow
+
+#### Infrastructure
+
+* `88d98224f` Revert "Merge pull request #1498 from siemens/feat/rest/provide-group-upload"
+* `a55e1e818` chore(wget_agent): Remove redndant code
+* `8cb62708e` chore(nomos): Rename test file
+* `12b7da1d7` chore(lib): Move agent list to common place
+* `f50ff3ca6` refac(wget_agent): DBLoadGold Don't open pipe before checking Fin
+* `7237b38b8` refac(wget_agent): DBLoadGold: Prevent possible buffer overflow
+* `d9beb426a` refac(wget_agent): Remove superfluous rc_system variable
+* `2244a9150` refac(wget_agent): Part 1 - Prevent possible buffer overflow
+* `dff78a713` refac(wget_agent): add function for destination of wget command
+
+#### Features
+
+* `c3dca9ae0` feat(migrate): Program to make file UTF-8 compatible
+* `b31ba2ff1` feat(unifiedReport): include DNU information in assesment summary
+* `80a184dad` feat(SWHagent): add status of request to DB
+* `e2b92bc15` feat(auth): Add external authentification feature
+* `8f4c63010` feat(ojo): Remove upper limit from license name
+* `2a6ab581b` feat(rest): Get the license list for upload
+* `164fb898f` feat(reuse): add reuse of report configuration settings
+* `28111118e` feat(SHagent): add new table column with Software Heritage Status
+* `d15c64d3b` feat(email-smtp-config): Add SMTP User field into Fossology email
+* `6f00ed38e` feat(rest): Add group context (groupName param) for REST Api calls
+* `9d981d2ce` feat(rest): Send upload summary
+* `f4b56e186` feat(upload): add feature to change permission of a all uploads in a folder
+* `77d4d8895` feat(decisions): add new decision type do not use
+* `74aa499d2` feat(ui): Place DataTables processing at top
+* `f3bb51eac` feat(software-heritage): Update the description in debian package
+* `a05ac660d` feat(software-heritage): Update the composer.lock file
+* `d9fdbd6c1` feat(softwareHeritage): Update software heritage details in debian package
+* `1e994d646` feat(softwareHeritageView): Show the details of software heritage in the license list page
+* `de6a46b85` feat(softwareHeritageView): Show the details of software heritage in the license list page
+* `71d785cda` feat(software-heritage): Make softwareHeritage dao function and add all
+* `abb463dd9` feat(software-heritage): Redundancy check while inserting softwareHeritage record
+* `6a9786544` feat(software-heritage): Make the ui section of software heritage
+* `0869f6c66` feat(software-heritage): Create a software heritage agent
+* `bf47edabd` feat(db): Make table of software heritage to store information
+* `034c48aa2` feat(dashboard): New dashboard pages with submenu
+* `9fe3d90d3` feat(unifiedReport): exclude scanner found copyrights of irrelevent files
+* `66a009d83` feat(conf): add obligations to consider a particular license for its obligation
+
 ### 3.7.0 (Dec 11th 2019)
 
 This release adds important corrections to
