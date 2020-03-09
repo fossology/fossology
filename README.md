@@ -142,5 +142,5 @@ the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.
     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
     02110-1301  USA
 
-Please see the files COPYING and COPYING.LGPL included with this
-software for the full text of these licenses.
+Please see the LICENSE file included with this software for the full texts of
+these licenses.
