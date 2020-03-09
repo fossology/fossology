@@ -20,6 +20,7 @@ VERSION
 .vagrant/
 *.orig
 .#*
+tags
 
 # compiled or derived files
 install/db/dbcreate
