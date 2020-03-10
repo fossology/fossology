@@ -118,7 +118,12 @@ class AdminLicenseCandidate extends DefaultPlugin
       case 'verify':
       case 'variant':
         $rfParent = ($request->get('do')=='verify') ? $rf : $suggest;
-        $ok = $this->verifyCandidate($rf,$shortname,$rfParent);
+        try{
+          $ok = $this->verifyCandidate($rf,$shortname,$rfParent);
+        } catch (\Throwable $th) {
+          $vars['message'] = 'The license text already exists.';
+          break;
+        }
         if ($ok) {
           $with = $rfParent ? '' : " as variant of <i>$vars[suggest_shortname]</i> ($rfParent)";
           $vars = array(
