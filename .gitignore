@@ -21,6 +21,7 @@ VERSION
 *.orig
 .#*
 tags
+php.ini
 
 # compiled or derived files
 install/db/dbcreate
