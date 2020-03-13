@@ -134,7 +134,12 @@ class AdminLicenseCandidate extends DefaultPlugin
         $vars['message'] = 'Short name must be unique';
         break;
       case 'merge':
-        $ok = $this->mergeCandidate($rf,$suggest,$vars);
+        try {
+          $ok = $this->mergeCandidate($rf,$suggest,$vars);
+        } catch (\Throwable $th) {
+          $vars['message'] = 'The license text already exists.';
+          break;
+        }
         if ($ok) {
           $vars = array(
               'aaData' => json_encode($this->getArrayArrayData()),
