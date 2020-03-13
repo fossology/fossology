@@ -156,7 +156,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','clearing_event_pkey','jobqueue_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event',
-      'clearing_decision','license_file','highlight','jobqueue','job'),false);
+      'clearing_decision','license_file', 'license_ref','highlight','jobqueue','job'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('nomos','monk','copyright'));
 

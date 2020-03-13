@@ -191,7 +191,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey',
       'upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master',
-      'license_ref_bulk','clearing_event','clearing_decision','license_file','highlight'),false);
+      'license_ref_bulk','license_ref','clearing_event','clearing_decision','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->createInheritedArsTables(array('monk'));
 

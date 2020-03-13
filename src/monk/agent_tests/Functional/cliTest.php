@@ -100,6 +100,7 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
   {
     $this->testDb->createPlainTables(array('license_ref'),false);
     $this->testDb->createSequences(array('license_ref_rf_pk_seq'),false);
+    $this->testDb->alterTables(array('license_ref'),false);
 
     $this->testDb->insertData_license_ref(1<<10);
   }
