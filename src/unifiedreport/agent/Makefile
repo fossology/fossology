@@ -10,7 +10,7 @@ VARS=$(TOP)/Makefile.conf
 DEPS=$(TOP)/Makefile.deps
 include $(VARS)
 
-EXE=unifiedreport.php reportStatic.php reportSummary.php version.php obligations.php
+EXE=unifiedreport.php reportStatic.php reportSummary.php version.php
 WRAP=unifiedreport
 MODNAME=unifiedreport
 

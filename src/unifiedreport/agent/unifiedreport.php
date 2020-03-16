@@ -107,6 +107,7 @@ use Fossology\Lib\Report\LicenseDNUGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
+use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Element\Section;
@@ -116,7 +117,6 @@ use PhpOffice\PhpWord\Shared\Html;
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
 include_once(__DIR__ . "/reportSummary.php");
-include_once(__DIR__ . "/obligations.php");
 
 /**
  * @class UnifiedReport
@@ -163,6 +163,11 @@ class UnifiedReport extends Agent
    * licenseIrrelevantCommentGetter object
    */
   private $licenseIrrelevantCommentGetter;
+
+  /** @var obligationsGetter $obligationsGetter
+   * obligationsGetter object
+   */
+  private $obligationsGetter;
 
   /** @var OtherGetter $otherGetter
    * otherGetter object
@@ -240,6 +245,7 @@ class UnifiedReport extends Agent
     $this->licenseDNUGetter = new LicenseDNUGetter();
     $this->licenseDNUCommentGetter = new LicenseDNUGetter(false);
     $this->otherGetter = new OtherGetter();
+    $this->obligationsGetter = new ObligationsGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -298,6 +304,7 @@ class UnifiedReport extends Agent
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
+    $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
 
     $contents = array(
                         "licenses" => $licenses,
@@ -686,9 +693,7 @@ class UnifiedReport extends Agent
     $reportSummarySection = new ReportSummary();
     $reportStaticSection = new ReportStatic($timestamp);
 
-    $licenseObligation = new ObligationsToLicenses();
-
-    list($obligations, $whiteLists) = $licenseObligation->getObligations($contents['licenses']['statements'],
+    list($obligations, $whiteLists) = $this->obligationsGetter->getObligations($contents['licenses']['statements'],
       $contents['licensesMain']['statements'], $uploadId, $groupId);
 
     /* Header starts */
@@ -702,7 +707,7 @@ class UnifiedReport extends Agent
       $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
 
     /* Assessment summery table */
-    $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
+    $bookMarkCell = $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
 
     /* Todoinfo table */
     $reportStaticSection->todoTable($section);
@@ -791,6 +796,12 @@ class UnifiedReport extends Agent
 
     /* Display Do not use license files */
     $heading = "Do not use Files";
+    if ($contents['otherStatement']['includeDNU']) {
+      // adding an internal bookmark
+      $columnStyleWithUnderline = array("size" => 11, "color" => "0000A0", 'underline' => 'single');
+      $section->addBookmark('DNUBookmark');
+      $bookMarkCell->addLink('DNUBookmark', htmlspecialchars(' NOTE: DO NOT USE files found! Please check Do not use files section', ENT_COMPAT, 'UTF-8'), $columnStyleWithUnderline, "pStyle", true);
+    }
     $titleSubHeadingIrre = "(Path, Files, Licenses)";
     $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesDNU']['statements'], $titleSubHeadingIrre);
 

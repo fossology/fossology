@@ -25,7 +25,8 @@
         "symfony/dependency-injection" : "v3.4.26",
         "symfony/yaml" : "v3.4.26",
         "twig/twig" : "v1.38.4",
-        "twig/extensions" : "v1.5.4"
+        "twig/extensions" : "v1.5.4",
+        "guzzlehttp/guzzle": "6.3.3"
     },
     "require-dev" : {
         "doctrine/instantiator" : "1.0.5",

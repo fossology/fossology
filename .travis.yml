@@ -5,6 +5,7 @@
 
 language: php
 dist: xenial
+os: linux
 php: 7.0
 cache:
   ccache: true
@@ -47,6 +48,7 @@ addons:
       - sleuthkit
       - unrar-free
       - upx-ucl
+      - libicu-dev
 
 services: postgresql
 
@@ -152,7 +154,7 @@ jobs:
 #### PHPUnit tests ###########################
     - &phpunit-tests
       php: 5.6
-      addon: {}
+      addons: {}
       install: composer install --prefer-dist --working-dir=src
       before_script: ./utils/prepare-test -afty
       script:
@@ -195,12 +197,12 @@ jobs:
         - bash utils/deploy-pages.sh
       deploy:
         provider: pages
-        skip-cleanup: true
-        github-token: $GITHUB_TOKEN
-        keep-history: false
-        local-dir: ./code_docs
+        cleanup: true
+        token: $GITHUB_TOKEN
+        keep_history: false
+        local_dir: ./code_docs
         repo: $GH_REPO_REF
-        target-branch: master
+        target_branch: master
         on:
           branch: master
   allow_failures:

@@ -37,7 +37,7 @@ class UploadDao
   const REUSE_NONE = 0;
   const REUSE_ENHANCED = 2;
   const REUSE_MAIN = 4;
-  const REUSE_ENH_MAIN = 8;
+  const REUSE_CONF = 16;
 
   /** @var DbManager */
   private $dbManager;
@@ -542,7 +542,7 @@ class UploadDao
 
     $sql = "
 SELECT ufile_name, uploadtree_pk, lft, rgt, ufile_mode,
-       pfile_pk, pfile_md5, pfile_sha1
+       pfile_pk, pfile_md5, pfile_sha1, pfile_sha256
 FROM $uploadTreeTableName
   LEFT JOIN pfile
     ON pfile_fk = pfile_pk
@@ -594,6 +594,7 @@ ORDER BY lft asc
       $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
       $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
       $pfilePerFileName[$path]['sha1'] = $row['pfile_sha1'];
+      $pfilePerFileName[$path]['sha256'] = $row['pfile_sha256'];
     }
   }
 
@@ -661,4 +662,50 @@ ORDER BY lft asc
     }
     return $row;
   }
+
+  /**
+   * @brief Get Pfile hashes from the pfile id
+   * @param $pfilePk
+   * @return array
+   */
+  public function getUploadHashesFromPfileId($pfilePk)
+  {
+    $stmt = __METHOD__."getUploadHashesFromPfileId";
+    $sql = "SELECT * FROM pfile WHERE pfile_pk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($pfilePk), $stmt);
+
+    return ["sha1" => $row["pfile_sha1"], "md5" => $row["pfile_md5"], "sha256" => $row["pfile_sha256"]];
+  }
+
+  /**
+   * @param int $uploadId
+   * @param int $reusedUploadId
+   * @return bolean
+   */
+  public function insertReportConfReuse($uploadId, $reusedUploadId)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT exists(SELECT 1 FROM report_info WHERE upload_fk = $1 LIMIT 1)::int";
+    $row = $this->dbManager->getSingleRow($sql, array($reusedUploadId), $stmt);
+
+    if ($row['exists']) {
+      $stmt = __METHOD__."CopyinsertReportConfReuse";
+      $this->dbManager->prepare($stmt,
+        "INSERT INTO report_info(
+           upload_fk, ri_ga_checkbox_selection, ri_spdx_selection,
+           ri_excluded_obligations, ri_reviewed, ri_footer, ri_report_rel,
+           ri_community, ri_component, ri_version, ri_release_date,
+           ri_sw360_link, ri_general_assesment, ri_ga_additional, ri_ga_risk)
+        SELECT $1, ri_ga_checkbox_selection, ri_spdx_selection,
+           ri_excluded_obligations, ri_reviewed, ri_footer, ri_report_rel,
+           ri_community, ri_component, ri_version, ri_release_date,
+           ri_sw360_link, ri_general_assesment, ri_ga_additional, ri_ga_risk
+           FROM report_info WHERE upload_fk = $2"
+      );
+      $this->dbManager->freeResult($this->dbManager->execute($stmt, array($uploadId, $reusedUploadId)));
+      return true;
+    }
+    return false;
+  }
 }
+

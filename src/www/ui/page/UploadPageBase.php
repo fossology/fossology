@@ -37,7 +37,6 @@ abstract class UploadPageBase extends DefaultPlugin
   const UPLOAD_FORM_BUILD_PARAMETER_NAME = 'uploadformbuild';
   const PUBLIC_ALL = 'public';
   const PUBLIC_GROUPS = 'protected';
-  const UPLOAD_GROUP = 'groupId';
 
   /** @var FolderDao */
   private $folderDao;
@@ -127,6 +126,9 @@ abstract class UploadPageBase extends DefaultPlugin
     $parmAgentList = MenuHook::getAgentPluginNames("ParmAgents");
     $plainAgentList = MenuHook::getAgentPluginNames("Agents");
     $agentList = array_merge($plainAgentList, $parmAgentList);
+
+    $this->rearrangeDependencies($parmAgentList);
+
     foreach ($parmAgentList as $parmAgent) {
       $agent = plugin_find($parmAgent);
       $agent->scheduleAgent($jobId, $uploadId, $errorMsg, $request, $agentList);
@@ -252,5 +254,21 @@ abstract class UploadPageBase extends DefaultPlugin
     $str = str_replace('`', '\`', $str);
     $str = str_replace('$', '\$', $str);
     return $str;
+  }
+
+  /**
+   * Make sure reuser is scheduled before decider so decider does not run
+   * another reuser as dependency
+   * @param[in,out] array $parmList List of parameterized agents
+   */
+  private function rearrangeDependencies(&$parmList)
+  {
+    $deciderKey = array_search('agent_decider', $parmList);
+    $reuserKey = array_search('agent_reuser', $parmList);
+    if ($deciderKey !== false && $reuserKey !== false) {
+      $temp = $parmList[$deciderKey];
+      $parmList[$deciderKey] = $parmList[$reuserKey];
+      $parmList[$reuserKey] = $temp;
+    }
   }
 }

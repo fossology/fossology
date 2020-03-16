@@ -1166,20 +1166,10 @@ char* GetVersionControlCommand(int withPassword)
     if (GlobalProxy[0] && GlobalProxy[0][0])
     {
       res = asprintf(&command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, tmpfile_dir);
-      if (res == -1)
-      {
-        free(tmpfile_dir);
-        return NULL;
-      }
     }
     else
     {
       res = asprintf(&command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, tmpfile_dir);
-      if (res == - 1)
-      {
-        free(tmpfile_dir);
-        return NULL;
-      }
     }
   }
   else if (0 == strcmp(GlobalType, Type[1]))
@@ -1188,21 +1178,16 @@ char* GetVersionControlCommand(int withPassword)
     if (GlobalProxy[0] && GlobalProxy[0][0])
     {
       res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
-      if (res == -1)
-      {
-        free(tmpfile_dir);
-        return NULL;
-      }
     }
     else
     {
       res = asprintf(&command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
-      if (res == -1)
-      {
-        free(tmpfile_dir);
-        return NULL;
-      }
     }
+  }
+  if (res == -1)
+  {
+    free(tmpfile_dir);
+    return NULL;
   }
 
   return command;

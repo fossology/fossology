@@ -31,6 +31,8 @@ use Fossology\Lib\Plugin\AgentPlugin;
 use Fossology\Lib\Util\StringOperation;
 use Symfony\Component\HttpFoundation\Request;
 
+include_once(dirname(__DIR__) . "/agent/version.php");
+
 /**
  * @class ReuserAgentPlugin
  * @brief UI element for reuser during Uploading new package
@@ -53,15 +55,6 @@ class ReuserAgentPlugin extends AgentPlugin
     parent::__construct();
 
     $this->uploadDao = $GLOBALS['container']->get('dao.upload');
-  }
-
-  /**
-   * @copydoc Fossology::Lib::Plugin::AgentPlugin::doAgentAdd()
-   * @see Fossology::Lib::Plugin::AgentPlugin::doAgentAdd()
-   */
-  public function doAgentAdd($jobId, $uploadId, &$errorMsg, $dependencies, $jqargs = "", $jq_cmd_args = null)
-  {
-    parent::doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $jqargs, $jq_cmd_args);
   }
 
   /**
@@ -105,7 +98,8 @@ class ReuserAgentPlugin extends AgentPlugin
    */
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
-    $reuseUploadPair = explode(',', $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
+    $reuseUploadPair = explode(',',
+      $request->get(self::UPLOAD_TO_REUSE_SELECTOR_NAME), 2);
     if (count($reuseUploadPair) == 2) {
       list($reuseUploadId, $reuseGroupId) = $reuseUploadPair;
     } else {
@@ -114,25 +108,32 @@ class ReuserAgentPlugin extends AgentPlugin
     }
     $groupId = $request->get('groupId', Auth::getGroupId());
 
-    $getReuseValue = $request->get('reuseMode');
+    $getReuseValue = $request->get('reuseMode') ?: array();
+    $reuserDependencies = array("agent_adj2nest");
 
     $reuseMode = UploadDao::REUSE_NONE;
-
-    if (! empty($getReuseValue)) {
-      if (count($getReuseValue) < 2) {
-        if (in_array('reuseMain', $getReuseValue)) {
-          $reuseMode = UploadDao::REUSE_MAIN;
-        } else {
-          $reuseMode = UploadDao::REUSE_ENHANCED;
-        }
-      } else {
-        $reuseMode = UploadDao::REUSE_ENH_MAIN;
+    foreach ($getReuseValue as $currentReuseValue) {
+      switch ($currentReuseValue) {
+        case 'reuseMain':
+          $reuseMode |= UploadDao::REUSE_MAIN;
+          break;
+        case 'reuseEnhanced':
+          $reuseMode |= UploadDao::REUSE_ENHANCED;
+          break;
+        case 'reuseConf':
+          $reuseMode |= UploadDao::REUSE_CONF;
+          break;
       }
     }
 
-    $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode);
+    $reuserDependencies = array_merge($reuserDependencies,
+      $this->getReuserDependencies($request));
 
-    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, array("agent_adj2nest"), $uploadId);
+    $this->createPackageLink($uploadId, $reuseUploadId, $groupId, $reuseGroupId,
+      $reuseMode);
+
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg,
+      array_unique($reuserDependencies), $uploadId);
   }
 
   /**
@@ -161,6 +162,29 @@ class ReuserAgentPlugin extends AgentPlugin
     $packageDao->addUploadToPackage($uploadId, $package);
 
     $this->uploadDao->addReusedUpload($uploadId, $reuseUploadId, $groupId, $reuseGroupId, $reuseMode);
+  }
+
+  /**
+   * Add scanners as reuser dependencies.
+   * @param Request $request Symfony request
+   * @return array List of agent dependencies
+   */
+  private function getReuserDependencies($request)
+  {
+    $dependencies = array();
+    if ($request->get("Check_agent_nomos", false)) {
+      $dependencies[] = "agent_nomos";
+    }
+    if ($request->get("Check_agent_monk", false)) {
+      $dependencies[] = "agent_monk";
+    }
+    if ($request->get("Check_agent_ojo", false)) {
+      $dependencies[] = "agent_ojo";
+    }
+    if ($request->get("Check_agent_ninka", false)) {
+      $dependencies[] = "agent_ninka";
+    }
+    return $dependencies;
   }
 }
 

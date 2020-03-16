@@ -32,6 +32,7 @@ use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\UI\Page\BrowseLicense;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Dao\AgentDao;
 
 /**
  * @class UploadHelper
@@ -78,14 +79,12 @@ class UploadHelper
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
    * @param boolean $ignoreScm True if the SCM should be ignored.
-   * @param integer $groupId   Group under which the upload should happen.
-   *        Use default group id if not provided.
    * @return array Array with status, message and upload id
    * @see createVcsUpload()
    * @see createFileUpload()
    */
   public function createNewUpload(ServerRequestInterface $request, $folderName,
-    $fileDescription, $isPublic, $ignoreScm, $groupId = -1)
+    $fileDescription, $isPublic, $ignoreScm)
   {
     $uploadedFile = $request->getUploadedFiles();
     $vcsData = $request->getParsedBody();
@@ -106,11 +105,11 @@ class UploadHelper
         );
       }
       return $this->createVcsUpload($vcsData, $folderName, $fileDescription,
-        $isPublic, $ignoreScm, $groupId);
+        $isPublic, $ignoreScm);
     } else {
       $uploadedFile = $uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME];
       return $this->createFileUpload($uploadedFile, $folderName,
-        $fileDescription, $isPublic, $ignoreScm, $groupId);
+        $fileDescription, $isPublic, $ignoreScm);
     }
   }
 
@@ -122,12 +121,10 @@ class UploadHelper
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
    * @param boolean $ignoreScm  True if the SCM should be ignored.
-   * @param integer $groupId   Group under which the upload should happen.
-   *        Use default group id if not provided.
    * @return array Array with status, message and upload id
    */
   private function createFileUpload($uploadedFile, $folderName, $fileDescription,
-    $isPublic, $ignoreScm = 0, $groupId = -1)
+    $isPublic, $ignoreScm = 0)
   {
     $path = $uploadedFile->file;
     $originalName = $uploadedFile->getClientFilename();
@@ -151,9 +148,6 @@ class UploadHelper
       $this->uploadFilePage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
     $symfonyRequest->request->set('public', $isPublic);
     $symfonyRequest->request->set('scm', $ignoreScm);
-    if ($groupId > 0) {
-      $symfonyRequest->request->set($this->uploadFilePage::UPLOAD_GROUP, $groupId);
-    }
 
     return $this->uploadFilePage->handleRequest($symfonyRequest);
   }
@@ -166,12 +160,10 @@ class UploadHelper
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
    * @param boolean $ignoreScm True if the SCM should be ignored.
-   * @param integer $groupId   Group under which the upload should happen.
-   *        Use default group id if not provided.
    * @return array Array with status, message and upload id
    */
   private function createVcsUpload($vcsData, $folderName, $fileDescription,
-    $isPublic, $ignoreScm = 0, $groupId = -1)
+    $isPublic, $ignoreScm = 0)
   {
     $sanity = $this->sanitizeVcsData($vcsData);
     if ($sanity !== true) {
@@ -203,9 +195,6 @@ class UploadHelper
     $symfonyRequest->request->set('username', $vcsUsername);
     $symfonyRequest->request->set('passwd', $vcsPasswd);
     $symfonyRequest->request->set('scm', $ignoreScm);
-    if ($groupId > 0) {
-      $symfonyRequest->request->set($this->uploadVcsPage::UPLOAD_GROUP, $groupId);
-    }
 
     return $this->uploadVcsPage->handleRequest($symfonyRequest);
   }
@@ -341,5 +330,39 @@ class UploadHelper
       array_push($mainLicenses, $row['rf_shortname']);
     }
     return $mainLicenses;
+  }
+
+  /**
+   * Get the license list for given upload scanned by provided agents
+   * @param integer $uploadId        Upload ID
+   * @param array $agents            List of agents to get list from
+   * @param boolean $printContainers If true, print container info also
+   * @return array Array containing `filePath`, `agentFindings` and
+   * `conclusions` for each upload tree item
+   */
+  public function getUploadLicenseList($uploadId, $agents, $printContainers)
+  {
+    global $container;
+    $restHelper = $container->get('helper.restHelper');
+    $uploadDao = $restHelper->getUploadDao();
+    $agentDao = $container->get('dao.agent');
+
+    $uploadTreeTableName = $uploadDao->getUploadtreeTableName($uploadId);
+    $parent = $uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    $scanProx->createAgentStatus($agents);
+    $agent_ids = $scanProx->getLatestSuccessfulAgentIds();
+
+    /** @var ui_license_list $licenseListObj
+     * ui_license_list object to get licenses
+     */
+    $licenseListObj = $restHelper->getPlugin('license-list');
+    $licenseList = $licenseListObj->createListOfLines($uploadTreeTableName,
+      $parent->getItemId(), $agent_ids, -1, true, '', !$printContainers);
+    if (array_key_exists("warn", $licenseList)) {
+      unset($licenseList["warn"]);
+    }
+    return $licenseList;
   }
 }

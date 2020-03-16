@@ -101,6 +101,7 @@ class DeciderAgentPlugin extends AgentPlugin
         case 'reuseBulk':
           $dependencies[] = 'agent_nomos';
           $dependencies[] = 'agent_monk';
+          $dependencies[] = 'agent_reuser';
           $rulebits |= 0x4;
           break;
         case 'ojoNoContradiction':

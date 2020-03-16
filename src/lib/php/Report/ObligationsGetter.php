@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2017, Siemens AG
+ Copyright (C) 2017,2020, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+namespace Fossology\Lib\Report;
+
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -24,7 +26,7 @@ use Fossology\Lib\Dao\UploadDao;
  * @class ObligationsToLicenses
  * @brief Handles license obligations
  */
-class ObligationsToLicenses
+class ObligationsGetter
 {
   /** @var LicenseDao $licenseDao
    * LicenseDao object
@@ -130,7 +132,7 @@ class ObligationsToLicenses
       $obText = $obligation['ob_text'];
       $licenseName = $obligation['rf_shortname'];
       $groupBy = $obText;
-      if (!in_array($licenseName, $excludedObligations[$obTopic])) {
+      if (!in_array($licenseName,(array) $excludedObligations[$obTopic])) {
         if (array_key_exists($groupBy, $groupedOb)) {
           $currentLics = &$groupedOb[$groupBy]['license'];
           if (!in_array($licenseName, $currentLics)) {

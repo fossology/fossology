@@ -10,12 +10,13 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 # -Werror -Wextra
-CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp $(shell pkg-config --cflags jsoncpp)
+CXXFLAGS_LOCAL = $(FO_CXXFLAGS) -I. -Wall -Wextra -fopenmp \
+                 $(shell pkg-config --cflags jsoncpp icu-uc)
 DEF = -DDATADIR='"$(MODDIR)"'
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 CXXFLAGS_LINK = -lboost_regex -lboost_program_options -lboost_system \
                 -lboost_filesystem $(ALL_CXXFLAGS) -lm -fopenmp \
-                $(FO_CXXLDFLAGS) $(shell pkg-config --libs jsoncpp)
+                $(FO_CXXLDFLAGS) $(shell pkg-config --libs jsoncpp icu-uc)
 
 DEF_ID_COP = -DIDENTITY_COPYRIGHT
 DEF_ID_ECC = -DIDENTITY_ECC
