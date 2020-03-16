@@ -1055,7 +1055,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_TITLE_PHP30)) {
       INTERESTING(lDebug ? "PHP(v3.0#2)" : "PHP-3.0");
     }
-    else if (INFILE(_TITLE_PHP20)) {
+    else if (INFILE(_TITLE_PHP2_02)) {
       INTERESTING(lDebug ? "PHP(v2.02#1)" : "PHP-2.02");
     }      
     else if (INFILE(_TITLE_PHP202)) {
