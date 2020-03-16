@@ -608,6 +608,10 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_CR_SLEEPYCAT) || INFILE(_LT_SLEEPYCAT_1)) {
       MEDINTEREST(lDebug ? "Sleepycat(1)" : "Sleepycat");
     }
+    else if (INFILE(_TITLE_PHP202)) {
+      INTERESTING(lDebug ? "PHP(v2.0.2#1)" : "PHP-2.0.2");
+      lmem[_mPHP] = 1;
+    }
     else if (INFILE(_TITLE_ZEND_V20)) {
       INTERESTING("Zend-2.0");
     }
@@ -1059,7 +1063,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       INTERESTING(lDebug ? "PHP(v2.02#1)" : "PHP-2.02");
     }      
     else if (INFILE(_TITLE_PHP202)) {
-      INTERESTING(lDebug ? "PHP(v2.0.2#3)" : "PHP-2.0.2");
+      INTERESTING(lDebug ? "PHP(v2.0.2#2)" : "PHP-2.0.2");
     }  
     else if (INFILE(_CR_PHP)) {
       INTERESTING(lDebug ? "PHP(1)" : "PHP");
