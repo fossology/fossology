@@ -98,16 +98,6 @@ install: all
 	@if [ ! -f $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf"; \
 	 	$(INSTALL) -m 666 src-install-apache-example.conf $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf; \
-		if [ -d $(APACHE2_SITE_DIR) ]; then \
-			echo "NOTE: enabling fossology site for apache2"; \
-			ln -s $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf $(APACHE2_SITE_DIR)/fossology.conf; \
-			$(APACHE2_EN_SITE) fossology.conf; \
-			$(APACHE_CTL) restart; \
-		elif [ -d $(HTTPD_SITE_DIR) ]; then \
-			echo "NOTE: enabling fossology site for httpd"; \
-			ln -s $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf $(HTTPD_SITE_DIR)/fossology.conf; \
-			$(APACHE_CTL) restart; \
-		fi; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/conf/src-install-apache-example.conf already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
