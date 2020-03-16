@@ -307,8 +307,30 @@ if [[ $WEBONLY ]]; then
      # We are on Debian
      echo "NOTE: Enabling apache module rewrite"
      a2enmod rewrite
-     apachectl restart
+     {$APACHE_CTL} restart
    fi
+
+  # Enable fossology for source install
+  if [[ "{$DESTDIR}" != *"debian"* ]]; then
+    if [[ -d {$APACHE2_SITE_DIR} ]]; then
+      if [[ -f {$APACHE2_SITE_DIR}/fossology.conf ]]; then
+        echo "Fossology already enabled for apache2";
+      else
+        echo "NOTE: enabling fossology site for apache2";
+        ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$APACHE2_SITE_DIR}/fossology.conf;
+        {$APACHE2_EN_SITE} fossology.conf;
+        {$APACHE_CTL} restart;
+      fi;
+    elif [[ -d {$HTTPD_SITE_DIR} ]]; then
+      if [[ -f {$HTTPD_SITE_DIR}/fossology.conf ]]; then
+        echo "Fossology already enabled for httpd";
+      else
+        echo "NOTE: enabling fossology site for httpd";
+        ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$HTTPD_SITE_DIR}/fossology.conf;
+        {$APACHE_CTL} restart;
+      fi;
+    fi;
+  fi;
 
    # apache2 reload is only necessary when it is running.
    if /etc/init.d/apache2 status > /dev/null; then
