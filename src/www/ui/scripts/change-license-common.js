@@ -294,12 +294,33 @@ function submitTextModal(){
   }
 }
 
+function checkIfEligibleForGlobalDecision()
+{
+  var checkBox = document.getElementById("globalDecision");
+  if (checkBox.checked == true) {
+    $.ajax({
+      type: "POST",
+      url: "?mod=conclude-license&do=checkCandidateLicense",
+      data: {"item": $('#uploadTreeId').val()},
+      success: function(data) {
+        if (data != 'success') {
+          alert(data);
+          checkBox.checked = false;
+        }
+      },
+      error: function(data) {
+      }
+    });
+  }
+}
+
 function doOnSuccess() {
   textModal.plainModal('close');
   $('#decTypeSet').addClass('decTypeWip');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
+
 $(document).ready(function () {
   textModal = $('#textModal').plainModal();
   $('#textModal').draggable({
