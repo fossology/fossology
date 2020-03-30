@@ -49,6 +49,11 @@ interface Driver
   public function isConnected();
 
   /**
+   * @return int
+   */
+  public function version();
+  
+  /**
    * @return string
    */
   public function getLastError();

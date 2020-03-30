@@ -88,6 +88,16 @@ class Postgres implements Driver
   }
 
   /**
+   * @return int
+  */
+  public function version()
+  {
+    $v = pg_version($this->dbConnection);
+    return (int)(explode(' ', $v['server'])[0]);
+  }
+
+
+  /**
    * @return string
    */
   public function getLastError()

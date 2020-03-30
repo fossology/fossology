@@ -551,13 +551,15 @@ class fo_libschema
   {
     $referencedSequencesInTableColumns = array();
 
+    $ad_col_name = $this->dbman->getDriver()->version() < 12 ? "adsrc" : "adbin";
+
     $sql = "SELECT class.relname AS table,
         attr.attnum AS ordinal,
         attr.attname AS column_name,
         type.typname AS type,
         attr.atttypmod-4 AS modifier,
         attr.attnotnull AS notnull,
-        attrdef.adsrc AS default,
+        attrdef.".$ad_col_name." AS default,
         col_description(attr.attrelid, attr.attnum) AS description
       FROM pg_class AS class
       INNER JOIN pg_attribute AS attr ON attr.attrelid = class.oid AND attr.attnum > 0
