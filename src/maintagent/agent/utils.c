@@ -33,6 +33,7 @@
 FUNCTION void exitNow(int exitVal)
 {
   if (pgConn) PQfinish(pgConn);
+  if (dbManager) fo_dbManager_free(dbManager);
 
   if (exitVal) LOG_ERROR("Exiting with status %d", exitVal);
 

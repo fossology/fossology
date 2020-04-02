@@ -87,6 +87,7 @@ class maintagent extends FO_Plugin {
                      "F"=>_("Validate folder contents."),
               //       "g"=>_("Remove orphaned gold files."),
                      "E"=>_("Remove orphaned rows from database."),
+                     "L"=>_("Remove orphaned log files from file system."),
                      "N"=>_("Normalize priority "),
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),
