@@ -245,7 +245,7 @@ class AdminLicenseCandidate extends DefaultPlugin
     /** @var DbManager */
     $dbManager = $this->getObject('db.manager');
     $tableColumnMap = array("license_file"=>"rf_fk",
-        "license_ref_bulk"=>"rf_fk",
+        "license_set_bulk"=>"rf_fk",
         "clearing_event"=>"rf_fk");
     foreach ($tableColumnMap as $table=>$column) {
       $dbManager->prepare($stmt=__METHOD__.".$table","UPDATE $table SET $column=$1 WHERE $column=$2");
