@@ -6,7 +6,7 @@
 
 ## About
 
-FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance workflow. In one click you can generate an SPDX file, or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
+FOSSology is a open source license compliance software system and toolkit. As a toolkit you can run license, copyright, and export control scans from the command line. As a system, a database and web ui are provided to give you an open source license compliance workflow. In one click you can generate an SPDX file, or a ReadMe with all the copyright notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
 
 [Check out Who Uses FOSSology!](http://www.fossology.org/projects/fossology/wiki/WhoUsesFOSSology)
 
@@ -25,26 +25,29 @@ See https://github.com/fossology/fossology/releases for source code download of 
 
 For installation instructions see [Github Wiki](https://github.com/fossology/fossology/wiki)
 
-## Docker
-
-FOSSology comes with a Dockerfile allowing the containerized execution
-both as single instance or in combination with an external PostgreSQL database.
+### Install as a single container with all services combined
 **Note:** It is strongly recommended to use an external database for production
-use, since the the standalone image does not take care of data persistency.
+use, since the the single container does not handle data persistence.
 
-A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following command:
+FOSSology comes with a [Dockerfile](https://github.com/fossology/fossology/blob/master/Dockerfile) which creates a single container which runs all three services; web-based UI, the FOSSology scheduler, and the PostgresSQL database. A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following commands:
+
 ``` sh
 docker run -p 8081:80 fossology/fossology
 ```
+The docker image's web-base UI can then be used viewed http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
-The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy passwd fossy.
-
-Execution with external database container can be done using Docker Compose, via the following command:
+### Install separate services with docker-compose
+Separate containers for the web-based UI, the FOSSology scheduler, and the PostgresSQL database can be set up with Docker Compose, via the following command:
 ``` sh
-docker-compose up
+1. git clone https://github.com/fossology/fossology.git
+2. cd fossology/
+3. docker-compose up -d
 ```
+This set up allows for an separate container for the database which in turn configures data persistency on the host. You will not get data peristency with the single container set up, you have to use the Docker compose set up.
 
-The Docker image allows configuration of it's database connection over a set of environment variables.
+### Database configuration
+
+Configuration of the database connection via environment variables can be done;
 
 - **FOSSOLOGY_DB_HOST:** Hostname of the PostgreSQL database server.
   An integrated PostgreSQL instance is used if not defined or set to `localhost`.
