@@ -394,8 +394,8 @@ class UserEditPage extends DefaultPlugin
       } catch (DuplicateTokenNameException $e) {
         throw new \UnexpectedValueException($e->getMessage());
       }
-      return $this->authHelper->generateJwtToken($request->getHost(), $tokenExpiry,
-          $jti['created_on'], $jti['jti'], $tokenScope, $key);
+      return $this->authHelper->generateJwtToken($tokenExpiry,
+        $jti['created_on'], $jti['jti'], $tokenScope, $key);
     }
   }
 
