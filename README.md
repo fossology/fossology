@@ -34,7 +34,7 @@ FOSSology comes with a [Dockerfile](https://github.com/fossology/fossology/blob/
 ``` sh
 docker run -p 8081:80 fossology/fossology
 ```
-The docker image's web-base UI can then be used viewed http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
+The docker image's web-base UI can then be used viewed http://IP_OF_DOCKER_HOST:8081/repo user `fossy` password `fossy`.
 
 ### Install separate services with docker-compose
 Separate containers for the web-based UI, the FOSSology scheduler, and the PostgresSQL database can be set up with Docker Compose, via the following command:
