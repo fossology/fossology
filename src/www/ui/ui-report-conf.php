@@ -262,18 +262,20 @@ class ui_report_conf extends FO_Plugin
   {
     $uploadId = GetParm("upload", PARM_INTEGER);
     $groupId = Auth::getGroupId();
+    $userId = Auth::getUserId();
     if (!$this->uploadDao->isAccessible($uploadId, $groupId)) {
       return;
     }
 
     $itemId = GetParm("item",PARM_INTEGER);
     $this->vars['micromenu'] = Dir2Browse("browse", $itemId, NULL, $showBox=0, "View-Meta");
+    $this->vars['globalClearingAvailable'] = Auth::isClearingAdmin();
 
     $submitReportConf = GetParm("submitReportConf", PARM_STRING);
 
     if (isset($submitReportConf)) {
       $parms = array();
-      $obLicenses = $_POST["obLicenses"];
+      $obLicenses = @$_POST["obLicenses"];
       $i = 1;
       $columns = "";
       foreach ($this->mapDBColumns as $key => $value) {
@@ -297,6 +299,22 @@ class ui_report_conf extends FO_Plugin
                "WHERE upload_fk = $$uploadIdPos;";
       $this->dbManager->getSingleRow($SQL, $parms,
         __METHOD__ . "updateReportInfoData");
+
+      if (@$_POST['markGlobal']) {
+        $upload = $this->uploadDao->getUpload($uploadId);
+        $uploadName = $upload->getFilename();
+        $jobId = JobAddJob($userId, $groupId, $uploadName, $uploadId);
+        /** @var agent_fodecider $deciderPlugin */
+        $deciderPlugin = plugin_find("agent_deciderjob");
+        $conflictStrategyId = "global";
+        $errorMsg = "";
+        $deciderPlugin->AgentAdd($jobId, $uploadId, $errorMsg, array(), $conflictStrategyId);
+        $schedulerMsg = empty(GetRunnableJobList()) ? _("Is the scheduler running? ") : '';
+        $url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+        $text = _("Your jobs have been added to job queue.");
+        $linkText = _("View Jobs");
+        $this->vars['message'] = "$schedulerMsg" . "$text <a href=\"$url\">$linkText</a>";
+      }
     }
     $this->vars += $this->allReportConfiguration($uploadId, $groupId);
   }

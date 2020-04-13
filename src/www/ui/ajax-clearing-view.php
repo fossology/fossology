@@ -254,7 +254,7 @@ class AjaxClearingView extends FO_Plugin
         return new JsonResponse($this->doClearingHistory($groupId, $uploadId, $uploadTreeId));
 
       case "checkCandidateLicense":
-        if (!empty($this->clearingDao->getCandidateCountForItemId($uploadTreeId))) {
+        if (!empty($this->clearingDao->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
           return $this->createPlainResponse("Cannot add candidate license as global decision");
         }
         return $this->createPlainResponse("success");

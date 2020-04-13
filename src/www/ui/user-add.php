@@ -106,7 +106,7 @@ class user_add extends FO_Plugin
     }
 
     /* See if the user already exists (better not!) */
-    $row = $this->dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1 LIMIT 1;",
+    $row = $this->dbManager->getSingleRow("SELECT * FROM users WHERE LOWER(user_name) = LOWER($1) LIMIT 1;",
         array($User), $stmt = __METHOD__ . ".getUserIfExisting");
     if (! empty($row['user_name'])) {
       $text = _("User already exists.  Not added.");
@@ -170,6 +170,8 @@ class user_add extends FO_Plugin
     $V.= "<option selected value='" . PLUGIN_DB_READ . "'>$text</option>\n";
     $text = _("Read-Write (read, download, or edit information)");
     $V.= "<option value='" . PLUGIN_DB_WRITE . "'>$text</option>\n";
+    $text = _("Clearing Administrator (read, download, edit information and edit decisions)");
+    $V.= "<option value='" . PLUGIN_DB_CADMIN . "'>$text</option>\n";
     $text = _("Full Administrator (all access including adding and deleting users)");
     $V.= "<option value='" . PLUGIN_DB_ADMIN . "'>$text</option>\n";
     $V.= "</select></td>\n";

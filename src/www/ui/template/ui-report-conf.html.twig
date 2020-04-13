@@ -15,6 +15,9 @@
         <li><a href="#ObligationsConfTab">Obligations in Unified Report</a></li>
       {% endif %}
       <li><a href="#SPDXConfTab">SPDX Report Settings</a></li>
+      {% if globalClearingAvailable is not empty %}
+        <li><a href="#clearingConfTab">Decision Settings</a></li>
+      {% endif %}
     </ul>
     <div id="reportConfTab">
       <table border="1">
@@ -207,6 +210,29 @@
         </tr>
       </table>
     </div>
+    {% if globalClearingAvailable is not empty %}
+      <div id="clearingConfTab">
+        <table border="1">
+          <tr>
+            <th>
+              {{ "Attribute"|trans }}
+            </th>
+            <th>
+              {{ "Information"|trans }}
+            </th>
+          </tr>
+          <tr>
+            <td align="left">
+              {{ "Mark all the decisions for this upload as global"|trans }}
+            </td>
+            <td align="left">
+              <input type="checkbox" name="markGlobal" {{ markGlobal }} />
+            </td>
+          </tr>
+        </table>
+      </div>
+    {% endif %}
+
   </div>
   <table border="0" align="center" cellpadding="20">
     <tr>

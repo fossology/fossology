@@ -67,7 +67,7 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   $user_name = $row['user_name'];
   $user_pk = $row['user_pk'];
   // Add user group
-  $dbManager->prepare($stmt='group.get', $sql = "select group_pk from groups where group_name=$1");
+  $dbManager->prepare($stmt='group.get', $sql = "select group_pk from groups where LOWER(group_name)=LOWER($1)");
   $verg = $dbManager->execute('group.get',array($user_name));
   $GroupRow = $dbManager->fetchArray($verg);
   if (false === $GroupRow) {
@@ -76,6 +76,7 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
     $GroupRow = $dbManager->fetchArray(
       $dbManager->execute('group.get', array($user_name)));
   }
+
   $group_pk = $GroupRow['group_pk'];
   // make user a member of their own group
   $dbManager->getSingleRow($sql="insert into group_user_member (group_fk, user_fk, group_perm) values ($1,$2,$3)",

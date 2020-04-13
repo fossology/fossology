@@ -167,6 +167,7 @@ class UserEditPage extends DefaultPlugin
           PLUGIN_DB_NONE => _("None (very basic, no database access)"),
           PLUGIN_DB_READ => _("Read-only (read, but no writes or downloads)"),
           PLUGIN_DB_WRITE => _("Read-Write (read, download, or edit information)"),
+          PLUGIN_DB_CADMIN => _("Clearing Administrator (read, download, edit information and edit decisions)"),
           PLUGIN_DB_ADMIN => _("Full Administrator (all access including adding and deleting users)")
         );
       $vars['accessLevel'] = $UserRec['user_perm'];
