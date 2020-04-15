@@ -55,6 +55,6 @@ void parseTempJson();
  * @param json String to unescape
  * @return The JSON with unescaped path separator.
  */
-char *unescapePathSeparator(char* json);
+char *unescapePathSeparator(const char* json);
 
 #endif /* _JSON_WRITER_H_ */
