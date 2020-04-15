@@ -10,7 +10,8 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 CLIBDIR = ../c/
-CXXFLAGS_LOCAL = -fPIC $(FO_CXXFLAGS) -Wextra -Weffc++
+CXXFLAGS_LOCAL = -fPIC $(FO_CXXFLAGS) -Wextra -Weffc++ \
+                 $(shell pkg-config --cflags icu-uc)
 
 CONFDEF = -DFOSSDB_CONF='"$(SYSCONFDIR)/Db.conf"' \
           -DFOSSGROUP='"$(PROJECTGROUP)"' \

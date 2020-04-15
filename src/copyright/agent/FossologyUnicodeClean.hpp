@@ -27,7 +27,8 @@
 #include <fstream>
 #include <vector>
 #include <boost/program_options.hpp>
-#include <unicode/ustream.h>
+
+#include "libfossUtils.hpp"
 
 /**
  * Maximum number of buffered lines to store
@@ -47,7 +48,6 @@ class FossologyUnicodeClean
     size_t bufferSize;
     bool stopRead;
 
-    const icu::UnicodeString removeNonUtf(const std::string &input);
     const std::string dirtyRead();
     void write(const icu::UnicodeString &output);
     void flush();

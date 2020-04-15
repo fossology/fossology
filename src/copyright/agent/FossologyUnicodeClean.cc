@@ -77,34 +77,6 @@ FossologyUnicodeClean::FossologyUnicodeClean(string &source,
 }
 
 /**
- * Remove non UTF-8 characters from input and return icu::UnicodeString
- * @param input Raw input
- * @return UTF-8 valid string
- */
-const icu::UnicodeString FossologyUnicodeClean::removeNonUtf(const string &input)
-{
-  int len = input.length();
-  const unsigned char *in = reinterpret_cast<const unsigned char *>(input.c_str());
-
-  icu::UnicodeString out;
-  for (int i = 0; i < len;) {
-    UChar32 uniChar;
-    int lastPos = i;
-    U8_NEXT(in, i, len, uniChar);
-    if (uniChar > 0) {
-      out.append(uniChar);
-    } else {
-      i = lastPos;
-      U16_NEXT(in, i, len, uniChar);
-      if (U_IS_UNICODE_CHAR(uniChar) && uniChar > 0) {
-        out.append(uniChar);
-      }
-    }
-  }
-  return out;
-}
-
-/**
  * Start the process to read from file/stream -> remove invalid chars -> print
  * to file/stream.
  */
@@ -114,7 +86,7 @@ void FossologyUnicodeClean::startConvert()
   input = this->dirtyRead();
   while (!this->stopRead)
   {
-    icu::UnicodeString output = this->removeNonUtf(input);
+    icu::UnicodeString output = fo::recodeToUnicode(input);
     this->write(output);
     input = this->dirtyRead();
   }

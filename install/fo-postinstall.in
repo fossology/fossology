@@ -24,6 +24,7 @@ Usage: fo-postinstall [options]
   --no-running-database   : omit all database operations
   --force-decision        : Force update of SHA256 hash in decision tables
   --force-pfile           : Force calculation of SHA256 hash of pfile entries
+  --force-encode          : Force recoding copyright and sister tables
 EOF
 \}
 
@@ -31,17 +32,18 @@ AGENT=''
 DATABASE=''
 WEBONLY=''
 SCHEDULERONLY=''
-EVERYTHING=''
+EVERYTHING=true
 OVERWRITE=''
 LICENSEREF=''
 COMMON=''
 RUNNINGDATABASE=true
 FORCEDECISION=''
 FORCEPFILE=''
+FORCEENCODE=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,force-encode,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -49,33 +51,31 @@ fi
 
 eval set -- "$OPTS"
 
-# if no options or just -o or --force-decision/pfile with or without -o then
-# do everything
-if [[ $OPTS == ' --' || $OPTS == ' -o --' || $OPTS == ' --force-decision --' \
-  || $OPTS == ' --force-pfile --' || $OPTS == ' -o --force-decision --' \
-  || $OPTS == ' -o --force-pfile --' || $OPTS == ' --force-decision --force-pfile --' \
-  || $OPTS == ' -o --force-decision --force-pfile --' ]]; then
-   EVERYTHING=true
-fi
-
+# If any flags are sent, set them and make everything false
 while true; do
    case "$1" in
-      -a|--agent)            AGENT=true; shift;;
-      -d|--database)         DATABASE=true; shift;;
-      -w|--web-only)         WEBONLY=true; shift;;
-      -s|--scheduler-only)   SCHEDULERONLY=true; shift;;
+      -a|--agent)            AGENT=true; EVERYTHING=''; shift;;
+      -d|--database)         DATABASE=true; EVERYTHING=''; shift;;
+      -w|--web-only)         WEBONLY=true; EVERYTHING=''; shift;;
+      -s|--scheduler-only)   SCHEDULERONLY=true; EVERYTHING=''; shift;;
       -e|--everything)       EVERYTHING=true; shift;;
       -o|--overwrite)        OVERWRITE=true; shift;;
-      -l|--licenseref)       LICENSEREF=true; shift;;
-      -c|--common)           COMMON=true; shift;;
-      --no-running-database) RUNNINGDATABASE=''; shift;;
+      -l|--licenseref)       LICENSEREF=true; EVERYTHING=''; shift;;
+      -c|--common)           COMMON=true; EVERYTHING=''; shift;;
+      --no-running-database) RUNNINGDATABASE=''; EVERYTHING=''; shift;;
       --force-decision)      FORCEDECISION='--force-decision'; shift;;
       --force-pfile)         FORCEPFILE='--force-pfile'; shift;;
+      --force-encode)        FORCEENCODE='--force-encode'; shift;;
       -h|--help)             show_help; exit;;
       --)                    shift; break;;
       *)                     echo "Error: option $1 not recognised"; exit 1;;
    esac
 done
+
+# If everything flags were sent, set everything to true to prevent overwrite
+if [[ $OPT == *" -e "* || $OPT == *" --everything "* ]]; then
+    EVERYTHING=true
+fi
 
 set -o errexit -o nounset -o pipefail
 
@@ -235,8 +235,9 @@ if [[ $DATABASE && $RUNNINGDATABASE ]]; then
 fi # end of DATABASE
 
 if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
-   echo "*** update the database and license_ref table ***"
-   {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR} $FORCEDECISION $FORCEPFILE
+    must_run_as_root
+    echo "*** update the database and license_ref table ***"
+    {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR} $FORCEDECISION $FORCEPFILE $FORCEENCODE
 fi # end of license reference
 
 ########################################################################
@@ -276,39 +277,42 @@ fi # end of SCHEDULERONLY
 
 ########################################################################
 if [[ $WEBONLY ]]; then
-   must_run_as_root
+  must_run_as_root
+  RESTART_MESSAGE=false
 
-   echo "*** Setting up the web interface ***"
+  echo "*** Setting up the web interface ***"
 
-   # See if web server user exists, if so add to the group.
-   # check for www-data (Debian, etc)
-   if grep -q "^www-data:" /etc/passwd; then
-     echo "NOTE: Adding user www-data to group $PROJECTGROUP"
-     # this is smart enough to not add multiple times so it's ok to repeat
-     usermod --groups $PROJECTGROUP --append www-data
-   fi
+  # See if web server user exists, if so add to the group.
+  # check for www-data (Debian, etc)
+  if grep -q "^www-data:" /etc/passwd; then
+    echo "NOTE: Adding user www-data to group $PROJECTGROUP"
+    # this is smart enough to not add multiple times so it's ok to repeat
+    usermod --groups $PROJECTGROUP --append www-data
+  fi
 
-   # check for apache (RHEL/CentOS, etc)
-   if grep -q "^apache:" /etc/passwd; then
-     echo "NOTE: Adding user apache to group $PROJECTGROUP"
-     # this is smart enough to not add multiple times so it's ok to repeat
-     usermod --groups $PROJECTGROUP --append apache
-   fi
+  # check for apache (RHEL/CentOS, etc)
+  if grep -q "^apache:" /etc/passwd; then
+    echo "NOTE: Adding user apache to group $PROJECTGROUP"
+    # this is smart enough to not add multiple times so it's ok to repeat
+    usermod --groups $PROJECTGROUP --append apache
+  fi
 
-   # Enable mod_rewrite for REST API
-   if [[ -f /etc/httpd/conf.modules.d/00-base.conf ]]; then
-     # We are on RHEL
-     if ! egrep -q "^LoadModule rewrite_module modules/mod_rewrite.so" /etc/httpd/conf.modules.d/00-base.conf; then
-       echo "NOTE: Enabling apache module rewrite"
-       echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
-       systemctl restart httpd
-     fi
-   else
-     # We are on Debian
-     echo "NOTE: Enabling apache module rewrite"
-     a2enmod rewrite
-     {$APACHE_CTL} restart
-   fi
+  # Enable mod_rewrite for REST API
+  if [[ -f /etc/httpd/conf.modules.d/00-base.conf ]]; then
+    # We are on RHEL
+    if ! egrep -q "^LoadModule rewrite_module modules/mod_rewrite.so" /etc/httpd/conf.modules.d/00-base.conf; then
+      echo "NOTE: Enabling apache module rewrite"
+      echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
+      RESTART_MESSAGE=true
+    fi
+  else
+    # We are on Debian
+    if ! a2query -q -m rewrite; then
+      echo "NOTE: Enabling apache module rewrite"
+      /usr/sbin/a2enmod rewrite
+      RESTART_MESSAGE=true
+    fi
+  fi
 
   # Enable fossology for source install
   if [[ "{$DESTDIR}" != *"debian"* ]]; then
@@ -319,7 +323,7 @@ if [[ $WEBONLY ]]; then
         echo "NOTE: enabling fossology site for apache2";
         ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$APACHE2_SITE_DIR}/fossology.conf;
         {$APACHE2_EN_SITE} fossology.conf;
-        {$APACHE_CTL} restart;
+        RESTART_MESSAGE=true
       fi;
     elif [[ -d {$HTTPD_SITE_DIR} ]]; then
       if [[ -f {$HTTPD_SITE_DIR}/fossology.conf ]]; then
@@ -327,15 +331,18 @@ if [[ $WEBONLY ]]; then
       else
         echo "NOTE: enabling fossology site for httpd";
         ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$HTTPD_SITE_DIR}/fossology.conf;
-        {$APACHE_CTL} restart;
+        RESTART_MESSAGE=true
       fi;
     fi;
   fi;
 
-   # apache2 reload is only necessary when it is running.
-   if /etc/init.d/apache2 status > /dev/null; then
-     /etc/init.d/apache2 reload
-   fi
+  # apache2 reload is only necessary when it is running.
+  if /etc/init.d/apache2 status > /dev/null; then
+    /etc/init.d/apache2 reload
+    if [[ "$RESTART_MESSAGE" = true ]]; then
+      echo "NOTE: Restart apache to apply the changes"
+    fi
+  fi
 fi # end of WEBONLY
 
 ########################################################################

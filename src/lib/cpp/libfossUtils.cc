@@ -34,3 +34,38 @@ unsigned long fo::stringToUnsignedLong(const char* string)
   std::stringstream(string) >> uLongVariable;
   return uLongVariable;
 }
+
+/**
+ * Remove all non-UTF8 characters from a string.
+ * @param input The string to be recoded
+ * @return Unicode string with invalid characters removed
+ */
+icu::UnicodeString fo::recodeToUnicode(const std::string &input)
+{
+  int len = input.length();
+  const unsigned char *in =
+    reinterpret_cast<const unsigned char*>(input.c_str());
+
+  icu::UnicodeString out;
+  for (int i = 0; i < len;)
+  {
+    UChar32 uniChar;
+    int lastPos = i;
+    U8_NEXT(in, i, len, uniChar);
+    if (uniChar > 0)
+    {
+      out.append(uniChar);
+    }
+    else
+    {
+      i = lastPos;
+      U16_NEXT(in, i, len, uniChar);
+      if (U_IS_UNICODE_CHAR(uniChar) && uniChar > 0)
+      {
+        out.append(uniChar);
+      }
+    }
+  }
+  out.trim();
+  return out;
+}

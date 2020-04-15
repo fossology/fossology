@@ -188,6 +188,12 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
   bool success = false;
   unsigned long result = 0;
 
+  icu::UnicodeString unicodeCleanShortname = fo::recodeToUnicode(rfShortName);
+
+  // Clean shortname to get utf8 string
+  rfShortName = "";
+  unicodeCleanShortname.toUTF8String(rfShortName);
+
   fo_dbManager_PreparedStatement *searchWithOr = fo_dbManager_PrepareStamement(
       dbManager.getStruct_dbManager(),
       "selectLicenseIdWithOrOJO",
