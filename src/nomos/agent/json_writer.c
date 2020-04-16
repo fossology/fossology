@@ -22,37 +22,16 @@
 #include "nomos_utils.h"
 #include <json-c/json.h>
 
-void writeToTemp()
+void writeJson()
 {
   char realPathOfTarget[PATH_MAX];
-  if (optionIsSet(OPTS_LONG_CMD_OUTPUT))
-  {
-    if (!realpath(cur.targetFile, realPathOfTarget))
-    {
-      strcpy(realPathOfTarget, basename(cur.targetFile));
-    }
-  }
-  else
-  {
-    strcpy(realPathOfTarget, basename(cur.targetFile));
-  }
-  sem_wait(&cur.mutexTempJson);
-  fprintf(cur.tempJsonPath, "%s;%s\n", realPathOfTarget, cur.compLic);
-  fflush(cur.tempJsonPath);
-  sem_post(&cur.mutexTempJson);
-}
-
-void writeToStdOut()
-{
-  json_object *root = json_object_new_object();
-  json_object *results = json_object_new_array();
   json_object *result = json_object_new_object();
   json_object *licenses = json_object_new_array();
   json_object *fileLocation = NULL;
   json_object *aLicense = NULL;
-  char realPathOfTarget[PATH_MAX];
-  parseLicenseList();
   size_t i = 0;
+
+  parseLicenseList();
   while (cur.licenseList[i] != NULL)
   {
     aLicense = json_object_new_string(cur.licenseList[i]);
@@ -71,72 +50,21 @@ void writeToStdOut()
   }
   json_object_object_add(result, "file", fileLocation);
   json_object_object_add(result, "licenses", licenses);
-  json_object_array_add(results, result);
-  json_object_object_add(root, "results", results);
   char *prettyJson = unescapePathSeparator(
-    json_object_to_json_string_ext(root, JSON_C_TO_STRING_PRETTY));
-  printf("%s\n", prettyJson);
+    json_object_to_json_string_ext(result, JSON_C_TO_STRING_PRETTY));
+  sem_wait(mutexJson);
+  if (*printcomma)
+  {
+    printf(",%s\n", prettyJson);
+  }
+  else
+  {
+    *printcomma = true;
+    printf("%s\n", prettyJson);
+  }
+  sem_post(mutexJson);
   free(prettyJson);
-  json_object_put(root);
-}
-
-void parseTempJson()
-{
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  gboolean printcomma = false;
-  json_object *result = NULL;
-  json_object *licenses = NULL;
-  json_object *fileLocation = NULL;
-  json_object *aLicense = NULL;
-
-  fseek(cur.tempJsonPath, 0, SEEK_SET);
-  printf("{\n\"results\":[\n");
-  while ((read = getline(&line, &len, cur.tempJsonPath)) != -1)
-  {
-    if (line[read - 1] == '\n')
-    {
-      line[read - 1] = '\0';
-    }
-    fileLocation = json_object_new_string(strtok(line, ";"));
-    memset(cur.compLic, '\0', sizeof(cur.compLic));
-    strncpy(cur.compLic, strtok(NULL, ";"), sizeof(cur.compLic) - 1);
-    parseLicenseList();
-    free(line);
-    line = NULL;
-    len = 0;
-
-    licenses = json_object_new_array();
-    size_t i = 0;
-    while (cur.licenseList[i] != NULL)
-    {
-      aLicense = json_object_new_string(cur.licenseList[i]);
-      cur.licenseList[i] = NULL;
-      json_object_array_add(licenses, aLicense);
-      ++i;
-    }
-    result = json_object_new_object();
-    json_object_object_add(result, "file", fileLocation);
-    json_object_object_add(result, "licenses", licenses);
-    char *prettyJson = unescapePathSeparator(json_object_to_json_string_ext(
-        result, JSON_C_TO_STRING_PRETTY));
-    if (printcomma)
-    {
-      printf(",%s\n", prettyJson);
-    }
-    else
-    {
-      printcomma = true;
-      printf("%s\n", prettyJson);
-    }
-    json_object_put(result);
-  }
-  printf("]\n}\n");
-  if (line)
-  {
-    free(line);
-  }
+  json_object_put(result);
 }
 
 char *unescapePathSeparator(const char* json)
@@ -178,4 +106,20 @@ char *unescapePathSeparator(const char* json)
   }
   free(tempjson);
   return result;
+}
+
+inline void initializeJson()
+{
+  mutexJson = (sem_t *) mmap(NULL, sizeof(sem_t),
+    PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+  printcomma = (gboolean *) mmap(NULL, sizeof(gboolean),
+    PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  sem_init(mutexJson, 2, SEM_DEFAULT_VALUE);
+}
+
+inline void destroyJson()
+{
+  sem_destroy(mutexJson);
+  munmap(printcomma, sizeof(gboolean));
+  munmap(mutexJson, sizeof(sem_t));
 }
