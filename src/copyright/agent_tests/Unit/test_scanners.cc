@@ -51,6 +51,10 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "if (c) { return -1 } \n\n"
   "Written by: me, myself and Irene.\n\n"
   "Authors all the people at ABC\n\n"
+  "<author>Author1</author>"
+  "<head>All the people</head>"
+  "<author>Author1 Author2 Author3</author>"
+  "<author>Author4</author><b>example</b>"
   "Apache\n\n"
   "This file is protected under pants 1 , 2 ,3\n\n"
   "Do not modify this document\n\n"
@@ -135,6 +139,9 @@ protected:
     scannerTest(sc, testContent, "author", {
       "Written by: me, myself and Irene.",
       "Authors all the people at ABC",
+      "Author1",
+      "Author1 Author2 Author3",
+      "Author4",
       "maintained by benjamin drieu <benj@debian.org>"
     });
   }
