@@ -28,6 +28,8 @@ use Fossology\Lib\Dao\SoftwareHeritageDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 use \GuzzleHttp\Client;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
 
 include_once(__DIR__ . "/version.php");
 
@@ -165,23 +167,33 @@ class softwareHeritageAgent extends Agent
     }
 
     $client = new Client(['http_errors' => false, 'proxy' => $proxy]);
-    $response = $client->get($URIToGetLicenses);
-    $statusCode = $response->getStatusCode();
-    $cookedResult = array();
-    if ($statusCode == SoftwareHeritageDao::SWH_STATUS_OK) {
-      $responseContent = json_decode($response->getBody()->getContents(),true);
-      $cookedResult = $responseContent["facts"][0]["licenses"];
-    } else if ($statusCode == SoftwareHeritageDao::SWH_RATELIMIT_EXCEED) {
+    try {
+      $response = $client->get($URIToGetLicenses);
+      $statusCode = $response->getStatusCode();
+      $cookedResult = array();
+      if ($statusCode == SoftwareHeritageDao::SWH_STATUS_OK) {
+        $responseContent = json_decode($response->getBody()->getContents(),true);
+        $cookedResult = $responseContent["facts"][0]["licenses"];
+      } else if ($statusCode == SoftwareHeritageDao::SWH_RATELIMIT_EXCEED) {
         $responseContent = $response->getHeaders();
         $cookedResult = $responseContent["X-RateLimit-Reset"][0];
-    } else if ($statusCode == SoftwareHeritageDao::SWH_NOT_FOUND) {
-      $response = $client->get($URIToGetContent);
-      $responseContent = json_decode($response->getBody(),true);
-      if (isset($responseContent["status"])) {
-        $statusCode = SoftwareHeritageDao::SWH_STATUS_OK;
+      } else if ($statusCode == SoftwareHeritageDao::SWH_NOT_FOUND) {
+        $response = $client->get($URIToGetContent);
+        $responseContent = json_decode($response->getBody(),true);
+        if (isset($responseContent["status"])) {
+          $statusCode = SoftwareHeritageDao::SWH_STATUS_OK;
+        }
       }
+      return array($statusCode, $cookedResult);
+    } catch (RequestException $e) {
+      echo "Sorry, something went wrong. check if the host is accessible!\n";
+      echo Psr7\str($e->getRequest());
+      if ($e->hasResponse()) {
+        echo Psr7\str($e->getResponse());
+      }
+      $this->scheduler_disconnect(1);
+      exit;
     }
-    return array($statusCode, $cookedResult);
   }
 
   /**
