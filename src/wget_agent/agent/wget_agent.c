@@ -1058,6 +1058,7 @@ void replace_url_with_auth()
   char URI[FILEPATH] = "";
   char *token = NULL;
   char *temp = NULL;
+  char *additionalParams = NULL;
 
   if (strstr(GlobalParam, "password") && strstr(GlobalParam, "username"))
   {
@@ -1079,12 +1080,22 @@ void replace_url_with_auth()
     while( token != NULL )
     {
       if (1 == index) username = token;
-      if (3 == index) password = token;
+      if (3 == index) {
+        password = token;
+        additionalParams = token + strlen(token) + 1;
+        break;
+      }
       token = strtok(NULL, needle);
       index++;
     }
     snprintf(GlobalURL, URLMAX, "%s%s:%s@%s", http, username, password, URI);
-    memset(GlobalParam,'\0',STRMAX);
+
+    if (strlen(additionalParams) > 0) {
+      memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
+    } 
+    else {
+      memset(GlobalParam,'\0',STRMAX);
+    }
   }
 }
 

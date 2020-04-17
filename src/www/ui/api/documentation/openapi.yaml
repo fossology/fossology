@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.13
+  version: 1.0.14
   contact:
     email: fossology@fossology.org
   license:
@@ -1192,6 +1192,9 @@ components:
             - git
         vcsUrl:
           description: URL of the repository
+          type: string
+        vcsBranch:
+          description: Branch to checkout for analysis (for Git only)
           type: string
         vcsName:
           description: Display name of the upload
