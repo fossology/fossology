@@ -43,7 +43,7 @@
 {% if licenseComment is empty %}
     <spdx:licenseComments rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}
-    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]</spdx:licenseComments>
+    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]></spdx:licenseComments>
 {% endif %}
 {% endif %}
 {% if scannerLicenses|default is empty %}
