@@ -11,7 +11,7 @@ SPDXID: SPDXRef-upload{{ packageId }}
 PackageDownloadLocation: NOASSERTION
 PackageVerificationCode: {{ verificationCode }}
 PackageChecksum: SHA1: {{ sha1 | lower }}
-{# PackageChecksum: SHA256: #}
+PackageChecksum: SHA256: {{ sha256 | lower }}
 PackageChecksum: MD5: {{ md5 | lower }}
 {# PackageChecksum: SSDEEP: #}
 {% if mainLicenses|default is empty %}

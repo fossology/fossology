@@ -16,6 +16,12 @@
     </spdx:checksum>
     <spdx:checksum> 
       <spdx:Checksum>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha256" />
+        <spdx:checksumValue>{{ sha256 | lower }}</spdx:checksumValue>
+      </spdx:Checksum>
+    </spdx:checksum>
+    <spdx:checksum> 
+      <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
         <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
       </spdx:Checksum>

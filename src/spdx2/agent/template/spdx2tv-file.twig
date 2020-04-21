@@ -11,6 +11,7 @@ FileName: {{ fileName }}
 SPDXID: SPDXRef-item{{ fileId }}
 {# FileType: OTHER #}
 FileChecksum: SHA1: {{ sha1 | lower }}
+FileChecksum: SHA256: {{ sha256 | lower }}
 FileChecksum: MD5: {{ md5 | lower }}
 {% if isCleared %}
 {% if concludedLicenses|default is empty %}
