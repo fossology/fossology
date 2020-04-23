@@ -1,5 +1,64 @@
 # Changelog of FOSSology
 
+### 3.8.0 (April 23rd 2020)
+
+This release adds important corrections to
+[3.8.0-rc1](https://github.com/fossology/fossology/releases/tag/3.8.0-rc1)
+
+The release 3.8.0 also introduces new agent `Software Heritage`. There is a
+special note about this agent.
+> Due to rate-limiting from Software Heritage, the agent might run slow. Please
+> check the **Geeky Scan Details** of the agent to understand the cause of the
+> delay.
+
+Please check https://archive.softwareheritage.org/api/#rate-limiting for more
+info.
+
+Some notes about the UTF-8 database. The copyright (and sister) agent now
+creates only UTF-8 string. So it is safe to update to Postgres with UTF-8
+encoded database. For more information, please refer to the wikipage
+[Migration to UTF-8 DB](https://github.com/fossology/fossology/wiki/Migration-to-UTF-8-DB)
+
+#### Credits to contributors for 3.8.0
+
+From the git commit history, we have following contributors since
+[3.8.0-rc1](https://github.com/fossology/fossology/releases/tag/3.8.0-rc1):
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Anupam <ag.4ums@gmail.com>
+> Carmen Bianca Bakker <carmenbianca.bakker@liferay.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Kaushl2208 <kaushlendrapratap.9837@gmail.com>
+> Mikko Murto <mikko.murto@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> sjha2048 <sjha200000@gmail.com>
+```
+
+#### Features
+* `5ca84b7a4` feat(SWH): catch exceptions in case of bad response
+* `d8ac396c7` feat(DB): Recode copyright tables to UTF-8
+* `3bbb7156a` feat(SWH): add time to reset if X-RateLimit-Limit reached for SWH agent
+* `144b81c19` feat(Copyright): Fixed the checking of config file in wrong folder
+* `3b6f4fac6` feat(unifiedReport): move obligations to DAO layer remove unused file
+
+#### Corrections
+* `148b774e5` fix(delete): Do not remove upload_pk
+* `6296b6738` fix(schema): Match schema with schema export
+* `c49c5a691` fix(spdx-rdf-report): Fix comments in export.
+* `8880d1a98` fix(travis): Fix build config warnings
+* `c9c6f3cb9` fix(fo-installdeps): Added missing Fedora dependecies
+* `7d905ed6a` fix(AdviceLicense):Show error message on failure
+* `c0a4b25b3` fix(package): fix syntax
+* `eec0a5faa` fix(rest): Remove hostname from JWT
+
+#### Infrastructure
+* `88f6de2e8` fix(travis): Fix page deploy stage
+* `a106def1c` fix(packaging): Create apache softlink on source
+* `b3abe195b` docs(contributing.md): Fixed broken link in contributing.md
+* `018de9705` fix(git) : add php.ini to gitignore
+* `09b48ffe5` docs(README): Refer to the correct file for the licenses
+* `5a28eabdc` fix(apache): Enable fossology on source install
+
 ### 3.8.0-RC1 (Mar 05th 2020)
 
 This release brings a number of corrections (see below) and changes to the infrastructure. But it also adds new features to FOSSology, including:
