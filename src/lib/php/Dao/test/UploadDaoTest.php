@@ -454,9 +454,9 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createPlainTables(array('pfile'));
     $this->dbManager->queryOnce('TRUNCATE upload');
     $this->testDb->insertData(array('upload','pfile'));
-    // (pfile_pk, pfile_md5, pfile_sha1, pfile_size) := (9, 'F703E0197FB6C5BD0C8DFDCC115A0231', '5DAFC9C82988A81413B995210B668CF5CF5975FF', 16845)
-    $hashes = $this->uploadDao->getUploadHashes(2);
-    assertThat($hashes,equalTo(array('md5'=>'F703E0197FB6C5BD0C8DFDCC115A0231','sha1'=>'5DAFC9C82988A81413B995210B668CF5CF5975FF')));
+    // (pfile_pk, pfile_md5, pfile_sha1, pfile_sha256, pfile_size) := (755, 'E7295A5773D0EA17D53CBE6293924DD4', '93247C8DB814F0A224B75B522C1FA4DC92DC3078', 'E29ABC32DB8B6241D598BC7C76681A7623D176D85F99E738A56C0CB684C367E1', 10240)
+    $hashes = $this->uploadDao->getUploadHashes(44);
+    assertThat($hashes,equalTo(array('md5'=>'E7295A5773D0EA17D53CBE6293924DD4','sha1'=>'93247C8DB814F0A224B75B522C1FA4DC92DC3078','sha256'=>'E29ABC32DB8B6241D598BC7C76681A7623D176D85F99E738A56C0CB684C367E1')));
   }
 
   public function testGetFatItem()
