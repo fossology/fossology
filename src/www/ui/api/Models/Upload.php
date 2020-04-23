@@ -63,6 +63,11 @@ class Upload
    */
   private $fileSize;
   /**
+   * @var string $fileSha1
+   * SHA1 checksum of the uploaded file
+   */
+  private $fileSha1;
+  /**
    * Upload constructor.
    * @param integer $folderId
    * @param string $folderName
@@ -71,9 +76,10 @@ class Upload
    * @param string $uploadName
    * @param string $uploadDate
    * @param integer $fileSize
+   * @param string $fileSha1
    * @param string $tag
    */
-  public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $tag = NULL)
+  public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $fileSha1, $tag = NULL)
   {
     $this->folderId = intval($folderId);
     $this->folderName = $folderName;
@@ -82,6 +88,7 @@ class Upload
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
     $this->fileSize = intval($fileSize);
+    $this->fileSha1 = $fileSha1;
   }
 
   /**
@@ -106,7 +113,8 @@ class Upload
       "description" => $this->description,
       "uploadname"  => $this->uploadName,
       "uploaddate"  => $this->uploadDate,
-      "filesize"    => $this->fileSize
+      "filesize"    => $this->fileSize,
+      "filesha1"    => $this->fileSha1,
     ];
   }
 }
