@@ -53,136 +53,9 @@ services: postgresql
 jobs:
   fast_finish: true
   include:
-    - name: Syntax Check
-      script:
-        - src/testing/syntax/syntaxtest.sh
-        - composer validate --no-check-all --working-dir=src --strict
-    - name: Static Code Analysis
-      addons:
-        apt:
-          packages:
-            - cppcheck
-      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
-    - name: Copy/Paste Detector
-      install: composer install --prefer-dist --working-dir=src
-      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
     - name: PHP Codesniffer
       install: composer install --prefer-dist --working-dir=src
       script: src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
-#### Docker tests ###########################
-    - name: Docker Tests
-      addons: {}
-      services: docker
-      before_script: docker-compose build
-      script:
-        - src/testing/docker/test-cluster.sh
-        - src/testing/docker/test-standalone.sh
-#### C/C++ agent tests ###########################
-    - &compiler-tests
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-5
-            - g++-5
-      install:
-        - composer install --prefer-dist --working-dir=src
-        - ./install/scripts/install-spdx-tools.sh
-        - sudo /usr/sbin/update-ccache-symlinks
-        - ls /usr/lib/ccache/
-      before_script: &default-before-script
-        ./utils/prepare-test -afty
-      script:
-        - make test
-      after_success:
-        - ccache -s
-    - <<: *compiler-tests
-      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-6
-            - g++-6
-    - <<: *compiler-tests
-      env: CC=gcc-7 CXX=g++-7 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-7
-            - g++-7
-    - <<: *compiler-tests
-      env: CC=gcc-8 CXX=g++-8 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-8
-            - g++-8
-    - <<: *compiler-tests
-      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
-      addons:
-        postgresql: "10"
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-6
-            - g++-6
-            - postgresql-10
-            - postgresql-client-10
-      before_script: &postgres-before-script
-        # Use default port
-        - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
-        # Use 9.6 auth config:
-        - sudo cp /etc/postgresql/{9.5,10}/main/pg_hba.conf
-        - sudo service postgresql restart
-        - *default-before-script
-#### PHPUnit tests ###########################
-    - &phpunit-tests
-      php: 5.6
-      addon: {}
-      install: composer install --prefer-dist --working-dir=src
-      before_script: ./utils/prepare-test -afty
-      script:
-        - make build-lib VERSIONFILE build-cli
-        - src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite"
-      after_success: php src/vendor/bin/php-coveralls -vv -o coveralls.json -x clover.xml
-    - &php7-phpunit-tests
-      <<: *phpunit-tests
-      php: 7.0
-      install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
-      script:
-        - set -o pipefail
-        - make build-lib VERSIONFILE build-cli
-        - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
-    - &php71-phpunit-tests
-      <<: *php7-phpunit-tests
-      php: 7.1
-    - <<: *php7-phpunit-tests
-      php: 7.2
-    - <<: *php7-phpunit-tests
-      php: 7.2
-      env: PGPORT=5432
-      addons:
-        postgresql: "10"
-        apt:
-          packages:
-            - postgresql-10
-            - postgresql-client-10
-            - *default_packages
-      before_script: *postgres-before-script
     - stage: GitHub Page Release
       name: GitHub Page deploy
       addons:
@@ -195,10 +68,10 @@ jobs:
         - bash utils/deploy-pages.sh
       deploy:
         provider: pages
-        skip-cleanup: true
-        github-token: $GITHUB_TOKEN
-        keep-history: false
-        local-dir: ./code_docs
+        cleanup: false
+        token: $GITHUB_TOKEN
+        keep_history: false
+        local_dir: ./code_docs
         repo: $GH_REPO_REF
         target-branch: master
         on:
