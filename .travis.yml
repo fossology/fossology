@@ -63,12 +63,10 @@ jobs:
       script:
         - doxygen -v
         - bash utils/deploy-pages.sh
-        - pwd
-        - git status
-        - ls -al code_docs
       deploy:
         provider: pages
         cleanup: false
+        skip_cleanup: true
         token: $GITHUB_TOKEN
         keep_history: false
         local_dir: code_docs
