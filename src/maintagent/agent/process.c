@@ -171,7 +171,8 @@ FUNCTION void removeUploads()
 
   char *SQL = "DELETE FROM upload WHERE upload_pk  \
                IN (SELECT upload_fk FROM uploadtree WHERE parent IS NULL AND pfile_fk IS NULL)  \
-               OR upload_pk NOT IN (SELECT upload_fk FROM uploadtree)";
+               OR (upload_pk NOT IN (SELECT upload_fk FROM uploadtree) \
+                 AND expire_action != 'd' AND pfile_fk IS NOT NULL)";
 
   startTime = (long)time(0);
 

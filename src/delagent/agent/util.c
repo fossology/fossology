@@ -421,6 +421,11 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   snprintf(SQL,MAXSQL,"DROP TABLE %s;",tempTable);
   PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
 
+  /* Mark upload deleted in upload table */
+  snprintf(SQL,MAXSQL,"UPDATE upload SET expire_action = 'd', "
+      "expire_date = now(), pfile_fk = NULL WHERE upload_pk = %ld;", uploadId);
+  PQexecCheckClear("Marking upload as deleted", SQL, __FILE__, __LINE__);
+
   PQexecCheckClear(NULL, "SET statement_timeout = 120000;", __FILE__, __LINE__);
 
   printfInCaseOfVerbosity("Deleted upload %ld from DB, now doing repository.\n",uploadId);

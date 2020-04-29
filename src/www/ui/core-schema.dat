@@ -2085,7 +2085,6 @@
   $Schema["CONSTRAINT"]["tags_uploadtree_pkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_pkey\" PRIMARY KEY (\"tag_uploadtree_pk\");";
   $Schema["CONSTRAINT"]["tags_uploadtree_tag_fk_fkey"] = "ALTER TABLE \"tag_uploadtree\" ADD CONSTRAINT \"tags_uploadtree_tag_fk_fkey\" FOREIGN KEY (\"tag_fk\") REFERENCES \"tag\" (\"tag_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pkey_idx\" PRIMARY KEY (\"upload_pk\");";
-  $Schema["CONSTRAINT"]["upload_pfile_fk_fkey"] = "ALTER TABLE \"upload\" ADD CONSTRAINT \"upload_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_clearing_pkey"] = "ALTER TABLE \"upload_clearing\" ADD CONSTRAINT \"upload_clearing_pkey\" PRIMARY KEY (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["upload_clearing_license_upload_fk_fkey"] = "ALTER TABLE \"upload_clearing_license\" ADD CONSTRAINT \"upload_clearing_license_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["upload_packages_package_fk"] = "ALTER TABLE \"upload_packages\" ADD CONSTRAINT \"upload_packages_package_fk\" FOREIGN KEY (\"package_fk\") REFERENCES \"package\" (\"package_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";

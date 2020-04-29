@@ -293,7 +293,7 @@ class AjaxShowJobs extends \FO_Plugin
           'uploadName' => $jobs['upload']['upload_filename'],
           'uploadId' => $jobs['upload']['upload_pk'],
           'uploadDesc' => $jobs['upload']['upload_desc'],
-          'uploadItem' => $jobs['uploadtree']['uploadtree_pk'],
+          'uploadItem' => empty($jobs['uploadtree']) ? -1 : $jobs['uploadtree']['uploadtree_pk'],
           'uploadEta' => $this->showJobsDao->getEstimatedTime($jobs['job']['job_pk'], '', 0, $jobs['upload']['upload_pk'])
         );
       } else {

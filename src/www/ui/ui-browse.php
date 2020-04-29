@@ -265,7 +265,9 @@ class ui_browse extends FO_Plugin
     global $container;
     /* @var $dbManager DbManager */
     $dbManager = $container->get('db.manager');
-    $uploadExists = $dbManager->getSingleRow("SELECT count(*) cnt FROM upload WHERE upload_pk=$1",array($uploadId));
+    $uploadExists = $dbManager->getSingleRow(
+      "SELECT count(*) cnt FROM upload WHERE upload_pk=$1 " .
+      "AND expire_action!='d' AND pfile_fk IS NOT NULL", array($uploadId));
     if ($uploadExists['cnt']< 1) {
       throw new Exception("This upload no longer exists on this system.");
     }
