@@ -53,9 +53,6 @@ services: postgresql
 jobs:
   fast_finish: true
   include:
-    - name: PHP Codesniffer
-      install: composer install --prefer-dist --working-dir=src
-      script: src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
     - stage: GitHub Page Release
       name: GitHub Page deploy
       addons:
@@ -66,15 +63,16 @@ jobs:
       script:
         - doxygen -v
         - bash utils/deploy-pages.sh
+        - pwd
+        - git status
+        - ls -al code_docs
       deploy:
         provider: pages
         cleanup: false
         token: $GITHUB_TOKEN
         keep_history: false
-        local_dir: ./code_docs
+        local_dir: code_docs
         repo: $GH_REPO_REF
         target-branch: master
         on:
           branch: master
-  allow_failures:
-    - name: Copy/Paste Detector
