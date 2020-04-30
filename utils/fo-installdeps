@@ -104,7 +104,7 @@ if [[ $BUILDTIME ]]; then
             libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
             build-essential libtext-template-perl subversion rpm librpm-dev \
             libmagic-dev libglib2.0 libboost-regex-dev \
-            libboost-program-options-dev
+            libboost-program-options-dev libpq-dev
          case "$CODENAME" in
            jessie)
              apt-get $YesOpt install php5-cli;;
@@ -141,14 +141,14 @@ if [[ $BUILDTIME ]]; then
             perl-Text-Template subversion \
             postgresql-devel file-devel \
             libxml2 \
-            boost-devel php-mbstring libicu-devel
+            boost-devel php-mbstring libicu-devel libpq-devel
          ;;
       RedHatEnterprise*|CentOS)
          yum $YesOpt install \
             postgresql-devel \
             gcc make file libxml2 \
             perl-Text-Template subversion \
-            boost-devel php-mbstring libicu-devel
+            boost-devel php-mbstring libicu-devel libpq-devel
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
