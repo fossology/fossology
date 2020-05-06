@@ -386,6 +386,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
     strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
 
+  $variable = "SkipFiles";
+  $mimeTypeToSkip = _("Skip MimeTypes from scanning");
+  $mimeTypeDesc = _("add  comma (,) separated mimetype to exclude files from scanning");
+  $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
+    strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */

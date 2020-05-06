@@ -36,34 +36,12 @@ OjosDatabaseHandler::OjosDatabaseHandler(DbManager dbManager) :
 /**
  * Get a vector of all file id for a given upload id.
  * @param uploadId Upload ID to be queried
+ * @param ignoreFilesWithMimeType To ignore files with particular mimetype
  * @return List of all pfiles for the given upload
  */
-vector<unsigned long> OjosDatabaseHandler::queryFileIdsForUpload(int uploadId)
+vector<unsigned long> OjosDatabaseHandler::queryFileIdsForUpload(int uploadId, bool ignoreFilesWithMimeType)
 {
-  return queryFileIdsVectorForUpload(uploadId);
-}
-
-/**
- * Get a vector of all file id for a given upload id which are not scanned by the given agentId.
- * @param uploadId Upload ID to be queried
- * @param agentId  ID of the agent
- * @return List of all pfiles for the given upload
- */
-vector<unsigned long> OjosDatabaseHandler::queryFileIdsForScan(int uploadId, int agentId)
-{
-  string uploadtreeTableName = queryUploadTreeTableName(uploadId);
-
-  QueryResult queryResult = dbManager.execPrepared(
-    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-      ("pfileForUploadFilterAgent" + uploadtreeTableName).c_str(),
-      ("SELECT distinct(ut.pfile_fk) FROM " + uploadtreeTableName + " AS ut "
-      "LEFT JOIN license_file AS lf ON ut.pfile_fk = lf.pfile_fk "
-      "AND lf.agent_fk = $2 WHERE lf.pfile_fk IS NULL "
-      "AND ut.upload_fk = $1 AND (ut.ufile_mode&x'3C000000'::int)=0;").c_str(),
-      int, int),
-    uploadId, agentId);
-
-  return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
+  return queryFileIdsVectorForUpload(uploadId, ignoreFilesWithMimeType);
 }
 
 /**

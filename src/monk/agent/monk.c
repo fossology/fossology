@@ -34,7 +34,7 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
                                          {"jobId", required_argument, 0, 'j'},
                                          {NULL, 0, NULL, 0}};
   int option_index = 0;
-  while ((c = getopt_long(argc, argv, "VvJhs:k:c:", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "VvJhIs:k:c:", long_options, &option_index)) != -1) {
     switch (c) {
       case 'c':
         break;
@@ -66,6 +66,9 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
       case 'k':
         state->scanMode = MODE_CLI_OFFLINE;
         state->knowledgebaseFile = optarg;
+        break;
+      case 'I':
+        state->ignoreFilesWithMimeType = true;
         break;
       case 'h':
       case '?':
@@ -113,12 +116,14 @@ void parseArguments(MonkState* state, int argc, char** argv, int* fileOptInd) {
 
 int main(int argc, char** argv) {
   int fileOptInd;
+
   MonkState stateStore = { .dbManager = NULL,
                            .agentId = 0,
                            .scanMode = 0,
                            .verbosity = 0,
                            .knowledgebaseFile = NULL,
                            .json = 0,
+                           .ignoreFilesWithMimeType = false,
                            .ptr = NULL };
   MonkState* state = &stateStore;
   parseArguments(state, argc, argv, &fileOptInd);

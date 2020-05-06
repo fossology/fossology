@@ -67,41 +67,59 @@ char* getUploadTreeTableName(fo_dbManager* dbManager, int uploadId)
  * \brief Get all file IDs (pfile_fk) for a given upload
  * \param dbManager fo_dbManager in use
  * \param uploadId  ID of the upload
+ * \param ignoreFilesWithMimeType To ignore Files With MimeType
  * \return File IDs for the given upload
  */
-PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId)
+PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId, bool ignoreFilesWithMimeType)
 {
-
   PGresult* result;
+  char SQL[1024];
 
   char* uploadtreeTableName = getUploadTreeTableName(dbManager, uploadId);
+  char* queryName;
 
   if (strcmp(uploadtreeTableName, "uploadtree_a") == 0)
   {
-    char* queryName = g_strdup_printf("queryFileIdsForUpload.%s", uploadtreeTableName);
-    char* sql;
-    sql = g_strdup_printf("select distinct(pfile_fk) from %s where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
+    queryName = g_strdup_printf("queryFileIdsForUpload.%s", uploadtreeTableName);
+    g_snprintf(SQL, sizeof(SQL), "select distinct(pfile_fk) from %s join pfile on pfile_pk=pfile_fk where upload_fk=$1 and (ufile_mode&x'3C000000'::int)=0",
       uploadtreeTableName);
+  }
+  else {
+    queryName = g_strdup_printf("queryFileIdsForUpload.%s", uploadtreeTableName);
+    g_snprintf(SQL, sizeof(SQL), "select distinct(pfile_fk) from %s join pfile on pfile_pk=pfile_fk where (ufile_mode&x'3C000000'::int)=0",
+      uploadtreeTableName);
+  }
 
+  if (ignoreFilesWithMimeType)
+  {
+    queryName = g_strdup_printf("%s.%s", queryName, "WithMimeType");
+    strcat(SQL, " AND (pfile_mimetypefk not in (SELECT mimetype_pk from mimetype where mimetype_name=any(string_to_array(( \
+      SELECT conf_value from sysconfig where variablename='SkipFiles'),','))))");
+  }
+
+  if (strcmp(uploadtreeTableName, "uploadtree_a") == 0)
+  {
     result = fo_dbManager_ExecPrepared(
       fo_dbManager_PrepareStamement(
         dbManager,
         queryName,
-        sql,
+        SQL,
         int),
       uploadId
     );
-
-    g_free(sql);
     g_free(queryName);
   }
   else
   {
-
-    result = fo_dbManager_Exec_printf(dbManager,
-      "select distinct(pfile_fk) from %s where (ufile_mode&x'3C000000'::int)=0",
-      uploadtreeTableName
+    result = fo_dbManager_ExecPrepared(
+      fo_dbManager_PrepareStamement(
+        dbManager,
+        queryName,
+        SQL,
+        int),
+      uploadId
     );
+    g_free(queryName);
   }
 
   g_free(uploadtreeTableName);
@@ -118,13 +136,13 @@ PGresult* queryFileIdsForUpload(fo_dbManager* dbManager, int uploadId)
 char* queryPFileForFileId(fo_dbManager* dbManager, long fileId)
 {
   PGresult* fileNameResult = fo_dbManager_ExecPrepared(
-    fo_dbManager_PrepareStamement(
-      dbManager,
-      "queryPFileForFileId",
-      "select pfile_sha1 || '.' || pfile_md5 ||'.'|| pfile_size AS pfilename from pfile where pfile_pk=$1",
-      long),
-    fileId
-  );
+     fo_dbManager_PrepareStamement(
+       dbManager,
+       "queryPFileForFileId",
+       "select pfile_sha1 || '.' || pfile_md5 ||'.'|| pfile_size AS pfilename from pfile where pfile_pk=$1",
+       long),
+       fileId
+    );
 
   if (PQntuples(fileNameResult) == 0)
   {
@@ -414,4 +432,65 @@ FUNCTION char* GetUploadtreeTableName(PGconn* pgConn, int upload_pk)
   PQclear(result);
 
   return (uploadtree_tablename);
+}
+
+
+/**
+* \brief Get the upload_pk and agent_pk
+*        to find out the agent has already scanned the package.
+*
+* \param pgConn Database connection object pointer.
+* \param upload_pk  Upload ID
+* \param agent_pk  agentPk
+*
+* \return result, ars_pk if the agent has already scanned the package.
+* \note Caller must free the (non-null) returned value.
+*/
+PGresult* checkDuplicateReq(PGconn* pgConn, int uploadPk, int agentPk)
+{
+  PGresult* result;
+  char SQL[1024];
+    /* if it is duplicate request (same upload_pk, sameagent_fk), then do not repeat */
+    snprintf(SQL, sizeof(SQL),
+        "select ars_pk from ars_master,agent \
+                where agent_pk=agent_fk and ars_success=true \
+                  and upload_fk='%d' and agent_fk='%d'",
+        uploadPk, agentPk);
+    result = PQexec(pgConn, SQL);
+    return result;
+}
+
+
+/**
+* \brief Get the upload_pk, agent_pk and ignoreFilesWithMimeType
+*        to get all the file Ids for nomos.
+*
+* \param pgConn Database connection object pointer.
+* \param upload_pk  uploadPk
+* \param agent_pk  agentPk
+* \param ignoreFilesWithMimeType To ignore Files With MimeType
+*
+* \return the result, the list of pfiles, require to be scan by nomos.
+* \note Caller must free the (non-null) returned value.
+*/
+PGresult* getSelectedPFiles(PGconn* pgConn, int uploadPk, int agentPk, bool ignoreFilesWithMimeType)
+{
+  PGresult* result;
+  char SQL[1024];
+
+  snprintf(SQL, sizeof(SQL),
+      "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
+          FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS \
+          left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on PF=pfile_pk \
+         WHERE (fl_pk IS null or agent_fk <>'%d')",
+         uploadPk, agentPk, agentPk);
+  
+  if (ignoreFilesWithMimeType)
+  {
+        strcat(SQL, " AND (pfile_mimetypefk not in ( \
+            SELECT mimetype_pk from mimetype where mimetype_name=any(string_to_array(( \
+            SELECT conf_value from sysconfig where variablename='SkipFiles'),','))))");
+  }
+  result = PQexec(pgConn, SQL);
+  return result;
 }

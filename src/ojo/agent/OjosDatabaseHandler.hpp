@@ -79,8 +79,8 @@ class OjosDatabaseHandler: public fo::AgentDatabaseHandler
     ;
     OjosDatabaseHandler spawn() const;
 
-    std::vector<unsigned long> queryFileIdsForUpload(int uploadId);
-    std::vector<unsigned long> queryFileIdsForScan(int uploadId, int agentId);
+    std::vector<unsigned long> queryFileIdsForUpload(int uploadId, bool ignoreFilesWithMimeType);
+    std::vector<unsigned long> queryFileIdsForScan(int uploadId, int agentId, bool ignoreFilesWithMimeType);
     unsigned long saveLicenseToDatabase(OjoDatabaseEntry &entry) const;
     bool insertNoResultInDatabase(OjoDatabaseEntry &entry) const;
     bool saveHighlightToDatabase(const ojomatch &match,

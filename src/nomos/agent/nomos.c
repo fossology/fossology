@@ -62,15 +62,15 @@ char BuildVersion[] = "nomos build version: NULL.\n";
  *
  * At the end, make an entry in the ars using fo_WriteARS().
  * \param cacheroot Root for hash table
+ * \param ignoreFilesWithMimeType to exclude files with particular mimetype
  */
-void arsNomos(cacheroot_t* cacheroot){
+void arsNomos(cacheroot_t* cacheroot, bool ignoreFilesWithMimeType) {
   int i;
   int upload_pk = 0;
   int numrows;
   int ars_pk = 0;
   int user_pk = 0;
   char *AgentARSName = "nomos_ars";
-  char sqlbuf[1024];
   PGresult *result;
 
   char *repFile;
@@ -90,14 +90,8 @@ void arsNomos(cacheroot_t* cacheroot){
       LOG_ERROR("You have no update permissions on upload %d", upload_pk);
       continue;
     }
-    /* if it is duplicate request (same upload_pk, sameagent_fk), then do not repeat */
-    snprintf(sqlbuf, sizeof(sqlbuf),
-        "select ars_pk from nomos_ars,agent \
-                where agent_pk=agent_fk and ars_success=true \
-                  and upload_fk='%d' and agent_fk='%d'",
-        upload_pk, gl.agentPk);
-    result = PQexec(gl.pgConn, sqlbuf);
-    if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__))
+    result = checkDuplicateReq(gl.pgConn, upload_pk, gl.agentPk);
+    if (fo_checkPQresult(gl.pgConn, result, NULL, __FILE__, __LINE__))
       Bail(-__LINE__);
     if (PQntuples(result) != 0)
     {
@@ -106,17 +100,12 @@ void arsNomos(cacheroot_t* cacheroot){
       continue;
     }
     PQclear(result);
+
     /* Record analysis start in nomos_ars, the nomos audit trail. */
     ars_pk = fo_WriteARS(gl.pgConn, ars_pk, upload_pk, gl.agentPk, AgentARSName, 0, 0);
-    /* retrieve the records to process */
-    snprintf(sqlbuf, sizeof(sqlbuf),
-        "SELECT pfile_pk, pfile_sha1 || '.' || pfile_md5 || '.' || pfile_size AS pfilename \
-         FROM (SELECT distinct(pfile_fk) AS PF FROM uploadtree WHERE upload_fk='%d' and (ufile_mode&x'3C000000'::int)=0) as SS \
-              left outer join license_file on (PF=pfile_fk and agent_fk='%d') inner join pfile on PF=pfile_pk\
-         WHERE fl_pk IS null or agent_fk <>'%d'",
-        upload_pk, gl.agentPk, gl.agentPk);
-    result = PQexec(gl.pgConn, sqlbuf);
-    if (fo_checkPQresult(gl.pgConn, result, sqlbuf, __FILE__, __LINE__))
+
+    result = getSelectedPFiles(gl.pgConn, upload_pk, gl.agentPk, ignoreFilesWithMimeType);
+    if (fo_checkPQresult(gl.pgConn, result, NULL, __FILE__, __LINE__))
       Bail(-__LINE__);
     numrows = PQntuples(result);
     /* process all files in this upload */
@@ -288,6 +277,7 @@ int main(int argc, char **argv)
   cacheroot_t cacheroot;
   char *scanning_directory= NULL;
   int process_count = 0;
+  bool ignoreFilesWithMimeType = false;
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &(gl.pgConn));
@@ -354,7 +344,7 @@ int main(int argc, char **argv)
   }
 
   /* Process command line options */
-  while ((c = getopt(argc, argv, "VJSNvhilc:d:n:")) != -1)
+  while ((c = getopt(argc, argv, "VJSNvhiIlc:d:n:")) != -1)
   {
     switch (c) {
       case 'c': break; /* handled by fo_scheduler_connect() */
@@ -367,15 +357,15 @@ int main(int argc, char **argv)
         break;
       case 'v':
         Verbose++; break;
-    case 'J':
-      gl.progOpts |= OPTS_JSON_OUTPUT;
-      break;
-    case 'S':
-      gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
-      break;
-    case 'N':
-      gl.progOpts |= OPTS_NO_HIGHLIGHTINFO;
-      break;
+      case 'J':
+        gl.progOpts |= OPTS_JSON_OUTPUT;
+        break;
+      case 'S':
+        gl.progOpts |= OPTS_HIGHLIGHT_STDOUT;
+        break;
+      case 'N':
+        gl.progOpts |= OPTS_NO_HIGHLIGHTINFO;
+        break;
       case 'V':
         printf("%s", BuildVersion);
         Bail(0);
@@ -394,6 +384,9 @@ int main(int argc, char **argv)
         break;
       case 'n': /* spawn mutiple processes to scan */
         process_count = atoi(optarg);
+        break;
+      case 'I':
+        ignoreFilesWithMimeType = true;
         break;
       case 'h':
       default:
@@ -415,7 +408,7 @@ int main(int argc, char **argv)
 
   if (file_count == 0 && !scanning_directory)
   {
-    arsNomos(&cacheroot);
+    arsNomos(&cacheroot, ignoreFilesWithMimeType);
   }
   else
   { /******** Files on the command line ********/

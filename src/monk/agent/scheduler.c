@@ -32,7 +32,7 @@ MatchCallbacks schedulerCallbacks =
   };
 
 int processUploadId(MonkState* state, int uploadId, const Licenses* licenses) {
-  PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId);
+  PGresult* fileIdResult = queryFileIdsForUpload(state->dbManager, uploadId, state->ignoreFilesWithMimeType);
 
   if (!fileIdResult)
     return 0;

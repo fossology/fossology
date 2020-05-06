@@ -311,36 +311,48 @@ bool CopyrightDatabaseHandler::createTableClearing() const
  * \brief Get the list of pfile ids on which the given agent has no findings for a given upload
  * \param agentId  Agent id to be removed from result
  * \param uploadId Upload id to scan for files
+ * \param ignoreFilesWithMimeType to exclude filetypes with particular mimetype
  * \return List of pfiles on which the given agent has no findings
  */
-std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId)
+std::vector<unsigned long> CopyrightDatabaseHandler::queryFileIdsForUpload(int agentId, int uploadId, bool ignoreFilesWithMimeType)
 {
   std::string uploadTreeTableName = queryUploadTreeTableName(uploadId);
-
-  fo_dbManager_PreparedStatement* preparedStatement =
-      fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
-          ("queryFileIdsForUpload:" IDENTITY "Agent" + uploadTreeTableName).c_str(),
-          ("SELECT pfile_pk"
-            " FROM ("
-            "  SELECT distinct(pfile_fk) AS PF"
-            "  FROM " + uploadTreeTableName +
-            "  WHERE upload_fk = $1 and (ufile_mode&x'3C000000'::int)=0"
-            " ) AS SS "
-          "LEFT OUTER JOIN " IDENTITY " ON (PF = pfile_fk AND agent_fk = $2) "
+  fo_dbManager_PreparedStatement* preparedStatement;
+  std::string sql = "SELECT pfile_pk"
+    " FROM ("
+    "  SELECT distinct(pfile_fk) AS PF"
+    "  FROM " + uploadTreeTableName +
+    "  WHERE upload_fk = $1 and (ufile_mode&x'3C000000'::int)=0"
+    " ) AS SS "
+    "LEFT OUTER JOIN " IDENTITY " ON (PF = pfile_fk AND agent_fk = $2) "
 #ifdef IDENTITY_COPYRIGHT
-          "LEFT OUTER JOIN author AS au ON (PF = au.pfile_fk AND au.agent_fk = $2) "
+    "LEFT OUTER JOIN author AS au ON (PF = au.pfile_fk AND au.agent_fk = $2) "
 #endif
-          "INNER JOIN pfile ON (PF = pfile_pk) "
+    "INNER JOIN pfile ON (PF = pfile_pk) "
 #ifdef IDENTITY_COPYRIGHT
-          "WHERE copyright.copyright_pk IS NULL AND au.author_pk IS NULL;").c_str(),
+    "WHERE copyright.copyright_pk IS NULL AND au.author_pk IS NULL"
 #else
-          "WHERE " IDENTITY "_pk IS NULL OR agent_fk <> $2;").c_str(),
+    "WHERE (" IDENTITY "_pk IS NULL OR agent_fk <> $2)"
 #endif
-          int, int);
+    ;
+  std::string statementName = "queryFileIdsForUpload:" IDENTITY "Agent" + uploadTreeTableName;
+  if (ignoreFilesWithMimeType)
+  {
+    sql = sql + " AND (pfile_mimetypefk NOT IN ( "
+      "SELECT mimetype_pk FROM mimetype WHERE mimetype_name=ANY(string_to_array(( "
+      "SELECT conf_value FROM sysconfig WHERE variablename='SkipFiles'),','))));";
+    statementName = statementName + "withMimetype";
+  }
+  preparedStatement =
+    fo_dbManager_PrepareStamement(dbManager.getStruct_dbManager(),
+      statementName.c_str(),
+      sql.c_str(),
+      int, int);
   QueryResult queryResult = dbManager.execPrepared(preparedStatement,
       uploadId, agentId);
 
   return queryResult.getSimpleResults<unsigned long>(0, fo::stringToUnsignedLong);
+
 }
 
 /**

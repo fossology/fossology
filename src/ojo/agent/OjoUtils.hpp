@@ -45,7 +45,7 @@ int writeARS(const OjoState &state, int arsId, int uploadId, int success,
   fo::DbManager &dbManager);
 void bail(int exitval);
 bool processUploadId(const OjoState &state, int uploadId,
-  OjosDatabaseHandler &databaseHandler);
+  OjosDatabaseHandler &databaseHandler, bool ignoreFilesWithMimeType);
 bool storeResultInDb(const vector<ojomatch> &matches,
   OjosDatabaseHandler &databaseHandle, const int agent_fk,
   const int pfile_fk);

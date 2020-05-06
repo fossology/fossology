@@ -59,7 +59,7 @@ std::vector<CopyrightMatch> matchStringToRegexes(const std::string& content, std
 */
 void normalizeContent(std::string& content);
 
-bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& handler);
+bool processUploadId(const CopyrightState& state, int agentId, int uploadId, CopyrightDatabaseHandler& handler, bool ignoreFilesWithMimeType);
 
 std::pair<std::string, std::list<match>> processSingleFile(const CopyrightState& state,
   const std::string fileName);

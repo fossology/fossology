@@ -96,12 +96,13 @@ char* fo::AgentDatabaseHandler::getPFileNameForFileId(unsigned long pfileId) con
 /**
  * \brief Get pfile ids for a given upload id
  * \param uploadId Upload id to fetch from
+ * \param ignoreFilesWithMimeType ignore files with particular mimetype
  * \return Vector of pfile ids in given upload id
  * \sa queryFileIdsForUpload()
  */
-std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload(int uploadId) const
+std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload(int uploadId, bool ignoreFilesWithMimeType) const
 {
-  QueryResult queryResult(queryFileIdsForUpload(dbManager.getStruct_dbManager(), uploadId));
+  QueryResult queryResult(queryFileIdsForUpload(dbManager.getStruct_dbManager(), uploadId, ignoreFilesWithMimeType));
   return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
 }
 
