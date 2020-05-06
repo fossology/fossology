@@ -532,6 +532,7 @@
   $Schema["TABLE"]["keyword"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
   $Schema["TABLE"]["keyword"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
+
   $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["DESC"] = "";
   $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"keyword_decision_pk\" int8 DEFAULT nextval('keyword_decision_pk_seq'::regclass)";
   $Schema["TABLE"]["keyword_decision"]["keyword_decision_pk"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"keyword_decision_pk\" SET NOT NULL, ALTER COLUMN \"keyword_decision_pk\" SET DEFAULT nextval('keyword_decision_pk_seq'::regclass)";
@@ -567,6 +568,8 @@
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"keyword_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ADD"] = "ALTER TABLE \"file_picker\" ADD COLUMN \"file_picker_pk\" int4 DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass)";
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["ALTER"] = "ALTER TABLE \"file_picker\" ALTER COLUMN \"file_picker_pk\" SET NOT NULL, ALTER COLUMN \"file_picker_pk\" SET DEFAULT nextval('file_picker_file_picker_pk_seq'::regclass)";
@@ -1048,6 +1051,7 @@
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ADD"] = "ALTER TABLE \"mimetype\" ADD COLUMN \"mimetype_name\" text";
   $Schema["TABLE"]["mimetype"]["mimetype_name"]["ALTER"] = "ALTER TABLE \"mimetype\" ALTER COLUMN \"mimetype_name\" SET NOT NULL";
 
+
   $Schema["TABLE"]["obligation_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"om_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["obligation_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
   $Schema["TABLE"]["obligation_map"]["om_pk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"om_pk\" SET NOT NULL, ALTER COLUMN \"om_pk\" SET DEFAULT nextval('obligation_map_om_pk_seq'::regclass)";
@@ -1059,6 +1063,7 @@
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"obligation_map\".\"rf_fk\" IS 'Reference license key as in rf_license'";
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_map\" ADD COLUMN \"rf_fk\" int8";
   $Schema["TABLE"]["obligation_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
+
 
   $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_candidate_map\".\"om_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["obligation_candidate_map"]["om_pk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"om_pk\" int8 DEFAULT nextval('obligation_candidate_map_om_pk_seq'::regclass)";
@@ -1072,6 +1077,7 @@
   $Schema["TABLE"]["obligation_candidate_map"]["rf_fk"]["ADD"] = "ALTER TABLE \"obligation_candidate_map\" ADD COLUMN \"rf_fk\" int8";
   $Schema["TABLE"]["obligation_candidate_map"]["rf_fk"]["ALTER"] = "ALTER TABLE \"obligation_candidate_map\" ALTER COLUMN \"rf_fk\" SET NOT NULL";
 
+
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_pk\" int8 DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
   $Schema["TABLE"]["obligation_ref"]["ob_pk"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_pk\" SET NOT NULL, ALTER COLUMN \"ob_pk\" SET DEFAULT nextval('obligation_ref_ob_pk_seq'::regclass)";
@@ -1080,7 +1086,7 @@
   $Schema["TABLE"]["obligation_ref"]["ob_type"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_type\" text DEFAULT 'Obligation'::text";
   $Schema["TABLE"]["obligation_ref"]["ob_type"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_type\" SET NOT NULL, ALTER COLUMN \"ob_type\" SET DEFAULT 'Obligation'::text";
 
-    $Schema["TABLE"]["obligation_ref"]["ob_topic"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_topic\" IS 'An arbitrary name for the obligation: include notices, copyleft effect, ...'";
+  $Schema["TABLE"]["obligation_ref"]["ob_topic"]["DESC"] = "COMMENT ON COLUMN \"obligation_ref\".\"ob_topic\" IS 'An arbitrary name for the obligation: include notices, copyleft effect, ...'";
   $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ADD"] = "ALTER TABLE \"obligation_ref\" ADD COLUMN \"ob_topic\" text";
   $Schema["TABLE"]["obligation_ref"]["ob_topic"]["ALTER"] = "ALTER TABLE \"obligation_ref\" ALTER COLUMN \"ob_topic\" SET NOT NULL";
 

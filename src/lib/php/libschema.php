@@ -551,22 +551,15 @@ class fo_libschema
   {
     $referencedSequencesInTableColumns = array();
 
-    $sql = "SELECT class.relname AS table,
-        attr.attnum AS ordinal,
-        attr.attname AS column_name,
-        type.typname AS type,
-        attr.atttypmod-4 AS modifier,
-        attr.attnotnull AS notnull,
-        attrdef.adsrc AS default,
-        col_description(attr.attrelid, attr.attnum) AS description
-      FROM pg_class AS class
-      INNER JOIN pg_attribute AS attr ON attr.attrelid = class.oid AND attr.attnum > 0
-      INNER JOIN pg_type AS type ON attr.atttypid = type.oid
-      INNER JOIN information_schema.tables AS tab ON class.relname = tab.table_name
-        AND tab.table_type = 'BASE TABLE'
-        AND tab.table_schema = 'public'
-      LEFT OUTER JOIN pg_attrdef AS attrdef ON adrelid = attrelid AND adnum = attnum
-      ORDER BY class.relname,attr.attnum";
+    $sql = "SELECT
+    table_name AS table, ordinal_position AS ordinal, column_name,
+    udt_name AS type, character_maximum_length AS modifier,
+    CASE is_nullable WHEN 'YES' THEN false WHEN 'NO' THEN true END AS notnull,
+    column_default AS default,
+    col_description(table_name::regclass, ordinal_position) AS description
+  FROM information_schema.columns
+  WHERE table_schema = 'public'
+  ORDER BY table_name, ordinal_position;";
     $stmt = __METHOD__;
     $this->dbman->prepare($stmt, $sql);
     $result = $this->dbman->execute($stmt);
