@@ -476,13 +476,13 @@ class UploadDao
 
   /**
    * @param int $uploadId
-   * @return array with keys sha1, md5
+   * @return array with keys sha1, md5, sha256
    */
   public function getUploadHashes($uploadId)
   {
     $pfile = $this->dbManager->getSingleRow('SELECT pfile.* FROM upload, pfile WHERE upload_pk=$1 AND pfile_fk=pfile_pk',
         array($uploadId), __METHOD__);
-    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
 
   /**
