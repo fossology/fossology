@@ -173,6 +173,7 @@ class UploadHelper
     $vcsName = $vcsData["vcsName"];
     $vcsUsername = $vcsData["vcsUsername"];
     $vcsPasswd = $vcsData["vcsPassword"];
+    $vcsBranch = $vcsData["vcsBranch"];
 
     $symfonySession = $GLOBALS['container']->get('session');
     $symfonySession->set($this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
@@ -193,6 +194,7 @@ class UploadHelper
     $symfonyRequest->request->set('vcstype', $vcsType);
     $symfonyRequest->request->set('username', $vcsUsername);
     $symfonyRequest->request->set('passwd', $vcsPasswd);
+    $symfonyRequest->request->set('branch', $vcsBranch);
     $symfonyRequest->request->set('scm', $ignoreScm);
 
     return $this->uploadVcsPage->handleRequest($symfonyRequest);
@@ -242,6 +244,9 @@ class UploadHelper
     }
     if (! array_key_exists("vcsPassword", $vcsData)) {
       $vcsData["vcsPassword"] = "";
+    }
+    if (! array_key_exists("vcsBranch", $vcsData)) {
+      $vcsData["vcsBranch"] = "";
     }
     $vcsData["vcsType"] = $vcsType;
     if ($code !== 0) {
