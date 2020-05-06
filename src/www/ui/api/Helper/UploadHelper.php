@@ -29,7 +29,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Models\UploadSummary;
-use Fossology\UI\Page\BrowseLicense;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Dao\AgentDao;
@@ -289,7 +288,7 @@ class UploadHelper
 
     $mainLicenses = $this->getMainLicenses($dbManager, $uploadId, $groupId);
 
-    $uiLicense = new BrowseLicense();
+    $uiLicense = $restHelper->getPlugin("license");
     $hist = $uiLicense->getUploadHist($itemTreeBounds);
 
     $summary = new UploadSummary();
