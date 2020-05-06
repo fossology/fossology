@@ -372,4 +372,21 @@ class ShowJobsDao
       return array();
     }
   }
+
+  /**
+   * Get the status of all pending or running jobs.
+   * @return array Containing job name, number of jobs pending and running
+   */
+  public function getJobsForAll()
+  {
+    $sql = "SELECT jq_type AS job, jq_job_fk, job_upload_fk AS upload_fk, " .
+      "CASE WHEN (jq_endtext IS NULL AND jq_end_bits = 0) THEN 'pending' " .
+      "WHEN (jq_endtext = ANY('{Started,Restarted,Paused}')) THEN 'running' " .
+      "ELSE '' END AS status " .
+      "FROM jobqueue INNER JOIN job " .
+      "ON jq_job_fk = job_pk " .
+      "WHERE jq_endtime IS NULL;";
+    $statement = __METHOD__ . ".getAllUnFinishedJobs";
+    return $this->dbManager->getRows($sql, [], $statement);
+  }
 }
