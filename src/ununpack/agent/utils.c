@@ -18,10 +18,10 @@
  * \file
  * \brief Contains all utility functions used by FOSSology
  */
+
 #include "ununpack.h"
 #include "externs.h"
 #include "regex.h"
-#include "sha2.h"
 
 /**
  * \brief File mode BITS
@@ -1456,33 +1456,6 @@ int	AddToRepository	(ContainerInfo *CI, char *Fuid, int Mask)
   if (ForceDuplicate) IsUnique=1;
   return(IsUnique);
 } /* AddToRepository() */
-
-int calc_sha256sum(char*filename, char* dst) {
-    sha256_ctx ctx;
-    unsigned char buf[32];
-    unsigned char digest[32];
-    memset(digest, '\0', sizeof(digest));
-    FILE *f;
-    if(!(f=fopen(filename, "rb")))
-    {
-        LOG_FATAL("Failed to open file '%s'\n", filename);
-        return(1);
-    }
-    sha256_init(&ctx);
-
-    int i=0;
-    while((i=fread(buf, 1, sizeof(buf), f)) > 0) {
-        sha256_update(&ctx, buf, i);
-    }
-    sha256_final(&ctx, digest);
-    fclose(f);
-
-    for (i=0; i<32; i++) {
-        snprintf(dst+i*2, 3, "%02X", digest[i]);
-    }
-
-    return 0;
-}
 
 /**
  * @brief Print what can be printed in XML.

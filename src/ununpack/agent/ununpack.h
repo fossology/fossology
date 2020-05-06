@@ -45,8 +45,6 @@
 
 #include "libfossology.h"
 #include "checksum.h"
-#include "md5.h"
-#include "sha1.h"
 #include "ununpack-ar.h"
 #include "ununpack-disk.h"
 #include "ununpack-iso.h"

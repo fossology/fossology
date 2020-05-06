@@ -49,6 +49,7 @@ addons:
       - unrar-free
       - upx-ucl
       - libicu-dev
+      - libgcrypt20-dev
 
 services: postgresql
 

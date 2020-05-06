@@ -20,15 +20,16 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic $(shell libgcrypt-config --libs)
+CFLAGS_LOCAL = $(FO_CFLAGS) $(shell libgcrypt-config --cflags)
 EXE = departition ununpack
 
-CHKHDR = checksum.h md5.h sha1.h sha2.h
+CHKHDR = checksum.h
 CHKSRC = $(CHKHDR:%.h=%.c) traverse.c utils.c
 UUHDR = ununpack.h ununpack-iso.h ununpack-disk.h ununpack-ar.h $(CHKHDR) ununpack_globals.h
 UUSRC = $(UUHDR:%.h=%.c)
 
-OBJECTS = checksum.o md5.o traverse.o ununpack-iso.o sha1.o sha2.o ununpack-ar.o ununpack-disk.o utils.o
+OBJECTS = checksum.o traverse.o ununpack-iso.o ununpack-ar.o ununpack-disk.o utils.o
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
 
 all: $(FOLIB) $(EXE)
@@ -63,10 +64,10 @@ uninstall: $(VARS)
 	rm -rf $(DESTDIR)$(MODDIR)/ununpack/agent
 
 $(OBJECTS): %.o: %.c $(UUHDR)
-	$(CC) -c $< $(FO_CFLAGS)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(FO_CFLAGS) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libununpack.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)

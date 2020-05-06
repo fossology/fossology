@@ -21,16 +21,19 @@ DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
 EXE = wget_agent
-CHKHDR = ../../ununpack/agent/checksum.h ../../ununpack/agent/md5.h ../../ununpack/agent/sha1.h
+CHKHDR = ../../ununpack/agent/checksum.h
 CHKSRC = $(CHKHDR:%.h=%.c)
 OBJECTS = wget_agent.o
 HDIR = $(OBJS:.o=.h)
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) $(shell libgcrypt-config --libs)
+CFLAGS_LOCAL = $(FO_CFLAGS) $(shell libgcrypt-config --cflags)
 
 all: $(EXE)
 
 $(EXE): main.c $(FOLIB) libwget_agent.a $(CHKHDR) $(CHKSRC) $(DB) $(REPO) $(VARS)
-	$(CC) main.c libwget_agent.a $(FO_LDFLAGS) $(CHKSRC) $(FO_CFLAGS) $(DEFS) -o $@
+	$(CC) main.c libwget_agent.a $(CHKSRC) $(CFLAGS_LOCAL) $(DEFS) \
+      $(LDFLAGS_LOCAL) -o $@
 
 install: all
 	$(INSTALL_PROGRAM) $(EXE) $(DESTDIR)$(MODDIR)/$(EXE)/agent/$(EXE)
@@ -39,10 +42,10 @@ uninstall:
 	rm -rf $(DESTDIR)$(MODDIR)/$(EXE)/agent
 
 $(OBJECTS): %.o: %.c
-	$(CC) -c $< $(FO_CFLAGS)
+	$(CC) -c $< $(CFLAGS_LOCAL)
 
 $(COVERAGE): %_cov.o: %.c
-	$(CC) -c $< $(FO_CFLAGS) $(FLAG_COV) -o $@
+	$(CC) -c $< $(CFLAGS_LOCAL) $(FLAG_COV) -o $@
 
 libwget_agent.a: $(OBJECTS)
 	ar cvr $@ $(OBJECTS)
