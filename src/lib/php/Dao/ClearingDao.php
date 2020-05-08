@@ -333,6 +333,10 @@ class ClearingDao
    */
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
+    if ( ($scope == DecisionScopes::REPO) &&
+         !empty($this->getCandidateCountForItemId($uploadTreeId))) {
+      throw new \Exception( _("Cannot add candidate license as global decision\n") );
+    }
     $this->dbManager->begin();
 
     $this->removeWipClearingDecision($uploadTreeId, $groupId);
@@ -1021,5 +1025,25 @@ SELECT count(*) AS cnt
 FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
     $foundCounter = $this->dbManager->getSingleRow($sql, $params, $statement);
     return $foundCounter['cnt'];
+  }
+
+  /**
+   * @param uploadTreeId
+   * @return count
+   */
+  public function getCandidateCountForItemId($uploadTreeId)
+  {
+    $sql = "WITH latestEvents AS (
+      SELECT rf_fk, date_added, removed FROM (
+        SELECT rf_fk, date_added, removed, row_number()
+          OVER (PARTITION BY rf_fk ORDER BY date_added DESC) AS ROWNUM
+        FROM clearing_event WHERE uploadtree_fk=$1) SORTABLE 
+          WHERE ROWNUM = 1 ORDER BY rf_fk) 
+      SELECT count(*) FROM license_candidate WHERE license_candidate.rf_pk IN
+        (SELECT rf_fk FROM latestEvents WHERE removed=false);";
+    $countCandidate = $this->dbManager->getSingleRow($sql,
+                 array($uploadTreeId), $sqlLog = __METHOD__);
+
+    return $countCandidate['count'];
   }
 }
