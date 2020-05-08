@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2017, Siemens AG
+Copyright (C) 2014-2017,2020, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -134,5 +134,39 @@ class ClearingDecisionFilter
     }
 
     return false;
+  }
+
+  /**
+   * @brief Get clearing decision as map of `<item-id> => <license-shortnames>`
+   * for copyright list
+   *
+   * Irrelevant decisions and removed licenses are marked as `"Void"`.
+   * @param ClearingDecision[] $clearingDecisions Clearing decisions to be
+   * filtered.
+   * @return ClearingDecision[]
+   */
+  public function filterCurrentClearingDecisionsForCopyrightList($clearingDecisions)
+  {
+    $clearingDecisionsForCopyList = array();
+
+    foreach ($clearingDecisions as $clearingDecision) {
+      $itemId = $clearingDecision->getUploadTreeId();
+      $clearingDecisionsForCopyList[$itemId] = array();
+      if ($clearingDecision->getType() == DecisionTypes::IRRELEVANT) {
+        $clearingDecisionsForCopyList[$itemId][] = "Void";
+        continue;
+      }
+
+      foreach ($clearingDecision->getClearingLicenses() as $clearingLicense) {
+        if ($clearingLicense->isRemoved()) {
+          continue;
+        }
+        $clearingDecisionsForCopyList[$itemId][] = $clearingLicense->getShortName();
+      }
+      if (empty($clearingDecisionsForCopyList[$itemId])) {
+        $clearingDecisionsForCopyList[$itemId][] = "Void";
+      }
+    }
+    return $clearingDecisionsForCopyList;
   }
 }
