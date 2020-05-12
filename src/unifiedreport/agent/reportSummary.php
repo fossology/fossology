@@ -118,7 +118,7 @@ class ReportSummary
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowSpan)->addText(htmlspecialchars(" Clearing Information"), $firstRowStyle, "pStyle");
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Department"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" FOSSology Generation"), null, "pStyle");
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_department']), null, "pStyle");
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);

@@ -44,6 +44,14 @@
         </tr>
         <tr>
           <td align="left">
+            {{ "Department"|trans }}
+          </td>
+          <td align="left">
+            <input type="text" name="department" style="width:98%" value="{{ department|e }}" />
+          </td>
+        </tr>
+        <tr>
+          <td align="left">
             {{ "Report release date"|trans }}
           </td>
           <td align="left">
@@ -103,8 +111,8 @@
             {{ "Source / binary integration notes"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}<br />
-            <input type="checkbox" name="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}
+            <label><input type="checkbox" name="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
+            <label><input type="checkbox" name="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
           </td>
         </tr>
         <tr>
@@ -112,9 +120,9 @@
             {{ "Dependency notes"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}<br />
-            <input type="checkbox" name="dependencySource" {{ dependencySource }} />{{ "dependencies found in source code (see obligations)"|trans }}<br />
-            <input type="checkbox" name="dependencyBinary" {{ dependencyBinary }} />{{ "dependencies found in binaries (see obligations)"|trans }}
+            <label><input type="checkbox" name="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}</label><br />
+            <label><input type="checkbox" name="dependencySource" {{ dependencySource }} />{{ "dependencies found in source code (see obligations)"|trans }}</label><br />
+            <label><input type="checkbox" name="dependencyBinary" {{ dependencyBinary }} />{{ "dependencies found in binaries (see obligations)"|trans }}</label>
           </td>
         </tr>
         <tr>
@@ -122,8 +130,8 @@
             {{ "Export restrictions by copyright owner"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}<br />
-            <input type="checkbox" name="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}
+            <label><input type="checkbox" name="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}</label><br />
+            <label><input type="checkbox" name="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}</label>
           </td>
         </tr>
         <tr>
@@ -131,8 +139,8 @@
             {{ "Restrictions for use by copyright owner \n<br/> (e.g. not for Nuclear Power)"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}<br />
-            <input type="checkbox" name="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}
+            <label><input type="checkbox" name="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}</label><br />
+            <label><input type="checkbox" name="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}</label>
           </td>
         </tr>
         <tr>

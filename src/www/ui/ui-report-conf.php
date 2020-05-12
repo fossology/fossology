@@ -55,6 +55,7 @@ class ui_report_conf extends FO_Plugin
    */
   private $mapDBColumns = array(
     "reviewedBy" => "ri_reviewed",
+    "department" => "ri_department",
     "reportRel" => "ri_report_rel",
     "community" => "ri_community",
     "component" => "ri_component",
@@ -281,14 +282,21 @@ class ui_report_conf extends FO_Plugin
         $i++;
       }
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListUR);
+      $checkBoxUrPos = count($parms);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
+      $checkBoxSpdxPos = count($parms);
       $parms[] = json_encode($obLicenses);
+      $excludeObligationPos = count($parms);
       $parms[] = $uploadId;
+      $uploadIdPos = count($parms);
 
       $SQL = "UPDATE report_info SET $columns" .
-               "ri_ga_checkbox_selection = $12, ri_spdx_selection = $13, ri_excluded_obligations = $14" .
-             "WHERE upload_fk = $15;";
-      $this->dbManager->getSingleRow($SQL, $parms, __METHOD__ . "updateReportInfoData");
+               "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
+               "ri_spdx_selection = $$checkBoxSpdxPos, " .
+               "ri_excluded_obligations = $$excludeObligationPos" .
+               "WHERE upload_fk = $$uploadIdPos;";
+      $this->dbManager->getSingleRow($SQL, $parms,
+        __METHOD__ . "updateReportInfoData");
     }
     $this->vars += $this->allReportConfiguration($uploadId, $groupId);
   }
