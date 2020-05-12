@@ -224,13 +224,20 @@ class UploadController extends RestController
       $public = $request->getHeaderLine('public');
       $public = empty($public) ? 'protected' : $public;
       $ignoreScm = $request->getHeaderLine('ignoreScm');
-      list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
-        $request, $folderId, $description, $public, $ignoreScm);
+      $uploadType = $request->getHeaderLine('uploadType');
+      if (empty($uploadType)) {
+        $uploadType = "vcs";
+      }
+      $uploadResponse = $uploadHelper->createNewUpload($request, $folderId,
+        $description, $public, $ignoreScm, $uploadType);
+      $status = $uploadResponse[0];
+      $message = $uploadResponse[1];
+      $statusDescription = $uploadResponse[2];
       if (! $status) {
-        $info = new Info($uploadId != -1 ? $uploadId : 500,
-          $message . "\n" . $statusDescription,
+        $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
       } else {
+        $uploadId = $uploadResponse[3];
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }
       return $response->withJson($info->getArray(), $info->getCode());
