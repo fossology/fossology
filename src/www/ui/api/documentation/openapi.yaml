@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.14
+  version: 1.0.15
   contact:
     email: fossology@fossology.org
   license:
@@ -963,6 +963,9 @@ components:
         filesize:
           type: integer
           description: Filesize in Bytes.
+        filesha1:
+          type: string
+          description: SHA1 digest of the file
     UploadSummary:
       type: object
       properties:

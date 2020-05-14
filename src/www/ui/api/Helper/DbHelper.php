@@ -82,7 +82,7 @@ class DbHelper
     if ($uploadId == null) {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size
+folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1
 FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
@@ -94,7 +94,7 @@ ORDER BY upload.upload_pk;";
     } else {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size
+folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1
 FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
@@ -110,7 +110,7 @@ ORDER BY upload.upload_pk;";
     foreach ($result as $row) {
       $upload = new Upload($row["folder_pk"], $row["folder_name"],
         $row["upload_pk"], $row["upload_desc"], $row["upload_filename"],
-        $row["upload_ts"], $row["pfile_size"]);
+        $row["upload_ts"], $row["pfile_size"], $row["pfile_sha1"]);
       array_push($uploads, $upload->getArray());
     }
     return $uploads;
