@@ -41,7 +41,7 @@ class OjosAgentPlugin extends AgentPlugin
    */
   public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
   {
-    $unpackArgs = intval($_POST['scm']) == 1 ? '-I' : '';
+    $unpackArgs = intval(@$_POST['scm']) == 1 ? '-I' : '';
     if ($this->AgentHasResults($uploadId) == 1) {
       return 0;
     }
