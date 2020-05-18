@@ -1,5 +1,24 @@
 # Changelog of FOSSology
 
+### 3.8.1 (May 18th 2020)
+
+This release is a quick hot-fix on
+[3.8.0](https://github.com/fossology/fossology/releases/3.8.0) release.
+
+The bug fix is for Browse page load issue, solved and reported in pull request
+[PR#1714](https://github.com/fossology/fossology/pull/1714).
+
+#### Credits to contributors for 3.8.1
+
+From the git commit history, we have following contributors since
+[3.8.0](https://github.com/fossology/fossology/releases/3.8.0):
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+```
+
+#### Corrections
+* `85c6697fc` fix(upload): Fix the check for expire_action
+
 ### 3.8.0 (April 23rd 2020)
 
 This release adds important corrections to
