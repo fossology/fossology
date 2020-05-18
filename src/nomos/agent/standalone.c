@@ -30,6 +30,9 @@ void fo_dbManager_free(fo_dbManager* dbManager) {}
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes) {return NULL;}
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...) {return NULL;}
 
+PGresult* getSelectedPFiles(PGconn* pgConn, int uploadPk, int agentPk, bool ignoreFilesWithMimeType) {return NULL;}
+PGresult* checkDuplicateReq(PGconn* pgConn, int uploadPk, int agentPk) {return NULL;}
+
 //ExecStatusType PQresultStatus(const PGresult *res);
 int PQresultStatus(const PGresult *res){ return(PGRES_COMMAND_OK);}
 char *PQresultErrorMessage(const PGresult *res){return(0);}
