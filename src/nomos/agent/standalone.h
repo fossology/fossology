@@ -1,6 +1,7 @@
 #ifndef _STANDALONE_H
 #define _STANDALONE_H 1
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef int PGconn;
 typedef enum
@@ -88,6 +89,10 @@ fo_dbManager* fo_dbManager_new(PGconn* dbConnection);
 void fo_dbManager_free(fo_dbManager* dbManager);
 fo_dbManager_PreparedStatement* fo_dbManager_PrepareStamement_str(fo_dbManager* dbManager, const char* name, const char* query, const char* paramtypes);
 PGresult* fo_dbManager_ExecPrepared(fo_dbManager_PreparedStatement* preparedStatement, ...);
+
+PGresult* getSelectedPFiles(PGconn* pgConn, int uploadPk, int agentPk, bool ignoreFilesWithMimeType);
+PGresult* checkDuplicateReq(PGconn* pgConn, int upload_pk, int agentPk);
+
 
 //ExecStatusType PQresultStatus(const PGresult *res);
 extern int PQresultStatus(const PGresult *res);
