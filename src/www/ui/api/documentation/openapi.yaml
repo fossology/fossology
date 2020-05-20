@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.15
+  version: 1.0.16
   contact:
     email: fossology@fossology.org
   license:
@@ -244,7 +244,7 @@ paths:
       tags:
         - Upload
       summary: Uploads
-      description: |
+      description: >
         The uploads endpoint returns all uploads
       responses:
         '200':
@@ -261,13 +261,16 @@ paths:
       tags:
         - Upload
       summary: Post new upload to FOSSology
-      description: |
+      description: >
         Endpoint to create a new upload in FOSSology
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VcsUpload'
+              oneOf:
+                - $ref: '#/components/schemas/VcsUpload'
+                - $ref: '#/components/schemas/UrlUpload'
+                - $ref: '#/components/schemas/ServerUpload'
           multipart/form-data:
             schema:
               type: object
@@ -300,7 +303,8 @@ paths:
               - public
             default: protected
         - name: ignoreScm
-          description: Ignore SCM files (Git, SVN, TFS)
+          description: >
+            Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
           in: header
           required: false
           schema:
@@ -313,6 +317,18 @@ paths:
           schema:
             type: string
             description: Group name, from last login if not provided    
+        - name: uploadType
+          description: >
+            Type of upload done. Required for VCS, URL and server uploads
+          in: header
+          required: false
+          schema:
+            type: string
+            enum:
+              - vcs
+              - url
+              - server
+            default: vcs
       responses:
         '201':
           description: Upload is created
@@ -1238,6 +1254,41 @@ components:
             example:
               - "MIT"
               - "No_license_found"
+    UrlUpload:
+      description: To create an upload from a URL
+      type: object
+      properties:
+        url:
+          description: URL for file/folder to be uploaded
+          type: string
+        name:
+          description: Viewable name for this file or directory
+          type: string
+        accept:
+          description: >
+            Comma-separated lists of file name suffixes or patterns to accpet
+          type: string
+        reject:
+          description: >
+            Comma-separated lists of file name suffixes or patterns to reject
+          type: string
+        maxRecursionDepth:
+          description: Maximum recursion depth for folders (0 for infinite)
+          type: integer
+      required:
+        - url
+    ServerUpload:
+      description: To create an upload from a server
+      type: object
+      properties:
+        path:
+          description: File path to be uploaded (reccursive, support *)
+          type: string
+        name:
+          description: Viewable name for this file or directory
+          type: string
+      required:
+        - path
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"

@@ -110,7 +110,7 @@ class UploadUrlPage extends UploadPageBase
     }
 
     $message = $this->postUploadAddJobs($request, $shortName, $uploadId, $jobId, true);
-    return array(true, $message, $description);
+    return array(true, $message, $description, $uploadId);
   }
 
   protected function handleView(Request $request, $vars)

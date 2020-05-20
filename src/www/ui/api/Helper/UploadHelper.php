@@ -28,6 +28,8 @@ namespace Fossology\UI\Api\Helper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
+use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadSrvPage;
 use Fossology\UI\Api\Models\UploadSummary;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -52,6 +54,18 @@ class UploadHelper
   private $uploadVcsPage;
 
   /**
+   * @var HelperToUploadUrlPage $uploadUrlPage
+   * Object to handle URL based uploads
+   */
+  private $uploadUrlPage;
+
+  /**
+   * @var HelperToUploadSrvPage $uploadSrvPage
+   * Object to handle server based uploads
+   */
+  private $uploadSrvPage;
+
+  /**
    * @var array VALID_VCS_TYPES
    * Array of valid inputs for vcsType parameter
    */
@@ -61,12 +75,24 @@ class UploadHelper
   );
 
   /**
+   * @var array VALID_UPLOAD_TYPES
+   * Array of valid inputs for uploadType parameter
+   */
+  const VALID_UPLOAD_TYPES = array(
+    "vcs",
+    "url",
+    "server"
+  );
+
+  /**
    * Constructor to get UploadFilePage and UploadVcsPage objects.
    */
   public function __construct()
   {
     $this->uploadFilePage = new HelperToUploadFilePage();
     $this->uploadVcsPage = new HelperToUploadVcsPage();
+    $this->uploadUrlPage = new HelperToUploadUrlPage();
+    $this->uploadSrvPage = new HelperToUploadSrvPage();
   }
 
   /**
@@ -74,19 +100,20 @@ class UploadHelper
    * processed by FOSSology
    *
    * @param ServerRequestInterface $request
-   * @param string $folderName Name of the folder to upload the file
+   * @param string $folderId ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
    * @param boolean $ignoreScm True if the SCM should be ignored.
+   * @param string $uploadType Type of upload (if other than file)
    * @return array Array with status, message and upload id
    * @see createVcsUpload()
    * @see createFileUpload()
    */
-  public function createNewUpload(ServerRequestInterface $request, $folderName,
-    $fileDescription, $isPublic, $ignoreScm)
+  public function createNewUpload(ServerRequestInterface $request, $folderId,
+    $fileDescription, $isPublic, $ignoreScm, $uploadType)
   {
     $uploadedFile = $request->getUploadedFiles();
-    $vcsData = $request->getParsedBody();
+    $body = $request->getParsedBody();
 
     if (! empty($ignoreScm) && ($ignoreScm == "true" || $ignoreScm)) {
       // If SCM should be ignored
@@ -96,18 +123,18 @@ class UploadHelper
     }
     if (empty($uploadedFile) ||
       ! isset($uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME])) {
-      if (empty($vcsData)) {
-        return array(false, "Missing input",
+      if (empty($uploadType)) {
+        return array(false, "Missing 'uploadType' header",
           "Send file with parameter " . $this->uploadFilePage::FILE_INPUT_NAME .
-          " or JSON with VCS parameters.",
+          " or define 'uploadType' header with appropriate body.",
           - 1
         );
       }
-      return $this->createVcsUpload($vcsData, $folderName, $fileDescription,
-        $isPublic, $ignoreScm);
+      return $this->handleUpload($body, $uploadType, $folderId,
+        $fileDescription, $isPublic, $ignoreScm);
     } else {
       $uploadedFile = $uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME];
-      return $this->createFileUpload($uploadedFile, $folderName,
+      return $this->createFileUpload($uploadedFile, $folderId,
         $fileDescription, $isPublic, $ignoreScm);
     }
   }
@@ -116,13 +143,13 @@ class UploadHelper
    * Create request required by UploadFilePage
    *
    * @param array $uploadedFile Uploaded file object by Slim
-   * @param string $folderName  Name of the folder to upload the file
+   * @param string $folderId    ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
-   * @param boolean $ignoreScm  True if the SCM should be ignored.
+   * @param integer $ignoreScm  1 if the SCM should be ignored.
    * @return array Array with status, message and upload id
    */
-  private function createFileUpload($uploadedFile, $folderName, $fileDescription,
+  private function createFileUpload($uploadedFile, $folderId, $fileDescription,
     $isPublic, $ignoreScm = 0)
   {
     $path = $uploadedFile->file;
@@ -137,7 +164,7 @@ class UploadHelper
       $this->uploadFilePage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
 
     $symfonyRequest->request->set($this->uploadFilePage::FOLDER_PARAMETER_NAME,
-      $folderName);
+      $folderId);
     $symfonyRequest->request->set($this->uploadFilePage::DESCRIPTION_INPUT_NAME,
       $fileDescription);
     $symfonyRequest->files->set($this->uploadFilePage::FILE_INPUT_NAME,
@@ -152,52 +179,56 @@ class UploadHelper
   }
 
   /**
-   * Create request required by UploadVcsPage
+   * Create request required by Upload pages
    *
-   * @param array $vcsData     Parsed VCS object from request
-   * @param string $folderName Name of the folder to upload the file
+   * @param array $body Parsed upload request
+   * @param string $uploadType Type of upload (url, vcs or server)
+   * @param string $folderId   ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
-   * @param boolean $ignoreScm True if the SCM should be ignored.
+   * @param integer $ignoreScm 1 if the SCM should be ignored.
    * @return array Array with status, message and upload id
    */
-  private function createVcsUpload($vcsData, $folderName, $fileDescription,
+  private function handleUpload($body, $uploadType, $folderId, $fileDescription,
     $isPublic, $ignoreScm = 0)
   {
-    $sanity = $this->sanitizeVcsData($vcsData);
+    $sanity = false;
+    switch ($uploadType) {
+      case "vcs":
+        $sanity = $this->sanitizeVcsData($body);
+        break;
+      case "url":
+        $sanity = $this->sanitizeUrlData($body);
+        break;
+      case "server":
+        $sanity = $this->sanitizeSrvData($body);
+        break;
+      default:
+        $message = "Invalid 'uploadType'";
+        $statusDescription = "uploadType should be any of (" .
+          implode(",", self::VALID_UPLOAD_TYPES) . ")";
+        $code = 400;
+        $sanity = array(false, $message, $statusDescription, $code);
+    }
     if ($sanity !== true) {
       return $sanity;
     }
-    $vcsType = $vcsData["vcsType"];
-    $vcsUrl = $vcsData["vcsUrl"];
-    $vcsName = $vcsData["vcsName"];
-    $vcsUsername = $vcsData["vcsUsername"];
-    $vcsPasswd = $vcsData["vcsPassword"];
-    $vcsBranch = $vcsData["vcsBranch"];
-
-    $symfonySession = $GLOBALS['container']->get('session');
-    $symfonySession->set($this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
-      "restUpload");
-
-    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
-    $symfonyRequest->setSession($symfonySession);
-
-    $symfonyRequest->request->set($this->uploadVcsPage::FOLDER_PARAMETER_NAME,
-      $folderName);
-    $symfonyRequest->request->set($this->uploadVcsPage::DESCRIPTION_INPUT_NAME,
-      $fileDescription);
-    $symfonyRequest->request->set($this->uploadVcsPage::GETURL_PARAM, $vcsUrl);
-    $symfonyRequest->request->set(
-      $this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
-    $symfonyRequest->request->set('public', $isPublic);
-    $symfonyRequest->request->set('name', $vcsName);
-    $symfonyRequest->request->set('vcstype', $vcsType);
-    $symfonyRequest->request->set('username', $vcsUsername);
-    $symfonyRequest->request->set('passwd', $vcsPasswd);
-    $symfonyRequest->request->set('branch', $vcsBranch);
-    $symfonyRequest->request->set('scm', $ignoreScm);
-
-    return $this->uploadVcsPage->handleRequest($symfonyRequest);
+    $uploadResponse = false;
+    switch ($uploadType) {
+      case "vcs":
+        $uploadResponse = $this->generateVcsUpload($body, $folderId,
+          $fileDescription, $isPublic, $ignoreScm);
+        break;
+      case "url":
+        $uploadResponse = $this->generateUrlUpload($body, $folderId,
+          $fileDescription, $isPublic, $ignoreScm);
+        break;
+      case "server":
+        $uploadResponse = $this->generateSrvUpload($body, $folderId,
+          $fileDescription, $isPublic, $ignoreScm);
+        break;
+    }
+    return $uploadResponse;
   }
 
   /**
@@ -254,6 +285,201 @@ class UploadHelper
     } else {
       return true;
     }
+  }
+
+  /**
+   * @brief Check if the passed URL object is correct or not.
+   *
+   * 1. Check if all the required parameters are passed by user.
+   * 2. Add missing keys with empty data to prevent warnings.
+   *
+   * @param array $urlData Parsed URL object to be sanitized
+   * @return array|boolean True if everything is correct, error array otherwise
+   */
+  private function sanitizeUrlData(&$urlData)
+  {
+    $message = "";
+    $statusDescription = "";
+    $code = 0;
+
+    if (! array_key_exists("url", $urlData)) {
+      $message = "Missing url";
+      $statusDescription = "Missing upload url from request";
+      $code = 400;
+    }
+
+    if (! array_key_exists("name", $urlData)) {
+      $urlData["name"] = "";
+    }
+    if (! array_key_exists("accept", $urlData)) {
+      $urlData["accept"] = "";
+    }
+    if (! array_key_exists("reject", $urlData)) {
+      $urlData["reject"] = "";
+    }
+    if (! array_key_exists("maxRecursionDepth", $urlData)) {
+      $urlData["maxRecursionDepth"] = "";
+    }
+    if ($code !== 0) {
+      return array(false, $message, $statusDescription, $code);
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * @brief Check if the passed server upload object is correct or not.
+   *
+   * 1. Check if all the required parameters are passed by user.
+   * 2. Add missing keys with empty data to prevent warnings.
+   *
+   * @param array $srvData Parsed server upload object to be sanitized
+   * @return array|boolean True if everything is correct, error array otherwise
+   */
+  private function sanitizeSrvData(&$srvData)
+  {
+    $message = "";
+    $statusDescription = "";
+    $code = 0;
+
+    if (! array_key_exists("path", $srvData)) {
+      $message = "Missing path";
+      $statusDescription = "Missing upload path from request";
+      $code = 400;
+    }
+
+    if (! array_key_exists("name", $srvData)) {
+      $srvData["name"] = "";
+    }
+    if ($code !== 0) {
+      return array(false, $message, $statusDescription, $code);
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * Generate the upload by calling handleRequest of HelperToUploadVcsPage
+   * @param array   $vcsData         Information from POST
+   * @param string  $folderId        ID of the folder
+   * @param string  $fileDescription Description of the upload
+   * @param string  $isPublic        Upload is `public, private or protected`
+   * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @return array Array with status, message and upload id
+   */
+  private function generateVcsUpload($vcsData, $folderId, $fileDescription,
+    $isPublic, $ignoreScm)
+  {
+    $vcsType = $vcsData["vcsType"];
+    $vcsUrl = $vcsData["vcsUrl"];
+    $vcsName = $vcsData["vcsName"];
+    $vcsUsername = $vcsData["vcsUsername"];
+    $vcsPasswd = $vcsData["vcsPassword"];
+    $vcsBranch = $vcsData["vcsBranch"];
+
+    $symfonySession = $GLOBALS['container']->get('session');
+    $symfonySession->set($this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
+      "restUpload");
+
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->setSession($symfonySession);
+
+    $symfonyRequest->request->set($this->uploadVcsPage::FOLDER_PARAMETER_NAME,
+      $folderId);
+    $symfonyRequest->request->set($this->uploadVcsPage::DESCRIPTION_INPUT_NAME,
+      $fileDescription);
+    $symfonyRequest->request->set($this->uploadVcsPage::GETURL_PARAM, $vcsUrl);
+    $symfonyRequest->request->set(
+      $this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
+    $symfonyRequest->request->set('public', $isPublic);
+    $symfonyRequest->request->set('name', $vcsName);
+    $symfonyRequest->request->set('vcstype', $vcsType);
+    $symfonyRequest->request->set('username', $vcsUsername);
+    $symfonyRequest->request->set('passwd', $vcsPasswd);
+    $symfonyRequest->request->set('branch', $vcsBranch);
+    $symfonyRequest->request->set('scm', $ignoreScm);
+
+    return $this->uploadVcsPage->handleRequest($symfonyRequest);
+  }
+
+  /**
+   * Generate the upload by calling handleRequest of HelperToUploadUrlPage
+   * @param array   $urlData         Information from POST
+   * @param string  $folderId        ID of the folder
+   * @param string  $fileDescription Description of the upload
+   * @param string  $isPublic        Upload is `public, private or protected`
+   * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @return array Array with status, message and upload id
+   */
+  private function generateUrlUpload($urlData, $folderName, $fileDescription,
+    $isPublic, $ignoreScm)
+  {
+    $url = $urlData["url"];
+    $name = $urlData["name"];
+    $accept = $urlData["accept"];
+    $reject = $urlData["reject"];
+    $maxRecursionDepth = $urlData["maxRecursionDepth"];
+
+    $symfonySession = $GLOBALS['container']->get('session');
+    $symfonySession->set($this->uploadUrlPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
+      "restUpload");
+
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->setSession($symfonySession);
+
+    $symfonyRequest->request->set($this->uploadUrlPage::FOLDER_PARAMETER_NAME,
+      $folderName);
+    $symfonyRequest->request->set($this->uploadUrlPage::DESCRIPTION_INPUT_NAME,
+      $fileDescription);
+    $symfonyRequest->request->set(
+      $this->uploadUrlPage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
+    $symfonyRequest->request->set('public', $isPublic);
+    $symfonyRequest->request->set($this->uploadUrlPage::NAME_PARAM, $name);
+    $symfonyRequest->request->set($this->uploadUrlPage::ACCEPT_PARAM, $accept);
+    $symfonyRequest->request->set($this->uploadUrlPage::REJECT_PARAM, $reject);
+    $symfonyRequest->request->set($this->uploadUrlPage::GETURL_PARAM, $url);
+    $symfonyRequest->request->set($this->uploadUrlPage::LEVEL_PARAM,
+      $maxRecursionDepth);
+    $symfonyRequest->request->set('scm', $ignoreScm);
+
+    return $this->uploadUrlPage->handleRequest($symfonyRequest);
+  }
+
+  /**
+   * Generate the upload by calling handleRequest of HelperToUploadSrvPage
+   * @param array   $srvData         Information from POST
+   * @param string  $folderId        ID of the folder
+   * @param string  $fileDescription Description of the upload
+   * @param string  $isPublic        Upload is `public, private or protected`
+   * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @return array Array with status, message and upload id
+   */
+  private function generateSrvUpload($srvData, $folderName, $fileDescription,
+    $isPublic, $ignoreScm)
+  {
+    $path = $srvData["path"];
+    $name = $srvData["name"];
+
+    $symfonySession = $GLOBALS['container']->get('session');
+    $symfonySession->set($this->uploadSrvPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
+      "restUpload");
+
+    $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
+    $symfonyRequest->setSession($symfonySession);
+
+    $symfonyRequest->request->set($this->uploadSrvPage::FOLDER_PARAMETER_NAME,
+      $folderName);
+    $symfonyRequest->request->set($this->uploadSrvPage::DESCRIPTION_INPUT_NAME,
+      $fileDescription);
+    $symfonyRequest->request->set(
+      $this->uploadSrvPage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
+    $symfonyRequest->request->set('public', $isPublic);
+    $symfonyRequest->request->set($this->uploadSrvPage::SOURCE_FILES_FIELD,
+      $path);
+    $symfonyRequest->request->set($this->uploadSrvPage::NAME_PARAM, $name);
+    $symfonyRequest->request->set('scm', $ignoreScm);
+
+    return $this->uploadSrvPage->handleRequest($symfonyRequest);
   }
 
   /**

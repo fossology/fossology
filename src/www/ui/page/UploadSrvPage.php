@@ -282,7 +282,7 @@ class UploadSrvPage extends UploadPageBase
     $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
     $message .= "The file $sourceFiles has been uploaded. ";
     $keep = "It is <a href='$Url'>upload #" . $uploadId . "</a>.\n";
-    return array(true, $message.$keep, $description);
+    return array(true, $message.$keep, $description, $uploadId);
   }
 }
 register_plugin(new UploadSrvPage());
