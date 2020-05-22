@@ -242,7 +242,7 @@ void myFork(int proc_num, FILE **pFile) {
   {
     LOG_FATAL("fork failed\n");
   }
-  else if (pid == 0) { // chile process, every singe process runs on one temp path file
+  else if (pid == 0) { // Child process, every single process runs on one temp path file
     read_file_grab_license(proc_num, pFile); // grabbing licenses on /tmp/foss-XXXXXX
     return;
   }
@@ -420,18 +420,11 @@ int main(int argc, char **argv)
     /* when scanning_directory is real direcotry, scan license in parallel */
     if (scanning_directory) {
       if (process_count < 2) process_count = 2; // the least count is 2, at least has one child process
-
-      if (optionIsSet(OPTS_JSON_OUTPUT))
+      if (mutexJson == NULL && optionIsSet(OPTS_JSON_OUTPUT))
       {
-        char json_file_template[] = "/tmp/foss-nomos-json-XXXXXX";
-        int json_file_descriptor = mkstemp(json_file_template);
-        cur.tempJsonPath = fdopen(json_file_descriptor, "w+");
-        if (!cur.tempJsonPath)
-        {
-          LOG_FATAL("failed to open %s, %s\n", json_file_template,
-              strerror(errno));
-        }
-        sem_init(&cur.mutexTempJson, 1, 1);
+        initializeJson();
+        printf("{\n\"results\":[\n");
+        fflush(0);
       }
       pFile = malloc(process_count*(sizeof(FILE*)));
       pTempFileName = malloc(process_count*sizeof(char[50]));
@@ -490,10 +483,8 @@ int main(int argc, char **argv)
 
         if (optionIsSet(OPTS_JSON_OUTPUT))
         {
-          /* Print the JSON output and clean related variables */
-          parseTempJson();
-          sem_destroy(&cur.mutexTempJson);
-          fclose(cur.tempJsonPath);
+          printf("]\n}\n");
+          destroyJson();
         }
 
         /* free memeory */
@@ -506,11 +497,22 @@ int main(int argc, char **argv)
       {
         printf("Warning: -n {nprocs} ONLY works with -d {directory}.\n");
       }
+      if (optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        initializeJson();
+        printf("{\n\"results\":[\n");
+        fflush(0);
+      }
       for (i = 0; i < file_count; i++) {
         initializeCurScan(&cur);
         processFile(files_to_be_scanned[i]);
         recordScanToDB(&cacheroot, &cur);
         freeAndClearScan(&cur);
+      }
+      if (optionIsSet(OPTS_JSON_OUTPUT))
+      {
+        printf("]\n}\n");
+        destroyJson();
       }
     }
   }

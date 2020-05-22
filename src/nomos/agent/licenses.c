@@ -1228,14 +1228,7 @@ static void saveLicenseData(scanres_t *scores, int nCand, int nElem,
   {
     if (optionIsSet(OPTS_JSON_OUTPUT))
     {
-      if (optionIsSet(OPTS_SCANNING_DIRECTORY))
-      {
-        writeToTemp();
-      }
-      else
-      {
-        writeToStdOut();
-      }
+      writeJson();
     } else {
       if (optionIsSet(OPTS_LONG_CMD_OUTPUT) && realpath(cur.targetFile, realPathOfTarget))
         {

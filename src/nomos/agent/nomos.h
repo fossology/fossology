@@ -431,9 +431,6 @@ struct curScan {
   GArray* keywordPositions; /**< List of matche positions */
   GArray* docBufferPositionsAndOffsets;
   int currentLicenceIndex;
-  FILE *tempJsonPath; /**< File descriptor for temporary file where
-                           intermediate outputs for json are stored */
-  sem_t mutexTempJson; /**< Mutex to handle writes to tempJsonPath */
 };
 
 /**

@@ -26,25 +26,9 @@
 #define _JSON_WRITER_H_
 
 /**
- * \brief Write the scan output to a temp file
- *
- * The function writes the output of a scan result to a temp file in append
- * mode which is read by parseTempJson() to create a single JSON output.
+ * \brief Write the scan output as a JSON
  */
-void writeToTemp();
-
-/**
- * \brief Write the scan result as JSON to STDOUT
- */
-void writeToStdOut();
-
-/**
- * \brief Read temp file and print a JSON to STDOUT
- *
- * Reads the temp file created by writeToTemp(), parse it and create a JSON.
- * Then writes this JSON to STDOUT.
- */
-void parseTempJson();
+void writeJson();
 
 /**
  * \brief Unescape the path separator from JSON
@@ -55,6 +39,17 @@ void parseTempJson();
  * @param json String to unescape
  * @return The JSON with unescaped path separator.
  */
-char *unescapePathSeparator(char* json);
+char *unescapePathSeparator(const char* json);
+
+/**
+ * Initialize the semaphore and boolean to store flag for comma in JSON
+ */
+void initializeJson();
+
+/**
+ * Destory the semaphore the comma flag for JSON
+ */
+void destroyJson();
+
 
 #endif /* _JSON_WRITER_H_ */
