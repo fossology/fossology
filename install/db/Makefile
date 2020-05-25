@@ -5,13 +5,16 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-all: dbcreate dbmigrate_pfile_calculate_sha256.php dbmigrate_change_db_encoding.php
+all: dbcreate db.cron dbmigrate_pfile_calculate_sha256.php dbmigrate_change_db_encoding.php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
 # generate the dbcreate script
 dbcreate: dbcreate-process
 	chmod +x dbcreate
+
+# generate db.cron
+db.cron: db.cron-process
 
 # generate the pfile hash script
 dbmigrate_pfile_calculate_sha256.php:	dbmigrate_pfile_calculate_sha256-process_php
@@ -41,6 +44,8 @@ install: all
 	$(INSTALL_DATA) dbmigrate_copyright-author.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	$(INSTALL_DATA) dbmigrate_multiple_copyright_decisions.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
 	$(INSTALL_DATA) resequence_author_table.php $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
+	# Database instance Unique Identifier is requred as part of FossDash setup
+	$(INSTALL_DATA) instance_uuid.php $(DESTDIR)$(LIBEXECDIR)/instance_uuid.php
 	$(INSTALL_PROGRAM) dbmigrate_pfile_calculate_sha256.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 	$(INSTALL_PROGRAM) dbmigrate_change_db_encoding.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_change_db_encoding.php
 
@@ -95,7 +100,7 @@ uninstall:
 	@echo "  Remove by hand if you desire."
 
 clean:
-	rm -f core dbcreate
+	rm -f core dbcreate db.cron
 
 test: all
 	@echo "NOTICE: no tests available for db"
