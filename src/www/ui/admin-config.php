@@ -56,17 +56,22 @@ class foconfig extends FO_Plugin
 
     $Group = "";
     $InputStyle = "style='background-color:#dbf0f7'";
+    $OutBuf .= '<style> table.myTable > tbody > tr:first-child > td:first-child{width:20%} </style>';
     $OutBuf .= "<form method='POST'>";
     while ($row = pg_fetch_assoc($result)) {
       if ($Group != $row['group_name']) {
         if ($Group) {
-          $OutBuf .= "</table><br>";
+          $OutBuf .= '</table><br>';
         }
         $Group = $row['group_name'];
-        $OutBuf .= "<table border=1>";
+        $OutBuf .= '<table border=1 class="myTable table table-striped" style="border-collapse: unset;" >';
+      }
+      if ($row['variablename']=="InfluxDBUser" || $row['variablename']=="InfluxDBUserPassword") {
+        $OutBuf .= "<tr id='rowId$row[variablename]' style='display: none;'><td>$row[ui_label]</td><td>";
+      } else {
+        $OutBuf .= "<tr id='rowId$row[variablename]'><td>$row[ui_label]</td><td>";
       }
 
-      $OutBuf .= "<tr><td>$row[ui_label]</td><td>";
       switch ($row['vartype']) {
         case CONFIG_TYPE_INT:
         case CONFIG_TYPE_TEXT:
@@ -77,6 +82,11 @@ class foconfig extends FO_Plugin
         case CONFIG_TYPE_TEXTAREA:
           $ConfVal = htmlentities($row['conf_value']);
           $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
+          $OutBuf .= "<br>$row[description]";
+          break;
+        case CONFIG_TYPE_DISABLED:
+          $ConfVal = htmlentities($row['conf_value']);
+          $OutBuf .= "<br><textarea disabled name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
           $OutBuf .= "<br>$row[description]";
           break;
         case CONFIG_TYPE_PASSWORD:
@@ -115,6 +125,31 @@ class foconfig extends FO_Plugin
     $OutBuf .= "<p><input type='submit' value='$btnlabel'>";
     $OutBuf .= "</form>";
 
+    $scriptToHideShow = '
+    <script>
+      function showHide() {
+          if($(\'[name="new[AuthType]"]\').val() == "0") {
+              $("#rowIdInfluxDBToken").show();
+              $("#rowIdInfluxDBUser").hide();
+              $("#rowIdInfluxDBUserPassword").hide();
+              
+          } else {
+              $("#rowIdInfluxDBToken").hide();
+              $("#rowIdInfluxDBUser").show();
+              $("#rowIdInfluxDBUserPassword").show();
+          }
+      }
+      $(function () {
+        $(\'[name="new[AuthType]"]\').change(showHide);
+      });
+
+      window.onload = function() {
+        showHide()
+      };
+    </script>';
+
+    $this->renderScripts($scriptToHideShow);
+
     return $OutBuf;
   }
 
@@ -129,10 +164,12 @@ class foconfig extends FO_Plugin
 
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
+    $LIBEXECDIR = $GLOBALS['SysConf']['DIRECTORIES']['LIBEXECDIR'];
 
     /* Compare new and old array
      * and update DB with new values */
     $UpdateMsg = "";
+    $ErrorMsg="";
     if (! empty($newarray)) {
       foreach ($newarray as $VarName => $VarValue) {
         if ($VarValue != $oldarray[$VarName]) {
@@ -149,6 +186,22 @@ class foconfig extends FO_Plugin
             $this->dbManager->getSingleRow(
               "update sysconfig set conf_value=$1 where variablename=$2",
               array($VarValue, $VarName), __METHOD__ . '.setVarNameData');
+            if ($VarName == "FossdashEnableDisable") {
+                $exec_fossdash_configuration_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py fossdash_configure " . $VarValue;
+                $output = shell_exec($exec_fossdash_configuration_cmd);
+                file_put_contents('php://stderr', "output of the cmd for fossology_configuration(enable/Disable) changed ={$output} \n");
+            } elseif ($VarName == "FossologyInstanceName") {
+              $parameterName = "uuid";
+              $exec_script_uuid_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py " . $parameterName;
+              $output = shell_exec($exec_script_uuid_cmd);
+              file_put_contents('php://stderr', "output of cmd for fossology_instance_name changed ={$output} \n");
+            } elseif ($VarName == "FossDashScriptCronSchedule") {
+              $parameterName = "cron";
+              $exec_script_cron_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py " . $parameterName;
+              $output = shell_exec($exec_script_cron_cmd);
+              file_put_contents('php://stderr', "output of cmd for cron job changed  ={$output} \n");
+            }
+
             if (! empty($UpdateMsg)) {
               $UpdateMsg .= ", ";
             }
@@ -158,6 +211,10 @@ class foconfig extends FO_Plugin
              * the validation_function is not empty, but after checking, the value
              * is invalid
              */
+            if (! empty($ErrorMsg)) {
+              $ErrorMsg .= ", ";
+            }
+            $ErrorMsg .= $VarName;
             if (! strcmp($validation_function, 'check_boolean')) {
               $warning_msg = _(
                 "Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
@@ -173,13 +230,21 @@ class foconfig extends FO_Plugin
       if (! empty($UpdateMsg)) {
         $UpdateMsg .= _(" updated.");
       }
+      if (! empty($ErrorMsg)) {
+        $ErrorMsg .= _(" Error occurred.");
+      }
     }
 
     $OutBuf = '';
     if ($this->OutputType == 'HTML') {
+      $OutBuf .= "<div>";
       if ($UpdateMsg) {
-        $OutBuf .= "<span style='background-color:#ff8a8a'>$UpdateMsg</style><hr>";
+        $OutBuf .= "<span style='background-color:#99FF99'>$UpdateMsg</style>";
       }
+      if ($ErrorMsg) {
+        $OutBuf .= "<span style='background-color:#FF8181'>$ErrorMsg</style><hr>";
+      }
+      $OutBuf .= "</div> <hr>";
       $OutBuf .= $this->HTMLout();
     }
     $this->vars['content'] = $OutBuf;
