@@ -235,6 +235,11 @@ if [ $RMDB ]; then
    fi
 fi
 
+## cron job
+echo "*** Cleaning up old cron job for www-data and fossy user ***"
+crontab -r -u www-data
+crontab -r -u fossy
+
 ## Repository
 if [ $RMREPO ]; then
    echo "*** Deleting repository ***"
