@@ -25,6 +25,7 @@
 
 /**********  Globals  *************/
 PGconn* pgConn = NULL;        ///< the connection to Database
+fo_dbManager* dbManager;      ///< fo_dbManager object
 
 /**
  * \brief simple wrapper which includes PQexec and fo_checkPQcommand
@@ -448,5 +449,79 @@ FUNCTION void removeOrphanedRows()
 
   printf("Time taken for removing orphaned rows from database : %ld seconds\n", endTime-startTime);
 
+  return;  // success
+}
+
+
+/**
+ * Remove orphan log files created to store the logs from agents on disk.
+ * @returns void but writes status to stdout
+ */
+FUNCTION void removeOrphanedLogFiles()
+{
+  PGresult* result;
+  PGresult* updateResult;
+  int row;
+  int countTuples;
+  int removedCount = 0;
+  int jobQueueId;
+  char* logPath;
+  long startTime, endTime;
+  fo_dbManager_PreparedStatement* updateStatement;
+  struct stat statbuf;
+
+  char *SQL = "SELECT jq_pk, jq_log FROM job ja "
+    "INNER JOIN job jb ON ja.job_upload_fk = jb.job_upload_fk "
+    "INNER JOIN jobqueue jq ON jb.job_pk = jq.jq_job_fk "
+    "WHERE ja.job_name = 'Delete' AND jq_log IS NOT NULL "
+    "AND jq_log != 'removed';";
+
+  startTime = (long)time(0);
+
+  result = PQexec(pgConn, SQL);
+  if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__))
+  {
+    exitNow(-140);
+  }
+  countTuples = PQntuples(result);
+
+  updateStatement = fo_dbManager_PrepareStamement(dbManager,
+    "updateRemovedLogFromJobqueue",
+    "UPDATE jobqueue SET jq_log = 'removed' WHERE jq_pk = $1;", int);
+  /* Loop through the logs found and delete them. Also update the database */
+  for (row = 0; row < countTuples; row++)
+  {
+    fo_dbManager_begin(dbManager);
+    jobQueueId = atoi(PQgetvalue(result, row, 0));
+    logPath = PQgetvalue(result, row, 1);
+    if (stat(logPath, &statbuf) == -1)
+    {
+      LOG_NOTICE("Log file '%s' does not exists", logPath);
+    }
+    else
+    {
+      remove(logPath);
+      LOG_VERBOSE2("Removed file '%s'", logPath);
+    }
+    updateResult = fo_dbManager_ExecPrepared(updateStatement, jobQueueId);
+    if (updateResult)
+    {
+      free(updateResult);
+      removedCount++;
+    }
+    else
+    {
+      LOG_ERROR("Unable to update the value of jobqueue.jq_log to 'removed' "
+        "for jq_pk = %d", jobQueueId);
+    }
+    fo_dbManager_commit(dbManager);
+  }
+  PQclear(result);
+
+  endTime = (long)time(0);
+  printf("%d / %d Orphaned log files were removed "
+    "(%ld seconds)\n", removedCount, countTuples, endTime - startTime);
+
+  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }

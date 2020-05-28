@@ -154,7 +154,7 @@ class AjaxShowJobs extends \FO_Plugin
           }
           break;
         case 'jq_log':
-          if (empty($row[$field]) || !file_exists($row[$field])) {
+          if (empty($row[$field]) || $row[$field] == 'removed' || !file_exists($row[$field])) {
             break;
           }
           if (filesize($row[$field]) > self::MAX_LOG_OUTPUT) {

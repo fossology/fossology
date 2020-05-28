@@ -36,6 +36,7 @@
 
 /* for DB */
 extern PGconn* pgConn;
+extern fo_dbManager* dbManager;
 
 /**
  * Maximum buffer to use
@@ -65,5 +66,6 @@ void deleteOrphanGold();
 void normalizeUploadPriorities();
 void reIndexAllTables();
 void removeOrphanedRows();
+void removeOrphanedLogFiles();
 
 #endif /* _MAINTAGENT_H */
