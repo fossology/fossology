@@ -123,7 +123,7 @@ class ui_spasht extends FO_Plugin
     $uploadId = GetParm("upload",PARM_INTEGER);
     /** @var UploadDao $uploadDao */
 
-    $upload_name = GetUploadName($uploadId);
+    $upload_name = preg_replace('/(?i)(?:\.(?:tar\.xz|tar\.bz2|tar\.gz|zip|tgz|tbz|txz|tar))/',"",GetUploadName($uploadId));
     $uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $uploadtree_tablename = GetUploadtreeTableName($uploadId);
