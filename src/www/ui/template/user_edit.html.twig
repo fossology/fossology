@@ -69,6 +69,14 @@
       <th width="25%">{{ "Default bucket pool"| trans }}</th>
       <td>{{ bucketPool }}</td>
     </tr>
+    {%  if isSessionAdmin %}
+      <tr class="classic">
+        <th width="25%">{{ "Select user's default group."|trans }}</th>
+        <td><select name="default_group_fk" class="ui-render-select2">
+          {{ defaultGroupOption }}
+        </select></td>
+      </tr>
+    {% endif %}
   </table>
   <input type="submit" name="UpdateBtn" value="{{ 'Update Account'|trans }}"/>
   </form>
