@@ -974,7 +974,7 @@ INSERT INTO clearing_decision (
       $statementName, $params);
 
     $statementName = __METHOD__ . $statementName;
-    $sql = "$cte SELECT COUNT(*) AS cnt FROM decision;";
+    $sql = "$cte SELECT COUNT(*) AS cnt FROM decision WHERE type_id <> ".DecisionTypes::TO_BE_DISCUSSED;
 
     $clearedCounter = $this->dbManager->getSingleRow($sql, $params,
       $statementName);

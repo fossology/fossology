@@ -399,14 +399,6 @@ class AjaxExplorer extends DefaultPlugin
 
     $img = ($filesCleared == $filesToBeCleared) ? 'green' : 'red';
 
-    // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
-    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
-    $img = $isDecisionTBD ? 'yellow' : $img;
-
-    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
-    $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
-    $img = $isDecisionDNU ? 'redGreen' : $img;
-
     // override green/red flag with grey flag in case of no_license_found scanner finding
     if (!empty($licenseList) && empty($editedLicenseList)) {
       $img = (
@@ -415,6 +407,14 @@ class AjaxExplorer extends DefaultPlugin
               (count(explode(",", $licenseList)) == 1)
              ) ? 'grey' : $img;
     }
+
+    // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
+    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
+    $img = $isDecisionTBD ? 'yellow' : $img;
+
+    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
+    $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
+    $img = $isDecisionDNU ? 'redGreen' : $img;
 
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   }
