@@ -83,17 +83,17 @@ class ReportController extends RestController
         case $this->reportsAllowed[2]:
           $spdxGenerator = $this->restHelper->getPlugin('ui_spdx2');
           list ($jobId, $jobQueueId, $error) = $spdxGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload, $reportFormat);
+            $this->restHelper->getGroupId(), $upload, $reportFormat);
           break;
         case $this->reportsAllowed[3]:
           $readmeGenerator = $this->restHelper->getPlugin('ui_readmeoss');
           list ($jobId, $jobQueueId, $error) = $readmeGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload);
+            $this->restHelper->getGroupId(), $upload);
           break;
         case $this->reportsAllowed[4]:
           $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
           list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
-            Auth::getGroupId(), $upload);
+            $this->restHelper->getGroupId(), $upload);
           break;
         default:
           $error = new Info(500, "Some error occured!", InfoType::ERROR);
@@ -166,7 +166,7 @@ class ReportController extends RestController
     if (array_key_exists("port", $url_parts)) {
       $download_path .= ':' . $url_parts["port"];
     }
-    if ($url_parts["path"][-1] !== '/') {
+    if (substr($url_parts["path"], -1) !== '/') {
       $url_parts["path"] .= '/';
     }
     $download_path .= $url_parts["path"] . $jobId;
