@@ -196,7 +196,7 @@ class AjaxBrowse extends DefaultPlugin
       $nameColumn = '<input type="checkbox" name="uploads[]" class="browse-upload-checkbox" value="'.$uploadId.'"/>'.$nameColumn;
     }
 
-    $dateCol = substr($row['upload_ts'], 0, 19);
+    $dateCol = Convert2BrowserTime(substr($row['upload_ts'], 0, 19));
     $pairIdPrio = array($uploadId, floatval($row[UploadBrowseProxy::PRIO_COLUMN]));
     if (!$this->userPerm && 4 == $row['status_fk']) {
       $currentStatus = $this->statusTypes[4];

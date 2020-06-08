@@ -2,6 +2,7 @@
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  * Copyright (C) 2015 Siemens AG
+ * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -201,6 +202,11 @@ class core_auth extends FO_Plugin
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
+    $timezone = GetParm("timezone", PARM_TEXT);
+    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
+      $timezone = date_default_timezone_get();
+    }
+    $_SESSION['timezone'] = $timezone;
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
     if (empty($referrer)) {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
