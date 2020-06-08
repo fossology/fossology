@@ -1,0 +1,75 @@
+# FOSSologyNG CI Dockerfile
+# Copyright Siemens AG 2020, anupam.ghosh@siemens.com, gaurav.mishra@siemens.com
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+#
+# Description: Gitlab CI runner image recipie
+# Using Debian 10
+
+FROM debian:buster-slim as builder
+
+WORKDIR /fossologyng
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    git \
+    lsb-release \
+    php-cli \
+    sudo \
+    dpkg-dev \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY ./utils/fo-installdeps ./utils/fo-installdeps
+COPY ./utils/utils.sh ./utils/utils.sh
+COPY ./src/nomos/mod_deps ./src/nomos/
+COPY ./src/ojo/mod_deps ./src/ojo/
+COPY ./src/copyright/mod_deps ./src/copyright/
+
+RUN mkdir -p /fossologyng/dependencies-for-runtime \
+ && cp -R /fossologyng/src /fossologyng/utils /fossologyng/dependencies-for-runtime/
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive /fossologyng/utils/fo-installdeps --build --offline -y \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY . .
+
+RUN chown $(whoami):$(whoami) -R .
+
+RUN make clean build-lib \
+ && make -C src/nomos/agent -f Makefile.sa all \
+ && make -C src/copyright/agent copyright \
+ && make -C src/copyright/agent keyword \
+ && make -C src/ojo/agent ojo
+
+RUN dpkg-shlibdeps -Orun-deps -esrc/nomos/agent/nomossa \
+                              -esrc/copyright/agent/copyright \
+                              -esrc/copyright/agent/keyword \
+                              -esrc/ojo/agent/ojo \
+ && sed -E -i -e 's/(shlibs:Depends=)|(\(>=?[ 0-9\:\.\~\-]*\))|(,)//g' run-deps
+
+FROM debian:buster-slim
+
+LABEL maintainer="Fossology <fossology@fossology.org>"
+
+COPY --from=builder /fossologyng/src/nomos/agent/nomossa /bin/nomossa
+COPY --from=builder /fossologyng/src/ojo/agent/ojo /bin/ojo
+COPY --from=builder /fossologyng/src/copyright/agent/copyright /bin/copyright
+COPY --from=builder /fossologyng/src/copyright/agent/copyright.conf /usr/local/share/fossology/copyright/agent/copyright.conf
+COPY --from=builder /fossologyng/src/copyright/agent/keyword /bin/keyword
+COPY --from=builder /fossologyng/src/copyright/agent/keyword.conf /usr/local/share/fossology/keyword/agent/keyword.conf
+COPY --from=builder /fossologyng/run-deps /opt/run-deps
+
+COPY ./utils/automation/fossologyscanner.py /bin/fossologyscanner
+
+RUN echo 'APT::Install-Recommends "0" ; APT::Install-Suggests "0" ;' >> /etc/apt/apt.conf \
+ && DEBIAN_FRONTEND=noninteractive apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+ --no-install-recommends $(cat /opt/run-deps) python3 \
+ && DEBIAN_FRONTEND=noninteractive apt-get autoremove --yes \
+ && rm -rf /var/lib/apt/lists/* /opt/run-deps
+
+CMD ["bash"]
