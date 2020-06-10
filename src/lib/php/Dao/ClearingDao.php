@@ -469,8 +469,8 @@ INSERT INTO clearing_decision (
   {
     $stmt = __METHOD__;
     $this->dbManager->prepare($stmt,
-      "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment)
-        SELECT $2, $3, $4, type_fk, rf_fk, removed, reportinfo, comment FROM clearing_event WHERE clearing_event_pk = $1"
+      "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, type_fk, rf_fk, removed, reportinfo, comment, acknowledgement)
+        SELECT $2, $3, $4, type_fk, rf_fk, removed, reportinfo, comment, acknowledgement FROM clearing_event WHERE clearing_event_pk = $1"
       );
 
     $this->dbManager->freeResult($this->dbManager->execute($stmt, array($eventId, $itemId, $userId, $groupId)));
@@ -1037,8 +1037,8 @@ FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
       SELECT rf_fk, date_added, removed FROM (
         SELECT rf_fk, date_added, removed, row_number()
           OVER (PARTITION BY rf_fk ORDER BY date_added DESC) AS ROWNUM
-        FROM clearing_event WHERE uploadtree_fk=$1) SORTABLE 
-          WHERE ROWNUM = 1 ORDER BY rf_fk) 
+        FROM clearing_event WHERE uploadtree_fk=$1) SORTABLE
+          WHERE ROWNUM = 1 ORDER BY rf_fk)
       SELECT count(*) FROM license_candidate WHERE license_candidate.rf_pk IN
         (SELECT rf_fk FROM latestEvents WHERE removed=false);";
     $countCandidate = $this->dbManager->getSingleRow($sql,
