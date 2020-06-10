@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file
  * \brief System configuration functions.
@@ -391,6 +393,14 @@ function Populate_sysconfig()
   $mimeTypeDesc = _("add  comma (,) separated mimetype to exclude files from scanning");
   $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
     strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
+
+  $perm_admin=Auth::PERM_ADMIN;
+  $perm_write=Auth::PERM_WRITE;
+  $variable = "SourceCodeDownloadRights";
+  $SourceDownloadRightsPrompt = _('Acces rights required to download source code');
+  $SourceDownloadRightsDesc = _('Choose which acces level will be required for user to be able to download source code.');
+  $valueArray[$variable] = array("'$variable'", "'$perm_write'", "'$SourceDownloadRightsPrompt'",
+  strval(CONFIG_TYPE_DROP), "'DOWNLOAD'", "1", "'$SourceDownloadRightsDesc'", "null", "'Administrator{{$perm_admin}}|Read_Write{{$perm_write}}'");
 
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.

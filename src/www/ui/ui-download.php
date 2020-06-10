@@ -48,8 +48,12 @@ class ui_download extends FO_Plugin
    */
   function RegisterMenus()
   {
+    global $SysConf;
     $text = _("Download this file");
-    menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
+    if ($_SESSION[Auth::USER_LEVEL] >= $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
+      menu_insert("Browse-Pfile::Download",0,$this->Name,$text);
+    }
+
   } // RegisterMenus()
 
   /**
@@ -130,6 +134,7 @@ class ui_download extends FO_Plugin
       throw new Exception('Download plugin is not ready');
     }
 
+    global $SysConf;
     global $container;
     /** @var DbManager $dbManager */
     $dbManager = $container->get('db.manager');
@@ -160,6 +165,8 @@ class ui_download extends FO_Plugin
       $uploadId = $row['job_upload_fk'];
     } elseif (empty($item)) {
       throw new Exception("Invalid item parameter");
+    } elseif ($_SESSION[Auth::USER_LEVEL] < $SysConf['SYSCONFIG']['SourceCodeDownloadRights']) {
+      throw new Exception("User permissions not sufficient for source code download");
     } else {
       $path = RepPathItem($item);
       if (empty($path)) {
