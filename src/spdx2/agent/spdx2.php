@@ -526,10 +526,23 @@ class SpdxTwoAgent extends Agent
    */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
-    /* @var $copyrightDao CopyrightDao */
+    $agentName = 'copyright';
+    /** @var CopyrightDao $copyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
+    /** @var ScanJobProxy $scanJobProxy */
+    $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'),
+      $uploadId);
+
+    $scanJobProxy->createAgentStatus(array($agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return;
+    }
+    $latestAgentId = $selectedScanners[$agentName];
+    $extrawhere = ' agent_fk='.$latestAgentId;
+
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere=null);
+    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
     $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
     foreach ($allScannerEntries as $finding) {
       $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
