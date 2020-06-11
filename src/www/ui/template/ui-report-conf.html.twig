@@ -114,8 +114,8 @@
             {{ "Source / binary integration notes"|trans }}
           </td>
           <td align="left">
-            <label><input type="checkbox" name="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
-            <label><input type="checkbox" name="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
+            <label><input type="radio" name="critical" value="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
+            <label><input type="radio" name="critical" value="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
           </td>
         </tr>
         <tr>
@@ -123,9 +123,10 @@
             {{ "Dependency notes"|trans }}
           </td>
           <td align="left">
-            <label><input type="checkbox" name="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}</label><br />
-            <label><input type="checkbox" name="dependencySource" {{ dependencySource }} />{{ "dependencies found in source code (see obligations)"|trans }}</label><br />
-            <label><input type="checkbox" name="dependencyBinary" {{ dependencyBinary }} />{{ "dependencies found in binaries (see obligations)"|trans }}</label>
+            <label><input type="radio" name="dependencySourceBinary" value="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}</label><br />
+            <label><input type="radio" name="dependencySourceBinary" {{ dependencySource }} value="dependencySource" />{{ "dependencies found in source code (see obligations)"|trans }}</label><br />
+            <label><input type="radio" name="dependencySourceBinary" {{ dependencyBinary }} value="dependencyBinary" />{{ "dependencies found in binaries (see obligations)"|trans }}</label>
+            <label><textarea {{ styleDependencyTA }} id="dependencyBinarySource" name="dependencyBinarySource">{{ dependencyBinarySource|e }}</textarea></label>
           </td>
         </tr>
         <tr>
@@ -133,8 +134,9 @@
             {{ "Export restrictions by copyright owner"|trans }}
           </td>
           <td align="left">
-            <label><input type="checkbox" name="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}</label><br />
-            <label><input type="checkbox" name="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}</label>
+            <label><input type="radio" name="exportRestriction" value="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}</label><br />
+            <label><input type="radio" name="exportRestriction" value="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}</label>
+            <label><textarea {{ styleExportTA }} id="exportRestrictionText" name="exportRestrictionText">{{ exportRestrictionText|e }}</textarea></label>
           </td>
         </tr>
         <tr>
@@ -142,8 +144,9 @@
             {{ "Restrictions for use by copyright owner \n<br/> (e.g. not for Nuclear Power)"|trans }}
           </td>
           <td align="left">
-            <label><input type="checkbox" name="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}</label><br />
-            <label><input type="checkbox" name="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}</label>
+            <label><input type="radio" name="restrictionForUse" value="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}</label><br />
+            <label><input type="radio" name="restrictionForUse" value="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}</label>
+            <label><textarea {{ styleRestrictionTA }} id="copyrightRestrictionText" name="copyrightRestrictionText">{{ copyrightRestrictionText|e }}</textarea></label>
           </td>
         </tr>
         <tr>
@@ -197,7 +200,7 @@
             {{ "Show SPDX license comments"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="spdxLicenseComment" {{ spdxLicenseComment }} />
+            <input type="checkbox" name="spdxLicenseComment" value="spdxLicenseComment" {{ spdxLicenseComment }} />
          </td>
         </tr>
         <tr>
@@ -205,7 +208,7 @@
             {{ "Ignore files with no info in SPDX"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
+            <input type="checkbox" name="ignoreFilesWOInfo" value="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
           </td>
         </tr>
       </table>

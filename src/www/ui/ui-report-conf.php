@@ -65,30 +65,33 @@ class ui_report_conf extends FO_Plugin
     "footerNote" => "ri_footer",
     "generalAssesment" => "ri_general_assesment",
     "gaAdditional" => "ri_ga_additional",
-    "gaRisk" => "ri_ga_risk"
+    "gaRisk" => "ri_ga_risk",
+    "dependencyBinarySource" => "ri_depnotes",
+    "exportRestrictionText" => "ri_exportnotes",
+    "copyrightRestrictionText" => "ri_copyrightnotes"
   );
 
   /**
-   * @var checkBoxListUR $checkBoxListUR
+   * @var radioListUR $radioListUR
    */
-  private $checkBoxListUR = array(
-    "nonCritical",
-    "critical",
-    "noDependency",
-    "dependencySource",
-    "dependencyBinary",
-    "noExportRestriction",
-    "exportRestriction",
-    "noRestriction",
-    "restrictionForUse"
+  private $radioListUR = array(
+    "nonCritical" => "critical",
+    "critical" => "critical",
+    "noDependency" => "dependencySourceBinary",
+    "dependencySource" => "dependencySourceBinary",
+    "dependencyBinary" => "dependencySourceBinary",
+    "noExportRestriction" => "exportRestriction",
+    "exportRestriction" => "exportRestriction",
+    "noRestriction" => "restrictionForUse",
+    "restrictionForUse" => "restrictionForUse"
   );
 
   /**
    * @var checkBoxListSPDX $checkBoxListSPDX
    */
   private $checkBoxListSPDX = array(
-    "spdxLicenseComment",
-    "ignoreFilesWOInfo"
+    "spdxLicenseComment" => "spdxLicenseComment",
+    "ignoreFilesWOInfo" => "ignoreFilesWOInfo"
   );
 
 
@@ -155,17 +158,31 @@ class ui_report_conf extends FO_Plugin
     foreach ($this->mapDBColumns as $key => $value) {
       $vars[$key] = $row[$value];
     }
+    $textAreaNoneStyle = ' style="display:none;overflow:auto;width:98%;height:80px;"';
+    $textAreaStyle = ' style="overflow:auto;width:98%;height:80px;"';
+    $vars['styleDependencyTA'] = $vars['styleExportTA'] = $vars['styleRestrictionTA'] = $textAreaStyle;
+    if ($row['ri_depnotes'] == 'NA' || empty($row['ri_depnotes'])) {
+       $vars['styleDependencyTA'] = $textAreaNoneStyle;
+    }
+
+    if ($row['ri_exportnotes'] == 'NA' || empty($row['ri_exportnotes'])) {
+       $vars['styleExportTA'] = $textAreaNoneStyle;
+    }
+
+    if ($row['ri_copyrightnotes'] == 'NA' || empty($row['ri_copyrightnotes'])) {
+       $vars['styleRestrictionTA'] = $textAreaNoneStyle;
+    }
 
     if (!empty($row['ri_ga_checkbox_selection'])) {
       $listURCheckbox = explode(',', $row['ri_ga_checkbox_selection']);
-      foreach ($this->checkBoxListUR as $key => $value) {
+      foreach (array_keys($this->radioListUR) as $key => $value) {
         $vars[$value] = $listURCheckbox[$key];
       }
     }
 
     if (!empty($row['ri_spdx_selection'])) {
       $listSPDXCheckbox = explode(',', $row['ri_spdx_selection']);
-      foreach ($this->checkBoxListSPDX as $key => $value) {
+      foreach (array_keys($this->checkBoxListSPDX) as $key => $value) {
         $vars[$value] = $listSPDXCheckbox[$key];
       }
     }
@@ -240,14 +257,14 @@ class ui_report_conf extends FO_Plugin
   }
 
   /**
-   * @param array $checkBoxListParams
+   * @param array $listParams
    * @return $cbSelectionList
    */
-  protected function getCheckBoxSelectionList($checkBoxListParams)
+  protected function getCheckBoxSelectionList($listParams)
   {
-    foreach ($checkBoxListParams as $checkBoxListParam) {
-      $ret = GetParm($checkBoxListParam, PARM_STRING);
-      if (empty($ret)) {
+    foreach ($listParams as $listkey => $listValue) {
+      $ret = GetParm($listValue, PARM_STRING);
+      if ($ret != $listkey) {
         $cbList[] = "unchecked";
       } else {
         $cbList[] = "checked";
@@ -283,7 +300,7 @@ class ui_report_conf extends FO_Plugin
         $parms[] = GetParm($key, PARM_TEXT);
         $i++;
       }
-      $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListUR);
+      $parms[] = $this->getCheckBoxSelectionList($this->radioListUR);
       $checkBoxUrPos = count($parms);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
       $checkBoxSpdxPos = count($parms);
@@ -342,6 +359,33 @@ class ui_report_conf extends FO_Plugin
           var idString = $(e.currentTarget).attr('id');
           idString = parseInt(idString.slice(-1)) - 1;
           $.cookie(reportTabCookie, idString);
+        }
+      });
+      $(\"input[name='dependencySourceBinary']\").change(function(){
+        var val = $(\"input[name='dependencySourceBinary']:checked\").val();
+        if (val == 'noDependency') {
+          $('#dependencyBinarySource').hide();
+          $('#dependencyBinarySource').val('');
+        } else {
+          $('#dependencyBinarySource').css('display', 'block');
+        }
+      });
+      $(\"input[name='exportRestriction']\").change(function(){
+        var val = $(\"input[name='exportRestriction']:checked\").val();
+        if (val == 'noExportRestriction') {
+          $('#exportRestrictionText').hide();
+          $('#exportRestrictionText').val('');
+        } else {
+          $('#exportRestrictionText').css('display', 'block');
+        }
+      });
+      $(\"input[name='restrictionForUse']\").change(function(){
+        var val = $(\"input[name='restrictionForUse']:checked\").val();
+        if (val == 'noRestriction') {
+          $('#copyrightRestrictionText').hide();
+          $('#copyrightRestrictionText').val('');
+        } else {
+          $('#copyrightRestrictionText').css('display', 'block');
         }
       });
     });

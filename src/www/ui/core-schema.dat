@@ -1884,6 +1884,18 @@
   $Schema["TABLE"]["report_info"]["ri_department"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_department\" text DEFAULT 'FOSSology Generation'::text";
   $Schema["TABLE"]["report_info"]["ri_department"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_department\" SET NOT NULL, ALTER COLUMN \"ri_department\" SET DEFAULT 'FOSSology Generation'::text";
 
+  $Schema["TABLE"]["report_info"]["ri_depnotes"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_depnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_depnotes\" text DEFAULT 'NA'::text";
+  $Schema["TABLE"]["report_info"]["ri_depnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_depnotes\" SET NOT NULL, ALTER COLUMN \"ri_depnotes\" SET DEFAULT 'NA'::text";
+
+  $Schema["TABLE"]["report_info"]["ri_exportnotes"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_exportnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_exportnotes\" text DEFAULT 'NA'::text";
+  $Schema["TABLE"]["report_info"]["ri_exportnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_exportnotes\" SET NOT NULL, ALTER COLUMN \"ri_exportnotes\" SET DEFAULT 'NA'::text";
+
+  $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_copyrightnotes\" text DEFAULT 'NA'::text";
+  $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_copyrightnotes\" SET NOT NULL, ALTER COLUMN \"ri_copyrightnotes\" SET DEFAULT 'NA'::text";
+
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
 
