@@ -2042,6 +2042,7 @@
   $Schema["CONSTRAINT"]["keyword_decision_pfile_fk_fkey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["keyword_decision_pfile_hash_ukey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["license_candidate_rf_pk_idk"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_pk_idk\" PRIMARY KEY (\"rf_pk\");";
   $Schema["CONSTRAINT"]["license_file_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["license_file_pfile_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
