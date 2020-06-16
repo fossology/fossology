@@ -297,10 +297,12 @@ function Get1stUploadtreeID($upload)
  */
 function Convert2BrowserTime($server_time)
 {
-  $tz = $_SESSION["timezone"];
   $server_timezone = date_default_timezone_get();
   $browser_time = new \DateTime($server_time, new \DateTimeZone($server_timezone));
-  $browser_time->setTimeZone(new \DateTimeZone($tz));
+  if (array_key_exists("timezone", $_SESSION)) {
+    $tz = $_SESSION["timezone"];
+    $browser_time->setTimeZone(new \DateTimeZone($tz));
+  }
   $time = $browser_time->format('Y-m-d H:i:s');
   return $time;
 }
