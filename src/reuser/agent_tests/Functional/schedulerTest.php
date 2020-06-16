@@ -30,6 +30,7 @@ namespace Fossology\Reuser\Test;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\HighlightDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\TreeDao;
@@ -84,6 +85,10 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * ClearingDao object
    */
   private $clearingDao;
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
   /** @var ClearingDecisionFilter $clearingDecisionFilter
    * ClearingDecisionFilter object
    */
@@ -130,12 +135,14 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->highlightDao = new HighlightDao($this->dbManager);
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
+    $this->copyrightDao = new CopyrightDao($this->dbManager, $this->uploadDao);
     $this->treeDao = \Mockery::mock(TreeDao::class);
 
     $agentDao = new AgentDao($this->dbManager, $logger);
 
     $this->runnerMock = new SchedulerTestRunnerMock($this->dbManager, $agentDao,
-      $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter, $this->treeDao);
+                        $this->clearingDao, $this->uploadDao, $this->clearingDecisionFilter,
+                        $this->treeDao, $this->copyrightDao);
     $this->runnerCli = new SchedulerTestRunnerCli($this->testDb);
   }
 
@@ -150,6 +157,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->licenseDao = null;
     $this->highlightDao = null;
     $this->clearingDao = null;
+    $this->copyrightDao = null;
   }
 
   /**
