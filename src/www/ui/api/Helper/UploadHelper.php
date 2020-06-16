@@ -584,10 +584,10 @@ class UploadHelper
     $scanProx->createAgentStatus($agents);
     $agent_ids = $scanProx->getLatestSuccessfulAgentIds();
 
-    /** @var ui_license_list $licenseListObj
-     * ui_license_list object to get licenses
+    /** @var UIExportList $licenseListObj
+     * UIExportList object to get licenses
      */
-    $licenseListObj = $restHelper->getPlugin('license-list');
+    $licenseListObj = $restHelper->getPlugin('export-list');
     $licenseList = $licenseListObj->createListOfLines($uploadTreeTableName,
       $parent->getItemId(), $agent_ids, -1, true, '', !$printContainers);
     if (array_key_exists("warn", $licenseList)) {

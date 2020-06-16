@@ -215,13 +215,15 @@ class CopyrightDao
   }
 
   /**
-   * @param $tableName
-   * @param $uploadTreeTableName
-   * @param $uploadId
-   * @param $decisionType
+   * @param string  $tableName
+   * @param string  $uploadTreeTableName
+   * @param integer $uploadId
+   * @param integer $decisionType
+   * @param string  $extrawhere
    * @return array $result
    */
-  public function getEditedEntries($tableName, $uploadTreeTableName, $uploadId, $decisionType)
+  public function getEditedEntries($tableName, $uploadTreeTableName, $uploadId,
+    $decisionType, $extrawhere="")
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
     $params = array();
@@ -238,6 +240,12 @@ class CopyrightDao
       $extendWClause .= " AND clearing_decision_type_fk = $".count($params);
       $statementName .= ".withDecisionType";
     }
+
+    if (!empty($extrawhere)) {
+      $extendWClause .= " AND ". $extrawhere;
+      $statementName .= "._".$extrawhere."_";
+    }
+
     $columns = "CD.description as description, CD.textfinding as textfinding, CD.comment as comments, UT.uploadtree_pk as uploadtree_pk";
 
     $primaryColumn = $tableName . '_pk';

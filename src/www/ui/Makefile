@@ -27,7 +27,8 @@ UIFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|dat|dtd|j
 OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php admin-folder-delete.php \
                 admin-dashboard.php ajax-showjobs.php group-manage-self.php group-manage.php ajax-perms.php \
                 upload_permissions.php upload-srv-files.php upload-vcs.php template/components \
-                template/include ui-browse-license.php
+                template/include ui-browse-license.php ui-license-list.php \
+                template/ui-license-list-form.html.twig
 
 OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm|openapi.yaml)$$"`
 
