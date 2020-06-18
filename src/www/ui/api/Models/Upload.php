@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
-Copyright (C) 2017 Siemens AG
+Copyright (C) 2017,2020 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -58,15 +58,11 @@ class Upload
    */
   private $uploadDate;
   /**
-   * @var integer $fileSize
-   * Upload size
+   * @var Hash $hash
+   * Hash information of the upload
    */
-  private $fileSize;
-  /**
-   * @var string $fileSha1
-   * SHA1 checksum of the uploaded file
-   */
-  private $fileSha1;
+  private $hash;
+
   /**
    * Upload constructor.
    * @param integer $folderId
@@ -75,11 +71,10 @@ class Upload
    * @param string $description
    * @param string $uploadName
    * @param string $uploadDate
-   * @param integer $fileSize
-   * @param string $fileSha1
-   * @param string $tag
+   * @param Hash $hash
    */
-  public function __construct($folderId, $folderName, $uploadId, $description, $uploadName, $uploadDate, $fileSize, $fileSha1, $tag = NULL)
+  public function __construct($folderId, $folderName, $uploadId, $description,
+    $uploadName, $uploadDate, $hash)
   {
     $this->folderId = intval($folderId);
     $this->folderName = $folderName;
@@ -87,8 +82,7 @@ class Upload
     $this->description = $description;
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
-    $this->fileSize = intval($fileSize);
-    $this->fileSha1 = $fileSha1;
+    $this->hash = $hash;
   }
 
   /**
@@ -113,8 +107,7 @@ class Upload
       "description" => $this->description,
       "uploadname"  => $this->uploadName,
       "uploaddate"  => $this->uploadDate,
-      "filesize"    => $this->fileSize,
-      "filesha1"    => $this->fileSha1,
+      "hash"        => $this->hash->getArray()
     ];
   }
 }

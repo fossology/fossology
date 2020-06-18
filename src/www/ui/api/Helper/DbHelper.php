@@ -28,11 +28,12 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) .
 use Fossology\Lib\Db\ModernDbManager;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
-use Fossology\UI\Api\Models\User;
+use Fossology\UI\Api\Models\Hash;
+use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Job;
 use Fossology\UI\Api\Models\Upload;
-use Fossology\UI\Api\Models\InfoType;
-use Fossology\UI\Api\Models\Info;
+use Fossology\UI\Api\Models\User;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Auth\Auth;
 
@@ -82,7 +83,8 @@ class DbHelper
     if ($uploadId == null) {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1
+folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1,
+pfile.pfile_md5, pfile.pfile_sha256
 FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
@@ -94,7 +96,8 @@ ORDER BY upload.upload_pk;";
     } else {
       $sql = "SELECT
 upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1
+folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1,
+pfile.pfile_md5, pfile.pfile_sha256
 FROM upload
 INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
 INNER JOIN folder ON folder.folder_pk = folderlist.parent
@@ -108,9 +111,11 @@ ORDER BY upload.upload_pk;";
     $result = $this->dbManager->getRows($sql, $params, $statementName);
     $uploads = [];
     foreach ($result as $row) {
+      $hash = new Hash($row['pfile_sha1'], $row['pfile_md5'],
+        $row['pfile_sha256'], $row['pfile_size']);
       $upload = new Upload($row["folder_pk"], $row["folder_name"],
         $row["upload_pk"], $row["upload_desc"], $row["upload_filename"],
-        $row["upload_ts"], $row["pfile_size"], $row["pfile_sha1"]);
+        $row["upload_ts"], $hash);
       array_push($uploads, $upload->getArray());
     }
     return $uploads;

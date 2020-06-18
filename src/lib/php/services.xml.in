@@ -104,6 +104,10 @@ without any warranty.
             <argument type="service" id="logger"/>
             <argument type="service" id="dao.upload"/>
         </service>
+        <service id="dao.pfile" class="Fossology\Lib\Dao\PfileDao">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+        </service>
 
         <service id="event.types" class="Fossology\Lib\Data\Clearing\ClearingEventTypes">
         </service>
@@ -189,6 +193,9 @@ without any warranty.
 
         <service id="helper.dbHelper" class="Fossology\UI\Api\Helper\DbHelper">
             <argument type="service" id="db.manager"/>
+        </service>
+        <service id="helper.fileHelper" class="Fossology\UI\Api\Helper\FileHelper">
+            <argument type="service" id="dao.pfile"/>
         </service>
 
         <service id="helper.authHelper" class="Fossology\UI\Api\Helper\AuthHelper">

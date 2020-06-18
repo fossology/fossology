@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.16
+  version: 1.1.0
   contact:
     email: fossology@fossology.org
   license:
@@ -179,7 +179,7 @@ paths:
           required: false
           schema:
             type: string
-            description: Group name, from last login if not provided  
+            description: Group name, from last login if not provided
       responses:
         '202':
           description: Upload will be deleted
@@ -316,7 +316,7 @@ paths:
           required: false
           schema:
             type: string
-            description: Group name, from last login if not provided    
+            description: Group name, from last login if not provided
         - name: uploadType
           description: >
             Type of upload done. Required for VCS, URL and server uploads
@@ -635,7 +635,7 @@ paths:
             required: false
             schema:
               type: string
-              description: Group name, from last login if not provided    
+              description: Group name, from last login if not provided
         requestBody:
           description: Agents to be scheduled with the job
           required: true
@@ -856,7 +856,7 @@ paths:
           required: false
           schema:
             type: string
-            description: Group name, from last login if not provided      
+            description: Group name, from last login if not provided
       responses:
         '201':
           description: Report generation is scheduled. Link to download report will be in message
@@ -880,7 +880,7 @@ paths:
         required: false
         schema:
           type: string
-          description: Group name, from last login if not provided    
+          description: Group name, from last login if not provided
     get:
       tags:
       - Job
@@ -910,6 +910,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+  /filesearch:
+    parameters:
+      - name: groupName
+        description: The group name to chose while downloading specific report
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
+    post:
+      tags:
+      - Upload
+      - Search
+      summary: Get the information of files matching the provided hashes
+      requestBody:
+          description: List of file hashes to fetch
+          required: true
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Hash'
+      responses:
+        '200':
+          description: List of matching files
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/File'
         default:
             $ref: '#/components/responses/defaultResponse'
 
@@ -976,12 +1010,8 @@ components:
         uploaddate:
           type: string
           description: Date, when the file was uploaded.
-        filesize:
-          type: integer
-          description: Filesize in Bytes.
-        filesha1:
-          type: string
-          description: SHA1 digest of the file
+        hash:
+          $ref: '#/components/schemas/Hash'
     UploadSummary:
       type: object
       properties:
@@ -1236,24 +1266,8 @@ components:
             description: Relative file path
             type: string
             example: "path/to/LICENSE"
-          agentFindings:
-            description: Short names of the found licenses
-            type: array
-            items:
-              type: string
-              nullable: true
-            example:
-              - "MIT"
-              - "No_license_found"
-          conclusions:
-            description: License decided by user
-            type: array
-            items:
-              type: string
-              nullable: true
-            example:
-              - "MIT"
-              - "No_license_found"
+          findings:
+            $ref: '#/components/schemas/Findings'
     UrlUpload:
       description: To create an upload from a URL
       type: object
@@ -1289,10 +1303,83 @@ components:
           type: string
       required:
         - path
+    Hash:
+      description: Hash information of a file
+      type: object
+      properties:
+        sha1:
+          description: SHA1 checksum of the file
+          type: string
+          example:
+            "81fe8bfe87576c3ecb22426f8e57847382917acf"
+        md5:
+          description: MD5 checksum of the file
+          type: string
+          example:
+            "e2fc714c4727ee9395f324cd2e7f331f"
+        sha256:
+          description: SHA256 checksum of the file
+          type: string
+          example:
+            "88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589"
+        size:
+          description: Size of the file in bytes
+          type: integer
+    File:
+      description: Meta information about file in FOSSology
+      type: object
+      properties:
+        hash:
+          $ref: '#/components/schemas/Hash'
+        findings:
+          $ref: '#/components/schemas/Findings'
+        uploads:
+          description: Upload ID if the file was uploaded as a package
+          type: array
+          items:
+            type: integer
+            description: Upload IDs where the given file was found
+          nullable: true
+        message:
+          description: Message in case provided hash not found or error
+          type: string
+          enum:
+            - "Not found"
+            - "Invalid keys"
+          example:
+            "Not found"
+          nullable: true
+      required:
+        - hash
+    Findings:
+      description: License findings and conclusions of file
+      type: object
+      properties:
+        scanner:
+          description: Licenses finding by scanner
+          type: array
+          items:
+            type: string
+            description: Name of license found
+            nullable: true
+          example:
+            - "MIT"
+            - "BSD-3-Clause"
+        conclusion:
+          description: >
+            Licenses concluded by user or main license in case of package
+          type: array
+          items:
+            type: string
+            description: Name of license concluded
+            nullable: true
+          example:
+            - "MIT"
+            - "GPL-2.0"
   responses:
     defaultResponse:
-          description: Some error occured. Check the "message"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
+      description: Some error occured. Check the "message"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Info'
