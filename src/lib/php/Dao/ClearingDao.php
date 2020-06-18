@@ -334,7 +334,7 @@ class ClearingDao
   public function createDecisionFromEvents($uploadTreeId, $userId, $groupId, $decType, $scope, $eventIds)
   {
     if ( ($scope == DecisionScopes::REPO) &&
-         !empty($this->getCandidateCountForItemId($uploadTreeId))) {
+         !empty($this->getCandidateLicenseCountForCurrentDecisions($uploadTreeId))) {
       throw new \Exception( _("Cannot add candidate license as global decision\n") );
     }
     $this->dbManager->begin();
@@ -1031,19 +1031,55 @@ FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
    * @param uploadTreeId
    * @return count
    */
-  public function getCandidateCountForItemId($uploadTreeId)
+  public function getCandidateLicenseCountForCurrentDecisions($uploadTreeId, $uploadId=0)
   {
+    if (!empty($uploadId)) {
+      $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+      $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+      $params[] = $itemTreeBounds->getLeft();
+      $params[] = $itemTreeBounds->getRight();
+      $condition = "UT.lft BETWEEN $1 AND $2";
+      $uploadtreeStatement = " uploadtree_fk IN (SELECT uploadtree_pk FROM $uploadTreeTableName UT WHERE $condition)";
+    } else {
+      $params = array($uploadTreeId);
+      $uploadtreeStatement = " uploadtree_fk = $1";
+    }
+
     $sql = "WITH latestEvents AS (
       SELECT rf_fk, date_added, removed FROM (
         SELECT rf_fk, date_added, removed, row_number()
           OVER (PARTITION BY rf_fk ORDER BY date_added DESC) AS ROWNUM
-        FROM clearing_event WHERE uploadtree_fk=$1) SORTABLE
+        FROM clearing_event WHERE $uploadtreeStatement) SORTABLE 
           WHERE ROWNUM = 1 ORDER BY rf_fk)
       SELECT count(*) FROM license_candidate WHERE license_candidate.rf_pk IN
         (SELECT rf_fk FROM latestEvents WHERE removed=false);";
     $countCandidate = $this->dbManager->getSingleRow($sql,
-                 array($uploadTreeId), $sqlLog = __METHOD__);
+                 $params, $sqlLog = __METHOD__);
 
     return $countCandidate['count'];
+  }
+
+  /**
+   * @param uploadId
+   * @return count
+   */
+  public function marklocalDecisionsAsGlobal($uploadId)
+  {
+    $statementName = __METHOD__ . $uploadId;
+
+    $sql = "WITH latestDecisions AS (
+              SELECT clearing_decision_pk FROM (
+                SELECT clearing_decision_pk, uploadtree_fk, date_added, row_number()
+                  OVER (PARTITION BY uploadtree_fk ORDER BY date_added DESC) AS ROWNUM
+              FROM clearing_decision WHERE uploadtree_fk IN
+                   (SELECT uploadtree_pk FROM uploadtree WHERE upload_fk = $1)) SORTABLE
+                WHERE ROWNUM = $2 ORDER BY uploadtree_fk)
+             UPDATE clearing_decision SET scope = $2 WHERE clearing_decision_pk IN (
+               SELECT clearing_decision_pk FROM latestDecisions) RETURNING clearing_decision_pk";
+
+    $countUpdated = $this->dbManager->getSingleRow($sql,
+                 array($uploadId, DecisionScopes::REPO), $statementName);
+
+    return count($countUpdated);
   }
 }

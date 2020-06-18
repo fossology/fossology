@@ -55,6 +55,9 @@ class Auth
   /** @var int PERM_WRITE
    * DB writes permitted */
   const PERM_WRITE= 3;
+  /** @var int PERM_WRITE
+   * DB writes permitted, with additional clearing permissions. */
+  const PERM_CADMIN=5;
   /** @var int PERM_ADMIN
    * Add/delete users and groups. This is the 'superuser' permission. */
   const PERM_ADMIN=10;
@@ -84,5 +87,14 @@ class Auth
   public static function isAdmin()
   {
     return $_SESSION[self::USER_LEVEL]==self::PERM_ADMIN;
+  }
+
+  /**
+   * @brief Check if user is clearing admin
+   * @return boolean True if user is an clearing admin or more, false otherwise.
+   */
+  public static function isClearingAdmin()
+  {
+    return $_SESSION[self::USER_LEVEL]>=self::PERM_CADMIN;
   }
 }

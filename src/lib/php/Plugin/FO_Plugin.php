@@ -41,6 +41,7 @@ define("PLUGIN_STATE_READY", 2); // used during post-install
 define("PLUGIN_DB_NONE", 0);
 define("PLUGIN_DB_READ", 1);
 define("PLUGIN_DB_WRITE", 3);        /* DB writes permitted */
+define("PLUGIN_DB_CADMIN", 5);       /* DB writes permitted, with additional clearing permissions */
 define("PLUGIN_DB_ADMIN", 10);        /* add/delete users */
 
 
@@ -49,7 +50,8 @@ $NoneText = _("None");
 $ReadText = _("Read");
 $WriteText = _("Write");
 $AdminText = _("Admin");
-$GLOBALS['PERM_NAMES'] = array(Auth::PERM_NONE => $NoneText, Auth::PERM_READ => $ReadText, Auth::PERM_WRITE => $WriteText, Auth::PERM_ADMIN => $AdminText);
+$cAdminText = _("Clearing Admin");
+$GLOBALS['PERM_NAMES'] = array(Auth::PERM_NONE => $NoneText, Auth::PERM_READ => $ReadText, Auth::PERM_WRITE => $WriteText, Auth::PERM_ADMIN => $AdminText, Auth::PERM_CADMIN => $cAdminText);
 
 /**
  * \class FO_Plugin

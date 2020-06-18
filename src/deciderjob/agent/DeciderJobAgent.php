@@ -169,8 +169,16 @@ class DeciderJobAgent extends Agent
 
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
-    $this->processClearingEventOfCurrentJob();
-
+    if ($this->conflictStrategyId == 'global') {
+      $uploadTreeId = 0; // zero because we are checking candidate license for whole upload.
+      if (!empty($this->clearingDao->getCandidateLicenseCountForCurrentDecisions($uploadTreeId, $uploadId))) {
+        throw new \Exception( _("Cannot add candidate license as global decision\n") );
+      }
+      $this->heartbeat(1);
+      $this->heartbeat($this->clearingDao->marklocalDecisionsAsGlobal($uploadId));
+    } else {
+      $this->processClearingEventOfCurrentJob();
+    }
     return true;
   }
 
