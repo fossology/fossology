@@ -53,7 +53,7 @@ class WeirdCharClearedGetter extends ClearedGetterCommon
   {
   }
 
-  public function getCleared($uploadId, $groupId=null, $extended = true, $agentcall = NULL, $isUnifiedReport = false)
+  public function getCleared($uploadId, $groupId = null, $extended = true, $agentcall = null, $isUnifiedReport = false, $objectAgent)
   {
     return array(
       array("good" => "漢", "esc" => "escape", "uml" => ' ü ')
@@ -119,7 +119,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->with(3, $uploadTreeTableName, $parentId)
          ->andReturn("a/b/1");
 
-    $statements = $this->clearedGetterTest->getCleared($uploadId);
+    $statements = $this->clearedGetterTest->getCleared($uploadId,null,true,null,false,null);
     $expected = array(
       "statements" => array(
         array(
@@ -177,7 +177,7 @@ class ClearedComonReportTest extends \PHPUnit\Framework\TestCase
          ->andReturn("a/b/1");
 
     $tester = new TestClearedGetter("text");
-    $statements = $tester->getCleared($uploadId);
+    $statements = $tester->getCleared($uploadId,null,true,null,false,null);
     $expected = array(
       "statements" => array(
         array(
