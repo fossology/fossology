@@ -1,0 +1,85 @@
+{# Copyright 2020 Siemens AG
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <table border="0">
+    <tr>
+      <th style="padding:3px 10px">{{ 'Scheduler'|trans }}</th>
+      <td style="padding:3px 10px" id="scheduler_status"></td>
+    </tr>
+  </table><br />
+  <table border="1" style="width:auto !important;margin:unset !important;"
+    id="alljobstatustable">
+    <thead>
+      <tr>
+        <th>{{ 'Agent name'|trans }}</th>
+        <th>{{ 'Running'|trans }}</th>
+        <th>{{ 'Pending'|trans }}</th>
+        <th>{{ 'ETA'|trans }}</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <td style="font-weight:bold;text-align:right">{{ 'Total'|trans }}</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript" src="scripts/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="scripts/jquery.dataTables.select.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function() {
+	  var t = $("#alljobstatustable").DataTable({
+	    processing: true,
+	    searching: false,
+	    paging: false,
+	    info: false,
+	    autoWidth: false,
+	    ajax: {
+          url: "?mod=ajax_all_job_status",
+          dataSrc: function (json) {
+            var returnval = [];
+            for (var i = 0; i < json.data.length; i++) {
+              var newrow = [];
+              newrow.push(json.data[i].name);
+              newrow.push(json.data[i].running);
+              newrow.push(json.data[i].pending);
+              newrow.push(json.data[i].eta);
+              returnval.push(newrow);
+            }
+            $("#scheduler_status").html(json.scheduler);
+            return returnval;
+          }
+        },
+        footerCallback: function (row, data, start, end, display) {
+          var api = this.api(), data;
+          var totalRunning = api.column(1).data().reduce(function (a, b) {
+            return parseInt(a) + parseInt(b);
+          }, 0);
+          var totalPending = api.column(2).data().reduce(function (a, b) {
+            return parseInt(a) + parseInt(b);
+          }, 0);
+          $(api.column(1).footer()).html(totalRunning);
+          $(api.column(2).footer()).html(totalPending);
+        }
+	  });
+	  var clockTime = {{ clockTime }};
+	  if (clockTime != "0") {
+	    setInterval(function(){
+	      t.ajax.reload();
+	    }, clockTime * 1000);
+	  }
+	});
+  </script>
+{% endblock %}

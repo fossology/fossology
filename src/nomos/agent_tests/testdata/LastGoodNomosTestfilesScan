@@ -421,7 +421,7 @@ File NomosTestfiles/MPL/mozilla.xhtml contains license(s) Dual-license,GPL-2.0+,
 File NomosTestfiles/MPL/MPL-2.0_not_MPL.txt contains license(s) MPL-2.0
 File NomosTestfiles/MPL/MPL-2.0_and_BSD-2-Clause.txt contains license(s) BSD-2-Clause,MPL-2.0
 File NomosTestfiles/MPL/webutil.js contains license(s) MPL-2.0
-File NomosTestfiles/MPL/LICENSE.TXT contains license(s) BSD-style,GPL-2.0,MPL-1.1
+File NomosTestfiles/MPL/YUI-Compressor.txt contains license(s) BSD-style,GPL-2.0,MPL-1.1
 File NomosTestfiles/MPL/RabbitMQ.license contains license(s) MPL-1.1
 File NomosTestfiles/BSD/WalkinBSD contains license(s) BSD
 File NomosTestfiles/BSD/BSD_style_f.txt contains license(s) BSD-2-Clause
@@ -585,7 +585,7 @@ File NomosTestfiles/Frameworx/Frameworx-1.0.txt contains license(s) Frameworx-1.
 File NomosTestfiles/APL/APL-1.0.txt contains license(s) APL-1.0
 File NomosTestfiles/EUPL/EUPL-1.0.txt contains license(s) EUPL-1.0
 File NomosTestfiles/EUPL/EUPL-1.1.txt contains license(s) EUPL-1.1
-File NomosTestfiles/EUPL/EUPL-1.2.txt contains license(s) CC-BY,EUPL-1.2,LGPL,MPL
+File NomosTestfiles/EUPL/EUPL-1.2.txt contains license(s) CC-BY-SA,EUPL-1.2,LGPL,MPL
 File NomosTestfiles/EUPL/simRender.h contains license(s) EUPL-1.1
 File NomosTestfiles/EUPL/async_log.c contains license(s) EUPL
 File NomosTestfiles/No_license_found/ConfigRuleSet.class contains license(s) Apache-possibility
@@ -1305,6 +1305,7 @@ File NomosTestfiles/SPDX/GPL-1.0+ contains license(s) GPL-1.0+
 File NomosTestfiles/SPDX/GPL-1.0-or-later contains license(s) GPL-1.0+
 File NomosTestfiles/SPDX/GPL-2.0 contains license(s) GPL-2.0
 File NomosTestfiles/SPDX/GPL-2.0-only contains license(s) GPL-2.0
+File NomosTestfiles/SPDX/GPL-2.0-with-code.js contains license(s) Dual-license,GPL-2.0
 File NomosTestfiles/SPDX/GPL-2.0+ contains license(s) GPL-2.0+
 File NomosTestfiles/SPDX/GPL-2.0-or-later contains license(s) GPL-2.0+
 File NomosTestfiles/SPDX/GPL-3.0 contains license(s) GPL-3.0

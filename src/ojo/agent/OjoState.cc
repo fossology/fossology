@@ -58,9 +58,10 @@ const OjoAgent& OjoState::getOjoAgent() const
  * @brief Constructor for OjoCliOptions
  * @param verbosity Verbosity set by CLI
  * @param json      True to get output in JSON format
+ * @param ignoreFilesWithMimeType To ignore files with particular mimetype
  */
-OjoCliOptions::OjoCliOptions(int verbosity, bool json) :
-    verbosity(verbosity), json(json)
+OjoCliOptions::OjoCliOptions(int verbosity, bool json, bool ignoreFilesWithMimeType) :
+    verbosity(verbosity), json(json), ignoreFilesWithMimeType(ignoreFilesWithMimeType)
 {
 }
 
@@ -68,7 +69,7 @@ OjoCliOptions::OjoCliOptions(int verbosity, bool json) :
  * @brief Default constructor for OjoCliOptions
  */
 OjoCliOptions::OjoCliOptions() :
-    verbosity(0), json(false)
+    verbosity(0), json(false), ignoreFilesWithMimeType(false)
 {
 }
 
@@ -98,3 +99,13 @@ bool OjoCliOptions::doJsonOutput() const
 {
   return json;
 }
+
+/**
+ * @brief Check ignore files with particular mimetype is required
+ * @return True if required, else false
+ */
+bool OjoCliOptions::doignoreFilesWithMimeType() const
+{
+  return ignoreFilesWithMimeType;
+}
+

@@ -32,6 +32,13 @@
   The URL can begin with HTTP://, HTTPS:// . When do git upload, if https url fails, please try http URL.
 </li>
 <li>
+  <label for="{{ branchField }}">
+    {{ '(Optional for Git) Branch name'| trans }}:
+  </label>
+  <br/>
+  <input name="{{ branchField }}" type="text" size="60"/><br/>
+</li>
+<li>
   <label for="{{ usernameField }}">
     {{ '(Optional) Username'| trans }}:
   </label>

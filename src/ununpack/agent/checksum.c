@@ -16,9 +16,9 @@
 
  ************************************************************/
 
+#include <gcrypt.h>
+
 #include "checksum.h"
-#include "md5.h"
-#include "sha1.h"
 
 /**
  * \file
@@ -126,22 +126,38 @@ int	CountDigits	(uint64_t Num)
  */
 Cksum *	SumComputeFile	(FILE *Fin)
 {
-  int rc;
-  SHA1Context sha1;
-  MyMD5_CTX md5;
+  gcry_md_hd_t checksumhandler;
+  gcry_error_t checksumError = 0;
   char Buffer[64];
   Cksum *Sum;
+  unsigned char *tempBuff;
   int ReadLen;
   uint64_t ReadTotalLen=0;
 
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
   if (!Sum) return(NULL);
 
-  MyMD5_Init(&md5);
-  rc = SHA1Reset(&sha1);
-  if (rc)
+  checksumError = gcry_md_open(&checksumhandler, GCRY_MD_NONE, 0);
+  if (! checksumhandler)
   {
-    LOG_ERROR("Unable to initialize sha1\n");
+    LOG_ERROR("Unable to initialize checksum\n");
+    free(Sum);
+    return(NULL);
+  }
+  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_MD5);
+  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
+  {
+    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
+        gcry_strerror(checksumError));
+    free(Sum);
+    return(NULL);
+  }
+
+  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_SHA1);
+  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
+  {
+    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
+        gcry_strerror(checksumError));
     free(Sum);
     return(NULL);
   }
@@ -151,26 +167,20 @@ Cksum *	SumComputeFile	(FILE *Fin)
     ReadLen = fread(Buffer,1,64,Fin);
     if (ReadLen > 0)
     {
-      MyMD5_Update(&md5,Buffer,ReadLen);
-      if (SHA1Input(&sha1,(uint8_t *)Buffer,ReadLen) != shaSuccess)
-      {
-        LOG_ERROR("Failed to compute sha1 (intermediate compute)\n");
-        free(Sum);
-        return(NULL);
-      }
+      gcry_md_write(checksumhandler, Buffer, ReadLen);
       ReadTotalLen += ReadLen;
     }
   }
 
   Sum->DataLen = ReadTotalLen;
-  MyMD5_Final(Sum->MD5digest,&md5);
-  rc = SHA1Result(&sha1,Sum->SHA1digest);
-  if (rc != shaSuccess)
-  {
-    LOG_ERROR("Failed to compute sha1\n");
-    free(Sum);
-    return(NULL);
-  }
+
+  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_MD5);
+  memcpy(Sum->MD5digest, tempBuff, sizeof(Sum->MD5digest));
+
+  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA1);
+  memcpy(Sum->SHA1digest, tempBuff, sizeof(Sum->SHA1digest));
+  gcry_md_close(checksumhandler);
+
   return(Sum);
 } /* SumComputeFile() */
 
@@ -183,34 +193,49 @@ Cksum *	SumComputeFile	(FILE *Fin)
  */
 Cksum *	SumComputeBuff	(CksumFile *CF)
 {
-  int rc;
-  SHA1Context sha1;
-  MyMD5_CTX md5;
   Cksum *Sum;
+  gcry_md_hd_t checksumhandler;
+  gcry_error_t checksumError;
+  unsigned char *tempBuff;
+
+  checksumError = gcry_md_open(&checksumhandler, GCRY_MD_NONE, 0);
+  if (! checksumhandler)
+  {
+    LOG_ERROR("Unable to initialize checksum\n");
+    return(NULL);
+  }
+  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_MD5);
+  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
+  {
+    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
+        gcry_strerror(checksumError));
+    return(NULL);
+  }
+
+  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_SHA1);
+  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
+  {
+    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
+        gcry_strerror(checksumError));
+    return(NULL);
+  }
 
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
-  if (!Sum) return(NULL);
+  if (!Sum)
+  {
+    return(NULL);
+  }
   Sum->DataLen = CF->MmapSize;
 
-  MyMD5_Init(&md5);
-  rc = SHA1Reset(&sha1);
-  if (rc)
-  {
-    LOG_ERROR("Unable to initialize sha1\n");
-    free(Sum);
-    return(NULL);
-  }
+  gcry_md_write(checksumhandler, CF->Mmap, CF->MmapSize);
 
-  MyMD5_Update(&md5,CF->Mmap,CF->MmapSize);
-  MyMD5_Final(Sum->MD5digest,&md5);
-  SHA1Input(&sha1,CF->Mmap,CF->MmapSize);
-  rc = SHA1Result(&sha1,Sum->SHA1digest);
-  if (rc)
-  {
-    LOG_ERROR("Failed to compute sha1\n");
-    free(Sum);
-    return(NULL);
-  }
+  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_MD5);
+  memcpy(Sum->MD5digest, tempBuff, sizeof(Sum->MD5digest));
+
+  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA1);
+  memcpy(Sum->SHA1digest, tempBuff, sizeof(Sum->SHA1digest));
+
+  gcry_md_close(checksumhandler);
   return(Sum);
 } /* SumComputeBuff() */
 
@@ -243,3 +268,40 @@ char *	SumToString	(Cksum *Sum)
   return(Result);
 } /* SumToString() */
 
+int calc_sha256sum(char*filename, char* dst) {
+  gcry_md_hd_t checksumhandler;
+  unsigned char buf[32];
+  unsigned char *tempBuff;
+  memset(buf, '\0', sizeof(buf));
+  FILE *f;
+  if(!(f=fopen(filename, "rb")))
+  {
+    LOG_FATAL("Failed to open file '%s'\n", filename);
+    return(1);
+  }
+  gcry_md_open(&checksumhandler, GCRY_MD_SHA256, 0);
+  if (! checksumhandler ||
+    (! gcry_md_is_enabled(checksumhandler, GCRY_MD_SHA256)))
+  {
+    LOG_ERROR("Unable to initialize checksum\n");
+    return(2);
+  }
+
+  int i=0;
+  while((i=fread(buf, 1, sizeof(buf), f)) > 0) {
+    gcry_md_write(checksumhandler, buf, i);
+  }
+  fclose(f);
+  memset(buf, '\0', sizeof(buf));
+  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA256);
+  memcpy(buf, tempBuff, sizeof(buf));
+
+  gcry_md_close(checksumhandler);
+
+  for (i=0; i<32; i++)
+  {
+    snprintf(dst+i*2, 3, "%02X", buf[i]);
+  }
+
+  return 0;
+}

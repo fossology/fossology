@@ -37,7 +37,7 @@
             <td align='right'><small>{{ 'Group'|trans }}:</small></td>
             <td>
               {% if singleGroup %}{{ singleGroup }}
-              {%else%}       
+              {%else%}
                 <form action="{{ backtraceUri }}" method="post">
                   {% import "include/macros.html.twig" as macro %}
                   {{ macro.select('selectMemberGroup',allAssignedGroups,'selectMemberGroup',groupId,' class="ui-render-select2" onchange="this.form.submit()"') }}

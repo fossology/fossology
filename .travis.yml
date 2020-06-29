@@ -5,6 +5,7 @@
 
 language: php
 dist: xenial
+os: linux
 php: 7.0
 cache:
   ccache: true
@@ -47,6 +48,8 @@ addons:
       - sleuthkit
       - unrar-free
       - upx-ucl
+      - libicu-dev
+      - libgcrypt20-dev
 
 services: postgresql
 
@@ -71,6 +74,6 @@ jobs:
         keep_history: false
         local_dir: code_docs
         repo: $GH_REPO_REF
-        target-branch: master
+        target_branch: master
         on:
           branch: master

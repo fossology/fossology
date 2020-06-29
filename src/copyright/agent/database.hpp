@@ -71,7 +71,7 @@ public:
   bool createTables() const;
   bool insertInDatabase(DatabaseEntry& entry) const;
   bool insertNoResultInDatabase(long agentId, long pFileId) const;
-  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId);
+  std::vector<unsigned long> queryFileIdsForUpload(int agentId, int uploadId, bool ignoreFilesWithMimeType);
 
 private:
   /**

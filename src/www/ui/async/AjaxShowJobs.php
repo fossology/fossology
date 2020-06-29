@@ -3,6 +3,7 @@
  Copyright (C) 2015-2019, Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
+ Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -132,6 +133,11 @@ class AjaxShowJobs extends \FO_Plugin
       $value ="";
       $label = $labelKey;
       switch ($field) {
+        case 'job_queued':
+        case 'jq_starttime':
+        case 'jq_endtime':
+          $value = Convert2BrowserTime($row[$field]);
+          break;
         case 'jq_itemsprocessed':
           $value = number_format($row[$field]);
           break;
@@ -154,7 +160,7 @@ class AjaxShowJobs extends \FO_Plugin
           }
           break;
         case 'jq_log':
-          if (empty($row[$field]) || !file_exists($row[$field])) {
+          if (empty($row[$field]) || $row[$field] == 'removed' || !file_exists($row[$field])) {
             break;
           }
           if (filesize($row[$field]) > self::MAX_LOG_OUTPUT) {
@@ -224,6 +230,8 @@ class AjaxShowJobs extends \FO_Plugin
         'jobQueue' => $jobs['jobqueue']
       );
       foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
+        $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime($jobArr['jobQueue'][$key]['jq_starttime']);
+        $jobArr['jobQueue'][$key]['jq_endtime'] = Convert2BrowserTime($jobArr['jobQueue'][$key]['jq_endtime']) ;
         if (! empty($singleJobQueue["jq_endtime"])) {
           $numSecs = strtotime($singleJobQueue['jq_endtime']) -
             strtotime($singleJobQueue['jq_starttime']);
@@ -293,7 +301,7 @@ class AjaxShowJobs extends \FO_Plugin
           'uploadName' => $jobs['upload']['upload_filename'],
           'uploadId' => $jobs['upload']['upload_pk'],
           'uploadDesc' => $jobs['upload']['upload_desc'],
-          'uploadItem' => $jobs['uploadtree']['uploadtree_pk'],
+          'uploadItem' => empty($jobs['uploadtree']) ? -1 : $jobs['uploadtree']['uploadtree_pk'],
           'uploadEta' => $this->showJobsDao->getEstimatedTime($jobs['job']['job_pk'], '', 0, $jobs['upload']['upload_pk'])
         );
       } else {

@@ -20,8 +20,8 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-CFLAGS_LOCAL = $(FO_CFLAGS)
-LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq -lssl -lcrypto
+CFLAGS_LOCAL = $(FO_CFLAGS) $(shell libgcrypt-config --cflags)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq $(shell libgcrypt-config --libs)
 CONFDIR = $(DESTDIR)$(SYSCONFDIR)
 
 EXE = delagent

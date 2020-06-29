@@ -261,9 +261,9 @@ class TreeDaoTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createPlainTables(array('pfile'));
     $this->dbManager->queryOnce('ALTER TABLE uploadtree RENAME TO uploadtree_a');
     $this->testDb->insertData(array('uploadtree_a','pfile'));
-    // (pfile_pk, pfile_md5, pfile_sha1, pfile_size) := (4, '59CACDFCE5051CD8A1D8A1F2DCCE40A5', '04621571BCBABCE75C4DD1C6445B87DEC0995734', 12320);
-    $hashes = $this->treeDao->getItemHashes(7,'uploadtree_a');
-    assertThat($hashes,equalTo(array('md5'=>'59CACDFCE5051CD8A1D8A1F2DCCE40A5','sha1'=>'04621571BCBABCE75C4DD1C6445B87DEC0995734')));
+    // (pfile_pk, pfile_md5, pfile_sha1, pfile_sha256, pfile_size) := (762, 'C655F0AD3E4D3F90D8EE0541DD636E2E', 'D62DCD25DC68180758FD1C064ADC91AB70A78CB1', '8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355', 34);
+    $hashes = $this->treeDao->getItemHashes(463,'uploadtree_a');
+    assertThat($hashes,equalTo(array('md5'=>'C655F0AD3E4D3F90D8EE0541DD636E2E','sha1'=>'D62DCD25DC68180758FD1C064ADC91AB70A78CB1','sha256'=>'8F39AC8ADD8CD0C0C2BF8924CE3B24F4B2760B8723BFD4205A49FB142490A355')));
   }
 
   protected function getNestedTestFileStructure()

@@ -177,6 +177,7 @@
  * -# \subpage unifiedreport
  * -# \subpage ununpack
  * -# \subpage wget_agent
+ * -# \subpage softwareHeritage
  *
  * \page exampleagents Example agents to begin with
  * \tableofcontents

@@ -26,6 +26,7 @@ use Fossology\UI\Api\Models\Info;
 use Firebase\JWT\JWT;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
+use Fossology\Lib\Dao\UserDao;
 
 class UserEditPage extends DefaultPlugin
 {
@@ -39,17 +40,23 @@ class UserEditPage extends DefaultPlugin
    * Auth helper object */
   private $authHelper;
 
+  /**
+   * @var UserDao
+   * UserDao object */
+  private $userDao;
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
         self::TITLE => _("Edit User Account"),
         self::MENU_LIST => 'Admin::Users::Edit User Account',
         self::REQUIRES_LOGIN => true,
-        self::PERMISSION => Auth::PERM_WRITE
+        self::PERMISSION => Auth::PERM_READ
     ));
 
     $this->dbManager = $this->getObject('db.manager');
     $this->authHelper = $this->getObject('helper.authHelper');
+    $this->userDao = $this->getObject('dao.user');
   }
 
   /**
@@ -117,6 +124,7 @@ class UserEditPage extends DefaultPlugin
     $vars['tokenList'] = $this->getListOfActiveTokens();
     $vars['expiredTokenList'] = $this->getListOfExpiredTokens();
     $vars['maxTokenDate'] = $this->authHelper->getMaxTokenValidity();
+    $vars['writeAccess'] = ($_SESSION[Auth::USER_LEVEL] >= 3);
 
     return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
@@ -159,6 +167,7 @@ class UserEditPage extends DefaultPlugin
           PLUGIN_DB_NONE => _("None (very basic, no database access)"),
           PLUGIN_DB_READ => _("Read-only (read, but no writes or downloads)"),
           PLUGIN_DB_WRITE => _("Read-Write (read, download, or edit information)"),
+          PLUGIN_DB_CADMIN => _("Clearing Administrator (read, download, edit information and edit decisions)"),
           PLUGIN_DB_ADMIN => _("Full Administrator (all access including adding and deleting users)")
         );
       $vars['accessLevel'] = $UserRec['user_perm'];
@@ -171,6 +180,7 @@ class UserEditPage extends DefaultPlugin
     $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack",
       "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
     $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
+    $vars['defaultGroupOption'] = $this->getUserGroupSelect($UserRec);
 
     return $vars;
   }
@@ -190,34 +200,43 @@ class UserEditPage extends DefaultPlugin
     /**** Validations ****/
     /* Make sure we have a user_pk */
     if (empty($UserRec['user_pk'])) {
-      $Errors .= "<li>" . _("Consistency error (User_pk missing).  Please start over.");
+      $Errors .= "<li>" . _("Consistency error (User_pk missing).  Please start over.") . "</li>";
     }
 
     /* Make sure username looks valid */
     if (empty($UserRec['user_name'])) {
-      $Errors .= "<li>" . _("Username must be specified.");
+      $Errors .= "<li>" . _("Username must be specified.") . "</li>";
     }
 
     /* Verify the user_name is not a duplicate  */
     $CheckUserRec = GetSingleRec("users", "WHERE user_name='$UserRec[user_name]'");
     if ((!empty($CheckUserRec)) and ( $CheckUserRec['user_pk'] != $UserRec['user_pk'])) {
-      $Errors .= "<li>" . _("Username is not unique.");
+      $Errors .= "<li>" . _("Username is not unique.") . "</li>";
     }
 
     /* Make sure password matches */
     if ($UserRec['_pass1'] != $UserRec['_pass2']) {
-      $Errors .= "<li>" . _("Passwords do not match.");
+      $Errors .= "<li>" . _("Passwords do not match.") . "</li>";
     }
 
     /* Make sure email looks valid */
     $Check = preg_replace("/[^a-zA-Z0-9@_.+-]/", "", $UserRec['user_email']);
     if ($Check != $UserRec['user_email']) {
-      $Errors .= "<li>" . _("Invalid email address.");
+      $Errors .= "<li>" . _("Invalid email address.") . "</li>";
     }
 
     /* Did they specify a password and also request a blank password?  */
     if (!empty($UserRec['_blank_pass']) and ( !empty($UserRec['_pass1']) or ! empty($UserRec['_pass2']))) {
-      $Errors .= "<li>" . _("You cannot specify both a password and a blank password.");
+      $Errors .= "<li>" . _("You cannot specify both a password and a blank password.") . "</li>";
+    }
+
+    /* Check if the user is member of the group */
+    if (!empty($UserRec['group_fk'])) {
+      $group_map = $this->userDao->getUserGroupMap($UserRec['user_pk']);
+      if (array_search($UserRec['group_fk'], array_keys($group_map)) === false) {
+        $Errors .= "<li>" . _("User is not member of provided group.") .
+          "</li>";
+      }
     }
 
     /* If we have any errors, return them */
@@ -252,7 +271,7 @@ class UserEditPage extends DefaultPlugin
       $sql .= "$key='" . pg_escape_string($val) . "'";
       $first = false;
     }
-    $sql .= " where user_pk=$UserRec[user_pk]";
+    $sql .= " WHERE user_pk=$UserRec[user_pk]";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
     pg_free_result($result);
@@ -314,6 +333,7 @@ class UserEditPage extends DefaultPlugin
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
       $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
       $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
+      $UserRec['group_fk'] = intval($request->get('default_group_fk'));
 
       $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
       $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
@@ -360,7 +380,11 @@ class UserEditPage extends DefaultPlugin
     $user_pk = Auth::getUserId();
     $tokenName = GetParm('pat_name', PARM_STRING);
     $tokenExpiry = GetParm('pat_expiry', PARM_STRING);
-    $tokenScope = GetParm('pat_scope', PARM_STRING);
+    if ($_SESSION[Auth::USER_LEVEL] < 3) {
+      $tokenScope = 'r';
+    } else {
+      $tokenScope = GetParm('pat_scope', PARM_STRING);
+    }
     $tokenScope = array_search($tokenScope, RestHelper::SCOPE_DB_MAP);
     $restHelper = $container->get('helper.restHelper');
     $isTokenRequestValid = $restHelper->validateTokenRequest($tokenExpiry,
@@ -389,8 +413,8 @@ class UserEditPage extends DefaultPlugin
       } catch (DuplicateTokenNameException $e) {
         throw new \UnexpectedValueException($e->getMessage());
       }
-      return $this->authHelper->generateJwtToken($request->getHost(), $tokenExpiry,
-          $jti['created_on'], $jti['jti'], $tokenScope, $key);
+      return $this->authHelper->generateJwtToken($tokenExpiry,
+        $jti['created_on'], $jti['jti'], $tokenScope, $key);
     }
   }
 
@@ -455,6 +479,26 @@ class UserEditPage extends DefaultPlugin
     }
     array_multisort(array_column($response, "created"), SORT_ASC, $response);
     return $response;
+  }
+
+  /**
+   * Generate the HTML option list of groups for the user
+   * @param array $userRec User record being updated
+   * @return string HTML option list
+   */
+  private function getUserGroupSelect($userRec)
+  {
+    $groups = $this->userDao->getUserGroupMap($userRec['user_pk']);
+    $userDefaults = $this->userDao->getUserAndDefaultGroupByUserName($userRec['user_name']);
+    $options = "";
+    foreach ($groups as $groupId => $groupName) {
+      $options .= "<option value='$groupId' ";
+      if ($groupId == $userDefaults['group_fk']) {
+        $options .= "selected='selected'";
+      }
+      $options .= ">$groupName</option>";
+    }
+    return $options;
   }
 }
 

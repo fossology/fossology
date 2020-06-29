@@ -20,6 +20,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Data\AgentRef;
 
 /**
  * \file ui-list-lic-files.php
@@ -45,7 +46,7 @@ class LicenseListFiles extends FO_Plugin
   private $agentDao;
 
   /** @var Array */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   function __construct()
   {

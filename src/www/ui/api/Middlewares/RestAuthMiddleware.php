@@ -59,8 +59,10 @@ class RestAuthMiddleware
     } else {
       $authHelper = $GLOBALS['container']->get('helper.authHelper');
       $jwtToken = $request->getHeader('Authorization')[0];
-      $tokenValid = $authHelper->verifyAuthToken($jwtToken,
-        $requestUri->getHost(), $userId, $tokenScope);
+      $userId = -1;
+      $tokenScope = false;
+      $tokenValid = $authHelper->verifyAuthToken($jwtToken, $userId,
+        $tokenScope);
       if ($tokenValid === true && (stristr($request->getMethod(), "get") === false &&
           stristr($tokenScope, "write") === false)) {
         /*
@@ -70,8 +72,21 @@ class RestAuthMiddleware
         $tokenValid = new Info(403, "Do not have required scope.", InfoType::ERROR);
       }
       if ($tokenValid === true) {
-        $authHelper->updateUserSession($userId, $tokenScope);
-        $response = $next($request, $response);
+        $groupName = "";
+        $groupName = strval($request->getHeaderLine('groupName'));
+        if (!empty($groupName)) { // if request contains groupName
+          $userHasGroupAccess = $authHelper->userHasGroupAccess($userId, $groupName);
+          if ($userHasGroupAccess === true) {
+            $authHelper->updateUserSession($userId, $tokenScope, $groupName);
+            $response = $next($request, $response);
+          } else { // no group access or group does not exist
+            $response = $response->withJson($userHasGroupAccess->getArray(),
+            $userHasGroupAccess->getCode());
+          }
+        } else { // no groupName passed, use defult groupId saved in DB
+          $authHelper->updateUserSession($userId, $tokenScope);
+          $response = $next($request, $response);
+        }
       } else {
         $response = $response->withJson($tokenValid->getArray(),
           $tokenValid->getCode());

@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2018,2020 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -25,11 +25,15 @@ namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Fossology\Lib\Auth\Auth;
+use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\UI\Page\UploadPageBase;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
+use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
 
 /**
  * @class UploadController
@@ -37,6 +41,25 @@ use Fossology\UI\Api\Helper\UploadHelper;
  */
 class UploadController extends RestController
 {
+
+  /**
+   * Get query parameter name for agent listing
+   */
+  const AGENT_PARAM = "agent";
+
+  /**
+   * Get query parameter name for container listing
+   */
+  const CONTAINER_PARAM = "containers";
+
+  public function __construct($container)
+  {
+    parent::__construct($container);
+    $groupId = $this->restHelper->getGroupId();
+    $dbManager = $this->dbHelper->getDbManager();
+    $uploadBrowseProxy = new UploadBrowseProxy($groupId, 0, $dbManager, false);
+    $uploadBrowseProxy->sanity();
+  }
 
   /**
    * Get list of uploads for current user
@@ -48,34 +71,48 @@ class UploadController extends RestController
    */
   public function getUploads($request, $response, $args)
   {
-    $thisSession = $this->restHelper->getAuthHelper()->getSession();
     $id = null;
     if (isset($args['id'])) {
       $id = intval($args['id']);
-      if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $id)) {
-        $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+      $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+      if ($upload !== true) {
+        return $response->withJson($upload->getArray(), $upload->getCode());
+      }
+      $temp = $this->isAdj2nestDone($id, $response);
+      if ($temp !== true) {
+        return $temp;
       }
     }
-    $uploads = $this->dbHelper->getUploads($thisSession->get(Auth::USER_ID), $id);
+    $uploads = $this->dbHelper->getUploads($this->restHelper->getUserId(), $id);
     if ($id !== null) {
-      if ($uploads === null) {
-        $returnVal = new Info(404, "Upload does not exist", InfoType::ERROR);
-        return $response->withJson($returnVal->getArray(), $returnVal->getCode());
-      }
-      if (! empty($uploads)) {
-        $uploads = $uploads[0];
-      } else {
-        $returnVal = new Info(503,
-          "Ununpack job not started. Please check job status at " .
-          "/api/v1/jobs?upload=" . $id,
-          InfoType::INFO);
-        return $response->withHeader('Retry-After',
-          '60')->withHeader('Look-at', "/api/v1/jobs?upload=" .
-          $id)->withJson($returnVal->getArray(), $returnVal->getCode());
-      }
+      $uploads = $uploads[0];
     }
     return $response->withJson($uploads, 200);
+  }
+
+  /**
+   * Get summary of given upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function getUploadSummary($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $temp = $this->isAdj2nestDone($id, $response);
+    if ($temp !== true) {
+      return $temp;
+    }
+    $uploadHelper = new UploadHelper();
+    $uploadSummary = $uploadHelper->generateUploadSummary($id,
+      $this->restHelper->getGroupId());
+    return $response->withJson($uploadSummary->getArray(), 200);
   }
 
   /**
@@ -92,14 +129,19 @@ class UploadController extends RestController
       "/delagent/ui/delete-helper.php";
     $returnVal = null;
     $id = intval($args['id']);
-    if ($this->dbHelper->doesIdExist("upload", "upload_pk", $id)) {
-      TryToDelete($id, $this->restHelper->getUserId(),
-        $this->restHelper->getGroupId(), $this->restHelper->getUploadDao());
+
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $result = TryToDelete($id, $this->restHelper->getUserId(),
+      $this->restHelper->getGroupId(), $this->restHelper->getUploadDao());
+    if ($result->getDeleteMessageCode() !== DeleteMessages::SUCCESS) {
+      $returnVal = new Info(500, $result->getDeleteMessageString(),
+        InfoType::ERROR);
+    } else {
       $returnVal = new Info(202, "Delete Job for file with id " . $id,
         InfoType::INFO);
-    } else {
-      $returnVal = new Info(404, "Upload " . $id . " doesn't exist",
-        InfoType::ERROR);
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
@@ -167,44 +209,181 @@ class UploadController extends RestController
     if ($request->hasHeader('folderId') &&
       is_numeric($folderId = $request->getHeaderLine('folderId')) && $folderId > 0) {
 
-      $allFolderIds = $this->container->get('dao.folder')->getAllFolderIds();
+      $allFolderIds = $this->restHelper->getFolderDao()->getAllFolderIds();
       if (!in_array($folderId, $allFolderIds)) {
         $error = new Info(404, "folderId $folderId does not exists!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
       }
-      if (!$this->container->get('dao.folder')->isFolderAccessible($folderId)) {
+      if (!$this->restHelper->getFolderDao()->isFolderAccessible($folderId)) {
         $error = new Info(403, "folderId $folderId is not accessible!",
           InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
-      }
-
-      $groupId = intval($request->getHeaderLine(UploadPageBase::UPLOAD_GROUP));
-      if (! empty($groupId)) {
-        $groupMap = $this->container->get('dao.user')->getUserGroupMap(
-          $this->restHelper->getUserId());
-        if (! key_exists($groupId, $groupMap)) {
-          $error = new Info(403, "User is not member of group $groupId!", InfoType::ERROR);
-          return $response->withJson($error->getArray(), $error->getCode());
-        }
       }
 
       $description = $request->getHeaderLine('uploadDescription');
       $public = $request->getHeaderLine('public');
       $public = empty($public) ? 'protected' : $public;
       $ignoreScm = $request->getHeaderLine('ignoreScm');
-      list ($status, $message, $statusDescription, $uploadId) = $uploadHelper->createNewUpload(
-        $request, $folderId, $description, $public, $ignoreScm, $groupId);
+      $uploadType = $request->getHeaderLine('uploadType');
+      if (empty($uploadType)) {
+        $uploadType = "vcs";
+      }
+      $uploadResponse = $uploadHelper->createNewUpload($request, $folderId,
+        $description, $public, $ignoreScm, $uploadType);
+      $status = $uploadResponse[0];
+      $message = $uploadResponse[1];
+      $statusDescription = $uploadResponse[2];
       if (! $status) {
-        $info = new Info($uploadId != -1 ? $uploadId : 500,
-          $message . "\n" . $statusDescription,
+        $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
       } else {
+        $uploadId = $uploadResponse[3];
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }
       return $response->withJson($info->getArray(), $info->getCode());
     } else {
-      $error = new Info(400, "folderId must be a positive integer!", InfoType::ERROR);
+      $error = new Info(400, "folderId must be a positive integer!",
+        InfoType::ERROR);
       return $response->withJson($error->getArray(), $error->getCode());
     }
+  }
+
+  /**
+   * Get list of licenses for given upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function getUploadLicenses($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $query = $request->getQueryParams();
+
+    if (! array_key_exists(self::AGENT_PARAM, $query)) {
+      $error = new Info(400, "'agent' parameter missing from query.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $agents = explode(",", $query[self::AGENT_PARAM]);
+    $containers = true;
+    if (array_key_exists(self::CONTAINER_PARAM, $query)) {
+      $containers = (strcasecmp($query[self::CONTAINER_PARAM], "true") === 0);
+    }
+
+    $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
+    if ($upload !== true) {
+      return $response->withJson($upload->getArray(), $upload->getCode());
+    }
+    $adj2nest = $this->isAdj2nestDone($id, $response);
+    $agentScheduled = $this->areAgentsScheduled($id, $agents, $response);
+    if ($adj2nest !== true) {
+      return $adj2nest;
+    } else if ($agentScheduled !== true) {
+      return $agentScheduled;
+    }
+
+    $uploadHelper = new UploadHelper();
+    $licenseList = $uploadHelper->getUploadLicenseList($id, $agents,
+      $containers);
+    return $response->withJson($licenseList, 200);
+  }
+
+  /**
+   * Check if upload is accessible
+   * @param integer $groupId Group ID
+   * @param integer $id      Upload ID
+   * @return Fossology::UI::Api::Models::Info|boolean Info object on failure or
+   *         true otherwise
+   */
+  private function uploadAccessible($groupId, $id)
+  {
+    if (! $this->dbHelper->doesIdExist("upload", "upload_pk", $id)) {
+      return new Info(404, "Upload does not exist", InfoType::ERROR);
+    } else if (! $this->restHelper->getUploadDao()->isAccessible($id, $groupId)) {
+      return new Info(403, "Upload is not accessible", InfoType::ERROR);
+    }
+    return true;
+  }
+
+  /**
+   * Check if adj2nest agent finished on upload
+   * @param integer $id Upload ID
+   * @param ResponseInterface $response
+   * @return ResponseInterface|boolean Response if failure, true otherwise
+   */
+  private function isAdj2nestDone($id, $response)
+  {
+    $itemTreeBounds = $this->restHelper->getUploadDao()->getParentItemBounds(
+      $id);
+    if ($itemTreeBounds === false || empty($itemTreeBounds->getLeft())) {
+      $returnVal = new Info(503,
+        "Ununpack job not started. Please check job status at " .
+        "/api/v1/jobs?upload=" . $id, InfoType::INFO);
+      return $response->withHeader('Retry-After', '60')
+        ->withHeader('Look-at', "/api/v1/jobs?upload=" . $id)
+        ->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+    return true;
+  }
+
+  /**
+   * Check if every agent passed is scheduled for the upload
+   * @param integer $uploadId Upload ID to check agents for
+   * @param array $agents     List of agents to check
+   * @param ResponseInterface $response
+   * @return ResponseInterface|boolean Error response on failure, true on
+   * success
+   */
+  private function areAgentsScheduled($uploadId, $agents, $response)
+  {
+    global $container;
+    $agentDao = $container->get('dao.agent');
+
+    $agentList = array_keys(AgentRef::AGENT_LIST);
+    $intersectArray = array_intersect($agents, $agentList);
+
+    $error = null;
+    if (count($agents) != count($intersectArray)) {
+      $error = new Info(400, "Agent should be any of " .
+        implode(", ", $agentList) . ". " . implode(",", $agents) . " passed.",
+        InfoType::ERROR);
+    } else {
+      // Agent is valid, check if they have ars tables.
+      foreach ($agents as $agent) {
+        if (! $agentDao->arsTableExists($agent)) {
+          $error = new Info(412, "Agent $agent not scheduled for the upload. " .
+            "Please POST to /jobs", InfoType::ERROR);
+          break;
+        }
+      }
+    }
+    if ($error !== null) {
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $scanProx = new ScanJobProxy($agentDao, $uploadId);
+    $agentList = $scanProx->createAgentStatus($agents);
+
+    foreach ($agentList as $agent) {
+      if (! array_key_exists('currentAgentId', $agent)) {
+        $error = new Info(412, "Agent " . $agent["agentName"] .
+          " not scheduled for the upload. Please POST to /jobs",
+          InfoType::ERROR);
+        $response = $response->withJson($error->getArray(), $error->getCode());
+      } else if ($agent['isAgentRunning']) {
+        $error = new Info(503, "Agent $agent is running. " .
+          "Please check job status at /api/v1/jobs?upload=" . $uploadId,
+          InfoType::INFO);
+        $response = $response->withHeader('Retry-After', '60')
+        ->withHeader('Look-at', "/api/v1/jobs?upload=" . $uploadId)
+        ->withJson($error->getArray(), $error->getCode());
+      }
+      if ($error !== null) {
+        return $response;
+      }
+    }
+    return true;
   }
 }

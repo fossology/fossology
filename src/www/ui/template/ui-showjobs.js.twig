@@ -109,7 +109,7 @@ function createTableForJob(job) {
     border: "1"
   });
   var uploadLink = "";
-  if (job.upload !== null) {
+  if (job.upload !== null && job.upload.uploadItem != -1) {
     uploadLink = '<a title="{{ "Click to browse"|trans }}" ' +
     'href="?mod=browse&upload=' + job.upload.uploadId + '&item=' +
     job.upload.uploadItem + '">' + job.upload.uploadName + '</a>';

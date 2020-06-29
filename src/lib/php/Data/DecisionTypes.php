@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014,2019-2020, Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -21,6 +21,7 @@ namespace Fossology\Lib\Data;
 class DecisionTypes extends Types
 {
   const TO_BE_DISCUSSED = 3;
+  const DO_NOT_USE = 6;
   const IRRELEVANT = 4;
   const IDENTIFIED = 5;
   const WIP = 0;
@@ -31,6 +32,7 @@ class DecisionTypes extends Types
 
     $this->map = array(
         self::TO_BE_DISCUSSED => "To be discussed",
+        self::DO_NOT_USE => "Do not use",
         self::IRRELEVANT => "Irrelevant",
         self::IDENTIFIED => "Identified"
     );

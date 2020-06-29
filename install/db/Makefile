@@ -5,7 +5,7 @@ TOP = ../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-all: dbcreate dbmigrate_pfile_calculate_sha256.php
+all: dbcreate dbmigrate_pfile_calculate_sha256.php dbmigrate_change_db_encoding.php
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -17,6 +17,10 @@ dbcreate: dbcreate-process
 dbmigrate_pfile_calculate_sha256.php:	dbmigrate_pfile_calculate_sha256-process_php
 	chmod +x dbmigrate_pfile_calculate_sha256.php
 
+# generate the recoding script
+dbmigrate_change_db_encoding.php:	dbmigrate_change_db_encoding-process_php
+	chmod +x dbmigrate_change_db_encoding.php
+
 install: all
 	$(INSTALL_DATA) fossologyinit.sql $(DESTDIR)$(LIBEXECDIR)/fossologyinit.sql
 	$(INSTALL_DATA) licenseRef.json $(DESTDIR)$(LIBEXECDIR)/licenseRef.json
@@ -27,6 +31,8 @@ install: all
 	$(INSTALL_DATA) dbmigrate_2.5-2.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	$(INSTALL_DATA) dbmigrate_3.3-3.4.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.3-3.4.php
 	$(INSTALL_DATA) dbmigrate_3.5-3.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.5-3.6.php
+	$(INSTALL_DATA) dbmigrate_3.6-3.7.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.6-3.7.php
+	$(INSTALL_DATA) dbmigrate_3.7-3.8.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.7-3.8.php
 	$(INSTALL_DATA) dbmigrate_clearing-event.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	$(INSTALL_DATA) dbmigrate_real-parent.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	$(INSTALL_DATA) dbmigrate_bulk_license.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php
@@ -35,7 +41,8 @@ install: all
 	$(INSTALL_DATA) dbmigrate_copyright-author.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-author.php
 	$(INSTALL_DATA) dbmigrate_multiple_copyright_decisions.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
 	$(INSTALL_DATA) resequence_author_table.php $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
-	$(INSTALL_DATA) dbmigrate_pfile_calculate_sha256.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
+	$(INSTALL_PROGRAM) dbmigrate_pfile_calculate_sha256.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
+	$(INSTALL_PROGRAM) dbmigrate_change_db_encoding.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_change_db_encoding.php
 
 	chmod +x $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 
@@ -62,6 +69,8 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_2.5-2.6.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.3-3.4.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.5-3.6.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.6-3.7.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.7-3.8.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php
@@ -71,6 +80,7 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_multiple_copyright_decisions.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_change_db_encoding.php
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \

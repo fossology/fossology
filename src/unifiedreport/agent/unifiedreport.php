@@ -103,9 +103,11 @@ use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
+use Fossology\Lib\Report\LicenseDNUGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
+use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Element\Section;
@@ -115,7 +117,6 @@ use PhpOffice\PhpWord\Shared\Html;
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/reportStatic.php");
 include_once(__DIR__ . "/reportSummary.php");
-include_once(__DIR__ . "/obligations.php");
 
 /**
  * @class UnifiedReport
@@ -148,6 +149,11 @@ class UnifiedReport extends Agent
    */
   private $licenseIrrelevantGetter;
 
+  /** @var LicenseDNUGetter $licenseDNUGetter
+   * LicenseDNUGetter object
+   */
+  private $licenseDNUGetter;
+
   /** @var BulkMatchesGetter $bulkMatchesGetter
    * BulkMatchesGetter object
    */
@@ -157,6 +163,11 @@ class UnifiedReport extends Agent
    * licenseIrrelevantCommentGetter object
    */
   private $licenseIrrelevantCommentGetter;
+
+  /** @var obligationsGetter $obligationsGetter
+   * obligationsGetter object
+   */
+  private $obligationsGetter;
 
   /** @var OtherGetter $otherGetter
    * otherGetter object
@@ -231,7 +242,10 @@ class UnifiedReport extends Agent
     $this->bulkMatchesGetter = new BulkMatchesGetter();
     $this->licenseIrrelevantGetter = new LicenseIrrelevantGetter();
     $this->licenseIrrelevantCommentGetter = new LicenseIrrelevantGetter(false);
+    $this->licenseDNUGetter = new LicenseDNUGetter();
+    $this->licenseDNUCommentGetter = new LicenseDNUGetter(false);
     $this->otherGetter = new OtherGetter();
+    $this->obligationsGetter = new ObligationsGetter();
 
     parent::__construct(REPORT_AGENT_NAME, AGENT_VERSION, AGENT_REV);
 
@@ -250,40 +264,47 @@ class UnifiedReport extends Agent
 
     $this->heartbeat(0);
 
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
-    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId);
+    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
-    $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
+    $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
 
-    $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId);
+    $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
-    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
+    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
-    $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId);
+    $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licenseComments) ? 0 : count($licenseComments["statements"]));
 
-    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId);
+    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licensesIrre) ? 0 : count($licensesIrre["statements"]));
 
-    $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId);
+    $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId, true, null, false, $this);
     $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true);
+    $licensesDNU = $this->licenseDNUGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $this->heartbeat(empty($licensesDNU) ? 0 : count($licensesDNU["statements"]));
+
+    $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
+
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true, $this);
     $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
-    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc");
+    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc", false, $this);
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
+    $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
 
     $contents = array(
                         "licenses" => $licenses,
@@ -294,6 +315,8 @@ class UnifiedReport extends Agent
                         "ecc" => $ecc,
                         "licensesIrre" => $licensesIrre,
                         "licensesIrreComment" => $licensesIrreComment,
+                        "licensesDNU" => $licensesDNU,
+                        "licensesDNUComment" => $licensesDNUComment,
                         "licensesMain" => $licensesMain,
                         "licensesHist" => $licensesHist,
                         "otherStatement" => $otherStatement
@@ -670,9 +693,7 @@ class UnifiedReport extends Agent
     $reportSummarySection = new ReportSummary();
     $reportStaticSection = new ReportStatic($timestamp);
 
-    $licenseObligation = new ObligationsToLicenses();
-
-    list($obligations, $whiteLists) = $licenseObligation->getObligations($contents['licenses']['statements'],
+    list($obligations, $whiteLists) = $this->obligationsGetter->getObligations($contents['licenses']['statements'],
       $contents['licensesMain']['statements'], $uploadId, $groupId);
 
     /* Header starts */
@@ -686,7 +707,7 @@ class UnifiedReport extends Agent
       $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
 
     /* Assessment summery table */
-    $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
+    $bookMarkCell = $reportStaticSection->assessmentSummaryTable($section, $contents['otherStatement']);
 
     /* Todoinfo table */
     $reportStaticSection->todoTable($section);
@@ -772,6 +793,23 @@ class UnifiedReport extends Agent
     $section->addTitle(htmlspecialchars("$subHeading"), 3);
     $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
     $this->bulkLicenseTable($section, "", $contents['licensesIrreComment']['statements'], $titleSubHeadingNotes);
+
+    /* Display Do not use license files */
+    $heading = "Do not use Files";
+    if ($contents['otherStatement']['includeDNU']) {
+      // adding an internal bookmark
+      $columnStyleWithUnderline = array("size" => 11, "color" => "0000A0", 'underline' => 'single');
+      $section->addBookmark('DNUBookmark');
+      $bookMarkCell->addLink('DNUBookmark', htmlspecialchars(' NOTE: DO NOT USE files found! Please check Do not use files section', ENT_COMPAT, 'UTF-8'), $columnStyleWithUnderline, "pStyle", true);
+    }
+    $titleSubHeadingIrre = "(Path, Files, Licenses)";
+    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesDNU']['statements'], $titleSubHeadingIrre);
+
+    /* Display Do not use file license comment  */
+    $subHeading = "Comment for Do not use files";
+    $section->addTitle(htmlspecialchars("$subHeading"), 3);
+    $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
+    $this->bulkLicenseTable($section, "", $contents['licensesDNUComment']['statements'], $titleSubHeadingNotes);
 
     /* clearing protocol change log table */
     $reportStaticSection->clearingProtocolChangeLogTable($section);

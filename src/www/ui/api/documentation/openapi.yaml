@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2019
+# Copyright (C) Siemens AG 2017-2020
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.0.6
+  version: 1.0.16
   contact:
     email: fossology@fossology.org
   license:
@@ -172,6 +172,14 @@ paths:
         - Upload
         - Organize
       summary: Delete upload by id
+      parameters:
+        - name: groupName
+          description: The group name to chose while deleting the package
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided  
       responses:
         '202':
           description: Upload will be deleted
@@ -193,6 +201,13 @@ paths:
           required: true
           schema:
             type: integer
+        - name: groupName
+          description: The group name to chose while changing the package
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided
       responses:
         '202':
           description: Upload will be moved
@@ -229,7 +244,7 @@ paths:
       tags:
         - Upload
       summary: Uploads
-      description: |
+      description: >
         The uploads endpoint returns all uploads
       responses:
         '200':
@@ -246,13 +261,16 @@ paths:
       tags:
         - Upload
       summary: Post new upload to FOSSology
-      description: |
+      description: >
         Endpoint to create a new upload in FOSSology
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VcsUpload'
+              oneOf:
+                - $ref: '#/components/schemas/VcsUpload'
+                - $ref: '#/components/schemas/UrlUpload'
+                - $ref: '#/components/schemas/ServerUpload'
           multipart/form-data:
             schema:
               type: object
@@ -285,22 +303,141 @@ paths:
               - public
             default: protected
         - name: ignoreScm
-          description: Ignore SCM files (Git, SVN, TFS)
+          description: >
+            Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
           in: header
           required: false
           schema:
             type: boolean
             default: false
-        - name: groupId
-          description: The group id to chose while uploading the package
+        - name: groupName
+          description: The group name to chose while uploading the package
           in: header
           required: false
           schema:
-            type: integer
-            description: Group id, from last login if not provided
+            type: string
+            description: Group name, from last login if not provided    
+        - name: uploadType
+          description: >
+            Type of upload done. Required for VCS, URL and server uploads
+          in: header
+          required: false
+          schema:
+            type: string
+            enum:
+              - vcs
+              - url
+              - server
+            default: vcs
       responses:
         '201':
           description: Upload is created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/summary:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+    get:
+      tags:
+        - Upload
+      summary: Get single upload summary
+      description:
+        Returns summary for single upload
+      responses:
+        '200':
+          description: Get summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadSummary'
+        '503':
+          description: >
+            The ununpack agent has not started yet. Please check the 'Look-at'
+            header for more information
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /uploads/{id}/licenses:
+    parameters:
+      - name: id
+        required: true
+        description: Id of the upload
+        in: path
+        schema:
+          type: integer
+      - name: agent
+        required: true
+        description: Name of the agent
+        in: query
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - nomos
+              - monk
+              - ninka
+              - ojo
+              - reportImport
+          uniqueItems: true
+        style: form
+        explode: false
+      - name: containers
+        required: false
+        description: Show directories and containers
+        in: query
+        schema:
+          type: boolean
+          default: true
+    get:
+      tags:
+        - Upload
+      summary: Get licenses found by agent
+      description:
+        Returns the list of licenses found by requested agent
+      responses:
+        '200':
+          description: Get licenses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadLicenses'
+        '503':
+          description: >
+            The ununpack agent or queried agents have not started yet. Please
+            check the 'Look-at' header for more information.
+          headers:
+            'Look-at':
+              description: Contains the URL to get jobs for the given upload
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '412':
+          description: >
+            The agent has not been scheduled for the upload. Please check the
+            response message.
           content:
             application/json:
               schema:
@@ -314,6 +451,13 @@ paths:
           - Search
         description: Search the FOSSology for a specific file
         parameters:
+          - name: groupName
+            description: The group name to chose while performing search
+            in: header
+            required: false
+            schema:
+              type: string
+              description: Group name, from last login if not provided
           - name: searchType
             # use 'allfiles', if not given
             required: false
@@ -485,6 +629,13 @@ paths:
             required: true
             schema:
               type: integer
+          - name: groupName
+            description: The group name to chose while scheduling jobs
+            in: header
+            required: false
+            schema:
+              type: string
+              description: Group name, from last login if not provided    
         requestBody:
           description: Agents to be scheduled with the job
           required: true
@@ -699,6 +850,13 @@ paths:
               - spdx2tv
               - readmeoss
               - unifiedreport
+        - name: groupName
+          description: The group name to chose while generating a report
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided      
       responses:
         '201':
           description: Report generation is scheduled. Link to download report will be in message
@@ -716,6 +874,13 @@ paths:
         description: Id the report to download
         schema:
           type: integer
+      - name: groupName
+        description: The group name to chose while downloading specific report
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided    
     get:
       tags:
       - Job
@@ -814,6 +979,50 @@ components:
         filesize:
           type: integer
           description: Filesize in Bytes.
+        filesha1:
+          type: string
+          description: SHA1 digest of the file
+    UploadSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Upload id of the upload.
+        uploadName:
+          type: string
+          description: Display name of the upload.
+        mainLicense:
+          type: string
+          description: Main license selected on the upload.
+        uniqueLicenses:
+          type: integer
+          description: No. of unique licenses found.
+        totalLicenses:
+          type: integer
+          description: Total no. of licenses found.
+        uniqueConcludedLicenses:
+          type: integer
+          description: Unique licenses concluded.
+        totalConcludedLicenses:
+          type: integer
+          description: Total concluded licenses.
+        filesToBeCleared:
+          type: integer
+          description: Files without clearing decisions.
+        filesCleared:
+          type: integer
+          description: Files with clearing decisions.
+        clearingStatus:
+          type: string
+          enum:
+            - Open
+            - InProgress
+            - Closed
+            - Rejected
+          description: Upload is clearing status.
+        copyrightCount:
+          type: integer
+          description: No. of copyrights found in the upload.
     Job:
       type: object
       properties:
@@ -893,6 +1102,10 @@ components:
           description: enable email notification when upload scan completes
         agents:
           $ref: '#/components/schemas/Analysis'
+      required:
+        - id
+        - name
+        - description
     Analysis:
       type: object
       properties:
@@ -999,6 +1212,9 @@ components:
         vcsUrl:
           description: URL of the repository
           type: string
+        vcsBranch:
+          description: Branch to checkout for analysis (for Git only)
+          type: string
         vcsName:
           description: Display name of the upload
           type: string
@@ -1011,6 +1227,68 @@ components:
       required:
         - vcsType
         - vcsUrl
+    UploadLicenses:
+      type: array
+      items:
+        type: object
+        properties:
+          filePath:
+            description: Relative file path
+            type: string
+            example: "path/to/LICENSE"
+          agentFindings:
+            description: Short names of the found licenses
+            type: array
+            items:
+              type: string
+              nullable: true
+            example:
+              - "MIT"
+              - "No_license_found"
+          conclusions:
+            description: License decided by user
+            type: array
+            items:
+              type: string
+              nullable: true
+            example:
+              - "MIT"
+              - "No_license_found"
+    UrlUpload:
+      description: To create an upload from a URL
+      type: object
+      properties:
+        url:
+          description: URL for file/folder to be uploaded
+          type: string
+        name:
+          description: Viewable name for this file or directory
+          type: string
+        accept:
+          description: >
+            Comma-separated lists of file name suffixes or patterns to accpet
+          type: string
+        reject:
+          description: >
+            Comma-separated lists of file name suffixes or patterns to reject
+          type: string
+        maxRecursionDepth:
+          description: Maximum recursion depth for folders (0 for infinite)
+          type: integer
+      required:
+        - url
+    ServerUpload:
+      description: To create an upload from a server
+      type: object
+      properties:
+        path:
+          description: File path to be uploaded (reccursive, support *)
+          type: string
+        name:
+          description: Viewable name for this file or directory
+          type: string
+      required:
+        - path
   responses:
     defaultResponse:
           description: Some error occured. Check the "message"

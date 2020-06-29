@@ -83,9 +83,15 @@ string cleanStatement(string::const_iterator sBegin, string::const_iterator sEnd
 string cleanMatch(const string& sText, const match& m)
 {
   string::const_iterator it = sText.begin();
+  icu::UnicodeString unicodeStr = fo::recodeToUnicode(string(it + m.start,
+    it + m.end));
+  string utfCompatibleText;
+
+  unicodeStr.toUTF8String(utfCompatibleText);
+
   if (m.type == "statement")
-    return cleanStatement(it + m.start, it + m.end);
+    return cleanStatement(utfCompatibleText.begin(), utfCompatibleText.end());
   else
-    return cleanGeneral(it + m.start, it + m.end);
+    return cleanGeneral(utfCompatibleText.begin(), utfCompatibleText.end());
 }
 

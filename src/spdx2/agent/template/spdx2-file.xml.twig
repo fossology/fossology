@@ -16,6 +16,12 @@
     </spdx:checksum>
     <spdx:checksum> 
       <spdx:Checksum>
+        <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha256" />
+        <spdx:checksumValue>{{ sha256 | lower }}</spdx:checksumValue>
+      </spdx:Checksum>
+    </spdx:checksum>
+    <spdx:checksum> 
+      <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
         <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
@@ -43,7 +49,7 @@
 {% if licenseComment is empty %}
     <spdx:licenseComments rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}
-    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]</spdx:licenseComments>
+    <spdx:licenseComments><![CDATA[{{ licenseComment|e }}]]></spdx:licenseComments>
 {% endif %}
 {% endif %}
 {% if scannerLicenses|default is empty %}

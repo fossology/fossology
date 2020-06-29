@@ -186,7 +186,7 @@ class ReuserPlugin extends DefaultPlugin
     foreach ($folderUploads as $uploadProgress) {
       $key = $uploadProgress->getId().','.$uploadProgress->getGroupId();
       $display = $uploadProgress->getFilename() . _(" from ")
-               . date("Y-m-d H:i",$uploadProgress->getTimestamp())
+               . Convert2BrowserTime(date("Y-m-d H:i:s",$uploadProgress->getTimestamp()))
                . ' ('. $uploadProgress->getStatusString() . ')';
       $uploadsById[$key] = $display;
     }

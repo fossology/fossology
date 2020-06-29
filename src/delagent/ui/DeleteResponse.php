@@ -58,12 +58,12 @@ class DeleteResponse
   public function getDeleteMessageString()
   {
     switch ($this->getDeleteMessageCode()) {
-      case 0:
-        return "You don't have permissions to delete the upload";
       case 1:
         return "Deletion Scheduling failed";
       case 2:
         return "Deletion added to job queue";
+      case 3:
+        return "You don't have permissions to delete the upload";
       default:
         return "Invalid Error";
     }

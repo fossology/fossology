@@ -16,6 +16,8 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************/
 
+use Fossology\Lib\Auth\Auth;
+
 /**
  * \file
  * \brief System configuration functions.
@@ -350,11 +352,17 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'L'", "'$smtpAuthPrompt'",
     strval(CONFIG_TYPE_DROP), "'SMTP'", "3", "'$smtpAuthDesc'", "null", "'Login{L}|None{N}|Plain{P}'");
 
+  $variable = "SMTPFrom";
+  $smtpFrom = _('SMTP Email');
+  $smtpFromDesc = _('e.g.: "user@domain.com"<br>Sender email.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$smtpFrom'",
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpFromDesc'", "'check_email_address'", "null");
+
   $variable = "SMTPAuthUser";
   $smtpAuthUserPrompt = _('SMTP User');
-  $smtpAuthUserDesc = _('e.g.: "user@domain.com"<br>Email to be used for login in SMTP and for from address.');
+  $smtpAuthUserDesc = _('e.g.: "user"<br>Login to be used for login on SMTP Server.');
   $valueArray[$variable] = array("'$variable'", "null", "'$smtpAuthUserPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'SMTP'", "4", "'$smtpAuthUserDesc'", "'check_email_address'", "null");
+    strval(CONFIG_TYPE_TEXT), "'SMTP'", "5", "'$smtpAuthUserDesc'", "null", "null");
 
   $variable = "SMTPAuthPasswd";
   $smtpAuthPasswdPrompt = _('SMTP Login Password');
@@ -379,6 +387,20 @@ function Populate_sysconfig()
   $patTokenValidityDesc = _('Maximum validity of tokens (in days)');
   $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
     strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
+
+  $variable = "SkipFiles";
+  $mimeTypeToSkip = _("Skip MimeTypes from scanning");
+  $mimeTypeDesc = _("add  comma (,) separated mimetype to exclude files from scanning");
+  $valueArray[$variable] = array("'$variable'", "null", "'$mimeTypeToSkip'",
+    strval(CONFIG_TYPE_TEXT), "'Skip'", "1", "'$mimeTypeDesc'", "null", "null");
+
+  $perm_admin=Auth::PERM_ADMIN;
+  $perm_write=Auth::PERM_WRITE;
+  $variable = "SourceCodeDownloadRights";
+  $SourceDownloadRightsPrompt = _('Acces rights required to download source code');
+  $SourceDownloadRightsDesc = _('Choose which acces level will be required for user to be able to download source code.');
+  $valueArray[$variable] = array("'$variable'", "'$perm_write'", "'$SourceDownloadRightsPrompt'",
+  strval(CONFIG_TYPE_DROP), "'DOWNLOAD'", "1", "'$SourceDownloadRightsDesc'", "null", "'Administrator{{$perm_admin}}|Read_Write{{$perm_write}}'");
 
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.

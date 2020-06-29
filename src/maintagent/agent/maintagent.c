@@ -38,6 +38,7 @@
  -P|Verify and fix file permissions|
  -R|Remove uploads with no pfiles|
  -T|Remove orphaned temp tables|
+ -L|Remove orphaned log files from file systems|
  -U|Process expired uploads (slow)|
  -Z|Remove orphaned files from the repository (slow)|
  -i|Initialize the database, then exit|
@@ -46,11 +47,12 @@
  -V|print the version info, then exit|
  -c SYSCONFDIR|Specify the directory for the system configuration.|
 
-  Anyone with execute access can run this agent. This makes it easy to put in a cron job.
-  If run from the FOSSology UI, you must be an admin.
-  \section maintagentsource Agent source
-   - \link src/maintagent/agent \endlink
-   - \link src/maintagent/ui \endlink
+ Anyone with execute access can run this agent. This makes it easy to put in a
+ cron job.
+ If run from the FOSSology UI, you must be an admin.
+ \section maintagentsource Agent source
+  - \link src/maintagent/agent \endlink
+  - \link src/maintagent/ui \endlink
  */
 
 #include "maintagent.h"
@@ -74,6 +76,7 @@ int main(int argc, char **argv)
 
   /* connect to the scheduler */
   fo_scheduler_connect(&argc, argv, &pgConn);
+  dbManager = fo_dbManager_new(pgConn);
 
   /* get agent pk
    * Note, if GetAgentKey fails, this process will exit.
@@ -94,164 +97,209 @@ int main(int argc, char **argv)
   int removeOrphanedFilesExe = 0;
   int reIndexAllTablesExe = 0;
   int removeOrphanedRowsExe = 0;
+  int removeOrphanedLogs = 0;
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aADEFghIpNPRTUZivVc:")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNpPRTUvVZ")) != -1)
   {
     switch (cmdopt)
     {
       case 'a': /* All non slow operations */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'A': /* All operations */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          if (processExpiredExe == 0) {
-            processExpired();
-            processExpiredExe = 1;
-          }
-          if (removeOrphanedFilesExe == 0) {
-            removeOrphanedFiles();
-            removeOrphanedFilesExe = 1;
-          }
-          if (reIndexAllTablesExe == 0) {
-            reIndexAllTables();
-            reIndexAllTablesExe = 1;
-          }
-          if (removeOrphanedRowsExe == 0) {
-            removeOrphanedRows();
-            removeOrphanedRowsExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        if (processExpiredExe == 0)
+        {
+          processExpired();
+          processExpiredExe = 1;
+        }
+        if (removeOrphanedFilesExe == 0)
+        {
+          removeOrphanedFiles();
+          removeOrphanedFilesExe = 1;
+        }
+        if (reIndexAllTablesExe == 0)
+        {
+          reIndexAllTables();
+          reIndexAllTablesExe = 1;
+        }
+        if (removeOrphanedRowsExe == 0)
+        {
+          removeOrphanedRows();
+          removeOrphanedRowsExe = 1;
+        }
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'D': /* Vac/Analyze (slow) */
-          if (vacAnalyzeExe == 0) {
-            vacAnalyze();
-            vacAnalyzeExe = 1;
-          }
-          break;
+        if (vacAnalyzeExe == 0)
+        {
+          vacAnalyze();
+          vacAnalyzeExe = 1;
+        }
+        break;
       case 'F': /* Validate folder contents */
-          if (validateFoldersExe == 0) {
-            validateFolders();
-            validateFoldersExe = 1;
-          }
-          break;
+        if (validateFoldersExe == 0)
+        {
+          validateFolders();
+          validateFoldersExe = 1;
+        }
+        break;
       case 'g': /* Delete orphan gold files */
-          deleteOrphanGold();
-          break;
+        deleteOrphanGold();
+        break;
       case 'h':
-            usage(argv[0]);
-            exitNow(0);
+        usage(argv[0]);
+        exitNow(0);
       case 'N': /* Remove uploads with no pfiles */
-          if (normalizeUploadPrioritiesExe == 0) {
-            normalizeUploadPriorities();
-            normalizeUploadPrioritiesExe = 1;
-          }
-          break;
+        if (normalizeUploadPrioritiesExe == 0)
+        {
+          normalizeUploadPriorities();
+          normalizeUploadPrioritiesExe = 1;
+        }
+        break;
       case 'p': /* Verify file permissions */
-          verifyFilePerms(0);
-          break;
+        verifyFilePerms(0);
+        break;
       case 'P': /* Verify and fix file permissions */
-          if (verifyFilePermsExe == 0) {
-            verifyFilePerms(1);
-            verifyFilePermsExe = 1;
-          }
-          break;
+        if (verifyFilePermsExe == 0)
+        {
+          verifyFilePerms(1);
+          verifyFilePermsExe = 1;
+        }
+        break;
       case 'R': /* Remove uploads with no pfiles */
-          if (removeUploadsExe == 0) {
-            removeUploads();
-            removeUploadsExe = 1;
-          }
-          break;
+        if (removeUploadsExe == 0)
+        {
+          removeUploads();
+          removeUploadsExe = 1;
+        }
+        break;
       case 'T': /* Remove orphaned temp tables */
-          if (removeTempsExe == 0) {
-            removeTemps();
-            removeTempsExe = 1;
-          }
-          break;
+        if (removeTempsExe == 0)
+        {
+          removeTemps();
+          removeTempsExe = 1;
+        }
+        break;
       case 'U': /* Process expired uploads (slow) */
-          if (processExpiredExe == 0) {
-            processExpired();
-            processExpiredExe = 1;
-          }
-          break;
+        if (processExpiredExe == 0)
+        {
+          processExpired();
+          processExpiredExe = 1;
+        }
+        break;
       case 'Z': /* Remove orphaned files from the repository (slow) */
-          if (removeOrphanedFilesExe == 0) {
-            removeOrphanedFiles();
-            removeOrphanedFilesExe = 1;
-          }
-          break;
+        if (removeOrphanedFilesExe == 0)
+        {
+          removeOrphanedFiles();
+          removeOrphanedFilesExe = 1;
+        }
+        break;
       case 'I': /* Reindexing of database */
-          if (reIndexAllTablesExe == 0) {
-            reIndexAllTables();
-            reIndexAllTablesExe = 1;
-          }
-          break;
+        if (reIndexAllTablesExe == 0)
+        {
+          reIndexAllTables();
+          reIndexAllTablesExe = 1;
+        }
+        break;
       case 'E': /* Remove orphaned files from the database */
-          if (removeOrphanedRowsExe == 0) {
-            removeOrphanedRows();
-            removeOrphanedRowsExe = 1;
-          }
-          break;
+        if (removeOrphanedRowsExe == 0)
+        {
+          removeOrphanedRows();
+          removeOrphanedRowsExe = 1;
+        }
+        break;
+      case 'L': /* Remove orphaned log files from file system */
+        if (removeOrphanedLogs == 0)
+        {
+          removeOrphanedLogFiles();
+          removeOrphanedLogs = 1;
+        }
+        break;
       case 'i': /* "Initialize" */
-            exitNow(0);
+        exitNow(0);
       case 'v': /* verbose output for debugging  */
-          agent_verbose++;   // global agent verbose flag.  Can be changed in running agent by the scheduler on each fo_scheduler_next() call
-            break;
+        agent_verbose++;  ///< global agent verbose flag. Can be changed in running agent by the scheduler on each fo_scheduler_next() call
+        break;
       case 'V': /* print version info */
-            printf("%s", BuildVersion);
-            exitNow(0);
-      case 'c': break; /* handled by fo_scheduler_connect() */
+        printf("%s", BuildVersion);
+        exitNow(0);
+      case 'c':
+        break; /* handled by fo_scheduler_connect() */
       default:
-            usage(argv[0]);
-            exitNow(-1);
+        usage(argv[0]);
+        exitNow(-1);
     }
   }
 
-  exitNow(0);  /* success */
-  return(0);   /* Never executed but prevents compiler warning */
+  exitNow(0); /* success */
+  return (0); /* Never executed but prevents compiler warning */
 } /* main() */

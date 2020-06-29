@@ -27,7 +27,7 @@ function createDirlistTable() {
         }
     },
     "aoColumns": [{"sTitle":"Files","sClass":"left"},
-        {"sTitle":"Scanner Results (N: nomos, M: monk, Nk: ninka, I: reportImport, O: ojo)","sClass":"left","bSortable":false},
+        {"sTitle":"Scanner Results&nbsp;{{ agent_list }}","sClass":"left","bSortable":false},
         {"sTitle":"Edited Results","sClass":"left","bSortable":false},
         {"sTitle":"Clearing Status","sClass":"clearingStatus center","bSortable":false,"bSearchable":false,"sWidth":"5%","mRender":function ( data, type, full ) {
             if(type!='display') return data;
@@ -36,6 +36,10 @@ function createDirlistTable() {
                 return '<img alt="done" src="images/green.png" class="icon-small"/>';
               case 'yellow':
                 return '<img alt="done" src="images/yellow.png" class="icon-small"/>';
+              case 'redGreen':
+                return '<img alt="done" src="images/redGreen.png" class="icon-small"/>';
+              case 'grey':
+                return '<img alt="done" src="images/grey.png" class="icon-small"/>';
               default:
                 return '<img alt="not done" src="images/red.png" class="icon-small"/>';
             }
@@ -68,7 +72,7 @@ function createDirlistTable() {
 
 $(document).ready(function () {
   createDirlistTable();
-  $(document).tooltip();
+  $('img').tooltip();
   $("#lichistogram_length select").css('text-align','right');
   $("#dirlist_length select").css('text-align','right');
 

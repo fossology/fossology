@@ -12,8 +12,8 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf
 
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
-LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq $(CUNIT_LIB) -lcunit $(TEST_LIB)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION) $(shell libgcrypt-config --cflags)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lpq $(CUNIT_LIB) -lcunit $(TEST_LIB) $(shell libgcrypt-config --libs)
 
 EXE = test_wget_agent
 TEST_OBJ_RUN = testRun.o utility.o
@@ -21,7 +21,7 @@ TEST_OBJ = ./wget_agent/testGetURL.o \
            ./wget_agent/testSetEnv.o \
            ./wget_agent/testUtilities.o \
            ./wget_agent/testDBLoadGold.o
-CHKHDR = $(LOCALAGENTDIR)/../../ununpack/agent/checksum.h $(LOCALAGENTDIR)/../../ununpack/agent/md5.h $(LOCALAGENTDIR)/../../ununpack/agent/sha1.h
+CHKHDR = $(LOCALAGENTDIR)/../../ununpack/agent/checksum.h
 CHKSRC = $(CHKHDR:%.h=%.c)
 
 all: $(EXE)

@@ -98,6 +98,7 @@ class AgentAdder extends DefaultPlugin
    */
   private function agentsAdd($uploadId, $agentsToStart, Request $request)
   {
+    $mimetypeIgnore = intval($request->get('scm') == 1) ? '-I' : '';
     if (! is_array($agentsToStart)) {
       return "bad parameters";
     }
@@ -128,7 +129,11 @@ class AgentAdder extends DefaultPlugin
     }
 
     foreach ($agents as &$agent) {
-      $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      if (!empty($mimetypeIgnore)) {
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array("agent_mimetype"), $mimetypeIgnore);
+      } else {
+        $rv = $agent->AgentAdd($jobId, $uploadId, $errorMsg, array());
+      }
       if ($rv == -1) {
         return $errorMsg;
       }

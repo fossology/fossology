@@ -111,11 +111,13 @@ abstract class ClearedGetterCommon
     unset($statement);
   }
 
-  protected function groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport)
+  protected function groupStatements($ungrupedStatements, $extended, $agentCall, $isUnifiedReport, $objectAgent)
   {
     $statements = array();
     $findings = array();
+    $countLoop = 0;
     foreach ($ungrupedStatements as $statement) {
+      $licenseId = $statement['licenseId'];
       $content = convertToUTF8($statement['content'], false);
       $content = htmlspecialchars($content, ENT_DISALLOWED);
       $comments = convertToUTF8($statement['comments'], false);
@@ -128,8 +130,7 @@ abstract class ClearedGetterCommon
         if ($description === null) {
           $text = "";
         } else {
-          //$agentcall only have copyright so making it empty for other agents
-          if (!empty($textfinding) && empty($agentcall)) {
+          if (!empty($textfinding) && empty($agentCall)) {
             $content = $textfinding;
           }
           $text = $description;
@@ -138,6 +139,11 @@ abstract class ClearedGetterCommon
         $text = $statement['text'];
       }
 
+      if ($agentCall == "license") {
+        $this->groupBy = "text";
+      } else {
+        $this->groupBy = "content";
+      }
       $groupBy = $statement[$this->groupBy];
 
       if (empty($comments) && array_key_exists($groupBy, $statements)) {
@@ -147,12 +153,12 @@ abstract class ClearedGetterCommon
         }
       } else {
         $singleStatement = array(
+            "licenseId" => $licenseId,
             "content" => convertToUTF8($content, false),
             "text" => convertToUTF8($text, false),
             "files" => array($fileName)
           );
         if ($extended) {
-          $singleStatement["licenseId"] = $statement['licenseId'];
           $singleStatement["comments"] = convertToUTF8($comments, false);
           $singleStatement["risk"] =  $statement['risk'];
         }
@@ -163,26 +169,37 @@ abstract class ClearedGetterCommon
           $statements[] = $singleStatement;
         }
       }
-      if (!empty($statement['textfinding']) && !empty($agentcall)) {
-        $findings[$fileName] = array(
+      if (!empty($statement['textfinding']) && !empty($agentCall) && $agentCall != "license") {
+        $findings[] = array(
+            "licenseId" => $licenseId,
             "content" => convertToUTF8($statement['textfinding'], false),
             "text" => convertToUTF8($text, false),
             "files" => array($fileName)
           );
         if ($extended) {
-          $findings[$fileName]["comments"] = convertToUTF8($comments, false);
+          $key = array_search($statement['textfinding'], array_column($findings, 'content'));
+          $findings[$key]["comments"] = convertToUTF8($comments, false);
         }
       }
-    }
-    if ($agentcall == "copyright" && $isUnifiedReport == true) {
-      if (!empty($findings)) {
-        return array("userFindings" => $findings, "scannerFindings" => $statements);
-      } else {
-        return array("scannerFindings" => $statements);
+      //To keep the schedular alive for large files
+      $countLoop += 1;
+      if ($countLoop % 500 == 0) {
+        $objectAgent->heartbeat(0);
       }
+    }
+    arsort($statements);
+    if ($isUnifiedReport) {
+      arsort($findings);
+      if (!empty($objectAgent)) {
+        $actualHeartbeat = (count($statements) + count($findings));
+        $objectAgent->heartbeat($actualHeartbeat);
+      }
+      return array("userFindings" => $findings, "scannerFindings" => $statements);
     } else {
       $statements = array_merge($findings, $statements);
-      arsort($statements);
+      if (!empty($objectAgent)) {
+        $objectAgent->heartbeat(count($statements));
+      }
       return array("statements" => array_values($statements));
     }
   }
@@ -195,12 +212,12 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false, $objectAgent)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
     $this->changeTreeIdsToPaths($ungrupedStatements, $uploadTreeTableName, $uploadId);
-    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport);
+    $statements = $this->groupStatements($ungrupedStatements, $extended, $agentcall, $isUnifiedReport, $objectAgent);
     return $statements;
   }
 
@@ -214,7 +231,7 @@ abstract class ClearedGetterCommon
   {
     $escapeChars = array('\\f',"\\", "/", "\"");
     $withThisValue = array("","\\\\", "\\/", "\\\"");
-    $clearedString = str_replace($escapeChars, $withThisValue, $this->getCleared($uploadId, $groupId, false));
+    $clearedString = str_replace($escapeChars, $withThisValue, $this->getCleared($uploadId, $groupId, false, null, false, null));
     $json = json_encode($clearedString);
     return str_replace('\u001b','',$json);
   }

@@ -1,4 +1,4 @@
-{# Copyright 2014-2017 Siemens AG
+{# Copyright 2014-2017,2019 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -38,9 +38,14 @@
       <button type="button" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
     </div>
     <div style="text-align: center;">
-      <button type="button" autofocus onclick="markDecisions();">{{ 'Mark decisions as irrelevant'|trans }}</button>
+      <button type="button" autofocus value="irrelevant" onclick="markDecisions(this.value);">{{ 'Mark decisions as irrelevant'|trans }}</button>
       &nbsp;
-      <button type="button" autofocus onclick="deleteMarkedDecisions();">{{ 'Remove marked irrelevant decisions'|trans }}</button>
+      <button type="button" autofocus value="deleteIrrelevant" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked irrelevant decisions'|trans }}</button>
+    </div>
+    <div style="text-align: center;">
+      <button type="button" autofocus value="doNotUse" onclick="markDecisions(this.value);">{{ 'Mark decisions as do not use'|trans }}</button>
+      &nbsp;
+      <button type="button" autofocus value="deleteDoNotUse" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked do not use decisions'|trans }}</button>
     </div>
     <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
     <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />

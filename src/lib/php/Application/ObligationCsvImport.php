@@ -226,7 +226,6 @@ class ObligationCsvImport
     $exists = $this->getKeyFromTopicAndText($row);
     $associatedLicenses = "";
     $candidateLicenses = "";
-    $listFromCsv = "";
     $msg = "";
     if ($exists !== false) {
       $msg = "Obligation topic '$row[topic]' already exists in DB (id=".$exists."),";
@@ -235,21 +234,21 @@ class ObligationCsvImport
       } else {
         $this->clearListFromDb($exists, false);
         if (!empty($row['licnames'])) {
-          $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $exists, false);
+          $associatedLicenses .= $this->AssociateWithLicenses($row['licnames'], $exists, false);
         }
         $msg .=" Updated AssociatedLicense license";
       }
       if ($this->compareLicList($exists, $row['candidatenames'], true, $row) === 0) {
         $msg .=" No Changes in CandidateLicense";
       } else {
-        $this->clearListFromDb($exists, $listFromCsv);
+        $this->clearListFromDb($exists, true);
         if (!empty($row['candidatenames'])) {
-          $associatedLicenses = $this->AssociateWithLicenses($row['candidatenames'], $exists, true);
+          $associatedLicenses .= $this->AssociateWithLicenses($row['candidatenames'], $exists, true);
         }
         $msg .=" Updated CandidateLicense";
       }
       $this->updateOtherFields($exists, $row);
-      return $msg."\n";
+      return $msg . "\n" . $associatedLicenses . "\n";
     }
 
     $stmtInsert = __METHOD__.'.insert';
@@ -260,7 +259,7 @@ class ObligationCsvImport
     $dbManager->freeResult($resi);
 
     if (!empty($row['licnames'])) {
-      $associatedLicenses = $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
+      $associatedLicenses .= $this->AssociateWithLicenses($row['licnames'], $new['ob_pk']);
     }
     if (!empty($row['candidatenames'])) {
       $candidateLicenses = $this->AssociateWithLicenses($row['candidatenames'], $new['ob_pk'], true);
@@ -288,20 +287,20 @@ class ObligationCsvImport
 
     $licenses = explode(";",$licList);
     foreach ($licenses as $license) {
-      $licId = $this->obligationMap->getIdFromShortname($license, $candidate);
-      if ($this->obligationMap->isLicenseAssociated($obPk, $licId, $candidate)) {
-        continue;
+      $licIds = $this->obligationMap->getIdFromShortname($license, $candidate);
+      $updated = false;
+      if (empty($licIds)) {
+        $message .= "License $license could not be found in the DB.\n";
+      } else {
+        $updated = $this->obligationMap->associateLicenseFromLicenseList($obPk,
+          $licIds, $candidate);
       }
-
-      if (!empty($licId)) {
-        $this->obligationMap->associateLicenseWithObligation($obPk, $licId, $candidate);
+      if ($updated) {
         if ($associatedLicenses == "") {
           $associatedLicenses = "$license";
         } else {
           $associatedLicenses .= ";$license";
         }
-      } else {
-        $message .= "License $license could not be found in the DB.\n";
       }
     }
 

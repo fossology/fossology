@@ -22,19 +22,23 @@
  * \file wget_agent.c
  * \brief wget_agent: Retrieve a file and put it in the database.
  */
+#define _GNU_SOURCE           // for asprintf
+
+#define ASPRINTF_MEM_ERROR  88
+#define ASPRINTF_MEM_ERROR_LOG LOG_FATAL("Not enough memory for asprintf before line %d", __LINE__)
 
 #include "wget_agent.h"
 
-char SQL[MAXCMD];
+char SQL[STRMAX];
 
 PGconn *pgConn = NULL;        ///< For the DB
 long GlobalUploadKey=-1;      ///< Input for this system
-char GlobalTempFile[MAXCMD];  ///< Temp file to be used
-char GlobalURL[MAXCMD];       ///< URL to download
-char GlobalType[MAXCMD];      ///< Type of download (FILE/version control)
-char GlobalParam[MAXCMD];     ///< Additional parameters
+char GlobalTempFile[STRMAX];  ///< Temp file to be used
+char GlobalURL[URLMAX];       ///< URL to download
+char GlobalType[STRMAX];      ///< Type of download (FILE/version control)
+char GlobalParam[STRMAX];     ///< Additional parameters
 char *GlobalProxy[6];         ///< Proxy from fossology.conf
-char GlobalHttpProxy[MAXCMD]; ///< HTTP proxy command to use
+char GlobalHttpProxy[STRMAX]; ///< HTTP proxy command to use
 int GlobalImportGold=1;       ///< Set to 0 to not store file in gold repository
 gid_t ForceGroup=-1;          ///< Set to group id to be used for download files
 
@@ -91,47 +95,35 @@ void DBLoadGold()
   Cksum *Sum;
   char *Unique=NULL;
   char *SHA1, *MD5, *Len;
-  char SQL[MAXCMD];
+  char SQL[STRMAX];
   long PfileKey;
   char *Path;
-  char SHA256[65], command[PATH_MAX + 13];
+  char SHA256[65];
   FILE *Fin;
-  int rc = -1, i;
+  int rc = -1;
   PGresult *result;
-  int read = 0;
-
   memset(SHA256, '\0', sizeof(SHA256));
 
   LOG_VERBOSE0("Processing %s",GlobalTempFile);
   Fin = fopen(GlobalTempFile,"rb");
-
-  // Calculate sha256 value
-  snprintf(command, PATH_MAX + 13, "sha256sum '%s'", GlobalTempFile);
-  FILE* file = popen(command, "r");
-
   if (!Fin)
   {
     LOG_FATAL("upload %ld Unable to open temp file %s from %s",
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(1);
   }
-  if (file != (FILE*) NULL)
-  {
-    read = fscanf(file, "%64s", SHA256);
-    rc = WEXITSTATUS(pclose(file));
-  }
-  if (file == (FILE*) NULL || rc != 0 || read != 1)
+
+  Sum = SumComputeFile(Fin);
+  fclose(Fin);
+
+  // Calculate sha256 value
+  rc = calc_sha256sum(GlobalTempFile, SHA256);
+  if (rc != 0)
   {
     LOG_FATAL("Unable to calculate SHA256 of %s\n", GlobalTempFile);
     SafeExit(56);
   }
-  // Change SHA256 to upper case like other checksums
-  for (i = 0; i < 65; i++)
-  {
-    SHA256[i] = toupper(SHA256[i]);
-  }
-  Sum = SumComputeFile(Fin);
-  fclose(Fin);
+
   if ((int)ForceGroup > 0)
   {
     rc = chown(GlobalTempFile,-1,ForceGroup);
@@ -144,12 +136,14 @@ void DBLoadGold()
         GlobalUploadKey,GlobalTempFile,GlobalURL);
     SafeExit(2);
   }
+
   if (Sum->DataLen <= 0)
   {
     LOG_FATAL("upload %ld No bytes downloaded from %s to %s.",
         GlobalUploadKey,GlobalURL,GlobalTempFile);
     SafeExit(3);
   }
+
   Unique = SumToString(Sum);
   LOG_VERBOSE0("Unique %s",Unique);
 
@@ -175,6 +169,7 @@ void DBLoadGold()
   {
     Path = GlobalTempFile;
   } /* else if !GlobalImportGold */
+
   LOG_VERBOSE0("Path is %s",Path);
 
   if (!Path)
@@ -183,18 +178,22 @@ void DBLoadGold()
         GlobalUploadKey,Unique);
     SafeExit(5);
   }
+
   LOG_VERBOSE0("Import files %s",Path);
+
   if (fo_RepImport(Path,"files",Unique,1) != 0)
   {
     LOG_FATAL("upload %ld Failed to import %s from %s into files",
         GlobalUploadKey,Unique,Path);
     SafeExit(6);
   }
+
   if ((int)ForceGroup >= 0)
   {
     rc = chown(Path,-1,ForceGroup);
     if (rc) LOG_ERROR("chown failed on %s, error: %s", Path, strerror(errno));
   }
+
   if (Path != GlobalTempFile)
   {
     if(Path)
@@ -210,8 +209,8 @@ void DBLoadGold()
   MD5 = Unique+41; /* 40 for sha1 + 1 for '.' */
   Len = Unique+41+33; /* 32 for md5 + 1 for '.' */
   /* Set the pfile */
-  memset(SQL,'\0',MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
+  memset(SQL,'\0',STRMAX);
+  snprintf(SQL,STRMAX-1,"SELECT pfile_pk FROM pfile WHERE pfile_sha1 = '%.40s' AND pfile_md5 = '%.32s' AND pfile_size = %s;",
       SHA1,MD5,Len);
   result =  PQexec(pgConn, SQL); /* SELECT */
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(7);
@@ -220,8 +219,8 @@ void DBLoadGold()
   if (PQntuples(result) <=0)
   {
     /* Insert it */
-    memset(SQL,'\0',MAXCMD);
-    snprintf(SQL,MAXCMD-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_sha256, pfile_size) VALUES ('%.40s','%.32s','%.64s',%s)",
+    memset(SQL,'\0',STRMAX);
+    snprintf(SQL,STRMAX-1,"INSERT INTO pfile (pfile_sha1, pfile_md5, pfile_sha256, pfile_size) VALUES ('%.40s','%.32s','%.64s',%s)",
         SHA1,MD5,SHA256,Len);
     PQclear(result);
     result = PQexec(pgConn, SQL);
@@ -230,6 +229,7 @@ void DBLoadGold()
     result = PQexec(pgConn, "SELECT currval('pfile_pfile_pk_seq')");
     if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(182);
   }
+
   PfileKey = atol(PQgetvalue(result,0,0));
   LOG_VERBOSE0("pfile_pk = %ld",PfileKey);
 
@@ -238,14 +238,14 @@ void DBLoadGold()
   result = PQexec(pgConn, "BEGIN");
   if (fo_checkPQcommand(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(-1);
 
-  memset(SQL,0,MAXCMD);
-  snprintf(SQL,MAXCMD-1,"SELECT * FROM upload WHERE upload_pk=%ld FOR UPDATE;",GlobalUploadKey);
+  memset(SQL,0,STRMAX);
+  snprintf(SQL,STRMAX-1,"SELECT * FROM upload WHERE upload_pk=%ld FOR UPDATE;",GlobalUploadKey);
   PQclear(result);
   result = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, result, SQL, __FILE__, __LINE__)) SafeExit(-1);
 
-  memset(SQL,0,MAXCMD);
-  snprintf(SQL,MAXCMD-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld",
+  memset(SQL,0,STRMAX);
+  snprintf(SQL,STRMAX-1,"UPDATE upload SET pfile_fk=%ld WHERE upload_pk=%ld",
       PfileKey,GlobalUploadKey);
   LOG_VERBOSE0("SQL=%s\n",SQL);
   PQclear(result);
@@ -262,6 +262,7 @@ void DBLoadGold()
     free(Sum);
     Sum = NULL;
   }
+
   if (Unique)
   {
     free(Unique);
@@ -297,6 +298,34 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
   return(Sin[i]=='\0');
 } /* TaintURL() */
 
+
+/**
+ * \brief Prepare directory for wget.
+ * \param TempFile
+ * \param TempFileDir
+ * \param TempFileDirectory
+ * \parblock
+ * Internal helper function for function GetURL 
+ * \endparblock
+ * \return destination for wget download or NULL
+ */
+char *PrepareWgetDest(char *TempFile, char *TempFileDir, char *TempFileDirectory)
+{
+  if (TempFile && TempFile[0])
+  {
+    /* Delete the temp file if it exists */
+    unlink(TempFile);
+    return TempFileDirectory;
+  }
+  else if(TempFileDir && TempFileDir[0])
+  {
+    return TempFileDir;
+  }
+    
+  return NULL;
+}
+
+
 /**
  * \brief Do the wget.
  * \param TempFile
@@ -310,18 +339,23 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
  */
 int GetURL(char *TempFile, char *URL, char *TempFileDir)
 {
-  char CMD[MAXCMD];
-  char TaintedURL[MAXCMD];
-  char TempFileDirectory[MAXCMD];
-  char DeleteTempDirCmd[MAXCMD];
+  char *cmd;
+  char TaintedURL[STRMAX];
+  char TempFileDirectory[STRMAX+128];
+  char *delete_tmpdir_cmd;
   int rc;
+  int res;
 
-  memset(TempFileDirectory,'\0',MAXCMD);
-  memset(DeleteTempDirCmd,'\0',MAXCMD);
+  memset(TempFileDirectory,'\0',STRMAX+128);
 
   /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   sprintf(TempFileDirectory, "%s.dir", TempFile);
-  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
+  res = asprintf(&delete_tmpdir_cmd, "rm -rf %s", TempFileDirectory);
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    SafeExit(ASPRINTF_MEM_ERROR);
+  }
 #if 1
   char WgetArgs[]="--no-check-certificate --progress=dot -rc -np -e robots=off";
 #else
@@ -329,13 +363,12 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
   char WgetArgs[]="--progress=dot -rc -np -e robots=off";
 #endif
 
-  if (!TaintURL(URL,TaintedURL,MAXCMD))
+  if (!TaintURL(URL,TaintedURL,STRMAX))
   {
     LOG_FATAL("Failed to taint the URL '%s'",URL);
     SafeExit(10);
   }
 
-  memset(CMD,'\0',MAXCMD);
   /*
    Wget options:
    --progress=dot :: display a new line as it progresses.
@@ -350,138 +383,191 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 
   struct stat sb;
   int rc_system =0;
-  char no_proxy[MAXCMD] = {0};
-  char proxy[MAXCMD] = {0};
-  char proxy_temp[MAXCMD] = {0};
+  char no_proxy[STRMAX] = {0};
+  char proxy[STRMAX] = {0};
+  char proxy_temp[STRMAX] = {0};
 
   /* http_proxy is optional so don't error if it doesn't exist */
   /** set proxy */
   if (GlobalProxy[0] && GlobalProxy[0][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export http_proxy='%s' ;", GlobalProxy[0]);
+    snprintf(proxy_temp, STRMAX-1, "export http_proxy='%s' ;", GlobalProxy[0]);
     strcat(proxy, proxy_temp);
   }
   if (GlobalProxy[1] && GlobalProxy[1][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export https_proxy='%s' ;", GlobalProxy[1]);
+    snprintf(proxy_temp, STRMAX-1, "export https_proxy='%s' ;", GlobalProxy[1]);
     strcat(proxy, proxy_temp);
   }
   if (GlobalProxy[2] && GlobalProxy[2][0])
   {
-    snprintf(proxy_temp, MAXCMD-1, "export ftp_proxy='%s' ;", GlobalProxy[2]);
+    snprintf(proxy_temp, STRMAX-1, "export ftp_proxy='%s' ;", GlobalProxy[2]);
     strcat(proxy, proxy_temp);
   }
   if (GlobalProxy[3] && GlobalProxy[3][0])
   {
-    snprintf(no_proxy, MAXCMD-1, "-e no_proxy='%s'", GlobalProxy[3]);
+    snprintf(no_proxy, STRMAX-1, "-e no_proxy='%s'", GlobalProxy[3]);
   }
 
-  if (TempFile && TempFile[0])
-  {
-    /* Delete the temp file if it exists */
-    unlink(TempFile);
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
-        proxy, WgetArgs,TempFileDirectory,TaintedURL,GlobalParam, no_proxy);
-  }
-  else if(TempFileDir && TempFileDir[0])
-  {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
-        proxy, WgetArgs, TempFileDir, TaintedURL, GlobalParam, no_proxy);
+  char *dest;
+
+  dest = PrepareWgetDest(TempFile, TempFileDir, TempFileDirectory);
+
+  if (dest) {
+    res = asprintf(&cmd," %s /usr/bin/wget -q %s -P '%s' '%s' %s %s 2>&1",
+        proxy, WgetArgs, dest, TaintedURL, GlobalParam, no_proxy);
   }
   else
   {
-    snprintf(CMD,MAXCMD-1," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
-        proxy, WgetArgs,TaintedURL, GlobalParam, no_proxy);
+    res = asprintf(&cmd," %s /usr/bin/wget -q %s '%s' %s %s 2>&1",
+        proxy, WgetArgs, TaintedURL, GlobalParam, no_proxy);
   }
+
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    free(delete_tmpdir_cmd);
+    SafeExit(ASPRINTF_MEM_ERROR);
+  }
+
   /* the command is like
   ". /usr/local/etc/fossology/Proxy.conf;
      /usr/bin/wget -q --no-check-certificate --progress=dot -rc -np -e robots=off -P
      '/srv/fossology/repository/localhost/wget/wget.xxx.dir/'
      'http://a.org/file' -l 1 -R index.html*  2>&1"
    */
-  LOG_VERBOSE0("CMD: %s", CMD);
-  rc = system(CMD);
+  LOG_VERBOSE0("CMD: %s", cmd);
+  rc = system(cmd);
 
   if (WIFEXITED(rc) && (WEXITSTATUS(rc) != 0))
   {
-    LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),CMD);
+    LOG_FATAL("upload %ld Download failed; Return code %d from: %s",GlobalUploadKey,WEXITSTATUS(rc),cmd);
     unlink(GlobalTempFile);
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    free(delete_tmpdir_cmd);
     SafeExit(12);
   }
 
   /* Run from scheduler! store /srv/fossology/repository/localhost/wget/wget.xxx.dir/<files|directories> to one temp file */
   if (TempFile && TempFile[0])
   {
-    char TempFilePath[MAXCMD];
-    memset(TempFilePath,'\0',MAXCMD);
+    char* tmpfile_path;
     /* for one url http://a.org/test.deb, TempFilePath should be /srv/fossology/repository/localhost/wget/wget.xxx.dir/a.org/test.deb */
     int Position = GetPosition(TaintedURL);
     if (0 == Position)
     {
       LOG_FATAL("path %s is not http://, https://, or ftp://", TaintedURL);
       unlink(GlobalTempFile);
-      rc_system = system(DeleteTempDirCmd);
-      if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+      rc_system = system(delete_tmpdir_cmd);
+      if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+      free(delete_tmpdir_cmd);
       SafeExit(26);
     }
-    snprintf(TempFilePath, MAXCMD-1, "%s/%s", TempFileDirectory, TaintedURL + Position);
-
-    if (!stat(TempFilePath, &sb))
+    res = asprintf(&tmpfile_path, "%s/%s", TempFileDirectory, TaintedURL + Position);
+    if (res == -1)
     {
-      memset(CMD,'\0',MAXCMD);
+      ASPRINTF_MEM_ERROR_LOG;
+      free(delete_tmpdir_cmd);
+      SafeExit(ASPRINTF_MEM_ERROR);
+    }
+
+    if (!stat(tmpfile_path, &sb))
+    {
       if (S_ISDIR(sb.st_mode))
       {
-        snprintf(CMD,MAXCMD-1, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", TempFilePath);
-        rc_system = system(CMD); // delete all empty directories downloaded
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, CMD)
-        memset(CMD,'\0',MAXCMD);
-        snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, TempFilePath);
+        res = asprintf(&cmd, "find '%s' -mindepth 1 -type d -empty -exec rmdir {} \\; > /dev/null 2>&1", tmpfile_path);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
+          free(delete_tmpdir_cmd);
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
+        rc_system = system(cmd); // delete all empty directories downloaded
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, cmd)
+        free(cmd);
+
+        res = asprintf(&cmd, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", TempFile, tmpfile_path);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
+          free(delete_tmpdir_cmd);
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
       }
       else
       {
-        snprintf(CMD,MAXCMD-1, "mv '%s' '%s' 2>&1", TempFilePath, TempFile);
+        res = asprintf(&cmd, "mv '%s' '%s' 2>&1", tmpfile_path, TempFile);
+        if (res == -1)
+        {
+          ASPRINTF_MEM_ERROR_LOG;
+          free(tmpfile_path);
+          free(delete_tmpdir_cmd);
+          SafeExit(ASPRINTF_MEM_ERROR);
+        }
       }
-      rc_system = system(CMD);
+      
+      free(tmpfile_path);
+
+      rc_system = system(cmd);
       if (rc_system != 0)
       {
-        systemError(__LINE__, rc_system, CMD)
+        systemError(__LINE__, rc_system, cmd)
+        free(cmd);
         unlink(GlobalTempFile);
-        rc_system = system(DeleteTempDirCmd);
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+        rc_system = system(delete_tmpdir_cmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+        free(delete_tmpdir_cmd);
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
+
     }
     else
     {
-      memset(CMD,'\0',MAXCMD);
-      snprintf(CMD,MAXCMD-1, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile);
-      rc_system = system(CMD);
+      res = asprintf(&cmd, "find '%s' -type f -exec mv {} %s \\; > /dev/null 2>&1", TempFileDirectory, TempFile);
+      if (res == -1)
+      {
+        ASPRINTF_MEM_ERROR_LOG;
+        free(delete_tmpdir_cmd);
+        SafeExit(ASPRINTF_MEM_ERROR);
+      }
+      rc_system = system(cmd);
       if (rc_system != 0)
       {
-        systemError(__LINE__, rc_system, CMD)
+        systemError(__LINE__, rc_system, cmd)
+        free(cmd);
         unlink(GlobalTempFile);
-        rc_system = system(DeleteTempDirCmd);
-        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+        rc_system = system(delete_tmpdir_cmd);
+        if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+        free(delete_tmpdir_cmd);
         SafeExit(24); // failed to store the temperary directory(one file) as one temperary file
       }
+
     }
   }
 
   if (TempFile && TempFile[0] && !IsFile(TempFile,1))
   {
-    LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, CMD);
+    LOG_FATAL("upload %ld File %s not created from URL: %s, CMD: %s",GlobalUploadKey,TempFile,URL, cmd);
+    free(cmd);
     unlink(GlobalTempFile);
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc_system = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
+    free(delete_tmpdir_cmd);
     SafeExit(15);
   }
+  
+  free(cmd);
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  rc_system = system(DeleteTempDirCmd);
-  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+  rc_system = system(delete_tmpdir_cmd);
+  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, delete_tmpdir_cmd)
   LOG_VERBOSE0("upload %ld Downloaded %s to %s",GlobalUploadKey,URL,TempFile);
+
+  free(delete_tmpdir_cmd);
+
   return(0);
 } /* GetURL() */
 
@@ -492,13 +578,14 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
 int GetVersionControl()
 {
   char *command = NULL;
-  char TempFileDirectory[MAXCMD];
-  char DeleteTempDirCmd[MAXCMD];
-  char TempHome[MAXCMD];
+  char *tmp_file_directory;
+  char *delete_tmpdir_cmd;
+  char *tmp_home;
+
   int rc = 0;
   int resethome = 0; // 0: default; 1: home is null before setting, should rollback
-  int rc_system =0;
   char *homeenv = NULL;
+  int res;
 
   homeenv = getenv("HOME");
   if(NULL == homeenv) resethome = 1;
@@ -506,16 +593,39 @@ int GetVersionControl()
   /* We need HOME to point to where .gitconfig is installed
    * path is the repository path and .gitconfig is installed in its parent directory
    */
-  snprintf(TempHome, sizeof(TempHome), "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
-  setenv("HOME", TempHome, 1);
+  res = asprintf(&tmp_home, "%s/..", fo_config_get(sysconfig, "FOSSOLOGY", "path", NULL));
+  if (res == -1)
+  {
+    return ASPRINTF_MEM_ERROR;
+  }
+
+  setenv("HOME", tmp_home, 1);
+  free(tmp_home);
 
   /* save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
-  sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
-  sprintf(DeleteTempDirCmd, "rm -rf %s", TempFileDirectory);
+  res = asprintf(&tmp_file_directory, "%s.dir", GlobalTempFile);
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    return ASPRINTF_MEM_ERROR;
+  }
+
+  res = asprintf(&delete_tmpdir_cmd, "rm -rf %s", tmp_file_directory);
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    free(tmp_file_directory);
+    return ASPRINTF_MEM_ERROR;
+  }
 
   command = GetVersionControlCommand(1);
-
+  if (!command)
+  {
+    free(tmp_file_directory);
+    return ASPRINTF_MEM_ERROR;
+  }
   rc = system(command);
+  free(command);
 
   if (resethome) // rollback
     unsetenv("HOME");
@@ -525,6 +635,12 @@ int GetVersionControl()
   if (rc != 0)
   {
     command = GetVersionControlCommand(-1);
+    if (!command)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      free(tmp_file_directory);
+      return ASPRINTF_MEM_ERROR;
+    }
     systemError(__LINE__, rc, command)
     /** for user fossy
     \code git: git config --global http.proxy web-proxy.cce.hp.com:8088; git clone http://github.com/schacon/grit.git
@@ -532,26 +648,39 @@ int GetVersionControl()
     */
     LOG_FATAL("please make sure the URL of repo is correct, also add correct proxy for your version control system, command is:%s, GlobalTempFile is:%s, rc is:%d. \n", command, GlobalTempFile, rc);
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    rc = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
+    free(command);
+    free(tmp_file_directory);
+    free(delete_tmpdir_cmd);
     return 1;
   }
 
-  snprintf(command,MAXCMD-1, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, TempFileDirectory);
+  res = asprintf(&command, "tar -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalTempFile, tmp_file_directory);
+  if (res == -1)
+  {
+    ASPRINTF_MEM_ERROR_LOG;
+    free(tmp_file_directory);
+    free(delete_tmpdir_cmd);
+    return ASPRINTF_MEM_ERROR;
+  }
+  free(tmp_file_directory);
   rc = system(command);
   if (rc != 0)
   {
-    systemError(__LINE__, rc_system, DeleteTempDirCmd)
+    systemError(__LINE__, rc, command)
     /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-    rc_system = system(DeleteTempDirCmd);
-    if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
-    LOG_FATAL("DeleteTempDirCmd is:%s\n", DeleteTempDirCmd);
+    rc = system(delete_tmpdir_cmd);
+    if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
+    LOG_FATAL("DeleteTempDirCmd is:%s\n", delete_tmpdir_cmd);
+    free(delete_tmpdir_cmd);
     return 1;
   }
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
-  rc_system = system(DeleteTempDirCmd);
-  if (!WIFEXITED(rc_system)) systemError(__LINE__, rc_system, DeleteTempDirCmd)
+  rc = system(delete_tmpdir_cmd);
+  if (!WIFEXITED(rc)) systemError(__LINE__, rc, delete_tmpdir_cmd)
+  free(delete_tmpdir_cmd);
 
   return 0; // succeed to retrieve source
 }
@@ -568,8 +697,8 @@ void    SetEnv  (char *S, char *TempFileDir)
   int SLen,GLen; /* lengths for S and global string */
 
   GlobalUploadKey = -1;
-  memset(GlobalTempFile,'\0',MAXCMD);
-  memset(GlobalURL,'\0',MAXCMD);
+  memset(GlobalTempFile,'\0',STRMAX);
+  memset(GlobalURL,'\0',URLMAX);
   if (!S) return;
 
   /* first value is the upload_pk */
@@ -582,7 +711,7 @@ void    SetEnv  (char *S, char *TempFileDir)
   /** This will be removed when the jobqueue is changed. **/
   SLen=0;
   GLen=0;
-  while((GLen < MAXCMD-4) && S[SLen] && !isspace(S[SLen]))
+  while((GLen < STRMAX-4) && S[SLen] && !isspace(S[SLen]))
   {
     if ((S[SLen] == '\'') || isspace(S[SLen]) || !isprint(S[SLen]))
     {
@@ -597,14 +726,14 @@ void    SetEnv  (char *S, char *TempFileDir)
 #endif
   if (TempFileDir)
   {
-    memset(GlobalTempFile,'\0',MAXCMD);
-    snprintf(GlobalTempFile,MAXCMD-1,"%s/wget.%d",TempFileDir,getpid());
+    memset(GlobalTempFile,'\0',STRMAX);
+    snprintf(GlobalTempFile,STRMAX-1,"%s/wget.%d",TempFileDir,getpid());
   }
 
   /* third value is the URL location -- taint any single-quotes */
   SLen=0;
   GLen=0;
-  while((GLen < MAXCMD-4) && S[SLen])
+  while((GLen < STRMAX-4) && S[SLen])
   {
     if ((S[SLen] == '\\') && isprint(S[SLen+1])) // in file path, if include '\ ', that mean this file name include spaces
     {
@@ -629,7 +758,7 @@ void    SetEnv  (char *S, char *TempFileDir)
   char Type[][4] = {"SVN", "Git", "CVS"};
   int i = 0; // type index
 
-  memset(GlobalType,'\0',MAXCMD);
+  memset(GlobalType,'\0',STRMAX);
   strncpy(GlobalType, S, 3);
   if ((0 == strcmp(GlobalType, Type[i++])) || (0 == strcmp(GlobalType, Type[i++])) || (0 == strcmp(GlobalType, Type[i++])))
   {
@@ -637,7 +766,7 @@ void    SetEnv  (char *S, char *TempFileDir)
   }
   else
   {
-    memset(GlobalType,'\0',MAXCMD);
+    memset(GlobalType,'\0',STRMAX);
   }
 
   strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
@@ -701,60 +830,92 @@ char *PathCheck(char *DirPath)
  */
 int Archivefs(char *Path, char *TempFile, char *TempFileDir, struct stat Status)
 {
-  char CMD[MAXCMD] = {0};
+  char *cmd;
   int rc_system = 0;
+  int res;
 
-  snprintf(CMD,MAXCMD-1, "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
-  rc_system = system(CMD);
-  if (!WIFEXITED(rc_system))
+  res = asprintf(&cmd , "mkdir -p '%s' >/dev/null 2>&1", TempFileDir);
+  if (res == -1)
   {
-    LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
-    systemError(__LINE__, rc_system, CMD)
+    ASPRINTF_MEM_ERROR_LOG;
     return 0;
   }
 
+  rc_system = system(cmd);
+  if (!WIFEXITED(rc_system))
+  {
+    LOG_FATAL("[%s:%d] Could not create temporary directory", __FILE__, __LINE__);
+    systemError(__LINE__, rc_system, cmd)
+    free(cmd);
+    return 0;
+  }
+  free(cmd);
+
   if (S_ISDIR(Status.st_mode)) /* directory? */
   {
-    memset(CMD,'\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
-    rc_system = system(CMD);
+    res = asprintf(&cmd, "tar %s -cf  '%s' -C '%s' ./ 1>/dev/null", GlobalParam, TempFile, Path);
+    if (res == -1)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      return 0;
+    }
+    rc_system = system(cmd);
     if (!WIFEXITED(rc_system))
     {
-      systemError(__LINE__, rc_system, CMD)
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
       return 0;
     }
+    free(cmd);
   } else if (strstr(Path, "*"))  // wildcards
   {
-    memset(CMD, '\0', MAXCMD);
     /* for the wildcards upload, keep the path */
     /* copy * files to TempFileDir/temp primarily */
-    snprintf(CMD,MAXCMD-1, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r %s '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
-    rc_system = system(CMD);
-    if (rc_system != 0)
+    res = asprintf(&cmd, "mkdir -p '%s/temp'  > /dev/null 2>&1 && cp -r %s '%s/temp' > /dev/null 2>&1", TempFileDir, Path, TempFileDir);
+    if (res == -1)
     {
-      systemError(__LINE__, rc_system, CMD)
+      ASPRINTF_MEM_ERROR_LOG;
       return 0;
     }
-    memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
-    rc_system = system(CMD);
+    rc_system = system(cmd);
     if (rc_system != 0)
     {
-      systemError(__LINE__, rc_system, CMD)
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
       return 0;
     }
+    free(cmd);
+    res = asprintf(&cmd, "tar -cf  '%s' -C %s/temp ./  1> /dev/null && rm -rf %s/temp  > /dev/null 2>&1", TempFile, TempFileDir, TempFileDir);
+    if (res == -1)
+    {
+      ASPRINTF_MEM_ERROR_LOG;
+      return 0;
+    }
+    rc_system = system(cmd);
+    if (rc_system != 0)
+    {
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
+      return 0;
+    }
+    free(cmd);
   } else if(S_ISREG(Status.st_mode)) /* regular file? */
   {
-    memset(CMD, '\0', MAXCMD);
-    snprintf(CMD,MAXCMD-1, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
-    rc_system = system(CMD);
-    if (rc_system != 0)
+    res = asprintf(&cmd, "cp '%s' '%s' >/dev/null 2>&1", Path, TempFile);
+    if (res == -1)
     {
-      systemError(__LINE__, rc_system, CMD)
+      ASPRINTF_MEM_ERROR_LOG;
       return 0;
     }
-  }
-  else return 0; /* neither a directory nor a regular file */
+    rc_system = system(cmd);
+    if (rc_system != 0)
+    {
+      systemError(__LINE__, rc_system, cmd)
+      free(cmd);
+      return 0;
+    }
+    free(cmd);
+  } else return 0; /* neither a directory nor a regular file */
 
   return 1;
 }
@@ -856,34 +1017,55 @@ void Usage(char *Name)
   */
 void replace_url_with_auth()
 {
+#define PREFIXMAX 10
+
   const char needle[] = " ";
   const char needle2[] = "//";
   int index = 0;
   char *username = NULL;
   char *password = NULL;
-  char http[10] = "";
+  char http[PREFIXMAX] = "";
   char URI[FILEPATH] = "";
   char *token = NULL;
   char *temp = NULL;
+  char *additionalParams = NULL;
 
   if (strstr(GlobalParam, "password") && strstr(GlobalParam, "username"))
   {
     temp = strstr(GlobalURL, needle2);
+    if (!temp || (temp - GlobalURL) < 3)
+    {
+      return;
+    }
     strcpy(URI, temp + 2);
-    strncpy(http, GlobalURL, strlen(GlobalURL) - strlen(URI));
+    if (strlen(GlobalURL) - strlen(URI) > PREFIXMAX - 1)
+    {
+      return;
+    }
 
+    strncpy(http, GlobalURL, strlen(GlobalURL) - strlen(URI));
     /* get the first token */
     token = strtok(GlobalParam, needle);
     /* walk through other tokens */
     while( token != NULL )
     {
       if (1 == index) username = token;
-      if (3 == index) password = token;
+      if (3 == index) {
+        password = token;
+        additionalParams = token + strlen(token) + 1;
+        break;
+      }
       token = strtok(NULL, needle);
       index++;
     }
-    snprintf(GlobalURL, FILEPATH, "%s%s:%s@%s", http, username, password, URI);
-    memset(GlobalParam,'\0',MAXCMD);
+    snprintf(GlobalURL, URLMAX, "%s%s:%s@%s", http, username, password, URI);
+
+    if (strlen(additionalParams) > 0) {
+      memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
+    } 
+    else {
+      memset(GlobalParam,'\0',STRMAX);
+    }
   }
 }
 
@@ -897,11 +1079,11 @@ void MaskPassword()
   int secondIndex = 0;
   char *username = NULL;
   char *token = NULL;
-  char newParam[MAXCMD];
+  char newParam[STRMAX];
   char *beg = NULL;
   char *end = NULL;
 
-  memset(newParam, '\0', MAXCMD);
+  memset(newParam, '\0', STRMAX);
   // SVN if parameters exists
   if (strstr(GlobalParam, "password") && strstr(GlobalParam, "username")) {
     /* get the first token */
@@ -918,7 +1100,7 @@ void MaskPassword()
     }
     // Create new parameters with masked password
     sprintf(newParam, " --username %s --password ****", username);
-    memset(GlobalParam, '\0', MAXCMD);
+    memset(GlobalParam, '\0', STRMAX);
     strcpy(GlobalParam, newParam);
   }
   // GIT
@@ -948,30 +1130,45 @@ void MaskPassword()
 char* GetVersionControlCommand(int withPassword)
 {
   char Type[][4] = {"SVN", "Git", "CVS"};
-  char *command = NULL;
-  char TempFileDirectory[MAXCMD];
+  char *command;
+  char *tmpfile_dir;
+  int res;
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
-  sprintf(TempFileDirectory, "%s.dir", GlobalTempFile);
-
-  command = (char *)malloc(MAXCMD);
-  memset(command,'\0',MAXCMD);
+  res = asprintf(&tmpfile_dir, "%s.dir", GlobalTempFile);
+  if (res == -1)
+  {
+    return NULL;
+  }
 
   if(withPassword < 0) MaskPassword();
   if (0 == strcmp(GlobalType, Type[0]))
   {
     if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, TempFileDirectory);
+    {
+      res = asprintf(&command, "svn --config-option servers:global:http-proxy-host=%s --config-option servers:global:http-proxy-port=%s export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalProxy[4], GlobalProxy[5], GlobalURL, GlobalParam, tmpfile_dir);
+    }
     else
-      sprintf(command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, TempFileDirectory);
+    {
+      res = asprintf(&command, "svn export %s %s %s --no-auth-cache >/dev/null 2>&1", GlobalURL, GlobalParam, tmpfile_dir);
+    }
   }
   else if (0 == strcmp(GlobalType, Type[1]))
   {
     replace_url_with_auth();
     if (GlobalProxy[0] && GlobalProxy[0][0])
-      sprintf(command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+    {
+      res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
+    }
     else
-      sprintf(command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, TempFileDirectory, TempFileDirectory);
+    {
+      res = asprintf(&command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
+    }
+  }
+  if (res == -1)
+  {
+    free(tmpfile_dir);
+    return NULL;
   }
 
   return command;

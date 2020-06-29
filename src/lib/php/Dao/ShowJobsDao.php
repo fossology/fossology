@@ -278,7 +278,7 @@ class ShowJobsDao
 
       $selectCol = "jq_type, jq_endtime, jq_starttime, jq_itemsprocessed";
       if (empty($jq_Type)) {
-        $removeType = "jq_type NOT LIKE 'ununpack' AND jq_type NOT LIKE 'reportgen' AND jq_type NOT LIKE 'decider' AND";
+        $removeType = "jq_type NOT LIKE 'ununpack' AND jq_type NOT LIKE 'reportgen' AND jq_type NOT LIKE 'decider' AND jq_type NOT LIKE 'softwareHeritage' AND";
         /* get starttime endtime and jobtype form jobqueue for a jobid except $removeType */
         $statementName = __METHOD__."$selectCol.$removeType";
         $this->dbManager->prepare($statementName,
@@ -371,5 +371,22 @@ class ShowJobsDao
     } else {
       return array();
     }
+  }
+
+  /**
+   * Get the status of all pending or running jobs.
+   * @return array Containing job name, number of jobs pending and running
+   */
+  public function getJobsForAll()
+  {
+    $sql = "SELECT jq_type AS job, jq_job_fk, job_upload_fk AS upload_fk, " .
+      "CASE WHEN (jq_endtext IS NULL AND jq_end_bits = 0) THEN 'pending' " .
+      "WHEN (jq_endtext = ANY('{Started,Restarted,Paused}')) THEN 'running' " .
+      "ELSE '' END AS status " .
+      "FROM jobqueue INNER JOIN job " .
+      "ON jq_job_fk = job_pk " .
+      "WHERE jq_endtime IS NULL;";
+    $statement = __METHOD__ . ".getAllUnFinishedJobs";
+    return $this->dbManager->getRows($sql, [], $statement);
   }
 }

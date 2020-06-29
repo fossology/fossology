@@ -104,21 +104,31 @@ class ReuserAgent extends Agent
       if (false === $itemTreeBoundsReused) {
         continue;
       }
+
       if ($reuseMode & UploadDao::REUSE_ENHANCED) {
-        $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      } elseif ($reuseMode & UploadDao::REUSE_MAIN) {
-        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
-        $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
-      } elseif ($reuseMode & UploadDao::REUSE_ENH_MAIN) {
-        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
         $this->processEnhancedUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       } else {
         $this->processUploadReuse($itemTreeBounds, $itemTreeBoundsReused, $reusedGroupId);
       }
+
+      if ($reuseMode & UploadDao::REUSE_MAIN) {
+        $this->reuseMainLicense($uploadId, $this->groupId, $reusedUploadId, $reusedGroupId);
+      }
+
+      if ($reuseMode & UploadDao::REUSE_CONF) {
+        $this->reuseConfSettings($uploadId, $reusedUploadId);
+      }
     }
     return true;
   }
-
+  protected function reuseConfSettings($uploadId, $reusedUploadId)
+  {
+    if (!$this->uploadDao->insertReportConfReuse($uploadId, $reusedUploadId)) {
+      echo "INFO :: Report configuration for select upload doesn't exists. Unable to copy!!!";
+    }
+    $this->heartbeat(1);
+    return true;
+  }
   /**
    * @brief Reuse main license from previous upload
    *

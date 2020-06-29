@@ -51,6 +51,7 @@ class UploadVcsPage extends UploadPageBase
     $vars['usernameField'] = 'username';
     $vars['passwdField'] = 'passwd';
     $vars['geturlField'] = self::GETURL_PARAM;
+    $vars['branchField'] = 'branch';
     $vars['nameField'] = 'name';
     $this->renderer->clearTemplateCache();
     $this->renderer->clearCacheFiles();
@@ -107,7 +108,7 @@ class UploadVcsPage extends UploadPageBase
     /* Create an upload record. */
     $uploadMode = (1 << 2); // code for "it came from wget"
     $userId = Auth::getUserId();
-    $groupId = intval($request->get(self::UPLOAD_GROUP, Auth::getGroupId()));
+    $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl,
       $description, $uploadMode, $folderId, $publicPermission);
     if (empty($uploadId)) {
@@ -135,7 +136,12 @@ class UploadVcsPage extends UploadPageBase
     $Passwd = trim($request->get('passwd'));
     $Passwd = $this->basicShEscaping($Passwd);
     if (!empty($Passwd)) {
-      $jq_args .= "--password $Passwd";
+      $jq_args .= "--password $Passwd ";
+    }
+
+    $Branch = trim(explode(' ',trim($request->get('branch')))[0]);
+    if (!empty($Branch) && strcasecmp($VCSType,'git') == 0) {
+      $jq_args .= "--single-branch --branch '$Branch'";
     }
 
     $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, NULL, NULL);

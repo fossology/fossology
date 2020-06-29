@@ -73,6 +73,16 @@ DISTRO=$(lsb_release --id --short)
 
 if [ $BUILDTIME ]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        libgcrypt20-dev
+      ;;
+    RedHatEnterprise*|CentOS|Fedora)
+      yum $YesOpt install \
+        libgcrypt-devel
+      ;;
+  esac
 fi
 
 if [ $RUNTIME ]; then
@@ -80,15 +90,18 @@ if [ $RUNTIME ]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       apt-get $YesOpt install \
-        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl unzip gzip sleuthkit p7zip-full unrar-free
+        bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl \
+        unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install \
-        bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins sleuthkit unrar
+        bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins\
+        sleuthkit unrar libgcrypt
       ;;
     Fedora)
       yum $YesOpt install \
-        bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm tar upx unzip gzip sleuthkit unrar
+        bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm\
+        tar upx unzip gzip sleuthkit unrar libgcrypt
       ;;
   esac
 fi

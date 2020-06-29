@@ -123,13 +123,13 @@ class TreeDao
 
   /**
    * @param int $uploadtreeId
-   * @return array with keys sha1, md5
+   * @return array with keys sha1, md5, sha256
    */
   public function getItemHashes($uploadtreeId, $uploadtreeTablename='uploadtree')
   {
     $pfile = $this->dbManager->getSingleRow("SELECT pfile.* FROM $uploadtreeTablename, pfile WHERE uploadtree_pk=$1 AND pfile_fk=pfile_pk",
         array($uploadtreeId), __METHOD__);
-    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5']);
+    return array('sha1'=>$pfile['pfile_sha1'],'md5'=>$pfile['pfile_md5'],'sha256'=>$pfile['pfile_sha256']);
   }
 
   public function getRepoPathOfPfile($pfileId, $repo="files")

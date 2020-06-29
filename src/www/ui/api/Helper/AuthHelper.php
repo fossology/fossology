@@ -93,14 +93,14 @@ class AuthHelper
    * Verify the JWT token sent by user.
    *
    * @param string $authHeader The "Authorization" header sent by user.
-   * @param string $hostname   Host name to verify the audience of the token.
    * @param int    $userId     The user id as per the valid token.
    * @param string $tokenScope The scope of the token presented.
    * @return boolean|Fossology::UI::Api::Models::Info True if the token is valid,
    *         false otherwise, Info in case of error.
    */
-  public function verifyAuthToken($authHeader, $hostname, &$userId, &$tokenScope)
+  public function verifyAuthToken($authHeader, &$userId, &$tokenScope)
   {
+    $jwtTokenMatch = null;
     $headerValid = preg_match(
       "/^bearer (([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+))$/i",
       $authHeader, $jwtTokenMatch);
@@ -114,8 +114,7 @@ class AuthHelper
       $jwtTokenPayloadDecoded = JWT::jsonDecode(
         JWT::urlsafeB64Decode($jwtTokenPayload));
 
-      if (($jwtTokenPayloadDecoded->{'jti'} === null) ||
-        ($jwtTokenPayloadDecoded->{'aud'} != $hostname)) {
+      if ($jwtTokenPayloadDecoded->{'jti'} === null) {
         return new Info(403, "Invalid token sent.", InfoType::ERROR);
       }
       $jwtJti = $jwtTokenPayloadDecoded->{'jti'};
@@ -186,13 +185,18 @@ class AuthHelper
    *
    * @param int    $userId User id from the JWT.
    * @param string $scope  Scope of the current token.
+   * @param string $groupName  Name of the group to update session with.
    * @sa updateSession()
    */
-  public function updateUserSession($userId, $scope)
+  public function updateUserSession($userId, $scope, $groupName = null)
   {
     $authPlugin = $GLOBALS["container"]->get("helper.restHelper")->getPlugin('auth');
-    $user = $this->dbHelper->getUsers($userId)[0];
-    $row = $this->userDao->getUserAndDefaultGroupByUserName($user["name"]);
+    $user = $this->userDao->getUserByPk($userId);
+    $row = $this->userDao->getUserAndDefaultGroupByUserName($user["user_name"]);
+    if ($groupName !== null) {
+      $row['group_fk'] = $this->userDao->getGroupIdByName($groupName);
+      $row['group_name'] = $groupName;
+    }
     $authPlugin->updateSession($row);
     $this->getSession()->set('token_scope', $scope);
   }
@@ -200,7 +204,6 @@ class AuthHelper
   /**
    * Generates new JWT token.
    *
-   * @param string $hostname Hostname of the issuer
    * @param string $expire   When the token will expire ('YYYY-MM-DD')
    * @param string $created  When the token was created ('YYYY-MM-DD')
    * @param string $jti      Token id (`pat_pk.user_pk`)
@@ -208,11 +211,9 @@ class AuthHelper
    * @param string $key      Token secret key
    * @return string New JWT token
    */
-  public function generateJwtToken($hostname, $expire, $created, $jti, $scope, $key)
+  public function generateJwtToken($expire, $created, $jti, $scope, $key)
   {
     $newJwtToken = [
-      "iss" => $hostname,
-      "aud" => $hostname,
       "exp" => strtotime($expire . " +1 day -1 second"),  // To allow day level granularity
       "nbf" => strtotime($created),
       "jti" => base64_encode($jti),
@@ -230,5 +231,45 @@ class AuthHelper
   public function getMaxTokenValidity()
   {
     return $this->dbHelper->getMaxTokenValidity();
+  }
+
+  /**
+   * @brief Verify if given User Id has access to given Group name.
+   *
+   * @param int    $userId User id from the JWT.
+   * @param string $groupName  Name of the group to verify access to.
+   * @return boolean|Fossology::UI::Api::Models::Info True if user has access to group,
+   *         Info in case of no access or not existing group.
+   */
+  public function userHasGroupAccess($userId, $groupName)
+  {
+    $isGroupExisting = $this->isGroupExisting($groupName);
+    if ($isGroupExisting === true) {
+      $groupMap = $this->userDao->getUserGroupMap($userId);
+      $userHasGroupAccess = in_array($groupName, $groupMap, true);
+    } else {
+      return $isGroupExisting;
+    }
+
+    if (!$userHasGroupAccess) {
+        $userHasGroupAccess = new Info(403, "User has no access to " . $groupName . " group", InfoType::ERROR);
+    }
+    return $userHasGroupAccess;
+  }
+
+  /**
+   * @brief Verify if given Group name exists.
+   *
+   * @param string $groupName  Name of the group to update session with.
+   * @return boolean|Fossology::UI::Api::Models::Info True if group exists,
+   *         Info in case of nt existing group.
+   */
+  public function isGroupExisting($groupName)
+  {
+    if (! empty($this->userDao->getGroupIdByName($groupName))) {
+      return true;
+    } else {
+      return new Info(403, "Provided group:" . $groupName . " does not exist", InfoType::ERROR);
+    }
   }
 }

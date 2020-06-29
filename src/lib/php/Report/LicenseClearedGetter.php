@@ -26,6 +26,7 @@ use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Data\AgentRef;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
@@ -42,7 +43,7 @@ class LicenseClearedGetter extends ClearedGetterCommon
   /** @var string[] */
   private $licenseCache = array();
   /** @var agentNames */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
 
   public function __construct()
   {

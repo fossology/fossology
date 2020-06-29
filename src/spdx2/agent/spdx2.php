@@ -69,6 +69,7 @@ use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\License;
+use Fossology\Lib\Data\AgentRef;
 
 include_once(__DIR__ . "/spdx2utils.php");
 
@@ -114,7 +115,7 @@ class SpdxTwoAgent extends Agent
   /** @var array $agentNames
    * Agent names mapping
    */
-  protected $agentNames = array('nomos' => 'N', 'monk' => 'M', 'ninka' => 'Nk', 'reportImport' => 'I', 'ojo' => 'O');
+  protected $agentNames = AgentRef::AGENT_LIST;
   /** @var array $includedLicenseIds
    * License ids included
    */
@@ -346,6 +347,7 @@ class SpdxTwoAgent extends Agent
         'uploadName' => $upload->getFilename(),
         'sha1' => $hashes['sha1'],
         'md5' => $hashes['md5'],
+        'sha256' => $hashes['sha256'],
         'verificationCode' => $this->getVerificationCode($upload),
         'mainLicenses' => $mainLicenses,
         'mainLicense' => SpdxTwoUtils::implodeLicenses($mainLicenses, $this->spdxValidityChecker),
@@ -441,7 +443,7 @@ class SpdxTwoAgent extends Agent
       if (($filesProceeded&2047)==0) {
         $this->heartbeat(0);
       }
-      $fullPath = $treeDao->getFullPath($fileId,$treeTableName,0,true);
+      $fullPath = $treeDao->getFullPath($fileId,$treeTableName,0);
       if (!empty($licenses['concluded']) && count($licenses['concluded'])>0) {
         $this->toLicensesWithFilesAdder($licensesWithFiles,$licenses['concluded'],$licenses['copyrights'],$fileId,$fullPath);
       } else {
@@ -524,10 +526,23 @@ class SpdxTwoAgent extends Agent
    */
   protected function addCopyrightResults(&$filesWithLicenses, $uploadId)
   {
-    /* @var $copyrightDao CopyrightDao */
+    $agentName = 'copyright';
+    /** @var CopyrightDao $copyrightDao */
     $copyrightDao = $this->container->get('dao.copyright');
+    /** @var ScanJobProxy $scanJobProxy */
+    $scanJobProxy = new ScanJobProxy($this->container->get('dao.agent'),
+      $uploadId);
+
+    $scanJobProxy->createAgentStatus(array($agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return;
+    }
+    $latestAgentId = $selectedScanners[$agentName];
+    $extrawhere = ' agent_fk='.$latestAgentId;
+
     $uploadtreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
-    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere=null);
+    $allScannerEntries = $copyrightDao->getScannerEntries('copyright', $uploadtreeTable, $uploadId, $type='statement', $extrawhere);
     $allEditedEntries = $copyrightDao->getEditedEntries('copyright_decision', $uploadtreeTable, $uploadId, $decisionType=null);
     foreach ($allScannerEntries as $finding) {
       $filesWithLicenses[$finding['uploadtree_pk']]['copyrights'][] = \convertToUTF8($finding['content'],false);
@@ -674,7 +689,7 @@ class SpdxTwoAgent extends Agent
         $lastValue = $filesProceeded;
       }
       $hashes = $treeDao->getItemHashes($fileId);
-      $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0, true);
+      $fileName = $treeDao->getFullPath($fileId, $treeTableName, 0);
       if (!is_array($licenses['concluded'])) {
         $licenses['concluded'] = array();
       }
@@ -689,6 +704,7 @@ class SpdxTwoAgent extends Agent
           'fileId' => $fileId,
           'sha1' => $hashes['sha1'],
           'md5' => $hashes['md5'],
+          'sha256' => $hashes['sha256'],
           'uri' => $this->uri,
           'fileName' => $fileName,
           'fileDirName' => dirname($fileName),

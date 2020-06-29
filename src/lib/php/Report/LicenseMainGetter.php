@@ -56,12 +56,11 @@ class LicenseMainGetter extends ClearedGetterCommon
         'content' => $licenseMap->getProjectedShortname($originLicenseId),
         'text' => $allLicenseCols->getText()
       );
-
     }
     return $allStatements;
   }
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
+  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false, $objectAgent)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $statements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);

@@ -4,10 +4,10 @@ Priority: optional
 Maintainer: Michael Jaeger <michael.c.jaeger@siemens.com>
 Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
  libmxml-dev, libtext-template-perl, librpm-dev, subversion, rpm, libpcre3-dev,
- libssl-dev, postgresql-server-dev-all, libboost-regex-dev,
- libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev,
+ libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libicu-dev,
+ libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev, libpq-dev,
  php5-cli|php7.0-cli|php7.2-cli|php7.3-cli, php-mbstring|php5, php-zip|php5,
- php-xml|php5, libboost-system-dev, libboost-filesystem-dev
+ php-xml|php5, libboost-system-dev, libboost-filesystem-dev, libgcrypt20-dev
 Standards-Version: 3.9.1
 Homepage: https://fossology.org
 
@@ -30,7 +30,7 @@ Depends: fossology-web, fossology-scheduler, fossology-ununpack,
  fossology-delagent, fossology-wgetagent, ${misc:Depends}
 Recommends: fossology-monk, fossology-monkbulk, fossology-decider,
  fossology-readmeoss, fossology-spdx2, fossology-reportimport,
- fossology-reuser, fossology-ninka
+ fossology-softwareheritage, fossology-reuser, fossology-ninka
 Conflicts: fossology-db (<= 1.4.1), fossology-common (<= 1.4.1)
 Description: open and modular architecture for analyzing software
  The FOSSology project is a web based framework that allows you to
@@ -49,6 +49,7 @@ Architecture: any
 Depends: php5-pgsql|php7.0-pgsql|php7.2-pgsql|php7.3-pgsql, php-pear,
  php5-cli|php7.0-cli|php7.2-cli|php7.3-cli, php-mbstring|php5,
  php5-json|php7.0-json|php7.2-json|php7.3-json, php-zip|php5, php-xml|php5,
+ php5-curl|php7.0-curl|php7.2-curl|php7.3-curl,
  ${shlibs:Depends}, ${misc:Depends}
 Description: architecture for analyzing software, common files
  The FOSSology project is a web based framework that allows you to
@@ -339,3 +340,15 @@ Description: architecture for analyzing software, report importer
  type identification.
  .
  This package contains the reportImport agent programs and their resources.
+
+Package: fossology-softwareheritage
+Architecture: any
+Depends: fossology-ununpack, fossology-wgetagent, ${misc:Depends}
+Description: architecture for fetching the origin of a file software heritage archive.
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the softwareHeritage agent programs and their resources.

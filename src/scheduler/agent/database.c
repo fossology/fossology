@@ -1098,16 +1098,22 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
         g_string_append_printf(client_cmd, " -S smtp-auth=plain");
       }
     }
+
     if(g_hash_table_contains(smtpvariables, "SMTPAuthUser"))
     {
-      g_string_append_printf(client_cmd, " -S smtp-auth-user=\"%s\" -S from=\"%s\"",
-          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"),
+      g_string_append_printf(client_cmd, " -S smtp-auth-user=\"%s\"" ,
           (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"));
+    }
+
+    if(g_hash_table_contains(smtpvariables, "SMTPFrom"))
+    {
+      g_string_append_printf(client_cmd, " -S from=\"%s\"",
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPFrom"));
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuthPasswd"))
     {
       g_string_append_printf(client_cmd, " -S smtp-auth-password=\"%s\"",
-         (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
     }
     if(g_hash_table_contains(smtpvariables, "SMTPSslVerify"))
     {

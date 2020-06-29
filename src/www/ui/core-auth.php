@@ -2,6 +2,7 @@
 /***********************************************************
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  * Copyright (C) 2015 Siemens AG
+ * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -34,6 +35,8 @@ class core_auth extends FO_Plugin
   private $userDao;
   /** @var Session */
   private $session;
+  /** @var External Authentication */
+  private $authExternal;
 
   function __construct()
   {
@@ -47,6 +50,7 @@ class core_auth extends FO_Plugin
     $this->dbManager = $container->get("db.manager");
     $this->userDao = $container->get('dao.user');
     $this->session = $container->get('session');
+    $this->authExternal = auth_external_check();
   }
 
   /**
@@ -85,6 +89,11 @@ class core_auth extends FO_Plugin
     if (!$this->session->isStarted()) {
       $this->session->setName('Login');
       $this->session->start();
+    }
+
+    //--------- Authentification external connection for auto-login-----------
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
+      $this->checkUsernameAndPassword($this->authExternal['loginAuthExternal'], $this->authExternal['passwordAuthExternal']);
     }
 
     if (array_key_exists('selectMemberGroup', $_POST)) {
@@ -193,6 +202,11 @@ class core_auth extends FO_Plugin
   {
     $userName = GetParm("username", PARM_TEXT);
     $password = GetParm("password", PARM_TEXT);
+    $timezone = GetParm("timezone", PARM_TEXT);
+    if (empty($timezone) || strpos($timezone,"Unknown") == true) {
+      $timezone = date_default_timezone_get();
+    }
+    $_SESSION['timezone'] = $timezone;
     $referrer = GetParm("HTTP_REFERER", PARM_TEXT);
     if (empty($referrer)) {
       $referrer = GetArrayVal('HTTP_REFERER', $_SERVER);
@@ -252,6 +266,33 @@ class core_auth extends FO_Plugin
    */
   function checkUsernameAndPassword($userName, $password)
   {
+    $user_exists=true;
+    /* Check the user for external authentication */
+    if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
+      $username = $this->authExternal['loginAuthExternal'];
+      /* checking if user exists */
+      try {
+        $this->userDao->getUserAndDefaultGroupByUserName($username);
+      } catch (Exception $e) {
+          $user_exists=false;
+      }
+      if (! $user_exists && $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AUTO_CREATE']) {
+        /* If user does not exist then we create it */
+        $User = trim(str_replace("'", "''", $this->authExternal['loginAuthExternal']));
+        $Pass = $this->authExternal['passwordAuthExternal'] ;
+        $Seed = rand() . rand();
+        $Hash = sha1($Seed . $Pass);
+        $Desc = $this->authExternal['descriptionAuthExternal'];
+        $Perm = 3;
+        $Folder = 1;
+        $Email_notify = "y";
+        $Email = $this->authExternal['emailAuthExternal'];
+        /* Set default list of agents when a new user is created */
+        $agentList = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AGENT_LIST'];
+        add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify, $agentList, $Folder);
+      }
+    }
+
     if (empty($userName) || $userName == 'Default User') {
       return false;
     }

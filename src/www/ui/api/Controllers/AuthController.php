@@ -122,8 +122,7 @@ class AuthController extends RestController
           }
           if (isset($jti['jti']) && ! empty($jti['jti'])) {
             $theJwtToken = $this->restHelper->getAuthHelper()->generateJwtToken(
-              $request->getUri()->getHost(), $expire, $jti['created_on'],
-              $jti['jti'], $scope, $key);
+              $expire, $jti['created_on'], $jti['jti'], $scope, $key);
             $returnVal = $response->withJson([
               "Authorization" => "Bearer " . $theJwtToken
             ], 201);

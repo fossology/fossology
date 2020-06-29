@@ -69,6 +69,14 @@
       <th width="25%">{{ "Default bucket pool"| trans }}</th>
       <td>{{ bucketPool }}</td>
     </tr>
+    {%  if isSessionAdmin %}
+      <tr class="classic">
+        <th width="25%">{{ "Select user's default group."|trans }}</th>
+        <td><select name="default_group_fk" class="ui-render-select2">
+          {{ defaultGroupOption }}
+        </select></td>
+      </tr>
+    {% endif %}
   </table>
   <input type="submit" name="UpdateBtn" value="{{ 'Update Account'|trans }}"/>
   </form>
@@ -121,7 +129,8 @@
               <tbody>
                 <tr>
                   <td>
-                    <input type="radio" name="pat_scope" value="r" id="pat_scope_r" />
+                    <input type="radio" name="pat_scope" value="r"
+                      id="pat_scope_r" checked="checked" />
                   </td>
                   <td style="width:100%">
                     <label class="font-weight:bold" for="pat_scope_r">
@@ -134,6 +143,7 @@
                     </label>
                   </td>
                 </tr>
+              {% if writeAccess %}
                 <tr>
                   <td>
                     <input type="radio" name="pat_scope" value="w" id="pat_scope_w" />
@@ -149,6 +159,7 @@
                     </label>
                   </td>
                 </tr>
+              {% endif %}
               </tbody>
             </table>
           </td>

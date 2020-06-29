@@ -182,6 +182,10 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/reportImport install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-softwareheritage \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/softwareHeritage install
+
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
 	cp $(COMPOSER_PHAR) $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/

@@ -28,13 +28,15 @@
             {% endif %}
           </table>
       </td>
-      <td>
       {% if bulkHistoryHighlightUri and row.id > 0 and row.matched %}
+      <td class="hi-bulk">
       <a href="{{ bulkHistoryHighlightUri }}&item={{ itemId }}&clearingId={{ row.id }}#highlight">{{ row.text|e }}<a>
-      {% else %}
-      {{ row.text|e }}
-      {% endif %}
       </td>
+      {% else %}
+      <td>
+      {{ row.text|e }}
+      </td>
+      {% endif %}
     </tr>
   {% endfor %}
   {% else %}

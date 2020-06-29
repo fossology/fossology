@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019, Siemens AG
+ * Copyright (C) 2020, Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,18 +29,25 @@
  *
  * -# The regex first finds occurance of `spdx-license-identifier` in the text
  * -# Throw the text `spdx-license-identifier`
- * -# Matches at most 5 identifiers each with max length of 37 (based on
+ * -# Matches at most 5 identifiers each with length greater than 3 (based on
  * https://github.com/spdx/license-list-data/tree/master/html)
  */
-#define SPDX_LICENSE_LIST "spdx-licen[cs]e(?:id|[- ]identifier): \\K((?:(?: (?:and|or|with) )?\\(?(?:[\\w\\d\\.\\+\\-]{1,37})\\)?){1,5})"
+#define SPDX_LICENSE_LIST "spdx-licen[cs]e(?:id|[- ]identifier): \\K((?:(?: (?:and|or|with) )?\\(?(?:[\\w\\d\\.\\+\\-]{3,})\\)?){1,5})"
 /**
  * @def SPDX_LICENSE_NAMES
  * @brief Regex to filter license names from list of license list
  *
  * -# License names will consist of words, digits, dots and hyphens.
- * -# Maximum length of license name will be 37 (based on
+ * -# Length of license names greater than 3 (based on
  * https://github.com/spdx/license-list-data/tree/master/html)
  */
-#define SPDX_LICENSE_NAMES "(?: and | or | with )?\\(?([\\w\\d\\.\\+\\-]{1,37})\\)?"
+#define SPDX_LICENSE_NAMES "(?: and | or | with )?\\(?([\\w\\d\\.\\+\\-]{3,})\\)?"
+/**
+ * @def SPDX_DUAL_LICENSE
+ * @brief Regex to check if Dual-license
+ *
+ * -# Check if the license string contains or, with or and.
+ */
+#define SPDX_DUAL_LICENSE "(?: (and|or|with)? )"
 
 #endif /* SRC_OJO_AGENT_OJOREGEX_HPP_ */

@@ -77,6 +77,7 @@ int main(int argc, char** argv)
   }
 
   bool json = cliOptions.doJsonOutput();
+  bool ignoreFilesWithMimeType = cliOptions.doignoreFilesWithMimeType();
   CopyrightState state = getState(std::move(cliOptions));
 
   if (!fileNames.empty())
@@ -144,7 +145,7 @@ int main(int argc, char** argv)
       if (arsId <= 0)
         return_sched(5);
 
-      if (!processUploadId(state, agentId, uploadId, copyrightDatabaseHandler))
+      if (!processUploadId(state, agentId, uploadId, copyrightDatabaseHandler, ignoreFilesWithMimeType))
         return_sched(2);
 
       fo_scheduler_heart(0);
@@ -154,6 +155,5 @@ int main(int argc, char** argv)
     /* do not use bail, as it would prevent the destructors from running */
     return_sched(0);
   }
-
 }
 

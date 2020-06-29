@@ -58,7 +58,6 @@ echo
 echo 'Fossology initialisation complete; Starting up...'
 echo
 if [[ $# -eq 0 ]]; then
-  /etc/init.d/fossology start
   /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \

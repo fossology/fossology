@@ -36,6 +36,7 @@ FUNCTION void usage(char *name)
   printf("  -F   :: Validate folder contents.\n");
   printf("  -g   :: Delete orphan gold files.\n");
   printf("  -h   :: Print help (usage).\n");
+  printf("  -L   :: Remove orphaned logs from file system.\n");
   printf("  -N   :: Normalize the (internal) priority numbers.\n");
   printf("  -p   :: Verify file permissions (report only).\n");
   printf("  -P   :: Verify and fix file permissions.\n");
