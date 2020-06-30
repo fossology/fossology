@@ -4,17 +4,15 @@
 # build FOSSology on Travis CI - https://travis-ci.org/
 
 language: php
-dist: xenial
+dist: bionic
 os: linux
-php: 7.0
-cache:
-  ccache: true
-  directories:
-    - $HOME/.composer
+
 env:
   global:
     - PATH="/usr/lib/ccache/:$PATH"
-    - COMPOSER_HOME="$HOME/.composer/"
+
+services:
+  - postgresql
 
 addons:
   apt:
@@ -51,29 +49,39 @@ addons:
       - libicu-dev
       - libgcrypt20-dev
 
-services: postgresql
-
 jobs:
-  fast_finish: true
   include:
-    - stage: GitHub Page Release
-      name: GitHub Page deploy
-      addons:
-        apt:
-          packages:
-            - doxygen
-            - graphviz
+    - stage: Build
+      name: Build
+      install:
+        - sudo apt-get -qq -y install lsb-release cppcheck libcunit1-dev libcppunit-dev sudo git php-phpdbg
+        - sudo apt-get -qq -y install sqlite3 php-sqlite3 libsqlite3-dev libdbd-sqlite3-perl postgresql-server-dev-all composer
+        - sudo utils/fo-installdeps -e -o -y
       script:
-        - doxygen -v
-        - bash utils/deploy-pages.sh
-      deploy:
-        provider: pages
-        cleanup: false
-        skip_cleanup: true
-        token: $GITHUB_TOKEN
-        keep_history: false
-        local_dir: code_docs
-        repo: $GH_REPO_REF
-        target_branch: master
-        on:
-          branch: master
+        - make
+    - stage: Compliance
+      name: Copyright
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull gmishx/fossology-ci:latest
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          gmishx/fossology-ci:latest "/bin/fossologyscanner" copyright keyword ;
+          fi
+    - stage: Compliance
+      name: License
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull gmishx/fossology-ci:latest
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          gmishx/fossology-ci:latest "/bin/fossologyscanner" nomos ojo ;
+          fi
