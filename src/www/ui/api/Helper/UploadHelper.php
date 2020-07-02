@@ -115,7 +115,7 @@ class UploadHelper
     $uploadedFile = $request->getUploadedFiles();
     $body = $request->getParsedBody();
 
-    if (! empty($ignoreScm) && ($ignoreScm == "true" || $ignoreScm)) {
+    if (! empty($ignoreScm) && ($ignoreScm == "true")) {
       // If SCM should be ignored
       $ignoreScm = 1;
     } else {
