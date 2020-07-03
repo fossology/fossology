@@ -101,7 +101,7 @@ class ReportStatic
    * @brief Generates clearing protocol change log table
    * @param Section $section
    */
-  function clearingProtocolChangeLogTable(Section $section)
+  function clearingProtocolChangeLogTable(Section $section, $heading)
   {
     $thColor = array("bgColor" => "E0E0E0");
     $thText = array("size" => 12, "bold" => true);
@@ -111,7 +111,6 @@ class ReportStatic
     $cellSecondLen = 4500;
     $cellThirdLen = 9000;
 
-    $heading = "Clearing Protocol Change Log";
     $section->addTitle(htmlspecialchars($heading), 2);
 
     $table = $section->addTable($this->tablestyle);
@@ -155,9 +154,8 @@ class ReportStatic
    * @param Section $section
    * @param string $otherStatement
    */
-  function assessmentSummaryTable(Section $section, $otherStatement)
+  function assessmentSummaryTable(Section $section, $otherStatement, $heading)
   {
-    $heading = "Assessment Summary";
     $infoText = "The following table only contains significant obligations, "
         ."restrictions & risks for a quick overview – all obligations, "
         ."restrictions & risks according to Section 3 must be considered.";
@@ -282,7 +280,7 @@ class ReportStatic
    * @brief Generate todo table
    * @param Section $section
    */
-  function todoTable(Section $section)
+  function todoTable(Section $section, $heading)
   {
     global $SysConf;
     $textCommonObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["CommonObligation"]);
@@ -295,7 +293,6 @@ class ReportStatic
     $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
 
-    $heading = "Required license compliance tasks";
     $subHeading = "Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined"
       ." to simplify the To-Dos for development and distribution. The following"

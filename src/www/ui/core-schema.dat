@@ -1896,6 +1896,10 @@
   $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_copyrightnotes\" text DEFAULT 'NA'::text";
   $Schema["TABLE"]["report_info"]["ri_copyrightnotes"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_copyrightnotes\" SET NOT NULL, ALTER COLUMN \"ri_copyrightnotes\" SET DEFAULT 'NA'::text";
 
+  $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["DESC"] = "COMMENT ON COLUMN \"report_info\".\"ri_unifiedcolumns\" IS 'to edit unified report columns'";
+  $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_unifiedcolumns\" json";
+  $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_unifiedcolumns\" DROP NOT NULL";
+
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
 

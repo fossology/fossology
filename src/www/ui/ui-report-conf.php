@@ -203,7 +203,27 @@ class ui_report_conf extends FO_Plugin
       }
       $tableRows .= '</td></tr>';
     }
+    $tableRowsUnifiedReport = "";
+    $unifiedColumns = array();
+    if (!empty($row['ri_unifiedcolumns'])) {
+      $unifiedColumns = (array) json_decode($row['ri_unifiedcolumns'], true);
+    } else {
+      $unifiedColumns = UploadDao::UNIFIED_REPORT_HEADINGS;
+    }
+    foreach ($unifiedColumns as $name => $unifiedReportColumns) {
+      foreach ($unifiedReportColumns as $columnName => $isenabled) {
+        $tableRowsUnifiedReport .= '<tr>';
+        $tableRowsUnifiedReport .= '<td><input type="text" style="width:95%" name="'.$name.'[]" value="'.$columnName.'"></td>';
+        $checked = '';
+        if ($isenabled) {
+          $checked = 'checked';
+        }
+        $tableRowsUnifiedReport .= '<td><input type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
+        $tableRowsUnifiedReport .= '</tr>';
+      }
+    }
     $vars['tableRows'] = $tableRows;
+    $vars['tableRowsUnifiedReport'] = $tableRowsUnifiedReport;
     $vars['scriptBlock'] = $this->createScriptBlock();
 
     return $vars;
@@ -308,18 +328,27 @@ class ui_report_conf extends FO_Plugin
         $i++;
       }
       $parms[] = $this->getCheckBoxSelectionList($this->radioListUR);
+
+      $unifiedReportColumnsForJson = array();
+      foreach (UploadDao::UNIFIED_REPORT_HEADINGS as $columnName => $columnValue) {
+        $columnResult = @$_POST[$columnName];
+        $unifiedReportColumnsForJson[$columnName] = array($columnResult[0] => isset($columnResult[1]) ? $columnResult[1] : null);
+      }
       $checkBoxUrPos = count($parms);
       $parms[] = $this->getCheckBoxSelectionList($this->checkBoxListSPDX);
       $checkBoxSpdxPos = count($parms);
       $parms[] = json_encode($obLicenses);
       $excludeObligationPos = count($parms);
+      $parms[] = json_encode($unifiedReportColumnsForJson);
+      $unifiedColumnsPos = count($parms);
       $parms[] = $uploadId;
       $uploadIdPos = count($parms);
 
       $SQL = "UPDATE report_info SET $columns" .
                "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
                "ri_spdx_selection = $$checkBoxSpdxPos, " .
-               "ri_excluded_obligations = $$excludeObligationPos" .
+               "ri_excluded_obligations = $$excludeObligationPos, " .
+               "ri_unifiedcolumns = $$unifiedColumnsPos" .
                "WHERE upload_fk = $$uploadIdPos;";
       $this->dbManager->getSingleRow($SQL, $parms,
         __METHOD__ . "updateReportInfoData");
