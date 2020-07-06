@@ -51,7 +51,7 @@ class AllJobStatus extends DefaultPlugin
         self::TITLE => "Status - all server jobs",
         self::MENU_LIST => "Admin::Dashboards::All Jobs",
         self::REQUIRES_LOGIN => false,
-        self::PERMISSION => Auth::PERM_NONE
+        self::PERMISSION => Auth::PERM_READ
       ));
   }
 

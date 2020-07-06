@@ -374,7 +374,7 @@ class ShowJobsDao
   }
 
   /**
-   * Get the status of all pending or running jobs.
+   * Get the status of all recent pending or running jobs.
    * @return array Containing job name, number of jobs pending and running
    */
   public function getJobsForAll()
@@ -385,6 +385,7 @@ class ShowJobsDao
       "ELSE '' END AS status " .
       "FROM jobqueue INNER JOIN job " .
       "ON jq_job_fk = job_pk " .
+      "AND job_queued >= (now() - interval '" . $this->nhours . " hours') " .
       "WHERE jq_endtime IS NULL;";
     $statement = __METHOD__ . ".getAllUnFinishedJobs";
     return $this->dbManager->getRows($sql, [], $statement);
