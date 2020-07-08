@@ -264,42 +264,42 @@ class UnifiedReport extends Agent
 
     $this->heartbeat(0);
 
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
-    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesMain) ? 0 : count($licensesMain["statements"]));
 
-    $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId, true, null, false, $this);
+    $licensesHist = $this->licenseClearedGetter->getLicenseHistogramForReport($uploadId, $groupId);
     $this->heartbeat(empty($licensesHist) ? 0 : count($licensesHist["statements"]));
 
-    $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $bulkLicenses = $this->bulkMatchesGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
-    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
-    $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licenseComments = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licenseComments) ? 0 : count($licenseComments["statements"]));
 
-    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licensesIrre = $this->licenseIrrelevantGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesIrre) ? 0 : count($licensesIrre["statements"]));
 
-    $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licensesIrreComment = $this->licenseIrrelevantCommentGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesIrreComment) ? 0 : count($licensesIrreComment["statements"]));
 
-    $licensesDNU = $this->licenseDNUGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licensesDNU = $this->licenseDNUGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesDNU) ? 0 : count($licensesDNU["statements"]));
 
-    $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $groupId, true, null, false, $this);
+    $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
 
-    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $groupId, true, "copyright", true, $this);
+    $copyrights = $this->cpClearedGetter->getCleared($uploadId, $this, $groupId, true, "copyright", true);
     $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
 
-    $ecc = $this->eccClearedGetter->getCleared($uploadId, $groupId, true, "ecc", false, $this);
+    $ecc = $this->eccClearedGetter->getCleared($uploadId, $this, $groupId, true, "ecc", false);
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));
 
     $otherStatement = $this->otherGetter->getReportData($uploadId);

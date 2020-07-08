@@ -1033,6 +1033,7 @@ FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
    */
   public function getCandidateLicenseCountForCurrentDecisions($uploadTreeId, $uploadId=0)
   {
+    $params = array();
     if (!empty($uploadId)) {
       $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
       $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -1049,7 +1050,7 @@ FROM (SELECT DISTINCT uploadtree_pk FROM allDecs) AS no_license_uploadtree;";
       SELECT rf_fk, date_added, removed FROM (
         SELECT rf_fk, date_added, removed, row_number()
           OVER (PARTITION BY rf_fk ORDER BY date_added DESC) AS ROWNUM
-        FROM clearing_event WHERE $uploadtreeStatement) SORTABLE 
+        FROM clearing_event WHERE $uploadtreeStatement) SORTABLE
           WHERE ROWNUM = 1 ORDER BY rf_fk)
       SELECT count(*) FROM license_candidate WHERE license_candidate.rf_pk IN
         (SELECT rf_fk FROM latestEvents WHERE removed=false);";
