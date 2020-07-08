@@ -649,19 +649,39 @@ ORDER BY lft asc
   }
 
   /**
-   * @param array $licenseLists
+   * Get obligations associated to the list of licenses sent.
+   * @param array   $licenseLists List of licenses
+   * @param boolean $candidate    Is candidate obligation map?
    * @return array
-   **/
-  public function getLicenseObligations($licenseLists, $tableName='obligation_map')
+   */
+  public function getLicenseObligations($licenseLists, $candidate = false)
   {
     if (!empty($licenseLists)) {
-      $licenseList = implode (",",$licenseLists);
+      $sql = "";
+      $params = array();
+      $params[] = '{' . implode(',', $licenseLists) . '}';
+      if ($candidate) {
+        $tableName='obligation_candidate_map';
+        $sql = "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, " .
+          "rf_shortname FROM obligation_ref " .
+          "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
+          "JOIN license_ref ON $tableName.rf_fk = license_ref.rf_pk " .
+          "WHERE ob_active='t' AND rf_fk = ANY($1::int[]);";
+      } else {
+        $tableName='obligation_map';
+        $conclusionmapCte = LicenseMap::getMappedLicenseRefView('$2');
+        $sql = "WITH conclusionmap AS (" . $conclusionmapCte . ") " .
+          "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_origin AS rf_fk, " .
+          "lr.rf_shortname FROM obligation_ref " .
+          "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
+          "JOIN conclusionmap ON $tableName.rf_fk = conclusionmap.rf_pk " .
+          "INNER JOIN license_ref lr ON conclusionmap.rf_origin = lr.rf_pk " .
+          "WHERE ob_active='t' AND rf_origin = ANY($1::int[]);";
+        $params[] = LicenseMap::CONCLUSION;
+      }
       $statementName = __METHOD__.$tableName;
-      $this->dbManager->prepare($statementName,
-            "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, rf_shortname FROM obligation_ref
-             JOIN $tableName ON $tableName.ob_fk=obligation_ref.ob_pk
-             JOIN license_ref ON $tableName.rf_fk=license_ref.rf_pk WHERE ob_active='t' and rf_fk in ($licenseList)");
-      $result = $this->dbManager->execute($statementName, array());
+      $this->dbManager->prepare($statementName, $sql);
+      $result = $this->dbManager->execute($statementName, $params);
       $ObligationRef = $this->dbManager->fetchAll($result);
       $this->dbManager->freeResult($result);
       return $ObligationRef;
