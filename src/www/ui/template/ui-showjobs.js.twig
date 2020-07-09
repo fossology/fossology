@@ -113,6 +113,9 @@ function createTableForJob(job) {
     uploadLink = '<a title="{{ "Click to browse"|trans }}" ' +
     'href="?mod=browse&upload=' + job.upload.uploadId + '&item=' +
     job.upload.uploadItem + '">' + job.upload.uploadName + '</a>';
+  } else if (job.upload !== null && job.job.jobName == "Delete") {
+    uploadLink = '<span style="color:black">' + job.upload.uploadName +
+      ' (Deleted)</span>';
   } else {
     uploadLink = '<span style="color:black">' + job.job.jobName + '</span>';
   }

@@ -61,7 +61,7 @@ class core_uploads extends FO_Plugin
         $V .= " (" . htmlentities($upload['upload_desc']) . ")";
       }
       if (! empty($upload['upload_ts'])) {
-        $V .= " :: " . htmlentities($upload['upload_ts']);
+        $V .= " :: " . htmlentities(Convert2BrowserTime($upload['upload_ts']));
       }
       $V .= "</option>\n";
     }
