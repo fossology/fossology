@@ -38,6 +38,7 @@ class UploadDao
   const REUSE_ENHANCED = 2;
   const REUSE_MAIN = 4;
   const REUSE_CONF = 16;
+  const REUSE_COPYRIGHT = 32;
 
   /** @var DbManager */
   private $dbManager;

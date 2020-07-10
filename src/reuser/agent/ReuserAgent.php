@@ -26,6 +26,9 @@ use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\BusinessRules\ClearingEventProcessor;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\Item;
@@ -67,6 +70,14 @@ class ReuserAgent extends Agent
    * ClearingDao object
    */
   private $clearingDao;
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
+  /** @var AgentDao $aagentDao
+   * AgentDao object
+   */
+  private $aagentDao;
   /** @var DecisionTypes $decisionTypes
    * DecisionTypes object
    */
@@ -75,8 +86,10 @@ class ReuserAgent extends Agent
   function __construct()
   {
     parent::__construct(REUSER_AGENT_NAME, AGENT_VERSION, AGENT_REV);
+    $this->aagentDao = $this->container->get('dao.agent');
     $this->uploadDao = $this->container->get('dao.upload');
     $this->clearingDao = $this->container->get('dao.clearing');
+    $this->copyrightDao = $this->container->get('dao.copyright');
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingEventProcessor = $this->container->get('businessrules.clearing_event_processor');
     $this->clearingDecisionFilter = $this->container->get('businessrules.clearing_decision_filter');
@@ -118,6 +131,10 @@ class ReuserAgent extends Agent
       if ($reuseMode & UploadDao::REUSE_CONF) {
         $this->reuseConfSettings($uploadId, $reusedUploadId);
       }
+
+      if ($reuseMode & UploadDao::REUSE_COPYRIGHT) {
+        $this->reuseCopyrights($uploadId, $reusedUploadId);
+      }
     }
     return true;
   }
@@ -129,6 +146,7 @@ class ReuserAgent extends Agent
     $this->heartbeat(1);
     return true;
   }
+
   /**
    * @brief Reuse main license from previous upload
    *
@@ -148,6 +166,68 @@ class ReuserAgent extends Agent
           continue;
         } else {
           $this->clearingDao->makeMainLicense($uploadId, $groupId, $mainLicenseId);
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief getAgentId from upload
+   *
+   * Get add the main licenses from previous upload and make them in new upload
+   * @param int $uploadId       uplaodId
+   * @return int agentId
+   */
+  protected function getAgentId($uploadId)
+  {
+    $agentName = 'copyright';
+
+    /** @var ScanJobProxy $scanJobProxy */
+    $scanJobProxy = new ScanJobProxy($this->aagentDao, $uploadId);
+
+    $scanJobProxy->createAgentStatus(array($agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return;
+    }
+    $latestAgentId = $selectedScanners[$agentName];
+    return $latestAgentId;
+  }
+
+
+  /**
+   * @brief Reuse deactivated Copyrights from previous upload
+   *
+   * Get add the main licenses from previous upload and make them in new upload
+   * @param int $uploadId       Current upload
+   * @param int $reusedUploadId Upload to reuse
+   * @return boolean True once finished
+   */
+  protected function reuseCopyrights($uploadId, $reusedUploadId)
+  {
+    $agentId = $this->getAgentId($uploadId);
+    $reusedAgentId = $this->getAgentId($reusedUploadId);
+    if ($agentId == $reusedAgentId || $agentId == null || $reusedAgentId == null) {
+      return true;
+    }
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $extrawhere = ' agent_fk='.$agentId;
+    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright', $uploadTreeTableName, $uploadId, $type=null,
+                                                            $extrawhere, $enabled='true');
+    $reusedUploadtreeTableName = $this->uploadDao->getUploadtreeTableName($reusedUploadId);
+    $extrawhere = ' agent_fk='.$reusedAgentId;
+    $reusedCopyrights = $this->copyrightDao->getScannerEntries('copyright', $reusedUploadtreeTableName, $reusedUploadId,
+                                                                $type=null, $extrawhere, $enabled='false');
+    if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
+      foreach ($reusedCopyrights as $reusedCopyright) {
+        foreach ($allCopyrights as $copyright) {
+          if ($copyright['hash'] == $reusedCopyright['hash']) {
+            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']), $uploadTreeTableName);
+            $this->copyrightDao->updateTable($item, $copyright['hash'], $copyright['content'], $this->userId,
+                                             $cpTable='copyright', $action='delete');
+            $this->heartbeat(1);
+          }
         }
       }
     }

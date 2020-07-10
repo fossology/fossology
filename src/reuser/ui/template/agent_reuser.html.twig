@@ -8,6 +8,7 @@
   <input type="checkbox" name="reuseMode[]" value="reuseEnhanced"/> {{ 'Enhanced reuse (slower)'|trans }}<img src="images/info_16.png" title="{{'will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
   <input type="checkbox" name="reuseMode[]" value="reuseMain"/> {{ 'Reuse main license/s'|trans }}<img src="images/info_16.png" title="{{'will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
   <input type="checkbox" name="reuseMode[]" value="reuseConf"/> {{ 'Reuse report configuration settings'|trans }}<img src="images/info_16.png" title="{{'use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+  <input type="checkbox" name="reuseMode[]" value="reuseCopyright"/> {{ 'Reuse deactivated copyrights'|trans }}<img src="images/info_16.png" title="{{'use to copy only deactived copyright decisions from the reused package'|trans}}" alt="" class="info-bullet"/><br/>
   {{ 'Upload to reuse'|trans }}:<br/>
   {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
 </li>

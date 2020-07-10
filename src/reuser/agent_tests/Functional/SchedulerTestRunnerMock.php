@@ -22,6 +22,7 @@ use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\ClearingDecisionProcessor;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
+use Fossology\Lib\Dao\CopyrightDao;
 use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\DecisionTypes;
@@ -49,6 +50,10 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
    * ClearingDao object
    */
   private $clearingDao;
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
   /** @var ClearingDecisionFilter $clearingDecisionFilter
    * ClearingDecisionFilter object
    */
@@ -70,9 +75,12 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
    */
   private $treeDao;
 
-  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao, ClearingDecisionFilter $clearingDecisionFilter, TreeDao $treeDao)
+  public function __construct(DbManager $dbManager, AgentDao $agentDao, ClearingDao $clearingDao, UploadDao $uploadDao,
+                                                    ClearingDecisionFilter $clearingDecisionFilter, TreeDao $treeDao,
+                                                    CopyrightDao $copyrightDao)
   {
     $this->clearingDao = $clearingDao;
+    $this->copyrightDao = $copyrightDao;
     $this->uploadDao = $uploadDao;
     $this->agentDao = $agentDao;
     $this->dbManager = $dbManager;
@@ -97,6 +105,7 @@ class SchedulerTestRunnerMock implements SchedulerTestRunner
     $container->shouldReceive('get')->with('db.manager')->andReturn($this->dbManager);
     $container->shouldReceive('get')->with('dao.agent')->andReturn($this->agentDao);
     $container->shouldReceive('get')->with('dao.clearing')->andReturn($this->clearingDao);
+    $container->shouldReceive('get')->with('dao.copyright')->andReturn($this->copyrightDao);
     $container->shouldReceive('get')->with('dao.upload')->andReturn($this->uploadDao);
     $container->shouldReceive('get')->with('decision.types')->andReturn($this->decisionTypes);
     $container->shouldReceive('get')->with('businessrules.clearing_event_processor')->andReturn($this->clearingEventProcessor);
