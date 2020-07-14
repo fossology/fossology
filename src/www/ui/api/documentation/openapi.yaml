@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.1.0
+  version: 1.1.1
   contact:
     email: fossology@fossology.org
   license:
@@ -138,6 +138,13 @@ paths:
         in: path
         schema:
           type: integer
+      - name: groupName
+        description: The group name to chose while accessing the package
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
         - Upload
@@ -172,14 +179,6 @@ paths:
         - Upload
         - Organize
       summary: Delete upload by id
-      parameters:
-        - name: groupName
-          description: The group name to chose while deleting the package
-          in: header
-          required: false
-          schema:
-            type: string
-            description: Group name, from last login if not provided
       responses:
         '202':
           description: Upload will be deleted
@@ -201,13 +200,6 @@ paths:
           required: true
           schema:
             type: integer
-        - name: groupName
-          description: The group name to chose while changing the package
-          in: header
-          required: false
-          schema:
-            type: string
-            description: Group name, from last login if not provided
       responses:
         '202':
           description: Upload will be moved
@@ -240,15 +232,57 @@ paths:
           $ref: '#/components/responses/defaultResponse'
 
   /uploads:
+    parameters:
+      - name: groupName
+        description: The group name to chose while accessing the package
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
         - Upload
       summary: Uploads
+      parameters:
+        - name: folderId
+          description: Folder ID to limit the uploads to
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: recursive
+          description: Load uploads from child folders as well
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: page
+          description: Page number to fetch
+          in: header
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          description: Limits of responses per request
+          in: header
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 100
       description: >
         The uploads endpoint returns all uploads
       responses:
         '200':
           description: An array of uploads
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be fetched
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -310,13 +344,6 @@ paths:
           schema:
             type: boolean
             default: false
-        - name: groupName
-          description: The group name to chose while uploading the package
-          in: header
-          required: false
-          schema:
-            type: string
-            description: Group name, from last login if not provided
         - name: uploadType
           description: >
             Type of upload done. Required for VCS, URL and server uploads
@@ -347,6 +374,13 @@ paths:
         in: path
         schema:
           type: integer
+      - name: groupName
+        description: The group name to chose while accessing the package
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
         - Upload
@@ -408,6 +442,13 @@ paths:
         schema:
           type: boolean
           default: true
+      - name: groupName
+        description: The group name to chose while accessing the package
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
         - Upload
@@ -446,85 +487,85 @@ paths:
           $ref: '#/components/responses/defaultResponse'
 
   /search:
-      get:
-        tags:
-          - Search
-        description: Search the FOSSology for a specific file
-        parameters:
-          - name: groupName
-            description: The group name to chose while performing search
-            in: header
-            required: false
-            schema:
-              type: string
-              description: Group name, from last login if not provided
-          - name: searchType
-            # use 'allfiles', if not given
-            required: false
-            description: Limit search to
-            in: header
-            schema:
-              type: string
-              enum:
-                - directory
-                - containers
-                - allfiles
-              default: allfiles
-          - name: uploadId
-            in: header
-            required: false
-            description: Id of the upload to search files into
-            schema:
-              type: integer    
-          - name: filename
-            description: Filename to find, can contain % as wild-card
-            required: false
-            in: header
-            schema:
-              type: string
-          - name: tag
-            description: Tag to find
-            required: false
-            in: header
-            schema:
-              type: string
-          - name: filesizemin
-            description: Min filesize in bytes
-            required: false
-            in: header
-            schema:
-              type: integer
-              minimum: 0
-          - name: filesizemax
-            description: Max filesize in bytes
-            required: false
-            in: header
-            schema:
-              type: integer
-              minimum: 0
-          - name: license
-            description: License search filter
-            required: false
-            in: header
-            schema:
-              type: string
-          - name: copyright
-            description: Copyright search filter
-            required: false
-            in: header
-            schema:
-              type: string
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/SearchResults'
-          default:
-            $ref: '#/components/responses/defaultResponse'
+    get:
+      tags:
+        - Search
+      description: Search the FOSSology for a specific file
+      parameters:
+        - name: groupName
+          description: The group name to chose while performing search
+          in: header
+          required: false
+          schema:
+            type: string
+            description: Group name, from last login if not provided
+        - name: searchType
+          # use 'allfiles', if not given
+          required: false
+          description: Limit search to
+          in: header
+          schema:
+            type: string
+            enum:
+              - directory
+              - containers
+              - allfiles
+            default: allfiles
+        - name: uploadId
+          in: header
+          required: false
+          description: Id of the upload to search files into
+          schema:
+            type: integer
+        - name: filename
+          description: Filename to find, can contain % as wild-card
+          required: false
+          in: header
+          schema:
+            type: string
+        - name: tag
+          description: Tag to find
+          required: false
+          in: header
+          schema:
+            type: string
+        - name: filesizemin
+          description: Min filesize in bytes
+          required: false
+          in: header
+          schema:
+            type: integer
+            minimum: 0
+        - name: filesizemax
+          description: Max filesize in bytes
+          required: false
+          in: header
+          schema:
+            type: integer
+            minimum: 0
+        - name: license
+          description: License search filter
+          required: false
+          in: header
+          schema:
+            type: string
+        - name: copyright
+          description: Copyright search filter
+          required: false
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SearchResults'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /users:
       get:
         tags:
@@ -544,11 +585,11 @@ paths:
             $ref: '#/components/responses/defaultResponse'
   /users/{id}:
     parameters:
-        - name: id
-          required: true
-          in: path
-          schema:
-            type: integer
+      - name: id
+        required: true
+        in: path
+        schema:
+          type: integer
     get:
       tags:
         - User
@@ -578,86 +619,87 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
   /jobs:
-      get:
-        tags:
-        - Job
-        summary: Gets all jobs
-        description: Returns all jobs with their status
-        parameters:
-          - name: limit
-            required: false
-            schema:
-              type: integer
-              minimum: 1
-            in: header
-          - name: page
-            required: false
-            schema:
-              type: integer
-              minimum: 1
-            in: header
-          - name: upload
-            required: false
-            schema:
-              type: integer
-            in: query
-            description: Return jobs for the given upload id only
-        responses:
-          '200':
-            description: OK
-            headers:
-              X-Total-Pages:
-                description: Total number of pages which can be generated based on limit
-                schema:
-                  type: integer
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Job'
-          default:
-            $ref: '#/components/responses/defaultResponse'
-      post:
-        tags:
-          - Job
-        summary: Schedule an Analysis
-        description:  Schedule an Analysis of an existing upload
-        parameters:
-          # This could also be omitted, because there are no real folders
-          - name: folderId
-            in: header
-            required: true
-            schema:
-              type: integer
-          - name: uploadId
-            in: header
-            required: true
-            schema:
-              type: integer
-          - name: groupName
-            description: The group name to chose while scheduling jobs
-            in: header
-            required: false
-            schema:
-              type: string
-              description: Group name, from last login if not provided
-        requestBody:
-          description: Agents to be scheduled with the job
-          required: true
+    parameters:
+      - name: groupName
+        description: The group name to chose while accessing jobs
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
+    get:
+      tags:
+      - Job
+      summary: Gets all jobs
+      description: Returns all jobs with their status
+      parameters:
+        - name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          in: header
+        - name: page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+          in: header
+        - name: upload
+          required: false
+          schema:
+            type: integer
+          in: query
+          description: Return jobs for the given upload id only
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ScanOptions'
-        responses:
-          '201':
-            description: Job Scheduled with job id in message
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Info'
-          default:
-            $ref: '#/components/responses/defaultResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Job'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+    post:
+      tags:
+        - Job
+      summary: Schedule an Analysis
+      description:  Schedule an Analysis of an existing upload
+      parameters:
+        # This could also be omitted, because there are no real folders
+        - name: folderId
+          in: header
+          required: true
+          schema:
+            type: integer
+        - name: uploadId
+          in: header
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: Agents to be scheduled with the job
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanOptions'
+      responses:
+        '201':
+          description: Job Scheduled with job id in message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /jobs/{id}:
     parameters:
       - name: id
@@ -682,6 +724,14 @@ paths:
             $ref: '#/components/responses/defaultResponse'
 
   /folders:
+    parameters:
+      - name: groupName
+        description: The group name to chose while accessing folders
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
       - Organize
@@ -745,6 +795,13 @@ paths:
         description: ID of the folder
         schema:
           type: integer
+      - name: groupName
+        description: The group name to chose while accessing the folder
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
       - Organize

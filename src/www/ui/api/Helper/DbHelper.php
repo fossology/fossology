@@ -34,8 +34,11 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Job;
 use Fossology\UI\Api\Models\Upload;
 use Fossology\UI\Api\Models\User;
+use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Auth\Auth;
+use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\Lib\Data\Folder\Folder;
 
 /**
  * @class DbHelper
@@ -50,13 +53,21 @@ class DbHelper
   private $dbManager;
 
   /**
+   * @var FolderDao $folderDao
+   * FolderDao object
+   */
+  private $folderDao;
+
+  /**
    * DbHelper constructor.
    *
    * @param DbManager $dbManager DB manager in use
+   * @param FolderDao $folderDao Folder Dao to use
    */
-  public function __construct(DbManager $dbManager)
+  public function __construct(DbManager $dbManager, FolderDao $folderDao)
   {
     $this->dbManager = $dbManager;
+    $this->folderDao = $folderDao;
   }
 
   /**
@@ -75,50 +86,91 @@ class DbHelper
    * Get a single upload information under the given user and upload id.
    *
    * @param integer $userId   User to check
+   * @param integer $groupId  Group trying to access
+   * @param integer $limit    Max number of results
+   * @param integer $page     Page to get
    * @param integer $uploadId Pass the upload id to check for single upload.
-   * @return Upload[][] Uploads as an associative array
+   * @param integer $folderId Folder to limit the uploads to
+   * @param bool $recursive   True to recursive listing of uploads
+   * @return array Total pages as first value, uploads as an array in second
+   *         value
    */
-  public function getUploads($userId, $uploadId = null)
+  public function getUploads($userId, $groupId, $limit, $page = 1,
+    $uploadId = null, $folderId = null, $recursive = true)
   {
-    if ($uploadId == null) {
-      $sql = "SELECT
-upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1,
-pfile.pfile_md5, pfile.pfile_sha256
-FROM upload
-INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
-INNER JOIN folder ON folder.folder_pk = folderlist.parent
-INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
-WHERE upload.user_fk = $1
-ORDER BY upload.upload_pk;";
-      $statementName = __METHOD__ . ".getAllUploads";
-      $params = [$userId];
-    } else {
-      $sql = "SELECT
-upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename,
-folder.folder_pk, folder.folder_name, pfile.pfile_size, pfile.pfile_sha1,
-pfile.pfile_md5, pfile.pfile_sha256
-FROM upload
-INNER JOIN folderlist ON folderlist.upload_pk = upload.upload_pk
-INNER JOIN folder ON folder.folder_pk = folderlist.parent
-INNER JOIN pfile ON pfile.pfile_pk = upload.pfile_fk
-WHERE upload.user_fk = $1
-AND upload.upload_pk = $2
-ORDER BY upload.upload_pk;";
-      $statementName = __METHOD__ . ".getSpecificUpload";
-      $params = [$userId,$uploadId];
+    $uploadProxy = new UploadBrowseProxy($groupId, 0, $this->dbManager);
+    if ($folderId === null) {
+      $user = $this->getUsers($userId);
+      $folderId = $user[0]['rootFolderId'];
     }
-    $result = $this->dbManager->getRows($sql, $params, $statementName);
+    $folders = [$folderId];
+
+    if ($uploadId !== null) {
+      $recursive = true;
+      $user = $this->getUsers($userId);
+      $folderId = $user[0]['rootFolderId'];
+      $folders = [$folderId];
+    }
+
+    if ($recursive) {
+      $tree = $this->folderDao->getFolderStructure($folderId);
+      $folders = array_map(function ($folder) {
+        return $folder[$this->folderDao::FOLDER_KEY]->getId();
+      }, $tree);
+    }
+
+    $params = [$folders];
+    $partialQuery = $uploadProxy->getFolderPartialQuery($params);
+
+    $where = "";
+    $statementCount = __METHOD__ . ".countAllUploads";
+    $statementGet = __METHOD__ . ".getAllUploads.$limit";
+    if ($uploadId !== null) {
+      $params[] = $uploadId;
+      $where = "AND upload.upload_pk = $" . count($params);
+      $statementGet .= ".upload";
+      $statementCount .= ".upload";
+    }
+    $sql = "SELECT count(*) AS cnt FROM $partialQuery $where;";
+    $totalResult = $this->dbManager->getSingleRow($sql, $params, $statementCount);
+    $totalResult = intval($totalResult['cnt']);
+    $totalResult = intval(floor($totalResult / $limit) + 1);
+
+    $params[] = ($page - 1) * $limit;
+
+    $sql = "SELECT
+upload.upload_pk, upload.upload_desc, upload.upload_ts, upload.upload_filename
+FROM $partialQuery $where ORDER BY upload_pk ASC LIMIT $limit OFFSET $" .
+      count($params) . ";";
+    $results = $this->dbManager->getRows($sql, $params, $statementGet);
     $uploads = [];
-    foreach ($result as $row) {
-      $hash = new Hash($row['pfile_sha1'], $row['pfile_md5'],
-        $row['pfile_sha256'], $row['pfile_size']);
-      $upload = new Upload($row["folder_pk"], $row["folder_name"],
-        $row["upload_pk"], $row["upload_desc"], $row["upload_filename"],
-        $row["upload_ts"], $hash);
+    foreach ($results as $row) {
+      $uploadId = $row["upload_pk"];
+      $pfile_size = null;
+      $pfile_sha1 = null;
+      $pfile_md5 = null;
+      $pfile_sha256 = null;
+      $pfile = $this->getPfileInfoForUpload($uploadId);
+      if ($pfile !== null) {
+        $pfile_size = $pfile['pfile_size'];
+        $pfile_sha1 = $pfile['pfile_sha1'];
+        $pfile_md5 = $pfile['pfile_md5'];
+        $pfile_sha256 = $pfile['pfile_sha256'];
+      }
+
+      $folder = $this->getFolderForUpload($uploadId);
+      if ($folder === null) {
+        continue;
+      }
+      $folderId = $folder->getId();
+      $folderName = $folder->getName();
+
+      $hash = new Hash($pfile_sha1, $pfile_md5, $pfile_sha256, $pfile_size);
+      $upload = new Upload($folderId, $folderName, $uploadId,
+        $row["upload_desc"], $row["upload_filename"], $row["upload_ts"], $hash);
       array_push($uploads, $upload->getArray());
     }
-    return $uploads;
+    return [$totalResult, $uploads];
   }
 
   /**
@@ -391,5 +443,35 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $validity = intval($result['conf_value']);
     }
     return $validity;
+  }
+
+  /**
+   * Get all info from pfile for given upload
+   * @param integer $uploadId Upload to get info for
+   * @return array|NULL Array of pfile if upload found, null otherwise
+   */
+  public function getPfileInfoForUpload($uploadId)
+  {
+    $sql = "SELECT pfile.* FROM upload INNER JOIN pfile " .
+      "ON pfile_fk = pfile_pk WHERE upload_pk = $1;";
+    $result = $this->dbManager->getSingleRow($sql, [$uploadId],
+      __METHOD__ . ".getPfileFromUpload");
+    if (! empty($result)) {
+      return $result;
+    }
+    return null;
+  }
+
+  /**
+   * Get the folder for given upload
+   * @param integer $uploadId Upload to get folder for
+   * @return Folder|null Folder object if found, null otherwise
+   */
+  private function getFolderForUpload($uploadId)
+  {
+    $contentId = $this->folderDao->getFolderContentsId($uploadId,
+      $this->folderDao::MODE_UPLOAD);
+    $content = $this->folderDao->getContent($contentId);
+    return $this->folderDao->getFolder($content['parent_fk']);
   }
 }

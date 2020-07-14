@@ -193,6 +193,7 @@ without any warranty.
 
         <service id="helper.dbHelper" class="Fossology\UI\Api\Helper\DbHelper">
             <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.folder"/>
         </service>
         <service id="helper.fileHelper" class="Fossology\UI\Api\Helper\FileHelper">
             <argument type="service" id="dao.pfile"/>
