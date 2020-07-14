@@ -98,8 +98,6 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       case "$CODENAME" in
-        jessie)
-          apt-get $YesOpt install libjsoncpp0 libboost-filesystem1.55.0 libboost-program-options1.55.0 libboost-regex1.55.0;;
         stretch)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-regex1.62.0;;
         buster)

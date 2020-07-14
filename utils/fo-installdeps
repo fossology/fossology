@@ -106,8 +106,6 @@ if [[ $BUILDTIME ]]; then
             libmagic-dev libglib2.0 libboost-regex-dev \
             libboost-program-options-dev libpq-dev
          case "$CODENAME" in
-           jessie)
-             apt-get $YesOpt install php5-cli;;
            xenial|stretch)
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip;;
            buster)
@@ -119,8 +117,6 @@ if [[ $BUILDTIME ]]; then
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              jessie)
-                apt-get $YesOpt install postgresql-server-dev-9.4;;
               xenial)
                 apt-get $YesOpt install postgresql-server-dev-9.5;;
               stretch)
@@ -174,9 +170,6 @@ if [[ $RUNTIME ]]; then
             subversion git \
             dpkg-dev
          case "$CODENAME" in
-            jessie)
-               apt-get $YesOpt install postgresql-9.4 php5-pgsql libapache2-mod-php5 php5 php5-pgsql \
-                 php5-cli php5-curl heirloom-mailx libboost-program-options1.55.0 libboost-regex1.55.0 libicu52;;
             xenial)
                apt-get $YesOpt install postgresql-9.5 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
                  php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip s-nail libboost-program-options1.58.0 \
