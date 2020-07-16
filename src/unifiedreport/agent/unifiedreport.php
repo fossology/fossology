@@ -264,7 +264,7 @@ class UnifiedReport extends Agent
 
     $this->heartbeat(0);
 
-    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $licenses = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
     $this->heartbeat(empty($licenses) ? 0 : count($licenses["statements"]));
 
     $licensesMain = $this->licenseMainGetter->getCleared($uploadId, $this, $groupId, true, null, false);
@@ -277,7 +277,7 @@ class UnifiedReport extends Agent
     $this->heartbeat(empty($bulkLicenses) ? 0 : count($bulkLicenses["statements"]));
 
     $this->licenseClearedGetter->setOnlyAcknowledgements(true);
-    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $licenseAcknowledgements = $this->licenseClearedGetter->getCleared($uploadId, $this, $groupId, true, "license", false);
     $this->heartbeat(empty($licenseAcknowledgements) ? 0 : count($licenseAcknowledgements["statements"]));
 
     $this->licenseClearedGetter->setOnlyComments(true);
@@ -297,7 +297,7 @@ class UnifiedReport extends Agent
     $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
 
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $this, $groupId, true, "copyright", true);
-    $this->heartbeat(empty($copyrights["statements"]) ? 0 : count($copyrights["statements"]));
+    $this->heartbeat(empty($copyrights["scannerFindings"]) ? 0 : count($copyrights["scannerFindings"]) + count($copyrights["userFindings"]));
 
     $ecc = $this->eccClearedGetter->getCleared($uploadId, $this, $groupId, true, "ecc", false);
     $this->heartbeat(empty($ecc) ? 0 : count($ecc["statements"]));

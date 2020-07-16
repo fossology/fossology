@@ -179,6 +179,7 @@ abstract class ClearedGetterCommon
         if ($extended) {
           $key = array_search($statement['textfinding'], array_column($findings, 'content'));
           $findings[$key]["comments"] = convertToUTF8($comments, false);
+          $findings[$key]["licenseId"] = $licenseId;
         }
       }
       //To keep the schedular alive for large files
@@ -188,7 +189,7 @@ abstract class ClearedGetterCommon
       }
     }
     arsort($statements);
-    if ($isUnifiedReport) {
+    if ($agentCall == "copyright" && $isUnifiedReport) {
       arsort($findings);
       if (!empty($objectAgent)) {
         $actualHeartbeat = (count($statements) + count($findings));
