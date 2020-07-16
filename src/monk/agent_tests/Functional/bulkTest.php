@@ -121,7 +121,7 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey', 'license_ref_bulk_pkey', 'license_set_bulk_fkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','license_file','highlight'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','license_set_bulk','clearing_event','license_file','highlight'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
     $this->testDb->insertData_license_ref();
@@ -161,7 +161,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $removing = false;
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseId => $removing), $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseId => array($removing,"","","")), $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
@@ -181,7 +182,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $refSecondText = "Our General Public Licenses are designed to make sure that you " .
                "have the freedom to distribute copies of free software";
     $licenseSecondId = 215;
-    $bulkSecondId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseSecondId => $removing), $refSecondText);
+    $bulkSecondId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseSecondId => array($removing,"","","")), $refSecondText);
 
     $jobId++;
     list($output,$retCode) = $this->runBulkMonk($userId, $groupId, $jobId, $bulkSecondId);
@@ -190,7 +192,7 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $relevantDecisionsItemPfile3 = $this->clearingDao->getRelevantClearingEvents($bounds6, $groupId);
     $relevantDecisionsItemPfile4 = $this->clearingDao->getRelevantClearingEvents($bounds7, $groupId);
     assertThat(count($relevantDecisionsItemPfile3), is(equalTo(1)));
-    
+
     assertThat(count($relevantDecisionsItemPfile4), is(equalTo(2)));
     assertThat($relevantDecisionsItemPfile4, hasKeyInArray($licenseSecondId));
 
@@ -214,7 +216,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
-      array($licenseId1 => $removing1, $licenseId2 => $removing2), $refText);
+      array($licenseId1 => array($removing1,"","",""),
+        $licenseId2 => array($removing2,"","","")), $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
@@ -283,7 +286,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $removing = false;
     $refText = "The GNU General Public License is a free, copyleft license for software and other kinds of works.";
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseId => $removing), $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseId => array($removing,"","","")), $refText);
 
     $this->assertGreaterThan($expected = 0, $bulkId);
 
@@ -338,7 +342,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
 
     $jobId = 64;
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseId => $removing), $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseId => array($removing,"","","")), $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
@@ -370,7 +375,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $removing = false;
     $refText = "The GNU";
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseId => $removing), $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseId => array($removing,"","","")), $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 
@@ -423,7 +429,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $removing = false;
     $refText = "";
 
-    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId, array($licenseId => $removing), $refText);
+    $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId, $uploadTreeId,
+      array($licenseId => array($removing,"","","")), $refText);
 
     $this->assertGreaterThan($expected=0, $bulkId);
 

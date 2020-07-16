@@ -125,7 +125,7 @@ class Highlight
    */
   public function setLicenseId($licenseId)
   {
-    $this->licenseId = $licenseId;
+    $this->licenseId = intval($licenseId);
   }
 
   /**

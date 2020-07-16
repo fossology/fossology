@@ -129,7 +129,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx',
       'FileLicense_pkey','clearing_event_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk',
-      'clearing_event','clearing_decision','license_file','highlight'));
+      'clearing_event','clearing_decision','license_file','license_ref','highlight'));
 
     $this->testDb->insertData(array('mimetype_ars','pkgagent_ars','ununpack_ars','decider_ars'),true,__DIR__.'/fo_report.sql');
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');

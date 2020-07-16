@@ -95,11 +95,16 @@ abstract class TestAbstractDb
     $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
     $statementName = __METHOD__.'.insertInToLicenseRef';
     foreach ($jsonData as $licenseArrayKey => $licenseArray) {
-      $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
-      $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
-      $SQL = "INSERT INTO license_ref ( $keys ) VALUES ($valuePlaceHolders);";
+      $arrayKeys = array_keys($licenseArray);
+      $arrayValues = array_values($licenseArray);
+      $keys = strtr(implode(",", $arrayKeys), $keysToBeChanged);
+      $valuePlaceHolders = "$" . join(",$",range(1, count($arrayKeys)));
+      $md5PlaceHolder = "$". (count($arrayKeys) + 1);
+      $arrayValues[] = $licenseArray['rf_text'];
+      $SQL = "INSERT INTO license_ref ( $keys,rf_md5 ) " .
+      "VALUES ($valuePlaceHolders,md5($md5PlaceHolder));";
       $this->dbManager->prepare($statementName, $SQL);
-      $this->dbManager->execute($statementName, array_values($licenseArray));
+      $this->dbManager->execute($statementName, $arrayValues);
       if ($licenseArrayKey >= $limit) {
         break;
       }

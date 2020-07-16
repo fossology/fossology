@@ -892,8 +892,8 @@
   $Schema["TABLE"]["license_ref"]["rf_url"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_url\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_ref"]["rf_add_date"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_add_date\" IS 'Date License added to this table'";
-  $Schema["TABLE"]["license_ref"]["rf_add_date"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_add_date\" date";
-  $Schema["TABLE"]["license_ref"]["rf_add_date"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_add_date\" DROP NOT NULL";
+  $Schema["TABLE"]["license_ref"]["rf_add_date"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_add_date\" date DEFAULT now()";
+  $Schema["TABLE"]["license_ref"]["rf_add_date"]["ALTER"] = "ALTER TABLE \"license_ref\" ALTER COLUMN \"rf_add_date\" DROP NOT NULL, ALTER COLUMN \"rf_add_date\" SET DEFAULT now()";
 
   $Schema["TABLE"]["license_ref"]["rf_copyleft"]["DESC"] = "COMMENT ON COLUMN \"license_ref\".\"rf_copyleft\" IS 'Is license copyleft?'";
   $Schema["TABLE"]["license_ref"]["rf_copyleft"]["ADD"] = "ALTER TABLE \"license_ref\" ADD COLUMN \"rf_copyleft\" bit(1)";
