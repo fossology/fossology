@@ -1,6 +1,6 @@
 # FOSSology Makefile - src dir
 # Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
-# Copyright (C) 2015 Siemens AG
+# Copyright (C) 2015,2021, Siemens AG
 
 TOP = ..
 VARS = $(TOP)/Makefile.conf
@@ -83,6 +83,13 @@ $(CLEANDIRS):
 
 phpvendors:
 	$(COMPOSER_PHAR) install -q
+	if ! patch --reverse --silent --force --dry-run $(TOP)/src/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; then \
+		patch --silent --force $(TOP)/src/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; \
+	fi
+	rm -rf $(TOP)/src/www/ui/css/bootstrap
+	rm -rf $(TOP)/src/www/ui/scripts/bootstrap
+	$(INSTALL_DATA) $(TOP)/src/vendor/twbs/bootstrap/dist/css/* -t $(TOP)/src/www/ui/css/bootstrap
+	$(INSTALL_DATA) $(TOP)/src/vendor/twbs/bootstrap/dist/js/* -t $(TOP)/src/www/ui/scripts/bootstrap
 
 composer_install:
 	@echo "current dir: '$${PWD}'"
@@ -91,6 +98,10 @@ composer_install:
 	if ! patch --reverse --silent --force --dry-run $(DESTDIR)$(MODDIR)/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; then \
 		patch --silent --force $(DESTDIR)$(MODDIR)/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; \
 	fi
+	rm -rf $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap
+	rm -rf $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap
+	$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/css/* -t $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap
+	$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/js/* -t $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap
 
 .PHONY: subdirs $(BUILDDIRS)
 .PHONY: subdirs $(DIRS)

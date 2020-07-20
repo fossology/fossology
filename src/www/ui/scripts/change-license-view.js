@@ -27,10 +27,12 @@ function clearingSuccess(data) {
 function openBulkModal() {
   $('#userModal').hide();
   $('#ClearingHistoryDataModal').hide();
+  bulkModalOpened = 1;
   $('#bulkModal').toggle();
 }
 
 function closeBulkModal() {
+  bulkModalOpened = 0;
   $('#bulkModal').hide();
 }
 
@@ -48,6 +50,18 @@ function closeUserModal() {
   $('#userModal').hide();
 }
 
+
+$("#textModal").on('show.bs.modal', function (e) {
+  if(bulkModalOpened) {
+    $("#bulkModal").modal("hide");
+  }
+});
+
+$("#textModal").on('hide.bs.modal', function (e) {
+  if(bulkModalOpened) {
+    $("#bulkModal").modal("show");
+  }
+});
 function openClearingHistoryDataModal() {
   $('#bulkModal').hide();
   $('#userModal').hide();

@@ -387,13 +387,13 @@ class AjaxExplorer extends DefaultPlugin
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
     $getTextEditUser = _("Edit");
-    $fileListLinks .= "[<a href='#' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
+    $fileListLinks .= "[<a href='#'  data-toggle='modal' data-target='#userModal' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
 
     if ($isContainer) {
       $getTextEditBulk = _("Bulk");
-      $fileListLinks .= "[<a href='#' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
+      $fileListLinks .= "[<a href='#' data-toggle='modal' data-target='#bulkModal' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
-    $fileListLinks .= "<input type='checkbox' id='selectedForIrrelevant' value='".$childUploadTreeId."'>";
+    $fileListLinks .= "<input type='checkbox' id='selectedForIrrelevant' class='info-bullet view-license-rc-size' value='".$childUploadTreeId."'>";
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
 

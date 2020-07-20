@@ -4,50 +4,82 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-<div class="modal" id="userModal" hidden>
-  <form name="licenseListSelect">
-    <table>
-      <tr>
-        <td>{{ 'Available licenses'| trans }}:<br/>
-          <select name="licenseLeft" id="licenseLeft" style="min-width:200px" size="20" multiple="multiple">
-            {%  for opt in licenseArray  %}
-            <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
-                    ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
-                              '{{ 'License Text'|trans}}','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');" >
-              {{ opt.shortname }}
-            </option>
-            {% endfor %}
-          </select>
-        </td>
-        <td align="center" valign="middle">
-          <input type="button" value="&gt;" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" /><br />
-          <input type="button" value="&lt;" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
-        </td>
-        <td>
-          {{ 'Selected licenses'|trans }}:<br/>
-          <select name="licenseRight" id="licenseRight" style="min-width:200px" size="20" multiple="multiple">
-          </select>
-        </td>
-      </tr>
-    </table>
 
-    {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}
-    <div style="text-align: center;">
-      <button type="button" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
-      &nbsp;
-      <button type="button" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
+
+<!-- The User Modal -->
+<div class="modal" id="userModal">
+  <form name="licenseListSelect">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="width:120%;">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Decisions</h4>
+        <button type="button" class="close" onclick='closeUserModal();' data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+        <table>
+          <tr>
+            <td>{{ 'Available licenses'| trans }}:<br/>
+              <select name="licenseLeft" class="form-control-sm" id="licenseLeft" style="min-width:200px" size="20" multiple="multiple">
+                {%  for opt in licenseArray  %}
+                <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
+                        ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
+                                  '{{ 'License Text'|trans}}','width=600,height=400,toolbar=no,scrollbars=yes,resizable=yes');" >
+                  {{ opt.shortname }}
+                </option>
+                {% endfor %}
+              </select>
+            </td>
+            <td align="center" valign="middle">
+              <input type="button" value="&gt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
+              <br><br>
+              <input type="button" value="&lt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
+            </td>
+            <td>
+              {{ 'Selected licenses'|trans }}:<br/>
+              <select name="licenseRight" class="form-control-sm" id="licenseRight" style="min-width:200px" size="20" multiple="multiple">
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              <button type="button" class="btn btn-default btn-sm" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
+              &nbsp;
+              <button type="button" class="btn btn-default btn-sm" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              <button type="button" class="btn btn-default btn-sm" autofocus value="irrelevant" onclick="markDecisions(this.value);">{{ 'Mark decisions as irrelevant'|trans }}</button>
+              &nbsp;
+              <button type="button" class="btn btn-default btn-sm" autofocus value="deleteIrrelevant" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked irrelevant decisions'|trans }}</button>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              <button type="button" class="btn btn-default btn-sm" autofocus value="doNotUse" onclick="markDecisions(this.value);">{{ 'Mark decisions as do not use'|trans }}</button>
+              &nbsp;
+              <button type="button" class="btn btn-default btn-sm" autofocus value="deleteDoNotUse" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked do not use decisions'|trans }}</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
+        <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
+      </div>
+
     </div>
-    <div style="text-align: center;">
-      <button type="button" autofocus value="irrelevant" onclick="markDecisions(this.value);">{{ 'Mark decisions as irrelevant'|trans }}</button>
-      &nbsp;
-      <button type="button" autofocus value="deleteIrrelevant" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked irrelevant decisions'|trans }}</button>
-    </div>
-    <div style="text-align: center;">
-      <button type="button" autofocus value="doNotUse" onclick="markDecisions(this.value);">{{ 'Mark decisions as do not use'|trans }}</button>
-      &nbsp;
-      <button type="button" autofocus value="deleteDoNotUse" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked do not use decisions'|trans }}</button>
-    </div>
-    <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
-    <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
+  </div>
   </form>
 </div>

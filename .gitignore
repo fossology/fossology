@@ -175,6 +175,7 @@ install/db/db.cron
 install/fossdash/fossdash-publish.py
 src/reso/agent/version.php
 src/reso/agent/reso
+src/www/ui/css/bootstrap/
 
 # Add all the Ubuntu consol log file
 ubuntu-*

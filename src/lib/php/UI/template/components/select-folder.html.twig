@@ -7,7 +7,7 @@
 {% if selected is not defined %}
   {% set selected = -1 %}
 {% endif %}
-<select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %} class="ui-render-select2">
+<select name="{{ name }}"{% if id is defined %} id="{{ id }}"{% endif %} class="ui-render-select2 form-control-sm">
   {% for entry in folderStructure %}
     <option value="{{ entry.folder.id }}"{% if selected == entry.folder.id %} selected="selected"{% endif %}>
       {% for i in range(0, entry.depth*2) if i > 0 %}&nbsp;{% endfor %}{{ entry.folder.name | escape('html') }}
