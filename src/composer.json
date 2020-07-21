@@ -10,7 +10,7 @@
         "without any warranty."
     ],
     "require" : {
-        "easyrdf/easyrdf" : "v0.9.1",
+        "easyrdf/easyrdf" : "v0.9.0",
         "ext-gettext": "*",
         "ext-mbstring": "*",
         "ext-json" : "*",
@@ -20,10 +20,10 @@
         "monolog/monolog" : "v1.25.4",
         "phpoffice/phpword" : "v0.17.0",
         "slim/slim": "v3.12.3",
-        "symfony/config" : "v3.4.42 || v3.3.6",
-        "symfony/http-foundation" : "v3.4.42 || v3.3.6",
-        "symfony/dependency-injection" : "v3.4.42 || v3.3.6",
-        "symfony/yaml" : "v3.4.42 || v3.3.6",
+        "symfony/config" : "v3.4.42",
+        "symfony/http-foundation" : "v3.4.42",
+        "symfony/dependency-injection" : "v3.4.42",
+        "symfony/yaml" : "v3.4.42",
         "twig/twig" : "v2.12.5",
         "twig/extensions" : "v1.5.4",
         "guzzlehttp/guzzle": "v6.5.5"
@@ -36,10 +36,10 @@
         "mockery/mockery" : "v1.3.2",
         "myclabs/deep-copy" : "v1.7.0",
         "php-coveralls/php-coveralls" : "v2.2.0",
-        "phpunit/phpunit" : "5.7.27 || 6.5.14",
+        "phpunit/phpunit" : "6.5.14",
         "sebastian/phpcpd" : "v3.0.1",
         "squizlabs/php_codesniffer" : "v3.5.5",
-        "phpstan/phpstan" : "*"
+        "phpstan/phpstan" : "0.9.3"
     },
     "autoload" : {
         "psr-4" : {
@@ -54,7 +54,7 @@
     },
     "config" : {
         "platform" : {
-            "php" : "7.0"
+            "php" : "7.0.8"
         }
     },
     "homepage" : "https://www.fossology.org/",
