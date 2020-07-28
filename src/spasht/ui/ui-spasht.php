@@ -7,6 +7,8 @@ use Fossology\Lib\UI\Component\MicroMenu;
 use GuzzleHttp\Client;
 use Fossology\Lib\Dao\SpashtDao;
 
+include_once(dirname(__DIR__) . "/agent/version.php");
+
 /**
  * @class ui_spashts
  * Install spashts plugin to UI menu
@@ -14,21 +16,23 @@ use Fossology\Lib\Dao\SpashtDao;
 class ui_spasht extends FO_Plugin
 {
 
-  /** @var SpashtDao  $spashtDao*/
+  /**
+   * @var SpashtDao $spashtDao
+   * Spasht dao
+   */
   private $spashtDao;
 
-  protected $viewName;
-  /** @var string
-   * Name of uploadtree table to use
+  /**
+   * @var string $viewName
+   * View name of single files
    */
+  protected $viewName;
 
   /**
     * @var AgentDao $agentDao
     * AgentDao object
     */
   protected $agentDao;
-
-  public $vars;
 
   function __construct()
   {
@@ -40,19 +44,20 @@ class ui_spasht extends FO_Plugin
     $this->uploadDao  = $GLOBALS['container']->get('dao.upload');
     $this->spashtDao  = $GLOBALS['container']->get('dao.spasht');
     $this->agentDao   = $GLOBALS['container']->get('dao.agent');
-    $this->viewName   = "copyright_spasht_list";
+    $this->viewName   = "view";
     $this->renderer   = $GLOBALS['container']->get('twig.environment');
-    $this->modBack    = $this->Name;
+    $this->agentName  = "spasht";
+    $this->vars['name'] = $this->Name;
 
     parent::__construct();
   }
 
-  public $uploadAvailable = "no";
   /**
     * \brief Customize submenus.
     */
   function RegisterMenus()
   {
+    // For all other menus, permit coming back here.
     $URI = $this->Name . Traceback_parm_keep(array(
       "show", "format", "page", "upload", "item"));
     $Item = GetParm("item", PARM_INTEGER);
@@ -63,14 +68,13 @@ class ui_spasht extends FO_Plugin
       $menuPosition = 55;
       if (GetParm("mod", PARM_STRING) == $this->Name) {
         menu_insert("Browse::$menuText", $menuPosition);
+        menu_insert("Browse::[BREAK]", 100);
       } else {
         menu_insert("Browse::$menuText", $menuPosition, $URI, $tooltipText);
+        menu_insert("View::$menuText", $menuPosition, $URI, $tooltipText);
       }
-      $this->microMenu->insert(MicroMenu::TARGET_DEFAULT, $menuText,
-        $menuPosition, $this->getName(), $URI, $tooltipText);
     }
   } // RegisterMenus()
-
 
   /**
     * @brief This is called before the plugin is used.
@@ -98,59 +102,50 @@ class ui_spasht extends FO_Plugin
   } // Initialize()
 
   /**
-    * @brief This function returns the scheduler status.
-    * @see FO_Plugin::Output()
-    */
+   * @brief This function returns the scheduler status.
+   * @see FO_Plugin::Output()
+   */
   public function Output()
   {
     global $SysConf;
 
-    $this->agentName = "spasht";
-    $optionSelect = GetParm("optionSelectedToOpen",PARM_RAW);
-    $uploadAvailable = GetParm("uploadAvailable",PARM_STRING);
-
     $statusbody = "definition_not_found";
 
-    $patternName = GetParm("patternName",PARM_STRING); //Get the entery from search box
-    $revisionName = GetParm("revisionName",PARM_STRING);
-    $namespaceName = GetParm("namespaceName",PARM_STRING);
-    $typeName = GetParm("typeName",PARM_STRING);
-    $providerName = GetParm("providerName",PARM_STRING);
+    $optionSelect = trim(GetParm("optionSelectedToOpen", PARM_STRING));
+    $patternName = trim(GetParm("patternName", PARM_STRING)); // Get the entry
+                                                              // from search box
+    $revisionName = trim(GetParm("revisionName", PARM_STRING));
+    $namespaceName = trim(GetParm("namespaceName", PARM_STRING));
+    $typeName = trim(GetParm("typeName", PARM_STRING));
+    $providerName = trim(GetParm("providerName", PARM_STRING));
 
     $this->vars['storeStatus'] = "false";
     $this->vars['pageNo'] = "definition_not_found";
 
-    $uploadId = GetParm("upload",PARM_INTEGER);
-    /** @var UploadDao $uploadDao */
+    $uploadId = GetParm("upload", PARM_INTEGER);
 
-    $upload_name = preg_replace('/(?i)(?:\.(?:tar\.xz|tar\.bz2|tar\.gz|zip|tgz|tbz|txz|tar))/',"",GetUploadName($uploadId));
+    /* check upload permissions */
+    if (empty($uploadId)) {
+      return 'no item selected';
+    } elseif (!$this->uploadDao->isAccessible($uploadId, Auth::getGroupId())) {
+      $text = _("Permission Denied");
+      return "<h2>$text</h2>";
+    }
+
+    $upload_name = preg_replace(
+      '/(?i)(?:\.(?:tar\.xz|tar\.bz2|tar\.gz|zip|tgz|tbz|txz|tar))/', "",
+      GetUploadName($uploadId));
     $uri = preg_replace("/&item=([0-9]*)/", "", Traceback());
     $uploadtree_pk = GetParm("item",PARM_INTEGER);
     $uploadtree_tablename = GetUploadtreeTableName($uploadId);
     $agentId = $this->agentDao->getCurrentAgentId("spasht");
 
-    $this->vars['micromenu'] = Dir2Browse($this->modBack, $uploadtree_pk, NULL, $showBox = 0, "View", -1, '', '', $uploadtree_tablename);
+    $this->vars['micromenu'] = Dir2Browse($this->Name, $uploadtree_pk, null,
+      false, "Browse", -1, '', '', $uploadtree_tablename);
+
 
     if (!empty($optionSelect)) {
-      $str = explode ("/", $optionSelect);
-      $body = array();
-      $body['body_type'] = $str[0];
-      $body['body_provider'] = $str[1];
-      $body['body_namespace'] = $str[2];
-      $body['body_name'] = $str[3];
-      $body['body_revision'] = $str[4];
-
-      if ($uploadAvailable == "yes") {
-        $result = $this->spashtDao->alterComponentRevision($body, $uploadId);
-      } else {
-        $result = $this->spashtDao->addComponentRevision($body, $uploadId);
-      }
-
-      if ($result >= 0) {
-        $patternName = null;
-      } else {
-        $patternName = $body['body_name'];
-      }
+      $patternName = $this->handleNewSelection($optionSelect, $uploadId);
     }
 
     if ($patternName != null && !empty($patternName)) {//Check if search is not empty
@@ -252,11 +247,9 @@ class ui_spasht extends FO_Plugin
       } else {
         $this->vars['pageNo'] = "definition_not_found";
       }
-
-      $this->vars['uploadAvailable'] = $uploadAvailable;
       $upload_name = $patternName;
     } else {
-      if ( !$this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
+      if (! $this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
         $text = _("Upload Id Not found");
         return "<h2>$text</h2>";
       }
@@ -265,53 +258,29 @@ class ui_spasht extends FO_Plugin
 
       $searchUploadId = $this->spashtDao->getComponent($uploadId);
 
-      if (!empty($searchUploadId)) {
-        $this->vars['uploadAvailable'] = "yes";
+      if (! empty($searchUploadId)) {
         $this->vars['pageNo'] = "show_upload_table";
         $this->vars['body'] = $searchUploadId;
 
-        $arstable = $this->spashtDao->getSpashtArs($uploadId);
-        $ars_success = "f";
+        $message = "";
 
-        if (!empty($arstable)) {
-          $ars_success = $arstable['ars_success'];
-        }
-
-        $OutBuf = "";
-
-        if ($ars_success == 'f') {
-          /* schedule agent directly spasht page */
-          $OutBuf .= ActiveHTTPscript("Schedule");
-          $OutBuf .= "<script language='javascript'>\n";
-          $OutBuf .= "function Schedule_Reply()\n";
-          $OutBuf .= "  {\n";
-          $OutBuf .= "  if ((Schedule.readyState==4) && (Schedule.status==200 || Schedule.status==400))\n";
-          $OutBuf .= "    document.getElementById('msgdiv').innerHTML = Schedule.responseText;\n";
-          $OutBuf .= "    document.getElementById('msgdiv').style.color = 'red';\n";
-          $OutBuf .= "  }\n";
-          $OutBuf .= "</script>\n";
-
-          $OutBuf .= "<form name='formy' method='post'>\n";
-          $OutBuf .= "<div id='msgdiv'>\n";
-          $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
-          $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_{$this->agentName}')\">\n";
-          $OutBuf .= "</input>";
-          $OutBuf .= "</div> \n";
-          $OutBuf .= "</form>\n";
-
+        $plugin = plugin_find($this->agentName);
+        if ($plugin == null) {
+          $message = "Agent spasht not installed";
         } else {
-          $OutBuf = "Scan completed successfully\n";
+          $results = $plugin->AgentHasResults($uploadId);
+          if ($results != 0) {
+            $message = "Scan completed successfully\n";
+          } else {
+            $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+            $message = _("Agent scheduled.") . " <a href=$jobUrl>Show</a>\n";
+          }
         }
-        $this->vars['body_menu'] = $OutBuf;
+        $this->vars['body_menu'] = $message;
 
-        list($this->vars['countOfFile'], $this->vars['fileList']) = $this->getFileListing($uploadtree_pk, $uri, $uploadtree_tablename, $agentId, $uploadId);
-      } else {
-        $uploadAvailable = "no";
       }
     }
-
     $table = array();
-    $tables = array();
 
     $table['uploadId'] = $uploadId;
     $table['uploadTreeId'] = $uploadtree_pk;
@@ -319,16 +288,24 @@ class ui_spasht extends FO_Plugin
     $table['type'] = 'statement';
     $table['filter'] = 'Show all';
     $table['sorting'] = json_encode($this->returnSortOrder());
+    $this->vars['tables'] = [$table];
 
-    $tables[] = $table;
+    $advanceSearchFormStatus = "hidden";
+    $this->vars['uploadName']    = $upload_name;
+    $this->vars['revisionName']  = $revisionName;
+    $this->vars['namespaceName'] = $namespaceName;
+    $this->vars['typeName']      = $typeName;
+    $this->vars['providerName']  = $providerName;
+    if (! empty($revisionName) || ! empty($namespaceName) || ! empty($typeName)
+      || ! empty($providerName)) {
+      $advanceSearchFormStatus = "show";
+    }
 
-    $this->vars['tables'] = $tables;
+    $this->vars['advanceSearchFormStatus'] = $advanceSearchFormStatus;
+    $this->vars['fileList'] = $this->getFileListing($uploadtree_pk, $uri,
+      $uploadtree_tablename, $agentId, $uploadId);
 
-    $this->vars['uploadName'] = $upload_name;
-
-    $out = $this->render('agent_spasht.html.twig',$this->vars);
-
-    //$this->Output_tables();
+    $out = $this->render('agent_spasht.html.twig', $this->vars);
 
     return($out);
   }
@@ -341,72 +318,49 @@ class ui_spasht extends FO_Plugin
     * @param int    $upload_pk            Upload id
     * @return array
     */
-  protected function getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename, $Agent_pk, $upload_pk)
+  protected function getFileListing($Uploadtree_pk, $Uri, $uploadtree_tablename,
+    $Agent_pk, $upload_pk)
   {
-    $VF=""; // return values for file listing
     /*******    File Listing     ************/
     /* Get ALL the items under this Uploadtree_pk */
     $Children = GetNonArtifactChildren($Uploadtree_pk, $uploadtree_tablename);
-    $ChildCount = 0;
-    $ChildLicCount = 0;
-    $ChildDirCount = 0; /* total number of directory or containers */
 
-    foreach ($Children as $c) {
-      if (Iscontainer($c['ufile_mode'])) {
-        $ChildDirCount++;
-      }
+    $tableData = [];
+    $uploadInfo = $this->uploadDao->getUploadEntry($Uploadtree_pk,
+      $uploadtree_tablename);
+    if (! empty($uploadInfo['parent'])) {
+      $uploadtree_pk = $uploadInfo['parent'];
+      $row = [];
+      $row['url'] = "$Uri&item=$uploadtree_pk";
+      $row['content'] = "../";
+      $row['id'] = $uploadInfo['uploadtree_pk'];
+      $tableData[] = $row;
     }
 
-    $VF .= "<table border=0>";
     foreach ($Children as $child) {
       if (empty($child)) {
         continue;
       }
 
-      $ChildCount++;
-
-      global $Plugins;
-      $ModLicView = &$Plugins[plugin_find_id($this->viewName)];
-      /* Determine the hyperlink for non-containers to view-license  */
-      if (!empty($child['pfile_fk']) && !empty($ModLicView)) {
-        $LinkUri = Traceback_uri();
-        $LinkUri .= "?mod=".$this->viewName."&agent=$Agent_pk&upload=$upload_pk&item=$child[uploadtree_pk]";
-      } else {
-        $LinkUri = NULL;
-      }
-
-      /* Determine link for containers */
-      if (Iscontainer($child['ufile_mode'])) {
-        $uploadtree_pk = DirGetNonArtifact($child['uploadtree_pk'], $uploadtree_tablename);
-        $LicUri = "$Uri&item=" . $uploadtree_pk;
-      } else {
-        $LicUri = NULL;
-      }
-
       /* Populate the output ($VF) - file list */
       /* id of each element is its uploadtree_pk */
-      $LicCount = 0;
-
       $cellContent = Isdir($child['ufile_mode']) ? $child['ufile_name'].'/' : $child['ufile_name'];
 
       if (Iscontainer($child['ufile_mode'])) {
-        $cellContent = "<a href='$LicUri'><b>$cellContent</b></a>";
-      } else if (!empty($LinkUri)) {//  && ($LicCount > 0))
-        $cellContent = "<a href='$LinkUri'>$cellContent</a>";
+        $uploadtree_pk = DirGetNonArtifact($child['uploadtree_pk'], $uploadtree_tablename);
+        $LinkUri = "$Uri&item=" . $uploadtree_pk;
+      } else {
+        $LinkUri = Traceback_uri();
+        $LinkUri .= "?mod=".$this->viewName."&agent=$Agent_pk&upload=$upload_pk&item=$child[uploadtree_pk]";
       }
 
-      $VF .= "<tr><td id='$child[uploadtree_pk]' align='left'>$cellContent</td><td>";
-      if ($LicCount) {
-        $VF .= "[" . number_format($LicCount, 0, "", ",") . "&nbsp;";
-        $VF .= "license" . ($LicCount == 1 ? "" : "s");
-        $VF .= "</a>";
-        $VF .= "]";
-        $ChildLicCount += $LicCount;
-      }
-      $VF .= "</td></tr>\n";
+      $row = [];
+      $row['url'] = $LinkUri;
+      $row['content'] = $cellContent;
+      $row['id'] = $child['uploadtree_pk'];
+      $tableData[] = $row;
     }
-    $VF .= "</table>\n";
-    return array($ChildCount, $VF);
+    return $tableData;
   }
 
   /**
@@ -440,23 +394,74 @@ class ui_spasht extends FO_Plugin
    */
   public function checkAdvanceSearch ($body, $revisionName, $namespaceName, $typeName, $providerName)
   {
-    if (! empty($revisionName != "") && $body['revision'] != $revisionName) {
+    if (! empty($revisionName) && $body['revision'] != $revisionName) {
       return false;
     }
 
-    if (! empty($namespaceName != "") && $body['namespace'] != $namespaceName) {
+    if (! empty($namespaceName) && $body['namespace'] != $namespaceName) {
       return false;
     }
 
-    if (! empty($typeName != "") && $body['type'] != $typeName) {
+    if (! empty($typeName) && $body['type'] != $typeName) {
       return false;
     }
 
-    if (! empty($providerName != "") && $body['provider'] != $providerName) {
+    if (! empty($providerName) && $body['provider'] != $providerName) {
       return false;
     }
 
     return true;
+  }
+
+  /**
+   * Handle new selection from user, store it in DB and schedule the agent.
+   * @param string $optionSelect Option selected by user
+   * @return NULL|string null if new selection inserted, name otherwise.
+   */
+  private function handleNewSelection($optionSelect, $uploadId)
+  {
+    $patternName = null;
+    $str = explode ("/", $optionSelect);
+
+    $selection = array();
+    $selection['body_type'] = $str[0];
+    $selection['body_provider'] = $str[1];
+    $selection['body_namespace'] = $str[2];
+    $selection['body_name'] = $str[3];
+    $selection['body_revision'] = $str[4];
+
+    $uploadAvailable = $this->spashtDao->getComponent($uploadId);
+    if (! empty($uploadAvailable)) {
+      $result = $this->spashtDao->alterComponentRevision($selection, $uploadId);
+    } else {
+      $result = $this->spashtDao->addComponentRevision($selection, $uploadId);
+    }
+
+    if ($result >= 0) {
+      $patternName = null;
+
+      $userId = Auth::getUserId();
+      $groupId = Auth::getGroupId();
+      $errorMessage = "";
+
+      $plugin = plugin_find($this->agentName);
+      $jobId = JobAddJob($userId, $groupId, $this->agentName, $uploadId);
+      $rv = $plugin->AgentAdd($jobId, $uploadId, $errorMessage);
+      if ($rv < 0) {
+        $text = _("Scheduling of agent failed: ");
+        $this->vars['message'] = $text . $errorMessage;
+      } elseif ($rv == 0) {
+        $text = _("Agent already scheduled");
+        $this->vars['message'] = $text;
+      } else {
+        $text = _("Agent scheduled successfully.");
+        $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
+        $this->vars['message'] = "$text <a href=$jobUrl>Show</a>";
+      }
+    } else {
+      $patternName = $selection['body_name'];
+    }
+    return $patternName;
   }
 }
 

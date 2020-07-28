@@ -385,11 +385,17 @@ class AjaxClearingView extends FO_Plugin
     foreach ($licenseDecisionResult->getAgentDecisionEvents() as $agentDecisionEvent) {
       $agentId = $agentDecisionEvent->getAgentId();
       $matchId = $agentDecisionEvent->getMatchId();
-      $percentage = $agentDecisionEvent->getPercentage();
-      $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+      $highlightRegion = $this->highlightDao->getHighlightRegion($matchId);
+      $uri = null;
+      $percentage = false;
+      if ($highlightRegion[0] != "" && $highlightRegion[1] != "") {
+        $percentage = $agentDecisionEvent->getPercentage();
+        $page = $this->highlightDao->getPageNumberOfHighlightEntry($matchId);
+        $uri = $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight";
+      }
       $agentResults[$agentDecisionEvent->getAgentName()][] = array(
-          "uri" => $uberUri . "&item=$uploadTreeId&agentId=$agentId&highlightId=$matchId&page=$page#highlight",
-          "text" => $percentage ? " (" . $percentage . " %)" : ""
+        "uri" => $uri,
+        "text" => $percentage ? " (" . $percentage . " %)" : ""
       );
     }
 
@@ -399,9 +405,14 @@ class AjaxClearingView extends FO_Plugin
 
       foreach ($agentResult as $index => $agentData) {
         $uri = $agentData['uri'];
-        $matchTexts[] = "<a href=\"$uri\">#" . ($index + 1) . "</a>" . $agentData['text'];
+        if (! empty($uri)) {
+          $matchTexts[] = "<a href=\"$uri\">#" . ($index + 1) . "</a>" . $agentData['text'];
+        } else {
+          $matchTexts[] = $agentData['text'];
+        }
       }
-      $results[] = $agentName . ": " . implode(', ', $matchTexts);
+      $matchTexts = implode(', ', $matchTexts);
+      $results[] = $agentName . (empty($matchTexts) ? "" : ": $matchTexts");
     }
     return $results;
   }

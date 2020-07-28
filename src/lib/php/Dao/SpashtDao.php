@@ -49,7 +49,14 @@ class SpashtDao
   {
     $statement = __METHOD__.".AddingNewRevision";
 
-    $params = [ $revisionBody['body_revision'], $revisionBody['body_namespace'], $revisionBody['body_name'], $revisionBody['body_type'], $revisionBody['body_provider'], $uploadID ];
+    $params = [
+      $revisionBody['body_revision'],
+      $revisionBody['body_namespace'],
+      $revisionBody['body_name'],
+      $revisionBody['body_type'],
+      $revisionBody['body_provider'],
+      $uploadID
+    ];
 
     $sql = "INSERT INTO spasht ".
     "(spasht_revision, spasht_namespace, spasht_name, spasht_type, spasht_provider, upload_fk)".
@@ -94,7 +101,6 @@ class SpashtDao
   /**
    * Get Spasht ars status for Upload id
    */
-
   public function getSpashtArs($uploadID)
   {
     $statement = __METHOD__.".CheckUpload";
@@ -102,7 +108,7 @@ class SpashtDao
     $params = [ $uploadID ];
 
     $sql = "SELECT * FROM spasht_ars ".
-    "WHERE upload_fk = $1";
+      "WHERE upload_fk = $1 ORDER BY ars_pk DESC;";
 
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
     return ($row);

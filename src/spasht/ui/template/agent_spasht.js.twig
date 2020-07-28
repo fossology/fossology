@@ -8,19 +8,26 @@
 
 <script>
 $("#advanceSearchForm").ready(function() {
-  $("#advanceSearchForm").hide();
-  $(".ui-icon-caret-1-n").hide();
-})
+  if ($("#advanceSearchFormStatus").val() === "hidden") {
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    $("#advanceSearchForm").hide();
+  } else {
+    $(".ui-icon-caret-1-n").show();
+    $(".ui-icon-caret-1-s").hide();
+    $("#advanceSearchForm").show();
+  }
+});
 
 function advanceSearchFormEnabled() {
-  if (document.getElementById("advanceSearchFormStatus").value === "hidden") {
+  if ($("#advanceSearchFormStatus").val() === "hidden") {
     $(".ui-icon-caret-1-s").hide();
     $(".ui-icon-caret-1-n").show();
-    document.getElementById("advanceSearchFormStatus").value = "shown";
+    $("#advanceSearchFormStatus").val("shown");
   } else {
     $(".ui-icon-caret-1-n").hide();
     $(".ui-icon-caret-1-s").show();
-    document.getElementById("advanceSearchFormStatus").value = "hidden";
+    $("#advanceSearchFormStatus").val("hidden");
   }
   $("#advanceSearchForm").toggle("blind");
 }

@@ -77,8 +77,16 @@ class SpashtAgent extends Agent
     }
 
     $uploadAvailable = $this->searchUploadIdInSpasht($uploadId);
+    if ($uploadAvailable === false) {
+      // Nothing to perform
+      return true;
+    }
 
-     $getNewResult = $this->getInformation($uploadAvailable, $pfileSha1AndpfileId);
+    $getNewResult = $this->getInformation($uploadAvailable, $pfileSha1AndpfileId);
+    if (is_string($getNewResult)) {
+      echo "Error: $getNewResult";
+      return false;
+    }
 
     $resultUploadIntoLicenseTable = $this->insertLicensesSpashtAgentRecord(
       $getNewResult, $agentId);
@@ -180,7 +188,6 @@ class SpashtAgent extends Agent
           }
           $newResultBody[] = $temp;
         }
-        $this->heartbeat(1);
       }
 
       return $newResultBody;
@@ -199,17 +206,16 @@ class SpashtAgent extends Agent
     foreach ($checkString as $license) {
       if ($license === "AND" || $license === "OR") {
         continue;
-      } else {
-        $strSubLicense = explode("-", $license);
-
-        if ($strSubLicense[2] === "or" && $strSubLicense[3] === "later") {
-          $license = $strSubLicense[0] . "-" . $strSubLicense[1] . "+";
-        } elseif ($strSubLicense[2] === "only") {
-          $license = $strSubLicense[0] . "-" . $strSubLicense[1];
-        }
-
-        $strLicense[] = $license;
       }
+      $strSubLicense = explode("-", $license);
+
+      if ($strSubLicense[2] === "or" && $strSubLicense[3] === "later") {
+        $license = $strSubLicense[0] . "-" . $strSubLicense[1] . "+";
+      } elseif ($strSubLicense[2] === "only") {
+        $license = $strSubLicense[0] . "-" . $strSubLicense[1];
+      }
+
+      $strLicense[] = $license;
     }
     return $strLicense;
   }
@@ -227,14 +233,21 @@ class SpashtAgent extends Agent
       foreach ($key['license'] as $license) {
         $l = $this->licenseDao->getLicenseByShortName($license);
 
-        if ($l != null) {
-          if (! empty($l->getId())) {
-            $this->dbManager->insertTableRow('license_file', [
-              'agent_fk' => $agentId,
-              'pfile_fk' => $key['pfileId'],
-              'rf_fk' => $l->getId()
-            ]);
+        if ($l != null && ! empty($l->getId())) {
+          $sql = "SELECT fl_pk FROM license_file " .
+            "WHERE agent_fk = $1 AND pfile_fk = $2 AND rf_fk = $3;";
+          $statement = __METHOD__ . ".checkExists";
+          $row = $this->dbManager->getSingleRow($sql,
+            [$agentId, $key['pfileId'], $l->getId()], $statement);
+          if (! empty($row) && ! empty($row['fl_pk'])) {
+            continue;
           }
+          $this->dbManager->insertTableRow('license_file', [
+            'agent_fk' => $agentId,
+            'pfile_fk' => $key['pfileId'],
+            'rf_fk' => $l->getId()
+          ], __METHOD__ . ".insertLicense");
+          $this->heartbeat(1);
         }
       }
     }
@@ -252,7 +265,20 @@ class SpashtAgent extends Agent
   {
     foreach ($body as $key) {
       foreach ($key['attributions'] as $keyCopyright) {
+        if ($keyCopyright == "No_Copyright_Found") {
+          continue;
+        }
+
         $hashForCopyright = hash("sha256", $keyCopyright);
+        $sql = "SELECT copyright_spasht_pk FROM copyright_spasht " .
+          "WHERE agent_fk = $1 AND pfile_fk = $2 AND hash = $3 " .
+          "AND clearing_decision_type_fk = 0;";
+        $statement = __METHOD__ . ".checkExists";
+        $row = $this->dbManager->getSingleRow($sql,
+          [$agentId, $key['pfileId'], $hashForCopyright], $statement);
+        if (! empty($row) && ! empty($row['copyright_spasht_pk'])) {
+          continue;
+        }
         $this->dbManager->insertTableRow('copyright_spasht',
           [
             'agent_fk' => $agentId,
@@ -260,7 +286,8 @@ class SpashtAgent extends Agent
             'textfinding' => $keyCopyright,
             'hash' => $hashForCopyright,
             'clearing_decision_type_fk' => 0
-          ]);
+          ], __METHOD__ . ".insertCopyright");
+        $this->heartbeat(1);
       }
     }
     return true;

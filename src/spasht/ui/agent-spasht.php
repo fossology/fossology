@@ -22,11 +22,13 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Plugin\AgentPlugin;
 
+include_once(dirname(__DIR__) . "/agent/version.php");
+
 class SpashtAgentPlugin extends AgentPlugin
 {
   public function __construct()
   {
-    $this->Name = "agent_spasht";
+    $this->Name = "spasht";
     $this->Title = _("Spasht Analysis");
     $this->AgentName = "spasht";
 
@@ -45,6 +47,26 @@ class SpashtAgentPlugin extends AgentPlugin
     return false;
   }
 
+  /**
+   * Agent can be rescheduled for a new package. No need to check
+   * AgentHasResults()
+   *
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentAdd()
+   */
+  public function AgentAdd($jobId, $uploadId, &$errorMsg, $dependencies=array(), $arguments=null)
+  {
+    $dependencies[] = "agent_adj2nest";
+
+    $jobQueueId = \IsAlreadyScheduled($jobId, $this->AgentName, $uploadId);
+    if ($jobQueueId != 0) {
+      return $jobQueueId;
+    }
+
+    $args = is_array($arguments) ? '' : $arguments;
+    return $this->doAgentAdd($jobId, $uploadId, $errorMsg, $dependencies, $uploadId, $args);
+  }
+
 
   /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
@@ -52,7 +74,7 @@ class SpashtAgentPlugin extends AgentPlugin
    */
   function AgentHasResults($uploadId=0)
   {
-    return CheckARS($uploadId, $this->AgentName, "spasht scanner", "spasht_ars");
+    return CheckARS($uploadId, $this->AgentName, "spasht agent", "spasht_ars");
   }
 }
 

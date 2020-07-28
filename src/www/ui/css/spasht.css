@@ -3,6 +3,10 @@
   font-size: 1.2em;
 }
 
+.searchTable td:nth-child(1), .searchTable td:nth-child(2) {
+  width: 9em;
+}
+
 .spasht-full-row {
   width: 100%;
   text-align: center;
@@ -16,7 +20,7 @@
   text-align: left;
 }
 
-.wrapTable td {
+.wrapTable td, .detailsTable td span {
   word-wrap: anywhere;
 }
 
@@ -29,7 +33,10 @@
   display: inline-block;
   width: 50em;
   text-align: left;
-  word-wrap: anywhere;
+}
+
+.wrapTable th, .wrapTable td, .detailsTable th, .detailsRow td {
+  padding: 1pt 3pt;
 }
 
 .spasht-loading {
