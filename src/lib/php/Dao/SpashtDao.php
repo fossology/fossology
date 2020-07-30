@@ -19,6 +19,8 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Spasht\Coordinate;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
 
@@ -43,48 +45,61 @@ class SpashtDao
 
   /**
    * Add new entry into spasht Agent
+   *
+   * @param Coordinate $coordinate Coordinates
+   * @param integer $uploadID      Upload ID
+   * @return integer New id
    */
-
-  public function addComponentRevision($revisionBody, $uploadID)
+  public function addComponentRevision($coordinate, $uploadID)
   {
     $statement = __METHOD__.".AddingNewRevision";
 
+    $keys = "spasht_type,spasht_provider,spasht_namespace,spasht_name," .
+      "spasht_revision,upload_fk";
+
     $params = [
-      $revisionBody['body_revision'],
-      $revisionBody['body_namespace'],
-      $revisionBody['body_name'],
-      $revisionBody['body_type'],
-      $revisionBody['body_provider'],
+      $coordinate->getType(),
+      $coordinate->getProvider(),
+      $coordinate->getNamespace(),
+      $coordinate->getName(),
+      $coordinate->getRevision(),
       $uploadID
     ];
 
-    $sql = "INSERT INTO spasht ".
-    "(spasht_revision, spasht_namespace, spasht_name, spasht_type, spasht_provider, upload_fk)".
-    " VALUES($1,$2,$3,$4,$5,$6)";
-
-    $returningValue = "spasht_pk";
-
-    return ($this->dbManager->insertPreparedAndReturn($statement, $sql, $params, $returningValue));
+    return $this->dbManager->insertInto("spasht", $keys, $params, $statement,
+      "spasht_pk");
   }
 
-  public function alterComponentRevision($revisionBody, $uploadID)
+  /**
+   * Update the component coordinates in DB
+   *
+   * @param Coordinate $coordinate New coordinates
+   * @param integer $uploadID      Upload to update
+   * @return integer Upload ID on success
+   */
+  public function alterComponentRevision($coordinate, $uploadID)
   {
-    $assocParams = array('spasht_namespace' => $revisionBody['body_namespace'], 'spasht_name' => $revisionBody['body_name'],
-    'spasht_type' => $revisionBody['body_type'], 'spasht_provider' => $revisionBody['body_provider'],
-    'spasht_revision' => $revisionBody['body_revision']);
+    $assocParams = [
+      "spasht_type" => $coordinate->getType(),
+      "spasht_provider" => $coordinate->getProvider(),
+      "spasht_namespace" => $coordinate->getNamespace(),
+      "spasht_name" => $coordinate->getName(),
+      "spasht_revision" => $coordinate->getRevision()
+    ];
 
     $tableName = "spasht";
     $primaryColumn = 'upload_fk';
 
-    $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn, $uploadID);
+    $this->dbManager->updateTableRow($tableName, $assocParams, $primaryColumn,
+      $uploadID, __METHOD__ . ".updateCoordinates");
     return $uploadID;
   }
 
   /**
-   * Get available row in spasht.
-   * Where uploadId is found.
+   * Get available coordinate in spasht where uploadId is found.
+   * @param integer $uploadId Upload to search
+   * @return Coordinate Coordinate, if found. NULL otherwise.
    */
-
   public function getComponent($uploadID)
   {
     $statement = __METHOD__.".CheckUpload";
@@ -92,14 +107,19 @@ class SpashtDao
     $params = [ $uploadID ];
 
     $sql = "SELECT * FROM spasht ".
-    "WHERE upload_fk = $1";
+      "WHERE upload_fk = $1";
 
     $row = $this->dbManager->getSingleRow($sql, $params, $statement);
-    return ($row);
+    if (empty($row)) {
+      return null;
+    }
+    return $this->rowToCoordinate($row);
   }
 
   /**
    * Get Spasht ars status for Upload id
+   * @params integer $uploadId Upload to get information from
+   * @return array Row from ARS table
    */
   public function getSpashtArs($uploadID)
   {
@@ -150,5 +170,22 @@ class SpashtDao
       $stmt .= '.upload';
     }
     $this->dbManager->getSingleRow($sql, $params, $stmt);
+  }
+
+  /**
+   * Translate row from DB to Coordinate object
+   * @param array $row Row from DB
+   * @return Fossology::Lib::Data::Spasht::Coordinate Coordinate object
+   */
+  private function rowToCoordinate($row)
+  {
+    $obj = [
+      'type' => $row['spasht_type'],
+      'provider' => $row['spasht_provider'],
+      'namespace' => $row['spasht_namespace'],
+      'name' => $row['spasht_name'],
+      'revision' => $row['spasht_revision']
+    ];
+    return new Coordinate($obj);
   }
 }

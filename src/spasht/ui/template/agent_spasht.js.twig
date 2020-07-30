@@ -51,32 +51,13 @@ function StoreIntoDb() {
   }
 }
 
-$("#detailsTable").ready(function() {
-  // Hide showdetails Table
-  $("#detailsTable").hide();
-  $(".detailsRow").hide();
-  $("#defentionSelector").on("click", StoreIntoDb);
-});
-
 function showDetails(key) {
-
-  var detailsRow = ".detailsId"+key;
-  var definitionsRow = "#definitionsRow"+key;
-
-  // Hide all the Table row
-  $(".detailsRow").hide();
-
-  // Remove Highlight from all
-  $(".definitionsRow").addClass("even").removeClass("odd");
-
-  // Show hidden Table row
-  $("#detailsTable").show();
-  $(detailsRow).show(400);
-
-  // Highlight selected definition
-  $(definitionsRow).removeClass("even").addClass("odd");
-
+  var modalId = "#detailsModal" + key;
+  var rowId = "#definitionsRow" + key;
   $("#selectedDetailKey").val(key);
+  $(".definitionsRow").removeClass("definitionsRowHighlight");
+  $(rowId).addClass("definitionsRowHighlight");
+  $(modalId).dialog("open");
 }
 
 $( function() {
@@ -96,6 +77,58 @@ $( function() {
       idString = parseInt(idString.slice(-1)) - 1;
       $.cookie(spashtTabCookie, idString);
     }
+  });
+
+  $(".detailsClass").each(function() {
+    $(this).dialog({
+      autoOpen: false,
+      height: "auto",
+      width: "auto",
+      title: "Details",
+      modal: true,
+      open: function() {
+        // Gery out the background and close on clicking outside
+        $(".ui-widget-overlay")
+        .addClass("grey-overlay")
+        .bind("click", function () {
+          $(this).siblings(".ui-dialog")
+          .find(".ui-dialog-content").dialog("close");
+        });
+      },
+      buttons: [
+        {
+          text: "Select & schedule",
+          icon: "ui-icon-gear",
+          click: StoreIntoDb
+        },
+        {
+          text: "Cancel",
+          icon: "ui-icon-closethick",
+          click: function() {
+            $("#selectedDetailKey").val("");
+            $(this).dialog("close");
+          }
+        }
+      ]
+    });
+  });
+
+  $("#definitionsTable").ready(function() {
+    var t = $("#definitionsTable").DataTable({
+      "processing": false,
+      "paginationType": "listbox",
+      "order": [[ 1, 'asc' ]],
+      "autoWidth": false,
+      "columnDefs": [{
+        "orderable": true,
+        "searchable": true,
+        "targets": [0, 1, 2, 3]
+      },{
+        "orderable": false,
+        "searchable": false,
+        "targets": [4]
+      }]
+    });
   });
 });
 </script>

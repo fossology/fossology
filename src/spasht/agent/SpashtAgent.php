@@ -16,10 +16,11 @@
 namespace Fossology\Spasht;
 
 use Fossology\Lib\Agent\Agent;
+use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\SpashtDao;
 use Fossology\Lib\Dao\LicenseDao;
-use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Data\Spasht\Coordinate;
 use GuzzleHttp\Client;
 
 include_once (__DIR__ . "/version.php");
@@ -38,11 +39,13 @@ class SpashtAgent extends Agent
    * UploadDao object
    */
   private $uploadDao;
+
   /**
    * @var SpashtDao $spashtDao
    * SpashtDao object
    */
   private $spashtDao;
+
   /**
    * @var LicenseDao $licenseDao
    * LicenseDao object
@@ -82,22 +85,24 @@ class SpashtAgent extends Agent
       return true;
     }
 
-    $getNewResult = $this->getInformation($uploadAvailable, $pfileSha1AndpfileId);
+    $getNewResult = $this->getInformation($uploadAvailable,
+      $pfileSha1AndpfileId);
     if (is_string($getNewResult)) {
       echo "Error: $getNewResult";
       return false;
     }
 
-    $resultUploadIntoLicenseTable = $this->insertLicensesSpashtAgentRecord(
-      $getNewResult, $agentId);
-    $resultUploadIntoCopyrightTable = $this->insertCopyrightSpashtAgentRecord(
-      $getNewResult, $agentId);
+    $this->insertLicensesSpashtAgentRecord($getNewResult, $agentId);
+    $this->insertCopyrightSpashtAgentRecord($getNewResult, $agentId);
     return true;
   }
 
   /**
    * This function is responsible for available upload in the spasht db.
    * If the upload is available then only the spasht agent will run.
+   *
+   * @param integer $uploadId
+   * @return Coordinate|boolean
    */
   protected function searchUploadIdInSpasht($uploadId)
   {
@@ -112,17 +117,15 @@ class SpashtAgent extends Agent
 
   /**
    * Search pfile for uploads into clearlydefined
-   * tool used is scancode
+   *
+   * @param Coordinate $details
+   * @param array $pfileSha1AndpfileId Associated pfile and sha1 array
+   * @return array Array containing license, copyright and pfile info. String
+   *         containing error message if and error occurred
    */
   protected function getInformation($details, $pfileSha1AndpfileId)
   {
     global $SysConf;
-
-    $namespace = $details['spasht_namespace'];
-    $name = $details['spasht_name'];
-    $revision = $details['spasht_revision'];
-    $type = $details['spasht_type'];
-    $provider = $details['spasht_provider'];
 
     $dir = "files";
 
@@ -135,8 +138,7 @@ class SpashtAgent extends Agent
     ]);
 
     // uri to definitions section in the api to get scancode details
-    $uri = 'definitions/' . $type . "/" . $provider . "/" . $namespace . "/" .
-      $name . "/" . $revision;
+    $uri = 'definitions/' . $details->generateUrlString();
     // Prepare proxy
     $proxy = [];
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
@@ -152,7 +154,11 @@ class SpashtAgent extends Agent
       $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
     }
 
-    $res = $client->request('GET', $uri, ["proxy" => $proxy]);
+    try {
+      $res = $client->request('GET', $uri, ["proxy" => $proxy]);
+    } catch (\Exception $e) {
+      return "Unable to fetch info from $uri. " . $e->getMessage();
+    }
 
     if ($res->getStatusCode() == 200) {
       $body = json_decode($res->getBody()->getContents());
@@ -172,7 +178,7 @@ class SpashtAgent extends Agent
           $temp['sha1'] = $key->hashes->sha1;
 
           if (! empty($key->license)) {
-            $temp['license'] = $this->sperateLicenses($key->license);
+            $temp['license'] = $this->separateLicenses($key->license);
           } else {
             $temp['license'] = [
               "No_License_Found"
@@ -197,25 +203,38 @@ class SpashtAgent extends Agent
 
   /**
    * Convert the license string into fossology format
+   *
+   * @param string $rawLicenses License name
+   * @return string Fossology license shortname
    */
-  protected function sperateLicenses($key)
+  private function separateLicenses($rawLicenses)
   {
     $strLicense = array();
-    $checkString = explode(" ", $key);
+    $checkString = explode(" ", $rawLicenses);
 
     foreach ($checkString as $license) {
-      if ($license === "AND" || $license === "OR") {
+      if (strcasecmp($license, "and") === 0 || strcasecmp($license, "or") === 0) {
         continue;
       }
       $strSubLicense = explode("-", $license);
-
-      if ($strSubLicense[2] === "or" && $strSubLicense[3] === "later") {
-        $license = $strSubLicense[0] . "-" . $strSubLicense[1] . "+";
-      } elseif ($strSubLicense[2] === "only") {
-        $license = $strSubLicense[0] . "-" . $strSubLicense[1];
+      $partCount = count($strSubLicense);
+      if ($partCount < 2) {
+        $strLicense[] = $license;
+        continue;
       }
 
-      $strLicense[] = $license;
+      $fossLicense = $license;
+      if ($partCount >= 3 &&
+        strcasecmp($strSubLicense[$partCount - 2], "or") === 0 &&
+        strcasecmp($strSubLicense[$partCount - 1], "later") === 0) {
+        // <license>-or-later
+        $fossLicense = implode("-", array_slice($strSubLicense, 0, -2)) . "+";
+      } elseif (strcasecmp($strSubLicense[$partCount - 1], "only") === 0) {
+        // <license>-only
+        $fossLicense = implode("-", array_slice($strSubLicense, 0, -1));
+      }
+
+      $strLicense[] = $fossLicense;
     }
     return $strLicense;
   }
@@ -224,8 +243,6 @@ class SpashtAgent extends Agent
    * @brief Insert the License Details in Spasht Agent table
    * @param $agentId Integer
    * @param $license Array
-   *
-   * @return boolean True if finished
    */
   protected function insertLicensesSpashtAgentRecord($body, $agentId)
   {
@@ -237,8 +254,8 @@ class SpashtAgent extends Agent
           $sql = "SELECT fl_pk FROM license_file " .
             "WHERE agent_fk = $1 AND pfile_fk = $2 AND rf_fk = $3;";
           $statement = __METHOD__ . ".checkExists";
-          $row = $this->dbManager->getSingleRow($sql,
-            [$agentId, $key['pfileId'], $l->getId()], $statement);
+          $row = $this->dbManager->getSingleRow($sql, [$agentId,
+            $key['pfileId'], $l->getId()], $statement);
           if (! empty($row) && ! empty($row['fl_pk'])) {
             continue;
           }
@@ -251,15 +268,12 @@ class SpashtAgent extends Agent
         }
       }
     }
-    return true;
   }
 
   /**
    * @brief Insert the Copyright Details in Spasht Agent table
    * @param $agentId Integer
    * @param $license Array
-   *
-   * @return boolean True if finished
    */
   protected function insertCopyrightSpashtAgentRecord($body, $agentId)
   {
@@ -274,22 +288,21 @@ class SpashtAgent extends Agent
           "WHERE agent_fk = $1 AND pfile_fk = $2 AND hash = $3 " .
           "AND clearing_decision_type_fk = 0;";
         $statement = __METHOD__ . ".checkExists";
-        $row = $this->dbManager->getSingleRow($sql,
-          [$agentId, $key['pfileId'], $hashForCopyright], $statement);
+        $row = $this->dbManager->getSingleRow($sql, [$agentId, $key['pfileId'],
+          $hashForCopyright
+        ], $statement);
         if (! empty($row) && ! empty($row['copyright_spasht_pk'])) {
           continue;
         }
-        $this->dbManager->insertTableRow('copyright_spasht',
-          [
-            'agent_fk' => $agentId,
-            'pfile_fk' => $key['pfileId'],
-            'textfinding' => $keyCopyright,
-            'hash' => $hashForCopyright,
-            'clearing_decision_type_fk' => 0
-          ], __METHOD__ . ".insertCopyright");
+        $this->dbManager->insertTableRow('copyright_spasht', [
+          'agent_fk' => $agentId,
+          'pfile_fk' => $key['pfileId'],
+          'textfinding' => $keyCopyright,
+          'hash' => $hashForCopyright,
+          'clearing_decision_type_fk' => 0
+        ], __METHOD__ . ".insertCopyright");
         $this->heartbeat(1);
       }
     }
-    return true;
   }
 }

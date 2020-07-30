@@ -3,9 +3,14 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\SpashtDao;
+use Fossology\Lib\Data\Spasht\DefinitionSummary;
+use Fossology\Lib\Data\Spasht\Coordinate;
 use Fossology\Lib\UI\Component\MicroMenu;
 use GuzzleHttp\Client;
-use Fossology\Lib\Dao\SpashtDao;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
 
 include_once(dirname(__DIR__) . "/agent/version.php");
 
@@ -143,7 +148,6 @@ class ui_spasht extends FO_Plugin
     $this->vars['micromenu'] = Dir2Browse($this->Name, $uploadtree_pk, null,
       false, "Browse", -1, '', '', $uploadtree_tablename);
 
-
     if (!empty($optionSelect)) {
       $patternName = $this->handleNewSelection($optionSelect, $uploadId);
     }
@@ -169,72 +173,78 @@ class ui_spasht extends FO_Plugin
         $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
       }
 
-      // Point to definitions section in the api
-      $res = $client->request('GET', 'definitions', [
-        'query' => ['pattern' => $patternName], //Perform query operation into the api
-        'proxy' => $proxy
-      ]);
+      try {
+        // Point to definitions section in the api
+        $res = $client->request('GET', 'definitions', [
+          'query' => ['pattern' => $patternName], //Perform query operation into the api
+          'proxy' => $proxy
+        ]);
+      } catch (RequestException $e) {
+        $this->vars['message'] = "Unable to reach " .
+          $SysConf['SYSCONFIG']["ClearlyDefinedURL"] . ". Code: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      } catch (ClientException $e) {
+        $this->vars['message'] = "Request failed. Status: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      } catch (ServerException $e) {
+        $this->vars['message'] = "Request failed. Status: " .
+          $e->getCode();
+        return $this->render('agent_spasht.html.twig', $this->vars);
+      }
 
       if ($res->getStatusCode()==200) {//Get the status of http request
-        $body = json_decode($res->getBody()->getContents()); //Fetch's body response from the request and convert it into json_decoded
+        $findings = json_decode($res->getBody()->getContents());
 
-        if (sizeof($body) == 0) {//Check if no element is found
+        if (count($findings) == 0) {//Check if no element is found
           $statusbody = "definition_not_found";
         } else {
-          $temp = array();
+          $matches = array();
           $details = array();
-          $acceptResult = false;
 
-          for ($x = 0; $x < sizeof($body) ; $x++) {
-            $str = explode ("/", $body[$x]);
-            $temp2 = array();
+          foreach ($findings as $finding) {
+            $obj = Coordinate::generateFromString($finding);
 
-            $temp2['revision'] = $str[4];
-            $temp2['type'] = $str[0];
-            $temp2['name'] = $str[3];
-            $temp2['provider'] = $str[1];
-            $temp2['namespace'] = $str[2];
-
-            $accept = $this->checkAdvanceSearch($temp2, $revisionName, $namespaceName, $typeName, $providerName);
-
-            if ($accept == true) {
-              $acceptResult = true;
-              $temp[] = $temp2;
-              $uri = "definitions/".$body[$x];
-
-              $detail_body = array();
+            if ($this->checkAdvanceSearch($obj, $revisionName, $namespaceName,
+              $typeName, $providerName)) {
+              $matches[] = $obj;
+              $uri = "definitions/" . $obj->generateUrlString();
 
               //details section
-              $res_details = $client->request('GET', $uri, [
-                'query' => [
-                  'expand' => "-files"
-                ], //Perform query operation into the api
-                'proxy' => $proxy
-              ]);
+              try {
+                $res_details = $client->request('GET', $uri, [
+                  'query' => [
+                    'expand' => "-files"
+                  ], //Perform query operation into the api
+                  'proxy' => $proxy
+                ]);
+              } catch (RequestException $e) {
+                $this->vars['message'] = "Unable to reach " .
+                  $SysConf['SYSCONFIG']["ClearlyDefinedURL"] . ". Code: " .
+                  $e->getCode();
+                return $this->render('agent_spasht.html.twig', $this->vars);
+              } catch (ClientException $e) {
+                $this->vars['message'] = "Request failed. Status: " .
+                  $e->getCode();
+                return $this->render('agent_spasht.html.twig', $this->vars);
+              } catch (ServerException $e) {
+                $this->vars['message'] = "Request failed. Status: " .
+                  $e->getCode();
+                return $this->render('agent_spasht.html.twig', $this->vars);
+              }
 
-              $detail_body = json_decode($res_details->getBody()->getContents(),true);
+              $detail_body = json_decode($res_details->getBody()->getContents(),
+                true);
 
-              $details_temp = array();
-
-              $details_temp['declared'] = $detail_body["licensed"]["declared"];
-              $details_temp['source'] = $detail_body["described"]["sourceLocation"]["url"];
-              $details_temp['release'] = $detail_body["described"]["releaseDate"];
-              $details_temp['files'] = $detail_body["licensed"]["facets"]["core"]["files"];
-              $details_temp['attribution'] = substr(
-                implode(", ",
-                  $detail_body['licensed']["facets"]["core"]['attribution']['parties']),
-                0, 100);
-              $details_temp['discovered'] = substr(
-                implode(", ",
-                  $detail_body['licensed']["facets"]["core"]['discovered']['expressions']),
-                0, 100);
+              $details_temp = new DefinitionSummary($detail_body);
 
               $details[] = $details_temp;
             }
           }
-          if ($acceptResult == true) {
+          if (!empty($details)) {
             $this->vars['details'] = $details;
-            $this->vars['body'] = $temp;
+            $this->vars['body'] = $matches;
             $statusbody = "definition_found";
           } else {
             $statusbody = "definition_not_found";
@@ -249,11 +259,6 @@ class ui_spasht extends FO_Plugin
       }
       $upload_name = $patternName;
     } else {
-      if (! $this->uploadDao->isAccessible($uploadId, Auth::getGroupId()) ) {
-        $text = _("Upload Id Not found");
-        return "<h2>$text</h2>";
-      }
-
       $this->vars['pageNo'] = "Please Search and Select Revision";
 
       $searchUploadId = $this->spashtDao->getComponent($uploadId);
@@ -269,7 +274,8 @@ class ui_spasht extends FO_Plugin
           $message = "Agent spasht not installed";
         } else {
           $results = $plugin->AgentHasResults($uploadId);
-          if ($results != 0) {
+          $running = isAlreadyRunning($this->agentName, $uploadId);
+          if ($results != 0 && $running == 0) {
             $message = "Scan completed successfully\n";
           } else {
             $jobUrl = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
@@ -277,7 +283,6 @@ class ui_spasht extends FO_Plugin
           }
         }
         $this->vars['body_menu'] = $message;
-
       }
     }
     $table = array();
@@ -421,14 +426,7 @@ class ui_spasht extends FO_Plugin
   private function handleNewSelection($optionSelect, $uploadId)
   {
     $patternName = null;
-    $str = explode ("/", $optionSelect);
-
-    $selection = array();
-    $selection['body_type'] = $str[0];
-    $selection['body_provider'] = $str[1];
-    $selection['body_namespace'] = $str[2];
-    $selection['body_name'] = $str[3];
-    $selection['body_revision'] = $str[4];
+    $selection = Coordinate::generateFromString($optionSelect);
 
     $uploadAvailable = $this->spashtDao->getComponent($uploadId);
     if (! empty($uploadAvailable)) {
@@ -459,7 +457,7 @@ class ui_spasht extends FO_Plugin
         $this->vars['message'] = "$text <a href=$jobUrl>Show</a>";
       }
     } else {
-      $patternName = $selection['body_name'];
+      $patternName = $selection->getName();
     }
     return $patternName;
   }

@@ -16,6 +16,10 @@
   display: flex;
 }
 
+.definitionsRowHighlight td {
+  background-color: #B1B5E3 !important
+}
+
 .left-align-cells td {
   text-align: left;
 }
@@ -54,4 +58,13 @@
   font-size: 12pt;
   background-color: white;
   z-index: 999;
+}
+
+.ui-widget-overlay.grey-overlay
+{
+  background-color: black;
+  background-image: none;
+  opacity: 0.4;
+  filter: alpha(opacity=40); /* support: IE8 */
+  z-index: 9999;
 }
