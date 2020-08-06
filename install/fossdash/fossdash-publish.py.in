@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (C) 2020 Orange
 # SPDX-License-Identifier: GPL-2.0
@@ -25,17 +25,19 @@ import psycopg2
 import datetime
 import random
 import string 
-import json
 import re
 import requests
 import subprocess
 import sys
+import yaml
 
 #base dir for fossdash reporting
 TEMP_BASE_DIR = "{$REPODIR}/fossdash"
 
 # Fossology DB configuration file
 DB_CONFIG_FILE = "{$SYSCONFDIR}/Db.conf"
+
+
 CONFIG_STATIC = dict()
 # parse DB_CONFIG_FILE
 with open(DB_CONFIG_FILE, mode="r") as dbf:
@@ -50,18 +52,11 @@ config = " ".join(["=".join(config) for config in CONFIG_STATIC.items()])
 
 timestamp = datetime.datetime.now().strftime("%s000000000")
 
-QUERIES_NAME = [
-    "number_of_users", "number_of_groups", "number_of_file_uploads",
-    "number_of_projects__theoretically", "number_of_url_uploads",
-    "agents_count", "number_of_upload_status", "number_of_projects_per_size",
-    "reportgen_count", "pfile_count", "avg_pfile_count", "job_count"
-]
-
-# All Query metrics data needs to publish
+# Quries to fetch sysconfig value from database
 QUERIES = \{
-
     'uuid': "SELECT instance_uuid uuid FROM instance;",
     'FossDashReportingAPIUrl': "select conf_value from sysconfig where variablename='FossDashReportingAPIUrl'",
+    'FossdashMetricConfig':  "select conf_value from sysconfig where variablename='FossdashMetricConfig'",
     'FossologyInstanceName': "select conf_value from sysconfig where variablename='FossologyInstanceName'",
     'FossDashScriptCronSchedule': "select conf_value from sysconfig where variablename='FossDashScriptCronSchedule'",
     'FossdashReportedCleaning': "select conf_value from sysconfig where variablename='FossdashReportedCleaning'",
@@ -69,20 +64,7 @@ QUERIES = \{
     'AuthType': "select conf_value from sysconfig where variablename='AuthType'",
     'InfluxDBUser': "select conf_value from sysconfig where variablename='InfluxDBUser'",
     'InfluxDBUserPassword': "select conf_value from sysconfig where variablename='InfluxDBUserPassword'",
-    'InfluxDBToken': "select conf_value from sysconfig where variablename='InfluxDBToken'",
-    'number_of_users': "SELECT count(u.*) AS users FROM users u;",
-    'number_of_groups': "SELECT count(g.*) AS groups FROM groups g;",
-    'number_of_projects__theoretically': "SELECT count(up.*) as uploads from (select distinct upload_mode, upload_origin from upload) up;",
-    'number_of_file_uploads': "SELECT count(up1.upload_origin) as file_uploads FROM upload up1 WHERE up1.upload_mode = 104;",
-    'number_of_url_uploads': "SELECT count(up2.upload_origin) as url_uploads FROM upload up2 WHERE up2.upload_mode = 100;",
-    'agents_count': "SELECT ag.agent_name,count(jq.*) AS fired_jobs FROM agent ag LEFT OUTER JOIN jobqueue jq ON (jq.jq_type = ag.agent_name) GROUP BY ag.agent_name ORDER BY fired_jobs DESC;",
-    'number_of_upload_status': "select CASE WHEN a.status=1 THEN 'open' WHEN a.status=2 THEN 'in_progres' WHEN a.status=3 THEN 'closed' WHEN a.status=3 THEN 'rejected' ELSE 'unknown' END status, a.count from (select status_fk status, count(1) as count from upload_clearing group by status_fk) a;",
-    'number_of_projects_per_size': "select t.size, count(t.size) from (select CASE WHEN s.sx<2000 THEN 'small' WHEN s.sx>=2000 and s.sx<10000 THEN 'normal' ELSE 'big' END size from (select count(ut.ufile_name) sx from uploadtree ut group by upload_fk) s) t group by t.size;",
-    "reportgen_count": "select count(*) from reportgen;",
-    "pfile_count": "select count(*) from pfile;",
-    "avg_pfile_count": "select COALESCE(round(avg(pfile_size)),0) from pfile;",
-    "job_count": "select count(*) as jobs from job;"
-    
+    'InfluxDBToken': "select conf_value from sysconfig where variablename='InfluxDBToken'"
 \}
 
 # prefix for generating fossdash fileName
@@ -97,11 +79,11 @@ def _query(connection, query, single=False):
     result = cur.fetchone() if single else cur.fetchall()
     return result
 
-# execute all QUERIES and return corresponding result of each query.
-def report(connection):
+# execute all metric queries and return corresponding result of each query.
+def report(connection,fossdash_metric_yaml):
     _result = dict()
-    for query in QUERIES_NAME:
-        result = _query(connection, QUERIES[query])
+    for query in fossdash_metric_yaml["QUERIES_NAME"]:
+        result = _query(connection, fossdash_metric_yaml["QUERY"][query])
         if result:
             _result[query] = result if len(result) > 1 else result[0]
             # print "==> ", _result[query]
@@ -187,9 +169,9 @@ def prepare_report(data, uuid, prefix=None):
 
     return reported_metrics
 
-def getAllMetricsData(connection,uuid):
+def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
     
-    raw_report = report(connection)
+    raw_report = report(connection,fossdash_metric_yaml)
     # print(raw_report)
     query_results_metrics = prepare_report(raw_report,uuid)
     buid_version_metrics = getBuildVersionData(uuid)
@@ -227,7 +209,7 @@ def pushMetricsToInflux(connection, fossdash_url,file_path, auth_type):
         influxDBPass_query = QUERIES['InfluxDBUserPassword']
         influxDBPass_record = _query(connection,influxDBPass_query,True)
         if influxDBPass_record is None or influxDBPass_record[0] is None:
-            print("No Password found for user !!!")
+            print("No Password found for InfluxDB user !!!")
         InfluxDBPass = influxDBPass_record[0]
         fossdash_response = requests.post(fossdash_url, auth=(InfluxDBUser,InfluxDBPass), data=file_data)
     else: #  0 - token based authentication
@@ -374,7 +356,15 @@ if __name__ == "__main__":
         fossology_instance_name = None
         if fossology_instance_name_record is not None and fossology_instance_name_record[0] is not None:
             fossology_instance_name = fossology_instance_name_record[0]
-
+        
+        fossdash_metric_config_record = _query(connection, QUERIES['FossdashMetricConfig'], single=True)
+        fossdash_metric_config = None
+        if fossdash_metric_config_record is not None and fossdash_metric_config_record[0] is not None:
+            fossdash_metric_config = fossdash_metric_config_record[0]
+        else:
+            print("Missing fossdash metric config !!!")
+            exit(0)
+        fossdash_metric_yaml = yaml.load(fossdash_metric_config)
         final_uuid = getFossologyInstanceName(autogenerated_uuid,fossology_instance_name)
 
         agv_len = len(sys.argv)
@@ -402,7 +392,7 @@ if __name__ == "__main__":
             print("Invalid command line argument")
 
         print("Fossology Instance UUID = ",final_uuid)
-        final_metrics = getAllMetricsData(connection,final_uuid)
+        final_metrics = getAllMetricsData(connection,final_uuid,fossdash_metric_yaml)
         print("All data metrics Generated")
         file_path = os.path.join(TEMP_BASE_DIR, file_name_prefix + "." + file_name_postfix_timestamp)
 
