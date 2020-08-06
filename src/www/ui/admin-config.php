@@ -57,7 +57,7 @@ class foconfig extends FO_Plugin
     $Group = "";
     $InputStyle = "style='background-color:#dbf0f7'";
     $OutBuf .= '<style> table.myTable > tbody > tr:first-child > td:first-child{width:20%} </style>';
-    $OutBuf .= "<form method='POST'>";
+    $OutBuf .= "<form method='POST' enctype='multipart/form-data'>";
     while ($row = pg_fetch_assoc($result)) {
       if ($Group != $row['group_name']) {
         if ($Group) {
