@@ -133,9 +133,13 @@ require_once("$MODDIR/lib/php/common-db.php");
 require_once("$MODDIR/lib/php/common-container.php");
 require_once("$MODDIR/lib/php/common-cache.php");
 require_once("$MODDIR/lib/php/common-sysconfig.php");
+require_once("$MODDIR/lib/php/fossdash-config.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
 ConfigInit($SYSCONFDIR, $SysConf);
+
+/* Initialize fossdash configuration variables */
+FossdashConfigInit($SYSCONFDIR, $SysConf);
 
 /** delete from copyright where pfile_fk not in (select pfile_pk from pfile) */
 /** add foreign constraint on copyright pfile_fk if not exist */
