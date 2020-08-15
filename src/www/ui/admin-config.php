@@ -174,7 +174,7 @@ class foconfig extends FO_Plugin
               $ErrorMsg .= ", ";
             }
             $ErrorMsg .= $VarName;
-            
+
           }
         }
       }
