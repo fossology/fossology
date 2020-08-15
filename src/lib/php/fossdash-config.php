@@ -160,7 +160,7 @@ function Populate_fossdashconfig()
   $variable = "FossdashMetricConfig";
   $FossdashMetricConfigPrompt = _('Fossdash metric-reporting config');
   $FossdashMetricConfigValid = "check_fossdash_config";
-  $FossdashMetricConfigDesc = _('modify the fossdash metric reporting config');
+  $FossdashMetricConfigDesc = _('Modify the fossdash reporting metrics config. Leave empty to use default one.');
   $valueArray[$variable] = array("'$variable'", "null", "'$FossdashMetricConfigPrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'FossDashAPI'", "3", "'$FossdashMetricConfigDesc'", "'$FossdashMetricConfigValid'", "null");
 
@@ -181,7 +181,7 @@ function Populate_fossdashconfig()
   $variable = "FossdashReportedCleaning";
   $FossdashReportingCleaningPrompt = _('Fossdash reported files cleaning');
   $FossdashReportingCleaningValid = "check_fossdash_cleaning";
-  $FossdashReportingCleaningDesc = _('Number of days after which successfully pushed metrics are cleaned up. Set to Zero to disable cleanup.');
+  $FossdashReportingCleaningDesc = _('number of days for which the successfully pushed metrics are archived. Older data will be deleted. Leave empty to disable cleanup');
   $valueArray[$variable] = array("'$variable'", "null", "'$FossdashReportingCleaningPrompt'",
     strval(CONFIG_TYPE_TEXT), "'FossDashAPI'", "6", "'$FossdashReportingCleaningDesc'", "'$FossdashReportingCleaningValid'", "null");
 
@@ -290,7 +290,7 @@ function check_fossology_instance_name($instance_name)
  */
 function check_fossdash_cleaning($cleaning_days)
 {
-  $numeric_day_regex = "#^[0-9][0-9]*$#";
+  $numeric_day_regex = "#^[0-9]*$#";
   return preg_match($numeric_day_regex, $cleaning_days);
 }
 

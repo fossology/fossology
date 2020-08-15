@@ -37,6 +37,8 @@ TEMP_BASE_DIR = "{$REPODIR}/fossdash"
 # Fossology DB configuration file
 DB_CONFIG_FILE = "{$SYSCONFDIR}/Db.conf"
 
+# Fossology metrics file
+FOSSDASH_METRICS_FILE = "{$SYSCONFDIR}/fossdash_metrics.yml"
 
 CONFIG_STATIC = dict()
 # parse DB_CONFIG_FILE
@@ -263,15 +265,15 @@ def cleanOldReportedFile(connection):
 
     fossdash_clean_days_record = _query(connection, QUERIES['FossdashReportedCleaning'], single=True)
     fossdash_clean_days = None
-    if fossdash_clean_days_record is not None and fossdash_clean_days_record[0] is not None:
-        fossdash_clean_days = fossdash_clean_days_record[0]
+    if (fossdash_clean_days_record is not None) and (fossdash_clean_days_record[0] is not None) and (len(fossdash_clean_days_record[0])>0):
+        fossdash_clean_days = int(fossdash_clean_days_record[0])
     else:
         return
     
     fossdash_cleanfile_path = os.path.join(TEMP_BASE_DIR,"fossdash_clean_file_list")
     #dump all old reported files NAME into fossdash_clean_file_list 
-    find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + fossdash_clean_days + ' > '+fossdash_cleanfile_path
-    # print(find_cmd)
+    find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + str(fossdash_clean_days-1) + ' > '+fossdash_cleanfile_path
+    # print("find_cmd = ", find_cmd)
     find_cmd_output = subprocess.Popen(find_cmd,shell=True)
 
     with open(fossdash_cleanfile_path,"r") as file_ptr:
@@ -385,13 +387,14 @@ if __name__ == "__main__":
 
         print("Fossology Instance UUID = ",final_uuid)
         fossdash_metric_config_record = _query(connection, QUERIES['FossdashMetricConfig'], single=True)
-        fossdash_metric_config = None
-        if fossdash_metric_config_record is not None and fossdash_metric_config_record[0] is not None:
+        fossdash_metric_yaml = None
+        if (fossdash_metric_config_record is not None) and (fossdash_metric_config_record[0] is not None) and (len(fossdash_metric_config_record[0])>0):
             fossdash_metric_config = fossdash_metric_config_record[0]
+            fossdash_metric_yaml = yaml.load(fossdash_metric_config)
         else:
-            print("Missing fossdash metric config !!!")
-            exit(0)
-        fossdash_metric_yaml = yaml.load(fossdash_metric_config)
+            with open(FOSSDASH_METRICS_FILE,"r") as metrics_ptr:
+                fossdash_metric_yaml = yaml.load(metrics_ptr)
+        # print(fossdash_metric_yaml)
         final_metrics = getAllMetricsData(connection,final_uuid,fossdash_metric_yaml)
         print("All data metrics Generated")
         file_path = os.path.join(TEMP_BASE_DIR, file_name_prefix + "." + file_name_postfix_timestamp)

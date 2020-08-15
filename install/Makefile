@@ -75,6 +75,14 @@ install: all
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
 
+	@if [ ! -f $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml -o "$(OVERWRITE)" ]; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml"; \
+	 	$(INSTALL) -m 666 fossdash/fossdash_metrics.yml $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi
+
 	@if [ ! -f $(DESTDIR)$(CONFPATH)/sampleheader.txt -o "$(OVERWRITE)" ]; then \
 		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/sampleheader.txt"; \
 	 	$(INSTALL) -m 666 defconf/sampleheader.txt $(DESTDIR)$(CONFPATH)/sampleheader.txt; \
