@@ -272,8 +272,11 @@ def cleanOldReportedFile(connection):
     
     fossdash_cleanfile_path = os.path.join(TEMP_BASE_DIR,"fossdash_clean_file_list")
     #dump all old reported files NAME into fossdash_clean_file_list 
-    find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + str(fossdash_clean_days-1) + ' > '+fossdash_cleanfile_path
-    # print("find_cmd = ", find_cmd)
+    if fossdash_clean_days > 0 : 
+        find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + str(fossdash_clean_days-1) + ' > '+fossdash_cleanfile_path
+    else:
+        find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" > ' + fossdash_cleanfile_path
+    print("find_cmd = ", find_cmd)
     find_cmd_output = subprocess.Popen(find_cmd,shell=True)
 
     with open(fossdash_cleanfile_path,"r") as file_ptr:
