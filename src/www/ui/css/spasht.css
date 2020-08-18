@@ -1,0 +1,70 @@
+.searchBoxText {
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.searchTable td:nth-child(1), .searchTable td:nth-child(2) {
+  width: 9em;
+}
+
+.spasht-full-row {
+  width: 100%;
+  text-align: center;
+  padding-top: 2em;
+  padding-right: 1em;
+  justify-content: center;
+  display: flex;
+}
+
+.definitionsRowHighlight td {
+  background-color: #B1B5E3 !important
+}
+
+.left-align-cells td {
+  text-align: left;
+}
+
+.wrapTable td, .detailsTable td span {
+  word-wrap: anywhere;
+}
+
+.detailsTable th {
+  width: 8em;
+  text-align: left;
+}
+
+.detailsTable td span {
+  display: inline-block;
+  width: 50em;
+  text-align: left;
+}
+
+.wrapTable th, .wrapTable td, .detailsTable th, .detailsRow td {
+  padding: 1pt 3pt;
+}
+
+.spasht-loading {
+  position: absolute;
+  top: 8em;
+  left: 50%;
+  width: 16em;
+  height: 2em;
+  margin-left: -8em;
+  margin-top: -1em;
+  padding: 1em 0 .5em 0;
+  border: 1px solid #ddd;
+  text-align: center;
+  color: #777;
+  font-size: 12pt;
+  background-color: white;
+  z-index: 999;
+}
+
+.ui-widget-overlay.grey-overlay
+{
+  background-color: black;
+  background-image: none;
+  opacity: 0.4;
+  filter: alpha(opacity=40); /* support: IE8 */
+  z-index: 9999;
+}

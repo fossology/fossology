@@ -1,0 +1,45 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<div id="definitionsTableContent">
+<table id="definitionsTable" class="wrapTable" style="max-width:90em;min-width:54em">
+  <thead>
+    <tr>
+      <th>Namespace/Name</th>
+      <th>Revision</th>
+      <th>Type</th>
+      <th>Provider</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for result in body %}
+    <tr id="definitionsRow{{ loop.index0 }}" class="definitionsRow">
+      <td>
+        <span id="definitionsRow_namespace{{ loop.index0 }}">
+          {{ result.namespace }}
+        </span>/<span id="definitionsRow_name{{ loop.index0 }}">
+          {{ result.name }}
+        </span>
+      </td>
+      <td>
+        <span id="definitionsRow_revision{{ loop.index0 }}">
+          {{ result.revision }}
+        </span>
+      </td>
+      <td id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</td>
+      <td id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</td>
+      <td onclick="showDetails({{ loop.index0 }})"><a href="#!">Show Details</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<form name="storeForm" id="storeForm" method="post" action="">
+  <input id="optionSelectedToOpen" type="hidden" name="optionSelectedToOpen" value="" />
+</form>
+</div>

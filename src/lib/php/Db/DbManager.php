@@ -358,7 +358,7 @@ abstract class DbManager
     $nKeys = sizeof($keys);
 
     if (empty($sqlLog)) {
-      $sqlLog = __METHOD__ . ".$tableName.$keys";
+      $sqlLog = __METHOD__ . ".$tableName." . implode(",", $keys);
     }
 
     $sql = "UPDATE $tableName SET";

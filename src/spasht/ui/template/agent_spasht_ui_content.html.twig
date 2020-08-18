@@ -1,0 +1,31 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<div class="spasht-full-row">
+  {% include 'agent_spasht_search.html.twig' %}
+</div>
+{% if pageNo == "definition_not_found" %}
+  <div class="spasht-full-row">
+    <div id="definitionsTableNOTFound">No Match Found</div>
+  </div>
+{% elseif pageNo == "show_upload_table" %}
+  <div class="spasht-full-row">
+    {% include 'show_uploads_table.html.twig' %}
+  </div>
+{% elseif pageNo == "show_definitions" %}
+  <div class="spasht-full-row">
+    <span class="spasht-full-row">
+      {% include 'show_definitions.html.twig' %}
+    </span>
+  </div>
+  {% include 'show_details_table.html.twig' %}
+{% else %}
+  <div class="spasht-full-row">
+    <b>Please Search and Select Revision</b>
+  </div>
+{% endif %}

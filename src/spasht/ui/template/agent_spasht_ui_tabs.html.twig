@@ -1,0 +1,87 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<table border="0" width="100%">
+  <tr>
+    <td valign="top">
+      <div id="spashtTabs">
+        <ul>
+          <li><a href="#ConfigureTab">Configure</a></li>
+          <li><a href="#CopyrightTab">Copyrights</a></li>
+        </ul>
+        <div id="ConfigureTab">
+          {% include 'agent_spasht_ui_content.html.twig' %}
+        </div>
+        <div id="CopyrightTab" style="padding-bottom:2.5em">
+          <table border="0" style="width:100%"><tr>
+          <td valign="top">
+            {{ "Copyrights from ClearlyDefined are for reference purpose."|e }}
+            {{ " They are not processed with FOSSology copyrights."|e }}
+            <br />
+            <span style="font-weight:bold;display:block;padding:1em 0 1em;font-size:15pt;">Activated statements</span>
+            <table id="copyright_spasht_table" class="dataTable">
+              <thead>
+                <tr>
+                  <th>COUNT</th>
+                  <th>COPYRIGHT CONTENT</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <br /><br />
+            <div>
+              <span>
+                Replace: <input type='text' id='replaceTextstatement' style='width:80%'>
+              </span>
+              <br/><br/>
+              <a style='cursor:pointer;margin-left:10px;' id='replaceSelectedstatement'
+                class='buttonLink'>Mark selected rows for replace</a>
+              <a style='cursor:pointer;margin-left:10px;' id='deleteSelectedstatement'
+                class='buttonLink'>Mark selected rows for deletion</a>
+              <br />
+            </div>
+            <span style="font-weight:bold;display:block;padding:3em 0 1em;font-size:15pt;">Deactivated statements</span>
+            <table id="copyright_spasht_table_deactivated" class="dataTable">
+              <thead>
+                <tr>
+                  <th>COUNT</th>
+                  <th>COPYRIGHT CONTENT</th>
+                  <th></th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </td>
+          {% if fileList is not empty %}
+          <td valign="top" style="width:15em">
+            <table border="0" style="100%" class="wrapTable">
+            {% for row in fileList %}
+              <tr>
+                <td id="{{ row.id }}">
+                  {% if row.content ends with '/' %}
+                  <b>
+                  {% endif %}
+                  <a href="{{ row.url }}">{{ row.content }}</a>
+                  {% if row.content ends with '/' %}
+                  </b>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+            </table>
+          </td>
+          {% endif %}
+          </tr></table>
+        </div>
+      </div>
+    </td>
+  </tr>
+</table>

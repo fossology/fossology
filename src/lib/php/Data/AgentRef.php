@@ -31,7 +31,8 @@ class AgentRef
     'monk' => 'M',
     'ninka' => 'Nk',
     'reportImport' => 'I',
-    'ojo' => 'O'
+    'ojo' => 'O',
+    'spasht' => 'Sp'
   );
   /**
    * @var int

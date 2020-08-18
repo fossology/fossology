@@ -1,0 +1,68 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+{% for result in details %}
+<div class="detailsClass" id="detailsModal{{ loop.index0 }}" style="display:none">
+  <table id="detailsTable" class="simpleTable detailsTable left-align-cells">
+    <tbody>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Declared
+        </th>
+        <td>
+          <span>{{ result.declaredLicense|e }}</span>
+        </td>
+      </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Source
+        </th>
+        <td>
+          <span>
+            <a href="{{ result.url }}" target="_blank"
+              rel="noopener noreferrer">{{ result.url }}</a>
+          </span>
+        </td>
+      </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Release
+        </th>
+        <td>
+          <span>{{ result.release|e }}</span>
+        </td>
+      </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Files
+        </th>
+        <td>
+          <span>{{ result.files }}</span>
+        </td>
+      </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Attributions
+        </th>
+        <td>
+          <span>{{ result.attribution|e }}{% if result.attribution is not empty %}...{% endif %}</span>
+        </td>
+      </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Discovered
+        </th>
+        <td>
+          <span>{{ result.discoveredLicenses|e }}{% if result.discoveredLicenses is not empty %}...{% endif %}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+{% endfor %}
+
+<input id="selectedDetailKey" type="hidden" name="selectedDetailKey" value="" />

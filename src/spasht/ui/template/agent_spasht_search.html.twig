@@ -1,0 +1,63 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<form id="searchForm" method="post" action="">
+  <table class="left-align-cells searchBoxText searchTable">
+    <tbody>
+      <tr>
+        <td>Name:</td>
+        <td><input type="text" name="patternName" value="{{ uploadName }}" size="30"/></td>
+        <td>
+          <span class="ui-icon ui-icon-caret-1-s" onclick="advanceSearchFormEnabled()"></span>
+          <span class="ui-icon ui-icon-caret-1-n" onclick="advanceSearchFormEnabled()"></span>
+        </td>
+        <td><input type="submit" value="Search" class="buttonLink" style="cursor:pointer;float:none"/></td>
+      </tr>
+    </tbody>
+  </table>
+  <table id="advanceSearchForm" class="left-align-cells searchBoxText searchTable" style="position:relative">
+    <tbody>
+      <tr>
+        <td>Namespace:</td>
+        <td>
+          <input type="text" name="namespaceName" value="{{ namespaceName }}" size="30"/>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Revision:</td>
+        <td>
+          <input type="text" name="revisionName" value="{{ revisionName }}" size="30"/>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Type:</td>
+        <td>
+          <input type="text" name="typeName" value="{{ typeName }}" size="30"/>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>Provider:</td>
+        <td>
+          <input type="text" name="providerName" value="{{ providerName }}" size="30"/>
+        </td>
+        <td></td>
+        <td></td>
+      </tr>
+    </tbody>
+  </table>
+  <input id="advanceSearchFormStatus" type="hidden" name="advanceSearchFormStatus" value="{{ advanceSearchFormStatus }}" />
+
+</form>
+
+<div class="spasht-loading" style="display:none">Loading...</div>
