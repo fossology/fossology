@@ -54,10 +54,10 @@ class AjaxNoticeFiles extends FO_Plugin
       return;
     }
 
-    $uploadId = GetParm("upload", PARM_INTEGER);
+    $getuploadEntry = $this->uploadDao->getUploadEntry(GetParm("uploadTreeId", PARM_INTEGER));
 
     // Get the root of the upload tree where this item belongs to
-    $parentBounds = $this->uploadDao->getParentItemBounds($uploadId, null);
+    $parentBounds = $this->uploadDao->getParentItemBounds($getuploadEntry['upload_fk'], null);
     $uploadTreeId = $parentBounds->getItemId();
 
     // Search the upload tree for all files named NOTICE*
@@ -91,13 +91,8 @@ class AjaxNoticeFiles extends FO_Plugin
           continue;
         }
 
-        $maxlength = 64;
-
         $contents = fread($f, filesize($repofile));
-        $contents_short = $contents;
-        if (strlen($contents) > $maxlength) {
-          $contents_short = substr($contents, 0, $maxlength) . "...";
-        }
+        $contents_short = "<textarea style='overflow:auto;width:400px;height:80px;'>" .$contents. "</textarea>";
         $UploadtreeRecsResult[0][$k]['contents'] = $contents;
         $UploadtreeRecsResult[0][$k]['contents_short'] = $contents_short;
         fclose($f);

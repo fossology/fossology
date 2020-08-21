@@ -25,6 +25,8 @@ var userModal;
 var removed = false;
 
 $(document).ready(function () {
+  textAckInputModal = $('#textAckInputModal').plainModal();
+  textModal = $('#textModal').plainModal({child: textAckInputModal});
   bulkModal = $('#bulkModal').plainModal({child: textModal});
   userModal = $('#userModal').plainModal();
   clearingHistoryDataModal = $('#ClearingHistoryDataModal').plainModal();

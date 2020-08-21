@@ -1,7 +1,7 @@
 /*
- Copyright (C) 2014-2019, Siemens AG
+ Copyright (C) 2014-2020, Siemens AG
  Authors: Daniele Fognini, Johannes Najjar, Steffen Weber,
-          Andreas J. Reichel
+          Andreas J. Reichel, Shaheem Azmal M MD
  
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -237,17 +237,15 @@ function removeMainLicense(uploadId,licenseId) {
 }
 
 function openTextModel(uploadTreeId, licenseId, what, type) {
-  var dialogObj = textModal;
   var refTextId = "#referenceText"
 
   if(type === undefined) {
     type = 0;
   }
 
-  if (what == 3) {
-    // clicked to add inside the Acknowledgement column
-    dialogObj = textAckInputModal;
-    refTextId += "Ack";
+  if (what == 3 || what === 'acknowledgement') {
+    // clicked to add button to display child modal
+    $('#selectFromNoticeFile').css('display','inline-block');
   }
 
   if(type == 0) {
@@ -261,7 +259,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    dialogObj.plainModal('open');
+    textModal.plainModal('open');
   } else {
     $(refTextId).val($("#"+licenseId+what+type).attr('title'));
     whatCol = what;
@@ -272,12 +270,13 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    dialogObj.plainModal('open');
+    textModal.plainModal('open');
   }
   whatType = type;
 }
 
 function closeTextModal() {
+  $('#selectFromNoticeFile').css('display','none');
   textModal.plainModal('close');
 }
 
@@ -285,7 +284,7 @@ function ApplyNoticeText(idx)
 {
   var hiddenNotice = $("#hiddennotice"+idx);
   var NoticeText = hiddenNotice.val();
-  var textArea = $("#referenceTextAck");
+  var textArea = $("#referenceText");
 
   var cursorPos = textArea.prop('selectionStart');
   var v = textArea.val();
@@ -293,6 +292,7 @@ function ApplyNoticeText(idx)
   var textAfter  = v.substring(cursorPos, v.length);
 
   textArea.val(textBefore + NoticeText + textAfter);
+  closeAckInputModal();
 }
 
 function UseThisNoticeButton(idx, text)
@@ -309,7 +309,7 @@ function doHandleNoticeFiles(response) {
   $.each(response, function(idx, el) {
     if (el.ufile_name !== undefined && el.contents_short !== undefined
         && el.contents !== undefined) {
-      noticeSelectTable.row.add([ idx, el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
+      noticeSelectTable.row.add([el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
       noticeSelectTable.draw();
     }
   });
@@ -318,29 +318,20 @@ function doHandleNoticeFiles(response) {
 function selectNoticeFile() {
   var GetNoticeFilesUrl = "?mod=ajax-notice-files&do=search";
 
-  noticeSelectTableDiv.show();
-  $("#noticeFilesButton").hide();
-
   $.ajax({
     type: "POST",
     url: GetNoticeFilesUrl,
     data: {
-      "upload": uploadId
+      "uploadTreeId": $('#uploadTreeId').val()
     },
     success: (response) => doHandleNoticeFiles(response),
     failure: () => alert('Ajax: Could not get notice files.')
   });
 }
 
-function submitTextModal(fromAckColumn){
-  var dialogObj = textModal;
+function submitTextModal(){
   var refTextId = "#referenceText"
   var ConcludeLicenseUrl = "?mod=conclude-license&do=updateClearings";
-  if (fromAckColumn){
-    // called from Acknowledgment Text Dialog
-    dialogObj = textAckInputModal;
-    refTextId += "Ack";
-  }
   if(whatType == 0) {
     var post_data = {
       "id": idLicUploadTree,
@@ -351,10 +342,11 @@ function submitTextModal(fromAckColumn){
       type: "POST",
       url: ConcludeLicenseUrl,
       data: post_data,
-      success: () => doOnSuccess(dialogObj)
+      success: () => doOnSuccess(textModal)
     });
+    $('#selectFromNoticeFile').css('display','none');
   } else {
-    dialogObj.plainModal('close');
+    textModal.plainModal('close');
     $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
     referenceText = $(refTextId).val().trim();
     if(referenceText !== null && referenceText !== '') {
@@ -362,6 +354,7 @@ function submitTextModal(fromAckColumn){
     } else {
       $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
     }
+    $('#selectFromNoticeFile').css('display','none');
   }
 }
 
@@ -385,28 +378,25 @@ function checkIfEligibleForGlobalDecision()
   }
 }
 
-function submitAckInputModal(){
-  submitTextModal(true)
+function openAckInputModal(){
+  selectNoticeFile();
+  textAckInputModal.plainModal('open');
 }
 
 function closeAckInputModal(){
   textAckInputModal.plainModal('close');
 }
 
-function doOnSuccess(dialogObj) {
-  dialogObj.plainModal('close');
+function doOnSuccess(textModal) {
+  textModal.plainModal('close');
   $('#decTypeSet').addClass('decTypeWip');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
 
 $(document).ready(function () {
-  textModal = $('#textModal').plainModal();
-  $('#textModal').draggable({
-    stop: function(){
-      $(this).css({'width':'','height':''});
-    }
-  });
+  newtextModal = $('#newtextModal').plainModal();
+
   textAckInputModal = $('#textAckInputModal').plainModal();
   $('#textAckInputModal').draggable({
     stop: function(){
@@ -415,12 +405,17 @@ $(document).ready(function () {
   });
 
   noticeSelectTable = $('#noticeSelectTable').DataTable({
-    scrollY: "192px",
     paging: false,
+    searching: false,
     data: []
   });
-  noticeSelectTableDiv = $('#noticeSelectTableDiv');
-  noticeSelectTableDiv.hide();
+
+  textModal = $('#textModal').plainModal({child: textAckInputModal});
+  $('#textModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
+    }
+  });
 });
 
 function createDropDown(element, textBox) {
