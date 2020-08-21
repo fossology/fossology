@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2019 Siemens AG
+ Copyright (C) 2019-2020 Siemens AG
  Author: Andreas J. Reichel <andreas.reichel@tngtech.com>
 
  This program is free software; you can redistribute it and/or
@@ -18,7 +18,7 @@
  ***********************************************************/
 
 include_once "search-helper.php";
-include_once "common-repo.php";
+require_once dirname(dirname(dirname(__FILE__))) . "/lib/php/common-repo.php";
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
@@ -77,8 +77,6 @@ class AjaxNoticeFiles extends FO_Plugin
 
     foreach ($UploadtreeRecsResult[0] as $k => $res) {
 
-      // Get the real file name using RepPath from common-repo.php
-      $ufilename = $res['ufile_name'];
       $pfilefk = $res['pfile_fk'];
       $repofile = RepPath($pfilefk);
 
@@ -87,10 +85,9 @@ class AjaxNoticeFiles extends FO_Plugin
       // Get the contents of the file and attach it to the JSON output
       if (is_readable($repofile)) {
         $f = fopen($repofile, "r");
-	if ($f === false) {
+        if ($f === false) {
           continue;
         }
-
         $contents = fread($f, filesize($repofile));
         $contents_short = "<textarea style='overflow:auto;width:400px;height:80px;'>" .$contents. "</textarea>";
         $UploadtreeRecsResult[0][$k]['contents'] = $contents;

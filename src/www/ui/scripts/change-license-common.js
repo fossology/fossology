@@ -259,7 +259,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    textModal.dialog('open');
   } else {
     $(refTextId).val($("#"+licenseId+what+type).attr('title'));
     whatCol = what;
@@ -270,14 +270,14 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    textModal.dialog('open');
   }
   whatType = type;
 }
 
 function closeTextModal() {
   $('#selectFromNoticeFile').css('display','none');
-  textModal.plainModal('close');
+  textModal.dialog('close');
 }
 
 function ApplyNoticeText(idx)
@@ -346,7 +346,7 @@ function submitTextModal(){
     });
     $('#selectFromNoticeFile').css('display','none');
   } else {
-    textModal.plainModal('close');
+    textModal.dialog('close');
     $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
     referenceText = $(refTextId).val().trim();
     if(referenceText !== null && referenceText !== '') {
@@ -380,24 +380,22 @@ function checkIfEligibleForGlobalDecision()
 
 function openAckInputModal(){
   selectNoticeFile();
-  textAckInputModal.plainModal('open');
+  textAckInputModal.dialog('open');
 }
 
 function closeAckInputModal(){
-  textAckInputModal.plainModal('close');
+  textAckInputModal.dialog('close');
 }
 
 function doOnSuccess(textModal) {
-  textModal.plainModal('close');
+  textModal.dialog('close');
   $('#decTypeSet').addClass('decTypeWip');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
 
 $(document).ready(function () {
-  newtextModal = $('#newtextModal').plainModal();
-
-  textAckInputModal = $('#textAckInputModal').plainModal();
+  textAckInputModal = $('#textAckInputModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
   $('#textAckInputModal').draggable({
     stop: function(){
       $(this).css({'width':'','height':''});
@@ -410,7 +408,7 @@ $(document).ready(function () {
     data: []
   });
 
-  textModal = $('#textModal').plainModal({child: textAckInputModal});
+  textModal = $('#textModal').dialog({autoOpen:false, width:"auto",height:"auto"});
   $('#textModal').draggable({
     stop: function(){
       $(this).css({'width':'','height':''});
