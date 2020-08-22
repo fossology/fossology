@@ -1,4 +1,26 @@
-# Example of fossdash metrics config file
+# Fossdash metrics config
+#
+# Copyright Darshan Kansagara (kansagara.darshan97@gmail.com)
+# SPDX-License-Identifier: GPL-2.0
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# If you want to add new metric
+#   - Include name of metric (e.g pfile_count ) in QUERIES_NAME
+#   - Add same metric name (pfile_count) and its respective query to fetch data from FossologyDB in QUERY.
+#   - Make sure to follow yaml file standards
+
 QUERIES_NAME: [
     "number_of_users", "number_of_groups", "number_of_file_uploads",
     "number_of_projects__theoretically", "number_of_url_uploads",
