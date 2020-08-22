@@ -334,7 +334,6 @@ class FO_Plugin implements Plugin
     }
 
     $styles = "<link rel='stylesheet' href='css/jquery-ui.css'>\n";
-    $styles = "<link rel='stylesheet' href='css/bootstrap.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/select2.min.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/jquery.dataTables.css'>\n";
     $styles .= "<link rel='stylesheet' href='css/fossology.css'>\n";
