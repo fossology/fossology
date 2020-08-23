@@ -17,8 +17,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # If you want to add new metric
-#   - Include name of metric (e.g pfile_count ) in QUERIES_NAME
-#   - Add same metric name (pfile_count) and its respective query to fetch data from FossologyDB in QUERY.
+#   - Include name of query metric (e.g pfile_count ) in QUERIES_NAME
+#   - Add same query metric name (pfile_count) and its respective query to fetch data from FossologyDB in QUERY.
 #   - Make sure to follow yaml file standards
 
 QUERIES_NAME: [
@@ -40,3 +40,9 @@ QUERY:
   pfile_count: "select count(*) from pfile;"
   avg_pfile_count: "select COALESCE(round(avg(pfile_size)),0) from pfile;"
   job_count: "select count(*) as jobs from job;"
+
+VERSION_INFO:
+  display: "YES"    # NO, If don't want to display VERSION and BUILD info
+
+LOG_COUNT_INFO:
+  display: "YES"   # NO, If don't want to display ERROR, FATAL and WARNING count
