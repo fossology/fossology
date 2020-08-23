@@ -30,14 +30,23 @@ import subprocess
 import sys
 import yaml
 
+# SYSCONFDIR path
+SYSCONFDIR = "{$SYSCONFDIR}"
+
 #base dir for fossdash reporting
 TEMP_BASE_DIR = "{$REPODIR}/fossdash"
 
 # Fossology DB configuration file
-DB_CONFIG_FILE = "{$SYSCONFDIR}/Db.conf"
+DB_CONFIG_FILE = SYSCONFDIR + "/Db.conf"
+
+# Fossology VERSION file 
+VERSION_FILE = SYSCONFDIR + "/VERSION"
 
 # Fossology metrics file
-FOSSDASH_METRICS_FILE = "{$SYSCONFDIR}/fossdash_metrics.yml"
+FOSSDASH_METRICS_FILE = SYSCONFDIR + "/fossdash_metrics.yml"
+
+# Fossology error counter log file
+ERROR_COUNTER_LOG_FILE = TEMP_BASE_DIR + "/log_counter.log" 
 
 CONFIG_STATIC = dict()
 # parse DB_CONFIG_FILE
@@ -94,7 +103,7 @@ def report(connection,fossdash_metric_yaml):
 def getBuildVersionData(uuid) :
     # final build version report metric
     build_version_metrics = []
-    with open("{$SYSCONFDIR}/VERSION","r") as verf:
+    with open(VERSION_FILE,"r") as verf:
         for line_number, line in enumerate(verf):
             if line_number == 0 : # to skip the first line of heading 
                 continue
@@ -123,6 +132,24 @@ def getBuildVersionData(uuid) :
             build_version_metrics.append(finalData)
 
     return build_version_metrics
+
+def getErrorCountMetrics(uuid):
+    log_cnt_list = []
+    if os.path.exists(ERROR_COUNTER_LOG_FILE) :
+        with open(ERROR_COUNTER_LOG_FILE) as cnt_ptr:
+            for line in cnt_ptr:
+                varName, varVal = line.split("=")
+                log_metric = varName+",instance="+uuid+" value="+ varVal  + " " + timestamp
+                log_cnt_list.append(log_metric)
+    else:
+        log_metric = "error_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
+        log_cnt_list.append(log_metric)
+        log_metric = "fatal_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
+        log_cnt_list.append(log_metric)
+        log_metric = "warning_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
+        log_cnt_list.append(log_metric)
+    
+    return log_cnt_list
 
 # final report prepared as per influx DB data dump formate
 def prepare_report(data, uuid, prefix=None):
@@ -172,11 +199,17 @@ def prepare_report(data, uuid, prefix=None):
 
 def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
     
+    final_result = []
     raw_report = report(connection,fossdash_metric_yaml)
-    # print(raw_report)
     query_results_metrics = prepare_report(raw_report,uuid)
-    buid_version_metrics = getBuildVersionData(uuid)
-    final_result = query_results_metrics + buid_version_metrics
+    final_result += query_results_metrics
+    query_results_metrics = prepare_report(raw_report,uuid)
+    if fossdash_metric_yaml["VERSION_INFO"]["display"] == "YES" :
+        buid_version_metrics = getBuildVersionData(uuid)
+        final_result += buid_version_metrics
+    if fossdash_metric_yaml["LOG_COUNT_INFO"]["display"] == "YES" :
+        error_count_metrics = getErrorCountMetrics(uuid)
+        final_result += error_count_metrics
     return final_result
  
 ## fetching fossdash reporting URL from database
@@ -239,6 +272,11 @@ def pushAllUnreportedFilesToInfluxDB(connection, fossdash_url, auth_type):
     for file_name in unreported_files :
         pushMetricsToInflux(connection, fossdash_url, os.path.join(TEMP_BASE_DIR,file_name), auth_type)
 
+def addCronjobToSystem(cron_job_interval):
+    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(TEMP_BASE_DIR,"fossdash.log") + ' 2>&1") | crontab -'
+    # print(cron_update_cmd)
+    cron_update_cmd_output = subprocess.Popen(cron_update_cmd,shell=True)
+
 def UpdateCronJobSchedule(connection):
 
     # get the latest cron schedule interval from database
@@ -252,13 +290,11 @@ def UpdateCronJobSchedule(connection):
     fossdash_configuration_record = _query(connection, QUERIES['FossdashEnableDisable'], single=True)
     fossdash_configuration = int(fossdash_configuration_record[0])
     if(fossdash_configuration == 0):
-         print("fossdash cron job configuration was disable")
-         exit(0)
+        # print("fossdash is disable")
+        exit(0)
 
     print("Updating cron job interval = ", new_cron_job_interval)
-    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+new_cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(TEMP_BASE_DIR,"fossdash.log") + ' 2>&1") | crontab -'
-    # print(cron_update_cmd)
-    cron_update_cmd_output = subprocess.Popen(cron_update_cmd,shell=True)
+    addCronjobToSystem(new_cron_job_interval)
 
 def cleanOldReportedFile(connection):
 
@@ -275,7 +311,7 @@ def cleanOldReportedFile(connection):
         find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + str(fossdash_clean_days-1) + ' > '+fossdash_cleanfile_path
     else:
         find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" > ' + fossdash_cleanfile_path
-    print("find_cmd = ", find_cmd)
+    # print("find_cmd = ", find_cmd)
     find_cmd_output = subprocess.Popen(find_cmd,shell=True)
 
     with open(fossdash_cleanfile_path,"r") as file_ptr:
@@ -344,9 +380,7 @@ def enable_fossdash(connection):
     else:
         cron_job_interval = "* * * * *"
 
-    fossdash_enable_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(TEMP_BASE_DIR,"fossdash.log") + ' 2>&1") | crontab -'
-    # print(fossdash_enable_cmd)
-    fossdash_enable_cmd_output = subprocess.Popen(fossdash_enable_cmd,shell=True)
+    addCronjobToSystem(cron_job_interval)
 
 if __name__ == "__main__":
 
