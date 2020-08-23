@@ -139,6 +139,7 @@ def getErrorCountMetrics(uuid):
         with open(ERROR_COUNTER_LOG_FILE) as cnt_ptr:
             for line in cnt_ptr:
                 varName, varVal = line.split("=")
+                varVal = varVal[:-1]
                 log_metric = varName+",instance="+uuid+" value="+ varVal  + " " + timestamp
                 log_cnt_list.append(log_metric)
     else:
