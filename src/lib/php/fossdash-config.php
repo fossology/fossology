@@ -165,7 +165,7 @@ function Populate_fossdashconfig()
   $FossdashMetricConfigValid = "check_fossdash_config";
   $FossdashMetricConfigDesc = _('Modify the fossdash reporting metrics config. Leave empty to use default one.
                                 <br>e.g. Reporting config file <a target="_blank" href="https://github.com/fossology/fossology/blob/a53e8a2536d40f96b3f3ad8b8c820f3078c5d260/install/fossdash/fossdash_metrics.yml">Here</a>.
-                                <br>To add new metric : 1.Add metric name in <b>QUERIES_NAME</b> list. 2.Add same metric name and its corresponding DB_query under the <b>QUERY</b>');
+                                <br>To add new query_metric : 1.Add query_metric name in <b>QUERIES_NAME</b> list. 2.Add same query_metric name and its corresponding DB_query under the <b>QUERY</b>');
   $valueArray[$variable] = array("'$variable'", "null", "'$FossdashMetricConfigPrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'FossDashAPI'", "3", "'$FossdashMetricConfigDesc'", "'$FossdashMetricConfigValid'", "null");
 
