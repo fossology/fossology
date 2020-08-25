@@ -164,7 +164,7 @@ function Populate_fossdashconfig()
   $FossdashMetricConfigPrompt = _('Fossdash metric-reporting config');
   $FossdashMetricConfigValid = "check_fossdash_config";
   $FossdashMetricConfigDesc = _('Modify the fossdash reporting metrics config. Leave empty to use default one.
-                                <br>e.g. Reporting config file <a target="_blank" href="https://github.com/fossology/fossology/blob/a53e8a2536d40f96b3f3ad8b8c820f3078c5d260/install/fossdash/fossdash_metrics.yml">Here</a>.
+                                <br>e.g. Reporting config file <a target="_blank" href="https://github.com/darshank15/GSoC_2020_FOSSOlogy/wiki/Configuration-for-Fossdash-metric-reporting">Here</a>.
                                 <br>To add new query_metric : 1.Add query_metric name in <b>QUERIES_NAME</b> list. 2.Add same query_metric name and its corresponding DB_query under the <b>QUERY</b>');
   $valueArray[$variable] = array("'$variable'", "null", "'$FossdashMetricConfigPrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'FossDashAPI'", "3", "'$FossdashMetricConfigDesc'", "'$FossdashMetricConfigValid'", "null");
@@ -214,7 +214,7 @@ function Populate_fossdashconfig()
   $variable = "InfluxDBToken";
   $InfluxDBTokenPrompt = _('InlfuxDB Encoded Token');
   $InfluxDBTokenDesc = _('Please Enter encoded token for InfluxDB Authentication.
-                          <br>Check out the steps for <a target="_blank" href="https://github.com/darshank15/GSoC_2020_FOSSOlogy/wiki#configuration---to-get-started-with-fossdash">Token Generation</a>.');
+                          <br>Check out the steps for <a target="_blank" href="https://github.com/darshank15/GSoC_2020_FOSSOlogy/wiki/Steps-to-generate-InfluxDB-token">Token Generation</a>.');
   $valueArray[$variable] = array("'$variable'", "null", "'$InfluxDBTokenPrompt'",
     strval(CONFIG_TYPE_TEXTAREA), "'FossDashAPI'", "10", "'$InfluxDBTokenDesc'", "null", "null");
 
