@@ -333,7 +333,7 @@ function check_fossdash_config($config_str)
   $lower_config_str = strtolower($config_str);
   $db_update_command_list = array("drop", "insert", "update", "alter", "truncate", "delete");
   foreach ($db_update_command_list as $cmd) {
-    if (strpos($lower_config_str,$cmd)) {
+    if (strpos($lower_config_str,$cmd) !== false) {
       return 0;
     }
   }
