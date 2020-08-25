@@ -208,12 +208,19 @@ def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
     query_results_metrics = prepare_report(raw_report,uuid)
     final_result += query_results_metrics
     query_results_metrics = prepare_report(raw_report,uuid)
-    if fossdash_metric_yaml["VERSION_INFO"]["display"] == "YES" :
-        buid_version_metrics = getBuildVersionData(uuid)
-        final_result += buid_version_metrics
-    if fossdash_metric_yaml["LOG_COUNT_INFO"]["display"] == "YES" :
-        error_count_metrics = getErrorCountMetrics(uuid)
-        final_result += error_count_metrics
+    if "VERSION_INFO" in fossdash_metric_yaml :
+        if fossdash_metric_yaml["VERSION_INFO"]["display"] == "YES" :
+            buid_version_metrics = getBuildVersionData(uuid)
+            final_result += buid_version_metrics
+    else:
+        print("WARNING :: VERSION_INFO not found in fossdash metric config file")
+
+    if "LOG_COUNT_INFO" in fossdash_metric_yaml :  
+        if fossdash_metric_yaml["LOG_COUNT_INFO"]["display"] == "YES" :
+            error_count_metrics = getErrorCountMetrics(uuid)
+            final_result += error_count_metrics
+    else:
+        print("WARNING :: LOG_COUNT_INFO not found in fossdash metric config file")
     return final_result
  
 ## fetching fossdash reporting URL from database
@@ -223,7 +230,7 @@ def getFossDashURL(connection) :
     fossdash_url_record = _query(connection,fossdash_url_query,True)
     fossdash_url = ""
     if fossdash_url_record is None or fossdash_url_record[0] is None:
-        print("FossDashReportingAPIUrl is not configured")
+        print("ERROR :: FossDashReportingAPIUrl is not configured")
         exit(0)
     else :
         fossdash_url = fossdash_url_record[0]
@@ -241,13 +248,15 @@ def pushMetricsToInflux(connection, fossdash_url,file_path, auth_type):
         influxDBuser_query = QUERIES['InfluxDBUser']
         influxDBuser_record = _query(connection,influxDBuser_query,True)
         if influxDBuser_record is None or influxDBuser_record[0] is None:
-            print("No Username found for InfluxDB !!!")
+            print("ERROR :: No Username found for InfluxDB !!!")
+            exit(0)
         InfluxDBUser = influxDBuser_record[0]
 
         influxDBPass_query = QUERIES['InfluxDBUserPassword']
         influxDBPass_record = _query(connection,influxDBPass_query,True)
         if influxDBPass_record is None or influxDBPass_record[0] is None:
-            print("No Password found for InfluxDB user !!!")
+            print("ERROR :: No Password found for InfluxDB user !!!")
+            exit(0)
         InfluxDBPass = influxDBPass_record[0]
         fossdash_response = requests.post(fossdash_url, auth=(InfluxDBUser,InfluxDBPass), data=file_data)
     else: #  0 - token based authentication
@@ -255,7 +264,7 @@ def pushMetricsToInflux(connection, fossdash_url,file_path, auth_type):
         InfluxDBToken_query = QUERIES['InfluxDBToken']
         InfluxDBToken_record = _query(connection,InfluxDBToken_query,True)
         if InfluxDBToken_record is None or InfluxDBToken_record[0] is None:
-            print("No InfluxDB Token Found !!!")
+            print("ERROR :: No InfluxDB Token Found !!!")
             exit(0)
         influxdb_token = InfluxDBToken_record[0]
         auth_header = \{'Authorization': "Bearer "+influxdb_token\}
@@ -423,7 +432,7 @@ if __name__ == "__main__":
         elif agv_len == 1:
             pass
         else:
-            print("Invalid command line argument")
+            print("WARNING :: Invalid command line argument")
 
         print("Fossology Instance UUID = ",final_uuid)
         fossdash_metric_config_record = _query(connection, QUERIES['FossdashMetricConfig'], single=True)
@@ -450,8 +459,6 @@ if __name__ == "__main__":
 
         authType_query = QUERIES['AuthType']
         authType_record = _query(connection,authType_query,True)
-        if authType_record is None or authType_record[0] is None:
-            print("No Password found for user !!!")
         auth_type = int(authType_record[0])
 
         pushMetricsToInflux(connection, fossdash_url, file_path, auth_type)
@@ -462,7 +469,7 @@ if __name__ == "__main__":
         cleanOldReportedFile(connection)
         
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        print("ERROR :: ", error)
     finally:
         if connection:
             connection.commit()
