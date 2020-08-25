@@ -33,6 +33,9 @@ import yaml
 # SYSCONFDIR path
 SYSCONFDIR = "{$SYSCONFDIR}"
 
+# Fossology LOG path
+LOGDIR = "{$LOGDIR}"
+
 #base dir for fossdash reporting
 TEMP_BASE_DIR = "{$REPODIR}/fossdash"
 
@@ -274,7 +277,7 @@ def pushAllUnreportedFilesToInfluxDB(connection, fossdash_url, auth_type):
         pushMetricsToInflux(connection, fossdash_url, os.path.join(TEMP_BASE_DIR,file_name), auth_type)
 
 def addCronjobToSystem(cron_job_interval):
-    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(TEMP_BASE_DIR,"fossdash.log") + ' 2>&1") | crontab -'
+    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(LOGDIR,"fossdash.log") + ' 2>&1") | crontab -'
     # print(cron_update_cmd)
     cron_update_cmd_output = subprocess.Popen(cron_update_cmd,shell=True)
 
@@ -314,7 +317,7 @@ def cleanOldReportedFile(connection):
         find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" > ' + fossdash_cleanfile_path
     # print("find_cmd = ", find_cmd)
     find_cmd_output = subprocess.Popen(find_cmd,shell=True)
-
+    # TODO: require BUG FIX
     with open(fossdash_cleanfile_path,"r") as file_ptr:
         for file_name in file_ptr:
             print("cleaning old reported file : ", file_name)
