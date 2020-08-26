@@ -312,6 +312,7 @@ void write_log_counter()
 {
 
     FILE * fPtr;
+    // TODO :: Require to fix the path
     fPtr = fopen("/srv/fossology/repository/fossdash/log_counter.log", "w+");
     if(fPtr == NULL)
     {
