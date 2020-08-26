@@ -186,13 +186,10 @@ def prepare_report(data, uuid, prefix=None):
 def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
     
     final_result = []
-    if "QUERY" in fossdash_metric_yaml and "QUERIES_NAME" in fossdash_metric_yaml:
-        raw_report = report(connection,fossdash_metric_yaml)
-        query_results_metrics = prepare_report(raw_report,uuid)
-        final_result += query_results_metrics
-    else:
-        print("WARNING :: QUERIES_NAME or QUERY not found in fossdash metric config file")
-        exit(0)
+    raw_report = report(connection,fossdash_metric_yaml)
+    query_results_metrics = prepare_report(raw_report,uuid)
+    final_result += query_results_metrics
+    query_results_metrics = prepare_report(raw_report,uuid)
     if "VERSION_INFO" in fossdash_metric_yaml :
         if fossdash_metric_yaml["VERSION_INFO"]["display"] == "YES" :
             buid_version_metrics = getBuildVersionData(uuid)
@@ -304,14 +301,7 @@ def cleanOldReportedFile(connection):
     else:
         find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" > ' + fossdash_cleanfile_path
     # print("find_cmd = ", find_cmd)
-    find_cmd_proc = subprocess.Popen(find_cmd,shell=True)
-    # Wait untill command gets executed 
-    try:
-        outs, errs = find_cmd_proc.communicate(timeout=15)
-    except Exception:
-        find_cmd_proc.kill()
-        outs, errs = find_cmd_proc.communicate()
-
+    find_cmd_output = subprocess.Popen(find_cmd,shell=True)
     # TODO: require BUG FIX
     with open(fossdash_cleanfile_path,"r") as file_ptr:
         for file_name in file_ptr:
