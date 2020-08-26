@@ -38,7 +38,6 @@
 require_once(dirname(dirname(dirname(__FILE__))) . "/vendor/autoload.php");
 
 require_once("common-sysconfig.php");
-require_once("fossdash-config.php");
 
 // setup dependency injection
 require_once("common-container.php");
