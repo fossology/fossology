@@ -197,11 +197,12 @@ if [[ $COMMON ]]; then
       "{$PROJECTSTATEDIR}" \
       "{$PROJECTSTATEDIR}/agents" \
       "{$CACHEDIR}" \
-      "$REPO"
-
+      "$REPO" \
+      "{$REPODIR}/fossdash"
+      
    chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
-   chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
-
+   chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash"
+   
    # make sure repo and its parent dir has the right permissions
    if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
      echo "NOTE: Repository group is not correct."

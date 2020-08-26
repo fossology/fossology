@@ -1,0 +1,462 @@
+#!/usr/bin/env python3
+#
+# Copyright Darshan Kansagara <kansagara.darshan97@gmail.com>
+# SPDX-License-Identifier: GPL-2.0
+# Author: Nicolas Toussaint <nicolas1.toussaint@orange.com>
+# Author: Darshan Kansagara <kansagara.darshan97@gmail.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+import os
+import time
+import psycopg2
+import datetime
+import random
+import string 
+import re
+import requests
+import subprocess
+import sys
+import yaml
+
+# SYSCONFDIR path
+SYSCONFDIR = "{$SYSCONFDIR}"
+
+# Fossology LOG path
+LOGDIR = "{$LOGDIR}"
+
+#base dir for fossdash reporting
+TEMP_BASE_DIR = "{$REPODIR}/fossdash"
+
+# Fossology DB configuration file
+DB_CONFIG_FILE = SYSCONFDIR + "/Db.conf"
+
+# Fossology VERSION file 
+VERSION_FILE = SYSCONFDIR + "/VERSION"
+
+# Fossology metrics file
+FOSSDASH_METRICS_FILE = SYSCONFDIR + "/fossdash_metrics.yml"
+
+# Fossology error counter log file
+ERROR_COUNTER_LOG_FILE = TEMP_BASE_DIR + "/log_counter.log" 
+
+CONFIG_STATIC = dict()
+# parse DB_CONFIG_FILE
+with open(DB_CONFIG_FILE, mode="r") as dbf:
+    config_entry = dbf.readline()
+    while config_entry:
+        config_entry = config_entry.split("=")
+        CONFIG_STATIC[config_entry[0]] = config_entry[1].strip().replace(";", "")
+        config_entry = dbf.readline()
+
+# produces "conf1=val1 conf2=val2 conf3=val3 ..."
+config = " ".join(["=".join(config) for config in CONFIG_STATIC.items()])
+
+timestamp = datetime.datetime.now().strftime("%s000000000")
+
+# Quries to fetch fossdashconfig value from database
+QUERIES = \{
+    'uuid': "SELECT instance_uuid uuid FROM instance;",
+    'FossDashReportingAPIUrl': "select conf_value from fossdashconfig where variablename='FossDashReportingAPIUrl'",
+    'FossdashMetricConfig':  "select conf_value from fossdashconfig where variablename='FossdashMetricConfig'",
+    'FossologyInstanceName': "select conf_value from fossdashconfig where variablename='FossologyInstanceName'",
+    'FossDashScriptCronSchedule': "select conf_value from fossdashconfig where variablename='FossDashScriptCronSchedule'",
+    'FossdashReportedCleaning': "select conf_value from fossdashconfig where variablename='FossdashReportedCleaning'",
+    'FossdashEnableDisable': "select conf_value from fossdashconfig where variablename='FossdashEnableDisable'",
+    'AuthType': "select conf_value from fossdashconfig where variablename='AuthType'",
+    'InfluxDBUser': "select conf_value from fossdashconfig where variablename='InfluxDBUser'",
+    'InfluxDBUserPassword': "select conf_value from fossdashconfig where variablename='InfluxDBUserPassword'",
+    'InfluxDBToken': "select conf_value from fossdashconfig where variablename='InfluxDBToken'"
+\}
+
+# prefix for generating fossdash fileName
+file_name_prefix = os.path.basename(__file__)[:-3]
+# postfix timestamp for generating fossdash fileName
+file_name_postfix_timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S') 
+
+# execute given query and return result
+def _query(connection, query, single=False):
+    cur = connection.cursor()
+    cur.execute(query)
+    result = cur.fetchone() if single else cur.fetchall()
+    return result
+
+# execute all metric queries and return corresponding result of each query.
+def report(connection,fossdash_metric_yaml):
+    _result = dict()
+    for query in fossdash_metric_yaml["QUERIES_NAME"]:
+        result = _query(connection, fossdash_metric_yaml["QUERY"][query])
+        if result:
+            _result[query] = result if len(result) > 1 else result[0]
+            # print "==> ", _result[query]
+    return _result
+
+# fetch Build and version Data from VERSION file
+def getBuildVersionData(uuid) :
+    # final build version report metric
+    build_version_metrics = []
+    with open(VERSION_FILE,"r") as verf:
+        for line_number, line in enumerate(verf):
+            if line_number == 0 : # to skip the first line of heading 
+                continue
+            version_entry_array = line.split("=")
+            variableName = version_entry_array[0].lower()
+            variableValue = version_entry_array[1].strip()
+            if line_number == 1 :
+                variableValueArray = variableValue.split('-')
+                # print(variableValueArray)
+                variableValueArray[0] = variableValueArray[0].replace('"','')
+                finalData = "version"+",instance="+uuid+" value=\""+variableValueArray[0]  + "\" " + timestamp
+                build_version_metrics.append(finalData)
+                variableValueArray[1] = variableValueArray[1].replace('"','')
+                finalData = "total_commit"+",instance="+uuid+" value=\""+variableValueArray[1]  + "\" " + timestamp
+                build_version_metrics.append(finalData)
+                variableValueArray[2] = variableValueArray[2].replace('"','')
+                finalData = "latest_commit_id"+",instance="+uuid+" value=\""+variableValueArray[2]  + "\" " + timestamp
+                build_version_metrics.append(finalData)
+                continue
+            if line_number == 3 : # to convert commit hash to string
+                variableValue = "\"" + variableValue + "\""
+            elif line_number == 4 or line_number == 5 : # to adjust DATEs value in string formate
+                variableValue = "\"" + variableValue[0:10] + "\""
+
+            finalData = variableName+",instance="+uuid+" value="+variableValue  + " " + timestamp
+            build_version_metrics.append(finalData)
+
+    return build_version_metrics
+
+
+# final report prepared as per influx DB data dump formate
+def prepare_report(data, uuid, prefix=None):
+
+    # final report
+    reported_metrics = []
+
+    def getFormatedData(data):
+
+        tuple_length = len(data)
+        mask_length = tuple_length - 1  # if tuple_length > 1 else 0
+        mask = ""
+        if mask_length > 0:
+            mask = ",type=%s"
+        
+        mask += " value=%s"
+        
+        return mask % data
+
+    # resolves embedded metric names (when reports returns more than one value, with subnames)
+    def dig(metric_name, data, uuid):
+        if isinstance(data, list):
+            multi = []
+            for d in data:
+                temp_data = getFormatedData(d)
+                finaldata = "\{\},instance=\{\}".format(metric_name,uuid)
+                finaldata += temp_data + " " + timestamp
+                reported_metrics.append(finaldata)
+            return multi
+
+        else :
+            temp_data = getFormatedData(data)
+            finaldata = "\{\},instance=\{\}".format(metric_name,uuid)
+            finaldata += temp_data + " " + timestamp
+            return finaldata
+        
+
+    for metric_name, metric_vals in data.items():
+        report_data = dig("\{\}".format(metric_name), metric_vals, uuid)
+        if isinstance(report_data, list):
+            for single_row in report_data :
+                reported_metrics.append(single_row)
+        else :
+            reported_metrics.append(report_data)
+
+    return reported_metrics
+
+def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
+    
+    final_result = []
+    if "QUERY" in fossdash_metric_yaml and "QUERIES_NAME" in fossdash_metric_yaml:
+        raw_report = report(connection,fossdash_metric_yaml)
+        query_results_metrics = prepare_report(raw_report,uuid)
+        final_result += query_results_metrics
+    else:
+        print("WARNING :: QUERIES_NAME or QUERY not found in fossdash metric config file")
+        exit(0)
+    if "VERSION_INFO" in fossdash_metric_yaml :
+        if fossdash_metric_yaml["VERSION_INFO"]["display"] == "YES" :
+            buid_version_metrics = getBuildVersionData(uuid)
+            final_result += buid_version_metrics
+    else:
+        print("WARNING :: VERSION_INFO not found in fossdash metric config file")
+
+    return final_result
+ 
+## fetching fossdash reporting URL from database
+def getFossDashURL(connection) :
+    
+    fossdash_url_query = QUERIES['FossDashReportingAPIUrl']
+    fossdash_url_record = _query(connection,fossdash_url_query,True)
+    fossdash_url = ""
+    if fossdash_url_record is None or fossdash_url_record[0] is None:
+        print("ERROR :: FossDashReportingAPIUrl is not configured")
+        exit(0)
+    else :
+        fossdash_url = fossdash_url_record[0]
+
+    return fossdash_url
+
+# Publish the generated temp_data metrics file into influxDB via API.
+def pushMetricsToInflux(connection, fossdash_url,file_path, auth_type):
+    
+    print("sending file to influxDB = "+file_path)
+    file_data = open(file_path, 'rb').read() 
+    fossdash_response = None
+    if auth_type == 1 : # 1 - user-password based authentication
+        print("user_pass authentication ")
+        influxDBuser_query = QUERIES['InfluxDBUser']
+        influxDBuser_record = _query(connection,influxDBuser_query,True)
+        if influxDBuser_record is None or influxDBuser_record[0] is None:
+            print("ERROR :: No Username found for InfluxDB !!!")
+            exit(0)
+        InfluxDBUser = influxDBuser_record[0]
+
+        influxDBPass_query = QUERIES['InfluxDBUserPassword']
+        influxDBPass_record = _query(connection,influxDBPass_query,True)
+        if influxDBPass_record is None or influxDBPass_record[0] is None:
+            print("ERROR :: No Password found for InfluxDB user !!!")
+            exit(0)
+        InfluxDBPass = influxDBPass_record[0]
+        fossdash_response = requests.post(fossdash_url, auth=(InfluxDBUser,InfluxDBPass), data=file_data)
+    else: #  0 - token based authentication
+        print("token based authentication ")
+        InfluxDBToken_query = QUERIES['InfluxDBToken']
+        InfluxDBToken_record = _query(connection,InfluxDBToken_query,True)
+        if InfluxDBToken_record is None or InfluxDBToken_record[0] is None:
+            print("ERROR :: No InfluxDB Token Found !!!")
+            exit(0)
+        influxdb_token = InfluxDBToken_record[0]
+        auth_header = \{'Authorization': "Bearer "+influxdb_token\}
+        fossdash_response = requests.post(fossdash_url, headers=auth_header, data=file_data)
+    
+    print("status code = " + str(fossdash_response.status_code))
+    if fossdash_response.status_code == 200 or fossdash_response.status_code == 204 :
+        try :
+            os.rename(file_path, file_path+".reported") 
+        except (Exception) as error:
+            print(error)
+    else :
+        print(fossdash_response.text)
+
+def pushAllUnreportedFilesToInfluxDB(connection, fossdash_url, auth_type):
+    # gathering all unreported files and trying to publish them again
+    unreported_files = [f for f in os.listdir(TEMP_BASE_DIR) if re.match(r'fossdash-publish.*(?<!(reported))$', f)]
+    for file_name in unreported_files :
+        pushMetricsToInflux(connection, fossdash_url, os.path.join(TEMP_BASE_DIR,file_name), auth_type)
+
+def addCronjobToSystem(cron_job_interval):
+    cron_update_cmd = '(crontab -l | grep -v fossdash ; echo "'+cron_job_interval+' python3 {$LIBEXECDIR}/fossdash-publish.py >> ' + os.path.join(LOGDIR,"fossdash.log") + ' 2>&1") | crontab -'
+    # print(cron_update_cmd)
+    cron_update_cmd_output = subprocess.Popen(cron_update_cmd,shell=True)
+
+def UpdateCronJobSchedule(connection):
+
+    # get the latest cron schedule interval from database
+    cron_schedule_record = _query(connection, QUERIES['FossDashScriptCronSchedule'], single=True)
+    new_cron_job_interval = None
+    if cron_schedule_record is not None and cron_schedule_record[0] is not None:
+        new_cron_job_interval = cron_schedule_record[0]
+    else:
+        return
+    
+    fossdash_configuration_record = _query(connection, QUERIES['FossdashEnableDisable'], single=True)
+    fossdash_configuration = int(fossdash_configuration_record[0])
+    if(fossdash_configuration == 0):
+        # print("fossdash is disable")
+        exit(0)
+
+    print("Updating cron job interval = ", new_cron_job_interval)
+    addCronjobToSystem(new_cron_job_interval)
+
+def cleanOldReportedFile(connection):
+
+    fossdash_clean_days_record = _query(connection, QUERIES['FossdashReportedCleaning'], single=True)
+    fossdash_clean_days = None
+    if (fossdash_clean_days_record is not None) and (fossdash_clean_days_record[0] is not None) and (len(fossdash_clean_days_record[0])>0):
+        fossdash_clean_days = int(fossdash_clean_days_record[0])
+    else:
+        return
+    
+    fossdash_cleanfile_path = os.path.join(TEMP_BASE_DIR,"fossdash_clean_file_list")
+    #dump all old reported files NAME into fossdash_clean_file_list 
+    if fossdash_clean_days > 0 : 
+        find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" -ctime +' + str(fossdash_clean_days-1) + ' > '+fossdash_cleanfile_path
+    else:
+        find_cmd = "find " +TEMP_BASE_DIR+ ' -maxdepth 1 -iname "fossdash-publish*.reported" > ' + fossdash_cleanfile_path
+    # print("find_cmd = ", find_cmd)
+    find_cmd_proc = subprocess.Popen(find_cmd,shell=True)
+    # Wait untill command gets executed 
+    try:
+        outs, errs = find_cmd_proc.communicate(timeout=15)
+    except Exception:
+        find_cmd_proc.kill()
+        outs, errs = find_cmd_proc.communicate()
+
+    # TODO: require BUG FIX
+    with open(fossdash_cleanfile_path,"r") as file_ptr:
+        for file_name in file_ptr:
+            print("cleaning old reported file : ", file_name)
+            delete_cmd = "rm -rf "+file_name
+            delete_cmd_output = subprocess.Popen(delete_cmd,shell=True)
+              
+def updateNewInstanceNameInAllFiles(new_instance_name):
+
+    print("updating all reported files with new instance UUID : ", new_instance_name)
+    #get all reported files
+    reported_files = [f for f in os.listdir(TEMP_BASE_DIR) if re.match(r'fossdash-publish.*(reported)$', f)]
+    #get all un-reported files
+    unreported_files = [f for f in os.listdir(TEMP_BASE_DIR) if re.match(r'fossdash-publish.*(?<!(reported))$', f)]
+    #update all reported files with new_instance_name
+    for reported_file_name in reported_files:
+        file_path = os.path.join(TEMP_BASE_DIR,reported_file_name)
+        with open(file_path,"r") as file_ptr:
+            file_content = file_ptr.read()
+            new_instace_name_tag = "instance="+new_instance_name
+            # replaceAll old instanceID with new InstanceID
+            new_content = re.sub('instance=[a-zA-Z0-9_-]+',new_instace_name_tag,file_content)
+            new_file_path = file_path[:-9] # remove .reported extension
+            with open(new_file_path,'w+') as new_file_ptr:
+                new_file_ptr.write(new_content)
+        os.remove(file_path)
+
+    #update all un-reported files with new_instance_name
+    for unreported_file_name in unreported_files:
+        file_path = os.path.join(TEMP_BASE_DIR,unreported_file_name)
+        try:
+            #copy file content
+            file_ptr = open(file_path,"r")
+            file_content = file_ptr.read()
+            file_ptr.close()
+            new_instace_name_tag = "instance="+new_instance_name
+            # replaceAll old instanceID with new InstanceID
+            new_content = re.sub('instance=[a-zA-Z0-9_-]+',new_instace_name_tag,file_content)
+            #write new file content into the same unreported file
+            file_ptr = open(file_path,"w+")
+            file_ptr.write(new_content)
+            file_ptr.close()
+        except (Exception) as error:
+            print(error)
+
+
+def getFossologyInstanceName(autogenerated_uuid,fossdashconfig_instance_name):
+    if fossdashconfig_instance_name is None:
+        return autogenerated_uuid
+    else:
+        return fossdashconfig_instance_name
+
+def disable_fossdash():
+    print("Disabling the fossdash !!!")
+    fossdash_disable_cmd = "(crontab -l | grep -v fossdash) | crontab - "
+    fossdash_disable_cmd_output = subprocess.Popen(fossdash_disable_cmd,shell=True)
+
+def enable_fossdash(connection):
+    print("Enabling the fossdash")
+    # get the latest cron schedule interval from database
+    cron_schedule_record = _query(connection, QUERIES['FossDashScriptCronSchedule'], single=True)
+    cron_job_interval = None
+    if cron_schedule_record is not None and cron_schedule_record[0] is not None:
+        cron_job_interval = cron_schedule_record[0]
+    else:
+        cron_job_interval = "* * * * *"
+
+    addCronjobToSystem(cron_job_interval)
+
+if __name__ == "__main__":
+
+    connection = None
+    print("\n")
+    print(datetime.datetime.now())
+    try:
+        connection = psycopg2.connect(config)
+        autogenerated_uuid = _query(connection, QUERIES['uuid'], single=True)[0]  # tuple
+        fossology_instance_name_record = _query(connection, QUERIES['FossologyInstanceName'], single=True)
+        fossology_instance_name = None
+        if fossology_instance_name_record is not None and fossology_instance_name_record[0] is not None:
+            fossology_instance_name = fossology_instance_name_record[0]
+        
+        final_uuid = getFossologyInstanceName(autogenerated_uuid,fossology_instance_name)
+
+        agv_len = len(sys.argv)
+        if  agv_len == 2 :
+            arg = sys.argv[1]
+            if arg == "cron":
+                # update cronJob schedule
+                UpdateCronJobSchedule(connection)
+            elif arg == "uuid":
+                # update all reported files with new fossology instance name
+                updateNewInstanceNameInAllFiles(final_uuid) 
+            exit(0)
+        elif agv_len == 3 :
+            arg_name = sys.argv[1]
+            arg_value = int(sys.argv[2])
+            if arg_name == "fossdash_configure":
+                if arg_value == 0 :
+                    disable_fossdash()
+                else :
+                    enable_fossdash(connection)
+            exit(0)
+        elif agv_len == 1:
+            pass
+        else:
+            print("WARNING :: Invalid command line argument")
+
+        print("Fossology Instance UUID = ",final_uuid)
+        fossdash_metric_config_record = _query(connection, QUERIES['FossdashMetricConfig'], single=True)
+        fossdash_metric_yaml = None
+        if (fossdash_metric_config_record is not None) and (fossdash_metric_config_record[0] is not None) and (len(fossdash_metric_config_record[0])>0):
+            fossdash_metric_config = fossdash_metric_config_record[0]
+            fossdash_metric_yaml = yaml.load(fossdash_metric_config)
+        else:
+            with open(FOSSDASH_METRICS_FILE,"r") as metrics_ptr:
+                fossdash_metric_yaml = yaml.load(metrics_ptr)
+        # print(fossdash_metric_yaml)
+        final_metrics = getAllMetricsData(connection,final_uuid,fossdash_metric_yaml)
+        print("All data metrics Generated")
+        file_path = os.path.join(TEMP_BASE_DIR, file_name_prefix + "." + file_name_postfix_timestamp)
+
+        # writting final resulted metrics into a file
+        with open(file_path,"w+") as f:
+            for row in final_metrics:
+                f.write(row)
+                f.write("\n")
+
+        fossdash_url = getFossDashURL(connection)
+        print("publishing FossDash URL = "+ fossdash_url)
+
+        authType_query = QUERIES['AuthType']
+        authType_record = _query(connection,authType_query,True)
+        auth_type = int(authType_record[0])
+
+        pushMetricsToInflux(connection, fossdash_url, file_path, auth_type)
+        
+        pushAllUnreportedFilesToInfluxDB(connection, fossdash_url, auth_type)
+
+        # cleaning task for old reported file
+        cleanOldReportedFile(connection)
+        
+    except (Exception, psycopg2.DatabaseError) as error:
+        print("ERROR :: ", error)
+    finally:
+        if connection:
+            connection.commit()
+            connection.close()
