@@ -43,10 +43,6 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 log_t* main_log = NULL;
 
-int fatal_count=0;
-int error_count=0;
-int warning_count=0;
-
 /* ************************************************************************** */
 /* **** local functions ***************************************************** */
 /* ************************************************************************** */
@@ -308,18 +304,4 @@ int clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...)
   return ret;
 }
 
-void write_log_counter()
-{
 
-    FILE * fPtr;
-    fPtr = fopen("/srv/fossology/repository/fossdash/log_counter.log", "w+");
-    if(fPtr == NULL)
-    {
-        printf("Unable to create log_counter.\n");
-        exit(EXIT_FAILURE);
-    }
-    fprintf(fPtr, "error_count=%d\n", error_count);
-    fprintf(fPtr, "fatal_count=%d\n", fatal_count);
-    fprintf(fPtr, "warning_count=%d\n", warning_count);
-    fclose(fPtr);
-}

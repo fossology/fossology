@@ -43,6 +43,3 @@ QUERY:
 
 VERSION_INFO:
   display: "YES"    # NO, If don't want to display VERSION and BUILD info
-
-LOG_COUNT_INFO:
-  display: "YES"   # NO, If don't want to display ERROR, FATAL and WARNING count
