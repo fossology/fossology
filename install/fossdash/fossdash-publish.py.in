@@ -136,24 +136,6 @@ def getBuildVersionData(uuid) :
 
     return build_version_metrics
 
-def getErrorCountMetrics(uuid):
-    log_cnt_list = []
-    if os.path.exists(ERROR_COUNTER_LOG_FILE) :
-        with open(ERROR_COUNTER_LOG_FILE) as cnt_ptr:
-            for line in cnt_ptr:
-                varName, varVal = line.split("=")
-                varVal = varVal[:-1]
-                log_metric = varName+",instance="+uuid+" value="+ varVal  + " " + timestamp
-                log_cnt_list.append(log_metric)
-    else:
-        log_metric = "error_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
-        log_cnt_list.append(log_metric)
-        log_metric = "fatal_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
-        log_cnt_list.append(log_metric)
-        log_metric = "warning_count"+",instance="+uuid+" value="+ "0"  + " " + timestamp
-        log_cnt_list.append(log_metric)
-    
-    return log_cnt_list
 
 # final report prepared as per influx DB data dump formate
 def prepare_report(data, uuid, prefix=None):
@@ -215,12 +197,6 @@ def getAllMetricsData(connection,uuid,fossdash_metric_yaml):
     else:
         print("WARNING :: VERSION_INFO not found in fossdash metric config file")
 
-    if "LOG_COUNT_INFO" in fossdash_metric_yaml :  
-        if fossdash_metric_yaml["LOG_COUNT_INFO"]["display"] == "YES" :
-            error_count_metrics = getErrorCountMetrics(uuid)
-            final_result += error_count_metrics
-    else:
-        print("WARNING :: LOG_COUNT_INFO not found in fossdash metric config file")
     return final_result
  
 ## fetching fossdash reporting URL from database
