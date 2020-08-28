@@ -222,6 +222,8 @@ else
   print "Database schema update completed successfully.\n";
 }
 
+$FAILED_LICENSE_IMPORT = array();
+
 /* initialize the license_ref table */
 if ($UpdateLiceneseRef)
 {
@@ -407,6 +409,39 @@ if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
 }
+if (! empty($FAILED_LICENSE_IMPORT)) {
+  $errors = 11;
+  $failedInsert = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "INSERT";
+    });
+  $failedUpdate = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "UPDATE";
+    });
+  $failedPromote = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "CANPROMOTE";
+    });
+  if (! empty($failedInsert)) {
+    echo "*** Failed to insert following licenses ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }), $failedInsert) . "\n";
+  }
+  if (! empty($failedUpdate)) {
+    echo "*** Failed to update following licenses ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }), $failedUpdate) . "\n";
+  }
+  if (! empty($failedPromote)) {
+    echo "*** Failed to move following licenses from candidate table ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }), $failedPromote) . "\n";
+  }
+}
 exit($errors);
 
 /**
@@ -517,7 +552,7 @@ function initLicenseRefTable($Verbose)
       $rf_detector_type_check = $row_check['rf_detector_type'];
       $rf_flag_check = $row_check['rf_flag'];
 
-      $candidateLicense = isACandidateLicense($dbManager, $rf_shortname);
+      $candidateLicense = isLicenseExists($dbManager, $rf_shortname, true);
       if ($candidateLicense) {
         mergeCandidateLicense($dbManager, $candidateLicense);
       }
@@ -587,7 +622,12 @@ function initLicenseRefTable($Verbose)
         $params[] = $rf_shortname;
         $position = "$" . count($params);
         $sql .= " WHERE rf_shortname=$position;";
-        $dbManager->getSingleRow($sql, $params, $statement);
+        try {
+          $dbManager->getSingleRow($sql, $params, $statement);
+        } catch (\Exception $e) {
+          global $FAILED_LICENSE_IMPORT;
+          $FAILED_LICENSE_IMPORT[] = array($rf_shortname, "UPDATE");
+        }
       }
     } else {  // insert when it is new
       pg_free_result($result_check);
@@ -613,18 +653,25 @@ function initLicenseRefTable($Verbose)
 } // initLicenseRefTable()
 
 /**
- * Check if the given shortname is a candidate license.
+ * Check if the given shortname exists in DB.
  *
  * @param DbManager $dbManager DbManager used
  * @param string $rf_shortname Shortname of the license to check
- * @returns False if the license is not candidate else DB row
+ * @param boolean $isCandidate check given shortname in candidate table
+ * @returns False if the license does not exists else DB row
  */
-function isACandidateLicense($dbManager, $rf_shortname)
+function isLicenseExists($dbManager, $rf_shortname, $isCandidate = true)
 {
-  $sql = "SELECT * FROM ONLY license_candidate WHERE rf_shortname = $1;";
-  $candidateRow = $dbManager->getSingleRow($sql, array($rf_shortname));
-  if (! empty($candidateRow) > 0) {
-    return $candidateRow;
+  $tableName = "license_ref";
+  if ($isCandidate) {
+    $tableName = "license_candidate";
+  }
+  $statement = __METHOD__ . ".$tableName";
+  $sql = "SELECT * FROM ONLY $tableName WHERE rf_shortname = $1;";
+  $licenseRow = $dbManager->getSingleRow($sql, array($rf_shortname),
+    $statement);
+  if (! empty($licenseRow)) {
+    return $licenseRow;
   } else {
     return false;
   }
@@ -639,14 +686,54 @@ function isACandidateLicense($dbManager, $rf_shortname)
  */
 function mergeCandidateLicense($dbManager, $candidateLicense)
 {
+  $mainLicense = isLicenseExists($dbManager, $candidateLicense['rf_shortname'],
+    false);
+  $statement = __METHOD__ . ".md5Exists";
+  $sql = "SELECT rf_pk FROM ONLY license_ref WHERE md5(rf_text) = md5($1);";
+  $licenseRow = $dbManager->getSingleRow($sql,
+    array($candidateLicense['rf_text']), $statement);
+  if (! empty($licenseRow)) {
+    $md5Exists = true;
+  } else {
+    $md5Exists = false;
+  }
+  if ($mainLicense !== false && $md5Exists) {
+    $dbManager->begin();
+    $updateStatements = __METHOD__ . ".updateCandidateToMain";
+    $updateCeSql = "UPDATE clearing_event SET rf_fk = $1 WHERE rf_fk = $2;";
+    $updateCeSt = $updateStatements . ".ce";
+    $updateLsbSql = "UPDATE license_set_bulk SET rf_fk = $1 WHERE rf_fk = $2;";
+    $updateLsbSt = $updateStatements . ".lsb";
+    $updateUclSql = "UPDATE upload_clearing_license SET rf_fk = $1 " .
+      "WHERE rf_fk = $2;";
+    $updateUclSt = $updateStatements . ".ucl";
+    $deleteOcmSql = "DELETE FROM obligation_candidate_map WHERE rf_fk = $1;";
+    $deleteOcmSt = $updateStatements . ".ocm";
+
+    $dbManager->getSingleRow($updateCeSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateCeSt);
+    $dbManager->getSingleRow($updateLsbSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateLsbSt);
+    $dbManager->getSingleRow($updateUclSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateUclSt);
+    $dbManager->getSingleRow($deleteOcmSql, array($candidateLicense['rf_pk']),
+      $deleteOcmSt);
+    $dbManager->commit();
+  } elseif ($mainLicense !== false || $md5Exists) {
+    // Short name exists and MD5 does not match
+    // Or short name does not exists by MD5 match
+    return -1;
+  }
   $dbManager->begin();
   $deleteSql = "DELETE FROM license_candidate WHERE rf_pk = $1;";
   $deleteStatement = __METHOD__ . ".deleteCandidte";
   $dbManager->prepare($deleteStatement, $deleteSql);
   $dbManager->execute($deleteStatement, array($candidateLicense['rf_pk']));
-  $licenseId = insertNewLicense($dbManager, $candidateLicense, true);
+  if ($mainLicense === false && $md5Exists === false) {
+    // License does not exists
+    insertNewLicense($dbManager, $candidateLicense, true);
+  }
   $dbManager->commit();
-  return $licenseId;
 }
 
 /**
@@ -691,6 +778,17 @@ function insertNewLicense($dbManager, $license, $wasCandidate = false)
   $textPos = "$" . count($params);
 
   $sql .= "md5($textPos),now())";
-  return $dbManager->insertPreparedAndReturn($insertStatement, $sql, $params,
-    "rf_pk");
+  $rfPk = -1;
+  try {
+    $rfPk = $dbManager->insertPreparedAndReturn($insertStatement, $sql, $params,
+      "rf_pk");
+  } catch (\Exception $e) {
+    global $FAILED_LICENSE_IMPORT;
+    $type = "INSERT";
+    if ($wasCandidate) {
+      $type = "CANPROMOTE";
+    }
+    $FAILED_LICENSE_IMPORT[] = array($license['rf_shortname'], $type);
+  }
+  return $rfPk;
 }
