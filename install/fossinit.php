@@ -410,7 +410,6 @@ if($errors>0)
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
 }
 if (! empty($FAILED_LICENSE_IMPORT)) {
-  $errors = 11;
   $failedInsert = array_filter($FAILED_LICENSE_IMPORT,
     function ($x){
       return $x[1] == "INSERT";
@@ -427,19 +426,19 @@ if (! empty($FAILED_LICENSE_IMPORT)) {
     echo "*** Failed to insert following licenses ***\n";
     echo implode(",", array_map(function ($x) {
       return $x[0];
-    }), $failedInsert) . "\n";
+    }, $failedInsert)) . "\n";
   }
   if (! empty($failedUpdate)) {
     echo "*** Failed to update following licenses ***\n";
     echo implode(",", array_map(function ($x) {
       return $x[0];
-    }), $failedUpdate) . "\n";
+    }, $failedUpdate)) . "\n";
   }
   if (! empty($failedPromote)) {
     echo "*** Failed to move following licenses from candidate table ***\n";
     echo implode(",", array_map(function ($x) {
       return $x[0];
-    }), $failedPromote) . "\n";
+    }, $failedPromote)) . "\n";
   }
 }
 exit($errors);
@@ -646,7 +645,7 @@ function initLicenseRefTable($Verbose)
   }
   pg_free_result($result_new);
 
-  $dbManager->queryOnce("DROP TABLE license_ref_2");
+  $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2");
   $dbManager->commit();
 
   return (0);
