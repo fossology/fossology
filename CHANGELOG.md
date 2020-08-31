@@ -1,5 +1,108 @@
 # Changelog of FOSSology
 
+### 3.9.0-RC1 (Aug 31st 2020)
+
+With every new release, FOSSology brings various bug fixes, infrastructure changes and various new features.
+
+You can check the list of commits in release bellow but few highlights for the release will be:
+
+* New agent **Spasht** which searches for decisions from ClearlyDefined.io and bring them to FOSSology.
+* New Docker image to use in CI
+* PostgreSQL 12 support
+* New page to check status of all job in a server
+* Using user's time zone to change time in UI
+* Ability to specify GIT branch in Upload from VCS
+* Reuse of deactivated copyrights
+* Remove OpenSSL dependency and use `libgcrypt`
+* Removal of redundant MD5 checksum from `licenseRef.json`
+
+#### Credits to contributors for 3.9.0-RC1
+
+From the GIT commit history, we have following contributors since [3.8.1](https://github.com/fossology/fossology/releases/tag/3.8.1):
+
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Akash-Sareen <akash7sareen@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avneet Singh <Avneet.Singh@sony.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Lakshmi Bhavani <Nagavalli.LakshmiBhavani@in.bosch.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Michael <michael.c.jaeger@siemens.com>
+> Mikko Murto <mikko.murto@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> vivek kumar <vvksindia@gmail.com>
+```
+
+#### Corrections
+
+* `f24547d85` fix(licenseRef): Fix type in array_map
+* `f09761d20` fix(licenseref): handle errors license errors
+* `2fcbff0b1` fix(Nomos): Added a new License signature
+* `a7908a68d` fix(spasht-ui): Removed extension from the spasht search
+* `5638337f2` fix(report): Don't group results with custom text
+* `865f8ac02` fix(licenseRef): Fix import of licenseRef.json
+* `23504c7a2` fix(lib): Correct non-default argument position
+* `059ed1cfb` fix(lib): Remove extra parameters
+* `485ddc75d` fix(obligation): Refer to license conclusions
+* `eb60785b5` fix(rest): fixed ignoreScm flag when input is false
+* `7880e856a` fix(delagent): Remove clearing_decision and lrb
+* `a41120ad8` fix(spdxReport): add missing artifact to file path in spdx reporting
+* `40792c1c2` fix(ui): Use default timezone if not set
+* `75c59cde8` fix(bulk): add class to show text highlighted for matched page
+* `3931634dd` fix(spdx): Fix duplicate copyrights
+* `0728965c8` fix(clearingDao): Copy acknowledgement with event
+* `441d224e4` fix(clearingCount): do not add count as cleared in case of to be discussed
+* `58562d7da` fix(nomos-standalone): included changes for the PR #1600
+* `c07cf2ee0` fix(SCM): fix warnings in apache log if SCM is not selected
+* `eb08c0e2b` fix(unifiedreport): Get department from config
+* `7b8b5ef77` fix(fo-installdeps): added a missing dependency
+* `420903394` fix(upload): Fix the check for expire_action
+* `1b062b135` fix(spdx): fix spdx-rdf export.
+* `de279e3de` fix(libschema): Schema fix for PostgreSQL 12
+* `421a4221f` fix(AdviceLicense):show error message on failed merge
+* `c08a54f8c` fix(rest): Get upload summary without UI
+
+#### Infrastructure
+
+* `73c5b6a08` chore(alljobs): Restrict to read
+* `b002820e9` perf(license_candidate): Create PRIMARY KEY
+* `7fecfc84e` test(GetHashes): Change tests for sha256
+* `685e78632` table reference fixed
+* `52f4096a0` chore(delagent): Remove OpenSSL dependency
+* `926f8540f` chore(ununpack): Remove external checksum code
+
+#### Features
+
+* `e35f31c73` feat(licenseRef): update existing licenses
+* `cb06d031e` feat(spasht): Use dialog for details
+* `758ed16ab` feat(spasht): Change UI and remove some steps
+* `e27a9862d` feat(spasht): Added Agent spasht
+* `3aa573e33` feat(reuser): reuse deactivated copyrights
+* `dbd411529` feat(showjobs): Show delete file name
+* `87f8876f5` feat(ci): Use FOSSology scanners in GitLab CI
+* `46c1384fb` feat(decisions): auto deactivate copyrights
+* `84185975d` feat(conf): add feature to change all local clearings to global from conf
+* `bd5662577` feat(ReportDao): send heartbeat from Dao to keep the agent alive for large files
+* `a737c4bcb` feat(jobs): Show all running jobs
+* `462591e8c` feat(export): Export Copyrights
+* `4e025c1b7` feat(download): Limit source code download only for users with specified access rights
+* `00a68a13d` feat(ui): Display Job timings in browser timezone and formatted date time to Y-m-d H:i:s
+* `2ca5257cd` feat(rest): Upload from URL and server
+* `08132e0c9` feat(rest): extend upload model with filesha1
+* `0bc755ad7` feat(globalDecision): show warning if the candidate license is added to license list
+* `8f395952a` feat(upload): Add possibility to upload specific Git branch
+* `a35edb985` feat(groups): Update default group for user
+* `e834b41bd` feat(spdx export): Add sha256 to exported spdx.
+* `d90175480` feat(copyright): Enable agent to read authors from ROS catkin package manifest files as per spec
+* `bbaf4f071` feat(nomos): Print JSON directly to STDOUT
+* `807f6614b` feat(nomos): Optimize JSON output
+* `af22a5b21` feat(scanner): ignore files from scanning using mimetype
+* `59464a500` feat(maintenance): Remove orphan log files
+
 ### 3.8.0 (April 23rd 2020)
 
 This release adds important corrections to
