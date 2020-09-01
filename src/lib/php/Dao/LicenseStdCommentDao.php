@@ -24,6 +24,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\StringOperation;
 
 /**
  * @class LicenseStdCommentDao
@@ -81,7 +82,8 @@ class LicenseStdCommentDao
       "WHERE lsc_pk = $1 " .
       "RETURNING 1 AS updated;";
     $row = $this->dbManager->getSingleRow($sql,
-      [$commentPk, $newName, $newComment, $userFk]);
+      [$commentPk, $newName,
+        StringOperation::replaceUnicodeControlChar($newComment), $userFk]);
     return $row['updated'] == 1;
   }
 
@@ -112,7 +114,7 @@ class LicenseStdCommentDao
 
     $params = [
       'name' => $name,
-      'comment' => $comment,
+      'comment' => StringOperation::replaceUnicodeControlChar($comment),
       'user_fk' => $userFk
     ];
     $statement = __METHOD__ . ".insertNewLicStdComment";
@@ -164,7 +166,7 @@ class LicenseStdCommentDao
         $statement .= ".name";
       }
       if (array_key_exists("comment", $comment)) {
-        $params[] = $comment["comment"];
+        $params[] = StringOperation::replaceUnicodeControlChar($comment["comment"]);
         $updateStatement[] = "comment = $" . count($params);
         $statement .= ".comment";
       }
