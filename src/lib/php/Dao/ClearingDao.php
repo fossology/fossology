@@ -343,6 +343,10 @@ class ClearingDao
     }
 
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId);
+    $uploadId = $itemTreeBounds->getUploadId();
+    $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
+
     if ($this->isDecisionIrrelevant($uploadTreeId, $groupId)) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
     } else if ($decType == DecisionTypes::IRRELEVANT) {

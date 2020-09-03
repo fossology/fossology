@@ -462,7 +462,7 @@ class CopyrightDao
             INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
             WHERE cpr.$cpTablePk = cp.$cpTablePk
               AND $withHash ( ut.lft BETWEEN $1 AND $2 )";
-    if ('uploadtree_a' == $item->getUploadTreeTableName()) {
+    if ('uploadtree_a' == $item->getUploadTreeTableName() || 'uploadtree' == $item->getUploadTreeTableName()) {
       $params[] = $item->getUploadId();
       $sql .= " AND ut.upload_fk=$".count($params);
       $stmt .= '.upload';
