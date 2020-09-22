@@ -470,6 +470,12 @@ paths:
                 - containers
                 - allfiles
               default: allfiles
+          - name: uploadId
+            in: header
+            required: false
+            description: Id of the upload to search files into
+            schema:
+              type: integer    
           - name: filename
             description: Filename to find, can contain % as wild-card
             required: false

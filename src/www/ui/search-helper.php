@@ -36,7 +36,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  *         contains uploadtree_pk, parent, upload_fk, pfile_fk, ufile_mode, and
  *         ufile_name
  */
-function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchtype,
+function GetResults($Item, $Filename, $Upload, $tag, $Page, $SizeMin, $SizeMax, $searchtype,
                     $License, $Copyright, $uploadDao, $groupID, $PG_CONN)
 {
   $MaxPerPage  = 100;  /* maximum number of result items per page */
@@ -163,6 +163,14 @@ function GetResults($Item, $Filename, $tag, $Page, $SizeMin, $SizeMax, $searchty
       $SQL .= " AND";
     }
     $SQL .= " ufile_name ilike '". pg_escape_string($Filename) . "'";
+    $NeedAnd=1;
+  }
+
+  if ($Upload != 0) {
+    if ($NeedAnd) {
+      $SQL .= " AND";
+    }
+    $SQL .= " upload_fk = ". pg_escape_string($Upload) . "";
     $NeedAnd=1;
   }
 

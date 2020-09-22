@@ -54,10 +54,16 @@ class SearchController extends RestController
     $filesizeMax = $request->getHeaderLine("filesizemax");
     $license = $request->getHeaderLine("license");
     $copyright = $request->getHeaderLine("copyright");
+    $uploadId = $request->getHeaderLine("uploadId");
 
     // set searchtype to search allfiles by default
     if (empty($searchType)) {
       $searchType = "allfiles";
+    }
+
+    // set uploadId to 0 - search in all files
+    if (empty($uploadId)) {
+      $uploadId = 0;
     }
 
     /*
@@ -83,7 +89,7 @@ class SearchController extends RestController
     }
 
     $item = GetParm("item", PARM_INTEGER);
-    $results = GetResults($item, $filename, $tag, 0,
+    $results = GetResults($item, $filename, $uploadId, $tag, 0,
       $filesizeMin, $filesizeMax, $searchType, $license, $copyright,
       $this->restHelper->getUploadDao(), $this->restHelper->getGroupId(),
       $GLOBALS['PG_CONN'])[0];
