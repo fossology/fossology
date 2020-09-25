@@ -379,7 +379,7 @@ void convertWhitespaceToSpaceAndRemoveSpecialChars(char* buf, int isCR )
     case '<':
       if (strncasecmp(cp, "<string", 7) == 0)
       {
-        (void) strncpy(cp, "          ", 7);
+        (void) memcpy(cp, "       ", 7 * sizeof(char));
       }
       break;
       /* CDB - Big #ifdef 0 left out */

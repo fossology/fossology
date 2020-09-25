@@ -7,7 +7,7 @@ notice and this notice are preserved.  This file is offered as-is,
 without any warranty.
 */
 
-unsigned int squareVisitorX[SQUARE_VISITOR_LENGTH];
-unsigned int squareVisitorY[SQUARE_VISITOR_LENGTH];
+extern unsigned int squareVisitorX[SQUARE_VISITOR_LENGTH];
+extern unsigned int squareVisitorY[SQUARE_VISITOR_LENGTH];
 
 #endif // SQUAREVISITOR_H

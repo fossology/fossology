@@ -133,6 +133,16 @@ jobs:
             - gcc-8
             - g++-8
     - <<: *compiler-tests
+      env: CC=gcc-9 CXX=g++-9 CFLAGS='-Wall'
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - *default_packages
+            - gcc-9
+            - g++-9
+    - <<: *compiler-tests
       env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
       addons:
         postgresql: "10"

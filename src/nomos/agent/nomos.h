@@ -80,6 +80,7 @@
 #ifndef	_GNU_SOURCE
 #define	_GNU_SOURCE
 #endif	/* not defined _GNU_SOURCE */
+#include <glib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -114,8 +115,6 @@
 #include <libfossology.h>
 #include <libfossdbmanager.h>
 #endif
-
-#include <glib.h>
 
 /**
  * To use our local version of debug-malloc(), compile -DMEMORY_TRACING
@@ -156,11 +155,11 @@
 #define OPTS_JSON_OUTPUT 0x20
 #define OPTS_SCANNING_DIRECTORY 0x40
 
-char debugStr[myBUFSIZ];        ///< Debug string
-char dbErrString[myBUFSIZ];     ///< DB error string
-char saveLics[myBUFSIZ];        ///< License string
+extern char debugStr[myBUFSIZ];        ///< Debug string
+extern char dbErrString[myBUFSIZ];     ///< DB error string
+extern char saveLics[myBUFSIZ];        ///< License string
 
-size_t hashEntries;             ///< Hash entries
+extern size_t hashEntries;             ///< Hash entries
 
 /**
   Flags for program control

@@ -305,7 +305,7 @@ int TaintURL(char *Sin, char *Sout, int SoutSize)
  * \param TempFileDir
  * \param TempFileDirectory
  * \parblock
- * Internal helper function for function GetURL 
+ * Internal helper function for function GetURL
  * \endparblock
  * \return destination for wget download or NULL
  */
@@ -321,7 +321,7 @@ char *PrepareWgetDest(char *TempFile, char *TempFileDir, char *TempFileDirectory
   {
     return TempFileDir;
   }
-    
+
   return NULL;
 }
 
@@ -508,7 +508,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
           SafeExit(ASPRINTF_MEM_ERROR);
         }
       }
-      
+
       free(tmpfile_path);
 
       rc_system = system(cmd);
@@ -558,7 +558,7 @@ int GetURL(char *TempFile, char *URL, char *TempFileDir)
     free(delete_tmpdir_cmd);
     SafeExit(15);
   }
-  
+
   free(cmd);
 
   /* remove the temp dir /srv/fossology/repository/localhost/wget/wget.xxx.dir/ for this upload */
@@ -769,7 +769,7 @@ void    SetEnv  (char *S, char *TempFileDir)
     memset(GlobalType,'\0',STRMAX);
   }
 
-  strncpy(GlobalParam, S, sizeof(GlobalParam)); // get the parameters, kind of " -A rpm -R fosso -l 1* "
+  strncpy(GlobalParam, S, sizeof(GlobalParam) - 1); // get the parameters, kind of " -A rpm -R fosso -l 1* "
   LOG_VERBOSE0("  upload %ld wget_agent globals loaded:\n  upload_pk = %ld\n  tmpfile=%s  URL=%s  GlobalParam=%s\n",GlobalUploadKey, GlobalUploadKey,GlobalTempFile,GlobalURL,GlobalParam);
 } /* SetEnv() */
 
@@ -1062,7 +1062,7 @@ void replace_url_with_auth()
 
     if (strlen(additionalParams) > 0) {
       memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
-    } 
+    }
     else {
       memset(GlobalParam,'\0',STRMAX);
     }
