@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Fossology\Lib\Data\DecisionScopes;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Test\TestPgDb;
@@ -223,10 +224,10 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($zipDescendantsT, equalTo(array(103)) );
   }
 
-  protected function insertDecisionEvent($decisionId,$eventId,$rfId,$groupId,$item,$pfileId,$type,$removed,$date)
+  protected function insertDecisionEvent($decisionId,$eventId,$rfId,$groupId,$item,$pfileId,$type,$removed,$date,$scope=DecisionScopes::ITEM)
   {
     $this->dbManager->insertTableRow('clearing_decision',array('clearing_decision_pk'=>$decisionId,'pfile_fk'=>$pfileId,'uploadtree_fk'=>$item,
-        'group_fk'=>$groupId,'date_added'=>$date,'decision_type'=> $type));
+        'group_fk'=>$groupId,'date_added'=>$date,'decision_type'=> $type,'scope'=>$scope));
     $this->dbManager->insertTableRow('clearing_event',array('clearing_event_pk'=>$eventId,'rf_fk'=>$rfId,'group_fk'=>$groupId,'uploadtree_fk'=>$item,
         'date_added'=>$date,'removed'=>$removed));
     if ($type != DecisionTypes::WIP) {

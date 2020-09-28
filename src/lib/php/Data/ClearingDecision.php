@@ -234,7 +234,9 @@ class ClearingDecision
   {
     $output = "ClearingDecision(#" . $this->clearingId . ", ";
 
-    foreach ($this->clearingLicenses as $clearingLicense) {
+    $clearingLicenses = $this->getClearingLicenses();
+
+    foreach ($clearingLicenses as $clearingLicense) {
       $output .= ($clearingLicense->isRemoved() ? "-" : ""). $clearingLicense->getShortName() . ", ";
     }
 
