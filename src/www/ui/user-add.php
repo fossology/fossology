@@ -85,6 +85,15 @@ class user_add extends FO_Plugin
       return ($text);
     }
 
+    /* Make sure password matches policy */
+    $policyRegex = generate_password_policy();
+    $result = preg_match('/^' . $policyRegex . '$/m', $Pass);
+    if ($result !== 1) {
+      $text = _("Password does not match policy.");
+      $text .= "<br />" . generate_password_policy_string();
+      return ($text);
+    }
+
     if (empty($Email)) {
       $text = _("Email must be specified. Not added.");
       return ($text);
@@ -142,7 +151,7 @@ class user_add extends FO_Plugin
       }
     }
 
-    $V = "<form name='formy' method='POST'>\n";
+    $V = "<form name='user_add' method='POST'>\n";
     $V.= _("To create a new user, enter the following information:<P />\n");
     $Style = "<tr><td colspan=2 style='background:black;'></td></tr><tr>";
     $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
@@ -184,10 +193,17 @@ class user_add extends FO_Plugin
     $V.= "</select></td>\n";
     $V.= "</tr>\n";
     $text = _("Password (optional)");
-    $V.= "$Style<th>$text</th><td><input type='password' name='pass1' size=20></td>\n";
-    $V.= "</tr>\n";
+    if (passwordPolicyEnabled()) {
+      $text = _("Password");
+    }
+    $V.= "$Style<th>$text</th><td><input type='password' name='pass1' id='passcheck' size=20>";
+    $policy = generate_password_policy_string();
+    if ($policy != "No policy defined.") {
+      $V.= "<br /><span class='passPolicy'>$policy</span>";
+    }
+    $V.= "</td>\n</tr>\n";
     $text = _("Re-enter password");
-    $V.= "$Style<th>$text</th><td><input type='password' name='pass2' size=20></td>\n";
+    $V.= "$Style<th>$text</th><td><input type='password' name='pass2' id='pass2' size=20 style='margin:4px'></td>\n";
     $V.= "</tr>\n";
     $text = _("E-mail Notification");
     $text1 = _("Check to enable email notification when upload scan completes .");
@@ -212,6 +228,14 @@ class user_add extends FO_Plugin
     $text = _("Add User");
     $V.= "<input type='submit' value='$text'>\n";
     $V.= "</form>\n";
+
+    $this->vars['formName'] = "user_add";
+    $this->vars['policyDisabled'] = passwordPolicyEnabled() ? "false" : "true";
+    $this->vars['policyRegex'] = generate_password_policy();
+    $passwordScript = $this->renderString("password-policy-check.js.twig");
+    $this->renderScripts('<script type="text/javascript">' . $passwordScript .
+      '</script>');
+
     return $V;
   }
 }

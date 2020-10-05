@@ -125,6 +125,14 @@ class UserEditPage extends DefaultPlugin
     $vars['expiredTokenList'] = $this->getListOfExpiredTokens();
     $vars['maxTokenDate'] = $this->authHelper->getMaxTokenValidity();
     $vars['writeAccess'] = ($_SESSION[Auth::USER_LEVEL] >= 3);
+    $vars['policyRegex'] = generate_password_policy();
+    $vars['policyDisabled'] = "true"; // Form allows empty password for unchanged
+    $vars['formName'] = "user_edit";
+    $vars['passwordPolicy'] = "";
+    $policy = generate_password_policy_string();
+    if ($policy != "No policy defined.") {
+      $vars['passwordPolicy'] = $policy;
+    }
 
     return $this->render('user_edit.html.twig', $this->mergeWithDefault($vars));
   }
@@ -225,9 +233,25 @@ class UserEditPage extends DefaultPlugin
       $Errors .= "<li>" . _("Invalid email address.") . "</li>";
     }
 
+    /* Make sure user can't ask for blank password if policy is enabled */
+    if (passwordPolicyEnabled() && !empty($UserRec['_blank_pass'])) {
+      $Errors .= "<li>" . _("Password policy enabled, can't have a blank password.") . "</li>";
+    }
+
     /* Did they specify a password and also request a blank password?  */
-    if (!empty($UserRec['_blank_pass']) and ( !empty($UserRec['_pass1']) or ! empty($UserRec['_pass2']))) {
+    if (!empty($UserRec['_blank_pass']) && ( !empty($UserRec['_pass1']) || ! empty($UserRec['_pass2']))) {
       $Errors .= "<li>" . _("You cannot specify both a password and a blank password.") . "</li>";
+    }
+
+    /* Make sure password matches policy */
+    if (!empty($UserRec['_pass1']) && !empty($UserRec['_pass2'])) {
+      $policyRegex = generate_password_policy();
+      $result = preg_match('/^' . $policyRegex . '$/m', $UserRec['_pass1']);
+      if ($result !== 1) {
+        $Errors .= "<li>" . _("Password does not match policy.");
+        $Errors .= "<br />" . generate_password_policy_string();
+        $Errors .= "</li>";
+      }
     }
 
     /* Check if the user is member of the group */
