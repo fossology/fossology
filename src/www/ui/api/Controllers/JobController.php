@@ -301,14 +301,14 @@ class JobController extends RestController
     }
 
     $jobStatusString = "";
-    if ($jobStatus & self::JOB_STARTED) {
+    if ($jobStatus & self::JOB_FAILED) {
+      /* If at least one job is failed, set status as failed */
+      $jobStatusString = "Failed";
+    } else if ($jobStatus & self::JOB_STARTED) {
       /* If at least one job is started, set status as processing */
       $jobStatusString = "Processing";
     } else if ($jobStatus & self::JOB_QUEUED) {
       $jobStatusString = "Queued";
-    } else if ($jobStatus & self::JOB_FAILED) {
-      /* If at least one job is failed, set status as failed */
-      $jobStatusString = "Failed";
     } else {
       /* If everything completed successfully, set status as completed */
       $jobStatusString = "Completed";
