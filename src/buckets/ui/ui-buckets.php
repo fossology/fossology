@@ -118,6 +118,15 @@ class ui_buckets extends FO_Plugin
       $URI = $this->Name . Traceback_parm_keep(array("format","page","upload","item","bp"));
       $tooltipText = _("Browse by buckets");
       $this->microMenu->insert(array(MicroMenu::VIEW_META, MicroMenu::VIEW), $menuText, $menuPosition, $this->getName(), $URI, $tooltipText);
+      if (GetParm("mod",PARM_STRING) == $this->Name)
+      {
+        menu_insert("Browse::Bucket",0);
+        menu_insert("Browse::[BREAK]",100);
+      }
+      else
+      {
+        menu_insert("Browse::Bucket",0,$URI,$tooltipText);
+      }
     }
   } // RegisterMenus()
 
