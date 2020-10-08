@@ -1,5 +1,14 @@
 # Changelog of FOSSology
 
+### 3.9.0-RC2 (Oct 8th 2020)
+
+This pre-release adds important corrections to 3.9.0-RC2.
+
+#### Corrections
+
+* `4df3358c2` perf(ui): Reduce load time for tree view
+* `c56ae1733` fix(ClearingDao): Get uploadtree table name
+
 ### 3.9.0-RC1 (Aug 31st 2020)
 
 With every new release, FOSSology brings various bug fixes, infrastructure changes and various new features.
