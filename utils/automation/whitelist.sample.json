@@ -1,0 +1,11 @@
+{
+  "licenses": [
+    "GPL-2.0+",
+    "GPL-2.0",
+    "LGPL-2.0+"
+  ],
+  "exclude": [
+    "*/agent_tests/*",
+    "src/vendor/*"
+  ]
+}

@@ -136,7 +136,9 @@ class AjaxShowJobs extends \FO_Plugin
         case 'job_queued':
         case 'jq_starttime':
         case 'jq_endtime':
-          $value = Convert2BrowserTime($row[$field]);
+          if (! empty($row[$field])) {
+            $value = Convert2BrowserTime($row[$field]);
+          }
           break;
         case 'jq_itemsprocessed':
           $value = number_format($row[$field]);
@@ -230,8 +232,14 @@ class AjaxShowJobs extends \FO_Plugin
         'jobQueue' => $jobs['jobqueue']
       );
       foreach ($jobArr['jobQueue'] as $key => $singleJobQueue) {
-        $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime($jobArr['jobQueue'][$key]['jq_starttime']);
-        $jobArr['jobQueue'][$key]['jq_endtime'] = Convert2BrowserTime($jobArr['jobQueue'][$key]['jq_endtime']) ;
+        if (! empty($jobArr['jobQueue'][$key]['jq_starttime'])) {
+          $jobArr['jobQueue'][$key]['jq_starttime'] = Convert2BrowserTime(
+            $jobArr['jobQueue'][$key]['jq_starttime']);
+        }
+        if (! empty($jobArr['jobQueue'][$key]['jq_endtime'])) {
+          $jobArr['jobQueue'][$key]['jq_endtime'] = Convert2BrowserTime(
+            $jobArr['jobQueue'][$key]['jq_endtime']) ;
+        }
         if (! empty($singleJobQueue["jq_endtime"])) {
           $numSecs = strtotime($singleJobQueue['jq_endtime']) -
             strtotime($singleJobQueue['jq_starttime']);

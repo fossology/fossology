@@ -1,0 +1,41 @@
+# Copyright Siemens AG 2020, anupam.ghosh@siemens.com, gaurav.mishra@siemens.com
+#
+# Copying and distribution of this file, with or without modification,
+# are permitted in any medium without royalty provided the copyright
+# notice and this notice are preserved.  This file is offered as-is,
+# without any warranty.
+
+dist: bionic
+os: linux
+
+services:
+  - docker
+
+jobs:
+  include:
+    - stage: Compliance
+      name: Copyright
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull fossology/fossology:scanner
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword ;
+          fi
+    - stage: Compliance
+      name: License
+      addons: {}
+      services: docker
+      script:
+        - >-
+          if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
+          docker pull fossology/fossology:scanner
+          && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
+          -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
+          -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
+          fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo ;
+          fi

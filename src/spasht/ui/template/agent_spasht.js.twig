@@ -1,0 +1,134 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+<script>
+$("#advanceSearchForm").ready(function() {
+  if ($("#advanceSearchFormStatus").val() === "hidden") {
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    $("#advanceSearchForm").hide();
+  } else {
+    $(".ui-icon-caret-1-n").show();
+    $(".ui-icon-caret-1-s").hide();
+    $("#advanceSearchForm").show();
+  }
+});
+
+function advanceSearchFormEnabled() {
+  if ($("#advanceSearchFormStatus").val() === "hidden") {
+    $(".ui-icon-caret-1-s").hide();
+    $(".ui-icon-caret-1-n").show();
+    $("#advanceSearchFormStatus").val("shown");
+  } else {
+    $(".ui-icon-caret-1-n").hide();
+    $(".ui-icon-caret-1-s").show();
+    $("#advanceSearchFormStatus").val("hidden");
+  }
+  $("#advanceSearchForm").toggle("blind");
+}
+
+function StoreIntoDb() {
+  var key = $("#selectedDetailKey").val();
+  if (key) {
+    var namespace = $.trim($("#definitionsRow_namespace" + key).text());
+    var name = $.trim($("#definitionsRow_name" + key).text());
+    var revision = $.trim($("#definitionsRow_revision" + key).text());
+    var type = $.trim($("#definitionsRow_type" + key).text());
+    var provider = $.trim($("#definitionsRow_provider" + key).text());
+
+    var params = type + "/" + provider + "/" + namespace + "/" + name +
+      "/" + revision;
+
+    $("#optionSelectedToOpen").val(params);
+    $("#storeForm").submit();
+  } else {
+    return true;
+  }
+}
+
+function showDetails(key) {
+  var modalId = "#detailsModal" + key;
+  var rowId = "#definitionsRow" + key;
+  $("#selectedDetailKey").val(key);
+  $(".definitionsRow").removeClass("definitionsRowHighlight");
+  $(rowId).addClass("definitionsRowHighlight");
+  $(modalId).dialog("open");
+}
+
+$( function() {
+  $(".spasht-loading").hide();
+
+  $("#searchForm").submit(function(event) {
+    $(".spasht-loading").show();
+    return;
+  });
+
+  var spashtTabCookie = 'stickySpashtTab';
+  $('#spashtTabs').tabs({
+    active: ($.cookie(spashtTabCookie) || 0),
+    activate: function(e, ui){
+      // Get active tab index and update cookie
+      var idString = $(e.currentTarget).attr('id');
+      idString = parseInt(idString.slice(-1)) - 1;
+      $.cookie(spashtTabCookie, idString);
+    }
+  });
+
+  $(".detailsClass").each(function() {
+    $(this).dialog({
+      autoOpen: false,
+      height: "auto",
+      width: "auto",
+      title: "Details",
+      modal: true,
+      open: function() {
+        // Gery out the background and close on clicking outside
+        $(".ui-widget-overlay")
+        .addClass("grey-overlay")
+        .bind("click", function () {
+          $(this).siblings(".ui-dialog")
+          .find(".ui-dialog-content").dialog("close");
+        });
+      },
+      buttons: [
+        {
+          text: "Select & schedule",
+          icon: "ui-icon-gear",
+          click: StoreIntoDb
+        },
+        {
+          text: "Cancel",
+          icon: "ui-icon-closethick",
+          click: function() {
+            $("#selectedDetailKey").val("");
+            $(this).dialog("close");
+          }
+        }
+      ]
+    });
+  });
+
+  $("#definitionsTable").ready(function() {
+    var t = $("#definitionsTable").DataTable({
+      "processing": false,
+      "paginationType": "listbox",
+      "order": [[ 1, 'asc' ]],
+      "autoWidth": false,
+      "columnDefs": [{
+        "orderable": true,
+        "searchable": true,
+        "targets": [0, 1, 2, 3]
+      },{
+        "orderable": false,
+        "searchable": false,
+        "targets": [4]
+      }]
+    });
+  });
+});
+</script>

@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper. 
+# Sample debian/rules that uses debhelper.
 # debhelper is licensed under GPL-2.0, more info at:
 # http://joeyh.name/code/debhelper/
 #
@@ -32,7 +32,7 @@ configure-stamp:
 build: build-arch build-indep
 
 build-arch: build-arch-stamp
-build-arch-stamp: configure-stamp  
+build-arch-stamp: configure-stamp
 
 	# Add here commands to compile the arch part of the package.
 	@dpkg-parsechangelog | sed -n -e 's/^Version: //p' > VERSIONSTRING
@@ -41,26 +41,26 @@ build-arch-stamp: configure-stamp
 	touch $@
 
 build-indep: build-indep-stamp
-build-indep-stamp: configure-stamp  
+build-indep-stamp: configure-stamp
 
 	@# this currently doesn't do anything, but in case it does someday
 	$(MAKE) PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var install/db/
 	touch $@
 
-clean: 
+clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-arch-stamp build-indep-stamp configure-stamp
 
 	$(MAKE) clean
 
-	dh_clean 
+	dh_clean
 
 install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i 
+	dh_clean -k -i
 	dh_installdirs -i
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-db \
@@ -72,7 +72,7 @@ install-indep:
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s 
+	dh_clean -k -s
 	dh_installdirs -s
 
 ifeq ($(COMPOSER_PHAR),)
@@ -186,6 +186,10 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/softwareHeritage install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-spasht \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/spasht install
+
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/bin
 	cp $(COMPOSER_PHAR) $(CURDIR)/debian/fossology-dev/usr/bin
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
@@ -198,12 +202,12 @@ endif
 binary-common:
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs 
+	dh_installchangelogs
 	dh_installdocs -A -Nfossology-common debian/README.Debian
 	dh_installdocs -pfossology-common
 	dh_installexamples
-#	dh_installdebconf	
-	dh_installlogrotate	
+#	dh_installdebconf
+	dh_installlogrotate
 #	dh_installmime
 	DH_OPTIONS= dh_installinit -o -pfossology --name=fossology
 #	dh_installcron -pfossology-db

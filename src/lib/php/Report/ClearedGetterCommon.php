@@ -179,6 +179,7 @@ abstract class ClearedGetterCommon
         if ($extended) {
           $key = array_search($statement['textfinding'], array_column($findings, 'content'));
           $findings[$key]["comments"] = convertToUTF8($comments, false);
+          $findings[$key]["licenseId"] = $licenseId;
         }
       }
       //To keep the schedular alive for large files
@@ -188,7 +189,7 @@ abstract class ClearedGetterCommon
       }
     }
     arsort($statements);
-    if ($isUnifiedReport) {
+    if ($agentCall == "copyright" && $isUnifiedReport) {
       arsort($findings);
       if (!empty($objectAgent)) {
         $actualHeartbeat = (count($statements) + count($findings));
@@ -212,7 +213,7 @@ abstract class ClearedGetterCommon
    */
   abstract protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null);
 
-  public function getCleared($uploadId, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false, $objectAgent)
+  public function getCleared($uploadId, $objectAgent, $groupId=null, $extended=true, $agentcall=null, $isUnifiedReport=false)
   {
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $ungrupedStatements = $this->getStatements($uploadId, $uploadTreeTableName, $groupId);
@@ -231,7 +232,7 @@ abstract class ClearedGetterCommon
   {
     $escapeChars = array('\\f',"\\", "/", "\"");
     $withThisValue = array("","\\\\", "\\/", "\\\"");
-    $clearedString = str_replace($escapeChars, $withThisValue, $this->getCleared($uploadId, $groupId, false, null, false, null));
+    $clearedString = str_replace($escapeChars, $withThisValue, $this->getCleared($uploadId, null, $groupId, false, null, false));
     $json = json_encode($clearedString);
     return str_replace('\u001b','',$json);
   }

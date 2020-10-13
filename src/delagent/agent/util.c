@@ -299,7 +299,7 @@ int deleteUpload (long uploadId, int userId, int userPerm)
     return permission_upload;
   }
 
-  snprintf(tempTable,sizeof(tempTable),"DelUp_%ld_pfile",uploadId);
+  snprintf(tempTable,sizeof(tempTable),"delup_%ld_pfile",uploadId);
   snprintf(SQL,MAXSQL,"DROP TABLE IF EXISTS %s;",tempTable);
   PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
 
@@ -336,7 +336,7 @@ int deleteUpload (long uploadId, int userId, int userPerm)
 
   /* Now to delete the actual pfiles from the repository before remove the DB. */
   /* Get the file listing -- needed for deleting pfiles from the repository. */
-  snprintf(SQL,MAXSQL,"SELECT * FROM %s ORDER BY pfile_pk;",tempTable);
+  snprintf(SQL,MAXSQL,"SELECT pfile FROM %s ORDER BY pfile_pk;",tempTable);
   pfileResult = PQexec(pgConn, SQL);
   if (fo_checkPQresult(pgConn, pfileResult, SQL, __FILE__, __LINE__)) {
     return -1;
@@ -345,7 +345,7 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   if (Test <= 1) {
     maxRow = PQntuples(pfileResult);
     for(Row=0; Row<maxRow; Row++) {
-      S = PQgetvalue(pfileResult,Row,1); /* sha1.md5.len */
+      S = PQgetvalue(pfileResult,Row,0); /* sha1.md5.len */
       if (fo_RepExist("files",S)) {
         if (Test) {
           printf("TEST: Delete %s %s\n","files",S);
@@ -386,7 +386,6 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   snprintf(SQL,MAXSQL,"DELETE FROM tag_uploadtree USING uploadtree WHERE uploadtree_fk = uploadtree_pk AND upload_fk = %ld;",uploadId);
   PQexecCheckClear("Deleting tag_uploadtree", SQL, __FILE__, __LINE__);
 
-  /* Delete uploadtree_nnn table */
   char uploadtree_tablename[1000];
   snprintf(SQL,MAXSQL,"SELECT uploadtree_tablename FROM upload WHERE upload_pk = %ld;",uploadId);
   result = PQexec(pgConn, SQL);
@@ -396,24 +395,61 @@ int deleteUpload (long uploadId, int userId, int userPerm)
   if (PQntuples(result)) {
     strcpy(uploadtree_tablename, PQgetvalue(result, 0, 0));
     PQclear(result);
-    if (strcasecmp(uploadtree_tablename,"uploadtree_a")) {
-      snprintf(SQL,MAXSQL,"DROP TABLE %s;", uploadtree_tablename);
-      PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
-    }
   }
 
-  printfInCaseOfVerbosity("Deleting license decisions for upload %ld\n",uploadId);
-  /* delete from clearing_decision_event table. */
-  snprintf(SQL, MAXSQL, "DELETE FROM clearing_decision_event USING clearing_event WHERE clearing_decision_event.clearing_event_fk = clearing_event.clearing_event_pk AND clearing_event.uploadtree_fk IN (SELECT uploadtree_pk FROM uploadtree INNER JOIN %s ON uploadtree.pfile_fk = %s.pfile_pk WHERE upload_fk = %ld);", tempTable, tempTable, uploadId);
-  PQexecCheckClear("Deleting from clearing_decision_event", SQL, __FILE__, __LINE__);
-
+  printfInCaseOfVerbosity("Deleting local license decisions for upload %ld\n",
+    uploadId);
   /* delete from clearing_event table. */
-  snprintf(SQL, MAXSQL, "DELETE FROM clearing_event WHERE uploadtree_fk IN (SELECT uploadtree_pk FROM uploadtree INNER JOIN %s ON uploadtree.pfile_fk = %s.pfile_pk WHERE upload_fk = %ld);", tempTable, tempTable, uploadId);
+  snprintf(SQL, MAXSQL, "WITH alld AS ("
+      "SELECT *, ROW_NUMBER() OVER "
+        "(PARTITION BY clearing_event_pk ORDER BY scope DESC) rnum "
+      "FROM clearing_event ce "
+      "INNER JOIN clearing_decision_event cde "
+        "ON cde.clearing_event_fk = ce.clearing_event_pk "
+      "INNER JOIN clearing_decision cd "
+        "ON cd.clearing_decision_pk = cde.clearing_decision_fk "
+        "AND cd.uploadtree_fk IN "
+        "(SELECT uploadtree_pk FROM %s WHERE upload_fk = %ld)) "
+    "DELETE FROM clearing_event ce USING alld AS ad "
+    "WHERE ad.rnum = 1 AND ad.scope = 0 " // Make sure not to delete global decisions
+    "AND ce.clearing_event_pk = ad.clearing_event_pk;",
+    uploadtree_tablename, uploadId);
   PQexecCheckClear("Deleting from clearing_event", SQL, __FILE__, __LINE__);
 
+  /* delete from clearing_decision_event table. */
+  snprintf(SQL, MAXSQL, "DELETE FROM clearing_decision_event AS cde "
+    "USING clearing_decision AS cd "
+      "WHERE cd.scope = 0 " // Make sure not to delete global decisions
+      "AND cd.uploadtree_fk IN "
+      "(SELECT uploadtree_pk FROM %s WHERE upload_fk = %ld) "
+    "AND cd.clearing_decision_pk = cde.clearing_decision_fk;",
+    uploadtree_tablename, uploadId);
+  PQexecCheckClear("Deleting from clearing_decision_event", SQL, __FILE__, __LINE__);
+
+  /* delete from clearing_decision table. */
+  snprintf(SQL, MAXSQL, "DELETE FROM clearing_decision "
+    "WHERE scope = 0 AND uploadtree_fk IN "
+      "(SELECT uploadtree_pk FROM %s WHERE upload_fk = %ld);",
+    uploadtree_tablename, uploadId);
+  PQexecCheckClear("Deleting from clearing_decision", SQL, __FILE__, __LINE__);
+
+  /* delete from license_ref_bulk table. */
+  snprintf(SQL, MAXSQL, "DELETE FROM license_ref_bulk "
+    "WHERE uploadtree_fk IN "
+      "(SELECT uploadtree_pk FROM %s WHERE upload_fk = %ld);",
+    uploadtree_tablename, uploadId);
+  PQexecCheckClear("Deleting from license_ref_bulk", SQL, __FILE__, __LINE__);
+
   /* delete from uploadtree table. */
-  snprintf(SQL, MAXSQL, "DELETE FROM uploadtree WHERE upload_fk = %ld;", uploadId);
+  snprintf(SQL, MAXSQL, "DELETE FROM %s WHERE upload_fk = %ld;",
+      uploadtree_tablename, uploadId);
   PQexecCheckClear("Deleting from uploadtree", SQL, __FILE__, __LINE__);
+
+  /* Delete uploadtree_nnn table */
+  if (strcasecmp(uploadtree_tablename,"uploadtree_a")) {
+    snprintf(SQL,MAXSQL,"DROP TABLE %s;", uploadtree_tablename);
+    PQexecCheckClear(NULL, SQL, __FILE__, __LINE__);
+  }
 
   /* delete from pfile is SLOW due to constraint checking. Do it separately. */
   snprintf(SQL,MAXSQL,"DELETE FROM pfile USING %s WHERE pfile.pfile_pk = %s.pfile_pk;",tempTable,tempTable);

@@ -263,6 +263,14 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'$fossologyURL'", "'$urlPrompt'",
     strval(CONFIG_TYPE_TEXT), "'URL'", "1", "'$urlDesc'", "'$urlValid'", "null");
 
+  $variable = "ClearlyDefinedURL";
+  $urlPrompt = _("ClearlyDefined URL");
+  $cdURL = "https://api.clearlydefined.io/";
+  $urlDesc = _("URL of ClearlyDefined server, e.g. $cdURL");
+  $urlValid = "check_url";
+  $valueArray[$variable] = array("'$variable'", "'$cdURL'", "'$urlPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'URL'", "2", "'$urlDesc'", "'$urlValid'", "null");
+
   $variable = "NomostListNum";
   $nomosNumPrompt = _("Maximum licenses to List");
   $nomostListNum = "2200";

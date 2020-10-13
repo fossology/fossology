@@ -29,6 +29,7 @@ DIRS = \
 	reuser \
 	scheduler \
 	softwareHeritage \
+	spasht \
 	spdx2 \
 	reportImport \
 	ununpack \

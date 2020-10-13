@@ -1,0 +1,222 @@
+{# Copyright 2019
+   Author: Vivek Kumar<vvksindia@gmail.com>
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+
+function createTableBase{{ table.type }}(activated) {
+  var aoColumns = [
+      { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
+      { "sTitle": "{{ 'Copyright Content'| trans }}", "sClass": "left"},
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ];
+
+  if (activated)
+  {
+    var id = '#copyright_spasht_table';
+    var action = 'getData';
+  }
+  else
+  {
+    var id = '#copyright_spasht_table_deactivated';
+    var action = 'getDeactivatedData';
+  }
+
+  return $(id).dataTable({
+    "bServerSide": true,
+    "sAjaxSource": "?mod=ajax-spasht-copyright-hist&action=" + action,
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      aoData.push({ "name":"upload", "value": "{{ table.uploadId }}" });
+      aoData.push({ "name":"item", "value": "{{ table.uploadTreeId }}" });
+      aoData.push({ "name":"agent", "value": "{{ table.agentId }}" });
+      aoData.push({ "name":"type", "value": "{{ table.type }}" });
+      aoData.push({ "name":"filter", "value": "{{ table.filter }}" });
+      $.getJSON(sSource, aoData, fnCallback).fail(function() {
+        if (confirm("You are not logged in. Go to login page?"))
+          window.location.href = "?mod=auth";
+      });
+    },
+    "sPaginationType": "listbox",
+    "aoColumns": aoColumns,
+    "aaSorting": {{ table.sorting }},
+    "iDisplayLength": 50,
+    "bProcessing": true,
+    "bStateSave": true,
+    "bRetrieve": true
+  });
+}
+
+function createTable{{ table.type }}() {
+  var enabledTable = createTableBase{{ table.type }}(true).makeEditable({
+    "sReadOnlyCellClass": "read_only",
+    "sSelectedRowClass": "selectedRow",
+    "sUpdateURL": "?mod=ajax-spasht-copyright-hist&action=update&type={{ table.type }}",
+    "fnOnEditing": function(aInput) {
+      var value = aInput[0].value;
+      var isValid = (value) && !(/^\s*$/.test(value));
+      if (isValid) {
+        var id = aInput.parents("tr:first")[0].id;
+        var hash = id.split(",")[2];
+        $("#delete{{ table.type }}" + hash).hide();
+        var updateElement = $("#update{{ table.type }}" + hash);
+        updateElement.text("updating...");
+        updateElement.show();
+      }
+      return isValid;
+    },
+    "sSuccessResponse": "success"
+  });
+
+  createTableBase{{ table.type }}(false);
+
+  $('#selectDelete{{ table.type }}').change(function () {
+    $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#deleteSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      delete{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    });
+  });
+
+  $('#replaceSelected{{ table.type }}').click(function () {
+    var replaceText = $('#replaceText{{ table.type }}').val().trim();
+    var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
+    var ajaxList = new Array();
+    if(replaceIsValid){
+      $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+        currentValue = $(this).val();
+        var currUploadData = currentValue.split(',');
+        updateRows{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3], replaceText);
+        ajaxList.push(updateRows{{ table.type }}(currUploadData[0],
+          currUploadData[1], currUploadData[2], currUploadData[3], replaceText));
+      });
+      // Wait for all ajax calls to resolve
+      $.when.apply($, ajaxList).done(function(){
+        location.reload(true)
+      });
+    }
+  });
+
+  return enabledTable;
+}
+
+function createPlaneTableBase{{ table.type }}(activated) {
+  var aoColumns = [
+      { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
+      { "sTitle": "{{ table.description }}", "sClass": "left"},
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+    ];
+  if (activated)
+  {
+    var id = '#copyright{{ table.type }}';
+    var action = 'getData'
+    aoColumns = aoColumns.concat([
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
+  }
+  else
+  {
+    var id = '#copyright{{ table.type }}deactivated';
+    var action = 'getDeactivatedData'
+  }
+
+  return $(id).dataTable({
+    "bServerSide": true,
+    "sAjaxSource": "?mod=ajax-spasht-copyright-hist&action=" + action,
+    "fnServerData": function (sSource, aoData, fnCallback) {
+      aoData.push({ "name":"upload", "value": "{{ table.uploadId }}" });
+      aoData.push({ "name":"item", "value": "{{ table.uploadTreeId }}" });
+      aoData.push({ "name":"type", "value": "{{ table.type }}" });
+      aoData.push({ "name":"filter", "value": "{{ table.filter }}" });
+      $.getJSON(sSource, aoData, fnCallback).fail(function() {
+        if (confirm("You are not logged in. Go to login page?"))
+          window.location.href = "?mod=auth";
+      });
+    },
+    "sPaginationType": "listbox",
+    "aoColumns": aoColumns,
+    "aaSorting": {{ table.sorting }},
+    "iDisplayLength": 50,
+    "bProcessing": true,
+    "bStateSave": true,
+    "bRetrieve": true
+  });
+}
+
+function createPlainTable{{ table.type }}() {
+  var enabledTable = createPlaneTableBase{{ table.type }}(true);
+  createPlaneTableBase{{ table.type }}(false);
+
+  $('#selectDelete{{ table.type }}').change(function () {
+    $('.deleteBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#deleteSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      deleteHashDecision(currUploadData[0], currUploadData[1], currUploadData[2]);
+    });
+  });
+
+  $('#replaceText{{ table.type }}').parent().remove();
+  $('#replaceSelected{{ table.type }}').remove();
+
+  return enabledTable;
+}
+
+function updateRows{{ table.type }}(upload, item, hash, kind, replaceText) {
+  return $.ajax({
+    type: 'POST',
+    dataType: 'text',
+    url: '?mod=ajax-spasht-copyright-hist&action=update&type={{ table.type }}',
+    data: { id : upload + ',' + item + ',' + hash + ',' + kind, value : replaceText },
+      success: function(data) {
+        var updateElement = $("#update{{ table.type }}" + hash);
+        $("#delete{{ table.type }}" + hash).hide();
+        updateElement.html("updating...");
+      },
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
+      }
+  });
+}
+
+function delete{{ table.type }}(upload, item, hash, kind) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'text',
+    url: '?mod=ajax-spasht-copyright-hist&action=delete&type={{ table.type }}',
+    data: { id : upload + ',' + item + ',' + hash + ',' + kind },
+      success: function(data) {
+        $("#delete{{ table.type }}" + hash).hide();
+        $("#update{{ table.type }}" + hash).show();
+      },
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
+      }
+  });
+}
+
+function undo{{ table.type }}(upload, item, hash, kind) {
+  $.ajax({
+    type: 'POST',
+    dataType: 'text',
+    url: '?mod=ajax-spasht-copyright-hist&action=undo',
+    data: { id : upload + ',' + item + ',' + hash + ',' + kind },
+      success: function(data) {
+        $("#delete{{ table.type }}" + hash).show();
+        $("#update{{ table.type }}" + hash).hide();
+        $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);
+      },
+      error: function(errorResponse) {
+        alert(errorResponse.responseText);
+      }
+  });
+}

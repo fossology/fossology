@@ -122,6 +122,8 @@ src/scheduler/agent_tests/agents/fossology.conf
 src/scheduler/agent_tests/agents/fossology.log
 src/scheduler/agent_tests/agents/mods-enabled/
 src/scheduler/agent_tests/agents/variables.list
+src/spasht/agent/spasht
+src/spasht/agent/version.php
 src/ununpack/agent/departition
 src/ununpack/agent/ununpack
 src/wget_agent/agent/wget_agent

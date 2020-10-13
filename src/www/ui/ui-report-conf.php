@@ -217,8 +217,8 @@ class ui_report_conf extends FO_Plugin
         $allClearedLicenses[] = $licenseMap->getProjectedId($getLicenseId);
       }
     }
-    $obligationsForLicenses = $this->licenseDao->getLicenseObligations($allClearedLicenses, 'obligation_map') ?: array();
-    $obligationsForLicenseCandidates = $this->licenseDao->getLicenseObligations($allClearedLicenses, 'obligation_candidate_map') ?: array();
+    $obligationsForLicenses = $this->licenseDao->getLicenseObligations($allClearedLicenses) ?: array();
+    $obligationsForLicenseCandidates = $this->licenseDao->getLicenseObligations($allClearedLicenses, true) ?: array();
     $allObligations = array_merge($obligationsForLicenses, $obligationsForLicenseCandidates);
     $groupedObligations = array();
     foreach ($allObligations as $obligations) {

@@ -44,7 +44,7 @@ class exportLicenseRef
     $newLicenseRefData = array();
     $usage = "Usage: " . basename($argv[0]) . " [options]
 
-      Create new licenseref.json file.  Options are: 
+      Create new licenseref.json file.  Options are:
         -E    Update all existing licenses and also add new licenses.
               (NOTE: there may be failure of test cases)
 
@@ -52,7 +52,7 @@ class exportLicenseRef
               (NOTE: there may be failure of test cases)
 
         -n    Only add new licenses.
- 
+
        --type Usually licenses/exceptions (optional)
               (ex: --type 'licenses')
 
@@ -179,9 +179,6 @@ class exportLicenseRef
       /* dump all the data from licenseRef.json file to a array */
       $existingLicenseRefData = (array) json_decode($getExistingLicenseRefData, true);
     }
-    /* get max rf_pk from existing licenseref.json file */
-    $maxkey = array_search(max($existingLicenseRefData), $existingLicenseRefData);
-    $newRfPk = $existingLicenseRefData[$maxkey]['rf_pk'] + 1;
     /* get license list and each license's URL */
     $getList = json_decode(file_get_contents($URL));
     foreach ($getList->$type as $listValue) {
@@ -191,8 +188,8 @@ class exportLicenseRef
       echo "INFO: search for license ".$getCurrentData[$this->mapArrayData[$type][0]]."\n";
       /* check if the licenseid of the current license exists in old license data */
       $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]], array_column($existingLicenseRefData, 'rf_shortname'));
-      $currentMD5 = md5($getCurrentData[$this->mapArrayData[$type][1]]);
-      $MD5Check = array_search($currentMD5, array_column($existingLicenseRefData, 'rf_md5'));
+      $currentText = $getCurrentData[$this->mapArrayData[$type][1]];
+      $textCheck = array_search($currentText, array_column($existingLicenseRefData, 'rf_text'));
       if (!is_numeric($licenseIdCheck)) {
         /* if licenseid does'nt exists then remove the suffix if any and search again */
         $getCurrentData[$this->mapArrayData[$type][0]] = $this->getLicenseNameWithOutSuffix($getCurrentData[$this->mapArrayData[$type][0]]);
@@ -200,7 +197,7 @@ class exportLicenseRef
         $licenseIdCheck = array_search($getCurrentData[$this->mapArrayData[$type][0]], array_column($existingLicenseRefData, 'rf_shortname'));
       }
       if (is_numeric($licenseIdCheck) &&
-          !is_numeric($MD5Check) &&
+          !is_numeric($textCheck) &&
           (
             !empty($updateWithNew) ||
             !empty($updateExisting)
@@ -209,19 +206,17 @@ class exportLicenseRef
         $existingLicenseRefData[$licenseIdCheck]['rf_fullname'] = $getCurrentData[$this->mapArrayData[$type][2]];
         $existingLicenseRefData[$licenseIdCheck]['rf_text'] = $getCurrentData[$this->mapArrayData[$type][1]];
         $existingLicenseRefData[$licenseIdCheck]['rf_url'] = $getCurrentData['seeAlso'][0];
-        $existingLicenseRefData[$licenseIdCheck]['rf_md5'] = $currentMD5;
         $existingLicenseRefData[$licenseIdCheck]['rf_notes'] = (array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : $existingLicenseRefData[$licenseIdCheck]['rf_notes']);
         echo "INFO: license ".$getCurrentData[$this->mapArrayData[$type][0]]." updated\n\n";
       }
       if (!is_numeric($licenseIdCheck) &&
-          !is_numeric($MD5Check) &&
+          !is_numeric($textCheck) &&
           (
             !empty($updateWithNew) ||
             !empty($addNewLicense)
           )
          ) {
         $existingLicenseRefData[] = array(
-          'rf_pk' => "$newRfPk",
           'rf_shortname' => $getCurrentData[$this->mapArrayData[$type][0]],
           'rf_text' =>  $getCurrentData[$this->mapArrayData[$type][1]],
           'rf_url' =>  $getCurrentData['seeAlso'][0],
@@ -237,7 +232,6 @@ class exportLicenseRef
           'marydone' => "f",
           'rf_active' => "t",
           'rf_text_updatable' => "f",
-          'rf_md5' => $currentMD5,
           'rf_detector_type' => 1,
           'rf_source' => null,
           'rf_risk' => null,
@@ -245,7 +239,6 @@ class exportLicenseRef
           'rf_flag' => "1"
         );
         echo "INFO: new license ".$getCurrentData[$this->mapArrayData[$type][0]]." added\n\n";
-        $newRfPk++;
       }
     }
     return $existingLicenseRefData;

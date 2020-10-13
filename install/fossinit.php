@@ -222,6 +222,8 @@ else
   print "Database schema update completed successfully.\n";
 }
 
+$FAILED_LICENSE_IMPORT = array();
+
 /* initialize the license_ref table */
 if ($UpdateLiceneseRef)
 {
@@ -383,7 +385,7 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == "3.1
 }
 
 $dbManager->begin();
-$dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),$sqlLog='drop.sysconfig.release');
+$dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),'drop.sysconfig.release');
 $dbManager->insertTableRow('sysconfig',
         array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
 $dbManager->commit();
@@ -406,6 +408,38 @@ $errors = $checker->check();
 if($errors>0)
 {
   echo "ERROR: $errors sanity check".($errors>1?'s':'')." failed\n";
+}
+if (! empty($FAILED_LICENSE_IMPORT)) {
+  $failedInsert = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "INSERT";
+    });
+  $failedUpdate = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "UPDATE";
+    });
+  $failedPromote = array_filter($FAILED_LICENSE_IMPORT,
+    function ($x){
+      return $x[1] == "CANPROMOTE";
+    });
+  if (! empty($failedInsert)) {
+    echo "*** Failed to insert following licenses ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }, $failedInsert)) . "\n";
+  }
+  if (! empty($failedUpdate)) {
+    echo "*** Failed to update following licenses ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }, $failedUpdate)) . "\n";
+  }
+  if (! empty($failedPromote)) {
+    echo "*** Failed to move following licenses from candidate table ***\n";
+    echo implode(",", array_map(function ($x) {
+      return $x[0];
+    }, $failedPromote)) . "\n";
+  }
 }
 exit($errors);
 
@@ -431,8 +465,10 @@ function insertInToLicenseRefTableUsingJson($tableName)
   }
   $dbManager->begin();
   if ($tableName === 'license_ref_2') {
-    $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2", $statment = __METHOD__.'.dropAncientBackUp');
-    $dbManager->queryOnce("CREATE TABLE license_ref_2 AS SELECT * FROM license_ref WHERE 1=2", $statment = __METHOD__.'.backUpData');
+    $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2",
+      __METHOD__.'.dropAncientBackUp');
+    $dbManager->queryOnce("CREATE TABLE license_ref_2 (LIKE license_ref INCLUDING DEFAULTS)",
+      __METHOD__.'.backUpData');
   }
   /** import licenseRef.json */
   $keysToBeChanged = array(
@@ -445,15 +481,20 @@ function insertInToLicenseRefTableUsingJson($tableName)
 
   $jsonData = json_decode(file_get_contents("$LIBEXECDIR/licenseRef.json"), true);
   $statementName = __METHOD__.'.insertInTo'.$tableName;
-  foreach($jsonData as $licenseArrayKey => $licenseArray) {
-    $keys = strtr(implode(",", array_keys($licenseArray)), $keysToBeChanged);
-    $valuePlaceHolders = "$" . join(",$",range(1, count(array_keys($licenseArray))));
-    $SQL = "INSERT INTO $tableName ( $keys ) VALUES ($valuePlaceHolders);";
+  foreach($jsonData as $licenseArray) {
+    $arrayKeys = array_keys($licenseArray);
+    $arrayValues = array_values($licenseArray);
+    $keys = strtr(implode(",", $arrayKeys), $keysToBeChanged);
+    $valuePlaceHolders = "$" . join(",$",range(1, count($arrayKeys)));
+    $md5PlaceHolder = "$". (count($arrayKeys) + 1);
+    $arrayValues[] = $licenseArray['rf_text'];
+    $SQL = "INSERT INTO $tableName ( $keys,rf_md5 ) " .
+      "VALUES ($valuePlaceHolders,md5($md5PlaceHolder));";
     $dbManager->prepare($statementName, $SQL);
-    $dbManager->execute($statementName, array_values($licenseArray));
+    $dbManager->execute($statementName, $arrayValues);
   }
   $dbManager->commit();
-  return;
+  return (0);
 }
 
 /**
@@ -468,24 +509,25 @@ function initLicenseRefTable($Verbose)
 {
   global $dbManager;
 
-  $dbManager->queryOnce("BEGIN");
+  $dbManager->begin();
   insertInToLicenseRefTableUsingJson('license_ref_2');
-  $dbManager->prepare(__METHOD__.".newLic", "select * from license_ref_2");
+  $dbManager->prepare(__METHOD__.".newLic", "SELECT * FROM license_ref_2");
   $result_new = $dbManager->execute(__METHOD__.".newLic");
 
-  $dbManager->prepare(__METHOD__.'.licenseRefByShortname','SELECT * from license_ref where rf_shortname=$1');
+  $dbManager->prepare(__METHOD__.'.licenseRefByShortname',
+    'SELECT *,md5(rf_text) AS hash FROM license_ref WHERE rf_shortname=$1');
   /** traverse all records in user's license_ref table, update or insert */
   while ($row = pg_fetch_assoc($result_new))
   {
     $rf_shortname = $row['rf_shortname'];
-    $escaped_name = pg_escape_string($rf_shortname);
-    $result_check = $dbManager->execute(__METHOD__.'.licenseRefByShortname',array($rf_shortname));
+    $result_check = $dbManager->execute(__METHOD__.'.licenseRefByShortname', array($rf_shortname));
     $count = pg_num_rows($result_check);
 
-    $rf_text = pg_escape_string($row['rf_text']);
-    $rf_url = pg_escape_string($row['rf_url']);
-    $rf_fullname = pg_escape_string($row['rf_fullname']);
-    $rf_notes = pg_escape_string($row['rf_notes']);
+    $rf_text = $row['rf_text'];
+    $rf_md5 = $row['rf_md5'];
+    $rf_url = $row['rf_url'];
+    $rf_fullname = $row['rf_fullname'];
+    $rf_notes = $row['rf_notes'];
     $rf_active = $row['rf_active'];
     $marydone = $row['marydone'];
     $rf_text_updatable = $row['rf_text_updatable'];
@@ -496,47 +538,256 @@ function initLicenseRefTable($Verbose)
     {
       $row_check = pg_fetch_assoc($result_check);
       pg_free_result($result_check);
-      $rf_text_check = pg_escape_string($row_check['rf_text']);
-      $rf_url_check = pg_escape_string($row_check['rf_url']);
-      $rf_fullname_check = pg_escape_string($row_check['rf_fullname']);
-      $rf_notes_check = pg_escape_string($row_check['rf_notes']);
+      $params = array();
+      $rf_text_check = $row_check['rf_text'];
+      $rf_md5_check = $row_check['rf_md5'];
+      $hash_check = $row_check['hash'];
+      $rf_url_check = $row_check['rf_url'];
+      $rf_fullname_check = $row_check['rf_fullname'];
+      $rf_notes_check = $row_check['rf_notes'];
       $rf_active_check = $row_check['rf_active'];
       $marydone_check = $row_check['marydone'];
       $rf_text_updatable_check = $row_check['rf_text_updatable'];
       $rf_detector_type_check = $row_check['rf_detector_type'];
       $rf_flag_check = $row_check['rf_flag'];
 
-      $sql = "UPDATE license_ref set ";
-      if ($rf_flag_check == 2 &&  $rf_flag == 1) {
-        $sql .= " rf_text='$rf_text_check',";
-      } else {
-        if ($rf_text_check != $rf_text && !empty($rf_text) && !(stristr($rf_text, 'License by Nomos')))  $sql .= " rf_text='$rf_text', rf_flag='1',";
+      $candidateLicense = isLicenseExists($dbManager, $rf_shortname, true);
+      if ($candidateLicense) {
+        mergeCandidateLicense($dbManager, $candidateLicense);
       }
-      if ($rf_url_check != $rf_url && !empty($rf_url))  $sql .= " rf_url='$rf_url',";
-      if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname))  $sql .= " rf_fullname ='$rf_fullname',";
-      if ($rf_notes_check != $rf_notes && !empty($rf_notes))  $sql .= " rf_notes ='$rf_notes',";
-      if ($rf_active_check != $rf_active && !empty($rf_active))  $sql .= " rf_active ='$rf_active',";
-      if ($marydone_check != $marydone && !empty($marydone))  $sql .= " marydone ='$marydone',";
-      if ($rf_text_updatable_check != $rf_text_updatable && !empty($rf_text_updatable))  $sql .= " rf_text_updatable ='$rf_text_updatable',";
-      if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type))  $sql .= " rf_detector_type = '$rf_detector_type',";
-      $sql = substr_replace($sql ,"",-1);
+
+      $statement = __METHOD__ . ".updateLicenseRef";
+      $sql = "UPDATE license_ref set ";
+      if (($rf_flag_check == 2 && $rf_flag == 1) ||
+        ($hash_check != $rf_md5_check)) {
+        $params[] = $rf_text_check;
+        $position = "$" . count($params);
+        $sql .= "rf_text=$position,rf_md5=md5($position),";
+        $statement .= ".text";
+      } else {
+        if ($rf_text_check != $rf_text && !empty($rf_text) &&
+          !(stristr($rf_text, 'License by Nomos'))) {
+          $params[] = $rf_text;
+          $position = "$" . count($params);
+          $sql .= "rf_text=$position,rf_md5=md5($position),rf_flag=1,";
+          $statement .= ".insertT";
+        }
+      }
+      if ($rf_url_check != $rf_url && !empty($rf_url)) {
+        $params[] = $rf_url;
+        $position = "$" . count($params);
+        $sql .= "rf_url=$position,";
+        $statement .= ".url";
+      }
+      if ($rf_fullname_check != $rf_fullname && !empty($rf_fullname)) {
+        $params[] = $rf_fullname;
+        $position = "$" . count($params);
+        $sql .= "rf_fullname=$position,";
+        $statement .= ".name";
+      }
+      if ($rf_notes_check != $rf_notes && !empty($rf_notes)) {
+        $params[] = $rf_notes;
+        $position = "$" . count($params);
+        $sql .= "rf_notes=$position,";
+        $statement .= ".notes";
+      }
+      if ($rf_active_check != $rf_active && !empty($rf_active)) {
+        $params[] = $rf_active;
+        $position = "$" . count($params);
+        $sql .= "rf_active=$position,";
+        $statement .= ".active";
+      }
+      if ($marydone_check != $marydone && !empty($marydone)) {
+        $params[] = $marydone;
+        $position = "$" . count($params);
+        $sql .= "marydone=$position,";
+        $statement .= ".marydone";
+      }
+      if ($rf_text_updatable_check != $rf_text_updatable && !empty($rf_text_updatable)) {
+        $params[] = $rf_text_updatable;
+        $position = "$" . count($params);
+        $sql .= "rf_text_updatable=$position,";
+        $statement .= ".tUpdate";
+      }
+      if ($rf_detector_type_check != $rf_detector_type && !empty($rf_detector_type)) {
+        $params[] = $rf_detector_type;
+        $position = "$" . count($params);
+        $sql .= "rf_detector_type=$position,";
+        $statement .= ".dType";
+      }
+      $sql = substr_replace($sql, "", -1);
 
       if ($sql != "UPDATE license_ref set") { // check if have something to update
-        $sql .= " where rf_shortname = '$escaped_name'";
-        $dbManager->queryOnce($sql);
+        $params[] = $rf_shortname;
+        $position = "$" . count($params);
+        $sql .= " WHERE rf_shortname=$position;";
+        try {
+          $dbManager->getSingleRow($sql, $params, $statement);
+        } catch (\Exception $e) {
+          global $FAILED_LICENSE_IMPORT;
+          $FAILED_LICENSE_IMPORT[] = array($rf_shortname, "UPDATE");
+        }
       }
     } else {  // insert when it is new
       pg_free_result($result_check);
-      $sql = "INSERT INTO license_ref (rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, rf_text_updatable, rf_detector_type, marydone)"
-              . "VALUES ('$escaped_name', '$rf_text', '$rf_url', '$rf_fullname', '$rf_notes', '$rf_active', '$rf_text_updatable', '$rf_detector_type', '$marydone');";
-      $dbManager->queryOnce($sql);
+      $params = array();
+      $params['rf_shortname'] = $rf_shortname;
+      $params['rf_text'] = $rf_text;
+      $params['rf_url'] = $rf_url;
+      $params['rf_fullname'] = $rf_fullname;
+      $params['rf_notes'] = $rf_notes;
+      $params['rf_active'] = $rf_active;
+      $params['rf_text_updatable'] = $rf_text_updatable;
+      $params['rf_detector_type'] = $rf_detector_type;
+      $params['marydone'] = $marydone;
+      insertNewLicense($dbManager, $params);
     }
   }
   pg_free_result($result_new);
 
-  $dbManager->queryOnce("DROP TABLE license_ref_2");
-  $dbManager->queryOnce("COMMIT");
+  $dbManager->queryOnce("DROP TABLE IF EXISTS license_ref_2");
+  $dbManager->commit();
 
   return (0);
 } // initLicenseRefTable()
 
+/**
+ * Check if the given shortname exists in DB.
+ *
+ * @param DbManager $dbManager DbManager used
+ * @param string $rf_shortname Shortname of the license to check
+ * @param boolean $isCandidate check given shortname in candidate table
+ * @returns False if the license does not exists else DB row
+ */
+function isLicenseExists($dbManager, $rf_shortname, $isCandidate = true)
+{
+  $tableName = "license_ref";
+  if ($isCandidate) {
+    $tableName = "license_candidate";
+  }
+  $statement = __METHOD__ . ".$tableName";
+  $sql = "SELECT * FROM ONLY $tableName WHERE rf_shortname = $1;";
+  $licenseRow = $dbManager->getSingleRow($sql, array($rf_shortname),
+    $statement);
+  if (! empty($licenseRow)) {
+    return $licenseRow;
+  } else {
+    return false;
+  }
+}
+
+/**
+ * Merge the candidate license to the main license_ref table.
+ *
+ * @param DbManager $dbManager    DbManager used
+ * @param array $candidateLicense Shortname of the license to check
+ * @return integer License ID
+ */
+function mergeCandidateLicense($dbManager, $candidateLicense)
+{
+  $mainLicense = isLicenseExists($dbManager, $candidateLicense['rf_shortname'],
+    false);
+  $statement = __METHOD__ . ".md5Exists";
+  $sql = "SELECT rf_pk FROM ONLY license_ref WHERE md5(rf_text) = md5($1);";
+  $licenseRow = $dbManager->getSingleRow($sql,
+    array($candidateLicense['rf_text']), $statement);
+  if (! empty($licenseRow)) {
+    $md5Exists = true;
+  } else {
+    $md5Exists = false;
+  }
+  if ($mainLicense !== false && $md5Exists) {
+    $dbManager->begin();
+    $updateStatements = __METHOD__ . ".updateCandidateToMain";
+    $updateCeSql = "UPDATE clearing_event SET rf_fk = $1 WHERE rf_fk = $2;";
+    $updateCeSt = $updateStatements . ".ce";
+    $updateLsbSql = "UPDATE license_set_bulk SET rf_fk = $1 WHERE rf_fk = $2;";
+    $updateLsbSt = $updateStatements . ".lsb";
+    $updateUclSql = "UPDATE upload_clearing_license SET rf_fk = $1 " .
+      "WHERE rf_fk = $2;";
+    $updateUclSt = $updateStatements . ".ucl";
+    $deleteOcmSql = "DELETE FROM obligation_candidate_map WHERE rf_fk = $1;";
+    $deleteOcmSt = $updateStatements . ".ocm";
+
+    $dbManager->getSingleRow($updateCeSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateCeSt);
+    $dbManager->getSingleRow($updateLsbSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateLsbSt);
+    $dbManager->getSingleRow($updateUclSql,
+      array($mainLicense['rf_pk'], $candidateLicense['rf_pk']), $updateUclSt);
+    $dbManager->getSingleRow($deleteOcmSql, array($candidateLicense['rf_pk']),
+      $deleteOcmSt);
+    $dbManager->commit();
+  } elseif ($mainLicense !== false || $md5Exists) {
+    // Short name exists and MD5 does not match
+    // Or short name does not exists by MD5 match
+    return -1;
+  }
+  $dbManager->begin();
+  $deleteSql = "DELETE FROM license_candidate WHERE rf_pk = $1;";
+  $deleteStatement = __METHOD__ . ".deleteCandidte";
+  $dbManager->prepare($deleteStatement, $deleteSql);
+  $dbManager->execute($deleteStatement, array($candidateLicense['rf_pk']));
+  if ($mainLicense === false && $md5Exists === false) {
+    // License does not exists
+    insertNewLicense($dbManager, $candidateLicense, true);
+  }
+  $dbManager->commit();
+}
+
+/**
+ * Insert new license to license_ref
+ *
+ * @param DbManager $dbManager  DbManager to be used
+ * @param array $license        License row to be added
+ * @param boolean $wasCandidate Was the new license already a candidate?
+ *        (required for rf_pk)
+ * @return integer New license ID
+ */
+function insertNewLicense($dbManager, $license, $wasCandidate = false)
+{
+  $insertStatement = __METHOD__ . ".insertNewLicense";
+  $sql = "INSERT INTO license_ref (";
+  if ($wasCandidate) {
+    $sql .= "rf_pk, ";
+    $insertStatement .= ".wasCandidate";
+  }
+  $sql .= "rf_shortname, rf_text, rf_url, rf_fullname, rf_notes, rf_active, " .
+    "rf_text_updatable, rf_detector_type, marydone, rf_md5, rf_add_date" .
+    ") VALUES (";
+  $params = array();
+  if ($wasCandidate) {
+    $params[] = $license['rf_pk'];
+  }
+  $params[] = $license['rf_shortname'];
+  $params[] = $license['rf_text'];
+  $params[] = $license['rf_url'];
+  $params[] = $license['rf_fullname'];
+  $params[] = $license['rf_notes'];
+  $params[] = $license['rf_active'];
+  $params[] = $license['rf_text_updatable'];
+  $params[] = $license['rf_detector_type'];
+  $params[] = $license['marydone'];
+
+  for ($i = 1; $i <= count($params); $i++) {
+    $sql .= "$" . $i . ",";
+  }
+
+  $params[] = $license['rf_text'];
+  $textPos = "$" . count($params);
+
+  $sql .= "md5($textPos),now())";
+  $rfPk = -1;
+  try {
+    $rfPk = $dbManager->insertPreparedAndReturn($insertStatement, $sql, $params,
+      "rf_pk");
+  } catch (\Exception $e) {
+    global $FAILED_LICENSE_IMPORT;
+    $type = "INSERT";
+    if ($wasCandidate) {
+      $type = "CANPROMOTE";
+    }
+    $FAILED_LICENSE_IMPORT[] = array($license['rf_shortname'], $type);
+  }
+  return $rfPk;
+}

@@ -117,7 +117,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq','upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq','license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq','clearing_event_clearing_event_pk_seq','clearing_decision_clearing_decision_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey','upload_pkey_idx','FileLicense_pkey','clearing_event_pkey','clearing_decision_pkey'),false);
-    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_set_bulk','clearing_event','license_file','highlight','clearing_decision'),false);
+    $this->testDb->alterTables(array('agent','pfile','upload','ars_master','license_ref_bulk','license_ref','license_set_bulk','clearing_event','license_file','highlight','clearing_decision'),false);
     $this->testDb->createInheritedTables();
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users'), false);
     $this->testDb->insertData_license_ref(200);
@@ -167,7 +167,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(7));
 
-    $expectedHighlight = new Highlight(18, 35825, Highlight::MATCH, 20, 35819);
+    $expectedHighlight = new Highlight(18, 35825, Highlight::MATCH, 20, 35146);
     $expectedHighlight->setLicenseId($matchedLicense->getId());
 
     $this->assertEquals(array($expectedHighlight), $highlights);
@@ -175,9 +175,9 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(11));
 
     $expectedHighlights = array();
-    $expectedHighlights[] = new Highlight(18, 339, Highlight::MATCH, 20, 350);
-    $expectedHighlights[] = new Highlight(340, 347, Highlight::CHANGED, 351, 357);
-    $expectedHighlights[] = new Highlight(348, 35149, Highlight::MATCH, 358, 35819);
+    $expectedHighlights[] = new Highlight(18, 339, Highlight::MATCH, 20, 341);
+    $expectedHighlights[] = new Highlight(340, 347, Highlight::CHANGED, 342, 348);
+    $expectedHighlights[] = new Highlight(348, 35149, Highlight::MATCH, 349, 35146);
     foreach($expectedHighlights as $expectedHighlight) {
       $expectedHighlight->setLicenseId($matchedLicense->getId());
     }
