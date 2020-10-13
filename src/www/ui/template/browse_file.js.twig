@@ -96,7 +96,11 @@ $(document).ready(function () {
         currentArray.push(getCurrentVal);
       }
     });
-    markDecisions(currentArray);
+    if (currentArray.length === 0) {
+      alert('Please select checkboxes in actions column!');
+    } else {
+      openUserModal(currentArray);
+    }
   });
 });
 

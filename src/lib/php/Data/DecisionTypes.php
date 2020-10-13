@@ -22,6 +22,7 @@ class DecisionTypes extends Types
 {
   const TO_BE_DISCUSSED = 3;
   const DO_NOT_USE = 6;
+  const NON_FUNCTIONAL = 7;
   const IRRELEVANT = 4;
   const IDENTIFIED = 5;
   const WIP = 0;
@@ -33,6 +34,7 @@ class DecisionTypes extends Types
     $this->map = array(
         self::TO_BE_DISCUSSED => "To be discussed",
         self::DO_NOT_USE => "Do not use",
+        self::NON_FUNCTIONAL => "Non functional",
         self::IRRELEVANT => "Irrelevant",
         self::IDENTIFIED => "Identified"
     );
