@@ -97,17 +97,13 @@ function performPostRequest(doRemove) {
   });
 }
 
-function markDecisions(uploadTreeIdForMultiple) {
-  if(Array.isArray(uploadTreeIdForMultiple)){
-    var data = {
-      "uploadTreeId": uploadTreeIdForMultiple,
-      "decisionMark": 'irrelevant'
-    };
-  }else{
-    var data = {
-      "uploadTreeId": $('#uploadTreeId').val(),
-      "decisionMark": uploadTreeIdForMultiple
-    };
+function performPostRequestTree(permVal) {
+  var decisionToBeApplied = "";
+  var checkedRadio = $("input[type='radio']:checked");
+
+  if ($('#licenseRight option').length > 0) {
+    performPostRequest(permVal);
+    return false;
   }
   resultEntity = $('#bulkIdResult');
   $.ajax({
@@ -118,12 +114,22 @@ function markDecisions(uploadTreeIdForMultiple) {
     error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
   });
 
+  if (checkedRadio.length > 0) {
+    return markDecisions(checkedRadio.val(), permVal);
+  }
 }
 
-function deleteMarkedDecisions(decisionToBeRemoved) {
+function markDecisions(decisionToBeApplied, permVal) {
+  if (permVal == true) {
+    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
+    if (pleaseConfirm == false) {
+      return false;
+    }
+  }
   var data = {
     "uploadTreeId": $('#uploadTreeId').val(),
-    "decisionMark": decisionToBeRemoved
+    "decisionMark": decisionToBeApplied,
+    "isRemoval": permVal
   };
   resultEntity = $('#bulkIdResult');
     var txt;

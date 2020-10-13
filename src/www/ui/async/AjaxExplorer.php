@@ -418,10 +418,14 @@ class AjaxExplorer extends DefaultPlugin
     $isDecisionTBD = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::TO_BE_DISCUSSED);
     $img = $isDecisionTBD ? 'yellow' : $img;
 
-    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
+    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use" or "Non functional"
     $isDecisionDNU = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::DO_NOT_USE);
     $img = $isDecisionDNU ? 'redGreen' : $img;
-    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
+
+    $isDecisionNonFunctional = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::NON_FUNCTIONAL);
+    $img = ($isDecisionDNU || $isDecisionNonFunctional) ? 'redGreen' : $img;
+
+    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
   }
 
   /**

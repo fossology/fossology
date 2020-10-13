@@ -1,4 +1,4 @@
-{# Copyright 2014-2017,2019 Siemens AG
+{# Copyright 2014-2017,2019,2021, Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -82,6 +82,11 @@
                     onclick="markDecisions(this.value);">
                   {{ 'Mark decisions as do not use'|trans }}
                 </button>
+                <button type="button" class="btn btn-default text-right"
+                    autofocus value="nonFunctional"
+                    onclick="markDecisions(this.value);">
+                  {{ 'Mark decisions as Non-Functional'|trans }}
+                </button>
               </div>
             </div>
             <div class="col-md-6 text-left">
@@ -95,6 +100,11 @@
                     autofocus value="deleteDoNotUse"
                     onclick="deleteMarkedDecisions(this.value);">
                   {{ 'Remove marked do not use decisions'|trans }}
+                </button>
+                <button type="button" class="btn btn-default text-left"
+                    autofocus value="nonFunctional"
+                    onclick="deleteMarkedDecisions(this.value);">
+                  {{ 'Remove marked Non-Functional decisions'|trans }}
                 </button>
               </div>
             </div>

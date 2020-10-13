@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2018,2020,2022, Siemens AG
+Copyright (C) 2014-2018,2020-2022, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -628,7 +628,8 @@ INSERT INTO clearing_decision (
     $columns = "decision_type";
     if (!in_array($decisionType,
          [DecisionTypes::WIP, DecisionTypes::TO_BE_DISCUSSED,
-          DecisionTypes::DO_NOT_USE, DecisionTypes::IRRELEVANT])
+          DecisionTypes::DO_NOT_USE, DecisionTypes::IRRELEVANT,
+          DecisionTypes::NON_FUNCTIONAL])
        ) {
       $columns = "decision_type, scope";
     }
@@ -775,17 +776,28 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * @param int $decisionType
+   * @return actual DecisionTypes
+   */
+  public function getDecisionType($decisionType)
+  {
+    if ($decisionType == "doNotUse" || $decisionType == "deleteDoNotUse") {
+      return DecisionTypes::DO_NOT_USE;
+    } else if ($decisionType == "irrelevant" || $decisionType == "deleteIrrelevant") {
+      return DecisionTypes::IRRELEVANT;
+    } else {
+      return DecisionTypes::NON_FUNCTIONAL;
+    }
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
    */
-  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
+  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $isRemoval, $decisionMark)
   {
-    if ($decisionMark == "doNotUse") {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    $decisionMark = $this->getDecisionType($decisionMark);
     $this->markDirectoryAsDecisionTypeRec($itemTreeBounds, $groupId, $userId, false, $decisionMark);
   }
 
@@ -796,11 +808,7 @@ INSERT INTO clearing_decision (
    */
   public function deleteDecisionTypeFromDirectory(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
   {
-    if ($decisionMark == "deleteDoNotUse") {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    $decisionMark = $this->getDecisionType($decisionMark);
     $this->markDirectoryAsDecisionTypeRec($itemTreeBounds, $groupId, $userId, true, $decisionMark);
   }
 
@@ -920,11 +928,7 @@ INSERT INTO clearing_decision (
    */
   function getFilesForDecisionTypeFolderLevel(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $decisionMark="")
   {
-    if (!empty($decisionMark)) {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    $decisionMark = $this->getDecisionType($decisionMark);
     $statementName = __METHOD__;
     $params = array();
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params);
