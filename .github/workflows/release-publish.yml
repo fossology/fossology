@@ -1,0 +1,80 @@
+name: Publish Release Packages
+
+on:
+  release:
+    types:
+      - created
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  build:
+
+    strategy:
+      matrix:
+        os:
+          - 'debian:buster'
+          - 'debian:stretch'
+          - 'ubuntu:bionic'
+          - 'ubuntu:xenial'
+
+    runs-on: ubuntu-latest
+    container: ${{ matrix.os }}
+
+    steps:
+    - name: Install git
+      run: |
+        apt-get update
+        apt-get install --no-install-recommends -y git ca-certificates
+
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 10
+
+    - name: Install dependencies
+      run: |
+        apt-get install --no-install-recommends -y wget lsb-release sudo composer curl php-cli
+        apt-get install --no-install-recommends -y libcppunit-dev libcunit1-dev libdbd-sqlite3-perl
+        apt-get install --no-install-recommends -y php-sqlite3 php-zip tar debhelper libssl-dev postgresql-server-dev-all
+        ./utils/fo-installdeps -y -b
+        ./install/scripts/install-spdx-tools.sh
+        rm -rf src/vendor
+        make clean phpvendors
+
+    - name: Fetch tags
+      run: |
+        git fetch --tags
+
+    - name: Get release info
+      id: get_release
+      uses: bruceadams/get-release@v1.2.2
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Set environment
+      env:
+        VERSION: ${{ steps.get_release.outputs.tag_name }}
+      run: |
+        echo PACKAGE_NAME=$(echo "FOSSology-${VERSION}-$(lsb_release -si | tr [:upper:] [:lower:])-$(lsb_release -sc | tr [:upper:] [:lower:]).tar.gz") >> $GITHUB_ENV
+
+    - name: Build Debs
+      run: dpkg-buildpackage -I
+
+    - name: Package
+      run: |
+        find .. -type f -name "*-dbgsym*" -exec rm -rf {} \;
+        mkdir packages
+        mv ../*.deb packages/
+        tar -czvf ${PACKAGE_NAME} ./packages
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: ${{ env.PACKAGE_NAME }}
+        asset_name: ${{ env.PACKAGE_NAME }}
+        asset_content_type: application/gzip
