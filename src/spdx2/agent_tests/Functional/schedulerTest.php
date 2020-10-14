@@ -256,15 +256,15 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
    * @brief Pull SPDX toolkit from github if not found
    *
    * -# Verify if Java is installed
-   * -# Pull version 2.1.0
-   * -# Store only spdx-tools-2.1.0-jar-with-dependencies.jar
+   * -# Pull version 2.2.2
+   * -# Store only spdx-tools-2.2.2-jar-with-dependencies.jar
    * @return string Jar file path
    */
   protected function pullSpdxTools()
   {
     $this-> verifyJavaIsInstalled();
 
-    $version='2.1.0';
+    $version='2.2.2';
     $tag='v'.$version;
 
     $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
