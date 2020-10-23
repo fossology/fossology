@@ -1,0 +1,4 @@
+## Original code and the switchr R package are
+## Copyright 2018 Genentech Inc. All Rights Reserved.
+## Author: Gabriel Becker <gabembecker@gmail.com>
+## Distributed under the Artistic 2.0 License
