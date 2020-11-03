@@ -17,6 +17,7 @@
 
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
+export HOME := $(CURDIR)
 
 COMPOSER_PHAR := $(shell which composer)
 
@@ -76,9 +77,9 @@ install-arch:
 	dh_installdirs -s
 
 ifeq ($(COMPOSER_PHAR),)
-	mkdir -p ~/composer/
-	utils/install_composer.sh ~/composer/
-	$(eval COMPOSER_PHAR=~/composer/composer)
+	mkdir -p $(CURDIR)/composer/
+	utils/install_composer.sh $(CURDIR)/composer/
+	$(eval COMPOSER_PHAR=$(CURDIR)/composer/composer)
 endif
 
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-common \
