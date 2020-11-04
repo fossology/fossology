@@ -444,6 +444,7 @@ class CopyrightDao
     if (!empty($hash)) {
       $params[] = $hash;
       $withHash = " cp.hash = $3 AND ";
+      $stmt .= ".hash";
     }
     if ($action == "delete") {
       $setSql = "is_enabled='false'";
