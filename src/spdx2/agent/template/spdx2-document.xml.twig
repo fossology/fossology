@@ -26,11 +26,11 @@
   {% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
   <spdx:hasExtractedLicensingInfo>
 {% if licenseId starts with 'LicenseRef-' %}
-    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#{{ licenseId|replace(' ','-')|url_encode }}">
+    <spdx:ExtractedLicensingInfo rdf:about="{{ uri }}#{{ licenseId|replace({' ': '-'})|url_encode }}">
 {% else %}
-    <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseId|replace(' ','-')|url_encode }}">
+    <spdx:ExtractedLicensingInfo rdf:about="http://spdx.org/licenses/{{ licenseId|replace({' ': '-'})|url_encode }}">
 {% endif %}
-      <spdx:licenseId>{{ licenseId|replace(' ','-')|e }}</spdx:licenseId>
+      <spdx:licenseId>{{ licenseId|replace({' ': '-'})|e }}</spdx:licenseId>
       <spdx:name>{{ licenseData['name']|e }}</spdx:name>
       <spdx:extractedText><![CDATA[
 {{ licenseData['text']|replace({'\f':''})
