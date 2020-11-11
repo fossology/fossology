@@ -54,6 +54,7 @@
  * | application/x-rpm | rpm2cpio |
  * | application/x-archive | ar |
  * | application/x-debian-package | ar |
+ * | application/vnd.debian.binary-package | ar |
  * | application/x-iso | isoinfo |
  * | application/x-iso9660-image | isoinfo |
  * | application/x-fat | fat |
