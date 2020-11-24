@@ -57,7 +57,6 @@ class AboutPage extends DefaultPlugin
     $vars = array(
         'licenseCount' => $this->licenseDao->getLicenseCount(),
         'project' => _("FOSSology"),
-        'copyright' => _(" Copyright (C) 2017-2020 The Linux Foundation.<br>\n Copyright (C) 2014-2020 Siemens AG.<br>\n Copyright (C) 2007-2014 Hewlett-Packard Development Company, L.P."),
     );
 
     if (Auth::isAdmin()) {
