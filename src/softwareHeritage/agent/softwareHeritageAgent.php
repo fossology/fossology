@@ -81,6 +81,7 @@ class softwareHeritageAgent extends Agent
    */
   function __construct()
   {
+    global $SysConf;
     parent::__construct(SOFTWARE_HERITAGE_AGENT_NAME, AGENT_VERSION, AGENT_REV);
     $this->uploadDao = $this->container->get('dao.upload');
     $this->licenseDao = $this->container->get('dao.license');
@@ -88,6 +89,27 @@ class softwareHeritageAgent extends Agent
     $this->agentDao = $this->container->get('dao.agent');
     $this->softwareHeritageDao = $this->container->get('dao.softwareHeritage');
     $this->configuration = parse_ini_file(__DIR__ . '/softwareHeritage.conf');
+
+    $proxy = [];
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+    if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
+      ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
+      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
+    }
+
+    $version = $SysConf['BUILD']['VERSION'];
+    $this->guzzleClient = new Client([
+      'http_errors' => false,
+      'proxy' => $proxy,
+      'headers' => ['User-Agent' => "fossology/$version"]
+    ]);
   }
 
   /**
@@ -148,27 +170,15 @@ class softwareHeritageAgent extends Agent
    */
   protected function getSoftwareHeritageLicense($sha256)
   {
-    global $SysConf;
-    $proxy = [];
-    $URIToGetLicenses = $this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256.$this->configuration['api']['content'];
-    $URIToGetContent = $this->configuration['api']['url'].$this->configuration['api']['uri'].$sha256;
+    $sha256 = strtolower($sha256);
+    $URIToGetLicenses = $this->configuration['api']['url'] .
+      $this->configuration['api']['uri'] . $sha256 .
+      $this->configuration['api']['content'];
+    $URIToGetContent = $this->configuration['api']['url'] .
+      $this->configuration['api']['uri'] . $sha256;
 
-    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
-        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
-      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
-    }
-    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
-        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
-      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
-    }
-    if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
-        ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
-      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
-    }
-
-    $client = new Client(['http_errors' => false, 'proxy' => $proxy]);
     try {
-      $response = $client->get($URIToGetLicenses);
+      $response = $this->guzzleClient->get($URIToGetLicenses);
       $statusCode = $response->getStatusCode();
       $cookedResult = array();
       if ($statusCode == SoftwareHeritageDao::SWH_STATUS_OK) {
@@ -178,7 +188,7 @@ class softwareHeritageAgent extends Agent
         $responseContent = $response->getHeaders();
         $cookedResult = $responseContent["X-RateLimit-Reset"][0];
       } else if ($statusCode == SoftwareHeritageDao::SWH_NOT_FOUND) {
-        $response = $client->get($URIToGetContent);
+        $response = $this->guzzleClient->get($URIToGetContent);
         $responseContent = json_decode($response->getBody(),true);
         if (isset($responseContent["status"])) {
           $statusCode = SoftwareHeritageDao::SWH_STATUS_OK;
