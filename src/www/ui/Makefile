@@ -32,6 +32,8 @@ OBSOLETEFILES = admin-tag-ns.php admin-change-owner.php admin-tag-ns-perm.php ad
 
 OTHERFILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(css|htc|gif|png|ico|htm|openapi.yaml)$$"`
 
+TPL = $(TOP)/NOTICES-THIRDPARTY.html
+
 RMFILES = FILES = `find . -type f | grep -v svn |grep -v tests | grep -E "(php|css|htm|html|dtd|htc|gif|png|dat|po|mo)$$"`
 
 all:
@@ -59,6 +61,7 @@ install: empty-cache
 	fi
 	@ln -sfn $(MODDIR)/www/ui/page $(CONFDIR)/mods-enabled/www-page
 	@ln -sfn $(MODDIR)/www/ui/async $(CONFDIR)/mods-enabled/www-async
+	@$(INSTALL_DATA) $(TPL) $(DESTDIR)$(WEBDIR)/ui/NOTICES-THIRDPARTY.html
 
 empty-cache:
 	rm -rf $(CACHEDIR)/*

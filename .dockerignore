@@ -1,5 +1,3 @@
-fossology310-source.spdx
-
 ################################################################################
 # omit rebuilding after changing some unrelated files.
 .editorconfig
@@ -9,7 +7,8 @@ fossology310-source.spdx
 
 *.md
 LICENSE
-NOTICES*
+NOTICES
+NOTICES.spdx
 Dockerfile
 docker-compose.yml
 
