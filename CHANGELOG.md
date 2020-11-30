@@ -49,11 +49,13 @@ From the git commit history, we have following contributors since
 * `010f94747` chore(spdx): bump spdx version to 2.2
 
 #### Corrections
+* `6a2ce3dee` fix(spasht): Fix advance search
 * `be5189da4` fix(swh): Update User-Agent, lowecase SHA256
 * `bd65ab70b` fix(ununpack): Correct the mimetype for deb files
 * `4f4f311b2` fix(copyrightDao): Change statement in updateTable
 
 #### Infrastructure
+* `87829c8e4` feat(cd): Publish release packages with Actions
 * `bc2f2eb07` update(org): drop debian 8 support
 
 ### 3.9.0-RC2 (Oct 8th 2020)
