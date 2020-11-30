@@ -395,23 +395,29 @@ class ui_spasht extends FO_Plugin
 
   /**
    * @brief Check for Advance Search
+   * @param Coordinate $coord     Coordinates searched
+   * @param string $revisionName  Revision searched
+   * @param string $namespaceName Namespace searched
+   * @param string $typeName      Type searched
+   * @param string $providerName  Provider searched
    * @return boolean
    */
-  public function checkAdvanceSearch ($body, $revisionName, $namespaceName, $typeName, $providerName)
+  public function checkAdvanceSearch($coord, $revisionName, $namespaceName,
+    $typeName, $providerName)
   {
-    if (! empty($revisionName) && $body['revision'] != $revisionName) {
+    if (! empty($revisionName) && $coord->getRevision() != $revisionName) {
       return false;
     }
 
-    if (! empty($namespaceName) && $body['namespace'] != $namespaceName) {
+    if (! empty($namespaceName) && $coord->getNamespace() != $namespaceName) {
       return false;
     }
 
-    if (! empty($typeName) && $body['type'] != $typeName) {
+    if (! empty($typeName) && $coord->getType() != $typeName) {
       return false;
     }
 
-    if (! empty($providerName) && $body['provider'] != $providerName) {
+    if (! empty($providerName) && $coord->getProvider() != $providerName) {
       return false;
     }
 
