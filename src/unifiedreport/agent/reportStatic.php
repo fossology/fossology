@@ -217,6 +217,10 @@ class ReportStatic
     $this->addCheckBoxText($cell, $getCheckboxList[2], $nodependenciesfound);
     $this->addCheckBoxText($cell, $getCheckboxList[3], $dependenciesfoundinsourcecode);
     $this->addCheckBoxText($cell, $getCheckboxList[4], $dependenciesfoundinbinaries);
+    if ($otherStatement["ri_depnotes"] != 'NA' && !empty($otherStatement["ri_depnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_depnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $noexportrestrictionsfound = " no export restrictions found";
     $exportrestrictionsfound = " export restrictions found (see obligations)";
@@ -225,6 +229,10 @@ class ReportStatic
     $cell = $table->addCell($cellLen);
     $this->addCheckBoxText($cell, $getCheckboxList[5], $noexportrestrictionsfound);
     $this->addCheckBoxText($cell, $getCheckboxList[6], $exportrestrictionsfound);
+    if ($otherStatement["ri_exportnotes"] != 'NA' && !empty($otherStatement["ri_exportnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_exportnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $norestrictionsforusefound = " no restrictions for use found";
     $restrictionsforusefound = " restrictions for use found (see obligations)";
@@ -234,6 +242,10 @@ class ReportStatic
     $cell = $table->addCell($cellLen);
     $this->addCheckBoxText($cell, $getCheckboxList[7], $norestrictionsforusefound);
     $this->addCheckBoxText($cell, $getCheckboxList[8], $restrictionsforusefound);
+    if ($otherStatement["ri_copyrightnotes"] != 'NA' && !empty($otherStatement["ri_copyrightnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_copyrightnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $table->addRow($rowWidth, "pStyle");
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
