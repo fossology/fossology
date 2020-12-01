@@ -196,9 +196,9 @@ class ui_report_conf extends FO_Plugin
                      $obData['text'].'</textarea></td><td>';
       foreach ($obData['license'] as $value) {
         if (!empty($excludedObligations[$obTopic]) && in_array($value, $excludedObligations[$obTopic])) {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.$obTopic.'][]" value="'.$value.'" checked> '.$value.'<br />';
+          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'" checked> '.$value.'<br />';
         } else {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.$obTopic.'][]" value="'.$value.'"> '.$value.'<br />';
+          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'"> '.$value.'<br />';
         }
       }
       $tableRows .= '</td></tr>';
@@ -292,7 +292,14 @@ class ui_report_conf extends FO_Plugin
 
     if (isset($submitReportConf)) {
       $parms = array();
-      $obLicenses = @$_POST["obLicenses"];
+      $obLicensesEncoded = @$_POST["obLicenses"];
+      $obLicensesEncoded = !empty($obLicensesEncoded) ? $obLicensesEncoded : array();
+      $obLicenses = array();
+      array_walk($obLicensesEncoded,
+        function (&$licArray, $obTopic) use (&$obLicenses) {
+          $obLicenses[urldecode($obTopic)] = $licArray;
+        }
+      );
       $i = 1;
       $columns = "";
       foreach ($this->mapDBColumns as $key => $value) {
