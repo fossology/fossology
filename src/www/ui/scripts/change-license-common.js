@@ -1,7 +1,8 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
- Author: Daniele Fognini, Johannes Najjar, Steffen Weber
-
+ Copyright (C) 2014-2020, Siemens AG
+ Authors: Daniele Fognini, Johannes Najjar, Steffen Weber,
+          Andreas J. Reichel, Shaheem Azmal M MD
+ 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -234,24 +235,33 @@ function removeMainLicense(uploadId,licenseId) {
       .fail(failed);
   }
 }
+
 function openTextModel(uploadTreeId, licenseId, what, type) {
+  var refTextId = "#referenceText"
+
   if(type === undefined) {
     type = 0;
   }
+
+  if (what == 3 || what === 'acknowledgement') {
+    // clicked to add button to display child modal
+    $('#selectFromNoticeFile').css('display','inline-block');
+  }
+
   if(type == 0) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
-    $("#referenceText").val(clearingsForSingleFile);
+    $(refTextId).val(clearingsForSingleFile);
     if (what == 4 || what == "comment") {
       createDropDown($("#textModal > form > div"), $("#referenceText"));
     } else {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    textModal.dialog('open');
   } else {
-    $("#referenceText").val($("#"+licenseId+what+type).attr('title'));
+    $(refTextId).val($("#"+licenseId+what+type).attr('title'));
     whatCol = what;
     whatLicId = licenseId;
     if (what == 4 || what == "comment") {
@@ -260,37 +270,91 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.plainModal('open');
+    textModal.dialog('open');
   }
   whatType = type;
 }
 
 function closeTextModal() {
-  textModal.plainModal('close');
+  $('#selectFromNoticeFile').css('display','none');
+  textModal.dialog('close');
+}
+
+function ApplyNoticeText(idx)
+{
+  var hiddenNotice = $("#hiddennotice"+idx);
+  var NoticeText = hiddenNotice.val();
+  var textArea = $("#referenceText");
+
+  var cursorPos = textArea.prop('selectionStart');
+  var v = textArea.val();
+  var textBefore = v.substring(0,  cursorPos);
+  var textAfter  = v.substring(cursorPos, v.length);
+
+  textArea.val(textBefore + NoticeText + textAfter);
+  closeAckInputModal();
+}
+
+function UseThisNoticeButton(idx, text)
+{
+  return "<div>" +
+         "<textarea id='hiddennotice"+idx+"' hidden='hidden'>" + text + "</textarea>" +
+         "<input type=button onClick='ApplyNoticeText("+idx+")' value='Use this' />" +
+         "</div>";
+}
+
+function doHandleNoticeFiles(response) {
+   noticeSelectTable.clear();
+
+  $.each(response, function(idx, el) {
+    if (el.ufile_name !== undefined && el.contents_short !== undefined
+        && el.contents !== undefined) {
+      noticeSelectTable.row.add([el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
+      noticeSelectTable.draw();
+    }
+  });
+}
+
+function selectNoticeFile() {
+  var GetNoticeFilesUrl = "?mod=ajax-notice-files&do=search";
+
+  $.ajax({
+    type: "POST",
+    url: GetNoticeFilesUrl,
+    data: {
+      "uploadTreeId": $('#uploadTreeId').val()
+    },
+    success: (response) => doHandleNoticeFiles(response),
+    failure: () => alert('Ajax: Could not get notice files.')
+  });
 }
 
 function submitTextModal(){
+  var refTextId = "#referenceText"
+  var ConcludeLicenseUrl = "?mod=conclude-license&do=updateClearings";
   if(whatType == 0) {
     var post_data = {
       "id": idLicUploadTree,
       "columnId": whatCol,
-      "value": $("#referenceText").val()
+      "value": $(refTextId).val()
     };
     $.ajax({
       type: "POST",
-      url: "?mod=conclude-license&do=updateClearings",
+      url: ConcludeLicenseUrl,
       data: post_data,
-      success: doOnSuccess
+      success: () => doOnSuccess(textModal)
     });
+    $('#selectFromNoticeFile').css('display','none');
   } else {
-    textModal.plainModal('close');
-    $("#"+ whatLicId + whatCol +"Bulk").attr('title', $("#referenceText").val());
-    referenceText = $("#referenceText").val().trim();
+    textModal.dialog('close');
+    $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
+    referenceText = $(refTextId).val().trim();
     if(referenceText !== null && referenceText !== '') {
       $("#"+ whatLicId + whatCol + whatType).html($("#"+ whatLicId + whatCol + whatType).attr('title').slice(0, 10) + "...");
     } else {
       $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
     }
+    $('#selectFromNoticeFile').css('display','none');
   }
 }
 
@@ -314,15 +378,37 @@ function checkIfEligibleForGlobalDecision()
   }
 }
 
-function doOnSuccess() {
-  textModal.plainModal('close');
+function openAckInputModal(){
+  selectNoticeFile();
+  textAckInputModal.dialog('open');
+}
+
+function closeAckInputModal(){
+  textAckInputModal.dialog('close');
+}
+
+function doOnSuccess(textModal) {
+  textModal.dialog('close');
   $('#decTypeSet').addClass('decTypeWip');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
 
 $(document).ready(function () {
-  textModal = $('#textModal').plainModal();
+  textAckInputModal = $('#textAckInputModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
+  $('#textAckInputModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
+    }
+  });
+
+  noticeSelectTable = $('#noticeSelectTable').DataTable({
+    paging: false,
+    searching: false,
+    data: []
+  });
+
+  textModal = $('#textModal').dialog({autoOpen:false, width:"auto",height:"auto"});
   $('#textModal').draggable({
     stop: function(){
       $(this).css({'width':'','height':''});

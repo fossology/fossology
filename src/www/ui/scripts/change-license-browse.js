@@ -25,42 +25,42 @@ var userModal;
 var removed = false;
 
 $(document).ready(function () {
-  bulkModal = $('#bulkModal').plainModal({child: textModal});
-  userModal = $('#userModal').plainModal();
-  clearingHistoryDataModal = $('#ClearingHistoryDataModal').plainModal();
+  bulkModal = $('#bulkModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
+  userModal = $('#userModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
+  clearingHistoryDataModal = $('#ClearingHistoryDataModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
 });
 
 function openBulkModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
-  bulkModal.plainModal('open');
+  bulkModal.dialog('open');
 }
 
 function closeBulkModal() {
-  bulkModal.plainModal('close');
+  bulkModal.dialog('close');
 }
 
 function loadBulkHistoryModal() {
   refreshBulkHistory(function(data) {
-    $('#bulkHistoryModal').plainModal('open');
+    $('#bulkHistoryModal').dialog('open');
   });
 }
 
 function openUserModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
-  userModal.plainModal('open');
+  userModal.dialog('open');
 }
 
 function closeUserModal() {
-  userModal.plainModal('close');
+  userModal.dialog('close');
 }
 
 function openClearingHistoryDataModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
-  clearingHistoryDataModal.plainModal('open');
+  clearingHistoryDataModal.dialog('open');
 }
 
 function closeClearingHistoryDataModal() {
-  clearingHistoryDataModal.plainModal('close');
+  clearingHistoryDataModal.dialog('close');
 }
 
 function scheduleBulkScan() {
