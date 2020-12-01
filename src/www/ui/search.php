@@ -48,6 +48,21 @@ class search extends FO_Plugin
     return $this->State;
   }
 
+  function loadUploads()
+  {
+    $allUploadsPre = $this->uploadDao->getActiveUploadsArray();
+    $filteredUploadsList = array();
+
+    $filteredUploadsList = array_filter($allUploadsPre, function($uploadObj){
+      if ($this->uploadDao->isAccessible($uploadObj->getId(), Auth::getGroupId())) {
+        return true;
+      }
+      return false;
+    });
+
+    return $filteredUploadsList;
+  }
+
   /**
    * \brief Customize submenus.
    */
@@ -116,6 +131,10 @@ class search extends FO_Plugin
     $CriteriaCount = 0;
     $GETvars="";
 
+    // loads list of all uploads to put in Search filter select field
+    $uploadsArray = $this->loadUploads();
+    $this->vars['uploadsArray'] = $uploadsArray;
+
     $Item = GetParm("item",PARM_INTEGER);
     /* Show path if searching an item tree (don't show on global searches) */
     if ($Item) {
@@ -141,9 +160,22 @@ class search extends FO_Plugin
       $this->vars["Filename"] = $Filename;
     }
 
-    $tag = GetParm("tag", PARM_RAW);
-    if (! empty($tag)) {
-      $CriteriaCount ++;
+    $Upload = GetParm("upload",PARM_INTEGER);
+    $SelectedUploadName = "All uploads";
+    if ($Upload != 0) {
+      $CriteriaCount++;
+      $GETvars .= "&upload=" . urlencode($Upload);
+      $this->vars["Upload"] = $Upload;
+      foreach ($uploadsArray as $row) {
+        if ($row->getId() == $Upload) {
+          $SelectedUploadName = $row->getFilename() . " from " .  Convert2BrowserTime(date("Y-m-d H:i:s",$row->getTimestamp()));
+        }
+      }
+    }
+
+    $tag = GetParm("tag",PARM_RAW);
+    if (!empty($tag)) {
+      $CriteriaCount++;
       $GETvars .= "&tag=" . urlencode($tag);
       $this->vars["tag"] = $tag;
     }
@@ -186,7 +218,7 @@ class search extends FO_Plugin
       if (empty($Page)) {
         $Page = 0;
       }
-      $UploadtreeRecsResult = GetResults($Item, $Filename, $tag, $Page, $SizeMin,
+      $UploadtreeRecsResult = GetResults($Item, $Filename,$Upload, $tag, $Page, $SizeMin,
         $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
         Auth::getGroupId(), $PG_CONN);
       $html = "<hr>\n";
@@ -194,7 +226,7 @@ class search extends FO_Plugin
         "The indented search results are same files in different folders");
       $html .= "<H4>$message</H4>\n";
       $text = $UploadtreeRecsResult[1] . " " . _("Files matching");
-      $html .= "<H2>$text " . htmlentities($Filename) . "</H2>\n";
+      $html .= "<H2>$text " . htmlentities($Filename) . " in ". htmlentities($SelectedUploadName) . "</H2>\n";
       $html .= $this->HTMLResults($UploadtreeRecsResult[0], $Page, $GETvars,
         $License, $Copyright);
       $this->vars["result"] = $html;

@@ -101,6 +101,20 @@ class UploadDao
     return $row ? Upload::createFromTable($row) : null;
   }
 
+  public function getActiveUploadsArray()
+  {
+    $stmt = __METHOD__;
+    $queryResult = $this->dbManager->getRows("SELECT * FROM upload where pfile_fk IS NOT NULL",
+        array(), $stmt);
+
+    $results = array();
+    foreach ($queryResult as $row) {
+      $results[] = Upload::createFromTable($row);
+    }
+
+    return $results;
+  }
+
   /**
    * @param $itemId
    * @param $uploadTreeTableName
