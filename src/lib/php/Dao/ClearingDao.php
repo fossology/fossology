@@ -33,6 +33,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Monolog\Logger;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Util\StringOperation;
 
 class ClearingDao
 {
@@ -507,6 +508,10 @@ INSERT INTO clearing_decision (
   public function insertClearingEvent($uploadTreeId, $userId, $groupId, $licenseId, $isRemoved, $type = ClearingEventTypes::USER, $reportInfo = '', $comment = '', $acknowledgement = '', $jobId=0)
   {
     $insertIsRemoved = $this->dbManager->booleanToDb($isRemoved);
+
+    $reportInfo = StringOperation::replaceUnicodeControlChar($reportInfo);
+    $comment = StringOperation::replaceUnicodeControlChar($comment);
+    $acknowledgement = StringOperation::replaceUnicodeControlChar($acknowledgement);
 
     $stmt = __METHOD__;
     $params = array($uploadTreeId, $userId, $groupId, $type, $licenseId, $insertIsRemoved, $reportInfo, $comment, $acknowledgement);

@@ -23,6 +23,7 @@ use Fossology\Lib\Data\Spasht\Coordinate;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
+use Fossology\Lib\Util\StringOperation;
 
 /**
  * Class AgentDao
@@ -155,7 +156,7 @@ class SpashtDao
       $stmt .= '.rollback';
     } else {
       $setSql = "textfinding = $4, hash = md5($4), is_enabled='true'";
-      $params[] = $content;
+      $params[] = StringOperation::replaceUnicodeControlChar($content);
     }
 
     $sql = "UPDATE copyright_spasht AS cpr SET $setSql
