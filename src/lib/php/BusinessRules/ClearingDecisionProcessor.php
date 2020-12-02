@@ -164,8 +164,11 @@ class ClearingDecisionProcessor
     $this->dbManager->begin();
 
     $itemId = $itemBounds->getItemId();
-
-    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, $includeSubFolders=false);
+    $includeSubFolders = false;
+    if (($global == DecisionScopes::REPO) && ($type != self::NO_LICENSE_KNOWN_DECISION_TYPE)) {
+      $includeSubFolders = true;
+    }
+    $previousEvents = $this->clearingDao->getRelevantClearingEvents($itemBounds, $groupId, $includeSubFolders);
     if ($type === self::NO_LICENSE_KNOWN_DECISION_TYPE) {
       $type = DecisionTypes::IDENTIFIED;
       $clearingEventIds = $this->insertClearingEventsForAgentFindings($itemBounds, $userId, $groupId, true, ClearingEventTypes::USER);

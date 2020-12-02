@@ -100,7 +100,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
 
   public function testMakeDecisionFromLastEvents()
   {
-    $isGlobal = DecisionScopes::REPO;
+    $isGlobal = DecisionScopes::ITEM;
     $addedEvent = $this->createClearingEvent(123, $this->timestamp, 13, "licA", "License A");
 
     $this->clearingDao->shouldReceive("getRelevantClearingEvents")
