@@ -33,6 +33,7 @@ require_once dirname(dirname(dirname(dirname(__FILE__)))) .
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Controllers\BadRequestController;
 use Fossology\UI\Api\Controllers\FolderController;
+use Fossology\UI\Api\Controllers\FileSearchController;
 use Fossology\UI\Api\Controllers\JobController;
 use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
@@ -155,6 +156,13 @@ $app->group(VERSION_1 . 'report',
 $app->group(VERSION_1 . 'version',
   function (){
     $this->get('', VersionController::class . ':getVersion');
+  });
+
+/////////////////////////FILE SEARCH////////////////////
+$app->group(VERSION_1 . 'filesearch',
+  function (){
+    $this->post('', FileSearchController::class . ':getFiles');
+    $this->any('/{params:.*}', BadRequestController::class);
   });
 
 $app->run();
