@@ -565,7 +565,7 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   /*
    * Check Apache licenses before BSD
    */
-  if (HASTEXT(_PHR_Apache_ref0, REG_EXTENDED) || INFILE(_PHR_Apache_ref7)) {
+  if (HASTEXT(_PHR_Apache_ref0, REG_EXTENDED) || INFILE(_PHR_Apache_ref7) || INFILE(_TITLE_Apache)) {
     cp = ASLVERS();
     INTERESTING(cp);
   }
