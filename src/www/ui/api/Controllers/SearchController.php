@@ -98,7 +98,13 @@ class SearchController extends RestController
     // rewrite it and add additional information about it's parent upload
     for ($i = 0; $i < sizeof($results); $i ++) {
       $currentUpload = $this->dbHelper->getUploads(
-        $this->restHelper->getUserId(), $results[$i]["upload_fk"])[0];
+        $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
+        $results[$i]["upload_fk"], null, true)[1];
+      if (! empty($currentUpload)) {
+        $currentUpload = $currentUpload[0];
+      } else {
+        continue;
+      }
       $uploadTreePk = $results[$i]["uploadtree_pk"];
       $filename = $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);

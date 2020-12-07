@@ -215,7 +215,8 @@ class RestHelper
         return new Info(403, "Upload is not accessible.",
           InfoType::ERROR);
       }
-      $uploadContentId = $this->folderDao->getFolderContentsId($uploadId);
+      $uploadContentId = $this->folderDao->getFolderContentsId($uploadId,
+        $this->folderDao::MODE_UPLOAD);
       $contentMove = $this->getPlugin('content_move');
 
       $errors = $contentMove->copyContent([$uploadContentId], $newFolderId, $isCopy);

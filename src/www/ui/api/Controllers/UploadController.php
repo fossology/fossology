@@ -48,6 +48,31 @@ class UploadController extends RestController
   const AGENT_PARAM = "agent";
 
   /**
+   * Get query parameter name for folder id
+   */
+  const FOLDER_PARAM = "folderId";
+
+  /**
+   * Get query parameter name for recursive listing
+   */
+  const RECURSIVE_PARAM = "recursive";
+
+  /**
+   * Get query parameter name for page listing
+   */
+  const PAGE_PARAM = "page";
+
+  /**
+   * Get query parameter name for limiting listing
+   */
+  const LIMIT_PARAM = "limit";
+
+  /**
+   * Limit of uploads in get query
+   */
+  const UPLOAD_FETCH_LIMIT = 100;
+
+  /**
    * Get query parameter name for container listing
    */
   const CONTAINER_PARAM = "containers";
@@ -72,6 +97,49 @@ class UploadController extends RestController
   public function getUploads($request, $response, $args)
   {
     $id = null;
+    $folderId = null;
+    $recursive = true;
+    $retVal = null;
+    $query = $request->getQueryParams();
+
+    if (array_key_exists(self::FOLDER_PARAM, $query)) {
+      $folderId = filter_var($query[self::FOLDER_PARAM], FILTER_VALIDATE_INT);
+      if (! $this->restHelper->getFolderDao()->isFolderAccessible($folderId,
+        $this->restHelper->getUserId())) {
+        $info = new Info(404, "Folder does not exist", InfoType::ERROR);
+        $retVal = $response->withJson($info->getArray(), $info->getCode());
+      }
+    }
+
+    if (array_key_exists(self::RECURSIVE_PARAM, $query)) {
+      $recursive = filter_var($query[self::RECURSIVE_PARAM],
+        FILTER_VALIDATE_BOOLEAN);
+    }
+
+    $page = $request->getHeaderLine(self::PAGE_PARAM);
+    if (! empty($page)) {
+      $page = filter_var($page, FILTER_VALIDATE_INT);
+      if ($page <= 0) {
+        $info = new Info(400, "page should be positive integer > 0",
+          InfoType::ERROR);
+        $retVal = $response->withJson($info->getArray(), $info->getCode());
+      }
+    } else {
+      $page = 1;
+    }
+
+    $limit = $request->getHeaderLine(self::LIMIT_PARAM);
+    if (! empty($limit)) {
+      $limit = filter_var($limit, FILTER_VALIDATE_INT);
+      if ($limit < 1) {
+        $info = new Info(400, "limit should be positive integer > 1",
+          InfoType::ERROR);
+        $retVal = $response->withJson($info->getArray(), $info->getCode());
+      }
+    } else {
+      $limit = self::UPLOAD_FETCH_LIMIT;
+    }
+
     if (isset($args['id'])) {
       $id = intval($args['id']);
       $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
@@ -80,14 +148,21 @@ class UploadController extends RestController
       }
       $temp = $this->isAdj2nestDone($id, $response);
       if ($temp !== true) {
-        return $temp;
+        $retVal = $temp;
       }
     }
-    $uploads = $this->dbHelper->getUploads($this->restHelper->getUserId(), $id);
-    if ($id !== null) {
-      $uploads = $uploads[0];
+    if ($retVal !== null) {
+      return $retVal;
     }
-    return $response->withJson($uploads, 200);
+    list($pages, $uploads) = $this->dbHelper->getUploads(
+      $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $limit,
+      $page, $id, $folderId, $recursive);
+    if ($id !== null && ! empty($uploads)) {
+      $uploads = $uploads[0];
+      $pages = 1;
+    }
+    return $response->withHeader("X-Total-Pages", $pages)->withJson($uploads,
+      200);
   }
 
   /**
@@ -372,7 +447,8 @@ class UploadController extends RestController
           " not scheduled for the upload. Please POST to /jobs",
           InfoType::ERROR);
         $response = $response->withJson($error->getArray(), $error->getCode());
-      } else if ($agent['isAgentRunning']) {
+      } else if (array_key_exists('isAgentRunning', $agent) &&
+        $agent['isAgentRunning']) {
         $error = new Info(503, "Agent $agent is running. " .
           "Please check job status at /api/v1/jobs?upload=" . $uploadId,
           InfoType::INFO);
