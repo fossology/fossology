@@ -195,7 +195,7 @@ class ui_browse extends FO_Plugin
     $this->vars['assigneeOptions'] = $assigneeArray;
     $this->vars['statusOptions'] = $this->uploadDao->getStatusTypeMap();
     $this->vars['folder'] = $folderId;
-    $this->vars['folderName'] = $rootFolder->getName();
+    $this->vars['folderName'] = $this->folderDao->getFolder($folderId)->getName();
   }
 
   /**

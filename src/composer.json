@@ -24,7 +24,7 @@
         "symfony/http-foundation" : "v3.4.26",
         "symfony/dependency-injection" : "v3.4.26",
         "symfony/yaml" : "v3.4.26",
-        "twig/twig" : "v1.38.4",
+        "twig/twig" : "v1.42.5",
         "twig/extensions" : "v1.5.4",
         "guzzlehttp/guzzle": "6.3.3"
     },
