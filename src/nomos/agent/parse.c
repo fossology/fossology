@@ -3165,6 +3165,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
     else if (INFILE(_LT_INTEL_RESTRICT)) {
       INTERESTING("Intel.RESTRICTED");
     }
+    else if (INFILE(_LT_INTEL_BINARY) && HASTEXT(_TEXT_INTELCORPBINARY, 0) && HASTEXT(_TEXT_NOMODIFICATION, 0)) {
+      INTERESTING("Intel-Binary");
+    }
   }
   else if (INFILE(_LT_INTEL_5)) {
     INTERESTING(lDebug ? "CPL(Intel)" : "CPL");

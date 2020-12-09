@@ -3402,6 +3402,10 @@
 %KEY% "licen[cs]"
 %STR% "Intel grants free of charge to any person =FEW= obtaining a copy of the source code =SOME= irrevocable perpetual worldwide license under Intel.s copyrights (in|for) the (base )?code distributed =FEW= by Intel =FEW= to copy make derivatives distribute use and display any portion of the (covered )?code in any form with the right to sublicense such rights"
 #
+%ENTRY% _LT_INTEL_BINARY
+%KEY% "permi[st]"
+%STR% "Neither the name of Intel Corporation nor the names of its suppliers may be used to endorse or promote products derived from this software without specific prior written permission"
+#
 %ENTRY% _LT_INTERLINK_EULA
 %KEY% "legal"
 %STR% "this end[ -]user licen[cs]e agreement eula is a legal agreement between you either an individual or an entity and interlink networks inc for the product identified above"
@@ -11790,6 +11794,14 @@ k
 %ENTRY% _TEXT_INTELCORP
 %KEY% =NULL=
 %STR% "intel corp"
+#
+%ENTRY% _TEXT_INTELCORPBINARY
+%KEY% =NULL=
+%STR% "binary form"
+#
+%ENTRY% _TEXT_NOMODIFICATION
+%KEY% =NULL=
+%STR% "without modification"
 #
 %ENTRY% _TEXT_JPNIC
 %KEY% =NULL=

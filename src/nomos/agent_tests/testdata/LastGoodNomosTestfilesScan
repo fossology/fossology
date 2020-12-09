@@ -292,6 +292,7 @@ File NomosTestfiles/Intel/INTEL-LICENSE.txt contains license(s) BSD-3-Clause,Int
 File NomosTestfiles/Intel/intel-wlan-license.txt contains license(s) Intel-WLAN
 File NomosTestfiles/Intel/README.ipw3945 contains license(s) BSD-3-Clause,GPL-2.0,Intel-WLAN
 File NomosTestfiles/Intel/Intel-ACPI.txt contains license(s) Intel-ACPI
+File NomosTestfiles/Intel/INTEL-binary.txt contains license(s) Intel-Binary
 File NomosTestfiles/Python/hashlib.py contains license(s) Python
 File NomosTestfiles/Python/Python-2.0.txt contains license(s) Python-2.0
 File NomosTestfiles/Python/crtlicense.txt contains license(s) Microsoft,Python
