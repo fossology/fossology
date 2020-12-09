@@ -18,6 +18,7 @@ jobs:
           - 'debian:stretch'
           - 'ubuntu:bionic'
           - 'ubuntu:xenial'
+          - 'ubuntu:focal'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
