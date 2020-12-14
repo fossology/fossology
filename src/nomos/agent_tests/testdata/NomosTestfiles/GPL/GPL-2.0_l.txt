@@ -1,0 +1,11 @@
+/* SPDX-License-Identifier: GPL-2.0 */
+#ifndef __API_FS__
+#define __API_FS__
+
+#include <stdbool.h>
+#include <unistd.h>
+
+/*
+* On most systems <limits.h> would have given us this, but not on some systems
+* (e.g. GNU/Hurd).
+*/
