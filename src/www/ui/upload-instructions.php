@@ -42,8 +42,6 @@ class UploadInstructions extends DefaultPlugin
   protected function handle(Request $request)
   {
     $vars['URI'] = Traceback_uri();
-    $this->renderer->clearTemplateCache();
-    $this->renderer->clearCacheFiles();
 
     return $this->render('upload_instructions.html.twig', $this->mergeWithDefault($vars));
   }

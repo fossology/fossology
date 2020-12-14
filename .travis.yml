@@ -153,23 +153,16 @@ jobs:
         - sudo service postgresql restart
         - *default-before-script
 #### PHPUnit tests ###########################
-    - &phpunit-tests
-      php: 5.6
-      addons: {}
-      install: composer install --prefer-dist --working-dir=src
-      before_script: ./utils/prepare-test -afty
-      script:
-        - make build-lib VERSIONFILE build-cli
-        - src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite"
-      after_success: php src/vendor/bin/php-coveralls -vv -o coveralls.json -x clover.xml
     - &php7-phpunit-tests
-      <<: *phpunit-tests
+      addons: {}
       php: 7.0
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
+      before_script: ./utils/prepare-test -afty
       script:
         - set -o pipefail
         - make build-lib VERSIONFILE build-cli
         - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
+      after_success: php src/vendor/bin/php-coveralls -vv -o coveralls.json -x clover.xml
     - &php71-phpunit-tests
       <<: *php7-phpunit-tests
       php: 7.1
