@@ -120,6 +120,9 @@ class CopyrightHistogram extends HistogramBase {
     $(document).ready(function() {
       tableCopyright =  createTablestatement();
       tableFindings = createPlainTablecopyFindings();
+      $('#testReplacementstatement').click(function() {
+        testReplacement(tableCopyright, 'statement');
+      });
       $('#copyrightFindingsTabs').tabs({
         active: ($.cookie(copyrightTabCookie) || 0),
         activate: function(e, ui){

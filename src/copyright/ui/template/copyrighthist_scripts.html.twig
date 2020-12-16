@@ -39,5 +39,45 @@
     });
   }
 
+  function advanceSearchToRegex(search) {
+    var val = $.fn.dataTable.util.escapeRegex(search.trim());
+    return val.replace(/\\\(\\\*\\\)/g, "(.*)");
+  }
+
+  function testReplacement(table, type) {
+    var checkBoxes = $("input:checkbox[class=deleteBySelect" + type + "]:checked");
+    var toVal = $('#replaceText' + type).val();
+    if (checkBoxes.length == 0 || /^\s*$/.test(toVal)) {
+      return;
+    }
+    var idPrefix = '#testVal' + type;
+
+    var firstRow = checkBoxes.first();
+    var testVal = table.api().row($(firstRow).parent().parent()[0]).data()[1];
+    testVal = $("<textarea/>").html(testVal).text();  // Decode HTML &lt; &gt;
+    var regex = advanceSearchToRegex($('#advSearchText' + type).val());
+    var finalVal = toVal;
+    if (!/^\s*$/.test(regex)) {
+      finalVal = testVal.replace(new RegExp(regex, "gi"), toVal);
+    }
+
+    $(idPrefix + 'From').text(testVal);
+    $(idPrefix + 'To').text(finalVal);
+    $(idPrefix).show();
+  }
+
+  function createReplacementText(type) {
+    var searchRegex = $('#advSearchText' + type).val();
+    var i = 1;
+    var replaceText = searchRegex.replace(/\(\*\)/g, function(match) {
+      return "$" + (i++);
+    });
+    $('#replaceText' + type).val(replaceText);
+  }
+
+  $(document).ready(function() {
+    $('img').tooltip();
+  });
+
   {{ scriptBlock }}
 </script>

@@ -79,19 +79,35 @@ abstract class HistogramBase extends FO_Plugin {
       $typeDescriptor = $description;
     }
     $output = "<h4>Activated $typeDescriptor statements:</h4>
-               <div><table border=1 width='100%' id='copyright".$type."'></table></div>
-               <br/><br/>
-               <div>
-                 <span>
-                   Replace: <input type='text' id='replaceText".$type."' style='width:80%'>
-                 </span>
-               <br/><br/>
-               <a style='cursor: pointer; margin-left:10px;' id='replaceSelected".$type."' class='buttonLink'>Mark selected rows for replace</a>
-               <a style='cursor: pointer; margin-left:10px;' id='deleteSelected".$type."' class='buttonLink'>Mark selected rows for deletion</a>
-               <br/><br/>
-               <h4>Deactivated $typeDescriptor statements:</h4>
-               </div>
-               <div><table border=1 width='100%' id='copyright".$type."deactivated'></table></div>";
+<div><table border=1 width='100%' id='copyright".$type."'></table></div>
+<br/><br/>
+<div>
+  <table border=0 width='100%' id='searchReplaceTable".$type."'>
+  <tr>
+    <td>Advance search:</td>
+    <td style='width:80%'><input type='text' id='advSearchText".$type."' style='width:90%' class='advSearch'>
+      <img src='images/info_16.png' title='Use \"(*)\" to match any thing.\nExample: \"Copyright (*) All rights reserved(*)\" will match \"Copyright 2012-2020 Company ABC. All rights reserved {and some garbage here}\"' alt='' class='info-bullet'></td>
+    <td><a class='buttonLink' onClick='createReplacementText(\"".$type."\")' title='Create a replacement text with all placeholders.'>Create replacement text</a></td>
+  </tr>
+  <tr>
+    <td>Replace:</td>
+    <td style='width:80%'><input type='text' id='replaceText".$type."' style='width:90%'>
+      <img src='images/info_16.png' title='Use \"$1 $2\" as placeholder for corresponding (*) values.\nExample: \"Copyright $1 All rights reserved\" will result in \"Copyright 2012-2020 Company ABC. All rights reserved\" from example above' alt='' class='info-bullet'></td>
+    <td></td>
+  </tr></table>
+  <br/><br/>
+  <a style='cursor: pointer; margin-left:10px;' id='testReplacement".$type."' class='buttonLink'>Test replacement</a>
+  <a style='cursor: pointer; margin-left:10px;' id='replaceSelected".$type."' class='buttonLink'>Replace selected rows</a>
+  <a style='cursor: pointer; margin-left:10px;' id='deleteSelected".$type."' class='buttonLink'>Deactivate selected rows</a>
+  <br /><br />
+  <table border=1 id='testVal".$type."' style='display:none' class='dataTable'>
+    <tr><th style='width:50%'>From</th><th style='width:50%'>To</th></tr>
+    <tr><td id='testVal".$type."From'></td><td id='testVal".$type."To'></td></tr>
+  </table>
+  <br/><br/>
+  <h4>Deactivated $typeDescriptor statements:</h4>
+</div>
+<div><table border=1 width='100%' id='copyright".$type."deactivated'></table></div>";
 
     return array($output, $out);
   }
