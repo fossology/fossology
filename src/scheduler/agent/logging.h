@@ -70,10 +70,18 @@ extern log_t* main_log;
  * a single statement that requires a ";" at the end to be syntactically correct
  */
 
+// Three counter used to count total number of fatal. error, warning in fossology.
+extern int fatal_count;
+extern int error_count;
+extern int warning_count;
+
 /** Macro that is called when the scheduler hits a fatal error */
 #define FATAL(...)  do { \
+            fatal_count++; \
+            write_log_counter(); \
             lprintf(main_log, "FATAL %s.%d: ", __FILE__, __LINE__); \
             lprintf(main_log, __VA_ARGS__); \
+            lprintf(main_log, " :: fatal_count=%d\n", fatal_count); \
             lprintf(main_log, "\n"); \
             lprintf(main_log, "FATAL errno is: %s\n", strerror(errno)); \
             exit(-2); } while(0)
@@ -88,12 +96,17 @@ extern log_t* main_log;
 
 /** Macro that is called when any type of error is generated */
 #define ERROR(...) do { \
+            error_count++; \
+            write_log_counter(); \
             lprintf(main_log, "ERROR %s.%d: ", __FILE__, __LINE__); \
             lprintf(main_log, __VA_ARGS__); \
+            lprintf(main_log, " :: error_count=%d\n", error_count); \
             lprintf(main_log, "\n"); } while(0)
 
 /** Macro that is called when any type of postgresql error is generated */
 #define PQ_ERROR(pg_r, ...) { \
+            error_count++; \
+            write_log_counter(); \
             lprintf(main_log, "ERROR %s.%d: ", __FILE__, __LINE__); \
             lprintf(main_log, __VA_ARGS__); \
             lprintf(main_log, "\n"); \
@@ -110,8 +123,11 @@ extern log_t* main_log;
 /** Macros that is called when any type of warning is generated */
 #define TEST_WARNING verbose > 1
 #define WARNING(...) if(TEST_WARNING) do {                  \
+            warning_count++; \
+            write_log_counter();  \
             lprintf(main_log, "WARNING %s.%d: ", __FILE__, __LINE__); \
             lprintf(main_log, __VA_ARGS__);                           \
+            lprintf(main_log, " :: warning_count=%d\n", warning_count); \
             lprintf(main_log, "\n"); } while(0)
 
 /* verbose macros, if changing from greater than scheme to bit mask, just */
@@ -146,6 +162,7 @@ void log_destroy(log_t* log);
 int  lprintf (log_t* log, const char* fmt, ...);
 int  clprintf(log_t* log, char* s_name, uint16_t s_line, const char* fmt, ...);
 int  vlprintf(log_t* log, const char* fmt, va_list args);
+void write_log_counter();
 
 #define log_printf(...)       lprintf(main_log, __VA_ARGS__)
 #define con_printf(log, ...) clprintf(log, __FILE__, __LINE__, __VA_ARGS__)

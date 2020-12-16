@@ -13,7 +13,7 @@ CONFPATH = $(SYSCONFDIR)
 # default version is the scm revision number
 -DVERSION=$(SCM_REV)
 
-all: fo-postinstall defconf/Db.conf defconf/fossology.conf db/dbcreate
+all: fo-postinstall defconf/Db.conf defconf/fossology.conf fossdash/fossdash-publish.py db/dbcreate db/db.cron.in
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -25,6 +25,9 @@ fo-postinstall:	fo-postinstall-process
 # generate the default Db.conf file
 defconf/Db.conf: defconf/Db.conf-process
 
+# generate the fossdash-publish.py file
+fossdash/fossdash-publish.py: fossdash/fossdash-publish.py-process
+
 # generate fossology.conf
 defconf/fossology.conf:	defconf/fossology.conf-process
 
@@ -35,6 +38,7 @@ install_offline: install
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	$(INSTALL_PROGRAM) ./fossdash/fossdash-publish.py $(DESTDIR)$(LIBEXECDIR)/fossdash-publish.py
 	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
 	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	$(INSTALL_PROGRAM) fossinit-common.php $(DESTDIR)$(LIBEXECDIR)/fossinit-common.php
@@ -68,6 +72,14 @@ install: all
 	 	$(INSTALL) -m 666 defconf/fossology.conf $(DESTDIR)$(CONFPATH)/fossology.conf; \
 	else \
 		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossology.conf already exists."; \
+		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
+	fi
+
+	@if [ ! -f $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml -o "$(OVERWRITE)" ]; then \
+		echo "NOTE: using default version for $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml"; \
+	 	$(INSTALL) -m 666 fossdash/fossdash_metrics.yml $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml; \
+	else \
+		echo "WARNING: $(DESTDIR)$(CONFPATH)/fossdash_metrics.yml already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
 
@@ -125,7 +137,7 @@ uninstall:
 	$(MAKE) -s -C db uninstall
 
 clean:
-	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf
+	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf fossdash/fossdash-publish.py
 	$(MAKE) -s -C db clean
 
 test: all
