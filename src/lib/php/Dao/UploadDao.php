@@ -39,6 +39,26 @@ class UploadDao
   const REUSE_MAIN = 4;
   const REUSE_CONF = 16;
   const REUSE_COPYRIGHT = 32;
+  const UNIFIED_REPORT_HEADINGS = array(
+    "assessment" => array("Assessment Summary" => true),
+    "compliancetasks" => array("Required license compliance tasks" => true),
+    "acknowledgements" => array("Acknowledgements" => true),
+    "exportrestrictions" => array("Export Restrictions" => true),
+    "notes" => array("Notes" => true),
+    "scanresults" => array("Results of License Scan" => true),
+    "mainlicenses" => array("Main Licenses" => true),
+    "redlicense" => array("Other OSS Licenses (red) - Do not Use Licenses" => true),
+    "yellowlicense" => array("Other OSS Licenses (yellow) - additional obligations to common rules (e.g. copyleft)" => true),
+    "whitelicense" => array("Other OSS Licenses (white) - only common rules" => true),
+    "overviewwithwithoutobligations" => array("Overview of All Licenses with or without Obligations" => true),
+    "copyrights" => array("Copyrights" => true),
+    "copyrightsuf" => array("Copyrights (User Findings)" => true),
+    "bulkfindings" => array("Bulk Findings" => true),
+    "licensenf" => array("Non-Functional Licenses" => true),
+    "irrelevantfiles" => array("Irrelevant Files" => true),
+    "dnufiles" => array("Do not use Files" => true),
+    "changelog" => array("Clearing Protocol Change Log" => true)
+  );
 
   /** @var DbManager */
   private $dbManager;
