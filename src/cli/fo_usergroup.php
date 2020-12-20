@@ -72,8 +72,8 @@ if ($user !== false) {
 
 if ($uName && !$user) {
   $pass = array_key_exists('upasswd', $opts) ? $opts['upasswd'] : '';
-  $seed = rand() . rand();
-  $hash = sha1($seed . $pass);
+  $options = array('cost' => 10);
+  $hash = password_hash($pass, PASSWORD_DEFAULT, $options);
   $desc = 'created via cli';
   $perm = array_key_exists('accesslvl', $opts) ? intval($opts['accesslvl']) : 0;
   if (array_key_exists('folder', $opts)) {
@@ -89,7 +89,7 @@ if ($uName && !$user) {
   }
   $agentList = userAgents();
   $email = $emailNotify = '';
-  add_user($uName, $desc, $seed, $hash, $perm, $email, $emailNotify, $agentList, $folderid);
+  add_user($uName, $desc, $hash, $perm, $email, $emailNotify, $agentList, $folderid);
   $user = $userDao->getUserByName($uName);
   print "added user $uName\n";
 }

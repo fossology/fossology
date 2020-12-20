@@ -192,9 +192,6 @@ class UserDao
   function updateUserTable()
   {
     $statementBasename = __FUNCTION__;
-    $this->dbManager->getSingleRow("UPDATE users SET user_seed = $1 WHERE user_seed IS NULL;",
-            array(rand()),
-            $statementBasename . '.randomizeEmptySeeds');
 
     /* No users with no seed and no perm -- make them read-only */
     $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1 WHERE user_perm IS NULL;",
@@ -216,15 +213,15 @@ class UserDao
     $row = $this->getUserByPermission($perm);
     if (empty($row['user_name'])) {
       /* No user with PLUGIN_DB_ADMIN access. */
-      $seed = rand() . rand();
-      $hash = sha1($seed . self::SUPER_USER);
+      $options = array('cost' => 10);
+      $hash = password_hash(self::SUPER_USER, PASSWORD_DEFAULT, $options);
       $row0 = $this->getUserByName(self::SUPER_USER);
 
       if (empty($row0['user_name'])) {
         $this->dbManager->getSingleRow("
           INSERT INTO users (user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk)
             VALUES ($1,'Default Administrator',$2, $3, $4, $1,'y',1)",
-            array(self::SUPER_USER, $seed, $hash, $perm), $statementBasename . '.createDefaultAdmin');
+            array(self::SUPER_USER, 'Seed', $hash, $perm), $statementBasename . '.createDefaultAdmin');
       } else {
         $this->dbManager->getSingleRow("UPDATE users SET user_perm = $1, email_notify = 'y'," .
             " user_email=$2 WHERE user_name =$2",

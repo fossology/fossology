@@ -512,8 +512,9 @@ debug("Elapsed Time = $elapsed");
 
 // insert the 'fossy' user into the test database
 // this is the FOSSology user 'fossy' (not a Postgres user, or a system user)
-$random_seed = rand().rand();
-$hash = sha1($random_seed . "fossy");
+$random_seed = 'Seed';
+$options = array('cost' => 10);
+$hash = password_hash("fossy", PASSWORD_DEFAULT, $options);
 $user_sql = "INSERT INTO users (user_pk, user_name, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, root_folder_fk) VALUES (1, 'fossy', 'Default Administrator', '$random_seed', '$hash', 10, 'fossy', 'n', 1);";
 pg_query($test_db_conn, $user_sql)
     or die("FAIL: could not insert default user into user table\n");
