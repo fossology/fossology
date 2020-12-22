@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # This script packages the directory into a tar file.
 # Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
 #

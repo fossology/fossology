@@ -90,6 +90,7 @@ git checkout -- debian/changelog
 
 # Package deb files
 echo "Packaging files as ${TOP}/fossology_${VERSION}.tar.gz"
+find .. -type f -name "*-dbgsym*" -exec rm -rf {} \;
 mkdir -p packages
 mv ../*.deb packages/
 mv ../fossology_${VERSION}_*.buildinfo packages/

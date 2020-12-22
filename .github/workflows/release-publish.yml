@@ -60,14 +60,10 @@ jobs:
         echo PACKAGE_NAME=$(echo "FOSSology-${VERSION}-$(lsb_release -si | tr [:upper:] [:lower:])-$(lsb_release -sc | tr [:upper:] [:lower:]).tar.gz") >> $GITHUB_ENV
 
     - name: Build Debs
-      run: dpkg-buildpackage -I
+      run: ./utils/fo-debuild --no-sign
 
-    - name: Package
-      run: |
-        find .. -type f -name "*-dbgsym*" -exec rm -rf {} \;
-        mkdir packages
-        mv ../*.deb packages/
-        tar -czvf ${PACKAGE_NAME} ./packages
+    - name: Rename package
+      run: mv fossology_*.tar.gz ${PACKAGE_NAME}
 
     - name: Upload Release Asset
       id: upload-release-asset
