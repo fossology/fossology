@@ -10,14 +10,14 @@
 {% endblock %}
 
 {% block content %}
-  <form name="user_edit" method="POST">
+  <form name="{{ formName }}" method="POST">
   <input type="hidden" name="user_pk" value="{{ userId }}"/>
   {%  if isSessionAdmin %}
     {{ "Select the user to edit"|trans }}:
     {% import "include/macros.html.twig" as macro %}
     {{ macro.select('userid', allUsers, 'userid', userId, ' class="ui-render-select2" onchange="RefreshPage(this.value);"') }}
   {% endif %}
-    
+
   <table style="border:1px solid black; border-collapse: collapse;" width="100%">
     <tr class="classic">
       <th width="25%">{{ "Username."|trans }}</th>
@@ -35,8 +35,8 @@
       <th width="25%">{{ "E-mail notification on job completion"|trans }}</th>
       <td><input type="checkbox" name="email_notify" {% if eMailNotification %}checked{% endif %}></td>
     </tr>
-    
-    {%  if isSessionAdmin %}
+
+    {% if isSessionAdmin %}
       <tr class="classic">
         <th width="25%">{{ "Select the user's access level."|trans }}</th>
         <td>{{ macro.select('user_perm', allAccessLevels, 'user_perm', accessLevel) }}</td>
@@ -47,19 +47,23 @@
           {{ folderListOption }}
         </select></td>
       </tr>
+      {% if passwordPolicy is empty %}
       <tr class="classic">
         <th width="25%">{{ "Require no password."|trans }}</th>
         <td><input type="checkbox" name="_blank_pass" id="blank_pass" {% if isBlankPassword %}checked="checked" disabled="disabled"{% endif %}/></td>
       </tr>
+      {% endif %}
     {% endif %}
-    
+
     <tr class="classic">
       <th width="25%">{{ "Password."|trans }}</th>
-      <td><input type="password" name="_pass1" size="20" id="pass1"/></td>
+      <td><input type="password" name="_pass1" size="20" id="passcheck"/>{% if passwordPolicy is not empty %}
+      <br /><span class="passPolicy">{{ passwordPolicy }}</span>
+      {% endif %}</td>
     </tr>
     <tr class="classic">
       <th width='25%'>{{ "Re-enter password."|trans }}</th>
-      <td><input type="password" name="_pass2" size="20"/></td>
+      <td><input type="password" name="_pass2" size="20" id="pass2"/></td>
     </tr>
     <tr class="classic">
       <th width='25%'>{{ 'Default agents selected when uploading data.'|trans }}</th>
@@ -284,7 +288,7 @@
 
     {% if isBlankPassword %}
     $(document).ready(function(){
-      $("#pass1").keyup(function (){
+      $("#passcheck").keyup(function (){
         var isBlank = ($(this).val()==='');
         $("#blank_pass").prop("checked", isBlank);
       });
@@ -303,4 +307,5 @@
     });
   </script>
   <script src="scripts/user-edit.js" type="text/javascript"></script>
+  <script type="text/javascript">{% include "password-policy-check.js.twig" %}</script>
 {% endblock %}

@@ -78,9 +78,9 @@ function deleteUser($UserId, $dbManager)
 
   /* Make sure it was deleted */
   $result = $dbManager->execute($userCheckStatement, [$UserId]);
-  $rowCount = count($dbManager->fetchArray($result)['cnt']);
+  $rowEmpty = empty($dbManager->fetchArray($result)['cnt']);
   $dbManager->freeResult($result);
-  if ($rowCount != 0) {
+  if (! $rowEmpty) {
     $text = _("Failed to delete user.");
     return ($text);
   }
