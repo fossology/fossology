@@ -14,7 +14,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.1.1
+  version: 1.1.2
   contact:
     email: fossology@fossology.org
   license:
@@ -1439,6 +1439,17 @@ components:
           example:
             - "MIT"
             - "GPL-2.0"
+        copyright:
+          description: >
+            Copyright findings for the file
+          type: array
+          items:
+            type: string
+            description: Copyright finding
+            nullable: true
+          example:
+            - "Copyright (C) 2017-2020 Free Software Foundation, Inc."
+            - "Copyright (C) 1991-2020 Free Software Foundation, Inc."
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"

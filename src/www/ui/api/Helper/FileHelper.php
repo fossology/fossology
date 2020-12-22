@@ -99,4 +99,16 @@ class FileHelper
   {
     return $this->pfileDao->getUploadForPackage($pfileId);
   }
+
+  /**
+   * Get the copyright for given pfile
+   *
+   * @param integer $pfileId PfileId to get copyright for
+   * @return array List of copyrights found
+   * @sa Fossology::Lib::Dao::PfileDao::getCopyright()
+   */
+  public function pfileCopyright($pfileId)
+  {
+    return $this->pfileDao->getCopyright($pfileId);
+  }
 }
