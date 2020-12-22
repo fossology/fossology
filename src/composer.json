@@ -26,7 +26,8 @@
         "symfony/yaml" : "v3.4.46",
         "twig/twig" : "v2.12.5",
         "twig/extensions" : "v1.5.4",
-        "guzzlehttp/guzzle": "v6.5.5"
+        "guzzlehttp/guzzle": "v6.5.5",
+        "container-interop/container-interop": "v1.2.0"
     },
     "require-dev" : {
         "doctrine/instantiator" : "v1.0.5",
