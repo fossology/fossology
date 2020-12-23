@@ -31,7 +31,11 @@
 #include <fcntl.h>
 #include <dirent.h>
 
+#ifdef STANDALONE
+#include "standalone.h"
+#else
 #include "libfossology.h"
+#endif
 
 /**
  * \brief Store check sum of a file
