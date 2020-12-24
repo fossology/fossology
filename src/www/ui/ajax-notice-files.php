@@ -63,6 +63,7 @@ class AjaxNoticeFiles extends FO_Plugin
     // Search the upload tree for all files named NOTICE*
     $Item = $uploadTreeId;
     $Filename = "NOTICE%";
+    $uploadId = $getuploadEntry['upload_fk'];
     $tag = "";
     $Page = 0;
     $SizeMin = "";
@@ -71,7 +72,7 @@ class AjaxNoticeFiles extends FO_Plugin
     $License = "";
     $Copyright = "";
 
-    $UploadtreeRecsResult = GetResults($Item, $Filename, $tag, $Page, $SizeMin,
+    $UploadtreeRecsResult = GetResults($Item, $Filename, $uploadId, $tag, $Page, $SizeMin,
       $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
       Auth::getGroupId(), $PG_CONN);
 
