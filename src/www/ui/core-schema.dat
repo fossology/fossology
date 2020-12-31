@@ -2281,6 +2281,8 @@
   $Schema["INDEX"]["personal_access_tokens"]["user_fk_active_idx"] = "CREATE INDEX user_fk_active_idx ON personal_access_tokens USING btree (user_fk, active);";
 
   $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
+  $Schema["INDEX"]["pfile"]["pfile_sha1_idx"] = "CREATE INDEX pfile_sha1_idx ON pfile USING btree (pfile_sha1);";
+  $Schema["INDEX"]["pfile"]["pfile_sha256_idx"] = "CREATE INDEX pfile_sha256_idx ON pfile USING btree (pfile_sha256);";
 
   $Schema["INDEX"]["report_cache"]["report_cache_createdts"] = "CREATE INDEX report_cache_createdts ON report_cache USING btree (report_cache_tla);";
 
