@@ -43,11 +43,16 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "libfossology.h"
 #include "checksum.h"
 #include "ununpack-ar.h"
 #include "ununpack-disk.h"
 #include "ununpack-iso.h"
+
+#ifdef STANDALONE
+#include "standalone.h"
+#else
+#include "libfossology.h"
+#endif
 
 #define Last(x)	(x)[strlen(x)-1]
 #define MAXCHILD        4096
