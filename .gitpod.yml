@@ -13,4 +13,4 @@ github:
     addComment: true
 
 tasks:
-  - init: sudo ./utils/fo-installdeps -ye && make && sudo make install && sudo /usr/local/lib/fossology/fo-postinstall && sudo service fossology start && sudo ./install/scripts/php-conf-fix.sh --overwrite && sudo -HE apachectl restart
+  - init: sudo ./utils/fo-installdeps -ye && make && sudo make install && sudo service postgresql restart && sudo /usr/local/lib/fossology/fo-postinstall && sudo service fossology start && sudo ./install/scripts/php-conf-fix.sh --overwrite && sudo -HE apachectl restart
