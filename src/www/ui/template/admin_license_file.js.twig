@@ -51,7 +51,7 @@ function getDataForTable() {
     "rf_fullname":        "{{ entry['rf_fullname']|escape('js') }}",
     "rf_text":            [ "{{ entry['rf_pk'] }}", "{{ entry['rf_text'][:120]|escape('js') }}" ],
     "rf_url":             "{{ entry['rf_url'] }}",
-    "ob_topic":           "{{ entry['ob_topic'] }}"
+    "ob_topic":           "{{ entry['ob_topic']|escape('js') }}"
   });
   {% endfor %}
 

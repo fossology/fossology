@@ -45,6 +45,18 @@
         <ul>
             <li>
                 <b>
+                    {{ "Choose upload to search into: "|trans }}
+                </b>
+                <select id="scanFilter" name='upload'>
+                    <option value="0">-- {{ 'All uploads'|trans }} --</option>
+                    {% for uploadObj in uploadsArray %}
+                        <option value="{{ uploadObj.getId() }}"> {{ uploadObj.getFilename() }} from {{ uploadObj.getTimestamp() | date("Y-m-d H:i:s") }}</option>
+                    {% endfor %}
+                </select>
+                <br>
+            </li>
+            <li>
+                <b>
                     {{ "Enter the filename to find: " | trans }}
                 </b>
                 <INPUT type='text' name='filename' size='40' value='{{ Filename|e }}'>
@@ -125,5 +137,8 @@
             setReadonlyForFilters(true);
         });
         {% endif %}
+
+        document.getElementById('scanFilter').value = {{ Upload }};
+
     </script>
 {% endblock %}

@@ -235,7 +235,7 @@ class FolderController extends RestController
       $isCopy = (strcmp($action, "copy") == 0);
       $message = $folderMove->copyContent(
         [
-          $folderDao->getFolderContentsId($folderId)
+          $folderDao->getFolderContentsId($folderId, $folderDao::MODE_FOLDER)
         ], $newParent, $isCopy);
       if (empty($message)) {
         $info = new Info(202,

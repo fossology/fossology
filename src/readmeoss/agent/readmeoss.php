@@ -206,7 +206,7 @@ class ReadmeOssAgent extends Agent
         $outData .= $addSeparator . $break;
       }
     }
-    return $outData;
+    return htmlspecialchars_decode($outData, ENT_DISALLOWED);
   }
 
   /**

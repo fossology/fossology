@@ -14,13 +14,13 @@
         <spdx:checksumValue>{{ sha1 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
-    <spdx:checksum> 
+    <spdx:checksum>
       <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_sha256" />
         <spdx:checksumValue>{{ sha256 | lower }}</spdx:checksumValue>
       </spdx:Checksum>
     </spdx:checksum>
-    <spdx:checksum> 
+    <spdx:checksum>
       <spdx:Checksum>
         <spdx:algorithm rdf:resource="http://spdx.org/rdf/terms#checksumAlgorithm_md5" />
         <spdx:checksumValue>{{ md5 | lower }}</spdx:checksumValue>
@@ -34,9 +34,9 @@
       <spdx:DisjunctiveLicenseSet>
 {% for res in concludedLicenses %}
 {% if res starts with 'LicenseRef-' %}
-        <spdx:member rdf:resource="{{ uri }}#{{ res|replace(' ','-')|url_encode }}" />
+        <spdx:member rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
 {% else %}
-        <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace(' ','-')|url_encode }}" />
+        <spdx:member rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
 {% endif %}
 {% endfor %}
       </spdx:DisjunctiveLicenseSet>
@@ -56,9 +56,9 @@
     <spdx:licenseInfoInFile rdf:resource="http://spdx.org/rdf/terms#noassertion" />
 {% else %}{% for res in scannerLicenses %}
 {% if res starts with 'LicenseRef-' %}
-    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#{{ res|replace(' ','-')|url_encode }}" />
+    <spdx:licenseInfoInFile rdf:resource="{{ uri }}#{{ res|replace({' ': '-'})|url_encode }}" />
 {% else %}
-    <spdx:licenseInfoInFile rdf:resource="http://spdx.org/licenses/{{ res|replace(' ','-')|url_encode }}" />
+    <spdx:licenseInfoInFile rdf:resource="http://spdx.org/licenses/{{ res|replace({' ': '-'})|url_encode }}" />
 {% endif %}
 {% endfor %}{% endif %}
 {% if copyrights|default is empty %}

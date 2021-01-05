@@ -33,6 +33,8 @@ define("CONFIG_TYPE_TEXTAREA", 3);
 define("CONFIG_TYPE_PASSWORD", 4);
 /** Dropdown type config */
 define("CONFIG_TYPE_DROP", 5);
+/** Checkbox type config */
+define("CONFIG_TYPE_BOOL", 6);
 
 
 /**
@@ -376,19 +378,66 @@ function Populate_sysconfig()
   $smtpAuthPasswdPrompt = _('SMTP Login Password');
   $smtpAuthPasswdDesc = _('Password used for SMTP login.');
   $valueArray[$variable] = array("'$variable'", "null", "'$smtpAuthPasswdPrompt'",
-    strval(CONFIG_TYPE_PASSWORD), "'SMTP'", "5", "'$smtpAuthPasswdDesc'", "null", "null");
+    strval(CONFIG_TYPE_PASSWORD), "'SMTP'", "6", "'$smtpAuthPasswdDesc'", "null", "null");
 
   $variable = "SMTPSslVerify";
   $smtpSslPrompt = _('SMTP SSL Verify');
   $smtpSslDesc = _('The SSL verification for connection is required?');
   $valueArray[$variable] = array("'$variable'", "'S'", "'$smtpSslPrompt'",
-    strval(CONFIG_TYPE_DROP), "'SMTP'", "6", "'$smtpSslDesc'", "null", "'Ignore{I}|Strict{S}|Warn{W}'");
+    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpSslDesc'", "null", "'Ignore{I}|Strict{S}|Warn{W}'");
 
   $variable = "SMTPStartTls";
   $smtpTlsPrompt = _('Start TLS');
   $smtpTlsDesc = _('Use TLS connection for SMTP?');
   $valueArray[$variable] = array("'$variable'", "'1'", "'$smtpTlsPrompt'",
-    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
+    strval(CONFIG_TYPE_DROP), "'SMTP'", "8", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
+
+  /* Password policy config */
+  $variable = "PasswdPolicy";
+  $prompt = _('Enable password policy');
+  $desc = _('Enable password policy check');
+  $valueArray[$variable] = array("'$variable'", "false", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "1", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyMinChar";
+  $prompt = _('Minimum characters');
+  $desc = _('Blank for no limit');
+  $valueArray[$variable] = array("'$variable'", "8", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'PASSWD'", "2", "'$desc'", "null", "null");
+
+  $variable = "PasswdPolicyMaxChar";
+  $prompt = _('Maximum characters');
+  $desc = _('Blank for no limit');
+  $valueArray[$variable] = array("'$variable'", "16", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'PASSWD'", "3", "'$desc'", "null", "null");
+
+  $variable = "PasswdPolicyLower";
+  $prompt = _('Lowercase');
+  $desc = _('Minimum one lowercase character.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "4", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyUpper";
+  $prompt = _('Uppercase');
+  $desc = _('Minimum one uppercase character.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "5", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicyDigit";
+  $prompt = _('Digit');
+  $desc = _('Minimum one digit.');
+  $valueArray[$variable] = array("'$variable'", "true", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'PASSWD'", "6", "'$desc'",
+    "'check_boolean'", "null");
+
+  $variable = "PasswdPolicySpecial";
+  $prompt = _('Allowed special characters');
+  $desc = _('Empty for do not care');
+  $valueArray[$variable] = array("'$variable'", "'@$!%*?&'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'PASSWD'", "7", "'$desc'", "null", "null");
 
   $variable = "PATMaxExipre";
   $patTokenValidityPrompt = _('Max token validity');

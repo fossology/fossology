@@ -216,3 +216,107 @@ function read_permission($upload, $user)
   return 0;
 }
 
+/**
+ * Check if the password policy has been enabled
+ * @return boolean
+ */
+function passwordPolicyEnabled()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! array_key_exists('PasswdPolicy', $sysconfig) ||
+    $sysconfig['PasswdPolicy'] == 'false') {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Generate the password policy regex from sysconfig
+ * @return string Regex based on policy selected
+ */
+function generate_password_policy()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! passwordPolicyEnabled()) {
+    return ".*";
+  }
+  $limit = "*";
+  $min = trim($sysconfig['PasswdPolicyMinChar']);
+  $max = trim($sysconfig['PasswdPolicyMaxChar']);
+  if (!empty($min) || !empty($max)) {
+    if (empty($min)) {
+      $min = 0;
+    }
+    $min = intval($min) < 0 ? 0 : $min;
+    $max = intval($max) < 0 ? 0 : $max;
+    $limit = '{' . $min . ",$max}";
+  }
+  $lookAhead = "";
+  $charset = "a-zA-Z\\d";
+  if ($sysconfig['PasswdPolicyLower'] == 'true') {
+    $lookAhead .= '(?=.*[a-z])';
+  }
+  if ($sysconfig['PasswdPolicyUpper'] == 'true') {
+    $lookAhead .= '(?=.*[A-Z])';
+  }
+  if ($sysconfig['PasswdPolicyDigit'] == 'true') {
+    $lookAhead .= '(?=.*\\d)';
+  }
+  $special = trim($sysconfig['PasswdPolicySpecial']);
+  if (!empty($special)) {
+    $lookAhead .= "(?=.*[$special])";
+    $charset .= $special;
+    $charset = '[' . $charset . ']';
+  } else {
+    $charset = '.';  // Allow any special character
+  }
+  return $lookAhead . $charset . $limit;
+}
+
+/**
+ * Translate selected password policy into user understandable string
+ * @return string
+ */
+function generate_password_policy_string()
+{
+  $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+  if (! passwordPolicyEnabled()) {
+    return "No policy defined.";
+  }
+  $limit = "Any length.";
+  $min = trim($sysconfig['PasswdPolicyMinChar']);
+  $max = trim($sysconfig['PasswdPolicyMaxChar']);
+  if (!empty($min) || !empty($max)) {
+    if (empty($min)) {
+      $min = 0;
+    }
+    $limit = "Minimum $min";
+    if (!empty($max)) {
+      $limit .= ", maximum $max";
+    }
+    $limit .= " characters.";
+  }
+  $others = [];
+  if ($sysconfig['PasswdPolicyLower'] == 'true') {
+    $others[] = "lower case";
+  }
+  if ($sysconfig['PasswdPolicyUpper'] == 'true') {
+    $others[] = "upper case";
+  }
+  if ($sysconfig['PasswdPolicyDigit'] == 'true') {
+    $others[] = "digit";
+  }
+  if (!empty($others)) {
+    $others = "At least one " . join(", ", $others);
+  } else {
+    $others = "";
+  }
+  $special = trim($sysconfig['PasswdPolicySpecial']);
+  if (!empty($special)) {
+    if (!empty($others)) {
+      $others .= " and";
+    }
+    $others .= " one of <em>$special</em>";
+  }
+  return "$limit $others.";
+}

@@ -296,7 +296,7 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
     return !empty($cycle);
   }
 
-  protected function getContent($folderContentId)
+  public function getContent($folderContentId)
   {
     $content = $this->dbManager->getSingleRow('SELECT * FROM foldercontents WHERE foldercontents_pk=$1',
       array($folderContentId),
@@ -444,13 +444,14 @@ WHERE fc.parent_fk = $1 AND fc.foldercontents_mode = " . self::MODE_UPLOAD . " A
   /**
    * Get the folder contents id for a given child id
    * @param integer $childId Id of the child
+   * @param integer $mode    Mode of child
    * @return NULL|integer Folder content id if success, NULL otherwise
    */
-  public function getFolderContentsId($childId)
+  public function getFolderContentsId($childId, $mode)
   {
     $folderContentsRow = $this->dbManager->getSingleRow(
       'SELECT foldercontents_pk FROM foldercontents '.
-      'WHERE child_id = $1', [$childId]);
+      'WHERE child_id = $1 AND foldercontents_mode = $2', [$childId, $mode]);
     if (!$folderContentsRow) {
       return null;
     }

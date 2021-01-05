@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
-Copyright (C) 2017 Siemens AG
+Copyright (C) 2017,2020 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -22,81 +22,175 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\UI\Api\Models;
 
+/**
+ * @class File
+ * @brief File model holding information about a single file
+ */
 class File
 {
+
   /**
-   * @var string $filename
-   * Current file name
+   * @var string $NOT_FOUND
+   * Message for files not found in DB
    */
-  private $filename;
+  const NOT_FOUND = "Not found";
   /**
-   * @var string $contentType
-   * HTTP Content-Type header string for current file
+   * @var string $INVALID
+   * Message for files not found in DB
    */
-  private $contentType;
+  const INVALID = "Invalid keys";
+
   /**
-   * @var string $fileContent
-   * File content
+   * @var Hash $hash
+   * Hash info of the file
    */
-  private $fileContent;
+  private $hash;
+  /**
+   * @var Findings $findings
+   * Findings about the file
+   */
+  private $findings;
+  /**
+   * @var array $uploads
+   * Upload IDs the file belongs to
+   */
+  private $uploads;
+  /**
+   * @var string $message
+   * Message associated with the file
+   */
+  private $message;
 
   /**
    * File constructor.
-   * @param string $filename
-   * @param string $contentType
-   * @param string $fileContent
+   * @param Hash $hash
    */
-  public function __construct($filename, $contentType, $fileContent)
+  public function __construct($hash)
   {
-    $this->filename = $filename;
-    $this->contentType = $contentType;
-    $this->fileContent = $fileContent;
+    $this->hash = $hash;
+    $this->findings = null;
+    $this->uploads = null;
+    $this->message = "";
   }
 
-  ////// Getters //////
+  /**
+   * @return Hash
+   */
+  public function getHash()
+  {
+    return $this->hash;
+  }
+
+  /**
+   * @return Findings|null If message is `NOT_FOUND` or `INVALID`, returns null,
+   * findings otherwise
+   */
+  public function getFindings()
+  {
+    if ($this->message == self::NOT_FOUND || $this->message == self::INVALID) {
+      return null;
+    }
+    return $this->findings;
+  }
+
+  /**
+   * @return array|null
+   */
+  public function getUploads()
+  {
+    if (count($this->uploads) == 1 && $this->uploads[0] == 0) {
+      return null;
+    }
+    return $this->uploads;
+  }
 
   /**
    * @return string
    */
-  public function getFilename()
+  public function getMessage()
   {
-    return $this->filename;
+    return $this->message;
   }
 
   /**
-   * @return string
+   * @param Hash $hash
    */
-  public function getContentType()
+  public function setHash($hash)
   {
-    return $this->contentType;
+    $this->hash = $hash;
   }
 
   /**
-   * @return string
+   * @param Findings $findings
    */
-  public function getFileContent()
+  public function setFindings($findings)
   {
-    return $this->fileContent;
+    $this->findings = $findings;
   }
 
   /**
-   * @return string json
+   * @param array $uploads
    */
-  public function getJSON()
+  public function setUploads($uploads)
   {
-    return json_encode($this->getArray());
+    if (is_array($uploads)) {
+      $this->uploads = $uploads;
+    } else {
+      if ($this->uploads === null) {
+        $this->uploads = array();
+      }
+      $this->uploads[] = intval($uploads);
+    }
+  }
+
+  /**
+   * @param string $message
+   */
+  public function setMessage($message)
+  {
+    $this->message = $message;
   }
 
   /**
    * Get the file element as associative array
+   *
+   * Do not return findings and uploads if message is `NOT_FOUND` or `INVALID`.
    * @return array
    */
   public function getArray()
   {
-    return [
-      'filename'    => $this->filename,
-      'contentType' => $this->contentType,
-      'fileContent' => $this->fileContent
-    ];
+    $returnArray = [];
+    $returnArray['hash'] = $this->hash->getArray();
+    if ($this->message != self::NOT_FOUND && $this->message != self::INVALID) {
+      $returnArray['findings'] = $this->getFindings()->getArray();
+      $returnArray['uploads'] = $this->getUploads();
+    } else {
+      $returnArray['message'] = $this->getMessage();
+    }
+    return $returnArray;
+  }
+
+  /**
+   * Parse a list of hashes and generate array of File objects.
+   *
+   * @param array $inputList Array of hashes to parse
+   * @return File[] Array of files
+   * @sa Fossology::UI::Api::Models::Hash::createFromArray()
+   */
+  public static function parseFromArray($inputList)
+  {
+    $fileList = [];
+    foreach ($inputList as $fileJson) {
+      $hash = Hash::createFromArray($fileJson);
+      if ($hash === null) {
+        $hash = new Hash();
+        $file = new File($hash);
+        $file->setMessage(self::INVALID);
+      } else {
+        $file = new File($hash);
+      }
+      $fileList[] = $file;
+    }
+    return $fileList;
   }
 }

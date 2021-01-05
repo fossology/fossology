@@ -101,7 +101,7 @@ class ReportStatic
    * @brief Generates clearing protocol change log table
    * @param Section $section
    */
-  function clearingProtocolChangeLogTable(Section $section)
+  function clearingProtocolChangeLogTable(Section $section, $heading)
   {
     $thColor = array("bgColor" => "E0E0E0");
     $thText = array("size" => 12, "bold" => true);
@@ -111,7 +111,6 @@ class ReportStatic
     $cellSecondLen = 4500;
     $cellThirdLen = 9000;
 
-    $heading = "Clearing Protocol Change Log";
     $section->addTitle(htmlspecialchars($heading), 2);
 
     $table = $section->addTable($this->tablestyle);
@@ -155,9 +154,8 @@ class ReportStatic
    * @param Section $section
    * @param string $otherStatement
    */
-  function assessmentSummaryTable(Section $section, $otherStatement)
+  function assessmentSummaryTable(Section $section, $otherStatement, $heading)
   {
-    $heading = "Assessment Summary";
     $infoText = "The following table only contains significant obligations, "
         ."restrictions & risks for a quick overview – all obligations, "
         ."restrictions & risks according to Section 3 must be considered.";
@@ -217,6 +215,10 @@ class ReportStatic
     $this->addCheckBoxText($cell, $getCheckboxList[2], $nodependenciesfound);
     $this->addCheckBoxText($cell, $getCheckboxList[3], $dependenciesfoundinsourcecode);
     $this->addCheckBoxText($cell, $getCheckboxList[4], $dependenciesfoundinbinaries);
+    if ($otherStatement["ri_depnotes"] != 'NA' && !empty($otherStatement["ri_depnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_depnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $noexportrestrictionsfound = " no export restrictions found";
     $exportrestrictionsfound = " export restrictions found (see obligations)";
@@ -225,6 +227,10 @@ class ReportStatic
     $cell = $table->addCell($cellLen);
     $this->addCheckBoxText($cell, $getCheckboxList[5], $noexportrestrictionsfound);
     $this->addCheckBoxText($cell, $getCheckboxList[6], $exportrestrictionsfound);
+    if ($otherStatement["ri_exportnotes"] != 'NA' && !empty($otherStatement["ri_exportnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_exportnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $norestrictionsforusefound = " no restrictions for use found";
     $restrictionsforusefound = " restrictions for use found (see obligations)";
@@ -234,6 +240,10 @@ class ReportStatic
     $cell = $table->addCell($cellLen);
     $this->addCheckBoxText($cell, $getCheckboxList[7], $norestrictionsforusefound);
     $this->addCheckBoxText($cell, $getCheckboxList[8], $restrictionsforusefound);
+    if ($otherStatement["ri_copyrightnotes"] != 'NA' && !empty($otherStatement["ri_copyrightnotes"])) {
+      $extraNotes = str_replace("\n", "<w:br/>", htmlspecialchars($otherStatement["ri_copyrightnotes"], ENT_DISALLOWED));
+      $cell->addText($extraNotes, $rightColStyleBlue, "pStyle");
+    }
 
     $table->addRow($rowWidth, "pStyle");
     $table->addCell($cellFirstLen)->addText(htmlspecialchars(" Additional notes"), $leftColStyle, "pStyle");
@@ -270,7 +280,7 @@ class ReportStatic
    * @brief Generate todo table
    * @param Section $section
    */
-  function todoTable(Section $section)
+  function todoTable(Section $section, $heading)
   {
     global $SysConf;
     $textCommonObligation = $this->reArrangeObligationText($SysConf['SYSCONFIG']["CommonObligation"]);
@@ -283,7 +293,6 @@ class ReportStatic
     $rowTextStyleRight = array("size" => 10, "bold" => false);
     $rowTextStyleRightBold = array("size" => 10, "bold" => true);
 
-    $heading = "Required license compliance tasks";
     $subHeading = "Common obligations, restrictions and risks:";
     $subHeadingInfoText = "  There is a list of common rules which was defined"
       ." to simplify the To-Dos for development and distribution. The following"

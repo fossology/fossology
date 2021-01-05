@@ -270,18 +270,9 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $jarFileBasename = 'spdx-tools-'.$version.'-jar-with-dependencies.jar';
     $jarFile = __DIR__.'/'.$jarFileBasename;
     if (!file_exists($jarFile)) {
-      $zipFileBasename='SPDXTools-'.$tag.'.zip';
-      $zipFile=__DIR__.'/'.$zipFileBasename;
-      if (!file_exists($zipFile)) {
-        file_put_contents($zipFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$zipFileBasename, 'r'));
-
-      }
-      $this->assertFileExists($zipFile, 'could not download SPDXTools');
-
-      system('unzip -n -d '.__DIR__.' '.$zipFile);
-      rename (__DIR__.'/SPDXTools-'.$tag.'/'.$jarFileBasename, $jarFile);
+      file_put_contents($jarFile, fopen('https://github.com/spdx/tools/releases/download/'.$tag.'/'.$jarFileBasename, 'r'));
     }
-    $this->assertFileExists($jarFile, 'could not extract SPDXTools');
+    $this->assertFileExists($jarFile, 'could not download SPDXTools');
     return $jarFile;
   }
 

@@ -92,12 +92,19 @@ function createTable{{ table.type }}() {
     var replaceText = $('#replaceText{{ table.type }}').val().trim();
     var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
     var ajaxList = new Array();
-    if(replaceIsValid){
+    if (replaceIsValid) {
+      var regex = advanceSearchToRegex($('#advSearchText{{ table.type }}').val().trim());
       $("input:checkbox[class=deleteBySelect{{ table.type }}]:checked").each(function () {
-        currentValue = $(this).val();
-        var currUploadData = currentValue.split(',');
+        var currentId = $(this).val();
+        var currUploadData = currentId.split(',');
+        var currentValue = enabledTable.api().row($(this).parent().parent()[0]).data()[1];
+        currentValue = $("<textarea/>").html(currentValue).text();  // Decode HTML &lt; &gt;
+        var newValue = replaceText;
+        if (!/^\s*$/.test(regex)) {
+          newValue = currentValue.replace(new RegExp(regex, "gi"), replaceText);
+        }
         ajaxList.push(updateRows{{ table.type }}(currUploadData[0],
-          currUploadData[1], currUploadData[2], currUploadData[3], replaceText));
+          currUploadData[1], currUploadData[2], currUploadData[3], newValue));
       });
       // Wait for all ajax calls to resolve
       $.when.apply($, ajaxList).done(function(){
@@ -169,7 +176,9 @@ function createPlainTable{{ table.type }}() {
     });
   });
 
-  $('#replaceText{{ table.type }}').parent().remove();
+  $('#searchReplaceTable{{ table.type }}').remove();
+  $('#testVal{{ table.type }}').remove();
+  $('#testReplacement{{ table.type }}').remove();
   $('#replaceSelected{{ table.type }}').remove();
 
   return enabledTable;
@@ -214,7 +223,7 @@ function undo{{ table.type }}(upload, item, hash, kind) {
     dataType: 'text',
     url: '?mod=ajax-copyright-hist&action=undo',
     data: { id : upload + ',' + item + ',' + hash + ',' + kind },
-      success: function(data) { 
+      success: function(data) {
         $("#delete{{ table.type }}" + hash).show();
         $("#update{{ table.type }}" + hash).hide();
         $("#deleteBySelect{{ table.type }}" + hash).prop('checked', false);

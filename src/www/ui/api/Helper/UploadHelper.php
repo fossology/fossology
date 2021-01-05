@@ -35,6 +35,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\UI\Api\Models\Findings;
 
 /**
  * @class UploadHelper
@@ -604,6 +605,16 @@ class UploadHelper
     if (array_key_exists("warn", $licenseList)) {
       unset($licenseList["warn"]);
     }
-    return $licenseList;
+
+    $responseList = array();
+    foreach ($licenseList as $license) {
+      $findings = new Findings($license['agentFindings'],
+        $license['conclusions']);
+      $responseRow = array();
+      $responseRow['filePath'] = $license['filePath'];
+      $responseRow['findings'] = $findings->getArray();
+      $responseList[] = $responseRow;
+    }
+    return $responseList;
   }
 }

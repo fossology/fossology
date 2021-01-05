@@ -126,6 +126,8 @@ src/spasht/agent/spasht
 src/spasht/agent/version.php
 src/ununpack/agent/departition
 src/ununpack/agent/ununpack
+src/ununpack/agent/departition-sa
+src/ununpack/agent/ununpack-sa
 src/wget_agent/agent/wget_agent
 variable.list
 /nbproject/private/

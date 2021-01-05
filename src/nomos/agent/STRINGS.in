@@ -788,6 +788,18 @@
 %KEY% "permi[st]"
 %STR% "permission to use copy modify and distribute this software for any purpose is hereby granted without fee provided that the above copyright notice and this permission notice appear in all copies"
 #
+%ENTRY% _LT_blessing
+%KEY% "legal"
+%STR% "in place of a legal notice here is a blessing"
+#
+%ENTRY% _LT_BlueOak_100_Purpose
+%KEY% "software"
+%STR% "gives everyone as much permission to work with this software as possible"
+#
+%ENTRY% _LT_BlueOak_100_Acceptance
+%KEY% "licen[cs]"
+%STR% "rules of this license are both obligations under"
+#
 %ENTRY% _LT_BOGUSTMPL
 %KEY% "licen[cs]"
 %STR% "This file is r?e?-?distributed under the same licen[cs]e as the package PACKAGE"
@@ -890,6 +902,10 @@
 %ENTRY% _LT_BSDref14
 %KEY% "licen[cs]"
 %STR% "subject to the terms and conditions of the bsd license"
+#
+%ENTRY% _LT_BSDref15
+%KEY% "licen[cs]"
+%STR% "is bsd.licensed"
 #
 %ENTRY% _LT_BSDSTYLEref1
 %KEY% "\<under\>"
@@ -1020,7 +1036,7 @@
 #
 %ENTRY% _LT_BSD_CLAUSE_1
 %KEY% "copyright"
-%STR% "redistributions? of source code must retain the (above )?copyright notice (unmodified )?this list of conditions and the following disclaimer"
+%STR% "redistributions? of source code must retain the (above |original author.s )?copyright notice (unmodified )?this list of conditions and the following disclaimer"
 #
 %ENTRY% _LT_BSD_CLAUSE_1_DISCLAIMER
 %KEY% "copyright"
@@ -1028,7 +1044,7 @@
 #
 %ENTRY% _LT_BSD_CLAUSE_2
 %KEY% "copyright"
-%STR% "redistributions? in binary form must reproduc[et] the (above )?copyright notice this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution"
+%STR% "redistributions? in binary form must reproduc[et] the (above |original author.s )?copyright notice this list of conditions and the following disclaimer (listed in this license )?in the documentation and ?/or other materials provided with the distribution"
 #
 %ENTRY% _LT_BSD_CLAUSE_3
 %KEY% "software"
@@ -1049,6 +1065,10 @@
 %ENTRY% _LT_BSD_CLAUSE_CLEAR
 %KEY% "licen[cs]"
 %STR% "no express or implied licenses to any =FEW= patent rights are granted by this license"
+#
+%ENTRY% _LT_BSD_CLAUSE_OPEN_MPI
+%KEY% "so(ftware|urce)"
+%STR% "no reassurances that the source code provided does not infringe any patent"
 #
 %ENTRY% _LT_BSD_CLAUSE_PATENT
 %KEY% "licen[cs]"
@@ -1108,7 +1128,7 @@
 #
 %ENTRY% _LT_CC_ref
 %KEY% =NULL=
-%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?) =SOME= \<creative ?commons\>"
+%STR% "(distribu|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used?|see) =SOME= \<creative ?commons\>"
 #
 # _LT_CC_BY_SA is for v 2.5
 %ENTRY% _LT_CC_BY_SA_25
@@ -1128,11 +1148,7 @@
 %ENTRY% _LT_CC_BY_ND_30
 %KEY% "derogatory"
 %STR% "You must not distort, mutilate, modify or take other derogatory"
-#####
-# DELETED: ... you a world-?wide royalty-free non-?exclusive perpetual
-# for the duration of the applicable copyright licen[cs]e to exercise
-# the rights in the work as stated below
-#####
+#
 %ENTRY% _LT_CCPL
 %KEY% "(condit|vers)ion"
 %STR% "subject to the terms and conditions of this (public )?licen[cs]e =FEW= licen[cs]or hereby grants"
@@ -1384,9 +1400,13 @@
 %KEY% "so(ftware|urce)"
 %STR% "free software you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms of =SOME= as published by DARPA"
 #
-%ENTRY% _LT_DARPA_COUGAAR
+%ENTRY% _LT_DARPA_COUGAAR_1
 %KEY% "so(ftware|urce)"
 %STR% "free software you (can|may) r?e?-?distribute (it a|a)nd/or modify it under the terms of the cougaar open source licen[cs]e as published by DARPA"
+#
+%ENTRY% _LT_DARPA_COUGAAR_2
+%KEY% "so(ftware|urce)"
+%STR% "this product includes software developed in part by support from the defense advanced research project agency"
 #####
 # DELETED: ... any party from selling or giving away the software
 # as a component of an aggregate software distribution containing
@@ -1501,7 +1521,7 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_9
 %KEY% "licen[cs]"
-%STR% "(is|was|are|were) (\<dual\>|multiple)[ -]licensed"
+%STR% "(is|was|are|were) (\<dual\>|multiple)[ -]license"
 #
 %ENTRY% _LT_DUAL_LICENSE_10
 %KEY% "licen[cs]"
@@ -1620,7 +1640,7 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_38
 %KEY% "licen[cs]"
-%STR% "you (may|can) choose between two licenses"
+%STR% "you (may|can) choose (between two|either) licenses?"
 #
 %ENTRY% _LT_DUAL_LICENSE_39
 %KEY% "licen[cs]"
@@ -1665,7 +1685,7 @@
 #
 %ENTRY% _LT_DUAL_LICENSE_49
 %KEY% "licen[cs]"
-%STR% "spdx-license-identifier.{1,100}[[:space:]]OR[[:space:]]"
+%STR% "spdx-license-identifier[-_:\+\.\(\)[:alnum:][:blank:]]+[[:blank:]]OR[[:blank:]]"
 #
 %ENTRY% _LT_SUBSEQUENT_VERSION
 %KEY% "licen[cs]"
@@ -2088,7 +2108,7 @@
 #
 %ENTRY% _LT_FREE_51
 %KEY% "distribut"
-%STR% "copying and distribution of this file with or without modification are permitted (in any medium without royalty )?provided"
+%STR% "copying and distribution of this file with or without modification are permitted provided"
 #
 %ENTRY% _LT_FREE_52
 %KEY% "distribut"
@@ -2330,6 +2350,10 @@
 %KEY% "distribut"
 %STR% "you may freely use modify and/or r?e?distribute this file"
 #
+%ENTRY% _LT_FREE_111
+%KEY% "\<free\>"
+%STR% "free for all purposes without any express guarantee"
+#
 %ALIAS% _FREE_last_other
 %ALIAS% _FREECLAIM_last
 #
@@ -2415,15 +2439,19 @@
 %ENTRY% _LT_FSF_5
 %KEY% "distribut"
 %STR% "and you are welcome to r?e?-?distribut(e|e copies of) it under certain conditions"
-#####
-# DELETED: free =SOME= ... to copy distribute and modify it
-#####
+#
 %ENTRY% _LT_FSFref1
 %KEY% "permi[st]"
 %STR% "the free software foundation gives unlimited permission"
-#####
-# DELETED: ... you preserve this copyright notice and permission notice
-#####
+#
+%ENTRY% _LT_FSFAP
+%KEY% "distribut"
+%STR% "copying and distribution of this file with or without modification are permitted in any medium without royalty provided"
+#
+%ENTRY% _LT_FSFUL
+%KEY% "distribut"
+%STR% "gives unlimited permission to copy distribute and modify it"
+#
 %ENTRY% _LT_LG
 %KEY% "licen[cs]"
 %STR% "License agreement"
@@ -2685,7 +2713,7 @@
 #
 %ENTRY% _LT_GPL_NAMED2
 %KEY% "gpl"
-%STR% "(under|terms|releas) ==SOME== [^al]gpl"
+%STR% "(under|terms|releas) =SOME= [^al]gpl"
 #
 # To catch things like "this is GPL".
 %ENTRY% _LT_GPL_NAMED3
@@ -3112,6 +3140,14 @@
 %ENTRY% _LT_HP_PROPRIETARY_3
 %KEY% "so(ftware|urce)"
 %STR% "hp grants you a licen[cs]e to use one copy of the software use means storing loading installing executing or displaying the software you may not modify the software or disable any licen[cs]ing"
+#
+%ENTRY% _LT_HPND_1
+%KEY% "distribut"
+%STR% "not be used in advertising or publicity pertaining to distribution"
+#
+%ENTRY% _LT_HPND_2
+%KEY% "so(ftware|urce)"
+%STR% "no representations about the suitability of this software"
 #####
 # DELETED: ... =ANY= is hereby granted provided that the above
 # copyright notices? =SOME= appear in all copies
@@ -3402,6 +3438,10 @@
 %KEY% "licen[cs]"
 %STR% "Intel grants free of charge to any person =FEW= obtaining a copy of the source code =SOME= irrevocable perpetual worldwide license under Intel.s copyrights (in|for) the (base )?code distributed =FEW= by Intel =FEW= to copy make derivatives distribute use and display any portion of the (covered )?code in any form with the right to sublicense such rights"
 #
+%ENTRY% _LT_INTEL_BINARY
+%KEY% "permi[st]"
+%STR% "Neither the name of Intel Corporation nor the names of its suppliers may be used to endorse or promote products derived from this software without specific prior written permission"
+#
 %ENTRY% _LT_INTERLINK_EULA
 %KEY% "legal"
 %STR% "this end[ -]user licen[cs]e agreement eula is a legal agreement between you either an individual or an entity and interlink networks inc for the product identified above"
@@ -3437,6 +3477,14 @@
 %ENTRY% _LT_IPTC_2
 %KEY% "licen[cs]"
 %STR% "subject to =FEW= licensing requirements contained herein you may =FEW= use the specifications and materials =FEW= IPTC"
+#
+%ENTRY% _LT_ISSL_1
+%KEY% "distribut"
+%STR% "you may use and redistribute =SOME= without modification"
+#
+%ENTRY% _LT_ISSL_2
+%KEY% "licen[cs]"
+%STR% "Intel grants you a world-wide royalty-free non-exclusive license under patents"
 #
 %ENTRY% _LT_ITU_T_1
 %KEY% "licen[cs]"
@@ -3658,7 +3706,7 @@
 #####
 %ENTRY% _LT_LGPLref2
 %KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code) =SOME= under =SOME= (\<lgpl|lesser GNU (general p|p)ublic licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|\<use\>|code|published) =SOME= under =SOME= (\<lgpl|lesser GNU (general p|p)ublic licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))"
 #
 %ENTRY% _LT_LGPLref3
 %KEY% "(condit|vers)ion"
@@ -3717,7 +3765,7 @@
 #
 %ENTRY% _LT_LGPL3ref
 %KEY% "\<under\>"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= under =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))(([v-]?| ?version) ?)3"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code|published) =SOME= under =SOME= (lgpl|lesser GNU general public licen[cs]e|GNU (lesser|library) (gpl|(general p|p)ublic licen[cs]e))(([v-]| ?version) ?)3"
 #
 %ENTRY% _LT_LGPL3_ref_later
 %KEY% "licen[cs]"
@@ -3733,7 +3781,7 @@
 # To catch things like "this is LGPL".
 %ENTRY% _LT_LGPL_NAMED2
 %KEY% "lgpl"
-%STR% "[^-_]\<lgpl\>"
+%STR% "[^-_]\<lgpl(v(2|3))?\>"
 #
 %ENTRY% _LT_LGPL_OR
 %NOCHECK%
@@ -3748,9 +3796,17 @@
 %KEY% "rar" 
 %STR% "re-create the rar compression algorithm"
 #
+%ENTRY% _LT_libmng_2007_1
+%KEY% =NULL=
+%STR% "result from the use of the MNG Library"
+#
 %ENTRY% _LT_libmng_2007_Clause_1
 %KEY% "software"
 %STR% "you must not claim that you wrote the original software"
+#
+%ENTRY% _LT_libpng_20_Clause_1
+%KEY% "software"
+%STR% "if you use this software =FEW= acknowledgment =FEW= would be appreciated"
 #
 %ENTRY% _LT_linking_exception_1
 %KEY% "permi[st]"
@@ -4004,7 +4060,7 @@
 #
 %ENTRY% _LT_MITref7
 %KEY% "licen[cs]"
-%STR% "licen[cs]ed?:? (type )?\<mit\>"
+%STR% "licen[cs]ed?:? (type |is )?\<mit\>"
 #
 %ENTRY% _LT_MITref8
 %KEY% "licen[cs]"
@@ -4195,7 +4251,7 @@
 #
 %ENTRY% _LT_MSCORP_PLref3
 %KEY% "licen[cs]"
-%STR% "subject to (the )?microsoft (permissive|public) licen[cs]e"
+%STR% "subject to (the |terms and conditions of the )?microsoft (permissive|public) licen[cs]e"
 #####
 # DELETED: ... your products maintaining your products or enhancing the
 # interoperability of your products with the software and specifically
@@ -4227,6 +4283,10 @@
 %ENTRY% _LT_MTLL
 %KEY% "software"
 %STR% "the name MTL shall not be used to endorse or promote products derived from this software"
+#
+%ENTRY% _LT_MulanPSL_10
+%KEY% "software"
+%STR% "distribution of the software shall be subject to Mulan PSL (version |v)1"
 #
 %ENTRY% _LT_MULTICORP_1
 %KEY% "licen[cs]"
@@ -4299,13 +4359,18 @@
 # and distribute the original software or portions thereof with or
 # without modifications and/or as part of a larger work
 #####
+%ENTRY% _LT_NIST_1
+%KEY% "distribut"
+%STR% "you may use copy and distribute copies of the software =SOME= keep intact this entire notice"
+#
+%ENTRY% _LT_NIST_2
+%KEY% "distribut"
+%STR% "you may improve modify and create derivative works of the software =SOME= distribute such modifications or works"
+#
 %ENTRY% _LT_NOKIA
 %KEY% "licen[cs]"
 %STR% "under copyrights licen[cs]able by Nokia"
-#####
-# DELETED: permission is granted to copy and create derivative works for ...
-# is preserved in all copies of source code or included in human readable form
-#####
+#
 %ENTRY% _LT_NONCOMMERCIAL_1
 %KEY% "commerc"
 %STR% "any non-?commercial purpose provided th(is|ese) copyright notice"
@@ -4366,6 +4431,10 @@
 %KEY% "permi[st]"
 %STR% "permission to use copy modify and distribute this software and its documentation for any purpose (with or|and) without fee is hereby granted provided that the above copyright notice appears in all copies and that both the copyright notice and this permission notice appear in supporting documentation"
 #
+%ENTRY% _LT_NTP_0
+%KEY% "so(ftware|urce)"
+%STR% "advertising or =FEW= distribution of the software without =FEW= permission"
+#
 %ENTRY% _LT_NVIDIA
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "hereby granted a non-?exclusive,? royalty-free copyright (and design patent)? licen[cs]e"
@@ -4408,6 +4477,10 @@
 %ENTRY% _LT_ODL
 %KEY% "licen[cs]"
 %STR% "subject to all of the terms and conditions of this Open Directory licen[cs]e"
+#
+%ENTRY% _LT_OGC
+%KEY% "licen[cs]"
+%STR% "OGC work =SOME= is being provided by the copyright holders under the following license"
 #####
 # DELETED: ... on with or for operating systems which are not open
 # source programs
@@ -4511,7 +4584,7 @@
 #
 %ENTRY% _LT_OpenSSL_exception_2
 %KEY% "openssl"
-%STR% "as (an additional|a special) (exemption|exception) =SOME= permission to link =FEW= with the (OpenSSL project.s )?OpenSSL librar(y|ies)"
+%STR% "as (an additional|a(nother)? special) (exemption|exception) =SOME= permission to link =SOME= with (any version of )?the (OpenSSL project.s )?OpenSSL librar(y|ies)"
 #
 %ENTRY% _LT_openvpn_openssl_exception
 %KEY% "openssl"
@@ -4792,7 +4865,6 @@
 #####
 %ENTRY% _LT_PUBDOM_CC
 %KEY% "p(atent|roduc|rofit|roject|ublic)"
-#%STR% "copyright-only dedication =SOME= or public[ -]domain cert"
 %STR% "to the best of his knowledge the work of authorship identified is in the \<public\>[ -]domain of the country from which the work is published"
 #
 %ENTRY% _LT_PURDUE
@@ -4938,7 +5010,7 @@
 #
 %ENTRY% _LT_PYTHONref3
 %KEY% "licen[cs]"
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= python =FEW= licen[cs]e"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code) =SOME= \<python =FEW= licen[cs]e"
 #
 %ENTRY% _LT_PYTHONSTYLEref
 %KEY% "licen[cs]"
@@ -5342,6 +5414,18 @@
 %ENTRY% _LT_SNIAref
 %KEY% "licen[cs]"
 %STR% "(distribu|develop|offere?d?|released?|licen[cs]ed?|available|protected|provided|subject|comes) =SOME= (snia|storage network industry) =FEW= public licen[cs]e"
+#
+%ENTRY% _LT_Spencer_86_94_CLAUSE_1
+%KEY% "software"
+%STR% "author is not responsible for the consequences of use of this software"
+#
+%ENTRY% _LT_Spencer_94_CLAUSE_2
+%KEY% "source"
+%STR% "since few users ever read (the )?sources credits must appear in the documentation"
+#
+%ENTRY% _LT_Spencer_99
+%KEY% "software"
+%STR% "given credit for this package in the documentation of software"
 #####
 # DELETED: permission is granted to make and distribute verbatim copies
 # of this =SOME= ...
@@ -5363,6 +5447,14 @@
 %ENTRY% _LT_SRA
 %KEY% "distribut"
 %STR% "use and r?e?-?distribution for any purpose are granted as long as all copyright notices are retained r?e?-?distribution with modification is allowed"
+#
+%ENTRY% _LT_SSH
+%KEY% =NULL=
+%STR% "it must be called by a name other than \"?ssh\"? or \"?secure shell\"?"
+#
+%ENTRY% _LT_SSH_OpenSSH
+%KEY% "permi[st]"
+%STR% "legal status of this program is some combination of all these permissions and restrictions"
 #
 %ENTRY% _LT_SSLEAY
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
@@ -5542,7 +5634,7 @@
 #
 %ENTRY% _LT_TCL
 %KEY% "software"
-%STR% "this software is copyrighted by the Regents of the University of California Sun Microsystem =FEW= Scriptics Corporation =SOME= and other parties =SOME= apply to all files associated with the software unless explicitly disclaimed in individual files"
+%STR% "this software is copyrighted by the Regents of the University of California Sun Microsystem =SOME= and other parties =SOME= apply to all files associated with the software unless explicitly disclaimed in individual files"
 #####
 # DELETED: ... distribute this software and its documentation for
 # any purpose and without fee provided that
@@ -5734,11 +5826,11 @@
 %KEY% "licen[cs]"
 %STR% "provided under specific written licen[cs]e from the University of Washington and may only"
 #
-%ENTRY% _LT_VIM_1
+%ENTRY% _LT_Vim_1
 %KEY% "distribut"
 %STR% "if you make changes to Vim yourself you must clearly describe in the distribution how to contact you"
 #
-%ENTRY% _LT_VIM_2
+%ENTRY% _LT_Vim_2
 %KEY% "restrict"
 %STR% "no restrictions on distributing unmodified copies of Vim except that they must include this licen[cs]e text"
 #
@@ -5774,43 +5866,23 @@
 %ENTRY% _LT_W3C_1
 %KEY% "permi[st]"
 %STR% "permission to use copy and/?o?r? distribute the contents"
-#####
-# DELETED: ... or royalty is hereby granted provided that you include
-# the following on all copies of the software and documentation or
-# portions thereof including modifications that you make
-#####
+#
 %ENTRY% _LT_W3C_2
 %KEY% "permi[st]"
 %STR% "permission to use copy modify and/?o?r? distribute this software and its documentatio(n|n with or without modification) for any purpose (and w|with or w|w)ithout fee"
-#####
-# VERY similar to W3C_2 above, except 's/use copy/copy/'
-#####
-# DELETED: ... and its documentation with or without modification for
-# any purpose and without fee or royalty is hereby granted provided
-# that you include the following on all copies
-#####
+#
 %ENTRY% _LT_W3C_3
 %KEY% "permi[st]"
-%STR% "permission to copy modify and/?o?r? distribute this software"
-#####
-# DELETED: ... code =ANY= for any purpose without fee subject to the
-# following
-#####
+%STR% "permission to copy modify and/?o?r? distribute this (software|work)"
+#
 %ENTRY% _LT_W3C_4
 %KEY% "permi[st]"
 %STR% "permission is hereby granted to use copy modify and/?o?r? distribute this source"
-#####
-# DELETED: this document or the W3C document from which this statement
-# is linked
-#####
+#
 %ENTRY% _LT_W3C_5
 %KEY% "permi[st]"
 %STR% "permission to copy and/?o?r? distribute the contents of"
-#####
-# DELETED: permission to use copy modify and distribute the XHTML Basic
-# DTD and its accompanying documentation for any purpose and without fee
-# is hereby ...
-#####
+#
 %ENTRY% _LT_W3C_6
 %KEY% "(©|\(c\)|copyright|\<c\>[^+:]|&copy)"
 %STR% "granted in perpetuity provided that the above copyright notice and this paragraph appear in all copies"
@@ -5820,6 +5892,22 @@
 %ENTRY% _LT_W3C_7
 %KEY% "permi[st]"
 %STR% "permission to use copy and/?o?r? modify this software"
+#
+%ENTRY% _LT_W3C_8
+%KEY% "notice"
+%STR% "W3C software (and document )?short notice should be included"
+#
+%ENTRY% _LT_W3C_19980720
+%KEY% "notice"
+%STR% "notice of any changes or modifications to the W3C files"
+#
+%ENTRY% _LT_W3C_20021231
+%KEY% "notice"
+%STR% "notice of any changes or modifications to the files including the date"
+#
+%ENTRY% _LT_W3C_20150513
+%KEY% "notice"
+%STR% "notice of any changes or modifications through a copyright statement"
 #
 %ENTRY% _LT_W3Cref1
 %KEY% "licen[cs]"
@@ -6274,7 +6362,7 @@ k
 #
 %ENTRY% _LT_SEE_COPYING_FINAL2
 %KEY% "\<(see|sell|sale|sold|charge)\>"
-%STR% "see the (file =FEW= \<copying\>|\<copying\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+%STR% "see the (file =FEW= \<copying\>|\<copying\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft|details)"
 #
 %ENTRY% _LT_SEE_COPYING_FINAL3
 %NOCHECK%
@@ -6440,7 +6528,7 @@ k
 #
 %ENTRY% _LT_SEE_LICENSE_18
 %KEY% "licen[cs]"
-%STR% "see (the )?license file =FEW= for licensing terms"
+%STR% "see (the )?license( file|\.?txt) =FEW= for licens(ing terms|e information)"
 #
 %ENTRY% _LT_SEE_LICENSE_19
 %KEY% "licen[cs]"
@@ -7293,6 +7381,10 @@ k
 %KEY% "so(ftware|urce)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= sleepycat software"
 #
+%ENTRY% _CR_Spencer
+%KEY% "so(ftware|urce)"
+%STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= Henry Spencer"
+#
 %ENTRY% _CR_SPI
 %KEY% "so(ftware|urce)"
 %STR% "(©|\(c\)|copyright|\<c\>[^+:]|&copy) =YEAR= =SOME= (software in the public interest inc|\<spi\>)"
@@ -7619,19 +7711,27 @@ k
 %KEY% "\<ap(ache|ple)\>"
 %STR% "apache =FEW= licen[cs]e"
 #
-%ENTRY% _TITLE_COPYLEFT_NEXT_030
+%ENTRY% _TITLE_CERN_OHL_11
+%KEY% "licen[cs]"
+%STR% "CERN Open Hardware Licence (version |v)1\.?1"
+#
+%ENTRY% _TITLE_CERN_OHL_12
+%KEY% "licen[cs]"
+%STR% "CERN Open Hardware Licence (version |v)1\.?2"
+#
+%ENTRY% _TITLE_copyleft_next_030
 %KEY% "licen[cs]"
 %STR% "copyleft-next 0\.?3\.?0 =FEW= license release date 2013-05-16"
 #
-%ENTRY% _TITLE_COPYLEFT_NEXT_031
+%ENTRY% _TITLE_copyleft_next_031
 %KEY% "licen[cs]"
 %STR% "copyleft-next 0\.?3\.?1 =FEW= license release date 2016-04-29"
 #
-%ENTRY% _PHR_COPYLEFT_NEXT_PARA1
+%ENTRY% _PHR_copyleft_next_PARA1
 %KEY% "licen[cs]"
 %STR% "license grants no trademark license"
 #
-%ENTRY% _PHR_COPYLEFT_NEXT_PARA3
+%ENTRY% _PHR_copyleft_next_PARA3
 %KEY% "distribut"
 %STR% "conditions for distributing derived works outbound gpl compatibility"
 #
@@ -7682,6 +7782,10 @@ k
 %ENTRY% _TITLE_BITTORRENT10
 %KEY% "licen[cs]"
 %STR% "bittorrent open source licen[cs]e (v|version )1\.?0"
+#
+%ENTRY% _TITLE_BlueOak_100
+%KEY% "licen[cs]"
+%STR% "Blue Oak Model License (v|version )1\.?0\.?0"
 #
 %ENTRY% _TITLE_BOOST
 %KEY% "licen[cs]"
@@ -7861,11 +7965,11 @@ k
 #
 %ENTRY% _TITLE_CDDL_10
 %KEY% "licen[cs]"
-%STR% "common development and distribution licen[cs]e (cddl )?(v|version )1\.?0"
+%STR% "common development and distribution licen[cs]e (cddl )?(v|version )?1\.?0"
 #
 %ENTRY% _TITLE_CDDL_11
 %KEY% "licen[cs]"
-%STR% "common development and distribution licen[cs]e (cddl )?(v|version )1\.?1"
+%STR% "common development and distribution licen[cs]e (cddl )?(v|version )?1\.?1"
 #
 %ENTRY% _TITLE_CDLA_Permissive_10
 %KEY% "licen[cs]"
@@ -8413,6 +8517,10 @@ k
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
 %STR% "mozilla =SOME= end[ -]user software licen[cs]e agreement (v|version )1\.?1"
 #
+%ENTRY% _TITLE_MulanPSL_10
+%KEY% "licen[cs]"
+%STR% "Mulan Permissive Software License (version |v)1"
+#
 %ENTRY% _TITLE_MYSQL_V03
 %KEY% "licen[cs]"
 %STR% "mysql floss licen[cs]e exception version 0\.?3"
@@ -8785,9 +8893,13 @@ k
 %KEY% "licen[cs]"
 %STR% "(licen[cs] agreement for python 2\.?4\.?4|python 2\.?4\.?4 licen[cs]e)"
 #
-%ENTRY% _TITLE_PYTHON2
+%ENTRY% _TITLE_PYTHON_20_1
 %KEY% "licen[cs]"
 %STR% "(licen[cs]e agreement for python 2|python 2 licen[cs]e)"
+#
+%ENTRY% _TITLE_PYTHON_20_2
+%KEY% "licen[cs]"
+%STR% "python software foundation licen[cs]e v?2"
 #
 %ENTRY% _TITLE_QUEST_EULA
 %KEY% "licen[cs]"
@@ -8981,7 +9093,7 @@ k
 %KEY% =NULL=
 %STR% "Universal FOSS Exception (Version |v\.)1.0"
 #
-%ENTRY% _TITLE_VIM
+%ENTRY% _TITLE_Vim
 %KEY% "licen[cs]"
 %STR% "vim licen[cs]e"
 #
@@ -9146,12 +9258,14 @@ k
 %KEY% =NULL=
 %STR% "^begin "
 #
+%ENTRY% _PHR_0BSD
+%KEY% "licen[cs]"
+%STR% "(released|distributed|licen[cs]ed) under (the )?zero clause bsd licen[cs]e"
+#
 %ENTRY% _PHR_AFL
 %KEY% "licen[cs]"
 %STR% "academic free licen[cs]e =SOME= (v|version)"
 #
-
-
 %ENTRY% _PHR_AGPL
 %KEY% "licen[cs]"
 %STR% "affero (general p|p)ublic licen[cs]e"
@@ -9179,9 +9293,12 @@ k
 %KEY% =NULL=
 %STR% "(license|available under) =FEW= AGPL( ?v\.?3|[- ]3\.?0| version 3)"
 #
+# From the regex point of view '( to)?' is unnecessary, however, =FEW= matches
+# up to 30 chars and f.ex. in case 'subject to terms and conditions of the
+# Apache License' Apache license is missed if regex uses 'subject' only.
 %ENTRY% _PHR_Apache_ref0
 %KEY% =NULL=
-%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject|comes|used|software|\<is\>|code|copyright|www|under|corresponding to) =FEW= apache"
+%STR% "(free|distribu|develop|offere?d?|covered|released?|licen[cs]ed?|available|protected|provided|subject( to)?|comes|used|software|\<is\>|code|copyright|www|under|corresponding to) =FEW= apache"
 #
 %ENTRY% _PHR_Apache_ref1
 %KEY% "\<ap(ache|ple)\>"
@@ -9222,7 +9339,7 @@ k
 #
 %ENTRY% _PHR_Apache_20_ref2
 %KEY% "\<ap(ache|ple)\>"
-%STR% "(covered by|(licen[cs]ed|is|released) under) =FEW= apache(( |-)2\.?0| ?v2)"
+%STR% "(covered by|(licen[cs]ed|is|released|provided) under) =FEW= apache(( |-)2\.?0| ?v2)"
 #
 %ENTRY% _PHR_Apache_20_ref3
 %KEY% "licen[cs]"
@@ -9230,7 +9347,7 @@ k
 #
 %ENTRY% _PHR_Apache_20_ref4
 %KEY% "\<ap(ache|ple)\>"
-%STR% "(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache licen[cs]e =FEW= (v|version )2\.?0?"
+%STR% "(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =SOME= apache (software )?licen[cs]e =FEW= (v|version )2\.?0?"
 #
 %ENTRY% _PHR_Apache_20_ref5
 %KEY% "licen[cs]"
@@ -9239,6 +9356,14 @@ k
 %ENTRY% _PHR_Apache_20_ref6
 %KEY% "licen[cs]"
 %STR% "license =FEW= osi approved =FEW= apache (software )?license"
+#
+%ENTRY% _PHR_Apache_20_ref7
+%KEY% "licen[cs]"
+%STR% "subject to =FEW= apache (software )?license (v(ersion )?)2"
+#
+%ENTRY% _PHR_Artistic_20
+%KEY% "licen[cs]"
+%STR% "(distribut(able|ed?)|offere?d?|released?|licen[cs]ed?|available|protected|provided) under =FEW= artistic (licen[cs]e 2\.?0|2\.?0 licen[cs]e)"
 #
 %ENTRY% _PHR_ARTISTIC_DESC1
 %KEY% "distribut"
@@ -9255,6 +9380,10 @@ k
 %ENTRY% _PHR_ATTRIBUTION
 %KEY% "a(gree|ttribut|vailabl|uthor)"
 %STR% "attribution =SOME= (present|provide|display|include)"
+#
+%ENTRY% _PHR_Autoconf_exception_30
+%KEY% "configur"
+%STR% "Autoconf Configure Script Exception version 3\.?0"
 #
 %ENTRY% _PHR_BOOST_V10
 %KEY% "licen[cs]"
@@ -9318,7 +9447,7 @@ k
 #
 %ENTRY% _PHR_CC0_2
 %KEY% "licen[cs]"
-%STR% "under the terms of a creative commons cc0 1\.?0 licen[cs]e"
+%STR% "under the (terms of a )?creative commons (zero )?cc0 (1\.?0 )?licen[cs]e"
 #
 %ENTRY% _PHR_CC_BY_SA_30
 %KEY% "licen[cs]"
@@ -9336,13 +9465,13 @@ k
 %KEY% "commerc"
 %STR% "(commerciall?y? (and|or|and/or) non[ -]?commerc|non[ -]?commerciall?y? (and|or|and/or) commerc)"
 #
-%ENTRY% _PHR_COPYLEFT_NEXT_030
-%KEY% "licen[cs]"
-%STR% "(r?e?distributed|available|licensed) under copyleft-next( |-)0\.?3\.?0 (licen[cs]e)?"
+%ENTRY% _PHR_copyleft_next_030
+%KEY% "copyleft"
+%STR% "(r?e?distributed?|available|licensed|modify) =FEW= under (the terms of )?copyleft-next( |-| v| version )0\.?3\.?0"
 #
-%ENTRY% _PHR_COPYLEFT_NEXT_031
-%KEY% "licen[cs]"
-%STR% "(r?e?distributed|available|licensed) under copyleft-next( |-)0\.?3\.?1 (licen[cs]e)?"
+%ENTRY% _PHR_copyleft_next_031
+%KEY% "copyleft"
+%STR% "(r?e?distributed?|available|licensed|modify) =FEW= under (the terms of )?copyleft-next( |-| v| version )0\.?3\.?1"
 #
 %ENTRY% _PHR_DOC
 %KEY% "licen[cs]e"
@@ -9464,7 +9593,7 @@ k
 #
 %ENTRY% _PHR_GPL2_ONLY_1
 %KEY% "(\<gnu|free\>)"
-%STR% "version 2 of (the )?gnu general public license"
+%STR% "version 2\.?0? of (the )?gnu general public license"
 #
 %ENTRY% _PHR_GPL2_ONLY_2
 %KEY% "(\<gnu|free\>)"
@@ -9724,7 +9853,7 @@ k
 #
 %ENTRY% _PHR_LGPL2_OR_LATER_2
 %KEY% "(\<gnu|free\>|l?gpl)"
-%STR% "lgpl( |-|v)2\.?0?\+"
+%STR% "lgpl( |-| ?v)2\.?0?\+"
 #
 %ENTRY% _PHR_LGPL2_OR_LATER_3
 %KEY% "(\<gnu|free\>|l?gpl)"
@@ -9792,7 +9921,7 @@ k
 #
 %ENTRY% _PHR_LGPL3_OR_LATER_ref3
 %KEY% =NULL=
-%STR% "lgpl( ?v|-)?3\.?0?-or-later"
+%STR% "lgpl( ?v|-)?3\.?0?(-or-later|\+)"
 #
 %ENTRY% _PHR_LGPL_30plus
 %KEY% "licen[cs]e"
@@ -10029,6 +10158,10 @@ k
 %KEY% "restrict"
 %STR% "government is subject to restrictions as set forth in"
 #
+%ENTRY% _PHR_Vim
+%KEY% "licen[cs]"
+%STR% "(r?e?distribut|modif(y|ied)|licen[cs]ed?|deliver|use|cop(y|ied)) =SOME= under (the terms of )?(the )?Vim licen[cs]e"
+#
 %ENTRY% _PHR_WTFPL
 %KEY% "licen[cs]"
 %STR% "licen[cs]e =FEW= \<WTFPL\>"
@@ -10112,7 +10245,7 @@ k
 
 %ENTRY% _SPDX_AGPL_10plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(AGPL[- v]1\.?0\+|(.{1,32} (AND|OR)){1,4} AGPL[- v]1\.?0\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(AGPL[- v]1\.?0\+|(.{1,32} (AND|OR)){1,4} AGPL[- v]1\.?0\+)"
 
 %ENTRY% _SPDX_AGPL_30
 %KEY% "licen[cs]e"
@@ -10124,7 +10257,7 @@ k
 
 %ENTRY% _SPDX_AGPL_30plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(AGPL[- v]3\.?0\+|(.{1,32} (AND|OR)){1,4} AGPL[- v]3\.?0\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(AGPL[- v]3\.?0\+|(.{1,32} (AND|OR)){1,4} AGPL[- v]3\.?0\+)"
 
 %ENTRY% _SPDX_Aladdin
 %KEY% "licen[cs]e"
@@ -10226,6 +10359,14 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BitTorrent[- ]1\.?1|(.{1,32} (AND|OR)){1,4} BitTorrent[- ]1\.?1)"
 
+%ENTRY% _SPDX_blessing
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](blessing|(.{1,32} (AND|OR)){1,4} blessing)"
+
+%ENTRY% _SPDX_BlueOak_100
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BlueOak[- ]1\.?0\.?0|(.{1,32} (AND|OR)){1,4} BlueOak[- ]1\.?0\.?0)"
+
 %ENTRY% _SPDX_BSL_10
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} BSL[- ]1\.?0)"
@@ -10258,6 +10399,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSD-2-Clause-Patent|(.{1,32} (AND|OR)){1,4} BSD-2-Clause-Patent)"
 
+%ENTRY% _SPDX_BSD_2_Clause_Views
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSD-2-Clause-Views|(.{1,32} (AND|OR)){1,4} BSD-2-Clause-Views)"
+
 %ENTRY% _SPDX_BSD_3_Clause
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSD-3-Clause|(.{1,32} (AND|OR)){1,4} BSD-3-Clause)"
@@ -10277,6 +10422,10 @@ k
 %ENTRY% _SPDX_BSD_3_Clause_No_Nuclear_Warranty
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSD-3-Clause-No-Nuclear-Warranty|(.{1,32} (AND|OR)){1,4} BSD-3-Clause-No-Nuclear-Warranty)"
+
+%ENTRY% _SPDX_BSD_3_Clause_Open_MPI
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](BSD-3-Clause-Open-MPI|(.{1,32} (AND|OR)){1,4} BSD-3-Clause-Open-MPI)"
 
 %ENTRY% _SPDX_BSD_4_Clause
 %KEY% "licen[cs]e"
@@ -10306,89 +10455,25 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](bzip2[- ]1\.?0\.?6|(.{1,32} (AND|OR)){1,4} bzip2[- ]1\.?0\.?6)"
 
+%ENTRY% _SPDX_CAL_10_Combined_Work_Exception
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CAL-1\.?0-Combined-Work-Exception|(.{1,32} (AND|OR)){1,4} CAL-1\.?0-Combined-Work-Exception)"
+
+%ENTRY% _SPDX_CAL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CAL-1\.?0|(.{1,32} (AND|OR)){1,4} CAL-1\.?0)"
+
 %ENTRY% _SPDX_Caldera
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Caldera|(.{1,32} (AND|OR)){1,4} Caldera)"
-
-%ENTRY% _SPDX_CDLA_Permissive_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDLA-Permissive-1\.?0|(.{1,32} (AND|OR)){1,4} CDLA-Permissive-1\.?0)"
-
-%ENTRY% _SPDX_CDLA_Sharing_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDLA-Sharing-1\.?0|(.{1,32} (AND|OR)){1,4} CDLA-Sharing-1\.?0)"
-
-%ENTRY% _SPDX_CECILL_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-1\.?0|(.{1,32} (AND|OR)){1,4} CECILL-1\.?0)"
-
-%ENTRY% _SPDX_CECILL_11
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-1\.?1|(.{1,32} (AND|OR)){1,4} CECILL-1\.?1)"
-
-%ENTRY% _SPDX_CECILL_20
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} CECILL[- ]2\.?0)"
-
-%ENTRY% _SPDX_CECILL_21
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL[- ]2\.?1|(.{1,32} (AND|OR)){1,4} CECILL[- ]2\.?1)"
-
-%ENTRY% _SPDX_CECILL_B
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-B|(.{1,32} (AND|OR)){1,4} CECILL-B)"
-
-%ENTRY% _SPDX_CECILL_C
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-C|(.{1,32} (AND|OR)){1,4} CECILL-C)"
-
-%ENTRY% _SPDX_ClArtistic
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ClArtistic|(.{1,32} (AND|OR)){1,4} ClArtistic)"
-
-%ENTRY% _SPDX_MIT_CMU
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MIT-CMU|(.{1,32} (AND|OR)){1,4} MIT-CMU)"
-
-%ENTRY% _SPDX_CNRI_Jython
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Jython|(.{1,32} (AND|OR)){1,4} CNRI-Jython)"
-
-%ENTRY% _SPDX_CNRI_Python
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Python|(.{1,32} (AND|OR)){1,4} CNRI-Python)"
-
-%ENTRY% _SPDX_CNRI_Python_GPL_Compatible
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Python-GPL-Compatible|(.{1,32} (AND|OR)){1,4} CNRI-Python-GPL-Compatible)"
-
-%ENTRY% _SPDX_CPOL_102
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPOL[- ]1\.?02|(.{1,32} (AND|OR)){1,4} CPOL[- ]1\.?02)"
-
-%ENTRY% _SPDX_CDDL_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDDL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CDDL[- ]1\.?0)"
-
-%ENTRY% _SPDX_CDDL_11
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDDL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} CDDL[- ]1\.?1)"
-
-%ENTRY% _SPDX_CPAL_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPAL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CPAL[- ]1\.?0)"
-
-%ENTRY% _SPDX_CPL_10
-%KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CPL[- ]1\.?0)"
 
 %ENTRY% _SPDX_CATOSL_11
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CATOSL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} CATOSL[- ]1\.?1)"
 
-%ENTRY% _SPDX_Condor_11
+%ENTRY% _SPDX_CC0_10
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Condor[- ]1\.?1|(.{1,32} (AND|OR)){1,4} Condor[- ]1\.?1)"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC0-1\.?0|(.{1,32} (AND|OR)){1,4} CC0-1\.?0)"
 
 %ENTRY% _SPDX_CC_BY_10
 %KEY% "licen[cs]e"
@@ -10405,6 +10490,10 @@ k
 %ENTRY% _SPDX_CC_BY_30
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-3\.?0|(.{1,32} (AND|OR)){1,4} CC-BY-3\.?0)"
+
+%ENTRY% _SPDX_CC_BY_30_AT
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-3\.?0-AT|(.{1,32} (AND|OR)){1,4} CC-BY-3\.?0-AT)"
 
 %ENTRY% _SPDX_CC_BY_40
 %KEY% "licen[cs]e"
@@ -10466,6 +10555,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-NC-ND-3\.?0|(.{1,32} (AND|OR)){1,4} CC-BY-NC-ND-3\.?0)"
 
+%ENTRY% _SPDX_CC_BY_NC_ND_30_IGO
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-NC-ND-3\.?0-IGO|(.{1,32} (AND|OR)){1,4} CC-BY-NC-ND-3\.?0-IGO)"
+
 %ENTRY% _SPDX_CC_BY_NC_ND_40
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-NC-ND-4\.?0|(.{1,32} (AND|OR)){1,4} CC-BY-NC-ND-4\.?0)"
@@ -10506,13 +10599,101 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-SA-3\.?0|(.{1,32} (AND|OR)){1,4} CC-BY-SA-3\.?0)"
 
+%ENTRY% _SPDX_CC_BY_SA_30_AT
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-SA-3\.?0-AT|(.{1,32} (AND|OR)){1,4} CC-BY-SA-3\.?0-AT)"
+
 %ENTRY% _SPDX_CC_BY_SA_40
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-BY-SA-4\.?0|(.{1,32} (AND|OR)){1,4} CC-BY-SA-4\.?0)"
 
-%ENTRY% _SPDX_CC0_10
+%ENTRY% _SPDX_CC_PDDC
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC0-1\.?0|(.{1,32} (AND|OR)){1,4} CC0-1\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CC-PDDC|(.{1,32} (AND|OR)){1,4} CC-PDDC)"
+
+%ENTRY% _SPDX_CDDL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDDL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CDDL[- ]1\.?0)"
+
+%ENTRY% _SPDX_CDDL_11
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDDL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} CDDL[- ]1\.?1)"
+
+%ENTRY% _SPDX_CDLA_Permissive_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDLA-Permissive-1\.?0|(.{1,32} (AND|OR)){1,4} CDLA-Permissive-1\.?0)"
+
+%ENTRY% _SPDX_CDLA_Sharing_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CDLA-Sharing-1\.?0|(.{1,32} (AND|OR)){1,4} CDLA-Sharing-1\.?0)"
+
+%ENTRY% _SPDX_CECILL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-1\.?0|(.{1,32} (AND|OR)){1,4} CECILL-1\.?0)"
+
+%ENTRY% _SPDX_CECILL_11
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-1\.?1|(.{1,32} (AND|OR)){1,4} CECILL-1\.?1)"
+
+%ENTRY% _SPDX_CECILL_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} CECILL[- ]2\.?0)"
+
+%ENTRY% _SPDX_CECILL_21
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL[- ]2\.?1|(.{1,32} (AND|OR)){1,4} CECILL[- ]2\.?1)"
+
+%ENTRY% _SPDX_CECILL_B
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-B|(.{1,32} (AND|OR)){1,4} CECILL-B)"
+
+%ENTRY% _SPDX_CECILL_C
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CECILL-C|(.{1,32} (AND|OR)){1,4} CECILL-C)"
+
+%ENTRY% _SPDX_CERN_OHL_11
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CERN-OHL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} CERN-OHL[- ]1\.?1)"
+
+%ENTRY% _SPDX_CERN_OHL_12
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CERN-OHL[- ]1\.?2|(.{1,32} (AND|OR)){1,4} CERN-OHL[- ]1\.?2)"
+
+%ENTRY% _SPDX_CERN_OHL_P_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CERN-OHL-P[- ]2\.?0|(.{1,32} (AND|OR)){1,4} CERN-OHL-P[- ]2\.?0)"
+
+%ENTRY% _SPDX_CERN_OHL_S_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CERN-OHL-S[- ]2\.?0|(.{1,32} (AND|OR)){1,4} CERN-OHL-S[- ]2\.?0)"
+
+%ENTRY% _SPDX_CERN_OHL_W_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CERN-OHL-W[- ]2\.?0|(.{1,32} (AND|OR)){1,4} CERN-OHL-W[- ]2\.?0)"
+
+%ENTRY% _SPDX_ClArtistic
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ClArtistic|(.{1,32} (AND|OR)){1,4} ClArtistic)"
+
+%ENTRY% _SPDX_MIT_CMU
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MIT-CMU|(.{1,32} (AND|OR)){1,4} MIT-CMU)"
+
+%ENTRY% _SPDX_CNRI_Jython
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Jython|(.{1,32} (AND|OR)){1,4} CNRI-Jython)"
+
+%ENTRY% _SPDX_CNRI_Python
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Python|(.{1,32} (AND|OR)){1,4} CNRI-Python)"
+
+%ENTRY% _SPDX_CNRI_Python_GPL_Compatible
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CNRI-Python-GPL-Compatible|(.{1,32} (AND|OR)){1,4} CNRI-Python-GPL-Compatible)"
+
+%ENTRY% _SPDX_Condor_11
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Condor[- ]1\.?1|(.{1,32} (AND|OR)){1,4} Condor[- ]1\.?1)"
 
 %ENTRY% _SPDX_copyleft_next_030
 %KEY% "licen[cs]e"
@@ -10521,6 +10702,18 @@ k
 %ENTRY% _SPDX_copyleft_next_031
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](copyleft-next-0\.?3\.?1|(.{1,32} (AND|OR)){1,4} copyleft-next-0\.?3\.?1)"
+
+%ENTRY% _SPDX_CPAL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPAL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CPAL[- ]1\.?0)"
+
+%ENTRY% _SPDX_CPL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} CPL[- ]1\.?0)"
+
+%ENTRY% _SPDX_CPOL_102
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](CPOL[- ]1\.?02|(.{1,32} (AND|OR)){1,4} CPOL[- ]1\.?02)"
 
 %ENTRY% _SPDX_Crossword
 %KEY% "licen[cs]e"
@@ -10552,7 +10745,7 @@ k
 
 %ENTRY% _SPDX_DOC
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(DOC\>|(.{1,32} (AND|OR)){1,4} DOC\>)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(DOC\>|(.{1,32} (AND|OR)){1,4} DOC\>)"
 
 %ENTRY% _SPDX_Dotseqn
 %KEY% "licen[cs]e"
@@ -10602,9 +10795,17 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Entessa|(.{1,32} (AND|OR)){1,4} Entessa)"
 
+%ENTRY% _SPDX_EPICS
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](EPICS|(.{1,32} (AND|OR)){1,4} EPICS)"
+
 %ENTRY% _SPDX_ErlPL_11
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ErlPL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} ErlPL[- ]1\.?1)"
+
+%ENTRY% _SPDX_etalab_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](etalab[- ]2\.?0|(.{1,32} (AND|OR)){1,4} etalab[- ]2\.?0)"
 
 %ENTRY% _SPDX_EUDatagrid
 %KEY% "licen[cs]e"
@@ -10628,7 +10829,7 @@ k
 
 %ENTRY% _SPDX_Fair
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(Fair[[:space:]|\"]|(.{1,32} (AND|OR)){1,4} Fair[[:space:]|\"])"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(Fair[[:space:]|\"]|(.{1,32} (AND|OR)){1,4} Fair[[:space:]|\"])"
 
 %ENTRY% _SPDX_Frameworx_10
 %KEY% "licen[cs]e"
@@ -10668,7 +10869,23 @@ k
 
 %ENTRY% _SPDX_GFDL_11plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(GFDL[- v]1\.?1\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(GFDL[- v]1\.?1\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1\+)"
+
+%ENTRY% _SPDX_GFDL_11_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?1-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_11_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?1-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1-invariants.or.later)"
+
+%ENTRY% _SPDX_GFDL_11_no_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?1-no-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1-no-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_11_no_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?1-no-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?1-no-invariants.or.later)"
 
 %ENTRY% _SPDX_GFDL_12
 %KEY% "licen[cs]e"
@@ -10680,7 +10897,23 @@ k
 
 %ENTRY% _SPDX_GFDL_12plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(GFDL[- v]1\.?2\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(GFDL[- v]1\.?2\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2\+)"
+
+%ENTRY% _SPDX_GFDL_12_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?2-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_12_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?2-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2-invariants.or.later)"
+
+%ENTRY% _SPDX_GFDL_12_no_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?2-no-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2-no-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_12_no_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?2-no-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?2-no-invariants.or.later)"
 
 %ENTRY% _SPDX_GFDL_13
 %KEY% "licen[cs]e"
@@ -10692,7 +10925,23 @@ k
 
 %ENTRY% _SPDX_GFDL_13plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(GFDL[- v]1\.?3\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(GFDL[- v]1\.?3\+|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3\+)"
+
+%ENTRY% _SPDX_GFDL_13_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?3-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_13_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?3-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3-invariants.or.later)"
+
+%ENTRY% _SPDX_GFDL_13_no_invariants_only
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?3-no-invariants-only|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3-no-invariants-only)"
+
+%ENTRY% _SPDX_GFDL_13_no_invariants_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GFDL[- v]1\.?3-no-invariants.or.later|(.{1,32} (AND|OR)){1,4} GFDL[- v]1\.?3-no-invariants.or.later)"
 
 %ENTRY% _SPDX_GL2PS
 %KEY% "licen[cs]e"
@@ -10702,25 +10951,33 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Glulxe|(.{1,32} (AND|OR)){1,4} Glulxe)"
 
+%ENTRY% _SPDX_GLWTPL
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](GLWTPL|(.{1,32} (AND|OR)){1,4} GLWTPL)"
+
 %ENTRY% _SPDX_GPL_10
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[]+(GPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0)"
 
 %ENTRY% _SPDX_GPL_10plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(GPL[- ]1\.?0\+|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(GPL[- ]1\.?0\+|(.{1,32} (AND|OR)){1,4} GPL[- ]1\.?0\+)"
 
 %ENTRY% _SPDX_GPL_20
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[]+(GPL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0)"
+
+%ENTRY% _SPDX_GPL_20_or_later
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+(GPL[- ]2\.?0-or-later|(.{1,32} (AND|OR)){1,4} GPL[- ]2\.?0-or-later)"
 
 %ENTRY% _SPDX_GPL_30
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[: \[]+GPL[- ]3\.?0)"
+%STR% "licen[cs]e(id|[- ]identifier)?[: \[\(]+GPL[- ]3\.?0)"
 
 %ENTRY% _SPDX_GPL_30plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(GPL[- ]3\.?0\+|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.?0\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(GPL[- ]3\.?0\+|(.{1,32} (AND|OR)){1,4} GPL[- ]3\.?0\+)"
 
 %ENTRY% _SPDX_LGPL_20
 %KEY% "licen[cs]e"
@@ -10736,7 +10993,7 @@ k
 
 %ENTRY% _SPDX_LGPL_30plus
 %KEY% "licen[cs]e"
-%STR% "licen[cs]e(id|[- ]identifier)?[\[\":[:space:]]+(LGPL[- ]3\.?0\+|(.{1,32} (AND|OR)){1,4} LGPL[- ]3\.?0\+)"
+%STR% "licen[cs]e(id|[- ]identifier)?[\[\"\(:[:space:]]+(LGPL[- ]3\.?0\+|(.{1,32} (AND|OR)){1,4} LGPL[- ]3\.?0\+)"
 
 %ENTRY% _SPDX_gnuplot
 %KEY% "licen[cs]e"
@@ -10750,9 +11007,17 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](HaskellReport|(.{1,32} (AND|OR)){1,4} HaskellReport)"
 
+%ENTRY% _SPDX_Hippocratic_21
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Hippocratic[- ]2\.?1|(.{1,32} (AND|OR)){1,4} Hippocratic[- ]2\.?1)"
+
 %ENTRY% _SPDX_HPND
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](HPND|(.{1,32} (AND|OR)){1,4} HPND)"
+
+%ENTRY% _SPDX_HPND_sell_variant
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](HPND-sell-variant|(.{1,32} (AND|OR)){1,4} HPND-sell-variant)"
 
 %ENTRY% _SPDX_IBM_pibs
 %KEY% "licen[cs]e"
@@ -10810,6 +11075,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](JasPer[- ]2\.?0|(.{1,32} (AND|OR)){1,4} JasPer[- ]2\.?0)"
 
+%ENTRY% _SPDX_JPNIC
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<JPNIC\>|(.{1,32} (AND|OR)){1,4} \<JPNIC\>)"
+
 %ENTRY% _SPDX_JSON
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<JSON\>|(.{1,32} (AND|OR)){1,4} \<JSON\>)"
@@ -10853,6 +11122,14 @@ k
 %ENTRY% _SPDX_Libpng
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Libpng|(.{1,32} (AND|OR)){1,4} Libpng)"
+
+%ENTRY% _SPDX_libpng_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](libpng[- ]2\.?0|(.{1,32} (AND|OR)){1,4} libpng[- ]2\.?0)"
+
+%ENTRY% _SPDX_libselinux_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](libselinux[- ]1\.?0|(.{1,32} (AND|OR)){1,4} libselinux[- ]1\.?0)"
 
 %ENTRY% _SPDX_libtiff
 %KEY% "licen[cs]e"
@@ -10958,6 +11235,14 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MTLL|(.{1,32} (AND|OR)){1,4} MTLL)"
 
+%ENTRY% _SPDX_MulanPSL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MulanPSL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} MulanPSL[- ]1\.?0)"
+
+%ENTRY% _SPDX_MulanPSL_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](MulanPSL[- ]2\.?0|(.{1,32} (AND|OR)){1,4} MulanPSL[- ]2\.?0)"
+
 %ENTRY% _SPDX_Multics
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Multics|(.{1,32} (AND|OR)){1,4} Multics)"
@@ -10978,6 +11263,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NBPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} NBPL[- ]1\.?0)"
 
+%ENTRY% _SPDX_NCGL_UK_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NCGL-UK[- ]2\.?0|(.{1,32} (AND|OR)){1,4} NCGL-UK[- ]2\.?0)"
+
 %ENTRY% _SPDX_NCSA
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NCSA|(.{1,32} (AND|OR)){1,4} NCSA)"
@@ -10997,6 +11286,14 @@ k
 %ENTRY% _SPDX_NGPL
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NGPL|(.{1,32} (AND|OR)){1,4} NGPL)"
+
+%ENTRY% _SPDX_NIST_PD
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NIST-PD|(.{1,32} (AND|OR)){1,4} NIST-PD)"
+
+%ENTRY% _SPDX_NIST_PD_fallback
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NIST-PD-fallback|(.{1,32} (AND|OR)){1,4} NIST-PD-fallback)"
 
 %ENTRY% _SPDX_NLOD_10
 %KEY% "licen[cs]e"
@@ -11034,6 +11331,10 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](NRL|(.{1,32} (AND|OR)){1,4} NRL)"
 
+%ENTRY% _SPDX_NTP_0
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<NTP-0\>|(.{1,32} (AND|OR)){1,4} \<NTP-0\>)"
+
 %ENTRY% _SPDX_NTP
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<NTP\>|(.{1,32} (AND|OR)){1,4} \<NTP\>)"
@@ -11041,6 +11342,10 @@ k
 %ENTRY% _SPDX_Nunit
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Nunit|(.{1,32} (AND|OR)){1,4} Nunit)"
+
+%ENTRY% _SPDX_O_UDA_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](O-UDA[- ]1\.?0|(.{1,32} (AND|OR)){1,4} O-UDA[- ]1\.?0)"
 
 %ENTRY% _SPDX_OCLC_20
 %KEY% "licen[cs]e"
@@ -11058,13 +11363,37 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](ODC-By-1\.?0|(.{1,32} (AND|OR)){1,4} ODC-By-1\.?0)"
 
+%ENTRY% _SPDX_OFL_10_no_RFN
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL-1\.?0-no-RFN|(.{1,32} (AND|OR)){1,4} OFL-1\.?0-no-RFN)"
+
+%ENTRY% _SPDX_OFL_10_RFN
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL-1\.?0-RFN|(.{1,32} (AND|OR)){1,4} OFL-1\.?0-RFN)"
+
 %ENTRY% _SPDX_OFL_10
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} OFL[- ]1\.?0)"
 
+%ENTRY% _SPDX_OFL_11_no_RFN
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL-1\.?1-no-RFN|(.{1,32} (AND|OR)){1,4} OFL-1\.?1-no-RFN)"
+
+%ENTRY% _SPDX_OFL_11_RFN
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL-1\.?1-RFN|(.{1,32} (AND|OR)){1,4} OFL-1\.?1-RFN)"
+
 %ENTRY% _SPDX_OFL_11
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OFL[- ]1\.?1|(.{1,32} (AND|OR)){1,4} OFL[- ]1\.?1)"
+
+%ENTRY% _SPDX_OGC_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OGC[ -]1\.?0|(.{1,32} (AND|OR)){1,4} OGC[ -]1\.?0)"
+
+%ENTRY% _SPDX_OGL_Canada_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OGL-Canada-2\.?0|(.{1,32} (AND|OR)){1,4} OGL-Canada-2\.?0)"
 
 %ENTRY% _SPDX_OGL_UK_10
 %KEY% "licen[cs]e"
@@ -11184,6 +11513,14 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](OSET-PL-2\.?1|(.{1,32} (AND|OR)){1,4} OSET-PL-2\.?1)"
 
+%ENTRY% _SPDX_Parity_600
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Parity[- ]6\.?0\.?0|(.{1,32} (AND|OR)){1,4} Parity[- ]6\.?0\.?0)"
+
+%ENTRY% _SPDX_Parity_700
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Parity[- ]7\.?0\.?0|(.{1,32} (AND|OR)){1,4} Parity[- ]7\.?0\.?0)"
+
 %ENTRY% _SPDX_PDDL_10
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](PDDL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} PDDL[- ]1\.?0)"
@@ -11200,9 +11537,21 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Plexus|(.{1,32} (AND|OR)){1,4} Plexus)"
 
+%ENTRY% _SPDX_PolyForm_Noncommercial_100
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](PolyForm-Noncommercial[- ]1\.?0\.?0|(.{1,32} (AND|OR)){1,4} PolyForm-Noncommercial[- ]1\.?0\.?0)"
+
+%ENTRY% _SPDX_PolyForm_Small_Business_100
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](PolyForm-Small-Business[- ]1\.?0\.?0|(.{1,32} (AND|OR)){1,4} PolyForm-Small-Business[- ]1\.?0\.?0)"
+
 %ENTRY% _SPDX_PostgreSQL
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](PostgreSQL|(.{1,32} (AND|OR)){1,4} PostgreSQL)"
+
+%ENTRY% _SPDX_PSF_20
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](PSF[- ]2\.?0|(.{1,32} (AND|OR)){1,4} PSF[- ]2\.?0)"
 
 %ENTRY% _SPDX_psfrag
 %KEY% "licen[cs]e"
@@ -11276,6 +11625,14 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](Sendmail-8\.?23|(.{1,32} (AND|OR)){1,4} Sendmail-8\.?23)"
 
+%ENTRY% _SPDX_SHL_051
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<SHL-0\.?51|(.{1,32} (AND|OR)){1,4} \<SHL-0\.?51)"
+
+%ENTRY% _SPDX_SHL_05
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](\<SHL-0\.?5|(.{1,32} (AND|OR)){1,4} \<SHL-0\.?5)"
+
 %ENTRY% _SPDX_SGI_B_10
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SGI-B-1\.?0|(.{1,32} (AND|OR)){1,4} SGI-B-1\.?0)"
@@ -11336,9 +11693,25 @@ k
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} SPL[- ]1\.?0)"
 
+%ENTRY% _SPDX_SSH_OpenSSH
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SSH-OpenSSH|(.{1,32} (AND|OR)){1,4} SSH-OpenSSH)"
+
+%ENTRY% _SPDX_SSH_short
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SSH-short|(.{1,32} (AND|OR)){1,4} SSH-short)"
+
+%ENTRY% _SPDX_SSPL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SSPL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} SSPL[- ]1\.?0)"
+
 %ENTRY% _SPDX_SWL
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](SWL|(.{1,32} (AND|OR)){1,4} SWL)"
+
+%ENTRY% _SPDX_TAPR_OHL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](TAPR-OHL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} TAPR-OHL[- ]1\.?0)"
 
 %ENTRY% _SPDX_TCL
 %KEY% "licen[cs]e"
@@ -11367,6 +11740,10 @@ k
 %ENTRY% _SPDX_TU_Berlin_20
 %KEY% "licen[cs]e"
 %STR% "licen[cs]e(id|[- ]identifier| name)?[: ](TU-Berlin-2\.?0|(.{1,32} (AND|OR)){1,4} TU-Berlin-2\.?0)"
+
+%ENTRY% _SPDX_UCL_10
+%KEY% "licen[cs]e"
+%STR% "licen[cs]e(id|[- ]identifier| name)?[: ](UCL[- ]1\.?0|(.{1,32} (AND|OR)){1,4} UCL[- ]1\.?0)"
 
 %ENTRY% _SPDX_Unicode_DFS_2015
 %KEY% "licen[cs]e"
@@ -11718,11 +12095,11 @@ k
 # [including the GNU Public Licence.]
 %ENTRY% _TEXT_NOT_GPL
 %KEY% "(gnu|gpl)"
-%STR% "not\> =SOME= (\<gnu\>|\<gpl\>)"
+%STR% "not\> =SOME= (gnu (general|public)|\<gpl\>)"
 #
 %ENTRY% _TEXT_NOT_GPL2
 %KEY% "(gnu|gpl)"
-%STR% "not\> =SOME= cop(y|ied) =SOME= another =SOME= (\<gnu\>|\<gpl\>)"
+%STR% "not\> =SOME= cop(y|ied) =SOME= another =SOME= (gnu (general|public)|\<gpl\>)"
 #
 %ENTRY% _TEXT_GPLV1
 %KEY% "(\<gnu|free\>|l?gpl)"
@@ -11790,6 +12167,14 @@ k
 %ENTRY% _TEXT_INTELCORP
 %KEY% =NULL=
 %STR% "intel corp"
+#
+%ENTRY% _TEXT_INTELCORPBINARY
+%KEY% =NULL=
+%STR% "binary form"
+#
+%ENTRY% _TEXT_NOMODIFICATION
+%KEY% =NULL=
+%STR% "without modification"
 #
 %ENTRY% _TEXT_JPNIC
 %KEY% =NULL=
@@ -12067,6 +12452,10 @@ k
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?opensource\.?org/licen[cs]es?/artistic"
 #
+%ENTRY% _URL_BlueOak_100
+%KEY% "licen[cs]"
+%STR% "blueoakcouncil\.?org/licen[cs]e/1\.?0\.?0"
+#
 %ENTRY% _URL_BOOST_10
 %KEY% "licen[cs]"
 %STR% "w?w?w?\.?boost\.?org/licen[cs]e[_-]?1_?0"
@@ -12211,7 +12600,7 @@ k
 %KEY% "public"
 %STR% "creativecommons\.?org/publicdomain/zero/1\.?0"
 #
-%ENTRY% _URL_CC_PD
+%ENTRY% _URL_CC_PDDC
 %KEY% "public"
 %STR% "creativecommons\.?org/licenses/publicdomain"
 #
@@ -12293,7 +12682,7 @@ k
 #
 %ENTRY% _URL_ISC
 %KEY% =NULL=
-%STR% "http://isc\?.org/copyright"
+%STR% "isc\.?org/copyright"
 #
 %ENTRY% _URL_IMAGEMAGICK
 %KEY% "licen[cs]"
@@ -12346,6 +12735,10 @@ k
 %ENTRY% _URL_MPL20
 %KEY% "\<([mn]pl|mozilla|netscape)\>"
 %STR% "w?w?w?\.?mozilla\.?org/[MN]PL/MPL-2\.?0"
+#
+%ENTRY% _URL_MulanPSL
+%KEY% "licen[cs]"
+%STR% "license\.?coscl\.?org\.?cn/MulanPSL"
 #
 %ENTRY% _URL_mysql_floss_exception
 %KEY% "licen[cs]"
@@ -12673,7 +13066,7 @@ k
 #
 %ENTRY% _MIN2_GPL
 %KEY% "so(ftware|urce)"
-%STR% "(GPL src-instance|[^l]gpl =FEW= \<source\>|\<source\> =FEW= [^l]gpl)"
+%STR% "(GPL src-instance|\<gpl\> =FEW= \<source\>|\<source\> =FEW= \<gpl\>)"
 #
 %ENTRY% _MIN2_HP
 %KEY% "so(ftware|urce)"

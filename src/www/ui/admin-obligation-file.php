@@ -20,6 +20,7 @@
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\BusinessRules\ObligationMap;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\StringOperation;
 
 define("TITLE_ADMIN_OBLIGATION_FILE", _("Obligations and Risks Administration"));
 
@@ -377,11 +378,11 @@ class admin_obligation_file extends FO_Plugin
   function Updatedb()
   {
     $obId = intval($_POST['ob_pk']);
-    $topic = trim($_POST['ob_topic']);
+    $topic = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_topic']));
     $licnames = $_POST['licenseSelector'];
     $candidatenames = $_POST['candidateSelector'];
-    $text = trim($_POST['ob_text']);
-    $comment = trim($_POST['ob_comment']);
+    $text = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_text']));
+    $comment = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_comment']));
 
     if (empty($topic)) {
       $text = _("ERROR: The obligation topic is empty.");
@@ -438,11 +439,11 @@ class admin_obligation_file extends FO_Plugin
    */
   function Adddb()
   {
-    $topic = trim($_POST['ob_topic']);
+    $topic = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_topic']));
     $licnames = empty($_POST['licenseSelector']) ? array() : $_POST['licenseSelector'];
     $candidatenames = empty($_POST['candidateSelector']) ? array() : $_POST['candidateSelector'];
-    $text = trim($_POST['ob_text']);
-    $comment = trim($_POST['ob_comment']);
+    $text = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_text']));
+    $comment = StringOperation::replaceUnicodeControlChar(trim($_POST['ob_comment']));
     $message = "";
 
     if (empty($topic)) {
@@ -469,7 +470,15 @@ class admin_obligation_file extends FO_Plugin
     $stmt = __METHOD__.'.ob';
     $sql = "INSERT into obligation_ref (ob_active, ob_type, ob_modifications, ob_topic, ob_md5, ob_text, ob_classification, ob_text_updatable, ob_comment) VALUES ($1, $2, $3, $4, md5($5), $5, $6, $7, $8) RETURNING ob_pk";
     $this->dbManager->prepare($stmt,$sql);
-    $res = $this->dbManager->execute($stmt,array($_POST['ob_active'],$_POST['ob_type'],$_POST['ob_modifications'],$topic,$text, $_POST['ob_classification'],$_POST['ob_text_updatable'],$comment));
+    $res = $this->dbManager->execute($stmt,
+      array($_POST['ob_active'],
+        $_POST['ob_type'],
+        $_POST['ob_modifications'],
+        $topic,
+        $text,
+        $_POST['ob_classification'],
+        $_POST['ob_text_updatable'],
+        $comment));
     $row = $this->dbManager->fetchArray($res);
     $obId = $row['ob_pk'];
 

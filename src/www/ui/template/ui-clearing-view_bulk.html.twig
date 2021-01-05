@@ -4,14 +4,26 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-  <div class="modal" id="textModal" hidden>
+  <div class="modal" id="textModal" hidden="hidden">
     <form name="addOrRemoveText">
       <div>{{ 'Please enter the text phrase:'|trans }}</div>
       <textarea id="referenceText" style="overflow:auto;width:100%;height:80px;" name="referenceText"></textarea>
+      <br/>
+      <a class="buttonLink" id="selectFromNoticeFile" style="display:none;width:96%;" onclick="openAckInputModal();">Select from Notice File</a>
       <br/><br/>
       <a class="buttonLink" style="width:7em;" onclick="submitTextModal();">OK</a>  &nbsp; &nbsp;
       <a class="buttonLink" style="width:7em;" onclick="closeTextModal();">{{ 'Cancel'|trans }}</a>
     </form>
+  </div>
+
+  <div class="modal" id="textAckInputModal" hidden="hidden">
+      <div id="noticeSelectTableDiv">
+        <table id="noticeSelectTable">
+          <thead><tr><th>File name</th><th>Content</th><th></th></tr></thead>
+        </table>
+      </div>
+      <br/><br/>
+      <a class="buttonLink" style="width:7em;" onclick="closeAckInputModal();">{{ 'Cancel'|trans }}</a>
   </div>
 
 <div class="modal" id="bulkModal" hidden>

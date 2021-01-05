@@ -1,3 +1,10 @@
+fossology (3.9.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.9.0 for details
+
+ -- Gaurav Mishra <mishra.gaurav@siemens.com>  Mon, 30 Nov 2020 11:11:11 +0530
+
 fossology (3.9.0~rc2-1) unstable; urgency=low
 
   * New upstream release

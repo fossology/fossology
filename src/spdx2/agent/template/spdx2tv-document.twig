@@ -43,7 +43,7 @@ LicenseListVersion: 2.6
 ##-------------------------
 
 {% for licenseId,licenseData in licenseTexts %}{% if licenseId starts with 'LicenseRef-' %}
-LicenseID: {{ licenseId|replace(' ','-') }}
+LicenseID: {{ licenseId|replace({' ': '-'}) }}
 LicenseName: {{ licenseData['name'] }}
 ExtractedText: <text> {{ licenseData['text']|replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
                                             |replace({'\f':''}) }} </text>

@@ -131,12 +131,16 @@ class UploadBrowseProxy
     if (count($params)!=1) {
       throw new \Exception('expected argument to be array with exactly one element for folderId');
     }
+    if (! is_array($params[0])) {
+      $params[0] = [$params[0]];
+    }
+    $params[0] = '{' . implode(',', $params[0]) . '}';
     $params[] = $this->groupId;
     $params[] = Auth::PERM_READ;
     $partQuery = 'upload
         INNER JOIN upload_clearing ON upload_pk = upload_clearing.upload_fk AND group_fk=$2
         INNER JOIN uploadtree ON upload_pk = uploadtree.upload_fk AND upload.pfile_fk = uploadtree.pfile_fk
-        WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode&2 != 0 AND parent_fk = $1 )
+        WHERE upload_pk IN (SELECT child_id FROM foldercontents WHERE foldercontents_mode&2 != 0 AND parent_fk = ANY($1::int[]) )
          AND (public_perm>=$3
               OR EXISTS(SELECT * FROM perm_upload WHERE perm_upload.upload_fk = upload_pk AND group_fk=$2))
          AND parent IS NULL
