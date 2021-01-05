@@ -23,6 +23,7 @@ use Fossology\Lib\Data\Highlight;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\ScanJobProxy;
+use Fossology\Lib\Util\StringOperation;
 use Fossology\Lib\Data\AgentRef;
 use Monolog\Logger;
 
@@ -113,6 +114,7 @@ class CopyrightDao
   public function saveDecision($tableName, $pfileId, $userId , $clearingType,
                                $description, $textFinding, $comment, $decision_pk=-1)
   {
+    $textFinding = StringOperation::replaceUnicodeControlChar($textFinding);
     $primaryColumn = $tableName . '_pk';
     $assocParams = array(
       'user_fk' => $userId,
@@ -454,7 +456,7 @@ class CopyrightDao
       $stmt .= '.rollback';
     } else {
       $setSql = "content = $4, hash = md5($4), is_enabled='true'";
-      $params[] = $content;
+      $params[] = StringOperation::replaceUnicodeControlChar($content);
     }
 
     $cpTablePk = $cpTable."_pk";

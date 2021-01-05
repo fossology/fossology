@@ -21,6 +21,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
 use Symfony\Component\HttpFoundation\Response;
 use Fossology\Lib\BusinessRules\ObligationMap;
+use Fossology\Lib\Util\StringOperation;
 
 define("TITLE_ADMIN_LICENSE_FILE", _("License Administration"));
 
@@ -392,11 +393,11 @@ class admin_license_file extends FO_Plugin
   function Updatedb()
   {
     $rfId = intval($_POST['rf_pk']);
-    $shortname = trim($_POST['rf_shortname']);
-    $fullname = trim($_POST['rf_fullname']);
+    $shortname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_shortname']));
+    $fullname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_fullname']));
     $url = $_POST['rf_url'];
     $notes = $_POST['rf_notes'];
-    $text = trim($_POST['rf_text']);
+    $text = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_text']));
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
@@ -490,15 +491,16 @@ class admin_license_file extends FO_Plugin
    */
   function Adddb()
   {
-    $rf_shortname = trim($_POST['rf_shortname']);
-    $rf_fullname = trim($_POST['rf_fullname']);
+    $rf_shortname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_shortname']));
+    $rf_fullname = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_fullname']));
     $rf_url = $_POST['rf_url'];
     $rf_notes = $_POST['rf_notes'];
-    $rf_text = trim($_POST['rf_text']);
+    $rf_text = StringOperation::replaceUnicodeControlChar(trim($_POST['rf_text']));
     $parent = $_POST['rf_parent'];
     $report = $_POST['rf_report'];
     $riskLvl = intval($_POST['risk_level']);
-    $selectedObligations = $_POST[$this->obligationSelectorName];
+    $selectedObligations = array_key_exists($this->obligationSelectorName,
+      $_POST) ? $_POST[$this->obligationSelectorName] : [];
 
     if (empty($rf_shortname)) {
       $text = _("ERROR: The license shortname is empty. License not added.");

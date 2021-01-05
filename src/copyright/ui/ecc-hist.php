@@ -63,7 +63,7 @@ class EccHistogram  extends HistogramBase {
     list($VEcc, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $V = "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VEcc</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td valign='top'>$VEcc</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     return array($V,$tableVars);
@@ -104,7 +104,10 @@ class EccHistogram  extends HistogramBase {
 
     $(document).ready(function() {
       tableEcc =  createTableecc();
-    } );
+      $('#testReplacementecc').click(function() {
+        testReplacement(tableEcc, 'ecc');
+      });
+    });
 
     ";
 

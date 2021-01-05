@@ -102,8 +102,18 @@ class foconfig extends FO_Plugin
           $OutBuf .= "</select>";
           $OutBuf .= "<br>$row[description]";
           break;
+        case CONFIG_TYPE_BOOL:
+          $ConfVal = filter_var($row['conf_value'], FILTER_VALIDATE_BOOLEAN);
+          $checked = $ConfVal ? "checked" : "";
+          $ConfVal = $ConfVal ? "true" : "false";
+          $OutBuf .= "<input type='checkbox' name='new[" . $row['variablename'] .
+            "]' id='" . $row['variablename'] . "' value='true' title='" .
+            $row['description'] . "' $InputStyle $checked />";
+          $OutBuf .= "<label for='" . $row['variablename'] .
+            "'>" . $row['description'] . "</label>";
+          break;
         default:
-          $OutBuf .= "Invalid configuration variable.  Unknown type.";
+          $OutBuf .= "Invalid configuration variable. Unknown type.";
       }
       $OutBuf .= "</td></tr>";
       $OutBuf .= "<INPUT type='hidden' name='old[$row[variablename]]' value='$ConfVal'>";
@@ -129,6 +139,20 @@ class foconfig extends FO_Plugin
 
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
+
+    if (!empty($newarray)) {
+      // Get missing keys from new array (unchecked checkboxes are not sent)
+      $boolFalseArray = array_diff_key($oldarray, $newarray);
+      foreach ($boolFalseArray as $varname => $value) {
+        // Make sure it was boolean data
+        $isBoolean = $this->dbManager->getSingleRow("SELECT 1 FROM sysconfig " .
+          "WHERE variablename = $1 AND vartype = " . CONFIG_TYPE_BOOL,
+          array($varname), __METHOD__ . '.checkIfBool');
+        if (! empty($isBoolean)) {
+          $newarray[$varname] = 'false';
+        }
+      }
+    }
 
     /* Compare new and old array
      * and update DB with new values */

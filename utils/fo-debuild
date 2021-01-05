@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# This script builds the .deb packages by changing debian/changelog
+# Copyright (C) 2020 Siemens AG
+#
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  version 2 as published by the Free Software Foundation.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License along
+#  with this program; if not, write to the Free Software Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TOP="${SCRIPT_DIR}/.."
+
+show_help() {
+  cat <<EOF
+Usage: fo-debuild [options]
+  -s or --no-sign    : do not sign packages
+  -h or --help       : this help text
+EOF
+}
+
+NOSIGN=''
+
+. "${SCRIPT_DIR}/utils.sh"
+
+# Make sure we are in correct location
+pushd $TOP
+
+# make sure we're in a checked out git copy
+if [ ! -d .git ]; then
+   echo "ERROR: No Git information found. This script requires an git tree."
+   exit 0
+fi
+
+# Check if GIT is available. If not, then abort.
+which git >/dev/null 2>&1
+if [ $? != 0 ]; then
+   echo "ERROR: git command missing."
+   exit 1
+fi
+
+set -o errexit -o nounset -o pipefail
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o sh --long no-sign,help -n 'fo-debuild' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+while true; do
+   case "$1" in
+      -s|--no-sign)     NOSIGN="--no-sign"; shift;;
+      -h|--help)        show_help; exit;;
+      --)               shift; break;;
+      *)                echo "ERROR: option $1 not recognised"; exit 1;;
+   esac
+done
+
+# Get the version
+VERSION=$(eval ${VERSION_COMMAND})
+VERSION="${VERSION/-rc/~rc}-1"
+DISTRO=$(lsb_release --codename --short)
+
+# Update debian/changelog
+echo "Updating changelog with ${DISTRO} distro and ${VERSION} version."
+debchange --distribution ${DISTRO} \
+  --newversion ${VERSION} \
+  --urgency low --maintmaint "New patch build"
+
+utils/fo-mktar
+
+# Clean and build packages
+echo "Building packages..."
+make clean phpvendors
+dpkg-buildpackage ${NOSIGN}
+
+# Discard changelog changes
+git checkout -- debian/changelog
+
+# Package deb files
+echo "Packaging files as ${TOP}/fossology_${VERSION}.tar.gz"
+find .. -type f -name "*-dbgsym*" -exec rm -rf {} \;
+mkdir -p packages
+mv ../*.deb packages/
+mv ../fossology_${VERSION}_*.buildinfo packages/
+mv ../fossology_${VERSION}_*.changes packages/
+mv ../fossology_${VERSION}.dsc packages/
+tar -czvf fossology_${VERSION}.tar.gz packages
+rm -rf packages
+
+popd
+

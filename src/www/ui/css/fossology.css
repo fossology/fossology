@@ -115,7 +115,7 @@ html, body
 .semibordered
 {
   border:1px solid black;
-  border-collapse:collapse;    
+  border-collapse:collapse;
 }
 
 .semibordered td, .semibordered th
@@ -347,4 +347,23 @@ div.infoTable {
 
 .riskLevelBackgroud5 {
   background: #e95850;
+}
+
+.passPolicy {
+  font-size: .9em;
+  color: #FF666C;
+}
+
+.passFail {
+  box-shadow: 0 0 6px #FF2F4D;
+  margin: 4px;
+}
+
+.passPass {
+  box-shadow: 0 0 6px #2EFF57;
+  margin: 4px;
+}
+
+#passcheck, #pass2 {
+  margin: 4px;
 }

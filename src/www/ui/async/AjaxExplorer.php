@@ -342,6 +342,7 @@ class AjaxExplorer extends DefaultPlugin
     /* show licenses under file name */
     $childItemTreeBounds =
         new ItemTreeBounds($childUploadTreeId, $this->uploadtree_tablename, $child['upload_fk'], $child['lft'], $child['rgt']);
+    $totalFilesCount = $this->uploadDao->countPlainFiles($childItemTreeBounds);
     if ($isContainer) {
       $agentFilter = $selectedAgentId ? array($selectedAgentId) : $latestSuccessfulAgentIds;
       $licenseEntries = $this->licenseDao->getLicenseShortnamesContained($childItemTreeBounds, $agentFilter, array());
@@ -419,8 +420,7 @@ class AjaxExplorer extends DefaultPlugin
     // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
     $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
     $img = $isDecisionDNU ? 'redGreen' : $img;
-
-    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared/$filesToBeCleared", $fileListLinks);
+    return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
   }
 
   /**

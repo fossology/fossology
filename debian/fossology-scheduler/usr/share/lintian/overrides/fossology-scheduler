@@ -1,2 +1,0 @@
-# We use #DEBHELPER# to generate the update-rc and invoke-rc calls
-fossology-scheduler: script-in-etc-init.d-not-registered-via-update-rc.d etc/init.d/fossology

@@ -54,10 +54,16 @@ class SearchController extends RestController
     $filesizeMax = $request->getHeaderLine("filesizemax");
     $license = $request->getHeaderLine("license");
     $copyright = $request->getHeaderLine("copyright");
+    $uploadId = $request->getHeaderLine("uploadId");
 
     // set searchtype to search allfiles by default
     if (empty($searchType)) {
       $searchType = "allfiles";
+    }
+
+    // set uploadId to 0 - search in all files
+    if (empty($uploadId)) {
+      $uploadId = 0;
     }
 
     /*
@@ -83,7 +89,7 @@ class SearchController extends RestController
     }
 
     $item = GetParm("item", PARM_INTEGER);
-    $results = GetResults($item, $filename, $tag, 0,
+    $results = GetResults($item, $filename, $uploadId, $tag, 0,
       $filesizeMin, $filesizeMax, $searchType, $license, $copyright,
       $this->restHelper->getUploadDao(), $this->restHelper->getGroupId(),
       $GLOBALS['PG_CONN'])[0];
@@ -92,7 +98,13 @@ class SearchController extends RestController
     // rewrite it and add additional information about it's parent upload
     for ($i = 0; $i < sizeof($results); $i ++) {
       $currentUpload = $this->dbHelper->getUploads(
-        $this->restHelper->getUserId(), $results[$i]["upload_fk"])[0];
+        $this->restHelper->getUserId(), $this->restHelper->getGroupId(), 1, 1,
+        $results[$i]["upload_fk"], null, true)[1];
+      if (! empty($currentUpload)) {
+        $currentUpload = $currentUpload[0];
+      } else {
+        continue;
+      }
       $uploadTreePk = $results[$i]["uploadtree_pk"];
       $filename = $this->dbHelper->getFilenameFromUploadTree($uploadTreePk);
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);

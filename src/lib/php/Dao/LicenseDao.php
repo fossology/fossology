@@ -27,6 +27,7 @@ use Fossology\Lib\Data\LicenseRef;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Proxy\LicenseViewProxy;
+use Fossology\Lib\Util\StringOperation;
 use Monolog\Logger;
 
 class LicenseDao
@@ -556,7 +557,8 @@ ORDER BY lft asc
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
         "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text)
       VALUES ($1,$2,$3,$4) RETURNING lrb_pk",
-        array($userId, $groupId, $uploadTreeId, $refText),
+        array($userId, $groupId, $uploadTreeId,
+          StringOperation::replaceUnicodeControlChar($refText)),
         __METHOD__ . '.getLrb'
     );
     if ($licenseRefBulkIdResult === false) {
@@ -567,7 +569,11 @@ ORDER BY lft asc
     $stmt = __METHOD__ . '.insertAction';
     $this->dbManager->prepare($stmt, "INSERT INTO license_set_bulk (lrb_fk, rf_fk, removing, comment, reportinfo, acknowledgement) VALUES ($1,$2,$3,$4,$5,$6)");
     foreach ($licenseRemovals as $licenseId=>$removing) {
-      $this->dbManager->execute($stmt, array($bulkId, $licenseId, $this->dbManager->booleanToDb($removing[0]), $removing[1], $removing[2], $removing[3]));
+      $this->dbManager->execute($stmt, array($bulkId, $licenseId,
+        $this->dbManager->booleanToDb($removing[0]),
+        StringOperation::replaceUnicodeControlChar($removing[1]),
+        StringOperation::replaceUnicodeControlChar($removing[2]),
+        StringOperation::replaceUnicodeControlChar($removing[3])));
     }
 
     return $bulkId ;
@@ -596,7 +602,9 @@ ORDER BY lft asc
   {
     $row = $this->dbManager->getSingleRow(
       "INSERT INTO license_ref (rf_shortname, rf_text, rf_detector_type, rf_spdx_compatible) VALUES ($1, $2, 2, $3) RETURNING rf_pk",
-      array($shortname, $refText, $spdxCompatible ? 1 : 0),
+      array(StringOperation::replaceUnicodeControlChar($shortname),
+        StringOperation::replaceUnicodeControlChar($refText),
+        $spdxCompatible ? 1 : 0),
       __METHOD__.".addLicense" );
     return $row["rf_pk"];
   }
@@ -609,7 +617,9 @@ ORDER BY lft asc
   public function insertUploadLicense($newShortname, $refText, $groupId)
   {
     $sql = 'INSERT INTO license_candidate (group_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
-    $refArray = $this->dbManager->getSingleRow($sql, array($groupId, $newShortname, $refText), __METHOD__);
+    $refArray = $this->dbManager->getSingleRow($sql, array($groupId,
+      StringOperation::replaceUnicodeControlChar($newShortname),
+      StringOperation::replaceUnicodeControlChar($refText)), __METHOD__);
     return $refArray['rf_pk'];
   }
 
@@ -635,7 +645,11 @@ ORDER BY lft asc
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
     $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, rf_notes=$6, marydone=$7, rf_risk=$8 WHERE rf_pk=$1',
-        array($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $marydone, $riskLvl), __METHOD__);
+      array($rf_pk, StringOperation::replaceUnicodeControlChar($shortname),
+        StringOperation::replaceUnicodeControlChar($fullname),
+        StringOperation::replaceUnicodeControlChar($rfText), $url,
+        StringOperation::replaceUnicodeControlChar($rfNotes), $marydone,
+        $riskLvl), __METHOD__);
   }
 
   /**

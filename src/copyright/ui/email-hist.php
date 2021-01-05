@@ -113,6 +113,15 @@ class EmailHistogram extends HistogramBase {
       tableEmail = createTableemail();
       tableUrl = createTableurl();
       tableAuthor = createTableauthor();
+      $('#testReplacementemail').click(function() {
+        testReplacement(tableEmail, 'email');
+      });
+      $('#testReplacementurl').click(function() {
+        testReplacement(tableUrl, 'url');
+      });
+      $('#testReplacementauthor').click(function() {
+        testReplacement(tableAuthor, 'author');
+      });
       $(\"#EmailUrlAuthorTabs\").tabs({
         active: ($.cookie(emailTabCookie) || 0),
         activate: function(e, ui){

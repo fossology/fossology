@@ -1,0 +1,15 @@
+(* Apache HTTPD lens for Augeas
+
+Authors:
+David Lutterkort <lutter@redhat.com>
+Francis Giraldeau <francis.giraldeau@usherbrooke.ca>
+Raphael Pinson <raphink@gmail.com>
+
+About: Reference
+Online Apache configuration manual: http://httpd.apache.org/docs/trunk/
+
+About: License
+This file is licensed under the LGPL v2+.
+
+About: Lens Usage
+Sample usage of this lens in augtool

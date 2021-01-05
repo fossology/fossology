@@ -29,7 +29,7 @@ class KeywordHistogram  extends HistogramBase {
     $this->agentName = "keyword";
     parent::__construct();
   }
-  
+
   /**
    * @param $upload_pk
    * @param $Uploadtree_pk
@@ -61,7 +61,7 @@ class KeywordHistogram  extends HistogramBase {
     list($VKeyword, $tableVars) = $this->getTableContent($upload_pk, $Uploadtree_pk, $filter, $agentId);
 
     $V = "<table border=0 width='100%'>\n";
-    $V .= "<tr><td valign='top' width='50%'>$VKeyword</td><td valign='top'>$VF</td></tr>\n";
+    $V .= "<tr><td valign='top'>$VKeyword</td><td valign='top'>$VF</td></tr>\n";
     $V .= "</table>\n";
     $V .= "<hr />\n";
     return array($V,$tableVars);
@@ -93,8 +93,11 @@ class KeywordHistogram  extends HistogramBase {
     return "
 
     $(document).ready(function() {
-      tableKeyword =  createTablekeyword();
-    } );
+      tableKeyword = createTablekeyword();
+      $('#testReplacementkeyword').click(function() {
+        testReplacement(tableKeyword, 'keyword');
+      });
+    });
 
     ";
 

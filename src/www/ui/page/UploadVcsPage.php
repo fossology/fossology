@@ -53,8 +53,6 @@ class UploadVcsPage extends UploadPageBase
     $vars['geturlField'] = self::GETURL_PARAM;
     $vars['branchField'] = 'branch';
     $vars['nameField'] = 'name';
-    $this->renderer->clearTemplateCache();
-    $this->renderer->clearCacheFiles();
     return $this->render("upload_vcs.html.twig", $this->mergeWithDefault($vars));
   }
 

@@ -60,7 +60,10 @@ class UploadPermissionDao
 
     $perm = $this->dbManager->getSingleRow('SELECT perm FROM perm_upload WHERE upload_fk=$1 AND group_fk=$2',
         array($uploadId, $groupId), __METHOD__);
-    return $perm['perm']>=Auth::PERM_WRITE;
+    if (! empty($perm) && array_key_exists('perm', $perm)) {
+      return $perm['perm']>=Auth::PERM_WRITE;
+    }
+    return false;
   }
 
   public function makeAccessibleToGroup($uploadId, $groupId, $perm=null)

@@ -1705,7 +1705,7 @@ char *PathCheck(char *DirPath)
     free(NewPath);
     NewPath = strdup(TmpPath);
   }
-
+#ifndef STANDALONE
   if ((subs = strstr(NewPath, "%R")) )
   {
     /* repo location substitution */
@@ -1715,7 +1715,7 @@ char *PathCheck(char *DirPath)
     free(NewPath);
     NewPath = strdup(TmpPath);
   }
-
+#endif
   return(NewPath);
 }
 

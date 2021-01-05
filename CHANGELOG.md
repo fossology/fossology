@@ -1,5 +1,63 @@
 # Changelog of FOSSology
 
+### 3.9.0 (November 30th 2020)
+
+This release adds important corrections to
+[3.9.0-rc2](https://github.com/fossology/fossology/releases/tag/3.9.0-rc2)
+
+The release 3.9.0 introduces following major changes:
+- Introduce support for Ubuntu Focal Fossa (20.04)
+- Drop support for Debian 8 Jessie
+- Obligations now refer to license conclusions
+- Auto deactivation of copyrights for irrelevant files
+- REST API now supports upload from URL
+- Display time in browser's timezone wherever possible
+- Ability to export Copyright CSV
+
+The release 3.9.0 also introduces new agent `Spasht` which connects with
+ClearlyDefined server and pulls information like License and Copyrights (if
+available).
+To use it, upload a package, open it and goto Spasht page from the
+top yellow bar. From there, search for the desired package on ClearlyDefined and
+schedule the scan. Licenses and copyrights will appear on the same page.
+
+#### Credits to contributors for 3.9.0
+
+From the git commit history, we have following contributors since
+[3.8.0](https://github.com/fossology/fossology/releases/tag/3.8.0):
+```
+> adityabisoi <adityabisoi1999@gmail.com>
+> Akash-Sareen <akash7sareen@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avneet Singh <Avneet.Singh@sony.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Lakshmi Bhavani <Nagavalli.LakshmiBhavani@in.bosch.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> sjha2048 <sjha200000@gmail.com>
+> vivek kumar <vvksindia@gmail.com>
+```
+
+#### Features
+* `d9ed388d5` chore(documentation): updating basic license info in UI
+* `81e029137` feat(about): add new page for third party licenses
+* `a333fb5eb` update(org): added focal-fossa support
+* `010f94747` chore(spdx): bump spdx version to 2.2
+
+#### Corrections
+* `6a2ce3dee` fix(spasht): Fix advance search
+* `be5189da4` fix(swh): Update User-Agent, lowecase SHA256
+* `bd65ab70b` fix(ununpack): Correct the mimetype for deb files
+* `4f4f311b2` fix(copyrightDao): Change statement in updateTable
+
+#### Infrastructure
+* `87829c8e4` feat(cd): Publish release packages with Actions
+* `bc2f2eb07` update(org): drop debian 8 support
+
 ### 3.9.0-RC2 (Oct 8th 2020)
 
 This pre-release adds important corrections to 3.9.0-RC2.
@@ -697,7 +755,7 @@ Looking into the git commit history, it shows you all the users who have contrib
 
 #### Corrections
 
-* `ee8b69c` fix(constraints): Remove more faulty constraints    
+* `ee8b69c` fix(constraints): Remove more faulty constraints
 * `c6743d5` fix(unifiedreport): add default count as 0 in result of scan
 
 #### Refactorings, Infrastructure
