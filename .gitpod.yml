@@ -1,5 +1,16 @@
 image:
   file: .gitpod.Dockerfile
+ports:
+  - port: 5432
+    onOpen: ignore
+
+github:
+  prebuilds:
+    master: true
+    branches: false
+    pullRequests: true
+    pullRequestsFromForks: true
+    addComment: true
 
 tasks:
-  - init: ./utils/fo-installdeps -ye
+  - init: sudo ./utils/fo-installdeps -ye && make && sudo make install && sudo /usr/local/lib/fossology/fo-postinstall && sudo systemctl enable --now fossology && sudo systemctl start fossology && sudo ./install/scripts/php-conf-fix.sh --overwrite
