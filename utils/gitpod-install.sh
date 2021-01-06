@@ -16,10 +16,9 @@
 #  with this program; if not, write to the Free Software Foundation, Inc.,
 #  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# Build FOSSology
-make PREFIX="/workspace/fossy/code" INITDIR="/workspace/fossy/etc" \
-  REPODIR="/workspace/fossy/srv" LOCALSTATEDIR="/workspace/fossy/var" \
-  APACHE2_SITE_DIR="/workspace/apache" SYSCONFDIR="/workspace/fossy/etc/fossology"
+# Make sure apache conf is accessible
+mkdir -p /workspace/apache
+chmod 777 /workspace/apache
 
 # Install FOSSology in Gitpod's workspace
 sudo make install PREFIX="/workspace/fossy/code" INITDIR="/workspace/fossy/etc" \
