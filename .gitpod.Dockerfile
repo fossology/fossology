@@ -12,7 +12,7 @@ RUN sudo apt-get update \
     php php-mbstring php-cli php-xml php-zip php-pear php-pgsql php-curl \
     libicu66 libjsoncpp-dev libboost-system-dev libboost-filesystem-dev \
     libjson-c-dev libgcrypt20-dev bzip2 tar gzip libglib2.0-dev \
- && echo "\nIncludeOptional /workspace/apache/*.conf\n" | sudo tee -a /etc/apache2/apache2.conf \
+ && echo "\nIncludeOptional /workspace/apache/*.conf\n" | sudo tee -a /etc/apache2/apache2.conf
 
 # Fix PHP for FOSSology
 RUN PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}') \
