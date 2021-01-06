@@ -17,19 +17,20 @@
 #  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Build FOSSology
-make DESTDIR="/workspace/fossy" PREFIX="/code" \
-  INITDIR="/workspace/fossy/etc" REPODIR="/workspace/fossy/srv" \
-  LOCALSTATEDIR="/workspace/fossy/var" \
-  APACHE2_SITE_DIR="/workspace/apache"
+make PREFIX="/workspace/fossy/code" INITDIR="/workspace/fossy/etc" \
+  REPODIR="/workspace/fossy/srv" LOCALSTATEDIR="/workspace/fossy/var" \
+  APACHE2_SITE_DIR="/workspace/apache" SYSCONFDIR="/workspace/fossy/etc/fossology"
 
 # Install FOSSology in Gitpod's workspace
-sudo make install DESTDIR="/workspace/fossy" PREFIX="/code" \
-  INITDIR="/workspace/fossy/etc" REPODIR="/workspace/fossy/srv" \
-  LOCALSTATEDIR="/workspace/fossy/var" \
-  APACHE2_SITE_DIR="/workspace/apache"
+sudo make install PREFIX="/workspace/fossy/code" INITDIR="/workspace/fossy/etc" \
+  REPODIR="/workspace/fossy/srv" LOCALSTATEDIR="/workspace/fossy/var" \
+  APACHE2_SITE_DIR="/workspace/apache" SYSCONFDIR="/workspace/fossy/etc/fossology"
 
 # Run postinstall script
-sudo /workspace/fossy/code/lib/fossology/fo-postinstall
+sudo /workspace/fossy/code/lib/fossology/fo-postinstall || echo "Done"
 
 # Fix the FOSSology path for Apache
-sudo sed -ie "s/\/usr\/local\/share/\/workspace\/fossy\/code\/share" "/workspace/apache/fossology.conf"
+sudo sed -i "s/\/usr\/local\/share/\/workspace\/fossy\/code\/share/" "/workspace/apache/fossology.conf"
+
+# Fix permissions
+sudo chown gitpod:fossy -R /workspace/fossy/var /workspace/fossy/etc/fossology/Db.conf
