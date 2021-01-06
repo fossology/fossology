@@ -14,7 +14,7 @@ github:
     addComment: true
 
 tasks:
-  - init: ./utils/gitpod-install.sh && sudo mkdir -p /var/log/fossology && sudo chown fossy:gitpod /var/log/fossology
-    command: mkdir -p public && apachectl restart
+  - init: ./utils/gitpod-install.sh; sudo mkdir -p /var/log/fossology; sudo chown fossy:gitpod /var/log/fossology
+    command: mkdir -p public; apachectl restart
   - command: sudo /workspace/fossy/code/share/fossology/scheduler/agent/fo_scheduler --verbose=3 --reset
     name: fossology
