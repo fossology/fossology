@@ -18,10 +18,10 @@ RUN sudo apt-get update \
 RUN PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}') \
  && phpIni="${PHP_PATH}/../apache2/php.ini" \
  && TIMEZONE=$(cat /etc/timezone) \
- && sudo sed -i 's/^\(max_execution_time\s*=\s*\).*$/\1300/' $phpIni
- && sudo sed -i 's/^\(memory_limit\s*=\s*\).*$/\1702M/' $phpIni
- && sudo sed -i 's/^\(post_max_size\s*=\s*\).*$/\1701M/' $phpIni
- && sudo sed -i 's/^\(upload_max_filesize\s*=\s*\).*$/\1700M/' $phpIni
+ && sudo sed -i 's/^\(max_execution_time\s*=\s*\).*$/\1300/' $phpIni \
+ && sudo sed -i 's/^\(memory_limit\s*=\s*\).*$/\1702M/' $phpIni \
+ && sudo sed -i 's/^\(post_max_size\s*=\s*\).*$/\1701M/' $phpIni \
+ && sudo sed -i 's/^\(upload_max_filesize\s*=\s*\).*$/\1700M/' $phpIni \
  && sudo sed -i "s%.*date.timezone =.*%date.timezone = $TIMEZONE%" $phpIni
 
 # Copy PostgreSQL setup from https://github.com/gitpod-io/workspace-images/blob/master/postgres/Dockerfile
