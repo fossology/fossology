@@ -32,12 +32,13 @@ RUN PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}') \
 # Setup PostgreSQL server for user gitpod
 ENV PATH="$PATH:/usr/lib/postgresql/12/bin"
 ENV PGDATA="/workspace/.pgsql/data"
-ENV SOCLOC="${HOME//\//\\\/}\/.pg_ctl\/sockets"
+ENV SOCLOC="${HOME}/.pg_ctl/sockets"
 RUN mkdir -p ~/.pg_ctl/bin ~/.pg_ctl/sockets \
  && printf '#!/bin/bash\n[ ! -d $PGDATA ] && mkdir -p $PGDATA && initdb -D $PGDATA\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" start\n' > ~/.pg_ctl/bin/pg_start \
  && printf '#!/bin/bash\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" stop\n' > ~/.pg_ctl/bin/pg_stop \
  && chmod +x ~/.pg_ctl/bin/* \
- && sudo sed -i "s/^\(unix_socket_directories\s*=\s*\).*\$/\1${SOCLOC}/" /etc/postgresql/12/main/postgresql.conf
+ && sudo sed -i '/^\(unix_socket_directories\s*=\s*\).*$/d' /etc/postgresql/12/main/postgresql.conf
+ && echo "\nunix_socket_directories = ${SOCLOC}" | sudo tee -a /etc/postgresql/12/main/postgresql.conf
 ENV PATH="$PATH:$HOME/.pg_ctl/bin"
 ENV DATABASE_URL="postgresql://gitpod@localhost"
 ENV PGHOSTADDR="127.0.0.1"
