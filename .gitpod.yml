@@ -13,5 +13,5 @@ github:
     addComment: true
 
 tasks:
-  - init: sudo ./utils/fo-installdeps -ye && make && sudo make install && sudo service postgresql restart && sudo /usr/local/lib/fossology/fo-postinstall && sudo service fossology start && sudo ./install/scripts/php-conf-fix.sh --overwrite
-    command: mkdir -p public && sudo service postgresql restart && sudo -HE apachectl restart
+  - init: ./utils/gitpod-install.sh
+    command: mkdir -p public && apachectl restart
