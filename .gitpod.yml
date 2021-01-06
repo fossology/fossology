@@ -3,7 +3,8 @@ image:
 ports:
   - port: 5432
     onOpen: ignore
-
+  - port: 24693
+    onOpen: ignore
 github:
   prebuilds:
     master: true
@@ -13,5 +14,7 @@ github:
     addComment: true
 
 tasks:
-  - init: ./utils/gitpod-install.sh
+  - init: ./utils/gitpod-install.sh && sudo mkdir -p /var/log/fossology && sudo chown fossy:gitpod /var/log/fossology
     command: mkdir -p public && apachectl restart
+  - command: sudo /workspace/fossy/code/share/fossology/scheduler/agent/fo_scheduler --verbose=3 --reset
+    name: fossology

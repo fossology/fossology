@@ -11,11 +11,10 @@ RUN sudo apt-get update \
     p7zip wget dpkg-dev s-nail \
     php php-mbstring php-cli php-xml php-zip php-pear php-pgsql php-curl \
     libicu66 libjsoncpp-dev libboost-system-dev libboost-filesystem-dev \
-    libjson-c-dev libgcrypt20-dev bzip2 tar gzip libglib2.0-dev \
- && sudo mkdir -p /workspace/apache \
- && sudo chown gitpod:gitpod /workspace/apache \
- && sudo chmod 766 /workspace/apache \
- && echo "\nIncludeOptional /workspace/apache/*.conf\n" | sudo tee -a /etc/apache2/apache2.conf \
+    libjson-c-dev libgcrypt20-dev bzip2 tar gzip libglib2.0-dev
+
+# Setup apache
+RUN echo "\nIncludeOptional /workspace/apache/*.conf\n" | sudo tee -a /etc/apache2/apache2.conf \
  && sudo /usr/sbin/a2enmod rewrite
 
 # Fix PHP for FOSSology
@@ -29,17 +28,20 @@ RUN PHP_PATH=$(php --ini | awk '/\/etc\/php.*\/cli$/{print $5}') \
  && sudo sed -i "s%.*date.timezone =.*%date.timezone = $TIMEZONE%" $phpIni
 
 # Copy PostgreSQL setup from https://github.com/gitpod-io/workspace-images/blob/master/postgres/Dockerfile
+# Changes:
+# 1. Call initdb with `postgres' as the user
+# 2. Change the unix_socket_directories in postgresql.conf
 # Setup PostgreSQL server for user gitpod
 ENV PATH="$PATH:/usr/lib/postgresql/12/bin"
 ENV PGDATA="/workspace/.pgsql/data"
 ENV SOCLOC="${HOME}/.pg_ctl/sockets"
 RUN mkdir -p ~/.pg_ctl/bin ~/.pg_ctl/sockets \
- && printf '#!/bin/bash\n[ ! -d $PGDATA ] && mkdir -p $PGDATA && initdb -D $PGDATA\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" start\n' > ~/.pg_ctl/bin/pg_start \
+ && printf '#!/bin/bash\n[ ! -d $PGDATA ] && mkdir -p $PGDATA && initdb -D $PGDATA -U postgres\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" start\n' > ~/.pg_ctl/bin/pg_start \
  && printf '#!/bin/bash\npg_ctl -D $PGDATA -l ~/.pg_ctl/log -o "-k ~/.pg_ctl/sockets" stop\n' > ~/.pg_ctl/bin/pg_stop \
  && chmod +x ~/.pg_ctl/bin/* \
- && sudo sed -i "s:^\(unix_socket_directories\s*=\s*\).*\$:\1${SOCLOC}:" /etc/postgresql/12/main/postgresql.conf
+ && sudo sed -i "s:^\(unix_socket_directories\s*=\s*\).*\$:\1'${SOCLOC}':" /etc/postgresql/12/main/postgresql.conf
 ENV PATH="$PATH:$HOME/.pg_ctl/bin"
-ENV DATABASE_URL="postgresql://gitpod@localhost"
+ENV DATABASE_URL="postgresql://postgres@localhost"
 ENV PGHOSTADDR="127.0.0.1"
 ENV PGDATABASE="postgres"
 
