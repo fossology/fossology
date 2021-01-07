@@ -59,8 +59,8 @@ class user_add extends FO_Plugin
     $User = trim($User);
     $Pass = GetParm('pass1', PARM_TEXT);
     $Pass2 = GetParm('pass2', PARM_TEXT);
-    $Seed = rand() . rand();
-    $Hash = sha1($Seed . $Pass);
+    $options = array('cost' => 10);
+    $Hash = password_hash($Pass, PASSWORD_DEFAULT, $options);
     $Desc = str_replace("'", "''", GetParm('description', PARM_TEXT));
     $Perm = GetParm('permission', PARM_INTEGER);
     $Folder = GetParm('folder', PARM_INTEGER);
@@ -129,7 +129,7 @@ class user_add extends FO_Plugin
       $Email_notify = '';
     }
 
-    $ErrMsg = add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
+    $ErrMsg = add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
       $agentList, $Folder, $default_bucketpool_fk);
 
     return ($ErrMsg);

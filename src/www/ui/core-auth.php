@@ -267,6 +267,7 @@ class core_auth extends FO_Plugin
   function checkUsernameAndPassword($userName, $password)
   {
     $user_exists=true;
+    $options = array('cost' => 10);
     /* Check the user for external authentication */
     if ($this->authExternal !== false && $this->authExternal['useAuthExternal']) {
       $username = $this->authExternal['loginAuthExternal'];
@@ -280,8 +281,7 @@ class core_auth extends FO_Plugin
         /* If user does not exist then we create it */
         $User = trim(str_replace("'", "''", $this->authExternal['loginAuthExternal']));
         $Pass = $this->authExternal['passwordAuthExternal'] ;
-        $Seed = rand() . rand();
-        $Hash = sha1($Seed . $Pass);
+        $Hash = password_hash($Pass, PASSWORD_DEFAULT, $options);
         $Desc = $this->authExternal['descriptionAuthExternal'];
         $Perm = 3;
         $Folder = 1;
@@ -289,7 +289,7 @@ class core_auth extends FO_Plugin
         $Email = $this->authExternal['emailAuthExternal'];
         /* Set default list of agents when a new user is created */
         $agentList = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AGENT_LIST'];
-        add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify, $agentList, $Folder);
+        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $agentList, $Folder);
       }
     }
 
@@ -307,15 +307,27 @@ class core_auth extends FO_Plugin
     }
 
     /* Check the password -- only if a password exists */
-    if (! empty($row['user_seed']) && ! empty($row['user_pass'])) {
-      $passwordHash = sha1($row['user_seed'] . $password);
-      if (strcmp($passwordHash, $row['user_pass']) != 0) {
-        return false;
+    if (! empty($row['user_pass'])) {
+      $options = array('cost' => 10);
+      /* Check if the password matches by password_verify */
+      if (password_verify($password, $row['user_pass'])) {
+        if (password_needs_rehash($row['user_pass'], PASSWORD_DEFAULT, $options)) {
+          $newHash = password_hash($password, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash */
+          update_password_hash($userName, $newHash);
+        }
+      } else if (! empty($row['user_seed'])) {
+        $passwordHash = sha1($row['user_seed'] . $password);
+        /* If verify with new hash fails check with the old hash */
+        if (strcmp($passwordHash, $row['user_pass']) == 0) {
+          $newHash = password_hash($password, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash */
+          update_password_hash($userName, $newHash);
+        } else {
+          return false;
+        }
       }
-    } else if (! empty($row['user_seed'])) {
-      /* Seed with no password hash = no login */
-      return false;
-    } else if (!empty($password)) {
+    } else if (! empty($password)) {
       /* empty password required */
       return false;
     }
