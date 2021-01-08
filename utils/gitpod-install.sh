@@ -34,4 +34,5 @@ sudo sed -i "s/\/usr\/local\/share/\/workspace\/fossy\/code\/share/" "/workspace
 # Fix permissions
 sudo mkdir -p /workspace/fossy/srv
 sudo chown gitpod:fossy -R /workspace/fossy/var /workspace/fossy/srv
+sudo chmod 775 -R /workspace/fossy/srv
 sudo chmod 775 -R /workspace/fossy/var

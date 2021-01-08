@@ -13,7 +13,7 @@ address = localhost
 depth = 3
 
 ; REPLACEMENT for RepPath.conf
-path = ${REPODIR}
+path = {$REPODIR}
 
 ; REPLACEMENT for Proxy.conf
 ; proxy settings that will be used by fossology agents

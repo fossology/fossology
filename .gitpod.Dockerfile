@@ -53,4 +53,6 @@ RUN printf "\n# Auto-start PostgreSQL server.\n[[ \$(pg_ctl status | grep PID) ]
 # Setup fossy user
 RUN sudo groupadd --system fossy \
  && sudo useradd --comment "fossy" --gid fossy --groups gitpod --create-home --shell /bin/bash --system fossy \
- && sudo usermod --append --groups fossy gitpod
+ && sudo usermod --append --groups fossy gitpod \
+ && sudo mkdir -p /var/log/fossology \
+ && sudo chown fossy:gitpod /var/log/fossology
