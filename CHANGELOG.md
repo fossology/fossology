@@ -1,5 +1,92 @@
 # Changelog of FOSSology
 
+### 3.10.0-RC1 (Jan 8th 2021)
+
+With every new release, FOSSology brings various bug fixes, infrastructure
+changes and various new features.
+
+You can check the list of commits in release bellow but few highlights for the
+release will be:
+
+* Drop support for PHP5 and update dependencies for PHP7
+* Update password hashing algorithm from SHA1 to more secure bcrypt.
+* Ability to search file from hash values in REST API.
+* New licenses from SPDX 3.10 and many fixes in nomos.
+* Advance search and replace for copyrights.
+* Ability to enforce password policies.
+* Feature to import license acknowledgement from NOTICE file.
+* Change the versioning scheme to include patch number (featched from GIT).
+* Ununpack agent can be compiled to work in standalone mode.
+
+#### Credits to contributors for 3.10.0-RC1
+
+From the GIT commit history, we have following contributors since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> David Lechner <david@pybricks.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Helio Chissini de Castro <helio@kde.org>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> rlintu <raino.lintulampi@bittium.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `9027b8711` fix(login): Do not set group_fk if empty
+* `e6b060fbe` fix(db): add indexes to pfile on sha1 and sha256
+* `0714946c9` fix(ack): add missing uploadid in getresults function
+* `71981e494` fix(API): added container-interop dependency for resolving Internal Server Error
+* `c6d1c87a3` fix(twig): Update twig version to preserve spaces
+* `d250b735b` fix(globalDecision): make includesubfolders true in case of global to capture previous decisions
+* `32cef88e4` fix(readmeoss): unescape contents
+* `34486d07d` fix(conf): fix not able to save conf in case of brackets
+* `88024fe35` fix(ununpack): Initialize gcrypt
+* `40d96ebeb` fix(rest) : Set job status as Failed when any one of the job is failed
+
+#### Infrastructure
+
+* `a0338b740` refactor(login): updated password hashing algorithm
+* `30f0b773a` docs(db): remove obsolete comment from schema
+* `3d29039b7` chore(cd): Use fo-debuild script to build packages
+* `65041f002` debian: Improve deb package building (#1828)
+* `855aec69a` update(org): upgraded php version to php7
+
+#### Features
+
+* `932b82d76` feat(ununpack): standalone
+* `106a95907` feat(docker): improve database healthcheck command
+* `3291eec27` feat(docker): services healthchecks in docker-compose file
+* `fc8b111ca` feat(build): Get build version number from git
+* `7f36edb90` feat(password): Create password policy
+* `a3dad10ab` feat(browser): total files in license browser view
+* `4fd3007e4` feat(copyright): Search and replace with regex
+* `c1773ec41` feat(conf): make unified report configurable
+* `b96010ea1` feat(licenses): New licenses added from SPDX 3.10 to nomos.
+* `9b327e80b` Nomos: New licenses from SPDX 3.10 added. Lots of other corrections.
+* `323155150` feat(cd): Build Focal packages on release
+* `a9ce7e738` feat(nomos): add new license intel-binary
+* `bc3e1bf6b` feat(rest): Filter uploads by folder id
+* `03f7f53c4` feat(utils): Filter inputs for unicode ctrl chars
+* `5e4fae26e` feat(search) - possibility to search in selected upload only
+* `d03ed3493` feat(gui): Add Bucket link for license view page
+* `f9cdc2d38` feat(conf): add textarea in conf page for notes
+* `42ffc492f` feat(nomos): Apache detection
+* `5db568481` feat(rest): Get file info from hash
+* `d1fdfe4d7` feat(modal): use jquery-ui dailog instead of plain modal
+* `d013e0903` feat(noticeImport): add child modal to load notice files
+* `d1583ca87` feat(notice_import): Increase size of textarea and fix a max notice preview length
+* `0642f8ed2` feat(notice_import): Import notice file content into acknowledgement
+
 ### 3.9.0 (November 30th 2020)
 
 This release adds important corrections to

@@ -18,7 +18,7 @@ http://fossology.org/
 
 ## Requirements
 
-The PHP versions 5.6.x and 7.0.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.6 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
+The PHP versions 7.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.6 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
 ## Installation
 
@@ -63,13 +63,13 @@ FOSSology comes with a VagrantFile that can be used to create an isolated enviro
 
 **Steps:**
 
-```    
+```
 git clone https://github.com/fossology/fossology
 cd fossology/
 vagrant up
 ```
 
-The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/) and user can login the credentials using 
+The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/) and user can login the credentials using
 
 ```
 user: fossy
@@ -99,7 +99,7 @@ We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTIN
 
 The original FOSSology source code and associated documentation
 including these web pages are Copyright (C) 2007-2012 HP Development
-Company, L.P. In the past years, other contributors added source code 
+Company, L.P. In the past years, other contributors added source code
 and documentation to the project, see the NOTICES file or the referring
 files for more information.
 
