@@ -3,7 +3,7 @@ name: Publish Release Packages
 on:
   release:
     types:
-      - created
+      - published
 
 env:
   DEBIAN_FRONTEND: noninteractive
