@@ -217,7 +217,7 @@ class ClearingView extends FO_Plugin
     $lastItem = GetParm("lastItem", PARM_INTEGER);
 
     if (!empty($lastItem)) {
-      $this->updateLastItem($userId, $groupId,$lastItem);
+      $this->updateLastItem($userId, $groupId, $lastItem, $uploadTreeId);
     }
 
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
@@ -344,13 +344,16 @@ class ClearingView extends FO_Plugin
    * @param int $lastItem
    * @return array
    */
-  protected function updateLastItem($userId, $groupId, $lastItem)
+  protected function updateLastItem($userId, $groupId, $lastItem, $currentUploadtreeId)
   {
     $type = GetParm("clearingTypes", PARM_INTEGER);
     $global = GetParm("globalDecision", PARM_STRING) === "on" ? 1 : 0;
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($lastItem);
     $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
-    $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
+    $isDecisionWip = $this->clearingDao->isDecisionWip($currentUploadtreeId, $groupId);
+    if ($isDecisionWip || !$global) {
+      $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
+    }
   }
 }
 
