@@ -110,6 +110,8 @@ you agree to indemnify, hold harmless and defend adobe systems incorporated from
 INSERT INTO copyright (copyright_pk, agent_fk, pfile_fk, content, hash, type, copy_startbyte, copy_endbyte, is_enabled) VALUES (16, 8, 9, 'copyright (c) 2048', '0x5c8f0370f2ab5d53', 'statement', 0, 18, 'true');
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (5, 8, 1, true, NULL, '2014-08-07 09:57:20.634464+00', '2014-08-07 09:57:20.642878+00');
 INSERT INTO copyright_ars (ars_pk, agent_fk, upload_fk, ars_success, ars_status, ars_starttime, ars_endtime) VALUES (11, 8, 2, true, NULL, '2014-08-07 09:57:27.86361+00', '2014-08-07 09:57:27.869927+00');
+INSERT INTO copyright_decision (copyright_decision_pk, user_fk, pfile_fk, clearing_decision_type_fk, description, textfinding, hash, comment, is_enabled) VALUES (1, 1, 9, 5, 'Manual copyright entry', 'copyright (c) manual', '3b6f7162caec7a85a34be604c5bb446fc34ed7e5ff2dacecaf1aaba3a782a23a', 'A friendly copyright comment', TRUE);
+INSERT INTO copyright_decision (copyright_decision_pk, user_fk, pfile_fk, clearing_decision_type_fk, description, textfinding, hash, comment, is_enabled) VALUES (1, 1, 14, 5, 'Manual copyright entry', 'copyright (c) independent manual', '3b6f7162caec7a85a34be604c5bb446fc34ed7e5ff2dacecaf1aaba3a782a23c', 'A friendly copyright comment', TRUE);
 INSERT INTO folder (folder_pk, folder_name, folder_desc, folder_perm) VALUES (1, 'Software Repository', 'Top Folder', NULL);
 INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (1, 1, 0, 0);
 INSERT INTO foldercontents (foldercontents_pk, parent_fk, foldercontents_mode, child_id) VALUES (2, 1, 2, 1);
