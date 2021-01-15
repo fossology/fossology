@@ -34,7 +34,7 @@ class Reuser
   private $reuseUpload;
   /**
    * @var string $reuseGroup
-   * Group id to reuse from
+   * Group name to reuse from
    */
   private $reuseGroup;
   /**
