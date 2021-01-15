@@ -141,7 +141,7 @@ class JobController extends RestController
         $decider->setUsingArray($scanOptionsJSON["decider"]);
         $parametersSent = true;
       }
-      $reuser = new Reuser(0, 0, false, false);
+      $reuser = new Reuser(0, 'groupName', false, false);
       try {
         if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
           $reuser->setUsingArray($scanOptionsJSON["reuse"]);
