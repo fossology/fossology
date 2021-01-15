@@ -40,6 +40,7 @@ use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Controllers\VersionController;
+use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
@@ -162,6 +163,13 @@ $app->group(VERSION_1 . 'version',
 $app->group(VERSION_1 . 'filesearch',
   function (){
     $this->post('', FileSearchController::class . ':getFiles');
+    $this->any('/{params:.*}', BadRequestController::class);
+  });
+
+/////////////////////////LICENSE SEARCH/////////////////
+$app->group(VERSION_1 . 'license',
+  function (){
+    $this->get('', LicenseController::class . ':getLicense');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
