@@ -27,6 +27,7 @@ use Fossology\Reuser\ReuserAgentPlugin;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
+use Fossology\Lib\Dao\UserDao;
 
 require_once dirname(dirname(__DIR__)) . "/agent-add.php";
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
@@ -149,7 +150,8 @@ class ScanOptions
     if ($this->reuse->getReuseEnhanced() === true) {
       $reuserRules[] = 'reuseEnhanced';
     }
-    $reuserSelector = $this->reuse->getReuseUpload() . "," . $this->reuse->getReuseGroup();
+    $userDao = $GLOBALS['container']->get("dao.user");
+    $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
     $request->request->set(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME, $reuserSelector);
     //global $SysConf;
     //$request->request->set('groupId', $SysConf['auth'][Auth::GROUP_ID]);
