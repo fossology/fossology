@@ -18,44 +18,53 @@ addons:
   apt:
     packages: &default_packages
       - cabextract
+      - composer
+      - cppcheck
       - genisoimage
+      - git
+      - libboost-filesystem-dev
       - libboost-program-options-dev
       - libboost-regex-dev
       - libboost-system-dev
-      - libboost-filesystem-dev
-      - libglib2.0-dev
       - libcppunit-dev
       - libcunit1-dev
       - libdbd-sqlite3-perl
-      - libjsoncpp-dev
+      - libgcrypt20-dev
+      - libglib2.0-dev
+      - libicu-dev
       - libjson-c-dev
+      - libjsoncpp-dev
       - liblocal-lib-perl
       - libmagic-dev
       - librpm-dev
       - libspreadsheet-writeexcel-perl
+      - libsqlite3-dev
       - libtext-template-perl
-      - php-cli
-      - php-pgsql
-      - php-zip
-      - php-xml
-      - php-mbstring
-      - poppler-utils
+      - lsb-release
       - p7zip
       - p7zip-full
+      - php-cli
+      - php-mbstring
+      - php-pgsql
+      - php-phpdbg
+      - php-sqlite3
+      - php-xml
+      - php-zip
+      - poppler-utils
+      - postgresql-server-dev-all
       - rpm
       - sleuthkit
+      - sqlite3
+      - sudo
       - unrar-free
       - upx-ucl
-      - libicu-dev
-      - libgcrypt20-dev
 
 jobs:
   include:
     - stage: Build
       name: Build
       install:
-        - sudo apt-get -qq -y install lsb-release cppcheck libcunit1-dev libcppunit-dev sudo git php-phpdbg
-        - sudo apt-get -qq -y install sqlite3 php-sqlite3 libsqlite3-dev libdbd-sqlite3-perl postgresql-server-dev-all composer
+        - sudo /usr/sbin/update-ccache-symlinks
         - sudo utils/fo-installdeps -e -o -y
       script:
         - make
@@ -66,11 +75,11 @@ jobs:
       script:
         - >-
           if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-          docker pull gmishx/fossology-ci:latest
+          docker pull fossology/fossology:scanner
           && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
           -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
           -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
-          gmishx/fossology-ci:latest "/bin/fossologyscanner" copyright keyword ;
+          fossology/fossology:scanner "/bin/fossologyscanner" copyright keyword ;
           fi
     - stage: Compliance
       name: License
@@ -79,9 +88,9 @@ jobs:
       script:
         - >-
           if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-          docker pull gmishx/fossology-ci:latest
+          docker pull fossology/fossology:scanner
           && docker run --name "fossologyscanner" -w "/opt/repo" -v ${PWD}:/opt/repo
           -e TRAVIS=${TRAVIS} -e TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
           -e TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST}
-          gmishx/fossology-ci:latest "/bin/fossologyscanner" nomos ojo ;
+          fossology/fossology:scanner "/bin/fossologyscanner" nomos ojo ;
           fi
