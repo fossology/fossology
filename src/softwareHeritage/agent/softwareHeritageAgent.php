@@ -105,10 +105,17 @@ class softwareHeritageAgent extends Agent
     }
 
     $version = $SysConf['BUILD']['VERSION'];
+    $headers = ['User-Agent' => "fossology/$version"];
+    if (!empty($this->configuration['api']['token'])) {
+      $headers['Authorization'] = 'Bearer ' .
+        $this->configuration['api']['token'];
+    }
+
     $this->guzzleClient = new Client([
       'http_errors' => false,
       'proxy' => $proxy,
-      'headers' => ['User-Agent' => "fossology/$version"]
+      'base_uri' => $this->configuration['api']['url'],
+      'headers' => $headers
     ]);
   }
 
@@ -171,11 +178,9 @@ class softwareHeritageAgent extends Agent
   protected function getSoftwareHeritageLicense($sha256)
   {
     $sha256 = strtolower($sha256);
-    $URIToGetLicenses = $this->configuration['api']['url'] .
-      $this->configuration['api']['uri'] . $sha256 .
+    $URIToGetContent = $this->configuration['api']['uri'] . $sha256;
+    $URIToGetLicenses = $URIToGetContent .
       $this->configuration['api']['content'];
-    $URIToGetContent = $this->configuration['api']['url'] .
-      $this->configuration['api']['uri'] . $sha256;
 
     try {
       $response = $this->guzzleClient->get($URIToGetLicenses);
