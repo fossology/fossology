@@ -459,6 +459,39 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'$perm_write'", "'$SourceDownloadRightsPrompt'",
   strval(CONFIG_TYPE_DROP), "'DOWNLOAD'", "1", "'$SourceDownloadRightsDesc'", "null", "'Administrator{{$perm_admin}}|Read_Write{{$perm_write}}'");
 
+  /* SoftwareHeritage agent config */
+  $variable = "SwhURL";
+  $prompt = _('SoftwareHeritage URL');
+  $desc = _('URL to Software Heritage servers');
+  $valueArray[$variable] = array("'$variable'",
+    "'https://archive.softwareheritage.org'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SWH'", "1", "'$desc'", "'check_url'", "null");
+
+  $variable = "SwhBaseURL";
+  $prompt = _('SoftwareHeritage API base URI');
+  $desc = _('Base URI for API calls');
+  $valueArray[$variable] = array("'$variable'", "'/api/1/content/sha256:'",
+    "'$prompt'", strval(CONFIG_TYPE_TEXT), "'SWH'", "2", "'$desc'", "null",
+    "null");
+
+  $variable = "SwhContent";
+  $prompt = _('Content endpoint');
+  $desc = _('Endpoint to get content about file');
+  $valueArray[$variable] = array("'$variable'", "'/license'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'SWH'", "3", "'$desc'", "null", "null");
+
+  $variable = "SwhSleep";
+  $prompt = _('Max sleep time');
+  $desc = _('Max time to sleep for rate-limit. Note: This concerns with scheduler heartbeat.');
+  $valueArray[$variable] = array("'$variable'", "100", "'$prompt'",
+    strval(CONFIG_TYPE_INT), "'SWH'", "4", "'$desc'", "null", "null");
+
+  $variable = "SwhToken";
+  $prompt = _('Auth token');
+  $desc = _('');
+  $valueArray[$variable] = array("'$variable'", "''", "'$prompt'",
+    strval(CONFIG_TYPE_PASSWORD), "'SWH'", "5", "'$desc'", "null", "null");
+
   /* Doing all the rows as a single insert will fail if any row is a dupe.
    So insert each one individually so that new variables get added.
   */
