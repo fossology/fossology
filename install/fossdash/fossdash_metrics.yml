@@ -1,0 +1,45 @@
+# Fossdash metrics config
+#
+# Copyright Darshan Kansagara (kansagara.darshan97@gmail.com)
+# SPDX-License-Identifier: GPL-2.0
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# If you want to add new metric
+#   - Include name of query metric (e.g pfile_count ) in QUERIES_NAME
+#   - Add same query metric name (pfile_count) and its respective query to fetch data from FossologyDB in QUERY.
+#   - Make sure to follow yaml file standards
+
+QUERIES_NAME: [
+    "number_of_users", "number_of_groups", "number_of_file_uploads",
+    "number_of_projects__theoretically", "number_of_url_uploads",
+    "agents_count", "number_of_upload_status", "number_of_projects_per_size",
+    "reportgen_count", "pfile_count", "avg_pfile_count", "job_count"]
+
+QUERY:
+  number_of_users: "SELECT count(u.*) AS users FROM users u;"
+  number_of_groups: "SELECT count(g.*) AS groups FROM groups g;"
+  number_of_projects__theoretically: "SELECT count(up.*) as uploads from (select distinct upload_mode, upload_origin from upload) up;"
+  number_of_file_uploads: "SELECT count(up1.upload_origin) as file_uploads FROM upload up1 WHERE up1.upload_mode = 104;"
+  number_of_url_uploads: "SELECT count(up2.upload_origin) as url_uploads FROM upload up2 WHERE up2.upload_mode = 100;"
+  agents_count: "SELECT ag.agent_name,count(jq.*) AS fired_jobs FROM agent ag LEFT OUTER JOIN jobqueue jq ON (jq.jq_type = ag.agent_name) GROUP BY ag.agent_name ORDER BY fired_jobs DESC;"
+  number_of_upload_status: "select CASE WHEN a.status=1 THEN 'open' WHEN a.status=2 THEN 'in_progres' WHEN a.status=3 THEN 'closed' WHEN a.status=3 THEN 'rejected' ELSE 'unknown' END status, a.count from (select status_fk status, count(1) as count from upload_clearing group by status_fk) a;"
+  number_of_projects_per_size: "select t.size, count(t.size) from (select CASE WHEN s.sx<2000 THEN 'small' WHEN s.sx>=2000 and s.sx<10000 THEN 'normal' ELSE 'big' END size from (select count(ut.ufile_name) sx from uploadtree ut group by upload_fk) s) t group by t.size;"
+  reportgen_count: "select count(*) from reportgen;"
+  pfile_count: "select count(*) from pfile;"
+  avg_pfile_count: "select COALESCE(round(avg(pfile_size)),0) from pfile;"
+  job_count: "select count(*) as jobs from job;"
+
+VERSION_INFO:
+  display: "YES"    # NO, If don't want to display VERSION and BUILD info

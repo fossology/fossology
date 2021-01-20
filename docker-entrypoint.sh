@@ -58,6 +58,7 @@ echo
 echo 'Fossology initialisation complete; Starting up...'
 echo
 if [[ $# -eq 0 ]]; then
+  /etc/init.d/cron start
   /usr/local/share/fossology/scheduler/agent/fo_scheduler \
     --log /dev/stdout \
     --verbose=3 \
@@ -69,6 +70,7 @@ elif [[ $# -eq 1 && "$1" == "scheduler" ]]; then
     --verbose=3 \
     --reset
 elif [[ $# -eq 1 && "$1" == "web" ]]; then
+  /etc/init.d/cron start
   exec /usr/sbin/apache2ctl -e info -D FOREGROUND
 else
   exec "$@"

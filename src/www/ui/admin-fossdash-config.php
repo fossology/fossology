@@ -1,30 +1,32 @@
 <?php
 /***********************************************************
- Copyright (C) 2011-2013 Hewlett-Packard Development Company, L.P.
+Copyright Darshan Kansagara <kansagara.darshan97@gmail.com>
+SPDX-License-Identifier: GPL-2.0
+Author: Darshan Kansagara <kansagara.darshan97@gmail.com>
 
- This program is free software; you can redistribute it and/or
- modify it under the terms of the GNU General Public License
- version 2 as published by the Free Software Foundation.
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+version 2 as published by the Free Software Foundation.
 
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
- You should have received a copy of the GNU General Public License along
- with this program; if not, write to the Free Software Foundation, Inc.,
- 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 ***********************************************************/
 
 use Fossology\Lib\Db\DbManager;
 
-define("TITLE_FOCONFIG", _("Configuration Variables"));
+define("TITLE_FOSSDASH_CONFIG", _("Fossdash Configuration"));
 
 /**
- * \class foconfig extend from FO_Plugin
+ * \class FossdashConfig extend from FO_Plugin
  * \brief display and set FOSSology configuration
  */
-class foconfig extends FO_Plugin
+class FossdashConfig extends FO_Plugin
 {
   var $CreateAttempts = 0;
   /** @var DbManager */
@@ -32,9 +34,9 @@ class foconfig extends FO_Plugin
 
   function __construct()
   {
-    $this->Name       = "foconfig";
-    $this->Title      = TITLE_FOCONFIG;
-    $this->MenuList   = "Admin::Customize";
+    $this->Name       = "FossdashConfig";
+    $this->Title      = TITLE_FOSSDASH_CONFIG;
+    $this->MenuList   = "Admin::Fossdash";
     $this->DBaccess   = PLUGIN_DB_ADMIN;
     $this->PluginLevel = 50;    // run before 'regular' plugins
     parent::__construct();
@@ -49,25 +51,29 @@ class foconfig extends FO_Plugin
     global $PG_CONN;
     $OutBuf="";
 
-    /* get config rows from sysconfig table */
-    $sql = "select * from sysconfig order by group_name, group_order";
+    /* get config rows from fossdashconfig table */
+    $sql = "select * from fossdashconfig order by group_name, group_order";
     $result = pg_query($PG_CONN, $sql);
     DBCheckResult($result, $sql, __FILE__, __LINE__);
 
     $Group = "";
     $InputStyle = "style='background-color:#dbf0f7'";
     $OutBuf .= '<style> table.myTable > tbody > tr:first-child > td:first-child{width:20%} </style>';
-    $OutBuf .= "<form method='POST'>";
+    $OutBuf .= "<form method='POST' enctype='multipart/form-data'>";
     while ($row = pg_fetch_assoc($result)) {
       if ($Group != $row['group_name']) {
         if ($Group) {
-          $OutBuf .= "</table><br>";
+          $OutBuf .= '</table><br>';
         }
         $Group = $row['group_name'];
-        $OutBuf .= '<table border=1 class="myTable table table-striped" style="border-collapse: unset;">';
+        $OutBuf .= '<table border=1 class="myTable table table-striped" style="border-collapse: unset;" >';
+      }
+      if ($row['variablename']=="InfluxDBUser" || $row['variablename']=="InfluxDBUserPassword") {
+        $OutBuf .= "<tr id='rowId$row[variablename]' style='display: none;'><td>$row[ui_label]</td><td>";
+      } else {
+        $OutBuf .= "<tr id='rowId$row[variablename]'><td>$row[ui_label]</td><td>";
       }
 
-      $OutBuf .= "<tr><td>$row[ui_label]</td><td>";
       switch ($row['vartype']) {
         case CONFIG_TYPE_INT:
         case CONFIG_TYPE_TEXT:
@@ -77,7 +83,7 @@ class foconfig extends FO_Plugin
           break;
         case CONFIG_TYPE_TEXTAREA:
           $ConfVal = htmlentities($row['conf_value']);
-          $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=80 title='$row[description]' $InputStyle>$ConfVal</textarea>";
+          $OutBuf .= "<br><textarea name='new[$row[variablename]]' rows=3 cols=100 title='$row[description]' $InputStyle>$ConfVal</textarea>";
           $OutBuf .= "<br>$row[description]";
           break;
         case CONFIG_TYPE_PASSWORD:
@@ -103,18 +109,8 @@ class foconfig extends FO_Plugin
           $OutBuf .= "</select>";
           $OutBuf .= "<br>$row[description]";
           break;
-        case CONFIG_TYPE_BOOL:
-          $ConfVal = filter_var($row['conf_value'], FILTER_VALIDATE_BOOLEAN);
-          $checked = $ConfVal ? "checked" : "";
-          $ConfVal = $ConfVal ? "true" : "false";
-          $OutBuf .= "<input type='checkbox' name='new[" . $row['variablename'] .
-            "]' id='" . $row['variablename'] . "' value='true' title='" .
-            $row['description'] . "' $InputStyle $checked />";
-          $OutBuf .= "<label for='" . $row['variablename'] .
-            "'>" . $row['description'] . "</label>";
-          break;
         default:
-          $OutBuf .= "Invalid configuration variable. Unknown type.";
+          $OutBuf .= "Invalid configuration variable.  Unknown type.";
       }
       $OutBuf .= "</td></tr>";
       $OutBuf .= "<INPUT type='hidden' name='old[$row[variablename]]' value='$ConfVal'>";
@@ -123,8 +119,33 @@ class foconfig extends FO_Plugin
     pg_free_result($result);
 
     $btnlabel = _("Update");
-    $OutBuf .= "<p><input type='submit' value='$btnlabel'>";
+    $OutBuf .= "<p><input type='submit' class='btn btn-secondary btn-sm' style='display: block; margin: 0 auto;' value='$btnlabel'>";
     $OutBuf .= "</form>";
+
+    $scriptToHideShow = '
+    <script>
+      function showHide() {
+          if($(\'[name="new[AuthType]"]\').val() == "0") {
+              $("#rowIdInfluxDBToken").show();
+              $("#rowIdInfluxDBUser").hide();
+              $("#rowIdInfluxDBUserPassword").hide();
+              
+          } else {
+              $("#rowIdInfluxDBToken").hide();
+              $("#rowIdInfluxDBUser").show();
+              $("#rowIdInfluxDBUserPassword").show();
+          }
+      }
+      $(function () {
+        $(\'[name="new[AuthType]"]\').change(showHide);
+      });
+
+      window.onload = function() {
+        showHide()
+      };
+    </script>';
+
+    $this->renderScripts($scriptToHideShow);
 
     return $OutBuf;
   }
@@ -140,20 +161,7 @@ class foconfig extends FO_Plugin
 
     $newarray = GetParm("new", PARM_RAW);
     $oldarray = GetParm("old", PARM_RAW);
-
-    if (!empty($newarray)) {
-      // Get missing keys from new array (unchecked checkboxes are not sent)
-      $boolFalseArray = array_diff_key($oldarray, $newarray);
-      foreach ($boolFalseArray as $varname => $value) {
-        // Make sure it was boolean data
-        $isBoolean = $this->dbManager->getSingleRow("SELECT 1 FROM sysconfig " .
-          "WHERE variablename = $1 AND vartype = " . CONFIG_TYPE_BOOL,
-          array($varname), __METHOD__ . '.checkIfBool');
-        if (! empty($isBoolean)) {
-          $newarray[$varname] = 'false';
-        }
-      }
-    }
+    $LIBEXECDIR = $GLOBALS['SysConf']['DIRECTORIES']['LIBEXECDIR'];
 
     /* Compare new and old array
      * and update DB with new values */
@@ -162,19 +170,35 @@ class foconfig extends FO_Plugin
     if (! empty($newarray)) {
       foreach ($newarray as $VarName => $VarValue) {
         if ($VarValue != $oldarray[$VarName]) {
-          /* get validation_function row from sysconfig table */
-          $sys_array = $this->dbManager->getSingleRow("select validation_function, ui_label from sysconfig where variablename=$1",array($VarName),__METHOD__.'.getVarNameData');
+          /* get validation_function row from fossdashconfig table */
+          $sys_array = $this->dbManager->getSingleRow("select validation_function, ui_label from fossdashconfig where variablename=$1",array($VarName),__METHOD__.'.getVarNameData');
           $validation_function = $sys_array['validation_function'];
           $ui_label = $sys_array['ui_label'];
           $is_empty = empty($validation_function);
           /* 1. the validation_function is empty
            2. the validation_function is not empty, and after checking, the value is valid
-          update sysconfig table
+          update fossdashconfig table
           */
           if ($is_empty || (! $is_empty && (1 == $validation_function($VarValue)))) {
             $this->dbManager->getSingleRow(
-              "update sysconfig set conf_value=$1 where variablename=$2",
+              "update fossdashconfig set conf_value=$1 where variablename=$2",
               array($VarValue, $VarName), __METHOD__ . '.setVarNameData');
+            if ($VarName == "FossdashEnableDisable") {
+                $exec_fossdash_configuration_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py fossdash_configure " . $VarValue;
+                $output = shell_exec($exec_fossdash_configuration_cmd);
+                file_put_contents('php://stderr', "output of the cmd for fossology_configuration(enable/Disable) changed ={$output} \n");
+            } elseif ($VarName == "FossologyInstanceName") {
+              $parameterName = "uuid";
+              $exec_script_uuid_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py " . $parameterName;
+              $output = shell_exec($exec_script_uuid_cmd);
+              file_put_contents('php://stderr', "output of cmd for fossology_instance_name changed ={$output} \n");
+            } elseif ($VarName == "FossDashScriptCronSchedule") {
+              $parameterName = "cron";
+              $exec_script_cron_cmd = "python3 ".$LIBEXECDIR."/fossdash-publish.py " . $parameterName;
+              $output = shell_exec($exec_script_cron_cmd);
+              file_put_contents('php://stderr', "output of cmd for cron job changed  ={$output} \n");
+            }
+
             if (! empty($UpdateMsg)) {
               $UpdateMsg .= ", ";
             }
@@ -184,16 +208,6 @@ class foconfig extends FO_Plugin
              * the validation_function is not empty, but after checking, the value
              * is invalid
              */
-            if (! strcmp($validation_function, 'check_boolean')) {
-              $warning_msg = _(
-                "Error: You set $ui_label to $VarValue. Valid  values are 'true' and 'false'.");
-              echo "<script>alert('$warning_msg');</script>";
-            } else if (strpos($validation_function, "url")) {
-              $warning_msg = _(
-                "Error: $ui_label $VarValue, is not a reachable URL.");
-              echo "<script>alert('$warning_msg');</script>";
-            }
-
             if (! empty($ErrorMsg)) {
               $ErrorMsg .= ", ";
             }
@@ -226,5 +240,5 @@ class foconfig extends FO_Plugin
   }
 }
 
-$NewPlugin = new foconfig;
+$NewPlugin = new FossdashConfig;
 $NewPlugin->Initialize();
