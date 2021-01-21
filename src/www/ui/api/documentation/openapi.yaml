@@ -1,4 +1,5 @@
 # Copyright (C) Siemens AG 2017-2020
+# Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.2.0
+  version: 1.2.1
   contact:
     email: fossology@fossology.org
   license:
@@ -885,6 +886,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+
+  /groups:
+    get:
+      tags:
+      - Organize
+      - Groups
+      summary: Get the list of groups (accessible groups for user, all groups for admin)
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+    post:
+      tags:
+      - Organize
+      - Groups
+      summary: Create a group folder
+      parameters:
+        - name: name
+          in: header
+          required: true
+          description: Name of the new group
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group has been added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Group already exists, failed to create group or no group name provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'        
         default:
             $ref: '#/components/responses/defaultResponse'
 

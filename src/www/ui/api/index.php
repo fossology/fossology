@@ -1,6 +1,7 @@
 <?php
 /***************************************************************
  Copyright (C) 2017-2018 Siemens AG
+ Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -42,6 +43,7 @@ use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Controllers\VersionController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
+use Fossology\UI\Api\Controllers\GroupController;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -119,6 +121,13 @@ $app->group(VERSION_1 . 'users',
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
     $this->any('/{params:.*}', BadRequestController::class);
   });
+
+////////////////////////////GROUPS/////////////////////
+$app->group(VERSION_1 . 'groups',
+function (){
+  $this->get('', GroupController::class . ':getGroups');
+  $this->post('', GroupController::class . ':createGroup');
+});
 
 ////////////////////////////JOBS/////////////////////
 $app->group(VERSION_1 . 'jobs',
