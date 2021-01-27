@@ -6,19 +6,20 @@
 [![Coverage Status](https://coveralls.io/repos/github/fossology/fossology/badge.svg?branch=master)](https://coveralls.io/github/fossology/fossology?branch=master)
 [![Slack Channel](https://img.shields.io/badge/slack-fossology-blue.svg?longCache=true&logo=slack)](https://join.slack.com/t/fossology/shared_invite/enQtNzI0OTEzMTk0MjYzLTYyZWQxNDc0N2JiZGU2YmI3YmI1NjE4NDVjOGYxMTVjNGY3Y2MzZmM1OGZmMWI5NTRjMzJlNjExZGU2N2I5NGY)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fossology/fossology)](https://github.com/fossology/fossology/releases/latest)
+[![YouTube Channel](https://img.shields.io/badge/youtube-FOSSology-red.svg?&logo=youtube&link=https://www.youtube.com/channel/UCZGPJnQZVnEPQWxOuNamLpw)](https://www.youtube.com/channel/UCZGPJnQZVnEPQWxOuNamLpw)
 
 ## About
 
-FOSSology is a open source license compliance software system and toolkit.  As a toolkit you can run license, copyright and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance workflow. In one click you can generate an SPDX file, or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
+FOSSology is an open source license compliance software system and toolkit. As a toolkit, you can run license, copyright and export control scans from the command line. As a system, a database and web UI are provided to give you a compliance workflow. In one click you can generate an SPDX file or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
 
-[Check out Who Uses FOSSology!](http://www.fossology.org/projects/fossology/wiki/WhoUsesFOSSology)
+[Check out Who Uses FOSSology!](https://www.fossology.org)
 
 FOSSology does not give legal advice.
-http://fossology.org/
+https://fossology.org/
 
 ## Requirements
 
-The PHP versions 7.x are supported to work for FOSSology. FOSSology requires Postgresql as database server and apache httpd 2.6 as web server. These and more dependencies are installed by `utils/fo-installdeps`.
+The PHP versions 7.x are supported to work for FOSSology. FOSSology requires Postgresql as the database server and apache httpd 2.6 as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
 ## Installation
 
@@ -26,16 +27,17 @@ FOSSology should work with many Linux distributions.
 
 See https://github.com/fossology/fossology/releases for source code download of the releases.
 
-For installation instructions see [Github Wiki](https://github.com/fossology/fossology/wiki)
+For installation instructions see [Install from Source](https://github.com/fossology/fossology/wiki/Install-from-Source)
+page in [Github Wiki](https://github.com/fossology/fossology/wiki)
 
 ## Docker
 
 FOSSology comes with a Dockerfile allowing the containerized execution
-both as single instance or in combination with an external PostgreSQL database.
+both as a single instance or in combination with an external PostgreSQL database.
 **Note:** It is strongly recommended to use an external database for production
-use, since the the standalone image does not take care of data persistency.
+use since the standalone image does not take care of data persistency.
 
-A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using following command:
+A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
 ``` sh
 docker run -p 8081:80 fossology/fossology
 ```
@@ -47,7 +49,7 @@ Execution with external database container can be done using Docker Compose, via
 docker-compose up
 ```
 
-The Docker image allows configuration of it's database connection over a set of environment variables.
+The Docker image allows the configuration of its database connection over a set of environment variables.
 
 - **FOSSOLOGY_DB_HOST:** Hostname of the PostgreSQL database server.
   An integrated PostgreSQL instance is used if not defined or set to `localhost`.
@@ -69,18 +71,29 @@ cd fossology/
 vagrant up
 ```
 
-The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/) and user can login the credentials using
+The server must be ready at [http://localhost:8081/repo/](http://localhost:8081/repo/). The login credentials are:
 
 ```
 user: fossy
 pass: fossy
 ```
 
+## Test Instance
+
+For trying out FOSSology quickly, a test instance is also available at [https://fossology.osuosl.org/](https://fossology.osuosl.org/). **This instance can be deleted or reinstalled at any time, thus it is not suitable for serving as your productive version**. The login credentials are as follows:
+
+```
+Username: fossy
+Password: fossy
+```
+
+**Note:** The test instance is not up to date with the latest release. The instance will reset every night at 2 am UTC and all the user uploaded data will be lost.
+
 ## Documentation
 
-We are currently migrating our documentation to github.  At this stage you can find general documentation at:
-http://www.fossology.org/projects/fossology/wiki/User_Documentation
-and developer docs here on [github](https://github.com/fossology/fossology/wiki)
+We are currently migrating our documentation to Github. At this stage, you can find general documentation at:
+https://www.fossology.org/get-started/basic-workflow/
+and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki) and https://fossology.github.io/
 
 ## Support
 
@@ -130,7 +143,7 @@ General Public License version 2, with the following exceptions:
 libfossdb and libfossrepo libraries are licensed under the terms of
 the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.com/license/gnu-lesser-general-public-license-v2.1-(lgpl-2.1)).
 
-    This library are free software; you can redistribute it and/or
+    This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
     License as published by the Free Software Foundation; either
     version 2.1 of the License.
