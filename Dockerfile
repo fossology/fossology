@@ -43,9 +43,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 
 COPY . .
 
-RUN /fossology/utils/install_composer.sh
-
-RUN make clean install clean
+RUN make clean install \
+ && make clean
 
 
 FROM debian:stretch-slim
