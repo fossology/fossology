@@ -85,14 +85,20 @@ class SoftwareHeritageDao
    */
   public function getSoftwareHetiageRecord($pfileId)
   {
-    $stmt = __METHOD__."getSoftwareHeritageRecord";
-    $row = $this->dbManager->getSingleRow("SELECT swh_shortnames, swh_status FROM software_heritage WHERE pfile_fk = $1",
-        array($pfileId), $stmt);
+    $stmt = __METHOD__ . "getSoftwareHeritageRecord";
+    $row = $this->dbManager->getSingleRow(
+      "SELECT swh_shortnames, swh_status FROM software_heritage WHERE pfile_fk = $1",
+      array($pfileId), $stmt);
+    if (empty($row)) {
+      $row = [
+        'swh_status' => null,
+        'swh_shortnames' => null
+      ];
+    }
     $img = '<img alt="done" src="images/red.png" class="icon-small"/>';
     if (self::SWH_STATUS_OK == $row['swh_status']) {
       $img = '<img alt="done" src="images/green.png" class="icon-small"/>';
     }
     return ["license" => $row['swh_shortnames'], "img" => $img];
-
   }
 }

@@ -47,7 +47,7 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
    */
   private $shDao;
   /**
-   * configuraiton for software heritage api
+   * Configuration for software heritage api
    * @var array $configuration
    */
   private $configuration;
@@ -67,7 +67,14 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
     $this->licenseDao = $this->getObject('dao.license');
     $this->agentDao = $this->getObject('dao.agent');
     $this->shDao = $this->container->get('dao.softwareHeritage');
-    $this->configuration = parse_ini_file(__DIR__ . '/../agent/softwareHeritage.conf');
+    $sysconfig = $GLOBALS['SysConf']['SYSCONFIG'];
+    $this->configuration = [
+      'url' => trim($sysconfig['SwhURL']),
+      'uri' => trim($sysconfig['SwhBaseURL']),
+      'content' => trim($sysconfig['SwhContent']),
+      'maxtime' => intval($sysconfig['SwhSleep']),
+      'token' => trim($sysconfig['SwhToken'])
+    ];
   }
 
   /**
@@ -250,7 +257,7 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
     $fileName = htmlspecialchars($child['ufile_name']);
     if ($isContainer) {
       $fileName = "<a href='$linkUri'><span style='color: darkblue'> <b>$fileName</b> </span></a>";
-    } else if (!empty($linkUri)) {
+    } else if (! empty($linkUri)) {
       $fileName = "<a href='$linkUri'>$fileName</a>";
     }
 
@@ -260,7 +267,9 @@ class AjaxSHDetailsBrowser extends DefaultPlugin
 
     if (! $isContainer) {
       $text = _("Software Heritage");
-      $shLink = $this->configuration['api']['url'].$this->configuration['api']['uri'].$pfileHash["sha256"].$this->configuration['api']['content'];
+      $shLink = $this->configuration['url'] .
+        $this->configuration['uri'] . strtolower($pfileHash["sha256"]) .
+        $this->configuration['content'];
       $fileListLinks .= "[<a href='".$shLink."' target=\"_blank\">$text</a>]";
     }
     $img = "";
