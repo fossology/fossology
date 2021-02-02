@@ -271,6 +271,9 @@ class ReuserAgent extends Agent
 
     foreach ($containedItems as $item) {
       $fileId = $item->getFileId();
+      if (empty($fileId)) {
+        continue;
+      }
       if (array_key_exists($fileId, $clearingDecisionToImportByFileId)) {
         $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId,
           $clearingDecisionToImportByFileId[$fileId]);
@@ -309,11 +312,19 @@ class ReuserAgent extends Agent
 
     foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
+      if (empty($reusedPath)) {
+        // File missing from repo
+        continue;
+      }
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       while ($row = $this->dbManager->fetchArray($res)) {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
+        if (empty($newPath)) {
+          // File missing from repo
+          continue;
+        }
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
       }
       $this->dbManager->freeResult($res);
