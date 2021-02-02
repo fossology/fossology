@@ -22,7 +22,7 @@ CREATE LANGUAGE plpgsql;
 SET client_encoding = 'SQL_ASCII';
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 --
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --

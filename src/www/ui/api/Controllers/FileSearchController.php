@@ -141,14 +141,17 @@ class FileSearchController extends RestController
       $uploads = $this->getPackageUpload($pfileId);
       if (! empty($uploads)) {
         $scannerFindings = [];
+        $copyright = [];
         $conclusions = $this->getMainLicenses($uploads);
       } else {
         $scannerFindings = $this->getFileFindings($pfileId);
         $conclusions = $this->getFileConclusions($pfileId);
+        $copyright = $this->getFileCopyright($pfileId);
       }
       $findings = new Findings();
       $findings->setScanner($scannerFindings);
       $findings->setConclusion($conclusions);
+      $findings->setCopyright($copyright);
       $inputFileList[$pfileId]->setFindings($findings);
       $inputFileList[$pfileId]->setUploads($uploads);
     }
@@ -173,6 +176,16 @@ class FileSearchController extends RestController
   {
     return $this->fileHelper->pfileConclusions($this->restHelper->getGroupId(),
       $pfileId);
+  }
+
+  /**
+   * Get the copyright for given pfile id
+   * @param integer $pfileId
+   * @sa Fossology::UI::Api::Helper::FileHelper::pfileCopyright()
+   */
+  private function getFileCopyright($pfileId)
+  {
+    return $this->fileHelper->pfileCopyright($pfileId);
   }
 
   /**

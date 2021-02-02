@@ -33,8 +33,8 @@ class Reuser
    */
   private $reuseUpload;
   /**
-   * @var integer $reuseGroup
-   * Group id to reuse from
+   * @var string $reuseGroup
+   * Group name to reuse from
    */
   private $reuseGroup;
   /**
@@ -52,7 +52,7 @@ class Reuser
    * Reuser constructor.
    *
    * @param integer $reuseUpload
-   * @param integer $reuseGroup
+   * @param string $reuseGroup
    * @param boolean $reuseMain
    * @param boolean $reuseEnhanced
    * @throws \UnexpectedValueException If reuse upload of reuse group are non
@@ -61,14 +61,14 @@ class Reuser
   public function __construct($reuseUpload, $reuseGroup, $reuseMain = false,
     $reuseEnhanced = false)
   {
-    if (is_numeric($reuseUpload) && is_numeric($reuseGroup)) {
+    if (is_numeric($reuseUpload)) {
       $this->reuseUpload = $reuseUpload;
       $this->reuseGroup = $reuseGroup;
       $this->reuseMain = $reuseMain;
       $this->reuseEnhanced = $reuseEnhanced;
     } else {
       throw new \UnexpectedValueException(
-        "reuse_upload and reuse_group should be integers", 400);
+        "reuse_upload should be integer", 400);
     }
   }
 
@@ -87,8 +87,7 @@ class Reuser
         FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
     }
     if (array_key_exists("reuse_group", $reuserArray)) {
-      $this->reuseGroup = filter_var($reuserArray["reuse_group"],
-        FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+      $this->reuseGroup = $reuserArray["reuse_group"];
     }
     if (array_key_exists("reuse_main", $reuserArray)) {
       $this->reuseMain = filter_var($reuserArray["reuse_main"],
@@ -98,9 +97,13 @@ class Reuser
       $this->reuseEnhanced = filter_var($reuserArray["reuse_enhanced"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if ($this->reuseUpload === null || $this->reuseGroup === null) {
+    if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException(
-        "reuse_upload and reuse_group should be integers", 400);
+        "reuse_upload should be integer", 400);
+    }
+    if ($this->reuseGroup === null) {
+      throw new \UnexpectedValueException(
+        "reuse_group should be a string", 400);
     }
     return $this;
   }
@@ -115,7 +118,7 @@ class Reuser
   }
 
   /**
-   * @return integer
+   * @return string
    */
   public function getReuseGroup()
   {
@@ -152,14 +155,13 @@ class Reuser
   }
 
   /**
-   * @param integer $reuseGroup
+   * @param string $reuseGroup
    */
   public function setReuseGroup($reuseGroup)
   {
-    $this->reuseGroup = filter_var($reuseGroup,
-      FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+    $this->reuseGroup = $reuseGroup;
     if ($this->reuseGroup === null) {
-      throw new \UnexpectedValueException("Reuse group should be an integer!", 400);
+      throw new \UnexpectedValueException("Reuse group should be a string!", 400);
     }
   }
 

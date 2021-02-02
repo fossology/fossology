@@ -1531,6 +1531,45 @@
   $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" varchar(40) DEFAULT NULL::character varying";
   $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
 
+  $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["DESC"] = "";
+  $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"fossdashconfig_pk\" int4 DEFAULT nextval('fossdashconfig_fossdashconfig_pk_seq'::regclass)";
+  $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"fossdashconfig_pk\" SET NOT NULL, ALTER COLUMN \"fossdashconfig_pk\" SET DEFAULT nextval('fossdashconfig_fossdashconfig_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["fossdashconfig"]["variablename"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"variablename\" IS 'Name of configuration variable'";
+  $Schema["TABLE"]["fossdashconfig"]["variablename"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"variablename\" varchar(30)";
+  $Schema["TABLE"]["fossdashconfig"]["variablename"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"variablename\" SET NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["conf_value"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"conf_value\" IS 'value of config variable'";
+  $Schema["TABLE"]["fossdashconfig"]["conf_value"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"conf_value\" text";
+  $Schema["TABLE"]["fossdashconfig"]["conf_value"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"conf_value\" DROP NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["ui_label"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"ui_label\" IS 'Label that appears on user interface to prompt for variable'";
+  $Schema["TABLE"]["fossdashconfig"]["ui_label"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"ui_label\" varchar(60)";
+  $Schema["TABLE"]["fossdashconfig"]["ui_label"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"ui_label\" SET NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["vartype"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"vartype\" IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown'";
+  $Schema["TABLE"]["fossdashconfig"]["vartype"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"vartype\" int4";
+  $Schema["TABLE"]["fossdashconfig"]["vartype"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"vartype\" SET NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["group_name"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"group_name\" IS 'Name of this variables group in the user interface'";
+  $Schema["TABLE"]["fossdashconfig"]["group_name"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"group_name\" varchar(20)";
+  $Schema["TABLE"]["fossdashconfig"]["group_name"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"group_name\" SET NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["group_order"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"group_order\" IS 'The order this variable appears in the user interface group'";
+  $Schema["TABLE"]["fossdashconfig"]["group_order"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"group_order\" int4";
+  $Schema["TABLE"]["fossdashconfig"]["group_order"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"group_order\" DROP NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["description"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"description\" IS 'Description of variable to document how/where the variable value is used.'";
+  $Schema["TABLE"]["fossdashconfig"]["description"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"description\" text";
+  $Schema["TABLE"]["fossdashconfig"]["description"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"description\" SET NOT NULL";
+
+  $Schema["TABLE"]["fossdashconfig"]["validation_function"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"validation_function\" IS 'Name of function to validate input. Not currently implemented.'";
+  $Schema["TABLE"]["fossdashconfig"]["validation_function"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"validation_function\" varchar(40) DEFAULT NULL::character varying";
+  $Schema["TABLE"]["fossdashconfig"]["validation_function"]["ALTER"] = "ALTER TABLE \"fossdashconfig\" ALTER COLUMN \"validation_function\" DROP NOT NULL, ALTER COLUMN \"validation_function\" SET DEFAULT NULL::character varying";
+
+  $Schema["TABLE"]["fossdashconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"fossdashconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
+  $Schema["TABLE"]["fossdashconfig"]["option_value"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"option_value\" varchar(40) DEFAULT NULL::character varying";
+  $Schema["TABLE"]["fossdashconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
 
   $Schema["TABLE"]["tag"]["tag_pk"]["DESC"] = "";
   $Schema["TABLE"]["tag"]["tag_pk"]["ADD"] = "ALTER TABLE \"tag\" ADD COLUMN \"tag_pk\" int4 DEFAULT nextval('tags_tag_pk_seq'::regclass)";
@@ -1909,6 +1948,9 @@
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"sysconfig_sysconfig_pk_seq\"";
   $Schema["SEQUENCE"]["sysconfig_sysconfig_pk_seq"]["UPDATE"] = "SELECT setval('sysconfig_sysconfig_pk_seq',(SELECT greatest(1,max(sysconfig_pk)) val FROM sysconfig))";
 
+  $Schema["SEQUENCE"]["fossdashconfig_fossdashconfig_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"fossdashconfig_fossdashconfig_pk_seq\"";
+  $Schema["SEQUENCE"]["fossdashconfig_fossdashconfig_pk_seq"]["UPDATE"] = "SELECT setval('fossdashconfig_fossdashconfig_pk_seq',(SELECT greatest(1,max(fossdashconfig_pk)) val FROM fossdashconfig))";
+
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"jobqueue_jq_pk_seq\"";
   $Schema["SEQUENCE"]["jobqueue_jq_pk_seq"]["UPDATE"] = "SELECT setval('jobqueue_jq_pk_seq',(SELECT greatest(1,max(jq_pk)) val FROM jobqueue))";
 
@@ -2178,6 +2220,8 @@
   $Schema["CONSTRAINT"]["spasht_upload_fk_ukey"] = "ALTER TABLE \"spasht\" ADD CONSTRAINT \"spasht_upload_fk_ukey\" UNIQUE (\"upload_fk\");";
   $Schema["CONSTRAINT"]["sysconfig_pkey"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_pkey\" PRIMARY KEY (\"sysconfig_pk\");";
   $Schema["CONSTRAINT"]["sysconfig_variablename_key"] = "ALTER TABLE \"sysconfig\" ADD CONSTRAINT \"sysconfig_variablename_key\" UNIQUE (\"variablename\");";
+  $Schema["CONSTRAINT"]["fossdashconfig_pkey"] = "ALTER TABLE \"fossdashconfig\" ADD CONSTRAINT \"fossdashconfig_pkey\" PRIMARY KEY (\"fossdashconfig_pk\");";
+  $Schema["CONSTRAINT"]["fossdashconfig_variablename_key"] = "ALTER TABLE \"fossdashconfig\" ADD CONSTRAINT \"fossdashconfig_variablename_key\" UNIQUE (\"variablename\");";
   $Schema["CONSTRAINT"]["tags_pkey"] = "ALTER TABLE \"tag\" ADD CONSTRAINT \"tags_pkey\" PRIMARY KEY (\"tag_pk\");";
   $Schema["CONSTRAINT"]["tags_file_pkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pkey\" PRIMARY KEY (\"tag_file_pk\");";
   $Schema["CONSTRAINT"]["tags_file_pfile_fk_fkey"] = "ALTER TABLE \"tag_file\" ADD CONSTRAINT \"tags_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";

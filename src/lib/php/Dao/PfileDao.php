@@ -197,5 +197,31 @@ WHERE rnk = 1 AND removed = false AND decision_type = " .
     }
     return false;
   }
+
+  /**
+   * Get the list of copyrights for given pfile
+   * @param integer $pfileId Pfile to search
+   * @return array Array of copyrights found and not disabled
+   */
+  public function getCopyright($pfileId)
+  {
+    $statement = __METHOD__ . ".getCopyright";
+    $sql = "SELECT content " .
+      "FROM copyright " .
+      "WHERE (pfile_fk = $1) AND (is_enabled = TRUE) " .
+      "UNION " .
+      "SELECT textfinding " .
+      "FROM copyright_decision " .
+      "WHERE (pfile_fk = $1) AND (is_enabled = TRUE);";
+    $params = [$pfileId];
+    $rows = $this->dbManager->getRows($sql, $params, $statement);
+    if (!empty($rows) && array_key_exists('content', $rows[0])) {
+      $copyright = array_column($rows, 'content');
+      natcasesort($copyright);
+      return array_values($copyright);
+    } else {
+      return [];
+    }
+  }
 }
 

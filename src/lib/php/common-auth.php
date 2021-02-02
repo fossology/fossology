@@ -159,11 +159,27 @@ function account_check(&$user, &$passwd, &$group = "")
       exit(1);
     }
 
-    if (! empty($row['user_seed']) && ! empty($row['user_pass'])) {
-      $passwd_hash = sha1($row['user_seed'] . $passwd);
-      if (strcmp($passwd_hash, $row['user_pass']) != 0) {
-        echo "User name or password is invalid.\n";
-        exit(1);
+    if (! empty($row['user_pass'])) {
+      $options = array('cost' => 10);
+      if (password_verify($passwd, $row['user_pass'])) {
+        if (password_needs_rehash($row['user_pass'], PASSWORD_DEFAULT, $options)) {
+          $newHash = password_hash($passwd, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash  */
+          update_password_hash($user, $newHash);
+        }
+        return true;
+      } else if (! empty($row['user_seed'])) {
+        $passwd_hash = sha1($row['user_seed'] . $passwd);
+        /* If verify with new hash fails check with the old hash */
+        if (strcmp($passwd_hash, $row['user_pass']) == 0) {
+          $newHash = password_hash($passwd, PASSWORD_DEFAULT, $options);
+          /* Update old hash with new hash */
+          update_password_hash($user, $newHash);
+          return true;
+        } else {
+          echo "User name or password is invalid.\n";
+          exit(1);
+        }
       }
     }
   }

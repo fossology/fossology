@@ -1,4 +1,5 @@
 # Copyright (C) Siemens AG 2017-2020
+# Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # version 2 as published by the Free Software Foundation.
@@ -14,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.1.1
+  version: 1.2.1
   contact:
     email: fossology@fossology.org
   license:
@@ -888,6 +889,57 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
 
+  /groups:
+    get:
+      tags:
+      - Organize
+      - Groups
+      summary: Get the list of groups (accessible groups for user, all groups for admin)
+      responses:
+        '200':
+          description: List of groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Group'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+    post:
+      tags:
+      - Organize
+      - Groups
+      summary: Create a group folder
+      parameters:
+        - name: name
+          in: header
+          required: true
+          description: Name of the new group
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Group has been added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '400':
+          description: Group already exists, failed to create group or no group name provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error with details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'        
+        default:
+            $ref: '#/components/responses/defaultResponse'
+
   /report:
     get:
       tags:
@@ -1007,6 +1059,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/File'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+
+  /license:
+    get:
+      tags:
+      - License
+      summary: Get license from the database
+      parameters:
+        - name: shortName
+          in: header
+          required: true
+          description: Short name of the license
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Requested license
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/License'
+        '404':
+          description: No license found with the given parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
 
@@ -1236,7 +1316,7 @@ components:
           type: integer
           description: The UploadID to reuse.
         reuse_group:
-          type: integer
+          type: string
           description: The group of the reused upload
         reuse_main:
           type: boolean
@@ -1439,6 +1519,47 @@ components:
           example:
             - "MIT"
             - "GPL-2.0"
+        copyright:
+          description: >
+            Copyright findings for the file
+          type: array
+          items:
+            type: string
+            description: Copyright finding
+            nullable: true
+          example:
+            - "Copyright (C) 2017-2020 Free Software Foundation, Inc."
+            - "Copyright (C) 1991-2020 Free Software Foundation, Inc."
+    License:
+      description: License from the database
+      type: object
+      properties:
+        id:
+          description: Id key
+          type: integer
+          example:
+            126
+        shortName:
+          description: Short name
+          type: string
+          example:
+            "MIT"
+        fullName:
+          description: Full name
+          type: string
+          example:
+            "MIT License"
+        text:
+          description: License text
+          type: string
+          example:
+            "MIT License Copyright (c) <year> <copyright holders> ..."
+        risk:
+          description: Risk level
+          type: integer
+          nullable: true
+          example:
+            3
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"

@@ -119,8 +119,8 @@
   function add_user($user='fossy', $password='fossy') {
     global $PG_CONN;
     /* User does not exist.  Create it. */
-    $Seed = rand() . rand();
-    $Hash = sha1($Seed . $password);
+    $options = array('cost' => 10);
+    $Hash = password_hash($password, PASSWORD_DEFAULT, $options);
     $sql = "SELECT * FROM users WHERE user_name = '$user';";
     $result = pg_query($PG_CONN, $sql);
     $row0 = pg_fetch_assoc($result);
@@ -129,7 +129,7 @@
       /* User does not exist.  Create it. */
       $SQL = "INSERT INTO users (user_name,user_desc,user_seed,user_pass," .
         "user_perm,user_email,email_notify,root_folder_fk)
-        VALUES ('$user','Default Administrator','$Seed','$Hash',10,'$password','y',1);";
+        VALUES ('$user','Default Administrator','Seed','$Hash',10,'$password','y',1);";
       // $text = _("*** Created default administrator: '$user' with password '$password'.");
       $result = pg_query($PG_CONN, $SQL);
       pg_free_result($result);

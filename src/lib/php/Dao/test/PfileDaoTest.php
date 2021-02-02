@@ -223,4 +223,47 @@ class PfileDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($expectedNoConclusion, $actualNoConclusions);
     $this->assertEquals($expectedAllRemoval, $actualAllRemoval);
   }
+
+  /**
+   * @test
+   * -# Test for PfileDao::getCopyright()
+   * -# Setup required tables and data
+   * -# Fetch results for different pfiles with 1 or 2 results
+   * -# Make sure the license list is sorted
+   * -# Not found results should be empty array
+   */
+  public function testGetCopyright()
+  {
+    $this->testDb->createPlainTables(['copyright', 'copyright_decision']);
+    $this->testDb->insertData(['copyright', 'copyright_decision']);
+
+    $expectedFirstFinding = [
+      'copyright (c) 2048',
+      'copyright (c) manual'
+    ];
+    $expectedSecondFinding = [
+      'copyright (c) 2002 lawrence e. rosen. all rights
+reserved. permission is hereby granted to copy and distribute this
+',
+      'copyright grant to the software. the
+    bsd and apache licenses are vague and incomplete in that respect.
+',
+      'copyright to the license will control changes. the apache
+'
+    ];
+    $expectedThirdFinding = [
+      'copyright (c) independent manual'
+    ];
+    $expectedNoFinding = [];
+
+    $actualFirstFinding = $this->pfileDao->getCopyright(9);
+    $actualSecondFinding = $this->pfileDao->getCopyright(6);
+    $actualThirdFinding = $this->pfileDao->getCopyright(14);
+    $actualNoFinding = $this->pfileDao->getCopyright(15);
+
+    $this->assertEquals($expectedFirstFinding, $actualFirstFinding);
+    $this->assertEquals($expectedSecondFinding, $actualSecondFinding);
+    $this->assertEquals($expectedThirdFinding, $actualThirdFinding);
+    $this->assertEquals($expectedNoFinding, $actualNoFinding);
+  }
 }

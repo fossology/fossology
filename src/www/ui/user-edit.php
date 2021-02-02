@@ -93,7 +93,7 @@ class UserEditPage extends DefaultPlugin
 
     $vars = array('refreshUri' => Traceback_uri() . "?mod=" . self::NAME);
 
-      /*
+    /*
      * If this is a POST (the submit button was clicked), then process the
      * request.
      */
@@ -271,8 +271,9 @@ class UserEditPage extends DefaultPlugin
     /**** Update the users database record ****/
     /* First remove user_pass and user_seed if the password wasn't changed. */
     if (!empty($UserRec['_blank_pass']) ) {
-      $UserRec['user_seed'] = rand() . rand();
-      $UserRec['user_pass'] = sha1($UserRec['user_seed'] . "");
+      $UserRec['user_seed'] = '';
+      $options = array('cost' => 10);
+      $UserRec['user_pass'] = password_hash("", PASSWORD_DEFAULT, $options);
     } else if (empty($UserRec['_pass1'])) { // password wasn't changed
       unset( $UserRec['user_pass']);
       unset( $UserRec['user_seed']);
@@ -350,28 +351,32 @@ class UserEditPage extends DefaultPlugin
       $UserRec = $this->GetUserRec($user_pk);
       $UserRec['_pass1'] = "";
       $UserRec['_pass2'] = "";
-      $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($UserRec['user_seed'] . "")) ? "on" : "";
+      $UserRec['_blank_pass'] = password_verify('', $UserRec['user_pass']) ? "on" : "";
     } else {
       $UserRec = array();
       $UserRec['user_pk'] = intval($request->get('user_pk'));
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
       $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
       $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
-      $UserRec['group_fk'] = intval($request->get('default_group_fk'));
+      $defaultGroup = $request->get('default_group_fk', null);
+      if ($defaultGroup !== null) {
+        $UserRec['group_fk'] = intval($defaultGroup);
+      }
 
       $UserRec['_pass1'] = stripslashes($request->get('_pass1'));
       $UserRec['_pass2'] = stripslashes($request->get('_pass2'));
       if (!empty($UserRec['_pass1'])) {
-        $UserRec['user_seed'] = rand() . rand();
-        $UserRec['user_pass'] = sha1($UserRec['user_seed'] . $UserRec['_pass1']);
+        $UserRec['user_seed'] = 'Seed';
+        $options = array('cost' => 10);
+        $UserRec['user_pass'] = password_hash($UserRec['_pass1'], PASSWORD_DEFAULT, $options);
         $UserRec['_blank_pass'] = "";
       } else {
         $UserRec['user_pass'] = "";
         $UserRec['_blank_pass'] = stripslashes($request->get("_blank_pass"));
         if (empty($UserRec['_blank_pass'])) { // check for blank password
-          // get the stored seed
           $StoredUserRec = $this->GetUserRec($UserRec['user_pk']);
-          $UserRec['_blank_pass'] = ($UserRec['user_pass'] == sha1($StoredUserRec['user_seed'] . "")) ? "on" : "";
+          $options = array('cost' => 10);
+          $UserRec['_blank_pass'] = password_verify($StoredUserRec['user_pass'], password_hash("", PASSWORD_DEFAULT, $options)) ? "on" : "";
         }
       }
 

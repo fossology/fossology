@@ -12,7 +12,7 @@ include $(VARS)
 
 MOD_NAME = softwareHeritage
 
-COPY = softwareHeritage.php version.php softwareHeritage.conf softwareHeritageAgent.php
+COPY = softwareHeritage.php version.php softwareHeritageAgent.php
 WRAP = softwareHeritage
 
 all: version.php softwareHeritage

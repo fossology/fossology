@@ -30,7 +30,6 @@
  * Parameters are the user table fields:
  * \param string $User  user_name
  * \param string $Desc  user_desc
- * \param string $Seed  user_seed
  * \param string $Hash  user_pass
  * \param int    $Perm  user_perm
  * \param string $Email user_email
@@ -41,7 +40,7 @@
  *
  * \return error: exit (1)
  */
-function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
+function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
                   $agentList, $Folder, $default_bucketpool_fk='')
 {
   global $container;
@@ -54,7 +53,7 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
          (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
           email_notify,user_agent_list,root_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9)");
-  $dbManager->execute($stmt,array ($User,$Desc,$Seed,$Hash,$Perm,$Email,  $Email_notify,$agentList,$Folder));
+  $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$agentList,$Folder));
 
   /* Make sure it was added */
   $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');
@@ -84,5 +83,30 @@ function add_user($User, $Desc, $Seed, $Hash, $Perm, $Email, $Email_notify,
   // set active group = own group
   $dbManager->prepare($stmt='users.update', $sql = "update users SET group_fk=$1, default_bucketpool_fk=$3 WHERE user_pk=$2");
   $dbManager->execute($stmt,array($group_pk,$user_pk,$default_bucketpool_fk));
+  return ('');
+}
+
+/**
+ * \brief Update user password hash
+ *
+ * \param string $User  user_name
+ * \param string $Hash  user_pass
+ *
+ * \return error: exit (1)
+ */
+function update_password_hash($User, $Hash)
+{
+  global $container;
+  $dbManager = $container->get('db.manager');
+
+  // Check if user exist
+  $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');
+  if (empty($row['user_name'])) {
+    $text = _("User does not exist.");
+    return ($text);
+  }
+
+  $dbManager->prepare($stmt = 'users.update_hash', $sql = "UPDATE users SET user_seed = $1, user_pass = $2  WHERE user_name = $3");
+  $dbManager->execute($stmt,array ('Seed', $Hash, $User));
   return ('');
 }

@@ -88,7 +88,14 @@ class softwareHeritageAgent extends Agent
     $this->dbManeger = $this->container->get('db.manager');
     $this->agentDao = $this->container->get('dao.agent');
     $this->softwareHeritageDao = $this->container->get('dao.softwareHeritage');
-    $this->configuration = parse_ini_file(__DIR__ . '/softwareHeritage.conf');
+    $sysconfig = $SysConf['SYSCONFIG'];
+    $this->configuration = [
+      'url' => trim($sysconfig['SwhURL']),
+      'uri' => trim($sysconfig['SwhBaseURL']),
+      'content' => trim($sysconfig['SwhContent']),
+      'maxtime' => intval($sysconfig['SwhSleep']),
+      'token' => trim($sysconfig['SwhToken'])
+    ];
 
     $proxy = [];
     if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
@@ -105,10 +112,16 @@ class softwareHeritageAgent extends Agent
     }
 
     $version = $SysConf['BUILD']['VERSION'];
+    $headers = ['User-Agent' => "fossology/$version"];
+    if (!empty($this->configuration['token'])) {
+      $headers['Authorization'] = 'Bearer ' . $this->configuration['token'];
+    }
+
     $this->guzzleClient = new Client([
       'http_errors' => false,
       'proxy' => $proxy,
-      'headers' => ['User-Agent' => "fossology/$version"]
+      'base_uri' => $this->configuration['url'],
+      'headers' => $headers
     ]);
   }
 
@@ -125,7 +138,8 @@ class softwareHeritageAgent extends Agent
     $pfileFileDetails = $this->uploadDao->getPFileDataPerFileName($itemTreeBounds);
     $pfileFks = $this->softwareHeritageDao->getSoftwareHeritagePfileFk($uploadId);
     $agentId = $this->agentDao->getCurrentAgentId("softwareHeritage");
-    $maxTime = $this->configuration['api']['maxtime'];
+    $maxTime = $this->configuration['maxtime'];
+    $maxTime = ($maxTime < 2) ? 2 : $maxTime;
     foreach ($pfileFileDetails as $pfileDetail) {
       if (!in_array($pfileDetail['pfile_pk'], array_column($pfileFks, 'pfile_fk'))) {
         $this->processEachPfileForSWH($pfileDetail, $agentId, $maxTime);
@@ -171,11 +185,8 @@ class softwareHeritageAgent extends Agent
   protected function getSoftwareHeritageLicense($sha256)
   {
     $sha256 = strtolower($sha256);
-    $URIToGetLicenses = $this->configuration['api']['url'] .
-      $this->configuration['api']['uri'] . $sha256 .
-      $this->configuration['api']['content'];
-    $URIToGetContent = $this->configuration['api']['url'] .
-      $this->configuration['api']['uri'] . $sha256;
+    $URIToGetContent = $this->configuration['uri'] . $sha256;
+    $URIToGetLicenses = $URIToGetContent . $this->configuration['content'];
 
     try {
       $response = $this->guzzleClient->get($URIToGetLicenses);

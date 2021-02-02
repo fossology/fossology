@@ -41,15 +41,23 @@ class Findings
   private $conclusion;
 
   /**
+   * @var array $copyright
+   * List of copyright
+   */
+  private $copyright;
+
+  /**
    * Findings constructor.
    *
    * @param array $scanner    Licenses found by scanners
    * @param array $conclusion Licenses concluded by users
+   * @param array $copyright  Copyright for the file
    */
-  public function __construct($scanner = null, $conclusion = null)
+  public function __construct($scanner = null, $conclusion = null, $copyright = null)
   {
     $this->setScanner($scanner);
     $this->setConclusion($conclusion);
+    $this->setCopyright($copyright);
   }
 
   /**
@@ -66,6 +74,14 @@ class Findings
   public function getConclusion()
   {
     return $this->conclusion;
+  }
+
+  /**
+   * @return array
+   */
+  public function getCopyright()
+  {
+    return $this->copyright;
   }
 
   /**
@@ -97,6 +113,20 @@ class Findings
   }
 
   /**
+   * @param array $copyrights
+   */
+  public function setCopyright($copyright)
+  {
+    if (is_array($copyright)) {
+      $this->copyright = $copyright;
+    } elseif (is_string($copyright)) {
+      $this->copyright = [$copyright];
+    } elseif ($copyright === null && empty($this->copyright)) {
+      $this->copyright = null;
+    }
+  }
+
+  /**
    * Get the object as associative array
    *
    * @return array
@@ -105,7 +135,8 @@ class Findings
   {
     return [
       'scanner'     => $this->getScanner(),
-      'conclusion'  => $this->getConclusion()
+      'conclusion'  => $this->getConclusion(),
+      'copyright'  => $this->getCopyright()
     ];
   }
 }
