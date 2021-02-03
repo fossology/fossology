@@ -107,6 +107,23 @@ std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload
 }
 
 /**
+ * \brief Get pfile ids for a given upload id which agent has not scanned
+ * \param uploadId Upload id to fetch from
+ * \param agentId  Agent id to filter pfiles for
+ * \param ignoreFilesWithMimeType ignore files with particular mimetype
+ * \return Vector of pfile ids in given upload id
+ * \sa getSelectedPFiles()
+ */
+std::vector<unsigned long> fo::AgentDatabaseHandler::queryFileIdsVectorForUpload (
+    int uploadId, int agentId, bool ignoreFilesWithMimeType) const
+{
+  QueryResult queryResult(
+    getSelectedPFiles(dbManager.getConnection(), uploadId, agentId,
+                      ignoreFilesWithMimeType));
+  return queryResult.getSimpleResults(0, fo::stringToUnsignedLong);
+}
+
+/**
  * \brief Get the upload tree table name for a given upload id
  * \param uploadId Upload id to check
  * \return Name of the table holding the upload tree
