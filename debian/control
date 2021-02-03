@@ -7,7 +7,8 @@ Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
  libssl-dev, postgresql-server-dev-all, libboost-regex-dev, libicu-dev,
  libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev, libpq-dev,
  php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring, php-zip,
- php-xml, libboost-system-dev, libboost-filesystem-dev, libgcrypt20-dev, composer
+ php-xml, libboost-system-dev, libboost-filesystem-dev, libgcrypt20-dev,
+ composer, patch
 Standards-Version: 3.9.1
 Homepage: https://fossology.org
 
