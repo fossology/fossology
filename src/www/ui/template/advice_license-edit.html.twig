@@ -12,6 +12,24 @@
   <input type="hidden" name="mod" value="advice_license"/>
   <input type="hidden" name="rf" value="{{ rf_pk }}"/>
   <table>
+  {% if rf_lastmodified is not empty %}
+    <tr>
+      <td>{{ 'User Created'|trans }}:</td>
+      <td><span> {{ rf_user_fk_created|e }}</span></td>
+    </tr>    
+    <tr>
+      <td>{{ 'Date of Creation'|trans }}:</td>
+      <td><span> {{ rf_creationdate|e }}</span></td>
+    </tr>
+    <tr>
+      <td>{{ 'User Modified'|trans }}:</td>
+      <td><span> {{ rf_user_fk_modified|e }}</span></td>
+    </tr>
+    <tr>
+      <td>{{ 'Last Modified'|trans }}:</td>
+      <td><span> {{ rf_lastmodified|e }}</span></td>
+    </tr>
+    {% endif %}
     <tr>
       <td>{{ 'Shortname'|trans }}:</td>
       <td><input type="input" name="shortname" value="{{ rf_shortname|e }}"/></td>

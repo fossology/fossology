@@ -1006,6 +1006,22 @@
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
   $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+  
+  $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_creationdate\" IS 'License creation date'";
+  $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_creationdate\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_creationdate\" DROP NOT NULL, ALTER COLUMN \"rf_creationdate\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_candidate"]["rf_lastmodified"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_lastmodified\" IS 'License modified date'";
+  $Schema["TABLE"]["license_candidate"]["rf_lastmodified"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_lastmodified\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["license_candidate"]["rf_lastmodified"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_lastmodified\" DROP NOT NULL, ALTER COLUMN \"rf_lastmodified\" SET DEFAULT now()";
+
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_created"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_user_fk_created\" IS 'user who created'";
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_created"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_user_fk_created\" int4 DEFAULT 3";
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_created"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_user_fk_created\" DROP NOT NULL";
+
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_user_fk_modified\" IS 'user who modified'";
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_user_fk_modified\" int4";
+  $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_user_fk_modified\" DROP NOT NULL";
 
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"user_fk\" IS 'user who made this bulk scan'";
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"user_fk\" int8";
@@ -2174,6 +2190,8 @@
   $Schema["CONSTRAINT"]["keyword_decision_pfile_hash_ukey"] = "ALTER TABLE \"keyword_decision\" ADD CONSTRAINT \"keyword_decision_pfile_hash_ukey\" UNIQUE (\"pfile_fk\",\"hash\");";
   $Schema["CONSTRAINT"]["license_candidate_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_candidate_rf_pk_idk"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_pk_idk\" PRIMARY KEY (\"rf_pk\");";
+  $Schema["CONSTRAINT"]["license_candidate_rf_user_fk_modified_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_user_fk_modified_fkey\" FOREIGN KEY (\"rf_user_fk_modified\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
+  $Schema["CONSTRAINT"]["license_candidate_rf_user_fk_created_fkey"] = "ALTER TABLE \"license_candidate\" ADD CONSTRAINT \"license_candidate_rf_user_fk_created_fkey\" FOREIGN KEY (\"rf_user_fk_created\") REFERENCES \"users\" (\"user_pk\") ON UPDATE SET NULL ON DELETE SET NULL;";
   $Schema["CONSTRAINT"]["license_file_pkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pkey\" PRIMARY KEY (\"fl_pk\");";
   $Schema["CONSTRAINT"]["license_file_pfile_fk_fkey"] = "ALTER TABLE \"license_file\" ADD CONSTRAINT \"license_file_pfile_fk_fkey\" FOREIGN KEY (\"pfile_fk\") REFERENCES \"pfile\" (\"pfile_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
   $Schema["CONSTRAINT"]["license_map_pkpk"] = "ALTER TABLE \"license_map\" ADD CONSTRAINT \"license_map_pkpk\" PRIMARY KEY (\"license_map_pk\");";
