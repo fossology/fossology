@@ -60,7 +60,7 @@ class LicenseDao
     $statementName = __METHOD__ . ".$uploadTreeTableName.$usageId";
     $params = array($itemTreeBounds->getUploadId(), $itemTreeBounds->getLeft(), $itemTreeBounds->getRight());
     if ($usageId==LicenseMap::TRIVIAL) {
-      $licenseJoin = "ONLY license_ref mlr ON license_file.rf_fk = mlr.rf_pk";
+      $licenseJoin = "license_ref mlr ON license_file.rf_fk = mlr.rf_pk";
     } else {
       $params[] = $usageId;
       $licenseMapCte = LicenseMap::getMappedLicenseRefView('$4');
