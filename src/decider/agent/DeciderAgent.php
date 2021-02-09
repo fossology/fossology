@@ -284,9 +284,9 @@ class DeciderAgent extends Agent
       try {
         $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
           $itemTreeBounds, $this->userId, $this->groupId,
-          DecisionTypes::IDENTIFIED, true);
+          DecisionTypes::IDENTIFIED, false);
       } catch (\Exception $e) {
-        echo "Can not auto decide global as file '" .
+        echo "Can not auto decide as file '" .
           $itemTreeBounds->getItemId() . "' contains candidate license.\n";
       }
     }
