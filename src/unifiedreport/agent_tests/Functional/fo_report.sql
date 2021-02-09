@@ -116,8 +116,8 @@ INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: fossy
 --
 
-INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
-INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', NULL, NULL, 'simple', NULL, NULL, NULL);
+INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL);
+INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL);
 
 
 --

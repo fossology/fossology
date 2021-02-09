@@ -189,6 +189,7 @@ class UserEditPage extends DefaultPlugin
       "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
     $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
     $vars['defaultGroupOption'] = $this->getUserGroupSelect($UserRec);
+    $vars['uploadVisibility'] = $UserRec['upload_visibility'];
 
     return $vars;
   }
@@ -357,6 +358,7 @@ class UserEditPage extends DefaultPlugin
       $UserRec['user_pk'] = intval($request->get('user_pk'));
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
       $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
+      $UserRec['upload_visibility'] = stripslashes($request->get('public'));
       $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
       $defaultGroup = $request->get('default_group_fk', null);
       if ($defaultGroup !== null) {

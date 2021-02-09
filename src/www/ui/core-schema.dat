@@ -1528,8 +1528,8 @@
   $Schema["TABLE"]["sysconfig"]["validation_function"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"validation_function\" DROP NOT NULL, ALTER COLUMN \"validation_function\" SET DEFAULT NULL::character varying";
 
   $Schema["TABLE"]["sysconfig"]["option_value"]["DESC"] = "COMMENT ON COLUMN \"sysconfig\".\"option_value\" IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...'";
-  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" varchar(40) DEFAULT NULL::character varying";
-  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL::character varying";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ADD"] = "ALTER TABLE \"sysconfig\" ADD COLUMN \"option_value\" text DEFAULT NULL";
+  $Schema["TABLE"]["sysconfig"]["option_value"]["ALTER"] = "ALTER TABLE \"sysconfig\" ALTER COLUMN \"option_value\" DROP NOT NULL, ALTER COLUMN \"option_value\" SET DEFAULT NULL";
 
   $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["DESC"] = "";
   $Schema["TABLE"]["fossdashconfig"]["fossdashconfig_pk"]["ADD"] = "ALTER TABLE \"fossdashconfig\" ADD COLUMN \"fossdashconfig_pk\" int4 DEFAULT nextval('fossdashconfig_fossdashconfig_pk_seq'::regclass)";
@@ -1828,6 +1828,10 @@
   $Schema["TABLE"]["users"]["email_notify"]["DESC"] = "COMMENT ON COLUMN \"users\".\"email_notify\" IS 'Email notification flag'";
   $Schema["TABLE"]["users"]["email_notify"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"email_notify\" varchar(1) DEFAULT 'y'::character varying";
   $Schema["TABLE"]["users"]["email_notify"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"email_notify\" DROP NOT NULL, ALTER COLUMN \"email_notify\" SET DEFAULT 'y'::character varying";
+
+  $Schema["TABLE"]["users"]["upload_visibility"]["DESC"] = "COMMENT ON COLUMN \"users\".\"upload_visibility\" IS 'Default Visibility for uploads by the user'";
+  $Schema["TABLE"]["users"]["upload_visibility"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"upload_visibility\" text";
+  $Schema["TABLE"]["users"]["upload_visibility"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"upload_visibility\" DROP NOT NULL";  
 
   $Schema["TABLE"]["users"]["user_agent_list"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_agent_list\" IS 'list of user agents to automatically run on upload'";
   $Schema["TABLE"]["users"]["user_agent_list"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_agent_list\" text";

@@ -66,6 +66,7 @@ class user_add extends FO_Plugin
     $Folder = GetParm('folder', PARM_INTEGER);
     $Email_notify = GetParm('enote', PARM_TEXT);
     $Email = str_replace("'", "''", GetParm('email', PARM_TEXT));
+    $Upload_visibility = GetParm('public', PARM_TEXT);
     $agentList = userAgents();
     $default_bucketpool_fk = GetParm('default_bucketpool_fk', PARM_INTEGER);
 
@@ -129,7 +130,11 @@ class user_add extends FO_Plugin
       $Email_notify = '';
     }
 
-    $ErrMsg = add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
+    if (empty($Upload_visibility)) {
+      $Upload_visibility = null;
+    }
+
+    $ErrMsg = add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $Upload_visibility,
       $agentList, $Folder, $default_bucketpool_fk);
 
     return ($ErrMsg);
@@ -210,6 +215,18 @@ class user_add extends FO_Plugin
     $V .= "$Style<th>$text</th><td><input type='checkbox'" .
             "name='enote' value='y' checked='checked'>" .
             "$text1</td>\n";
+    $V.= "</tr>\n";
+    $text = _("Default upload visibility");
+    $text1 = _("Visible only for active group");
+    $text2 = _("Visible for all groups");
+    $text3 = _("Make Public");
+    $text4 = _("which is the currently selected group");
+    $text5 = _("which are accessible by you now");
+    $text6 = _("visible for all users");
+    $V.= "$Style<th>$text</th><td>" .
+    "<input type='radio' name='public' value='private'/>$text1<img src='images/info_16.png' title='$text4' alt='' class='info-bullet'/><br/>" .
+    "<input type='radio' name='public' value='protected'/>$text2<img src='images/info_16.png' title='$text5' alt='' class='info-bullet'/><br/>" .
+    "<input type='radio' name='public' value='public'/>$text3<img src='images/info_16.png' title='$text6' alt='' class='info-bullet'/><br/></td>\n";
     $V.= "</tr>\n";
     $text = _("Agents selected by default when uploading");
     $V .= "$Style<th>$text\n</th><td> ";
