@@ -245,6 +245,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $limit = GetParm('iDisplayLength', PARM_INTEGER);
 
     $tableName = $this->getTableName($type);
+    $tableNameEvent = $tableName.'_event';
     $orderString = $this->getOrderString();
 
     list($left, $right) = $this->uploadDao->getLeftAndRight($item, $uploadTreeTableName);
@@ -276,25 +277,30 @@ class CopyrightHistogramProcessPost extends FO_Plugin
 
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
+    if (!$activated) {
+      $activatedClause = " AND CE.is_enabled=false ";
+    } else {
+      $activatedClause = " AND cp.".$tableName."_pk NOT IN (SELECT ".$tableName."_fk FROM $tableNameEvent WHERE upload_fk = $upload_pk AND is_enabled = false) ";
+    }
     $unorderedQuery = "FROM $tableName AS cp " .
         "INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk " .
+        "LEFT JOIN $tableNameEvent AS CE ON CE.".$tableName."_fk = cp.".$tableName."_pk " .
         $join .
         "WHERE cp.content!='' " .
         "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND cp.type = $3 " .
         "AND cp.agent_fk= $4 " .
-        "AND cp.is_enabled=" . ($activated ? 'true' : 'false') .
+        $activatedClause .
         $sql_upload;
     $totalFilter = $filterQuery . " " . $searchFilter;
+    $grouping = " GROUP BY cp.content ";
 
-    $grouping = " GROUP BY content ";
-
-    $countQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery $totalFilter $grouping) as K";
+    $countQuery = "SELECT count(*) FROM (SELECT cp.content, count(*) $unorderedQuery $totalFilter $grouping) as K";
     $iTotalDisplayRecordsRow = $this->dbManager->getSingleRow($countQuery,
         $filterParms, __METHOD__.$tableName . ".count" . ($activated ? '' : '_deactivated'));
     $iTotalDisplayRecords = $iTotalDisplayRecordsRow['count'];
 
-    $countAllQuery = "SELECT count(*) FROM (SELECT content, count(*) $unorderedQuery$grouping) as K";
+    $countAllQuery = "SELECT count(*) FROM (SELECT cp.content, count(*) $unorderedQuery$grouping) as K";
     $iTotalRecordsRow = $this->dbManager->getSingleRow($countAllQuery, $params, __METHOD__,$tableName . "count.all" . ($activated ? '' : '_deactivated'));
     $iTotalRecords = $iTotalRecordsRow['count'];
 
@@ -304,12 +310,18 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $filterParms[] = $limit;
     $range .= ' LIMIT $' . count($filterParms);
 
-    $sql = "SELECT content, hash, count(*) as copyright_count  " .
-        $unorderedQuery . $totalFilter . " GROUP BY content, hash " . $orderString . $range;
+    $sql = "SELECT cp.content, cp.hash, CE.content AS contentedited, CE.hash AS hashedited, count(*) AS copyright_count  " .
+        $unorderedQuery . $totalFilter . " GROUP BY cp.content, cp.hash, CE.content, CE.hash " . $orderString . $range;
     $statement = __METHOD__ . $filter.$tableName . $uploadTreeTableName . ($activated ? '' : '_deactivated');
     $this->dbManager->prepare($statement, $sql);
     $result = $this->dbManager->execute($statement, $filterParms);
     $rows = $this->dbManager->fetchAll($result);
+    foreach ($rows as $key => $row) {
+      if (!empty($row['contentedited'])) {
+        $rows[$key]['content'] = $rows[$key]['contentedited'];
+        $row[$key]['hash'] = $rows[$key]['hashedited'];
+      }
+    }
     $this->dbManager->freeResult($result);
 
     return array($rows, $iTotalDisplayRecords, $iTotalRecords);
