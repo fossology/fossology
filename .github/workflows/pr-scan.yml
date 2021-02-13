@@ -1,0 +1,42 @@
+name: License scan on PR
+
+on: [pull_request]
+
+jobs:
+  compliance_check:
+    runs-on: ubuntu-latest
+    name: Perform license scan
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: License check
+      id: compliance
+      uses: GMishx/fossology-scan@main
+      with:
+        scan-mode: 'diff'
+        scanners: 'nomos ojo'
+    - name: 'Upload report'
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() }}
+      with:
+        name: Scan results
+        path: results
+  copyright_check:
+    runs-on: ubuntu-latest
+    name: Perform copyright scan
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: License check
+      id: compliance
+      uses: GMishx/fossology-scan@main
+      with:
+        scan-mode: 'diff'
+        scanners: 'copyright keyword'
+    - name: 'Upload report'
+      uses: actions/upload-artifact@v2
+      if: ${{ failure() }}
+      with:
+        name: Scan results
+        path: results
+
