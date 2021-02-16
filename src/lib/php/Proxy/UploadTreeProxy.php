@@ -37,7 +37,6 @@ class UploadTreeProxy extends DbViewProxy
   const OPT_SCAN_REF = 'scanRef';
   const OPT_CONCLUDE_REF = 'conRef';
   const OPT_SKIP_ALREADY_CLEARED = 'alreadyCleared';
-  const OPT_ONLY_MAIN_LICENSE = 'onlyMainLicense';
 
   /** @var string */
   private $uploadTreeTableName;
@@ -274,13 +273,14 @@ class UploadTreeProxy extends DbViewProxy
    */
   private static function getQueryCondition($skipThese, $options, $groupId = null, $agentFilter='')
   {
-    $only = "";
-    if (array_key_exists(self::OPT_ONLY_MAIN_LICENSE, $options)) {
-      $only = "ONLY";
-    }
-    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM $only license_ref lr INNER JOIN license_file lf"
-      . " ON lf.rf_fk=lr.rf_pk AND lf.pfile_fk = ut.pfile_fk $agentFilter WHERE rf_shortname NOT IN ('No_license_found', 'Void'))
-          OR EXISTS (SELECT 1 FROM clearing_decision AS cd WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
+    $conditionQueryHasLicense = "(EXISTS (SELECT 1 FROM license_file lf " .
+      "LEFT JOIN ONLY license_ref lr ON lf.rf_fk = lr.rf_pk " .
+      "LEFT JOIN license_candidate lc ON lf.rf_fk = lc.rf_pk " .
+      "AND lc.group_fk = $groupId " .
+      "WHERE (lr.rf_shortname NOT IN ('No_license_found', 'Void') OR lr.rf_shortname IS NULL) " .
+      "AND lf.pfile_fk = ut.pfile_fk $agentFilter)" .
+      "OR EXISTS (SELECT 1 FROM clearing_decision AS cd " .
+      "WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
 
     switch ($skipThese) {
       case "noLicense":

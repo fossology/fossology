@@ -162,10 +162,11 @@ class LicenseMapTest extends \PHPUnit\Framework\TestCase
     $res = $this->dbManager->execute($stmt);
     $map = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
-    assertThat($map,is(arrayWithSize(2)));
+    assertThat($map,is(arrayWithSize(3)));
     $expected = array(
         array('rf_origin'=>1, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'),
-        array('rf_origin'=>2, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1')
+        array('rf_origin'=>2, 'rf_pk'=>1,'rf_shortname'=>'One','rf_fullname'=>'One-1'),
+        array('rf_origin'=>3, 'rf_pk'=>3,'rf_shortname'=>'Three','rf_fullname'=>'Three-3')
     );
     assertThat($map,containsInAnyOrder($expected));
   }

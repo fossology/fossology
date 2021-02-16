@@ -114,7 +114,7 @@ bool processUploadId(const OjoState &state, int uploadId,
     OjosDatabaseHandler &databaseHandler, bool ignoreFilesWithMimeType)
 {
   vector<unsigned long> fileIds = databaseHandler.queryFileIdsForUpload(
-      uploadId, ignoreFilesWithMimeType);
+      uploadId, state.getAgentId(), ignoreFilesWithMimeType);
   char const *repoArea = "files";
 
   bool errors = false;
@@ -152,7 +152,8 @@ bool processUploadId(const OjoState &state, int uploadId,
       vector<ojomatch> identified;
       try
       {
-        identified = agentObj.processFile(filePath, threadLocalDatabaseHandler);
+        identified = agentObj.processFile(filePath, threadLocalDatabaseHandler,
+                                          state.getCliOptions().getGroupId());
       }
       catch (std::runtime_error &e)
       {
@@ -315,6 +316,16 @@ bool parseCliOptions(int argc, char **argv, OjoCliOptions &dest,
     bool  ignoreFilesWithMimeType = vm.count("ignoreFilesWithMimeType") > 0 ?  true : false;
 
     dest = OjoCliOptions(verbosity, json, ignoreFilesWithMimeType);
+
+    if (vm.count("userID") > 0)
+    {
+      dest.setUserId(vm["userID"].as<int>());
+    }
+
+    if (vm.count("groupID") > 0)
+    {
+      dest.setGroupId(vm["groupID"].as<int>());
+    }
 
     if (vm.count("directory"))
     {

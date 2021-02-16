@@ -281,7 +281,14 @@ class DeciderAgent extends Agent
     }
 
     if ($licenseMatchExists) {
-      $this->clearingDecisionProcessor->makeDecisionFromLastEvents($itemTreeBounds, $this->userId, $this->groupId, DecisionTypes::IDENTIFIED, $global=true);
+      try {
+        $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+          $itemTreeBounds, $this->userId, $this->groupId,
+          DecisionTypes::IDENTIFIED, false);
+      } catch (\Exception $e) {
+        echo "Can not auto decide as file '" .
+          $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+      }
     }
     return $licenseMatchExists;
   }

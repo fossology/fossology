@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019, Siemens AG
+ * Copyright (C) 2019,2021 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -37,11 +37,18 @@ class OjoCliOptions
     int verbosity;  /**< The verbosity level */
     bool json;      /**< Whether to generate JSON output */
     bool ignoreFilesWithMimeType; /**< Ignore files with particular mimetype */
+    int userId;     /**< User running the agent */
+    int groupId;    /**< Group running the agent */
 
   public:
+    void setUserId(const int);
+    void setGroupId(const int);
+
     bool isVerbosityDebug() const;
     bool doJsonOutput() const;
     bool doignoreFilesWithMimeType() const;
+    int getUserId() const;
+    int getGroupId() const;
 
     OjoCliOptions(int verbosity, bool json, bool ignoreFilesWithMimeType);
     OjoCliOptions();

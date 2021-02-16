@@ -140,10 +140,15 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'upload',
         'pfile',
         'users',
+        'groups',
         'ars_master',
         'license_ref',
         'license_file',
         'highlight'
+      ));
+    $this->testDb->createInheritedTables(
+      array(
+        'license_candidate'
       ));
     $this->testDb->createSequences(
       array(
@@ -151,6 +156,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'upload_upload_pk_seq',
         'pfile_pfile_pk_seq',
         'users_user_pk_seq',
+        'group_group_pk_seq',
         'nomos_ars_ars_pk_seq',
         'license_ref_rf_pk_seq',
         'license_file_fl_pk_seq',
@@ -171,6 +177,7 @@ class OjoScheduledTest extends \PHPUnit\Framework\TestCase
         'upload',
         'ars_master',
         'users',
+        'groups',
         'license_ref',
         'license_file'
       ));
