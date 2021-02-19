@@ -35,7 +35,7 @@ Consider the usual best practice for writing issues, among them:
 - Screenshots are a great help
 - Providing example files (in case for example scanning crashes)
 - Please determine the version, better the commit id
-- Details on operating system you are using
+- Details on the operating system you are using
 
 ## Code Guidelines
 
@@ -67,7 +67,7 @@ The cardinal rule for creating good commits is to ensure there is only one
   review & identify potential flaws.
 
 - If a change is found to be flawed later, it may be necessary to revert the
-  broken commit. This is much easier to do if there are not other unrelated
+  broken commit. This is much easier to do if there are no other unrelated
   code changes entangled with the original commit.
 
 - When troubleshooting problems using Git's bisect capability, small well
@@ -108,7 +108,7 @@ Allowed types:
 - **test**: Adding missing tests
 - **chore**: Changes to the build process or auxiliary tools and libraries such as documentation generation
 
-You can add additional details after a new line to describe the change in detail or automatically close a issue on Github.
+You can add additional details after a new line to describe the change in detail or automatically close an issue on Github.
 
 ```none
 feat(CONTRIBUTING.md): create initial CONTRIBUTING.md
@@ -125,7 +125,7 @@ This closes #22
 
 All commits not submitted via GitHub pull request shall contain a
 Signed-off-by line, also known as the **Developer Certificate of Origin (DCO)**
-as we know it from the Linux Kernel [Documenation/SubmittingPatches](https://www.kernel.org/doc/Documentation/SubmittingPatches)
+as we know it from the Linux Kernel [Documenation/SubmittingPatches](https://www.kernel.org/doc/Documentation/process/submitting-patches.rst)
 
 ```none
     Signed-off-by: Peace Fun Ingenium <peacefun.ingenium@example.com>
@@ -194,7 +194,7 @@ Follow the steps to get your work included in the project.
 
    Commit your changes in logical chunks. Please adhere to **Git Commit Conventions**
    and [Coding guidelines](https://github.com/fossology/fossology/wiki/Coding-Style)
-   or your code is unlikely be merged into the main project.
+   or your code is unlikely to be merged into the main project.
    Use Git's [interactive rebase](https://www.atlassian.com/git/tutorials/rewriting-history/git-rebase)
    feature to tidy up your commits before making them public.
 
@@ -219,7 +219,7 @@ The FOSSology project does not require you to assign the copyright of your
 contributions, you retain the copyright. The FOSSology project **does** require
 that you make your contributions available under the
 [GNU General Public License as published by the Free Software Foundation, version 2](LICENSE),
-in order to be accepted as contribution in the main repo.
+in order to be accepted as a contribution in the main repo.
 
 If appropriate, include the [GPLv2 license header](https://github.com/fossology/fossology/wiki/Coding-Style#default-license-and-file-headers)
 at the top of each file along with the copyright info. If you are adding a new
