@@ -338,6 +338,7 @@ class CopyrightDao
   public function getAllEntries($tableName, $uploadId, $uploadTreeTableName, $type=null, $onlyCleared=false, $decisionType=null, $extrawhere=null)
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
+    $tableNameEvent = $tableName.'_event';
 
     $params = array();
     $whereClause = "";
@@ -389,11 +390,13 @@ class CopyrightDao
             FROM $tableName C
             INNER JOIN $uploadTreeTableName UT
               ON C.pfile_fk = UT.pfile_fk
+            LEFT JOIN $tableNameEvent AS CE
+              ON CE.".$tableName."_fk = C.".$tableName."_pk
             $joinType JOIN (SELECT * FROM $tableNameDecision WHERE is_enabled='true') AS CD
               ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL
               AND C.content!=''
-              AND C.is_enabled='true'
+              AND C.".$tableName."_pk NOT IN (SELECT DISTINCT(".$tableName."_fk) FROM $tableNameEvent TE WHERE TE.upload_fk = $uploadId AND is_enabled = false)
               $whereClause
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.textfinding, CD.$decisionTableKey DESC";
 
@@ -470,42 +473,52 @@ class CopyrightDao
    * @param int $userId
    * @param string $cpTable
    */
-  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright', $action='', $scope=1)
+  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright', $action='', $scope=1, $forCopyrightTestCases=array())
   {
-    $itemTable = $item->getUploadTreeTableName();
-    $stmt = __METHOD__.".$cpTable.$itemTable";
-    $uploadId = $item->getUploadId();
-    $params = array($item->getLeft(),$item->getRight(),$uploadId);
-    $withHash = "";
-
-    if (!empty($hash)) {
-      $params[] = $hash;
-      $withHash = " cp.hash = $4 AND ";
-      $stmt .= ".hash";
-    }
-
-    $agentName = "copyright";
-    $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),
-      $uploadId);
-    $scanJobProxy->createAgentStatus([$agentName]);
-    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
-    if (!array_key_exists($agentName, $selectedScanners)) {
-      return array();
-    }
-    $latestAgentId = $selectedScanners[$agentName];
-    $agentFilter = ' AND cp.agent_fk='.$latestAgentId;
-
     $cpTablePk = $cpTable."_pk";
-    $sql = "SELECT DISTINCT ON ($cpTablePk) $cpTablePk, uploadtree_pk FROM $cpTable as cp
-              INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
-              AND $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3";
+    $paramEvent = array();
+    $stmt = '.updateTable';
+    if (empty($forCopyrightTestCases)) {
+      $itemTable = $item->getUploadTreeTableName();
+      $stmt = __METHOD__.".$cpTable.$itemTable";
+      $uploadId = $item->getUploadId();
+      $params = array($item->getLeft(),$item->getRight(),$uploadId);
+      $withHash = "";
 
-    $this->dbManager->prepare($stmt, "$sql");
-    $resource = $this->dbManager->execute($stmt, $params);
-    $rows = $this->dbManager->fetchAll($resource);
+      if (!empty($hash)) {
+        $params[] = $hash;
+        $withHash = " cp.hash = $4 AND ";
+        $stmt .= ".hash";
+      }
+      // get latest agent id for copyright agent
+      $agentName = "copyright";
+      $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),
+        $uploadId);
+      $scanJobProxy->createAgentStatus([$agentName]);
+      $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+      if (!array_key_exists($agentName, $selectedScanners)) {
+        return array();
+      }
+      $latestAgentId = $selectedScanners[$agentName];
+      $agentFilter = '';
+      if (!empty($latestAgentId)) {
+        $agentFilter = ' AND cp.agent_fk='.$latestAgentId;
+      }
+
+      $sql = "SELECT DISTINCT ON ($cpTablePk) $cpTablePk, uploadtree_pk, upload_fk FROM $cpTable as cp
+                INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
+                AND $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3";
+
+      $this->dbManager->prepare($stmt, "$sql");
+      $resource = $this->dbManager->execute($stmt, $params);
+      $rows = $this->dbManager->fetchAll($resource);
+      $this->dbManager->freeResult($resource);
+    } else {
+      $rows = $forCopyrightTestCases;
+    }
 
     foreach ($rows as $row) {
-      $paramEvent[] = $uploadId;
+      $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
       if ($action == "delete") {
@@ -537,6 +550,5 @@ class CopyrightDao
       $this->dbManager->freeResult($resourceEvent);
       $paramEvent = array();
     }
-    $this->dbManager->freeResult($resource);
   }
 }
