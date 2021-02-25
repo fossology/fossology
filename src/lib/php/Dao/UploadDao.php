@@ -226,14 +226,20 @@ class UploadDao
   }
 
   /**
-   * @brief unused function
+   * @brief Get the upload status.
+   * @param int $uploadId Upload to get status for
+   * @param int $groupId  Effective group
+   * @return integer Status fk or 1 if not found
+   * @throws Exception if upload not accessible.
    */
   public function getStatus($uploadId, $groupId)
   {
     if ($this->isAccessible($uploadId, $groupId)) {
-      $row = $this->dbManager->getSingleRow("SELECT status_fk FROM upload_clearing WHERE upload_fk = $1", array($uploadId));
+      $row = $this->dbManager->getSingleRow("SELECT status_fk " .
+        "FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2;",
+        array($uploadId, $groupId));
       if (false === $row) {
-        throw new \Exception("cannot find uploadId=$uploadId");
+        return 1;
       }
       return $row['status_fk'];
     } else {
