@@ -643,6 +643,15 @@ INSERT INTO clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::DO_NOT_USE);
   }
 
+  public function getClearingType($uploadTreeId, $groupId, $type)
+  {
+    $sql = "SELECT decision_type, scope FROM clearing_decision
+              WHERE uploadtree_fk=$1 AND group_fk = $2
+            ORDER BY clearing_decision_pk DESC LIMIT 1";
+    $latestDec = $this->dbManager->getSingleRow($sql,
+                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
+    return $latestDec;
+  }
 
   public function isDecisionIrrelevant($uploadTreeId, $groupId)
   {
