@@ -22,6 +22,7 @@ namespace Fossology\Lib\Dao;
 
 use Fossology\Lib\Db\DbManager;
 use Monolog\Logger;
+use Fossology\Lib\Data\Tree\ItemTreeBounds;
 
 class TreeDao
 {
@@ -143,5 +144,20 @@ class TreeDao
     $path = '';
     exec("$LIBEXECDIR/reppath $repo $hash", $path);
     return($path[0]);
+  }
+
+  /**
+   * Get the parent item of a given uploadtree item
+   * @param ItemTreeBounds $itemTreeBounds Item bounds to get parent for
+   * @return integer Item id of parent
+   */
+  public function getParentOfItem($itemTreeBounds)
+  {
+    $item = $itemTreeBounds->getItemId();
+    $tableName = $itemTreeBounds->getUploadTreeTableName();
+    $sql = "SELECT realparent FROM $tableName WHERE uploadtree_pk = $1;";
+    $statement = __METHOD__ . ".$tableName";
+    $row = $this->dbManager->getSingleRow($sql, [$item], $statement);
+    return $row['realparent'];
   }
 }
