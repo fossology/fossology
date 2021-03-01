@@ -277,7 +277,8 @@ class UploadTreeProxy extends DbViewProxy
       "LEFT JOIN ONLY license_ref lr ON lf.rf_fk = lr.rf_pk " .
       "LEFT JOIN license_candidate lc ON lf.rf_fk = lc.rf_pk " .
       "AND lc.group_fk = $groupId " .
-      "WHERE (lr.rf_shortname NOT IN ('No_license_found', 'Void') OR lr.rf_shortname IS NULL) " .
+      "WHERE (lr.rf_shortname NOT IN ('No_license_found', 'Void') " .
+      "OR (lr.rf_pk IS NULL AND lc.rf_pk IS NOT NULL)) " .
       "AND lf.pfile_fk = ut.pfile_fk $agentFilter)" .
       "OR EXISTS (SELECT 1 FROM clearing_decision AS cd " .
       "WHERE cd.group_fk = $groupId AND ut.uploadtree_pk = cd.uploadtree_fk))";
