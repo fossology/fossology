@@ -537,6 +537,7 @@ class UploadHelper
     $summary = new UploadSummary();
     $summary->setUploadId($uploadId);
     $summary->setUploadName($uploadDao->getUpload($uploadId)->getFilename());
+    $summary->setAssignee($uploadDao->getAssignee($uploadId, $groupId));
     if ($mainLicenses !== null) {
       $summary->setMainLicense(implode(",", $mainLicenses));
     }
