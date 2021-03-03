@@ -62,6 +62,7 @@ void writeJson()
     *printcomma = true;
     printf("%s\n", prettyJson);
   }
+  fflush(stdout);
   sem_post(mutexJson);
   free(prettyJson);
   json_object_put(result);
