@@ -109,7 +109,13 @@ class UserEditPage extends DefaultPlugin
 
         /* Reread the user record as update verification */
         $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
+        if ($user_pk == $user_pk_to_modify) {
+          $_SESSION['User'] = $UserRec['user_name'];
+        }
       } else {
+        if (empty($UserRec['user_name']) || $_SESSION['User'] != $UserRec['user_name']) {
+          $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
+        }
         $vars['message'] = $rv;
       }
     } else {
@@ -261,6 +267,11 @@ class UserEditPage extends DefaultPlugin
         $Errors .= "<li>" . _("User is not member of provided group.") .
           "</li>";
       }
+    }
+
+    /* Make sure only admin can change the username */
+    if ((!Auth::isAdmin()) && ($UserRec['user_name'] != $_SESSION['User'])) {
+      $Errors .= "<li>" . _("Only admin can change the username.") . "</li>";
     }
 
     /* If we have any errors, return them */
