@@ -1560,6 +1560,20 @@ components:
           nullable: true
           example:
             3
+    Group:
+      description: Group object
+      type: object
+      properties:
+        id:
+          description: Id key
+          type: integer
+          example:
+            126
+        name:
+          description: Name of a group
+          type: string
+          example:
+            "Main group"    
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"
