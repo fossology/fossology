@@ -102,7 +102,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
 
   private function setUpClearingTables()
   {
-    $this->testDb->createPlainTables(array('copyright','uploadtree','copyright_decision'));
+    $this->testDb->createPlainTables(array('copyright','uploadtree','copyright_decision','copyright_event'));
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->insertData(array('copyright','uploadtree_a'));
 
@@ -165,7 +165,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
-    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED, "content LIKE '%permission of 3dfx interactiv%'");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", false, DecisionTypes::IDENTIFIED, "C.content LIKE '%permission of 3dfx interactiv%'");
     $this->assertEquals(1, count($entries));
     $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
   }
@@ -241,7 +241,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
 
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
-    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "C.content LIKE 'written%'");
     $this->assertEquals(1, count($entries));
     $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
   }
@@ -268,7 +268,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $decisionId = $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
     $copyrightDao->removeDecision("copyright_decision", 4, $decisionId);
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
-    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "C.content LIKE 'written%'");
     $this->assertEquals(0, count($entries));
   }
 
@@ -282,7 +282,7 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc","text","comment");
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IRRELEVANT,"desc1","text1","comment1");
     $copyrightDao->saveDecision("copyright_decision", 4, 2, DecisionTypes::IDENTIFIED,"desc2","text","comment");
-    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "content LIKE 'written%'");
+    $entries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a", "statement", true, DecisionTypes::IDENTIFIED, "C.content LIKE 'written%'");
     $this->assertEquals(1, count($entries));
     $this->assertTrue($this->searchContent($entries, "written permission of 3dfx interactive, \ninc. see the 3dfx glide general public license for a full text of the \n"));
     $this->assertEquals("desc2", $entries[0]['description']);
@@ -295,12 +295,14 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
     $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
     $hash2 = '0x3a910990f114f12f';
     $ctPk = 2;
+    $rowsForTest = array(array('copyright_pk' => '2', 'uploadtree_pk' => '10', 'upload_fk' => '6'));
+    $content = 'foo';
 
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
-    $copyrightDao->updateTable($item, $hash2, $content='foo', $userId=55);
+    $copyrightDao->updateTable($item, $hash2, 'foo', '55', 'copyright', 'update', '1', $rowsForTest);
 
-    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright WHERE copyright_pk=$1',array($ctPk),__METHOD__.'.cp');
+    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright_event WHERE copyright_fk=$1',array($ctPk),__METHOD__.'.cp');
     assertThat($updatedCp['content'],is(equalTo($content)));
   }
 
@@ -310,15 +312,15 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
 
     $uploadDao = M::mock('Fossology\Lib\Dao\UploadDao');
     $copyrightDao = new CopyrightDao($this->dbManager,$uploadDao);
-    $initialEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
+    $rowsForDelTest = array(array('copyright_pk' => '15', 'uploadtree_pk' => '12', 'upload_fk' => '1'));
+    $initialEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");//print_r($initialEntries); exit;
     $initialCount = count($initialEntries);
 
-    $item = new ItemTreeBounds(6,'uploadtree_a',1,17,18);
-    $hash2 = '0x3a910990f114f12f';
-    $copyrightDao->updateTable($item, $hash2, $content='', 55, 'copyright', 'delete');
-
-    $remainingEntries = $copyrightDao->getAllEntries("copyright", 1, "uploadtree_a");
-    $remainingCount = count($remainingEntries);
+    $copyrightDao->updateTable('', '', '', '55', 'copyright', 'delete', '1', $rowsForDelTest);
+    $updatedCp = $this->dbManager->getSingleRow('SELECT * FROM copyright_event WHERE copyright_fk=$1',array($rowsForDelTest[0]['copyright_pk']),__METHOD__.'.cpDel');
+    $deletedIdCheck = array_search($updatedCp['uploadtree_fk'], array_column($initialEntries, 'uploadtree_pk'));
+    unset($initialEntries[$deletedIdCheck]);
+    $remainingCount = count($initialEntries);
     assertThat($remainingCount,is(equalTo($initialCount-1)));
   }
 }

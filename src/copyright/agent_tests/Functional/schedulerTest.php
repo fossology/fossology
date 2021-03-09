@@ -167,7 +167,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    */
   private function setUpTables()
   {
-    $this->testDb->createPlainTables(array('agent','uploadtree','upload','pfile','users','bucketpool','mimetype','ars_master','author'));
+    $this->testDb->createPlainTables(array('agent','uploadtree','upload','pfile','users','bucketpool','mimetype','ars_master','author','copyright_event'));
     $this->testDb->createSequences(array('agent_agent_pk_seq','upload_upload_pk_seq','pfile_pfile_pk_seq','users_user_pk_seq','nomos_ars_ars_pk_seq'));
     $this->testDb->createConstraints(array('agent_pkey','upload_pkey_idx','pfile_pkey','user_pkey'));
     $this->testDb->alterTables(array('agent','pfile','upload','ars_master','users'));
