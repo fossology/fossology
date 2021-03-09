@@ -56,12 +56,13 @@ function insertCopyrightEventTables($dbManager)
     $sql = "SELECT count(*) AS cnt FROM ";
     $statement = __METHOD__ . ".getCountsFor";
     $length = 0;
-    $row = $dbManager->getSingleRow($sql . $table ."WHERE is_enabled=false;", array(), $statement . $table);
+    $row = $dbManager->getSingleRow($sql . $table ." WHERE is_enabled=false;", array(), $statement . $table);
     $length = intval($row['cnt']);
-    
-    echo "*** Inserting $length records from $table to $tableEvent table ***\n";
-    
+    if (!empty($length)) {
+      echo "*** Inserting $length records from $table to $tableEvent table ***\n";
+    }
     $tablePk = $table."_pk";
+    $tableFk = $table."_fk";
     $sql = "SELECT DISTINCT ON ($tablePk) $tablePk, uploadtree_pk, upload_fk 
               FROM $table as cp
             INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
@@ -69,16 +70,16 @@ function insertCopyrightEventTables($dbManager)
                 LIMIT $1 OFFSET $2;";
     $i = 0;
     $statement = __METHOD__ . ".updateContentFor.$tableEvent";
-    while ($i <= $length) {
+    while ($i < $length) {
       $rows = $dbManager->getRows($sql, array(MAX_SIZE_OF_ROW, $i),
         $statement);
       $i += count($rows);
       $dbManager->begin();
       foreach ($rows as $key => $content) {
-        $sqlEvent = "INSERT INTO $tableEvent (upload_fk, copyright_fk, uploadtree_fk) VALUES($content[upload_fk], $content[copyright_pk], $content[uploadtree_pk])";
+        $sqlEvent = "INSERT INTO $tableEvent (upload_fk, $tableFk, uploadtree_fk) VALUES($content[upload_fk], $content[$tablePk], $content[uploadtree_pk])";
         $dbManager->queryOnce($sqlEvent, $statement.$key."Insert");
         
-        $sqlTable = "UPDATE $table SET is_enabled=true WHERE copyright_pk = $content[copyright_pk]";
+        $sqlTable = "UPDATE $table SET is_enabled=true WHERE $tablePk = $content[$tablePk]";
         $dbManager->queryOnce($sqlTable, $statement.$key."Update");
       }
       $dbManager->commit();
@@ -100,7 +101,7 @@ function checkIfMigratePossible($dbManager)
   }
 
   $migPossible = true;
-  foreach (ENCODE_TABLES as $table => $tableEvent) {
+  foreach (TABLE_NAMES as $table => $tableEvent) {
     if (DB_TableExists($table) != 1) {
       $migPossible = false;
       break;

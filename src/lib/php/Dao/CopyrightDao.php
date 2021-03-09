@@ -476,6 +476,8 @@ class CopyrightDao
   public function updateTable($item, $hash, $content, $userId, $cpTable='copyright', $action='', $scope=1, $forCopyrightTestCases=array())
   {
     $cpTablePk = $cpTable."_pk";
+    $cpTableEvent = $cpTable."_event";
+    $cpTableEventFk = $cpTable."_fk";
     $paramEvent = array();
     $stmt = '.updateTable';
     if (empty($forCopyrightTestCases)) {
@@ -523,24 +525,24 @@ class CopyrightDao
       $paramEvent[] = $row['uploadtree_pk'];
       if ($action == "delete") {
         $paramEvent[] = $scope;
-        $sqlEvent = "INSERT INTO copyright_event(upload_fk, copyright_fk, uploadtree_fk, scope) VALUES($1, $2, $3, $4)";
+        $sqlEvent = "INSERT INTO $cpTableEvent (upload_fk, $cpTableEventFk, uploadtree_fk, scope) VALUES($1, $2, $3, $4)";
         $stmt .= '.delete';
       } else if ($action == "rollback") {
-        $sqlEvent = "DELETE FROM copyright_event WHERE upload_fk = $1 AND uploadtree_fk = $3 AND copyright_fk = $2";
+        $sqlEvent = "DELETE FROM $cpTableEvent WHERE upload_fk = $1 AND uploadtree_fk = $3 AND $cpTableEventFk = $2";
         $stmt .= '.rollback';
       } else {
         $paramEvent[] = "true";
         $paramEvent[] = StringOperation::replaceUnicodeControlChar($content);
-        $sqlExists = "SELECT exists(SELECT 1 FROM copyright_event WHERE copyright_fk = $1)::int";
+        $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1)::int";
         $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk]), $stmt.'Exists');
 
         if ($rowExists['exists']) {
-          $sqlEvent = "UPDATE copyright_event
+          $sqlEvent = "UPDATE $cpTableEvent
                         SET upload_fk = $1, uploadtree_fk = $3, is_enabled = $4, content = $5, hash = md5($5)
-                       WHERE copyright_fk = $2";
+                       WHERE $cpTableEventFk = $2";
           $stmt .= '.update';
         } else {
-          $sqlEvent = "INSERT INTO copyright_event(upload_fk, uploadtree_fk, copyright_fk, is_enabled, content, hash)
+          $sqlEvent = "INSERT INTO $cpTableEvent(upload_fk, uploadtree_fk, $cpTableEventFk, is_enabled, content, hash)
                        VALUES($1, $3, $2, $4, $5, md5($5))";
           $stmt .= '.insert';
         }

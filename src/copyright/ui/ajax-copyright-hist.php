@@ -278,7 +278,7 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
     if (!$activated) {
-      $activatedClause = " AND CE.is_enabled=false ";
+      $activatedClause = " AND CE.is_enabled=false and CE.upload_fk = $upload_pk ";
     } else {
       $activatedClause = " AND cp.".$tableName."_pk NOT IN (SELECT ".$tableName."_fk FROM $tableNameEvent WHERE upload_fk = $upload_pk AND is_enabled = false) ";
     }
