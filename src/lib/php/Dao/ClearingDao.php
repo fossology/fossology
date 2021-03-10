@@ -351,7 +351,7 @@ class ClearingDao
     if ($this->isDecisionIrrelevant($uploadTreeId, $groupId)) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
     } else if ($decType == DecisionTypes::IRRELEVANT) {
-      $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete', '2');
+      $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete');
     }
 
     $this->dbManager->begin();
@@ -841,7 +841,7 @@ INSERT INTO clearing_decision (
                FROM UploadTreeView WHERE NOT EXISTS (
              SELECT uploadtree_fk FROM clearing_decision
               WHERE decision_type=$'.($a+2).' AND uploadtree_fk=UploadTreeView.uploadtree_pk)';
-       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete', '2');
+       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete');
     } else {
       $params[] = $decisionMark;
       $sql = $uploadTreeProxy->asCte()
