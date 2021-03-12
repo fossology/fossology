@@ -13,9 +13,9 @@ readonly HOST="$(docker-compose port web 80)"
 curl --silent --location "http://${HOST}/repo/" | grep -q "<title>Getting Started with FOSSology</title>"
 
 #### test copyright is running
-docker-compose exec web /usr/local/share/fossology/copyright/agent/copyright -h
+docker-compose exec -T web /usr/local/share/fossology/copyright/agent/copyright -h
 
 #### test whether the scheduler is running
-docker-compose exec scheduler /usr/local/share/fossology/scheduler/agent/fo_cli -S
+docker-compose exec -T scheduler /usr/local/share/fossology/scheduler/agent/fo_cli -S
 
 docker-compose down

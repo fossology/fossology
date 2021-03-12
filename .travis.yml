@@ -72,15 +72,7 @@ jobs:
     - name: PHP Codesniffer
       install: composer install --prefer-dist --working-dir=src
       script: src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
-#### Docker tests ###########################
-    - name: Docker Tests
-      addons: {}
-      services: docker
-      before_script: docker-compose build
-      script:
-        - src/testing/docker/test-cluster.sh
-        - src/testing/docker/test-standalone.sh
-#### C/C++ agent tests ###########################
+    #### C/C++ agent tests ###########################
     - &compiler-tests
       env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
       addons:
@@ -96,8 +88,7 @@ jobs:
         - ./install/scripts/install-spdx-tools.sh
         - sudo /usr/sbin/update-ccache-symlinks
         - ls /usr/lib/ccache/
-      before_script: &default-before-script
-        ./utils/prepare-test -afty
+      before_script: &default-before-script ./utils/prepare-test -afty
       script:
         - make test
       after_success:
@@ -135,7 +126,7 @@ jobs:
     - <<: *compiler-tests
       env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
       addons:
-        postgresql: "10"
+        postgresql: '10'
         apt:
           sources:
             - ubuntu-toolchain-r-test
@@ -145,14 +136,13 @@ jobs:
             - g++-6
             - postgresql-10
             - postgresql-client-10
-      before_script: &postgres-before-script
-        # Use default port
+      before_script: &postgres-before-script # Use default port
         - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
         # Use 9.6 auth config:
         - sudo cp /etc/postgresql/{9.5,10}/main/pg_hba.conf
         - sudo service postgresql restart
         - *default-before-script
-#### PHPUnit tests ###########################
+    #### PHPUnit tests ###########################
     - &php7-phpunit-tests
       addons: {}
       php: 7.0
@@ -172,7 +162,7 @@ jobs:
       php: 7.2
       env: PGPORT=5432
       addons:
-        postgresql: "10"
+        postgresql: '10'
         apt:
           packages:
             - postgresql-10
