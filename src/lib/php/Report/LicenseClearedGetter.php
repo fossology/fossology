@@ -27,6 +27,7 @@ use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Agent\Agent;
 
 class LicenseClearedGetter extends ClearedGetterCommon
 {
@@ -107,6 +108,74 @@ class LicenseClearedGetter extends ClearedGetterCommon
     }
 
     return $ungroupedStatements;
+  }
+
+  /**
+   * Override of getCleared() to handle acknowledgement grouping
+   * {@inheritDoc}
+   * @see Fossology::Lib::Report::ClearedGetterCommon::getCleared()
+   */
+  public function getCleared($uploadId, $objectAgent, $groupId=null,
+    $extended=true, $agentCall=null, $isUnifiedReport=false)
+  {
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $ungroupedStatements = $this->getStatements($uploadId, $uploadTreeTableName,
+      $groupId);
+    $this->changeTreeIdsToPaths($ungroupedStatements, $uploadTreeTableName,
+      $uploadId);
+    if ($this->onlyAcknowledgements || $this->onlyComments) {
+      return $this->groupStatementsSpecial($ungroupedStatements, $objectAgent);
+    }
+    return $this->groupStatements($ungroupedStatements, $extended, $agentCall,
+      $isUnifiedReport, $objectAgent);
+  }
+
+  /**
+   * Group acknowledgement statements
+   * @param array $ungrupedStatements
+   * @param Agent $objectAgent
+   * @return array
+   */
+  protected function groupStatementsSpecial($ungrupedStatements, $objectAgent)
+  {
+    $statements = array();
+    $countLoop = 0;
+    foreach ($ungrupedStatements as $statement) {
+      $licenseId = $statement['licenseId'];
+      $content = convertToUTF8($statement['content'], false);
+      $content = htmlspecialchars($content, ENT_DISALLOWED);
+      $text = convertToUTF8($statement['text'], false);
+      $text = htmlspecialchars($text, ENT_DISALLOWED);
+      $fileName = $statement['fileName'];
+
+      $statementKey = md5("$content.$text");
+      if (!array_key_exists($statementKey, $statements)) {
+        $statements[$statementKey] = [
+          "licenseId" => $licenseId,
+          "content" => $content,
+          "text" => $text,
+          "files" => [$fileName]
+        ];
+      } else {
+        if (!in_array($fileName, $statements[$statementKey]["files"])) {
+          $statements[$statementKey]["files"][] = $fileName;
+        }
+      }
+
+      //To keep the scheduler alive for large files
+      $countLoop += 1;
+      if ($countLoop % 500 == 0) {
+        $objectAgent->heartbeat(0);
+      }
+    }
+    $statements = array_values($statements);
+    usort($statements, function($a, $b) {
+      return strnatcmp($a["content"], $b["content"]);
+    });
+    if (!empty($objectAgent)) {
+      $objectAgent->heartbeat(count($statements));
+    }
+    return array("statements" => array_values($statements));
   }
 
   /**
