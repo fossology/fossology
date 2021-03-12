@@ -347,6 +347,7 @@ abstract class DefaultPlugin implements Plugin
 
     $metadata = "<meta name='description' content='The study of Open Source'>\n";
     $metadata .= "<meta http-equiv='Content-Type' content='text/html;charset=UTF-8'>\n";
+    $metadata .= "<meta name='viewport' content='width=device-width,initial-scale=1.0'>\n";
 
     $vars['metadata'] = $metadata;
 
