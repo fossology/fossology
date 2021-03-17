@@ -1011,7 +1011,10 @@ void printRegexMatch(int n, int cached)
 #endif /* PROC_TRACE */
 
   if (*debugStr == NULL_CHAR) {
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wstringop-truncation\"") // suppress trucation warning while copying
     strncpy(debugStr, gl.initwd, sizeof(debugStr)-1);
+    _Pragma("GCC diagnostic pop")
     strncat(debugStr, "/Nomos.strings.txt", sizeof(debugStr)-1);
 #ifdef DEBUG
     printf("File: %s\n", debugStr);

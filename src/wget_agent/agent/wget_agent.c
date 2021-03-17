@@ -1042,8 +1042,10 @@ void replace_url_with_auth()
     {
       return;
     }
-
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wstringop-overflow=\"") // suppress overflow warning
     strncpy(http, GlobalURL, strlen(GlobalURL) - strlen(URI));
+    _Pragma("GCC diagnostic pop")
     /* get the first token */
     token = strtok(GlobalParam, needle);
     /* walk through other tokens */
@@ -1058,8 +1060,10 @@ void replace_url_with_auth()
       token = strtok(NULL, needle);
       index++;
     }
-    snprintf(GlobalURL, URLMAX, "%s%s:%s@%s", http, username, password, URI);
-
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wformat-truncation=\"") // suppress truncation warning
+    snprintf(GlobalURL, URLMAX-1, "%s%s:%s@%s", http, username, password, URI);
+    _Pragma("GCC diagnostic pop")
     if (strlen(additionalParams) > 0) {
       memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
     }
