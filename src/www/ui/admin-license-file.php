@@ -298,9 +298,9 @@ class admin_license_file extends FO_Plugin
         "SELECT * FROM ONLY license_ref WHERE rf_pk=$1", array($rf_pk),
         __METHOD__ . '.forUpdate');
       if ($row === false) {
-        $text = _("No licenses matching this key");
+        $text = _("ERROR: No licenses matching this key");
         $text1 = _("was found");
-        return "$text ($rf_pk) $text1.";
+        return ["error" => "$text ($rf_pk) $text1."];
       }
       $row['rf_parent'] = $parentMap->getProjectedId($rf_pk);
       $row['rf_report'] = $reportMap->getProjectedId($rf_pk);

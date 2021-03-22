@@ -8,6 +8,7 @@
 
 {% block content %}
 
+{% if error is empty %}
 <form name="Updatefm" action="{{ actionUri }}" method="post">
   <input type="hidden" name="req_marydone" value="{{ req_marydone }}"/>
   <input type="hidden" name="req_shortname" value="{{ req_shortname }}"/>
@@ -84,6 +85,9 @@
   {% endif %}
   <input type="submit" value="{% if rfId %}{{ 'Update'|trans }}{% else %}{{ 'Add license'|trans }}{% endif %}"/>
 </form>
+{% else %}
+  {{ error }}
+{% endif %}
 {% endblock %}
 
 {% block foot %}
