@@ -2,8 +2,6 @@
 /**
  * Part of JsonMapper
  *
- * PHP version 5
- *
  * @category Netresearch
  * @package  JsonMapper
  * @author   Christian Weiske <christian.weiske@netresearch.de>
@@ -106,7 +104,7 @@ class JsonMapper
         continue;
       }
 
-      if ($type{0} != '\\') {
+      if ($type[0] != '\\') {
         //create a full qualified namespace
         if ($strNs != '') {
           $type = '\\' . $strNs . '\\' . $type;
@@ -130,7 +128,7 @@ class JsonMapper
       }
 
       if ($array !== null) {
-        if ($subtype{0} != '\\') {
+        if ($subtype[0] != '\\') {
           //create a full qualified namespace
           if ($strNs != '') {
             $subtype = $strNs . '\\' . $subtype;
