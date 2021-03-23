@@ -179,26 +179,5 @@ jobs:
             - postgresql-client-10
             - *default_packages
       before_script: *postgres-before-script
-    - stage: GitHub Page Release
-      name: GitHub Page deploy
-      addons:
-        apt:
-          packages:
-            - doxygen
-            - graphviz
-      script:
-        - doxygen -v
-        - bash utils/deploy-pages.sh
-      deploy:
-        provider: pages
-        cleanup: false
-        skip_cleanup: true
-        token: $GITHUB_TOKEN
-        keep_history: false
-        local_dir: ./code_docs
-        repo: $GH_REPO_REF
-        target_branch: master
-        on:
-          branch: master
   allow_failures:
     - name: Copy/Paste Detector
