@@ -76,6 +76,12 @@ class Job
   private $status;
 
   /**
+   * @var array $jobqueue
+   * Job Queue to hold job queue related info
+   */
+  private $jobqueue;
+
+  /**
    * Job constructor.
    *
    * @param integer $id
@@ -98,6 +104,7 @@ class Job
     $this->groupId = intval($groupId);
     $this->eta = intval($eta);
     $this->status = $status;
+    $this->jobqueue = [];
   }
 
   /**
@@ -123,7 +130,8 @@ class Job
       'userId'    => $this->userId,
       'groupId'   => $this->groupId,
       'eta'       => $this->eta,
-      'status'    => $this->status
+      'status'    => $this->status,
+      'jobs'  => $this->jobqueue
     ];
   }
 
@@ -260,5 +268,21 @@ class Job
   public function setStatus($status)
   {
     $this->status = $status;
+  }
+
+
+  /**
+   * Set the job queue information
+   * @param string $status Job status
+   */
+  public function setJobQueue($id,$agent,$status, $startTime, $endTime, $itemsProcessed)
+  {
+    $jq = new JobQueue($id);
+    $jq->setAgent($agent);
+    $jq->setStatus($status);
+    $jq->setStartTime($startTime);
+    $jq->setEndTime($endTime);
+    $jq->setItemsProcessed($itemsProcessed);
+    $this->jobqueue[] = $jq->getArray();
   }
 }

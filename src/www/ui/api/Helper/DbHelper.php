@@ -312,6 +312,10 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $totalResult = 1;
     }
 
+    $jqSQL = "SELECT jq_pk ,jq_type , jq_endtext, jq_starttime, " .
+             "jq_endtime, jq_itemsprocessed from jobqueue";
+    $jqFilter = "";
+    $jqStatement = __METHOD__ . ".getJobQueue";
     $jobs = [];
     $result = $this->dbManager->getRows("$jobSQL $filter $pagination;", $params,
       $statement);
@@ -322,6 +326,15 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $job->setUploadId($row["job_upload_fk"]);
       $job->setUserId($row["job_user_fk"]);
       $job->setGroupId($row["job_group_fk"]);
+
+      $jq_params = [];
+      $jq_params[] = $row["job_pk"];
+      $jqFilter = "WHERE jq_job_fk = $" . count($jq_params);
+      $jq_result = $this->dbManager->getRows("$jqSQL $jqFilter;", $jq_params, $jqStatement);
+      foreach ($jq_result as $jq) {
+        $job->setJobQueue($jq["jq_pk"],$jq["jq_type"],$jq["jq_endtext"], $jq["jq_starttime"], $jq["jq_endtime"], $jq["jq_itemsprocessed"]);
+      }
+
       $jobs[] = $job;
     }
     return [$jobs, $totalResult];

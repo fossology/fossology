@@ -1228,6 +1228,32 @@ components:
             - Queued
             - Processing
           description: Denotes the current status of the job in the queue
+          jobs:
+          type: object
+          properties:
+            queueId:
+              type: integer
+              description: ID of the queued child job
+            agentName:
+              type: string
+              description: Name of the agent
+            status:
+              type: string
+              enum:
+                - Completed
+                - Failed
+                - Queued
+                - Processing
+              description: Denotes the current status of the child job queued
+            startTime:
+              type: string
+              description: Time when the child job was queued
+            endTime:
+              type: string
+              description: Time when the child job was completed, empty when status is Failed/Queued/Processing
+            itemsProcessed:
+              type: integer
+              description: Number of items processed by the agent
     Info:
       type: object
       properties:
