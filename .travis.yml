@@ -56,22 +56,6 @@ services: postgresql
 jobs:
   fast_finish: true
   include:
-    - name: Syntax Check
-      script:
-        - src/testing/syntax/syntaxtest.sh
-        - composer validate --no-check-all --working-dir=src --strict
-    - name: Static Code Analysis
-      addons:
-        apt:
-          packages:
-            - cppcheck
-      script: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
-    - name: Copy/Paste Detector
-      install: composer install --prefer-dist --working-dir=src
-      script: src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/
-    - name: PHP Codesniffer
-      install: composer install --prefer-dist --working-dir=src
-      script: src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
 #### Docker tests ###########################
     - name: Docker Tests
       addons: {}
@@ -179,5 +163,3 @@ jobs:
             - postgresql-client-10
             - *default_packages
       before_script: *postgres-before-script
-  allow_failures:
-    - name: Copy/Paste Detector

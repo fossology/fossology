@@ -1,0 +1,79 @@
+# Copyright 2021 Avinal Kumar <avinal.xlvii@gmail.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.
+
+name: Static checks and analysis
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php7.4-cli
+          export PATH="/usr/lib/ccache/:$PATH"
+          export COMPOSER_HOME="$HOME/.composer/"
+          sudo update-alternatives --set php /usr/bin/php7.4
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - name: Syntax Check
+        run: |
+          bash src/testing/syntax/syntaxtest.sh
+          composer validate --no-check-all --working-dir=src --strict
+
+  code-analysis:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+          export PATH="/usr/lib/ccache/:$PATH"
+
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - name: Static Code Analysis
+        run: cppcheck -q -isrc/nomos/agent_tests/testdata/NomosTestfiles/ -isrc/testing/dataFiles/ src/
+
+  codesniffer:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php-cli
+          export PATH="/usr/lib/ccache/:$PATH"
+          export COMPOSER_HOME="$HOME/.composer/"
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - name: PHP Codesniffer
+        run: |
+          composer install --prefer-dist --working-dir=src
+          src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
+  
+  copy-paste:
+    runs-on: ubuntu-20.04
+    continue-on-error: true
+    steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y php-cli
+          export PATH="/usr/lib/ccache/:$PATH"
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      - name: Copy/Paste detector
+        run: |
+          composer install --prefer-dist --working-dir=src
+          sudo phpdismod -v ALL -s ALL xdebug
+          src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
