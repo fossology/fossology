@@ -411,7 +411,7 @@
   $Schema["TABLE"]["copyright_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
   $Schema["TABLE"]["copyright_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
 
-  $Schema["TABLE"]["copyright_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"copyright_event\".\"scope\" IS 'to differentiate disabled copyrights 1 for normal'";
+  $Schema["TABLE"]["copyright_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"copyright_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
   $Schema["TABLE"]["copyright_event"]["scope"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
   $Schema["TABLE"]["copyright_event"]["scope"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
 
@@ -518,7 +518,7 @@
   $Schema["TABLE"]["author_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
   $Schema["TABLE"]["author_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
 
-  $Schema["TABLE"]["author_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"author_event\".\"scope\" IS 'to differentiate disabled copyrights 1 for normal'";
+  $Schema["TABLE"]["author_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"author_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
   $Schema["TABLE"]["author_event"]["scope"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
   $Schema["TABLE"]["author_event"]["scope"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
 
@@ -625,7 +625,7 @@
   $Schema["TABLE"]["ecc_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
   $Schema["TABLE"]["ecc_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
 
-  $Schema["TABLE"]["ecc_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"ecc_event\".\"scope\" IS 'to differentiate disabled copyrights 1 for normal'";
+  $Schema["TABLE"]["ecc_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"ecc_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
   $Schema["TABLE"]["ecc_event"]["scope"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
   $Schema["TABLE"]["ecc_event"]["scope"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
 
@@ -2157,7 +2157,7 @@
 
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,max(rf_pk)) val FROM license_ref))";
-  
+
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 

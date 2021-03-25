@@ -213,10 +213,11 @@ class ReuserAgent extends Agent
     }
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $extrawhere = ' agent_fk='.$agentId;
-    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright', $uploadTreeTableName, $uploadId, $type=null,
-                                                            $extrawhere, $enabled='true');
+    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright',
+      $uploadTreeTableName, $uploadId, null, $extrawhere);
 
-    $reusedCopyrights = $this->copyrightDao->getAllEventEntriesForUpload($reusedUploadId, $reusedAgentId);
+    $reusedCopyrights = $this->copyrightDao->getAllEventEntriesForUpload(
+      $reusedUploadId, $reusedAgentId, false);
 
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
       foreach ($reusedCopyrights as $reusedCopyright) {
@@ -224,17 +225,11 @@ class ReuserAgent extends Agent
           if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
             $action = "delete";
             $content = "";
-            $hash = $reusedCopyright['hash'];
-            if ($reusedCopyright['isEnabledEdited']
-              && !empty($reusedCopyright['hashedited'])
-               ) {
-              $action = "";
-              $content = $reusedCopyright['contentedited'];
-            }
+            $hash = $copyright['hash'];
             $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
                       $uploadTreeTableName);
-            $this->copyrightDao->updateTable($item, $hash, $content, $this->userId,
-                      'copyright', $action);
+            $this->copyrightDao->updateTable($item, $hash, $content,
+              $this->userId, 'copyright', $action);
             unset($allCopyrights[$copyrightKey]);
             $this->heartbeat(1);
           }

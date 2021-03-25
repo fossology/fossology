@@ -172,22 +172,21 @@ class CopyrightDao
    * @param $scope
    * @return array $rows
    */
-  public function getAllEventEntriesForUpload($uploadFk, $agentId, $scope=1)
+  public function getAllEventEntriesForUpload($uploadFk, $agentId,
+    $enabled=true, $scope=1)
   {
-    $statementName = __METHOD__.$uploadFk;
+    $statementName = __METHOD__ . $uploadFk . ($enabled ? 'en' : 'dis');
     $params[] = $uploadFk;
     $params[] = $agentId;
     $params[] = $scope;
-    $sql = "SELECT DISTINCT ON (copyright_pk) copyright_pk, C.content, c.hash, CE.content AS contentedited, CE.hash AS hashedited, CE.is_enabled As isEnabledEdited
-              FROM copyright_event CE INNER JOIN copyright C ON C.copyright_pk = CE.copyright_fk
-            WHERE CE.upload_fk=$1 AND scope=$3 AND C.agent_fk = $2";
-
-    $this->dbManager->prepare($statementName, $sql);
-    $sqlResult = $this->dbManager->execute($statementName, $params);
-    $rows = $this->dbManager->fetchAll($sqlResult);
-    $this->dbManager->freeResult($sqlResult);
-
-    return $rows;
+    $params[] = $enabled;
+    $sql = "SELECT DISTINCT ON (copyright_pk) copyright_pk, C.content, c.hash,
+  CE.content AS contentedited, CE.hash AS hashedited,
+  CE.is_enabled AS isEnabledEdited
+FROM copyright_event CE
+INNER JOIN copyright C ON C.copyright_pk = CE.copyright_fk
+WHERE CE.upload_fk=$1 AND scope=$3 AND C.agent_fk = $2 AND CE.is_enabled = $4";
+    return $this->dbManager->getRows($sql, $params, $statementName);
   }
 
   /**
@@ -199,16 +198,16 @@ class CopyrightDao
    * @param $enabled
    * @return array $result
    */
-  public function getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere, $enabled='true')
+  public function getScannerEntries($tableName, $uploadTreeTableName, $uploadId,
+    $type, $extrawhere, $enabled='true')
   {
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
-    $params = array();
+    $params = array($uploadId);
     $extendWClause = null;
     $tableNameEvent = $tableName.'_event';
 
     if ($uploadTreeTableName === "uploadtree_a") {
-      $params[]= $uploadId;
-      $extendWClause .= " AND UT.upload_fk = $".count($params);
+      $extendWClause .= " AND UT.upload_fk = $1";
       $statementName .= ".withUI";
     }
 
@@ -223,35 +222,27 @@ class CopyrightDao
       $statementName .= "._".$extrawhere."_";
     }
 
+    $activatedClause = "";
     if ($enabled != 'false') {
-      $activatedClause = " AND CE.is_enabled=false ";
+      $activatedClause = "NOT";
       $statementName .= "._"."enabled";
-    } else {
-      $activatedClause = " AND C.".$tableName."_pk NOT IN (SELECT ".$tableName."_fk FROM $tableNameEvent WHERE upload_fk = $uploadId AND is_enabled = false) ";
     }
 
-    $sql = "SELECT DISTINCT(copyright_pk), UT.uploadtree_pk as uploadtree_pk, C.content AS content,
-              C.hash AS hash, C.agent_fk as agent_fk, CE.content AS contentedited, CE.hash AS hashedited
-              FROM $tableName C
-             INNER JOIN $uploadTreeTableName UT ON C.pfile_fk = UT.pfile_fk
-             LEFT JOIN $tableNameEvent AS CE ON CE.".$tableName."_fk = C.".$tableName."_pk
-             WHERE C.content IS NOT NULL
-               AND C.content!=''
-               $activatedClause
-               $extendWClause
-             ORDER BY UT.uploadtree_pk, C.content DESC";
-    $this->dbManager->prepare($statementName, $sql);
-    $sqlResult = $this->dbManager->execute($statementName, $params);
-    $rows = $this->dbManager->fetchAll($sqlResult);
-    foreach ($rows as $key => $row) {
-      if (!empty($row['contentedited'])) {
-        $rows[$key]['content'] = $rows[$key]['contentedited'];
-        $row[$key]['hash'] = $rows[$key]['hashedited'];
-      }
-    }
-    $this->dbManager->freeResult($sqlResult);
-
-    return $rows;
+    $sql = "SELECT DISTINCT(copyright_pk), UT.uploadtree_pk as uploadtree_pk,
+(CASE WHEN (CE.content IS NULL OR CE.content = '') THEN C.content ELSE CE.content END) AS content,
+(CASE WHEN (CE.hash IS NULL OR CE.hash = '') THEN C.hash ELSE CE.hash END) AS hash,
+C.agent_fk as agent_fk
+  FROM $tableName C
+  INNER JOIN $uploadTreeTableName UT ON C.pfile_fk = UT.pfile_fk
+  LEFT JOIN $tableNameEvent AS CE ON CE.".$tableName."_fk = C.".$tableName."_pk
+    AND CE.upload_fk = $1
+  WHERE C.content IS NOT NULL
+    AND C.content!=''
+    AND C." . $tableName . "_pk $activatedClause IN
+(SELECT " . $tableName . "_fk FROM $tableNameEvent WHERE upload_fk = $1 AND is_enabled = false)
+  $extendWClause
+ORDER BY UT.uploadtree_pk, content DESC";
+    return $this->dbManager->getRows($sql, $params, $statementName);
   }
 
   /**
@@ -318,16 +309,16 @@ class CopyrightDao
     $tableNameDecision = $tableName."_decision";
     if ($tableName == 'copyright') {
       $scannerEntries = $this->getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere);
-      if (!empty($groupId)) {
-        $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-        $irrelevantDecisions = $GLOBALS['container']->get('dao.clearing')->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId);
-        $uniqueIrrelevantDecisions = array_unique(array_column($irrelevantDecisions, 'uploadtree_pk'));
-        foreach ($scannerEntries as $key => $value) {
-          if (in_array($value['uploadtree_pk'], $uniqueIrrelevantDecisions)) {
-            unset($scannerEntries[$key]);
-          }
-        }
-      }
+//       if (!empty($groupId)) {
+//         $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
+//         $irrelevantDecisions = $GLOBALS['container']->get('dao.clearing')->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId);
+//         $uniqueIrrelevantDecisions = array_unique(array_column($irrelevantDecisions, 'uploadtree_pk'));
+//         foreach ($scannerEntries as $key => $value) {
+//           if (in_array($value['uploadtree_pk'], $uniqueIrrelevantDecisions)) {
+//             unset($scannerEntries[$key]);
+//           }
+//         }
+//       }
       $editedEntries = $this->getEditedEntries($tableNameDecision, $uploadTreeTableName, $uploadId, $decisionType);
       return array_merge($scannerEntries, $editedEntries);
     } else {
@@ -340,14 +331,13 @@ class CopyrightDao
     $statementName = __METHOD__.$tableName.$uploadTreeTableName;
     $tableNameEvent = $tableName.'_event';
 
-    $params = array();
+    $params = array($uploadId);
     $whereClause = "";
     $distinctContent = "";
     $tableNameDecision = $tableName."_decision";
 
     if ($uploadTreeTableName === "uploadtree_a") {
-      $params []= $uploadId;
-      $whereClause .= " AND UT.upload_fk = $".count($params);
+      $whereClause .= " AND UT.upload_fk = $1";
       $statementName .= ".withUI";
     }
     if ($type !== null && $type != "skipcontent") {
@@ -392,11 +382,12 @@ class CopyrightDao
               ON C.pfile_fk = UT.pfile_fk
             LEFT JOIN $tableNameEvent AS CE
               ON CE.".$tableName."_fk = C.".$tableName."_pk
+              AND CE.upload_fk = $1
             $joinType JOIN (SELECT * FROM $tableNameDecision WHERE is_enabled='true') AS CD
               ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL
               AND C.content!=''
-              AND C.".$tableName."_pk NOT IN (SELECT DISTINCT(".$tableName."_fk) FROM $tableNameEvent TE WHERE TE.upload_fk = $uploadId AND is_enabled = false)
+              AND C.".$tableName."_pk NOT IN (SELECT DISTINCT(".$tableName."_fk) FROM $tableNameEvent TE WHERE TE.upload_fk = $1 AND is_enabled = false)
               $whereClause
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.textfinding, CD.$decisionTableKey DESC";
 
@@ -478,7 +469,6 @@ class CopyrightDao
     $cpTablePk = $cpTable."_pk";
     $cpTableEvent = $cpTable."_event";
     $cpTableEventFk = $cpTable."_fk";
-    $paramEvent = array();
     $itemTable = $item->getUploadTreeTableName();
     $stmt = __METHOD__.".$cpTable.$itemTable";
     $uploadId = $item->getUploadId();
@@ -487,11 +477,11 @@ class CopyrightDao
 
     if (!empty($hash)) {
       $params[] = $hash;
-      $withHash = " cp.hash = $4 AND ";
+      $withHash = " (cp.hash = $4 OR ce.hash = $4) AND ";
       $stmt .= ".hash";
     }
-    // get latest agent id for copyright agent
-    $agentName = "copyright";
+    // get latest agent id for agent
+    $agentName = $this->getAgentName($cpTable);
     $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'),
       $uploadId);
     $scanJobProxy->createAgentStatus([$agentName]);
@@ -505,36 +495,49 @@ class CopyrightDao
       $agentFilter = ' AND cp.agent_fk='.$latestAgentId;
     }
 
-    $sql = "SELECT DISTINCT ON ($cpTablePk) $cpTablePk, uploadtree_pk, upload_fk FROM $cpTable as cp
-              INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
-              AND $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3";
+    $sql = "SELECT DISTINCT ON ($cpTablePk) $cpTablePk, ut.uploadtree_pk, ut.upload_fk, ce." . $cpTableEvent . "_pk
+FROM $cpTable as cp
+INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
+LEFT JOIN $cpTableEvent AS ce ON ce.$cpTableEventFk = cp.$cpTablePk
+  AND ce.upload_fk = $3
+WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3";
 
-    $this->dbManager->prepare($stmt, "$sql");
-    $resource = $this->dbManager->execute($stmt, $params);
-    $rows = $this->dbManager->fetchAll($resource);
-    $this->dbManager->freeResult($resource);
+    $rows = $this->dbManager->getRows($sql, $params, $stmt);
 
     foreach ($rows as $row) {
+      $paramEvent = array();
       $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
+      $eventExists = !empty($row[$cpTableEvent . "_pk"]);
       if ($action == "delete") {
-        $paramEvent[] = $scope;
-        $sqlEvent = "INSERT INTO $cpTableEvent (upload_fk, $cpTableEventFk, uploadtree_fk, scope) VALUES($1, $2, $3, $4)";
-        $statement = "$stmt.delete";
+        if ($eventExists) {
+          $paramEvent[] = $scope;
+          $sqlEvent = "UPDATE $cpTableEvent SET scope = $4, is_enabled = false
+          WHERE upload_fk = $1 AND $cpTableEventFk = $2 AND uploadtree_fk = $3";
+          $statement = "$stmt.delete.up";
+        } else {
+          $paramEvent[] = $scope;
+          $sqlEvent = "INSERT INTO $cpTableEvent (upload_fk, $cpTableEventFk, uploadtree_fk, scope) VALUES($1, $2, $3, $4)";
+          $statement = "$stmt.delete";
+        }
       } else if ($action == "rollback") {
-        $sqlEvent = "DELETE FROM $cpTableEvent WHERE upload_fk = $1 AND uploadtree_fk = $3 AND $cpTableEventFk = $2";
-        $statement = "$stmt.rollback";
+        if ($eventExists) {
+          $sqlEvent = "UPDATE $cpTableEvent SET scope = 1, is_enabled = true
+          WHERE upload_fk = $1 AND $cpTableEventFk = $2 AND uploadtree_fk = $3";
+          $statement = "$stmt.rollback.up";
+        } else {
+          $sqlEvent = "DELETE FROM $cpTableEvent WHERE upload_fk = $1 AND uploadtree_fk = $3 AND $cpTableEventFk = $2";
+          $statement = "$stmt.rollback";
+        }
       } else {
         $paramEvent[] = "true";
         $paramEvent[] = StringOperation::replaceUnicodeControlChar($content);
-        $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1)::int";
-        $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk]), $stmt.'Exists');
 
-        if ($rowExists['exists']) {
+        if ($eventExists) {
           $sqlEvent = "UPDATE $cpTableEvent
                         SET upload_fk = $1, uploadtree_fk = $3, is_enabled = $4, content = $5, hash = md5($5)
-                       WHERE $cpTableEventFk = $2";
+                       WHERE $cpTableEventFk = $2 AND uploadtree_fk = $3";
           $statement = "$stmt.update";
         } else {
           $sqlEvent = "INSERT INTO $cpTableEvent(upload_fk, uploadtree_fk, $cpTableEventFk, is_enabled, content, hash)
@@ -542,10 +545,25 @@ class CopyrightDao
           $statement = "$stmt.insert";
         }
       }
-      $this->dbManager->prepare($statement, $sqlEvent);
-      $resourceEvent = $this->dbManager->execute($statement, $paramEvent);
-      $this->dbManager->freeResult($resourceEvent);
-      $paramEvent = array();
+      $this->dbManager->getSingleRow($sqlEvent, $paramEvent, $statement);
     }
+  }
+
+  /**
+   * @brief Get agent name based on table name
+   *
+   * - copyright => copyright
+   * - ecc       => ecc
+   * - keyword   => keyword
+   * - others    => copyright
+   * @param string $table Table name
+   * @return string Agent name
+   */
+  private function getAgentName($table)
+  {
+    if (array_search($table, ["ecc", "keyword", "copyright"]) !== false) {
+      return $table;
+    }
+    return "copyright";
   }
 }
