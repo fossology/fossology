@@ -217,7 +217,7 @@ class ReuserAgent extends Agent
       $uploadTreeTableName, $uploadId, null, $extrawhere);
 
     $reusedCopyrights = $this->copyrightDao->getAllEventEntriesForUpload(
-      $reusedUploadId, $reusedAgentId, false);
+      $reusedUploadId, $reusedAgentId);
 
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
       foreach ($reusedCopyrights as $reusedCopyright) {

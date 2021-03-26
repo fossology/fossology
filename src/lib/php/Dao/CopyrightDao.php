@@ -172,20 +172,17 @@ class CopyrightDao
    * @param $scope
    * @return array $rows
    */
-  public function getAllEventEntriesForUpload($uploadFk, $agentId,
-    $enabled=true, $scope=1)
+  public function getAllEventEntriesForUpload($uploadFk, $agentId, $scope=1)
   {
-    $statementName = __METHOD__ . $uploadFk . ($enabled ? 'en' : 'dis');
+    $statementName = __METHOD__ . $uploadFk;
     $params[] = $uploadFk;
     $params[] = $agentId;
     $params[] = $scope;
-    $params[] = $enabled;
     $sql = "SELECT DISTINCT ON (copyright_pk) copyright_pk, C.content, c.hash,
-  CE.content AS contentedited, CE.hash AS hashedited,
-  CE.is_enabled AS isEnabledEdited
-FROM copyright_event CE
-INNER JOIN copyright C ON C.copyright_pk = CE.copyright_fk
-WHERE CE.upload_fk=$1 AND scope=$3 AND C.agent_fk = $2 AND CE.is_enabled = $4";
+              CE.content AS contentedited, CE.hash AS hashedited
+            FROM copyright_event CE
+              INNER JOIN copyright C ON C.copyright_pk = CE.copyright_fk
+            WHERE CE.upload_fk=$1 AND CE.is_enabled=false AND scope=$3 AND C.agent_fk = $2";
     return $this->dbManager->getRows($sql, $params, $statementName);
   }
 
@@ -309,16 +306,6 @@ ORDER BY UT.uploadtree_pk, content DESC";
     $tableNameDecision = $tableName."_decision";
     if ($tableName == 'copyright') {
       $scannerEntries = $this->getScannerEntries($tableName, $uploadTreeTableName, $uploadId, $type, $extrawhere);
-//       if (!empty($groupId)) {
-//         $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId, $uploadTreeTableName);
-//         $irrelevantDecisions = $GLOBALS['container']->get('dao.clearing')->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId);
-//         $uniqueIrrelevantDecisions = array_unique(array_column($irrelevantDecisions, 'uploadtree_pk'));
-//         foreach ($scannerEntries as $key => $value) {
-//           if (in_array($value['uploadtree_pk'], $uniqueIrrelevantDecisions)) {
-//             unset($scannerEntries[$key]);
-//           }
-//         }
-//       }
       $editedEntries = $this->getEditedEntries($tableNameDecision, $uploadTreeTableName, $uploadId, $decisionType);
       return array_merge($scannerEntries, $editedEntries);
     } else {
@@ -509,7 +496,9 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
       $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
-      $eventExists = !empty($row[$cpTableEvent . "_pk"]);
+      $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1 AND upload_fk = $2)::int";
+      $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk], $row['upload_fk']), $stmt.'Exists');
+      $eventExists = $rowExists['exists'];
       if ($action == "delete") {
         if ($eventExists) {
           $paramEvent[] = $scope;

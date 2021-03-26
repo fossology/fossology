@@ -1887,6 +1887,10 @@
   $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reuse_mode\" int4 DEFAULT 0";
   $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reuse_mode\" SET NOT NULL, ALTER COLUMN \"reuse_mode\" SET DEFAULT 0";
 
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
+
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4 DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass)";
