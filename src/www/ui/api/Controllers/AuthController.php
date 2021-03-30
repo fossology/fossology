@@ -56,6 +56,15 @@ class AuthController extends RestController
       $returnVal->getArray(), $returnVal->getCode());
   }
 
+  public function optionsVerification($request, $response, $args)
+  {
+    $Message = "Successful";
+    $returnVal = new Info(200, $Message, InfoType::INFO);
+    return $response->withJson(
+      $returnVal->getArray(), $returnVal->getCode());
+
+  }
+
   /**
    * Get the JWT authentication headers for the user
    *

@@ -111,6 +111,7 @@ $app->group(VERSION_1 . 'uploads',
     $this->post('', UploadController::class . ':postUpload');
     $this->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $this->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -119,6 +120,7 @@ $app->group(VERSION_1 . 'users',
   function (){
     $this->get('[/{id:\\d+}]', UserController::class . ':getUsers');
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -127,6 +129,7 @@ $app->group(VERSION_1 . 'groups',
 function (){
   $this->get('', GroupController::class . ':getGroups');
   $this->post('', GroupController::class . ':createGroup');
+  $this->options('', AuthController::class . ':optionsVerification');
 });
 
 ////////////////////////////JOBS/////////////////////
@@ -134,6 +137,7 @@ $app->group(VERSION_1 . 'jobs',
   function (){
     $this->get('[/{id:\\d+}]', JobController::class . ':getJobs');
     $this->post('', JobController::class . ':createJob');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -141,6 +145,7 @@ $app->group(VERSION_1 . 'jobs',
 $app->group(VERSION_1 . 'search',
   function (){
     $this->get('', SearchController::class . ':performSearch');
+    $this->options('', AuthController::class . ':optionsVerification');
   });
 
 ////////////////////////////FOLDER/////////////////////
@@ -151,6 +156,7 @@ $app->group(VERSION_1 . 'folders',
     $this->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
     $this->patch('/{id:\\d+}', FolderController::class . ':editFolder');
     $this->put('/{id:\\d+}', FolderController::class . ':copyFolder');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -159,6 +165,7 @@ $app->group(VERSION_1 . 'report',
   function (){
     $this->get('', ReportController::class . ':getReport');
     $this->get('/{id:\\d+}', ReportController::class . ':downloadReport');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -166,12 +173,14 @@ $app->group(VERSION_1 . 'report',
 $app->group(VERSION_1 . 'version',
   function (){
     $this->get('', VersionController::class . ':getVersion');
+    $this->options('', AuthController::class . ':optionsVerification');
   });
 
 /////////////////////////FILE SEARCH////////////////////
 $app->group(VERSION_1 . 'filesearch',
   function (){
     $this->post('', FileSearchController::class . ':getFiles');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -179,6 +188,7 @@ $app->group(VERSION_1 . 'filesearch',
 $app->group(VERSION_1 . 'license',
   function (){
     $this->get('', LicenseController::class . ':getLicense');
+    $this->options('', AuthController::class . ':optionsVerification');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 

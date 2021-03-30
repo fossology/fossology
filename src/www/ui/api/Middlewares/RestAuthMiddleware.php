@@ -49,9 +49,9 @@ class RestAuthMiddleware
   public function __invoke($request, $response, $next)
   {
     $requestUri = $request->getUri();
-    if (stristr($requestUri->getPath(), "/auth") !== false) {
+    if(stristr($request->getMethod(), "options") !== false){
       $response = $next($request, $response);
-    } elseif (stristr($requestUri->getPath(), "/version") !== false) {
+    }elseif (stristr($requestUri->getPath(), "/version") !== false) {
       $response = $next($request, $response);
     } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
       stristr($request->getMethod(), "post") !== false) {
