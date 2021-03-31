@@ -1,4 +1,5 @@
 {# Copyright 2016-2017,2020 Siemens AG
+   Copyright (c) 2021 LG Electronics Inc.
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -73,6 +74,31 @@
             Exclude files containing some substring in the path. 'mac' and it should
             exclude all files and directories containing the substring 'mac'.
           </label>
+        </li>
+        <li>
+          <span>
+            {{ "Consolidate Results?"|trans }}
+          </span>
+          <ul>
+            <li>
+              <lable>
+                <input type="radio" name="consolidate" value="rawResult" {% if rawResult %}checked{% endif %}>
+                Print raw result per file.
+              </lable>
+            </li>
+            <li>
+              <lable>
+                <input type="radio" name="consolidate" value="perFile" {% if perFile %}checked{% endif %}>
+                Print consolidated result per file.
+              </lable>
+            </li>
+            <li>
+              <lable>
+                <input type="radio" name="consolidate" value="perDirectory" {% if perDirectory %}checked{% endif %}>
+                Print consolidated result per directory.
+              </lable>
+            </li>
+          </ul>
         </li>
         <li>
           <label>

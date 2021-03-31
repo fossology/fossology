@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  * Copyright (C) 2014-2017,2020 Siemens AG
+ * Copyright (c) 2021 LG Electronics Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -308,6 +309,16 @@ class UIExportList extends FO_Plugin
     $exclude = GetParm("exclude", PARM_STRING);
     $formVars["exclude"] = $exclude;
 
+    $consolidateLicenses = (GetParm("consolidate", PARM_STRING) == "perFile");
+    $formVars["perFile"] = $consolidateLicenses;
+    $consolidatePerDirectory = (GetParm("consolidate", PARM_STRING) == "perDirectory");
+    $formVars["perDirectory"] = $consolidatePerDirectory;
+    if (!$consolidateLicenses&&!$consolidatePerDirectory) {
+      $formVars["rawResult"] = true;
+    } else {
+      $formVars["rawResult"] = false;
+    }
+
     $this->vars = array_merge($this->vars, $formVars);
 
     if ($exportCopyright) {
@@ -328,6 +339,13 @@ class UIExportList extends FO_Plugin
     }
     if (empty($lines)) {
       $this->vars['warnings'][] = "<br /><b>Result empty</b><br />";
+    }
+
+    if ($consolidateLicenses||$consolidatePerDirectory) {
+      $lines = $this->consolidateResult($lines);
+    }
+    if ($consolidatePerDirectory) {
+      $lines = $this->consolidateFindingsPerDirectory($lines);
     }
 
     if ($dltext) {
@@ -521,6 +539,84 @@ class UIExportList extends FO_Plugin
     }
     return $V;
   }
+
+  /**
+   * Reduce license findings from agents into one
+   * @param array $lines     Scanned results of agents and conclusions
+   * @return array Lines with consolidated license list
+   */
+  private function consolidateResult($lines)
+  {
+    $newLines = [];
+    foreach ($lines as $row) {
+      $consolidatedLicenses = array();
+      if ($row['conclusions'] !== null) {
+        $row['agentFindings'] = array();
+        foreach ($row['conclusions'] as $key => $value) {
+          $row['agentFindings'][$key] = $row['conclusions'][$key];
+        }
+        $row['conclusions'] = null;
+      } else {
+        foreach ($row['agentFindings'] as $key => $value) {
+          if ($value == "No_license_found") {
+            unset($row['agentFindings'][$key]);
+          } else {
+            $consolidatedLicenses[] = $row['agentFindings'][$key];
+          }
+        }
+        $consolidatedLicenses = array_unique($consolidatedLicenses);
+        foreach ($row['agentFindings'] as $key => $value) {
+          if (array_key_exists($key, $consolidatedLicenses) && $consolidatedLicenses[$key] !== null) {
+            $row['agentFindings'][$key] = $consolidatedLicenses[$key];
+          } else {
+            unset($row['agentFindings'][$key]);
+          }
+        }
+      }
+      if ($row['agentFindings'] == null) {
+        continue;
+      }
+      $newLines[] = $row;
+    }
+
+    return $newLines;
+  }
+
+  /**
+   * Remove basename from filePath
+   * and reduce lines that has same result.
+   * @param array $lines     License and results per file
+   * @return array Lines by directories without duplicated result
+   */
+  private function consolidateFindingsPerDirectory($lines)
+  {
+    $newLines = [];
+    $consolidatedByDirectory = [];
+    foreach ($lines as $row) {
+      $path_parts = pathinfo($row['filePath']);
+      sort($row['agentFindings']);
+      if (array_key_exists($path_parts['dirname'], $consolidatedByDirectory)) {
+        if (in_array($row['agentFindings'], $consolidatedByDirectory[$path_parts['dirname']])) {
+          continue;
+        } else {
+          $consolidatedByDirectory[$path_parts['dirname']][] = $row['agentFindings'];
+        }
+      } else {
+        $consolidatedByDirectory[$path_parts['dirname']][] = $row['agentFindings'];
+      }
+    }
+    foreach ($consolidatedByDirectory as $key => $value) {
+      foreach ($consolidatedByDirectory[$key] as $newKey => $newValue) {
+        $newRow = [];
+        $newRow['filePath'] = $key . "/";
+        $newRow['agentFindings'] = $newValue;
+        $newRow['conclusions'] = null;
+        $newLines[] = $newRow;
+      }
+    }
+    return $newLines;
+  }
+
 
   /**
    * Print the lines as CSV
