@@ -11,7 +11,7 @@
 
 ## About
 
-FOSSology is an open source license compliance software system and toolkit. As a toolkit, you can run license, copyright and export control scans from the command line. As a system, a database and web UI are provided to give you a compliance workflow. In one click you can generate an SPDX file or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
+FOSSology is an open source license compliance software system and toolkit. As a toolkit, you can run license, copyright, and export control scans from the command line. As a system, a database and web UI are provided to give you a compliance workflow. In one click you can generate an SPDX file or a ReadMe with all the copyrights notices from your software. FOSSology deduplication means that you can scan an entire distro, rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
 
 [Check out Who Uses FOSSology!](https://www.fossology.org)
 
@@ -98,7 +98,7 @@ and developer docs on [Github Wiki](https://github.com/fossology/fossology/wiki)
 
 ## Support
 
-Mailing lists, FAQs, Release Notes, and other useful info is available
+Mailing lists, FAQs, Release Notes, and other useful info are available
 by clicking the documentation tab on the project website. We encourage
 all users to join the mailing list and participate in discussions.
 There is also a #fossology IRC channel on the freenode IRC network if

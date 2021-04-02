@@ -71,10 +71,10 @@ The cardinal rule for creating good commits is to ensure there is only one
   code changes entangled with the original commit.
 
 - When troubleshooting problems using Git's bisect capability, small well
-  defined changes will aid in isolating exactly where the code problem was
+  -defined changes will aid in isolating exactly where the code problem was
   introduced.
 
-- When browsing history using Git annotate/blame, small well defined changes
+- When browsing history using Git annotate/blame, small well-defined changes
   also aid in isolating exactly where & why a piece of code came from.
 
 Things to avoid when creating commits
