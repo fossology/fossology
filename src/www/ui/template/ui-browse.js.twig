@@ -62,7 +62,7 @@ $(document).ready(function() {
   browseTable = createBrowseTable();
   $('.clickable-folder').click(function(event){
     folder = $(this).attr('data-folder');
-    browseTable.fnDraw();
+    browseTable.draw();
     $('#current-folder').text($(this).text());
     $('#browse-upload-all').val(folder);
     return false;
