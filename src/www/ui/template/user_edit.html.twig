@@ -35,7 +35,6 @@
       <th width="25%">{{ "E-mail notification on job completion"|trans }}</th>
       <td><input type="checkbox" name="email_notify" {% if eMailNotification %}checked{% endif %}></td>
     </tr>
-
     {% if isSessionAdmin %}
       <tr class="classic">
         <th width="25%">{{ "Select the user's access level."|trans }}</th>
@@ -47,6 +46,14 @@
           {{ folderListOption }}
         </select></td>
       </tr>
+    {% endif %}
+      <tr class="classic">
+        <th width="25%">{{ "Select the user's default folder. Root for Upload and Browse will be this folder."|trans }}</th>
+        <td><select name="default_folder_fk" class="ui-render-select2">
+          {{ folderListOption2 }}
+        </select></td>
+      </tr>
+    {% if isSessionAdmin %}
       {% if passwordPolicy is empty %}
       <tr class="classic">
         <th width="25%">{{ "Require no password."|trans }}</th>
