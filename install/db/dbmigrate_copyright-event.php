@@ -28,7 +28,7 @@ use Fossology\Lib\Db\DbManager;
  * Maximum rows to process at once
  * @var integer MAX_ROW_SIZE
  */
-const MAX_SIZE_OF_ROW = 10000;
+const MAX_SIZE_OF_ROW = 100000;
 
 /**
  * Tables with is_enabled data
@@ -46,7 +46,7 @@ const TABLE_NAMES = array(
  * @param DbManager $dbManager
  * @return int Count of updated rows
  */
-function insertCopyrightEventTables($dbManager)
+function insertDataInToEventTables($dbManager)
 {
   if ($dbManager == NULL) {
     echo "No connection object passed!\n";
@@ -56,35 +56,46 @@ function insertCopyrightEventTables($dbManager)
     $sql = "SELECT count(*) AS cnt FROM ";
     $statement = __METHOD__ . ".getCountsFor";
     $length = 0;
-    $row = $dbManager->getSingleRow($sql . $table ." WHERE is_enabled=false;", array(), $statement . $table);
+    $row = $dbManager->getSingleRow($sql . $table ." AS cp
+            INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
+              WHERE cp.is_enabled=false;", array(), $statement . $table);
     $length = intval($row['cnt']);
+
     if (!empty($length)) {
       echo "*** Inserting $length records from $table to $tableEvent table ***\n";
     }
     $tablePk = $table."_pk";
     $tableFk = $table."_fk";
-    $sql = "SELECT DISTINCT ON ($tablePk) $tablePk, uploadtree_pk, upload_fk 
-              FROM $table as cp
-            INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
-              WHERE cp.is_enabled=false ORDER BY $tablePk
-                LIMIT $1;";
     $i = 0;
     $statement = __METHOD__ . ".updateContentFor.$tableEvent";
+    $sql = "
+        CREATE OR REPLACE FUNCTION migrate_".$table."_events_event(newlimit int, newoffset int) RETURNS VOID AS
+        $$
+        BEGIN
+         INSERT INTO $tableEvent (upload_fk, $tableFk, uploadtree_fk)
+           SELECT upload_fk, $tablePk, uploadtree_pk FROM $table as cp
+             INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
+           WHERE cp.is_enabled=false ORDER BY ut.uploadtree_pk LIMIT newlimit OFFSET newoffset;
+        END
+        $$
+        LANGUAGE 'plpgsql';";
+    $dbManager->queryOnce($sql, $statement.'plPGsqlfunction');
     while ($i < $length) {
-      $rows = $dbManager->getRows($sql, array(MAX_SIZE_OF_ROW),
-        $statement);
-      $i += count($rows);
+      $startTime = microtime(true);
       $dbManager->begin();
-      foreach ($rows as $key => $content) {
-        $sqlEvent = "INSERT INTO $tableEvent (upload_fk, $tableFk, uploadtree_fk) VALUES($content[upload_fk], $content[$tablePk], $content[uploadtree_pk])";
-        $dbManager->queryOnce($sqlEvent, $statement.$key."Insert");
-        
-        $sqlTable = "UPDATE $table SET is_enabled=true WHERE $tablePk = $content[$tablePk]";
-        $dbManager->queryOnce($sqlTable, $statement.$key."Update");
-      }
+      $statementName = __METHOD__."insert from function".$i;
+      $dbManager->queryOnce("SELECT 1 FROM migrate_".$table."_events_event(".MAX_SIZE_OF_ROW.", $i)", $statementName);
+      $i = $i + MAX_SIZE_OF_ROW;
       $dbManager->commit();
-      echo "Inserted $i out of $length rows in $tableEvent table\n";
+      $endTime = microtime(true);
+      $totalTime = ($endTime - $startTime);
+      if ($i > $length) {
+        $i = $length;
+      }
+      echo "Inserted $i rows out of $length rows to $tableEvent table in ".gmdate("i:s.u", $totalTime)."\n";
     }
+    $sqlTable = "UPDATE $table SET is_enabled=true";
+    $dbManager->queryOnce($sqlTable, $statement."Update");
   }
 }
 
@@ -128,7 +139,7 @@ function createCopyrightMigrationForCopyrightEvents($dbManager)
     return;
   }
   try {
-    insertCopyrightEventTables($dbManager);
+    insertDataInToEventTables($dbManager);
   } catch (Exception $e) {
     echo "Something went wrong. Try running postinstall again!\n";
     $dbManager->rollback();
