@@ -101,10 +101,29 @@
           </ul>
         </li>
         <li>
-          <label>
-            <input type="checkbox" name="output" value="dltext" {% if dltext %}checked{% endif %}>
-            Download CSV after creation?
-          </label>
+          <span>
+            {{ "Download License List after creation?"|trans }}
+          </span>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="output" value="noDownload" {% if noDownload %}checked{% endif %}>
+                Don't download license list.
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="output" value="dltext" {% if dltext %}checked{% endif %}>
+                Download license list in CSV.
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="output" value="dlspreadsheet" {% if dlspreadsheet %}checked{% endif %}>
+                Download license list in Spreadsheet.
+              </label>
+            </li>
+          </ul>
         </li>
       </ol>
       <input type='submit' value='{{ "Generate list"|trans }}'>

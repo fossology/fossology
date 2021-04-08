@@ -41,6 +41,7 @@ addons:
       - php-zip
       - php-xml
       - php-mbstring
+      - php-gd
       - poppler-utils
       - p7zip
       - p7zip-full
