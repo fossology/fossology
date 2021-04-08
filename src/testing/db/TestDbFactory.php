@@ -64,6 +64,13 @@ class TestDbFactory
         if ($cmdRtn != 0)
           throw new \Exception("ERROR: failed to add plpgsql to $dbName database");
       }
+      exec($cmd = "echo 'SELECT * FROM pg_extension;' | psql -Ufossy -h localhost -t $dbName | grep -q uuid-ossp", $cmdOut, $cmdRtn);
+      if ($cmdRtn != 0)
+      {
+        exec($cmd = "echo 'CREATE EXTENSION \"uuid-ossp\";' | psql -Ufossy -h localhost $dbName", $cmdOut, $cmdRtn);
+        if ($cmdRtn != 0)
+          throw new \Exception("ERROR: failed to add 'uuid-ossp' to $dbName database");
+      }
     } else
     {
       $fosstestSql = file_get_contents(dirname(__FILE__) . '/../../lib/php/Test/fosstestinit.sql');

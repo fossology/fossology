@@ -96,6 +96,7 @@ if echo ${WarnAccept} | grep -q -e "^[yY]$" ; then
   sudo chown "$(whoami)" /var/local/cache/fossology
   sudo mkdir -p /srv/fossologyTestRepo
   sudo chown "$(whoami)" /srv/fossologyTestRepo
+  sudo su postgres -c "echo 'CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";'|psql -d template1" || true
   if [[ "${CreateFossy}" == "Y" ]]; then
     sudo su postgres -c "echo \"CREATE USER fossy WITH PASSWORD 'fossy' CREATEDB;\"|psql" || true >/dev/null
     echo "localhost:*:*:fossy:fossy" >> ~/.pgpass

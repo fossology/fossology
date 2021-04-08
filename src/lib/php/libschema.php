@@ -131,6 +131,27 @@ class fo_libschema
       }
     }
 
+    $sql_statement = "select extname from pg_extension where extname = 'uuid-ossp'";
+
+    $result = pg_query($PG_CONN, $sql_statement);
+    if (!$result) {
+      throw new Exception("Could not check the database for uuid-ossp extension");
+    }
+
+    $uuid_already_installed = false;
+    if ( pg_fetch_row($result) ) {
+      $uuid_already_installed = true;
+    }
+
+    // then create extension uuid-ossp if not already created
+    if ( $uuid_already_installed == false ) {
+      $sql_statement = 'CREATE EXTENSION "uuid-ossp";';
+      $result = pg_query($PG_CONN, $sql_statement);
+      if (!$result) {
+        throw new Exception("Could not create uuid-ossp extension in the database");
+      }
+    }
+
     $this->debug = $debug;
     if (!file_exists($filename)) {
       $errMsg = "$filename does not exist.";
