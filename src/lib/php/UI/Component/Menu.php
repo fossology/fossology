@@ -35,7 +35,7 @@ class Menu
     menu_insert("Main::Jobs", 60);
     menu_insert("Main::Organize", 50);
     menu_insert("Main::Help", -1);
-    menu_insert("Main::Help::Documentation", 0, NULL, NULL, NULL, "<a href='http://www.fossology.org/projects/fossology/wiki/User_Documentation'>Documentation</a>");
+    menu_insert("Main::Help::Documentation", 0, NULL, NULL, NULL, "<a href='https://github.com/fossology/fossology/wiki'>Documentation</a>");
     $this->renderer = $renderer;
   }
 
