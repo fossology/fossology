@@ -88,7 +88,7 @@ function markDecisions(uploadTreeIdForMultiple) {
       "decisionMark": uploadTreeIdForMultiple
     };
   }
-  resultEntity = $('bulkIdResult');
+  resultEntity = $('#bulkIdResult');
   $.ajax({
     type: "POST",
     url: "?mod=change-license-processPost",
@@ -104,7 +104,7 @@ function deleteMarkedDecisions(decisionToBeRemoved) {
     "uploadTreeId": $('#uploadTreeId').val(),
     "decisionMark": decisionToBeRemoved
   };
-  resultEntity = $('bulkIdResult');
+  resultEntity = $('#bulkIdResult');
     var txt;
     var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
   if (pleaseConfirm == true) {

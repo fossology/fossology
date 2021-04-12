@@ -2,7 +2,7 @@
  Copyright (C) 2014-2020, Siemens AG
  Authors: Daniele Fognini, Johannes Najjar, Steffen Weber,
           Andreas J. Reichel, Shaheem Azmal M MD
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -105,7 +105,10 @@ function scheduledDeciderSuccess (data, resultEntity, callbackSuccess, callbackC
 }
 
 function scheduledDeciderError (responseobject, resultEntity) {
-  var error = responseobject.responseJSON.error;
+  var error = false;
+  if (responseobject.responseJSON !== undefined) {
+    error = responseobject.responseJSON.error;
+  }
   if (error) {
     resultEntity.text("error: " + error);
   } else {
@@ -146,7 +149,7 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   if(isUserError(bulkActions, refText)) {
     return;
   }
-  
+
   var post_data = {
     "bulkAction": bulkActions,
     "refText": refText,
