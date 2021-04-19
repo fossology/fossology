@@ -3,7 +3,7 @@ create role fossy with createdb login password 'fossy';
 -- PostgreSQL database dump
 --
 
-SET client_encoding = 'SQL_ASCII';
+SET client_encoding = 'UTF8';
 SET check_function_bodies = false;
 SET client_min_messages = warning;
 
@@ -11,7 +11,7 @@ SET client_min_messages = warning;
 -- Name: fosstest; Type: DATABASE; Schema: -; Owner: fossy
 --
 
-CREATE DATABASE fosstest WITH TEMPLATE = template0 ENCODING = 'SQL_ASCII';
+CREATE DATABASE fosstest WITH TEMPLATE = template1 ENCODING = 'UTF8';
 
 
 ALTER DATABASE fosstest OWNER TO fossy;
@@ -19,9 +19,10 @@ ALTER DATABASE fosstest OWNER TO fossy;
 \connect fosstest
 CREATE LANGUAGE plpgsql;
 
-SET client_encoding = 'SQL_ASCII';
+SET client_encoding = 'UTF8';
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 --
 -- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
