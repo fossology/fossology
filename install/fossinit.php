@@ -407,6 +407,10 @@ require_once("$LIBEXECDIR/instance_uuid.php");
 require_once("$LIBEXECDIR/dbmigrate_3.7-3.8.php");
 Migrate_37_38($dbManager, $MODDIR);
 
+// Migration script for copyright_event table
+require_once("$LIBEXECDIR/dbmigrate_copyright-event.php");
+createCopyrightMigrationForCopyrightEvents($dbManager);
+
 /* sanity check */
 require_once ("$LIBEXECDIR/sanity_check.php");
 $checker = new SanityChecker($dbManager,$Verbose);

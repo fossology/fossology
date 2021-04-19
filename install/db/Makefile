@@ -36,6 +36,7 @@ install: all
 	$(INSTALL_DATA) dbmigrate_3.5-3.6.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.5-3.6.php
 	$(INSTALL_DATA) dbmigrate_3.6-3.7.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.6-3.7.php
 	$(INSTALL_DATA) dbmigrate_3.7-3.8.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.7-3.8.php
+	$(INSTALL_DATA) dbmigrate_copyright-event.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-event.php
 	$(INSTALL_DATA) dbmigrate_clearing-event.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	$(INSTALL_DATA) dbmigrate_real-parent.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	$(INSTALL_DATA) dbmigrate_bulk_license.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php
@@ -76,6 +77,7 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.5-3.6.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.6-3.7.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_3.7-3.8.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_copyright-event.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_clearing-event.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_real-parent.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_bulk_license.php

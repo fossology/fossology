@@ -383,6 +383,39 @@
   $Schema["TABLE"]["copyright_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["copyright_event"]["copyright_event_pk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["copyright_event_pk"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"copyright_event_pk\" int8 DEFAULT nextval('copyright_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["copyright_event"]["copyright_event_pk"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"copyright_event_pk\" SET NOT NULL, ALTER COLUMN \"copyright_event_pk\" SET DEFAULT nextval('copyright_event_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["copyright_event"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["upload_fk"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["copyright_event"]["upload_fk"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_event"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["copyright_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_event"]["copyright_fk"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["copyright_fk"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"copyright_fk\" int8";
+  $Schema["TABLE"]["copyright_event"]["copyright_fk"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"copyright_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["copyright_event"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["content"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["copyright_event"]["content"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_event"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["copyright_event"]["hash"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["copyright_event"]["hash"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["copyright_event"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"copyright_event\".\"is_enabled\" IS 'true to enabled with edited, false to disable'";
+  $Schema["TABLE"]["copyright_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
+  $Schema["TABLE"]["copyright_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
+
+  $Schema["TABLE"]["copyright_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"copyright_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
+  $Schema["TABLE"]["copyright_event"]["scope"]["ADD"] = "ALTER TABLE \"copyright_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
+  $Schema["TABLE"]["copyright_event"]["scope"]["ALTER"] = "ALTER TABLE \"copyright_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
+
+
   $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["DESC"] = "";
   $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["ADD"] = "ALTER TABLE \"copyright_spasht\" ADD COLUMN \"copyright_spasht_pk\" int8 DEFAULT nextval('copyright_spasht_pk_seq'::regclass)";
   $Schema["TABLE"]["copyright_spasht"]["copyright_spasht_pk"]["ALTER"] = "ALTER TABLE \"copyright_spasht\" ALTER COLUMN \"copyright_spasht_pk\" SET NOT NULL, ALTER COLUMN \"copyright_spasht_pk\" SET DEFAULT nextval('copyright_spasht_pk_seq'::regclass)";
@@ -455,6 +488,39 @@
   $Schema["TABLE"]["author"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"author\".\"is_enabled\" IS 'true to enable, false to disable'";
   $Schema["TABLE"]["author"]["is_enabled"]["ADD"] = "ALTER TABLE \"author\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
   $Schema["TABLE"]["author"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
+  $Schema["TABLE"]["author_event"]["author_event_pk"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["author_event_pk"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"author_event_pk\" int8 DEFAULT nextval('author_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["author_event"]["author_event_pk"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"author_event_pk\" SET NOT NULL, ALTER COLUMN \"author_event_pk\" SET DEFAULT nextval('author_event_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["author_event"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["upload_fk"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["author_event"]["upload_fk"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["author_event"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["author_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["author_event"]["author_fk"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["author_fk"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"author_fk\" int8";
+  $Schema["TABLE"]["author_event"]["author_fk"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"author_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["author_event"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["content"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["author_event"]["content"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author_event"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["author_event"]["hash"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["author_event"]["hash"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["author_event"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"author_event\".\"is_enabled\" IS 'true to enabled with edited, false to disable'";
+  $Schema["TABLE"]["author_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
+  $Schema["TABLE"]["author_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
+
+  $Schema["TABLE"]["author_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"author_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
+  $Schema["TABLE"]["author_event"]["scope"]["ADD"] = "ALTER TABLE \"author_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
+  $Schema["TABLE"]["author_event"]["scope"]["ALTER"] = "ALTER TABLE \"author_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
 
 
   $Schema["TABLE"]["ecc"]["ecc_pk"]["DESC"] = "";
@@ -531,6 +597,39 @@
   $Schema["TABLE"]["ecc_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
 
 
+  $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"ecc_event_pk\" int8 DEFAULT nextval('ecc_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["ecc_event"]["ecc_event_pk"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"ecc_event_pk\" SET NOT NULL, ALTER COLUMN \"ecc_event_pk\" SET DEFAULT nextval('ecc_event_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["ecc_event"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["upload_fk"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["ecc_event"]["upload_fk"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ecc_event"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["ecc_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ecc_event"]["ecc_fk"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["ecc_fk"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"ecc_fk\" int8";
+  $Schema["TABLE"]["ecc_event"]["ecc_fk"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"ecc_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["ecc_event"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["content"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["ecc_event"]["content"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ecc_event"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["ecc_event"]["hash"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["ecc_event"]["hash"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["ecc_event"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"ecc_event\".\"is_enabled\" IS 'true to enabled with edited, false to disable'";
+  $Schema["TABLE"]["ecc_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
+  $Schema["TABLE"]["ecc_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
+
+  $Schema["TABLE"]["ecc_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"ecc_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
+  $Schema["TABLE"]["ecc_event"]["scope"]["ADD"] = "ALTER TABLE \"ecc_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
+  $Schema["TABLE"]["ecc_event"]["scope"]["ALTER"] = "ALTER TABLE \"ecc_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
+
+
   $Schema["TABLE"]["keyword"]["keyword_pk"]["DESC"] = "";
   $Schema["TABLE"]["keyword"]["keyword_pk"]["ADD"] = "ALTER TABLE \"keyword\" ADD COLUMN \"keyword_pk\" int8 DEFAULT nextval('keyword_pk_seq'::regclass)";
   $Schema["TABLE"]["keyword"]["keyword_pk"]["ALTER"] = "ALTER TABLE \"keyword\" ALTER COLUMN \"keyword_pk\" SET NOT NULL, ALTER COLUMN \"keyword_pk\" SET DEFAULT nextval('keyword_pk_seq'::regclass)";
@@ -603,6 +702,39 @@
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"keyword_decision\".\"is_enabled\" IS 'true to enable, false to disable'";
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword_decision\" ADD COLUMN \"is_enabled\" bool DEFAULT true";
   $Schema["TABLE"]["keyword_decision"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword_decision\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT true";
+
+
+  $Schema["TABLE"]["keyword_event"]["keyword_event_pk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["keyword_event_pk"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"keyword_event_pk\" int8 DEFAULT nextval('keyword_event_pk_seq'::regclass)";
+  $Schema["TABLE"]["keyword_event"]["keyword_event_pk"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"keyword_event_pk\" SET NOT NULL, ALTER COLUMN \"keyword_event_pk\" SET DEFAULT nextval('keyword_event_pk_seq'::regclass)";
+
+  $Schema["TABLE"]["keyword_event"]["upload_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["upload_fk"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"upload_fk\" int8";
+  $Schema["TABLE"]["keyword_event"]["upload_fk"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"upload_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_event"]["uploadtree_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"uploadtree_fk\" int4";
+  $Schema["TABLE"]["keyword_event"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_event"]["keyword_fk"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["keyword_fk"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"keyword_fk\" int8";
+  $Schema["TABLE"]["keyword_event"]["keyword_fk"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"keyword_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["keyword_event"]["content"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["content"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"content\" text";
+  $Schema["TABLE"]["keyword_event"]["content"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"content\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_event"]["hash"]["DESC"] = "";
+  $Schema["TABLE"]["keyword_event"]["hash"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"hash\" text";
+  $Schema["TABLE"]["keyword_event"]["hash"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"hash\" DROP NOT NULL";
+
+  $Schema["TABLE"]["keyword_event"]["is_enabled"]["DESC"] = "COMMENT ON COLUMN \"keyword_event\".\"is_enabled\" IS 'true to enabled with edited, false to disable'";
+  $Schema["TABLE"]["keyword_event"]["is_enabled"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"is_enabled\" bool DEFAULT false";
+  $Schema["TABLE"]["keyword_event"]["is_enabled"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"is_enabled\" DROP NOT NULL, ALTER COLUMN \"is_enabled\" SET DEFAULT false";
+
+  $Schema["TABLE"]["keyword_event"]["scope"]["DESC"] = "COMMENT ON COLUMN \"keyword_event\".\"scope\" IS '1 for normal and 2 for deactivation from license page ex: irrelevent'";
+  $Schema["TABLE"]["keyword_event"]["scope"]["ADD"] = "ALTER TABLE \"keyword_event\" ADD COLUMN \"scope\" int4 DEFAULT 1";
+  $Schema["TABLE"]["keyword_event"]["scope"]["ALTER"] = "ALTER TABLE \"keyword_event\" ALTER COLUMN \"scope\" SET NOT NULL, ALTER COLUMN \"scope\" SET DEFAULT 1";
 
 
   $Schema["TABLE"]["file_picker"]["file_picker_pk"]["DESC"] = "";
@@ -1755,6 +1887,10 @@
   $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"reuse_mode\" int4 DEFAULT 0";
   $Schema["TABLE"]["upload_reuse"]["reuse_mode"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"reuse_mode\" SET NOT NULL, ALTER COLUMN \"reuse_mode\" SET DEFAULT 0";
 
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["DESC"] = "";
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["ADD"] = "ALTER TABLE \"upload_reuse\" ADD COLUMN \"date_added\" timestamptz DEFAULT now()";
+  $Schema["TABLE"]["upload_reuse"]["date_added"]["ALTER"] = "ALTER TABLE \"upload_reuse\" ALTER COLUMN \"date_added\" SET NOT NULL, ALTER COLUMN \"date_added\" SET DEFAULT now()";
+
 
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["DESC"] = "";
   $Schema["TABLE"]["uploadtree"]["uploadtree_pk"]["ADD"] = "ALTER TABLE \"uploadtree\" ADD COLUMN \"uploadtree_pk\" int4 DEFAULT nextval('uploadtree_uploadtree_pk_seq'::regclass)";
@@ -1984,6 +2120,18 @@
   $Schema["SEQUENCE"]["copyright_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_pk_seq"]["UPDATE"] = "SELECT setval('copyright_pk_seq',(SELECT greatest(1,max(copyright_pk)) val FROM copyright))";
 
+  $Schema["SEQUENCE"]["copyright_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_event_pk_seq\"";
+  $Schema["SEQUENCE"]["copyright_event_pk_seq"]["UPDATE"] = "SELECT setval('copyright_event_pk_seq',(SELECT greatest(1,max(copyright_event_pk)) val FROM copyright_event))";
+
+  $Schema["SEQUENCE"]["author_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"author_event_pk_seq\"";
+  $Schema["SEQUENCE"]["author_event_pk_seq"]["UPDATE"] = "SELECT setval('author_event_pk_seq',(SELECT greatest(1,max(author_event_pk)) val FROM author_event))";
+
+  $Schema["SEQUENCE"]["ecc_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"ecc_event_pk_seq\"";
+  $Schema["SEQUENCE"]["ecc_event_pk_seq"]["UPDATE"] = "SELECT setval('ecc_event_pk_seq',(SELECT greatest(1,max(ecc_event_pk)) val FROM ecc_event))";
+
+  $Schema["SEQUENCE"]["keyword_event_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"keyword_event_pk_seq\"";
+  $Schema["SEQUENCE"]["keyword_event_pk_seq"]["UPDATE"] = "SELECT setval('keyword_event_pk_seq',(SELECT greatest(1,max(keyword_event_pk)) val FROM keyword_event))";
+
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_file_fl_pk_seq\"";
   $Schema["SEQUENCE"]["license_file_fl_pk_seq"]["UPDATE"] = "SELECT setval('license_file_fl_pk_seq',(SELECT greatest(1,max(fl_pk)) val FROM license_file))";
 
@@ -2013,7 +2161,7 @@
 
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"license_ref_rf_pk_seq\"";
   $Schema["SEQUENCE"]["license_ref_rf_pk_seq"]["UPDATE"] = "SELECT setval('license_ref_rf_pk_seq',(SELECT greatest(1,max(rf_pk)) val FROM license_ref))";
-  
+
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["CREATE"] = "CREATE SEQUENCE \"copyright_decision_pk_seq\"";
   $Schema["SEQUENCE"]["copyright_decision_pk_seq"]["UPDATE"] = "SELECT setval('copyright_decision_pk_seq',(SELECT greatest(1,max(copyright_decision_pk)) val FROM copyright_decision))";
 
@@ -2243,6 +2391,19 @@
   $Schema["CONSTRAINT"]["users_default_bucketpool_pk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_default_bucketpool_pk_fkey\" FOREIGN KEY (\"default_bucketpool_fk\") REFERENCES \"bucketpool\" (\"bucketpool_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_group_id_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_group_id_fkey\" FOREIGN KEY (\"group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE NO ACTION ON DELETE NO ACTION;";
   $Schema["CONSTRAINT"]["users_new_upload_group_fk_fkey"] = "ALTER TABLE \"users\" ADD CONSTRAINT \"users_new_upload_group_fk_fkey\" FOREIGN KEY (\"new_upload_group_fk\") REFERENCES \"groups\" (\"group_pk\") ON UPDATE CASCADE ON DELETE RESTRICT;";
+  $Schema["CONSTRAINT"]["copyright_event_pkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_pkey\" PRIMARY KEY (\"copyright_event_pk\");";
+  $Schema["CONSTRAINT"]["copyright_event_upload_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["copyright_event_copyright_fk_fkey"] = "ALTER TABLE \"copyright_event\" ADD CONSTRAINT \"copyright_event_copyright_fk_fkey\" FOREIGN KEY (\"copyright_fk\") REFERENCES \"copyright\" (\"copyright_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+    $Schema["CONSTRAINT"]["author_event_pkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_pkey\" PRIMARY KEY (\"author_event_pk\");";
+  $Schema["CONSTRAINT"]["author_event_upload_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["author_event_author_fk_fkey"] = "ALTER TABLE \"author_event\" ADD CONSTRAINT \"author_event_author_fk_fkey\" FOREIGN KEY (\"author_fk\") REFERENCES \"author\" (\"author_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+    $Schema["CONSTRAINT"]["ecc_event_pkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_pkey\" PRIMARY KEY (\"ecc_event_pk\");";
+  $Schema["CONSTRAINT"]["ecc_event_upload_fk_fkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["ecc_event_ecc_fk_fkey"] = "ALTER TABLE \"ecc_event\" ADD CONSTRAINT \"ecc_event_ecc_fk_fkey\" FOREIGN KEY (\"ecc_fk\") REFERENCES \"ecc\" (\"ecc_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_event_pkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_pkey\" PRIMARY KEY (\"keyword_event_pk\");";
+  $Schema["CONSTRAINT"]["keyword_event_upload_fk_fkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_upload_fk_fkey\" FOREIGN KEY (\"upload_fk\") REFERENCES \"upload\" (\"upload_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["keyword_event_keyword_fk_fkey"] = "ALTER TABLE \"keyword_event\" ADD CONSTRAINT \"keyword_event_keyword_fk_fkey\" FOREIGN KEY (\"keyword_fk\") REFERENCES \"keyword\" (\"keyword_pk\") ON UPDATE NO ACTION ON DELETE CASCADE;";
+
 
   $Schema["INDEX"]["bucket_container"]["bucketcontainer_uploadtree"] = "CREATE INDEX bucketcontainer_uploadtree ON bucket_container USING btree (uploadtree_fk);";
 
@@ -2260,6 +2421,7 @@
   $Schema["INDEX"]["clearing_event"]["clearing_event_uploadtree_group_fk_idx"] = "CREATE INDEX clearing_event_uploadtree_group_fk_idx ON clearing_event USING btree (uploadtree_fk, group_fk, date_added);";
   $Schema["INDEX"]["clearing_event"]["clearing_event_pk_removed_idx"] = "CREATE INDEX clearing_event_pk_removed_idx ON clearing_event USING btree(clearing_event_pk, removed, rf_fk) WHERE NOT removed;";
 
+  $Schema["INDEX"]["copyright"]["copyright_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX copyright_pfile_fk_is_enabled_false_idx ON copyright USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
   $Schema["INDEX"]["copyright"]["copyright_agent_fk_idx"] = "CREATE INDEX copyright_agent_fk_idx ON copyright USING btree (agent_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_fk_index"] = "CREATE INDEX copyright_pfile_fk_index ON copyright USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright"]["copyright_pfile_hash_idx"] = "CREATE INDEX copyright_pfile_hash_idx ON copyright USING btree (hash, pfile_fk);";
@@ -2273,10 +2435,12 @@
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_fk_index"] = "CREATE INDEX copyright_spasht_pfile_fk_index ON copyright_spasht USING btree (pfile_fk);";
   $Schema["INDEX"]["copyright_spasht"]["copyright_spasht_pfile_hash_index"] = "CREATE INDEX copyright_spasht_pfile_hash_index ON copyright_spasht USING btree (hash, pfile_fk);";
 
+  $Schema["INDEX"]["author"]["author_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX author_pfile_fk_is_enabled_false_idx ON author USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
   $Schema["INDEX"]["author"]["author_agent_fk_idx"] = "CREATE INDEX author_agent_fk_idx ON author USING btree (agent_fk);";
   $Schema["INDEX"]["author"]["author_pfile_fk_index"] = "CREATE INDEX author_pfile_fk_index ON author USING btree (pfile_fk);";
   $Schema["INDEX"]["author"]["author_pfile_hash_idx"] = "CREATE INDEX author_pfile_hash_idx ON author USING btree (hash, pfile_fk);";
 
+  $Schema["INDEX"]["ecc"]["ecc_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX ecc_pfile_fk_is_enabled_false_idx ON ecc USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
   $Schema["INDEX"]["ecc"]["ecc_agent_fk_index"] = "CREATE INDEX ecc_agent_fk_index ON ecc USING btree (agent_fk);";
   $Schema["INDEX"]["ecc"]["ecc_hash_index"] = "CREATE INDEX ecc_hash_index ON ecc USING btree (hash);";
   $Schema["INDEX"]["ecc"]["ecc_pfile_fk_index"] = "CREATE INDEX ecc_pfile_fk_index ON ecc USING btree (pfile_fk);";
@@ -2287,6 +2451,7 @@
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_user_fk_index"] = "CREATE INDEX ecc_decision_user_fk_index ON ecc_decision USING btree (user_fk);";
   $Schema["INDEX"]["ecc_decision"]["ecc_decision_pfile_hash_index"] = "CREATE INDEX ecc_decision_pfile_hash_index ON ecc_decision USING btree (hash, pfile_fk);";
 
+  $Schema["INDEX"]["keyword"]["keyword_pfile_fk_is_enabled_false_idx"] = "CREATE INDEX keyword_pfile_fk_is_enabled_false_idx ON keyword USING btree (pfile_fk, is_enabled) WHERE is_enabled = false;";
   $Schema["INDEX"]["keyword"]["keyword_agent_fk_index"] = "CREATE INDEX keyword_agent_fk_index ON keyword USING btree (agent_fk);";
   $Schema["INDEX"]["keyword"]["keyword_hash_index"] = "CREATE INDEX keyword_hash_index ON keyword USING btree (hash);";
   $Schema["INDEX"]["keyword"]["keyword_pfile_fk_index"] = "CREATE INDEX keyword_pfile_fk_index ON keyword USING btree (pfile_fk);";
@@ -2342,6 +2507,22 @@
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_fk_lft_idx"] = "CREATE INDEX uploadtree_a_upload_fk_lft_idx ON uploadtree_a USING btree (upload_fk, lft);";
   $Schema["INDEX"]["uploadtree_a"]["uploadtree_a_upload_lft_ufilemode_pfile_idx"] = "CREATE INDEX uploadtree_a_upload_lft_ufilemode_pfile_idx ON uploadtree_a USING btree (upload_fk, lft, ufile_mode, pfile_fk);";
   $Schema["INDEX"]["upload_clearing_license"]["upload_clearing_license_upload_group_idx"] = "CREATE INDEX upload_clearing_license_upload_group_idx ON upload_clearing_license USING btree (upload_fk, group_fk);";
+
+  $Schema["INDEX"]["copyright_event"]["copyright_event_upload_fk_index"] = "CREATE INDEX copyright_event_upload_fk_index ON copyright_event USING btree (upload_fk);";
+  $Schema["INDEX"]["copyright_event"]["copyright_event_uploadtree_fk_index"] = "CREATE INDEX copyright_event_uploadtree_fk_index ON copyright_event USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["copyright_event"]["copyright_event_copyright_fk_index"] = "CREATE INDEX copyright_event_copyright_fk_index ON copyright_event USING btree (copyright_fk);";
+
+  $Schema["INDEX"]["author_event"]["author_event_upload_fk_index"] = "CREATE INDEX author_event_upload_fk_index ON author_event USING btree (upload_fk);";
+  $Schema["INDEX"]["author_event"]["author_event_uploadtree_fk_index"] = "CREATE INDEX author_event_uploadtree_fk_index ON author_event USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["author_event"]["author_event_author_fk_index"] = "CREATE INDEX author_event_author_fk_index ON author_event USING btree (author_fk);";
+
+  $Schema["INDEX"]["keyword_event"]["keyword_event_upload_fk_index"] = "CREATE INDEX keyword_event_upload_fk_index ON keyword_event USING btree (upload_fk);";
+  $Schema["INDEX"]["keyword_event"]["keyword_event_uploadtree_fk_index"] = "CREATE INDEX keyword_event_uploadtree_fk_index ON keyword_event USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["keyword_event"]["keyword_event_keyword_fk_index"] = "CREATE INDEX keyword_event_keyword_fk_index ON keyword_event USING btree (keyword_fk);";
+
+  $Schema["INDEX"]["ecc_event"]["ecc_event_upload_fk_index"] = "CREATE INDEX ecc_event_upload_fk_index ON ecc_event USING btree (upload_fk);";
+  $Schema["INDEX"]["ecc_event"]["ecc_event_uploadtree_fk_index"] = "CREATE INDEX ecc_event_uploadtree_fk_index ON ecc_event USING btree (uploadtree_fk);";
+  $Schema["INDEX"]["ecc_event"]["ecc_event_ecc_fk_index"] = "CREATE INDEX ecc_event_ecc_fk_index ON ecc_event USING btree (ecc_fk);";
 
   $Schema["CLUSTER"]["upload_pkey_idx"] = "ALTER TABLE \"upload\" CLUSTER ON \"upload_pkey_idx\";";
   $Schema["CLUSTER"]["ufile_rel_pkey"] = "ALTER TABLE \"uploadtree\" CLUSTER ON \"ufile_rel_pkey\";";

@@ -38,7 +38,7 @@ class UploadDao
   const REUSE_ENHANCED = 2;
   const REUSE_MAIN = 4;
   const REUSE_CONF = 16;
-  const REUSE_COPYRIGHT = 32;
+  const REUSE_COPYRIGHT = 128;
   const UNIFIED_REPORT_HEADINGS = array(
     "assessment" => array("Assessment Summary" => true),
     "compliancetasks" => array("Required license compliance tasks" => true),
@@ -428,7 +428,7 @@ class UploadDao
     $statementName = __METHOD__;
 
     $this->dbManager->prepare($statementName,
-        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2");
+        "SELECT reused_upload_fk, reused_group_fk, reuse_mode FROM upload_reuse WHERE upload_fk = $1 AND group_fk=$2 ORDER BY date_added DESC");
     $res = $this->dbManager->execute($statementName, array($uploadId, $groupId));
     $reusedPairs = $this->dbManager->fetchAll($res);
     $this->dbManager->freeResult($res);
