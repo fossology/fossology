@@ -1,5 +1,110 @@
 # Changelog of FOSSology
 
+### 3.10.0-RC2 (Apr 19th 2021)
+
+This release adds important corrections to
+[3.10.0-rc1](https://github.com/fossology/fossology/releases/tag/3.10.0-rc1)
+
+The release 3.10.0-RC2 introduces following major changes:
+
+* Change copyright handling add new table copyright_event.
+* Create new licenses as candidate for OJO.
+* Read XML in chunks to support large files for ReportImport.
+* Show parent folder on *Browser views.
+* Add license search based on short name in REST.
+* Do not add decisions if the events have no change.
+* Migrate github pages deployment to GHA.
+
+NOTE: This release also adds a migration script which migrates copyright data to new table copyright_event.
+      Migration processes is mandatory because without migration, old copyright activation/deactivation may not work.
+      also it approximately takes 30 mins for 1M records.
+
+#### Credits to contributors for 3.10.0-RC2
+
+From the GIT commit history, we have following contributors since
+[3.10.0-rc1](https://github.com/fossology/fossology/releases/tag/3.10.0-rc1):
+
+```
+> Alan Hohn <Alan.M.Hohn@lmco.com>
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam <ag.4ums@gmail.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> Darshan <kansagara.darshan97@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Pawan Kumar Meena <Pawank1804@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> YashJipkate <yashjipkate@gmail.com>
+```
+
+#### Corrections
+
+* `53aa058cb` fix(DBMigrate): add rows with same agent_fk for migration
+* `8e1e7bfcd` fix(ui): updated the link of scheduler documentation
+* `71cc0cea1` fix(copyright): improve reuse and correct update queries
+* `23fe64335` fix(link): changed the broken documentation page link
+* `3a5eeab03` fix(copyrightevent): General improvements
+* `50b9dd5e4` fix(rest): missing Group component in API documentation
+* `543c05669` fix(testcases): fix testcases of copyrightDaoTest in Dao
+* `0bda7e2b7` fix(nomos): Flush stdout in JSON writer
+* `44dea1ab0` fix(UploadTreeProxy): Get if candidate license
+* `36200a90a` fix(ui): Show parent folder on *Browser views
+* `5fc03c699` fix(uploadDao): Fetch status based on group id
+* `405e8529e` fix(globalDecision): fix global decision prevent adding history in case of global decision
+* `a4e5dd93a` fix(decider): Do not global ojo decisions
+* `729e654fb` fix(ojo): Create new licenses as candidate
+* `1e9138445` fix(reuser): updated misleading UI label This closes issue 1876
+* `81ac2b584` fix(reportImport): Read XML in chunks
+* `cf547a77f` fix(reuser): Do not process pfiles with id 0
+* `3e4dcdf7b` fix(reuse): correct docstring
+* `ca9395bfd` fix(globaldecision): do not add decisions if the events have no change
+* `de92148a8` fix(cd): Use published event to build release pkgs
+* `1c42760b7` fix(fossdash) : waiting for completing the execuition of find command
+* `84d9153fa` bugfix(fossdash) : updated find cmd to clean reported files
+* `707b93149` fix(fossdash script):  script file to install fossdash dependencies
+* `fae866901` fix(fossdash script) : fix the improper formate of data to influxDB.
+* `14e7ee101` other(fossdash config): changed config file link to permanent wiki page.
+* `4d2c1791d` other(fossdash.log) : changed fossdash log path
+* `a635bc1aa` removed(bootstrap file): removed bootstrap min js and it's related references.
+* `870e5fd94` Other(license changed) : License info changed and fossdash UI config changed
+* `3c28b7df9` remove(log counter) : remove error counter feat from fossdash. and consider it in the future scope.
+* `a6341a21f` fix(fossdash-config): fixed substring find
+* `4ff79d6c0` fix(uuid-ossp): Create extension as postgres
+
+#### Features
+
+* `9a1fd6163` feat(static-checks.yml): migrate static checks and analysis to GHA
+* `2a90ff34b` feat(copyright): save deleted copyrights in copyright_event table
+* `eded1d7d2` feat(deploy-pages.yml): migrate github pages deployment to GHA
+* `836d9de50` feat(copyright): save deleted copyrights in copyright_event table
+* `f91881a7b` feat(swh): Allow API token
+* `1e28973b2` feat(rest): get groups and create group functionality
+* `41d8e88fa` feat(reuse): Change data type of reuse_group from int to string
+* `8aa47c444` feat(rest): add license search based on short name
+* `6181f9165` feat(rest): get copyright info for file hash
+* `7d1fa425b` feat(fossdash metrics config): using default metrics file, if metric config is empty.
+* `14afdd588` feat(beautify error) : Added ERROR and WARNING sign
+* `e8da2b880` feat(log counter) : Maintain and push log counter into influxDB.
+* `57db5d36f` Test(fossdash-config) : unit-test for fossdash_config.php
+
+#### Infrastructure
+
+* `0dba2364c` docs(deploy-pages.yml): add copyright
+* `d434bf7b5` docs(CONTRIBUTING.md): Fixed broken link and typos
+* `98311e89d` docs(README): fixed broken links, typos, grammatical errors and added test instance
+* `0886d574f` refactor(.travis.yml): remove static checks and analysis
+* `f0603b6e1` refactor(.travis.yml): remove github pages deployment
+* `cbdb12d73` Revert "feat(copyright): save deleted copyrights in copyright_event table"
+* `0c564843c` refac(swh): Move agent configuration to Sysconf
+* `5c23a327e` refactor(fossdash UI menu) :  created new menu and new php pages for fossdash.
+* `5e39eb87b` refactor(fossdash script) : remove all metric queries from the code, Put them into configuration way.
+* `3f1ecc583` add the cron-triggered metrics exporter for FossDash
+* `744485fd2` chore(ui): Show candidate licenses from agents
+* `50fc42213` chore(reportImport): Make agent immortal
+
 ### 3.10.0-RC1 (Jan 8th 2021)
 
 With every new release, FOSSology brings various bug fixes, infrastructure
