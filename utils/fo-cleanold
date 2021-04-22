@@ -80,7 +80,7 @@ if [ ! $EVERYTHING ]; then
         echo "ERROR: you have bucket data in $BUCKET,"
         echo " please migrate it to the new location and ensure this directory"
         echo " is empty before re-running fo-cleanold. See"
-        echo " http://fossology.org/buckets for more info." 
+        echo " https://github.com/fossology/fossology/wiki/Buckets for more info." 
         exit 1
     fi
   done  

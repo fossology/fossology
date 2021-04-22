@@ -6,7 +6,7 @@
  * \mainpage Overview of FOSSology
  * \tableofcontents
  *
- * More developer information can be found at http://www.fossology.org/projects/fossology/wiki/Developer_Documentation
+ * More developer information can be found at https://github.com/fossology/fossology/wiki
  *
  * \section about About
  * FOSSology is a open source license compliance software system and toolkit.
@@ -15,7 +15,7 @@
  * In one click you can generate an SPDX file, or a ReadMe with all the copyrights
  * notices from your software. FOSSology deduplication means that you can scan an entire distro,
  * rescan a new version, and only the changed files will get rescanned. This is a big time saver for large projects.
- * [Check out Who Uses FOSSology!](http://www.fossology.org/projects/fossology/wiki/WhoUsesFOSSology)
+ * [Check out Who Uses FOSSology!](https://www.fossology.org)
  * FOSSology does not give legal advice.
  *
  * \section requirements Requirements
@@ -77,7 +77,7 @@
  * We encourage all users to join the mailing list and participate in discussions.
  * There is also a #fossology IRC channel on the freenode IRC network if
  * you'd like to talk to other FOSSology users and developers.
- * See [Contact Us](https://www.fossology.org/get-started)
+ * See [Contact Us](https://www.fossology.org/about/contact/)
  * \section contributing Contributing
  * We really like contributions in several forms, see [CONTRIBUTING.md](CONTRIBUTING.md)
  * \section licensing Licensing
@@ -141,7 +141,7 @@
  * under modules/ since there is both a backend and UI components.
  *
  * \section modsection modules
- * The module directory structure can be found at http://www.fossology.org/projects/fossology/wiki/Module_Structure
+ * The UI architecture can be found at https://github.com/fossology/fossology/wiki/UI-Architecture-Overview
  *
  * \subsection subui ui/
  * Contains UI components for the module.

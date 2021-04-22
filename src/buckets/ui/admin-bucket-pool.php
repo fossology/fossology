@@ -140,7 +140,7 @@ select bucket_name, bucket_color, bucket_reportorder, bucket_evalorder, $newbuck
 
     $V = "<p>";
     $V .= _("The purpose of this is to facilitate editing an existing bucketpool.  Make sure you understand");
-    $V .= " <a href='http://www.fossology.org/projects/fossology/wiki/Buckets'>";
+    $V .= " <a href='https://github.com/fossology/fossology/wiki/Buckets'>";
     $V .= _("Creating Bucket Pools");
     $V .= "</a> ";
     $V .= _("before continuing.");
