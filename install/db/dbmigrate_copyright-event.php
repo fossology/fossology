@@ -67,35 +67,43 @@ function insertDataInToEventTables($dbManager)
     $tablePk = $table."_pk";
     $tableFk = $table."_fk";
     $i = 0;
+    $j = MAX_SIZE_OF_ROW;
+    $num = 0;
     $statement = __METHOD__ . ".updateContentFor.$tableEvent";
+    $dbManager->queryOnce("DROP FUNCTION IF EXISTS migrate_".$table."_events_event(upperuploadtreeid int, loweruploadtreeid int)", $statement."drop");
     $sql = "
-        CREATE OR REPLACE FUNCTION migrate_".$table."_events_event(newlimit int, newoffset int) RETURNS VOID AS
+        CREATE OR REPLACE FUNCTION migrate_".$table."_events_event(upperuploadtreeid int, loweruploadtreeid int) RETURNS VOID AS
         $$
         BEGIN
          INSERT INTO $tableEvent (upload_fk, $tableFk, uploadtree_fk)
            SELECT upload_fk, $tablePk, uploadtree_pk FROM $table as cp
              INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
-           WHERE cp.is_enabled=false ORDER BY ut.uploadtree_pk LIMIT newlimit OFFSET newoffset;
+           WHERE ut.uploadtree_pk > loweruploadtreeid
+             AND ut.uploadtree_pk < upperuploadtreeid
+             AND cp.is_enabled=false
+           ORDER BY ut.uploadtree_pk;
         END
         $$
         LANGUAGE 'plpgsql';";
     $dbManager->queryOnce($sql, $statement.'plPGsqlfunction');
-    while ($i < $length) {
+    while ($num < $length) {
       $startTime = microtime(true);
       $dbManager->begin();
       $statementName = __METHOD__."insert from function".$i;
-      $dbManager->queryOnce("SELECT 1 FROM migrate_".$table."_events_event(".MAX_SIZE_OF_ROW.", $i)", $statementName);
-      $i = $i + MAX_SIZE_OF_ROW;
+      $dbManager->queryOnce("SELECT 1 FROM migrate_".$table."_events_event($j, $i)", $statementName);
+      $rows = $dbManager->getSingleRow("SELECT count(*) AS cnt, max(uploadtree_fk) AS uploadtree FROM $tableEvent", array(), $statement . $tableEvent. $i);
+      $num = intval($rows['cnt']);
+      $i =  $rows['uploadtree'];
+      $j = $j + MAX_SIZE_OF_ROW;
       $dbManager->commit();
       $endTime = microtime(true);
       $totalTime = ($endTime - $startTime);
-      if ($i > $length) {
-        $i = $length;
-      }
-      echo "Inserted $i rows out of $length rows to $tableEvent table in ".gmdate("i:s.u", $totalTime)."\n";
+      echo "Inserted $num / $length rows to $tableEvent table in ".gmdate("i", $totalTime)." minutes and ".gmdate("s", $totalTime)." seconds. \n";
     }
+    $dbManager->begin();
     $sqlTable = "UPDATE $table SET is_enabled=true";
     $dbManager->queryOnce($sqlTable, $statement."Update");
+    $dbManager->commit();
   }
 }
 
