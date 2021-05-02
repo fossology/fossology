@@ -79,6 +79,16 @@ $(document).ready(function() {
     }
   });
   $('#browse-upload-all-label').removeClass("ui-state-focus ui-state-hover ui-state-active");
+  $("#searchFolderTree").on('keyup',function(){
+    var folderName = $(this).val().toLowerCase();
+    $("#tree li").each(function(){
+      if ($(this).text().toLowerCase().search(folderName) > -1) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  })
 });
 
 $('#nav-hider').click(function() {
