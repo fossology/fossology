@@ -258,6 +258,10 @@ class ReportStatic
       $table->addRow($rowWidth);
       $cell = $table->addCell($cellFirstLen, $cellColSpan3);
     }
+    if ($otherStatement["includeNonFunctional"]) {
+      $table->addRow($rowWidth);
+      $cell = $table->addCell($cellFirstLen, $cellColSpan3);
+    }
 
     $section->addTextBreak();
     return $cell;

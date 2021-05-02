@@ -356,7 +356,7 @@ class ClearingView extends FO_Plugin
     $itemBounds = $this->uploadDao->getItemTreeBounds($lastItem, $uploadTreeTableName);
     if ($global) {
       $isDecisionWip = $this->clearingDao->isDecisionWip($currentUploadtreeId, $groupId);
-      $hasChangedClearingType = $this->clearingDao->getClearingType($currentUploadtreeId, $groupId, $type);
+      $hasChangedClearingType = $this->clearingDao->getClearingType($currentUploadtreeId, $groupId);
       if ($isDecisionWip) {
         $this->clearingDecisionEventProcessor->makeDecisionFromLastEvents($itemBounds, $userId, $groupId, $type, $global);
       } else if (empty($hasChangedClearingType['scope'])

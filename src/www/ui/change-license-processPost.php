@@ -19,6 +19,7 @@
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\Data\Clearing\ClearingEventTypes;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -31,6 +32,15 @@ class changeLicenseProcessPost extends FO_Plugin
   private $clearingDao;
   /** @var UploadDao */
   private $uploadDao;
+  /** @var decisionSearch */
+  private $decisionSearch = array(
+      DecisionTypes::IRRELEVANT => "noLicenseKnown",
+      DecisionTypes::NON_FUNCTIONAL => "nonFunctional",
+      DecisionTypes::TO_BE_DISCUSSED => "toBeDiscussed",
+      DecisionTypes::IRRELEVANT => "irrelevant",
+      DecisionTypes::DO_NOT_USE => "doNotUse",
+      DecisionTypes::IDENTIFIED => "identified"
+    );
 
   function __construct()
   {
@@ -79,55 +89,40 @@ class changeLicenseProcessPost extends FO_Plugin
    */
   function Output()
   {
+    $itemArray = array();
     if ($this->State != PLUGIN_STATE_READY) {
       return;
     }
     $itemId = @$_POST['uploadTreeId'];
     if (empty($itemId)) {
-      return $this->errorJson("bad item id");
+      return $this->errorJson("Bad item id");
     }
-
+    $itemArray = explode(',', $itemId);
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
+    $isRemoval = @$_POST['isRemoval'];
     $decisionMark = @$_POST['decisionMark'];
-    if (! empty($decisionMark) && ($decisionMark == "irrelevant" || $decisionMark == "doNotUse") ) {
-      if (! is_array($itemId)) {
-        $responseMsg = $this->doMarkDecisionTypes($itemId, $groupId, $userId, $decisionMark);
-      } else {
-        foreach ($itemId as $uploadTreeId) {
-          $responseMsg = $this->doMarkDecisionTypes($uploadTreeId, $groupId,
-            $userId, $decisionMark);
-          if (! empty($responseMsg)) {
-            return $responseMsg;
-          }
+    $decisionMarkExists = array_search($decisionMark, $this->decisionSearch, true);
+
+    if ( (!empty($decisionMark)) && $decisionMarkExists !== false ) {
+      foreach ($itemArray as $uploadTreeId) {
+        $responseMsg = $this->doMarkDecisionTypes($uploadTreeId, $groupId,
+          $userId, $decisionMarkExists, $isRemoval);
+        if (! empty($responseMsg)) {
+          return $responseMsg;
         }
-      }
-      if (!empty($responseMsg)) {
-        return $responseMsg;
       }
       return new JsonResponse(array('result'=>'success'));
     }
-
-    if (!empty($decisionMark) && ($decisionMark == "deleteIrrelevant" || $decisionMark == "deleteDoNotUse")) {
-      $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
-      /** @var ItemTreeBounds */
-      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId, $itemTableName);
-      $errMsg = $this->clearingDao->deleteDecisionTypeFromDirectory($itemTreeBounds, $groupId, $userId, $decisionMark);
-      if (empty($errMsg)) {
-        return new JsonResponse(array('result'=>'success'));
-      }
-      return $this->errorJson($errMsg,$errMsg);
-    }
-
-    return $this->doEdit($userId,$groupId,$itemId);
+    return $this->doEdit($userId, $groupId, $itemId);
   }
 
-  function doMarkDecisionTypes($itemId, $groupId, $userId, $decisionMark)
+  function doMarkDecisionTypes($itemId, $groupId, $userId, $decisionMark, $isRemoval)
   {
     $itemTableName = $this->uploadDao->getUploadtreeTableName($itemId);
     /** @var ItemTreeBounds */
-    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId,$itemTableName);
-    $errMsg = $this->clearingDao->markDirectoryAsDecisionType($itemTreeBounds, $groupId, $userId, $decisionMark);
+    $itemTreeBounds = $this->uploadDao->getItemTreeBounds($itemId, $itemTableName);
+    $errMsg = $this->clearingDao->markDirectoryAsDecisionType($itemTreeBounds, $groupId, $userId, $isRemoval, $decisionMark);
     return $errMsg;
   }
 

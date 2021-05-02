@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2017, Siemens AG
+ Copyright (C) 2020, Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -20,18 +20,18 @@ namespace Fossology\Lib\Report;
 
 use Fossology\Lib\Dao\ClearingDao;
 
-class LicenseIrrelevantGetter extends ClearedGetterCommon
+class LicenseNonFunctionalGetter extends ClearedGetterCommon
 {
   /** @var ClearingDao */
   private $clearingDao;
 
-  /** @var irreleavntFilesOnly */
-  private $irreleavntFilesOnly;
+  /** @var nonFunctionalFilesOnly */
+  private $nonFunctionalFilesOnly;
 
-  public function __construct($irreleavntFilesOnly=true)
+  public function __construct($nonFunctionalFilesOnly=true)
   {
     $this->clearingDao = $GLOBALS['container']->get('dao.clearing');
-    $this->irreleavntFilesOnly = $irreleavntFilesOnly;
+    $this->nonFunctionalFilesOnly = $nonFunctionalFilesOnly;
     parent::__construct($groupBy = 'text');
   }
 
@@ -44,7 +44,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
   protected function getStatements($uploadId, $uploadTreeTableName, $groupId=null)
   {
     $itemTreeBounds = $this->uploadDao->getParentItemBounds($uploadId,$uploadTreeTableName);
-    return $this->clearingDao->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId, true, 'irrelevant');
+    return $this->clearingDao->getFilesForDecisionTypeFolderLevel($itemTreeBounds, $groupId, true, 'nonFunctional');
   }
 
   /**
@@ -61,7 +61,7 @@ class LicenseIrrelevantGetter extends ClearedGetterCommon
       $baseName = basename($statement['fileName']);
       $comment = $statement['comment'];
       $licenseName = $statement['shortname'];
-      if ($this->irreleavntFilesOnly) {
+      if ($this->nonFunctionalFilesOnly) {
         if (array_key_exists($fileName, $statements)) {
           $currentLics = &$statements[$fileName]["licenses"];
           if (! in_array($licenseName, $currentLics)) {

@@ -643,7 +643,7 @@ INSERT INTO clearing_decision (
     return ($latestDec['decision_type'] == DecisionTypes::DO_NOT_USE);
   }
 
-  public function getClearingType($uploadTreeId, $groupId, $type)
+  public function getClearingType($uploadTreeId, $groupId)
   {
     $sql = "SELECT decision_type, scope FROM clearing_decision
               WHERE uploadtree_fk=$1 AND group_fk = $2
@@ -651,6 +651,19 @@ INSERT INTO clearing_decision (
     $latestDec = $this->dbManager->getSingleRow($sql,
                  array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
     return $latestDec;
+  }
+
+  public function isDecisionNonFunctional($uploadTreeId, $groupId)
+  {
+    $sql = "SELECT decision_type FROM clearing_decision
+              WHERE uploadtree_fk=$1 AND group_fk = $2
+            ORDER BY clearing_decision_pk DESC LIMIT 1";
+    $latestDec = $this->dbManager->getSingleRow($sql,
+                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
+    if ($latestDec === false) {
+      return false;
+    }
+    return ($latestDec['decision_type'] == DecisionTypes::NON_FUNCTIONAL);
   }
 
   public function isDecisionIrrelevant($uploadTreeId, $groupId)
@@ -794,17 +807,28 @@ INSERT INTO clearing_decision (
   }
 
   /**
+   * @param int $decisionType
+   * @return actual DecisionTypes
+   */
+  public function getDecisionType($decisionType)
+  {
+    if ($decisionType == "doNotUse" || $decisionType == "deleteDoNotUse") {
+      return DecisionTypes::DO_NOT_USE;
+    } else if ($decisionType == "irrelevant" || $decisionType == "deleteIrrelevant") {
+      return DecisionTypes::IRRELEVANT;
+    } else {
+      return DecisionTypes::NON_FUNCTIONAL;
+    }
+  }
+
+  /**
    * @param ItemTreeBounds $itemTreeBounds
    * @param int $groupId
    * @param int $userId
    */
-  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
+  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $isRemoval, $decisionMark)
   {
-    if ($decisionMark == "doNotUse") {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    //$decisionMark = $this->getDecisionType($decisionMark);
     $this->markDirectoryAsDecisionTypeIfScannerDetected($itemTreeBounds, $groupId, $userId, false, $decisionMark);
     $this->markDirectoryAsDecisionTypeIfUserEdited($itemTreeBounds, $groupId, $userId, false, $decisionMark);
   }
@@ -816,11 +840,7 @@ INSERT INTO clearing_decision (
    */
   public function deleteDecisionTypeFromDirectory(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
   {
-    if ($decisionMark == "deleteDoNotUse") {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    //$decisionMark = $this->getDecisionType($decisionMark);
     $this->markDirectoryAsDecisionTypeIfScannerDetected($itemTreeBounds, $groupId, $userId, true, $decisionMark);
     $this->markDirectoryAsDecisionTypeIfUserEdited($itemTreeBounds, $groupId, $userId, true, $decisionMark);
   }
@@ -950,11 +970,7 @@ INSERT INTO clearing_decision (
    */
   function getFilesForDecisionTypeFolderLevel(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent=true, $decisionMark="")
   {
-    if (!empty($decisionMark)) {
-      $decisionMark = DecisionTypes::DO_NOT_USE;
-    } else {
-      $decisionMark = DecisionTypes::IRRELEVANT;
-    }
+    $decisionMark = $this->getDecisionType($decisionMark);
     $statementName = __METHOD__;
     $params = array();
     $decisionsCte = $this->getRelevantDecisionsCte($itemTreeBounds, $groupId, $onlyCurrent, $statementName, $params);

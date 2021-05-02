@@ -76,46 +76,41 @@ function performPostRequest(doRemove) {
   });
 }
 
-function markDecisions(uploadTreeIdForMultiple) {
-  if(Array.isArray(uploadTreeIdForMultiple)){
-    var data = {
-      "uploadTreeId": uploadTreeIdForMultiple,
-      "decisionMark": 'irrelevant'
-    };
-  }else{
-    var data = {
-      "uploadTreeId": $('#uploadTreeId').val(),
-      "decisionMark": uploadTreeIdForMultiple
-    };
+function performPostRequestTree(permVal) {
+  var decisionToBeApplied = "";
+  var checkedRadio = $("input[type='radio']:checked");
+
+  if ($('#licenseRight option').length > 0) {
+    performPostRequest(permVal);
+    return false;
   }
-  resultEntity = $('bulkIdResult');
+
+  if (checkedRadio.length > 0) {
+    return markDecisions(checkedRadio.val(), permVal);
+  }
+}
+
+function markDecisions(decisionToBeApplied, permVal) {
+  if (permVal == true) {
+    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
+    if (pleaseConfirm == false) {
+      return false;
+    }
+  }
+  var data = {
+    "uploadTreeId": $('#uploadTreeId').val(),
+    "decisionMark": decisionToBeApplied,
+    "isRemoval": permVal
+  };
+  alert(JSON.stringify(data));
+  resultEntity = $('#bulkIdResult');
   $.ajax({
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
     success: function (data) { location.reload(); },
     error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
-  });
-
-}
-
-function deleteMarkedDecisions(decisionToBeRemoved) {
-  var data = {
-    "uploadTreeId": $('#uploadTreeId').val(),
-    "decisionMark": decisionToBeRemoved
-  };
-  resultEntity = $('bulkIdResult');
-    var txt;
-    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
-  if (pleaseConfirm == true) {
-    $.ajax({
-      type: "POST",
-      url: "?mod=change-license-processPost",
-      data: data,
-      success: function (data) { location.reload(); },
-      error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
-      });
-  }
+ });
 }
 
 function cleanText() {
