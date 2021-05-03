@@ -54,7 +54,7 @@ services:
       - FOSSOLOGY_SCHEDULER_HOST=scheduler
     command: web
     ports:
-      - 8082:80
+      - 8081:80
     depends_on:
       - db
       - scheduler
