@@ -5,8 +5,11 @@ name: GitHub Pages Deploy
 
 on:
   push:
-    branches: 
+    branches:
       - master
+  release:
+    types:
+      - published
 
 jobs:
   build:
