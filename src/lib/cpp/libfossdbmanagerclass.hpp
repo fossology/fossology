@@ -19,9 +19,7 @@
 #ifndef LIBFOSSDBMANAGERCLASS_HPP_
 #define LIBFOSSDBMANAGERCLASS_HPP_
 
-extern "C" {
 #include "libfossdbmanager.h"
-}
 
 #include <cstdarg>
 #include <vector>

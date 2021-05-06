@@ -23,6 +23,10 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <stdarg.h>
 #include <glib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct fo_dbmanager_preparedstatement fo_dbManager_PreparedStatement;
 typedef struct fo_dbmanager fo_dbManager;
 
@@ -92,5 +96,9 @@ int fo_dbManager_exists(fo_dbManager* dbManager, const char* type, const char* n
 // visible for testing
 int fo_dbManager_parseParamStr(const char* paramtypes, GArray** params);
 char* fo_dbManager_printStatement(fo_dbManager_PreparedStatement* preparedStatement);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* LIBFOSSDBMANAGER_H */
