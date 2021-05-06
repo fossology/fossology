@@ -1,6 +1,6 @@
 /*
 Author: Daniele Fognini, Andreas Wuerl
-Copyright (C) 2013-2015,2018 Siemens AG
+Copyright (C) 2013-2015,2018,2021 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -84,7 +84,8 @@ int queryBulkArguments(MonkState* state, long bulkId) {
     fo_dbManager_PrepareStamement(
       state->dbManager,
       "queryBulkArguments",
-      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, lrb.rf_text "
+      "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, "
+      "lrb.rf_text, lrb.ignore_irrelevant "
       "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
       "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",
@@ -103,6 +104,7 @@ int queryBulkArguments(MonkState* state, long bulkId) {
       bulkArguments->userId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
       bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
       bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, column++));
+      bulkArguments->ignoreIrre = strcmp(PQgetvalue(bulkArgumentsResult, 0, column++), "t") == 0;
       bulkArguments->bulkId = bulkId;
       bulkArguments->actions = queryBulkActions(state, bulkId);
       bulkArguments->jobId = fo_scheduler_jobId();
@@ -154,7 +156,7 @@ BulkAction** queryBulkActions(MonkState* state, long bulkId) {
   if (bulkActionsResult) {
     PQclear(bulkActionsResult);
   }
-  
+
   return bulkActions;
 }
 
@@ -189,7 +191,8 @@ int bulk_identification(MonkState* state) {
     bulkArguments->uploadId,
     bulkArguments->uploadTreeLeft,
     bulkArguments->uploadTreeRight,
-    bulkArguments->groupId
+    bulkArguments->groupId,
+    bulkArguments->ignoreIrre
   );
 
   int haveError = 1;
@@ -296,19 +299,48 @@ int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches)
   if (!fo_dbManager_begin(state->dbManager))
     return 0;
 
-  BulkAction **actions = bulkArguments->actions; 
+  BulkAction **actions = bulkArguments->actions;
+  gchar* insertSql;
+  char* uploadtreeTableName = getUploadTreeTableName(state->dbManager,
+                                                     bulkArguments->uploadId);
+  gchar* stmt = g_strdup_printf("saveBulkResult:decision.%s",
+                                uploadtreeTableName);
+  if (bulkArguments->ignoreIrre)
+  {
+    insertSql = g_strdup_printf("INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, "
+      "job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement) "
+      "SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10 "
+      "FROM ("
+        "SELECT DISTINCT ON(ut.uploadtree_pk, ut.pfile_fk, scopesort) "
+          "ut.pfile_fk pfile_fk, ut.uploadtree_pk, decision_type, "
+          "CASE cd.scope WHEN 1 THEN 1 ELSE 0 END AS scopesort"
+        " FROM %s AS ut "
+        " LEFT JOIN clearing_decision cd ON "
+        "  ((ut.uploadtree_pk = cd.uploadtree_fk AND scope = 0 AND cd.group_fk = $3) "
+        "  OR (ut.pfile_fk = cd.pfile_fk AND scope = 1)) "
+        " WHERE upload_fk = $11 AND (lft BETWEEN $12 AND $13) AND ut.pfile_fk = $1"
+        " ORDER BY ut.uploadtree_pk, scopesort, ut.pfile_fk, clearing_decision_pk DESC"
+      ") itemView WHERE decision_type != %d OR decision_type IS NULL"
+      " RETURNING clearing_event_pk;", uploadtreeTableName, DECISION_TYPE_FOR_IRRELEVANT);
+    stmt = g_strconcat(stmt, ".ignoreirre", NULL);
+  }
+  else
+  {
+    insertSql = g_strdup_printf("INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, "
+      "job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement)"
+      "SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10 "
+      "FROM %s "
+      " WHERE upload_fk = $11 AND (lft BETWEEN $12 AND $13) AND pfile_fk = $1"
+      " RETURNING clearing_event_pk;", uploadtreeTableName);
+  }
   for (int i = 0; actions[i] != NULL; i++) {
     BulkAction* action = actions[i];
 
     PGresult* licenseDecisionIds = fo_dbManager_ExecPrepared(
             fo_dbManager_PrepareStamement(
                     state->dbManager,
-                    "saveBulkResult:decision",
-                    "INSERT INTO clearing_event(uploadtree_fk, user_fk, group_fk, job_fk, type_fk, rf_fk, removed, comment, reportinfo, acknowledgement)"
-                            " SELECT uploadtree_pk, $2, $3, $4, $5, $6, $7, $8, $9, $10"
-                            " FROM uploadtree"
-                            " WHERE upload_fk = $11 AND pfile_fk = $1 AND lft BETWEEN $12 AND $13"
-                            "RETURNING clearing_event_pk",
+                    stmt,
+                    insertSql,
     long, int, int, int, int, long, int, char*, char*, char*,
     int, long, long
     ),
@@ -369,6 +401,8 @@ int bulk_onAllMatches(MonkState* state, const File* file, const GArray* matches)
       return 0;
     }
   }
+  g_free(stmt);
+  g_free(insertSql);
 
 
   return fo_dbManager_commit(state->dbManager);
