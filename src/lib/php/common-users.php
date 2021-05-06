@@ -52,8 +52,8 @@ function add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
 
   $dbManager->prepare($stmt='users.insert',$sql="INSERT INTO users
          (user_name,user_desc,user_seed,user_pass,user_perm,user_email,
-          email_notify,user_agent_list,root_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9)");
-  $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$agentList,$Folder));
+          email_notify,user_agent_list,root_folder_fk,default_folder_fk) VALUES ($1,$2,$3,$4,$5,$6,  $7,$8,$9,$10)");
+  $dbManager->execute($stmt,array ($User,$Desc,'Seed',$Hash,$Perm,$Email,  $Email_notify,$agentList,$Folder,$Folder));
 
   /* Make sure it was added */
   $row = $dbManager->getSingleRow("SELECT * FROM users WHERE user_name = $1",array($User),$stmt='users.get');

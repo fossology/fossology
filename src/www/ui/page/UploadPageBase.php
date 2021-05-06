@@ -73,7 +73,10 @@ abstract class UploadPageBase extends DefaultPlugin
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
 
-    $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    $rootFolder = $this->folderDao->getDefaultFolder(Auth::getUserId());
+    if ($rootFolder == NULL) {
+      $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
+    }
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
 
     $vars['folderStructure'] = $folderStructure;
