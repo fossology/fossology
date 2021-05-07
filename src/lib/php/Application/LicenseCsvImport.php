@@ -67,7 +67,8 @@ class LicenseCsvImport
       'notes'=>array('notes'),
       'source'=>array('source','Foreign ID'),
       'risk'=>array('risk','risk_level'),
-      'group'=>array('group','License group')
+      'group'=>array('group','License group'),
+      'obligations'=>array('obligations','License obligations')
       );
 
   /**
