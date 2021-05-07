@@ -40,9 +40,9 @@
           <input type="checkbox" name="scm" value="1"/> {{ 'Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype'| trans }}<img src="images/info_16.png" title="{{'Configure mimetypes from Admin-Customize-Skip MimeTypes from scanning'|trans}}" alt="" class="info-bullet"/><br/>
       </li>
       <li>
-        <input type="radio" name="public" value="private"/> {{ 'Visible only for active group'| trans }}<img src="images/info_16.png" title="{{'which is the currently selected group'|trans}}" alt="" class="info-bullet"/><br/>
-        <input type="radio" name="public" value="protected" checked="checked"/> {{ 'Visible for all groups'| trans }}<img src="images/info_16.png" title="{{'which are accessible by you now'|trans}}" alt="" class="info-bullet"/><br/>
-        <input type="radio" name="public" value="public"/> {{ 'Make Public'| trans }}<img src="images/info_16.png" title="{{'visible for all users'|trans}}" alt="" class="info-bullet"/><br/>
+        <input type="radio" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/> {{ 'Visible only for active group' | trans }}<img src="images/info_16.png" title="{{ 'which is the currently selected group'|trans }}" alt="" class="info-bullet"/><br/>
+        <input type="radio" name="public" value="protected" {% if uploadVisibility == "protected" %} checked="checked" {% endif %}/> {{ 'Visible for all groups'| trans }}<img src="images/info_16.png" title="{{ 'which are accessible by you now'|trans }}" alt="" class="info-bullet"/><br/>
+        <input type="radio" name="public" value="public" {% if uploadVisibility == "public" %} checked="checked" {% endif %}/> {{ 'Make Public'| trans }}<img src="images/info_16.png" title="{{ 'visible for all users'|trans }}" alt="" class="info-bullet"/><br/>
       </li>
       {% if agentCheckBoxMake %}
       <li>

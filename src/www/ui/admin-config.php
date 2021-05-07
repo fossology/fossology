@@ -91,7 +91,7 @@ class foconfig extends FO_Plugin
           $OutBuf .= "<select name='new[$row[variablename]]' title='$row[description]' $InputStyle>";
           foreach ($Options as $Option) {
             $matches = array();
-            preg_match('/(\\w+)[{](.*)[}]/', $Option, $matches);
+            preg_match('/([ \\w]+)[{​​​​](.*)[}​​​​]/', $Option, $matches);
             $Option_display = $matches[1];
             $Option_value = $matches[2];
             $OutBuf .= "<option $InputStyle value='$Option_value' ";
