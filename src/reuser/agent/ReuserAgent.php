@@ -349,7 +349,7 @@ class ReuserAgent extends Agent
    */
   protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
   {
-    $diffLevel = system("diff $reusedPath $newPath | wc -l");
+    $diffLevel = exec("diff $reusedPath $newPath | wc -l");
     if ($diffLevel === false) {
       throw new \Exception('cannot use diff tool');
     }
