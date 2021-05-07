@@ -1,5 +1,69 @@
 # Changelog of FOSSology
 
+### 3.10.0 (May 7th 2021)
+
+This release adds important corrections to
+[3.10.0-rc2](https://github.com/fossology/fossology/releases/tag/3.10.0-rc2)
+
+The release 3.10.0 introduces following major changes since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+* Change copyright handling add new table copyright_event.
+* Drop support for PHP5 and update dependencies for PHP7
+* Update password hashing algorithm from SHA1 to more secure bcrypt.
+* Advance search and replace for copyrights.
+* Ability to enforce password policies.
+* Feature to import license acknowledgement from NOTICE file.
+* Ununpack agent can be compiled to work in standalone mode.
+* Create new licenses as candidate for OJO.
+* Read XML in chunks to support large files for ReportImport.
+* Add license search based on short name in REST.
+* Do not add decisions if the events have no change.
+
+NOTE: This release also adds a migration script which migrates copyright data to new table copyright_event.
+      Migration processes is mandatory because without migration, old copyright activation/deactivation may not work.
+      also it approximately takes 15 min for 1M records.
+
+#### Credits to contributors for 3.10.0
+
+From the GIT commit history, we have following contributors since
+[3.9.0](https://github.com/fossology/fossology/releases/tag/3.9.0):
+
+```
+> Alan Hohn <Alan.M.Hohn@lmco.com>
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Andreas J. Reichel <andreas.reichel@tngtech.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Avinal Kumar <avinal.xlvii@gmail.com>
+> Bartłomiej Dróżdż <bartlomiej.drozdz@orange.com>
+> Darshan <kansagara.darshan97@gmail.com>
+> David Lechner <david@pybricks.com>
+> Dineshkumar Devarajan (RBEI/BSF6) <Devarajan.Dineshkumar@in.bosch.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Helio Chissini de Castro <helio@kde.org>
+> Mikko Murto <mikko.murto@hhpartners.fi>
+> Michael C.Jaeger <michael.c.jaeger@siemens.com>
+> Pawan Kumar Meena <Pawank1804@gmail.com>
+> Piotr Pszczola <piotr.pszczola@orange.com>
+> rlintu <raino.lintulampi@bittium.com>
+> Sahil <sjha200000@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> YashJipkate <yashjipkate@gmail.com>
+
+```
+
+#### Corrections
+
+* `58e1e4c9d` fix(docker-compose): Revert container port to 8081
+* `d269582a5` fix(actions): Build pages on release
+
+#### Infrastructure
+
+* `e9ca31401` perf(migration): remove offset to make the query faster
+* `271287be1` fix(build): Make script compatible with Xenial
+
 ### 3.10.0-RC2 (Apr 19th 2021)
 
 This release adds important corrections to
@@ -48,7 +112,6 @@ From the GIT commit history, we have following contributors since
 * `23fe64335` fix(link): changed the broken documentation page link
 * `3a5eeab03` fix(copyrightevent): General improvements
 * `50b9dd5e4` fix(rest): missing Group component in API documentation
-* `543c05669` fix(testcases): fix testcases of copyrightDaoTest in Dao
 * `0bda7e2b7` fix(nomos): Flush stdout in JSON writer
 * `44dea1ab0` fix(UploadTreeProxy): Get if candidate license
 * `36200a90a` fix(ui): Show parent folder on *Browser views
@@ -79,7 +142,6 @@ From the GIT commit history, we have following contributors since
 * `9a1fd6163` feat(static-checks.yml): migrate static checks and analysis to GHA
 * `2a90ff34b` feat(copyright): save deleted copyrights in copyright_event table
 * `eded1d7d2` feat(deploy-pages.yml): migrate github pages deployment to GHA
-* `836d9de50` feat(copyright): save deleted copyrights in copyright_event table
 * `f91881a7b` feat(swh): Allow API token
 * `1e28973b2` feat(rest): get groups and create group functionality
 * `41d8e88fa` feat(reuse): Change data type of reuse_group from int to string
