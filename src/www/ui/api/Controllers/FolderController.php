@@ -25,7 +25,6 @@ namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -156,7 +155,7 @@ class FolderController extends RestController
       $folderParent = intval($folderArray[count($folderArray) - 2]['folder_pk']);
       $folderId = "$folderParent $folderId";
 
-      $rc = $folderDelete->Delete($folderId, Auth::getUserId());
+      $rc = $folderDelete->Delete($folderId, $this->restHelper->getUserId());
       if ($rc == "No access to delete this folder") {
         $info = new Info(403, $rc, InfoType::ERROR);
       } elseif ($rc !== null) {
