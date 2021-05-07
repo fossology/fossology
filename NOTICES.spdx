@@ -571,7 +571,7 @@ FileCopyrightText: <text> Copyright 2013 Klaus Hartl Released under the MIT lice
 
 ##File
 
-FileName: fossology/src/www/ui/scripts/jquery-3.3.1.min.js
+FileName: fossology/src/www/ui/scripts/jquery-3.6.0.min.js
 SPDXID: SPDXRef-item25069
 FileChecksum: SHA1: 3021c5223ec0b3e60db9b224a82bfaf99a88f998
 FileChecksum: MD5: 612c1bb8612cffd0b64169b6196cea71
