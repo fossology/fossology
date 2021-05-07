@@ -21,7 +21,7 @@
   <table style="border:1px solid black; border-collapse: collapse;" width="100%">
     <tr class="classic">
       <th width="25%">{{ "Username."|trans }}</th>
-      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20"></td>
+      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20" {% if not isSessionAdmin %}disabled="disabled"{% endif %}></td>
     </tr>
     <tr class="classic">
       <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
