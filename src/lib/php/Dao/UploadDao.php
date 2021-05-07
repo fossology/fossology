@@ -247,6 +247,29 @@ class UploadDao
     }
   }
 
+
+  /**
+   * @brief Get the upload assignee id.
+   * @param int $uploadId Upload to get assignee id
+   * @param int $groupId  Effective group
+   * @return integer 1 if not found
+   * @throws Exception if upload not accessible.
+   */
+  public function getAssignee($uploadId, $groupId)
+  {
+    if ($this->isAccessible($uploadId, $groupId)) {
+      $row = $this->dbManager->getSingleRow("SELECT assignee FROM upload_clearing WHERE upload_fk=$1 AND group_fk=$2;",
+       array($uploadId, $groupId));
+      if (false === $row) {
+        return 1;
+      }
+      return $row['assignee'];
+    } else {
+      throw new \Exception("permission denied");
+    }
+  }
+
+
   /**
    * \brief Get the uploadtree table name for this upload_pk
    *        If upload_pk does not exist, return "uploadtree".

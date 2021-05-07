@@ -58,6 +58,11 @@ class Upload
    */
   private $uploadDate;
   /**
+   * @var integer $assignee
+   * Upload assignee id
+   */
+  private $assignee;
+  /**
    * @var Hash $hash
    * Hash information of the upload
    */
@@ -74,7 +79,7 @@ class Upload
    * @param Hash $hash
    */
   public function __construct($folderId, $folderName, $uploadId, $description,
-    $uploadName, $uploadDate, $hash)
+    $uploadName, $uploadDate, $assignee, $hash)
   {
     $this->folderId = intval($folderId);
     $this->folderName = $folderName;
@@ -82,6 +87,7 @@ class Upload
     $this->description = $description;
     $this->uploadName = $uploadName;
     $this->uploadDate = $uploadDate;
+    $this->assignee = $assignee == 1 ? null : intval($assignee);
     $this->hash = $hash;
   }
 
@@ -107,6 +113,7 @@ class Upload
       "description" => $this->description,
       "uploadname"  => $this->uploadName,
       "uploaddate"  => $this->uploadDate,
+      "assignee"    => $this->assignee,
       "hash"        => $this->hash->getArray()
     ];
   }
