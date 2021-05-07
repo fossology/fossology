@@ -614,12 +614,12 @@ ORDER BY lft asc
    * @param string $refText
    * @return int Id of license candidate
    */
-  public function insertUploadLicense($newShortname, $refText, $groupId)
+  public function insertUploadLicense($newShortname, $refText, $groupId, $userId)
   {
-    $sql = 'INSERT INTO license_candidate (group_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type) VALUES ($1,$2,$2,$3,md5($3),1) RETURNING rf_pk';
+    $sql = 'INSERT INTO license_candidate (group_fk,rf_shortname,rf_fullname,rf_text,rf_md5,rf_detector_type,rf_user_fk_created) VALUES ($1,$2,$2,$3,md5($3),1,$4) RETURNING rf_pk';
     $refArray = $this->dbManager->getSingleRow($sql, array($groupId,
       StringOperation::replaceUnicodeControlChar($newShortname),
-      StringOperation::replaceUnicodeControlChar($refText)), __METHOD__);
+      StringOperation::replaceUnicodeControlChar($refText), $userId), __METHOD__);
     return $refArray['rf_pk'];
   }
 
@@ -641,14 +641,14 @@ ORDER BY lft asc
    * @param string $readyformerge
    * @param int $riskLvl
    */
-  public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $readyformerge, $riskLvl)
+  public function updateCandidate($rf_pk, $shortname, $fullname, $rfText, $url, $rfNotes, $lastmodified, $userIdmodified, $readyformerge, $riskLvl)
   {
     $marydone = $this->dbManager->booleanToDb($readyformerge);
-    $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, rf_notes=$6, marydone=$7, rf_risk=$8 WHERE rf_pk=$1',
+    $this->dbManager->getSingleRow('UPDATE license_candidate SET rf_shortname=$2, rf_fullname=$3, rf_text=$4, rf_url=$5, rf_notes=$6, rf_lastmodified=$7, rf_user_fk_modified=$8, marydone=$9, rf_risk=$10 WHERE rf_pk=$1',
       array($rf_pk, StringOperation::replaceUnicodeControlChar($shortname),
         StringOperation::replaceUnicodeControlChar($fullname),
         StringOperation::replaceUnicodeControlChar($rfText), $url,
-        StringOperation::replaceUnicodeControlChar($rfNotes), $marydone,
+        StringOperation::replaceUnicodeControlChar($rfNotes), $lastmodified, $userIdmodified, $marydone,
         $riskLvl), __METHOD__);
   }
 

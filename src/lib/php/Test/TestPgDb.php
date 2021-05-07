@@ -178,7 +178,7 @@ class TestPgDb extends TestAbstractDb
   {
     $table = 'license_candidate';
     if ((empty($tableList) || in_array($table, $tableList)) && !$this->dbManager->existsTable($table)) {
-      $this->dbManager->queryOnce("CREATE TABLE $table (group_fk integer) INHERITS (license_ref)");
+      $this->dbManager->queryOnce("CREATE TABLE $table (group_fk integer,rf_creationdate timestamptz,rf_lastmodified timestamptz,rf_user_fk_created integer,rf_user_fk_modified integer) INHERITS (license_ref)");
     }
     $coreSchemaFile = $this->dirnameRec(__FILE__, 4) . '/www/ui/core-schema.dat';
     $Schema = array();
