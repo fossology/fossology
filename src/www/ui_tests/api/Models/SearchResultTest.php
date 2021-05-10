@@ -40,7 +40,8 @@ class SearchResultTest extends \PHPUnit\Framework\TestCase
   public function testDataFormat()
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
-    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', $hash);
+    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', null,
+      $hash);
     $expectedResult = [
       'upload'        => $upload->getArray(),
       'uploadTreeId'  => 12,

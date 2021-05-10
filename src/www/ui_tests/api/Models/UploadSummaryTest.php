@@ -41,6 +41,7 @@ class UploadSummaryTest extends \PHPUnit\Framework\TestCase
     $expected = [
       "id"                      => 5,
       "uploadName"              => 'test.tar.gz',
+      "assignee"                => 3,
       "mainLicense"             => 'MIT',
       "uniqueLicenses"          => 5,
       "totalLicenses"           => 25,
@@ -55,6 +56,7 @@ class UploadSummaryTest extends \PHPUnit\Framework\TestCase
     $actual = new UploadSummary();
     $actual->setUploadId(5);
     $actual->setUploadName('test.tar.gz');
+    $actual->setAssignee(3);
     $actual->setMainLicense('MIT');
     $actual->setUniqueLicenses(5);
     $actual->setTotalLicenses(25);

@@ -236,7 +236,7 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
     }
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', $fileSize);
     return new Upload($folderId, $folderName, $id, $description,
-      $uploadName, $uploadDate, $hash);
+      $uploadName, $uploadDate, null, $hash);
   }
 
   /**

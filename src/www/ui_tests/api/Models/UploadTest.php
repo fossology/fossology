@@ -39,7 +39,7 @@ class UploadTest extends \PHPUnit\Framework\TestCase
   public function testDataFormat()
   {
     $hash = new Hash('sha1checksum', 'md5checksum', 'sha256checksum', 123123);
-    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', $hash);
+    $upload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', 3, $hash);
     $expectedUpload = [
       "folderid"    => 2,
       "foldername"  => 'root',
@@ -47,10 +47,11 @@ class UploadTest extends \PHPUnit\Framework\TestCase
       "description" => '',
       "uploadname"  => 'my.tar.gz',
       "uploaddate"  => '01-01-2020',
+      "assignee"    => 3,
       "hash"        => $hash->getArray()
     ];
 
-    $actualUpload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020',
+    $actualUpload = new Upload(2, 'root', 3, '', 'my.tar.gz', '01-01-2020', 3,
       $hash);
 
     $this->assertEquals($expectedUpload, $actualUpload->getArray());
