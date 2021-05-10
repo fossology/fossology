@@ -67,5 +67,6 @@ void normalizeUploadPriorities();
 void reIndexAllTables();
 void removeOrphanedRows();
 void removeOrphanedLogFiles();
+void removeExpiredTokens();
 
 #endif /* _MAINTAGENT_H */
