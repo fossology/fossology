@@ -17,7 +17,6 @@ jobs:
           - 'debian:buster'
           - 'debian:stretch'
           - 'ubuntu:bionic'
-          - 'ubuntu:xenial'
           - 'ubuntu:focal'
 
     runs-on: ubuntu-latest
