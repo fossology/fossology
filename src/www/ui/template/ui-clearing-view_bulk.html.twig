@@ -83,7 +83,13 @@
       <option value="u">{{ 'scan whole Upload'| trans }}</option>
       <option value="f">{{ 'scan only current Folder'| trans }}</option>
     </select><img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/>
-    <input type="checkbox" style="vertical-align:bottom;" id="forceDecision"/>{{ 'ignoreConflicts'|trans }}<img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/>
+    <input type="checkbox" style="vertical-align:bottom;" id="forceDecision"/><label for="forceDecision">{{ 'ignoreConflicts'|trans }}<img src="images/info_16.png" style="vertical-align:middle !important;" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></label>
+    <input type="checkbox" style="vertical-align:bottom;" id="bulkIgnoreIrre" checked="checked"/>
+    <label for="bulkIgnoreIrre">
+      {{ 'Ignore Irrelevant files'|trans }}<img src="images/info_16.png"
+      style="vertical-align:middle !important;"
+      title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
+    </label>
     <br>
       <button type="button" onclick='cleanText();'>Clean text</button>
       <img src="images/info_16.png" style="vertical-align:middle;" title="{{ 'The matching process ignores comment symbols, e.g. double-slashes. Hence, these symbols can be remove from bulk text.'|trans }}" alt="" class="info-bullet"/>

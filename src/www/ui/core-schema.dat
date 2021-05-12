@@ -1175,6 +1175,10 @@
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"uploadtree_fk\" int8";
   $Schema["TABLE"]["license_ref_bulk"]["uploadtree_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"uploadtree_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"ignore_irrelevant\" IS 'Should the irrelevant files be ignored during scan?'";
+  $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"ignore_irrelevant\" bool DEFAULT true";
+  $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"ignore_irrelevant\" SET NOT NULL, ALTER COLUMN \"ignore_irrelevant\" SET DEFAULT true";
+
 
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["ADD"] = "ALTER TABLE \"license_set_bulk\" ADD COLUMN \"rf_fk\" int8";

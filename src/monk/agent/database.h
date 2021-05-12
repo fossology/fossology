@@ -22,7 +22,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <libfossology.h>
 #include "highlight.h"
 
-PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId, long left, long right, long groupId);
+#define DECISION_TYPE_FOR_IRRELEVANT 4
+
+PGresult* queryFileIdsForUploadAndLimits(fo_dbManager* dbManager, int uploadId,
+                                         long left, long right, long groupId,
+                                         bool ignoreIrre);
 PGresult* queryAllLicenses(fo_dbManager* dbManager);
 char* getLicenseTextForLicenseRefId(fo_dbManager* dbManager, long refId);
 int hasAlreadyResultsFor(fo_dbManager* dbManager, int agentId, long pFileId);

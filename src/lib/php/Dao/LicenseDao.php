@@ -550,15 +550,17 @@ ORDER BY lft asc
    * @param int $uploadTreeId
    * @param bool[] $licenseRemovals
    * @param string $refText
+   * @param bool $ignoreIrrelevant Ignore irrelevant files while scanning
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true)
   {
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text)
-      VALUES ($1,$2,$3,$4) RETURNING lrb_pk",
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text, ignore_irrelevant)
+      VALUES ($1,$2,$3,$4,$5) RETURNING lrb_pk",
         array($userId, $groupId, $uploadTreeId,
-          StringOperation::replaceUnicodeControlChar($refText)),
+          StringOperation::replaceUnicodeControlChar($refText),
+          $this->dbManager->booleanToDb($ignoreIrrelevant)),
         __METHOD__ . '.getLrb'
     );
     if ($licenseRefBulkIdResult === false) {
