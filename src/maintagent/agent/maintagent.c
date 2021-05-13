@@ -98,9 +98,11 @@ int main(int argc, char **argv)
   int reIndexAllTablesExe = 0;
   int removeOrphanedRowsExe = 0;
   int removeOrphanedLogs = 0;
+  int removeExpiredTokensExe = 0;
+  int tokenRetentionPeriod = 30;
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNpPRTUvVZ")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNpPRt:TUvVZ")) != -1)
   {
     switch (cmdopt)
     {
@@ -242,6 +244,14 @@ int main(int argc, char **argv)
           removeUploadsExe = 1;
         }
         break;
+      case 't': /* Remove expired personal access token */
+        if (removeExpiredTokensExe == 0)
+        {
+          tokenRetentionPeriod = atol(optarg);
+          removeExpiredTokens(tokenRetentionPeriod);
+          removeExpiredTokensExe = 1;
+        }
+        break;      
       case 'T': /* Remove orphaned temp tables */
         if (removeTempsExe == 0)
         {

@@ -451,6 +451,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
     strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
 
+  $variable = "PATMaxPostExpiryRetention";
+  $patTokenRetentionPrompt = _('Max expired token retention period');
+  $patTokenRetentionDesc = _('Maximum retention period of expired tokens (in days) for Maintagent');
+  $valueArray[$variable] = array("'$variable'", "30", "'$patTokenRetentionPrompt'",
+    strval(CONFIG_TYPE_INT), "'PAT'", "2", "'$patTokenRetentionDesc'", "null", "null");
+
   $variable = "SkipFiles";
   $mimeTypeToSkip = _("Skip MimeTypes from scanning");
   $mimeTypeDesc = _("add  comma (,) separated mimetype to exclude files from scanning");
