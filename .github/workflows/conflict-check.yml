@@ -1,0 +1,20 @@
+# Copyright 2021 Gaurav Mishra <mishra.gaurav@siemens.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+
+name: Check PRs for conflicts
+
+on:
+  pull_request_target:
+    types: [synchronize]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if PRs are dirty
+        uses: eps1lon/actions-label-merge-conflict@releases/2.x
+        with:
+          dirtyLabel: "has merge conflicts"
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          commentOnDirty: |
+            This pull request has conflicts, please rebase with master to resolve those before we can evaluate the pull request.
