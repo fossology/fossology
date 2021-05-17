@@ -9,7 +9,7 @@ on:
     types: [synchronize]
 
 jobs:
-  main:
+  check:
     runs-on: ubuntu-latest
     steps:
       - name: Check if PRs are dirty
@@ -18,4 +18,4 @@ jobs:
           dirtyLabel: "has merge conflicts"
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           commentOnDirty: |
-            "This pull request has conflicts, please rebase with master to resolve those before we can evaluate the pull request."
+            This pull request has conflicts, please rebase with master to resolve those before we can evaluate the pull request.
