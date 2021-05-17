@@ -19,9 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #ifndef LIBFOSSDBQUERYRESULT_HPP_
 #define LIBFOSSDBQUERYRESULT_HPP_
 
-extern "C" {
 #include "libfossdbmanager.h"
-}
 
 #include "uniquePtr.hpp"
 
