@@ -308,15 +308,16 @@ function UseThisNoticeButton(idx, text)
 }
 
 function doHandleNoticeFiles(response) {
-   noticeSelectTable.clear();
+  noticeSelectTable.clear();
 
   $.each(response, function(idx, el) {
     if (el.ufile_name !== undefined && el.contents_short !== undefined
         && el.contents !== undefined) {
       noticeSelectTable.row.add([el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
-      noticeSelectTable.draw();
     }
   });
+  noticeSelectTable.draw();
+  textAckInputModal.dialog("option", "position", {my: "center", at: "center", of: window });
 }
 
 function selectNoticeFile() {
@@ -399,10 +400,13 @@ function doOnSuccess(textModal) {
 }
 
 $(document).ready(function () {
-  textAckInputModal = $('#textAckInputModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  $('#textAckInputModal').draggable({
-    stop: function(){
-      $(this).css({'width':'','height':''});
+  textAckInputModal = $('#textAckInputModal').dialog({
+    autoOpen:false, width:"auto", height:"auto", modal:true, resizable: false,
+    open: function() {
+      $(".ui-widget-overlay").addClass("grey-overlay");
+      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
+        .css("min-height", "20vh").css("max-width", "70vw")
+        .css("min-width", "20vw");
     }
   });
 
@@ -412,10 +416,12 @@ $(document).ready(function () {
     data: []
   });
 
-  textModal = $('#textModal').dialog({autoOpen:false, width:"auto",height:"auto"});
-  $('#textModal').draggable({
-    stop: function(){
-      $(this).css({'width':'','height':''});
+  textModal = $('#textModal').dialog({
+    autoOpen:false, width:"auto",height:"auto",
+    open: function() {
+      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
+        .css("min-height", "20vh").css("max-width", "70vw")
+        .css("min-width", "20vw");
     }
   });
 });

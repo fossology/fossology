@@ -464,6 +464,7 @@ INSERT INTO clearing_decision (
       $row['acknowledgement'] = "";
     }
 
+    $changeTo = StringOperation::replaceUnicodeControlChar($changeTo, false);
     if ($what == 'reportinfo') {
       $reportInfo = $changeTo;
       $comment = $row['comment'];

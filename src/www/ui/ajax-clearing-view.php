@@ -277,9 +277,9 @@ class AjaxClearingView extends FO_Plugin
     }
 
     if (!empty($forValue)) {
-      $value = substr(ltrim($forValue, " \t\n"), 0, 15)."...";
+      $value = convertToUTF8(substr(ltrim($forValue, " \t\n"), 0, 15)."...");
     }
-    return "<a href=\"javascript:;\" style='$classAttr' id='clearingsForSingleFile$licenseId$what' onclick=\"openTextModel($uploadTreeId, $licenseId, $what);\" title='".htmlspecialchars($forValue, ENT_QUOTES)."'>$value</a>";
+    return "<a href=\"javascript:;\" style='$classAttr' id='clearingsForSingleFile$licenseId$what' onclick=\"openTextModel($uploadTreeId, $licenseId, $what);\" title='".convertToUTF8(htmlspecialchars($forValue, ENT_QUOTES), true)."'>$value</a>";
   }
 
   /**
