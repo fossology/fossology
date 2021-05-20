@@ -679,6 +679,7 @@ ORDER BY lft asc
       if ($candidate) {
         $tableName='obligation_candidate_map';
         $sql = "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, " .
+          "ob_type, ob_classification, ob_comment, " .
           "rf_shortname FROM obligation_ref " .
           "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
           "JOIN license_ref ON $tableName.rf_fk = license_ref.rf_pk " .
@@ -688,6 +689,7 @@ ORDER BY lft asc
         $conclusionmapCte = LicenseMap::getMappedLicenseRefView('$2');
         $sql = "WITH conclusionmap AS (" . $conclusionmapCte . ") " .
           "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_origin AS rf_fk, " .
+          "ob_type, ob_classification, ob_comment, " .
           "lr.rf_shortname FROM obligation_ref " .
           "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
           "JOIN conclusionmap ON $tableName.rf_fk = conclusionmap.rf_pk " .

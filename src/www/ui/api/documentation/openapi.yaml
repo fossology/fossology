@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2020
+# Copyright (C) Siemens AG 2017-2021
 # Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.2.3
+  version: 1.3.0
   contact:
     email: fossology@fossology.org
   license:
@@ -26,10 +26,40 @@ servers:
     description: Localhost instance
 security:
   - bearerAuth: []
+externalDocs:
+  description: Basic guide
+  url: https://github.com/fossology/fossology/wiki/FOSSology-REST-API
+tags:
+- name: auth
+  description: Authentication endpoints
+- name: info
+  description: Basic info about API
+- name: Upload
+  description: Endpoints related to uploads
+- name: Organize
+  description: Endpoints for organization of data
+- name: Search
+  description: Searching data on FOSSology
+- name: User
+  description: User management
+- name: Admin
+  description: Administrator tasks
+- name: Job
+  description: FOSSology jobs
+- name: Folders
+  description: Folder management
+- name: Groups
+  description: User group management
+- name: Report
+  description: Upload's report
+- name: License
+  description: License and obligation management
 
 paths:
   /auth:
     get:
+      tags:
+        - auth
       deprecated: true
       security: []
       summary: Get a login session registered (deprecated, use /tokens)
@@ -71,6 +101,8 @@ paths:
 
   /tokens:
     post:
+      tags:
+        - auth
       security: []
       summary: Generate a new token
       description: >
@@ -108,6 +140,8 @@ paths:
 
   /version:
     get:
+      tags:
+        - info
       security: []
       summary: Get the current API information
       description: >
@@ -149,7 +183,6 @@ paths:
     get:
       tags:
         - Upload
-        - Organize
       summary: Get single upload by id
       description:
         Returns a single upload
@@ -749,7 +782,6 @@ paths:
           description: Group name, from last login if not provided
     get:
       tags:
-      - Organize
       - Folders
       summary: Get the list of accessible folders
       responses:
@@ -766,6 +798,7 @@ paths:
     post:
       tags:
       - Organize
+      - Admin
       - Folders
       summary: Create a new folder
       parameters:
@@ -819,7 +852,6 @@ paths:
           description: Group name, from last login if not provided
     get:
       tags:
-      - Organize
       - Folders
       summary: Get a single folder details
       responses:
@@ -835,6 +867,7 @@ paths:
       tags:
       - Organize
       - Folders
+      - Admin
       summary: Delete a folder
       responses:
         '202':
@@ -906,7 +939,6 @@ paths:
   /groups:
     get:
       tags:
-      - Organize
       - Groups
       summary: Get the list of groups (accessible groups for user, all groups for admin)
       responses:
@@ -924,7 +956,8 @@ paths:
       tags:
       - Organize
       - Groups
-      summary: Create a group folder
+      - Admin
+      summary: Create a new group
       parameters:
         - name: name
           in: header
@@ -950,7 +983,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Info'        
+                $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
 
@@ -1075,28 +1108,184 @@ paths:
                   $ref: '#/components/schemas/File'
         default:
             $ref: '#/components/responses/defaultResponse'
-
   /license:
+    parameters:
+      - name: groupName
+        description: The group name to chose
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
     get:
       tags:
       - License
-      summary: Get license from the database
       parameters:
-        - name: shortName
+        - name: page
+          description: Page number to fetch
           in: header
-          required: true
-          description: Short name of the license
+          required: false
           schema:
-            type: string
+            type: integer
+            default: 1
+        - name: limit
+          description: Limits of responses per request
+          in: header
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 100
+        - name: active
+          description: Get only active licenses
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
+      summary: Get all license from the database
       responses:
         '200':
-          description: Requested license
+          description: All licenses from database
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be fetched
+              schema:
+                type: integer
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/License'
+                type: array
+                items:
+                  allOf:
+                    - type: object
+                      properties:
+                        id:
+                          type: integer
+                          description: Id key
+                          example:
+                            125
+                    - $ref: '#/components/schemas/License'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+    post:
+      tags:
+      - License
+      summary: Create a new license
+      requestBody:
+        description: Information about new license
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/License'
+                - type: object
+                  properties:
+                    mergeRequest:
+                      description: Open a merge request for candidate license?
+                      type: boolean
+                      default: false
+              required:
+                - shortName
+      responses:
+        '201':
+          description: License added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+  /license/{shortname}:
+    parameters:
+      - name: shortname
+        in: path
+        required: true
+        description: Shortname of the license
+        schema:
+          type: string
+      - name: groupName
+        description: The group name to chose
+        in: header
+        required: false
+        schema:
+          type: string
+          description: Group name, from last login if not provided
+    get:
+      tags:
+      - License
+      summary: Get a specific license
+      responses:
+        '200':
+          description: License
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: Id key
+                        example:
+                          125
+                  - $ref: "#/components/schemas/License"
+                  - type: object
+                    properties:
+                      obligations:
+                        description: Obligations associated with the license
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Obligation'
         '404':
-          description: No license found with the given parameters
+          description: License not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
+    patch:
+      tags:
+      - License
+      summary: Update a license
+      requestBody:
+        description: Information to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Set the properties to be updated
+              properties:
+                fullName:
+                  description: New fullname
+                  type: string
+                  nullable: true
+                  example:
+                    "Updated license name"
+                text:
+                  description: New license text
+                  type: string
+                  nullable: true
+                  example:
+                    "Updated and corrected license text"
+                url:
+                  description: New URL for license
+                  type: string
+                  nullable: true
+                  example:
+                    "https://opensource.org/licenses/MIT"
+                risk:
+                  description: New risk value
+                  type: integer
+                  nullable: true
+                  example:
+                    2
+      responses:
+        '200':
+          description: License added successfully
           content:
             application/json:
               schema:
@@ -1169,7 +1358,7 @@ components:
           description: Date, when the file was uploaded.
         assignee:
           type: integer
-          description: assignee id of the upload.          
+          description: assignee id of the upload.
           nullable: true
         hash:
           $ref: '#/components/schemas/Hash'
@@ -1184,7 +1373,7 @@ components:
           description: Display name of the upload.
         assignee:
           type: integer
-          description: assignee id of the upload.            
+          description: assignee id of the upload.
           nullable: true
         mainLicense:
           type: string
@@ -1562,11 +1751,6 @@ components:
       description: License from the database
       type: object
       properties:
-        id:
-          description: Id key
-          type: integer
-          example:
-            126
         shortName:
           description: Short name
           type: string
@@ -1582,12 +1766,20 @@ components:
           type: string
           example:
             "MIT License Copyright (c) <year> <copyright holders> ..."
+        url:
+          description: URL of the license text
+          type: string
+          example:
+            "https://opensource.org/licenses/MIT"
         risk:
           description: Risk level
           type: integer
           nullable: true
           example:
             3
+        isCandidate:
+          description: Is the license a candidate?
+          type: boolean
     Group:
       description: Group object
       type: object
@@ -1601,7 +1793,47 @@ components:
           description: Name of a group
           type: string
           example:
-            "Main group"    
+            "Main group"
+    Obligation:
+      description: Obligation information
+      type: object
+      properties:
+        id:
+          description: Id key
+          type: integer
+          example:
+            126
+        topic:
+          description: Obligation topic
+          type: string
+          example:
+            "Should preserve notice"
+        type:
+          description: Type of obligation
+          type: string
+          example:
+            "Obligation"
+        text:
+          description: Obligation text
+          type: string
+          example:
+            "All notices from the package should be preserved."
+        classification:
+          description: >
+            Level of attention this obligation
+            should raise in the clearing process
+          type: string
+          enum:
+            - green
+            - white
+            - yellow
+            - red
+        comment:
+          description: Comments for the obligation
+          type: string
+          nullable: true
+          example:
+            "Please respect the obligation"
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"
