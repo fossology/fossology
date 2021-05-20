@@ -102,7 +102,7 @@ by clicking the documentation tab on the project website. We encourage
 all users to join the mailing list and participate in discussions.
 There is also a #fossology IRC channel on the freenode IRC network if
 you'd like to talk to other FOSSology users and developers.
-See [Contact Us](https://www.fossology.org/get-started)
+See [Contact Us](https://www.fossology.org/about/contact/)
 
 ## Contributing
 

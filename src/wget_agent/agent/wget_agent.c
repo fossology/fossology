@@ -73,7 +73,7 @@ void  SafeExit(int rc)
  * \brief Get the position (ending + 1) of http|https|ftp:// of one url
  * \param URL The URL
  * \return the position (ending + 1) of http|https|ftp:// of one url
- *         E.g. http://fossology.org, return 7
+ *         E.g. http://fossology.org return 7
  */
 int GetPosition(char *URL)
 {
