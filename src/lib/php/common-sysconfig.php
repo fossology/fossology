@@ -527,6 +527,13 @@ function Populate_sysconfig()
     strval(CONFIG_TYPE_BOOL), "'USER_READ_ONLY'", "1", "'$desc'",
     "'check_boolean'", "null");
 
+  $variable = "LicenseTypes";
+  $licenseTypeTitle = _("License Title");
+  $contextValue = "Permissive, Strong Copyleft, Weak Copyleft";
+  $licenseTypeDesc = _("add  comma (,) separated different license types");
+  $valueArray[$variable] = array("'$variable'", "'$contextValue'", "'$licenseTypeTitle'",
+    strval(CONFIG_TYPE_TEXT), "'License'", "1", "'$licenseTypeDesc'", "null", "null");
+
   /* SoftwareHeritage agent config */
   $variable = "SwhURL";
   $prompt = _('SoftwareHeritage URL');

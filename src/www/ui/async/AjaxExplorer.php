@@ -13,6 +13,7 @@ use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\ClearingDecisionFilter;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\CompatibilityDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
@@ -40,6 +41,8 @@ class AjaxExplorer extends DefaultPlugin
   private $uploadtree_tablename = "";
   /** @var UploadDao */
   private $uploadDao;
+  /** @var CompatibilityDao */
+  private $compatibilityDao;
   /** @var LicenseDao */
   private $licenseDao;
   /** @var ClearingDao */
@@ -76,6 +79,7 @@ class AjaxExplorer extends DefaultPlugin
     ));
 
     $this->uploadDao = $this->getObject('dao.upload');
+    $this->compatibilityDao = $this->getObject('dao.compatibility');
     $this->licenseDao = $this->getObject('dao.license');
     $this->clearingDao = $this->getObject('dao.clearing');
     $this->agentDao = $this->getObject('dao.agent');
@@ -399,7 +403,13 @@ class AjaxExplorer extends DefaultPlugin
             );
           }
 
-          $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+          //call that function----file_id,upload_id,shortname
+          $compatible = $this->compatibilityDao->getCompatibilityForFile($childItemTreeBounds, $shortName);
+          if (!$compatible) {
+            $licenseEntries[] = "<b><font color='red'>$shortName</font></b>" . " [" . implode("][", $agentEntries) . "]";
+          } else {
+            $licenseEntries[] = $shortName . " [" . implode("][", $agentEntries) . "]";
+          }
         }
       }
 

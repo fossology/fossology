@@ -25,6 +25,20 @@ unsigned long fo::stringToUnsignedLong(const char* string)
 }
 
 /**
+ * Translates a string to boolean type.
+ * \param string String to be translated
+ * \return Translated boolean value
+ */
+bool fo::stringToBool(const char* str)
+{
+  std::string str2(str);
+  if(str2 == "true" || str2 == "t")
+    return true;
+  else
+    return false;
+}
+
+/**
  * Remove all non-UTF8 characters from a string.
  * @param input The string to be recoded
  * @return Unicode string with invalid characters removed
