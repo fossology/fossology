@@ -10,19 +10,24 @@ function createTableBase{{ table.type }}(activated) {
   var aoColumns = [
       { "sTitle": "{{ 'Count'| trans }}", "sClass": "right read_only", "sWidth": "5%" },
       { "sTitle": "{{ 'Copyright Content'| trans }}", "sClass": "left"},
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
-      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
     ];
 
   if (activated)
   {
     var id = '#copyright_spasht_table';
     var action = 'getData';
+    aoColumns = aoColumns.concat([
+      { "sTitle": "<input type='checkbox' name='selectDelete{{ table.type }}' id='selectDelete{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
   }
   else
   {
     var id = '#copyright_spasht_table_deactivated';
     var action = 'getDeactivatedData';
+    aoColumns = aoColumns.concat([
+      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
   }
 
   return $(id).dataTable({
@@ -81,6 +86,18 @@ function createTable{{ table.type }}() {
       currentValue = $(this).val();
       var currUploadData = currentValue.split(',');
       delete{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    });
+  });
+
+  $('#selectUndo{{ table.type }}').change(function () {
+    $('.undoBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#undoSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=undoBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      undo{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
     });
   });
 
