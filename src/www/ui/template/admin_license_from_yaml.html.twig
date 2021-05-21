@@ -1,0 +1,23 @@
+{# SPDX-FileCopyrightText: © 2024 Siemens AG
+
+   SPDX-License-Identifier: FSFAP
+#}
+{% extends "include/base.html.twig" %}
+
+{% block content %}
+  <p>
+    {{ 'This option permits uploading a YAML file from your computer to FOSSology.'| trans }} <br/>
+    {{ 'Your FOSSology server has imposed a maximum upload file size of'| trans }}
+    {{ upload_max_filesize }}bytes.
+  </p>
+  <form enctype="multipart/form-data" method="post">
+    <label for="file_input">
+      {{ 'Select the YAML-file to upload'| trans }}:
+    </label>
+    <input name="file_input" type="file"/><br/>
+    <br/>
+    <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" value="{{ 'Upload'| trans }}"/>
+    </p>
+  </form>
+
+{% endblock %}

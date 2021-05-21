@@ -80,7 +80,7 @@ SELECT DISTINCT ON(rf_pk) * FROM
   ONLY license_ref
   NATURAL FULL JOIN marydoneCand)
 SELECT
-  rf.rf_shortname AS shortname, rf.rf_fullname AS fullname, rf.rf_spdx_id AS spdx_id, rf.rf_text AS text,
+  rf.rf_shortname AS shortname, rf.rf_fullname AS fullname, rf.rf_spdx_id AS spdx_id, rf.rf_licensetype as license_type, rf.rf_text AS text,
   rc.rf_shortname parent_shortname, rr.rf_shortname report_shortname, rf.rf_url AS url,
   rf.rf_notes AS notes, rf.rf_source AS source, rf.rf_risk AS risk, gp.group_name AS group,
   string_agg(ob_topic, ', ') obligations
@@ -115,7 +115,7 @@ WHERE rf.rf_detector_type=$1";
       $out = fopen('php://output', 'w');
       ob_start();
       $head = array(
-        'shortname', 'fullname', 'spdx_id', 'text', 'parent_shortname',
+        'shortname', 'fullname', 'spdx_id', 'licensetype', 'text', 'parent_shortname',
         'report_shortname', 'url', 'notes', 'source', 'risk', 'group',
         'obligations');
       fputs($out, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));

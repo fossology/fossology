@@ -112,6 +112,13 @@ SPDX-License-Identifier: FSFAP
             <argument type="service" id="db.manager"/>
             <argument type="service" id="logger"/>
         </service>
+        <service id="dao.compatibility" class="Fossology\Lib\Dao\CompatibilityDao" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="logger"/>
+            <argument type="service" id="dao.license"/>
+            <argument type="service" id="dao.agent"/>
+        </service>
+
         <service id="dao.searchhelperdao" class="Fossology\Lib\Dao\SearchHelperDao" public="true">
             <argument type="service" id="db.manager"/>
         </service>
@@ -176,6 +183,16 @@ SPDX-License-Identifier: FSFAP
         <service id="app.license_csv_import" class="Fossology\Lib\Application\LicenseCsvImport" public="true">
             <argument type="service" id="db.manager"/>
             <argument type="service" id="dao.user"/>
+        </service>
+
+        <service id="app.license_yaml_import" class="Fossology\Lib\Application\LicenseCompatibilityRulesYamlImport" public="true">
+            <argument type="service" id="db.manager"/>
+            <argument type="service" id="dao.user"/>
+            <argument type="service" id="dao.license"/>
+        </service>
+
+        <service id="app.users_csv_import" class="Fossology\Lib\Application\UsersCsvImport" public="true">
+            <argument type="service" id="db.manager"/>
         </service>
 
         <service id="app.obligation_csv_import" class="Fossology\Lib\Application\ObligationCsvImport" public="true">
