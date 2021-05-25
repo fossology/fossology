@@ -55,7 +55,15 @@ class AuthController extends RestController
     return $response->withHeader('Warning', $warningMessage)->withJson(
       $returnVal->getArray(), $returnVal->getCode());
   }
-
+  public function optionsVerification($request, $response, $args)
+  {
+    global $SysConf;
+    return $response->withStatus(204)
+      ->withHeader('Access-Control-Allow-Origin', $SysConf['SYSCONFIG']['CorsOrigins'])
+      ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+      ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
+      ->withHeader('Access-Control-Allow-Credentials', 'true');
+  }
   /**
    * Get the JWT authentication headers for the user
    *
