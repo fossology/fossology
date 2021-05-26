@@ -324,7 +324,7 @@ class LicenseController extends RestController
         "rf_pk", $license->getId(), __METHOD__ . ".updateLicense");
       $newInfo = new Info(200, "License " . $license->getShortName() .
         " updated.", InfoType::INFO);
-    } while(false);
+    } while (false);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 }
