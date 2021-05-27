@@ -63,7 +63,11 @@ function insertDataInToEventTables($dbManager)
 
     if (!empty($length)) {
       echo "*** Inserting $length records from $table to $tableEvent table ***\n";
+    } else {
+      echo "*** Table $table already migrated to $tableEvent table ***\n";
+      continue;
     }
+
     $tablePk = $table."_pk";
     $tableFk = $table."_fk";
     $i = 0;
@@ -89,9 +93,9 @@ function insertDataInToEventTables($dbManager)
     while ($num < $length) {
       $startTime = microtime(true);
       $dbManager->begin();
-      $statementName = __METHOD__."insert from function".$i;
-      $dbManager->queryOnce("SELECT 1 FROM migrate_".$table."_events_event($j, $i)", $statementName);
-      $rows = $dbManager->getSingleRow("SELECT count(*) AS cnt, max(uploadtree_fk) AS uploadtree FROM $tableEvent", array(), $statement . $tableEvent. $i);
+      $statementName = __METHOD__."insert from function".$table;
+      $dbManager->getSingleRow("SELECT 1 FROM migrate_".$table."_events_event($1, $2)", array($j, $i), $statementName);
+      $rows = $dbManager->getSingleRow("SELECT count(*) AS cnt, max(uploadtree_fk) AS uploadtree FROM $tableEvent", array(), $statement . $tableEvent. $table);
       $num = intval($rows['cnt']);
       $i =  $rows['uploadtree'];
       $j = $j + MAX_SIZE_OF_ROW;
@@ -101,7 +105,7 @@ function insertDataInToEventTables($dbManager)
       echo "Inserted $num / $length rows to $tableEvent table in ".gmdate("i", $totalTime)." minutes and ".gmdate("s", $totalTime)." seconds. \n";
     }
     $dbManager->begin();
-    $sqlTable = "UPDATE $table SET is_enabled=true";
+    $sqlTable = "UPDATE $table SET is_enabled=true WHERE is_enabled=false";
     $dbManager->queryOnce($sqlTable, $statement."Update");
     $dbManager->commit();
   }
