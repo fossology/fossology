@@ -24,7 +24,8 @@ function createTableBase{{ table.type }}(activated) {
     var id = '#copyright{{ table.type }}deactivated';
     var action = 'getDeactivatedData'
     aoColumns = aoColumns.concat([
-      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false }
+      { "sTitle": "", "sClass": "center read_only", "sWidth": "10%", "bSortable": false },
+      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
     ]);
   }
 
@@ -88,6 +89,18 @@ function createTable{{ table.type }}() {
     });
   });
 
+  $('#selectUndo{{ table.type }}').change(function () {
+    $('.undoBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#undoSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=undoBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      undo{{ table.type }}(currUploadData[0], currUploadData[1], currUploadData[2], currUploadData[3]);
+    });
+  });
+
   $('#replaceSelected{{ table.type }}').click(function () {
     var replaceText = $('#replaceText{{ table.type }}').val().trim();
     var replaceIsValid = (replaceText) && !(/^\s*$/.test(replaceText));
@@ -134,6 +147,9 @@ function createPlaneTableBase{{ table.type }}(activated) {
   {
     var id = '#copyright{{ table.type }}deactivated';
     var action = 'getDeactivatedData'
+    aoColumns = aoColumns.concat([
+      { "sTitle": "<input type='checkbox' name='selectUndo{{ table.type }}' id='selectUndo{{ table.type }}' style='margin-left:11px'>", "sClass": "center read_only", "sWidth": "5%", "bSortable": false }
+    ]);
   }
 
   return $(id).dataTable({
@@ -173,6 +189,18 @@ function createPlainTable{{ table.type }}() {
       currentValue = $(this).val();
       var currUploadData = currentValue.split(',');
       deleteHashDecision(currUploadData[0], currUploadData[1], currUploadData[2]);
+    });
+  });
+
+  $('#selectUndo{{ table.type }}').change(function () {
+    $('.undoBySelect{{ table.type }}').prop('checked', $(this).prop("checked"));
+  });
+
+  $('#undoSelected{{ table.type }}').click(function () {
+    $("input:checkbox[class=undoBySelect{{ table.type }}]:checked").each(function () {
+      currentValue = $(this).val();
+      var currUploadData = currentValue.split(',');
+      undoHashDecision(currUploadData[0], currUploadData[1], currUploadData[2]);
     });
   });
 

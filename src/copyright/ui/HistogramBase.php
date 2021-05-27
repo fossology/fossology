@@ -107,7 +107,11 @@ abstract class HistogramBase extends FO_Plugin {
   <br/><br/>
   <h4>Deactivated $typeDescriptor statements:</h4>
 </div>
-<div><table border=1 width='100%' id='copyright".$type."deactivated'></table></div>";
+<div><table border=1 width='100%' id='copyright".$type."deactivated'></table>
+  <br/><br/>
+  <a id='undoSelected".$type."' class='buttonLink'>Undo selected rows</a>
+  <br /><br />
+</div>";
 
     return array($output, $out);
   }
