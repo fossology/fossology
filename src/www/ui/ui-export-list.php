@@ -36,6 +36,8 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Symfony\Component\HttpFoundation\Response;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 /**
  * @class UIExportList
  * Print the founded and concluded license or copyrights as a list or CSV.
@@ -297,6 +299,13 @@ class UIExportList extends FO_Plugin
 
     $dltext = (GetParm("output", PARM_STRING) == 'dltext');
     $formVars["dltext"] = $dltext;
+    $dlspreadsheet = (GetParm("output", PARM_STRING) == 'dlspreadsheet');
+    $formVars["dlspreadsheet"] = $dlspreadsheet;
+    if (!$dltext&&!$dlspreadsheet) {
+      $formVars["noDownload"] = true;
+    } else {
+      $formVars["noDownload"] = false;
+    }
 
     $NomostListNum = @$SysConf['SYSCONFIG']['NomostListNum'];
     $formVars["NomostListNum"] = $NomostListNum;
@@ -350,6 +359,8 @@ class UIExportList extends FO_Plugin
 
     if ($dltext) {
       return $this->printCSV($lines, $uploadtreeTablename, $exportCopyright);
+    } elseif ($dlspreadsheet) {
+      return $this->printSpreadsheet($lines, $uploadtreeTablename);
     } else {
       $this->vars['listoutput'] = $this->printLines($lines, $exportCopyright);
       return;
@@ -676,6 +687,136 @@ class UIExportList extends FO_Plugin
     );
 
     return new Response($content, Response::HTTP_OK, $headers);
+  }
+
+  /**
+   * Print the lines as spreadsheet
+   * @param array   $lines     Lines to be printed
+   * @param string  $uploadtreeTablename Upload tree table name
+   * @return Response spreadsheet(xlsx) file as a response
+   */
+  private function printSpreadsheet($lines, $uploadtreeTablename)
+  {
+    $request = $this->getRequest();
+    $itemId = intval($request->get('item'));
+    $path = Dir2Path($itemId, $uploadtreeTablename);
+    $fileName = $path[count($path) - 1]['ufile_name']."-".date("Ymd");
+
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+
+    $headRow = array(
+        'A' => array(5, 'id', 'ID'),
+        'B' => array(30, 'path', 'Source Name or Path'),
+        'C' => array(20, 'name', 'OSS Name'),
+        'D' => array(10, 'version', 'OSS Version'),
+        'E' => array(20, 'scan results', 'Scan Results'),
+        'F' => array(20, 'concluded results', 'Concluded Results'),
+        'G' => array(20, 'download', 'Download Location'),
+        'H' => array(20, 'homepage', 'Homepage'),
+        'I' => array(30, 'copyright', 'Copyright Text'),
+        'J' => array(10, 'exclude', 'Exclude'),
+        'K' => array(30, 'comment', 'Comment')
+    );
+    $styleArray = [
+        'font' => [
+            'bold' => true,
+            'color' => ['argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE],
+        ],
+        'alignment' => [
+            'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+        ],
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK],
+            ]
+        ],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => '002060'],
+        ],
+    ];
+    $sheet->getStyle('A1:J1')->applyFromArray($styleArray);
+    foreach ($headRow as $key => $val) {
+      $cellName = $key.'1';
+
+      $sheet->getColumnDimension($key)->setWidth($val[0]);
+
+      $sheet->setCellValue($cellName, $val[2]);
+    }
+
+    $styleArray = [
+        'font' => [
+            'color' => ['argb' => '808080'],
+        ],
+        'borders' => [
+            'vertical' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => 'B2B2B2'],
+            ]
+        ],
+        'fill' => [
+            'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FFFFCC'],
+        ],
+    ];
+    $sheet->getStyle('A2:J2')->applyFromArray($styleArray);
+    $annotationRow = array(
+      'A' => array('id', '-'),
+      'B' => array('path', '[Name of the Source File or Path]'),
+      'C' => array('name', '[Name of the OSS used]'),
+      'D' => array('version', '[Version Number of the OSS]'),
+      'E' => array('scanResults', '[Scan results. Use SPDX Identifier : https://spdx.org/licenses/]'),
+      'F' => array('concludedResults', '[Concluded results. Use SPDX Identifier : https://spdx.org/licenses/]'),
+      'G' => array('download', '[Download URL or a specific location within a VCS for the OSS]'),
+      'H' => array('homepage', '[Web site that serves as the OSSs home page]'),
+      'I' => array('copyright', '[The copyright holders of the OSS. E.g. Copyright (c) 201X Copyright Holder]'),
+      'J' => array('exclude', '[If this OSS is not included in the final version, Check exclude]'),
+      'K' => array('comment','')
+    );
+    foreach ($annotationRow as $key => $val) {
+      $cellName = $key.'2';
+
+      $sheet->setCellValue($cellName, $val[1]);
+    }
+
+    $styleArray = [
+        'borders' => [
+            'allBorders' => [
+                'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                'color' => ['argb' => \PhpOffice\PhpSpreadsheet\Style\Color::COLOR_BLACK],
+            ]
+        ],
+    ];
+
+    $id = 1;
+    foreach ($lines as $row) {
+      $rowNumber = $id + 2;
+      $range = 'A'.$rowNumber.':K'.$rowNumber;
+      $sheet->getStyle($range)->applyFromArray($styleArray);
+      $sheet->setCellValue('A'.$rowNumber, "$id");
+      $sheet->setCellValue('B'.$rowNumber, $row['filePath']);
+
+      if ($row['agentFindings'] !== null) {
+        $scannedLicenses = implode(',', $row['agentFindings']);
+        $sheet->setCellValue('E'.$rowNumber, $scannedLicenses);
+      }
+      if ($row['conclusions'] !== null) {
+        $concludedLicenses = implode(',', $row['conclusions']);
+        $sheet->setCellValue('F'.$rowNumber, $concludedLicenses);
+      }
+      $id++;
+    }
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="'.$fileName.'.xlsx"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    ob_end_clean();
+    $writer->save('php://output');
+    exit();
   }
 
   /**

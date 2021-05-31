@@ -108,15 +108,15 @@ if [[ $BUILDTIME ]]; then
             libdistro-info-perl
          case "$CODENAME" in
            xenial|stretch)
-             apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip;;
+             apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd;;
            buster)
-             apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip;;
+             apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd;;
            bionic)
-             apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip;;
+             apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip php7.2-gd;;
            sid)
-             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip;;
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd;;
            focal)
-             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip;;
+             apt-get $YesOpt install php-mbstring php-cli php-xml php-zip php-gd;;
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
