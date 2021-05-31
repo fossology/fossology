@@ -795,7 +795,7 @@ class UIExportList extends FO_Plugin
       $rowNumber = $id + 2;
       $range = 'A'.$rowNumber.':K'.$rowNumber;
       $sheet->getStyle($range)->applyFromArray($styleArray);
-      $sheet->setCellValue('A'.$rowNumber, $id);
+      $sheet->setCellValue('A'.$rowNumber, "$id");
       $sheet->setCellValue('B'.$rowNumber, $row['filePath']);
 
       if ($row['agentFindings'] !== null) {
