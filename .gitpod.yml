@@ -5,6 +5,9 @@ ports:
     onOpen: ignore
   - port: 24693
     onOpen: ignore
+  - port: 8001
+    visibility: public
+    onOpen: notify
 github:
   prebuilds:
     master: true
@@ -12,9 +15,41 @@ github:
     pullRequests: true
     pullRequestsFromForks: true
     addComment: true
+workspaceLocation: fossology
+checkoutLocation:  fossology
 
 tasks:
-  - init: ./utils/gitpod-install.sh; sudo mkdir -p /var/log/fossology; sudo chown fossy:gitpod /var/log/fossology
-    command: mkdir -p public; apachectl restart
-  - command: sudo chown gitpod:fossy /workspace/fossy/etc/fossology/Db.conf; sudo /workspace/fossy/code/share/fossology/scheduler/agent/fo_scheduler --verbose=3 --reset
+  - init: |
+      mkdir -p "/workspace/apache/"
+      ./utils/gitpod-install.sh
+    name: install
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
+  - command: |
+      mkdir -p public "/workspace/apache" "/workspace/fossy/srv" "/workspace/fossy/var"
+      if [[ -z $(grep "/workspace/apache" "/etc/apache2/apache2.conf") ]];then printf '\nIncludeOptional /workspace/apache/*.conf\n' >> /etc/apache2/apache2.conf; fi
+      sudo /usr/sbin/a2enmod rewrite
+      sudo chown gitpod:gitpod -R /var/log/apache2/
+      apachectl restart
+      gp sync-done ui
+      gp preview "$(gp url 8001)/repo/" --external
+    name: Apache UI
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
+  - command: |
+      gp sync-await ui
+      sudo mkdir -p /var/log/fossology/
+      sudo chown gitpod:gitpod -R /var/log/fossology/
+      fossrun
     name: fossology
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
