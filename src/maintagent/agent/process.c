@@ -525,3 +525,39 @@ FUNCTION void removeOrphanedLogFiles()
   fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
   return;  // success
 }
+
+/**
+ * @brief remove expired personal access tokens from fossology database
+ * @returns void but writes status to stdout
+ */
+FUNCTION void removeExpiredTokens(long int retentionPeriod)
+{
+  PGresult* result; // the result of the database access
+  char *countTuples;
+  long startTime, endTime;
+  char SQL[1024];
+  time_t current_time = time(0);
+  time_t shifted_time = current_time - (retentionPeriod*24*60*60);
+  struct tm time_structure = *localtime(&shifted_time);
+
+  snprintf(SQL, sizeof(SQL),
+          "DELETE FROM personal_access_tokens WHERE active = 'FALSE' OR expire_on < '%d-%02d-%02d'",
+          time_structure.tm_year + 1900,
+          time_structure.tm_mon + 1,
+          time_structure.tm_mday
+  );
+
+  startTime = (long)time(0);
+
+  result = PQexecCheck(-220, SQL, __FILE__, __LINE__);
+  countTuples = PQcmdTuples(result);
+  PQclear(result);
+  printf("%s Expired personal access tokens have been removed from personal_access_tokens table\n", countTuples);
+  fo_scheduler_heart(1);
+
+  endTime = (long)time(0);
+
+  printf("Time taken for removing expired personal access tokens from database : %ld seconds\n", endTime-startTime);
+
+  return;  // success
+}

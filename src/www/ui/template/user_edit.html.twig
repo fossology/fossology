@@ -21,7 +21,7 @@
   <table style="border:1px solid black; border-collapse: collapse;" width="100%">
     <tr class="classic">
       <th width="25%">{{ "Username."|trans }}</th>
-      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20"></td>
+      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20" {% if not isSessionAdmin %}disabled="disabled"{% endif %}></td>
     </tr>
     <tr class="classic">
       <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
@@ -64,6 +64,14 @@
     <tr class="classic">
       <th width='25%'>{{ "Re-enter password."|trans }}</th>
       <td><input type="password" name="_pass2" size="20" id="pass2"/></td>
+    </tr>
+    <tr class="classic">
+      <th width='25%'>{{ ('Default visibility') |trans }}</th>
+      <td>
+        <input type="radio" name="public" value="private" {% if uploadVisibility == "private" %} checked="checked" {% endif %}/> {{ 'Visible only for active group'| trans }}<img src="images/info_16.png" title="{{ 'which is the currently selected group'|trans }}" alt="" class="info-bullet"/><br/>
+        <input type="radio" name="public" value="protected" {% if uploadVisibility == "protected" %} checked="checked" {% endif %}/> {{ 'Visible for all groups'| trans }}<img src="images/info_16.png" title="{{ 'which are accessible by you now'|trans }}" alt="" class="info-bullet"/><br/>
+        <input type="radio" name="public" value="public" {% if uploadVisibility == "public" %} checked="checked" {% endif %}/> {{ 'Make Public'| trans }}<img src="images/info_16.png" title="{{ 'visible for all users'|trans }}" alt="" class="info-bullet"/><br/>
+      </td>
     </tr>
     <tr class="classic">
       <th width='25%'>{{ 'Default agents selected when uploading data.'|trans }}</th>

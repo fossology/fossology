@@ -2,7 +2,7 @@
  Copyright (C) 2014-2020, Siemens AG
  Authors: Daniele Fognini, Johannes Najjar, Steffen Weber,
           Andreas J. Reichel, Shaheem Azmal M MD
- 
+
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
  version 2 as published by the Free Software Foundation.
@@ -105,7 +105,10 @@ function scheduledDeciderSuccess (data, resultEntity, callbackSuccess, callbackC
 }
 
 function scheduledDeciderError (responseobject, resultEntity) {
-  var error = responseobject.responseJSON.error;
+  var error = false;
+  if (responseobject.responseJSON !== undefined) {
+    error = responseobject.responseJSON.error;
+  }
   if (error) {
     resultEntity.text("error: " + error);
   } else {
@@ -146,13 +149,14 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
   if(isUserError(bulkActions, refText)) {
     return;
   }
-  
+
   var post_data = {
     "bulkAction": bulkActions,
     "refText": refText,
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
-    "forceDecision": $('#forceDecision').is(':checked')?1:0
+    "forceDecision": $('#forceDecision').is(':checked')?1:0,
+    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0
   };
 
   resultEntity.hide();
@@ -304,15 +308,16 @@ function UseThisNoticeButton(idx, text)
 }
 
 function doHandleNoticeFiles(response) {
-   noticeSelectTable.clear();
+  noticeSelectTable.clear();
 
   $.each(response, function(idx, el) {
     if (el.ufile_name !== undefined && el.contents_short !== undefined
         && el.contents !== undefined) {
       noticeSelectTable.row.add([el.ufile_name, el.contents_short, UseThisNoticeButton(idx, el.contents) ]);
-      noticeSelectTable.draw();
     }
   });
+  noticeSelectTable.draw();
+  textAckInputModal.dialog("option", "position", {my: "center", at: "center", of: window });
 }
 
 function selectNoticeFile() {
@@ -395,10 +400,13 @@ function doOnSuccess(textModal) {
 }
 
 $(document).ready(function () {
-  textAckInputModal = $('#textAckInputModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  $('#textAckInputModal').draggable({
-    stop: function(){
-      $(this).css({'width':'','height':''});
+  textAckInputModal = $('#textAckInputModal').dialog({
+    autoOpen:false, width:"auto", height:"auto", modal:true, resizable: false,
+    open: function() {
+      $(".ui-widget-overlay").addClass("grey-overlay");
+      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
+        .css("min-height", "20vh").css("max-width", "70vw")
+        .css("min-width", "20vw");
     }
   });
 
@@ -408,10 +416,12 @@ $(document).ready(function () {
     data: []
   });
 
-  textModal = $('#textModal').dialog({autoOpen:false, width:"auto",height:"auto"});
-  $('#textModal').draggable({
-    stop: function(){
-      $(this).css({'width':'','height':''});
+  textModal = $('#textModal').dialog({
+    autoOpen:false, width:"auto",height:"auto",
+    open: function() {
+      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
+        .css("min-height", "20vh").css("max-width", "70vw")
+        .css("min-width", "20vw");
     }
   });
 });

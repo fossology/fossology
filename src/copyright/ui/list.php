@@ -114,13 +114,20 @@ class copyright_list extends FO_Plugin
         $upload_pk, $lft, $rgt, $hash
       ];
     } else {
+      $eventTable = $tableName . "_event";
+      $eventFk = $tableName . "_fk";
+      $tablePk = $tableName . "_pk";
       /* get all the copyright records for this uploadtree.  */
-      $sql = "SELECT content, type, uploadtree_pk, ufile_name, PF
-                FROM $tableName,
-                (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
-                   WHERE upload_fk=$1
-                     AND uploadtree.lft BETWEEN $2 AND $3) AS SS
-                WHERE PF=pfile_fk AND agent_fk=$4 AND hash=$5 AND type=$6 ORDER BY uploadtree_pk";
+      $sql = "SELECT
+(CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS content,
+type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
+                FROM $tableName AS cp
+              INNER JOIN uploadtree UT ON cp.pfile_fk = ut.pfile_fk
+                AND ut.upload_fk=$1
+                AND ut.lft BETWEEN $2 AND $3
+              LEFT JOIN $eventTable AS ce ON ce.$eventFk = cp.$tablePk
+                AND ce.upload_fk = $1
+              WHERE agent_fk=$4 AND (cp.hash=$5 OR ce.hash=$5) AND type=$6 ORDER BY uploadtree_pk";
       $params = [
         $upload_pk, $lft, $rgt, $Agent_pk, $hash, $type
       ];

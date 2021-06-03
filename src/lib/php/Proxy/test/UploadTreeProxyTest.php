@@ -312,6 +312,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
   public function testOptionSkipAlreadyClearedRanged()
   {
     $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+    $this->testDb->createInheritedTables( array('license_candidate') );
 
     $rfId = 201;
     $groupId = 301;
@@ -346,6 +347,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
   public function testOptionSkipAlreadyClearedParented()
   {
     $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+    $this->testDb->createInheritedTables( array('license_candidate') );
 
     $rfId = 201;
     $groupId = 301;
@@ -379,6 +381,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
   public function testOptionSkipTheseThatAreAlreadyCleared()
   {
     $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref') );
+    $this->testDb->createInheritedTables( array('license_candidate') );
 
     $rfId = 201;
     $groupId = 301;
@@ -412,6 +415,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
   public function testOptionSkipAlreadyClearedButScanRanged()
   {
     $this->testDb->createPlainTables( array('license_file','clearing_decision','clearing_decision_event','clearing_event','license_ref','license_map') );
+    $this->testDb->createInheritedTables( array('license_candidate') );
 
     $rfId = 201;
     $groupId = 301;

@@ -22,6 +22,7 @@ use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
@@ -82,8 +83,21 @@ class ui_file_browse extends DefaultPlugin
     if (empty($Item) || empty($Upload)) {
       return;
     }
-    $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+    $viewLicenseURI = $this->Name . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
+
+    $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($Upload);
+    $itemBounds = $this->uploadDao->getItemTreeBounds($Item, $uploadTreeTable);
+    if (! $itemBounds->containsFiles()) {
+      global $container;
+      /**
+       * @var TreeDao $treeDao Tree dao object
+       */
+      $treeDao = $container->get('dao.tree');
+      $parent = $treeDao->getParentOfItem($itemBounds);
+      $viewLicenseURI = $this->NAME . Traceback_parm_keep(array("show",
+        "format", "page", "upload")) . "&item=$parent";
+    }
     if (GetParm("mod", PARM_STRING) == self::NAME) {
       menu_insert("Browse::$menuName", 98);
       menu_insert("View::$menuName", 98);

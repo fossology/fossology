@@ -169,6 +169,8 @@ src/reportImport/agent/reportImport
 src/delagent/agent_tests/Unit/test_delagent
 src/delagent/agent_tests/Unit/testconf/
 /utils/fo_unicode_clean
+install/db/db.cron
+install/fossdash/fossdash-publish.py
 
 # Add all the Ubuntu consol log file
 ubuntu-*

@@ -208,24 +208,29 @@ class ReuserAgent extends Agent
   {
     $agentId = $this->getAgentId($uploadId);
     $reusedAgentId = $this->getAgentId($reusedUploadId);
-    if ($agentId == $reusedAgentId || $agentId == null || $reusedAgentId == null) {
+    if ($agentId == null || $reusedAgentId == null) {
       return true;
     }
     $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
     $extrawhere = ' agent_fk='.$agentId;
-    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright', $uploadTreeTableName, $uploadId, $type=null,
-                                                            $extrawhere, $enabled='true');
-    $reusedUploadtreeTableName = $this->uploadDao->getUploadtreeTableName($reusedUploadId);
-    $extrawhere = ' agent_fk='.$reusedAgentId;
-    $reusedCopyrights = $this->copyrightDao->getScannerEntries('copyright', $reusedUploadtreeTableName, $reusedUploadId,
-                                                                $type=null, $extrawhere, $enabled='false');
+    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright',
+      $uploadTreeTableName, $uploadId, null, $extrawhere);
+
+    $reusedCopyrights = $this->copyrightDao->getAllEventEntriesForUpload(
+      $reusedUploadId, $reusedAgentId);
+
     if (!empty($reusedCopyrights) && !empty($allCopyrights)) {
       foreach ($reusedCopyrights as $reusedCopyright) {
-        foreach ($allCopyrights as $copyright) {
-          if ($copyright['hash'] == $reusedCopyright['hash']) {
-            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']), $uploadTreeTableName);
-            $this->copyrightDao->updateTable($item, $copyright['hash'], $copyright['content'], $this->userId,
-                                             $cpTable='copyright', $action='delete');
+        foreach ($allCopyrights as $copyrightKey => $copyright) {
+          if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
+            $action = "delete";
+            $content = "";
+            $hash = $copyright['hash'];
+            $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
+                      $uploadTreeTableName);
+            $this->copyrightDao->updateTable($item, $hash, $content,
+              $this->userId, 'copyright', $action);
+            unset($allCopyrights[$copyrightKey]);
             $this->heartbeat(1);
           }
         }
@@ -271,6 +276,9 @@ class ReuserAgent extends Agent
 
     foreach ($containedItems as $item) {
       $fileId = $item->getFileId();
+      if (empty($fileId)) {
+        continue;
+      }
       if (array_key_exists($fileId, $clearingDecisionToImportByFileId)) {
         $this->createCopyOfClearingDecision($item->getId(), $userId, $groupId,
           $clearingDecisionToImportByFileId[$fileId]);
@@ -309,11 +317,19 @@ class ReuserAgent extends Agent
 
     foreach ($clearingDecisionsToImport as $clearingDecision) {
       $reusedPath = $treeDao->getRepoPathOfPfile($clearingDecision->getPfileId());
+      if (empty($reusedPath)) {
+        // File missing from repo
+        continue;
+      }
 
       $res = $this->dbManager->execute($stmt,array($itemTreeBounds->getUploadId(),
         $itemTreeBoundsReused->getUploadId(),$clearingDecision->getPfileId()));
       while ($row = $this->dbManager->fetchArray($res)) {
         $newPath = $treeDao->getRepoPathOfPfile($row['pfile_fk']);
+        if (empty($newPath)) {
+          // File missing from repo
+          continue;
+        }
         $this->copyClearingDecisionIfDifferenceIsSmall($reusedPath, $newPath, $clearingDecision, $row['uploadtree_pk']);
       }
       $this->dbManager->freeResult($res);
@@ -333,7 +349,7 @@ class ReuserAgent extends Agent
    */
   protected function copyClearingDecisionIfDifferenceIsSmall($reusedPath,$newPath,$clearingDecision,$itemId)
   {
-    $diffLevel = system("diff $reusedPath $newPath | wc -l");
+    $diffLevel = exec("diff $reusedPath $newPath | wc -l");
     if ($diffLevel === false) {
       throw new \Exception('cannot use diff tool');
     }

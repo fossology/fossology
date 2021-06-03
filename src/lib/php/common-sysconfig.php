@@ -171,7 +171,7 @@ CREATE TABLE sysconfig (
     group_order int,
     description text NOT NULL,
     validation_function character varying(40) DEFAULT NULL,
-    option_value character varying(40) DEFAULT NULL
+    option_value text DEFAULT NULL
 );
 ";
 
@@ -210,6 +210,13 @@ function Populate_sysconfig()
   $columns = array("variablename", "conf_value", "ui_label", "vartype", "group_name",
     "group_order", "description", "validation_function", "option_value");
   $valueArray = array();
+
+  /*  CorsOrigin */
+  $variable = "CorsOrigins";
+  $prompt = _('Allowed origins for REST API');
+  $desc = _('[scheme]://[hostname]:[port], "*" for anywhere');
+  $valueArray[$variable] = array("'$variable'", "'localhost:3000'", "'$prompt'",
+    strval(CONFIG_TYPE_TEXT), "'PAT'", "3", "'$desc'", "null", "null");
 
   /*  Email */
   $variable = "SupportEmailLabel";
@@ -392,6 +399,12 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "'1'", "'$smtpTlsPrompt'",
     strval(CONFIG_TYPE_DROP), "'SMTP'", "8", "'$smtpTlsDesc'", "null", "'Yes{1}|No{2}'");
 
+  $variable = "UploadVisibility";
+  $prompt = _('Default Upload Visibility');
+  $desc = _('Default Visibility for uploads by the user');
+  $valueArray[$variable] = array("'$variable'", "'protected'", "'$prompt'",
+    strval(CONFIG_TYPE_DROP), "'UploadFlag'", "1", "'$desc'", "null", "'Visible only for active group{private}|Visible for all groups{protected}|Make Public{public}'");
+
   /* Password policy config */
   $variable = "PasswdPolicy";
   $prompt = _('Enable password policy');
@@ -444,6 +457,12 @@ function Populate_sysconfig()
   $patTokenValidityDesc = _('Maximum validity of tokens (in days)');
   $valueArray[$variable] = array("'$variable'", "30", "'$patTokenValidityPrompt'",
     strval(CONFIG_TYPE_INT), "'PAT'", "1", "'$patTokenValidityDesc'", "null", "null");
+
+  $variable = "PATMaxPostExpiryRetention";
+  $patTokenRetentionPrompt = _('Max expired token retention period');
+  $patTokenRetentionDesc = _('Maximum retention period of expired tokens (in days) for Maintagent');
+  $valueArray[$variable] = array("'$variable'", "30", "'$patTokenRetentionPrompt'",
+    strval(CONFIG_TYPE_INT), "'PAT'", "2", "'$patTokenRetentionDesc'", "null", "null");
 
   $variable = "SkipFiles";
   $mimeTypeToSkip = _("Skip MimeTypes from scanning");
@@ -536,31 +555,69 @@ function Create_option_value()
   global $PG_CONN;
 
   /* If sysconfig exists, then we are done */
-  $sql = "SELECT column_name FROM information_schema.columns WHERE "
+  $sql = "SELECT column_name, data_type FROM information_schema.columns WHERE "
        . "table_name='sysconfig' and column_name='option_value' limit 1;";
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $numrows = pg_num_rows($result);
+  $rows = pg_fetch_assoc($result);
   pg_free_result($result);
   if ($numrows > 0) {
-    return 0;
+    if ($rows['data_type'] == 'text') {
+      return 0;
+    }
   }
 
-  /* Create the option_value column */
-  $sql = "ALTER TABLE sysconfig ADD COLUMN option_value character varying(40) DEFAULT NULL;";
+  if ($numrows < 1) {
+    /* Create the option_value column */
+    $sql = "ALTER TABLE sysconfig ADD COLUMN option_value text DEFAULT NULL;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+    /* Document columns */
+    $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
+         . "provide options in format op1{val1}|op2{val2}|...';";
+    /* this is a non critical update */
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+    return 1;
+  }
 
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
+  /* Column exists but with old data type */
+  pg_query($PG_CONN, "BEGIN;");
 
-  /* Document columns */
-  $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
-       . "provide options in format op1{val1}|op2{val2}|...';";
-  /* this is a non critical update */
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return 1;
+  try {
+    $sql = "ALTER TABLE sysconfig RENAME COLUMN option_value TO old_option_value;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "ALTER TABLE sysconfig ADD COLUMN option_value text DEFAULT NULL;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
+      . "provide options in format op1{val1}|op2{val2}|...';";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "UPDATE sysconfig SET option_value = old_option_value;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+
+    $sql = "ALTER TABLE sysconfig DROP COLUMN old_option_value;";
+    $result = pg_query($PG_CONN, $sql);
+    DBCheckResult($result, $sql, __FILE__, __LINE__);
+    pg_free_result($result);
+  } catch (\Exception $e) {
+    pg_query($PG_CONN, "ROLLBACK;");
+    throw $e;
+  }
+  pg_query($PG_CONN, "COMMIT;");
 }
 
 /**

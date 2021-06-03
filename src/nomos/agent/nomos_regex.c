@@ -37,6 +37,7 @@
 static char regexErrbuf[myBUFSIZ];
 
 regex_t idx_regc[NFOOTPRINTS];
+regex_t regc[NFOOTPRINTS];
 
 /**
  * \brief Log an error caused by regex

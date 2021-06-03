@@ -149,7 +149,7 @@ class core_init extends FO_Plugin
   } // Output()
 
   /**
-   * @see http://www.fossology.org/projects/fossology/wiki/UI_Architecture_Overview
+   * @see https://github.com/fossology/fossology/wiki/UI-Architecture-Overview
    */
   function infoFirstTimeUsage()
   {

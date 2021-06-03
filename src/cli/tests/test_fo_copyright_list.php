@@ -32,7 +32,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
   protected function setUp()
   {
     $this->testDb = new TestPgDb("fossclitest");
-    $tables = array('users','upload','uploadtree_a','uploadtree','copyright','groups','group_user_member','agent','copyright_decision','copyright_ars','ars_master');
+    $tables = array('users','upload','uploadtree_a','uploadtree','copyright','groups','group_user_member','agent','copyright_decision','copyright_ars','ars_master','copyright_event');
     $this->testDb->createPlainTables($tables);
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->createInheritedArsTables(array('copyright'));

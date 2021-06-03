@@ -79,19 +79,21 @@ class OjosDatabaseHandler: public fo::AgentDatabaseHandler
     ;
     OjosDatabaseHandler spawn() const;
 
-    std::vector<unsigned long> queryFileIdsForUpload(int uploadId, bool ignoreFilesWithMimeType);
-    std::vector<unsigned long> queryFileIdsForScan(int uploadId, int agentId, bool ignoreFilesWithMimeType);
+    std::vector<unsigned long> queryFileIdsForUpload(int uploadId, int agentId,
+                                                     bool ignoreFilesWithMimeType);
     unsigned long saveLicenseToDatabase(OjoDatabaseEntry &entry) const;
     bool insertNoResultInDatabase(OjoDatabaseEntry &entry) const;
     bool saveHighlightToDatabase(const ojomatch &match,
       const unsigned long fl_fk) const;
 
-    unsigned long getLicenseIdForName(std::string const &rfShortName);
+    unsigned long getLicenseIdForName(std::string const &rfShortName,
+                                      const int groupId);
 
   private:
-    unsigned long getCachedLicenseIdForName(
+    unsigned long getCachedLicenseIdForName (
       std::string const &rfShortName) const;
-    unsigned long selectOrInsertLicenseIdForName(std::string rfShortname);
+    unsigned long selectOrInsertLicenseIdForName (std::string rfShortname,
+                                                  const int groupId);
     /**
      * Cached license pairs
      */

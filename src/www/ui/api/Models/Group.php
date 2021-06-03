@@ -18,7 +18,7 @@
  ***************************************************************/
 /**
  * @file
- * @brief Folder model
+ * @brief Group model
  */
 
 namespace Fossology\UI\Api\Models;
@@ -37,7 +37,7 @@ class Group
   private $name;
 
   /**
-   * Folder constructor.
+   * Group constructor.
    *
    * @param int $id
    * @param string $name

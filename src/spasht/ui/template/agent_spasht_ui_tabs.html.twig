@@ -42,9 +42,9 @@
               </span>
               <br/><br/>
               <a style='cursor:pointer;margin-left:10px;' id='replaceSelectedstatement'
-                class='buttonLink'>Mark selected rows for replace</a>
+                class='buttonLink'>Replace selected rows</a>
               <a style='cursor:pointer;margin-left:10px;' id='deleteSelectedstatement'
-                class='buttonLink'>Mark selected rows for deletion</a>
+                class='buttonLink'>Deactivate selected rows</a>
               <br />
             </div>
             <span style="font-weight:bold;display:block;padding:3em 0 1em;font-size:15pt;">Deactivated statements</span>
@@ -59,6 +59,12 @@
               </thead>
               <tbody></tbody>
             </table>
+            <br /><br />
+            <div>
+              <a id='undoSelectedstatement'
+                class='buttonLink'>Undo selected rows</a>
+              <br />
+            </div>
           </td>
           {% if fileList is not empty %}
           <td valign="top" style="width:15em">

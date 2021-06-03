@@ -23,10 +23,12 @@ show_help() {
 Usage: fo-debuild [options]
   -s or --no-sign    : do not sign packages
   -h or --help       : this help text
+  -t or --no-tar     : do not tar packages folder
 EOF
 }
 
 NOSIGN=''
+NOTAR=''
 
 . "${SCRIPT_DIR}/utils.sh"
 
@@ -50,7 +52,7 @@ set -o errexit -o nounset -o pipefail
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o sh --long no-sign,help -n 'fo-debuild' -- "$@")
+OPTS=$(getopt -o sht --long no-sign,help,no-tar -n 'fo-debuild' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -60,8 +62,9 @@ eval set -- "$OPTS"
 
 while true; do
    case "$1" in
-      -s|--no-sign)     NOSIGN="--no-sign"; shift;;
+      -s|--no-sign)     NOSIGN="-us -uc"; shift;;
       -h|--help)        show_help; exit;;
+      -t|--no-tar)      NOTAR="1"; shift;;
       --)               shift; break;;
       *)                echo "ERROR: option $1 not recognised"; exit 1;;
    esac
@@ -89,15 +92,17 @@ dpkg-buildpackage ${NOSIGN}
 git checkout -- debian/changelog
 
 # Package deb files
-echo "Packaging files as ${TOP}/fossology_${VERSION}.tar.gz"
+echo "Organizing files to ${TOP}/packages/"
 find .. -type f -name "*-dbgsym*" -exec rm -rf {} \;
 mkdir -p packages
 mv ../*.deb packages/
-mv ../fossology_${VERSION}_*.buildinfo packages/
-mv ../fossology_${VERSION}_*.changes packages/
+mv ../fossology_${VERSION}_* packages/
 mv ../fossology_${VERSION}.dsc packages/
-tar -czvf fossology_${VERSION}.tar.gz packages
-rm -rf packages
+if [[ -z "${NOTAR}" ]]; then
+  echo "Packaging files as ${TOP}/fossology_${VERSION}.tar.gz"
+  tar -czvf fossology_${VERSION}.tar.gz packages
+  rm -rf packages
+fi
 
 popd
 

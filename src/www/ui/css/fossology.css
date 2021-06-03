@@ -146,6 +146,11 @@ html, body
   background-color: #E6E6E6;
   border-radius: 10px;
   display: none;
+  box-sizing: border-box;
+  max-height: 70vh;
+  min-height: 20vh;
+  max-width: 70vw;
+  min-width: 20vw;
 }
 
 .icon-small {
@@ -160,7 +165,6 @@ html, body
 .boxnew {
   background-color: #ffffff;
   border: 5px solid #f2f2f2;
-  display: inline-block;
   float: left;
   height: 700px;
   overflow: auto;
@@ -183,20 +187,9 @@ html, body
   overflow: auto;
 }
 
-.scrollable {
-  /*overflow: auto;*/
-  /*max-height: 20%;*/
-}
-
-.scrollable2 {
-  /*overflow: auto;*/
-  /*max-height: 30%;*/
-}
-
 .headerBox {
   width: 99%;
   background-color: #ffffff;
-  display: inline-block;
   float: right;
   height: 700px;
   overflow: auto;
@@ -213,7 +206,6 @@ img.delete, img.add, img.deleted, img.added {
   height: 16px;
   width: 16px;
   margin: 0 auto;
-  padding: 0 auto;
 }
 
 img.add, img.delete {
@@ -289,7 +281,6 @@ tr.classic {
 
 td.dashboard {
   vertical-align: top;
-  horiz-align: center;
   padding-right: 10%;
 }
 

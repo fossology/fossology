@@ -27,7 +27,8 @@
         "twig/twig" : "v2.12.5",
         "twig/extensions" : "v1.5.4",
         "guzzlehttp/guzzle": "v6.5.5",
-        "container-interop/container-interop": "v1.2.0"
+        "container-interop/container-interop": "v1.2.0",
+        "phpoffice/phpspreadsheet": "^1"
     },
     "require-dev" : {
         "doctrine/instantiator" : "v1.0.5",

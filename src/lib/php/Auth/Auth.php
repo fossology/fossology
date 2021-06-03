@@ -29,7 +29,7 @@ namespace Fossology\Lib\Auth;
  * @brief Contains the constants and helpers for authentication of user.
  *
  * Permissions
- * See https://github.com/fossology/fossology/wiki/Permissions-and-Groups
+ * See https://github.com/fossology/fossology/wiki/Access-Control
  */
 class Auth
 {

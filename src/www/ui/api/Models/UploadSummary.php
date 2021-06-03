@@ -56,6 +56,11 @@ class UploadSummary
    */
   private $uploadName;
   /**
+   * @var integer $assignee
+   * Upload assignee Id
+   */
+  private $assignee;
+  /**
    * @var integer $uniqueConcludedLicenses
    * No of unique licenses concluded for upload
    */
@@ -99,6 +104,7 @@ class UploadSummary
     $this->filesCleared = 0;
     $this->clearingStatus = UploadStatus::OPEN;
     $this->copyrightCount = 0;
+    $this->assignee = null;
   }
 
   /**
@@ -119,6 +125,7 @@ class UploadSummary
     return [
       "id"                      => $this->uploadId,
       "uploadName"              => $this->uploadName,
+      "assignee"                => $this->assignee,
       "mainLicense"             => $this->mainLicense,
       "uniqueLicenses"          => $this->uniqueLicenses,
       "totalLicenses"           => $this->totalLicenses,
@@ -169,6 +176,14 @@ class UploadSummary
   public function setUploadName($uploadName)
   {
     $this->uploadName = $uploadName;
+  }
+
+  /**
+   * @param integer $assignee
+   */
+  public function setAssignee($assignee)
+  {
+    $this->assignee = $assignee == 1 ? null : intval($assignee);
   }
 
   /**

@@ -461,8 +461,7 @@ class AjaxExplorer extends DefaultPlugin
           UploadTreeProxy::OPT_SKIP_THESE => UploadTreeProxy::OPT_SKIP_ALREADY_CLEARED,
           UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
           $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
-          UploadTreeProxy::OPT_GROUP_ID => $groupId,
-          UploadTreeProxy::OPT_ONLY_MAIN_LICENSE => true
+          UploadTreeProxy::OPT_GROUP_ID => $groupId
         ), $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'already_cleared_uploadtree' . $itemTreeBounds->getUploadId());
 
@@ -477,8 +476,7 @@ class AjaxExplorer extends DefaultPlugin
           UploadTreeProxy::OPT_SKIP_THESE => "noLicense",
           UploadTreeProxy::OPT_ITEM_FILTER => "AND (lft BETWEEN " .
           $itemTreeBounds->getLeft() . " AND " . $itemTreeBounds->getRight() . ")",
-          UploadTreeProxy::OPT_GROUP_ID => $groupId,
-          UploadTreeProxy::OPT_ONLY_MAIN_LICENSE => true
+          UploadTreeProxy::OPT_GROUP_ID => $groupId
         ), $itemTreeBounds->getUploadTreeTableName(),
         $viewName = 'no_license_uploadtree' . $itemTreeBounds->getUploadId());
       $this->noLicenseUploadTreeView->materialize();

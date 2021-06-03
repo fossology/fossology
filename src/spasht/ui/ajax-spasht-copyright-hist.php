@@ -410,7 +410,7 @@ class SpashtCopyrightHistogramProcessPost extends FO_Plugin
     if ($rw && $activated) {
       $output['3'] = "<input type='checkbox' class='deleteBySelect$type' id='deleteBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     } else {
-        $output['3'] = "";
+      $output['3'] = "<input type='checkbox' class='undoBySelect$type' id='undoBySelect$type$hash' value='".$upload.",".$uploadTreeId.",".$hash.",".$type."'>";
     }
     return $output;
   }

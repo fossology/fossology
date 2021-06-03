@@ -100,8 +100,12 @@ int event_loop_put(event_loop_t* event_loop, event_t* e)
  */
 event_t* event_loop_take(event_loop_t* event_loop)
 {
+#if !GLIB_CHECK_VERSION(2, 32, 0)
   GTimeVal timeout;
+#endif
   event_t* ret;
+  int sec = 0;
+  int usec = 0;
 
   if(event_loop->terminated)
   {
@@ -109,14 +113,15 @@ event_t* event_loop_take(event_loop_t* event_loop)
   }
 
   /* wait for 1 second */
-  timeout.tv_sec  = 1;
-  timeout.tv_usec = 0;
-
-#if GLIB_MAJOR_VERSION >= 2 && GLIB_MINOR_VERSION >= 32
+  sec = 1;
+  usec = 0;
+#if GLIB_CHECK_VERSION(2, 32, 0)
   if((ret = g_async_queue_timeout_pop(event_loop->queue,
-      timeout.tv_sec * 1000000 + timeout.tv_usec)) == NULL)
+      sec * 1000000 + usec)) == NULL)
     return ret;
 #else
+  timeout.tv_sec  = sec;
+  timeout.tv_usec = usec;
   g_get_current_time(&timeout);
   g_time_val_add(&timeout, 1000000);
   if((ret = g_async_queue_timed_pop(event_loop->queue, &timeout)) == NULL)

@@ -89,7 +89,7 @@ LOGDIR=/var/log/$PROJECT
 header  = sampleheader.txt
 footer  = samplefooter.txt
 subject = FOSSology scan complete
-client  = /usr/bin/mailx
+client  = /usr/bin/s-nail
 
 [EXT_AUTH]
 ; Use external Authentication

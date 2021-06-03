@@ -109,7 +109,13 @@ class UserEditPage extends DefaultPlugin
 
         /* Reread the user record as update verification */
         $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
+        if ($user_pk == $user_pk_to_modify) {
+          $_SESSION['User'] = $UserRec['user_name'];
+        }
       } else {
+        if (empty($UserRec['user_name']) || $_SESSION['User'] != $UserRec['user_name']) {
+          $UserRec = $this->CreateUserRec($request, $UserRec['user_pk']);
+        }
         $vars['message'] = $rv;
       }
     } else {
@@ -189,6 +195,7 @@ class UserEditPage extends DefaultPlugin
       "agent_adj2nest", "wget_agent"), $UserRec['user_name']);
     $vars['bucketPool'] = SelectBucketPool($UserRec["default_bucketpool_fk"]);
     $vars['defaultGroupOption'] = $this->getUserGroupSelect($UserRec);
+    $vars['uploadVisibility'] = $UserRec['upload_visibility'];
 
     return $vars;
   }
@@ -261,6 +268,11 @@ class UserEditPage extends DefaultPlugin
         $Errors .= "<li>" . _("User is not member of provided group.") .
           "</li>";
       }
+    }
+
+    /* Make sure only admin can change the username */
+    if ((!Auth::isAdmin()) && ($UserRec['user_name'] != $_SESSION['User'])) {
+      $Errors .= "<li>" . _("Only admin can change the username.") . "</li>";
     }
 
     /* If we have any errors, return them */
@@ -357,6 +369,7 @@ class UserEditPage extends DefaultPlugin
       $UserRec['user_pk'] = intval($request->get('user_pk'));
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
       $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
+      $UserRec['upload_visibility'] = stripslashes($request->get('public'));
       $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
       $defaultGroup = $request->get('default_group_fk', null);
       if ($defaultGroup !== null) {

@@ -44,6 +44,8 @@ abstract class UploadPageBase extends DefaultPlugin
   private $uploadDao;
   /** @var Logger */
   private $logger;
+  /** @var UserDao */
+  private $userDao;
 
   public function __construct($name, $parameters = array())
   {
@@ -52,6 +54,7 @@ abstract class UploadPageBase extends DefaultPlugin
     $this->folderDao = $this->getObject('dao.folder');
     $this->uploadDao = $this->getObject('dao.upload');
     $this->logger = $this->getObject('logger');
+    $this->userDao = $this->getObject('dao.user');
   }
   abstract protected function handleUpload(Request $request);
   abstract protected function handleView(Request $request, $vars);
@@ -72,7 +75,14 @@ abstract class UploadPageBase extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['upload_max_filesize'] = ini_get('upload_max_filesize');
     $vars['agentCheckBoxMake'] = '';
-
+    global $SysConf;
+    $userId = Auth::getUserId();
+    $UserRec = $this->userDao->getUserByPk($userId);
+    if (!empty($UserRec['upload_visibility'])) {
+      $vars['uploadVisibility'] = $UserRec['upload_visibility'];
+    } else {
+      $vars['uploadVisibility'] = $SysConf['SYSCONFIG']['UploadVisibility'];
+    }
     $rootFolder = $this->folderDao->getRootFolder(Auth::getUserId());
     $folderStructure = $this->folderDao->getFolderStructure($rootFolder->getId());
 

@@ -1,0 +1,38 @@
+# This patch is created from https://github.com/easyrdf/easyrdf/pull/370
+# It tries to improve the Report Import agent without updating the easyrdf
+# from 0.9.0 to latest version due to PHP version constraints.
+#
+# The copyrights are help by the respective authors (see
+# https://github.com/easyrdf/easyrdf/blob/master/LICENSE.md).
+
+--- vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php	2020-09-08 17:14:43.328912848 +0530
++++ vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php	2021-01-27 14:06:18.391440952 +0530
+@@ -795,14 +795,22 @@
+         /* xml parser */
+         $this->initXMLParser();
+ 
+-        /* parse */
+-        if (!xml_parse($this->xmlParser, $data, false)) {
++        /* split into 1MB chunks, so XML parser can cope */
++        $chunkSize = 1000000;
++        $length = strlen($data);
++        for ($pos=0; $pos < $length; $pos += $chunkSize) {
++          $chunk = substr($data, $pos, $chunkSize);
++          $isLast = ($pos + $chunkSize > $length);
++
++          /* Parse the chunk */
++          if (!xml_parse($this->xmlParser, $chunk, $isLast)) {
+             $message = xml_error_string(xml_get_error_code($this->xmlParser));
+             throw new EasyRdf_Parser_Exception(
+-                'XML error: "' . $message . '"',
+-                xml_get_current_line_number($this->xmlParser),
+-                xml_get_current_column_number($this->xmlParser)
+-            );
++              'XML error: "' . $message . '"',
++              xml_get_current_line_number($this->xmlParser),
++              xml_get_current_column_number($this->xmlParser)
++              );
++          }
+         }
+ 
+         xml_parser_free($this->xmlParser);

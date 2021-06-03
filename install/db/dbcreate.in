@@ -15,6 +15,17 @@ echo "*** Setting up the FOSSology database ***"
 # At some point this is where we could dynamically set the db password
 
 # first check that postgres is running
+psqln=0
+until [ "$psqln" -ge 10 ]; do
+   su postgres -c 'echo \\q|psql'
+   if [ $? = 0 ]; then
+      break
+   fi
+   echo "WARNING: postgresql isn't running. Retrying..."
+   sleep 15
+   psqln=$((psqln+1))
+done
+
 su postgres -c 'echo \\q|psql'
 if [ $? != 0 ]; then
    echo "ERROR: postgresql isn't running"
@@ -34,6 +45,17 @@ if [ $? = 0 ]; then
       su postgres -c 'echo "CREATE LANGUAGE plpgsql;" | psql fossology'
       if [ $? != 0 ]; then
          echo "ERROR: failed to add plpgsql to fossology database"
+      fi
+   fi
+   echo "*** Checking for 'uuid-ossp' support ***"
+   su postgres -c 'echo "SELECT * FROM pg_extension;" | psql -t fossology' |grep -q uuid-ossp
+   if [ $? = 0 ]; then
+      echo "NOTE: 'uuid-ossp' already exists in fossology database, good"
+   else
+      echo "NOTE: 'uuid-ossp' doesn't exist, adding"
+      su postgres -c 'echo "CREATE EXTENSION \"uuid-ossp\";" | psql fossology'
+      if [ $? != 0 ]; then
+         echo "ERROR: failed to add 'uuid-ossp' to fossology database"
       fi
    fi
 else

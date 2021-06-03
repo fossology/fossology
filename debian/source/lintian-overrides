@@ -4,7 +4,7 @@ fossology source: * *test* *
 # Long lines in minified javascript files in source files
 fossology source: source-is-missing src/www/ui/scripts/jquery-ui.js *
 fossology source: source-is-missing src/www/ui/scripts/jquery.validate.js *
-fossology source: insane-line-length-in-source-file debian/missing-sources/jquery-3.3.1.js *
+fossology source: insane-line-length-in-source-file debian/missing-sources/jquery-3.6.0.js *
 fossology source: insane-line-length-in-source-file debian/missing-sources/jquery.dataTables.js *
 fossology source: insane-line-length-in-source-file debian/missing-sources/jquery.plainmodal.js *
 fossology source: insane-line-length-in-source-file debian/missing-sources/select2.full.js *

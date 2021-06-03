@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<phpunit
+  bootstrap="../../../phpunit-bootstrap.php" colors="true"
+  backupGlobals="true"
+  beStrictAboutTestsThatDoNotTestAnything="false"
+  convertErrorsToExceptions="true"
+  convertNoticesToExceptions="false"
+  stopOnFailure="false">
+
+  <testsuites>
+    <testsuite name="Fossology PhpUnit REST API">
+      <directory suffix="Test.php">Controllers</directory>
+      <directory suffix="Test.php">Helper</directory>
+      <directory suffix="Test.php">Models</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>

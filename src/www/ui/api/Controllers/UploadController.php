@@ -449,7 +449,7 @@ class UploadController extends RestController
         $response = $response->withJson($error->getArray(), $error->getCode());
       } else if (array_key_exists('isAgentRunning', $agent) &&
         $agent['isAgentRunning']) {
-        $error = new Info(503, "Agent $agent is running. " .
+        $error = new Info(503, "Agent " . $agent["agentName"] . " is running. " .
           "Please check job status at /api/v1/jobs?upload=" . $uploadId,
           InfoType::INFO);
         $response = $response->withHeader('Retry-After', '60')

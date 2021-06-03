@@ -41,6 +41,7 @@ FUNCTION void usage(char *name)
   printf("  -p   :: Verify file permissions (report only).\n");
   printf("  -P   :: Verify and fix file permissions.\n");
   printf("  -R   :: Remove uploads with no pfiles.\n");
+  printf("  -t # :: Remove personal access tokens expired # days ago.\n");
   printf("  -T   :: Remove orphaned temp tables.\n");
   printf("  -U   :: Process expired uploads (slow).\n");
   printf("  -Z   :: Remove orphaned files from the repository (slow).\n");

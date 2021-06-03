@@ -37,6 +37,11 @@ extern licText_t licText[]; /* Defined in _autodata.c */
 struct globals gl;
 struct curScan cur;
 
+char debugStr[myBUFSIZ];
+char dbErrString[myBUFSIZ];
+
+size_t hashEntries;
+
 int schedulerMode = 0; /**< Non-zero when being run from scheduler */
 int Verbose = 0; /**< Verbosity level */
 
@@ -184,7 +189,7 @@ void list_dir (const char * dir_name, int process_count, int *distribute_count, 
         list_dir(filename_buf, process_count, distribute_count, pFile); // deep into this directory and travel it
       }
       else {
-        sprintf(filename_buf, "%s\n", filename_buf); // add one new line character by the end of one file path, one line is one file path
+        strncat(filename_buf, "\n", PATH_MAX - 1); // add one new line character by the end of one file path, one line is one file path
         /* write on average process_count */
         file_number = *distribute_count%process_count;
         fwrite (filename_buf, sizeof(char), strlen(filename_buf), pFile[file_number]);

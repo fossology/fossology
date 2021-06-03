@@ -51,6 +51,10 @@ class maintagent extends FO_Plugin {
     foreach ($_REQUEST as $key => $value) {
       if ($key == $value) {
         $options .= $value;
+        if ($key == "t") {
+          $retentionPeriod = $SysConf['SYSCONFIG']['PATMaxPostExpiryRetention'];
+          $options .= $retentionPeriod;
+        }
       }
     }
 
@@ -92,6 +96,7 @@ class maintagent extends FO_Plugin {
               //       "p"=>_("Verify file permissions (report only)."),
               //       "P"=>_("Verify and fix file permissions."),
                      "R"=>_("Remove uploads with no pfiles."),
+                     "t"=>_("Remove expired personal access tokens."),
                      "T"=>_("Remove orphaned temp tables."),
                      "D"=>_("Vacuum Analyze the database."),
               //       "U"=>_("Process expired uploads (slow)."),
@@ -117,7 +122,7 @@ class maintagent extends FO_Plugin {
     $V.= "<p>";
     $V.= _("More information about these operations can be found ");
     $text = _("here.");
-    $V.= "<a href=http://www.fossology.org/projects/fossology/wiki/Maintagent> $text </a>";
+    $V.= "<a href=https://github.com/fossology/fossology/wiki/Maintenance-Agent> $text </a>";
 
     $V.= "<input type=hidden name=queue value=true>";
 

@@ -26,6 +26,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Dao\TreeDao;
 use Fossology\Lib\Data\ClearingDecision;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
@@ -90,9 +91,22 @@ class BrowseLicense extends DefaultPlugin
     if (empty($Item) || empty($Upload)) {
       return;
     }
-    $viewLicenseURI = "view-license" . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
+    $viewLicenseURI = $this->NAME . Traceback_parm_keep(array("show", "format", "page", "upload", "item"));
     $menuName = $this->Title;
-    if (GetParm("mod", PARM_STRING) == self::NAME) {
+
+    $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($Upload);
+    $itemBounds = $this->uploadDao->getItemTreeBounds($Item, $uploadTreeTable);
+    if (! $itemBounds->containsFiles()) {
+      global $container;
+      /**
+       * @var TreeDao $treeDao Tree dao object
+       */
+      $treeDao = $container->get('dao.tree');
+      $parent = $treeDao->getParentOfItem($itemBounds);
+      $viewLicenseURI = $this->NAME . Traceback_parm_keep(array("show",
+        "format", "page", "upload")) . "&item=$parent";
+    }
+    if (GetParm("mod", PARM_STRING) == $this->NAME) {
       menu_insert("Browse::$menuName", 99);
       menu_insert("View::$menuName", 99);
       menu_insert("View-Meta::$menuName", 99);

@@ -21,16 +21,16 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
-DIRS =  ui_tests
+DIRS =  api
 TESTDIR = ui_tests
 
 dirloop=for dir in $(DIRS); do $(MAKE) -s -C $$dir $(1);  done
 
 all:
-	echo "all: Nothing to do for ui_tests"
+	$(call dirloop, )
 
 test:
-	echo "test: Place holder for launching UI functional tests"
+	$(call dirloop,test)
 
 coverage:
 	echo "No make coverage for ui_tests"

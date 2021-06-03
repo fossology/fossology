@@ -97,6 +97,9 @@ $app->add(new FossologyInitMiddleware());
 // Middleware for authentication
 $app->add(new RestAuthMiddleware());
 
+//////////////////////////OPTIONS/////////////////////
+$app->options(VERSION_1 . '{routes:.+}', AuthController::class . ':optionsVerification');
+
 //////////////////////////AUTH/////////////////////
 $app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
 $app->post(VERSION_1 . 'tokens', AuthController::class . ':createNewJwtToken');

@@ -325,7 +325,9 @@ class TextFindingsAjax
         "id='deleteBySelectfinding$hash' value='$hash,$upload," .
         $this->getDecisionTypeName($type) . "'>";
     } else {
-      $output['3'] = "";
+      $output['3'] = "<input type='checkbox' class='undoBySelect$type' " .
+        "id='undoBySelectfinding$hash' value='$hash,$upload," .
+        $this->getDecisionTypeName($type) . "'>";
     }
     return $output;
   }
