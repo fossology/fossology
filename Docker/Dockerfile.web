@@ -1,0 +1,41 @@
+# FOSSology Dockerfile
+# SPDX-FileCopyrightText: 2021 Omar AbdelSamea <omarmohamed168@gmail.com>
+# SPDX-License-Identifier: GPL-2.0
+#
+# Description: Docker container image recipe for web 
+
+FROM fossology/packages:latest as builder
+LABEL maintainer="Fossology <fossology@fossology.org>"
+
+WORKDIR /fossology_packages/fossology
+
+FROM debian:buster-slim
+
+WORKDIR /fossology
+
+LABEL maintainer="Fossology <fossology@fossology.org>"
+
+### install dependencies
+COPY --from=builder /fossology_packages/fossology/packages/fossology-common_*_amd64.deb .
+COPY --from=builder /fossology_packages/fossology/packages/fossology-web_*_amd64.deb .
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && dpkg -i fossology-common_*_amd64.deb fossology-web_*_amd64.deb || echo "deb failed" \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y -f
+
+# configure php
+COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
+RUN /fossology/install/scripts/php-conf-fix.sh --overwrite
+
+# configure apache
+RUN mkdir -p /var/log/apache2/ \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/access.log \
+ && ln -sf /proc/self/fd/1 /var/log/apache2/error.log
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install cron -y\
+    && service cron start 
+
+COPY ./Docker/docker-entrypoint.k8s.sh /fossology/docker-entrypoint.sh
+RUN chmod +x /fossology/docker-entrypoint.sh
+ENTRYPOINT ["/fossology/docker-entrypoint.sh"]

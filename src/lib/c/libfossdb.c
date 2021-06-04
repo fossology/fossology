@@ -25,6 +25,46 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 #include "libfossdb.h"
 
 #include <string.h>
+#include <json-c/json.h>
+#include <curl/curl.h>
+
+struct MemoryStruct
+{
+  char *memory;
+  size_t size;
+};
+
+/**
+ * @brief Callback function to get chuncks of the response and attachet to a memory location.
+ *
+ * @param contents  
+ * @param size  
+ * @param nmemb  
+ * @param userp  
+ * 
+ */
+
+static size_t
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+  char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+  if (!ptr)
+  {
+    /* out of memory! */
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+
+  mem->memory = ptr;
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+
+  return realsize;
+}
 
 /*!
  \brief Connect to a database. The default is Db.conf.
@@ -39,126 +79,86 @@ along with this library; if not, write to the Free Software Foundation, Inc.0
 ****************************************************/
 PGconn* fo_dbconnect(char* DBConfFile, char** ErrorBuf)
 {
-  FILE* Fconf;
   PGconn* pgConn;
-  char Line[1024];
   char CMD[10240];
-  int i, CMDlen;
-  int C;
-  int PosEqual; /* index of "=" in Line */
-  int PosSemi;  /* index of ";" in Line */
-  int BufLen;
 
-  if (DBConfFile)
-    Fconf = fopen(DBConfFile, "r");
+  CURL *curl_handle;
+  CURLcode res;
+
+  struct MemoryStruct chunk;
+
+  chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+  chunk.size = 0;           /* no data at this point */
+
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  /* init the curl session */
+  curl_handle = curl_easy_init();
+
+  /* specify URL to get */
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://192.168.49.2:30079/v2/keys/db");
+
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+  /* we pass our 'chunk' struct to the callback function */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+  /* some servers don't like requests that are made without a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+  /* get it! */
+  res = curl_easy_perform(curl_handle);
+
+  /* check for errors */
+  if (res != CURLE_OK)
+  {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
+  }
   else
-    Fconf = fopen(FOSSDB_CONF, "r");
-  if (!Fconf)
   {
-    *ErrorBuf = malloc(ERRBUFSIZE);
-    if (*ErrorBuf)
+    /*
+     * Now, our chunk.memory points to a memory block that is chunk.size
+     * bytes big and contains the remote file.
+     */
+    printf("%s \n", chunk.memory);
+    struct json_object *parsed_json, *action, *key, *node_db, *db_string;
+
+    parsed_json = json_tokener_parse(chunk.memory);
+
+    json_object_object_get_ex(parsed_json, "action", &action);
+    json_object_object_get_ex(parsed_json, "node", &node_db);
+
+    parsed_json = node_db;
+
+    json_object_object_get_ex(parsed_json, "key", &key);
+    json_object_object_get_ex(parsed_json, "value", &db_string);
+
+    strcpy(CMD, json_object_get_string(db_string));
+    /* Perform the connection */
+    pgConn = PQconnectdb(CMD);
+    if (PQstatus(pgConn) != CONNECTION_OK)
     {
-      snprintf(*ErrorBuf, ERRBUFSIZE, "Database conf file: %s, ",
-        (DBConfFile ? DBConfFile : "FOSSDB_CONF"));
-      BufLen = strlen(*ErrorBuf);
-      strerror_r(errno, *ErrorBuf + BufLen, ERRBUFSIZE - BufLen);
+      *ErrorBuf = malloc(ERRBUFSIZE);
+      if (*ErrorBuf)
+      {
+        int i = 0;
+        const char pass[10]= "password=";
+        for(i = strstr(CMD,pass) - CMD + strlen(pass); i < strlen(CMD); i++){
+          if(CMD[i] == ' '){
+            break;
+          }
+          CMD[i] ='*';
+        }
+        snprintf(*ErrorBuf, ERRBUFSIZE,
+          "ERROR: Unable to connect to the database\n   Connection string: '%s'\n   Connection status: '%d'\n", json_object_get_string(db_string), PQstatus(pgConn));
+      }
+      return (NULL);
     }
     return (NULL);
   }
-
-  /* read the configuration file */
-  memset(CMD, '\0', sizeof(CMD));
-  CMDlen = 0;
-  while (!feof(Fconf))
-  {
-    C = '@';
-    PosEqual = 0;
-    PosSemi = 0;
-    memset(Line, '\0', sizeof(Line));
-    /* read a line of data */
-    /* All lines are in the format: "field=value;" */
-    /* Lines beginning with "#" are ignored. */
-    for (i = 0; (i < sizeof(Line)) && (C != '\n') && (C > 0); i++)
-    {
-      C = fgetc(Fconf);
-      if ((C > 0) && (C != '\n')) Line[i] = C;
-      if ((C == '=') && !PosEqual) PosEqual = i;
-      else if ((C == ';') && !PosSemi) PosSemi = i;
-    }
-    /* check for a valid line */
-    if (PosSemi < PosEqual) PosEqual = 0;
-    if ((Line[0] != '#') && PosEqual && PosSemi)
-    {
-      /* looks good to me! */
-      if (CMD[0] != '\0')
-      {
-        CMD[CMDlen++] = ' ';
-        if (CMDlen >= sizeof(CMD))
-        {
-          fclose(Fconf);
-          goto BadConf;
-        }
-      }
-      Line[PosSemi] = '\0';
-      for (i = 0; i < PosEqual; i++)
-      {
-        if (!isspace(Line[i])) CMD[CMDlen++] = Line[i];
-        if (CMDlen >= sizeof(CMD))
-        {
-          fclose(Fconf);
-          goto BadConf;
-        }
-      }
-      CMD[CMDlen++] = '=';
-      if (CMDlen >= sizeof(CMD))
-      {
-        fclose(Fconf);
-        goto BadConf;
-      }
-      for (i = PosEqual + 1; Line[i] != '\0'; i++)
-      {
-        if (!isspace(Line[i])) CMD[CMDlen++] = Line[i];
-        if (CMDlen >= sizeof(CMD))
-        {
-          fclose(Fconf);
-          goto BadConf;
-        }
-      }
-    }
-  }
-
-  /* done reading file */
-  fclose(Fconf);
-  if (CMD[0] == '\0') goto BadConf;
-
-  /* Perform the connection */
-  pgConn = PQconnectdb(CMD);
-  if (PQstatus(pgConn) != CONNECTION_OK)
-  {
-    *ErrorBuf = malloc(ERRBUFSIZE);
-    if (*ErrorBuf)
-    {
-      int i = 0;
-      const char pass[10]= "password=";
-      for(i = strstr(CMD,pass) - CMD + strlen(pass); i < strlen(CMD); i++){
-        if(CMD[i] == ' '){
-          break;
-        }
-        CMD[i] ='*';
-      }
-      snprintf(*ErrorBuf, ERRBUFSIZE,
-        "ERROR: Unable to connect to the database\n   Connection string: '%s'\n   Connection status: '%d'\n  Check: /usr/local/etc/fossology/Db.conf\n", CMD, PQstatus(pgConn));
-    }
-    return (NULL);
-  }
-
-  return (pgConn);
-
-  BadConf:
-  *ErrorBuf = malloc(ERRBUFSIZE);
-  snprintf(*ErrorBuf, ERRBUFSIZE, "Invalid Database conf file: %s, ",
-    (DBConfFile ? DBConfFile : "FOSSDB_CONF"));
-  return (NULL);
 } /* fo_dbconnect() */
 
 

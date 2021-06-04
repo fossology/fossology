@@ -5,7 +5,8 @@
 .gitignore
 .travis.yml
 
-*.md
+# deleted *.md due to this error when running fo-debuild
+# dh_installdocs: Cannot find (any matches for) "README.md" (tried in .)
 LICENSE
 NOTICES
 NOTICES.spdx

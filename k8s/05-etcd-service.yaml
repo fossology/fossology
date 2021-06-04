@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    etcd_node: etcd
+  name: etcd
+spec:
+  ports:
+  - name: client
+    port: 2379
+    protocol: TCP
+    targetPort: 2379
+    nodePort: 30079
+  - name: server
+    port: 2380
+    protocol: TCP
+    targetPort: 2380
+    nodePort: 30080
+  selector:
+    etcd_node: etcd
+  type: NodePort

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: scheduler
+  name: scheduler
+spec:
+  ports:
+    - name: scheduler
+      port: 24693
+  selector:
+    app: scheduler
+  type: ClusterIP

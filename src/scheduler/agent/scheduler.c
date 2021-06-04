@@ -49,6 +49,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include <glib.h>
 #include <gio/gio.h>
 
+#include <json-c/json.h>
+#include <curl/curl.h>
+
 /**
  * Test if error is not NULL then print it to the log.
  */
@@ -85,6 +88,44 @@ CONF_VARIABLES_TYPES(SELECT_DECLS)
 #define MASK_SIGHUP  (1 << 4)
 
 int sigmask = 0;
+
+struct MemoryStruct
+{
+  char *memory;
+  size_t size;
+};
+
+/**
+ * @brief Callback function to get chuncks of the response and attachet to a memory location.
+ *
+ * @param contents  
+ * @param size  
+ * @param nmemb  
+ * @param userp  
+ * 
+ */
+
+static size_t
+WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+  size_t realsize = size * nmemb;
+  struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+  char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+  if (!ptr)
+  {
+    /* out of memory! */
+    printf("not enough memory (realloc returned NULL)\n");
+    return 0;
+  }
+
+  mem->memory = ptr;
+  memcpy(&(mem->memory[mem->size]), contents, realsize);
+  mem->size += realsize;
+  mem->memory[mem->size] = 0;
+
+  return realsize;
+}
 
 /**
  * @brief Handles any signals sent to the scheduler that are not SIGCHLD.
@@ -753,82 +794,142 @@ void g_tree_clear(GTree* tree)
  */
 void scheduler_agent_config(scheduler_t* scheduler)
 {
-  DIR* dp;                  // directory pointer used to load meta agents;
-  struct dirent* ep;        // information about directory
-  gchar* dirname;           // holds the name of the current configuration file
   uint8_t max = -1;         // the number of agents to a host or number of one type running
   uint32_t special = 0;     // anything that is special about the agent (EXCLUSIVE)
-  int32_t i;
-  gchar* name;
-  gchar* cmd;
-  gchar* tmp;
-  GError* error = NULL;
-  fo_conf* config;
 
-  dirname = g_strdup_printf("%s/%s/", scheduler->sysconfigdir, AGENT_CONF);
-  if((dp = opendir(dirname)) == NULL)
+  CURL *curl_handle;
+  CURLcode res;
+
+  struct MemoryStruct chunk;
+
+  chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+  chunk.size = 0;           /* no data at this point */
+
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  /* init the curl session */
+  curl_handle = curl_easy_init();
+
+  /* specify URL to get */
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://etcd:2379/v2/keys/agents?recursive=true");
+
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+  /* we pass our 'chunk' struct to the callback function */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+  /* some servers don't like requests that are made without a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+  /* get it! */
+  res = curl_easy_perform(curl_handle);
+
+  /* check for errors */
+  if (res != CURLE_OK)
   {
-    FATAL("Could not open agent config directory: %s", dirname);
-    return;
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
   }
-  g_free(dirname);
-
-  /* load the configuration for the agents */
-  while((ep = readdir(dp)) != NULL)
+  else
   {
-    if(ep->d_name[0] != '.')
+    /*
+     * Now, our chunk.memory points to a memory block that is chunk.size
+     * bytes big and contains the remote file.
+     */
+    printf("%s \n", chunk.memory);
+    char conf_buff[20];
+    char agent_name_buff[128], conf_key_buff[128], name[128], cmd[128], spc[128];
+    struct json_object *parsed_json, *action, *key, *node_agents;
+    struct json_object *nodes_agents, *node_conf, *nodes_conf, *value;
+    struct json_object *node_special;
+    int nodes_agents_len, nodes_conf_len, special_len;
+
+    parsed_json = json_tokener_parse(chunk.memory);
+
+    json_object_object_get_ex(parsed_json, "action", &action);
+    json_object_object_get_ex(parsed_json, "node", &node_agents);
+
+    NOTIFY("action: %s", json_object_get_string(action));
+    NOTIFY("node_agents: %s", json_object_get_string(node_agents));
+
+    parsed_json = node_agents;
+
+    json_object_object_get_ex(parsed_json, "key", &key);
+    json_object_object_get_ex(parsed_json, "nodes", &nodes_agents);
+
+    NOTIFY("key: %s", json_object_get_string(key));
+    NOTIFY("nodes_agents: %s", json_object_get_string(nodes_agents));
+
+    nodes_agents_len = json_object_array_length(nodes_agents);
+
+    for (size_t i = 0; i < nodes_agents_len; i++)
     {
-      dirname = g_strdup_printf("%s/%s/%s/%s.conf",
-          scheduler->sysconfigdir, AGENT_CONF, ep->d_name, ep->d_name);
+      struct json_object *conf_special;
+      node_agents = json_object_array_get_idx(nodes_agents, i);
+      json_object_object_get_ex(node_agents, "key", &key);
+      json_object_object_get_ex(node_agents, "nodes", &nodes_conf);
 
-      config = fo_config_load(dirname, &error);
-      if(error && error->code == fo_missing_file)
+      NOTIFY("key: %s", json_object_get_string(key));
+      NOTIFY("nodes_conf: %s", json_object_get_string(nodes_conf));
+      strcpy(agent_name_buff, json_object_get_string(key));
+      nodes_conf_len = json_object_array_length(nodes_conf);
+      for (size_t j = 0; j < nodes_conf_len; j++)
       {
-        V_SCHED("CONFIG: Could not find %s\n", dirname);
-        g_clear_error(&error);
-        continue;
-      }
-      TEST_ERROR(error, "no additional info");
-      V_SCHED("CONFIG: loading config file %s\n", dirname);
-
-      if(!fo_config_has_group(config, "default"))
-      {
-        log_printf("ERROR: %s must have a \"default\" group\n", dirname);
-        log_printf("ERROR: cause by %s.%d\n", __FILE__, __LINE__);
-        continue;
-      }
-
-      special = 0;
-      name = ep->d_name;
-      max = fo_config_list_length(config, "default", "special", &error);
-      TEST_ERROR(error, "%s: the special key should be of type list", dirname);
-      for(i = 0; i < max; i++)
-      {
-        cmd = fo_config_get_list(config, "default", "special", i, &error);
-        TEST_ERROR(error, "%s: failed to load element %d of special list",
-            dirname, i)
-
-        if(cmd[0] != '\0') {
-          if(strncmp(cmd, "EXCLUSIVE", 9) == 0)
-            special |= SAG_EXCLUSIVE;
-          else if(strncmp(cmd, "NOEMAIL", 7) == 0)
-            special |= SAG_NOEMAIL;
-          else if(strncmp(cmd, "NOKILL", 6) == 0)
-            special |= SAG_NOKILL;
-          else if(strncmp(cmd, "LOCAL", 6) == 0)
-            special |= SAG_LOCAL;
-          else if(strlen(cmd) != 0)
-            WARNING("%s: Invalid special type for agent %s: %s",
-                dirname, name, cmd);
+        node_conf = json_object_array_get_idx(nodes_conf, j);
+        json_object_object_get_ex(node_conf, "key", &key);
+        strcpy(conf_key_buff, json_object_get_string(key));
+        memcpy(conf_buff, conf_key_buff + strlen(agent_name_buff) + 1, strlen(conf_key_buff) - strlen(agent_name_buff));
+        conf_buff[strlen(conf_key_buff) - strlen(agent_name_buff)] = '\0';
+        if (strncmp("name", conf_buff, 4) == 0)
+        {
+          json_object_object_get_ex(node_conf, "value", &value);
+          strcpy(name, json_object_get_string(value));
+          NOTIFY("key: %s", json_object_get_string(key));
+          NOTIFY("value: %s", name);
+        }
+        else if (strncmp("command", conf_buff, 7) == 0)
+        {
+          json_object_object_get_ex(node_conf, "value", &value);
+          strcpy(cmd, json_object_get_string(value));
+          NOTIFY("key: %s", json_object_get_string(key));
+          NOTIFY("value: %s", cmd);
+        }
+        else if (strncmp("max", conf_buff, 3) == 0)
+        {
+          json_object_object_get_ex(node_conf, "value", &value);
+          max = json_object_get_int(value);
+          NOTIFY("key: %s", json_object_get_string(key));
+          NOTIFY("value: %d", max);
+        }
+        else if (strncmp("special", conf_buff, 7) == 0)
+        {
+          json_object_object_get_ex(node_conf, "nodes", &conf_special);
+          special_len = json_object_array_length(conf_special);
+          for (size_t k = 0; k < special_len; k++)
+          {
+            node_special = json_object_array_get_idx(conf_special, k);
+            json_object_object_get_ex(node_special, "value", &value);
+            strcpy(spc, json_object_get_string(value));
+            if (spc[0] != '\0')
+            {
+                if(strncmp(spc, "EXCLUSIVE", 9) == 0)
+                  special |= SAG_EXCLUSIVE;
+                else if(strncmp(spc, "NOEMAIL", 7) == 0)
+                  special |= SAG_NOEMAIL;
+                else if(strncmp(spc, "NOKILL", 6) == 0)
+                  special |= SAG_NOKILL;
+                else if(strncmp(spc, "LOCAL", 6) == 0)
+                  special |= SAG_LOCAL;
+            }
+          }
         }
       }
-
-      cmd  = fo_config_get(config, "default", "command", &error);
-      TEST_ERROR(error, "%s: the default group must have a command key", dirname);
-      tmp  = fo_config_get(config, "default", "max", &error);
-      TEST_ERROR(error, "%s: the default group must have a max key", dirname);
-
-      if(!add_meta_agent(scheduler->meta_agents, name, cmd, (max = atoi(tmp)), special))
+      NOTIFY("Debug ma list cmd %s", cmd);
+      NOTIFY("Debug ma list max %d", max);
+      NOTIFY("Debug ma list name %s", name);
+      if(!add_meta_agent(scheduler->meta_agents, name, cmd, max, special))
       {
         V_SCHED("CONFIG: could not create meta agent using %s\n", ep->d_name);
       }
@@ -839,14 +940,20 @@ void scheduler_agent_config(scheduler_t* scheduler)
         log_printf(" command = %s\n", cmd);
         log_printf("     max = %d\n", max);
         log_printf(" special = %d\n", special);
-      }
-
-      g_free(dirname);
-      fo_config_free(config);
+      }  
     }
   }
 
-  closedir(dp);
+  // printf("%s", chunk.memory);
+
+  /* cleanup curl stuff */
+  curl_easy_cleanup(curl_handle);
+
+  free(chunk.memory);
+
+  /* we're done with libcurl, so clean it up */
+  curl_global_cleanup();
+
   event_signal(scheduler_test_agents, NULL);
 }
 
@@ -861,115 +968,226 @@ void scheduler_agent_config(scheduler_t* scheduler)
  * key/value pairs under this category. For each of these hosts, the scheduler
  * will create a new host as an internal representation.
  */
-void scheduler_foss_config(scheduler_t* scheduler)
+void scheduler_foss_config(scheduler_t *scheduler)
 {
-  gchar*   tmp;                   // pointer into a string
-  gchar**  keys;                  // list of host names grabbed from the config file
-  int32_t  max = -1;              // the number of agents to a host or number of one type running
-  int32_t  special = 0;           // anything that is special about the agent (EXCLUSIVE)
-  gchar    addbuf[512];           // standard string buffer
-  gchar    dirbuf[FILENAME_MAX];  // standard string buffer
-  GError*  error = NULL;          // error return location
-  int32_t  i;                     // indexing variable
-  host_t*  host;                  // new hosts will be created in the loop
-  fo_conf* version;               // information loaded from the version file
+  gchar *tmp;       // pointer into a string
+  int32_t max = -1; // the number of agents to a host or number of one type running        // anything that is special about the agent (EXCLUSIVE)
+  char conf_key_buff[128];
+  gchar addbuf[512];           // standard string buffer
+  gchar dirbuf[FILENAME_MAX];  // standard string buffer
+  gchar typebuf[FILENAME_MAX]; // standard string buffer
+  GError *error = NULL;        // error return location
+  int32_t i, j;                // indexing variable
+  host_t *host;                // new hosts will be created in the loop
+  fo_conf *version;            // information loaded from the version file
 
-  if(scheduler->sysconfig != NULL)
+  if (scheduler->sysconfig != NULL)
     fo_config_free(scheduler->sysconfig);
-
-  /* parse the config file */
+    /* parse the config file */
   tmp = g_strdup_printf("%s/fossology.conf", scheduler->sysconfigdir);
   scheduler->sysconfig = fo_config_load(tmp, &error);
   if(error) FATAL("%s", error->message);
   g_free(tmp);
 
-  /* set the user and group before proceeding */
-  set_usr_grp(scheduler->process_name, scheduler->sysconfig);
-
-  /* load the port setting */
-  if(scheduler->i_port == 0)
-    scheduler->i_port = atoi(fo_config_get(scheduler->sysconfig,
-        "FOSSOLOGY", "port", &error));
-
-  /* load the log directory */
-  if(!scheduler->logcmdline)
-  {
-    if(fo_config_has_key(scheduler->sysconfig, "DIRECTORIES", "LOGDIR"))
-      scheduler->logdir = fo_config_get(scheduler->sysconfig, "DIRECTORIES", "LOGDIR", &error);
-    scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
-
-    if(main_log)
-    {
-      log_destroy(main_log);
-      main_log = scheduler->main_log;
-    }
-  }
-
-  /* load the host settings */
-  keys = fo_config_key_set(scheduler->sysconfig, "HOSTS", &special);
-  for(i = 0; i < special; i++)
-  {
-    tmp = fo_config_get(scheduler->sysconfig, "HOSTS", keys[i], &error);
-    if(error)
-    {
-      WARNING("%s\n", error->message);
-      g_clear_error(&error);
-      continue;
-    }
-
-    sscanf(tmp, "%s %s %d", addbuf, dirbuf, &max);
-    host = host_init(keys[i], addbuf, dirbuf, max);
-    host_insert(host, scheduler);
-    if(TVERB_SCHED)
-    {
-      log_printf("CONFIG: added new host\n");
-      log_printf("      name = %s\n", keys[i]);
-      log_printf("   address = %s\n", addbuf);
-      log_printf(" directory = %s\n", dirbuf);
-      log_printf("       max = %d\n", max);
-    }
-  }
-
-  if((tmp = fo_RepValidate(scheduler->sysconfig)) != NULL)
-  {
-    ERROR("configuration file failed repository validation");
-    ERROR("The offending line: \"%s\"", tmp);
-    g_free(tmp);
-    exit(254);
-  }
-
   /* load the version information */
   tmp = g_strdup_printf("%s/VERSION", scheduler->sysconfigdir);
   version = fo_config_load(tmp, &error);
-  if(error) FATAL("%s", error->message);
+  if (error)
+    FATAL("%s", error->message);
   g_free(tmp);
 
   fo_config_join(scheduler->sysconfig, version, NULL);
   fo_config_free(version);
 
-  /* This will create the load and the print command for the special
-   * configuration variables. This uses the l_op operation to load the variable
-   * from the file and the w_op variable to write the variable to the log file.
-   *
-   * example:
-   *   if this is in the CONF_VARIABLES_TYPES():
-   *
-   *     apply(char*, test_variable, NOOP, %s, "hello")
-   *
-   *   this is generated:
-   *
-   *     if(fo_config_has_key(sysconfig, "SCHEDULER", "test_variable")
-   *       CONF_test_variable = fo_config_get(sysconfig, "SCHEDULER",
-   *           "test_variable", NULL);
-   *     V_SPECIAL("CONFIG: %s == %s\n", "test_variable", CONF_test_variable);
-   *
-   */
-#define SELECT_CONF_INIT(type, name, l_op, w_op, val)                                  \
-  if(fo_config_has_key(scheduler->sysconfig, "SCHEDULER", #name))                      \
-    CONF_##name = l_op(fo_config_get(scheduler->sysconfig, "SCHEDULER", #name, NULL)); \
-  V_SPECIAL("CONFIG: %s == " MK_STRING_LIT(w_op) "\n", #name, CONF_##name );
+  CURL *curl_handle;
+  CURLcode res;
+
+  struct MemoryStruct chunk;
+
+  chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+  chunk.size = 0;           /* no data at this point */
+
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  /* init the curl session */
+  curl_handle = curl_easy_init();
+
+  /* specify URL to get */
+  curl_easy_setopt(curl_handle, CURLOPT_URL, "http://etcd:2379/v2/keys/fossology?recursive=true");
+
+  /* send all data to this function  */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+  /* we pass our 'chunk' struct to the callback function */
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+  /* some servers don't like requests that are made without a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+  /* get it! */
+  res = curl_easy_perform(curl_handle);
+
+  /* check for errors */
+  if (res != CURLE_OK)
+  {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
+  }
+  else
+  {
+    /*
+     * Now, our chunk.memory points to a memory block that is chunk.size
+     * bytes big and contains the remote file.
+     */
+    NOTIFY("%s \n", chunk.memory);
+
+    /* set the user and group before proceeding */
+    set_usr_grp(scheduler->process_name, scheduler->sysconfig);
+
+    struct json_object *parsed_json;
+    struct json_object *action;
+    struct json_object *key;
+    struct json_object *node;
+    struct json_object *nodes;
+    struct json_object *node_conf;
+    struct json_object *nodes_conf;
+    struct json_object *value;
+    int nodes_len, conf_nodes_len;
+
+    parsed_json = json_tokener_parse(chunk.memory);
+
+    json_object_object_get_ex(parsed_json, "action", &action);
+    json_object_object_get_ex(parsed_json, "node", &node);
+
+    NOTIFY("action: %s", json_object_get_string(action));
+    NOTIFY("node: %s", json_object_get_string(node));
+
+    parsed_json = node;
+
+    json_object_object_get_ex(parsed_json, "key", &key);
+    json_object_object_get_ex(parsed_json, "nodes", &nodes);
+
+    NOTIFY("key: %s", json_object_get_string(key));
+    NOTIFY("nodes: %s", json_object_get_string(nodes));
+
+    nodes_len = json_object_array_length(nodes);
+
+    /* cleanup curl stuff */
+    curl_easy_cleanup(curl_handle);
+
+    free(chunk.memory);
+
+    /* we're done with libcurl, so clean it up */
+    curl_global_cleanup();
+
+    for (i = 0; i < nodes_len; i++)
+    {
+      node = json_object_array_get_idx(nodes, i);
+      json_object_object_get_ex(node, "key", &key);
+      strcpy(conf_key_buff, json_object_get_string(key));
+      /* load the host settings */
+      if (strncmp(conf_key_buff, "/fossology/hosts", 16) == 0)
+      {
+        json_object_object_get_ex(node, "nodes", &nodes_conf);
+        conf_nodes_len = json_object_array_length(nodes_conf);
+        for (j = 0; j < conf_nodes_len; j++)
+        {
+          node_conf = json_object_array_get_idx(nodes_conf, j);
+          json_object_object_get_ex(node_conf, "key", &key);
+          json_object_object_get_ex(node_conf, "value", &value);
+
+          NOTIFY("key: %s", json_object_get_string(key));
+          NOTIFY("value: %s", json_object_get_string(value));
+
+          sscanf(json_object_get_string(value), "%s %s %d %s", addbuf, dirbuf, &max, typebuf);
+          host = host_init((char *)json_object_get_string(key), addbuf, dirbuf, max, typebuf);
+          host_insert(host, scheduler);
+          if (TVERB_SCHED)
+          {
+            log_printf("CONFIG: added new host\n");
+            log_printf("      name = %s\n", json_object_get_string(key));
+            log_printf("   address = %s\n", addbuf);
+            log_printf(" directory = %s\n", dirbuf);
+            log_printf("       max = %d\n", max);
+            log_printf("      type = %s\n", typebuf);
+          }
+        }
+      }
+      else if (strncmp(conf_key_buff, "/fossology/fossology", 20) == 0)
+      {
+        json_object_object_get_ex(node, "nodes", &nodes_conf);
+        conf_nodes_len = json_object_array_length(nodes_conf);
+        for (j = 0; j < conf_nodes_len; j++)
+        {
+          node_conf = json_object_array_get_idx(nodes_conf, j);
+          json_object_object_get_ex(node_conf, "key", &key);
+          strcpy(conf_key_buff, json_object_get_string(key));
+          /* load the port setting */
+          if (strncmp(conf_key_buff, "/fossology/fossology/port", 25) == 0)
+          {
+            json_object_object_get_ex(node_conf, "value", &value);
+            NOTIFY("key: %s", json_object_get_string(key));
+            NOTIFY("value: %s", json_object_get_string(value));
+            if (scheduler->i_port == 0)
+              scheduler->i_port = json_object_get_int(value);
+          }
+        }
+      }
+      else if (strncmp(conf_key_buff, "/fossology/directories", 22) == 0)
+      {
+        json_object_object_get_ex(node, "nodes", &nodes_conf);
+        conf_nodes_len = json_object_array_length(nodes_conf);
+        for (j = 0; j < conf_nodes_len; j++)
+        {
+          node_conf = json_object_array_get_idx(nodes_conf, j);
+          json_object_object_get_ex(node_conf, "key", &key);
+          strcpy(conf_key_buff, json_object_get_string(key));
+          /* load the log directory */
+          if (!scheduler->logcmdline && strncmp(conf_key_buff, "/fossology/directories/logdir", 29) == 0)
+          {
+            json_object_object_get_ex(node_conf, "value", &value);
+            NOTIFY("key: %s", json_object_get_string(key));
+            NOTIFY("value: %s", json_object_get_string(value));
+            scheduler->logdir = (char *)json_object_get_string(value);
+            scheduler->main_log = log_new(scheduler->logdir, NULL, scheduler->s_pid);
+            if (main_log)
+            {
+              log_destroy(main_log);
+              main_log = scheduler->main_log;
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+
+  /*
+  * This will create the load and the print command for the special
+  * configuration variables. This uses the l_op operation to load the variable
+  * from the file and the w_op variable to write the variable to the log file.
+  *
+  * example:
+  *   if this is in the CONF_VARIABLES_TYPES():
+  *
+  *     apply(char*, test_variable, NOOP, %s, "hello")
+  *
+  *   this is generated:
+  *
+  *     if(fo_config_has_key(sysconfig, "SCHEDULER", "test_variable")
+  *       CONF_test_variable = fo_config_get(sysconfig, "SCHEDULER",
+  *           "test_variable", NULL);
+  *     V_SPECIAL("CONFIG: %s == %s\n", "test_variable", CONF_test_variable);
+  *
+  */
+  #define SELECT_CONF_INIT(type, name, l_op, w_op, val)                                  \
+    if (fo_config_has_key(scheduler->sysconfig, "SCHEDULER", #name))                     \
+      CONF_##name = l_op(fo_config_get(scheduler->sysconfig, "SCHEDULER", #name, NULL)); \
+    V_SPECIAL("CONFIG: %s == " MK_STRING_LIT(w_op) "\n", #name, CONF_##name);
   CONF_VARIABLES_TYPES(SELECT_CONF_INIT)
-#undef SELECT_CONF_INIT
+  #undef SELECT_CONF_INIT
 }
 
 /**

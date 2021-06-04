@@ -94,6 +94,13 @@ function plugin_disable($Level)
   /* Disable all plugins with >= $Level access */
   //echo "<pre>COMP: starting to disable plugins\n</pre>";
   $LoginFlag = empty($_SESSION['User']);
+  $agentEtcdJson = file_get_contents('http://etcd:2379/v2/keys/agents/');
+  $agentEtcdJson = json_decode($agentEtcdJson, true);
+  $availbleAgents = array();
+  foreach ($agentEtcdJson['node']['nodes'] as $Host) {
+    $agentName = explode('/', $Host['key'])[2];
+    $availbleAgents[] = $agentName;
+  }
   foreach ($Plugins as $pluginName => &$P) {
     if ($P->State == PLUGIN_STATE_INVALID) {
       // echo "<pre>COMP: Plugin $P->Name is in INVALID state\n</pre>";
@@ -105,6 +112,12 @@ function plugin_disable($Level)
       // $Level\n</pre>";
       $P->unInstall();
       unset($Plugins[$pluginName]);
+    }
+    if (isset($P->AgentName)) {
+      if (!in_array($P->AgentName, $availbleAgents)) {
+        $P->unInstall();
+        unset($Plugins[$pluginName]);
+      }
     }
     unset($P);
   }

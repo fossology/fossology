@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-svc
+spec:
+  selector:
+    app: agent
+  clusterIP: None
