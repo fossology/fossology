@@ -54,12 +54,12 @@ install: all
 
 	$(INSTALL_PROGRAM) export_license_ref.php $(DESTDIR)$(LIBEXECDIR)/export_license_ref.php
 	$(INSTALL_PROGRAM) dbcreate $(DESTDIR)$(LIBEXECDIR)/dbcreate
-	@if [ ! -f "$(DESTDIR)/etc/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
-		mkdir -p $(DESTDIR)/etc/cron.d/; \
-		echo "NOTE: using default version for $(DESTDIR)/etc/cron.d/fossology"; \
-		$(INSTALL_DATA) db.cron $(DESTDIR)/etc/cron.d/fossology; \
+	@if [ ! -f "$(DESTDIR)$(INITDIR)/cron.d/fossology" -o "$(OVERWRITE)" ]; then \
+		mkdir -p $(DESTDIR)$(INITDIR)/cron.d/; \
+		echo "NOTE: using default version for $(DESTDIR)$(INITDIR)/cron.d/fossology"; \
+		$(INSTALL_DATA) db.cron $(DESTDIR)$(INITDIR)/cron.d/fossology; \
 	else \
-		echo "WARNING: $(DESTDIR)/etc/cron.d/fossology already exists."; \
+		echo "WARNING: $(DESTDIR)$(INITDIR)/cron.d/fossology already exists."; \
 		echo "  Not overwriting, consider checking it by hand or use the OVERWRITE option."; \
 	fi
 
@@ -98,7 +98,7 @@ uninstall:
 	fi
 
 	@echo "WARNING: Cowardly refusing to remove the following"
-	@echo "      $(DESTDIR)/etc/cron.d/fossology"
+	@echo "      $(DESTDIR)$(INITDIR)/cron.d/fossology"
 	@echo "  Remove by hand if you desire."
 
 clean:
