@@ -174,3 +174,6 @@ install/fossdash/fossdash-publish.py
 
 # Add all the Ubuntu consol log file
 ubuntu-*
+
+# GitPod installation location
+/.foinst
