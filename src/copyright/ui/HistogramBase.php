@@ -79,7 +79,7 @@ abstract class HistogramBase extends FO_Plugin {
       $typeDescriptor = $description;
     }
     $output = "<h4>Activated $typeDescriptor statements:</h4>
-<div><table border=1 width='100%' id='copyright".$type."'></table></div>
+<div><table border=1 width='100%' id='copyright".$type."' class='wordbreaktable'></table></div>
 <br/><br/>
 <div>
   <table border=0 width='100%' id='searchReplaceTable".$type."'>
@@ -100,14 +100,14 @@ abstract class HistogramBase extends FO_Plugin {
   <a style='cursor: pointer; margin-left:10px;' id='replaceSelected".$type."' class='buttonLink'>Replace selected rows</a>
   <a style='cursor: pointer; margin-left:10px;' id='deleteSelected".$type."' class='buttonLink'>Deactivate selected rows</a>
   <br /><br />
-  <table border=1 id='testVal".$type."' style='display:none' class='dataTable'>
+  <table border=1 id='testVal".$type."' style='display:none' class='dataTable wordbreaktable'>
     <tr><th style='width:50%'>From</th><th style='width:50%'>To</th></tr>
     <tr><td id='testVal".$type."From'></td><td id='testVal".$type."To'></td></tr>
   </table>
   <br/><br/>
   <h4>Deactivated $typeDescriptor statements:</h4>
 </div>
-<div><table border=1 width='100%' id='copyright".$type."deactivated'></table>
+<div><table border=1 width='100%' id='copyright".$type."deactivated' class='wordbreaktable'></table>
   <br/><br/>
   <a id='undoSelected".$type."' class='buttonLink'>Undo selected rows</a>
   <br /><br />
