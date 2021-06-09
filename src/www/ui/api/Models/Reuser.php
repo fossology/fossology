@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- * Copyright (C) 2018 Siemens AG
+ * Copyright (C) 2018,2021 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -47,6 +47,16 @@ class Reuser
    * Use enhanced reuse
    */
   private $reuseEnhanced;
+  /**
+   * @var boolean $reuseReport
+   * Use enhanced reuse
+   */
+  private $reuseReport;
+  /**
+   * @var boolean $reuseCopyright
+   * Use enhanced reuse
+   */
+  private $reuseCopyright;
 
   /**
    * Reuser constructor.
@@ -66,6 +76,8 @@ class Reuser
       $this->reuseGroup = $reuseGroup;
       $this->reuseMain = $reuseMain;
       $this->reuseEnhanced = $reuseEnhanced;
+      $this->reuseReport = false;
+      $this->reuseCopyright = false;
     } else {
       throw new \UnexpectedValueException(
         "reuse_upload should be integer", 400);
@@ -83,19 +95,22 @@ class Reuser
   public function setUsingArray($reuserArray)
   {
     if (array_key_exists("reuse_upload", $reuserArray)) {
-      $this->reuseUpload = filter_var($reuserArray["reuse_upload"],
-        FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+      $this->setReuseUpload($reuserArray["reuse_upload"]);
     }
     if (array_key_exists("reuse_group", $reuserArray)) {
       $this->reuseGroup = $reuserArray["reuse_group"];
     }
     if (array_key_exists("reuse_main", $reuserArray)) {
-      $this->reuseMain = filter_var($reuserArray["reuse_main"],
-        FILTER_VALIDATE_BOOLEAN);
+      $this->setReuseMain($reuserArray["reuse_main"]);
     }
     if (array_key_exists("reuse_enhanced", $reuserArray)) {
-      $this->reuseEnhanced = filter_var($reuserArray["reuse_enhanced"],
-        FILTER_VALIDATE_BOOLEAN);
+      $this->setReuseEnhanced($reuserArray["reuse_enhanced"]);
+    }
+    if (array_key_exists("reuse_report", $reuserArray)) {
+      $this->setReuseReport($reuserArray["reuse_report"]);
+    }
+    if (array_key_exists("reuse_copyright", $reuserArray)) {
+      $this->setReuseCopyright($reuserArray["reuse_copyright"]);
     }
     if ($this->reuseUpload === null) {
       throw new \UnexpectedValueException(
@@ -141,6 +156,22 @@ class Reuser
     return $this->reuseEnhanced;
   }
 
+  /**
+   * @return boolean
+   */
+  public function getReuseReport()
+  {
+    return $this->reuseReport;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReuseCopyright()
+  {
+    return $this->reuseCopyright;
+  }
+
   ////// Setters //////
   /**
    * @param integer $reuseUpload
@@ -184,16 +215,36 @@ class Reuser
   }
 
   /**
+   * @param boolean $reuseReport
+   */
+  public function setReuseReport($reuseReport)
+  {
+    $this->reuseReport = filter_var($reuseReport,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @param boolean $reuseCopyright
+   */
+  public function setReuseCopyright($reuseCopyright)
+  {
+    $this->reuseCopyright = filter_var($reuseCopyright,
+      FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * Get reuser info as an associative array
    * @return array
    */
   public function getArray()
   {
     return [
-      "reuse_upload"   => $this->reuseUpload,
-      "reuse_group"    => $this->reuseGroup,
-      "reuse_main"     => $this->reuseMain,
-      "reuse_enhanced" => $this->reuseEnhanced
+      "reuse_upload"    => $this->reuseUpload,
+      "reuse_group"     => $this->reuseGroup,
+      "reuse_main"      => $this->reuseMain,
+      "reuse_enhanced"  => $this->reuseEnhanced,
+      "reuse_report"    => $this->reuseReport,
+      "reuse_copyright" => $this->reuseCopyright
     ];
   }
 }

@@ -150,11 +150,15 @@ class ScanOptions
     if ($this->reuse->getReuseEnhanced() === true) {
       $reuserRules[] = 'reuseEnhanced';
     }
+    if ($this->reuse->getReuseReport() === true) {
+      $reuserRules[] = 'reuseConf';
+    }
+    if ($this->reuse->getReuseCopyright() === true) {
+      $reuserRules[] = 'reuseCopyright';
+    }
     $userDao = $GLOBALS['container']->get("dao.user");
     $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
     $request->request->set(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME, $reuserSelector);
-    //global $SysConf;
-    //$request->request->set('groupId', $SysConf['auth'][Auth::GROUP_ID]);
     $request->request->set('reuseMode', $reuserRules);
   }
 
