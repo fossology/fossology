@@ -219,9 +219,9 @@ class CopyrightDao
       $statementName .= "._".$extrawhere."_";
     }
 
-    $activatedClause = "";
+    $activatedClause = "ce.is_enabled = 'false'";
     if ($enabled != 'false') {
-      $activatedClause = "NOT";
+      $activatedClause = "ce.is_enabled IS NULL OR ce.is_enabled = 'true'";
       $statementName .= "._"."enabled";
     }
 
@@ -232,11 +232,10 @@ C.agent_fk as agent_fk
   FROM $tableName C
   INNER JOIN $uploadTreeTableName UT ON C.pfile_fk = UT.pfile_fk
   LEFT JOIN $tableNameEvent AS CE ON CE.".$tableName."_fk = C.".$tableName."_pk
-    AND CE.upload_fk = $1
+    AND CE.upload_fk = $1 AND CE.uploadtree_fk = UT.uploadtree_pk
   WHERE C.content IS NOT NULL
     AND C.content!=''
-    AND C." . $tableName . "_pk $activatedClause IN
-(SELECT " . $tableName . "_fk FROM $tableNameEvent WHERE upload_fk = $1 AND is_enabled = false)
+    AND ($activatedClause)
   $extendWClause
 ORDER BY UT.uploadtree_pk, content DESC";
     return $this->dbManager->getRows($sql, $params, $statementName);
@@ -369,12 +368,12 @@ ORDER BY UT.uploadtree_pk, content DESC";
               ON C.pfile_fk = UT.pfile_fk
             LEFT JOIN $tableNameEvent AS CE
               ON CE.".$tableName."_fk = C.".$tableName."_pk
-              AND CE.upload_fk = $1
+              AND CE.upload_fk = $1 AND CE.uploadtree_fk = UT.uploadtree_pk
             $joinType JOIN (SELECT * FROM $tableNameDecision WHERE is_enabled='true') AS CD
               ON C.pfile_fk = CD.pfile_fk
             WHERE C.content IS NOT NULL
               AND C.content!=''
-              AND C.".$tableName."_pk NOT IN (SELECT DISTINCT(".$tableName."_fk) FROM $tableNameEvent TE WHERE TE.upload_fk = $1 AND is_enabled = false)
+              AND (ce.is_enabled IS NULL OR ce.is_enabled = 'true')
               $whereClause
             ORDER BY CD.pfile_fk, UT.uploadtree_pk, C.content, CD.textfinding, CD.$decisionTableKey DESC";
 
@@ -482,11 +481,11 @@ ORDER BY UT.uploadtree_pk, content DESC";
       $agentFilter = ' AND cp.agent_fk='.$latestAgentId;
     }
 
-    $sql = "SELECT DISTINCT ON ($cpTablePk) $cpTablePk, ut.uploadtree_pk, ut.upload_fk, ce." . $cpTableEvent . "_pk
+    $sql = "SELECT DISTINCT ON ($cpTablePk, ut.uploadtree_pk) $cpTablePk, ut.uploadtree_pk, ut.upload_fk, ce." . $cpTableEvent . "_pk
 FROM $cpTable as cp
 INNER JOIN $itemTable AS ut ON cp.pfile_fk = ut.pfile_fk
 LEFT JOIN $cpTableEvent AS ce ON ce.$cpTableEventFk = cp.$cpTablePk
-  AND ce.upload_fk = $3
+  AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
 WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3";
 
     $rows = $this->dbManager->getRows($sql, $params, $stmt);
@@ -496,41 +495,34 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
       $paramEvent[] = $row['upload_fk'];
       $paramEvent[] = $row[$cpTablePk];
       $paramEvent[] = $row['uploadtree_pk'];
-      $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1 AND upload_fk = $2)::int";
-      $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk], $row['upload_fk']), $stmt.'Exists');
+      $sqlExists = "SELECT exists(SELECT 1 FROM $cpTableEvent WHERE $cpTableEventFk = $1 AND upload_fk = $2 AND uploadtree_fk = $3)::int";
+      $rowExists = $this->dbManager->getSingleRow($sqlExists, array($row[$cpTablePk], $row['upload_fk'], $row['uploadtree_pk']), $stmt.'Exists');
       $eventExists = $rowExists['exists'];
       if ($action == "delete") {
+        $paramEvent[] = $scope;
         if ($eventExists) {
-          $paramEvent[] = $scope;
           $sqlEvent = "UPDATE $cpTableEvent SET scope = $4, is_enabled = false
           WHERE upload_fk = $1 AND $cpTableEventFk = $2 AND uploadtree_fk = $3";
           $statement = "$stmt.delete.up";
         } else {
-          $paramEvent[] = $scope;
-          $sqlEvent = "INSERT INTO $cpTableEvent (upload_fk, $cpTableEventFk, uploadtree_fk, scope) VALUES($1, $2, $3, $4)";
+          $sqlEvent = "INSERT INTO $cpTableEvent (upload_fk, $cpTableEventFk, uploadtree_fk, is_enabled, scope) VALUES($1, $2, $3, 'f', $4)";
           $statement = "$stmt.delete";
         }
-      } else if ($action == "rollback") {
-        if ($eventExists) {
+      } else if ($action == "rollback" && $eventExists) {
           $sqlEvent = "UPDATE $cpTableEvent SET scope = 1, is_enabled = true
           WHERE upload_fk = $1 AND $cpTableEventFk = $2 AND uploadtree_fk = $3";
           $statement = "$stmt.rollback.up";
-        } else {
-          $sqlEvent = "DELETE FROM $cpTableEvent WHERE upload_fk = $1 AND uploadtree_fk = $3 AND $cpTableEventFk = $2";
-          $statement = "$stmt.rollback";
-        }
       } else {
-        $paramEvent[] = "true";
         $paramEvent[] = StringOperation::replaceUnicodeControlChar($content);
 
         if ($eventExists) {
           $sqlEvent = "UPDATE $cpTableEvent
-                        SET upload_fk = $1, uploadtree_fk = $3, is_enabled = $4, content = $5, hash = md5($5)
+                       SET upload_fk = $1, content = $4, hash = md5($4)
                        WHERE $cpTableEventFk = $2 AND uploadtree_fk = $3";
           $statement = "$stmt.update";
         } else {
           $sqlEvent = "INSERT INTO $cpTableEvent(upload_fk, uploadtree_fk, $cpTableEventFk, is_enabled, content, hash)
-                       VALUES($1, $3, $2, $4, $5, md5($5))";
+                       VALUES($1, $3, $2, 'true', $4, md5($4))";
           $statement = "$stmt.insert";
         }
       }
