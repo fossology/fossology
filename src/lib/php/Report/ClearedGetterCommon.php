@@ -141,10 +141,11 @@ abstract class ClearedGetterCommon
 
       if ($agentCall == "license") {
         $this->groupBy = "text";
+        $groupBy = md5($statement[$this->groupBy].$statement["content"]);
       } else {
         $this->groupBy = "content";
+        $groupBy = $statement[$this->groupBy];
       }
-      $groupBy = $statement[$this->groupBy];
 
       if (empty($comments) && array_key_exists($groupBy, $statements)) {
         $currentFiles = &$statements[$groupBy]['files'];
