@@ -178,11 +178,11 @@ class CopyrightDao
     $params[] = $uploadFk;
     $params[] = $agentId;
     $params[] = $scope;
-    $sql = "SELECT DISTINCT ON (copyright_pk) copyright_pk, C.content, c.hash,
+    $sql = "SELECT copyright_pk, CE.is_enabled, C.content, c.hash,
               CE.content AS contentedited, CE.hash AS hashedited
             FROM copyright_event CE
               INNER JOIN copyright C ON C.copyright_pk = CE.copyright_fk
-            WHERE CE.upload_fk=$1 AND CE.is_enabled=false AND scope=$3 AND C.agent_fk = $2";
+            WHERE CE.upload_fk=$1 AND scope=$3 AND C.agent_fk = $2";
     return $this->dbManager->getRows($sql, $params, $statementName);
   }
 
@@ -225,7 +225,8 @@ class CopyrightDao
       $statementName .= "._"."enabled";
     }
 
-    $sql = "SELECT DISTINCT(copyright_pk), UT.uploadtree_pk as uploadtree_pk,
+    $sql = "SELECT DISTINCT ON(copyright_pk, UT.uploadtree_pk)
+copyright_pk, UT.uploadtree_pk as uploadtree_pk,
 (CASE WHEN (CE.content IS NULL OR CE.content = '') THEN C.content ELSE CE.content END) AS content,
 (CASE WHEN (CE.hash IS NULL OR CE.hash = '') THEN C.hash ELSE CE.hash END) AS hash,
 C.agent_fk as agent_fk
@@ -237,7 +238,7 @@ C.agent_fk as agent_fk
     AND C.content!=''
     AND ($activatedClause)
   $extendWClause
-ORDER BY UT.uploadtree_pk, content DESC";
+ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
     return $this->dbManager->getRows($sql, $params, $statementName);
   }
 

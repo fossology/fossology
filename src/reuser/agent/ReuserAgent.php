@@ -223,8 +223,13 @@ class ReuserAgent extends Agent
       foreach ($reusedCopyrights as $reusedCopyright) {
         foreach ($allCopyrights as $copyrightKey => $copyright) {
           if (strcmp($copyright['hash'], $reusedCopyright['hash']) == 0) {
-            $action = "delete";
-            $content = "";
+            if ($this->dbManager->booleanFromDb($reusedCopyright['is_enabled'])) {
+              $action = "update";
+              $content = $reusedCopyright["contentedited"];
+            } else {
+              $action = "delete";
+              $content = "";
+            }
             $hash = $copyright['hash'];
             $item = $this->uploadDao->getItemTreeBounds(intval($copyright['uploadtree_pk']),
                       $uploadTreeTableName);
