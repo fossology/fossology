@@ -240,6 +240,14 @@ function removeMainLicense(uploadId,licenseId) {
   }
 }
 
+function htmlDecode(value) {
+    if (value) {
+        return $('<div/>').html(value).text();
+    } else {
+        return '';
+    }
+}
+
 function openTextModel(uploadTreeId, licenseId, what, type) {
   var refTextId = "#referenceText"
 
@@ -256,7 +264,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
-    $(refTextId).val(clearingsForSingleFile);
+    $(refTextId).val(htmlDecode(clearingsForSingleFile));
     if (what == 4 || what == "comment") {
       createDropDown($("#textModal > form > div"), $("#referenceText"));
     } else {
@@ -265,7 +273,7 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     }
     textModal.dialog('open');
   } else {
-    $(refTextId).val($("#"+licenseId+what+type).attr('title'));
+    $(refTextId).val(htmlDecode($("#"+licenseId+what+type).attr('title')));
     whatCol = what;
     whatLicId = licenseId;
     if (what == 4 || what == "comment") {
