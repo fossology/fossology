@@ -91,10 +91,11 @@ class copyright_list extends FO_Plugin
    * @param string $hash Content hash
    * @param string $type Content type
    * @param string $tableName Content table name (copyright|ecc|author)
+   * @param string $filter Filter activated/deactivated statements
    * @throws Exception
    * @return array Rows to process, and $upload_pk
    */
-  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName)
+  function GetRows($Uploadtree_pk, $Agent_pk, &$upload_pk, $hash, $type, $tableName, $filter="")
   {
     /*******  Get license names and counts  ******/
     $row = $this->uploadDao->getUploadEntry($Uploadtree_pk);
@@ -104,7 +105,7 @@ class copyright_list extends FO_Plugin
     $params = [];
 
     if ($type == "copyFindings") {
-      $sql = "SELECT textfinding AS content, '$type' AS type, uploadtree_pk, ufile_name, PF
+      $sql = "SELECT textfinding AS content, '$type' AS type, uploadtree_pk, ufile_name, PF, hash
               FROM $tableName,
               (SELECT uploadtree_pk, pfile_fk AS PF, ufile_name FROM uploadtree
                  WHERE upload_fk=$1
@@ -117,17 +118,28 @@ class copyright_list extends FO_Plugin
       $eventTable = $tableName . "_event";
       $eventFk = $tableName . "_fk";
       $tablePk = $tableName . "_pk";
+      $active_filter = "";
+      if (!empty($filter)) {
+        if ($filter == "active") {
+          $active_filter = "AND (ce.is_enabled IS NULL OR ce.is_enabled = 'true')";
+        } elseif ($filter = "inactive") {
+          $active_filter = "AND ce.is_enabled = 'false'";
+        }
+      }
       /* get all the copyright records for this uploadtree.  */
       $sql = "SELECT
 (CASE WHEN (ce.content IS NULL OR ce.content = '') THEN cp.content ELSE ce.content END) AS content,
+(CASE WHEN (ce.hash IS NULL OR ce.hash = '') THEN cp.hash ELSE ce.hash END) AS hash,
 type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
                 FROM $tableName AS cp
               INNER JOIN uploadtree UT ON cp.pfile_fk = ut.pfile_fk
                 AND ut.upload_fk=$1
                 AND ut.lft BETWEEN $2 AND $3
               LEFT JOIN $eventTable AS ce ON ce.$eventFk = cp.$tablePk
-                AND ce.upload_fk = $1
-              WHERE agent_fk=$4 AND (cp.hash=$5 OR ce.hash=$5) AND type=$6 ORDER BY uploadtree_pk";
+                AND ce.upload_fk = ut.upload_fk AND ce.uploadtree_fk = ut.uploadtree_pk
+              WHERE agent_fk=$4 AND (cp.hash=$5 OR ce.hash=$5) AND type=$6
+                $active_filter
+              ORDER BY uploadtree_pk";
       $params = [
         $upload_pk, $lft, $rgt, $Agent_pk, $hash, $type
       ];
@@ -149,16 +161,17 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
    * \param string $excl
    * \param int $NumRows the number of instances.
    * \param string $filter
+   * \param string $hash
    * \return array new array and $NumRows
    */
-  function GetRequestedRows($rows, $excl, &$NumRows, $filter)
+  function GetRequestedRows($rows, $excl, &$NumRows, $filter, $hash)
   {
     $NumRows = count($rows);
     $prev = 0;
     $ExclArray = explode(":", $excl);
 
     /* filter will need to know the rf_pk of "No_license_found" or "Void" */
-    if (!empty($filter))
+    if (!empty($filter) && ($filter == "nolic"))
     {
       $NoLicStr = "No_license_found";
       $VoidLicStr = "Void";
@@ -183,6 +196,10 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
     for($RowIdx = 0; $RowIdx < $NumRows; $RowIdx++)
     {
       $row = $rows[$RowIdx];
+      /* remove non matching entries */
+      if ($row['hash'] != $hash) {
+        unset($rows[$RowIdx]);
+      }
       /* remove excluded files */
       if ($excl)
       {
@@ -195,7 +212,7 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
       }
 
       /* apply filters */
-      if (($filter == "nolic") and ($rf_clause))
+      if (($filter == "nolic") && ($rf_clause))
       {
         /* discard file unless it has no license */
         $sql = "select rf_fk from license_file where ($rf_clause) and pfile_fk=$1";
@@ -299,12 +316,12 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
 
     /* get all rows */
     $upload_pk = -1;
-    $allRows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName);
+    $allRows = $this->GetRows($uploadtree_pk, $agent_pk, $upload_pk, $hash, $type, $tableName, $filter);
     $uploadtree_tablename = $this->uploadDao->getUploadtreeTableName($upload_pk);
 
     /* slim down to all rows with this hash and type,  and filter */
     $NumInstances = 0;
-    $rows = $this->GetRequestedRows($allRows, $excl, $NumInstances, $filter);
+    $rows = $this->GetRequestedRows($allRows, $excl, $NumInstances, $filter, $hash);
 
     // micro menus
     $OutBuf .= menu_to_1html(menu_find($this->Name, $MenuDepth),0);
