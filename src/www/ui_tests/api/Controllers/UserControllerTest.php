@@ -230,4 +230,25 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->assertEquals($this->getResponseJson($expectedResponse),
       $this->getResponseJson($actualResponse));
   }
+
+  /**
+   * @test
+   * -# Test UserController::getCurrentUser()
+   * -# Check if response contains current user's info
+   */
+  public function testGetCurrentUser()
+  {
+    $userId = 2;
+    $user = $this->getUsers([$userId]);
+    $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
+    $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
+      ->andReturn($user);
+    $expectedResponse = (new Response())->withJson($user[0], 200);
+    $actualResponse = $this->userController->getCurrentUser(null,
+      new Response(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
 }

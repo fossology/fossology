@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2017-2018 Siemens AG
+ Copyright (C) 2017-2018,2021 Siemens AG
  Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
  This program is free software; you can redistribute it and/or
@@ -122,6 +122,7 @@ $app->group(VERSION_1 . 'users',
   function (){
     $this->get('[/{id:\\d+}]', UserController::class . ':getUsers');
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
+    $this->get('/self', UserController::class . ':getCurrentUser');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
