@@ -64,7 +64,7 @@ Description: architecture for analyzing software, common files
 
 Package: fossology-web
 Architecture: any
-Depends: fossology-common, apache2,
+Depends: fossology-common, apache2, php7.0-gd|php7.2-gd|php7.3-gd|php7.4-gd,
  libapache2-mod-php7.0|libapache2-mod-php7.2|libapache2-mod-php7.3|libapache2-mod-php7.4,
  ${misc:Depends}
 Recommends: fossology-db
