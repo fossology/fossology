@@ -2,6 +2,7 @@
 /**
  * *************************************************************
  * Copyright (C) 2017 Siemens AG
+ * Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,7 +49,7 @@ class Decider
   private $newScanner;
   /**
    * @var boolean $ojoDecider
-   * Scanners matches if Ojo findings are no contradiction with other findings
+   * Scanners matches if Ojo or Reso findings are no contradiction with other findings
    */
   private $ojoDecider;
 

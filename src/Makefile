@@ -26,6 +26,7 @@ DIRS = \
 	pkgagent \
 	readmeoss \
 	unifiedreport \
+	reso \
 	reuser \
 	scheduler \
 	softwareHeritage \

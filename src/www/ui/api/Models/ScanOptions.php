@@ -1,6 +1,7 @@
 <?php
 /***************************************************************
 Copyright (C) 2017 Siemens AG
+Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -104,6 +105,7 @@ class ScanOptions
 
     $paramAgentRequest = new Request();
     $agentsToAdd = $this->prepareAgents();
+    file_put_contents('php://stderr', "AgentsToAdd: " . print_r($agentsToAdd, true) . " \n");
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
@@ -122,6 +124,7 @@ class ScanOptions
   {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
+      file_put_contents('php://stderr', "AgentsToAdd: " . $agent . " set: " . $set . " \n");
       if ($set === true) {
         if ($agent == "copyright_email_author") {
           $agentsToAdd[] = "agent_copyright";
