@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.2.2
+  version: 1.2.3
   contact:
     email: fossology@fossology.org
   license:
@@ -1328,10 +1328,16 @@ components:
           description: The group of the reused upload
         reuse_main:
           type: boolean
-          description: Scanners matches if all Nomos findings are within the Monk findings.
+          description: Copy the main license from reused package?
         reuse_enhanced:
           type: boolean
-          description: Bulk phrases from reused packages.
+          description: Run enhanced reuser with diff tool (slow)
+        reuse_report:
+          type: boolean
+          description: Copy all report configuration from conf page.
+        reuse_copyright:
+          type: boolean
+          description: Copy the copyright deactivation and edits.
       required:
         - reuse_uplod
         - reuse_group
