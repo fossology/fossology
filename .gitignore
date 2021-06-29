@@ -169,13 +169,8 @@ src/reportImport/agent/reportImport
 src/delagent/agent_tests/Unit/test_delagent
 src/delagent/agent_tests/Unit/testconf/
 /utils/fo_unicode_clean
-<<<<<<< HEAD
 install/db/db.cron
 install/fossdash/fossdash-publish.py
-=======
-install/fossdash/fossdash-publish.py
-install/db/db.cron
->>>>>>> origin/dev/reuse-software-agent/main
 src/reso/agent/version.php
 src/reso/agent/reso
 
