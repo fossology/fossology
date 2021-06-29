@@ -568,22 +568,22 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
   /users:
-      get:
-        tags:
-          - User
-          - Admin
-        description: Get the registered users
-        responses:
-          '200':
-            description: OK
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/User'
-          default:
-            $ref: '#/components/responses/defaultResponse'
+    get:
+      tags:
+        - User
+        - Admin
+      description: Get the registered users
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /users/{id}:
     parameters:
       - name: id
@@ -619,6 +619,20 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+  /users/self:
+    get:
+      tags:
+        - User
+      description: Get the information about logged in user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        default:
+          $ref: '#/components/responses/defaultResponse'
   /jobs:
     parameters:
       - name: groupName

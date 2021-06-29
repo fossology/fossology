@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2018,2021 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -78,5 +78,19 @@ class UserController extends RestController
       $returnVal = new Info(404, "UserId doesn't exist", InfoType::ERROR);
     }
     return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
+   * Get information of current user
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function getCurrentUser($request, $response, $args)
+  {
+    $user = $this->dbHelper->getUsers($this->restHelper->getUserId());
+    return $response->withJson($user[0], 200);
   }
 }
