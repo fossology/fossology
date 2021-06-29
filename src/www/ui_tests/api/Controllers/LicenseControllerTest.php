@@ -453,6 +453,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       "rf_shortname" => $license->getShortName(),
       "rf_fullname" => $license->getFullName(),
       "rf_text" => $license->getText(),
+      "rf_md5" => md5($license->getText()),
       "rf_risk" => $license->getRisk(),
       "rf_url" => $license->getUrl(),
       "rf_detector_type" => 1,
@@ -462,11 +463,16 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       "marydone" => false
     ];
 
+    $sql = "SELECT count(*) cnt FROM ".
+      "$tableName WHERE rf_shortname = $1 AND group_fk = $2;";
+
     $this->dbManager->shouldReceive('insertTableRow')
       ->withArgs([$tableName, $assocData, M::any(), "rf_pk"])->andReturn(4);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$license->getShortName(), $this->groupId], M::any()])
+      ->andReturn(["cnt" => 0]);
 
-    $info = new Info(201, "License " . $license->getShortName() .
-      " added with id '4'.", InfoType::INFO);
+    $info = new Info(201, '4', InfoType::INFO);
     $expectedResponse = (new Response())->withJson($info->getArray(),
       $info->getCode());
 
@@ -536,6 +542,49 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
 
     $info = new Info(403, "Need to be admin to create non-candidate license.",
       InfoType::ERROR);
+    $expectedResponse = (new Response())->withJson($info->getArray(),
+      $info->getCode());
+
+    $actualResponse = $this->licenseController->createLicense($request,
+      new Response(), []);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::createLicense() to create new license
+   * -# Simulate duplicate license name
+   * -# Check if response is 409
+   */
+  public function testCreateDuplicateLicense()
+  {
+    $license = $this->getLicense("MIT");
+    $requestBody = $license->getArray();
+    $requestBody["isCandidate"] = true;
+    unset($requestBody['id']);
+
+    $requestHeaders = new Headers();
+    $requestHeaders->set('Content-Type', 'application/json');
+    $body = new Body(fopen('php://temp', 'wr+'));
+    $body->write(json_encode($requestBody));
+    $body->seek(0);
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/license"), $requestHeaders, [], [], $body);
+
+    $tableName = "license_candidate";
+
+    $sql = "SELECT count(*) cnt FROM ".
+      "$tableName WHERE rf_shortname = $1 AND group_fk = $2;";
+
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([$sql, [$license->getShortName(), $this->groupId], M::any()])
+      ->andReturn(["cnt" => 1]);
+
+    $info = new Info(409, "License with shortname '" .
+      $license->getShortName() . "' already exists!", InfoType::ERROR);
     $expectedResponse = (new Response())->withJson($info->getArray(),
       $info->getCode());
 

@@ -25,6 +25,7 @@ namespace Fossology\UI\Api\Controllers;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\LicenseDao;
+use Fossology\Lib\Exception;
 use Fossology\Lib\Util\StringOperation;
 use Fossology\UI\Api\Models\License;
 use Fossology\UI\Api\Models\Obligation;
@@ -240,21 +241,36 @@ class LicenseController extends RestController
       "rf_shortname" => $newLicense->getShortName(),
       "rf_fullname" => $newLicense->getFullName(),
       "rf_text" => $newLicense->getText(),
+      "rf_md5" => md5($newLicense->getText()),
       "rf_risk" => $newLicense->getRisk(),
       "rf_url" => $newLicense->getUrl(),
       "rf_detector_type" => 1
     ];
+    $okToAdd = true;
     if ($newLicense->getIsCandidate()) {
       $tableName = "license_candidate";
       $assocData["group_fk"] = $this->restHelper->getGroupId();
       $assocData["rf_user_fk_created"] = $this->restHelper->getUserId();
       $assocData["rf_user_fk_modified"] = $this->restHelper->getUserId();
       $assocData["marydone"] = $newLicense->getMergeRequest();
+      $okToAdd = $this->isNewLicense($newLicense->getShortName(),
+        $this->restHelper->getGroupId());
+    } else {
+      $okToAdd = $this->isNewLicense($newLicense->getShortName());
     }
-    $rfPk = $this->dbHelper->getDbManager()->insertTableRow($tableName,
-      $assocData, __METHOD__ . ".newLicense", "rf_pk");
-    $newInfo = new Info(201, "License " . $newLicense->getShortName() .
-      " added with id '$rfPk'.", InfoType::INFO);
+    if (! $okToAdd) {
+      $newInfo = new Info(409, "License with shortname '" .
+        $newLicense->getShortName() . "' already exists!", InfoType::ERROR);
+      return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+    }
+    try {
+      $rfPk = $this->dbHelper->getDbManager()->insertTableRow($tableName,
+        $assocData, __METHOD__ . ".newLicense", "rf_pk");
+      $newInfo = new Info(201, $rfPk, InfoType::INFO);
+    } catch (Exception $e) {
+      $newInfo = new Info(409, "License with same text already exists!",
+        InfoType::ERROR);
+    }
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
   }
 
@@ -326,5 +342,30 @@ class LicenseController extends RestController
         " updated.", InfoType::INFO);
     } while (false);
     return $response->withJson($newInfo->getArray(), $newInfo->getCode());
+  }
+
+  /**
+   * Check if the given shortname already exists in DB.
+   *
+   * @param string  $shortName Shortname to check
+   * @param integer $groupId   Group ID if candidate license
+   */
+  private function isNewLicense($shortName, $groupId = 0)
+  {
+    $tableName = "ONLY license_ref";
+    $where = "";
+    $params = [$shortName];
+    $statement = __METHOD__;
+    if ($groupId != 0) {
+      $tableName = "license_candidate";
+      $where = "AND group_fk = $2";
+      $params[] = $groupId;
+      $statement .= ".candidate";
+    }
+    $sql = "SELECT count(*) cnt FROM " .
+      "$tableName WHERE rf_shortname = $1 $where;";
+    $result = $this->dbHelper->getDbManager()->getSingleRow($sql, $params,
+      $statement);
+    return $result["cnt"] == 0;
   }
 }

@@ -1195,6 +1195,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Info'
+        '409':
+          description: License with same name or text already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
   /license/{shortname}:
