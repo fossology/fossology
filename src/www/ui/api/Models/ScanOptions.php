@@ -105,7 +105,6 @@ class ScanOptions
 
     $paramAgentRequest = new Request();
     $agentsToAdd = $this->prepareAgents();
-    file_put_contents('php://stderr', "AgentsToAdd: " . print_r($agentsToAdd, true) . " \n");
     $this->prepareReuser($paramAgentRequest);
     $this->prepareDecider($paramAgentRequest);
     $returnStatus = (new \AgentAdder())->scheduleAgents($uploadId, $agentsToAdd, $paramAgentRequest);
@@ -124,7 +123,6 @@ class ScanOptions
   {
     $agentsToAdd = [];
     foreach ($this->analysis->getArray() as $agent => $set) {
-      file_put_contents('php://stderr', "AgentsToAdd: " . $agent . " set: " . $set . " \n");
       if ($set === true) {
         if ($agent == "copyright_email_author") {
           $agentsToAdd[] = "agent_copyright";
