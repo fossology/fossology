@@ -39,6 +39,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\Lib\Data\Folder\Folder;
+use Fossology\Lib\Proxy\LicenseViewProxy;
 
 /**
  * @class DbHelper
@@ -134,7 +135,7 @@ class DbHelper
     $sql = "SELECT count(*) AS cnt FROM $partialQuery $where;";
     $totalResult = $this->dbManager->getSingleRow($sql, $params, $statementCount);
     $totalResult = intval($totalResult['cnt']);
-    $totalResult = intval(floor($totalResult / $limit) + 1);
+    $totalResult = intval(ceil($totalResult / $limit));
 
     $params[] = ($page - 1) * $limit;
 
@@ -197,7 +198,8 @@ WHERE uploadtree_pk=' . pg_escape_string($uploadTreePk))["ufile_name"];
   public function doesIdExist($tableName, $idRowName, $id)
   {
     return (0 < (intval($this->getDbManager()->getSingleRow("SELECT COUNT(*)
-FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
+FROM $tableName WHERE $idRowName = $1", [$id],
+      __METHOD__ . $tableName . $idRowName)["count"])));
   }
 
   /**
@@ -307,7 +309,7 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $params[] = $offset;
       $pagination .= " OFFSET $" . count($params);
       $statement .= ".withLimit";
-      $totalResult = floor($totalResult / $limit) + 1;
+      $totalResult = ceil($totalResult / $limit);
     } else {
       $totalResult = 1;
     }
@@ -473,5 +475,50 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $this->folderDao::MODE_UPLOAD);
     $content = $this->folderDao->getContent($contentId);
     return $this->folderDao->getFolder($content['parent_fk']);
+  }
+
+  /**
+   * Get the licenses from database in paginated way
+   *
+   * @param integer $page    Which page number to fetch
+   * @param integer $limit   Limit of results
+   * @param integer $groupId Group of the user
+   * @param boolean $active  True to get only active licenses
+   * @return array
+   */
+  public function getLicensesPaginated($page, $limit, $groupId, $active)
+  {
+    $statementName = __METHOD__;
+    $rfTable = 'license_all';
+    $options = ['columns' => ['rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text',
+      'rf_url', 'rf_risk', 'group_fk']];
+    if ($active) {
+      $options['extraCondition'] = "rf_active = '" .
+        $this->dbManager->booleanToDb($active) . "'";
+    }
+    $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
+    $withCte = $licenseViewDao->asCTE();
+
+    return $this->dbManager->getRows($withCte .
+      " SELECT * FROM $rfTable ORDER BY LOWER(rf_shortname) " .
+      "LIMIT $1 OFFSET $2;",
+      [$limit, ($page - 1) * $limit], $statementName);
+  }
+
+  /**
+   * Get the count of licenses accessible by user based on group ID
+   *
+   * @param integer $groupId Group of the user
+   * @return int Count of licenses
+   */
+  public function getLicenseCount($groupId)
+  {
+    $result = $this->dbManager->getSingleRow(
+      "SELECT sum(cnt) AS total FROM (" .
+      " SELECT count(*) AS cnt FROM ONLY license_ref " .
+      " UNION ALL " .
+      " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1" .
+      ") as all_lic;", [$groupId], __METHOD__ . ".getLicenseCount");
+    return intval($result['total']);
   }
 }

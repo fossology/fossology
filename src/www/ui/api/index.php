@@ -182,9 +182,18 @@ $app->group(VERSION_1 . 'filesearch',
 /////////////////////////LICENSE SEARCH/////////////////
 $app->group(VERSION_1 . 'license',
   function (){
-    $this->get('', LicenseController::class . ':getLicense');
+    $this->get('', LicenseController::class . ':getAllLicenses');
+    $this->post('', LicenseController::class . ':createLicense');
+    $this->get('/{shortname:.+}', LicenseController::class . ':getLicense');
+    $this->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $this->any('/{params:.*}', BadRequestController::class);
   });
+
+// Catch all routes
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
+  $handler = $this->get('notFoundHandler');
+  return $handler($req, $res);
+});
 
 $app->run();
 

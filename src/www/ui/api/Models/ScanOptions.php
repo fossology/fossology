@@ -23,13 +23,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\UI\Api\Models;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Reuser\ReuserAgentPlugin;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
 use Fossology\Lib\Dao\UserDao;
 
-require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+if (!class_exists("AgentAdder", false)) {
+  require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+}
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
 
 /**
@@ -158,7 +159,7 @@ class ScanOptions
     }
     $userDao = $GLOBALS['container']->get("dao.user");
     $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
-    $request->request->set(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME, $reuserSelector);
+    $request->request->set('uploadToReuse', $reuserSelector);
     $request->request->set('reuseMode', $reuserRules);
   }
 

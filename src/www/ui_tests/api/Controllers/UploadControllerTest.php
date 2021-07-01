@@ -48,7 +48,7 @@ use Fossology\UI\Api\Models\Hash;
 
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {
-  return UploadControllerTests::$function->TryToDelete($uploadpk, $user_pk,
+  return UploadControllerTest::$function->TryToDelete($uploadpk, $user_pk,
     $group_pk, $uploadDao);
 }
 
@@ -56,7 +56,7 @@ function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
  * @class UploadControllerTest
  * @brief Unit tests for UploadController
  */
-class UploadControllerTests extends \PHPUnit\Framework\TestCase
+class UploadControllerTest extends \PHPUnit\Framework\TestCase
 {
   /**
    * @var \Mockery\MockInterface $functions
