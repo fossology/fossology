@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.0
+  version: 1.3.1
   contact:
     email: fossology@fossology.org
   license:
@@ -466,6 +466,7 @@ paths:
               - ninka
               - ojo
               - reportImport
+              - reso
           uniqueItems: true
         style: form
         explode: false
@@ -1331,7 +1332,7 @@ components:
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
         ojo_decider:
           type: boolean
-          description: Scanners matches if Ojo findings are no contradiction with other findings.
+          description: Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings.
     ScanOptions:
       type: object
       properties:
@@ -1526,6 +1527,9 @@ components:
         package:
           type: boolean
           description: Should Package Analysis be run on this upload.
+        reso:
+          type: boolean
+          description: Should REUSE.Software Analysis be run on this upload.
     Reuser:
       type: object
       properties:
