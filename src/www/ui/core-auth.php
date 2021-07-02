@@ -289,7 +289,8 @@ class core_auth extends FO_Plugin
         $Email = $this->authExternal['emailAuthExternal'];
         /* Set default list of agents when a new user is created */
         $agentList = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AGENT_LIST'];
-        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $agentList, $Folder);
+        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
+          $GLOBALS['SysConf']['SYSCONFIG']['UploadVisibility'], $agentList, $Folder);
       }
     }
 
