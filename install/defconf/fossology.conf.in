@@ -111,12 +111,6 @@ CONF_EXT_AUTH_LOWERCASE_USER=true
 ; logging in for the first time
 CONF_EXT_AUTH_NEW_USER_AUTO_CREATE=true
 
-; Set new users' default visibility for new uploads. Choose between
-;  private: Visible only for active group
-;  protected: Visible for all groups
-;  public: Visible to all
-CONF_EXT_AUTH_NEW_USER_UPLOAD_VISIBILITY=private
-
 ; List of agents attributed to newly created users
 ; Example:
 ; "agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo,agent_shagent"
