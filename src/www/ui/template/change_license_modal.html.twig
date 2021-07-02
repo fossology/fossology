@@ -9,8 +9,8 @@
 <!-- The User Modal -->
 <div class="modal" id="userModal">
   <form name="licenseListSelect">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="width:120%;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
 
       <!-- Modal Header -->
       <div class="modal-header">
@@ -20,10 +20,14 @@
 
       <!-- Modal body -->
       <div class="modal-body">
-        <table>
-          <tr>
-            <td>{{ 'Available licenses'| trans }}:<br/>
-              <select name="licenseLeft" class="form-control-sm" id="licenseLeft" style="min-width:200px" size="20" multiple="multiple">
+        <div class="container-fluid">
+          <div class="row justify-content-md-center pb-3">
+            <div class="col">
+              {{ 'Available licenses'| trans }}: <img src='images/info_16.png'
+                title="{{ 'Double-click on license opens a popup with the full text.'| trans }}" alt="{{ 'Double-click on license opens a popup with the full text.'| trans }}" class='info-bullet'/>
+              <br/>
+              <select name="licenseLeft" class="custom-select w-100 h-100"
+                id="licenseLeft" size="20" multiple="multiple">
                 {%  for opt in licenseArray  %}
                 <option value= {{ opt.id }} title='{{ opt.fullname | e }}'
                         ondblclick="javascript:window.open('{{ licenseUri }}{{ opt.id }}',
@@ -32,53 +36,73 @@
                 </option>
                 {% endfor %}
               </select>
-            </td>
-            <td align="center" valign="middle">
+            </div>
+            <div class="col-xs-1 my-auto px-0 text-center">
               <input type="button" value="&gt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseLeft, this.form.licenseRight);" />
               <br><br>
               <input type="button" value="&lt;" class="btn btn-default btn-sm" onclick="moveLicense(this.form.licenseRight, this.form.licenseLeft);" />
-            </td>
-            <td>
+            </div>
+            <div class="col">
               {{ 'Selected licenses'|trans }}:<br/>
-              <select name="licenseRight" class="form-control-sm" id="licenseRight" style="min-width:200px" size="20" multiple="multiple">
+              <select name="licenseRight" class="custom-select w-100 h-100" id="licenseRight" size="20" multiple="multiple">
               </select>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" style="text-align: center;">
-              {{ 'Hint'| trans }}: {{ 'Double-click on license opens a popup with the full text.'| trans }}
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" style="text-align: center;">
-              <button type="button" class="btn btn-default btn-sm" autofocus onclick="performPostRequest(false);">{{ 'Add selected licenses'|trans }}</button>
-              &nbsp;
-              <button type="button" class="btn btn-default btn-sm" autofocus onclick="performPostRequest(true);">{{ 'Remove selected licenses'|trans }}</button>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" style="text-align: center;">
-              <button type="button" class="btn btn-default btn-sm" autofocus value="irrelevant" onclick="markDecisions(this.value);">{{ 'Mark decisions as irrelevant'|trans }}</button>
-              &nbsp;
-              <button type="button" class="btn btn-default btn-sm" autofocus value="deleteIrrelevant" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked irrelevant decisions'|trans }}</button>
-            </td>
-          </tr>
-          <tr>
-            <td colspan="3" style="text-align: center;">
-              <button type="button" class="btn btn-default btn-sm" autofocus value="doNotUse" onclick="markDecisions(this.value);">{{ 'Mark decisions as do not use'|trans }}</button>
-              &nbsp;
-              <button type="button" class="btn btn-default btn-sm" autofocus value="deleteDoNotUse" onclick="deleteMarkedDecisions(this.value);">{{ 'Remove marked do not use decisions'|trans }}</button>
-            </td>
-          </tr>
-        </table>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Modal footer -->
       <div class="modal-footer">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-md-6 text-right">
+              <button type="button" class="btn btn-default text-right"
+                  autofocus onclick="performPostRequest(false);">
+                {{ 'Add selected licenses'|trans }}
+              </button>
+            </div>
+            <div class="col-md-6 text-left">
+              <button type="button" class="btn btn-default text-left"
+                  autofocus onclick="performPostRequest(true);">
+                {{ 'Remove selected licenses'|trans }}
+              </button>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-md-6 text-right">
+              <div class="btn-group btn-group-vertical" role="group">
+                <button type="button" class="btn btn-default text-right"
+                    autofocus value="irrelevant"
+                    onclick="markDecisions(this.value);">
+                  {{ 'Mark decisions as irrelevant'|trans }}
+                </button>
+                <button type="button" class="btn btn-default text-right"
+                    autofocus value="doNotUse"
+                    onclick="markDecisions(this.value);">
+                  {{ 'Mark decisions as do not use'|trans }}
+                </button>
+              </div>
+            </div>
+            <div class="col-md-6 text-left">
+              <div class="btn-group btn-group-vertical" role="group">
+                <button type="button" class="btn btn-default text-left"
+                    autofocus value="deleteIrrelevant"
+                    onclick="deleteMarkedDecisions(this.value);">
+                  {{ 'Remove marked irrelevant decisions'|trans }}
+                </button>
+                <button type="button" class="btn btn-default text-left"
+                    autofocus value="deleteDoNotUse"
+                    onclick="deleteMarkedDecisions(this.value);">
+                  {{ 'Remove marked do not use decisions'|trans }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <input name="licenseNumbersToBeSubmitted" id="licenseNumbersToBeSubmitted" type="hidden" value="" />
         <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ uploadTreeId }}" />
       </div>
-
     </div>
   </div>
   </form>

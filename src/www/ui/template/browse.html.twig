@@ -30,7 +30,7 @@
 
   <table border="0" style="padding:2px; width:100%">
     <tr>
-      <td style="padding-left:18px; vertical-align:top; height:100%; width:75%">
+      <td style="vertical-align:top; height:100%; width:75%" class="px-2">
         <table border="0" id="dirlist" class="semibordered">
           <thead>
             <tr>
@@ -60,15 +60,12 @@
           <tbody></tbody>
           <tfoot></tfoot>
         </table>
-  
+
         {{ parent() }}
       </td>
-      <td style="vertical-align:top; height:100%; width:25%">
+      <td style="vertical-align:top; height:100%; width:25%" class="px-2">
       {% if not(agentMap is empty) %}
         <table border="0" class="semibordered" id="lichistogram"></table>
-        <br/><br/>
-        {{ "Hint"|trans }}:
-        {{ 'Click on the license name to search for where the license is found in the file listing.'|trans}}
         <br/><br/>
         {% include 'browse_license-summary.html.twig' %}
       {% endif %}

@@ -9,7 +9,7 @@ function createLicHistTable() {
   tableColumns = [
       {"sTitle": "{{ "Scanner Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
       {"sTitle": "{{ "Concluded License Count"|trans }}", "sClass": "right", "sWidth": "5%", "bSearchable": false, "sType": "num-html"},
-      {"sTitle": "{{ "License Name"|trans }}", "sClass": "left", "mRender": dressContents}
+      {"sTitle": "{{ "License Name"|trans }} <img src='images/info_16.png' title='{{ "Click on the license name to search for where the license is found in the file listing."|trans}}' alt='' class='info-bullet'/>", "sClass": "left", "mRender": dressContents}
   ];
 
   tableSorting = [

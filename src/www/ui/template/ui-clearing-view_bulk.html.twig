@@ -56,8 +56,8 @@
 
   <!-- The bulk Modal -->
   <div class="modal" id="bulkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="false">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content" style="width:130%;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
         <!-- Modal Header -->
         <div class="modal-header">
           <h4 class="modal-title">Bulk Recognition</h4>
@@ -75,7 +75,7 @@
             <table>
               <tr>
                 <td id="bulkExistingLicense">
-                  <select id="bulkLicense" style="width:100%" class="ui-render-select2">
+                  <select id="bulkLicense" class="ui-render-select2 w-100">
                     {% for license in licenseArray %}
                     <option value="{{ license.id }}" title="{{ license.fullname|e }}">{{ license.shortname|e }}</option>
                     {% endfor %}
@@ -84,10 +84,10 @@
                 <td>
                   <img src="images/info_16.png" data-toggle="tooltip" style="vertical-align:middle !important;" title="{{ 'The user can select an according license'|trans }}" alt="" class="info-bullet"/>
                 </td>
-                <td style="padding:0px 3px 0px 3px">
+                <td class="px-1">
                   <a href="#" id="bulkFormAddLicense" style="font-size:20px;"><img src="images/icons/add_16.png" title="append job to add selected license" alt="+"/></a>
                 </td>
-                <td style="padding:0px 3px 0px 3px">
+                <td class="px-1">
                   <a href="#" id="bulkFormRmLicense" style="font-size:20px;"><img src="images/icons/remove_16.png" title="append job to remove selected license" alt="-"/></a>
                 </td>
                 <td>
@@ -116,24 +116,29 @@
 
             <br/>
             {{ 'Reference text'| trans }}:<br/>
-            <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" class="form-control-sm" style="width:100%"></textarea><br>
+            <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" class="form-control"></textarea><br>
             <select name="bulkScope" class="form-control-sm" id="bulkScope">
               <option value="u">{{ 'scan whole Upload'| trans }}</option>
               <option value="f">{{ 'scan only current Folder'| trans }}</option>
             </select>
-            <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" style="vertical-align:middle !important;" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
+            <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
 
-            <input type="checkbox" class="info-bullet view-license-rc-size" id="forceDecision"/>
-            <label for="forceDecision">
-              {{ 'ignoreConflicts'|trans }}
-              <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
-            </label>
-            <input type="checkbox" class="info-bullet view-license-rc-size" id="bulkIgnoreIrre" checked="checked"/>
-            <label for="bulkIgnoreIrre">
-              {{ 'Ignore Irrelevant files'|trans }}<img src="images/info_16.png"
-              data-toggle="tooltip" data-placement="left" style="vertical-align:middle !important;"
-              title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
-            </label>
+            <div class="form-check form-check-inline">
+              <input type="checkbox" class="form-check-input" id="forceDecision"/>
+              <label for="forceDecision" class="form-check-label">
+                {{ 'ignoreConflicts'|trans }}
+                <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input type="checkbox" class="form-check-input" id="bulkIgnoreIrre" checked="checked"/>
+              <label for="bulkIgnoreIrre"  class="form-check-label">
+                {{ 'Ignore Irrelevant files'|trans }}
+                <img src="images/info_16.png" data-toggle="tooltip"
+                data-placement="left" style="vertical-align:middle !important;"
+                title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
+              </label>
+            </div>
             <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
           </form>
         </div>
