@@ -52,6 +52,9 @@ $SysConf = bootstrap($sysconfdir);
 ConfigInit($SYSCONFDIR, $SysConf);
 
 /* User must be in group fossy or what configured in fossology.conf */
+/*
+* REMOVE FOR OPENSHIFT BUILD
+*
 $projectGroup = $SysConf['DIRECTORIES']['PROJECTGROUP'] ?: 'fossy';
 $gInfo = posix_getgrnam($projectGroup);
 posix_setgid($gInfo['gid']);
@@ -61,7 +64,7 @@ if (!preg_match("/\s$projectGroup\s/",$groups) && (posix_getgid() != $gInfo['gid
   print "FATAL: You must be in group '$projectGroup'.\n";
   exit(1);
 }
-
+*/
 require_once("$MODDIR/lib/php/libschema.php");
 
 /* Locations where the target .php file might exist */

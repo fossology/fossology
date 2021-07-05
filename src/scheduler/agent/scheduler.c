@@ -884,7 +884,10 @@ void scheduler_foss_config(scheduler_t* scheduler)
   g_free(tmp);
 
   /* set the user and group before proceeding */
-  set_usr_grp(scheduler->process_name, scheduler->sysconfig);
+
+  /* REMOVE FOR OPENSHIFT BUILD
+  //set_usr_grp(scheduler->process_name, scheduler->sysconfig);
+  */
 
   /* load the port setting */
   if(scheduler->i_port == 0)

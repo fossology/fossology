@@ -2,6 +2,7 @@
 # FOSSology postinstall script
 # Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 # Copyright (C) 2015 Siemens AG
+# Copyright Orange, nicolas1.toussaint@orange.com
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be
@@ -12,7 +13,7 @@ show_help() \{
   cat <<EOF
 Usage: fo-postinstall [options]
   -a or --agent           : agent specific actions
-  -d or --database        : Create the FOSSology database
+  -d or --database        : create the FOSSology database
   -w or --web-only        : web interface specific actions
   -s or --scheduler-only  : scheduler specific actions
   -e or --everything      : all actions, default
@@ -22,6 +23,8 @@ Usage: fo-postinstall [options]
   -h or --help            : this help text
  Special options
   --no-running-database   : omit all database operations
+  --container-mode        : do not expect to be running as root
+                            + skip creation of users and groups
   --force-decision        : Force update of SHA256 hash in decision tables
   --force-pfile           : Force calculation of SHA256 hash of pfile entries
   --force-encode          : Force recoding copyright and sister tables
@@ -37,13 +40,14 @@ OVERWRITE=''
 LICENSEREF=''
 COMMON=''
 RUNNINGDATABASE=true
+CONTAINER_MODE=''
 FORCEDECISION=''
 FORCEPFILE=''
 FORCEENCODE=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,force-encode,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,container-mode,force-decision,force-pfile,force-encode,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -63,6 +67,7 @@ while true; do
       -l|--licenseref)       LICENSEREF=true; EVERYTHING=''; shift;;
       -c|--common)           COMMON=true; EVERYTHING=''; shift;;
       --no-running-database) RUNNINGDATABASE=''; EVERYTHING=''; shift;;
+      --container-mode)      CONTAINER_MODE=true; shift;;
       --force-decision)      FORCEDECISION='--force-decision'; shift;;
       --force-pfile)         FORCEPFILE='--force-pfile'; shift;;
       --force-encode)        FORCEENCODE='--force-encode'; shift;;
@@ -89,12 +94,24 @@ if [[ $EVERYTHING ]]; then
    LICENSEREF=true
 fi
 
-must_run_as_root() \{
-  # This must run as root.
-  if [[ $(id -u) -ne 0 ]] ; then
-    echo >&2 "ERROR: fo-postinstall must run as root."
-    echo >&2 "Aborting."
-    exit 1
+# Checks if we are and should be running as root
+# Returns 0 if running as root
+# Returns 1 if not running as root, and not expected to
+# Exits with failure is not running as root, and expected to be.
+
+check_run_as_root() \{
+  if [[ $(id -u) -eq 0 ]]
+  then # we are root
+    return 0
+  else
+    if [[ $CONTAINER_MODE ]]
+    then # not root, and should not be
+      return 1
+    else # not root, but expected to be
+      echo >&2 "ERROR: fo-postinstall must run as root."
+      echo >&2 "Aborting."
+      exit 1
+    fi
   fi
 \}
 
@@ -127,8 +144,15 @@ else
    exit 1
 fi
 
+###############################################
+echo "=============================***======================================="
+echo "User id: $(id)"
+echo "USER: {$USER}"
+echo "CONTAINER_MODE: $CONTAINER_MODE"
+echo "=============================***======================================="
+###############################################
+
 if [[ $COMMON ]]; then
-   must_run_as_root
    echo "*** Running postinstall for common actions***"
 
    # check path to repo
@@ -140,47 +164,51 @@ if [[ $COMMON ]]; then
       PROJECTGROUP="{$PROJECTGROUP}"
    \}
 
-   ## create user and group
-   # Because we are doing these by name, in the multi-machine install case
-   # we may end up with uid/gid being different across machines. This will
-   # either need to be fixed by hand or with NFSv4 you can use rpc.idmapd
-   # to do uid/gid mapping. More details will be provided in the multi-machine
-   # documentation.
+   if [[ ! $CONTAINER_MODE ]]
+   then
+      check_run_as_root
+      ## create user and group
+      # Because we are doing these by name, in the multi-machine install case
+      # we may end up with uid/gid being different across machines. This will
+      # either need to be fixed by hand or with NFSv4 you can use rpc.idmapd
+      # to do uid/gid mapping. More details will be provided in the multi-machine
+      # documentation.
 
-   # Make sure the user and group exist, if not then create
-   echo "*** Creating user and group ***"
+      # Make sure the user and group exist, if not then create
+      echo "*** Creating user and group ***"
 
-   # check for group
-   if grep -q "^$PROJECTGROUP:" /etc/group; then
-      echo "NOTE: group '$PROJECTGROUP' already exists, good."
-   elif groupadd --system "$PROJECTGROUP"; then
-      echo "NOTE: group '$PROJECTGROUP' created"
-   else
-      echo >&2 "ERROR: Unable to create group '$PROJECTGROUP'"
-      exit 1
-   fi
-
-   # check for user
-   if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
-      echo "NOTE: user '{$PROJECTUSER}' already exists, good."
-      USERSHELL=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 7)
-      if [[ $USERSHELL == "/bin/false" ]]; then
-         echo >&2 "ERROR: {$PROJECTUSER} shell must be a real shell"
+      # check for group
+      if grep -q "^$PROJECTGROUP:" /etc/group; then
+         echo "NOTE: group '$PROJECTGROUP' already exists, good."
+      elif groupadd --system "$PROJECTGROUP"; then
+         echo "NOTE: group '$PROJECTGROUP' created"
+      else
+         echo >&2 "ERROR: Unable to create group '$PROJECTGROUP'"
          exit 1
       fi
-      USERHOME=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 6)
-      if [[ $USERHOME != "/home/{$PROJECTUSER}" ]]; then
-         echo "NOTE: change user '{$PROJECTUSER}' homedir from $USERHOME to /home/{$PROJECTUSER}."
-         mkdir --parents /home/{$PROJECTUSER}
-         chown {$PROJECTUSER}:$PROJECTGROUP /home/{$PROJECTUSER}
-         usermod --home /home/{$PROJECTUSER} {$PROJECTUSER}
+
+      # check for user
+      if grep -q "^{$PROJECTUSER}:" /etc/passwd; then
+         echo "NOTE: user '{$PROJECTUSER}' already exists, good."
+         USERSHELL=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 7)
+         if [[ $USERSHELL == "/bin/false" ]]; then
+            echo >&2 "ERROR: {$PROJECTUSER} shell must be a real shell"
+            exit 1
+         fi
+         USERHOME=$(grep "^{$PROJECTUSER}:" /etc/passwd | cut -d: -f 6)
+         if [[ $USERHOME != "/home/{$PROJECTUSER}" ]]; then
+            echo "NOTE: change user '{$PROJECTUSER}' homedir from $USERHOME to /home/{$PROJECTUSER}."
+            mkdir --parents /home/{$PROJECTUSER}
+            chown {$PROJECTUSER}:$PROJECTGROUP /home/{$PROJECTUSER}
+            usermod --home /home/{$PROJECTUSER} {$PROJECTUSER}
+         fi
+      elif useradd --comment "{$PROJECT}" --gid $PROJECTGROUP --create-home --shell /bin/bash --system {$PROJECTUSER}; then
+         echo "NOTE: user '{$PROJECTUSER}' created"
+      else
+         echo >&2 "ERROR: Unable to create user '{$PROJECTUSER}'"
+         exit 1
       fi
-   elif useradd --comment "{$PROJECT}" --gid $PROJECTGROUP --create-home --shell /bin/bash --system {$PROJECTUSER}; then
-      echo "NOTE: user '{$PROJECTUSER}' created"
-   else
-      echo >&2 "ERROR: Unable to create user '{$PROJECTUSER}'"
-      exit 1
-   fi
+   fi # end of ! CONTAINER_MODE
 
    ## check for existance/ownership/permissions of needed directories
    echo "*** Making sure needed dirs exist with right ownership/permissions ***"
@@ -200,43 +228,58 @@ if [[ $COMMON ]]; then
       "$REPO" \
       "{$REPODIR}/fossdash"
       
-   chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
-   chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash"
+   if [[ ! $CONTAINER_MODE ]]
+   then
+      check_run_as_root
+      chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
+      chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash"
    
-   # make sure repo and its parent dir has the right permissions
-   if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
-     echo "NOTE: Repository group is not correct."
-     echo "Fixing..This may take long duration, depending on your repository size."
-     chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
-   fi
-   chmod 2770 $\{REPO%/*\} $REPO
+      # make sure repo and its parent dir has the right permissions
+      if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
+      echo "NOTE: Repository group is not correct."
+      echo "Fixing..This may take long duration, depending on your repository size."
+      chown --recursive {$PROJECTUSER}:$PROJECTGROUP $\{REPO%/*\} $REPO
+      fi
+      chmod 2770 $\{REPO%/*\} $REPO
 
-   # make install sets Db.conf's mode to 660, but can't chgrp it because
-   # the group doesn't exist until we create it above. So chgrp now
-   chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo >&2 "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+      # make install sets Db.conf's mode to 660, but can't chgrp it because
+      # the group doesn't exist until we create it above. So chgrp now
+      chgrp $PROJECTGROUP {$SYSCONFDIR}/Db.conf || echo >&2 "ERROR: failed to chgrp {$SYSCONFDIR}/Db.conf"
+   fi # end of ! CONTAINER_MODE
+
+   if [[ $CONTAINER_MODE ]]
+   then # In Container + Root == Building container.
+      if check_run_as_root; then
+         # FIXME -> set minimum permissions
+         chmod a+rwX --recursive --verbose "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash" {$SYSCONFDIR}/Db.conf
+      fi
+   fi # end of CONTAINER_MODE
+
 
    cat <<EOF
 NOTE: Running the PostgreSQL vacuum and analyze command can result in a large database performance improvement.
       We suggest that you either configure postgres to run its autovacuum and autoanalyze daemons, or maintagent -D in a cron job, or run Admin > Maintenance on a regular basis.
       Admin > Dashboard will show you the last time vacuum and analyze have been run.
 EOF
-fi
+fi # end of COMMON
 
-[[ $PROJECTGROUP ]] || \{ echo "PROJECTGROUP is not set"; exit 2; \}
-
-if [[ $WEBONLY ]]; then
-   echo "*** Running postinstall for web-only actions***"
-   LICENSEREF=true
-fi
+if [[ ! $CONTAINER_MODE ]]
+then
+   [[ $PROJECTGROUP ]] || \{ echo "PROJECTGROUP is not set"; exit 2; \}
+fi # end of ! CONTAINER_MODE
 
 ########################################################################
 
 if [[ $DATABASE && $RUNNINGDATABASE ]]; then
+   echo "*** Create Database ***"
    {$LIBEXECDIR}/dbcreate
 fi # end of DATABASE
 
+if [[ $WEBONLY ]]; then
+   LICENSEREF=true
+fi
+
 if [[ $LICENSEREF && $RUNNINGDATABASE ]]; then
-    must_run_as_root
     echo "*** update the database and license_ref table ***"
     {$LIBEXECDIR}/fossinit.php -l -c {$SYSCONFDIR} $FORCEDECISION $FORCEPFILE $FORCEENCODE
 fi # end of license reference
@@ -244,59 +287,83 @@ fi # end of license reference
 ########################################################################
 
 if [[ $AGENT ]]; then
-   must_run_as_root
-   # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
-   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
-   chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1\{,.gz\} {$MAN1DIR}/fossjobs.1\{,.gz\} || echo
-fi
-
-if [[ $AGENT && $RUNNINGDATABASE ]]; then
-   if ! {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}; then
-     echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
-     exit 1
+   echo "*** Running postinstall Agents ***"
+   if [[ ! $CONTAINER_MODE ]]
+   then
+      check_run_as_root
+      # change all files ownership to {$PROJECTUSER}:$PROJECTGROUP
+      chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
+      chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
+      chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1\{,.gz\} {$MAN1DIR}/fossjobs.1\{,.gz\} || echo
+   elif check_run_as_root
+   then # In Container + Root == Building container.
+      # FIXME -> set minimum permissions
+      chmod a+rwX --recursive {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}  {$INCLUDEDIR}/libfossology.h
+      [ -d {$MAN1DIR} ] && chmod a+r -R {$MAN1DIR} || true
    fi
-   echo "Database connectivity is good."
+
+   if [[ $RUNNINGDATABASE ]]; then
+      if ! {$LIBEXECDIR}/fo_dbcheck.php -c {$SYSCONFDIR}; then
+      echo "FATAL: unable to connect to database, please check {$SYSCONFDIR}/Db.conf"
+      exit 1
+      fi
+      echo "Database connectivity is good."
+   fi
 fi # end of AGENT
 
 ########################################################################
 
 if [[ $SCHEDULERONLY ]]; then
-   must_run_as_root
-   echo "*** Setting up scheduler ***"
+   echo "*** Setting up Scheduler ***"
+   if check_run_as_root; then
 
-   # Create the scheduler log directory.
-   if [[ -f {$LOGDIR} ]] ; then
-     # Must be a directory and not a file
-     rm --force {$LOGDIR}
+      # Create the scheduler log directory.
+      if [[ -f {$LOGDIR} ]] ; then
+      # Must be a directory and not a file
+      rm --force {$LOGDIR}
+      fi
+      mkdir --parents {$LOGDIR}
+      if [[ ! $CONTAINER_MODE ]]
+      then
+         chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
+         chmod 2775 {$LOGDIR}
+         find {$LOGDIR} -type f -print0 | xargs --no-run-if-empty --null chmod 660
+      else
+         # FIXME -> set minimum permissions
+         chmod a+rwX --recursive {$LOGDIR}
+      fi
+
+      echo "Install S3 Backup tools"
+      {$LIBEXECDIR}/fo-backup-S3.sh --install
    fi
-   mkdir --parents {$LOGDIR}
-   chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$LOGDIR}
-   chmod 2775 {$LOGDIR}
-   find {$LOGDIR} -type f -print0 | xargs --no-run-if-empty --null chmod 660
+
 fi # end of SCHEDULERONLY
 
 ########################################################################
-if [[ $WEBONLY ]]; then
-  must_run_as_root
-  RESTART_MESSAGE=false
 
+if [[ $WEBONLY ]]; then
+  RESTART_MESSAGE=false
   echo "*** Setting up the web interface ***"
 
-  # See if web server user exists, if so add to the group.
-  # check for www-data (Debian, etc)
-  if grep -q "^www-data:" /etc/passwd; then
-    echo "NOTE: Adding user www-data to group $PROJECTGROUP"
-    # this is smart enough to not add multiple times so it's ok to repeat
-    usermod --groups $PROJECTGROUP --append www-data
-  fi
+  if [[ ! $CONTAINER_MODE ]]
+  then
+      check_run_as_root
 
-  # check for apache (RHEL/CentOS, etc)
-  if grep -q "^apache:" /etc/passwd; then
-    echo "NOTE: Adding user apache to group $PROJECTGROUP"
-    # this is smart enough to not add multiple times so it's ok to repeat
-    usermod --groups $PROJECTGROUP --append apache
-  fi
+      # See if web server user exists, if so add to the group.
+      # check for www-data (Debian, etc)
+      if grep -q "^www-data:" /etc/passwd; then
+         echo "NOTE: Adding user www-data to group $PROJECTGROUP"
+         # this is smart enough to not add multiple times so it's ok to repeat
+         usermod --groups $PROJECTGROUP --append www-data
+      fi
+
+      # check for apache (RHEL/CentOS, etc)
+      if grep -q "^apache:" /etc/passwd; then
+         echo "NOTE: Adding user apache to group $PROJECTGROUP"
+         # this is smart enough to not add multiple times so it's ok to repeat
+         usermod --groups $PROJECTGROUP --append apache
+      fi
+  fi # end of ! CONTAINER_MODE
 
   # Enable mod_rewrite for REST API
   if [[ -f /etc/httpd/conf.modules.d/00-base.conf ]]; then
@@ -305,18 +372,25 @@ if [[ $WEBONLY ]]; then
       echo "NOTE: Enabling apache module rewrite"
       echo "LoadModule rewrite_module modules/mod_rewrite.so" >> /etc/httpd/conf.modules.d/00-base.conf
       RESTART_MESSAGE=true
-    fi
-  else
-    # We are on Debian
-    if ! a2query -q -m rewrite; then
-      echo "NOTE: Enabling apache module rewrite"
-      /usr/sbin/a2enmod rewrite
-      RESTART_MESSAGE=true
+    elif [[ -f /opt/bitnami/apache/conf/httpd.conf ]]
+    then # We are in Bitnami Apache container
+       echo "NOTE: Enabling apache module rewrite for Bitnami"
+       sed -i -r 's/#LoadModule rewrite_module/LoadModule rewrite_module/' /opt/bitnami/apache/conf/httpd.conf
+    else
+      # We are on Debian
+      if ! a2query -q -m rewrite; then
+         echo "NOTE: Enabling apache module rewrite"
+         /usr/sbin/a2enmod rewrite
+         RESTART_MESSAGE=true
+      fi
     fi
   fi
 
   # Enable fossology for source install
-  if [[ "{$DESTDIR}" != *"debian"* ]]; then
+  if [[ -f /opt/bitnami/apache/conf/httpd.conf ]]; then # Bitnami Apache container
+    echo "NOTE: Copy fossology site to {$APACHE2_SITE_DIR}"
+    ln -s {$DESTDIR}{$SYSCONFDIR}/conf/src-install-apache-example.conf {$APACHE2_SITE_DIR}/fossology.conf
+  elif [[ "{$DESTDIR}" != *"debian"* ]]; then
     if [[ -d {$APACHE2_SITE_DIR} ]]; then
       if [[ -f {$APACHE2_SITE_DIR}/fossology.conf ]]; then
         echo "Fossology already enabled for apache2";
@@ -338,13 +412,44 @@ if [[ $WEBONLY ]]; then
   fi;
 
   # apache2 reload is only necessary when it is running.
-  if /etc/init.d/apache2 status > /dev/null; then
-    /etc/init.d/apache2 reload
-    if [[ "$RESTART_MESSAGE" = true ]]; then
-      echo "NOTE: Restart apache to apply the changes"
+  if [[ -x /etc/init.d/apache2 ]] # exclude Bitnami containers
+  then
+    if /etc/init.d/apache2 status > /dev/null; then
+      /etc/init.d/apache2 reload
+      if [[ "$RESTART_MESSAGE" = true ]]; then
+         echo "NOTE: Restart apache to apply the changes"
+      fi
     fi
   fi
 fi # end of WEBONLY
+
+########################################################################
+if [[ $CONTAINER_MODE ]]
+then
+   if check_run_as_root
+   then
+      # FIXME -> set minimum permissions
+      echo "Force permissive permissions in containers."
+      for f in \
+         /usr/local/etc/fossology/Db.conf \
+         /usr/local/etc/fossology/fossology.conf \
+         /etc/apache2/conf-available/security.conf \
+         /etc/apache2/conf-available/ \
+         /etc/apache2/sites-available/
+      do
+         [ -e $f ] && chmod a+w -R "$f"
+      done
+      for f in \
+         /usr/local/etc/fossology \
+         /var/local/ \
+         /var/run/apache2/ \
+         /var/log/apache2/ \
+         /srv/
+      do
+         [ -e $f ] && chmod a+wrx -R "$f"
+      done
+   fi
+fi # end of CONTAINER_MODE
 
 ########################################################################
 

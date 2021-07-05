@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# SPDX-FileCopyrightText: 2021 Orange
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Author: Nicolas Toussaint <nicolas1.toussaint@orange.com>
+
+# This file provides configuration for Scheduler.
+# It relies on environment variables so as to be used directly
+# in container based deployments
+
+. $(dirname $0)/fo-config-common.sh
+
+f_log "Configure container: SCHEDULER"
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### ####
+# Proxy confgiguration
+fossology_conf="{$SYSCONFDIR}/fossology.conf"
+if [ -n "$HTTPS_PROXY$HTTP_PROXY$FTP_PROXY" ]
+then
+    f_log "Proxy: Configure $fossology_conf"
+cat >>$fossology_conf <<EOF
+http_proxy="$HTTP_PROXY"
+https_proxy="$HTTPS_PROXY"
+ftp_proxy="$FTP_PROXY"
+no_proxy="$NO_PROXY"
+EOF
+else
+    f_log "Proxy: no proxy to configure"
+fi
+
+# Extra keywords for Keywords agent
+if [ -n "$FOSSOLOGY_CONF_EXTRA_KEYWORDS" ]; then
+  $(dirname $0)/fo-config_set-keywords "$FOSSOLOGY_CONF_EXTRA_KEYWORDS"
+else
+    f_log "Keywords for the 'keyword' agent: no keyword configured"
+fi

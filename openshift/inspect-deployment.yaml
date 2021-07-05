@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: inspect
+  name: inspect
+spec:
+  replicas: 1
+  triggers:
+    - type: "ConfigChange"
+  selector:
+    matchLabels:
+      io.kompose.service: inspect
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: inspect
+    spec:
+      containers:
+        - name: inspect
+          image: fossology-scheduler:latest
+          args: ["inspect"]
+          imagePullPolicy: Always
+          env:
+            - name: FOSSOLOGY_CONF_PROXY_HTTP
+            - name: FOSSOLOGY_CONF_PROXY_HTTPS
+            - name: FOSSOLOGY_CONF_PROXY_NONE
+            - name: FOSSOLOGY_CONF_REMOVE_DEFAULT_USER
+            - name: FOSSOLOGY_CONF_SMTP_AUTH
+            - name: FOSSOLOGY_CONF_SMTP_AUTH_PWD
+            - name: FOSSOLOGY_CONF_SMTP_AUTH_USER
+            - name: FOSSOLOGY_CONF_SMTP_ENABLE
+            - name: FOSSOLOGY_CONF_SMTP_FROM
+            - name: FOSSOLOGY_CONF_SMTP_HOSTNAME
+            - name: FOSSOLOGY_CONF_SMTP_PORT
+            - name: FOSSOLOGY_CONF_SMTP_SSL_VERIFY
+            - name: FOSSOLOGY_CONF_SMTP_START_TLS
+            - name: FOSSOLOGY_CRON_START
+              value: "false"
+            - name: FOSSOLOGY_DB_HOST
+              value: db
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_DATABASE
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_USERNAME
+            - name: FOSSOLOGY_CONF_EXTRA_KEYWORDS
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology-config-map
+                  key: extra-keywords
+          envFrom:
+            - configMapRef:
+                name: proxy-config
+            - configMapRef:
+                name: fossology-backup-configmap
+            - secretRef:
+                name: fossology-backup-s3-secret
+          livenessProbe:
+            exec:
+              command:
+                - "true"
+            failureThreshold: 2
+            periodSeconds: 5
+            timeoutSeconds: 5
+          resources: {}
+          volumeMounts:
+            - mountPath: /srv/fossology/
+              name: repository
+      imagePullSecrets:
+          - name: gitlab-tech-registry
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository
+status: {}

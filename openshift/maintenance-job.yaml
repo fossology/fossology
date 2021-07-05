@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: maintenance
+spec:
+  parallelism: 1
+  completions: 1
+  activeDeadlineSeconds: 1800
+  backoffLimit: 6
+  template:
+    metadata:
+      name: maintenance
+    spec:
+      containers:
+      - name: maintenance
+        image: registry.gitlab.tech.orange/opensource/fossology:scheduler-o-master-dev-247-maintenance
+        args: ["maintenance"]
+        restartPolicy: OnFailure
+        imagePullPolicy: Always
+        env:
+            - name: FOSSOLOGY_DB_HOST
+              value: db
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_DB_NAME
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_USERNAME
+            - name: FOSSOLOGY_CONF_EXTRA_KEYWORDS
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology-config-map
+                  key: extra-keywords
+        envFrom:
+            - configMapRef:
+                name: proxy-config
+        livenessProbe:
+            exec:
+              command:
+                - "true"
+            failureThreshold: 2
+            periodSeconds: 5
+            timeoutSeconds: 5
+        volumeMounts:
+            - mountPath: /srv/fossology/repository/
+              name: repository
+      imagePullSecrets:
+          - name: gitlab-tech-registry
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: fossolog-repository

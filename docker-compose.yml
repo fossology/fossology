@@ -12,21 +12,29 @@
 version: '3.5'
 services:
   scheduler:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    image: fossology
+    image: fossology-scheduler:latest
     restart: unless-stopped
+    user: "1001"
     environment:
-      - FOSSOLOGY_DB_HOST=db
-      - FOSSOLOGY_DB_NAME=fossology
-      - FOSSOLOGY_DB_USER=fossy
-      - FOSSOLOGY_DB_PASSWORD=fossy
-    command: scheduler
+      - FOSSOLOGY_DB_HOST=${DB_HOST}
+      - FOSSOLOGY_DB_NAME=${DB_NAME}
+      - FOSSOLOGY_DB_USER=${DB_USER}
+      - FOSSOLOGY_DB_PASSWORD=${DB_PASSWORD}
+      - FOSSOLOGY_CRON_START=false
+      - FOSSOLOGY_CONF_REMOVE_DEFAULT_USER=${CONF_REMOVE_DEFAULT_USER}
+      - FOSSOLOGY_CONF_BANNER_TEXT=${CONF_BANNER_TEXT}
+      - FOSSOLOGY_CONF_SMTP_ENABLE=${CONF_SMTP_ENABLE}
+      - FOSSOLOGY_CONF_SMTP_HOSTNAME=${CONF_SMTP_HOSTNAME}
+      - FOSSOLOGY_CONF_SMTP_PORT=${CONF_SMTP_PORT}
+      - FOSSOLOGY_CONF_SMTP_FROM=${CONF_SMTP_FROM}
+      - FOSSOLOGY_CONF_SMTP_AUTH=${CONF_SMTP_AUTH}
+      - FOSSOLOGY_CONF_SMTP_AUTH_USER=${CONF_SMTP_AUTH_USER}
+      - FOSSOLOGY_CONF_SMTP_AUTH_PWD=${CONF_SMTP_AUTH_PWD}
+      - FOSSOLOGY_CONF_SMTP_SSL_VERIFY=${CONF_SMTP_SSL_VERIFY}
+      - FOSSOLOGY_CONF_SMTP_START_TLS=${CONF_SMTP_START_TLS}
+      - FOSSOLOGY_CONF_PROXY_HTTP=${CONF_PROXY_HTTP}
+      - FOSSOLOGY_CONF_PROXY_HTTPS=${CONF_PROXY_HTTPS}
+      - FOSSOLOGY_CONF_PROXY_NONE=${CONF_PROXY_NONE}
     depends_on:
       - db
     volumes:
@@ -37,14 +45,8 @@ services:
       timeout: 5s
       retries: 2
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
-    image: fossology
+    image: fossology-web:latest
+    user: "1001"
     restart: unless-stopped
     environment:
       - FOSSOLOGY_DB_HOST=db
@@ -52,9 +54,12 @@ services:
       - FOSSOLOGY_DB_USER=fossy
       - FOSSOLOGY_DB_PASSWORD=fossy
       - FOSSOLOGY_SCHEDULER_HOST=scheduler
+      - FOSSDASH_URL=http://influxdb:8086
+      - FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE=${CONF_WEB_APACHE_CONF_FILE}
+      - FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH=${CONF_WEB_APACHE_SECURITY_PATCH}
     command: web
     ports:
-      - 8081:80
+      - 80:1880
     depends_on:
       - db
       - scheduler
@@ -66,13 +71,15 @@ services:
       timeout: 5s
       retries: 5
   db:
-    image: postgres:9.6
+    image: fossology-db:latest
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=fossology
-      - POSTGRES_USER=fossy
-      - POSTGRES_PASSWORD=fossy
-      - POSTGRES_INITDB_ARGS='-E SQL_ASCII'
+      - POSTGRESQL_DB=fossology
+      # Regular User & Password
+      - POSTGRESQL_USER=fossy
+      - POSTGRESQL_PASSWORD=fossy
+      # Password for admin user 'postgres'
+      - POSTGRESQL_POSTGRES_PASSWORD=yssof
     volumes:
       - database:/var/lib/postgresql/data
     healthcheck:

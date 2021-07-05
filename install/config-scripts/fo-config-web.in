@@ -1,0 +1,68 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# SPDX-FileCopyrightText: 2021 Orange
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Author: Nicolas Toussaint <nicolas1.toussaint@orange.com>
+
+# This file provides configuration for the Fossology Web server.
+# It relies on environment variables so as to be used directly
+# in container based deployments
+
+. $(dirname $0)/fo-config-common.sh
+
+f_log "Configure container: WEB"
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### ####
+# Apache Security file
+apache2_security_file="/etc/apache2/conf-available/security.conf"
+if [ -n "$FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH" ]
+then
+    f_log "FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH: (len=$(echo $FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH | wc -c ))"
+    echo "<<<"
+    echo "$FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH" | \
+    while read left right; do f_mod_conf_file $apache2_security_file $left $right; done
+    echo ">>>"
+fi
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### ####
+# Apache Conf file
+# FIXME: will only work in Bitnam Apache container for the moment
+apache_conf_file="/vhosts/fossology.conf" # will be copied to /opt/bitnami/apache/conf/vhosts/fossology.conf
+if [ -n "$FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE" ]
+then
+    f_log "Configure Apache server"
+    [ -e $apache_conf_file ] && mv -v $apache_conf_file $apache_conf_file.orig
+    f_log "FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE: (len=$(echo $FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE | wc -c ))"
+    echo "<<<"
+    echo "$FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE" | tee $apache_conf_file
+    echo ">>>"
+fi
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### ####
+# External Authantication
+fossology_conf="{$SYSCONFDIR}/fossology.conf"
+if [ -n "$FOSSOLOGY_CONF_EXTERNAL_AUTH" ]
+then
+    f_log "Updating external authentication configuration"
+    f_log "FOSSOLOGY_CONF_EXTERNAL_AUTH: (len=$(echo $FOSSOLOGY_CONF_EXTERNAL_AUTH | wc -c ))"
+    echo "$FOSSOLOGY_CONF_EXTERNAL_AUTH" | while read line
+    do
+        left=$(echo "$line" | cut -d '=' -f1)
+        right=$(echo "$line" | cut -d '=' -f2)
+        sed -i "s/^$left *=.*$/$left=$right/" $fossology_conf || f_fatal "Failed to configure '$left'"
+    done
+fi

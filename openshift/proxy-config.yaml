@@ -1,0 +1,8 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: proxy-config
+data:
+  HTTPS_PROXY: 'http://cs.pr-proxy.service.sd.diod.tech:3128/'
+  HTTP_PROXY: 'http://cs.pr-proxy.service.sd.diod.tech:3128/'
+  NO_PROXY: 'localhost,.svc'

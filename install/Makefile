@@ -13,7 +13,14 @@ CONFPATH = $(SYSCONFDIR)
 # default version is the scm revision number
 -DVERSION=$(SCM_REV)
 
-all: fo-postinstall defconf/Db.conf defconf/fossology.conf fossdash/fossdash-publish.py db/dbcreate db/db.cron.in
+all: fo-postinstall \
+     config-scripts/fo-config-web \
+	 config-scripts/fo-config-db \
+	 config-scripts/fo-config-scheduler \
+	 config-scripts/fo-config_set-keywords \
+	 defconf/Db.conf defconf/fossology.conf \
+	 fossdash/fossdash-publish.py \
+	 db/dbcreate db/db.cron.in
 
 # include the preprocessing stuff
 include $(TOP)/Makefile.process
@@ -21,6 +28,16 @@ include $(TOP)/Makefile.process
 # generate the postinstall script
 fo-postinstall:	fo-postinstall-process
 	chmod +x fo-postinstall
+
+# generate config scripts
+config-scripts/fo-config-web: config-scripts/fo-config-web-process
+	chmod +x config-scripts/fo-config-web
+config-scripts/fo-config-db: config-scripts/fo-config-db-process
+	chmod +x config-scripts/fo-config-db
+config-scripts/fo-config-scheduler: config-scripts/fo-config-scheduler-process
+	chmod +x config-scripts/fo-config-scheduler
+config-scripts/fo-config_set-keywords: config-scripts/fo-config_set-keywords-process
+	chmod +x config-scripts/fo-config_set-keywords
 
 # generate the default Db.conf file
 defconf/Db.conf: defconf/Db.conf-process
@@ -38,6 +55,15 @@ install_offline: install
 
 install: all
 	$(INSTALL_PROGRAM) fo-postinstall $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	$(INSTALL_PROGRAM) config-scripts/fo-config-db $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config-web $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config-scheduler $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config-common.sh $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config_set-keywords $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config_remove-default-user.sh $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config_set-banner.sh $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-config_smtp.sh $(DESTDIR)$(LIBEXECDIR)/
+	$(INSTALL_PROGRAM) config-scripts/fo-backup-S3.sh $(DESTDIR)$(LIBEXECDIR)/
 	$(INSTALL_PROGRAM) ./fossdash/fossdash-publish.py $(DESTDIR)$(LIBEXECDIR)/fossdash-publish.py
 	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
 	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
@@ -117,6 +143,12 @@ install: all
 
 uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-postinstall
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-config-db
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-config-scheduler
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-config-web
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-config-common.sh
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-config_set-keywords
+	rm -f $(DESTDIR)$(LIBEXECDIR)/config-scripts/fo-backup-S3.sh
 	rm -f $(DESTDIR)$(CONFPATH)/sampleheader.txt
 	rm -f $(DESTDIR)$(CONFPATH)/samplefooter.txt
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossinit.php
@@ -138,6 +170,7 @@ uninstall:
 
 clean:
 	rm -f fo-postinstall defconf/Db.conf defconf/fossology.conf fossdash/fossdash-publish.py
+	rm -f config-scripts/fo-config-web config-scripts/fo-config-db-scheduler config-scripts/fo-config_set-keywords
 	$(MAKE) -s -C db clean
 
 test: all

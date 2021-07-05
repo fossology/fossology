@@ -25,6 +25,7 @@
 show_help() {
   cat <<EOF
 Usage: fo-installdeps [options]
+  -d or --distro     : force distro type
   -r or --runtime    : install runtime dependencies
   -b or --buildtime  : install buildtime dependencies
   -e or --everything : install all dependencies (default)
@@ -47,10 +48,11 @@ OFFLINE=''
 EVERYTHING=''
 RUNTIME=''
 BUILDTIME=''
+ARG_DISTRO=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o rbeohy --long runtime,buildtime,everything,offline,help -n 'fo-installdeps' -- "$@")
+OPTS=$(getopt -o d:rbeohy --long distro:,runtime,buildtime,everything,offline,help -n 'fo-installdeps' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -66,6 +68,7 @@ fi
 while true; do
    case "$1" in
       -r|--runtime)     RUNTIME=true; shift;;
+      -d|--distro)      ARG_DISTRO="$2"; shift 2;;
       -b|--buildtime)   BUILDTIME=true; shift;;
       -e|--everything)  EVERYTHING=true; shift;;
       -o|--offline)     OFFLINE=true; shift;;
@@ -88,8 +91,10 @@ if [[ $EVERYTHING ]]; then
 fi
 
 # figure out what distro we're on
-DISTRO=$(lsb_release --id --short)
+DISTRO="$ARG_DISTRO"
+[[ -z "$DISTRO" ]] && DISTRO=$(lsb_release --id --short)
 CODENAME=$(lsb_release --codename --short)
+echo "Distro: $DISTRO/$CODENAME"
 
 ########################################################################
 
@@ -136,7 +141,20 @@ if [[ $BUILDTIME ]]; then
            esac
          fi
          ;;
-      Fedora)
+      minideb) # when building inside a Bitnami minideb Docker container.
+         echo "BUG ; should not get here, we're not building inside a minideb container ?!"
+         install_packages \
+            libmxml-dev curl libxml2-dev libcunit1-dev libicu-dev \
+            build-essential libtext-template-perl subversion rpm librpm-dev \
+            libmagic-dev libglib2.0 libboost-regex-dev \
+            libboost-program-options-dev libpq-dev composer patch devscripts \
+            libdistro-info-perl
+         install_packages php-mbstring php7.0-cli php7.0-xml php7.0-zip
+         install_packages postgresql-server-dev-9.6
+            # E: Unable to locate package:
+            # subversion git
+         ;;
+     Fedora)
          yum $YesOpt groupinstall "Development Tools"
          yum $YesOpt install \
             perl-Text-Template subversion \
@@ -200,6 +218,32 @@ if [[ $RUNTIME ]]; then
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
          ;;
+      minideb) # when building inside a Bitnami minideb Docker container.
+         install_packages postgresql-client
+         install_packages php-pear \
+            libxml2 \
+            binutils \
+            cabextract cpio sleuthkit genisoimage \
+            poppler-utils upx-ucl \
+            unrar-free unzip p7zip-full p7zip wget \
+            subversion git \
+            dpkg-dev \
+            s-nail
+         install_packages libglib2.0-0 # Required by wget agent
+         install_packages \
+            php php-pgsql php-cli php-curl php-xml php-zip php-mbstring libapache2-mod-php php-gettext
+         install_packages \
+            libicu63 libboost-program-options1.67.0  libboost-regex1.67.0
+
+         echo "Include php7.3 conf file in default httpd.conf"
+         tee -a /opt/bitnami/apache2/conf/httpd.conf <<EOS
+LoadModule php7_module /usr/lib/apache2/modules/libphp7.3.so
+Include /etc/apache2/mods-available/php7.3.conf
+EOS
+         echo "Apache enabled modules:"
+         apachectl -t -D DUMP_MODULES
+
+         ;;
       Fedora)
          yum $YesOpt install postgresql-server httpd chkconfig
          yum $YesOpt install \
@@ -238,7 +282,7 @@ if [[ $RUNTIME ]]; then
        echo "WARNING: composer is not installed, and the installer does not install it due to the offline switch"
        echo "Please run the equivalent of 'sudo ./utils/install_composer.sh'"
    else
-       "$( dirname "$0" )/install_composer.sh"
+       "$(dirname "$0" )/install_composer.sh"
    fi
 fi
 
@@ -255,8 +299,15 @@ fi
 if [[ $YesOpt ]]; then
   options="$options -y"
 fi
+
+#if [ -z "$ARG_DISTRO" ]]; then
+#  options="$options --distro $ARG_DISTRO"
+#fi
+
 mods_dir="$(dirname "$0")/../src/" ## get the directory where fo-installdeps resides
 
+# TODO: each mod_deps script should be adapted (or not ignored?) for Bitnami containers
+#       fails with warning only for the moment
 find "$mods_dir" -type f -name mod_deps -execdir bash -cv "{} $options" \;
 
 ########################################################################

@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# SPDX-FileCopyrightText: 2021 Orange
+# SPDX-License-Identifier: GPL-2.0-only
+#
+# Author: Nicolas Toussaint <nicolas1.toussaint@orange.com>
+
+# This file provides configuration for Database.
+# It relies on environment variables so as to be used directly
+# in container based deployments
+
+. $(dirname $0)/fo-config-common.sh
+
+f_log "Configure Database"
+
+# Remove default (and admin) account.
+if [ "$FOSSOLOGY_CONF_REMOVE_DEFAULT_USER" = "true" ]; then
+  $(dirname $0)/fo-config_remove-default-user.sh
+fi
+
+# Banner Config
+if [ -n "$FOSSOLOGY_CONF_BANNER_TEXT" ]; then
+  $(dirname $0)/fo-config_set-banner.sh "$FOSSOLOGY_CONF_BANNER_TEXT"
+fi
+
+# SMTP configuration
+if [ "$FOSSOLOGY_CONF_SMTP_ENABLE" = "true" ]; then
+  $(dirname $0)/fo-config_smtp.sh
+fi
+
+# Custom Licenses
+if false ; then # TODO: configure folder where CSV files should be placed
+  $(dirname $0)/fo-config_add-custom-licenses.sh
+fi

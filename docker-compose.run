@@ -1,0 +1,5 @@
+#!/bin/sh
+
+[ -n "$CONF_WEB_APACHE_CONF_FILE" ] && export CONF_WEB_APACHE_CONF_FILE="$(cat .env.apache2-conf-file)"
+[ -n "$FOSSOLOGY_CONF_EXTERNAL_AUTH" ] && export FOSSOLOGY_CONF_EXTERNAL_AUTH="$(cat .env.external-auth)"
+docker-compose -p fossology up "$@"

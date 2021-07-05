@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: db
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: db
+    spec:
+      containers:
+        - name: db
+          image: fossology-db:latest
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: database-secrets
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready --dbname $POSTGRESQL_DATABASE --username $POSTGRESQL_USERNAME
+            failureThreshold: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          resources: {}
+          volumeMounts:
+            - mountPath: /bitnami/postgresql
+              name: database
+      restartPolicy: Always
+      volumes:
+        - name: database
+          persistentVolumeClaim:
+            claimName: database
+status: {}

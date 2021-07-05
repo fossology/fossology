@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: web
+  name: web
+spec:
+  replicas: 1
+  triggers:
+    - type: "ConfigChange"
+  selector:
+    matchLabels:
+      io.kompose.service: web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: web
+    spec:
+      containers:
+        - name: web
+          image: fossology-web:latest
+          imagePullPolicy: Always
+          env:
+            - name: FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH
+            - name: FOSSOLOGY_DB_HOST
+              value: db
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_DATABASE
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRESQL_USERNAME
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              value: scheduler
+            - name: FOSSOLOGY_CONF_WEB_APACHE_CONF_FILE
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology-config-map
+                  key: apache-fossology.conf
+            - name: FOSSOLOGY_CONF_EXTERNAL_AUTH
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology-config-map
+                  key: external-auth.conf
+          envFrom:
+            - configMapRef:
+                name: proxy-config
+            - prefix: CONNECT_
+              secretRef:
+                name: connect-secret
+          livenessProbe:
+            exec:
+              command:
+                - curl -sSf localhost/repo/api/v1/version || exit 1
+            failureThreshold: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 1880
+          resources: {}
+          volumeMounts:
+            - mountPath: /srv/fossology/
+              name: repository
+      imagePullSecrets:
+          - name: gitlab-tech-registry
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository
+status: {}
