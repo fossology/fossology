@@ -153,7 +153,8 @@ bool processUploadId(const OjoState &state, int uploadId,
       try
       {
         identified = agentObj.processFile(filePath, threadLocalDatabaseHandler,
-                                          state.getCliOptions().getGroupId());
+                                          state.getCliOptions().getGroupId(),
+                                          state.getCliOptions().getUserId());
       }
       catch (std::runtime_error &e)
       {
