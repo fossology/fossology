@@ -276,7 +276,7 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
 {
   $V = "";
   if ($ShowBox) {
-    $V .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
+    $V .= "<div class='alert alert-info' style='padding:5px;'>\n";
   }
 
   if ($Enumerate >= 0) {
@@ -293,8 +293,6 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
    */
   $Path = Dir2Path($UploadtreePk, $uploadtree_tablename);
   $Last = &$Path[count($Path)-1];
-
-  $V .= "<font class='text'>\n";
 
   /* Add in additional text */
   if (! empty($PreText)) {
@@ -351,7 +349,6 @@ $ShowBox=1, $ShowMicro=NULL, $Enumerate=-1, $PreText='', $PostText='', $uploadtr
       $V .= "</a>";
     }
   }
-  $V .= "</font>\n";
 
   if (! empty($ShowMicro)) {
     $MenuDepth = 0; /* unused: depth of micro menu */

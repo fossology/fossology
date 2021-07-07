@@ -1,14 +1,29 @@
 {% import "include/macros.html.twig" as macro %}
 
 <li>
-  ({{ 'Optional'|trans }}) {{ 'Reuse'|trans }}<img src="images/info_16.png" title="{{ 'copy clearing decisions if there is the same file hash between two files'|trans }}" alt="" class="info-bullet"/><br/>
-  <input type="checkbox" id="searchInFolder"/> {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
-  {% include 'reuse-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
-  <br/>
-  <input type="checkbox" name="reuseMode[]" value="reuseEnhanced"/> {{ 'Enhanced reuse (slower)'|trans }}<img src="images/info_16.png" title="{{'will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
-  <input type="checkbox" name="reuseMode[]" value="reuseMain"/> {{ 'Reuse main license/s'|trans }}<img src="images/info_16.png" title="{{'will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
-  <input type="checkbox" name="reuseMode[]" value="reuseConf"/> {{ 'Reuse report configuration settings'|trans }}<img src="images/info_16.png" title="{{'use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/><br/>
-  <input type="checkbox" name="reuseMode[]" value="reuseCopyright"/> {{ 'Reuse edited and deactivated copyrights'|trans }}<img src="images/info_16.png" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/><br/>
-  {{ 'Upload to reuse'|trans }}:<br/>
-  {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+  <div class="form-group">
+    <label for="reuse">({{ 'Optional'|trans }}) {{ 'Reuse'|trans }}</label>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Copy clearing decisions if there is the same file hash between two files'|trans }}" alt="" class="info-bullet"/><br/>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" id="searchInFolder"/> {{ 'Select an already uploaded package for reuse in specific folder ' | trans }}
+    {% include 'reuse-folder.html.twig' with {'name': reuseFolderSelectorName, 'id': reuseFolderSelectorName} %}
+    <br/>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseEnhanced"/>
+    {{ 'Enhanced reuse (slower)'|trans }}
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a clearing decision if the two files differ by one line determined by a diff tool'|trans}}" alt="" class="info-bullet"/><br/>
+
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseMain"/>
+    {{ 'Reuse main license/s'|trans }}
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Will copy a main license decision(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseConf"/>
+    {{ 'Reuse report configuration settings'|trans }}
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy all the information from conf page(if any)'|trans}}" alt="" class="info-bullet"/><br/>
+
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="reuseMode[]" value="reuseCopyright"/>
+    {{ 'Reuse deactivated copyrights'|trans }}
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{'Use to copy edited and deactivated copyrights from the reused package'|trans}}" alt="" class="info-bullet"/><br/>
+
+    <label for="uploadReuse">{{ 'Upload to reuse'|trans }}:</label><br/>
+    {{ macro.select(uploadToReuseSelectorName, folderUploads, uploadToReuseSelectorName, reuseUploadId, 'style="min-width:420px;"', 5) }}
+  </div>
 </li>

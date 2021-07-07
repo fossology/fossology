@@ -1,13 +1,21 @@
 {% import "include/macros.html.twig" as macro %}
 
 <li>
-  {{ 'Automatic Concluded License Decider'|trans }}<img src="images/info_16.png" title="{{ 'only for relevant files'|trans }}" alt="" class="info-bullet"/>,
-  {{ 'based on'|trans }}<br/>
-  <input type="checkbox" name="deciderRules[]" value="nomosInMonk" /> {{ '... scanners matches if all Nomos findings are within the Monk findings'|trans }}<br />
-  <input type="checkbox" name="deciderRules[]" value="ojoNoContradiction" /> {{ '... scanners matches if Ojo findings are no contradiction with other findings'|trans }}<br />
-  {% if isNinkaInstalled %}
-  <input type="checkbox" name="deciderRules[]" value="nomosMonkNinka" /> {{ '... scanners matches if Nomos, Monk and Ninka find the same license'|trans }}<br />
-  {% endif %}
-  <input type="checkbox" name="deciderRules[]" value="reuseBulk" /> {{ '... bulk phrases from reused packages'|trans }}<br />
-  <input type="checkbox" name="deciderRules[]" value="wipScannerUpdates" /> {{ '... new scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}
+  <div class="form-group">
+    <label for="decider">{{ 'Automatic Concluded License Decider'|trans }}</label>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'only for relevant files'|trans }}" alt="" class="info-bullet"/>
+    {{ ', based on'|trans }}<br/>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosInMonk" />
+    {{ ' Scanners matches if all Nomos findings are within the Monk findings'|trans }}<br />
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="ojoNoContradiction" />
+    {{ ' Scanners matches if Ojo findings are no contradiction with other findings'|trans }}<br />
+    {% if isNinkaInstalled %}
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="nomosMonkNinka" />
+    {{ ' Scanners matches if Nomos, Monk and Ninka find the same license'|trans }}<br />
+    {% endif %}
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="reuseBulk" />
+    {{ ' Bulk phrases from reused packages'|trans }}<br />
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="wipScannerUpdates" />
+    {{ ' New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}
+  </div>
 </li>

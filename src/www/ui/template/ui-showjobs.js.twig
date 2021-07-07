@@ -67,7 +67,6 @@ function createShowJobsTable(data)
   var mainTBody = $("#showjobstable tbody");
   var joblist = data.showJobsData;
 
-  $("#paginationup").empty();
   mainTBody.empty();
   $("#paginationdown").empty();
 
@@ -98,7 +97,6 @@ function createShowJobsTable(data)
       i = i + 1;
     }
   }
-  $("#paginationup").append(data.pagination);
   $("#paginationdown").append(data.pagination);
 }
 
@@ -124,7 +122,7 @@ function createTableForJob(job) {
     uploadETA = job.upload.uploadEta;
   }
   tableTemplate.html('<thead><tr><th></th>' +
-    '<th colspan="6">' + uploadLink + '</th><th style="color:black">' +
+    '<th colspan="6" class="text-center">' + uploadLink + '</th><th style="color:black">' +
     uploadETA + '</th></tr>' + '</thead><tbody></tbody>');
   return tableTemplate;
 }

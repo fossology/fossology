@@ -59,7 +59,7 @@ function displayMessage($Message, $keep = null)
   $HTML = null;
   $HTML .= "\n<div id='dmessage'>";
   $text = _("Close");
-  $HTML .= "<button name='eraseme' value='close' onclick='rmMsg()'> $text</button>\n";
+  $HTML .= "<button name='eraseme' value='close' class='btn btn-default btn-sm' onclick='rmMsg()'> $text</button>\n";
   $HTML .= $Message;
   $HTML .= $keep . "\n</p>";
   $HTML .= "  <hr>\n";

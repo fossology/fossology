@@ -46,7 +46,7 @@ function createDirlistTable() {
           }
         },
         {"sTitle":"Cleared / Open / Total","sClass":"center","bSortable":false,"bSearchable":false},
-        {"sTitle":"Actions <input type='checkbox' id='selectMarkIrrelevant'>","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
+        {"sTitle":"Actions <input type='checkbox' class='info-bullet view-license-rc-size' id='selectMarkIrrelevant'>","sClass":"left","bSortable":false,"bSearchable":false,"sWidth":"13.6%"}],
     "sPaginationType": "listbox",
     "bProcessing": true,
     "bStateSave": true,
@@ -59,10 +59,10 @@ function createDirlistTable() {
       renderSelect2();
     },
     "oLanguage":{"sInfo":"Showing _START_ to _END_ of _TOTAL_ files" ,
-      "sSearch":'_INPUT_<button onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
-      "sLengthMenu":'Display <select><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
+      "sSearch":'_INPUT_<button class="btn btn-default btn-sm" style="vertical-align:top;margin:1px;" onclick="clearSearchFiles();" title=\"{{ 'Clear file filter'|trans }}\" >Clear<\/button>',
+      "sLengthMenu":'Display <select class="form-control-sm"><option value="10">10<\/option><option value="25">25<\/option><option value="50">50<\/option><option value="100">100<\/option><\/select> {#
        #}   {{ 'files'|trans }} ({% if isFlat %}<a href="{{ fileSwitch }}">{{ 'tree view'|trans }}</a> {{ 'or'|trans }} <b>{{ 'flat'|trans }}</b>{#
-       #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})' 
+       #}{% else %}<b>{{ 'tree view'|trans }}</b> {{ 'or'|trans }} <a href="{{ fileSwitch }}">{{ 'flat'|trans }}</a>{% endif %})'
       }
   };
 
@@ -72,9 +72,9 @@ function createDirlistTable() {
 
 $(document).ready(function () {
   createDirlistTable();
-  $('img').tooltip();
   $("#lichistogram_length select").css('text-align','right');
   $("#dirlist_length select").css('text-align','right');
+  $("input[type='search'], #lichistogram_length").addClass("form-control-sm");
 
   $('#selectMarkIrrelevant').change(function (){
     if($(this).is(":checked")) {

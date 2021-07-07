@@ -34,19 +34,15 @@
   border-style: none none dotted none;
 }
 
+hr.menu {
+  border: 1px solid #d1ecf1;
+  padding: 0px;
+  margin: 3px;
+}
+
 table { border-spacing:0; }
 
 th { background:lightsteelblue; }
-
-a, a:visited, a:link
-{
-  text-decoration:none;
-  color:blue;
-}
-a:active, a:hover
-{
-  color:red;
-}
 
 div
 {
@@ -140,19 +136,6 @@ html, body
   background-color: #bebebe;
 }
 
-.modal {
-  padding: 20px 40px;
-  color: #000000;
-  background-color: #E6E6E6;
-  border-radius: 10px;
-  display: none;
-  box-sizing: border-box;
-  max-height: 70vh;
-  min-height: 20vh;
-  max-width: 70vw;
-  min-width: 20vw;
-}
-
 .icon-small {
   width: 16px;
   height: 16px;
@@ -242,13 +225,19 @@ img.deleted {
   margin-left: 3px;
   width: 11px;
 }
+
+.view-license-rc-size {
+  width:1.10rem;
+  height:1.10rem;
+}
+
 .nobreaktext {
   white-space: nowrap;
 }
 
 .browse-upload-checkbox {
-  vertical-align: bottom;
-  margin:0px;
+  vertical-align: middle;
+  margin:1px;
 }
 
 .ui-button-text .browse-upload-all-off {

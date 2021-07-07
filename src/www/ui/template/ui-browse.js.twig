@@ -6,28 +6,18 @@
 #}
 tableColumns = [
   {"sTitle": "{{ "Upload Name and Description"|trans }}", "sClass": "left"},
-  {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSearchable": false},
-  {
-    "sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false,
-    "mRender": 2
-  },
+  {"sTitle": "{{ "Action"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
+  {"sTitle": "{{ "Status"|trans }}", "sClass": "center", "bSortable": false, "bSearchable": false},
+  {"sTitle": "{{ "Comment"|trans }}", "sClass": "center cc", "bSortable": false, "bSearchable": false, "mRender": 2},
   {"sTitle": "{{ "Main licenses"|trans }}", "sClass": "center", "bSearchable": false, "bSortable": false},
-  {"sTitle": "{{ "Assigned to"|trans }}", "sClass": "center", "bSearchable": false},
   {"sTitle": "{{ "Upload Date"|trans }}", "sClass": "center", "sType": "string", "bSearchable": false},
-  {
-    "sTitle": "{{ "Priority"|trans }}", "sClass": "center priobucket", "bSearchable": false,
-    "mRender": function (source, type, val) {
-      return prioColumn(source, type, val);
-    }
-  }
+  {"sTitle": "{{ "Assigned to"|trans }}", "sClass": "center", "bSearchable": false}
 ];
 
 tableSorting = [
-  [6, "desc"],
+  [5, "desc"],
   [0, "asc"],
-  [4, "desc"],
-  [1, "desc"],
-  [5, "desc"]
+  [6, "desc"]
 ];
 
 var folder = {{ folder }};
@@ -106,7 +96,7 @@ function removeMainLicense(uploadId,licenseId) {
     $.getJSON("?mod=conclude-license&do=removeMainLicense&upload=" + uploadId + "&licenseId=" + licenseId)
       .done(function (data) {
         var table = createBrowseTable();
-        table.fnDraw(false);
+        table.draw(false);
       })
       .fail(failed);
   }
@@ -126,37 +116,3 @@ $(function() {
     cookieId: "fossology_treeview"
     });
   });
-  
-function prioColumn(source, type, val) {
-  if (type === 'set') {
-    source[1] = val;
-    // Store the computed display and filter values for efficiency?
-    return;
-  }
-  if (type === 'display') {
-    if (myKey === 0) {
-      return '<img alt="[to top]" src="images/icons/blue_arrow_up_32.png" class="icon-small limit-mover" {#
-              #} data-source="' + source[0] + '" data-dir="top" title="{{ 'click to set priority of this upload as highest'|trans }}"/>'
-              + ' <img alt="[select]" src="images/icons/arrow_updown_32.png" class="icon-small click-mover" {#
-              #} title="{{ 'click to change priority of this upload'|trans }}"/>'
-              + ' <img alt="[to bottom]" src="images/icons/blue_arrow_down_32.png" class="icon-small limit-mover" {#
-              #} data-source="' + source[0] + '" data-dir="-1" title="{{ 'click to set priority of this upload as lowest'|trans }}"/>';
-    }
-    else if (myVal < source[1]) {
-      return '<img alt="[move here]" src="images/icons/arrow_up_32.png" class="icon-small" {#
-              #} title="{{ 'selected upload will have higher priority than this upload'|trans }}"/>';
-    }
-    else if (myVal > source[1]) {
-      return '<img alt="[move here]" src="images/icons/arrow_down_32.png" class="icon-small" {#
-              #} title="{{ 'selected upload will have lower priority than this upload'|trans }}"/>';
-    }
-    else
-      return 'cancel <img alt="[x]" src="images/icons/close_32.png" class="icon-small" {#
-              #} title="{{ 'let priority of this upload as it is'|trans }}"/>';
-  }
-  if (type === 'sort') {
-    return -source[1];
-  }
-  // 'filter', 'sort', 'type' and undefined all just use the integer
-  return source[1];
-}

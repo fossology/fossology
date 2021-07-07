@@ -123,26 +123,25 @@ class Menu
     $depth = 0;
     $label = "";
     $Menu = menu_find("Main", $MenuDepth);
-    $cssBorder = "border-color:#CCC #CCC #CCC #CCC; border-width:1px 1px 1px 1px;";
+    $cssBorder = "border-color:#bee5eb #bee5eb #bee5eb #bee5eb; border-width:1px 1px 1px 1px; border-radius:3px;";
     $cssPadding = "padding:4px 0px 4px 4px;";
     $FOSScolor1 = "#c50830";
-    $FOSScolor2 = "#808080";
     $FOSSbg = "white";
 
     $FOSSfg1 = "black";
     $FOSSbg1 = "white";
     $FOSSfg1h = $FOSScolor1; // highlight colors
-    $FOSSbg1h = "beige";
+    $FOSSbg1h = "#d1ecf1";
 
-    $FOSSfg2 = "black";
-    $FOSSbg2 = "beige";
+    $FOSSfg2 = "#0c5460";
+    $FOSSbg2 = "#d1ecf1";
     $FOSSfg2h = $FOSScolor1; // highlight colors
-    $FOSSbg2h = "beige";
+    $FOSSbg2h = "#d1ecf1";
 
-    $FOSSfg3 = "black";
-    $FOSSbg3 = "beige";
+    $FOSSfg3 = "#0c5460";
+    $FOSSbg3 = "#d1ecf1";
     $FOSSfg3h = $FOSScolor1; // highlight colors
-    $FOSSbg3h = "beige";
+    $FOSSbg3h = "#d1ecf1";
 
     if ($depth < $MenuDepth) {
       /** The "float:left" is needed to fix IE **/
@@ -196,7 +195,7 @@ class Menu
       $output .= "  { float:left; display:block; visibility:visible; }\n";
       $label .= " ul#menu-" . $depth . " li";
       $output .= $label . "\n";
-      $output .= "  { z-index:$depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; }\n";
+      $output .= "  { z-index:$depth; margin:0; padding:0; display:block; visibility:visible; position:relative; width:150px; margin-left:-6px; }\n";
       $output .= $label . " a:link,\n";
       $output .= $label . " a:visited\n";
       $output .= "  { z-index:$depth; $cssPadding color:$FOSSfg3; background:$FOSSbg2h; border:1px solid #000; $cssBorder width:150px; display:block; }\n";

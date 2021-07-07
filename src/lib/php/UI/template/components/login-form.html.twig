@@ -5,28 +5,33 @@
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
    This file is offered as-is, without any warranty.
 #}
-{% if protocol != 'HTTPS' %}
-  {{ 'This login uses '|trans }}{{ protocol }}{{', so passwords are transmitted in plain text.'|trans }}
-  {{ 'This is not a secure connection.'|trans }} <br/> <br/> 
-{% endif %}  
-{{ info }}
-<form method="post" action="{{ authUrl }}">
-  <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
-  <input type="hidden" name="timezone" id="timezone" value="" />
-  <table border="0">
-    <tr>
-      <td>{{ 'Username'|trans }}:</td>
-      <td><input type="text" size="20" name="username" id="unamein" autofocus="autofocus" value="{{ userName|e }}"/></td>
-    </tr>
-    <tr>
-      <td>{{ 'Password'|trans }}:</td>
-      <td><input type="password" size="20" name="password"/></td>
-    </tr>
-    <tr>
-      <td></td>
-      <td><input type="submit" value="{{ 'Login'|trans }}"/></td>
-    </tr>
-  </table>
-  <script type="text/javascript">document.getElementById("unamein").focus();</script>
-  <script type="text/javascript">document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone ;</script>
-</form>
+<div class="container">
+  {% if protocol != 'HTTPS' %}
+    {{ 'This login uses '|trans }}{{ protocol }}{{', so passwords are transmitted in plain text.'|trans }}
+    {{ 'This is not a secure connection.'|trans }}<br/><br/>
+  {% endif %}
+  {{ info }}
+  <form method="post" action="{{ authUrl }}">
+    <input type="hidden" name="HTTP_REFERER" value="{{ referrer }}"/>
+    <input type="hidden" name="timezone" id="timezone" value="" />
+    <div class="form-group">
+      <label class="control-label col-sm-2">{{ 'Username'|trans }}:</label>
+      <div class="col-sm-10">
+        <input id="unamein" type="text" class="form-control" name="username" placeholder="Enter username" autofocus="autofocus" value="{{ userName|e }}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-sm-2" for="pwd">{{ 'Password'|trans }}:</label>
+      <div class="col-sm-10">
+        <input type="password" class="form-control" id="pwd" placeholder="Enter password" name="password">
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-default">{{ 'Login'|trans }}</button>
+      </div>
+    </div>
+    <script type="text/javascript">document.getElementById("unamein").focus();</script>
+    <script type="text/javascript">document.getElementById("timezone").value = Intl.DateTimeFormat().resolvedOptions().timeZone ;</script>
+  </form>
+</div>

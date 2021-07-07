@@ -46,7 +46,7 @@ class OneShot extends DefaultPlugin
   {
     parent::__construct(self::NAME, array(
         self::TITLE => "One-Shot Monk",
-        self::MENU_LIST => "Upload::One-Shot Monk",
+        self::MENU_LIST => "Upload::One-Shot Monk Analysis",
         self::PERMISSION => Auth::PERM_WRITE,
         self::REQUIRES_LOGIN => true
     ));

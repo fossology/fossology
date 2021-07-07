@@ -16,7 +16,7 @@
       },
       success: function(data) {
         $("#deleteHashDecision" + type + hash).hide();
-        $("#undoDeleteHashDecision" + type + hash).show();
+        $("#undoDeleteHashDecision" + type + hash).attr("style","display:inline !important;");
       },
       error: function() { alert('error'); }
     });
@@ -33,7 +33,7 @@
       },
       success: function(data) {
         $("#undoDeleteHashDecision" + type + hash).hide();
-        $("#deleteHashDecision" + type + hash).show();
+        $("#deleteHashDecision" + type + hash).attr("style","display:inline !important;");
       },
       error: function() { alert('error'); }
     });

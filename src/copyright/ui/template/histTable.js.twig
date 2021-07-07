@@ -237,7 +237,7 @@ function delete{{ table.type }}(upload, item, hash, kind) {
     data: { id : upload + ',' + item + ',' + hash + ',' + kind },
       success: function(data) {
         $("#delete{{ table.type }}" + hash).hide();
-        $("#update{{ table.type }}" + hash).show();
+        $("#update{{ table.type }}" + hash).attr("style","display:inline !important;");
       },
       error: function(errorResponse) {
         alert(errorResponse.responseText);

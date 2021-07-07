@@ -17,14 +17,14 @@
 
 {% block fileselect %}
 <li>
-  <label for="{{ fileInputName }}">
-    {{ 'Select the file to upload'| trans }}:
-  </label>
-  <br/>
-  <input name="{{ fileInputName }}" type="file"/><br/>
+  <div class="form-group">
+    <label for="{{ fileInputName }}">{{ 'Select the file to upload'| trans }}:</label>
+    <input type="file" class="form-control-file" name="{{ fileInputName }}">
+  </div>
 </li>
 {% endblock %}
 
 {% block uploadText %}
-  {{ 'After you press Upload, please be patient while your file is transferring.'| trans }}
+  <div class="form-group" style="margin-left:2%	;">
+    <label for="pText">{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}</label>
 {% endblock %}

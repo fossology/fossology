@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2015,2021, Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -9,31 +9,20 @@
 {% block content %}
     {{ pathOfItem }}
 
-    <form action='{{ postUrl }}' method='POST'>
-        <u>
-            <i>
-                <b>
-                    {{ "Limit search to" | trans }}:
-                </b>
-            </i>
-        </u>
-        <br>
-        <input type='radio' name='searchtype' value='containers' {{ ContainersChecked }} onclick="setReadonlyForFilters(false);">
-        <b>
-            {{ "Containers only (rpms, tars, isos, etc), including directories." | trans }}
-        </b>
-        <br>
-        <input type='radio' name='searchtype' value='directory' {{ DirectoryChecked }} onclick="setReadonlyForFilters(true);">
-        <b>
-            {{ "Containers only (rpms, tars, isos, etc), excluding directories." | trans }}
-        </b>
-        The filtering for license or copyright is not supported in this case.
-        <br>
-        <input type='radio' name='searchtype' value='allfiles' {{ AllFilesChecked }} onclick="setReadonlyForFilters(false);">
-        <b>
-            {{ "All Files" | trans }}
-        </b>
-
+<div class="container">
+  <form action='{{ postUrl }}' method='POST'>
+    <u><i><b>{{ "Limit search to" | trans }}:</b></i></u>
+    <br><br>
+    <input type='radio' name='searchtype' value='containers' {{ ContainersChecked }} onclick="setReadonlyForFilters(false);">
+    <b>{{ "Containers only (rpms, tars, isos, etc), including directories." | trans }}</b>
+    <br><br>
+    <input type='radio' name='searchtype' value='directory' {{ DirectoryChecked }} onclick="setReadonlyForFilters(true);">
+    <b>{{ "Containers only (rpms, tars, isos, etc), excluding directories." | trans }}</b>
+    {{ "The filtering for license or copyright is not supported in this case." | trans }}
+    <br><br>
+    <input type='radio' name='searchtype' value='allfiles' {{ AllFilesChecked }} onclick="setReadonlyForFilters(false);">
+    <b>{{ "All Files" | trans }}</b>
+    <br><br>
         <p>
             <u>
                 <i>
@@ -42,79 +31,97 @@
                     </b>
                 </i>
             </u>
-        <ul>
-            <li>
-                <b>
-                    {{ "Choose upload to search into: "|trans }}
-                </b>
-                <select id="scanFilter" name='upload'>
-                    <option value="0">-- {{ 'All uploads'|trans }} --</option>
-                    {% for uploadObj in uploadsArray %}
-                        <option value="{{ uploadObj.getId() }}"> {{ uploadObj.getFilename() }} from {{ uploadObj.getTimestamp() | date("Y-m-d H:i:s") }}</option>
-                    {% endfor %}
-                </select>
-                <br>
-            </li>
-            <li>
-                <b>
-                    {{ "Enter the filename to find: " | trans }}
-                </b>
-                <INPUT type='text' name='filename' size='40' value='{{ Filename|e }}'>
-                <br>
-                {{ "You can use '%' as a wild-card. " | trans }}
-                {{ "For example, '%v3.war', or 'mypkg%.tar'." | trans }}
-            </li>
-            <li>
-                <b>
-                    {{ "Tag to find" | trans }}:
-                </b>
-                <input name='tag' size='30' value='{{ tag|e }}'>
-            </li>
-            <li>
-                <b>
-                    {{ "File size is" | trans }} &ge;
-                </b>
-                <input name='sizemin' size=10 value='{{ SizeMin }}'> {{ " bytes" | trans}};
-            </li>
-            <li>
-                <b>
-                    {{ "File size is" | trans }} &le;
-                </b>
-                <input name='sizemax' size=10 value='{{ SizeMax }}'> {{ " bytes" | trans }}
-            </li>
-        </ul>
+    <ul>
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-10">{{ 'Choose upload to search into'|trans }}:</label></b>
+          <div class="col-sm-10">
+            <select class="form-control" id="scanFilter" name='upload'>
+              <option value="0">-- {{ 'All uploads'|trans }} --</option>
+              {% for uploadObj in uploadsArray %}
+              <option value="{{ uploadObj.getId() }}"> {{ uploadObj.getFilename() }} from {{ uploadObj.getTimestamp() | date("Y-m-d H:i:s") }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </li>
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-10">{{ 'Enter the filename to find'|trans }}:</label></b>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" name="filename" placeholder="Enter filename" value="{{ Filename|e }}">
+          </div>
+          <label class="col-sm-10">
+            {{ "You can use '%' as a wild-card, For example: '%v3.war', or 'mypkg%.tar'. " | trans }}
+          </label>
+        </div>
+      </li>
 
-        <p>
-            <u>
-                <i>
-                    <b>
-                        {{ "You may also choose one or more optional search filters (not case sensitive)." | trans }}
-                    </b>
-                </i>
-            </u>
-        </p>
-        <ul>
-            <li>
-                <b>
-                    {{ "License" | trans }}:
-                </b>
-                <input name='license' value='{{ License }}'>
-                <br>
-                {{ "For example, 'AGPL%'." | trans }}
-            </li>
-            <li>
-                <b>
-                    {{ "Copyright" | trans }}:
-                </b>
-                <input name='copyright' value='{{ Copyright }}'>
-                <br>
-                {{ "For example, 'fsf'." | trans }}
-            </li>
-        </ul>
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-2">{{ 'Tag to find'|trans }}:</label></b>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" name="tag" placeholder="Enter tag to find" value="{{ tag|e }}">
+          </div>
+        </div>
+      </li>
 
-        <input type='hidden' name='item' value='{{ Item }}'>
-        <input type='submit' value='{{ "Search" | trans }}'>
-    </form>
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-2">{{ 'File size is'|trans }} &ge;</label></b>
+          <div class="col-sm-10">
+            <input type="text" size=10 class="form-control" name="sizemin" placeholder="Enter file size in bytes" value="{{ SizeMin }}">
+          </div>
+        </div>
+      </li>
+
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-2">{{ 'File size is'|trans }} &le;</label></b>
+          <div class="col-sm-10">
+            <input type="text" size=10 class="form-control" name="sizemax" placeholder="Enter file size in bytes" value="{{ SizeMax }}">
+          </div>
+        </div>
+      </li>
+
+    </ul>
+    <p><u><i><b>{{ "You may also choose one or more optional search filters (not case sensitive)." | trans }}</b></i></u></p>
+    <ul>
+
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-2">{{ 'License'|trans }}:</label></b>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" name="license" placeholder="Enter license" value="{{ License|e }}">
+          </div>
+          <label class="col-sm-10">
+          {{ "For example, 'AGPL%'." | trans }}
+          </label>
+        </div>
+      </li>
+
+      <li>
+        <div class="form-group">
+          <b><label class="control-label col-sm-2">{{ 'Copyright'|trans }}:</label></b>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" name="copyright" placeholder="Enter copyright" value="{{ Copyright|e }}">
+          </div>
+          <label class="col-sm-10">
+          {{ "For example, 'Copyright 2014-2020 fossology'." | trans }}
+          </label>
+        </div>
+      </li>
+
+    </ul>
+
+    <input type='hidden' name='item' value='{{ Item }}'>
+    <div class="form-group">
+      <div class="col-sm-offset-2 col-sm-10">
+        <button type="submit" class="btn btn-default">{{ 'Search'|trans }}</button>
+      </div>
+    </div>
+  </form>
+</div>
 
     {{ result }}
 {% endblock %}
