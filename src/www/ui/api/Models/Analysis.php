@@ -72,7 +72,7 @@ class Analysis
   private $ojo;
   /**
    * @var boolean $pkgagent
-   * Whether to schedule package agent or not
+   * Whether to schedule reso agent or not
    */
   private $reso;
   /**
