@@ -2,6 +2,7 @@
 /*
  Author: Daniele Fognini
  Copyright (C) 2014-2019, Siemens AG
+ Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -234,6 +235,10 @@ class DeciderAgent extends Agent
       $haveDecided = $this->autodecideIfOjoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
     }
 
+    if (!$haveDecided && ($this->activeRules&self::RULES_OJO_NO_CONTRADICTION) == self::RULES_OJO_NO_CONTRADICTION) {
+      $haveDecided = $this->autodecideIfResoMatchesNoContradiction($itemTreeBounds, $projectedScannerMatches);
+    }
+
     if (!$haveDecided && ($this->activeRules&self::RULES_NOMOS_IN_MONK) == self::RULES_NOMOS_IN_MONK) {
       $haveDecided = $this->autodecideNomosMatchesInsideMonk($itemTreeBounds, $projectedScannerMatches);
     }
@@ -278,6 +283,34 @@ class DeciderAgent extends Agent
     $licenseMatchExists = count($matches) > 0;
     foreach ($matches as $licenseMatches) {
       $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndOJOAgreed($licenseMatches);
+    }
+
+    if ($licenseMatchExists) {
+      try {
+        $this->clearingDecisionProcessor->makeDecisionFromLastEvents(
+          $itemTreeBounds, $this->userId, $this->groupId,
+          DecisionTypes::IDENTIFIED, false);
+      } catch (\Exception $e) {
+        echo "Can not auto decide as file '" .
+          $itemTreeBounds->getItemId() . "' contains candidate license.\n";
+      }
+    }
+    return $licenseMatchExists;
+  }
+
+  /**
+   * @brief Auto decide matches which are in nomos, monk, OJO and Reso findings
+   *
+   * Get the matches which really agree and apply the decisions.
+   * @param ItemTreeBounds $itemTreeBounds ItemTreeBounds to apply decisions
+   * @param LicenseMatch[] $matches        New license matches found
+   * @return boolean True if decisions applied, false otherwise
+   */
+  private function autodecideIfResoMatchesNoContradiction(ItemTreeBounds $itemTreeBounds, $matches)
+  {
+    $licenseMatchExists = count($matches) > 0;
+    foreach ($matches as $licenseMatches) {
+      $licenseMatchExists = $licenseMatchExists && $this->areOtherScannerFindingsAndRESOAgreed($licenseMatches);
     }
 
     if ($licenseMatchExists) {
@@ -477,6 +510,33 @@ class DeciderAgent extends Agent
     }
     foreach ($findingsByOtherScanner as $findingsByScanner) {
       if (in_array($findingsByScanner, $findingsByOjo) === false) {
+        // contradiction found
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check if the finding by only contains one single license and that no other scanner (nomos) has produced a contradicting statement
+   * @param LicenseMatch[][] $licenseMatches
+   * @return boolean True if they match, false otherwise
+   */
+  protected function areOtherScannerFindingsAndRESOAgreed($licenseMatches)
+  {
+    $findingsByReso = $this->getLicenseIdsOfMatchesForScanner('reso', $licenseMatches);
+    if (count($findingsByReso) == 0) {
+      // nothing to do
+      return false;
+    }
+
+    $findingsByOtherScanner = $this->getLicenseIdsOfMatchesForScanner('nomos', $licenseMatches);
+    if (count($findingsByOtherScanner) == 0) {
+      // nothing found by other scanner, so no contradiction
+      return true;
+    }
+    foreach ($findingsByOtherScanner as $findingsByScanner) {
+      if (in_array($findingsByScanner, $findingsByReso) === false) {
         // contradiction found
         return false;
       }

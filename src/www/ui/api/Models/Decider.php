@@ -48,7 +48,7 @@ class Decider
   private $newScanner;
   /**
    * @var boolean $ojoDecider
-   * Scanners matches if Ojo findings are no contradiction with other findings
+   * Scanners matches if Ojo or Reso findings are no contradiction with other findings
    */
   private $ojoDecider;
 

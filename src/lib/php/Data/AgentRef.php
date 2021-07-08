@@ -32,7 +32,8 @@ class AgentRef
     'ninka' => 'Nk',
     'reportImport' => 'I',
     'ojo' => 'O',
-    'spasht' => 'Sp'
+    'spasht' => 'Sp',
+    'reso' => 'Rs'
   );
   /**
    * @var int

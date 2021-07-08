@@ -1,6 +1,7 @@
 <?php
 /***************************************************************
 Copyright (C) 2017 Siemens AG
+Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
