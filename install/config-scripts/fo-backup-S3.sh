@@ -21,7 +21,7 @@
 #
 # Implement S3 Backup / Restore of Database and repository folder,
 # with incremental backup support.
-# 
+#
 # Backups are stored with date tag in their filenames.
 # Incremental backup files are accompanied by a tar-style diff file and
 # a file listing all previous backups to be restored before.
@@ -52,15 +52,12 @@ aws_cmd='/usr/local/bin/aws'
 USE_TEMP_DIRECTORY=/tmp
 
 f_aws_cmd() {
-    $aws_cmd --endpoint-url $BUCKET_HOST s3 "$@"
+    $aws_cmd --endpoint-url $BUCKET_HOST --region $BUCKET_REGION s3 "$@"
 }
 
 # Example command to list Bucket contents
-# aws --endpoint-url $BUCKET_HOST s3 ls s3://$BUCKET_NAME/
-
-# alias awss3='aws --endpoint-url $BUCKET_HOST s3'
-# alias awslsb='aws --endpoint-url $BUCKET_HOST s3 ls s3://$BUCKET_NAME'
-# alias awss3api='aws --endpoint-url $BUCKET_HOST s3api'
+# aws --endpoint-url $BUCKET_HOST --region $BUCKET_REGION s3 ls s3://$BUCKET_NAME/
+# alias awss3='aws --endpoint-url $BUCKET_HOST --region $BUCKET_REGION s3'
 
 f_help() {
   cat <<EOF
@@ -79,12 +76,13 @@ Usage: fo-backup-s3 [options]
 
   -r or --restore-latest               : Restore database and repository filesystem,
                                          using most recent backups from S3 Bucket
-  -e or --restore-db <backup filename> : Restore specific database backup
-  -g or --restore-fs <backup filename> : Restore specific repository filsystem backup
-                                         Incremental backups detected and applied
+  -e or --restore-db-latest            : Restore latest database backup
+  -E or --restore-db <backup filename> : Restore specific database backup
+  -g or --restore-fs-latest            : Restore latest repository filsystem backup
+  -G or --restore-fs <backup filename> : Restore specific repository filsystem backup
 
 Expects S3 connection and credentials details in following environment variables:
-  AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, BUCKET_HOST, BUCKET_NAME
+  AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, BUCKET_HOST, BUCKET_NAME, BUCKET_REGION
 
 EOF
 }
@@ -130,7 +128,7 @@ f_test_s3_connection() {
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o abBde:fFg:hilrt --long 'alt-s3,backup-all,backup-all-full,backup-db,backup-fs,backup-fs-full,restore-latest,restore-db:,restore-fs:,test,install,list,help' -n "$(basename $0)" -- "$@")
+OPTS=$(getopt -o abBdeE:fFgG:hilrt --long 'alt-s3,backup-all,backup-all-full,backup-db,backup-fs,backup-fs-full,restore-latest,restore-db:,restore-db-latest,restore-fs:,--restore-fs-latest,test,install,list,help' -n "$(basename $0)" -- "$@")
 [ $? -ne 0 ] && OPTS="--help"
 [ $# -eq 0 ] && OPTS="--help"
 
@@ -155,21 +153,24 @@ while true; do
         [ -n "$ALT_AWS_ACCESS_KEY_ID" ]     && AWS_ACCESS_KEY_ID="$ALT_AWS_ACCESS_KEY_ID"
         [ -n "$ALT_BUCKET_HOST" ]           && BUCKET_HOST="$ALT_BUCKET_HOST"
         [ -n "$ALT_BUCKET_NAME" ]           && BUCKET_NAME="$ALT_BUCKET_NAME"
+        [ -n "$ALT_BUCKET_REGION" ]         && BUCKET_REGION="$ALT_BUCKET_REGION"
         shift;;
-      -b|--backup-all)      ACTION_BACKUP_DB=true; ACTION_BACKUP_FS=true; ACTION_BACKUP_FS_INC=true ; shift;;
-      -B|--backup-all-full) ACTION_BACKUP_DB=true; ACTION_BACKUP_FS=true; shift;;
-      -d|--backup-db)       ACTION_BACKUP_DB=true; shift;;
-      -f|--backup-fs)       ACTION_BACKUP_FS=true; ACTION_BACKUP_FS_INC=true ; shift;;
-      -F|--backup-fs-full)  ACTION_BACKUP_FS=true; shift;;
-      -r|--restore-latest)  ACTION_RESTORE_DB=true; ACTION_RESTORE_FS=true; shift;;
-      -e|--restore-db)      ACTION_RESTORE_DB=true; ACTION_RESTORE_DB_FILE=$2 ; shift 2;;
-      -g|--restore-fs)      ACTION_RESTORE_FS=true; ACTION_RESTORE_FS_FILE=$2 ; shift 2;;
-      -h|--help)            f_help; exit;;
-      -i|--install)         ACTION_INSTALL=true; shift;;
-      -l|--list)            ACTION_LIST=true; shift;;
-      -t|--test)            ACTION_TEST_S3=true; shift;;
-      --)                   shift; break;;
-      *)                    echo "Error: option $1 not recognised, try --help"; exit 1;;
+      -b|--backup-all)        ACTION_BACKUP_DB=true; ACTION_BACKUP_FS=true; ACTION_BACKUP_FS_INC=true ; shift;;
+      -B|--backup-all-full)   ACTION_BACKUP_DB=true; ACTION_BACKUP_FS=true; shift;;
+      -d|--backup-db)         ACTION_BACKUP_DB=true; shift;;
+      -f|--backup-fs)         ACTION_BACKUP_FS=true; ACTION_BACKUP_FS_INC=true ; shift;;
+      -F|--backup-fs-full)    ACTION_BACKUP_FS=true; shift;;
+      -r|--restore-latest)    ACTION_RESTORE_DB=true; ACTION_RESTORE_FS=true; shift;;
+      -e|--restore-db-latest) ACTION_RESTORE_DB=true; shift;;
+      -E|--restore-db)        ACTION_RESTORE_DB=true; ACTION_RESTORE_DB_FILE=$2 ; shift 2;;
+      -g|--restore-fs-latest) ACTION_RESTORE_FS=true; shift;;
+      -G|--restore-fs)        ACTION_RESTORE_FS=true; ACTION_RESTORE_FS_FILE=$2 ; shift 2;;
+      -h|--help)              f_help; exit;;
+      -i|--install)           ACTION_INSTALL=true; shift;;
+      -l|--list)              ACTION_LIST=true; shift;;
+      -t|--test)              ACTION_TEST_S3=true; shift;;
+      --)                     shift; break;;
+      *)                      echo "Error: option $1 not recognised, try --help"; exit 1;;
    esac
 done
 
@@ -255,32 +256,29 @@ then
     if $ACTION_BACKUP_FS_INC
     then
         f_log -s "Back up repository filesystem, incremental, tag=$now_tag"
-        incremental_list=$(f_find_most_recent_backup $backup_fs_prefix $backup_fs_suffix_inc_list)
-        [ -z "$incremental_list" ] || f_fatal "ERROR: no previous incremental backup found."
-        s3_file_prefix="$(echo $incremental_list | sed 's/$backup_fs_suffix_inc_list$//')"
-        incremental_diff="${s3_file_prefix}${backup_fs_suffix_tar_diff}"
-        s3_file="${s3_file_prefix}_inc_${now_tag}${backup_fs_suffix}"
+        incremental_list_latest=$(f_find_most_recent_backup $backup_fs_prefix $backup_fs_suffix_inc_list)
+        [ -n "$incremental_list_latest" ] || f_fatal "ERROR: no previous incremental backup found."
+        s3_file_prefix_root="$(echo $incremental_list_latest | sed 's/\.[^\.]*$//')"
+        s3_file_prefix_root="$(echo $s3_file_prefix_root | sed 's/\_inc_.*$//')"
+        incremental_diff="${s3_file_prefix_root}${backup_fs_suffix_tar_diff}"
+        s3_file_prefix="${s3_file_prefix_root}_inc_${now_tag}"
 
-        f_log "Download incremental data: $incremental_list / $incremental_diff"
-        f_copy_from_s3 "$incremental_list" "$repository_location/"
+        f_log "Download incremental data: $incremental_list_latest"
         f_copy_from_s3 "$incremental_diff" "$repository_location/"
+        f_copy_from_s3 "$incremental_list_latest" "$repository_location/"
     else
         f_log -s "Back up repository filesystem, tag=$now_tag"
         s3_file_prefix="fossology_fs_${now_tag}"
         incremental_diff="${s3_file_prefix}${backup_fs_suffix_tar_diff}"
-        incremental_list="${s3_file_prefix}${backup_fs_suffix_inc_list}"
-        s3_file="${s3_file_prefix}_${now_tag}${backup_fs_suffix}"
-
-        [ -e "$repository_location/$incremental_list" ] && rm -v "$repository_location/$incremental_list"
-        [ -e "$repository_location/$incremental_diff" ] && rm -v "$repository_location/$incremental_diff"
     fi
-    s3_dest="s3://$BUCKET_NAME/$s3_file"
-    f_log -l "Dest file: $s3_file"
+    s3_file="${s3_file_prefix}${backup_fs_suffix}"
+    incremental_list="${s3_file_prefix}${backup_fs_suffix_inc_list}"
 
-    f_log "Perform backup"
-    tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | f_aws_cmd cp - $s3_dest || \
+    f_log "Perform backup to $s3_file"
+    tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | f_aws_cmd cp - "s3://$BUCKET_NAME/$s3_file" || \
         f_fatal "Failed to backup repository to S3"
     f_copy_to_s3 "$repository_location/$incremental_diff"
+    [ -f "$repository_location/$incremental_list_latest" ] && cp "$repository_location/$incremental_list_latest" "$repository_location/$incremental_list"
     echo "$s3_file" >> "$repository_location/$incremental_list"
     echo "New incremental list:"
     cat -n "$repository_location/$incremental_list"
@@ -289,12 +287,12 @@ then
     if ! $ACTION_BACKUP_FS_INC
     then
         cp -v "$repository_location/$incremental_diff" "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
-        f_copy_to_s3 "$repository_location/$incremental_diff$backup_fs_suffix_tar_initial_diff"
+        f_copy_to_s3 "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
     fi
 
     # FIXME: should check file size too
-    f_check_file_exists "$s3_file" || f_log "ERROR: repository filesystem backup failed"
-    f_log "SUCCESS: repository filesystem backed up to '$s3_dest'"
+    f_check_file_exists "$s3_file" || f_fatal "ERROR: repository filesystem backup failed"
+    f_log "SUCCESS: repository filesystem backed up to '$s3_file'"
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -345,15 +343,13 @@ f_restore_fs() {
         f_copy_from_s3 "$tar_file" "$USE_TEMP_DIRECTORY"
 
         f_log "File $tar_file copied to $USE_TEMP_DIRECTORY"
-        tar xzf -C "$repository_location" $USE_TEMP_DIRECTORY/$tar_file || \
-            f_fatal "ERROR: Failed to restore $tar_file"
+        tar xzf $USE_TEMP_DIRECTORY/$tar_file -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
         f_log "SUCCESS: Restored $tar_file"
         rm -v $USE_TEMP_DIRECTORY/$tar_file
     else
         # TODO: test export AWS_CLIENT_TIMEOUT=900000 (120000ms  is the default)
         s3_source="s3://$BUCKET_NAME/$tar_file"
-        f_aws_cmd cp $s3_source - | tar xz -C "$repository_location" || \
-            f_fatal "ERROR: Failed to restore $tar_file"
+        f_aws_cmd cp $s3_source - | tar xz -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
         f_log "SUCCESS: Restored $tar_file"
     fi
 }
@@ -361,7 +357,7 @@ f_restore_fs() {
 if $ACTION_RESTORE_FS
 then
     f_test_s3_connection
-    f_log -s "Restore repository fileystem: '$ACTION_RESTORE_FS_FILE'"
+    f_log -s "Restore repository fileystem"
     if [ -n "$ACTION_RESTORE_FS_FILE" ]
     then
         f_check_file_exists $ACTION_RESTORE_FS_FILE || \
@@ -372,7 +368,9 @@ then
         [ -n "$ACTION_RESTORE_FS_FILE" ] || f_fatal "ERROR: Failed to find most recent backup file."
     fi
 
-    f_log "Using file: $ACTION_RESTORE_FS_FILE"
+    backup_file_root="$(echo $ACTION_RESTORE_FS_FILE | sed 's/\.[^\.]*$//')"
+    backup_file_inc=$backup_file_root$backup_fs_suffix_inc_list
+    f_log "Using file: $ACTION_RESTORE_FS_FILE, root: $backup_file_root"
     [ -d "$repository_location" ] || f_fatal "Cannot find directory: $repository_location"
 
     # Remove existing repository filesystem
@@ -380,20 +378,22 @@ then
     # So, 1. move folder before deleting and 2. only log deletion errors as warnings.
     f_log "Moving and deleting existing repository directory '$repository_path'"
     repository_path_old="${repository_path}_$(date +%Y%m%d_%H%M%S)"
-    mv -v $repository_path $repository_path_old || f_fatal
-    rm -rf "$repository_path_old" || \
-        f_log "WARNING: existing repository could not be completely deleted, files left in '$repository_path_old'"
-
-    incremental_list="${ACTION_RESTORE_FS_FILE}${backup_fs_suffix_inc_list}"
-    if f_check_file_exists "$incremental_list"
+    if [ -d $repository_path ]
     then
-        f_log "Process incremental restore: '$incremental_list'"
-        f_copy_from_s3 "$incremental_list" "$repository_path/"
-        cat -n "$repository_path/$incremental_list"
+        mv -v $repository_path $repository_path_old || f_fatal
+        rm -rf "$repository_path_old" || \
+            f_log "WARNING: existing repository could not be completely deleted, files left in '$repository_path_old'"
+    fi
+
+    if f_check_file_exists "$backup_file_inc"
+    then
+        f_log "Process incremental restore: '$backup_file_inc'"
+        f_copy_from_s3 "$backup_file_inc" "$repository_path/"
+        cat -n "$repository_path/$backup_file_inc"
         while read f
         do
             f_restore_fs "$f"
-        done < "$repository_path/$incremental_list"
+        done < "$repository_path/$backup_file_inc"
     else
         f_log "Process non-incremental restore"
         f_restore_fs "${ACTION_RESTORE_FS_FILE}"
