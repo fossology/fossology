@@ -87,13 +87,15 @@ class OjosDatabaseHandler: public fo::AgentDatabaseHandler
       const unsigned long fl_fk) const;
 
     unsigned long getLicenseIdForName(std::string const &rfShortName,
-                                      const int groupId);
+                                      const int groupId,
+                                      const int userId);
 
   private:
     unsigned long getCachedLicenseIdForName (
       std::string const &rfShortName) const;
     unsigned long selectOrInsertLicenseIdForName (std::string rfShortname,
-                                                  const int groupId);
+                                                  const int groupId,
+                                                  const int userId);
     /**
      * Cached license pairs
      */
