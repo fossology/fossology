@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.1
+  version: 1.3.2
   contact:
     email: fossology@fossology.org
   license:
@@ -1144,6 +1144,17 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: kind
+          description: Which kind of licenses to get.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - candidate
+              - main
+              - all
+            default: all
       summary: Get all license from the database
       responses:
         '200':

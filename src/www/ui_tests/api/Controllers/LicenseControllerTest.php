@@ -374,9 +374,9 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs([$this->groupId])->andReturn(4);
+      ->withArgs(["all", $this->groupId])->andReturn(4);
     $this->dbHelper->shouldReceive('getLicensesPaginated')
-      ->withArgs([1, 100, $this->groupId, false])
+      ->withArgs([1, 100, "all", $this->groupId, false])
       ->andReturn($this->traslateLicenseToDb($licenses));
 
     $responseLicense = [];
@@ -412,7 +412,7 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/license"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getLicenseCount')
-      ->withArgs([$this->groupId])->andReturn(4);
+      ->withArgs(["all", $this->groupId])->andReturn(4);
 
     $info = new Info(400, "Can not exceed total pages: 1", InfoType::ERROR);
     $expectedResponse = (new Response())->withHeader("X-Total-Pages", 1)
@@ -426,6 +426,60 @@ class LicenseControllerTest extends \PHPUnit\Framework\TestCase
       $this->getResponseJson($actualResponse));
     $this->assertEquals($expectedResponse->getHeaders(),
       $actualResponse->getHeaders());
+  }
+
+  /**
+   * @test
+   * -# Test for LicenseController::getAllLicenses() with kind filter
+   * -# Check if proper parameters are passed to DbHelper
+   */
+  public function testGetAllLicenseFilters()
+  {
+    // All licenses
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license", "kind=all"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getLicenseCount')
+      ->withArgs(["all", $this->groupId])->andReturn(4)->once();
+    $this->dbHelper->shouldReceive('getLicensesPaginated')
+      ->withArgs([1, 100, "all", $this->groupId, false])
+      ->andReturn([])->once();
+
+    $this->licenseController->getAllLicenses($request, new Response(), []);
+
+    // Main licenses
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license", "kind=main"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getLicenseCount')
+      ->withArgs(["main", $this->groupId])->andReturn(4)->once();
+    $this->dbHelper->shouldReceive('getLicensesPaginated')
+      ->withArgs([1, 100, "main", $this->groupId, false])
+      ->andReturn([])->once();
+
+    $this->licenseController->getAllLicenses($request, new Response(), []);
+
+    // Candidate licenses
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license", "kind=candidate"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getLicenseCount')
+      ->withArgs(["candidate", $this->groupId])->andReturn(4)->once();
+    $this->dbHelper->shouldReceive('getLicensesPaginated')
+      ->withArgs([1, 100, "candidate", $this->groupId, false])
+      ->andReturn([])->once();
+
+    $this->licenseController->getAllLicenses($request, new Response(), []);
+
+    // wrong filter
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/license", "kind=bogus"), $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getLicenseCount')
+      ->withArgs(["all", $this->groupId])->andReturn(4)->once();
+    $this->dbHelper->shouldReceive('getLicensesPaginated')
+      ->withArgs([1, 100, "all", $this->groupId, false])
+      ->andReturn([])->once();
+
+    $this->licenseController->getAllLicenses($request, new Response(), []);
   }
 
   /**
