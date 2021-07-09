@@ -57,6 +57,12 @@ class DefinitionSummary
   private $discoveredLicenses;
 
   /**
+   * @var integer $score
+   * Package score
+   */
+  private $score;
+
+  /**
    * Set the object based on object returned by API
    * @param array $obj Array containing the data
    */
@@ -68,6 +74,7 @@ class DefinitionSummary
     $this->files = 0;
     $this->release = "";
     $this->url = "";
+    $this->score = 0;
 
     if (array_key_exists('licensed', $result)) {
       $licensed = $result["licensed"];
@@ -105,6 +112,11 @@ class DefinitionSummary
       if (array_key_exists("releaseDate", $described)) {
         $this->release = $described["releaseDate"];
       }
+    }
+
+    if (array_key_exists("scores", $result) &&
+        array_key_exists("effective", $result["scores"])) {
+      $this->score = $result["scores"]["effective"];
     }
   }
 
@@ -154,5 +166,13 @@ class DefinitionSummary
   public function getDiscoveredLicenses()
   {
     return $this->discoveredLicenses;
+  }
+
+  /**
+   * @return integer
+   */
+  public function getScore()
+  {
+    return $this->score;
   }
 }

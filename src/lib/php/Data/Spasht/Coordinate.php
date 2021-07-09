@@ -55,6 +55,12 @@ class Coordinate
   private $namespace;
 
   /**
+   * @var integer $score
+   * Package score
+   */
+  private $score;
+
+  /**
    * Set the object based on array returned by API
    * @param array $obj Array containing the data
    * @throws \InvalidArgumentException If the input obj does not contain
@@ -132,6 +138,14 @@ class Coordinate
   }
 
   /**
+   * @return integer
+   */
+  public function getScore()
+  {
+    return $this->score;
+  }
+
+  /**
    * Helper function to generate Coordinate from string
    * @param string $coordinate Coordinates returned from definintions API
    * @throws \InvalidArgumentException If the coordinate string is not in valid
@@ -152,5 +166,15 @@ class Coordinate
       'revision' => $parts[4]
     ];
     return new Coordinate($obj);
+  }
+
+  /**
+   * Set the score for this coordinate of package.
+   *
+   * @param integer $score Score
+   */
+  public function setScore($score)
+  {
+    $this->score = intval($score);
   }
 }

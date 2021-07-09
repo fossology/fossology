@@ -61,6 +61,14 @@
           <span>{{ result.discoveredLicenses|e }}{% if result.discoveredLicenses is not empty %}...{% endif %}</span>
         </td>
       </tr>
+      <tr class="detailsRow detailsId{{ loop.index0 }}">
+        <th>
+          Score
+        </th>
+        <td>
+          <span>{{ result.score }}</span>
+        </td>
+      </tr>
     </tbody>
   </table>
 {% endfor %}
