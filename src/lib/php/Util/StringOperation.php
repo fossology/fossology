@@ -30,7 +30,7 @@ class StringOperation
     $headLength = 0;
     $maxNumberOfCharsToCompare = min(strlen($a), strlen($b));
     while ($headLength < $maxNumberOfCharsToCompare &&
-      $a{$headLength} === $b{$headLength}) {
+      $a[$headLength] === $b[$headLength]) {
       $headLength += 1;
     }
     return substr($a,0,$headLength);
