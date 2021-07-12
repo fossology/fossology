@@ -1,4 +1,10 @@
-fossology (3.11.0~rc1-1) unstable; urgency=low
+fossology (3.11.0~rc2-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/3.11.0-rc2 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Tue, 12 Jul 2021 12:25:12 +0530
+ fossology (3.11.0~rc1-1) unstable; urgency=low
 
   * New upstream release
   * https://github.com/fossology/fossology/releases/tag/3.11.0-rc1 for details

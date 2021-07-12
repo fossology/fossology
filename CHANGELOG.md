@@ -1,5 +1,54 @@
 # Changelog of FOSSology
 
+### 3.11.0-RC2 (Jul 12th 2021)
+
+This release adds important corrections to
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1)
+
+The release 3.11.0-rc2 introduces following major changes since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+The release 3.11.0-rc2 also introduces new agent `reso` which copies
+license findings from OJO based on REUSE.Software standard on
+what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.10.0
+
+From the GIT commit history, we have following contributors since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+
+```
+#### Corrections
+
+* `f7c7715fa` fix(reso) fix comment
+* `8e399f0cd` fix(ojo): Set candidate license creator
+* `8031b128b` fix(auth): read default visibility from database rather then config file
+* `b3f0d1db0` fix(api): Check for duplicate shortnames
+* `2d6d8b187` fix(auth): fix call to add_user() when login from external auth
+
+#### Features
+
+* `df52e53ba` feat(rest): Filter licenses by kind
+* `3c98947cf` feat(expose-headers): added the expose headers option for response headers
+* `d1031cae3` feat(reso): new agent for REUSE.Software standard
+* `2e1d28eb1` feat(rest): Add POST/PATCH license endpoints
+
+#### Infrastructure
+
+* `93a47eab0` docs(licenses): updating the license info files
+* `0eacc14af` test(api): Test cases for LicenseController
+
 ### 3.11.0-RC1 (Jun 29th 2021)
 
 This release adds important corrections to
