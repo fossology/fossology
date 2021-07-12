@@ -310,13 +310,13 @@ int main(int argc, char **argv)
   /* Record the progname name */
   if ((cp = strrchr(*argv, '/')) == NULL_STR)
   {
-    strncpy(gl.progName, *argv, sizeof(gl.progName));
+    strncpy(gl.progName, *argv, sizeof(gl.progName)-1);
   }
   else
   {
     while (*cp == '.' || *cp == '/')
       cp++;
-    strncpy(gl.progName, cp, sizeof(gl.progName));
+    strncpy(gl.progName, cp, sizeof(gl.progName)-1);
   }
 
   if (putenv("LANG=C") < 0)

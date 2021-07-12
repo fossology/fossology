@@ -577,9 +577,12 @@ char* createRelativePath(item_t *p, scanres_t *scp)
   }
   else
   {
+    _Pragma("GCC diagnostic push")
+    _Pragma("GCC diagnostic ignored \"-Wstringop-truncation\"") // suppress trucation warning while copying
     strncpy(scp->fullpath, cur.cwd, sizeof(scp->fullpath)-1);
     strncat(scp->fullpath, "/", sizeof(scp->fullpath)-1);
     strncat(scp->fullpath, p->str, sizeof(scp->fullpath)-1);
+    _Pragma("GCC diagnostic pop")
     scp->nameOffset = (size_t) (cur.cwdLen + 1);
     cp = p->str; /* relative path == faster open() */
   }
