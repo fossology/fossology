@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.2
+  version: 1.3.3
   contact:
     email: fossology@fossology.org
   license:
@@ -292,6 +292,37 @@ paths:
           schema:
             type: boolean
             default: true
+        - name: name
+          description: Filter pattern for name and description
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: status
+          description: Status of uploads
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - Open
+              - InProgress
+              - Closed
+              - Rejected
+        - name: assignee
+          description: >
+            User name to which uploads are assigned to or -me- or -unassigned-
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: since
+          description: Uploads since given date in YYYY-MM-DD format
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: \d{4}\-\d{2}\-\d{2}
         - name: page
           description: Page number to fetch
           in: header

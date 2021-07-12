@@ -91,15 +91,16 @@ class DbHelper
    * @param integer $limit    Max number of results
    * @param integer $page     Page to get
    * @param integer $uploadId Pass the upload id to check for single upload.
-   * @param integer $folderId Folder to limit the uploads to
+   * @param integer $options  Filter options
    * @param bool $recursive   True to recursive listing of uploads
    * @return array Total pages as first value, uploads as an array in second
    *         value
    */
   public function getUploads($userId, $groupId, $limit, $page = 1,
-    $uploadId = null, $folderId = null, $recursive = true)
+    $uploadId = null, $options = null, $recursive = true)
   {
     $uploadProxy = new UploadBrowseProxy($groupId, 0, $this->dbManager);
+    $folderId = $options["folderId"];
     if ($folderId === null) {
       $user = $this->getUsers($userId);
       $folderId = $user[0]['rootFolderId'];
@@ -131,6 +132,32 @@ class DbHelper
       $where = "AND upload.upload_pk = $" . count($params);
       $statementGet .= ".upload";
       $statementCount .= ".upload";
+    }
+    if (! empty($options["name"])) {
+      $params[] = strtolower("%" . $options["name"] . "%");
+      $where = "AND (LOWER(upload_desc) LIKE $" . count($params) .
+        " OR LOWER(ufile_name) LIKE $" . count($params) .
+        " OR LOWER(upload_filename) LIKE $" . count($params) . ")";
+      $statementGet .= ".name";
+      $statementCount .= ".name";
+    }
+    if (! empty($options["status"])) {
+      $params[] = $options["status"];
+      $where = "AND status_fk = $" . count($params);
+      $statementGet .= ".stat";
+      $statementCount .= ".stat";
+    }
+    if (! empty($options["assignee"])) {
+      $params[] = $options["assignee"];
+      $where = "AND assignee = $" . count($params);
+      $statementGet .= ".assi";
+      $statementCount .= ".assi";
+    }
+    if (! empty($options["since"])) {
+      $params[] = $options["since"];
+      $where = "AND upload_ts >= to_timestamp($" . count($params) . ")";
+      $statementGet .= ".since";
+      $statementCount .= ".since";
     }
     $sql = "SELECT count(*) AS cnt FROM $partialQuery $where;";
     $totalResult = $this->dbManager->getSingleRow($sql, $params, $statementCount);
