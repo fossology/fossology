@@ -26,8 +26,8 @@ CHKSRC = $(CHKHDR:%.h=%.c)
 OBJECTS = wget_agent.o
 HDIR = $(OBJS:.o=.h)
 COVERAGE = $(OBJECTS:%.o=%_cov.o)
-LDFLAGS_LOCAL = $(FO_LDFLAGS) $(shell libgcrypt-config --libs)
-CFLAGS_LOCAL = $(FO_CFLAGS) $(shell libgcrypt-config --cflags)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) $(shell pkg-config --silence-errors --libs botan-1.10 || pkg-config --silence-errors --libs botan-2)
+CFLAGS_LOCAL = $(FO_CFLAGS) $(shell pkg-config --silence-errors --cflags botan-1.10 || pkg-config --silence-errors --cflags botan-2)
 
 all: $(EXE)
 

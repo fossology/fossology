@@ -68,6 +68,7 @@ fi
 
 # figure out what distro we're on
 DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
 
 ########################################################################
 
@@ -75,12 +76,20 @@ if [ $BUILDTIME ]; then
   echo "*** Installing $DISTRO buildtime dependencies ***";
   case "$DISTRO" in
     Debian|Ubuntu)
-      apt-get $YesOpt install \
-        libgcrypt20-dev
+      case "$CODENAME" in
+        jessie|stretch)
+          apt-get $YesOpt install \
+            libbotan1.10-dev
+          ;;
+        *)
+          apt-get $YesOpt install \
+            libbotan-2-dev
+          ;;
+      esac
       ;;
     RedHatEnterprise*|CentOS|Fedora)
       yum $YesOpt install \
-        libgcrypt-devel
+        botan2-devel
       ;;
   esac
 fi
@@ -91,17 +100,43 @@ if [ $RUNTIME ]; then
     Debian|Ubuntu)
       apt-get $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip poppler-utils rpm tar upx-ucl \
-        unzip gzip sleuthkit p7zip-full unrar-free libgcrypt20
+        unzip gzip sleuthkit p7zip-full unrar-free
+      case "$CODENAME" in
+        jessie)
+          apt-get $YesOpt install \
+            libbotan-1.10-0
+          ;;
+        stretch)
+          apt-get $YesOpt install \
+            libbotan-1.10-1
+          ;;
+        bionic)
+          apt-get $YesOpt install \
+            libbotan-2-4
+          ;;
+        buster)
+          apt-get $YesOpt install \
+            libbotan-2-9
+          ;;
+        focal)
+          apt-get $YesOpt install \
+            libbotan-2-12
+          ;;
+        testing|sid)
+          apt-get $YesOpt install \
+            libbotan-2-17
+          ;;
+      esac
       ;;
     RedHatEnterprise*|CentOS)
       yum $YesOpt install \
         bzip2 cpio mkisofs p7zip poppler-utils rpm tar unzip gzip p7zip-plugins\
-        sleuthkit unrar libgcrypt
+        sleuthkit unrar botan2
       ;;
     Fedora)
       yum $YesOpt install \
         bzip2 cabextract cpio genisoimage p7zip p7zip-plugins poppler-utils rpm\
-        tar upx unzip gzip sleuthkit unrar libgcrypt
+        tar upx unzip gzip sleuthkit unrar botan2
       ;;
   esac
 fi

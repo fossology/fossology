@@ -107,7 +107,6 @@
 #define _GNU_SOURCE
 #include "ununpack.h"
 #include "ununpack_globals.h"
-#include <gcrypt.h>
 
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="ununpack build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
@@ -199,11 +198,6 @@ int	main(int argc, char *argv[])
         SafeExit(25);
     }
   }
-
-  /* Initialize gcrypt and disable security memory */
-  gcry_check_version(NULL);
-  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
   /* Open DB and Initialize CMD table */
   if (UseRepository)

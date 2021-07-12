@@ -16,8 +16,6 @@
 
  ************************************************************/
 
-#include <gcrypt.h>
-
 #include "checksum.h"
 
 /**
@@ -126,38 +124,31 @@ int	CountDigits	(uint64_t Num)
  */
 Cksum *	SumComputeFile	(FILE *Fin)
 {
-  gcry_md_hd_t checksumhandler;
-  gcry_error_t checksumError = 0;
+  botan_hash_t mdchecksumhandler;
+  botan_hash_t shachecksumhandler;
+  int checksumError = 0;
   char Buffer[64];
   Cksum *Sum;
-  unsigned char *tempBuff;
+  unsigned char tempBuff[21] = {0};
   int ReadLen;
   uint64_t ReadTotalLen=0;
 
   Sum = (Cksum *)calloc(1,sizeof(Cksum));
   if (!Sum) return(NULL);
 
-  checksumError = gcry_md_open(&checksumhandler, GCRY_MD_NONE, 0);
-  if (! checksumhandler)
+  checksumError = botan_hash_init(&mdchecksumhandler, "MD5", 0);
+  checksumError |= botan_hash_init(&shachecksumhandler, "SHA-1", 0);
+  if (! mdchecksumhandler || !shachecksumhandler ||
+    checksumError != BOTAN_FFI_SUCCESS)
   {
-    LOG_ERROR("Unable to initialize checksum\n");
-    free(Sum);
-    return(NULL);
-  }
-  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_MD5);
-  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
-  {
-    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
-        gcry_strerror(checksumError));
-    free(Sum);
-    return(NULL);
-  }
-
-  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_SHA1);
-  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
-  {
-    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
-        gcry_strerror(checksumError));
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum init error: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to initialize checksum\n");
+#endif
+    botan_hash_destroy(mdchecksumhandler);
+    botan_hash_destroy(shachecksumhandler);
     free(Sum);
     return(NULL);
   }
@@ -165,21 +156,54 @@ Cksum *	SumComputeFile	(FILE *Fin)
   while(!feof(Fin))
   {
     ReadLen = fread(Buffer,1,64,Fin);
+    checksumError = 0;
     if (ReadLen > 0)
     {
-      gcry_md_write(checksumhandler, Buffer, ReadLen);
+      checksumError = botan_hash_update(mdchecksumhandler,
+        (unsigned char *) Buffer, ReadLen);
+      checksumError |= botan_hash_update(shachecksumhandler,
+        (unsigned char *) Buffer, ReadLen);
       ReadTotalLen += ReadLen;
+    }
+    if (checksumError != BOTAN_FFI_SUCCESS)
+    {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum calc fail: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to calculate checksum\n");
+#endif
+      botan_hash_destroy(mdchecksumhandler);
+      botan_hash_destroy(shachecksumhandler);
+      free(Sum);
+      return(NULL);
     }
   }
 
   Sum->DataLen = ReadTotalLen;
 
-  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_MD5);
+  checksumError = botan_hash_final(mdchecksumhandler, tempBuff);
   memcpy(Sum->MD5digest, tempBuff, sizeof(Sum->MD5digest));
 
-  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA1);
+  checksumError |= botan_hash_final(shachecksumhandler, tempBuff);
   memcpy(Sum->SHA1digest, tempBuff, sizeof(Sum->SHA1digest));
-  gcry_md_close(checksumhandler);
+
+  if (checksumError != BOTAN_FFI_SUCCESS)
+  {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    botan_hash_destroy(mdchecksumhandler);
+    botan_hash_destroy(shachecksumhandler);
+    free(Sum);
+    return(NULL);
+  }
+
+  botan_hash_destroy(mdchecksumhandler);
+  botan_hash_destroy(shachecksumhandler);
 
   return(Sum);
 } /* SumComputeFile() */
@@ -194,29 +218,24 @@ Cksum *	SumComputeFile	(FILE *Fin)
 Cksum *	SumComputeBuff	(CksumFile *CF)
 {
   Cksum *Sum;
-  gcry_md_hd_t checksumhandler;
-  gcry_error_t checksumError;
-  unsigned char *tempBuff;
+  botan_hash_t mdchecksumhandler;
+  botan_hash_t shachecksumhandler;
+  int checksumError = 0;
+  unsigned char tempBuff[21] = {0};
 
-  checksumError = gcry_md_open(&checksumhandler, GCRY_MD_NONE, 0);
-  if (! checksumhandler)
+  checksumError = botan_hash_init(&mdchecksumhandler, "MD5", 0);
+  checksumError |= botan_hash_init(&shachecksumhandler, "SHA-1", 0);
+  if (! mdchecksumhandler || !shachecksumhandler ||
+    checksumError != BOTAN_FFI_SUCCESS)
   {
-    LOG_ERROR("Unable to initialize checksum\n");
-    return(NULL);
-  }
-  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_MD5);
-  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
-  {
-    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
-        gcry_strerror(checksumError));
-    return(NULL);
-  }
-
-  checksumError = gcry_md_enable(checksumhandler, GCRY_MD_SHA1);
-  if (gcry_err_code(checksumError) != GPG_ERR_NO_ERROR)
-  {
-    LOG_ERROR("GCRY Error: %s/%s\n", gcry_strsource(checksumError),
-        gcry_strerror(checksumError));
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum init error: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to initialize checksum\n");
+#endif
+    botan_hash_destroy(mdchecksumhandler);
+    botan_hash_destroy(shachecksumhandler);
     return(NULL);
   }
 
@@ -227,15 +246,44 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
   }
   Sum->DataLen = CF->MmapSize;
 
-  gcry_md_write(checksumhandler, CF->Mmap, CF->MmapSize);
-
-  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_MD5);
+  checksumError = botan_hash_update(mdchecksumhandler, CF->Mmap, CF->MmapSize);
+  checksumError |= botan_hash_update(shachecksumhandler, CF->Mmap, CF->MmapSize);
+  if (checksumError != BOTAN_FFI_SUCCESS)
+  {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    botan_hash_destroy(mdchecksumhandler);
+    botan_hash_destroy(shachecksumhandler);
+    free(Sum);
+    return(NULL);
+  }
+  checksumError = botan_hash_final(mdchecksumhandler, tempBuff);
   memcpy(Sum->MD5digest, tempBuff, sizeof(Sum->MD5digest));
 
-  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA1);
+  checksumError |= botan_hash_final(shachecksumhandler, tempBuff);
   memcpy(Sum->SHA1digest, tempBuff, sizeof(Sum->SHA1digest));
 
-  gcry_md_close(checksumhandler);
+  if (checksumError != BOTAN_FFI_SUCCESS)
+  {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    botan_hash_destroy(mdchecksumhandler);
+    botan_hash_destroy(shachecksumhandler);
+    free(Sum);
+    return(NULL);
+  }
+
+  botan_hash_destroy(mdchecksumhandler);
+  botan_hash_destroy(shachecksumhandler);
+
   return(Sum);
 } /* SumComputeBuff() */
 
@@ -248,30 +296,50 @@ Cksum *	SumComputeBuff	(CksumFile *CF)
  */
 char *	SumToString	(Cksum *Sum)
 {
-  int i;
+  char sha1sum[41] = {0};
+  char md5sum[33] = {0};
   char *Result;
+  int checksumError = 0;
 
   Result = (char *)calloc(1,16*2 +1+ 20*2 +1+ CountDigits(Sum->DataLen) + 1);
   if (!Result) return(NULL);
 
-  for(i=0; i<20; i++)
+  checksumError = botan_hex_encode(Sum->SHA1digest, sizeof(Sum->SHA1digest),
+    sha1sum, 0);
+  if (checksumError != BOTAN_FFI_SUCCESS)
   {
-    sprintf(Result + (i*2),"%02X",Sum->SHA1digest[i]);
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    return NULL;
   }
-  Result[40]='.';
-  for(i=0; i<16; i++)
+  checksumError = botan_hex_encode(Sum->MD5digest, sizeof(Sum->MD5digest),
+    md5sum, 0);
+  if (checksumError != BOTAN_FFI_SUCCESS)
   {
-    sprintf(Result + 41 + (i*2),"%02X",Sum->MD5digest[i]);
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    return NULL;
   }
-  Result[41+32]='.';
-  sprintf(Result + 33 + 41,"%Lu",(long long unsigned int)Sum->DataLen);
+  sprintf(Result, "%s.%s.%Lu", sha1sum, md5sum,
+    (long long unsigned int)Sum->DataLen);
   return(Result);
 } /* SumToString() */
 
-int calc_sha256sum(char*filename, char* dst) {
-  gcry_md_hd_t checksumhandler;
+int calc_sha256sum(char*filename, char* dst)
+{
+  botan_hash_t checksumhandler;
+  int checksumError = 0;
   unsigned char buf[32];
   unsigned char *tempBuff;
+  size_t buffsize = 0;
   memset(buf, '\0', sizeof(buf));
   FILE *f;
   if(!(f=fopen(filename, "rb")))
@@ -279,29 +347,64 @@ int calc_sha256sum(char*filename, char* dst) {
     LOG_FATAL("Failed to open file '%s'\n", filename);
     return(1);
   }
-  gcry_md_open(&checksumhandler, GCRY_MD_SHA256, 0);
-  if (! checksumhandler ||
-    (! gcry_md_is_enabled(checksumhandler, GCRY_MD_SHA256)))
+  checksumError = botan_hash_init(&checksumhandler, "SHA-256", 0);
+  if (! checksumhandler || checksumError != BOTAN_FFI_SUCCESS)
   {
-    LOG_ERROR("Unable to initialize checksum\n");
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum init error: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to initialize checksum\n");
+#endif
     return(2);
   }
 
   int i=0;
-  while((i=fread(buf, 1, sizeof(buf), f)) > 0) {
-    gcry_md_write(checksumhandler, buf, i);
+  while((i=fread(buf, 1, sizeof(buf), f)) > 0)
+  {
+    checksumError = botan_hash_update(checksumhandler, buf, i);
+    if (checksumError != BOTAN_FFI_SUCCESS)
+    {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum calc fail: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to calculate checksum\n");
+#endif
+      botan_hash_destroy(checksumhandler);
+      return(3);
+    }
   }
   fclose(f);
-  memset(buf, '\0', sizeof(buf));
-  tempBuff = gcry_md_read(checksumhandler, GCRY_MD_SHA256);
-  memcpy(buf, tempBuff, sizeof(buf));
 
-  gcry_md_close(checksumhandler);
-
-  for (i=0; i<32; i++)
+  botan_hash_output_length(checksumhandler, &buffsize);
+  tempBuff = (unsigned char *) calloc(buffsize + 1, sizeof(unsigned char *));
+  checksumError = botan_hash_final(checksumhandler, tempBuff);
+  if (checksumError != BOTAN_FFI_SUCCESS)
   {
-    snprintf(dst+i*2, 3, "%02X", buf[i]);
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    botan_hash_destroy(checksumhandler);
+    return(3);
   }
+  botan_hash_destroy(checksumhandler);
+
+  checksumError = botan_hex_encode(tempBuff, buffsize, dst, 0);
+  if (checksumError != BOTAN_FFI_SUCCESS)
+  {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+    LOG_ERROR("Checksum calc fail: %s\n",
+      botan_error_description(checksumError));
+#else
+    LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    return -1;
+  }
+  free(tempBuff);
 
   return 0;
 }

@@ -24,7 +24,6 @@
 
 #define _GNU_SOURCE
 #include "wget_agent.h"
-#include <gcrypt.h>
 
 #ifdef COMMIT_HASH_S
 char BuildVersion[]="wget_agent build version: " VERSION_S " r(" COMMIT_HASH_S ").\n";
@@ -195,11 +194,6 @@ int main  (int argc, char *argv[])
     if (pgConn) PQfinish(pgConn);
     SafeExit(0);
   }
-
-  /* Initialize gcrypt and disable security memory */
-  gcry_check_version(NULL);
-  gcry_control (GCRYCTL_DISABLE_SECMEM, 0);
-  gcry_control (GCRYCTL_INITIALIZATION_FINISHED, 0);
 
   COMMIT_HASH = fo_sysconfig("wget_agent", "COMMIT_HASH");
   VERSION = fo_sysconfig("wget_agent", "VERSION");

@@ -12,8 +12,8 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf 
 
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(AGENTDIR) -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION) $(shell libgcrypt-config --cflags)
-LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB) $(shell libgcrypt-config --libs)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(AGENTDIR) -I./ -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION) $(shell pkg-config --silence-errors --cflags botan-1.10 || pkg-config --silence-errors --cflags botan-2)
+LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB) $(shell pkg-config --silence-errors --libs botan-1.10 || pkg-config --silence-errors --libs botan-2)
 EXE = run_tests
 
 OBJS =	run_tests.o \

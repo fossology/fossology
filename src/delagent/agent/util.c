@@ -23,6 +23,10 @@
  * delagent: Remove an upload from the DB and repository
  *
  */
+
+#include <botan/ffi.h>
+#include <botan/build.h>
+
 #include "delagent.h"
 
 int Verbose = 0;
@@ -111,9 +115,12 @@ int authentication(char *user, char *password, int *userId, int *userPerm)
   char SQL[MAXSQL] = {0};
   PGresult *result;
   char user_seed[myBUFSIZ] = {0};
-  char pass_hash_valid[41] = {0};
+  char pass_hash_valid[myBUFSIZ] = {0};
   unsigned char pass_hash_actual_raw[21] = {0};
   char pass_hash_actual[41] = {0};
+  int hash_match = -1;
+  botan_hash_t sha1handler;
+  int checksumError = 0;
 
   /** get user_seed, user_pass on one specified user */
   snprintf(SQL,MAXSQL,"SELECT user_seed, user_pass, user_perm, user_pk from users where user_name=$1;");
@@ -134,22 +141,69 @@ int authentication(char *user, char *password, int *userId, int *userPerm)
   *userPerm = atoi(PQgetvalue(result, 0, 2));
   *userId = atoi(PQgetvalue(result, 0, 3));
   PQclear(result);
+  if (pass_hash_valid[0])
+  {
+    hash_match = botan_bcrypt_is_valid(password, pass_hash_valid);
+  }
   if (user_seed[0] && pass_hash_valid[0])
   {
     strcat(user_seed, password);  // get the hash code on seed+pass
-    gcry_md_hash_buffer(GCRY_MD_SHA1, pass_hash_actual_raw, user_seed,
+    checksumError = botan_hash_init(&sha1handler, "SHA-1", 0);
+    if (checksumError != BOTAN_FFI_SUCCESS)
+    {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum init error: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to initialize checksum\n");
+#endif
+      return -1;
+    }
+    checksumError = botan_hash_update(sha1handler, (unsigned char*) user_seed,
       strlen(user_seed));
+    if (checksumError != BOTAN_FFI_SUCCESS)
+    {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum calc fail: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to calculate checksum\n");
+#endif
+      return -1;
+    }
+    checksumError = botan_hash_final(sha1handler, pass_hash_actual_raw);
+    if (checksumError != BOTAN_FFI_SUCCESS)
+    {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum calc fail: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to calculate checksum\n");
+#endif
+      return -1;
+    }
+    botan_hash_destroy(sha1handler);
   }
   else
   {
     return -1;
   }
-  int i = 0;
-  char temp[256] = {0};
-  for (i = 0; i < 20; i++)
+  if (hash_match == 0)
   {
-    snprintf(temp, 256, "%02x", pass_hash_actual_raw[i]);
-    strcat(pass_hash_actual, temp);
+    return 0;
+  }
+  checksumError = botan_hex_encode(pass_hash_actual_raw,
+    sizeof(pass_hash_actual_raw) - 1, pass_hash_actual,
+    BOTAN_FFI_HEX_LOWER_CASE);
+  if (checksumError != BOTAN_FFI_SUCCESS)
+  {
+#if BOTAN_VERSION_MAJOR > 2 && BOTAN_VERSION_MINOR > 4
+      LOG_ERROR("Checksum calc fail: %s\n",
+        botan_error_description(checksumError));
+#else
+      LOG_ERROR("Failed to calculate checksum\n");
+#endif
+    return -1;
   }
   return (strcmp(pass_hash_valid, pass_hash_actual) == 0) ? 0 : 1;
 }

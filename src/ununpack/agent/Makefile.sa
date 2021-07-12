@@ -19,8 +19,8 @@ TOP = ../../..
 VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
-LDFLAGS_LOCAL = -lmagic $(shell libgcrypt-config --libs)
-CFLAGS_LOCAL = -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 $(shell libgcrypt-config --cflags) $(shell pkg-config --cflags --libs glib-2.0)
+LDFLAGS_LOCAL = -lmagic $(shell pkg-config --silence-errors --libs botan-1.10 || pkg-config --silence-errors --libs botan-2)
+CFLAGS_LOCAL = -DSTANDALONE -Wall -D_FILE_OFFSET_BITS=64 $(shell pkg-config --cflags --libs glib-2.0) $(shell pkg-config --silence-errors --cflags botan-1.10 || pkg-config --silence-errors --cflags botan-2)
 EXE = departition-sa ununpack-sa
 
 CHKHDR = checksum.h

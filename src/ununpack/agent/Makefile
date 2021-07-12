@@ -20,8 +20,8 @@ VARS = $(TOP)/Makefile.conf
 DEPS = $(TOP)/Makefile.deps
 include $(VARS)
 
-LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic $(shell libgcrypt-config --libs)
-CFLAGS_LOCAL = $(FO_CFLAGS) $(shell libgcrypt-config --cflags)
+LDFLAGS_LOCAL = $(FO_LDFLAGS) -lmagic $(shell pkg-config --silence-errors --libs botan-1.10 || pkg-config --silence-errors --libs botan-2)
+CFLAGS_LOCAL = $(FO_CFLAGS) $(shell pkg-config --silence-errors --cflags botan-1.10 || pkg-config --silence-errors --cflags botan-2)
 EXE = departition ununpack
 
 CHKHDR = checksum.h
@@ -43,7 +43,7 @@ departition-coverage: departition.c $(VARS)
 	$(CC) $< $(FO_CFLAGS) $(FO_LDFLAGS) $(FLAG_COV) -o $(@:%-coverage=%)
 
 ununpack: ununpack.c libununpack.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
-	$(CC) ununpack.c libununpack.a $(FO_CFLAGS) $(LDFLAGS_LOCAL) $(DEFS) -o $@
+	$(CC) ununpack.c libununpack.a $(CFLAGS_LOCAL) $(LDFLAGS_LOCAL) $(DEFS) -o $@
 
 ununpack-coverage: ununpack.c libununpack_cov.a $(VARS) $(DB) $(REPO) $(AGENTLIB) $(UUHDR)
 	$(CC) ununpack.c libununpack_cov.a $(FO_CFLAGS) $(LDFLAGS_LOCAL) $(FLAG_COV) $(DEFS) -o $(@:%-coverage=%)

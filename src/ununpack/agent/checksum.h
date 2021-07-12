@@ -30,6 +30,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <dirent.h>
+#include <botan/ffi.h>
 
 #ifdef STANDALONE
 #include "standalone.h"

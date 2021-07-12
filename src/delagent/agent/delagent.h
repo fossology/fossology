@@ -34,7 +34,6 @@
 #include <signal.h>
 #include <libgen.h>
 #include <getopt.h>
-#include <gcrypt.h>
 
 #include "libfossology.h"
 
