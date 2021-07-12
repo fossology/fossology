@@ -13,7 +13,7 @@ address = localhost
 depth = 3
 
 ; REPLACEMENT for RepPath.conf
-path = /srv/fossology/repository
+path = {$REPODIR}
 
 ; REPLACEMENT for Proxy.conf
 ; proxy settings that will be used by fossology agents
@@ -26,7 +26,7 @@ path = /srv/fossology/repository
 ; REPLACEMENT for Hosts.conf
 ; set up the set of hosts available to analyze files. If there is an entry
 ; for localhost it will be read, if there isn't one then it is assumed that
-; localhost cannot host any agents. A man of -1 does not indicate that a 
+; localhost cannot host any agents. A man of -1 does not indicate that a
 ; host can have as many agents running as necessary, (i.e. there should always
 ; be a max on the number of agents for a particular host).
 [HOSTS]
@@ -37,11 +37,12 @@ localhost[] = * 00 ff
 
 [DIRECTORIES]
 
-; Project Name and Group 
-; Do not change after installation since PROJECT and PROJECTGROUP is used in installation 
-; directory names and ownership.
+; Project Name and Group
+; Do not change after installation since PROJECT, PROJECTUSER and PROJECTGROUP
+; is used in installation directory names and ownership.
 ; Use PREFIX to install multiple copies of FOSSology.
 PROJECT={$PROJECT}
+PROJECTUSER={$PROJECTUSER}
 PROJECTGROUP={$PROJECTGROUP}
 
 ; base of the program data tree

@@ -1,5 +1,6 @@
 # FOSSology
 
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/fossology/fossology)
 [![GPL-2.0](https://img.shields.io/github/license/fossology/fossology)](LICENSE)
 [![Travis-CI Build Status](https://travis-ci.org/fossology/fossology.svg?branch=master)](https://travis-ci.org/fossology/fossology)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2395/badge)](https://bestpractices.coreinfrastructure.org/projects/2395)
