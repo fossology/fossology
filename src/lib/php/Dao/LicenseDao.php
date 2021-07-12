@@ -361,7 +361,7 @@ ORDER BY lft asc
     $pathStack = array($row['ufile_name']);
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
-    $path = implode($pathStack,'/');
+    $path = implode('/', $pathStack);
     $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     while ($row = $this->dbManager->fetchArray($result)) {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding)) {
@@ -373,7 +373,7 @@ ORDER BY lft asc
       }
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
-      $path = implode($pathStack,'/');
+      $path = implode('/', $pathStack);
       $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     }
     $this->dbManager->freeResult($result);

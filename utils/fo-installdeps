@@ -107,7 +107,7 @@ if [[ $BUILDTIME ]]; then
             libboost-program-options-dev libpq-dev composer patch devscripts \
             libdistro-info-perl
          case "$CODENAME" in
-           xenial|stretch)
+           stretch)
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd;;
            buster)
              apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd;;
@@ -120,8 +120,6 @@ if [[ $BUILDTIME ]]; then
          esac
          if ! dpkg --get-selections | grep -q postgresql-server-dev; then  ## if postgresql-server-dev is not installed
            case "$CODENAME" in
-              xenial)
-                apt-get $YesOpt install postgresql-server-dev-9.5;;
               stretch)
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
               buster)
@@ -175,10 +173,6 @@ if [[ $RUNTIME ]]; then
             subversion git \
             dpkg-dev
          case "$CODENAME" in
-            xenial)
-               apt-get $YesOpt install postgresql-9.5 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
-                 php7.0-cli php7.0-curl php7.0-mbstring php7.0-zip php-gettext s-nail libboost-program-options1.58.0 \
-                 libboost-regex1.58.0 libicu55;;
             stretch)
                apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
                  php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring php-gettext s-nail libboost-program-options1.62.0 \

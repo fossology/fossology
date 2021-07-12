@@ -62,7 +62,7 @@ eval set -- "$OPTS"
 
 while true; do
    case "$1" in
-      -s|--no-sign)     NOSIGN="-us -uc"; shift;;
+      -s|--no-sign)     NOSIGN="--no-sign" shift;;
       -h|--help)        show_help; exit;;
       -t|--no-tar)      NOTAR="1"; shift;;
       --)               shift; break;;

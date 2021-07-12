@@ -476,15 +476,15 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
    * -# Check if the contents of file get unpacked
    * @todo Uncertain how the unpack results looks like
    */
-  function testNormalUpx(){
-    global $TEST_DATA_PATH;
-    global $TEST_RESULT_PATH;
+//   function testNormalUpx(){
+//     global $TEST_DATA_PATH;
+//     global $TEST_RESULT_PATH;
 
     //$command = "$this->UNUNPACK_PATH -qCR $TEST_DATA_PATH/".
     //            " -d $TEST_RESULT_PATH";
     //exec($command);
     //$this->assertFileExists("$TEST_RESULT_PATH/");
-  }
+//   }
 
   /**
    * @brief Check for disk images (file systems)
@@ -501,7 +501,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
                   "ext2file.fs -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */
-    $this->assertFileExists("$TEST_RESULT_PATH/ext2file.fs.dir/test.zip.dir/ununpack");
+    $this->assertFileExists("$TEST_RESULT_PATH/ext2file.fs.dir/testtwo.zip.dir/test.zip.dir/ununpack");
 
     // delete the directory ./test_result
     exec("/bin/rm -rf $TEST_RESULT_PATH");
@@ -512,7 +512,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
                   "ext3file.fs -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */
-    $this->assertFileExists("$TEST_RESULT_PATH/ext3file.fs.dir/test.zip.dir/ununpack");
+    $this->assertFileExists("$TEST_RESULT_PATH/ext3file.fs.dir/testtwo.zip.dir/test.zip.dir/ununpack");
 
     // delete the directory ./test_result
     exec("/bin/rm -rf $TEST_RESULT_PATH");
@@ -534,7 +534,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
                   "ntfsfile.fs -d $TEST_RESULT_PATH";
     exec($command);
     /* check if the result is ok? select one file to confirm */
-    $this->assertFileExists("$TEST_RESULT_PATH/ntfsfile.fs.dir/test.zip.dir/ununpack");
+    $this->assertFileExists("$TEST_RESULT_PATH/ntfsfile.fs.dir/testtwo.zip.dir/test.zip.dir/ununpack");
   }
 
   /* unpack boot x-x86_boot image, to-do, do not confirm

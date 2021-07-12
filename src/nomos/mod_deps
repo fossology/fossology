@@ -92,8 +92,6 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       case "$CODENAME" in
-        xenial)
-          apt-get $YesOpt install libjson-c2;;
         stretch|buster|sid|bionic|cosmic)
           apt-get $YesOpt install libjson-c3;;
         focal)

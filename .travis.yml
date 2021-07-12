@@ -1,20 +1,21 @@
-# Copyright Siemens AG, 2014-2019
-# SPDX-License-Identifier: GPL-2.0 LGPL-2.1
+# Copyright Siemens AG, 2014-2021
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
 
 # build FOSSology on Travis CI - https://travis-ci.org/
 
 language: php
-dist: xenial
+dist: bionic
 os: linux
-php: 7.0
+php: 7.1
 cache:
   ccache: true
   directories:
     - $HOME/.composer
 env:
   global:
-    - PATH="/usr/lib/ccache/:$PATH"
+    - PATH="/usr/lib/ccache/:$TRAVIS_BUILD_DIR/src/ununpack/agent/:$PATH"
     - COMPOSER_HOME="$HOME/.composer/"
+    - PGPORT=5432
 
 addons:
   apt:
@@ -51,6 +52,7 @@ addons:
       - upx-ucl
       - libicu-dev
       - libgcrypt20-dev
+      - cppcheck
 
 services: postgresql
 
@@ -67,15 +69,15 @@ jobs:
         - src/testing/docker/test-standalone.sh
 #### C/C++ agent tests ###########################
     - &compiler-tests
-      env: CC=gcc-5 CXX=g++-5 CFLAGS='-Wall'
+      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - *default_packages
-            - gcc-5
-            - g++-5
+            - gcc-6
+            - g++-6
       install:
         - composer install --prefer-dist --working-dir=src
         - ./install/scripts/install-spdx-tools.sh
@@ -88,21 +90,11 @@ jobs:
       after_success:
         - ccache -s
     - <<: *compiler-tests
-      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall'
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - *default_packages
-            - gcc-6
-            - g++-6
-    - <<: *compiler-tests
       env: CC=gcc-7 CXX=g++-7 CFLAGS='-Wall'
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - *default_packages
             - gcc-7
@@ -112,7 +104,7 @@ jobs:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - *default_packages
             - gcc-8
@@ -122,35 +114,45 @@ jobs:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - *default_packages
             - gcc-9
             - g++-9
     - <<: *compiler-tests
-      env: CC=gcc-6 CXX=g++-6 CFLAGS='-Wall' PGPORT=5432
+      env: CC=gcc-10 CXX=g++-10 CFLAGS='-Wall'
       addons:
-        postgresql: "10"
         apt:
           sources:
-            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
           packages:
             - *default_packages
-            - gcc-6
-            - g++-6
-            - postgresql-10
-            - postgresql-client-10
+            - gcc-10
+            - g++-10
+    - <<: *compiler-tests
+      env: CC=gcc-10 CXX=g++-10 CFLAGS='-Wall'
+      addons:
+        postgresql: "13"
+        apt:
+          sources:
+            - sourceline: 'ppa:ubuntu-toolchain-r/test'
+          packages:
+            - *default_packages
+            - gcc-10
+            - g++-10
+            - postgresql-13
+            - postgresql-client-13
       before_script: &postgres-before-script
         # Use default port
-        - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/10/main/postgresql.conf
-        # Use 9.6 auth config:
-        - sudo cp /etc/postgresql/{9.5,10}/main/pg_hba.conf
+        - sudo sed -i 's/port = 5433/port = 5432/' /etc/postgresql/13/main/postgresql.conf
+        # Use 10 auth config:
+        - sudo cp /etc/postgresql/{10,13}/main/pg_hba.conf
         - sudo service postgresql restart
         - *default-before-script
 #### PHPUnit tests ###########################
     - &php7-phpunit-tests
       addons: {}
-      php: 7.0
+      php: 7.1
       install: composer update --ignore-platform-reqs --with-dependencies --prefer-dist --working-dir=src phpunit/phpunit
       before_script: ./utils/prepare-test -afty
       script:
@@ -158,21 +160,21 @@ jobs:
         - make build-lib VERSIONFILE build-cli
         - phpdbg -qrr src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always | grep -v 'script>\|c.log'
       after_success: php src/vendor/bin/php-coveralls -vv -o coveralls.json -x clover.xml
-    - &php71-phpunit-tests
-      <<: *php7-phpunit-tests
-      php: 7.1
     - <<: *php7-phpunit-tests
       php: 7.2
     - <<: *php7-phpunit-tests
       php: 7.3
     - <<: *php7-phpunit-tests
-      php: 7.2
-      env: PGPORT=5432
+      php: 7.4
       addons:
-        postgresql: "10"
+        postgresql: "13"
         apt:
           packages:
-            - postgresql-10
-            - postgresql-client-10
+            - postgresql-13
+            - postgresql-client-13
             - *default_packages
+      script:
+        - set -o pipefail
+        - make build-lib VERSIONFILE build-cli
+        - ./src/vendor/bin/phpunit -csrc/phpunit.xml --testsuite="Fossology PhpUnit Test Suite" --colors=always
       before_script: *postgres-before-script
