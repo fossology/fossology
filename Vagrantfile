@@ -64,8 +64,8 @@ SCRIPT
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
   config.vm.post_up_message = $post_up_message
-  config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder ".", "/fossology"
+  config.vm.synced_folder ".", "/vagrant", type: "rsync", disabled: true
+  config.vm.synced_folder ".", "/fossology", type: "rsync"
 
   config.vm.provider "virtualbox" do |vbox|
     vbox.customize ["modifyvm", :id, "--memory", "4096"]
