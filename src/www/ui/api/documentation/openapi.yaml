@@ -58,6 +58,7 @@ tags:
 paths:
   /auth:
     get:
+      operationId: getAuth
       tags:
         - auth
       deprecated: true
@@ -101,6 +102,7 @@ paths:
 
   /tokens:
     post:
+      operationId: createToken
       tags:
         - auth
       security: []
@@ -140,6 +142,7 @@ paths:
 
   /version:
     get:
+      operationId: getVersion
       tags:
         - info
       security: []
@@ -181,6 +184,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getUploadById
       tags:
         - Upload
       summary: Get single upload by id
@@ -209,10 +213,13 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteUploadById
       tags:
         - Upload
         - Organize
       summary: Delete upload by id
+      description: >
+        Delete a single upload by id
       responses:
         '202':
           description: Upload will be deleted
@@ -223,6 +230,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: moveUploadById
       tags:
         - Upload
         - Organize
@@ -244,6 +252,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
+      operationId: copyUploadById
       tags:
         - Upload
         - Organize
@@ -275,6 +284,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getUploads
       tags:
         - Upload
       summary: Uploads
@@ -326,6 +336,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createUpload
       tags:
         - Upload
       summary: Post new upload to FOSSology
@@ -416,6 +427,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getSummaryByUploadId
       tags:
         - Upload
       summary: Get single upload summary
@@ -485,6 +497,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicensesByUploadId
       tags:
         - Upload
       summary: Get licenses found by agent
@@ -523,6 +536,7 @@ paths:
 
   /search:
     get:
+      operationId: searchFile
       tags:
         - Search
       description: Search the FOSSology for a specific file
@@ -603,6 +617,7 @@ paths:
           $ref: '#/components/responses/defaultResponse'
   /users:
     get:
+      operationId: getUsers
       tags:
         - User
         - Admin
@@ -626,10 +641,13 @@ paths:
         schema:
           type: integer
     get:
+      operationId: getUserById
       tags:
         - User
         - Admin
       summary: Get user by id
+      description: >
+        Get one single user by id
       responses:
         '200':
           description: User with the given id
@@ -640,10 +658,13 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteUserById
       tags:
         - User
         - Admin
       summary: Delete user by id
+      description: >
+        Delete a single user by id
       responses:
         '202':
           description: User will be deleted
@@ -655,6 +676,7 @@ paths:
             $ref: '#/components/responses/defaultResponse'
   /users/self:
     get:
+      operationId: getSelf
       tags:
         - User
       description: Get the information about logged in user
@@ -677,6 +699,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getJobs
       tags:
       - Job
       summary: Gets all jobs
@@ -717,6 +740,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: startJobs
       tags:
         - Job
       summary: Schedule an Analysis
@@ -758,6 +782,7 @@ paths:
         schema:
           type: integer
     get:
+      operationId: getJobById
       tags:
       - Job
       summary: Gets single job by id
@@ -782,9 +807,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getFolders
       tags:
       - Folders
       summary: Get the list of accessible folders
+      description: >
+        Get all folders or from a specific group
       responses:
         '200':
           description: List of folders
@@ -797,11 +825,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createFolder
       tags:
       - Organize
       - Admin
       - Folders
       summary: Create a new folder
+      description: >
+        Create a new child folder with optional description
       parameters:
         - name: parentFolder
           in: header
@@ -852,9 +883,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getFolderById
       tags:
       - Folders
       summary: Get a single folder details
+      description:
+        Get a single folder by id
       responses:
         '200':
           description: Details of the required folder
@@ -865,11 +899,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteFolderById
       tags:
       - Organize
       - Folders
       - Admin
       summary: Delete a folder
+      description: >
+        Schedule a folder deletion
       responses:
         '202':
           description: Folder scheduled to be deleted
@@ -880,6 +917,7 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: patchFolderById
       tags:
       - Organize
       - Folders
@@ -897,6 +935,8 @@ paths:
           schema:
             type: string
       summary: Edit a folder's description
+      description: >
+        Change a folder's name and/or description
       responses:
         '200':
           description: Folder is updated
@@ -907,6 +947,7 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     put:
+      operationId: moveFolderById
       tags:
       - Organize
       - Folders
@@ -927,6 +968,8 @@ paths:
               - copy
               - move
       summary: Copy/Move a folder
+      description: >
+        Copy or move a folder by id
       responses:
         '202':
           description: Folder will be copied/moved
@@ -939,9 +982,12 @@ paths:
 
   /groups:
     get:
+      operationId: getGroups
       tags:
       - Groups
-      summary: Get the list of groups (accessible groups for user, all groups for admin)
+      summary: Get the list of groups
+      description: >
+        Returns accessible groups for a user, all groups for an admin
       responses:
         '200':
           description: List of groups
@@ -954,11 +1000,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createGroup
       tags:
       - Organize
       - Groups
       - Admin
       summary: Create a new group
+      description: >
+        Create a new user group
       parameters:
         - name: name
           in: header
@@ -990,10 +1039,13 @@ paths:
 
   /report:
     get:
+      operationId: getReportsByUpload
       tags:
       - Job
       - Report
       summary: Get the reports for a given upload
+      description: >
+        List all reports available for a given upload
       parameters:
         - name: uploadId
           in: header
@@ -1045,10 +1097,13 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getReportById
       tags:
       - Job
       - Report
       summary: Download the report
+      description: >
+        Get a report by id
       responses:
         '200':
           description: Required report
@@ -1085,10 +1140,13 @@ paths:
           type: string
           description: Group name, from last login if not provided
     post:
+      operationId: getFiles
       tags:
       - Upload
       - Search
       summary: Get the information of files matching the provided hashes
+      description: >
+        Get a list of files by hashes
       requestBody:
           description: List of file hashes to fetch
           required: true
@@ -1119,6 +1177,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicenses
       tags:
       - License
       parameters:
@@ -1156,6 +1215,8 @@ paths:
               - all
             default: all
       summary: Get all license from the database
+      description: >
+        Get a list of available licenses (filtered by kind or status)
       responses:
         '200':
           description: All licenses from database
@@ -1181,9 +1242,12 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createLicense
       tags:
       - License
       summary: Create a new license
+      description: >
+        Add a new license to the database
       requestBody:
         description: Information about new license
         required: true
@@ -1231,9 +1295,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicenseByShortname
       tags:
       - License
       summary: Get a specific license
+      description: >
+        Get information about a specific license
       responses:
         '200':
           description: License
@@ -1265,9 +1332,12 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: updateLicenseByShortname
       tags:
       - License
       summary: Update a license
+      description: >
+        Update information about a given license
       requestBody:
         description: Information to be updated
         required: true
