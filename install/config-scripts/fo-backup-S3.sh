@@ -66,6 +66,7 @@ Usage: fo-backup-s3 [options]
   -a or --alt-s3  : Use alternative environment variable names for S3 credentials
                     (prefixed with 'ALT_', where available)
   -l or --list    : List files in bucket
+  -n or --dry-run : Do not really perform backup / restore actions, for testing purposes
   -h or --help    : Print this help
 
   -b or --backup-all      : Database and incremental repository filesystem backups
@@ -128,7 +129,7 @@ f_test_s3_connection() {
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o abBdeE:fFgG:hilrt --long 'alt-s3,backup-all,backup-all-full,backup-db,backup-fs,backup-fs-full,restore-latest,restore-db:,restore-db-latest,restore-fs:,--restore-fs-latest,test,install,list,help' -n "$(basename $0)" -- "$@")
+OPTS=$(getopt -o abBdeE:fFgG:hilnrt --long 'alt-s3,backup-all,backup-all-full,backup-db,backup-fs,backup-fs-full,restore-latest,restore-db:,restore-db-latest,restore-fs:,restore-fs-latest,test,install,dry-run,list,help' -n "$(basename $0)" -- "$@")
 [ $? -ne 0 ] && OPTS="--help"
 [ $# -eq 0 ] && OPTS="--help"
 
@@ -143,6 +144,7 @@ ACTION_RESTORE_DB_FILE=""
 ACTION_RESTORE_FS=false
 ACTION_RESTORE_FS_FILE=""
 ACTION_TEST_S3=false
+ACTION_DRY_RUN=false
 
 eval set -- "$OPTS"
 while true; do
@@ -169,6 +171,7 @@ while true; do
       -i|--install)           ACTION_INSTALL=true; shift;;
       -l|--list)              ACTION_LIST=true; shift;;
       -t|--test)              ACTION_TEST_S3=true; shift;;
+      -n|--dry-run)           ACTION_DRY_RUN=true; shift;;
       --)                     shift; break;;
       *)                      echo "Error: option $1 not recognised, try --help"; exit 1;;
    esac
@@ -241,10 +244,15 @@ then
 
     f_log -l "Dest file: $s3_file"
 
-    pg_dump -Fc -d $FOSSOLOGY_DB_NAME | f_aws_cmd cp - $s3_dest
-    # FIXME: should check file size too
-    f_check_file_exists "$s3_file" || f_fatal "ERROR: Database backup failed"
-    f_log "SUCCESS: Database backed up to '$s3_dest'"
+    if $ACTION_DRY_RUN
+    then
+        echo "DRY RUN: Dump $FOSSOLOGY_DB_NAME to S3 bucket $s3_dest"
+    else
+        pg_dump -Fc -d $FOSSOLOGY_DB_NAME | f_aws_cmd cp - $s3_dest
+        # FIXME: should check file size too
+        f_check_file_exists "$s3_file" || f_fatal "ERROR: Database backup failed"
+        f_log "SUCCESS: Database backed up to '$s3_dest'"
+    fi
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -274,25 +282,30 @@ then
     s3_file="${s3_file_prefix}${backup_fs_suffix}"
     incremental_list="${s3_file_prefix}${backup_fs_suffix_inc_list}"
 
-    f_log "Perform backup to $s3_file"
-    tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | f_aws_cmd cp - "s3://$BUCKET_NAME/$s3_file" || \
-        f_fatal "Failed to backup repository to S3"
-    f_copy_to_s3 "$repository_location/$incremental_diff"
-    [ -f "$repository_location/$incremental_list_latest" ] && cp "$repository_location/$incremental_list_latest" "$repository_location/$incremental_list"
-    echo "$s3_file" >> "$repository_location/$incremental_list"
-    echo "New incremental list:"
-    cat -n "$repository_location/$incremental_list"
-    f_copy_to_s3 "$repository_location/$incremental_list"
-
-    if ! $ACTION_BACKUP_FS_INC
+    if $ACTION_DRY_RUN
     then
-        cp -v "$repository_location/$incremental_diff" "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
-        f_copy_to_s3 "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
-    fi
+        echo "DRY RUN: [tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname]"
+    else
+        f_log "Perform backup to $s3_file"
+        tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | f_aws_cmd cp - "s3://$BUCKET_NAME/$s3_file" || \
+            f_fatal "Failed to backup repository to S3"
+        f_copy_to_s3 "$repository_location/$incremental_diff"
+        [ -f "$repository_location/$incremental_list_latest" ] && cp "$repository_location/$incremental_list_latest" "$repository_location/$incremental_list"
+        echo "$s3_file" >> "$repository_location/$incremental_list"
+        echo "New incremental list:"
+        cat -n "$repository_location/$incremental_list"
+        f_copy_to_s3 "$repository_location/$incremental_list"
 
-    # FIXME: should check file size too
-    f_check_file_exists "$s3_file" || f_fatal "ERROR: repository filesystem backup failed"
-    f_log "SUCCESS: repository filesystem backed up to '$s3_file'"
+        if ! $ACTION_BACKUP_FS_INC
+        then
+            cp -v "$repository_location/$incremental_diff" "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
+            f_copy_to_s3 "$repository_location/$incremental_diff$backup_fs_suffix_tar_diff_initial"
+        fi
+
+        # FIXME: should check file size too
+        f_check_file_exists "$s3_file" || f_fatal "ERROR: repository filesystem backup failed"
+        f_log "SUCCESS: repository filesystem backed up to '$s3_file'"
+    fi
 fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -307,7 +320,7 @@ then
     else
         f_log "Selecting most recent DB backup"
         ACTION_RESTORE_DB_FILE=$(f_find_most_recent_backup $backup_db_prefix $backup_db_suffix)
-        [ - "$ACTION_RESTORE_DB_FILE" ] || f_fatal "ERROR: Failed to find most recent backup file."
+        [ -n "$ACTION_RESTORE_DB_FILE" ] || f_fatal "ERROR: Failed to find most recent backup file."
     fi
 
     if [ -n "$USE_TEMP_DIRECTORY" ]
@@ -317,17 +330,27 @@ then
         f_copy_from_s3 "$ACTION_RESTORE_DB_FILE" "$USE_TEMP_DIRECTORY/"
 
         f_log "Restore database"
-        cat $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE | pg_restore -Fc -c -C -d $FOSSOLOGY_DB_NAME || \
-            f_fatal "ERROR: Database restore failed"
-        rm -v $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE
-        f_log "SUCCESS: Database restored from local copy"
+        if $ACTION_DRY_RUN
+        then
+            echo "DRY RUN: Restore '$USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE' to database $FOSSOLOGY_DB_NAME"
+        else
+            cat $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE | pg_restore -Fc -c -C -d $FOSSOLOGY_DB_NAME || \
+                f_fatal "ERROR: Database restore failed"
+            rm -v $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE
+            f_log "SUCCESS: Database restored from local copy"
+        fi
     else
         s3_source="s3://$BUCKET_NAME/$ACTION_RESTORE_DB_FILE"
         # TODO: test export AWS_CLIENT_TIMEOUT=900000 (120000ms is the default)
-        f_log "Download + Restore database"
-        f_aws_cmd cp $s3_source - | pg_restore -Fc -d $FOSSOLOGY_DB_NAME || \
-            f_fatal "ERROR: Database restore failed"
-        f_log "SUCCESS: Database restored successfuly"
+        if $ACTION_DRY_RUN
+        then
+            echo "DRY RUN: Restore '$s3_source' to database $FOSSOLOGY_DB_NAME"
+        else
+            f_log "Download + Restore database"
+            f_aws_cmd cp $s3_source - | pg_restore -Fc -d $FOSSOLOGY_DB_NAME || \
+                f_fatal "ERROR: Database restore failed"
+            f_log "SUCCESS: Database restored successfuly"
+        fi
     fi
 fi
 
@@ -343,14 +366,24 @@ f_restore_fs() {
         f_copy_from_s3 "$tar_file" "$USE_TEMP_DIRECTORY"
 
         f_log "File $tar_file copied to $USE_TEMP_DIRECTORY"
-        tar xzf $USE_TEMP_DIRECTORY/$tar_file -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
-        f_log "SUCCESS: Restored $tar_file"
+        if $ACTION_DRY_RUN
+        then
+            echo "DRY RUN: [tar xzf $USE_TEMP_DIRECTORY/$tar_file -C $repository_location]"
+        else
+            tar xzf $USE_TEMP_DIRECTORY/$tar_file -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
+            f_log "SUCCESS: Restored $tar_file"
+        fi
         rm -v $USE_TEMP_DIRECTORY/$tar_file
     else
         # TODO: test export AWS_CLIENT_TIMEOUT=900000 (120000ms  is the default)
         s3_source="s3://$BUCKET_NAME/$tar_file"
-        f_aws_cmd cp $s3_source - | tar xz -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
-        f_log "SUCCESS: Restored $tar_file"
+        if $ACTION_DRY_RUN
+        then
+            echo "DRY RUN: [f_aws_cmd cp $s3_source - | tar xz -C $repository_location]"
+        else
+            f_aws_cmd cp $s3_source - | tar xz -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
+            f_log "SUCCESS: Restored $tar_file"
+        fi
     fi
 }
 
@@ -380,9 +413,14 @@ then
     repository_path_old="${repository_path}_$(date +%Y%m%d_%H%M%S)"
     if [ -d $repository_path ]
     then
-        mv -v $repository_path $repository_path_old || f_fatal
-        rm -rf "$repository_path_old" || \
-            f_log "WARNING: existing repository could not be completely deleted, files left in '$repository_path_old'"
+        if $ACTION_DRY_RUN
+        then
+            echo "DRY RUN: Would delete $repository_path]"
+        else
+            mv -v $repository_path $repository_path_old || f_fatal
+            rm -rf "$repository_path_old" || \
+                f_log "WARNING: existing repository could not be completely deleted, files left in '$repository_path_old'"
+        fi
     fi
 
     if f_check_file_exists "$backup_file_inc"
