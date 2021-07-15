@@ -82,7 +82,7 @@ function insertDataInToEventTables($dbManager)
          INSERT INTO $tableEvent (upload_fk, $tableFk, uploadtree_fk)
            SELECT upload_fk, $tablePk, uploadtree_pk FROM $table as cp
              INNER JOIN uploadtree AS ut ON cp.pfile_fk = ut.pfile_fk
-           WHERE ut.uploadtree_pk > loweruploadtreeid
+           WHERE ut.uploadtree_pk >= loweruploadtreeid
              AND ut.uploadtree_pk < upperuploadtreeid
              AND cp.is_enabled=false
            ORDER BY ut.uploadtree_pk;
@@ -90,14 +90,18 @@ function insertDataInToEventTables($dbManager)
         $$
         LANGUAGE 'plpgsql';";
     $dbManager->queryOnce($sql, $statement.'plPGsqlfunction');
-    while ($num < $length) {
+    while ($num <= $length) {
       $startTime = microtime(true);
       $dbManager->begin();
       $statementName = __METHOD__."insert from function".$table;
       $dbManager->getSingleRow("SELECT 1 FROM migrate_".$table."_events_event($1, $2)", array($j, $i), $statementName);
       $rows = $dbManager->getSingleRow("SELECT count(*) AS cnt, max(uploadtree_fk) AS uploadtree FROM $tableEvent", array(), $statement . $tableEvent. $table);
       $num = intval($rows['cnt']);
-      $i =  $rows['uploadtree'];
+      if (!empty($rows['uploadtree'])) {
+        $i =  $rows['uploadtree'];
+      } else {
+        $i = $j;
+      }
       $j = $j + MAX_SIZE_OF_ROW;
       $dbManager->commit();
       $endTime = microtime(true);
