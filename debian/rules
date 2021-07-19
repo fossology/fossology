@@ -157,6 +157,10 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/ojo install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-reso \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/reso install
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-decider \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/decider install
