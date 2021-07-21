@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.2
+  version: 1.3.3
   contact:
     email: fossology@fossology.org
   license:
@@ -56,50 +56,6 @@ tags:
   description: License and obligation management
 
 paths:
-  /auth:
-    get:
-      operationId: getAuth
-      tags:
-        - auth
-      deprecated: true
-      security: []
-      summary: Get a login session registered (deprecated, use /tokens)
-      description: >
-        Get a login session registered using the username and password
-      parameters:
-        - name: username
-          required: true
-          description: Username of the login user
-          in: query
-          schema:
-            type: string
-        - name: password
-          required: true
-          description: Password of the user trying to login
-          in: query
-          schema:
-            type: string
-      responses:
-        '299':
-          description: Resource is deprecated. Use /tokens
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  header:
-                      type: string
-              example:
-                {"header": "authorization: Basic Zm9zc3k6Zm9zc3k="}
-        '404':
-          description: UserName or password incorrect
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-
   /tokens:
     post:
       operationId: createToken
@@ -143,30 +99,65 @@ paths:
   /version:
     get:
       operationId: getVersion
+      deprecated: true
       tags:
         - info
       security: []
-      summary: Get the current API information
+      summary: Current API information
       description: >
-        Get the current API version and supported authentication methods
+        Deprecated in favour of /info endpoint.
       responses:
         '200':
           description: The version and security information
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  version:
-                      type: string
-                      description: Current API version as per documentation
-                  security:
-                      type: array
-                      items:
-                        type: string
-
+                $ref: '#/components/schemas/ApiInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /info:
+    get:
+      operationId: getInfo
+      tags:
+        - info
+      security: []
+      summary: Get the current API information
+      description: >
+        Get the current API version, supported authentication methods
+        and description
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /health:
+    get:
+      operationId: getHealth
+      tags:
+        - info
+      security: []
+      summary: Get the status of API service
+      description: >
+        Check if API is ready to accept requests or not
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeathInfo'
+        '503':
+          description: The API is not unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeathInfo'
 
   /uploads/{id}:
     parameters:
@@ -1925,6 +1916,68 @@ components:
           nullable: true
           example:
             "Please respect the obligation"
+    ApiInfo:
+      description: Info about the API
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the API service
+        description:
+          type: string
+          description: Additional information
+        version:
+          type: string
+          description: Current API version as per documentation
+        security:
+          type: array
+          description: Security methods allowed
+          items:
+            type: string
+        contact:
+          type: string
+          description: Contact email from API docs
+        license:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of license
+            url:
+              type: string
+              description: Link to license
+          description: Licensing of API
+    HeathInfo:
+      description: Health status of server
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+            - WARN
+            - ERROR
+          description: Status of service
+        scheduler:
+          type: object
+          description: Scheduler information
+          properties:
+            status:
+              type: string
+              description: Health status of scheduler
+              enum:
+                - OK
+                - ERROR
+        db:
+          type: object
+          description: DB connection status
+          properties:
+            status:
+              type: string
+              description: Health status of DB connection
+              enum:
+                - OK
+                - ERROR
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"

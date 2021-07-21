@@ -60,6 +60,7 @@ define("CONFIG_TYPE_BOOL", 6);
  *
  * \param string $sysconfdir   Path to SYSCONFDIR
  * \param[out] array &$SysConf Configuration variable array (updated by this function)
+ * \param boolean $exitOnDbFail Do an exit() if can't connect to DB?
  *
  * If the sysconfig table doesn't exist then create it.
  * Write records for the core variables into sysconfig table.
@@ -74,7 +75,7 @@ define("CONFIG_TYPE_BOOL", 6);
  * to be global, this function will define the same globals (everything in the
  * DIRECTORIES section of fossology.conf).
  */
-function ConfigInit($sysconfdir, &$SysConf)
+function ConfigInit($sysconfdir, &$SysConf, $exitOnDbFail=true)
 {
   global $PG_CONN;
 
@@ -111,7 +112,11 @@ function ConfigInit($sysconfdir, &$SysConf)
    * Connect to the database.  If the connection fails,
    * DBconnect() will print a failure message and exit.
    */
-  $PG_CONN = DBconnect($sysconfdir);
+  $PG_CONN = DBconnect($sysconfdir, "", $exitOnDbFail);
+
+  if (! $exitOnDbFail && ($PG_CONN === null || $PG_CONN === false)) {
+    return -1;
+  }
 
   global $container;
   $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($PG_CONN);
