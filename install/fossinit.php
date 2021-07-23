@@ -136,7 +136,7 @@ require_once("$MODDIR/lib/php/common-sysconfig.php");
 require_once("$MODDIR/lib/php/fossdash-config.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
-ConfigInit($SYSCONFDIR, $SysConf);
+$GLOBALS["PG_CONN"] = get_pg_conn($SYSCONFDIR, $SysConf);
 
 /* Initialize fossdash configuration variables */
 FossdashConfigInit($SYSCONFDIR, $SysConf);
@@ -203,6 +203,11 @@ if ($FailMsg)
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
+
+// Populate sysconfig table
+Populate_sysconfig();
+populate_from_sysconfig($PG_CONN, $SysConf);
+
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
