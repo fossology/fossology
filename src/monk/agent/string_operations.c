@@ -43,9 +43,10 @@ unsigned splittingDelim(char a, const char* delimiters) {
 }
 
 unsigned specialDelim(const char* z){
-  char a, b;
+  char a, b, c;
   a = *z;
   b = *(z+1);
+  c = *(z+2);
   if( a=='/') {
     if (b=='/' || b=='*')
       return 2;
@@ -57,6 +58,13 @@ unsigned specialDelim(const char* z){
   }
   else if( a==':' && b==':') {
     return 2;
+  }
+  else if ((a==b && b==c) && (a=='"' || a=='\'')) {
+    return 3;
+  }
+  else if (a=='d' && b=='n' && c=='l') {
+    // dnl comments
+    return 3;
   }
   return 0;
 }

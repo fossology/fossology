@@ -35,7 +35,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #define DIFF_TYPE_REMOVAL "M-"
 #define DIFF_TYPE_REPLACE "MR"
 
-#define DELIMITERS " \t\n\r\f#^%"
+#define DELIMITERS " \t\n\r\f#^%,*"
 
 #define MONK_CASE_INSENSITIVE
 #define MAX_ALLOWED_DIFF_LENGTH 256
