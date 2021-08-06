@@ -74,7 +74,7 @@ abstract class HistogramBase extends FO_Plugin {
     $out = array("type" => $type, "sorting" => $sorting, "uploadId" => $uploadId,
         "uploadTreeId" => $uploadTreeId, "agentId" => $agentId, "filter" => $filter, "description" => $description);
     $typeDescriptor = "";
-    if($type !== "statement")
+    if($type !== "statement" || $type !== 'scancode_statement')
     {
       $typeDescriptor = $description;
     }
@@ -234,7 +234,7 @@ abstract class HistogramBase extends FO_Plugin {
     $dataset = $this->agentName."_dataset";
     $arstable = $this->agentName."_ars";
     /* get proper agent_id */
-    $agentId = GetParm("agent", PARM_INTEGER);
+    // $agentId = GetParm("agent", PARM_INTEGER);
     if (empty($agentId))
     {
       $agentId = LatestAgentpk($uploadId, $arstable);
@@ -255,8 +255,11 @@ abstract class HistogramBase extends FO_Plugin {
       $OutBuf .= "<form name='formy' method='post'>\n";
       $OutBuf .= "<div id='msgdiv'>\n";
       $OutBuf .= _("No data available.");
-      $OutBuf .= "<input type='button' class='btn btn-default btn-sm' name='scheduleAgent' value='Schedule Agent'";
+      $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule FOSSology Copyright'";
       $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_{$this->agentName}')\">\n";
+      $OutBuf .= "</input>";
+      $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule ScanCode for Copyright'";
+      $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_scancode')\">\n";
       $OutBuf .= "</input>";
       $OutBuf .= "</div> \n";
       $OutBuf .= "</form>\n";
@@ -265,7 +268,7 @@ abstract class HistogramBase extends FO_Plugin {
       return;
     }
 
-    $AgentSelect = AgentSelect($this->agentName, $uploadId, $dataset, $agentId, "onchange=\"addArsGo('newds', 'copyright_dataset');\"");
+    $AgentSelect = AgentSelect($this->agentName, $uploadId, $dataset, $agentId, "onchange=\"addArsGo('newds', $dataset);\"");
 
     /* change the copyright  result when selecting one version of copyright */
     if (!empty($AgentSelect))

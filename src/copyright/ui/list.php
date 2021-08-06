@@ -343,12 +343,21 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         case "statement":
           $TypeStr = "$text3";
           break;
+        case "scancode_statement":
+          $TypeStr = "$text3";
+          break;
         case "email":
           $TypeStr = "$text4";
           break;
         case "url":
           $TypeStr = "$text5";
           break;
+        case "scancode_email":
+            $TypeStr = "$text4";
+            break;
+        case "scancode_url":
+            $TypeStr = "$text5";
+            break;
         case "ecc":
           $TypeStr = _("export restriction");
           break;
@@ -471,6 +480,11 @@ type, uploadtree_pk, ufile_name, cp.pfile_fk AS PF
         break;
       case "statement" :
         $tableName = "copyright";
+        $modBack = "copyright-hist";
+        $viewName = "copyright-view";
+        break;
+      case "scancode_statement" :
+        $tableName = "scancode_copyright";
         $modBack = "copyright-hist";
         $viewName = "copyright-view";
         break;

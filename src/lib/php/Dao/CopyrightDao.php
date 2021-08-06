@@ -451,7 +451,7 @@ ORDER BY copyright_pk, UT.uploadtree_pk, content DESC";
    * @param int $userId
    * @param string $cpTable
    */
-  public function updateTable($item, $hash, $content, $userId, $cpTable='copyright', $action='', $scope=1)
+  public function updateTable($item, $hash, $content, $userId, $cpTable, $action='', $scope=1)
   {
     $cpTablePk = $cpTable."_pk";
     $cpTableEvent = $cpTable."_event";
@@ -545,6 +545,8 @@ WHERE $withHash ( ut.lft BETWEEN $1 AND $2 ) $agentFilter AND ut.upload_fk = $3"
   {
     if (array_search($table, ["ecc", "keyword", "copyright"]) !== false) {
       return $table;
+    } else if (array_search($table, ["scancode_copyright", "scancode_author"]) !== false) {
+      return "scancode";
     }
     return "copyright";
   }
