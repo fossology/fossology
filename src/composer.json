@@ -82,7 +82,7 @@
         "license"
     ],
     "scripts": {
-      "phpcs": "phpcs --standard=fossy-ruleset.xml -p",
-      "phpcbf": "phpcbf --standard=fossy-ruleset.xml -p"
+        "phpcs": "phpcs --standard=fossy-ruleset.xml -p",
+        "phpcbf": "phpcbf --standard=fossy-ruleset.xml -p"
     }
 }

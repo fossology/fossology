@@ -11,7 +11,7 @@ SRCDIR = ..
 
 TESTDIR = $(TOP)/src/testing/lib/c
 TESTDBDIR = $(TOP)/src/testing/db/c
-TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR) -DCU_VERSION_P=$(CUNIT_VERSION)
+TEST_CFLAGS = -I $(TESTDIR) -I $(TESTDBDIR)
 TEST_LDFLAGS = -L$(TESTDIR) -L$(TESTDBDIR) -l fodbreposysconf -l focunit
 
 CFLAGS_LOCAL = $(FO_CFLAGS) $(TEST_CFLAGS) -I$(SRCDIR) -I../

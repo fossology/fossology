@@ -1,0 +1,7 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-2.0-only
+# SPDX-FileCopyrightText: © 2021 Avinal Kumar <avinal.xlvii@gmail.com>
+
+export COMPOSER_HOME=/dev/null
+export COMPOSER_ALLOW_SUPERUSER=1
+composer install --no-plugins --no-scripts --no-dev

@@ -11,7 +11,7 @@ FROM gitpod/workspace-full:latest
 USER root
 
 RUN install-packages --option Dpkg::Options::="--force-confold" \
-    binutils build-essential bzip2 cabextract composer cpio cppcheck \
+    binutils build-essential bzip2 cabextract cmake composer cpio cppcheck \
     curl debhelper devscripts dpkg-dev genisoimage git git-core gzip \
     libboost-filesystem-dev libboost-program-options-dev \
     libboost-regex-dev libboost-system-dev libcppunit-dev libcunit1-dev \
@@ -19,8 +19,8 @@ RUN install-packages --option Dpkg::Options::="--force-confold" \
     libicu66 libicu-dev libjson-c-dev libjsoncpp-dev \
     liblocal-lib-perl libmagic-dev libmxml-dev libpcre3-dev libpq-dev \
     librpm-dev libspreadsheet-writeexcel-perl libsqlite3-0 libsqlite3-dev \
-    libssl-dev libtext-template-perl libxml2-dev lsb-release p7zip p7zip-full \
-    poppler-utils postgresql-12 postgresql-contrib-12 \
+    libssl-dev libtext-template-perl libxml2-dev lsb-release ninja-build p7zip \
+    p7zip-full poppler-utils postgresql-12 postgresql-contrib-12 \
     postgresql-server-dev-all rpm sleuthkit s-nail sqlite3 subversion tar \
     unrar-free unzip upx-ucl wget zip
 
@@ -66,7 +66,7 @@ RUN printf "parse_git_branch() {\n  git branch 2> /dev/null | sed -e '/^[^*]/d' 
  && echo 'PS1="\[\e]0;\u: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[0;33m\]\$(parse_git_branch)\[\033[00m\]$ "' >> ~/.bashrc
 
 # Add custom aliases
-RUN printf "fossinstallparams=\"PREFIX='/workspace/fossy/code' INITDIR='/workspace/fossy/etc' REPODIR='/workspace/fossy/srv' LOCALSTATEDIR='/workspace/fossy/var' APACHE2_SITE_DIR='/workspace/apache' SYSCONFDIR='/workspace/fossy/etc/fossology' PROJECTUSER='gitpod' PROJECTGROUP='gitpod'\"\n" >> ~/.bashrc \
+RUN printf "fossinstallparams=\"-DCMAKE_INSTALL_PREFIX:PATH='/workspace/fossy/code' -DFO_INITDIR:PATH='/workspace/fossy/etc' -DFO_REPODIR:PATH='/workspace/fossy/srv' -DFO_LOCALSTATEDIR:PATH='/workspace/fossy/var' -DFO_APACHE2SITE_DIR:PATH='/workspace/apache' -DFO_SYSCONFDIR:PATH='/workspace/fossy/etc/fossology' -DFO_PROJECTUSER='gitpod' -DFO_PROJECTGROUP='gitpod' -DTESTING=ON\"\n" >> ~/.bashrc \
  && printf '# Fossology alias\nalias fossrun="sudo /workspace/fossy/code/share/fossology/scheduler/agent/fo_scheduler --verbose=3 --reset --config /workspace/fossy/etc/fossology/"\n' >> ~/.bash_aliases \
- && printf 'alias fossinstallclean="make clean empty-cache ${fossinstallparams} && make install ${fossinstallparams} && sudo -E ./install/fo-postinstall -oe"\n' >> ~/.bash_aliases \
- && printf 'alias fossinstallnoclean="make install empty-cache ${fossinstallparams} && sudo -E ./install/fo-postinstall -eo"\n' >> ~/.bash_aliases
+ && printf 'alias conffoss="cmake ${fossinstallparams} -GNinja -S. -B./build' \
+ && printf 'alias installfoss="ninja -C build install && sudo -E /workspace/fossy/code/lib/fossology/fo-postinstall -oe"\n' >> ~/.bash_aliases

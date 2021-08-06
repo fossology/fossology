@@ -16,7 +16,7 @@
 #include "process.h"
 #include "nomos.h"
 #include "nomos_regex.h"
-#include "_autodefs.h"
+#include <_autodefs.h>
 
 #define PG_ERRCODE_UNIQUE_VIOLATION "23505"
 #define FOSSY_EXIT( XY , XZ) printf(" %s %s,%d", XY , __FILE__, __LINE__);  Bail( XZ );

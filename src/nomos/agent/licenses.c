@@ -30,7 +30,7 @@
 #include "list.h"
 #include "nomos_regex.h"
 #include "parse.h"
-#include "_autodefs.h"
+#include <_autodefs.h>
 
 #define	HASHES		"#####################"
 #define	DEBCPYRIGHT	"debian/copyright"

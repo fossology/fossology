@@ -41,7 +41,6 @@ extern CU_TestInfo PathCheck_testcases[];       ///< Pacth check test cases
 extern CU_TestInfo DBInsertPfile_testcases[];   ///< DB insertion test cases (pfile)
 extern CU_TestInfo DBInsertUploadTree_testcases[];  ///< DB insertion test cases (uploadtree)
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] =
 {
   // ununpack-ar.c
@@ -78,44 +77,6 @@ CU_SuiteInfo suites[] =
 
   CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] =
-{
-  // ununpack-ar.c
-  {"ExtractAR", NULL, NULL, ExtractAR_testcases},
-
-  // ununpack-iso.c
-  {"ununpack-iso", NULL, NULL, ununpack_iso_testcases},
-
-  // ununpack-disk.c
-  {"ununpack-disk", FatDiskNameInit, FatDiskNameClean, ununpack_disk_testcases},
-
-  // utils.c
-  {"CopyFile", CopyFileInit, CopyFileClean, CopyFile_testcases},
-  /** \todo not working {"FindCmd", NULL, NULL, FindCmd_testcases}, */
-  {"Prune", PruneInit, PruneClean, Prune_testcases},
-  {"RunCommand", NULL, NULL, RunCommand_testcases},
-  {"TaintString", NULL, NULL, TaintString_testcases},
-  {"IsFunctions", NULL, NULL, IsFunctions_testcases},
-  {"ContainerInfo", NULL, NULL, ContainerInfo_testcases},
-  {"PathCheck", NULL, NULL, PathCheck_testcases},
-  //{"DBInsert", DBInsertInit, DBInsertClean, DBInsert_testcases},
-
-  // traverse.c
-  {"Traverse", TraverseInit, TraverseClean, Traverse_testcases},
-  {"TraverseChild", TraverseChildInit, NULL, TraverseChild_testcases},
-  {"TraverseStart", TraverseStartInit, TraverseStartClean, TraverseStart_testcases},
-
-  // checksum.c
-  {"checksum", NULL, NULL, Checksum_testcases},
-
-  //utils.c
-  {"DBInsertPfile", DBInsertInit, DBInsertClean, DBInsertPfile_testcases},
-  {"DBInsertUploadTree", DBInsertInit, DBInsertClean, DBInsertUploadTree_testcases},
-
-  CU_SUITE_INFO_NULL
-};
-#endif
 
 /**
  * @brief test if a file or directory exists

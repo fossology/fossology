@@ -11,7 +11,7 @@
 #include <ctype.h>
 #include "nomos.h"
 #include "util.h"
-#include "_autodefs.h"
+#include <_autodefs.h>
 
 extern regex_t regc[NFOOTPRINTS];
 

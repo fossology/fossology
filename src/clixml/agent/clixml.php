@@ -512,7 +512,11 @@ class CliXml extends Agent
       }
     }
     $componentType = $row['ri_component_type'];
-    $componentType = ComponentType::TYPE_MAP[$componentType];
+    if (!empty($componentType)) {
+      $componentType = ComponentType::TYPE_MAP[$componentType];
+    } else {
+      $componentType = ComponentType::TYPE_MAP[ComponentType::PURL];
+    }
     $componentId = $row['ri_component_id'];
     if (empty($componentId) || $componentId == "NA") {
       $componentId = "";

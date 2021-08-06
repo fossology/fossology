@@ -378,7 +378,7 @@ void test_matchNTokensCorners(){
 
 int _test_lookForAdditions(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedTextPosition, int expectedSearchPosition) {
+        size_t expectedTextPosition, size_t expectedSearchPosition) {
   char* testText = g_strdup(text);
   char* testSearch = g_strdup(search);
 
@@ -392,11 +392,11 @@ int _test_lookForAdditions(char* text, char* search,
 
   if (ret) {
     if (result.search.start != expectedSearchPosition) {
-      printf("adds(%s,%s): result.search.start == %zu != %d\n", text, search,
+      printf("adds(%s,%s): result.search.start == %zu != %ld\n", text, search,
              result.search.start, expectedSearchPosition);
     }
     if (result.text.start != expectedTextPosition) {
-      printf("adds(%s,%s): result.text.start == %zu != %d\n", text, search,
+      printf("adds(%s,%s): result.text.start == %zu != %ld\n", text, search,
              result.text.start, expectedTextPosition);
     }
 
@@ -414,7 +414,7 @@ int _test_lookForAdditions(char* text, char* search,
 
 int _test_lookForRemovals(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedTextPosition, int expectedSearchPosition) {
+        size_t expectedTextPosition, size_t expectedSearchPosition) {
   char* testText = g_strdup(text);
   char* testSearch = g_strdup(search);
 
@@ -428,11 +428,11 @@ int _test_lookForRemovals(char* text, char* search,
 
   if (ret) {
     if (result.search.start != expectedSearchPosition) {
-      printf("rems(%s,%s): result.search.start == %zu != %d\n", text, search,
+      printf("rems(%s,%s): result.search.start == %zu != %ld\n", text, search,
              result.search.start, expectedSearchPosition);
     }
     if (result.text.start != expectedTextPosition) {
-      printf("rems(%s,%s): result.text.start == %zu != %d\n", text, search,
+      printf("rems(%s,%s): result.text.start == %zu != %ld\n", text, search,
              result.text.start, expectedTextPosition);
     }
 
@@ -486,7 +486,7 @@ void test_lookForReplacesNotOverflowing() {
 
 int _test_lookForReplaces(char* text, char* search,
         int textPosition, int searchPosition, int maxAllowedDiff, int minTrailingMatches,
-        int expectedTextPosition, int expectedSearchPosition) {
+        size_t expectedTextPosition, size_t expectedSearchPosition) {
   char* testText = g_strdup(text);
   char* testSearch = g_strdup(search);
 
@@ -499,11 +499,11 @@ int _test_lookForReplaces(char* text, char* search,
 
   if (ret) {
     if (result.search.start != expectedSearchPosition) {
-      printf("replS(%s,%s): result.search.start == %zu != %d\n", text, search,
+      printf("replS(%s,%s): result.search.start == %zu != %ld\n", text, search,
              result.search.start, expectedSearchPosition);
     }
     if (result.text.start != expectedTextPosition) {
-      printf("replS(%s,%s): result.text.start == %zu != %d\n", text, search,
+      printf("replS(%s,%s): result.text.start == %zu != %ld\n", text, search,
              result.text.start, expectedTextPosition);
     }
 

@@ -18,14 +18,22 @@ sudo a2dismod mpm_event
 sudo a2enmod php7.4
 
 # Install FOSSology in Gitpod's workspace
-make install \
- PREFIX='/workspace/fossy/code' \
- INITDIR='/workspace/fossy/etc' \
- REPODIR='/workspace/fossy/srv' \
- LOCALSTATEDIR='/workspace/fossy/var' \
- APACHE2_SITE_DIR='/workspace/apache' \
- SYSCONFDIR='/workspace/fossy/etc/fossology' \
- PROJECTUSER='gitpod' PROJECTGROUP='gitpod'
+rm -rf build
+
+mkdir -p build
+
+cmake -DCMAKE_INSTALL_PREFIX:PATH='/workspace/fossy/code' \
+ -DFO_INITDIR:PATH='/workspace/fossy/etc' \
+ -DFO_REPODIR:PATH='/workspace/fossy/srv' \
+ -DFO_LOCALSTATEDIR:PATH='/workspace/fossy/var' \
+ -DFO_APACHE2SITE_DIR:PATH='/workspace/apache' \
+ -DFO_SYSCONFDIR:PATH='/workspace/fossy/etc/fossology' \
+ -DFO_PROJECTUSER='gitpod' -DFO_PROJECTGROUP='gitpod' -DTESTING=ON \
+ -GNinja -S. -B./build
+
+cmake --build build --parallel
+
+sudo ninja -C build install
 
 # Setup DB for gitpod
 sudo su postgres -c psql < install/db/gitpod-fossologyinit.sql

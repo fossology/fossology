@@ -1,6 +1,7 @@
 # FOSSology Dockerfile
-# SPDX-FileCopyrightText: © 2016 Siemens AG
+# SPDX-FileCopyrightText: © 2016,2022 Siemens AG
 # SPDX-FileCopyrightText: © fabio.huser@siemens.com
+# SPDX-FileCopyrightText: © mishra.gaurav@siemens.com
 # SPDX-FileCopyrightText: © 2016-2017 TNG Technology Consulting GmbH
 # SPDX-FileCopyrightText: © maximilian.huber@tngtech.com
 #
@@ -22,6 +23,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
       lsb-release \
       php7.3-cli \
       sudo \
+      cmake \
+      ninja-build \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
@@ -48,9 +51,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
 
 COPY . .
 
-RUN make clean install \
- && make clean
-
+RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel -S. -B./build -G Ninja \
+ && cmake --build ./build --parallel \
+ && ninja -C ./build install
 
 FROM debian:buster-slim
 

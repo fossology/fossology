@@ -21,7 +21,7 @@
 
 ## Options parsing and setup
 # parse options
-OPTS=`getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@"`
+OPTS=$(getopt -o h --long delete-conffiles,delete-database,delete-repository,delete-user,delete-everything,help -n 'fo-cleanold' -- "$@")
 
 if [ $? != 0 ]; then
    echo "ERROR: Bad option specified."
@@ -63,7 +63,7 @@ fi
 
 
 # This must run as root.
-if [ `id -u` != "0" ] ; then
+if [ "$(id -u)" != "0" ] ; then
    echo "ERROR: fo-cleanold must run as root."
    echo "Aborting."
    exit 1
@@ -168,7 +168,7 @@ DIRS="/usr/local/fossology/
 /usr/local/etc/fossology/mods-enabled
 /usr/local/share/nomos3/"
 
-TMPDIR=`mktemp -d /tmp/fossology-configs.XXXXXX` || exit 1
+TMPDIR=$(mktemp -d /tmp/fossology-configs.XXXXXX) || exit 1
 echo "*** Searching for old fossology config files ***"
 for conffile in $OLDSAVE; do
    if [ -e "$conffile" -o -L "$conffile" ]; then
@@ -182,7 +182,7 @@ echo "*** Searching for new fossology config files ***"
 for conffile in $NEWSAVE; do
    if [ -f "$conffile" -o -L "$conffile" ]; then
       if [ $RMCONF ]; then
-         path=`dirname $conffile`
+         path=$(dirname $conffile)
          destpath="$TMPDIR/$path"
          if [ ! -d $destpath ]; then
            mkdir -p $destpath

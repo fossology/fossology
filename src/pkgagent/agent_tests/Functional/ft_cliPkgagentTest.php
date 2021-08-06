@@ -13,7 +13,10 @@
  * Test cli parameter i and v and rpm file and no parameters.
  */
 
-require_once (__DIR__ . "/../../../testing/db/createEmptyTestEnvironment.php");
+
+use Fossology\Lib\Test\TestPgDb;
+use Fossology\Lib\Test\TestInstaller;
+use Fossology\Lib\Db\DbManager;
 
 /**
  * @class ft_cliPkgagentTest
@@ -23,9 +26,13 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
 
   public $agentDir;
   public $pkgagent;
-  protected $testfile = '../testdata/fossology-1.2.0-1.el5.i386.rpm';
-  private $db_conf;
+  public $cwd;
+  protected $testfile = __DIR__.'/../testdata/fossology-1.2.0-1.el5.i386.rpm';
 
+    /** @var TestPgDb */
+    private $testDb;
+    /** @var TestInstaller */
+    private $testInstaller;
   /**
    * @brief Set up test environment
    * @see PHPUnit_Framework_TestCase::setUp()
@@ -53,12 +60,23 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     }
 */
     //print "agent:$this->agentDir\npkgagent:$this->pkgagent\n";
+    global $cwd;
+    $cwd = dirname(__DIR__, 4).'/build/src/pkgagent/agent_tests';
 
-    $cwd = getcwd();
-    list($test_name, $this->db_conf, $DB_NAME, $PG_CONN) = setupTestEnv($cwd, "pkgagent");
-
-    $this->agentDir = '../../agent';
-    $this->pkgagent = $this->agentDir .'/pkgagent -c ' . $this->db_conf;
+    $this->agentDir = dirname(__DIR__, 4).'/build/src/pkgagent/agent';
+    $this->testDb = new TestPgDb("fosspkgagenttest");
+    $this->dbManager = $this->testDb->getDbManager();
+    $tables = array('agent');
+    $this->testDb->createPlainTables($tables);
+    $this->testDb->createSequences(['agent_agent_pk_seq']);
+    $this->testDb->createConstraints(['agent_pkey']);
+    $this->testDb->alterTables($tables);
+    $db_conf = $this->testDb->getFossSysConf();
+    $this->testInstaller = new TestInstaller($db_conf);
+    $this->testInstaller->init();
+    $this->testInstaller->cpRepo();
+    $this->testInstaller->install($cwd.'/..');
+    $this->pkgagent = $this->agentDir .'/pkgagent -c ' . $db_conf;
     return;
   } // setUP
 
@@ -180,11 +198,21 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
     $size = count($got);
     foreach($expected as $match) {
       if(FALSE === in_array($match, $got)){
-        $this->fail("pkgagent FAILED! did not fine $match in output\n");
+        $this->fail("pkgagent FAILED! did not find $match in output\n");
       }
     }
     $this->assertEquals('OK',$got[$size-1]);
     return;
+  }
+
+  protected function tearDown() : void {
+    global $cwd;
+    if (!is_callable('pg_connect')) {
+      return;
+    }
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
+    $this->testInstaller->uninstall($cwd.'/..');
   }
 }
 ?>

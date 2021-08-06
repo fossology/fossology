@@ -63,8 +63,8 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
 
     $agentName = "monkbulk";
 
-    $agentDir = dirname(dirname(__DIR__));
-    $execDir = __DIR__;
+    $agentDir = dirname(__DIR__,4).'/build/src/monk';
+    $execDir = $agentDir.'/agent';
     system("install -D $agentDir/VERSION-monkbulk $sysConf/mods-enabled/$agentName/VERSION");
 
     $pipeFd = popen("echo '0\n$bulkId\n0' | $execDir/$agentName -c $sysConf --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start", "r");

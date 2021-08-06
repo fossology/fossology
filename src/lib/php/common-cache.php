@@ -75,6 +75,9 @@ function ReportCacheGet($CacheKey)
   $result = pg_query($PG_CONN, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
   $row = pg_fetch_assoc($result);
+  if ($row == false) {
+    return;
+  }
   $cashedvalue = $row['report_cache_value'];
   pg_free_result($result);
   return $cashedvalue;

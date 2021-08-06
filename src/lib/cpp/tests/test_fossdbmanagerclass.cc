@@ -42,6 +42,9 @@ private:
   fo::DbManager* dbManager;       ///< Object for DbManager
 
 public:
+  FoLibCPPTest() : dbManager(){}
+  FoLibCPPTest(const FoLibCPPTest& obj) : dbManager(obj.dbManager){}
+
   /**
    * One time setup to create test environment and get new DbManager
    */
@@ -253,7 +256,8 @@ public:
     const char* sysConf = get_sysconfdir(); // [sic]
 
     // TODO make this correctly
-    CPPUNIT_ASSERT(system((std::string("install -D ../../../../VERSION '") + sysConf + "/mods-enabled/an agent name/VERSION'").c_str()) >= 0);
+
+    CPPUNIT_ASSERT(system((std::string("install -D ") + BUILDDIR + "/install/VERSION '" + sysConf + "/mods-enabled/an agent name/VERSION'").c_str()) >= 0);
     char const* argv[] = {"an agent name", "-c", sysConf};
     int argc = 3;
 

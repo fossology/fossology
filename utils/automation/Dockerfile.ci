@@ -1,4 +1,4 @@
-# FOSSologyNG CI Dockerfile
+# FOSSology CI Dockerfile
 # SPDX-FileCopyrightText: © 2020 Siemens AG
 # SPDX-FileCopyrightText: © anupam.ghosh@siemens.com
 # SPDX-FileCopyrightText: © gaurav.mishra@siemens.com
@@ -10,7 +10,7 @@
 
 FROM debian:buster-slim as builder
 
-WORKDIR /fossologyng
+WORKDIR /fossology
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -19,6 +19,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     php-cli \
     sudo \
     dpkg-dev \
+    cmake \
+    ninja-build \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
@@ -27,40 +29,39 @@ COPY ./src/nomos/mod_deps ./src/nomos/
 COPY ./src/ojo/mod_deps ./src/ojo/
 COPY ./src/copyright/mod_deps ./src/copyright/
 
-RUN mkdir -p /fossologyng/dependencies-for-runtime \
- && cp -R /fossologyng/src /fossologyng/utils /fossologyng/dependencies-for-runtime/
+RUN mkdir -p /fossology/dependencies-for-runtime \
+ && cp -R /fossology/src /fossology/utils /fossology/dependencies-for-runtime/
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
- && DEBIAN_FRONTEND=noninteractive /fossologyng/utils/fo-installdeps --build --offline -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build --offline -y \
  && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
 RUN chown $(whoami):$(whoami) -R .
 
-RUN make clean build-lib \
- && make -C src/nomos/agent -f Makefile.sa all \
- && make -C src/copyright/agent copyright \
- && make -C src/copyright/agent keyword \
- && make -C src/ojo/agent ojo
+RUN cmake -DCMAKE_BUILD_TYPE=MinSizeRel \
+    -DAGENTS="nomos;copyright;ojo" \
+    -S. -B./build -G Ninja \
+ && ninja -C ./build nomossa copyright keyword ojo
 
-RUN dpkg-shlibdeps -Orun-deps -esrc/nomos/agent/nomossa \
-                              -esrc/copyright/agent/copyright \
-                              -esrc/copyright/agent/keyword \
-                              -esrc/ojo/agent/ojo \
+RUN dpkg-shlibdeps -Orun-deps -ebuild/src/nomos/agent/nomossa \
+                              -ebuild/src/copyright/agent/copyright \
+                              -ebuild/src/copyright/agent/keyword \
+                              -ebuild/src/ojo/agent/ojo \
  && sed -E -i -e 's/(shlibs:Depends=)|(\(>=?[ 0-9\:\.\~\-]*\))|(,)//g' run-deps
 
 FROM debian:buster-slim
 
 LABEL maintainer="Fossology <fossology@fossology.org>"
 
-COPY --from=builder /fossologyng/src/nomos/agent/nomossa /bin/nomossa
-COPY --from=builder /fossologyng/src/ojo/agent/ojo /bin/ojo
-COPY --from=builder /fossologyng/src/copyright/agent/copyright /bin/copyright
-COPY --from=builder /fossologyng/src/copyright/agent/copyright.conf /usr/local/share/fossology/copyright/agent/copyright.conf
-COPY --from=builder /fossologyng/src/copyright/agent/keyword /bin/keyword
-COPY --from=builder /fossologyng/src/copyright/agent/keyword.conf /usr/local/share/fossology/keyword/agent/keyword.conf
-COPY --from=builder /fossologyng/run-deps /opt/run-deps
+COPY --from=builder /fossology/build/src/nomos/agent/nomossa /bin/nomossa
+COPY --from=builder /fossology/build/src/ojo/agent/ojo /bin/ojo
+COPY --from=builder /fossology/build/src/copyright/agent/copyright /bin/copyright
+COPY --from=builder /fossology/src/copyright/agent/copyright.conf /usr/local/share/fossology/copyright/agent/copyright.conf
+COPY --from=builder /fossology/build/src/copyright/agent/keyword /bin/keyword
+COPY --from=builder /fossology/src/copyright/agent/keyword.conf /usr/local/share/fossology/keyword/agent/keyword.conf
+COPY --from=builder /fossology/run-deps /opt/run-deps
 
 COPY ./utils/automation/fossologyscanner.py /bin/fossologyscanner
 

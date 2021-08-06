@@ -10,6 +10,8 @@
  * \brief unit tests for common-sysconfig.php
  */
 
+use Fossology\Lib\Test\TestPgDb;
+
 require_once(dirname(dirname(__FILE__)) . '/common-container.php');
 require_once(dirname(dirname(__FILE__)) . '/common-db.php');
 require_once(dirname(dirname(__FILE__)) . '/fossdash-config.php');
@@ -19,9 +21,10 @@ require_once(dirname(dirname(__FILE__)) . '/fossdash-config.php');
  */
 class test_fossdash_config extends \PHPUnit\Framework\TestCase
 {
-  public $PG_CONN;
-  public $DB_COMMAND =  "";
-  public $DB_NAME =  "";
+
+  /** @var TestPgDb */
+  private $testDb;
+
   public $sys_conf = "";
 
   /**
@@ -29,17 +32,10 @@ class test_fossdash_config extends \PHPUnit\Framework\TestCase
    */
   protected function setUpDb()
   {
-    if (!is_callable('pg_connect')) {
-      $this->markTestSkipped("php-psql not found");
-    }
-    global $PG_CONN;
-    global $DB_COMMAND;
     global $sys_conf;
 
-    $DB_COMMAND  = dirname(dirname(dirname(dirname(__FILE__))))."/testing/db/createTestDB.php";
-    exec($DB_COMMAND, $dbout, $rc);
-    $sys_conf = $dbout[0];
-    $PG_CONN = DBconnect($sys_conf);
+    $this->testDb = new TestPgDb("fosslibtest");
+    $sys_conf = $this->testDb->getFossSysConf();
   }
 
   /**
@@ -59,19 +55,15 @@ class test_fossdash_config extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * \brief clean the env db
+   * \brief clean the env
    */
   protected function tearDownDb()
   {
     if (!is_callable('pg_connect')) {
       return;
     }
-    global $PG_CONN;
-    global $DB_COMMAND;
-    global $DB_NAME;
-
-    pg_close($PG_CONN);
-    exec("$DB_COMMAND -d $DB_NAME");
+    $this->testDb->fullDestruct();
+    $this->testDb = null;
   }
 
   /**

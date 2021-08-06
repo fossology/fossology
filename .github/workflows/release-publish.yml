@@ -67,6 +67,9 @@ jobs:
         rm -rf src/vendor
         make clean phpvendors
 
+    - name: Get CMake v3.23.0
+      uses: lukka/get-cmake@v3.23.0
+
     - name: Fetch tags
       run: |
         git fetch --tags
@@ -82,12 +85,21 @@ jobs:
         VERSION: ${{ steps.get_release.outputs.tag_name }}
       run: |
         echo PACKAGE_NAME=$(echo "FOSSology-${VERSION}-$(lsb_release -si | tr [:upper:] [:lower:])-$(lsb_release -sc | tr [:upper:] [:lower:]).tar.gz") >> $GITHUB_ENV
+    - name: Configure and Generate CMake Project
+      run: |
+        mkdir build
+        cd build
+        cmake -GNinja ..
 
     - name: Build Debs
-      run: ./utils/fo-debuild --no-sign
+      run: ninja -C build package
 
     - name: Rename package
-      run: mv fossology_*.tar.gz ${PACKAGE_NAME}
+      run: |
+        find build -type f -name "*-dbgsym*" -delete
+        mkdir -p packages
+        mv build/*.deb packages/
+        tar -czvf ${PACKAGE_NAME} packages
 
     - name: Upload Release Asset
       id: upload-release-asset

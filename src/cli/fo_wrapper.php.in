@@ -111,7 +111,7 @@ function bootstrap($sysconfdir="")
       }
       if ($sysconfdir === false) {
         /** set the sysconfdir with default */
-        $sysconfdir = "{$SYSCONFDIR}";
+        $sysconfdir = "@FO_SYSCONFDIR@";
       }
     }
   }

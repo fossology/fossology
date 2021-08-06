@@ -39,7 +39,7 @@ class TestCLib extends \PHPUnit\Framework\TestCase
     $sysConf = $this->testDb->getFossSysConf();
     $returnCode = 0;
     $lines = array();
-    exec("./testlibs ".$sysConf."/Db.conf", $lines, $returnCode);
+    exec("./test_clibs ".$sysConf."/Db.conf", $lines, $returnCode);
 
     $this->assertEquals($expected=0, $returnCode, "error: ".implode("\n", $lines));
   }

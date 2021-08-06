@@ -10,7 +10,7 @@ if [ ! -d $REPODIR/localhost/ ]; then
   mkdir -p $REPODIR/localhost/
 fi
 
-tar -xf ../testdata/testrepo_gold.tar.gz -C $REPODIR/localhost/
-tar -xf ../testdata/testrepo_files.tar.gz -C $REPODIR/localhost/
+tar -xf ./testdata/testrepo_gold.tar.gz -C $REPODIR/localhost/
+tar -xf ./testdata/testrepo_files.tar.gz -C $REPODIR/localhost/
 
 echo "Create Test Repository success!"

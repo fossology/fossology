@@ -7,7 +7,7 @@
 
 #include "diff.h"
 
-#include "_squareVisitor.h"
+#include <_squareVisitor.h>
 #include <stdlib.h>
 
 int matchNTokens(const GArray* textTokens, size_t textStart, size_t textLength,

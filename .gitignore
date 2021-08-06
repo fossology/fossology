@@ -161,6 +161,7 @@ variable.list
 /src/copyright/VERSION-copyright
 /src/spdx2/agent_tests/Functional/spdx-tools-2.2.2-jar-with-dependencies.jar*
 /src/spdx2/agent/version.php
+/src/unifiedreport/agent/unifiedreport
 /src/unifiedreport/agent/version.php
 /src/spdx2/agent/spdx2
 src/reportImport/agent/spdx2Import
@@ -195,3 +196,7 @@ ubuntu-*
 .phpunit.result.cache
 *-Xunit.xml
 /phpenv/
+# cmake ignore files
+**/build
+cmake-build-release
+cmake-build-debug

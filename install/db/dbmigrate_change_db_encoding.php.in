@@ -58,7 +58,7 @@ $AllPossibleOpts = "abc:d:efghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 
 /* defaults */
 $DatabaseName = "fossology";
-$sysconfdir = "{$SYSCONFDIR}";
+$sysconfdir = "@FO_SYSCONFDIR@";
 $force = true;
 
 /* command-line options */

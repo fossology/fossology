@@ -11,7 +11,7 @@
 /* cunit includes */
 #include <libfodbreposysconf.h>
 
-#define AGENT_DIR "../../"
+// #define AGENT_DIR "../"
 
 fo_dbManager* dbManager;
 
@@ -40,7 +40,6 @@ extern int database_tearDownFunc();
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] = {
     {"Testing process:", NULL, NULL, NULL, NULL, string_operations_testcases},
     {"Testing monk:", NULL, NULL, NULL, NULL, file_operations_testcases},
@@ -54,21 +53,6 @@ CU_SuiteInfo suites[] = {
     {"Testing serialize:", NULL, NULL, NULL, NULL, serialize_testcases},
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] = {
-    {"Testing process:", NULL, NULL, string_operations_testcases},
-    {"Testing monk:", NULL, NULL, file_operations_testcases},
-    {"Testing license:", license_setUpFunc, license_tearDownFunc, license_testcases},
-    {"Testing highlighting:", NULL, NULL, highlight_testcases},
-    {"Testing hash:", NULL, NULL, hash_testcases},
-    {"Testing diff:", NULL, NULL, diff_testcases},
-    {"Testing match:", NULL, NULL, match_testcases},
-    {"Testing database:", database_setUpFunc, database_tearDownFunc, database_testcases},
-    {"Testing encoding:", NULL, NULL, encoding_testcases},
-    {"Testing serialize:", NULL, NULL, serialize_testcases},
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 /* ************************************************************************** */
 /* **** main test functions ************************************************* */

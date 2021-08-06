@@ -4,5 +4,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 define("AGENT_DECIDER_NAME", "decider");
-define("AGENT_DECIDER_VERSION", "{$VERSION}");
-define("AGENT_DECIDER_REV", "{$COMMIT_HASH}");
+define("AGENT_DECIDER_VERSION", "@FO_VERSION@");
+define("AGENT_DECIDER_REV", "@FO_COMMIT_HASH@");

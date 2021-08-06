@@ -52,7 +52,7 @@ function bootstrap($sysconfdir="")
         $sysconfdir = file_get_contents($rcfile);
       }
       if ($sysconfdir === false) {
-        $sysconfdir = "{$SYSCONFDIR}";
+        $sysconfdir = "@FO_SYSCONFDIR@";
       }
     }
   }

@@ -4,11 +4,16 @@
 
 name: Static checks and analysis
 
+concurrency:
+  group: static-${{ github.head_ref }}
+  cancel-in-progress: true
+
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
+  workflow_dispatch:
 
 jobs:
   syntax-check:
@@ -17,8 +22,8 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          export PATH="/usr/lib/ccache/:$PATH"
-          export COMPOSER_HOME="$HOME/.composer/"
+          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
+          echo COMPOSER_HOME="$HOME/.composer/" >> $GITHUB_ENV
       - uses: actions/checkout@v2
         with:
           fetch-depth: 50
@@ -47,7 +52,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cppcheck
-          export PATH="/usr/lib/ccache/:$PATH"
+          echo PATH="/usr/lib/ccache/:$PATH" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
         with:
@@ -95,14 +100,14 @@ jobs:
   openapi-lint:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup default rules
-      run: |
-        echo '{"extends": ["spectral:oas"]}' > .spectral.json
-    - name: Run spectral
-      uses: stoplightio/spectral-action@v0.8.2
-      with:
-        file_glob: src/www/ui/api/documentation/openapi.yaml
+      - uses: actions/checkout@v2
+      - name: Setup default rules
+        run: |
+          echo '{"extends": ["spectral:oas"]}' > .spectral.json
+      - name: Run spectral
+        uses: stoplightio/spectral-action@v0.8.2
+        with:
+          file_glob: src/www/ui/api/documentation/openapi.yaml
 
   REUSE-Compliance-Check:
     runs-on: ubuntu-latest

@@ -36,9 +36,10 @@ class SchedulerTestRunnerCli implements SchedulerTestRunner
 
     $agentName = "decider";
 
-    $agentDir = dirname(dirname(__DIR__));
+    $agentDir = dirname(__DIR__, 2);
+    $baseDir = dirname(__DIR__, 4);
     $execDir = "$agentDir/agent";
-    system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
+    system("install -D $baseDir/build/src/decider/VERSION $sysConf/mods-enabled/$agentName/VERSION");
 
     $pipeFd = popen($cmd = "echo $uploadId | $execDir/$agentName --userID=$userId --groupID=$groupId --jobId=$jobId --scheduler_start -c $sysConf $args", "r");
     $success = $pipeFd !== false;

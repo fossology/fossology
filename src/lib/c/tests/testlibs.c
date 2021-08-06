@@ -29,7 +29,6 @@ extern CU_TestInfo libfossdbmanager_testcases[];
 * \todo Fix `fossscheduler_testcases`
 */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] =
   {
     {"Testing libfossdb", NULL, NULL, NULL, NULL, libfossdb_testcases},
@@ -38,16 +37,6 @@ CU_SuiteInfo suites[] =
     // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
     CU_SUITE_INFO_NULL
   };
-#else
-CU_SuiteInfo suites[] =
-  {
-    {"Testing libfossdb", NULL, NULL, libfossdb_testcases},
-    {"Testing fossconfig", NULL, NULL, fossconfig_testcases},
-    {"Testing libfossdbmanger", NULL, NULL, libfossdbmanager_testcases},
-    // TODO fix { "Testing fossscheduler", NULL, NULL, fossscheduler_testcases },
-    CU_SUITE_INFO_NULL
-  };
-#endif
 
 /* ************************************************************************** */
 /* **** main function ******************************************************* */

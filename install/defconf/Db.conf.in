@@ -1,5 +1,5 @@
-dbname={$PROJECT};
+dbname=@FO_PROJECT@;
 host=localhost;
-user={$PROJECTUSER};
-password={$PROJECTUSER};
+user=@FO_PROJECTUSER@;
+password=@FO_PROJECTUSER@;
 client_encoding=utf8;

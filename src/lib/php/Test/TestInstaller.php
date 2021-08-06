@@ -50,7 +50,7 @@ class TestInstaller
       }
     }
 
-    $topDir = dirname(dirname(dirname(dirname(__DIR__))));
+    $topDir = dirname(__DIR__,4).'/build/install';
     system("install -D $topDir/VERSION $sysConf");
   }
 
@@ -70,14 +70,14 @@ class TestInstaller
   public function install($srcDir)
   {
     $sysConfDir = $this->sysConf;
-    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir install", $unused, $rt);
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make install", $unused, $rt);
     return ($rt != 0);
   }
 
   public function uninstall($srcDir)
   {
     $sysConfDir = $this->sysConf;
-    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir uninstall", $unused, $rt);
+    exec("make MODDIR=$sysConfDir DESTDIR= BINDIR=$sysConfDir SYSCONFDIR=$sysConfDir -C $srcDir --file=TestInstall.make uninstall", $unused, $rt);
     $modEnabled = "$sysConfDir/mods-enabled";
     if (is_dir($modEnabled)) {
       rmdir($modEnabled);

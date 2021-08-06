@@ -5,12 +5,12 @@
 
 _runojo()
 {
-  ./ojo "$@" | sed -e '1d'
+  ../../../../build/src/ojo/agent/ojo "$@" | sed -e '1d'
 }
 
 _getLicenseName()
 {
-  echo `echo $1 | grep -o ": '[^']*" | cut -d\' -f2 | tr '\n' ' ' | rev | cut -c2- | rev`
+  echo $(echo $1 | grep -o ": '[^']*" | cut -d\' -f2 | tr '\n' ' ' | rev | cut -c2- | rev)
 }
 
 test0BSD()

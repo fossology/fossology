@@ -22,7 +22,7 @@ extern char *DBConfFile;
  */
 void test_GetMetadata_normal()
 {
-  char *pkg = "../testdata/fossology-1.2.0-1.el5.i386.rpm";
+  char *pkg = "./testdata/fossology-1.2.0-1.el5.i386.rpm";
   struct rpmpkginfo *pi;
   //char *DBConfFile = NULL;  /* use default Db.conf */
   char *ErrorBuf;
@@ -65,7 +65,7 @@ void test_GetMetadata_normal()
  */
 void test_GetMetadata_wrong_testfile()
 {
-  char *pkg = "../testdata/fossology_1.4.1.dsc";
+  char *pkg = "./testdata/fossology_1.4.1.dsc";
   struct rpmpkginfo *pi;
   pi = (struct rpmpkginfo *)malloc(sizeof(struct rpmpkginfo));
   memset(pi, 0, sizeof(struct rpmpkginfo));

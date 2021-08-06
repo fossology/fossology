@@ -17,7 +17,7 @@ address = localhost
 depth = 3
 
 ; REPLACEMENT for RepPath.conf
-path = {$REPODIR}
+path = @FO_REPODIR@
 
 ; REPLACEMENT for Proxy.conf
 ; proxy settings that will be used by fossology agents
@@ -34,7 +34,7 @@ path = {$REPODIR}
 ; host can have as many agents running as necessary, (i.e. there should always
 ; be a max on the number of agents for a particular host).
 [HOSTS]
-localhost = localhost {$SYSCONFDIR} 10
+localhost = localhost @FO_SYSCONFDIR@ 10
 
 [REPOSITORY]
 localhost[] = * 00 ff
@@ -45,12 +45,12 @@ localhost[] = * 00 ff
 ; Do not change after installation since PROJECT, PROJECTUSER and PROJECTGROUP
 ; is used in installation directory names and ownership.
 ; Use PREFIX to install multiple copies of FOSSology.
-PROJECT={$PROJECT}
-PROJECTUSER={$PROJECTUSER}
-PROJECTGROUP={$PROJECTGROUP}
+PROJECT=@FO_PROJECT@
+PROJECTGROUP=@FO_PROJECTGROUP@
+PROJECTUSER=@FO_PROJECTUSER@
 
 ; base of the program data tree
-PREFIX={$PREFIX}
+PREFIX=@FO_PREFIX@
 
 ; executable programs that users run
 BINDIR=$PREFIX/bin
@@ -74,7 +74,7 @@ DATAROOTDIR=$PREFIX/share
 MODDIR=$DATAROOTDIR/$PROJECT
 
 ; local state
-LOCALSTATEDIR={$LOCALSTATEDIR}
+LOCALSTATEDIR=@FO_LOCALSTATEDIR@
 
 ; project local state
 PROJECTSTATEDIR=$LOCALSTATEDIR/lib/$PROJECT

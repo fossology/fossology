@@ -14,7 +14,7 @@ CUNIT_LIB = -L $(CUNIT_LIB_DIR) -l focunit
 TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf
 
-CFLAGS_LOCAL = -I/usr/include/rpm $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR) -DCU_VERSION_P=$(CUNIT_VERSION)
+CFLAGS_LOCAL = -I/usr/include/rpm $(FO_CFLAGS) -I$(LOCALAGENTDIR) -I $(TEST_LIB_DIR) -I $(CUNIT_LIB_DIR)
 LDFLAGS_LOCAL = -lrpm $(FO_LDFLAGS) -lcunit $(CUNIT_LIB) $(TEST_LIB) -lrpmio
 EXE = test_pkgagent
 TEST_OBJ = testRun.o testGetFieldValue.o testRecordMetadataRPM.o testRecordMetadataDEB.o testGetMetadataDebSource.o testGetMetadataDebBinary.o

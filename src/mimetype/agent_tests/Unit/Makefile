@@ -15,7 +15,7 @@ TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
 LDFLAGS_LOCAL = -lmagic $(FO_LDFLAGS) $(CUNIT_LIB) -lcunit $(TEST_LIB)
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./ -DCU_VERSION_P=$(CUNIT_VERSION)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR)/ -I./
 EXE = test_mimetype
 TEST_OBJ_RUN = testRun.o
 TEST_OBJ = ./finder/testDBCheckMime.o \

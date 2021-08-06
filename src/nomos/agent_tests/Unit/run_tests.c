@@ -43,21 +43,12 @@ extern CU_TestInfo doctorBuffer_testcases[];
 /* **** create test suite *************************************************** */
 /* ************************************************************************** */
 
-#if CU_VERSION_P == 213
 CU_SuiteInfo suites[] =
 {
     {"Testing process:", NULL, NULL, NULL, NULL, nomos_gap_testcases},
     {"Testing doctor Buffer:", NULL, NULL, NULL, NULL, doctorBuffer_testcases},
     CU_SUITE_INFO_NULL
 };
-#else
-CU_SuiteInfo suites[] =
-{
-    {"Testing process:", NULL, NULL, nomos_gap_testcases},
-    {"Testing doctor Buffer:", NULL, NULL, doctorBuffer_testcases},
-    CU_SUITE_INFO_NULL
-};
-#endif
 
 /* ************************************************************************** */
 /* **** main test functions ************************************************* */

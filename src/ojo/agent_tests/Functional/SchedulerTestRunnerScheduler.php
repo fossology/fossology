@@ -34,7 +34,7 @@ class SchedulerTestRunnerScheduler implements SchedulerTestRunner
 
     $agentName = "ojo";
 
-    $agentDir = dirname(dirname(__DIR__));
+    $agentDir = dirname(__DIR__, 4).'/build/src/ojo';
     $execDir = "$agentDir/agent";
     system("install -D $agentDir/VERSION $sysConf/mods-enabled/$agentName/VERSION");
     system("install -D $agentDir/agent/$agentName $sysConf/mods-enabled/$agentName/agent/$agentName");

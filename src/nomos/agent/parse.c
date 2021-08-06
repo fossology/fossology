@@ -14,7 +14,7 @@
 #include "util.h"
 #include "nomos_regex.h"
 #include "nomos_utils.h"
-#include "_autodefs.h"
+#include <_autodefs.h>
 
 /* DEBUG
 #define DOCTOR_DEBUG 1

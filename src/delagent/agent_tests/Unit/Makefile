@@ -14,7 +14,7 @@ TEST_LIB_DIR = $(TOP)/src/testing/db/c
 TEST_LIB = -L $(TEST_LIB_DIR) -l fodbreposysconf -I $(TEST_LIB_DIR)
 
 LDFLAGS_LOCAL = $(FO_LDFLAGS) -lcunit $(CUNIT_LIB) $(TEST_LIB) $(shell libgcrypt-config --libs)
-CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) -DCU_VERSION_P=$(CUNIT_VERSION) $(shell libgcrypt-config --cflags)
+CFLAGS_LOCAL = $(FO_CFLAGS) -I$(LOCALAGENTDIR) $(shell libgcrypt-config --cflags)
 
 EXE = test_delagent
 TEST_OBJ_RUN = testRun.o
