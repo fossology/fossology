@@ -196,8 +196,6 @@ class LicenseListFiles extends FO_Plugin
       $baseURL = "?mod=" . $this->Name . "&item=$uploadtree_pk&lic=$ushortname&page=-1";
 
       $V .= "<table>";
-      $text = _("File");
-      $V .= "<tr><th>$text</th><th>&nbsp";
       $LastPfilePk = -1;
       $ExclArray = explode(":", $Excl);
       $ExclicArray = explode(":", $Exclic);

@@ -75,7 +75,7 @@ class FolderNav
     $title = empty($row['folder_desc']) ? '' : ' title="' . htmlspecialchars($row['folder_desc']) . '"';
     return '<a'.$title.
            ' href="'.$uri.'?mod=browse&folder='.$row['folder_pk'].'"'.
-           ' class="clickable-folder" data-folder="'.$row['folder_pk'].'"'.
+           ' class="clickable-folder btn btn-outline-secondary btn-sm" style="padding:2px;" data-folder="'.$row['folder_pk'].'"'.
            '>'.htmlentities($row['folder_name']).'</a>';
   }
 }

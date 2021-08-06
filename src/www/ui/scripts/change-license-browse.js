@@ -25,42 +25,57 @@ var userModal;
 var removed = false;
 
 $(document).ready(function () {
-  bulkModal = $('#bulkModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  userModal = $('#userModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  clearingHistoryDataModal = $('#ClearingHistoryDataModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
+
+  $("input[type='search']").addClass("form-control-sm");
+  clearingHistoryDataModal = $('#ClearingHistoryDataModal').modal('hide');
+  $('#bulkModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
+    }
+  });
+});
+
+$("#textModal").on('show.bs.modal', function (e) {
+    $("#bulkModal").modal("hide");
+});
+
+$("#textModal").on('hide.bs.modal', function (e) {
+    $("#bulkModal").modal("show");
 });
 
 function openBulkModal(uploadTreeId) {
+  bulkModal = $('#bulkModal').modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  bulkModal.dialog('open');
+  bulkModal.toggle();
 }
 
 function closeBulkModal() {
-  bulkModal.dialog('close');
+  $('#bulkModal').hide();
 }
 
 function loadBulkHistoryModal() {
   refreshBulkHistory(function(data) {
-    $('#bulkHistoryModal').dialog('open');
+    $('#bulkHistoryModal').modal('show');
   });
 }
 
 function openUserModal(uploadTreeId) {
+  userModal = $('#userModal').modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  userModal.dialog('open');
+  userModal.toggle();
 }
 
 function closeUserModal() {
-  userModal.dialog('close');
+  userModal.hide();
 }
 
 function openClearingHistoryDataModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
-  clearingHistoryDataModal.dialog('open');
+  clearingHistoryDataModal.modal('show');
 }
 
 function closeClearingHistoryDataModal() {
-  clearingHistoryDataModal.dialog('close');
+  clearingHistoryDataModal.modal('hide');
 }
 
 function scheduleBulkScan() {

@@ -84,21 +84,39 @@ abstract class HistogramBase extends FO_Plugin {
 <div>
   <table border=0 width='100%' id='searchReplaceTable".$type."'>
   <tr>
-    <td>Advance search:</td>
-    <td style='width:80%'><input type='text' id='advSearchText".$type."' style='width:90%' class='advSearch'>
-      <img src='images/info_16.png' title='Use \"(*)\" to match any thing.\nExample: \"Copyright (*) All rights reserved(*)\" will match \"Copyright 2012-2020 Company ABC. All rights reserved {and some garbage here}\"' alt='' class='info-bullet'></td>
-    <td><a class='buttonLink' onClick='createReplacementText(\"".$type."\")' title='Create a replacement text with all placeholders.'>Create replacement text</a></td>
+    <td style='width:80%'>
+      <div class='form-group'>
+        <label class='control-label col-sm-2'>Advance search:<img src='images/info_16.png' title='Use \"(*)\" to match any thing.\nExample: \"Copyright (*) All rights reserved(*)\" will match \"Copyright 2012-2020 Company ABC. All rights reserved {and some garbage here}\"' alt='' class='info-bullet'></label>
+        <div class='col-sm-10'>
+          <input id='advSearchText".$type."' type='text' class='form-control advSearch'>
+        </div>
+      </div>
+    </td>
+    <td rowspan='2'>
+      <div class='form-group'>
+        <div class='col-sm-offset-2 col-sm-10'>
+          <button class='btn btn-default' style='margin-top:25px;padding:15%;' onClick='createReplacementText(\"".$type."\")' title='Create a replacement text with all placeholders.'>Create replacement text</button>
+        </div>
+      </div>
+    </td>
   </tr>
   <tr>
-    <td>Replace:</td>
-    <td style='width:80%'><input type='text' id='replaceText".$type."' style='width:90%'>
-      <img src='images/info_16.png' title='Use \"$1 $2\" as placeholder for corresponding (*) values.\nExample: \"Copyright $1 All rights reserved\" will result in \"Copyright 2012-2020 Company ABC. All rights reserved\" from example above' alt='' class='info-bullet'></td>
-    <td></td>
+    <td>
+      <div class='form-group'>
+        <label class='control-label col-sm-2'>Replace:<img src='images/info_16.png' title='Use \"$1 $2\" as placeholder for corresponding (*) values.\nExample: \"Copyright $1 All rights reserved\" will result in \"Copyright 2012-2020 Company ABC. All rights reserved\" from example above' alt='' class='info-bullet'></label>
+        <div class='col-sm-10'>
+          <input id='replaceText".$type."' type='text' class='form-control'>
+      </div>
+    </div>
+  </td>
   </tr></table>
-  <br/><br/>
-  <a style='cursor: pointer; margin-left:10px;' id='testReplacement".$type."' class='buttonLink'>Test replacement</a>
-  <a style='cursor: pointer; margin-left:10px;' id='replaceSelected".$type."' class='buttonLink'>Replace selected rows</a>
-  <a style='cursor: pointer; margin-left:10px;' id='deleteSelected".$type."' class='buttonLink'>Deactivate selected rows</a>
+    <div class='form-group'>
+      <div class='col-sm-offset-2 col-sm-10'>
+        <button class='btn btn-default' id='testReplacement".$type."'>Test replacement</button>
+        <button class='btn btn-default' id='replaceSelected".$type."'>Replace selected rows</button>
+        <button class='btn btn-default' id='deleteSelected".$type."'>Deactivate selected rows</button>
+      </div>
+    </div>
   <br /><br />
   <table border=1 id='testVal".$type."' style='display:none' class='dataTable wordbreaktable'>
     <tr><th style='width:50%'>From</th><th style='width:50%'>To</th></tr>
@@ -237,7 +255,7 @@ abstract class HistogramBase extends FO_Plugin {
       $OutBuf .= "<form name='formy' method='post'>\n";
       $OutBuf .= "<div id='msgdiv'>\n";
       $OutBuf .= _("No data available.");
-      $OutBuf .= "<input type='button' name='scheduleAgent' value='Schedule Agent'";
+      $OutBuf .= "<input type='button' class='btn btn-default btn-sm' name='scheduleAgent' value='Schedule Agent'";
       $OutBuf .= "onClick=\"Schedule_Get('" . Traceback_uri() . "?mod=schedule_agent&upload=$uploadId&agent=agent_{$this->agentName}')\">\n";
       $OutBuf .= "</input>";
       $OutBuf .= "</div> \n";
@@ -269,7 +287,7 @@ abstract class HistogramBase extends FO_Plugin {
     }
 
     $selectKey = $filter == 'nolic' ? 'nolic' : 'all';
-    $OutBuf .= "<select name='view_filter' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
+    $OutBuf .= "<select name='view_filter' class='form-control-sm' id='view_filter' onchange='ChangeFilter(this,$uploadId, $item);'>";
     foreach(array('all'=>_("Show all"), 'nolic'=> _("Show files without licenses")) as $key=>$text)
     {
       $selected = ($selectKey == $key) ? "selected" : "";
@@ -349,11 +367,11 @@ abstract class HistogramBase extends FO_Plugin {
       $cellContent = Isdir($child['ufile_mode']) ? $child['ufile_name'].'/' : $child['ufile_name'];
       if (Iscontainer($child['ufile_mode']))
       {
-        $cellContent = "<a href='$LicUri'><b>$cellContent</b></a>";
+        $cellContent = "<a class='btn btn-outline-secondary btn-sm' href='$LicUri'><b>$cellContent</b></a>";
       }
       else if (!empty($LinkUri)) //  && ($LicCount > 0))
       {
-        $cellContent = "<a href='$LinkUri'>$cellContent</a>";
+        $cellContent = "<a class='btn btn-outline-secondary btn-sm' href='$LinkUri'>$cellContent</a>";
       }
       $VF .= "<tr><td id='$child[uploadtree_pk]' align='left'>$cellContent</td><td>";
 

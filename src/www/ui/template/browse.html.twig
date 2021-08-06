@@ -9,35 +9,34 @@
 {% block content %}
   {% include 'change_license_modal.html.twig' %}
   {% include 'ui-clearing-view_bulk.html.twig' %}
-  <div class="modal" id="bulkHistoryModal" hidden>
-  {% include 'bulk-history.html.twig' %}
+  <!-- The bulk history Modal -->
+  <div class="modal" id="bulkHistoryModal" tabindex="-1" role="dialog" aria-labelledby="bulkHistoryModalLabel" aria-hidden="true" data-backdrop="false">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Bulk History</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body" style="max-height:400px;overflow:auto;">
+          {% include 'bulk-history.html.twig' %}
+        </div>
+      </div>
+    </div>
   </div>
 
   <table border="0" style="padding:2px; width:100%">
     <tr>
-      <td style="vertical-align:top; height:100%; width:25%">
-  
-      {% if not(agentMap is empty) %}
-        <table border="0" class="semibordered" id="lichistogram"></table>
-        <br/><br/>
-        {{ "Hint"|trans }}:
-        {{ 'Click on the license name to search for where the license is found in the file listing.'|trans}}
-        <br/><br/>
-        {% include 'browse_license-summary.html.twig' %}
-      {% endif %}
-      {% include 'browse_license-agent_selector.html.twig' %}
-
-        <button onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
-        <br/>
-        <span id="bulkIdResult" hidden></span>
-      </td>
-      <td style="padding-left:18px; vertical-align:top; height:100%; width:75%">
+      <td style="vertical-align:top; height:100%; width:75%" class="px-2">
         <table border="0" id="dirlist" class="semibordered">
           <thead>
             <tr>
               <th></th>
               <th>
-                <select id="scanFilter" class="ui-render-select2">
+                <select id="scanFilter" class="ui-render-select2 form-control-sm">
                   <option value="0">-- {{'filter for scan results'|trans}} --</option>
                   {% for shortname,row in scannerLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
@@ -45,24 +44,35 @@
                 </select>
               </th>
               <th>
-                <select id="conFilter" class="ui-render-select2">
+                <select id="conFilter" class="ui-render-select2 form-control-sm">
                   <option value="0">-- {{'filter for edited results'|trans}} --</option>
                   {% for shortname,row in editedLicenses %}
                     <option value="{{row.rf_pk}}">{{ shortname }}</option>
                   {% endfor %}
                 </select>
               </th>
-              <th><input type="checkbox" id="openCBoxFilter"/>{{ 'open'|trans }}</th>
+              <th><input type="checkbox" class="info-bullet view-license-rc-size" id="openCBoxFilter"/>{{ ' Open'|trans }}</th>
               <th></th>
-              <th><button type="button" id="markIrrelevant" >MarkAsIrrelevant</button></th>
+              <th><button class="btn btn-default btn-sm" id="markIrrelevant">MarkAsIrrelevant</button></th>
             </tr>
             <tr><th></th><th></th><th></th><th></th><th></th><th></th></tr>
           </thead>
           <tbody></tbody>
           <tfoot></tfoot>
         </table>
-  
+
         {{ parent() }}
+      </td>
+      <td style="vertical-align:top; height:100%; width:25%" class="px-2">
+      {% if not(agentMap is empty) %}
+        <table border="0" class="semibordered" id="lichistogram"></table>
+        <br/><br/>
+        {% include 'browse_license-summary.html.twig' %}
+      {% endif %}
+      {% include 'browse_license-agent_selector.html.twig' %}
+        <button data-toggle='modal' data-target='#bulkHistoryModal' class="btn btn-default btn-sm" onclick="loadBulkHistoryModal();">{{ "Show bulk history"|trans }}</button>
+        <br/>
+        <span id="bulkIdResult" hidden></span>
       </td>
     </tr>
   </table>
@@ -72,7 +82,6 @@
   {{ parent() }}
   <script src="scripts/jquery.dataTables.min.js" type="text/javascript"></script>
   <script src="scripts/jquery.dataTables.select.js" type="text/javascript"></script>
-  <script src="scripts/jquery.plainmodal.min.js" type="text/javascript"></script>
   <script src="scripts/job-queue-poll.js" type="text/javascript"></script>
   <script src="scripts/change-license-common.js" type="text/javascript"></script>
   <script src="scripts/change-license-browse.js" type="text/javascript"></script>

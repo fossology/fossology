@@ -905,7 +905,7 @@ body .ui-tooltip {
     background: #ffffff;
     color: #333333;
 }
-.ui-widget-content a {
+.ui-widget-content {
     color: #333333;
 }
 .ui-widget-header {
