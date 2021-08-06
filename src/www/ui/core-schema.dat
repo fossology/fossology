@@ -1135,10 +1135,7 @@
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
-  
+
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_creationdate\" IS 'License creation date'";
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_creationdate\" timestamptz DEFAULT now()";
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_creationdate\" DROP NOT NULL, ALTER COLUMN \"rf_creationdate\" SET DEFAULT now()";
@@ -1155,6 +1152,11 @@
   $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_user_fk_modified\" int4";
   $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_user_fk_modified\" DROP NOT NULL";
 
+
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"user_fk\" IS 'user who made this bulk scan'";
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"user_fk\" int8";
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"user_fk\" SET NOT NULL";
@@ -1163,7 +1165,7 @@
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_text\" IS 'text searched by nulk scan'";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_text\" IS 'text searched by bulk scan'";
   $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_text\" text";
   $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_text\" SET NOT NULL";
 
@@ -1178,6 +1180,10 @@
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"ignore_irrelevant\" IS 'Should the irrelevant files be ignored during scan?'";
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"ignore_irrelevant\" bool DEFAULT true";
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"ignore_irrelevant\" SET NOT NULL, ALTER COLUMN \"ignore_irrelevant\" SET DEFAULT true";
+
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"bulk_delimiters\" IS 'What delimiters to use for scan?'";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"bulk_delimiters\" text DEFAULT NULL";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"bulk_delimiters\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";

@@ -49,6 +49,7 @@ typedef struct {
   int groupId;
   char* refText;
   bool ignoreIrre;
+  char* delimiters;
   BulkAction** actions;
 } BulkArguments;
 

@@ -157,7 +157,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
-    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0
+    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
+    "delimiters": $("#delimdrop").val()
   };
 
   resultEntity.hide();
@@ -420,6 +421,19 @@ $(document).ready(function () {
     stop: function(){
       $(this).css({'width':'','height':''});
     }
+  });
+
+  $('#custDelim').change(function () {
+    if (this.checked) {
+      $('#delimRow').removeClass("invisible").addClass("visible");
+    } else {
+      $('#delimRow').removeClass("visible").addClass("invisible");
+      $('#resetDel').click();
+    }
+  });
+
+  $('#resetDel').click(function () {
+    $('#delimdrop').val('DEFAULT');
   });
 });
 
