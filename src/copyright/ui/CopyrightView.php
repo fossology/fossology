@@ -72,7 +72,7 @@ class CopyrightView extends Xpview
         $agentId=LatestAgentpk($uploadId, 'scancode_ars');
         $this->agentName = "scancode";
       }
-    list($out, $vars) = $modCopyrightHist->getTableForSingleType($type,$description , $uploadId, $uploadTreeId, $filter, $agentId);
+    list($out, $vars) = $modCopyrightHist->getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId);
     $tableVars[$type] = $vars;
     $output[] = $out;
     }

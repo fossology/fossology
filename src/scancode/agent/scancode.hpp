@@ -19,10 +19,21 @@
 #ifndef SCANCODE_AGENT_SCANCODE_HPP
 #define SCANCODE_AGENT_SCANCODE_HPP
 
+#include <iostream>
+
 #include "scancode_utils.hpp"
+#include "scancode_wrapper.hpp"
 
 extern "C" {
 #include "libfossagent.h"
 }
+
+using namespace std;
+
+/**
+ * @brief Utility functions for file handling
+ */
+using namespace fo;
+
 
 #endif // SCANCODE_AGENT_SCANCODE_HPP

@@ -17,11 +17,7 @@
  ****************************************************************************/
 
 #include "scancode_utils.hpp"
-#include "scancode_wrapper.hpp"
-#include <boost/program_options.hpp>
-#include <iostream>
 
-using namespace fo;
 namespace po = boost::program_options;
 
 /**
@@ -68,10 +64,10 @@ int queryAgentId(DbManager &dbManager) {
 
 /**
  * @brief Write ARS to the agent's ars table
- * @param state State of the agent
- * @param arsId ARS id (0 for new entry)
+ * @param state     State of the agent
+ * @param arsId     ARS id (0 for new entry)
  * @param uploadId  Upload ID
- * @param success Success status
+ * @param success   Success status
  * @param dbManager DbManager to use
  * @return ARS ID.
  */
@@ -86,8 +82,8 @@ int writeARS(const State &state, int arsId, int uploadId, int success,
 
 /**
  * @brief Process a given upload id, scan from statements and add to database
- * @param state State of the agent
- * @param uploadId  Upload id to be processed
+ * @param state           State of the agent
+ * @param uploadId        Upload id to be processed
  * @param databaseHandler Database handler object
  * @return True when upload is successful
  */
@@ -124,8 +120,8 @@ bool processUploadId(const State &state, int uploadId,
 }
 /**
  * @brief match PFile with Licenses
- * @param state State of the agent
- * @param pFileId pfile Id of upload
+ * @param state           State of the agent
+ * @param pFileId         pfile Id of upload
  * @param databaseHandler Database handler object
  * @return true on success, false otherwise
  */
@@ -165,7 +161,7 @@ bool matchPFileWithLicenses(const State &state, unsigned long pFileId,
  * scan file with scancode and save result in the database
  *  
  * @param state state of the agent
- * @param file  code/binary file sent by scheduler 
+ * @param file            code/binary file sent by scheduler 
  * @param databaseHandler databaseHandler Database handler object
  * @return true on saving scan result successfully, false otherwise
  */
@@ -193,9 +189,9 @@ return saveLicenseMatchesToDatabase(
  * save license in license_file table
  * save license highlight inforamtion in highlight table
  * 
- * @param state state of the agent
- * @param matches vector of objects of Match class
- * @param pFileId pfile Id
+ * @param state           state of the agent
+ * @param matches         vector of objects of Match class
+ * @param pFileId         pfile Id
  * @param databaseHandler databaseHandler Database handler object
  * @return true on success, false otherwise
  */
@@ -259,9 +255,9 @@ bool saveLicenseMatchesToDatabase(const State &state,
 
 /**
  * @brief save copyright/copyright holder in the database
- * @param state state of the agent
- * @param matches vector of objects of Match class
- * @param pFileId pfile Id
+ * @param state           state of the agent
+ * @param matches         vector of objects of Match class
+ * @param pFileId         pfile Id
  * @param databaseHandler databaseHandler Database handler object
  * @return  true on success, false otherwise
  */
@@ -292,10 +288,10 @@ bool saveOtherMatchesToDatabase(const State &state,
 
 /**
  * @brief parse command line options for scancode toolkit to get required falgs for scanning
- * @param[in] argc  command line arguments count 
- * @param[in] argv  command line argument vector 
- * @param[out] cliOption command line options for scancode toolkit 
- * @param[out] ignoreFilesWithMimeType  set this flag is user wants to ignore FilesWithMimeType
+ * @param[in] argc                     command line arguments count 
+ * @param[in] argv                     command line argument vector 
+ * @param[out] cliOption               command line options for scancode toolkit 
+ * @param[out] ignoreFilesWithMimeType set this flag is user wants to ignore FilesWithMimeType
  * @return  true if parsing is successful otherwise false
  */
 bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFilesWithMimeType) 
@@ -308,11 +304,11 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
   ("copyright,r", "scancode copyright")
   ("email,e", "scancode email")
   ("url,u", "scancode url")
-  ("config,c", boost::program_options::value<string>(), "path to the sysconfigdir")
+  ("config,c", po::value<string>(), "path to the sysconfigdir")
   ("scheduler_start", "specifies, that the command was called by the scheduler")
-  ("userID", boost::program_options::value<int>(), "the id of the user that created the job (only in combination with --scheduler_start)")
-  ("groupID", boost::program_options::value<int>(), "the id of the group of the user that created the job (only in combination with --scheduler_start)")
-  ("jobId", boost::program_options::value<int>(), "the id of the job (only in combination with --scheduler_start)");
+  ("userID", po::value<int>(), "the id of the user that created the job (only in combination with --scheduler_start)")
+  ("groupID", po::value<int>(), "the id of the group of the user that created the job (only in combination with --scheduler_start)")
+  ("jobId", po::value<int>(), "the id of the job (only in combination with --scheduler_start)");
   po::variables_map vm;
   try
   {
@@ -336,7 +332,7 @@ bool parseCommandLine(int argc, char **argv, string &cliOption, bool &ignoreFile
     cout << desc << "\n";
     return false;
   } 
-  catch (boost::program_options::error &) 
+  catch (po::error &) 
   {
     LOG_FATAL("wrong command line arguments\n");
     cout << desc << "\n";

@@ -23,17 +23,27 @@
 #define AGENT_DESC "scancode agent"
 #define AGENT_ARS  "scancode_ars"
 
+#include <iostream>
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
 #include "files.hpp"
 #include "match.hpp"
 #include "scancode_state.hpp"
+#include "scancode_wrapper.hpp"
 
 extern "C" {
 #include "libfossology.h"
 }
 
 using namespace std;
+
+/**
+ * @brief Utility functions for file handling
+ */
+using namespace fo;
 
 State getState(fo::DbManager& dbManager);
 int queryAgentId(fo::DbManager& dbManager);

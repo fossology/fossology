@@ -17,16 +17,6 @@
  *****************************************************************************/
 
 #include "scancode_dbhandler.hpp"
-#include "libfossUtils.hpp"
-
-#include <iostream>
-
-/**
- * @brief Utility functions for file handling
- */
-using namespace fo;
-using namespace std;
-
 
 /**
  * @brief Default constructor for DatabaseEntry
@@ -44,14 +34,13 @@ DatabaseEntry::DatabaseEntry() :
 
 /**
  * @brief constructor for DatabaseEntry
- * @param match object of type Match class
+ * @param match   object of type Match class
  * @param agentId primary key of ScanCode agent
  * @param pfileId primary key of pfile
  */
-DatabaseEntry::DatabaseEntry(Match match,unsigned long agentId, unsigned long pfileId) :
-        agent_fk(agentId),
-        pfile_fk(pfileId),
-        hash("")  
+DatabaseEntry::DatabaseEntry(Match match, unsigned long agentId,
+                             unsigned long pfileId) :
+    agent_fk(agentId), pfile_fk(pfileId), hash("")
 {
   content = match.getMatchName();
   type = match.getType();
@@ -80,7 +69,6 @@ std::string ScancodeDatabaseHandler::getColumnCreationString(const ScancodeDatab
   }
   return result;
 }
-
 
 /**
  * @brief Default constructor for ScanCode Database Handler class
@@ -233,7 +221,7 @@ void ScancodeDatabaseHandler::insertOrCacheLicenseIdForName(string const& rfShor
 
 /**
  * @brief for given short name search license 
- * @param rfShortName spdx license key for the license
+ * @param rfShortName   spdx license key for the license
  * @return license id if found in license_ref table, 0 otherwise
  */
 unsigned long ScancodeDatabaseHandler::getCachedLicenseIdForName(string const& rfShortName) const
@@ -269,14 +257,11 @@ bool hasEnding(string const &firstString, string const &ending)
   }
 }
 
-//  TODO insert license text to database
-// create a scancode plugin
-
 /**
  * @brief insert license if not present in license_ref table and return rf_pk
  * @param rfShortName  spdx license key for the license
  * @param rfFullName   full name of the license
- * @param rfTextUrl   reference url for license text
+ * @param rfTextUrl    reference url for license text
  * @return licenseId on success, 0 on failure
  */
 unsigned long ScancodeDatabaseHandler::selectOrInsertLicenseIdForName(string rfShortName, string rfFullname, string rfTexturl)
@@ -415,7 +400,7 @@ unsigned long ScancodeDatabaseHandler::selectOrInsertLicenseIdForName(string rfS
 
 /**
  * @brief insert copyright/author in scancode_copyright/scancode_author table 
- * @param entry object of DatabaseEntry class
+ * @param entry   object of DatabaseEntry class
  * @return  true on success, false otherwise
  */
 bool ScancodeDatabaseHandler::insertInDatabase(DatabaseEntry& entry) const
@@ -475,8 +460,10 @@ bool ScancodeDatabaseHandler::createTables() const
   dbManager.ignoreWarnings(false);
   return tablesChecked;
 }
-// #define SEQUENCENAME "%s"
 
+/**
+ * @brief Columns required to store copyright information by scancode agent
+ */
 const ScancodeDatabaseHandler::ColumnDef
     ScancodeDatabaseHandler::columns_copyright[] = {
 #define CSEQUENCE_NAME "scancode_copyright_pk_seq"
@@ -493,6 +480,9 @@ const ScancodeDatabaseHandler::ColumnDef
         {"is_enabled", "boolean", "NOT NULL DEFAULT TRUE"},
 };
 
+/**
+ * @brief Columns required to store author information by scancode agent
+ */
 const ScancodeDatabaseHandler::ColumnDef
     ScancodeDatabaseHandler::columns_author[] = {
 #define ASEQUENCE_NAME "scancode_author_pk_seq"
@@ -511,7 +501,7 @@ const ScancodeDatabaseHandler::ColumnDef
 
 /**
  * @brief create table to store agent findings
- * @param table name
+ * @param tableName   name of the table to be created
  * @return  true on successful creation, false otherwise
  */
 bool ScancodeDatabaseHandler::createTableAgentFindings( string tableName) const
@@ -590,7 +580,9 @@ bool ScancodeDatabaseHandler::createTableAgentFindings( string tableName) const
   return true;
 }
  
-
+/**
+ * @brief Columns required to store copyright deactivated statement
+ */
 const ScancodeDatabaseHandler::ColumnDef
     ScancodeDatabaseHandler::columns_copyright_event[] = {
 #define CESEQUENCE_NAME "scancode_copyright_event_pk_seq"
@@ -606,6 +598,9 @@ const ScancodeDatabaseHandler::ColumnDef
         {"scope", "int4", "NOT NULL"},
 };
 
+/**
+ * @brief Columns required to store author deactivated statement
+ */
 const ScancodeDatabaseHandler::ColumnDef
     ScancodeDatabaseHandler::columns_author_event[] = {
 #define AESEQUENCE_NAME "scancode_author_event_pk_seq"
@@ -623,7 +618,7 @@ const ScancodeDatabaseHandler::ColumnDef
 
 /**
  * @brief create table to store agent events
- * @param table name
+ * @param tableName   name of the table to be created
  * @return  true on successful creation, false otherwise
  */
 bool ScancodeDatabaseHandler::createTableAgentEvents( string tableName) const
@@ -708,6 +703,3 @@ bool ScancodeDatabaseHandler::createTableAgentEvents( string tableName) const
   }
   return true;
 }
-
-
-// TODO insertNoResult function for copyright and author

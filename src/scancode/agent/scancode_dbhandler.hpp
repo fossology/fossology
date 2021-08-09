@@ -19,20 +19,27 @@
 #ifndef SCANCODE_AGENT_DATABASE_HANDLER_HPP
 #define SCANCODE_AGENT_DATABASE_HANDLER_HPP
 
+#include <algorithm>
 #include <iostream>
 #include <string>
-#include <vector>
-#include <algorithm>
 #include <unordered_map>
-#include "match.hpp"
+#include <vector>
 
 #include "libfossAgentDatabaseHandler.hpp"
+#include "libfossUtils.hpp"
 #include "libfossdbmanagerclass.hpp"
-
+#include "match.hpp"
 
 extern "C" {
 #include "libfossology.h"
 }
+
+using namespace std;
+
+/**
+ * @brief Utility functions for file handling
+ */
+using namespace fo;
 
 #define RETURN_IF_FALSE(query) \
   do {\
@@ -92,7 +99,6 @@ private:
   /**
    * \struct ColumnDef
    * \brief Holds the column related data for table creation
-   * \see CopyrightDatabaseHandler::columns
    */
   struct ColumnDef
   {

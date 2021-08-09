@@ -66,11 +66,6 @@ class Analysis
    */
   private $nomos;
   /**
-   * @var boolean $scancode
-   * Whether to schedule scancode agent or not
-   */
-  private $scancode;
-  /**
    * @var boolean $ojo
    * Whether to schedule ojo agent or not
    */
@@ -95,13 +90,12 @@ class Analysis
    * @param boolean $mime
    * @param boolean $monk
    * @param boolean $nomos
-   * @param boolean $scancode
    * @param boolean $ojo
    * @param boolean $reso
    * @param boolean $package
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $scancode = false, $ojo = false, $reso = false, $pkgagent = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -110,7 +104,6 @@ class Analysis
     $this->mimetype = $mimetype;
     $this->monk = $monk;
     $this->nomos = $nomos;
-    $this->scancode = $scancode;
     $this->ojo = $ojo;
     $this->reso = $reso;
     $this->pkgagent = $pkgagent;
@@ -158,9 +151,6 @@ class Analysis
       $this->pkgagent = filter_var($analysisArray["package"],
         FILTER_VALIDATE_BOOLEAN);
     }
-    if (array_key_exists("scancode", $analysisArray)) {
-      $this->scancode = filter_var($analysisArray["scancode"], FILTER_VALIDATE_BOOLEAN);
-    }
     return $this;
   }
 
@@ -191,9 +181,6 @@ class Analysis
     }
     if (stristr($analysisString, "nomos")) {
       $this->nomos = true;
-    }
-    if (stristr($analysisString, "scancode")) {
-      $this->scancode = true;
     }
     if (stristr($analysisString, "ojo")) {
       $this->ojo = true;
@@ -262,13 +249,6 @@ class Analysis
   public function getNomos()
   {
     return $this->nomos;
-  }
-  /**
-   * @return boolean
-   */
-  public function getScancode()
-  {
-    return $this->scancode;
   }
 
   /**
@@ -351,13 +331,6 @@ class Analysis
   {
     $this->nomos = filter_var($nomos, FILTER_VALIDATE_BOOLEAN);
   }
-  /**
-   * @param boolean $scancode
-   */
-  public function setScancode($scancode)
-  {
-    $this->scancode = filter_var($scancode, FILTER_VALIDATE_BOOLEAN);
-  }
 
   /**
    * @param boolean $ojo
@@ -399,8 +372,7 @@ class Analysis
       "nomos"     => $this->nomos,
       "ojo"       => $this->ojo,
       "reso"       => $this->reso,
-      "package"   => $this->pkgagent,
-      "scancode"   => $this->scancode
+      "package"   => $this->pkgagent
     ];
   }
 }

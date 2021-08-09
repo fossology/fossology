@@ -17,10 +17,6 @@
  ****************************************************************************/
 
 #include "scancode_wrapper.hpp"
-#include "scancode_utils.hpp"
-#include <boost/tokenizer.hpp>
-#include <iostream>
-#include<fstream>
 
 #define MINSCORE 50
 
@@ -55,21 +51,28 @@ unsigned getFilePointer(const string &filename, size_t start_line,
   return 0;
 }
 
+
 /**
  * @brief scan file with scancode-toolkit 
  * 
  * using cli command for custom template
- * scancode -lc --custom-output <output> --custom-template scancode_template.html <input> --license-text
+ * scancode <scancode flags> --custom-output <output> --custom-template scancode_template.html <input>
+ * scancode is a parametric agent, depending upon user's choice flags will be set.
  * -l flag scans for license
  * -c flag scans for copyright and holder
  * license score in ScanCode is percentage and 
  * copyright holder in scancode is author in FOSSology
+ * The option --license-text is a sub-option of and requires the option --license, it provides the text 
+ * in the upload file matched with the scancode license rule.
  * custom template provide only those information which
- * user wants to see. 
+ * user wants to see.
+ * --quiet helps to remove summary and/or progress message
  * 
- * @param state an object of class State which can provide agent Id and CliOptions
+ * @param state  an object of class State which can provide agent Id and CliOptions
  * @param file  code/binary file sent by scheduler
  * @return scanned data output on success, null otherwise
+ * 
+ * @see https://scancode-toolkit.readthedocs.io/en/latest/cli-reference/list-options.html#all-basic-scan-options
  */
 string scanFileWithScancode(const State &state, const fo::File &file) {
 
@@ -111,6 +114,9 @@ return result;
  * text_url-> license text reference url
  * matched_text-> text in code file matched for the license
  * start_line-> matched text start line
+ * 
+ * Incase there is no license found by scancode, 
+ * FOSSology has "No_license_found" license short name.
  *
  * In copyright array:
  * value-> copyright statement
@@ -121,7 +127,7 @@ return result;
  * start-> start line of copyright holder
  *
  * @param scancodeResult  scanned result by scancode
- * @param filename  name of the file uploaded
+ * @param filename        name of the file uploaded
  * @return map having key as type of scanned and value as content for the type
  */
 
@@ -143,41 +149,41 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
       for (unsigned int i = 0; i < licensearrays.size(); i++) 
       {
           Json::Value oneresult = licensearrays[i];
-            string licensename = oneresult["key"].asString();
-            int percentage = (int)oneresult["score"].asFloat();
-            string full_name=oneresult["name"].asString();
-            string text_url=oneresult["text_url"].asString();
-            string match_text = oneresult["matched_text"].asString();
-            unsigned long start_line=oneresult["start_line"].asUInt();
-            string temp_text= match_text.substr(0,match_text.find("\n"));
-            unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
-            unsigned length = match_text.length();
-            result["scancode_license"].push_back(Match(licensename,percentage,full_name,text_url,start_pointer,length));
+          string licensename = oneresult["key"].asString();
+          int percentage = (int)oneresult["score"].asFloat();
+          string full_name=oneresult["name"].asString();
+          string text_url=oneresult["text_url"].asString();
+          string match_text = oneresult["matched_text"].asString();
+          unsigned long start_line=oneresult["start_line"].asUInt();
+          string temp_text= match_text.substr(0,match_text.find("\n"));
+          unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
+          unsigned length = match_text.length();
+          result["scancode_license"].push_back(Match(licensename,percentage,full_name,text_url,start_pointer,length));
       }
     }
 
     Json::Value copyarrays = scancodevalue["copyrights"];
     for (unsigned int i = 0; i < copyarrays.size(); i++) {
         Json::Value oneresult = copyarrays[i];
-          string copyrightname = oneresult["value"].asString();
-          unsigned long start_line=oneresult["start"].asUInt();
-          string temp_text= copyrightname.substr(0,copyrightname.find("[\n\t]"));
-          unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
-          unsigned length = copyrightname.length();
-          string type="scancode_statement";
-          result["scancode_statement"].push_back(Match(copyrightname,type,start_pointer,length));
+        string copyrightname = oneresult["value"].asString();
+        unsigned long start_line=oneresult["start"].asUInt();
+        string temp_text= copyrightname.substr(0,copyrightname.find("[\n\t]"));
+        unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
+        unsigned length = copyrightname.length();
+        string type="scancode_statement";
+        result["scancode_statement"].push_back(Match(copyrightname,type,start_pointer,length));
     }
 
     Json::Value holderarrays = scancodevalue["holders"];
     for (unsigned int i = 0; i < holderarrays.size(); i++) {
         Json::Value oneresult = holderarrays[i];
-          string holdername = oneresult["value"].asString();
-          unsigned long start_line=oneresult["start"].asUInt();
-          string temp_text= holdername.substr(0,holdername.find("\n"));
-          unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
-          unsigned length = holdername.length();
-          string type="scancode_author";
-          result["scancode_author"].push_back(Match(holdername,type,start_pointer,length));
+        string holdername = oneresult["value"].asString();
+        unsigned long start_line=oneresult["start"].asUInt();
+        string temp_text= holdername.substr(0,holdername.find("\n"));
+        unsigned start_pointer = getFilePointer(filename, start_line, temp_text);
+        unsigned length = holdername.length();
+        string type="scancode_author";
+        result["scancode_author"].push_back(Match(holdername,type,start_pointer,length));
     }
   } else {
     LOG_FATAL("JSON parsing failed %s \n", scanner.getFormattedErrorMessages().c_str());

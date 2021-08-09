@@ -29,6 +29,7 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Analysis;
 use Fossology\UI\Api\Models\Decider;
+use Fossology\UI\Api\Models\Scancode;
 use Fossology\UI\Api\Models\Reuser;
 use Fossology\UI\Api\Models\ScanOptions;
 use Fossology\UI\Api\Models\Job;
@@ -141,6 +142,11 @@ class JobController extends RestController
         $decider->setUsingArray($scanOptionsJSON["decider"]);
         $parametersSent = true;
       }
+      $scancode = new Scancode();
+      if (array_key_exists("scancode", $scanOptionsJSON) && ! empty($scanOptionsJSON["scancode"])) {
+        $scancode->setUsingArray($scanOptionsJSON["scancode"]);
+        $parametersSent = true;
+      }
       $reuser = new Reuser(0, 'groupName', false, false);
       try {
         if (array_key_exists("reuse", $scanOptionsJSON) && ! empty($scanOptionsJSON["reuse"])) {
@@ -158,7 +164,7 @@ class JobController extends RestController
         return $response->withJson($error->getArray(), $error->getCode());
       }
 
-      $scanOptions = new ScanOptions($analysis, $reuser, $decider);
+      $scanOptions = new ScanOptions($analysis, $reuser, $decider, $scancode);
       $info = $scanOptions->scheduleAgents($folder, $upload);
       return $response->withJson($info->getArray(), $info->getCode());
     } else {

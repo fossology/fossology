@@ -16,15 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  ****************************************************************************/
 
-#include<iostream>
 #include "scancode.hpp"
-#include "scancode_wrapper.hpp"
-
-/**
- * @brief Utility functions for file handling
- */
-using namespace fo;
-using namespace std;
 
 /**
  * @def return_sched(retval)

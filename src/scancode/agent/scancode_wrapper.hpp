@@ -23,14 +23,19 @@
 #define AGENT_DESC "scancode agent"
 #define AGENT_ARS  "scancode_ars"
 
+#include <fstream>
+#include <iostream>
+#include <map>
 #include <string>
 #include <vector>
-#include<unordered_map>
+
+#include <boost/tokenizer.hpp>
+#include <jsoncpp/json/json.h>
+
 #include "files.hpp"
 #include "match.hpp"
 #include "scancode_state.hpp"
-#include <map>
-#include <jsoncpp/json/json.h>
+#include "scancode_utils.hpp"
 
 using namespace std;
 

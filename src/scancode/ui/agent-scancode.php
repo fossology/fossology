@@ -18,13 +18,14 @@
  ****************************************************************************/
 
 namespace Fossology\Scancode\Ui;
-use Symfony\Component\HttpFoundation\Request;
 
 use Fossology\Lib\Plugin\AgentPlugin;
+use Symfony\Component\HttpFoundation\Request;
 
 class ScancodesAgentPlugin extends AgentPlugin
 {
   const SCAN_FLAG = '-';
+
   public function __construct() {
     $this->Name = "agent_scancode";
     $this->Title =  _("Scancode Toolkit");
@@ -54,23 +55,21 @@ class ScancodesAgentPlugin extends AgentPlugin
     return "";
   }
 
-  // l-> license
-  // c-> copyright
-  // e-> email 
-  // u-> url
-
   /**
-   * @brief Schedule decider agent
-   * @param int $jobId
-   * @param int $uploadId
-   * @param string $errorMsg
-   * @param Request $request Session request
-   * @return string
+   * @brief Schedule scancode agent
+   * 
+   * flags:
+   * l-> license,
+   * r-> copyright,
+   * e-> email,
+   * u->url
+   * 
+   * @param int $jobId  schedule Job Id which has to add
+   * @param int $uploadId     Uploaded pfile Id 
+   * @param string $errorMsg  Erraor message which has to be dispalyed
+   * @param Request $request  Session request in html 
+   * @return int  $jobQueueId jq_pk of scheduled jobqueue or 0 if not scheduled 
    */
-
-  //  ASK: mismatch of number of arguments 
-  // UploadPageBase.php ln:144
-  
   public function scheduleAgent($jobId, $uploadId, &$errorMsg, $request)
   {
     $dependencies = array();
@@ -108,12 +107,15 @@ class ScancodesAgentPlugin extends AgentPlugin
     return parent::AgentAdd($jobId, $uploadId, $errorMsg, array_unique($dependencies) , $args);
   }
   
+  /**
+   * @copydoc Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   * @see Fossology::Lib::Plugin::AgentPlugin::AgentHasResults()
+   */
   function AgentHasResults($uploadId=0)
   {
     return CheckARS($uploadId, $this->AgentName, "scancode agent", "scancode_ars");
   }
   
-
   /**
    * Check if agent already included in the dependency list
    * @param mixed  $dependencies Array of job dependencies
@@ -132,6 +134,7 @@ class ScancodesAgentPlugin extends AgentPlugin
     }
     return false;
   }
+
   /**
    * @copydoc Fossology::Lib::Plugin::AgentPlugin::preInstall()
    * @see Fossology::Lib::Plugin::AgentPlugin::preInstall()

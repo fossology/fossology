@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.4
+  version: 1.3.5
   contact:
     email: fossology@fossology.org
   license:
@@ -501,6 +501,7 @@ paths:
               - ojo
               - reportImport
               - reso
+              - scancode
           uniqueItems: true
         style: form
         explode: false
@@ -1445,6 +1446,8 @@ components:
           $ref: '#/components/schemas/LicenseDecider'
         reuse:
           $ref: '#/components/schemas/Reuser'
+        scancode:
+          $ref: '#/components/schemas/Scancode'
     Upload:
       type: object
       properties:
@@ -1657,6 +1660,21 @@ components:
       required:
         - reuse_uplod
         - reuse_group
+    Scancode:
+      type: object
+      properties:
+        license:
+          type: boolean
+          description: A full comparison between the database of licenses present in ScanCode and the code uploaded by users based approach. 
+        copyright:
+          type: boolean
+          description: Copyright along with copyright holder/author information.
+        email:
+          type: boolean
+          description: Email(s) present in the scan code file.
+        url:
+          type: boolean
+          description: URL(s) present in the scan code file.
     Folder:
       type: object
       properties:

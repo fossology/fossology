@@ -43,6 +43,7 @@ public:
   unsigned getLength() const;
 
 private:
+
   /**
    * value/content matched
    * spdx short name incase of licenses
@@ -50,26 +51,32 @@ private:
    * copyright holder
    */
   string matchName;
+
   /**
    * scan type
    */
   string type;
+
   /**
    * score of a rule to matched with the output licenes
    */
   int percentage;
+
   /**
    * Full name of the licenses scanned
    */
   string licenseFullName;
+
   /**
    * reference text URL
    */
   string textUrl;
+
   /**
    * start byte of matched text
    */
   unsigned startPosition;
+
   /**
    * no of bytes matched 
    */
