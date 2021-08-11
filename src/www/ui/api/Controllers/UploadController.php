@@ -117,7 +117,7 @@ class UploadController extends RestController
     }
 
     $page = $request->getHeaderLine(self::PAGE_PARAM);
-    if (! empty($page)) {
+    if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
         $info = new Info(400, "page should be positive integer > 0",
