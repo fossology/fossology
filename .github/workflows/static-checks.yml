@@ -77,3 +77,12 @@ jobs:
           composer install --prefer-dist --working-dir=src
           sudo phpdismod -v ALL -s ALL xdebug
           src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
+
+  openapi-lint:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: swagger-cli
+      uses: vaibhav-jain/spectral-action/@v2.6
+      with:
+        file_path: src/www/ui/api/documentation/openapi.yaml

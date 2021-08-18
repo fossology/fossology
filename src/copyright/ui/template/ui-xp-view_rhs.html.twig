@@ -5,42 +5,42 @@
   <input name="changedSomething" id="changedSomething" type="hidden" value="false"/>
   <table>
     <tr>
-      <td>
+      <td style="vertical-align:top;">
         <div class="groupBox">
-          <button type="submit" name="update"  id="prev" disabled >&lt;</button>
-          <button type="submit" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
-          <button type="submit" name="update" id="next" disabled  >&gt;</button>
+          <button type="submit" class="btn btn-sm" name="update"  id="prev" disabled >&lt;</button>
+          <button type="submit" class="btn btn-sm" name="update" onclick="form.action = '{{ uri }}&item={{ itemId }}';">Submit</button>
+          <button type="submit" class="btn btn-sm" name="update" id="next" disabled  >&gt;</button>
         </div>
       </td>
       <td>
         <p>
-          <input type="radio" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
-          <input type="radio" name="FileSelection" id="FileSelection" value="{{ skipOption }}"> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
+          <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" id="FileSelection" value="none"> {{ 'Go through all files'|trans }}<br>
+          <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" id="FileSelection" value="{{ skipOption }}"> {{ 'Go through all files'|trans }} {{ 'with'|trans }} {{ xptext|trans }}<br>
         </p>
       </td>
     </tr>
   </table>
   <span id="editingExistingWarning" hidden><b>You are editing an existing decision. [<a href="#" onclick="event.preventDefault();clearDecisionEditing();">clear</a>]</b></span>
   <div class="groupBox">
-    <fieldset style="display:inline">
+    <fieldset class="border p-2" style="display:inline">
       <legend>
         {{ 'Issue Type'| trans }}
       </legend>
       {% for clearingTypeVal, clearingType in clearingTypes %}
         <input type="radio" {% if clearingTypeVal == selectedClearingType %}checked=""{% endif %} name="clearingTypes"
-               value="{{ clearingTypeVal }}" class="supervised"/>
+               value="{{ clearingTypeVal }}" class="supervised info-bullet view-license-rc-size"/>
         {{ clearingType }}
         <br/>
       {% endfor %}
     </fieldset>
     <br/>
     <input type="number" name="decision_pk" value="-1" hidden>
-    {{ 'Description'| trans }}<img src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
-    <textarea rows="2" name="description" style="width:90%" class="supervised">{{ description }}</textarea><br/>
+    {{ 'Description'| trans }}<img data-toggle="tooltip" src="images/info_16.png" title="{{ 'Classification of the finding, such as copyright statement or TSU number or ECC warning or author but no copyright statement'|trans }}" alt="" class="info-bullet"/>: <br/>
+    <textarea rows="2" name="description" data-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ description }}</textarea><br/>
     {{ 'Text finding'| trans }}<img src="images/info_16.png" title="{{ 'Exact text finding, if the regular expression match is wrong not matching everything, too much'|trans }}" alt="" class="info-bullet"/>: <br/>
-    <textarea rows="2" name="textFinding" style="width:90%" class="supervised">{{ textFinding }}</textarea><br/>
+    <textarea rows="2" name="textFinding" data-toggle="tooltip" style="width:90%" class="supervised form-control-sm">{{ textFinding }}</textarea><br/>
     {{ 'Comment'| trans }}<img src="images/info_16.png" title="{{ 'A user can place comment for leaving a notice that ma be viewed by other users on Fossology'|trans }}" alt="" class="info-bullet"/>: <br/>
-    <textarea rows="2" name="comment" style="width:90%" class="supervised">{{ comment }}</textarea><br/>
+    <textarea rows="2" name="comment" style="width:90%" class="supervised form-control-sm">{{ comment }}</textarea><br/>
   </div>
 </form>
 
@@ -109,7 +109,7 @@
               , uploadTreePk : '{{ itemId }}'},
         success: function(data) {
           $("#actionsOf" + pk + " .basicActions").hide();
-          $("#actionsOf" + pk + " .undoActions").show();
+          $("#actionsOf" + pk + " .undoActions").attr("style","display:inline !important;");
         },
         error: function() { alert('error'); }
       });
@@ -125,7 +125,7 @@
           , pfile : '{{ pfile }}'
           , uploadTreePk : '{{ itemId }}'},
         success: function(data) {
-          $("#actionsOf" + pk + " .basicActions").show();
+          $("#actionsOf" + pk + " .basicActions").attr("style","display:inline !important;");
           $("#actionsOf" + pk + " .undoActions").hide();
         },
         error: function() { alert('error'); }

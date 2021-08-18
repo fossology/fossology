@@ -39,6 +39,7 @@ OjoAgent::OjoAgent() :
  * @param filePath        The file to be scanned.
  * @param databaseHandler Database handler to be used.
  * @param groupId         Group running the scan
+ * @param userId          User running the scan
  * @return List of matches found.
  * @sa OjoAgent::scanString()
  * @sa OjoAgent::filterMatches()
@@ -47,7 +48,7 @@ OjoAgent::OjoAgent() :
  * read with the file path in description.
  */
 vector<ojomatch> OjoAgent::processFile(const string &filePath,
-  OjosDatabaseHandler &databaseHandler, const int groupId)
+  OjosDatabaseHandler &databaseHandler, const int groupId, const int userId)
 {
   ifstream stream(filePath);
   std::stringstream sstr;
@@ -68,7 +69,7 @@ vector<ojomatch> OjoAgent::processFile(const string &filePath,
     scanString(m.content, regDualLicense, licenseNames, m.start, true);
   }
 
-  findLicenseId(licenseNames, databaseHandler, groupId);
+  findLicenseId(licenseNames, databaseHandler, groupId, userId);
   filterMatches(licenseNames);
 
   return licenseNames;
@@ -169,14 +170,15 @@ void OjoAgent::filterMatches(vector<ojomatch> &matches)
  * @param[in,out] matches List of matches to be updated
  * @param databaseHandler Database handler to be used
  * @param groupId         Group running the scan
+ * @param userId          User running the scan
  */
 void OjoAgent::findLicenseId(vector<ojomatch> &matches,
-  OjosDatabaseHandler &databaseHandler, const int groupId)
+  OjosDatabaseHandler &databaseHandler, const int groupId, const int userId)
 {
   // Update license_fk
   for (size_t i = 0; i < matches.size(); ++i)
   {
     matches[i].license_fk = databaseHandler.getLicenseIdForName(
-      matches[i].content, groupId);
+      matches[i].content, groupId, userId);
   }
 }

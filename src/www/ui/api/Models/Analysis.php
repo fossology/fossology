@@ -1,6 +1,7 @@
 <?php
 /***************************************************************
 Copyright (C) 2017 Siemens AG
+Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -71,6 +72,11 @@ class Analysis
   private $ojo;
   /**
    * @var boolean $pkgagent
+   * Whether to schedule reso agent or not
+   */
+  private $reso;
+  /**
+   * @var boolean $pkgagent
    * Whether to schedule package agent or not
    */
   private $pkgagent;
@@ -85,10 +91,11 @@ class Analysis
    * @param boolean $monk
    * @param boolean $nomos
    * @param boolean $ojo
+   * @param boolean $reso
    * @param boolean $package
    */
   public function __construct($bucket = false, $copyright = false, $ecc = false, $keyword = false,
-    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $pkgagent = false)
+    $mimetype = false, $monk = false, $nomos = false, $ojo = false, $reso = false, $pkgagent = false)
   {
     $this->bucket = $bucket;
     $this->copyright = $copyright;
@@ -98,6 +105,7 @@ class Analysis
     $this->monk = $monk;
     $this->nomos = $nomos;
     $this->ojo = $ojo;
+    $this->reso = $reso;
     $this->pkgagent = $pkgagent;
   }
 
@@ -136,6 +144,9 @@ class Analysis
     if (array_key_exists("ojo", $analysisArray)) {
       $this->ojo = filter_var($analysisArray["ojo"], FILTER_VALIDATE_BOOLEAN);
     }
+    if (array_key_exists("reso", $analysisArray)) {
+      $this->reso = filter_var($analysisArray["reso"], FILTER_VALIDATE_BOOLEAN);
+    }
     if (array_key_exists("package", $analysisArray)) {
       $this->pkgagent = filter_var($analysisArray["package"],
         FILTER_VALIDATE_BOOLEAN);
@@ -173,6 +184,9 @@ class Analysis
     }
     if (stristr($analysisString, "ojo")) {
       $this->ojo = true;
+    }
+    if (stristr($analysisString, "reso")) {
+      $this->reso = true;
     }
     if (stristr($analysisString, "pkgagent")) {
       $this->pkgagent = true;
@@ -243,6 +257,14 @@ class Analysis
   public function getOjo()
   {
     return $this->ojo;
+  }
+
+  /**
+   * @return boolean
+   */
+  public function getReso()
+  {
+    return $this->reso;
   }
 
   /**
@@ -319,6 +341,14 @@ class Analysis
   }
 
   /**
+   * @param boolean $reso
+   */
+  public function setReso($reso)
+  {
+    $this->reso = filter_var($reso, FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
    * @param boolean $package
    */
   public function setPackage($package)
@@ -341,6 +371,7 @@ class Analysis
       "monk"      => $this->monk,
       "nomos"     => $this->nomos,
       "ojo"       => $this->ojo,
+      "reso"       => $this->reso,
       "package"   => $this->pkgagent
     ];
   }

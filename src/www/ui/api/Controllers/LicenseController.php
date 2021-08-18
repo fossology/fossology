@@ -145,6 +145,7 @@ class LicenseController extends RestController
   public function getAllLicenses($request, $response, $args)
   {
     $retVal = null;
+    $query = $request->getQueryParams();
     $limit = $request->getHeaderLine(self::LIMIT_PARAM);
     if (! empty($limit)) {
       $limit = filter_var($limit, FILTER_VALIDATE_INT);
@@ -157,12 +158,18 @@ class LicenseController extends RestController
       $limit = self::LICENSE_FETCH_LIMIT;
     }
 
-    $totalPages = $this->dbHelper->getLicenseCount(
+    $kind = "all";
+    if (array_key_exists("kind", $query) && !empty($query["kind"]) &&
+      (array_search($query["kind"], ["all", "candidate", "main"]) !== false)) {
+        $kind = $query["kind"];
+    }
+
+    $totalPages = $this->dbHelper->getLicenseCount($kind,
       $this->restHelper->getGroupId());
     $totalPages = intval(ceil($totalPages / $limit));
 
     $page = $request->getHeaderLine(self::PAGE_PARAM);
-    if (! empty($page)) {
+    if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
         $info = new Info(400, "page should be positive integer > 0",
@@ -189,7 +196,7 @@ class LicenseController extends RestController
     }
 
     $licenses = $this->dbHelper->getLicensesPaginated($page, $limit,
-      $this->restHelper->getGroupId(), $onlyActive);
+      $kind, $this->restHelper->getGroupId(), $onlyActive);
     $licenseList = [];
 
     foreach ($licenses as $license) {

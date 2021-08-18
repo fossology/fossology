@@ -1,0 +1,72 @@
+# FOSSology gitpod.io configuration
+# Copyright (C) 2021 Siemens AG
+# Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+image:
+  file: .gitpod.Dockerfile
+ports:
+  - port: 5432
+    onOpen: ignore
+    visibility: private
+  - port: 24693
+    onOpen: ignore
+    visibility: private
+  - port: 8001
+    visibility: public
+    onOpen: notify
+github:
+  prebuilds:
+    master: true
+    branches: false
+    pullRequests: true
+    pullRequestsFromForks: true
+    addBadge: true
+workspaceLocation: fossology
+checkoutLocation:  fossology
+
+tasks:
+  - init: |
+      mkdir -p "/workspace/apache/"
+      ./utils/gitpod-install.sh
+    name: install
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
+    command: |
+      mkdir -p public "/workspace/apache" "/workspace/fossy/srv" "/workspace/fossy/var"
+      if [[ -z $(grep "/workspace/apache" "/etc/apache2/apache2.conf") ]];then printf '\nIncludeOptional /workspace/apache/*.conf\n' >> /etc/apache2/apache2.conf; fi
+      sudo /usr/sbin/a2enmod rewrite
+      sudo chown gitpod:gitpod -R /var/log/apache2/
+      apachectl restart
+      gp sync-done ui
+  - command: |
+      gp sync-await ui
+      sudo mkdir -p /var/log/fossology/
+      sudo chown gitpod:gitpod -R /var/log/fossology/
+      fossrun
+    name: fossology
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
+vscode:
+  extensions:
+    - "felixfbecker.php-debug"
+    - "ms-azuretools.vscode-docker"
+    - "fterrag.vscode-php-cs-fixer"

@@ -1,5 +1,107 @@
 # Changelog of FOSSology
 
+### 3.11.0 (Jul 27th 2021)
+
+This release adds important corrections to
+[3.11.0-rc2](https://github.com/fossology/fossology/releases/tag/3.11.0-rc2)
+
+The release 3.11.0 introduces following major changes since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+* Add bulk undo for deactivated copyrights.
+* Configurable irrelevant file scan for monkbulk.
+* Add job to remove expired tokens from database.
+* Add a simple search to get folder.
+* Unit test cases for REST API.
+* Reuse edited copyright.
+* Add scroll to NOTICE file modal.
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+NOTE:
+ The release 3.11.0 also introduces new agent `reso` which copies
+ license findings from OJO based on REUSE.Software standard on
+ what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0
+
+From the GIT commit history, we have following contributors since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Anwar Hashmi @HashmiAS
+> bighnesh0404 <saibighneshprusty@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> OmarAbdelSamea <1700903@eng.asu.edu.eg>
+> R3da <hash.rkh@gmail.com>
+> Rolf Eike Beer <eb@emlix.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> shivamgoyal7 <goyalshivam661@gmail.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Wonjae Park <wonjae.park@lge.com>
+> Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+
+```
+#### Corrections
+
+* `e4803b8fe` fix(migration): check if uploadtree is empty
+* `635d4904a` fix(rules) : adding debian package for reso agent
+* `b44249e2d` fix(copyright):Change menu text of copyright page
+
+### 3.11.0-RC2 (Jul 12th 2021)
+
+This release adds important corrections to
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1)
+
+The release 3.11.0-rc2 introduces following major changes since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+The release 3.11.0-rc2 also introduces new agent `reso` which copies
+license findings from OJO based on REUSE.Software standard on
+what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0-RC2
+
+From the GIT commit history, we have following contributors since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+
+```
+#### Corrections
+
+* `f7c7715fa` fix(reso) fix comment
+* `8e399f0cd` fix(ojo): Set candidate license creator
+* `8031b128b` fix(auth): read default visibility from database rather then config file
+* `b3f0d1db0` fix(api): Check for duplicate shortnames
+* `2d6d8b187` fix(auth): fix call to add_user() when login from external auth
+
+#### Features
+
+* `df52e53ba` feat(rest): Filter licenses by kind
+* `3c98947cf` feat(expose-headers): added the expose headers option for response headers
+* `d1031cae3` feat(reso): new agent for REUSE.Software standard
+* `2e1d28eb1` feat(rest): Add POST/PATCH license endpoints
+
+#### Infrastructure
+
+* `93a47eab0` docs(licenses): updating the license info files
+* `0eacc14af` test(api): Test cases for LicenseController
+
 ### 3.11.0-RC1 (Jun 29th 2021)
 
 This release adds important corrections to

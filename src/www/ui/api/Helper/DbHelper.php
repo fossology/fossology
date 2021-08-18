@@ -482,11 +482,12 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    *
    * @param integer $page    Which page number to fetch
    * @param integer $limit   Limit of results
+   * @param string  $kind    Which kind of licenses to fetch
    * @param integer $groupId Group of the user
    * @param boolean $active  True to get only active licenses
    * @return array
    */
-  public function getLicensesPaginated($page, $limit, $groupId, $active)
+  public function getLicensesPaginated($page, $limit, $kind, $groupId, $active)
   {
     $statementName = __METHOD__;
     $rfTable = 'license_all';
@@ -495,6 +496,11 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     if ($active) {
       $options['extraCondition'] = "rf_active = '" .
         $this->dbManager->booleanToDb($active) . "'";
+    }
+    if ($kind == "candidate") {
+      $options['diff'] = true;
+    } elseif ($kind == "main") {
+      $groupId = 0;
     }
     $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
     $withCte = $licenseViewDao->asCTE();
@@ -508,17 +514,30 @@ FROM $tableName WHERE $idRowName = $1", [$id],
   /**
    * Get the count of licenses accessible by user based on group ID
    *
+   * @param string  $kind    Which kind of licenses to look for
    * @param integer $groupId Group of the user
    * @return int Count of licenses
    */
-  public function getLicenseCount($groupId)
+  public function getLicenseCount($kind, $groupId)
   {
-    $result = $this->dbManager->getSingleRow(
-      "SELECT sum(cnt) AS total FROM (" .
-      " SELECT count(*) AS cnt FROM ONLY license_ref " .
-      " UNION ALL " .
-      " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1" .
-      ") as all_lic;", [$groupId], __METHOD__ . ".getLicenseCount");
+    $sql = "SELECT sum(cnt) AS total FROM (";
+    $mainLicSql = " SELECT count(*) AS cnt FROM ONLY license_ref ";
+    $candidateLicSql = " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1";
+    $params = [];
+
+    if ($kind == "main") {
+      $sql .= $mainLicSql;
+    } elseif ($kind == "candidate") {
+      $sql .= $candidateLicSql;
+      $params[] = $groupId;
+    } else {
+      $sql .= $mainLicSql . " UNION ALL " . $candidateLicSql;
+      $params[] = $groupId;
+    }
+    $sql .= ") as all_lic;";
+
+    $statement = __METHOD__ . ".getLicenseCount.$kind";
+    $result = $this->dbManager->getSingleRow($sql, $params, $statement);
     return intval($result['total']);
   }
 }

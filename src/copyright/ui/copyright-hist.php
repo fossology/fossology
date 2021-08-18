@@ -96,12 +96,12 @@ class CopyrightHistogram extends HistogramBase {
     {
       if (GetParm("mod",PARM_STRING) == $this->Name)
       {
-        menu_insert("Browse::Copyright agent/user findings",10);
+        menu_insert("Browse::Copyright",10);
         menu_insert("Browse::[BREAK]",100);
       }
       else
       {
-        $text = _("View copyright agent/user findings histogram");
+        $text = _("View copyright histogram");
         menu_insert("Browse::Copyright",10,$URI,$text);
       }
     }

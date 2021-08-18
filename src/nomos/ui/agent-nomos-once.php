@@ -150,23 +150,8 @@ class agent_nomos_once extends FO_Plugin
     /* Only register with the menu system if the user is logged in. */
     if (! empty($_SESSION['User'])) {
       if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_WRITE) {
-        menu_insert("Main::Upload::One-Shot Analysis", $this->MenuOrder,
+        menu_insert("Main::Upload::One-Shot Nomos Analysis", $this->MenuOrder,
           $this->Name, $this->MenuTarget);
-      }
-      // Debugging changes to license analysis
-      if ($_SESSION[Auth::USER_LEVEL] >= PLUGIN_DB_ADMIN) {
-        $URI = $this->Name . Traceback_parm_keep(array(
-          "format",
-          "item"
-        ));
-        $menuText = "One-Shot License";
-        $menuPosition = 100;
-        $tooltipText = _("One-shot License, real-time license analysis");
-        menu_insert("View::[BREAK]", $menuPosition);
-        menu_insert("View::{$menuText}", $menuPosition + 1, $URI, $tooltipText);
-        menu_insert("View-Meta::[BREAK]", $menuPosition);
-        menu_insert("View-Meta::{$menuText}", $menuPosition + 1, $URI,
-          $tooltipText);
       }
     }
   }

@@ -681,7 +681,9 @@ class UnifiedReport extends Agent
     $timestamp = $jobInfo['ts'];
     $packageUri = "";
     if (!empty($jobInfo['jq_cmd_args'])) {
-      $packageUri = trim($jobInfo['jq_cmd_args'])."?mod=showjobs&upload=".$uploadId;
+      $packageUri = trim($jobInfo['jq_cmd_args']);
+      $packageUri = preg_replace("/api\/.*/i", "", $packageUri); // Remove api/v1/report
+      $packageUri .= "?mod=showjobs&upload=" . $uploadId;
     }
 
     /* Applying document properties and styling */

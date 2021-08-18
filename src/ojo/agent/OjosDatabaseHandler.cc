@@ -165,10 +165,11 @@ bool hasEnding(string const &firstString, string const &ending)
  *
  * @param rfShortName Short name to be searched.
  * @param groupId     Group id for candidate license
+ * @param userId      User who is running the agent
  * @returns License id, 0 on failure
  */
 unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
-    string rfShortName, const int groupId)
+    string rfShortName, const int groupId, const int userId)
 {
   bool success = false;
   unsigned long result = 0;
@@ -268,6 +269,11 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
     return 0;
   }
 
+  if (userId < 1)
+  {
+    return 0;
+  }
+
   unsigned count = 0;
   while ((!success) && count++ < 3)
   {
@@ -287,8 +293,9 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
           "),"
           "insertNew AS ("
           "INSERT INTO license_candidate"
-          "(rf_shortname, rf_text, rf_detector_type, group_fk)"
-          " SELECT $1, $2, $3, $4"
+          "(rf_shortname, rf_text, rf_detector_type, group_fk, "
+          "rf_user_fk_created, rf_user_fk_modified)"
+          " SELECT $1, $2, $3, $4, $5, $5"
           " WHERE NOT EXISTS(SELECT * FROM selectExisting)"
           " RETURNING rf_pk"
           ") "
@@ -296,9 +303,9 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
           "SELECT rf_pk FROM insertNew "
           "UNION "
           "SELECT rf_pk FROM selectExisting",
-          char*, char*, int, int
+          char*, char*, int, int, int
         ),
-        rfShortName.c_str(), "License by OJO.", 3, groupId);
+        rfShortName.c_str(), "License by OJO.", 3, groupId, userId);
 
     success = queryResult && queryResult.getRowCount() > 0;
 
@@ -326,16 +333,18 @@ unsigned long OjosDatabaseHandler::selectOrInsertLicenseIdForName(
  * The function first checks if the license exists in the cache list. If the
  * license is not cached, it checks in DB and store in the cache.
  * @param rfShortName Short name to be searched
+ * @param groupId     Group running the agent
+ * @param userId      UserRunning the agent
  * @returns License ID if found, 0 otherwise
  * @sa OjosDatabaseHandler::getCachedLicenseIdForName()
  */
 unsigned long OjosDatabaseHandler::getLicenseIdForName(
-    string const &rfShortName, const int groupId)
+    string const &rfShortName, const int groupId, const int userId)
 {
   unsigned long licenseId = getCachedLicenseIdForName(rfShortName);
   if (licenseId == 0)
   {
-    licenseId = selectOrInsertLicenseIdForName(rfShortName, groupId);
+    licenseId = selectOrInsertLicenseIdForName(rfShortName, groupId, userId);
     licenseRefCache.insert(std::make_pair(rfShortName, licenseId));
   }
   return licenseId;

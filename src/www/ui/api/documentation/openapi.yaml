@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.0
+  version: 1.3.3
   contact:
     email: fossology@fossology.org
   license:
@@ -56,51 +56,9 @@ tags:
   description: License and obligation management
 
 paths:
-  /auth:
-    get:
-      tags:
-        - auth
-      deprecated: true
-      security: []
-      summary: Get a login session registered (deprecated, use /tokens)
-      description: >
-        Get a login session registered using the username and password
-      parameters:
-        - name: username
-          required: true
-          description: Username of the login user
-          in: query
-          schema:
-            type: string
-        - name: password
-          required: true
-          description: Password of the user trying to login
-          in: query
-          schema:
-            type: string
-      responses:
-        '299':
-          description: Resource is deprecated. Use /tokens
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  header:
-                      type: string
-              example:
-                {"header": "authorization: Basic Zm9zc3k6Zm9zc3k="}
-        '404':
-          description: UserName or password incorrect
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Info'
-        default:
-          $ref: '#/components/responses/defaultResponse'
-
   /tokens:
     post:
+      operationId: createToken
       tags:
         - auth
       security: []
@@ -140,30 +98,66 @@ paths:
 
   /version:
     get:
+      operationId: getVersion
+      deprecated: true
       tags:
         - info
       security: []
-      summary: Get the current API information
+      summary: Current API information
       description: >
-        Get the current API version and supported authentication methods
+        Deprecated in favour of /info endpoint.
       responses:
         '200':
           description: The version and security information
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  version:
-                      type: string
-                      description: Current API version as per documentation
-                  security:
-                      type: array
-                      items:
-                        type: string
-
+                $ref: '#/components/schemas/ApiInfo'
         default:
           $ref: '#/components/responses/defaultResponse'
+
+  /info:
+    get:
+      operationId: getInfo
+      tags:
+        - info
+      security: []
+      summary: Get the current API information
+      description: >
+        Get the current API version, supported authentication methods
+        and description
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiInfo'
+        default:
+          $ref: '#/components/responses/defaultResponse'
+
+  /health:
+    get:
+      operationId: getHealth
+      tags:
+        - info
+      security: []
+      summary: Get the status of API service
+      description: >
+        Check if API is ready to accept requests or not
+      responses:
+        '200':
+          description: The API information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeathInfo'
+        '503':
+          description: The API is not unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeathInfo'
 
   /uploads/{id}:
     parameters:
@@ -181,6 +175,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getUploadById
       tags:
         - Upload
       summary: Get single upload by id
@@ -209,10 +204,13 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteUploadById
       tags:
         - Upload
         - Organize
       summary: Delete upload by id
+      description: >
+        Delete a single upload by id
       responses:
         '202':
           description: Upload will be deleted
@@ -223,6 +221,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: moveUploadById
       tags:
         - Upload
         - Organize
@@ -244,6 +243,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
+      operationId: copyUploadById
       tags:
         - Upload
         - Organize
@@ -275,6 +275,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getUploads
       tags:
         - Upload
       summary: Uploads
@@ -326,6 +327,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createUpload
       tags:
         - Upload
       summary: Post new upload to FOSSology
@@ -416,6 +418,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getSummaryByUploadId
       tags:
         - Upload
       summary: Get single upload summary
@@ -466,6 +469,7 @@ paths:
               - ninka
               - ojo
               - reportImport
+              - reso
           uniqueItems: true
         style: form
         explode: false
@@ -484,6 +488,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicensesByUploadId
       tags:
         - Upload
       summary: Get licenses found by agent
@@ -522,6 +527,7 @@ paths:
 
   /search:
     get:
+      operationId: searchFile
       tags:
         - Search
       description: Search the FOSSology for a specific file
@@ -602,6 +608,7 @@ paths:
           $ref: '#/components/responses/defaultResponse'
   /users:
     get:
+      operationId: getUsers
       tags:
         - User
         - Admin
@@ -625,10 +632,13 @@ paths:
         schema:
           type: integer
     get:
+      operationId: getUserById
       tags:
         - User
         - Admin
       summary: Get user by id
+      description: >
+        Get one single user by id
       responses:
         '200':
           description: User with the given id
@@ -639,10 +649,13 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteUserById
       tags:
         - User
         - Admin
       summary: Delete user by id
+      description: >
+        Delete a single user by id
       responses:
         '202':
           description: User will be deleted
@@ -654,6 +667,7 @@ paths:
             $ref: '#/components/responses/defaultResponse'
   /users/self:
     get:
+      operationId: getSelf
       tags:
         - User
       description: Get the information about logged in user
@@ -676,6 +690,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getJobs
       tags:
       - Job
       summary: Gets all jobs
@@ -716,6 +731,7 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: startJobs
       tags:
         - Job
       summary: Schedule an Analysis
@@ -757,6 +773,7 @@ paths:
         schema:
           type: integer
     get:
+      operationId: getJobById
       tags:
       - Job
       summary: Gets single job by id
@@ -781,9 +798,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getFolders
       tags:
       - Folders
       summary: Get the list of accessible folders
+      description: >
+        Get all folders or from a specific group
       responses:
         '200':
           description: List of folders
@@ -796,11 +816,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createFolder
       tags:
       - Organize
       - Admin
       - Folders
       summary: Create a new folder
+      description: >
+        Create a new child folder with optional description
       parameters:
         - name: parentFolder
           in: header
@@ -851,9 +874,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getFolderById
       tags:
       - Folders
       summary: Get a single folder details
+      description:
+        Get a single folder by id
       responses:
         '200':
           description: Details of the required folder
@@ -864,11 +890,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     delete:
+      operationId: deleteFolderById
       tags:
       - Organize
       - Folders
       - Admin
       summary: Delete a folder
+      description: >
+        Schedule a folder deletion
       responses:
         '202':
           description: Folder scheduled to be deleted
@@ -879,6 +908,7 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: patchFolderById
       tags:
       - Organize
       - Folders
@@ -896,6 +926,8 @@ paths:
           schema:
             type: string
       summary: Edit a folder's description
+      description: >
+        Change a folder's name and/or description
       responses:
         '200':
           description: Folder is updated
@@ -906,6 +938,7 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     put:
+      operationId: moveFolderById
       tags:
       - Organize
       - Folders
@@ -926,6 +959,8 @@ paths:
               - copy
               - move
       summary: Copy/Move a folder
+      description: >
+        Copy or move a folder by id
       responses:
         '202':
           description: Folder will be copied/moved
@@ -938,9 +973,12 @@ paths:
 
   /groups:
     get:
+      operationId: getGroups
       tags:
       - Groups
-      summary: Get the list of groups (accessible groups for user, all groups for admin)
+      summary: Get the list of groups
+      description: >
+        Returns accessible groups for a user, all groups for an admin
       responses:
         '200':
           description: List of groups
@@ -953,11 +991,14 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createGroup
       tags:
       - Organize
       - Groups
       - Admin
       summary: Create a new group
+      description: >
+        Create a new user group
       parameters:
         - name: name
           in: header
@@ -989,10 +1030,13 @@ paths:
 
   /report:
     get:
+      operationId: getReportsByUpload
       tags:
       - Job
       - Report
       summary: Get the reports for a given upload
+      description: >
+        List all reports available for a given upload
       parameters:
         - name: uploadId
           in: header
@@ -1044,10 +1088,13 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getReportById
       tags:
       - Job
       - Report
       summary: Download the report
+      description: >
+        Get a report by id
       responses:
         '200':
           description: Required report
@@ -1084,10 +1131,13 @@ paths:
           type: string
           description: Group name, from last login if not provided
     post:
+      operationId: getFiles
       tags:
       - Upload
       - Search
       summary: Get the information of files matching the provided hashes
+      description: >
+        Get a list of files by hashes
       requestBody:
           description: List of file hashes to fetch
           required: true
@@ -1118,6 +1168,7 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicenses
       tags:
       - License
       parameters:
@@ -1143,7 +1194,20 @@ paths:
           schema:
             type: boolean
             default: false
+        - name: kind
+          description: Which kind of licenses to get.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - candidate
+              - main
+              - all
+            default: all
       summary: Get all license from the database
+      description: >
+        Get a list of available licenses (filtered by kind or status)
       responses:
         '200':
           description: All licenses from database
@@ -1169,9 +1233,12 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     post:
+      operationId: createLicense
       tags:
       - License
       summary: Create a new license
+      description: >
+        Add a new license to the database
       requestBody:
         description: Information about new license
         required: true
@@ -1219,9 +1286,12 @@ paths:
           type: string
           description: Group name, from last login if not provided
     get:
+      operationId: getLicenseByShortname
       tags:
       - License
       summary: Get a specific license
+      description: >
+        Get information about a specific license
       responses:
         '200':
           description: License
@@ -1253,9 +1323,12 @@ paths:
         default:
             $ref: '#/components/responses/defaultResponse'
     patch:
+      operationId: updateLicenseByShortname
       tags:
       - License
       summary: Update a license
+      description: >
+        Update information about a given license
       requestBody:
         description: Information to be updated
         required: true
@@ -1331,7 +1404,7 @@ components:
           description: New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses.
         ojo_decider:
           type: boolean
-          description: Scanners matches if Ojo findings are no contradiction with other findings.
+          description: Scanners matches if Ojo or REUSE.Software findings are no contradiction with other findings.
     ScanOptions:
       type: object
       properties:
@@ -1526,6 +1599,9 @@ components:
         package:
           type: boolean
           description: Should Package Analysis be run on this upload.
+        reso:
+          type: boolean
+          description: Should REUSE.Software Analysis be run on this upload.
     Reuser:
       type: object
       properties:
@@ -1840,6 +1916,68 @@ components:
           nullable: true
           example:
             "Please respect the obligation"
+    ApiInfo:
+      description: Info about the API
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the API service
+        description:
+          type: string
+          description: Additional information
+        version:
+          type: string
+          description: Current API version as per documentation
+        security:
+          type: array
+          description: Security methods allowed
+          items:
+            type: string
+        contact:
+          type: string
+          description: Contact email from API docs
+        license:
+          type: object
+          properties:
+            name:
+              type: string
+              description: Name of license
+            url:
+              type: string
+              description: Link to license
+          description: Licensing of API
+    HeathInfo:
+      description: Health status of server
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - OK
+            - WARN
+            - ERROR
+          description: Status of service
+        scheduler:
+          type: object
+          description: Scheduler information
+          properties:
+            status:
+              type: string
+              description: Health status of scheduler
+              enum:
+                - OK
+                - ERROR
+        db:
+          type: object
+          description: DB connection status
+          properties:
+            status:
+              type: string
+              description: Health status of DB connection
+              enum:
+                - OK
+                - ERROR
   responses:
     defaultResponse:
       description: Some error occured. Check the "message"

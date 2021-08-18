@@ -52,5 +52,5 @@ Usage: mod_deps [options]
 EOF
 }
 
-VERSION_PATTERN='([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)(-?rc[[:digit:]]+)?-([[:digit:]]+)-[[:alnum:]]*'
-VERSION_COMMAND="git describe --tags > /dev/null 2>&1 && git describe --tags | head -1 | sed -re 's/${VERSION_PATTERN}/\\1.\\3\\2/'"
+VERSION_PATTERN='([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)(-?rc[[:digit:]]+)?-?([[:digit:]]*)-?[[:alnum:]]*'
+VERSION_COMMAND="git describe --tags > /dev/null 2>&1 && git describe --tags | head -1 | sed -re 's/${VERSION_PATTERN}/\\1.\\3\\2/' | sed -re 's/\.$/.0/'"

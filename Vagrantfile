@@ -62,7 +62,7 @@ sudo systemctl daemon-reload
 SCRIPT
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "ubuntu/xenial64"
+  config.vm.box = "ubuntu/focal64"
   config.vm.post_up_message = $post_up_message
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.synced_folder ".", "/fossology"

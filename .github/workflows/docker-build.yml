@@ -1,0 +1,44 @@
+# Copyright 2021 Siemens AG, Gaurav Mishra <mishra.gaurav@siemens.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+name: Docker images - master
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push main image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: fossology/fossology:latest
+        context: .
+
+    - name: Build and push runner image
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        tags: fossology/fossology:scanner
+        file: utils/automation/Dockerfile.ci
