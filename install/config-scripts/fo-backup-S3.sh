@@ -45,6 +45,14 @@ repository_path="$repository_location/$repository_dirname"
 now_tag=$(date +%Y%m%d_%H%M%S)
 s3_cnx_tested=false
 aws_cmd='/usr/local/bin/aws'
+nocache_cmd=""
+
+# Set to false to _not_ use the nocache command with
+# (from man page): nocache tries  to minimize the effect an application has on the Linux file system cache.
+# Useful with tar command, as Kuberneter/Openshift (strangely) consider Cache memory as not reclaimable,
+#    resulting in frequents OOM when backing up large repositories
+#    See: https://github.com/kubernetes/kubernetes/issues/43916
+USE_NOCACHE_DIRECTIVE=true
 
 # It looks like copying from S3 and untarring to the filesystem in the same pipe
 # causes trouble and breaks the pipe.
@@ -62,12 +70,13 @@ f_aws_cmd() {
 f_help() {
   cat <<EOF
 Usage: fo-backup-s3 [options]
-  -i or --install : Install required tools (requires internet access and root privileges)
+  -i or --install : Install required tools and exits (requires internet access and root privileges)
+  -l or --list    : List files in bucket and exits
+  -t or --test    : Tests connection to S3 storage and exits
+
   -a or --alt-s3  : Use alternative environment variable names for S3 credentials
                     (prefixed with 'ALT_', where available)
-  -l or --list    : List files in bucket
   -n or --dry-run : Do not really perform backup / restore actions, for testing purposes
-  -h or --help    : Print this help
 
   -b or --backup-all      : Database and incremental repository filesystem backups
   -B or --backup-all-full : Database and full repository filesystem backups
@@ -81,6 +90,8 @@ Usage: fo-backup-s3 [options]
   -E or --restore-db <backup filename> : Restore specific database backup
   -g or --restore-fs-latest            : Restore latest repository filsystem backup
   -G or --restore-fs <backup filename> : Restore specific repository filsystem backup
+
+  -h or --help    : Print this help
 
 Expects S3 connection and credentials details in following environment variables:
   AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, BUCKET_HOST, BUCKET_NAME, BUCKET_REGION
@@ -194,6 +205,7 @@ then
     ./aws/install $update_option || f_fatal "Failed installing awscli"
     $aws_cmd --version || f_fatal "Error testing command: $aws_cmd"
     f_log "Tool 'awscli' was succesfuly installed"
+    exit 0
 fi
 
 export PGUSER=$FOSSOLOGY_DB_USER
@@ -220,21 +232,33 @@ PGPASSWORD : $PGPASSWORD_EMPTY
 PGHOST     : $FOSSOLOGY_DB_HOST
 PGDATABASE : $FOSSOLOGY_DB_NAME
 
+Config
+Temporary directory: $USE_TEMP_DIRECTORY
+No cache directive : $USE_NOCACHE_DIRECTIVE
+
 EOS
 
 
 if $ACTION_TEST_S3
 then
     f_test_s3_connection
+    exit 0
 fi
 
 if $ACTION_LIST
 then
     f_aws_cmd ls s3://$BUCKET_NAME --human-readable --summarize
+    exit $?
 fi
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# BACKUP DB
+if $USE_NOCACHE_DIRECTIVE
+then
+    nocache || f_fatal "NOCACHE directive is set, but the tool is not available. Aborting."
+    nocache_cmd="nocache"
+fi
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# BACKUP DB
 if $ACTION_BACKUP_DB
 then
     f_test_s3_connection
@@ -246,17 +270,17 @@ then
 
     if $ACTION_DRY_RUN
     then
-        echo "DRY RUN: Dump $FOSSOLOGY_DB_NAME to S3 bucket $s3_dest"
+        echo "DRY RUN: Dump $FOSSOLOGY_DB_NAME to S3 bucket $s3_dest"
     else
         pg_dump -Fc -d $FOSSOLOGY_DB_NAME | f_aws_cmd cp - $s3_dest
         # FIXME: should check file size too
-        f_check_file_exists "$s3_file" || f_fatal "ERROR: Database backup failed"
+        f_check_file_exists "$s3_file" || f_fatal "ERROR: Database backup failed"
         f_log "SUCCESS: Database backed up to '$s3_dest'"
     fi
 fi
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# BACKUP REPOSITORY
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# BACKUP REPOSITORY
 if $ACTION_BACKUP_FS
 then
     f_test_s3_connection
@@ -284,11 +308,28 @@ then
 
     if $ACTION_DRY_RUN
     then
-        echo "DRY RUN: [tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname]"
+        echo "DRY RUN: nocache_cmd=$nocache_cmd"
+        echo "DRY RUN: repository_location=$repository_location"
+        echo "DRY RUN: Temp directory=$USE_TEMP_DIRECTORY"
+        echo "DRY RUN: Incremental option: -g $repository_location/$incremental_diff]"
     else
         f_log "Perform backup to $s3_file"
-        tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | f_aws_cmd cp - "s3://$BUCKET_NAME/$s3_file" || \
-            f_fatal "Failed to backup repository to S3"
+        if [ -n "$USE_TEMP_DIRECTORY" ]
+        then
+            [ -d "$USE_TEMP_DIRECTORY" ] || f_fatal "Could not find directory '$USE_TEMP_DIRECTORY'"
+            f_log "Backup repository to '$USE_TEMP_DIRECTORY/$s3_file'"
+            $nocache_cmd tar czpf $USE_TEMP_DIRECTORY/$s3_file -C $repository_location -g $repository_location/$incremental_diff $repository_dirname || \
+                f_fatal "Failed to backup repository to temp location '$USE_TEMP_DIRECTORY/$s3_file'"
+            f_log "$(ls -l '$USE_TEMP_DIRECTORY/$s3_file')"
+            f_log "Send backup file to S3 storage"
+            f_aws_cmd cp $USE_TEMP_DIRECTORY/$s3_file "s3://$BUCKET_NAME/$s3_file" || \
+                f_fatal "Failed to send file to S3 (temp file will not be deleted)"
+            rm $USE_TEMP_DIRECTORY/$s3_file
+        else
+            $nocache_cmd tar czp -C $repository_location -g $repository_location/$incremental_diff $repository_dirname | \
+                f_aws_cmd cp - "s3://$BUCKET_NAME/$s3_file" || \
+                f_fatal "Failed to backup repository to S3"
+        fi
         f_copy_to_s3 "$repository_location/$incremental_diff"
         [ -f "$repository_location/$incremental_list_latest" ] && cp "$repository_location/$incremental_list_latest" "$repository_location/$incremental_list"
         echo "$s3_file" >> "$repository_location/$incremental_list"
@@ -308,8 +349,22 @@ then
     fi
 fi
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # RESTORE DB
+
+# Memo to mannually recreate the database
+# CREATE DATABASE fossology WITH TEMPLATE = template0 ENCODING = 'SQL_ASCII' LC_COLLATE = 'en_US.utf8' LC_CTYPE = 'en_US.utf8';
+
+f_prepare_db_for_restore() {
+    # Remove all existing connections to database, allowing the restore to drop and recreate the database
+    # At that point, Web and Scheduler services should be offline.
+    # 
+    # With PostgreSQL version >= 13, see the FORCE option: https://www.postgresql.org/docs/current/sql-dropdatabase.html
+    local terminate_cnx_command="SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '$PGDATABASE' AND pid <> pg_backend_pid();"
+    f_log "Terminate current connections to databases"
+    psql -h "$FOSSOLOGY_DB_HOST" --command="$terminate_cnx_command"
+}
+
 if $ACTION_RESTORE_DB
 then
     f_test_s3_connection
@@ -334,7 +389,8 @@ then
         then
             echo "DRY RUN: Restore '$USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE' to database $FOSSOLOGY_DB_NAME"
         else
-            cat $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE | pg_restore -Fc -c -C -d $FOSSOLOGY_DB_NAME || \
+            f_prepare_db_for_restore
+            pg_restore -c -C --dbname=postgres $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE || \
                 f_fatal "ERROR: Database restore failed"
             rm -v $USE_TEMP_DIRECTORY/$ACTION_RESTORE_DB_FILE
             f_log "SUCCESS: Database restored from local copy"
@@ -346,15 +402,16 @@ then
         then
             echo "DRY RUN: Restore '$s3_source' to database $FOSSOLOGY_DB_NAME"
         else
+            f_prepare_db_for_restore
             f_log "Download + Restore database"
-            f_aws_cmd cp $s3_source - | pg_restore -Fc -d $FOSSOLOGY_DB_NAME || \
+            f_aws_cmd cp $s3_source - | pg_restore -c -C --dbname=postgres || \
                 f_fatal "ERROR: Database restore failed"
             f_log "SUCCESS: Database restored successfuly"
         fi
     fi
 fi
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # RESTORE REPOSITORY
 
 f_restore_fs() {
@@ -368,9 +425,9 @@ f_restore_fs() {
         f_log "File $tar_file copied to $USE_TEMP_DIRECTORY"
         if $ACTION_DRY_RUN
         then
-            echo "DRY RUN: [tar xzf $USE_TEMP_DIRECTORY/$tar_file -C $repository_location]"
+            echo "DRY RUN: [$nocache_cmd tar xzf $USE_TEMP_DIRECTORY/$tar_file -C $repository_location]"
         else
-            tar xzf $USE_TEMP_DIRECTORY/$tar_file -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
+            $nocache_cmd tar xzf $USE_TEMP_DIRECTORY/$tar_file -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
             f_log "SUCCESS: Restored $tar_file"
         fi
         rm -v $USE_TEMP_DIRECTORY/$tar_file
@@ -379,9 +436,9 @@ f_restore_fs() {
         s3_source="s3://$BUCKET_NAME/$tar_file"
         if $ACTION_DRY_RUN
         then
-            echo "DRY RUN: [f_aws_cmd cp $s3_source - | tar xz -C $repository_location]"
+            echo "DRY RUN: [f_aws_cmd cp $s3_source - | $nocache_cmd tar xz -C $repository_location]"
         else
-            f_aws_cmd cp $s3_source - | tar xz -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
+            f_aws_cmd cp $s3_source - | $nocache_cmd tar xz -C "$repository_location" || f_fatal "ERROR: Failed to restore $tar_file"
             f_log "SUCCESS: Restored $tar_file"
         fi
     fi
@@ -418,7 +475,7 @@ then
             echo "DRY RUN: Would delete $repository_path]"
         else
             mv -v $repository_path $repository_path_old || f_fatal
-            rm -rf "$repository_path_old" || \
+            rm -rf "$repository_path_old" || \
                 f_log "WARNING: existing repository could not be completely deleted, files left in '$repository_path_old'"
         fi
     fi

@@ -136,6 +136,7 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       curl \
       lsb-release \
       sudo \
+      nocache \
       cron \
       python \
       python3 \

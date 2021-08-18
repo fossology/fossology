@@ -6,7 +6,7 @@ shift
 get_pod() {
     pod=$1
     oc get pod -o "custom-columns=POD:.metadata.name,STATUS:status.phase" | \
-        sed -n "/^$pod.*Running/s/  *.*$//p"
+        sed -n "/^$pod/s/  *.*$//p" | grep -v 'deploy$'
 }
 
 pod_name=$(get_pod $pod)

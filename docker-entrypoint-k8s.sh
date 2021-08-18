@@ -58,6 +58,14 @@ backup)
   echo 'Run backup jobs'
   /usr/local/lib/fossology/fo-backup-S3.sh --backup-all
   ;;
+fullbackup)
+  echo 'Run full backup jobs'
+  /usr/local/lib/fossology/fo-backup-S3.sh --backup-all-full
+  ;;
+restorelatest)
+  echo 'Run latest restore jobs'
+  /usr/local/lib/fossology/fo-backup-S3.sh --restore-latest
+  ;;
 inspect)
   echo 'Stay idle to allow rsh connections'
   while true

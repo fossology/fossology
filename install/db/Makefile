@@ -49,6 +49,7 @@ install: all
 	$(INSTALL_DATA) instance_uuid.php $(DESTDIR)$(LIBEXECDIR)/instance_uuid.php
 	$(INSTALL_PROGRAM) dbmigrate_pfile_calculate_sha256.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 	$(INSTALL_PROGRAM) dbmigrate_change_db_encoding.php $(DESTDIR)$(LIBEXECDIR)/dbmigrate_change_db_encoding.php
+	$(INSTALL_PROGRAM) psql-connect.sh $(DESTDIR)$(LIBEXECDIR)/psql-connect.sh
 
 	chmod +x $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 
@@ -88,6 +89,7 @@ uninstall:
 	rm -f $(DESTDIR)$(LIBEXECDIR)/resequence_author_table.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_pfile_calculate_sha256.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/dbmigrate_change_db_encoding.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/psql-connect.sh
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \
