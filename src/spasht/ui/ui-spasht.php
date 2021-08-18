@@ -208,7 +208,6 @@ class ui_spasht extends FO_Plugin
 
             if ($this->checkAdvanceSearch($obj, $revisionName, $namespaceName,
               $typeName, $providerName)) {
-              $matches[] = $obj;
               $uri = "definitions/" . $obj->generateUrlString();
 
               //details section
@@ -238,7 +237,9 @@ class ui_spasht extends FO_Plugin
                 true);
 
               $details_temp = new DefinitionSummary($detail_body);
+              $obj->setScore($details_temp->getScore());
 
+              $matches[] = $obj;
               $details[] = $details_temp;
             }
           }
