@@ -52,9 +52,11 @@ class RestAuthMiddleware
     $requestUri = $request->getUri();
     if (stristr($request->getMethod(), "options") !== false) {
       $response = $next($request, $response);
-    } elseif (stristr($requestUri->getPath(), "/auth") !== false) {
-      $response = $next($request, $response);
     } elseif (stristr($requestUri->getPath(), "/version") !== false) {
+      $response = $next($request, $response);
+    } elseif (stristr($requestUri->getPath(), "/info") !== false) {
+      $response = $next($request, $response);
+    } elseif (stristr($requestUri->getPath(), "/health") !== false) {
       $response = $next($request, $response);
     } elseif (stristr($requestUri->getPath(), "/tokens") !== false &&
       stristr($request->getMethod(), "post") !== false) {
