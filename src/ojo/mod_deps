@@ -102,8 +102,6 @@ if [[ $RUNTIME ]]; then
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.62.0 libboost-program-options1.62.0 libboost-regex1.62.0;;
         buster)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.67.0 libboost-program-options1.67.0 libboost-regex1.67.0;;
-        xenial)
-          apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.58.0 libboost-program-options1.58.0 libboost-regex1.58.0;;
         bionic)
           apt-get $YesOpt install libjsoncpp1 libboost-filesystem1.65.1 libboost-program-options1.65.1 libboost-regex1.65.1;;
         sid)
