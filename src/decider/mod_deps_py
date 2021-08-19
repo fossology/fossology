@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+# FOSSology mod_deps_pu script
+# This script helps you install python dependencies on a system for a module
+#
+# Copyright (C) 2022 Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+source "$(dirname ${BASH_SOURCE[0]})/../../utils/utils.sh"
+
+#
+# Don't show the -y option.  Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o rbehy --long runtime,buildtime,everything,help -n 'mod_deps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+  OPTS='--help'
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)     RUNTIME=true; shift;;
+    -b|--buildtime)   BUILDTIME=true; shift;;
+    -e|--everything)  EVERYTHING=true; shift;;
+    -y)               YesOpt='-y'; shift;;
+    -h|--help)        show_help_for_mod_deps; exit;;
+    --)               shift; break;;
+    *)                echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+need_lsb_release
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime python dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+# figure out what distro we're on
+DISTRO=$(lsb_release --id --short)
+CODENAME=$(lsb_release --codename --short)
+
+########################################################################
+
+if [[ $BUILDTIME ]]; then
+  echo "*** No buildtime dependencies ***";
+fi
+
+if [[ $RUNTIME ]]; then
+  echo "*** Installing $DISTRO runtime python dependencies ***";
+  su fossy -c 'python3 -m pip install --target=$HOME/pythondeps --no-input spacy'
+  su fossy -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+fi
+
+#######################################################################

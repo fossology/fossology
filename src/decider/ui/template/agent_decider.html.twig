@@ -16,6 +16,13 @@
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="reuseBulk" />
     {{ ' Bulk phrases from reused packages'|trans }}<br />
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="wipScannerUpdates" />
-    {{ ' New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}
+    {{ ' New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}</br>
+    {% if isSpacyInstalled %}
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivation" />
+    {{ ' False Positive Copyright Deactivation'|trans }} ({{ 'experimental'|trans }})</br>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivationClutterRemoval" />
+    {{ ' False Positive Copyright Deactivation and clutter removal'|trans }} ({{ 'experimental'|trans }})
+    {% endif %}
+
   </div>
 </li>
