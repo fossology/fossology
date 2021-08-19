@@ -1961,6 +1961,10 @@
   $Schema["TABLE"]["users"]["root_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"root_folder_fk\" int4";
   $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"root_folder_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["users"]["default_folder_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"default_folder_fk\" IS 'default folder for this user'";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT -1";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL";
+
   $Schema["TABLE"]["users"]["user_desc"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_desc"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_desc\" text";
   $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_desc\" DROP NOT NULL";

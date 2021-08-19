@@ -189,6 +189,8 @@ class UserEditPage extends DefaultPlugin
       $SelectedFolderPk = $UserRec['root_folder_fk'];
       $vars['folderListOption'] = FolderListOption($ParentFolder = -1, $Depth = 0, $IncludeTop = 1, $SelectedFolderPk);
     }
+      $SelectedDefaultFolderPk = $UserRec['default_folder_fk'];
+      $vars['folderListOption2'] = FolderListOption($ParentFolder = $UserRec['root_folder_fk'], $Depth = 0, $IncludeTop = 1, $SelectedDefaultFolderPk);
 
     $vars['isBlankPassword'] = ($UserRec['_blank_pass'] == 'on');
     $vars['agentSelector'] = AgentCheckBoxMake(-1, array("agent_unpack",
@@ -301,7 +303,6 @@ class UserEditPage extends DefaultPlugin
       if (!$SessionIsAdmin && ($key == "user_perm" || $key == "root_folder_fk")) {
         continue;
       }
-
       if (!$first) {
         $sql .= ",";
       }
@@ -370,6 +371,7 @@ class UserEditPage extends DefaultPlugin
       $UserRec['user_name'] = stripslashes($request->get('user_name'));
       $UserRec['root_folder_fk'] = intval($request->get('root_folder_fk'));
       $UserRec['upload_visibility'] = stripslashes($request->get('public'));
+      $UserRec['default_folder_fk'] = intval($request->get('default_folder_fk'));
       $UserRec['user_desc'] = stripslashes($request->get('user_desc'));
       $defaultGroup = $request->get('default_group_fk', null);
       if ($defaultGroup !== null) {
