@@ -91,12 +91,19 @@ function cleanText() {
   var $textField = $('#bulkRefText');
   var text = $textField.val();
 
+  var delimiters = $("#delimdrop").val();
+  if (delimiters.toLowerCase() === "default") {
+    delimiters = '\t\f#^%*';
+  }
+  delimiters = escapeRegExp(delimiters);
+  var re = new RegExp("[" + delimiters + "]+", "gi");
   text = text.replace(/ [ ]*/gi, ' ')
              .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
              .replace(/(^|\n) ?['"]{3}/gi, '$1')
              .replace(/[\*]+\//gi, '')
-             .replace(/(^|\n) ?([#*;]|dnl)+/gi,'$1')
-             .replace(/(^|\n)[ \t]*/gim,'$1')
+             .replace(/(^|\n) ?(dnl)+/gi, '$1')
+             .replace(re, ' ')
+             .replace(/(^|\n)[ \t]*/gim, '$1')
              ;
   $textField.val(text);
 }

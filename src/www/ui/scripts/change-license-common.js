@@ -499,3 +499,8 @@ function getStdLicenseComments(scope, callback) {
     }
   });
 }
+
+function escapeRegExp(string){
+  string = string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+  return string.replace(/\\\\([abfnrtv])/g, '\\$1'); // Preserve default escape sequences
+}
