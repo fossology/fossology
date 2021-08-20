@@ -32,6 +32,7 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 
@@ -56,6 +57,26 @@ class UploadController extends RestController
    * Get query parameter name for recursive listing
    */
   const RECURSIVE_PARAM = "recursive";
+
+  /**
+   * Get query parameter name for name filtering
+   */
+  const FILTER_NAME = "name";
+
+  /**
+   * Get query parameter name for status filtering
+   */
+  const FILTER_STATUS = "status";
+
+  /**
+   * Get query parameter name for assignee filtering
+   */
+  const FILTER_ASSIGNEE = "assignee";
+
+  /**
+   * Get query parameter name for since filtering
+   */
+  const FILTER_DATE = "since";
 
   /**
    * Get query parameter name for page listing
@@ -101,6 +122,10 @@ class UploadController extends RestController
     $recursive = true;
     $retVal = null;
     $query = $request->getQueryParams();
+    $name = null;
+    $status = null;
+    $assignee = null;
+    $since = null;
 
     if (array_key_exists(self::FOLDER_PARAM, $query)) {
       $folderId = filter_var($query[self::FOLDER_PARAM], FILTER_VALIDATE_INT);
@@ -114,6 +139,52 @@ class UploadController extends RestController
     if (array_key_exists(self::RECURSIVE_PARAM, $query)) {
       $recursive = filter_var($query[self::RECURSIVE_PARAM],
         FILTER_VALIDATE_BOOLEAN);
+    }
+    if (array_key_exists(self::FILTER_NAME, $query)) {
+      $name = $query[self::FILTER_NAME];
+    }
+    if (array_key_exists(self::FILTER_STATUS, $query)) {
+      switch (strtolower($query[self::FILTER_STATUS])) {
+        case "open":
+          $status = UploadStatus::OPEN;
+          break;
+        case "inprogress":
+          $status = UploadStatus::IN_PROGRESS;
+          break;
+        case "closed":
+          $status = UploadStatus::CLOSED;
+          break;
+        case "rejected":
+          $status = UploadStatus::REJECTED;
+          break;
+        default:
+          $status = null;
+      }
+    }
+    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
+      $username = $query[self::FILTER_ASSIGNEE];
+      if (strcasecmp($username, "-me-") === 0) {
+        $assignee = $this->restHelper->getUserId();
+      } elseif (strcasecmp($username, "-unassigned-") === 0) {
+        $assignee = 1;
+      } else {
+        $assignee = $this->restHelper->getUserDao()->getUserByName($username);
+        if (! empty($assignee)) {
+          $assignee = $assignee['user_pk'];
+        } else {
+          $info = new Info(404, "No user with user name '$username'",
+            InfoType::ERROR);
+          $retVal = $response->withJson($info->getArray(), $info->getCode());
+        }
+      }
+    }
+    if (array_key_exists(self::FILTER_DATE, $query)) {
+      $date = filter_var($query[self::FILTER_DATE], FILTER_VALIDATE_REGEXP,
+        ["options" => [
+          "regexp" => "/^\d{4}\-\d{2}\-\d{2}$/",
+          "flags" => FILTER_NULL_ON_FAILURE
+        ]]);
+      $since = strtotime($date);
     }
 
     $page = $request->getHeaderLine(self::PAGE_PARAM);
@@ -154,9 +225,16 @@ class UploadController extends RestController
     if ($retVal !== null) {
       return $retVal;
     }
+    $options = [
+      "folderId" => $folderId,
+      "name"     => $name,
+      "status"   => $status,
+      "assignee" => $assignee,
+      "since"    => $since
+    ];
     list($pages, $uploads) = $this->dbHelper->getUploads(
       $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $limit,
-      $page, $id, $folderId, $recursive);
+      $page, $id, $options, $recursive);
     if ($id !== null && ! empty($uploads)) {
       $uploads = $uploads[0];
       $pages = 1;
