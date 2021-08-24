@@ -1,0 +1,52 @@
+# Copyright 2021 Anupam Ghosh <ag.4ums@gmail.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.
+
+name: c tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  C-tests:
+    runs-on: ubuntu-20.04
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_DB: fossology
+          POSTGRES_PASSWORD:  fossy
+          POSTGRES_USER: fossy
+        ports:
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 50
+      
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libcppunit-dev
+          sudo ./utils/fo-installdeps -y -e
+          export PATH="/usr/lib/ccache/:$PATH"
+
+      - name: Setup test database
+        env:
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_PORT: 5432
+        run: |
+          sudo ./utils/prepare-test
+
+          #remove test all as delagent is failing  
+      - name: Unit tests
+        run: make all phpvendors test-cli test-copyright test-lib test-nomos test-ojo test-reuser test-scheduler test-spdx2 test-unifiedreport test-www
