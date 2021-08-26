@@ -50,6 +50,9 @@ extern fo_dbManager* dbManager;
 
 /* File utils.c */
 void exitNow(int exitVal);
+void recurseDir(char* path, int level);
+void checkGoldExists(char* sha1, char* md5, long fsize);
+void deleteGoldFile(char* sha1, char* md5, long fsize);
 
 /* File usage.c */
 void usage(char *name);

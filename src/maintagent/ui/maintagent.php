@@ -89,7 +89,7 @@ class maintagent extends FO_Plugin {
     $Options = array("a"=>_("Run all non slow maintenance operations."),
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
-              //       "g"=>_("Remove orphaned gold files."),
+                     "g"=>_("Remove orphaned gold files."),
                      "E"=>_("Remove orphaned rows from database."),
                      "L"=>_("Remove orphaned log files from file system."),
                      "N"=>_("Normalize priority "),
