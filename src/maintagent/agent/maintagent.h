@@ -71,5 +71,6 @@ void reIndexAllTables();
 void removeOrphanedRows();
 void removeOrphanedLogFiles();
 void removeExpiredTokens();
+void deleteOldGold(char* date);
 
 #endif /* _MAINTAGENT_H */

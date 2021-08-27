@@ -582,3 +582,80 @@ FUNCTION void removeExpiredTokens(long int retentionPeriod)
 
   return;  // success
 }
+
+/**
+ * @brief Delete gold files which are older than specified date
+ *
+ * List all pfiles which are older than given date and are not used by other
+ * upload. Delete all such pfiles from the repository.
+ * @returns void but writes status to stdout
+ */
+FUNCTION void deleteOldGold(char* date)
+{
+  PGresult* result; // the result of the database access
+  int numrows = 0;  // generic return value
+  long StartTime, EndTime;
+  int countTuples, row, remval;
+  int day, month, year; // Date validation
+  char* filepath;
+  char sql[MAXSQL];
+
+  day = month = year = -1;
+  sscanf(date, "%4d-%2d-%2d", &year, &month, &day);
+  if (((year < 1900) || (year > 9999)) || ((month < 1) || (month > 12)) ||
+      ((day < 1) || (day > 31)))
+  {
+    LOG_FATAL("Invalid date! Require yyyy-mm-dd, '%s' given.", date);
+    exitNow(-144);
+  }
+
+  snprintf(sql, MAXSQL,
+           "SELECT DISTINCT ON(pfile_pk) "
+           "CONCAT(LOWER(pfile_sha1), '.', LOWER(pfile_md5), '.', pfile_size) "
+           "AS filename FROM upload INNER JOIN pfile ON pfile_pk = pfile_fk "
+           "WHERE upload_ts < '%s' AND pfile_fk NOT IN ("
+           "SELECT pfile_fk FROM upload WHERE upload_ts > '%s' "
+           "AND pfile_fk IS NOT NULL);",
+           date, date);
+
+  StartTime = (long)time(0);
+
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
+  {
+    exitNow(-145);
+  }
+  countTuples = PQntuples(result);
+  if (agent_verbose)
+  {
+    LOG_DEBUG("Read %d rows from DB.", countTuples);
+  }
+  /* Loop through the pfiles and remove them from repository */
+  for (row = 0; row < countTuples; row++)
+  {
+    filepath = fo_RepMkPath("gold", PQgetvalue(result, row, 0));
+    remval = remove(filepath);
+    if (remval < 0)
+    {
+      if (errno != ENOENT)
+      {
+        // Removal failed and error != file not exist
+        LOG_WARNING("Unable to remove '%s' file.", filepath);
+      }
+    }
+    else
+    {
+      numrows++;
+    }
+    free(filepath);
+  }
+  PQclear(result);
+
+  EndTime = (long)time(0);
+  printf("Removed %d old gold files from the repository, took %ld seconds\n",
+         numrows, EndTime - StartTime);
+
+  fo_scheduler_heart(
+      1); // Tell the scheduler that we are alive and update item count
+  return; // success
+}
