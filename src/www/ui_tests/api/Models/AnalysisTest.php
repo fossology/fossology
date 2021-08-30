@@ -111,7 +111,8 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
       "monk"      => false,
       "nomos"     => true,
       "ojo"       => true,
-      "package"   => false
+      "package"   => false,
+      "reso"      => true
     ];
     $actualObject = new Analysis();
     $actualObject->setBucket(true);
@@ -119,6 +120,7 @@ class AnalysisTest extends \PHPUnit\Framework\TestCase
     $actualObject->setMime(true);
     $actualObject->setNomos(true);
     $actualObject->setOjo(true);
+    $actualObject->setReso(true);
 
     $this->assertEquals($expectedArray, $actualObject->getArray());
   }
