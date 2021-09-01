@@ -704,9 +704,15 @@ class UnifiedReport extends Agent
     list($contents['licensesMain']['statements'], $contents['licenses']['statements']) = $this->licenseClearedGetter->updateIdentifiedGlobalLicenses($contents['licensesMain']['statements'], $contents['licenses']['statements']);
 
     /* Summery table */
+    $assignedToUserId = $this->uploadDao->getAssignee($uploadId, $groupId);
+    if ($assignedToUserId != 1) {
+      $assignedToUserName = $this->userDao->getUserName($assignedToUserId);
+    } else {
+      $assignedToUserName = "";
+    }
     $reportSummarySection->summaryTable($section, $uploadId, $userName,
       $contents['licensesMain']['statements'], $contents['licenses']['statements'],
-      $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri);
+      $contents['licensesHist']['statements'], $contents['otherStatement'], $timestamp, $groupName, $packageUri, $assignedToUserName);
 
     if (!empty($contents['otherStatement']['ri_unifiedcolumns'])) {
       $unifiedColumns = (array) json_decode($contents['otherStatement']['ri_unifiedcolumns'], true);
