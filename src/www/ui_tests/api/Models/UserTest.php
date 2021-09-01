@@ -57,7 +57,8 @@ class UserTest extends \PHPUnit\Framework\TestCase
         "monk"      => false,
         "nomos"     => true,
         "ojo"       => true,
-        "package"   => false
+        "package"   => false,
+        "reso"      => false
       ]
     ];
     $expectedNonAdminUser = [
