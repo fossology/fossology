@@ -51,9 +51,11 @@ class maintagent extends FO_Plugin {
     foreach ($_REQUEST as $key => $value) {
       if ($key == $value) {
         $options .= $value;
-        if ($key == "t") {
+        if ($key === "t") {
           $retentionPeriod = $SysConf['SYSCONFIG']['PATMaxPostExpiryRetention'];
           $options .= $retentionPeriod;
+        } elseif ($key === "l") {
+          $options .= GetParm("logsDate", PARM_TEXT) . " ";
         }
         if ($key == "o") {
           $options .= GetParm("goldDate", PARM_TEXT) . " ";
@@ -106,7 +108,8 @@ class maintagent extends FO_Plugin {
                      "Z"=>_("Remove orphaned files from the repository (slow)."),
                      "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
                      "v"=>_("verbose (turns on debugging output)"),
-                     "o"=>_("Remove older gold files from repository.")
+                     "o"=>_("Remove older gold files from repository."),
+                     "l"=>_("Remove older log files from repository.")
                     );
     $V = "";
 
@@ -117,6 +120,9 @@ class maintagent extends FO_Plugin {
         <label class='form-check-label' for='men$option'>$description</label>";
       if ($option === "o") {
         $V .= "<input type='date' class='form-control' name='goldDate' value='" . gmdate('Y-m-d', strtotime("-1 year")) . "' style='width:auto'>";
+      }
+      if ($option === "l") {
+        $V .= "<input type='date' class='form-control' name='logsDate' value='" . gmdate('Y-m-d', strtotime("-1 year")) . "' style='width:auto'>";
       }
       $V .= "</div></div>\n";
     }

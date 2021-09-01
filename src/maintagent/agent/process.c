@@ -659,3 +659,74 @@ FUNCTION void deleteOldGold(char* date)
       1); // Tell the scheduler that we are alive and update item count
   return; // success
 }
+
+/*
+ * @brief Delete all log files older than given date in olderThan param
+ *
+ * -# Use find to list all files in a temporary location.
+ * -# Use the number of lines in the file to get the total no of files.
+ * -# Feed the file to xargs and call rm to remove them.
+ * -# Close the fd and unlink the temporary file.
+ * @param olderThan Delete logs older than this date (YYYY-MM-DD)
+ */
+FUNCTION void removeOldLogFiles(const char* olderThan)
+{
+  time_t current_time = time(0); ///< Now
+  time_t shifted_time;           ///< Target time
+  time_t ellapsed_time;      ///< Difference between now and target time in days
+  struct tm ti = {0};        ///< Input time
+  char cmd[myBUFSIZ];        ///< Command to run
+  unsigned int numfiles = 0; ///< Number of files removed
+  long StartTime, EndTime;
+  char ch;
+  FILE* tempFile;
+
+  StartTime = (long)time(0);
+  if (sscanf(olderThan, "%d-%d-%d", &ti.tm_year, &ti.tm_mon, &ti.tm_mday) != 3)
+  {
+    LOG_FATAL("Unable to parse date '%s' in YYYY-MM-DD format.", olderThan);
+    exitNow(-148);
+  }
+  ti.tm_year -= 1900;
+  ti.tm_mon -= 1;
+  shifted_time = mktime(&ti);
+  ellapsed_time = (current_time - shifted_time) / 60 / 60 / 24 - 1;
+
+  char file_template[] = "/tmp/foss-XXXXXX";
+  int fd = mkstemp(file_template);
+
+  snprintf(cmd, myBUFSIZ, "/usr/bin/find %s/logs -type f -mtime +%ld -fprint %s",
+           fo_sysconfig("FOSSOLOGY", "path"), ellapsed_time, file_template);
+  system(cmd); // Find and print files in temp location
+  tempFile = fdopen(fd, "r");
+  if (tempFile == NULL)
+  {
+    LOG_FATAL("Unable to open temp file.");
+    unlink(file_template);
+    exitNow(-148);
+  }
+  while ((ch = fgetc(tempFile)) != EOF)
+  {
+    if (ch == '\n')
+    {
+      numfiles++;
+    }
+  }
+
+  snprintf(cmd, myBUFSIZ, "/usr/bin/xargs --arg-file=%s /bin/rm -f", file_template);
+  system(cmd);
+  fclose(tempFile);
+  unlink(file_template);
+
+  EndTime = (long)time(0);
+
+  printf("Removed %d log files.\n", numfiles);
+
+  printf(
+      "Removing log files older than '%s' from the repository took %ld "
+      "seconds\n",
+      olderThan, EndTime - StartTime);
+
+  fo_scheduler_heart(1);
+  return;
+}
