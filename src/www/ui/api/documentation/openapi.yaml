@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.4
+  version: 1.4.0
   contact:
     email: fossology@fossology.org
   license:
@@ -221,21 +221,43 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
-      operationId: moveUploadById
+      operationId: updateUploadById
       tags:
         - Upload
         - Organize
-      description: Move upload from one folder to other
+      description: Update an upload information
       parameters:
-        - name: folderId
-          description: Folder Id, where upload should be moved to
-          in: header
-          required: true
+        - name: status
+          description: New status of the upload
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - Open
+              - InProgress
+              - Closed
+              - Rejected
+          example: Closed
+        - name: assignee
+          description: New assignee for the project
+          in: query
+          required: false
           schema:
             type: integer
+      requestBody:
+        description: >
+          Comment on the status, required for Closed and Rejected states.
+          Ignored for others.
+        content:
+          text/plain:
+            schema:
+              description: The comment for new status
+              type: string
+              example: "The upload cleared for use."
       responses:
         '202':
-          description: Upload will be moved
+          description: Upload will be updated
           content:
             application/json:
               schema:
@@ -243,11 +265,11 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
-      operationId: copyUploadById
+      operationId: moveUploadById
       tags:
         - Upload
         - Organize
-      description: Can be used to copy uploads
+      description: Copy or move an upload by id
       parameters:
         - name: folderId
           description: Folder Id, where upload should be copied to
@@ -255,9 +277,19 @@ paths:
           required: true
           schema:
             type: integer
+        - name: action
+          in: header
+          required: true
+          description: Action to be performed
+          schema:
+            type: string
+            enum:
+              - copy
+              - move
+      summary: Copy/Move an upload
       responses:
         '202':
-          description: Upload will be copied
+          description: Upload will be copied/moved
           content:
             application/json:
               schema:
