@@ -31,7 +31,7 @@ require_once 'ReportImportSink.php';
 require_once 'ReportImportHelper.php';
 require_once 'ReportImportConfiguration.php';
 
-use EasyRdf_Graph;
+use EasyRdf\Graph;
 
 require_once 'version.php';
 require_once 'services.php';
