@@ -20,7 +20,7 @@
 namespace Fossology\Lib\UI\Component;
 
 use Fossology\Lib\Auth\Auth;
-use Twig_Environment;
+use Twig\Environment;
 
 class Menu
 {
@@ -28,7 +28,7 @@ class Menu
   var $MenuTarget = "treenav";
   protected $renderer;
 
-  public function __construct(Twig_Environment $renderer)
+  public function __construct(Environment $renderer)
   {
     // Add default menus (with no actions linked to plugins)
     menu_insert("Main::Upload", 70);
@@ -268,7 +268,7 @@ class Menu
       $this->mergeUserLoginVars($vars);
     }
 
-    $out = $this->renderer->loadTemplate('components/menu.html.twig')->render($vars);
+    $out = $this->renderer->load('components/menu.html.twig')->render($vars);
     return $out;
   }
 

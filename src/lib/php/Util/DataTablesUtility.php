@@ -42,7 +42,7 @@ class DataTablesUtility
   {
     if (array_key_exists('iSortingCols', $inputArray)) {
       if ($inputArray['iSortingCols'] > count($columNamesInDatabase)) {
-        $this->logger->addWarning(
+        $this->logger->warning(
           "did have enough columNames for " . $inputArray['iSortingCols'] .
           " sort columns.");
         return null;
@@ -50,7 +50,7 @@ class DataTablesUtility
       return $this->getSortingParametersFromArrayImpl($inputArray,
         $columNamesInDatabase, $defaultSearch);
     } else {
-      $this->logger->addWarning("did not find iSortingCols in inputArray");
+      $this->logger->warning("did not find iSortingCols in inputArray");
       return null;
     }
   }

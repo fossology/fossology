@@ -18,7 +18,7 @@
 namespace Fossology\ReportImport;
 
 use Fossology\Lib\Data\License;
-use EasyRdf_Graph;
+use EasyRdf\Graph;
 require_once 'ReportImportData.php';
 require_once 'ReportImportDataItem.php';
 require_once 'ImportSource.php';
@@ -33,7 +33,7 @@ class SpdxTwoImportSource implements ImportSource
   private $filename;
   /** @var  string */
   private $uri;
-  /** @var EasyRdf_Graph */
+  /** @var Graph $graph */
   private $graph;
   /** @var array */
   private $index;
@@ -58,8 +58,8 @@ class SpdxTwoImportSource implements ImportSource
 
   private function loadGraph($filename, $uri = null)
   {
-    /** @var EasyRdf_Graph */
-    $graph = new EasyRdf_Graph();
+    /** @var Graph $graph */
+    $graph = new Graph();
     $graph->parseFile($filename, 'rdfxml', $uri);
     return $graph;
   }
