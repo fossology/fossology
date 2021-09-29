@@ -90,7 +90,7 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
   }
 
   /* initialization */
-  protected function setUp() {
+  protected function setUp() : void {
     global $SYSCONF_DIR;
     global $DB_COMMAND;
     global $DB_NAME;
@@ -164,7 +164,7 @@ class ft_DelagentTest extends \PHPUnit\Framework\TestCase {
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown() : void {
     rollback_repo(); // rollback the repo dir in ununpack.conf and wget_agent.conf to the default
     drop_db();
     print "End up functional test for cp2foss \n";

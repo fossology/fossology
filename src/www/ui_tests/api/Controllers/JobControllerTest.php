@@ -82,7 +82,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $container;
     $container = M::mock('ContainerBuilder');
@@ -105,7 +105,7 @@ class JobControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);

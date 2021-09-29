@@ -30,7 +30,7 @@ require_once(dirname(__FILE__) . '/../common-auth.php');
 class test_common_auth extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
     print "Starting unit test for common-auth.php\n";
   }
@@ -51,7 +51,7 @@ class test_common_auth extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     print "Ending unit test for common-auth.php\n";
   }

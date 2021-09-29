@@ -71,7 +71,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    * @brief Setup the test cases and initialize the objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("copyrightSched".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -88,7 +88,7 @@ class CopyrightScheduledTest extends \PHPUnit\Framework\TestCase
    * @brief Destruct the objects initialized during setUp()
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

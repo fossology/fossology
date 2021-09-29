@@ -36,7 +36,7 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   public $DB_CONF = "";
 
   /* initialization */
-  protected function setUp() {
+  protected function setUp() : void {
     global $EXE_PATH;
     global $PG_CONN;
     global $DB_COMMAND;
@@ -178,7 +178,7 @@ class ft_cliDelagentTest extends \PHPUnit\Framework\TestCase {
   /**
    * \brief clean the env
    */
-  protected function tearDown() {
+  protected function tearDown() : void {
     global $PG_CONN;
     global $DB_COMMAND;
     global $DB_NAME;

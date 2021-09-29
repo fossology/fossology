@@ -181,3 +181,6 @@ src/clixml/agent/clixml
 
 # Add all the Ubuntu consol log file
 ubuntu-*
+
+# PHPUnit cache
+.phpunit.result.cache

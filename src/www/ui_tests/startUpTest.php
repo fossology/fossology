@@ -19,7 +19,7 @@ class StartUpTest extends \PHPUnit\Framework\TestCase
   /** @var string */
   private $pageContent;
   
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->pageContent = '';
     $p = popen('php  '. dirname(__DIR__).'/ui/index.php 2>&1', 'r');

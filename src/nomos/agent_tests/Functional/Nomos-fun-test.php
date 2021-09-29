@@ -37,7 +37,7 @@ class NomosFunTest extends CommonCliTest
    * @brief Setup the test cases and initialize the objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     parent::setUp();
 
