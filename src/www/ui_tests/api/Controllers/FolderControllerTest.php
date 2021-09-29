@@ -138,7 +138,7 @@ namespace Fossology\UI\Api\Test\Controllers
      * @brief Setup test objects
      * @see PHPUnit_Framework_TestCase::setUp()
      */
-    protected function setUp()
+    protected function setUp() : void
     {
       global $container;
       $this->userId = 2;
@@ -175,7 +175,7 @@ namespace Fossology\UI\Api\Test\Controllers
      * @brief Remove test objects
      * @see PHPUnit_Framework_TestCase::tearDown()
      */
-    protected function tearDown()
+    protected function tearDown() : void
     {
       $this->addToAssertionCount(
         \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);

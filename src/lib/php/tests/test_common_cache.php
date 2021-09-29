@@ -37,7 +37,7 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $PG_CONN;
     $sysconfig = dirname(__FILE__).'/sysconfigDirTest';
@@ -192,7 +192,7 @@ class test_common_cached extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     global $PG_CONN;
     /** db close */

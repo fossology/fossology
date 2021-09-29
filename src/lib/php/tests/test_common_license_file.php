@@ -53,7 +53,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $PG_CONN;
     global $upload_pk;
@@ -274,7 +274,7 @@ class test_common_license_file extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     if (!is_callable('pg_connect')) {
       return;

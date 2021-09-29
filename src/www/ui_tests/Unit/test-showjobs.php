@@ -32,7 +32,7 @@ class test_showjobs extends \PHPUnit\Framework\TestCase {
   /**
    * \brief initialization
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     DBconnect("/usr/local/etc/fossology/");
   }
@@ -59,7 +59,7 @@ class test_showjobs extends \PHPUnit\Framework\TestCase {
   /**
    * \brief clean up
    */
-  protected function tearDown() {
+  protected function tearDown() : void {
     global $PG_CONN;
     pg_close($PG_CONN);
   }

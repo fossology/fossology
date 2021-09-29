@@ -70,7 +70,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup test db
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("spdx2test");
     $this->dbManager = $this->testDb->getDbManager();
@@ -84,7 +84,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Teardown test db
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
