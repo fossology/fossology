@@ -48,7 +48,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
   private $groupId = 601;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->uploadDao = M::mock(UploadDao::class);
 
@@ -194,7 +194,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     }
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     $this->testDb = null;
     $this->dbManager = null;

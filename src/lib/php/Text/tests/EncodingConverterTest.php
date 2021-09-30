@@ -26,7 +26,7 @@ class EncodingConverterTest extends \PHPUnit\Framework\TestCase
   /** @var EncodingConverter */
   private $converter;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $detected = mb_detect_encoding($this->testString);
     assertThat($detected, is("UTF-8"));

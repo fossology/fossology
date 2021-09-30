@@ -24,11 +24,14 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Data\Upload\Upload;
+use Fossology\UI\Api\Helper\ResponseHelper;
+use Slim\Psr7\Factory\StreamFactory;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * @class ReportController
@@ -54,9 +57,9 @@ class ReportController extends RestController
    * Get the required report for the required upload
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getReport($request, $response, $args)
   {
@@ -189,9 +192,9 @@ class ReportController extends RestController
    * Download the report with the given job id
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function downloadReport($request, $response, $args)
   {
@@ -211,18 +214,24 @@ class ReportController extends RestController
        * @var BinaryFileResponse $responseFile
        */
       $responseFile = $ui_download->getReport($args['id']);
+      /**
+       * @var File $responseContent
+       */
       $responseContent = $responseFile->getFile();
       $newResponse = $response->withHeader('Content-Description',
         'File Transfer')
         ->withHeader('Content-Type',
-        $responseFile->headers->get('Content-Type'))
+        $responseContent->getMimeType())
         ->withHeader('Content-Disposition',
         $responseFile->headers->get('Content-Disposition'))
         ->withHeader('Cache-Control', 'must-revalidate')
         ->withHeader('Pragma', 'private')
-        ->withHeader('Content-Length', filesize($responseContent));
+        ->withHeader('Content-Length', filesize($responseContent->getPathname()));
+      $sf = new StreamFactory();
+      $newResponse = $newResponse->withBody(
+        $sf->createStreamFromFile($responseContent->getPathname())
+      );
 
-      readfile($responseContent);
       return $newResponse;
     } catch (\Exception $e) {
       $error = new Info(500, $e->getMessage(), InfoType::ERROR);

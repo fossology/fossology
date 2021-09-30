@@ -30,7 +30,7 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
   /** @var DbManager */
   protected $dbManager;
 
-  function setUp()
+  function setUp() : void
   {
     $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
     $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
@@ -43,7 +43,7 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     $this->logger->shouldReceive('addDebug');
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     M::close();
   }

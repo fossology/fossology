@@ -39,7 +39,7 @@ class ClearingEventTest extends \PHPUnit\Framework\TestCase
   /** @var int */
   private $timestamp;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->timestamp = time();
     $this->clearingLicense = M::mock(ClearingLicense::class);
@@ -48,7 +48,7 @@ class ClearingEventTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

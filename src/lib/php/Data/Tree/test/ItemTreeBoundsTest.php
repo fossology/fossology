@@ -38,7 +38,7 @@ class ItemTreeBoundsTest extends \PHPUnit\Framework\TestCase
 
   private $right = 26;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->itemTreeBounds = new ItemTreeBounds($this->uploadTreeId, $this->uploadTreeTableName, $this->uploadId, $this->left, $this->right);
   }

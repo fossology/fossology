@@ -39,7 +39,7 @@ class AgentClearingEventTest extends \PHPUnit\Framework\TestCase
   /** @var AgentClearingEvent */
   private $agentClearingEvent;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->licenseRef = M::mock(LicenseRef::class);
     $this->agentRef = M::mock(AgentRef::class);
@@ -47,7 +47,7 @@ class AgentClearingEventTest extends \PHPUnit\Framework\TestCase
     $this->agentClearingEvent = new AgentClearingEvent($this->licenseRef, $this->agentRef, $this->matchId, $this->percentage);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

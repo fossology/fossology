@@ -30,7 +30,7 @@ class LicenseRefTest extends \PHPUnit\Framework\TestCase
    */
   private $licenseRef;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->licenseRef = new LicenseRef($this->id, $this->shortName, $this->fullName);
   }

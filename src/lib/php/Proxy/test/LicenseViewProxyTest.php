@@ -25,7 +25,7 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $dbManagerMock;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     global $container;
     $container = M::mock('ContainerBuilder');
@@ -34,7 +34,7 @@ class LicenseViewProxyTest extends \PHPUnit\Framework\TestCase
     $this->almostAllColumns = 'rf_pk,rf_shortname,rf_text,rf_url,rf_add_date,rf_copyleft,rf_fullname,rf_notes,marydone,rf_active,rf_text_updatable,rf_md5,rf_detector_type,rf_source';
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

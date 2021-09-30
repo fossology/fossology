@@ -23,7 +23,6 @@
 
 namespace Fossology\UI\Api\Controllers;
 
-use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\DelAgent\UI\DeleteMessages;
 use Fossology\UI\Page\UploadPageBase;
@@ -35,6 +34,7 @@ use Fossology\Lib\Dao\AgentDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
+use Fossology\UI\Api\Helper\ResponseHelper;
 
 /**
  * @class UploadController
@@ -116,9 +116,9 @@ class UploadController extends RestController
    * Get list of uploads for current user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getUploads($request, $response, $args)
   {
@@ -252,9 +252,9 @@ class UploadController extends RestController
    * Get summary of given upload
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getUploadSummary($request, $response, $args)
   {
@@ -277,9 +277,9 @@ class UploadController extends RestController
    * Delete a given upload
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function deleteUpload($request, $response, $args)
   {
@@ -308,9 +308,9 @@ class UploadController extends RestController
    * Move or copy a given upload to a new folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function moveUpload($request, $response, $args)
   {
@@ -327,10 +327,10 @@ class UploadController extends RestController
    * Perform copy/move based on $isCopy
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
    * @param boolean $isCopy True to perform copy, else false
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   private function changeUpload($request, $response, $args, $isCopy)
   {
@@ -350,9 +350,9 @@ class UploadController extends RestController
    * Get a new upload from the POST method
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function postUpload($request, $response, $args)
   {
@@ -381,7 +381,8 @@ class UploadController extends RestController
       if (empty($uploadType)) {
         $uploadType = "vcs";
       }
-      $uploadResponse = $uploadHelper->createNewUpload($request, $folderId,
+      $reqBody = $this->getParsedBody($request);
+      $uploadResponse = $uploadHelper->createNewUpload($reqBody, $folderId,
         $description, $public, $ignoreScm, $uploadType, $applyGlobal);
       $status = $uploadResponse[0];
       $message = $uploadResponse[1];
@@ -405,9 +406,9 @@ class UploadController extends RestController
    * Get list of licenses for given upload
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getUploadLicenses($request, $response, $args)
   {
@@ -543,8 +544,8 @@ class UploadController extends RestController
   /**
    * Check if adj2nest agent finished on upload
    * @param integer $id Upload ID
-   * @param ResponseInterface $response
-   * @return ResponseInterface|boolean Response if failure, true otherwise
+   * @param ResponseHelper $response
+   * @return ResponseHelper|boolean Response if failure, true otherwise
    */
   private function isAdj2nestDone($id, $response)
   {
@@ -565,8 +566,8 @@ class UploadController extends RestController
    * Check if every agent passed is scheduled for the upload
    * @param integer $uploadId Upload ID to check agents for
    * @param array $agents     List of agents to check
-   * @param ResponseInterface $response
-   * @return ResponseInterface|boolean Error response on failure, true on
+   * @param ResponseHelper $response
+   * @return ResponseHelper|boolean Error response on failure, true on
    * success
    */
   private function areAgentsScheduled($uploadId, $agents, $response)

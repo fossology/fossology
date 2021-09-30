@@ -37,7 +37,7 @@ class RepositoryApiTest extends \PHPUnit\Framework\TestCase
    * Mock the CurlRequest class and set mockCurlRequest variable
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->mockCurlRequest = \Mockery::mock('CurlRequest');
 
@@ -58,7 +58,7 @@ class RepositoryApiTest extends \PHPUnit\Framework\TestCase
    * @brief Tear down mock objects
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  public function tearDown()
+  public function tearDown() : void
   {
     \Mockery::close();
   }

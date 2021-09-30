@@ -24,7 +24,7 @@ use Fossology\Lib\Test\EnumMapTestBase;
 class ClearingEventTypesTest extends EnumMapTestBase
 {
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->setTypes(new ClearingEventTypes());
   }

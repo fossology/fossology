@@ -23,8 +23,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Analysis;
@@ -63,9 +63,9 @@ class JobController extends RestController
    * Get all jobs by a user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getJobs($request, $response, $args)
   {
@@ -116,16 +116,16 @@ class JobController extends RestController
    * Create a new job
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function createJob($request, $response, $args)
   {
     $folder = $request->getHeaderLine("folderId");
     $upload = $request->getHeaderLine("uploadId");
     if (is_numeric($folder) && is_numeric($upload) && $folder > 0 && $upload > 0) {
-      $scanOptionsJSON = $request->getParsedBody();
+      $scanOptionsJSON = $this->getParsedBody($request);
       if (empty($scanOptionsJSON)) {
         $error = new Info(403, "No agents selected!", InfoType::ERROR);
         return $response->withJson($error->getArray(), $error->getCode());
@@ -171,10 +171,10 @@ class JobController extends RestController
    * Get all jobs for the current user.
    *
    * @param integer|null $id Specific job id or null for all jobs
-   * @param ResponseInterface $response Response object
+   * @param ResponseHelper $response Response object
    * @param integer $limit   Limit of jobs per page
    * @param integer $page    Page number required
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   private function getAllResults($id, $response, $limit, $page)
   {
@@ -194,10 +194,10 @@ class JobController extends RestController
    * Get all jobs for the given upload.
    *
    * @param integer $uploadId Upload id to be filtered
-   * @param ResponseInterface $response Response object
+   * @param ResponseHelper $response Response object
    * @param integer $limit    Limit of jobs per page
    * @param integer $page     Page number required
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   private function getFilteredResults($uploadId, $response, $limit, $page)
   {

@@ -42,7 +42,7 @@ class PagedResultTest extends \PHPUnit\Framework\TestCase
   /** @var TestPagedResult */
   private $pagedResult;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->pagedResult = new TestPagedResult(self::START_OFFSET);
   }

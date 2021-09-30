@@ -31,6 +31,7 @@ namespace Fossology\UI\Api\Helper;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Fossology\Lib\Dao\UserDao;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 
@@ -135,7 +136,8 @@ class AuthHelper
         $returnValue = $isTokenActive;
       } else {
         try {
-          $jwtTokenDecoded = JWT::decode($jwtToken, $dbRows["token_key"], ['HS256']);
+          $key = new Key($dbRows["token_key"], 'HS256');
+          $jwtTokenDecoded = JWT::decode($jwtToken, $key);
           $tokenScope = $jwtTokenDecoded->{'scope'};
         } catch (\UnexpectedValueException $e) {
           $returnValue = new Info(403, $e->getMessage(), InfoType::ERROR);

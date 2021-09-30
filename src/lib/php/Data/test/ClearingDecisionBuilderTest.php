@@ -59,7 +59,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
   /** @var ClearingDecisionBuilder */
   private $clearingDecisionBuilder;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->sameUpload = true;
     $this->sameFolder = true;
@@ -80,7 +80,7 @@ class ClearingDecisionBuilderTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

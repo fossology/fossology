@@ -12,7 +12,7 @@ use Fossology\DelAgent\UI\DeleteResponse;
  * @param $user_pk - the user_id
  * @param $group_pk - the group_id
  * @param $uploadDao - an instance of a uploadDao
- * @return string with the message.
+ * @return DeleteResponse with the message.
  */
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {

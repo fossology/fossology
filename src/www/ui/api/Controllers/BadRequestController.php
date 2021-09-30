@@ -23,8 +23,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 
@@ -39,9 +39,9 @@ class BadRequestController extends RestController
    * Get app the uploads for current user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function __invoke($request, $response, $args)
   {

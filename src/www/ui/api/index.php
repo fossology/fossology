@@ -44,14 +44,22 @@ use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
 use Fossology\UI\Api\Controllers\GroupController;
+use Fossology\UI\Api\Helper\ResponseFactoryHelper;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Middlewares\FossologyInitMiddleware;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Slim\App;
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
+use Slim\Exception\HttpNotFoundException;
+use Slim\Factory\AppFactory;
+use Slim\Middleware\ContentLengthMiddleware;
+use Slim\Psr7\Response;
+use Throwable;
 
-const REST_VERSION_SLUG = "restVersion";
+const REST_VERSION = "1";
 
-const VERSION_1   = "/v{" . REST_VERSION_SLUG . ":1}/";
+const BASE_PATH   = "/repo/api/v" . REST_VERSION;
 
 const AUTH_METHOD = "JWT_TOKEN";
 
@@ -85,11 +93,14 @@ if ($dbConnected) {
   plugin_load();
 }
 
-$app = new App($GLOBALS['container']);
+AppFactory::setContainer($container);
+AppFactory::setResponseFactory(new ResponseFactoryHelper());
+$app = AppFactory::create();
+$app->setBasePath(BASE_PATH);
 
 /*
  * To check the order of middlewares, refer
- * https://www.slimframework.com/docs/v3/concepts/middleware.html
+ * https://www.slimframework.com/docs/v4/concepts/middleware.html
  *
  * FOSSology Init is the first middleware and Rest Auth is second.
  *
@@ -104,15 +115,17 @@ if ($dbConnected) {
   $app->add(new FossologyInitMiddleware());
   // Middleware for authentication
   $app->add(new RestAuthMiddleware());
+  // Content length middleware
+  $app->add(new ContentLengthMiddleware());
 } else {
   // DB not connected
   // Respond to health request as expected
-  $app->get(VERSION_1 . 'health', function($req, $res) {
+  $app->get('/health', function($req, $res) {
     $handler = new InfoController($GLOBALS['container']);
     return $handler->getHealth($req, $res, -1);
   });
   // Handle any other request and respond explicitly
-  $app->any('{route:.*}', function($req, $res) {
+  $app->any('{route:.*}', function(ServerRequestInterface $req, ResponseHelper $res) {
     $error = new Info(503, "Unable to connect to DB.", InfoType::ERROR);
     return $res->withJson($error->getArray(), $error->getCode());
   });
@@ -123,109 +136,160 @@ if ($dbConnected) {
 }
 
 //////////////////////////OPTIONS/////////////////////
-$app->options(VERSION_1 . '{routes:.+}', AuthController::class . ':optionsVerification');
+$app->options('/{routes:.+}', AuthController::class . ':optionsVerification');
 
 //////////////////////////AUTH/////////////////////
-$app->post(VERSION_1 . 'tokens', AuthController::class . ':createNewJwtToken');
+$app->post('/tokens', AuthController::class . ':createNewJwtToken');
 
 //////////////////////////UPLOADS/////////////////////
-$app->group(VERSION_1 . 'uploads',
-  function (){
-    $this->get('[/{id:\\d+}]', UploadController::class . ':getUploads');
-    $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
-    $this->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
-    $this->put('/{id:\\d+}', UploadController::class . ':moveUpload');
-    $this->post('', UploadController::class . ':postUpload');
-    $this->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
-    $this->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/uploads',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('[/{id:\\d+}]', UploadController::class . ':getUploads');
+    $app->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
+    $app->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
+    $app->put('/{id:\\d+}', UploadController::class . ':moveUpload');
+    $app->post('', UploadController::class . ':postUpload');
+    $app->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
+    $app->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////ADMIN-USERS/////////////////////
-$app->group(VERSION_1 . 'users',
-  function (){
-    $this->get('[/{id:\\d+}]', UserController::class . ':getUsers');
-    $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
-    $this->get('/self', UserController::class . ':getCurrentUser');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/users',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('[/{id:\\d+}]', UserController::class . ':getUsers');
+    $app->delete('/{id:\\d+}', UserController::class . ':deleteUser');
+    $app->get('/self', UserController::class . ':getCurrentUser');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////GROUPS/////////////////////
-$app->group(VERSION_1 . 'groups',
-function (){
-  $this->get('', GroupController::class . ':getGroups');
-  $this->post('', GroupController::class . ':createGroup');
-});
+$app->group('/groups',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', GroupController::class . ':getGroups');
+    $app->post('', GroupController::class . ':createGroup');
+  });
 
 ////////////////////////////JOBS/////////////////////
-$app->group(VERSION_1 . 'jobs',
-  function (){
-    $this->get('[/{id:\\d+}]', JobController::class . ':getJobs');
-    $this->post('', JobController::class . ':createJob');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/jobs',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('[/{id:\\d+}]', JobController::class . ':getJobs');
+    $app->post('', JobController::class . ':createJob');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////SEARCH/////////////////////
-$app->group(VERSION_1 . 'search',
-  function (){
-    $this->get('', SearchController::class . ':performSearch');
+$app->group('/search',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', SearchController::class . ':performSearch');
   });
 
 ////////////////////////////FOLDER/////////////////////
-$app->group(VERSION_1 . 'folders',
-  function (){
-    $this->get('[/{id:\\d+}]', FolderController::class . ':getFolders');
-    $this->post('', FolderController::class . ':createFolder');
-    $this->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
-    $this->patch('/{id:\\d+}', FolderController::class . ':editFolder');
-    $this->put('/{id:\\d+}', FolderController::class . ':copyFolder');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/folders',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('[/{id:\\d+}]', FolderController::class . ':getFolders');
+    $app->post('', FolderController::class . ':createFolder');
+    $app->delete('/{id:\\d+}', FolderController::class . ':deleteFolder');
+    $app->patch('/{id:\\d+}', FolderController::class . ':editFolder');
+    $app->put('/{id:\\d+}', FolderController::class . ':copyFolder');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////REPORT/////////////////////
-$app->group(VERSION_1 . 'report',
-  function (){
-    $this->get('', ReportController::class . ':getReport');
-    $this->get('/{id:\\d+}', ReportController::class . ':downloadReport');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/report',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', ReportController::class . ':getReport');
+    $app->get('/{id:\\d+}', ReportController::class . ':downloadReport');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 ////////////////////////////INFO/////////////////////
-$app->group(VERSION_1 . 'version',
-  function (){
-    $this->get('', InfoController::class . ':getInfo');
+$app->group('/version',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', InfoController::class . ':getInfo');
   });
-$app->group(VERSION_1 . 'info',
-  function (){
-    $this->get('', InfoController::class . ':getInfo');
+$app->group('/info',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', InfoController::class . ':getInfo');
   });
-$app->group(VERSION_1 . 'health',
-  function (){
-    $this->get('', InfoController::class . ':getHealth');
+$app->group('/health',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', InfoController::class . ':getHealth');
   });
 
 /////////////////////////FILE SEARCH////////////////////
-$app->group(VERSION_1 . 'filesearch',
-  function (){
-    $this->post('', FileSearchController::class . ':getFiles');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/filesearch',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->post('', FileSearchController::class . ':getFiles');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
 /////////////////////////LICENSE SEARCH/////////////////
-$app->group(VERSION_1 . 'license',
-  function (){
-    $this->get('', LicenseController::class . ':getAllLicenses');
-    $this->post('', LicenseController::class . ':createLicense');
-    $this->get('/{shortname:.+}', LicenseController::class . ':getLicense');
-    $this->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
-    $this->any('/{params:.*}', BadRequestController::class);
+$app->group('/license',
+  function (\Slim\Routing\RouteCollectorProxy $app) {
+    $app->get('', LicenseController::class . ':getAllLicenses');
+    $app->post('', LicenseController::class . ':createLicense');
+    $app->get('/{shortname:.+}', LicenseController::class . ':getLicense');
+    $app->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
+    $app->any('/{params:.*}', BadRequestController::class);
   });
 
+/////////////////////ERROR HANDLING/////////////////
+// Define Custom Error Handler
+$customErrorHandler = function (
+  ServerRequestInterface $request,
+  Throwable $exception,
+  bool $displayErrorDetails,
+  bool $logErrors,
+  bool $logErrorDetails,
+  ?LoggerInterface $logger = null
+) use ($app) {
+  if ($logger === null) {
+    $logger = $app->getContainer()->get('logger');
+  }
+  if ($logErrors) {
+    $logger->error($exception->getMessage(), $exception->getTrace());
+  }
+  if ($displayErrorDetails) {
+    $payload = ['error'=> $exception->getMessage(),
+      'trace' => $exception->getTraceAsString()];
+  } else {
+    $error = new Info(500, "Something went wrong! Please try again later.",
+      InfoType::ERROR);
+    $payload = $error->getArray();
+  }
+
+  $response = $app->getResponseFactory()->createResponse(500)
+    ->withHeader("Content-Type", "application/json");
+  $response->getBody()->write(
+      json_encode($payload, JSON_UNESCAPED_UNICODE)
+  );
+
+  return $response;
+};
+
+$errorMiddleware = $app->addErrorMiddleware(false, true, true,
+  $container->get("logger"));
+$errorMiddleware->setDefaultErrorHandler($customErrorHandler);
+
 // Catch all routes
-$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
-  $handler = $this->get('notFoundHandler');
-  return $handler($req, $res);
-});
+$errorMiddleware->setErrorHandler(
+  HttpNotFoundException::class,
+  function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
+      $response = new ResponseHelper();
+      $error = new Info(404, "Resource not found", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+  });
+
+// Set the Not Allowed Handler
+$errorMiddleware->setErrorHandler(
+  HttpMethodNotAllowedException::class,
+  function (ServerRequestInterface $request, Throwable $exception, bool $displayErrorDetails) {
+      $response = new Response();
+      $response->getBody()->write('405 NOT ALLOWED');
+
+      return $response->withStatus(405);
+  });
 
 $app->run();
 

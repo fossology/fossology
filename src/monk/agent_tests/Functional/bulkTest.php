@@ -45,7 +45,7 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
   /** @var HighlightDao */
   private $highlightDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("monkBulk");
     $this->dbManager = $this->testDb->getDbManager();
@@ -58,7 +58,7 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
     $this->clearingDao = new ClearingDao($this->dbManager, $this->uploadDao);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

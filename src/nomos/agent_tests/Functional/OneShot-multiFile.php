@@ -112,7 +112,7 @@ class OneShotMultiFileTest extends CommonCliTest
       $this->assertArrayHasKey($fileName, $this->Results,
         "Failure, filename $fileName was not found in the master results\n");
       $expected  = $this->Results[$fileName];
-      $this->assertContains($licenses, $expected,
+      $this->assertStringContainsString($licenses, $expected,
         "Failure, Master results $expected \n do not match current results $licenses \n");
     }
   }

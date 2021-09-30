@@ -255,7 +255,7 @@ class ShowJobsDao
    * @param string $jq_Type
    * @param float $filesPerSec
    * @param int $uploadId
-   * @return Returns empty if estimated time is 0 else returns time.
+   * @return string Returns empty if estimated time is 0 else returns time.
    **/
   public function getEstimatedTime($job_pk, $jq_Type='', $filesPerSec=0, $uploadId=0, $timeInSec=0)
   {
