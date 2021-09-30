@@ -24,8 +24,6 @@ use Monolog\Handler\BrowserConsoleHandler;
 use Monolog\Handler\ErrorLogHandler;
 use Monolog\Logger;
 use Fossology\Lib\Util\TimingLogger;
-use Fossology\UI\Api\Models\Info;
-use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -41,51 +39,26 @@ $containerBuilder = "Symfony\Component\DependencyInjection\ContainerBuilder";
 
 $startTime = microtime(true);
 
-if ($restCall) {
-  // Call from REST api
-  $containerClassName = 'FossologyRestCachedContainer';
-  $cacheFile = "$cacheDir/rest-container.php";
-  $containerBuilder = "\Flexsounds\Component\SymfonyContainerSlimBridge\ContainerBuilder";
-}
-
 $cached = $cacheDir && file_exists($cacheFile);
 
 if ($cached) {
   require_once ($cacheFile);
+  /**
+   * @var Symfony\Component\DependencyInjection\Container $container
+   * The dependency container for all FOSSology usage.
+   */
   $container = new $containerClassName();
 } else {
+  /**
+   * @var Symfony\Component\DependencyInjection\ContainerBuilder $container
+   * The dependency container for all FOSSology usage.
+   */
   $container = new $containerBuilder();
 
   $container->setParameter('application_root', dirname(dirname(__DIR__)));
 
   $loader = new XmlFileLoader($container, new FileLocator(__DIR__));
   $loader->load('services.xml');
-
-  if ($restCall) {
-    // Set error handlers for Slim
-    $container->set('notFoundHandler',
-      function ($request, $response){
-        $error = new Info(404, "Resource not found", InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
-      });
-    $container->set('notAllowedHandler',
-      function ($request, $response, $methods){
-        $error = new Info(405,
-          'Method must be one of: ' . implode(', ', $methods), InfoType::ERROR);
-        return $response->withHeader('Allow', implode(', ', $methods))
-          ->withJson($error->getArray(), $error->getCode());
-      });
-    $container->set('phpErrorHandler',
-      function ($request, $response, $error){
-        $GLOBALS['container']->get('logger')
-          ->error($error);
-        $error = new Info(500, "Something went wrong! Please try again later.",
-          InfoType::ERROR);
-        return $response->withJson($error->getArray(), $error->getCode());
-      });
-    $phpErrorHandler = $container->get('phpErrorHandler');
-    $container->set('errorHandler', $phpErrorHandler);
-  }
 
   $container->compile();
 
@@ -99,7 +72,7 @@ if ($cached) {
   }
 }
 
-if ($restCall) {
+if ($restCall && $container->has('environment')) {
   // Replace cached values with current values
   $container->get('environment')->replace($_SERVER);
 }

@@ -36,7 +36,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -45,7 +45,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * @brief Close mockery
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

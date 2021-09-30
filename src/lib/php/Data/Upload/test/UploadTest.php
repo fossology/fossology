@@ -33,7 +33,7 @@ class UploadTest extends \PHPUnit\Framework\TestCase
   /** @var Upload */
   private $upload;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->timestamp = time();
     $this->upload = new Upload($this->id, $this->fileName, $this->description, $this->treeTableName, $this->timestamp);
@@ -41,7 +41,7 @@ class UploadTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

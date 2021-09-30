@@ -185,6 +185,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   public function runJobFromJobque($uploadId, $jobId)
   {
     list($success,$output,$retCode) = $this->runnerCli->run($uploadId, $this->userId, $this->groupId, $jobId);
+    var_dump([$success,$output,$retCode]);
 
     assertThat('cannot run runner', $success, equalTo(true));
     assertThat('report failed: "'.$output.'"', $retCode, equalTo(0));

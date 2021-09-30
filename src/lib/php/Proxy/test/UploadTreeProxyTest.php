@@ -27,7 +27,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
 {
   private $testDb;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->testDb->createPlainTables( array('uploadtree') );
@@ -37,7 +37,7 @@ class UploadTreeProxyTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

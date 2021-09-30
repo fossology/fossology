@@ -25,8 +25,7 @@
  */
 namespace Fossology\UI\Api\Helper;
 
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UploadedFileInterface;
+use Slim\Psr7\Request;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
@@ -37,6 +36,7 @@ use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\AgentDao;
 use Fossology\UI\Api\Models\Findings;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
  * @class UploadHelper
@@ -102,7 +102,7 @@ class UploadHelper
    * Get a request from Slim and translate to Symfony request to be
    * processed by FOSSology
    *
-   * @param ServerRequestInterface $request
+   * @param array|null $request
    * @param string $folderId ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
@@ -113,11 +113,12 @@ class UploadHelper
    * @see createVcsUpload()
    * @see createFileUpload()
    */
-  public function createNewUpload(ServerRequestInterface $request, $folderId,
-    $fileDescription, $isPublic, $ignoreScm, $uploadType, $applyGlobal = false)
+  public function createNewUpload($reqBody, $folderId, $fileDescription,
+    $isPublic, $ignoreScm, $uploadType, $applyGlobal = false)
   {
-    $uploadedFile = $request->getUploadedFiles();
-    $body = $request->getParsedBody();
+    $symReq = \Symfony\Component\HttpFoundation\Request::createFromGlobals();
+    $uploadedFile = $symReq->files->get($this->uploadFilePage::FILE_INPUT_NAME,
+      null);
 
     if ($applyGlobal) {
       // If global decisions should be ignored
@@ -132,8 +133,7 @@ class UploadHelper
     } else {
       $ignoreScm = 0;
     }
-    if (empty($uploadedFile) ||
-      ! isset($uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME])) {
+    if (empty($uploadedFile)) {
       if (empty($uploadType)) {
         return array(false, "Missing 'uploadType' header",
           "Send file with parameter " . $this->uploadFilePage::FILE_INPUT_NAME .
@@ -141,10 +141,9 @@ class UploadHelper
           - 1
         );
       }
-      return $this->handleUpload($body, $uploadType, $folderId,
+      return $this->handleUpload($reqBody, $uploadType, $folderId,
         $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     } else {
-      $uploadedFile = $uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME];
       return $this->createFileUpload($uploadedFile, $folderId,
         $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     }
@@ -153,7 +152,7 @@ class UploadHelper
   /**
    * Create request required by UploadFilePage
    *
-   * @param UploadedFileInterface $uploadedFile Uploaded file object by Slim
+   * @param UploadedFile $uploadedFile Uploaded file object
    * @param string $folderId    ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
@@ -164,12 +163,6 @@ class UploadHelper
   private function createFileUpload($uploadedFile, $folderId, $fileDescription,
     $isPublic, $ignoreScm = 0, $applyGlobal = 0)
   {
-    $path = $uploadedFile->file;
-    $originalName = $uploadedFile->getClientFilename();
-    $originalMime = $uploadedFile->getClientMediaType();
-    $originalError = $uploadedFile->getError();
-    $symfonyFile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-      $path, $originalName, $originalMime, $originalError);
     $symfonyRequest = new \Symfony\Component\HttpFoundation\Request();
     $symfonySession = $GLOBALS['container']->get('session');
     $symfonySession->set(

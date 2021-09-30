@@ -67,7 +67,7 @@ class AgentDaoTest extends \PHPUnit\Framework\TestCase
   /** @var AgentRef */
   private $incompleteAgent;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->dbManager = M::mock(DbManager::class);
     $this->logger = M::mock('Monolog\Logger');
@@ -117,7 +117,7 @@ class AgentDaoTest extends \PHPUnit\Framework\TestCase
     }
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->dbManager->queryOnce("drop table " . $this->agentName . AgentDao::ARS_TABLE_SUFFIX);
     $this->dbManager->queryOnce("drop table " . $this->otherAgentName . AgentDao::ARS_TABLE_SUFFIX);

@@ -41,7 +41,7 @@ class HighlightRendererTest extends \PHPUnit\Framework\TestCase
   /** @var array */
   private $colorMap;
 
-  function setUp()
+  function setUp() : void
   {
     $this->highlightRenderer = new HighlightRenderer();
     $this->colorMap = array('type1' => 'red', 'type2' => 'yellow', 'any' => 'gray');
@@ -49,7 +49,7 @@ class HighlightRendererTest extends \PHPUnit\Framework\TestCase
     $this->prepareMocks();
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     M::close();
   }

@@ -36,11 +36,11 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Controllers\AuthController;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\AuthHelper;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Http\Body;
-use Slim\Http\Uri;
-use Slim\Http\Headers;
+use Fossology\UI\Api\Helper\ResponseHelper;
+use Slim\Psr7\Request;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Uri;
+use Slim\Psr7\Headers;
 
 /**
  * @class AuthControllerTest
@@ -74,6 +74,12 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
   private $assertCountBefore;
 
   /**
+   * @var StreamFactory $streamFactory
+   * Stream factory to create body streams.
+   */
+  private $streamFactory;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -90,6 +96,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->authController = new AuthController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+    $this->streamFactory = new StreamFactory();
   }
 
   /**
@@ -130,19 +137,18 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array('helper.restHelper'))
       ->andReturn($this->restHelper);
 
-    $body = new Body(fopen('php://temp', 'r+'));
-    $body->write(json_encode([
-        "username" => "foss",
-        "password" => "foss",
-        "token_name" => "test_token",
-        "token_scope" => "read",
-        "token_expire" => "2020-01-01"
-      ]));
+    $body = $this->streamFactory->createStream(json_encode([
+      "username" => "foss",
+      "password" => "foss",
+      "token_name" => "test_token",
+      "token_scope" => "read",
+      "token_expire" => "2020-01-01"
+    ]));
     $requestHeaders = new Headers();
-    $requestHeaders->set('Content-Type', 'application/json');
-    $request = new Request("POST", new Uri("HTTP", "localhost"), $requestHeaders,
-      [], [], $body);
-    $response = new Response();
+    $requestHeaders->setHeader('Content-Type', 'application/json');
+    $request = new Request("POST", new Uri("HTTP", "localhost"),
+      $requestHeaders, [], [], $body);
+    $response = new ResponseHelper();
     $response = $this->authController->createNewJwtToken($request, $response,
       []);
     $response->getBody()->seek(0);
@@ -180,19 +186,18 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
 
-    $body = new Body(fopen('php://temp', 'r+'));
-    $body->write(json_encode([
-        "username" => "foss",
-        "password" => "foss",
-        "token_name" => "test_token",
-        "token_scope" => "read",
-        "token_expire" => "2020-01-02"
-      ]));
+    $body = $this->streamFactory->createStream(json_encode([
+      "username" => "foss",
+      "password" => "foss",
+      "token_name" => "test_token",
+      "token_scope" => "read",
+      "token_expire" => "2020-01-02"
+    ]));
     $requestHeaders = new Headers();
-    $requestHeaders->set('Content-Type', 'application/json');
+    $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"), $requestHeaders,
       [], [], $body);
-    $response = new Response();
+    $response = new ResponseHelper();
     $response = $this->authController->createNewJwtToken($request, $response,
       []);
     $response->getBody()->seek(0);
@@ -221,19 +226,18 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
 
-    $body = new Body(fopen('php://temp', 'r+'));
-    $body->write(json_encode([
-        "username" => "foss",
-        "password" => "foss",
-        "token_name" => "test_token",
-        "token_scope" => "read",
-        "token_expire" => "2020-01-03"
-      ]));
+    $body = $this->streamFactory->createStream(json_encode([
+      "username" => "foss",
+      "password" => "foss",
+      "token_name" => "test_token",
+      "token_scope" => "read",
+      "token_expire" => "2020-01-03"
+    ]));
     $requestHeaders = new Headers();
-    $requestHeaders->set('Content-Type', 'application/json');
+    $requestHeaders->setHeader('Content-Type', 'application/json');
     $request = new Request("POST", new Uri("HTTP", "localhost"), $requestHeaders,
       [], [], $body);
-    $response = new Response();
+    $response = new ResponseHelper();
     $failedResponse = new Info(404, "Username or password incorrect.",
       InfoType::ERROR);
     $response = $this->authController->createNewJwtToken($request, $response,

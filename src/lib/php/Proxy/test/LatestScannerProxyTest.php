@@ -29,7 +29,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
   private $assertCountBefore;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestLiteDb();
     $this->testDb->createPlainTables( array('agent','ars_master') );
@@ -39,7 +39,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

@@ -22,14 +22,14 @@ namespace Fossology\Lib\Db;
 class ModernDbManagerTest extends DbManagerTest
 {
 
-  function setUp()
+  function setUp() : void
   {
     parent::setUp();
     $this->dbManager = new ModernDbManager($this->logger);
     $this->dbManager->setDriver($this->driver);
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     parent::tearDown();
   }

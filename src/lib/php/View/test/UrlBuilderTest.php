@@ -31,7 +31,7 @@ class UrlBuilderTest extends \PHPUnit\Framework\TestCase
   /** @var UrlBuilder */
   private $urlBuilder;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->urlBuilder = new UrlBuilder();
   }

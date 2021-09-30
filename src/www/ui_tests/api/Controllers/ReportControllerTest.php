@@ -33,11 +33,11 @@ use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
-use Slim\Http\Body;
-use Slim\Http\Headers;
-use Slim\Http\Request;
-use Slim\Http\Response;
-use Slim\Http\Uri;
+use Fossology\UI\Api\Helper\ResponseHelper;
+use Slim\Psr7\Request;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\Uri;
+use Slim\Psr7\Headers;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -128,6 +128,12 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   private $assertCountBefore;
 
   /**
+   * @var StreamFactory $streamFactory
+   * Stream factory to create body streams.
+   */
+  private $streamFactory;
+
+  /**
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
@@ -169,6 +175,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       'helper.restHelper'))->andReturn($this->restHelper);
     $this->reportController = new ReportController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
+    $this->streamFactory = new StreamFactory();
   }
 
   /**
@@ -233,12 +240,12 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
   private function getResponseForReport($uploadId, $reportFormat)
   {
     $requestHeaders = new Headers();
-    $requestHeaders->set('uploadId', $uploadId);
-    $requestHeaders->set('reportFormat', $reportFormat);
-    $body = new Body(fopen('php://temp', 'r+'));
+    $requestHeaders->setHeader('uploadId', $uploadId);
+    $requestHeaders->setHeader('reportFormat', $reportFormat);
+    $body = $this->streamFactory->createStream();
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/api/v1/report"), $requestHeaders, [], [], $body);
-    $response = new Response();
+    $response = new ResponseHelper();
     return $this->reportController->getReport($request, $response, []);
   }
 
@@ -393,7 +400,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $fileContent = $fileResponse->getFile();
     $this->downloadPlugin->shouldReceive('getReport')->andReturn($fileResponse);
 
-    $expectedResponse = new Response();
+    $expectedResponse = new ResponseHelper();
     $expectedResponse = $expectedResponse->withHeader('Content-Description',
         'File Transfer')
       ->withHeader('Content-Type', $fileResponse->headers->get('Content-Type'))
@@ -403,17 +410,14 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->withHeader('Pragma', 'private')
       ->withHeader('Content-Length', filesize($fileContent));
 
-    ob_start();
     $actualResponse = $this->reportController->downloadReport(null,
-      new Response(), ["id" => $reportId]);
-    $output = ob_get_clean();
+      new ResponseHelper(), ["id" => $reportId]);
 
     $expectedResponse->getBody()->seek(0);
-    $this->assertEquals($expectedResponse->getBody()->getContents(),
+    $this->assertEquals(file_get_contents($tmpfile),
       $actualResponse->getBody()->getContents());
     $this->assertEquals($expectedResponse->getHeaders(),
       $actualResponse->getHeaders());
-    $this->assertEquals(file_get_contents($tmpfile), $output);
     unlink($tmpfile);
   }
 
@@ -442,7 +446,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       InfoType::INFO);
 
     $actualResponse = $this->reportController->downloadReport(null,
-      new Response(), ["id" => $reportId]);
+      new ResponseHelper(), ["id" => $reportId]);
 
     $this->assertEquals($expectedResponse->getCode(),
       $actualResponse->getStatusCode());
@@ -468,7 +472,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
             InfoType::ERROR);
 
     $actualResponse = $this->reportController->downloadReport(null,
-      new Response(), ["id" => $reportId]);
+      new ResponseHelper(), ["id" => $reportId]);
 
     $this->assertEquals($expectedResponse->getCode(),
       $actualResponse->getStatusCode());
@@ -505,7 +509,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       InfoType::INFO);
 
     $actualResponse = $this->reportController->downloadReport(null,
-      new Response(), ["id" => $reportId]);
+      new ResponseHelper(), ["id" => $reportId]);
 
     $this->assertEquals($expectedResponse->getCode(),
       $actualResponse->getStatusCode());

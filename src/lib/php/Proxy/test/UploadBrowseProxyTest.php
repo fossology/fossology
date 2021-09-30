@@ -28,7 +28,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
   private $testDb;
   private $groupId = 401;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->testDb->createPlainTables( array('upload','upload_clearing','perm_upload') );
@@ -39,7 +39,7 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

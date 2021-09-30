@@ -65,7 +65,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
   /** @var boolean */
   private $includeSubFolders;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->uploadTreeId = 432;
     $this->pfileId = 32;
@@ -92,7 +92,7 @@ class ClearingDecisionProcessorTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

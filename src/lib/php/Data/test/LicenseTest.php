@@ -28,7 +28,7 @@ class LicenseTest extends \PHPUnit\Framework\TestCase
   /** @var License */
   private $license;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->text = "The License text";
     $this->url = "http://www.fossology.org";
