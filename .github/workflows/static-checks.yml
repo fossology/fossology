@@ -59,7 +59,7 @@ jobs:
         run: |
           composer install --prefer-dist --working-dir=src
           src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
-  
+
   copy-paste:
     runs-on: ubuntu-20.04
     continue-on-error: true
