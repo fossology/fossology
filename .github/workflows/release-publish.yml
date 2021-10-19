@@ -18,6 +18,7 @@ jobs:
         os:
           - 'debian:buster'
           - 'debian:stretch'
+          - 'debian:bullseye'
           - 'ubuntu:bionic'
           - 'ubuntu:focal'
 
