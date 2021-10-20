@@ -47,4 +47,6 @@ int tokensEquals(const GArray* a, const GArray* b);
 
 size_t token_position_of(size_t index, const GArray* tokens);
 
+char* normalize_escape_string(char* input);
+
 #endif // MONK_AGENT_STRING_OPERATIONS_H

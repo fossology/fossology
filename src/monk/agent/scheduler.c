@@ -69,7 +69,7 @@ int processUploadId(MonkState* state, int uploadId, const Licenses* licenses) {
           continue;
         }
 
-        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses, &schedulerCallbacks)) {
+        if (matchPFileWithLicenses(threadLocalState, pFileId, licenses, &schedulerCallbacks, DELIMITERS)) {
           fo_scheduler_heart(1);
         } else {
           fo_scheduler_heart(0);
