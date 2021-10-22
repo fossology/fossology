@@ -10,7 +10,7 @@
 }
 
 .treeview .hitarea {
-    background: url(../images/treeview-default.gif) -64px -25px no-repeat;
+    background: url(../images/treeview-default.gif) -64px -23px no-repeat;
     height: 16px;
     width: 16px;
     margin-left: -16px;
@@ -39,7 +39,7 @@
 
 .treeview .expandable-hitarea { background-position: -80px -3px; }
 
-.treeview li.last { background-position: 0 -1759px }
+.treeview li.last { background-position: 0 -1762px }
 .treeview li.lastCollapsable, .treeview li.lastExpandable { background-image: url(../images/treeview-default.gif); }  
 .treeview li.lastCollapsable { background-position: 0 -111px }
 .treeview li.lastExpandable { background-position: -32px -67px }

@@ -28,6 +28,7 @@ function openBulkModal() {
   $('#userModal').hide();
   $('#ClearingHistoryDataModal').hide();
   bulkModalOpened = 1;
+  $("#bulkModal").attr("hidden",false);
   $('#bulkModal').toggle();
 }
 
@@ -62,6 +63,7 @@ $("#textModal").on('hide.bs.modal', function (e) {
     $("#bulkModal").modal("show");
   }
 });
+
 function openClearingHistoryDataModal() {
   $('#bulkModal').hide();
   $('#userModal').hide();
