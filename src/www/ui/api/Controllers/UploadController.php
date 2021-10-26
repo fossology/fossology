@@ -98,6 +98,11 @@ class UploadController extends RestController
    */
   const CONTAINER_PARAM = "containers";
 
+  /**
+   * Valid status inputs
+   */
+  const VALID_STATUS = ["open", "inprogress", "closed", "rejected"];
+
   public function __construct($container)
   {
     parent::__construct($container);
@@ -300,20 +305,7 @@ class UploadController extends RestController
   }
 
   /**
-   * Copy a given upload to a new folder
-   *
-   * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
-   * @param array $args
-   * @return ResponseInterface
-   */
-  public function copyUpload($request, $response, $args)
-  {
-    return $this->changeUpload($request, $response, $args, true);
-  }
-
-  /**
-   * Move a given upload to a new folder
+   * Move or copy a given upload to a new folder
    *
    * @param ServerRequestInterface $request
    * @param ResponseInterface $response
@@ -322,7 +314,13 @@ class UploadController extends RestController
    */
   public function moveUpload($request, $response, $args)
   {
-    return $this->changeUpload($request, $response, $args, false);
+    $action = $request->getHeaderLine('action');
+    if (strtolower($action) == "move") {
+      $copy = false;
+    } else {
+      $copy = true;
+    }
+    return $this->changeUpload($request, $response, $args, $copy);
   }
 
   /**
@@ -441,6 +439,86 @@ class UploadController extends RestController
     $licenseList = $uploadHelper->getUploadLicenseList($id, $agents,
       $containers);
     return $response->withJson($licenseList, 200);
+  }
+
+  /**
+   * Update an upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function updateUpload($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $query = $request->getQueryParams();
+    $userDao = $this->restHelper->getUserDao();
+    $userId = $this->restHelper->getUserId();
+    $groupId = $this->restHelper->getGroupId();
+
+    $perm = $userDao->isAdvisorOrAdmin($userId, $groupId);
+    if (!$perm) {
+      $error = new Info(403, "Not advisor or admin of current group. " .
+        "Can not update upload.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $uploadBrowseProxy = new UploadBrowseProxy(
+      $groupId,
+      $perm,
+      $this->dbHelper->getDbManager()
+    );
+
+    $assignee = null;
+    $status = null;
+    $comment = null;
+
+    $returnVal = true;
+    // Handle assignee info
+    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
+      $assignee = filter_var($query[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
+      $userList = $userDao->getUserChoices($groupId);
+      if (!array_key_exists($assignee, $userList)) {
+        $returnVal = new Info(
+          404,
+          "New assignee does not have permisison on upload.",
+          InfoType::ERROR
+        );
+      } else {
+        $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
+      }
+    }
+    // Handle new status
+    if (
+      array_key_exists(self::FILTER_STATUS, $query) &&
+      in_array(strtolower($query[self::FILTER_STATUS]), self::VALID_STATUS) &&
+      $returnVal === true
+    ) {
+      $newStatus = strtolower($query[self::FILTER_STATUS]);
+      $comment = '';
+      if (in_array($newStatus, ["closed", "rejected"])) {
+        $body = $request->getBody();
+        $comment = $body->getContents();
+        $body->close();
+      }
+      $status = 0;
+      if ($newStatus == self::VALID_STATUS[1]) {
+        $status = UploadStatus::IN_PROGRESS;
+      } elseif ($newStatus == self::VALID_STATUS[2]) {
+        $status = UploadStatus::CLOSED;
+      } elseif ($newStatus == self::VALID_STATUS[3]) {
+        $status = UploadStatus::REJECTED;
+      } else {
+        $status = UploadStatus::OPEN;
+      }
+      $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
+    }
+    if ($returnVal !== true) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $returnVal = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
   /**

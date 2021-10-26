@@ -44,6 +44,7 @@ use Slim\Http\Body;
 use Slim\Http\Uri;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Models\Hash;
 
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
@@ -141,6 +142,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadDao = M::mock(UploadDao::class);
     $this->folderDao = M::mock(FolderDao::class);
     $this->agentDao = M::mock(AgentDao::class);
+    $this->userDao = M::mock(UserDao::class);
 
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -154,6 +156,8 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       ->andReturn($this->uploadDao);
     $this->restHelper->shouldReceive('getFolderDao')
       ->andReturn($this->folderDao);
+    $this->restHelper->shouldReceive('getUserDao')
+      ->andReturn($this->userDao);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -486,7 +490,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for UploadController::copyUpload()
+   * -# Test for UploadController::moveUpload() for a copy action
    * -# Check if response status is 202
    */
   public function testCopyUpload()
@@ -503,10 +507,11 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->set('folderId', $folderId);
+    $requestHeaders->set('action', 'copy');
     $body = new Body(fopen('php://temp', 'r+'));
     $request = new Request("PUT", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-    $actualResponse = $this->uploadController->copyUpload($request,
+    $actualResponse = $this->uploadController->moveUpload($request,
       new Response(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -530,6 +535,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->set('folderId', 'alpha');
+    $requestHeaders->set('action', 'move');
     $body = new Body(fopen('php://temp', 'r+'));
     $request = new Request("PATCH", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
@@ -809,5 +815,81 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
       $this->getResponseJson($actualResponse));
     $this->assertEquals($expectedResponse->getHeaders(),
       $actualResponse->getHeaders());
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload()
+   * -# Check if response status is 202
+   */
+  public function testUpdateUpload()
+  {
+    $upload = 2;
+    $assignee = 4;
+    $status = UploadStatus::REJECTED;
+    $comment = "Not helpful";
+
+    $body = new Body(
+      fopen('data://text/plain;base64,' . base64_encode($comment), 'r+'));
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
+      UploadController::FILTER_ASSIGNEE . "=$assignee"),
+      new Headers(), [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+    $this->userDao->shouldReceive('getUserChoices')
+      ->withArgs([$this->groupId])
+      ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload],
+        M::any()]);
+
+    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    $expectedResponse = (new Response())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new Response(), ['id' => $upload]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() without permission
+   * -# Check if response status is 403
+   */
+  public function testUpdateUploadNoPerm()
+  {
+    $upload = 2;
+    $assignee = 4;
+    $comment = "Not helpful";
+
+    $body = new Body(
+      fopen('data://text/plain;base64,' . base64_encode($comment), 'r+'));
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
+      UploadController::FILTER_ASSIGNEE . "=$assignee"),
+      new Headers(), [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(false);
+
+    $info = new Info(403, "Not advisor or admin of current group. " .
+      "Can not update upload.", InfoType::ERROR);
+    $expectedResponse = (new Response())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new Response(), ['id' => $upload]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
   }
 }
