@@ -116,8 +116,8 @@ INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: fossy
 --
 
-INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL, 1);
-INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL, 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (2, 'fossy', 1, 'Default Administrator', '16294329171791449506', 'b27fd9578d6893916952c2fb74a64bbc9e1bf0b9', 10, 'y', 'y', 'public', 'agent_copyright,agent_mimetype,agent_monk,agent_nomos,agent_pkgagent', 1, '', NULL, NULL, 1);
 
 
 --

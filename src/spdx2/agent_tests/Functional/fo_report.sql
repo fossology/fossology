@@ -77,8 +77,8 @@ INSERT INTO pfile VALUES (5, '39C379E9C7F5BB524754C4DEF5FEF135', '840B5882792482
 INSERT INTO pfile VALUES (6, '2702A657B801333C3150BDC8BE642F9B', '798826BF3EB294E5D514ECFA3222CCF09BBCD985', '8df6eb5d69ffe2bf61937d49f3ef72e98213fd09f9ad41c626e419503178bacd', 14554, NULL);
 
 
-INSERT INTO users VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL, 1);
-INSERT INTO users VALUES (2, 'fossy', 1, 'Default Administrator', '14272952581103610285', 'cdd40d0517419e8495a6e40b14369b6a39031581', 10, 'y', 'y', 'public', NULL, NULL, 'simple', NULL, NULL, NULL, 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (1, 'Default User', 1, 'Default User when nobody is logged in', 'Seed', 'Pass', 0, NULL, 'y', 'public', NULL, NULL, 'simple', NULL, NULL, 1);
+INSERT INTO users (user_pk, user_name, root_folder_fk, user_desc, user_seed, user_pass, user_perm, user_email, email_notify, upload_visibility, user_agent_list, default_bucketpool_fk, ui_preference, new_upload_group_fk, new_upload_perm, default_folder_fk) VALUES (2, 'fossy', 1, 'Default Administrator', '16294329171791449506', 'b27fd9578d6893916952c2fb74a64bbc9e1bf0b9', 10, 'y', 'y', 'public', 'agent_copyright,agent_mimetype,agent_monk,agent_nomos,agent_pkgagent', 1, '', NULL, NULL, 1);
 
 
 INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added) VALUES (2, 4, 2, 2, 2, 5, 1, '2015-05-04 11:43:18.276425+02');
