@@ -114,7 +114,7 @@ def getBuildVersionData(uuid) :
             variableName = version_entry_array[0].lower()
             variableValue = version_entry_array[1].strip()
             if line_number == 1 :
-                variableValueArray = variableValue.split('-')
+                variableValueArray = variableValue.split('.')
                 # print(variableValueArray)
                 variableValueArray[0] = variableValueArray[0].replace('"','')
                 finalData = "version"+",instance="+uuid+" value=\""+variableValueArray[0]  + "\" " + timestamp
