@@ -139,15 +139,6 @@ class MonkBulkTest extends \PHPUnit\Framework\TestCase
   }
 
   /** @group Functional */
-  public function testDatabaseSetup()
-  {
-    $this->setUpTables();
-    $this->setUpRepo();
-
-    $this->rmRepo();
-  }
-
-  /** @group Functional */
   public function testRunTwoIndependentMonkBulkScans()
   {
     $this->setUpTables();
