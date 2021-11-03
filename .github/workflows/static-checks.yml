@@ -82,7 +82,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
-    - name: swagger-cli
-      uses: vaibhav-jain/spectral-action/@v2.6
+    - name: Setup default rules
+      run: |
+        echo '{"extends": ["spectral:oas"]}' > .spectral.json
+    - name: Run spectral
+      uses: stoplightio/spectral-action@v0.8.0
       with:
-        file_path: src/www/ui/api/documentation/openapi.yaml
+        file_glob: src/www/ui/api/documentation/openapi.yaml
