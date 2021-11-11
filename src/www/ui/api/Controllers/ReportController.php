@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2018 Siemens AG
+ Copyright (C) 2018,2021 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 
  This program is free software; you can redistribute it and/or
@@ -46,7 +46,8 @@ class ReportController extends RestController
     'spdx2',
     'spdx2tv',
     'readmeoss',
-    'unifiedreport'
+    'unifiedreport',
+    'clixml'
   );
 
   /**
@@ -93,6 +94,11 @@ class ReportController extends RestController
         case $this->reportsAllowed[4]:
           $unifiedGenerator = $this->restHelper->getPlugin('agent_founifiedreport');
           list ($jobId, $jobQueueId, $error) = $unifiedGenerator->scheduleAgent(
+            $this->restHelper->getGroupId(), $upload);
+          break;
+        case $this->reportsAllowed[5]:
+          $clixmlGenerator = $this->restHelper->getPlugin('ui_clixml');
+          list ($jobId, $jobQueueId) = $clixmlGenerator->scheduleAgent(
             $this->restHelper->getGroupId(), $upload);
           break;
         default:
