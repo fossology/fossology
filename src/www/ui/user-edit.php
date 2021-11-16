@@ -101,6 +101,10 @@ class UserEditPage extends DefaultPlugin
     if (! empty($BtnText)) {
       /* Get the form data to in an associated array */
       $UserRec = $this->CreateUserRec($request, "");
+      if (empty($UserRec['user_name']) && !$SessionIsAdmin) {
+        // Possibly disabled field due to non admin user
+        $UserRec['user_name'] = $SessionUserRec['user_name'];
+      }
 
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
       if (empty($rv)) {
