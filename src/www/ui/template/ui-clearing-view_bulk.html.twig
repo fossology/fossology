@@ -116,28 +116,68 @@
 
             <br/>
             {{ 'Reference text'| trans }}:<br/>
-            <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" class="form-control"></textarea><br>
-            <select name="bulkScope" class="form-control-sm" id="bulkScope">
-              <option value="u">{{ 'scan whole Upload'| trans }}</option>
-              <option value="f">{{ 'scan only current Folder'| trans }}</option>
-            </select>
-            <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
-
-            <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" id="forceDecision"/>
-              <label for="forceDecision" class="form-check-label">
-                {{ 'ignoreConflicts'|trans }}
-                <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
-              </label>
-            </div>
-            <div class="form-check form-check-inline">
-              <input type="checkbox" class="form-check-input" id="bulkIgnoreIrre" checked="checked"/>
-              <label for="bulkIgnoreIrre"  class="form-check-label">
-                {{ 'Ignore Irrelevant files'|trans }}
-                <img src="images/info_16.png" data-toggle="tooltip"
-                data-placement="left" style="vertical-align:middle !important;"
-                title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
-              </label>
+            <textarea name="bulkRefText" id="bulkRefText" type="text" rows="12" class="form-control"></textarea>
+            <div class="container-fluid pt-2">
+              <div class="row justify-content-start">
+                <div class="col-sm-auto pr-0">
+                  <select name="bulkScope" class="form-control-sm" id="bulkScope">
+                    <option value="u">{{ 'scan whole Upload'| trans }}</option>
+                    <option value="f">{{ 'scan only current Folder'| trans }}</option>
+                  </select>
+                  <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'Scan whole upload or this folder determines the scope of files where the text phrase is searched for. If “scan whole upload” is selected, the text phrase is searched in all files of the entire upload'|trans }}" alt="" class="info-bullet"/></img>
+                </div>
+                <div class="col-sm-auto pr-0">
+                  <div class="form-check form-check-inline">
+                    <input type="checkbox" class="form-check-input" id="forceDecision"/>
+                    <label for="forceDecision" class="form-check-label">
+                      {{ 'Ignore conflicts'|trans }}
+                      <img src="images/info_16.png" data-toggle="tooltip" data-placement="left" title="{{ 'The bulk scan will create a clearing result, if the resulting list of licenses does not show conflicts. A conflict would be two different license ids for example. Imagine Nomos has found “Apache-1.0” and a bulk scan finds a text phrase with Apache-2.0 set, this represents a conflict. Otherwise if Nomos found Apache-2.0 and the bulk scan find a text phrase with “Apache-2.0” set, this is free from conflicts and a clearing result is set. Normally conflicts prevent clearing results. Checking the “ignore conflicts” will set a clearing decision in any case'|trans }}" alt="" class="info-bullet"/></img>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-sm-auto pr-0">
+                  <div class="form-check form-check-inline">
+                    <input type="checkbox" class="form-check-input" id="bulkIgnoreIrre" checked="checked"/>
+                    <label for="bulkIgnoreIrre" class="form-check-label">
+                      {{ 'Ignore Irrelevant files'|trans }}
+                      <img src="images/info_16.png" data-toggle="tooltip"
+                      data-placement="left" style="vertical-align:middle !important;"
+                      title="{{ 'Do not include files marked as irrevelant for this scan.'|trans }}" alt="" class="info-bullet"/>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-sm-auto pr-0">
+                  <div class="form-check form-check-inline">
+                    <input type="checkbox" class="form-check-input" id="custDelim"/>
+                    <label for="custDelim" class="form-check-label">
+                      {{ 'Custom delimiters'|trans }}
+                      <img src="images/info_16.png" data-toggle="tooltip"
+                      data-placement="left" style="vertical-align:middle !important;"
+                      title="{{ 'Provide custom list of characters for spliting tokens for scan. Note, the characters will be ignored.'|trans }}"
+                      alt="" class="info-bullet"/>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              <div class="row pt-2 invisible" id="delimRow">
+                <div class="col-md-auto">
+                  <label for="delimdrop" class="col-form-label">
+                    Delimiters:
+                  </label>&nbsp;<img src="images/info_16.png"
+                    data-toggle="tooltip"
+                    data-placement="left"
+                    title="{{ 'Use default list of delimiters (\' \\t\\n\\r\\f#^%,*\') or type your own in the box. Currently limited to single characters only and space is always a delimiter.'|trans }}"
+                    alt="" class="info-bullet"/>
+                </div>
+                <div class="col">
+                  <div class="input-group input-group-sm">
+                    <div class="input-group-prepend">
+                      <button class="btn btn-outline-secondary" type="button" id="resetDel">Reset</button>
+                    </div>
+                    <input class="form-control" id="delimdrop" type="text" value="DEFAULT">
+                  </div>
+                </div>
+              </div>
             </div>
             <input name="uploadTreeId" id="uploadTreeId" type="hidden" value="{{ itemId }}" />
           </form>

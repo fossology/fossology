@@ -133,8 +133,8 @@ $app->group(VERSION_1 . 'uploads',
   function (){
     $this->get('[/{id:\\d+}]', UploadController::class . ':getUploads');
     $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
-    $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
-    $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
+    $this->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
+    $this->put('/{id:\\d+}', UploadController::class . ':moveUpload');
     $this->post('', UploadController::class . ':postUpload');
     $this->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $this->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');

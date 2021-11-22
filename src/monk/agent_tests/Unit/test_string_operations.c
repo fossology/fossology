@@ -43,10 +43,10 @@ void test_tokenize() {
 }
 
 void test_tokenizeWithSpecialDelims() {
-  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo \n:: qoo ");
+  char* test = g_strdup("/*foo \n * bar \n *baz*/ ***booo \n:: qoo \ndnl zit ");
 
   GArray* token = tokenize(test, " \n");
-  CU_ASSERT_EQUAL(token->len, 5);
+  CU_ASSERT_EQUAL(token->len, 6);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).hashedContent, hash("foo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 0).removedBefore, 2);
@@ -62,6 +62,9 @@ void test_tokenizeWithSpecialDelims() {
   CU_ASSERT_EQUAL(g_array_index(token, Token, 4).hashedContent, hash("qoo"));
   CU_ASSERT_EQUAL(g_array_index(token, Token, 4).length, 3);
   CU_ASSERT_EQUAL(g_array_index(token, Token, 4).removedBefore, 5);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 5).hashedContent, hash("zit"));
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 5).length, 3);
+  CU_ASSERT_EQUAL(g_array_index(token, Token, 5).removedBefore, 6);
   g_array_free(token, TRUE);
   g_free(test);
 }

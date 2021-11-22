@@ -157,7 +157,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
-    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0
+    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
+    "delimiters": $("#delimdrop").val()
   };
 
   resultEntity.hide();
@@ -421,6 +422,19 @@ $(document).ready(function () {
       $(this).css({'width':'','height':''});
     }
   });
+
+  $('#custDelim').change(function () {
+    if (this.checked) {
+      $('#delimRow').removeClass("invisible").addClass("visible");
+    } else {
+      $('#delimRow').removeClass("visible").addClass("invisible");
+      $('#resetDel').click();
+    }
+  });
+
+  $('#resetDel').click(function () {
+    $('#delimdrop').val('DEFAULT');
+  });
 });
 
 function createDropDown(element, textBox) {
@@ -484,4 +498,9 @@ function getStdLicenseComments(scope, callback) {
       callback(data.error);
     }
   });
+}
+
+function escapeRegExp(string){
+  string = string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+  return string.replace(/\\\\([abfnrtv])/g, '\\$1'); // Preserve default escape sequences
 }
