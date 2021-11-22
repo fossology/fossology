@@ -1,39 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
   labels:
-    io.kompose.service: web
-  name: web
+    deployment: web 
+    app: fossology
+  name: web    
 spec:
   replicas: 1
   triggers:
     - type: "ConfigChange"
   selector:
     matchLabels:
-      io.kompose.service: web
+      app: fossology
+      component: web
   strategy:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: web
+        app: fossology
+        component: web
     spec:
+      volume:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository
       containers:
         - name: web
-          image: fossology-web:latest
+          image: fossology:web
           imagePullPolicy: Always
+          resources:
+            requests: 
+              memory: "100Mi"
+              cpu: "50m"
+            limits:
+              memory: "250Mi"
+              cpu: "200m"
           env:
-            - name: FOSSOLOGY_CONF_WEB_APACHE_SECURITY_PATCH
-            - name: FOSSOLOGY_DB_HOST
-              value: db
             - name: FOSSOLOGY_DB_NAME
               valueFrom:
                 secretKeyRef:
@@ -64,19 +67,20 @@ spec:
           envFrom:
             - configMapRef:
                 name: proxy-config
+            - configMapRef:
+                name: fossology-global-config
             - prefix: CONNECT_
               secretRef:
                 name: connect-secret
-          livenessProbe:
-            exec:
-              command:
-                - curl -sSf localhost/repo/api/v1/version || exit 1
-            failureThreshold: 5
-            periodSeconds: 5
-            timeoutSeconds: 5
+          # livenessProbe:
+          #  exec:
+          #    command:
+          #      - curl -sSf localhost/repo/api/v1/version || exit 1
+          #  failureThreshold: 5
+          #  periodSeconds: 5
+          #  timeoutSeconds: 5
           ports:
             - containerPort: 1880
-          resources: {}
           volumeMounts:
             - mountPath: /srv/fossology/
               name: repository
@@ -87,4 +91,5 @@ spec:
         - name: repository
           persistentVolumeClaim:
             claimName: repository
-status: {}
+  imagePullSecrets:
+    - name: gitlab-tech-registry

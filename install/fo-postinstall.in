@@ -2,7 +2,7 @@
 # FOSSology postinstall script
 # Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
 # Copyright (C) 2015 Siemens AG
-# Copyright Orange, nicolas1.toussaint@orange.com
+# Copyright (C) 2021 Orange, nicolas1.toussaint@orange.com
 #
 # This script is for things that need to be done on the runtime system
 # after we've installed the bits on the filesystem. It needs to be

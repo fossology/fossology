@@ -20,10 +20,10 @@ USER 1001
 
 FROM debian:buster-slim as builder
 
-LABEL maintainer="opensource-audit-solutions@list.orange.com"
-LABEL Name="Fossology_Orange-OpenSource"
+LABEL maintainer="abc@xyz.com"
+LABEL Name="Fossology"
 LABEL Description="Fossology Docker Image"
-LABEL Url="https://gitlab.forge.orange-labs.fr/opensource/fossology/wikis/"
+LABEL Url="https://..."
 
 EXPOSE 8080
 

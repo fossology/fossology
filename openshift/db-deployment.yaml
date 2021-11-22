@@ -1,44 +1,45 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
   labels:
-    io.kompose.service: db
+    deployment: db
+    app: fossology
   name: db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: db
+      component: db
+      app: fossology
   strategy:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: db
+        component: db
+        app: fossology
     spec:
       containers:
         - name: db
-          image: fossology-db:latest
+          image: fossology:db
           imagePullPolicy: Always
+          resources:
+            requests: 
+              memory: "240Mi"
+              cpu: "50m"
+            limits:
+              memory: "350Mi"
+              cpu: "200m"
           envFrom:
             - secretRef:
                 name: database-secrets
-          livenessProbe:
-            exec:
-              command:
-                - pg_isready --dbname $POSTGRESQL_DATABASE --username $POSTGRESQL_USERNAME
-            failureThreshold: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
-          resources: {}
+          # livenessProbe:
+          #  exec:
+          #    command:
+          #      - pg_isready --dbname $POSTGRESQL_DATABASE --username $POSTGRESQL_USERNAME
+          #  failureThreshold: 5
+          #  periodSeconds: 10
+          #  timeoutSeconds: 5
           volumeMounts:
             - mountPath: /bitnami/postgresql
               name: database
@@ -47,4 +48,11 @@ spec:
         - name: database
           persistentVolumeClaim:
             claimName: database
-status: {}
+      resources: {}
+      volumeMounts:
+        - name: database
+          mountPath: /bitnami/postgresql
+  imagePullSecrets:
+    - name: gitlab-tech-registry
+  triggers:
+  - type: "ConfigChange"

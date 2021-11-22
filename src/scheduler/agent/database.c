@@ -164,7 +164,7 @@ static gboolean email_replace(const GMatchInfo* match, GString* ret,
     else
     {
       g_string_append_printf(ret,
-          "http://%s?mod=browse&upload=%s&item=%s&show=detail",
+          "http://%s?mod=license&upload=%s&item=%s",
           fossy_url, PQgetvalue(db_result, 0, 0), PQgetvalue(db_result, 0, 1));
     }
 

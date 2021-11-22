@@ -1,12 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.22.0 (955b78124)
-  creationTimestamp: null
   labels:
-    io.kompose.service: scheduler
+    deployment: scheduler
+    app: fossology
   name: scheduler
 spec:
   replicas: 1
@@ -14,41 +11,28 @@ spec:
     - type: "ConfigChange"
   selector:
     matchLabels:
-      io.kompose.service: scheduler
+      app: fossology
+      component: scheduler
   strategy:
     type: Recreate
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.22.0 (955b78124)
-      creationTimestamp: null
       labels:
-        io.kompose.service: scheduler
+        app: fossology
+        component: scheduler
     spec:
       containers:
         - name: scheduler
-          image: fossology-scheduler:latest
+          image: fossology:scheduler
           imagePullPolicy: Always
+          resources:
+            requests: 
+              memory: "315Mi"
+              cpu: "50m"
+            limits:
+              memory: "450Mi"
+              cpu: "200m"
           env:
-            - name: FOSSOLOGY_CONF_BANNER_TEXT
-            - name: FOSSOLOGY_CONF_PROXY_HTTP
-            - name: FOSSOLOGY_CONF_PROXY_HTTPS
-            - name: FOSSOLOGY_CONF_PROXY_NONE
-            - name: FOSSOLOGY_CONF_REMOVE_DEFAULT_USER
-            - name: FOSSOLOGY_CONF_SMTP_AUTH
-            - name: FOSSOLOGY_CONF_SMTP_AUTH_PWD
-            - name: FOSSOLOGY_CONF_SMTP_AUTH_USER
-            - name: FOSSOLOGY_CONF_SMTP_ENABLE
-            - name: FOSSOLOGY_CONF_SMTP_FROM
-            - name: FOSSOLOGY_CONF_SMTP_HOSTNAME
-            - name: FOSSOLOGY_CONF_SMTP_PORT
-            - name: FOSSOLOGY_CONF_SMTP_SSL_VERIFY
-            - name: FOSSOLOGY_CONF_SMTP_START_TLS
-            - name: FOSSOLOGY_CRON_START
-              value: "false"
-            - name: FOSSOLOGY_DB_HOST
-              value: db
             - name: FOSSOLOGY_DB_NAME
               valueFrom:
                 secretKeyRef:
@@ -71,6 +55,8 @@ spec:
                   key: extra-keywords
           envFrom:
             - configMapRef:
+                name: fossology-global-config
+            - configMapRef:
                 name: proxy-config
             - configMapRef:
                 name: fossology-backup-configmap
@@ -83,7 +69,6 @@ spec:
             failureThreshold: 2
             periodSeconds: 5
             timeoutSeconds: 5
-          resources: {}
           volumeMounts:
             - mountPath: /srv/fossology/
               name: repository
