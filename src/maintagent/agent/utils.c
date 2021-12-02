@@ -59,8 +59,8 @@ FUNCTION char* strtoupper(char* s)
 /**
  * @brief Recursively read directory till level is 0
  *
- * Since gold files are stored in following format, we need to iterate on path
- * for 3 levels before we reach a file.
+ * Since files in repository are stored in following format, we need to iterate
+ * on path for 3 levels before we reach a file.
  * @verbatim
  *   /srv/fossology/repository/localhost/gold
  *   ├── fc
@@ -69,13 +69,14 @@ FUNCTION char* strtoupper(char* s)
  *   │           └── fc49776c2a..... < the actual file
  * @endverbatim
  * The function will iteratively go to deper level till it reaches level 0, i.e.
- * the file level. Once at file level, will call checkGoldExists() with
+ * the file level. Once at file level, will call checkPFileExists() with
  * individual pfile elements.
  *
+ * @param type  Type of repo file (gold/files)
  * @param path  Root of path to traverse
  * @param level How many more levels to go (0 if we've reached file level)
  */
-FUNCTION void recurseDir(char* path, int level)
+FUNCTION void recurseDir(const char* type, char* path, int level)
 {
   DIR* dir;
   struct dirent* entry;
@@ -92,7 +93,7 @@ FUNCTION void recurseDir(char* path, int level)
         strncat(nextpath, "/", myBUFSIZ - 1);
         strncat(nextpath, entry->d_name, myBUFSIZ - 1);
 
-        recurseDir(nextpath, level - 1);
+        recurseDir(type, nextpath, level - 1);
       }
       else
       {
@@ -103,6 +104,8 @@ FUNCTION void recurseDir(char* path, int level)
         long fsize;
         char* ptr;
 
+        memset(sha1, '\0', 41);
+        memset(md5, '\0', 33);
         strncpy(nextpath, entry->d_name, myBUFSIZ - 1);
         ptr = strtok(nextpath, delim);
         if (ptr == NULL)
@@ -115,28 +118,35 @@ FUNCTION void recurseDir(char* path, int level)
         strncpy(md5, ptr, 32);
         ptr = strtok(NULL, delim);
         fsize = atol(ptr);
-        checkGoldExists(sha1, md5, fsize);
+        checkPFileExists(sha1, md5, fsize, type);
       }
     }
   }
 }
 
 /**
- * @brief Check if given checksums exists in DB, if not call deleteGoldFile()
+ * @brief Check if given checksums exists in DB, if not call deleteRepoFile()
  *
  * @param sha1  SHA1 of the file
  * @param md5   MD5 of the file
  * @param fsize size of the file
+ * @param type  Type of file
  */
-FUNCTION void checkGoldExists(char* sha1, char* md5, long fsize)
+FUNCTION void checkPFileExists(char* sha1, char* md5, long fsize,
+                               const char* type)
 {
   PGresult* result;
   int countTuples;
   fo_dbManager_PreparedStatement* existsStatement;
   char sql[] =
-      "SELECT 1 FROM pfile "
-      "WHERE pfile_md5 = $1 AND pfile_sha1 = $2 AND "
-      "pfile_size = $3;";
+      "WITH pf AS ("
+      "SELECT pfile_pk FROM pfile "
+      "WHERE pfile_md5 = $1 AND pfile_sha1 = $2 AND pfile_size = $3) "
+      "SELECT 1 AS exists FROM uploadtree INNER JOIN pf "
+      "ON pf.pfile_pk = pfile_fk "
+      "UNION ALL "
+      "SELECT 1 AS exists FROM upload INNER JOIN pf "
+      "ON pf.pfile_pk = pfile_fk;";
 
   existsStatement = fo_dbManager_PrepareStamement(dbManager, "checkPfileExists",
                                                   sql, char*, char*, long);
@@ -150,7 +160,7 @@ FUNCTION void checkGoldExists(char* sha1, char* md5, long fsize)
   countTuples = PQntuples(result);
   if (countTuples < 1)
   {
-    deleteGoldFile(sha1, md5, fsize);
+    deleteRepoFile(sha1, md5, fsize, type);
     fo_scheduler_heart(1);
   }
   else
@@ -166,15 +176,17 @@ FUNCTION void checkGoldExists(char* sha1, char* md5, long fsize)
  * @param sha1  SHA1 of the file
  * @param md5   MD5 of the file
  * @param fsize size of the file
+ * @param type  Type of file (gold/files)
  * @sa fo_RepMkPath()
  */
-FUNCTION void deleteGoldFile(char* sha1, char* md5, long fsize)
+FUNCTION void deleteRepoFile(char* sha1, char* md5, long fsize,
+                             const char* type)
 {
   char filename[myBUFSIZ];
   char* goldFilePath;
 
   snprintf(filename, myBUFSIZ, "%s.%s.%ld", sha1, md5, fsize);
-  goldFilePath = fo_RepMkPath("gold", filename);
+  goldFilePath = fo_RepMkPath(type, filename);
   unlink(goldFilePath);
   free(goldFilePath);
 }

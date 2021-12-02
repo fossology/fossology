@@ -100,7 +100,7 @@ class maintagent extends FO_Plugin {
                      "T"=>_("Remove orphaned temp tables."),
                      "D"=>_("Vacuum Analyze the database."),
               //       "U"=>_("Process expired uploads (slow)."),
-              //       "Z"=>_("Remove orphaned files from the repository (slow)."),
+                     "Z"=>_("Remove orphaned files from the repository (slow)."),
                      "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
                      "v"=>_("verbose (turns on debugging output)")
                     );
