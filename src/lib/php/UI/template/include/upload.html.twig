@@ -39,6 +39,13 @@
       </li>
       <li>
         <div class="form-group">
+          <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="globalDecisions" value="1"/>
+          {{ 'Apply global decisions for current upload'| trans }}
+          <img src="images/info_16.png" data-toggle="tooltip" title="{{'Apply results of concluded files marked as global from previous uploads'|trans}}" alt="" class="info-bullet"/>
+        </div>
+      </li>
+      <li>
+        <div class="form-group">
           <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="scm" value="1"/>
           {{ 'Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype'| trans }}
           <img src="images/info_16.png" data-toggle="tooltip" title="{{'Configure mimetypes from Admin-Customize-Skip MimeTypes from scanning'|trans}}" alt="" class="info-bullet"/>

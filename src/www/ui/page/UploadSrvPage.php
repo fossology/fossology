@@ -163,6 +163,8 @@ class UploadSrvPage extends UploadPageBase
       return array(false, $uploadErrors[UPLOAD_ERR_INVALID_FOLDER_PK], $description);
     }
 
+    $setGlobal = ($request->get('globalDecisions')) ? 1 : 0;
+
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
@@ -233,7 +235,7 @@ class UploadSrvPage extends UploadPageBase
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $shortName, $sourceFiles,
-      $description, $uploadMode, $folderId, $publicPermission);
+      $description, $uploadMode, $folderId, $publicPermission, $setGlobal);
 
     if (empty($uploadId)) {
       $text = _("Failed to insert upload record");

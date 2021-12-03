@@ -435,6 +435,14 @@ paths:
               - protected
               - public
             default: protected
+        - name: applyGlobal
+          description: >
+            Apply global decisions for current upload
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: ignoreScm
           description: >
             Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype

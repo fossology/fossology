@@ -726,6 +726,27 @@ ORDER BY lft asc
     }
     return $row;
   }
+  /* @param int $uploadId
+   * @return ri_globaldecision
+   */
+  public function getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal=0)
+  {
+    $stmt = __METHOD__;
+    $sql = "SELECT ri_globaldecision FROM report_info WHERE upload_fk = $1";
+    $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+
+    if (!empty($setGlobal)) {
+      $stmt = __METHOD__.'ifempty';
+      if ($row['ri_globaldecision'] == "") {
+        $sql = "INSERT INTO report_info (upload_fk, ri_globaldecision) VALUES ($1, $2) RETURNING ri_globaldecision";
+      } else {
+        $sql = "UPDATE report_info SET ri_globaldecision = $2 WHERE upload_fk = $1 RETURNING ri_globaldecision";
+      }
+      $row = $this->dbManager->getSingleRow($sql, array($uploadId, $setGlobal), $stmt);
+    }
+
+    return $row['ri_globaldecision'];
+  }
 
   /**
    * @brief Get Pfile hashes from the pfile id
