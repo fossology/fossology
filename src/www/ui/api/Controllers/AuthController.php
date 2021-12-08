@@ -23,6 +23,7 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Auth\Auth;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
@@ -61,6 +62,12 @@ class AuthController extends RestController
    */
   public function createNewJwtToken($request, $response, $args)
   {
+    if (Auth::getRestTokenType() == Auth::TOKEN_OAUTH) {
+      $error = new Info(400,
+        "Request to create tokens blocked. Use OAuth clients.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
     $tokenRequestBody = $this->getParsedBody($request);
     $paramsRequired = [
       "username",

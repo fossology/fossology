@@ -12,5 +12,8 @@
     {% elseif loginFailure %}
       {{ 'The combination of user name and password was not found.'|trans }}<br/><br/>
     {% endif %}
-    {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName} only %}
+    {% include "components/login-form.html.twig" with {
+      'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl,
+      'userName': userName, 'providerExist': providerExist,
+      'loginProvider': loginProvider} only %}
 {% endblock %}

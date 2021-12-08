@@ -7,10 +7,13 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-  
+
 {% if authUrl %}
   <div style="float: right; border: 1px black dashed; max-width: 30%; padding: 5px;">
-    {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+    {% include 'components/login-form.html.twig' with {
+      'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl,
+      'providerExist': providerExist, 'loginProvider': loginProvider,
+      'getOauth': getOauth} only %}
   </div>
 {% endif %}
 

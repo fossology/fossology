@@ -104,7 +104,7 @@
   <input type="submit" name="UpdateBtn" value="{{ 'Update Account'|trans }}"/>
   </form>
   <hr>
-  <h3>{{ 'Rest API Tokens'|trans }}</h3>
+  <h3>{{ 'REST API Tokens'|trans }}</h3>
   <p>
     {{ 'You can create/manage your tokens here for using FOSSology\'s REST API.'|trans }}
   </p>
@@ -121,6 +121,181 @@
     </tr>
   </table>
   {% endif %}
+  {% if newClient is not empty %}
+  <h3>{{ 'New Client'|trans }}</h3>
+  <table style="border:1px solid black; border-collapse: collapse;" width="100%">
+    <tr class="classic">
+      <td style="width:20%">
+        {{ newClient|trans }}
+      </td>
+    </tr>
+  </table>
+  {% endif %}
+  {% if resttoken == "both" or resttoken == "oauth" %}
+  <h3>{{ 'Add new oauth client'|trans }}</h3>
+  <form name="oauth-token" method="POST">
+    <table style="border:1px solid black; border-collapse: collapse;" width="100%">
+      <tbody>
+        <tr class="classic">
+          <th width="20%">
+            {{ 'Name'|trans }}
+          </th>
+          <td>
+            <input type="text" name="client_name" size="30" id="client_name"
+              placeholder="{{ 'Friendly name for client'|trans }}" required="true" />
+          </td>
+        </tr>
+        <tr class="classic">
+          <th width="20%">
+            {{ 'Client ID'|trans }}
+          </th>
+          <td>
+            <input type="text" name="client_id" size="30" id="client_id"
+              placeholder="{{ 'Client ID from OAuth'|trans }}" required="true" />
+          </td>
+        </tr>
+        <tr class="classic">
+          <th width="20%">
+            {{ 'Access scope'|trans }}
+          </th>
+          <td>
+            <table style="border:0px solid white;border-collapse:collapse" width="100%">
+              <tbody>
+                <tr>
+                  <td>
+                    <input type="radio" name="client_scope" value="r"
+                      id="client_scope_r" checked="checked" />
+                  </td>
+                  <td style="width:100%">
+                    <label class="font-weight:bold" for="client_scope_r">
+                      <div>
+                        {{ 'Read only access'|trans }}
+                      </div>
+                      <div style="font-weight:lighter;color:#777">
+                        {{ 'Limited only to "GET" calls'|trans }}
+                      </div>
+                    </label>
+                  </td>
+                </tr>
+              {% if writeAccess %}
+                <tr>
+                  <td>
+                    <input type="radio" name="client_scope" value="w" id="client_scope_w" />
+                  </td>
+                  <td style="width:100%">
+                    <label class="font-weight:bold" for="client_scope_w">
+                      <div>
+                        {{ 'Read/Write access'|trans }}
+                      </div>
+                      <div style="font-weight:lighter;color:#777">
+                        {{ 'Required for calls other than "GET"'|trans }}
+                      </div>
+                    </label>
+                  </td>
+                </tr>
+              {% endif %}
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <input type="hidden" name="new_client" value="true" />
+    <input type="submit" value="{{ 'Add new client'|trans }}" />
+  </form>
+  {% if clientList is not empty %}
+    <hr>
+    <h3>{{ 'Active clients '|trans }}({{ clientList|length }})</h3>
+    <table class="active-token-table">
+      <thead>
+        <tr>
+          <th>
+            {{ 'Client name'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Created on'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Scope'|trans }}
+          </th>
+          <th style="width:15%" colspan="2"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for singleClient in clientList %}
+        <tr>
+          <td>
+            {{ singleClient.name }}
+          </td>
+          <td>
+            {{ singleClient.created }}
+          </td>
+          <td>
+            {%if singleClient.scope == 'r' %}
+              {{ 'read only'|trans }}
+            {% else %}
+              {{ 'read/write'|trans }}
+            {% endif %}
+          </td>
+          <td>
+            <input type="button" class="pat-action pat-reveal" value="Reveal"
+              id="reveal-{{ singleClient.id }}" />
+          </td>
+          <td>
+            <input type="button" class="pat-action pat-revoke" value="Revoke"
+              id="revoke-{{ singleClient.id }}" />
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  {% if revokedClientList is not empty %}
+    <hr>
+    <h3>{{ 'Revoked Clients '|trans }}({{ revokedClientList|length }})</h3>
+    <table class="expired-token-table">
+      <thead>
+        <tr>
+          <th>
+            {{ 'Client name'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Created on'|trans }}
+          </th>
+          <th style="width:15%">
+            {{ 'Scope'|trans }}
+          </th>
+          <th style="width:15%"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for singleClient in revokedClientList %}
+        <tr>
+          <td>
+            {{ singleClient.name }}
+          </td>
+          <td>
+            {{ singleClient.created }}
+          </td>
+          <td>
+            {%if singleClient.scope == 'r' %}
+              {{ 'read only'|trans }}
+            {% else %}
+              {{ 'read/write'|trans }}
+            {% endif %}
+          </td>
+          <td>
+            <input type="button" class="pat-action pat-reveal" value="Reveal"
+              id="reveal-{{ singleClient.id }}" />
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+  {% endif %} {# End for resttoken #}
+  {% if resttoken == "both" or resttoken == "token" %}
+  <hr />
   <h3>{{ 'Create a new token'|trans }}</h3>
   <form name="personal-access-token" method="POST">
     <table style="border:1px solid black; border-collapse: collapse;" width="100%">
@@ -294,6 +469,7 @@
       </tbody>
     </table>
   {% endif %}
+  {% endif %} {# End for resttoken #}
   <br /><br /><br />
 {% endblock %}
 

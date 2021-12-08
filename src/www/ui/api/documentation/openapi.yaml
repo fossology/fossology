@@ -26,6 +26,7 @@ servers:
     description: Localhost instance
 security:
   - bearerAuth: []
+  - oauth: []
 externalDocs:
   description: Basic guide
   url: https://github.com/fossology/fossology/wiki/FOSSology-REST-API
@@ -1454,6 +1455,14 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: "Token from FOSSology"
+    oauth:
+      description: "Machine-2-Machine communication from oauth"
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://api.example.com/oauth2/authorize"
+          scopes: {}
   schemas:
     SearchResults:
       type: object

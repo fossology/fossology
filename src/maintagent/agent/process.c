@@ -562,7 +562,7 @@ FUNCTION void removeExpiredTokens(long int retentionPeriod)
   struct tm time_structure = *localtime(&shifted_time);
 
   snprintf(SQL, sizeof(SQL),
-          "DELETE FROM personal_access_tokens WHERE active = 'FALSE' OR expire_on < '%d-%02d-%02d'",
+          "DELETE FROM personal_access_tokens WHERE (active = 'FALSE' OR expire_on < '%d-%02d-%02d') AND client_id IS NULL",
           time_structure.tm_year + 1900,
           time_structure.tm_mon + 1,
           time_structure.tm_mday
