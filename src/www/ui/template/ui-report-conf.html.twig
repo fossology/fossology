@@ -11,7 +11,7 @@
   <div id="confTabs">
     <ul>
       <li><a href="#reportConfTab">Unified Report Settings</a></li>
-      {% if tableRows is not empty %} 
+      {% if tableRows is not empty %}
         <li><a href="#ObligationsConfTab">Obligations in Unified Report</a></li>
       {% endif %}
       <li><a href="#SPDXConfTab">SPDX Report Settings</a></li>
@@ -20,17 +20,17 @@
       {% endif %}
     </ul>
     <div id="reportConfTab">
-        <table border="1" align="right" style="width:20%" class="table">
-          <tr>
-            <th>
-              {{ "Unified Report Heading"|trans }}
-            </th>
-            <th>
-              {{ "Enabled"|trans }}
-            </th>
-          </tr>
-            {{ tableRowsUnifiedReport }}
-        </table>
+      <table border="1" align="right" style="width:20%" class="table">
+        <tr>
+          <th>
+            {{ "Unified Report Heading"|trans }}
+          </th>
+          <th>
+            {{ "Enabled"|trans }}
+          </th>
+        </tr>
+          {{ tableRowsUnifiedReport }}
+      </table>
       <table border="1" class="table" style="max-width:70%;">
         <tr>
           <th>
@@ -41,7 +41,7 @@
           </th>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Copyright Text(report footer)"|trans }}
           </td>
           <td align="left">
@@ -49,7 +49,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Reviewed by (opt.)"|trans }}
           </td>
           <td align="left">
@@ -57,7 +57,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Department"|trans }}
           </td>
           <td align="left">
@@ -65,7 +65,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Report release date"|trans }}
           </td>
           <td align="left">
@@ -73,7 +73,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Community"|trans }}
           </td>
           <td align="left">
@@ -81,7 +81,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Component"|trans }}
           </td>
           <td align="left">
@@ -89,7 +89,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Version"|trans }}
           </td>
           <td align="left">
@@ -97,7 +97,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Release date"|trans }}
           </td>
           <td align="left">
@@ -105,7 +105,7 @@
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Mainline /SW360 Portal Link"|trans }}
           </td>
           <td align="left">

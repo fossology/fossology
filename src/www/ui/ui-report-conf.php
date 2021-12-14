@@ -218,7 +218,7 @@ class ui_report_conf extends FO_Plugin
         if ($isenabled) {
           $checked = 'checked';
         }
-        $tableRowsUnifiedReport .= '<td><input class="browse-upload-checkbox view-license-rc-size" type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
+        $tableRowsUnifiedReport .= '<td style="vertical-align:middle"><input class="browse-upload-checkbox view-license-rc-size" type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
         $tableRowsUnifiedReport .= '</tr>';
       }
     }
