@@ -50,6 +50,9 @@ extern fo_dbManager* dbManager;
 
 /* File utils.c */
 void exitNow(int exitVal);
+void recurseDir(const char* type, char* path, int level);
+void checkPFileExists(char* sha1, char* md5, long fsize, const char* type);
+void deleteRepoFile(char* sha1, char* md5, long fsize, const char* type);
 
 /* File usage.c */
 void usage(char *name);

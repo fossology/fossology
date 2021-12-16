@@ -250,51 +250,72 @@ FUNCTION void processExpired()
 
 /**
  * @brief Remove orphaned files from the repository (slow)
- * Loop through each file in the repository and make sure there is a pfile table entry.
+ * Loop through each file in the repository and make sure there is a pfile
+ * table entry.
  * Then make sure the pfile_pk is used by uploadtree.
  * @returns void but writes status to stdout
- * @todo Remove orphaned files from the repository is not implemented yet
  */
 FUNCTION void removeOrphanedFiles()
 {
-/*
-  PGresult* result; // the result of the database access
-  int numrows;             // generic return value
   long StartTime, EndTime;
+  char* repoPath;           ///< Path to fossology repository
+  char filesPath[myBUFSIZ]; ///< Path to files directory
 
   StartTime = (long)time(0);
 
-  EndTime = (long)time(0);
-  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
-*/
-  LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
+  repoPath = fo_sysconfig("FOSSOLOGY", "path");
+  strncpy(filesPath, repoPath, myBUFSIZ - 1);
+  strncat(filesPath, "/localhost/files", myBUFSIZ - 1);
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  if (access(filesPath, R_OK | W_OK) != 0)
+  {
+    LOG_ERROR("Files path is not readable/writeable: '%s'", filesPath);
+  }
+  else
+  {
+    recurseDir("files", filesPath, 3);
+  }
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned files from the repository took %ld seconds\n",
+         EndTime - StartTime);
+
+  return; // success
 }
 
 /**
  * @brief Delete orphaned gold files from the repository
- * Loop through each gold file in the repository and make sure there is a pfile entry in the upload table.
+ *
+ * Loop through each gold file in the repository and make sure there is a pfile
+ * entry in the upload table.
  * @returns void but writes status to stdout
- * @todo Remove orphaned gold files from the repository is not implemented yet
  */
 FUNCTION void deleteOrphanGold()
 {
-/*
-  PGresult* result; // the result of the database access
-  int numrows;             // generic return value
   long StartTime, EndTime;
+  char* repoPath;          ///< Path to fossology repository
+  char goldPath[myBUFSIZ]; ///< Path to gold directory
 
   StartTime = (long)time(0);
 
-  EndTime = (long)time(0);
-  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
-*/
-  LOG_NOTICE("Remove orphaned gold files from the repository is not implemented yet");
+  repoPath = fo_sysconfig("FOSSOLOGY", "path");
+  strncpy(goldPath, repoPath, myBUFSIZ - 1);
+  strncat(goldPath, "/localhost/gold", myBUFSIZ - 1);
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  if (access(goldPath, R_OK | W_OK) != 0)
+  {
+    LOG_ERROR("Gold path is not readable/writeable: '%s'", goldPath);
+  }
+  else
+  {
+    recurseDir("gold", goldPath, 3);
+  }
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned gold files from the repository took %ld seconds\n",
+         EndTime - StartTime);
+
+  return; // success
 }
 
 /**

@@ -89,7 +89,7 @@ class maintagent extends FO_Plugin {
     $Options = array("a"=>_("Run all non slow maintenance operations."),
                      "A"=>_("Run all maintenance operations."),
                      "F"=>_("Validate folder contents."),
-              //       "g"=>_("Remove orphaned gold files."),
+                     "g"=>_("Remove orphaned gold files."),
                      "E"=>_("Remove orphaned rows from database."),
                      "L"=>_("Remove orphaned log files from file system."),
                      "N"=>_("Normalize priority "),
@@ -100,7 +100,7 @@ class maintagent extends FO_Plugin {
                      "T"=>_("Remove orphaned temp tables."),
                      "D"=>_("Vacuum Analyze the database."),
               //       "U"=>_("Process expired uploads (slow)."),
-              //       "Z"=>_("Remove orphaned files from the repository (slow)."),
+                     "Z"=>_("Remove orphaned files from the repository (slow)."),
                      "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
                      "v"=>_("verbose (turns on debugging output)")
                     );
