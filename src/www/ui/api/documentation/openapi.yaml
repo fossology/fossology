@@ -1687,7 +1687,7 @@ components:
           type: boolean
           description: Copy the copyright deactivation and edits.
       required:
-        - reuse_uplod
+        - reuse_upload
         - reuse_group
     Folder:
       type: object
