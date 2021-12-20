@@ -81,6 +81,12 @@ FUNCTION void recurseDir(const char* type, char* path, int level)
   DIR* dir;
   struct dirent* entry;
   dir = opendir(path);
+  if (dir == NULL)
+  {
+    LOG_ERROR("Unable to open dir: '%s'", path);
+    LOG_ERROR("Error: %s", strerror(errno));
+    return;
+  }
   while ((entry = readdir(dir)) != NULL)
   {
     if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
@@ -122,6 +128,7 @@ FUNCTION void recurseDir(const char* type, char* path, int level)
       }
     }
   }
+  closedir(dir);
 }
 
 /**

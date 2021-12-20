@@ -37,8 +37,10 @@
  -p|Verify file permissions (report only)
  -P|Verify and fix file permissions|
  -R|Remove uploads with no pfiles|
+ -t #|Remove personal access tokens expired # days ago.|
  -T|Remove orphaned temp tables|
  -L|Remove orphaned log files from file systems|
+ -o <yyyy-mm-dd>|Remove gold files older than given date (slow)|
  -U|Process expired uploads (slow)|
  -Z|Remove orphaned files from the repository (slow)|
  -i|Initialize the database, then exit|
@@ -100,9 +102,11 @@ int main(int argc, char **argv)
   int removeOrphanedLogs = 0;
   int removeExpiredTokensExe = 0;
   int tokenRetentionPeriod = 30;
+  int removeOldGoldExe = 0;
+  char goldOlder[11];
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNpPRt:TUvVZ")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNo:pPRt:TUvVZ")) != -1)
   {
     switch (cmdopt)
     {
@@ -227,6 +231,14 @@ int main(int argc, char **argv)
           normalizeUploadPrioritiesExe = 1;
         }
         break;
+      case 'o': /* Gold files older than given date */
+        if (removeOldGoldExe == 0)
+        {
+          strncpy(goldOlder, optarg, 10);
+          deleteOldGold(goldOlder);
+          removeOldGoldExe = 1;
+        }
+        break;
       case 'p': /* Verify file permissions */
         verifyFilePerms(0);
         break;
@@ -251,7 +263,7 @@ int main(int argc, char **argv)
           removeExpiredTokens(tokenRetentionPeriod);
           removeExpiredTokensExe = 1;
         }
-        break;      
+        break;
       case 'T': /* Remove orphaned temp tables */
         if (removeTempsExe == 0)
         {

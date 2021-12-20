@@ -55,6 +55,9 @@ class maintagent extends FO_Plugin {
           $retentionPeriod = $SysConf['SYSCONFIG']['PATMaxPostExpiryRetention'];
           $options .= $retentionPeriod;
         }
+        if ($key == "o") {
+          $options .= GetParm("goldDate", PARM_TEXT) . " ";
+        }
       }
     }
 
@@ -102,27 +105,29 @@ class maintagent extends FO_Plugin {
               //       "U"=>_("Process expired uploads (slow)."),
                      "Z"=>_("Remove orphaned files from the repository (slow)."),
                      "I"=>_("Reindexing of database (This activity may take 5-10 mins. Execute only when system is not in use)."),
-                     "v"=>_("verbose (turns on debugging output)")
+                     "v"=>_("verbose (turns on debugging output)"),
+                     "o"=>_("Remove older gold files from repository.")
                     );
     $V = "";
 
-    $V.= "<form method='post'>\n"; // no url = this url
-    $V.= "<ol>\n";
-
-    foreach ($Options as $option=>$description)
-    {
-      $V.= "<li>";
-      $V.= "<input type='checkbox' name='$option' value='$option' > $description <p>\n";
+    $V .= "<form method='post'>\n"; // no url = this url
+    foreach ($Options as $option => $description) {
+      $V .= "<div class='form-group'><div class='form-check'>";
+      $V .= " <input class='form-check-input' type='checkbox' name='$option' value='$option' id='men$option'>
+        <label class='form-check-label' for='men$option'>$description</label>";
+      if ($option === "o") {
+        $V .= "<input type='date' class='form-control' name='goldDate' value='" . gmdate('Y-m-d', strtotime("-1 year")) . "' style='width:auto'>";
+      }
+      $V .= "</div></div>\n";
     }
 
-    $V.= "</ol>\n";
     $text = _("Queue the maintenance agent");
-    $V.= "<input type='submit' value='$text'>\n";
+    $V.= "<br /><button type='submit' class='btn btn-primary'>$text</button>\n";
 
     $V.= "<p>";
     $V.= _("More information about these operations can be found ");
     $text = _("here.");
-    $V.= "<a href=https://github.com/fossology/fossology/wiki/Maintenance-Agent> $text </a>";
+    $V.= "<a href=https://github.com/fossology/fossology/wiki/Maintenance-Agent> $text </a></p>";
 
     $V.= "<input type=hidden name=queue value=true>";
 
