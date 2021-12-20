@@ -72,5 +72,6 @@ void removeOrphanedRows();
 void removeOrphanedLogFiles();
 void removeExpiredTokens();
 void deleteOldGold(char* date);
+void removeOldLogFiles(const char* olderThan);
 
 #endif /* _MAINTAGENT_H */

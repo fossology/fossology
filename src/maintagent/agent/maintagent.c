@@ -41,6 +41,7 @@
  -T|Remove orphaned temp tables|
  -L|Remove orphaned log files from file systems|
  -o <yyyy-mm-dd>|Remove gold files older than given date (slow)|
+ -l #|Remove log files older than given date|
  -U|Process expired uploads (slow)|
  -Z|Remove orphaned files from the repository (slow)|
  -i|Initialize the database, then exit|
@@ -103,10 +104,12 @@ int main(int argc, char **argv)
   int removeExpiredTokensExe = 0;
   int tokenRetentionPeriod = 30;
   int removeOldGoldExe = 0;
+  int removeOldLogsExe = 0;
   char goldOlder[11];
+  char oldLogsDate[11] = {};
 
   /* command line options */
-  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiILNo:pPRt:TUvVZ")) != -1)
+  while ((cmdopt = getopt(argc, argv, "aAc:DEFghiIl:LNo:pPRt:TUvVZ")) != -1)
   {
     switch (cmdopt)
     {
@@ -297,6 +300,14 @@ int main(int argc, char **argv)
         {
           removeOrphanedRows();
           removeOrphanedRowsExe = 1;
+        }
+        break;
+      case 'l': /* Remove old log files */
+        if (removeOldLogsExe == 0)
+        {
+          strncpy(oldLogsDate, optarg, 10);
+          removeOldLogFiles(oldLogsDate);
+          removeOldLogsExe = 1;
         }
         break;
       case 'L': /* Remove orphaned log files from file system */
