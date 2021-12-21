@@ -196,9 +196,9 @@ class ui_report_conf extends FO_Plugin
                      $obData['text'].'</textarea></td><td>';
       foreach ($obData['license'] as $value) {
         if (!empty($excludedObligations[$obTopic]) && in_array($value, $excludedObligations[$obTopic])) {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'" checked> '.$value.'<br />';
+          $tableRows .= '<input class="browse-upload-checkbox view-license-rc-size" type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'" checked> '.$value.'<br />';
         } else {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'"> '.$value.'<br />';
+          $tableRows .= '<input class="browse-upload-checkbox view-license-rc-size" type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'"> '.$value.'<br />';
         }
       }
       $tableRows .= '</td></tr>';
@@ -213,12 +213,12 @@ class ui_report_conf extends FO_Plugin
     foreach ($unifiedColumns as $name => $unifiedReportColumns) {
       foreach ($unifiedReportColumns as $columnName => $isenabled) {
         $tableRowsUnifiedReport .= '<tr>';
-        $tableRowsUnifiedReport .= '<td><input type="text" style="width:95%" name="'.$name.'[]" value="'.$columnName.'"></td>';
+        $tableRowsUnifiedReport .= '<td><input class="form-control" type="text" style="width:95%" name="'.$name.'[]" value="'.$columnName.'"></td>';
         $checked = '';
         if ($isenabled) {
           $checked = 'checked';
         }
-        $tableRowsUnifiedReport .= '<td><input type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
+        $tableRowsUnifiedReport .= '<td style="vertical-align:middle"><input class="browse-upload-checkbox view-license-rc-size" type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
         $tableRowsUnifiedReport .= '</tr>';
       }
     }

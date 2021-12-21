@@ -46,6 +46,8 @@ $("#textModal").on('hide.bs.modal', function (e) {
 function openBulkModal(uploadTreeId) {
   bulkModal = $('#bulkModal').modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
+  $("#bulkModal").attr("hidden",false);
+  $("#bulkModal").addClass("modal");
   bulkModal.toggle();
 }
 

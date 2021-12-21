@@ -11,7 +11,7 @@
   <div id="confTabs">
     <ul>
       <li><a href="#reportConfTab">Unified Report Settings</a></li>
-      {% if tableRows is not empty %} 
+      {% if tableRows is not empty %}
         <li><a href="#ObligationsConfTab">Obligations in Unified Report</a></li>
       {% endif %}
       <li><a href="#SPDXConfTab">SPDX Report Settings</a></li>
@@ -20,18 +20,18 @@
       {% endif %}
     </ul>
     <div id="reportConfTab">
-        <table border="1" align="right" style="width:20%">
-          <tr>
-            <th>
-              {{ "Unified Report Heading"|trans }}
-            </th>
-            <th>
-              {{ "Enabled"|trans }}
-            </th>
-          </tr>
-            {{ tableRowsUnifiedReport }}
-        </table>
-      <table border="1">
+      <table border="1" align="right" style="width:20%" class="table">
+        <tr>
+          <th>
+            {{ "Unified Report Heading"|trans }}
+          </th>
+          <th>
+            {{ "Enabled"|trans }}
+          </th>
+        </tr>
+          {{ tableRowsUnifiedReport }}
+      </table>
+      <table border="1" class="table" style="max-width:70%;">
         <tr>
           <th>
             {{ "Attribute"|trans }}
@@ -41,75 +41,75 @@
           </th>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Copyright Text(report footer)"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="footerNote" style="width:98%" value="{{ footerNote|e }}" />
+            <input type="text" class="form-control" name="footerNote" style="width:98%" value="{{ footerNote|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Reviewed by (opt.)"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="reviewedBy" style="width:98%" value="{{ reviewedBy|e }}" />
+            <input type="text" class="form-control" name="reviewedBy" style="width:98%" value="{{ reviewedBy|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Department"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="department" style="width:98%" value="{{ department|e }}" />
+            <input type="text" class="form-control" name="department" style="width:98%" value="{{ department|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Report release date"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="reportRel" style="width:98%" value="{{ reportRel|e }}" />
+            <input type="text" class="form-control" name="reportRel" style="width:98%" value="{{ reportRel|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Community"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="community" style="width:98%" value="{{ community|e }}" />
+            <input type="text" class="form-control" name="community" style="width:98%" value="{{ community|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Component"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="component" style="width:98%" value="{{ component|e }}" />
+            <input type="text" class="form-control" name="component" style="width:98%" value="{{ component|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Version"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="version" style="width:98%" value="{{ version|e }}" />
+            <input type="text" class="form-control" name="version" style="width:98%" value="{{ version|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Release date"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="relDate" style="width:98%" value="{{ relDate|e }}" />
+            <input type="text" class="form-control" name="relDate" style="width:98%" value="{{ relDate|e }}" />
           </td>
         </tr>
         <tr>
-          <td align="left">
+          <td align="left" style="vertical-align: middle">
             {{ "Mainline /SW360 Portal Link"|trans }}
           </td>
           <td align="left">
-            <input type="text" name="sw360Link" style="width:98%" value="{{ sw360Link|e }}" />
+            <input type="text" class="form-control" name="sw360Link" style="width:98%" value="{{ sw360Link|e }}" />
           </td>
         </tr>
         <tr>
@@ -117,7 +117,7 @@
             {{ "General assessment"|trans }}
           </td>
           <td align="left">
-            <textarea style="overflow:auto;width:98%;height:80px;" name="generalAssesment">{{ generalAssesment|e }}</textarea>
+            <textarea class="form-control" style="overflow:auto;width:98%;height:80px;" name="generalAssesment">{{ generalAssesment|e }}</textarea>
           </td>
         </tr>
         <tr>
@@ -125,8 +125,8 @@
             {{ "Source / binary integration notes"|trans }}
           </td>
           <td align="left">
-            <label><input type="radio" name="critical" value="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
-            <label><input type="radio" name="critical" value="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="critical" value="nonCritical" {{ nonCritical }} />{{ "no critical files found, source code and binaries can be used as is"|trans }}</label><br />
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="critical" value="critical" {{ critical }} />{{ "critical files found, source code needs to be adapted and binaries possibly re-built"|trans }}</label>
           </td>
         </tr>
         <tr>
@@ -134,9 +134,9 @@
             {{ "Dependency notes"|trans }}
           </td>
           <td align="left">
-            <label><input type="radio" name="dependencySourceBinary" value="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}</label><br />
-            <label><input type="radio" name="dependencySourceBinary" {{ dependencySource }} value="dependencySource" />{{ "dependencies found in source code (see obligations)"|trans }}</label><br />
-            <label><input type="radio" name="dependencySourceBinary" {{ dependencyBinary }} value="dependencyBinary" />{{ "dependencies found in binaries (see obligations)"|trans }}</label>
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="dependencySourceBinary" value="noDependency" {{ noDependency }} />{{ "no dependencies found, neither in source code nor in binaries"|trans }}</label><br />
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="dependencySourceBinary" {{ dependencySource }} value="dependencySource" />{{ "dependencies found in source code (see obligations)"|trans }}</label><br />
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="dependencySourceBinary" {{ dependencyBinary }} value="dependencyBinary" />{{ "dependencies found in binaries (see obligations)"|trans }}</label>
             <label><textarea {{ styleDependencyTA }} id="dependencyBinarySource" name="dependencyBinarySource">{{ dependencyBinarySource|e }}</textarea></label>
           </td>
         </tr>
@@ -145,8 +145,8 @@
             {{ "Export restrictions by copyright owner"|trans }}
           </td>
           <td align="left">
-            <label><input type="radio" name="exportRestriction" value="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}</label><br />
-            <label><input type="radio" name="exportRestriction" value="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}</label>
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="exportRestriction" value="noExportRestriction" {{ noExportRestriction }} />{{ "no export restrictions found"|trans }}</label><br />
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="exportRestriction" value="exportRestriction" {{ exportRestriction }} />{{ "export restrictions found (see obligations)"|trans }}</label>
             <label><textarea {{ styleExportTA }} id="exportRestrictionText" name="exportRestrictionText">{{ exportRestrictionText|e }}</textarea></label>
           </td>
         </tr>
@@ -155,9 +155,9 @@
             {{ "Restrictions for use by copyright owner \n<br/> (e.g. not for Nuclear Power)"|trans }}
           </td>
           <td align="left">
-            <label><input type="radio" name="restrictionForUse" value="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}</label><br />
-            <label><input type="radio" name="restrictionForUse" value="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}</label>
-            <label><textarea {{ styleRestrictionTA }} id="copyrightRestrictionText" name="copyrightRestrictionText">{{ copyrightRestrictionText|e }}</textarea></label>
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="restrictionForUse" value="noRestriction" {{ noRestriction }} />{{ "no restrictions for use found"|trans }}</label><br />
+            <label><input type="radio" class="browse-upload-checkbox view-license-rc-size" name="restrictionForUse" value="restrictionForUse" {{ restrictionForUse }} />{{ "restrictions for use found (see obligations)"|trans }}</label>
+            <label><textarea {{ styleRestrictionTA }} class="form-control" id="copyrightRestrictionText" name="copyrightRestrictionText">{{ copyrightRestrictionText|e }}</textarea></label>
           </td>
         </tr>
         <tr>
@@ -165,7 +165,7 @@
             {{ "Additional notes"|trans }}
           </td>
           <td align="left">
-           <textarea style="overflow:auto;width:98%;height:80px;" name="gaAdditional">{{ gaAdditional|e }}</textarea>
+           <textarea class="form-control" style="overflow:auto;width:98%;height:80px;" name="gaAdditional">{{ gaAdditional|e }}</textarea>
           </td>
         </tr>
         <tr>
@@ -173,14 +173,14 @@
             {{ "General Risks (optional)"|trans }}
           </td>
           <td align="left">
-            <textarea style="overflow:auto;width:98%;height:80px;" name="gaRisk">{{ gaRisk|e }}</textarea>
+            <textarea class="form-control" style="overflow:auto;width:98%;height:80px;" name="gaRisk">{{ gaRisk|e }}</textarea>
           </td>
         </tr>
       </table>
     </div>
     {% if tableRows is not empty %}
       <div id="ObligationsConfTab">
-        <table border="1">
+        <table border="1" class="table">
           <tr>
             <th>
               {{ "Obligation Topic"|trans }}
@@ -197,7 +197,7 @@
       </div>
     {% endif %}
     <div id="SPDXConfTab">
-      <table border="1">
+      <table border="1" class="table">
         <tr>
           <th>
             {{ "Attribute"|trans }}
@@ -211,7 +211,7 @@
             {{ "Show SPDX license comments"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="spdxLicenseComment" value="spdxLicenseComment" {{ spdxLicenseComment }} />
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="spdxLicenseComment" value="spdxLicenseComment" {{ spdxLicenseComment }} />
          </td>
         </tr>
         <tr>
@@ -219,14 +219,14 @@
             {{ "Ignore files with no info in SPDX"|trans }}
           </td>
           <td align="left">
-            <input type="checkbox" name="ignoreFilesWOInfo" value="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
+            <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="ignoreFilesWOInfo" value="ignoreFilesWOInfo" {{ ignoreFilesWOInfo }} />
           </td>
         </tr>
       </table>
     </div>
     {% if globalClearingAvailable is not empty %}
       <div id="clearingConfTab">
-        <table border="1">
+        <table border="1" class="table">
           <tr>
             <th>
               {{ "Attribute"|trans }}
@@ -240,7 +240,7 @@
               {{ "Mark all the decisions for this upload as global"|trans }}
             </td>
             <td align="left">
-              <input type="checkbox" name="markGlobal" {{ markGlobal }} />
+              <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="markGlobal" {{ markGlobal }} />
             </td>
           </tr>
         </table>
@@ -251,7 +251,7 @@
   <table border="0" align="center" cellpadding="20">
     <tr>
       <td>
-        <input type="submit" name="submitReportConf" value="Submit" />
+        <input type="submit" class="btn btn-default" name="submitReportConf" value="Submit" />
       </td>
     </tr>
   </table>

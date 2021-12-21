@@ -65,7 +65,7 @@
            <th></th>
            <th></th>
            <th>
-             <select id="assigneeSelector" class="form-control-sm" onchange="filterAssignee();">
+             <select id="assigneeSelector" style="max-width:250px;" class="form-control-sm" onchange="filterAssignee();">
              {% for key,disp in assigneeOptions %}
                <option value="{{ key }}" {%if key == 0 %} selected{% endif %}>{{ disp }}</option>
              {% endfor %}
