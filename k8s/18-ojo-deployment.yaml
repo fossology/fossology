@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: agent
+    agent.type: ojo
+  name: ojo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+      agent.type: ojo
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: agent
+        agent.type: ojo
+    spec:
+      hostname: ojo
+      subdomain: agent-svc
+      containers:
+        - args:
+            - agent
+            - ojo
+          env:
+            - name: FOSSOLOGY_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_DB_HOST
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db
+                  key: POSTGRES_DB
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_SCHEDULER_HOST
+          volumeMounts:
+            - mountPath: /srv/fossology/repository/
+              name: repository                     
+          image: fossology/ojo:latest
+          imagePullPolicy: Never
+          name: ojo
+          resources: {}
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository            
+status: {}

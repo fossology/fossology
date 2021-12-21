@@ -153,7 +153,7 @@ void agent_destroy(agent_t* agent);
 /* ************************************************************************** */
 /* **** Modifier Functions and events *************************************** */
 /* ************************************************************************** */
-
+char* remove_underscores(char* input);
 void agent_death_event(scheduler_t* scheduler, pid_t* pids);
 void agent_create_event(scheduler_t* scheduler, agent_t* agent);
 void agent_ready_event(scheduler_t* scheduler, agent_t* agent);

@@ -40,6 +40,7 @@ typedef struct {
   char* address;    ///< The address of the host, used by ssh when starting a new agent
   char* agent_dir;  ///< The location on the host machine where the executables are
   int max;          ///< The max number of agents that can run on this host
+  char* agent_type;  ///< The location on the host machine where the executables are
   int running;      ///< The number of agents currently running on this host
 } host_t;
 
@@ -47,7 +48,7 @@ typedef struct {
 /* **** Contructor Destructor *********************************************** */
 /* ************************************************************************** */
 
-host_t* host_init(char* name, char* address, char* agent_dir, int max);
+host_t* host_init(char* name, char* address, char* agent_dir, int max, char* agent_type);
 void host_destroy(host_t* h);
 
 /* ************************************************************************** */

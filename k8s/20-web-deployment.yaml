@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - args:
+            - web
+          env:
+            - name: FOSSOLOGY_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_DB_HOST
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db
+                  key: POSTGRES_DB
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_SCHEDULER_HOST               
+          image: fossology/web:latest
+          imagePullPolicy: Never
+          name: web
+          ports:
+            - containerPort: 80
+          resources: {}
+          volumeMounts:
+            - mountPath: /srv/fossology/repository/
+              name: repository
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository
+status: {}

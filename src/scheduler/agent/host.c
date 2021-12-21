@@ -57,7 +57,7 @@ static int print_host_all(gchar* host_name, host_t* host, GOutputStream* ostr)
  * @param max         The max number of agent that can run on this host
  * @returns New host
  */
-host_t* host_init(char* name, char* address, char* agent_dir, int max)
+host_t* host_init(char* name, char* address, char* agent_dir, int max, char* agent_type)
 {
   host_t* host = g_new0(host_t, 1);
 
@@ -65,6 +65,7 @@ host_t* host_init(char* name, char* address, char* agent_dir, int max)
   host->address = g_strdup(address);
   host->agent_dir = g_strdup(agent_dir);
   host->max = max;
+  host->agent_type = g_strdup(agent_type);
   host->running = 0;
 
   return host;

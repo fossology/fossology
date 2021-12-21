@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: agent
+    agent.type: adj2nest
+  name: adj2nest
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent
+      agent.type: adj2nest
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: agent
+        agent.type: adj2nest
+    spec:
+      hostname: adj2nest
+      subdomain: agent-svc
+      containers:
+        - args:
+            - agent
+            - adj2nest
+          env:
+            - name: FOSSOLOGY_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_DB_HOST
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db
+                  key: POSTGRES_DB
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+            - name: FOSSOLOGY_SCHEDULER_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_SCHEDULER_HOST
+          image: fossology/ununpack:latest # adj2nest is installed inside ununpack
+          imagePullPolicy: Never
+          volumeMounts:
+            - mountPath: /srv/fossology/repository/
+              name: repository             
+          name: adj2nest
+          resources: {}
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository            
+status: {}

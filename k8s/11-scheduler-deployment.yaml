@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: scheduler
+  name: scheduler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduler
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      
+      labels:
+        app: scheduler
+    spec:
+      hostname: scheduler
+      subdomain: svc
+      serviceAccountName: internal-kubectl
+      containers:
+        - args:
+            - scheduler
+          env:
+            - name: FOSSOLOGY_DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fossology
+                  key: FOSSOLOGY_DB_HOST
+            - name: FOSSOLOGY_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: db
+                  key: POSTGRES_DB
+            - name: FOSSOLOGY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_PASSWORD
+            - name: FOSSOLOGY_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: POSTGRES_USER
+          image: fossology/scheduler:latest
+          ports:
+            - containerPort: 24693
+          imagePullPolicy: Never
+          livenessProbe:
+            exec:
+              command:
+                - "true"
+            failureThreshold: 2
+            periodSeconds: 5
+            timeoutSeconds: 5
+          name: scheduler
+          resources: {}
+          volumeMounts:
+            - mountPath: /srv/fossology/repository/
+              name: repository
+      restartPolicy: Always
+      volumes:
+        - name: repository
+          persistentVolumeClaim:
+            claimName: repository
+status: {}

@@ -23,7 +23,7 @@ include $(VARS)
 
 #GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -I/usr/include/libgtop-2.0/ -lgtop-2.0
 GLIB_FLAGS = -lgthread-2.0 -lgio-2.0 -lgobject-2.0
-LDFLAGS_LOCAL = $(GLIB_FLAGS) $(FO_LDFLAGS) -lpthread
+LDFLAGS_LOCAL = $(GLIB_FLAGS) $(FO_LDFLAGS) -lpthread -lcurl -ljson-c
 CFLAGS_LOCAL = $(FO_CFLAGS) -I.
 DEPEN = Makefile logging.h
 DEF = -DLOG_DIR='"$(LOGDIR)"' \

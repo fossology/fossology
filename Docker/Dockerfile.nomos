@@ -1,0 +1,32 @@
+# FOSSology Dockerfile
+# SPDX-FileCopyrightText: 2021 Omar AbdelSamea <omarmohamed168@gmail.com>
+# SPDX-License-Identifier: GPL-2.0
+#
+# Description: Docker container image recipe
+
+FROM fossology/packages:latest as builder
+LABEL maintainer="Fossology <fossology@fossology.org>"
+
+WORKDIR /fossology_packages/fossology
+
+FROM debian:buster-slim
+
+WORKDIR /fossology
+
+LABEL maintainer="Fossology <fossology@fossology.org>"
+
+### install dependencies
+COPY --from=builder /fossology_packages/fossology/packages/fossology-common_*_amd64.deb .
+COPY --from=builder /fossology_packages/fossology/packages/fossology-nomos_*_amd64.deb .
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+    && dpkg -i fossology-common_*_amd64.deb fossology-nomos_*_amd64.deb || echo "deb failed" \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y -f \
+    && DEBIAN_FRONTEND=noninteractive apt-get install curl libjson-c-dev -y
+
+COPY ./Docker/fo_cli /usr/share/fossology/scheduler/agent/
+COPY ./Docker/fo_conf.sh  /fossology/
+
+COPY ./Docker/docker-entrypoint.k8s.sh /fossology/docker-entrypoint.sh
+RUN chmod +x /fossology/docker-entrypoint.sh
+ENTRYPOINT ["/fossology/docker-entrypoint.sh"]

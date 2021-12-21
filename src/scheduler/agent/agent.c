@@ -125,6 +125,30 @@ const char* agent_status_strings[] =
 /* ************************************************************************** */
 /* **** Local Functions ***************************************************** */
 /* ************************************************************************** */
+/**
+ * @brief This will remove all underscores from string
+ *
+ * This function will be called by g_tree_foreach() which is the reason for its
+ * formatting.
+ *
+ * @param input   char pointer to input string frist char
+ * @return char pointer to input string without underscores first char
+ */
+
+char* remove_underscores(char* input)                                         
+{
+    int i,j;
+    char *output = input;
+    for (i = 0, j = 0; i<strlen(input); i++,j++)          
+    {
+        if (input[i] != '_')                           
+            output[j] = input[i];                     
+        else
+            j--;                                     
+    }
+    output[j]=0;
+    return output;
+}
 
 /**
  * @brief This will close all of the agent's pipes
@@ -253,13 +277,16 @@ static int agent_test(const gchar* name, meta_agent_t* ma, scheduler_t* schedule
   GList* iter;
   host_t* host;
   char *jq_cmd_args = 0;
-
   for (iter = scheduler->host_queue; iter != NULL; iter = iter->next)
-  {
+  {    
     host = (host_t*) iter->data;
-    V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
-    job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, 0, jq_cmd_args);
-    agent_init(scheduler, host, job);
+    if (strcmp(host->agent_type, ma->name) == 0)
+    {
+      V_AGENT("META_AGENT[%s] testing on HOST[%s]\n", ma->name, host->name);
+      job_t* job = job_init(scheduler->job_list, scheduler->job_queue, ma->name, host->name, id_gen--, 0, 0, 0, 0, jq_cmd_args);
+      agent_init(scheduler, host, job);
+      break;
+    }
   }
 
   return 0;
@@ -648,6 +675,7 @@ static void* agent_spawn(agent_spawn_args* pass)
   int len;
   char buffer[2048];          // character buffer
 
+
   /* spawn the new process */
   while ((agent->pid = fork()) < 0)
     sleep(rand() % CONF_fork_backoff_time);
@@ -668,7 +696,6 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* set the priority of the process to the job's priority */
     if (nice(agent->owner->priority) == -1)
       ERROR("unable to correctly set priority of agent process %d", agent->pid);
-
     /* if host is null, the agent will run locally to */
     /* run the agent locally, use the commands that    */
     /* were parsed when the meta_agent was created    */
@@ -688,7 +715,6 @@ static void* agent_spawn(agent_spawn_args* pass)
       {
         ERROR("unable to change working directory: %s\n", strerror(errno));
       }
-
       execv(args[0], args);
     }
     /* otherwise the agent will be started using ssh   */
@@ -697,8 +723,8 @@ static void* agent_spawn(agent_spawn_args* pass)
     /* command as the last argument to the ssh command */
     else
     {
-      args = g_new0(char*, 5);
-      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --scheduler_start --jobId=%d",
+      args = g_new0(char*, 10);
+      len = snprintf(buffer, sizeof(buffer), AGENT_BINARY " --userID=%d --groupID=%d --jobId=%d",
                      agent->host->agent_dir, AGENT_CONF, agent->type->name, agent->type->raw_cmd,
                      agent->owner->user_id, agent->owner->group_id, agent->owner->parent_id);
 
@@ -710,11 +736,20 @@ static void* agent_spawn(agent_spawn_args* pass)
         exit(5);
       }
 
-      args[0] = "/usr/bin/ssh";
-      args[1] = agent->host->address;
-      args[2] = buffer;
-      args[3] = agent->owner->jq_cmd_args;
-      args[4] = NULL;
+      char pod_selector[20] = "deploy/";
+      char *agent_selector = agent->owner->agent_type;
+      remove_underscores(agent_selector);
+      strcat(pod_selector, agent_selector);
+      args[0] = "/usr/local/bin/kubectl";
+      args[1] = "exec";
+      args[2] = pod_selector;
+      args[3] = "-i";
+      args[4] = "--";
+      args[5] = "bash";
+      args[6] = "-c";
+      args[7] = buffer;
+      args[8] = agent->owner->jq_cmd_args;
+      args[9] = NULL;
       execv(args[0], args);
     }
 
@@ -855,7 +890,7 @@ agent_t* agent_init(scheduler_t* scheduler, host_t* host, job_t* job)
     ERROR("agent %s has been invalidated by version information", job->agent_type);
     return NULL;
   }
-
+  
   /* create the pipes between the child and the parent */
   if (pipe(parent_to_child) != 0)
   {

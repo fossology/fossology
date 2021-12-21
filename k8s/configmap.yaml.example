@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db
+  labels:
+    app: db
+data:
+  POSTGRES_DB: fossology
+  POSTGRES_INITDB_ARGS: '-E SQL_ASCII'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fossology
+  labels:
+    app: fossology
+data:
+  FOSSOLOGY_DB_HOST: db
+  FOSSOLOGY_SCHEDULER_HOST: scheduler.svc
+

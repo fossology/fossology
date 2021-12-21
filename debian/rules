@@ -200,6 +200,106 @@ endif
 	mkdir -p $(CURDIR)/debian/fossology-dev/usr/share/fossology/
 	tar czf $(CURDIR)/debian/fossology-dev/usr/share/fossology/php-vendor.tar.gz -C $(CURDIR)/debian/fossology-common/usr/share/fossology vendor
 
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/wget_agent
+	cp -r $(CURDIR)/debian/fossology-wgetagent/usr/share/fossology/wget_agent/ $(CURDIR)/debian/fossology-web/usr/share/fossology/
+	ln -s /usr/share/fossology/wget_agent $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/wget_agent
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/ununpack
+	cp -r $(CURDIR)/debian/fossology-ununpack/usr/share/fossology/ununpack/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/ununpack/ui
+	ln -s /usr/share/fossology/ununpack $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/ununpack
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/adj2nest
+	cp -r $(CURDIR)/debian/fossology-ununpack/usr/share/fossology/adj2nest/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/adj2nest/ui
+	ln -s /usr/share/fossology/adj2nest $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/adj2nest
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/copyright
+	cp -r $(CURDIR)/debian/fossology-copyright/usr/share/fossology/copyright/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/copyright/ui
+	ln -s /usr/share/fossology/copyright $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/copyright
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/ecc
+	cp -r $(CURDIR)/debian/fossology-copyright/usr/share/fossology/ecc/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/ecc/ui
+	ln -s /usr/share/fossology/ecc $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/ecc
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/keyword
+	cp -r $(CURDIR)/debian/fossology-copyright/usr/share/fossology/keyword/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/keyword/ui
+	ln -s /usr/share/fossology/keyword $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/keyword
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/buckets
+	cp -r $(CURDIR)/debian/fossology-buckets/usr/share/fossology/buckets/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/buckets/ui
+	ln -s /usr/share/fossology/buckets $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/buckets
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/mimetype
+	cp -r $(CURDIR)/debian/fossology-mimetype/usr/share/fossology/mimetype/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/mimetype/ui
+	ln -s /usr/share/fossology/mimetype $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/mimetype
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/nomos
+	cp -r $(CURDIR)/debian/fossology-nomos/usr/share/fossology/nomos/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/nomos/ui
+	ln -s /usr/share/fossology/nomos $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/nomos
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/pkgagent
+	cp -r $(CURDIR)/debian/fossology-pkgagent/usr/share/fossology/pkgagent/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/pkgagent/ui
+	ln -s /usr/share/fossology/pkgagent $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/pkgagent
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/delagent
+	cp -r $(CURDIR)/debian/fossology-delagent/usr/share/fossology/delagent/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/delagent/ui
+	ln -s /usr/share/fossology/delagent $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/delagent
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/monk
+	cp -r $(CURDIR)/debian/fossology-monk/usr/share/fossology/monk/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/monk/ui
+	ln -s /usr/share/fossology/monk $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/monk
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/monkbulk
+	cp -r $(CURDIR)/debian/fossology-monkbulk/usr/share/fossology/monkbulk/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/monkbulk/ui
+	ln -s /usr/share/fossology/monkbulk $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/monkbulk
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/ojo
+	cp -r $(CURDIR)/debian/fossology-ojo/usr/share/fossology/ojo/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/ojo/ui
+	ln -s /usr/share/fossology/ojo $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/ojo
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/decider
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/decider/agent
+	cp -r $(CURDIR)/debian/fossology-decider/usr/share/fossology/decider/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/decider/ui
+	cp -r $(CURDIR)/debian/fossology-decider/usr/share/fossology/decider/agent/version.php $(CURDIR)/debian/fossology-web/usr/share/fossology/decider/agent/version.php 
+	ln -s /usr/share/fossology/decider $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/decider
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/deciderjob
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/deciderjob/agent
+	cp -r $(CURDIR)/debian/fossology-deciderjob/usr/share/fossology/deciderjob/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/deciderjob/ui
+	cp -r $(CURDIR)/debian/fossology-deciderjob/usr/share/fossology/deciderjob/agent/version.php $(CURDIR)/debian/fossology-web/usr/share/fossology/deciderjob/agent/version.php
+	ln -s /usr/share/fossology/deciderjob $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/deciderjob
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/readmeoss
+	cp -r $(CURDIR)/debian/fossology-readmeoss/usr/share/fossology/readmeoss/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/readmeoss/ui
+	ln -s /usr/share/fossology/readmeoss $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/readmeoss
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/unifiedreport
+	cp -r $(CURDIR)/debian/fossology-unifiedreport/usr/share/fossology/unifiedreport/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/unifiedreport/ui
+	ln -s /usr/share/fossology/unifiedreport $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/unifiedreport
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/reuser
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/reuser/agent
+	cp -r $(CURDIR)/debian/fossology-reuser/usr/share/fossology/reuser/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/reuser/ui
+	cp -r $(CURDIR)/debian/fossology-reuser/usr/share/fossology/reuser/agent/version.php $(CURDIR)/debian/fossology-web/usr/share/fossology/reuser/agent/version.php
+	ln -s /usr/share/fossology/reuser $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/reuser
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/spdx2
+	cp -r $(CURDIR)/debian/fossology-spdx2/usr/share/fossology/spdx2/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/spdx2/ui
+	ln -s /usr/share/fossology/spdx2 $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/spdx2
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/reportImport
+	cp -r $(CURDIR)/debian/fossology-reportimport/usr/share/fossology/reportImport/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/reportImport/ui
+	ln -s /usr/share/fossology/reportImport $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/reportImport
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/softwareHeritage
+	cp -r $(CURDIR)/debian/fossology-softwareheritage/usr/share/fossology/softwareHeritage/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/softwareHeritage/ui
+	ln -s /usr/share/fossology/softwareHeritage $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/softwareHeritage
+
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/spasht
+	mkdir -p $(CURDIR)/debian/fossology-web/usr/share/fossology/spasht/agent
+	cp -r $(CURDIR)/debian/fossology-spasht/usr/share/fossology/spasht/ui $(CURDIR)/debian/fossology-web/usr/share/fossology/spasht/ui
+	cp -r $(CURDIR)/debian/fossology-spasht/usr/share/fossology/spasht/agent/version.php $(CURDIR)/debian/fossology-web/usr/share/fossology/spasht/agent/version.php	
+	ln -s /usr/share/fossology/spasht $(CURDIR)/debian/fossology-web/etc/fossology/mods-enabled/spasht
+
 	dh_install -a
 # Must not depend on anything. This is to be called by
 # binary-arch/binary-indep
