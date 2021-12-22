@@ -24,6 +24,7 @@ jobs:
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
+    continue-on-error: true
 
     steps:
     - name: Install git
