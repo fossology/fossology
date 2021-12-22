@@ -1,5 +1,90 @@
 # Changelog of FOSSology
 
+### 4.0.0-rc1 (Dec 21st 2021)
+
+This release adds important corrections to
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0)
+
+The release 4.0.0-rc1 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0-rc1
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `b7fca0b45` fix(logrotate): Send SIGHUP
+* `272c0c8a3` fix(report): same license text for different shortname
+* `31127344e` fix(ui):Fix upload from VCS for parameterize agent
+* `93c5fa446` fix(ui): Change folder edit to bootstrap
+* `8a52c390d` fix (build): do not fail is /usr/share/man* folders already exist
+* `f7dbf3833` fix(rest): fixed the pagination in apis
+* `d8b776ba1` fix(unifiedreport): Fix upload link for API
+* `a3c92909e` hotfix(api): Add missing auth controller
+* `4a978109a` fix(upload): Fix upload description input
+* `36a1573ae` fix(login): Allow non-admin user to update
+* `6c241d202` fix(test): Fix licenseRef.json
+* `e62c84291` fix(ci): Update OpenAPI lint
+* `c039b4c37` fix(ui): Allign folder tree
+* `7e7cf82db` fix(rest): fix typo in openapi.yaml, s/reuse_uplod/reuse_upload/
+* `5b17c4999` fix(ui): add line break in upload name if exceeds 20 chars
+
+#### Features
+
+* `7db93f622` feat(gitpod): Inital contribution
+* `2e2b27642` feat(spasht): Show effective score
+* `7f117cbe6` feat(ui): add bootstrap in fossology to beautify ui
+* `bb9d7f946` feat(licenseText): update license texts from SPDX
+* `5f0696095` feat(monkbulk): Custom delimters
+* `f42e07318` feat(monk): New delimiters dnl
+* `143e20e80` feat(edit-user): Let user can define default folder and use the default
+* `b6de455d6` feat(rest): New info and health endpoints
+* `50ebaf51f` feat(maintagent): Implement deleteOrphanGold fn
+* `9b474be28` feat(ui): Read delimiters for clean text
+* `267ef0af4` feat(rest): Filter uploads with 4 new parameters
+* `31dd1c44f` feat(ci): GitHub-ci for c-tests
+* `3d71a2ca7` feat(os): Support Debian 11
+* `4064dfc31` feat(maintagent): Implement removeOrphanedFiles fn
+* `d0f7bddcf` feat(maintagent): Remove old gold files
+* `856a2c40d` feat(maintagent): Remove old log files
+
+#### Infrastructure
+
+* `6af218c92` chore(os): Drop xenial support for eol
+* `2844492a0` docs(openapi): complete OAS spec to pass linting
+* `32f707c25` chore(lint): make sure swagger spec is correct
+* `a309c814d` ci(actions): Build Docker images in Actions
+* `0d5227960` docs: Updated README.md and CONTRIBUTING.md
+* `50b3bf168` feat(rest): Update upload information
+* `b3d8b4789` feat(unifiedreport): include assigned to in component clearing section
+
 ### 3.11.0 (Jul 27th 2021)
 
 This release adds important corrections to
