@@ -6288,6 +6288,10 @@ k
 %KEY% =NULL=
 %STR% "(org|com|net|cn|de)\.?\/licenses?"
 #
+%ENTRY% _LT_SEE_URL_ref2
+%KEY% =NULL=
+%STR% "licen[cs]e =FEW= (https?|ftp) =SOME= \/licen[cs]es?"
+#
 %ENTRY% _LT_SEE_COPYING_1
 %KEY% "licen[cs]"
 %STR% "under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
