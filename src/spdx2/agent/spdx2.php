@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- * 
+ *
  * SPDX-License-Identifier: GPL-2.0
  */
 /**
@@ -241,7 +241,7 @@ class SpdxTwoAgent extends Agent
         break;
       case "spdx2tv":
         break;
-        case "spdx2csv":
+      case "spdx2csv":
         break;
       case "dep5":
         $prefix = $prefix . "copyright-";
@@ -268,7 +268,7 @@ class SpdxTwoAgent extends Agent
         case "spdx2tv":
           $fileName = $fileName .".spdx";
           break;
-          case "spdx2csv":
+        case "spdx2csv":
           $fileName = $fileName .".csv";
           break;
         case "dep5":

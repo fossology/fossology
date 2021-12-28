@@ -291,7 +291,7 @@ class AjaxShowJobs extends \FO_Plugin
           case 'spdx2tv':
             $jobArr['jobQueue'][$key]['download'] = "SPDX2 tag/value report";
             break;
-            case 'spdx2csv':
+          case 'spdx2csv':
             $varJobQueueRow['download'] = "SPDX2 CSV report";
             break;
           case 'dep5':
