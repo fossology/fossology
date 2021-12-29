@@ -1,6 +1,8 @@
 <?php
 /***********************************************************
  Copyright (C) 2014 Hewlett-Packard Development Company, L.P.
+ Copyright (c) 2021-2022 Orange
+ Contributors: Piotr Pszczola, Bartlomiej Drozdz
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License

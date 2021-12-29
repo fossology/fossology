@@ -3,6 +3,8 @@
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  * Copyright (C) 2015 Siemens AG
  * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+ * Copyright (c) 2021-2022 Orange
+ * Contributors: Piotr Pszczola, Bartlomiej Drozdz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
