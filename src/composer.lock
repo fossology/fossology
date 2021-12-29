@@ -828,11 +828,11 @@
         },
         {
             "name": "phpoffice/phpspreadsheet",
-            "version": "1.8.2",
+            "version": "1.16.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPOffice/PhpSpreadsheet.git",
-                "reference": "0c1346a1956347590b7db09533966307d20cb7cc"
+                "reference": "76d4323b85129d0c368149c831a07a3e258b2b50"
             },
             "dist": {
                 "type": "zip",
