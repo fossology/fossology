@@ -478,10 +478,17 @@ function Populate_sysconfig()
   $perm_admin=Auth::PERM_ADMIN;
   $perm_write=Auth::PERM_WRITE;
   $variable = "SourceCodeDownloadRights";
-  $SourceDownloadRightsPrompt = _('Acces rights required to download source code');
-  $SourceDownloadRightsDesc = _('Choose which acces level will be required for user to be able to download source code.');
+  $SourceDownloadRightsPrompt = _('Access rights required to download source code');
+  $SourceDownloadRightsDesc = _('Choose which access level will be required for user to be able to download source code.');
   $valueArray[$variable] = array("'$variable'", "'$perm_write'", "'$SourceDownloadRightsPrompt'",
   strval(CONFIG_TYPE_DROP), "'DOWNLOAD'", "1", "'$SourceDownloadRightsDesc'", "null", "'Administrator{{$perm_admin}}|Read_Write{{$perm_write}}'");
+
+  $variable = "UserDescReadOnly";
+  $prompt = _('Make account details read-only');
+  $desc = _('Make account details (username, email, description) read-only');
+  $valueArray[$variable] = array("'$variable'", "false", "'$prompt'",
+    strval(CONFIG_TYPE_BOOL), "'USER_READ_ONLY'", "1", "'$desc'",
+    "'check_boolean'", "null");
 
   /* SoftwareHeritage agent config */
   $variable = "SwhURL";
