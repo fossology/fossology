@@ -41,6 +41,10 @@
         <td>{{ macro.select('user_perm', allAccessLevels, 'user_perm', accessLevel) }}</td>
       </tr>
       <tr class="classic">
+        <th width="25%">{{ "Select the user's status."|trans }} </th>
+        <td>{{ macro.select('user_status', allUserStatuses, 'user_status', userStatus) }}</td>
+      </tr>
+      <tr class="classic">
         <th width="25%">{{ "Select the user's top-level folder. Access is restricted to this folder."|trans }}</th>
         <td><select name="root_folder_fk" class="ui-render-select2">
           {{ folderListOption }}

@@ -1971,9 +1971,17 @@
   $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT -1";
   $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["users"]["last_connection"]["DESC"] = "";
+  $Schema["TABLE"]["users"]["last_connection"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"last_connection\" timestamptz";
+  $Schema["TABLE"]["users"]["last_connection"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"last_connection\" DROP NOT NULL";
+
   $Schema["TABLE"]["users"]["user_desc"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_desc"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_desc\" text";
   $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_desc\" DROP NOT NULL";
+
+  $Schema["TABLE"]["users"]["user_status"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_status\" IS 'active, incactive'";
+  $Schema["TABLE"]["users"]["user_status"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_status\" text DEFAULT 'active'";
+  $Schema["TABLE"]["users"]["user_status"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_status\" DROP NOT NULL, ALTER COLUMN \"user_status\" SET DEFAULT 'active'";
 
   $Schema["TABLE"]["users"]["user_seed"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_seed"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_seed\" text";

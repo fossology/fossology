@@ -333,6 +333,12 @@ class core_auth extends FO_Plugin
       return false;
     }
 
+    if (!$this->userDao->isUserActive($userName)) {
+      /* user not active */
+      $this->vars['userInactive'] = true;
+      return false;
+    }
+
       /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
@@ -350,6 +356,9 @@ class core_auth extends FO_Plugin
     } else {
       $_SESSION['NoPopup'] = 0;
     }
+
+    $this->userDao->updateUserLastConnection($row['user_pk']);
+
     return true;
   }
 }
