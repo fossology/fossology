@@ -156,11 +156,8 @@ class UserEditPage extends DefaultPlugin
    */
   private function DisplayForm($UserRec, $SessionIsAdmin)
   {
-    global $SysConf;
-
     $vars = array('isSessionAdmin' => $SessionIsAdmin,
                   'userId' => $UserRec['user_pk']);
-    $vars['userDescReadOnly'] = $SysConf['SYSCONFIG']['UserDescReadOnly'];
 
     /* For Admins, get the list of all users
      * For non-admins, only show themself
@@ -307,7 +304,7 @@ class UserEditPage extends DefaultPlugin
       if ($key[0] == '_' || $key == "user_pk") {
         continue;
       }
-      if (!$SessionIsAdmin && ($key == "user_perm" || $key == "root_folder_fk" || $key == "user_status")) {
+      if (!$SessionIsAdmin && ($key == "user_perm" || $key == "root_folder_fk")) {
         continue;
       }
       if (!$first) {
@@ -403,7 +400,6 @@ class UserEditPage extends DefaultPlugin
       }
 
       $UserRec['user_perm'] = intval($request->get('user_perm'));
-      $UserRec['user_status'] = stripslashes($request->get('user_status'));
       $UserRec['user_email'] = stripslashes($request->get('user_email'));
       $UserRec['email_notify'] = stripslashes($request->get('email_notify'));
       if (!empty($UserRec['email_notify'])) {
