@@ -24,15 +24,15 @@ namespace Fossology\SpdxTwo;
 use Fossology\Lib\Plugin\AgentPlugin;
 
 /**
- * @class SpdxTwoTagValueAgentPlugin
- * @brief Add multiple uploads to SPDX2 report in Tag:Value format
+ * @class SpdxTwoCommaSeparatedValuesAgentPlugin
+ * @brief Add multiple uploads to CSV reports including SPDX identifiers
  */
 class SpdxTwoCommaSeparatedValuesAgentPlugin extends AgentPlugin
 {
   public function __construct()
   {
     $this->Name = "agent_spdx2csv";
-    $this->Title =  _("SPDX2 generation in CSV format");
+    $this->Title =  _("Export CSV report (SPDX)");
     $this->AgentName = "spdx2csv";
 
     parent::__construct();
