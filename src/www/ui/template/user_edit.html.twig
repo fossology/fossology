@@ -21,15 +21,15 @@
   <table style="border:1px solid black; border-collapse: collapse;" width="100%">
     <tr class="classic">
       <th width="25%">{{ "Username."|trans }}</th>
-      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20" {% if not isSessionAdmin %}disabled="disabled"{% endif %}></td>
+      <td><input type="text" value="{{ userName|e }}" name="user_name" size="20" {%- if not isSessionAdmin or userDescReadOnly == "true" -%}readonly="true"{%- endif -%}></td>
     </tr>
     <tr class="classic">
       <th width="25%">{{ "Description (name, contact, or other information)."|trans }} {{ "This may be blank."|trans }}</th>
-      <td><input type="text" value="{{ userDescription|e }}" name="user_desc" size="60"></td>
+      <td><input type="text" value="{{ userDescription|e }}" name="user_desc" size="60" {%- if userDescReadOnly == "true" -%}readonly="true"{%- endif -%}></td>
     </tr>
     <tr class="classic">
       <th width="25%">{{ "Email address."|trans }} {{ "This may be blank."|trans }}</th>
-      <td><input type="text" value="{{ userEMail|e }}" name="user_email" size="60"></td>
+      <td><input type="text" value="{{ userEMail|e }}" name="user_email" size="60" {%- if userDescReadOnly == "true" -%}readonly="true"{%- endif -%}></td>
     </tr>
     <tr class="classic">
       <th width="25%">{{ "E-mail notification on job completion"|trans }}</th>

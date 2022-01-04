@@ -156,8 +156,11 @@ class UserEditPage extends DefaultPlugin
    */
   private function DisplayForm($UserRec, $SessionIsAdmin)
   {
+    global $SysConf;
+
     $vars = array('isSessionAdmin' => $SessionIsAdmin,
                   'userId' => $UserRec['user_pk']);
+    $vars['userDescReadOnly'] = $SysConf['SYSCONFIG']['UserDescReadOnly'];
 
     /* For Admins, get the list of all users
      * For non-admins, only show themself
