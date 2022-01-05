@@ -66,7 +66,7 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
     menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value&nbsp;report", 0, self::NAME . '&outputFormat=spdx2tv', $text);
 
     $text = _("Generate CSV report (with SPDX IDs)");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;CSV&nbsp;report&nbsp;(SPDX)", 0, self::NAME . '&outputFormat=spdx2csv', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;CSV&nbsp;report&nbsp;(SPDX)", 0, self::NAME . '&outputFormat=spdx2csv', $text);
 
     $text = _("Generate Debian Copyright file");
     menu_insert("Browse-Pfile::Export&nbsp;DEP5&nbsp;report", 0, self::NAME . '&outputFormat=dep5', $text);
