@@ -101,10 +101,6 @@ class UserEditPage extends DefaultPlugin
     if (! empty($BtnText)) {
       /* Get the form data to in an associated array */
       $UserRec = $this->CreateUserRec($request, "");
-      if (empty($UserRec['user_name']) && !$SessionIsAdmin) {
-        // Possibly disabled field due to non admin user
-        $UserRec['user_name'] = $SessionUserRec['user_name'];
-      }
 
       $rv = $this->UpdateUser($UserRec, $SessionIsAdmin);
       if (empty($rv)) {
@@ -156,8 +152,11 @@ class UserEditPage extends DefaultPlugin
    */
   private function DisplayForm($UserRec, $SessionIsAdmin)
   {
+    global $SysConf;
+
     $vars = array('isSessionAdmin' => $SessionIsAdmin,
                   'userId' => $UserRec['user_pk']);
+    $vars['userDescReadOnly'] = $SysConf['SYSCONFIG']['UserDescReadOnly'];
 
     /* For Admins, get the list of all users
      * For non-admins, only show themself
