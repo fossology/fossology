@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.4.2
+  version: 1.4.3
   contact:
     email: fossology@fossology.org
   license:
@@ -2022,6 +2022,37 @@ components:
               type: string
               description: Link to license
           description: Licensing of API
+        fossology:
+          type: object
+          description: Information about FOSSology server. Values can be null.
+          properties:
+            version:
+              type: string
+              description: Version of the FOSSology server
+              nullable: true
+              example: "4.0.0"
+            branchName:
+              type: string
+              description: Branch deployed on the FOSSology server
+              nullable: true
+              example: master
+            commitHash:
+              type: string
+              description: Hash of commit deployed on the FOSSology server
+              nullable: true
+              example: "306260"
+            commitDate:
+              type: string
+              description: |
+                Date of commit deployed on the FOSSology server in
+                ISO8601 format
+              nullable: true
+              example: "2022-01-05T22:03:00+05:30"
+            buildDate:
+              type: string
+              description: Date on which packages were built in ISO8601 format
+              nullable: true
+              example: "2022-01-07T11:13:00+05:30"
     HeathInfo:
       description: Health status of server
       type: object
