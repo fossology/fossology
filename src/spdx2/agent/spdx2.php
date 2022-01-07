@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ * SPDX-License-Identifier: GPL-2.0
  */
 /**
  * @dir
@@ -85,7 +87,7 @@ class SpdxTwoAgent extends Agent
 
   const OUTPUT_FORMAT_KEY = "outputFormat";               ///< Argument key for output format
   const DEFAULT_OUTPUT_FORMAT = "spdx2";                  ///< Default output format
-  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5";  ///< Output formats available
+  const AVAILABLE_OUTPUT_FORMATS = "spdx2,spdx2tv,dep5,spdx2csv";  ///< Output formats available
   const UPLOAD_ADDS = "uploadsAdd";                       ///< Argument for additional uploads
 
   /** @var UploadDao $uploadDao
@@ -239,6 +241,8 @@ class SpdxTwoAgent extends Agent
         break;
       case "spdx2tv":
         break;
+      case "spdx2csv":
+        break;
       case "dep5":
         $prefix = $prefix . "copyright-";
         break;
@@ -263,6 +267,9 @@ class SpdxTwoAgent extends Agent
           break;
         case "spdx2tv":
           $fileName = $fileName .".spdx";
+          break;
+        case "spdx2csv":
+          $fileName = $fileName .".csv";
           break;
         case "dep5":
           $fileName = $fileName .".txt";
