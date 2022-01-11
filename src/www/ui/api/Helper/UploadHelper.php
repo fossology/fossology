@@ -105,20 +105,20 @@ class UploadHelper
    * @param string $folderId ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
-   * @param boolean $applyGlobal True if global decisions should be applied.
    * @param boolean $ignoreScm True if the SCM should be ignored.
    * @param string $uploadType Type of upload (if other than file)
+   * @param boolean $applyGlobal True if global decisions should be applied.
    * @return array Array with status, message and upload id
    * @see createVcsUpload()
    * @see createFileUpload()
    */
   public function createNewUpload(ServerRequestInterface $request, $folderId,
-    $fileDescription, $isPublic, $applyGlobal, $ignoreScm, $uploadType)
+    $fileDescription, $isPublic, $ignoreScm, $uploadType, $applyGlobal = false)
   {
     $uploadedFile = $request->getUploadedFiles();
     $body = $request->getParsedBody();
 
-    if (! empty($applyGlobal) && ($applyGlobal == "true")) {
+    if ($applyGlobal) {
       // If global decisions should be ignored
       $applyGlobal = 1;
     } else {
@@ -141,11 +141,11 @@ class UploadHelper
         );
       }
       return $this->handleUpload($body, $uploadType, $folderId,
-        $fileDescription, $isPublic, $applyGlobal, $ignoreScm);
+        $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     } else {
       $uploadedFile = $uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME];
       return $this->createFileUpload($uploadedFile, $folderId,
-        $fileDescription, $isPublic, $applyGlobal, $ignoreScm);
+        $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     }
   }
 
@@ -156,12 +156,12 @@ class UploadHelper
    * @param string $folderId    ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
-   * @param boolean $applyGlobal 1 if global decisions should be applied.
    * @param integer $ignoreScm  1 if the SCM should be ignored.
+   * @param integer $applyGlobal 1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function createFileUpload($uploadedFile, $folderId, $fileDescription,
-    $isPublic, $applyGlobal = 0, $ignoreScm = 0)
+    $isPublic, $ignoreScm = 0, $applyGlobal = 0)
   {
     $path = $uploadedFile->file;
     $originalName = $uploadedFile->getClientFilename();
@@ -198,12 +198,12 @@ class UploadHelper
    * @param string $folderId   ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
-   * @param boolean $applyGlobal 1 if global decisions should be applied.
    * @param integer $ignoreScm 1 if the SCM should be ignored.
+   * @param integer $applyGlobal 1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function handleUpload($body, $uploadType, $folderId, $fileDescription,
-    $isPublic, $applyGlobal, $ignoreScm = 0)
+    $isPublic, $ignoreScm = 0, $applyGlobal = 0)
   {
     $sanity = false;
     switch ($uploadType) {
@@ -230,15 +230,15 @@ class UploadHelper
     switch ($uploadType) {
       case "vcs":
         $uploadResponse = $this->generateVcsUpload($body, $folderId,
-          $fileDescription, $isPublic, $applyGlobal, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
       case "url":
         $uploadResponse = $this->generateUrlUpload($body, $folderId,
-          $fileDescription, $isPublic, $applyGlobal, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
       case "server":
         $uploadResponse = $this->generateSrvUpload($body, $folderId,
-          $fileDescription, $isPublic, $applyGlobal, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
     }
     return $uploadResponse;
@@ -377,12 +377,12 @@ class UploadHelper
    * @param string  $folderId        ID of the folder
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
-   * @param boolean $applyGlobal     1 if global decisions should be applied.
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param boolean $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateVcsUpload($vcsData, $folderId, $fileDescription,
-    $isPublic, $applyGlobal, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $vcsType = $vcsData["vcsType"];
     $vcsUrl = $vcsData["vcsUrl"];
@@ -423,12 +423,12 @@ class UploadHelper
    * @param string  $folderId        ID of the folder
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
-   * @param boolean $applyGlobal     1 if global decisions should be applied.
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param integer $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateUrlUpload($urlData, $folderName, $fileDescription,
-    $isPublic, $applyGlobal, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $url = $urlData["url"];
     $name = $urlData["name"];
@@ -468,12 +468,12 @@ class UploadHelper
    * @param string  $folderId        ID of the folder
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
-   * @param boolean $applyGlobal     1 if global decisions should be applied.
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param integer $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateSrvUpload($srvData, $folderName, $fileDescription,
-    $isPublic, $applyGlobal, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $path = $srvData["path"];
     $name = $srvData["name"];

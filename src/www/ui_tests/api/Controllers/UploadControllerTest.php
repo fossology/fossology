@@ -572,7 +572,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
-        'vcs'])
+        'vcs', false])
       ->andReturn([true, '', '', 20]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
@@ -689,7 +689,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
-        'vcs'])
+        'vcs', false])
       ->andReturn([false, $errorMessage, $errorDesc, -1]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);

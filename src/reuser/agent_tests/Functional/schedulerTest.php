@@ -189,12 +189,11 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
       'uploadtree_a','license_ref','license_ref_bulk','clearing_decision',
       'clearing_decision_event','clearing_event','license_file','highlight',
       'highlight_bulk','agent','pfile','ars_master','users','group_user_member',
-
-    'upload_clearing_license'),false);
+      'upload_clearing_license','report_info'),false);
     $this->testDb->createSequences(array('agent_agent_pk_seq','pfile_pfile_pk_seq',
       'upload_upload_pk_seq','nomos_ars_ars_pk_seq','license_file_fl_pk_seq',
       'license_ref_rf_pk_seq','license_ref_bulk_lrb_pk_seq',
-      'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq'),false);
+      'clearing_decision_clearing_decision_pk_seq','clearing_event_clearing_event_pk_seq','report_info_pk_seq'),false);
     $this->testDb->createViews(array('license_file_ref'),false);
     $this->testDb->createConstraints(array('agent_pkey','pfile_pkey',
       'upload_pkey_idx','FileLicense_pkey','clearing_event_pkey'),false);
@@ -204,7 +203,8 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->testDb->createInheritedArsTables(array('monk'));
 
     $this->testDb->insertData(array('pfile','upload','uploadtree_a','users',
-      'group_user_member','agent','license_file','monk_ars'), false);
+      'group_user_member','agent','license_file','monk_ars','report_info'),
+      false);
     $this->testDb->insertData_license_ref(80);
 
     $this->testDb->resetSequenceAsMaxOf('agent_agent_pk_seq', 'agent', 'agent_pk');

@@ -734,6 +734,10 @@ ORDER BY lft asc
     $stmt = __METHOD__;
     $sql = "SELECT ri_globaldecision FROM report_info WHERE upload_fk = $1";
     $row = $this->dbManager->getSingleRow($sql, array($uploadId), $stmt);
+    if (empty($row) && empty($setGlobal)) {
+      // No upload information in DB and user did not update
+      return 0;
+    }
 
     if (!empty($setGlobal)) {
       $stmt = __METHOD__.'ifempty';
