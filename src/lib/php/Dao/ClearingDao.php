@@ -96,7 +96,7 @@ class ClearingDao
                       AND cd.scope = $localScope AND cd.group_fk = $p2)";
     } else {
       $applyGlobal = "(ut.uploadtree_pk = cd.uploadtree_fk
-                      AND (cd.scope = $localScope OR cd.scope = $globalScope) AND cd.group_fk = $p2)";
+                      AND cd.group_fk = $p2)";
     }
 
     return "WITH decision AS (

@@ -83,11 +83,13 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
                array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
 
-  if (!empty($setGlobal)) {
-    /* @var $uploadDao UploadDao */
-    $uploadDao = $GLOBALS['container']->get('dao.upload');
-    $uploadDao->getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal);
+  // Force insertion
+  if ($setGlobal != 1) {
+    $setGlobal = 0;
   }
+  /* @var UploadDao $uploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
+  $uploadDao->getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal);
 
   /**
    * ** Add user permission to perm_upload ****
