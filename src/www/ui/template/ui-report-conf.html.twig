@@ -243,6 +243,14 @@
               <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="markGlobal" {{ markGlobal }} />
             </td>
           </tr>
+          <tr>
+            <td align="left">
+              {{ "Apply global decisions from previous uploads to current upload"|trans }}
+            </td>
+            <td align="left">
+              <input type="checkbox" class="browse-upload-checkbox view-license-rc-size"  name="applyGlobal" value="applyGlobal" {{ applyGlobal }} />
+            </td>
+          </tr>
         </table>
       </div>
     {% endif %}

@@ -222,6 +222,9 @@ class ui_report_conf extends FO_Plugin
         $tableRowsUnifiedReport .= '</tr>';
       }
     }
+    if (!empty($row['ri_globaldecision'])) {
+      $vars['applyGlobal'] = "checked";
+    }
     $vars['tableRows'] = $tableRows;
     $vars['tableRowsUnifiedReport'] = $tableRowsUnifiedReport;
     $vars['scriptBlock'] = $this->createScriptBlock();
@@ -311,6 +314,8 @@ class ui_report_conf extends FO_Plugin
     $submitReportConf = GetParm("submitReportConf", PARM_STRING);
 
     if (isset($submitReportConf)) {
+      $applyGlobal = @$_POST["applyGlobal"];
+      $applyGlobal = !empty($applyGlobal) ? 1 : 0;
       $parms = array();
       $obLicensesEncoded = @$_POST["obLicenses"];
       $obLicensesEncoded = !empty($obLicensesEncoded) ? $obLicensesEncoded : array();
@@ -341,6 +346,8 @@ class ui_report_conf extends FO_Plugin
       $excludeObligationPos = count($parms);
       $parms[] = json_encode($unifiedReportColumnsForJson);
       $unifiedColumnsPos = count($parms);
+      $parms[] = $applyGlobal;
+      $applyGlobalPos = count($parms);
       $parms[] = $uploadId;
       $uploadIdPos = count($parms);
 
@@ -348,7 +355,8 @@ class ui_report_conf extends FO_Plugin
                "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
                "ri_spdx_selection = $$checkBoxSpdxPos, " .
                "ri_excluded_obligations = $$excludeObligationPos, " .
-               "ri_unifiedcolumns = $$unifiedColumnsPos" .
+               "ri_unifiedcolumns = $$unifiedColumnsPos, " .
+               "ri_globaldecision = $$applyGlobalPos " .
                "WHERE upload_fk = $$uploadIdPos;";
       $this->dbManager->getSingleRow($SQL, $parms,
         __METHOD__ . "updateReportInfoData");
