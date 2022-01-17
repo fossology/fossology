@@ -260,6 +260,8 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
   if (what == 3 || what === 'acknowledgement') {
     // clicked to add button to display child modal
     $('#selectFromNoticeFile').css('display','inline-block');
+  } else {
+    $('#selectFromNoticeFile').css('display','none');
   }
 
   if(type == 0) {
@@ -358,7 +360,6 @@ function submitTextModal(){
       data: post_data,
       success: () => doOnSuccess(textModal)
     });
-    $('#selectFromNoticeFile').css('display','none');
   } else {
     textModal.modal('hide');
     $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
@@ -368,7 +369,6 @@ function submitTextModal(){
     } else {
       $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
     }
-    $('#selectFromNoticeFile').css('display','none');
   }
 }
 
@@ -417,9 +417,14 @@ $(document).ready(function () {
 
   $('[data-toggle="tooltip"]').tooltip();
   textModal = $('#textModal').modal('hide');
-  $('#textModal, #bulkModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
+  $('#textModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
     stop: function(){
       $(this).css({'width':'','height':''});
+    }
+  });
+  $('#bulkModal').draggable({
+    stop: function(){
+      $(this).css('height', '');
     }
   });
 
