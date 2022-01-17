@@ -28,7 +28,6 @@ function openBulkModal() {
   $('#userModal').hide();
   $('#ClearingHistoryDataModal').hide();
   bulkModalOpened = 1;
-  $("#bulkModal").attr("hidden",false);
   $('#bulkModal').toggle();
 }
 
@@ -36,6 +35,12 @@ function closeBulkModal() {
   bulkModalOpened = 0;
   $('#bulkModal').hide();
 }
+
+// Hide backdrop for bulk modal
+$('#bulkModal').on('shown.bs.modal', function () {
+  $('.modal-backdrop').css('display', 'none');
+  $('#bulkModal').css({'width': 'fit-content', 'margin': '0 auto'});
+});
 
 function openUserModal() {
   $('#bulkModal').hide();
