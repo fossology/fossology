@@ -1,4 +1,11 @@
-fossology (4.0.0~rc1-1) unstable; urgency=low
+fossology (4.0.0-1) unstable; urgency=low
+
+  * New upstream release
+  * https://github.com/fossology/fossology/releases/tag/4.0.0 for details
+
+ -- Shaheem Azmal M MD <shaheem.azmal@siemens.com>  Wed, 20 Jan 2022 12:51:20 +0530
+ 
+ fossology (4.0.0~rc1-1) unstable; urgency=low
 
   * New upstream release
   * https://github.com/fossology/fossology/releases/tag/4.0.0-rc1 for details
