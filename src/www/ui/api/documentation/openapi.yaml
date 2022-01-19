@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.4.0
+  version: 1.4.1
   contact:
     email: fossology@fossology.org
   license:
@@ -435,6 +435,14 @@ paths:
               - protected
               - public
             default: protected
+        - name: applyGlobal
+          description: >
+            Apply global decisions for current upload
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: ignoreScm
           description: >
             Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype

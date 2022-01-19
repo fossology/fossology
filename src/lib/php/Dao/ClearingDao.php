@@ -66,13 +66,14 @@ class ClearingDao
   private function getRelevantDecisionsCte(ItemTreeBounds $itemTreeBounds, $groupId, $onlyCurrent, &$statementName, &$params, $condition="")
   {
     $uploadTreeTable = $itemTreeBounds->getUploadTreeTableName();
+    $uploadId = $itemTreeBounds->getUploadId();
 
     $params[] = DecisionTypes::WIP; $p1 = "$". count($params);
     $params[] = $groupId; $p2 = "$". count($params);
 
     $sql_upload = "";
     if ('uploadtree' === $uploadTreeTable || 'uploadtree_a' === $uploadTreeTable) {
-      $params[] = $itemTreeBounds->getUploadId(); $p = "$". count($params);
+      $params[] = $uploadId; $p = "$". count($params);
       $sql_upload = " AND ut.upload_fk=$p";
     }
     if (!empty($condition)) {
@@ -88,6 +89,16 @@ class ClearingDao
     $globalScope = DecisionScopes::REPO;
     $localScope = DecisionScopes::ITEM;
 
+    $applyGlobal = $this->uploadDao->getGlobalDecisionSettingsFromInfo($uploadId);
+    if (!empty($applyGlobal)) {
+      $applyGlobal = "(ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope) OR
+                      (ut.uploadtree_pk = cd.uploadtree_fk
+                      AND cd.scope = $localScope AND cd.group_fk = $p2)";
+    } else {
+      $applyGlobal = "(ut.uploadtree_pk = cd.uploadtree_fk
+                      AND cd.group_fk = $p2)";
+    }
+
     return "WITH decision AS (
               SELECT
                 $filterClause
@@ -100,10 +111,7 @@ class ClearingDao
                 EXTRACT(EPOCH FROM cd.date_added) AS ts_added
               FROM clearing_decision cd
                 INNER JOIN $uploadTreeTable ut
-                  ON (
-                    (ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope)
-                    OR (ut.uploadtree_pk = cd.uploadtree_fk
-                      AND cd.scope = $localScope AND cd.group_fk = $p2))
+                  ON ( $applyGlobal )
                   $sql_upload $condition
               WHERE cd.decision_type != $p1
               $sortClause

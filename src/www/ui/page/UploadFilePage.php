@@ -112,6 +112,8 @@ class UploadFilePage extends UploadPageBase
     $originalFileName = $uploadedFile->getClientOriginalName();
     $originalFileName = $this->basicShEscaping($originalFileName);
 
+    $setGlobal = ($request->get('globalDecisions')) ? 1 : 0;
+
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
@@ -120,7 +122,7 @@ class UploadFilePage extends UploadPageBase
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $originalFileName,
-      $originalFileName, $description, $uploadMode, $folderId, $publicPermission);
+      $originalFileName, $description, $uploadMode, $folderId, $publicPermission, $setGlobal);
     if (empty($uploadId)) {
       return array(false, _("Failed to insert upload record"), $description);
     }

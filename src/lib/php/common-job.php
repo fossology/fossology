@@ -2,6 +2,7 @@
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Db\DbManager;
 /***********************************************************
  Copyright (C) 2008-2015 Hewlett-Packard Development Company, L.P.
@@ -63,7 +64,7 @@ use Fossology\Lib\Db\DbManager;
  * \return upload_pk or null (failure).
  *         On failure, error is written to stdout
  */
-function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE)
+function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMode, $folder_pk, $public_perm=Auth::PERM_NONE, $setGlobal=0)
 {
   global $container;
 
@@ -81,6 +82,14 @@ function JobAddUpload($userId, $groupId, $job_name, $filename, $desc, $UploadMod
 
   $dbManager->getSingleRow("INSERT INTO foldercontents (parent_fk,foldercontents_mode,child_id) VALUES ($1,$2,$3)",
                array($folder_pk,FolderDao::MODE_UPLOAD,$uploadId),'insert.foldercontents');
+
+  // Force insertion
+  if ($setGlobal != 1) {
+    $setGlobal = 0;
+  }
+  /* @var UploadDao $uploadDao */
+  $uploadDao = $GLOBALS['container']->get('dao.upload');
+  $uploadDao->getGlobalDecisionSettingsFromInfo($uploadId, $setGlobal);
 
   /**
    * ** Add user permission to perm_upload ****

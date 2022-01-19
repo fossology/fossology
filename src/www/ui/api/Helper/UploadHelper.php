@@ -107,15 +107,23 @@ class UploadHelper
    * @param string $isPublic   Upload is `public, private or protected`
    * @param boolean $ignoreScm True if the SCM should be ignored.
    * @param string $uploadType Type of upload (if other than file)
+   * @param boolean $applyGlobal True if global decisions should be applied.
    * @return array Array with status, message and upload id
    * @see createVcsUpload()
    * @see createFileUpload()
    */
   public function createNewUpload(ServerRequestInterface $request, $folderId,
-    $fileDescription, $isPublic, $ignoreScm, $uploadType)
+    $fileDescription, $isPublic, $ignoreScm, $uploadType, $applyGlobal = false)
   {
     $uploadedFile = $request->getUploadedFiles();
     $body = $request->getParsedBody();
+
+    if ($applyGlobal) {
+      // If global decisions should be ignored
+      $applyGlobal = 1;
+    } else {
+      $applyGlobal = 0;
+    }
 
     if (! empty($ignoreScm) && ($ignoreScm == "true")) {
       // If SCM should be ignored
@@ -133,11 +141,11 @@ class UploadHelper
         );
       }
       return $this->handleUpload($body, $uploadType, $folderId,
-        $fileDescription, $isPublic, $ignoreScm);
+        $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     } else {
       $uploadedFile = $uploadedFile[$this->uploadFilePage::FILE_INPUT_NAME];
       return $this->createFileUpload($uploadedFile, $folderId,
-        $fileDescription, $isPublic, $ignoreScm);
+        $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
     }
   }
 
@@ -149,10 +157,11 @@ class UploadHelper
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
    * @param integer $ignoreScm  1 if the SCM should be ignored.
+   * @param integer $applyGlobal 1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function createFileUpload($uploadedFile, $folderId, $fileDescription,
-    $isPublic, $ignoreScm = 0)
+    $isPublic, $ignoreScm = 0, $applyGlobal = 0)
   {
     $path = $uploadedFile->file;
     $originalName = $uploadedFile->getClientFilename();
@@ -175,6 +184,7 @@ class UploadHelper
     $symfonyRequest->request->set(
       $this->uploadFilePage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
     $symfonyRequest->request->set('public', $isPublic);
+    $symfonyRequest->request->set('globalDecisions', $applyGlobal);
     $symfonyRequest->request->set('scm', $ignoreScm);
 
     return $this->uploadFilePage->handleRequest($symfonyRequest);
@@ -189,10 +199,11 @@ class UploadHelper
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic   Upload is `public, private or protected`
    * @param integer $ignoreScm 1 if the SCM should be ignored.
+   * @param integer $applyGlobal 1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function handleUpload($body, $uploadType, $folderId, $fileDescription,
-    $isPublic, $ignoreScm = 0)
+    $isPublic, $ignoreScm = 0, $applyGlobal = 0)
   {
     $sanity = false;
     switch ($uploadType) {
@@ -219,15 +230,15 @@ class UploadHelper
     switch ($uploadType) {
       case "vcs":
         $uploadResponse = $this->generateVcsUpload($body, $folderId,
-          $fileDescription, $isPublic, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
       case "url":
         $uploadResponse = $this->generateUrlUpload($body, $folderId,
-          $fileDescription, $isPublic, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
       case "server":
         $uploadResponse = $this->generateSrvUpload($body, $folderId,
-          $fileDescription, $isPublic, $ignoreScm);
+          $fileDescription, $isPublic, $ignoreScm, $applyGlobal);
         break;
     }
     return $uploadResponse;
@@ -367,10 +378,11 @@ class UploadHelper
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param boolean $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateVcsUpload($vcsData, $folderId, $fileDescription,
-    $isPublic, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $vcsType = $vcsData["vcsType"];
     $vcsUrl = $vcsData["vcsUrl"];
@@ -399,6 +411,7 @@ class UploadHelper
     $symfonyRequest->request->set('username', $vcsUsername);
     $symfonyRequest->request->set('passwd', $vcsPasswd);
     $symfonyRequest->request->set('branch', $vcsBranch);
+    $symfonyRequest->request->set('globalDecisions', $applyGlobal);
     $symfonyRequest->request->set('scm', $ignoreScm);
 
     return $this->uploadVcsPage->handleRequest($symfonyRequest);
@@ -411,10 +424,11 @@ class UploadHelper
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param integer $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateUrlUpload($urlData, $folderName, $fileDescription,
-    $isPublic, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $url = $urlData["url"];
     $name = $urlData["name"];
@@ -442,6 +456,7 @@ class UploadHelper
     $symfonyRequest->request->set($this->uploadUrlPage::GETURL_PARAM, $url);
     $symfonyRequest->request->set($this->uploadUrlPage::LEVEL_PARAM,
       $maxRecursionDepth);
+    $symfonyRequest->request->set('globalDecisions', $applyGlobal);
     $symfonyRequest->request->set('scm', $ignoreScm);
 
     return $this->uploadUrlPage->handleRequest($symfonyRequest);
@@ -454,10 +469,11 @@ class UploadHelper
    * @param string  $fileDescription Description of the upload
    * @param string  $isPublic        Upload is `public, private or protected`
    * @param integer $ignoreScm       1 if the SCM should be ignored.
+   * @param integer $applyGlobal     1 if global decisions should be applied.
    * @return array Array with status, message and upload id
    */
   private function generateSrvUpload($srvData, $folderName, $fileDescription,
-    $isPublic, $ignoreScm)
+    $isPublic, $ignoreScm, $applyGlobal)
   {
     $path = $srvData["path"];
     $name = $srvData["name"];
@@ -479,6 +495,7 @@ class UploadHelper
     $symfonyRequest->request->set($this->uploadSrvPage::SOURCE_FILES_FIELD,
       $path);
     $symfonyRequest->request->set($this->uploadSrvPage::NAME_PARAM, $name);
+    $symfonyRequest->request->set('globalDecisions', $applyGlobal);
     $symfonyRequest->request->set('scm', $ignoreScm);
 
     return $this->uploadSrvPage->handleRequest($symfonyRequest);
