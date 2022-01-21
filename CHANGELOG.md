@@ -1,5 +1,75 @@
 # Changelog of FOSSology
 
+### 4.0.0 (Jan 20th 2022)
+
+This release adds important corrections to
+[4.0.0-rc1](https://github.com/fossology/fossology/releases/tag/4.0.0-rc1)
+
+The release 4.0.0 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+* Add new report format CSV.
+* Option to make user details read-only
+* Make global decisions configurable while upload
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `734f439e4` fix(reportImport): Fix interfaces in report import
+* `bc70462a8` fix(ui): Fix bulk modal with selectable bg
+* `d4f32b865` fix(reports) fix CSV report action title
+* `1287c5723` Fix merge errors
+
+#### Features
+
+* `574c13d1c` feat(reports): fix indent errors
+* `2550919a2` feat(reports): Add new CSV report type
+* `df3573982` feat(nomos): See file regex to include view
+* `44acd2029` feat(nomos): New see-url pattern
+* `01273ae78` feat(users) Add option to make user details read-only
+* `306260bfc` feat(reports) Fix DEP5 report menu entry
+* `144875921` feat(reports): change report names in drop down menu
+* `a778c5f68` feat(upload): make global decisions configurable
+* `f1c4ed4fa` Add option to make user details read-only
+
+#### Infrastructure
+
+* `0afbb8fe5` chore(cd): Continue release build on failure
+* `ff3b7d63a` Update src/www/ui/async/AjaxShowJobs.php
+* `ec0a26956` Revert "fix(login): Allow non-admin user to update"
+* `5596f78d7` Revert "Add option to make user details read-only"
+* `e063beda2` Revert "Fix merge errors"
+* `a07ccd939` Merge all GDPR related work
+
 ### 4.0.0-rc1 (Dec 21st 2021)
 
 This release adds important corrections to
