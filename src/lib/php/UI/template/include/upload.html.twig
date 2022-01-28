@@ -26,7 +26,7 @@
         <div class="form-group">
           <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded files'| trans }}:</label>
             <br/>
-            {% include 'components/select-folder.html.twig' with {'name': folderParameterName} %}
+            {% include 'components/select-folder.html.twig' with {'name': folderParameterName, 'id': 'uploadFolderSelector'} %}
         </div>
       </li>
       {% block fileselect %}

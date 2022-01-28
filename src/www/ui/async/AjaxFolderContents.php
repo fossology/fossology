@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- * Copyright (C) 2015 Siemens AG
+ * Copyright (C) 2015,2022 Siemens AG
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@ namespace Fossology\UI\Ajax;
 
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\FolderDao;
+use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,24 +30,33 @@ class AjaxFolderContents extends DefaultPlugin
 {
   const NAME = "foldercontents";
 
+  /**
+   * @var FolderDao $folderDao
+   * FolderDao object
+   */
+  private $folderDao;
+
   function __construct()
   {
     parent::__construct(self::NAME, array(
         self::PERMISSION => Auth::PERM_WRITE
     ));
+    $this->folderDao = $this->getObject('dao.folder');
   }
 
   protected function handle(Request $request)
   {
     $folderId = intval($request->get('folder'));
-    /* @var $folderDao FolderDao */
-    $folderDao = $this->getObject('dao.folder');
+    $uploadName = $request->get('upload');
+    if (!empty($uploadName)) {
+      return $this->uploadExists(Auth::getGroupId(), $folderId, $uploadName);
+    }
     $results = array();
-    $childFolders = $folderDao->getFolderChildFolders($folderId);
+    $childFolders = $this->folderDao->getFolderChildFolders($folderId);
     foreach ($childFolders as $folder) {
       $results[$folder['foldercontents_pk']] = '/'.$folder['folder_name'];
     }
-    $childUploads = $folderDao->getFolderChildUploads($folderId, Auth::getGroupId());
+    $childUploads = $this->folderDao->getFolderChildUploads($folderId, Auth::getGroupId());
     foreach ($childUploads as $upload) {
       $uploadStatus = new UploadStatus();
       $uploadDate = explode(".",$upload['upload_ts'])[0];
@@ -59,13 +69,48 @@ class AjaxFolderContents extends DefaultPlugin
     }
 
     $filterResults = array();
-    foreach ($folderDao->getRemovableContents($folderId) as $content) {
+    foreach ($this->folderDao->getRemovableContents($folderId) as $content) {
       $filterResults[$content] = $results[$content];
     }
     if (empty($filterResults)) {
       $filterResults["-1"] = "No removable content found";
     }
     return new JsonResponse($filterResults);
+  }
+
+  /**
+   * Check if upload with given name exists in given folder.
+   *
+   * @param int $groupId       Relevant group id
+   * @param int $folderId      Folder to search in
+   * @param string $uploadName Upload name to search
+   *
+   * @return JsonResponse Json response with upload id in `upload` key and
+   *                      upload date in `date` key. Upload will be false
+   *                      and date will be null if not found.
+   */
+  private function uploadExists($groupId, $folderId, $uploadName)
+  {
+    $childUploads = $this->folderDao->getFolderChildUploads($folderId, $groupId);
+    $found = false;
+    $date = null;
+    foreach ($childUploads as $upload) {
+      if (strcasecmp($upload['upload_filename'], $uploadName) === 0) {
+        $found = $upload['upload_pk'];
+        $date = Convert2BrowserTime($upload['upload_ts']);
+        break;
+      }
+    }
+    if ($found) {
+      /**
+       * @var UploadDao $uploadDao
+       * UploadDao object
+       */
+      $uploadDao = $this->getObject('dao.upload');
+      $parent = $uploadDao->getUploadParent($found);
+      $found = tracebackTotalUri() . "?mod=browse&upload=$found&item=$parent";
+    }
+    return new JsonResponse(["upload" => $found, "date" => $date]);
   }
 }
 
