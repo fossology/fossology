@@ -33,6 +33,16 @@ $(document).ready(function () {
       $(this).css('height', '');
     }
   });
+
+  $("#markDecisionAdd").click(function() {
+    var decision = $("#markDecision").val();
+    return markDecisions(decision, false);
+  });
+
+  $("#markDecisionRemove").click(function() {
+    var decision = $("#removeDecision").val();
+    return markDecisions(decision, true);
+  });
 });
 
 $("#textModal").on('show.bs.modal', function (e) {
@@ -66,13 +76,15 @@ function loadBulkHistoryModal() {
 }
 
 function openUserModal(uploadTreeId) {
-  userModal = $('#userModal').modal('hide');
+  userModal = $('#userModal').modal({"show": false});
+  userModal.modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  userModal.toggle();
+  $("#bulkIdResult").hide();
+  userModal.modal('show');
 }
 
 function closeUserModal() {
-  userModal.hide();
+  userModal.modal('hide');
 }
 
 function openClearingHistoryDataModal(uploadTreeId) {
@@ -93,34 +105,12 @@ function scheduleBulkScan() {
 function performPostRequest(doRemove) {
   removed = doRemove;
   performPostRequestCommon($('#bulkIdResult'), function () {
-      location.reload();
+    location.reload();
   });
 }
 
-function performPostRequestTree(permVal) {
-  var decisionToBeApplied = "";
-  var checkedRadio = $("input[type='radio']:checked");
-
-  if ($('#licenseRight option').length > 0) {
-    performPostRequest(permVal);
-    return false;
-  }
-  resultEntity = $('#bulkIdResult');
-  $.ajax({
-    type: "POST",
-    url: "?mod=change-license-processPost",
-    data: data,
-    success: function (data) { location.reload(); },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
-  });
-
-  if (checkedRadio.length > 0) {
-    return markDecisions(checkedRadio.val(), permVal);
-  }
-}
-
-function markDecisions(decisionToBeApplied, permVal) {
-  if (permVal == true) {
+function markDecisions(decisionToBeApplied, isRemoval) {
+  if (isRemoval == true) {
     var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
     if (pleaseConfirm == false) {
       return false;
@@ -129,20 +119,18 @@ function markDecisions(decisionToBeApplied, permVal) {
   var data = {
     "uploadTreeId": $('#uploadTreeId').val(),
     "decisionMark": decisionToBeApplied,
-    "isRemoval": permVal
+    "isRemoval": isRemoval
   };
   resultEntity = $('#bulkIdResult');
-    var txt;
-    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
-  if (pleaseConfirm == true) {
-    $.ajax({
-      type: "POST",
-      url: "?mod=change-license-processPost",
-      data: data,
-      success: function (data) { location.reload(); },
-      error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
-      });
-  }
+  $.ajax({
+    type: "POST",
+    url: "?mod=change-license-processPost",
+    data: data,
+    success: function (data) { location.reload(); },
+    error: function(responseobject) {
+      bootstrapAlertError(responseobject, resultEntity);
+    }
+  });
 }
 
 function cleanText() {

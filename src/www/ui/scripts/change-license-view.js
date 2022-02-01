@@ -42,7 +42,7 @@ $('#bulkModal').on('shown.bs.modal', function () {
   $('#bulkModal').css({'width': 'fit-content', 'margin': '0 auto'});
 });
 
-function openUserModal() {
+function openUserDecisionModal() {
   $('#bulkModal').hide();
   $('#ClearingHistoryDataModal').hide();
   $('#userModal').toggle();
