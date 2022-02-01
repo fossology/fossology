@@ -47,13 +47,26 @@
       <legend style="width:auto;">
         {{ 'Clearing decision type'| trans }}
       </legend>
-      <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" />
-      {{ 'No license known'| trans }}
-      <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/></img>
+      <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="2" id="clearingType0" />
+      <label for="clearingType0">{{ 'No license known'| trans }}</label>
+      <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Even after review, no license relevant information can be determined'|trans }}" alt="" class="info-bullet"/>
       {% for typeKey,typeText in clearingTypes %}
-        <br/>
-        <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}"
-        {% if typeKey==selectedClearingType %}checked="checked"{% endif %}/> {{ typeText }}<img src="images/info_16.png" data-toggle="tooltip" {% if typeKey==3 %} title="{{ 'Mark the file for having had a look at it, but a clearing result cannot be determined at the current time'|trans }}" {% elseif typeKey==4 %} title="{{ 'There is license relevant information, but this is not relevant information for the clearing of this file (for example, files that are not used at all and also not distributed)'|trans }}" {% elseif typeKey ==5 %} title="{{ 'This setting considers the selection of the licenses shown in the table below to create a clearing result.'|trans }}" {% elseif typeKey ==6 %} title="{{ 'There may be license relevant information but this particular file should not be considered as part of actual source code (for example, excluded from distributed solution).'|trans}} " {% endif %} alt="" class="info-bullet"/>
+        <br />
+        <input type="radio" class="info-bullet view-license-rc-size" name="clearingTypes" value="{{ typeKey }}" id="clearingType{{ typeKey }}"
+        {% if typeKey == selectedClearingType %}checked="checked"{% endif %}/>
+        <label for="clearingType{{ typeKey }}">{{ typeText }}</label>
+        <img src="images/info_16.png" data-toggle="tooltip"
+          {%- if typeKey == 3 ~%}
+            title="{{ 'Mark the file for having had a look at it, but a clearing result cannot be determined at the current time'|trans }}"
+          {%- elseif typeKey == 4 ~%}
+            title="{{ 'There is license relevant information, but this is not relevant information for the clearing of this file (for example, files that are not used at all and also not distributed)'|trans }}"
+          {%- elseif typeKey == 5 ~%}
+            title="{{ 'This setting considers the selection of the licenses shown in the table below to create a clearing result.'|trans }}"
+          {%- elseif typeKey == 6 ~%}
+            title="{{ 'There may be license relevant information but this particular file should not be considered as part of actual source code (for example, transient binary files, .dll).'|trans}}"
+          {%- elseif typeKey == 7 ~%}
+            title="{{ 'There may be license relevant information but this particular file is not distributed but used by source (for example, build config, documentation, unit test, example files).'|trans}}"
+          {%- endif %} alt="" class="info-bullet"/>
       {% endfor %}
     </fieldset>
   </div>
@@ -70,7 +83,7 @@
     file.
     '| trans }}
   {% else %}
-    <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-default btn-sm" onclick="openUserModal();">
+    <button type="button" data-toggle="modal" data-target="#userModal" class="btn btn-default btn-sm" onclick="openUserDecisionModal();">
       {{ 'User Decision ...'| trans }}
     </button><img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Add manually a license that is not found by scanners or bulk'|trans }}" alt="" class="info-bullet"/>
     &nbsp;

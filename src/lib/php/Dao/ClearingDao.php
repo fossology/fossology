@@ -795,7 +795,7 @@ INSERT INTO clearing_decision (
    * @param int $groupId
    * @param int $userId
    */
-  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $isRemoval, $decisionMark)
+  public function markDirectoryAsDecisionType(ItemTreeBounds $itemTreeBounds, $groupId, $userId, $decisionMark)
   {
     $decisionMark = $this->getDecisionType($decisionMark);
     $this->markDirectoryAsDecisionTypeRec($itemTreeBounds, $groupId, $userId, false, $decisionMark);
