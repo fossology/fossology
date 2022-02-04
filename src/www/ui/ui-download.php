@@ -204,7 +204,7 @@ class ui_download extends FO_Plugin
   /**
    * @global type $container
    * @param type $path
-   * @param type $filename
+   * @param string $filename
    * @return BinaryFileResponse
    */
   protected function downloadFile($path, $filename)
@@ -220,7 +220,11 @@ class ui_download extends FO_Plugin
     $response = new BinaryFileResponse($path);
     $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, $filenameFallback);
     if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx') {
-      $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
+      $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    } elseif (pathinfo($filename, PATHINFO_EXTENSION) == 'rdf') {
+      $response->headers->set('Content-Type', 'application/xml');
+    } else {
+      $response->headers->set('Content-Type', 'text/plain');
     }
 
     $logger = $container->get("logger");

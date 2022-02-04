@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2021
+# Copyright (C) Siemens AG 2017-2022
 # Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.4.1
+  version: 1.4.2
   contact:
     email: fossology@fossology.org
   license:
@@ -1174,7 +1174,11 @@ paths:
               schema:
                 type: string
                 format: binary
-            application/zip:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+            application/xml:
               schema:
                 type: string
                 format: binary
