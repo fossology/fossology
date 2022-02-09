@@ -573,7 +573,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
         'vcs', false])
-      ->andReturn([true, '', '', 20]);
+      ->andReturn([true, '', '', [20]]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
@@ -690,7 +690,7 @@ class UploadControllerTest extends \PHPUnit\Framework\TestCase
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
         'vcs', false])
-      ->andReturn([false, $errorMessage, $errorDesc, -1]);
+      ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')

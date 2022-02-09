@@ -390,7 +390,7 @@ class UploadController extends RestController
         $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
       } else {
-        $uploadId = $uploadResponse[3];
+        $uploadId = $uploadResponse[3][0];
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }
       return $response->withJson($info->getArray(), $info->getCode());

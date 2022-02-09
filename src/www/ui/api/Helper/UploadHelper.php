@@ -26,6 +26,7 @@
 namespace Fossology\UI\Api\Helper;
 
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadFilePage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadVcsPage;
 use Fossology\UI\Api\Helper\UploadHelper\HelperToUploadUrlPage;
@@ -152,7 +153,7 @@ class UploadHelper
   /**
    * Create request required by UploadFilePage
    *
-   * @param array $uploadedFile Uploaded file object by Slim
+   * @param UploadedFileInterface $uploadedFile Uploaded file object by Slim
    * @param string $folderId    ID of the folder to upload the file
    * @param string $fileDescription Description of file uploaded
    * @param string $isPublic    Upload is `public, private or protected`
@@ -176,10 +177,11 @@ class UploadHelper
 
     $symfonyRequest->request->set($this->uploadFilePage::FOLDER_PARAMETER_NAME,
       $folderId);
-    $symfonyRequest->request->set($this->uploadFilePage::DESCRIPTION_INPUT_NAME,
-      $fileDescription);
+    $symfonyRequest->request->set(
+      $this->uploadFilePage::DESCRIPTION_INPUT_NAME,
+      [$fileDescription]);
     $symfonyRequest->files->set($this->uploadFilePage::FILE_INPUT_NAME,
-      $symfonyFile);
+      [$symfonyFile]);
     $symfonyRequest->setSession($symfonySession);
     $symfonyRequest->request->set(
       $this->uploadFilePage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
