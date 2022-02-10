@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2015,2022 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -19,7 +19,7 @@
 <li>
   <div class="form-group">
     <label for="{{ fileInputName }}">{{ 'Select the file to upload'| trans }}:</label>
-    <input type="file" class="form-control-file" name="{{ fileInputName }}">
+    <input type="file" class="form-control-file" name="{{ fileInputName }}" id="fileUploader">
   </div>
 </li>
 {% endblock %}
@@ -27,4 +27,35 @@
 {% block uploadText %}
   <div class="form-group" style="margin-left:2%	;">
     <label for="pText">{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}</label>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    $(document).ready(function () {
+      $('#fileUploader').change(function(e) {
+        var uploadName = e.target.files[0].name;
+        var folderId = $("#uploadFolderSelector").val();
+        $.ajax({
+          url : '?mod=foldercontents',
+          type : 'post',
+          dataType : 'json',
+          data : {"folder": folderId, "upload": uploadName},
+          success : function(data) {
+            if (data.upload !== false) {
+              var message = `Same file was uploaded at ${data.date}. ` +
+                `<a href='${data.upload}' target="blank">` +
+                'Click here to check the upload</a>.';
+              $('#fileUploader').popover({
+                "content": message, "html": true, "title": "Warning!",
+                "placement": "top", "trigger": "focus"
+              }).popover('show');
+            } else {
+              $('#fileUploader').popover('dispose');
+            }
+          }
+        });
+      });
+    });
+  </script>
 {% endblock %}
