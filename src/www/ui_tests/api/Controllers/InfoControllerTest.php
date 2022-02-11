@@ -115,6 +115,22 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
     foreach ($yamlDocArray["security"] as $secMethod) {
       $security[] = key($secMethod);
     }
+    $GLOBALS["SysConf"] = [
+      "BUILD" => [
+        "VERSION" => "1.0.0",
+        "BRANCH" => "tree",
+        "COMMIT_HASH" => "deadbeef",
+        "COMMIT_DATE" => "2022/01/01 00:01 +05:30",
+        "BUILD_DATE" => "2022/01/01 00:02 +05:30"
+      ]
+    ];
+    $fossInfo = [
+      "version"    => "1.0.0",
+      "branchName" => "tree",
+      "commitHash" => "deadbeef",
+      "commitDate" => "2021-12-31T18:31:00+00:00",
+      "buildDate"  => "2021-12-31T18:32:00+00:00"
+    ];
     $expectedResponse = (new Response())->withJson(array(
       "name" => $apiTitle,
       "description" => $apiDescription,
@@ -124,7 +140,8 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
       "license" => [
         "name" => $apiLicense["name"],
         "url" => $apiLicense["url"]
-      ]
+      ],
+      "fossology" => $fossInfo
     ), 200);
     $actualResponse = $this->infoController->getInfo(null, new Response(),
       []);
