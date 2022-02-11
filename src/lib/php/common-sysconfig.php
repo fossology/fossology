@@ -1,6 +1,7 @@
 <?php
 /***********************************************************
  Copyright (C) 2011-2015 Hewlett-Packard Development Company, L.P.
+ Copyright (C) 2021 Siemens AG
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -62,9 +63,6 @@ define("CONFIG_TYPE_BOOL", 6);
  * \param[out] array &$SysConf Configuration variable array (updated by this function)
  * \param boolean $exitOnDbFail Do an exit() if can't connect to DB?
  *
- * If the sysconfig table doesn't exist then create it.
- * Write records for the core variables into sysconfig table.
- *
  * The first array dimension of $SysConf is the group, the second is the variable name.
  * For example:
  *  -  $SysConf[SYSCONFIG][LogoLink] => "http://my/logo.gif"
@@ -79,6 +77,23 @@ function ConfigInit($sysconfdir, &$SysConf, $exitOnDbFail=true)
 {
   global $PG_CONN;
 
+  $PG_CONN = get_pg_conn($sysconfdir, $SysConf, $exitOnDbFail);
+
+  populate_from_sysconfig($PG_CONN, $SysConf);
+} // ConfigInit()
+
+/**
+ * Parse the VERSION file and Db.conf and initialize respective keys in SysConf
+ *
+ * The function also opens the connection to Postgres DB and return the object.
+ * \param string $sysconfdir Path to SYSCONFDIR
+ * \param[in,out] array $SysConf Configuration variable array
+ * \param boolean $exitOnDbFail Do an exit() if can't connect to DB?
+ *
+ * \returns resource Postgres connection resource
+ */
+function get_pg_conn($sysconfdir, &$SysConf, $exitOnDbFail=true)
+{
   /*************  Parse VERSION *******************/
   $versionFile = "{$sysconfdir}/VERSION";
   $versionConf = parse_ini_file($versionFile, true);
@@ -112,98 +127,37 @@ function ConfigInit($sysconfdir, &$SysConf, $exitOnDbFail=true)
    * Connect to the database.  If the connection fails,
    * DBconnect() will print a failure message and exit.
    */
-  $PG_CONN = DBconnect($sysconfdir, "", $exitOnDbFail);
+  $pg_conn = DBconnect($sysconfdir, "", $exitOnDbFail);
 
-  if (! $exitOnDbFail && ($PG_CONN === null || $PG_CONN === false)) {
+  if (! $exitOnDbFail && ($pg_conn === null || $pg_conn === false)) {
     return -1;
   }
 
   global $container;
-  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($PG_CONN);
+  $postgresDriver = new \Fossology\Lib\Db\Driver\Postgres($pg_conn);
   $container->get('db.manager')->setDriver($postgresDriver);
 
-  /**************** read/create/populate the sysconfig table *********/
-  /* create if sysconfig table if it doesn't exist */
-  $newTable  = Create_sysconfig();
-  $newColumn = Create_option_value();
+  return $pg_conn;
+}
 
-  /* populate it with core variables */
-  Populate_sysconfig();
-
+/**
+ * Populate SysConf array with sysconfig DB table.
+ *
+ * \param resource $conn Connection to Postgres
+ * \param[in,out] array $SysConf Configuration variable array
+ */
+function populate_from_sysconfig($conn, &$SysConf)
+{
   /* populate the global $SysConf array with variable/value pairs */
   $sql = "SELECT variablename, conf_value FROM sysconfig;";
-  $result = pg_query($PG_CONN, $sql);
+  $result = pg_query($conn, $sql);
   DBCheckResult($result, $sql, __FILE__, __LINE__);
 
   while ($row = pg_fetch_assoc($result)) {
     $SysConf['SYSCONFIG'][$row['variablename']] = $row['conf_value'];
   }
   pg_free_result($result);
-
-  return;
-} // ConfigInit()
-
-
-/**
- * \brief Create the sysconfig table.
- *
- * \return 0 if table already exists.
- * 1 if it was created
- */
-function Create_sysconfig()
-{
-  global $PG_CONN;
-
-  /* If sysconfig exists, then we are done */
-  $sql = "SELECT typlen  FROM pg_type WHERE typname='sysconfig' limit 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $numrows = pg_num_rows($result);
-  pg_free_result($result);
-  if ($numrows > 0) {
-    return 0;
-  }
-
-  /* Create the sysconfig table */
-  $sql = "
-CREATE TABLE sysconfig (
-    sysconfig_pk serial NOT NULL PRIMARY KEY,
-    variablename character varying(30) NOT NULL UNIQUE,
-    conf_value text,
-    ui_label character varying(60) NOT NULL,
-    vartype int NOT NULL,
-    group_name character varying(20) NOT NULL,
-    group_order int,
-    description text NOT NULL,
-    validation_function character varying(40) DEFAULT NULL,
-    option_value text DEFAULT NULL
-);
-";
-
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-
-  /* Document columns */
-  $sql = "
-COMMENT ON TABLE sysconfig IS 'System configuration values';
-COMMENT ON COLUMN sysconfig.variablename IS 'Name of configuration variable';
-COMMENT ON COLUMN sysconfig.conf_value IS 'value of config variable';
-COMMENT ON COLUMN sysconfig.ui_label IS 'Label that appears on user interface to prompt for variable';
-COMMENT ON COLUMN sysconfig.group_name IS 'Name of this variables group in the user interface';
-COMMENT ON COLUMN sysconfig.group_order IS 'The order this variable appears in the user interface group';
-COMMENT ON COLUMN sysconfig.description IS 'Description of variable to document how/where the variable value is used.';
-COMMENT ON COLUMN sysconfig.validation_function IS 'Name of function to validate input. Not currently implemented.';
-COMMENT ON COLUMN sysconfig.vartype IS 'variable type.  1=int, 2=text, 3=textarea, 4=password, 5=dropdown';
-COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, provide options in format op1{val1}|op2{val2}|...';
-    ";
-  /* this is a non critical update */
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  pg_free_result($result);
-  return 1;
 }
-
 
 /**
  * \brief Populate the sysconfig table with core variables.
@@ -554,82 +508,6 @@ function Populate_sysconfig()
     }
     unset($VarRec);
   }
-}
-
-/**
- * \brief Create the option_value column in sysconfig table.
- *
- * \return 0 if column already exists.
- * 1 if it was created
- */
-function Create_option_value()
-{
-  global $PG_CONN;
-
-  /* If sysconfig exists, then we are done */
-  $sql = "SELECT column_name, data_type FROM information_schema.columns WHERE "
-       . "table_name='sysconfig' and column_name='option_value' limit 1;";
-  $result = pg_query($PG_CONN, $sql);
-  DBCheckResult($result, $sql, __FILE__, __LINE__);
-  $numrows = pg_num_rows($result);
-  $rows = pg_fetch_assoc($result);
-  pg_free_result($result);
-  if ($numrows > 0) {
-    if ($rows['data_type'] == 'text') {
-      return 0;
-    }
-  }
-
-  if ($numrows < 1) {
-    /* Create the option_value column */
-    $sql = "ALTER TABLE sysconfig ADD COLUMN option_value text DEFAULT NULL;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-    /* Document columns */
-    $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
-         . "provide options in format op1{val1}|op2{val2}|...';";
-    /* this is a non critical update */
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-    return 1;
-  }
-
-  /* Column exists but with old data type */
-  pg_query($PG_CONN, "BEGIN;");
-
-  try {
-    $sql = "ALTER TABLE sysconfig RENAME COLUMN option_value TO old_option_value;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    $sql = "ALTER TABLE sysconfig ADD COLUMN option_value text DEFAULT NULL;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    $sql = "COMMENT ON COLUMN sysconfig.option_value IS 'If vartype is 5, "
-      . "provide options in format op1{val1}|op2{val2}|...';";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    $sql = "UPDATE sysconfig SET option_value = old_option_value;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-
-    $sql = "ALTER TABLE sysconfig DROP COLUMN old_option_value;";
-    $result = pg_query($PG_CONN, $sql);
-    DBCheckResult($result, $sql, __FILE__, __LINE__);
-    pg_free_result($result);
-  } catch (\Exception $e) {
-    pg_query($PG_CONN, "ROLLBACK;");
-    throw $e;
-  }
-  pg_query($PG_CONN, "COMMIT;");
 }
 
 /**
