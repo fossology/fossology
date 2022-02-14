@@ -264,6 +264,13 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     $('#selectFromNoticeFile').css('display','none');
   }
 
+  if (what == 2 || what === 'reportinfo') {
+    // clicked to add button to display child modal
+    $('#clearText').css('display','inline-block');
+  } else {
+    $('#clearText').css('display','none');
+  }
+
   if(type == 0) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
@@ -293,6 +300,12 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
 
 function closeTextModal() {
   textModal.modal('hide');
+}
+
+function cleanTextModal() {
+  var textAreaValue = document.getElementById("referenceText").value;
+  textAreaValue = textAreaValue.replace(/,/g, '');
+  document.getElementById("referenceText").value = textAreaValue;
 }
 
 function ApplyNoticeText(idx)
