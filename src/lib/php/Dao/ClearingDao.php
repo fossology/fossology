@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014-2018,2020, Siemens AG
+Copyright (C) 2014-2018,2020,2022, Siemens AG
 Author: Johannes Najjar
 
 This program is free software; you can redistribute it and/or
@@ -357,7 +357,7 @@ class ClearingDao
     $uploadTreeTable = $this->uploadDao->getUploadtreeTableName($uploadId);
     $itemTreeBounds = $this->uploadDao->getItemTreeBounds($uploadTreeId, $uploadTreeTable);
 
-    if ($this->isDecisionIrrelevant($uploadTreeId, $groupId)) {
+    if ($this->isDecisionCheck($uploadTreeId, $groupId, DecisionTypes::IRRELEVANT)) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'rollback');
     } else if ($decType == DecisionTypes::IRRELEVANT) {
       $this->copyrightDao->updateTable($itemTreeBounds, '', '', $userId, 'copyright', 'delete', '2');
@@ -618,62 +618,33 @@ INSERT INTO clearing_decision (
     $this->dbManager->freeResult($res);
   }
 
-  public function isDecisionWip($uploadTreeId, $groupId)
+  /**
+   * @param int $uploadTreeId
+   * @param int $groupId
+   * @param Char $decisionType
+   */
+  public function isDecisionCheck($uploadTreeId, $groupId, $decisionType)
   {
-    $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND group_fk = $2 ORDER BY date_added DESC LIMIT 1";
-    $latestDec = $this->dbManager->getSingleRow($sql,
-                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
-    if ($latestDec === false) {
-      return false;
+    $columns = "decision_type";
+    if (!in_array($decisionType,
+         [DecisionTypes::WIP, DecisionTypes::TO_BE_DISCUSSED,
+          DecisionTypes::DO_NOT_USE, DecisionTypes::IRRELEVANT])
+       ) {
+      $columns = "decision_type, scope";
     }
-    return ($latestDec['decision_type'] == DecisionTypes::WIP);
-  }
-
-  public function isDecisionTBD($uploadTreeId, $groupId)
-  {
-    $sql = "SELECT decision_type FROM clearing_decision WHERE uploadtree_fk=$1 AND group_fk = $2 ORDER BY date_added DESC LIMIT 1";
-    $latestDec = $this->dbManager->getSingleRow($sql,
-                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
-    if ($latestDec === false) {
-      return false;
-    }
-    return ($latestDec['decision_type'] == DecisionTypes::TO_BE_DISCUSSED);
-  }
-
-  public function isDecisionDNU($uploadTreeId, $groupId)
-  {
-    $sql = "SELECT decision_type FROM clearing_decision
+    $sql = "SELECT $columns FROM clearing_decision
               WHERE uploadtree_fk=$1 AND group_fk = $2
             ORDER BY clearing_decision_pk DESC LIMIT 1";
     $latestDec = $this->dbManager->getSingleRow($sql,
                  array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
+
     if ($latestDec === false) {
       return false;
+    } else if ($decisionType != "") {
+      return ($latestDec['decision_type'] == $decisionType);
+    } else {
+      return $latestDec;
     }
-    return ($latestDec['decision_type'] == DecisionTypes::DO_NOT_USE);
-  }
-
-  public function getClearingType($uploadTreeId, $groupId, $type)
-  {
-    $sql = "SELECT decision_type, scope FROM clearing_decision
-              WHERE uploadtree_fk=$1 AND group_fk = $2
-            ORDER BY clearing_decision_pk DESC LIMIT 1";
-    $latestDec = $this->dbManager->getSingleRow($sql,
-                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
-    return $latestDec;
-  }
-
-  public function isDecisionIrrelevant($uploadTreeId, $groupId)
-  {
-    $sql = "SELECT decision_type FROM clearing_decision
-              WHERE uploadtree_fk=$1 AND group_fk = $2
-            ORDER BY clearing_decision_pk DESC LIMIT 1";
-    $latestDec = $this->dbManager->getSingleRow($sql,
-                 array($uploadTreeId, $groupId), $sqlLog = __METHOD__);
-    if ($latestDec === false) {
-      return false;
-    }
-    return ($latestDec['decision_type'] == DecisionTypes::IRRELEVANT);
   }
 
   /**

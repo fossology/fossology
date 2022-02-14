@@ -33,6 +33,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Data\DecisionTypes;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -414,11 +415,11 @@ class AjaxExplorer extends DefaultPlugin
     }
 
     // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
-    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
+    $isDecisionTBD = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::TO_BE_DISCUSSED);
     $img = $isDecisionTBD ? 'yellow' : $img;
 
     // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
-    $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
+    $isDecisionDNU = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::DO_NOT_USE);
     $img = $isDecisionDNU ? 'redGreen' : $img;
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
   }
