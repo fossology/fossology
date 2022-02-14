@@ -31,12 +31,14 @@
       </li>
       {% block fileselect %}
       {% endblock %}
+      {% block filedescription %}
       <li>
         <div class="form-group">
           <label for="{{ fileInputName }}">({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:</label>
           <input type="text" class="form-control" style="width:40%;" name="{{ descriptionInputName }}" value="{{ descriptionInputValue }}">
         </div>
       </li>
+      {% endblock %}
       <li>
         <div class="form-group">
           <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="globalDecisions" value="1"/>
