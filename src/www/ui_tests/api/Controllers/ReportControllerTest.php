@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- * Copyright (C) 2020 Siemens AG
+ * Copyright (C) 2020-2021 Siemens AG
  * Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -24,6 +24,7 @@
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Mockery as M;
+use Fossology\CliXml\CliXmlGeneratorUi;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
@@ -56,7 +57,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     'spdx2',
     'spdx2tv',
     'readmeoss',
-    'unifiedreport'
+    'unifiedreport',
+    'clixml'
   );
 
   /**
@@ -94,6 +96,12 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
    * ReadMeOssPlugin mock
    */
   private $readmeossPlugin;
+
+  /**
+   * @var M\MockInterface $clixmlPlugin
+   * CLIXMLPlugin mock
+   */
+  private $clixmlPlugin;
 
   /**
    * @var M\MockInterface $unifiedPlugin
@@ -135,6 +143,7 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->uploadDao = M::mock(UploadDao::class);
     $this->spdxPlugin = M::mock(SpdxTwoGeneratorUi::class);
     $this->readmeossPlugin = M::mock('ReadMeOssPlugin');
+    $this->clixmlPlugin = M::mock(CliXmlGeneratorUi::class);
     $this->unifiedPlugin = M::mock('FoUnifiedReportGenerator');
     $this->downloadPlugin = M::mock('ui_download');
 
@@ -148,6 +157,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(array('ui_spdx2'))->andReturn($this->spdxPlugin);
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('ui_readmeoss'))->andReturn($this->readmeossPlugin);
+    $this->restHelper->shouldReceive('getPlugin')
+      ->withArgs(array('ui_clixml'))->andReturn($this->clixmlPlugin);
     $this->restHelper->shouldReceive('getPlugin')
       ->withArgs(array('download'))->andReturn($this->downloadPlugin);
     $this->restHelper->shouldReceive('getPlugin')
@@ -252,6 +263,8 @@ class ReportControllerTest extends \PHPUnit\Framework\TestCase
     $this->readmeossPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
     $this->unifiedPlugin->shouldReceive('scheduleAgent')
+      ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
+    $this->clixmlPlugin->shouldReceive('scheduleAgent')
       ->withArgs([$this->groupId, $upload])->andReturn([32, 33, ""]);
 
     $expectedResponse = new Info(201, "localhost/api/v1/report/32",

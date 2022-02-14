@@ -1127,6 +1127,7 @@ paths:
               - spdx2tv
               - readmeoss
               - unifiedreport
+              - clixml
         - name: groupName
           description: The group name to chose while generating a report
           in: header

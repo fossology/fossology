@@ -306,6 +306,18 @@ Description: architecture for analyzing software, OSS readme generator
  .
  This package contains the readmeoss agent programs and their resources.
 
+Package: fossology-clixml
+Architecture: any
+Depends: fossology-common, php-uuid, ${misc:Depends}
+Description: architecture for analyzing software, XML based report generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the clixml agent programs and their resources.
+
 Package: fossology-unifiedreport
 Architecture: any
 Depends: fossology-common, php-zip, php-xml, ${misc:Depends}

@@ -176,6 +176,8 @@ install/fossdash/fossdash-publish.py
 src/reso/agent/version.php
 src/reso/agent/reso
 src/www/ui/css/bootstrap/
+src/clixml/agent/version.php
+src/clixml/agent/clixml
 
 # Add all the Ubuntu consol log file
 ubuntu-*
