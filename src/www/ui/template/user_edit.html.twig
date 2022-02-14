@@ -42,14 +42,7 @@
       </tr>
       <tr class="classic">
         <th width="25%">{{ "Select the user's status."|trans }} </th>
-        {% if userStatus == "anonymized" %}          
-          <td><select disabled name="disabled" }>
-                <option value="anonymized">Anonymized</option>
-              </select>
-          </td>           
-        {% else %}
-          <td> {{ macro.select('user_status', allUserStatuses, 'user_status', userStatus) }}</td>
-        {% endif %}
+        <td>{{ macro.select('user_status', allUserStatuses, 'user_status', userStatus) }}</td>
       </tr>
       <tr class="classic">
         <th width="25%">{{ "Select the user's top-level folder. Access is restricted to this folder."|trans }}</th>

@@ -2,6 +2,8 @@
 /***********************************************************
  Copyright (C) 2014-2015, 2018 Siemens AG
  Author: Steffen Weber
+ Copyright (c) 2021-2022 Orange
+ Contributors: Piotr Pszczola, Bartlomiej Drozdz
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
