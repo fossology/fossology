@@ -1,27 +1,28 @@
+# Copyright 2021 Siemens AG, Gaurav Mishra <mishra.gaurav@siemens.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
 name: Publish Release Packages
 
 on:
-  release:
-    types:
-      - published
+  - release
 
 env:
   DEBIAN_FRONTEND: noninteractive
 
 jobs:
-  build:
+  release-build:
 
     strategy:
       matrix:
         os:
           - 'debian:buster'
           - 'debian:stretch'
+          - 'debian:bullseye'
           - 'ubuntu:bionic'
-          - 'ubuntu:xenial'
           - 'ubuntu:focal'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
+    continue-on-error: true
 
     steps:
     - name: Install git
@@ -57,7 +58,7 @@ jobs:
 
     - name: Get release info
       id: get_release
-      uses: bruceadams/get-release@v1.2.2
+      uses: bruceadams/get-release@v1.2.3
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -75,11 +76,45 @@ jobs:
 
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: actions/upload-release-asset@v1
+      uses: xresloader/upload-to-github-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        file: ${{ env.PACKAGE_NAME }}
+        overwrite: true
+        release_id: ${{ steps.get_release.outputs.id }}
+        draft: ${{ steps.get_release.outputs.draft }}
+        prerelease: ${{ steps.get_release.outputs.prerelease }}
+
+  docker-release-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 10
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Get release info
+      id: get_release
+      uses: bruceadams/get-release@v1.2.3
       env:
         GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Build and push main image
+      uses: docker/build-push-action@v2
       with:
-        upload_url: ${{ steps.get_release.outputs.upload_url }}
-        asset_path: ${{ env.PACKAGE_NAME }}
-        asset_name: ${{ env.PACKAGE_NAME }}
-        asset_content_type: application/gzip
+        push: true
+        tags: GMishx/fossology:${{ steps.get_release.outputs.tag_name }}
+        context: .

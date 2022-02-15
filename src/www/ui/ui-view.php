@@ -182,7 +182,7 @@ class ui_view extends FO_Plugin
     }
 
     $output = "";
-    $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre>');
+    $output .= ($Flowed ? '<div class="text">' : '<div class="mono"><pre style="overflow:unset;">');
 
     fseek($inputFile, $startOffset, SEEK_SET);
     $textFragment = new TextFragment($startOffset,

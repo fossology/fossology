@@ -136,7 +136,7 @@ require_once("$MODDIR/lib/php/common-sysconfig.php");
 require_once("$MODDIR/lib/php/fossdash-config.php");
 
 /* Initialize global system configuration variables $SysConfig[] */
-ConfigInit($SYSCONFDIR, $SysConf);
+$GLOBALS["PG_CONN"] = get_pg_conn($SYSCONFDIR, $SysConf);
 
 /* Initialize fossdash configuration variables */
 FossdashConfigInit($SYSCONFDIR, $SysConf);
@@ -203,6 +203,11 @@ if ($FailMsg)
   print "ApplySchema failed: $FailMsg\n";
   exit(1);
 }
+
+// Populate sysconfig table
+Populate_sysconfig();
+populate_from_sysconfig($PG_CONN, $SysConf);
+
 $Filename = "$MODDIR/www/ui/init.ui";
 $flagRemoved = !file_exists($Filename);
 if (!$flagRemoved)
@@ -391,7 +396,9 @@ if($isUpdating && (empty($sysconfig['Release']) || $sysconfig['Release'] == "3.1
 $dbManager->begin();
 $dbManager->getSingleRow("DELETE FROM sysconfig WHERE variablename=$1",array('Release'),'drop.sysconfig.release');
 $dbManager->insertTableRow('sysconfig',
-        array('variablename'=>'Release','conf_value'=>$sysconfig['Release'],'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>''));
+  array('variablename'=>'Release','conf_value'=>$SysConf["BUILD"]["VERSION"],
+  'ui_label'=>'Release','vartype'=>2,'group_name'=>'Release','description'=>'')
+);
 $dbManager->commit();
 /* email/url/author data migration to other table */
 require_once("$LIBEXECDIR/dbmigrate_copyright-author.php");

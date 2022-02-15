@@ -105,27 +105,6 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * Test is getAuthHeaders always return deprecation notice
-   */
-  public function testGetAuthHeaders()
-  {
-    $request = M::mock(Request::class);
-    $response = new Response();
-    $response = $this->authController->getAuthHeaders($request, $response,
-      array());
-
-    $warningMessage = "The resource is deprecated. Use /tokens";
-    $returnVal = new Info(406, $warningMessage, InfoType::ERROR);
-
-    $response->getBody()->seek(0);
-    $this->assertEquals($warningMessage, $response->getHeaderLine('Warning'));
-    $this->assertEquals($returnVal->getArray(),
-      json_decode($response->getBody()->getContents(), true));
-    $this->assertEquals($returnVal->getCode(), $response->getStatusCode());
-  }
-
-  /**
-   * @test
    * -# Mock the request to get a new token
    * -# Call AuthController::createNewJwtToken()
    * -# Check if response contains a new JWT token

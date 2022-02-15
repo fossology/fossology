@@ -101,7 +101,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     global $EXE_PATH;
     global $PG_CONN;
 
-    $mimeType1 = "application/x-executable";
+    $mimeType1 = "application/x-sharedlib";
     /* delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType1');";
     $result = pg_query($PG_CONN, $sql);

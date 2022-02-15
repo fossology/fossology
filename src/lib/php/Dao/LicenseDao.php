@@ -361,7 +361,7 @@ ORDER BY lft asc
     $pathStack = array($row['ufile_name']);
     $rgtStack = array($row['rgt']);
     $lastLft = $row['lft'];
-    $path = implode($pathStack,'/');
+    $path = implode('/', $pathStack);
     $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     while ($row = $this->dbManager->fetchArray($result)) {
       if (!empty($excluding) && false!==strpos("/$row[ufile_name]/", $excluding)) {
@@ -373,7 +373,7 @@ ORDER BY lft asc
       }
 
       $this->updateStackState($pathStack, $rgtStack, $lastLft, $row);
-      $path = implode($pathStack,'/');
+      $path = implode('/', $pathStack);
       $this->addToLicensesPerFileName($licensesPerFileName, $path, $row, $ignore, $clearingDecisionsForLicList);
     }
     $this->dbManager->freeResult($result);
@@ -551,16 +551,24 @@ ORDER BY lft asc
    * @param bool[] $licenseRemovals
    * @param string $refText
    * @param bool $ignoreIrrelevant Ignore irrelevant files while scanning
+   * @param string $delimiters Delimiters for bulk scan,
+   *                           null or "DEFAULT" for default values
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true, $delimiters=null)
   {
+    if (strcasecmp($delimiters, "DEFAULT") === 0) {
+      $delimiters = null;
+    } elseif ($delimiters !== null) {
+      $delimiters = StringOperation::replaceUnicodeControlChar($delimiters);
+    }
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text, ignore_irrelevant)
-      VALUES ($1,$2,$3,$4,$5) RETURNING lrb_pk",
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text, ignore_irrelevant, bulk_delimiters)
+      VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
         array($userId, $groupId, $uploadTreeId,
           StringOperation::replaceUnicodeControlChar($refText),
-          $this->dbManager->booleanToDb($ignoreIrrelevant)),
+          $this->dbManager->booleanToDb($ignoreIrrelevant),
+          $delimiters),
         __METHOD__ . '.getLrb'
     );
     if ($licenseRefBulkIdResult === false) {
@@ -679,6 +687,7 @@ ORDER BY lft asc
       if ($candidate) {
         $tableName='obligation_candidate_map';
         $sql = "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_fk, " .
+          "ob_type, ob_classification, ob_comment, " .
           "rf_shortname FROM obligation_ref " .
           "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
           "JOIN license_ref ON $tableName.rf_fk = license_ref.rf_pk " .
@@ -688,6 +697,7 @@ ORDER BY lft asc
         $conclusionmapCte = LicenseMap::getMappedLicenseRefView('$2');
         $sql = "WITH conclusionmap AS (" . $conclusionmapCte . ") " .
           "SELECT ob_pk, ob_topic, ob_text, ob_active, rf_origin AS rf_fk, " .
+          "ob_type, ob_classification, ob_comment, " .
           "lr.rf_shortname FROM obligation_ref " .
           "JOIN $tableName ON $tableName.ob_fk = obligation_ref.ob_pk " .
           "JOIN conclusionmap ON $tableName.rf_fk = conclusionmap.rf_pk " .

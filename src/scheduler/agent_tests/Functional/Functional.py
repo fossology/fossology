@@ -32,7 +32,7 @@ from xml.dom.minidom import getDOMImplementation
 from xml.dom.minidom import parseString
 from xml.dom import Node
 from optparse import OptionParser
-import ConfigParser
+import configparser
 import subprocess
 import functools
 import signal
@@ -121,7 +121,7 @@ class testsuite:
     self.defines['pids'] = {}
     
     # get variable definitions
-    for i in xrange(definitions.length):
+    for i in range(definitions.length):
       if definitions.item(i).name not in self.defines:
         self.defines[definitions.item(i).name] = self.substitute(definitions.item(i).value, defNode)
     
@@ -275,7 +275,7 @@ class testsuite:
     Returns the new action
     """
     def action_wrapper(action, node, doc, dest):
-      print '.',# node.nodeName,
+      print('.', end=' ')# node.nodeName,
       return action(node, doc, dest)
     
     if not hasattr(self, node.nodeName):
@@ -398,8 +398,8 @@ class testsuite:
     """
     dir = self.required(node, 'directory')
     
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(dir + "/fossology.conf"))
+    config = configparser.ConfigParser()
+    config.read_file(open(dir + "/fossology.conf"))
     
     self.defines["FOSSOLOGY"] = {}
     self.defines["BUILD"] = {}
@@ -408,7 +408,7 @@ class testsuite:
     self.defines["FOSSOLOGY"]["path"]  = config.get("FOSSOLOGY", "path")
     self.defines["FOSSOLOGY"]["depth"] = config.get("FOSSOLOGY", "depth")
     
-    config.readfp(open(dir + "/VERSION"))
+    config.read_file(open(dir + "/VERSION"))
     
     self.defines["BUILD"]["VERSION"] = config.get("BUILD", "VERSION")
     self.defines["BUILD"]["COMMIT_HASH"] = config.get("BUILD", "COMMIT_HASH")
@@ -448,7 +448,7 @@ class testsuite:
           tests  += ret[0]
           failed += ret[1]
     else:
-      for i in xrange(int(iterations)):
+      for i in range(int(iterations)):
         self.defines[varname] = str(i)
         for action in actions:
           ret = action(doc, dest)
@@ -598,12 +598,12 @@ class testsuite:
     tests        = 0
     totalasserts = 0
     
-    print "start up",
+    print("start up", end=' ')
     for action in self.setup:
       while action(None, None)[1] != 0:
         time.sleep(5)
     
-    print "tests",
+    print("tests", end=' ')
     for test in self.tests:
       assertions = 0
       testNode = document.createElement("testcase")
@@ -627,7 +627,7 @@ class testsuite:
       
       suiteNode.appendChild(testNode)
     
-    print " clean up",
+    print(" clean up", end=' ')
     for action in self.cleanup:
       action(None, None)
     
@@ -637,7 +637,7 @@ class testsuite:
     suiteNode.setAttribute("failures", str(failures))
     suiteNode.setAttribute("tests", str(tests))
     suiteNode.setAttribute("assertions", str(totalasserts))
-    print
+    print()
  
 ################################################################################
 ### MAIN #######################################################################
@@ -684,10 +684,10 @@ def main():
     if options.specific and suite.getAttribute("name") != options.specific:
       continue
     if suite.hasAttribute("disable"):
-      print suite.getAttribute("name"),'::','disabled'
+      print(suite.getAttribute("name"),'::','disabled')
       continue
     if options.skipLongTests and suite.hasAttribute("longest") and int(suite.getAttribute("longest"))>int(options.skipLongTests):
-      print suite.getAttribute("name"),'::','expected to run',suite.getAttribute("longest"),'time units'
+      print(suite.getAttribute("name"),'::','expected to run',suite.getAttribute("longest"),'time units')
       continue
     suiteNode = resultsDoc.createElement("testsuite")
     errors = 0
@@ -706,7 +706,7 @@ def main():
       curr.cleanup = cleanup + curr.cleanup
 
       starttime = time.time()
-      print "{0: >15} ::".format(suite.getAttribute("name")),
+      print("{0: >15} ::".format(suite.getAttribute("name")), end=' ')
       if not timeout(functools.partial(curr.performTests, suiteNode, resultsDoc, testFile.name), maxRuntime):
         errors += 1
         errorNode = resultsDoc.createElement("error")

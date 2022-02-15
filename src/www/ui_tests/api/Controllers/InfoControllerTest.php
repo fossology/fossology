@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- * Copyright (C) 2020 Siemens AG
+ * Copyright (C) 2020,2021 Siemens AG
  * Author: Gaurav Mishra <mishra.gaurav@siemens.com>
  *
  * This program is free software; you can redistribute it and/or
@@ -18,24 +18,23 @@
  ***************************************************************/
 /**
  * @file
- * @brief Tests for VersionController
+ * @brief Tests for InfoController
  */
 
 namespace Fossology\UI\Api\Test\Controllers;
 
 use Mockery as M;
 use Symfony\Component\Yaml\Parser;
-use Symfony\Component\Yaml\Exception\ParseException;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Slim\Http\Response;
-use Fossology\UI\Api\Controllers\VersionController;
+use Fossology\UI\Api\Controllers\InfoController;
 
 /**
- * @class VersionControllerTest
- * @brief Test cases for VersionController
+ * @class InfoControllerTest
+ * @brief Test cases for InfoController
  */
-class VersionControllerTest extends \PHPUnit\Framework\TestCase
+class InfoControllerTest extends \PHPUnit\Framework\TestCase
 {
   /**
    * @var string YAML_LOC
@@ -76,7 +75,7 @@ class VersionControllerTest extends \PHPUnit\Framework\TestCase
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
-    $this->versionController = new VersionController($container);
+    $this->infoController = new InfoController($container);
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
@@ -103,24 +102,48 @@ class VersionControllerTest extends \PHPUnit\Framework\TestCase
     return json_decode($response->getBody()->getContents(), true);
   }
 
-  public function testGetVersion()
+  public function testGetInfo()
   {
-    try {
-      $yaml = new Parser();
-      $yamlDocArray = $yaml->parseFile(self::YAML_LOC);
-    } catch (ParseException $exception) {
-      printf("Unable to parse the YAML string: %s", $exception->getMessage());
-    }
+    $yaml = new Parser();
+    $yamlDocArray = $yaml->parseFile(self::YAML_LOC);
+    $apiTitle = $yamlDocArray["info"]["title"];
+    $apiDescription = $yamlDocArray["info"]["description"];
     $apiVersion = $yamlDocArray["info"]["version"];
+    $apiContact = $yamlDocArray["info"]["contact"]["email"];
+    $apiLicense = $yamlDocArray["info"]["license"];
     $security = array();
     foreach ($yamlDocArray["security"] as $secMethod) {
       $security[] = key($secMethod);
     }
+    $GLOBALS["SysConf"] = [
+      "BUILD" => [
+        "VERSION" => "1.0.0",
+        "BRANCH" => "tree",
+        "COMMIT_HASH" => "deadbeef",
+        "COMMIT_DATE" => "2022/01/01 00:01 +05:30",
+        "BUILD_DATE" => "2022/01/01 00:02 +05:30"
+      ]
+    ];
+    $fossInfo = [
+      "version"    => "1.0.0",
+      "branchName" => "tree",
+      "commitHash" => "deadbeef",
+      "commitDate" => "2021-12-31T18:31:00+00:00",
+      "buildDate"  => "2021-12-31T18:32:00+00:00"
+    ];
     $expectedResponse = (new Response())->withJson(array(
-        "version" => $apiVersion,
-        "security" => $security
-      ), 200);
-    $actualResponse = $this->versionController->getVersion(null, new Response(),
+      "name" => $apiTitle,
+      "description" => $apiDescription,
+      "version" => $apiVersion,
+      "security" => $security,
+      "contact" => $apiContact,
+      "license" => [
+        "name" => $apiLicense["name"],
+        "url" => $apiLicense["url"]
+      ],
+      "fossology" => $fossInfo
+    ), 200);
+    $actualResponse = $this->infoController->getInfo(null, new Response(),
       []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());

@@ -276,7 +276,7 @@ class ui_picker extends FO_Plugin
     $Uri2 = Traceback_uri() . "?mod=$this->Name";
 
     /* Box decorations */
-    $OutBuf .= "<div style='border: thin dotted gray; background-color:lightyellow'>\n";
+    $OutBuf .= "<div class='alert alert-info' style='padding:5px;'>\n";
 
     /* write the FolderList */
     $text = _("Folder");

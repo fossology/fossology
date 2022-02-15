@@ -44,11 +44,12 @@ use Slim\Http\Body;
 use Slim\Http\Uri;
 use Fossology\Lib\Dao\FolderDao;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Dao\UserDao;
 use Fossology\UI\Api\Models\Hash;
 
 function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
 {
-  return UploadControllerTests::$function->TryToDelete($uploadpk, $user_pk,
+  return UploadControllerTest::$functions->TryToDelete($uploadpk, $user_pk,
     $group_pk, $uploadDao);
 }
 
@@ -56,7 +57,7 @@ function TryToDelete($uploadpk, $user_pk, $group_pk, $uploadDao)
  * @class UploadControllerTest
  * @brief Unit tests for UploadController
  */
-class UploadControllerTests extends \PHPUnit\Framework\TestCase
+class UploadControllerTest extends \PHPUnit\Framework\TestCase
 {
   /**
    * @var \Mockery\MockInterface $functions
@@ -141,6 +142,7 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
     $this->uploadDao = M::mock(UploadDao::class);
     $this->folderDao = M::mock(FolderDao::class);
     $this->agentDao = M::mock(AgentDao::class);
+    $this->userDao = M::mock(UserDao::class);
 
     $this->dbManager->shouldReceive('getSingleRow')
       ->withArgs([M::any(), [$this->groupId, UploadStatus::OPEN,
@@ -154,6 +156,8 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
       ->andReturn($this->uploadDao);
     $this->restHelper->shouldReceive('getFolderDao')
       ->andReturn($this->folderDao);
+    $this->restHelper->shouldReceive('getUserDao')
+      ->andReturn($this->userDao);
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -247,6 +251,13 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
   public function testGetSingleUpload()
   {
     $uploadId = 3;
+    $options = [
+      "folderId" => null,
+      "name"     => null,
+      "status"   => null,
+      "assignee" => null,
+      "since"    => null
+    ];
     $upload = $this->getUpload($uploadId);
     $requestHeaders = new Headers();
     $body = new Body(fopen('php://temp', 'r+'));
@@ -259,8 +270,8 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
     $this->uploadDao->shouldReceive('getParentItemBounds')
       ->withArgs([$uploadId])->andReturn($this->getUploadBounds($uploadId));
     $this->dbHelper->shouldReceive('getUploads')
-      ->withArgs([$this->userId, $this->groupId, 100, 1, $uploadId, null, true])
-      ->andReturn([1, [$upload->getArray()]]);
+      ->withArgs([$this->userId, $this->groupId, 100, 1, $uploadId, $options,
+      true])->andReturn([1, [$upload->getArray()]]);
     $expectedResponse = (new Response())->withJson($upload->getArray(), 200);
     $actualResponse = $this->uploadController->getUploads($request,
       new Response(), ['id' => $uploadId]);
@@ -298,6 +309,115 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
+   * -# Test for UploadController::getUploads() with filters
+   * -# Setup various options according to query parameter which will be passed
+   *    to DbHelper::getUploads()
+   * -# Make sure all mocks are having once() set to force mockery
+   */
+  public function testGetUploadWithFilters()
+  {
+    $options = [
+      "folderId" => null,
+      "name"     => null,
+      "status"   => null,
+      "assignee" => null,
+      "since"    => null
+    ];
+
+    // Test for folder filter
+    $folderId = 2;
+    $folderOptions = $options;
+    $folderOptions["folderId"] = $folderId;
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FOLDER_PARAM . "=$folderId"),
+      $requestHeaders, [], [], $body);
+    $this->folderDao->shouldReceive('isFolderAccessible')
+      ->withArgs([$folderId, $this->userId])->andReturn(true)->once();
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $folderOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+
+    // Test for name filter
+    $name = "foss";
+    $nameOptions = $options;
+    $nameOptions["name"] = $name;
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FILTER_NAME . "=$name"), $requestHeaders,
+      [], [], $body);
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $nameOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+
+    // Test for status filter
+    $statusString = "InProgress";
+    $status = UploadStatus::IN_PROGRESS;
+    $statusOptions = $options;
+    $statusOptions["status"] = $status;
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FILTER_STATUS . "=$statusString"),
+      $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $statusOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+
+    // Test for assignee filter
+    $assignee = "-me-";
+    $assigneeOptions = $options;
+    $assigneeOptions["assignee"] = $this->userId;
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FILTER_ASSIGNEE . "=$assignee"),
+      $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $assigneeOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+
+    // Test for since filter
+    $since = "2021-02-28";
+    $sinceOptions = $options;
+    $sinceOptions["since"] = strtotime($since);
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FILTER_DATE . "=$since"),
+      $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $sinceOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+
+    // Test for status and since filter
+    $statusString = "Open";
+    $status = UploadStatus::OPEN;
+    $since = "2021-02-28";
+    $combOptions = $options;
+    $combOptions["since"] = strtotime($since);
+    $combOptions["status"] = $status;
+    $requestHeaders = new Headers();
+    $body = new Body(fopen('php://temp', 'r+'));
+    $request = new Request("GET", new Uri("HTTP", "localhost", 80,
+      "/uploads", UploadController::FILTER_DATE . "=$since&" .
+      UploadController::FILTER_STATUS . "=$statusString"),
+      $requestHeaders, [], [], $body);
+    $this->dbHelper->shouldReceive('getUploads')
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $combOptions,
+      true])->andReturn([1, []])->once();
+    $this->uploadController->getUploads($request, new Response(), []);
+  }
+
+  /**
+   * @test
    * -# Test UploadController::getUploads() for all uploads
    * -# Check if the response is array with status 200
    */
@@ -308,12 +428,19 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
       $this->getUpload(3)->getArray(),
       $this->getUpload(4)->getArray()
     ];
+    $options = [
+      "folderId" => null,
+      "name"     => null,
+      "status"   => null,
+      "assignee" => null,
+      "since"    => null
+    ];
     $requestHeaders = new Headers();
     $body = new Body(fopen('php://temp', 'r+'));
     $request = new Request("GET", new Uri("HTTP", "localhost", 80,
       "/uploads/"), $requestHeaders, [], [], $body);
     $this->dbHelper->shouldReceive('getUploads')
-      ->withArgs([$this->userId, $this->groupId, 100, 1, null, null, true])
+      ->withArgs([$this->userId, $this->groupId, 100, 1, null, $options, true])
       ->andReturn([1, $uploads]);
     $expectedResponse = (new Response())->withJson($uploads, 200);
     $actualResponse = $this->uploadController->getUploads($request,
@@ -363,7 +490,7 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
 
   /**
    * @test
-   * -# Test for UploadController::copyUpload()
+   * -# Test for UploadController::moveUpload() for a copy action
    * -# Check if response status is 202
    */
   public function testCopyUpload()
@@ -380,10 +507,11 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->set('folderId', $folderId);
+    $requestHeaders->set('action', 'copy');
     $body = new Body(fopen('php://temp', 'r+'));
     $request = new Request("PUT", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
-    $actualResponse = $this->uploadController->copyUpload($request,
+    $actualResponse = $this->uploadController->moveUpload($request,
       new Response(), ['id' => $uploadId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -407,6 +535,7 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
 
     $requestHeaders = new Headers();
     $requestHeaders->set('folderId', 'alpha');
+    $requestHeaders->set('action', 'move');
     $body = new Body(fopen('php://temp', 'r+'));
     $request = new Request("PATCH", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
@@ -443,8 +572,8 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
-        'vcs'])
-      ->andReturn([true, '', '', 20]);
+        'vcs', false])
+      ->andReturn([true, '', '', [20]]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
@@ -560,8 +689,8 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
     $uploadHelper = M::mock('overload:Fossology\UI\Api\Helper\UploadHelper');
     $uploadHelper->shouldReceive('createNewUpload')
       ->withArgs([$request, $folderId, $uploadDescription, 'protected', true,
-        'vcs'])
-      ->andReturn([false, $errorMessage, $errorDesc, -1]);
+        'vcs', false])
+      ->andReturn([false, $errorMessage, $errorDesc, [-1]]);
 
     $this->folderDao->shouldReceive('getAllFolderIds')->andReturn([2,3,4]);
     $this->folderDao->shouldReceive('isFolderAccessible')
@@ -686,5 +815,81 @@ class UploadControllerTests extends \PHPUnit\Framework\TestCase
       $this->getResponseJson($actualResponse));
     $this->assertEquals($expectedResponse->getHeaders(),
       $actualResponse->getHeaders());
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload()
+   * -# Check if response status is 202
+   */
+  public function testUpdateUpload()
+  {
+    $upload = 2;
+    $assignee = 4;
+    $status = UploadStatus::REJECTED;
+    $comment = "Not helpful";
+
+    $body = new Body(
+      fopen('data://text/plain;base64,' . base64_encode($comment), 'r+'));
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
+      UploadController::FILTER_ASSIGNEE . "=$assignee"),
+      new Headers(), [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(true);
+    $this->userDao->shouldReceive('getUserChoices')
+      ->withArgs([$this->groupId])
+      ->andReturn([$this->userId => "fossy", $assignee => "friendly-fossy"]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$assignee, $this->groupId, $upload], M::any()]);
+    $this->dbManager->shouldReceive('getSingleRow')
+      ->withArgs([M::any(), [$status, $comment, $this->groupId, $upload],
+        M::any()]);
+
+    $info = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    $expectedResponse = (new Response())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new Response(), ['id' => $upload]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
+  }
+
+  /**
+   * @test
+   * -# Test for UploadController::updateUpload() without permission
+   * -# Check if response status is 403
+   */
+  public function testUpdateUploadNoPerm()
+  {
+    $upload = 2;
+    $assignee = 4;
+    $comment = "Not helpful";
+
+    $body = new Body(
+      fopen('data://text/plain;base64,' . base64_encode($comment), 'r+'));
+    $request = new Request("POST", new Uri("HTTP", "localhost", 80,
+      "/uploads/$upload", UploadController::FILTER_STATUS . "=Rejected&" .
+      UploadController::FILTER_ASSIGNEE . "=$assignee"),
+      new Headers(), [], [], $body);
+
+    $this->userDao->shouldReceive('isAdvisorOrAdmin')
+      ->withArgs([$this->userId, $this->groupId])
+      ->andReturn(false);
+
+    $info = new Info(403, "Not advisor or admin of current group. " .
+      "Can not update upload.", InfoType::ERROR);
+    $expectedResponse = (new Response())->withJson($info->getArray(),
+      $info->getCode());
+    $actualResponse = $this->uploadController->updateUpload($request,
+      new Response(), ['id' => $upload]);
+    $this->assertEquals($expectedResponse->getStatusCode(),
+      $actualResponse->getStatusCode());
+    $this->assertEquals($this->getResponseJson($expectedResponse),
+      $this->getResponseJson($actualResponse));
   }
 }

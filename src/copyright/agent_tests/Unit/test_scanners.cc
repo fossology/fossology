@@ -63,7 +63,8 @@ const char testContent[] = "© 2007 Hugh Jackman\n\n"
   "maintained by benjamin drieu <benj@debian.org>\n\n"
   "* Copyright (c) 1989, 1993\n" // Really just one newline here!
   "* The Regents of the University of California. All rights reserved.\n\n"
-  "to be licensed as a whole";
+  "to be licensed as a whole"
+  "/* Most of the following tests are stolen from RCS 5.7's src/conf.sh.  */";
 
 class scannerTestSuite : public CPPUNIT_NS :: TestFixture {
   CPPUNIT_TEST_SUITE (scannerTestSuite);
@@ -191,7 +192,7 @@ protected:
    */
   void regKeywordTest () {
     regexScanner sc("keyword", "keyword");
-    scannerTest(sc, testContent, "keyword", {"patent", "licensed as"});
+    scannerTest(sc, testContent, "keyword", {"patent", "licensed as", "stolen from"});
   }
 
   /**

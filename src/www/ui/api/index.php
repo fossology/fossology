@@ -1,6 +1,6 @@
 <?php
 /***************************************************************
- Copyright (C) 2017-2018 Siemens AG
+ Copyright (C) 2017-2018,2021 Siemens AG
  Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
  This program is free software; you can redistribute it and/or
@@ -40,7 +40,7 @@ use Fossology\UI\Api\Controllers\ReportController;
 use Fossology\UI\Api\Controllers\SearchController;
 use Fossology\UI\Api\Controllers\UploadController;
 use Fossology\UI\Api\Controllers\UserController;
-use Fossology\UI\Api\Controllers\VersionController;
+use Fossology\UI\Api\Controllers\InfoController;
 use Fossology\UI\Api\Controllers\LicenseController;
 use Fossology\UI\Api\Middlewares\RestAuthMiddleware;
 use Fossology\UI\Api\Controllers\GroupController;
@@ -71,11 +71,19 @@ $loader->addPath(dirname(dirname(__FILE__)).'/template');
 
 /* Initialize global system configuration variables $SysConfig[] */
 $timingLogger->tic();
-ConfigInit($GLOBALS['SYSCONFDIR'], $SysConf);
+$error = ConfigInit($GLOBALS['SYSCONFDIR'], $SysConf, false);
+
+$dbConnected = true;
+if ($error === -1) {
+  $dbConnected = false;
+}
+
 $timingLogger->toc("setup init");
 
 $timingLogger->tic();
-plugin_load();
+if ($dbConnected) {
+  plugin_load();
+}
 
 $app = new App($GLOBALS['container']);
 
@@ -91,17 +99,33 @@ $app = new App($GLOBALS['container']);
  * 4. The call now enteres FOSSology Init again and plugins are unloaded.
  * 5. Then call then enters Rest Auth and leaves as is.
  */
+if ($dbConnected) {
+  // Middleware for plugin initialization
+  $app->add(new FossologyInitMiddleware());
+  // Middleware for authentication
+  $app->add(new RestAuthMiddleware());
+} else {
+  // DB not connected
+  // Respond to health request as expected
+  $app->get(VERSION_1 . 'health', function($req, $res) {
+    $handler = new InfoController($GLOBALS['container']);
+    return $handler->getHealth($req, $res, -1);
+  });
+  // Handle any other request and respond explicitly
+  $app->any('{route:.*}', function($req, $res) {
+    $error = new Info(503, "Unable to connect to DB.", InfoType::ERROR);
+    return $res->withJson($error->getArray(), $error->getCode());
+  });
 
-// Middleware for plugin initialization
-$app->add(new FossologyInitMiddleware());
-// Middleware for authentication
-$app->add(new RestAuthMiddleware());
+  // Prevent further actions and exit
+  $app->run();
+  return 0;
+}
 
 //////////////////////////OPTIONS/////////////////////
 $app->options(VERSION_1 . '{routes:.+}', AuthController::class . ':optionsVerification');
 
 //////////////////////////AUTH/////////////////////
-$app->get(VERSION_1 . 'auth', AuthController::class . ':getAuthHeaders');
 $app->post(VERSION_1 . 'tokens', AuthController::class . ':createNewJwtToken');
 
 //////////////////////////UPLOADS/////////////////////
@@ -109,8 +133,8 @@ $app->group(VERSION_1 . 'uploads',
   function (){
     $this->get('[/{id:\\d+}]', UploadController::class . ':getUploads');
     $this->delete('/{id:\\d+}', UploadController::class . ':deleteUpload');
-    $this->patch('/{id:\\d+}', UploadController::class . ':moveUpload');
-    $this->put('/{id:\\d+}', UploadController::class . ':copyUpload');
+    $this->patch('/{id:\\d+}', UploadController::class . ':updateUpload');
+    $this->put('/{id:\\d+}', UploadController::class . ':moveUpload');
     $this->post('', UploadController::class . ':postUpload');
     $this->get('/{id:\\d+}/summary', UploadController::class . ':getUploadSummary');
     $this->get('/{id:\\d+}/licenses', UploadController::class . ':getUploadLicenses');
@@ -122,6 +146,7 @@ $app->group(VERSION_1 . 'users',
   function (){
     $this->get('[/{id:\\d+}]', UserController::class . ':getUsers');
     $this->delete('/{id:\\d+}', UserController::class . ':deleteUser');
+    $this->get('/self', UserController::class . ':getCurrentUser');
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
@@ -165,10 +190,18 @@ $app->group(VERSION_1 . 'report',
     $this->any('/{params:.*}', BadRequestController::class);
   });
 
-////////////////////////////VERSION/////////////////////
+////////////////////////////INFO/////////////////////
 $app->group(VERSION_1 . 'version',
   function (){
-    $this->get('', VersionController::class . ':getVersion');
+    $this->get('', InfoController::class . ':getInfo');
+  });
+$app->group(VERSION_1 . 'info',
+  function (){
+    $this->get('', InfoController::class . ':getInfo');
+  });
+$app->group(VERSION_1 . 'health',
+  function (){
+    $this->get('', InfoController::class . ':getHealth');
   });
 
 /////////////////////////FILE SEARCH////////////////////
@@ -181,12 +214,20 @@ $app->group(VERSION_1 . 'filesearch',
 /////////////////////////LICENSE SEARCH/////////////////
 $app->group(VERSION_1 . 'license',
   function (){
-    $this->get('', LicenseController::class . ':getLicense');
+    $this->get('', LicenseController::class . ':getAllLicenses');
+    $this->post('', LicenseController::class . ':createLicense');
+    $this->get('/{shortname:.+}', LicenseController::class . ':getLicense');
+    $this->patch('/{shortname:.+}', LicenseController::class . ':updateLicense');
     $this->any('/{params:.*}', BadRequestController::class);
   });
+
+// Catch all routes
+$app->map(['GET', 'POST', 'PUT', 'DELETE', 'PATCH'], '/{routes:.+}', function($req, $res) {
+  $handler = $this->get('notFoundHandler');
+  return $handler($req, $res);
+});
 
 $app->run();
 
 $GLOBALS['container']->get("db.manager")->flushStats();
 return 0;
-

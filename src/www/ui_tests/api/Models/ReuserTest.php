@@ -41,7 +41,9 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
       "reuse_upload"   => 2,
       "reuse_group"    => 'fossy',
       "reuse_main"     => true,
-      "reuse_enhanced" => false
+      "reuse_enhanced" => false,
+      "reuse_copyright" => false,
+      "reuse_report"   => false
     ];
 
     $actualReuser = new Reuser(2, 'fossy', true);
@@ -71,13 +73,39 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
       "reuse_upload"   => 2,
       "reuse_group"    => 'fossy',
       "reuse_main"     => 'true',
-      "reuse_enhanced" => false
+      "reuse_enhanced" => false,
+      "reuse_copyright" => false,
+      "reuse_report"   => false
     ];
 
     $actualReuser = new Reuser(1, 'fossy');
     $actualReuser->setUsingArray($expectedArray);
 
     $expectedArray["reuse_main"] = true;
+    $this->assertEquals($expectedArray, $actualReuser->getArray());
+  }
+
+  /**
+   * @test
+   * -# Test for Reuser::setUsingArray()
+   * -# Add some changes to the array.
+   */
+  public function testSetUsingArraySomeOptions()
+  {
+    $expectedArray = [
+      "reuse_upload"   => 2,
+      "reuse_group"    => 'fossy',
+      "reuse_main"     => 'true',
+      "reuse_enhanced" => false,
+      "reuse_copyright" => 'true',
+      "reuse_report"   => false
+    ];
+
+    $actualReuser = new Reuser(1, 'fossy');
+    $actualReuser->setUsingArray($expectedArray);
+
+    $expectedArray["reuse_main"] = true;
+    $expectedArray["reuse_copyright"] = true;
     $this->assertEquals($expectedArray, $actualReuser->getArray());
   }
 
@@ -96,7 +124,7 @@ class ReuserTest extends \PHPUnit\Framework\TestCase
     ];
 
     $this->expectException(\UnexpectedValueException::class);
-    $this->expectExceptionMessage("reuse_upload should be integer");
+    $this->expectExceptionMessage("Reuse upload should be an integer");
 
     $actualReuser = new Reuser(1, 'fossy');
     $actualReuser->setUsingArray($expectedArray);

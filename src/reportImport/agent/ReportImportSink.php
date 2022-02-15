@@ -163,7 +163,8 @@ class ReportImportSink
       if($this->configuration->isCreateLicensesAsCandidate() || !$this->userIsAdmin)
       {
         echo "Creating it as license candidate ...\n";
-        $licenseId = $this->licenseDao->insertUploadLicense($licenseShortName, $licenseCandidate->getText(), $groupId);
+        $licenseId = $this->licenseDao->insertUploadLicense($licenseShortName,
+          $licenseCandidate->getText(), $groupId, $this->userId);
         $this->licenseDao->updateCandidate(
           $licenseId,
           $licenseCandidate->getShortName(),
@@ -171,8 +172,11 @@ class ReportImportSink
           $licenseCandidate->getText(),
           $licenseCandidate->getUrl(),
           "Created for ReportImport with jobId=[".$this->jobId."]",
+          date(DATE_ATOM),
+          $this->userId,
           false,
-          0);
+          0
+        );
         return $licenseId;
       }
       else
@@ -243,6 +247,7 @@ class ReportImportSink
           ClearingEventTypes::IMPORT,
           trim($licenseText),
           '', // comment
+          '', // ack
           $this->jobId);
       }
       foreach ($removeLicenseIds as $licenseId)
@@ -257,6 +262,7 @@ class ReportImportSink
           ClearingEventTypes::IMPORT,
           $licenseText,
           '', // comment
+          '', // ack
           $this->jobId);
       }
       $this->clearingDao->createDecisionFromEvents(

@@ -14,6 +14,7 @@ cov.txt
 VERSION
 /.project
 /.cproject
+.settings
 .*.sw?
 *~
 /src/vendor
@@ -22,6 +23,7 @@ VERSION
 .#*
 tags
 php.ini
+.cache
 
 # compiled or derived files
 install/db/dbcreate
@@ -147,7 +149,7 @@ variable.list
 /src/copyright/VERSION-ecc
 /src/copyright/VERSION-keyword
 /src/copyright/VERSION-copyright
-/src/spdx2/agent_tests/Functional/spdx-tools-2.0.2-jar-with-dependencies.jar*
+/src/spdx2/agent_tests/Functional/spdx-tools-2.2.2-jar-with-dependencies.jar*
 /src/spdx2/agent/version.php
 /src/unifiedreport/agent/version.php
 /src/spdx2/agent/spdx2
@@ -171,6 +173,9 @@ src/delagent/agent_tests/Unit/testconf/
 /utils/fo_unicode_clean
 install/db/db.cron
 install/fossdash/fossdash-publish.py
+src/reso/agent/version.php
+src/reso/agent/reso
+src/www/ui/css/bootstrap/
 
 # Add all the Ubuntu consol log file
 ubuntu-*

@@ -1,6 +1,7 @@
 <?php
 /***************************************************************
 Copyright (C) 2017 Siemens AG
+Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -23,13 +24,14 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 namespace Fossology\UI\Api\Models;
 
 use Fossology\Lib\Auth\Auth;
-use Fossology\Reuser\ReuserAgentPlugin;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Symfony\Component\HttpFoundation\Request;
 use Fossology\Lib\Dao\UserDao;
 
-require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+if (!class_exists("AgentAdder", false)) {
+  require_once dirname(dirname(__DIR__)) . "/agent-add.php";
+}
 require_once dirname(dirname(dirname(dirname(__DIR__)))) . "/lib/php/common-folders.php";
 
 /**
@@ -150,11 +152,15 @@ class ScanOptions
     if ($this->reuse->getReuseEnhanced() === true) {
       $reuserRules[] = 'reuseEnhanced';
     }
+    if ($this->reuse->getReuseReport() === true) {
+      $reuserRules[] = 'reuseConf';
+    }
+    if ($this->reuse->getReuseCopyright() === true) {
+      $reuserRules[] = 'reuseCopyright';
+    }
     $userDao = $GLOBALS['container']->get("dao.user");
     $reuserSelector = $this->reuse->getReuseUpload() . "," . $userDao->getGroupIdByName($this->reuse->getReuseGroup());
-    $request->request->set(ReuserAgentPlugin::UPLOAD_TO_REUSE_SELECTOR_NAME, $reuserSelector);
-    //global $SysConf;
-    //$request->request->set('groupId', $SysConf['auth'][Auth::GROUP_ID]);
+    $request->request->set('uploadToReuse', $reuserSelector);
     $request->request->set('reuseMode', $reuserRules);
   }
 

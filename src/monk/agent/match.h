@@ -62,7 +62,7 @@ size_t match_getEnd(const Match* match);
 
 GArray* findAllMatchesBetween(const File* file, const Licenses* licenses, unsigned maxAllowedDiff, unsigned minAdjacentMatches, unsigned maxLeadingDiff);
 
-int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks);
+int matchPFileWithLicenses(MonkState* state, long pFileId, const Licenses* licenses, const MatchCallbacks* callbacks, char* delimiters);
 int matchFileWithLicenses(MonkState* state, const File* file, const Licenses* licenses, const MatchCallbacks* callbacks);
 
 void findDiffMatches(const File* file, const License* license,

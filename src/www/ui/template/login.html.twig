@@ -7,8 +7,10 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-    {% if loginFailure %}
-      {{ 'The combination of user name and password was not found.'|trans }}<br/><br/> 
+    {% if userInactive %}
+      {{ 'User is inactive'|trans }}<br/><br/>
+    {% elseif loginFailure %}
+      {{ 'The combination of user name and password was not found.'|trans }}<br/><br/>
     {% endif %}
     {% include "components/login-form.html.twig" with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl, 'userName': userName} only %}
 {% endblock %}

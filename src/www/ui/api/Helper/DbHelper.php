@@ -39,6 +39,7 @@ use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 use Fossology\Lib\Data\Folder\Folder;
+use Fossology\Lib\Proxy\LicenseViewProxy;
 
 /**
  * @class DbHelper
@@ -90,15 +91,16 @@ class DbHelper
    * @param integer $limit    Max number of results
    * @param integer $page     Page to get
    * @param integer $uploadId Pass the upload id to check for single upload.
-   * @param integer $folderId Folder to limit the uploads to
+   * @param integer $options  Filter options
    * @param bool $recursive   True to recursive listing of uploads
    * @return array Total pages as first value, uploads as an array in second
    *         value
    */
   public function getUploads($userId, $groupId, $limit, $page = 1,
-    $uploadId = null, $folderId = null, $recursive = true)
+    $uploadId = null, $options = null, $recursive = true)
   {
     $uploadProxy = new UploadBrowseProxy($groupId, 0, $this->dbManager);
+    $folderId = $options["folderId"];
     if ($folderId === null) {
       $user = $this->getUsers($userId);
       $folderId = $user[0]['rootFolderId'];
@@ -127,14 +129,40 @@ class DbHelper
     $statementGet = __METHOD__ . ".getAllUploads.$limit";
     if ($uploadId !== null) {
       $params[] = $uploadId;
-      $where = "AND upload.upload_pk = $" . count($params);
+      $where .= " AND upload.upload_pk = $" . count($params);
       $statementGet .= ".upload";
       $statementCount .= ".upload";
+    }
+    if (! empty($options["name"])) {
+      $params[] = strtolower("%" . $options["name"] . "%");
+      $where .= " AND (LOWER(upload_desc) LIKE $" . count($params) .
+        " OR LOWER(ufile_name) LIKE $" . count($params) .
+        " OR LOWER(upload_filename) LIKE $" . count($params) . ")";
+      $statementGet .= ".name";
+      $statementCount .= ".name";
+    }
+    if (! empty($options["status"])) {
+      $params[] = $options["status"];
+      $where .= " AND status_fk = $" . count($params);
+      $statementGet .= ".stat";
+      $statementCount .= ".stat";
+    }
+    if (! empty($options["assignee"])) {
+      $params[] = $options["assignee"];
+      $where .= " AND assignee = $" . count($params);
+      $statementGet .= ".assi";
+      $statementCount .= ".assi";
+    }
+    if (! empty($options["since"])) {
+      $params[] = $options["since"];
+      $where .= " AND upload_ts >= to_timestamp($" . count($params) . ")";
+      $statementGet .= ".since";
+      $statementCount .= ".since";
     }
     $sql = "SELECT count(*) AS cnt FROM $partialQuery $where;";
     $totalResult = $this->dbManager->getSingleRow($sql, $params, $statementCount);
     $totalResult = intval($totalResult['cnt']);
-    $totalResult = intval(floor($totalResult / $limit) + 1);
+    $totalResult = intval(ceil($totalResult / $limit));
 
     $params[] = ($page - 1) * $limit;
 
@@ -197,7 +225,8 @@ WHERE uploadtree_pk=' . pg_escape_string($uploadTreePk))["ufile_name"];
   public function doesIdExist($tableName, $idRowName, $id)
   {
     return (0 < (intval($this->getDbManager()->getSingleRow("SELECT COUNT(*)
-FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
+FROM $tableName WHERE $idRowName = $1", [$id],
+      __METHOD__ . $tableName . $idRowName)["count"])));
   }
 
   /**
@@ -307,7 +336,7 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $params[] = $offset;
       $pagination .= " OFFSET $" . count($params);
       $statement .= ".withLimit";
-      $totalResult = floor($totalResult / $limit) + 1;
+      $totalResult = ceil($totalResult / $limit);
     } else {
       $totalResult = 1;
     }
@@ -473,5 +502,69 @@ FROM $tableName WHERE $idRowName= " . pg_escape_string($id))["count"])));
       $this->folderDao::MODE_UPLOAD);
     $content = $this->folderDao->getContent($contentId);
     return $this->folderDao->getFolder($content['parent_fk']);
+  }
+
+  /**
+   * Get the licenses from database in paginated way
+   *
+   * @param integer $page    Which page number to fetch
+   * @param integer $limit   Limit of results
+   * @param string  $kind    Which kind of licenses to fetch
+   * @param integer $groupId Group of the user
+   * @param boolean $active  True to get only active licenses
+   * @return array
+   */
+  public function getLicensesPaginated($page, $limit, $kind, $groupId, $active)
+  {
+    $statementName = __METHOD__;
+    $rfTable = 'license_all';
+    $options = ['columns' => ['rf_pk', 'rf_shortname', 'rf_fullname', 'rf_text',
+      'rf_url', 'rf_risk', 'group_fk']];
+    if ($active) {
+      $options['extraCondition'] = "rf_active = '" .
+        $this->dbManager->booleanToDb($active) . "'";
+    }
+    if ($kind == "candidate") {
+      $options['diff'] = true;
+    } elseif ($kind == "main") {
+      $groupId = 0;
+    }
+    $licenseViewDao = new LicenseViewProxy($groupId, $options, $rfTable);
+    $withCte = $licenseViewDao->asCTE();
+
+    return $this->dbManager->getRows($withCte .
+      " SELECT * FROM $rfTable ORDER BY LOWER(rf_shortname) " .
+      "LIMIT $1 OFFSET $2;",
+      [$limit, ($page - 1) * $limit], $statementName);
+  }
+
+  /**
+   * Get the count of licenses accessible by user based on group ID
+   *
+   * @param string  $kind    Which kind of licenses to look for
+   * @param integer $groupId Group of the user
+   * @return int Count of licenses
+   */
+  public function getLicenseCount($kind, $groupId)
+  {
+    $sql = "SELECT sum(cnt) AS total FROM (";
+    $mainLicSql = " SELECT count(*) AS cnt FROM ONLY license_ref ";
+    $candidateLicSql = " SELECT count(*) AS cnt FROM license_candidate WHERE group_fk = $1";
+    $params = [];
+
+    if ($kind == "main") {
+      $sql .= $mainLicSql;
+    } elseif ($kind == "candidate") {
+      $sql .= $candidateLicSql;
+      $params[] = $groupId;
+    } else {
+      $sql .= $mainLicSql . " UNION ALL " . $candidateLicSql;
+      $params[] = $groupId;
+    }
+    $sql .= ") as all_lic;";
+
+    $statement = __METHOD__ . ".getLicenseCount.$kind";
+    $result = $this->dbManager->getSingleRow($sql, $params, $statement);
+    return intval($result['total']);
   }
 }

@@ -1135,10 +1135,7 @@
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_candidate"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
-  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
-  
+
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["DESC"] = "COMMENT ON COLUMN \"license_candidate\".\"rf_creationdate\" IS 'License creation date'";
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_creationdate\" timestamptz DEFAULT now()";
   $Schema["TABLE"]["license_candidate"]["rf_creationdate"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_creationdate\" DROP NOT NULL, ALTER COLUMN \"rf_creationdate\" SET DEFAULT now()";
@@ -1155,6 +1152,11 @@
   $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ADD"] = "ALTER TABLE \"license_candidate\" ADD COLUMN \"rf_user_fk_modified\" int4";
   $Schema["TABLE"]["license_candidate"]["rf_user_fk_modified"]["ALTER"] = "ALTER TABLE \"license_candidate\" ALTER COLUMN \"rf_user_fk_modified\" DROP NOT NULL";
 
+
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"lrb_pk\" IS 'Primary Key'";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"lrb_pk\" int8 DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+  $Schema["TABLE"]["license_ref_bulk"]["lrb_pk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"lrb_pk\" SET NOT NULL, ALTER COLUMN \"lrb_pk\" SET DEFAULT nextval('license_ref_bulk_lrb_pk_seq'::regclass)";
+
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"user_fk\" IS 'user who made this bulk scan'";
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"user_fk\" int8";
   $Schema["TABLE"]["license_ref_bulk"]["user_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"user_fk\" SET NOT NULL";
@@ -1163,7 +1165,7 @@
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"group_fk\" int8";
   $Schema["TABLE"]["license_ref_bulk"]["group_fk"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"group_fk\" DROP NOT NULL";
 
-  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_text\" IS 'text searched by nulk scan'";
+  $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"rf_text\" IS 'text searched by bulk scan'";
   $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"rf_text\" text";
   $Schema["TABLE"]["license_ref_bulk"]["rf_text"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"rf_text\" SET NOT NULL";
 
@@ -1178,6 +1180,10 @@
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"ignore_irrelevant\" IS 'Should the irrelevant files be ignored during scan?'";
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"ignore_irrelevant\" bool DEFAULT true";
   $Schema["TABLE"]["license_ref_bulk"]["ignore_irrelevant"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"ignore_irrelevant\" SET NOT NULL, ALTER COLUMN \"ignore_irrelevant\" SET DEFAULT true";
+
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["DESC"] = "COMMENT ON COLUMN \"license_ref_bulk\".\"bulk_delimiters\" IS 'What delimiters to use for scan?'";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ADD"] = "ALTER TABLE \"license_ref_bulk\" ADD COLUMN \"bulk_delimiters\" text DEFAULT NULL";
+  $Schema["TABLE"]["license_ref_bulk"]["bulk_delimiters"]["ALTER"] = "ALTER TABLE \"license_ref_bulk\" ALTER COLUMN \"bulk_delimiters\" SET DEFAULT true";
 
 
   $Schema["TABLE"]["license_set_bulk"]["rf_fk"]["DESC"] = "COMMENT ON COLUMN \"license_set_bulk\".\"rf_fk\" IS 'reference to license_ref* (not only license_ref)'";
@@ -1953,6 +1959,7 @@
   $Schema["TABLE"]["users"]["user_pk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_pk\" int4 DEFAULT nextval('users_user_pk_seq'::regclass)";
   $Schema["TABLE"]["users"]["user_pk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_pk\" SET NOT NULL, ALTER COLUMN \"user_pk\" SET DEFAULT nextval('users_user_pk_seq'::regclass)";
 
+
   $Schema["TABLE"]["users"]["user_name"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_name"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_name\" text";
   $Schema["TABLE"]["users"]["user_name"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_name\" SET NOT NULL";
@@ -1961,9 +1968,21 @@
   $Schema["TABLE"]["users"]["root_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"root_folder_fk\" int4";
   $Schema["TABLE"]["users"]["root_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"root_folder_fk\" SET NOT NULL";
 
+  $Schema["TABLE"]["users"]["default_folder_fk"]["DESC"] = "COMMENT ON COLUMN \"users\".\"default_folder_fk\" IS 'default folder for this user'";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"default_folder_fk\" int4 DEFAULT -1";
+  $Schema["TABLE"]["users"]["default_folder_fk"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"default_folder_fk\" SET NOT NULL";
+
+  $Schema["TABLE"]["users"]["last_connection"]["DESC"] = "";
+  $Schema["TABLE"]["users"]["last_connection"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"last_connection\" timestamptz";
+  $Schema["TABLE"]["users"]["last_connection"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"last_connection\" DROP NOT NULL";
+
   $Schema["TABLE"]["users"]["user_desc"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_desc"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_desc\" text";
   $Schema["TABLE"]["users"]["user_desc"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_desc\" DROP NOT NULL";
+
+  $Schema["TABLE"]["users"]["user_status"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_status\" IS 'active, incactive'";
+  $Schema["TABLE"]["users"]["user_status"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_status\" text DEFAULT 'active'";
+  $Schema["TABLE"]["users"]["user_status"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"user_status\" DROP NOT NULL, ALTER COLUMN \"user_status\" SET DEFAULT 'active'";
 
   $Schema["TABLE"]["users"]["user_seed"]["DESC"] = "";
   $Schema["TABLE"]["users"]["user_seed"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_seed\" text";
@@ -2097,6 +2116,9 @@
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_unifiedcolumns\" json";
   $Schema["TABLE"]["report_info"]["ri_unifiedcolumns"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_unifiedcolumns\" DROP NOT NULL";
 
+  $Schema["TABLE"]["report_info"]["ri_globaldecision"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_globaldecision\" int2 DEFAULT 1";
+  $Schema["TABLE"]["report_info"]["ri_globaldecision"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_globaldecision\" SET NOT NULL, ALTER COLUMN \"ri_globaldecision\" SET DEFAULT 1";
 
   $Schema["VIEW"]["license_file_ref"] = "CREATE VIEW \"license_file_ref\" AS SELECT license_ref.rf_fullname, license_ref.rf_shortname, license_ref.rf_pk, license_file.fl_end_byte, license_file.rf_match_pct, license_file.rf_timestamp, license_file.fl_start_byte, license_file.fl_ref_end_byte, license_file.fl_ref_start_byte, license_file.fl_pk, license_file.agent_fk, license_file.pfile_fk FROM (license_file JOIN license_ref ON ((license_file.rf_fk = license_ref.rf_pk)));";
 

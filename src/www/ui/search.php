@@ -171,6 +171,8 @@ class search extends FO_Plugin
           $SelectedUploadName = $row->getFilename() . " from " .  Convert2BrowserTime(date("Y-m-d H:i:s",$row->getTimestamp()));
         }
       }
+    } else {
+      $this->vars["Upload"] = 0;
     }
 
     $tag = GetParm("tag",PARM_RAW);

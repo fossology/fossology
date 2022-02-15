@@ -1,6 +1,8 @@
 <?php
 /***************************************************************
  * Copyright (C) 2018 Siemens AG
+ * Copyright (c) 2021-2022 Orange
+ * Contributors: Piotr Pszczola, Bartlomiej Drozdz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -123,7 +125,11 @@ class AuthHelper
 
       $dbRows = $this->dbHelper->getTokenKey($tokenId);
       $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
-      if (empty($dbRows)) {
+      $isUserActive = $this->userDao->isUserIdActive($userId);
+
+      if (!$isUserActive) {
+        $returnValue = new Info(403, "User inactive.", InfoType::ERROR);
+      } elseif (empty($dbRows)) {
         $returnValue = new Info(403, "Invalid token sent.", InfoType::ERROR);
       } elseif ($isTokenActive !== true) {
         $returnValue = $isTokenActive;

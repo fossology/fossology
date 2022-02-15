@@ -37,7 +37,8 @@ class OjoAgent
   public:
     OjoAgent();
     std::vector<ojomatch> processFile(const std::string &filePath,
-      OjosDatabaseHandler &databaseHandler, const int groupId);
+      OjosDatabaseHandler &databaseHandler, const int groupId,
+      const int userId);
     std::vector<ojomatch> processFile(const std::string &filePath);
   private:
     /**
@@ -53,7 +54,8 @@ class OjoAgent
         std::vector<ojomatch> &result, unsigned int offset, bool isDualTest);
     void filterMatches(std::vector<ojomatch> &matches);
     void findLicenseId(std::vector<ojomatch> &matches,
-      OjosDatabaseHandler &databaseHandler, const int groupId);
+      OjosDatabaseHandler &databaseHandler, const int groupId,
+      const int userId);
 };
 
 #endif /* SRC_OJO_AGENT_OJOAGENT_HPP_ */

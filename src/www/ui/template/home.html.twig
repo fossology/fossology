@@ -8,17 +8,16 @@
 
 {% block content %}
   
-    {% if authUrl %}
-    <div style="float: right; border: 1px black dashed; max-width: 360px; padding: 5px;">
-        {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
-    </div>
-  {% endif %}
-  
-  <b>
-    {{ 'FOSSology'| trans }}
-  </b>
-  {{ 'is a framework for software analysis tools.'| trans }}
-  {{ 'With it, you can:'| trans }}
+{% if authUrl %}
+  <div style="float: right; border: 1px black dashed; max-width: 30%; padding: 5px;">
+    {% include 'components/login-form.html.twig' with {'referrer': referrer, 'protocol': protocol, 'authUrl': authUrl} only %}
+  </div>
+{% endif %}
+
+<ul class="list-group">
+  <h3>{{ 'FOSSology'| trans }}</h3>
+  <b>{{ 'is a framework for software analysis tools.'| trans }}
+  {{ 'With it, you can:'| trans }}</b>
   <ul>
     <li>
       {{ 'Upload files into the fossology repository.'| trans }}
@@ -47,18 +46,17 @@
     <li>
         {{ 'Report files based on your own custom classification scheme.'| trans }}
     </li>
-</ul>
-<p></p>
-<b>
-    {{ 'Where to Begin...'| trans }}
-</b><br/>
-
-<ul>
-  <li>{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}</li>
-  <li>
-    <b>{% if authUrl %}<a href="{{ authUrl }}">{{ 'Login'| trans }}</a>{% else %}{{ 'Login'| trans }}{% endif %}</b>:
-    {{ "Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
-        even add new users."| trans }}
-  </li>
+    <p></p>
+  </ul>
+  <b>{{ 'Where to Begin...'| trans }}</b><br/>
+  <ul>
+    <li>{{ 'The menu at the top contains all the primary capabilities of FOSSology.'| trans }}</li>
+    <li>
+      <b>{% if authUrl %}<code><a href="{{ authUrl }}">{{ 'Login'| trans }}</a></code>{% else %}{{ 'Login'| trans }}{% endif %}</b>:
+         {{ "Depending on your account's access rights, you may be able to upload files, schedule analysis tasks, or
+          even add new users."| trans }}
+    </li>
+    <p></p>
+  </ul>
 </ul>
 {% endblock %}

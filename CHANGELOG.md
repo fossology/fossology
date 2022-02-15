@@ -1,5 +1,346 @@
 # Changelog of FOSSology
 
+### 4.0.0 (Jan 20th 2022)
+
+This release adds important corrections to
+[4.0.0-rc1](https://github.com/fossology/fossology/releases/tag/4.0.0-rc1)
+
+The release 4.0.0 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+* Add new report format CSV.
+* Option to make user details read-only
+* Make global decisions configurable while upload
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `734f439e4` fix(reportImport): Fix interfaces in report import
+* `bc70462a8` fix(ui): Fix bulk modal with selectable bg
+* `d4f32b865` fix(reports) fix CSV report action title
+* `1287c5723` Fix merge errors
+
+#### Features
+
+* `574c13d1c` feat(reports): fix indent errors
+* `2550919a2` feat(reports): Add new CSV report type
+* `df3573982` feat(nomos): See file regex to include view
+* `44acd2029` feat(nomos): New see-url pattern
+* `01273ae78` feat(users) Add option to make user details read-only
+* `306260bfc` feat(reports) Fix DEP5 report menu entry
+* `144875921` feat(reports): change report names in drop down menu
+* `a778c5f68` feat(upload): make global decisions configurable
+* `f1c4ed4fa` Add option to make user details read-only
+
+#### Infrastructure
+
+* `0afbb8fe5` chore(cd): Continue release build on failure
+* `ff3b7d63a` Update src/www/ui/async/AjaxShowJobs.php
+* `ec0a26956` Revert "fix(login): Allow non-admin user to update"
+* `5596f78d7` Revert "Add option to make user details read-only"
+* `e063beda2` Revert "Fix merge errors"
+* `a07ccd939` Merge all GDPR related work
+
+### 4.0.0-rc1 (Dec 21st 2021)
+
+This release adds important corrections to
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0)
+
+The release 4.0.0-rc1 introduces following major changes since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+* Support Debian 11
+* Add bootstrap in fossology to beautify ui
+* Remove old gold files
+* Remove old log files
+* Provide custom delimiters for monkbulk scan
+* New info and health endpoints for rest
+* Update license texts from SPDX
+
+NOTE:
+ The release also introduces new look to fossology tool,
+ only few pages have changes/classes of new bootstrap UI. Other
+ pages still needs corrections.
+
+#### Credits to contributors for 4.0.0-rc1
+
+From the GIT commit history, we have following contributors since
+[3.11.0](https://github.com/fossology/fossology/releases/tag/3.11.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Marion Deveaud <marion.deveaud@siemens.com>
+> Piyussshh @Piyussshh
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+> Wonjae Park <wonjae.park@lge.com>
+```
+
+#### Corrections
+
+* `b7fca0b45` fix(logrotate): Send SIGHUP
+* `272c0c8a3` fix(report): same license text for different shortname
+* `31127344e` fix(ui):Fix upload from VCS for parameterize agent
+* `93c5fa446` fix(ui): Change folder edit to bootstrap
+* `8a52c390d` fix (build): do not fail is /usr/share/man* folders already exist
+* `f7dbf3833` fix(rest): fixed the pagination in apis
+* `d8b776ba1` fix(unifiedreport): Fix upload link for API
+* `a3c92909e` hotfix(api): Add missing auth controller
+* `4a978109a` fix(upload): Fix upload description input
+* `36a1573ae` fix(login): Allow non-admin user to update
+* `6c241d202` fix(test): Fix licenseRef.json
+* `e62c84291` fix(ci): Update OpenAPI lint
+* `c039b4c37` fix(ui): Allign folder tree
+* `7e7cf82db` fix(rest): fix typo in openapi.yaml, s/reuse_uplod/reuse_upload/
+* `5b17c4999` fix(ui): add line break in upload name if exceeds 20 chars
+
+#### Features
+
+* `7db93f622` feat(gitpod): Inital contribution
+* `2e2b27642` feat(spasht): Show effective score
+* `7f117cbe6` feat(ui): add bootstrap in fossology to beautify ui
+* `bb9d7f946` feat(licenseText): update license texts from SPDX
+* `5f0696095` feat(monkbulk): Custom delimters
+* `f42e07318` feat(monk): New delimiters dnl
+* `143e20e80` feat(edit-user): Let user can define default folder and use the default
+* `b6de455d6` feat(rest): New info and health endpoints
+* `50ebaf51f` feat(maintagent): Implement deleteOrphanGold fn
+* `9b474be28` feat(ui): Read delimiters for clean text
+* `267ef0af4` feat(rest): Filter uploads with 4 new parameters
+* `31dd1c44f` feat(ci): GitHub-ci for c-tests
+* `3d71a2ca7` feat(os): Support Debian 11
+* `4064dfc31` feat(maintagent): Implement removeOrphanedFiles fn
+* `d0f7bddcf` feat(maintagent): Remove old gold files
+* `856a2c40d` feat(maintagent): Remove old log files
+
+#### Infrastructure
+
+* `6af218c92` chore(os): Drop xenial support for eol
+* `2844492a0` docs(openapi): complete OAS spec to pass linting
+* `32f707c25` chore(lint): make sure swagger spec is correct
+* `a309c814d` ci(actions): Build Docker images in Actions
+* `0d5227960` docs: Updated README.md and CONTRIBUTING.md
+* `50b3bf168` feat(rest): Update upload information
+* `b3d8b4789` feat(unifiedreport): include assigned to in component clearing section
+
+### 3.11.0 (Jul 27th 2021)
+
+This release adds important corrections to
+[3.11.0-rc2](https://github.com/fossology/fossology/releases/tag/3.11.0-rc2)
+
+The release 3.11.0 introduces following major changes since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+* Add bulk undo for deactivated copyrights.
+* Configurable irrelevant file scan for monkbulk.
+* Add job to remove expired tokens from database.
+* Add a simple search to get folder.
+* Unit test cases for REST API.
+* Reuse edited copyright.
+* Add scroll to NOTICE file modal.
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+NOTE:
+ The release 3.11.0 also introduces new agent `reso` which copies
+ license findings from OJO based on REUSE.Software standard on
+ what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0
+
+From the GIT commit history, we have following contributors since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Anwar Hashmi @HashmiAS
+> bighnesh0404 <saibighneshprusty@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> OmarAbdelSamea <1700903@eng.asu.edu.eg>
+> R3da <hash.rkh@gmail.com>
+> Rolf Eike Beer <eb@emlix.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> shivamgoyal7 <goyalshivam661@gmail.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Wonjae Park <wonjae.park@lge.com>
+> Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+
+```
+#### Corrections
+
+* `e4803b8fe` fix(migration): check if uploadtree is empty
+* `635d4904a` fix(rules) : adding debian package for reso agent
+* `b44249e2d` fix(copyright):Change menu text of copyright page
+
+### 3.11.0-RC2 (Jul 12th 2021)
+
+This release adds important corrections to
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1)
+
+The release 3.11.0-rc2 introduces following major changes since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+* Set candidate license creator for ojo.
+* Fix external auth.
+* Updating the license info files.
+
+The release 3.11.0-rc2 also introduces new agent `reso` which copies
+license findings from OJO based on REUSE.Software standard on
+what license is a binary file licensed under(if available).
+
+#### Credits to contributors for 3.11.0-RC2
+
+From the GIT commit history, we have following contributors since
+[3.11.0-rc1](https://github.com/fossology/fossology/releases/tag/3.11.0-rc1):
+
+```
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Michael C. Jaeger <michael.c.jaeger@siemens.com>
+> Nicolas Toussaint <nicolas1.toussaint@orange.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+
+```
+#### Corrections
+
+* `f7c7715fa` fix(reso) fix comment
+* `8e399f0cd` fix(ojo): Set candidate license creator
+* `8031b128b` fix(auth): read default visibility from database rather then config file
+* `b3f0d1db0` fix(api): Check for duplicate shortnames
+* `2d6d8b187` fix(auth): fix call to add_user() when login from external auth
+
+#### Features
+
+* `df52e53ba` feat(rest): Filter licenses by kind
+* `3c98947cf` feat(expose-headers): added the expose headers option for response headers
+* `d1031cae3` feat(reso): new agent for REUSE.Software standard
+* `2e1d28eb1` feat(rest): Add POST/PATCH license endpoints
+
+#### Infrastructure
+
+* `93a47eab0` docs(licenses): updating the license info files
+* `0eacc14af` test(api): Test cases for LicenseController
+
+### 3.11.0-RC1 (Jun 29th 2021)
+
+This release adds important corrections to
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0)
+
+The release 3.11.0-rc1 introduces following major changes since
+[3.10.0](https://github.com/fossology/fossology/releases/tag/3.10.0):
+
+* Add bulk undo for deactivated copyrights.
+* Configurable irrelevant file scan for monkbulk.
+* Add job to remove expired tokens from database.
+* Add a simple search to get folder.
+* Unit test cases for REST API.
+* Reuse edited copyright.
+* Add scroll to NOTICE file modal
+
+```
+> Aman Dwivedi <aman.dwivedi5@gmail.com>
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Anwar Hashmi @HashmiAS
+> bighnesh0404 <saibighneshprusty@gmail.com>
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> OmarAbdelSamea <1700903@eng.asu.edu.eg>
+> R3da <hash.rkh@gmail.com>
+> Rolf Eike Beer <eb@emlix.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> shivamgoyal7 <goyalshivam661@gmail.com>
+> Shruti3004 <mail2shruti.ag@gmail.com>
+> Wonjae Park <wonjae.park@lge.com>
+> Ying-Chun Liu (PaulLiu) <paulliu@debian.org>
+
+```
+#### Corrections
+
+* `858a9070d` fix(ui): Fix the modal height for small screens
+* `01afe6c2d` fix(reuser): Reuse edited copyright
+* `7343edb40` fix(copyright): Make check strict
+* `d90541903` fix(nomos): improved nomos MPL-2.0 detection
+* `e16588a8c` fix(api): Add missing reuser options
+* `7782452a7` fix(ui): Break long lines in copyright table
+* `65832e9a0` fix(debian): Add php-gd package as dependency
+* `576bf4c79` fix(ui-export-list): Dont add integers
+* `c985342f9` fix(ui): License text editor
+* `ac86e7e6c` fix(ui): Add scroll to NOTICE file modal
+* `06796d149` fix: remove wrong 'extern "C"' guards
+* `5365585a6` fix(links): fix broken links
+* `c7a2a9ab1` fix(decision): Create ce for folder decisions irr
+* `1139443b7` fix(Dockerfile): upgrade debian distribution
+* `58160879f` fix(ui): Show error message for invalid license id
+* `d9857c6dc` fix(report): Do not merge ack text
+* `3a6454b4d` Update ReuserAgent.php
+* `c7cfffbdc` fix(UI): fix html errors, css errors and add viewport meta tag
+* `f2ff40b6d` fix(username): update session variable on username change
+* `d92ee4c0b` fix(email): Update email command for s-nail
+* `d5d56f7c2` fix(gcc-10): Fix errors and warnings
+* `83e857261` fix(test): Add new assignee attribute to REST
+* `c38d57888` fix(cli): Dependency exception
+* `858a9070d` fix(ui): Fix the modal height for small screens
+
+#### Features
+
+* `b1ab4d0a0` feat(dbcreate): retry psql check while starting
+* `1d7f5f9fc` feat(restAPI): Added options request and verification function
+* `ff3816fb3` test(rest): Unit test cases for REST API
+* `1c3dab241` feat(licenseExport): include obligation topic in exported CSV
+* `61c320418` feat(ui): Remember assignee filter on Browse view
+* `1e8764463` feat(rest): Add assignee id to fossology API
+* `40b3e2faf` feat(Ui): added Default upload visibility
+* `af89659c7` feat(addMetadata): added creationdate,lastModifiedDate,usernameCreated and usernameModified in candidate license
+* `2bc632925` feat(migration): general improvements for copyright migration
+* `5a7d45708` feat(copyright): add bulk undo for deactivated copyrights
+* `86fe8a3f2` feat(browse): add a simple search to get folder
+* `1dc44506d` feat(ci): Mark PRs with conflict with Actions
+* `47d9cb9be` feat(maintagent): add job to remove expired tokens from database
+* `c563e80ce` feat(export): Download results in spreadsheet (xlsx)
+* `26fe22e8a` feat(monkbulk): Configurable irrelevant file scan
+* `d973e1983` feat(export) : Consolidating results per file or directories
+* `02fcb8afd` feat(rest): Add /users/self endpoint
+
+#### Infrastructure
+
+* `ccabb703c` chore(gitignore): add db.cron and fossdash-publish.py to .gitignore
+* `4238d7808` chore(dependency): update jquery and select2 version
+
 ### 3.10.0 (May 7th 2021)
 
 This release adds important corrections to

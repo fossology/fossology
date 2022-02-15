@@ -59,7 +59,7 @@ jobs:
         run: |
           composer install --prefer-dist --working-dir=src
           src/vendor/bin/phpcs --standard=src/fossy-ruleset.xml -p
-  
+
   copy-paste:
     runs-on: ubuntu-20.04
     continue-on-error: true
@@ -77,3 +77,15 @@ jobs:
           composer install --prefer-dist --working-dir=src
           sudo phpdismod -v ALL -s ALL xdebug
           src/vendor/bin/phpcpd src/cli/ src/copyright/ src/decider*/ src/lib/ src/monk/ src/nomos/ src/readmeoss/ src/spdx2/ src/www/ || echo -e "\033[0;31mDuplication detected: Task Failed"
+
+  openapi-lint:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup default rules
+      run: |
+        echo '{"extends": ["spectral:oas"]}' > .spectral.json
+    - name: Run spectral
+      uses: stoplightio/spectral-action@v0.8.0
+      with:
+        file_glob: src/www/ui/api/documentation/openapi.yaml

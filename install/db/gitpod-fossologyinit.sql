@@ -1,3 +1,7 @@
+--
+-- Copy of fossologyinit.sql for gitpod
+--
+
 create role gitpod with createdb login password 'gitpod';
 --
 -- PostgreSQL database dump

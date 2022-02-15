@@ -22,6 +22,7 @@
   <file>unifiedreport</file>
   <file>softwareHeritage</file>
   <file>www/ui</file>
+  <file>reso</file>
 
   <!--
     The vendor folder by composer must not be scanned.

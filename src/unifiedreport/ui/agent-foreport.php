@@ -125,7 +125,9 @@ class FoUnifiedReportGenerator extends DefaultPlugin
     $uploadId = $upload->getId();
     $jobId = JobAddJob($userId, $groupId, $upload->getFilename(), $uploadId);
     $error = "";
-    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), tracebackTotalUri());
+    $url = tracebackTotalUri();
+    $url = preg_replace("/api\/.*/i", "", $url); // Remove api/v1/report
+    $jobQueueId = $reportGenAgent->AgentAdd($jobId, $uploadId, $error, array(), $url);
     return array($jobId, $jobQueueId, $error);
   }
 }
