@@ -3,12 +3,7 @@
 name: Docker images - master
 
 on:
-  push:
-    branches:
-      - master
-  release:
-    types:
-      - published
+  - push
 
 jobs:
   docker-build:
@@ -35,12 +30,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: fossology/fossology:latest
+        tags: GMishx/fossology:latest
         context: .
-
-    - name: Build and push runner image
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: fossology/fossology:scanner
-        file: utils/automation/Dockerfile.ci

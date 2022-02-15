@@ -3,9 +3,7 @@
 name: Publish Release Packages
 
 on:
-  release:
-    types:
-      - published
+  - release
 
 env:
   DEBIAN_FRONTEND: noninteractive
@@ -110,5 +108,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}
+        tags: GMishx/fossology:${{ steps.get_release.outputs.tag_name }}
         context: .
