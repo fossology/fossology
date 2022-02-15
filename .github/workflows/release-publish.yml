@@ -116,5 +116,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: GMishx/fossology:${{ steps.get_release.outputs.tag_name }}
+        tags: gmishx/fossology:${{ steps.get_release.outputs.tag_name }}
         context: .
