@@ -34,6 +34,14 @@ jobs:
       with:
         fetch-depth: 10
 
+    - name: Setup cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ format('{0}/.composer', env.HOME) }}
+        key: ${{ matrix.os }}-build-${{ hashFiles('src/composer.lock') }}
+        restore-keys: |
+          ${{ matrix.os }}-build-
+
     - name: Install dependencies
       run: |
         apt-get install --no-install-recommends -y wget lsb-release sudo composer curl php-cli

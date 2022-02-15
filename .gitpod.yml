@@ -34,6 +34,7 @@ github:
     pullRequests: true
     pullRequestsFromForks: true
     addBadge: true
+    addComment: true
 workspaceLocation: fossology
 checkoutLocation:  fossology
 
@@ -47,13 +48,20 @@ tasks:
       FOSSOLOGY_DB_PASSWORD: gitpod
       SYSCONFDIR: /workspace/fossy/etc/fossology/
       FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
-    command: |
+  - command: |
       mkdir -p public "/workspace/apache" "/workspace/fossy/srv" "/workspace/fossy/var"
       if [[ -z $(grep "/workspace/apache" "/etc/apache2/apache2.conf") ]];then printf '\nIncludeOptional /workspace/apache/*.conf\n' >> /etc/apache2/apache2.conf; fi
       sudo /usr/sbin/a2enmod rewrite
       sudo chown gitpod:gitpod -R /var/log/apache2/
       apachectl restart
       gp sync-done ui
+      gp preview "$(gp url 8001)/repo/" --external
+    name: Apache UI
+    env:
+      FOSSOLOGY_DB_USER: gitpod
+      FOSSOLOGY_DB_PASSWORD: gitpod
+      SYSCONFDIR: /workspace/fossy/etc/fossology/
+      FO_SYSCONFDIR: /workspace/fossy/etc/fossology/
   - command: |
       gp sync-await ui
       sudo mkdir -p /var/log/fossology/

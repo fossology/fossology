@@ -1,0 +1,15 @@
+{
+  "licenses": [
+    "GPL-2.0+",
+    "GPL-2.0",
+    "GPL",
+    "LGPL-2.1+",
+    "MIT",
+    "BSD-3-Clause"
+  ],
+  "exclude": [
+    "*/agent_tests/*",
+    "src/vendor/*",
+    ".git/*"
+  ]
+}

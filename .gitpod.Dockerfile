@@ -72,12 +72,10 @@ ENV PGDATABASE="postgres"
 # PostgreSQL server is running, and if not starts it.
 RUN printf "\n# Auto-start PostgreSQL server.\n[[ \$(pg_ctl status | grep PID) ]] || pg_start > /dev/null\n" >> ~/.bashrc
 
-# Git branch prepend
-RUN printf "parse_git_branch() {\n  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\\\1)/'\n}\n" >> ~/.bashrc \
- && echo 'PS1="\[\e]0;\u: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[0;33m\]\$(parse_git_branch)\[\033[00m\]$ "' >> ~/.bashrc
-
 # Add custom aliases
 RUN printf "fossinstallparams=\"PREFIX='/workspace/fossy/code' INITDIR='/workspace/fossy/etc' REPODIR='/workspace/fossy/srv' LOCALSTATEDIR='/workspace/fossy/var' APACHE2_SITE_DIR='/workspace/apache' SYSCONFDIR='/workspace/fossy/etc/fossology' PROJECTUSER='gitpod' PROJECTGROUP='gitpod'\"\n" >> ~/.bashrc \
  && printf '# Fossology alias\nalias fossrun="sudo /workspace/fossy/code/share/fossology/scheduler/agent/fo_scheduler --verbose=3 --reset --config /workspace/fossy/etc/fossology/"\n' >> ~/.bash_aliases \
- && printf 'alias fossinstallclean="make clean empty-cache ${fossinstallparams} && make install ${fossinstallparams} && sudo -E ./install/fo-postinstall -oe"\n' >> ~/.bash_aliases \
- && printf 'alias fossinstallnoclean="make install empty-cache ${fossinstallparams} && sudo -E ./install/fo-postinstall -eo"\n' >> ~/.bash_aliases
+ && printf 'alias fossinstallclean="make clean install empty-cache ${fossinstallparams} && sudo -E ./install/fo-postinstall -oe && fossrestart"\n' >> ~/.bash_aliases \
+ && printf 'alias fossinstallnoclean="make install empty-cache ${fossinstallparams} && sudo -E ./install/fo-postinstall -eo && fossrestart"\n' >> ~/.bash_aliases \
+ && printf '# Commit ammend\nalias git-amc="git add --update -v && git commit --amend --no-edit && git push --force-with-lease"\n' >> ~/.bash_aliases \
+ && printf 'alias git-bp="git remote prune \$(git remote) && git gc"\n' >> ~/.bash_aliases
