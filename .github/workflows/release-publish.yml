@@ -85,6 +85,7 @@ jobs:
         release_id: ${{ steps.get_release.outputs.id }}
         draft: ${{ steps.get_release.outputs.draft }}
         prerelease: ${{ steps.get_release.outputs.prerelease }}
+        tag_name: ${{ steps.get_release.outputs.tag_name }}
 
   docker-release-build:
     runs-on: ubuntu-latest
