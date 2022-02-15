@@ -52,7 +52,7 @@ class AjaxAdminScheduler extends DefaultPlugin
     $vars['jobOptions'] = $this->jobListOption($operation);
     $vars['operation'] = $operation;
     $vars['priorityList'] = $this->priorityListOption();
-    $content = $this->renderer->loadTemplate('ajax-admin-scheduler.html.twig')->render($vars);
+    $content = $this->renderer->load('ajax-admin-scheduler.html.twig')->render($vars);
 
     if ('pause' == $operation || 'restart' == $operation ||
       'status' == $operation || 'priority' == $operation) {

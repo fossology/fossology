@@ -29,12 +29,12 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

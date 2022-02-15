@@ -26,6 +26,10 @@ namespace Fossology\UI\Api\Middlewares;
 require_once dirname(dirname(dirname(dirname(dirname(__FILE__))))) .
   "/lib/php/bootstrap.php";
 
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Psr7\Response;
+
 /**
  * @class FossologyInitMiddleware
  * @brief Middleware to initialize FOSSology for Slim framework
@@ -35,13 +39,12 @@ class FossologyInitMiddleware
   /**
    * Clean all FOSSology plugins and load them again.
    *
-   * @param  \Psr\Http\Message\ServerRequestInterface $request  PSR7 request
-   * @param  \Psr\Http\Message\ResponseInterface      $response PSR7 response
-   * @param  callable                                 $next     Next middleware
+   * @param  Request        $request  PSR7 request
+   * @param  RequestHandler $response PSR-15 request handler
    *
-   * @return \Psr\Http\Message\ResponseInterface
+   * @return Response
    */
-  public function __invoke($request, $response, $next)
+  public function __invoke(Request $request, RequestHandler $handler) : Response
   {
     global $container;
     $timingLogger = $container->get("log.timing");
@@ -49,7 +52,7 @@ class FossologyInitMiddleware
     plugin_postinstall();
     $timingLogger->toc("setup plugins");
 
-    $response = $next($request, $response);
+    $response = $handler->handle($request);
 
     plugin_unload();
     return $response;

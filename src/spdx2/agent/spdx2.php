@@ -655,7 +655,7 @@ class SpdxTwoAgent extends Agent
    */
   protected function renderString($templateName, $vars)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars);
+    return $this->renderer->load($templateName)->render($vars);
   }
 
   /**

@@ -295,7 +295,7 @@ abstract class DefaultPlugin implements Plugin
 
     $startTime = microtime(true);
 
-    $content = $this->renderer->loadTemplate($templateName)
+    $content = $this->renderer->load($templateName)
         ->render($vars ?: $this->getDefaultVars());
 
     $this->logger->debug(sprintf("%s: render response in %.3fs", get_class($this), microtime(true) - $startTime));

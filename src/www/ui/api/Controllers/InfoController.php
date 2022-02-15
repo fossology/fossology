@@ -23,8 +23,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -38,11 +38,10 @@ class InfoController extends RestController
    * Get the current API info
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
-   * @param array $args
-   * @return ResponseInterface
+   * @param ResponseHelper $response
+   * @return ResponseHelper
    */
-  public function getInfo($request, $response, $args)
+  public function getInfo($request, $response)
   {
     global $SysConf;
     try {
@@ -99,9 +98,9 @@ class InfoController extends RestController
    * Get the API health status
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args  Set to -1 in index.php if DB connection failed
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getHealth($request, $response, $args)
   {

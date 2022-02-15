@@ -24,7 +24,7 @@ use Fossology\Lib\Test\EnumMapTestBase;
 class DecisionScopesTest extends EnumMapTestBase
 {
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->setTypes(new DecisionScopes());
   }

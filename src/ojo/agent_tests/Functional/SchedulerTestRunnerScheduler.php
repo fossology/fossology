@@ -61,7 +61,7 @@ class SchedulerTestRunnerScheduler implements SchedulerTestRunner
       }
       $retCode = pclose($pipeFd);
     } else {
-      print "failed opening pipe to $cmd";
+      print "failed opening pipe to $pCmd";
     }
 
     unlink("$sysConf/mods-enabled/$agentName/VERSION");

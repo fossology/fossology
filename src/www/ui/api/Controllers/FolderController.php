@@ -23,8 +23,8 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Models\Folder;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
@@ -40,9 +40,9 @@ class FolderController extends RestController
    * Get all folders accessible by the user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getFolders($request, $response, $args)
   {
@@ -91,9 +91,9 @@ class FolderController extends RestController
    * Create a new folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function createFolder($request, $response, $args)
   {
@@ -133,9 +133,9 @@ class FolderController extends RestController
    * Delete a folder all sub-folders and uploads within the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function deleteFolder($request, $response, $args)
   {
@@ -171,9 +171,9 @@ class FolderController extends RestController
    * Change the description/name of the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function editFolder($request, $response, $args)
   {
@@ -200,9 +200,9 @@ class FolderController extends RestController
    * Copy/move the folder
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function copyFolder($request, $response, $args)
   {

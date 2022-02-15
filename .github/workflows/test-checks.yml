@@ -59,12 +59,12 @@ jobs:
         run: |
           ./utils/prepare-test -afty
 
-          #remove test all as delagent is failing
       - name: Unit tests
         env:
           PGHOST: 127.0.0.1
           PGPORT: 5432
         run: |
-          make all phpvendors test-cli test-copyright test-lib test-monk \
+          make all phpvendors
+          make test-cli test-copyright test-lib test-monk \
           test-nomos test-ojo test-reuser test-scheduler test-spdx2 \
           test-unifiedreport test-www

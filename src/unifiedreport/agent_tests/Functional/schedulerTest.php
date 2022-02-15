@@ -69,7 +69,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup test env
    */
-  public function setUp()
+  public function setUp() : void
   {
     $this->testDb = new TestPgDb("report".time());
     $this->dbManager = $this->testDb->getDbManager();
@@ -81,7 +81,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Tear down test env
    */
-  public function tearDown()
+  public function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     // $this->testDb->fullDestruct();

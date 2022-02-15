@@ -423,7 +423,7 @@ class FO_Plugin implements Plugin
    */
   public function renderString($templateName, $vars = null)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars ?: $this->vars);
+    return $this->renderer->load($templateName)->render($vars ?: $this->vars);
   }
 
   /**

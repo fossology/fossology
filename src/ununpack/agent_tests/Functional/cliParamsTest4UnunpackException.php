@@ -53,7 +53,7 @@ class cliParamsTest4UnunpackExcption extends \PHPUnit\Framework\TestCase
    * @brief Setup test repo and db
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  function setUp()
+  function setUp() : void
   {
     $this->testDb = new TestPgDb('ununpackExceptional');
     $this->agentDir = dirname(dirname(__DIR__))."/";
@@ -73,7 +73,7 @@ class cliParamsTest4UnunpackExcption extends \PHPUnit\Framework\TestCase
    * @brief Teardown test repo and db
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  public function tearDown()
+  public function tearDown() : void
   {
     $this->testInstaller->uninstall($this->agentDir);
     $this->testInstaller->clear();

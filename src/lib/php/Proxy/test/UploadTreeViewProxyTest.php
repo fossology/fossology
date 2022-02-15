@@ -28,7 +28,7 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
   /** @var ItemTreeBounds|M\MockInterface */
   private $itemTreeBounds;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
   }

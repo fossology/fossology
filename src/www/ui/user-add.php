@@ -158,7 +158,7 @@ class user_add extends FO_Plugin
 
     $V = "<form name='user_add' method='POST'>\n";
     $V.= _("To create a new user, enter the following information:<P />\n");
-    $Style = "<tr><td colspan=2 style='background:black;'></td></tr><tr>";
+    $Style = "<tr style='border-bottom:1px solid black'>";
     $V.= "<table style='border:1px solid black; text-align:left; background:lightyellow;' width='75%'>";
     $Val = htmlentities(GetParm('username', PARM_TEXT), ENT_QUOTES);
     $text = _("Username");

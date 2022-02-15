@@ -17,16 +17,16 @@
         <button type="submit" name="update" class="btn btn-default btn-sm" id="next" disabled>&gt;</button>
       </td>
       <td>
-        <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="none"> 
-        {% trans "Go through all files" %}
+        <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="none">
+        {{ "Go through all files"|trans }}
         <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing through every file of the upload'|trans }}" alt="" class="info-bullet"/></img>
         <br/>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="noLicense">
-        {% trans "Go through all files with licenses" %}
+        {{ "Go through all files with licenses"|trans }}
         <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent, regardless of an existing clearing result or not'|trans }}" alt="" class="info-bullet"/></img>
         <br/>
         <input type="radio" class="info-bullet view-license-rc-size" name="FileSelection" value="alreadyCleared">
-        {% trans "Go through all files with licenses and no clearing result" %}
+        {{ "Go through all files with licenses and no clearing result"|trans }}
         <img data-toggle="tooltip" data-placement="left" src="images/info_16.png" title="{{ 'Back and forward browsing going through files only with a license found by a scanner agent only where no clearing result was created. This setting is useful for just browsing to “remaining work”'|trans }}" alt="" class="info-bullet"/>
       </td>
     </tr>

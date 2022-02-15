@@ -27,13 +27,13 @@ require_once dirname(dirname(dirname(dirname(__DIR__)))) .
   '/lib/php/Plugin/FO_Plugin.php';
 
 use Mockery as M;
-use Slim\Http\Response;
 use Fossology\UI\Api\Controllers\UserController;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\UI\Api\Helper\ResponseHelper;
 
 /**
  * @class UserControllerTest
@@ -64,7 +64,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $container;
     $container = M::mock('ContainerBuilder');
@@ -83,7 +83,7 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
@@ -140,8 +140,8 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
-    $expectedResponse = (new Response())->withJson($user[0], 200);
-    $actualResponse = $this->userController->getUsers(null, new Response(),
+    $expectedResponse = (new ResponseHelper())->withJson($user[0], 200);
+    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(),
       ['id' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -160,9 +160,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
     $error = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-    $expectedResponse = (new Response())->withJson($error->getArray(),
+    $expectedResponse = (new ResponseHelper())->withJson($error->getArray(),
       $error->getCode());
-    $actualResponse = $this->userController->getUsers(null, new Response(),
+    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(),
       ['id' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -180,8 +180,8 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $users = $this->getUsers([2, 3, 4]);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([null])
       ->andReturn($users);
-    $expectedResponse = (new Response())->withJson($users, 200);
-    $actualResponse = $this->userController->getUsers(null, new Response(), []);
+    $expectedResponse = (new ResponseHelper())->withJson($users, 200);
+    $actualResponse = $this->userController->getUsers(null, new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),
@@ -200,9 +200,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
       ->withArgs(["users", "user_pk", $userId])->andReturn(true);
     $this->dbHelper->shouldReceive('deleteUser')->withArgs([$userId]);
     $info = new Info(202, "User will be deleted", InfoType::INFO);
-    $expectedResponse = (new Response())->withJson($info->getArray(),
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
-    $actualResponse = $this->userController->deleteUser(null, new Response(),
+    $actualResponse = $this->userController->deleteUser(null, new ResponseHelper(),
       ['id' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -221,9 +221,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('doesIdExist')
       ->withArgs(["users", "user_pk", $userId])->andReturn(false);
     $info = new Info(404, "UserId doesn't exist", InfoType::ERROR);
-    $expectedResponse = (new Response())->withJson($info->getArray(),
+    $expectedResponse = (new ResponseHelper())->withJson($info->getArray(),
       $info->getCode());
-    $actualResponse = $this->userController->deleteUser(null, new Response(),
+    $actualResponse = $this->userController->deleteUser(null, new ResponseHelper(),
       ['id' => $userId]);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
@@ -243,9 +243,9 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
-    $expectedResponse = (new Response())->withJson($user[0], 200);
+    $expectedResponse = (new ResponseHelper())->withJson($user[0], 200);
     $actualResponse = $this->userController->getCurrentUser(null,
-      new Response(), []);
+      new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),

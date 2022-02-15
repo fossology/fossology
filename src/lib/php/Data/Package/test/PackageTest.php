@@ -33,7 +33,7 @@ class PackageTest extends \PHPUnit\Framework\TestCase
   /** @var Package */
   private $package;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->uploads = array(M::mock(Upload::class));
 

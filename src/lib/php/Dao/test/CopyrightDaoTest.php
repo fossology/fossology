@@ -41,13 +41,13 @@ class CopyrightDaoTest extends \PHPUnit\Framework\TestCase
   /** @var DbManager */
   private $dbManager;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb = null;
     $this->dbManager = null;

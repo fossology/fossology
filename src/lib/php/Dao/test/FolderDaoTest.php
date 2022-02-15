@@ -32,7 +32,7 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
   /** @var FolderDao */
   private $folderDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
@@ -48,7 +48,7 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;

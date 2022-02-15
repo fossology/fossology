@@ -27,8 +27,8 @@ use Mockery as M;
 use Symfony\Component\Yaml\Parser;
 use Fossology\UI\Api\Helper\DbHelper;
 use Fossology\UI\Api\Helper\RestHelper;
-use Slim\Http\Response;
 use Fossology\UI\Api\Controllers\InfoController;
+use Fossology\UI\Api\Helper\ResponseHelper;
 
 /**
  * @class InfoControllerTest
@@ -64,7 +64,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     global $container;
     $container = M::mock('ContainerBuilder');
@@ -83,7 +83,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
@@ -131,7 +131,7 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
       "commitDate" => "2021-12-31T18:31:00+00:00",
       "buildDate"  => "2021-12-31T18:32:00+00:00"
     ];
-    $expectedResponse = (new Response())->withJson(array(
+    $expectedResponse = (new ResponseHelper())->withJson(array(
       "name" => $apiTitle,
       "description" => $apiDescription,
       "version" => $apiVersion,
@@ -143,8 +143,8 @@ class InfoControllerTest extends \PHPUnit\Framework\TestCase
       ],
       "fossology" => $fossInfo
     ), 200);
-    $actualResponse = $this->infoController->getInfo(null, new Response(),
-      []);
+    $actualResponse = $this->infoController->getInfo(null,
+      new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),
       $actualResponse->getStatusCode());
     $this->assertEquals($this->getResponseJson($expectedResponse),

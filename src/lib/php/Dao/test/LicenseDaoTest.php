@@ -33,14 +33,14 @@ class LicenseDaoTest extends \PHPUnit\Framework\TestCase
   /** @var DbManager */
   private $dbManager;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb();
     $this->dbManager = $this->testDb->getDbManager();
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb = null;
     $this->dbManager = null;

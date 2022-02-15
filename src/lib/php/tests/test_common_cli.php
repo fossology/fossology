@@ -31,7 +31,7 @@ class test_common_cli extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp()
+  protected function setUp() : void
   {
   }
 
@@ -58,7 +58,7 @@ class test_common_cli extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     if (file_exists("./cli.log")) {
       unlink("./cli.log");

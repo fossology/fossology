@@ -57,7 +57,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
    * @brief Setup test repo and db
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  function setUp()
+  function setUp() : void
   {
     global $TEST_DATA_PATH;
     global $TEST_RESULT_PATH;
@@ -85,7 +85,7 @@ class cliParamsTest4Ununpack extends \PHPUnit\Framework\TestCase
    * @brief Teardown test repo and db
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  public function tearDown()
+  public function tearDown() : void
   {
     $this->testInstaller->uninstall($this->agentDir);
     $this->testInstaller->clear();

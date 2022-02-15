@@ -33,7 +33,7 @@ class UserInfoTest extends \PHPUnit\Framework\TestCase
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->userInfo = new UserInfo();
   }

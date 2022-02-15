@@ -62,7 +62,7 @@ class SolidDbManager extends DbManager
     $res = $this->dbDriver->query($statement);
     $execTime = microtime(true) - $startTime;
     $this->collectStatistics($statementName, $execTime);
-    $this->logger->addDebug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
+    $this->logger->debug("execution of '$statementName' took " . $this->formatMilliseconds($execTime));
     $this->checkResult($res, "$statementName :: $statement");
     return $res;
   }
@@ -96,7 +96,7 @@ class SolidDbManager extends DbManager
       $sql = $sqlRep;
     }
     if (preg_match('/(\$[\d]+)([^\d]|$)/', $sql, $match)) {
-      $this->logger->addDebug($match[1]." in '$statementName not resolved");
+      $this->logger->debug($match[1]." in '$statementName not resolved");
     }
     return $sql;
   }

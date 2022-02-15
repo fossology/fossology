@@ -123,7 +123,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup test env
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("reuserSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -149,7 +149,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Tear down test env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

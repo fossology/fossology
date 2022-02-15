@@ -225,7 +225,7 @@ class ui_file_browse extends DefaultPlugin
    */
   public function renderString($templateName, $vars)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars);
+    return $this->renderer->load($templateName)->render($vars);
   }
 }
 

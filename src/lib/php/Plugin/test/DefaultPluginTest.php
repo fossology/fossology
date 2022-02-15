@@ -98,7 +98,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
   /** @var TestPlugin */
   private $plugin;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
@@ -120,7 +120,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->plugin = new TestPlugin($this->name);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

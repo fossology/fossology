@@ -34,7 +34,7 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
   public $DB_NAME =  "";
 
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
     if (!is_callable('pg_connect')) {
       $this->markTestSkipped("php-psql not found");
@@ -94,7 +94,7 @@ class test_common_pkg extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     if (!is_callable('pg_connect')) {
       return;

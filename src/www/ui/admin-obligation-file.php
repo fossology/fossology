@@ -243,7 +243,7 @@ class admin_obligation_file extends FO_Plugin
            "<img border=0 src='" . Traceback_uri() . "images/button_edit.png'></a></td>";
 
       $ob .= "<td align=left>$row[ob_type]</td>";
-      $ob .= "<td align=left>$row[ob_topic]</td>";
+      $ob .= "<td align=left>" . htmlspecialchars($row["ob_topic"]) . "</td>";
       $vetext = htmlspecialchars($row['ob_text']);
       $ob .= "<td><textarea readonly=readonly rows=3 cols=40>$vetext</textarea></td> ";
       $ob .= "<td align=left>$row[ob_classification]</td>";

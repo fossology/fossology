@@ -99,7 +99,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase
 
 
   // this method is run once before each test method defined for this test class.
-  protected function setUp()
+  protected function setUp() : void
   {
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -418,7 +418,7 @@ class test_cp2foss extends \PHPUnit\Framework\TestCase
    * \brief clean the env
    */
   // this method is run once after each test method defined for this test class.
-  protected function tearDown()
+  protected function tearDown() : void
   {
 
     global $fossology_testconfig;
