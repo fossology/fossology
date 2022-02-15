@@ -1,6 +1,6 @@
 <?php
 /***********************************************************
- Copyright (C) 2019 Siemens AG
+ Copyright (C) 2019,2021 Siemens AG
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -42,6 +42,10 @@ class exportLicenseRef
     $updateExisting = '';
     $addNewLicense = '';
     $newLicenseRefData = array();
+    $scanList = array(
+      'licenses' => 'https://spdx.org/licenses/licenses.json',
+      'exceptions' => 'https://spdx.org/licenses/exceptions.json'
+    );
     $usage = "Usage: " . basename($argv[0]) . " [options]
 
       Create new licenseref.json file.  Options are:
@@ -64,10 +68,6 @@ class exportLicenseRef
           For type 'licenses' URL is : $scanList[licenses]
 
           For type 'exceptions' URL is : $scanList[exceptions]";
-    $scanList = array(
-    'licenses' => 'https://spdx.org/licenses/licenses.json',
-    'exceptions' => 'https://spdx.org/licenses/exceptions.json'
-    );
 
     $options = getopt("hcEen", array("type:","url:"));
     /* get type and url if exists if not set them to empty */
@@ -203,10 +203,10 @@ class exportLicenseRef
             !empty($updateExisting)
           )
          ) {
-        $existingLicenseRefData[$licenseIdCheck]['rf_fullname'] = $getCurrentData[$this->mapArrayData[$type][2]];
-        $existingLicenseRefData[$licenseIdCheck]['rf_text'] = $getCurrentData[$this->mapArrayData[$type][1]];
+        $existingLicenseRefData[$licenseIdCheck]['rf_fullname'] = $this->replaceUnicode($getCurrentData[$this->mapArrayData[$type][2]]);
+        $existingLicenseRefData[$licenseIdCheck]['rf_text'] = $this->replaceUnicode($getCurrentData[$this->mapArrayData[$type][1]]);
         $existingLicenseRefData[$licenseIdCheck]['rf_url'] = $getCurrentData['seeAlso'][0];
-        $existingLicenseRefData[$licenseIdCheck]['rf_notes'] = (array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : $existingLicenseRefData[$licenseIdCheck]['rf_notes']);
+        $existingLicenseRefData[$licenseIdCheck]['rf_notes'] = $this->replaceUnicode((array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : $existingLicenseRefData[$licenseIdCheck]['rf_notes']));
         echo "INFO: license ".$getCurrentData[$this->mapArrayData[$type][0]]." updated\n\n";
       }
       if (!is_numeric($licenseIdCheck) &&
@@ -218,7 +218,7 @@ class exportLicenseRef
          ) {
         $existingLicenseRefData[] = array(
           'rf_shortname' => $getCurrentData[$this->mapArrayData[$type][0]],
-          'rf_text' =>  $getCurrentData[$this->mapArrayData[$type][1]],
+          'rf_text' =>  $this->replaceUnicode($getCurrentData[$this->mapArrayData[$type][1]]),
           'rf_url' =>  $getCurrentData['seeAlso'][0],
           'rf_add_date' => null,
           'rf_copyleft' => null,
@@ -227,7 +227,7 @@ class exportLicenseRef
           'rf_FSFfree' => null,
           'rf_GPLv2compatible' => null,
           'rf_GPLv3compatible' => null,
-          'rf_notes' => (array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : null),
+          'rf_notes' => $this->replaceUnicode((array_key_exists("licenseComments", $getCurrentData) ? $getCurrentData['licenseComments'] : null)),
           'rf_Fedora' => null,
           'marydone' => "f",
           'rf_active' => "t",
@@ -242,6 +242,35 @@ class exportLicenseRef
       }
     }
     return $existingLicenseRefData;
+  }
+
+  /**
+   * Replace common unicode characters with ASCII for consistent results.
+   *
+   * @param string $text Input text
+   * @return string Input with characters replaced
+   */
+  private function replaceUnicode($text)
+  {
+    $search = [
+      '\u00a0',  // no break space
+      '\u2018',  // Left single quote
+      '\u2019',  // Right single quote
+      '\u201c',  // Left double quote
+      '\u201d',  // Right double quote
+      '\u2013',  // em dash
+    ];
+
+    $replace = [
+      " ",
+      "'",
+      "'",
+      '"',
+      '"',
+      "-",
+    ];
+
+    return str_replace($search, $replace, $text);
   }
 }
 $obj = new exportLicenseRef();

@@ -14,6 +14,7 @@
       <th>Revision</th>
       <th>Type</th>
       <th>Provider</th>
+      <th>Effective Score</th>
       <th>Action</th>
     </tr>
   </thead>
@@ -34,6 +35,7 @@
       </td>
       <td id="definitionsRow_type{{ loop.index0 }}">{{ result.type }}</td>
       <td id="definitionsRow_provider{{ loop.index0 }}">{{ result.provider }}</td>
+      <td id="definitionsRow_score{{ loop.index0 }}">{{ result.score }}</td>
       <td onclick="showDetails({{ loop.index0 }})"><a href="#!">Show Details</a></td>
     </tr>
   {% endfor %}

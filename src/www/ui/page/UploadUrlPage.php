@@ -71,10 +71,11 @@ class UploadUrlPage extends UploadPageBase
     $mode = (1 << 2); // code for "it came from wget"
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
+    $setGlobal = ($request->get('globalDecisions')) ? 1 : 0;
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
 
-    $uploadId = JobAddUpload($userId, $groupId, $shortName, $getURL, $description, $mode, $folderId, $publicPermission);
+    $uploadId = JobAddUpload($userId, $groupId, $shortName, $getURL, $description, $mode, $folderId, $publicPermission, $setGlobal);
     if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);

@@ -6831,7 +6831,11 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
   }
   cleanLicenceBuffer();
   /* Mozilla Public License possibility */
-  if (!lmem[_mMPL] && URL_INFILE(_URL_MPL_LATEST)) {
+  if (!lmem[_mMPL] && INFILE(_TEXT_MPLV2) && INFILE(_URL_MPL20)) {
+      INTERESTING("MPL-2.0");
+      lmem[_mMPL] = 1;
+  }
+  else if (!lmem[_mMPL] && URL_INFILE(_URL_MPL_LATEST)) {
     INTERESTING(lDebug ? "MPL(latest)" : "MPL");
   }
   cleanLicenceBuffer();
@@ -9899,7 +9903,7 @@ void checkFileReferences(char *filetext, int size, int score, int kwbm,
   if(HASTEXT(_LT_SEE_COPYING_LICENSE_1, REG_EXTENDED) || HASTEXT(_LT_SEE_COPYING_LICENSE_2, REG_EXTENDED)) {
     INTERESTING("See-file");
   }
-  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED)) {
+  else if (HASTEXT(_LT_SEE_URL, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref1, REG_EXTENDED) || HASTEXT(_LT_SEE_URL_ref2, REG_EXTENDED)) {
     INTERESTING("See-URL");
   }
   return;

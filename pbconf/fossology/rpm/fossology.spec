@@ -447,9 +447,11 @@ cp VERSION $RPM_BUILD_ROOT%{_sysconfdir}/PBPROJ/
 %{_sysconfdir}/PBPROJ/mods-enabled/spdx2
 %{_sysconfdir}/PBPROJ/mods-enabled/dep5
 %{_sysconfdir}/PBPROJ/mods-enabled/spdx2tv
+%{_sysconfdir}/PBPROJ/mods-enabled/spdx2csv
 %{_datadir}/PBPROJ/spdx2/*
 %{_datadir}/PBPROJ/dep5/*
 %{_datadir}/PBPROJ/spdx2tv/*
+%{_datadir}/PBPROJ/spdx2csv/*
 
 #
 # post

@@ -278,21 +278,20 @@ class CopyrightHistogramProcessPost extends FO_Plugin
     $filterParms = $params;
     $searchFilter = $this->addSearchFilter($filterParms);
 
-    $activatedClause = "";
+    $activatedClause = "ce.is_enabled = 'false'";
     if ($activated) {
-      $activatedClause = "NOT";
+      $activatedClause = "ce.is_enabled IS NULL OR ce.is_enabled = 'true'";
     }
     $unorderedQuery = "FROM $tableName AS cp " .
         "INNER JOIN $uploadTreeTableName AS UT ON cp.pfile_fk = UT.pfile_fk " .
         "LEFT JOIN $tableNameEvent AS ce ON ce.".$tableName."_fk = cp.".$tableName."_pk " .
-        "AND ce.upload_fk = $5 " .
+        "AND ce.upload_fk = $5 AND ce.uploadtree_fk = UT.uploadtree_pk " .
         $join .
         "WHERE cp.content!='' " .
         "AND ( UT.lft  BETWEEN  $1 AND  $2 ) " .
         "AND cp.type = $3 " .
         "AND cp.agent_fk= $4 " .
-        "AND cp." . $tableName . "_pk $activatedClause IN " .
-        "(SELECT " . $tableName . "_fk FROM $tableNameEvent WHERE upload_fk = $5 AND is_enabled = false)" .
+        "AND ($activatedClause)" .
         $sql_upload;
     $grouping = " GROUP BY mcontent ";
 
@@ -440,6 +439,13 @@ count(*) AS copyright_count " .
     $link = "<a href='";
     $link .= Traceback_uri();
     $urlArgs = "?mod=".$listPage."&agent=$agentId&item=$uploadTreeId&hash=$hash&type=$type";
+    if ((empty($filter) || $filter == "all")) {
+      if ($activated) {
+        $filter = "active";
+      } else {
+        $filter = "inactive";
+      }
+    }
     if (!empty($filter)) {
       $urlArgs .= "&filter=$filter";
     }

@@ -58,15 +58,18 @@ class SpdxTwoGeneratorUi extends DefaultPlugin
    */
   function preInstall()
   {
-    $text = _("Generate SPDX report");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;RDF", 0, self::NAME, $text);
+    $text = _("Generate SPDX report in RDF format");
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;RDF&nbsp;report", 0, self::NAME, $text);
     menu_insert("UploadMulti::Generate&nbsp;SPDX", 0, self::NAME, $text);
 
     $text = _("Generate SPDX report in tag:value format");
-    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;SPDX&nbsp;tag:value&nbsp;report", 0, self::NAME . '&outputFormat=spdx2tv', $text);
+
+    $text = _("Generate CSV report (with SPDX IDs)");
+    menu_insert("Browse-Pfile::Export&nbsp;CSV&nbsp;report&nbsp;(SPDX)", 0, self::NAME . '&outputFormat=spdx2csv', $text);
 
     $text = _("Generate Debian Copyright file");
-    menu_insert("Browse-Pfile::Export&nbsp;DEP5", 0, self::NAME . '&outputFormat=dep5', $text);
+    menu_insert("Browse-Pfile::Export&nbsp;DEP5&nbsp;report", 0, self::NAME . '&outputFormat=dep5', $text);
   }
 
   /**

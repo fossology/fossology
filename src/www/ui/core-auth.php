@@ -3,6 +3,8 @@
  * Copyright (C) 2008-2013 Hewlett-Packard Development Company, L.P.
  * Copyright (C) 2015 Siemens AG
  * Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
+ * Copyright (c) 2021-2022 Orange
+ * Contributors: Piotr Pszczola, Bartlomiej Drozdz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -289,7 +291,8 @@ class core_auth extends FO_Plugin
         $Email = $this->authExternal['emailAuthExternal'];
         /* Set default list of agents when a new user is created */
         $agentList = $GLOBALS['SysConf']['EXT_AUTH']['CONF_EXT_AUTH_NEW_USER_AGENT_LIST'];
-        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify, $agentList, $Folder);
+        add_user($User, $Desc, $Hash, $Perm, $Email, $Email_notify,
+          $GLOBALS['SysConf']['SYSCONFIG']['UploadVisibility'], $agentList, $Folder);
       }
     }
 
@@ -332,6 +335,12 @@ class core_auth extends FO_Plugin
       return false;
     }
 
+    if (!$this->userDao->isUserActive($userName)) {
+      /* user not active */
+      $this->vars['userInactive'] = true;
+      return false;
+    }
+
       /* If you make it here, then username and password were good! */
     $this->updateSession($row);
 
@@ -349,6 +358,9 @@ class core_auth extends FO_Plugin
     } else {
       $_SESSION['NoPopup'] = 0;
     }
+
+    $this->userDao->updateUserLastConnection($row['user_pk']);
+
     return true;
   }
 }

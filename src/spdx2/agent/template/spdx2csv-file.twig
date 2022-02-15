@@ -1,0 +1,37 @@
+{# Copyright 2021 Orange
+
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+#}
+{{- fileName -}},SPDXRef-item{{- fileId -}},
+{%- if isCleared -%}
+{%- if concludedLicenses|default is empty -%}
+NONE,
+{%- else -%}
+"{{- concludedLicense -}}",
+{%- endif -%}
+{%- else -%}
+NOASSERTION,
+{%- endif -%}
+{%- if licenseComment != null -%}
+"{{ licenseComment
+                                       |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+                                       |replace({'\f':''})
+                                       |replace({'"':'""'}) }}"
+{%- endif -%},
+{%- if scannerLicenses|default is empty -%}
+NOASSERTION,
+{%- else -%}
+"{{- scannerLicenses|join('AND')
+                    |replace({' ':'-'})
+                    |replace({'AND':' AND '}) -}}",
+{%- endif -%}
+{%- if copyrights|default is empty -%}
+NOASSERTION
+{%- else -%}
+"{{- copyrights |join(';')
+                |replace({'<text>':'&lt;text&gt;','</text>':'&lt;/text&gt;'})
+                |replace({ '\r\n': ' ', '\n': ' ', '\r': ' ' })
+                |replace({'\f':''})
+                |replace({'"':'""'}) }}" {% endif %}                                    

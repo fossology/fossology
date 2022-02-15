@@ -1,3 +1,22 @@
+# FOSSology gitpod.io Dockerfile
+# Copyright (C) 2021 Siemens AG
+# Author: Gaurav Mishra <mishra.gaurav@siemens.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# Description: Docker container image recipe for gitpod.io workspace
+
 FROM gitpod/workspace-full:latest
 
 USER root
@@ -47,10 +66,6 @@ ENV PATH="$PATH:$HOME/.pg_ctl/bin"
 ENV DATABASE_URL="postgresql://postgres@localhost"
 ENV PGHOSTADDR="127.0.0.1"
 ENV PGDATABASE="postgres"
-
-# Git branch prepend
-RUN printf "parse_git_branch() {\n  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\\\1)/'\n}\n" >> ~/.bashrc \
- && echo 'PS1="\[\e]0;\u: \w\a\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[0;33m\]\$(parse_git_branch)\[\033[00m\]$ "' >> ~/.bashrc
 
 # This is a bit of a hack. At the moment we have no means of starting background
 # tasks from a Dockerfile. This workaround checks, on each bashrc eval, if the

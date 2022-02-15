@@ -39,31 +39,18 @@ class AuthController extends RestController
 {
 
   /**
-   * Get the authentication headers for the user.
+   * Respond to OPTIONS requests with an empty 204 response
    *
    * @param ServerRequestInterface $request
    * @param ResponseInterface $response
    * @param array $args
    * @return ResponseInterface
-   * @deprecated Use createNewJwtToken()
    */
-  public function getAuthHeaders($request, $response, $args)
-  {
-    $warningMessage = "The resource is deprecated. Use /tokens";
-    $returnVal = new Info(406, $warningMessage, InfoType::ERROR);
-
-    return $response->withHeader('Warning', $warningMessage)->withJson(
-      $returnVal->getArray(), $returnVal->getCode());
-  }
   public function optionsVerification($request, $response, $args)
   {
-    global $SysConf;
-    return $response->withStatus(204)
-      ->withHeader('Access-Control-Allow-Origin', $SysConf['SYSCONFIG']['CorsOrigins'])
-      ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
-      ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS')
-      ->withHeader('Access-Control-Allow-Credentials', 'true');
+    return $response->withStatus(204);
   }
+
   /**
    * Get the JWT authentication headers for the user
    *
@@ -163,3 +150,4 @@ class AuthController extends RestController
     return !array_diff_key(array_flip($keys), $array);
   }
 }
+

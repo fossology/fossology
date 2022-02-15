@@ -21,6 +21,7 @@
 var magicNumberNoLicenseFoundInt = 507;
 var magicNumberNoLicenseFound = "507";
 var noLicenseString = "No_license_found";
+var bulkModalOpened = 0;
 
 
 function jsArrayFromHtmlOptions(pListBox) {
@@ -156,7 +157,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
-    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0
+    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
+    "delimiters": $("#delimdrop").val()
   };
 
   resultEntity.hide();
@@ -202,7 +204,7 @@ function modifyLicense(doWhat ,uploadId, uploadTreeId, licenseId) {
   $.getJSON("?mod=conclude-license&do=" + doWhat + "&upload=" + uploadId + "&item=" + uploadTreeId + "&licenseId=" + licenseId)
     .done(function (data) {
       if(data) {
-        $('#decTypeSet').addClass('decTypeWip');
+        $('#decTypeSet').addClass('border-danger');
       }
       var table = createClearingTable();
       table.fnDraw(false);
@@ -240,6 +242,14 @@ function removeMainLicense(uploadId,licenseId) {
   }
 }
 
+function htmlDecode(value) {
+    if (value) {
+        return $('<div/>').html(value).text();
+    } else {
+        return '';
+    }
+}
+
 function openTextModel(uploadTreeId, licenseId, what, type) {
   var refTextId = "#referenceText"
 
@@ -250,22 +260,24 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
   if (what == 3 || what === 'acknowledgement') {
     // clicked to add button to display child modal
     $('#selectFromNoticeFile').css('display','inline-block');
+  } else {
+    $('#selectFromNoticeFile').css('display','none');
   }
 
   if(type == 0) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
     whatCol = what;
-    $(refTextId).val(clearingsForSingleFile);
+    $(refTextId).val(htmlDecode(clearingsForSingleFile));
     if (what == 4 || what == "comment") {
       createDropDown($("#textModal > form > div"), $("#referenceText"));
     } else {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.dialog('open');
+    textModal.modal('show');
   } else {
-    $(refTextId).val($("#"+licenseId+what+type).attr('title'));
+    $(refTextId).val(htmlDecode($("#"+licenseId+what+type).attr('title')));
     whatCol = what;
     whatLicId = licenseId;
     if (what == 4 || what == "comment") {
@@ -274,14 +286,13 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
       $("#licenseStdCommentDropDown-text").hide();
       $("#licenseStdCommentDropDown").next(".select2-container").hide();
     }
-    textModal.dialog('open');
+    textModal.modal('show');
   }
   whatType = type;
 }
 
 function closeTextModal() {
-  $('#selectFromNoticeFile').css('display','none');
-  textModal.dialog('close');
+  textModal.modal('hide');
 }
 
 function ApplyNoticeText(idx)
@@ -317,7 +328,7 @@ function doHandleNoticeFiles(response) {
     }
   });
   noticeSelectTable.draw();
-  textAckInputModal.dialog("option", "position", {my: "center", at: "center", of: window });
+  $('#textAckInputModal').modal('show');
 }
 
 function selectNoticeFile() {
@@ -349,9 +360,8 @@ function submitTextModal(){
       data: post_data,
       success: () => doOnSuccess(textModal)
     });
-    $('#selectFromNoticeFile').css('display','none');
   } else {
-    textModal.dialog('close');
+    textModal.modal('hide');
     $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
     referenceText = $(refTextId).val().trim();
     if(referenceText !== null && referenceText !== '') {
@@ -359,7 +369,6 @@ function submitTextModal(){
     } else {
       $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
     }
-    $('#selectFromNoticeFile').css('display','none');
   }
 }
 
@@ -385,44 +394,51 @@ function checkIfEligibleForGlobalDecision()
 
 function openAckInputModal(){
   selectNoticeFile();
-  textAckInputModal.dialog('open');
+  $('#textAckInputModal').modal('show');
 }
 
 function closeAckInputModal(){
-  textAckInputModal.dialog('close');
+  $('#textAckInputModal').modal('show');
 }
 
 function doOnSuccess(textModal) {
-  textModal.dialog('close');
-  $('#decTypeSet').addClass('decTypeWip');
+  textModal.modal('hide');
+  $('#decTypeSet').addClass('border-danger');
   oTable = $('#licenseDecisionsTable').dataTable(selectedLicensesTableConfig).makeEditable(editableConfiguration);
   oTable.fnDraw(false);
 }
 
 $(document).ready(function () {
-  textAckInputModal = $('#textAckInputModal').dialog({
-    autoOpen:false, width:"auto", height:"auto", modal:true, resizable: false,
-    open: function() {
-      $(".ui-widget-overlay").addClass("grey-overlay");
-      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
-        .css("min-height", "20vh").css("max-width", "70vw")
-        .css("min-width", "20vw");
-    }
-  });
-
   noticeSelectTable = $('#noticeSelectTable').DataTable({
     paging: false,
     searching: false,
     data: []
   });
 
-  textModal = $('#textModal').dialog({
-    autoOpen:false, width:"auto",height:"auto",
-    open: function() {
-      $(this).css("box-sizing", "border-box").css("max-height", "70vh")
-        .css("min-height", "20vh").css("max-width", "70vw")
-        .css("min-width", "20vw");
+  $('[data-toggle="tooltip"]').tooltip();
+  textModal = $('#textModal').modal('hide');
+  $('#textModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
+    stop: function(){
+      $(this).css({'width':'','height':''});
     }
+  });
+  $('#bulkModal').draggable({
+    stop: function(){
+      $(this).css('height', '');
+    }
+  });
+
+  $('#custDelim').change(function () {
+    if (this.checked) {
+      $('#delimRow').removeClass("invisible").addClass("visible");
+    } else {
+      $('#delimRow').removeClass("visible").addClass("invisible");
+      $('#resetDel').click();
+    }
+  });
+
+  $('#resetDel').click(function () {
+    $('#delimdrop').val('DEFAULT');
   });
 });
 
@@ -487,4 +503,9 @@ function getStdLicenseComments(scope, callback) {
       callback(data.error);
     }
   });
+}
+
+function escapeRegExp(string){
+  string = string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+  return string.replace(/\\\\([abfnrtv])/g, '\\$1'); // Preserve default escape sequences
 }

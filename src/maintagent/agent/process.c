@@ -250,51 +250,72 @@ FUNCTION void processExpired()
 
 /**
  * @brief Remove orphaned files from the repository (slow)
- * Loop through each file in the repository and make sure there is a pfile table entry.
+ * Loop through each file in the repository and make sure there is a pfile
+ * table entry.
  * Then make sure the pfile_pk is used by uploadtree.
  * @returns void but writes status to stdout
- * @todo Remove orphaned files from the repository is not implemented yet
  */
 FUNCTION void removeOrphanedFiles()
 {
-/*
-  PGresult* result; // the result of the database access
-  int numrows;             // generic return value
   long StartTime, EndTime;
+  char* repoPath;           ///< Path to fossology repository
+  char filesPath[myBUFSIZ]; ///< Path to files directory
 
   StartTime = (long)time(0);
 
-  EndTime = (long)time(0);
-  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
-*/
-  LOG_NOTICE("Remove orphaned files from the repository is not implemented yet");
+  repoPath = fo_sysconfig("FOSSOLOGY", "path");
+  strncpy(filesPath, repoPath, myBUFSIZ - 1);
+  strncat(filesPath, "/localhost/files", myBUFSIZ - 1);
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  if (access(filesPath, R_OK | W_OK) != 0)
+  {
+    LOG_ERROR("Files path is not readable/writeable: '%s'", filesPath);
+  }
+  else
+  {
+    recurseDir("files", filesPath, 3);
+  }
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned files from the repository took %ld seconds\n",
+         EndTime - StartTime);
+
+  return; // success
 }
 
 /**
  * @brief Delete orphaned gold files from the repository
- * Loop through each gold file in the repository and make sure there is a pfile entry in the upload table.
+ *
+ * Loop through each gold file in the repository and make sure there is a pfile
+ * entry in the upload table.
  * @returns void but writes status to stdout
- * @todo Remove orphaned gold files from the repository is not implemented yet
  */
 FUNCTION void deleteOrphanGold()
 {
-/*
-  PGresult* result; // the result of the database access
-  int numrows;             // generic return value
   long StartTime, EndTime;
+  char* repoPath;          ///< Path to fossology repository
+  char goldPath[myBUFSIZ]; ///< Path to gold directory
 
   StartTime = (long)time(0);
 
-  EndTime = (long)time(0);
-  printf("Remove orphaned files from the repository took %ld seconds\n", EndTime-StartTime);
-*/
-  LOG_NOTICE("Remove orphaned gold files from the repository is not implemented yet");
+  repoPath = fo_sysconfig("FOSSOLOGY", "path");
+  strncpy(goldPath, repoPath, myBUFSIZ - 1);
+  strncat(goldPath, "/localhost/gold", myBUFSIZ - 1);
 
-  fo_scheduler_heart(1);  // Tell the scheduler that we are alive and update item count
-  return;  // success
+  if (access(goldPath, R_OK | W_OK) != 0)
+  {
+    LOG_ERROR("Gold path is not readable/writeable: '%s'", goldPath);
+  }
+  else
+  {
+    recurseDir("gold", goldPath, 3);
+  }
+
+  EndTime = (long)time(0);
+  printf("Remove orphaned gold files from the repository took %ld seconds\n",
+         EndTime - StartTime);
+
+  return; // success
 }
 
 /**
@@ -560,4 +581,152 @@ FUNCTION void removeExpiredTokens(long int retentionPeriod)
   printf("Time taken for removing expired personal access tokens from database : %ld seconds\n", endTime-startTime);
 
   return;  // success
+}
+
+/**
+ * @brief Delete gold files which are older than specified date
+ *
+ * List all pfiles which are older than given date and are not used by other
+ * upload. Delete all such pfiles from the repository.
+ * @returns void but writes status to stdout
+ */
+FUNCTION void deleteOldGold(char* date)
+{
+  PGresult* result; // the result of the database access
+  int numrows = 0;  // generic return value
+  long StartTime, EndTime;
+  int countTuples, row, remval;
+  int day, month, year; // Date validation
+  char* filepath;
+  char sql[MAXSQL];
+
+  day = month = year = -1;
+  sscanf(date, "%4d-%2d-%2d", &year, &month, &day);
+  if (((year < 1900) || (year > 9999)) || ((month < 1) || (month > 12)) ||
+      ((day < 1) || (day > 31)))
+  {
+    LOG_FATAL("Invalid date! Require yyyy-mm-dd, '%s' given.", date);
+    exitNow(-144);
+  }
+
+  snprintf(sql, MAXSQL,
+           "SELECT DISTINCT ON(pfile_pk) "
+           "CONCAT(LOWER(pfile_sha1), '.', LOWER(pfile_md5), '.', pfile_size) "
+           "AS filename FROM upload INNER JOIN pfile ON pfile_pk = pfile_fk "
+           "WHERE upload_ts < '%s' AND pfile_fk NOT IN ("
+           "SELECT pfile_fk FROM upload WHERE upload_ts > '%s' "
+           "AND pfile_fk IS NOT NULL);",
+           date, date);
+
+  StartTime = (long)time(0);
+
+  result = PQexec(pgConn, sql);
+  if (fo_checkPQresult(pgConn, result, sql, __FILE__, __LINE__))
+  {
+    exitNow(-145);
+  }
+  countTuples = PQntuples(result);
+  if (agent_verbose)
+  {
+    LOG_DEBUG("Read %d rows from DB.", countTuples);
+  }
+  /* Loop through the pfiles and remove them from repository */
+  for (row = 0; row < countTuples; row++)
+  {
+    filepath = fo_RepMkPath("gold", PQgetvalue(result, row, 0));
+    remval = remove(filepath);
+    if (remval < 0)
+    {
+      if (errno != ENOENT)
+      {
+        // Removal failed and error != file not exist
+        LOG_WARNING("Unable to remove '%s' file.", filepath);
+      }
+    }
+    else
+    {
+      numrows++;
+    }
+    free(filepath);
+  }
+  PQclear(result);
+
+  EndTime = (long)time(0);
+  printf("Removed %d old gold files from the repository, took %ld seconds\n",
+         numrows, EndTime - StartTime);
+
+  fo_scheduler_heart(
+      1); // Tell the scheduler that we are alive and update item count
+  return; // success
+}
+
+/*
+ * @brief Delete all log files older than given date in olderThan param
+ *
+ * -# Use find to list all files in a temporary location.
+ * -# Use the number of lines in the file to get the total no of files.
+ * -# Feed the file to xargs and call rm to remove them.
+ * -# Close the fd and unlink the temporary file.
+ * @param olderThan Delete logs older than this date (YYYY-MM-DD)
+ */
+FUNCTION void removeOldLogFiles(const char* olderThan)
+{
+  time_t current_time = time(0); ///< Now
+  time_t shifted_time;           ///< Target time
+  time_t ellapsed_time;      ///< Difference between now and target time in days
+  struct tm ti = {0};        ///< Input time
+  char cmd[myBUFSIZ];        ///< Command to run
+  unsigned int numfiles = 0; ///< Number of files removed
+  long StartTime, EndTime;
+  char ch;
+  FILE* tempFile;
+
+  StartTime = (long)time(0);
+  if (sscanf(olderThan, "%d-%d-%d", &ti.tm_year, &ti.tm_mon, &ti.tm_mday) != 3)
+  {
+    LOG_FATAL("Unable to parse date '%s' in YYYY-MM-DD format.", olderThan);
+    exitNow(-148);
+  }
+  ti.tm_year -= 1900;
+  ti.tm_mon -= 1;
+  shifted_time = mktime(&ti);
+  ellapsed_time = (current_time - shifted_time) / 60 / 60 / 24 - 1;
+
+  char file_template[] = "/tmp/foss-XXXXXX";
+  int fd = mkstemp(file_template);
+
+  snprintf(cmd, myBUFSIZ, "/usr/bin/find %s/logs -type f -mtime +%ld -fprint %s",
+           fo_sysconfig("FOSSOLOGY", "path"), ellapsed_time, file_template);
+  system(cmd); // Find and print files in temp location
+  tempFile = fdopen(fd, "r");
+  if (tempFile == NULL)
+  {
+    LOG_FATAL("Unable to open temp file.");
+    unlink(file_template);
+    exitNow(-148);
+  }
+  while ((ch = fgetc(tempFile)) != EOF)
+  {
+    if (ch == '\n')
+    {
+      numfiles++;
+    }
+  }
+
+  snprintf(cmd, myBUFSIZ, "/usr/bin/xargs --arg-file=%s /bin/rm -f", file_template);
+  system(cmd);
+  fclose(tempFile);
+  unlink(file_template);
+
+  EndTime = (long)time(0);
+
+  printf("Removed %d log files.\n", numfiles);
+
+  printf(
+      "Removing log files older than '%s' from the repository took %ld "
+      "seconds\n",
+      olderThan, EndTime - StartTime);
+
+  fo_scheduler_heart(1);
+  return;
 }

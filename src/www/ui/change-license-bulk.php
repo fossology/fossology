@@ -55,7 +55,7 @@ class ChangeLicenseBulk extends DefaultPlugin
   {
     $uploadTreeId = intval($request->get('uploadTreeId'));
     if ($uploadTreeId <= 0) {
-      return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+      return new JsonResponse(array("error" => 'bad request'), JsonResponse::HTTP_BAD_REQUEST);
     }
 
     try {
@@ -109,13 +109,15 @@ class ChangeLicenseBulk extends DefaultPlugin
     $refText = $request->get('refText');
     $actions = $request->get('bulkAction');
     $ignoreIrrelevantFiles = (intval($request->get('ignoreIrre')) == 1);
+    $delimiters = $request->get('delimiters');
 
     $licenseRemovals = array();
     foreach ($actions as $licenseAction) {
       $licenseRemovals[$licenseAction['licenseId']] = array(($licenseAction['action']=='Remove'), $licenseAction['comment'], $licenseAction['reportinfo'], $licenseAction['acknowledgement']);
     }
     $bulkId = $this->licenseDao->insertBulkLicense($userId, $groupId,
-      $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevantFiles);
+      $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevantFiles,
+      $delimiters);
 
     if ($bulkId <= 0) {
       throw new Exception('cannot insert bulk reference');

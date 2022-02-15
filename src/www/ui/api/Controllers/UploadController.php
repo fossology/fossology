@@ -32,6 +32,7 @@ use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\UploadHelper;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Dao\AgentDao;
+use Fossology\Lib\Data\UploadStatus;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadBrowseProxy;
 
@@ -58,6 +59,26 @@ class UploadController extends RestController
   const RECURSIVE_PARAM = "recursive";
 
   /**
+   * Get query parameter name for name filtering
+   */
+  const FILTER_NAME = "name";
+
+  /**
+   * Get query parameter name for status filtering
+   */
+  const FILTER_STATUS = "status";
+
+  /**
+   * Get query parameter name for assignee filtering
+   */
+  const FILTER_ASSIGNEE = "assignee";
+
+  /**
+   * Get query parameter name for since filtering
+   */
+  const FILTER_DATE = "since";
+
+  /**
    * Get query parameter name for page listing
    */
   const PAGE_PARAM = "page";
@@ -76,6 +97,11 @@ class UploadController extends RestController
    * Get query parameter name for container listing
    */
   const CONTAINER_PARAM = "containers";
+
+  /**
+   * Valid status inputs
+   */
+  const VALID_STATUS = ["open", "inprogress", "closed", "rejected"];
 
   public function __construct($container)
   {
@@ -101,6 +127,10 @@ class UploadController extends RestController
     $recursive = true;
     $retVal = null;
     $query = $request->getQueryParams();
+    $name = null;
+    $status = null;
+    $assignee = null;
+    $since = null;
 
     if (array_key_exists(self::FOLDER_PARAM, $query)) {
       $folderId = filter_var($query[self::FOLDER_PARAM], FILTER_VALIDATE_INT);
@@ -115,9 +145,55 @@ class UploadController extends RestController
       $recursive = filter_var($query[self::RECURSIVE_PARAM],
         FILTER_VALIDATE_BOOLEAN);
     }
+    if (array_key_exists(self::FILTER_NAME, $query)) {
+      $name = $query[self::FILTER_NAME];
+    }
+    if (array_key_exists(self::FILTER_STATUS, $query)) {
+      switch (strtolower($query[self::FILTER_STATUS])) {
+        case "open":
+          $status = UploadStatus::OPEN;
+          break;
+        case "inprogress":
+          $status = UploadStatus::IN_PROGRESS;
+          break;
+        case "closed":
+          $status = UploadStatus::CLOSED;
+          break;
+        case "rejected":
+          $status = UploadStatus::REJECTED;
+          break;
+        default:
+          $status = null;
+      }
+    }
+    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
+      $username = $query[self::FILTER_ASSIGNEE];
+      if (strcasecmp($username, "-me-") === 0) {
+        $assignee = $this->restHelper->getUserId();
+      } elseif (strcasecmp($username, "-unassigned-") === 0) {
+        $assignee = 1;
+      } else {
+        $assignee = $this->restHelper->getUserDao()->getUserByName($username);
+        if (! empty($assignee)) {
+          $assignee = $assignee['user_pk'];
+        } else {
+          $info = new Info(404, "No user with user name '$username'",
+            InfoType::ERROR);
+          $retVal = $response->withJson($info->getArray(), $info->getCode());
+        }
+      }
+    }
+    if (array_key_exists(self::FILTER_DATE, $query)) {
+      $date = filter_var($query[self::FILTER_DATE], FILTER_VALIDATE_REGEXP,
+        ["options" => [
+          "regexp" => "/^\d{4}\-\d{2}\-\d{2}$/",
+          "flags" => FILTER_NULL_ON_FAILURE
+        ]]);
+      $since = strtotime($date);
+    }
 
     $page = $request->getHeaderLine(self::PAGE_PARAM);
-    if (! empty($page)) {
+    if (! empty($page) || $page == "0") {
       $page = filter_var($page, FILTER_VALIDATE_INT);
       if ($page <= 0) {
         $info = new Info(400, "page should be positive integer > 0",
@@ -154,9 +230,16 @@ class UploadController extends RestController
     if ($retVal !== null) {
       return $retVal;
     }
+    $options = [
+      "folderId" => $folderId,
+      "name"     => $name,
+      "status"   => $status,
+      "assignee" => $assignee,
+      "since"    => $since
+    ];
     list($pages, $uploads) = $this->dbHelper->getUploads(
       $this->restHelper->getUserId(), $this->restHelper->getGroupId(), $limit,
-      $page, $id, $folderId, $recursive);
+      $page, $id, $options, $recursive);
     if ($id !== null && ! empty($uploads)) {
       $uploads = $uploads[0];
       $pages = 1;
@@ -222,20 +305,7 @@ class UploadController extends RestController
   }
 
   /**
-   * Copy a given upload to a new folder
-   *
-   * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
-   * @param array $args
-   * @return ResponseInterface
-   */
-  public function copyUpload($request, $response, $args)
-  {
-    return $this->changeUpload($request, $response, $args, true);
-  }
-
-  /**
-   * Move a given upload to a new folder
+   * Move or copy a given upload to a new folder
    *
    * @param ServerRequestInterface $request
    * @param ResponseInterface $response
@@ -244,7 +314,13 @@ class UploadController extends RestController
    */
   public function moveUpload($request, $response, $args)
   {
-    return $this->changeUpload($request, $response, $args, false);
+    $action = $request->getHeaderLine('action');
+    if (strtolower($action) == "move") {
+      $copy = false;
+    } else {
+      $copy = true;
+    }
+    return $this->changeUpload($request, $response, $args, $copy);
   }
 
   /**
@@ -298,13 +374,15 @@ class UploadController extends RestController
       $description = $request->getHeaderLine('uploadDescription');
       $public = $request->getHeaderLine('public');
       $public = empty($public) ? 'protected' : $public;
+      $applyGlobal = filter_var($request->getHeaderLine('applyGlobal'),
+        FILTER_VALIDATE_BOOLEAN);
       $ignoreScm = $request->getHeaderLine('ignoreScm');
       $uploadType = $request->getHeaderLine('uploadType');
       if (empty($uploadType)) {
         $uploadType = "vcs";
       }
       $uploadResponse = $uploadHelper->createNewUpload($request, $folderId,
-        $description, $public, $ignoreScm, $uploadType);
+        $description, $public, $ignoreScm, $uploadType, $applyGlobal);
       $status = $uploadResponse[0];
       $message = $uploadResponse[1];
       $statusDescription = $uploadResponse[2];
@@ -312,7 +390,7 @@ class UploadController extends RestController
         $info = new Info(500, $message . "\n" . $statusDescription,
           InfoType::ERROR);
       } else {
-        $uploadId = $uploadResponse[3];
+        $uploadId = $uploadResponse[3][0];
         $info = new Info(201, intval($uploadId), InfoType::INFO);
       }
       return $response->withJson($info->getArray(), $info->getCode());
@@ -363,6 +441,86 @@ class UploadController extends RestController
     $licenseList = $uploadHelper->getUploadLicenseList($id, $agents,
       $containers);
     return $response->withJson($licenseList, 200);
+  }
+
+  /**
+   * Update an upload
+   *
+   * @param ServerRequestInterface $request
+   * @param ResponseInterface $response
+   * @param array $args
+   * @return ResponseInterface
+   */
+  public function updateUpload($request, $response, $args)
+  {
+    $id = intval($args['id']);
+    $query = $request->getQueryParams();
+    $userDao = $this->restHelper->getUserDao();
+    $userId = $this->restHelper->getUserId();
+    $groupId = $this->restHelper->getGroupId();
+
+    $perm = $userDao->isAdvisorOrAdmin($userId, $groupId);
+    if (!$perm) {
+      $error = new Info(403, "Not advisor or admin of current group. " .
+        "Can not update upload.", InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $uploadBrowseProxy = new UploadBrowseProxy(
+      $groupId,
+      $perm,
+      $this->dbHelper->getDbManager()
+    );
+
+    $assignee = null;
+    $status = null;
+    $comment = null;
+
+    $returnVal = true;
+    // Handle assignee info
+    if (array_key_exists(self::FILTER_ASSIGNEE, $query)) {
+      $assignee = filter_var($query[self::FILTER_ASSIGNEE], FILTER_VALIDATE_INT);
+      $userList = $userDao->getUserChoices($groupId);
+      if (!array_key_exists($assignee, $userList)) {
+        $returnVal = new Info(
+          404,
+          "New assignee does not have permisison on upload.",
+          InfoType::ERROR
+        );
+      } else {
+        $uploadBrowseProxy->updateTable("assignee", $id, $assignee);
+      }
+    }
+    // Handle new status
+    if (
+      array_key_exists(self::FILTER_STATUS, $query) &&
+      in_array(strtolower($query[self::FILTER_STATUS]), self::VALID_STATUS) &&
+      $returnVal === true
+    ) {
+      $newStatus = strtolower($query[self::FILTER_STATUS]);
+      $comment = '';
+      if (in_array($newStatus, ["closed", "rejected"])) {
+        $body = $request->getBody();
+        $comment = $body->getContents();
+        $body->close();
+      }
+      $status = 0;
+      if ($newStatus == self::VALID_STATUS[1]) {
+        $status = UploadStatus::IN_PROGRESS;
+      } elseif ($newStatus == self::VALID_STATUS[2]) {
+        $status = UploadStatus::CLOSED;
+      } elseif ($newStatus == self::VALID_STATUS[3]) {
+        $status = UploadStatus::REJECTED;
+      } else {
+        $status = UploadStatus::OPEN;
+      }
+      $uploadBrowseProxy->setStatusAndComment($id, $status, $comment);
+    }
+    if ($returnVal !== true) {
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    $returnVal = new Info(202, "Upload updated successfully.", InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
   }
 
   /**

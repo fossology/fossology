@@ -2,6 +2,8 @@
 /***********************************************************
  Copyright (C) 2014-2015, 2018 Siemens AG
  Author: Steffen Weber
+ Copyright (c) 2021-2022 Orange
+ Contributors: Piotr Pszczola, Bartlomiej Drozdz
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -113,8 +115,8 @@ class AdminGroupUsers extends DefaultPlugin
         'groupMapAction' => $onchange);
 
     $stmt = __METHOD__ . "getUsersWithGroup";
-    $dbManager->prepare($stmt, "select  user_pk, user_name, user_desc, group_user_member_pk, group_perm
-         FROM users LEFT JOIN group_user_member gum ON gum.user_fk=users.user_pk AND gum.group_fk=$1
+    $dbManager->prepare($stmt, "select user_pk, user_name, user_status, user_desc, group_user_member_pk, group_perm
+         FROM users LEFT JOIN group_user_member gum ON gum.user_fk=users.user_pk AND gum.group_fk=$1 
          ORDER BY user_name");
     $result = $dbManager->execute($stmt, array($group_pk));
     $vars['usersWithGroup'] = $dbManager->fetchAll($result);
@@ -122,7 +124,7 @@ class AdminGroupUsers extends DefaultPlugin
 
     $otherUsers = array('0' => '');
     foreach ($vars['usersWithGroup'] as $row) {
-      if ($row['group_user_member_pk']) {
+      if ($row['group_user_member_pk'] || $row['user_status']!='active') {
         continue;
       }
       $otherUsers[$row['user_pk']] = !empty($row['user_desc']) ? $row['user_desc']. ' ('. $row['user_name'] .')' : $row['user_name'];

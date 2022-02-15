@@ -21,7 +21,7 @@
  * @brief Controller for folder queries
  */
 
-namespace
+namespace Fossology\UI\Api\Controllers
 {
 
   /**
@@ -439,7 +439,7 @@ namespace Fossology\UI\Api\Test\Controllers
     public function testDeleteFolder()
     {
       $folderId = 3;
-      $folderName = FolderGetName($folderId);
+      $folderName = \Fossology\UI\Api\Controllers\FolderGetName($folderId);
       $this->folderDao->shouldReceive('getFolder')
         ->withArgs(array($folderId))->andReturn($this->getFolder($folderId));
       $this->deletePlugin->shouldReceive('Delete')
@@ -522,7 +522,7 @@ namespace Fossology\UI\Api\Test\Controllers
       $response = new Response();
       $actualResponse = $this->folderController->editFolder($request,
         $response, ["id" => $folderId]);
-      $expectedResponse = new Info(200, 'Folder "' . FolderGetName($folderId) .
+      $expectedResponse = new Info(200, 'Folder "' . \Fossology\UI\Api\Controllers\FolderGetName($folderId) .
         '" updated.', InfoType::INFO);
       $this->assertEquals($expectedResponse->getCode(),
         $actualResponse->getStatusCode());
@@ -598,8 +598,8 @@ namespace Fossology\UI\Api\Test\Controllers
       $folderId = 3;
       $parentId = 2;
       $folderContentPk = 5;
-      $folderName = FolderGetName($folderId);
-      $parentFolderName = FolderGetName($parentId);
+      $folderName = \Fossology\UI\Api\Controllers\FolderGetName($folderId);
+      $parentFolderName = \Fossology\UI\Api\Controllers\FolderGetName($parentId);
 
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);
@@ -639,8 +639,8 @@ namespace Fossology\UI\Api\Test\Controllers
       $folderId = 3;
       $parentId = 2;
       $folderContentPk = 5;
-      $folderName = FolderGetName($folderId);
-      $parentFolderName = FolderGetName($parentId);
+      $folderName = \Fossology\UI\Api\Controllers\FolderGetName($folderId);
+      $parentFolderName = \Fossology\UI\Api\Controllers\FolderGetName($parentId);
 
       $this->folderDao->shouldReceive('getFolder')
         ->andReturnUsing([$this, 'getFolder']);

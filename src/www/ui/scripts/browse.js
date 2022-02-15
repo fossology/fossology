@@ -29,23 +29,27 @@ var statusSelected = 0;
 var staSel = null;
 
 $(document).ready(function () {
+  assigneeSelected = ($.cookie("assigneeSelected") || 0);
+  $('#assigneeSelector').val(assigneeSelected);
   table = createBrowseTable();
   $('#insert_browsetbl_filter').append($('#browsetbl_filter'));
+  $("input[type='search']").addClass("form-control-sm");
+  $("input[type='search']").css({"width": "70%"});
   initPrioClick();
   table.on('draw', function () {
     initPrioClick();
     initPrioDraw();
     $('.cc').dblclick( function (){
         var source=table.cell(this).data();
-        openCommentModal(source[0],source[1],source[2]); 
+        openCommentModal(source[0],source[1],source[2]);
     } );
     $('select.goto-active-option').change(function() {
       var url = $(this).val();
       if(url){ window.location = url;}
     });
   });
-  commentModal = $('#commentModal').plainModal();
-  $(document).tooltip({'items':"img"});
+  commentModal = $('#commentModal').modal('hide');
+  //$(document).tooltip({'items':"img"});
 });
 
 function initPrioClick() {
@@ -78,7 +82,7 @@ function initPrioDraw() {
       return prioColumn(table.cell(this).data(), 'display');
     });
   });
-  
+
   $('.limit-mover').click(function(){
     var uploadId = $(this).attr('data-source');
     var dir = $(this).attr('data-dir');
@@ -105,12 +109,12 @@ function openCommentModal(upload, status, comment) {
   uploadId = upload;
   statusId = status;
   $("#commentText").val(comment);
-  commentModal.plainModal('open');
+  commentModal.modal('show');
 }
 
 function closeCommentModal() {
   $(staSel).val( $(staSel).find('option[selected]').val() );
-  commentModal.plainModal('close');
+  commentModal.modal('hide');
 }
 
 
@@ -154,6 +158,7 @@ function changeTableEntry(sel, uploadId, columnName) {
 
 function filterAssignee() {
   assigneeSelected = $('#assigneeSelector').val();
+  $.cookie("assigneeSelected", assigneeSelected);
   var oTable = createBrowseTable();
   oTable.draw(false);
 }

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2018,2021 Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -27,12 +27,20 @@ function clearingSuccess(data) {
 function openBulkModal() {
   $('#userModal').hide();
   $('#ClearingHistoryDataModal').hide();
+  bulkModalOpened = 1;
   $('#bulkModal').toggle();
 }
 
 function closeBulkModal() {
+  bulkModalOpened = 0;
   $('#bulkModal').hide();
 }
+
+// Hide backdrop for bulk modal
+$('#bulkModal').on('shown.bs.modal', function () {
+  $('.modal-backdrop').css('display', 'none');
+  $('#bulkModal').css({'width': 'fit-content', 'margin': '0 auto'});
+});
 
 function openUserModal() {
   $('#bulkModal').hide();
@@ -47,6 +55,19 @@ function openUserModal() {
 function closeUserModal() {
   $('#userModal').hide();
 }
+
+
+$("#textModal").on('show.bs.modal', function (e) {
+  if(bulkModalOpened) {
+    $("#bulkModal").modal("hide");
+  }
+});
+
+$("#textModal").on('hide.bs.modal', function (e) {
+  if(bulkModalOpened) {
+    $("#bulkModal").modal("show");
+  }
+});
 
 function openClearingHistoryDataModal() {
   $('#bulkModal').hide();
@@ -77,11 +98,19 @@ function cleanText() {
   var $textField = $('#bulkRefText');
   var text = $textField.val();
 
+  var delimiters = $("#delimdrop").val();
+  if (delimiters.toLowerCase() === "default") {
+    delimiters = '\t\f#^%*';
+  }
+  delimiters = escapeRegExp(delimiters);
+  var re = new RegExp("[" + delimiters + "]+", "gi");
   text = text.replace(/ [ ]*/gi, ' ')
-             .replace(/(^|\n)[ \t]*/gi,'$1')
              .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
+             .replace(/(^|\n) ?['"]{3}/gi, '$1')
              .replace(/[\*]+\//gi, '')
-             .replace(/(^|\n) ?#+/gi,'$1')
+             .replace(/(^|\n) ?(dnl)+/gi, '$1')
+             .replace(re, ' ')
+             .replace(/(^|\n)[ \t]*/gim, '$1')
              ;
   $textField.val(text);
 }

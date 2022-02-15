@@ -2,6 +2,8 @@
 /***********************************************************
  * Copyright (C) 2014-2017 Siemens AG
  * Author: J. Najjar, S. Weber, A. Wührl
+ * Copyright (c) 2021-2022 Orange
+ * Contributors: Piotr Pszczola, Bartlomiej Drozdz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,6 +31,8 @@ class UserDao
   const USER = 0;
   const ADMIN = 1;
   const ADVISOR = 2;
+
+  const USER_ACTIVE_STATUS = 'active';
 
   const SUPER_USER = 'fossy';
 
@@ -59,7 +63,7 @@ class UserDao
     $userChoices = array();
     $statementN = __METHOD__;
     $sql = "SELECT user_pk, user_name, user_desc FROM users LEFT JOIN group_user_member AS gum ON users.user_pk = gum.user_fk"
-            . " WHERE gum.group_fk = $1";
+            . " WHERE gum.group_fk = $1 AND users.user_status='active'";
     $this->dbManager->prepare($statementN, $sql);
     $res = $this->dbManager->execute($statementN, array($groupId));
     while ($rw = $this->dbManager->fetchArray($res)) {
@@ -296,6 +300,37 @@ class UserDao
     $userRow['group_fk'] = $groupRow['group_fk'];
     $userRow['group_name'] = $groupRow['group_name'];
     return $userRow;
+  }
+
+  /**
+   * @param string $userName
+   * @return boolean true if user status=active
+   */
+  public function isUserActive($userName)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT user_status FROM users WHERE user_name=$1",
+        array($userName), __METHOD__);
+    return $row!==false && ($row['user_status']==self::USER_ACTIVE_STATUS);
+  }
+
+  /**
+   * @param int $userId
+   * @return boolean true if user status=active
+   */
+  public function isUserIdActive($userId)
+  {
+    $row = $this->dbManager->getSingleRow("SELECT user_status FROM users WHERE user_pk=$1",
+        array($userId), __METHOD__);
+    return $row!==false && ($row['user_status']==self::USER_ACTIVE_STATUS);
+  }
+
+  /**
+   * @param int $userId
+   */
+  public function updateUserLastConnection($userId)
+  {
+    $this->dbManager->getSingleRow("UPDATE users SET last_connection=now() WHERE user_pk=$1",
+        array($userId), __FUNCTION__);
   }
 
   /**

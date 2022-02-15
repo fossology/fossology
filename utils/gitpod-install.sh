@@ -3,18 +3,18 @@
 # Copyright (C) 2021 Siemens AG
 # Author: Gaurav Mishra <mishra.gaurav@siemens.com>
 #
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  version 2 as published by the Free Software Foundation.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
 #
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License along
-#  with this program; if not, write to the Free Software Foundation, Inc.,
-#  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 sudo a2dismod php7.4 mpm_prefork
 
@@ -30,16 +30,16 @@ sudo a2enmod php7.4
 
 # Install FOSSology in Gitpod's workspace
 make install \
- PREFIX="/workspace/fossy/code" \
- INITDIR="/workspace/fossy/etc" \
- REPODIR="/workspace/fossy/srv" \
- LOCALSTATEDIR="/workspace/fossy/var" \
- APACHE2_SITE_DIR="/workspace/apache" \
- SYSCONFDIR="/workspace/fossy/etc/fossology" \
+ PREFIX='/workspace/fossy/code' \
+ INITDIR='/workspace/fossy/etc' \
+ REPODIR='/workspace/fossy/srv' \
+ LOCALSTATEDIR='/workspace/fossy/var' \
+ APACHE2_SITE_DIR='/workspace/apache' \
+ SYSCONFDIR='/workspace/fossy/etc/fossology' \
  PROJECTUSER='gitpod' PROJECTGROUP='gitpod'
 
 # Setup DB for gitpod
-sudo su postgres -c "psql" < install/db/gitpod-fossologyinit.sql
+sudo su postgres -c psql < install/db/gitpod-fossologyinit.sql
 
 # Run postinstall script
 sudo -HE /workspace/fossy/code/lib/fossology/fo-postinstall || echo "Done with fo-postinstall"

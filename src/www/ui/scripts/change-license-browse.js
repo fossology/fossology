@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2018,2021 Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -25,42 +25,63 @@ var userModal;
 var removed = false;
 
 $(document).ready(function () {
-  bulkModal = $('#bulkModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  userModal = $('#userModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
-  clearingHistoryDataModal = $('#ClearingHistoryDataModal').dialog({autoOpen:false, width:"auto",height:"auto", modal:true,open:function(){$(".ui-widget-overlay").addClass("grey-overlay");}});
+
+  $("input[type='search']").addClass("form-control-sm");
+  clearingHistoryDataModal = $('#ClearingHistoryDataModal').modal('hide');
+  $('#bulkModal').draggable({
+    stop: function(){
+      $(this).css('height', '');
+    }
+  });
+});
+
+$("#textModal").on('show.bs.modal', function (e) {
+    $("#bulkModal").modal("hide");
+});
+
+$("#textModal").on('hide.bs.modal', function (e) {
+    $("#bulkModal").modal("show");
 });
 
 function openBulkModal(uploadTreeId) {
+  bulkModal = $('#bulkModal').modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  bulkModal.dialog('open');
+  bulkModal.toggle();
 }
 
 function closeBulkModal() {
-  bulkModal.dialog('close');
+  $('#bulkModal').hide();
 }
+
+// Hide backdrop for bulk modal
+$('#bulkModal').on('shown.bs.modal', function () {
+  $('.modal-backdrop').css('display', 'none');
+  $('#bulkModal').css({'width': 'fit-content', 'margin': '0 auto'});
+});
 
 function loadBulkHistoryModal() {
   refreshBulkHistory(function(data) {
-    $('#bulkHistoryModal').dialog('open');
+    $('#bulkHistoryModal').modal('show');
   });
 }
 
 function openUserModal(uploadTreeId) {
+  userModal = $('#userModal').modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  userModal.dialog('open');
+  userModal.toggle();
 }
 
 function closeUserModal() {
-  userModal.dialog('close');
+  userModal.hide();
 }
 
 function openClearingHistoryDataModal(uploadTreeId) {
   $('#uploadTreeId').val(uploadTreeId);
-  clearingHistoryDataModal.dialog('open');
+  clearingHistoryDataModal.modal('show');
 }
 
 function closeClearingHistoryDataModal() {
-  clearingHistoryDataModal.dialog('close');
+  clearingHistoryDataModal.modal('hide');
 }
 
 function scheduleBulkScan() {
@@ -122,11 +143,19 @@ function cleanText() {
   var $textField = $('#bulkRefText');
   var text = $textField.val();
 
+  var delimiters = $("#delimdrop").val();
+  if (delimiters.toLowerCase() === "default") {
+    delimiters = '\t\f#^%*';
+  }
+  delimiters = escapeRegExp(delimiters);
+  var re = new RegExp("[" + delimiters + "]+", "gi");
   text = text.replace(/ [ ]*/gi, ' ')
-             .replace(/(^|\n)[ \t]*/gi,'$1')
              .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
+             .replace(/(^|\n) ?['"]{3}/gi, '$1')
              .replace(/[\*]+\//gi, '')
-             .replace(/(^|\n) ?#+/gi,'$1')
+             .replace(/(^|\n) ?(dnl)+/gi, '$1')
+             .replace(re, ' ')
+             .replace(/(^|\n)[ \t]*/gim, '$1')
              ;
   $textField.val(text);
 }

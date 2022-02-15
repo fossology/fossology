@@ -115,7 +115,7 @@ function AgentCheckBoxMake($upload_pk,$SkipAgents=array(), $specified_username =
         } else {
           $Selected = "";
         }
-        $V .= "<input type='checkbox' name='Check_$Name' value='1' $Selected />$Desc<br />\n";
+        $V .= "<input type='checkbox' class='browse-upload-checkbox view-license-rc-size' name='Check_$Name' value='1' $Selected /> $Desc<br />\n";
       }
     }
   }

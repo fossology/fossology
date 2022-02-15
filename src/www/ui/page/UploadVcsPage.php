@@ -90,6 +90,7 @@ class UploadVcsPage extends UploadPageBase
       $text = _("Invalid Folder.");
       return array(false, $text, $description);
     }
+    $setGlobal = ($request->get('globalDecisions')) ? 1 : 0;
 
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
@@ -108,7 +109,7 @@ class UploadVcsPage extends UploadPageBase
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl,
-      $description, $uploadMode, $folderId, $publicPermission);
+      $description, $uploadMode, $folderId, $publicPermission, $setGlobal);
     if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);
@@ -161,20 +162,8 @@ class UploadVcsPage extends UploadPageBase
       return array(false, _($ErrorMsg), $description);
     }
 
-    AgentCheckBoxDo($jobpk, $uploadId);
-
-    $msg = "";
-    /** check if the scheudler is running */
-    $status = GetRunnableJobList();
-    if (empty($status)) {
-      $msg .= _("Is the scheduler running? ");
-    }
-    $Url = Traceback_uri() . "?mod=showjobs&upload=$uploadId";
-    $text = _("The upload");
-    $text1 = _("has been queued. It is");
-    $msg .= "$text $Name $text1 ";
-    $keep =  "<a href='$Url'>upload #" . $uploadId . "</a>.\n";
-    return array(true, $msg.$keep, $description, $uploadId);
+    $message = $this->postUploadAddJobs($request, $Name, $uploadId, $jobpk);
+    return array(true, $message, $description, $uploadId);
   }
 }
 

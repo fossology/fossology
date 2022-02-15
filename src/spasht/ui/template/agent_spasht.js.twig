@@ -117,7 +117,7 @@ $( function() {
     var t = $("#definitionsTable").DataTable({
       "processing": false,
       "paginationType": "listbox",
-      "order": [[ 1, 'asc' ]],
+      "order": [[ 4, 'desc' ]],
       "autoWidth": false,
       "columnDefs": [{
         "orderable": true,
@@ -126,7 +126,7 @@ $( function() {
       },{
         "orderable": false,
         "searchable": false,
-        "targets": [4]
+        "targets": [5]
       }]
     });
   });
