@@ -189,8 +189,8 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess, closeUserModal); },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
+    success: function (data) { scheduledBootstrapSuccess(data, resultEntity, callbackSuccess, closeUserModal); },
+    error: function(responseobject) { bootstrapAlertError(responseobject, resultEntity); }
   });
 
 }
@@ -508,4 +508,34 @@ function getStdLicenseComments(scope, callback) {
 function escapeRegExp(string){
   string = string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
   return string.replace(/\\\\([abfnrtv])/g, '\\$1'); // Preserve default escape sequences
+}
+
+function bootstrapAlertError(responseobject, resultEntity) {
+  var error = false;
+  if (responseobject.responseJSON !== undefined) {
+    error = responseobject.responseJSON.error;
+  }
+  var errorSpan = resultEntity.find("span:first");
+  if (error) {
+    errorSpan.text("error: " + error);
+  } else {
+    errorSpan.text("error");
+  }
+  resultEntity.show();
+}
+
+function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess, callbackCloseModal) {
+  var jqPk = data.jqid;
+  var errorSpan = resultEntity.find("span:first");
+  if (jqPk) {
+    errorSpan.html("scan scheduled as " + linkToJob(jqPk));
+    if (callbackSuccess) {
+      resultEntity.show();
+      queueUpdateCheck(jqPk, callbackSuccess);
+    }
+    callbackCloseModal();
+  } else {
+    errorSpan.text("bad response from server");
+  }
+  resultEntity.show();
 }

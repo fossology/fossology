@@ -104,6 +104,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Report\LicenseClearedGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\LicenseDNUGetter;
+use Fossology\Lib\Report\LicenseNonFunctionalGetter;
 use Fossology\Lib\Report\BulkMatchesGetter;
 use Fossology\Lib\Report\XpClearedGetter;
 use Fossology\Lib\Report\LicenseMainGetter;
@@ -153,6 +154,11 @@ class UnifiedReport extends Agent
    * LicenseDNUGetter object
    */
   private $licenseDNUGetter;
+
+  /** @var LicenseNonFunctionalGetter $licenseNonFunctionalGetter
+   * LicenseNonFunctionalGetter object
+   */
+  private $licenseNonFunctionalGetter;
 
   /** @var BulkMatchesGetter $bulkMatchesGetter
    * BulkMatchesGetter object
@@ -244,6 +250,8 @@ class UnifiedReport extends Agent
     $this->licenseIrrelevantCommentGetter = new LicenseIrrelevantGetter(false);
     $this->licenseDNUGetter = new LicenseDNUGetter();
     $this->licenseDNUCommentGetter = new LicenseDNUGetter(false);
+    $this->licenseNonFunctionalGetter = new LicenseNonFunctionalGetter();
+    $this->licenseNonFunctionalCommentGetter = new LicenseNonFunctionalGetter(false);
     $this->otherGetter = new OtherGetter();
     $this->obligationsGetter = new ObligationsGetter();
 
@@ -296,6 +304,12 @@ class UnifiedReport extends Agent
     $licensesDNUComment = $this->licenseDNUCommentGetter->getCleared($uploadId, $this, $groupId, true, null, false);
     $this->heartbeat(empty($licensesDNUComment) ? 0 : count($licensesDNUComment["statements"]));
 
+    $licensesNonFunctional = $this->licenseNonFunctionalGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $this->heartbeat(empty($licensesNonFunctional) ? 0 : count($licensesNonFunctional["statements"]));
+
+    $licensesNonFunctionalComment = $this->licenseNonFunctionalCommentGetter->getCleared($uploadId, $this, $groupId, true, null, false);
+    $this->heartbeat(empty($licensesNonFunctionalComment) ? 0 : count($licensesNonFunctionalComment["statements"]));
+
     $copyrights = $this->cpClearedGetter->getCleared($uploadId, $this, $groupId, true, "copyright", true);
     $this->heartbeat(empty($copyrights["scannerFindings"]) ? 0 : count($copyrights["scannerFindings"]) + count($copyrights["userFindings"]));
 
@@ -305,6 +319,7 @@ class UnifiedReport extends Agent
     $otherStatement = $this->otherGetter->getReportData($uploadId);
     $this->heartbeat(empty($otherStatement) ? 0 : count($otherStatement));
     $otherStatement['includeDNU'] = (count($licensesDNU["statements"]) > 0) ? true : false;
+    $otherStatement['includeNonFunctional'] = (count($licensesNonFunctional["statements"]) > 0) ? true : false;
 
     $contents = array(
                         "licenses" => $licenses,
@@ -317,6 +332,8 @@ class UnifiedReport extends Agent
                         "licensesIrreComment" => $licensesIrreComment,
                         "licensesDNU" => $licensesDNU,
                         "licensesDNUComment" => $licensesDNUComment,
+                        "licensesNonFunctional" => $licensesNonFunctional,
+                        "licensesNonFunctionalComment" => $licensesNonFunctionalComment,
                         "licensesMain" => $licensesMain,
                         "licensesHist" => $licensesHist,
                         "otherStatement" => $otherStatement
@@ -878,6 +895,23 @@ class UnifiedReport extends Agent
       $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
       $this->bulkLicenseTable($section, "", $contents['licensesDNUComment']['statements'], $titleSubHeadingNotes);
     }
+
+    /* Display Non functional license files */
+    $heading = "Non functional Files";
+    if ($contents['otherStatement']['includeNonFunctional']) {
+      // adding an internal bookmark
+      $columnStyleWithUnderline = array("size" => 11, "color" => "0000A0", 'underline' => 'single');
+      $section->addBookmark('nonFunctionalBookmark');
+      $bookMarkCell->addLink('nonFunctionalBookmark', htmlspecialchars(' NOTE: Non functional files found! Please check Non functional files section', ENT_COMPAT, 'UTF-8'), $columnStyleWithUnderline, "pStyle", true);
+    }
+    $titleSubHeadingIrre = "(Path, Files, Licenses)";
+    $this->getRowsAndColumnsForIrre($section, $heading, $contents['licensesNonFunctional']['statements'], $titleSubHeadingIrre);
+
+    /* Display Non functional file license comment  */
+    $subHeading = "Comment for Non functional files";
+    $section->addTitle(htmlspecialchars("$subHeading"), 3);
+    $titleSubHeadingNotes = "(License name, Comment Entered, File path)";
+    $this->bulkLicenseTable($section, "", $contents['licensesNonFunctionalComment']['statements'], $titleSubHeadingNotes);
 
     $heading = array_keys($unifiedColumns['changelog'])[0];
     $isEnabled = array_values($unifiedColumns['changelog'])[0];

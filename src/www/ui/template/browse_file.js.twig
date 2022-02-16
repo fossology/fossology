@@ -78,25 +78,29 @@ $(document).ready(function () {
 
   $('#selectMarkIrrelevant').change(function (){
     if($(this).is(":checked")) {
-      $("input:checkbox[id=selectedForIrrelevant]").each(function() {
+      $(".selectedForIrrelevant").each(function() {
         $(this).prop("checked",true);
       });
     } else {
-      $("input:checkbox[id=selectedForIrrelevant]").each(function() {
+      $(".selectedForIrrelevant").each(function() {
         $(this).prop("checked",false);
       });
     }
   });
 
-  $('#markIrrelevant').click(function () {
+  $('#markDecisions').click(function () {
     var currentArray = [];
-    $("input:checkbox[id=selectedForIrrelevant]:checked").each(function() {
+    $(".selectedForIrrelevant:checked").each(function() {
       getCurrentVal = $(this).val();
       if(jQuery.inArray(getCurrentVal, currentArray) < 0 && getCurrentVal != ""){
         currentArray.push(getCurrentVal);
       }
     });
-    markDecisions(currentArray);
+    if (currentArray.length === 0) {
+      alert('Please select checkboxes in actions column!');
+    } else {
+      openUserModal(currentArray);
+    }
   });
 });
 
