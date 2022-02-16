@@ -94,8 +94,7 @@ function scheduleBulkScan() {
   scheduleBulkScanCommon($('#bulkIdResult'), reloadClearingTable);
 }
 
-function cleanText() {
-  var $textField = $('#bulkRefText');
+function cleanText($textField) {
   var text = $textField.val();
 
   var delimiters = $("#delimdrop").val();

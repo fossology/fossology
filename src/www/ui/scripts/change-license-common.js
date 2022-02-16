@@ -266,9 +266,9 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
 
   if (what == 2 || what === 'reportinfo') {
     // clicked to add button to display child modal
-    $('#clearText').css('display','inline-block');
+    $('#clearText').show();
   } else {
-    $('#clearText').css('display','none');
+    $('#clearText').hide();
   }
 
   if(type == 0) {
@@ -300,12 +300,6 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
 
 function closeTextModal() {
   textModal.modal('hide');
-}
-
-function cleanTextModal() {
-  var textAreaValue = document.getElementById("referenceText").value;
-  textAreaValue = textAreaValue.replace(/,/g, '');
-  document.getElementById("referenceText").value = textAreaValue;
 }
 
 function ApplyNoticeText(idx)
