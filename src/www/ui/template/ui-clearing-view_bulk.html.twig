@@ -23,6 +23,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn" id="selectFromNoticeFile" style="display:none;width:96%;" onclick="openAckInputModal();">Select from Notice File</button>
+          <button type="button" class="btn" id="clearText" style="display:none;width:96%;" onclick="cleanText( $('#referenceText') );">{{ 'Clean Text'|trans }}</button>
           <button type="button" class="btn btn-danger" onclick="closeTextModal();" data-dismiss="modal">{{ 'Cancel'|trans }}</button>
           <button type="button" class="btn btn-success" onclick="submitTextModal();" data-dismiss="modal">{{ 'Ok'|trans }}</button>
         </div>
@@ -185,7 +186,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
           <button type="button" class="btn btn-danger" onclick="closeBulkModal();" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-success" onclick="cleanText();">{{ 'Clean text'|trans }}</button>
+          <button type="button" class="btn btn-success" onclick="cleanText( $('#bulkRefText') );">{{ 'Clean text'|trans }}</button>
           <img src="images/info_16.png" data-toggle="tooltip" style="vertical-align:middle;" title="{{ 'The matching process ignores comment symbols, e.g. double-slashes. Hence, these symbols can be remove from bulk text.'|trans }}" alt="" class="info-bullet"/></img>
           <button type="button" class="btn btn-success" onclick="scheduleBulkScan();" data-dismiss="modal">{{ 'Schedule Bulk scan'|trans }}</button>
         </div>

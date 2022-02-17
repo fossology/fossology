@@ -94,9 +94,8 @@ function scheduleBulkScan() {
   scheduleBulkScanCommon($('#bulkIdResult'), reloadClearingTable);
 }
 
-function cleanText() {
-  var $textField = $('#bulkRefText');
-  var text = $textField.val();
+function cleanText(textField) {
+  var text = textField.val();
 
   var delimiters = $("#delimdrop").val();
   if (delimiters.toLowerCase() === "default") {
@@ -112,7 +111,7 @@ function cleanText() {
              .replace(re, ' ')
              .replace(/(^|\n)[ \t]*/gim, '$1')
              ;
-  $textField.val(text);
+  textField.val(text);
 }
 
 

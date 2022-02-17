@@ -264,6 +264,13 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
     $('#selectFromNoticeFile').css('display','none');
   }
 
+  if (what == 2 || what === 'reportinfo') {
+    // clicked to add button to display child modal
+    $('#clearText').show();
+  } else {
+    $('#clearText').hide();
+  }
+
   if(type == 0) {
     let clearingsForSingleFile = $("#clearingsForSingleFile"+licenseId+what).attr("title");
     idLicUploadTree = uploadTreeId+','+licenseId;
