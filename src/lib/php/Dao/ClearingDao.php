@@ -94,9 +94,11 @@ class ClearingDao
       $applyGlobal = "(ut.pfile_fk = cd.pfile_fk AND cd.scope = $globalScope) OR
                       (ut.uploadtree_pk = cd.uploadtree_fk
                       AND cd.scope = $localScope AND cd.group_fk = $p2)";
+      $statementName .= "WithGlobal";
     } else {
       $applyGlobal = "(ut.uploadtree_pk = cd.uploadtree_fk
                       AND cd.group_fk = $p2)";
+      $statementName .= "WithoutGlobal";
     }
 
     return "WITH decision AS (
