@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
+use Exception;
 use Mockery as M;
 use Mockery\MockInterface;
 
@@ -40,7 +41,7 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     });
 
     $this->logger = M::mock('Monolog\\Logger');
-    $this->logger->shouldReceive('addDebug');
+    $this->logger->shouldReceive('debug');
   }
 
   function tearDown() : void
@@ -61,11 +62,9 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->begin();
   }
 
-  /**
-   * @expectedException \Exception
-   */
   function testCommitTransaction()
   {
+    $this->expectException(Exception::class);
     $this->driver->shouldReceive("commit")->withNoArgs()->never();
     $this->dbManager->commit();
   }
@@ -105,11 +104,9 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     assertThat($existsTable, is(TRUE));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   function testExistsDb_hack()
   {
+    $this->expectException(Exception::class);
     $this->dbManager->existsTable("goodTable' OR 3<'4");
   }
 

@@ -641,7 +641,7 @@ INSERT INTO clearing_decision (
 
     if ($latestDec === false) {
       return false;
-    } else if ($decisionType != "") {
+    } else if ($decisionType !== "") {
       return ($latestDec['decision_type'] == $decisionType);
     } else {
       return $latestDec;
