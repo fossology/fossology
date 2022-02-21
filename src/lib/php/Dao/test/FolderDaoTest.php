@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Exception;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestPgDb;
 use Mockery as M;
@@ -161,11 +162,9 @@ class FolderDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($this->folderDao->getFolderChildFolders(FolderDao::TOP_LEVEL),is(arrayWithSize(2)));
   }
 
-  /**
-   * @expectedException Exception
-   */
   public function testMoveContentShouldFailIfCyclesAreProduced()
   {
+    $this->expectException(Exception::class);
     $this->folderDao->ensureTopLevelFolder();
     $folderA = $this->folderDao->insertFolder($folderName='A', '/A', FolderDao::TOP_LEVEL);
     $folderB = $this->folderDao->insertFolder($folderName='B', '/A/B', $folderA);

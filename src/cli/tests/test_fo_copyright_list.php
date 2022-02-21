@@ -37,6 +37,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->createInheritedArsTables(array('copyright'));
     $this->testDb->insertData($tables);
+    $this->testDb->setupSysconfig();
 
     $sysConf = $this->testDb->getFossSysConf();
     $this->fo_copyright_list_path = dirname(__DIR__) . '/fo_copyright_list -c '.$sysConf;

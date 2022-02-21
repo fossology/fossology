@@ -230,12 +230,11 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
         $this->agentClearingEvent1, $this->agentClearingEvent2)));
   }
 
-  /**
-   * @expectedException Exception
-   * @expectedExceptionMessage cannot create ClearingEvent without any event contained
-   */
   public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage("cannot create ClearingEvent without any "
+    . "event contained");
     new ClearingResult(null);
   }
 }

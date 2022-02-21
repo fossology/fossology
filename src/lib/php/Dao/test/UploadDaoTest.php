@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Exception;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
@@ -432,20 +433,18 @@ class UploadDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($topId,equalTo(3650));
   }
 
-  /** @expectedException \Exception
-   * @expectedExceptionMessage Missing upload tree parent for upload
-   */
   public function testGetUploadParentFromBrokenTree()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("Missing upload tree parent for upload");
     $this->prepareUploadTree(array(array(4651, 3650, 33, 0, 805323776, 2, 75, 'artifact.dir')));
     $this->uploadDao->getUploadParent(33);
   }
 
-  /** @expectedException \Exception
-   * @expectedExceptionMessage Missing upload tree parent for upload
-   */
   public function testGetUploadParentFromNonExistingTree()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("Missing upload tree parent for upload");
     $this->uploadDao->getUploadParent(34);
   }
 

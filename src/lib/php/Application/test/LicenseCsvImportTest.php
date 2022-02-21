@@ -18,9 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+use Exception;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Exception;
 use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
 use Fossology\Lib\Dao\UserDao;
@@ -456,7 +456,6 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @expectedException Exception
    * @brief Test for LicenseCsvImport::handleHeadCsv()
    * @test
    * -# Initialize LicenseCsvImport.
@@ -465,6 +464,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
+    $this->expectException(Exception::class);
     $dbManager = M::mock(DbManager::class);
     $userDao = M::mock(UserDao::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);

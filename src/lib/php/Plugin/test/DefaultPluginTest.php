@@ -186,12 +186,10 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     assertThat($this->plugin->getInitOrder(), is(15));
   }
 
-  /**
-   * @expectedException Exception
-   * @expectedExceptionMessage not allowed without login
-   */
   public function testExceptionWhenLoginIsRequired()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("not allowed without login");
     $this->plugin->getResponse();
   }
 

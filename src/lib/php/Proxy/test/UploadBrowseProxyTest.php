@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Exception;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Data\UploadStatus;
@@ -78,11 +79,9 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($updatedRow['status_fk'],equalTo($newStatus));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testUpdateTableStatusToRejectByUser()
   {
+    $this->expectException(Exception::class);
     $this->testDb->getDbManager()->insertTableRow('upload_clearing', array('upload_fk'=>1,'group_fk'=>$this->groupId, 'status_fk'=> UploadStatus::OPEN));
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->updateTable('status_fk', $uploadId=1, $newStatus=UploadStatus::REJECTED);
@@ -97,11 +96,9 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($updatedRow['status_fk'],equalTo($newStatus));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testUpdateTableNonEditableColum()
   {
+    $this->expectException(Exception::class);
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->updateTable('nonEditableColumn', 1, 123);
   }
@@ -114,11 +111,9 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($updatedRow['assignee'],equalTo($newAssignee));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testUpdateTableAssigneeForbidden()
   {
+    $this->expectException(Exception::class);
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $uploadBrowseProxy->updateTable('assignee', 1, 123);
   }
@@ -218,11 +213,9 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
   }
 
 
-  /**
-   * @expectedException \Exception
-   */
   public function testGetFolderPartialQueryWithInvalidParamCount()
   {
+    $this->expectException(Exception::class);
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager());
     $params = array();
     $uploadBrowseProxy->getFolderPartialQuery($params);
@@ -237,12 +230,9 @@ class UploadBrowseProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($uploadBrowseProxy->getStatus($uploadId), equalTo($newStatus));
   }
 
-  /**
-   * @expectedException \Exception
-   */
-
   public function testGetStatusException()
   {
+    $this->expectException(Exception::class);
     $uploadBrowseProxy = new UploadBrowseProxy($this->groupId, UserDao::USER, $this->testDb->getDbManager(), false);
     $uploadBrowseProxy->getStatus(-1);
   }

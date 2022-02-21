@@ -71,11 +71,10 @@ class ArrayOperationTest extends \PHPUnit\Framework\TestCase
     }, $values, 2), is(array(2, 2)));
   }
 
-  /** @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage chunk size should be positive
-   */
   public function testCallChunkedShouldThrowExceptionWhenChunkSizeIsNotPositive()
   {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("chunk size should be positive");
     ArrayOperation::callChunked(function ($values)
     {
       return array(count($values));
