@@ -485,7 +485,7 @@ class CliXml extends Agent
   {
     $row = $this->uploadDao->getReportInfo($uploadId);
 
-    $review = $row['ri_reviewed'];
+    $review = htmlspecialchars($row['ri_reviewed']);
     if ($review == 'NA') {
       $review = '';
     }
@@ -527,12 +527,12 @@ class CliXml extends Agent
     return [[
       'reportId' => uuid_create(UUID_TYPE_TIME),
       'reviewedBy' => $review,
-      'componentName' => $row['ri_component'],
-      'community' => $row['ri_community'],
-      'version' => $row['ri_version'],
+      'componentName' => htmlspecialchars($row['ri_component']),
+      'community' => htmlspecialchars($row['ri_community']),
+      'version' => htmlspecialchars($row['ri_version']),
       'componentHash' => '',
-      'componentReleaseDate' => $row['ri_release_date'],
-      'linkComponentManagement' => $row['ri_sw360_link']
+      'componentReleaseDate' => htmlspecialchars($row['ri_release_date']),
+      'linkComponentManagement' => htmlspecialchars($row['ri_sw360_link'])
     ], [
       'generalAssessment' => $row['ri_general_assesment'],
       'criticalFilesFound' => $critical,
