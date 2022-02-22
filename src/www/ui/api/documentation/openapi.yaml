@@ -553,6 +553,20 @@ paths:
         schema:
           type: boolean
           default: true
+      - name: license
+        required: false
+        description: Show license in response
+        in: query
+        schema:
+          type: boolean
+          default: true    
+      - name: copyright
+        required: false
+        description: Show copyrights in response
+        in: query
+        schema:
+          type: boolean
+          default: false    
       - name: groupName
         description: The group name to chose while accessing the package
         in: header
