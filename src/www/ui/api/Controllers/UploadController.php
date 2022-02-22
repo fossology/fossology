@@ -403,7 +403,7 @@ class UploadController extends RestController
   }
 
   /**
-   * Get list of licenses for given upload
+   * Get list of licenses and copyright for given upload
    *
    * @param ServerRequestInterface $request
    * @param ResponseHelper $response
@@ -426,6 +426,22 @@ class UploadController extends RestController
       $containers = (strcasecmp($query[self::CONTAINER_PARAM], "true") === 0);
     }
 
+    $license = true;
+    if (array_key_exists('license', $query)) {
+      $license = (strcasecmp($query['license'], "true") === 0);
+    }
+
+    $copyright = false;
+    if (array_key_exists('copyright', $query)) {
+      $copyright = (strcasecmp($query['copyright'], "true") === 0);
+    }
+
+    if (!$license && !$copyright) {
+      $error = new Info(400, "'license' and 'copyright' atleast one should be true.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
     $upload = $this->uploadAccessible($this->restHelper->getGroupId(), $id);
     if ($upload !== true) {
       return $response->withJson($upload->getArray(), $upload->getCode());
@@ -439,8 +455,7 @@ class UploadController extends RestController
     }
 
     $uploadHelper = new UploadHelper();
-    $licenseList = $uploadHelper->getUploadLicenseList($id, $agents,
-      $containers);
+    $licenseList = $uploadHelper->getUploadLicenseList($id, $agents, $containers, $license, $copyright);
     return $response->withJson($licenseList, 200);
   }
 
