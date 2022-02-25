@@ -160,7 +160,7 @@ if [[ $BUILDTIME ]]; then
    if [[ $YesOpt ]]; then
       options="$options -y"
    fi
-   "$( dirname "$0" )/fo-install-pythondeps $options"
+   "$( dirname "$0" )/fo-install-pythondeps" $options
 fi
 
 ########################################################################
@@ -252,7 +252,7 @@ if [[ $RUNTIME ]]; then
        if [[ $YesOpt ]]; then
          options="$options -y"
        fi
-       "$( dirname "$0" )/fo-install-pythondeps $options"
+       "$( dirname "$0" )/fo-install-pythondeps" $options
    fi
 fi
 

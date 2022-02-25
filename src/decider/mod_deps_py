@@ -79,8 +79,12 @@ fi
 
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime python dependencies ***";
-  su fossy -c 'python3 -m pip install --target=$HOME/pythondeps --no-input spacy'
-  su fossy -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+  if id "fossy" &>/dev/null; then
+    su fossy -c 'python3 -m pip install --target=$HOME/pythondeps --no-input spacy'
+    su fossy -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+  else
+    echo "*** User fossy does not exist, not installing python dependencies ***"
+  fi
 fi
 
 #######################################################################

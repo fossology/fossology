@@ -25,7 +25,7 @@
 
 show_help() {
   cat <<EOF
-Usage: fo-installdeps [options]
+Usage: fo-install-pythondeps [options]
   -r or --runtime    : install runtime dependencies
   -b or --buildtime  : install buildtime dependencies
   -e or --everything : install all dependencies (default)
@@ -111,8 +111,12 @@ fi
 
 if [[ $RUNTIME ]]; then
   echo "*** Installing $DISTRO runtime python dependencies ***";
-  su fossy -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
-  su fossy -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
+  if id "fossy" &>/dev/null; then
+    su fossy -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
+    su fossy -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
+  else
+    echo "*** User fossy does not exist, not installing python dependencies ***"
+  fi
 fi
 
 ########################################################################
