@@ -28,6 +28,9 @@ PackageCopyrightText: NOASSERTION
 
 Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-upload{{ packageId }}
 {# RelationshipComment: #}
+{%- if componentId is not empty ~%}
+ExternalRef: PACKAGE-MANAGER {{ componentType }} {{ componentId }}
+{%- endif ~%}
 
 ##--------------------------
 ## File Information

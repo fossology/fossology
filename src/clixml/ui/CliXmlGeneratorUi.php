@@ -18,6 +18,7 @@
 
 namespace Fossology\CliXml;
 
+use Exception;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UploadDao;
 use Fossology\Lib\Data\Upload\Upload;
@@ -104,7 +105,7 @@ class CliXmlGeneratorUi extends DefaultPlugin
                   'reportType' => $this->outputFormat);
     $text = sprintf(_("Generating ". $this->outputFormat . " report for '%s'"), $upload->getFilename());
     $vars['content'] = "<h2>".$text."</h2>";
-    $content = $this->renderer->loadTemplate("report.html.twig")->render($vars);
+    $content = $this->renderer->load("report.html.twig")->render($vars);
     $message = '<h3 id="jobResult"></h3>';
     $request->duplicate(array('injectedMessage'=>$message,'injectedFoot'=>$content,'mod'=>'showjobs'))->overrideGlobals();
     $showJobsPlugin = \plugin_find('showjobs');

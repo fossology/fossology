@@ -16,6 +16,7 @@
  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use Fossology\Lib\Data\Package\ComponentType;
 use PhpOffice\PhpWord\Element\Section;
 use \PhpOffice\PhpWord\Style;
 
@@ -60,6 +61,7 @@ class ReportSummary
    */
   private function accumulateLicenses($licenses)
   {
+    $allOtherLicenses = "";
     if (!empty($licenses)) {
       $licenses = array_unique(array_column($licenses, 'content'));
       foreach ($licenses as $otherLicenses) {
@@ -101,6 +103,7 @@ class ReportSummary
     $allMainLicenses = $this->accumulateLicenses($mainLicenses);
     $allOtherLicenses = $this->accumulateLicenses($licenses);
 
+    $allHistLicenses = "";
     if (!empty($histLicenses)) {
       foreach ($histLicenses as $histLicense) {
         $allHistLicenses .= $histLicense["licenseShortname"].", ";
@@ -183,6 +186,28 @@ class ReportSummary
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Release date"]), null, "pStyle");
     } else {
       $table->addCell($cellThirdLen)->addText(htmlspecialchars($otherStatement['ri_release_date']), null, "pStyle");
+    }
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Component Id"), $firstRowStyle1, "pStyle");
+
+    if (!empty($newSw360Component["Component Id"])) {
+      $table->addCell($cellThirdLen)->addText(htmlspecialchars($newSw360Component["Component Id"]), null, "pStyle");
+    } else {
+      if (
+        empty($otherStatement['ri_component_id']) ||
+        $otherStatement['ri_component_id'] == "NA"
+      ) {
+        $componentType = "";
+      } else {
+        $componentType = ComponentType::TYPE_MAP[
+          $otherStatement['ri_component_type']
+        ] . ": ";
+      }
+      $table->addCell($cellThirdLen)->addText(
+        $componentType . htmlspecialchars($otherStatement['ri_component_id']),
+        null, "pStyle");
     }
 
     $table->addRow($rowWidth);

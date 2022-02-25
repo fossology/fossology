@@ -2072,6 +2072,14 @@
   $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_sw360_link\" text DEFAULT 'NA'::text";
   $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_sw360_link\" SET NOT NULL, ALTER COLUMN \"ri_sw360_link\" SET DEFAULT 'NA'::text";
 
+  $Schema["TABLE"]["report_info"]["ri_component_type"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_component_type"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component_type\" int4 DEFAULT 0";
+  $Schema["TABLE"]["report_info"]["ri_component_type"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component_type\" SET NOT NULL, ALTER COLUMN \"ri_component_type\" SET DEFAULT 0";
+
+  $Schema["TABLE"]["report_info"]["ri_component_id"]["DESC"] = "";
+  $Schema["TABLE"]["report_info"]["ri_component_id"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component_id\" text DEFAULT 'NA'::text";
+  $Schema["TABLE"]["report_info"]["ri_component_id"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component_id\" SET NOT NULL, ALTER COLUMN \"ri_component_id\" SET DEFAULT 'NA'::text";
+
   $Schema["TABLE"]["report_info"]["ri_general_assesment"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_general_assesment\" text DEFAULT 'NA'::text";
   $Schema["TABLE"]["report_info"]["ri_general_assesment"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_general_assesment\" SET NOT NULL, ALTER COLUMN \"ri_general_assesment\" SET DEFAULT 'NA'::text";

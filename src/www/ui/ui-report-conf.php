@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\DecisionTypes;
 use Fossology\Lib\BusinessRules\LicenseMap;
+use Fossology\Lib\Data\Package\ComponentType;
 
 class ui_report_conf extends FO_Plugin
 {
@@ -62,6 +63,8 @@ class ui_report_conf extends FO_Plugin
     "version" => "ri_version",
     "relDate" => "ri_release_date",
     "sw360Link" => "ri_sw360_link",
+    "componentType" => "ri_component_type",
+    "componentId" => "ri_component_id",
     "footerNote" => "ri_footer",
     "generalAssesment" => "ri_general_assesment",
     "gaAdditional" => "ri_ga_additional",
@@ -72,7 +75,7 @@ class ui_report_conf extends FO_Plugin
   );
 
   /**
-   * @var radioListUR $radioListUR
+   * @var array $radioListUR
    */
   private $radioListUR = array(
     "nonCritical" => "critical",
@@ -87,7 +90,7 @@ class ui_report_conf extends FO_Plugin
   );
 
   /**
-   * @var checkBoxListSPDX $checkBoxListSPDX
+   * @var array $checkBoxListSPDX
    */
   private $checkBoxListSPDX = array(
     "spdxLicenseComment" => "spdxLicenseComment",
@@ -378,6 +381,13 @@ class ui_report_conf extends FO_Plugin
       }
     }
     $this->vars += $this->allReportConfiguration($uploadId, $groupId);
+    $this->vars['typemap'] = [];
+    foreach (ComponentType::TYPE_MAP as $key => $name) {
+      if ($key == ComponentType::PURL) {
+        continue;
+      }
+      $this->vars['typemap'][] = ['key' => $key, 'name' => $name];
+    }
   }
 
   public function getTemplateName()

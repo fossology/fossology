@@ -21,6 +21,12 @@
     <ComponentHash>{{ generalInformation.componentHash|trim }}</ComponentHash>
     <ComponentReleaseDate>{{ generalInformation.componentReleaseDate|trim }}</ComponentReleaseDate>
     <LinkComponentManagement><![CDATA[{{ generalInformation.linkComponentManagement|trim }}]]></LinkComponentManagement>
+    {%- if generalInformation.componentId is not empty ~%}
+    <ComponentId>
+      <Type>{{ generalInformation.componentType|trim }}</Type>
+      <Id>{{ generalInformation.componentId|trim }}</Id>
+    </ComponentId>
+    {%- endif ~%}
   </GeneralInformation>
 
   <AssessmentSummary>
