@@ -287,6 +287,9 @@ class UploadHelper
     if (! array_key_exists("vcsBranch", $vcsData)) {
       $vcsData["vcsBranch"] = "";
     }
+    if (! array_key_exists("vcsCommit", $vcsData)) {
+      $vcsData["vcsCommit"] = "";
+    }
     $vcsData["vcsType"] = $vcsType;
     if ($code !== 0) {
       return array(false, $message, $statusDescription, $code);
@@ -385,6 +388,7 @@ class UploadHelper
     $vcsUsername = $vcsData["vcsUsername"];
     $vcsPasswd = $vcsData["vcsPassword"];
     $vcsBranch = $vcsData["vcsBranch"];
+    $vcsCommit = $vcsData["vcsCommit"];
 
     $symfonySession = $GLOBALS['container']->get('session');
     $symfonySession->set($this->uploadVcsPage::UPLOAD_FORM_BUILD_PARAMETER_NAME,
@@ -406,6 +410,7 @@ class UploadHelper
     $symfonyRequest->request->set('username', $vcsUsername);
     $symfonyRequest->request->set('passwd', $vcsPasswd);
     $symfonyRequest->request->set('branch', $vcsBranch);
+    $symfonyRequest->request->set('commit', $vcsCommit);
     $symfonyRequest->request->set('globalDecisions', $applyGlobal);
     $symfonyRequest->request->set('scm', $ignoreScm);
 

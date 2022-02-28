@@ -1763,6 +1763,9 @@ components:
         vcsBranch:
           description: Branch to checkout for analysis (for Git only)
           type: string
+        vcsCommit:
+          description: Commit to checkout for analysis (for Git only)
+          type: string
         vcsName:
           description: Display name of the upload
           type: string

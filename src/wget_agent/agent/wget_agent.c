@@ -1158,11 +1158,11 @@ char* GetVersionControlCommand(int withPassword)
     replace_url_with_auth();
     if (GlobalProxy[0] && GlobalProxy[0][0])
     {
-      res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s %s  && rm -rf %s/.git", GlobalProxy[0], GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
+      res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s && cd %s && git checkout %s && rm -rf %s/.git", GlobalProxy[0], GlobalURL, tmpfile_dir, tmpfile_dir, GlobalParam, tmpfile_dir);
     }
     else
     {
-      res = asprintf(&command, "git clone %s %s %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, GlobalParam, tmpfile_dir, tmpfile_dir);
+      res = asprintf(&command, "git clone %s %s && cd %s && git checkout %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, tmpfile_dir, tmpfile_dir, GlobalParam, tmpfile_dir);
     }
   }
   if (res == -1)

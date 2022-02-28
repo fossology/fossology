@@ -52,6 +52,7 @@ class UploadVcsPage extends UploadPageBase
     $vars['passwdField'] = 'passwd';
     $vars['geturlField'] = self::GETURL_PARAM;
     $vars['branchField'] = 'branch';
+    $vars['commitField'] = 'commit';
     $vars['nameField'] = 'name';
     return $this->render("upload_vcs.html.twig", $this->mergeWithDefault($vars));
   }
@@ -140,7 +141,12 @@ class UploadVcsPage extends UploadPageBase
 
     $Branch = trim(explode(' ',trim($request->get('branch')))[0]);
     if (!empty($Branch) && strcasecmp($VCSType,'git') == 0) {
-      $jq_args .= "--single-branch --branch '$Branch'";
+      $jq_args .= $Branch;
+    }
+
+    $Commit = trim(explode(' ',trim($request->get('commit')))[0]);
+    if (!empty($Commit) && strcasecmp($VCSType,'git') == 0) {
+      $jq_args .= $Commit;
     }
 
     $jobqueuepk = JobQueueAdd($jobpk, "wget_agent", $jq_args, NULL, NULL);
