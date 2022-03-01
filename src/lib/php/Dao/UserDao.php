@@ -284,14 +284,21 @@ class UserDao
         array($userId, $groupId), __FUNCTION__);
   }
 
-  public function getUserAndDefaultGroupByUserName($userName)
+  public function getUserAndDefaultGroupByUserName($userName, $oauth=false)
   {
+    $searchEmail = " ";
+    $statement = __METHOD__;
+    if ($oauth) {
+      $searchEmail = " OR user_email=$1";
+      $statement .= "oauth";
+    }
     $userRow = $this->dbManager->getSingleRow(
-        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1",
-        array($userName), __FUNCTION__);
+        "SELECT users.*,group_name FROM users LEFT JOIN groups ON group_fk=group_pk WHERE user_name=$1$searchEmail",
+        array($userName), $statement);
     if (empty($userRow)) {
       throw new \Exception('invalid user name');
     }
+    $userRow['oauth'] = $oauth;
     if ($userRow['group_fk']) {
       return $userRow;
     }

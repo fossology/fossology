@@ -29,7 +29,8 @@
         "twig/twig" : "v3.3.8",
         "guzzlehttp/guzzle": "v7.4.1",
         "phpoffice/phpspreadsheet": "1.19.0",
-        "twbs/bootstrap": "4.0.0"
+        "twbs/bootstrap": "4.0.0",
+        "league/oauth2-client": "2.6.1"
     },
     "require-dev" : {
         "doctrine/instantiator" : "v1.4.0",

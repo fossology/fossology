@@ -149,6 +149,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("POST", new Uri("HTTP", "localhost"),
       $requestHeaders, [], [], $body);
     $response = new ResponseHelper();
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $response = $this->authController->createNewJwtToken($request, $response,
       []);
     $response->getBody()->seek(0);
@@ -198,6 +199,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $request = new Request("POST", new Uri("HTTP", "localhost"), $requestHeaders,
       [], [], $body);
     $response = new ResponseHelper();
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $response = $this->authController->createNewJwtToken($request, $response,
       []);
     $response->getBody()->seek(0);
@@ -240,6 +242,7 @@ class AuthControllerTest extends \PHPUnit\Framework\TestCase
     $response = new ResponseHelper();
     $failedResponse = new Info(404, "Username or password incorrect.",
       InfoType::ERROR);
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $response = $this->authController->createNewJwtToken($request, $response,
       []);
     $response->getBody()->seek(0);

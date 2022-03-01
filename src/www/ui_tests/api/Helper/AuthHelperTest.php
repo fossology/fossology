@@ -142,6 +142,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
 
     $expectedReturn = true;
 
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
       $tokenScope);
 
@@ -188,6 +189,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
 
     $expectedReturn = new Info(403, "User inactive.", InfoType::ERROR);
 
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
       $tokenScope);
 

@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (C) 2014, Siemens AG
+Copyright (C) 2014-2016,2021 Siemens AG
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -18,9 +18,19 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\UI\Page;
 
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
 use Fossology\Lib\Plugin\DefaultPlugin;
+use Fossology\UI\Api\Helper\AuthHelper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use League\OAuth2\Client\Provider\GenericProvider;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use League\OAuth2\Client\Token\AccessToken;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7;
+use League\OAuth2\Client\Token\AccessTokenInterface;
 
 /**
  * @brief about page on UI
@@ -45,7 +55,14 @@ class HomePage extends DefaultPlugin
    */
   protected function handle(Request $request)
   {
+    global $SysConf;
+
     $vars = array('isSecure' => $request->isSecure());
+    $vars['loginProvider'] = "password";
+    if (array_key_exists('AUTHENTICATION', $SysConf) &&
+      array_key_exists('provider', $SysConf['AUTHENTICATION'])) {
+        $vars['loginProvider'] = $SysConf['AUTHENTICATION']['provider'];
+    }
     if (array_key_exists('User', $_SESSION) && $_SESSION['User'] ==
       "Default User" && plugin_find_id("auth") >= 0) {
       if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] != "off") {
@@ -58,8 +75,132 @@ class HomePage extends DefaultPlugin
       $vars['referrer'] = "?mod=browse";
       $vars['authUrl'] = "?mod=auth";
     }
+    $vars['getEmail'] = "";
+    $vars['getOauth'] = false;
 
+    $email = null;
+    if (! empty(GetParm("code", PARM_TEXT))) {
+      try {
+        $email = $this->getEmailFromOAuth();
+      } catch (IdentityProviderException $e) {
+        $vars['message'] = $e->getMessage();
+      } catch (\UnexpectedValueException $e) {
+        $vars['message'] = $e->getMessage();
+      }
+    }
+    if (! empty(GetParm("error", PARM_TEXT))) {
+      $vars['message'] = GetParm("error_description", PARM_TEXT);
+    }
+
+    if ($email !== null) {
+      $_SESSION['oauthemail'] = $email;
+      $vars['getOauth'] = true;
+      if (array_key_exists('HTTP_REFERER', $_SESSION)) {
+        $vars['referrer'] = $_SESSION['HTTP_REFERER'];
+      }
+    }
+
+    if (!empty($SysConf['SYSCONFIG']['OidcAppName'])) {
+      $vars['providerExist'] = $SysConf['SYSCONFIG']['OidcAppName'];
+    } else {
+      $vars['providerExist'] = 0;
+    }
     return $this->render("home.html.twig", $this->mergeWithDefault($vars));
+  }
+
+  /**
+   * Get the email from the OAuth2 server.
+   *
+   * @throws \UnexpectedValueException If the state is invalid or access token
+   *                                   is invalid
+   * @throws IdentityProviderException If something goes wrong while
+   *                                   authenticating
+   * @return NULL|string Email from OAuth if success
+   */
+  private function getEmailFromOAuth()
+  {
+    global $SysConf;
+    if (empty(GetParm("state", PARM_TEXT)) ||
+        (isset($_SESSION['oauth2state']) &&
+        GetParm("state", PARM_TEXT) !== $_SESSION['oauth2state'])) {
+      // Check given state against previously stored one to mitigate CSRF attack
+      if (isset($_SESSION['oauth2state'])) {
+        unset($_SESSION['oauth2state']);
+      }
+      throw new \UnexpectedValueException('Invalid state');
+    }
+    $proxy = "";
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+
+    $provider = new GenericProvider([
+      "clientId"                => $SysConf['SYSCONFIG']['OidcAppId'],
+      "clientSecret"            => $SysConf['SYSCONFIG']['OidcSecret'],
+      "redirectUri"             => $SysConf['SYSCONFIG']['OidcRedirectURL'],
+      "urlAuthorize"            => $SysConf['SYSCONFIG']['OidcAuthorizeURL'],
+      "urlAccessToken"          => $SysConf['SYSCONFIG']['OidcAccessTokenURL'],
+      "urlResourceOwnerDetails" => $SysConf['SYSCONFIG']['OidcResourceURL'],
+      "responseResourceOwnerId" => "email",
+      "proxy"                   => $proxy
+    ]);
+    $accessToken = $provider->getAccessToken('authorization_code',
+      ['code' => GetParm("code", PARM_TEXT)]);
+
+    $this->validateAccessToken($accessToken);
+
+    return $this->getEmailFromResource($provider, $accessToken);
+  }
+
+  /**
+   * Validate JWT access token from OIDC
+   *
+   * @param AccessTokenInterface $accessToken Access token from provider
+   * @return bool True on success, throw exception if invalid.
+   *
+   * @throws \UnexpectedValueException Exception in case token is invalid
+   */
+  private function validateAccessToken($accessToken)
+  {
+    global $SysConf;
+    /**
+     * @var AuthHelper $authHelper
+     * Auth helper to load JWKS
+     */
+    $authHelper = $this->container->get('helper.authHelper');
+    $jwks = $authHelper::loadJwks();
+    $jwtToken = $accessToken->getToken();
+    $jwtTokenDecoded = JWT::decode(
+      $jwtToken,
+      JWK::parseKeySet($jwks),
+      ["RS256", "RS384", "RS512", "ES256"]
+    );
+    if (property_exists($jwtTokenDecoded, 'iss') &&
+        $jwtTokenDecoded->{'iss'} == $SysConf['SYSCONFIG']['OidcIssuer']) {
+      return true;
+    }
+    throw new \UnexpectedValueException("Invalid issuer of token.");
+  }
+
+  /**
+   * Get the email information from the resource server.
+   *
+   * @param GenericProvider $provider
+   * @param AccessToken $accessToken
+   * @return string|NULL
+   */
+  private function getEmailFromResource($provider, $accessToken)
+  {
+    $resourceOwner = $provider->getResourceOwner($accessToken);
+    if (!empty($resourceOwner->getId())) {
+      return $resourceOwner->getId();
+    }
+    return null;
   }
 }
 

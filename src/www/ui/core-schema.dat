@@ -1351,8 +1351,8 @@
   $Schema["TABLE"]["personal_access_tokens"]["created_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"created_on\" SET NOT NULL, ALTER COLUMN \"created_on\" SET DEFAULT now()";
 
   $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"expire_on\" IS 'When this token will expire'";
-  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"expire_on\" date";
-  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"expire_on\" SET NOT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"expire_on\" date DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["expire_on"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"expire_on\" SET DEFAULT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["token_scope"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"token_scope\" IS 'Scope of the token (r=read only, w=read and write)'";
   $Schema["TABLE"]["personal_access_tokens"]["token_scope"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_scope\" char(1)";
@@ -1363,12 +1363,16 @@
   $Schema["TABLE"]["personal_access_tokens"]["token_name"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_name\" SET NOT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["token_key"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"token_key\" IS 'The secret key for token verification'";
-  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_key\" char(40)";
-  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_key\" SET NOT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"token_key\" char(40) DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["token_key"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"token_key\" SET DEFAULT NULL";
 
   $Schema["TABLE"]["personal_access_tokens"]["active"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"active\" IS 'True if token is active, false otherwise'";
   $Schema["TABLE"]["personal_access_tokens"]["active"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"active\" bool";
   $Schema["TABLE"]["personal_access_tokens"]["active"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"active\" SET NOT NULL";
+
+  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["DESC"] = "COMMENT ON COLUMN \"personal_access_tokens\".\"client_id\" IS 'Client id from oauth'";
+  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ADD"] = "ALTER TABLE \"personal_access_tokens\" ADD COLUMN \"client_id\" text DEFAULT NULL";
+  $Schema["TABLE"]["personal_access_tokens"]["client_id"]["ALTER"] = "ALTER TABLE \"personal_access_tokens\" ALTER COLUMN \"client_id\" SET DEFAULT NULL";
 
 
   $Schema["TABLE"]["pfile"]["pfile_pk"]["DESC"] = "";
@@ -2390,6 +2394,7 @@
   $Schema["CONSTRAINT"]["perm_upload_upload_fk_group_fk_key"] = "ALTER TABLE \"perm_upload\" ADD CONSTRAINT \"perm_upload_upload_fk_group_fk_key\" UNIQUE (\"upload_fk\",\"group_fk\");";
   $Schema["CONSTRAINT"]["personal_access_tokens_pkey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_pkey\" PRIMARY KEY (\"pat_pk\");";
   $Schema["CONSTRAINT"]["personal_access_tokens_user_fk_fkey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_user_fk_key\" FOREIGN KEY (\"user_fk\") REFERENCES \"users\" (\"user_pk\") ON UPDATE CASCADE ON DELETE CASCADE;";
+  $Schema["CONSTRAINT"]["personal_access_tokens_client_id_ukey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_client_id_ukey\" UNIQUE (\"client_id\");";
   $Schema["CONSTRAINT"]["personal_access_tokens_token_key_ukey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_token_key_ukey\" UNIQUE (\"user_fk\",\"token_key\");";
   $Schema["CONSTRAINT"]["personal_access_tokens_token_name_ukey"] = "ALTER TABLE \"personal_access_tokens\" ADD CONSTRAINT \"personal_access_tokens_token_name_ukey\" UNIQUE (\"user_fk\",\"token_name\");";
   $Schema["CONSTRAINT"]["pfile_pkey"] = "ALTER TABLE \"pfile\" ADD CONSTRAINT \"pfile_pkey\" PRIMARY KEY (\"pfile_pk\");";
@@ -2534,6 +2539,7 @@
 
   $Schema["INDEX"]["personal_access_tokens"]["user_fk_idx"] = "CREATE INDEX user_fk_idx ON personal_access_tokens USING btree (user_fk);";
   $Schema["INDEX"]["personal_access_tokens"]["user_fk_active_idx"] = "CREATE INDEX user_fk_active_idx ON personal_access_tokens USING btree (user_fk, active);";
+  $Schema["INDEX"]["personal_access_tokens"]["personal_access_tokens_client_user_idx"] = "CREATE INDEX personal_access_tokens_client_user_idx ON personal_access_tokens USING btree (user_fk, client_id);";
 
   $Schema["INDEX"]["pfile"]["pfile_mimetypefk_idx"] = "CREATE INDEX pfile_mimetypefk_idx ON pfile USING btree (pfile_mimetypefk);";
   $Schema["INDEX"]["pfile"]["pfile_sha1_idx"] = "CREATE INDEX pfile_sha1_idx ON pfile USING btree (pfile_sha1);";

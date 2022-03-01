@@ -86,7 +86,7 @@ class AjaxManageToken extends DefaultPlugin
   }
 
   /**
-   * Regenerate the JWT token from DB.
+   * Regenerate the JWT token from DB, or get the client ID.
    *
    * @param int    $tokenPk  The token id
    * @param string $hostname Host issuing the token
@@ -101,6 +101,12 @@ class AjaxManageToken extends DefaultPlugin
     $jti = "$tokenPk.$user_pk";
 
     $tokenInfo = $restDbHelper->getTokenKey($tokenPk);
+    if (!empty($tokenInfo['client_id'])) {
+      return [
+        "status" => true,
+        "token" => $tokenInfo['client_id']
+      ];
+    }
     $tokenScope = array_search($tokenInfo['token_scope'], RestHelper::SCOPE_DB_MAP);
 
     $jwtToken = $authHelper->generateJwtToken($tokenInfo['expire_on'],
