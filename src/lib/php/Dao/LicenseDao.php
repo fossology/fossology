@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Data\AgentRef;
 use Fossology\Lib\Data\License;
@@ -712,5 +713,35 @@ ORDER BY lft asc
       $this->dbManager->freeResult($result);
       return $ObligationRef;
     }
+  }
+
+  /**
+   * @param string $licenseShortname
+   * @param int|null $groupId
+   * @param int|null $userId
+   * @return null
+   */
+  public function deleteLicenseByShortName($licenseShortname, $groupId)
+  {
+    $extraCondition = "";
+    $condition = 'rf_shortname=$1';
+    $param = array($licenseShortname);
+    if (Auth::isAdmin()) {
+      $row = $this->dbManager->getSingleRow(
+        "DELETE FROM ONLY license_ref WHERE $condition RETURNING rf_shortname",
+        $param, __METHOD__ . ".$condition.only");
+    } else {
+      $row = false;
+    }
+    if (false === $row) {
+      $param[] = $groupId;
+      $row = $this->dbManager->getSingleRow(
+        "DELETE FROM license_candidate WHERE $condition AND group_fk=$".count($param)." RETURNING rf_shortname",
+        $param, __METHOD__ . ".$condition.group");
+    }
+    if (false === $row) {
+      return false;
+    }
+    return true;
   }
 }

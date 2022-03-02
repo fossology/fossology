@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.4.3
+  version: 1.4.4
   contact:
     email: fossology@fossology.org
   license:
@@ -1398,6 +1398,29 @@ paths:
                 $ref: '#/components/schemas/Info'
         default:
             $ref: '#/components/responses/defaultResponse'
+    delete:
+      operationId: deleteLicenseByShortname
+      tags:
+      - License
+      summary: delete a specific license
+      description: >
+        delete information about a specific license
+        (only admin can delete main license)
+      responses:
+        '200':
+          description: License deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Info"
+        '404':
+          description: License not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        default:
+            $ref: '#/components/responses/defaultResponse'
     patch:
       operationId: updateLicenseByShortname
       tags:
@@ -2092,3 +2115,4 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Info'
+

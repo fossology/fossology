@@ -135,6 +135,43 @@ class LicenseController extends RestController
   }
 
   /**
+   * Delete the license information based on the provided parameters
+   *
+   * @param Request $request
+   * @param ResponseHelper $response
+   * @param array $args
+   * @return ResponseHelper
+   */
+  public function deleteLicense($request, $response, $args)
+  {
+    $shortName = trim($args["shortname"]);
+
+    if (empty($shortName)) {
+      $error = new Info(
+        400,
+        "Short name missing from request.",
+        InfoType::ERROR
+      );
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+
+    $result = $this->licenseDao->deleteLicenseByShortName($shortName,
+      $this->restHelper->getGroupId());
+
+    if ($result === false) {
+      $error = new Info(
+        404,
+        "No license found with short name '{$shortName}'.",
+        InfoType::ERROR
+      );
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $returnVal = new Info(200, "License deleted successfully",
+      InfoType::INFO);
+    return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+  }
+
+  /**
    * Get list of all licenses, paginated upon request params
    *
    * @param Request $request
