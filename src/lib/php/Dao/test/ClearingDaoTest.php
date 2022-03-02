@@ -48,7 +48,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
   private $groupId = 601;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->uploadDao = M::mock(UploadDao::class);
 
@@ -194,7 +194,7 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     }
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     $this->testDb = null;
     $this->dbManager = null;
@@ -246,17 +246,17 @@ class ClearingDaoTest extends \PHPUnit\Framework\TestCase
     $this->buildDecisions(array(
         array(301,1,$groupId,DecisionTypes::IDENTIFIED,-90,DecisionScopes::REPO,array($firstEventId,$firstEventId+1))
     ));
-    $watchThis = $this->clearingDao->isDecisionWip(301, $groupId);
+    $watchThis = $this->clearingDao->isDecisionCheck(301, $groupId, DecisionTypes::WIP);
     assertThat($watchThis,is(FALSE));
-    $watchOther = $this->clearingDao->isDecisionWip(303, $groupId);
+    $watchOther = $this->clearingDao->isDecisionCheck(303, $groupId, DecisionTypes::WIP);
     assertThat($watchOther,is(FALSE));
     $this->buildProposals(array(
         array(301,1,$groupId,403,false,-89),
     ),$firstEventId+3);
     $this->clearingDao->markDecisionAsWip(301, 1, $groupId);
-    $watchThisNow = $this->clearingDao->isDecisionWip(301, $groupId);
+    $watchThisNow = $this->clearingDao->isDecisionCheck(301, $groupId, DecisionTypes::WIP);
     assertThat($watchThisNow,is(TRUE));
-    $watchOtherNow = $this->clearingDao->isDecisionWip(303, $groupId);
+    $watchOtherNow = $this->clearingDao->isDecisionCheck(303, $groupId, DecisionTypes::WIP);
     assertThat($watchOtherNow,is(FALSE));
   }
 

@@ -551,16 +551,24 @@ ORDER BY lft asc
    * @param bool[] $licenseRemovals
    * @param string $refText
    * @param bool $ignoreIrrelevant Ignore irrelevant files while scanning
+   * @param string $delimiters Delimiters for bulk scan,
+   *                           null or "DEFAULT" for default values
    * @return int lrp_pk on success or -1 on fail
    */
-  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true)
+  public function insertBulkLicense($userId, $groupId, $uploadTreeId, $licenseRemovals, $refText, $ignoreIrrelevant=true, $delimiters=null)
   {
+    if (strcasecmp($delimiters, "DEFAULT") === 0) {
+      $delimiters = null;
+    } elseif ($delimiters !== null) {
+      $delimiters = StringOperation::replaceUnicodeControlChar($delimiters);
+    }
     $licenseRefBulkIdResult = $this->dbManager->getSingleRow(
-        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text, ignore_irrelevant)
-      VALUES ($1,$2,$3,$4,$5) RETURNING lrb_pk",
+        "INSERT INTO license_ref_bulk (user_fk, group_fk, uploadtree_fk, rf_text, ignore_irrelevant, bulk_delimiters)
+      VALUES ($1,$2,$3,$4,$5,$6) RETURNING lrb_pk",
         array($userId, $groupId, $uploadTreeId,
           StringOperation::replaceUnicodeControlChar($refText),
-          $this->dbManager->booleanToDb($ignoreIrrelevant)),
+          $this->dbManager->booleanToDb($ignoreIrrelevant),
+          $delimiters),
         __METHOD__ . '.getLrb'
     );
     if ($licenseRefBulkIdResult === false) {

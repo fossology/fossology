@@ -117,3 +117,14 @@ CONF_EXT_AUTH_NEW_USER_AUTO_CREATE=true
 ; "agent_copyright,agent_keyword,agent_mimetype,agent_monk,agent_nomos,agent_ojo,agent_shagent"
 CONF_EXT_AUTH_NEW_USER_AGENT_LIST=
 
+; Section to allow password login
+[AUTHENTICATION]
+; Should be one of
+; password : to allow passwords for login
+; external : passwords are not allowed
+provider = password
+; REST API token should be one of
+; token : to allow FOSSology tokens for use
+; oauth : to allow only oauth tokens
+; both  : to allow both FOSSology and oauth tokens
+resttoken = token

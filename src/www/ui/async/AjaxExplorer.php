@@ -33,6 +33,7 @@ use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Plugin\DefaultPlugin;
 use Fossology\Lib\Proxy\ScanJobProxy;
 use Fossology\Lib\Proxy\UploadTreeProxy;
+use Fossology\Lib\Data\DecisionTypes;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -387,13 +388,13 @@ class AjaxExplorer extends DefaultPlugin
     $fileListLinks = FileListLinks($uploadId, $childUploadTreeId, 0, $fileId, true, $UniqueTagArray, $this->uploadtree_tablename, !$isFlat);
 
     $getTextEditUser = _("Edit");
-    $fileListLinks .= "[<a href='#'  data-toggle='modal' data-target='#userModal' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
+    $fileListLinks .= "[<a href='#' onclick='openUserModal($childUploadTreeId)' >$getTextEditUser</a>]";
 
     if ($isContainer) {
       $getTextEditBulk = _("Bulk");
       $fileListLinks .= "[<a href='#' data-toggle='modal' data-target='#bulkModal' onclick='openBulkModal($childUploadTreeId)' >$getTextEditBulk</a>]";
     }
-    $fileListLinks .= "<input type='checkbox' id='selectedForIrrelevant' class='info-bullet view-license-rc-size' value='".$childUploadTreeId."'>";
+    $fileListLinks .= "<input type='checkbox' class='selectedForIrrelevant' class='info-bullet view-license-rc-size' value='".$childUploadTreeId."'>";
     $filesThatShouldStillBeCleared = array_key_exists($childItemTreeBounds->getItemId()
         , $this->filesThatShouldStillBeCleared) ? $this->filesThatShouldStillBeCleared[$childItemTreeBounds->getItemId()] : 0;
 
@@ -414,12 +415,15 @@ class AjaxExplorer extends DefaultPlugin
     }
 
     // override green/red flag with yellow flag in case of single file with decision type "To Be Discussed"
-    $isDecisionTBD = $this->clearingDao->isDecisionTBD($childUploadTreeId, $groupId);
+    $isDecisionTBD = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::TO_BE_DISCUSSED);
     $img = $isDecisionTBD ? 'yellow' : $img;
 
-    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use"
-    $isDecisionDNU = $this->clearingDao->isDecisionDNU($childUploadTreeId, $groupId);
-    $img = $isDecisionDNU ? 'redGreen' : $img;
+    // override green/red flag with greenRed flag in case of single file with decision type "Do Not Use" or "Non functional"
+    $isDecisionDNU = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::DO_NOT_USE);
+    $isDecisionNonFunctional = $this->clearingDao->isDecisionCheck($childUploadTreeId, $groupId, DecisionTypes::NON_FUNCTIONAL);
+
+    $img = ($isDecisionDNU || $isDecisionNonFunctional) ? 'redGreen' : $img;
+
     return array($fileName, $licenseList, $editedLicenseList, $img, "$filesCleared / $filesToBeCleared / $totalFilesCount", $fileListLinks);
   }
 

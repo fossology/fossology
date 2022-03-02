@@ -203,8 +203,8 @@ class ui_download extends FO_Plugin
 
   /**
    * @global type $container
-   * @param type $path
-   * @param type $filename
+   * @param string $path
+   * @param string $filename
    * @return BinaryFileResponse
    */
   protected function downloadFile($path, $filename)
@@ -219,9 +219,7 @@ class ui_download extends FO_Plugin
 
     $response = new BinaryFileResponse($path);
     $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $filename, $filenameFallback);
-    if (pathinfo($filename, PATHINFO_EXTENSION) == 'docx') {
-      $response->headers->set('Content-Type', ''); // otherwise mineType would be zip
-    }
+    $response->headers->set('Content-Type', $response->getFile()->getMimeType());
 
     $logger = $container->get("logger");
     $logger->pushHandler(new NullHandler(Logger::DEBUG));

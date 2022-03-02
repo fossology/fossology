@@ -98,7 +98,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
   /** @var TestPlugin */
   private $plugin;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->session = M::mock('Symfony\Component\HttpFoundation\Session\SessionInterface');
 
@@ -120,7 +120,7 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     $this->plugin = new TestPlugin($this->name);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }
@@ -186,12 +186,10 @@ class DefaultPluginTest extends \PHPUnit\Framework\TestCase
     assertThat($this->plugin->getInitOrder(), is(15));
   }
 
-  /**
-   * @expectedException Exception
-   * @expectedExceptionMessage not allowed without login
-   */
   public function testExceptionWhenLoginIsRequired()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("not allowed without login");
     $this->plugin->getResponse();
   }
 

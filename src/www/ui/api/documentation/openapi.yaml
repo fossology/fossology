@@ -1,4 +1,4 @@
-# Copyright (C) Siemens AG 2017-2021
+# Copyright (C) Siemens AG 2017-2022
 # Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -15,7 +15,7 @@ openapi: 3.0.2
 info:
   title: FOSSology API
   description: Automate your fossology instance using REST API
-  version: 1.3.5
+  version: 1.4.3
   contact:
     email: fossology@fossology.org
   license:
@@ -26,6 +26,7 @@ servers:
     description: Localhost instance
 security:
   - bearerAuth: []
+  - oauth: []
 externalDocs:
   description: Basic guide
   url: https://github.com/fossology/fossology/wiki/FOSSology-REST-API
@@ -221,21 +222,43 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     patch:
-      operationId: moveUploadById
+      operationId: updateUploadById
       tags:
         - Upload
         - Organize
-      description: Move upload from one folder to other
+      description: Update an upload information
       parameters:
-        - name: folderId
-          description: Folder Id, where upload should be moved to
-          in: header
-          required: true
+        - name: status
+          description: New status of the upload
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - Open
+              - InProgress
+              - Closed
+              - Rejected
+          example: Closed
+        - name: assignee
+          description: New assignee for the project
+          in: query
+          required: false
           schema:
             type: integer
+      requestBody:
+        description: >
+          Comment on the status, required for Closed and Rejected states.
+          Ignored for others.
+        content:
+          text/plain:
+            schema:
+              description: The comment for new status
+              type: string
+              example: "The upload cleared for use."
       responses:
         '202':
-          description: Upload will be moved
+          description: Upload will be updated
           content:
             application/json:
               schema:
@@ -243,11 +266,11 @@ paths:
         default:
           $ref: '#/components/responses/defaultResponse'
     put:
-      operationId: copyUploadById
+      operationId: moveUploadById
       tags:
         - Upload
         - Organize
-      description: Can be used to copy uploads
+      description: Copy or move an upload by id
       parameters:
         - name: folderId
           description: Folder Id, where upload should be copied to
@@ -255,9 +278,19 @@ paths:
           required: true
           schema:
             type: integer
+        - name: action
+          in: header
+          required: true
+          description: Action to be performed
+          schema:
+            type: string
+            enum:
+              - copy
+              - move
+      summary: Copy/Move an upload
       responses:
         '202':
-          description: Upload will be copied
+          description: Upload will be copied/moved
           content:
             application/json:
               schema:
@@ -403,6 +436,14 @@ paths:
               - protected
               - public
             default: protected
+        - name: applyGlobal
+          description: >
+            Apply global decisions for current upload
+          in: header
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: ignoreScm
           description: >
             Ignore SCM files (Git, SVN, TFS) and files with particular Mimetype
@@ -1088,6 +1129,7 @@ paths:
               - spdx2tv
               - readmeoss
               - unifiedreport
+              - clixml
         - name: groupName
           description: The group name to chose while generating a report
           in: header
@@ -1135,7 +1177,11 @@ paths:
               schema:
                 type: string
                 format: binary
-            application/zip:
+            application/vnd.openxmlformats-officedocument.wordprocessingml.document:
+              schema:
+                type: string
+                format: binary
+            application/xml:
               schema:
                 type: string
                 format: binary
@@ -1410,6 +1456,14 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: "Token from FOSSology"
+    oauth:
+      description: "Machine-2-Machine communication from oauth"
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://api.example.com/oauth2/authorize"
+          scopes: {}
   schemas:
     SearchResults:
       type: object
@@ -1658,7 +1712,7 @@ components:
           type: boolean
           description: Copy the copyright deactivation and edits.
       required:
-        - reuse_uplod
+        - reuse_upload
         - reuse_group
     Scancode:
       type: object
@@ -1996,6 +2050,37 @@ components:
               type: string
               description: Link to license
           description: Licensing of API
+        fossology:
+          type: object
+          description: Information about FOSSology server. Values can be null.
+          properties:
+            version:
+              type: string
+              description: Version of the FOSSology server
+              nullable: true
+              example: "4.0.0"
+            branchName:
+              type: string
+              description: Branch deployed on the FOSSology server
+              nullable: true
+              example: master
+            commitHash:
+              type: string
+              description: Hash of commit deployed on the FOSSology server
+              nullable: true
+              example: "306260"
+            commitDate:
+              type: string
+              description: |
+                Date of commit deployed on the FOSSology server in
+                ISO8601 format
+              nullable: true
+              example: "2022-01-05T22:03:00+05:30"
+            buildDate:
+              type: string
+              description: Date on which packages were built in ISO8601 format
+              nullable: true
+              example: "2022-01-07T11:13:00+05:30"
     HeathInfo:
       description: Health status of server
       type: object

@@ -1,6 +1,8 @@
 <?php
 /***************************************************************
- * Copyright (C) 2018 Siemens AG
+ * Copyright (C) 2018,2021 Siemens AG
+ * Copyright (c) 2021-2022 Orange
+ * Contributors: Piotr Pszczola, Bartlomiej Drozdz
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,9 +30,12 @@ namespace Fossology\UI\Api\Helper;
 
 use Symfony\Component\HttpFoundation\Session\Session;
 use Fossology\Lib\Dao\UserDao;
-use Firebase\JWT\JWT;
+use Fossology\Lib\Auth\Auth;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Firebase\JWT\JWK;
+use Firebase\JWT\JWT;
+use \GuzzleHttp\Client;
 
 /**
  * @class AuthHelper
@@ -71,6 +76,7 @@ class AuthHelper
       $this->session->setName('Login');
       $this->session->start();
     }
+    JWT::$leeway = 30; // Set 30 seconds of leeway
   }
 
   /**
@@ -90,7 +96,7 @@ class AuthHelper
   }
 
   /**
-   * Verify the JWT token sent by user.
+   * Verify the JWT/oauth token sent by user.
    *
    * @param string $authHeader The "Authorization" header sent by user.
    * @param int    $userId     The user id as per the valid token.
@@ -100,6 +106,7 @@ class AuthHelper
    */
   public function verifyAuthToken($authHeader, &$userId, &$tokenScope)
   {
+    global $SysConf;
     $jwtTokenMatch = null;
     $headerValid = preg_match(
       "/^bearer (([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+)\.([a-zA-Z0-9\-\_\+\/\=]+))$/i",
@@ -115,25 +122,35 @@ class AuthHelper
         JWT::urlsafeB64Decode($jwtTokenPayload));
 
       if ($jwtTokenPayloadDecoded->{'jti'} === null) {
-        return new Info(403, "Invalid token sent.", InfoType::ERROR);
-      }
-      $jwtJti = $jwtTokenPayloadDecoded->{'jti'};
-      $jwtJti = base64_decode($jwtJti, true);
-      list ($tokenId, $userId) = explode(".", $jwtJti);
-
-      $dbRows = $this->dbHelper->getTokenKey($tokenId);
-      $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
-      if (empty($dbRows)) {
         $returnValue = new Info(403, "Invalid token sent.", InfoType::ERROR);
-      } elseif ($isTokenActive !== true) {
-        $returnValue = $isTokenActive;
+      }
+      $restToken = Auth::getRestTokenType();
+      if (($restToken & Auth::TOKEN_OAUTH) == Auth::TOKEN_OAUTH &&
+        property_exists($jwtTokenPayloadDecoded, 'iss') &&
+        $jwtTokenPayloadDecoded->{'iss'} == $SysConf['SYSCONFIG']['OidcIssuer']
+      ) {
+        $returnValue = $this->validateOauthLogin(
+          $jwtToken,
+          $userId,
+          $tokenScope
+        );
+      } else if (($restToken & Auth::TOKEN_TOKEN) == Auth::TOKEN_TOKEN &&
+        ! property_exists($jwtTokenPayloadDecoded, 'iss')
+      ) {
+        $returnValue = $this->validateTokenLogin(
+          $jwtToken,
+          $jwtTokenPayloadDecoded,
+          $userId,
+          $tokenScope
+        );
       } else {
-        try {
-          $jwtTokenDecoded = JWT::decode($jwtToken, $dbRows["token_key"], ['HS256']);
-          $tokenScope = $jwtTokenDecoded->{'scope'};
-        } catch (\UnexpectedValueException $e) {
-          $returnValue = new Info(403, $e->getMessage(), InfoType::ERROR);
-        }
+        $returnValue = new Info(403, "Invalid token type sent.",
+          InfoType::ERROR);
+      }
+
+      $isUserActive = $this->userDao->isUserIdActive($userId);
+      if (!$isUserActive) {
+        $returnValue = new Info(403, "User inactive.", InfoType::ERROR);
       }
     }
     return $returnValue;
@@ -147,6 +164,9 @@ class AuthHelper
    */
   private function isDateExpired($date)
   {
+    if (empty($date)) { // oauth clients do not have expiry
+      return false;
+    }
     return strtotime("today") > strtotime($date);
   }
 
@@ -271,5 +291,140 @@ class AuthHelper
     } else {
       return new Info(403, "Provided group:" . $groupName . " does not exist", InfoType::ERROR);
     }
+  }
+
+  /**
+   * @brief Validate OAuth token
+   *
+   * Oauth tokens are majorly signed by RS256. Verify the key with library
+   * against the JWKs. If valid, then fetch the user id and token scope from the
+   * DB against the `client_id` stored in the token.
+   *
+   * @param      string  $jwtToken   Token from header
+   * @param[out] integer $userId     User ID from DB
+   * @param[out] string  $tokenScope Token scope from DB
+   *
+   * @return mixed True on success, Info object on failure.
+   */
+  private function validateOauthLogin($jwtToken, &$userId, &$tokenScope)
+  {
+    $jwks = $this->loadJwks();
+    try {
+      $jwtTokenDecoded = JWT::decode(
+        $jwtToken,
+        JWK::parseKeySet($jwks),
+        ["RS256", "RS384", "RS512", "ES256"]
+      );
+      $clientId = $jwtTokenDecoded->{'client_id'};
+      $tokenId = $this->dbHelper->getTokenIdFromClientId($clientId);
+      $dbRows = $this->dbHelper->getTokenKey($tokenId);
+
+      if (empty($dbRows)) {
+        throw new \UnexpectedValueException("Invalid token sent.", 403);
+      }
+      $isActive = $this->isTokenActive($dbRows, $tokenId);
+      if ($isActive !== true) {
+        throw new \UnexpectedValueException($isActive->getMessage(), 403);
+      }
+      $userId = $dbRows['user_fk'];
+      $tokenScope = $dbRows['token_scope'];
+    } catch (\UnexpectedValueException $e) {
+      return new Info(403, $e->getMessage(), InfoType::ERROR);
+    }
+    return true;
+  }
+
+  /**
+   * @brief Load the JWK array
+   *
+   * Load the JWK list from cache file (if exists), otherwise download from
+   * server and cache it. The cache is stored for 24 hours.
+   *
+   * @return array JWK keys
+   */
+  public static function loadJwks()
+  {
+    global $SysConf;
+    $cacheDir = array_key_exists('CACHEDIR', $GLOBALS) ? $GLOBALS['CACHEDIR'] : null;
+    $cacheFile = "$cacheDir/oauth.jwks";
+    if (file_exists($cacheFile)) {
+      $mtime = filemtime($cacheFile);
+      $mtime += 24 * 60 * 60;
+      if ($mtime > time()) {
+        return json_decode(file_get_contents($cacheFile), true);
+      }
+    }
+    $proxy = [];
+
+    if (
+      array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+      !empty($SysConf['FOSSOLOGY']['http_proxy'])
+    ) {
+      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (
+      array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+      !empty($SysConf['FOSSOLOGY']['https_proxy'])
+    ) {
+      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+    if (
+      array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
+      !empty($SysConf['FOSSOLOGY']['no_proxy'])
+    ) {
+      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
+    }
+
+    $version = $SysConf['BUILD']['VERSION'];
+    $headers = ['User-Agent' => "fossologyng/$version"];
+
+    $guzzleClient = new Client([
+      'http_errors' => false,
+      'proxy' => $proxy,
+      'headers' => $headers
+    ]);
+    $response = $guzzleClient->get($SysConf['SYSCONFIG']['OidcJwksURL']);
+    $content = $response->getBody()->getContents();
+    file_put_contents($cacheFile, $content);
+    return json_decode($content, true);
+  }
+
+  /**
+   * @brief Validate JWT token from FOSSology
+   *
+   * The token id is base64 encoded in JTI and the key for it will be fetched
+   * from the DB to validate the token. Once valid and active, the userid and
+   * scope will be taken from the DB.
+   *
+   * @param      string  $jwtToken   Token from header
+   * @param      object  $jwtTokenPayloadDecoded Decoded token
+   * @param[out] integer $userId     User ID from DB
+   * @param[out] string  $tokenScope Token scope from DB
+   *
+   * @return mixed True on success, Info object on failure.
+   */
+  private function validateTokenLogin($jwtToken, $jwtTokenPayloadDecoded,
+                                      &$userId, &$tokenScope)
+  {
+    $jwtJti = $jwtTokenPayloadDecoded->{'jti'};
+    $jwtJti = base64_decode($jwtJti, true);
+    list ($tokenId, $userId) = explode(".", $jwtJti);
+
+    $dbRows = $this->dbHelper->getTokenKey($tokenId);
+    $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
+    if (empty($dbRows)) {
+      $returnValue = new Info(403, "Invalid token sent.", InfoType::ERROR);
+    } elseif ($isTokenActive !== true) {
+      $returnValue = $isTokenActive;
+    } else {
+      $returnValue = true;
+      try {
+        $jwtTokenDecoded = JWT::decode($jwtToken, $dbRows["token_key"], ['HS256']);
+        $tokenScope = $jwtTokenDecoded->{'scope'};
+      } catch (\UnexpectedValueException $e) {
+        $returnValue = new Info(403, $e->getMessage(), InfoType::ERROR);
+      }
+    }
+    return $returnValue;
   }
 }

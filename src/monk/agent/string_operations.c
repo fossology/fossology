@@ -28,6 +28,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 #include "monk.h"
 
 #define MAX_TOKENS_ARRAY_SIZE 4194304
+#define MAX_DELIMIT_LEN 255
 
 unsigned splittingDelim(char a, const char* delimiters) {
   if (a == '\0')
@@ -43,9 +44,10 @@ unsigned splittingDelim(char a, const char* delimiters) {
 }
 
 unsigned specialDelim(const char* z){
-  char a, b;
+  char a, b, c;
   a = *z;
   b = *(z+1);
+  c = *(z+2);
   if( a=='/') {
     if (b=='/' || b=='*')
       return 2;
@@ -57,6 +59,13 @@ unsigned specialDelim(const char* z){
   }
   else if( a==':' && b==':') {
     return 2;
+  }
+  else if ((a==b && b==c) && (a=='"' || a=='\'')) {
+    return 3;
+  }
+  else if (a=='d' && b=='n' && c=='l') {
+    // dnl comments
+    return 3;
   }
   return 0;
 }
@@ -220,4 +229,80 @@ size_t token_position_of(size_t index, const GArray* tokens) {
   }
 
   return result;
+}
+
+inline char* normalize_escape_string(char* input)
+{
+  char* p = input;
+  char* q;
+  char ret[MAX_DELIMIT_LEN];
+  int i = 0;
+  bool flag = false;
+  bool space = false;
+  while (*p)
+  {
+    if (*p == ' ')
+    {
+      space = true;
+    }
+    if (*p == '\\')
+    {
+      q = p + 1;
+      if (*q == 'a')
+      {
+        ret[i] = '\a';
+        flag = true;
+      }
+      else if (*q == 'b')
+      {
+        ret[i] = '\b';
+        flag = true;
+      }
+      else if (*q == 'f')
+      {
+        ret[i] = '\f';
+        flag = true;
+      }
+      else if (*q == 'n')
+      {
+        ret[i] = '\n';
+        flag = true;
+      }
+      else if (*q == 'r')
+      {
+        ret[i] = '\r';
+        flag = true;
+      }
+      else if (*q == 't')
+      {
+        ret[i] = '\t';
+        flag = true;
+      }
+      else if (*q == 'v')
+      {
+        ret[i] = '\v';
+        flag = true;
+      }
+      else if (*q == '\\')
+      {
+        ret[i] = '\\';
+        flag = true;
+      }
+      if (flag == true)
+      {
+        flag = false;
+        p = q + 1;
+        i++;
+        continue;
+      }
+    }
+    ret[i++] = *p;
+    p++;
+  }
+  if (space != true)
+  {
+    ret[i++] = ' ';
+  }
+  ret[i] = '\0';
+  return g_strdup(ret);
 }

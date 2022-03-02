@@ -79,7 +79,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->userDao = M::mock(UserDao::class);
     $this->session = M::mock(Session::class);
@@ -96,7 +96,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);
@@ -115,6 +115,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
   public function testVerifyAuthToken()
   {
     $userId = null;
+    $expectedUser = 2;
     $tokenScope = null;
     $jti = "4.2";
     $key = "mysecretkey";
@@ -127,7 +128,7 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
       "token_key" => $key,
       "created_on" => $createdOn,
       "expire_on" => $expire,
-      "user_fk" => 2,
+      "user_fk" => $expectedUser,
       "active" => 't',
       "token_scope" => "w"
     ];
@@ -135,15 +136,65 @@ class AuthHelperTest extends \PHPUnit\Framework\TestCase
     $this->dbHelper->shouldReceive('getTokenKey')
       ->withArgs(["4"])
       ->andReturn($tokenRow);
+    $this->userDao->shouldReceive('isUserIdActive')
+      ->withArgs([$expectedUser])
+      ->andReturn(true);
 
     $expectedReturn = true;
 
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
     $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
       $tokenScope);
 
     $this->assertEquals($expectedReturn, $actualReturn);
-    $this->assertEquals(2, $userId);
+    $this->assertEquals($expectedUser, $userId);
     $this->assertEquals("write", $tokenScope);
+  }
+
+  /**
+   * @test
+   * -# Test for AuthHelper::verifyAuthToken() with inactive user
+   * -# Generate a JWT token using AuthHelper::generateJwtToken()
+   * -# Call AuthHelper::verifyAuthToken()
+   * -# Check if the function says token is active
+   * -# Check if the function updates user id and token scope.
+   */
+  public function testVerifyAuthTokenInactiveUser()
+  {
+    $userId = null;
+    $expectedUser = 2;
+    $tokenScope = null;
+    $jti = "4.2";
+    $key = "mysecretkey";
+    $createdOn = strftime('%Y-%m-%d');
+    $expire = strftime('%Y-%m-%d', strtotime('+3 day'));
+    $authToken = $this->authHelper->generateJwtToken($expire, $createdOn, $jti,
+      "write", $key);
+    $authHeader = "Bearer " . $authToken;
+    $tokenRow = [
+      "token_key" => $key,
+      "created_on" => $createdOn,
+      "expire_on" => $expire,
+      "user_fk" => $expectedUser,
+      "active" => 't',
+      "token_scope" => "w"
+    ];
+
+    $this->dbHelper->shouldReceive('getTokenKey')
+      ->withArgs(["4"])
+      ->andReturn($tokenRow);
+    $this->userDao->shouldReceive('isUserIdActive')
+      ->withArgs([$expectedUser])
+      ->andReturn(false);
+
+    $expectedReturn = new Info(403, "User inactive.", InfoType::ERROR);
+
+    $GLOBALS['SysConf'] = ['AUTHENTICATION' => ['resttoken' => 'token']];
+    $actualReturn = $this->authHelper->verifyAuthToken($authHeader, $userId,
+      $tokenScope);
+
+    $this->assertEquals($expectedReturn->getArray(), $actualReturn->getArray());
+    $this->assertEquals($expectedUser, $userId);
   }
 
   /**

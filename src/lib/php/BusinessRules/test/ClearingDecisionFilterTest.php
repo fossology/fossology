@@ -29,12 +29,12 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase
   /** @var ClearingDecisionFilter */
   private $clearingDecisionFilter;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->clearingDecisionFilter = new ClearingDecisionFilter();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }
@@ -64,12 +64,10 @@ class ClearingDecisionFilterTest extends \PHPUnit\Framework\TestCase
   }
 
 
-  /**
-   * @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage unhandled clearing decision scope '12345'
-   */
   public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("unhandled clearing decision scope '12345'");
     $itemId = 543;
     $pfileId = 432;
     $decision = M::mock(ClearingDecision::class);

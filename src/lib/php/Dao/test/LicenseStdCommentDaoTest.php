@@ -55,7 +55,7 @@ class LicenseStdCommentDaoTest extends TestCase
 
   private $authClass;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("licensestdcommentdao");
     $this->dbManager = $this->testDb->getDbManager();
@@ -69,7 +69,7 @@ class LicenseStdCommentDaoTest extends TestCase
     $this->authClass->expects('getUserId')->andReturn(2);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(
       \Hamcrest\MatcherAssert::getCount() - $this->assertCountBefore);

@@ -53,7 +53,7 @@ class CommonCliTest extends \PHPUnit\Framework\TestCase
    * @brief Setup the test cases and initialize the objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("nomosfun" . time());
     $this->agentDir = dirname(dirname(__DIR__));
@@ -81,7 +81,7 @@ class CommonCliTest extends \PHPUnit\Framework\TestCase
    * @brief Destruct the objects initialized during setUp()
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testInstaller->uninstall($this->agentDir);
     $this->testInstaller->clear();

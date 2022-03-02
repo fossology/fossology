@@ -10,39 +10,40 @@
         "without any warranty."
     ],
     "require" : {
-        "easyrdf/easyrdf" : "v0.9.0",
+        "easyrdf/easyrdf" : "1.1.1",
         "ext-gettext": "*",
         "ext-mbstring": "*",
         "ext-json" : "*",
         "ext-xml" : "*",
-        "flexsounds/slim-symfony-di-container": "v1.0.3",
-        "firebase/php-jwt": "v5.2.0",
-        "monolog/monolog" : "1.25.5",
-        "phpoffice/phpword" : "v0.17.0",
-        "slim/slim": "v3.12.3",
-        "symfony/config" : "v3.4.46",
-        "symfony/http-foundation" : "v3.4.46",
-        "symfony/dependency-injection" : "v3.4.46",
-        "symfony/yaml" : "v3.4.46",
-        "twig/twig" : "v2.12.5",
-        "twig/extensions" : "v1.5.4",
-        "guzzlehttp/guzzle": "v6.5.5",
-        "container-interop/container-interop": "v1.2.0",
-        "phpoffice/phpspreadsheet": "^1",
-        "twbs/bootstrap": "4.0.0"
+        "firebase/php-jwt": "v5.5.1",
+        "monolog/monolog" : "2.3.5",
+        "phpoffice/phpword" : "0.18.2",
+        "slim/slim": "4.8.1",
+        "slim/psr7": "1.4",
+        "symfony/config" : "v5.3.4",
+        "symfony/http-foundation" : "v5.3.7",
+        "symfony/dependency-injection" : "v5.3.8",
+        "symfony/translation" : "v5.3.9",
+        "symfony/yaml" : "v5.3.6",
+        "symfony/mime" : "v5.3.8",
+        "twig/twig" : "v3.3.8",
+        "guzzlehttp/guzzle": "v7.4.1",
+        "phpoffice/phpspreadsheet": "1.19.0",
+        "twbs/bootstrap": "4.0.0",
+        "league/oauth2-client": "2.6.1"
     },
     "require-dev" : {
-        "doctrine/instantiator" : "v1.0.5",
+        "doctrine/instantiator" : "v1.4.0",
         "ext-posix" : "*",
         "ext-sqlite3" : "*",
         "hamcrest/hamcrest-php" : "v2.0.1",
-        "mockery/mockery" : "v1.3.3",
-        "myclabs/deep-copy" : "v1.7.0",
-        "php-coveralls/php-coveralls" : "v2.4.2",
-        "phpunit/phpunit" : "5.7.27 || 6.5.14",
-        "sebastian/phpcpd" : "v3.0.1",
-        "squizlabs/php_codesniffer" : "v3.5.8",
-        "phpstan/phpstan" : "v0.9.3"
+        "mockery/mockery" : "v1.3.5",
+        "myclabs/deep-copy" : "1.10.2",
+        "php-coveralls/php-coveralls" : "v2.5.2",
+        "phpunit/phpunit" : "8.5.21",
+        "sebastian/phpcpd" : "4.1.0",
+        "squizlabs/php_codesniffer" : "3.6.1",
+        "phpstan/phpstan" : "1.2.0"
     },
     "autoload" : {
         "psr-4" : {
@@ -57,7 +58,7 @@
     },
     "config" : {
         "platform" : {
-            "php" : "7.0.8"
+            "php" : "7.2.24"
         }
     },
     "homepage" : "https://www.fossology.org/",

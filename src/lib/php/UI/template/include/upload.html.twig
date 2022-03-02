@@ -26,15 +26,24 @@
         <div class="form-group">
           <label for="{{ folderParameterName }}">{{ 'Select the folder for storing the uploaded files'| trans }}:</label>
             <br/>
-            {% include 'components/select-folder.html.twig' with {'name': folderParameterName} %}
+            {% include 'components/select-folder.html.twig' with {'name': folderParameterName, 'id': 'uploadFolderSelector'} %}
         </div>
       </li>
       {% block fileselect %}
       {% endblock %}
+      {% block filedescription %}
       <li>
         <div class="form-group">
           <label for="{{ fileInputName }}">({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:</label>
-          <input type="text" class="form-control" style="width:40%;" name="{{ descriptionInputName }} value="{{ descriptionInputValue }}">
+          <input type="text" class="form-control" style="width:40%;" name="{{ descriptionInputName }}" value="{{ descriptionInputValue }}">
+        </div>
+      </li>
+      {% endblock %}
+      <li>
+        <div class="form-group">
+          <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="globalDecisions" value="1"/>
+          {{ 'Apply global decisions for current upload'| trans }}
+          <img src="images/info_16.png" data-toggle="tooltip" title="{{'Apply results of concluded files marked as global from previous uploads'|trans}}" alt="" class="info-bullet"/>
         </div>
       </li>
       <li>

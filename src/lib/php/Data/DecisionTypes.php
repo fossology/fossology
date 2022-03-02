@@ -20,11 +20,12 @@ namespace Fossology\Lib\Data;
 
 class DecisionTypes extends Types
 {
+  const WIP = 0;
   const TO_BE_DISCUSSED = 3;
-  const DO_NOT_USE = 6;
   const IRRELEVANT = 4;
   const IDENTIFIED = 5;
-  const WIP = 0;
+  const DO_NOT_USE = 6;
+  const NON_FUNCTIONAL = 7;
 
   public function __construct()
   {
@@ -32,9 +33,10 @@ class DecisionTypes extends Types
 
     $this->map = array(
         self::TO_BE_DISCUSSED => "To be discussed",
-        self::DO_NOT_USE => "Do not use",
         self::IRRELEVANT => "Irrelevant",
-        self::IDENTIFIED => "Identified"
+        self::IDENTIFIED => "Identified",
+        self::DO_NOT_USE => "Do not use",
+        self::NON_FUNCTIONAL => "Non functional"
     );
   }
 

@@ -92,8 +92,10 @@ if [[ $RUNTIME ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       case "$CODENAME" in
-        stretch|buster|sid|bionic|cosmic)
+        stretch|buster|bionic|cosmic)
           apt-get $YesOpt install libjson-c3;;
+        bullseye|sid)
+          apt-get $YesOpt install libjson-c5;;
         focal)
           apt-get $YesOpt install libjson-c4;;
         *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;

@@ -18,9 +18,9 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Application;
 
+use Exception;
 use Fossology\Lib\BusinessRules\LicenseMap;
 use Fossology\Lib\Db\DbManager;
-use Fossology\Lib\Exception;
 use Fossology\Lib\Test\Reflectory;
 use Fossology\Lib\Test\TestLiteDb;
 use Fossology\Lib\Dao\UserDao;
@@ -36,7 +36,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * @brief One time setup for test
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -45,7 +45,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    * @brief Close mockery
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
@@ -456,7 +456,6 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
   }
 
   /**
-   * @expectedException Exception
    * @brief Test for LicenseCsvImport::handleHeadCsv()
    * @test
    * -# Initialize LicenseCsvImport.
@@ -465,6 +464,7 @@ class LicenseCsvImportTest extends \PHPUnit\Framework\TestCase
    */
   public function testHandleHeadCsv_missingMandidatoryKey()
   {
+    $this->expectException(Exception::class);
     $dbManager = M::mock(DbManager::class);
     $userDao = M::mock(UserDao::class);
     $licenseCsvImport = new LicenseCsvImport($dbManager, $userDao);

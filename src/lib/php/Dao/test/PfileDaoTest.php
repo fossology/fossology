@@ -56,7 +56,7 @@ class PfileDaoTest extends \PHPUnit\Framework\TestCase
    * Setup test DB and other objects
    * @see PHPUnit::Framework::TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("pfiledao");
     $this->dbManager = $this->testDb->getDbManager();
@@ -69,7 +69,7 @@ class PfileDaoTest extends \PHPUnit\Framework\TestCase
    * Tear down test DB and objects
    * @see PHPUnit::Framework::TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount() -
       $this->assertCountBefore);

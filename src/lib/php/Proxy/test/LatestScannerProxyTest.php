@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Proxy;
 
+use Exception;
 use Fossology\Lib\Test\TestLiteDb;
 use Mockery as M;
 
@@ -29,7 +30,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
   private $assertCountBefore;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestLiteDb();
     $this->testDb->createPlainTables( array('agent','ars_master') );
@@ -39,7 +40,7 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();
@@ -83,11 +84,9 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($scanners,arrayContainingInAnyOrder(array(array('agent_pk'=>6,'agent_name'=>'nomos'),array('agent_pk'=>5,'agent_name'=>'monk'))));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testQueryNoScanners()
   {
+    $this->expectException(Exception::class);
     $uploadId = 2;
     $agentNames = array();
     new LatestScannerProxy($uploadId,$agentNames,'latest_scanner', "AND agent_enabled='true'");
@@ -111,11 +110,9 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     $latestScannerProxy->materialize();
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testMaterializeNotPossibleForParameterizedQuery()
   {
+    $this->expectException(Exception::class);
     $agentNames = array('nomos');
     $latestScannerProxy = new LatestScannerProxy('$1',$agentNames,'latest_scanner', "AND agent_enabled='true'");
     $latestScannerProxy->materialize();
@@ -131,11 +128,9 @@ class LatestScannerProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($map,equalTo(array('nomos'=>6)));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testGetNameToIdMapNotPossibleForParameterizedQuery()
   {
+    $this->expectException(Exception::class);
     $agentNames = array('nomos');
     $latestScannerProxy = new LatestScannerProxy('$1',$agentNames,'latest_scanner', "AND agent_enabled='true'");
     $latestScannerProxy->getNameToIdMap();

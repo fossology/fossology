@@ -6288,6 +6288,10 @@ k
 %KEY% =NULL=
 %STR% "(org|com|net|cn|de)\.?\/licenses?"
 #
+%ENTRY% _LT_SEE_URL_ref2
+%KEY% =NULL=
+%STR% "licen[cs]e =FEW= (https?|ftp) =SOME= \/licen[cs]es?"
+#
 %ENTRY% _LT_SEE_COPYING_1
 %KEY% "licen[cs]"
 %STR% "under th(e|e terms of the) licen[cs]e (contained|listed|described|set (out|forth)|given|found) in the (file =FEW= \<copying\>|\<copying\> file)"
@@ -6463,7 +6467,7 @@ k
 #
 %ENTRY% _LT_SEE_LICENSE_2
 %KEY% "(condit|vers)ion"
-%STR% "under (certain|the) conditions (refer t(o|o the)|for details (read|read the|refer t(o|o the)|see|see the)|listed in the) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%STR% "under (certain|the) conditions (refer t(o|o the)|for details (read|read the|refer t(o|o the)|see|view|see the)|listed in the) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #
 %ENTRY% _LT_SEE_LICENSE_3
 %KEY% "licen[cs]"
@@ -6492,23 +6496,23 @@ k
 #
 %ENTRY% _LT_SEE_LICENSE_9
 %KEY% "licen[cs]"
-%STR% "see license?(qla|qlcnic|qlge) =SOME= for copyright and licensing details"
+%STR% "(see|view) license?(qla|qlcnic|qlge) =SOME= for copyright and licensing details"
 #
 %ENTRY% _LT_SEE_LICENSE_10
-%KEY% "licen[cs]" 
-%STR% "licen[cs]e see licen[cs]e?txt" 
+%KEY% "licen[cs]"
+%STR% "licen[cs]e (see|view) licen[cs]e?txt"
 #
 %ENTRY% _LT_SEE_LICENSE_11
 %KEY% "licen[cs]"
-%STR% "see the accompanying file license =SOME= for terms of use"
+%STR% "(see|view) the accompanying file license =SOME= for terms of use"
 #
 %ENTRY% _LT_SEE_LICENSE_12
 %KEY% "licen[cs]"
-%STR% "license please see accompanying LICENSE"
+%STR% "license please (see|view) accompanying LICENSE"
 #
 %ENTRY% _LT_SEE_LICENSE_13
 %KEY% "licen[cs]"
-%STR% "see =FEW= license file =FEW= for more information"
+%STR% "(see|view) =FEW= license file =FEW= for more information"
 #
 %ENTRY% _LT_SEE_LICENSE_14
 %KEY% "licen[cs]"
@@ -6528,7 +6532,7 @@ k
 #
 %ENTRY% _LT_SEE_LICENSE_18
 %KEY% "licen[cs]"
-%STR% "see (the )?license( file|\.?txt) =FEW= for licens(ing terms|e information)"
+%STR% "(see|view) (the )?license( file|\.?txt) =FEW= for licens(ing terms|e information)"
 #
 %ENTRY% _LT_SEE_LICENSE_19
 %KEY% "licen[cs]"
@@ -6540,13 +6544,18 @@ k
 #####
 # These MUST be the last 2 checks for license references in the file "license"
 #####
+# Following two strings have (see|view) as alternative which does not work with
+# CHECKSTR. Thus the NOCHECK
+#####
 %ENTRY% _LT_SEE_LICENSE_FINAL1
-%KEY% "\<(see|sell|sale|sold|charge)\>"
-%STR% "(distribut|copy|mod) =SOME= for details see th(e|is) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
+%NOCHECK%
+%KEY% "\<(see|sell|sale|sold|charge|view)\>"
+%STR% "(distribut|copy|mod) =SOME= for details (see|view) th(e|is) (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file)"
 #
 %ENTRY% _LT_SEE_LICENSE_FINAL2
-%KEY% "\<(see|sell|sale|sold|charge)\>"
-%STR% "see the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
+%NOCHECK%
+%KEY% "\<(see|sell|sale|sold|charge|view)\>"
+%STR% "(see|view) the (file =FEW= \<licen[cs]e\>|\<licen[cs]e\> file) =SOME= (distribut|dir|copy|us(e|age)|mod|free soft)"
 #
 %ENTRY% _LT_SEE_LICENSE_FINAL3
 %NOCHECK%

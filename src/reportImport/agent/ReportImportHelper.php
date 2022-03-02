@@ -17,7 +17,7 @@
  */
 namespace Fossology\ReportImport;
 
-use EasyRdf_Graph;
+use EasyRdf\Graph;
 
 class ReportImportHelper
 {

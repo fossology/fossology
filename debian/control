@@ -8,7 +8,7 @@ Build-Depends: debhelper (>=9~), libglib2.0-dev, libmagic-dev, libxml2-dev,
  libboost-program-options-dev, libjsoncpp-dev, libjson-c-dev, libpq-dev,
  php7.0-cli|php7.2-cli|php7.3-cli|php7.4-cli, php-mbstring, php-zip,
  php-xml, libboost-system-dev, libboost-filesystem-dev, libgcrypt20-dev,
- composer, patch
+ composer
 Standards-Version: 3.9.1
 Homepage: https://fossology.org
 
@@ -305,6 +305,18 @@ Description: architecture for analyzing software, OSS readme generator
  type identification.
  .
  This package contains the readmeoss agent programs and their resources.
+
+Package: fossology-clixml
+Architecture: any
+Depends: fossology-common, php-uuid, ${misc:Depends}
+Description: architecture for analyzing software, XML based report generator
+ The FOSSology project is a web based framework that allows you to
+ upload software to be picked apart and then analyzed by software agents
+ which produce results that are then browsable via the web interface.
+ Existing agents include license analysis, metadata extraction, and MIME
+ type identification.
+ .
+ This package contains the clixml agent programs and their resources.
 
 Package: fossology-unifiedreport
 Architecture: any

@@ -45,7 +45,7 @@ class ModernDbManager extends DbManager
     $res = $this->dbDriver->prepare($statementName, $sqlStatement);
     $this->cumulatedTime[$statementName] = microtime($get_as_float = true) - $startTime;
     $this->queryCount[$statementName] = 0;
-    $this->logger->addDebug("prepare '$statementName' took " . sprintf("%0.3fms", 1000 * $this->cumulatedTime[$statementName]));
+    $this->logger->debug("prepare '$statementName' took " . sprintf("%0.3fms", 1000 * $this->cumulatedTime[$statementName]));
     $this->checkResult($res, "$sqlStatement -- $statementName");
     $this->preparedStatements[$statementName] = $sqlStatement;
   }

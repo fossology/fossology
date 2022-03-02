@@ -294,4 +294,45 @@ class RestHelper
     }
     return $requestValid;
   }
+
+  /**
+   * @brief Check if the new oauth client is valid.
+   *
+   * The function checks for following properties:
+   * - The length of client name should be between 0 and 40.
+   * - The scope of client should be valid.
+   * - Same client should not exist for the user.
+   *
+   * @param integer $userId     User id
+   * @param string $clientName  The name of the new client.
+   * @param string $clientScope The scope of the new client.
+   * @param string $clientId    New client id.
+   * @return boolean|Fossology::UI::Api::Models::Info True if all parameters
+   *         are ok, else an info.
+   */
+  public function validateNewOauthClient($userId, $clientName, $clientScope,
+                                        $clientId)
+  {
+    $requestValid = true;
+    if (!in_array($clientScope, RestHelper::SCOPE_DB_MAP)) {
+      $requestValid = new Info(400, "Invalid client scope, allowed only " .
+          join(",", RestHelper::VALID_SCOPES), InfoType::ERROR);
+    } elseif (empty($clientName) || strlen($clientName) > 40) {
+      $requestValid = new Info(400,
+        "The client name must be a valid string of max 40 character length.",
+        InfoType::ERROR);
+    } else {
+      $sql = "SELECT 1 FROM personal_access_tokens " .
+        "WHERE user_fk = $1 AND client_id = $2;";
+      $rows = $this->dbHelper->getDbManager()->getSingleRow($sql, [
+        $userId,
+        $clientId
+      ], __METHOD__);
+      if (!empty($rows)) {
+        $requestValid = new Info(400, "Client already added for the user.",
+          InfoType::ERROR);
+      }
+    }
+    return $requestValid;
+  }
 }

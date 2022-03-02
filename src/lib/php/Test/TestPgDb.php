@@ -21,6 +21,7 @@ namespace Fossology\Lib\Test;
 // setup autoloading
 require_once(dirname(dirname(dirname(dirname(__FILE__)))) . "/vendor/autoload.php");
 require_once(__DIR__ . "/../../../testing/db/TestDbFactory.php");
+require (dirname(dirname(__FILE__)).'/common-sysconfig.php');
 
 use Fossology\Lib\Db\Driver\Postgres;
 use Monolog\Handler\StreamHandler;
@@ -200,5 +201,15 @@ class TestPgDb extends TestAbstractDb
         $this->dbManager->queryOnce("create table " . $agent . "_ars() inherits(ars_master)");
       }
     }
+  }
+
+  /**
+   * Populate sysconfig table.
+   */
+  public function setupSysconfig()
+  {
+    $this->createPlainTables(['sysconfig'], false);
+    $this->createSequences(['sysconfig_sysconfig_pk_seq'], false);
+    Populate_sysconfig();
   }
 }

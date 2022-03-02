@@ -36,14 +36,14 @@ class MonkCliTest extends \PHPUnit\Framework\TestCase
     );
   }
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDataDir = dirname(__DIR__)."/testlicenses";
     $this->testDb = new TestPgDb("monkCli".time());
     $this->dbManager = $this->testDb->getDbManager();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

@@ -90,6 +90,7 @@ class UploadVcsPage extends UploadPageBase
       $text = _("Invalid Folder.");
       return array(false, $text, $description);
     }
+    $setGlobal = ($request->get('globalDecisions')) ? 1 : 0;
 
     $public = $request->get('public');
     $publicPermission = ($public == self::PUBLIC_ALL) ? Auth::PERM_READ : Auth::PERM_NONE;
@@ -108,7 +109,7 @@ class UploadVcsPage extends UploadPageBase
     $userId = Auth::getUserId();
     $groupId = Auth::getGroupId();
     $uploadId = JobAddUpload($userId, $groupId, $ShortName, $getUrl,
-      $description, $uploadMode, $folderId, $publicPermission);
+      $description, $uploadMode, $folderId, $publicPermission, $setGlobal);
     if (empty($uploadId)) {
       $text = _("Failed to insert upload record");
       return array(false, $text, $description);

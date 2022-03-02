@@ -102,7 +102,7 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase
   }
 
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
 
     fwrite(STDOUT, "--> Running " . __METHOD__ . " method.\n");
@@ -253,7 +253,7 @@ class test_fossjobs extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     global $fossology_testconfig;
 

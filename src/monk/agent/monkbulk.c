@@ -85,7 +85,7 @@ int queryBulkArguments(MonkState* state, long bulkId) {
       state->dbManager,
       "queryBulkArguments",
       "SELECT ut.upload_fk, ut.uploadtree_pk, lrb.user_fk, lrb.group_fk, "
-      "lrb.rf_text, lrb.ignore_irrelevant "
+      "lrb.rf_text, lrb.ignore_irrelevant, lrb.bulk_delimiters "
       "FROM license_ref_bulk lrb INNER JOIN uploadtree ut "
       "ON ut.uploadtree_pk = lrb.uploadtree_fk "
       "WHERE lrb_pk = $1",
@@ -105,6 +105,15 @@ int queryBulkArguments(MonkState* state, long bulkId) {
       bulkArguments->groupId = atoi(PQgetvalue(bulkArgumentsResult, 0, column++));
       bulkArguments->refText = g_strdup(PQgetvalue(bulkArgumentsResult, 0, column++));
       bulkArguments->ignoreIrre = strcmp(PQgetvalue(bulkArgumentsResult, 0, column++), "t") == 0;
+      if (PQgetisnull(bulkArgumentsResult, 0, column) == 1)
+      {
+        bulkArguments->delimiters = g_strdup(DELIMITERS);
+        column++;
+      }
+      else
+      {
+        bulkArguments->delimiters = normalize_escape_string(PQgetvalue(bulkArgumentsResult, 0, column++));
+      }
       bulkArguments->bulkId = bulkId;
       bulkArguments->actions = queryBulkActions(state, bulkId);
       bulkArguments->jobId = fo_scheduler_jobId();
@@ -169,6 +178,7 @@ void bulkArguments_contents_free(BulkArguments* bulkArguments) {
   free(bulkActions);
 
   g_free(bulkArguments->refText);
+  g_free(bulkArguments->delimiters);
 
   free(bulkArguments);
 }
@@ -179,7 +189,7 @@ int bulk_identification(MonkState* state) {
   License license = (License){
     .refId = bulkArguments->licenseId,
   };
-  license.tokens = tokenize(bulkArguments->refText, DELIMITERS);
+  license.tokens = tokenize(bulkArguments->refText, bulkArguments->delimiters);
 
   GArray* licenseArray = g_array_new(FALSE, FALSE, sizeof (License));
   g_array_append_val(licenseArray, license);
@@ -217,7 +227,8 @@ int bulk_identification(MonkState* state) {
 
           long fileId = atol(PQgetvalue(filesResult, i, 0));
 
-          if (matchPFileWithLicenses(threadLocalState, fileId, licenses, &bulkCallbacks)) {
+          if (matchPFileWithLicenses(threadLocalState, fileId, licenses,
+            &bulkCallbacks, bulkArguments->delimiters)) {
             fo_scheduler_heart(1);
           } else {
             fo_scheduler_heart(0);

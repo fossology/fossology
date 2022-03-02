@@ -18,11 +18,13 @@ jobs:
         os:
           - 'debian:buster'
           - 'debian:stretch'
+          - 'debian:bullseye'
           - 'ubuntu:bionic'
           - 'ubuntu:focal'
 
     runs-on: ubuntu-latest
     container: ${{ matrix.os }}
+    continue-on-error: true
 
     steps:
     - name: Install git

@@ -50,7 +50,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
   /** @var HighlightDao */
   private $highlightDao;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("monkSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -65,7 +65,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $this->agentDir = dirname(dirname(__DIR__));
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;

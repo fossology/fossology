@@ -365,7 +365,7 @@ FROM $tableName WHERE $idRowName = $1", [$id],
    */
   public function getTokenKey($tokenId)
   {
-    $sql = "SELECT token_key, created_on, expire_on, user_fk, active, token_scope " .
+    $sql = "SELECT token_key, client_id, created_on, expire_on, user_fk, active, token_scope " .
       "FROM personal_access_tokens WHERE pat_pk = $1;";
     return $this->dbManager->getSingleRow($sql, [$tokenId],
       __METHOD__ . ".getTokenSecret");
@@ -413,6 +413,24 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     return $this->dbManager->getSingleRow($sql, [
       $userId, $expire, $scope, $name, $key
     ], __METHOD__ . ".insertNewToken");
+  }
+
+  /**
+   * Adds new oauth client to the user.
+   *
+   * @param string  $name     Name of the new client
+   * @param integer $userId   User PK
+   * @param string  $clientId New client ID
+   * @param string  $scope    Token scope
+   */
+  public function addNewClient($name, $userId, $clientId, $scope)
+  {
+    $sql = "INSERT INTO personal_access_tokens" .
+      "(user_fk, created_on, token_scope, token_name, client_id, active)" .
+      "VALUES ($1, NOW(), $2, $3, $4, true);";
+    $this->dbManager->getSingleRow($sql, [
+      $userId, $scope, $name, $clientId
+    ], __METHOD__);
   }
 
   /**
@@ -566,5 +584,22 @@ FROM $tableName WHERE $idRowName = $1", [$id],
     $statement = __METHOD__ . ".getLicenseCount.$kind";
     $result = $this->dbManager->getSingleRow($sql, $params, $statement);
     return intval($result['total']);
+  }
+
+  /*
+   * Get the OAuth token ID from a client id
+   *
+   * @param string $clientId Client ID to get info for
+   * @return integer Token ID
+   */
+  public function getTokenIdFromClientId($clientId)
+  {
+    $sql = "SELECT pat_pk FROM personal_access_tokens " .
+      "WHERE client_id = $1;";
+    $result = $this->dbManager->getSingleRow($sql, [$clientId], __METHOD__);
+    if (!empty($result)) {
+      return $result['pat_pk'];
+    }
+    return null;
   }
 }

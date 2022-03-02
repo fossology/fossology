@@ -81,7 +81,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Setup the objects, database and repository
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("deciderSched");
     $this->dbManager = $this->testDb->getDbManager();
@@ -109,7 +109,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
   /**
    * @brief Destroy objects, database and repository
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->testDb->fullDestruct();
     $this->testDb = null;
@@ -626,7 +626,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     /* insert NoLicenseKnown decisions */
     $this->dbManager->queryOnce("INSERT INTO clearing_decision (clearing_decision_pk, uploadtree_fk, pfile_fk, user_fk, group_fk, decision_type, scope, date_added)"
             . " VALUES (2, $itemId, $pfile, $userId, $groupId, ".DecisionTypes::IDENTIFIED.", ".DecisionScopes::ITEM.", '2015-05-04 11:43:18.276425+02')");
-    $isWipBeforeDecider = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    $isWipBeforeDecider = $this->clearingDao->isDecisionCheck($itemId, $groupId, DecisionTypes::WIP);
     assertThat($isWipBeforeDecider, equalTo(false));
 
     $this->dbManager->queryOnce("INSERT INTO license_file (fl_pk,rf_fk,pfile_fk,agent_fk) VALUES(12222,$licId1,$pfile,$monkAgentId)");
@@ -638,7 +638,7 @@ class SchedulerTest extends \PHPUnit\Framework\TestCase
     $this->assertTrue($success, 'cannot run runner');
     $this->assertEquals($retCode, 0, 'decider failed (did you make test?): '.$output);
 
-    $isWip = $this->clearingDao->isDecisionWip($itemId, $groupId);
+    $isWip = $this->clearingDao->isDecisionCheck($itemId, $groupId, DecisionTypes::WIP);
     assertThat($isWip, equalTo(true));
 
     $this->rmRepo();

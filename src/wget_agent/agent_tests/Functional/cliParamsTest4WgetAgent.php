@@ -45,7 +45,7 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
    * @biref Initialization
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp() {
+  protected function setUp() : void {
     global $WGET_PATH;
     global $DB_COMMAND;
     global $DB_NAME;
@@ -327,7 +327,7 @@ class cliParamsTest4Wget extends \PHPUnit\Framework\TestCase {
 	 * \brief Clean the env
 	 * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown() {
+  protected function tearDown() : void {
     global $TEST_RESULT_PATH;
     global $DB_COMMAND;
     global $DB_NAME;

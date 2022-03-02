@@ -31,7 +31,7 @@ class test_common_active extends \PHPUnit\Framework\TestCase
   /**
    * \brief initialization
    */
-  protected function setUp()
+  protected function setUp() : void
   {
   }
 
@@ -90,7 +90,7 @@ class test_common_active extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
   }
 }

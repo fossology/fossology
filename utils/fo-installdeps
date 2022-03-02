@@ -111,6 +111,8 @@ if [[ $BUILDTIME ]]; then
              apt-get $YesOpt install php-mbstring php7.0-cli php7.0-xml php7.0-zip php7.0-gd;;
            buster)
              apt-get $YesOpt install php-mbstring php7.3-cli php7.3-xml php7.3-zip php7.3-gd;;
+           bullseye)
+             apt-get $YesOpt install php7.4-mbstring php7.4-cli php7.4-xml php7.4-zip php7.4-gd;;
            bionic)
              apt-get $YesOpt install php-mbstring php7.2-cli php7.2-xml php7.2-zip php7.2-gd;;
            sid)
@@ -124,6 +126,8 @@ if [[ $BUILDTIME ]]; then
                 apt-get $YesOpt install postgresql-server-dev-9.6;;
               buster)
                 apt-get $YesOpt install postgresql-server-dev-11;;
+              bullseye)
+                apt-get $YesOpt install postgresql-server-dev-13;;
               bionic)
                 apt-get $YesOpt install postgresql-server-dev-10;;
               sid)
@@ -181,13 +185,18 @@ if [[ $RUNTIME ]]; then
                apt-get $YesOpt install postgresql-11 php7.3 php7.3-pgsql libapache2-mod-php7.3 php7.3-pgsql \
                  php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring php-gettext s-nail libboost-program-options1.67.0 \
                  libboost-regex1.67.0 libicu63;;
+            bullseye)
+               apt-get $YesOpt install postgresql-13 php7.4 php7.4-pgsql \
+               libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
+               php7.4-xml php7.4-zip php7.4-mbstring php-php-gettext s-nail \
+               libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             bionic)
                apt-get $YesOpt install postgresql-10 php7.2 php7.2-pgsql libapache2-mod-php7.2 php7.2-pgsql \
                  php7.2-cli php7.2-curl php7.2-xml php7.2-zip php7.2-mbstring php-gettext s-nail libboost-program-options1.65.1 \
                  libboost-regex1.65.1 libicu60;;
             sid)
                apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-gettext s-nail \
-                 libboost-program-options1.67.0 libboost-regex1.67.0 libicu63;;
+                 libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             focal)
                apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring s-nail \
                  libboost-program-options1.71.0 libboost-regex1.71.0 libicu66;;

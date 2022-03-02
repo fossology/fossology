@@ -24,6 +24,7 @@ use Fossology\Lib\Dao\UserDao;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\UI\FolderNav;
 use Fossology\Lib\UI\MenuHook;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 define("TITLE_UI_BROWSE", _("Browse"));
@@ -322,6 +323,12 @@ class ui_browse extends FO_Plugin
       }
 
       if (! Iscontainer($row['ufile_mode'])) {
+        $parentItemBounds = $this->uploadDao->getParentItemBounds($Upload);
+        if (! $parentItemBounds->containsFiles()) {
+          // Upload with a single file, open license view
+          return new RedirectResponse(Traceback_uri() . '?mod=view-license'
+            . Traceback_parm_keep(array("upload", "item")));
+        }
         global $Plugins;
         $View = &$Plugins[plugin_find_id("view")];
         if (! empty($View)) {

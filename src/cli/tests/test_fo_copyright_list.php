@@ -29,7 +29,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
   /** @var TestInstaller */
   private $testInstaller;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestPgDb("fossclitest");
     $tables = array('users','upload','uploadtree_a','uploadtree','copyright','groups','group_user_member','agent','copyright_decision','copyright_ars','ars_master','copyright_event');
@@ -37,6 +37,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->testDb->createInheritedTables(array('uploadtree_a'));
     $this->testDb->createInheritedArsTables(array('copyright'));
     $this->testDb->insertData($tables);
+    $this->testDb->setupSysconfig();
 
     $sysConf = $this->testDb->getFossSysConf();
     $this->fo_copyright_list_path = dirname(__DIR__) . '/fo_copyright_list -c '.$sysConf;
@@ -45,7 +46,7 @@ class test_fo_copyright_list extends \PHPUnit\Framework\TestCase
     $this->testInstaller->init();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     return;
     $this->testInstaller->clear();

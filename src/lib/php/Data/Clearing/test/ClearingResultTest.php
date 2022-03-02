@@ -37,7 +37,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
   private $licenseDecisionResult;
 
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->licenseRef = M::mock(LicenseRef::class);
     $this->clearingEvent = M::mock(ClearingEvent::class);
@@ -48,7 +48,7 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }
@@ -230,12 +230,11 @@ class ClearingResultTest extends \PHPUnit\Framework\TestCase
         $this->agentClearingEvent1, $this->agentClearingEvent2)));
   }
 
-  /**
-   * @expectedException Exception
-   * @expectedExceptionMessage cannot create ClearingEvent without any event contained
-   */
   public function testCreateClearingResultCreationFailsOfNoEventsWereFound()
   {
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage("cannot create ClearingEvent without any "
+    . "event contained");
     new ClearingResult(null);
   }
 }

@@ -30,7 +30,7 @@ require_once(dirname(__FILE__) . '/../common-parm.php');
 class test_common_menu extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
   }
 
@@ -121,7 +121,7 @@ class test_common_menu extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
   }
 }

@@ -35,14 +35,14 @@ class TextRendererTest extends \PHPUnit\Framework\TestCase
   /** @var TextRenderer */
   private $textRenderer;
 
-  function setUp()
+  function setUp() : void
   {
     $this->textFragment = new TextFragment(self::START_OFFSET, self::FRAGMENT_TEXT);
     $this->textRenderer = new TextRenderer(new HighlightRenderer());
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     M::close();

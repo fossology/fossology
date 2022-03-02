@@ -53,6 +53,8 @@ src/cli/fo_import_licenses
 src/cli/fo_usergroup
 src/cli/fossupload_status
 src/cli/exportLicenseRefUsingSPDX
+src/clixml/agent/version.php
+src/clixml/agent/clixml
 src/copyright/agent/copyright
 src/copyright/agent/keyword
 src/copyright/agent/fo_unicode_clean
@@ -131,6 +133,7 @@ src/ununpack/agent/departition
 src/ununpack/agent/ununpack
 src/ununpack/agent/departition-sa
 src/ununpack/agent/ununpack-sa
+src/ununpack/agent_tests/Unit/testconf
 src/wget_agent/agent/wget_agent
 variable.list
 /nbproject/private/
@@ -177,6 +180,10 @@ install/fossdash/fossdash-publish.py
 src/reso/agent/version.php
 src/reso/agent/reso
 src/www/ui/css/bootstrap/
+src/www/ui/scripts/bootstrap/
 
 # Add all the Ubuntu consol log file
 ubuntu-*
+
+# PHPUnit cache
+.phpunit.result.cache

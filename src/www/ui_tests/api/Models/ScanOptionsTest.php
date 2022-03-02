@@ -60,7 +60,7 @@ namespace Fossology\UI\Api\Test\Models
      * @brief Setup test objects
      * @see PHPUnit_Framework_TestCase::setUp()
      */
-    public function setUp()
+    public function setUp() : void
     {
       global $container;
       $container = M::mock('ContainerBuilder');

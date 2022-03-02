@@ -1,0 +1,238 @@
+{# Copyright 2021 Siemens AG
+   Copying and distribution of this file, with or without modification,
+   are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
+   This file is offered as-is, without any warranty.
+ #}
+
+{%- if contents.countAcknowledgement is same as(0) %}
+  {%- set acknow = '' -%}
+{% else %}
+  {%- set acknow = ' includesAcknowledgements="true" ' -%}
+{% endif -%}
+<ComponentLicenseInformation component="{{ documentName }}" creator="{{ userName }}" date="{{ 'now'|date('Y-m-d')}}" baseDoc="" toolUsed="FOSSology" componentID=""{{acknow}}  componentSHA1="{{componentHash}}" version="{{version}}">
+
+  <GeneralInformation>
+    <ReportId>{{ generalInformation.reportId|trim }}</ReportId>
+    {% if generalInformation.reviewedBy is not empty %}<ReviewedBy>{{ generalInformation.reviewedBy|trim }}</ReviewedBy>{% endif %}
+
+    <ComponentName>{{ generalInformation.componentName|trim }}</ComponentName>
+    <Community>{{ generalInformation.community|trim }}</Community>
+    <ComponentVersion>{{ generalInformation.version|trim }}</ComponentVersion>
+    <ComponentHash>{{ generalInformation.componentHash|trim }}</ComponentHash>
+    <ComponentReleaseDate>{{ generalInformation.componentReleaseDate|trim }}</ComponentReleaseDate>
+    <LinkComponentManagement><![CDATA[{{ generalInformation.linkComponentManagement|trim }}]]></LinkComponentManagement>
+  </GeneralInformation>
+
+  <AssessmentSummary>
+    <GeneralAssessment><![CDATA[{{ assessmentSummary.generalAssessment|trim }}]]></GeneralAssessment>
+    <CriticalFilesFound>{{ assessmentSummary.criticalFilesFound|trim }}</CriticalFilesFound>
+    <DependencyNotes>{{ assessmentSummary.dependencyNotes|trim }}</DependencyNotes>
+    <ExportRestrictionsFound>{{ assessmentSummary.exportRestrictionsFound|trim }}</ExportRestrictionsFound>
+    <UsageRestrictionsFound>{{ assessmentSummary.usageRestrictionsFound|trim }}</UsageRestrictionsFound>
+    <AdditionalNotes><![CDATA[{{ assessmentSummary.additionalNotes|trim }}]]></AdditionalNotes>
+  </AssessmentSummary>
+
+{% for licensesMain in contents %}
+  {%- if licensesMain %}
+    {%- for ids in licensesMain %}
+      {%~ if ids.textMain %}
+  <License type="global" name="{{ids.contentMain|e}}" spdxidentifier="{{ids.contentMain|e}}">
+    <Content><![CDATA[{{ ids.textMain }}
+]]></Content>
+    <Files><![CDATA[
+    {%- for id in ids.files %}
+      {%- if id %}
+        {{- id -}}
+      {%- endif ~%}
+    {%~ endfor %}
+]]></Files>
+    <FileHash><![CDATA[
+    {%- for id in ids.hash %}
+      {%- if id %}
+        {{- id -}}
+      {%- endif ~%}
+    {%~ endfor %}
+]]></FileHash>
+        {%- if ids.acknowledgementMain is not empty ~%}
+    <Acknowledgements><![CDATA[
+    {%- for id in ids.acknowledgementMain %}
+      {{~ id|e ~}}
+    {%~ endfor %}
+]]></Acknowledgements>
+        {%- endif ~%}
+  </License>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
+{%- for licenses in contents %}
+  {%- if licenses %}
+    {%- for ids in licenses %}
+      {%~ if ids.text %}
+  <License type="{{ids.risk}}" name="{{ids.content|e}}" spdxidentifier="{{ids.content|e}}">
+    <Content><![CDATA[{{ ids.text }}
+]]></Content>
+    <Files><![CDATA[
+    {%- for id in ids.files %}
+      {%- if id %}
+        {{- id -}}
+      {%- endif ~%}
+    {%~ endfor %}
+]]></Files>
+    <FileHash><![CDATA[
+    {%- for id in ids.hash %}
+      {%- if id %}
+        {{- id -}}
+      {%- endif ~%}
+    {%~ endfor %}
+]]></FileHash>
+        {%- if ids.acknowledgement is not empty ~%}
+    <Acknowledgements><![CDATA[
+    {%- for id in ids.acknowledgement %}
+      {{~ id|e ~}}
+    {%~ endfor %}
+]]></Acknowledgements>
+        {%- endif ~%}
+  </License>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
+{%- for obligations in contents %}
+  {%- if obligations %}
+    {%- for ido in obligations %}
+      {%~ if ido.topic %}
+  <Obligation>
+    <Topic><![CDATA[
+      {{- ido.topic }}
+]]></Topic>
+    <Text><![CDATA[
+      {{- ido.obliText }}
+]]></Text>
+    <Licenses>
+        {%- for id in ido.license %}
+          {%- if id ~%}
+      <License><![CDATA[{{ id }}]]></License>
+          {%- endif ~%}
+        {%- endfor ~%}
+    </Licenses>
+  </Obligation>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
+{%- for copyrights in contents %}
+  {%- if copyrights %}
+    {%- for idc in copyrights %}
+      {%~ if idc.contentCopy %}
+  <Copyright>
+    <Content><![CDATA[{{ idc.contentCopy }}
+]]></Content>
+    <Files><![CDATA[
+      {%- for id in idc.files %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></Files>
+    <FileHash><![CDATA[
+      {%- for id in idc.hash %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></FileHash>
+    {%- if idc.comments ~%}
+    <Comment><![CDATA[{{ idc.comments }}
+]]></Comment>
+    {%- endif ~%}
+  </Copyright>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
+
+{%- for ecc in contents %}
+  {%- if ecc %}
+    {%- for idc in ecc %}
+      {%~ if idc.contentEcc %}
+  <ExportRestrictions>
+    <Content><![CDATA[{{ idc.contentEcc }}
+]]></Content>
+    <Files><![CDATA[
+      {%- for id in idc.files %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></Files>
+    <FileHash><![CDATA[
+      {%- for id in idc.hash %}
+        {%- if id %}
+          {{- id -}}
+        {%- endif ~%}
+      {%~ endfor %}
+]]></FileHash>
+    {%- if idc.commentsEcc ~%}
+    <Comment><![CDATA[{{ idc.commentsEcc }}
+]]></Comment>
+    {%- endif ~%}
+  </ExportRestrictions>
+      {%~ endif %}
+    {%- endfor %}
+  {%- endif %}
+{% endfor %}
+
+{% if contents.licensesIrre %}
+  <IrrelevantFiles>
+    <Files><![CDATA[
+    {%- for Irre in contents.licensesIrre %}
+      {{- Irre.filesIrre ~}}
+    {%~ endfor %}
+]]></Files>
+  {%- if contents.irreComments ~%}
+    <Comment><![CDATA[
+    {%- for comm in contents.irreComments %}
+      {%- if comm.textIrre -%}
+        {{- comm.textIrre ~}}
+      {%~ endif -%}
+    {%- endfor %}
+]]></Comment>
+  {%- endif ~%}
+  </IrrelevantFiles>
+{% endif %}
+
+{% if contents.licensesDNU %}
+  <DoNotUseFiles>
+    <Files><![CDATA[
+      {%- for DNU in contents.licensesDNU %}
+        {{- DNU.filesDNU ~}}
+      {%~ endfor %}
+]]></Files>
+  {%- if contents.licensesDNUComment ~%}
+    <Comment><![CDATA[
+    {% for comm in contents.licensesDNUComment %}
+      {% if comm.textDNU %}
+        {{~ comm.textDNU ~}}
+      {% endif %}
+    {% endfor %}
+]]></Comment>
+  {%- endif ~%}
+  </DoNotUseFiles>
+{% endif %}
+
+  {%~ if commentAdditionalNotes is not empty and commentAdditionalNotes != 'NA' %}
+  <Comment>
+    <![CDATA[{{ commentAdditionalNotes|trim }}]]>
+  </Comment>
+  {%- endif ~%}
+  {%~ if externalIdLink is not empty and externalIdLink != 'NA' %}
+  <ExternalIds>
+    <![CDATA[{{ externalIdLink|trim }}]]>
+  </ExternalIds>
+  {%- endif ~%}
+</ComponentLicenseInformation>

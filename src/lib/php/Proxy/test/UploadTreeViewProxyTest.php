@@ -28,7 +28,7 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
   /** @var ItemTreeBounds|M\MockInterface */
   private $itemTreeBounds;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->itemTreeBounds = M::mock(ItemTreeBounds::class);
   }
@@ -132,12 +132,10 @@ class UploadTreeViewProxyTest extends \PHPUnit\Framework\TestCase
     assertThat($uploadTreeView->getDbViewQuery(), is("SELECT * FROM foo WHERE upload_fk = 5 AND ((ufile_mode & (3<<28))=0) AND pfile_fk != 0 AND lft BETWEEN 22 AND 43"));
   }
 
-  /**
-   * @expectedException \InvalidArgumentException
-   * @expectedExceptionMessage constraint bar is not defined
-   */
   public function testExcpetionWithUnknownConstraint()
   {
+    $this->expectException(\InvalidArgumentException::class);
+    $this->expectExceptionMessage("constraint bar is not defined");
     $this->itemTreeBounds->shouldReceive("getUploadTreeTableName")->once()->withNoArgs()->andReturn("foo");
 
     new UploadTreeViewProxy($this->itemTreeBounds, array('bar'));

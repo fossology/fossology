@@ -43,7 +43,7 @@ class ft_cliPkgagentTest extends \PHPUnit\Framework\TestCase {
    * @brief Set up test environment
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  function setUp() {
+  function setUp() : void {
 /*
     $AGENTDIR = NULL;
     // determine where the agents are installed

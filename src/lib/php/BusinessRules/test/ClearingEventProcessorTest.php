@@ -43,7 +43,7 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
   /** @var ClearingEventProcessor */
   protected $clearingEventProcessor;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->timestamp = time();
     $this->clearingEventProcessor = new ClearingEventProcessor();
@@ -70,7 +70,7 @@ class ClearingEventProcessorTest extends \PHPUnit\Framework\TestCase
     $this->removedEvent->shouldReceive("isRemoved")->withNoArgs()->andReturn(true);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

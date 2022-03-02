@@ -34,7 +34,7 @@ class HighlightProcessorTest extends \PHPUnit\Framework\TestCase
   /** @var HighlightProcessor */
   var $highlight;
 
-  function setUp()
+  function setUp() : void
   {
     $this->license1 = new License(10, "shortName", "fullName", "licenseFullText", 4, "URL", 2);
 
@@ -45,7 +45,7 @@ class HighlightProcessorTest extends \PHPUnit\Framework\TestCase
     $this->highlight = new HighlightProcessor($this->licenseDao);
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     M::close();
   }

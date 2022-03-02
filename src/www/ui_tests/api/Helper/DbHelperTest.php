@@ -71,7 +71,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
    * @brief Setup test objects
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->dbManager = M::mock(ModernDbManager::class);
     $this->folderDao = M::mock(FolderDao::class);
@@ -84,7 +84,7 @@ class DbHelperTest extends \PHPUnit\Framework\TestCase
    * @brief Remove test objects
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $GLOBALS['SysConf']['auth'][Auth::USER_ID] = -1;
     $_SESSION[Auth::USER_LEVEL] = -1;

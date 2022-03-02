@@ -41,6 +41,7 @@ $Usage = "Usage: " . basename($argv[0]) . " [options] [archives]
     --groupname string = group name
     --password string = password
     -c string = Specify the directory for the system configuration
+    -g number = set the global decisions from previous uploads or not. 1: yes; 0: no
     -P number = set the permission to public on this upload or not. 1: yes; 0: no
     -s        = Run synchronously. Don't return until archive already in FOSSology repository.
                 If the archive is a file (see below), then the file can be safely removed.
@@ -223,6 +224,7 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
   global $Test;
   global $QueueList;
   global $fossjobs_command;
+  global $global_flag;
   global $public_flag;
   global $SysConf;
   global $VCS;
@@ -269,14 +271,14 @@ function UploadOne($FolderPath, $UploadArchive, $UploadName, $UploadDescription,
 
   /* Create the upload for the file */
   if ($Verbose) {
-    print "JobAddUpload($user_pk, $group_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag);\n";
+    print "JobAddUpload($user_pk, $group_pk, $UploadName,$UploadArchive,$UploadDescription,$Mode,$FolderPk, $public_flag, $global_flag);\n";
   }
   if (!$Test) {
     $Src = $UploadArchive;
     if (!empty($TarSource)) {
       $Src = $TarSource;
     }
-    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag);
+    $UploadPk = JobAddUpload($user_pk, $group_pk, $UploadName, $Src, $UploadDescription, $Mode, $FolderPk, $public_flag, $global_flag);
     print "  UploadPk is: '$UploadPk'\n";
     print "  FolderPk is: '$FolderPk'\n";
   }
@@ -386,6 +388,7 @@ $UploadName = "";
 $QueueList = "";
 $TarExcludeList = "";
 $bucket_size = 3;
+$global_flag = 0;
 $public_flag = 0;
 $scmarg = NULL;
 $OptionS = "";
@@ -498,6 +501,14 @@ for ($i = 1; $i < $argc; $i ++) {
       break;
     case '-': /* it's an archive list from stdin! */
       $stdin_flag = 1;
+      break;
+    case '-g': /* set the permission to public or not */
+      $i++;
+      if (1 == $argv[$i]) {
+        $global_flag = 1;
+      } else {
+        $global_flag = 0;
+      }
       break;
     case '-P': /* set the permission to public or not */
       $i++;

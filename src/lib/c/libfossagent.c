@@ -368,9 +368,16 @@ FUNCTION int getEffectivePermissionOnUpload(PGconn* pgConn, long UploadPk, int u
   }
   PQclear(result);
 
-  return min(user_perm, max(permGroup, permPublic));
+  if (user_perm >= PLUGIN_DB_ADMIN)
+  {
+    return PERM_ADMIN;
+  }
+  else
+  {
+    return min(user_perm, max(permGroup, permPublic));
+  }
 }
-
+ 
 /**
 * \brief Get users permission to this upload
 *

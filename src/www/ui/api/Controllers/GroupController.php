@@ -24,13 +24,13 @@
 namespace Fossology\UI\Api\Controllers;
 
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Models\Group;
 use Fossology\Lib\Auth\Auth;
 use Fossology\Lib\Dao\UserDao;
+use Fossology\UI\Api\Helper\ResponseHelper;
 
 /**
  * @class GroupController
@@ -43,9 +43,9 @@ class GroupController extends RestController
    * Get list of Groups
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function getGroups($request, $response, $args)
   {
@@ -68,9 +68,9 @@ class GroupController extends RestController
    * Create a given group
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function createGroup($request, $response, $args)
   {

@@ -29,7 +29,7 @@ require_once(dirname(__FILE__) . '/../common-parm.php');
 class test_common_parm extends \PHPUnit\Framework\TestCase
 {
   /* initialization */
-  protected function setUp()
+  protected function setUp() : void
   {
     //print "Starting unit test for common-parm.php\n";
   }
@@ -154,7 +154,7 @@ class test_common_parm extends \PHPUnit\Framework\TestCase
   /**
    * \brief clean the env
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
   }
 }

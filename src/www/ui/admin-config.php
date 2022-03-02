@@ -17,6 +17,8 @@
 ***********************************************************/
 
 use Fossology\Lib\Db\DbManager;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 define("TITLE_FOCONFIG", _("Configuration Variables"));
 
@@ -160,6 +162,11 @@ class foconfig extends FO_Plugin
     $UpdateMsg = "";
     $ErrorMsg="";
     if (! empty($newarray)) {
+      // Fetch endpoints from OIDC documentation
+      if (! empty($newarray["OidcDiscoveryURL"]) &&
+          $newarray["OidcDiscoveryURL"] != $oldarray["OidcDiscoveryURL"]) {
+        $this->updateOidcEndpoints($newarray, $oldarray);
+      }
       foreach ($newarray as $VarName => $VarValue) {
         if ($VarValue != $oldarray[$VarName]) {
           /* get validation_function row from sysconfig table */
@@ -223,6 +230,58 @@ class foconfig extends FO_Plugin
       $OutBuf .= $this->HTMLout();
     }
     $this->vars['content'] = $OutBuf;
+  }
+
+  /**
+   * @brief Update OIDC endpoints from OIDC discovery document
+   *
+   * Fetch the OIDC discovery document and replace the old values of required
+   * endpoints. Update the values in the newarray.
+   * The function simply returns in case of error.
+   *
+   * @param[in,out] array $newarray Array with new values
+   * @param[in,out] array $oldarray Array with old values
+   */
+  private function updateOidcEndpoints(&$newarray, &$oldarray)
+  {
+    global $SysConf;
+    $client = new Client();
+    $proxy = [];
+    if (array_key_exists('http_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['http_proxy'])) {
+      $proxy['http'] = $SysConf['FOSSOLOGY']['http_proxy'];
+    }
+    if (array_key_exists('https_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['https_proxy'])) {
+      $proxy['https'] = $SysConf['FOSSOLOGY']['https_proxy'];
+    }
+    if (array_key_exists('no_proxy', $SysConf['FOSSOLOGY']) &&
+        ! empty($SysConf['FOSSOLOGY']['no_proxy'])) {
+      $proxy['no'] = explode(',', $SysConf['FOSSOLOGY']['no_proxy']);
+    }
+    try {
+      $res = $client->request("GET", $newarray["OidcDiscoveryURL"], [
+        "proxy" => $proxy
+      ]);
+    } catch (RequestException $e) {
+      return;
+    }
+    if ($res->getStatusCode() !== 200) {
+      return;
+    }
+    $body = (string)$res->getBody();
+    $body = json_decode($body, true);
+    // Reset old values to make sure the update happens
+    $oldarray["OidcIssuer"] = "";
+    $oldarray["OidcAuthorizeURL"] = "";
+    $oldarray["OidcAccessTokenURL"] = "";
+    $oldarray["OidcResourceURL"] = "";
+    $oldarray["OidcJwksURL"] = "";
+    $newarray["OidcIssuer"] = $body["issuer"];
+    $newarray["OidcAuthorizeURL"] = $body["authorization_endpoint"];
+    $newarray["OidcAccessTokenURL"] = $body["token_endpoint"];
+    $newarray["OidcResourceURL"] = $body["userinfo_endpoint"];
+    $newarray["OidcJwksURL"] = $body["jwks_uri"];
   }
 }
 

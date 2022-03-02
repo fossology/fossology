@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Db;
 
+use Exception;
 use Mockery as M;
 use Mockery\MockInterface;
 
@@ -30,7 +31,7 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
   /** @var DbManager */
   protected $dbManager;
 
-  function setUp()
+  function setUp() : void
   {
     $this->driver = M::mock('Fossology\\Lib\\Db\\Driver');
     $this->driver->shouldReceive('booleanToDb')->with(true)->andReturn('t');
@@ -40,10 +41,10 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     });
 
     $this->logger = M::mock('Monolog\\Logger');
-    $this->logger->shouldReceive('addDebug');
+    $this->logger->shouldReceive('debug');
   }
 
-  function tearDown()
+  function tearDown() : void
   {
     M::close();
   }
@@ -61,11 +62,9 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     $this->dbManager->begin();
   }
 
-  /**
-   * @expectedException \Exception
-   */
   function testCommitTransaction()
   {
+    $this->expectException(Exception::class);
     $this->driver->shouldReceive("commit")->withNoArgs()->never();
     $this->dbManager->commit();
   }
@@ -105,11 +104,9 @@ abstract class DbManagerTest extends \PHPUnit\Framework\TestCase
     assertThat($existsTable, is(TRUE));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   function testExistsDb_hack()
   {
+    $this->expectException(Exception::class);
     $this->dbManager->existsTable("goodTable' OR 3<'4");
   }
 

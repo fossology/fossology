@@ -10,7 +10,7 @@ VARS = $(TOP)/Makefile.conf
 include $(VARS)
 
 MOD_NAME = spdx2
-MOD_NAMES = spdx2 spdx2tv dep5
+MOD_NAMES = spdx2 spdx2tv dep5 spdx2csv
 
 DIRS = agent ui
 TESTDIRS = agent_tests

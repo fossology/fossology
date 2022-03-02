@@ -23,13 +23,14 @@
 
 namespace Fossology\UI\Api\Controllers;
 
+use Fossology\Lib\Auth\Auth;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Fossology\UI\Api\Helper\RestHelper;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\Lib\Exceptions\DuplicateTokenKeyException;
 use Fossology\Lib\Exceptions\DuplicateTokenNameException;
+use Fossology\UI\Api\Helper\ResponseHelper;
 
 /**
  * @class AuthController
@@ -42,9 +43,9 @@ class AuthController extends RestController
    * Respond to OPTIONS requests with an empty 204 response
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function optionsVerification($request, $response, $args)
   {
@@ -55,13 +56,19 @@ class AuthController extends RestController
    * Get the JWT authentication headers for the user
    *
    * @param ServerRequestInterface $request
-   * @param ResponseInterface $response
+   * @param ResponseHelper $response
    * @param array $args
-   * @return ResponseInterface
+   * @return ResponseHelper
    */
   public function createNewJwtToken($request, $response, $args)
   {
-    $tokenRequestBody = $request->getParsedBody();
+    if (Auth::getRestTokenType() == Auth::TOKEN_OAUTH) {
+      $error = new Info(400,
+        "Request to create tokens blocked. Use OAuth clients.",
+        InfoType::ERROR);
+      return $response->withJson($error->getArray(), $error->getCode());
+    }
+    $tokenRequestBody = $this->getParsedBody($request);
     $paramsRequired = [
       "username",
       "password",

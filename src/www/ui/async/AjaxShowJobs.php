@@ -1,6 +1,6 @@
 <?php
 /*
- Copyright (C) 2015-2019, Siemens AG
+ Copyright (C) 2015-2019,2021 Siemens AG
  Author: Shaheem Azmal<shaheem.azmal@siemens.com>,
          Anupam Ghosh <anupam.ghosh@siemens.com>
  Copyright (C) 2020 Robert Bosch GmbH, Dineshkumar Devarajan <Devarajan.Dineshkumar@in.bosch.com>
@@ -291,6 +291,9 @@ class AjaxShowJobs extends \FO_Plugin
           case 'spdx2tv':
             $jobArr['jobQueue'][$key]['download'] = "SPDX2 tag/value report";
             break;
+          case 'spdx2csv':
+            $jobArr['jobQueue'][$key]['download'] = "SPDX2 CSV report";
+            break;
           case 'dep5':
             $jobArr['jobQueue'][$key]['download'] = "DEP5 copyright file";
             break;
@@ -299,6 +302,9 @@ class AjaxShowJobs extends \FO_Plugin
             break;
           case 'unifiedreport':
             $jobArr['jobQueue'][$key]['download'] = "Unified Report";
+            break;
+          case 'clixml':
+            $jobArr['jobQueue'][$key]['download'] = "Clixml Report";
             break;
           default:
             $jobArr['jobQueue'][$key]['download'] = "";

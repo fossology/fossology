@@ -149,7 +149,7 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderUploads'] = $this->prepareFolderUploads($folderId, $trustGroupId);
 
     $renderer = $this->getObject('twig.environment');
-    return $renderer->loadTemplate('agent_reuser.html.twig')->render($vars);
+    return $renderer->load('agent_reuser.html.twig')->render($vars);
   }
 
   /**
@@ -163,7 +163,7 @@ class ReuserPlugin extends DefaultPlugin
     $vars['folderParameterName'] = self::FOLDER_PARAMETER_NAME;
     $vars['uploadToReuseSelectorName'] = self::UPLOAD_TO_REUSE_SELECTOR_NAME;
     $renderer = $this->getObject('twig.environment');
-    return $renderer->loadTemplate('agent_reuser.js.twig')->render($vars);
+    return $renderer->load('agent_reuser.js.twig')->render($vars);
   }
 
   /**

@@ -42,7 +42,7 @@ class HighlightTest extends \PHPUnit\Framework\TestCase
    */
   private $highlight;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->htmlElement = M::mock('Fossology\Lib\Html\HtmlElement');
 
@@ -50,7 +50,7 @@ class HighlightTest extends \PHPUnit\Framework\TestCase
     $this->highlight->setLicenseId($this->licenseId);
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     M::close();
   }

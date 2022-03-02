@@ -26,12 +26,12 @@ namespace Fossology\UI\Api\Controllers;
 use Fossology\Lib\Dao\ClearingDao;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\UI\Api\Helper\FileHelper;
+use Fossology\UI\Api\Helper\ResponseHelper;
 use Fossology\UI\Api\Models\File;
 use Fossology\UI\Api\Models\Findings;
 use Fossology\UI\Api\Models\Hash;
 use Psr\Container\ContainerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @class FileSearchController
@@ -71,14 +71,14 @@ class FileSearchController extends RestController
   /**
    * Get the file information based on hashes sent
    *
-   * @param Request $request
-   * @param Response $response
+   * @param ServerRequestInterface $request
+   * @param ResponseHelper $response
    * @param array $args
-   * @return Response
+   * @return ResponseHelper
    */
   public function getFiles($request, $response, $args)
   {
-    $fileListJSON = $request->getParsedBody();
+    $fileListJSON = $this->getParsedBody($request);
     $inputFileList = File::parseFromArray($fileListJSON);
     $existsList = [];
     $nonExistsList = [];

@@ -19,6 +19,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Exception;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Test\TestLiteDb;
 use Monolog\Logger;
@@ -36,7 +37,7 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
   /** @var assertCountBefore */
   private $assertCountBefore;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->testDb = new TestLiteDb();
     $this->dbManager = $this->testDb->getDbManager();
@@ -45,7 +46,7 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
 
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
     $this->testDb = null;
@@ -103,21 +104,17 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($row['group_name'], equalTo($groupName));
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testAddGroupFailIfAlreadyExists()
   {
+    $this->expectException(Exception::class);
     $this->testDb->createPlainTables(array('groups','users'));
     $this->testDb->insertData(array('groups','user'));
     $this->userDao->addGroup('fossy');
   }
 
-  /**
-   * @expectedException \Exception
-   */
   public function testAddGroupFailEmptyName()
   {
+    $this->expectException(Exception::class);
     $this->testDb->createPlainTables(array('groups','users'));
     $this->testDb->insertData(array('groups','user'));
     $this->userDao->addGroup('');
@@ -133,12 +130,10 @@ class UserDaoTest extends \PHPUnit\Framework\TestCase
     assertThat($uName,equalTo($username));
   }
 
-  /**
-   * @expectedException \Exception
-   * @expectedExceptionMessage unknown user with id=101
-   */
   public function testGetUserNameFail()
   {
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage("unknown user with id=101");
     $this->testDb->createPlainTables(array('users'));
     $this->userDao->getUserName(101);
   }

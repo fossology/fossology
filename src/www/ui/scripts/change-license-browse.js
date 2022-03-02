@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2014-2018, Siemens AG
+ Copyright (C) 2014-2018,2021 Siemens AG
  Author: Daniele Fognini, Johannes Najjar
 
  This program is free software; you can redistribute it and/or
@@ -30,8 +30,18 @@ $(document).ready(function () {
   clearingHistoryDataModal = $('#ClearingHistoryDataModal').modal('hide');
   $('#bulkModal').draggable({
     stop: function(){
-      $(this).css({'width':'','height':''});
+      $(this).css('height', '');
     }
+  });
+
+  $("#markDecisionAdd").click(function() {
+    var decision = $("#markDecision").val();
+    return markDecisions(decision, false);
+  });
+
+  $("#markDecisionRemove").click(function() {
+    var decision = $("#removeDecision").val();
+    return markDecisions(decision, true);
   });
 });
 
@@ -53,6 +63,12 @@ function closeBulkModal() {
   $('#bulkModal').hide();
 }
 
+// Hide backdrop for bulk modal
+$('#bulkModal').on('shown.bs.modal', function () {
+  $('.modal-backdrop').css('display', 'none');
+  $('#bulkModal').css({'width': 'fit-content', 'margin': '0 auto'});
+});
+
 function loadBulkHistoryModal() {
   refreshBulkHistory(function(data) {
     $('#bulkHistoryModal').modal('show');
@@ -60,13 +76,15 @@ function loadBulkHistoryModal() {
 }
 
 function openUserModal(uploadTreeId) {
-  userModal = $('#userModal').modal('hide');
+  userModal = $('#userModal').modal({"show": false});
+  userModal.modal('hide');
   $('#uploadTreeId').val(uploadTreeId);
-  userModal.toggle();
+  $("#bulkIdResult").hide();
+  userModal.modal('show');
 }
 
 function closeUserModal() {
-  userModal.hide();
+  userModal.modal('hide');
 }
 
 function openClearingHistoryDataModal(uploadTreeId) {
@@ -87,61 +105,50 @@ function scheduleBulkScan() {
 function performPostRequest(doRemove) {
   removed = doRemove;
   performPostRequestCommon($('#bulkIdResult'), function () {
-      location.reload();
+    location.reload();
   });
 }
 
-function markDecisions(uploadTreeIdForMultiple) {
-  if(Array.isArray(uploadTreeIdForMultiple)){
-    var data = {
-      "uploadTreeId": uploadTreeIdForMultiple,
-      "decisionMark": 'irrelevant'
-    };
-  }else{
-    var data = {
-      "uploadTreeId": $('#uploadTreeId').val(),
-      "decisionMark": uploadTreeIdForMultiple
-    };
+function markDecisions(decisionToBeApplied, isRemoval) {
+  if (isRemoval == true) {
+    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
+    if (pleaseConfirm == false) {
+      return false;
+    }
   }
+  var data = {
+    "uploadTreeId": $('#uploadTreeId').val(),
+    "decisionMark": decisionToBeApplied,
+    "isRemoval": isRemoval
+  };
   resultEntity = $('#bulkIdResult');
   $.ajax({
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
     success: function (data) { location.reload(); },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
+    error: function(responseobject) {
+      bootstrapAlertError(responseobject, resultEntity);
+    }
   });
-
 }
 
-function deleteMarkedDecisions(decisionToBeRemoved) {
-  var data = {
-    "uploadTreeId": $('#uploadTreeId').val(),
-    "decisionMark": decisionToBeRemoved
-  };
-  resultEntity = $('#bulkIdResult');
-    var txt;
-    var pleaseConfirm = confirm("You are about to delete recent decisions. Please confirm!");
-  if (pleaseConfirm == true) {
-    $.ajax({
-      type: "POST",
-      url: "?mod=change-license-processPost",
-      data: data,
-      success: function (data) { location.reload(); },
-      error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
-      });
+function cleanText(textField) {
+  var text = textField.val();
+
+  var delimiters = $("#delimdrop").val();
+  if (delimiters.toLowerCase() === "default") {
+    delimiters = '\t\f#^%*';
   }
-}
-
-function cleanText() {
-  var $textField = $('#bulkRefText');
-  var text = $textField.val();
-
+  delimiters = escapeRegExp(delimiters);
+  var re = new RegExp("[" + delimiters + "]+", "gi");
   text = text.replace(/ [ ]*/gi, ' ')
-             .replace(/(^|\n)[ \t]*/gi,'$1')
              .replace(/(^|\n) ?\/[\*\/]+/gi, '$1')
+             .replace(/(^|\n) ?['"]{3}/gi, '$1')
              .replace(/[\*]+\//gi, '')
-             .replace(/(^|\n) ?#+/gi,'$1')
+             .replace(/(^|\n) ?(dnl)+/gi, '$1')
+             .replace(re, ' ')
+             .replace(/(^|\n)[ \t]*/gim, '$1')
              ;
-  $textField.val(text);
+  textField.val(text);
 }

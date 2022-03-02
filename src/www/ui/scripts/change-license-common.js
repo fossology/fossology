@@ -157,7 +157,8 @@ function scheduleBulkScanCommon(resultEntity, callbackSuccess) {
     "bulkScope": $('#bulkScope').val(),
     "uploadTreeId": $('#uploadTreeId').val(),
     "forceDecision": $('#forceDecision').is(':checked')?1:0,
-    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0
+    "ignoreIrre": $('#bulkIgnoreIrre').is(':checked') ? 1 : 0,
+    "delimiters": $("#delimdrop").val()
   };
 
   resultEntity.hide();
@@ -188,8 +189,8 @@ function performPostRequestCommon(resultEntity, callbackSuccess) {
     type: "POST",
     url: "?mod=change-license-processPost",
     data: data,
-    success: function (data) { scheduledDeciderSuccess(data,resultEntity, callbackSuccess, closeUserModal); },
-    error: function(responseobject) { scheduledDeciderError(responseobject, resultEntity); }
+    success: function (data) { scheduledBootstrapSuccess(data, resultEntity, callbackSuccess, closeUserModal); },
+    error: function(responseobject) { bootstrapAlertError(responseobject, resultEntity); }
   });
 
 }
@@ -259,6 +260,15 @@ function openTextModel(uploadTreeId, licenseId, what, type) {
   if (what == 3 || what === 'acknowledgement') {
     // clicked to add button to display child modal
     $('#selectFromNoticeFile').css('display','inline-block');
+  } else {
+    $('#selectFromNoticeFile').css('display','none');
+  }
+
+  if (what == 2 || what === 'reportinfo') {
+    // clicked to add button to display child modal
+    $('#clearText').show();
+  } else {
+    $('#clearText').hide();
   }
 
   if(type == 0) {
@@ -357,7 +367,6 @@ function submitTextModal(){
       data: post_data,
       success: () => doOnSuccess(textModal)
     });
-    $('#selectFromNoticeFile').css('display','none');
   } else {
     textModal.modal('hide');
     $("#"+ whatLicId + whatCol +"Bulk").attr('title', $(refTextId).val());
@@ -367,7 +376,6 @@ function submitTextModal(){
     } else {
       $("#"+ whatLicId + whatCol +"Bulk").attr('title','');
     }
-    $('#selectFromNoticeFile').css('display','none');
   }
 }
 
@@ -416,10 +424,28 @@ $(document).ready(function () {
 
   $('[data-toggle="tooltip"]').tooltip();
   textModal = $('#textModal').modal('hide');
-  $('#textModal, #bulkModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
+  $('#textModal, #ClearingHistoryDataModal, #userModal, #bulkHistoryModal').draggable({
     stop: function(){
       $(this).css({'width':'','height':''});
     }
+  });
+  $('#bulkModal').draggable({
+    stop: function(){
+      $(this).css('height', '');
+    }
+  });
+
+  $('#custDelim').change(function () {
+    if (this.checked) {
+      $('#delimRow').removeClass("invisible").addClass("visible");
+    } else {
+      $('#delimRow').removeClass("visible").addClass("invisible");
+      $('#resetDel').click();
+    }
+  });
+
+  $('#resetDel').click(function () {
+    $('#delimdrop').val('DEFAULT');
   });
 });
 
@@ -484,4 +510,39 @@ function getStdLicenseComments(scope, callback) {
       callback(data.error);
     }
   });
+}
+
+function escapeRegExp(string){
+  string = string.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+  return string.replace(/\\\\([abfnrtv])/g, '\\$1'); // Preserve default escape sequences
+}
+
+function bootstrapAlertError(responseobject, resultEntity) {
+  var error = false;
+  if (responseobject.responseJSON !== undefined) {
+    error = responseobject.responseJSON.error;
+  }
+  var errorSpan = resultEntity.find("span:first");
+  if (error) {
+    errorSpan.text("error: " + error);
+  } else {
+    errorSpan.text("error");
+  }
+  resultEntity.show();
+}
+
+function scheduledBootstrapSuccess (data, resultEntity, callbackSuccess, callbackCloseModal) {
+  var jqPk = data.jqid;
+  var errorSpan = resultEntity.find("span:first");
+  if (jqPk) {
+    errorSpan.html("scan scheduled as " + linkToJob(jqPk));
+    if (callbackSuccess) {
+      resultEntity.show();
+      queueUpdateCheck(jqPk, callbackSuccess);
+    }
+    callbackCloseModal();
+  } else {
+    errorSpan.text("bad response from server");
+  }
+  resultEntity.show();
 }

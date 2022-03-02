@@ -12,6 +12,7 @@ DIRS = \
 	adj2nest \
 	buckets \
 	cli \
+	clixml \
 	copyright \
 	debug \
 	decider \
@@ -84,9 +85,6 @@ $(CLEANDIRS):
 
 phpvendors:
 	$(COMPOSER_PHAR) install -q
-	if ! patch --reverse --silent --force --dry-run $(TOP)/src/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; then \
-		patch --silent --force $(TOP)/src/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; \
-	fi
 	rm -rf $(TOP)/src/www/ui/css/bootstrap
 	rm -rf $(TOP)/src/www/ui/scripts/bootstrap
 	$(INSTALL_DATA) $(TOP)/src/vendor/twbs/bootstrap/dist/css/* -t $(TOP)/src/www/ui/css/bootstrap
@@ -96,9 +94,6 @@ composer_install:
 	@echo "current dir: '$${PWD}'"
 	$(INSTALL_DATA) composer.json composer.lock $(DESTDIR)$(MODDIR)
 	(cd $(DESTDIR)$(MODDIR); export COMPOSER_HOME=/dev/null; export COMPOSER_ALLOW_SUPERUSER=1; $(COMPOSER_PHAR) install --no-plugins --no-scripts --no-dev)
-	if ! patch --reverse --silent --force --dry-run $(DESTDIR)$(MODDIR)/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; then \
-		patch --silent --force $(DESTDIR)$(MODDIR)/vendor/easyrdf/easyrdf/lib/EasyRdf/Parser/RdfXml.php $(TOP)/RdfXml.php.patch; \
-	fi
 	rm -rf $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap
 	rm -rf $(DESTDIR)$(MODDIR)/www/ui/scripts/bootstrap
 	$(INSTALL_DATA) $(DESTDIR)$(MODDIR)/vendor/twbs/bootstrap/dist/css/* -t $(DESTDIR)$(MODDIR)/www/ui/css/bootstrap

@@ -196,9 +196,9 @@ class ui_report_conf extends FO_Plugin
                      $obData['text'].'</textarea></td><td>';
       foreach ($obData['license'] as $value) {
         if (!empty($excludedObligations[$obTopic]) && in_array($value, $excludedObligations[$obTopic])) {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'" checked> '.$value.'<br />';
+          $tableRows .= '<input class="browse-upload-checkbox view-license-rc-size" type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'" checked> '.$value.'<br />';
         } else {
-          $tableRows .= '<input type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'"> '.$value.'<br />';
+          $tableRows .= '<input class="browse-upload-checkbox view-license-rc-size" type="checkbox" name="obLicenses['.urlencode($obTopic).'][]" value="'.$value.'"> '.$value.'<br />';
         }
       }
       $tableRows .= '</td></tr>';
@@ -213,14 +213,17 @@ class ui_report_conf extends FO_Plugin
     foreach ($unifiedColumns as $name => $unifiedReportColumns) {
       foreach ($unifiedReportColumns as $columnName => $isenabled) {
         $tableRowsUnifiedReport .= '<tr>';
-        $tableRowsUnifiedReport .= '<td><input type="text" style="width:95%" name="'.$name.'[]" value="'.$columnName.'"></td>';
+        $tableRowsUnifiedReport .= '<td><input class="form-control" type="text" style="width:95%" name="'.$name.'[]" value="'.$columnName.'"></td>';
         $checked = '';
         if ($isenabled) {
           $checked = 'checked';
         }
-        $tableRowsUnifiedReport .= '<td><input type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
+        $tableRowsUnifiedReport .= '<td style="vertical-align:middle"><input class="browse-upload-checkbox view-license-rc-size" type="checkbox" style="width:95%" name="'.$name.'[]" '.$checked.'></td>';
         $tableRowsUnifiedReport .= '</tr>';
       }
+    }
+    if (!empty($row['ri_globaldecision'])) {
+      $vars['applyGlobal'] = "checked";
     }
     $vars['tableRows'] = $tableRows;
     $vars['tableRowsUnifiedReport'] = $tableRowsUnifiedReport;
@@ -311,6 +314,8 @@ class ui_report_conf extends FO_Plugin
     $submitReportConf = GetParm("submitReportConf", PARM_STRING);
 
     if (isset($submitReportConf)) {
+      $applyGlobal = @$_POST["applyGlobal"];
+      $applyGlobal = !empty($applyGlobal) ? 1 : 0;
       $parms = array();
       $obLicensesEncoded = @$_POST["obLicenses"];
       $obLicensesEncoded = !empty($obLicensesEncoded) ? $obLicensesEncoded : array();
@@ -341,6 +346,8 @@ class ui_report_conf extends FO_Plugin
       $excludeObligationPos = count($parms);
       $parms[] = json_encode($unifiedReportColumnsForJson);
       $unifiedColumnsPos = count($parms);
+      $parms[] = $applyGlobal;
+      $applyGlobalPos = count($parms);
       $parms[] = $uploadId;
       $uploadIdPos = count($parms);
 
@@ -348,7 +355,8 @@ class ui_report_conf extends FO_Plugin
                "ri_ga_checkbox_selection = $$checkBoxUrPos, " .
                "ri_spdx_selection = $$checkBoxSpdxPos, " .
                "ri_excluded_obligations = $$excludeObligationPos, " .
-               "ri_unifiedcolumns = $$unifiedColumnsPos" .
+               "ri_unifiedcolumns = $$unifiedColumnsPos, " .
+               "ri_globaldecision = $$applyGlobalPos " .
                "WHERE upload_fk = $$uploadIdPos;";
       $this->dbManager->getSingleRow($SQL, $parms,
         __METHOD__ . "updateReportInfoData");

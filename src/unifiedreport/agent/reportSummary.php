@@ -83,7 +83,7 @@ class ReportSummary
    * @param string $groupName
    * @param string $packageUri
    */
-  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri)
+  function summaryTable(Section $section, $uploadId, $userName, $mainLicenses, $licenses, $histLicenses, $otherStatement, $timestamp, $groupName, $packageUri, $assignedToUserName)
   {
     $cellRowContinue = array("vMerge" => "continue");
     $firstRowStyle = array("size" => 14, "bold" => true);
@@ -122,9 +122,15 @@ class ReportSummary
 
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
-    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Prepared by"), $firstRowStyle1, "pStyle");
-    $table->addCell($cellThirdLen)->addText(htmlspecialchars(" "
-      .date("Y/m/d", $timestamp)."  ".$userName." (".$groupName.") "), null, "pStyle");
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Report Created by"), $firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars(
+      date("Y/m/d", $timestamp)."  ".$userName." (".$groupName.") "), null, "pStyle");
+
+    $table->addRow($rowWidth);
+    $table->addCell($cellFirstLen, $cellRowContinue);
+    $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Analyzed by"),$firstRowStyle1, "pStyle");
+    $table->addCell($cellThirdLen)->addText(htmlspecialchars($assignedToUserName), null, "pStyle");
+
     $table->addRow($rowWidth);
     $table->addCell($cellFirstLen, $cellRowContinue);
     $table->addCell($cellSecondLen)->addText(htmlspecialchars(" Reviewed by (opt.)"),$firstRowStyle1, "pStyle");

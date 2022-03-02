@@ -38,7 +38,7 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    * @brief Setup test env
    * @see PHPUnit_Framework_TestCase::setUp()
    */
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->assertCountBefore = \Hamcrest\MatcherAssert::getCount();
   }
@@ -47,7 +47,7 @@ class spdx2Test extends \PHPUnit\Framework\TestCase
    * @brief Tear down test env
    * @see PHPUnit_Framework_TestCase::tearDown()
    */
-  protected function tearDown()
+  protected function tearDown() : void
   {
     $this->addToAssertionCount(\Hamcrest\MatcherAssert::getCount()-$this->assertCountBefore);
   }

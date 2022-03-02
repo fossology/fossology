@@ -1,4 +1,4 @@
-{# Copyright 2014-2015 Siemens AG
+{# Copyright 2014-2015,2022 Siemens AG
 
    Copying and distribution of this file, with or without modification,
    are permitted in any medium without royalty provided the copyright notice and this notice are preserved.
@@ -18,8 +18,22 @@
 {% block fileselect %}
 <li>
   <div class="form-group">
-    <label for="{{ fileInputName }}">{{ 'Select the file to upload'| trans }}:</label>
-    <input type="file" class="form-control-file" name="{{ fileInputName }}">
+    <label for="fileUploader">{{ 'Select the file(s) to upload'| trans }}:</label>
+    <input type="file" class="form-control-file" id="fileUploader" name="{{ fileInputName }}[]" multiple="multiple">
+  </div>
+</li>
+{% endblock %}
+{% block filedescription %}
+<li class="mb-4">
+  Description(s)
+  <div style="display:none" id="collapseDescription">
+    <button class="btn btn-info" type="button" data-toggle="collapse" data-target="#uploaddescriptions" aria-expanded="true" aria-controls="uploaddescriptions">+ expand</button>
+  </div>
+  <br />
+  <div id="uploaddescriptions" class="card-columns collapse show">
+    <span class="text-secondary">
+      {{ 'Select file(s) to enter description'|trans }}
+    </span>
   </div>
 </li>
 {% endblock %}
@@ -27,4 +41,101 @@
 {% block uploadText %}
   <div class="form-group" style="margin-left:2%	;">
     <label for="pText">{{ 'After you press Upload, please be patient while your file is transferring.'| trans }}</label>
+{% endblock %}
+
+{% block foot %}
+  {{ parent() }}
+  <script type="text/javascript">
+    function checkDuplicateUploadWarning(e) {
+      const allFiles = e.target.files;
+      const folderId = $("#uploadFolderSelector").val();
+      var messages = new Array();
+      var ajaxList = new Array();
+      var ajaxCall;
+      for (let i = 0; i < allFiles.length; i++) {
+        const uploadName = allFiles[i].name;
+        ajaxCall = $.ajax({
+          url : '?mod=foldercontents',
+          type : 'post',
+          dataType : 'json',
+          data : {"folder": folderId, "upload": uploadName},
+          success : function(data) {
+            if (data.upload !== false) {
+              messages.push(`${uploadName} already uploaded at ${data.date}. ` +
+                `<a href='${data.upload}' target="blank">` +
+                'Check the upload</a>.');
+            }
+          }
+        });
+        ajaxList.push(ajaxCall);
+      }
+      // Wait for all ajax calls to resolve
+      $.when.apply($, ajaxList).then(function(){
+        $('#fileUploader').popover('dispose');
+        if (messages.length != 0) {
+          $('#fileUploader').popover({
+            "content": messages.join("<br />"), "html": true,
+            "title": "Warning!", "placement": "top", "trigger": "focus"
+          }).popover('show');
+          $('html, body').animate({
+            scrollTop: $('#fileUploader').offset().top
+          }, 100);
+        }
+      });
+    }
+    function disableReuserOptions() {
+      if ($('#searchInFolder').length < 1) {
+        return;
+      }
+      var reuserdiv = $("#searchInFolder").parent();
+      reuserdiv.find("input").attr("disabled", true);
+      reuserdiv.find("select[id=uploadToReuse]").attr("disabled", true);
+      reuserdiv.addClass("text-muted");
+      $("#reusedisable").show();
+    }
+    function enableReuserOptions() {
+      if ($('#searchInFolder').length < 1) {
+        return;
+      }
+      var reuserdiv = $("#searchInFolder").parent();
+      reuserdiv.find("input").attr("disabled", false);
+      reuserdiv.find("select[id=uploadToReuse]").attr("disabled", false);
+      reuserdiv.removeClass("text-muted");
+      $("#reusedisable").hide();
+    }
+    $("#fileUploader").on("change", function(e) {
+      checkDuplicateUploadWarning(e);
+
+      var holder = $("#uploaddescriptions");
+      holder.html("");
+      let allFiles = e.target.files;
+      if (allFiles.length > 10) {
+        $("#collapseDescription").show();
+        $("#uploaddescriptions").collapse('hide');
+      }
+      if (allFiles.length > 1) { // Disable reuser for multi file upload
+        disableReuserOptions();
+      } else {
+        enableReuserOptions();
+      }
+      for (let i = 0; i < allFiles.length; i++) {
+        const val = allFiles[i];
+        var tt = $("<h6 class='card-title'>").append(val.name);
+        var formg = $("<div class='form-group'>");
+        var ll = $(`<label for='desc${i}' class='card-text'>`).append("({{ 'Optional'|trans }}) {{ 'Enter a description of this file'| trans }}:");
+        formg.append(ll).append(`<input type='text' class='form-control' name='{{ descriptionInputName }}[${i}]' id='desc${i}'>`);
+        var body = $("<div class='card-body'>");
+        body.append(tt).append(formg);
+        var html = $("<div class='card'>");
+        html.append(body);
+        holder.append(html);
+      };
+    });
+    $('#uploaddescriptions').on('hidden.bs.collapse', function () {
+      $('#collapseDescription').find('button').text('+ expand');
+    });
+    $('#uploaddescriptions').on('shown.bs.collapse', function () {
+      $('#collapseDescription').find('button').text('- collapse');
+    });
+  </script>
 {% endblock %}

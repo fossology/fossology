@@ -36,7 +36,7 @@ class FolderTest extends \PHPUnit\Framework\TestCase
   /** @var Folder */
   private $folder;
 
-  protected function setUp()
+  protected function setUp() : void
   {
     $this->folder = new Folder($this->folderId, $this->folderName,
       $this->folderDescription, $this->folderPermissions);
