@@ -155,12 +155,6 @@ if [[ $BUILDTIME ]]; then
          ;;
       *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
    esac
-   options='-b'
-
-   if [[ $YesOpt ]]; then
-      options="$options -y"
-   fi
-   "$( dirname "$0" )/fo-install-pythondeps" $options
 fi
 
 ########################################################################
@@ -248,11 +242,6 @@ if [[ $RUNTIME ]]; then
        echo "Please run the equivalent of 'sudo ./utils/install_composer.sh'"
    else
        "$( dirname "$0" )/install_composer.sh"
-       options='-r'
-       if [[ $YesOpt ]]; then
-         options="$options -y"
-       fi
-       "$( dirname "$0" )/fo-install-pythondeps" $options
    fi
 fi
 

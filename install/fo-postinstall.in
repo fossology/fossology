@@ -25,6 +25,8 @@ Usage: fo-postinstall [options]
   --force-decision        : Force update of SHA256 hash in decision tables
   --force-pfile           : Force calculation of SHA256 hash of pfile entries
   --force-encode          : Force recoding copyright and sister tables
+  --debian                : running as part of debian installation step
+  --python-experimental   : install experimental python dependencies
 EOF
 \}
 
@@ -40,10 +42,12 @@ RUNNINGDATABASE=true
 FORCEDECISION=''
 FORCEPFILE=''
 FORCEENCODE=''
+PYTHONEXPERI=''
+DEBIAN=''
 
 ## Options parsing and setup
 # parse options
-OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,force-encode,help -n 'fo-postinstall' -- "$@")
+OPTS=$(getopt -o adwseolch --long agent,database,web-only,scheduler-only,everything,overwrite,licenseref,common,no-running-database,force-decision,force-pfile,force-encode,python-experimental,debian,help -n 'fo-postinstall' -- "$@")
 
 if [[ $? -ne 0 ]]; then
    OPTS="--help"
@@ -66,6 +70,8 @@ while true; do
       --force-decision)      FORCEDECISION='--force-decision'; shift;;
       --force-pfile)         FORCEPFILE='--force-pfile'; shift;;
       --force-encode)        FORCEENCODE='--force-encode'; shift;;
+      --python-experimental) PYTHONEXPERI='--experimental'; shift;;
+      --debian)              DEBIAN='--debian'; shift;;
       -h|--help)             show_help; exit;;
       --)                    shift; break;;
       *)                     echo "Error: option $1 not recognised"; exit 1;;
@@ -199,10 +205,10 @@ if [[ $COMMON ]]; then
       "{$CACHEDIR}" \
       "$REPO" \
       "{$REPODIR}/fossdash"
-      
+
    chown root:$PROJECTGROUP "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR}
    chmod 2775 "{$PROJECTSTATEDIR}" "{$PROJECTSTATEDIR}/agents" {$CACHEDIR} "{$REPODIR}/fossdash"
-   
+
    # make sure repo and its parent dir has the right permissions
    if [[ $(stat -c "%G" $REPO) != {$PROJECTGROUP} ]]; then
      echo "NOTE: Repository group is not correct."
@@ -249,6 +255,10 @@ if [[ $AGENT ]]; then
    chown --recursive {$PROJECTUSER}:$PROJECTGROUP {$MODDIR} {$LIBEXECDIR} {$SYSCONFDIR}
    chown --silent {$PROJECTUSER}:$PROJECTGROUP {$INCLUDEDIR}/libfossology.h
    chown --silent {$PROJECTUSER}:$PROJECTGROUP {$MAN1DIR}/cp2foss.1\{,.gz\} {$MAN1DIR}/fossjobs.1\{,.gz\} || echo
+   # Install Python dependencies for source install only
+   if [[ "{$DESTDIR}" != *"debian"* ]]; then
+     {$LIBEXECDIR}/fo-install-pythondeps -y --runtime --user {$PROJECTUSER} $PYTHONEXPERI $DEBIAN
+   fi
 fi
 
 if [[ $AGENT && $RUNNINGDATABASE ]]; then
