@@ -42,7 +42,7 @@ class ScancodesAgentPlugin extends AgentPlugin
   public function renderContent(&$vars)
   {
     $renderer = $GLOBALS['container']->get('twig.environment');
-    return $renderer->loadTemplate('scancode.html.twig')->render($vars);
+    return $renderer->load('scancode.html.twig')->render($vars);
   }
 
   /**
