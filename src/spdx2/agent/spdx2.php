@@ -72,6 +72,7 @@ use Fossology\Lib\Proxy\UploadTreeProxy;
 use Fossology\Lib\Dao\LicenseDao;
 use Fossology\Lib\Data\License;
 use Fossology\Lib\Data\AgentRef;
+use Fossology\Lib\Data\Package\ComponentType;
 
 include_once(__DIR__ . "/spdx2utils.php");
 
@@ -347,11 +348,26 @@ class SpdxTwoAgent extends Agent
     }
 
     $hashes = $this->uploadDao->getUploadHashes($uploadId);
+
+    $reportInfo = $this->uploadDao->getReportInfo($uploadId);
+    $componentId = $reportInfo['ri_component_id'];
+    $componentType = $reportInfo['ri_component_type'];
+    if ($componentId == "NA") {
+      $componentId = "";
+    }
+    if ($componentType == ComponentType::MAVEN) {
+      $componentType = "maven-central";
+    } else {
+      $componentType = ComponentType::TYPE_MAP[$componentType];
+    }
+
     return $this->renderString($this->getTemplateFile('package'),array(
         'packageId' => $uploadId,
         'uri' => $this->uri,
         'packageName' => $upload->getFilename(),
         'uploadName' => $upload->getFilename(),
+        'componentType' => $componentType,
+        'componentId' => htmlspecialchars($componentId),
         'sha1' => $hashes['sha1'],
         'md5' => $hashes['md5'],
         'sha256' => $hashes['sha256'],

@@ -12,6 +12,17 @@
         <spdx:name>{{ packageName }}</spdx:name>
         <spdx:packageFileName>{{ uploadName }}</spdx:packageFileName>
         <spdx:downloadLocation rdf:resource="http://spdx.org/rdf/terms#noassertion" />
+        {%- if componentId is not empty ~%}
+        <spdx:externalRef>
+          <spdx:ExternalRef>
+            <spdx:referenceCategory rdf:resource
+              ="http://spdx.org/rdf/terms#referenceCategory_packageManager" />
+            <spdx:referenceType rdf:resource
+              ="http://spdx.org/rdf/references/{{ componentType }}" />
+            <spdx:referenceLocator>{{ componentId|trim }}</spdx:referenceLocator>
+          </spdx:ExternalRef>
+        </spdx:externalRef>
+        {%- endif ~%}
         <spdx:packageVerificationCode>
           <spdx:PackageVerificationCode>
           <spdx:packageVerificationCodeValue>{{ verificationCode }}</spdx:packageVerificationCodeValue>

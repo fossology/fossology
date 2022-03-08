@@ -19,6 +19,7 @@ namespace Fossology\CliXml;
 
 use Fossology\Lib\Agent\Agent;
 use Fossology\Lib\Dao\UploadDao;
+use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Upload\Upload;
 use Fossology\Lib\Db\DbManager;
 use Fossology\Lib\Report\XpClearedGetter;
@@ -28,7 +29,6 @@ use Fossology\Lib\Report\ObligationsGetter;
 use Fossology\Lib\Report\OtherGetter;
 use Fossology\Lib\Report\LicenseIrrelevantGetter;
 use Fossology\Lib\Report\LicenseDNUGetter;
-
 
 include_once(__DIR__ . "/version.php");
 include_once(__DIR__ . "/services.php");
@@ -169,7 +169,7 @@ class CliXml extends Agent
     return $prefix . $partname . $postfix;
   }
 
-  protected function getUri($fileBase,$packageName)
+  protected function getUri($fileBase)
   {
     $fileName = $fileBase. strtoupper($this->outputFormat)."_".$this->packageName.'_'.date("Y-m-d_H:i:s");
     $fileName = $fileName .".xml" ;
@@ -435,7 +435,7 @@ class CliXml extends Agent
 
     $fileBase = $SysConf['FOSSOLOGY']['path']."/report/";
 
-    $this->uri = $this->getUri($fileBase,$packageName);
+    $this->uri = $this->getUri($fileBase);
   }
 
   protected function writeReport($contents, $packageIds, $uploadId)
@@ -471,7 +471,7 @@ class CliXml extends Agent
    */
   protected function renderString($templateName, $vars)
   {
-    return $this->renderer->loadTemplate($templateName)->render($vars);
+    return $this->renderer->load($templateName)->render($vars);
   }
 
   /**
@@ -523,6 +523,12 @@ class CliXml extends Agent
         $usage = 'Found';
       }
     }
+    $componentType = $row['ri_component_type'];
+    $componentType = ComponentType::TYPE_MAP[$componentType];
+    $componentId = $row['ri_component_id'];
+    if (empty($componentId) || $componentId == "NA") {
+      $componentId = "";
+    }
 
     return [[
       'reportId' => uuid_create(UUID_TYPE_TIME),
@@ -532,7 +538,9 @@ class CliXml extends Agent
       'version' => htmlspecialchars($row['ri_version']),
       'componentHash' => '',
       'componentReleaseDate' => htmlspecialchars($row['ri_release_date']),
-      'linkComponentManagement' => htmlspecialchars($row['ri_sw360_link'])
+      'linkComponentManagement' => htmlspecialchars($row['ri_sw360_link']),
+      'componentType' => htmlspecialchars($componentType),
+      'componentId' => htmlspecialchars($componentId)
     ], [
       'generalAssessment' => $row['ri_general_assesment'],
       'criticalFilesFound' => $critical,

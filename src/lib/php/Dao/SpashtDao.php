@@ -3,6 +3,8 @@
 Copyright (C) 2019
 Author: Vivek Kumar<vvksindia@gmail.com>
 
+Copyright (C) 2022, Siemens AG
+
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
 version 2 as published by the Free Software Foundation.
@@ -19,9 +21,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 namespace Fossology\Lib\Dao;
 
+use Fossology\Lib\Data\Package\ComponentType;
 use Fossology\Lib\Data\Spasht\Coordinate;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Db\DbManager;
+use Fossology\Lib\Util\PurlOperations;
 use Monolog\Logger;
 use Fossology\Lib\Util\StringOperation;
 
@@ -188,5 +192,43 @@ class SpashtDao
       'revision' => $row['spasht_revision']
     ];
     return new Coordinate($obj);
+  }
+
+  /**
+   * @brief Get ClearlyDefined Coordinate if component id is a pURL.
+   *
+   * Read component id from Database. If empty or is not a pURL, return NULL.
+   * Otherwise parse the pURL and create a Coordinate from it.
+   *
+   * @note pURL does not have type and provide, so they both get same value in
+   *       coordinate.
+   *
+   * @param integer $uploadId Upload to get Coordinate from.
+   * @return null|Coordinate Return null if not pURL, Coordinate otherwise.
+   */
+  public function getCoordinateFromCompId($uploadId)
+  {
+    $sql = "SELECT ri_component_type, ri_component_id " .
+      "FROM report_info WHERE upload_fk = $1;";
+    $compRow = $this->dbManager->getSingleRow($sql, [$uploadId]);
+    if (
+      empty($compRow) || empty($compRow['ri_component_id'])
+      || $compRow['ri_component_id'] == "NA"
+      || $compRow['ri_component_type'] != ComponentType::PURL
+    ) {
+      return null;
+    }
+    $componentId = $compRow['ri_component_id'];
+    $purl = PurlOperations::fromString($componentId);
+    if ($purl["scheme"] != "pkg") {
+      return null;
+    }
+    return new Coordinate([
+      "type" => $purl["type"],
+      "provider" => $purl["type"],
+      "namespace" => $purl["namespace"],
+      "name" => $purl["name"],
+      "revision" => $purl["version"]
+    ]);
   }
 }

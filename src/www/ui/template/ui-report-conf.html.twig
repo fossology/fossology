@@ -113,6 +113,30 @@
           </td>
         </tr>
         <tr>
+          <td align="left" style="vertical-align: middle">
+            {{ "Component Id"|trans }}
+          </td>
+          <td align="left">
+            <div class="input-group" style="width:98%">
+              <div class="input-group-prepend">
+                <select class="custom-select" name="componentType">
+                  <optgroup label="Recommended">
+                    <option value="0" {% if componentType == 0 %}selected{% endif %}>purl</option>
+                  </optgroup>
+                  <optgroup label="Legacy">
+                  {%- for type in typemap ~%}
+                    <option value="{{ type.key }}"
+                    {%- if componentType == type.key %} selected{% endif -%}
+                    >{{ type.name }}</option>
+                  {%- endfor ~%}
+                  </optgroup>
+                </select>
+              </div>
+              <input type="text" class="form-control" aria-label="Component Id" name="componentId" value="{{ componentId|e }}" />
+            </div>
+          </td>
+        </tr>
+        <tr>
           <td align="left">
             {{ "General assessment"|trans }}
           </td>
