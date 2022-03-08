@@ -24,6 +24,7 @@ DIRS = \
 	monk \
 	nomos \
 	ojo \
+	scancode \
 	pkgagent \
 	readmeoss \
 	unifiedreport \

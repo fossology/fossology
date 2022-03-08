@@ -32,6 +32,7 @@ class AgentRef
     'ninka' => 'Nk',
     'reportImport' => 'I',
     'ojo' => 'O',
+    'scancode' => 'S',
     'spasht' => 'Sp',
     'reso' => 'Rs'
   );

@@ -58,15 +58,53 @@ class CopyrightView extends Xpview
       $agentMap = $this->agentDao->getLatestAgentResultForUpload($uploadId,array('copyright'));
       $agentId = array_key_exists('copyright',$agentMap) ? $agentMap['copyright'] : 0;
     }
-
+    $typeDescriptionPairs = array(
+      'statement' => _("FOSSology"),
+      'scancode_statement' => _("ScanCode")
+    );
+    $tableVars = array();
+    $output = array();
     $modCopyrightHist = plugin_find('copyright-hist');
     $filter = '';
-    list($output, $tableVars) = $modCopyrightHist->getTableForSingleType('statement', _("Copyright"), $uploadId, $uploadTreeId, $filter, $agentId);
+    foreach($typeDescriptionPairs as $type=>$description)
+    {
+      if($type==="scancode_statement"){
+        $agentId=LatestAgentpk($uploadId, 'scancode_ars');
+        $this->agentName = "scancode";
+      }
+    list($out, $vars) = $modCopyrightHist->getTableForSingleType($type, $description, $uploadId, $uploadTreeId, $filter, $agentId);
+    $tableVars[$type] = $vars;
+    $output[] = $out;
+    }
 
-    $vars = array('statement'=>$tableVars,
-        'content' => "$output\n",
-        'script' => '<script>$(document).ready(function() { createTablestatement(); } );</script>');
+    list ($vCopyright, $vScancode)=$output;
+    $vars = array('tables'=>$tableVars,
+        'foss_content' => "$vCopyright\n",
+        'scan_content' => "$vScancode\n",
+        'script' => $this->createScriptBlock());
     return $vars;
+  }
+  
+  protected function createScriptBlock()
+  {
+    return "
+
+    var copyrightTabViewCookie = 'stickyCopyrightViewTab';
+
+    $(document).ready(function() {
+      tableCopyright =  createTablestatement();
+      tableScancode =  createTablescancode_statement();
+      $('#CopyrightViewTabs').tabs({
+        active: ($.cookie(copyrightTabViewCookie) || 0),
+        activate: function(e, ui){
+          // Get active tab index and update cookie
+          var idString = $(e.currentTarget).attr('id');
+          idString = parseInt(idString.slice(-1)) - 1;
+          $.cookie(copyrightTabViewCookie, idString);
+        }
+      });
+    });
+    ";
   }
 
 }
