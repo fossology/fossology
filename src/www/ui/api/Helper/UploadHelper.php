@@ -174,7 +174,7 @@ class UploadHelper
       $this->uploadFilePage::DESCRIPTION_INPUT_NAME,
       [$fileDescription]);
     $symfonyRequest->files->set($this->uploadFilePage::FILE_INPUT_NAME,
-      [$symfonyFile]);
+      [$uploadedFile]);
     $symfonyRequest->setSession($symfonySession);
     $symfonyRequest->request->set(
       $this->uploadFilePage::UPLOAD_FORM_BUILD_PARAMETER_NAME, "restUpload");
