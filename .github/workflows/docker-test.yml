@@ -1,0 +1,28 @@
+# Copyright 2022 Siemens AG, Gaurav Mishra <mishra.gaurav@siemens.com>
+# SPDX-License-Identifier: GPL-2.0 AND LGPL-2.1
+name: Docker test
+
+on:
+  pull_request
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v1
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build images
+      run: docker-compose build
+
+    - name: Test cluster
+      run: src/testing/docker/test-cluster.sh
+
+    - name: Test standalone
+      run: src/testing/docker/test-standalone.sh
