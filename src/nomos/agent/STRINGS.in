@@ -5094,6 +5094,10 @@
 %KEY% =NULL=
 %STR% "with exceptions as appearing in the file LICENSE\.GPL3-EXCEPT"
 #
+%ENTRY% _LT_OPENBSD_GPL_EXCEPTION
+%KEY% =NULL=
+%STR% "contribute changes back to the authors under this freer than gpl license"
+#
 %ENTRY% _LT_QUEST_EULA
 %KEY% "so(ftware|urce)"
 %STR% "this agreement the agreement is made between quest software inc Quest and you the customer licen[cs]ee"
