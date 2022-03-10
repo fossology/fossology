@@ -687,6 +687,9 @@ char *parseLicenses(char *filetext, int size, scanres_t *scp,
       else if (INFILE(_CR_CRYPTOGAMS)) {
         INTERESTING("Cryptogams");
       }
+      else if (INFILE(_LT_BSD_SHORTENED_CLAUSE_0) && INFILE(_LT_BSD_SHORTENED_CLAUSE_1) && INFILE(_LT_BSD_SHORTENED_CLAUSE_2) && INFILE(_LT_BSD_CLAUSE_3)) {
+        INTERESTING("BSD-4-Clause-Shortened");
+      }
       else if (INFILE(_CR_BSDCAL)) {
         INTERESTING(lDebug ? "BSD(1)" : "BSD");
       }
