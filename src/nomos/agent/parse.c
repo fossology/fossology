@@ -8464,7 +8464,7 @@ char *gplVersion(char *filetext, int size, int isML, int isPS)
     }
     kludge.base = NULL_STR;
   }
-  if (lstr == NULL_STR && NOT_INFILE(_PHR_JYTHON_NOTGPL) && !HASTEXT(_TITLE_QT_GPL_EXCEPTION_10, 0)) {
+  if (lstr == NULL_STR && NOT_INFILE(_PHR_JYTHON_NOTGPL) && !HASTEXT(_TITLE_QT_GPL_EXCEPTION_10, 0) && !HASTEXT(_LT_OPENBSD_GPL_EXCEPTION, 0)) {
     lstr = lDebug ? "GPL(NULL)" : "GPL";
   }
   return lstr;
