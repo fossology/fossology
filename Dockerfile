@@ -95,4 +95,4 @@ COPY --from=builder /etc/init.d/fossology /etc/init.d/fossology
 COPY --from=builder /usr/local/ /usr/local/
 
 # the database is filled in the entrypoint
-RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database
+RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database 11111
