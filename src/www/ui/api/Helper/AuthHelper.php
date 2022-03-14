@@ -411,10 +411,11 @@ class AuthHelper
     list ($tokenId, $userId) = explode(".", $jwtJti);
 
     $dbRows = $this->dbHelper->getTokenKey($tokenId);
-    $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
     if (empty($dbRows)) {
-      $returnValue = new Info(403, "Invalid token sent.", InfoType::ERROR);
-    } elseif ($isTokenActive !== true) {
+      return new Info(403, "Invalid token sent.", InfoType::ERROR);
+    }
+    $isTokenActive = $this->isTokenActive($dbRows, $tokenId);
+    if ($isTokenActive !== true) {
       $returnValue = $isTokenActive;
     } else {
       $returnValue = true;
