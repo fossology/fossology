@@ -28,6 +28,7 @@ namespace Fossology\UI\Api\Test\Models
   use Fossology\UI\Api\Models\ScanOptions;
   use Fossology\UI\Api\Models\Reuser;
   use Fossology\UI\Api\Models\Decider;
+  use Fossology\UI\Api\Models\Scancode;
   use Fossology\Lib\Dao\UserDao;
   use Fossology\Lib\Auth\Auth;
   use Symfony\Component\HttpFoundation\Request;
@@ -79,7 +80,7 @@ namespace Fossology\UI\Api\Test\Models
         ]);
       self::$functions->shouldReceive('register_plugin')
         ->with(\Hamcrest\Matchers::identicalTo(
-          new ScanOptions(null, null, null)));
+          new ScanOptions(null, null, null, null)));
     }
 
     /**
@@ -142,7 +143,9 @@ namespace Fossology\UI\Api\Test\Models
       $decider->setOjoDecider(true);
       $decider->setNomosMonk(true);
 
-      $scanOption = new ScanOptions($analysis, $reuse, $decider);
+      $scancode = new Scancode();
+
+      $scanOption = new ScanOptions($analysis, $reuse, $decider, $scancode);
 
       $this->userDao->shouldReceive('getGroupIdByName')
         ->withArgs([$groupName])->andReturn($groupId);

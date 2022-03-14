@@ -34,9 +34,27 @@
           {% block rhs %}
             {% include 'ui-xp-view_rhs.html.twig' %}
           {% endblock %}
-          {% if content %}
+          {% if foss_content or scan_content %}
             <h3 style="padding-top: 1.3em;">Scanner findings:</h3>
-            {{ content }}
+            <table border="0" width="100%">
+            <tr>
+              <td valign="top">
+                <div id="CopyrightViewTabs" style="padding-bottom:2em">
+                  <ul>
+                  <li><a href="#FossTab">FOSSology</a></li>
+                  <li><a href="#ScanTab">ScanCode</a></li>
+                  </ul>
+                  <div id="FossTab">
+                  {{ foss_content }}
+                  </div>
+                  <div id="ScanTab">
+                  {{ scan_content }}
+                  </div>
+                </div>
+              </td>
+              <td valign="top">{{ fileList }}</td>
+            </tr>
+            </table>
           {%endif%}
         </td>
       </tr>
@@ -57,9 +75,9 @@
   <script src="scripts/legend.js" type="text/javascript"></script>
   <script src="scripts/tools.js" type="text/javascript"></script>
   <script src="scripts/supervised.js" type="text/javascript"></script>
+  <script src="scripts/jquery.cookie.js" type="text/javascript"></script>
   <script type="text/javascript">{% include "next-options.js.twig" %}</script>
 
-  {{ script }}
 
   <script type="text/javascript">
     $(document).ready(function () {
@@ -70,13 +88,15 @@
         "info":     false,
       });
     });
+    {{ script }}
   </script>
 
   {% include "copyrighthist_scripts.html.twig" %}
-  {% if agentName == "copyright" %}
+  {% if agentName == "copyright" or agentName == "scancode" %}
     <script language="javascript">
-    {% set table=statement %}
+    {% for type, table in tables %}
     {% include "histTable.js.twig" with table %}
+    {% endfor %}
     </script>
   {%endif%}
 {% endblock %}
