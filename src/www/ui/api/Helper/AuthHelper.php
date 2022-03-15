@@ -328,6 +328,11 @@ class AuthHelper
       }
       $userId = $dbRows['user_fk'];
       $tokenScope = $dbRows['token_scope'];
+      if ($tokenScope == "w") {
+        $tokenScope = "write";
+      } elseif ($tokenScope == "r") {
+        $tokenScope = "read";
+      }
     } catch (\UnexpectedValueException $e) {
       return new Info(403, $e->getMessage(), InfoType::ERROR);
     }
