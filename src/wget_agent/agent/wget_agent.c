@@ -1130,9 +1130,15 @@ void MaskPassword()
 char* GetVersionControlCommand(int withPassword)
 {
   char Type[][4] = {"SVN", "Git", "CVS"};
-  char *command;
-  char *tmpfile_dir;
+  char* command;
+  char* tmpfile_dir;
   int res;
+  char* branchFound = NULL;
+  char* commitFound= NULL;
+  char* tokens = NULL;
+  int i=0; 
+  char temp1[STRMAX];
+  char temp2[STRMAX];
 
   /** save each upload files in /srv/fossology/repository/localhost/wget/wget.xxx.dir/ */
   res = asprintf(&tmpfile_dir, "%s.dir", GlobalTempFile);
@@ -1156,13 +1162,82 @@ char* GetVersionControlCommand(int withPassword)
   else if (0 == strcmp(GlobalType, Type[1]))
   {
     replace_url_with_auth();
+
+  strcpy(temp1, GlobalParam);
+  branchFound = strstr(temp1, "--branch");
+
+  if(branchFound) 
+  {
+    tokens = strtok(branchFound, " ");
+    while(tokens != NULL) 
+    {
+      if(i == 1) 
+      {
+        branchFound = tokens;
+        break;
+      }
+      tokens = strtok(NULL, " ");
+      i++;
+    }
+    i=0; 
+    tokens = "";
+  }
+
+  strcpy(temp2, GlobalParam);
+
+  commitFound = strstr(temp2, "--commit");
+  if(commitFound) 
+  {
+    tokens = strtok(commitFound, " ");
+    while(tokens != NULL) 
+    {
+      if(i == 1)
+      {
+        commitFound = tokens;
+      }
+      tokens = strtok(NULL, " ");
+      i++;
+    } 
+  }
+
+
     if (GlobalProxy[0] && GlobalProxy[0][0])
     {
+      if(commitFound == NULL && branchFound == NULL)
+      {
       res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s && cd %s && git checkout %s && rm -rf %s/.git", GlobalProxy[0], GlobalURL, tmpfile_dir, tmpfile_dir, GlobalParam, tmpfile_dir);
+      }
+      else if(commitFound == NULL && branchFound != NULL)
+      {
+        res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s && cd %s && git checkout %s && rm -rf %s/.git", GlobalProxy[0], GlobalURL, tmpfile_dir, tmpfile_dir, branchFound, tmpfile_dir);
+      }
+      else if(commitFound != NULL && branchFound == NULL)
+      {
+        res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s && cd %s && git checkout %s && rm -rf %s/.git", GlobalProxy[0], GlobalURL, tmpfile_dir, tmpfile_dir, commitFound, tmpfile_dir);
+      }
+      else 
+      {
+      res = asprintf(&command, "git config --global http.proxy %s && git clone %s %s && cd %s && git checkout %s && git checkout %s && rm -rf %s/.git", GlobalProxy[0], GlobalURL, tmpfile_dir, tmpfile_dir, branchFound, commitFound, tmpfile_dir);
+      }
     }
     else
     {
+      if(commitFound == NULL && branchFound == NULL)
+      {
       res = asprintf(&command, "git clone %s %s && cd %s && git checkout %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, tmpfile_dir, tmpfile_dir, GlobalParam, tmpfile_dir);
+      }
+      else if(commitFound == NULL && branchFound != NULL)
+      {
+        res = asprintf(&command, "git clone %s %s && cd %s && git checkout %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, tmpfile_dir, tmpfile_dir, branchFound, tmpfile_dir);
+      }
+      else if(commitFound != NULL && branchFound == NULL)
+      {
+        res = asprintf(&command, "git clone %s %s && cd %s && git checkout %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, tmpfile_dir, tmpfile_dir, commitFound, tmpfile_dir);
+      }
+      else 
+      {
+      res = asprintf(&command, "git clone %s %s && cd %s && git checkout %s && git checkout %s >/dev/null 2>&1 && rm -rf %s/.git", GlobalURL, tmpfile_dir, tmpfile_dir, branchFound, commitFound, tmpfile_dir);
+      }
     }
   }
   if (res == -1)
