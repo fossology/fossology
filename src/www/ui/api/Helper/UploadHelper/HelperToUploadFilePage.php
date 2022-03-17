@@ -44,6 +44,10 @@ class HelperToUploadFilePage extends UploadFilePage
    */
   public function handleRequest(Request $request)
   {
-    return $this->handleUpload($request);
+    $response = $this->handleUpload($request);
+    if ($response[0]) {
+      $response[3] = $response[3][0];
+    }
+    return $response;
   }
 }
