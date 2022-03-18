@@ -152,13 +152,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HeathInfo'
+                $ref: '#/components/schemas/HealthInfo'
         '503':
           description: The API is not unavailable
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HeathInfo'
+                $ref: '#/components/schemas/HealthInfo'
 
   /uploads/{id}:
     parameters:
@@ -2081,7 +2081,7 @@ components:
               description: Date on which packages were built in ISO8601 format
               nullable: true
               example: "2022-01-07T11:13:00+05:30"
-    HeathInfo:
+    HealthInfo:
       description: Health status of server
       type: object
       properties:
