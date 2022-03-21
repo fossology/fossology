@@ -9,6 +9,10 @@
 
 {% block content %}
   
+  {% if schedularStatus != "" %}
+  {{schedularStatus}}
+  <br/><br/>
+  {% endif %} 
       
   {{ 'Select the folder that contains the upload'|trans }}: 
   {% include 'components/select-folder.html.twig' with {'name':'folderselect','id':'folderselect','selected':folderId} %}
