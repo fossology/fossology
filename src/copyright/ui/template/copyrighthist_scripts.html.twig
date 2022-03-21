@@ -16,7 +16,7 @@
       },
       success: function(data) {
         $("#deleteHashDecision" + type + hash).hide();
-        $("#undoDeleteHashDecision" + type + hash).attr("style","display:inline !important;");
+        $("#undoDeleteHashDecision" + type + hash).attr("style","display:inline !important; background-color:yellow !important;");
       },
       error: function() { alert('error'); }
     });

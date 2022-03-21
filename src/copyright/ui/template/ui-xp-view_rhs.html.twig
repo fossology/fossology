@@ -109,7 +109,7 @@
               , uploadTreePk : '{{ itemId }}'},
         success: function(data) {
           $("#actionsOf" + pk + " .basicActions").hide();
-          $("#actionsOf" + pk + " .undoActions").attr("style","display:inline !important;");
+          $("#actionsOf" + pk + " .undoActions").attr("style","display:inline !important; background-color:yellow !important;");
         },
         error: function() { alert('error'); }
       });
