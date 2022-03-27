@@ -78,8 +78,7 @@ class UploadPermissionPage extends DefaultPlugin
     $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
     if ($commu_status) {
       $response_from_scheduler = "";
-    }
-    else {
+    } else {
       $response_from_scheduler = "Warning: Schedular is not running!";
       $error_info = null;
     }
@@ -97,7 +96,7 @@ class UploadPermissionPage extends DefaultPlugin
       if (!empty($perm_upload_pk)) {
         $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
       } else if (!empty($newgroup) && !empty($newperm)) {
-        if($commu_status) {
+        if ($commu_status) {
           $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
         }
         $newperm = $newgroup = 0;
@@ -110,7 +109,6 @@ class UploadPermissionPage extends DefaultPlugin
         if (!empty($newgroup) && !empty($newperm)) {
           if ($commu_status) {
             $this->insertPermission($newgroup, $upload_pk, $newperm, $UploadList);
-            
           }
         } else if ($public_perm >= 0) {
           $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
