@@ -174,7 +174,7 @@ function Populate_sysconfig()
   $variable = "CorsOrigins";
   $prompt = _('Allowed origins for REST API');
   $desc = _('[scheme]://[hostname]:[port], "*" for anywhere');
-  $valueArray[$variable] = array("'$variable'", "'localhost:3000'", "'$prompt'",
+  $valueArray[$variable] = array("'$variable'", "'http://localhost:3000'", "'$prompt'",
     strval(CONFIG_TYPE_TEXT), "'PAT'", "3", "'$desc'", "null", "null");
 
   /*  Email */
