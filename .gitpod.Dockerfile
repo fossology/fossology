@@ -32,7 +32,7 @@ RUN install-packages --option Dpkg::Options::="--force-confold" \
     librpm-dev libspreadsheet-writeexcel-perl libsqlite3-0 libsqlite3-dev \
     libssl-dev libtext-template-perl libxml2-dev lsb-release p7zip p7zip-full \
     poppler-utils postgresql-12 postgresql-contrib-12 \
-    postgresql-server-dev-all rpm sleuthkit s-nail sqlite3 subversion tar \
+    postgresql-server-dev-all rpm sleuthkit swaks sqlite3 subversion tar \
     unrar-free unzip upx-ucl wget zip
 
 # Fix PHP for FOSSology
