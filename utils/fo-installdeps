@@ -183,42 +183,42 @@ if [[ $RUNTIME ]]; then
          case "$CODENAME" in
             stretch)
                apt-get $YesOpt install postgresql-9.6 php7.0 php7.0-pgsql libapache2-mod-php7.0 php7.0-pgsql \
-                 php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring php7.0-uuid php-gettext s-nail libboost-program-options1.62.0 \
+                 php7.0-cli php7.0-curl php7.0-xml php7.0-zip php7.0-mbstring php7.0-uuid php-gettext swaks libboost-program-options1.62.0 \
                  libboost-regex1.62.0 libicu57;;
             buster)
                apt-get $YesOpt install postgresql-11 php7.3 php7.3-pgsql libapache2-mod-php7.3 php7.3-pgsql \
-                 php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring php7.3-uuid php-gettext s-nail libboost-program-options1.67.0 \
+                 php7.3-cli php7.3-curl php7.3-xml php7.3-zip php7.3-mbstring php7.3-uuid php-gettext swaks libboost-program-options1.67.0 \
                  libboost-regex1.67.0 libicu63;;
             bullseye)
                apt-get $YesOpt install postgresql-13 php7.4 php7.4-pgsql \
                libapache2-mod-php7.4 php7.4-pgsql php7.4-cli php7.4-curl \
-               php7.4-xml php7.4-zip php7.4-mbstring php7.4-uuid php-php-gettext s-nail \
+               php7.4-xml php7.4-zip php7.4-mbstring php7.4-uuid php-php-gettext swaks \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             bookworm)
                apt-get $YesOpt install postgresql-15 php8.2 php8.2-pgsql \
                libapache2-mod-php8.2 php8.2-pgsql php8.2-cli php8.2-curl \
-               php8.2-xml php8.2-zip php8.2-mbstring php8.2-uuid php-php-gettext s-nail \
+               php8.2-xml php8.2-zip php8.2-mbstring php8.2-uuid php-php-gettext swaks \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu72;;
             trixie)
                apt-get $YesOpt install postgresql-17 php8.4 php8.4-pgsql \
                libapache2-mod-php8.4 php8.4-pgsql php8.4-cli php8.4-curl \
-               php8.4-xml php8.4-zip php8.4-mbstring php8.4-uuid s-nail \
+               php8.4-xml php8.4-zip php8.4-mbstring php8.4-uuid swaks \
                libboost-program-options1.83.0 libboost-regex1.83.0 libicu76 pcre2-utils;;
             sid)
-               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid php-gettext s-nail \
+               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid php-gettext swaks \
                  libboost-program-options1.74.0 libboost-regex1.74.0 libicu67;;
             focal)
-               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid s-nail \
+               apt-get $YesOpt install postgresql php php-pgsql php-cli php-curl php-xml php-zip php-mbstring php-uuid swaks \
                  libboost-program-options1.71.0 libboost-regex1.71.0 libicu66;;
             jammy)
                apt-get $YesOpt install postgresql-14 php8.1 php8.1-pgsql \
                libapache2-mod-php8.1 php8.1-pgsql php8.1-cli php8.1-curl \
-               php8.1-xml php8.1-zip php8.1-mbstring php8.1-uuid php-php-gettext s-nail \
+               php8.1-xml php8.1-zip php8.1-mbstring php8.1-uuid php-php-gettext swaks \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu70;;
             noble)
                apt-get $YesOpt install postgresql-16 php8.3 php8.3-pgsql \
                libapache2-mod-php8.3 php8.3-pgsql php8.3-cli php8.3-curl \
-               php8.3-xml php8.3-zip php8.3-mbstring php8.3-uuid php-php-gettext s-nail \
+               php8.3-xml php8.3-zip php8.3-mbstring php8.3-uuid php-php-gettext swaks \
                libboost-program-options1.74.0 libboost-regex1.74.0 libicu74;;
             *) echo "ERROR: Unknown or Unsupported $DISTRO $CODENAME release, please report to the mailing list"; exit 1;;
          esac
@@ -230,7 +230,7 @@ if [[ $RUNTIME ]]; then
             php php-pear php-pgsql php-process php-xml php-mbstring\
             smtpdaemon \
             libxml2 \
-            binutils mailx \
+            binutils swaks \
             sleuthkit boost libicu
 
          # enable, possible init, and start postgresql
@@ -250,7 +250,7 @@ if [[ $RUNTIME ]]; then
             php php-pear php-pgsql php-process php-mbstring\
             smtpdaemon \
             file libxml2 \
-            binutils mailx boost libicu
+            binutils swaks boost libicu
          echo "NOTE: cabextract, sleuthkit, upx, and unrar are not"
          echo "    available in RHEL please install from upstream sources."
          ;;

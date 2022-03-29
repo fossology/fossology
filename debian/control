@@ -81,7 +81,7 @@ Description: architecture for analyzing software, web interface
 
 Package: fossology-scheduler
 Architecture: any
-Depends: fossology-common, s-nail, ${shlibs:Depends},
+Depends: fossology-common, swaks, ${shlibs:Depends},
  ${misc:Depends}
 Conflicts: fossology-scheduler-single
 Description: architecture for analyzing software, scheduler

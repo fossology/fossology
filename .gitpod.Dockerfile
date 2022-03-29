@@ -18,10 +18,11 @@ RUN install-packages --option Dpkg::Options::="--force-confold" \
     libdbd-sqlite3-perl libdistro-info-perl libgcrypt20-dev \
     libicu70 libicu-dev libjson-c-dev libjsoncpp-dev \
     liblocal-lib-perl libmagic-dev libmxml-dev libpcre3-dev libpq-dev \
+<<<<<<< HEAD
     librpm-dev libzstd-dev libspreadsheet-writeexcel-perl libsqlite3-0 libsqlite3-dev \
     libssl-dev libtext-template-perl libxml2-dev lsb-release ninja-build p7zip \
     p7zip-full poppler-utils postgresql-14 postgresql-contrib-14 \
-    postgresql-server-dev-all rpm sleuthkit s-nail sqlite3 subversion tar \
+    postgresql-server-dev-all rpm sleuthkit swaks sqlite3 subversion tar \
     unrar-free unzip wget zip
 
 # Fix PHP for FOSSology

@@ -39,7 +39,8 @@
   email_notify = 0;        \
   error = NULL; }
 
-#define EMAIL_BUILD_CMD "%s %s -s '%s' %s"    ///< Email command format
+#define EMAIL_BUILD_CMD "%s %s --header 'Subject: %s' --to '%s'" \
+    " --body - --silent --auth-hide-password" ///< Email command format
 #define DEFAULT_HEADER  "FOSSology scan complete\nmessage:\"" ///< Default email header
 #define DEFAULT_FOOTER  "\""                  ///< Default email footer
 #define DEFAULT_SUBJECT "FOSSology scan complete\n" ///< Default email subject
@@ -1032,39 +1033,6 @@ void database_job_priority(scheduler_t* scheduler, job_t* job, int priority)
 }
 
 /**
- * @brief Find s-nail version to check if mta is supported 
- *
- * \return 1 if mta is supported, 0 if not
- */
-int check_mta_support()
-{
-  char cmd[] = "dpkg -s s-nail | grep -i 'Version' | awk '{print$2}' | cut -c -4";
-  char version_str[128];
-  char buf[128];
-  float version_float;
-  FILE *fp;
-
-  fp = popen(cmd, "r");
-  if(!fp)
-  {
-    WARNING("Unable to run the command '%s'.\n", cmd);
-    return 0;
-  }
-  while(fgets(buf, sizeof(buf), fp) != NULL)
-  {
-    strcpy(version_str,buf);
-  }
-  pclose(fp);
-  sscanf(version_str, "%f", &version_float);
-
-  if(version_float - 14.8 > 0.0001)
-  {
-    return 1;
-  }
-  return 0;
-}
-
-/**
  * \brief Build command to run to send email
  * \param scheduler  Current scheduler object
  * \param user_email Email id to send mail to
@@ -1103,7 +1071,7 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls");
       if(g_strcmp0(temp_smtpvariable, "1") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-use-starttls");
+        g_string_append_printf(client_cmd, " -tls");
       }
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuth"))
@@ -1111,80 +1079,46 @@ char* get_email_command(scheduler_t* scheduler, char* user_email)
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPAuth");
       if(g_strcmp0(temp_smtpvariable, "L") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-auth=login");
+        g_string_append_printf(client_cmd, " --auth LOGIN");
       }
       else if(g_strcmp0(temp_smtpvariable, "P") == 0)
       {
-        g_string_append_printf(client_cmd, " -S smtp-auth=plain");
-      }
-      else if(g_strcmp0(temp_smtpvariable, "N") == 0)
-      {
-        g_string_append_printf(client_cmd, " -S smtp-auth=none");
+        g_string_append_printf(client_cmd, " --auth PLAIN");
       }
     }
     if(g_hash_table_contains(smtpvariables, "SMTPFrom"))
     {
-      g_string_append_printf(client_cmd, " -S from=\"%s\"",
+      g_string_append_printf(client_cmd, " --from='%s'",
           (char *)g_hash_table_lookup(smtpvariables, "SMTPFrom"));
     }
     if(g_hash_table_contains(smtpvariables, "SMTPSslVerify"))
     {
       temp_smtpvariable = (char *)g_hash_table_lookup(smtpvariables, "SMTPSslVerify");
-      g_string_append(client_cmd, " -S ssl-verify=");
-      if(g_strcmp0(temp_smtpvariable, "I") == 0)
+      if(g_strcmp0(temp_smtpvariable, "1") == 0)
       {
-        g_string_append(client_cmd, "ignore");
+        g_string_append_printf(client_cmd, " --tls-verify");
       }
-      else if(g_strcmp0(temp_smtpvariable, "S") == 0)
-      {
-        g_string_append(client_cmd, "strict");
-      }
-      else if(g_strcmp0(temp_smtpvariable, "W") == 0)
-      {
-        g_string_append(client_cmd, "warn");
-      }
-    }
-    g_string_append_printf(client_cmd, " -S v15-compat");
-    if(!check_mta_support())
-    {
-      g_string_append_printf(client_cmd, " -S smtp=\"");
-    }
-    else
-    {
-      g_string_append_printf(client_cmd, " -S mta=\"");
-    }
-    /* use smtps only if port is not 25 or SMTPStartTls is provided */
-    if((g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPPort"), "25") !=  0) 
-        || g_strcmp0((char *)g_hash_table_lookup(smtpvariables, "SMTPStartTls"), "1") == 0)
-    {
-      g_string_append_printf(client_cmd, "smtps://");
-    }
-    else
-    {
-      g_string_append_printf(client_cmd, "smtp://");
     }
     if(g_hash_table_contains(smtpvariables, "SMTPAuthUser"))
     {
-      temp_smtpvariable = g_hash_table_lookup(smtpvariables, "SMTPAuthUser");
-      g_string_append_uri_escaped(client_cmd, temp_smtpvariable, NULL, TRUE);
+      g_string_append_printf(client_cmd, " --auth-user='%s'",
+        (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthUser"));
       if(g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"))
       {
-        g_string_append_printf(client_cmd, ":");
-        temp_smtpvariable = g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd");
-        g_string_append_uri_escaped(client_cmd, temp_smtpvariable, NULL, TRUE);
+        g_string_append_printf(client_cmd, " --auth-password='%s'",
+          (char *)g_hash_table_lookup(smtpvariables, "SMTPAuthPasswd"));
       }
-      g_string_append_printf(client_cmd, "@");
-      g_string_append_printf(client_cmd, "%s:%s\"", (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"),
-          (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
     }
+    g_string_append_printf(client_cmd, " --server=%s",
+      (char *)g_hash_table_lookup(smtpvariables, "SMTPHostName"));
+    g_string_append_printf(client_cmd, " --port=%s",
+      (char *)g_hash_table_lookup(smtpvariables, "SMTPPort"));
     temp_smtpvariable = NULL;
     final_command = g_strdup_printf(EMAIL_BUILD_CMD, scheduler->email_command,
                   client_cmd->str, scheduler->email_subject, user_email);
   }
   else
   {
-    NOTIFY("Unable to send email. SMTP host or port not found in the configuration.\n"
-        "Please check Configuration Variables.");
     final_command = NULL;
   }
   g_hash_table_destroy(smtpvariables);

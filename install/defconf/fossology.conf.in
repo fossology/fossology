@@ -94,7 +94,7 @@ LOGDIR=/var/log/$PROJECT
 header  = sampleheader.txt
 footer  = samplefooter.txt
 subject = FOSSology scan complete
-client  = /usr/bin/s-nail
+client  = /usr/bin/swaks
 
 [EXT_AUTH]
 ; Use external Authentication

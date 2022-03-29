@@ -472,8 +472,8 @@ function Populate_sysconfig()
   $variable = "SMTPSslVerify";
   $smtpSslPrompt = _('SMTP SSL Verify');
   $smtpSslDesc = _('The SSL verification for connection is required?');
-  $valueArray[$variable] = array("'$variable'", "'S'", "'$smtpSslPrompt'",
-    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpSslDesc'", "null", "'Ignore{I}|Strict{S}|Warn{W}'");
+  $valueArray[$variable] = array("'$variable'", "'1'", "'$smtpSslPrompt'",
+    strval(CONFIG_TYPE_DROP), "'SMTP'", "7", "'$smtpSslDesc'", "null", "'Yes{1}|No{2}'");
 
   $variable = "SMTPStartTls";
   $smtpTlsPrompt = _('Start TLS');
