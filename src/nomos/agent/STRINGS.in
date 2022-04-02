@@ -1034,6 +1034,10 @@
 %KEY% "permi[st]"
 %STR% "redistribution and use in source and binary forms with or without modification are permitted subject to the limitations in the disclaimer below"
 #
+%ENTRY% _LT_BSD_SHORTENED_CLAUSE_0
+%KEY% "permi[st]"
+%STR% "redistribution and use in source and binary forms with or without modification are permitted provided that"
+#
 %ENTRY% _LT_BSD_CLAUSE_1
 %KEY% "copyright"
 %STR% "redistributions? of source code must retain the (above |original author.s )?copyright notice (unmodified )?this list of conditions and the following disclaimer"
@@ -1042,13 +1046,21 @@
 %KEY% "copyright"
 %STR% "redistributions? of source code must retain the above copyright notice (unmodified )?this list of conditions and the following disclaimer this software is provided"
 #
+%ENTRY% _LT_BSD_SHORTENED_CLAUSE_1
+%KEY% "copyright"
+%STR% "source code distributions retain the above copyright notice and this paragraph in its entirety"
+#
 %ENTRY% _LT_BSD_CLAUSE_2
 %KEY% "copyright"
 %STR% "redistributions? in binary form must reproduc[et] the (above |original author.s )?copyright notice this list of conditions and the following disclaimer (listed in this license )?in the documentation and ?/or other materials provided with the distribution"
 #
+%ENTRY% _LT_BSD_SHORTENED_CLAUSE_2
+%KEY% "copyright"
+%STR% "distributions? including binary code include the above copyright notice and this paragraph in its entirety in the documentation or other materials provided with the distribution and"
+#
 %ENTRY% _LT_BSD_CLAUSE_3
 %KEY% "software"
-%STR% "all advertising materials mentioning features or use of this software must display the following acknowledgement"
+%STR% "all advertising materials mentioning features or use of this software (must )?display the following acknowledgement"
 #
 %ENTRY% _LT_BSD_CLAUSE_4
 %KEY% "software"
@@ -5093,6 +5105,10 @@
 %ENTRY% _LT_QT_GPL_EXCEPTION_10_3
 %KEY% =NULL=
 %STR% "with exceptions as appearing in the file LICENSE\.GPL3-EXCEPT"
+#
+%ENTRY% _LT_OPENBSD_GPL_EXCEPTION
+%KEY% =NULL=
+%STR% "contribute changes back to the authors under this freer than gpl license"
 #
 %ENTRY% _LT_QUEST_EULA
 %KEY% "so(ftware|urce)"
