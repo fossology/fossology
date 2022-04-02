@@ -79,7 +79,7 @@ class UploadPermissionPage extends DefaultPlugin
     if ($commu_status) {
       $response_from_scheduler = "";
     } else {
-      $response_from_scheduler = "Warning: Schedular is not running!";
+      $response_from_scheduler = "Warning: Scheduler is not running!";
       $error_info = null;
     }
 
@@ -126,7 +126,7 @@ class UploadPermissionPage extends DefaultPlugin
             'newGroup' => $newgroup,
             'uploadList' => $UploadList,
             'permNames' => $GLOBALS['PERM_NAMES'],
-            'schedularStatus' => $response_from_scheduler
+            'schedulerStatus' => $response_from_scheduler
             );
 
     if (!empty($UploadList)) {
