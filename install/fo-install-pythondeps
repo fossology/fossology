@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+# FOSSology fo-install-pythondeps script
+# Copyright (C) 2022 Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# version 2 as published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+# This script helps you install build and runtime python dependencies on a
+# system.
+
+show_help() {
+  cat <<EOF
+Usage: fo-install-pythondeps [options]
+  -r or --runtime      : install runtime dependencies
+  -b or --buildtime    : install buildtime dependencies
+  -e or --everything   : install all dependencies (default)
+  -p or --experimental : install experimental dependencies
+  -y                   : Automatic yes to prompts
+  -u or --user         : install python packages local to this user (required)
+  -h or --help         : this help text
+  --debian             : in debian step don't call apt
+EOF
+}
+
+must_run_as_root() {
+  # This must run as root.
+  if [[ $(id -u) -ne 0 ]] ; then
+    echo >&2 "ERROR: fo-install-pythondeps must run as root."
+    echo >&2 "Aborting."
+    exit 1
+  fi
+}
+
+need_lsb_release() {
+  hash lsb_release 2>/dev/null || { cat >&2 <<EOF
+ERROR: this program requires the lsb_release command. On Debian based
+  systems this is probably in the lsb-release package, on
+  Fedora/RedHat systems it is probably the redhat-lsb package.
+Aborting.
+EOF
+  exit 1; }
+}
+
+#
+# Don't show the -y option. Should only be used for install testing, as using
+# it without being careful can destroy your system.
+#
+YesOpt=''
+
+EVERYTHING=''
+RUNTIME=''
+BUILDTIME=''
+TARGETUSER=''
+EXPERIMENTAL=''
+DEBIAN=''
+
+## Options parsing and setup
+# parse options
+OPTS=$(getopt -o :behrpu:y --longoptions runtime,buildtime,experimental,everything,user:,debian,help -n 'fo-install-pythondeps' -- "$@")
+
+if [[ $? -ne 0 ]]; then
+   OPTS="--help"
+fi
+
+eval set -- "$OPTS"
+
+# if no options or just -y then do everything
+if [[ $OPTS == ' --' || $OPTS == ' -y --' ]]; then
+  EVERYTHING=true
+fi
+
+while true; do
+  case "$1" in
+    -r|--runtime)      RUNTIME=true; shift;;
+    -b|--buildtime)    BUILDTIME=true; shift;;
+    -e|--everything)   EVERYTHING=true; shift;;
+    -p|--experimental) EXPERIMENTAL=true; shift;;
+    -y)                YesOpt='-y'; shift;;
+    -u|--user)         TARGETUSER="$2"; shift 2;;
+    --debian)          DEBIAN=true; shift;;
+    -h|--help)         show_help; exit;;
+    --)                shift; break;;
+    *)                 echo "ERROR: option $1 not recognised"; exit 1;;
+  esac
+done
+
+set -o errexit -o nounset -o pipefail
+
+must_run_as_root
+if [[ -z $DEBIAN ]]; then
+  need_lsb_release
+  # figure out what distro we're on
+  DISTRO=$(lsb_release --id --short)
+  CODENAME=$(lsb_release --codename --short)
+fi
+
+if [[ -z $RUNTIME && -z $BUILDTIME ]]; then
+  EVERYTHING=true;
+fi
+
+if [[ $EVERYTHING ]]; then
+  echo "*** Installing both runtime and buildtime Python dependencies ***"
+  RUNTIME=true
+  BUILDTIME=true
+fi
+
+if [[ $RUNTIME && -z $TARGETUSER ]]; then
+  echo "*** --user is a mandatory option, none passed ***"
+  show_help
+  exit 2
+fi
+
+########################################################################
+
+echo "install python dependencies"
+
+if [[ $BUILDTIME && -z "$DEBIAN" ]]; then
+  echo "*** Installing $DISTRO buildtime python dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        python3 python3-pip
+      ;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum $YesOpt install \
+        python3-pip
+      ;;
+    *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
+  esac
+fi
+
+########################################################################
+
+if [[ $RUNTIME && -z "$DEBIAN" ]]; then
+  echo "*** Installing $DISTRO runtime python dependencies ***";
+  case "$DISTRO" in
+    Debian|Ubuntu)
+      apt-get $YesOpt install \
+        python3 python3-pip
+      ;;
+    Fedora|RedHatEnterprise*|CentOS)
+      yum $YesOpt install \
+        python3-pip
+      ;;
+    *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
+  esac
+fi
+if [[ $RUNTIME ]]; then
+  if id "$TARGETUSER" &>/dev/null; then
+    su $TARGETUSER -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
+    su $TARGETUSER -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
+    ###########################################################################
+    # Experimental dependencies
+    if [[ $EXPERIMENTAL ]]; then
+      # Dependencies for decider
+      su $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input spacy pandas'
+      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+    fi
+    ###########################################################################
+  else
+    echo "*** User $TARGETUSER does not exist, not installing python dependencies ***"
+  fi
+fi

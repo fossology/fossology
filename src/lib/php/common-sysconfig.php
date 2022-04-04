@@ -758,3 +758,13 @@ function check_IP($ip)
   $e = "([0-9]|1[0-9]{2}|[1-9][0-9]|2[0-4][0-9]|25[0-5])";
   return preg_match("/^$e\.$e\.$e\.$e$/", $ip);
 }
+
+/**
+ * Set PYTHONPATH to appropriate location
+ */
+function set_python_path()
+{
+  global $SysConf;
+  putenv("PYTHONPATH=/home/" . $SysConf['DIRECTORIES']['PROJECTUSER'] .
+      "/pythondeps");
+}

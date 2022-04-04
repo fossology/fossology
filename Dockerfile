@@ -23,6 +23,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./utils/fo-installdeps ./utils/fo-installdeps
+COPY ./install/fo-install-pythondeps ./install/fo-install-pythondeps
 COPY ./utils/utils.sh ./utils/utils.sh
 COPY ./src/copyright/mod_deps ./src/copyright/
 COPY ./src/delagent/mod_deps ./src/delagent/
@@ -39,6 +40,7 @@ RUN mkdir -p /fossology/dependencies-for-runtime \
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --build -y \
+ && DEBIAN_FRONTEND=noninteractive /fossology/install/fo-install-pythondeps --build -y \
  && rm -rf /var/lib/apt/lists/*
 
 COPY . .
@@ -72,8 +74,9 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       python3-yaml \
       python3-psycopg2 \
       python3-requests \
+      python3-pip \
+ && python3 -m pip install pip==21.2.2 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
- && DEBIAN_FRONTEND=noninteractive apt-get purge -y lsb-release \
  && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
 
@@ -95,4 +98,4 @@ COPY --from=builder /etc/init.d/fossology /etc/init.d/fossology
 COPY --from=builder /usr/local/ /usr/local/
 
 # the database is filled in the entrypoint
-RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database
+RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database --python-experimental

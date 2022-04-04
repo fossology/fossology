@@ -3,6 +3,7 @@
  Author: Daniele Fognini
  Copyright (C) 2014-2019, Siemens AG
  Copyright (C) 2021 Orange by Piotr Pszczola <piotr.pszczola@orange.com>
+ Copyright (C) 2021 Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
 
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License
@@ -66,6 +67,8 @@ use Fossology\Lib\Data\LicenseMatch;
 use Fossology\Lib\Data\Tree\Item;
 use Fossology\Lib\Data\Tree\ItemTreeBounds;
 use Fossology\Lib\Dao\ShowJobsDao;
+use Fossology\Lib\Dao\CopyrightDao;
+use Fossology\Lib\Proxy\ScanJobProxy;
 
 include_once(__DIR__ . "/version.php");
 
@@ -80,7 +83,9 @@ class DeciderAgent extends Agent
   const RULES_BULK_REUSE = 0x4;
   const RULES_WIP_SCANNER_UPDATES = 0x8;
   const RULES_OJO_NO_CONTRADICTION = 0x10;
-  const RULES_ALL = 0xf; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
+  const RULES_COPYRIGHT_FALSE_POSITIVE = 0x20;
+  const RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER = 0x40;
+  const RULES_ALL = 0xff; // self::RULES_NOMOS_IN_MONK | self::RULES_NOMOS_MONK_NINKA | ... -> feature not available in php5.3
 
   /** @var int $activeRules
    * Rules active for upload (nomos in monk; ninka in monk; nomos, ninka and monk)
@@ -123,6 +128,11 @@ class DeciderAgent extends Agent
    */
   private $licenseMapUsage = null;
 
+  /** @var CopyrightDao $copyrightDao
+   * CopyrightDao object
+   */
+  private $copyrightDao;
+
   function __construct($licenseMapUsage=null)
   {
     parent::__construct(AGENT_DECIDER_NAME, AGENT_DECIDER_VERSION, AGENT_DECIDER_REV);
@@ -134,7 +144,7 @@ class DeciderAgent extends Agent
     $this->decisionTypes = $this->container->get('decision.types');
     $this->clearingDecisionProcessor = $this->container->get('businessrules.clearing_decision_processor');
     $this->agentLicenseEventProcessor = $this->container->get('businessrules.agent_license_event_processor');
-
+    $this->copyrightDao = $this->container->get('dao.copyright');
     $this->licenseMapUsage = $licenseMapUsage;
     $this->agentSpecifOptions = "r:";
   }
@@ -149,6 +159,12 @@ class DeciderAgent extends Agent
     $this->activeRules = array_key_exists('r', $args) ? intval($args['r']) : self::RULES_ALL;
     $this->licenseMap = new LicenseMap($this->dbManager, $this->groupId, $this->licenseMapUsage);
 
+    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE)== self::RULES_COPYRIGHT_FALSE_POSITIVE)) {
+      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, 0);
+    }
+    if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)== self::RULES_COPYRIGHT_FALSE_POSITIVE_CLUTTER)) {
+      $this->getCopyrightsToDisableFalsePositivesClutter($uploadId, 1);
+    }
     if (array_key_exists("r", $args) && (($this->activeRules&self::RULES_BULK_REUSE)== self::RULES_BULK_REUSE)) {
       $bulkReuser = new BulkReuser();
       $bulkIds = $this->clearingDao->getPreviousBulkIds($uploadId, $this->groupId, $this->userId);
@@ -542,5 +558,62 @@ class DeciderAgent extends Agent
       }
     }
     return true;
+  }
+
+  private function getCopyrightsToDisableFalsePositivesClutter($uploadId, $clutter_flag)
+  {
+    if (empty($uploadId)) {
+      return array();
+    }
+    $agentName = 'copyright';
+    $uploadTreeTableName = $this->uploadDao->getUploadtreeTableName($uploadId);
+    $scanJobProxy = new ScanJobProxy($GLOBALS['container']->get('dao.agent'), $uploadId);
+    $scanJobProxy->createAgentStatus(array($agentName));
+    $selectedScanners = $scanJobProxy->getLatestSuccessfulAgentIds();
+    if (!array_key_exists($agentName, $selectedScanners)) {
+      return array();
+    }
+    $latestXpAgentId = $selectedScanners[$agentName];
+    $extrawhere = ' agent_fk='.$latestXpAgentId;
+    $allCopyrights = $this->copyrightDao->getScannerEntries('copyright',
+      $uploadTreeTableName, $uploadId, null, $extrawhere);
+
+    $copyrightJSON = json_encode($allCopyrights);
+    $tmpFile = tmpfile();
+    $tmpFilePath = stream_get_meta_data($tmpFile)['uri'];
+    fwrite($tmpFile, $copyrightJSON);
+    $deactivatedCopyrightData = $this->callCopyrightDeactivationClutterRemovalScript($tmpFilePath, $clutter_flag);
+    if (empty($deactivatedCopyrightData)) {
+      return array();
+    }
+    $deactivatedCopyrights = json_decode($deactivatedCopyrightData, true);
+    foreach ($deactivatedCopyrights as $deactivatedCopyright) {
+      $item = $deactivatedCopyright['uploadtree_pk'];
+      $itemTreeBounds = $this->uploadDao->getItemTreeBounds($item, $uploadTreeTableName);
+      $hash = $deactivatedCopyright['hash'];
+      $content = $deactivatedCopyright['content'];
+      $cpTable = 'copyright';
+      if ($deactivatedCopyright['is_copyright'] == "t") {
+        $action = '';
+        $hash = '';
+        $content = $deactivatedCopyright['edited_text'];
+      } else {
+        $hash = $deactivatedCopyright['hash'];
+        $action = 'delete';
+      }
+      $this->copyrightDao->updateTable($itemTreeBounds, $hash, $content, $this->userId, $cpTable, $action);
+      $this->heartbeat(1);
+    }
+    fclose($tmpFile);
+  }
+  private function callCopyrightDeactivationClutterRemovalScript($tmpFilePath, $clutter_flag)
+  {
+    $script = "copyrightDeactivationClutterRemovalScript.py";
+    $path_to_file =  __DIR__ . "/$script";
+    $command = "python3 " . $path_to_file . " -f" . $tmpFilePath . " -c" . $clutter_flag;
+    set_python_path();
+    $output = shell_exec($command);
+    $this->heartbeat(0);
+    return $output;
   }
 }

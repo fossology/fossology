@@ -21,7 +21,7 @@ set -e
 case "$1" in
     configure)
     # need to run fo-postinstall agent stuff
-    /usr/lib/fossology/fo-postinstall --agent
+    /usr/lib/fossology/fo-postinstall --agent --debian
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
