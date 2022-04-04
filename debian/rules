@@ -196,6 +196,10 @@ endif
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/softwareHeritage install
 
+	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-scancode \
+           PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
+           -C src/scancode install
+
 	$(MAKE) DESTDIR=$(CURDIR)/debian/fossology-spasht \
            PREFIX=/usr SYSCONFDIR=/etc/fossology LOCALSTATEDIR=/var \
            -C src/spasht install
