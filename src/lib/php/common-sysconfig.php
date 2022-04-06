@@ -207,7 +207,7 @@ function Populate_sysconfig()
   $variable = "OidcClientIdClaim";
   $oidcPrompt = _('OIDC Client Id Claim');
   $oidcDesc = _('e.g. "azp"<br>Client ID claim in the decoded payload.');
-  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+  $valueArray[$variable] = array("'$variable'", "'client-id'", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "2", "'$oidcDesc'", "null", "null");
 
   $variable = "OidcAppId";
