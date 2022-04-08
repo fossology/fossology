@@ -34,6 +34,7 @@ use Fossology\UI\Api\Models\User;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Fossology\UI\Api\Helper\ResponseHelper;
+use Fossology\Lib\Dao\UserDao;
 
 /**
  * @class UserControllerTest
@@ -70,8 +71,11 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
     $container = M::mock('ContainerBuilder');
     $this->dbHelper = M::mock(DbHelper::class);
     $this->restHelper = M::mock(RestHelper::class);
+    $this->userDao = M::mock(UserDao::class);
 
     $this->restHelper->shouldReceive('getDbHelper')->andReturn($this->dbHelper);
+    $this->restHelper->shouldReceive('getUserDao')
+      ->andReturn($this->userDao);  
 
     $container->shouldReceive('get')->withArgs(array(
       'helper.restHelper'))->andReturn($this->restHelper);
@@ -240,10 +244,13 @@ class UserControllerTest extends \PHPUnit\Framework\TestCase
   {
     $userId = 2;
     $user = $this->getUsers([$userId]);
+    $user[0]["default_group"] = "fossy";
     $this->restHelper->shouldReceive('getUserId')->andReturn($userId);
     $this->dbHelper->shouldReceive('getUsers')->withArgs([$userId])
       ->andReturn($user);
     $expectedResponse = (new ResponseHelper())->withJson($user[0], 200);
+    $this->userDao->shouldReceive('getUserAndDefaultGroupByUserName')->withArgs([$user[0]["name"]])
+      ->andReturn(["group_name" => "fossy"]);
     $actualResponse = $this->userController->getCurrentUser(null,
       new ResponseHelper(), []);
     $this->assertEquals($expectedResponse->getStatusCode(),

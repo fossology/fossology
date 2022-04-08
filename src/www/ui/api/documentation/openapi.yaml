@@ -750,7 +750,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      default_group:
+                        type: string
+                        description: Default group of the user
+                        example:
+                          "fossy"        
         default:
           $ref: '#/components/responses/defaultResponse'
   /jobs:
