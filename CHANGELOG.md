@@ -1,5 +1,117 @@
 # Changelog of FOSSology
 
+### 4.1.0-rc1 (April 8th 2022)
+
+This release adds important corrections to
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0)
+
+The release 4.1.0-rc1 also introduces new agent `ScanCode`, used to
+scan for licenses, copyrights etc.
+
+The release 4.1.0-rc1 also introduces new feature to automatically
+deactivate the copyrights and cutter removal. There is a
+special note about this feature.
+> As this feature can still be improved, we are marking this as
+`experimental` and not recomended for productive instances.
+> Also this feature requires to install additional dependencies.
+One needs to run fo-postinstall with --python-experimental.
+
+The release 4.1.0-rc1 introduces a number of corrections to
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0)
+and major changes to FOSSology, including:
+
+* Add a new agent scancode-toolkit
+* Deciding copyrights with Spacy
+* Add new decision type non-functional
+* Admin can delete any upload
+* Fix unicode replacement in exportLicenseRef
+* Provide server version on REST api
+* Update license texts from SPDX
+* Clixml-xml based reporting format
+
+#### Credits to contributors for 4.1.0-rc1
+
+From the GIT commit history, we have following contributors since
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Archisman Dawn <archismandawn7@gmail.com>
+> coder-whale @coder-whale
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+> krishna9304 <krishna.mahato@precily.com>
+> Rohit Pandey <rohit.pandey4900@gmail.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> SvetaInChina <Huaying.Liu@mediatek.com>
+> Tassilo Pitrasch <t.pitrasch@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `3fb149388` fix(rest): fix CORS issue
+* `163866bd6` fix(rest): Added default client ID claim
+* `711618199` fix(rest): Allows client ID claim to be configurable
+* `0f53f78fd` fix(exportLicenseRef): fix unicode replacement
+* `32ed138b2` fix(pkgagent): Fixes FossologyUI unexpected token error
+* `13603a0c6` fix(API): Fixes FossologyUI CORS error for localhost
+* `346db84fc` fix(openapi.yaml): OpenAPI Description: Fix typo in HeathInfo
+* `784bb5782` fix(api): Correct uploadId is returned for UploadFromURL
+* `568fe02e3` fix(rest): fix scope for oauth
+* `6e6688402` fix(nomos): Improved nomos GPL detection
+* `b81696054` feat(nomos): add 'BSD-4-Clauset-Shortened' license
+* `4739e6c93` fix(scancode): update load function and fix testcases for scan code
+* `d10e3c3f8` hotfix(rest): fix file upload
+* `4e26e35b7` fix(deleteupload): Admin can delete any upload
+* `d5bdf4acd` fix(installdeps): fix call to external script
+* `f15fe07db` fix(global): add statement name for global query to fix reuser
+* `b2e1273f6` fix(clixml): fix free text fields in clixml
+* `79d604d8b` fix(testcase): fix test cases for lib
+* `fc603ef54` fix(rest): Slim fixes for REST API
+* `b37948fe5` fix(phpunit): Fix function signature for PHPUnit
+* `52e37ca0b` fix(test): fix test failures caused by sysconfig
+* `2e9b8f1de` fix(report): Set content type header
+
+
+#### Features
+
+* `0b65c31b6` feat(licenseRef): add or update license texts from SPDX
+* `c00bc94f8` feat(scancode): add scancode to debian packaging
+* `bc577a049` feat(report): accept package URL
+* `19d6cb2f0` feat(copyright): Deciding copyrights with Spacy
+* `cc9f94bd3` feat(dev-ctbutton): Added clean text button at license text field
+* `2a7d18e86` feat(rest): oidc based authentication
+* `24f666101` feat(upload): Warning on duplicate upload
+* `b8e94ac29` feat(scancode):Added scancode API and minor fixes
+* `6cf46d450` feat(copyright):Integrating scancode to copyrightUI
+* `14437f970` feat(scancode):Add a new agent scancode-toolkit
+* `e08eeb71f` feat(version): Update sysconfig release from version
+* `cc30d1293` feat(newAgent): clixml-xml based reporting format
+* `7fcf09f70` feat(ui): show dropdown for "mark as" decisions
+* `bb85d5350` feat(decisions): add new decision type non-functional
+* `438f178f2` feat(upload): allow multifile upload from UI
+* `d98041925` feat(gdpr) deactivate users + Store last cnx timestamp
+* `7445f15bf` feat(keyword): add new word 'stolen from' to keyword agent
+* `f9d17c50c` feat(lbtablelength):Added all for license browser table
+* `1da36ad53` feat(rest): Provide server version on REST api
+
+#### Infrastructure
+
+* `5d3b01304` chore(deps): bump guzzlehttp/psr7 from 2.1.0 to 2.2.1 in /src
+* `5fd23105f` chore(install): update python deps installation
+* `01bafc2e2` test(ci): run docker tests in GitHub Actions
+* `d70570c56` chore(browse): redirect to license view if empty
+* `3fc43965f` chore(composer): update composer form 1.9.0 to 2.2.6 version
+* `830608b62` chore(deps): bump twig/twig from 3.3.4 to 3.3.8 in /src
+* `8d245be73` chore(composer): Update composer dependencies
+* `9b1df8f77` refactor(clearingDao): add few functions to a single one
+* `0aeebfe2e` refactor(ui-clearing-view_rhs.html.twig) : Changed tooltip description for "Do not use"
+* `10011f039` perf(sysconfig): Setup sysconfig at fossinit
+
 ### 4.0.0 (Jan 20th 2022)
 
 This release adds important corrections to
