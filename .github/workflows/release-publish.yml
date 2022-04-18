@@ -28,6 +28,7 @@ jobs:
     - name: Install git
       run: |
         ## Install git
+        apt-get update
         apt-get install -y software-properties-common
         add-apt-repository $GIT_REPO -y
         apt-get update
