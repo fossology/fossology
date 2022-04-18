@@ -27,14 +27,22 @@ jobs:
     steps:
     - name: Install git
       run: |
+        ## Install git
+        apt-get install -y software-properties-common
+        add-apt-repository $GIT_REPO -y
         apt-get update
-        apt-get install --no-install-recommends -y git ca-certificates
+        apt-get install git sudo -y
+        # Remove source repo's
+        add-apt-repository --remove $GIT_REPO -y
+        apt-get update
+      env:
+        GIT_REPO: "ppa:git-core/ppa"
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
-        fetch-depth: 10
+        fetch-depth: 0
 
-    - name: Setup cache
+      - name: Setup cache
       uses: actions/cache@v2
       with:
         path: ${{ format('{0}/.composer', env.HOME) }}
@@ -76,16 +84,11 @@ jobs:
 
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: xresloader/upload-to-github-release@v1
+      uses: alexellis/upload-assets@0.2.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        file: ${{ env.PACKAGE_NAME }}
-        overwrite: true
-        release_id: ${{ steps.get_release.outputs.id }}
-        draft: ${{ steps.get_release.outputs.draft }}
-        prerelease: ${{ steps.get_release.outputs.prerelease }}
-        tag_name: ${{ steps.get_release.outputs.tag_name }}
+        asset_paths: '["${{ env.PACKAGE_NAME }}"]'
 
   docker-release-build:
     runs-on: ubuntu-latest
@@ -93,7 +96,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        fetch-depth: 10
+        fetch-depth: 0
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
