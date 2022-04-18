@@ -27,14 +27,22 @@ jobs:
     steps:
     - name: Install git
       run: |
-        ## Install git
+        ## Add backport
+        if [[ "${{ matrix.os }}" = debian* ]]; then
+          echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main" > /etc/apt/sources.list.d/backport.list
+        else
+          apt-get update
+          apt-get install -y software-properties-common
+          add-apt-repository $GIT_REPO -y
+        fi
         apt-get update
-        apt-get install -y software-properties-common
-        add-apt-repository $GIT_REPO -y
-        apt-get update
-        apt-get install git sudo -y
-        # Remove source repo's
-        add-apt-repository --remove $GIT_REPO -y
+        apt-get install git sudo gpg -y
+        # Remove backport to default
+        if [[ "${{ matrix.os }}" = debian* ]]; then
+          rm /etc/apt/sources.list.d/backport.list
+        else
+          add-apt-repository --remove $GIT_REPO -y
+        fi
         apt-get update
       env:
         GIT_REPO: "ppa:git-core/ppa"
