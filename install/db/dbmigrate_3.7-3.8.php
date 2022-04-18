@@ -47,11 +47,13 @@ const ENCODE_TABLES = array(
  */
 function calculateNumberOfRecordsToRecode($dbManager)
 {
-  $sql = "SELECT count(*) AS cnt FROM ";
+  $selectSql = "SELECT count(*) AS cnt FROM ";
+  $where = " WHERE (content IS NOT NULL AND content != '')";
   $statement = __METHOD__ . ".getCountsFor";
   $count = 0;
   foreach (ENCODE_TABLES as $table) {
-    $row = $dbManager->getSingleRow($sql . $table, array(), $statement . $table);
+    $sql = $selectSql . $table . $where;
+    $row = $dbManager->getSingleRow($sql, array(), $statement . $table);
     $count += intval($row['cnt']);
   }
   return $count;
@@ -84,9 +86,7 @@ function updateRecodedValues($dbManager, $table, $rows)
   $statement = __METHOD__ . ".updateContentFor.$table";
 
   $dbManager->begin();
-  foreach ($rows as $id => $content) {
-    $dbManager->queryOnce($sql, $statement);
-  }
+  $dbManager->queryOnce($sql, $statement);
   $dbManager->commit();
   return count($rows);
 }
@@ -170,12 +170,13 @@ function startRecodingTables($dbManager, $MODDIR)
 
   $sql = "SET client_encoding = 'SQL_ASCII';";
   $dbManager->queryOnce($sql);
+  $where = " WHERE (content IS NOT NULL AND content != '')";
 
   foreach (ENCODE_TABLES as $table) {
-    $countSql = "SELECT count(*) AS cnt FROM $table;";
+    $countSql = "SELECT count(*) AS cnt FROM $table $where;";
     $countStatement = __METHOD__ . ".getCountFor.$table";
     $contentSql = "SELECT " . $table . "_pk AS id, content " .
-      "FROM $table " .
+      "FROM $table $where " .
       "ORDER BY " . $table . "_pk " .
       "LIMIT $1 OFFSET $2;";
     $contentStatement = __METHOD__ . ".getContentFor.$table";
@@ -191,6 +192,9 @@ function startRecodingTables($dbManager, $MODDIR)
       $i += count($rows);
       $data = array();
       foreach ($rows as $row) {
+        if (empty($row['content'])) {
+          continue;
+        }
         $data[$row['id']] = $row['content'];
       }
       recodeContents($data, $MODDIR);
