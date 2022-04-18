@@ -28,7 +28,7 @@ jobs:
     - name: Install git
       run: |
         apt-get update
-        apt-get install -y lsb_release sudo gpg
+        apt-get install -y lsb-release sudo gpg
         ## Add repo for latest git
         if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
           echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main" > /etc/apt/sources.list.d/backport.list
