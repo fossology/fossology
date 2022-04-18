@@ -15,7 +15,6 @@ jobs:
       matrix:
         os:
           - 'debian:buster'
-          - 'debian:stretch'
           - 'debian:bullseye'
           - 'ubuntu:bionic'
           - 'ubuntu:focal'
@@ -65,6 +64,7 @@ jobs:
         apt-get install --no-install-recommends -y wget lsb-release sudo composer curl php-cli
         apt-get install --no-install-recommends -y libcppunit-dev libcunit1-dev libdbd-sqlite3-perl
         apt-get install --no-install-recommends -y php-sqlite3 php-zip tar debhelper libssl-dev postgresql-server-dev-all
+        sudo chown -R $(id -u):$(id -g) .
         ./utils/fo-installdeps -y -b
         ./install/scripts/install-spdx-tools.sh
         rm -rf src/vendor
@@ -94,11 +94,15 @@ jobs:
 
     - name: Upload Release Asset
       id: upload-release-asset
-      uses: alexellis/upload-assets@0.2.2
+      uses: shogo82148/actions-upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        asset_paths: '["${{ env.PACKAGE_NAME }}"]'
+        upload_url: ${{ steps.get_release.outputs.upload_url }}
+        asset_path: ${{ env.PACKAGE_NAME }}
+        asset_name: ${{ env.PACKAGE_NAME }}
+        asset_content_type: application/gzip
+        overwrite: true
 
   docker-release-build:
     runs-on: ubuntu-latest
