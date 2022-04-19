@@ -1049,18 +1049,24 @@ paths:
       operationId: getGroups
       tags:
       - Groups
-      summary: Get the list of groups
+      summary: Get the default group of user
       description: >
-        Returns accessible groups for a user, all groups for an admin
+        Returns default groups for a user
       responses:
         '200':
-          description: List of groups
+          description: Returns the default group of the user
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      default_group:
+                        type: string
+                        description: Default group of the user
+                        example:
+                          "fossy"
         default:
             $ref: '#/components/responses/defaultResponse'
     post:

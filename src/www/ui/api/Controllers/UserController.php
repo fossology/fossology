@@ -1,4 +1,5 @@
 <?php
+
 /***************************************************************
  Copyright (C) 2018,2021 Siemens AG
  Author: Gaurav Mishra <mishra.gaurav@siemens.com>
@@ -27,6 +28,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\Lib\Dao\UserDao;
 
 /**
  * @class UserController
@@ -47,7 +49,7 @@ class UserController extends RestController
     $id = null;
     if (isset($args['id'])) {
       $id = intval($args['id']);
-      if (! $this->dbHelper->doesIdExist("users", "user_pk", $id)) {
+      if (!$this->dbHelper->doesIdExist("users", "user_pk", $id)) {
         $returnVal = new Info(404, "UserId doesn't exist", InfoType::ERROR);
         return $response->withJson($returnVal->getArray(), $returnVal->getCode());
       }
@@ -71,7 +73,7 @@ class UserController extends RestController
   {
     $id = intval($args['id']);
     $returnVal = null;
-    if ($this->dbHelper->doesIdExist("users","user_pk", $id)) {
+    if ($this->dbHelper->doesIdExist("users", "user_pk", $id)) {
       $this->dbHelper->deleteUser($id);
       $returnVal = new Info(202, "User will be deleted", InfoType::INFO);
     } else {
@@ -90,7 +92,10 @@ class UserController extends RestController
    */
   public function getCurrentUser($request, $response, $args)
   {
-    $user = $this->dbHelper->getUsers($this->restHelper->getUserId());
-    return $response->withJson($user[0], 200);
+    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0];
+    $userDao = $this->restHelper->getUserDao();
+    $defaultGroup = $userDao->getUserAndDefaultGroupByUserName($user["name"])["group_name"];
+    $user["default_group"] = $defaultGroup;
+    return $response->withJson($user, 200);
   }
 }
