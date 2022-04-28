@@ -46,11 +46,14 @@ class DeciderAgentPlugin extends AgentPlugin
    */
   public function renderContent(&$vars)
   {
+    global $SysConf;
     $renderer = $GLOBALS['container']->get('twig.environment');
     $vars['isNinkaInstalled'] = false;
     if ($ninkaUi=plugin_find('agent_ninka')) {
       $vars['isNinkaInstalled'] = $ninkaUi->isNinkaInstalled();
     }
+    $vars['isSpacyInstalled'] = file_exists("/home/" .
+      $SysConf['DIRECTORIES']['PROJECTUSER'] . "/pythondeps/bin/spacy");
     return $renderer->load('agent_decider.html.twig')->render($vars);
   }
 
@@ -114,6 +117,13 @@ class DeciderAgentPlugin extends AgentPlugin
         case 'wipScannerUpdates':
           $this->addScannerDependencies($dependencies, $request);
           $rulebits |= 0x8;
+          break;
+        case 'copyrightDeactivation':
+          $rulebits |= 0x20;
+          break;
+        case 'copyrightDeactivationClutterRemoval':
+          $rulebits |= 0x40;
+          break;
       }
     }
 
