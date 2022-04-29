@@ -177,8 +177,7 @@ class HomePage extends DefaultPlugin
     $jwtToken = $accessToken->getToken();
     $jwtTokenDecoded = JWT::decode(
       $jwtToken,
-      JWK::parseKeySet($jwks),
-      ["RS256", "RS384", "RS512", "ES256"]
+      JWK::parseKeySet($jwks)
     );
     if (property_exists($jwtTokenDecoded, 'iss') &&
         $jwtTokenDecoded->{'iss'} == $SysConf['SYSCONFIG']['OidcIssuer']) {
