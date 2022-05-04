@@ -308,6 +308,7 @@ class AuthHelper
    */
   private function validateOauthLogin($jwtToken, &$userId, &$tokenScope)
   {
+    global $SysConf;
     $jwks = $this->loadJwks();
     try {
       $jwtTokenDecoded = JWT::decode(
@@ -315,7 +316,7 @@ class AuthHelper
         JWK::parseKeySet($jwks),
         ["RS256", "RS384", "RS512", "ES256"]
       );
-      $clientId = $jwtTokenDecoded->{'client_id'};
+      $clientId = $jwtTokenDecoded->{$SysConf['SYSCONFIG']['OidcClientIdClaim']};
       $tokenId = $this->dbHelper->getTokenIdFromClientId($clientId);
       $dbRows = $this->dbHelper->getTokenKey($tokenId);
 

@@ -16,6 +16,16 @@
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="reuseBulk" />
     {{ ' Bulk phrases from reused packages'|trans }}<br />
     <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="wipScannerUpdates" />
-    {{ ' New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}
+    {{ ' New scanner results, i.e., decisions were marked as work in progress if new scanner finds additional licenses'|trans }}</br>
+    {% if isSpacyInstalled %}
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivation" />
+    {{ ' False Positive Copyright Deactivation'|trans }}
+    <span style="color:red;font-weight:bold;">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Do not run on production, can result in data loss.'|trans }}" alt="" class="info-bullet"/></br>
+    <input type="checkbox" class="browse-upload-checkbox view-license-rc-size" name="deciderRules[]" value="copyrightDeactivationClutterRemoval" />
+    {{ ' False Positive Copyright Deactivation and clutter removal'|trans }}
+    <span style="color:red;font-weight:bold;">({{ 'experimental'|trans }})</span>
+    <img src="images/info_16.png" data-toggle="tooltip" title="{{ 'Do not run on production, can result in data loss.'|trans }}" alt="" class="info-bullet"/>
+    {% endif %}
   </div>
 </li>
