@@ -486,9 +486,10 @@ count(*) AS copyright_count " .
   protected function doUpdate($itemId, $hash, $type)
   {
     $content = GetParm("value", PARM_RAW);
-    if (!$content)
+    if (empty($content))
     {
-      return new Response('empty content not allowed', Response::HTTP_BAD_REQUEST ,array('Content-type'=>'text/plain'));
+      return new Response('empty content not allowed',
+        Response::HTTP_BAD_REQUEST ,array('Content-type'=>'text/plain'));
     }
 
     $item = $this->uploadDao->getItemTreeBounds($itemId, $this->uploadtree_tablename);

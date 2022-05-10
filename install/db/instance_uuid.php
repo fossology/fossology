@@ -51,5 +51,5 @@ COMMIT;
 
  }
 
-echo "*** Instance UUID ***";
+echo "*** Instance UUID ***\n";
 CreateInstanceUUIDTable($dbManager);
