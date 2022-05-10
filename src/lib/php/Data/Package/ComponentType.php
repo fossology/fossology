@@ -46,6 +46,11 @@ class ComponentType
    */
   const PYPI = 4;
   /**
+   * @var int PACKAGEURL
+   * Component Type package-url
+   */
+  const PACKAGEURL = 5;
+  /**
    * @var array TYPE_MAP
    * Corresponding type name for id
    */
@@ -54,6 +59,7 @@ class ComponentType
     self::MAVEN => 'maven',
     self::NUGET => 'nuget',
     self::NPM => 'npm',
-    self::PYPI => 'pypi'
+    self::PYPI => 'pypi',
+    self::PACKAGEURL => 'package-url'
   ];
 }

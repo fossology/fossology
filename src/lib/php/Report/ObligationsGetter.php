@@ -158,6 +158,7 @@ class ObligationsGetter
    */
   function contentOnly($licenseStatements)
   {
+    $licenseId = [];
     foreach ($licenseStatements as $licenseStatement) {
       $licenseId[] = $licenseStatement["licenseId"];
     }
