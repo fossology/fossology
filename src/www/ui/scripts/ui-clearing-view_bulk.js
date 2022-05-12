@@ -22,18 +22,56 @@ var bulkFormTableContent = (function(){
     var s = "";
     var uploadTreeId = $('#uploadTreeId').val();
     for (i = 0; i < content.length; ++i) {
-      s += "<tr class=\"" + ((i % 2 == 1) ? "even" : "odd") + "\">"
-        +  "<td align=\"center\">" + content[i].action + "</td>"
-        +  "<td>" + content[i].licenseName + "</td>"
-        +  "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "reportinfoBulk'"
-        +  "onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'reportinfo', 'Bulk');\" title=''>Click to add</a></td>"
-        +  "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "acknowledgementBulk'"
-        +  "onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'acknowledgement', 'Bulk');\" title=''>Click to add</a></td>"
-        +  "<td><a href=\"javascript:;\" style=\"color:#000000;\" id='" + content[i].licenseId + "commentBulk'"
-        +  "onclick=\"openTextModel("+ uploadTreeId +", " + content[i].licenseId + ", 'comment', 'Bulk');\" title=''>Click to add</a></td>"
-        +  "<td><a href='#' onclick='bulkFormTableContent[2](" + content[i].licenseId + ")'>"
-        +  "<img src=\"images/icons/remove_16.png\" title=\"remove selected license row\" alt=\"-\"/></a></td>"
-        +  "</tr>";
+      // Set defaults
+      var licenseTitle = $(`#${content[i].licenseId}reportinfoBulk`)
+        .attr('title');
+      var licenseText = 'Click to add';
+      var ackTitle = $(`#${content[i].licenseId}acknowledgementBulk`)
+        .attr('title');
+      var ackText = 'Click to add';
+      var commentTitle = $(`#${content[i].licenseId}commentBulk`)
+        .attr('title');
+      var commentText = 'Click to add';
+
+      // If titles are undefined, make them empty string
+      licenseTitle ??= "";
+      ackTitle ??= "";
+      commentTitle ??= "";
+
+      // Change display text if value exists
+      if (licenseTitle.length != 0) {
+        licenseText = licenseTitle.slice(0, 10) + "...";
+      }
+      if (ackTitle.length != 0) {
+        ackText = ackTitle.slice(0, 10) + "...";
+      }
+      if (commentTitle.length != 0) {
+        commentText = commentTitle.slice(0, 10) + "...";
+      }
+
+      s += `<tr class='${(i % 2 == 1) ? "even" : "odd"}'>
+        <td align='center'>${content[i].action}</td>
+        <td>${content[i].licenseName}</td>
+        <td><a href='javascript:;' style='color:#000;'
+          id='${content[i].licenseId}reportinfoBulk'
+          onClick="openTextModel(${uploadTreeId}, ${content[i].licenseId},
+            'reportinfo', 'Bulk');" title='${licenseTitle}'>
+          ${licenseText}</a></td>
+        <td><a href='javascript:;' style='color:#000;'
+          id='${content[i].licenseId}acknowledgementBulk'
+          onClick="openTextModel(${uploadTreeId}, ${content[i].licenseId},
+            'acknowledgement', 'Bulk');" title='${ackTitle}'>
+          ${ackText}</a></td>
+        <td><a href='javascript:;' style='color:#000;'
+          id='${content[i].licenseId}commentBulk'
+          onClick="openTextModel(${uploadTreeId}, ${content[i].licenseId},
+            'comment', 'Bulk');" title='${commentTitle}'>
+          ${commentText}</a></td>
+        <td><a href='#'
+          onClick='bulkFormTableContent[2](${content[i].licenseId})'>
+          <img src='images/icons/remove_16.png'
+            title='Remove selected license row' alt='-' /></a></td>
+      </tr>`;
     }
     $('#bulkFormTable tbody').html(s);
   }
