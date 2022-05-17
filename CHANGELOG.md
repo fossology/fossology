@@ -1,5 +1,60 @@
 # Changelog of FOSSology
 
+### 4.1.0 (May 12th 2022)
+
+This release adds important corrections to
+[4.1.0-rc1](https://github.com/fossology/fossology/releases/tag/4.1.0-rc1)
+
+The release 4.1.0 introduces new agent `ScanCode`, used to scan for licenses,
+copyrights etc.
+
+The release 4.1.0 also introduces new feature to automatically deactivate the
+copyrights and cutter removal. There is a special note about this feature.
+> As this feature can still be improved, we are marking this as `experimental`
+and not recomended for productive instances.
+> Also this feature requires to install additional dependencies. One needs to
+run fo-postinstall with --python-experimental.
+
+The release 4.1.0 introduces a number of corrections to
+[4.1.0-rc1](https://github.com/fossology/fossology/releases/tag/4.1.0-rc1)
+and major changes to FOSSology, including:
+
+* Security fix for JWT tokens
+* Migration fix for copyrights
+
+#### Credits to contributors for 4.1.0
+
+From the GIT commit history, we have following contributors since
+[4.0.0](https://github.com/fossology/fossology/releases/tag/4.0.0):
+
+```
+> Anupam Ghosh <anupam.ghosh@siemens.com>
+> Archisman Dawn <archismandawn7@gmail.com>
+> coder-whale @coder-whale
+> Gaurav Mishra <mishra.gaurav@siemens.com>
+> Ettinger Katharina <katharina.ettinger@siemens.com>
+> Karthik Krishna <gkarthikkrishna1@gmail.com>
+> Kaushlendra Pratap <kaushlendrapratap.9837@gmail.com>
+> krishna9304 <krishna.mahato@precily.com>
+> Rohit Pandey <rohit.pandey4900@gmail.com>
+> Sarita Singh <saritasingh.0425@gmail.com>
+> Shaheem Azmal M MD <shaheem.azmal@siemens.com>
+> SvetaInChina <Huaying.Liu@mediatek.com>
+> Tassilo Pitrasch <t.pitrasch@gmail.com>
+> Toussaint Nicolas <nicolas1.toussaint@orange.com>
+```
+
+#### Corrections
+
+* `840479e51` fix(scancode): add missing class name to fix tooltip
+* `31ca7525a` fix(scancode): move python dependencies
+* `cc5d9d8e5` fix(jwt): explicitly declare jwk algorithm
+* `f8a18ae7e` fix(copyright): do not update empty copyrights
+
+#### Infrastructure
+
+* `f431c98c7` chore(scancode): hide scancode UI if not installed
+
 ### 4.1.0-rc1 (April 8th 2022)
 
 This release adds important corrections to
