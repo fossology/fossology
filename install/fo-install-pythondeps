@@ -146,11 +146,11 @@ if [[ $RUNTIME && -z "$DEBIAN" ]]; then
   case "$DISTRO" in
     Debian|Ubuntu)
       apt-get $YesOpt install \
-        python3 python3-pip
+        python3 python3-pip python3-dev
       ;;
     Fedora|RedHatEnterprise*|CentOS)
       yum $YesOpt install \
-        python3-pip
+        python3-pip python3-devel
       ;;
     *) echo "ERROR: distro not recognised, please fix and send a patch"; exit 1;;
   esac
@@ -160,11 +160,19 @@ if [[ $RUNTIME ]]; then
     su $TARGETUSER -c 'mkdir -p $HOME/pythondeps && touch $HOME/.bashrc'
     su $TARGETUSER -c 'grep -qF pythondeps $HOME/.bashrc || printf "export PATH=\"$PATH:$HOME/pythondeps/bin\"\nexport PYTHONPATH=\"$HOME/pythondeps\"" >> $HOME/.bashrc'
     ###########################################################################
-    # Experimental dependencies
+    # Install pip dependencies together.
+    # Using --target causes conflict in bin dir, using --upgrade overwrites it.
+    # See https://github.com/pypa/pip/issues/8063
+    # Dependencies for scancode
+    su $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input setuptools wheel'
+    ###########################################################################
     if [[ $EXPERIMENTAL ]]; then
-      # Dependencies for decider
-      su $TARGETUSER -c 'python3 -m pip install --target=$HOME/pythondeps --no-input spacy pandas'
+      # Include experimental dependencies
+      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade spacy pandas scancode-toolkit'
       su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m spacy download en_core_web_sm --target=$HOME/pythondeps'
+    else
+      # Only non-experimental dependencies
+      su $TARGETUSER -c 'PYTHONPATH="$HOME/pythondeps" python3 -m pip install --target=$HOME/pythondeps --no-input --upgrade scancode-toolkit'
     fi
     ###########################################################################
   else
