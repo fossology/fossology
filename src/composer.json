@@ -15,7 +15,7 @@
         "ext-mbstring": "*",
         "ext-json" : "*",
         "ext-xml" : "*",
-        "firebase/php-jwt": "v5.5.1",
+        "firebase/php-jwt": "v6.1.2",
         "monolog/monolog" : "2.3.5",
         "phpoffice/phpword" : "0.18.2",
         "slim/slim": "4.8.1",

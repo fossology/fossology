@@ -115,6 +115,9 @@ class CopyrightDao
                                $description, $textFinding, $comment, $decision_pk=-1)
   {
     $textFinding = StringOperation::replaceUnicodeControlChar($textFinding);
+    if (empty($textFinding)) {
+      return;
+    }
     $primaryColumn = $tableName . '_pk';
     $assocParams = array(
       'user_fk' => $userId,

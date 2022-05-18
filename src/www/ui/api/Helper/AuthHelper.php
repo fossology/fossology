@@ -35,7 +35,9 @@ use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
 use Firebase\JWT\JWK;
 use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 use \GuzzleHttp\Client;
+use UnexpectedValueException;
 
 /**
  * @class AuthHelper
@@ -313,8 +315,7 @@ class AuthHelper
     try {
       $jwtTokenDecoded = JWT::decode(
         $jwtToken,
-        JWK::parseKeySet($jwks),
-        ["RS256", "RS384", "RS512", "ES256"]
+        JWK::parseKeySet($jwks)
       );
       $clientId = $jwtTokenDecoded->{$SysConf['SYSCONFIG']['OidcClientIdClaim']};
       $tokenId = $this->dbHelper->getTokenIdFromClientId($clientId);
@@ -347,6 +348,8 @@ class AuthHelper
    * server and cache it. The cache is stored for 24 hours.
    *
    * @return array JWK keys
+   * @throws UnexpectedValueException Throws exception if jwk does not contain
+   *                                  "keys"
    */
   public static function loadJwks()
   {
@@ -382,7 +385,7 @@ class AuthHelper
     }
 
     $version = $SysConf['BUILD']['VERSION'];
-    $headers = ['User-Agent' => "fossologyng/$version"];
+    $headers = ['User-Agent' => "fossology/$version"];
 
     $guzzleClient = new Client([
       'http_errors' => false,
@@ -391,8 +394,21 @@ class AuthHelper
     ]);
     $response = $guzzleClient->get($SysConf['SYSCONFIG']['OidcJwksURL']);
     $content = $response->getBody()->getContents();
-    file_put_contents($cacheFile, $content);
-    return json_decode($content, true);
+    $jwks = json_decode($content, true);
+    if (!array_key_exists("keys", $jwks)) {
+      throw new UnexpectedValueException('"keys" member must exist in the JWK Set');
+    }
+    $algInject = $SysConf['SYSCONFIG']['OidcJwkAlgInject'];
+    if (!empty($algInject)) {
+      // Change alg key if DB has value
+      for ($i=0; $i < count($jwks['keys']); $i++) {
+        if (!array_key_exists("alg", $jwks['keys'][$i])) {
+          $jwks['keys'][$i]["alg"] = $algInject;
+        }
+      }
+    }
+    file_put_contents($cacheFile, json_encode($jwks));
+    return $jwks;
   }
 
   /**
@@ -426,7 +442,8 @@ class AuthHelper
     } else {
       $returnValue = true;
       try {
-        $jwtTokenDecoded = JWT::decode($jwtToken, $dbRows["token_key"], ['HS256']);
+        $jwtTokenDecoded = JWT::decode($jwtToken,
+          new Key($dbRows["token_key"], 'HS256'));
         $tokenScope = $jwtTokenDecoded->{'scope'};
       } catch (\UnexpectedValueException $e) {
         $returnValue = new Info(403, $e->getMessage(), InfoType::ERROR);

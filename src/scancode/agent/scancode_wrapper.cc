@@ -1,16 +1,16 @@
 /*****************************************************************************
  * SPDX-License-Identifier: GPL-2.0
  * SPDX-FileCopyrightText: 2021 Sarita Singh <saritasingh.0425@gmail.com>
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * version 2 as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -22,10 +22,10 @@
 
 /**
  * @brief convertes start line to start byte of the matched text
- * 
- * count number of characters before start line and add it to the 
+ *
+ * count number of characters before start line and add it to the
  * characters before the matched text in the start line.
- * 
+ *
  * @param filename name of the file uploaded
  * @param start_line  start line of the matched text by scancode
  * @param match_text  text inthe codefile matched by scancode
@@ -41,7 +41,7 @@ unsigned getFilePointer(const string &filename, size_t start_line,
     }
     unsigned int file_p = checkfile.tellg();
     getline(checkfile, str);
-    unsigned int pos = str.find(match_text); 
+    unsigned int pos = str.find(match_text);
     if (pos != string::npos) {
       return file_p + pos;
     }else{
@@ -53,34 +53,41 @@ unsigned getFilePointer(const string &filename, size_t start_line,
 
 
 /**
- * @brief scan file with scancode-toolkit 
- * 
+ * @brief scan file with scancode-toolkit
+ *
  * using cli command for custom template
  * scancode <scancode flags> --custom-output <output> --custom-template scancode_template.html <input>
  * scancode is a parametric agent, depending upon user's choice flags will be set.
  * -l flag scans for license
  * -c flag scans for copyright and holder
- * license score in ScanCode is percentage and 
+ * license score in ScanCode is percentage and
  * copyright holder in scancode is author in FOSSology
- * The option --license-text is a sub-option of and requires the option --license, it provides the text 
+ * The option --license-text is a sub-option of and requires the option --license, it provides the text
  * in the upload file matched with the scancode license rule.
  * custom template provide only those information which
  * user wants to see.
  * --quiet helps to remove summary and/or progress message
- * 
+ *
  * @param state  an object of class State which can provide agent Id and CliOptions
  * @param file  code/binary file sent by scheduler
  * @return scanned data output on success, null otherwise
- * 
+ *
  * @see https://scancode-toolkit.readthedocs.io/en/latest/cli-reference/list-options.html#all-basic-scan-options
  */
 string scanFileWithScancode(const State &state, const fo::File &file) {
 
   FILE *in;
   char buffer[512];
+  string projectUser = fo_config_get(sysconfig, "DIRECTORIES", "PROJECTUSER",
+    NULL);
+  string cacheDir = fo_config_get(sysconfig, "DIRECTORIES", "CACHEDIR",
+    NULL);
 
   string command =
-      "scancode -" + state.getCliOptions() +
+      "PYTHONPATH='/home/" + projectUser + "/pythondeps/' " +
+      "SCANCODE_CACHE=" + cacheDir + "/scancode " + // Use fossology's cache
+      "/home/" + projectUser + "/pythondeps/bin/scancode -" +
+      state.getCliOptions() +
       " --custom-output - --custom-template scancode_template.html " +
       file.getFileName() + " --quiet " +
       ((state.getCliOptions().find('l') != string::npos) ? " --license-text --license-score " + to_string(MINSCORE): "");
@@ -106,7 +113,7 @@ return result;
 
 /**
  * @brief extract data from scancode scanned result
- * 
+ *
  * In licenses array:
  * key-> license spdx key
  * score-> score of a rule to matched with the output licenes
@@ -114,8 +121,8 @@ return result;
  * text_url-> license text reference url
  * matched_text-> text in code file matched for the license
  * start_line-> matched text start line
- * 
- * Incase there is no license found by scancode, 
+ *
+ * Incase there is no license found by scancode,
  * FOSSology has "No_license_found" license short name.
  *
  * In copyright array:
@@ -146,7 +153,7 @@ map<string, vector<Match>> extractDataFromScancodeResult(const string& scancodeR
     }
     else
     {
-      for (unsigned int i = 0; i < licensearrays.size(); i++) 
+      for (unsigned int i = 0; i < licensearrays.size(); i++)
       {
           Json::Value oneresult = licensearrays[i];
           string licensename = oneresult["key"].asString();

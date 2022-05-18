@@ -31,6 +31,7 @@ COPY ./src/mimetype/mod_deps ./src/mimetype/
 COPY ./src/nomos/mod_deps ./src/nomos/
 COPY ./src/ojo/mod_deps ./src/ojo/
 COPY ./src/pkgagent/mod_deps ./src/pkgagent/
+COPY ./src/scancode/mod_deps ./src/scancode/
 COPY ./src/scheduler/mod_deps ./src/scheduler/
 COPY ./src/ununpack/mod_deps ./src/ununpack/
 COPY ./src/wget_agent/mod_deps ./src/wget_agent/
@@ -77,8 +78,7 @@ RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \
       python3-pip \
  && python3 -m pip install pip==21.2.2 \
  && DEBIAN_FRONTEND=noninteractive /fossology/utils/fo-installdeps --offline --runtime -y \
- && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y \
- && rm -rf /var/lib/apt/lists/*
+ && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
 
 # configure php
 COPY ./install/scripts/php-conf-fix.sh ./install/scripts/php-conf-fix.sh
@@ -98,4 +98,6 @@ COPY --from=builder /etc/init.d/fossology /etc/init.d/fossology
 COPY --from=builder /usr/local/ /usr/local/
 
 # the database is filled in the entrypoint
-RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only --web-only --no-running-database --python-experimental
+RUN /usr/local/lib/fossology/fo-postinstall --agent --common --scheduler-only \
+     --web-only --no-running-database --python-experimental \
+ && rm -rf /var/lib/apt/lists/*

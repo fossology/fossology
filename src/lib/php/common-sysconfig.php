@@ -264,11 +264,17 @@ function Populate_sysconfig()
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
     strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "11", "'$oidcDesc'", "null", "null");
 
+  $variable = "OidcJwkAlgInject";
+  $oidcPrompt = _('OIDC JWKS Algorithm inject');
+  $oidcDesc = _('Algorithm value to inject for JWKS. Leave empty to not modifiy.<br><a href="https://datatracker.ietf.org/doc/html/rfc7517#section-4.4">Check info</a>.');
+  $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "12", "'$oidcDesc'", "null", "null");
+
   $variable = "OidcLogoutURL";
   $oidcPrompt = _('Logout URL');
   $oidcDesc = _('e.g. "http://oauth.com/logout.oauth2"<br>URL to redirect user to for logout.');
   $valueArray[$variable] = array("'$variable'", "null", "'$oidcPrompt'",
-    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "12", "'$oidcDesc'", "null", "null");
+    strval(CONFIG_TYPE_TEXT), "'OauthSupport'", "13", "'$oidcDesc'", "null", "null");
 
   /*  Banner Message */
   $variable = "BannerMsg";
