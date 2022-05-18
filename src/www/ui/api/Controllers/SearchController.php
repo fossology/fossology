@@ -55,6 +55,8 @@ class SearchController extends RestController
     $license = $request->getHeaderLine("license");
     $copyright = $request->getHeaderLine("copyright");
     $uploadId = $request->getHeaderLine("uploadId");
+    $page = $request->getHeaderLine("page");
+    $limit = $request->getHeaderLine("limit");
 
     // set searchtype to search allfiles by default
     if (empty($searchType)) {
@@ -88,11 +90,35 @@ class SearchController extends RestController
       return $response->withJson($returnVal->getArray(), $returnVal->getCode());
     }
 
+    /*
+     * check if page && limit are numeric, if existing
+     */
+    if ((! ($page==='') && (! is_numeric($page) || $page < 1)) ||
+      (! ($limit==='') && (! is_numeric($limit) || $limit < 1))) {
+      $returnVal = new Info(400,
+        "Bad Request. page and limit need to be positive integers!",
+        InfoType::ERROR);
+      return $response->withJson($returnVal->getArray(), $returnVal->getCode());
+    }
+
+    // set page to 1 by default
+    if (empty($page)) {
+      $page = 1;
+    }
+
+    // set limit to 50 by default and max as 100
+    if (empty($limit)) {
+      $limit = 50;
+    } else if ($limit > 100) {
+      $limit = 100;
+    }
+
     $item = GetParm("item", PARM_INTEGER);
-    $results = GetResults($item, $filename, $uploadId, $tag, 0,
+    list($results, $count) = GetResults($item, $filename, $uploadId, $tag, $page-1, $limit,
       $filesizeMin, $filesizeMax, $searchType, $license, $copyright,
       $this->restHelper->getUploadDao(), $this->restHelper->getGroupId(),
-      $GLOBALS['PG_CONN'])[0];
+      $GLOBALS['PG_CONN']);
+    $totalPages = intval(ceil($count / $limit));
 
     $searchResults = [];
     // rewrite it and add additional information about it's parent upload
@@ -110,6 +136,6 @@ class SearchController extends RestController
       $currentResult = new SearchResult($currentUpload, $uploadTreePk, $filename);
       $searchResults[] = $currentResult->getArray();
     }
-    return $response->withJson($searchResults, 200);
+    return $response->withHeader("X-Total-Pages", $totalPages)->withJson($searchResults, 200);
   }
 }

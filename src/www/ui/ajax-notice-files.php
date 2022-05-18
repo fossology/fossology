@@ -66,13 +66,14 @@ class AjaxNoticeFiles extends FO_Plugin
     $uploadId = $getuploadEntry['upload_fk'];
     $tag = "";
     $Page = 0;
+    $Limit = 100;
     $SizeMin = "";
     $SizeMax = "";
     $searchtype = "allfiles";
     $License = "";
     $Copyright = "";
 
-    $UploadtreeRecsResult = GetResults($Item, $Filename, $uploadId, $tag, $Page, $SizeMin,
+    $UploadtreeRecsResult = GetResults($Item, $Filename, $uploadId, $tag, $Page, $Limit, $SizeMin,
       $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
       Auth::getGroupId(), $PG_CONN);
 
