@@ -8,7 +8,7 @@
 {% extends "include/base.html.twig" %}
 
 {% block content %}
-  
+      
   {{ 'Select the folder that contains the upload'|trans }}: 
   {% include 'components/select-folder.html.twig' with {'name':'folderselect','id':'folderselect','selected':folderId} %}
   <br/><br/>
