@@ -41,14 +41,16 @@ both as a single instance or in combination with an external PostgreSQL database
 use since the standalone image does not take care of data persistency.
 
 A pre-built Docker image is available from [Docker Hub](https://hub.docker.com/r/fossology/fossology/) and can be run using the following command:
-``` sh
+
+```sh
 docker run -p 8081:80 fossology/fossology
 ```
 
-The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy passwd fossy.
+The docker image can then be used using http://IP_OF_DOCKER_HOST:8081/repo user fossy password fossy.
 
 Execution with external database container can be done using Docker Compose, via the following command:
-``` sh
+
+```sh
 docker-compose up
 ```
 
@@ -64,7 +66,7 @@ The Docker image allows the configuration of its database connection over a set 
 
 FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
 
-**Pre-requisites:**  Vagrant >= 2.x and Virtualbox >= 5.2.x
+**Pre-requisites:** Vagrant >= 2.x and Virtualbox >= 5.2.x
 
 **Steps:**
 
@@ -144,7 +146,7 @@ All of the FOSSology source code is licensed under the terms of the GNU
 General Public License version 2, with the following exceptions:
 
 libfossdb and libfossrepo libraries are licensed under the terms of
-the GNU Lesser General Public License version 2.1, [LGPL-2.1](https://tldrlegal.com/license/gnu-lesser-general-public-license-v2.1-(lgpl-2.1)).
+the GNU Lesser General Public License version 2.1, [LGPL-2.1](<https://tldrlegal.com/license/gnu-lesser-general-public-license-v2.1-(lgpl-2.1)>).
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
