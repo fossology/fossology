@@ -9,7 +9,10 @@
 # Description: Docker container image recipe
 
 FROM debian:buster-slim as builder
-LABEL maintainer="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
+LABEL org.opencontainers.image.vendor="FOSSology"
+LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
 
 WORKDIR /fossology
 
@@ -51,7 +54,13 @@ RUN make clean install \
 
 FROM debian:buster-slim
 
-LABEL maintainer="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.authors="Fossology <fossology@fossology.org>"
+LABEL org.opencontainers.image.url="https://fossology.org"
+LABEL org.opencontainers.image.source="https://github.com/fossology/fossology"
+LABEL org.opencontainers.image.vendor="FOSSology"
+LABEL org.opencontainers.image.licenses="GPL-2.0-only AND LGPL-2.1-only"
+LABEL org.opencontainers.image.title="FOSSology"
+LABEL org.opencontainers.image.description="FOSSology is an open source license compliance software system and toolkit.  As a toolkit you can run license, copyright and export control scans from the command line.  As a system, a database and web ui are provided to give you a compliance workflow. License, copyright and export scanners are tools used in the workflow."
 
 ### install dependencies
 COPY --from=builder /fossology/dependencies-for-runtime /fossology

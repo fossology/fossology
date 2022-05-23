@@ -131,3 +131,5 @@ jobs:
       with:
         push: true
         tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}
+        labels: |
+          org.opencontainers.image.version=${{ steps.get_release.outputs.tag_name }}.0
