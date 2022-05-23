@@ -121,7 +121,7 @@
               <div class="input-group-prepend">
                 <select class="custom-select" name="componentType">
                   <optgroup label="Recommended">
-                    <option value="0" {% if componentType == 0 %}selected{% endif %}>purl</option>
+                    <option value="5" {% if componentType == 5 %}selected{% endif %}>package-url</option>
                   </optgroup>
                   <optgroup label="Legacy">
                   {%- for type in typemap ~%}

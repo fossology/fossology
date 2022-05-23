@@ -278,7 +278,6 @@ class CliXml extends Agent
       'organisation' => '',
       'componentHash' => strtolower($componentHash['sha1']),
       'contents' => $contents,
-      'packageIds' => $packageIds,
       'commentAdditionalNotes' => $notes,
       'externalIdLink' => htmlspecialchars($otherStatement['ri_sw360_link']),
       'generalInformation' => $generalInformation,
