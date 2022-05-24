@@ -75,6 +75,13 @@ class UploadPermissionPage extends DefaultPlugin
     $newgroup = intval($request->get('newgroup'));
     $newperm = intval($request->get('newperm'));
     $public_perm = $request->get('public', -1);
+    $commu_status = fo_communicate_with_scheduler('status', $response_from_scheduler, $error_info);
+    if ($commu_status) {
+      $response_from_scheduler = "";
+    } else {
+      $response_from_scheduler = "Error: Scheduler is not running!";
+      $error_info = null;
+    }
 
     $root_folder_pk = $this->folderDao->getRootFolder(Auth::getUserId())->getId();
     if (empty($folder_pk)) {
@@ -89,7 +96,9 @@ class UploadPermissionPage extends DefaultPlugin
       if (!empty($perm_upload_pk)) {
         $this->uploadPermDao->updatePermissionId($perm_upload_pk, $perm);
       } else if (!empty($newgroup) && !empty($newperm)) {
-        $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
+        if ($commu_status) {
+          $this->insertPermission($newgroup,$upload_pk,$newperm,$UploadList);
+        }
         $newperm = $newgroup = 0;
       } else if ($public_perm >= 0) {
         $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
@@ -98,7 +107,9 @@ class UploadPermissionPage extends DefaultPlugin
       foreach ($UploadList as $uploadDetails) {
         $upload_pk = $uploadDetails['upload_pk'];
         if (!empty($newgroup) && !empty($newperm)) {
-          $this->insertPermission($newgroup, $upload_pk, $newperm, $UploadList);
+          if ($commu_status) {
+            $this->insertPermission($newgroup, $upload_pk, $newperm, $UploadList);
+          }
         } else if ($public_perm >= 0) {
           $this->uploadPermDao->setPublicPermission($upload_pk, $public_perm);
         }
@@ -114,7 +125,8 @@ class UploadPermissionPage extends DefaultPlugin
             'newPerm' => $newperm,
             'newGroup' => $newgroup,
             'uploadList' => $UploadList,
-            'permNames' => $GLOBALS['PERM_NAMES']
+            'permNames' => $GLOBALS['PERM_NAMES'],
+            'message' => $response_from_scheduler
             );
 
     if (!empty($UploadList)) {
