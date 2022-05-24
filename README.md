@@ -30,7 +30,7 @@ FOSSology should work with many Linux distributions.
 
 See https://github.com/fossology/fossology/releases for source code download of the releases.
 
-For installation instructions see [Install from Source](https://github.com/fossology/fossology/wiki/Install-from-Source)
+For installation instructions, refer [Install from Source](https://github.com/fossology/fossology/wiki/Install-from-Source)
 page in [Github Wiki](https://github.com/fossology/fossology/wiki)
 
 ## Docker
@@ -62,7 +62,7 @@ The Docker image allows the configuration of its database connection over a set 
 
 ## Vagrant
 
-FOSSology comes with a VagrantFile that can be used to create an isolated environment for FOSSology and its dependencies.
+FOSSology comes with a Vagrant File that can be used to create an isolated environment for FOSSology and its dependencies.
 
 **Pre-requisites:**  Vagrant >= 2.x and Virtualbox >= 5.2.x
 
@@ -90,7 +90,7 @@ Username: fossy
 Password: fossy
 ```
 
-**Note:** The test instance is not up to date with the latest release. The instance will reset every night at 2 am UTC and all the user uploaded data will be lost.
+**Note:** The test instance is not up to date with the latest release. The instance will reset every night at 2 am UTC and all the users' uploaded data will be lost.
 
 ## Documentation
 
