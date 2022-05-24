@@ -212,6 +212,7 @@ class search extends FO_Plugin
       $this->vars["Copyright"] = $Copyright;
     }
 
+    $Limit = GetParm("limit",PARM_INTEGER);
     $Page = GetParm("page",PARM_INTEGER);
 
     $this->vars["postUrl"] = Traceback_uri() . "?mod=" . self::getName();
@@ -220,7 +221,7 @@ class search extends FO_Plugin
       if (empty($Page)) {
         $Page = 0;
       }
-      $UploadtreeRecsResult = GetResults($Item, $Filename,$Upload, $tag, $Page, $SizeMin,
+      $UploadtreeRecsResult = GetResults($Item, $Filename,$Upload, $tag, $Page, $Limit, $SizeMin,
         $SizeMax, $searchtype, $License, $Copyright, $this->uploadDao,
         Auth::getGroupId(), $PG_CONN);
       $html = "<hr>\n";
