@@ -30,7 +30,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
 
   /** @var TestPgDb */
   private $testDb;
-  
+
   /** @var ModernDbManager */
   private $dbManager;
 
@@ -59,7 +59,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     $this->testInstaller->init();
     $this->testInstaller->cpRepo();
     $this->testInstaller->install($cwd.'/..');
-  
+
     $sql = "INSERT INTO public.mimetype (mimetype_pk, mimetype_name) VALUES (2, 'application/gzip'),"
          . " (3, 'application/x-gzip'), (4, 'application/x-compress'), (5, 'application/x-bzip'), (6, 'application/x-bzip2'),"
          . " (7, 'application/x-upx'), (8, 'application/pdf'), (9, 'application/x-pdf'), (10, 'application/x-zip'),"
@@ -135,7 +135,7 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
   function testMimetypeInDB(){
     global $EXE_PATH;
 
-    $mimeType = "text/x-makefile";
+    $mimeType = "text/plain";
     /* delete test data pre testing */
     $sql = "DELETE FROM mimetype where mimetype_name in ('$mimeType');";
     $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "delete.mimetype");
@@ -143,10 +143,10 @@ class cliParamsTest4Mimetype extends \PHPUnit\Framework\TestCase {
     $sql = "INSERT INTO mimetype(mimetype_pk, mimetype_name) VALUES(10000, '$mimeType');";
     $result = $this->dbManager->getSingleRow($sql, [], __METHOD__ . "insert.mimetype");
     /* the file is one c source file */
-    $filePath = __DIR__."/Makefile";
+    $filePath = dirname(__DIR__)."/CMakeLists.txt";
     $command = "$EXE_PATH $filePath";
     exec($command, $out, $rtn);
-    $expected_string = "text/x-makefile : mimetype_pk=10000";
+    $expected_string = "text/plain : mimetype_pk=10000";
     $this->assertStringStartsWith($expected_string, $out[0]);
 
     /* delete test data post testing */
