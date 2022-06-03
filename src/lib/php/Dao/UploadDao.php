@@ -444,7 +444,8 @@ class UploadDao
   /**
    * @param int $uploadId
    * @param int $groupId
-   * @return int
+   * @return array Assoc array of reused_upload_fk, reused_group_fk and
+   *               reuse_mode
    */
   public function getReusedUpload($uploadId, $groupId)
   {
@@ -653,7 +654,7 @@ ORDER BY lft asc
   private function addToPFilePerFileName(&$pfilePerFileName, $pathStack, $row)
   {
     if (($row['ufile_mode'] & (1 << 29)) == 0) {
-      $path = implode($pathStack,'/');
+      $path = implode('/', $pathStack);
       $pfilePerFileName[$path]['pfile_pk'] = $row['pfile_pk'];
       $pfilePerFileName[$path]['uploadtree_pk'] = $row['uploadtree_pk'];
       $pfilePerFileName[$path]['md5'] = $row['pfile_md5'];
@@ -774,28 +775,40 @@ ORDER BY lft asc
    */
   public function insertReportConfReuse($uploadId, $reusedUploadId)
   {
-    $stmt = __METHOD__;
-    $sql = "SELECT exists(SELECT 1 FROM report_info WHERE upload_fk = $1 LIMIT 1)::int";
+    $stmt = __METHOD__ . ".checkReused";
+    $sql = "SELECT 1 AS exists FROM report_info WHERE upload_fk = $1 LIMIT 1;";
     $row = $this->dbManager->getSingleRow($sql, array($reusedUploadId), $stmt);
 
-    if ($row['exists']) {
-      $stmt = __METHOD__."CopyinsertReportConfReuse";
-      $this->dbManager->prepare($stmt,
-        "INSERT INTO report_info(
-           upload_fk, ri_ga_checkbox_selection, ri_spdx_selection,
-           ri_excluded_obligations, ri_reviewed, ri_footer, ri_report_rel,
-           ri_community, ri_component, ri_version, ri_release_date,
-           ri_sw360_link, ri_general_assesment, ri_ga_additional, ri_ga_risk)
-        SELECT $1, ri_ga_checkbox_selection, ri_spdx_selection,
-           ri_excluded_obligations, ri_reviewed, ri_footer, ri_report_rel,
-           ri_community, ri_component, ri_version, ri_release_date,
-           ri_sw360_link, ri_general_assesment, ri_ga_additional, ri_ga_risk
-           FROM report_info WHERE upload_fk = $2"
-      );
-      $this->dbManager->freeResult($this->dbManager->execute($stmt, array($uploadId, $reusedUploadId)));
-      return true;
+    if (empty($row['exists'])) {
+      return false;
     }
-    return false;
+
+    $this->dbManager->begin();
+
+    $stmt = __METHOD__ . ".removeExists";
+    $sql = "DELETE FROM report_info WHERE upload_fk = $1;";
+    $this->dbManager->getSingleRow($sql, [$uploadId], $stmt);
+
+    $stmt = __METHOD__ . ".getAllColumns";
+    $sql = "SELECT string_agg(column_name, ',') AS columns
+      FROM information_schema.columns
+      WHERE table_name = 'report_info'
+        AND column_name != 'ri_pk'
+        AND column_name != 'upload_fk';";
+    $row = $this->dbManager->getSingleRow($sql, [], $stmt);
+    $columns = $row['columns'];
+
+    $stmt = __METHOD__."CopyinsertReportConfReuse";
+    $this->dbManager->prepare($stmt,
+      "INSERT INTO report_info(upload_fk, $columns)
+      SELECT $1, $columns
+      FROM report_info WHERE upload_fk = $2"
+    );
+    $this->dbManager->freeResult($this->dbManager->execute(
+      $stmt, array($uploadId, $reusedUploadId)
+    ));
+
+    $this->dbManager->commit();
+    return true;
   }
 }
-

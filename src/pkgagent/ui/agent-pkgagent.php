@@ -54,7 +54,7 @@ class PkgAgentPlugin extends AgentPlugin
   {
     $dbManager = $GLOBALS['container']->get('db.manager');
     $latestPkgAgent = $dbManager->getSingleRow("SELECT agent_enabled FROM agent WHERE agent_name=$1 ORDER BY agent_ts LIMIT 1",array('pkgagent'));
-    if (isset($latestPkgAgent) && !$dbManager->booleanFromDb($latestPkgAgent['agent_enabled']))
+    if (!empty($latestPkgAgent) && !$dbManager->booleanFromDb($latestPkgAgent['agent_enabled']))
     {
       return 0;
     }

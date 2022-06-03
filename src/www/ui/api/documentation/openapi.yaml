@@ -642,6 +642,23 @@ paths:
           in: header
           schema:
             type: string
+        - name: page
+          description: Page number (starts from 1)
+          required: false
+          in: header
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          description: Limits of responses per request
+          required: false
+          in: header
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
         - name: filesizemin
           description: Min filesize in bytes
           required: false
@@ -671,6 +688,11 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            X-Total-Pages:
+              description: Total number of pages which can be generated based on limit
+              schema:
+                type: integer
           content:
             application/json:
               schema:
@@ -750,7 +772,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                allOf:
+                  - $ref: '#/components/schemas/User'
+                  - type: object
+                    properties:
+                      default_group:
+                        type: string
+                        description: Default group of the user
+                        example:
+                          "fossy"        
         default:
           $ref: '#/components/responses/defaultResponse'
   /jobs:

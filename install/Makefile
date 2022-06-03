@@ -42,6 +42,7 @@ install: all
 	$(INSTALL_PROGRAM) fo_dbcheck.php $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
 	$(INSTALL_PROGRAM) fossinit.php $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	$(INSTALL_PROGRAM) fossinit-common.php $(DESTDIR)$(LIBEXECDIR)/fossinit-common.php
+	$(INSTALL_PROGRAM) fo-install-pythondeps $(DESTDIR)$(LIBEXECDIR)/fo-install-pythondeps
 	$(MAKE) -s -C db install
 
 	@echo "Making configuration directories"; \
@@ -121,6 +122,7 @@ uninstall:
 	rm -f $(DESTDIR)$(CONFPATH)/samplefooter.txt
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fossinit.php
 	rm -f $(DESTDIR)$(LIBEXECDIR)/fo_dbcheck.php
+	rm -f $(DESTDIR)$(LIBEXECDIR)/fo-install-pythondeps
 
 	@if [ -d $(DESTDIR)$(LIBEXECDIR) ]; then \
 		if [ "`ls -A $(DESTDIR)$(LIBEXECDIR)`" ]; then \

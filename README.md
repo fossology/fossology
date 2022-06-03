@@ -22,6 +22,8 @@ https://fossology.org/
 
 The PHP versions 7.x are supported to work for FOSSology. FOSSology requires Postgresql as the database server and apache httpd 2.6 as the web server. These and more dependencies are installed by `utils/fo-installdeps`.
 
+To install Python dependencies, run `install/fo-install-pythondeps`.
+
 ## Installation
 
 FOSSology should work with many Linux distributions.

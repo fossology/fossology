@@ -86,6 +86,6 @@ jobs:
       run: |
         echo '{"extends": ["spectral:oas"]}' > .spectral.json
     - name: Run spectral
-      uses: stoplightio/spectral-action@v0.8.0
+      uses: stoplightio/spectral-action@v0.8.2
       with:
         file_glob: src/www/ui/api/documentation/openapi.yaml

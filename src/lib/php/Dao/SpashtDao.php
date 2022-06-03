@@ -214,7 +214,10 @@ class SpashtDao
     if (
       empty($compRow) || empty($compRow['ri_component_id'])
       || $compRow['ri_component_id'] == "NA"
-      || $compRow['ri_component_type'] != ComponentType::PURL
+      || (
+        $compRow['ri_component_type'] != ComponentType::PURL
+        && $compRow['ri_component_type'] != ComponentType::PACKAGEURL
+        )
     ) {
       return null;
     }

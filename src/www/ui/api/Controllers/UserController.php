@@ -27,6 +27,7 @@ use Fossology\UI\Api\Helper\ResponseHelper;
 use Psr\Http\Message\ServerRequestInterface;
 use Fossology\UI\Api\Models\Info;
 use Fossology\UI\Api\Models\InfoType;
+use Fossology\Lib\Dao\UserDao;
 
 /**
  * @class UserController
@@ -90,7 +91,10 @@ class UserController extends RestController
    */
   public function getCurrentUser($request, $response, $args)
   {
-    $user = $this->dbHelper->getUsers($this->restHelper->getUserId());
-    return $response->withJson($user[0], 200);
+    $user = $this->dbHelper->getUsers($this->restHelper->getUserId())[0];
+    $userDao = $this->restHelper->getUserDao();
+    $defaultGroup = $userDao->getUserAndDefaultGroupByUserName($user["name"])["group_name"];
+    $user["default_group"] = $defaultGroup;
+    return $response->withJson($user, 200);
   }
 }

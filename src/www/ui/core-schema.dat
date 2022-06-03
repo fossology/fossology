@@ -2010,7 +2010,7 @@
 
   $Schema["TABLE"]["users"]["upload_visibility"]["DESC"] = "COMMENT ON COLUMN \"users\".\"upload_visibility\" IS 'Default Visibility for uploads by the user'";
   $Schema["TABLE"]["users"]["upload_visibility"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"upload_visibility\" text";
-  $Schema["TABLE"]["users"]["upload_visibility"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"upload_visibility\" DROP NOT NULL";  
+  $Schema["TABLE"]["users"]["upload_visibility"]["ALTER"] = "ALTER TABLE \"users\" ALTER COLUMN \"upload_visibility\" DROP NOT NULL";
 
   $Schema["TABLE"]["users"]["user_agent_list"]["DESC"] = "COMMENT ON COLUMN \"users\".\"user_agent_list\" IS 'list of user agents to automatically run on upload'";
   $Schema["TABLE"]["users"]["user_agent_list"]["ADD"] = "ALTER TABLE \"users\" ADD COLUMN \"user_agent_list\" text";
@@ -2077,8 +2077,8 @@
   $Schema["TABLE"]["report_info"]["ri_sw360_link"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_sw360_link\" SET NOT NULL, ALTER COLUMN \"ri_sw360_link\" SET DEFAULT 'NA'::text";
 
   $Schema["TABLE"]["report_info"]["ri_component_type"]["DESC"] = "";
-  $Schema["TABLE"]["report_info"]["ri_component_type"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component_type\" int4 DEFAULT 0";
-  $Schema["TABLE"]["report_info"]["ri_component_type"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component_type\" SET NOT NULL, ALTER COLUMN \"ri_component_type\" SET DEFAULT 0";
+  $Schema["TABLE"]["report_info"]["ri_component_type"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component_type\" int4 DEFAULT 5";
+  $Schema["TABLE"]["report_info"]["ri_component_type"]["ALTER"] = "ALTER TABLE \"report_info\" ALTER COLUMN \"ri_component_type\" SET NOT NULL, ALTER COLUMN \"ri_component_type\" SET DEFAULT 5";
 
   $Schema["TABLE"]["report_info"]["ri_component_id"]["DESC"] = "";
   $Schema["TABLE"]["report_info"]["ri_component_id"]["ADD"] = "ALTER TABLE \"report_info\" ADD COLUMN \"ri_component_id\" text DEFAULT 'NA'::text";

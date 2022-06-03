@@ -357,6 +357,8 @@ class SpdxTwoAgent extends Agent
     }
     if ($componentType == ComponentType::MAVEN) {
       $componentType = "maven-central";
+    } elseif ($componentType == ComponentType::PACKAGEURL) {
+      $componentType = "purl";
     } else {
       $componentType = ComponentType::TYPE_MAP[$componentType];
     }

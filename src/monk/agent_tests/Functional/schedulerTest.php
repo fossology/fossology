@@ -167,7 +167,7 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
 
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(7));
 
-    $expectedHighlight = new Highlight(18, 35825, Highlight::MATCH, 20, 35146);
+    $expectedHighlight = new Highlight(18, 35824, Highlight::MATCH, 0, 34505);
     $expectedHighlight->setLicenseId($matchedLicense->getId());
 
     $this->assertEquals(array($expectedHighlight), $highlights);
@@ -175,9 +175,9 @@ class MonkScheduledTest extends \PHPUnit\Framework\TestCase
     $highlights = $this->highlightDao->getHighlightDiffs($this->uploadDao->getItemTreeBounds(11));
 
     $expectedHighlights = array();
-    $expectedHighlights[] = new Highlight(18, 339, Highlight::MATCH, 20, 341);
-    $expectedHighlights[] = new Highlight(340, 347, Highlight::CHANGED, 342, 348);
-    $expectedHighlights[] = new Highlight(348, 35149, Highlight::MATCH, 349, 35146);
+    $expectedHighlights[] = new Highlight(18, 338, Highlight::MATCH, 0, 265);
+    $expectedHighlights[] = new Highlight(339, 346, Highlight::CHANGED, 266, 272);
+    $expectedHighlights[] = new Highlight(347, 35148, Highlight::MATCH, 273, 34505);
     foreach($expectedHighlights as $expectedHighlight) {
       $expectedHighlight->setLicenseId($matchedLicense->getId());
     }
