@@ -214,7 +214,7 @@ int main  (int argc, char *argv[])
   for(arg=optind; arg < argc; arg++)
   {
     memset(GlobalURL,'\0',sizeof(GlobalURL));
-    strncpy(GlobalURL,argv[arg],sizeof(GlobalURL));
+    strncpy(GlobalURL,argv[arg],sizeof(GlobalURL)-1);
     /* If the file contains "://" then assume it is a URL.
        Else, assume it is a file. */
     LOG_VERBOSE0("Command-line: %s",GlobalURL);
