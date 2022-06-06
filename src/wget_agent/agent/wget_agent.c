@@ -1058,7 +1058,7 @@ void replace_url_with_auth()
       token = strtok(NULL, needle);
       index++;
     }
-    snprintf(GlobalURL, URLMAX, "%s%s:%s@%s", http, username, password, URI);
+    snprintf(GlobalURL, URLMAX-1, "%s%s:%s@%s", http, username, password, URI);
 
     if (strlen(additionalParams) > 0) {
       memmove(GlobalParam, additionalParams, strlen(additionalParams) +1);
