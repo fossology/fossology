@@ -17,7 +17,6 @@ jobs:
       matrix:
         os:
           - 'debian:buster'
-          - 'debian:stretch'
           - 'debian:bullseye'
           - 'ubuntu:bionic'
           - 'ubuntu:focal'
@@ -30,17 +29,36 @@ jobs:
     - name: Install git
       run: |
         apt-get update
-        apt-get install --no-install-recommends -y git ca-certificates
+        apt-get install -y lsb-release sudo gpg ca-certificates
+        ## Add repo for latest git
+        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
+          echo "deb http://deb.debian.org/debian $(lsb_release -cs)-backports main" > /etc/apt/sources.list.d/backport.list
+        else
+          apt-get install -y software-properties-common
+          add-apt-repository $GIT_REPO -y
+        fi
+        apt-get update
+        apt-get install git -y
+        # Remove added repos
+        if case "${{ matrix.os }}" in debian*) true;; *) false;; esac; then
+          rm /etc/apt/sources.list.d/backport.list
+        else
+          add-apt-repository --remove $GIT_REPO -y
+        fi
+        apt-get update
+      env:
+        GIT_REPO: "ppa:git-core/ppa"
 
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
       with:
-        fetch-depth: 10
+        fetch-depth: 0
 
     - name: Install dependencies
       run: |
         apt-get install --no-install-recommends -y wget lsb-release sudo composer curl php-cli
         apt-get install --no-install-recommends -y libcppunit-dev libcunit1-dev libdbd-sqlite3-perl
         apt-get install --no-install-recommends -y php-sqlite3 php-zip tar debhelper libssl-dev postgresql-server-dev-all
+        sudo chown -R $(id -u):$(id -g) .
         ./utils/fo-installdeps -y -b
         ./install/scripts/install-spdx-tools.sh
         rm -rf src/vendor
@@ -82,14 +100,19 @@ jobs:
   docker-release-build:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v2
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      uses: docker/setup-buildx-action@v2
 
     - name: Login to DockerHub
-      uses: docker/login-action@v1
+      uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
@@ -101,7 +124,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
 
     - name: Build and push main image
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v3
       with:
         push: true
         tags: fossology/fossology:${{ steps.get_release.outputs.tag_name }}
